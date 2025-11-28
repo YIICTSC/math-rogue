@@ -1,4 +1,5 @@
 
+
 import React, { useEffect, useState, useRef } from 'react';
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText } from '../types';
 import Card from './Card';
@@ -67,7 +68,7 @@ const FloatingTextOverlay: React.FC<{ data: FloatingText | null }> = ({ data }) 
     return (
         <div 
             key={data.id} // Forces re-mount to restart animation on new ID
-            className={`absolute top-0 left-1/2 -translate-x-1/2 z-50 font-bold text-3xl drop-shadow-[0_2px_2px_rgba(0,0,0,1)] pointer-events-none ${data.color}`}
+            className={`absolute top-0 left-1/2 -translate-x-1/2 z-50 font-bold text-3xl drop-shadow-[0_2px_2px_rgba(0,0,0,1)] pointer-events-none ${data.color} flex items-center`}
             style={{ 
                 animation: 'float-up-fade 0.8s ease-out forwards'
             }}
@@ -81,6 +82,7 @@ const FloatingTextOverlay: React.FC<{ data: FloatingText | null }> = ({ data }) 
                     }
                 `}
             </style>
+            {data.iconType === 'zap' && <Zap size={24} className="mr-1 fill-current" />}
             {data.text}
         </div>
     );
@@ -309,7 +311,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 <div key={r.id} className="w-4 h-4 md:w-5 md:h-5 bg-gray-700 rounded-full border border-yellow-600 flex items-center justify-center shrink-0 cursor-pointer relative group" onClick={() => showInfo(r.name, r.description)}>
                                     <Gem size={10} className="text-yellow-400" />
                                     {player.relicCounters[r.id] !== undefined && player.relicCounters[r.id] > 0 && (
-                                        <div className="absolute -top-1 -right-1 bg-red-600 text-white text-[8px] w-3 h-3 rounded-full flex items-center justify-center font-bold border border-black shadow">
+                                        <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold border-2 border-gray-900 shadow-md z-10 pointer-events-none">
                                             {player.relicCounters[r.id]}
                                         </div>
                                     )}

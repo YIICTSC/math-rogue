@@ -182,30 +182,29 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
             )}
 
             {mode === 'PREVIEW_SYNTHESIS' && synthCards.length === 2 && (
-                <div className="flex flex-col items-center">
-                    <div className="flex flex-wrap items-center justify-center gap-4 mb-8">
-                        <div className="scale-75 md:scale-90">
+                <div className="flex flex-col items-center flex-grow overflow-y-auto custom-scrollbar w-full">
+                    <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 mb-4 flex-grow content-center">
+                        <div className="scale-[0.65] md:scale-90 origin-center">
                              <Card card={synthCards[0]} onClick={() => {}} disabled={false} />
                         </div>
-                        <Plus size={24} className="text-gray-500" />
-                        <div className="scale-75 md:scale-90">
+                        <Plus size={20} className="text-gray-500" />
+                        <div className="scale-[0.65] md:scale-90 origin-center">
                              <Card card={synthCards[1]} onClick={() => {}} disabled={false} />
                         </div>
-                        <ArrowRight size={32} className="text-purple-500 animate-pulse mx-2" />
+                        <ArrowRight size={24} className="text-purple-500 animate-pulse mx-1 md:mx-2" />
                         
-                        {/* Fake Preview Card Visual */}
-                        <div className="w-32 h-48 border-4 border-purple-500 bg-black rounded-lg flex flex-col items-center justify-center animate-bounce shadow-[0_0_20px_rgba(168,85,247,0.6)]">
-                            <FlaskConical size={48} className="text-purple-400 mb-2" />
-                            <div className="text-purple-200 font-bold">???</div>
-                            <div className="text-xs text-purple-400 mt-2">融合中...</div>
+                        <div className="w-24 h-36 md:w-32 md:h-48 border-4 border-purple-500 bg-black rounded-lg flex flex-col items-center justify-center animate-bounce shadow-[0_0_20px_rgba(168,85,247,0.6)] shrink-0">
+                            <FlaskConical size={32} className="text-purple-400 mb-2" />
+                            <div className="text-purple-200 font-bold text-sm">???</div>
+                            <div className="text-[10px] text-purple-400 mt-1">融合中...</div>
                         </div>
                     </div>
-                    <div className="flex gap-4">
-                        <button onClick={confirmSynthesize} className="bg-purple-600 hover:bg-purple-500 text-white px-8 py-2 rounded font-bold border border-white">
-                            合体させる！
+                    <div className="flex gap-4 pb-4 shrink-0 justify-center">
+                        <button onClick={confirmSynthesize} className="bg-purple-600 hover:bg-purple-500 text-white px-6 py-3 rounded-lg font-bold border border-white shadow-lg whitespace-nowrap">
+                            合体！
                         </button>
-                        <button onClick={cancelPreview} className="bg-gray-600 hover:bg-gray-500 text-white px-8 py-2 rounded border border-gray-400">
-                            選び直す
+                        <button onClick={cancelPreview} className="bg-gray-600 hover:bg-gray-500 text-white px-6 py-3 rounded-lg border border-gray-400 whitespace-nowrap">
+                            戻る
                         </button>
                     </div>
                 </div>

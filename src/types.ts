@@ -1,4 +1,5 @@
 
+
 export enum CardType {
   ATTACK = 'ATTACK',
   SKILL = 'SKILL',
@@ -98,7 +99,7 @@ export interface FloatingText {
     id: string; // Unique ID to trigger animation (e.g. timestamp)
     text: string;
     color: string; // Tailwind text color class
-    iconType?: 'sword' | 'shield' | 'heart' | 'poison';
+    iconType?: 'sword' | 'shield' | 'heart' | 'poison' | 'zap';
 }
 
 export interface Enemy {

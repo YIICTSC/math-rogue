@@ -304,6 +304,25 @@ const App: React.FC = () => {
           }
       }
 
+      // Happy Flower Logic
+      if (p.relics.find(r => r.id === 'HAPPY_FLOWER')) {
+          const current = (p.relicCounters['HAPPY_FLOWER'] || 0) + 1;
+          if (current >= 3) {
+              p.currentEnergy += 1;
+              p.relicCounters['HAPPY_FLOWER'] = 0;
+              p.floatingText = { id: `hf-${Date.now()}`, text: '+1 Energy', color: 'text-yellow-400', iconType: 'zap' };
+          } else {
+              p.relicCounters['HAPPY_FLOWER'] = current;
+          }
+      }
+
+      // Reset turn-based counters for Ninja Relics
+      ['SHURIKEN', 'KUNAI', 'ORNAMENTAL_FAN'].forEach(id => {
+          if (p.relics.find(r => r.id === id)) {
+              p.relicCounters[id] = 0;
+          }
+      });
+
       // Draw Cards
       let newDrawPile = [...p.drawPile];
       let newDiscardPile = [...p.discardPile];
@@ -635,6 +654,23 @@ const App: React.FC = () => {
           if (p.relics.find(r => r.id === 'PEN_NIB')) {
               p.relicCounters['PEN_NIB'] = (p.relicCounters['PEN_NIB'] || 0) + 1;
           }
+
+          // Ninja Relics Logic
+          const ninjaRelics = [
+              { id: 'SHURIKEN', effect: () => { p.strength += 1; } },
+              { id: 'KUNAI', effect: () => { p.powers['DEXTERITY'] = (p.powers['DEXTERITY'] || 0) + 1; } },
+              { id: 'ORNAMENTAL_FAN', effect: () => { p.block += 4; } }
+          ];
+          
+          ninjaRelics.forEach(relic => {
+              if (p.relics.find(r => r.id === relic.id)) {
+                  p.relicCounters[relic.id] = (p.relicCounters[relic.id] || 0) + 1;
+                  if (p.relicCounters[relic.id] === 3) {
+                      relic.effect();
+                      p.relicCounters[relic.id] = 0;
+                  }
+              }
+          });
       }
 
       // Passive Powers
@@ -1446,6 +1482,7 @@ const App: React.FC = () => {
       setGameState(prev => {
           const counters = { ...prev.player.relicCounters };
           if (relic.id === 'PEN_NIB') counters['PEN_NIB'] = 0;
+          if (relic.id === 'HAPPY_FLOWER') counters['HAPPY_FLOWER'] = 0;
           
           return {
             ...prev,
@@ -1508,7 +1545,8 @@ const App: React.FC = () => {
 
   const handleSynthesizeCard = (c1: ICard, c2: ICard) => {
       const newName = c1.name.slice(0, 4) + c2.name.slice(-2);
-      const newCost = Math.min(9, c1.cost + c2.cost);
+      // Cost is the higher of the two
+      const newCost = Math.max(c1.cost, c2.cost);
 
       const newDamage = (c1.damage || 0) + (c2.damage || 0);
       const newBlock = (c1.block || 0) + (c2.block || 0);
