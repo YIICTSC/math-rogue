@@ -29,6 +29,8 @@ import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, S
 
 // --- HELPERS ---
 export const getUpgradedCard = (card: ICard): ICard => {
+    if (card.upgraded) return card; // Prevent double upgrade
+
     const newCard = { ...card, upgraded: true };
     
     const hasDamage = (card.damage !== undefined && card.damage > 0);
@@ -50,6 +52,7 @@ export const getUpgradedCard = (card: ICard): ICard => {
         if (newCard.weak) newCard.weak += 1;
         if (newCard.poison) newCard.poison += 2;
         if (newCard.strength) newCard.strength += 1;
+        if (newCard.poisonMultiplier) newCard.poisonMultiplier += 1;
     }
 
     // Specific Card Upgrade Logic overrides
@@ -378,6 +381,10 @@ const App: React.FC = () => {
       setGameState(prev => {
           const counters = { ...prev.player.relicCounters };
           if (relic.id === 'PEN_NIB') counters['PEN_NIB'] = 0;
+          
+          // Sneakers effect: Initial Draw Boost (Handled in battle start)
+          // Megaphone effect: Vulnerable (Handled in battle start)
+
           return {
             ...prev,
             screen: GameScreen.MAP,
@@ -604,6 +611,7 @@ const App: React.FC = () => {
                 p.hand.push({ ...power, id: `ench-${Date.now()}`, cost: 0 }); // Free first time
             }
             if (p.relics.find(r => r.id === 'RED_MASK')) enemies.forEach(e => e.weak += 1);
+            if (p.relics.find(r => r.id === 'MEGAPHONE')) enemies.forEach(e => e.vulnerable += 1);
 
             p.echoes = 0;
             p.cardsPlayedThisTurn = 0;
@@ -612,10 +620,12 @@ const App: React.FC = () => {
 
             // Relic: Vajra
             if (p.relics.find(r => r.id === 'VAJRA')) p.strength += 1;
-            // Relic: Bag of Prep / Snake Ring (Starter)
+            // Relic: Bag of Prep / Snake Ring (Starter) / Sneakers
             let drawCount = HAND_SIZE;
             if (p.relics.find(r => r.id === 'BAG_OF_PREP')) drawCount += 2;
             if (p.relics.find(r => r.id === 'SNAKE_RING')) drawCount += 2;
+            if (p.relics.find(r => r.id === 'SNEAKERS')) drawCount += 2;
+            
             if (p.relics.find(r => r.id === 'BLOOD_VIAL')) p.currentHp = Math.min(p.maxHp, p.currentHp + 2);
             if (node.type === NodeType.BOSS && p.relics.find(r => r.id === 'PENTOGRAPH')) p.currentHp = Math.min(p.maxHp, p.currentHp + 25);
             // Relic: Anchor
@@ -738,14 +748,13 @@ const App: React.FC = () => {
           const power = powers[Math.floor(Math.random() * powers.length)];
           p.hand.push({ ...power, id: `ai-${Date.now()}` });
       }
-      if (p.powers['TOOLS_OF_THE_TRADE']) { /* Draw handled below, discard separate */ }
-
+      
       // Relic: Mutagenic Strength (Lose)
       if (p.relics.find(r => r.id === 'MUTAGENIC_STRENGTH') && prev.turn === 1) p.strength -= 3;
       // Relic: Warped Tongs
       if (p.relics.find(r => r.id === 'WARPED_TONGS') && p.hand.length > 0) {
           const c = p.hand[Math.floor(Math.random() * p.hand.length)];
-          c.upgraded = true; c.damage = (c.damage ? Math.floor(c.damage*1.3)+2 : undefined); c.block = (c.block ? Math.floor(c.block*1.3)+2 : undefined);
+          p.hand = p.hand.map(card => card.id === c.id ? getUpgradedCard(c) : card);
       }
       // Relic: Happy Flower
       if (p.relics.find(r => r.id === 'HAPPY_FLOWER')) {
@@ -756,7 +765,7 @@ const App: React.FC = () => {
           }
       }
 
-      // Draw
+      // Draw Phase
       let drawCount = HAND_SIZE;
       if (p.powers['TOOLS_OF_THE_TRADE']) drawCount += 1;
       if (p.relics.find(r => r.id === 'SNECKO_EYE')) drawCount += 2;
@@ -765,19 +774,36 @@ const App: React.FC = () => {
       let newDiscardPile = [...p.discardPile];
       let newHand: ICard[] = [];
       
-      for (let i = 0; i < drawCount; i++) {
-        if (newDrawPile.length === 0) {
-          if (newDiscardPile.length === 0) break;
-          newDrawPile = shuffle(newDiscardPile);
-          newDiscardPile = [];
-        }
-        const card = newDrawPile.pop();
-        if (card) {
-            if (card.name === '虚無') p.currentEnergy = Math.max(0, p.currentEnergy - 1);
-            if (p.relics.find(r => r.id === 'SNECKO_EYE')) card.cost = Math.floor(Math.random() * 4);
-            newHand.push(card);
-        }
-      }
+      const drawCard = () => {
+          if (newDrawPile.length === 0) {
+              if (newDiscardPile.length === 0) return null;
+              newDrawPile = shuffle(newDiscardPile);
+              newDiscardPile = [];
+          }
+          return newDrawPile.pop();
+      };
+
+      const processDraw = (count: number) => {
+          for (let i = 0; i < count; i++) {
+              const card = drawCard();
+              if (card) {
+                  // Snecko Eye
+                  if (p.relics.find(r => r.id === 'SNECKO_EYE')) card.cost = Math.floor(Math.random() * 4);
+                  // Void Effect
+                  if (card.name === '虚無') p.currentEnergy = Math.max(0, p.currentEnergy - 1);
+                  
+                  newHand.push(card);
+
+                  // Evolve Power
+                  if (p.powers['EVOLVE'] && (card.type === CardType.STATUS || card.type === CardType.CURSE)) {
+                      const bonusCard = drawCard();
+                      if (bonusCard) newHand.push(bonusCard);
+                  }
+              }
+          }
+      };
+
+      processDraw(drawCount);
       
       p.currentEnergy = p.maxEnergy;
       if (!p.powers['BARRICADE'] && !p.relics.find(r => r.id === 'CALIPERS')) p.block = 0;
@@ -823,7 +849,7 @@ const App: React.FC = () => {
               p.hand = p.hand.filter(c => c.id !== card.id);
               if (mode.type === 'DISCARD') {
                  p.discardPile.push(card);
-                 if (p.powers['STRATEGIST']) p.currentEnergy += 2; // Rough impl
+                 if (p.powers['STRATEGIST']) p.currentEnergy += 2; 
               } else if (mode.type === 'EXHAUST') {
                  if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
               }
@@ -968,7 +994,15 @@ const App: React.FC = () => {
       if (p.relics.find(r => r.id === 'ORNAMENTAL_FAN') && p.attacksPlayedThisTurn % 3 === 0) p.block += 4;
       if (p.relics.find(r => r.id === 'PEN_NIB') && card.type === CardType.ATTACK) {
           p.relicCounters['PEN_NIB'] = (p.relicCounters['PEN_NIB'] || 0) + 1;
-          if (p.relicCounters['PEN_NIB'] === 10) { p.relicCounters['PEN_NIB'] = 0; } // Effect applies before damage calc usually, simplified here
+          if (p.relicCounters['PEN_NIB'] === 10) { p.relicCounters['PEN_NIB'] = 0; } 
+      }
+
+      // --- Apotheosis (Upgrade Deck) Logic ---
+      if (card.upgradeDeck) {
+          p.deck = p.deck.map(c => getUpgradedCard(c));
+          p.drawPile = p.drawPile.map(c => getUpgradedCard(c));
+          p.discardPile = p.discardPile.map(c => getUpgradedCard(c));
+          p.hand = p.hand.map(c => getUpgradedCard(c));
       }
 
       // --- Activations Loop (Echo Form, Burst) ---
@@ -1040,19 +1074,29 @@ const App: React.FC = () => {
               if (card.doubleBlock) p.block *= 2;
               if (card.heal) p.currentHp = Math.min(p.currentHp + card.heal, p.maxHp);
               if (card.energy) p.currentEnergy += card.energy;
-              if (card.selfDamage) { p.currentHp -= card.selfDamage; if (p.powers['RUPTURE']) p.strength += p.powers['RUPTURE']; }
+              if (card.selfDamage) { 
+                  p.currentHp -= card.selfDamage; 
+                  if (p.powers['RUPTURE']) p.strength += p.powers['RUPTURE']; 
+              }
               if (card.strength) p.strength += card.strength;
               if (card.vulnerable) targets.forEach(e => applyDebuff(e, 'VULNERABLE', card.vulnerable!));
               if (card.weak) targets.forEach(e => applyDebuff(e, 'WEAK', card.weak!));
               if (card.poison) targets.forEach(e => applyDebuff(e, 'POISON', card.poison!));
               
-              if (card.upgradeHand || p.powers['APOTHEOSIS']) {
+              if (card.upgradeHand) {
                   p.hand = p.hand.map(c => getUpgradedCard(c));
-                  if (p.powers['APOTHEOSIS']) { p.drawPile = p.drawPile.map(c => getUpgradedCard(c)); p.discardPile = p.discardPile.map(c => getUpgradedCard(c)); p.deck = p.deck.map(c => getUpgradedCard(c)); }
               }
               if (card.doubleStrength) p.strength *= 2;
               if (card.shuffleHandToDraw) { p.drawPile = shuffle([...p.drawPile, ...p.hand]); p.hand = []; }
               if (card.applyPower) p.powers[card.applyPower.id] = (p.powers[card.applyPower.id] || 0) + card.applyPower.amount;
+              
+              // Catalyst Logic
+              if (card.poisonMultiplier) {
+                  targets.forEach(e => {
+                      if (e.poison > 0) e.poison *= card.poisonMultiplier!;
+                  });
+              }
+
               if (card.draw) {
                 for (let j = 0; j < card.draw; j++) {
                   if (p.drawPile.length === 0) {
@@ -1123,8 +1167,6 @@ const App: React.FC = () => {
     for (const enemy of enemies) {
         if (gameState.player.currentHp <= 0) break;
         if (enemy.poison > 0) {
-            let poisonDmg = enemy.poison;
-            if (gameState.player.powers['DOUBLE_POISON']) poisonDmg *= 3; 
             enemy.currentHp -= enemy.poison;
             enemy.floatingText = createDamageText(enemy.poison, 'DAMAGE');
             enemy.poison--;
@@ -1199,16 +1241,46 @@ const App: React.FC = () => {
         if (p.powers['INTANGIBLE'] > 0) p.powers['INTANGIBLE']--;
         if (p.powers['METALLICIZE']) {/* handled start turn */}
         
-        // Curse Logic
-        p.hand.forEach(c => {
-            if (c.name === 'やけど') { p.currentHp -= 2; p.floatingText = createDamageText(2, 'DAMAGE'); }
-            if (c.name === '虫歯') { p.currentHp -= 2; p.floatingText = createDamageText(2, 'DAMAGE'); }
-            if (c.name === '後悔') { p.currentHp -= p.hand.length; p.floatingText = createDamageText(p.hand.length, 'DAMAGE'); }
-            if (c.name === '不安') { applyDebuff(p, 'WEAK', 1); }
-            if (c.name === '恥') { applyDebuff(p, 'VULNERABLE', 1); }
-        });
+        // Iterate hand for end of turn effects
+        const remainingHand = [];
+        for (const c of p.hand) {
+            let exhausted = false;
+            
+            // Ethereal check
+            if (c.exhaust) {
+                // If it's ephemeral/ethereal in hand (like Dazed), exhaust it
+                if (c.name === 'めまい' || c.name === 'DAZED' || c.name === '粘液' || c.name === 'SLIMED' || c.name === '虚無' || c.name === 'VOID' || c.name === '不器用' || c.name === 'CLUMSINESS') {
+                    if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
+                    exhausted = true;
+                }
+            }
 
-        p.discardPile = [...p.discardPile, ...p.hand];
+            if (!exhausted) {
+                // Curse Logic
+                if (c.name === 'やけど') { 
+                    p.currentHp -= 2; 
+                    p.floatingText = createDamageText(2, 'DAMAGE');
+                    if (p.powers['RUPTURE']) p.strength += p.powers['RUPTURE'];
+                }
+                if (c.name === '虫歯') { 
+                    p.currentHp -= 2; 
+                    p.floatingText = createDamageText(2, 'DAMAGE');
+                    if (p.powers['RUPTURE']) p.strength += p.powers['RUPTURE'];
+                }
+                if (c.name === '後悔') { 
+                    const dmg = p.hand.length; 
+                    p.currentHp -= dmg; 
+                    p.floatingText = createDamageText(dmg, 'DAMAGE');
+                    if (p.powers['RUPTURE']) p.strength += p.powers['RUPTURE'];
+                }
+                if (c.name === '不安') { applyDebuff(p, 'WEAK', 1); }
+                if (c.name === '恥') { applyDebuff(p, 'VULNERABLE', 1); }
+                
+                remainingHand.push(c);
+            }
+        }
+
+        p.discardPile = [...p.discardPile, ...remainingHand];
         p.hand = [];
         return { ...prev, player: p };
     });
@@ -1221,7 +1293,6 @@ const App: React.FC = () => {
   };
 
   const handleMathComplete = (correctCount: number) => {
-      // audioService.playSound(correctCount === 3 ? 'win' : 'select'); // Moved to Reward phase transition or kept here if needed
       goToRewardPhase(correctCount);
   };
 
@@ -1371,7 +1442,7 @@ const App: React.FC = () => {
             {gameState.screen === GameScreen.START_MENU && (
                 <div className="w-full h-full bg-gray-900 flex items-center justify-center">
                     <div className="text-center p-8 relative w-full h-full flex flex-col justify-center items-center">
-                        <div className="absolute bottom-4 right-4 text-gray-600 text-xs font-mono">v2.0.3</div>
+                        <div className="absolute bottom-4 right-4 text-gray-600 text-xs font-mono">v2.1.0</div>
                         <h1 className="text-4xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-b from-green-400 to-blue-600 mb-8 font-bold animate-pulse tracking-widest">
                             かけ算ローグ<br/><span className="text-2xl text-white">小学校の伝説</span>
                         </h1>

@@ -75,6 +75,53 @@ const MAGE_SVG = `
   <path d="M8 22h3v2H8zM13 22h3v2h-3z" fill="#37474f"/>
 </svg>`;
 
+// 4. Go-Home Club (Casual)
+const ROGUE_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges">
+  <path d="M0 0h24v24H0z" fill="none"/>
+  <!-- Hair (Messy) -->
+  <path d="M7 3h10v3H7z" fill="#fbc02d"/>
+  <path d="M6 4h1v3H6zM17 4h1v3h-1z" fill="#fbc02d"/>
+  <!-- Face -->
+  <path d="M9 6h6v4H9z" fill="#ffccbc"/>
+  <path d="M10 7h1v1h-1zM13 7h1v1h-1z" fill="#3e2723"/>
+  <!-- Headphones -->
+  <path d="M7 6h2v3H7zM15 6h2v3h-2z" fill="#333"/>
+  <path d="M9 5h6v1H9z" fill="#333"/>
+  <!-- Body (Hoodie/Casual) -->
+  <path d="M8 10h8v7H8z" fill="#90a4ae"/>
+  <path d="M10 11h4v4h-4z" fill="#cfd8dc"/>
+  <!-- Bag (Slung over) -->
+  <path d="M8 10h1v7H8z" fill="#5d4037"/>
+  <!-- Legs -->
+  <path d="M9 17h2v5H9zM13 17h2v5h-2z" fill="#37474f"/>
+  <path d="M8 22h3v2H8zM13 22h3v2h-3z" fill="#eeeeee"/>
+</svg>`;
+
+// 5. Broadcasting Club (Mic)
+const BARD_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges">
+  <path d="M0 0h24v24H0z" fill="none"/>
+  <!-- Hair (Pigtails) -->
+  <path d="M8 3h8v3H8z" fill="#ec407a"/>
+  <path d="M6 4h2v4H6zM16 4h2v4h-2z" fill="#ec407a"/>
+  <!-- Face -->
+  <path d="M9 6h6v4H9z" fill="#ffccbc"/>
+  <path d="M10 7h1v1h-1zM13 7h1v1h-1z" fill="#3e2723"/>
+  <!-- Mic -->
+  <path d="M13 11h3v3h-3z" fill="#212121"/>
+  <path d="M14 14h1v2h-1z" fill="#bdbdbd"/>
+  <!-- Body (Uniform) -->
+  <path d="M8 10h8v6H8z" fill="#fff9c4"/>
+  <path d="M10 10h4v2h-4z" fill="#f44336"/> <!-- Ribbon -->
+  <!-- Skirt -->
+  <path d="M7 16h10v3H7z" fill="#ad1457"/>
+  <!-- Legs -->
+  <path d="M9 19h2v3H9zM13 19h2v3h-2z" fill="#ffccbc"/>
+  <path d="M9 21h2v1H9zM13 21h2v1h-2z" fill="#fff"/> <!-- Socks -->
+  <path d="M8 22h3v2H8zM13 22h3v2h-3z" fill="#5d4037"/>
+</svg>`;
+
 export const HERO_IMAGE_DATA = `data:image/svg+xml;base64,${btoa(WARRIOR_SVG)}`;
 
 // --- RELICS (School Theme) ---
@@ -83,6 +130,8 @@ export const RELIC_LIBRARY: Record<string, Relic> = {
     BURNING_BLOOD: { id: 'BURNING_BLOOD', name: '給食の余り', description: '戦闘終了時、HPを6回復する。', rarity: 'STARTER' },
     SNAKE_RING: { id: 'SNAKE_RING', name: '秘密のメモ帳', description: '戦闘開始時、追加で2枚カードを引く。', rarity: 'STARTER' },
     HOLY_WATER: { id: 'HOLY_WATER', name: 'スポーツドリンク', description: '戦闘開始時、エネルギーを1得る。', rarity: 'STARTER' },
+    SNEAKERS: { id: 'SNEAKERS', name: '瞬足シューズ', description: '戦闘開始時、カードを2枚引く。', rarity: 'STARTER' },
+    MEGAPHONE: { id: 'MEGAPHONE', name: '校内放送マイク', description: '戦闘開始時、敵全体に脆弱1を与える。', rarity: 'STARTER' },
     
     // COMMON
     VAJRA: { id: 'VAJRA', name: '金の定規', description: '戦闘開始時、筋力1を得る。', rarity: 'COMMON', price: 150 },
@@ -318,9 +367,10 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
   BLADE_DANCE: { name: '剣の舞', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '手札にナイフ(0コス4ダメ)を3枚加える。', addCardToHand: { cardName: 'SLICE', count: 3, cost0: true }, rarity: 'COMMON' }, 
   CLOAK_AND_DAGGER: { name: '隠しナイフ', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック6。ナイフ1枚得る。', block: 6, addCardToHand: { cardName: 'SLICE', count: 1, cost0: true }, rarity: 'COMMON' },
   CALCULATED_GAMBLE: { name: '計算', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '手札を全て捨て、同じ枚数引く。', rarity: 'UNCOMMON' }, 
-  CATALYST: { name: '触媒', cost: 1, type: CardType.SKILL, target: TargetType.ENEMY, description: '毒を2倍にする。廃棄。', applyPower: { id: 'DOUBLE_POISON', amount: 1 }, exhaust: true, rarity: 'UNCOMMON' },
+  CATALYST: { name: '触媒', cost: 1, type: CardType.SKILL, target: TargetType.ENEMY, description: '毒を2倍にする。廃棄。', poisonMultiplier: 2, exhaust: true, rarity: 'UNCOMMON' },
   DISCOVERY: { name: '発見', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ランダムなカードを手札に加える。', exhaust: true, rarity: 'UNCOMMON' }, 
   STRATEGIST: { name: '作戦', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '捨てられた時E2得る。', unplayable: true, rarity: 'UNCOMMON' }, 
+  APOTHEOSIS: { name: '神格化', cost: 2, type: CardType.SKILL, target: TargetType.SELF, description: 'この戦闘中、全カードを強化。廃棄。', upgradeDeck: true, exhaust: true, rarity: 'RARE' },
 
   // POWERS
   INFLAME: { name: '発火', cost: 1, type: CardType.POWER, target: TargetType.SELF, description: '筋力を2得る。', strength: 2, rarity: 'RARE' },
@@ -346,7 +396,6 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
   BERSERK: { name: 'バーサク', cost: 0, type: CardType.POWER, target: TargetType.SELF, description: '脆弱2を受け、エネルギー1を得る。', energy: 1, vulnerable: 2, rarity: 'RARE' },
   INFINITE_BLADES: { name: '無限の刃', cost: 1, type: CardType.POWER, target: TargetType.SELF, description: '毎ターン手札にナイフを加える。', applyPower: { id: 'INFINITE_BLADES', amount: 1 }, rarity: 'UNCOMMON' },
   ACCURACY: { name: '精度上昇', cost: 1, type: CardType.POWER, target: TargetType.SELF, description: 'ナイフのダメージ+4。', applyPower: { id: 'ACCURACY', amount: 4 }, rarity: 'UNCOMMON' },
-  APOTHEOSIS: { name: '神格化', cost: 2, type: CardType.SKILL, target: TargetType.SELF, description: 'この戦闘中、全カードを強化。廃棄。', applyPower: { id: 'APOTHEOSIS', amount: 1 }, exhaust: true, rarity: 'RARE' },
 };
 
 export const STARTING_DECK_TEMPLATE = [
@@ -388,5 +437,27 @@ export const CHARACTERS: Character[] = [
         color: 'blue',
         deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'BALL_LIGHTNING', 'TURBO'],
         imageData: `data:image/svg+xml;base64,${btoa(MAGE_SVG)}`
+    },
+    {
+        id: 'ROGUE',
+        name: '帰宅部エース',
+        description: '誰よりも早く帰る。スピード（ドロー）が自慢。',
+        maxHp: 72,
+        gold: 100,
+        startingRelicId: 'SNEAKERS',
+        color: 'gray',
+        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'QUICK_SLASH', 'BACKFLIP'],
+        imageData: `data:image/svg+xml;base64,${btoa(ROGUE_SVG)}`
+    },
+    {
+        id: 'BARD',
+        name: '放送委員',
+        description: '校内放送で皆を支配する。デバフのスペシャリスト。',
+        maxHp: 68,
+        gold: 100,
+        startingRelicId: 'MEGAPHONE', 
+        color: 'yellow',
+        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'THUNDERCLAP', 'PIERCING_WAIL'],
+        imageData: `data:image/svg+xml;base64,${btoa(BARD_SVG)}`
     },
 ];

@@ -42,12 +42,14 @@ export interface Card {
   // Advanced Effects
   strengthScaling?: number; 
   lifesteal?: boolean;      
-  upgradeHand?: boolean;    
+  upgradeHand?: boolean;
+  upgradeDeck?: boolean; // New: Apotheosis
   fatalEnergy?: number;     
   fatalPermanentDamage?: number; 
   shuffleHandToDraw?: boolean;   
   doubleStrength?: boolean;      
   applyPower?: { id: string, amount: number }; 
+  poisonMultiplier?: number; // New: Catalyst
   
   // Even More Advanced Effects
   damageBasedOnBlock?: boolean; 
