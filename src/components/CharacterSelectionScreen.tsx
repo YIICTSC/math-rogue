@@ -95,7 +95,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                         <div className="w-full bg-black/40 rounded p-2 mb-4">
                             <div className="text-[10px] text-gray-400 mb-1">得意なカード</div>
                             <div className="text-xs text-white leading-relaxed truncate">
-                                {Array.from(new Set(char.deckTemplate)).filter(id => !['STRIKE','DEFEND'].includes(id)).map(cardId => {
+                                {Array.from(new Set(char.deckTemplate)).filter((id: string) => !['STRIKE','DEFEND'].includes(id)).map((cardId: string) => {
                                     const card = CARDS_LIBRARY[cardId];
                                     return card ? card.name : '';
                                 }).join(', ') || '基本カードのみ'}

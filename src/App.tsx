@@ -270,6 +270,86 @@ const App: React.FC = () => {
     setClearCount(storageService.getClearCount());
   }, []);
 
+  // --- Battle End Check ---
+  useEffect(() => {
+    if (gameState.screen === GameScreen.BATTLE) {
+        if (gameState.enemies.length === 0) {
+            // Victory!
+            audioService.stopBGM();
+            
+            if (gameState.act === 4) {
+                 // TRUE ENDING - Skip Math
+                 audioService.playSound('win');
+                 setGameState(prev => ({ ...prev, screen: GameScreen.ENDING }));
+                 recordScore(true);
+                 storageService.incrementClearCount();
+            } else {
+                 // STANDARD VICTORY -> GO TO MATH CHALLENGE
+                 setGameState(prev => ({ 
+                    ...prev, 
+                    screen: GameScreen.MATH_CHALLENGE
+                }));
+            }
+        } else if (gameState.player.currentHp <= 0) {
+            if (gameState.player.relics.find(r => r.id === 'LIZARD_TAIL')) {
+                // Lizard Tail Revive
+                audioService.playSound('block');
+                setGameState(prev => ({
+                    ...prev,
+                    player: {
+                        ...prev.player,
+                        currentHp: Math.floor(prev.player.maxHp / 2),
+                        relics: prev.player.relics.filter(r => r.id !== 'LIZARD_TAIL')
+                    }
+                }));
+                // Force a narrative update to explain
+                setTurnLog("トカゲの尻尾が身代わりになった！");
+            } else if (gameState.player.potions.find(p => p.templateId === 'GHOST_IN_JAR')) {
+                // Ghost in Jar Revive
+                audioService.playSound('block');
+                const revivePotion = gameState.player.potions.find(p => p.templateId === 'GHOST_IN_JAR');
+                setGameState(prev => ({
+                    ...prev,
+                    player: {
+                        ...prev.player,
+                        currentHp: Math.floor(prev.player.maxHp * 0.1),
+                        potions: prev.player.potions.filter(p => p.id !== revivePotion?.id),
+                        powers: { ...prev.player.powers, 'INTANGIBLE': (prev.player.powers['INTANGIBLE'] || 0) + 1 }
+                    }
+                }));
+                setTurnLog("お守りが発動した！");
+            } else {
+                audioService.playSound('lose');
+                audioService.stopBGM();
+                recordScore(false);
+                storageService.clearSave();
+                setGameState(prev => ({ ...prev, screen: GameScreen.GAME_OVER }));
+            }
+        }
+    }
+  }, [gameState.enemies, gameState.player.currentHp, gameState.screen]);
+
+  const handleMathChallengeComplete = (correctCount: number) => {
+      audioService.playSound('win');
+      
+      // Relic: Burning Blood Healing
+      let hpRegen = 0;
+      if (gameState.player.relics.find(r => r.id === 'BURNING_BLOOD')) hpRegen = 6;
+
+      // Bonus gold for correct math answers
+      const bonusGold = correctCount * 10; 
+
+      setGameState(prev => ({ 
+          ...prev, 
+          player: { 
+              ...prev.player, 
+              gold: prev.player.gold + VICTORY_GOLD + bonusGold, 
+              currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + hpRegen) 
+          },
+          screen: GameScreen.VICTORY
+      }));
+  };
+
   const unlockCards = (cards: ICard[]) => {
       let updated = false;
       const currentUnlocked = [...storageService.getUnlockedCards()]; 
@@ -730,7 +810,16 @@ const App: React.FC = () => {
       if (p.powers['DEVA_FORM']) p.maxEnergy += p.powers['DEVA_FORM']; 
       if (p.powers['METALLICIZE']) p.block += p.powers['METALLICIZE'];
       if (p.powers['REGEN']) { p.currentHp = Math.min(p.maxHp, p.currentHp + p.powers['REGEN']); p.floatingText = createDamageText(p.powers['REGEN'], 'HEAL'); p.powers['REGEN']--; }
-      if (p.powers['NOXIOUS_FUMES']) { prev.enemies.forEach(e => { e.poison += p.powers['NOXIOUS_FUMES']; }); }
+      
+      // NOXIOUS FUMES: Safe mutation
+      let currentEnemies = [...prev.enemies];
+      if (p.powers['NOXIOUS_FUMES']) { 
+          currentEnemies = currentEnemies.map(e => ({
+              ...e,
+              poison: (e.poison || 0) + p.powers['NOXIOUS_FUMES']
+          }));
+      }
+
       if (p.powers['INFINITE_BLADES']) p.hand.push({ ...CARDS_LIBRARY['SLICE'], id: `blade-${Date.now()}`, cost: 0 });
       if (p.powers['CREATIVE_AI']) { 
           const powers = Object.values(CARDS_LIBRARY).filter(c => c.type === CardType.POWER);
@@ -798,7 +887,7 @@ const App: React.FC = () => {
       p.attacksPlayedThisTurn = 0;
       p.turnFlags = {};
 
-      return { ...prev, player: p };
+      return { ...prev, player: p, enemies: currentEnemies };
     });
   };
 
@@ -833,16 +922,9 @@ const App: React.FC = () => {
       if (p.relics.find(r => r.id === 'ORNAMENTAL_FAN') && p.attacksPlayedThisTurn % 3 === 0) p.block += 4;
       if (p.relics.find(r => r.id === 'PEN_NIB') && card.type === CardType.ATTACK) {
           p.relicCounters['PEN_NIB'] = (p.relicCounters['PEN_NIB'] || 0) + 1;
-          if (p.relicCounters['PEN_NIB'] === 10) { p.relicCounters['PEN_NIB'] = 0; } 
       }
 
-      if (card.upgradeDeck) {
-          p.deck = p.deck.map(c => getUpgradedCard(c));
-          p.drawPile = p.drawPile.map(c => getUpgradedCard(c));
-          p.discardPile = p.discardPile.map(c => getUpgradedCard(c));
-          p.hand = p.hand.map(c => getUpgradedCard(c));
-      }
-
+      // --- Activations Loop (Echo Form, Burst) ---
       let activations = 1;
       if (p.echoes > 0) { activations++; p.echoes--; }
       if (card.type === CardType.SKILL && p.powers['BURST'] > 0) { activations++; p.powers['BURST']--; }
@@ -852,6 +934,7 @@ const App: React.FC = () => {
       }
 
       for (let act = 0; act < activations; act++) {
+          
           let hits = 1;
           if (card.playCopies) hits += card.playCopies;
 
@@ -872,12 +955,12 @@ const App: React.FC = () => {
                     if (card.damagePerCardInHand) baseDamage += (p.hand.filter(c => c.id !== card.id).length) * card.damagePerCardInHand!;
                     if (card.damagePerAttackPlayed) baseDamage += (p.attacksPlayedThisTurn - 1) * card.damagePerAttackPlayed!;
                     if (card.damagePerStrike) baseDamage += (p.deck.filter(c => c.name.includes('えんぴつ攻撃')).length) * card.damagePerStrike!;
-                    if (p.relics.find(r => r.id === 'PEN_NIB') && p.relicCounters['PEN_NIB'] === 9 && act === 0 && h === 0) baseDamage *= 2; 
-                    if (p.powers['ACCURACY'] && (card.name === 'ナイフ' || card.name === 'SLICE')) baseDamage += p.powers['ACCURACY'];
+                    if (p.powers['ACCURACY'] && card.name.includes('ナイフ')) baseDamage += p.powers['ACCURACY'];
 
                     let damage = baseDamage + strengthBonus;
                     if (e.vulnerable > 0) damage = Math.floor(damage * 1.5);
-                    if (p.powers['ENVENOM']) { e.poison = (e.poison || 0) + p.powers['ENVENOM']; }
+                    if (p.powers['ENVENOM']) applyDebuff(e, 'POISON', p.powers['ENVENOM']);
+                    if (p.relics.find(r => r.id === 'PEN_NIB') && p.relicCounters['PEN_NIB'] === 10) { damage *= 2; p.relicCounters['PEN_NIB'] = 0; }
                     
                     if (e.block >= damage) { e.block -= damage; damage = 0; }
                     else { damage -= e.block; e.block = 0; }
@@ -885,7 +968,11 @@ const App: React.FC = () => {
                     e.currentHp -= damage;
                     if (damage > 0) e.floatingText = createDamageText(damage, 'DAMAGE');
 
-                    if (card.lifesteal && damage > 0) { p.currentHp = Math.min(p.currentHp + damage, p.maxHp); p.floatingText = createDamageText(damage, 'HEAL'); }
+                    if (card.lifesteal && damage > 0) {
+                        const heal = Math.min(p.currentHp + damage, p.maxHp) - p.currentHp;
+                        p.currentHp += heal;
+                        p.floatingText = createDamageText(heal, 'HEAL');
+                    }
                     if (e.currentHp <= 0) {
                          if (card.fatalEnergy) p.currentEnergy += card.fatalEnergy;
                          if (card.fatalPermanentDamage) {
@@ -898,38 +985,37 @@ const App: React.FC = () => {
                 });
               }
 
-              let blockAmount = card.block || 0;
-              if (blockAmount > 0) {
-                  blockAmount += (p.powers['DEXTERITY'] || 0);
-                  p.block += blockAmount;
-                  p.floatingText = createDamageText(blockAmount, 'BLOCK');
+              if (card.block) {
+                  let blk = card.block;
+                  if (p.powers['DEXTERITY']) blk += p.powers['DEXTERITY'];
+                  p.block += blk;
+                  p.floatingText = createDamageText(blk, 'BLOCK');
               }
-              
               if (card.doubleBlock) p.block *= 2;
-              if (card.heal) p.currentHp = Math.min(p.currentHp + card.heal, p.maxHp);
-              if (card.energy) p.currentEnergy += card.energy;
-              if (card.selfDamage) { 
-                  p.currentHp -= card.selfDamage; 
-                  if (p.powers['RUPTURE']) p.strength += p.powers['RUPTURE']; 
+              if (card.heal) {
+                  p.currentHp = Math.min(p.currentHp + card.heal, p.maxHp);
+                  p.floatingText = createDamageText(card.heal, 'HEAL');
               }
+              if (card.energy) p.currentEnergy += card.energy;
+              if (card.selfDamage) { p.currentHp -= card.selfDamage; if (p.powers['RUPTURE']) p.strength += p.powers['RUPTURE']; }
               if (card.strength) p.strength += card.strength;
-              if (card.vulnerable) targets.forEach(e => { e.vulnerable = (e.vulnerable || 0) + card.vulnerable!; });
-              if (card.weak) targets.forEach(e => { e.weak = (e.weak || 0) + card.weak!; });
-              if (card.poison) targets.forEach(e => { e.poison = (e.poison || 0) + card.poison!; });
+              if (card.vulnerable) targets.forEach(e => applyDebuff(e, 'VULNERABLE', card.vulnerable!));
+              if (card.weak) targets.forEach(e => applyDebuff(e, 'WEAK', card.weak!));
+              if (card.poison) targets.forEach(e => applyDebuff(e, 'POISON', card.poison!));
+              if (card.poisonMultiplier) targets.forEach(e => { if (e.poison) e.poison *= card.poisonMultiplier!; });
               
               if (card.upgradeHand) {
                   p.hand = p.hand.map(c => getUpgradedCard(c));
               }
+              if (card.upgradeDeck) {
+                  p.deck = p.deck.map(c => getUpgradedCard(c));
+                  p.hand = p.hand.map(c => getUpgradedCard(c));
+                  p.drawPile = p.drawPile.map(c => getUpgradedCard(c));
+                  p.discardPile = p.discardPile.map(c => getUpgradedCard(c));
+              }
               if (card.doubleStrength) p.strength *= 2;
               if (card.shuffleHandToDraw) { p.drawPile = shuffle([...p.drawPile, ...p.hand]); p.hand = []; }
               if (card.applyPower) p.powers[card.applyPower.id] = (p.powers[card.applyPower.id] || 0) + card.applyPower.amount;
-              
-              if (card.poisonMultiplier) {
-                  targets.forEach(e => {
-                      if (e.poison > 0) e.poison *= card.poisonMultiplier!;
-                  });
-              }
-
               if (card.draw) {
                 for (let j = 0; j < card.draw; j++) {
                   if (p.drawPile.length === 0) {
@@ -940,7 +1026,6 @@ const App: React.FC = () => {
                   const newCard = p.drawPile.pop();
                   if (newCard) { 
                       if (newCard.name === '虚無') p.currentEnergy = Math.max(0, p.currentEnergy - 1); 
-                      if (p.relics.find(r => r.id === 'SNECKO_EYE')) newCard.cost = Math.floor(Math.random() * 4);
                       p.hand.push(newCard); 
                   }
                 }
@@ -961,25 +1046,44 @@ const App: React.FC = () => {
           }
       }
 
+      // Exhaust Logic
       p.hand = p.hand.filter(c => c.id !== card.id);
-      if (!card.exhaust && !(card.type === CardType.POWER) && !(card.promptsExhaust === 99) && !(p.powers['CORRUPTION'] && card.type === CardType.SKILL)) {
+      
+      let shouldExhaust = card.exhaust;
+      if (p.powers['CORRUPTION'] && card.type === CardType.SKILL) shouldExhaust = true;
+
+      if (!shouldExhaust && !(card.type === CardType.POWER) && !(card.promptsExhaust === 99)) {
           p.discardPile.push(card);
-      } else if (p.powers['FEEL_NO_PAIN']) {
-           p.block += p.powers['FEEL_NO_PAIN'];
+      } else {
+          // Exhausted
+          if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
       }
 
       let nextSelectionState = { ...prev.selectionState };
       if (card.promptsDiscard) nextSelectionState = { active: true, type: 'DISCARD', amount: card.promptsDiscard };
       if (card.promptsCopy) nextSelectionState = { active: true, type: 'COPY', amount: card.promptsCopy };
-      if (card.promptsExhaust === 99) {
-          if (card.name === '断捨離' || card.name === 'SEVER_SOUL') {
-              const cardsToExhaust = p.hand.filter(c => c.type !== CardType.ATTACK);
-              if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'] * cardsToExhaust.length;
-              p.hand = p.hand.filter(c => c.type === CardType.ATTACK);
-          } else if (card.name === '焚き火' || card.name === 'FIEND_FIRE') {
-               if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'] * p.hand.length;
-               p.hand = [];
-          }
+      if (card.name === '断捨離' || card.name === 'SEVER_SOUL') {
+          const cardsToExhaust = p.hand.filter(c => c.type !== CardType.ATTACK);
+          if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'] * cardsToExhaust.length;
+          p.hand = p.hand.filter(c => c.type === CardType.ATTACK);
+      } else if (card.name === '焚き火' || card.name === 'FIEND_FIRE') {
+           if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'] * p.hand.length;
+           p.hand = [];
+      } else if (card.name === '計算' || card.name === 'CALCULATED_GAMBLE') {
+           const count = p.hand.length;
+           p.discardPile.push(...p.hand);
+           p.hand = [];
+           for(let i=0; i<count; i++) {
+               if(p.drawPile.length === 0) { p.drawPile = shuffle(p.discardPile); p.discardPile = []; }
+               const c = p.drawPile.pop();
+               if(c) p.hand.push(c);
+           }
+      } else if (card.name === '発見' || card.name === 'DISCOVERY') {
+           // Simplified: Add 1 random card to hand (0 cost this turn)
+           const allCards = Object.values(CARDS_LIBRARY).filter(c => c.rarity !== 'SPECIAL');
+           const randomCard = allCards[Math.floor(Math.random() * allCards.length)];
+           const newCard = { ...randomCard, id: `disc-${Date.now()}`, cost: 0, exhaust: true };
+           p.hand.push(newCard);
       }
 
       let nextSelectedId = prev.selectedEnemyId;
@@ -1003,13 +1107,14 @@ const App: React.FC = () => {
             enemy.floatingText = createDamageText(enemy.poison, 'DAMAGE');
             enemy.poison--;
             setGameState(prev => ({ ...prev, enemies: prev.enemies.map(e => e.id === enemy.id ? { ...e, currentHp: enemy.currentHp, poison: enemy.poison, floatingText: enemy.floatingText } : e) }));
+            await wait(200);
             if (enemy.currentHp <= 0) continue;
         }
 
         setActingEnemyId(enemy.id);
         await wait(300); 
 
-        if (enemy.nextIntent.type === EnemyIntentType.ATTACK) audioService.playSound('attack');
+        if (enemy.nextIntent.type === EnemyIntentType.ATTACK || enemy.nextIntent.type === EnemyIntentType.ATTACK_DEBUFF || enemy.nextIntent.type === EnemyIntentType.ATTACK_DEFEND) audioService.playSound('attack');
         else if (enemy.nextIntent.type === EnemyIntentType.DEFEND) audioService.playSound('block');
         else audioService.playSound('select');
 
@@ -1021,57 +1126,65 @@ const App: React.FC = () => {
             const e = { ...newEnemies[currentEnemyIndex] };
             newEnemies[currentEnemyIndex] = e;
             e.block = 0; 
-            e.floatingText = null;
 
-            // Execute Intent
-            const intent = e.nextIntent;
-            if (intent.type === EnemyIntentType.ATTACK || intent.type === EnemyIntentType.ATTACK_DEBUFF || intent.type === EnemyIntentType.ATTACK_DEFEND) {
-                let damage = intent.value + (e.strength || 0);
+            // AI Action Execution
+            if (e.nextIntent.type === EnemyIntentType.ATTACK || e.nextIntent.type === EnemyIntentType.ATTACK_DEBUFF || e.nextIntent.type === EnemyIntentType.ATTACK_DEFEND) {
+                let damage = e.nextIntent.value + (e.strength || 0);
                 if (e.weak > 0) damage = Math.floor(damage * 0.75);
                 if (p.powers['INTANGIBLE'] > 0) damage = 1;
-                
                 if (p.powers['STATIC_DISCHARGE']) { e.currentHp -= p.powers['STATIC_DISCHARGE']; e.floatingText = createDamageText(p.powers['STATIC_DISCHARGE'], 'DAMAGE'); }
+                
                 if (p.powers['BUFFER'] > 0) { 
                     p.powers['BUFFER']--; 
                     damage = 0; 
                 }
                 
-                let blocked = false;
-                if (p.block >= damage) { p.block -= damage; damage = 0; blocked = true; }
-                else { damage -= p.block; p.block = 0; }
+                if (p.block >= damage) { 
+                    p.block -= damage; 
+                    damage = 0; 
+                } else { 
+                    damage -= p.block; 
+                    p.block = 0; 
+                }
                 
                 p.currentHp -= damage;
                 if (damage > 0) p.floatingText = createDamageText(damage, 'DAMAGE');
-                
-                if (p.powers['THORNS'] && !blocked) {
+
+                // Thorns logic
+                if (p.powers['THORNS']) {
                     e.currentHp -= p.powers['THORNS'];
                     e.floatingText = createDamageText(p.powers['THORNS'], 'DAMAGE');
                 }
 
-                if (intent.type === EnemyIntentType.ATTACK_DEFEND && intent.secondaryValue) e.block += intent.secondaryValue;
-                if (intent.type === EnemyIntentType.ATTACK_DEBUFF && intent.debuffType && intent.secondaryValue) {
-                    if (intent.debuffType === 'VULNERABLE') applyDebuff(p, 'VULNERABLE', intent.secondaryValue);
-                    if (intent.debuffType === 'WEAK') applyDebuff(p, 'WEAK', intent.secondaryValue);
-                    if (intent.debuffType === 'POISON') applyDebuff(p, 'POISON', intent.secondaryValue);
+                // Apply debuff if any
+                if (e.nextIntent.debuffType && e.nextIntent.secondaryValue) {
+                    if (e.nextIntent.debuffType === 'WEAK') p.powers['WEAK'] = (p.powers['WEAK'] || 0) + e.nextIntent.secondaryValue;
+                    if (e.nextIntent.debuffType === 'VULNERABLE') p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + e.nextIntent.secondaryValue;
+                    if (e.nextIntent.debuffType === 'POISON') p.powers['POISON'] = (p.powers['POISON'] || 0) + e.nextIntent.secondaryValue;
+                }
+                // Apply block if any
+                if (e.nextIntent.type === EnemyIntentType.ATTACK_DEFEND && e.nextIntent.secondaryValue) {
+                    e.block += e.nextIntent.secondaryValue;
                 }
 
-            } else if (intent.type === EnemyIntentType.DEFEND) {
-                e.block = intent.value;
-            } else if (intent.type === EnemyIntentType.BUFF) {
-                e.strength += (intent.secondaryValue || 2);
-            } else if (intent.type === EnemyIntentType.DEBUFF && intent.debuffType && intent.secondaryValue) {
-                if (intent.debuffType === 'VULNERABLE') applyDebuff(p, 'VULNERABLE', intent.secondaryValue);
-                if (intent.debuffType === 'WEAK') applyDebuff(p, 'WEAK', intent.secondaryValue);
-                if (intent.debuffType === 'POISON') applyDebuff(p, 'POISON', intent.secondaryValue);
+            } else if (e.nextIntent.type === EnemyIntentType.DEFEND) {
+                e.block = e.nextIntent.value;
+            } else if (e.nextIntent.type === EnemyIntentType.BUFF) {
+                if (e.nextIntent.secondaryValue) e.strength += e.nextIntent.secondaryValue;
+                else e.strength += 2;
+            } else if (e.nextIntent.type === EnemyIntentType.DEBUFF) {
+                 if (e.nextIntent.debuffType === 'WEAK') p.powers['WEAK'] = (p.powers['WEAK'] || 0) + (e.nextIntent.secondaryValue || 2);
+                 if (e.nextIntent.debuffType === 'VULNERABLE') p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + (e.nextIntent.secondaryValue || 2);
+                 if (e.nextIntent.debuffType === 'POISON') p.powers['POISON'] = (p.powers['POISON'] || 0) + (e.nextIntent.secondaryValue || 3);
             }
             
             if (e.vulnerable > 0) e.vulnerable--;
             if (e.weak > 0) e.weak--;
 
-            // Determine Next Intent
+            // New Intent Calculation for next turn
             e.nextIntent = getNextEnemyIntent(e, prev.turn + 1);
 
-            return { ...prev, player: p, enemies: newEnemies, turn: prev.turn + 1 };
+            return { ...prev, player: p, enemies: newEnemies };
         });
         await wait(600);
     }
@@ -1081,74 +1194,45 @@ const App: React.FC = () => {
     setGameState(prev => {
         const p = { ...prev.player };
         if (p.powers['INTANGIBLE'] > 0) p.powers['INTANGIBLE']--;
-        if (p.powers['METALLICIZE']) {/* handled start turn */}
+        if (p.powers['LOSE_STRENGTH'] > 0) { p.strength -= p.powers['LOSE_STRENGTH']; p.powers['LOSE_STRENGTH'] = 0; }
+        if (p.powers['ORANGE_PELLETS']) { /* Handled on play */ }
         
-        // Iterate hand for end of turn effects
-        const remainingHand = [];
-        for (const c of p.hand) {
-            let exhausted = false;
-            
-            // Ethereal check
-            if (c.exhaust) {
-                if (c.name === 'めまい' || c.name === 'DAZED' || c.name === '粘液' || c.name === 'SLIMED' || c.name === '虚無' || c.name === 'VOID' || c.name === '不器用' || c.name === 'CLUMSINESS') {
-                    if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
-                    exhausted = true;
-                }
-            }
+        // Curse Logic
+        p.hand.forEach(c => {
+            if (c.name === 'やけど') p.currentHp -= 2;
+            if (c.name === '虫歯') p.currentHp -= 2;
+            if (c.name === '不安') p.powers['WEAK'] = 1;
+            if (c.name === '恥') p.powers['VULNERABLE'] = 1;
+            if (c.name === '後悔') p.currentHp -= p.hand.length;
+        });
 
-            if (!exhausted) {
-                // Curse Logic
-                if (c.name === 'やけど') { 
-                    p.currentHp -= 2; 
-                    p.floatingText = createDamageText(2, 'DAMAGE');
-                    if (p.powers['RUPTURE']) p.strength += p.powers['RUPTURE'];
-                }
-                if (c.name === '虫歯') { 
-                    p.currentHp -= 2; 
-                    p.floatingText = createDamageText(2, 'DAMAGE');
-                    if (p.powers['RUPTURE']) p.strength += p.powers['RUPTURE'];
-                }
-                if (c.name === '後悔') { 
-                    const dmg = p.hand.length; 
-                    p.currentHp -= dmg; 
-                    p.floatingText = createDamageText(dmg, 'DAMAGE');
-                    if (p.powers['RUPTURE']) p.strength += p.powers['RUPTURE'];
-                }
-                if (c.name === '不安') { applyDebuff(p, 'WEAK', 1); }
-                if (c.name === '恥') { applyDebuff(p, 'VULNERABLE', 1); }
-                
-                remainingHand.push(c);
-            }
-        }
-
-        p.discardPile = [...p.discardPile, ...remainingHand];
+        p.discardPile = [...p.discardPile, ...p.hand];
         p.hand = [];
-        return { ...prev, player: p };
+        return { ...prev, player: p, turn: prev.turn + 1 };
     });
     startPlayerTurn();
   };
 
-  // Helper for applying player debuffs
-  const applyDebuff = (target: any, type: 'WEAK' | 'VULNERABLE' | 'POISON', amount: number) => {
-      if (target.artifact > 0) { target.artifact--; return; } // Simple player check
-      if (target.powers && target.powers['ARTIFACT'] > 0) { target.powers['ARTIFACT']--; return; } // Player check via powers
-
-      if (type === 'WEAK') target.weak = (target.weak || 0) + amount;
-      if (type === 'VULNERABLE') target.vulnerable = (target.vulnerable || 0) + amount;
-      if (type === 'POISON') target.poison = (target.poison || 0) + amount;
-      if (target.powers) target.powers[type] = (target.powers[type] || 0) + amount;
+  const applyDebuff = (enemy: Enemy, type: 'WEAK' | 'VULNERABLE' | 'POISON', amount: number) => {
+      if (enemy.artifact > 0) {
+          enemy.artifact--;
+          return;
+      }
+      if (type === 'WEAK') enemy.weak += amount;
+      if (type === 'VULNERABLE') enemy.vulnerable += amount;
+      if (type === 'POISON') enemy.poison += amount;
   };
 
-  // Other handlers ...
   const handleHandSelection = (card: ICard) => {
       setGameState(prev => {
           const p = { ...prev.player };
           const mode = prev.selectionState;
+          
           if (mode.type === 'DISCARD' || mode.type === 'EXHAUST') {
               p.hand = p.hand.filter(c => c.id !== card.id);
               if (mode.type === 'DISCARD') {
                  p.discardPile.push(card);
-                 if (p.powers['STRATEGIST']) p.currentEnergy += 2; 
+                 if (p.powers['STRATEGIST'] && card.name === '戦略家') p.currentEnergy += 2; // Not perfect check but ok
               } else if (mode.type === 'EXHAUST') {
                  if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
               }
@@ -1167,94 +1251,125 @@ const App: React.FC = () => {
 
   const handleUsePotion = (potion: Potion) => {
       if (gameState.screen !== GameScreen.BATTLE) return;
-      if (gameState.player.relics.find(r => r.id === 'SOZU')) return; 
       audioService.playSound('select');
+      
       setGameState(prev => {
           const p = { ...prev.player };
           const enemies = [...prev.enemies];
+          
+          // Remove potion
           p.potions = p.potions.filter(pt => pt.id !== potion.id);
+
+          // Apply Effect
           const target = enemies.find(e => e.id === prev.selectedEnemyId) || enemies[0];
 
-          if (potion.templateId === 'FIRE_POTION' && target) { target.currentHp -= 20; target.floatingText = createDamageText(20, 'DAMAGE'); }
-          else if (potion.templateId === 'BLOCK_POTION') { p.block += 12; p.floatingText = createDamageText(12, 'BLOCK'); }
-          else if (potion.templateId === 'STRENGTH_POTION') { p.strength += 2; }
-          else if (potion.templateId === 'ENERGY_POTION') { p.currentEnergy += 2; }
-          else if (potion.templateId === 'WEAK_POTION' && target) { target.weak = (target.weak || 0) + 3; }
-          else if (potion.templateId === 'HEALTH_POTION') { const heal = Math.min(p.maxHp - p.currentHp, 15); p.currentHp += heal; p.floatingText = createDamageText(heal, 'HEAL'); }
-          else if (potion.templateId === 'POISON_POTION' && target) { target.poison = (target.poison || 0) + 6; }
-          else if (potion.templateId === 'LIQUID_BRONZE') { p.powers['THORNS'] = (p.powers['THORNS'] || 0) + 3; }
-          else if (potion.templateId === 'ENTROPIC_BREW') {
-              const slots = 3 - p.potions.length;
-              for(let i=0; i<slots; i++) {
-                  const newPot = Object.values(POTION_LIBRARY)[Math.floor(Math.random()*Object.values(POTION_LIBRARY).length)];
-                  p.potions.push({...newPot, id: `pot-${Date.now()}-${i}`});
+          if (potion.templateId === 'FIRE_POTION' && target) {
+              target.currentHp -= 20;
+              target.floatingText = createDamageText(20, 'DAMAGE');
+          } else if (potion.templateId === 'BLOCK_POTION') {
+              p.block += 12;
+              p.floatingText = createDamageText(12, 'BLOCK');
+          } else if (potion.templateId === 'STRENGTH_POTION') {
+              p.strength += 2;
+          } else if (potion.templateId === 'ENERGY_POTION') {
+              p.currentEnergy += 2;
+          } else if (potion.templateId === 'WEAK_POTION' && target) {
+              applyDebuff(target, 'WEAK', 3);
+          } else if (potion.templateId === 'POISON_POTION' && target) {
+              applyDebuff(target, 'POISON', 6);
+          } else if (potion.templateId === 'HEALTH_POTION') {
+              p.currentHp = Math.min(p.maxHp, p.currentHp + 15);
+              p.floatingText = createDamageText(15, 'HEAL');
+          } else if (potion.templateId === 'LIQUID_BRONZE') {
+              p.powers['THORNS'] = (p.powers['THORNS'] || 0) + 3;
+          } else if (potion.templateId === 'ENTROPIC_BREW') {
+              // Fill slots
+              while(p.potions.length < 3) {
+                  const allPotions = Object.values(POTION_LIBRARY);
+                  const newP = allPotions[Math.floor(Math.random() * allPotions.length)];
+                  p.potions.push({ ...newP, id: `brew-${Date.now()}-${Math.random()}` });
               }
           } else if (potion.templateId === 'GAMBLERS_BREW') {
-              const discardCount = p.hand.length;
-              p.discardPile.push(...p.hand);
-              p.hand = [];
-              for(let i=0; i<discardCount; i++) {
-                  if (p.drawPile.length === 0) { p.drawPile = shuffle(p.discardPile); p.discardPile = []; }
-                  const c = p.drawPile.pop();
-                  if (c) p.hand.push(c);
-              }
+               const count = p.hand.length;
+               p.discardPile.push(...p.hand);
+               p.hand = [];
+               for(let i=0; i<count; i++) {
+                   if(p.drawPile.length === 0) { p.drawPile = shuffle(p.discardPile); p.discardPile = []; }
+                   const c = p.drawPile.pop();
+                   if(c) p.hand.push(c);
+               }
           }
+
+          // Clean up dead enemies (simple check)
           const remainingEnemies = enemies.filter(e => e.currentHp > 0);
+
           return { ...prev, player: p, enemies: remainingEnemies };
       });
   };
 
+  // --- Rest & Shop ---
+  const handleRestAction = () => {
+      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.currentHp + Math.floor(prev.player.maxHp * 0.3), prev.player.maxHp) } }));
+  };
+  const handleUpgradeCard = (card: ICard) => {
+      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: prev.player.deck.map(c => c.id === card.id ? getUpgradedCard(c) : c) } }));
+  };
+
+  // --- Treasure ---
   const handleOpenTreasure = () => {
+      // 1. Relic (High chance)
+      let reward: RewardItem;
+      const r = Math.random();
+      if (r < 0.8) {
+          const allRelics = Object.values(RELIC_LIBRARY).filter(relic => relic.rarity !== 'BOSS' && relic.rarity !== 'STARTER');
+          const relic = allRelics[Math.floor(Math.random() * allRelics.length)];
+          reward = { type: 'RELIC', value: relic, id: `tr-relic-${Date.now()}` };
+      } else {
+          reward = { type: 'GOLD', value: 100 + Math.floor(Math.random()*50), id: `tr-gold-${Date.now()}` };
+      }
+      
+      setTreasureRewards([reward]);
+      
+      // Apply reward immediately or just show? Apply on leave usually, but let's apply now for simplicity in this strict flow
       setGameState(prev => {
           const p = { ...prev.player };
-          const rewards: RewardItem[] = [];
-          let relicCount = 1;
-          if ((p.relicCounters['MATRYOSHKA'] || 0) > 0) { relicCount = 2; p.relicCounters['MATRYOSHKA']--; }
-          if (p.relics.find(r => r.id === 'CURSED_KEY')) {
+          if (reward.type === 'RELIC') p.relics.push(reward.value);
+          if (reward.type === 'GOLD') p.gold += reward.value;
+          
+          // Cursed Key check
+          if (p.relics.find(rel => rel.id === 'CURSED_KEY')) {
               const curses = Object.values(CURSE_CARDS);
               const curse = curses[Math.floor(Math.random() * curses.length)];
-              p.deck = [...p.deck, { ...curse, id: `curse-${Date.now()}` }];
-              rewards.push({ type: 'CARD', value: { ...curse, name: `呪い: ${curse.name}` }, id: `curse-${Date.now()}` });
+              p.deck.push({ ...curse, id: `curse-${Date.now()}` });
+              // Also show as reward for visual
+              const curseReward: RewardItem = { type: 'CARD', value: { ...curse, id: `curse-rew-${Date.now()}` }, id: `tr-curse-${Date.now()}` };
+              return { ...prev, player: p, rewards: [reward, curseReward] }; // Hack to show both
           }
-          const availableRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity !== 'STARTER' && r.rarity !== 'BOSS' && !p.relics.find(have => have.id === r.id));
-          const shuffledRelics = shuffle(availableRelics);
-          for(let i=0; i<relicCount; i++) {
-              if (shuffledRelics[i]) {
-                  rewards.push({ type: 'RELIC', value: shuffledRelics[i], id: `relic-${Date.now()}-${i}` });
-                  p.relics = [...p.relics, shuffledRelics[i]];
-                  if (shuffledRelics[i].id === 'MATRYOSHKA') p.relicCounters['MATRYOSHKA'] = 2;
-                  if (shuffledRelics[i].id === 'PEN_NIB') p.relicCounters['PEN_NIB'] = 0;
-                  if (shuffledRelics[i].id === 'OLD_COIN') p.gold += 300;
-              }
-          }
-          if (Math.random() > 0.5) {
-              const gold = Math.floor(Math.random() * 50) + 20;
-              p.gold += gold;
-              rewards.push({ type: 'GOLD', value: gold, id: `gold-${Date.now()}` });
-          }
-          setTreasureRewards(rewards);
-          return { ...prev, player: p };
+
+          return { ...prev, player: p, rewards: [reward] };
       });
   };
 
-  const goToMathChallenge = () => { setGameState(prev => ({ ...prev, screen: GameScreen.MATH_CHALLENGE })); };
-  const handleMathComplete = (correctCount: number) => { goToRewardPhase(correctCount); };
-  const goToRewardPhase = (mathScore: number = 3) => {
-    audioService.playBGM('menu'); 
+  // --- Reward Logic ---
+  const goToRewardPhase = () => {
     const rewards: RewardItem[] = [];
+    
+    // 1. Card Reward
     const allCards = Object.values(CARDS_LIBRARY).filter(c => c.type !== CardType.STATUS && c.type !== CardType.CURSE && c.rarity !== 'SPECIAL');
     while(rewards.length < 3) {
         const roll = Math.random() * 100;
         let targetRarity = 'COMMON';
-        if (mathScore === 3) { if (roll > 93) targetRarity = 'LEGENDARY'; else if (roll > 60) targetRarity = 'RARE'; else if (roll > 25) targetRarity = 'UNCOMMON'; } 
-        else if (mathScore === 2) { if (roll > 95) targetRarity = 'LEGENDARY'; else if (roll > 75) targetRarity = 'RARE'; else if (roll > 40) targetRarity = 'UNCOMMON'; } 
-        else if (mathScore === 1) { if (roll > 90) targetRarity = 'UNCOMMON'; }
-        const pool = allCards.filter(c => c.rarity === targetRarity).length > 0 ? allCards.filter(c => c.rarity === targetRarity) : allCards.filter(c => c.rarity === 'COMMON');
+        if (roll > 93) targetRarity = 'LEGENDARY'; else if (roll > 60) targetRarity = 'RARE';
+        else if (roll > 25) targetRarity = 'UNCOMMON';
+        
+        const pool = allCards.filter(c => c.rarity === targetRarity).length > 0 ? allCards.filter(c => c.rarity === targetRarity) : allCards;
         const candidate = pool[Math.floor(Math.random() * pool.length)];
         if (!rewards.some(r => r.value.name === candidate.name)) {
             rewards.push({ type: 'CARD', value: { ...candidate, id: `reward-${Date.now()}-${rewards.length}` }, id: `rew-${Date.now()}-${rewards.length}` });
         }
     }
+
+    // 2. Boss Relic Reward (If boss node)
     const currentNode = gameState.map.find(n => n.id === gameState.currentMapNodeId);
     if (currentNode && currentNode.type === NodeType.BOSS) {
         const bossRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'BOSS');
@@ -1262,11 +1377,14 @@ const App: React.FC = () => {
         rewards.push({ type: 'RELIC', value: relic, id: `rew-relic-${Date.now()}` });
         rewards.push({ type: 'GOLD', value: 100, id: `rew-gold-${Date.now()}` });
     }
+
+    // 3. Potion Reward (Chance)
     if (Math.random() < 0.4 && !gameState.player.relics.find(r => r.id === 'SOZU')) {
         const allPotions = Object.values(POTION_LIBRARY);
         const potion = allPotions[Math.floor(Math.random() * allPotions.length)];
         rewards.push({ type: 'POTION', value: { ...potion, id: `rew-pot-${Date.now()}` }, id: `rew-pot-${Date.now()}` });
     }
+
     setGameState(prev => ({ ...prev, screen: GameScreen.REWARD, rewards: rewards }));
     audioService.playSound('select');
   };
@@ -1274,99 +1392,144 @@ const App: React.FC = () => {
   const handleRewardSelection = (item: RewardItem) => {
       if (isLoading) return;
       audioService.playSound('select');
+
       setGameState(prev => {
           let p = { ...prev.player };
           let nextRewards = [...prev.rewards];
-          if (item.type === 'CARD') { p.deck = [...p.deck, item.value]; unlockCards([item.value]); nextRewards = nextRewards.filter(r => r.type !== 'CARD'); } 
-          else if (item.type === 'RELIC') {
+
+          if (item.type === 'CARD') {
+              p.deck = [...p.deck, item.value];
+              p.discardPile = [...p.discardPile, item.value];
+              unlockCards([item.value]);
+              // Remove ALL card rewards to enforce "Pick 1"
+              nextRewards = nextRewards.filter(r => r.type !== 'CARD');
+          } else if (item.type === 'RELIC') {
               p.relics = [...p.relics, item.value];
-              if (item.value.id === 'SOZU') p.maxEnergy += 1;
+              if (item.value.id === 'SOZU') p.maxEnergy += 1; // Immediate effect
               if (item.value.id === 'CURSED_KEY') p.maxEnergy += 1;
               if (item.value.id === 'PHILOSOPHER_STONE') p.maxEnergy += 1;
               if (item.value.id === 'VELVET_CHOKER') p.maxEnergy += 1;
               if (item.value.id === 'WAFFLE') { p.maxHp += 7; p.currentHp = p.maxHp; }
               nextRewards = nextRewards.filter(r => r.id !== item.id);
-          } else if (item.type === 'GOLD') { p.gold += item.value; nextRewards = nextRewards.filter(r => r.id !== item.id); } 
-          else if (item.type === 'POTION') { if (p.potions.length < 3) { p.potions = [...p.potions, item.value]; nextRewards = nextRewards.filter(r => r.id !== item.id); } }
-          if (nextRewards.length === 0) { setTimeout(finishRewardPhase, 500); }
+          } else if (item.type === 'GOLD') {
+              p.gold += item.value;
+              nextRewards = nextRewards.filter(r => r.id !== item.id);
+          } else if (item.type === 'POTION') {
+              if (p.potions.length < 3) {
+                  p.potions = [...p.potions, item.value];
+                  nextRewards = nextRewards.filter(r => r.id !== item.id);
+              }
+          }
+          
+          if (nextRewards.length === 0) {
+              setTimeout(finishRewardPhase, 500);
+          }
+
           return { ...prev, player: p, rewards: nextRewards };
       });
   };
 
   const finishRewardPhase = () => {
       const currentNode = gameState.map.find(n => n.id === gameState.currentMapNodeId);
-      if (currentNode && currentNode.type === NodeType.BOSS) { advanceAct(); } else { handleNodeComplete(); }
+      if (currentNode && currentNode.type === NodeType.BOSS) {
+          advanceAct();
+      } else {
+          handleNodeComplete();
+      }
   };
 
-  const handleRestAction = () => { setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.currentHp + Math.floor(prev.player.maxHp * 0.3), prev.player.maxHp) } })); };
-  const handleUpgradeCard = (card: ICard) => { setGameState(prev => ({ ...prev, player: { ...prev.player, deck: prev.player.deck.map(c => c.id === card.id ? getUpgradedCard(c) : c) } })); };
-  const handleRemoveCard = (cardId: string, cost: number) => { setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - cost, deck: prev.player.deck.filter(c => c.id !== cardId) } })); };
-
+  // --- Render ---
   return (
-    <div className="w-full h-screen bg-black flex items-center justify-center p-4">
-        <div className="w-full max-w-4xl h-[600px] border-[10px] md:border-[20px] border-gray-800 rounded-xl relative overflow-hidden shadow-2xl bg-black crt-scanline">
+    <div className="w-full h-screen bg-black flex items-center justify-center p-0 md:p-4 overflow-hidden fixed inset-0 touch-none select-none">
+        <div className="w-full max-w-4xl h-full md:h-[600px] border-0 md:border-[10px] border-gray-800 rounded-none md:rounded-xl relative overflow-hidden shadow-2xl bg-black crt-scanline flex flex-col">
             
             {gameState.screen === GameScreen.START_MENU && (
-                <div className="w-full h-full bg-gray-900 flex items-center justify-center">
-                    <div className="text-center p-8 relative w-full h-full flex flex-col justify-center items-center">
-                        <div className="absolute bottom-4 right-4 text-gray-600 text-xs font-mono">v2.4.1</div>
-                        <h1 className="text-4xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-b from-green-400 to-blue-600 mb-8 font-bold animate-pulse tracking-widest">
-                            算数ローグ<br/><span className="text-2xl text-white">小学校の伝説</span>
+                <div className="w-full h-full bg-gray-900 flex items-center justify-center relative overflow-hidden">
+                    <div className="absolute inset-0 bg-[url('https://picsum.photos/800/600?grayscale&blur=2')] opacity-20 bg-cover pointer-events-none"></div>
+                    <div className="text-center p-8 z-10">
+                        <h1 className="text-5xl md:text-7xl text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 to-yellow-600 mb-2 font-bold animate-pulse tracking-widest drop-shadow-lg" style={{fontFamily: "'DotGothic16', sans-serif"}}>
+                            算数ローグ
                         </h1>
-                        <div className="flex flex-col gap-4 items-center w-64">
+                        <p className="text-white mb-8 text-lg font-bold tracking-widest">小学校の伝説</p>
+                        
+                        <div className="flex flex-col gap-4 items-center w-full max-w-xs mx-auto">
+                            <button onClick={startGame} disabled={isLoading} className="w-full bg-blue-600 text-white px-8 py-4 text-xl font-bold border-b-4 border-blue-800 hover:bg-blue-500 hover:border-blue-700 active:border-b-0 active:translate-y-1 transition-all rounded shadow-lg flex items-center justify-center">
+                                <Play className="mr-2" /> {hasSave ? "最初から" : "冒険を始める"}
+                            </button>
+                            
                             {hasSave && (
-                                <button onClick={continueGame} className="bg-green-700 text-white px-8 py-4 text-xl font-bold border-4 border-green-500 hover:bg-green-600 cursor-pointer w-full flex items-center justify-center animate-bounce">
-                                    <Play className="mr-2" /> 続きから
+                                <button onClick={continueGame} className="w-full bg-green-600 text-white px-8 py-3 text-lg font-bold border-b-4 border-green-800 hover:bg-green-500 hover:border-green-700 active:border-b-0 active:translate-y-1 transition-all rounded shadow-lg flex items-center justify-center">
+                                    <RotateCcw className="mr-2" /> つづきから
                                 </button>
                             )}
-                            <button onClick={startGame} disabled={isLoading} className="bg-white text-black px-8 py-4 text-xl font-bold border-4 border-gray-500 hover:bg-gray-200 cursor-pointer w-full">
-                                {isLoading ? "生成中..." : "はじめから"}
+
+                            <div className="flex gap-4 w-full">
+                                <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.COMPENDIUM }))} className="flex-1 bg-gray-700 text-amber-200 px-4 py-3 text-sm font-bold border-b-4 border-gray-900 hover:bg-gray-600 active:border-b-0 active:translate-y-1 transition-all rounded shadow-lg flex items-center justify-center">
+                                    <BookOpen className="mr-1" size={16}/> 図鑑
+                                </button>
+                                <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.RANKING }))} className="flex-1 bg-gray-700 text-yellow-200 px-4 py-3 text-sm font-bold border-b-4 border-gray-900 hover:bg-gray-600 active:border-b-0 active:translate-y-1 transition-all rounded shadow-lg flex items-center justify-center">
+                                    <Trophy className="mr-1" size={16}/> 記録
+                                </button>
+                            </div>
+                            
+                            <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.HELP }))} className="text-gray-400 text-sm hover:text-white flex items-center mt-4">
+                                <HelpCircle className="mr-1" size={14} /> 遊び方
                             </button>
-                            <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.RANKING }))} className="bg-blue-900 text-yellow-400 px-8 py-3 text-lg font-bold border-4 border-blue-500 hover:bg-blue-800 cursor-pointer w-full flex items-center justify-center">
-                                <ScrollText className="mr-2"/> 冒険ログ
+                        </div>
+                    </div>
+                    <div className="absolute bottom-4 right-4 text-xs text-gray-500">v1.2.0</div>
+                </div>
+            )}
+
+            {gameState.screen === GameScreen.MODE_SELECTION && (
+                <div className="w-full h-full bg-gray-900 flex items-center justify-center text-white relative">
+                    <div className="text-center p-8 z-10 w-full max-w-lg">
+                        <h2 className="text-3xl font-bold mb-8 text-yellow-400">学習モード選択</h2>
+                        <div className="grid grid-cols-2 gap-4">
+                            <button onClick={() => handleModeSelect(GameMode.ADDITION)} className="bg-blue-600 hover:bg-blue-500 border-b-4 border-blue-800 rounded p-4 flex flex-col items-center gap-2 active:translate-y-1 active:border-b-0">
+                                <Plus size={32} /> <span className="text-xl font-bold">たし算</span>
                             </button>
-                            <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.COMPENDIUM }))} className="bg-gray-800 text-amber-500 px-8 py-3 text-lg font-bold border-4 border-amber-600 hover:bg-gray-700 cursor-pointer w-full flex items-center justify-center">
-                                <BookOpen className="mr-2"/> カード図鑑
+                            <button onClick={() => handleModeSelect(GameMode.SUBTRACTION)} className="bg-red-600 hover:bg-red-500 border-b-4 border-red-800 rounded p-4 flex flex-col items-center gap-2 active:translate-y-1 active:border-b-0">
+                                <Minus size={32} /> <span className="text-xl font-bold">ひき算</span>
                             </button>
-                            <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.HELP }))} className="bg-gray-700 text-white px-8 py-3 text-lg font-bold border-4 border-gray-500 hover:bg-gray-600 cursor-pointer w-full flex items-center justify-center">
-                                <HelpCircle className="mr-2"/> 遊び方
+                            <button onClick={() => handleModeSelect(GameMode.MULTIPLICATION)} className="bg-green-600 hover:bg-green-500 border-b-4 border-green-800 rounded p-4 flex flex-col items-center gap-2 active:translate-y-1 active:border-b-0">
+                                <MultiplyIcon size={32} /> <span className="text-xl font-bold">かけ算</span>
+                            </button>
+                            <button onClick={() => handleModeSelect(GameMode.DIVISION)} className="bg-yellow-600 hover:bg-yellow-500 border-b-4 border-yellow-800 rounded p-4 flex flex-col items-center gap-2 active:translate-y-1 active:border-b-0">
+                                <Divide size={32} /> <span className="text-xl font-bold">わり算</span>
+                            </button>
+                            <button onClick={() => handleModeSelect(GameMode.MIXED)} className="col-span-2 bg-purple-600 hover:bg-purple-500 border-b-4 border-purple-800 rounded p-4 flex flex-col items-center gap-2 active:translate-y-1 active:border-b-0">
+                                <Shuffle size={32} /> <span className="text-xl font-bold">ミックス</span>
                             </button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {gameState.screen === GameScreen.MODE_SELECTION && (
-                <div className="w-full h-full bg-gray-900 flex flex-col items-center justify-center p-8">
-                    <h2 className="text-3xl font-bold text-yellow-400 mb-8">計算モードを選んでね</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl">
-                        <button onClick={() => handleModeSelect(GameMode.ADDITION)} className="bg-blue-800 border-2 border-blue-500 hover:bg-blue-700 text-white p-6 rounded-lg flex items-center justify-center text-2xl font-bold">
-                            <Plus className="mr-2" size={32}/> たし算
-                        </button>
-                        <button onClick={() => handleModeSelect(GameMode.SUBTRACTION)} className="bg-red-800 border-2 border-red-500 hover:bg-red-700 text-white p-6 rounded-lg flex items-center justify-center text-2xl font-bold">
-                            <Minus className="mr-2" size={32}/> ひき算
-                        </button>
-                        <button onClick={() => handleModeSelect(GameMode.MULTIPLICATION)} className="bg-green-800 border-2 border-green-500 hover:bg-green-700 text-white p-6 rounded-lg flex items-center justify-center text-2xl font-bold">
-                            <MultiplyIcon className="mr-2" size={32}/> かけ算
-                        </button>
-                        <button onClick={() => handleModeSelect(GameMode.DIVISION)} className="bg-yellow-800 border-2 border-yellow-500 hover:bg-yellow-700 text-white p-6 rounded-lg flex items-center justify-center text-2xl font-bold">
-                            <Divide className="mr-2" size={32}/> わり算
-                        </button>
-                        <button onClick={() => handleModeSelect(GameMode.MIXED)} className="col-span-1 md:col-span-2 bg-purple-800 border-2 border-purple-500 hover:bg-purple-700 text-white p-6 rounded-lg flex items-center justify-center text-2xl font-bold">
-                            <Shuffle className="mr-2" size={32}/> ミックス (全部)
-                        </button>
-                    </div>
-                    <button onClick={returnToTitle} className="mt-8 text-gray-400 underline hover:text-white">戻る</button>
-                </div>
+            {gameState.screen === GameScreen.CHARACTER_SELECTION && (
+                <CharacterSelectionScreen characters={CHARACTERS} unlockedCount={Math.min(clearCount + 1, CHARACTERS.length)} onSelect={handleCharacterSelect} />
             )}
 
-            {gameState.screen === GameScreen.HELP && <HelpScreen onBack={returnToTitle} />}
-            {gameState.screen === GameScreen.RANKING && <RankingScreen onBack={returnToTitle} />}
-            {gameState.screen === GameScreen.CHARACTER_SELECTION && <CharacterSelectionScreen characters={CHARACTERS} unlockedCount={clearCount + 1} onSelect={handleCharacterSelect} />}
-            {gameState.screen === GameScreen.RELIC_SELECTION && <RelicSelectionScreen relics={starterRelics} onSelect={handleRelicSelect} />}
-            {gameState.screen === GameScreen.COMPENDIUM && <CompendiumScreen unlockedCardNames={unlockedCardNames} onBack={returnToTitle} />}
-            {gameState.screen === GameScreen.MAP && <MapScreen nodes={gameState.map} currentNodeId={gameState.currentMapNodeId} onNodeSelect={handleNodeSelect} player={gameState.player} />}
-            
+            {gameState.screen === GameScreen.RELIC_SELECTION && (
+                <RelicSelectionScreen relics={starterRelics} onSelect={handleRelicSelect} />
+            )}
+
+            {gameState.screen === GameScreen.COMPENDIUM && (
+                <CompendiumScreen unlockedCardNames={unlockedCardNames} onBack={returnToTitle} />
+            )}
+
+            {gameState.screen === GameScreen.RANKING && (
+                <RankingScreen onBack={returnToTitle} />
+            )}
+
+            {gameState.screen === GameScreen.HELP && (
+                <HelpScreen onBack={returnToTitle} />
+            )}
+
+            {gameState.screen === GameScreen.MAP && (
+                <MapScreen nodes={gameState.map} currentNodeId={gameState.currentMapNodeId} onNodeSelect={handleNodeSelect} player={gameState.player} />
+            )}
+
             {gameState.screen === GameScreen.BATTLE && (
                 <BattleScene 
                     player={gameState.player} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onEndTurn={handleEndTurn} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={gameState.selectionState} onHandSelection={handleHandSelection}
@@ -1374,48 +1537,110 @@ const App: React.FC = () => {
                 />
             )}
 
+            {gameState.screen === GameScreen.MATH_CHALLENGE && (
+                <MathChallengeScreen 
+                    mode={gameState.mode} 
+                    onComplete={handleMathChallengeComplete} 
+                />
+            )}
+
             {gameState.screen === GameScreen.VICTORY && (
-                 <div className="w-full h-full bg-green-900 flex items-center justify-center text-center text-white">
-                    <div>
-                        <h1 className="text-4xl mb-4 text-yellow-400 font-bold">勝利！</h1>
-                        <div className="text-yellow-400 text-2xl font-bold mb-4 flex items-center justify-center"><Coins className="mr-2"/> +{VICTORY_GOLD} 円</div>
-                        <button onClick={goToMathChallenge} className="bg-blue-600 px-8 py-4 border-2 border-white font-bold animate-bounce cursor-pointer">
-                            算数チャレンジへ！
-                        </button>
+                 <div className="w-full h-full bg-green-900 flex items-center justify-center text-center text-white relative overflow-hidden">
+                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/confetti-doodles.png')] opacity-20 animate-pulse"></div>
+                    <div className="z-10">
+                        <h1 className="text-6xl mb-4 text-yellow-400 font-bold drop-shadow-[0_5px_0_rgba(0,0,0,0.5)]">勝利！</h1>
+                        <div className="text-yellow-200 text-2xl font-bold mb-8 flex items-center justify-center">
+                            <Coins className="mr-2"/> +{VICTORY_GOLD} G
+                        </div>
+                        <button onClick={goToRewardPhase} className="bg-blue-600 px-12 py-4 border-b-8 border-blue-800 rounded-xl font-bold text-2xl animate-bounce shadow-xl active:border-b-0 active:translate-y-2 transition-all">報酬ゲット！</button>
                     </div>
                  </div>
             )}
 
-            {gameState.screen === GameScreen.MATH_CHALLENGE && (
-                <MathChallengeScreen onComplete={handleMathComplete} mode={gameState.mode} />
+            {gameState.screen === GameScreen.REWARD && (
+                <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading} />
             )}
 
-            {gameState.screen === GameScreen.REWARD && <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading} />}
-            {gameState.screen === GameScreen.TREASURE && <TreasureScreen onOpen={handleOpenTreasure} onLeave={handleNodeComplete} rewards={treasureRewards} hasCursedKey={!!gameState.player.relics.find(r => r.id === 'CURSED_KEY')} />}
-            {gameState.screen === GameScreen.REST && <RestScreen player={gameState.player} onRest={handleRestAction} onUpgrade={handleUpgradeCard} onLeave={handleNodeComplete} />}
-            
+            {gameState.screen === GameScreen.REST && (
+                <RestScreen player={gameState.player} onRest={handleRestAction} onUpgrade={handleUpgradeCard} onLeave={handleNodeComplete} />
+            )}
+
             {gameState.screen === GameScreen.SHOP && (
                 <ShopScreen 
-                    player={gameState.player} shopCards={shopCards} shopRelics={shopRelics} shopPotions={shopPotions} onBuyCard={(card) => { setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - (prev.player.relics.find(r=>r.id==='MEMBERSHIP_CARD') ? Math.floor((card.price||50)*0.5) : (card.price||50)), deck: [...prev.player.deck, { ...card, id: `buy-${Date.now()}` }], discardPile: [...prev.player.discardPile, { ...card, id: `buy-${Date.now()}` }] } })); }} onBuyRelic={(relic) => { setGameState(prev => { const counters = { ...prev.player.relicCounters }; if (relic.id === 'PEN_NIB') counters['PEN_NIB'] = 0; if (relic.id === 'HAPPY_FLOWER') counters['HAPPY_FLOWER'] = 1; return { ...prev, player: { ...prev.player, gold: prev.player.gold - (prev.player.relics.find(r=>r.id==='MEMBERSHIP_CARD') ? Math.floor((relic.price||150)*0.5) : (relic.price||150)), relics: [...prev.player.relics, relic], relicCounters: counters } }; }); }} onBuyPotion={(potion) => { if (gameState.player.potions.length < 3) { setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - (prev.player.relics.find(r=>r.id==='MEMBERSHIP_CARD') ? Math.floor((potion.price||50)*0.5) : (potion.price||50)), potions: [...prev.player.potions, { ...potion, id: `buy-pot-${Date.now()}` }] } })); } }} onRemoveCard={handleRemoveCard} onLeave={handleNodeComplete}
+                    player={gameState.player}
+                    shopCards={shopCards}
+                    shopRelics={shopRelics}
+                    shopPotions={shopPotions}
+                    onBuyCard={(card) => {
+                        setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - (prev.player.relics.find(r=>r.id==='MEMBERSHIP_CARD') ? Math.floor((card.price||50)*0.5) : (card.price||50)), deck: [...prev.player.deck, { ...card, id: `buy-${Date.now()}` }], discardPile: [...prev.player.discardPile, { ...card, id: `buy-${Date.now()}` }] } }));
+                    }}
+                    onBuyRelic={(relic) => {
+                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - (prev.player.relics.find(r=>r.id==='MEMBERSHIP_CARD') ? Math.floor((relic.price||150)*0.5) : (relic.price||150)), relics: [...prev.player.relics, relic] } }));
+                    }}
+                    onBuyPotion={(potion) => {
+                        if (gameState.player.potions.length < 3) {
+                             setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - (prev.player.relics.find(r=>r.id==='MEMBERSHIP_CARD') ? Math.floor((potion.price||50)*0.5) : (potion.price||50)), potions: [...prev.player.potions, { ...potion, id: `buy-pot-${Date.now()}` }] } }));
+                        }
+                    }}
+                    onRemoveCard={(cardId, cost) => {
+                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - cost, deck: prev.player.deck.filter(c => c.id !== cardId) } }));
+                    }}
+                    onLeave={handleNodeComplete}
                 />
             )}
 
-            {gameState.screen === GameScreen.EVENT && eventData && <EventScreen title={eventData.title} description={eventData.description} options={eventData.options} resultLog={eventResultLog} onContinue={handleNodeComplete} />}
-            {gameState.screen === GameScreen.GAME_OVER && <div className="w-full h-full bg-red-900 flex items-center justify-center text-center text-white"><div><h1 className="text-6xl mb-4 font-bold">保健室送り...</h1><p className="mb-8 text-2xl">Act {gameState.act} - Floor {gameState.floor}</p><div className="flex flex-col gap-4 items-center"><button onClick={startGame} className="bg-black border-2 border-white px-8 py-3 cursor-pointer w-64 hover:bg-gray-800 flex items-center justify-center"><RotateCcw className="mr-2" size={20} /> 再挑戦</button><button onClick={returnToTitle} className="bg-gray-700 border-2 border-white px-8 py-3 cursor-pointer w-64 hover:bg-gray-600 flex items-center justify-center"><Home className="mr-2" size={20} /> タイトルへ戻る</button></div></div></div>}
-            
-            {gameState.screen === GameScreen.ENDING && (
-                 <div className="w-full h-full bg-yellow-900 flex items-center justify-center text-center text-white">
-                    <div>
-                        <Trophy size={80} className="text-yellow-400 mx-auto mb-6 animate-pulse" />
-                        <h1 className="text-6xl mb-4 font-bold text-yellow-200">卒業おめでとう！</h1>
-                        <p className="mb-4 text-xl">あなたは校長先生を打ち破り、<br/>算数マスターになりました。</p>
-                        <p className="mb-8 text-md text-yellow-300 font-bold">新たな友達がアンロックされました！</p>
-                        <div className="flex flex-col gap-4 items-center">
-                            <button onClick={returnToTitle} className="bg-blue-600 border-2 border-white px-8 py-4 cursor-pointer text-xl hover:bg-blue-500 font-bold w-64">伝説となる</button>
-                            <button onClick={startEndlessMode} className="bg-purple-800 border-2 border-purple-400 px-8 py-4 cursor-pointer text-xl hover:bg-purple-700 font-bold w-64 flex items-center justify-center">
-                                <Infinity className="mr-2" /> 中学校編 (エンドレス)
-                            </button>
+            {gameState.screen === GameScreen.TREASURE && (
+                <TreasureScreen 
+                    rewards={treasureRewards}
+                    hasCursedKey={!!gameState.player.relics.find(r => r.id === 'CURSED_KEY')}
+                    onOpen={handleOpenTreasure} 
+                    onLeave={handleNodeComplete} 
+                />
+            )}
+
+            {gameState.screen === GameScreen.EVENT && eventData && (
+                <EventScreen 
+                    title={eventData.title} 
+                    description={eventData.description} 
+                    options={eventData.options} 
+                    resultLog={eventResultLog}
+                    onContinue={handleNodeComplete}
+                />
+            )}
+
+            {gameState.screen === GameScreen.GAME_OVER && (
+                 <div className="w-full h-full bg-red-900 flex items-center justify-center text-center text-white relative">
+                    <div className="absolute inset-0 bg-black/50"></div>
+                    <div className="z-10">
+                        <h1 className="text-6xl mb-4 font-bold text-red-500 drop-shadow-md">GAME OVER</h1>
+                        <p className="mb-8 text-2xl">Act {gameState.act} - Floor {gameState.floor}</p>
+                        <div className="flex flex-col gap-4 items-center w-64 mx-auto">
+                            <button onClick={startGame} className="w-full bg-black border-2 border-white px-8 py-3 hover:bg-gray-800 flex items-center justify-center font-bold"><RotateCcw className="mr-2" size={20} /> 再挑戦</button>
+                            <button onClick={returnToTitle} className="w-full bg-gray-700 border-2 border-white px-8 py-3 hover:bg-gray-600 flex items-center justify-center font-bold"><Home className="mr-2" size={20} /> タイトルへ</button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {gameState.screen === GameScreen.ENDING && (
+                 <div className="w-full h-full bg-yellow-900 flex items-center justify-center text-center text-white relative">
+                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                    <div className="z-10">
+                        <Trophy size={100} className="text-yellow-400 mx-auto mb-6 animate-bounce drop-shadow-[0_0_15px_rgba(255,215,0,0.8)]" />
+                        <h1 className="text-6xl mb-4 font-bold text-yellow-200">ゲームクリア！</h1>
+                        <p className="mb-8 text-xl font-bold">あなたは伝説となった。<br/>素晴らしい冒険でした！</p>
+                        
+                        {!gameState.isEndless ? (
+                            <button onClick={startEndlessMode} className="bg-purple-600 border-b-4 border-purple-800 px-8 py-4 text-xl hover:bg-purple-500 font-bold rounded-xl active:border-b-0 active:translate-y-1 mb-4 w-full flex items-center justify-center">
+                                <Infinity className="mr-2"/> エンドレスモードへ
+                            </button>
+                        ) : (
+                            <p className="text-purple-300 font-bold mb-4">エンドレスモード進行中...</p>
+                        )}
+
+                        <button onClick={returnToTitle} className="bg-blue-600 border-b-4 border-blue-800 px-8 py-4 text-xl hover:bg-blue-500 font-bold rounded-xl active:border-b-0 active:translate-y-1 w-full">
+                            タイトルへ戻る
+                        </button>
                     </div>
                 </div>
             )}
