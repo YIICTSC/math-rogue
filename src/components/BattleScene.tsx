@@ -85,7 +85,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
       
       {/* Top Bar: Narrative */}
       <div className="h-8 md:h-12 bg-black border-b-4 border-gray-700 flex items-center px-4 text-xs md:text-sm text-green-400 overflow-hidden whitespace-nowrap justify-between">
-        <span className="truncate mr-4"><span className="animate-pulse mr-2">>></span> {narrative}</span>
+        <span className="truncate mr-4"><span className="animate-pulse mr-2">&gt;&gt;</span> {narrative}</span>
       </div>
 
       {/* Battle Area */}
