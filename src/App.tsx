@@ -1221,11 +1221,14 @@ const App: React.FC = () => {
   };
 
   const handleMathComplete = (correctCount: number) => {
-      audioService.playSound(correctCount === 3 ? 'win' : 'select');
+      // audioService.playSound(correctCount === 3 ? 'win' : 'select'); // Moved to Reward phase transition or kept here if needed
       goToRewardPhase(correctCount);
   };
 
   const goToRewardPhase = (mathScore: number = 3) => {
+    // Switch back to Menu BGM after Math Challenge
+    audioService.playBGM('menu'); 
+
     const rewards: RewardItem[] = [];
     const allCards = Object.values(CARDS_LIBRARY).filter(c => c.type !== CardType.STATUS && c.type !== CardType.CURSE && c.rarity !== 'SPECIAL');
     
@@ -1368,7 +1371,7 @@ const App: React.FC = () => {
             {gameState.screen === GameScreen.START_MENU && (
                 <div className="w-full h-full bg-gray-900 flex items-center justify-center">
                     <div className="text-center p-8 relative w-full h-full flex flex-col justify-center items-center">
-                        <div className="absolute bottom-4 right-4 text-gray-600 text-xs font-mono">v2.0.2</div>
+                        <div className="absolute bottom-4 right-4 text-gray-600 text-xs font-mono">v2.0.3</div>
                         <h1 className="text-4xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-b from-green-400 to-blue-600 mb-8 font-bold animate-pulse tracking-widest">
                             かけ算ローグ<br/><span className="text-2xl text-white">小学校の伝説</span>
                         </h1>

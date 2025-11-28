@@ -7,7 +7,7 @@ class AudioService {
   
   private isMuted: boolean = false;
   private isPlayingBGM: boolean = false;
-  private currentBgmType: 'battle' | 'menu' | null = null;
+  private currentBgmType: 'battle' | 'menu' | 'math' | null = null;
   
   // Sequencer State
   private nextNoteTime: number = 0;
@@ -135,6 +135,26 @@ class AudioService {
               const note = scale[Math.floor(Math.random() * scale.length)];
               this.playOsc(note * 2, time, 0.3, 'sine', 0.15, this.bgmGain);
           }
+      } else if (this.currentBgmType === 'math') {
+          // --- MATH CHALLENGE THEME ---
+          // Ticking Clock Rhythm (Woodblock style)
+          if (beatNumber % 4 === 0) {
+              this.playOsc(800, time, 0.05, 'triangle', 0.3, this.bgmGain); // Tick
+          } else if (beatNumber % 4 === 2) {
+              this.playOsc(600, time, 0.05, 'triangle', 0.2, this.bgmGain); // Tock
+          }
+
+          // Thinking Bass (Sine)
+          if (beatNumber % 8 === 0) {
+              const bassNotes = [220, 220, 247, 261]; // A, A, B, C
+              const note = bassNotes[Math.floor((Date.now() / 2000) % 4)];
+              this.playOsc(note / 2, time, 0.2, 'sine', 0.4, this.bgmGain);
+          }
+
+          // Random "Idea" Blips
+          if (Math.random() < 0.1 && beatNumber % 2 !== 0) {
+              this.playOsc(1500, time, 0.05, 'square', 0.05, this.bgmGain);
+          }
       }
   }
 
@@ -198,7 +218,7 @@ class AudioService {
   }
 
   // --- Public API ---
-  public playBGM(type: 'battle' | 'menu') {
+  public playBGM(type: 'battle' | 'menu' | 'math') {
       // Don't restart if already playing same type
       if (this.isPlayingBGM && this.currentBgmType === type) return;
       
@@ -207,7 +227,11 @@ class AudioService {
       
       this.currentBgmType = type;
       this.isPlayingBGM = true;
-      this.tempo = type === 'battle' ? 135 : 90;
+      
+      if (type === 'battle') this.tempo = 135;
+      else if (type === 'math') this.tempo = 110;
+      else this.tempo = 90;
+
       this.current16thNote = 0;
       if (this.ctx) this.nextNoteTime = this.ctx.currentTime + 0.1;
       this.scheduler();
@@ -227,7 +251,7 @@ class AudioService {
       }
   }
 
-  public playSound(effect: 'select' | 'attack' | 'block' | 'win' | 'lose') {
+  public playSound(effect: 'select' | 'attack' | 'block' | 'win' | 'lose' | 'correct' | 'wrong') {
       this.init();
       if (!this.ctx || !this.sfxGain || this.isMuted) return;
       const t = this.ctx.currentTime;
@@ -276,6 +300,26 @@ class AudioService {
               loseGain.connect(this.sfxGain);
               loseOsc.start(t);
               loseOsc.stop(t + 1.0);
+              break;
+          case 'correct':
+              // Ding! (Major Triad)
+              this.playOsc(880, t, 0.1, 'sine', 0.3, this.sfxGain); // A5
+              this.playOsc(1108, t + 0.05, 0.1, 'sine', 0.3, this.sfxGain); // C#6
+              this.playOsc(1318, t + 0.1, 0.4, 'sine', 0.3, this.sfxGain); // E6
+              break;
+          case 'wrong':
+              // Buzz!
+              const wrongOsc = this.ctx.createOscillator();
+              wrongOsc.type = 'sawtooth';
+              wrongOsc.frequency.setValueAtTime(150, t);
+              wrongOsc.frequency.linearRampToValueAtTime(100, t + 0.3);
+              const wrongGain = this.ctx.createGain();
+              wrongGain.gain.setValueAtTime(0.5, t);
+              wrongGain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+              wrongOsc.connect(wrongGain);
+              wrongGain.connect(this.sfxGain);
+              wrongOsc.start(t);
+              wrongOsc.stop(t + 0.3);
               break;
       }
   }

@@ -1,5 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, Brain } from 'lucide-react';
+import { audioService } from '../services/audioService';
 
 interface MathChallengeScreenProps {
   onComplete: (correctCount: number) => void;
@@ -20,6 +22,9 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete })
   const [feedback, setFeedback] = useState<'CORRECT' | 'WRONG' | null>(null);
 
   useEffect(() => {
+    // Start Math BGM
+    audioService.playBGM('math');
+
     // Generate 3 multiplication problems
     const generatedProblems: MathProblem[] = [];
     for (let i = 0; i < 3; i++) {
@@ -56,8 +61,10 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete })
     if (isCorrect) {
       setCorrectCount(prev => prev + 1);
       setFeedback('CORRECT');
+      audioService.playSound('correct');
     } else {
       setFeedback('WRONG');
+      audioService.playSound('wrong');
     }
 
     setTimeout(() => {
