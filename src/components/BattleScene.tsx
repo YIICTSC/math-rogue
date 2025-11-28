@@ -97,7 +97,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 <span className="text-yellow-400 font-bold text-lg">
                     {selectionState.type === 'DISCARD' && `カードを ${selectionState.amount} 枚捨ててください`}
                     {selectionState.type === 'COPY' && `コピーするカードを選択してください`}
-                    {selectionState.type === 'EXHAUST' && `ポイするカードを選択してください`}
+                    {selectionState.type === 'EXHAUST' && `廃棄するカードを選択してください`}
                 </span>
             </div>
         )}
@@ -144,12 +144,12 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 {/* Player Powers */}
                 <div className="flex flex-wrap gap-1 mb-1">
                     {player.strength !== 0 && (
-                        <span className={`flex items-center ${player.strength > 0 ? 'text-red-400' : 'text-gray-400'} text-[9px]`} title="モリモリ（筋力）">
+                        <span className={`flex items-center ${player.strength > 0 ? 'text-red-400' : 'text-gray-400'} text-[9px]`}>
                             <Sword size={8} className="mr-0.5"/> {player.strength}
                         </span>
                     )}
                     {Object.entries(player.powers).map(([key, val]) => (val as number) > 0 && (
-                        <span key={key} className="text-yellow-400 text-[9px] border border-yellow-600 px-0.5 rounded" title={key}>
+                        <span key={key} className="text-yellow-400 text-[9px] border border-yellow-600 px-0.5 rounded">
                             {key.substring(0,3)}:{val as number}
                         </span>
                     ))}
@@ -206,22 +206,22 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             {/* Status Effects */}
                             <div className="flex flex-wrap gap-1 mb-1 justify-end">
                                 {enemy.vulnerable > 0 && (
-                                    <span className="text-pink-400 flex items-center bg-pink-900/50 px-1 rounded" title="ボロボロ（脆弱）">
+                                    <span className="text-pink-400 flex items-center bg-pink-900/50 px-1 rounded" title="脆弱">
                                         <AlertCircle size={8} className="mr-0.5"/> {enemy.vulnerable}
                                     </span>
                                 )}
                                 {enemy.weak > 0 && (
-                                    <span className="text-gray-400 flex items-center bg-gray-700/50 px-1 rounded" title="ヘロヘロ（弱体）">
+                                    <span className="text-gray-400 flex items-center bg-gray-700/50 px-1 rounded" title="弱体">
                                         <TrendingDown size={8} className="mr-0.5"/> {enemy.weak}
                                     </span>
                                 )}
                                 {enemy.poison > 0 && (
-                                    <span className="text-green-400 flex items-center bg-green-900/50 px-1 rounded" title="ドクドク（毒）">
+                                    <span className="text-green-400 flex items-center bg-green-900/50 px-1 rounded" title="毒">
                                         <Droplets size={8} className="mr-0.5"/> {enemy.poison}
                                     </span>
                                 )}
                                 {enemy.artifact > 0 && (
-                                    <span className="text-yellow-200 flex items-center bg-yellow-900/50 px-1 rounded" title="ガード（アーティファクト）">
+                                    <span className="text-yellow-200 flex items-center bg-yellow-900/50 px-1 rounded" title="アーティファクト">
                                         <Hexagon size={8} className="mr-0.5"/> {enemy.artifact}
                                     </span>
                                 )}
@@ -253,7 +253,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         {/* Energy & Deck Info */}
         <div className="absolute -top-4 md:-top-6 left-2 md:left-4 flex space-x-1 md:space-x-2">
             <div className="bg-black border-2 border-yellow-500 text-yellow-400 px-2 py-0.5 md:px-3 md:py-1 rounded-full flex items-center shadow-lg">
-                <Zap className="w-3 h-3 md:w-3.5 md:h-3.5 mr-1 fill-yellow-400"/>
+                <Zap size={12} md:size={14} className="mr-1 fill-yellow-400"/>
                 <span className="text-sm md:text-lg">{player.currentEnergy}/{player.maxEnergy}</span>
             </div>
             
