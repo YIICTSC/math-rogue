@@ -390,6 +390,12 @@ const App: React.FC = () => {
       if (savedState) {
           audioService.init();
           audioService.playSound('select');
+          
+          // Legacy save fix: Add mode if missing
+          if (!savedState.mode) {
+              savedState.mode = GameMode.MULTIPLICATION;
+          }
+
           setGameState(savedState);
           
           if (savedState.screen === GameScreen.BATTLE) {
@@ -482,7 +488,6 @@ const App: React.FC = () => {
   const generateEvent = (player: Player) => {
       const random = Math.random();
       const events = [
-          // ... (Existing events maintained) ...
           {
               title: "給食のおばちゃん",
               description: "「あら、たくさん余っちゃったのよ。食べていく？」",
@@ -715,8 +720,6 @@ const App: React.FC = () => {
   };
 
   // --- Battle Logic (Start Player Turn, Play Card, End Turn) ---
-  // (Maintained largely as is, but utilizing updated power logic if any)
-  
   const startPlayerTurn = () => {
     setTurnLog("あなたのターン");
     setGameState(prev => {
@@ -803,7 +806,7 @@ const App: React.FC = () => {
     setGameState(prev => ({ ...prev, selectedEnemyId: id }));
   };
 
-  // Card Playing Logic (Simplified for brevity, logic remains from previous App.tsx)
+  // Card Playing Logic
   const handlePlayCard = (card: ICard) => {
     if (gameState.player.currentEnergy < card.cost) return;
     if (gameState.enemies.length === 0) return;
@@ -1125,7 +1128,7 @@ const App: React.FC = () => {
     startPlayerTurn();
   };
 
-  // Helper for applying player debuffs (duplicating here for scoped access)
+  // Helper for applying player debuffs
   const applyDebuff = (target: any, type: 'WEAK' | 'VULNERABLE' | 'POISON', amount: number) => {
       if (target.artifact > 0) { target.artifact--; return; } // Simple player check
       if (target.powers && target.powers['ARTIFACT'] > 0) { target.powers['ARTIFACT']--; return; } // Player check via powers
@@ -1133,7 +1136,6 @@ const App: React.FC = () => {
       if (type === 'WEAK') target.weak = (target.weak || 0) + amount;
       if (type === 'VULNERABLE') target.vulnerable = (target.vulnerable || 0) + amount;
       if (type === 'POISON') target.poison = (target.poison || 0) + amount;
-      // Handle player powers object structure if needed, currently player uses flat props for some status
       if (target.powers) target.powers[type] = (target.powers[type] || 0) + amount;
   };
 
@@ -1307,7 +1309,7 @@ const App: React.FC = () => {
             {gameState.screen === GameScreen.START_MENU && (
                 <div className="w-full h-full bg-gray-900 flex items-center justify-center">
                     <div className="text-center p-8 relative w-full h-full flex flex-col justify-center items-center">
-                        <div className="absolute bottom-4 right-4 text-gray-600 text-xs font-mono">v2.4.0</div>
+                        <div className="absolute bottom-4 right-4 text-gray-600 text-xs font-mono">v2.4.1</div>
                         <h1 className="text-4xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-b from-green-400 to-blue-600 mb-8 font-bold animate-pulse tracking-widest">
                             算数ローグ<br/><span className="text-2xl text-white">小学校の伝説</span>
                         </h1>

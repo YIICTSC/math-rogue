@@ -24,15 +24,22 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
   const [feedback, setFeedback] = useState<'CORRECT' | 'WRONG' | null>(null);
 
   useEffect(() => {
-    audioService.playBGM('math');
+    try {
+        audioService.playBGM('math');
+    } catch (e) {
+        console.warn("BGM playback failed", e);
+    }
+
+    // Safeguard: default to multiplication if mode is undefined
+    const safeMode = mode || GameMode.MULTIPLICATION;
 
     const generatedProblems: MathProblem[] = [];
     for (let i = 0; i < 3; i++) {
       let a, b, answer, operator;
       
       // Determine operation type for this problem
-      let type = mode;
-      if (mode === GameMode.MIXED) {
+      let type = safeMode;
+      if (safeMode === GameMode.MIXED) {
           const types = [GameMode.ADDITION, GameMode.SUBTRACTION, GameMode.MULTIPLICATION, GameMode.DIVISION];
           type = types[Math.floor(Math.random() * types.length)];
       }
@@ -111,7 +118,11 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
     }, 1000);
   };
 
-  if (problems.length === 0) return <div>Loading...</div>;
+  if (problems.length === 0) return (
+      <div className="flex flex-col h-full w-full bg-green-900 text-white items-center justify-center p-8 font-mono">
+          <div className="animate-pulse text-2xl">準備中...</div>
+      </div>
+  );
 
   const currentProblem = problems[currentProblemIndex];
 
