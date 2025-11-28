@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card as ICard, RewardItem, Potion } from '../types';
 import Card from './Card';
 import { Gift, Gem, Coins, FlaskConical } from 'lucide-react';
@@ -12,6 +12,16 @@ interface RewardScreenProps {
 }
 
 const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, onSkip, isLoading }) => {
+  
+  useEffect(() => {
+    if (!isLoading && rewards.length === 0) {
+      const timer = setTimeout(() => {
+        onSkip();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [rewards, isLoading, onSkip]);
+
   return (
     <div className="flex flex-col items-center justify-center h-full w-full bg-gray-900 text-white relative p-4">
       
