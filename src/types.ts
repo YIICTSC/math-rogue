@@ -179,11 +179,12 @@ export interface Player {
 
 export enum GameScreen {
   START_MENU = 'START_MENU',
+  MODE_SELECTION = 'MODE_SELECTION', // New: Arithmetic mode selection
   CHARACTER_SELECTION = 'CHARACTER_SELECTION',
   RELIC_SELECTION = 'RELIC_SELECTION', 
   MAP = 'MAP',
   BATTLE = 'BATTLE',
-  MATH_CHALLENGE = 'MATH_CHALLENGE', // New Screen
+  MATH_CHALLENGE = 'MATH_CHALLENGE', 
   REWARD = 'REWARD',
   GAME_OVER = 'GAME_OVER',
   VICTORY = 'VICTORY',
@@ -195,6 +196,14 @@ export enum GameScreen {
   HELP = 'HELP',
   TREASURE = 'TREASURE',
   RANKING = 'RANKING'
+}
+
+export enum GameMode {
+  ADDITION = 'ADDITION',
+  SUBTRACTION = 'SUBTRACTION',
+  MULTIPLICATION = 'MULTIPLICATION',
+  DIVISION = 'DIVISION',
+  MIXED = 'MIXED'
 }
 
 // --- Map Types ---
@@ -244,6 +253,7 @@ export interface RankingEntry {
 
 export interface GameState {
   screen: GameScreen;
+  mode: GameMode; // New
   act: number;
   floor: number;
   turn: number;

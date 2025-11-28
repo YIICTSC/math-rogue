@@ -2,9 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, Brain } from 'lucide-react';
 import { audioService } from '../services/audioService';
+import { GameMode } from '../types';
 
 interface MathChallengeScreenProps {
   onComplete: (correctCount: number) => void;
+  mode: GameMode;
 }
 
 interface MathProblem {
@@ -13,7 +15,7 @@ interface MathProblem {
   answer: number;
 }
 
-const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete }) => {
+const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, mode }) => {
   const [problems, setProblems] = useState<MathProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -22,34 +24,64 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete })
   const [feedback, setFeedback] = useState<'CORRECT' | 'WRONG' | null>(null);
 
   useEffect(() => {
-    // Start Math BGM
     audioService.playBGM('math');
 
-    // Generate 3 multiplication problems
     const generatedProblems: MathProblem[] = [];
     for (let i = 0; i < 3; i++) {
-      const a = Math.floor(Math.random() * 9) + 1;
-      const b = Math.floor(Math.random() * 9) + 1;
-      const answer = a * b;
+      let a, b, answer, operator;
+      
+      // Determine operation type for this problem
+      let type = mode;
+      if (mode === GameMode.MIXED) {
+          const types = [GameMode.ADDITION, GameMode.SUBTRACTION, GameMode.MULTIPLICATION, GameMode.DIVISION];
+          type = types[Math.floor(Math.random() * types.length)];
+      }
+
+      switch (type) {
+          case GameMode.ADDITION:
+              a = Math.floor(Math.random() * 20) + 1;
+              b = Math.floor(Math.random() * 20) + 1;
+              answer = a + b;
+              operator = '+';
+              break;
+          case GameMode.SUBTRACTION:
+              a = Math.floor(Math.random() * 20) + 5;
+              b = Math.floor(Math.random() * a); // Ensure positive result
+              answer = a - b;
+              operator = '-';
+              break;
+          case GameMode.DIVISION:
+              b = Math.floor(Math.random() * 9) + 2; // Divisor
+              answer = Math.floor(Math.random() * 9) + 1; // Quotient
+              a = b * answer; // Dividend
+              operator = '÷';
+              break;
+          case GameMode.MULTIPLICATION:
+          default:
+              a = Math.floor(Math.random() * 9) + 1;
+              b = Math.floor(Math.random() * 9) + 1;
+              answer = a * b;
+              operator = '×';
+              break;
+      }
       
       const options = new Set<number>();
       options.add(answer);
       
       while (options.size < 4) {
-        // Generate believable wrong answers (close numbers)
         let wrong = answer + (Math.floor(Math.random() * 10) - 5);
-        if (wrong <= 0) wrong = 1;
+        if (wrong < 0) wrong = 0; 
         if (wrong !== answer) options.add(wrong);
       }
       
       generatedProblems.push({
-        question: `${a} × ${b} = ?`,
+        question: `${a} ${operator} ${b} = ?`,
         options: Array.from(options).sort(() => Math.random() - 0.5),
         answer: answer
       });
     }
     setProblems(generatedProblems);
-  }, []);
+  }, [mode]);
 
   const handleAnswer = (option: number) => {
     if (isAnswered) return;
@@ -74,7 +106,6 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete })
         setIsAnswered(false);
         setFeedback(null);
       } else {
-        // Finish
         onComplete(isCorrect ? correctCount + 1 : correctCount);
       }
     }, 1000);
@@ -91,14 +122,13 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete })
         <div className="z-10 w-full max-w-md text-center">
             <div className="mb-8">
                 <Brain size={48} className="mx-auto mb-2 text-yellow-300 animate-pulse" />
-                <h2 className="text-3xl font-bold text-white mb-2">かけ算バトル！</h2>
+                <h2 className="text-3xl font-bold text-white mb-2">算数バトル！</h2>
                 <p className="text-gray-300">正解すると良い報酬がもらえるかも？ ({currentProblemIndex + 1}/3)</p>
             </div>
 
             <div className="bg-black/40 border-4 border-white p-8 rounded-lg mb-8 shadow-2xl relative overflow-hidden">
                 <h3 className="text-5xl font-bold text-white tracking-widest">{currentProblem.question}</h3>
                 
-                {/* Feedback Overlay */}
                 {feedback && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-20 animate-in zoom-in duration-200">
                         {feedback === 'CORRECT' ? (
