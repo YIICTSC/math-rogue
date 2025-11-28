@@ -14,7 +14,7 @@ interface RestScreenProps {
 
 const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onLeave }) => {
   const [mode, setMode] = useState<'CHOICE' | 'UPGRADE' | 'PREVIEW' | 'DONE'>('CHOICE');
-  const [message, setMessage] = useState("焚き火を見つけた。温かい...");
+  const [message, setMessage] = useState("静かな教室を見つけた。休憩できそうだ...");
   const [selectedCard, setSelectedCard] = useState<ICard | null>(null);
 
   const healAmount = Math.floor(player.maxHp * 0.3);
@@ -22,12 +22,12 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onLe
   const handleRest = () => {
       onRest();
       setMode('DONE');
-      setMessage(`HPが ${healAmount} 回復した。体力がみなぎる！`);
+      setMessage(`昼寝をしてHPが ${healAmount} 回復した。体力がみなぎる！`);
   };
 
   const handleSmithChoice = () => {
       setMode('UPGRADE');
-      setMessage("どのカードを鍛える？");
+      setMessage("どの道具（カード）を改良する？");
   };
 
   const handleCardClick = (card: ICard) => {
@@ -41,7 +41,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onLe
       if (selectedCard) {
           onUpgrade(selectedCard);
           setMode('DONE');
-          setMessage(`${selectedCard.name} が強化された！切れ味が増したようだ。`);
+          setMessage(`${selectedCard.name} が強化された！使いやすくなったようだ。`);
           setSelectedCard(null);
       }
   };
@@ -57,7 +57,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onLe
         
         <div className="z-10 bg-black p-8 border-4 border-orange-800 rounded-lg max-w-4xl w-full text-center shadow-2xl">
             <h2 className="text-4xl text-orange-500 font-bold mb-4 flex items-center justify-center">
-                <Flame className="mr-3 animate-pulse" /> 休息の地
+                <Flame className="mr-3 animate-pulse" /> 放課後の教室
             </h2>
             <p className="text-xl text-gray-300 mb-8 min-h-[3rem]">{message}</p>
 
@@ -77,7 +77,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onLe
                         className="group flex flex-col items-center gap-2 p-4 border-2 border-gray-600 hover:border-yellow-500 rounded-lg hover:bg-gray-800 transition-all w-40"
                     >
                         <Hammer size={48} className="text-yellow-500 group-hover:rotate-12 transition-transform" />
-                        <span className="font-bold text-lg">鍛冶</span>
+                        <span className="font-bold text-lg">工夫</span>
                         <span className="text-xs text-gray-400">カードを1枚強化</span>
                     </button>
                 </div>

@@ -390,8 +390,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         <div className="w-full h-full overflow-x-auto overflow-y-hidden whitespace-nowrap px-2 flex items-center gap-2 custom-scrollbar touch-pan-x">
             {player.hand.map((card) => {
                 // Check for special disabling conditions
-                const isClashDisabled = card.name === '激突' && player.hand.some(c => c.type !== CardType.ATTACK && c.id !== card.id);
-                const isGrandFinaleDisabled = card.name === 'グランドフィナーレ' && player.drawPile.length > 0;
+                const isClashDisabled = card.name === '口喧嘩' && player.hand.some(c => c.type !== CardType.ATTACK && c.id !== card.id);
+                const isGrandFinaleDisabled = card.name === '卒業式' && player.drawPile.length > 0;
                 const specialDisabled = isClashDisabled || isGrandFinaleDisabled;
                 
                 // Visual Cost Override for Corruption

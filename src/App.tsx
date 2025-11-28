@@ -1002,7 +1002,8 @@ const App: React.FC = () => {
                     if (card.damageBasedOnBlock) baseDamage += p.block;
                     if (card.damagePerCardInHand) baseDamage += (p.hand.filter(c => c.id !== card.id).length) * card.damagePerCardInHand!;
                     if (card.damagePerAttackPlayed) baseDamage += (p.attacksPlayedThisTurn - 1) * card.damagePerAttackPlayed!;
-                    if (card.damagePerStrike) baseDamage += (p.deck.filter(c => c.name.includes('攻撃') || c.name.includes('STRIKE')).length) * card.damagePerStrike!;
+                    // Update check: Use "えんぴつ攻撃" (Pencil Attack)
+                    if (card.damagePerStrike) baseDamage += (p.deck.filter(c => c.name.includes('えんぴつ攻撃')).length) * card.damagePerStrike!;
                     if (p.relics.find(r => r.id === 'PEN_NIB') && p.relicCounters['PEN_NIB'] === 9 && act === 0 && h === 0) baseDamage *= 2; 
                     if (p.powers['ACCURACY'] && (card.name === 'ナイフ' || card.name === 'SLICE')) baseDamage += p.powers['ACCURACY'];
 
@@ -1203,6 +1204,8 @@ const App: React.FC = () => {
             if (c.name === 'やけど') { p.currentHp -= 2; p.floatingText = createDamageText(2, 'DAMAGE'); }
             if (c.name === '虫歯') { p.currentHp -= 2; p.floatingText = createDamageText(2, 'DAMAGE'); }
             if (c.name === '後悔') { p.currentHp -= p.hand.length; p.floatingText = createDamageText(p.hand.length, 'DAMAGE'); }
+            if (c.name === '不安') { applyDebuff(p, 'WEAK', 1); }
+            if (c.name === '恥') { applyDebuff(p, 'VULNERABLE', 1); }
         });
 
         p.discardPile = [...p.discardPile, ...p.hand];

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Player, Card as ICard, Relic, Potion } from '../types';
 import Card from './Card';
@@ -81,14 +82,15 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
            <div className="flex items-center">
                <ShoppingBag size={24} className="text-yellow-500 mr-2" />
                <div>
-                   <h2 className="text-xl font-bold text-yellow-100">商店</h2>
+                   <h2 className="text-xl font-bold text-yellow-100">購買部</h2>
+                   <p className="text-xs text-gray-400">「へいらっしゃい！」</p>
                </div>
            </div>
            
            <div className="flex items-center gap-2">
                 <div className="flex items-center bg-yellow-900 px-3 py-1 rounded-full border border-yellow-500">
                     <Coins className="text-yellow-400 mr-1" size={16}/>
-                    <span className="text-sm font-bold">{player.gold}G</span>
+                    <span className="text-sm font-bold">{player.gold}円</span>
                 </div>
                 <button onClick={onLeave} className="bg-red-600 hover:bg-red-500 px-3 py-1 rounded font-bold border-2 border-white cursor-pointer text-xs">
                     出る
@@ -112,7 +114,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                     disabled={removed || player.gold < getPrice(REMOVE_COST)}
                     className={`flex-1 py-2 rounded border-2 flex items-center justify-center gap-1 cursor-pointer text-sm ${viewMode === 'REMOVE' ? 'bg-red-600 border-white' : 'bg-gray-800 border-gray-600 text-gray-400'} ${removed ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                    <Trash2 size={14}/> 削除 ({getPrice(REMOVE_COST)} G)
+                    <Trash2 size={14}/> カード削除 ({getPrice(REMOVE_COST)} 円)
                 </button>
            </div>
 
@@ -141,10 +143,10 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                                 disabled={!canAfford}
                                                 className={`px-2 py-0.5 rounded-full font-bold text-xs shadow-lg border border-white ${canAfford ? 'bg-yellow-600 hover:bg-yellow-500 text-white cursor-pointer' : 'bg-gray-600 text-gray-400 cursor-not-allowed'}`}
                                             >
-                                                {price} G
+                                                {price} 円
                                             </button>
                                         )}
-                                        {isSold && <div className="text-red-500 font-bold rotate-12 text-xs">SOLD</div>}
+                                        {isSold && <div className="text-red-500 font-bold rotate-12 text-xs">売切れ</div>}
                                     </div>
                                 )
                             })}
@@ -170,10 +172,10 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                                 disabled={!canAfford}
                                                 className={`px-2 py-0.5 rounded-full font-bold text-xs shadow-lg border border-white ${canAfford ? 'bg-yellow-600 hover:bg-yellow-500 text-white cursor-pointer' : 'bg-gray-600 text-gray-400 cursor-not-allowed'}`}
                                             >
-                                                {isFull ? '満杯' : `${price} G`}
+                                                {isFull ? '満杯' : `${price} 円`}
                                             </button>
                                         )}
-                                        {isSold && <div className="text-red-500 font-bold rotate-12 text-xs">SOLD</div>}
+                                        {isSold && <div className="text-red-500 font-bold rotate-12 text-xs">売切れ</div>}
                                     </div>
                                 )
                             })}
@@ -204,7 +206,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                                     ${canAfford ? 'bg-yellow-600 hover:bg-yellow-500 text-white cursor-pointer' : 'bg-gray-600 text-gray-400 cursor-not-allowed'}
                                                 `}
                                             >
-                                                {price} G
+                                                {price} 円
                                             </button>
                                         </div>
                                     )}
