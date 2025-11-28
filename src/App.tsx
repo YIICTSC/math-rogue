@@ -1069,6 +1069,12 @@ const App: React.FC = () => {
                       p.hand.push(p.drawPile.pop()!);
                   }
               }
+          } else if (potion.templateId === 'ENTROPIC_BREW') {
+              const allPotions = Object.values(POTION_LIBRARY).filter(pot => pot.templateId !== 'ENTROPIC_BREW');
+              while (p.potions.length < 3) {
+                  const randomPot = allPotions[Math.floor(Math.random() * allPotions.length)];
+                  p.potions.push({ ...randomPot, id: `entropy-${Date.now()}-${Math.random()}` });
+              }
           }
 
           // Clean up
@@ -1294,6 +1300,14 @@ const App: React.FC = () => {
           console.error("Challenge Start Error:", e);
       } finally {
           setIsLoading(false);
+      }
+  };
+
+  const handleRetry = () => {
+      if (gameState.challengeMode === '1A1D') {
+          startChallengeGame();
+      } else {
+          startGame();
       }
   };
 
@@ -1817,7 +1831,7 @@ const App: React.FC = () => {
                         ) : (
                             <div className="flex flex-col gap-4 items-center animate-in zoom-in duration-300">
                                 {legacyCardSelected && <p className="text-yellow-400 mb-4 font-bold">遺志は継がれた...</p>}
-                                <button onClick={startGame} className="bg-black border-2 border-white px-8 py-3 cursor-pointer w-64 hover:bg-gray-800 flex items-center justify-center rounded text-xl font-bold"><RotateCcw className="mr-2" size={20} /> 再挑戦</button>
+                                <button onClick={handleRetry} className="bg-black border-2 border-white px-8 py-3 cursor-pointer w-64 hover:bg-gray-800 flex items-center justify-center rounded text-xl font-bold"><RotateCcw className="mr-2" size={20} /> 再挑戦</button>
                                 <button onClick={returnToTitle} className="bg-gray-700 border-2 border-white px-8 py-3 cursor-pointer w-64 hover:bg-gray-600 flex items-center justify-center rounded text-xl font-bold"><Home className="mr-2" size={20} /> タイトルへ戻る</button>
                             </div>
                         )}
