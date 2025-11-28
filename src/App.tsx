@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -902,7 +903,7 @@ const App: React.FC = () => {
                         if (p.powers['ARTIFACT']>0) p.powers['ARTIFACT']--; else p.powers['VULNERABLE'] = (p.powers['VULNERABLE']||0) + intent.secondaryValue;
                     }
                     if (intent.debuffType === 'WEAK') {
-                        if (p.powers['ARTIFACT']>0) p.powers['ARTIFACT']--; else p.powers['WEAK'] = (p.powers['WEAK']||0) + intent.secondaryValue;
+                        if (p.powers['ARTIFACT']>0) p.powers['ARTIFACT']--; else p.powers['WEAK'] = (p.powers['WEAK']||0) + (intent.secondaryValue || 2);
                     }
                 }
             }
@@ -1607,25 +1608,30 @@ const App: React.FC = () => {
             )}
 
             {gameState.screen === GameScreen.MODE_SELECTION && (
-                <div className="w-full h-full bg-gray-900 flex flex-col items-center justify-center text-white p-8">
-                    <h2 className="text-3xl font-bold mb-2 text-yellow-400">計算モード選択</h2>
-                    {gameState.challengeMode === '1A1D' && <p className="text-red-400 mb-6 font-bold animate-pulse">※1A1Dチャレンジモード適用中</p>}
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl">
-                        <button onClick={() => handleModeSelect(GameMode.ADDITION)} className="bg-red-900 border-2 border-red-500 p-6 rounded hover:bg-red-800 flex flex-col items-center">
-                            <Plus size={48} className="mb-2"/> <span className="text-xl font-bold">たし算</span>
-                        </button>
-                        <button onClick={() => handleModeSelect(GameMode.SUBTRACTION)} className="bg-blue-900 border-2 border-blue-500 p-6 rounded hover:bg-blue-800 flex flex-col items-center">
-                            <Minus size={48} className="mb-2"/> <span className="text-xl font-bold">ひき算</span>
-                        </button>
-                        <button onClick={() => handleModeSelect(GameMode.MULTIPLICATION)} className="bg-green-900 border-2 border-green-500 p-6 rounded hover:bg-green-800 flex flex-col items-center">
-                            <MultiplyIcon size={48} className="mb-2"/> <span className="text-xl font-bold">かけ算</span>
-                        </button>
-                        <button onClick={() => handleModeSelect(GameMode.MIXED)} className="bg-purple-900 border-2 border-purple-500 p-6 rounded hover:bg-purple-800 flex flex-col items-center">
-                            <Shuffle size={48} className="mb-2"/> <span className="text-xl font-bold">ミックス</span>
-                        </button>
+                <div className="w-full h-full bg-gray-900 flex flex-col items-center text-white p-4 overflow-y-auto custom-scrollbar">
+                    <div className="w-full max-w-2xl flex flex-col items-center my-auto">
+                        <h2 className="text-3xl font-bold mb-2 text-yellow-400 mt-4">計算モード選択</h2>
+                        {gameState.challengeMode === '1A1D' && <p className="text-red-400 mb-6 font-bold animate-pulse">※1A1Dチャレンジモード適用中</p>}
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+                            <button onClick={() => handleModeSelect(GameMode.ADDITION)} className="bg-red-900 border-2 border-red-500 p-4 md:p-6 rounded-xl hover:bg-red-800 flex flex-col items-center transition-transform hover:scale-105 active:scale-95 shadow-lg">
+                                <Plus size={40} className="mb-2"/> <span className="text-lg md:text-xl font-bold">たし算</span>
+                            </button>
+                            <button onClick={() => handleModeSelect(GameMode.SUBTRACTION)} className="bg-blue-900 border-2 border-blue-500 p-4 md:p-6 rounded-xl hover:bg-blue-800 flex flex-col items-center transition-transform hover:scale-105 active:scale-95 shadow-lg">
+                                <Minus size={40} className="mb-2"/> <span className="text-lg md:text-xl font-bold">ひき算</span>
+                            </button>
+                            <button onClick={() => handleModeSelect(GameMode.MULTIPLICATION)} className="bg-green-900 border-2 border-green-500 p-4 md:p-6 rounded-xl hover:bg-green-800 flex flex-col items-center transition-transform hover:scale-105 active:scale-95 shadow-lg">
+                                <MultiplyIcon size={40} className="mb-2"/> <span className="text-lg md:text-xl font-bold">かけ算</span>
+                            </button>
+                            <button onClick={() => handleModeSelect(GameMode.DIVISION)} className="bg-yellow-700 border-2 border-yellow-500 p-4 md:p-6 rounded-xl hover:bg-yellow-600 flex flex-col items-center transition-transform hover:scale-105 active:scale-95 shadow-lg">
+                                <Divide size={40} className="mb-2"/> <span className="text-lg md:text-xl font-bold">わり算</span>
+                            </button>
+                            <button onClick={() => handleModeSelect(GameMode.MIXED)} className="bg-purple-900 border-2 border-purple-500 p-4 md:p-6 rounded-xl hover:bg-purple-800 flex flex-col items-center sm:col-span-2 transition-transform hover:scale-105 active:scale-95 shadow-lg">
+                                <Shuffle size={40} className="mb-2"/> <span className="text-lg md:text-xl font-bold">ミックス</span>
+                            </button>
+                        </div>
+                        <button onClick={returnToTitle} className="mt-8 text-gray-400 hover:text-white underline mb-8">戻る</button>
                     </div>
-                    <button onClick={returnToTitle} className="mt-8 text-gray-400 hover:text-white underline">戻る</button>
                 </div>
             )}
 
