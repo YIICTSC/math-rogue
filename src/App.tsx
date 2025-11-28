@@ -20,7 +20,7 @@ import HelpScreen from './components/HelpScreen';
 import TreasureScreen from './components/TreasureScreen';
 import CharacterSelectionScreen from './components/CharacterSelectionScreen';
 import RankingScreen from './components/RankingScreen';
-import MathChallengeScreen from './components/MathChallengeScreen'; // New Import
+import MathChallengeScreen from './components/MathChallengeScreen';
 import { audioService } from './services/audioService';
 import { generateFlavorText, generateEnemyName } from './services/geminiService';
 import { generateDungeonMap } from './services/mapGenerator';
@@ -85,27 +85,12 @@ const calculateScore = (state: GameState, victory: boolean): number => {
 };
 
 // --- ENEMY DEFINITIONS & AI ---
-interface EnemyDefinition {
-    type: string;
-    minHp: number;
-    maxHp: number;
-}
-
-const ENEMY_TYPES: Record<string, EnemyDefinition> = {
-    'SLIME_ACID': { type: 'SLIME_ACID', minHp: 28, maxHp: 32 },
-    'SLIME_SPIKE': { type: 'SLIME_SPIKE', minHp: 40, maxHp: 44 },
-    'CULTIST': { type: 'CULTIST', minHp: 48, maxHp: 54 },
-    'LOOTER': { type: 'LOOTER', minHp: 44, maxHp: 48 },
-    'GUARDIAN': { type: 'GUARDIAN', minHp: 200, maxHp: 200 }, // Boss
-    'GENERIC': { type: 'GENERIC', minHp: 20, maxHp: 30 }
-};
-
 const determineEnemyType = (name: string, isBoss: boolean): string => {
     if (isBoss) return 'GUARDIAN'; 
-    if (name.includes('酸') || name.includes('鼻水')) return 'SLIME_ACID';
-    if (name.includes('トゲ') || name.includes('画鋲')) return 'SLIME_SPIKE';
-    if (name.includes('狂信者') || name.includes('悪魔')) return 'CULTIST';
-    if (name.includes('強盗') || name.includes('泥棒')) return 'LOOTER';
+    if (name.includes('酸') || name.includes('鼻水') || name.includes('虫')) return 'SLIME_ACID';
+    if (name.includes('トゲ') || name.includes('画鋲') || name.includes('ハチ')) return 'SLIME_SPIKE';
+    if (name.includes('狂信者') || name.includes('悪魔') || name.includes('先生') || name.includes('上級生')) return 'CULTIST';
+    if (name.includes('強盗') || name.includes('泥棒') || name.includes('カラス') || name.includes('野良犬')) return 'LOOTER';
     return 'GENERIC';
 };
 
@@ -464,59 +449,85 @@ const App: React.FC = () => {
     setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
   };
 
+  // --- School Themed Events ---
   const generateEvent = (player: Player) => {
       const random = Math.random();
       const events = [
           {
-              title: "大きな魚",
-              description: "巨大な魚が吊るされている。「バナナ」「ドーナツ」「箱」、どれか一つを持って行けと書いてある。",
+              title: "給食のおばちゃん",
+              description: "「あら、たくさん余っちゃったのよ。食べていく？」",
               options: [
-                  { label: "バナナ", text: "HPを20回復。", action: () => { setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 20) } })); handleNodeComplete(); } },
-                  { label: "ドーナツ", text: "最大HP+5。", action: () => { setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 5, currentHp: prev.player.currentHp + 5 } })); handleNodeComplete(); } },
-                  { label: "箱", text: "レリックを得る。呪いを受ける。", action: () => { setGameState(prev => ({ ...prev, player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.WARPED_TONGS], deck: [...prev.player.deck, { ...CURSE_CARDS.REGRET, id: `curse-${Date.now()}` }] } })); handleNodeComplete(); } }
+                  { label: "牛乳", text: "HPを20回復。", action: () => { setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 20) } })); handleNodeComplete(); } },
+                  { label: "揚げパン", text: "最大HP+5。", action: () => { setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 5, currentHp: prev.player.currentHp + 5 } })); handleNodeComplete(); } },
+                  { label: "謎の袋", text: "レリックを得る。呪いを受ける。", action: () => { setGameState(prev => ({ ...prev, player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.WARPED_TONGS], deck: [...prev.player.deck, { ...CURSE_CARDS.REGRET, id: `curse-${Date.now()}` }] } })); handleNodeComplete(); } }
               ]
           },
           {
-              title: "聖職者",
-              description: "青いローブを着た男が立っている。「不浄なものを浄化しましょうか？」",
+              title: "保健室の先生",
+              description: "「怪我をしてるの？ 治療してあげるわよ。」",
               options: [
-                  { label: "浄化", text: "カードを1枚削除 (50G)", action: () => { if(player.gold >= 50) { setGameState(prev => ({...prev, screen: GameScreen.SHOP, player: {...prev.player, gold: prev.player.gold - 50 }})); } else { handleNodeComplete(); } } },
-                  { label: "治療", text: "HP全回復 (35G)", action: () => { if(player.gold >= 35) { setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - 35, currentHp: prev.player.maxHp } })); handleNodeComplete(); } else handleNodeComplete(); } },
-                  { label: "立ち去る", text: "", action: () => handleNodeComplete() }
+                  { label: "相談", text: "カードを1枚削除 (50円)", action: () => { if(player.gold >= 50) { setGameState(prev => ({...prev, screen: GameScreen.SHOP, player: {...prev.player, gold: prev.player.gold - 50 }})); } else { handleNodeComplete(); } } },
+                  { label: "治療", text: "HP全回復 (35円)", action: () => { if(player.gold >= 35) { setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - 35, currentHp: prev.player.maxHp } })); handleNodeComplete(); } else handleNodeComplete(); } },
+                  { label: "大丈夫", text: "立ち去る", action: () => handleNodeComplete() }
               ]
           },
-          // ... (simplified event list for brevity, can be expanded back if needed)
           {
-              title: "変化の輪",
-              description: "グレムリンが巨大なルーレットを回している。「さあ、運試しだ！」",
+              title: "落書きだらけの壁",
+              description: "校舎の裏に落書きだらけの壁がある。不思議な力が宿っているようだ。",
               options: [
-                  { label: "回す", text: "ランダムな結果。", action: () => {
-                      const r = Math.random();
-                      let log = "";
-                      if (r < 0.2) { // Heal
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: prev.player.maxHp } }));
-                          log = "HPが全回復した！";
-                      } else if (r < 0.4) { // Damage
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 10) } }));
-                          log = "ダメージを受けた...";
-                      } else if (r < 0.6) { // Gold
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 100 } }));
-                          log = "100ゴールドを手に入れた！";
-                      } else if (r < 0.8) { // Curse
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.DECAY, id: `curse-${Date.now()}` }] } }));
-                          log = "呪われてしまった...";
-                      } else { // Remove
-                          setGameState(prev => {
-                              const deck = [...prev.player.deck];
-                              const removed = deck.splice(Math.floor(Math.random()*deck.length), 1)[0];
-                              return { ...prev, player: { ...prev.player, deck } };
-                          });
-                          log = "カードが1枚消滅した。";
-                      }
-                      setEventResultLog(log);
+                  { label: "消す", text: "カードを1枚削除。", action: () => { setGameState(prev => ({ ...prev, screen: GameScreen.SHOP })); } },
+                  { label: "書き足す", text: "カードを1枚変化させる。", action: () => { 
+                      const deck = [...player.deck];
+                      const idx = Math.floor(Math.random() * deck.length);
+                      const keys = Object.keys(CARDS_LIBRARY).filter(k => !STATUS_CARDS[k]);
+                      const newCard = CARDS_LIBRARY[keys[Math.floor(Math.random() * keys.length)]];
+                      deck[idx] = { ...newCard, id: `trans-${Date.now()}` };
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+                      handleNodeComplete();
+                  }},
+                  { label: "上書き", text: "カードを1枚強化。", action: () => { 
+                       const deck = [...player.deck];
+                       const upgradeable = deck.filter(c => !c.upgraded);
+                       if (upgradeable.length > 0) {
+                           const c = upgradeable[Math.floor(Math.random() * upgradeable.length)];
+                           const upgraded = getUpgradedCard(c);
+                           const cIdx = deck.findIndex(dc => dc.id === c.id);
+                           if(cIdx >= 0) deck[cIdx] = upgraded;
+                           setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+                       }
+                       handleNodeComplete();
                   }}
               ]
-          }
+          },
+          {
+              title: "不良グループ",
+              description: "「おい、持ってるもん出せよ」",
+              options: [
+                  { label: "戦う", text: "ダメージを受ける。", action: () => { 
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 15) } }));
+                      handleNodeComplete();
+                  }}, 
+                  { label: "逃げる", text: "ゴールドを全て失う。", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, gold: 0 } }));
+                      handleNodeComplete();
+                  }}
+              ]
+          },
+          {
+              title: "不思議な図書室",
+              description: "見たことのない本がたくさん並んでいる。",
+              options: [
+                  { label: "読む", text: "カードを選ぶ。", action: () => handleNodeComplete() },
+                  { label: "寝る", text: "HP回復。", action: () => { setGameState(prev => ({...prev, player: {...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 20)}})); handleNodeComplete(); } }
+              ]
+          },
+          {
+              title: "落とし物",
+              description: "廊下の隅に何かが落ちている。",
+              options: [
+                  { label: "拾う", text: "レリックを探す(ダメージ)。", action: () => handleNodeComplete() }
+              ]
+          },
       ];
       return events[Math.floor(random * events.length)];
   };
@@ -528,6 +539,7 @@ const App: React.FC = () => {
       const nextState = { ...gameState, currentMapNodeId: node.id, floor: node.y + 1 };
       
       try {
+        // Ensure START node is treated as a combat encounter
         if (node.type === NodeType.COMBAT || node.type === NodeType.ELITE || node.type === NodeType.BOSS || node.type === NodeType.START) {
             
             const actMultiplier = gameState.act; 
@@ -596,6 +608,7 @@ const App: React.FC = () => {
             p.echoes = 0;
             p.cardsPlayedThisTurn = 0;
             p.attacksPlayedThisTurn = 0;
+            p.turnFlags = {}; 
 
             // Relic: Vajra
             if (p.relics.find(r => r.id === 'VAJRA')) p.strength += 1;
@@ -1110,8 +1123,7 @@ const App: React.FC = () => {
         if (gameState.player.currentHp <= 0) break;
         if (enemy.poison > 0) {
             let poisonDmg = enemy.poison;
-            if (gameState.player.powers['DOUBLE_POISON']) poisonDmg *= 3; // Catalyst effect is stack application, but for damage calc we simulate
-            // Actually Catalyst just triples stacks. Damage is just stack count.
+            if (gameState.player.powers['DOUBLE_POISON']) poisonDmg *= 3; 
             enemy.currentHp -= enemy.poison;
             enemy.floatingText = createDamageText(enemy.poison, 'DAMAGE');
             enemy.poison--;
@@ -1143,7 +1155,6 @@ const App: React.FC = () => {
                 if (e.weak > 0) damage = Math.floor(damage * 0.75);
                 if (p.powers['INTANGIBLE'] > 0) damage = 1;
                 
-                // Multi-hit logic not fully implemented in intent struct, assuming single hit mostly
                 if (p.powers['STATIC_DISCHARGE']) { e.currentHp -= p.powers['STATIC_DISCHARGE']; e.floatingText = createDamageText(p.powers['STATIC_DISCHARGE'], 'DAMAGE'); }
                 if (p.powers['BUFFER'] > 0) { 
                     p.powers['BUFFER']--; 
@@ -1163,19 +1174,10 @@ const App: React.FC = () => {
                 }
 
                 if (intent.secondaryValue && intent.type === EnemyIntentType.ATTACK_DEFEND) e.block += intent.secondaryValue;
-                if (intent.secondaryValue && intent.type === EnemyIntentType.ATTACK_DEBUFF && intent.debuffType) {
-                    // Apply debuff to player
-                    // Simplified: Assuming player doesn't have complex debuff struct, using existing weak/vuln/poison
-                    // Usually player debuffs are handled via Artifact check too
-                    if (p.relics.find(r=>r.id==='ORANGE_PELLETS')) { /* logic to clear handled in card play */ }
-                    // Apply logic
-                }
             } else if (intent.type === EnemyIntentType.DEFEND) {
                 e.block = intent.value;
             } else if (intent.type === EnemyIntentType.BUFF) {
                 e.strength += (intent.secondaryValue || 2);
-            } else if (intent.type === EnemyIntentType.DEBUFF) {
-                // Apply debuff
             }
             
             if (e.vulnerable > 0) e.vulnerable--;
@@ -1363,7 +1365,7 @@ const App: React.FC = () => {
             {gameState.screen === GameScreen.START_MENU && (
                 <div className="w-full h-full bg-gray-900 flex items-center justify-center">
                     <div className="text-center p-8 relative w-full h-full flex flex-col justify-center items-center">
-                        <div className="absolute bottom-4 right-4 text-gray-600 text-xs font-mono">v2.0.1</div>
+                        <div className="absolute bottom-4 right-4 text-gray-600 text-xs font-mono">v2.0.2</div>
                         <h1 className="text-4xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-b from-green-400 to-blue-600 mb-8 font-bold animate-pulse tracking-widest">
                             かけ算ローグ<br/><span className="text-2xl text-white">小学校の伝説</span>
                         </h1>
