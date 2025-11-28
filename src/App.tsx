@@ -1812,13 +1812,13 @@ const App: React.FC = () => {
             {gameState.screen === GameScreen.GAME_OVER && (
                  <div className="w-full h-full bg-red-900 flex flex-col items-center justify-center text-center text-white p-4 overflow-hidden relative">
                     <div className="z-10 w-full max-w-4xl flex flex-col items-center">
-                        <h1 className="text-5xl md:text-6xl mb-2 font-bold tracking-widest text-red-500 drop-shadow-md">死亡</h1>
+                        <h1 className="text-5xl md:text-6xl mb-2 font-bold tracking-widest text-red-500 drop-shadow-md">補習決定...</h1>
                         <p className="mb-4 text-xl">Act {gameState.act} - Floor {gameState.floor}</p>
                         
                         {!legacyCardSelected && gameState.player.deck.length > 0 && !gameState.challengeMode ? (
                             <div className="w-full bg-black/60 p-4 rounded-lg border-2 border-red-500 mb-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
                                 <h2 className="text-xl font-bold text-yellow-400 mb-2 flex items-center justify-center">
-                                    <Send size={24} className="mr-2"/> 次の主人公へ託すカードを選べ
+                                    <Send size={24} className="mr-2"/> 後輩に「伝説のノート」を託す
                                 </h2>
                                 <p className="text-sm text-gray-300 mb-4">選ばれたカードは次の冒険の初期デッキに追加されます（1枚のみ）</p>
                                 
@@ -1833,12 +1833,12 @@ const App: React.FC = () => {
                                     onClick={() => setLegacyCardSelected(true)}
                                     className="mt-4 text-gray-400 underline hover:text-white text-sm"
                                 >
-                                    何も託さずに逝く
+                                    何も残さず下校する
                                 </button>
                             </div>
                         ) : (
                             <div className="flex flex-col gap-4 items-center animate-in zoom-in duration-300">
-                                {legacyCardSelected && <p className="text-yellow-400 mb-4 font-bold">遺志は継がれた...</p>}
+                                {legacyCardSelected && <p className="text-yellow-400 mb-4 font-bold">想いは託された！</p>}
                                 <button onClick={handleRetry} className="bg-black border-2 border-white px-8 py-3 cursor-pointer w-64 hover:bg-gray-800 flex items-center justify-center rounded text-xl font-bold"><RotateCcw className="mr-2" size={20} /> 再挑戦</button>
                                 <button onClick={returnToTitle} className="bg-gray-700 border-2 border-white px-8 py-3 cursor-pointer w-64 hover:bg-gray-600 flex items-center justify-center rounded text-xl font-bold"><Home className="mr-2" size={20} /> タイトルへ戻る</button>
                             </div>
@@ -1851,10 +1851,10 @@ const App: React.FC = () => {
                  <div className="w-full h-full bg-yellow-900 flex items-center justify-center text-center text-white p-4">
                     <div className="bg-black/50 p-8 rounded-xl border-4 border-yellow-500">
                         <Trophy size={80} className="text-yellow-400 mx-auto mb-6 animate-pulse" />
-                        <h1 className="text-4xl md:text-6xl mb-4 font-bold text-yellow-200">ゲームクリア！</h1>
-                        <p className="mb-8 text-lg md:text-xl">あなたは堕落の心臓を打ち砕き、<br/>ピクセル・スパイアの頂点に到達しました。</p>
+                        <h1 className="text-4xl md:text-6xl mb-4 font-bold text-yellow-200">完全下校！</h1>
+                        <p className="mb-8 text-lg md:text-xl">あなたは校長先生との激闘を制し、<br/>伝説の小学生として名を刻みました。</p>
                         <div className="mb-8 text-2xl font-bold text-white">SCORE: {calculateScore(gameState, true)}</div>
-                        <button onClick={returnToTitle} className="bg-blue-600 border-2 border-white px-8 py-4 cursor-pointer text-xl hover:bg-blue-500 font-bold rounded shadow-lg">伝説となる</button>
+                        <button onClick={returnToTitle} className="bg-blue-600 border-2 border-white px-8 py-4 cursor-pointer text-xl hover:bg-blue-500 font-bold rounded shadow-lg">卒業アルバムに載る</button>
                     </div>
                 </div>
             )}
