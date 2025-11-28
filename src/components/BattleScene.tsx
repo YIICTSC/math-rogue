@@ -203,7 +203,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         )}
 
         {/* Enemies Area (Top) */}
-        <div className="flex justify-center items-start pt-14 gap-2 min-h-[180px] shrink-0">
+        <div className="flex justify-center items-start pt-8 md:pt-14 gap-2 min-h-[180px] shrink-0">
             {enemies.map((enemy) => {
                 const enemyHpPercent = (enemy.currentHp / enemy.maxHp) * 100;
                 const isSelected = selectedEnemyId === enemy.id;
@@ -386,7 +386,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
       </div>
 
       {/* 4. Hand Area (Horizontal Scroll) */}
-      <div className={`h-44 md:h-48 bg-gray-900 border-t border-gray-700 relative z-10 ${selectionState.active ? 'bg-blue-900/20' : ''}`}>
+      <div className={`h-40 md:h-48 bg-gray-900 border-t border-gray-700 relative z-10 ${selectionState.active ? 'bg-blue-900/20' : ''}`}>
         <div className="w-full h-full overflow-x-auto overflow-y-hidden whitespace-nowrap px-2 flex items-center gap-2 custom-scrollbar touch-pan-x">
             {player.hand.map((card) => {
                 // Check for special disabling conditions
@@ -401,22 +401,24 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 }
 
                 return (
-                    <div key={card.id} className={`inline-block align-middle transition-transform duration-200 ${selectionState.active ? 'cursor-pointer hover:-translate-y-4' : ''}`}>
-                        <Card 
-                            card={displayCard} 
-                            onClick={() => {
-                                if (selectionState.active) {
-                                    onHandSelection(card);
-                                } else {
-                                    if (!specialDisabled) onPlayCard(card);
+                    <div key={card.id} className={`inline-block align-middle transition-transform duration-200 w-28 h-40 md:w-32 md:h-48 shrink-0 relative ${selectionState.active ? 'cursor-pointer hover:-translate-y-4' : ''}`}>
+                        <div className="absolute top-0 left-0 origin-top-left scale-[0.8] md:scale-100">
+                            <Card 
+                                card={displayCard} 
+                                onClick={() => {
+                                    if (selectionState.active) {
+                                        onHandSelection(card);
+                                    } else {
+                                        if (!specialDisabled) onPlayCard(card);
+                                    }
+                                }} 
+                                disabled={
+                                    selectionState.active 
+                                    ? false 
+                                    : (player.currentEnergy < displayCard.cost || !!actingEnemyId || card.unplayable || specialDisabled)
                                 }
-                            }} 
-                            disabled={
-                                selectionState.active 
-                                ? false 
-                                : (player.currentEnergy < displayCard.cost || !!actingEnemyId || card.unplayable || specialDisabled)
-                            }
-                        />
+                            />
+                        </div>
                     </div>
                 );
             })}

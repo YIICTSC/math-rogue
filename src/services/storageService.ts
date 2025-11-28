@@ -1,10 +1,11 @@
 
-import { GameState, GameScreen, RankingEntry } from '../types';
+import { GameState, GameScreen, RankingEntry, Card } from '../types';
 
 const STORAGE_KEY_UNLOCKED_CARDS = 'pixel_spire_unlocked_cards_v1';
 const STORAGE_KEY_GAME_STATE = 'pixel_spire_save_state_v1';
 const STORAGE_KEY_CLEAR_COUNT = 'pixel_spire_clear_count_v1';
 const STORAGE_KEY_RANKING = 'pixel_spire_ranking_v1';
+const STORAGE_KEY_LEGACY_CARD = 'pixel_spire_legacy_card_v1';
 
 export const storageService = {
   // --- Unlocked Cards ---
@@ -109,10 +110,33 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_GAME_STATE);
   },
 
+  // --- Legacy Card (Inheritance) ---
+  saveLegacyCard: (card: Card) => {
+      try {
+          localStorage.setItem(STORAGE_KEY_LEGACY_CARD, JSON.stringify(card));
+      } catch (e) {
+          console.warn("Failed to save legacy card", e);
+      }
+  },
+
+  getLegacyCard: (): Card | null => {
+      try {
+          const stored = localStorage.getItem(STORAGE_KEY_LEGACY_CARD);
+          return stored ? JSON.parse(stored) : null;
+      } catch (e) {
+          return null;
+      }
+  },
+
+  clearLegacyCard: () => {
+      localStorage.removeItem(STORAGE_KEY_LEGACY_CARD);
+  },
+
   resetProgress: () => {
       localStorage.removeItem(STORAGE_KEY_UNLOCKED_CARDS);
       localStorage.removeItem(STORAGE_KEY_GAME_STATE);
       localStorage.removeItem(STORAGE_KEY_CLEAR_COUNT);
       localStorage.removeItem(STORAGE_KEY_RANKING);
+      localStorage.removeItem(STORAGE_KEY_LEGACY_CARD);
   }
 };

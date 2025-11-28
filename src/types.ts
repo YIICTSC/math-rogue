@@ -55,7 +55,11 @@ export interface Card {
   damageBasedOnBlock?: boolean; 
   doubleBlock?: boolean;        
   fatalMaxHp?: number;
-  innate?: boolean;          
+  innate?: boolean;
+  
+  // Next Turn Effects
+  nextTurnEnergy?: number;
+  nextTurnDraw?: number;          
 
   // Complex Interactions
   promptsDiscard?: number;      
@@ -170,6 +174,10 @@ export interface Player {
   cardsPlayedThisTurn: number; 
   attacksPlayedThisTurn: number;
   
+  // Next Turn State
+  nextTurnEnergy: number;
+  nextTurnDraw: number;
+  
   // Relic & Turn Counters
   relicCounters: Record<string, number>; // Persists across battles (e.g. Pen Nib)
   turnFlags: Record<string, boolean>;    // Resets each turn (e.g. Necronomicon)
@@ -249,11 +257,13 @@ export interface RankingEntry {
     floor: number;
     victory: boolean;
     date: number; // timestamp
+    challengeMode?: string;
 }
 
 export interface GameState {
   screen: GameScreen;
-  mode: GameMode; // New
+  mode: GameMode; 
+  challengeMode?: string; // e.g. '1A1D'
   act: number;
   floor: number;
   turn: number;
