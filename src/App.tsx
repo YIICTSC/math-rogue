@@ -1558,7 +1558,15 @@ const App: React.FC = () => {
   };
 
   const handleSynthesizeCard = (c1: ICard, c2: ICard) => {
-      const newName = c1.name.slice(0, 4) + c2.name.slice(-2);
+      // Naming Logic: 2-4 chars from start of C1 + 2-4 chars from end of C2
+      const len1 = Math.floor(Math.random() * 3) + 2; // 2 to 4
+      const len2 = Math.floor(Math.random() * 3) + 2; // 2 to 4
+      
+      const part1 = c1.name.substring(0, Math.min(len1, c1.name.length));
+      const part2 = c2.name.substring(Math.max(0, c2.name.length - len2));
+      
+      const newName = part1 + part2;
+
       // Cost is the higher of the two
       const newCost = Math.max(c1.cost, c2.cost);
 
