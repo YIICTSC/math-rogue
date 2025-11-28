@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -1575,8 +1574,8 @@ const App: React.FC = () => {
             {gameState.screen === GameScreen.START_MENU && (
                 <div className="w-full h-full bg-gray-900 flex items-center justify-center">
                     <div className="text-center p-8">
-                        <h1 className="text-6xl text-transparent bg-clip-text bg-gradient-to-b from-purple-400 to-blue-600 mb-8 font-bold animate-pulse tracking-widest">
-                            ピクセル・スパイア
+                        <h1 className="text-5xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-b from-purple-400 to-blue-600 mb-8 font-bold animate-pulse tracking-widest leading-tight">
+                            算数ローグ<br/><span className="text-4xl">伝説の小学生</span>
                         </h1>
                         <p className="text-gray-400 mb-12 text-sm">Act {gameState.act} / Floor {gameState.floor}</p>
                         <div className="flex flex-col gap-4 items-center">
