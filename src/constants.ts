@@ -7,118 +7,158 @@ export const HAND_SIZE = 5;
 
 // --- SVG DATA URIS FOR CHARACTERS (24x24 Pixel Art) ---
 
-// 1. Elementary School Kid (Red Cap)
+// 1. Elementary School Kid (Red Cap) - The Warrior
 const WARRIOR_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges">
   <path d="M0 0h24v24H0z" fill="none"/>
-  <!-- Cap -->
   <path d="M8 2h8v2H8z" fill="#f44336"/>
   <path d="M7 4h10v2H7z" fill="#d32f2f"/>
-  <path d="M7 6h2v1H7z" fill="#f44336"/> <!-- Brim -->
-  <!-- Face -->
+  <path d="M7 6h2v1H7z" fill="#f44336"/>
   <path d="M9 6h6v4H9z" fill="#ffccbc"/>
-  <path d="M10 7h1v1h-1zM13 7h1v1h-1z" fill="#3e2723"/> <!-- Eyes -->
-  <!-- Body (T-Shirt) -->
+  <path d="M10 7h1v1h-1zM13 7h1v1h-1z" fill="#3e2723"/>
   <path d="M8 10h8v6H8z" fill="#ffffff"/>
   <path d="M10 12h4v1h-4z" fill="#e0e0e0"/>
-  <!-- Randoseru (Backpack straps) -->
   <path d="M8 10h1v4H8zM15 10h1v4h-1z" fill="#d32f2f"/>
-  <!-- Arms -->
   <path d="M6 10h2v4H6zM16 10h2v4h-2z" fill="#ffccbc"/>
-  <!-- Shorts -->
   <path d="M8 16h8v3H8z" fill="#1565c0"/>
-  <!-- Legs -->
   <path d="M9 19h2v3H9zM13 19h2v3h-2z" fill="#ffccbc"/>
-  <path d="M8 22h3v2H8zM13 22h3v2h-3z" fill="#ffffff"/> <!-- Shoes -->
+  <path d="M8 22h3v2H8zM13 22h3v2h-3z" fill="#ffffff"/>
 </svg>`;
 
-// 2. Transfer Student (Mysterious)
+// 2. Transfer Student (Mysterious) - The Assassin
 const ASSASSIN_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges">
   <path d="M0 0h24v24H0z" fill="none"/>
-  <!-- Hair -->
   <path d="M8 3h8v3h-1v1h-6v-1H8z" fill="#212121"/>
-  <!-- Face -->
   <path d="M9 6h6v4H9z" fill="#ffe0b2"/>
   <path d="M10 7h1v1h-1zM13 7h1v1h-1z" fill="#3e2723"/>
-  <path d="M9 8h6v1H9z" fill="#4caf50" opacity="0.3"/> <!-- Mask? -->
-  <!-- Body (Black Hoodie) -->
+  <path d="M9 8h6v1H9z" fill="#4caf50" opacity="0.3"/>
   <path d="M8 10h8v6H8z" fill="#424242"/>
   <path d="M10 11h4v4h-4z" fill="#616161"/>
-  <!-- Arms -->
   <path d="M6 10h2v4H6zM16 10h2v4h-2z" fill="#424242"/>
-  <!-- Pants -->
   <path d="M8 16h8v3H8z" fill="#263238"/>
-  <!-- Legs -->
   <path d="M9 19h2v3H9zM13 19h2v3h-2z" fill="#ffe0b2"/>
   <path d="M8 22h3v2H8zM13 22h3v2h-3z" fill="#212121"/>
 </svg>`;
 
-// 3. Science Club Kid (Glasses)
+// 3. Science Club Kid (Glasses) - The Mage
 const MAGE_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges">
   <path d="M0 0h24v24H0z" fill="none"/>
-  <!-- Hair -->
   <path d="M8 3h8v2H8z" fill="#5d4037"/>
-  <!-- Face -->
   <path d="M9 5h6v4H9z" fill="#ffccbc"/>
-  <!-- Glasses -->
   <path d="M9 6h2v1H9zM13 6h2v1h-2z" fill="#212121"/>
   <path d="M11 6h2v1h-2z" fill="#bdbdbd"/>
-  <!-- Lab Coat -->
   <path d="M7 9h10v9H7z" fill="#ffffff"/>
   <path d="M11 9h2v9h-2z" fill="#e3f2fd"/>
-  <!-- Flask -->
   <path d="M18 12h2v3h-2z" fill="#4caf50"/>
-  <!-- Legs -->
   <path d="M9 18h2v4H9zM13 18h2v4h-2z" fill="#455a64"/>
   <path d="M8 22h3v2H8zM13 22h3v2h-3z" fill="#37474f"/>
 </svg>`;
 
-// 4. Go-Home Club (Casual)
-const ROGUE_SVG = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges">
-  <path d="M0 0h24v24H0z" fill="none"/>
-  <!-- Hair (Messy) -->
-  <path d="M7 3h10v3H7z" fill="#fbc02d"/>
-  <path d="M6 4h1v3H6zM17 4h1v3h-1z" fill="#fbc02d"/>
-  <!-- Face -->
-  <path d="M9 6h6v4H9z" fill="#ffccbc"/>
-  <path d="M10 7h1v1h-1zM13 7h1v1h-1z" fill="#3e2723"/>
-  <!-- Headphones -->
-  <path d="M7 6h2v3H7zM15 6h2v3h-2z" fill="#333"/>
-  <path d="M9 5h6v1H9z" fill="#333"/>
-  <!-- Body (Hoodie/Casual) -->
-  <path d="M8 10h8v7H8z" fill="#90a4ae"/>
-  <path d="M10 11h4v4h-4z" fill="#cfd8dc"/>
-  <!-- Bag (Slung over) -->
-  <path d="M8 10h1v7H8z" fill="#5d4037"/>
-  <!-- Legs -->
-  <path d="M9 17h2v5H9zM13 17h2v5h-2z" fill="#37474f"/>
-  <path d="M8 22h3v2H8zM13 22h3v2h-3z" fill="#eeeeee"/>
-</svg>`;
-
-// 5. Broadcasting Club (Mic)
+// 4. Broadcasting Club (Mic) - The Bard
 const BARD_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges">
   <path d="M0 0h24v24H0z" fill="none"/>
-  <!-- Hair (Pigtails) -->
   <path d="M8 3h8v3H8z" fill="#ec407a"/>
   <path d="M6 4h2v4H6zM16 4h2v4h-2z" fill="#ec407a"/>
-  <!-- Face -->
   <path d="M9 6h6v4H9z" fill="#ffccbc"/>
   <path d="M10 7h1v1h-1zM13 7h1v1h-1z" fill="#3e2723"/>
-  <!-- Mic -->
   <path d="M13 11h3v3h-3z" fill="#212121"/>
   <path d="M14 14h1v2h-1z" fill="#bdbdbd"/>
-  <!-- Body (Uniform) -->
   <path d="M8 10h8v6H8z" fill="#fff9c4"/>
-  <path d="M10 10h4v2h-4z" fill="#f44336"/> <!-- Ribbon -->
-  <!-- Skirt -->
+  <path d="M10 10h4v2h-4z" fill="#f44336"/>
   <path d="M7 16h10v3H7z" fill="#ad1457"/>
-  <!-- Legs -->
   <path d="M9 19h2v3H9zM13 19h2v3h-2z" fill="#ffccbc"/>
-  <path d="M9 21h2v1H9zM13 21h2v1h-2z" fill="#fff"/> <!-- Socks -->
+  <path d="M9 21h2v1H9zM13 21h2v1h-2z" fill="#fff"/>
+  <path d="M8 22h3v2H8zM13 22h3v2h-3z" fill="#5d4037"/>
+</svg>`;
+
+// 5. Dodgeball Ace (Replaces Rogue) - Sporty
+const DODGEBALL_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges">
+  <path d="M0 0h24v24H0z" fill="none"/>
+  <path d="M7 3h10v3H7z" fill="#ff9800"/>
+  <path d="M6 4h1v2H6zM17 4h1v2h-1z" fill="#ff9800"/>
+  <path d="M9 6h6v4H9z" fill="#ffccbc"/>
+  <path d="M10 7h1v1h-1zM13 7h1v1h-1z" fill="#3e2723"/>
+  <path d="M8 5h8v1H8z" fill="#ffffff"/> <!-- Headband -->
+  <path d="M20 5h2v4h-2z" fill="#ffffff"/> <!-- Headband tails -->
+  <path d="M8 10h8v6H8z" fill="#ff5722"/> <!-- Jersey -->
+  <path d="M10 11h4v4h-4z" fill="#e64a19"/>
+  <path d="M6 10h2v4H6zM16 10h2v4h-2z" fill="#ffccbc"/>
+  <path d="M17 13h4v4h-4z" fill="#eeeeee"/> <!-- Ball -->
+  <path d="M18 13h1v4h-1z" fill="#bdbdbd"/>
+  <path d="M8 16h8v3H8z" fill="#333333"/> <!-- Shorts -->
+  <path d="M9 19h2v3H9zM13 19h2v3h-2z" fill="#ffccbc"/>
+  <path d="M8 22h3v2H8zM13 22h3v2h-3z" fill="#ff9800"/>
+</svg>`;
+
+// 6. Library Committee - Quiet
+const LIBRARIAN_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges">
+  <path d="M0 0h24v24H0z" fill="none"/>
+  <path d="M7 3h10v4H7z" fill="#3f51b5"/> <!-- Hair -->
+  <path d="M6 4h1v5H6zM17 4h1v5h-1z" fill="#3f51b5"/>
+  <path d="M9 7h6v4H9z" fill="#ffccbc"/>
+  <path d="M9 8h6v1H9z" fill="#212121"/> <!-- Glasses -->
+  <path d="M8 11h8v6H8z" fill="#e8eaf6"/> <!-- Shirt -->
+  <path d="M10 11h1v6h-1zM13 11h1v6h-1z" fill="#9fa8da"/>
+  <path d="M6 11h2v4H6zM16 11h2v4h-2z" fill="#ffccbc"/>
+  <path d="M16 13h4v4h-4z" fill="#5d4037"/> <!-- Book -->
+  <path d="M17 14h2v2h-2z" fill="#fff"/>
+  <path d="M7 17h10v4H7z" fill="#283593"/> <!-- Skirt -->
+  <path d="M9 21h2v3H9zM13 21h2v3h-2z" fill="#333"/>
+</svg>`;
+
+// 7. Lunch Duty Leader - Apron
+const CHEF_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges">
+  <path d="M0 0h24v24H0z" fill="none"/>
+  <path d="M8 1h8v4H8z" fill="#ffffff"/> <!-- Hat -->
+  <path d="M9 5h6v4H9z" fill="#ffccbc"/>
+  <path d="M10 6h1v1h-1zM13 6h1v1h-1z" fill="#3e2723"/>
+  <path d="M9 9h6v1H9z" fill="#ffffff"/> <!-- Mask -->
+  <path d="M7 10h10v7H7z" fill="#ffffff"/> <!-- Apron -->
+  <path d="M9 11h6v4H9z" fill="#eeeeee"/>
+  <path d="M5 10h2v4H5zM17 10h2v4h-2z" fill="#ffccbc"/>
+  <path d="M18 9h2v6h-2z" fill="#b0bec5"/> <!-- Ladle -->
+  <path d="M18 15h3v2h-3z" fill="#b0bec5"/>
+  <path d="M8 17h8v3H8z" fill="#37474f"/>
+  <path d="M9 20h2v4H9zM13 20h2v4h-2z" fill="#ffffff"/>
+</svg>`;
+
+// 8. Animal Caretaker - Green
+const CARETAKER_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges">
+  <path d="M0 0h24v24H0z" fill="none"/>
+  <path d="M7 3h10v3H7z" fill="#795548"/> <!-- Hair -->
+  <path d="M6 4h1v3H6zM17 4h1v3h-1z" fill="#795548"/>
+  <path d="M9 6h6v4H9z" fill="#ffccbc"/>
+  <path d="M10 7h1v1h-1zM13 7h1v1h-1z" fill="#3e2723"/>
+  <path d="M8 10h8v6H8z" fill="#8d6e63"/> <!-- Overalls -->
+  <path d="M10 12h4v2h-4z" fill="#a1887f"/>
+  <path d="M6 10h2v4H6zM16 10h2v4h-2z" fill="#ffccbc"/>
+  <path d="M16 13h3v3h-3z" fill="#ffffff"/> <!-- Rabbit -->
+  <path d="M17 12h1v1h-1z" fill="#ffffff"/>
+  <path d="M8 16h8v4H8z" fill="#5d4037"/>
+  <path d="M9 20h2v4H9zM13 20h2v4h-2z" fill="#3e2723"/>
+</svg>`;
+
+// 9. Gardener - Straw Hat
+const GARDENER_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges">
+  <path d="M0 0h24v24H0z" fill="none"/>
+  <path d="M6 3h12v2H6z" fill="#fdd835"/> <!-- Hat -->
+  <path d="M5 5h14v1H5z" fill="#fbc02d"/>
+  <path d="M9 6h6v4H9z" fill="#ffccbc"/>
+  <path d="M10 7h1v1h-1zM13 7h1v1h-1z" fill="#3e2723"/>
+  <path d="M8 10h8v6H8z" fill="#aed581"/> <!-- Shirt -->
+  <path d="M10 11h4v4h-4z" fill="#c5e1a5"/>
+  <path d="M6 10h2v4H6zM16 10h2v4h-2z" fill="#ffccbc"/>
+  <path d="M17 12h4v3h-4z" fill="#81c784"/> <!-- Can -->
+  <path d="M8 16h8v3H8z" fill="#558b2f"/> <!-- Pants -->
+  <path d="M9 19h2v3H9zM13 19h2v3h-2z" fill="#795548"/> <!-- Boots -->
   <path d="M8 22h3v2H8zM13 22h3v2h-3z" fill="#5d4037"/>
 </svg>`;
 
@@ -130,8 +170,13 @@ export const RELIC_LIBRARY: Record<string, Relic> = {
     BURNING_BLOOD: { id: 'BURNING_BLOOD', name: '給食の余り', description: '戦闘終了時、HPを6回復する。', rarity: 'STARTER' },
     SNAKE_RING: { id: 'SNAKE_RING', name: '秘密のメモ帳', description: '戦闘開始時、追加で2枚カードを引く。', rarity: 'STARTER' },
     HOLY_WATER: { id: 'HOLY_WATER', name: 'スポーツドリンク', description: '戦闘開始時、エネルギーを1得る。', rarity: 'STARTER' },
-    SNEAKERS: { id: 'SNEAKERS', name: '瞬足シューズ', description: '戦闘開始時、カードを2枚引く。', rarity: 'STARTER' },
     MEGAPHONE: { id: 'MEGAPHONE', name: '校内放送マイク', description: '戦闘開始時、敵全体に脆弱1を与える。', rarity: 'STARTER' },
+    // NEW STARTERS
+    HACHIMAKI: { id: 'HACHIMAKI', name: '必勝ハチマキ', description: '戦闘開始時、敏捷性1を得る。', rarity: 'STARTER' },
+    BOOKMARK: { id: 'BOOKMARK', name: '図書室のしおり', description: 'ターン終了時、カードを1枚保留する。', rarity: 'STARTER' }, // Keep simple or modify
+    BIG_LADLE: { id: 'BIG_LADLE', name: '巨大なお玉', description: '戦闘開始時、最大HP+4(一時的)を得る。', rarity: 'STARTER' },
+    WHISTLE: { id: 'WHISTLE', name: '魔法の笛', description: '戦闘開始時、ランダムな攻撃カード(コスト0)を1枚手札に加える。', rarity: 'STARTER' },
+    SEED_PACK: { id: 'SEED_PACK', name: '謎の種', description: '戦闘開始時、トゲ3を得る。', rarity: 'STARTER' },
     
     // COMMON
     VAJRA: { id: 'VAJRA', name: '金の定規', description: '戦闘開始時、筋力1を得る。', rarity: 'COMMON', price: 150 },
@@ -439,15 +484,15 @@ export const CHARACTERS: Character[] = [
         imageData: `data:image/svg+xml;base64,${btoa(MAGE_SVG)}`
     },
     {
-        id: 'ROGUE',
-        name: '帰宅部エース',
-        description: '誰よりも早く帰る。スピード（ドロー）が自慢。',
-        maxHp: 72,
+        id: 'DODGEBALL',
+        name: 'ドッジボールのエース',
+        description: 'クラスの人気者。身軽さを活かして攻撃をかわしつつ連撃を決める。',
+        maxHp: 75,
         gold: 100,
-        startingRelicId: 'SNEAKERS',
-        color: 'gray',
-        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'QUICK_SLASH', 'BACKFLIP'],
-        imageData: `data:image/svg+xml;base64,${btoa(ROGUE_SVG)}`
+        startingRelicId: 'HACHIMAKI',
+        color: 'orange',
+        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'QUICK_SLASH', 'BACKFLIP', 'ACROBATICS'],
+        imageData: `data:image/svg+xml;base64,${btoa(DODGEBALL_SVG)}`
     },
     {
         id: 'BARD',
@@ -460,4 +505,48 @@ export const CHARACTERS: Character[] = [
         deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'THUNDERCLAP', 'PIERCING_WAIL'],
         imageData: `data:image/svg+xml;base64,${btoa(BARD_SVG)}`
     },
+    {
+        id: 'LIBRARIAN',
+        name: '図書委員',
+        description: '静かな読書家。知識（カード）を蓄えて戦う晩成型。',
+        maxHp: 60,
+        gold: 120,
+        startingRelicId: 'BOOKMARK',
+        color: 'purple',
+        deckTemplate: ['STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'GLACIER', 'SCRY', 'SKIM'],
+        imageData: `data:image/svg+xml;base64,${btoa(LIBRARIAN_SVG)}`
+    },
+    {
+        id: 'CHEF',
+        name: '給食当番リーダー',
+        description: 'みんなの胃袋を掴む。回復と一時的な体力強化が得意。',
+        maxHp: 85,
+        gold: 100,
+        startingRelicId: 'BIG_LADLE',
+        color: 'pink',
+        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'FEED', 'IRON_WAVE'],
+        imageData: `data:image/svg+xml;base64,${btoa(CHEF_SVG)}`
+    },
+    {
+        id: 'CARETAKER',
+        name: '飼育委員',
+        description: '動物と心を通わす。0コストの攻撃カードを駆使する。',
+        maxHp: 72,
+        gold: 100,
+        startingRelicId: 'WHISTLE',
+        color: 'amber',
+        deckTemplate: ['STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'CLOAK_AND_DAGGER', 'BLADE_DANCE', 'ACCURACY'],
+        imageData: `data:image/svg+xml;base64,${btoa(CARETAKER_SVG)}`
+    },
+    {
+        id: 'GARDENER',
+        name: '園芸委員',
+        description: '花壇の手入れはお手の物。トゲと成長でじわじわ追い詰める。',
+        maxHp: 78,
+        gold: 100,
+        startingRelicId: 'SEED_PACK',
+        color: 'lime',
+        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'CALTROPS', 'ENTRENCH'], // Caltrops not implemented yet, mapping to thorns logic
+        imageData: `data:image/svg+xml;base64,${btoa(GARDENER_SVG)}`
+    }
 ];

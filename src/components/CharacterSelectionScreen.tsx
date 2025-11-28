@@ -22,7 +22,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
             <p className="text-sm text-gray-400">冒険に挑むキャラクターを選んでください</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl pb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl pb-20">
             {characters.map((char, index) => {
                 const isUnlocked = index < unlockedCount;
                 const relic = RELIC_LIBRARY[char.startingRelicId];
@@ -35,6 +35,11 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                     'purple': 'border-purple-600 bg-purple-900/40 hover:bg-purple-900/60',
                     'gray': 'border-gray-600 bg-gray-800/40 hover:bg-gray-800/60',
                     'yellow': 'border-yellow-600 bg-yellow-900/40 hover:bg-yellow-900/60',
+                    'orange': 'border-orange-600 bg-orange-900/40 hover:bg-orange-900/60',
+                    'cyan': 'border-cyan-600 bg-cyan-900/40 hover:bg-cyan-900/60',
+                    'pink': 'border-pink-600 bg-pink-900/40 hover:bg-pink-900/60',
+                    'lime': 'border-lime-600 bg-lime-900/40 hover:bg-lime-900/60',
+                    'amber': 'border-amber-600 bg-amber-900/40 hover:bg-amber-900/60',
                 };
                 
                 const baseClass = `relative border-4 rounded-xl p-4 transition-all duration-300 flex flex-col items-center ${isUnlocked ? 'cursor-pointer hover:-translate-y-2 shadow-lg' : 'opacity-60 cursor-not-allowed grayscale'}`;
@@ -64,34 +69,36 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                         </div>
 
                         <div className="w-full flex justify-between items-start mb-4 border-b border-white/20 pb-2">
-                            <h3 className="text-2xl font-bold text-white">{char.name}</h3>
-                            <div className="flex gap-2 text-xs">
+                            <h3 className="text-xl font-bold text-white truncate mr-2">{char.name}</h3>
+                            <div className="flex gap-2 text-xs shrink-0">
                                 <span className="flex items-center text-red-300"><Heart size={12} className="mr-1"/> {char.maxHp}</span>
                                 <span className="flex items-center text-yellow-300"><Coins size={12} className="mr-1"/> {char.gold}</span>
                             </div>
                         </div>
 
-                        <p className="text-sm text-gray-300 mb-4 text-center h-10">{char.description}</p>
+                        <p className="text-xs text-gray-300 mb-4 text-center h-12 leading-relaxed flex items-center justify-center">
+                            {char.description}
+                        </p>
 
                         {/* Starting Relic */}
                         <div className="w-full bg-black/40 rounded p-2 mb-4 flex items-center">
                             <div className="w-10 h-10 bg-gray-800 rounded-full border-2 border-gray-500 flex items-center justify-center mr-3 shrink-0">
                                 <Gem size={20} className="text-yellow-200" />
                             </div>
-                            <div className="text-left">
-                                <div className="text-xs text-gray-400">初期レリック</div>
-                                <div className="font-bold text-sm text-yellow-100">{relic ? relic.name : '???'}</div>
+                            <div className="text-left overflow-hidden">
+                                <div className="text-[10px] text-gray-400">初期レリック</div>
+                                <div className="font-bold text-sm text-yellow-100 truncate">{relic ? relic.name : '???'}</div>
                             </div>
                         </div>
 
                         {/* Deck Preview (Compact) */}
                         <div className="w-full bg-black/40 rounded p-2 mb-4">
-                            <div className="text-xs text-gray-400 mb-1">初期デッキ特性</div>
-                            <div className="text-xs text-white leading-relaxed">
-                                {Array.from(new Set(char.deckTemplate)).slice(0, 4).map(cardId => {
+                            <div className="text-[10px] text-gray-400 mb-1">得意なカード</div>
+                            <div className="text-xs text-white leading-relaxed truncate">
+                                {Array.from(new Set(char.deckTemplate)).filter(id => !['STRIKE','DEFEND'].includes(id)).map(cardId => {
                                     const card = CARDS_LIBRARY[cardId];
                                     return card ? card.name : '';
-                                }).join(', ')} ...他
+                                }).join(', ') || '基本カードのみ'}
                             </div>
                         </div>
 
