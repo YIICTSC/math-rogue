@@ -1,9 +1,9 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText } from '../types';
 import Card from './Card';
 import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info } from 'lucide-react';
 import PixelSprite from './PixelSprite';
+import { audioService } from '../services/audioService';
 
 interface BattleSceneProps {
   player: Player;
@@ -139,6 +139,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   const showInfo = (title: string, desc: string) => {
       setTooltip({ title, desc });
   };
+
+  const hasChoker = !!player.relics.find(r => r.id === 'VELVET_CHOKER');
 
   return (
     <div className="flex flex-col h-full relative bg-gray-900 overflow-hidden">
@@ -343,6 +345,14 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 <Sword size={8} className="mr-0.5"/> {player.strength}
                             </span>
                         )}
+                        {hasChoker && (
+                            <span 
+                                className={`flex items-center ${player.cardsPlayedThisTurn >= 6 ? 'text-red-500' : 'text-yellow-400'} text-[9px] font-bold border border-gray-700 px-1 rounded bg-black cursor-pointer`}
+                                onClick={() => showInfo("制服のカラー", "カードを1ターンに6枚までしか使えない。")}
+                            >
+                                <Info size={8} className="mr-0.5"/> {player.cardsPlayedThisTurn}/6
+                            </span>
+                        )}
                         {Object.entries(player.powers).map(([key, val]) => {
                             if ((val as number) <= 0) return null;
                             const def = POWER_DEFINITIONS[key] || { name: key, desc: "効果不明" };
@@ -393,7 +403,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 // Check for special disabling conditions
                 const isClashDisabled = card.name === '口喧嘩' && player.hand.some(c => c.type !== CardType.ATTACK && c.id !== card.id);
                 const isGrandFinaleDisabled = card.name === '卒業式' && player.drawPile.length > 0;
-                const specialDisabled = isClashDisabled || isGrandFinaleDisabled;
+                const isChokerDisabled = hasChoker && player.cardsPlayedThisTurn >= 6;
+                const specialDisabled = isClashDisabled || isGrandFinaleDisabled || isChokerDisabled;
                 
                 // Visual Cost Override for Corruption
                 const displayCard = { ...card };
@@ -411,6 +422,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                         onHandSelection(card);
                                     } else {
                                         if (!specialDisabled) onPlayCard(card);
+                                        else if (isChokerDisabled) audioService.playSound('wrong');
                                     }
                                 }} 
                                 disabled={

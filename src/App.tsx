@@ -277,7 +277,12 @@ const App: React.FC = () => {
       const p = { ...prev.player };
       
       // Process Next Turn Effects
-      p.currentEnergy = p.maxEnergy + p.nextTurnEnergy;
+      let carryOverEnergy = 0;
+      if (p.relics.find(r => r.id === 'ICE_CREAM')) {
+          carryOverEnergy = p.currentEnergy;
+      }
+      p.currentEnergy = p.maxEnergy + p.nextTurnEnergy + carryOverEnergy;
+      
       const drawCount = HAND_SIZE + (p.powers['TOOLS_OF_THE_TRADE'] ? 1 : 0) + p.nextTurnDraw;
       p.nextTurnEnergy = 0;
       p.nextTurnDraw = 0;
@@ -286,6 +291,15 @@ const App: React.FC = () => {
       if (p.powers['DEMON_FORM']) p.strength += p.powers['DEMON_FORM'];
       if (p.powers['ECHO_FORM']) p.echoes = p.powers['ECHO_FORM'];
       if (p.powers['DEVA_FORM']) p.maxEnergy += p.powers['DEVA_FORM']; 
+      
+      // Relics
+      if (p.relics.find(r => r.id === 'MERCURY_HOURGLASS')) {
+          prev.enemies.forEach(e => { e.currentHp -= 3; if (e.currentHp < 0) e.currentHp = 0; });
+      }
+      if (p.relics.find(r => r.id === 'HORN_CLEAT') && prev.turn === 1) { // Will become turn 2
+          p.block += 14;
+      }
+
       if (p.powers['CREATIVE_AI']) {
           const powers = Object.values(CARDS_LIBRARY).filter(c => c.type === CardType.POWER);
           const power = { ...powers[Math.floor(Math.random() * powers.length)], id: `creative-${Date.now()}`, cost: 0 };
@@ -329,6 +343,10 @@ const App: React.FC = () => {
       let newDiscardPile = [...p.discardPile];
       let newHand = [...p.hand];
       
+      // Snecko Eye Draw Bonus (+2)
+      let totalDraw = drawCount;
+      if (p.relics.find(r => r.id === 'SNECKO_EYE')) totalDraw += 2;
+
       // Helper to draw
       const drawCard = () => {
           if (newDrawPile.length === 0) {
@@ -339,16 +357,22 @@ const App: React.FC = () => {
           return newDrawPile.pop();
       };
 
-      for (let i = 0; i < drawCount; i++) {
+      for (let i = 0; i < totalDraw; i++) {
         if (newHand.length >= 10) break; // Hand limit
         const card = drawCard();
         if (card) {
             if (card.name === '虚無' || card.name === 'VOID') p.currentEnergy = Math.max(0, p.currentEnergy - 1);
+            
+            // Snecko Eye Randomization
+            if (p.relics.find(r => r.id === 'SNECKO_EYE') && card.cost >= 0) {
+                card.cost = Math.floor(Math.random() * 4); // 0-3
+            }
+            
             newHand.push(card);
         }
       }
 
-      // Reset Block unless Barricade
+      // Reset Block unless Barricade or Calipers
       if (!p.powers['BARRICADE'] && !p.powers['CALIPERS']) p.block = 0;
       else if (p.powers['CALIPERS']) {
           p.block = Math.max(0, p.block - 15);
@@ -361,7 +385,7 @@ const App: React.FC = () => {
       p.attacksPlayedThisTurn = 0;
       p.turnFlags = {}; // Reset turn flags
 
-      return { ...prev, player: p, turn: prev.turn + 1 };
+      return { ...prev, player: p, turn: prev.turn + 1, enemies: prev.enemies.filter(e => e.currentHp > 0) };
     });
   };
 
@@ -503,6 +527,16 @@ const App: React.FC = () => {
             if (p.relics.find(r => r.id === 'BIG_LADLE')) { p.maxHp += 4; p.currentHp += 4; } // Temp HP logic simplified
             if (p.relics.find(r => r.id === 'SEED_PACK')) p.powers['THORNS'] = 3;
 
+            // Combat Start Relics
+            if (p.relics.find(r => r.id === 'LANTERN')) p.currentEnergy += 1;
+            if (p.relics.find(r => r.id === 'ANCIENT_TEA_SET') && p.relicCounters['ANCIENT_TEA_SET_ACTIVE']) {
+                p.currentEnergy += 2;
+                p.relicCounters['ANCIENT_TEA_SET_ACTIVE'] = 0; // Consume
+            }
+            if (p.relics.find(r => r.id === 'PHILOSOPHER_STONE')) {
+                enemies.forEach(e => e.strength += 1);
+            }
+
             p.powers = {};
             if (p.relics.find(r => r.id === 'ENCHIRIDION')) {
                 const powers = Object.values(CARDS_LIBRARY).filter(c => c.type === CardType.POWER);
@@ -592,14 +626,20 @@ const App: React.FC = () => {
             audioService.playBGM('menu');
         } else if (node.type === NodeType.TREASURE) {
             const rewards: RewardItem[] = [];
-            const r = Math.random();
-            if (r < 0.6) {
-                const relicList = Object.values(RELIC_LIBRARY).filter(r => r.rarity !== 'STARTER' && r.rarity !== 'BOSS');
-                const relic = relicList[Math.floor(Math.random() * relicList.length)];
-                rewards.push({ type: 'RELIC', value: relic, id: `tr-r-${Date.now()}` });
-            } else {
-                rewards.push({ type: 'GOLD', value: 50 + Math.floor(Math.random() * 50), id: `tr-g-${Date.now()}` });
+            // Matryoshka check (Double Chest)
+            const count = nextState.player.relics.find(r => r.id === 'MATRYOSHKA') ? 2 : 1;
+            
+            for(let i=0; i<count; i++) {
+                const r = Math.random();
+                if (r < 0.6) {
+                    const relicList = Object.values(RELIC_LIBRARY).filter(r => r.rarity !== 'STARTER' && r.rarity !== 'BOSS');
+                    const relic = relicList[Math.floor(Math.random() * relicList.length)];
+                    rewards.push({ type: 'RELIC', value: relic, id: `tr-r-${Date.now()}-${i}` });
+                } else {
+                    rewards.push({ type: 'GOLD', value: 50 + Math.floor(Math.random() * 50), id: `tr-g-${Date.now()}-${i}` });
+                }
             }
+            
             setTreasureRewards(rewards);
             setGameState({ ...nextState, screen: GameScreen.TREASURE });
             audioService.playBGM('menu');
@@ -637,6 +677,12 @@ const App: React.FC = () => {
     if (actingEnemyId) return; 
     if (gameState.selectionState.active) return;
     if (card.unplayable) return;
+    
+    // Velvet Choker Check
+    if (gameState.player.relics.find(r => r.id === 'VELVET_CHOKER') && gameState.player.cardsPlayedThisTurn >= 6) {
+        audioService.playSound('wrong'); // Buzzer
+        return;
+    }
 
     audioService.playSound(card.type === CardType.ATTACK ? 'attack' : 'block');
     setLastActionType(card.type);
@@ -678,10 +724,14 @@ const App: React.FC = () => {
       if (p.powers['AFTER_IMAGE']) p.block += p.powers['AFTER_IMAGE'];
       if (p.powers['THOUSAND_CUTS']) enemies.forEach(e => e.currentHp -= p.powers['THOUSAND_CUTS']);
 
-      // --- Activations Loop (Echo Form, Burst) ---
+      // --- Activations Loop (Echo Form, Burst, Necronomicon) ---
       let activations = 1;
       if (p.echoes > 0) { activations++; p.echoes--; }
       if (card.type === CardType.SKILL && p.powers['BURST'] > 0) { activations++; p.powers['BURST']--; }
+      if (card.type === CardType.ATTACK && card.cost >= 2 && p.relics.find(r => r.id === 'NECRONOMICON') && !p.turnFlags['NECRONOMICON_TRIGGERED']) {
+          activations++;
+          p.turnFlags['NECRONOMICON_TRIGGERED'] = true;
+      }
 
       for (let act = 0; act < activations; act++) {
           
@@ -1005,8 +1055,23 @@ const App: React.FC = () => {
             if (c.name === '後悔' || c.name === 'REGRET') p.currentHp -= p.hand.length;
         });
 
+        // Retain Logic (Bookmark)
+        let retained: ICard[] = [];
+        if (p.relics.find(r => r.id === 'BOOKMARK') && p.hand.length > 0) {
+            // Retain the last card in hand
+            retained.push(p.hand.pop()!);
+        }
+
         p.discardPile = [...p.discardPile, ...p.hand];
-        p.hand = [];
+        p.hand = [...retained];
+
+        // Nilry's Codex Logic (Simplified: Add random card)
+        if (p.relics.find(r => r.id === 'NILRYS_CODEX')) {
+            const allCards = Object.values(CARDS_LIBRARY).filter(c => c.type !== CardType.STATUS && c.type !== CardType.CURSE && c.rarity !== 'SPECIAL');
+            const randomCard = { ...allCards[Math.floor(Math.random() * allCards.length)], id: `codex-${Date.now()}` };
+            p.hand.push(randomCard);
+        }
+
         return { ...prev, player: p };
     });
     
@@ -1157,7 +1222,9 @@ const App: React.FC = () => {
       audioService.playSound('win');
       
       let hpRegen = 0;
-      if (gameState.player.relics.find(r => r.id === 'BURNING_BLOOD')) hpRegen = 6;
+      if (gameState.player.relics.find(r => r.id === 'BURNING_BLOOD')) hpRegen += 6;
+      if (gameState.player.relics.find(r => r.id === 'MEAT_ON_THE_BONE') && gameState.player.currentHp <= gameState.player.maxHp / 2) hpRegen += 12;
+
       const bonusGold = correctCount * 10; 
 
       // Rewards generation logic here
@@ -1191,8 +1258,6 @@ const App: React.FC = () => {
           ...prev, 
           player: { 
               ...prev.player, 
-              // Gold added on reward selection usually, but here we add base? No, better add in selection.
-              // Let's pass bonus gold as reward item value.
               currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + hpRegen),
               nextTurnEnergy: 0,
               nextTurnDraw: 0
@@ -1571,7 +1636,15 @@ const App: React.FC = () => {
 
   // --- Rest & Shop ---
   const handleRestAction = () => {
-      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.currentHp + Math.floor(prev.player.maxHp * 0.3), prev.player.maxHp) } }));
+      setGameState(prev => {
+          const p = { ...prev.player };
+          p.currentHp = Math.min(p.currentHp + Math.floor(p.maxHp * 0.3), p.maxHp);
+          
+          if (p.relics.find(r => r.id === 'ANCIENT_TEA_SET')) {
+              p.relicCounters['ANCIENT_TEA_SET_ACTIVE'] = 1;
+          }
+          return { ...prev, player: p };
+      });
   };
   const handleUpgradeCard = (card: ICard) => {
       setGameState(prev => ({ ...prev, player: { ...prev.player, deck: prev.player.deck.map(c => c.id === card.id ? getUpgradedCard(c) : c) } }));
