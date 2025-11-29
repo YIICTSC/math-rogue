@@ -287,6 +287,9 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
   ...STATUS_CARDS,
   ...CURSE_CARDS,
   ...EVENT_CARDS,
+  // SHIV (ナイフ) Added
+  SHIV: { name: 'ナイフ', cost: 0, type: CardType.ATTACK, target: TargetType.ENEMY, description: '4ダメージ。廃棄。', damage: 4, exhaust: true, rarity: 'SPECIAL' },
+
   // STARTER SET
   STRIKE: { name: 'えんぴつ攻撃', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '6ダメージを与える。', damage: 6, rarity: 'COMMON' },
   DEFEND: { name: 'ノートで防御', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロックを5得る。', block: 5, rarity: 'COMMON' },
@@ -409,8 +412,8 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
   ALCHEMIZE: { name: '錬金術', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '手札にランダムなカードを加える。', addCardToHand: { cardName: 'BASH', count: 1 }, exhaust: true, rarity: 'RARE' },
   VAULT: { name: '大ジャンプ', cost: 3, type: CardType.SKILL, target: TargetType.SELF, description: '追加ターンを得る。廃棄。', draw: 5, block: 20, exhaust: true, rarity: 'LEGENDARY' },
   OFFERING_BLOOD: { name: '血の契約', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'HP4失い、E2とドロー2。', selfDamage: 4, energy: 2, draw: 2, rarity: 'RARE' },
-  BLADE_DANCE: { name: '剣の舞', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '手札にナイフ(0コス4ダメ)を3枚加える。', addCardToHand: { cardName: 'SLICE', count: 3, cost0: true }, rarity: 'COMMON' }, 
-  CLOAK_AND_DAGGER: { name: '隠しナイフ', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック6。ナイフ1枚得る。', block: 6, addCardToHand: { cardName: 'SLICE', count: 1, cost0: true }, rarity: 'COMMON' },
+  BLADE_DANCE: { name: '剣の舞', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '手札にナイフ(0コス4ダメ)を3枚加える。', addCardToHand: { cardName: 'SHIV', count: 3, cost0: true }, rarity: 'COMMON' }, 
+  CLOAK_AND_DAGGER: { name: '隠しナイフ', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック6。ナイフ1枚得る。', block: 6, addCardToHand: { cardName: 'SHIV', count: 1, cost0: true }, rarity: 'COMMON' },
   CALCULATED_GAMBLE: { name: '計算', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '手札を全て捨て、同じ枚数引く。', rarity: 'UNCOMMON' }, 
   CATALYST: { name: '触媒', cost: 1, type: CardType.SKILL, target: TargetType.ENEMY, description: 'ドクドクを2倍にする。廃棄。', poisonMultiplier: 2, exhaust: true, rarity: 'UNCOMMON' },
   DISCOVERY: { name: '発見', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ランダムなカードを手札に加える。', exhaust: true, rarity: 'UNCOMMON' }, 

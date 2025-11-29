@@ -306,7 +306,7 @@ const App: React.FC = () => {
           if (p.hand.length < 10) p.hand = [...p.hand, power]; 
       }
       if (p.powers['INFINITE_BLADES']) {
-           const shiv = { ...CARDS_LIBRARY['SLICE'], id: `inf-${Date.now()}`, cost: 0, damage: 4, exhaust: true, name: 'ナイフ' };
+           const shiv = { ...CARDS_LIBRARY['SHIV'], id: `inf-${Date.now()}` };
            if (p.powers['ACCURACY']) shiv.damage = (shiv.damage || 4) + p.powers['ACCURACY'];
            if (p.hand.length < 10) p.hand = [...p.hand, shiv];
       }
@@ -595,7 +595,7 @@ const App: React.FC = () => {
 
         } else if (node.type === NodeType.SHOP) {
             // Generate Shop
-            const keys = Object.keys(CARDS_LIBRARY).filter(k => !STATUS_CARDS[k] && !CURSE_CARDS[k] && !EVENT_CARDS[k]);
+            const keys = Object.keys(CARDS_LIBRARY).filter(k => !STATUS_CARDS[k] && !CURSE_CARDS[k] && !EVENT_CARDS[k] && k !== 'SHIV');
             const cards: ICard[] = [];
             for(let i=0; i<5; i++) {
                 const k = keys[Math.floor(Math.random() * keys.length)];
@@ -828,9 +828,6 @@ const App: React.FC = () => {
                   const deckCard = p.deck.find(c => c.id === card.id);
                   if (deckCard) {
                       deckCard.block = (deckCard.block || 0) + buffAmount;
-                      // Also update discard pile instance to show growth immediately if reshuffled?
-                      // Actually discard pile gets `card` pushed later. `card` is the instance from hand.
-                      // We should update `card` itself so when it goes to discard it has the new value.
                       card.block = (card.block || 0) + buffAmount;
                       p.floatingText = { id: `gen-${Date.now()}`, text: `Growth! +${buffAmount}`, color: 'text-green-400', iconType: 'shield' };
                   }
@@ -857,6 +854,12 @@ const App: React.FC = () => {
               if (card.addCardToHand) {
                   for (let c=0; c<card.addCardToHand.count; c++) {
                       let newC = { ...CARDS_LIBRARY[card.addCardToHand.cardName], id: `gen-${Date.now()}-${c}` };
+                      
+                      // Apply Accuracy if it's a Shiv
+                      if (newC.name === 'ナイフ' && p.powers['ACCURACY']) {
+                          newC.damage = (newC.damage || 0) + p.powers['ACCURACY'];
+                      }
+
                       if (card.addCardToHand.cost0) newC.cost = 0;
                       if (p.powers['MASTER_REALITY']) newC = getUpgradedCard(newC);
                       p.hand.push(newC);
