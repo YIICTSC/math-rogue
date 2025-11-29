@@ -10,9 +10,9 @@ interface CardProps {
 
 const KEYWORD_DEFINITIONS: Record<string, { title: string; desc: string }> = {
   EXHAUST: { title: '廃棄', desc: '使用後、この戦闘中はデッキから除外される。' },
-  STRENGTH: { title: '筋力', desc: '攻撃ダメージがその数値分増加する。' },
-  VULNERABLE: { title: '脆弱', desc: '攻撃から受けるダメージが50%増加する。' },
-  WEAK: { title: '弱体', desc: '攻撃で与えるダメージが25%減少する。' },
+  STRENGTH: { title: 'ムキムキ', desc: '攻撃ダメージがその数値分アップ！' },
+  VULNERABLE: { title: 'びくびく', desc: '攻撃から受けるダメージが50%増えちゃう！' },
+  WEAK: { title: 'へろへろ', desc: '攻撃で与えるダメージが25%減っちゃう...' },
   BLOCK: { title: 'ブロック', desc: '次のターンまで、敵からのダメージを防ぐ。' },
   DRAW: { title: 'ドロー', desc: '山札からカードを引く。' },
 };
@@ -70,9 +70,9 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled }) => {
   const activeKeywords = (() => {
     const keywords = [];
     if (card.exhaust) keywords.push(KEYWORD_DEFINITIONS.EXHAUST);
-    if (card.strength || card.description.includes('筋力')) keywords.push(KEYWORD_DEFINITIONS.STRENGTH);
-    if (card.vulnerable || card.description.includes('脆弱')) keywords.push(KEYWORD_DEFINITIONS.VULNERABLE);
-    if (card.weak || card.description.includes('弱体')) keywords.push(KEYWORD_DEFINITIONS.WEAK);
+    if (card.strength || card.description.includes('ムキムキ')) keywords.push(KEYWORD_DEFINITIONS.STRENGTH);
+    if (card.vulnerable || card.description.includes('びくびく')) keywords.push(KEYWORD_DEFINITIONS.VULNERABLE);
+    if (card.weak || card.description.includes('へろへろ')) keywords.push(KEYWORD_DEFINITIONS.WEAK);
     if (card.block || card.description.includes('ブロック')) keywords.push(KEYWORD_DEFINITIONS.BLOCK);
     if (card.draw || card.description.includes('引く')) keywords.push(KEYWORD_DEFINITIONS.DRAW);
     return keywords;
@@ -124,13 +124,16 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled }) => {
           desc = desc.replace(/ブロック(\d+)/g, `ブロック${card.block}`);
       }
       if (card.poison !== undefined) {
-          desc = desc.replace(/毒(\d+)/g, `毒${card.poison}`);
+          desc = desc.replace(/ドクドク(\d+)/g, `ドクドク${card.poison}`);
       }
       if (card.weak !== undefined) {
-          desc = desc.replace(/弱体(\d+)/g, `弱体${card.weak}`);
+          desc = desc.replace(/へろへろ(\d+)/g, `へろへろ${card.weak}`);
       }
       if (card.vulnerable !== undefined) {
-          desc = desc.replace(/脆弱(\d+)/g, `脆弱${card.vulnerable}`);
+          desc = desc.replace(/びくびく(\d+)/g, `びくびく${card.vulnerable}`);
+      }
+      if (card.strength !== undefined) {
+          desc = desc.replace(/ムキムキ(\d+)/g, `ムキムキ${card.strength}`);
       }
 
       return (

@@ -1,5 +1,4 @@
 
-
 import React, { useEffect, useState, useRef } from 'react';
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText } from '../types';
 import Card from './Card';
@@ -24,37 +23,37 @@ interface BattleSceneProps {
 }
 
 const POWER_DEFINITIONS: Record<string, {name: string, desc: string}> = {
-    WEAK: { name: "弱体", desc: "攻撃で与えるダメージが25%減少する。" },
-    VULNERABLE: { name: "脆弱", desc: "攻撃から受けるダメージが50%増加する。" },
-    POISON: { name: "毒", desc: "ターン終了時にHPダメージを受け、数値が1減る。" },
-    STRENGTH: { name: "筋力", desc: "攻撃ダメージがその数値分増加する。" },
-    DEXTERITY: { name: "敏捷性", desc: "ブロックを得るカードの効果がその数値分増加する。" },
-    ARTIFACT: { name: "アーティファクト", desc: "次に受けるデバフを無効化する。" },
-    INTANGIBLE: { name: "無形", desc: "受けるダメージとHP減少が1になる。" },
-    THORNS: { name: "トゲ", desc: "攻撃を受けた時、相手にその数値分のダメージを与える。" },
+    WEAK: { name: "へろへろ", desc: "攻撃で与えるダメージが25%減っちゃう。" },
+    VULNERABLE: { name: "びくびく", desc: "攻撃から受けるダメージが50%増えちゃう。" },
+    POISON: { name: "ドクドク", desc: "ターン終了時にHPダメージを受け、数値が1減る。" },
+    STRENGTH: { name: "ムキムキ", desc: "攻撃ダメージがその数値分アップ！" },
+    DEXTERITY: { name: "カチカチ", desc: "ブロックを得るカードの効果がその数値分アップ！" },
+    ARTIFACT: { name: "キラキラ", desc: "次に受ける悪い効果（デバフ）を無効化する。" },
+    INTANGIBLE: { name: "スケスケ", desc: "受けるダメージとHP減少が1になる。" },
+    THORNS: { name: "トゲトゲ", desc: "攻撃を受けた時、相手にその数値分のダメージを返す。" },
     METALLICIZE: { name: "金属化", desc: "ターン終了時、その数値分のブロックを得る。" },
-    REGEN: { name: "再生", desc: "ターン終了時、その数値分HPを回復し、数値が1減る。" },
-    STRENGTH_DOWN: { name: "筋力低下", desc: "ターン終了時、筋力が通常の値に戻る。" },
-    DEMON_FORM: { name: "悪魔化", desc: "ターン開始時、筋力を得る。" },
+    REGEN: { name: "じわじわ回復", desc: "ターン終了時、その数値分HPを回復し、数値が1減る。" },
+    STRENGTH_DOWN: { name: "ムキムキダウン", desc: "ターン終了時、ムキムキが通常の値に戻る。" },
+    DEMON_FORM: { name: "悪魔化", desc: "ターン開始時、ムキムキになる。" },
     ECHO_FORM: { name: "反響", desc: "各ターン、最初にプレイしたカードを2回使用する。" },
-    BARRICADE: { name: "バリケード", desc: "ターン開始時にブロックが消滅しなくなる。" },
-    NOXIOUS_FUMES: { name: "有毒ガス", desc: "ターン開始時、敵全体に毒を与える。" },
+    BARRICADE: { name: "バリケード", desc: "ターン開始時にブロックが消えなくなる。" },
+    NOXIOUS_FUMES: { name: "有毒ガス", desc: "ターン開始時、敵全体をドクドクにする。" },
     INFINITE_BLADES: { name: '無限の刃', desc: 'ターン開始時、手札にナイフを加える。' },
     AFTER_IMAGE: { name: '残像', desc: 'カードを使用する度、ブロック1を得る。' },
     THOUSAND_CUTS: { name: '千切れ', desc: 'カードを使用する度、敵全体にダメージを与える。' },
     TOOLS_OF_THE_TRADE: { name: '商売道具', desc: 'ターン開始時、1枚引いて1枚捨てる。' },
-    ENVENOM: { name: '猛毒', desc: '攻撃でダメージを与えた時、毒1を与える。' },
+    ENVENOM: { name: '猛毒', desc: '攻撃でダメージを与えた時、ドクドク1を与える。' },
     STATIC_DISCHARGE: { name: '静電放電', desc: '攻撃を受けた時、ランダムな敵にダメージを与える。' },
     BUFFER: { name: 'バッファー', desc: '次に受けるHPダメージを0にする。' },
     CREATIVE_AI: { name: '創造的AI', desc: 'ターン開始時、ランダムなパワーカードを加える。' },
     DEVA_FORM: { name: 'デバ化', desc: 'ターン開始時、エネルギーを得る。' },
     MASTER_REALITY: { name: '真なる理', desc: 'カードが生成された時、それをアップグレードする。' },
     BURST: { name: 'バースト', desc: '次にプレイするスキルカードが2回発動する。' },
-    DOUBLE_POISON: { name: '触媒', desc: '毒の効果を増幅させる。' },
-    LOSE_STRENGTH: { name: '筋力低下', desc: 'ターン終了時、筋力を失う。' },
+    DOUBLE_POISON: { name: '触媒', desc: 'ドクドクの効果を増幅させる。' },
+    LOSE_STRENGTH: { name: 'ムキムキダウン', desc: 'ターン終了時、ムキムキを失う。' },
     CORRUPTION: { name: '堕落', desc: 'スキルカードのコストが0になり、使用時に廃棄される。' },
     FEEL_NO_PAIN: { name: '無痛', desc: 'カードが廃棄される度、ブロックを得る。' },
-    RUPTURE: { name: '破裂', desc: 'HPを失った時、筋力を得る。' },
+    RUPTURE: { name: '破裂', desc: 'HPを失った時、ムキムキを得る。' },
     EVOLVE: { name: '進化', desc: '状態異常カードを引いた時、カードを引く。' },
     APOTHEOSIS: { name: '神格化', desc: 'デッキの全てのカードがアップグレードされる。' },
     ACCURACY: { name: '精度上昇', desc: 'ナイフのダメージが増加する。' },
@@ -252,22 +251,22 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             {/* Status Icons */}
                             <div className="flex flex-wrap gap-0.5 justify-center min-h-[14px]">
                                 {enemy.vulnerable > 0 && (
-                                    <div className="flex items-center bg-pink-900/80 rounded px-0.5 border border-pink-500/50 cursor-pointer" onClick={(e)=>{e.stopPropagation(); showInfo("脆弱", "攻撃から受けるダメージが50%増加。");}}>
+                                    <div className="flex items-center bg-pink-900/80 rounded px-0.5 border border-pink-500/50 cursor-pointer" onClick={(e)=>{e.stopPropagation(); showInfo("びくびく", "攻撃から受けるダメージが50%増加。");}}>
                                         <AlertCircle size={8} className="text-pink-300"/> <span className="text-[8px] ml-0.5 font-bold">{enemy.vulnerable}</span>
                                     </div>
                                 )}
                                 {enemy.weak > 0 && (
-                                    <div className="flex items-center bg-gray-700/80 rounded px-0.5 border border-gray-500/50 cursor-pointer" onClick={(e)=>{e.stopPropagation(); showInfo("弱体", "攻撃で与えるダメージが25%減少。");}}>
+                                    <div className="flex items-center bg-gray-700/80 rounded px-0.5 border border-gray-500/50 cursor-pointer" onClick={(e)=>{e.stopPropagation(); showInfo("へろへろ", "攻撃で与えるダメージが25%減少。");}}>
                                         <TrendingDown size={8} className="text-gray-300"/> <span className="text-[8px] ml-0.5 font-bold">{enemy.weak}</span>
                                     </div>
                                 )}
                                 {enemy.poison > 0 && (
-                                    <div className="flex items-center bg-green-900/80 rounded px-0.5 border border-green-500/50 cursor-pointer" onClick={(e)=>{e.stopPropagation(); showInfo("毒", "ターン終了時にHPダメージを受け、数値が1減る。");}}>
+                                    <div className="flex items-center bg-green-900/80 rounded px-0.5 border border-green-500/50 cursor-pointer" onClick={(e)=>{e.stopPropagation(); showInfo("ドクドク", "ターン終了時にHPダメージを受け、数値が1減る。");}}>
                                         <Droplets size={8} className="text-green-300"/> <span className="text-[8px] ml-0.5 font-bold">{enemy.poison}</span>
                                     </div>
                                 )}
                                 {enemy.artifact > 0 && (
-                                    <div className="flex items-center bg-yellow-900/80 rounded px-0.5 border border-yellow-500/50 cursor-pointer" onClick={(e)=>{e.stopPropagation(); showInfo("アーティファクト", "デバフを無効化する。");}}>
+                                    <div className="flex items-center bg-yellow-900/80 rounded px-0.5 border border-yellow-500/50 cursor-pointer" onClick={(e)=>{e.stopPropagation(); showInfo("キラキラ", "デバフを無効化する。");}}>
                                         <Hexagon size={8} className="text-yellow-200"/> <span className="text-[8px] ml-0.5 font-bold">{enemy.artifact}</span>
                                     </div>
                                 )}
@@ -339,7 +338,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         {player.strength !== 0 && (
                             <span 
                                 className={`flex items-center ${player.strength > 0 ? 'text-red-400' : 'text-gray-400'} text-[9px] font-bold border border-gray-700 px-1 rounded bg-black cursor-pointer`}
-                                onClick={() => showInfo("筋力", "攻撃カードのダメージを増加させる。")}
+                                onClick={() => showInfo("ムキムキ", "攻撃カードのダメージを増加させる。")}
                             >
                                 <Sword size={8} className="mr-0.5"/> {player.strength}
                             </span>

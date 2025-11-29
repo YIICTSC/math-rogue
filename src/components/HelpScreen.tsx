@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ArrowLeft, Book, Map, Sword, Brain, Flame, ShoppingBag, Skull, Gift, HelpCircle, BedDouble } from 'lucide-react';
 
@@ -120,27 +121,27 @@ const HelpScreen: React.FC<HelpScreenProps> = ({ onBack }) => {
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
                         <div>
-                            <span className="font-bold text-red-400">筋力 (Strength)</span>
+                            <span className="font-bold text-red-400">ムキムキ (Strength)</span>
                             <p className="text-xs text-gray-400">攻撃ダメージが数値分アップ。</p>
                         </div>
                         <div>
-                            <span className="font-bold text-blue-400">敏捷性 (Dexterity)</span>
+                            <span className="font-bold text-blue-400">カチカチ (Dexterity)</span>
                             <p className="text-xs text-gray-400">ブロック獲得量が数値分アップ。</p>
                         </div>
                         <div>
-                            <span className="font-bold text-pink-400">脆弱 (Vulnerable)</span>
+                            <span className="font-bold text-pink-400">びくびく (Vulnerable)</span>
                             <p className="text-xs text-gray-400">受けるダメージが50%増加。</p>
                         </div>
                         <div>
-                            <span className="font-bold text-gray-400">弱体 (Weak)</span>
+                            <span className="font-bold text-gray-400">へろへろ (Weak)</span>
                             <p className="text-xs text-gray-400">与えるダメージが25%減少。</p>
                         </div>
                         <div>
-                            <span className="font-bold text-green-500">毒 (Poison)</span>
+                            <span className="font-bold text-green-500">ドクドク (Poison)</span>
                             <p className="text-xs text-gray-400">ターン終了時にダメージ。数値が1減る。</p>
                         </div>
                         <div>
-                            <span className="font-bold text-orange-500">トゲ (Thorns)</span>
+                            <span className="font-bold text-orange-500">トゲトゲ (Thorns)</span>
                             <p className="text-xs text-gray-400">攻撃を受けると相手にダメージ。</p>
                         </div>
                         <div>
@@ -148,7 +149,7 @@ const HelpScreen: React.FC<HelpScreenProps> = ({ onBack }) => {
                             <p className="text-xs text-gray-400">使用するとその戦闘中はデッキから消滅。</p>
                         </div>
                         <div>
-                            <span className="font-bold text-yellow-500">アーティファクト</span>
+                            <span className="font-bold text-yellow-500">キラキラ (Artifact)</span>
                             <p className="text-xs text-gray-400">デバフを1回無効化。</p>
                         </div>
                     </div>
