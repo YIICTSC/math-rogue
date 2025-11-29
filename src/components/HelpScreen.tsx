@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ArrowLeft, Book, Map, Sword, Brain, Flame, ShoppingBag, Skull, Gift, HelpCircle, BedDouble } from 'lucide-react';
 
@@ -45,7 +46,7 @@ const HelpScreen: React.FC<HelpScreenProps> = ({ onBack }) => {
                     </h3>
                     <ul className="list-disc list-inside text-sm text-gray-300 space-y-2 mb-4">
                         <li><span className="font-bold text-white">エナジー:</span> カードを使うためのコスト。毎ターン回復します。</li>
-                        <li><span className="font-bold text-white">ブロック:</span> 敵の攻撃を防ぐ盾。ターン終了時に消えます。</li>
+                        <li><span className="font-bold text-white">バリア（ブロック）:</span> 敵の攻撃を防ぐ盾。ターン終了時に消えます。</li>
                         <li><span className="font-bold text-white">敵の意図:</span> 敵の頭上のアイコンを見て、攻撃を防ぐか攻めるか判断しましょう。</li>
                     </ul>
                     
@@ -86,33 +87,6 @@ const HelpScreen: React.FC<HelpScreenProps> = ({ onBack }) => {
                     </div>
                 </section>
 
-                {/* Map Icons */}
-                <section className="bg-gray-800 p-5 rounded border border-gray-700">
-                    <h3 className="text-lg font-bold text-blue-300 mb-4 border-b border-gray-600 pb-2 flex items-center">
-                        <Map className="mr-2" /> マップアイコン
-                    </h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs text-gray-300">
-                        <div className="flex items-center bg-black/30 p-2 rounded">
-                            <Sword size={16} className="mr-2 text-gray-400"/> 戦闘（通常）
-                        </div>
-                        <div className="flex items-center bg-black/30 p-2 rounded">
-                            <Skull size={16} className="mr-2 text-red-500"/> エリート（強敵・宝）
-                        </div>
-                        <div className="flex items-center bg-black/30 p-2 rounded">
-                            <Gift size={16} className="mr-2 text-yellow-500"/> 宝箱
-                        </div>
-                        <div className="flex items-center bg-black/30 p-2 rounded">
-                            <HelpCircle size={16} className="mr-2 text-blue-400"/> イベント
-                        </div>
-                        <div className="flex items-center bg-black/30 p-2 rounded">
-                            <ShoppingBag size={16} className="mr-2 text-yellow-600"/> ショップ
-                        </div>
-                        <div className="flex items-center bg-black/30 p-2 rounded">
-                            <BedDouble size={16} className="mr-2 text-green-500"/> 休憩所
-                        </div>
-                    </div>
-                </section>
-
                 {/* Keywords */}
                 <section className="bg-gray-800 p-5 rounded border border-gray-700">
                     <h3 className="text-lg font-bold text-green-400 mb-4 border-b border-gray-600 pb-2">
@@ -120,35 +94,31 @@ const HelpScreen: React.FC<HelpScreenProps> = ({ onBack }) => {
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
                         <div>
-                            <span className="font-bold text-red-400">筋力 (Strength)</span>
+                            <span className="font-bold text-red-400">モリモリ (筋力)</span>
                             <p className="text-xs text-gray-400">攻撃ダメージが数値分アップ。</p>
                         </div>
                         <div>
-                            <span className="font-bold text-blue-400">敏捷性 (Dexterity)</span>
-                            <p className="text-xs text-gray-400">ブロック獲得量が数値分アップ。</p>
-                        </div>
-                        <div>
-                            <span className="font-bold text-pink-400">脆弱 (Vulnerable)</span>
+                            <span className="font-bold text-pink-400">ボロボロ (脆弱)</span>
                             <p className="text-xs text-gray-400">受けるダメージが50%増加。</p>
                         </div>
                         <div>
-                            <span className="font-bold text-gray-400">弱体 (Weak)</span>
+                            <span className="font-bold text-gray-400">ヘロヘロ (弱体)</span>
                             <p className="text-xs text-gray-400">与えるダメージが25%減少。</p>
                         </div>
                         <div>
-                            <span className="font-bold text-green-500">毒 (Poison)</span>
+                            <span className="font-bold text-green-500">ドクドク (毒)</span>
                             <p className="text-xs text-gray-400">ターン終了時にダメージ。数値が1減る。</p>
                         </div>
                         <div>
-                            <span className="font-bold text-orange-500">トゲ (Thorns)</span>
+                            <span className="font-bold text-orange-500">チクチク (トゲ)</span>
                             <p className="text-xs text-gray-400">攻撃を受けると相手にダメージ。</p>
                         </div>
                         <div>
-                            <span className="font-bold text-gray-500">廃棄 (Exhaust)</span>
+                            <span className="font-bold text-gray-500">ポイ (廃棄)</span>
                             <p className="text-xs text-gray-400">使用するとその戦闘中はデッキから消滅。</p>
                         </div>
                         <div>
-                            <span className="font-bold text-yellow-500">アーティファクト</span>
+                            <span className="font-bold text-yellow-500">ガード (アーティファクト)</span>
                             <p className="text-xs text-gray-400">デバフを1回無効化。</p>
                         </div>
                     </div>

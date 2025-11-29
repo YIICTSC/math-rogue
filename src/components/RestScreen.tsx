@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Player, Card as ICard } from '../types';
 import Card from './Card';
-import { Flame, Hammer, ArrowRight, FlaskConical, Plus } from 'lucide-react';
+import { Flame, Hammer, ArrowRight, FlaskConical, Plus, Shuffle } from 'lucide-react';
 import { getUpgradedCard } from '../App';
 
 interface RestScreenProps {
@@ -65,6 +65,16 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       }
   };
 
+  const handleRandomSynthesis = () => {
+      if (player.deck.length < 2) return;
+      const shuffled = [...player.deck].sort(() => Math.random() - 0.5);
+      const c1 = shuffled[0];
+      const c2 = shuffled[1];
+      setSynthCards([c1, c2]);
+      setMode('PREVIEW_SYNTHESIS');
+      setMessage("ランダムに選ばれた2枚を合体させますか？");
+  };
+
   const confirmUpgrade = () => {
       if (selectedCard) {
           onUpgrade(selectedCard);
@@ -90,7 +100,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
           setMessage("どのカードを鍛える？");
       } else if (mode === 'PREVIEW_SYNTHESIS') {
           setMode('SYNTHESIS');
-          setSynthCards([]); // Clear selection to restart or keep? Let's clear for simplicity
+          setSynthCards([]); 
           setMessage("合体させたいカードを2枚選んでね。");
       }
   };
@@ -137,6 +147,14 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
 
             {(mode === 'UPGRADE' || mode === 'SYNTHESIS') && (
                 <div className="flex flex-col items-center flex-grow overflow-hidden">
+                     {mode === 'SYNTHESIS' && (
+                         <button 
+                            onClick={handleRandomSynthesis}
+                            className="mb-4 flex items-center bg-purple-900/50 hover:bg-purple-800/50 text-purple-200 px-4 py-2 rounded-full border border-purple-500 transition-colors text-sm"
+                         >
+                             <Shuffle size={14} className="mr-2" /> ランダムな2枚を選ぶ
+                         </button>
+                     )}
                      <div className="flex flex-wrap justify-center gap-4 overflow-y-auto w-full p-4 border-inner bg-gray-900/50 rounded custom-scrollbar">
                         {player.deck.filter(c => mode === 'SYNTHESIS' ? true : !c.upgraded).map(card => {
                             const isSelected = synthCards.some(s => s.id === card.id);
