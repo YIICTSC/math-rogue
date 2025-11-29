@@ -58,6 +58,10 @@ export interface Card {
   fatalMaxHp?: number;
   innate?: boolean;
   
+  // Special Mechanics
+  capture?: boolean; // If fatal, adds enemy as card to deck
+  textureRef?: string; // Seed/Name for generating PixelSprite on card
+  
   // Next Turn Effects
   nextTurnEnergy?: number;
   nextTurnDraw?: number;          

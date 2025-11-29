@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -64,6 +65,29 @@ export const getUpgradedCard = (card: ICard): ICard => {
     if (card.name === '限界突破' || card.name === 'LIMIT_BREAK') newCard.exhaust = false;
     
     return newCard;
+};
+
+const createCardFromEnemy = (enemy: Enemy): ICard => {
+    // Determine card stats based on enemy stats roughly
+    const isBoss = enemy.maxHp > 100;
+    
+    // Generic effect: Attack + Draw
+    // Damage scales with enemy max HP but capped
+    const dmg = Math.floor(enemy.maxHp * 0.3) + 2; 
+    
+    return {
+        id: `captured-${enemy.id}`,
+        name: enemy.name,
+        cost: 1,
+        type: CardType.ATTACK,
+        target: TargetType.ENEMY,
+        description: `${dmg}ダメージ。カードを1枚引く。`,
+        damage: dmg,
+        draw: 1,
+        rarity: isBoss ? 'LEGENDARY' : 'UNCOMMON',
+        textureRef: enemy.name, // Use name as texture seed for PixelSprite
+        exhaust: true // Consumable feel
+    };
 };
 
 const calculateScore = (state: GameState, victory: boolean): number => {
@@ -612,7 +636,7 @@ const App: React.FC = () => {
 
         } else if (node.type === NodeType.SHOP) {
             // Generate Shop
-            const keys = Object.keys(CARDS_LIBRARY).filter(k => !STATUS_CARDS[k] && !CURSE_CARDS[k] && !EVENT_CARDS[k] && k !== 'SHIV');
+            const keys = Object.keys(CARDS_LIBRARY).filter(k => !STATUS_CARDS[k] && !CURSE_CARDS[k] && !EVENT_CARDS[k] && k !== 'SHIV' && k !== 'CAPTURE_NET');
             const cards: ICard[] = [];
             for(let i=0; i<5; i++) {
                 const k = keys[Math.floor(Math.random() * keys.length)];
@@ -809,6 +833,13 @@ const App: React.FC = () => {
                          }
                          if (card.fatalMaxHp) { p.maxHp += card.fatalMaxHp!; p.currentHp += card.fatalMaxHp!; }
                          if (e.corpseExplosion) enemies.forEach(other => { if (other.id !== e.id) other.currentHp -= e.maxHp; });
+                         
+                         // CAPTURE LOGIC
+                         if (card.capture) {
+                             const capturedCard = createCardFromEnemy(e);
+                             p.deck.push(capturedCard);
+                             p.floatingText = { id: `cap-${Date.now()}`, text: "GET!", color: "text-amber-400", iconType: "zap" };
+                         }
                     }
                 });
               }
@@ -1878,7 +1909,7 @@ const App: React.FC = () => {
                             </div>
 
                             <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                <Terminal size={10}/> v2.0.1
+                                <Terminal size={10}/> v2.1.0
                             </button>
                         </div>
                     </div>
@@ -1890,36 +1921,30 @@ const App: React.FC = () => {
                 <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4" onClick={() => setShowDebugLog(false)}>
                     <div className="bg-gray-900 border-2 border-green-500 p-6 rounded-lg max-w-lg w-full shadow-[0_0_20px_rgba(34,197,94,0.3)]" onClick={e => e.stopPropagation()}>
                         <h2 className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2">
-                            System Update Log v2.0
+                            System Update Log v2.1
                         </h2>
                         <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                            <section>
+                                <h3 className="text-white font-bold mb-1">■ 飼育委員アップデート (Animal Caretaker)</h3>
+                                <ul className="list-disc pl-5 space-y-1">
+                                    <li>飼育委員を初期アンロックに変更（2人目の主人公）。</li>
+                                    <li>専用カード「捕獲網」を追加。敵を倒すとカード化してデッキに加えることが可能に。</li>
+                                    <li>捕獲した敵カードには、その敵のイラストが反映されます。</li>
+                                </ul>
+                            </section>
+                            <section>
+                                <h3 className="text-white font-bold mb-1">■ 敵・ビジュアル強化 (Enemies & Visuals)</h3>
+                                <ul className="list-disc pl-5 space-y-1">
+                                    <li>敵の種類を50種類以上に大幅増加。</li>
+                                    <li>敵のピクセルアート生成パターンを追加（蜘蛛、蛇、植物、炎、目玉など）。</li>
+                                </ul>
+                            </section>
                             <section>
                                 <h3 className="text-white font-bold mb-1">■ 新機能 (New Features)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
                                     <li><span className="text-yellow-400">1A1Dモード</span>: 攻撃1枚・防御1枚のみの極限デッキモード実装。</li>
                                     <li><span className="text-yellow-400">計算モード選択</span>: たし算、ひき算、わり算、ミックスモードを選択可能に。</li>
-                                    <li><span className="text-yellow-400">キャラクター選択</span>: クリア回数に応じて解放される9人のユニークキャラクター。</li>
                                     <li><span className="text-yellow-400">ランキング</span>: ローカル保存によるスコア・履歴閲覧機能。</li>
-                                    <li><span className="text-yellow-400">計算スキップ(Debug)</span>: タイトル10連打で計算問題をスキップ可能。</li>
-                                </ul>
-                            </section>
-                            
-                            <section>
-                                <h3 className="text-white font-bold mb-1">■ システム改善 (System)</h3>
-                                <ul className="list-disc pl-5 space-y-1">
-                                    <li>オートセーブ＆コンティニュー機能の実装。</li>
-                                    <li>遺産（Legacy Card）システム：敗北時にカードを1枚次へ継承可能。</li>
-                                    <li>オーディオエンジン強化：BGMの動的生成とSEの改善。</li>
-                                    <li>タイトル画面のUIレイアウト調整。</li>
-                                </ul>
-                            </section>
-
-                            <section>
-                                <h3 className="text-white font-bold mb-1">■ コンテンツ (Contents)</h3>
-                                <ul className="list-disc pl-5 space-y-1">
-                                    <li>新規カード・レリック・ポーションの大幅追加。</li>
-                                    <li>敵AIパターンの多様化とタイプ別行動ロジックの実装。</li>
-                                    <li>ドット絵（Pixel Art）生成エンジンの改良。</li>
                                 </ul>
                             </section>
                         </div>

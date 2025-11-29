@@ -1,4 +1,5 @@
 
+
 import { Card, CardType, TargetType, Relic, Potion, Character } from './types';
 
 export const INITIAL_HP = 75;
@@ -289,6 +290,8 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
   ...EVENT_CARDS,
   // SHIV (ナイフ) Added
   SHIV: { name: 'ナイフ', cost: 0, type: CardType.ATTACK, target: TargetType.ENEMY, description: '4ダメージ。廃棄。', damage: 4, exhaust: true, rarity: 'SPECIAL' },
+  // CAPTURE NET (Caretaker)
+  CAPTURE_NET: { name: '捕獲網', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '10ダメージ。これで倒すと敵をカード化してデッキに加える。廃棄。', damage: 10, capture: true, exhaust: true, rarity: 'SPECIAL' },
 
   // STARTER SET
   STRIKE: { name: 'えんぴつ攻撃', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '6ダメージを与える。', damage: 6, rarity: 'COMMON' },
@@ -465,6 +468,17 @@ export const CHARACTERS: Character[] = [
         imageData: `data:image/svg+xml;base64,${btoa(WARRIOR_SVG)}`
     },
     {
+        id: 'CARETAKER',
+        name: '飼育委員',
+        description: '動物と心を通わす。敵をカードにして仲間にできる。',
+        maxHp: 72,
+        gold: 100,
+        startingRelicId: 'WHISTLE',
+        color: 'amber',
+        deckTemplate: ['STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'CLOAK_AND_DAGGER', 'BLADE_DANCE', 'ACCURACY', 'CAPTURE_NET'],
+        imageData: `data:image/svg+xml;base64,${btoa(CARETAKER_SVG)}`
+    },
+    {
         id: 'ASSASSIN',
         name: '転校生',
         description: 'ミステリアスな転校生。ドクドク（悪口）や手数を操る。',
@@ -529,17 +543,6 @@ export const CHARACTERS: Character[] = [
         color: 'pink',
         deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'FEED', 'IRON_WAVE'],
         imageData: `data:image/svg+xml;base64,${btoa(CHEF_SVG)}`
-    },
-    {
-        id: 'CARETAKER',
-        name: '飼育委員',
-        description: '動物と心を通わす。0コストの攻撃カードを駆使する。',
-        maxHp: 72,
-        gold: 100,
-        startingRelicId: 'WHISTLE',
-        color: 'amber',
-        deckTemplate: ['STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'CLOAK_AND_DAGGER', 'BLADE_DANCE', 'ACCURACY'],
-        imageData: `data:image/svg+xml;base64,${btoa(CARETAKER_SVG)}`
     },
     {
         id: 'GARDENER',

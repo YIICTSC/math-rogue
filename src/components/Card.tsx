@@ -1,6 +1,8 @@
 
+
 import React, { useState, useRef } from 'react';
 import { Card as CardType, CardType as EnumCardType } from '../types';
+import PixelSprite from './PixelSprite';
 
 interface CardProps {
   card: CardType;
@@ -78,7 +80,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled }) => {
     return keywords;
   })();
 
-  const renderCardArt = (type: EnumCardType) => {
+  const renderCardArt = (card: CardType) => {
     const commonProps = {
       xmlns: "http://www.w3.org/2000/svg",
       viewBox: "0 0 16 16",
@@ -86,7 +88,13 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled }) => {
       shapeRendering: "crispEdges"
     };
 
-    if (type === EnumCardType.ATTACK) {
+    if (card.textureRef) {
+        return (
+            <PixelSprite seed={card.textureRef} name={card.textureRef} className="w-16 h-16 opacity-90 drop-shadow-md" size={16} />
+        );
+    }
+
+    if (card.type === EnumCardType.ATTACK) {
       return (
         <svg {...commonProps}>
           <path d="M10 3h2v2h-2z M8 5h2v2h-2z M6 7h2v2h-2z M4 9h2v2h-2z" fill="#E2E8F0" />
@@ -96,7 +104,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled }) => {
           <path d="M2 14h2v2h-2z" fill="#5F370E" />
         </svg>
       );
-    } else if (type === EnumCardType.SKILL) {
+    } else if (card.type === EnumCardType.SKILL) {
       return (
         <svg {...commonProps}>
            <path d="M3 2h10v6c0 4-5 7-5 7S3 12 3 8V2z" fill="#1E293B" />
@@ -184,7 +192,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled }) => {
 
       {/* Art */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-80 z-0">
-        {renderCardArt(card.type)}
+        {renderCardArt(card)}
       </div>
 
       {/* Description */}
@@ -194,6 +202,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled }) => {
             <div className="text-[7px] text-white leading-tight text-center whitespace-pre-wrap break-words w-full">
                 {renderDescription()}
                 {card.exhaust && <span className="text-gray-400 block font-bold text-[6px] mt-0.5">[廃棄]</span>}
+                {card.capture && <span className="text-amber-400 block font-bold text-[6px] mt-0.5">[捕獲]</span>}
             </div>
         </div>
         <div className="text-[7px] text-center mt-0.5 text-white/60 font-mono tracking-tighter">
