@@ -2,22 +2,23 @@
 import React, { useState } from 'react';
 import { Player, Card as ICard } from '../types';
 import Card from './Card';
-import { Flame, Hammer, ArrowRight, FlaskConical, Plus, Shuffle } from 'lucide-react';
+import { Flame, Hammer, ArrowRight, FlaskConical, Plus, Shuffle, Check } from 'lucide-react';
 import { getUpgradedCard } from '../App';
 
 interface RestScreenProps {
   player: Player;
   onRest: () => void;
   onUpgrade: (card: ICard) => void;
-  onSynthesize: (c1: ICard, c2: ICard) => void;
+  onSynthesize: (c1: ICard, c2: ICard) => ICard;
   onLeave: () => void;
 }
 
 const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSynthesize, onLeave }) => {
-  const [mode, setMode] = useState<'CHOICE' | 'UPGRADE' | 'SYNTHESIS' | 'PREVIEW_UPGRADE' | 'PREVIEW_SYNTHESIS' | 'DONE'>('CHOICE');
+  const [mode, setMode] = useState<'CHOICE' | 'UPGRADE' | 'SYNTHESIS' | 'PREVIEW_UPGRADE' | 'PREVIEW_SYNTHESIS' | 'RESULT' | 'DONE'>('CHOICE');
   const [message, setMessage] = useState("静かな教室を見つけた。休憩できそうだ...");
   const [selectedCard, setSelectedCard] = useState<ICard | null>(null);
   const [synthCards, setSynthCards] = useState<ICard[]>([]);
+  const [resultCard, setResultCard] = useState<ICard | null>(null);
 
   const healAmount = Math.floor(player.maxHp * 0.3);
 
@@ -86,8 +87,9 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
 
   const confirmSynthesize = () => {
       if (synthCards.length === 2) {
-          onSynthesize(synthCards[0], synthCards[1]);
-          setMode('DONE');
+          const result = onSynthesize(synthCards[0], synthCards[1]);
+          setResultCard(result);
+          setMode('RESULT');
           setMessage("カードが融合し、新たな力が生まれた！");
           setSynthCards([]);
       }
@@ -225,6 +227,20 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                             戻る
                         </button>
                     </div>
+                </div>
+            )}
+
+            {mode === 'RESULT' && resultCard && (
+                <div className="flex flex-col items-center animate-in zoom-in duration-300">
+                    <div className="scale-110 mb-8">
+                        <Card card={resultCard} onClick={() => {}} disabled={false} />
+                    </div>
+                    <button 
+                        onClick={() => { setMode('DONE'); setResultCard(null); }}
+                        className="bg-purple-600 hover:bg-purple-500 text-white px-8 py-3 rounded text-xl font-bold border-2 border-white shadow-lg flex items-center"
+                    >
+                        <Check className="mr-2" /> OK
+                    </button>
                 </div>
             )}
 

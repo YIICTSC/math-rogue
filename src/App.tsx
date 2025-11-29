@@ -1603,10 +1603,12 @@ const App: React.FC = () => {
       const newVulnerable = sum('vulnerable');
       const newSelfDamage = sum('selfDamage');
       const newStrength = sum('strength');
-      const newPlayCopies = sum('playCopies'); // Summing number of times
+      const newPlayCopies = sum('playCopies'); // Summing additional copies
       const newPromptsDiscard = sum('promptsDiscard');
       const newNextTurnEnergy = sum('nextTurnEnergy');
       const newNextTurnDraw = sum('nextTurnDraw');
+      const newStrengthScaling = sum('strengthScaling');
+      const newPoisonMultiplier = sum('poisonMultiplier');
 
       // Booleans (OR logic)
       const newExhaust = c1.exhaust || c2.exhaust;
@@ -1616,21 +1618,40 @@ const App: React.FC = () => {
       const newDoubleStrength = c1.doubleStrength || c2.doubleStrength;
       const newUpgradeHand = c1.upgradeHand || c2.upgradeHand;
       const newShuffleHandToDraw = c1.shuffleHandToDraw || c2.shuffleHandToDraw;
+      // If either card is unplayable (e.g. Curse), the result is unplayable to avoid exploit
+      const newUnplayable = c1.unplayable || c2.unplayable;
 
-      // Type determination
+      // Target determination: ALL > RANDOM > ENEMY > SELF
+      let newTarget = TargetType.SELF;
+      if (c1.target === TargetType.ALL_ENEMIES || c2.target === TargetType.ALL_ENEMIES) newTarget = TargetType.ALL_ENEMIES;
+      else if (c1.target === TargetType.RANDOM_ENEMY || c2.target === TargetType.RANDOM_ENEMY) newTarget = TargetType.RANDOM_ENEMY;
+      else if (c1.target === TargetType.ENEMY || c2.target === TargetType.ENEMY) newTarget = TargetType.ENEMY;
+      
+      // Type determination: ATTACK > POWER > SKILL (Generally aggressive > passive)
       const newType = (c1.type === CardType.ATTACK || c2.type === CardType.ATTACK) ? CardType.ATTACK : 
                       (c1.type === CardType.POWER || c2.type === CardType.POWER) ? CardType.POWER : CardType.SKILL;
 
-      // Target determination
-      let newTarget = TargetType.SELF;
-      if (c1.target === TargetType.ALL_ENEMIES || c2.target === TargetType.ALL_ENEMIES) newTarget = TargetType.ALL_ENEMIES;
-      else if (c1.target === TargetType.ENEMY || c2.target === TargetType.ENEMY) newTarget = TargetType.ENEMY;
-      else if (c1.target === TargetType.RANDOM_ENEMY || c2.target === TargetType.RANDOM_ENEMY) newTarget = TargetType.RANDOM_ENEMY;
-      else newTarget = TargetType.SELF;
+      // ApplyPower Logic
+      let newApplyPower = undefined;
+      if (c1.applyPower && !c2.applyPower) newApplyPower = c1.applyPower;
+      else if (!c1.applyPower && c2.applyPower) newApplyPower = c2.applyPower;
+      else if (c1.applyPower && c2.applyPower) {
+          // If IDs match, sum amounts.
+          if (c1.applyPower.id === c2.applyPower.id) {
+              newApplyPower = { id: c1.applyPower.id, amount: c1.applyPower.amount + c2.applyPower.amount };
+          } else {
+              // If conflict, pick based on Rarity (roughly) or arbitrary. 
+              // Let's pick the one from the higher cost card, or random.
+              newApplyPower = c1.cost > c2.cost ? c1.applyPower : c2.applyPower;
+          }
+      }
 
       // Description generation
       let parts = [];
-      if (newDamage > 0) parts.push(`${newDamage}ダメージ`);
+      if (newTarget === TargetType.ALL_ENEMIES) parts.push("全体");
+      if (newTarget === TargetType.RANDOM_ENEMY) parts.push("ランダム");
+      
+      if (newDamage > 0) parts.push(`${newDamage}ダメ`);
       if (newPlayCopies > 0) parts.push(`${newPlayCopies + 1}回攻撃`);
       if (newBlock > 0) parts.push(`ブロック${newBlock}`);
       if (newPoison > 0) parts.push(`毒${newPoison}`);
@@ -1649,9 +1670,17 @@ const App: React.FC = () => {
       if (newDoubleBlock) parts.push(`ブロック2倍`);
       if (newDoubleStrength) parts.push(`筋力2倍`);
       if (newUpgradeHand) parts.push(`手札強化`);
+      if (newStrengthScaling > 0) parts.push(`筋力効果${newStrengthScaling + 1}倍`);
+      if (newPoisonMultiplier > 0) parts.push(`毒${newPoisonMultiplier}倍`);
       
       if (newExhaust) parts.push(`廃棄`);
       if (newInnate) parts.push(`初期手札`);
+      if (newUnplayable) parts.push(`使用不可`);
+      
+      // If we have applyPower, try to describe it simply
+      if (newApplyPower) {
+          parts.push(`${newApplyPower.id}(${newApplyPower.amount})`);
+      }
 
       const newDesc = parts.join('。') + '。';
 
@@ -1677,16 +1706,24 @@ const App: React.FC = () => {
           promptsDiscard: newPromptsDiscard > 0 ? newPromptsDiscard : undefined,
           nextTurnEnergy: newNextTurnEnergy > 0 ? newNextTurnEnergy : undefined,
           nextTurnDraw: newNextTurnDraw > 0 ? newNextTurnDraw : undefined,
+          strengthScaling: newStrengthScaling > 0 ? newStrengthScaling : undefined,
+          poisonMultiplier: newPoisonMultiplier > 0 ? newPoisonMultiplier : undefined,
           
           exhaust: newExhaust,
           innate: newInnate,
+          unplayable: newUnplayable,
           lifesteal: newLifesteal,
           doubleBlock: newDoubleBlock,
           doubleStrength: newDoubleStrength,
           upgradeHand: newUpgradeHand,
           shuffleHandToDraw: newShuffleHandToDraw,
+          applyPower: newApplyPower,
       };
 
+      // Return the new card to the caller (RestScreen) instead of updating state directly here if we want to show preview.
+      // But currently App.tsx manages state. We need to update state here.
+      // We can return the card object so RestScreen can display it.
+      
       setGameState(prev => ({
           ...prev,
           player: {
@@ -1694,6 +1731,8 @@ const App: React.FC = () => {
               deck: [...prev.player.deck.filter(c => c.id !== c1.id && c.id !== c2.id), newCard]
           }
       }));
+      
+      return newCard; // Return for UI display
   };
 
   // --- Render ---
