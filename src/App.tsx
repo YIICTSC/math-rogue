@@ -1578,8 +1578,8 @@ const App: React.FC = () => {
 
   const handleSynthesizeCard = (c1: ICard, c2: ICard) => {
       // Naming Logic: 2-4 chars from start of C1 + 2-4 chars from end of C2
-      const len1 = Math.floor(Math.random() * 3) + 2; // 2 to 4
-      const len2 = Math.floor(Math.random() * 3) + 2; // 2 to 4
+      const len1 = Math.floor(Math.random() * 3) + 2; 
+      const len2 = Math.floor(Math.random() * 3) + 2; 
       
       const part1 = c1.name.substring(0, Math.min(len1, c1.name.length));
       const part2 = c2.name.substring(Math.max(0, c2.name.length - len2));
@@ -1589,29 +1589,66 @@ const App: React.FC = () => {
       // Cost is the higher of the two
       const newCost = Math.max(c1.cost, c2.cost);
 
-      const newDamage = (c1.damage || 0) + (c2.damage || 0);
-      const newBlock = (c1.block || 0) + (c2.block || 0);
-      const newDraw = (c1.draw || 0) + (c2.draw || 0);
-      const newEnergy = (c1.energy || 0) + (c2.energy || 0);
-      const newHeal = (c1.heal || 0) + (c2.heal || 0);
-      const newPoison = (c1.poison || 0) + (c2.poison || 0);
-      const newWeak = (c1.weak || 0) + (c2.weak || 0);
-      const newVulnerable = (c1.vulnerable || 0) + (c2.vulnerable || 0);
-      const newSelfDamage = (c1.selfDamage || 0) + (c2.selfDamage || 0);
+      // Helper to sum properties
+      const sum = (k: keyof ICard) => ((c1[k] as number) || 0) + ((c2[k] as number) || 0);
 
+      const newDamage = sum('damage');
+      const newBlock = sum('block');
+      const newDraw = sum('draw');
+      const newEnergy = sum('energy');
+      const newHeal = sum('heal');
+      const newPoison = sum('poison');
+      const newWeak = sum('weak');
+      const newVulnerable = sum('vulnerable');
+      const newSelfDamage = sum('selfDamage');
+      const newStrength = sum('strength');
+      const newPlayCopies = sum('playCopies'); // Summing number of times
+      const newPromptsDiscard = sum('promptsDiscard');
+      const newNextTurnEnergy = sum('nextTurnEnergy');
+      const newNextTurnDraw = sum('nextTurnDraw');
+
+      // Booleans (OR logic)
       const newExhaust = c1.exhaust || c2.exhaust;
       const newInnate = c1.innate || c2.innate;
+      const newLifesteal = c1.lifesteal || c2.lifesteal;
+      const newDoubleBlock = c1.doubleBlock || c2.doubleBlock;
+      const newDoubleStrength = c1.doubleStrength || c2.doubleStrength;
+      const newUpgradeHand = c1.upgradeHand || c2.upgradeHand;
+      const newShuffleHandToDraw = c1.shuffleHandToDraw || c2.shuffleHandToDraw;
 
+      // Type determination
+      const newType = (c1.type === CardType.ATTACK || c2.type === CardType.ATTACK) ? CardType.ATTACK : 
+                      (c1.type === CardType.POWER || c2.type === CardType.POWER) ? CardType.POWER : CardType.SKILL;
+
+      // Target determination
+      let newTarget = TargetType.SELF;
+      if (c1.target === TargetType.ALL_ENEMIES || c2.target === TargetType.ALL_ENEMIES) newTarget = TargetType.ALL_ENEMIES;
+      else if (c1.target === TargetType.ENEMY || c2.target === TargetType.ENEMY) newTarget = TargetType.ENEMY;
+      else if (c1.target === TargetType.RANDOM_ENEMY || c2.target === TargetType.RANDOM_ENEMY) newTarget = TargetType.RANDOM_ENEMY;
+      else newTarget = TargetType.SELF;
+
+      // Description generation
       let parts = [];
       if (newDamage > 0) parts.push(`${newDamage}ダメージ`);
+      if (newPlayCopies > 0) parts.push(`${newPlayCopies + 1}回攻撃`);
       if (newBlock > 0) parts.push(`ブロック${newBlock}`);
       if (newPoison > 0) parts.push(`毒${newPoison}`);
       if (newWeak > 0) parts.push(`弱体${newWeak}`);
       if (newVulnerable > 0) parts.push(`脆弱${newVulnerable}`);
+      if (newStrength > 0) parts.push(`筋力${newStrength}`);
       if (newHeal > 0) parts.push(`HP${newHeal}回復`);
       if (newDraw > 0) parts.push(`${newDraw}枚引く`);
       if (newEnergy > 0) parts.push(`E${newEnergy}得る`);
+      if (newNextTurnEnergy > 0) parts.push(`次E${newNextTurnEnergy}`);
+      if (newNextTurnDraw > 0) parts.push(`次引${newNextTurnDraw}`);
       if (newSelfDamage > 0) parts.push(`自傷${newSelfDamage}`);
+      if (newPromptsDiscard > 0) parts.push(`${newPromptsDiscard}枚捨てる`);
+      
+      if (newLifesteal) parts.push(`吸収`);
+      if (newDoubleBlock) parts.push(`ブロック2倍`);
+      if (newDoubleStrength) parts.push(`筋力2倍`);
+      if (newUpgradeHand) parts.push(`手札強化`);
+      
       if (newExhaust) parts.push(`廃棄`);
       if (newInnate) parts.push(`初期手札`);
 
@@ -1620,7 +1657,8 @@ const App: React.FC = () => {
       const newCard: ICard = {
           id: `synth-${Date.now()}`,
           name: newName,
-          type: c1.type === CardType.ATTACK || c2.type === CardType.ATTACK ? CardType.ATTACK : CardType.SKILL,
+          type: newType,
+          target: newTarget,
           cost: newCost,
           description: newDesc,
           rarity: 'SPECIAL',
@@ -1633,8 +1671,19 @@ const App: React.FC = () => {
           weak: newWeak > 0 ? newWeak : undefined,
           vulnerable: newVulnerable > 0 ? newVulnerable : undefined,
           selfDamage: newSelfDamage > 0 ? newSelfDamage : undefined,
+          strength: newStrength > 0 ? newStrength : undefined,
+          playCopies: newPlayCopies > 0 ? newPlayCopies : undefined,
+          promptsDiscard: newPromptsDiscard > 0 ? newPromptsDiscard : undefined,
+          nextTurnEnergy: newNextTurnEnergy > 0 ? newNextTurnEnergy : undefined,
+          nextTurnDraw: newNextTurnDraw > 0 ? newNextTurnDraw : undefined,
+          
           exhaust: newExhaust,
           innate: newInnate,
+          lifesteal: newLifesteal,
+          doubleBlock: newDoubleBlock,
+          doubleStrength: newDoubleStrength,
+          upgradeHand: newUpgradeHand,
+          shuffleHandToDraw: newShuffleHandToDraw,
       };
 
       setGameState(prev => ({
