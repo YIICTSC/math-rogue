@@ -9,11 +9,11 @@ interface CardProps {
 }
 
 const KEYWORD_DEFINITIONS: Record<string, { title: string; desc: string }> = {
-  EXHAUST: { title: 'ポイ（廃棄）', desc: '使うと、この戦闘中はデッキから無くなるよ。' },
-  STRENGTH: { title: 'モリモリ（筋力）', desc: '攻撃の威力がその数だけアップするよ。' },
-  VULNERABLE: { title: 'ボロボロ（脆弱）', desc: '攻撃から受けるダメージが50%増えちゃう。' },
-  WEAK: { title: 'ヘロヘロ（弱体）', desc: '攻撃で与えるダメージが25%減っちゃう。' },
-  BLOCK: { title: 'バリア（ブロック）', desc: '次のターンまで、敵からのダメージを防ぐよ。' },
+  EXHAUST: { title: '廃棄', desc: '使用後、この戦闘中はデッキから除外される。' },
+  STRENGTH: { title: '筋力', desc: '攻撃ダメージがその数値分増加する。' },
+  VULNERABLE: { title: '脆弱', desc: '攻撃から受けるダメージが50%増加する。' },
+  WEAK: { title: '弱体', desc: '攻撃で与えるダメージが25%減少する。' },
+  BLOCK: { title: 'ブロック', desc: '次のターンまで、敵からのダメージを防ぐ。' },
   DRAW: { title: 'ドロー', desc: '山札からカードを引く。' },
 };
 
@@ -69,11 +69,11 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled }) => {
 
   const activeKeywords = (() => {
     const keywords = [];
-    if (card.exhaust || card.description.includes('ポイ')) keywords.push(KEYWORD_DEFINITIONS.EXHAUST);
-    if (card.strength || card.description.includes('モリモリ')) keywords.push(KEYWORD_DEFINITIONS.STRENGTH);
-    if (card.vulnerable || card.description.includes('ボロボロ')) keywords.push(KEYWORD_DEFINITIONS.VULNERABLE);
-    if (card.weak || card.description.includes('ヘロヘロ')) keywords.push(KEYWORD_DEFINITIONS.WEAK);
-    if (card.block || card.description.includes('バリア')) keywords.push(KEYWORD_DEFINITIONS.BLOCK);
+    if (card.exhaust) keywords.push(KEYWORD_DEFINITIONS.EXHAUST);
+    if (card.strength || card.description.includes('筋力')) keywords.push(KEYWORD_DEFINITIONS.STRENGTH);
+    if (card.vulnerable || card.description.includes('脆弱')) keywords.push(KEYWORD_DEFINITIONS.VULNERABLE);
+    if (card.weak || card.description.includes('弱体')) keywords.push(KEYWORD_DEFINITIONS.WEAK);
+    if (card.block || card.description.includes('ブロック')) keywords.push(KEYWORD_DEFINITIONS.BLOCK);
     if (card.draw || card.description.includes('引く')) keywords.push(KEYWORD_DEFINITIONS.DRAW);
     return keywords;
   })();
@@ -121,20 +121,16 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled }) => {
           desc = desc.replace(/(\d+)ダメージ/g, `${card.damage}ダメージ`);
       }
       if (card.block !== undefined) {
-          desc = desc.replace(/バリア(\d+)/g, `バリア${card.block}`);
+          desc = desc.replace(/ブロック(\d+)/g, `ブロック${card.block}`);
       }
       if (card.poison !== undefined) {
-          desc = desc.replace(/ドクドク(\d+)/g, `ドクドク${card.poison}`);
+          desc = desc.replace(/毒(\d+)/g, `毒${card.poison}`);
       }
       if (card.weak !== undefined) {
-          desc = desc.replace(/ヘロヘロ(\d+)/g, `ヘロヘロ${card.weak}`);
+          desc = desc.replace(/弱体(\d+)/g, `弱体${card.weak}`);
       }
       if (card.vulnerable !== undefined) {
-          desc = desc.replace(/ボロボロ(\d+)/g, `ボロボロ${card.vulnerable}`);
-      }
-      if (card.strength !== undefined && card.type !== EnumCardType.POWER) {
-          desc = desc.replace(/モリモリ\((\d+)\)/g, `モリモリ(${card.strength})`);
-          desc = desc.replace(/モリモリ(\d+)/g, `モリモリ${card.strength}`);
+          desc = desc.replace(/脆弱(\d+)/g, `脆弱${card.vulnerable}`);
       }
 
       return (
@@ -193,7 +189,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled }) => {
         <div className="bg-black/60 p-1 rounded border border-white/10 backdrop-blur-[1px] w-full min-h-[2.5rem] flex items-center justify-center flex-col">
             <div className="text-[8px] text-white leading-tight text-center whitespace-pre-wrap">
                 {renderDescription()}
-                {card.exhaust && <span className="text-gray-400 block font-bold text-[7px] mt-0.5">[ポイ]</span>}
+                {card.exhaust && <span className="text-gray-400 block font-bold text-[7px] mt-0.5">[廃棄]</span>}
             </div>
         </div>
         <div className="text-[8px] text-center mt-1 text-white/60 font-mono tracking-tighter">
