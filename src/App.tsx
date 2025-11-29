@@ -1835,7 +1835,7 @@ const App: React.FC = () => {
             
             {gameState.screen === GameScreen.START_MENU && (
                 <div className="w-full h-full bg-gray-900 flex items-center justify-center">
-                    <div className="text-center p-8">
+                    <div className="text-center p-8 w-full flex flex-col items-center">
                         <h1 
                             className="text-5xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-b from-purple-400 to-blue-600 mb-2 font-bold animate-pulse tracking-widest leading-tight cursor-pointer select-none"
                             onClick={handleTitleClick}
@@ -1849,32 +1849,36 @@ const App: React.FC = () => {
                         )}
                         {!isMathDebugSkipped && <div className="mb-8 h-6"></div>}
 
-                        <p className="text-gray-400 mb-12 text-sm">Act {gameState.act} / Floor {gameState.floor}</p>
-                        <div className="flex flex-col gap-4 items-center">
+                        {/* Buttons Container */}
+                        <div className="flex flex-col gap-3 items-center w-full max-w-[280px]">
                             {hasSave && (
-                                <button onClick={continueGame} className="bg-blue-900 text-white px-8 py-3 text-lg font-bold border-4 border-blue-500 hover:bg-blue-800 cursor-pointer w-64 flex items-center justify-center">
-                                    <Play className="mr-2" /> つづきから
+                                <button onClick={continueGame} className="w-full bg-blue-900 text-white py-3 px-4 text-lg font-bold border-2 border-blue-400 hover:bg-blue-800 cursor-pointer flex items-center justify-center shadow-lg relative group overflow-hidden">
+                                    <div className="absolute inset-0 bg-blue-600 opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                                    <Play className="mr-2 fill-current" /> つづきから
                                 </button>
                             )}
-                            <button onClick={startGame} disabled={isLoading} className="bg-white text-black px-8 py-3 text-lg font-bold border-4 border-gray-500 hover:bg-gray-200 cursor-pointer w-64">
+                            <button onClick={startGame} disabled={isLoading} className="w-full bg-gray-100 text-black py-3 px-4 text-lg font-bold border-b-4 border-r-4 border-gray-500 hover:bg-white hover:border-gray-400 hover:translate-x-[1px] hover:translate-y-[1px] active:border-0 active:translate-y-[4px] active:translate-x-[4px] transition-all cursor-pointer shadow-lg flex items-center justify-center">
                                 {isLoading ? "生成中..." : "冒険を始める"}
                             </button>
                             
-                            <button onClick={startChallengeGame} disabled={isLoading} className="bg-red-900 text-white px-8 py-2 text-sm font-bold border-2 border-red-500 hover:bg-red-800 cursor-pointer w-64 flex items-center justify-center">
-                                <Swords className="mr-2" size={16}/> 1A1Dモード
+                            <button onClick={startChallengeGame} disabled={isLoading} className="w-full bg-red-900/80 text-red-100 py-2 px-4 text-sm font-bold border border-red-500 hover:bg-red-800 cursor-pointer flex items-center justify-center mb-2 shadow-md hover:shadow-red-900/50">
+                                <Swords className="mr-2" size={16}/> 1A1Dモード (高難易度)
                             </button>
 
-                            <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.COMPENDIUM }))} className="bg-gray-800 text-amber-500 px-8 py-2 text-sm font-bold border-2 border-amber-600 hover:bg-gray-700 cursor-pointer w-64 flex items-center justify-center">
-                                <BookOpen className="mr-2" size={16}/> カード図鑑
-                            </button>
-                            <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.RANKING }))} className="bg-gray-800 text-green-500 px-8 py-2 text-sm font-bold border-2 border-green-600 hover:bg-gray-700 cursor-pointer w-64 flex items-center justify-center">
-                                <Trophy className="mr-2" size={16}/> 記録を見る
-                            </button>
-                            <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.HELP }))} className="bg-gray-800 text-gray-400 px-8 py-2 text-sm font-bold border-2 border-gray-600 hover:bg-gray-700 cursor-pointer w-64 flex items-center justify-center">
-                                <HelpCircle className="mr-2" size={16}/> 遊び方
-                            </button>
-                            <button onClick={() => setShowDebugLog(true)} className="bg-gray-900 text-gray-500 text-xs px-4 py-1 border border-gray-700 hover:text-white hover:border-gray-500 mt-4 cursor-pointer flex items-center justify-center">
-                                <Terminal className="mr-2" size={12}/> Update Info (Debug)
+                            <div className="flex gap-2 w-full justify-between">
+                                <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.COMPENDIUM }))} className="flex-1 bg-gray-800 text-amber-500 py-2 text-[10px] font-bold border border-gray-600 hover:border-amber-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
+                                    <BookOpen className="mb-1" size={18}/> 図鑑
+                                </button>
+                                <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.RANKING }))} className="flex-1 bg-gray-800 text-green-500 py-2 text-[10px] font-bold border border-gray-600 hover:border-green-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
+                                    <Trophy className="mb-1" size={18}/> 記録
+                                </button>
+                                <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.HELP }))} className="flex-1 bg-gray-800 text-blue-400 py-2 text-[10px] font-bold border border-gray-600 hover:border-blue-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
+                                    <HelpCircle className="mb-1" size={18}/> 遊び方
+                                </button>
+                            </div>
+
+                            <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
+                                <Terminal size={10}/> v2.0.1
                             </button>
                         </div>
                     </div>
@@ -1906,6 +1910,7 @@ const App: React.FC = () => {
                                     <li>オートセーブ＆コンティニュー機能の実装。</li>
                                     <li>遺産（Legacy Card）システム：敗北時にカードを1枚次へ継承可能。</li>
                                     <li>オーディオエンジン強化：BGMの動的生成とSEの改善。</li>
+                                    <li>タイトル画面のUIレイアウト調整。</li>
                                 </ul>
                             </section>
 
