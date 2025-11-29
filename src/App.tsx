@@ -228,6 +228,10 @@ const App: React.FC = () => {
   const [legacyCardSelected, setLegacyCardSelected] = useState<boolean>(false);
   const [isChallengeSetup, setIsChallengeSetup] = useState<boolean>(false);
   const [showDebugLog, setShowDebugLog] = useState<boolean>(false);
+  
+  // Debug Logic
+  const [isMathDebugSkipped, setIsMathDebugSkipped] = useState<boolean>(false);
+  const [titleClickCount, setTitleClickCount] = useState<number>(0);
 
   // Shop & Event
   const [shopCards, setShopCards] = useState<ICard[]>([]);
@@ -268,7 +272,20 @@ const App: React.FC = () => {
     setUnlockedCardNames(unlocked);
     setHasSave(storageService.hasSaveFile());
     setClearCount(storageService.getClearCount());
+    setIsMathDebugSkipped(storageService.getDebugMathSkip());
   }, []);
+
+  const handleTitleClick = () => {
+      const next = titleClickCount + 1;
+      setTitleClickCount(next);
+      if (next >= 10) {
+          const newState = !isMathDebugSkipped;
+          setIsMathDebugSkipped(newState);
+          storageService.saveDebugMathSkip(newState);
+          setTitleClickCount(0);
+          audioService.playSound('select');
+      }
+  };
 
   // --- Start Player Turn ---
   const startPlayerTurn = () => {
@@ -1167,60 +1184,6 @@ const App: React.FC = () => {
       });
   };
 
-  // --- Battle End Check ---
-  useEffect(() => {
-    if (gameState.screen === GameScreen.BATTLE) {
-        if (gameState.enemies.length === 0) {
-            audioService.stopBGM();
-            if (gameState.act === 4) {
-                 audioService.playSound('win');
-                 setGameState(prev => ({ ...prev, screen: GameScreen.ENDING }));
-                 recordScore(true);
-                 storageService.incrementClearCount();
-            } else {
-                 setGameState(prev => ({ ...prev, screen: GameScreen.MATH_CHALLENGE }));
-            }
-        } else if (gameState.player.currentHp <= 0) {
-            if (gameState.player.relics.find(r => r.id === 'LIZARD_TAIL')) {
-                audioService.playSound('block');
-                setGameState(prev => ({
-                    ...prev,
-                    narrativeLog: [...prev.narrativeLog, "トカゲの尻尾が身代わりになった！"],
-                    player: {
-                        ...prev.player,
-                        currentHp: Math.floor(prev.player.maxHp / 2),
-                        relics: prev.player.relics.filter(r => r.id !== 'LIZARD_TAIL'),
-                        floatingText: { id: `revive-${Date.now()}`, text: "REVIVED!", color: "text-green-400", iconType: "heart" }
-                    }
-                }));
-                setTurnLog("復活！");
-            } else if (gameState.player.potions.find(p => p.templateId === 'GHOST_IN_JAR')) {
-                audioService.playSound('block');
-                const revivePotion = gameState.player.potions.find(p => p.templateId === 'GHOST_IN_JAR');
-                setGameState(prev => ({
-                    ...prev,
-                    narrativeLog: [...prev.narrativeLog, "お守りが発動した！"],
-                    player: {
-                        ...prev.player,
-                        currentHp: Math.floor(prev.player.maxHp * 0.1),
-                        potions: prev.player.potions.filter(p => p.id !== revivePotion?.id),
-                        powers: { ...prev.player.powers, 'INTANGIBLE': (prev.player.powers['INTANGIBLE'] || 0) + 1 },
-                        floatingText: { id: `revive-${Date.now()}`, text: "GHOST!", color: "text-gray-400", iconType: "heart" }
-                    }
-                }));
-                setTurnLog("幽霊化！");
-            } else {
-                audioService.playSound('lose');
-                audioService.stopBGM();
-                recordScore(false);
-                storageService.clearSave();
-                setLegacyCardSelected(false);
-                setGameState(prev => ({ ...prev, screen: GameScreen.GAME_OVER }));
-            }
-        }
-    }
-  }, [gameState.enemies, gameState.player.currentHp, gameState.screen]);
-
   const handleMathChallengeComplete = (correctCount: number) => {
       audioService.playSound('win');
       
@@ -1269,6 +1232,64 @@ const App: React.FC = () => {
           rewards: rewards
       }));
   };
+
+  // --- Battle End Check ---
+  useEffect(() => {
+    if (gameState.screen === GameScreen.BATTLE) {
+        if (gameState.enemies.length === 0) {
+            audioService.stopBGM();
+            if (gameState.act === 4) {
+                 audioService.playSound('win');
+                 setGameState(prev => ({ ...prev, screen: GameScreen.ENDING }));
+                 recordScore(true);
+                 storageService.incrementClearCount();
+            } else {
+                 if (isMathDebugSkipped) {
+                     handleMathChallengeComplete(1); // Auto-complete with 1 correct answer reward
+                 } else {
+                     setGameState(prev => ({ ...prev, screen: GameScreen.MATH_CHALLENGE }));
+                 }
+            }
+        } else if (gameState.player.currentHp <= 0) {
+            if (gameState.player.relics.find(r => r.id === 'LIZARD_TAIL')) {
+                audioService.playSound('block');
+                setGameState(prev => ({
+                    ...prev,
+                    narrativeLog: [...prev.narrativeLog, "トカゲの尻尾が身代わりになった！"],
+                    player: {
+                        ...prev.player,
+                        currentHp: Math.floor(prev.player.maxHp / 2),
+                        relics: prev.player.relics.filter(r => r.id !== 'LIZARD_TAIL'),
+                        floatingText: { id: `revive-${Date.now()}`, text: "REVIVED!", color: "text-green-400", iconType: "heart" }
+                    }
+                }));
+                setTurnLog("復活！");
+            } else if (gameState.player.potions.find(p => p.templateId === 'GHOST_IN_JAR')) {
+                audioService.playSound('block');
+                const revivePotion = gameState.player.potions.find(p => p.templateId === 'GHOST_IN_JAR');
+                setGameState(prev => ({
+                    ...prev,
+                    narrativeLog: [...prev.narrativeLog, "お守りが発動した！"],
+                    player: {
+                        ...prev.player,
+                        currentHp: Math.floor(prev.player.maxHp * 0.1),
+                        potions: prev.player.potions.filter(p => p.id !== revivePotion?.id),
+                        powers: { ...prev.player.powers, 'INTANGIBLE': (prev.player.powers['INTANGIBLE'] || 0) + 1 },
+                        floatingText: { id: `revive-${Date.now()}`, text: "GHOST!", color: "text-gray-400", iconType: "heart" }
+                    }
+                }));
+                setTurnLog("幽霊化！");
+            } else {
+                audioService.playSound('lose');
+                audioService.stopBGM();
+                recordScore(false);
+                storageService.clearSave();
+                setLegacyCardSelected(false);
+                setGameState(prev => ({ ...prev, screen: GameScreen.GAME_OVER }));
+            }
+        }
+    }
+  }, [gameState.enemies, gameState.player.currentHp, gameState.screen, isMathDebugSkipped]);
 
   const handleRewardSelection = (item: RewardItem) => {
       if (isLoading) return;
@@ -1796,10 +1817,6 @@ const App: React.FC = () => {
           applyPower: newApplyPower,
       };
 
-      // Return the new card to the caller (RestScreen) instead of updating state directly here if we want to show preview.
-      // But currently App.tsx manages state. We need to update state here.
-      // We can return the card object so RestScreen can display it.
-      
       setGameState(prev => ({
           ...prev,
           player: {
@@ -1819,9 +1836,19 @@ const App: React.FC = () => {
             {gameState.screen === GameScreen.START_MENU && (
                 <div className="w-full h-full bg-gray-900 flex items-center justify-center">
                     <div className="text-center p-8">
-                        <h1 className="text-5xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-b from-purple-400 to-blue-600 mb-8 font-bold animate-pulse tracking-widest leading-tight">
+                        <h1 
+                            className="text-5xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-b from-purple-400 to-blue-600 mb-2 font-bold animate-pulse tracking-widest leading-tight cursor-pointer select-none"
+                            onClick={handleTitleClick}
+                        >
                             算数ローグ<br/><span className="text-4xl">伝説の小学生</span>
                         </h1>
+                        {isMathDebugSkipped && (
+                            <div className="text-red-500 font-bold mb-6 text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse">
+                                (デバッグ: 計算スキップ ON)
+                            </div>
+                        )}
+                        {!isMathDebugSkipped && <div className="mb-8 h-6"></div>}
+
                         <p className="text-gray-400 mb-12 text-sm">Act {gameState.act} / Floor {gameState.floor}</p>
                         <div className="flex flex-col gap-4 items-center">
                             {hasSave && (
@@ -1869,6 +1896,7 @@ const App: React.FC = () => {
                                     <li><span className="text-yellow-400">計算モード選択</span>: たし算、ひき算、わり算、ミックスモードを選択可能に。</li>
                                     <li><span className="text-yellow-400">キャラクター選択</span>: クリア回数に応じて解放される9人のユニークキャラクター。</li>
                                     <li><span className="text-yellow-400">ランキング</span>: ローカル保存によるスコア・履歴閲覧機能。</li>
+                                    <li><span className="text-yellow-400">計算スキップ(Debug)</span>: タイトル10連打で計算問題をスキップ可能。</li>
                                 </ul>
                             </section>
                             
