@@ -26,7 +26,7 @@ import { audioService } from './services/audioService';
 import { generateFlavorText, generateEnemyName } from './services/geminiService';
 import { generateDungeonMap } from './services/mapGenerator';
 import { storageService } from './services/storageService';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal } from 'lucide-react';
 
 // --- HELPERS ---
 export const getUpgradedCard = (card: ICard): ICard => {
@@ -227,6 +227,7 @@ const App: React.FC = () => {
   const [selectedCharName, setSelectedCharName] = useState<string>("戦士");
   const [legacyCardSelected, setLegacyCardSelected] = useState<boolean>(false);
   const [isChallengeSetup, setIsChallengeSetup] = useState<boolean>(false);
+  const [showDebugLog, setShowDebugLog] = useState<boolean>(false);
 
   // Shop & Event
   const [shopCards, setShopCards] = useState<ICard[]>([]);
@@ -1730,7 +1731,56 @@ const App: React.FC = () => {
                             <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.HELP }))} className="bg-gray-800 text-gray-400 px-8 py-2 text-sm font-bold border-2 border-gray-600 hover:bg-gray-700 cursor-pointer w-64 flex items-center justify-center">
                                 <HelpCircle className="mr-2" size={16}/> 遊び方
                             </button>
+                            <button onClick={() => setShowDebugLog(true)} className="bg-gray-900 text-gray-500 text-xs px-4 py-1 border border-gray-700 hover:text-white hover:border-gray-500 mt-4 cursor-pointer flex items-center justify-center">
+                                <Terminal className="mr-2" size={12}/> Update Info (Debug)
+                            </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Debug Log Modal */}
+            {showDebugLog && (
+                <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4" onClick={() => setShowDebugLog(false)}>
+                    <div className="bg-gray-900 border-2 border-green-500 p-6 rounded-lg max-w-lg w-full shadow-[0_0_20px_rgba(34,197,94,0.3)]" onClick={e => e.stopPropagation()}>
+                        <h2 className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2">
+                            System Update Log v2.0
+                        </h2>
+                        <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                            <section>
+                                <h3 className="text-white font-bold mb-1">■ 新機能 (New Features)</h3>
+                                <ul className="list-disc pl-5 space-y-1">
+                                    <li><span className="text-yellow-400">1A1Dモード</span>: 攻撃1枚・防御1枚のみの極限デッキモード実装。</li>
+                                    <li><span className="text-yellow-400">計算モード選択</span>: たし算、ひき算、わり算、ミックスモードを選択可能に。</li>
+                                    <li><span className="text-yellow-400">キャラクター選択</span>: クリア回数に応じて解放される9人のユニークキャラクター。</li>
+                                    <li><span className="text-yellow-400">ランキング</span>: ローカル保存によるスコア・履歴閲覧機能。</li>
+                                </ul>
+                            </section>
+                            
+                            <section>
+                                <h3 className="text-white font-bold mb-1">■ システム改善 (System)</h3>
+                                <ul className="list-disc pl-5 space-y-1">
+                                    <li>オートセーブ＆コンティニュー機能の実装。</li>
+                                    <li>遺産（Legacy Card）システム：敗北時にカードを1枚次へ継承可能。</li>
+                                    <li>オーディオエンジン強化：BGMの動的生成とSEの改善。</li>
+                                </ul>
+                            </section>
+
+                            <section>
+                                <h3 className="text-white font-bold mb-1">■ コンテンツ (Contents)</h3>
+                                <ul className="list-disc pl-5 space-y-1">
+                                    <li>新規カード・レリック・ポーションの大幅追加。</li>
+                                    <li>敵AIパターンの多様化とタイプ別行動ロジックの実装。</li>
+                                    <li>ドット絵（Pixel Art）生成エンジンの改良。</li>
+                                </ul>
+                            </section>
+                        </div>
+                        <button 
+                            onClick={() => setShowDebugLog(false)} 
+                            className="mt-6 bg-green-900/50 hover:bg-green-800 text-green-300 border border-green-600 px-6 py-2 rounded w-full font-mono transition-colors cursor-pointer"
+                        >
+                            CLOSE TERMINAL
+                        </button>
                     </div>
                 </div>
             )}
