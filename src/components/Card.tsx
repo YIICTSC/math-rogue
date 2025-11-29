@@ -189,13 +189,14 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled }) => {
 
       {/* Description */}
       <div className="relative z-10 mt-auto flex flex-col items-center w-full">
-        <div className="bg-black/60 p-1 rounded border border-white/10 backdrop-blur-[1px] w-full min-h-[2.5rem] flex items-center justify-center flex-col">
-            <div className="text-[8px] text-white leading-tight text-center whitespace-pre-wrap">
+        {/* Adjusted padding and font size for better fit */}
+        <div className="bg-black/70 p-1 rounded border border-white/10 backdrop-blur-[1px] w-full min-h-[2.5rem] flex items-center justify-center flex-col overflow-hidden">
+            <div className="text-[7px] text-white leading-tight text-center whitespace-pre-wrap break-words w-full">
                 {renderDescription()}
-                {card.exhaust && <span className="text-gray-400 block font-bold text-[7px] mt-0.5">[廃棄]</span>}
+                {card.exhaust && <span className="text-gray-400 block font-bold text-[6px] mt-0.5">[廃棄]</span>}
             </div>
         </div>
-        <div className="text-[8px] text-center mt-1 text-white/60 font-mono tracking-tighter">
+        <div className="text-[7px] text-center mt-0.5 text-white/60 font-mono tracking-tighter">
             {getTypeText(card.type)}
         </div>
       </div>
