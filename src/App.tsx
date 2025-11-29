@@ -770,6 +770,21 @@ const App: React.FC = () => {
               if (card.shuffleHandToDraw) { p.drawPile = shuffle([...p.drawPile, ...p.hand]); p.hand = []; }
               if (card.applyPower) p.powers[card.applyPower.id] = (p.powers[card.applyPower.id] || 0) + card.applyPower.amount;
               
+              // Special Logic: Genetic Algorithm (Persistent Growth)
+              if (card.name === '学習アルゴリズム' || card.name === 'GENETIC_ALGORITHM') {
+                  const buffAmount = card.upgraded ? 3 : 2;
+                  // Look for this card in the deck using ID
+                  const deckCard = p.deck.find(c => c.id === card.id);
+                  if (deckCard) {
+                      deckCard.block = (deckCard.block || 0) + buffAmount;
+                      // Also update discard pile instance to show growth immediately if reshuffled?
+                      // Actually discard pile gets `card` pushed later. `card` is the instance from hand.
+                      // We should update `card` itself so when it goes to discard it has the new value.
+                      card.block = (card.block || 0) + buffAmount;
+                      p.floatingText = { id: `gen-${Date.now()}`, text: `Growth! +${buffAmount}`, color: 'text-green-400', iconType: 'shield' };
+                  }
+              }
+
               // Next Turn
               if (card.nextTurnEnergy) p.nextTurnEnergy += card.nextTurnEnergy;
               if (card.nextTurnDraw) p.nextTurnDraw += card.nextTurnDraw;
@@ -1101,26 +1116,30 @@ const App: React.FC = () => {
                 audioService.playSound('block');
                 setGameState(prev => ({
                     ...prev,
+                    narrativeLog: [...prev.narrativeLog, "トカゲの尻尾が身代わりになった！"],
                     player: {
                         ...prev.player,
                         currentHp: Math.floor(prev.player.maxHp / 2),
-                        relics: prev.player.relics.filter(r => r.id !== 'LIZARD_TAIL')
+                        relics: prev.player.relics.filter(r => r.id !== 'LIZARD_TAIL'),
+                        floatingText: { id: `revive-${Date.now()}`, text: "REVIVED!", color: "text-green-400", iconType: "heart" }
                     }
                 }));
-                setTurnLog("トカゲの尻尾が身代わりになった！");
+                setTurnLog("復活！");
             } else if (gameState.player.potions.find(p => p.templateId === 'GHOST_IN_JAR')) {
                 audioService.playSound('block');
                 const revivePotion = gameState.player.potions.find(p => p.templateId === 'GHOST_IN_JAR');
                 setGameState(prev => ({
                     ...prev,
+                    narrativeLog: [...prev.narrativeLog, "お守りが発動した！"],
                     player: {
                         ...prev.player,
                         currentHp: Math.floor(prev.player.maxHp * 0.1),
                         potions: prev.player.potions.filter(p => p.id !== revivePotion?.id),
-                        powers: { ...prev.player.powers, 'INTANGIBLE': (prev.player.powers['INTANGIBLE'] || 0) + 1 }
+                        powers: { ...prev.player.powers, 'INTANGIBLE': (prev.player.powers['INTANGIBLE'] || 0) + 1 },
+                        floatingText: { id: `revive-${Date.now()}`, text: "GHOST!", color: "text-gray-400", iconType: "heart" }
                     }
                 }));
-                setTurnLog("お守りが発動した！");
+                setTurnLog("幽霊化！");
             } else {
                 audioService.playSound('lose');
                 audioService.stopBGM();

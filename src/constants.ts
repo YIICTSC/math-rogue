@@ -394,7 +394,7 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
   LEG_SWEEP: { name: '足払い', cost: 2, type: CardType.SKILL, target: TargetType.ENEMY, description: '弱体2を与える。ブロック11。', weak: 2, block: 11, rarity: 'RARE' },
   GLACIER: { name: 'かまくら', cost: 2, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック12。', block: 12, rarity: 'RARE' },
   REBOOT: { name: '再起動', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '手札を全て山札に戻し4枚引く。', shuffleHandToDraw: true, draw: 4, rarity: 'RARE' },
-  GENETIC_ALGORITHM: { name: '学習アルゴリズム', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック1。使う度強くなる。廃棄。', block: 1, exhaust: true, rarity: 'RARE' },
+  GENETIC_ALGORITHM: { name: '学習アルゴリズム', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック1。この戦闘で使用すると、このカードのブロック値が恒久的に2増加する。廃棄。', block: 1, exhaust: true, rarity: 'RARE' },
   FORCE_FIELD: { name: 'バリア', cost: 3, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック12。', block: 12, rarity: 'RARE' },
   SPOT_WEAKNESS: { name: '弱点発見', cost: 1, type: CardType.SKILL, target: TargetType.ENEMY, description: '筋力+3。', strength: 3, rarity: 'RARE' },
   DISARM: { name: '武器奪取', cost: 1, type: CardType.SKILL, target: TargetType.ENEMY, description: '敵の筋力を2下げる。廃棄。', strength: -2, exhaust: true, rarity: 'RARE' },
