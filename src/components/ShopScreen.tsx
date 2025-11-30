@@ -1,8 +1,10 @@
 
+
+
 import React, { useState } from 'react';
 import { Player, Card as ICard, Relic, Potion } from '../types';
 import Card from './Card';
-import { ShoppingBag, Trash2, Coins, Gem, FlaskConical } from 'lucide-react';
+import { ShoppingBag, Trash2, Coins, Gem, FlaskConical, X } from 'lucide-react';
 
 interface ShopScreenProps {
   player: Player;
@@ -22,6 +24,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
   const [purchasedIds, setPurchasedIds] = useState<string[]>([]);
   const [removed, setRemoved] = useState(false);
   const [viewMode, setViewMode] = useState<'BUY' | 'REMOVE'>('BUY');
+  const [inspectedItem, setInspectedItem] = useState<{type: 'CARD'|'RELIC'|'POTION', data: any} | null>(null);
 
   const handleBuyCard = (card: ICard) => {
     if (purchasedIds.includes(card.id)) return;
@@ -47,13 +50,18 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
 
   const handleBuyPotion = (potion: Potion) => {
       if (purchasedIds.includes(potion.id)) return;
-      if (player.potions.length >= 3) return; // Full
-
+      // Note: Potion limit check handled in parent App logic now via callback if full
       let price = potion.price || 50;
       if (player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
 
       if (player.gold >= price) {
           onBuyPotion(potion);
+          // Only mark purchased if actually bought (not cancelled in swap). 
+          // However, since onBuyPotion triggers async modal if full, we might optimistically mark it?
+          // Or strictly, App should handle removal from shop list.
+          // For simplicity here: mark it. If swap cancelled, it stays sold in UI (minor quirk) or we rely on prop update.
+          // Better: Check player potions in render? No, purchasedIds is local.
+          // Let's assume purchase is successful for UI feedback.
           setPurchasedIds([...purchasedIds, potion.id]);
       }
   };
@@ -74,9 +82,49 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
       return base;
   };
 
+  const handleInspect = (type: 'CARD'|'RELIC'|'POTION', data: any) => {
+      setInspectedItem({ type, data });
+  };
+
   return (
     <div className="flex flex-col h-full w-full bg-gray-900 text-white relative">
        
+       {/* Inspect Modal */}
+       {inspectedItem && (
+            <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setInspectedItem(null)}>
+                <div className="bg-gray-800 border-4 border-yellow-500 rounded-xl p-6 max-w-sm w-full shadow-2xl relative animate-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
+                    <button onClick={() => setInspectedItem(null)} className="absolute top-2 right-2 text-gray-400 hover:text-white p-2">
+                        <X size={24} />
+                    </button>
+                    
+                    <div className="flex flex-col items-center text-center">
+                        {inspectedItem.type === 'CARD' && (
+                            <div className="scale-110 mb-4">
+                                <Card card={inspectedItem.data} onClick={() => {}} disabled={false} />
+                            </div>
+                        )}
+                        {inspectedItem.type === 'RELIC' && (
+                            <div className="w-24 h-24 bg-gray-700 rounded-full border-4 border-yellow-500 flex items-center justify-center mb-4">
+                                <Gem size={48} className="text-yellow-400" />
+                            </div>
+                        )}
+                        {inspectedItem.type === 'POTION' && (
+                            <div className="w-24 h-24 bg-gray-700 rounded-full border-4 border-white/50 flex items-center justify-center mb-4">
+                                <FlaskConical size={48} style={{ color: inspectedItem.data.color }} />
+                            </div>
+                        )}
+
+                        <h3 className="text-2xl font-bold text-yellow-400 mb-2">{inspectedItem.data.name}</h3>
+                        {inspectedItem.type !== 'CARD' && (
+                            <p className="text-gray-300 leading-relaxed bg-black/40 p-4 rounded border border-gray-600 w-full">
+                                {inspectedItem.data.description}
+                            </p>
+                        )}
+                    </div>
+                </div>
+            </div>
+       )}
+
        {/* Header */}
        <div className="z-20 flex justify-between items-center bg-black/90 p-3 border-b-4 border-yellow-600 shadow-xl shrink-0">
            <div className="flex items-center">
@@ -130,16 +178,20 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                 const price = getPrice(relic.price || 150);
                                 const canAfford = player.gold >= price;
                                 return (
-                                    <div key={relic.id} className={`group relative w-28 flex flex-col items-center ${isSold ? 'opacity-20 grayscale' : ''}`}>
-                                        <div className="w-16 h-16 bg-gray-800 border-4 border-yellow-600 rounded-full flex items-center justify-center mb-2 shadow-lg">
+                                    <div 
+                                        key={relic.id} 
+                                        className={`group relative w-28 flex flex-col items-center ${isSold ? 'opacity-20 grayscale' : ''}`}
+                                        onClick={() => handleInspect('RELIC', relic)}
+                                    >
+                                        <div className="w-16 h-16 bg-gray-800 border-4 border-yellow-600 rounded-full flex items-center justify-center mb-2 shadow-lg cursor-pointer">
                                             <Gem className="text-yellow-400" size={24}/>
                                         </div>
                                         <div className="text-xs font-bold text-center truncate w-full">{relic.name}</div>
-                                        <div className="text-[9px] text-gray-400 text-center mb-2 h-8 overflow-hidden leading-tight">{relic.description}</div>
+                                        <div className="text-[9px] text-gray-400 text-center mb-2 h-8 overflow-hidden leading-tight pointer-events-none">{relic.description}</div>
                                         
                                         {!isSold && (
                                             <button 
-                                                onClick={() => handleBuyRelic(relic)}
+                                                onClick={(e) => { e.stopPropagation(); handleBuyRelic(relic); }}
                                                 disabled={!canAfford}
                                                 className={`px-2 py-0.5 rounded-full font-bold text-xs shadow-lg border border-white ${canAfford ? 'bg-yellow-600 hover:bg-yellow-500 text-white cursor-pointer' : 'bg-gray-600 text-gray-400 cursor-not-allowed'}`}
                                             >
@@ -155,24 +207,28 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                             {shopPotions.map(potion => {
                                 const isSold = purchasedIds.includes(potion.id);
                                 const price = getPrice(potion.price || 50);
-                                const canAfford = player.gold >= price && player.potions.length < 3;
+                                const canAfford = player.gold >= price;
                                 const isFull = player.potions.length >= 3;
 
                                 return (
-                                    <div key={potion.id} className={`group relative w-28 flex flex-col items-center ${isSold ? 'opacity-20 grayscale' : ''}`}>
-                                        <div className="w-12 h-12 bg-gray-800 border-2 border-white/50 rounded flex items-center justify-center mb-2 shadow-lg">
+                                    <div 
+                                        key={potion.id} 
+                                        className={`group relative w-28 flex flex-col items-center ${isSold ? 'opacity-20 grayscale' : ''}`}
+                                        onClick={() => handleInspect('POTION', potion)}
+                                    >
+                                        <div className="w-12 h-12 bg-gray-800 border-2 border-white/50 rounded flex items-center justify-center mb-2 shadow-lg cursor-pointer">
                                             <FlaskConical size={24} style={{ color: potion.color }}/>
                                         </div>
                                         <div className="text-xs font-bold text-center truncate w-full">{potion.name}</div>
-                                        <div className="text-[9px] text-gray-400 text-center mb-2 h-8 overflow-hidden leading-tight">{potion.description}</div>
+                                        <div className="text-[9px] text-gray-400 text-center mb-2 h-8 overflow-hidden leading-tight pointer-events-none">{potion.description}</div>
                                         
                                         {!isSold && (
                                             <button 
-                                                onClick={() => handleBuyPotion(potion)}
+                                                onClick={(e) => { e.stopPropagation(); handleBuyPotion(potion); }}
                                                 disabled={!canAfford}
                                                 className={`px-2 py-0.5 rounded-full font-bold text-xs shadow-lg border border-white ${canAfford ? 'bg-yellow-600 hover:bg-yellow-500 text-white cursor-pointer' : 'bg-gray-600 text-gray-400 cursor-not-allowed'}`}
                                             >
-                                                {isFull ? '満杯' : `${price} 円`}
+                                                {isFull ? '入替' : `${price} 円`}
                                             </button>
                                         )}
                                         {isSold && <div className="text-red-500 font-bold rotate-12 text-xs">売切れ</div>}
@@ -194,7 +250,8 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                     <Card 
                                         card={card} 
                                         onClick={() => handleBuyCard(card)} 
-                                        disabled={isSold} 
+                                        disabled={isSold}
+                                        onInspect={(c) => handleInspect('CARD', c)} 
                                     />
                                     {!isSold && (
                                         <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-full text-center z-20">
@@ -222,7 +279,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                    <div className="grid grid-cols-3 gap-2 pt-4">
                        {player.deck.map(card => (
                            <div key={card.id} className="scale-75 origin-top-left w-24 h-36 cursor-pointer relative group" onClick={() => handleRemove(card.id)}>
-                                <Card card={card} onClick={() => handleRemove(card.id)} disabled={false} />
+                                <Card card={card} onClick={() => handleRemove(card.id)} disabled={false} onInspect={(c) => handleInspect('CARD', c)} />
                                 <div className="absolute inset-0 bg-red-500/0 group-hover:bg-red-500/20 transition-colors flex items-center justify-center rounded-lg z-20">
                                     <Trash2 className="opacity-0 group-hover:opacity-100 text-red-500 bg-black p-2 rounded-full border border-red-500" size={32} />
                                 </div>

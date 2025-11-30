@@ -1,4 +1,6 @@
 
+
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -26,7 +28,7 @@ import { audioService } from './services/audioService';
 import { generateFlavorText, generateEnemyName } from './services/geminiService';
 import { generateDungeonMap } from './services/mapGenerator';
 import { storageService } from './services/storageService';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, FlaskConical, X } from 'lucide-react';
 
 // --- HELPERS ---
 export const getUpgradedCard = (card: ICard): ICard => {
@@ -57,6 +59,8 @@ export const getUpgradedCard = (card: ICard): ICard => {
         // Next turn effects
         if (newCard.nextTurnEnergy) newCard.nextTurnEnergy += 1;
         if (newCard.nextTurnDraw) newCard.nextTurnDraw += 1;
+        // Mind Blast
+        if (newCard.damagePerCardInDraw) newCard.damagePerCardInDraw += 1; // Or innate? For simplicity boost scalar
     }
 
     // Specific Card Upgrade Logic overrides
@@ -66,6 +70,7 @@ export const getUpgradedCard = (card: ICard): ICard => {
     return newCard;
 };
 
+// ... (Keep existing helpers: createCardFromEnemy, calculateScore, determineEnemyType, getNextEnemyIntent) ...
 // --- CAPTURED CARD GENERATION ---
 const createCardFromEnemy = (enemy: Enemy): ICard => {
     // Basic scaling based on max HP
@@ -331,6 +336,9 @@ const App: React.FC = () => {
   const [isChallengeSetup, setIsChallengeSetup] = useState<boolean>(false);
   const [showDebugLog, setShowDebugLog] = useState<boolean>(false);
   
+  // Potion Swap Logic
+  const [potionSwapData, setPotionSwapData] = useState<{ newPotion: Potion, onConfirm: () => void } | null>(null);
+
   // Debug Logic
   const [isMathDebugSkipped, setIsMathDebugSkipped] = useState<boolean>(false);
   const [titleClickCount, setTitleClickCount] = useState<number>(0);
@@ -512,7 +520,7 @@ const App: React.FC = () => {
     });
   };
 
-  // --- Generators ---
+  // --- Generators (Event) ---
   const generateEvent = (player: Player) => {
       const events = [
           {
@@ -523,9 +531,12 @@ const App: React.FC = () => {
                       if (player.gold >= 20) {
                           const pots = Object.values(POTION_LIBRARY);
                           const pot = { ...pots[Math.floor(Math.random() * pots.length)], id: `pot-${Date.now()}` };
-                          storageService.saveUnlockedPotion(pot.templateId); // UNLOCK
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - 20, potions: [...prev.player.potions, pot].slice(0, 3) } }));
-                          setEventResultLog("ポーションをこっそり受け取った！");
+                          
+                          handlePotionAcquireAttempt(pot, () => {
+                              storageService.saveUnlockedPotion(pot.templateId); 
+                              setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - 20 } }));
+                              setEventResultLog("ポーションをこっそり受け取った！");
+                          });
                       } else {
                           setEventResultLog("お金が足りないとわかると、上級生は舌打ちをした。");
                       }
@@ -594,6 +605,38 @@ const App: React.FC = () => {
           }
       ];
       return events[Math.floor(Math.random() * events.length)];
+  };
+
+  const handlePotionAcquireAttempt = (newPotion: Potion, onSuccess: () => void) => {
+      // Check full
+      if (gameState.player.potions.length < 3) {
+          setGameState(prev => ({ 
+              ...prev, 
+              player: { ...prev.player, potions: [...prev.player.potions, newPotion] } 
+          }));
+          onSuccess();
+      } else {
+          // Open swap UI
+          setPotionSwapData({ newPotion, onConfirm: onSuccess });
+      }
+  };
+
+  const handlePotionSwap = (discardPotionId: string | null) => {
+      if (!potionSwapData) return;
+      
+      const { newPotion, onConfirm } = potionSwapData;
+      
+      if (discardPotionId) {
+          // Replace logic
+          setGameState(prev => {
+              const newPotions = prev.player.potions.map(p => p.id === discardPotionId ? newPotion : p);
+              return { ...prev, player: { ...prev.player, potions: newPotions } };
+          });
+          onConfirm();
+      }
+      
+      // Close modal (if cancelled, we do nothing and don't call onConfirm)
+      setPotionSwapData(null);
   };
 
   const continueGame = () => {
@@ -697,6 +740,7 @@ const App: React.FC = () => {
       audioService.playBGM('menu');
   };
 
+  // ... (handleNodeSelect omitted to save space, unchanged except for event log clearing) ...
   const handleNodeSelect = async (node: MapNode) => {
       setIsLoading(true);
       audioService.playSound('select');
@@ -712,7 +756,6 @@ const App: React.FC = () => {
             let enemies: Enemy[] = [];
             
             if (gameState.act === 4 && node.type === NodeType.BOSS) {
-                // TRUE BOSS
                 enemies.push({
                     id: 'true-boss',
                     enemyType: 'THE_HEART',
@@ -742,7 +785,7 @@ const App: React.FC = () => {
                         currentHp: Math.floor(baseHp),
                         block: 0,
                         strength: 0,
-                        nextIntent: { type: EnemyIntentType.UNKNOWN, value: 0 }, // Will be set by logic
+                        nextIntent: { type: EnemyIntentType.UNKNOWN, value: 0 }, 
                         vulnerable: 0, weak: 0, poison: 0, artifact: 0, corpseExplosion: false,
                         floatingText: null
                     };
@@ -760,15 +803,13 @@ const App: React.FC = () => {
             p.currentEnergy = p.maxEnergy;
             p.block = 0;
             p.strength = 0;
-            // Relic: Mutagenic Strength
             if (p.relics.find(r => r.id === 'MUTAGENIC_STRENGTH')) p.strength += 3;
 
             p.powers = {};
-            // Relic: Enchiridion
             if (p.relics.find(r => r.id === 'ENCHIRIDION')) {
                 const powers = Object.values(CARDS_LIBRARY).filter(c => c.type === CardType.POWER);
                 const power = powers[Math.floor(Math.random() * powers.length)];
-                p.hand.push({ ...power, id: `ench-${Date.now()}`, cost: 0 }); // Free first time
+                p.hand.push({ ...power, id: `ench-${Date.now()}`, cost: 0 }); 
             }
             if (p.relics.find(r => r.id === 'RED_MASK')) enemies.forEach(e => e.weak += 1);
             if (p.relics.find(r => r.id === 'MEGAPHONE')) enemies.forEach(e => e.vulnerable += 1);
@@ -785,15 +826,12 @@ const App: React.FC = () => {
             p.cardsPlayedThisTurn = 0;
             p.attacksPlayedThisTurn = 0;
 
-            // Relic: Vajra
             if (p.relics.find(r => r.id === 'VAJRA')) p.strength += 1;
-            // Relic: Bag of Prep / Snake Ring
             let drawCount = HAND_SIZE;
             if (p.relics.find(r => r.id === 'BAG_OF_PREP')) drawCount += 2;
             if (p.relics.find(r => r.id === 'SNAKE_RING')) drawCount += 2;
             if (p.relics.find(r => r.id === 'BLOOD_VIAL')) p.currentHp = Math.min(p.maxHp, p.currentHp + 2);
             if (node.type === NodeType.BOSS && p.relics.find(r => r.id === 'PENTOGRAPH')) p.currentHp = Math.min(p.maxHp, p.currentHp + 25);
-            // Relic: Anchor
             if (p.relics.find(r => r.id === 'ANCHOR')) p.block += 10;
             if (p.relics.find(r => r.id === 'BRONZE_SCALES')) p.powers['THORNS'] = (p.powers['THORNS'] || 0) + 3; 
             if (p.relics.find(r => r.id === 'LANTERN')) p.currentEnergy += 1;
@@ -802,14 +840,12 @@ const App: React.FC = () => {
                 if(p.drawPile.length > 0) {
                     const c = p.drawPile.pop();
                     if(c) {
-                        // Snecko Eye randomization
                         if (p.relics.find(r => r.id === 'SNECKO_EYE') && c.cost >= 0) c.cost = Math.floor(Math.random() * 4);
                         p.hand.push(c);
                     }
                 }
             }
             
-            // Innate Cards
             const innateIndices = p.drawPile.map((c, i) => c.innate ? i : -1).filter(i => i !== -1).reverse();
             innateIndices.forEach(idx => {
                  const c = p.drawPile.splice(idx, 1)[0];
@@ -834,7 +870,6 @@ const App: React.FC = () => {
             audioService.playBGM('menu');
 
         } else if (node.type === NodeType.SHOP) {
-            // Generate Shop
             const keys = Object.keys(CARDS_LIBRARY).filter(k => !STATUS_CARDS[k] && !CURSE_CARDS[k] && !EVENT_CARDS[k]);
             const cards: ICard[] = [];
             for(let i=0; i<5; i++) {
@@ -866,15 +901,12 @@ const App: React.FC = () => {
             audioService.playBGM('menu');
         
         } else if (node.type === NodeType.TREASURE) {
-            // Generate Treasure
             const rewards: RewardItem[] = [];
             const r = Math.random();
             if (r < 0.5) {
-                // Gold
                 rewards.push({ type: 'GOLD', value: 50 + Math.floor(Math.random() * 100), id: `tr-gold-${Date.now()}` });
             } 
             if (r < 0.8) {
-                // Relic
                 const relics = Object.values(RELIC_LIBRARY).filter(rel => rel.rarity !== 'BOSS' && rel.rarity !== 'STARTER');
                 const relic = relics[Math.floor(Math.random() * relics.length)];
                 rewards.push({ type: 'RELIC', value: relic, id: `tr-relic-${Date.now()}` });
@@ -894,8 +926,6 @@ const App: React.FC = () => {
 
   const handleSynthesizeCard = (c1: ICard, c2: ICard) => {
       // ... (Synthesis Logic remains same)
-      // For brevity, using logic from existing file
-      
       const len1 = Math.floor(Math.random() * 3) + 2; 
       const len2 = Math.floor(Math.random() * 3) + 2; 
       const part1 = c1.name.substring(0, Math.min(len1, c1.name.length));
@@ -920,6 +950,7 @@ const App: React.FC = () => {
       const newNextTurnDraw = sum('nextTurnDraw');
       const newStrengthScaling = sum('strengthScaling');
       const newPoisonMultiplier = sum('poisonMultiplier');
+      const newDamagePerCardInDraw = sum('damagePerCardInDraw');
 
       const newExhaust = c1.exhaust || c2.exhaust;
       const newInnate = c1.innate || c2.innate;
@@ -988,6 +1019,7 @@ const App: React.FC = () => {
       if (newInnate) parts.push(`初期手札`);
       if (newUnplayable) parts.push(`使用不可`);
       if (newCapture) parts.push(`捕獲`);
+      if (newDamagePerCardInDraw > 0) parts.push(`山札枚数ダメ`);
       if (newApplyPower) parts.push(`${newApplyPower.id}(${newApplyPower.amount})`);
 
       const newDesc = parts.join('。') + '。';
@@ -1027,6 +1059,7 @@ const App: React.FC = () => {
           applyPower: newApplyPower,
           textureRef: newTextureRef,
           capture: newCapture,
+          damagePerCardInDraw: newDamagePerCardInDraw > 0 ? newDamagePerCardInDraw : undefined
       };
 
       setGameState(prev => ({
@@ -1177,7 +1210,7 @@ const App: React.FC = () => {
                   if (target) targets = [target];
               }
 
-              if (card.damage || card.damageBasedOnBlock || card.damagePerCardInHand || card.damagePerAttackPlayed || card.damagePerStrike) {
+              if (card.damage || card.damageBasedOnBlock || card.damagePerCardInHand || card.damagePerAttackPlayed || card.damagePerStrike || card.damagePerCardInDraw) {
                 targets.forEach(e => {
                     let strengthBonus = p.strength * (card.strengthScaling || 1);
                     let baseDamage = (card.damage || 0);
@@ -1185,6 +1218,7 @@ const App: React.FC = () => {
                     if (card.damagePerCardInHand) baseDamage += (p.hand.filter(c => c.id !== card.id).length) * card.damagePerCardInHand!;
                     if (card.damagePerAttackPlayed) baseDamage += (p.attacksPlayedThisTurn - 1) * card.damagePerAttackPlayed!;
                     if (card.damagePerStrike) baseDamage += (p.deck.filter(c => c.name.includes('ストライク') || c.name.includes('STRIKE')).length) * card.damagePerStrike!;
+                    if (card.damagePerCardInDraw) baseDamage += (p.drawPile.length) * card.damagePerCardInDraw!;
 
                     let damage = baseDamage + strengthBonus;
                     if (e.vulnerable > 0) damage = Math.floor(damage * 1.5);
@@ -1205,7 +1239,6 @@ const App: React.FC = () => {
                         p.floatingText = { id: `heal-${Date.now()}`, text: `${damage}`, color: 'text-green-500', iconType: 'heart' };
                     }
                     if (e.currentHp <= 0) {
-                         // UNLOCK ENEMY
                          storageService.saveDefeatedEnemy(e.name);
 
                          if (card.fatalEnergy) p.currentEnergy += card.fatalEnergy;
@@ -1237,7 +1270,7 @@ const App: React.FC = () => {
               if (card.strength) p.strength += card.strength;
               if (card.vulnerable) targets.forEach(e => { if (e.artifact > 0) e.artifact--; else e.vulnerable += card.vulnerable!; });
               if (card.weak) targets.forEach(e => { if (e.artifact > 0) e.artifact--; else e.weak += card.weak!; });
-              if (card.poison) targets.forEach(e => { e.poison += card.poison!; }); // Artifact doesn't block poison typically in StS logic for this game, kept simple
+              if (card.poison) targets.forEach(e => { e.poison += card.poison!; }); 
               if (card.poisonMultiplier) targets.forEach(e => e.poison *= card.poisonMultiplier!);
               
               if (card.upgradeHand) p.hand = p.hand.map(c => getUpgradedCard(c));
@@ -1334,7 +1367,6 @@ const App: React.FC = () => {
             enemy.poison--;
             setGameState(prev => ({ ...prev, enemies: prev.enemies.map(e => e.id === enemy.id ? { ...e, currentHp: enemy.currentHp, poison: enemy.poison, floatingText: enemy.floatingText } : e) }));
             if (enemy.currentHp <= 0) {
-                // UNLOCK ENEMY (Poison Death)
                 storageService.saveDefeatedEnemy(enemy.name);
                 continue;
             }
@@ -1592,10 +1624,32 @@ const App: React.FC = () => {
               p.gold += item.value;
               nextRewards = nextRewards.filter(r => r.id !== item.id);
           } else if (item.type === 'POTION') {
+              // Defer logic to handlePotionAcquireAttempt but since that's a callback,
+              // we handle it here by NOT updating state immediately if full
+              // Actually, since we need to remove reward ONLY if successful,
+              // let's do a trick: check full here
               if (p.potions.length < 3) {
                   p.potions = [...p.potions, item.value];
                   storageService.saveUnlockedPotion(item.value.templateId); // UNLOCK
                   nextRewards = nextRewards.filter(r => r.id !== item.id);
+              } else {
+                  // Trigger swap, pass a callback that updates the reward state
+                  setPotionSwapData({
+                      newPotion: item.value,
+                      onConfirm: () => {
+                          setGameState(curr => {
+                              // We need to remove the reward now
+                              const updatedRewards = curr.rewards.filter(r => r.id !== item.id);
+                              // Potion is already swapped inside handlePotionSwap logic
+                              // wait, handlePotionSwap logic handles potion array update.
+                              // We just need to remove reward here.
+                              // Check if we need to auto-finish rewards
+                              if (updatedRewards.length === 0) setTimeout(finishRewardPhase, 500);
+                              return { ...curr, rewards: updatedRewards };
+                          });
+                      }
+                  });
+                  return prev; // Return previous state (no change yet), swap modal will open
               }
           }
           
@@ -1687,6 +1741,51 @@ const App: React.FC = () => {
     <div className="w-full h-screen bg-black flex items-center justify-center p-4">
         <div className="w-full max-w-4xl h-[600px] border-[10px] md:border-[20px] border-gray-800 rounded-xl relative overflow-hidden shadow-2xl bg-black crt-scanline">
             
+            {/* POTION SWAP MODAL */}
+            {potionSwapData && (
+                <div className="fixed inset-0 z-[200] bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm" onClick={() => setPotionSwapData(null)}>
+                    <div className="bg-gray-800 border-4 border-yellow-500 rounded-xl p-6 max-w-md w-full shadow-2xl animate-in zoom-in duration-300" onClick={e => e.stopPropagation()}>
+                        <div className="text-center mb-6">
+                            <h3 className="text-xl font-bold text-yellow-400 mb-2">ポーションがいっぱいです！</h3>
+                            <p className="text-sm text-gray-300">新しいポーションを手に入れるために、<br/>捨てるポーションを選んでください。</p>
+                        </div>
+                        
+                        <div className="flex justify-center gap-4 mb-8">
+                            <div className="flex flex-col items-center">
+                                <div className="text-xs text-green-400 font-bold mb-1">GET!</div>
+                                <div className="w-16 h-16 bg-gray-700 rounded-full border-2 border-green-500 flex items-center justify-center shadow-[0_0_15px_rgba(74,222,128,0.5)]">
+                                    <FlaskConical size={32} style={{ color: potionSwapData.newPotion.color }} />
+                                </div>
+                                <div className="text-xs mt-1 text-center font-bold text-white">{potionSwapData.newPotion.name}</div>
+                            </div>
+                        </div>
+
+                        <div className="text-xs text-center text-gray-400 mb-2">▼ どれと交換しますか？ ▼</div>
+                        
+                        <div className="grid grid-cols-3 gap-2 mb-6">
+                            {gameState.player.potions.map(p => (
+                                <div 
+                                    key={p.id} 
+                                    className="bg-gray-900 border-2 border-gray-600 hover:border-red-500 hover:bg-red-900/30 rounded p-2 flex flex-col items-center cursor-pointer transition-all"
+                                    onClick={() => handlePotionSwap(p.id)}
+                                >
+                                    <FlaskConical size={24} style={{ color: p.color }} className="mb-1" />
+                                    <div className="text-[10px] text-center leading-tight">{p.name}</div>
+                                    <div className="text-[9px] text-red-400 mt-1 font-bold">捨てる</div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <button 
+                            onClick={() => setPotionSwapData(null)}
+                            className="w-full bg-gray-700 hover:bg-gray-600 text-white py-3 rounded font-bold border border-gray-500"
+                        >
+                            あきらめる
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {gameState.screen === GameScreen.START_MENU && (
                 <div className="w-full h-full bg-gray-900 flex items-center justify-center">
                     <div className="text-center p-8 w-full flex flex-col items-center">
@@ -1731,7 +1830,7 @@ const App: React.FC = () => {
                             </div>
 
                             <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                <Terminal size={10}/> v2.2.1
+                                <Terminal size={10}/> v2.2.3
                             </button>
                         </div>
                     </div>
@@ -1742,15 +1841,15 @@ const App: React.FC = () => {
                 <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4" onClick={() => setShowDebugLog(false)}>
                     <div className="bg-gray-900 border-2 border-green-500 p-6 rounded-lg max-w-lg w-full shadow-[0_0_20px_rgba(34,197,94,0.3)]" onClick={e => e.stopPropagation()}>
                         <h2 className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2">
-                            System Update Log v2.2.2
+                            System Update Log v2.2.3
                         </h2>
                         <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
                             <section>
-                                <h3 className="text-white font-bold mb-1">■ 図鑑システムの拡張 (Compendium Update)</h3>
+                                <h3 className="text-white font-bold mb-1">■ 機能強化</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li>カードだけでなく、レリック、ポーション、敵の図鑑を追加しました。</li>
-                                    <li>獲得、または撃破することで図鑑に記録されます。</li>
-                                    <li>アイテムをタッチすると詳細な説明が表示されます。</li>
+                                    <li>ポーションが満杯のときに新しいポーションを取得しようとすると、交換を選択できるようになりました。</li>
+                                    <li>ショップや報酬画面でカードやアイテムを長押し/クリックすると詳細を確認できるようになりました。</li>
+                                    <li>カード「精神衝撃」が実装されました。</li>
                                 </ul>
                             </section>
                         </div>
@@ -1764,7 +1863,7 @@ const App: React.FC = () => {
                 </div>
             )}
 
-            {/* ... (Other screens logic unchanged except passed down props) ... */}
+            {/* ... (Other screens logic) ... */}
             {gameState.screen === GameScreen.MODE_SELECTION && (
                 <div className="w-full h-full bg-gray-900 flex flex-col items-center text-white p-4 overflow-y-auto custom-scrollbar">
                     <div className="w-full max-w-2xl flex flex-col items-center my-auto">
@@ -1861,9 +1960,14 @@ const App: React.FC = () => {
                          setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - (prev.player.relics.find(r=>r.id==='MEMBERSHIP_CARD') ? Math.floor((relic.price||150)*0.5) : (relic.price||150)), relics: [...prev.player.relics, relic] } }));
                     }}
                     onBuyPotion={(potion) => {
-                        if (gameState.player.potions.length < 3) {
-                             setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - (prev.player.relics.find(r=>r.id==='MEMBERSHIP_CARD') ? Math.floor((potion.price||50)*0.5) : (potion.price||50)), potions: [...prev.player.potions, { ...potion, id: `buy-pot-${Date.now()}` }] } }));
-                        }
+                        let price = potion.price || 50;
+                        if (gameState.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
+                        
+                        // Handle potential swap via App callback logic
+                        handlePotionAcquireAttempt(potion, () => {
+                             storageService.saveUnlockedPotion(potion.templateId); 
+                             setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - price } }));
+                        });
                     }}
                     onRemoveCard={(cardId, cost) => {
                          setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - cost, deck: prev.player.deck.filter(c => c.id !== cardId) } }));
