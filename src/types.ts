@@ -72,8 +72,7 @@ export interface Card {
   promptsExhaust?: number;      
   damagePerAttackPlayed?: number; 
   damagePerCardInHand?: number;   
-  damagePerStrike?: number;
-  damagePerCardInDraw?: number; // New: Mind Blast       
+  damagePerStrike?: number;       
   playCopies?: number;            
   addCardToHand?: { cardName: string, count: number, cost0?: boolean }; 
   addCardToDraw?: { cardName: string, count: number }; 

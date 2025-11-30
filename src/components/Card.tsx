@@ -1,6 +1,4 @@
 
-
-
 import React, { useState, useRef } from 'react';
 import { Card as CardType, CardType as EnumCardType } from '../types';
 import PixelSprite from './PixelSprite';
@@ -159,8 +157,6 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect }) => {
       if (card.strength !== undefined) {
           desc = desc.replace(/ムキムキ(\d+)/g, `ムキムキ${card.strength}`);
       }
-      // Note: card.damagePerCardInDraw dynamic check relies on description pattern if implemented visually, 
-      // but usually description is static text like "山札の枚数分のダメージ"
 
       return (
         <span className={card.upgraded ? "text-green-300 font-bold" : ""}>
