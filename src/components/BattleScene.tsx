@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText } from '../types';
-import Card from './Card';
+import Card, { KEYWORD_DEFINITIONS } from './Card';
 import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info } from 'lucide-react';
 import PixelSprite from './PixelSprite';
 import { audioService } from '../services/audioService';
@@ -99,6 +99,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   const [showDeck, setShowDeck] = useState(false);
   const [tooltip, setTooltip] = useState<{title: string, desc: string} | null>(null);
   const [potionConfirmation, setPotionConfirmation] = useState<Potion | null>(null);
+  const [inspectedCard, setInspectedCard] = useState<ICard | null>(null);
 
   useEffect(() => {
     if (lastActionTime > 0) {
@@ -141,6 +142,28 @@ const BattleScene: React.FC<BattleSceneProps> = ({
       setTooltip({ title, desc });
   };
 
+  const getProcessedDescription = (card: ICard) => {
+      let desc = card.description;
+      if (card.damage !== undefined) desc = desc.replace(/(\d+)ダメージ/g, `${card.damage}ダメージ`);
+      if (card.block !== undefined) desc = desc.replace(/ブロック(\d+)/g, `ブロック${card.block}`);
+      if (card.poison !== undefined) desc = desc.replace(/ドクドク(\d+)/g, `ドクドク${card.poison}`);
+      if (card.weak !== undefined) desc = desc.replace(/へろへろ(\d+)/g, `へろへろ${card.weak}`);
+      if (card.vulnerable !== undefined) desc = desc.replace(/びくびく(\d+)/g, `びくびく${card.vulnerable}`);
+      if (card.strength !== undefined) desc = desc.replace(/ムキムキ(\d+)/g, `ムキムキ${card.strength}`);
+      return desc;
+  };
+
+  const getCardKeywords = (card: ICard) => {
+      const keywords = [];
+      if (card.exhaust) keywords.push(KEYWORD_DEFINITIONS.EXHAUST);
+      if (card.strength || card.description.includes('ムキムキ')) keywords.push(KEYWORD_DEFINITIONS.STRENGTH);
+      if (card.vulnerable || card.description.includes('びくびく')) keywords.push(KEYWORD_DEFINITIONS.VULNERABLE);
+      if (card.weak || card.description.includes('へろへろ')) keywords.push(KEYWORD_DEFINITIONS.WEAK);
+      if (card.block || card.description.includes('ブロック')) keywords.push(KEYWORD_DEFINITIONS.BLOCK);
+      if (card.draw || card.description.includes('引く')) keywords.push(KEYWORD_DEFINITIONS.DRAW);
+      return keywords;
+  };
+
   const hasChoker = !!player.relics.find(r => r.id === 'VELVET_CHOKER');
 
   return (
@@ -166,7 +189,39 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             </div>
         )}
 
-        {/* Tooltip Modal Overlay */}
+        {/* Card Inspection Modal */}
+        {inspectedCard && (
+            <div className="fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setInspectedCard(null)}>
+                <div className="scale-150 mb-8 transform transition-transform" onClick={(e) => e.stopPropagation()}>
+                     <Card card={inspectedCard} onClick={() => {}} disabled={false} />
+                </div>
+                <div className="bg-gray-800 border-2 border-white p-6 rounded-lg max-w-sm w-full shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
+                    <button onClick={() => setInspectedCard(null)} className="absolute top-2 right-2 text-gray-400 hover:text-white p-2">
+                        <X size={24} />
+                    </button>
+                    <h3 className="text-2xl font-bold text-yellow-400 mb-2 border-b border-gray-600 pb-2">{inspectedCard.name}</h3>
+                    <div className="flex gap-2 mb-4 text-xs text-gray-400 font-mono">
+                        <span className="bg-blue-900/50 px-2 py-1 rounded border border-blue-500/30">コスト: {inspectedCard.cost}</span>
+                        <span className="bg-purple-900/50 px-2 py-1 rounded border border-purple-500/30">タイプ: {inspectedCard.type}</span>
+                    </div>
+                    <p className="text-lg text-white mb-6 leading-relaxed whitespace-pre-wrap font-bold bg-black/30 p-3 rounded">
+                        {getProcessedDescription(inspectedCard)}
+                    </p>
+                    
+                    {/* Keywords List */}
+                    <div className="space-y-2">
+                        {getCardKeywords(inspectedCard).map((k, idx) => (
+                            <div key={idx} className="flex flex-col text-left text-sm bg-gray-700/50 p-2 rounded">
+                                <span className="font-bold text-yellow-300 mb-0.5">{k.title}</span>
+                                <span className="text-gray-300 text-xs">{k.desc}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* Tooltip Modal Overlay (Existing for other UI elements) */}
         {tooltip && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4" onClick={() => setTooltip(null)}>
                 <div className="bg-black border-2 border-white p-4 rounded max-w-xs shadow-2xl animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
@@ -431,6 +486,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     ? false 
                                     : (player.currentEnergy < displayCard.cost || !!actingEnemyId || card.unplayable || specialDisabled)
                                 }
+                                onInspect={() => setInspectedCard(card)}
                             />
                         </div>
                     </div>
@@ -457,7 +513,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     <div className="grid grid-cols-3 gap-2 justify-items-center">
                         {sortedDeck.map((card) => (
                             <div key={card.id} className="scale-75 origin-top-left w-24 h-36">
-                                <Card card={card} onClick={() => {}} disabled={false} />
+                                <Card card={card} onClick={() => {}} disabled={false} onInspect={() => setInspectedCard(card)} />
                             </div>
                         ))}
                     </div>

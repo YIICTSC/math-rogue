@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -672,7 +673,7 @@ const App: React.FC = () => {
       // Generate random starter relics for selection (Bonus)
       // Filter out character starting relic
       const starters = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'STARTER' && r.id !== char.startingRelicId);
-      const randomStarters = shuffle(starters).slice(0, 3);
+      const randomStarters = shuffle(starters).slice(0, 2);
       setStarterRelics(randomStarters);
 
       setGameState(prev => ({ ...prev, screen: GameScreen.RELIC_SELECTION }));

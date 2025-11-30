@@ -1,5 +1,4 @@
 
-
 import React, { useState, useRef } from 'react';
 import { Card as CardType, CardType as EnumCardType } from '../types';
 import PixelSprite from './PixelSprite';
@@ -8,9 +7,10 @@ interface CardProps {
   card: CardType;
   onClick: () => void;
   disabled: boolean;
+  onInspect?: (card: CardType) => void;
 }
 
-const KEYWORD_DEFINITIONS: Record<string, { title: string; desc: string }> = {
+export const KEYWORD_DEFINITIONS: Record<string, { title: string; desc: string }> = {
   EXHAUST: { title: '廃棄', desc: '使用後、この戦闘中はデッキから除外される。' },
   STRENGTH: { title: 'ムキムキ', desc: '攻撃ダメージがその数値分アップ！' },
   VULNERABLE: { title: 'びくびく', desc: '攻撃から受けるダメージが50%増えちゃう！' },
@@ -19,7 +19,7 @@ const KEYWORD_DEFINITIONS: Record<string, { title: string; desc: string }> = {
   DRAW: { title: 'ドロー', desc: '山札からカードを引く。' },
 };
 
-const Card: React.FC<CardProps> = ({ card, onClick, disabled }) => {
+const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   const longPressTimer = useRef<any>(null);
   const isLongPress = useRef(false);
@@ -29,7 +29,11 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled }) => {
     isLongPress.current = false;
     longPressTimer.current = setTimeout(() => {
       isLongPress.current = true;
-      setShowTooltip(true);
+      if (onInspect) {
+          onInspect(card);
+      } else {
+          setShowTooltip(true);
+      }
     }, 500);
   };
 
@@ -39,7 +43,9 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled }) => {
     }
     if (isLongPress.current) {
       if (e.cancelable) e.preventDefault();
-      setShowTooltip(false);
+      // If we didn't inspect (no handler), we might want to hide tooltip on release?
+      // Keeping it simple: touch move hides it.
+      // setShowTooltip(false); 
     }
   };
 
@@ -48,6 +54,13 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled }) => {
       clearTimeout(longPressTimer.current);
     }
     if (showTooltip) setShowTooltip(false);
+  };
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+      e.preventDefault();
+      if (onInspect) {
+          onInspect(card);
+      }
   };
 
   // --- Style Logic ---
@@ -160,7 +173,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled }) => {
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onTouchMove={handleTouchMove}
-      onContextMenu={(e) => e.preventDefault()}
+      onContextMenu={handleContextMenu}
       className={`
         relative w-32 h-48 border-[3px] rounded-lg p-2 flex flex-col justify-between 
         transition-all duration-200 select-none group touch-manipulation
@@ -169,7 +182,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled }) => {
       `}
     >
       {/* Tooltip */}
-      {showTooltip && activeKeywords.length > 0 && (
+      {showTooltip && activeKeywords.length > 0 && !onInspect && (
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-56 bg-black border-4 border-white p-3 z-[100] shadow-2xl pointer-events-none rounded-lg">
           {activeKeywords.map((k, idx) => (
             <div key={k.title} className={`text-left ${idx !== activeKeywords.length - 1 ? 'mb-2 border-b border-gray-700 pb-1' : ''}`}>
