@@ -1,7 +1,12 @@
 
+
 import { GameState, GameScreen, RankingEntry, Card } from '../types';
 
 const STORAGE_KEY_UNLOCKED_CARDS = 'pixel_spire_unlocked_cards_v1';
+const STORAGE_KEY_UNLOCKED_RELICS = 'pixel_spire_unlocked_relics_v1';
+const STORAGE_KEY_UNLOCKED_POTIONS = 'pixel_spire_unlocked_potions_v1';
+const STORAGE_KEY_DEFEATED_ENEMIES = 'pixel_spire_defeated_enemies_v1';
+
 const STORAGE_KEY_GAME_STATE = 'pixel_spire_save_state_v1';
 const STORAGE_KEY_CLEAR_COUNT = 'pixel_spire_clear_count_v1';
 const STORAGE_KEY_RANKING = 'pixel_spire_ranking_v1';
@@ -9,17 +14,17 @@ const STORAGE_KEY_LEGACY_CARD = 'pixel_spire_legacy_card_v1';
 const STORAGE_KEY_DEBUG_MATH_SKIP = 'pixel_spire_debug_math_skip_v1';
 
 export const storageService = {
-  // --- Unlocked Cards ---
+  // --- Unlocked Items (Cards, Relics, Potions, Enemies) ---
+  
+  // Cards
   getUnlockedCards: (): string[] => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY_UNLOCKED_CARDS);
       return stored ? JSON.parse(stored) : [];
     } catch (e) {
-      console.warn("Failed to load unlocked cards", e);
       return [];
     }
   },
-
   saveUnlockedCard: (cardName: string) => {
     try {
       const current = storageService.getUnlockedCards();
@@ -30,6 +35,63 @@ export const storageService = {
     } catch (e) {
       console.warn("Failed to save unlocked card", e);
     }
+  },
+
+  // Relics
+  getUnlockedRelics: (): string[] => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_UNLOCKED_RELICS);
+      return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+      return [];
+    }
+  },
+  saveUnlockedRelic: (relicId: string) => {
+    try {
+      const current = storageService.getUnlockedRelics();
+      if (!current.includes(relicId)) {
+        const updated = [...current, relicId];
+        localStorage.setItem(STORAGE_KEY_UNLOCKED_RELICS, JSON.stringify(updated));
+      }
+    } catch (e) { console.warn(e); }
+  },
+
+  // Potions
+  getUnlockedPotions: (): string[] => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_UNLOCKED_POTIONS);
+      return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+      return [];
+    }
+  },
+  saveUnlockedPotion: (potionId: string) => {
+    try {
+      const current = storageService.getUnlockedPotions();
+      if (!current.includes(potionId)) {
+        const updated = [...current, potionId];
+        localStorage.setItem(STORAGE_KEY_UNLOCKED_POTIONS, JSON.stringify(updated));
+      }
+    } catch (e) { console.warn(e); }
+  },
+
+  // Defeated Enemies (Bestiary)
+  getDefeatedEnemies: (): string[] => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_DEFEATED_ENEMIES);
+      return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+      return [];
+    }
+  },
+  saveDefeatedEnemy: (enemyName: string) => {
+    try {
+      const current = storageService.getDefeatedEnemies();
+      if (!current.includes(enemyName)) {
+        const updated = [...current, enemyName];
+        localStorage.setItem(STORAGE_KEY_DEFEATED_ENEMIES, JSON.stringify(updated));
+      }
+    } catch (e) { console.warn(e); }
   },
 
   // --- Clear Count (Unlock Characters) ---
@@ -146,6 +208,9 @@ export const storageService = {
 
   resetProgress: () => {
       localStorage.removeItem(STORAGE_KEY_UNLOCKED_CARDS);
+      localStorage.removeItem(STORAGE_KEY_UNLOCKED_RELICS);
+      localStorage.removeItem(STORAGE_KEY_UNLOCKED_POTIONS);
+      localStorage.removeItem(STORAGE_KEY_DEFEATED_ENEMIES);
       localStorage.removeItem(STORAGE_KEY_GAME_STATE);
       localStorage.removeItem(STORAGE_KEY_CLEAR_COUNT);
       localStorage.removeItem(STORAGE_KEY_RANKING);

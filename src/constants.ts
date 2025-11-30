@@ -165,6 +165,76 @@ const GARDENER_SVG = `
 
 export const HERO_IMAGE_DATA = `data:image/svg+xml;base64,${btoa(WARRIOR_SVG)}`;
 
+// --- ENEMIES (Compendium Data) ---
+export const ENEMY_LIBRARY: Record<string, { name: string, description: string, tier: 1 | 2 | 3 }> = {
+    // Tier 1
+    "野良犬": { name: "野良犬", description: "校庭を徘徊する犬。腹を空かせている。", tier: 1 },
+    "意地悪なカラス": { name: "意地悪なカラス", description: "光るものが好きで、生徒の持ち物を狙っている。", tier: 1 },
+    "消しゴムのカス": { name: "消しゴムのカス", description: "勉強の怨念が集合して生まれた存在。", tier: 1 },
+    "グレムリン": { name: "グレムリン", description: "いたずら好きの小悪魔。機械を壊すのが得意。", tier: 1 },
+    "スズメバチ": { name: "スズメバチ", description: "巣を守るために攻撃してくる危険な虫。", tier: 1 },
+    "掃除サボり魔": { name: "掃除サボり魔", description: "ホウキを持って立っているだけで何もしない生徒の霊。", tier: 1 },
+    "迷子の幽霊": { name: "迷子の幽霊", description: "自分のクラスが分からなくなって泣いている。", tier: 1 },
+    "暴走した三輪車": { name: "暴走した三輪車", description: "乗り主がいなくても勝手に走り回る。", tier: 1 },
+    "凶暴なハムスター": { name: "凶暴なハムスター", description: "飼育小屋から脱走した。噛む力が強い。", tier: 1 },
+    "画鋲の妖精": { name: "画鋲の妖精", description: "上履きの中に潜む邪悪な妖精。", tier: 1 },
+    "埃の塊": { name: "埃の塊", description: "教室の隅に溜まった埃が意思を持った。", tier: 1 },
+    "放置された傘": { name: "放置された傘", description: "雨の日に置き去りにされた悲しみが動力源。", tier: 1 },
+    "裏庭のミミズ": { name: "裏庭のミミズ", description: "巨大化したミミズ。土を掘り返す。", tier: 1 },
+    "給食の残りカス": { name: "給食の残りカス", description: "好き嫌いされた食べ物の成れの果て。", tier: 1 },
+    "校庭の雑草": { name: "校庭の雑草", description: "抜いても抜いても生えてくる根性がある。", tier: 1 },
+    "ちぎれたノート": { name: "ちぎれたノート", description: "勉強へのストレスが書き殴られている。", tier: 1 },
+    "さまよう上履き": { name: "さまよう上履き", description: "持ち主を探して夜の廊下を歩く。", tier: 1 },
+    "水槽の金魚": { name: "水槽の金魚", description: "水槽から飛び出して攻撃してくる。", tier: 1 },
+    "忘れられたリコーダー": { name: "リコーダー", description: "深夜に勝手に音を奏でる。", tier: 1 },
+    "実験失敗スライム": { name: "実験失敗スライム", description: "理科の実験で偶然生まれたネバネバ。", tier: 1 },
+
+    // Tier 2
+    "宿題の悪魔": { name: "宿題の悪魔", description: "終わらない宿題のプレッシャーが具現化。", tier: 2 },
+    "給食泥棒": { name: "給食泥棒", description: "人気のデザートだけを狙う不届き者。", tier: 2 },
+    "動く人体模型": { name: "動く人体模型", description: "理科室の主。夜になると動き出す。", tier: 2 },
+    "トイレの花子さん": { name: "トイレの花子さん", description: "３番目の個室に住んでいる有名な幽霊。", tier: 2 },
+    "イジワルな上級生": { name: "イジワルな上級生", description: "廊下を占領している。力が強い。", tier: 2 },
+    "リコーダーの亡霊": { name: "リコーダーの亡霊", description: "下手な演奏で精神を削ってくる。", tier: 2 },
+    "チョーク・ゴーレム": { name: "チョーク・ゴーレム", description: "大量のチョークが合体した怪物。", tier: 2 },
+    "跳び箱ミミック": { name: "跳び箱ミミック", description: "跳ぼうとすると口を開けて噛み付く。", tier: 2 },
+    "反復横跳びマン": { name: "反復横跳びマン", description: "残像が見えるほどの速さで動く。", tier: 2 },
+    "図書室の主": { name: "図書室の主", description: "本を汚す者を許さない厳格な霊。", tier: 2 },
+    "音楽室の肖像画": { name: "音楽室の肖像画", description: "目が動く。夜になると歌い出す。", tier: 2 },
+    "理科室の骸骨": { name: "理科室の骸骨", description: "骨格標本。カチャカチャと音を立てる。", tier: 2 },
+    "家庭科室の包丁": { name: "家庭科室の包丁", description: "錆びついた包丁が宙を舞う。", tier: 2 },
+    "プールサイドの影": { name: "プールサイドの影", description: "水辺に潜む黒い影。引きずり込もうとする。", tier: 2 },
+    "焼却炉の精霊": { name: "焼却炉の精霊", description: "燃え盛る炎の精霊。熱い。", tier: 2 },
+    "放送室の怪人": { name: "放送室の怪人", description: "不気味な校内放送を流す犯人。", tier: 2 },
+    "保健室の偽医者": { name: "保健室の偽医者", description: "怪しい薬を飲ませようとしてくる。", tier: 2 },
+    "体育館のバスケットボール": { name: "バスケットボール", description: "ドリブルの音が止まらない。", tier: 2 },
+    "呪いの日本人形": { name: "呪いの日本人形", description: "髪が伸び続ける不気味な人形。", tier: 2 },
+    "巨大ムカデ": { name: "巨大ムカデ", description: "校舎の裏に潜む巨大な虫。", tier: 2 },
+
+    // Tier 3 / Elite / Boss
+    "体育の先生": { name: "体育の先生", description: "竹刀を持った鬼教師。精神論が好き。", tier: 3 },
+    "教頭先生": { name: "教頭先生", description: "長い説教で生徒を眠らせる。", tier: 3 },
+    "終わらない宿題": { name: "終わらない宿題", description: "やってもやっても増え続ける絶望。", tier: 3 },
+    "伝説の不良": { name: "伝説の不良", description: "かつて学校を支配した番長。", tier: 3 },
+    "激怒した用務員さん": { name: "用務員さん", description: "廊下を走る生徒を決して許さない。", tier: 3 },
+    "修学旅行の枕投げ": { name: "修学旅行の枕投げ", description: "高速で飛来する枕の嵐。", tier: 3 },
+    "校門の守護者": { name: "校門の守護者", description: "遅刻した生徒を阻む鉄壁の門。", tier: 3 },
+    "PTA会長": { name: "PTA会長", description: "学校の方針に口を出す最強の権力者。", tier: 3 },
+    "期末テストの化身": { name: "期末テストの化身", description: "赤点の恐怖を具現化した存在。", tier: 3 },
+    "部活の鬼顧問": { name: "部活の鬼顧問", description: "休みなしの練習を強要する。", tier: 3 },
+    "無限の廊下": { name: "無限の廊下", description: "走っても走っても出口にたどり着かない。", tier: 3 },
+    "真夜中のチャイム": { name: "真夜中のチャイム", description: "鳴るはずのない時間に鳴り響く音。", tier: 3 },
+    "卒業式の幻影": { name: "卒業式の幻影", description: "別れの悲しみが形になったもの。", tier: 3 },
+    "通知表の悪夢": { name: "通知表の悪夢", description: "オール1の恐怖。", tier: 3 },
+    "闇の教育委員会": { name: "闇の教育委員会", description: "理不尽な校則を作る黒幕。", tier: 3 },
+    "伝説の用務員": { name: "伝説の用務員", description: "学校の全ての秘密を知る男。", tier: 3 },
+    "禁断の参考書": { name: "禁断の参考書", description: "開くと頭がおかしくなる本。", tier: 3 },
+    "校舎の古龍": { name: "校舎の古龍", description: "開校以来、地下に眠っていたドラゴン。", tier: 3 },
+    "時間を食べる時計": { name: "時間を食べる時計", description: "授業時間を永遠に引き伸ばす。", tier: 3 },
+    "異界からの転校生": { name: "異界からの転校生", description: "教科書には載っていない魔法を使う。", tier: 3 },
+    "校長先生": { name: "校長先生", description: "この学校の全てを統べるラスボス。話が長い。", tier: 3 },
+};
+
 // --- RELICS (School Theme) ---
 export const RELIC_LIBRARY: Record<string, Relic> = {
     // STARTER
