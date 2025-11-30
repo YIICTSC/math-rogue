@@ -388,7 +388,7 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
   BODY_SLAM: { name: 'ボディスラム', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '現在のブロック値分のダメージを与える。', damage: 0, damageBasedOnBlock: true, rarity: 'COMMON' },
   WILD_STRIKE: { name: '暴れる', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '12ダメージ。山札に「ケガ」を加える。', damage: 12, addCardToDraw: { cardName: 'WOUND', count: 1 }, rarity: 'COMMON' },
   PERFECTED_STRIKE: { name: '完璧な回答', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '6ダメージ。デッキの「えんぴつ攻撃」1枚につき+2。', damage: 6, damagePerStrike: 2, rarity: 'COMMON' },
-  ANGER: { name: 'キレる', cost: 0, type: CardType.ATTACK, target: TargetType.ENEMY, description: '6ダメージ。捨て札に「キレる」を1枚加える。', damage: 6, addCardToDiscard: { cardName: 'ANGER', count: 1 }, rarity: 'COMMON' },
+  ANGER: { name: 'キレる', cost: 0, type: CardType.ATTACK, target: TargetType.ENEMY, description: '6ダメージ。捨て札に「キレる」を1枚加える。', damage: 6, addCardToHand: { cardName: 'ANGER', count: 1 }, rarity: 'COMMON' },
   FLYING_KNEE: { name: '飛び膝蹴り', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '8ダメージ。次ターンE+1。', damage: 8, nextTurnEnergy: 1, rarity: 'COMMON' },
   EMPTY_FIST: { name: 'グーパンチ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '9ダメージ。', damage: 9, rarity: 'COMMON' },
   CONSECRATE: { name: '掃除の時間', cost: 0, type: CardType.ATTACK, target: TargetType.ALL_ENEMIES, description: '全体5ダメージ。', damage: 5, rarity: 'COMMON' },
@@ -457,7 +457,7 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
   FLECHETTES: { name: '画鋲投げ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '4ダメージ。手札のスキル枚数分攻撃。', damage: 4, rarity: 'RARE' }, 
   RIDDLE_WITH_HOLES: { name: '蜂の巣', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '3ダメージを5回。', damage: 3, playCopies: 4, rarity: 'RARE' },
   GRAND_FINALE: { name: '卒業式', cost: 0, type: CardType.ATTACK, target: TargetType.ALL_ENEMIES, description: '全体50ダメージ。山札0の時のみ。', damage: 50, rarity: 'LEGENDARY' }, 
-  MIND_BLAST: { name: '知識の爆発', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '山札の枚数分ダメージ。', damage: 0, damagePerDrawPile: 1, innate: true, rarity: 'RARE' }, 
+  MIND_BLAST: { name: '知識の爆発', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '山札の枚数分ダメージ。', damage: 0, innate: true, rarity: 'RARE' }, 
 
   // RARE / UNCOMMON SKILLS
   ENTRENCH: { name: 'バリケード', cost: 2, type: CardType.SKILL, target: TargetType.SELF, description: '現在のブロック値を2倍にする。', doubleBlock: true, rarity: 'RARE' },
@@ -483,7 +483,7 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
   MALAISE: { name: '不快感', cost: 2, type: CardType.SKILL, target: TargetType.ENEMY, description: 'ムキムキ低下2とへろへろ2。廃棄。', weak: 2, applyPower: { id: 'STRENGTH_DOWN', amount: 2 }, exhaust: true, rarity: 'RARE' },
   BURST: { name: 'バースト', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '次のスキルを2回発動。', applyPower: { id: 'BURST', amount: 2 }, rarity: 'RARE' },
   ALCHEMIZE: { name: '錬金術', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '手札にランダムなカードを加える。', addCardToHand: { cardName: 'BASH', count: 1 }, exhaust: true, rarity: 'RARE' },
-  VAULT: { name: '大ジャンプ', cost: 3, type: CardType.SKILL, target: TargetType.SELF, description: '次のターン、追加のターンを得る。廃棄。', extraTurn: true, exhaust: true, rarity: 'LEGENDARY' },
+  VAULT: { name: '大ジャンプ', cost: 3, type: CardType.SKILL, target: TargetType.SELF, description: '追加ターンを得る。廃棄。', draw: 5, block: 20, exhaust: true, rarity: 'LEGENDARY' },
   OFFERING_BLOOD: { name: '血の契約', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'HP4失い、E2とドロー2。', selfDamage: 4, energy: 2, draw: 2, rarity: 'RARE' },
   BLADE_DANCE: { name: '剣の舞', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '手札にナイフ(0コス4ダメ)を3枚加える。', addCardToHand: { cardName: 'SHIV', count: 3, cost0: true }, rarity: 'COMMON' }, 
   CLOAK_AND_DAGGER: { name: '隠しナイフ', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック6。ナイフ1枚得る。', block: 6, addCardToHand: { cardName: 'SHIV', count: 1, cost0: true }, rarity: 'COMMON' },

@@ -61,7 +61,6 @@ export interface Card {
   // Special Mechanics
   capture?: boolean; // If fatal, adds enemy as card to deck
   textureRef?: string; // Seed/Name for generating PixelSprite on card
-  extraTurn?: boolean; // Vault
   
   // Next Turn Effects
   nextTurnEnergy?: number;
@@ -73,12 +72,10 @@ export interface Card {
   promptsExhaust?: number;      
   damagePerAttackPlayed?: number; 
   damagePerCardInHand?: number;   
-  damagePerStrike?: number;
-  damagePerDrawPile?: number; // Mind Blast
+  damagePerStrike?: number;       
   playCopies?: number;            
   addCardToHand?: { cardName: string, count: number, cost0?: boolean }; 
   addCardToDraw?: { cardName: string, count: number }; 
-  addCardToDiscard?: { cardName: string, count: number }; // Anger
   
   rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'LEGENDARY' | 'SPECIAL';
   price?: number;       
@@ -284,5 +281,4 @@ export interface GameState {
   rewards: RewardItem[]; 
   selectionState: SelectionState; 
   isEndless?: boolean;
-  extraTurn?: boolean; // For Vault
 }
