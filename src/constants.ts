@@ -174,7 +174,7 @@ export const RELIC_LIBRARY: Record<string, Relic> = {
     MEGAPHONE: { id: 'MEGAPHONE', name: '校内放送マイク', description: '戦闘開始時、敵全体をびくびく1にする。', rarity: 'STARTER' },
     // NEW STARTERS
     HACHIMAKI: { id: 'HACHIMAKI', name: '必勝ハチマキ', description: '戦闘開始時、カチカチ1を得る。', rarity: 'STARTER' },
-    BOOKMARK: { id: 'BOOKMARK', name: '図書室のしおり', description: 'ターン終了時、カードを1枚保留する。', rarity: 'STARTER' }, // Keep simple or modify
+    BOOKMARK: { id: 'BOOKMARK', name: '図書室のしおり', description: 'ターン終了時、カードを1枚保留する。', rarity: 'STARTER' }, 
     BIG_LADLE: { id: 'BIG_LADLE', name: '巨大なお玉', description: '戦闘開始時、最大HP+4(一時的)を得る。', rarity: 'STARTER' },
     WHISTLE: { id: 'WHISTLE', name: '魔法の笛', description: '戦闘開始時、ランダムな攻撃カード(コスト0)を1枚手札に加える。', rarity: 'STARTER' },
     SEED_PACK: { id: 'SEED_PACK', name: '謎の種', description: '戦闘開始時、トゲトゲ3を得る。', rarity: 'STARTER' },
@@ -459,12 +459,12 @@ export const CHARACTERS: Character[] = [
     {
         id: 'WARRIOR',
         name: 'わんぱく小学生',
-        description: '元気いっぱい。攻守のバランスが良い基本デッキ。',
+        description: '「ランドセルタックル」と「往復ビンタ」でガンガン攻める攻撃型！',
         maxHp: 80,
         gold: 100,
         startingRelicId: 'BURNING_BLOOD',
         color: 'red',
-        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'BASH', 'IRON_WAVE'], // Classic Balanced
+        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'BASH', 'TWIN_STRIKE'],
         imageData: `data:image/svg+xml;base64,${btoa(WARRIOR_SVG)}`
     },
     {
@@ -475,84 +475,84 @@ export const CHARACTERS: Character[] = [
         gold: 100,
         startingRelicId: 'WHISTLE',
         color: 'amber',
-        deckTemplate: ['STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'CLOAK_AND_DAGGER', 'BLADE_DANCE', 'ACCURACY', 'CAPTURE_NET'], // Kept unique capture mechanic
+        deckTemplate: ['STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'CLOAK_AND_DAGGER', 'BLADE_DANCE', 'ACCURACY', 'CAPTURE_NET'], 
         imageData: `data:image/svg+xml;base64,${btoa(CARETAKER_SVG)}`
     },
     {
         id: 'ASSASSIN',
         name: '転校生',
-        description: '毒とナイフの手数で攻める。初期から強力な毒カードを持つ。',
+        description: '「毒舌」で相手を毒状態にしてジワジワ追い詰めるテクニカル型。',
         maxHp: 70,
         gold: 100,
         startingRelicId: 'SNAKE_RING',
         color: 'green',
-        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'NEUTRALIZE', 'POISON_STAB', 'BANE'], // Poison Synergy
+        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'NEUTRALIZE', 'POISON_STAB'], 
         imageData: `data:image/svg+xml;base64,${btoa(ASSASSIN_SVG)}`
     },
     {
         id: 'MAGE',
         name: '理科クラブ部長',
-        description: '実験（コスト0カード）とエネルギー操作が得意。',
+        description: 'コスト0の「レーザー」とエネルギーを溜める「静電気」で手数を稼ぐ。',
         maxHp: 65,
         gold: 100,
         startingRelicId: 'HOLY_WATER',
         color: 'blue',
-        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'BEAM_CELL', 'TURBO', 'BALL_LIGHTNING'], // 0-cost & Energy
+        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'BEAM_CELL', 'BALL_LIGHTNING'], 
         imageData: `data:image/svg+xml;base64,${btoa(MAGE_SVG)}`
     },
     {
         id: 'DODGEBALL',
         name: 'ドッジボールのエース',
-        description: 'カードを引いて捨てて、デッキを回転させるスピードタイプ。',
+        description: 'カードを引いて捨てる「チョーク投げ」でデッキを回転させるスピードタイプ。',
         maxHp: 75,
         gold: 100,
         startingRelicId: 'HACHIMAKI',
         color: 'orange',
-        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'QUICK_SLASH', 'BACKFLIP', 'ACROBATICS', 'PREPARED'], // Draw/Discard
+        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'DAGGER_THROW', 'ACROBATICS'], 
         imageData: `data:image/svg+xml;base64,${btoa(DODGEBALL_SVG)}`
     },
     {
         id: 'BARD',
         name: '放送委員',
-        description: '全体攻撃とデバフで戦場を支配する。',
+        description: '「大声」で敵全体にダメージを与え、さらに弱体化させる。',
         maxHp: 68,
         gold: 100,
         startingRelicId: 'MEGAPHONE', 
         color: 'yellow',
-        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'THUNDERCLAP', 'PIERCING_WAIL', 'CLEAVE'], // AOE & Debuff
+        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'THUNDERCLAP', 'PIERCING_WAIL'],
         imageData: `data:image/svg+xml;base64,${btoa(BARD_SVG)}`
     },
     {
         id: 'LIBRARIAN',
         name: '図書委員',
-        description: '「予習（保留・ブロック）」で機会を伺う晩成型。',
+        description: '「予習（ブロック＆保留）」で次のターンに備える慎重派。',
         maxHp: 60,
         gold: 120,
         startingRelicId: 'BOOKMARK',
         color: 'purple',
-        deckTemplate: ['STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'GLACIER', 'THIRD_EYE', 'SCRY'], // Block & Scry
+        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'THIRD_EYE', 'SHRUG_IT_OFF'], 
         imageData: `data:image/svg+xml;base64,${btoa(LIBRARIAN_SVG)}`
     },
     {
         id: 'CHEF',
         name: '給食当番リーダー',
-        description: '回復しつつ、筋力を上げて殴るパワフルなスタイル。',
+        description: '「発火」でムキムキになり、「重いバット」で超火力を叩き出す！',
         maxHp: 85,
         gold: 100,
         startingRelicId: 'BIG_LADLE',
         color: 'pink',
-        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'INFLAME', 'HEAVY_BLADE'], // Strength Scaling
+        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'INFLAME', 'HEAVY_BLADE'], 
         imageData: `data:image/svg+xml;base64,${btoa(CHEF_SVG)}`
     },
     {
         id: 'GARDENER',
         name: '園芸委員',
-        description: '守りを固め、トゲトゲで反撃する耐久型。',
+        description: 'ブロックを固めて「ボディスラム」で反撃する鉄壁の守り。',
         maxHp: 78,
         gold: 100,
         startingRelicId: 'SEED_PACK',
         color: 'lime',
-        deckTemplate: ['STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'ENTRENCH', 'BODY_SLAM', 'IRON_WAVE'], // Block Body Slam
+        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'IRON_WAVE', 'BODY_SLAM'],
         imageData: `data:image/svg+xml;base64,${btoa(GARDENER_SVG)}`
     }
 ];
