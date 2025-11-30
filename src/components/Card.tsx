@@ -1,4 +1,5 @@
 
+
 import React, { useState, useRef } from 'react';
 import { Card as CardType, CardType as EnumCardType } from '../types';
 import PixelSprite from './PixelSprite';
@@ -124,6 +125,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled }) => {
   const renderDescription = () => {
       let desc = card.description;
       
+      // Dynamic replacement logic
       if (card.damage !== undefined) {
           desc = desc.replace(/(\d+)ダメージ/g, `${card.damage}ダメージ`);
       }
@@ -168,14 +170,14 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled }) => {
     >
       {/* Tooltip */}
       {showTooltip && activeKeywords.length > 0 && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-48 bg-black border-2 border-white p-2 z-[100] shadow-2xl pointer-events-none">
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-56 bg-black border-4 border-white p-3 z-[100] shadow-2xl pointer-events-none rounded-lg">
           {activeKeywords.map((k, idx) => (
             <div key={k.title} className={`text-left ${idx !== activeKeywords.length - 1 ? 'mb-2 border-b border-gray-700 pb-1' : ''}`}>
-              <div className="text-yellow-400 font-bold text-xs">{k.title}</div>
-              <div className="text-gray-300 text-[10px] leading-tight">{k.desc}</div>
+              <div className="text-yellow-400 font-bold text-sm">{k.title}</div>
+              <div className="text-gray-300 text-xs leading-relaxed">{k.desc}</div>
             </div>
           ))}
-          <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-white"></div>
+          <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-white"></div>
         </div>
       )}
 
