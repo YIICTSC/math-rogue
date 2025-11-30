@@ -11,6 +11,7 @@ interface PixelSpriteProps {
 // 16x16 Sprite Templates
 // . = Empty, # = Main Color, % = Secondary/Highlight, @ = Outline/Black
 const SPRITE_TEMPLATES: Record<string, string[]> = {
+  // --- EXISTING TEMPLATES ---
   SLIME: [
     "................",
     "................",
@@ -47,6 +48,62 @@ const SPRITE_TEMPLATES: Record<string, string[]> = {
     ".##.......##....",
     "................"
   ],
+  // NEW: Pompadour Hairstyle for "Senior/Delinquent"
+  SENIOR: [
+    "....######......",
+    "...########.....",
+    ".....#%%%%#.....",
+    "....#%@%%@%#....",
+    ".....#%%%%#.....",
+    "......####......",
+    ".....##..##.....",
+    "....#%####%#....",
+    "...#%######%#...",
+    "...#%##..##%#...",
+    "...####..####...",
+    "...##......##...",
+    "..##........##..",
+    "..##........##..",
+    ".##..........##.",
+    "................"
+  ],
+  // NEW: Long Hair for "Hanako/Girl"
+  GIRL: [
+    ".....######.....",
+    "....########....",
+    "...##%@%%@%##...",
+    "...##%%%%%%##...",
+    "...###%%%%###...",
+    "..####%%%%####..",
+    "..#..######..#..",
+    ".....#%##%#.....",
+    "....#%####%#....",
+    "....#%####%#....",
+    "....########....",
+    ".....##..##.....",
+    ".....##..##.....",
+    "....##....##....",
+    "................",
+    "................"
+  ],
+  // NEW: Holding a Stick/Book for "Teacher"
+  TEACHER: [
+    "................",
+    "......####......",
+    ".....#%%%%#.....",
+    "....#%@%@%%#....",
+    ".....#%%%%#.....",
+    "......####......",
+    ".....##..##.....",
+    "....#%####%#....",
+    "....#%####%#....",
+    "...#%#####%#....",
+    "...##########...",
+    "..##.##..##.....",
+    ".....##..##.....",
+    ".....##..##.....",
+    "....##....##....",
+    "...##..........."],
   CULTIST: [
     "................",
     "......##........",
@@ -446,8 +503,11 @@ const PixelSprite: React.FC<PixelSpriteProps> = ({ seed, name = "", className, s
     const n = shapeKeySource;
     
     // School / Theme mapping
-    if (n.includes('先生') || n.includes('用務員') || n.includes('上級生') || n.includes('不良') || n.includes('不審者') || n.includes('PTA')) spriteKey = 'HUMANOID';
-    else if (n.includes('花子') || n.includes('亡霊') || n.includes('幽霊') || n.includes('魂') || n.includes('影')) spriteKey = 'GHOST';
+    if (n.includes('上級生') || n.includes('不良') || n.includes('不審者') || n.includes('番長')) spriteKey = 'SENIOR';
+    else if (n.includes('花子') || n.includes('少女') || n.includes('マネージャー')) spriteKey = 'GIRL';
+    else if (n.includes('先生') || n.includes('教頭') || n.includes('校長') || n.includes('顧問') || n.includes('医者')) spriteKey = 'TEACHER';
+    else if (n.includes('用務員') || n.includes('PTA') || n.includes('大人')) spriteKey = 'HUMANOID'; // Default humanoid
+    else if (n.includes('亡霊') || n.includes('幽霊') || n.includes('魂') || n.includes('影')) spriteKey = 'GHOST';
     else if (n.includes('人体模型') || n.includes('ゴーレム') || n.includes('像') || n.includes('ロボ')) spriteKey = 'SKELETON';
     else if (n.includes('ミミック') || n.includes('スライム') || n.includes('塊') || n.includes('カス') || n.includes('ヘドロ')) spriteKey = 'SLIME';
     else if (n.includes('犬') || n.includes('ハムスター') || n.includes('ウサギ') || n.includes('ネズミ') || n.includes('獣')) spriteKey = 'BEAST';
@@ -457,7 +517,7 @@ const PixelSprite: React.FC<PixelSpriteProps> = ({ seed, name = "", className, s
     else if (n.includes('ノート') || n.includes('宿題') || n.includes('辞書') || n.includes('本')) spriteKey = 'NOTEBOOK';
     else if (n.includes('ランドセル') || n.includes('バッグ')) spriteKey = 'BACKPACK';
     else if (n.includes('上履き') || n.includes('靴')) spriteKey = 'SHOE';
-    else if (n.includes('校長') || n.includes('教頭') || n.includes('主') || n.includes('ボス') || n.includes('王') || n.includes('古龍')) spriteKey = 'BOSS';
+    else if (n.includes('ボス') || n.includes('王') || n.includes('古龍')) spriteKey = 'BOSS';
     else if (n.includes('悪魔') || n.includes('狂信者') || n.includes('ピエロ')) spriteKey = 'CULTIST';
     else if (n.includes('司祭') || n.includes('妖精') || n.includes('魔道士')) spriteKey = 'WIZARD';
     else if (n.includes('蜘蛛') || n.includes('ムカデ') || n.includes('虫') || n.includes('甲虫')) spriteKey = 'SPIDER';
@@ -468,7 +528,6 @@ const PixelSprite: React.FC<PixelSpriteProps> = ({ seed, name = "", className, s
     else if (n.includes('盾') || n.includes('守り')) spriteKey = 'SHIELD';
     else if (n.includes('剣') || n.includes('刃') || n.includes('ナイフ') || n.includes('包丁')) spriteKey = 'SWORD';
     else if (n.includes('薬') || n.includes('瓶')) spriteKey = 'POTION';
-    else spriteKey = 'HUMANOID';
     
     // Fallback if specific sprite key was passed directly (e.g. from synthesis result)
     if (SPRITE_TEMPLATES[shapeKeySource]) spriteKey = shapeKeySource;
@@ -506,7 +565,7 @@ const PixelSprite: React.FC<PixelSpriteProps> = ({ seed, name = "", className, s
         else if (c.includes('カス') || c.includes('骸骨') || c.includes('模型') || c.includes('ゴーレム') || c.includes('石')) palette = palettes[3]; // Grey
         else if (c.includes('花子') || c.includes('幽霊') || c.includes('毒') || c.includes('紫')) palette = palettes[4]; // Purple
         else if (c.includes('犬') || c.includes('ハムスター') || c.includes('机') || c.includes('木')) palette = palettes[5]; // Brown
-        else if (c.includes('カラス') || c.includes('墨') || c.includes('影')) palette = ['#212121', '#424242', '#000000']; // Black
+        else if (c.includes('カラス') || c.includes('墨') || c.includes('影') || c.includes('上級生') || c.includes('不良')) palette = ['#212121', '#424242', '#000000']; // Black
         else if (c.includes('チョーク') || c.includes('ノート') || c.includes('上履き') || c.includes('雪')) palette = ['#EEEEEE', '#FFFFFF', '#BDBDBD']; // White
         else if (c.includes('虫') || c.includes('草') || c.includes('森')) palette = palettes[0]; // Green
         else if (c.includes('電気') || c.includes('光') || c.includes('金')) palette = palettes[7]; // Yellow

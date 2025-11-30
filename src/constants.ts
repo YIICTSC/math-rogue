@@ -459,100 +459,100 @@ export const CHARACTERS: Character[] = [
     {
         id: 'WARRIOR',
         name: 'わんぱく小学生',
-        description: '元気いっぱい。赤白帽がトレードマーク。バランスが良い。',
+        description: '元気いっぱい。攻守のバランスが良い基本デッキ。',
         maxHp: 80,
         gold: 100,
         startingRelicId: 'BURNING_BLOOD',
         color: 'red',
-        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'BASH'],
+        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'BASH', 'IRON_WAVE'], // Classic Balanced
         imageData: `data:image/svg+xml;base64,${btoa(WARRIOR_SVG)}`
     },
     {
         id: 'CARETAKER',
         name: '飼育委員',
-        description: '動物と心を通わす。敵をカードにして仲間にできる。',
+        description: '「捕獲網」で敵をカード化して仲間にするユニークな戦術。',
         maxHp: 72,
         gold: 100,
         startingRelicId: 'WHISTLE',
         color: 'amber',
-        deckTemplate: ['STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'CLOAK_AND_DAGGER', 'BLADE_DANCE', 'ACCURACY', 'CAPTURE_NET'],
+        deckTemplate: ['STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'CLOAK_AND_DAGGER', 'BLADE_DANCE', 'ACCURACY', 'CAPTURE_NET'], // Kept unique capture mechanic
         imageData: `data:image/svg+xml;base64,${btoa(CARETAKER_SVG)}`
     },
     {
         id: 'ASSASSIN',
         name: '転校生',
-        description: 'ミステリアスな転校生。ドクドク（悪口）や手数を操る。',
+        description: '毒とナイフの手数で攻める。初期から強力な毒カードを持つ。',
         maxHp: 70,
         gold: 100,
         startingRelicId: 'SNAKE_RING',
         color: 'green',
-        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'NEUTRALIZE', 'POISON_STAB'],
+        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'NEUTRALIZE', 'POISON_STAB', 'BANE'], // Poison Synergy
         imageData: `data:image/svg+xml;base64,${btoa(ASSASSIN_SVG)}`
     },
     {
         id: 'MAGE',
         name: '理科クラブ部長',
-        description: '実験が大好き。エネルギー（やる気）を操作する。',
+        description: '実験（コスト0カード）とエネルギー操作が得意。',
         maxHp: 65,
         gold: 100,
-        startingRelicId: 'HOLY_WATER', // +1 Energy
+        startingRelicId: 'HOLY_WATER',
         color: 'blue',
-        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'BALL_LIGHTNING', 'TURBO'],
+        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'BEAM_CELL', 'TURBO', 'BALL_LIGHTNING'], // 0-cost & Energy
         imageData: `data:image/svg+xml;base64,${btoa(MAGE_SVG)}`
     },
     {
         id: 'DODGEBALL',
         name: 'ドッジボールのエース',
-        description: 'クラスの人気者。身軽さを活かして攻撃をかわしつつ連撃を決める。',
+        description: 'カードを引いて捨てて、デッキを回転させるスピードタイプ。',
         maxHp: 75,
         gold: 100,
         startingRelicId: 'HACHIMAKI',
         color: 'orange',
-        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'QUICK_SLASH', 'BACKFLIP', 'ACROBATICS'],
+        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'QUICK_SLASH', 'BACKFLIP', 'ACROBATICS', 'PREPARED'], // Draw/Discard
         imageData: `data:image/svg+xml;base64,${btoa(DODGEBALL_SVG)}`
     },
     {
         id: 'BARD',
         name: '放送委員',
-        description: '校内放送で皆を支配する。デバフのスペシャリスト。',
+        description: '全体攻撃とデバフで戦場を支配する。',
         maxHp: 68,
         gold: 100,
         startingRelicId: 'MEGAPHONE', 
         color: 'yellow',
-        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'THUNDERCLAP', 'PIERCING_WAIL'],
+        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'THUNDERCLAP', 'PIERCING_WAIL', 'CLEAVE'], // AOE & Debuff
         imageData: `data:image/svg+xml;base64,${btoa(BARD_SVG)}`
     },
     {
         id: 'LIBRARIAN',
         name: '図書委員',
-        description: '静かな読書家。知識（カード）を蓄えて戦う晩成型。',
+        description: '「予習（保留・ブロック）」で機会を伺う晩成型。',
         maxHp: 60,
         gold: 120,
         startingRelicId: 'BOOKMARK',
         color: 'purple',
-        deckTemplate: ['STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'GLACIER', 'SCRY', 'SKIM'],
+        deckTemplate: ['STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'GLACIER', 'THIRD_EYE', 'SCRY'], // Block & Scry
         imageData: `data:image/svg+xml;base64,${btoa(LIBRARIAN_SVG)}`
     },
     {
         id: 'CHEF',
         name: '給食当番リーダー',
-        description: 'みんなの胃袋を掴む。回復と一時的な体力強化が得意。',
+        description: '回復しつつ、筋力を上げて殴るパワフルなスタイル。',
         maxHp: 85,
         gold: 100,
         startingRelicId: 'BIG_LADLE',
         color: 'pink',
-        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'FEED', 'IRON_WAVE'],
+        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'INFLAME', 'HEAVY_BLADE'], // Strength Scaling
         imageData: `data:image/svg+xml;base64,${btoa(CHEF_SVG)}`
     },
     {
         id: 'GARDENER',
         name: '園芸委員',
-        description: '花壇の手入れはお手の物。トゲトゲと成長でじわじわ追い詰める。',
+        description: '守りを固め、トゲトゲで反撃する耐久型。',
         maxHp: 78,
         gold: 100,
         startingRelicId: 'SEED_PACK',
         color: 'lime',
-        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'CALTROPS', 'ENTRENCH'], // Caltrops not implemented yet, mapping to thorns logic
+        deckTemplate: ['STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'ENTRENCH', 'BODY_SLAM', 'IRON_WAVE'], // Block Body Slam
         imageData: `data:image/svg+xml;base64,${btoa(GARDENER_SVG)}`
     }
 ];
