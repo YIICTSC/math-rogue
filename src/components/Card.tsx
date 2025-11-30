@@ -1,5 +1,4 @@
 
-
 import React, { useState, useRef } from 'react';
 import { Card as CardType, CardType as EnumCardType } from '../types';
 import PixelSprite from './PixelSprite';

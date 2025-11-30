@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -67,27 +66,105 @@ export const getUpgradedCard = (card: ICard): ICard => {
     return newCard;
 };
 
+// --- CAPTURED CARD GENERATION ---
 const createCardFromEnemy = (enemy: Enemy): ICard => {
-    // Determine card stats based on enemy stats roughly
+    // Basic scaling based on max HP
     const isBoss = enemy.maxHp > 100;
+    const powerScale = Math.min(20, Math.floor(enemy.maxHp * 0.15));
+    const rarity = isBoss ? 'LEGENDARY' : 'UNCOMMON';
     
-    // Generic effect: Attack + Draw
-    // Damage scales with enemy max HP but capped
-    const dmg = Math.floor(enemy.maxHp * 0.3) + 2; 
-    
-    return {
+    const baseCard: ICard = {
         id: `captured-${enemy.id}`,
         name: enemy.name,
         cost: 1,
         type: CardType.ATTACK,
         target: TargetType.ENEMY,
-        description: `${dmg}ダメージ。カードを1枚引く。`,
-        damage: dmg,
-        draw: 1,
-        rarity: isBoss ? 'LEGENDARY' : 'UNCOMMON',
-        textureRef: enemy.name, // Use name as texture seed for PixelSprite
-        exhaust: true // Consumable feel
+        description: "",
+        rarity: rarity,
+        textureRef: enemy.name, // Use name for PixelSprite
+        exhaust: true // Default to exhaust
     };
+
+    // Customize effect based on enemy type
+    switch (enemy.enemyType) {
+        case 'TANK': // High Block & Retain-like
+            baseCard.type = CardType.SKILL;
+            baseCard.target = TargetType.SELF;
+            baseCard.block = 12 + powerScale;
+            baseCard.description = `ブロック${baseCard.block}を得る。廃棄。`;
+            baseCard.cost = 2;
+            break;
+
+        case 'GHOST': // Intangible or Debuff
+            baseCard.type = CardType.SKILL;
+            baseCard.target = TargetType.ENEMY;
+            baseCard.cost = 2;
+            baseCard.applyPower = { id: 'INTANGIBLE', amount: 1 };
+            baseCard.weak = 2;
+            baseCard.description = `敵にへろへろ2を与え、スケスケ1を得る。廃棄。`;
+            break;
+
+        case 'TEACHER': // Strength Buff
+            baseCard.type = CardType.SKILL;
+            baseCard.target = TargetType.SELF;
+            baseCard.cost = 1;
+            baseCard.strength = 2;
+            baseCard.description = `ムキムキ2を得る。廃棄。`;
+            break;
+
+        case 'AGGRESSIVE': // Multi-hit Attack
+            baseCard.type = CardType.ATTACK;
+            baseCard.cost = 1;
+            const dmgAgg = 4 + Math.floor(powerScale / 2);
+            baseCard.damage = dmgAgg;
+            baseCard.playCopies = 2; // Hits 3 times total
+            baseCard.description = `${dmgAgg}ダメージを3回与える。廃棄。`;
+            break;
+
+        case 'SWARM': // AOE Weak
+            baseCard.type = CardType.ATTACK;
+            baseCard.target = TargetType.ALL_ENEMIES;
+            baseCard.cost = 1;
+            baseCard.damage = 6 + Math.floor(powerScale / 2);
+            baseCard.weak = 1;
+            baseCard.description = `全体に${baseCard.damage}ダメージとへろへろ1。廃棄。`;
+            break;
+
+        case 'TRICKSTER': // Random Card / Draw
+            baseCard.type = CardType.SKILL;
+            baseCard.target = TargetType.SELF;
+            baseCard.cost = 0;
+            baseCard.draw = 2;
+            baseCard.addCardToHand = { cardName: 'SHIV', count: 2, cost0: true };
+            baseCard.description = `2枚引き、ナイフ2枚を手札に加える。廃棄。`;
+            break;
+        
+        case 'THE_HEART': // True Boss
+            baseCard.type = CardType.ATTACK;
+            baseCard.target = TargetType.ALL_ENEMIES;
+            baseCard.cost = 3;
+            baseCard.damage = 30;
+            baseCard.applyPower = { id: 'DEMON_FORM', amount: 3 };
+            baseCard.description = `全体30ダメージ。悪魔化3を得る。廃棄。`;
+            break;
+
+        case 'GUARDIAN': // Boss
+            baseCard.type = CardType.ATTACK;
+            baseCard.cost = 2;
+            baseCard.damage = 20;
+            baseCard.block = 20;
+            baseCard.description = `20ダメージ。ブロック20を得る。廃棄。`;
+            break;
+
+        default: // GENERIC
+            const dmg = 8 + powerScale;
+            baseCard.damage = dmg;
+            baseCard.draw = 1;
+            baseCard.description = `${dmg}ダメージ。カードを1枚引く。廃棄。`;
+            break;
+    }
+
+    return baseCard;
 };
 
 const calculateScore = (state: GameState, victory: boolean): number => {
@@ -109,12 +186,12 @@ const calculateScore = (state: GameState, victory: boolean): number => {
 // --- ENEMY DEFINITIONS & AI ---
 const determineEnemyType = (name: string, isBoss: boolean): string => {
     if (isBoss) return 'GUARDIAN'; 
-    if (name.includes('先生') || name.includes('用務員')) return 'TEACHER'; // High dmg, Buffs
-    if (name.includes('ゴーレム') || name.includes('主') || name.includes('守護者')) return 'TANK'; // High block
-    if (name.includes('亡霊') || name.includes('幽霊') || name.includes('花子')) return 'GHOST'; // Intangible/Debuff
-    if (name.includes('悪魔') || name.includes('不良') || name.includes('カラス')) return 'AGGRESSIVE'; // Multi-hit
-    if (name.includes('宿題') || name.includes('ミミック') || name.includes('泥棒')) return 'TRICKSTER'; // Debuff/Special
-    if (name.includes('虫') || name.includes('妖精') || name.includes('カス')) return 'SWARM'; // Low HP, Group
+    if (name.includes('先生') || name.includes('用務員') || name.includes('教頭')) return 'TEACHER'; // High dmg, Buffs
+    if (name.includes('ゴーレム') || name.includes('主') || name.includes('守護者') || name.includes('模型')) return 'TANK'; // High block
+    if (name.includes('亡霊') || name.includes('幽霊') || name.includes('花子') || name.includes('影')) return 'GHOST'; // Intangible/Debuff
+    if (name.includes('悪魔') || name.includes('不良') || name.includes('カラス') || name.includes('狂信者')) return 'AGGRESSIVE'; // Multi-hit
+    if (name.includes('宿題') || name.includes('ミミック') || name.includes('泥棒') || name.includes('妖精')) return 'TRICKSTER'; // Debuff/Special
+    if (name.includes('虫') || name.includes('カス') || name.includes('スライム') || name.includes('ハチ')) return 'SWARM'; // Low HP, Group
     return 'GENERIC';
 };
 
@@ -310,6 +387,12 @@ const App: React.FC = () => {
           audioService.playSound('select');
       }
   };
+
+  // ... (Keep existing startPlayerTurn, generateEvent, handleNodeSelect, etc.)
+  // We need to keep these unchanged or minimal changes. 
+  // I will omit full re-implementation of unmodified functions to save space, 
+  // but in the final output I must provide the FULL content of App.tsx as requested.
+  // Wait, the instruction says "Full content of file". I must include everything.
 
   // --- Start Player Turn ---
   const startPlayerTurn = () => {
@@ -543,7 +626,7 @@ const App: React.FC = () => {
                         currentHp: Math.floor(baseHp),
                         block: 0,
                         strength: 0,
-                        nextIntent: { type: EnemyIntentType.UNKNOWN, value: 0 }, // Will be set by getNextEnemyIntent
+                        nextIntent: { type: EnemyIntentType.UNKNOWN, value: 0 }, 
                         vulnerable: 0, weak: 0, poison: 0, artifact: 0, corpseExplosion: false,
                         floatingText: null
                     });
@@ -667,7 +750,6 @@ const App: React.FC = () => {
             audioService.playBGM('menu');
         } else if (node.type === NodeType.TREASURE) {
             const rewards: RewardItem[] = [];
-            // Matryoshka check (Double Chest)
             const count = nextState.player.relics.find(r => r.id === 'MATRYOSHKA') ? 2 : 1;
             
             for(let i=0; i<count; i++) {
@@ -1706,7 +1788,7 @@ const App: React.FC = () => {
   };
 
   const handleSynthesizeCard = (c1: ICard, c2: ICard) => {
-      // Naming Logic: 2-4 chars from start of C1 + 2-4 chars from end of C2
+      // Naming Logic
       const len1 = Math.floor(Math.random() * 3) + 2; 
       const len2 = Math.floor(Math.random() * 3) + 2; 
       
@@ -1764,14 +1846,29 @@ const App: React.FC = () => {
       if (c1.applyPower && !c2.applyPower) newApplyPower = c1.applyPower;
       else if (!c1.applyPower && c2.applyPower) newApplyPower = c2.applyPower;
       else if (c1.applyPower && c2.applyPower) {
-          // If IDs match, sum amounts.
           if (c1.applyPower.id === c2.applyPower.id) {
               newApplyPower = { id: c1.applyPower.id, amount: c1.applyPower.amount + c2.applyPower.amount };
           } else {
-              // If conflict, pick based on Rarity (roughly) or arbitrary. 
-              // Let's pick the one from the higher cost card, or random.
               newApplyPower = c1.cost > c2.cost ? c1.applyPower : c2.applyPower;
           }
+      }
+
+      // --- VISUAL SYNTHESIS FOR CAPTURED CARDS ---
+      let newTextureRef = undefined;
+      if (c1.textureRef && c2.textureRef) {
+          // Both are captured enemy cards. 
+          // Combine! Shape from C1, Color from C2.
+          // textureRef format: "ShapeSource|ColorSource"
+          
+          // If already composite, extract parts
+          const shapePart = c1.textureRef.split('|')[0];
+          const colorPart = c2.textureRef.split('|').pop(); // If composite, take the color part. If simple, takes name.
+          
+          newTextureRef = `${shapePart}|${colorPart}`;
+      } else if (c1.textureRef) {
+          newTextureRef = c1.textureRef;
+      } else if (c2.textureRef) {
+          newTextureRef = c2.textureRef;
       }
 
       // Description generation
@@ -1846,6 +1943,7 @@ const App: React.FC = () => {
           upgradeHand: newUpgradeHand,
           shuffleHandToDraw: newShuffleHandToDraw,
           applyPower: newApplyPower,
+          textureRef: newTextureRef, // Pass the composite texture ref
       };
 
       setGameState(prev => ({
@@ -1909,7 +2007,7 @@ const App: React.FC = () => {
                             </div>
 
                             <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                <Terminal size={10}/> v2.1.0
+                                <Terminal size={10}/> v2.2.0
                             </button>
                         </div>
                     </div>
@@ -1921,30 +2019,27 @@ const App: React.FC = () => {
                 <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4" onClick={() => setShowDebugLog(false)}>
                     <div className="bg-gray-900 border-2 border-green-500 p-6 rounded-lg max-w-lg w-full shadow-[0_0_20px_rgba(34,197,94,0.3)]" onClick={e => e.stopPropagation()}>
                         <h2 className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2">
-                            System Update Log v2.1
+                            System Update Log v2.2
                         </h2>
                         <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
                             <section>
-                                <h3 className="text-white font-bold mb-1">■ 飼育委員アップデート (Animal Caretaker)</h3>
+                                <h3 className="text-white font-bold mb-1">■ 捕獲システム強化 (Enhanced Capture)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li>飼育委員を初期アンロックに変更（2人目の主人公）。</li>
-                                    <li>専用カード「捕獲網」を追加。敵を倒すとカード化してデッキに加えることが可能に。</li>
-                                    <li>捕獲した敵カードには、その敵のイラストが反映されます。</li>
+                                    <li>捕獲した敵カード（飼育委員）の効果が敵タイプに応じて多彩に変化するようになりました。</li>
+                                    <li>敵タイプ: TANK(防御), GHOST(無敵), TEACHER(筋力), SWARM(全体), TRICKSTER(ドロー)など。</li>
                                 </ul>
                             </section>
                             <section>
-                                <h3 className="text-white font-bold mb-1">■ 敵・ビジュアル強化 (Enemies & Visuals)</h3>
+                                <h3 className="text-white font-bold mb-1">■ 合成ラボアップデート (Synthesis Lab)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li>敵の種類を50種類以上に大幅増加。</li>
-                                    <li>敵のピクセルアート生成パターンを追加（蜘蛛、蛇、植物、炎、目玉など）。</li>
+                                    <li>捕獲した敵カード同士を合成すると、イラストも融合するようになりました！</li>
+                                    <li>1枚目の「形」と2枚目の「色」を引き継ぎます。自分だけのキメラカードを作ろう。</li>
                                 </ul>
                             </section>
                             <section>
-                                <h3 className="text-white font-bold mb-1">■ 新機能 (New Features)</h3>
+                                <h3 className="text-white font-bold mb-1">■ ビジュアル拡張 (Visuals)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li><span className="text-yellow-400">1A1Dモード</span>: 攻撃1枚・防御1枚のみの極限デッキモード実装。</li>
-                                    <li><span className="text-yellow-400">計算モード選択</span>: たし算、ひき算、わり算、ミックスモードを選択可能に。</li>
-                                    <li><span className="text-yellow-400">ランキング</span>: ローカル保存によるスコア・履歴閲覧機能。</li>
+                                    <li>敵のスプライトパターンを追加（剣、盾、ポーション、コウモリなど）。</li>
                                 </ul>
                             </section>
                         </div>
