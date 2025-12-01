@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
-import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, ScrollText } from 'lucide-react';
+import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info } from 'lucide-react';
 import PixelSprite from './PixelSprite';
 import { audioService } from '../services/audioService';
 
@@ -21,7 +21,6 @@ interface BattleSceneProps {
   selectionState: SelectionState;
   onHandSelection: (card: ICard) => void;
   onUsePotion: (potion: Potion) => void;
-  battleLog?: string[]; // New
 }
 
 const POWER_DEFINITIONS: Record<string, {name: string, desc: string}> = {
@@ -62,12 +61,13 @@ const POWER_DEFINITIONS: Record<string, {name: string, desc: string}> = {
     STRATEGIST: { name: '戦略家', desc: 'このカードが捨てられた時、エネルギーを得る。' },
 };
 
+// Component for handling floating damage/heal numbers
 const FloatingTextOverlay: React.FC<{ data: FloatingText | null }> = ({ data }) => {
     if (!data) return null;
 
     return (
         <div 
-            key={data.id} 
+            key={data.id} // Forces re-mount to restart animation on new ID
             className={`absolute top-0 left-1/2 -translate-x-1/2 z-50 font-bold text-3xl drop-shadow-[0_2px_2px_rgba(0,0,0,1)] pointer-events-none ${data.color} flex items-center`}
             style={{ 
                 animation: 'float-up-fade 0.8s ease-out forwards'
@@ -90,18 +90,16 @@ const FloatingTextOverlay: React.FC<{ data: FloatingText | null }> = ({ data }) 
 
 const BattleScene: React.FC<BattleSceneProps> = ({ 
   player, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
-  selectionState, onHandSelection, onUsePotion, battleLog
+  selectionState, onHandSelection, onUsePotion
 }) => {
   
   const playerHpPercent = (player.currentHp / player.maxHp) * 100;
   
   const [isActing, setIsActing] = useState(false);
   const [showDeck, setShowDeck] = useState(false);
-  const [showLog, setShowLog] = useState(false);
   const [tooltip, setTooltip] = useState<{title: string, desc: string} | null>(null);
   const [potionConfirmation, setPotionConfirmation] = useState<Potion | null>(null);
   const [inspectedCard, setInspectedCard] = useState<ICard | null>(null);
-  const logEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (lastActionTime > 0) {
@@ -112,12 +110,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
       return () => clearTimeout(timer);
     }
   }, [lastActionTime]);
-
-  useEffect(() => {
-      if (showLog && logEndRef.current) {
-          logEndRef.current.scrollIntoView({ behavior: 'smooth' });
-      }
-  }, [showLog, battleLog]);
 
   const getActionClass = () => {
     if (!isActing) return '';
@@ -177,33 +169,16 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   return (
     <div className="flex flex-col h-full relative bg-gray-900 overflow-hidden">
       
-      {/* Top Bar */}
+      {/* 1. Top Bar: Narrative (Compact) */}
       <div className="h-8 shrink-0 bg-black border-b-2 border-gray-700 flex items-center px-4 text-xs text-green-400 overflow-hidden whitespace-nowrap justify-between z-30">
-        <span className="truncate mr-4 flex-1"><span className="animate-pulse mr-2">&gt;&gt;</span> {narrative}</span>
-        <div className="flex items-center gap-2">
-            <button onClick={() => setShowLog(!showLog)} className="text-gray-400 hover:text-white flex items-center cursor-pointer">
-                <ScrollText size={14} className="mr-1" /> Log
-            </button>
-            <span className="text-yellow-400 font-bold">{turnLog}</span>
-        </div>
+        <span className="truncate mr-4"><span className="animate-pulse mr-2">&gt;&gt;</span> {narrative}</span>
+        <span className="text-yellow-400">{turnLog}</span>
       </div>
 
-      {/* Battle Log Overlay */}
-      {showLog && battleLog && (
-          <div className="absolute top-8 right-0 z-40 bg-black/80 border-l border-b border-white text-green-300 text-xs w-64 h-64 overflow-y-auto p-2 font-mono custom-scrollbar">
-              <h4 className="text-white border-b border-gray-600 mb-1 pb-1 font-bold">Battle Log</h4>
-              <div className="space-y-1">
-                  {battleLog.map((log, i) => (
-                      <div key={i}>{log}</div>
-                  ))}
-                  <div ref={logEndRef} />
-              </div>
-          </div>
-      )}
-
-      {/* Main Viewport */}
+      {/* 2. Battle Viewport (Enemies & Player Sprite) - Scrollable to prevent overlap */}
       <div className="flex-1 relative overflow-y-auto custom-scrollbar flex flex-col justify-between p-2 bg-gray-800/50 gap-4">
         
+        {/* Selection Overlay */}
         {selectionState.active && (
             <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/80 z-40 text-center py-2 px-6 border-b-2 border-yellow-500 animate-pulse rounded shadow-xl pointer-events-none">
                 <span className="text-yellow-400 font-bold text-sm">
@@ -214,6 +189,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             </div>
         )}
 
+        {/* Card Inspection Modal */}
         {inspectedCard && (
             <div className="fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setInspectedCard(null)}>
                 <div className="scale-150 mb-8 transform transition-transform" onClick={(e) => e.stopPropagation()}>
@@ -231,6 +207,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     <p className="text-lg text-white mb-6 leading-relaxed whitespace-pre-wrap font-bold bg-black/30 p-3 rounded">
                         {getProcessedDescription(inspectedCard)}
                     </p>
+                    
+                    {/* Keywords List */}
                     <div className="space-y-2">
                         {getCardKeywords(inspectedCard).map((k, idx) => (
                             <div key={idx} className="flex flex-col text-left text-sm bg-gray-700/50 p-2 rounded">
@@ -243,7 +221,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             </div>
         )}
 
-        {/* ... (Tooltip & Potion Modals - Same as before) ... */}
+        {/* Tooltip Modal Overlay (Existing for other UI elements) */}
         {tooltip && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4" onClick={() => setTooltip(null)}>
                 <div className="bg-black border-2 border-white p-4 rounded max-w-xs shadow-2xl animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
@@ -254,6 +232,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             </div>
         )}
 
+        {/* Potion Confirmation Modal */}
         {potionConfirmation && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4" onClick={() => setPotionConfirmation(null)}>
                 <div className="bg-gray-900 border-2 border-white p-6 rounded shadow-2xl max-w-xs w-full text-center animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
@@ -282,7 +261,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             </div>
         )}
 
-        {/* Enemies Area */}
+        {/* Enemies Area (Top) */}
         <div className="flex justify-center items-start pt-8 md:pt-14 gap-2 min-h-[180px] shrink-0">
             {enemies.map((enemy) => {
                 const enemyHpPercent = (enemy.currentHp / enemy.maxHp) * 100;
@@ -295,8 +274,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         onClick={() => onSelectEnemy(enemy.id)}
                         className={`flex flex-col items-center z-10 transition-transform duration-200 cursor-pointer relative ${isSelected && !actionClass ? 'scale-105 z-20' : ''} ${!isSelected && !actionClass ? 'hover:scale-105' : ''} ${actionClass}`}
                     >
+                        {/* Damage Popup */}
                         <FloatingTextOverlay data={enemy.floatingText} />
 
+                        {/* Intent Bubble */}
                         <div 
                             className="absolute -top-10 left-1/2 -translate-x-1/2 z-30 bg-white text-black text-xs font-extrabold px-1.5 py-0.5 rounded border-2 border-red-600 animate-bounce whitespace-nowrap shadow-xl flex items-center justify-center min-w-[40px]"
                             onClick={(e) => { e.stopPropagation(); showInfo("敵の行動", enemy.nextIntent.type === 'ATTACK' ? `${enemy.nextIntent.value} ダメージを与える攻撃` : enemy.nextIntent.type === 'DEFEND' ? `${enemy.nextIntent.value} ブロックを得る` : "バフまたはデバフを使用"); }}
@@ -317,6 +298,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 {enemy.block > 0 && <span className="text-blue-300 flex items-center bg-blue-900/80 px-1 rounded text-[8px] font-bold ml-1" onClick={(e)=>{e.stopPropagation(); showInfo("ブロック", "次のターン開始時までダメージを防ぐ。");}}><Shield size={8} className="mr-0.5"/> {enemy.block}</span>}
                             </div>
                             
+                            {/* HP Bar & Text */}
                             <div className="relative w-full h-3 bg-gray-800 rounded-full overflow-hidden border border-gray-600 mb-0.5" onClick={(e) => { e.stopPropagation(); showInfo("HP", `現在: ${enemy.currentHp} / 最大: ${enemy.maxHp}`); }}>
                                 <div className="h-full bg-gradient-to-r from-red-600 to-red-500 transition-all duration-500" style={{width: `${enemyHpPercent}%`}}></div>
                                 <div className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-white shadow-black drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] leading-none">
@@ -324,6 +306,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 </div>
                             </div>
 
+                            {/* Status Icons */}
                             <div className="flex flex-wrap gap-0.5 justify-center min-h-[14px]">
                                 {enemy.vulnerable > 0 && (
                                     <div className="flex items-center bg-pink-900/80 rounded px-0.5 border border-pink-500/50 cursor-pointer" onClick={(e)=>{e.stopPropagation(); showInfo("びくびく", "攻撃から受けるダメージが50%増加。");}}>
@@ -352,11 +335,13 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             })}
         </div>
 
-        {/* Player Area */}
+        {/* Player Area (Bottom Left) */}
         <div className="flex items-end pl-2 pb-2 shrink-0 mt-auto">
             <div className="flex items-end relative">
+                {/* Damage Popup */}
                 <FloatingTextOverlay data={player.floatingText} />
 
+                {/* Player Sprite */}
                 <div className={`w-20 h-20 md:w-24 md:h-24 relative transition-all duration-150 ease-out mr-2 ${getActionClass()}`} onClick={() => showInfo("勇者", "あなたのキャラクター。\nHPが0になるとゲームオーバー。")}>
                      <img 
                         src={player.imageData} 
@@ -366,6 +351,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                      />
                 </div>
 
+                {/* Player Stats Panel */}
                 <div className="bg-black/80 border-2 border-white p-1 text-white text-xs w-36 md:w-40 mb-2 shadow-lg rounded z-20">
                     <div className="flex items-center justify-between mb-1">
                         <span className="text-red-400 flex items-center font-bold" onClick={() => showInfo("HP", "ヒットポイント。0になると死亡する。")}><Heart size={12} className="mr-1"/> {player.currentHp}/{player.maxHp}</span>
@@ -375,6 +361,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         <div className="h-full bg-green-500 transition-all duration-500" style={{width: `${playerHpPercent}%`}}></div>
                     </div>
                     
+                    {/* Relics/Potions Compact Row */}
                     <div className="flex items-center justify-between border-t border-gray-700 pt-1">
                         <div className="flex -space-x-1 overflow-hidden w-20">
                             {player.relics.slice(0,5).map(r => (
@@ -404,6 +391,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             ))}
                         </div>
                     </div>
+                    {/* Power Icons */}
                     <div className="flex flex-wrap gap-0.5 mt-1">
                         {player.strength !== 0 && (
                             <span 
@@ -436,8 +424,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         </div>
       </div>
 
-      {/* Control Bar */}
+      {/* 3. Control Bar (Energy, Deck, End Turn) */}
       <div className="h-12 bg-gray-800 border-t-2 border-white flex items-center justify-between px-2 shrink-0 z-20 shadow-lg">
+          
+          {/* Energy */}
           <div className="flex items-center">
               <div className="bg-black border-2 border-yellow-500 text-yellow-400 px-2 py-0.5 rounded-full flex items-center shadow-lg mr-2" onClick={() => showInfo("エネルギー", "カードを使用するために必要。ターン毎に回復する。")}>
                   <Zap size={14} className="mr-1 fill-yellow-400"/>
@@ -449,6 +439,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
               </div>
           </div>
 
+          {/* End Turn */}
           <button 
               onClick={!actingEnemyId && !selectionState.active ? onEndTurn : undefined}
               disabled={!!actingEnemyId || selectionState.active}
@@ -461,15 +452,17 @@ const BattleScene: React.FC<BattleSceneProps> = ({
           </button>
       </div>
 
-      {/* Hand Area */}
+      {/* 4. Hand Area (Horizontal Scroll) */}
       <div className={`h-40 md:h-48 bg-gray-900 border-t border-gray-700 relative z-10 ${selectionState.active ? 'bg-blue-900/20' : ''}`}>
         <div className="w-full h-full overflow-x-auto overflow-y-hidden whitespace-nowrap px-2 flex items-center gap-2 custom-scrollbar touch-pan-x">
             {player.hand.map((card) => {
+                // Check for special disabling conditions
                 const isClashDisabled = card.name === '口喧嘩' && player.hand.some(c => c.type !== CardType.ATTACK && c.id !== card.id);
                 const isGrandFinaleDisabled = card.name === '卒業式' && player.drawPile.length > 0;
                 const isChokerDisabled = hasChoker && player.cardsPlayedThisTurn >= 6;
                 const specialDisabled = isClashDisabled || isGrandFinaleDisabled || isChokerDisabled;
                 
+                // Visual Cost Override for Corruption
                 const displayCard = { ...card };
                 if (player.powers['CORRUPTION'] && card.type === CardType.SKILL) {
                     displayCard.cost = 0;
@@ -499,6 +492,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     </div>
                 );
             })}
+            {/* Spacer for right side of scroll */}
             <div className="w-4 shrink-0"></div>
         </div>
       </div>

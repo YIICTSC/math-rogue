@@ -1,8 +1,8 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Card as ICard, RewardItem, Potion } from '../types';
 import Card from './Card';
-import { Gift, Gem, Coins, FlaskConical, X } from 'lucide-react';
+import { Gift, Gem, Coins, FlaskConical } from 'lucide-react';
 
 interface RewardScreenProps {
   rewards: RewardItem[];
@@ -13,11 +13,6 @@ interface RewardScreenProps {
 
 const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, onSkip, isLoading }) => {
   
-  const [inspectedItem, setInspectedItem] = useState<{
-      type: 'CARD' | 'RELIC' | 'POTION';
-      data: any;
-  } | null>(null);
-
   useEffect(() => {
     if (!isLoading && rewards.length === 0) {
       const timer = setTimeout(() => {
@@ -26,11 +21,6 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
       return () => clearTimeout(timer);
     }
   }, [rewards, isLoading, onSkip]);
-
-  const handleContextMenu = (e: React.MouseEvent, type: 'RELIC' | 'POTION', data: any) => {
-      e.preventDefault();
-      setInspectedItem({ type, data });
-  };
 
   return (
     <div className="flex flex-col items-center justify-center h-full w-full bg-gray-900 text-white relative p-4">
@@ -42,41 +32,6 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
         <p className="text-gray-300 text-sm">欲しい報酬を選択してください</p>
       </div>
 
-      {/* Inspection Modal */}
-      {inspectedItem && (
-            <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setInspectedItem(null)}>
-                <div className="bg-gray-800 border-4 border-white w-full max-w-sm p-6 rounded-lg shadow-2xl relative flex flex-col items-center" onClick={e => e.stopPropagation()}>
-                    <button onClick={() => setInspectedItem(null)} className="absolute top-2 right-2 text-gray-400 hover:text-white p-2">
-                        <X size={24} />
-                    </button>
-
-                    {inspectedItem.type === 'CARD' && (
-                        <div className="scale-125 mb-6"><Card card={inspectedItem.data} onClick={() => {}} disabled={false} /></div>
-                    )}
-
-                    {inspectedItem.type === 'RELIC' && (
-                        <>
-                            <div className="w-24 h-24 bg-gray-800 border-4 border-yellow-600 rounded-full flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(234,179,8,0.5)]">
-                                <Gem className="text-yellow-400" size={48}/>
-                            </div>
-                            <h3 className="text-xl font-bold text-yellow-400 mb-2">{inspectedItem.data.name}</h3>
-                            <p className="text-white text-center">{inspectedItem.data.description}</p>
-                        </>
-                    )}
-
-                    {inspectedItem.type === 'POTION' && (
-                        <>
-                            <div className="w-24 h-24 bg-gray-800 border-2 border-white/50 rounded-full flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(255,255,255,0.3)]">
-                                <FlaskConical size={48} style={{ color: inspectedItem.data.color }}/>
-                            </div>
-                            <h3 className="text-xl font-bold text-white mb-2">{inspectedItem.data.name}</h3>
-                            <p className="text-white text-center">{inspectedItem.data.description}</p>
-                        </>
-                    )}
-                </div>
-            </div>
-       )}
-
       {/* Horizontal Scroll Container */}
       <div className={`z-10 flex flex-row items-center gap-8 w-full overflow-x-auto custom-scrollbar px-4 pt-20 pb-8 min-h-[420px] snap-x ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
         {rewards.map((reward) => (
@@ -86,12 +41,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
             {reward.type === 'CARD' && (
                 <div className="flex flex-col items-center w-48"> 
                     <div className="scale-110 mb-8 mt-6">
-                        <Card 
-                            card={reward.value as ICard} 
-                            onClick={() => !isLoading && onSelectReward(reward)} 
-                            disabled={isLoading} 
-                            onInspect={() => setInspectedItem({ type: 'CARD', data: reward.value })}
-                        />
+                        <Card card={reward.value as ICard} onClick={() => !isLoading && onSelectReward(reward)} disabled={isLoading} />
                     </div>
                     <button onClick={() => onSelectReward(reward)} className="mt-4 bg-blue-600 px-6 py-2 text-sm font-bold rounded border hover:bg-blue-500 shadow-lg w-full">カード獲得</button>
                 </div>
@@ -99,12 +49,8 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
             
             {/* Relic Reward */}
             {reward.type === 'RELIC' && (
-                <div 
-                    className="w-48 bg-black/60 border-2 border-yellow-500 rounded-xl flex flex-col items-center justify-between p-6 cursor-pointer hover:bg-black/80 shadow-lg h-72" 
-                    onClick={() => onSelectReward(reward)}
-                    onContextMenu={(e) => handleContextMenu(e, 'RELIC', reward.value)}
-                >
-                    <div className="bg-gray-800 p-4 rounded-full border-2 border-yellow-600 mb-4 shadow-[0_0_15px_rgba(234,179,8,0.5)] cursor-help" onClick={(e) => { e.stopPropagation(); setInspectedItem({ type: 'RELIC', data: reward.value }); }}>
+                <div className="w-48 bg-black/60 border-2 border-yellow-500 rounded-xl flex flex-col items-center justify-between p-6 cursor-pointer hover:bg-black/80 shadow-lg h-72" onClick={() => onSelectReward(reward)}>
+                    <div className="bg-gray-800 p-4 rounded-full border-2 border-yellow-600 mb-4 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
                         <Gem size={40} className="text-yellow-400" />
                     </div>
                     <div className="text-center mb-auto w-full">
@@ -131,12 +77,8 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
 
             {/* Potion Reward */}
             {reward.type === 'POTION' && (
-                <div 
-                    className="w-48 bg-black/60 border-2 border-white/50 rounded-xl flex flex-col items-center justify-between p-6 cursor-pointer hover:bg-black/80 shadow-lg h-72" 
-                    onClick={() => onSelectReward(reward)}
-                    onContextMenu={(e) => handleContextMenu(e, 'POTION', reward.value)}
-                >
-                    <div className="bg-gray-800 p-4 rounded-full border-2 border-white/50 mb-4 shadow-[0_0_15px_rgba(255,255,255,0.3)] cursor-help" onClick={(e) => { e.stopPropagation(); setInspectedItem({ type: 'POTION', data: reward.value }); }}>
+                <div className="w-48 bg-black/60 border-2 border-white/50 rounded-xl flex flex-col items-center justify-between p-6 cursor-pointer hover:bg-black/80 shadow-lg h-72" onClick={() => onSelectReward(reward)}>
+                    <div className="bg-gray-800 p-4 rounded-full border-2 border-white/50 mb-4 shadow-[0_0_15px_rgba(255,255,255,0.3)]">
                         <FlaskConical size={40} style={{ color: (reward.value as Potion).color }} />
                     </div>
                     <div className="text-center mb-auto w-full">
@@ -149,6 +91,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
           </div>
         ))}
         
+        {/* Padding at the end for scrolling comfort */}
         <div className="w-4 shrink-0"></div>
       </div>
 

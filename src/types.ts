@@ -1,4 +1,5 @@
 
+
 export enum CardType {
   ATTACK = 'ATTACK',
   SKILL = 'SKILL',
@@ -21,56 +22,63 @@ export interface Card {
   type: CardType;
   target?: TargetType;
   description: string;
-  rarity?: 'COMMON' | 'UNCOMMON' | 'RARE' | 'LEGENDARY' | 'SPECIAL' | 'STARTER';
   
+  // Values
   damage?: number;
   block?: number;
   draw?: number;
   heal?: number;
   energy?: number;
   selfDamage?: number;
-  poison?: number;
+  poison?: number;      
   
-  exhaust?: boolean;
-  strength?: number;
-  vulnerable?: number;
-  weak?: number;
-  upgraded?: boolean;
-  unplayable?: boolean;
+  // Basic Mechanics
+  exhaust?: boolean;    
+  strength?: number;    
+  vulnerable?: number;  
+  weak?: number;        
+  upgraded?: boolean;   
+  unplayable?: boolean; 
+
+  // Advanced Effects
+  strengthScaling?: number; 
+  lifesteal?: boolean;      
+  upgradeHand?: boolean;
+  upgradeDeck?: boolean; // New: Apotheosis
+  fatalEnergy?: number;     
+  fatalPermanentDamage?: number; 
+  shuffleHandToDraw?: boolean;   
+  doubleStrength?: boolean;      
+  applyPower?: { id: string, amount: number }; 
+  poisonMultiplier?: number; // New: Catalyst
+  
+  // Even More Advanced Effects
+  damageBasedOnBlock?: boolean; 
+  doubleBlock?: boolean;        
+  fatalMaxHp?: number;
   innate?: boolean;
   
-  // Advanced
-  strengthScaling?: number;
-  lifesteal?: boolean;
-  upgradeHand?: boolean;
-  upgradeDeck?: boolean;
-  fatalEnergy?: number;
-  fatalPermanentDamage?: number;
-  fatalMaxHp?: number;
-  shuffleHandToDraw?: boolean;
-  doubleStrength?: boolean;
-  applyPower?: { id: string, amount: number };
+  // Special Mechanics
+  capture?: boolean; // If fatal, adds enemy as card to deck
+  textureRef?: string; // Seed/Name for generating PixelSprite on card
   
-  damageBasedOnBlock?: boolean;
-  doubleBlock?: boolean;
-  
-  promptsDiscard?: number;
-  promptsCopy?: number;
-  promptsExhaust?: number;
-  damagePerAttackPlayed?: number;
-  damagePerCardInHand?: number;
-  damagePerStrike?: number;
-  playCopies?: number;
-  addCardToHand?: { cardName: string, count: number, cost0?: boolean };
-  addCardToDraw?: { cardName: string, count: number };
-  
-  poisonMultiplier?: number;
+  // Next Turn Effects
   nextTurnEnergy?: number;
-  nextTurnDraw?: number;
-  capture?: boolean;
+  nextTurnDraw?: number;          
+
+  // Complex Interactions
+  promptsDiscard?: number;      
+  promptsCopy?: number;         
+  promptsExhaust?: number;      
+  damagePerAttackPlayed?: number; 
+  damagePerCardInHand?: number;   
+  damagePerStrike?: number;       
+  playCopies?: number;            
+  addCardToHand?: { cardName: string, count: number, cost0?: boolean }; 
+  addCardToDraw?: { cardName: string, count: number }; 
   
-  textureRef?: string;
-  price?: number;
+  rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'LEGENDARY' | 'SPECIAL';
+  price?: number;       
 }
 
 export enum EnemyIntentType {
@@ -78,43 +86,44 @@ export enum EnemyIntentType {
   DEFEND = 'DEFEND',
   BUFF = 'BUFF',
   DEBUFF = 'DEBUFF',
+  UNKNOWN = 'UNKNOWN',
   ATTACK_DEBUFF = 'ATTACK_DEBUFF',
   ATTACK_DEFEND = 'ATTACK_DEFEND',
-  UNKNOWN = 'UNKNOWN'
+  SLEEP = 'SLEEP'
 }
 
 export interface EnemyIntent {
   type: EnemyIntentType;
   value: number;
-  secondaryValue?: number;
-  debuffType?: string;
+  secondaryValue?: number; // For debuff amount or block amount in mixed moves
+  debuffType?: 'WEAK' | 'VULNERABLE' | 'POISON'; // Added to specify debuff
 }
 
 export interface FloatingText {
-    id: string;
+    id: string; // Unique ID to trigger animation (e.g. timestamp)
     text: string;
-    color: string;
-    iconType?: 'sword' | 'shield' | 'zap' | 'poison';
+    color: string; // Tailwind text color class
+    iconType?: 'sword' | 'shield' | 'heart' | 'poison' | 'zap';
 }
 
 export interface Enemy {
   id: string;
+  enemyType: string; // For AI Logic (e.g., 'CULTIST', 'SLIME_ACID')
   name: string;
   maxHp: number;
   currentHp: number;
   block: number;
-  strength: number;
   nextIntent: EnemyIntent;
+  strength: number;
   
-  vulnerable: number;
-  weak: number;
-  poison: number;
-  artifact: number;
-  corpseExplosion: boolean;
+  // Status Effects
+  vulnerable: number; 
+  weak: number;       
+  poison: number;     
+  artifact: number;   
+  corpseExplosion: boolean; 
   
   floatingText: FloatingText | null;
-  enemyType: string;
-  tier?: number;
 }
 
 export interface Relic {
@@ -123,17 +132,29 @@ export interface Relic {
   description: string;
   rarity: 'STARTER' | 'COMMON' | 'UNCOMMON' | 'RARE' | 'BOSS' | 'SHOP';
   price?: number;
-  effectType?: string;
+  effectType?: 'START_BATTLE' | 'END_TURN' | 'END_BATTLE' | 'PASSIVE';
 }
 
 export interface Potion {
-    id: string;
+    id: string; // Instance ID
     templateId: string;
     name: string;
     description: string;
     rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'SHOP';
     price?: number;
-    color: string;
+    color: string; // Hex color for UI
+}
+
+export interface Character {
+    id: string;
+    name: string;
+    description: string;
+    maxHp: number;
+    gold: number;
+    startingRelicId: string;
+    deckTemplate: string[];
+    color: string; // Tailwind color class prefix (e.g. 'red', 'green')
+    imageData: string;
 }
 
 export interface Player {
@@ -149,60 +170,65 @@ export interface Player {
   discardPile: Card[];
   drawPile: Card[];
   relics: Relic[];
-  potions: Potion[];
+  potions: Potion[]; // New: Max 3
+  imageData: string;
   
+  // Advanced State
   powers: Record<string, number>; 
   echoes: number; 
   cardsPlayedThisTurn: number; 
   attacksPlayedThisTurn: number;
   
-  relicCounters: Record<string, number>;
-  turnFlags: Record<string, boolean>;
-  imageData: string;
-  floatingText: FloatingText | null;
-  
+  // Next Turn State
   nextTurnEnergy: number;
   nextTurnDraw: number;
+  
+  // Relic & Turn Counters
+  relicCounters: Record<string, number>; // Persists across battles (e.g. Pen Nib)
+  turnFlags: Record<string, boolean>;    // Resets each turn (e.g. Necronomicon)
+
+  floatingText: FloatingText | null;
 }
 
 export enum GameScreen {
   START_MENU = 'START_MENU',
-  MODE_SELECTION = 'MODE_SELECTION',
+  MODE_SELECTION = 'MODE_SELECTION', // New: Arithmetic mode selection
   CHARACTER_SELECTION = 'CHARACTER_SELECTION',
   RELIC_SELECTION = 'RELIC_SELECTION', 
   MAP = 'MAP',
   BATTLE = 'BATTLE',
+  MATH_CHALLENGE = 'MATH_CHALLENGE', 
   REWARD = 'REWARD',
   GAME_OVER = 'GAME_OVER',
   VICTORY = 'VICTORY',
   REST = 'REST',
   SHOP = 'SHOP',
   EVENT = 'EVENT',
-  TREASURE = 'TREASURE',
   COMPENDIUM = 'COMPENDIUM',
-  RANKING = 'RANKING',
-  HELP = 'HELP',
   ENDING = 'ENDING',
-  MATH_CHALLENGE = 'MATH_CHALLENGE'
+  HELP = 'HELP',
+  TREASURE = 'TREASURE',
+  RANKING = 'RANKING'
 }
 
 export enum GameMode {
-    ADDITION = 'ADDITION',
-    SUBTRACTION = 'SUBTRACTION',
-    MULTIPLICATION = 'MULTIPLICATION',
-    DIVISION = 'DIVISION',
-    MIXED = 'MIXED'
+  ADDITION = 'ADDITION',
+  SUBTRACTION = 'SUBTRACTION',
+  MULTIPLICATION = 'MULTIPLICATION',
+  DIVISION = 'DIVISION',
+  MIXED = 'MIXED'
 }
 
+// --- Map Types ---
 export enum NodeType {
   COMBAT = 'COMBAT',
   ELITE = 'ELITE',
   REST = 'REST',
   SHOP = 'SHOP',
   EVENT = 'EVENT',
-  TREASURE = 'TREASURE',
   BOSS = 'BOSS',
-  START = 'START'
+  START = 'START',
+  TREASURE = 'TREASURE'
 }
 
 export interface MapNode {
@@ -223,23 +249,26 @@ export interface SelectionState {
 
 export interface RewardItem {
     type: 'CARD' | 'RELIC' | 'GOLD' | 'POTION';
-    value?: any; 
+    value?: any; // Card object, Relic object, Potion object, or number
     id: string;
 }
 
 export interface RankingEntry {
-    date: number;
-    score: number;
+    id: string;
+    playerName: string;
     characterName: string;
+    score: number;
     act: number;
     floor: number;
     victory: boolean;
+    date: number; // timestamp
+    challengeMode?: string;
 }
 
 export interface GameState {
   screen: GameScreen;
   mode: GameMode; 
-  challengeMode?: string;
+  challengeMode?: string; // e.g. '1A1D'
   act: number;
   floor: number;
   turn: number;
@@ -249,20 +278,7 @@ export interface GameState {
   enemies: Enemy[];
   selectedEnemyId: string | null;
   narrativeLog: string[];
-  battleLog: string[];
   rewards: RewardItem[]; 
   selectionState: SelectionState; 
   isEndless?: boolean;
-}
-
-export interface Character {
-    id: string;
-    name: string;
-    description: string;
-    maxHp: number;
-    gold: number;
-    startingRelicId: string;
-    color: string;
-    deckTemplate: string[];
-    imageData: string;
 }
