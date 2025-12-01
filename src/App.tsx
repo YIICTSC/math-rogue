@@ -627,6 +627,22 @@ const App: React.FC = () => {
       startGame();
   };
 
+  const startEndlessMode = () => {
+      const newAct = gameState.act + 1; // Increment act (will be 5 if finished normal game)
+      const newMap = generateDungeonMap();
+      setGameState(prev => ({
+          ...prev,
+          screen: GameScreen.MAP,
+          act: newAct,
+          floor: 0,
+          map: newMap,
+          currentMapNodeId: null,
+          isEndless: true,
+          narrativeLog: [...prev.narrativeLog, `エンドレスモード開始！ Act ${newAct}へ...`]
+      }));
+      audioService.playBGM('menu');
+  };
+
   const startGame = async () => {
       try {
           setErrorMessage("");
@@ -727,8 +743,10 @@ const App: React.FC = () => {
             
             let enemies: Enemy[] = [];
             
-            if (gameState.act === 4 && node.type === NodeType.BOSS) {
-                // TRUE BOSS
+            // Only trigger True Boss in Act 4 if it's the specific boss node.
+            // If endless mode is active, acts > 4 generate standard enemies/bosses.
+            if (gameState.act === 4 && node.type === NodeType.BOSS && !gameState.isEndless) {
+                // TRUE BOSS (Only in normal progression Act 4)
                 const boss: Enemy = {
                     id: 'true-boss',
                     enemyType: 'THE_HEART',
@@ -1492,7 +1510,8 @@ const App: React.FC = () => {
                 player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + hpRegen) },
             }));
 
-            if (gameState.act === 4) {
+            // Check for Game Clear (Act 4 Boss Defeated)
+            if (gameState.act === 4 && !gameState.isEndless) {
                  storageService.saveScore({
                      id: Date.now().toString(),
                      playerName: 'Hero',
@@ -1635,7 +1654,8 @@ const App: React.FC = () => {
   };
 
   const advanceAct = () => {
-      if (gameState.act >= 3) {
+      // Normal game flow: Act 3 -> Act 4 (Boss)
+      if (!gameState.isEndless && gameState.act === 3) {
           const bossNode: MapNode = { id: 'true-boss', x: 3, y: 0, type: NodeType.BOSS, nextNodes: [], completed: false };
           setGameState(prev => ({
               ...prev,
@@ -1649,6 +1669,7 @@ const App: React.FC = () => {
           return;
       }
 
+      // Endless or Normal 1->2, 2->3 flow
       const nextAct = gameState.act + 1;
       const newMap = generateDungeonMap();
       setGameState(prev => ({
@@ -1771,6 +1792,13 @@ const App: React.FC = () => {
                             System Update Log v2.2.3
                         </h2>
                         <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                            <section>
+                                <h3 className="text-white font-bold mb-1">■ エンドレスモード (Endless Mode)</h3>
+                                <ul className="list-disc pl-5 space-y-1">
+                                    <li>クリア後、さらに強くなった敵と戦い続けるモードを追加しました。</li>
+                                    <li>Act数に応じて敵の強さが上昇します。</li>
+                                </ul>
+                            </section>
                             <section>
                                 <h3 className="text-white font-bold mb-1">■ 図鑑システムの拡張 (Compendium Update)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
@@ -2005,6 +2033,9 @@ const App: React.FC = () => {
                         )}
                         
                         <div className="flex flex-col gap-4 items-center mt-4 pb-8 shrink-0">
+                            <button onClick={startEndlessMode} className="bg-purple-900 border-4 border-purple-500 px-8 py-4 cursor-pointer text-xl hover:bg-purple-800 font-bold w-full max-w-sm shadow-[0_0_20px_rgba(168,85,247,0.5)] transform transition-transform hover:scale-105 active:scale-95 flex items-center justify-center animate-pulse">
+                                <Infinity className="mr-2" /> エンドレスモードへ (Act {gameState.act + 1})
+                            </button>
                             <button onClick={returnToTitle} className="bg-blue-600 border-2 border-white px-8 py-4 cursor-pointer text-xl hover:bg-blue-500 font-bold w-full max-w-sm shadow-lg transform transition-transform hover:scale-105 active:scale-95">
                                 伝説となる (タイトルへ)
                             </button>
