@@ -33,9 +33,9 @@ const HelpScreen: React.FC<HelpScreenProps> = ({ onBack }) => {
                         <Map className="mr-2" /> 伝説の小学生を目指せ！
                     </h3>
                     <p className="text-sm text-gray-300 leading-relaxed">
-                        このゲームは、算数の力とデッキ構築でダンジョンを攻略するローグライクRPGです。<br/>
-                        カードを集め、レリック（宝物）を手に入れ、最強のデッキを作り上げましょう。<br/>
-                        最深部（Act 4）に潜むボスを倒すことが最終目標です。
+                        このゲームは、算数の力とデッキ構築で<span className="text-white font-bold">放課後の学校（ダンジョン）</span>を攻略するローグライクRPGです。<br/>
+                        ユニークなカードやレリック（宝物）を集め、最強のデッキを作り上げましょう。<br/>
+                        最深部（Act 4）に潜む<span className="text-red-400 font-bold">校長先生</span>を説得（撃破）することが最終目標です。
                     </p>
                 </div>
 
@@ -65,23 +65,23 @@ const HelpScreen: React.FC<HelpScreenProps> = ({ onBack }) => {
                 {/* Rest Site Features */}
                 <section className="bg-gray-800 p-5 rounded border border-gray-700">
                     <h3 className="text-lg font-bold text-orange-400 mb-4 border-b border-gray-600 pb-2 flex items-center">
-                        <Flame className="mr-2" /> 休憩所でできること
+                        <Flame className="mr-2" /> 特別教室（休憩マス）
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                         <div className="bg-black/40 p-3 rounded text-center">
-                            <div className="font-bold text-green-400 mb-1">休憩</div>
-                            <p className="text-xs text-gray-400">HPを30%回復します。<br/>傷ついた体を癒やしましょう。</p>
+                            <div className="font-bold text-green-400 mb-1">保健室（休憩）</div>
+                            <p className="text-xs text-gray-400">ベッドで仮眠をとります。<br/>HPを30%回復します。</p>
                         </div>
                         <div className="bg-black/40 p-3 rounded text-center">
-                            <div className="font-bold text-yellow-400 mb-1">工夫（強化）</div>
-                            <p className="text-xs text-gray-400">カードを1枚アップグレード。<br/>威力が増したりコストが減ります。</p>
+                            <div className="font-bold text-yellow-400 mb-1">図工室（強化）</div>
+                            <p className="text-xs text-gray-400">道具を改良します。<br/>カード1枚の性能を上げます。</p>
                         </div>
                         <div className="bg-black/40 p-3 rounded text-center border border-purple-500/50">
-                            <div className="font-bold text-purple-400 mb-1">実験（合成）</div>
+                            <div className="font-bold text-purple-400 mb-1">理科室（合成）</div>
                             <p className="text-xs text-gray-400">
-                                任意の2枚を合体！<br/>
-                                <span className="text-purple-200">コストは足し算、効果は両取り</span>の<br/>
-                                キメラカードを作成できます。
+                                怪しい実験を行います。<br/>
+                                <span className="text-purple-200">2枚のカードを混ぜてキメラカード</span>を作成します。<br/>
+                                (50%の確率で鍵が開いています)
                             </p>
                         </div>
                     </div>
@@ -94,22 +94,22 @@ const HelpScreen: React.FC<HelpScreenProps> = ({ onBack }) => {
                     </h3>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs text-gray-300">
                         <div className="flex items-center bg-black/30 p-2 rounded">
-                            <Sword size={16} className="mr-2 text-gray-400"/> 戦闘（通常）
+                            <Sword size={16} className="mr-2 text-gray-400"/> 通常の敵（生徒・動物）
                         </div>
                         <div className="flex items-center bg-black/30 p-2 rounded">
-                            <Skull size={16} className="mr-2 text-red-500"/> エリート（強敵・宝）
+                            <Skull size={16} className="mr-2 text-red-500"/> 強敵（先生・上級生）
                         </div>
                         <div className="flex items-center bg-black/30 p-2 rounded">
-                            <Gift size={16} className="mr-2 text-yellow-500"/> 宝箱
+                            <Gift size={16} className="mr-2 text-yellow-500"/> 宝箱（落とし物）
                         </div>
                         <div className="flex items-center bg-black/30 p-2 rounded">
-                            <HelpCircle size={16} className="mr-2 text-blue-400"/> イベント
+                            <HelpCircle size={16} className="mr-2 text-blue-400"/> イベント（ハプニング）
                         </div>
                         <div className="flex items-center bg-black/30 p-2 rounded">
-                            <ShoppingBag size={16} className="mr-2 text-yellow-600"/> ショップ
+                            <ShoppingBag size={16} className="mr-2 text-yellow-600"/> 購買部（ショップ）
                         </div>
                         <div className="flex items-center bg-black/30 p-2 rounded">
-                            <BedDouble size={16} className="mr-2 text-green-500"/> 休憩所
+                            <BedDouble size={16} className="mr-2 text-green-500"/> 特別教室（休憩）
                         </div>
                     </div>
                 </section>
