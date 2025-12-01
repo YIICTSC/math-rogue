@@ -7,7 +7,7 @@ class AudioService {
   
   private isMuted: boolean = false;
   private isPlayingBGM: boolean = false;
-  private currentBgmType: 'battle' | 'menu' | 'math' | null = null;
+  private currentBgmType: 'battle' | 'menu' | 'math' | 'poker_shop' | 'poker_play' | null = null;
   
   // Sequencer State
   private nextNoteTime: number = 0;
@@ -16,6 +16,9 @@ class AudioService {
   private lookahead: number = 25.0; // ms
   private scheduleAheadTime: number = 0.1; // s
   private timerID: number | null = null;
+  
+  // Jazz Logic
+  private swing: number = 0; // 0 = straight, 0.33 = triplet swing, 0.5 = hard swing
 
   // Cache buffers
   private noiseBuffer: AudioBuffer | null = null;
@@ -86,74 +89,141 @@ class AudioService {
   private scheduleNote(beatNumber: number, time: number) {
       if (!this.bgmGain || this.isMuted) return;
 
+      // Apply Swing: Delay every 2nd 16th note (mostly affecting 8th note feel in 16th grid)
+      // 0, 1, 2, 3 -> 1 and 3 are off-beats in 16th grid? No, 0=Down, 2=8th Up.
+      // Standard Swing affects the "and" of the beat.
+      // In 16th grid: 0(1), 1(e), 2(&), 3(a). 
+      // We want to delay 2 and maybe 1/3 appropriately, but simple shuffle delays 2 and 6...
+      // Let's just delay odd 8th notes: indices 2, 6, 10, 14.
+      
+      let actualTime = time;
+      if (this.swing > 0 && (beatNumber % 4 === 2)) {
+          const secondsPerBeat = 60.0 / this.tempo;
+          actualTime += (secondsPerBeat * 0.25) * this.swing; 
+      }
+
       if (this.currentBgmType === 'battle') {
           // --- BATTLE THEME ---
-          // Bass Line (Driving 8th notes) - A Minor ish
           if (beatNumber % 2 === 0) { 
-             const measure = Math.floor(Date.now() / 2000) % 4; // Rudimentary progression
-             const rootMap = [55, 55, 48, 52]; // A1, A1, G1, Ab1 (Driving tension)
+             const measure = Math.floor(Date.now() / 2000) % 4; 
+             const rootMap = [55, 55, 48, 52]; 
              const root = rootMap[measure] || 55;
-             this.playOsc(root, time, 0.15, 'sawtooth', 0.5, this.bgmGain);
+             this.playOsc(root, actualTime, 0.15, 'sawtooth', 0.5, this.bgmGain);
           }
-          
-          // Drums
-          if (beatNumber % 4 === 0) this.playNoise(time, 0.08, 0.8, 'kick'); // Kick on beats
-          if (beatNumber % 8 === 4) this.playNoise(time, 0.12, 0.6, 'snare'); // Snare on backbeat
-          if (beatNumber % 2 === 0) this.playNoise(time, 0.04, 0.2, 'hat'); // 8th note hats
+          if (beatNumber % 4 === 0) this.playNoise(actualTime, 0.08, 0.8, 'kick'); 
+          if (beatNumber % 8 === 4) this.playNoise(actualTime, 0.12, 0.6, 'snare');
+          if (beatNumber % 2 === 0) this.playNoise(actualTime, 0.04, 0.2, 'hat');
 
-          // Melody / Arpeggios (Fast 16ths)
           const arpPattern = [220, 329, 440, 523, 440, 329, 261, 220, 196, 246, 293, 196, 207, 246, 207, 220];
           const note = arpPattern[beatNumber];
           if (note) {
-              // Main Lead
-              this.playOsc(note, time, 0.1, 'square', 0.2, this.bgmGain);
-              // Detuned Harmony for "Chorus" effect
-              this.playOsc(note * 1.01, time, 0.1, 'square', 0.2, this.bgmGain); 
+              this.playOsc(note, actualTime, 0.1, 'square', 0.2, this.bgmGain);
+              this.playOsc(note * 1.01, actualTime, 0.1, 'square', 0.2, this.bgmGain); 
           }
 
       } else if (this.currentBgmType === 'menu') {
           // --- MENU / MAP THEME ---
-          // Slow, atmospheric chords on beat 0 of a measure (simulated)
           if (beatNumber === 0) {
-              // Random minor/mysterious chords
               const chords = [
-                  [220, 261, 329], // Am
-                  [174, 220, 261], // Fmaj7
-                  [196, 246, 293], // G
-                  [164, 207, 246]  // E7ish
+                  [220, 261, 329], [174, 220, 261], 
+                  [196, 246, 293], [164, 207, 246]
               ];
               const chord = chords[Math.floor(Math.random() * chords.length)];
-              chord.forEach((freq, i) => {
-                  // Staggered entry (strum)
-                  this.playOsc(freq, time + i*0.05, 2.0, 'triangle', 0.2, this.bgmGain!);
-              });
+              this.playChord(chord, actualTime, 2.0, 'triangle', 0.2);
           }
-          
-          // Random "Twinkles" (High pitch sine/triangle)
           if (Math.random() < 0.2) {
-              const scale = [440, 523, 587, 659, 783, 880, 1046]; // Am pentatonic
+              const scale = [440, 523, 587, 659, 783, 880, 1046]; 
               const note = scale[Math.floor(Math.random() * scale.length)];
-              this.playOsc(note * 2, time, 0.3, 'sine', 0.15, this.bgmGain);
+              this.playOsc(note * 2, actualTime, 0.3, 'sine', 0.15, this.bgmGain);
           }
+
       } else if (this.currentBgmType === 'math') {
-          // --- MATH CHALLENGE THEME ---
-          // Ticking Clock Rhythm (Woodblock style)
-          if (beatNumber % 4 === 0) {
-              this.playOsc(800, time, 0.05, 'triangle', 0.3, this.bgmGain); // Tick
-          } else if (beatNumber % 4 === 2) {
-              this.playOsc(600, time, 0.05, 'triangle', 0.2, this.bgmGain); // Tock
-          }
-
-          // Thinking Bass (Sine)
+          // --- MATH CHALLENGE ---
+          if (beatNumber % 4 === 0) this.playOsc(800, actualTime, 0.05, 'triangle', 0.3, this.bgmGain); 
+          else if (beatNumber % 4 === 2) this.playOsc(600, actualTime, 0.05, 'triangle', 0.2, this.bgmGain); 
           if (beatNumber % 8 === 0) {
-              const bassNotes = [220, 220, 247, 261]; // A, A, B, C
+              const bassNotes = [220, 220, 247, 261];
               const note = bassNotes[Math.floor((Date.now() / 2000) % 4)];
-              this.playOsc(note / 2, time, 0.2, 'sine', 0.4, this.bgmGain);
+              this.playOsc(note / 2, actualTime, 0.2, 'sine', 0.4, this.bgmGain);
+          }
+          if (Math.random() < 0.1 && beatNumber % 2 !== 0) {
+              this.playOsc(1500, actualTime, 0.05, 'square', 0.05, this.bgmGain);
           }
 
-          // Random "Idea" Blips
-          if (Math.random() < 0.1 && beatNumber % 2 !== 0) {
-              this.playOsc(1500, time, 0.05, 'square', 0.05, this.bgmGain);
+      } else if (this.currentBgmType === 'poker_shop') {
+          // --- POKER SHOP (Relaxing Bossa/Lo-fi) ---
+          // Chord Progression (CMaj7 - Am7 - Dm7 - G7) style
+          // Frequencies: C4=261, E4=329, G4=392, B4=493
+          const measure = Math.floor(beatNumber / 16) % 4;
+          
+          // Smooth Chords (Pad) - Every 1st beat of bar
+          if (beatNumber % 16 === 0) {
+              let chord: number[] = [];
+              if (measure === 0) chord = [261.63, 329.63, 392.00, 493.88]; // CMaj7
+              else if (measure === 1) chord = [220.00, 261.63, 329.63, 392.00]; // Am7
+              else if (measure === 2) chord = [293.66, 349.23, 440.00, 523.25]; // Dm7
+              else chord = [196.00, 246.94, 293.66, 349.23]; // G7
+              
+              this.playChord(chord, actualTime, 2.5, 'sine', 0.15); // Soft Sine Pad
+          }
+
+          // Relaxed Melody (Pentatonic improv)
+          if (beatNumber % 4 === 0 && Math.random() > 0.4) {
+               const scale = [523.25, 587.33, 659.25, 783.99, 880.00]; // C Major Pentatonic
+               const note = scale[Math.floor(Math.random() * scale.length)];
+               this.playOsc(note, actualTime, 0.3, 'triangle', 0.1, this.bgmGain);
+          }
+
+          // Percussion (Bossa-ish Clave)
+          // Pattern: x . . x . . x . / . . x . x . . . 
+          const clave = [0, 3, 6, 10, 12]; // 16th grid indices
+          if (clave.includes(beatNumber % 16)) {
+              this.playNoise(actualTime, 0.03, 0.1, 'hat'); // Very soft rimshot/hat
+          }
+
+      } else if (this.currentBgmType === 'poker_play') {
+          // --- POKER PLAY (Cool Swing Jazz) ---
+          // Walking Bass (Quarter Notes)
+          if (beatNumber % 4 === 0) {
+              // A Minor Blues Walking Bass
+              // A (220) -> C (261) -> D (293) -> E (329) or similar walk
+              const walkPattern = [
+                  [110, 130, 146, 155], // A, C, D, Eb (Blue note)
+                  [164, 146, 130, 123], // E, D, C, B
+                  [110, 110, 146, 164], 
+                  [196, 164, 146, 123]  // G...
+              ];
+              const measure = Math.floor(beatNumber / 16) % 4;
+              const beatInBar = (beatNumber % 16) / 4;
+              const note = walkPattern[measure][beatInBar];
+              
+              this.playOsc(note, actualTime, 0.3, 'triangle', 0.5, this.bgmGain); // Upright Bass sound
+          }
+
+          // Piano Stabs (Off-beats / Charleston)
+          // Pattern: 1 . & . 
+          if (beatNumber % 16 === 0 || beatNumber % 16 === 6) { // Beat 1 and "2-and"
+              const measure = Math.floor(beatNumber / 16) % 4;
+              let chord: number[] = [];
+              // A min 7 / D 7 / E 7 alt
+              if (measure % 2 === 0) chord = [220, 261, 329, 392]; // Am7
+              else chord = [146, 185, 220, 261]; // D7
+              
+              // Short, sharp stabs
+              this.playChord(chord, actualTime, 0.1, 'square', 0.1); 
+          }
+
+          // Ride Cymbal (Swing Pattern: Ding, ding-a-ding)
+          // 0, 2, 3(skip), 4, 6, 7(skip)... 
+          // Grid: 0, 4, 6(swing), 8, 12, 14(swing)
+          if (beatNumber % 4 === 0) {
+              this.playNoise(actualTime, 0.05, 0.2, 'hat'); // Beat
+          } else if (beatNumber % 4 === 2) {
+              this.playNoise(actualTime, 0.03, 0.15, 'hat'); // Swing note
+          }
+          // Soft snare on 2 and 4 (Backbeat)
+          if (beatNumber % 16 === 4 || beatNumber % 16 === 12) {
+               this.playNoise(actualTime, 0.1, 0.3, 'snare');
           }
       }
   }
@@ -175,15 +245,23 @@ class AudioService {
       osc.type = type;
       osc.frequency.setValueAtTime(freq, time);
       
-      // Envelope (ADSR-like)
+      // Envelope
       gain.gain.setValueAtTime(0, time);
-      gain.gain.linearRampToValueAtTime(vol, time + 0.01); // Attack
-      gain.gain.exponentialRampToValueAtTime(0.001, time + duration); // Decay/Release
+      gain.gain.linearRampToValueAtTime(vol, time + 0.01); 
+      gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
 
       osc.connect(gain);
       gain.connect(dest);
       osc.start(time);
       osc.stop(time + duration);
+  }
+
+  private playChord(freqs: number[], time: number, duration: number, type: OscillatorType, vol: number) {
+      if (!this.bgmGain) return;
+      // Strum slightly
+      freqs.forEach((f, i) => {
+          this.playOsc(f, time + (i * 0.02), duration, type, vol / freqs.length, this.bgmGain!);
+      });
   }
 
   private playNoise(time: number, duration: number, vol: number, type: 'kick' | 'snare' | 'hat') {
@@ -212,25 +290,33 @@ class AudioService {
 
       src.connect(filter);
       filter.connect(gain);
-      gain.connect(this.bgmGain); // Use BGM gain for drums too, or split if needed
+      gain.connect(this.bgmGain); 
       src.start(time);
       src.stop(time + duration);
   }
 
   // --- Public API ---
-  public playBGM(type: 'battle' | 'menu' | 'math') {
-      // Don't restart if already playing same type
+  public playBGM(type: 'battle' | 'menu' | 'math' | 'poker_shop' | 'poker_play') {
       if (this.isPlayingBGM && this.currentBgmType === type) return;
       
-      this.init(); // Ensure ctx is ready
+      this.init(); 
       if (this.timerID) clearTimeout(this.timerID);
       
       this.currentBgmType = type;
       this.isPlayingBGM = true;
+      this.swing = 0; // Reset swing
       
-      if (type === 'battle') this.tempo = 135;
-      else if (type === 'math') this.tempo = 110;
-      else this.tempo = 90;
+      if (type === 'battle') { this.tempo = 135; }
+      else if (type === 'math') { this.tempo = 110; }
+      else if (type === 'poker_play') { 
+          this.tempo = 120; 
+          this.swing = 0.6; // Heavy Swing
+      }
+      else if (type === 'poker_shop') { 
+          this.tempo = 90; 
+          this.swing = 0; // Straight (Bossa feel is in the timing)
+      }
+      else { this.tempo = 90; }
 
       this.current16thNote = 0;
       if (this.ctx) this.nextNoteTime = this.ctx.currentTime + 0.1;
@@ -246,7 +332,6 @@ class AudioService {
   public toggleMute() {
       this.isMuted = !this.isMuted;
       if (this.masterGain && this.ctx) {
-          // Smooth mute
           this.masterGain.gain.setTargetAtTime(this.isMuted ? 0 : 0.4, this.ctx.currentTime, 0.1);
       }
   }
@@ -258,11 +343,9 @@ class AudioService {
 
       switch(effect) {
           case 'select':
-              // High pitched blip
               this.playOsc(1100, t, 0.05, 'triangle', 0.2, this.sfxGain);
               break;
           case 'attack':
-              // Impact: Pitch sweep + Noise
               const osc = this.ctx.createOscillator();
               osc.frequency.setValueAtTime(400, t);
               osc.frequency.exponentialRampToValueAtTime(50, t + 0.15);
@@ -273,22 +356,19 @@ class AudioService {
               g.connect(this.sfxGain);
               osc.start(t);
               osc.stop(t+0.15);
-              this.playNoise(t, 0.15, 0.5, 'snare'); // Crunch
+              this.playNoise(t, 0.15, 0.5, 'snare');
               break;
           case 'block':
-              // Metallic Clank (2 square waves detuned)
               this.playOsc(600, t, 0.1, 'square', 0.2, this.sfxGain);
               this.playOsc(850, t, 0.08, 'square', 0.2, this.sfxGain);
               break;
           case 'win':
-              // Fanfare Arpeggio (C Major)
               const fanfare = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
               fanfare.forEach((freq, i) => {
                   this.playOsc(freq, t + i*0.08, 0.4, 'square', 0.2, this.sfxGain!);
               });
               break;
           case 'lose':
-              // Sad descending slide
               const loseOsc = this.ctx.createOscillator();
               loseOsc.type = 'sawtooth';
               loseOsc.frequency.setValueAtTime(300, t);
@@ -302,13 +382,11 @@ class AudioService {
               loseOsc.stop(t + 1.0);
               break;
           case 'correct':
-              // Ding! (Major Triad)
-              this.playOsc(880, t, 0.1, 'sine', 0.3, this.sfxGain); // A5
-              this.playOsc(1108, t + 0.05, 0.1, 'sine', 0.3, this.sfxGain); // C#6
-              this.playOsc(1318, t + 0.1, 0.4, 'sine', 0.3, this.sfxGain); // E6
+              this.playOsc(880, t, 0.1, 'sine', 0.3, this.sfxGain);
+              this.playOsc(1108, t + 0.05, 0.1, 'sine', 0.3, this.sfxGain);
+              this.playOsc(1318, t + 0.1, 0.4, 'sine', 0.3, this.sfxGain);
               break;
           case 'wrong':
-              // Buzz!
               const wrongOsc = this.ctx.createOscillator();
               wrongOsc.type = 'sawtooth';
               wrongOsc.frequency.setValueAtTime(150, t);

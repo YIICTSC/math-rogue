@@ -223,7 +223,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           shopInventory: []
   });
       setPhase('BLIND_SELECT');
-      audioService.playBGM('menu');
+      audioService.playBGM('poker_shop'); // Chill start
   };
 
   const startBlind = () => {
@@ -243,7 +243,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           discardsRemaining: 3
       }));
       setPhase('PLAY');
-      audioService.playBGM('battle');
+      audioService.playBGM('poker_play'); // Swing Play
   };
 
   // --- Tooltip/Inspection Handlers ---
@@ -468,6 +468,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       } else {
           generateShop();
           setPhase('SHOP');
+          audioService.playBGM('poker_shop'); // Back to Shop/Chill music
       }
   };
 
@@ -526,6 +527,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           currentBlind: getBlindConfig(nextAnte, nextIndex)
       }));
       setPhase('BLIND_SELECT');
+      // BGM stays as shop theme for Blind Select (calm)
   };
 
   // --- Consumable Logic ---
