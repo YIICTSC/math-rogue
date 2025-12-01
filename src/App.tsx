@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -332,7 +333,9 @@ const App: React.FC = () => {
   
   // Debug Logic
   const [isMathDebugSkipped, setIsMathDebugSkipped] = useState<boolean>(false);
+  const [isDebugHpOne, setIsDebugHpOne] = useState<boolean>(false);
   const [titleClickCount, setTitleClickCount] = useState<number>(0);
+  const [logClickCount, setLogClickCount] = useState<number>(0);
 
   // Shop & Event
   const [shopCards, setShopCards] = useState<ICard[]>([]);
@@ -374,6 +377,7 @@ const App: React.FC = () => {
     setHasSave(storageService.hasSaveFile());
     setClearCount(storageService.getClearCount());
     setIsMathDebugSkipped(storageService.getDebugMathSkip());
+    setIsDebugHpOne(storageService.getDebugHpOne());
   }, []);
 
   const handleTitleClick = () => {
@@ -384,6 +388,19 @@ const App: React.FC = () => {
           setIsMathDebugSkipped(newState);
           storageService.saveDebugMathSkip(newState);
           setTitleClickCount(0);
+          audioService.playSound('select');
+      }
+  };
+
+  const handleLogTitleClick = (e: React.MouseEvent) => {
+      e.stopPropagation(); // Prevent closing modal
+      const next = logClickCount + 1;
+      setLogClickCount(next);
+      if (next >= 10) {
+          const newState = !isDebugHpOne;
+          setIsDebugHpOne(newState);
+          storageService.saveDebugHpOne(newState);
+          setLogClickCount(0);
           audioService.playSound('select');
       }
   };
@@ -716,8 +733,8 @@ const App: React.FC = () => {
                     id: 'true-boss',
                     enemyType: 'THE_HEART',
                     name: TRUE_BOSS.name,
-                    maxHp: TRUE_BOSS.maxHp,
-                    currentHp: TRUE_BOSS.maxHp,
+                    maxHp: isDebugHpOne ? 1 : TRUE_BOSS.maxHp,
+                    currentHp: isDebugHpOne ? 1 : TRUE_BOSS.maxHp,
                     block: 0,
                     strength: 0,
                     nextIntent: { type: EnemyIntentType.UNKNOWN, value: 0 },
@@ -739,8 +756,8 @@ const App: React.FC = () => {
                         id: `enemy-${node.y}-${i}-${Date.now()}`,
                         enemyType: type,
                         name: isBoss ? `ボス: ${name}` : name,
-                        maxHp: Math.floor(baseHp),
-                        currentHp: Math.floor(baseHp),
+                        maxHp: isDebugHpOne ? 1 : Math.floor(baseHp),
+                        currentHp: isDebugHpOne ? 1 : Math.floor(baseHp),
                         block: 0,
                         strength: 0,
                         nextIntent: { type: EnemyIntentType.UNKNOWN, value: 0 }, // Will be set by logic
@@ -1698,11 +1715,16 @@ const App: React.FC = () => {
                             算数ローグ<br/><span className="text-4xl">伝説の小学生</span>
                         </h1>
                         {isMathDebugSkipped && (
-                            <div className="text-red-500 font-bold mb-6 text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse">
+                            <div className="text-red-500 font-bold mb-1 text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse">
                                 (デバッグ: 計算スキップ ON)
                             </div>
                         )}
-                        {!isMathDebugSkipped && <div className="mb-8 h-6"></div>}
+                        {isDebugHpOne && (
+                            <div className="text-red-500 font-bold mb-6 text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse">
+                                (デバッグ: 敵HP1モード ON)
+                            </div>
+                        )}
+                        {(!isMathDebugSkipped && !isDebugHpOne) && <div className="mb-8 h-6"></div>}
 
                         <div className="flex flex-col gap-3 items-center w-full max-w-[280px]">
                             {hasSave && (
@@ -1732,7 +1754,7 @@ const App: React.FC = () => {
                             </div>
 
                             <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                <Terminal size={10}/> v2.2.1
+                                <Terminal size={10}/> v2.2.3
                             </button>
                         </div>
                     </div>
@@ -1742,8 +1764,11 @@ const App: React.FC = () => {
             {showDebugLog && (
                 <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4" onClick={() => setShowDebugLog(false)}>
                     <div className="bg-gray-900 border-2 border-green-500 p-6 rounded-lg max-w-lg w-full shadow-[0_0_20px_rgba(34,197,94,0.3)]" onClick={e => e.stopPropagation()}>
-                        <h2 className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2">
-                            System Update Log v2.2.2
+                        <h2 
+                            className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2 select-none active:text-green-200"
+                            onClick={handleLogTitleClick}
+                        >
+                            System Update Log v2.2.3
                         </h2>
                         <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
                             <section>
