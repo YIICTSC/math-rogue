@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, RotateCcw, Play, X, Trophy, AlertCircle, Club, Diamond, Heart, Spade, HelpCircle, ArrowUpDown, Layers } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -101,7 +100,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   // --- Initialization ---
   const initDeck = () => {
     const newDeck: PokerCard[] = [];
-    SUITS.forEach(suit => {
+    SUITS.forEach((suit) => {
       RANKS.forEach(rank => {
         newDeck.push({
           id: `${suit}-${rank}-${Math.random()}`,
@@ -368,20 +367,20 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       {/* Header */}
       <div className="bg-slate-800 p-2 border-b border-slate-600 flex justify-between items-center z-10 shrink-0 shadow-lg">
           <div className="flex items-center">
-              <button onClick={onBack} className="mr-4 text-gray-400 hover:text-white"><ArrowLeft/></button>
-              <h2 className="text-lg md:text-xl font-bold text-yellow-400 truncate">放課後ポーカー</h2>
-              <span className="ml-2 md:ml-4 text-xs md:text-sm bg-slate-700 px-2 py-1 rounded text-white">Round {round}</span>
+              <button onClick={onBack} className="mr-2 md:mr-4 text-gray-400 hover:text-white"><ArrowLeft/></button>
+              <h2 className="text-base md:text-xl font-bold text-yellow-400 truncate">放課後ポーカー</h2>
+              <span className="ml-2 md:ml-4 text-xs md:text-sm bg-slate-700 px-2 py-1 rounded text-white whitespace-nowrap">Round {round}</span>
           </div>
-          <div className="text-right flex items-center gap-4">
+          <div className="text-right flex items-center gap-2 md:gap-4">
               <button 
                 onClick={() => setShowHandList(true)}
-                className="bg-slate-700 hover:bg-slate-600 text-blue-300 px-3 py-1 rounded border border-blue-500/50 text-xs flex items-center"
+                className="bg-slate-700 hover:bg-slate-600 text-blue-300 px-2 py-1 md:px-3 rounded border border-blue-500/50 text-xs flex items-center"
               >
-                  <HelpCircle size={14} className="mr-1"/> 役一覧
+                  <HelpCircle size={14} className="mr-1"/> <span className="hidden md:inline">役一覧</span>
               </button>
               <div>
-                <div className="text-[10px] text-gray-400">目標スコア</div>
-                <div className="text-lg font-bold text-red-400">{targetScore.toLocaleString()}</div>
+                <div className="text-[9px] md:text-[10px] text-gray-400">目標</div>
+                <div className="text-sm md:text-lg font-bold text-red-400">{targetScore.toLocaleString()}</div>
               </div>
           </div>
       </div>
@@ -408,7 +407,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                           </div>
                           {Object.values(HAND_TYPES).sort((a,b) => b.baseChips * b.baseMult - a.baseChips * a.baseMult).map((h) => (
                               <div key={h.name} className="grid grid-cols-3 gap-2 items-center py-1 border-b border-gray-700/50 last:border-0">
-                                  <div className="text-white">{h.name}</div>
+                                  <div className="text-white text-xs">{h.name}</div>
                                   <div className="text-center text-blue-400">{h.baseChips}</div>
                                   <div className="text-center text-red-400">x{h.baseMult}</div>
                               </div>
@@ -419,19 +418,19 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           )}
 
           {/* Score Board */}
-          <div className="flex justify-center items-center py-4 space-x-8 bg-black/20 shrink-0">
-              <div className="bg-slate-800 border-4 border-slate-600 rounded-xl p-4 w-64 text-center shadow-2xl relative">
-                  <div className="text-xs text-gray-400 mb-1">現在のスコア</div>
-                  <div className="text-3xl font-bold text-white tracking-widest">{currentScore.toLocaleString()}</div>
+          <div className="flex justify-center items-center py-2 md:py-4 space-x-8 bg-black/20 shrink-0">
+              <div className="bg-slate-800 border-4 border-slate-600 rounded-xl p-2 md:p-4 w-48 md:w-64 text-center shadow-2xl relative">
+                  <div className="text-[10px] md:text-xs text-gray-400 mb-1">現在のスコア</div>
+                  <div className="text-2xl md:text-3xl font-bold text-white tracking-widest">{currentScore.toLocaleString()}</div>
                   {animatingScore && lastHandScore && (
                       <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-yellow-100 text-black px-4 py-2 rounded-full border-2 border-yellow-500 shadow-xl whitespace-nowrap animate-bounce z-50">
-                          <div className="font-bold text-lg">{lastHandScore.name}</div>
-                          <div className="text-sm font-bold flex items-center justify-center gap-2">
+                          <div className="font-bold text-base md:text-lg">{lastHandScore.name}</div>
+                          <div className="text-xs md:text-sm font-bold flex items-center justify-center gap-2">
                               <span className="text-blue-700">{lastHandScore.chips}</span>
                               <span className="text-gray-500">x</span>
                               <span className="text-red-600">{lastHandScore.mult}</span>
                               <span className="text-gray-500">=</span>
-                              <span className="text-xl">{lastHandScore.total}</span>
+                              <span className="text-lg md:text-xl">{lastHandScore.total}</span>
                           </div>
                       </div>
                   )}
@@ -439,10 +438,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           </div>
 
           {/* Supporters */}
-          <div className="flex justify-center gap-2 mb-2 px-2 overflow-x-auto min-h-[64px] shrink-0">
+          <div className="flex justify-center gap-2 mb-1 px-2 overflow-x-auto min-h-[50px] md:min-h-[64px] shrink-0">
               {supporters.map((s, idx) => (
-                  <div key={idx} className="w-12 h-12 bg-slate-700 border-2 border-yellow-500 rounded flex items-center justify-center relative group shrink-0" title={s.description}>
-                      <PixelSprite seed={s.icon} name={s.icon} className="w-10 h-10" />
+                  <div key={idx} className="w-10 h-10 md:w-12 md:h-12 bg-slate-700 border-2 border-yellow-500 rounded flex items-center justify-center relative group shrink-0" title={s.description}>
+                      <PixelSprite seed={s.icon} name={s.icon} className="w-8 h-8 md:w-10 md:h-10" />
                       <div className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs p-2 rounded z-50 w-32 text-center pointer-events-none border border-white/20">
                           <div className="font-bold text-yellow-300">{s.name}</div>
                           <div>{s.description}</div>
@@ -450,41 +449,41 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                   </div>
               ))}
               {[...Array(5 - supporters.length)].map((_, i) => (
-                  <div key={i} className="w-12 h-12 bg-black/20 border-2 border-slate-600 border-dashed rounded shrink-0"></div>
+                  <div key={i} className="w-10 h-10 md:w-12 md:h-12 bg-black/20 border-2 border-slate-600 border-dashed rounded shrink-0"></div>
               ))}
           </div>
 
           {/* Play Area */}
-          <div className="flex-grow flex flex-col items-center justify-center">
-              <div className="text-white/20 text-4xl font-bold select-none pointer-events-none rotate-[-5deg] mb-8">
+          <div className="flex-grow flex flex-col items-center justify-center min-h-0">
+              <div className="text-white/20 text-2xl md:text-4xl font-bold select-none pointer-events-none rotate-[-5deg] mb-2 md:mb-8">
                   {previewName}
               </div>
               
               {/* Sort Buttons */}
-              <div className="flex gap-4 mb-2">
-                  <button onClick={sortByRank} className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1 rounded text-xs flex items-center border border-slate-500">
+              <div className="flex gap-2 md:gap-4 mb-2">
+                  <button onClick={sortByRank} className="bg-slate-700 hover:bg-slate-600 text-white px-2 py-1 md:px-3 rounded text-[10px] md:text-xs flex items-center border border-slate-500">
                       <ArrowUpDown size={12} className="mr-1"/> ランク順
                   </button>
-                  <button onClick={sortBySuit} className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1 rounded text-xs flex items-center border border-slate-500">
+                  <button onClick={sortBySuit} className="bg-slate-700 hover:bg-slate-600 text-white px-2 py-1 md:px-3 rounded text-[10px] md:text-xs flex items-center border border-slate-500">
                       <Layers size={12} className="mr-1"/> スート順
                   </button>
               </div>
           </div>
 
-          {/* Hand Area */}
-          <div className="pb-4 pt-10 px-4 flex justify-center items-end h-48 relative shrink-0 overflow-visible">
+          {/* Hand Area - Responsive Sizing */}
+          <div className="pb-2 pt-2 md:pt-10 px-4 flex justify-center items-end h-32 md:h-48 relative shrink-0 overflow-visible">
               {hand.map((card, idx) => (
                   <div 
                     key={card.id}
                     onClick={() => toggleSelect(card.id)}
                     className={`
-                        w-24 h-36 bg-gray-100 rounded-lg border-2 shadow-xl flex flex-col items-center justify-between p-2 cursor-pointer transition-transform duration-200 select-none -ml-8 first:ml-0 hover:z-20 relative
-                        ${card.isSelected ? '-translate-y-6 z-10 border-yellow-400 ring-2 ring-yellow-400' : 'border-gray-300 hover:-translate-y-2'}
+                        w-16 h-24 md:w-24 md:h-36 bg-gray-100 rounded-lg border-2 shadow-xl flex flex-col items-center justify-between p-1 md:p-2 cursor-pointer transition-transform duration-200 select-none -ml-6 md:-ml-8 first:ml-0 hover:z-20 relative
+                        ${card.isSelected ? '-translate-y-4 md:-translate-y-6 z-10 border-yellow-400 ring-2 ring-yellow-400' : 'border-gray-300 hover:-translate-y-2'}
                     `}
                   >
                       {/* Top Left */}
                       <div className="self-start flex flex-col items-center leading-none">
-                          <span className={`text-lg font-bold ${['HEART','DIAMOND'].includes(card.suit) ? 'text-red-600' : 'text-slate-800'}`}>{getRankDisplay(card.rank)}</span>
+                          <span className={`text-base md:text-lg font-bold ${['HEART','DIAMOND'].includes(card.suit) ? 'text-red-600' : 'text-slate-800'}`}>{getRankDisplay(card.rank)}</span>
                           <span className="scale-75">{getSuitIcon(card.suit)}</span>
                       </div>
                       
@@ -492,30 +491,30 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                       <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
                           {getSuitIcon(card.suit)}
                       </div>
-                      <div className="text-[10px] text-gray-500 font-bold">{getSuitLabel(card.suit)}</div>
+                      <div className="text-[8px] md:text-[10px] text-gray-500 font-bold hidden md:block">{getSuitLabel(card.suit)}</div>
 
                       {/* Bottom Right */}
                       <div className="self-end flex flex-col items-center leading-none rotate-180">
-                          <span className={`text-lg font-bold ${['HEART','DIAMOND'].includes(card.suit) ? 'text-red-600' : 'text-slate-800'}`}>{getRankDisplay(card.rank)}</span>
+                          <span className={`text-base md:text-lg font-bold ${['HEART','DIAMOND'].includes(card.suit) ? 'text-red-600' : 'text-slate-800'}`}>{getRankDisplay(card.rank)}</span>
                           <span className="scale-75">{getSuitIcon(card.suit)}</span>
                       </div>
                   </div>
               ))}
           </div>
 
-          {/* Controls */}
-          <div className="bg-slate-800 p-4 border-t border-slate-600 flex justify-between items-center gap-4 shrink-0">
-              <div className="flex flex-col items-center">
-                  <div className="text-xs text-gray-400">残り手数</div>
-                  <div className="text-xl font-bold text-blue-400">{handsRemaining}</div>
+          {/* Controls - Compact */}
+          <div className="bg-slate-800 p-2 md:p-4 border-t border-slate-600 flex justify-between items-center gap-2 md:gap-4 shrink-0">
+              <div className="flex flex-col items-center min-w-[50px]">
+                  <div className="text-[10px] md:text-xs text-gray-400">残り手数</div>
+                  <div className="text-base md:text-xl font-bold text-blue-400">{handsRemaining}</div>
               </div>
               
-              <div className="flex gap-4">
+              <div className="flex gap-2 md:gap-4">
                   <button 
                     onClick={handlePlayHand}
                     disabled={selectedCards.length === 0 || handsRemaining <= 0 || animatingScore}
                     className={`
-                        px-8 py-3 rounded-lg font-bold text-lg shadow-lg transition-all transform active:scale-95 flex items-center
+                        px-4 py-2 md:px-8 md:py-3 rounded-lg font-bold text-sm md:text-lg shadow-lg transition-all transform active:scale-95 flex items-center
                         ${selectedCards.length > 0 && handsRemaining > 0 && !animatingScore ? 'bg-orange-600 hover:bg-orange-500 text-white border-b-4 border-orange-800' : 'bg-gray-600 text-gray-400 border-b-4 border-gray-700 cursor-not-allowed'}
                     `}
                   >
@@ -525,12 +524,12 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                     onClick={handleDiscard}
                     disabled={selectedCards.length === 0 || discardsRemaining <= 0 || animatingScore}
                     className={`
-                        px-6 py-3 rounded-lg font-bold text-sm shadow-lg transition-all transform active:scale-95 flex flex-col items-center
+                        px-3 py-2 md:px-6 md:py-3 rounded-lg font-bold text-xs md:text-sm shadow-lg transition-all transform active:scale-95 flex flex-col items-center justify-center
                         ${selectedCards.length > 0 && discardsRemaining > 0 && !animatingScore ? 'bg-red-900 hover:bg-red-800 text-white border-b-4 border-red-950' : 'bg-gray-700 text-gray-500 border-b-4 border-gray-800 cursor-not-allowed'}
                     `}
                   >
                       <span>DISCARD</span>
-                      <span className="text-[10px] opacity-70">残り: {discardsRemaining}</span>
+                      <span className="text-[9px] md:text-[10px] opacity-70">残: {discardsRemaining}</span>
                   </button>
               </div>
           </div>
