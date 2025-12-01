@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, RotateCcw, Play, X, Trophy, AlertCircle, Club, Diamond, Heart, Spade } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Play, X, Trophy, AlertCircle, Club, Diamond, Heart, Spade, HelpCircle, ArrowUpDown, Layers } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 
@@ -94,6 +94,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   // Animation State
   const [animatingScore, setAnimatingScore] = useState(false);
   const [rewardOption, setRewardOption] = useState<Supporter | null>(null);
+  
+  // UI State
+  const [showHandList, setShowHandList] = useState(false);
 
   // --- Initialization ---
   const initDeck = () => {
@@ -157,6 +160,24 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
     audioService.playSound('select');
   };
 
+  const sortByRank = () => {
+    setHand(prev => {
+        const sorted = [...prev].sort((a, b) => b.rank - a.rank || b.suit.localeCompare(a.suit));
+        return sorted;
+    });
+    audioService.playSound('select');
+  };
+
+  const sortBySuit = () => {
+    setHand(prev => {
+        // Suit order: Spades, Hearts, Diamonds, Clubs
+        const suitOrder: Record<string, number> = { 'SPADE': 0, 'HEART': 1, 'DIAMOND': 2, 'CLUB': 3 };
+        const sorted = [...prev].sort((a, b) => suitOrder[a.suit] - suitOrder[b.suit] || b.rank - a.rank);
+        return sorted;
+    });
+    audioService.playSound('select');
+  };
+
   const getSelectedCards = () => hand.filter(c => c.isSelected);
 
   const evaluateHand = (cards: PokerCard[]): { type: string, cards: PokerCard[] } => {
@@ -167,20 +188,23 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
     const ranks = sorted.map(c => c.rank);
     const suits = sorted.map(c => c.suit);
     
-    const isFlush = suits.every(s => s === suits[0]);
+    const isFlush = cards.length === 5 && suits.every(s => s === suits[0]);
     
-    // Check Straight (Ace can be low? Simplified to standard high for now, but handle A-5 if needed)
-    // 14, 2, 3, 4, 5 is handled by checking for 2,3,4,5,14
+    // Check Straight (5 cards only)
     let isStraight = true;
-    for (let i = 0; i < ranks.length - 1; i++) {
-      if (ranks[i+1] !== ranks[i] + 1) {
+    if (cards.length !== 5) {
         isStraight = false;
-        break;
-      }
-    }
-    // Special case A, 2, 3, 4, 5
-    if (!isStraight && ranks.length === 5 && ranks.includes(14) && ranks.includes(2) && ranks.includes(3) && ranks.includes(4) && ranks.includes(5)) {
-        isStraight = true;
+    } else {
+        for (let i = 0; i < ranks.length - 1; i++) {
+            if (ranks[i+1] !== ranks[i] + 1) {
+                isStraight = false;
+                break;
+            }
+        }
+        // Special case A, 2, 3, 4, 5 (14, 2, 3, 4, 5)
+        if (!isStraight && ranks.length === 5 && ranks.includes(14) && ranks.includes(2) && ranks.includes(3) && ranks.includes(4) && ranks.includes(5)) {
+            isStraight = true;
+        }
     }
 
     const counts: Record<number, number> = {};
@@ -188,7 +212,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
     const countsValues = Object.values(counts).sort((a, b) => b - a);
 
     if (isFlush && isStraight) {
-        if (ranks.includes(14) && ranks.includes(13)) return { type: 'ROYAL_FLUSH', cards: sorted }; // Just check high straight
+        if (ranks.includes(14) && ranks.includes(13)) return { type: 'ROYAL_FLUSH', cards: sorted };
         return { type: 'STRAIGHT_FLUSH', cards: sorted };
     }
     if (countsValues[0] === 4) return { type: 'FOUR_OF_A_KIND', cards: sorted };
@@ -207,7 +231,6 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
     
     const selected = getSelectedCards();
     if (selected.length === 0 || selected.length > 5) {
-        // Can allow < 5 but strictly enforce max 5
         if(selected.length > 5) return;
     }
 
@@ -250,8 +273,6 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
     
     // Remove played cards and draw
     const remainingHand = hand.filter(c => !c.isSelected);
-    // Return played cards to deck (reshuffle logic)? Balatro doesn't return immediately usually, but simplified here: they are gone until deck reset?
-    // Let's just discard them to a "played pile" conceptually (gone from deck).
     const { newHand: drawnHand, newDeck } = drawCards(remainingHand, deck, selected.length);
     setHand(drawnHand);
     setDeck(newDeck);
@@ -348,20 +369,57 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       <div className="bg-slate-800 p-2 border-b border-slate-600 flex justify-between items-center z-10 shrink-0 shadow-lg">
           <div className="flex items-center">
               <button onClick={onBack} className="mr-4 text-gray-400 hover:text-white"><ArrowLeft/></button>
-              <h2 className="text-xl font-bold text-yellow-400">放課後ポーカー</h2>
-              <span className="ml-4 text-sm bg-slate-700 px-2 py-1 rounded text-white">Round {round}</span>
+              <h2 className="text-lg md:text-xl font-bold text-yellow-400 truncate">放課後ポーカー</h2>
+              <span className="ml-2 md:ml-4 text-xs md:text-sm bg-slate-700 px-2 py-1 rounded text-white">Round {round}</span>
           </div>
-          <div className="text-right">
-              <div className="text-xs text-gray-400">目標スコア</div>
-              <div className="text-xl font-bold text-red-400">{targetScore.toLocaleString()}</div>
+          <div className="text-right flex items-center gap-4">
+              <button 
+                onClick={() => setShowHandList(true)}
+                className="bg-slate-700 hover:bg-slate-600 text-blue-300 px-3 py-1 rounded border border-blue-500/50 text-xs flex items-center"
+              >
+                  <HelpCircle size={14} className="mr-1"/> 役一覧
+              </button>
+              <div>
+                <div className="text-[10px] text-gray-400">目標スコア</div>
+                <div className="text-lg font-bold text-red-400">{targetScore.toLocaleString()}</div>
+              </div>
           </div>
       </div>
 
       {/* Main Area */}
       <div className="flex-grow flex flex-col relative overflow-hidden bg-[url('https://www.transparenttextures.com/patterns/felt.png')] bg-green-900/30">
           
+          {/* Hand List Modal */}
+          {showHandList && (
+              <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setShowHandList(false)}>
+                  <div className="bg-slate-800 border-2 border-white p-6 rounded-xl max-w-lg w-full shadow-2xl relative overflow-y-auto max-h-[90vh]" onClick={e => e.stopPropagation()}>
+                      <button onClick={() => setShowHandList(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X/></button>
+                      <h3 className="text-2xl font-bold text-yellow-400 mb-4 border-b border-gray-600 pb-2">役とスコア</h3>
+                      
+                      <div className="space-y-2 text-sm">
+                          <p className="text-gray-300 text-xs mb-4">
+                              スコア = (役のチップ + カードの数値) × 倍率<br/>
+                              ※J, Q, K = 10点, A = 11点
+                          </p>
+                          <div className="grid grid-cols-3 gap-2 font-bold text-gray-400 border-b border-gray-700 pb-1 mb-2">
+                              <div>役名</div>
+                              <div className="text-center">チップ</div>
+                              <div className="text-center">倍率</div>
+                          </div>
+                          {Object.values(HAND_TYPES).sort((a,b) => b.baseChips * b.baseMult - a.baseChips * a.baseMult).map((h) => (
+                              <div key={h.name} className="grid grid-cols-3 gap-2 items-center py-1 border-b border-gray-700/50 last:border-0">
+                                  <div className="text-white">{h.name}</div>
+                                  <div className="text-center text-blue-400">{h.baseChips}</div>
+                                  <div className="text-center text-red-400">x{h.baseMult}</div>
+                              </div>
+                          ))}
+                      </div>
+                  </div>
+              </div>
+          )}
+
           {/* Score Board */}
-          <div className="flex justify-center items-center py-4 space-x-8 bg-black/20">
+          <div className="flex justify-center items-center py-4 space-x-8 bg-black/20 shrink-0">
               <div className="bg-slate-800 border-4 border-slate-600 rounded-xl p-4 w-64 text-center shadow-2xl relative">
                   <div className="text-xs text-gray-400 mb-1">現在のスコア</div>
                   <div className="text-3xl font-bold text-white tracking-widest">{currentScore.toLocaleString()}</div>
@@ -381,30 +439,40 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           </div>
 
           {/* Supporters */}
-          <div className="flex justify-center gap-2 mb-2 px-2 overflow-x-auto min-h-[64px]">
+          <div className="flex justify-center gap-2 mb-2 px-2 overflow-x-auto min-h-[64px] shrink-0">
               {supporters.map((s, idx) => (
-                  <div key={idx} className="w-12 h-12 bg-slate-700 border-2 border-yellow-500 rounded flex items-center justify-center relative group" title={s.description}>
+                  <div key={idx} className="w-12 h-12 bg-slate-700 border-2 border-yellow-500 rounded flex items-center justify-center relative group shrink-0" title={s.description}>
                       <PixelSprite seed={s.icon} name={s.icon} className="w-10 h-10" />
-                      <div className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs p-1 rounded z-50 w-32 text-center pointer-events-none">
+                      <div className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs p-2 rounded z-50 w-32 text-center pointer-events-none border border-white/20">
                           <div className="font-bold text-yellow-300">{s.name}</div>
                           <div>{s.description}</div>
                       </div>
                   </div>
               ))}
               {[...Array(5 - supporters.length)].map((_, i) => (
-                  <div key={i} className="w-12 h-12 bg-black/20 border-2 border-slate-600 border-dashed rounded"></div>
+                  <div key={i} className="w-12 h-12 bg-black/20 border-2 border-slate-600 border-dashed rounded shrink-0"></div>
               ))}
           </div>
 
-          {/* Play Area (Empty usually, just spacing) */}
-          <div className="flex-grow flex items-center justify-center">
-              <div className="text-white/20 text-4xl font-bold select-none pointer-events-none rotate-[-5deg]">
+          {/* Play Area */}
+          <div className="flex-grow flex flex-col items-center justify-center">
+              <div className="text-white/20 text-4xl font-bold select-none pointer-events-none rotate-[-5deg] mb-8">
                   {previewName}
+              </div>
+              
+              {/* Sort Buttons */}
+              <div className="flex gap-4 mb-2">
+                  <button onClick={sortByRank} className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1 rounded text-xs flex items-center border border-slate-500">
+                      <ArrowUpDown size={12} className="mr-1"/> ランク順
+                  </button>
+                  <button onClick={sortBySuit} className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1 rounded text-xs flex items-center border border-slate-500">
+                      <Layers size={12} className="mr-1"/> スート順
+                  </button>
               </div>
           </div>
 
           {/* Hand Area */}
-          <div className="pb-4 pt-10 px-4 flex justify-center items-end h-48 relative">
+          <div className="pb-4 pt-10 px-4 flex justify-center items-end h-48 relative shrink-0 overflow-visible">
               {hand.map((card, idx) => (
                   <div 
                     key={card.id}
@@ -492,7 +560,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                             </div>
                         )}
 
-                        <button onClick={handleNextRound} className="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded font-bold text-xl border-b-4 border-blue-800 active:border-0 active:translate-y-1">
+                        <button onClick={handleNextRound} className="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded font-bold text-xl border-b-4 border-blue-800 active:border-0 active:translate-y-1 cursor-pointer">
                             次へ進む
                         </button>
                       </>
@@ -501,7 +569,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                         <h3 className="text-4xl font-bold text-red-500 mb-2">GAME OVER</h3>
                         <p className="text-gray-300 mb-6">ノルマ未達成... 補習決定。</p>
                         <div className="text-2xl font-bold text-white mb-8">到達: Round {round}</div>
-                        <button onClick={startGame} className="w-full bg-gray-600 hover:bg-gray-500 text-white py-3 rounded font-bold border-b-4 border-gray-800 mb-4">
+                        <button onClick={startGame} className="w-full bg-gray-600 hover:bg-gray-500 text-white py-3 rounded font-bold border-b-4 border-gray-800 mb-4 cursor-pointer">
                             リトライ
                         </button>
                         <button onClick={onBack} className="text-gray-400 hover:text-white underline">
