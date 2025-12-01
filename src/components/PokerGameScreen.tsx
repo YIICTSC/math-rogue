@@ -1,7 +1,6 @@
 
-
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Play, X, Trophy, Club, Diamond, Heart, Spade, HelpCircle, ArrowUpDown, ShoppingBag, Trash2, Zap, AlertTriangle, Check, BookOpen } from 'lucide-react';
+import { ArrowLeft, Play, X, Trophy, Club, Diamond, Heart, Spade, HelpCircle, ArrowUpDown, ShoppingBag, Trash2, Zap, AlertTriangle, Check, BookOpen, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { 
@@ -158,6 +157,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   // Consumable Usage
   const [selectedConsumable, setSelectedConsumable] = useState<PokerConsumable | null>(null);
 
+  // Sorting
+  const [sortRankAsc, setSortRankAsc] = useState(false);
+
   // --- Initialization ---
   useEffect(() => {
       initRun();
@@ -189,6 +191,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       // Draw initial hand
       const deck = [...runState.deck].sort(() => Math.random() - 0.5);
       const hand = deck.splice(0, 8);
+      // Initial Sort (Rank Desc)
+      hand.sort((a, b) => b.rank - a.rank);
       
       setRunState(prev => ({
           ...prev,
@@ -213,6 +217,23 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
               audioService.playSound('select');
           }
       }
+  };
+
+  const sortHandRank = () => {
+      const newAsc = !sortRankAsc;
+      setSortRankAsc(newAsc);
+      const newHand = [...runState.hand].sort((a, b) => newAsc ? a.rank - b.rank : b.rank - a.rank);
+      setRunState(prev => ({ ...prev, hand: newHand }));
+      audioService.playSound('select');
+  };
+
+  const sortHandSuit = () => {
+      const newHand = [...runState.hand].sort((a, b) => {
+          if (a.suit !== b.suit) return a.suit.localeCompare(b.suit);
+          return b.rank - a.rank;
+      });
+      setRunState(prev => ({ ...prev, hand: newHand }));
+      audioService.playSound('select');
   };
 
   const playHand = async () => {
@@ -279,6 +300,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           const drawn = currentDeck.splice(0, drawCount);
           newHand = [...newHand, ...drawn];
       }
+      // Auto sort drawn cards
+      newHand.sort((a, b) => b.rank - a.rank);
 
       setRunState(prev => ({
           ...prev,
@@ -314,6 +337,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           const drawn = currentDeck.splice(0, drawCount);
           newHand = [...newHand, ...drawn];
       }
+      // Auto sort
+      newHand.sort((a, b) => b.rank - a.rank);
 
       setRunState(prev => ({
           ...prev,
@@ -572,6 +597,37 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   // 3. Play Screen
   return (
     <div className="flex flex-col h-full w-full bg-green-900 text-white font-mono relative overflow-hidden">
+        
+        {/* Hand Levels Modal */}
+        {showHandList && (
+            <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowHandList(false)}>
+                <div className="bg-slate-800 border-4 border-slate-600 rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto relative shadow-2xl" onClick={e => e.stopPropagation()}>
+                    <button onClick={() => setShowHandList(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
+                    <h2 className="text-2xl font-bold text-white mb-4 flex items-center"><BarChart3 className="mr-2"/> Hand Levels (役のレベル)</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {Object.entries(POKER_HAND_LEVELS).map(([key, def]) => {
+                            const level = runState.handLevels[key] || 1;
+                            const currentChips = def.baseChips + (level - 1) * 10;
+                            const currentMult = def.baseMult + (level - 1) * 1;
+                            return (
+                                <div key={key} className={`p-3 rounded border flex justify-between items-center ${key === lastHandScore?.name ? 'bg-yellow-900/50 border-yellow-500' : 'bg-slate-900 border-slate-700'}`}>
+                                    <div>
+                                        <div className="font-bold text-white">{def.name}</div>
+                                        <div className="text-xs text-blue-300">Lvl {level}</div>
+                                    </div>
+                                    <div className="text-right">
+                                        <span className="text-blue-400 font-bold">{currentChips}</span>
+                                        <span className="text-gray-500 mx-1">X</span>
+                                        <span className="text-red-500 font-bold">{currentMult}</span>
+                                    </div>
+                                </div>
+                            )
+                        })}
+                    </div>
+                </div>
+            </div>
+        )}
+
         {/* Top Info Bar */}
         <div className="flex justify-between items-start p-2 md:p-4 bg-black/40 z-10">
             <div className="flex flex-col items-start bg-slate-800 p-2 rounded border border-slate-600 w-32 md:w-48 shadow-lg">
@@ -583,24 +639,32 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                 <div className="text-xs text-gray-400 mt-1">Current: {runState.currentScore.toLocaleString()}</div>
             </div>
 
-            <div className="flex gap-2">
-                <div className="bg-slate-800 p-2 rounded border border-yellow-600 flex flex-col items-center w-20 md:w-24">
-                    <div className="text-xs text-yellow-500 uppercase">Hands</div>
-                    <div className="text-xl font-bold text-blue-400">{runState.handsRemaining}</div>
+            <div className="flex items-center gap-2">
+                <button 
+                    onClick={() => { setShowHandList(true); audioService.playSound('select'); }}
+                    className="bg-slate-700 hover:bg-slate-600 p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-14 h-14"
+                >
+                    <BarChart3 size={20}/>
+                    <span className="text-[10px] mt-1">役確認</span>
+                </button>
+
+                <div className="bg-slate-800 p-2 rounded border border-yellow-600 flex flex-col items-center w-16 md:w-20">
+                    <div className="text-[10px] text-yellow-500 uppercase">Hands</div>
+                    <div className="text-lg font-bold text-blue-400">{runState.handsRemaining}</div>
                 </div>
-                <div className="bg-slate-800 p-2 rounded border border-red-900 flex flex-col items-center w-20 md:w-24">
-                    <div className="text-xs text-red-400 uppercase">Discards</div>
-                    <div className="text-xl font-bold text-red-400">{runState.discardsRemaining}</div>
+                <div className="bg-slate-800 p-2 rounded border border-red-900 flex flex-col items-center w-16 md:w-20">
+                    <div className="text-[10px] text-red-400 uppercase">Discard</div>
+                    <div className="text-lg font-bold text-red-400">{runState.discardsRemaining}</div>
                 </div>
-                <div className="bg-slate-800 p-2 rounded border border-yellow-500 flex flex-col items-center w-20 md:w-24">
-                    <div className="text-xs text-yellow-400 uppercase">Money</div>
-                    <div className="text-xl font-bold text-yellow-400">${runState.money}</div>
+                <div className="bg-slate-800 p-2 rounded border border-yellow-500 flex flex-col items-center w-16 md:w-20">
+                    <div className="text-[10px] text-yellow-400 uppercase">Money</div>
+                    <div className="text-lg font-bold text-yellow-400">${runState.money}</div>
                 </div>
             </div>
         </div>
 
         {/* Supporters Rack */}
-        <div className="absolute top-20 md:top-4 left-1/2 -translate-x-1/2 flex gap-2 z-0 opacity-50 hover:opacity-100 transition-opacity">
+        <div className="absolute top-24 md:top-6 left-1/2 -translate-x-1/2 flex gap-2 z-0 opacity-50 hover:opacity-100 transition-opacity">
             {runState.supporters.map((s, i) => (
                 <div key={i} className="w-10 h-10 md:w-12 md:h-12 bg-slate-800 border-2 border-yellow-500 rounded flex items-center justify-center relative group" title={s.description}>
                     <PixelSprite seed={s.icon} name={s.icon} className="w-8 h-8"/>
@@ -609,7 +673,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
         </div>
 
         {/* Consumable Rack */}
-        <div className="absolute top-24 right-4 flex flex-col gap-2">
+        <div className="absolute top-28 right-4 flex flex-col gap-2">
             {runState.consumables.map((c, i) => (
                 <div key={i} className="w-12 h-12 bg-slate-800 border-2 border-purple-500 rounded flex items-center justify-center relative group cursor-pointer hover:scale-110 transition-transform" onClick={() => useConsumable(c)}>
                     <PixelSprite seed={c.icon} name={c.icon} className="w-8 h-8"/>
@@ -644,6 +708,24 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                     </div>
                 </div>
             )}
+        </div>
+
+        {/* Sort Controls */}
+        <div className="absolute bottom-40 md:bottom-56 right-4 md:right-10 flex gap-2 z-30">
+            <button 
+                onClick={sortHandRank}
+                className="bg-orange-600 hover:bg-orange-500 text-white px-3 py-2 rounded font-bold text-xs flex items-center shadow-lg border-2 border-orange-800"
+            >
+                {sortRankAsc ? <ArrowUpNarrowWide size={16} className="mr-1"/> : <ArrowDownWideNarrow size={16} className="mr-1"/>}
+                Rank
+            </button>
+            <button 
+                onClick={sortHandSuit}
+                className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded font-bold text-xs flex items-center shadow-lg border-2 border-blue-800"
+            >
+                <LayoutList size={16} className="mr-1"/>
+                Suit
+            </button>
         </div>
 
         {/* Hand Area */}
