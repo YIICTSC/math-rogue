@@ -2,7 +2,9 @@
 
 
 
-import { Card, CardType, TargetType, Relic, Potion, Character } from './types';
+
+
+import { Card, CardType, TargetType, Relic, Potion, Character, PokerHandResult, PokerSupporter, PokerConsumable } from './types';
 
 export const INITIAL_HP = 75;
 export const INITIAL_ENERGY = 3;
@@ -627,4 +629,51 @@ export const CHARACTERS: Character[] = [
         deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'IRON_WAVE', 'BODY_SLAM'],
         imageData: `data:image/svg+xml;base64,${btoa(GARDENER_SVG)}`
     }
+];
+
+// --- POKER MINI GAME DATA ---
+
+export const POKER_HAND_LEVELS: Record<string, PokerHandResult> = {
+  'HIGH_CARD': { name: 'ハイカード', baseChips: 5, baseMult: 1, level: 1 },
+  'PAIR': { name: 'ワンペア', baseChips: 10, baseMult: 2, level: 1 },
+  'TWO_PAIR': { name: 'ツーペア', baseChips: 20, baseMult: 2, level: 1 },
+  'THREE_OF_A_KIND': { name: 'スリーカード', baseChips: 30, baseMult: 3, level: 1 },
+  'STRAIGHT': { name: 'ストレート', baseChips: 30, baseMult: 4, level: 1 },
+  'FLUSH': { name: 'フラッシュ', baseChips: 35, baseMult: 4, level: 1 },
+  'FULL_HOUSE': { name: 'フルハウス', baseChips: 40, baseMult: 4, level: 1 },
+  'FOUR_OF_A_KIND': { name: 'フォーカード', baseChips: 60, baseMult: 7, level: 1 },
+  'STRAIGHT_FLUSH': { name: 'ストレートフラッシュ', baseChips: 100, baseMult: 8, level: 1 },
+  'ROYAL_FLUSH': { name: 'ロイヤルストレートフラッシュ', baseChips: 200, baseMult: 20, level: 1 },
+};
+
+export const SUPPORTERS_LIBRARY: PokerSupporter[] = [
+  { id: 'TEACHER', name: '担任の先生', description: '倍率+4', price: 4, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.mult += 4, icon: 'TEACHER|#f44336' },
+  { id: 'PRINCIPAL', name: '校長先生', description: '倍率x2', price: 10, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.mult *= 2, icon: 'BOSS|#FFD700' },
+  { id: 'COOK', name: '給食のおばちゃん', description: 'チップ+50', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.chips += 50, icon: 'CHEF|#ffccbc' },
+  { id: 'ATHLETE', name: '体育会系', description: 'フラッシュで倍率+10', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(ctx.handType === 'FLUSH' || ctx.handType === 'STRAIGHT_FLUSH') ctx.mult += 10; }, icon: 'MUSCLE|#2196f3' },
+  { id: 'NERD', name: 'ガリ勉君', description: 'ストレートでチップ+100', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(ctx.handType === 'STRAIGHT' || ctx.handType === 'STRAIGHT_FLUSH') ctx.chips += 100; }, icon: 'LIBRARIAN|#4caf50' },
+  { id: 'IDOL', name: '学園のアイドル', description: '手札のハート1枚につき倍率+2', price: 7, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const hearts = ctx.cards.filter(c => c.suit === 'HEART').length; ctx.mult += hearts * 2; }, icon: 'GIRL|#e91e63' },
+  { id: 'DOG', name: '迷い犬', description: '手札のスペード1枚につきチップ+20', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const spades = ctx.cards.filter(c => c.suit === 'SPADE').length; ctx.chips += spades * 20; }, icon: 'DOG|#795548' },
+  { id: 'GHOST', name: 'トイレの幽霊', description: 'ペア系役の倍率x1.5', price: 8, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(['PAIR', 'TWO_PAIR', 'THREE_OF_A_KIND', 'FULL_HOUSE', 'FOUR_OF_A_KIND'].includes(ctx.handType)) ctx.mult = Math.floor(ctx.mult * 1.5); }, icon: 'GHOST|#9c27b0' },
+  { id: 'ALIEN', name: '転校生(宇宙人)', description: '奇数ランクのカードのチップ+30', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const odds = ctx.cards.filter(c => c.rank % 2 !== 0).length; ctx.chips += odds * 30; }, icon: 'ALIEN|#00bcd4' },
+];
+
+export const CONSUMABLES_LIBRARY: PokerConsumable[] = [
+    // Planets (Textbooks) - Upgrade Hand Levels
+    { id: 'TXT_MATH', type: 'PLANET', name: '数学ドリル', description: 'ハイカードのレベルアップ', price: 3, icon: 'NOTEBOOK|#2196f3' },
+    { id: 'TXT_JPN', type: 'PLANET', name: '漢字ドリル', description: 'ワンペアのレベルアップ', price: 3, icon: 'NOTEBOOK|#f44336' },
+    { id: 'TXT_SCI', type: 'PLANET', name: '理科実験集', description: 'ツーペアのレベルアップ', price: 3, icon: 'NOTEBOOK|#4caf50' },
+    { id: 'TXT_SOC', type: 'PLANET', name: '社会科資料集', description: 'スリーカードのレベルアップ', price: 3, icon: 'NOTEBOOK|#ff9800' },
+    { id: 'TXT_ENG', type: 'PLANET', name: '英単語帳', description: 'ストレートのレベルアップ', price: 3, icon: 'NOTEBOOK|#9c27b0' },
+    { id: 'TXT_ART', type: 'PLANET', name: '美術の教科書', description: 'フラッシュのレベルアップ', price: 3, icon: 'NOTEBOOK|#e91e63' },
+    { id: 'TXT_PE', type: 'PLANET', name: '体育のしおり', description: 'フルハウスのレベルアップ', price: 3, icon: 'NOTEBOOK|#795548' },
+    { id: 'TXT_MUS', type: 'PLANET', name: '音楽の教科書', description: 'フォーカードのレベルアップ', price: 3, icon: 'NOTEBOOK|#00bcd4' },
+    
+    // Tarots (Stationery) - Modify Cards
+    { id: 'STA_RULER', type: 'TAROT', name: '金の定規', description: '選んだカード2枚のランクを上げる', price: 4, icon: 'SWORD|#FFD700' },
+    { id: 'STA_ERASER', type: 'TAROT', name: '激落ち消しゴム', description: '選んだカード2枚をデッキから消す', price: 4, icon: 'SHIELD|#ffffff' },
+    { id: 'STA_STICKER', type: 'TAROT', name: 'キラキラシール', description: '選んだカード1枚にボーナスチップ+50', price: 4, icon: 'GEM|#00e676' },
+    { id: 'STA_MARKER', type: 'TAROT', name: '赤ペン', description: '選んだカード1枚を倍率x1.5にする', price: 4, icon: 'POTION|#f44336' },
+    { id: 'STA_PAINT', type: 'TAROT', name: '絵の具セット', description: '選んだカード3枚をハートに変える', price: 4, icon: 'POTION|#e91e63' },
+    { id: 'STA_INK', type: 'TAROT', name: '墨汁', description: '選んだカード3枚をスペードに変える', price: 4, icon: 'POTION|#212121' },
 ];

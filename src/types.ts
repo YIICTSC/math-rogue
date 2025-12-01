@@ -286,3 +286,83 @@ export interface GameState {
   selectionState: SelectionState; 
   isEndless?: boolean;
 }
+
+// --- Poker Mini Game Types ---
+export type PokerSuit = 'SPADE' | 'HEART' | 'DIAMOND' | 'CLUB';
+export type PokerRank = 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14; // 14 is Ace
+
+export interface PokerCard {
+  id: string;
+  suit: PokerSuit;
+  rank: PokerRank;
+  isSelected: boolean;
+  bonusChips: number;
+  multMultiplier: number;
+  enhancement?: 'BONUS' | 'MULT' | 'WILD' | 'STONE' | 'GLASS' | 'GOLD' | 'STEEL';
+}
+
+export interface PokerHandResult {
+  name: string;
+  baseChips: number;
+  baseMult: number;
+  level: number;
+}
+
+export interface PokerSupporter { // Joker
+  id: string;
+  name: string;
+  description: string;
+  rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'LEGENDARY';
+  price: number;
+  effect: (ctx: PokerScoringContext) => void;
+  icon: string;
+  triggerOn?: 'HAND_PLAYED' | 'DISCARD' | 'HELD_IN_HAND';
+}
+
+export interface PokerConsumable { // Tarot / Planet / Spectral
+  id: string;
+  type: 'TAROT' | 'PLANET' | 'SPECTRAL';
+  name: string;
+  description: string;
+  price: number;
+  icon: string;
+}
+
+export interface PokerScoringContext {
+  chips: number;
+  mult: number;
+  handType: string;
+  cards: PokerCard[];
+  handsPlayed: number;
+  discardsUsed: number;
+  deckState: PokerCard[];
+}
+
+export interface PokerBlind {
+    name: string; // e.g. "Small Blind", "Big Blind", "The Wall"
+    scoreGoal: number;
+    rewardMoney: number;
+    bossAbility?: string; // Special effect for Boss Blinds
+    description?: string;
+}
+
+export interface PokerRunState {
+    deck: PokerCard[];
+    money: number;
+    ante: number; // 1 to 8
+    blindIndex: number; // 0=Small, 1=Big, 2=Boss
+    currentBlind: PokerBlind;
+    supporters: PokerSupporter[];
+    consumables: PokerConsumable[];
+    handLevels: Record<string, number>;
+    vouchers: string[]; // IDs of bought vouchers
+    
+    // Play state
+    currentScore: number;
+    handsRemaining: number;
+    discardsRemaining: number;
+    hand: PokerCard[];
+    
+    // Shop state
+    shopInventory: (PokerSupporter | PokerConsumable)[];
+}
