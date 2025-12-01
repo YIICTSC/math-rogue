@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Play, X, Trophy, Club, Diamond, Heart, Spade, HelpCircle, ArrowUpDown, ShoppingBag, Trash2, Zap, AlertTriangle, Check, BookOpen, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList } from 'lucide-react';
+import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { 
-    PokerCard, PokerRunState, PokerBlind, PokerHandResult, PokerSupporter, PokerConsumable, PokerSuit, PokerRank, PokerScoringContext
+    PokerCard, PokerRunState, PokerBlind, PokerSupporter, PokerConsumable, PokerSuit, PokerRank, PokerScoringContext
 } from '../types';
 import { POKER_HAND_LEVELS, SUPPORTERS_LIBRARY, CONSUMABLES_LIBRARY } from '../constants';
 
@@ -157,6 +157,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   // Consumable Usage
   const [selectedConsumable, setSelectedConsumable] = useState<PokerConsumable | null>(null);
 
+  // Inspection Modal State
+  const [inspectedItem, setInspectedItem] = useState<PokerSupporter | PokerConsumable | null>(null);
+  const longPressTimer = useRef<any>(null);
+
   // Sorting
   const [sortRankAsc, setSortRankAsc] = useState(false);
 
@@ -210,13 +214,27 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       audioService.playBGM('battle');
   };
 
+  // --- Tooltip/Inspection Handlers ---
+  const handleTouchStart = (item: PokerSupporter | PokerConsumable) => {
+      longPressTimer.current = setTimeout(() => {
+          setInspectedItem(item);
+      }, 500);
+  };
+
+  const handleTouchEnd = () => {
+      if (longPressTimer.current) {
+          clearTimeout(longPressTimer.current);
+      }
+  };
+
+  const handleContextMenu = (e: React.MouseEvent, item: PokerSupporter | PokerConsumable) => {
+      e.preventDefault();
+      setInspectedItem(item);
+  };
+
   // --- Play Logic ---
   const toggleSelect = (id: string) => {
       if (animating) return;
-      
-      // Prevent rapidly toggling the same card in a single drag event
-      // However, if we click, we want to toggle.
-      // logic is handled in handlers.
       
       if (selectedCards.includes(id)) {
           setSelectedCards(prev => prev.filter(c => c !== id));
@@ -533,6 +551,33 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
 
   // --- Renders ---
 
+  // Inspection Modal
+  const renderInspectionModal = () => {
+      if (!inspectedItem) return null;
+      return (
+          <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setInspectedItem(null)}>
+              <div className="bg-slate-800 border-2 border-white p-6 rounded-lg max-w-sm w-full shadow-2xl relative" onClick={e => e.stopPropagation()}>
+                  <button onClick={() => setInspectedItem(null)} className="absolute top-2 right-2 text-gray-400 hover:text-white"><X size={24}/></button>
+                  <div className="flex flex-col items-center mb-4">
+                      <div className="w-24 h-24 mb-4">
+                          <PixelSprite seed={inspectedItem.icon} name={inspectedItem.icon} className="w-full h-full"/>
+                      </div>
+                      <h3 className="text-2xl font-bold text-yellow-400 mb-2">{inspectedItem.name}</h3>
+                      <div className="text-sm font-bold text-white bg-slate-700 px-3 py-1 rounded-full">
+                          {'rarity' in inspectedItem ? (inspectedItem as PokerSupporter).rarity : (inspectedItem as PokerConsumable).type}
+                      </div>
+                  </div>
+                  <p className="text-lg text-gray-300 text-center leading-relaxed">
+                      {inspectedItem.description}
+                  </p>
+                  <div className="mt-6 text-center text-yellow-500 font-bold text-xl">
+                      ${inspectedItem.price}
+                  </div>
+              </div>
+          </div>
+      );
+  };
+
   // 1. Blind Select Screen
   if (phase === 'BLIND_SELECT') {
       const config = runState.currentBlind;
@@ -561,58 +606,133 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
 
   // 2. Shop Screen
   if (phase === 'SHOP') {
+      const shopSupporters = runState.shopInventory.filter(i => 'rarity' in i) as PokerSupporter[];
+      const shopConsumables = runState.shopInventory.filter(i => !('rarity' in i)) as PokerConsumable[];
+
       return (
-          <div className="flex flex-col h-full w-full bg-slate-900 text-white p-4 font-mono">
-              <div className="flex justify-between items-center mb-6 bg-slate-800 p-4 rounded-lg shadow-lg">
+          <div className="flex flex-col h-full w-full bg-slate-900 text-white p-4 font-mono relative">
+              {renderInspectionModal()}
+              
+              <div className="flex justify-between items-center mb-4 bg-slate-800 p-4 rounded-lg shadow-lg shrink-0">
                   <h2 className="text-2xl font-bold flex items-center"><ShoppingBag className="mr-2 text-yellow-500"/> School Store</h2>
                   <div className="text-2xl font-bold text-yellow-400">${runState.money}</div>
-                  <button onClick={nextBlind} className="bg-green-600 hover:bg-green-500 px-6 py-2 rounded font-bold">Next Round <ArrowLeft className="rotate-180 inline ml-1"/></button>
+                  <button onClick={nextBlind} className="bg-green-600 hover:bg-green-500 px-6 py-2 rounded font-bold flex items-center">
+                      Next Round <ArrowLeft className="rotate-180 inline ml-1"/>
+                  </button>
               </div>
 
               <div className="flex-grow flex gap-4 overflow-hidden">
-                  <div className="w-2/3 bg-slate-800/50 p-4 rounded-lg border-2 border-slate-700 overflow-y-auto">
-                      <h3 className="text-xl font-bold mb-4 text-blue-300 border-b border-slate-600 pb-2">For Sale</h3>
-                      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                          {runState.shopInventory.map((item, idx) => (
-                              <div key={idx} className="bg-slate-700 p-4 rounded flex flex-col items-center text-center relative group">
-                                  <div className="w-16 h-16 mb-2">
-                                      <PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/>
-                                  </div>
-                                  <div className="font-bold text-sm mb-1">{item.name}</div>
-                                  <div className="text-xs text-gray-300 mb-2 h-10 overflow-hidden">{item.description}</div>
-                                  <div className="text-yellow-400 font-bold mb-2">${item.price}</div>
-                                  <button 
-                                    onClick={() => buyItem(item, idx)}
-                                    disabled={runState.money < item.price}
-                                    className={`w-full py-1 rounded font-bold text-sm ${runState.money >= item.price ? 'bg-blue-600 hover:bg-blue-500' : 'bg-gray-600 cursor-not-allowed'}`}
+                  <div className="w-2/3 bg-slate-800/50 p-4 rounded-lg border-2 border-slate-700 overflow-y-auto custom-scrollbar">
+                      
+                      {/* Supporters Section */}
+                      <div className="mb-8">
+                          <h3 className="text-xl font-bold mb-4 text-blue-300 border-b border-slate-600 pb-2 flex items-center">
+                              <PixelSprite seed="SMILE" name="SMILE" className="w-6 h-6 mr-2" />
+                              サポーター (Supporters)
+                          </h3>
+                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                              {shopSupporters.map((item) => (
+                                  <div 
+                                    key={item.id} 
+                                    className="bg-slate-700 p-4 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors"
+                                    onClick={() => buyItem(item, runState.shopInventory.indexOf(item))}
+                                    onContextMenu={(e) => handleContextMenu(e, item)}
+                                    onTouchStart={() => handleTouchStart(item)}
+                                    onTouchEnd={handleTouchEnd}
                                   >
-                                      BUY
-                                  </button>
-                              </div>
-                          ))}
+                                      <div className="w-16 h-16 mb-2">
+                                          <PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/>
+                                      </div>
+                                      <div className="font-bold text-sm mb-1">{item.name}</div>
+                                      <div className="text-xs text-gray-400 mb-2 h-8 overflow-hidden">{item.description}</div>
+                                      <div className="mt-auto w-full">
+                                          <button 
+                                            disabled={runState.money < item.price}
+                                            className={`w-full py-1 rounded font-bold text-sm ${runState.money >= item.price ? 'bg-blue-600 hover:bg-blue-500' : 'bg-gray-600 cursor-not-allowed'}`}
+                                          >
+                                              ${item.price} BUY
+                                          </button>
+                                      </div>
+                                  </div>
+                              ))}
+                              {shopSupporters.length === 0 && <div className="text-gray-500 italic">Sold Out</div>}
+                          </div>
                       </div>
+
+                      {/* Consumables Section */}
+                      <div>
+                          <h3 className="text-xl font-bold mb-4 text-purple-300 border-b border-slate-600 pb-2 flex items-center">
+                              <PixelSprite seed="NOTEBOOK" name="NOTEBOOK" className="w-6 h-6 mr-2" />
+                              消耗品 (Stationery)
+                          </h3>
+                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                              {shopConsumables.map((item) => (
+                                  <div 
+                                    key={item.id} 
+                                    className="bg-slate-700 p-4 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors"
+                                    onClick={() => buyItem(item, runState.shopInventory.indexOf(item))}
+                                    onContextMenu={(e) => handleContextMenu(e, item)}
+                                    onTouchStart={() => handleTouchStart(item)}
+                                    onTouchEnd={handleTouchEnd}
+                                  >
+                                      <div className="w-16 h-16 mb-2">
+                                          <PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/>
+                                      </div>
+                                      <div className="font-bold text-sm mb-1">{item.name}</div>
+                                      <div className="text-xs text-gray-400 mb-2 h-8 overflow-hidden">{item.description}</div>
+                                      <div className="mt-auto w-full">
+                                          <button 
+                                            disabled={runState.money < item.price}
+                                            className={`w-full py-1 rounded font-bold text-sm ${runState.money >= item.price ? 'bg-blue-600 hover:bg-blue-500' : 'bg-gray-600 cursor-not-allowed'}`}
+                                          >
+                                              ${item.price} BUY
+                                          </button>
+                                      </div>
+                                  </div>
+                              ))}
+                              {shopConsumables.length === 0 && <div className="text-gray-500 italic">Sold Out</div>}
+                          </div>
+                      </div>
+
                   </div>
 
                   <div className="w-1/3 flex flex-col gap-4">
                       {/* Inventory */}
                       <div className="bg-slate-800 p-4 rounded-lg border-2 border-slate-700 flex-1">
-                          <h3 className="text-lg font-bold mb-2 text-yellow-300">Supporters ({runState.supporters.length}/5)</h3>
-                          <div className="grid grid-cols-2 gap-2 mb-4">
-                              {runState.supporters.map((s, i) => (
-                                  <div key={i} className="bg-slate-900 p-2 rounded flex flex-col items-center text-xs" title={s.description}>
-                                      <PixelSprite seed={s.icon} name={s.icon} className="w-8 h-8"/>
-                                      <span className="truncate w-full text-center mt-1">{s.name}</span>
-                                  </div>
-                              ))}
+                          <h3 className="text-lg font-bold mb-2 text-yellow-300">Inventory</h3>
+                          <div className="mb-4">
+                              <div className="text-xs text-gray-400 mb-1">Supporters ({runState.supporters.length}/5)</div>
+                              <div className="grid grid-cols-2 gap-2">
+                                  {runState.supporters.map((s, i) => (
+                                      <div 
+                                        key={i} 
+                                        className="bg-slate-900 p-2 rounded flex flex-col items-center text-xs cursor-pointer hover:bg-slate-700"
+                                        onContextMenu={(e) => handleContextMenu(e, s)}
+                                        onTouchStart={() => handleTouchStart(s)}
+                                        onTouchEnd={handleTouchEnd}
+                                      >
+                                          <PixelSprite seed={s.icon} name={s.icon} className="w-8 h-8"/>
+                                          <span className="truncate w-full text-center mt-1">{s.name}</span>
+                                      </div>
+                                  ))}
+                              </div>
                           </div>
-                          <h3 className="text-lg font-bold mb-2 text-purple-300">Stationery ({runState.consumables.length}/2)</h3>
-                          <div className="grid grid-cols-2 gap-2">
-                              {runState.consumables.map((c, i) => (
-                                  <div key={i} className="bg-slate-900 p-2 rounded flex flex-col items-center text-xs" title={c.description}>
-                                      <PixelSprite seed={c.icon} name={c.icon} className="w-8 h-8"/>
-                                      <span className="truncate w-full text-center mt-1">{c.name}</span>
-                                  </div>
-                              ))}
+                          <div>
+                              <div className="text-xs text-gray-400 mb-1">Stationery ({runState.consumables.length}/2)</div>
+                              <div className="grid grid-cols-2 gap-2">
+                                  {runState.consumables.map((c, i) => (
+                                      <div 
+                                        key={i} 
+                                        className="bg-slate-900 p-2 rounded flex flex-col items-center text-xs cursor-pointer hover:bg-slate-700"
+                                        onContextMenu={(e) => handleContextMenu(e, c)}
+                                        onTouchStart={() => handleTouchStart(c)}
+                                        onTouchEnd={handleTouchEnd}
+                                      >
+                                          <PixelSprite seed={c.icon} name={c.icon} className="w-8 h-8"/>
+                                          <span className="truncate w-full text-center mt-1">{c.name}</span>
+                                      </div>
+                                  ))}
+                              </div>
                           </div>
                       </div>
                   </div>
@@ -636,6 +756,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   // 3. Play Screen
   return (
     <div className="flex flex-col h-full w-full bg-green-900 text-white font-mono relative overflow-hidden">
+        {renderInspectionModal()}
         
         {/* Hand Levels Modal */}
         {showHandList && (
@@ -668,7 +789,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
         )}
 
         {/* Top Info Bar */}
-        <div className="flex justify-between items-start p-2 md:p-4 bg-black/40 z-10">
+        <div className="flex justify-between items-start p-2 md:p-4 bg-black/60 z-20 shadow-md shrink-0">
             <div className="flex flex-col items-start bg-slate-800 p-2 rounded border border-slate-600 w-32 md:w-48 shadow-lg">
                 <div className="text-xs text-red-400 font-bold uppercase">Score Goal</div>
                 <div className="text-xl md:text-3xl font-black text-white">{runState.currentBlind.scoreGoal.toLocaleString()}</div>
@@ -702,23 +823,41 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
             </div>
         </div>
 
-        {/* Supporters Rack */}
-        <div className="absolute top-24 md:top-6 left-1/2 -translate-x-1/2 flex gap-2 z-0 opacity-50 hover:opacity-100 transition-opacity">
-            {runState.supporters.map((s, i) => (
-                <div key={i} className="w-10 h-10 md:w-12 md:h-12 bg-slate-800 border-2 border-yellow-500 rounded flex items-center justify-center relative group" title={s.description}>
-                    <PixelSprite seed={s.icon} name={s.icon} className="w-8 h-8"/>
-                </div>
-            ))}
-        </div>
+        {/* Item Shelf (Moved from absolute positioning to flex) */}
+        <div className="w-full bg-black/40 border-b border-black/50 p-2 flex justify-between items-center z-10 shrink-0 min-h-[64px]">
+            {/* Supporters Rack */}
+            <div className="flex gap-2 items-center flex-1 justify-center">
+                {runState.supporters.map((s, i) => (
+                    <div 
+                        key={i} 
+                        className="w-10 h-10 md:w-12 md:h-12 bg-slate-800 border-2 border-yellow-500 rounded flex items-center justify-center relative group cursor-pointer hover:bg-slate-700 transition-colors"
+                        onContextMenu={(e) => handleContextMenu(e, s)}
+                        onTouchStart={() => handleTouchStart(s)}
+                        onTouchEnd={handleTouchEnd}
+                    >
+                        <PixelSprite seed={s.icon} name={s.icon} className="w-8 h-8"/>
+                    </div>
+                ))}
+                {runState.supporters.length === 0 && <div className="text-xs text-gray-500">No Supporters</div>}
+            </div>
 
-        {/* Consumable Rack */}
-        <div className="absolute top-28 right-4 flex flex-col gap-2">
-            {runState.consumables.map((c, i) => (
-                <div key={i} className="w-12 h-12 bg-slate-800 border-2 border-purple-500 rounded flex items-center justify-center relative group cursor-pointer hover:scale-110 transition-transform" onClick={() => useConsumable(c)}>
-                    <PixelSprite seed={c.icon} name={c.icon} className="w-8 h-8"/>
-                    {selectedConsumable === c && <div className="absolute inset-0 bg-white/30 rounded animate-pulse"></div>}
-                </div>
-            ))}
+            {/* Consumables Rack */}
+            <div className="flex gap-2 items-center border-l border-white/20 pl-2">
+                {runState.consumables.map((c, i) => (
+                    <div 
+                        key={i} 
+                        className="w-10 h-10 md:w-12 md:h-12 bg-slate-800 border-2 border-purple-500 rounded flex items-center justify-center relative group cursor-pointer hover:scale-110 transition-transform" 
+                        onClick={() => useConsumable(c)}
+                        onContextMenu={(e) => handleContextMenu(e, c)}
+                        onTouchStart={() => handleTouchStart(c)}
+                        onTouchEnd={handleTouchEnd}
+                    >
+                        <PixelSprite seed={c.icon} name={c.icon} className="w-8 h-8"/>
+                        {selectedConsumable === c && <div className="absolute inset-0 bg-white/30 rounded animate-pulse"></div>}
+                    </div>
+                ))}
+                {runState.consumables.length === 0 && <div className="text-xs text-gray-500 w-12 text-center">Empty</div>}
+            </div>
         </div>
 
         {/* Play Area */}
@@ -738,7 +877,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
 
             {/* Selected Consumable UI */}
             {selectedConsumable && selectedConsumable.type === 'TAROT' && (
-                <div className="absolute top-4 bg-purple-900/80 p-2 rounded text-center border border-purple-400">
+                <div className="absolute top-4 bg-purple-900/80 p-2 rounded text-center border border-purple-400 z-40">
                     <div className="text-sm font-bold text-purple-200">Using: {selectedConsumable.name}</div>
                     <div className="text-xs mb-2">Select cards then click USE</div>
                     <div className="flex gap-2 justify-center">
@@ -751,7 +890,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
 
         {/* Hand Area (With Drag/Trace Support) */}
         <div 
-            className="h-40 md:h-56 w-full flex justify-center items-end pb-4 gap-[-20px] touch-none select-none"
+            className="h-40 md:h-56 w-full flex justify-center items-end pb-4 gap-[-20px] touch-none select-none shrink-0"
             onPointerLeave={handlePointerUp}
             onPointerUp={handlePointerUp}
             onPointerMove={handlePointerMove}
@@ -782,7 +921,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
         </div>
 
         {/* Sort Controls (Moved Below Cards) */}
-        <div className="flex justify-center gap-4 my-2 z-30">
+        <div className="flex justify-center gap-4 my-2 z-30 shrink-0">
             <button 
                 onClick={sortHandRank}
                 className="bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-full font-bold text-xs flex items-center shadow-lg border-2 border-orange-800"
@@ -800,7 +939,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
         </div>
 
         {/* Main Controls */}
-        <div className="bg-slate-800 p-2 md:p-4 flex justify-center gap-4 z-20 shadow-up">
+        <div className="bg-slate-800 p-2 md:p-4 flex justify-center gap-4 z-20 shadow-up shrink-0">
             <button 
                 onClick={playHand} 
                 disabled={animating || selectedCards.length === 0}
