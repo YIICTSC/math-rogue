@@ -77,6 +77,7 @@ export interface Card {
   playCopies?: number;            
   addCardToHand?: { cardName: string, count: number, cost0?: boolean }; 
   addCardToDraw?: { cardName: string, count: number }; 
+  addCardToDiscard?: { cardName: string, count: number };
   
   rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'LEGENDARY' | 'SPECIAL';
   price?: number;       

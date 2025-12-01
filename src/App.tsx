@@ -1,6 +1,8 @@
 
 
 
+
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -978,6 +980,11 @@ const App: React.FC = () => {
       const newUnplayable = c1.unplayable || c2.unplayable;
       const newCapture = c1.capture || c2.capture;
 
+      // Handle object properties merge
+      const newAddCardToHand = c1.addCardToHand || c2.addCardToHand;
+      const newAddCardToDraw = c1.addCardToDraw || c2.addCardToDraw;
+      const newAddCardToDiscard = c1.addCardToDiscard || c2.addCardToDiscard;
+
       let newTarget = TargetType.SELF;
       if (c1.target === TargetType.ALL_ENEMIES || c2.target === TargetType.ALL_ENEMIES) newTarget = TargetType.ALL_ENEMIES;
       else if (c1.target === TargetType.RANDOM_ENEMY || c2.target === TargetType.RANDOM_ENEMY) newTarget = TargetType.RANDOM_ENEMY;
@@ -1038,6 +1045,7 @@ const App: React.FC = () => {
       if (newUnplayable) parts.push(`使用不可`);
       if (newCapture) parts.push(`捕獲`);
       if (newApplyPower) parts.push(`${newApplyPower.id}(${newApplyPower.amount})`);
+      if (newAddCardToDiscard) parts.push(`捨て札に${newAddCardToDiscard.cardName}`);
 
       const newDesc = parts.join('。') + '。';
 
@@ -1080,6 +1088,9 @@ const App: React.FC = () => {
           applyPower: newApplyPower,
           textureRef: newTextureRef,
           capture: newCapture,
+          addCardToHand: newAddCardToHand,
+          addCardToDraw: newAddCardToDraw,
+          addCardToDiscard: newAddCardToDiscard,
       };
 
       setGameState(prev => ({
@@ -1350,6 +1361,13 @@ const App: React.FC = () => {
               if (card.addCardToDraw) {
                    for (let c=0; c<card.addCardToDraw.count; c++) { p.drawPile.push({ ...CARDS_LIBRARY[card.addCardToDraw.cardName], id: `gen-${Date.now()}-${c}` }); }
                    p.drawPile = shuffle(p.drawPile);
+              }
+              if (card.addCardToDiscard) {
+                   for (let c=0; c<card.addCardToDiscard.count; c++) {
+                       let newC = { ...CARDS_LIBRARY[card.addCardToDiscard.cardName], id: `gen-${Date.now()}-${c}` };
+                       if (p.powers['MASTER_REALITY']) newC = getUpgradedCard(newC);
+                       p.discardPile.push(newC);
+                   }
               }
               if (card.nextTurnEnergy) p.nextTurnEnergy += card.nextTurnEnergy;
               if (card.nextTurnDraw) p.nextTurnDraw += card.nextTurnDraw;

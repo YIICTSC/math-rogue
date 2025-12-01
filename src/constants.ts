@@ -1,6 +1,7 @@
 
 
 
+
 import { Card, CardType, TargetType, Relic, Potion, Character } from './types';
 
 export const INITIAL_HP = 75;
@@ -389,7 +390,7 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
   BODY_SLAM: { name: 'ボディスラム', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '現在のブロック値分のダメージを与える。', damage: 0, damageBasedOnBlock: true, rarity: 'COMMON' },
   WILD_STRIKE: { name: '暴れる', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '12ダメージ。山札に「ケガ」を加える。', damage: 12, addCardToDraw: { cardName: 'WOUND', count: 1 }, rarity: 'COMMON' },
   PERFECTED_STRIKE: { name: '完璧な回答', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '6ダメージ。デッキの「えんぴつ攻撃」1枚につき+2。', damage: 6, damagePerStrike: 2, rarity: 'COMMON' },
-  ANGER: { name: 'キレる', cost: 0, type: CardType.ATTACK, target: TargetType.ENEMY, description: '6ダメージ。捨て札に「キレる」を1枚加える。', damage: 6, addCardToHand: { cardName: 'ANGER', count: 1 }, rarity: 'COMMON' },
+  ANGER: { name: 'キレる', cost: 0, type: CardType.ATTACK, target: TargetType.ENEMY, description: '6ダメージ。捨て札に「キレる」を1枚加える。', damage: 6, addCardToDiscard: { cardName: 'ANGER', count: 1 }, rarity: 'COMMON' },
   FLYING_KNEE: { name: '飛び膝蹴り', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '8ダメージ。次ターンE+1。', damage: 8, nextTurnEnergy: 1, rarity: 'COMMON' },
   EMPTY_FIST: { name: 'グーパンチ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '9ダメージ。', damage: 9, rarity: 'COMMON' },
   CONSECRATE: { name: '掃除の時間', cost: 0, type: CardType.ATTACK, target: TargetType.ALL_ENEMIES, description: '全体5ダメージ。', damage: 5, rarity: 'COMMON' },
