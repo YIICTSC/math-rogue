@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Player, Card as ICard, Relic, Potion } from '../types';
-import Card from './Card';
+import Card, { KEYWORD_DEFINITIONS } from './Card';
 import { ShoppingBag, Trash2, Coins, Gem, FlaskConical, X } from 'lucide-react';
 
 interface ShopScreenProps {
@@ -23,6 +23,21 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
   const [removed, setRemoved] = useState(false);
   const [viewMode, setViewMode] = useState<'BUY' | 'REMOVE'>('BUY');
   const [potionToBuy, setPotionToBuy] = useState<Potion | null>(null); // For replacement modal
+  
+  const [inspectedItem, setInspectedItem] = useState<{ type: 'CARD' | 'RELIC' | 'POTION', data: any } | null>(null);
+  const longPressTimer = useRef<any>(null);
+
+  const handleTouchStart = (itemType: 'RELIC' | 'POTION', data: any) => {
+      longPressTimer.current = setTimeout(() => {
+          setInspectedItem({ type: itemType, data });
+      }, 500);
+  };
+
+  const handleTouchEnd = () => {
+      if (longPressTimer.current) {
+          clearTimeout(longPressTimer.current);
+      }
+  };
 
   const handleBuyCard = (card: ICard) => {
     if (purchasedIds.includes(card.id)) return;
@@ -85,9 +100,80 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
       return base;
   };
 
+  const getCardKeywords = (card: ICard) => {
+      const keywords = [];
+      if (card.exhaust) keywords.push(KEYWORD_DEFINITIONS.EXHAUST);
+      if (card.strength || card.description.includes('ムキムキ')) keywords.push(KEYWORD_DEFINITIONS.STRENGTH);
+      if (card.vulnerable || card.description.includes('びくびく')) keywords.push(KEYWORD_DEFINITIONS.VULNERABLE);
+      if (card.weak || card.description.includes('へろへろ')) keywords.push(KEYWORD_DEFINITIONS.WEAK);
+      if (card.block || card.description.includes('ブロック')) keywords.push(KEYWORD_DEFINITIONS.BLOCK);
+      if (card.draw || card.description.includes('引く')) keywords.push(KEYWORD_DEFINITIONS.DRAW);
+      return keywords;
+  };
+
+  const getProcessedDescription = (card: ICard) => {
+      let desc = card.description;
+      if (card.damage !== undefined) desc = desc.replace(/(\d+)ダメージ/g, `${card.damage}ダメージ`);
+      if (card.block !== undefined) desc = desc.replace(/ブロック(\d+)/g, `ブロック${card.block}`);
+      if (card.poison !== undefined) desc = desc.replace(/ドクドク(\d+)/g, `ドクドク${card.poison}`);
+      if (card.weak !== undefined) desc = desc.replace(/へろへろ(\d+)/g, `へろへろ${card.weak}`);
+      if (card.vulnerable !== undefined) desc = desc.replace(/びくびく(\d+)/g, `びくびく${card.vulnerable}`);
+      if (card.strength !== undefined) desc = desc.replace(/ムキムキ(\d+)/g, `ムキムキ${card.strength}`);
+      return desc;
+  };
+
   return (
     <div className="flex flex-col h-full w-full bg-gray-900 text-white relative">
        
+       {/* Inspection Modal */}
+       {inspectedItem && (
+            <div className="fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setInspectedItem(null)}>
+                <div className="bg-gray-800 border-2 border-white p-6 rounded-lg max-w-sm w-full shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
+                    <button onClick={() => setInspectedItem(null)} className="absolute top-2 right-2 text-gray-400 hover:text-white p-2">
+                        <X size={24} />
+                    </button>
+                    
+                    <div className="flex flex-col items-center mb-4">
+                        {inspectedItem.type === 'CARD' && (
+                            <div className="scale-100 mb-4">
+                                <Card card={inspectedItem.data} onClick={() => {}} disabled={false} />
+                            </div>
+                        )}
+                        {inspectedItem.type === 'RELIC' && (
+                            <div className="w-20 h-20 bg-gray-800 border-4 border-yellow-600 rounded-full flex items-center justify-center mb-4 shadow-lg">
+                                <Gem className="text-yellow-400" size={40}/>
+                            </div>
+                        )}
+                        {inspectedItem.type === 'POTION' && (
+                            <div className="w-20 h-20 bg-gray-800 border-2 border-white/50 rounded flex items-center justify-center mb-4 shadow-lg">
+                                <FlaskConical size={40} style={{ color: inspectedItem.data.color }}/>
+                            </div>
+                        )}
+                        
+                        <h3 className="text-2xl font-bold text-yellow-400 mb-2 border-b border-gray-600 pb-2 text-center w-full">
+                            {inspectedItem.data.name}
+                        </h3>
+                    </div>
+
+                    <div className="text-lg text-white mb-6 leading-relaxed whitespace-pre-wrap font-bold bg-black/30 p-3 rounded text-center">
+                        {inspectedItem.type === 'CARD' ? getProcessedDescription(inspectedItem.data) : inspectedItem.data.description}
+                    </div>
+                    
+                    {/* Keywords List for Cards */}
+                    {inspectedItem.type === 'CARD' && (
+                        <div className="space-y-2">
+                            {getCardKeywords(inspectedItem.data).map((k, idx) => (
+                                <div key={idx} className="flex flex-col text-left text-sm bg-gray-700/50 p-2 rounded">
+                                    <span className="font-bold text-yellow-300 mb-0.5">{k.title}</span>
+                                    <span className="text-gray-300 text-xs">{k.desc}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
+        )}
+
        {/* Header */}
        <div className="z-20 flex justify-between items-center bg-black/90 p-3 border-b-4 border-yellow-600 shadow-xl shrink-0">
            <div className="flex items-center">
@@ -173,7 +259,13 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                 const price = getPrice(relic.price || 150);
                                 const canAfford = player.gold >= price;
                                 return (
-                                    <div key={relic.id} className={`group relative w-28 flex flex-col items-center ${isSold ? 'opacity-20 grayscale' : ''}`}>
+                                    <div 
+                                        key={relic.id} 
+                                        className={`group relative w-28 flex flex-col items-center ${isSold ? 'opacity-20 grayscale' : ''}`}
+                                        onContextMenu={(e) => { e.preventDefault(); setInspectedItem({ type: 'RELIC', data: relic }); }}
+                                        onTouchStart={() => handleTouchStart('RELIC', relic)}
+                                        onTouchEnd={handleTouchEnd}
+                                    >
                                         <div className="w-16 h-16 bg-gray-800 border-4 border-yellow-600 rounded-full flex items-center justify-center mb-2 shadow-lg">
                                             <Gem className="text-yellow-400" size={24}/>
                                         </div>
@@ -202,7 +294,13 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                 const isFull = player.potions.length >= 3;
 
                                 return (
-                                    <div key={potion.id} className={`group relative w-28 flex flex-col items-center ${isSold ? 'opacity-20 grayscale' : ''}`}>
+                                    <div 
+                                        key={potion.id} 
+                                        className={`group relative w-28 flex flex-col items-center ${isSold ? 'opacity-20 grayscale' : ''}`}
+                                        onContextMenu={(e) => { e.preventDefault(); setInspectedItem({ type: 'POTION', data: potion }); }}
+                                        onTouchStart={() => handleTouchStart('POTION', potion)}
+                                        onTouchEnd={handleTouchEnd}
+                                    >
                                         <div className="w-12 h-12 bg-gray-800 border-2 border-white/50 rounded flex items-center justify-center mb-2 shadow-lg">
                                             <FlaskConical size={24} style={{ color: potion.color }}/>
                                         </div>
@@ -237,7 +335,8 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                     <Card 
                                         card={card} 
                                         onClick={() => handleBuyCard(card)} 
-                                        disabled={isSold} 
+                                        disabled={isSold}
+                                        onInspect={(c) => setInspectedItem({ type: 'CARD', data: c })}
                                     />
                                     {!isSold && (
                                         <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-full text-center z-20">
@@ -265,8 +364,13 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                    <div className="grid grid-cols-3 gap-2 pt-4">
                        {player.deck.map(card => (
                            <div key={card.id} className="scale-75 origin-top-left w-24 h-36 cursor-pointer relative group" onClick={() => handleRemove(card.id)}>
-                                <Card card={card} onClick={() => handleRemove(card.id)} disabled={false} />
-                                <div className="absolute inset-0 bg-red-500/0 group-hover:bg-red-500/20 transition-colors flex items-center justify-center rounded-lg z-20">
+                                <Card 
+                                    card={card} 
+                                    onClick={() => handleRemove(card.id)} 
+                                    disabled={false}
+                                    onInspect={(c) => setInspectedItem({ type: 'CARD', data: c })}
+                                />
+                                <div className="absolute inset-0 bg-red-500/0 group-hover:bg-red-500/20 transition-colors flex items-center justify-center rounded-lg z-20 pointer-events-none">
                                     <Trash2 className="opacity-0 group-hover:opacity-100 text-red-500 bg-black p-2 rounded-full border border-red-500" size={32} />
                                 </div>
                            </div>
