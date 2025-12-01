@@ -1980,15 +1980,16 @@ const App: React.FC = () => {
             )}
 
             {gameState.screen === GameScreen.ENDING && (
-                 <div className="w-full h-full bg-yellow-900 flex items-center justify-center text-center text-white p-4">
-                    <div>
-                        <Trophy size={80} className="text-yellow-400 mx-auto mb-6 animate-pulse" />
-                        <h1 className="text-6xl mb-4 font-bold text-yellow-200">ゲームクリア！</h1>
-                        <p className="mb-8 text-xl">あなたは校長先生を説得し、<br/>伝説の小学生として語り継がれることでしょう。</p>
+                 <div className="w-full h-full bg-yellow-900 flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar">
+                    <div className="my-auto w-full max-w-2xl py-8">
+                        <Trophy size={80} className="text-yellow-400 mx-auto mb-6 animate-pulse shrink-0" />
+                        <h1 className="text-4xl md:text-6xl mb-4 font-bold text-yellow-200 shrink-0">ゲームクリア！</h1>
+                        <p className="mb-8 text-lg md:text-xl shrink-0">あなたは校長先生を説得し、<br/>伝説の小学生として語り継がれることでしょう。</p>
+                        
                         {!legacyCardSelected ? (
-                            <div className="mb-8">
-                                <p className="mb-4 text-sm text-yellow-100">次回の冒険に持っていくカードを1枚選んでください</p>
-                                <div className="flex flex-wrap justify-center gap-2 max-h-64 overflow-y-auto custom-scrollbar p-2 bg-black/30 rounded">
+                            <div className="mb-8 shrink-0">
+                                <p className="mb-4 text-sm text-yellow-100 font-bold">次回の冒険に持っていくカードを1枚選んでください</p>
+                                <div className="flex flex-wrap justify-center gap-2 max-h-60 overflow-y-auto custom-scrollbar p-2 bg-black/30 rounded border border-yellow-700/50">
                                     {gameState.player.deck.map(card => (
                                         <div key={card.id} className="scale-75 cursor-pointer hover:scale-90 transition-transform" onClick={() => handleLegacyCardSelect(card)}>
                                             <Card card={card} onClick={() => handleLegacyCardSelect(card)} disabled={false} />
@@ -1997,11 +1998,16 @@ const App: React.FC = () => {
                                 </div>
                             </div>
                         ) : (
-                            <p className="mb-8 text-green-400 font-bold">カードを継承しました！</p>
+                            <div className="mb-8 p-4 bg-green-900/50 border border-green-500 rounded-lg animate-in zoom-in shrink-0">
+                                <p className="text-green-400 font-bold text-xl">カードを継承しました！</p>
+                                <p className="text-sm text-green-200 mt-1">次の冒険の初期デッキに追加されます。</p>
+                            </div>
                         )}
                         
-                        <div className="flex flex-col gap-4 items-center">
-                            <button onClick={returnToTitle} className="bg-blue-600 border-2 border-white px-8 py-4 cursor-pointer text-xl hover:bg-blue-500 font-bold w-64">伝説となる</button>
+                        <div className="flex flex-col gap-4 items-center mt-4 pb-8 shrink-0">
+                            <button onClick={returnToTitle} className="bg-blue-600 border-2 border-white px-8 py-4 cursor-pointer text-xl hover:bg-blue-500 font-bold w-full max-w-sm shadow-lg transform transition-transform hover:scale-105 active:scale-95">
+                                伝説となる (タイトルへ)
+                            </button>
                         </div>
                     </div>
                 </div>
