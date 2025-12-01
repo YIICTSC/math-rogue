@@ -530,31 +530,7 @@ const App: React.FC = () => {
   // --- Generators ---
   const generateEvent = (player: Player) => {
       const events = [
-          {
-              title: "不審な上級生",
-              description: "廊下の隅で、怪しい上級生が手招きしている。「いいもんあるぜ...」",
-              options: [
-                  { label: "買う", text: "20G支払ってポーションを得る。", action: () => {
-                      if (player.gold >= 20) {
-                          const pots = Object.values(POTION_LIBRARY);
-                          const pot = { ...pots[Math.floor(Math.random() * pots.length)], id: `pot-${Date.now()}` };
-                          storageService.saveUnlockedPotion(pot.templateId); // UNLOCK
-                          setGameState(prev => {
-                              // If full, simplistic logic for now (usually handled in Shop/Reward screens), just add if space
-                              if (prev.player.potions.length < 3) {
-                                  return { ...prev, player: { ...prev.player, gold: prev.player.gold - 20, potions: [...prev.player.potions, pot] } };
-                              } else {
-                                  return { ...prev, player: { ...prev.player, gold: prev.player.gold - 20 } }; // Taking gold even if full? Let's just say discarded for now in event logic to keep simple
-                              }
-                          });
-                          setEventResultLog("ポーションをこっそり受け取った！(満杯の場合は破棄されました)");
-                      } else {
-                          setEventResultLog("お金が足りないとわかると、上級生は舌打ちをした。");
-                      }
-                  }},
-                  { label: "無視", text: "何もせず立ち去る。", action: () => setEventResultLog("君は目を合わせずに通り過ぎた。") }
-              ]
-          },
+          // Existing / Standard
           {
               title: "冷水機",
               description: "冷たくて美味しそうな水が出る冷水機だ。喉が渇いている。",
@@ -569,52 +545,592 @@ const App: React.FC = () => {
                   }}
               ]
           },
+          // New / Funny / Eccentric
           {
-              title: "忘れ物ボックス",
-              description: "誰かの忘れ物がたくさん入った箱がある。役立ちそうなものがあるかも？",
+              title: "バナナの皮",
+              description: "廊下の真ん中に、絵に描いたようなバナナの皮が落ちている。誰の仕業だ？",
               options: [
-                  { label: "探す", text: "カードを1枚強化。", action: () => {
+                  { label: "踏む", text: "滑って転んでHP-5。でも、なぜかお金(30G)を拾う。", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 5), gold: prev.player.gold + 30 } }));
+                      setEventResultLog("ステーン！派手に転んだ拍子に、棚の下から小銭が出てきた！痛いけどラッキー？");
+                  }},
+                  { label: "拾う", text: "ゴミ箱へ捨てる。徳を積んで最大HP+3。", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 3, currentHp: prev.player.currentHp + 3 } }));
+                      setEventResultLog("良いことをした気分だ。心が洗われ、少し体が丈夫になった気がする。");
+                  }}
+              ]
+          },
+          {
+              title: "人体模型の悩み",
+              description: "理科室の人体模型がため息をついている。「内臓が...冷えるんだよね...」",
+              options: [
+                  { label: "服を着せる", text: "自分の「服」(ブロック系カード)を1枚失うが、レリックを得る。", action: () => {
+                      // Remove a random skill card if possible
+                      const skillCard = player.deck.find(c => c.type === CardType.SKILL && (c.block||0) > 0);
+                      if (skillCard) {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: prev.player.deck.filter(c => c.id !== skillCard.id), relics: [...prev.player.relics, RELIC_LIBRARY.WARPED_TONGS] } }));
+                          storageService.saveUnlockedRelic(RELIC_LIBRARY.WARPED_TONGS.id);
+                          setEventResultLog(`「ありがとう！温かいよ！」お礼に「ゆがんだフォーク」をもらった。なぜフォーク？`);
+                      } else {
+                          setEventResultLog("あげる服がなかった...人体模型は悲しそうにカタカタ震えている。");
+                      }
+                  }},
+                  { label: "励ます", text: "HP全回復。", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: prev.player.maxHp } }));
+                      setEventResultLog("「君の熱い言葉で心臓（模型）が温まったよ！」お礼に元気をわけてもらった。");
+                  }}
+              ]
+          },
+          {
+              title: "トイレの花子さん？",
+              description: "3番目の個室からノックの音がする。「紙...紙をください...」",
+              options: [
+                  { label: "カードを渡す", text: "デッキからカードを1枚削除する。", action: () => {
+                      // Simply remove a random card for simplicity in this logic, or random removal
+                      const cardToRemove = player.deck[Math.floor(Math.random() * player.deck.length)];
+                      if (cardToRemove) {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: prev.player.deck.filter(c => c.id !== cardToRemove.id) } }));
+                          setEventResultLog(`隙間から${cardToRemove.name}を差し入れた。「助かった...」という声と共に気配が消えた。`);
+                      }
+                  }},
+                  { label: "無視", text: "何もせず立ち去る。", action: () => setEventResultLog("君は聞かなかったことにして走って逃げた。") }
+              ]
+          },
+          {
+              title: "消しゴムバトル",
+              description: "クラスメイトたちが机の上で激しい消しゴムバトルを繰り広げている！参加するか？",
+              options: [
+                  { label: "参加する", text: "50%で勝利(100G)、50%で敗北(HP-10)。", action: () => {
+                      if (Math.random() > 0.5) {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 100 } }));
+                          setEventResultLog("君の超絶テクニックで相手の消しゴムを弾き飛ばした！賞金100Gをゲット！");
+                      } else {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 10) } }));
+                          setEventResultLog("相手の強力なデコピンが君の指に直撃！痛すぎる！(HP-10)");
+                      }
+                  }},
+                  { label: "見学", text: "カードを1枚強化。", action: () => {
                       setGameState(prev => {
                           const p = { ...prev.player };
                           const upgradable = p.deck.filter(c => !c.upgraded);
                           if (upgradable.length > 0) {
                               const target = upgradable[Math.floor(Math.random() * upgradable.length)];
                               p.deck = p.deck.map(c => c.id === target.id ? getUpgradedCard(c) : c);
-                              setEventResultLog(`使えそうな部品を見つけた！${target.name} が強化された！`);
+                              setEventResultLog(`達人の技を見て学びを得た。${target.name} が強化された！`);
                           } else {
-                              setEventResultLog("ガラクタしかなかった...");
+                              setEventResultLog("すごい戦いだったが、特に得るものはなかった。");
                           }
                           return { ...prev, player: p };
                       });
+                  }}
+              ]
+          },
+          {
+              title: "校長先生の銅像",
+              description: "夜の校舎で、校長先生の銅像が目を光らせている。何か言いたそうだ。",
+              options: [
+                  { label: "話しかける", text: "校長の話は長い。最大HP+10するが、呪い「退屈(NORMALITY)」を受ける。", action: () => {
+                      setGameState(prev => ({ 
+                          ...prev, 
+                          player: { 
+                              ...prev.player, 
+                              maxHp: prev.player.maxHp + 10, 
+                              currentHp: prev.player.currentHp + 10,
+                              deck: [...prev.player.deck, { ...CURSE_CARDS.NORMALITY, id: `curse-${Date.now()}` }]
+                          } 
+                      }));
+                      setEventResultLog("銅像は3時間にわたり教育理念を語り続けた。体は丈夫になったが、退屈で死にそうだ。");
                   }},
-                  { label: "深く探る", text: "レリックを探す (ダメージを受けるかも)", action: () => {
-                      const r = Math.random();
-                      if (r < 0.7) {
-                          storageService.saveUnlockedRelic(RELIC_LIBRARY.WARPED_TONGS.id); // UNLOCK
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.WARPED_TONGS] } }));
-                          setEventResultLog("底の方から「ゆがんだフォーク」を見つけた！");
+                  { label: "落書きする", text: "罰が当たる。HP-6。", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 6) } }));
+                      setEventResultLog("鼻毛を描こうとしたら、銅像から静電気が走った！");
+                  }}
+              ]
+          },
+          {
+              title: "謎の転校生",
+              description: "「ワレワレハ、ウチュウジン、ダ」...明らかに段ボールを被っただけの生徒がいる。",
+              options: [
+                  { label: "交信する", text: "HPを15失い、レアレリックを得る。", action: () => {
+                      const relics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'RARE');
+                      const relic = relics[Math.floor(Math.random() * relics.length)];
+                      storageService.saveUnlockedRelic(relic.id);
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 15), relics: [...prev.player.relics, relic] } }));
+                      setEventResultLog(`「トモダチ...」と言って、彼は${relic.name}をくれた。段ボールの隙間から上履きが見えている。`);
+                  }},
+                  { label: "段ボールを取る", text: "敵と戦闘になる。", action: () => {
+                      // Trigger elite fight logic manually or map node change logic could be complex here. 
+                      // For simplicity, just give gold and leave.
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 50 } }));
+                      setEventResultLog("「見たなー！」彼は悲鳴を上げて逃げていった。50G落としていった。");
+                  }}
+              ]
+          },
+          {
+              title: "給食の余り",
+              description: "配膳室に、大人気の「揚げパン」が一つだけ残っている...",
+              options: [
+                  { label: "食べる", text: "最大HP+5。", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 5, currentHp: prev.player.currentHp + 5 } }));
+                      setEventResultLog("冷めているが、砂糖たっぷりで美味しい！幸せな気分だ。");
+                  }},
+                  { label: "もっと探す", text: "腐ったミカンを見つけてしまう。呪い「寄生虫(PARASITE)」を受ける。", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.PARASITE, id: `curse-${Date.now()}` }] } }));
+                      setEventResultLog("奥からカビだらけのミカンが出てきた...見てはいけないものを見てしまった気分だ。");
+                  }}
+              ]
+          },
+          {
+              title: "焼却炉の主",
+              description: "焼却炉の前で、用務員さんが炎を見つめている。「燃やしたい過去はあるか？」",
+              options: [
+                  { label: "ある", text: "カードを1枚削除。", action: () => {
+                      // Random removal for simplicity in this pure logic block
+                      const card = player.deck[Math.floor(Math.random() * player.deck.length)];
+                      if (card) {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: prev.player.deck.filter(c => c.id !== card.id) } }));
+                          setEventResultLog(`「${card.name}」を炎に投げ込んだ。過去と決別し、心が軽くなった。`);
+                      }
+                  }},
+                  { label: "ない", text: "何もしない。", action: () => setEventResultLog("「そうか、それは幸せなことだ」用務員さんは焼き芋をくれた。（HP回復などはなし）") }
+              ]
+          },
+          {
+              title: "音楽室のピアノ",
+              description: "誰もいない音楽室で、ピアノが勝手に鳴っている。",
+              options: [
+                  { label: "一緒に弾く", text: "呪い「不器用」を受けるが、カードを1枚コピーする。", action: () => {
+                      if (player.deck.length > 0) {
+                          const c = player.deck[Math.floor(Math.random() * player.deck.length)];
+                          const copy = { ...c, id: `copy-event-${Date.now()}` };
+                          setGameState(prev => ({ 
+                              ...prev, 
+                              player: { 
+                                  ...prev.player, 
+                                  deck: [...prev.player.deck, copy, { ...CURSE_CARDS.CLUMSINESS, id: `curse-${Date.now()}` }] 
+                              } 
+                          }));
+                          setEventResultLog(`見えない誰かと連弾した！${c.name}が増えたが、指がもつれるようになった。`);
+                      }
+                  }},
+                  { label: "録音する", text: "100G得る。", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 100 } }));
+                      setEventResultLog("心霊動画としてネットにアップしたらバズった！広告収入を得た。");
+                  }}
+              ]
+          },
+          {
+              title: "伝説の竹刀",
+              description: "体育教官室に、黄金に輝く竹刀が飾られている。",
+              options: [
+                  { label: "盗む", text: "HPを6失う。カード「大打撃」を得る。", action: () => {
+                      const bludgeon = { ...CARDS_LIBRARY['BLUDGEON'], id: `event-${Date.now()}` };
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 6), deck: [...prev.player.deck, bludgeon] } }));
+                      setEventResultLog("ガラスを割って竹刀を手に入れた！破片で怪我をしたが、強力な武器だ。");
+                  }},
+                  { label: "磨く", text: "カードを1枚強化。", action: () => {
+                      setGameState(prev => {
+                          const p = { ...prev.player };
+                          const upgradable = p.deck.filter(c => !c.upgraded);
+                          if (upgradable.length > 0) {
+                              const target = upgradable[Math.floor(Math.random() * upgradable.length)];
+                              p.deck = p.deck.map(c => c.id === target.id ? getUpgradedCard(c) : c);
+                              setEventResultLog(`心を込めて磨いたら、自分の${target.name}もついでに鋭くなった気がする。`);
+                          } else {
+                              setEventResultLog("ピカピカになった。気持ちがいい。");
+                          }
+                          return { ...prev, player: p };
+                      });
+                  }}
+              ]
+          },
+          {
+              title: "迷子の犬",
+              description: "校庭に迷い込んだ犬が、悲しそうな目で見ている。首輪には「ポチ」とある。",
+              options: [
+                  { label: "餌をやる", text: "ポーションを1つ失うが、レリックを得る。", action: () => {
+                      if (player.potions.length > 0) {
+                          const p = player.potions[0]; // Take first potion
+                          const relic = RELIC_LIBRARY.J_A_X; // Reusing JAX logic as a placeholder or giving random relic
+                          // Actually let's give a random common relic
+                          const commonRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'COMMON');
+                          const reward = commonRelics[Math.floor(Math.random() * commonRelics.length)];
+                          storageService.saveUnlockedRelic(reward.id);
+                          
+                          setGameState(prev => ({ 
+                              ...prev, 
+                              player: { 
+                                  ...prev.player, 
+                                  potions: prev.player.potions.slice(1),
+                                  relics: [...prev.player.relics, reward]
+                              } 
+                          }));
+                          setEventResultLog(`${p.name}をあげたら、犬はお礼に${reward.name}を掘り出してくれた！`);
                       } else {
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 5) } }));
-                          setEventResultLog("痛っ！画鋲が刺さってしまった...");
+                          setEventResultLog("あげるものがなかった...犬は去っていった。");
+                      }
+                  }},
+                  { label: "撫でる", text: "HP回復(10)。", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 10) } }));
+                      setEventResultLog("モフモフした。癒やされた。");
+                  }}
+              ]
+          },
+          {
+              title: "放送室ジャック",
+              description: "放送室が無人だ。マイクのスイッチが入っている。",
+              options: [
+                  { label: "歌う", text: "HP全回復するが、呪い「恥」を受ける。", action: () => {
+                      setGameState(prev => ({ 
+                          ...prev, 
+                          player: { 
+                              ...prev.player, 
+                              currentHp: prev.player.maxHp,
+                              deck: [...prev.player.deck, { ...CURSE_CARDS.SHAME, id: `curse-${Date.now()}` }] 
+                          } 
+                      }));
+                      setEventResultLog("全校生徒に向けて熱唱した！ストレス発散になったが、明日から学校に行きづらい。");
+                  }},
+                  { label: "下校の合図", text: "敵との戦闘を回避(次のマスが敵ならスキップ)。(未実装のため金獲得)", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 50 } }));
+                      setEventResultLog("チャイムを鳴らした。先生たちが会議を始めた隙に、財布を拾った(50G)。");
+                  }}
+              ]
+          },
+          {
+              title: "理科準備室の実験",
+              description: "フラスコに入った紫色の液体が沸騰している。",
+              options: [
+                  { label: "飲む", text: "50%で全回復、50%でHP半減。", action: () => {
+                      if (Math.random() > 0.5) {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: prev.player.maxHp } }));
+                          setEventResultLog("味がすごい！力がみなぎる！(全回復)");
+                      } else {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.floor(prev.player.currentHp / 2) } }));
+                          setEventResultLog("お腹が...！猛烈な腹痛に襲われた。(HP半減)");
+                      }
+                  }},
+                  { label: "混ぜる", text: "カードがランダムに変化。", action: () => {
+                      const deck = [...player.deck];
+                      const idx = Math.floor(Math.random() * deck.length);
+                      const keys = Object.keys(CARDS_LIBRARY).filter(k => !STATUS_CARDS[k]);
+                      const newCard = CARDS_LIBRARY[keys[Math.floor(Math.random() * keys.length)]];
+                      const oldName = deck[idx].name;
+                      deck[idx] = { ...newCard, id: `trans-${Date.now()}` };
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+                      setEventResultLog(`液体をこぼしてカードにかかった！「${oldName}」が「${newCard.name}」に変質した！`);
+                  }}
+              ]
+          },
+          {
+              title: "プール掃除",
+              description: "冬のプールは緑色に濁っている。底に何か光るものが...",
+              options: [
+                  { label: "潜る", text: "HPを10失い、カードを1枚得る。", action: () => {
+                      const keys = Object.keys(CARDS_LIBRARY).filter(k => CARDS_LIBRARY[k].rarity === 'RARE');
+                      const newCard = CARDS_LIBRARY[keys[Math.floor(Math.random() * keys.length)]];
+                      setGameState(prev => ({ 
+                          ...prev, 
+                          player: { 
+                              ...prev.player, 
+                              currentHp: Math.max(1, prev.player.currentHp - 10),
+                              deck: [...prev.player.deck, { ...newCard, id: `pool-${Date.now()}` }]
+                          } 
+                      }));
+                      setEventResultLog(`冷たすぎる！風邪をひきそうだが、底から濡れた「${newCard.name}」を回収した。`);
+                  }},
+                  { label: "網ですくう", text: "ゴミしか取れない(呪い「ドジ」)", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.CLUMSINESS, id: `curse-${Date.now()}` }] } }));
+                      setEventResultLog("足を滑らせて網を壊してしまった。ドジっ子属性がついた。");
+                  }}
+              ]
+          },
+          {
+              title: "図書委員の勧誘",
+              description: "「ねえ、君も本を読まない？静かでいいところだよ」",
+              options: [
+                  { label: "入部する", text: "最大HP-3、カード削除。", action: () => {
+                      const cardToRemove = player.deck[Math.floor(Math.random() * player.deck.length)];
+                      if (cardToRemove) {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp - 3, deck: prev.player.deck.filter(c => c.id !== cardToRemove.id) } }));
+                          setEventResultLog(`運動不足でHPが減ったが、読書に没頭して「${cardToRemove.name}」を忘れた。`);
+                      }
+                  }},
+                  { label: "断る", text: "敵と戦闘。", action: () => {
+                      // Simulating fight avoidance or change logic is tough in pure function, just flavor text skip + minor damage
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 2) } }));
+                      setEventResultLog("「野蛮人！」と角で叩かれた(HP-2)。");
+                  }}
+              ]
+          },
+          {
+              title: "赤い靴と青い靴",
+              description: "不気味な声が聞こえる。「赤い靴と青い靴、どっちが欲しい...？」",
+              options: [
+                  { label: "赤い靴", text: "攻撃カードを強化。", action: () => {
+                      setGameState(prev => {
+                          const p = { ...prev.player };
+                          p.deck = p.deck.map(c => c.type === CardType.ATTACK ? getUpgradedCard(c) : c);
+                          return { ...prev, player: p };
+                      });
+                      setEventResultLog("攻撃カードが血のように赤く染まり、強力になった！");
+                  }},
+                  { label: "青い靴", text: "スキルカードを強化。", action: () => {
+                      setGameState(prev => {
+                          const p = { ...prev.player };
+                          p.deck = p.deck.map(c => c.type === CardType.SKILL ? getUpgradedCard(c) : c);
+                          return { ...prev, player: p };
+                      });
+                      setEventResultLog("スキルカードが青ざめるほど冷静になり、性能が上がった！");
+                  }},
+                  { label: "裸足", text: "HP全回復。", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: prev.player.maxHp } }));
+                      setEventResultLog("「...変わった子だね」怪異は呆れて去っていき、体調が戻った。");
+                  }}
+              ]
+          },
+          {
+              title: "タイムカプセル",
+              description: "校庭の隅に、掘り起こされたタイムカプセルがある。",
+              options: [
+                  { label: "開ける", text: "30年前のお金(100G)と、呪い「後悔」。", action: () => {
+                      setGameState(prev => ({ 
+                          ...prev, 
+                          player: { 
+                              ...prev.player, 
+                              gold: prev.player.gold + 100,
+                              deck: [...prev.player.deck, { ...CURSE_CARDS.REGRET, id: `curse-${Date.now()}` }]
+                          } 
+                      }));
+                      setEventResultLog("中には古銭と、黒歴史が書かれた手紙が入っていた。見てはいけなかった。");
+                  }},
+                  { label: "埋め直す", text: "カードを1枚デッキから削除(埋める)。", action: () => {
+                      const card = player.deck[Math.floor(Math.random() * player.deck.length)];
+                      if (card) {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: prev.player.deck.filter(c => c.id !== card.id) } }));
+                          setEventResultLog(`「${card.name}」を未来へ託した。さようなら。`);
                       }
                   }}
               ]
           },
           {
-              title: "図書室の主",
-              description: "静かな図書室で、不思議な雰囲気の生徒が本を読んでいる。",
+              title: "忍者ごっこ",
+              description: "休み時間に忍者ごっこをしている。「君も修行しないか？」",
               options: [
-                  { label: "教えてもらう", text: "HPを10失う。特別な本(レリック)を得る。", action: () => {
-                      const books = [RELIC_LIBRARY.NECRONOMICON, RELIC_LIBRARY.ENCHIRIDION, RELIC_LIBRARY.NILRYS_CODEX];
-                      const book = books[Math.floor(Math.random() * books.length)];
-                      storageService.saveUnlockedRelic(book.id); // UNLOCK
-                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 10), relics: [...prev.player.relics, book] } }));
-                      setEventResultLog("厳しい指導を受けたが、秘伝の書を譲り受けた！");
+                  { label: "修行する", text: "HPを5失い、カード「ナイフ」を3枚得る。", action: () => {
+                      const shivs = Array(3).fill(null).map((_, i) => ({ ...CARDS_LIBRARY.SHIV, id: `shiv-${Date.now()}-${i}` }));
+                      setGameState(prev => ({ 
+                          ...prev, 
+                          player: { 
+                              ...prev.player, 
+                              currentHp: Math.max(1, prev.player.currentHp - 5),
+                              deck: [...prev.player.deck, ...shivs]
+                          } 
+                      }));
+                      setEventResultLog("手裏剣の投げすぎで筋肉痛になったが、ナイフの扱いをマスターした。");
                   }},
-                  { label: "立ち去る", text: "", action: () => setEventResultLog("静かにその場を離れた。") }
+                  { label: "変化の術", text: "カード1枚を変化させる。", action: () => {
+                      const deck = [...player.deck];
+                      const idx = Math.floor(Math.random() * deck.length);
+                      const keys = Object.keys(CARDS_LIBRARY).filter(k => !STATUS_CARDS[k]);
+                      const newCard = CARDS_LIBRARY[keys[Math.floor(Math.random() * keys.length)]];
+                      deck[idx] = { ...newCard, id: `ninja-${Date.now()}` };
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+                      setEventResultLog("ドロン！煙が消えるとカードが変わっていた！");
+                  }}
+              ]
+          },
+          {
+              title: "100点のテスト",
+              description: "道端に100点のテストが落ちている。名前は書いてない。",
+              options: [
+                  { label: "自分のものにする", text: "知性を得る(カード強化)が、嘘をついたので呪い「疑念」を得る。", action: () => {
+                      setGameState(prev => {
+                          const p = { ...prev.player };
+                          // Upgrade random card
+                          const target = p.deck[Math.floor(Math.random() * p.deck.length)];
+                          p.deck = p.deck.map(c => c.id === target.id ? getUpgradedCard(c) : c);
+                          p.deck.push({ ...CURSE_CARDS.DOUBT, id: `curse-${Date.now()}` });
+                          return { ...prev, player: p };
+                      });
+                      setEventResultLog("親に見せて褒められたが、心が痛む。");
+                  }},
+                  { label: "届ける", text: "正直者は報われる(HP全回復)。", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: prev.player.maxHp } }));
+                      setEventResultLog("持ち主のガリ勉君が泣いて喜んでくれた。いい気分だ。");
+                  }}
+              ]
+          },
+          {
+              title: "保健室のベッド",
+              description: "白いシーツの悪魔的な誘惑。「授業サボって寝ちゃおうよ...」",
+              options: [
+                  { label: "寝る", text: "HP20回復。しかし眠すぎてカードを1枚失う(削除)。", action: () => {
+                      const card = player.deck[Math.floor(Math.random() * player.deck.length)];
+                      if (card) {
+                          setGameState(prev => ({ 
+                              ...prev, 
+                              player: { 
+                                  ...prev.player, 
+                                  currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 20),
+                                  deck: prev.player.deck.filter(c => c.id !== card.id)
+                              } 
+                          }));
+                          setEventResultLog(`ぐっすり寝た！夢の中で「${card.name}」を忘れてしまった。`);
+                      }
+                  }},
+                  { label: "我慢する", text: "最大HP+2。", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 2, currentHp: prev.player.currentHp + 2 } }));
+                      setEventResultLog("誘惑に打ち勝った！精神力が鍛えられた。");
+                  }}
+              ]
+          },
+          {
+              title: "呪いのビデオ",
+              description: "視聴覚室のテレビが砂嵐を映している。「あと7日...」",
+              options: [
+                  { label: "見る", text: "呪い「怪我」を受けるが、レリックを得る。", action: () => {
+                      const relic = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'RARE')[0]; // Just grab one
+                      setGameState(prev => ({ 
+                          ...prev, 
+                          player: { 
+                              ...prev.player, 
+                              relics: [...prev.player.relics, relic],
+                              deck: [...prev.player.deck, { ...CURSE_CARDS.INJURY, id: `curse-${Date.now()}` }]
+                          } 
+                      }));
+                      setEventResultLog(`恐怖で動けなくなったが、テレビの中から${relic.name}が出てきた。`);
+                  }},
+                  { label: "電源を切る", text: "何も起きない。", action: () => setEventResultLog("節電にご協力ありがとうございます。") }
+              ]
+          },
+          {
+              title: "廊下のカリスマ",
+              description: "廊下をローラーシューズで滑走する伝説の生徒。「俺のスピードについてこれるか？」",
+              options: [
+                  { label: "競走する", text: "勝てばカード強化、負ければHP-5。(50%)", action: () => {
+                      if (Math.random() > 0.5) {
+                          setGameState(prev => {
+                              const p = { ...prev.player };
+                              const target = p.deck[Math.floor(Math.random() * p.deck.length)];
+                              p.deck = p.deck.map(c => c.id === target.id ? getUpgradedCard(c) : c);
+                              return { ...prev, player: p };
+                          });
+                          setEventResultLog("勝利！君の速さに感動して、コツを教えてくれた。");
+                      } else {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 5) } }));
+                          setEventResultLog("壁に激突した。廊下は走ってはいけません。");
+                      }
+                  }},
+                  { label: "通報する", text: "先生が来て彼を連行した。お礼に20G。", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 20 } }));
+                      setEventResultLog("校則違反は許さない。治安が守られた。");
+                  }}
+              ]
+          },
+          {
+              title: "秘密基地",
+              description: "校舎裏の茂みの中に、誰かの秘密基地がある。",
+              options: [
+                  { label: "侵入する", text: "ゴールドを得る(50G)が、罠にかかる(HP-5)。", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 50, currentHp: Math.max(1, prev.player.currentHp - 5) } }));
+                      setEventResultLog("お菓子代(50G)を見つけたが、泥団子爆弾の直撃を受けた！");
+                  }},
+                  { label: "破壊する", text: "基地を壊して資材(カード)を奪う。", action: () => {
+                      const newCard = CARDS_LIBRARY['IRON_WAVE']; // Example
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...newCard, id: `base-${Date.now()}` }] } }));
+                      setEventResultLog("基地を解体して「鉄の波」の極意（ただの鉄板）を手に入れた。");
+                  }}
+              ]
+          },
+          {
+              title: "生き物係の暴走",
+              description: "「この子たち、お腹が空いてるの...」係の生徒が、巨大なウサギを連れている。",
+              options: [
+                  { label: "身を捧げる", text: "HP-10、レリックを得る。", action: () => {
+                      storageService.saveUnlockedRelic(RELIC_LIBRARY.J_A_X.id); // Assuming generic here or specific
+                      setGameState(prev => ({ 
+                          ...prev, 
+                          player: { 
+                              ...prev.player, 
+                              currentHp: Math.max(1, prev.player.currentHp - 10),
+                              relics: [...prev.player.relics, RELIC_LIBRARY.J_A_X] // Mutagenic logic
+                          } 
+                      }));
+                      setEventResultLog("噛まれた！体内で何かが変異し、「筋肉注射(J.A.X)」を手に入れた...？");
+                  }},
+                  { label: "逃げる", text: "逃走。", action: () => setEventResultLog("ウサギは予想以上に足が速かったが、なんとか撒いた。") }
+              ]
+          },
+          {
+              title: "伝説のヤンキー",
+              description: "「おい、ジャンプしてみろよ」",
+              options: [
+                  { label: "ジャンプする", text: "小銭(10-30G)を落として奪われる。", action: () => {
+                      const loss = Math.min(player.gold, Math.floor(Math.random() * 20) + 10);
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - loss } }));
+                      setEventResultLog(`チャリン... ${loss}G 奪われた。「あざっす」と言って去っていった。`);
+                  }},
+                  { label: "戦う", text: "カード「強打」を得る。", action: () => {
+                      const bash = { ...CARDS_LIBRARY.BASH, id: `yankee-${Date.now()}` };
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, bash] } }));
+                      setEventResultLog("逆にボコボコにして、「強打」の極意を学んだ。");
+                  }}
+              ]
+          },
+          {
+              title: "交換日記",
+              description: "女子たちの交換日記を拾った。中身が気になる。",
+              options: [
+                  { label: "読む", text: "精神的ダメージ(HP-5)を受けるが、弱点を知る(敵全体へろへろ)。", action: () => {
+                      // Add a special card or effect? Simplified to just damage + generic effect simulation
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 5) } }));
+                      setEventResultLog("自分の悪口が書いてあった...ショックでHPが減った。");
+                  }},
+                  { label: "書き込む", text: "呪い「疑念」を受ける。", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.DOUBT, id: `curse-${Date.now()}` }] } }));
+                      setEventResultLog("適当な嘘を書いておいた。バレないか心配だ。");
+                  }}
+              ]
+          },
+          {
+              title: "金色のカブトムシ",
+              description: "森で黄金のカブトムシを見つけた！これは高く売れそうだ。",
+              options: [
+                  { label: "捕まえる", text: "75Gを得る。", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 75 } }));
+                      setEventResultLog("デパートで売ったら75Gになった！");
+                  }},
+                  { label: "食べる", text: "最大HP+5。", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 5, currentHp: prev.player.currentHp + 5 } }));
+                      setEventResultLog("シャリシャリして金箔の味がした。体力がついた。");
+                  }}
+              ]
+          },
+          {
+              title: "開かずのロッカー",
+              description: "ガタガタと揺れるロッカーがある。",
+              options: [
+                  { label: "こじ開ける", text: "ランダムなコモンレリックを得る。", action: () => {
+                      const commons = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'COMMON');
+                      const r = commons[Math.floor(Math.random() * commons.length)];
+                      storageService.saveUnlockedRelic(r.id);
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, relics: [...prev.player.relics, r] } }));
+                      setEventResultLog(`中から${r.name}が転がり出てきた！ラッキー！`);
+                  }},
+                  { label: "封印する", text: "呪いカードを1枚削除。", action: () => {
+                      const curse = player.deck.find(c => c.type === CardType.CURSE);
+                      if (curse) {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: prev.player.deck.filter(c => c.id !== curse.id) } }));
+                          setEventResultLog(`「${curse.name}」をお札代わりにして貼り付けた。静かになった。`);
+                      } else {
+                          setEventResultLog("封印に使える呪いを持っていなかった...");
+                      }
+                  }}
               ]
           }
       ];
+
       return events[Math.floor(Math.random() * events.length)];
   };
 
