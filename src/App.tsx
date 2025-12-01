@@ -1,4 +1,6 @@
 
+
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -21,6 +23,7 @@ import TreasureScreen from './components/TreasureScreen';
 import CharacterSelectionScreen from './components/CharacterSelectionScreen';
 import RankingScreen from './components/RankingScreen';
 import MathChallengeScreen from './components/MathChallengeScreen';
+import DebugMenuScreen from './components/DebugMenuScreen';
 import Card from './components/Card';
 import { audioService } from './services/audioService';
 import { generateFlavorText, generateEnemyName } from './services/geminiService';
@@ -335,6 +338,7 @@ const App: React.FC = () => {
   const [isDebugHpOne, setIsDebugHpOne] = useState<boolean>(false);
   const [titleClickCount, setTitleClickCount] = useState<number>(0);
   const [logClickCount, setLogClickCount] = useState<number>(0);
+  const [debugLoadout, setDebugLoadout] = useState<{deck: ICard[], relics: Relic[], potions: Potion[]} | null>(null);
 
   // Shop & Event
   const [shopCards, setShopCards] = useState<ICard[]>([]);
@@ -363,7 +367,8 @@ const App: React.FC = () => {
           gameState.screen !== GameScreen.HELP &&
           gameState.screen !== GameScreen.RANKING &&
           gameState.screen !== GameScreen.CHARACTER_SELECTION &&
-          gameState.screen !== GameScreen.MODE_SELECTION
+          gameState.screen !== GameScreen.MODE_SELECTION &&
+          gameState.screen !== GameScreen.DEBUG_MENU
           ) {
           
           storageService.saveGame(gameState);
@@ -826,7 +831,7 @@ const App: React.FC = () => {
               title: "プール掃除",
               description: "冬のプールは緑色に濁っている。底に何か光るものが...",
               options: [
-                  { label: "潜る", text: "HPを10失い、カードを1枚得る。", action: () => {
+                  { label: "潜る", text: "HPを10失う、カードを1枚得る。", action: () => {
                       const keys = Object.keys(CARDS_LIBRARY).filter(k => CARDS_LIBRARY[k].rarity === 'RARE');
                       const newCard = CARDS_LIBRARY[keys[Math.floor(Math.random() * keys.length)]];
                       setGameState(prev => ({ 
@@ -1146,6 +1151,7 @@ const App: React.FC = () => {
       audioService.init();
       audioService.playSound('select');
       setLegacyCardSelected(false);
+      setDebugLoadout(null);
       
       setGameState(prev => ({
           ...prev,
@@ -1177,14 +1183,25 @@ const App: React.FC = () => {
           audioService.init();
           audioService.playSound('select');
           setLegacyCardSelected(false); 
+          setDebugLoadout(null);
           
-          setGameState(prev => ({ ...prev, screen: GameScreen.MODE_SELECTION, challengeMode: undefined }));
+          if (isDebugHpOne) {
+              setGameState(prev => ({ ...prev, screen: GameScreen.DEBUG_MENU, challengeMode: undefined }));
+          } else {
+              setGameState(prev => ({ ...prev, screen: GameScreen.MODE_SELECTION, challengeMode: undefined }));
+          }
       } catch (e) {
           console.error("Start Game Error:", e);
           setErrorMessage("エラーが発生しました。");
       } finally {
           setIsLoading(false);
       }
+  };
+
+  const handleDebugStart = (deck: ICard[], relics: Relic[], potions: Potion[]) => {
+      setDebugLoadout({ deck, relics, potions });
+      setGameState(prev => ({ ...prev, screen: GameScreen.MODE_SELECTION }));
+      audioService.playSound('select');
   };
 
   const handleModeSelect = (mode: GameMode) => {
@@ -1196,9 +1213,17 @@ const App: React.FC = () => {
       setSelectedCharName(char.name);
       
       let startingDeck: ICard[] = [];
+      let startingRelics: Relic[] = [];
+      let startingPotions: Potion[] = [];
 
+      // Debug Loadout Logic overrides standard logic
+      if (isDebugHpOne && debugLoadout) {
+          startingDeck = debugLoadout.deck.map(c => ({...c, id: `debug-${c.name}-${Date.now()}-${Math.random()}`}));
+          startingRelics = debugLoadout.relics;
+          startingPotions = debugLoadout.potions;
+      } 
       // 1A1D Logic
-      if (gameState.challengeMode === '1A1D') {
+      else if (gameState.challengeMode === '1A1D') {
           const validRarities = ['COMMON', 'UNCOMMON', 'RARE', 'LEGENDARY'];
           const allCards = Object.values(CARDS_LIBRARY).filter(c => validRarities.includes(c.rarity) && c.type !== CardType.CURSE && c.type !== CardType.STATUS);
           
@@ -1213,7 +1238,7 @@ const App: React.FC = () => {
                   { ...rSkl, id: `1a1d-def-${Date.now()}` }
               ];
           } else {
-              // Fallback if something goes wrong with filtering
+              // Fallback
               startingDeck = createDeck(char.deckTemplate);
           }
       } else {
@@ -1236,27 +1261,45 @@ const App: React.FC = () => {
               gold: char.gold,
               deck: startingDeck,
               imageData: char.imageData,
-              relics: [] // Will add starting relic in next step
+              relics: startingRelics,
+              potions: startingPotions
           },
       }));
       
-      // Add Character Starting Relic
-      const charRelic = RELIC_LIBRARY[char.startingRelicId];
-      if (charRelic) {
-           storageService.saveUnlockedRelic(charRelic.id); // UNLOCK
-           setGameState(prev => ({
-               ...prev,
-               player: { ...prev.player, relics: [...prev.player.relics, charRelic] }
-           }));
+      // If Debug Mode, skip Relic Selection screen and go straight to Map (or skip to Map if 1A1D too?)
+      // Actually standard flow goes to Relic Selection.
+      // If Debug Loadout is active, we skip Relic Selection to avoid polluting the precise loadout.
+      if (isDebugHpOne && debugLoadout) {
+          const map = generateDungeonMap();
+          setGameState(prev => ({
+              ...prev,
+              screen: GameScreen.MAP,
+              map: map,
+              narrativeLog: ["デバッグモードで冒険が始まった。"]
+          }));
+          audioService.playBGM('menu');
+      } else {
+          // Add Character Starting Relic (Standard Flow)
+          // Only add if not debug, because debug handles relics manually
+          if (!debugLoadout) {
+              const charRelic = RELIC_LIBRARY[char.startingRelicId];
+              if (charRelic) {
+                   storageService.saveUnlockedRelic(charRelic.id); // UNLOCK
+                   setGameState(prev => ({
+                       ...prev,
+                       player: { ...prev.player, relics: [...prev.player.relics, charRelic] }
+                   }));
+              }
+
+              // Generate random starter relics for selection (Bonus)
+              const starters = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'STARTER' && r.id !== char.startingRelicId);
+              const randomStarters = shuffle(starters).slice(0, 2);
+              setStarterRelics(randomStarters);
+
+              setGameState(prev => ({ ...prev, screen: GameScreen.RELIC_SELECTION }));
+          }
       }
-
-      // Generate random starter relics for selection (Bonus)
-      // Filter out character starting relic
-      const starters = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'STARTER' && r.id !== char.startingRelicId);
-      const randomStarters = shuffle(starters).slice(0, 2);
-      setStarterRelics(randomStarters);
-
-      setGameState(prev => ({ ...prev, screen: GameScreen.RELIC_SELECTION }));
+      
       audioService.playSound('select');
   };
 
@@ -2366,6 +2409,7 @@ const App: React.FC = () => {
     setShopCards([]);
     setEventData(null);
     setLegacyCardSelected(false); // Reset legacy state
+    setDebugLoadout(null);
     setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined }));
   };
 
@@ -2376,6 +2420,7 @@ const App: React.FC = () => {
 
   const handleRetry = () => {
       setLegacyCardSelected(false); // Reset legacy state
+      setDebugLoadout(null);
       startGame();
   };
 
@@ -2399,7 +2444,7 @@ const App: React.FC = () => {
                         )}
                         {isDebugHpOne && (
                             <div className="text-red-500 font-bold mb-6 text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse">
-                                (デバッグ: 敵HP1モード ON)
+                                (デバッグ: 敵HP1 & Loadout ON)
                             </div>
                         )}
                         {(!isMathDebugSkipped && !isDebugHpOne) && <div className="mb-8 h-6"></div>}
@@ -2473,11 +2518,16 @@ const App: React.FC = () => {
                 </div>
             )}
 
+            {gameState.screen === GameScreen.DEBUG_MENU && (
+                <DebugMenuScreen onStart={handleDebugStart} onBack={returnToTitle} />
+            )}
+
             {gameState.screen === GameScreen.MODE_SELECTION && (
                 <div className="w-full h-full bg-gray-900 flex flex-col items-center text-white p-4 overflow-y-auto custom-scrollbar">
                     <div className="w-full max-w-2xl flex flex-col items-center my-auto">
                         <h2 className="text-3xl font-bold mb-2 text-yellow-400 mt-4">計算モード選択</h2>
                         {gameState.challengeMode === '1A1D' && <p className="text-red-400 mb-6 font-bold animate-pulse">※1A1Dチャレンジモード適用中</p>}
+                        {debugLoadout && <p className="text-green-400 mb-6 font-bold animate-pulse font-mono">※DEBUG LOADOUT ACTIVE</p>}
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
                             <button onClick={() => handleModeSelect(GameMode.ADDITION)} className="bg-red-900 border-2 border-red-500 p-4 md:p-6 rounded-xl hover:bg-red-800 flex flex-col items-center transition-transform hover:scale-105 active:scale-95 shadow-lg">

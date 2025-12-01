@@ -194,7 +194,8 @@ export interface Player {
 
 export enum GameScreen {
   START_MENU = 'START_MENU',
-  MODE_SELECTION = 'MODE_SELECTION', // New: Arithmetic mode selection
+  DEBUG_MENU = 'DEBUG_MENU', // New
+  MODE_SELECTION = 'MODE_SELECTION', 
   CHARACTER_SELECTION = 'CHARACTER_SELECTION',
   RELIC_SELECTION = 'RELIC_SELECTION', 
   MAP = 'MAP',
