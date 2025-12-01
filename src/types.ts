@@ -211,7 +211,8 @@ export enum GameScreen {
   ENDING = 'ENDING',
   HELP = 'HELP',
   TREASURE = 'TREASURE',
-  RANKING = 'RANKING'
+  RANKING = 'RANKING',
+  MINI_GAME_POKER = 'MINI_GAME_POKER'
 }
 
 export enum GameMode {
