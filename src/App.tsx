@@ -1586,26 +1586,55 @@ const App: React.FC = () => {
     const rewards: RewardItem[] = [];
     const allCards = Object.values(CARDS_LIBRARY).filter(c => c.type !== CardType.STATUS && c.type !== CardType.CURSE && c.rarity !== 'SPECIAL');
     
-    while(rewards.length < 3) {
+    // 1. Gold Reward
+    let goldAmount = 15 + Math.floor(Math.random() * 11); // 15-25
+    const currentNode = gameState.map.find(n => n.id === gameState.currentMapNodeId);
+    
+    if (currentNode && currentNode.type === NodeType.ELITE) {
+        goldAmount = 25 + Math.floor(Math.random() * 11); // 25-35
+    } else if (currentNode && currentNode.type === NodeType.BOSS) {
+        goldAmount = 95 + Math.floor(Math.random() * 11); // 95-105
+    }
+
+    if (gameState.player.relics.find(r => r.id === 'GOLDEN_IDOL')) {
+        goldAmount = Math.floor(goldAmount * 1.25);
+    }
+    rewards.push({ type: 'GOLD', value: goldAmount, id: `rew-gold-${Date.now()}` });
+
+    // 2. Card Reward
+    while(rewards.filter(r => r.type === 'CARD').length < 3) {
         const roll = Math.random() * 100;
         let targetRarity = 'COMMON';
         if (roll > 93) targetRarity = 'LEGENDARY'; else if (roll > 60) targetRarity = 'RARE'; else if (roll > 25) targetRarity = 'UNCOMMON';
         
         const pool = allCards.filter(c => c.rarity === targetRarity).length > 0 ? allCards.filter(c => c.rarity === targetRarity) : allCards;
         const candidate = pool[Math.floor(Math.random() * pool.length)];
-        if (!rewards.some(r => r.value.name === candidate.name)) {
-            rewards.push({ type: 'CARD', value: { ...candidate, id: `reward-${Date.now()}-${rewards.length}` }, id: `rew-${Date.now()}-${rewards.length}` });
+        
+        // Prevent duplicate card choices
+        if (!rewards.some(r => r.type === 'CARD' && r.value.name === candidate.name)) {
+            rewards.push({ type: 'CARD', value: { ...candidate, id: `reward-${Date.now()}-${rewards.length}` }, id: `rew-card-${Date.now()}-${rewards.length}` });
         }
     }
 
-    const currentNode = gameState.map.find(n => n.id === gameState.currentMapNodeId);
-    if (currentNode && currentNode.type === NodeType.BOSS) {
-        const bossRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'BOSS');
-        const relic = bossRelics[Math.floor(Math.random() * bossRelics.length)];
-        rewards.push({ type: 'RELIC', value: relic, id: `rew-relic-${Date.now()}` });
-        rewards.push({ type: 'GOLD', value: 100, id: `rew-gold-${Date.now()}` });
+    // 3. Relics (Boss & Elite)
+    if (currentNode) {
+        if (currentNode.type === NodeType.BOSS) {
+            const bossRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'BOSS');
+            const relic = bossRelics[Math.floor(Math.random() * bossRelics.length)];
+            rewards.push({ type: 'RELIC', value: relic, id: `rew-relic-${Date.now()}` });
+        } else if (currentNode.type === NodeType.ELITE) {
+             const eliteRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'COMMON' || r.rarity === 'UNCOMMON' || r.rarity === 'RARE');
+             // Filter owned
+             const ownedIds = gameState.player.relics.map(r => r.id);
+             const available = eliteRelics.filter(r => !ownedIds.includes(r.id));
+             if (available.length > 0) {
+                 const relic = available[Math.floor(Math.random() * available.length)];
+                 rewards.push({ type: 'RELIC', value: relic, id: `rew-relic-${Date.now()}` });
+             }
+        }
     }
 
+    // 4. Potions
     if (Math.random() < 0.4 && !gameState.player.relics.find(r => r.id === 'SOZU')) {
         const allPotions = Object.values(POTION_LIBRARY);
         const potion = allPotions[Math.floor(Math.random() * allPotions.length)];
