@@ -1,8 +1,4 @@
 
-
-
-
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -1425,10 +1421,13 @@ const App: React.FC = () => {
     }
   };
 
-  const handleEndTurn = async (skipEnemies = false) => {
+  const handleEndTurn = async (skipEnemies: any = false) => {
+    // FIX: Ensure skipEnemies is strictly true (for Vault), otherwise false (ignore Event objects from onClick)
+    const isExtraTurn = skipEnemies === true;
+
     audioService.playSound('select');
     
-    if (!skipEnemies) {
+    if (!isExtraTurn) {
         setTurnLog("敵のターン...");
         setLastActionType(null);
         await wait(300);
@@ -1439,8 +1438,8 @@ const App: React.FC = () => {
 
     const enemies = [...gameState.enemies];
     
-    // Enemy Turn Loop - Skip if skipEnemies is true
-    if (!skipEnemies) {
+    // Enemy Turn Loop - Skip if isExtraTurn is true
+    if (!isExtraTurn) {
         for (const enemy of enemies) {
             if (gameState.player.currentHp <= 0) break;
             
