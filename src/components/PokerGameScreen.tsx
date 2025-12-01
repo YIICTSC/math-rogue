@@ -97,15 +97,42 @@ const getHandResult = (cards: PokerCard[]): { type: string, cards: PokerCard[] }
         if (ranks.includes(14) && ranks.includes(13)) return { type: 'ROYAL_FLUSH', cards: sorted };
         return { type: 'STRAIGHT_FLUSH', cards: sorted };
     }
-    if (countsValues[0] === 4) return { type: 'FOUR_OF_A_KIND', cards: sorted };
-    if (countsValues[0] === 3 && countsValues[1] >= 2) return { type: 'FULL_HOUSE', cards: sorted };
-    if (isFlush) return { type: 'FLUSH', cards: sorted };
-    if (isStraight) return { type: 'STRAIGHT', cards: sorted };
-    if (countsValues[0] === 3) return { type: 'THREE_OF_A_KIND', cards: sorted };
-    if (countsValues[0] === 2 && countsValues[1] === 2) return { type: 'TWO_PAIR', cards: sorted };
-    if (countsValues[0] === 2) return { type: 'PAIR', cards: sorted };
     
-    return { type: 'HIGH_CARD', cards: sorted }; // Logic simplified, usually selects best cards
+    // Four of a Kind
+    if (countsValues[0] === 4) {
+        const rank = Object.keys(counts).find(key => counts[Number(key)] === 4);
+        return { type: 'FOUR_OF_A_KIND', cards: sorted.filter(c => c.rank === Number(rank)) };
+    }
+    
+    // Full House (All cards score)
+    if (countsValues[0] === 3 && countsValues[1] >= 2) return { type: 'FULL_HOUSE', cards: sorted };
+    
+    // Flush (All cards score)
+    if (isFlush) return { type: 'FLUSH', cards: sorted };
+    
+    // Straight (All cards score)
+    if (isStraight) return { type: 'STRAIGHT', cards: sorted };
+    
+    // Three of a Kind
+    if (countsValues[0] === 3) {
+        const rank = Object.keys(counts).find(key => counts[Number(key)] === 3);
+        return { type: 'THREE_OF_A_KIND', cards: sorted.filter(c => c.rank === Number(rank)) };
+    }
+    
+    // Two Pair
+    if (countsValues[0] === 2 && countsValues[1] === 2) {
+        const pairRanks = Object.keys(counts).filter(key => counts[Number(key)] === 2).map(Number);
+        return { type: 'TWO_PAIR', cards: sorted.filter(c => pairRanks.includes(c.rank)) };
+    }
+    
+    // Pair
+    if (countsValues[0] === 2) {
+        const rank = Object.keys(counts).find(key => counts[Number(key)] === 2);
+        return { type: 'PAIR', cards: sorted.filter(c => c.rank === Number(rank)) };
+    }
+    
+    // High Card (Only highest card scores)
+    return { type: 'HIGH_CARD', cards: [sorted[sorted.length - 1]] }; 
 };
 
 const getRankDisplay = (rank: PokerRank) => {
@@ -803,18 +830,47 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
             </div>
         )}
 
-        {/* Deck List Modal */}
+        {/* Deck List Modal - UPDATED LAYOUT */}
         {showDeckList && (
             <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowDeckList(false)}>
                 <div className="bg-slate-800 border-4 border-slate-600 rounded-lg p-6 w-full max-w-4xl max-h-[80vh] overflow-y-auto relative shadow-2xl" onClick={e => e.stopPropagation()}>
                     <button onClick={() => setShowDeckList(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
-                    <h2 className="text-2xl font-bold text-white mb-4 flex items-center"><Layers className="mr-2"/> Deck List ({runState.deck.length + runState.hand.length + runState.discardPile.length})</h2>
-                    <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2">
-                        {[...runState.deck, ...runState.hand, ...runState.discardPile].sort((a,b) => b.rank - a.rank).map((card) => (
-                            <div key={card.id} className="bg-gray-100 rounded p-1 flex flex-col items-center justify-center h-16 w-10 text-xs">
-                                <div className="text-black font-bold">{getRankDisplay(card.rank)}</div>
-                                <div className="scale-75">{getSuitIcon(card.suit)}</div>
-                                {card.enhancement && <div className="text-[8px] text-purple-600 font-bold uppercase">{card.enhancement}</div>}
+                    <h2 className="text-2xl font-bold text-white mb-6 flex items-center"><Layers className="mr-2"/> Deck List ({runState.deck.length} remaining)</h2>
+                    
+                    <div className="space-y-4">
+                        {SUITS.map(suit => (
+                            <div key={suit} className="flex items-center bg-slate-900/50 p-2 rounded">
+                                <div className="w-10 flex-shrink-0 flex justify-center scale-150">
+                                    {getSuitIcon(suit)}
+                                </div>
+                                <div className="flex flex-wrap gap-1 flex-1 ml-4">
+                                    {[...runState.deck, ...runState.hand, ...runState.discardPile]
+                                        .filter(c => c.suit === suit)
+                                        .sort((a, b) => b.rank - a.rank)
+                                        .map((card) => {
+                                            const isInDeck = runState.deck.some(c => c.id === card.id);
+                                            return (
+                                                <div 
+                                                    key={card.id} 
+                                                    className={`
+                                                        rounded p-1 flex flex-col items-center justify-center h-14 w-10 text-xs border-2 transition-all
+                                                        ${isInDeck 
+                                                            ? 'bg-gray-100 border-gray-300 text-black shadow-md' 
+                                                            : 'bg-black border-gray-700 text-gray-600 opacity-60 grayscale'}
+                                                    `}
+                                                    title={isInDeck ? "In Deck" : "Drawn/Discarded"}
+                                                >
+                                                    <div className={`font-bold text-sm ${!isInDeck ? 'text-gray-600' : (['HEART', 'DIAMOND'].includes(card.suit) ? 'text-red-600' : 'text-black')}`}>
+                                                        {getRankDisplay(card.rank)}
+                                                    </div>
+                                                    <div className="scale-75 opacity-50">{getSuitIcon(card.suit)}</div>
+                                                    {card.enhancement && (
+                                                        <div className="absolute top-0 right-0 w-2 h-2 bg-purple-500 rounded-full"></div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                </div>
                             </div>
                         ))}
                     </div>
