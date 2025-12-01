@@ -41,7 +41,7 @@ interface ScoringContext {
 }
 
 // --- Constants ---
-const SUITS: Suit[] = ['SPADE' | 'HEART' | 'DIAMOND' | 'CLUB'];
+const SUITS: Suit[] = ['SPADE', 'HEART', 'DIAMOND', 'CLUB'];
 const RANKS: Rank[] = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
 
 const HAND_TYPES: Record<string, HandResult> = {
@@ -156,6 +156,19 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   // --- Logic ---
   const toggleSelect = (id: string) => {
     if (animatingScore || isGameOver || isRoundClear) return;
+    
+    const cardToToggle = hand.find(c => c.id === id);
+    if (!cardToToggle) return;
+
+    // Check limit if selecting a new card
+    if (!cardToToggle.isSelected) {
+        const selectedCount = hand.filter(c => c.isSelected).length;
+        if (selectedCount >= 5) {
+            audioService.playSound('wrong'); // Feedback for limit reached
+            return;
+        }
+    }
+
     setHand(prev => prev.map(c => c.id === id ? { ...c, isSelected: !c.isSelected } : c));
     audioService.playSound('select');
   };
@@ -231,7 +244,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
     
     const selected = getSelectedCards();
     if (selected.length === 0 || selected.length > 5) {
-        if(selected.length > 5) return;
+        return;
     }
 
     const { type, cards } = evaluateHand(selected);
