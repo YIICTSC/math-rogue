@@ -55,7 +55,14 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
   // Determine available nodes
   let availableNodeIds: string[] = [];
   if (!currentNodeId) {
-    availableNodeIds = nodes.filter(n => n.type === NodeType.START).map(n => n.id);
+    // Standard start: Type START
+    const startNodes = nodes.filter(n => n.type === NodeType.START).map(n => n.id);
+    if (startNodes.length > 0) {
+        availableNodeIds = startNodes;
+    } else {
+        // Special case (e.g. Act 4 Boss Rush start): If no START nodes, enable all nodes at y=0 (or just enable the only node if count is 1)
+        availableNodeIds = nodes.filter(n => n.y === 0).map(n => n.id);
+    }
   } else {
     const currentNode = nodes.find(n => n.id === currentNodeId);
     if (currentNode && currentNode.completed) {

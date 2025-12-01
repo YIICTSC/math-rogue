@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -713,7 +712,7 @@ const App: React.FC = () => {
             
             if (gameState.act === 4 && node.type === NodeType.BOSS) {
                 // TRUE BOSS
-                enemies.push({
+                const boss: Enemy = {
                     id: 'true-boss',
                     enemyType: 'THE_HEART',
                     name: TRUE_BOSS.name,
@@ -721,10 +720,12 @@ const App: React.FC = () => {
                     currentHp: TRUE_BOSS.maxHp,
                     block: 0,
                     strength: 0,
-                    nextIntent: { type: EnemyIntentType.BUFF, value: 0 },
+                    nextIntent: { type: EnemyIntentType.UNKNOWN, value: 0 },
                     vulnerable: 0, weak: 0, poison: 0, artifact: 2, corpseExplosion: false,
                     floatingText: null
-                });
+                };
+                boss.nextIntent = getNextEnemyIntent(boss, 1);
+                enemies.push(boss);
                 audioService.playBGM('battle');
             } else {
                 const numEnemies = node.type === NodeType.BOSS ? 1 : Math.floor(Math.random() * Math.min(3, 1 + Math.floor(node.y / 3))) + 1;
@@ -1764,7 +1765,6 @@ const App: React.FC = () => {
                 </div>
             )}
 
-            {/* ... (Other screens logic unchanged except passed down props) ... */}
             {gameState.screen === GameScreen.MODE_SELECTION && (
                 <div className="w-full h-full bg-gray-900 flex flex-col items-center text-white p-4 overflow-y-auto custom-scrollbar">
                     <div className="w-full max-w-2xl flex flex-col items-center my-auto">
@@ -1845,7 +1845,13 @@ const App: React.FC = () => {
             )}
 
             {gameState.screen === GameScreen.REST && (
-                <RestScreen player={gameState.player} onRest={handleRestAction} onUpgrade={handleUpgradeCard} onSynthesize={handleSynthesizeCard} onLeave={handleNodeComplete} />
+                <RestScreen 
+                    player={gameState.player} 
+                    onRest={handleRestAction} 
+                    onUpgrade={handleUpgradeCard} 
+                    onSynthesize={handleSynthesizeCard}
+                    onLeave={handleNodeComplete} 
+                />
             )}
 
             {gameState.screen === GameScreen.SHOP && (
@@ -1855,14 +1861,31 @@ const App: React.FC = () => {
                     shopRelics={shopRelics}
                     shopPotions={shopPotions}
                     onBuyCard={(card) => {
-                        setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - (prev.player.relics.find(r=>r.id==='MEMBERSHIP_CARD') ? Math.floor((card.price||50)*0.5) : (card.price||50)), deck: [...prev.player.deck, { ...card, id: `buy-${Date.now()}` }], discardPile: [...prev.player.discardPile, { ...card, id: `buy-${Date.now()}` }] } }));
+                        let price = card.price || 50;
+                        if (gameState.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
+                        setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - price, deck: [...prev.player.deck, { ...card, id: `buy-${Date.now()}` }], discardPile: [...prev.player.discardPile, { ...card, id: `buy-${Date.now()}` }] } }));
+                        storageService.saveUnlockedCard(card.name);
                     }}
                     onBuyRelic={(relic) => {
-                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - (prev.player.relics.find(r=>r.id==='MEMBERSHIP_CARD') ? Math.floor((relic.price||150)*0.5) : (relic.price||150)), relics: [...prev.player.relics, relic] } }));
+                         let price = relic.price || 150;
+                         if (gameState.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
+                         setGameState(prev => {
+                             const newP = { ...prev.player, gold: prev.player.gold - price, relics: [...prev.player.relics, relic] };
+                             if (relic.id === 'SOZU') newP.maxEnergy += 1;
+                             if (relic.id === 'CURSED_KEY') newP.maxEnergy += 1;
+                             if (relic.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
+                             if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
+                             if (relic.id === 'OLD_COIN') newP.gold += 300;
+                             return { ...prev, player: newP };
+                         });
+                         storageService.saveUnlockedRelic(relic.id);
                     }}
                     onBuyPotion={(potion) => {
                         if (gameState.player.potions.length < 3) {
-                             setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - (prev.player.relics.find(r=>r.id==='MEMBERSHIP_CARD') ? Math.floor((potion.price||50)*0.5) : (potion.price||50)), potions: [...prev.player.potions, { ...potion, id: `buy-pot-${Date.now()}` }] } }));
+                             let price = potion.price || 50;
+                             if (gameState.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
+                             setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - price, potions: [...prev.player.potions, { ...potion, id: `buy-pot-${Date.now()}` }] } }));
+                             storageService.saveUnlockedPotion(potion.templateId);
                         }
                     }}
                     onRemoveCard={(cardId, cost) => {
@@ -1884,76 +1907,77 @@ const App: React.FC = () => {
 
             {gameState.screen === GameScreen.TREASURE && (
                 <TreasureScreen 
-                    onOpen={() => { 
+                    rewards={treasureRewards}
+                    onOpen={() => {
+                        const hasCursedKey = !!gameState.player.relics.find(r => r.id === 'CURSED_KEY');
                         setGameState(prev => {
-                            let p = { ...prev.player };
+                            const newP = { ...prev.player };
+                            
+                            // Grant Rewards
                             treasureRewards.forEach(r => {
-                                if (r.type === 'GOLD') p.gold += r.value;
+                                if (r.type === 'GOLD') newP.gold += r.value;
                                 if (r.type === 'RELIC') {
-                                    p.relics.push(r.value);
-                                    storageService.saveUnlockedRelic(r.value.id); // UNLOCK
-                                    if (r.value.id === 'CURSED_KEY') p.deck.push({...CURSE_CARDS.PAIN, id: `curse-${Date.now()}`});
+                                    newP.relics = [...newP.relics, r.value];
+                                    storageService.saveUnlockedRelic(r.value.id);
+                                    if (r.value.id === 'SOZU') newP.maxEnergy += 1;
+                                    if (r.value.id === 'CURSED_KEY') newP.maxEnergy += 1;
+                                    if (r.value.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
+                                    if (r.value.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
+                                    if (r.value.id === 'OLD_COIN') newP.gold += 300;
                                 }
                             });
-                            if (p.relics.find(r => r.id === 'CURSED_KEY')) {
-                                const curse = Object.values(CURSE_CARDS)[Math.floor(Math.random() * Object.values(CURSE_CARDS).length)];
-                                p.deck.push({ ...curse, id: `chest-curse-${Date.now()}` });
+
+                            // Cursed Key Effect
+                            if (hasCursedKey) {
+                                const curse = { ...CURSE_CARDS.PAIN, id: `curse-${Date.now()}` }; 
+                                newP.deck = [...newP.deck, curse];
+                                newP.discardPile = [...newP.discardPile, curse];
                             }
-                            return { ...prev, player: p };
+                            return { ...prev, player: newP };
                         });
                     }}
-                    onLeave={handleNodeComplete} 
-                    rewards={treasureRewards}
+                    onLeave={handleNodeComplete}
                     hasCursedKey={!!gameState.player.relics.find(r => r.id === 'CURSED_KEY')}
                 />
             )}
 
             {gameState.screen === GameScreen.GAME_OVER && (
-                 <div className="w-full h-full bg-red-900 flex flex-col items-center justify-center text-center text-white p-4 overflow-hidden relative">
-                    <div className="z-10 w-full max-w-4xl flex flex-col items-center">
-                        <h1 className="text-5xl md:text-6xl mb-2 font-bold tracking-widest text-red-500 drop-shadow-md whitespace-nowrap">補習決定...</h1>
-                        <p className="mb-4 text-xl">Act {gameState.act} - Floor {gameState.floor}</p>
-                        
-                        {!legacyCardSelected && gameState.player.deck.length > 0 && !gameState.challengeMode ? (
-                            <div className="w-full bg-black/60 p-4 rounded-lg border-2 border-red-500 mb-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                                <h2 className="text-xl font-bold text-yellow-400 mb-2 flex items-center justify-center">
-                                    <Send size={24} className="mr-2"/> 後輩に「伝説のノート」を託す
-                                </h2>
-                                <p className="text-sm text-gray-300 mb-4">選ばれたカードは次の冒険の初期デッキに追加されます（1枚のみ）</p>
-                                
-                                <div className="flex flex-wrap justify-center gap-2 overflow-y-auto max-h-64 custom-scrollbar p-2">
-                                    {gameState.player.deck.map(card => (
-                                        <div key={card.id} className="scale-75 origin-center cursor-pointer hover:scale-90 transition-transform" onClick={() => handleLegacyCardSelect(card)}>
-                                            <Card card={card} onClick={() => handleLegacyCardSelect(card)} disabled={false} />
-                                        </div>
-                                    ))}
-                                </div>
-                                <button 
-                                    onClick={() => setLegacyCardSelected(true)}
-                                    className="mt-4 text-gray-400 underline hover:text-white text-sm"
-                                >
-                                    何も残さず下校する
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="flex flex-col gap-4 items-center animate-in zoom-in duration-300">
-                                {legacyCardSelected && <p className="text-yellow-400 mb-4 font-bold">想いは託された！</p>}
-                                <button onClick={handleRetry} className="bg-black border-2 border-white px-8 py-3 cursor-pointer w-64 hover:bg-gray-800 flex items-center justify-center rounded text-xl font-bold"><RotateCcw className="mr-2" size={20} /> 再挑戦</button>
-                                <button onClick={returnToTitle} className="bg-gray-700 border-2 border-white px-8 py-3 cursor-pointer w-64 hover:bg-gray-600 flex items-center justify-center rounded text-xl font-bold"><Home className="mr-2" size={20} /> タイトルへ戻る</button>
-                            </div>
-                        )}
+                 <div className="w-full h-full bg-red-900 flex items-center justify-center text-center text-white p-4">
+                    <div>
+                        <h1 className="text-6xl mb-4 font-bold">死亡</h1>
+                        <p className="mb-8 text-2xl">Act {gameState.act} - Floor {gameState.floor}</p>
+                        <div className="flex flex-col gap-4 items-center">
+                            <button onClick={handleRetry} className="bg-black border-2 border-white px-8 py-3 cursor-pointer w-64 hover:bg-gray-800 flex items-center justify-center"><RotateCcw className="mr-2" size={20} /> 再挑戦</button>
+                            <button onClick={returnToTitle} className="bg-gray-700 border-2 border-white px-8 py-3 cursor-pointer w-64 hover:bg-gray-600 flex items-center justify-center"><Home className="mr-2" size={20} /> タイトルへ戻る</button>
+                        </div>
                     </div>
                 </div>
             )}
 
             {gameState.screen === GameScreen.ENDING && (
                  <div className="w-full h-full bg-yellow-900 flex items-center justify-center text-center text-white p-4">
-                    <div className="bg-black/50 p-8 rounded-xl border-4 border-yellow-500">
+                    <div>
                         <Trophy size={80} className="text-yellow-400 mx-auto mb-6 animate-pulse" />
-                        <h1 className="text-4xl md:text-6xl mb-4 font-bold text-yellow-200">完全下校！</h1>
-                        <p className="mb-8 text-lg md:text-xl">あなたは校長先生との激闘を制し、<br/>伝説の小学生として名を刻みました。</p>
-                        <div className="mb-8 text-2xl font-bold text-white">SCORE: {calculateScore(gameState, true)}</div>
-                        <button onClick={returnToTitle} className="bg-blue-600 border-2 border-white px-8 py-4 cursor-pointer text-xl hover:bg-blue-500 font-bold rounded shadow-lg">卒業アルバムに載る</button>
+                        <h1 className="text-6xl mb-4 font-bold text-yellow-200">ゲームクリア！</h1>
+                        <p className="mb-8 text-xl">あなたは校長先生を説得し、<br/>伝説の小学生として語り継がれることでしょう。</p>
+                        {!legacyCardSelected ? (
+                            <div className="mb-8">
+                                <p className="mb-4 text-sm text-yellow-100">次回の冒険に持っていくカードを1枚選んでください</p>
+                                <div className="flex flex-wrap justify-center gap-2 max-h-64 overflow-y-auto custom-scrollbar p-2 bg-black/30 rounded">
+                                    {gameState.player.deck.map(card => (
+                                        <div key={card.id} className="scale-75 cursor-pointer hover:scale-90 transition-transform" onClick={() => handleLegacyCardSelect(card)}>
+                                            <Card card={card} onClick={() => handleLegacyCardSelect(card)} disabled={false} />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <p className="mb-8 text-green-400 font-bold">カードを継承しました！</p>
+                        )}
+                        
+                        <div className="flex flex-col gap-4 items-center">
+                            <button onClick={returnToTitle} className="bg-blue-600 border-2 border-white px-8 py-4 cursor-pointer text-xl hover:bg-blue-500 font-bold w-64">伝説となる</button>
+                        </div>
                     </div>
                 </div>
             )}
