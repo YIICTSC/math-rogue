@@ -1183,6 +1183,9 @@ const App: React.FC = () => {
     setLastActionType(card.type);
     setLastActionTime(Date.now());
 
+    // Check for VAULT *before* state update to trigger end turn after
+    const isVault = card.name === '大ジャンプ' || card.name === 'VAULT';
+
     setGameState(prev => {
       const p = { ...prev.player, hand: [...prev.player.hand], drawPile: [...prev.player.drawPile], discardPile: [...prev.player.discardPile], deck: [...prev.player.deck], powers: { ...prev.player.powers } };
       let enemies = prev.enemies.map(e => ({ ...e }));
@@ -1397,101 +1400,116 @@ const App: React.FC = () => {
 
       return { ...prev, player: p, enemies: enemies, selectedEnemyId: nextSelectedId, selectionState: nextSelectionState };
     });
+
+    // Trigger Vault Effect
+    if (isVault) {
+        setTimeout(() => handleEndTurn(true), 500); // Delay slightly to let animation play
+    }
   };
 
-  const handleEndTurn = async () => {
+  const handleEndTurn = async (skipEnemies = false) => {
     audioService.playSound('select');
-    setTurnLog("敵のターン...");
-    setLastActionType(null);
-    await wait(300);
+    
+    if (!skipEnemies) {
+        setTurnLog("敵のターン...");
+        setLastActionType(null);
+        await wait(300);
+    } else {
+        setTurnLog("追加ターン！");
+        await wait(500);
+    }
 
     const enemies = [...gameState.enemies];
-    for (const enemy of enemies) {
-        if (gameState.player.currentHp <= 0) break;
-        
-        if (enemy.poison > 0) {
-            enemy.currentHp -= enemy.poison;
-            enemy.floatingText = { id: `psn-${Date.now()}`, text: `${enemy.poison}`, color: 'text-green-500', iconType: 'poison' };
-            enemy.poison--;
-            setGameState(prev => ({ ...prev, enemies: prev.enemies.map(e => e.id === enemy.id ? { ...e, currentHp: enemy.currentHp, poison: enemy.poison, floatingText: enemy.floatingText } : e) }));
-            if (enemy.currentHp <= 0) {
-                // UNLOCK ENEMY (Poison Death)
-                storageService.saveDefeatedEnemy(enemy.name);
-                continue;
-            }
-        }
-
-        setActingEnemyId(enemy.id);
-        await wait(300); 
-
-        if (enemy.nextIntent.type === EnemyIntentType.ATTACK || enemy.nextIntent.type === EnemyIntentType.ATTACK_DEBUFF || enemy.nextIntent.type === EnemyIntentType.ATTACK_DEFEND) audioService.playSound('attack');
-        else if (enemy.nextIntent.type === EnemyIntentType.DEFEND) audioService.playSound('block');
-        else audioService.playSound('select');
-
-        setGameState(prev => {
-            const currentEnemyIndex = prev.enemies.findIndex(e => e.id === enemy.id);
-            if (currentEnemyIndex === -1) return prev;
-            const p = { ...prev.player };
-            const newEnemies = [...prev.enemies];
-            const e = { ...newEnemies[currentEnemyIndex] };
-            newEnemies[currentEnemyIndex] = e;
-            e.block = 0; 
-
-            const intent = e.nextIntent;
+    
+    // Enemy Turn Loop - Skip if skipEnemies is true
+    if (!skipEnemies) {
+        for (const enemy of enemies) {
+            if (gameState.player.currentHp <= 0) break;
             
-            if (intent.type === EnemyIntentType.ATTACK || intent.type === EnemyIntentType.ATTACK_DEBUFF || intent.type === EnemyIntentType.ATTACK_DEFEND) {
-                let damage = intent.value + (e.strength || 0);
-                if (e.weak > 0) damage = Math.floor(damage * 0.75);
-                if (p.powers['INTANGIBLE'] > 0) damage = 1;
-                if (p.powers['STATIC_DISCHARGE']) {
-                    const dmg = p.powers['STATIC_DISCHARGE'];
-                    e.currentHp -= dmg; 
-                    e.floatingText = { id: `sd-${Date.now()}`, text: `${dmg}`, color: 'text-purple-400', iconType: 'zap' };
+            if (enemy.poison > 0) {
+                enemy.currentHp -= enemy.poison;
+                enemy.floatingText = { id: `psn-${Date.now()}`, text: `${enemy.poison}`, color: 'text-green-500', iconType: 'poison' };
+                enemy.poison--;
+                setGameState(prev => ({ ...prev, enemies: prev.enemies.map(e => e.id === enemy.id ? { ...e, currentHp: enemy.currentHp, poison: enemy.poison, floatingText: enemy.floatingText } : e) }));
+                if (enemy.currentHp <= 0) {
+                    // UNLOCK ENEMY (Poison Death)
+                    storageService.saveDefeatedEnemy(enemy.name);
+                    continue;
                 }
+            }
+
+            setActingEnemyId(enemy.id);
+            await wait(300); 
+
+            if (enemy.nextIntent.type === EnemyIntentType.ATTACK || enemy.nextIntent.type === EnemyIntentType.ATTACK_DEBUFF || enemy.nextIntent.type === EnemyIntentType.ATTACK_DEFEND) audioService.playSound('attack');
+            else if (enemy.nextIntent.type === EnemyIntentType.DEFEND) audioService.playSound('block');
+            else audioService.playSound('select');
+
+            setGameState(prev => {
+                const currentEnemyIndex = prev.enemies.findIndex(e => e.id === enemy.id);
+                if (currentEnemyIndex === -1) return prev;
+                const p = { ...prev.player };
+                const newEnemies = [...prev.enemies];
+                const e = { ...newEnemies[currentEnemyIndex] };
+                newEnemies[currentEnemyIndex] = e;
+                e.block = 0; 
+
+                const intent = e.nextIntent;
                 
-                if (p.powers['BUFFER'] > 0) { 
-                    p.powers['BUFFER']--; 
-                    damage = 0; 
-                    p.floatingText = { id: `buf-${Date.now()}`, text: 'BLOCKED', color: 'text-blue-300' };
-                }
+                if (intent.type === EnemyIntentType.ATTACK || intent.type === EnemyIntentType.ATTACK_DEBUFF || intent.type === EnemyIntentType.ATTACK_DEFEND) {
+                    let damage = intent.value + (e.strength || 0);
+                    if (e.weak > 0) damage = Math.floor(damage * 0.75);
+                    if (p.powers['INTANGIBLE'] > 0) damage = 1;
+                    if (p.powers['STATIC_DISCHARGE']) {
+                        const dmg = p.powers['STATIC_DISCHARGE'];
+                        e.currentHp -= dmg; 
+                        e.floatingText = { id: `sd-${Date.now()}`, text: `${dmg}`, color: 'text-purple-400', iconType: 'zap' };
+                    }
+                    
+                    if (p.powers['BUFFER'] > 0) { 
+                        p.powers['BUFFER']--; 
+                        damage = 0; 
+                        p.floatingText = { id: `buf-${Date.now()}`, text: 'BLOCKED', color: 'text-blue-300' };
+                    }
 
-                if (p.block >= damage) { p.block -= damage; damage = 0; }
-                else { damage -= p.block; p.block = 0; }
-                
-                p.currentHp -= damage;
-                if (damage > 0) p.floatingText = { id: `pdmg-${Date.now()}`, text: `-${damage}`, color: 'text-red-500', iconType: 'sword' };
+                    if (p.block >= damage) { p.block -= damage; damage = 0; }
+                    else { damage -= p.block; p.block = 0; }
+                    
+                    p.currentHp -= damage;
+                    if (damage > 0) p.floatingText = { id: `pdmg-${Date.now()}`, text: `-${damage}`, color: 'text-red-500', iconType: 'sword' };
 
-                if (p.powers['THORNS']) {
-                    e.currentHp -= p.powers['THORNS'];
-                    e.floatingText = { id: `thorns-${Date.now()}`, text: `${p.powers['THORNS']}`, color: 'text-orange-500' };
-                }
+                    if (p.powers['THORNS']) {
+                        e.currentHp -= p.powers['THORNS'];
+                        e.floatingText = { id: `thorns-${Date.now()}`, text: `${p.powers['THORNS']}`, color: 'text-orange-500' };
+                    }
 
-                if (intent.type === EnemyIntentType.ATTACK_DEBUFF && intent.debuffType) {
+                    if (intent.type === EnemyIntentType.ATTACK_DEBUFF && intent.debuffType) {
+                        if (intent.debuffType === 'WEAK') p.powers['WEAK'] = (p.powers['WEAK'] || 0) + (intent.secondaryValue || 0);
+                        if (intent.debuffType === 'VULNERABLE') p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + (intent.secondaryValue || 0);
+                    }
+                    if (intent.type === EnemyIntentType.ATTACK_DEFEND) {
+                        e.block += (intent.secondaryValue || 0);
+                    }
+
+                } else if (intent.type === EnemyIntentType.DEFEND) {
+                    e.block = intent.value;
+                } else if (intent.type === EnemyIntentType.BUFF) {
+                    e.strength += (intent.secondaryValue || 2);
+                    e.floatingText = { id: `buff-${Date.now()}`, text: 'Strength UP', color: 'text-red-400' };
+                } else if (intent.type === EnemyIntentType.DEBUFF) {
                     if (intent.debuffType === 'WEAK') p.powers['WEAK'] = (p.powers['WEAK'] || 0) + (intent.secondaryValue || 0);
-                    if (intent.debuffType === 'VULNERABLE') p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + (intent.secondaryValue || 0);
+                    if (intent.debuffType === 'POISON') p.powers['POISON'] = (p.powers['POISON'] || 0) + (intent.secondaryValue || 0);
                 }
-                if (intent.type === EnemyIntentType.ATTACK_DEFEND) {
-                    e.block += (intent.secondaryValue || 0);
-                }
+                
+                if (e.vulnerable > 0) e.vulnerable--;
+                if (e.weak > 0) e.weak--;
 
-            } else if (intent.type === EnemyIntentType.DEFEND) {
-                e.block = intent.value;
-            } else if (intent.type === EnemyIntentType.BUFF) {
-                e.strength += (intent.secondaryValue || 2);
-                e.floatingText = { id: `buff-${Date.now()}`, text: 'Strength UP', color: 'text-red-400' };
-            } else if (intent.type === EnemyIntentType.DEBUFF) {
-                if (intent.debuffType === 'WEAK') p.powers['WEAK'] = (p.powers['WEAK'] || 0) + (intent.secondaryValue || 0);
-                if (intent.debuffType === 'POISON') p.powers['POISON'] = (p.powers['POISON'] || 0) + (intent.secondaryValue || 0);
-            }
-            
-            if (e.vulnerable > 0) e.vulnerable--;
-            if (e.weak > 0) e.weak--;
+                e.nextIntent = getNextEnemyIntent(e, prev.turn + 1);
 
-            e.nextIntent = getNextEnemyIntent(e, prev.turn + 1);
-
-            return { ...prev, player: p, enemies: newEnemies };
-        });
-        await wait(600);
+                return { ...prev, player: p, enemies: newEnemies };
+            });
+            await wait(600);
+        }
     }
     setActingEnemyId(null);
     
