@@ -540,8 +540,15 @@ const App: React.FC = () => {
                           const pots = Object.values(POTION_LIBRARY);
                           const pot = { ...pots[Math.floor(Math.random() * pots.length)], id: `pot-${Date.now()}` };
                           storageService.saveUnlockedPotion(pot.templateId); // UNLOCK
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - 20, potions: [...prev.player.potions, pot].slice(0, 3) } }));
-                          setEventResultLog("ポーションをこっそり受け取った！");
+                          setGameState(prev => {
+                              // If full, simplistic logic for now (usually handled in Shop/Reward screens), just add if space
+                              if (prev.player.potions.length < 3) {
+                                  return { ...prev, player: { ...prev.player, gold: prev.player.gold - 20, potions: [...prev.player.potions, pot] } };
+                              } else {
+                                  return { ...prev, player: { ...prev.player, gold: prev.player.gold - 20 } }; // Taking gold even if full? Let's just say discarded for now in event logic to keep simple
+                              }
+                          });
+                          setEventResultLog("ポーションをこっそり受け取った！(満杯の場合は破棄されました)");
                       } else {
                           setEventResultLog("お金が足りないとわかると、上級生は舌打ちをした。");
                       }
@@ -1609,7 +1616,7 @@ const App: React.FC = () => {
     audioService.playSound('select');
   };
 
-  const handleRewardSelection = (item: RewardItem) => {
+  const handleRewardSelection = (item: RewardItem, replacePotionId?: string) => {
       if (isLoading) return;
       audioService.playSound('select');
 
@@ -1635,10 +1642,16 @@ const App: React.FC = () => {
               p.gold += item.value;
               nextRewards = nextRewards.filter(r => r.id !== item.id);
           } else if (item.type === 'POTION') {
-              if (p.potions.length < 3) {
-                  p.potions = [...p.potions, item.value];
-                  storageService.saveUnlockedPotion(item.value.templateId); // UNLOCK
-                  nextRewards = nextRewards.filter(r => r.id !== item.id);
+              if (p.potions.length < 3 || replacePotionId) {
+                  let newPotions = [...p.potions];
+                  if (replacePotionId) {
+                      newPotions = newPotions.filter(pt => pt.id !== replacePotionId);
+                  }
+                  if (newPotions.length < 3) {
+                      p.potions = [...newPotions, item.value];
+                      storageService.saveUnlockedPotion(item.value.templateId); // UNLOCK
+                      nextRewards = nextRewards.filter(r => r.id !== item.id);
+                  }
               }
           }
           
@@ -1939,11 +1952,17 @@ const App: React.FC = () => {
                          });
                          storageService.saveUnlockedRelic(relic.id);
                     }}
-                    onBuyPotion={(potion) => {
-                        if (gameState.player.potions.length < 3) {
+                    onBuyPotion={(potion, replacePotionId) => {
+                        if (gameState.player.potions.length < 3 || replacePotionId) {
                              let price = potion.price || 50;
                              if (gameState.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
-                             setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - price, potions: [...prev.player.potions, { ...potion, id: `buy-pot-${Date.now()}` }] } }));
+                             setGameState(prev => {
+                                 let newPotions = [...prev.player.potions];
+                                 if (replacePotionId) {
+                                     newPotions = newPotions.filter(pt => pt.id !== replacePotionId);
+                                 }
+                                 return { ...prev, player: { ...prev.player, gold: prev.player.gold - price, potions: [...newPotions, { ...potion, id: `buy-pot-${Date.now()}` }] } }
+                             });
                              storageService.saveUnlockedPotion(potion.templateId);
                         }
                     }}

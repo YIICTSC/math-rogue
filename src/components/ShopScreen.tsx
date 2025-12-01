@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Player, Card as ICard, Relic, Potion } from '../types';
 import Card from './Card';
-import { ShoppingBag, Trash2, Coins, Gem, FlaskConical } from 'lucide-react';
+import { ShoppingBag, Trash2, Coins, Gem, FlaskConical, X } from 'lucide-react';
 
 interface ShopScreenProps {
   player: Player;
@@ -11,7 +11,7 @@ interface ShopScreenProps {
   shopPotions?: Potion[]; // New
   onBuyCard: (card: ICard) => void;
   onBuyRelic: (relic: Relic) => void;
-  onBuyPotion: (potion: Potion) => void; // New
+  onBuyPotion: (potion: Potion, replacePotionId?: string) => void; // Update signature
   onRemoveCard: (cardId: string, cost: number) => void;
   onLeave: () => void;
 }
@@ -22,6 +22,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
   const [purchasedIds, setPurchasedIds] = useState<string[]>([]);
   const [removed, setRemoved] = useState(false);
   const [viewMode, setViewMode] = useState<'BUY' | 'REMOVE'>('BUY');
+  const [potionToBuy, setPotionToBuy] = useState<Potion | null>(null); // For replacement modal
 
   const handleBuyCard = (card: ICard) => {
     if (purchasedIds.includes(card.id)) return;
@@ -45,17 +46,27 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
     }
   };
 
-  const handleBuyPotion = (potion: Potion) => {
+  const handleBuyPotionClick = (potion: Potion) => {
       if (purchasedIds.includes(potion.id)) return;
-      if (player.potions.length >= 3) return; // Full
-
+      
       let price = potion.price || 50;
       if (player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
 
       if (player.gold >= price) {
-          onBuyPotion(potion);
-          setPurchasedIds([...purchasedIds, potion.id]);
+          if (player.potions.length >= 3) {
+              setPotionToBuy(potion);
+          } else {
+              onBuyPotion(potion);
+              setPurchasedIds([...purchasedIds, potion.id]);
+          }
       }
+  };
+
+  const confirmPotionReplace = (replaceId: string) => {
+      if (!potionToBuy) return;
+      onBuyPotion(potionToBuy, replaceId);
+      setPurchasedIds([...purchasedIds, potionToBuy.id]);
+      setPotionToBuy(null);
   };
 
   const handleRemove = (cardId: string) => {
@@ -97,6 +108,38 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                 </button>
            </div>
        </div>
+
+       {/* Potion Replacement Modal */}
+       {potionToBuy && (
+           <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setPotionToBuy(null)}>
+               <div className="bg-gray-900 border-2 border-white p-6 rounded shadow-2xl max-w-sm w-full text-center animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
+                   <div className="absolute top-2 right-2 cursor-pointer" onClick={() => setPotionToBuy(null)}>
+                       <X size={24} className="text-gray-400 hover:text-white" />
+                   </div>
+                   <h3 className="text-xl font-bold text-white mb-4">ポーションがいっぱいです</h3>
+                   <p className="text-sm text-gray-300 mb-6">どれを捨てて入れ替えますか？</p>
+                   
+                   <div className="flex justify-center gap-4 mb-4">
+                        {player.potions.map(p => (
+                            <div 
+                                key={p.id} 
+                                className="flex flex-col items-center cursor-pointer hover:scale-110 transition-transform"
+                                onClick={() => confirmPotionReplace(p.id)}
+                            >
+                                <div className="w-12 h-12 bg-gray-800 border-2 border-white rounded-full flex items-center justify-center mb-1">
+                                    <FlaskConical size={24} style={{ color: p.color }} />
+                                </div>
+                                <div className="text-xs text-gray-400 w-16 truncate text-center">{p.name}</div>
+                            </div>
+                        ))}
+                   </div>
+                   
+                   <button onClick={() => setPotionToBuy(null)} className="mt-4 text-sm text-gray-500 hover:text-white underline">
+                       やっぱりやめる
+                   </button>
+               </div>
+           </div>
+       )}
 
        {/* Content */}
        <div className="z-10 flex-grow flex flex-col items-center overflow-hidden relative">
@@ -155,7 +198,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                             {shopPotions.map(potion => {
                                 const isSold = purchasedIds.includes(potion.id);
                                 const price = getPrice(potion.price || 50);
-                                const canAfford = player.gold >= price && player.potions.length < 3;
+                                const canAfford = player.gold >= price;
                                 const isFull = player.potions.length >= 3;
 
                                 return (
@@ -168,11 +211,11 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                         
                                         {!isSold && (
                                             <button 
-                                                onClick={() => handleBuyPotion(potion)}
+                                                onClick={() => handleBuyPotionClick(potion)}
                                                 disabled={!canAfford}
                                                 className={`px-2 py-0.5 rounded-full font-bold text-xs shadow-lg border border-white ${canAfford ? 'bg-yellow-600 hover:bg-yellow-500 text-white cursor-pointer' : 'bg-gray-600 text-gray-400 cursor-not-allowed'}`}
                                             >
-                                                {isFull ? '満杯' : `${price} 円`}
+                                                {isFull ? `${price} 円 (入替)` : `${price} 円`}
                                             </button>
                                         )}
                                         {isSold && <div className="text-red-500 font-bold rotate-12 text-xs">売切れ</div>}
