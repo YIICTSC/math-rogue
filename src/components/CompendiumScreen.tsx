@@ -1,7 +1,8 @@
 
+
 import React, { useMemo, useState, useEffect } from 'react';
 import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY, ENEMY_LIBRARY } from '../constants';
-import { Card as ICard } from '../types';
+import { Card as ICard, CardType } from '../types';
 import Card from './Card';
 import { BookOpen, Lock, ArrowLeft, Swords, Gem, FlaskConical, Skull, X } from 'lucide-react';
 import PixelSprite from './PixelSprite';
