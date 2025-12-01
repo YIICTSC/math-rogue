@@ -656,6 +656,7 @@ const App: React.FC = () => {
           setIsLoading(true);
           audioService.init();
           audioService.playSound('select');
+          setLegacyCardSelected(false); // Reset legacy selection state
           
           if (isChallengeSetup) {
               // Skip mode select if challenge
@@ -1824,6 +1825,7 @@ const App: React.FC = () => {
     audioService.stopBGM();
     setShopCards([]);
     setEventData(null);
+    setLegacyCardSelected(false); // Reset legacy state
     setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
   };
 
@@ -1833,7 +1835,7 @@ const App: React.FC = () => {
   };
 
   const handleRetry = () => {
-      setLegacyCardSelected(false);
+      setLegacyCardSelected(false); // Reset legacy state
       startGame();
   };
 
@@ -1890,7 +1892,7 @@ const App: React.FC = () => {
                             </div>
 
                             <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                <Terminal size={10}/> v2.2.3
+                                <Terminal size={10}/> v2.2.4
                             </button>
                         </div>
                     </div>
@@ -1904,22 +1906,20 @@ const App: React.FC = () => {
                             className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2 select-none active:text-green-200"
                             onClick={handleLogTitleClick}
                         >
-                            System Update Log v2.2.3
+                            System Update Log v2.2.4
                         </h2>
                         <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
                             <section>
-                                <h3 className="text-white font-bold mb-1">■ エンドレスモード (Endless Mode)</h3>
+                                <h3 className="text-white font-bold mb-1">■ 継承システムの改修 (Legacy System Fix)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li>クリア後、さらに強くなった敵と戦い続けるモードを追加しました。</li>
-                                    <li>Act数に応じて敵の強さが上昇します。</li>
+                                    <li>ゲームオーバー時にもカードを1枚継承できるようにしました。</li>
+                                    <li>次回の冒険開始時に、継承したカードが初期デッキに追加されます。</li>
                                 </ul>
                             </section>
                             <section>
-                                <h3 className="text-white font-bold mb-1">■ 図鑑システムの拡張 (Compendium Update)</h3>
+                                <h3 className="text-white font-bold mb-1">■ その他調整</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li>カードだけでなく、レリック、ポーション、敵の図鑑を追加しました。</li>
-                                    <li>獲得、または撃破することで図鑑に記録されます。</li>
-                                    <li>アイテムをタッチすると詳細な説明が表示されます。</li>
+                                    <li>状態リセット処理の安定性を向上させました。</li>
                                 </ul>
                             </section>
                         </div>
@@ -2116,10 +2116,29 @@ const App: React.FC = () => {
             )}
 
             {gameState.screen === GameScreen.GAME_OVER && (
-                 <div className="w-full h-full bg-red-900 flex items-center justify-center text-center text-white p-4">
-                    <div>
+                 <div className="w-full h-full bg-red-900 flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar">
+                    <div className="my-auto w-full max-w-2xl py-8">
                         <h1 className="text-6xl mb-4 font-bold">死亡</h1>
                         <p className="mb-8 text-2xl">Act {gameState.act} - Floor {gameState.floor}</p>
+                        
+                        {!legacyCardSelected ? (
+                            <div className="mb-8 shrink-0">
+                                <p className="mb-4 text-sm text-red-200 font-bold">次回の冒険に持っていくカードを1枚選んでください</p>
+                                <div className="flex flex-wrap justify-center gap-2 max-h-60 overflow-y-auto custom-scrollbar p-2 bg-black/30 rounded border border-red-700/50">
+                                    {gameState.player.deck.map(card => (
+                                        <div key={card.id} className="scale-75 cursor-pointer hover:scale-90 transition-transform" onClick={() => handleLegacyCardSelect(card)}>
+                                            <Card card={card} onClick={() => handleLegacyCardSelect(card)} disabled={false} />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="mb-8 p-4 bg-black/50 border border-gray-500 rounded-lg animate-in zoom-in shrink-0">
+                                <p className="text-gray-300 font-bold text-xl">遺志は継がれた...</p>
+                                <p className="text-sm text-gray-500 mt-1">次の冒険者が拾うことでしょう。</p>
+                            </div>
+                        )}
+
                         <div className="flex flex-col gap-4 items-center">
                             <button onClick={handleRetry} className="bg-black border-2 border-white px-8 py-3 cursor-pointer w-64 hover:bg-gray-800 flex items-center justify-center"><RotateCcw className="mr-2" size={20} /> 再挑戦</button>
                             <button onClick={returnToTitle} className="bg-gray-700 border-2 border-white px-8 py-3 cursor-pointer w-64 hover:bg-gray-600 flex items-center justify-center"><Home className="mr-2" size={20} /> タイトルへ戻る</button>
