@@ -328,7 +328,6 @@ const App: React.FC = () => {
   const [hasSave, setHasSave] = useState<boolean>(false);
   const [selectedCharName, setSelectedCharName] = useState<string>("戦士");
   const [legacyCardSelected, setLegacyCardSelected] = useState<boolean>(false);
-  const [isChallengeSetup, setIsChallengeSetup] = useState<boolean>(false);
   const [showDebugLog, setShowDebugLog] = useState<boolean>(false);
   
   // Debug Logic
@@ -628,10 +627,15 @@ const App: React.FC = () => {
   };
 
   const startChallengeGame = () => {
-      // Challenge Mode Setup
-      setGameState(prev => ({ ...prev, challengeMode: '1A1D' }));
-      setIsChallengeSetup(true);
-      startGame();
+      audioService.init();
+      audioService.playSound('select');
+      setLegacyCardSelected(false);
+      
+      setGameState(prev => ({
+          ...prev,
+          challengeMode: '1A1D',
+          screen: GameScreen.CHARACTER_SELECTION
+      }));
   };
 
   const startEndlessMode = () => {
@@ -656,14 +660,9 @@ const App: React.FC = () => {
           setIsLoading(true);
           audioService.init();
           audioService.playSound('select');
-          setLegacyCardSelected(false); // Reset legacy selection state
+          setLegacyCardSelected(false); 
           
-          if (isChallengeSetup) {
-              // Skip mode select if challenge
-              setGameState(prev => ({ ...prev, screen: GameScreen.CHARACTER_SELECTION }));
-          } else {
-              setGameState(prev => ({ ...prev, screen: GameScreen.MODE_SELECTION }));
-          }
+          setGameState(prev => ({ ...prev, screen: GameScreen.MODE_SELECTION, challengeMode: undefined }));
       } catch (e) {
           console.error("Start Game Error:", e);
           setErrorMessage("エラーが発生しました。");
@@ -679,12 +678,37 @@ const App: React.FC = () => {
 
   const handleCharacterSelect = (char: Character) => {
       setSelectedCharName(char.name);
-      const startingDeck = createDeck(char.deckTemplate);
       
-      // Load Legacy Card if exists
-      const legacyCard = storageService.getLegacyCard();
-      if (legacyCard) {
-          startingDeck.push({ ...legacyCard, id: `legacy-${Date.now()}` });
+      let startingDeck: ICard[] = [];
+
+      // 1A1D Logic
+      if (gameState.challengeMode === '1A1D') {
+          const validRarities = ['COMMON', 'UNCOMMON', 'RARE', 'LEGENDARY'];
+          const allCards = Object.values(CARDS_LIBRARY).filter(c => validRarities.includes(c.rarity) && c.type !== CardType.CURSE && c.type !== CardType.STATUS);
+          
+          const attacks = allCards.filter(c => c.type === CardType.ATTACK);
+          const skills = allCards.filter(c => c.type === CardType.SKILL);
+
+          if (attacks.length > 0 && skills.length > 0) {
+              const rAtk = attacks[Math.floor(Math.random() * attacks.length)];
+              const rSkl = skills[Math.floor(Math.random() * skills.length)];
+              startingDeck = [
+                  { ...rAtk, id: `1a1d-atk-${Date.now()}` },
+                  { ...rSkl, id: `1a1d-def-${Date.now()}` }
+              ];
+          } else {
+              // Fallback if something goes wrong with filtering
+              startingDeck = createDeck(char.deckTemplate);
+          }
+      } else {
+          // Standard Logic
+          startingDeck = createDeck(char.deckTemplate);
+          
+          // Load Legacy Card if exists
+          const legacyCard = storageService.getLegacyCard();
+          if (legacyCard) {
+              startingDeck.push({ ...legacyCard, id: `legacy-${Date.now()}` });
+          }
       }
 
       setGameState(prev => ({
@@ -1826,7 +1850,7 @@ const App: React.FC = () => {
     setShopCards([]);
     setEventData(null);
     setLegacyCardSelected(false); // Reset legacy state
-    setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
+    setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined }));
   };
 
   const handleLegacyCardSelect = (card: ICard) => {
@@ -2135,7 +2159,7 @@ const App: React.FC = () => {
                         ) : (
                             <div className="mb-8 p-4 bg-black/50 border border-gray-500 rounded-lg animate-in zoom-in shrink-0">
                                 <p className="text-gray-300 font-bold text-xl">遺志は継がれた...</p>
-                                <p className="text-sm text-gray-500 mt-1">次の冒険者が拾うことでしょう。</p>
+                                <p className="text-sm text-gray-500 mt-1">次の児童が拾うことでしょう。</p>
                             </div>
                         )}
 
