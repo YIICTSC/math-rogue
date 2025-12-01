@@ -1205,9 +1205,15 @@ const App: React.FC = () => {
           if (card.playCopies) hits += card.playCopies;
 
           for (let h = 0; h < hits; h++) {
+              if (enemies.length === 0) break; // FIX: Stop multi-hit loop if enemies are all dead
+
               let targets: Enemy[] = [];
               if (card.target === TargetType.ALL_ENEMIES) targets = enemies;
-              else if (card.target === TargetType.RANDOM_ENEMY) targets = [enemies[Math.floor(Math.random() * enemies.length)]];
+              else if (card.target === TargetType.RANDOM_ENEMY) {
+                  // FIX: Safely select random enemy
+                  const rIdx = Math.floor(Math.random() * enemies.length);
+                  if (enemies[rIdx]) targets = [enemies[rIdx]];
+              }
               else {
                   const target = enemies.find(e => e.id === prev.selectedEnemyId) || enemies[0];
                   if (target) targets = [target];
