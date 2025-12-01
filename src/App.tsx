@@ -2118,7 +2118,7 @@ const App: React.FC = () => {
             {gameState.screen === GameScreen.GAME_OVER && (
                  <div className="w-full h-full bg-red-900 flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar">
                     <div className="my-auto w-full max-w-2xl py-8">
-                        <h1 className="text-6xl mb-4 font-bold">死亡</h1>
+                        <h1 className="text-6xl mb-4 font-bold">宿題がふえた…</h1>
                         <p className="mb-8 text-2xl">Act {gameState.act} - Floor {gameState.floor}</p>
                         
                         {!legacyCardSelected ? (
