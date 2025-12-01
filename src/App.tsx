@@ -1,4 +1,6 @@
 
+
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -890,7 +892,7 @@ const App: React.FC = () => {
             }
             setShopCards(cards);
 
-            const allRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'SHOP' || r.rarity === 'COMMON' || r.rarity === 'RARE' || r.rarity === 'UNCOMMON');
+            const allRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'SHOP' || r.rarity === 'COMMON' || r.rarity === 'UNCOMMON' || r.rarity === 'RARE');
             const relicOptions = shuffle(allRelics).slice(0, 2);
             setShopRelics(relicOptions);
 
@@ -936,9 +938,6 @@ const App: React.FC = () => {
   };
 
   const handleSynthesizeCard = (c1: ICard, c2: ICard) => {
-      // ... (Synthesis Logic remains same)
-      // For brevity, using logic from existing file
-      
       const len1 = Math.floor(Math.random() * 3) + 2; 
       const len2 = Math.floor(Math.random() * 3) + 2; 
       const part1 = c1.name.substring(0, Math.min(len1, c1.name.length));
@@ -963,6 +962,11 @@ const App: React.FC = () => {
       const newNextTurnDraw = sum('nextTurnDraw');
       const newStrengthScaling = sum('strengthScaling');
       const newPoisonMultiplier = sum('poisonMultiplier');
+      
+      const newDamagePerCardInHand = sum('damagePerCardInHand');
+      const newDamagePerAttackPlayed = sum('damagePerAttackPlayed');
+      const newDamagePerStrike = sum('damagePerStrike');
+      const newDamagePerCardInDraw = sum('damagePerCardInDraw');
 
       const newExhaust = c1.exhaust || c2.exhaust;
       const newInnate = c1.innate || c2.innate;
@@ -1008,6 +1012,8 @@ const App: React.FC = () => {
       if (newTarget === TargetType.ALL_ENEMIES) parts.push("全体");
       if (newTarget === TargetType.RANDOM_ENEMY) parts.push("ランダム");
       if (newDamage > 0) parts.push(`${newDamage}ダメ`);
+      if (newDamagePerCardInHand > 0) parts.push(`手札数x${newDamagePerCardInHand}ダメ`);
+      if (newDamagePerCardInDraw > 0) parts.push(`山札数x${newDamagePerCardInDraw}ダメ`);
       if (newPlayCopies > 0) parts.push(`${newPlayCopies + 1}回攻撃`);
       if (newBlock > 0) parts.push(`ブロック${newBlock}`);
       if (newPoison > 0) parts.push(`毒${newPoison}`);
@@ -1059,6 +1065,10 @@ const App: React.FC = () => {
           nextTurnDraw: newNextTurnDraw > 0 ? newNextTurnDraw : undefined,
           strengthScaling: newStrengthScaling > 0 ? newStrengthScaling : undefined,
           poisonMultiplier: newPoisonMultiplier > 0 ? newPoisonMultiplier : undefined,
+          damagePerCardInHand: newDamagePerCardInHand > 0 ? newDamagePerCardInHand : undefined,
+          damagePerAttackPlayed: newDamagePerAttackPlayed > 0 ? newDamagePerAttackPlayed : undefined,
+          damagePerStrike: newDamagePerStrike > 0 ? newDamagePerStrike : undefined,
+          damagePerCardInDraw: newDamagePerCardInDraw > 0 ? newDamagePerCardInDraw : undefined,
           exhaust: newExhaust,
           innate: newInnate,
           unplayable: newUnplayable,
@@ -1157,7 +1167,13 @@ const App: React.FC = () => {
   };
 
   const handlePlayCard = (card: ICard) => {
-    if (gameState.player.currentEnergy < card.cost) return;
+    // Determine effective cost (Corruption Logic Fix)
+    let effectiveCost = card.cost;
+    if (gameState.player.powers['CORRUPTION'] && card.type === CardType.SKILL) {
+        effectiveCost = 0;
+    }
+
+    if (gameState.player.currentEnergy < effectiveCost) return;
     if (gameState.enemies.length === 0) return;
     if (actingEnemyId) return; 
     if (gameState.selectionState.active) return;
@@ -1171,7 +1187,13 @@ const App: React.FC = () => {
       const p = { ...prev.player, hand: [...prev.player.hand], drawPile: [...prev.player.drawPile], discardPile: [...prev.player.discardPile], deck: [...prev.player.deck], powers: { ...prev.player.powers } };
       let enemies = prev.enemies.map(e => ({ ...e }));
       
-      p.currentEnergy -= card.cost;
+      // Pay Cost (Corruption Logic Fix)
+      let costToPay = card.cost;
+      if (p.powers['CORRUPTION'] && card.type === CardType.SKILL) {
+          costToPay = 0;
+      }
+      p.currentEnergy -= costToPay;
+
       p.cardsPlayedThisTurn++;
       if (card.type === CardType.ATTACK) p.attacksPlayedThisTurn++;
 
@@ -1226,7 +1248,7 @@ const App: React.FC = () => {
                   if (target) targets = [target];
               }
 
-              if (card.damage || card.damageBasedOnBlock || card.damagePerCardInHand || card.damagePerAttackPlayed || card.damagePerStrike) {
+              if (card.damage || card.damageBasedOnBlock || card.damagePerCardInHand || card.damagePerAttackPlayed || card.damagePerStrike || card.damagePerCardInDraw) {
                 targets.forEach(e => {
                     let strengthBonus = p.strength * (card.strengthScaling || 1);
                     let baseDamage = (card.damage || 0);
@@ -1234,6 +1256,7 @@ const App: React.FC = () => {
                     if (card.damagePerCardInHand) baseDamage += (p.hand.filter(c => c.id !== card.id).length) * card.damagePerCardInHand!;
                     if (card.damagePerAttackPlayed) baseDamage += (p.attacksPlayedThisTurn - 1) * card.damagePerAttackPlayed!;
                     if (card.damagePerStrike) baseDamage += (p.deck.filter(c => c.name.includes('ストライク') || c.name.includes('STRIKE')).length) * card.damagePerStrike!;
+                    if (card.damagePerCardInDraw) baseDamage += p.drawPile.length * card.damagePerCardInDraw!;
 
                     let damage = baseDamage + strengthBonus;
                     if (e.vulnerable > 0) damage = Math.floor(damage * 1.5);
@@ -1327,6 +1350,15 @@ const App: React.FC = () => {
               }
               if (card.nextTurnEnergy) p.nextTurnEnergy += card.nextTurnEnergy;
               if (card.nextTurnDraw) p.nextTurnDraw += card.nextTurnDraw;
+
+              // Implement MADNESS effect (previously missing)
+              if (card.name === 'パニック' || card.name === 'MADNESS') {
+                  const eligible = p.hand.filter(c => c.id !== card.id && c.cost > 0);
+                  if (eligible.length > 0) {
+                      const target = eligible[Math.floor(Math.random() * eligible.length)];
+                      target.cost = 0;
+                  }
+              }
 
               enemies = enemies.filter(e => e.currentHp > 0);
           }

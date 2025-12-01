@@ -1,5 +1,6 @@
 
 
+
 import { Card, CardType, TargetType, Relic, Potion, Character } from './types';
 
 export const INITIAL_HP = 75;
@@ -457,7 +458,7 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
   FLECHETTES: { name: '画鋲投げ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '4ダメージ。手札のスキル枚数分攻撃。', damage: 4, rarity: 'RARE' }, 
   RIDDLE_WITH_HOLES: { name: '蜂の巣', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '3ダメージを5回。', damage: 3, playCopies: 4, rarity: 'RARE' },
   GRAND_FINALE: { name: '卒業式', cost: 0, type: CardType.ATTACK, target: TargetType.ALL_ENEMIES, description: '全体50ダメージ。山札0の時のみ。', damage: 50, rarity: 'LEGENDARY' }, 
-  MIND_BLAST: { name: '知識の爆発', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '山札の枚数分ダメージ。', damage: 0, innate: true, rarity: 'RARE' }, 
+  MIND_BLAST: { name: '知識の爆発', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '山札の枚数分ダメージ。', damage: 0, damagePerCardInDraw: 1, innate: true, rarity: 'RARE' }, 
 
   // RARE / UNCOMMON SKILLS
   ENTRENCH: { name: 'バリケード', cost: 2, type: CardType.SKILL, target: TargetType.SELF, description: '現在のブロック値を2倍にする。', doubleBlock: true, rarity: 'RARE' },
