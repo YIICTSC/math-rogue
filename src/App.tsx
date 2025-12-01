@@ -1986,7 +1986,12 @@ const App: React.FC = () => {
             )}
 
             {gameState.screen === GameScreen.CHARACTER_SELECTION && (
-                <CharacterSelectionScreen characters={CHARACTERS} unlockedCount={Math.min(CHARACTERS.length, clearCount + 2)} onSelect={handleCharacterSelect} />
+                <CharacterSelectionScreen 
+                    characters={CHARACTERS} 
+                    unlockedCount={Math.min(CHARACTERS.length, clearCount + 2)} 
+                    onSelect={handleCharacterSelect} 
+                    challengeMode={gameState.challengeMode}
+                />
             )}
 
             {gameState.screen === GameScreen.RELIC_SELECTION && (

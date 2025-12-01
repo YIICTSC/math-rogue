@@ -8,9 +8,10 @@ interface CharacterSelectionScreenProps {
   characters: Character[];
   unlockedCount: number;
   onSelect: (character: Character) => void;
+  challengeMode?: string;
 }
 
-const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ characters, unlockedCount, onSelect }) => {
+const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ characters, unlockedCount, onSelect, challengeMode }) => {
   return (
     <div className="flex flex-col h-full w-full bg-gray-900 text-white relative overflow-hidden">
       
@@ -19,7 +20,14 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
             <h2 className="text-3xl md:text-4xl text-yellow-400 font-bold mb-2 flex items-center justify-center animate-pulse">
              主人公選択
             </h2>
-            <p className="text-sm text-gray-400">冒険に挑むキャラクターを選んでください</p>
+            {challengeMode === '1A1D' ? (
+                <div className="bg-red-900/50 border border-red-500 p-2 rounded inline-block animate-in fade-in zoom-in duration-300">
+                    <p className="text-sm text-red-200 font-bold mb-1">【1A1Dモード】</p>
+                    <p className="text-xs text-red-100">初期レリックのみ所持。デッキはランダムなアタック1枚・スキル1枚でスタート。</p>
+                </div>
+            ) : (
+                <p className="text-sm text-gray-400">冒険に挑むキャラクターを選んでください</p>
+            )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl pb-20">
@@ -93,12 +101,18 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
 
                         {/* Deck Preview (Compact) */}
                         <div className="w-full bg-black/40 rounded p-2 mb-4">
-                            <div className="text-[10px] text-gray-400 mb-1">得意なカード</div>
+                            <div className="text-[10px] text-gray-400 mb-1">
+                                {challengeMode === '1A1D' ? '初期デッキ (1A1D)' : '得意なカード'}
+                            </div>
                             <div className="text-xs text-white leading-relaxed truncate">
-                                {Array.from(new Set(char.deckTemplate)).filter((id: string) => !['STRIKE','DEFEND'].includes(id)).map((cardId: string) => {
-                                    const card = CARDS_LIBRARY[cardId];
-                                    return card ? card.name : '';
-                                }).join(', ') || '基本カードのみ'}
+                                {challengeMode === '1A1D' ? (
+                                    <span className="text-red-300 font-bold">ランダムなアタック x1, スキル x1</span>
+                                ) : (
+                                    Array.from(new Set(char.deckTemplate)).filter((id: string) => !['STRIKE','DEFEND'].includes(id)).map((cardId: string) => {
+                                        const card = CARDS_LIBRARY[cardId];
+                                        return card ? card.name : '';
+                                    }).join(', ') || '基本カードのみ'
+                                )}
                             </div>
                         </div>
 
