@@ -1,6 +1,7 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList } from 'lucide-react';
+import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { 
@@ -145,6 +146,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       handsRemaining: 4,
       discardsRemaining: 3,
       hand: [],
+      discardPile: [],
       shopInventory: []
   });
 
@@ -153,6 +155,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   const [animating, setAnimating] = useState(false);
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
   const [showHandList, setShowHandList] = useState(false);
+  const [showDeckList, setShowDeckList] = useState(false);
   
   // Consumable Usage
   const [selectedConsumable, setSelectedConsumable] = useState<PokerConsumable | null>(null);
@@ -189,6 +192,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           handsRemaining: 4,
           discardsRemaining: 3,
           hand: [],
+          discardPile: [],
           shopInventory: []
   });
       setPhase('BLIND_SELECT');
@@ -206,6 +210,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           ...prev,
           deck, // Remaining deck
           hand,
+          discardPile: [],
           currentScore: 0,
           handsRemaining: prev.currentBlind.bossAbility === 'THE_NEEDLE' ? 1 : 4,
           discardsRemaining: 3
@@ -339,15 +344,17 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
 
       const newScore = runState.currentScore + score;
       
-      // Discard played
+      // Move played cards to discardPile
       let newHand = runState.hand.filter(c => !selectedCards.includes(c.id));
       let currentDeck = [...runState.deck];
+      let newDiscardPile = [...runState.discardPile, ...playedCards];
       
       // Boss: The Hook (Discard random)
       if (runState.currentBlind.bossAbility === 'THE_HOOK') {
           if (newHand.length > 0) {
               newHand.sort(() => Math.random() - 0.5);
-              newHand.splice(0, 2); 
+              const hookDiscarded = newHand.splice(0, 2);
+              newDiscardPile.push(...hookDiscarded);
           }
       }
 
@@ -365,6 +372,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           currentScore: newScore,
           hand: newHand,
           deck: currentDeck,
+          discardPile: newDiscardPile,
           handsRemaining: prev.handsRemaining - 1
       }));
       setSelectedCards([]);
@@ -385,8 +393,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   const discardHand = () => {
       if (animating || selectedCards.length === 0 || runState.discardsRemaining <= 0) return;
       
+      const discardedCards = runState.hand.filter(c => selectedCards.includes(c.id));
       let newHand = runState.hand.filter(c => !selectedCards.includes(c.id));
       let currentDeck = [...runState.deck];
+      let newDiscardPile = [...runState.discardPile, ...discardedCards];
       
       // Draw
       const drawCount = 8 - newHand.length;
@@ -401,6 +411,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           ...prev,
           hand: newHand,
           deck: currentDeck,
+          discardPile: newDiscardPile,
           discardsRemaining: prev.discardsRemaining - 1
       }));
       setSelectedCards([]);
@@ -418,7 +429,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       setRunState(prev => ({
           ...prev,
           money: newMoney,
-          deck: [...prev.deck, ...prev.hand] // Return cards to deck
+          // Restore Deck: Combine remaining deck + current hand + discard pile
+          deck: [...prev.deck, ...prev.hand, ...prev.discardPile],
+          hand: [],
+          discardPile: []
       }));
 
       // Check for Game Victory
@@ -533,7 +547,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           setRunState(prev => ({
               ...prev,
               hand: prev.hand.filter(c => !selectedCards.includes(c.id)), // Remove from hand
-              deck: prev.deck, // It's gone
+              deck: prev.deck, // It's gone from draw pile (well, effectively removed from game)
+              // NOTE: Cards removed here are NOT added to discardPile, so they are permanently gone.
               consumables: prev.consumables.filter(c => c !== selectedConsumable)
           }));
       } else {
@@ -788,6 +803,25 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
             </div>
         )}
 
+        {/* Deck List Modal */}
+        {showDeckList && (
+            <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowDeckList(false)}>
+                <div className="bg-slate-800 border-4 border-slate-600 rounded-lg p-6 w-full max-w-4xl max-h-[80vh] overflow-y-auto relative shadow-2xl" onClick={e => e.stopPropagation()}>
+                    <button onClick={() => setShowDeckList(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
+                    <h2 className="text-2xl font-bold text-white mb-4 flex items-center"><Layers className="mr-2"/> Deck List ({runState.deck.length + runState.hand.length + runState.discardPile.length})</h2>
+                    <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2">
+                        {[...runState.deck, ...runState.hand, ...runState.discardPile].sort((a,b) => b.rank - a.rank).map((card) => (
+                            <div key={card.id} className="bg-gray-100 rounded p-1 flex flex-col items-center justify-center h-16 w-10 text-xs">
+                                <div className="text-black font-bold">{getRankDisplay(card.rank)}</div>
+                                <div className="scale-75">{getSuitIcon(card.suit)}</div>
+                                {card.enhancement && <div className="text-[8px] text-purple-600 font-bold uppercase">{card.enhancement}</div>}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        )}
+
         {/* Top Info Bar */}
         <div className="flex justify-between items-start p-2 md:p-4 bg-black/60 z-20 shadow-md shrink-0">
             <div className="flex flex-col items-start bg-slate-800 p-2 rounded border border-slate-600 w-32 md:w-48 shadow-lg">
@@ -800,6 +834,13 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
             </div>
 
             <div className="flex items-center gap-2">
+                <button 
+                    onClick={() => { setShowDeckList(true); audioService.playSound('select'); }}
+                    className="bg-slate-700 hover:bg-slate-600 p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-14 h-14"
+                >
+                    <Layers size={20}/>
+                    <span className="text-[10px] mt-1">デッキ</span>
+                </button>
                 <button 
                     onClick={() => { setShowHandList(true); audioService.playSound('select'); }}
                     className="bg-slate-700 hover:bg-slate-600 p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-14 h-14"

@@ -362,6 +362,7 @@ export interface PokerRunState {
     handsRemaining: number;
     discardsRemaining: number;
     hand: PokerCard[];
+    discardPile: PokerCard[]; // Add discardPile to track cards during blind
     
     // Shop state
     shopInventory: (PokerSupporter | PokerConsumable)[];
