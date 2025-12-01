@@ -2416,7 +2416,7 @@ const App: React.FC = () => {
                             </button>
                             
                             <button onClick={startChallengeGame} disabled={isLoading} className="w-full bg-red-900/80 text-red-100 py-2 px-4 text-sm font-bold border border-red-500 hover:bg-red-800 cursor-pointer flex items-center justify-center mb-2 shadow-md hover:shadow-red-900/50">
-                                <Swords className="mr-2" size={16}/> 1A1Dモード (高難易度)
+                                <Swords className="mr-2" size={16}/> 1A1Dモード
                             </button>
 
                             <div className="flex gap-2 w-full justify-between">
@@ -2680,7 +2680,7 @@ const App: React.FC = () => {
                         ) : (
                             <div className="mb-8 p-4 bg-black/50 border border-gray-500 rounded-lg animate-in zoom-in shrink-0">
                                 <p className="text-gray-300 font-bold text-xl">遺志は継がれた...</p>
-                                <p className="text-sm text-gray-500 mt-1">次の児童が拾うことでしょう。</p>
+                                <p className="text-sm text-gray-500 mt-1">次の児童が拾うことになる。</p>
                             </div>
                         )}
 
