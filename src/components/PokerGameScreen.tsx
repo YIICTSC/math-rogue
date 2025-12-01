@@ -160,6 +160,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   // Sorting
   const [sortRankAsc, setSortRankAsc] = useState(false);
 
+  // Drag/Swipe Select
+  const isDraggingRef = useRef(false);
+  const lastProcessedCardIdRef = useRef<string | null>(null);
+
   // --- Initialization ---
   useEffect(() => {
       initRun();
@@ -182,7 +186,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           discardsRemaining: 3,
           hand: [],
           shopInventory: []
-      });
+  });
       setPhase('BLIND_SELECT');
       audioService.playBGM('menu');
   };
@@ -209,6 +213,11 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   // --- Play Logic ---
   const toggleSelect = (id: string) => {
       if (animating) return;
+      
+      // Prevent rapidly toggling the same card in a single drag event
+      // However, if we click, we want to toggle.
+      // logic is handled in handlers.
+      
       if (selectedCards.includes(id)) {
           setSelectedCards(prev => prev.filter(c => c !== id));
       } else {
@@ -217,6 +226,36 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
               audioService.playSound('select');
           }
       }
+  };
+
+  // --- Swipe / Drag Handlers ---
+  const handlePointerDown = (e: React.PointerEvent, id: string) => {
+      e.preventDefault(); // Prevent text selection etc.
+      isDraggingRef.current = true;
+      lastProcessedCardIdRef.current = id;
+      toggleSelect(id);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+      if (!isDraggingRef.current) return;
+      e.preventDefault();
+
+      // Find element under cursor/touch
+      const element = document.elementFromPoint(e.clientX, e.clientY);
+      const cardContainer = element?.closest('[data-card-id]');
+      
+      if (cardContainer) {
+          const id = cardContainer.getAttribute('data-card-id');
+          if (id && id !== lastProcessedCardIdRef.current) {
+              lastProcessedCardIdRef.current = id;
+              toggleSelect(id);
+          }
+      }
+  };
+
+  const handlePointerUp = () => {
+      isDraggingRef.current = false;
+      lastProcessedCardIdRef.current = null;
   };
 
   const sortHandRank = () => {
@@ -710,34 +749,22 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
             )}
         </div>
 
-        {/* Sort Controls */}
-        <div className="absolute bottom-40 md:bottom-56 right-4 md:right-10 flex gap-2 z-30">
-            <button 
-                onClick={sortHandRank}
-                className="bg-orange-600 hover:bg-orange-500 text-white px-3 py-2 rounded font-bold text-xs flex items-center shadow-lg border-2 border-orange-800"
-            >
-                {sortRankAsc ? <ArrowUpNarrowWide size={16} className="mr-1"/> : <ArrowDownWideNarrow size={16} className="mr-1"/>}
-                Rank
-            </button>
-            <button 
-                onClick={sortHandSuit}
-                className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded font-bold text-xs flex items-center shadow-lg border-2 border-blue-800"
-            >
-                <LayoutList size={16} className="mr-1"/>
-                Suit
-            </button>
-        </div>
-
-        {/* Hand Area */}
-        <div className="h-40 md:h-56 w-full flex justify-center items-end pb-4 gap-[-20px]">
+        {/* Hand Area (With Drag/Trace Support) */}
+        <div 
+            className="h-40 md:h-56 w-full flex justify-center items-end pb-4 gap-[-20px] touch-none select-none"
+            onPointerLeave={handlePointerUp}
+            onPointerUp={handlePointerUp}
+            onPointerMove={handlePointerMove}
+        >
             {runState.hand.map((card, idx) => {
                 const isSelected = selectedCards.includes(card.id);
                 return (
                     <div 
                         key={card.id}
-                        onClick={() => toggleSelect(card.id)}
+                        data-card-id={card.id}
+                        onPointerDown={(e) => handlePointerDown(e, card.id)}
                         className={`
-                            w-20 h-32 md:w-28 md:h-40 bg-gray-100 rounded-lg border-2 shadow-xl flex flex-col items-center justify-between p-2 cursor-pointer transition-transform duration-200 select-none -ml-4 first:ml-0 relative
+                            w-20 h-32 md:w-28 md:h-40 bg-gray-100 rounded-lg border-2 shadow-xl flex flex-col items-center justify-between p-2 cursor-pointer transition-transform duration-200 -ml-4 first:ml-0 relative
                             ${isSelected ? '-translate-y-6 z-20 border-yellow-400 ring-2 ring-yellow-400' : 'border-gray-400 hover:-translate-y-2 z-10'}
                             ${selectedConsumable ? 'hover:ring-2 hover:ring-purple-400' : ''}
                         `}
@@ -754,7 +781,25 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
             })}
         </div>
 
-        {/* Controls */}
+        {/* Sort Controls (Moved Below Cards) */}
+        <div className="flex justify-center gap-4 my-2 z-30">
+            <button 
+                onClick={sortHandRank}
+                className="bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-full font-bold text-xs flex items-center shadow-lg border-2 border-orange-800"
+            >
+                {sortRankAsc ? <ArrowUpNarrowWide size={16} className="mr-1"/> : <ArrowDownWideNarrow size={16} className="mr-1"/>}
+                Rank
+            </button>
+            <button 
+                onClick={sortHandSuit}
+                className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-full font-bold text-xs flex items-center shadow-lg border-2 border-blue-800"
+            >
+                <LayoutList size={16} className="mr-1"/>
+                Suit
+            </button>
+        </div>
+
+        {/* Main Controls */}
         <div className="bg-slate-800 p-2 md:p-4 flex justify-center gap-4 z-20 shadow-up">
             <button 
                 onClick={playHand} 
