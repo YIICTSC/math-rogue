@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, RotateCcw, Play, X, Trophy, AlertCircle, Club, Diamond, Heart, Spade, HelpCircle, ArrowUpDown, Layers } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -40,7 +41,7 @@ interface ScoringContext {
 }
 
 // --- Constants ---
-const SUITS: Suit[] = ['SPADE', 'HEART', 'DIAMOND', 'CLUB'];
+const SUITS: Suit[] = ['SPADE' | 'HEART' | 'DIAMOND' | 'CLUB'];
 const RANKS: Rank[] = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
 
 const HAND_TYPES: Record<string, HandResult> = {
@@ -477,8 +478,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                     key={card.id}
                     onClick={() => toggleSelect(card.id)}
                     className={`
-                        w-16 h-24 md:w-24 md:h-36 bg-gray-100 rounded-lg border-2 shadow-xl flex flex-col items-center justify-between p-1 md:p-2 cursor-pointer transition-transform duration-200 select-none -ml-6 md:-ml-8 first:ml-0 hover:z-20 relative
-                        ${card.isSelected ? '-translate-y-4 md:-translate-y-6 z-10 border-yellow-400 ring-2 ring-yellow-400' : 'border-gray-300 hover:-translate-y-2'}
+                        w-16 h-24 md:w-24 md:h-36 bg-gray-100 rounded-lg border-2 shadow-xl flex flex-col items-center justify-between p-1 md:p-2 cursor-pointer transition-transform duration-200 select-none -ml-6 md:-ml-8 first:ml-0 hover:z-20 relative shrink-0
+                        ${card.isSelected ? '-translate-y-4 md:-translate-y-6 border-yellow-400 ring-2 ring-yellow-400' : 'border-gray-300 hover:-translate-y-2'}
                     `}
                   >
                       {/* Top Left */}
