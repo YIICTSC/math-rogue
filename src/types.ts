@@ -297,7 +297,7 @@ export interface PokerCard {
   isSelected: boolean;
   bonusChips: number;
   multMultiplier: number;
-  enhancement?: 'BONUS' | 'MULT' | 'WILD' | 'STONE' | 'GLASS' | 'GOLD' | 'STEEL' | 'LUCKY';
+  enhancement?: 'BONUS' | 'MULT' | 'WILD' | 'STONE' | 'GLASS' | 'GOLD' | 'STEEL';
 }
 
 export interface PokerHandResult {
@@ -307,27 +307,13 @@ export interface PokerHandResult {
   level: number;
 }
 
-// Scoring Event for Animation Sequence
-export type ScoreEventType = 'BASE' | 'CARD' | 'SUPPORTER' | 'HELD_CARD' | 'TOTAL';
-
-export interface ScoreEvent {
-    type: ScoreEventType;
-    sourceName?: string;
-    sourceId?: string; // For highlighting card/supporter
-    addChips?: number;
-    addMult?: number;
-    multMult?: number; // Multiplicative Mult (x1.5 etc)
-    message?: string; // "+10 Chips", "x1.5 Mult"
-}
-
 export interface PokerSupporter { // Joker
   id: string;
   name: string;
   description: string;
   rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'LEGENDARY';
   price: number;
-  // Effect modified to push to event queue instead of direct mutation
-  effect: (ctx: PokerScoringContext, queue: ScoreEvent[]) => void;
+  effect: (ctx: PokerScoringContext) => void;
   icon: string;
   triggerOn?: 'HAND_PLAYED' | 'DISCARD' | 'HELD_IN_HAND';
 }
@@ -346,15 +332,15 @@ export interface PokerPack {
     name: string;
     description: string;
     price: number;
-    type: 'STANDARD' | 'BUFF' | 'SUPPORTER' | 'SPECTRAL';
+    type: 'STANDARD' | 'BUFF' | 'SUPPORTER';
     size: number; // How many cards revealed
     choose: number; // How many to pick
     icon: string;
 }
 
 export interface PokerScoringContext {
-  chips: number; // Current running total
-  mult: number;  // Current running total
+  chips: number;
+  mult: number;
   handType: string;
   cards: PokerCard[];
   handsPlayed: number;
