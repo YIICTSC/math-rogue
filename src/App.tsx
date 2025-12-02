@@ -1572,7 +1572,7 @@ const App: React.FC = () => {
                                 <Club className="mr-2" size={16}/> ミニゲーム：放課後ポーカー
                             </button>
 
-                            {(isDebugHpOne || isMathDebugSkipped) && (
+                            {isDebugHpOne && (
                                 <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.DEBUG_MENU }))} className="w-full bg-gray-800 text-red-400 py-2 px-4 text-sm font-bold border border-red-500 hover:bg-gray-700 cursor-pointer flex items-center justify-center shadow-md mb-2">
                                     <Zap className="mr-2" size={16}/> デバッグメニュー
                                 </button>
