@@ -1,9 +1,9 @@
 
 import React, { useMemo, useState } from 'react';
 import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY } from '../constants';
-import { Card as ICard, Relic, Potion, CardType } from '../types';
+import { Card as ICard, Relic, Potion, CardType, TargetType } from '../types';
 import Card from './Card';
-import { ArrowRight, Trash2, Plus, Gem, FlaskConical, Swords, Shield, Zap, Search } from 'lucide-react';
+import { ArrowRight, Trash2, Plus, Gem, FlaskConical, Swords, Shield, Zap, Search, Beaker, RotateCcw } from 'lucide-react';
 
 interface DebugMenuScreenProps {
   onStart: (deck: ICard[], relics: Relic[], potions: Potion[]) => void;
@@ -11,13 +11,18 @@ interface DebugMenuScreenProps {
 }
 
 const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) => {
-  const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS'>('CARDS');
+  const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS'>('CARDS');
   const [searchTerm, setSearchTerm] = useState("");
   
   // Selection State
   const [selectedDeck, setSelectedDeck] = useState<ICard[]>([]);
   const [selectedRelics, setSelectedRelics] = useState<Relic[]>([]);
   const [selectedPotions, setSelectedPotions] = useState<Potion[]>([]);
+
+  // Synthesis State
+  const [synthSlot1, setSynthSlot1] = useState<ICard | null>(null);
+  const [synthSlot2, setSynthSlot2] = useState<ICard | null>(null);
+  const [synthResult, setSynthResult] = useState<ICard | null>(null);
 
   // Libraries
   const allCards = useMemo(() => Object.values(CARDS_LIBRARY).sort((a, b) => a.type.localeCompare(b.type) || a.cost - b.cost), []);
@@ -32,7 +37,13 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
 
   const handleAddCard = (template: any) => {
       const newCard: ICard = { ...template, id: `debug-${Date.now()}-${Math.random()}` };
-      setSelectedDeck([...selectedDeck, newCard]);
+      
+      if (activeTab === 'SYNTHESIS') {
+          if (!synthSlot1) setSynthSlot1(newCard);
+          else if (!synthSlot2) setSynthSlot2(newCard);
+      } else {
+          setSelectedDeck([...selectedDeck, newCard]);
+      }
   };
 
   const handleRemoveCard = (index: number) => {
@@ -50,9 +61,6 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
   };
 
   const togglePotion = (potionTemplate: any) => {
-      // For potions, we create instances. Simple toggle doesn't work well if we want multiples, 
-      // but let's stick to unique types or max 3 for simplicity in debug.
-      // Actually, let's just allow adding up to 3.
       if (selectedPotions.length >= 3) return;
       const newPotion: Potion = { ...potionTemplate, id: `debug-pot-${Date.now()}` };
       setSelectedPotions([...selectedPotions, newPotion]);
@@ -65,6 +73,103 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
   };
 
   const clearDeck = () => setSelectedDeck([]);
+
+  // --- Synthesis Logic (Duplicated from App.tsx/RestScreen for Debug) ---
+  const performSynthesis = () => {
+      if (!synthSlot1 || !synthSlot2) return;
+      const c1 = synthSlot1;
+      const c2 = synthSlot2;
+
+      const len1 = Math.floor(Math.random() * 3) + 2; 
+      const len2 = Math.floor(Math.random() * 3) + 2; 
+      const part1 = c1.name.substring(0, Math.min(len1, c1.name.length));
+      const part2 = c2.name.substring(Math.max(0, c2.name.length - len2));
+      const newName = part1 + part2;
+      const newCost = Math.max(c1.cost, c2.cost);
+      
+      // Sum numeric stats
+      const sum = (k: keyof ICard) => ((c1[k] as number) || 0) + ((c2[k] as number) || 0);
+      const newDamage = sum('damage');
+      const newBlock = sum('block');
+      const newDraw = sum('draw');
+      const newEnergy = sum('energy');
+      const newHeal = sum('heal');
+      const newPoison = sum('poison');
+      const newWeak = sum('weak');
+      const newVulnerable = sum('vulnerable');
+      const newStrength = sum('strength');
+      const newSelfDamage = sum('selfDamage');
+
+      // Merge booleans
+      const newExhaust = c1.exhaust || c2.exhaust;
+      const newInnate = c1.innate || c2.innate;
+
+      // Determine Type & Target
+      let newType = c1.type;
+      if (newDamage > 0) newType = CardType.ATTACK;
+      else if (c1.type === CardType.POWER || c2.type === CardType.POWER) newType = CardType.POWER;
+      else newType = CardType.SKILL;
+
+      let newTarget = TargetType.ENEMY;
+      if (c1.target === TargetType.ALL_ENEMIES || c2.target === TargetType.ALL_ENEMIES) newTarget = TargetType.ALL_ENEMIES;
+      else if (c1.target === TargetType.RANDOM_ENEMY || c2.target === TargetType.RANDOM_ENEMY) newTarget = TargetType.RANDOM_ENEMY;
+      else if (c1.target === TargetType.SELF || c2.target === TargetType.SELF) newTarget = TargetType.SELF;
+      
+      if ((newDamage > 0 || newPoison > 0 || newWeak > 0 || newVulnerable > 0) && newTarget === TargetType.SELF) {
+          newTarget = TargetType.ENEMY;
+      }
+
+      // Generate Description
+      const parts: string[] = [];
+      if (newDamage > 0) {
+          if (newTarget === TargetType.ALL_ENEMIES) parts.push(`全体に${newDamage}ダメージ`);
+          else if (newTarget === TargetType.RANDOM_ENEMY) parts.push(`ランダムな敵に${newDamage}ダメージ`);
+          else parts.push(`${newDamage}ダメージ`);
+      }
+      if (newBlock > 0) parts.push(`ブロック${newBlock}`);
+      if (newPoison > 0) parts.push(`ドクドク${newPoison}`);
+      if (newWeak > 0) parts.push(`へろへろ${newWeak}`);
+      if (newVulnerable > 0) parts.push(`びくびく${newVulnerable}`);
+      if (newStrength > 0) parts.push(`ムキムキ${newStrength}`);
+      if (newDraw > 0) parts.push(`${newDraw}枚引く`);
+      if (newEnergy > 0) parts.push(`E${newEnergy}を得る`);
+      if (newHeal > 0) parts.push(`HP${newHeal}回復`);
+      if (newSelfDamage > 0) parts.push(`自分に${newSelfDamage}ダメージ`);
+      
+      let description = parts.join("。") + (parts.length > 0 ? "。" : "");
+      if (parts.length === 0) description = "効果なし。";
+
+      const newCard: ICard = {
+          id: `synth-debug-${Date.now()}`,
+          name: newName,
+          cost: newCost,
+          type: newType,
+          target: newTarget,
+          description: description,
+          rarity: 'SPECIAL',
+          damage: newDamage || undefined,
+          block: newBlock || undefined,
+          draw: newDraw || undefined,
+          energy: newEnergy || undefined,
+          heal: newHeal || undefined,
+          poison: newPoison || undefined,
+          weak: newWeak || undefined,
+          vulnerable: newVulnerable || undefined,
+          strength: newStrength || undefined,
+          selfDamage: newSelfDamage || undefined,
+          exhaust: newExhaust,
+          innate: newInnate,
+          textureRef: c1.textureRef || c1.name 
+      };
+
+      setSynthResult(newCard);
+  };
+
+  const addSynthToDeck = () => {
+      if (synthResult) {
+          setSelectedDeck([...selectedDeck, { ...synthResult, id: `synth-added-${Date.now()}` }]);
+      }
+  };
 
   return (
     <div className="flex flex-col h-full w-full bg-gray-900 text-white relative">
@@ -85,18 +190,84 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
         </div>
 
         <div className="flex flex-grow overflow-hidden">
-            {/* Left Panel: Library */}
+            {/* Left Panel: Library & Synthesis */}
             <div className="w-1/2 md:w-2/3 border-r border-gray-700 flex flex-col bg-gray-800/50">
                 {/* Tabs */}
                 <div className="flex bg-gray-800 border-b border-gray-700">
                     <button onClick={() => setActiveTab('CARDS')} className={`flex-1 py-3 font-bold ${activeTab === 'CARDS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>CARDS</button>
                     <button onClick={() => setActiveTab('RELICS')} className={`flex-1 py-3 font-bold ${activeTab === 'RELICS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>RELICS</button>
                     <button onClick={() => setActiveTab('POTIONS')} className={`flex-1 py-3 font-bold ${activeTab === 'POTIONS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>POTIONS</button>
+                    <button onClick={() => setActiveTab('SYNTHESIS')} className={`flex-1 py-3 font-bold ${activeTab === 'SYNTHESIS' ? 'bg-purple-900 text-white' : 'text-purple-400 hover:bg-gray-750'}`}>SYNTHESIS</button>
                 </div>
 
                 {/* Content */}
                 <div className="flex-grow overflow-y-auto p-4 custom-scrollbar">
-                    {activeTab === 'CARDS' && (
+                    
+                    {activeTab === 'SYNTHESIS' && (
+                        <div className="mb-8 border-b-2 border-purple-500 pb-4">
+                            <h3 className="text-purple-300 font-bold mb-4 flex items-center"><Beaker className="mr-2"/> SYNTHESIS LAB</h3>
+                            <div className="flex items-center justify-center gap-4 mb-4 bg-black/40 p-4 rounded-xl">
+                                <div className="flex flex-col items-center">
+                                    <div 
+                                        className="w-24 h-36 border-2 border-dashed border-gray-500 rounded flex items-center justify-center cursor-pointer hover:border-purple-400 bg-gray-900"
+                                        onClick={() => setSynthSlot1(null)}
+                                    >
+                                        {synthSlot1 ? (
+                                            <div className="scale-75 pointer-events-none"><Card card={synthSlot1} onClick={()=>{}} disabled={false}/></div>
+                                        ) : (
+                                            <span className="text-gray-600 text-xs">Slot 1</span>
+                                        )}
+                                    </div>
+                                </div>
+                                <Plus size={24} className="text-gray-500" />
+                                <div className="flex flex-col items-center">
+                                    <div 
+                                        className="w-24 h-36 border-2 border-dashed border-gray-500 rounded flex items-center justify-center cursor-pointer hover:border-purple-400 bg-gray-900"
+                                        onClick={() => setSynthSlot2(null)}
+                                    >
+                                        {synthSlot2 ? (
+                                            <div className="scale-75 pointer-events-none"><Card card={synthSlot2} onClick={()=>{}} disabled={false}/></div>
+                                        ) : (
+                                            <span className="text-gray-600 text-xs">Slot 2</span>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                    <button 
+                                        onClick={performSynthesis}
+                                        disabled={!synthSlot1 || !synthSlot2}
+                                        className={`px-4 py-2 rounded font-bold text-sm ${!synthSlot1 || !synthSlot2 ? 'bg-gray-700 text-gray-500' : 'bg-purple-600 text-white hover:bg-purple-500 animate-pulse'}`}
+                                    >
+                                        Synthesize
+                                    </button>
+                                    <button 
+                                        onClick={() => { setSynthSlot1(null); setSynthSlot2(null); setSynthResult(null); }}
+                                        className="text-gray-500 hover:text-white text-xs flex items-center justify-center"
+                                    >
+                                        <RotateCcw size={12} className="mr-1"/> Reset
+                                    </button>
+                                </div>
+                                
+                                {synthResult && (
+                                    <>
+                                        <ArrowRight size={24} className="text-purple-400" />
+                                        <div className="flex flex-col items-center gap-2">
+                                            <div className="scale-90"><Card card={synthResult} onClick={()=>{}} disabled={false} /></div>
+                                            <button 
+                                                onClick={addSynthToDeck}
+                                                className="bg-blue-600 hover:bg-blue-500 text-white px-2 py-1 rounded text-xs font-bold w-full"
+                                            >
+                                                Add to Deck
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                            <div className="text-center text-xs text-gray-400 mb-2">Select cards below to fill slots</div>
+                        </div>
+                    )}
+
+                    {(activeTab === 'CARDS' || activeTab === 'SYNTHESIS') && (
                         <>
                             <div className="relative mb-4">
                                 <Search className="absolute left-3 top-2.5 text-gray-400" size={16}/>
