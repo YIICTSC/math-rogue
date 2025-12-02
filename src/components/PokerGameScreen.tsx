@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -832,7 +831,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
             </div>
         )}
 
-        {/* Deck List Modal - UPDATED LAYOUT */}
+        {/* Deck List Modal */}
         {showDeckList && (
             <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowDeckList(false)}>
                 <div className="bg-slate-800 border-4 border-slate-600 rounded-lg p-6 w-full max-w-4xl max-h-[80vh] overflow-y-auto relative shadow-2xl" onClick={e => e.stopPropagation()}>
@@ -880,49 +879,69 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
             </div>
         )}
 
-        {/* Top Info Bar */}
-        <div className="flex justify-between items-start p-2 md:p-4 bg-black/60 z-20 shadow-md shrink-0">
-            <div className="flex flex-col items-start bg-slate-800 p-2 rounded border border-slate-600 w-32 md:w-48 shadow-lg">
-                <div className="text-xs text-red-400 font-bold uppercase">Score Goal</div>
-                <div className="text-xl md:text-3xl font-black text-white">{runState.currentBlind.scoreGoal.toLocaleString()}</div>
-                <div className="w-full h-2 bg-gray-700 rounded-full mt-1 overflow-hidden">
-                    <div className="h-full bg-red-500 transition-all duration-500" style={{ width: `${Math.min(100, (runState.currentScore / runState.currentBlind.scoreGoal) * 100)}%` }}></div>
+        {/* Top Info Bar - Responsive */}
+        <div className="flex flex-col md:flex-row justify-between items-stretch md:items-start p-2 md:p-4 bg-black/60 z-20 shadow-md shrink-0 gap-2">
+            
+            {/* Left Group: Score (and Money on Mobile) */}
+            <div className="flex gap-2 w-full md:w-auto">
+                <div className="flex flex-col items-start bg-slate-800 p-2 rounded border border-slate-600 flex-grow md:w-48 shadow-lg justify-center">
+                    <div className="flex justify-between w-full md:block">
+                        <div className="text-[10px] text-red-400 font-bold uppercase">Score Goal</div>
+                        <div className="text-[10px] text-gray-400 md:mt-1 block md:hidden">Curr: {runState.currentScore.toLocaleString()}</div>
+                    </div>
+                    <div className="text-xl md:text-3xl font-black text-white leading-tight">{runState.currentBlind.scoreGoal.toLocaleString()}</div>
+                    <div className="w-full h-1.5 bg-gray-700 rounded-full mt-1 overflow-hidden">
+                        <div className="h-full bg-red-500 transition-all duration-500" style={{ width: `${Math.min(100, (runState.currentScore / runState.currentBlind.scoreGoal) * 100)}%` }}></div>
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1 hidden md:block">Current: {runState.currentScore.toLocaleString()}</div>
                 </div>
-                <div className="text-xs text-gray-400 mt-1">Current: {runState.currentScore.toLocaleString()}</div>
-            </div>
 
-            <div className="flex items-center gap-2">
-                <button 
-                    onClick={() => { setShowDeckList(true); audioService.playSound('select'); }}
-                    className="bg-slate-700 hover:bg-slate-600 p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-14 h-14"
-                >
-                    <Layers size={20}/>
-                    <span className="text-[10px] mt-1">デッキ</span>
-                </button>
-                <button 
-                    onClick={() => { setShowHandList(true); audioService.playSound('select'); }}
-                    className="bg-slate-700 hover:bg-slate-600 p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-14 h-14"
-                >
-                    <BarChart3 size={20}/>
-                    <span className="text-[10px] mt-1">役確認</span>
-                </button>
-
-                <div className="bg-slate-800 p-2 rounded border border-yellow-600 flex flex-col items-center w-16 md:w-20">
-                    <div className="text-[10px] text-yellow-500 uppercase">Hands</div>
-                    <div className="text-lg font-bold text-blue-400">{runState.handsRemaining}</div>
-                </div>
-                <div className="bg-slate-800 p-2 rounded border border-red-900 flex flex-col items-center w-16 md:w-20">
-                    <div className="text-[10px] text-red-400 uppercase">Discard</div>
-                    <div className="text-lg font-bold text-red-400">{runState.discardsRemaining}</div>
-                </div>
-                <div className="bg-slate-800 p-2 rounded border border-yellow-500 flex flex-col items-center w-16 md:w-20">
+                {/* Money Mobile */}
+                <div className="bg-slate-800 p-2 rounded border border-yellow-500 flex flex-col items-center justify-center w-20 md:hidden shrink-0">
                     <div className="text-[10px] text-yellow-400 uppercase">Money</div>
                     <div className="text-lg font-bold text-yellow-400">${runState.money}</div>
                 </div>
             </div>
+
+            {/* Right Group: Controls & Stats */}
+            <div className="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto">
+                
+                <div className="flex gap-2">
+                    <button 
+                        onClick={() => { setShowDeckList(true); audioService.playSound('select'); }}
+                        className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"
+                    >
+                        <Layers size={18} className="md:w-5 md:h-5"/>
+                        <span className="text-[9px] md:text-[10px] leading-none mt-1">Deck</span>
+                    </button>
+                    <button 
+                        onClick={() => { setShowHandList(true); audioService.playSound('select'); }}
+                        className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"
+                    >
+                        <BarChart3 size={18} className="md:w-5 md:h-5"/>
+                        <span className="text-[9px] md:text-[10px] leading-none mt-1">Hands</span>
+                    </button>
+                </div>
+
+                <div className="flex gap-2">
+                    <div className="bg-slate-800 p-1 md:p-2 rounded border border-blue-600 flex flex-col items-center w-14 md:w-20 justify-center">
+                        <div className="text-[9px] md:text-[10px] text-blue-400 uppercase">Hands</div>
+                        <div className="text-base md:text-lg font-bold text-blue-100">{runState.handsRemaining}</div>
+                    </div>
+                    <div className="bg-slate-800 p-1 md:p-2 rounded border border-red-900 flex flex-col items-center w-14 md:w-20 justify-center">
+                        <div className="text-[9px] md:text-[10px] text-red-400 uppercase">Disc</div>
+                        <div className="text-base md:text-lg font-bold text-red-100">{runState.discardsRemaining}</div>
+                    </div>
+                    {/* Money Desktop */}
+                    <div className="bg-slate-800 p-2 rounded border border-yellow-500 hidden md:flex flex-col items-center w-20 justify-center">
+                        <div className="text-[10px] text-yellow-400 uppercase">Money</div>
+                        <div className="text-lg font-bold text-yellow-400">${runState.money}</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        {/* Item Shelf (Moved from absolute positioning to flex) */}
+        {/* Item Shelf */}
         <div className="w-full bg-black/40 border-b border-black/50 p-2 flex justify-between items-center z-10 shrink-0 min-h-[64px]">
             {/* Supporters Rack */}
             <div className="flex gap-2 items-center flex-1 justify-center">
