@@ -139,6 +139,11 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
       let description = parts.join("。") + (parts.length > 0 ? "。" : "");
       if (parts.length === 0) description = "効果なし。";
 
+      // Include type in textureRef for smarter sprite selection
+      const shapeSource = c1.textureRef ? c1.textureRef.split('|')[0] : c1.name;
+      const colorSource = c2.textureRef ? (c2.textureRef.split('|')[1] || c2.textureRef.split('|')[0]) : c2.name;
+      const newTextureRef = `${shapeSource}|${colorSource}|${newType}`;
+
       const newCard: ICard = {
           id: `synth-debug-${Date.now()}`,
           name: newName,
@@ -159,7 +164,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
           selfDamage: newSelfDamage || undefined,
           exhaust: newExhaust,
           innate: newInnate,
-          textureRef: c1.textureRef || c1.name 
+          textureRef: newTextureRef
       };
 
       setSynthResult(newCard);
@@ -389,7 +394,6 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
   );
 };
 
-// Simple Icon component for the delete button inside map
 const X = ({size}:{size:number}) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
 );

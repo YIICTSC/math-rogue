@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect } from 'react';
 
 interface PixelSpriteProps {
@@ -542,22 +543,25 @@ const PixelSprite: React.FC<PixelSpriteProps> = ({ seed, name = "", className, s
         ctx.fillRect((x + border) * pixelScale, (y + border) * pixelScale, pixelScale, pixelScale);
     };
 
-    // --- LOGIC UPDATE: Handle Composite Names (Shape|Color) ---
-    // If name contains '|', it splits: Part 1 = Shape Template, Part 2 = Color Seed Source
+    // --- LOGIC UPDATE: Handle Composite Names (Shape|Color|Type) ---
     const nameParts = name.split('|');
     const shapeKeySource = nameParts[0]; // "SNAKE", "先生", etc.
     const colorKeySource = nameParts.length > 1 ? nameParts[1] : (seed || name); // If split, use part 2, else use seed/name
+    const typeKey = nameParts.length > 2 ? nameParts[2] : null; // NEW: Card Type Hint
 
-    // 1. Determine Sprite Type based on Shape Source
-    let spriteKey = 'HUMANOID';
+    let spriteKey = null;
     const n = shapeKeySource;
     
-    // School / Theme mapping
-    if (n.includes('上級生') || n.includes('不良') || n.includes('不審者') || n.includes('番長')) spriteKey = 'SENIOR';
+    // 1. Direct key match (e.g. from debug menu manual override or existing keys)
+    if (SPRITE_TEMPLATES[shapeKeySource]) {
+        spriteKey = shapeKeySource;
+    } 
+    // 2. Keyword matching for known entities (Enemies/Characters)
+    else if (n.includes('上級生') || n.includes('不良') || n.includes('不審者') || n.includes('番長')) spriteKey = 'SENIOR';
     else if (n.includes('花子') || n.includes('少女') || n.includes('マネージャー')) spriteKey = 'GIRL';
     else if (n.includes('体育') || n.includes('教頭') || n.includes('ボス') || n.includes('ガード')) spriteKey = 'MUSCLE';
     else if (n.includes('先生') || n.includes('校長') || n.includes('顧問') || n.includes('医者')) spriteKey = 'TEACHER';
-    else if (n.includes('用務員') || n.includes('PTA') || n.includes('大人')) spriteKey = 'HUMANOID'; // Default humanoid
+    else if (n.includes('用務員') || n.includes('PTA') || n.includes('大人')) spriteKey = 'HUMANOID'; 
     else if (n.includes('亡霊') || n.includes('幽霊') || n.includes('魂') || n.includes('影') || n.includes('スケスケ')) spriteKey = 'GHOST';
     else if (n.includes('人体模型') || n.includes('ゴーレム') || n.includes('像') || n.includes('ロボ')) spriteKey = 'SKELETON';
     else if (n.includes('ミミック') || n.includes('スライム') || n.includes('塊') || n.includes('カス') || n.includes('ヘドロ')) spriteKey = 'SLIME';
@@ -565,28 +569,41 @@ const PixelSprite: React.FC<PixelSpriteProps> = ({ seed, name = "", className, s
     else if (n.includes('カラス') || n.includes('ハチ') || n.includes('鳥')) spriteKey = 'FLIER';
     else if (n.includes('コウモリ')) spriteKey = 'BAT';
     else if (n.includes('鎧') || n.includes('三輪車') || n.includes('掃除') || n.includes('マシン')) spriteKey = 'ROBOT';
-    
-    // Card Keywords Mapping
-    else if (n.includes('ノート') || n.includes('宿題') || n.includes('辞書') || n.includes('本') || n.includes('学習') || n.includes('予習') || n.includes('計算') || n.includes('研究')) spriteKey = 'NOTEBOOK';
-    else if (n.includes('ランドセル') || n.includes('バッグ') || n.includes('道具')) spriteKey = 'BACKPACK';
-    else if (n.includes('上履き') || n.includes('靴') || n.includes('足') || n.includes('ダッシュ') || n.includes('ステップ')) spriteKey = 'SHOE';
     else if (n.includes('王') || n.includes('古龍') || n.includes('支配')) spriteKey = 'BOSS';
     else if (n.includes('悪魔') || n.includes('狂信者') || n.includes('ピエロ') || n.includes('儀式')) spriteKey = 'CULTIST';
     else if (n.includes('司祭') || n.includes('妖精') || n.includes('魔道士') || n.includes('マジック')) spriteKey = 'WIZARD';
     else if (n.includes('蜘蛛') || n.includes('ムカデ') || n.includes('虫') || n.includes('甲虫')) spriteKey = 'SPIDER';
     else if (n.includes('蛇') || n.includes('ミミズ') || n.includes('ツチノコ')) spriteKey = 'SNAKE';
     else if (n.includes('花') || n.includes('草') || n.includes('キノコ') || n.includes('樹')) spriteKey = 'PLANT';
-    else if (n.includes('目玉') || n.includes('監視') || n.includes('ドローン') || n.includes('見') || n.includes('予見')) spriteKey = 'EYE';
-    else if (n.includes('火の玉') || n.includes('エレメント') || n.includes('精霊') || n.includes('炎') || n.includes('焼') || n.includes('熱') || n.includes('エネルギー') || n.includes('発火')) spriteKey = 'FLAME';
-    else if (n.includes('盾') || n.includes('守り') || n.includes('防御') || n.includes('ブロック') || n.includes('障壁') || n.includes('鉄壁') || n.includes('回避')) spriteKey = 'SHIELD';
-    else if (n.includes('剣') || n.includes('刃') || n.includes('ナイフ') || n.includes('包丁') || n.includes('攻撃') || n.includes('切') || n.includes('突') || n.includes('えんぴつ') || n.includes('スライス') || n.includes('画鋲')) spriteKey = 'SWORD';
-    else if (n.includes('薬') || n.includes('瓶') || n.includes('フラスコ') || n.includes('毒') || n.includes('ポーション') || n.includes('インク') || n.includes('絵の具')) spriteKey = 'POTION';
-    else if (n.includes('拳') || n.includes('パンチ') || n.includes('打撃') || n.includes('殴') || n.includes('手') || n.includes('つかむ')) spriteKey = 'FIST';
-    else if (n.includes('雷') || n.includes('電気') || n.includes('ビーム') || n.includes('光') || n.includes('サンダー') || n.includes('ショック')) spriteKey = 'LIGHTNING';
-    else if (n.includes('筋肉') || n.includes('ムキムキ') || n.includes('頭突き') || n.includes('体') || n.includes('タックル')) spriteKey = 'MUSCLE';
+    
+    // 3. Keyword matching for Cards (Items/Effects) - Expanded List
+    else if (n.includes('ノート') || n.includes('宿題') || n.includes('辞書') || n.includes('本') || n.includes('学習') || n.includes('予習') || n.includes('計算') || n.includes('研究') || n.includes('速読') || n.includes('計画') || n.includes('作戦') || n.includes('勉強') || n.includes('書') || n.includes('読') || n.includes('誌') || n.includes('帳')) spriteKey = 'NOTEBOOK';
+    else if (n.includes('ランドセル') || n.includes('バッグ') || n.includes('道具') || n.includes('準備')) spriteKey = 'BACKPACK';
+    else if (n.includes('上履き') || n.includes('靴') || n.includes('足') || n.includes('ダッシュ') || n.includes('ステップ') || n.includes('ジャンプ') || n.includes('側転') || n.includes('バック転') || n.includes('歩') || n.includes('走') || n.includes('跳') || n.includes('逃')) spriteKey = 'SHOE';
+    else if (n.includes('目玉') || n.includes('監視') || n.includes('ドローン') || n.includes('見') || n.includes('予見') || n.includes('カンニング') || n.includes('先読み') || n.includes('目隠し') || n.includes('発見') || n.includes('観察') || n.includes('視') || n.includes('睨')) spriteKey = 'EYE';
+    else if (n.includes('火の玉') || n.includes('エレメント') || n.includes('精霊') || n.includes('炎') || n.includes('焼') || n.includes('熱') || n.includes('エネルギー') || n.includes('発火') || n.includes('ギャグ') || n.includes('キレる') || n.includes('深呼吸') || n.includes('激昂') || n.includes('燃') || n.includes('火')) spriteKey = 'FLAME';
+    else if (n.includes('盾') || n.includes('守り') || n.includes('防御') || n.includes('ブロック') || n.includes('障壁') || n.includes('鉄壁') || n.includes('回避') || n.includes('生き残り') || n.includes('知らんぷり') || n.includes('装備') || n.includes('土下座') || n.includes('隠し')) spriteKey = 'SHIELD';
+    else if (n.includes('剣') || n.includes('刃') || n.includes('ナイフ') || n.includes('包丁') || n.includes('攻撃') || n.includes('切') || n.includes('突') || n.includes('えんぴつ') || n.includes('スライス') || n.includes('画鋲') || n.includes('チョーク') || n.includes('雑巾') || n.includes('定規') || n.includes('早弁') || n.includes('割り込む') || n.includes('タオル') || n.includes('消しゴム') || n.includes('カンチョー') || n.includes('追い打ち') || n.includes('斬') || n.includes('刺') || n.includes('投げ')) spriteKey = 'SWORD';
+    else if (n.includes('薬') || n.includes('瓶') || n.includes('フラスコ') || n.includes('毒') || n.includes('ポーション') || n.includes('インク') || n.includes('絵の具') || n.includes('カフェイン') || n.includes('お茶') || n.includes('液') || n.includes('水')) spriteKey = 'POTION';
+    else if (n.includes('拳') || n.includes('パンチ') || n.includes('打撃') || n.includes('殴') || n.includes('手') || n.includes('つかむ') || n.includes('ビンタ') || n.includes('叩く') || n.includes('ボディスラム') || n.includes('暴れる') || n.includes('膝蹴り') || n.includes('口喧嘩') || n.includes('タックル') || n.includes('打') || n.includes('締め')) spriteKey = 'FIST';
+    else if (n.includes('雷') || n.includes('電気') || n.includes('ビーム') || n.includes('光') || n.includes('サンダー') || n.includes('ショック') || n.includes('大声') || n.includes('レーザー') || n.includes('静電気') || n.includes('雄叫び') || n.includes('泣き叫ぶ') || n.includes('充電') || n.includes('怒号') || n.includes('叫') || n.includes('鳴') || n.includes('電')) spriteKey = 'LIGHTNING';
+    else if (n.includes('筋肉') || n.includes('ムキムキ') || n.includes('頭突き') || n.includes('体')) spriteKey = 'MUSCLE';
 
-    // Fallback if specific sprite key was passed directly (e.g. from synthesis result)
-    if (SPRITE_TEMPLATES[shapeKeySource]) spriteKey = shapeKeySource;
+    // 4. Fallback Logic using Type Hint
+    if (!spriteKey) {
+        if (typeKey) {
+            // Default appearance based on Card Type
+            if (typeKey === 'ATTACK') spriteKey = 'SWORD'; 
+            else if (typeKey === 'SKILL') spriteKey = 'SHIELD'; 
+            else if (typeKey === 'POWER') spriteKey = 'FLAME'; 
+            else if (typeKey === 'STATUS') spriteKey = 'SLIME';
+            else if (typeKey === 'CURSE') spriteKey = 'GHOST';
+            else spriteKey = 'NOTEBOOK'; // Generic
+        } else {
+            // No type hint and no keyword match -> Assume Entity (Enemy/Character)
+            spriteKey = 'HUMANOID'; 
+        }
+    }
 
     const template = SPRITE_TEMPLATES[spriteKey] || SPRITE_TEMPLATES.HUMANOID;
 

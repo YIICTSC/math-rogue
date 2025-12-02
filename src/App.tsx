@@ -344,7 +344,7 @@ const App: React.FC = () => {
           floor: 0, 
           map: generateDungeonMap(), 
           currentMapNodeId: null, 
-          screen: GameScreen.MAP,
+          screen: GameScreen.MAP, 
           isEndless: true,
           narrativeLog: [...prev.narrativeLog, "終わらない冒険が始まる..."]
       }));
@@ -1692,10 +1692,10 @@ const App: React.FC = () => {
       let description = parts.join("。") + (parts.length > 0 ? "。" : "");
       if (parts.length === 0) description = "効果なし。";
 
-      // New: Composite Texture Logic
+      // New: Composite Texture Logic with TYPE Hint
       const shapeSource = c1.textureRef ? c1.textureRef.split('|')[0] : c1.name;
       const colorSource = c2.textureRef ? (c2.textureRef.split('|')[1] || c2.textureRef.split('|')[0]) : c2.name;
-      const newTextureRef = `${shapeSource}|${colorSource}`;
+      const newTextureRef = `${shapeSource}|${colorSource}|${newType}`;
 
       const newCard: ICard = {
           id: `synth-${Date.now()}`,
