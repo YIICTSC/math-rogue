@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers } from 'lucide-react';
+import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { 
@@ -182,6 +182,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
   const [showHandList, setShowHandList] = useState(false);
   const [showDeckList, setShowDeckList] = useState(false);
+  const [showRulesModal, setShowRulesModal] = useState(false);
   
   // Consumable Usage
   const [selectedConsumable, setSelectedConsumable] = useState<PokerConsumable | null>(null);
@@ -801,6 +802,57 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
     <div className="flex flex-col h-full w-full bg-green-900 text-white font-mono relative overflow-hidden">
         {renderInspectionModal()}
         
+        {/* Rules / Game Info Modal */}
+        {showRulesModal && (
+            <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowRulesModal(false)}>
+                <div className="bg-slate-800 border-4 border-yellow-500 rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto relative shadow-2xl custom-scrollbar" onClick={e => e.stopPropagation()}>
+                    <button onClick={() => setShowRulesModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
+                    <h2 className="text-2xl font-bold text-yellow-400 mb-4 flex items-center"><HelpCircle className="mr-2"/> Game Rules (遊び方)</h2>
+                    
+                    <div className="space-y-6 text-sm text-gray-300">
+                        <section>
+                            <h3 className="text-lg font-bold text-white mb-2">目標</h3>
+                            <p>ポーカーの役を作ってチップを稼ぎ、制限ラウンド内に目標スコア（ブラインド）を達成しましょう。</p>
+                            <ul className="list-disc pl-5 mt-2 space-y-1">
+                                <li>手札から最大5枚選んで「PLAY HAND」でスコア獲得。</li>
+                                <li>「DISCARD」で不要なカードを捨てて引き直せます。</li>
+                                <li>手持ちの「Hands」が0になる前に目標スコアを超えればクリア！</li>
+                            </ul>
+                        </section>
+
+                        <section>
+                            <h3 className="text-lg font-bold text-white mb-2">スコア計算</h3>
+                            <p className="bg-slate-900 p-2 rounded border border-slate-700 font-mono text-center mb-2">
+                                Score = Chips x Mult
+                            </p>
+                            <p>各役には基本のチップと倍率（Mult）があります。カード自体のランク（数字）もチップに加算されます。</p>
+                        </section>
+
+                        <section>
+                            <h3 className="text-lg font-bold text-white mb-2">役一覧 (Base Score)</h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                {Object.values(POKER_HAND_LEVELS).map((h) => (
+                                    <div key={h.name} className="flex justify-between bg-slate-900 p-2 rounded text-xs">
+                                        <span>{h.name}</span>
+                                        <span className="text-blue-300">{h.baseChips} <span className="text-gray-500">x</span> <span className="text-red-400">{h.baseMult}</span></span>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+
+                        <section>
+                            <h3 className="text-lg font-bold text-white mb-2">ショップと強化</h3>
+                            <p>ラウンドクリアでお金を獲得し、ショップでアイテムを購入できます。</p>
+                            <ul className="list-disc pl-5 mt-2 space-y-1">
+                                <li><span className="text-blue-400 font-bold">サポーター (Jokers):</span> 所持しているだけで特殊効果を発揮します。</li>
+                                <li><span className="text-purple-400 font-bold">消耗品 (Stationery):</span> 使い切りのアイテム。カード強化や役のレベルアップができます。</li>
+                            </ul>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        )}
+
         {/* Hand Levels Modal */}
         {showHandList && (
             <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowHandList(false)}>
@@ -907,6 +959,13 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
             <div className="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto">
                 
                 <div className="flex gap-2">
+                    <button 
+                        onClick={() => { setShowRulesModal(true); audioService.playSound('select'); }}
+                        className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"
+                    >
+                        <HelpCircle size={18} className="md:w-5 md:h-5 text-yellow-400"/>
+                        <span className="text-[9px] md:text-[10px] leading-none mt-1">Help</span>
+                    </button>
                     <button 
                         onClick={() => { setShowDeckList(true); audioService.playSound('select'); }}
                         className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"
