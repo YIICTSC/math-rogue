@@ -1,5 +1,6 @@
 
-import { Card, CardType, TargetType, Relic, Potion, Character, PokerHandResult, PokerSupporter, PokerConsumable, PokerPack } from './types';
+
+import { Card, CardType, TargetType, Relic, Potion, Character, PokerHandResult, PokerSupporter, PokerConsumable, PokerPack, PokerSuit } from './types';
 
 export const INITIAL_HP = 75;
 export const INITIAL_ENERGY = 3;
@@ -166,7 +167,7 @@ export const HERO_IMAGE_DATA = `data:image/svg+xml;base64,${btoa(WARRIOR_SVG)}`;
 
 // --- ENEMIES (Compendium Data) ---
 export const ENEMY_LIBRARY: Record<string, { name: string, description: string, tier: 1 | 2 | 3 }> = {
-    // Tier 1
+    // ... (No change to enemy library)
     "野良犬": { name: "野良犬", description: "校庭を徘徊する犬。腹を空かせている。", tier: 1 },
     "意地悪なカラス": { name: "意地悪なカラス", description: "光るものが好きで、生徒の持ち物を狙っている。", tier: 1 },
     "消しゴムのカス": { name: "消しゴムのカス", description: "勉強の怨念が集合して生まれた存在。", tier: 1 },
@@ -187,8 +188,6 @@ export const ENEMY_LIBRARY: Record<string, { name: string, description: string, 
     "水槽の金魚": { name: "水槽の金魚", description: "水槽から飛び出して攻撃してくる。", tier: 1 },
     "忘れられたリコーダー": { name: "リコーダー", description: "深夜に勝手に音を奏でる。", tier: 1 },
     "実験失敗スライム": { name: "実験失敗スライム", description: "理科の実験で偶然生まれたネバネバ。", tier: 1 },
-
-    // Tier 2
     "宿題の悪魔": { name: "宿題の悪魔", description: "終わらない宿題のプレッシャーが具現化。", tier: 2 },
     "給食泥棒": { name: "給食泥棒", description: "人気のデザートだけを狙う不届き者。", tier: 2 },
     "動く人体模型": { name: "動く人体模型", description: "理科室の主。夜になると動き出す。", tier: 2 },
@@ -209,8 +208,6 @@ export const ENEMY_LIBRARY: Record<string, { name: string, description: string, 
     "体育館のバスケットボール": { name: "バスケットボール", description: "ドリブルの音が止まらない。", tier: 2 },
     "呪いの日本人形": { name: "呪いの日本人形", description: "髪が伸び続ける不気味な人形。", tier: 2 },
     "巨大ムカデ": { name: "巨大ムカデ", description: "校舎の裏に潜む巨大な虫。", tier: 2 },
-
-    // Tier 3 / Elite / Boss
     "体育の先生": { name: "体育の先生", description: "竹刀を持った鬼教師。精神論が好き。", tier: 3 },
     "教頭先生": { name: "教頭先生", description: "長い説教で生徒を眠らせる。", tier: 3 },
     "終わらない宿題": { name: "終わらない宿題", description: "やってもやっても増え続ける絶望。", tier: 3 },
@@ -236,19 +233,16 @@ export const ENEMY_LIBRARY: Record<string, { name: string, description: string, 
 
 // --- RELICS (School Theme) ---
 export const RELIC_LIBRARY: Record<string, Relic> = {
-    // STARTER
+    // ... (No change to relic library)
     BURNING_BLOOD: { id: 'BURNING_BLOOD', name: '給食の余り', description: '戦闘終了時、HPを6回復する。', rarity: 'STARTER' },
     SNAKE_RING: { id: 'SNAKE_RING', name: '秘密のメモ帳', description: '戦闘開始時、追加で2枚カードを引く。', rarity: 'STARTER' },
     HOLY_WATER: { id: 'HOLY_WATER', name: 'スポーツドリンク', description: '戦闘開始時、エネルギーを1得る。', rarity: 'STARTER' },
     MEGAPHONE: { id: 'MEGAPHONE', name: '校内放送マイク', description: '戦闘開始時、敵全体をびくびく1にする。', rarity: 'STARTER' },
-    // NEW STARTERS
     HACHIMAKI: { id: 'HACHIMAKI', name: '必勝ハチマキ', description: '戦闘開始時、カチカチ1を得る。', rarity: 'STARTER' },
     BOOKMARK: { id: 'BOOKMARK', name: '図書室のしおり', description: 'ターン終了時、カードを1枚保留する。', rarity: 'STARTER' }, 
     BIG_LADLE: { id: 'BIG_LADLE', name: '巨大なお玉', description: '戦闘開始時、最大HP+4(一時的)を得る。', rarity: 'STARTER' },
     WHISTLE: { id: 'WHISTLE', name: '魔法の笛', description: '戦闘開始時、ランダムな攻撃カード(コスト0)を1枚手札に加える。', rarity: 'STARTER' },
     SEED_PACK: { id: 'SEED_PACK', name: '謎の種', description: '戦闘開始時、トゲトゲ3を得る。', rarity: 'STARTER' },
-    
-    // COMMON
     VAJRA: { id: 'VAJRA', name: '金の定規', description: '戦闘開始時、ムキムキ1を得る。', rarity: 'COMMON', price: 150 },
     ANCHOR: { id: 'ANCHOR', name: '重いランドセル', description: '1ターン目の開始時、ブロック10を得る。', rarity: 'COMMON', price: 150 },
     BAG_OF_PREP: { id: 'BAG_OF_PREP', name: '予習セット', description: '戦闘開始時、追加で2枚引く。', rarity: 'COMMON', price: 150 },
@@ -257,8 +251,6 @@ export const RELIC_LIBRARY: Record<string, Relic> = {
     ANCIENT_TEA_SET: { id: 'ANCIENT_TEA_SET', name: '水筒', description: '休憩場所に着いた時、次の戦闘開始時にE+2。', rarity: 'COMMON', price: 150 },
     HAPPY_FLOWER: { id: 'HAPPY_FLOWER', name: 'アサガオ', description: '3ターンごとにエネルギーを1得る。', rarity: 'COMMON', price: 150 },
     PEN_NIB: { id: 'PEN_NIB', name: 'すごいペン先', description: '攻撃を10回プレイする度、その攻撃のダメージが倍になる。', rarity: 'COMMON', price: 180 }, 
-    
-    // UNCOMMON
     MERCURY_HOURGLASS: { id: 'MERCURY_HOURGLASS', name: '砂時計', description: 'ターン開始時、敵全体に3ダメージを与える。', rarity: 'RARE', price: 220 },
     HORN_CLEAT: { id: 'HORN_CLEAT', name: '上履き', description: '2ターン目の開始時、ブロック14を得る。', rarity: 'RARE', price: 200 },
     MATRYOSHKA: { id: 'MATRYOSHKA', name: 'お道具箱', description: '次の2つの宝箱の中身が2つになる。', rarity: 'RARE', price: 180 },
@@ -266,28 +258,20 @@ export const RELIC_LIBRARY: Record<string, Relic> = {
     KUNAI: { id: 'KUNAI', name: '折り紙の手裏剣', description: '1ターンにアタックを3枚使う度、カチカチ1を得る。', rarity: 'RARE', price: 280 },
     SHURIKEN: { id: 'SHURIKEN', name: '紙飛行機', description: '1ターンにアタックを3枚使う度、ムキムキ1を得る。', rarity: 'RARE', price: 280 },
     ORNAMENTAL_FAN: { id: 'ORNAMENTAL_FAN', name: '下敷き', description: '1ターンにアタックを3枚使う度、ブロック4を得る。', rarity: 'RARE', price: 250 },
-
-    // RARE
     PENTOGRAPH: { id: 'PENTOGRAPH', name: '習字セット', description: 'ボス戦開始時、HPを25回復する。', rarity: 'RARE', price: 250 },
     BRONZE_SCALES: { id: 'BRONZE_SCALES', name: '画鋲', description: '戦闘開始時、トゲトゲ3(反撃)を得る。', rarity: 'RARE', price: 200 },
     CALIPERS: { id: 'CALIPERS', name: 'コンパス', description: 'ターン開始時、ブロックが15より多ければ失われない。', rarity: 'RARE', price: 280 },
     ICE_CREAM: { id: 'ICE_CREAM', name: '溶けないアイス', description: 'エネルギーがターン終了時に保存される。', rarity: 'RARE', price: 300 },
     OLD_COIN: { id: 'OLD_COIN', name: 'お年玉', description: '獲得時、300円を得る。', rarity: 'RARE', price: 0 },
     LIZARD_TAIL: { id: 'LIZARD_TAIL', name: 'トカゲの尻尾', description: '死亡時、HP50%で復活する(1回のみ)。', rarity: 'RARE', price: 350 },
-
-    // SHOP
     MEMBERSHIP_CARD: { id: 'MEMBERSHIP_CARD', name: '図書カード', description: 'ショップの商品が安くなる。', rarity: 'SHOP', price: 100 },
     WAFFLE: { id: 'WAFFLE', name: '揚げパン', description: '最大HP+7。HP全回復。', rarity: 'SHOP', price: 300 },
     ORANGE_PELLETS: { id: 'ORANGE_PELLETS', name: 'ラムネ', description: 'パワー、スキル、アタックを1ターンに使うとデバフ解除。', rarity: 'SHOP', price: 180 },
-    
-    // BOSS
     SOZU: { id: 'SOZU', name: '持ち込み禁止令', description: '毎ターンE+1。ポーション使用不可。', rarity: 'BOSS' },
     CURSED_KEY: { id: 'CURSED_KEY', name: '理科室の鍵', description: '毎ターンE+1。宝箱から呪い出現。', rarity: 'BOSS' },
     PHILOSOPHER_STONE: { id: 'PHILOSOPHER_STONE', name: '謎の石', description: '毎ターンE+1。敵のムキムキ+1。', rarity: 'BOSS' },
     VELVET_CHOKER: { id: 'VELVET_CHOKER', name: '制服のカラー', description: '毎ターンE+1。カードを6枚しか使えなくなる。', rarity: 'BOSS' },
     SNECKO_EYE: { id: 'SNECKO_EYE', name: 'ぐるぐるメガネ', description: '毎ターン追加で2枚引く。混乱(コストランダム)状態になる。', rarity: 'BOSS' },
-
-    // Event Relics
     GOLDEN_IDOL: { id: 'GOLDEN_IDOL', name: '金色の像', description: '敵が落とすお金が25%増える。', rarity: 'RARE' },
     MUTAGENIC_STRENGTH: { id: 'MUTAGENIC_STRENGTH', name: '成長期', description: '戦闘開始時、ムキムキ3を得る。ターン終了時失う。', rarity: 'RARE' },
     WARPED_TONGS: { id: 'WARPED_TONGS', name: 'ゆがんだフォーク', description: 'ターン開始時、手札のランダムなカードを強化する。', rarity: 'RARE' },
@@ -300,6 +284,7 @@ export const RELIC_LIBRARY: Record<string, Relic> = {
 
 // --- POTIONS ---
 export const POTION_LIBRARY: Record<string, Omit<Potion, 'id'>> = {
+    // ... (No change to potion library)
     FIRE_POTION: { templateId: 'FIRE_POTION', name: 'コーラ', description: '敵1体に20ダメージを与える。', rarity: 'COMMON', color: '#f87171', price: 50 },
     BLOCK_POTION: { templateId: 'BLOCK_POTION', name: '牛乳', description: 'ブロック12を得る。', rarity: 'COMMON', color: '#60a5fa', price: 50 },
     STRENGTH_POTION: { templateId: 'STRENGTH_POTION', name: 'プロテイン', description: 'ムキムキ2を得る。', rarity: 'COMMON', color: '#ef4444', price: 75 },
@@ -321,8 +306,7 @@ export const TRUE_BOSS = {
 };
 
 // --- CARDS ---
-
-// Special Status Cards
+// ... (No change to card library)
 export const STATUS_CARDS: Record<string, Omit<Card, 'id'>> = {
     WOUND: { name: 'ケガ', cost: 0, type: CardType.STATUS, description: '使用不可。', unplayable: true, rarity: 'SPECIAL' },
     DAZED: { name: 'めまい', cost: 0, type: CardType.STATUS, description: '使用不可。ターン終了時廃棄。', unplayable: true, exhaust: true, rarity: 'SPECIAL' },
@@ -330,8 +314,6 @@ export const STATUS_CARDS: Record<string, Omit<Card, 'id'>> = {
     BURN: { name: 'やけど', cost: 0, type: CardType.STATUS, description: '使用不可。ターン終了時2ダメージ。', unplayable: true, rarity: 'SPECIAL' },
     SLIMED: { name: '鼻水', cost: 1, type: CardType.STATUS, description: '使用すると廃棄される。', exhaust: true, rarity: 'SPECIAL' }
 };
-
-// Curse Cards
 export const CURSE_CARDS: Record<string, Omit<Card, 'id'>> = {
     PAIN: { name: '腹痛', cost: 0, type: CardType.CURSE, description: '使用不可。手札にある間、カードを使うたび1ダメージ。', unplayable: true, rarity: 'SPECIAL' },
     REGRET: { name: '後悔', cost: 0, type: CardType.CURSE, description: '使用不可。ターン終了時、手札枚数分ダメージ。', unplayable: true, rarity: 'SPECIAL' },
@@ -344,31 +326,22 @@ export const CURSE_CARDS: Record<string, Omit<Card, 'id'>> = {
     DECAY: { name: '虫歯', cost: 0, type: CardType.CURSE, description: '使用不可。ターン終了時2ダメージ。', unplayable: true, rarity: 'SPECIAL' },
     CLUMSINESS: { name: 'ドジ', cost: 0, type: CardType.CURSE, description: '使用不可。廃棄。', unplayable: true, exhaust: true, rarity: 'SPECIAL' },
 };
-
-// Event Specific Cards
 export const EVENT_CARDS: Record<string, Omit<Card, 'id'>> = {
     BITE: { name: 'つまみ食い', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '7ダメージ。HP2回復。', damage: 7, heal: 2, rarity: 'SPECIAL' },
     APPARITION: { name: 'ドロン', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'スケスケ(被ダメ1)を得る。廃棄。', applyPower: { id: 'INTANGIBLE', amount: 1 }, exhaust: true, rarity: 'SPECIAL' },
     J_A_X: { name: '筋肉注射', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'ムキムキ3を得る。ターン終了時3失う。', strength: 3, applyPower: { id: 'LOSE_STRENGTH', amount: 3 }, rarity: 'SPECIAL' },
     MADNESS: { name: 'パニック', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '手札のランダムなカード1枚のコストを0にする。廃棄。', exhaust: true, rarity: 'SPECIAL' },
 };
-
 export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
   ...STATUS_CARDS,
   ...CURSE_CARDS,
   ...EVENT_CARDS,
-  // SHIV (ナイフ) Added
   SHIV: { name: 'ナイフ', cost: 0, type: CardType.ATTACK, target: TargetType.ENEMY, description: '4ダメージ。廃棄。', damage: 4, exhaust: true, rarity: 'SPECIAL' },
-  // CAPTURE NET (Caretaker)
   CAPTURE_NET: { name: '捕獲網', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '10ダメージ。これで倒すと敵をカード化してデッキに加える。廃棄。', damage: 10, capture: true, exhaust: true, rarity: 'SPECIAL' },
-
-  // STARTER SET
   STRIKE: { name: 'えんぴつ攻撃', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '6ダメージを与える。', damage: 6, rarity: 'COMMON' },
   DEFEND: { name: 'ノートで防御', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロックを5得る。', block: 5, rarity: 'COMMON' },
   BASH: { name: 'ランドセルタックル', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '8ダメージ。対象にびくびく2を与える。', damage: 8, vulnerable: 2, rarity: 'COMMON' },
   NEUTRALIZE: { name: '先生にチクる', cost: 0, type: CardType.ATTACK, target: TargetType.ENEMY, description: '3ダメージ。対象にへろへろ1を与える。', damage: 3, weak: 1, rarity: 'COMMON' },
-
-  // COMMON ATTACKS
   IRON_WAVE: { name: '上履きキック', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '5ダメージ。ブロック5を得る。', damage: 5, block: 5, rarity: 'COMMON' },
   HEADBUTT: { name: '頭突き', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '9ダメージ。自傷2ダメージ。', damage: 9, selfDamage: 2, rarity: 'COMMON' },
   CLOTHESLINE: { name: 'ラリアット', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '12ダメージ。対象にへろへろ2を与える。', damage: 12, weak: 2, rarity: 'COMMON' },
@@ -397,14 +370,12 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
   DAGGER_SPRAY: { name: '消しゴム投げ', cost: 1, type: CardType.ATTACK, target: TargetType.ALL_ENEMIES, description: '全体4ダメージを2回。', damage: 4, playCopies: 1, rarity: 'COMMON' },
   SUCKER_PUNCH: { name: 'カンチョー', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '7ダメージ。へろへろ1を与える。', damage: 7, weak: 1, rarity: 'COMMON' },
   BANE: { name: '追い打ち', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '7ダメージ。敵がドクドク状態なら更に7ダメージ。', damage: 7, rarity: 'COMMON' }, 
-  
-  // COMMON SKILLS
   SHIELD_BLOCK: { name: '盾構え', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロックを7得る。', block: 7, rarity: 'COMMON' },
   SURVIVOR: { name: '生き残り', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック8。手札を1枚捨てる。', block: 8, promptsDiscard: 1, rarity: 'COMMON' },
   WARCRY: { name: '雄叫び', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'カード1枚引く。廃棄される。', draw: 1, exhaust: true, rarity: 'COMMON' },
   SHRUG_IT_OFF: { name: '知らんぷり', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック8。カード1枚引く。', block: 8, draw: 1, rarity: 'COMMON' },
   DEFLECT: { name: '回避', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック4を得る。', block: 4, rarity: 'COMMON' },
-  PIERCING_WAIL: { name: '泣き叫ぶ', cost: 1, type: CardType.SKILL, target: TargetType.ALL_ENEMIES, description: '敵全体にムキムキダウン1を与える。廃棄。', strength: -6, exhaust: true, rarity: 'COMMON' }, // Mechanically strength down, but displayed as strength loss. Adjusted desc. Actually it sets strength down.
+  PIERCING_WAIL: { name: '泣き叫ぶ', cost: 1, type: CardType.SKILL, target: TargetType.ALL_ENEMIES, description: '敵全体にムキムキダウン1を与える。廃棄。', strength: -6, exhaust: true, rarity: 'COMMON' }, 
   CHARGE_BATTERY: { name: '充電', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック7。次ターンエナジー+1。', block: 7, nextTurnEnergy: 1, rarity: 'COMMON' },
   LEAP: { name: 'ジャンプ', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック9を得る。', block: 9, rarity: 'COMMON' },
   ARMAMENTS: { name: '装備点検', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック5。手札全て強化。', block: 5, upgradeHand: true, rarity: 'COMMON' },
@@ -421,8 +392,6 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
   BLIND: { name: '目隠し', cost: 0, type: CardType.SKILL, target: TargetType.ENEMY, description: 'へろへろ2を与える。', weak: 2, rarity: 'COMMON' },
   TRIP: { name: '足払い', cost: 0, type: CardType.SKILL, target: TargetType.ALL_ENEMIES, description: '敵全体にびくびく2を与える。', vulnerable: 2, rarity: 'COMMON' },
   DEEP_BREATH: { name: '深呼吸', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '捨て札を山札に戻す。1枚引く。', shuffleHandToDraw: true, draw: 1, rarity: 'COMMON' },
-
-  // RARE / UNCOMMON ATTACKS
   UPPERCUT: { name: 'アッパー', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '13ダメージ。へろへろ1とびくびく1。', damage: 13, weak: 1, vulnerable: 1, rarity: 'RARE' },
   BLUDGEON: { name: '大打撃', cost: 3, type: CardType.ATTACK, target: TargetType.ENEMY, description: '32ダメージを与える。', damage: 32, rarity: 'RARE' },
   REAPER: { name: '給食当番', cost: 2, type: CardType.ATTACK, target: TargetType.ALL_ENEMIES, description: '全体4ダメージ。未ブロック分HP回復。', damage: 4, lifesteal: true, rarity: 'RARE' },
@@ -457,8 +426,6 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
   RIDDLE_WITH_HOLES: { name: '蜂の巣', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '3ダメージを5回。', damage: 3, playCopies: 4, rarity: 'RARE' },
   GRAND_FINALE: { name: '卒業式', cost: 0, type: CardType.ATTACK, target: TargetType.ALL_ENEMIES, description: '全体50ダメージ。山札0の時のみ。', damage: 50, rarity: 'LEGENDARY' }, 
   MIND_BLAST: { name: '知識の爆発', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '山札の枚数分ダメージ。', damage: 0, damagePerCardInDraw: 1, innate: true, rarity: 'RARE' }, 
-
-  // RARE / UNCOMMON SKILLS
   ENTRENCH: { name: 'バリケード', cost: 2, type: CardType.SKILL, target: TargetType.SELF, description: '現在のブロック値を2倍にする。', doubleBlock: true, rarity: 'RARE' },
   SHOCKWAVE: { name: '衝撃波', cost: 2, type: CardType.SKILL, target: TargetType.ALL_ENEMIES, description: '敵全体にへろへろ3とびくびく3。廃棄。', weak: 3, vulnerable: 3, exhaust: true, rarity: 'RARE' },
   IMPERVIOUS: { name: '鉄壁', cost: 2, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック30を得る。廃棄。', block: 30, exhaust: true, rarity: 'RARE' },
@@ -491,8 +458,6 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
   DISCOVERY: { name: '発見', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ランダムなカードを手札に加える。', exhaust: true, rarity: 'UNCOMMON' }, 
   STRATEGIST: { name: '作戦', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '捨てられた時E2得る。', unplayable: true, rarity: 'UNCOMMON' }, 
   APOTHEOSIS: { name: '神格化', cost: 2, type: CardType.SKILL, target: TargetType.SELF, description: 'この戦闘中、全カードを強化。廃棄。', upgradeDeck: true, exhaust: true, rarity: 'RARE' },
-
-  // POWERS
   INFLAME: { name: '発火', cost: 1, type: CardType.POWER, target: TargetType.SELF, description: 'ムキムキを2得る。', strength: 2, rarity: 'RARE' },
   DEMON_FORM: { name: '悪魔化', cost: 3, type: CardType.POWER, target: TargetType.SELF, description: 'ターン開始時にムキムキ2を得る。', applyPower: { id: 'DEMON_FORM', amount: 2 }, rarity: 'LEGENDARY' },
   WRAITH_FORM: { name: '死霊化', cost: 3, type: CardType.POWER, target: TargetType.SELF, description: '2ターン無敵(スケスケ)になる。', applyPower: { id: 'INTANGIBLE', amount: 2 }, rarity: 'LEGENDARY' },
@@ -641,21 +606,38 @@ export const POKER_HAND_LEVELS: Record<string, PokerHandResult> = {
   'ROYAL_FLUSH': { name: 'ロイヤルストレートフラッシュ', baseChips: 200, baseMult: 20, level: 1 },
 };
 
+// Expanded Supporters
 export const SUPPORTERS_LIBRARY: PokerSupporter[] = [
+  // Original
   { id: 'TEACHER', name: '担任の先生', description: '倍率+4', price: 4, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.mult += 4, icon: 'TEACHER|#f44336' },
   { id: 'PRINCIPAL', name: '校長先生', description: '倍率x2', price: 10, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.mult *= 2, icon: 'BOSS|#FFD700' },
   { id: 'COOK', name: '給食のおばちゃん', description: 'チップ+50', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.chips += 50, icon: 'CHEF|#ffccbc' },
   { id: 'ATHLETE', name: '体育会系', description: 'フラッシュで倍率+10', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(ctx.handType === 'FLUSH' || ctx.handType === 'STRAIGHT_FLUSH') ctx.mult += 10; }, icon: 'MUSCLE|#2196f3' },
   { id: 'NERD', name: 'ガリ勉君', description: 'ストレートでチップ+100', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(ctx.handType === 'STRAIGHT' || ctx.handType === 'STRAIGHT_FLUSH') ctx.chips += 100; }, icon: 'LIBRARIAN|#4caf50' },
-  { id: 'IDOL', name: '学園のアイドル', description: '手札のハート1枚につき倍率+2', price: 7, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const hearts = ctx.cards.filter(c => c.suit === 'HEART').length; ctx.mult += hearts * 2; }, icon: 'GIRL|#e91e63' },
-  { id: 'DOG', name: '迷い犬', description: '手札のスペード1枚につきチップ+20', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const spades = ctx.cards.filter(c => c.suit === 'SPADE').length; ctx.chips += spades * 20; }, icon: 'DOG|#795548' },
+  { id: 'IDOL', name: '学園のアイドル', description: '手札のハート1枚につき倍率+2', price: 7, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const hearts = ctx.cards.filter(c => c.suit === 'HEART' || c.enhancement === 'WILD').length; ctx.mult += hearts * 2; }, icon: 'GIRL|#e91e63' },
+  { id: 'DOG', name: '迷い犬', description: '手札のスペード1枚につきチップ+20', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const spades = ctx.cards.filter(c => c.suit === 'SPADE' || c.enhancement === 'WILD').length; ctx.chips += spades * 20; }, icon: 'DOG|#795548' },
   { id: 'GHOST', name: 'トイレの幽霊', description: 'ペア系役の倍率x1.5', price: 8, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(['PAIR', 'TWO_PAIR', 'THREE_OF_A_KIND', 'FULL_HOUSE', 'FOUR_OF_A_KIND'].includes(ctx.handType)) ctx.mult = Math.floor(ctx.mult * 1.5); }, icon: 'GHOST|#9c27b0' },
   { id: 'ALIEN', name: '転校生(宇宙人)', description: '奇数ランクのカードのチップ+30', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const odds = ctx.cards.filter(c => c.rank % 2 !== 0).length; ctx.chips += odds * 30; }, icon: 'ALIEN|#00bcd4' },
+  
+  // New Additions
+  { id: 'MATH_DRILL', name: '算数ドリル', description: '偶数ランクのカードのチップ+30', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const evens = ctx.cards.filter(c => c.rank % 2 === 0).length; ctx.chips += evens * 30; }, icon: 'NOTEBOOK|#2196f3' },
+  { id: 'BROADCAST', name: '放送委員', description: '絵札(J,Q,K)の倍率+3', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const faces = ctx.cards.filter(c => c.rank > 10 && c.rank < 14).length; ctx.mult += faces * 3; }, icon: 'BARD|#ff9800' },
+  { id: 'SOCCER', name: 'サッカーボール', description: '1/4の確率で倍率x4', price: 8, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(Math.random() < 0.25) ctx.mult *= 4; }, icon: 'DODGEBALL|#ffffff' },
+  { id: 'LOVE_LETTER', name: 'ラブレター', description: 'ハートのチップ+50', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(ctx.cards.some(c=>c.suit==='HEART')) ctx.chips += 50; }, icon: 'NOTEBOOK|#e91e63' },
+  { id: 'UWABAKI', name: '上履き', description: '手札を出すたびチップ+10(永続)', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { /* Logic handled in component state if simpler, else static effect here is tough without state mutation. For now, simple buff */ ctx.chips += 10 * ctx.handsPlayed; }, icon: 'SHOE|#ffffff' },
+  { id: 'CLOCK', name: '古時計', description: '残りハンド数x10の倍率', price: 7, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { ctx.mult += (4 - ctx.handsPlayed + 1) * 10; }, icon: 'ROBOT|#795548' }, // Assuming 4 hands max, simplified
+  { id: 'RECESS_KING', name: '休み時間の王', description: 'ハイカードなら倍率x3', price: 6, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(ctx.handType === 'HIGH_CARD') ctx.mult *= 3; }, icon: 'SENIOR|#fbc02d' },
+  { id: 'GARDENER_CLUB', name: '園芸部', description: 'クラブのカード1枚につき倍率+2', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const clubs = ctx.cards.filter(c => c.suit === 'CLUB' || c.enhancement === 'WILD').length; ctx.mult += clubs * 2; }, icon: 'GARDENER|#4caf50' },
+  { id: 'BAND_CLUB', name: '軽音部', description: 'ダイヤのカード1枚につきチップ+15', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const diamonds = ctx.cards.filter(c => c.suit === 'DIAMOND' || c.enhancement === 'WILD').length; ctx.chips += diamonds * 15; }, icon: 'BARD|#f44336' },
+  { id: 'LOCKER', name: '掃除用具入れ', description: '手札のカード枚数が3枚以下の時、倍率+20', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(ctx.cards.length <= 3) ctx.mult += 20; }, icon: 'BACKPACK|#607d8b' },
+  { id: 'STATUE', name: '銅像', description: '何もせず、チップ+100', price: 4, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { ctx.chips += 100; }, icon: 'BOSS|#795548' },
+  { id: 'GOSSIP', name: '井戸端会議', description: 'ペアを含めば倍率x2', price: 8, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(ctx.handType.includes('PAIR') || ctx.handType === 'FULL_HOUSE') ctx.mult *= 2; }, icon: 'GIRL|#9c27b0' },
+  { id: 'CURRY', name: 'カレーライス', description: '倍率+15', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { ctx.mult += 15; }, icon: 'POTION|#ff9800' },
 ];
 
 export const CONSUMABLES_LIBRARY: PokerConsumable[] = [
-    // Planets (Textbooks) - Upgrade Hand Levels
-    { id: 'TXT_MATH', type: 'PLANET', name: '数学ドリル', description: 'ハイカードのレベルアップ', price: 3, icon: 'NOTEBOOK|#2196f3' },
+    // Planets (Textbooks)
+    { id: 'TXT_MATH', type: 'PLANET', name: '算数ドリル', description: 'ハイカードのレベルアップ', price: 3, icon: 'NOTEBOOK|#2196f3' },
     { id: 'TXT_JPN', type: 'PLANET', name: '漢字ドリル', description: 'ワンペアのレベルアップ', price: 3, icon: 'NOTEBOOK|#f44336' },
     { id: 'TXT_SCI', type: 'PLANET', name: '理科実験集', description: 'ツーペアのレベルアップ', price: 3, icon: 'NOTEBOOK|#4caf50' },
     { id: 'TXT_SOC', type: 'PLANET', name: '社会科資料集', description: 'スリーカードのレベルアップ', price: 3, icon: 'NOTEBOOK|#ff9800' },
@@ -664,17 +646,25 @@ export const CONSUMABLES_LIBRARY: PokerConsumable[] = [
     { id: 'TXT_PE', type: 'PLANET', name: '体育のしおり', description: 'フルハウスのレベルアップ', price: 3, icon: 'NOTEBOOK|#795548' },
     { id: 'TXT_MUS', type: 'PLANET', name: '音楽の教科書', description: 'フォーカードのレベルアップ', price: 3, icon: 'NOTEBOOK|#00bcd4' },
     
-    // Tarots (Stationery) - Modify Cards
+    // Tarots (Stationery)
     { id: 'STA_RULER', type: 'TAROT', name: '金の定規', description: '選んだカード2枚のランクを上げる', price: 4, icon: 'SWORD|#FFD700' },
     { id: 'STA_ERASER', type: 'TAROT', name: '激落ち消しゴム', description: '選んだカード2枚をデッキから消す', price: 4, icon: 'SHIELD|#ffffff' },
     { id: 'STA_STICKER', type: 'TAROT', name: 'キラキラシール', description: '選んだカード1枚にボーナスチップ+50', price: 4, icon: 'GEM|#00e676' },
     { id: 'STA_MARKER', type: 'TAROT', name: '赤ペン', description: '選んだカード1枚を倍率x1.5にする', price: 4, icon: 'POTION|#f44336' },
     { id: 'STA_PAINT', type: 'TAROT', name: '絵の具セット', description: '選んだカード3枚をハートに変える', price: 4, icon: 'POTION|#e91e63' },
     { id: 'STA_INK', type: 'TAROT', name: '墨汁', description: '選んだカード3枚をスペードに変える', price: 4, icon: 'POTION|#212121' },
+    
+    // New Consumables (Enhancements)
+    { id: 'STA_GOLD_SPRAY', type: 'TAROT', name: '金のスプレー', description: 'カード1枚をゴールドカードにする(使用時$3獲得)', price: 5, icon: 'POTION|#FFD700' },
+    { id: 'STA_GLASS_WORK', type: 'TAROT', name: 'ガラス細工', description: 'カード1枚をグラスカードにする(倍率x2, 1/4で破壊)', price: 5, icon: 'POTION|#a5d6a7' },
+    { id: 'STA_STEEL_RULER', type: 'TAROT', name: '鉄の定規', description: 'カード1枚をスチールカードにする(手札にある間倍率x1.5)', price: 5, icon: 'SWORD|#607d8b' },
+    { id: 'STA_RAINBOW_PEN', type: 'TAROT', name: '虹色ペン', description: 'カード1枚をワイルドカードにする(全スート扱い)', price: 5, icon: 'POTION|#9c27b0' },
 ];
 
 export const PACK_LIBRARY: PokerPack[] = [
     { id: 'PACK_STD', name: '給食の余り', description: 'ランダムなトランプカード3枚入り。\n1枚選んでデッキに追加。', price: 4, type: 'STANDARD', size: 3, choose: 1, icon: 'BACKPACK|#ffcc80' },
+    { id: 'PACK_STD_PLUS', name: '大盛り給食', description: 'ランダムなトランプカード5枚入り。\n1枚選んでデッキに追加。', price: 6, type: 'STANDARD', size: 5, choose: 1, icon: 'BACKPACK|#ffb74d' },
     { id: 'PACK_BUFF', name: '文房具セット', description: 'ドリルや文房具が3つ入っている。\n1つ選んで手持ちに追加。', price: 6, type: 'BUFF', size: 3, choose: 1, icon: 'NOTEBOOK|#81d4fa' },
+    { id: 'PACK_BUFF_L', name: '高級文房具', description: 'ドリルや文房具が5つ入っている。\n1つ選んで手持ちに追加。', price: 8, type: 'BUFF', size: 5, choose: 1, icon: 'NOTEBOOK|#4fc3f7' },
     { id: 'PACK_SUPP', name: '部員勧誘', description: 'サポーターが3人入っている。\n1人選んで仲間にする。', price: 8, type: 'SUPPORTER', size: 3, choose: 1, icon: 'SMILE|#a5d6a7' },
 ];

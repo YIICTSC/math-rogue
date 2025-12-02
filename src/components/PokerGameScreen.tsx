@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -129,10 +130,12 @@ const generateRandomPlayingCard = (): PokerCard => {
     // Chance for enhancement
     if (Math.random() < 0.1) {
         const r = Math.random();
-        if (r < 0.3) { card.enhancement = 'BONUS'; card.bonusChips += 30; }
-        else if (r < 0.6) { card.enhancement = 'MULT'; card.multMultiplier += 0.5; }
-        else if (r < 0.8) { card.enhancement = 'GOLD'; } // Give money when played
-        else { card.enhancement = 'STEEL'; } // Mult when held
+        if (r < 0.2) { card.enhancement = 'BONUS'; card.bonusChips += 30; }
+        else if (r < 0.4) { card.enhancement = 'MULT'; card.multMultiplier += 0.5; }
+        else if (r < 0.6) { card.enhancement = 'GOLD'; } 
+        else if (r < 0.8) { card.enhancement = 'STEEL'; }
+        else if (r < 0.9) { card.enhancement = 'GLASS'; card.multMultiplier *= 2; }
+        else { card.enhancement = 'WILD'; }
     }
     return card;
 };
@@ -141,8 +144,19 @@ const getHandResult = (cards: PokerCard[]): { type: string, cards: PokerCard[] }
     if (cards.length === 0) return { type: 'HIGH_CARD', cards: [] };
     const sorted = [...cards].sort((a, b) => a.rank - b.rank);
     const ranks = sorted.map(c => c.rank);
-    const suits = sorted.map(c => c.suit);
-    const isFlush = cards.length >= 5 && suits.every(s => s === suits[0]);
+    
+    // Flush Check (Handling WILD)
+    let isFlush = false;
+    if (cards.length >= 5) {
+        for (const suit of SUITS) {
+            const suitCount = cards.filter(c => c.suit === suit || c.enhancement === 'WILD').length;
+            if (suitCount >= 5) {
+                isFlush = true;
+                break;
+            }
+        }
+    }
+
     let isStraight = false;
     // Simple straight check for 5 cards
     if (cards.length === 5) {
@@ -209,7 +223,8 @@ const getRankDisplay = (rank: PokerRank) => {
     return rank.toString();
 };
 
-const getSuitIcon = (suit: PokerSuit) => {
+const getSuitIcon = (suit: PokerSuit, isWild?: boolean) => {
+    if (isWild) return <Sparkles className="text-purple-400 fill-current animate-pulse" />;
     switch(suit) {
         case 'SPADE': return <Spade className="text-blue-400 fill-current" />;
         case 'HEART': return <Heart className="text-red-500 fill-current" />;
@@ -410,22 +425,41 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       if (animating || selectedCards.length === 0 || runState.handsRemaining <= 0) return;
       
       const playedCards = runState.hand.filter(c => selectedCards.includes(c.id));
+      const heldCards = runState.hand.filter(c => !selectedCards.includes(c.id));
       const { type, cards: scoringCards } = getHandResult(playedCards);
       
       const level = runState.handLevels[type] || 1;
       const baseStats = POKER_HAND_LEVELS[type];
       
       // Calculate Base from Level
-      let chips = baseStats.baseChips + (level - 1) * 10; // Simple scaling
+      let chips = baseStats.baseChips + (level - 1) * 10;
       let mult = baseStats.baseMult + (level - 1) * 1;
 
       // Card Scoring
+      let bonusMoney = 0;
+      const cardsToDestroy: string[] = [];
+
       scoringCards.forEach(c => {
           let val = c.rank;
           if (val > 10 && val < 14) val = 10;
           if (val === 14) val = 11;
           chips += val + c.bonusChips;
-          mult += (c.multMultiplier - 1); // e.g. 1.5 -> add 0.5
+          mult += (c.multMultiplier - 1); 
+          
+          if (c.enhancement === 'GLASS') {
+              mult *= 2;
+              if (Math.random() < 0.25) cardsToDestroy.push(c.id); // 1 in 4 chance to break
+          }
+          if (c.enhancement === 'GOLD') {
+              bonusMoney += 3;
+          }
+      });
+
+      // Held Card Effects (Steel)
+      heldCards.forEach(c => {
+          if (c.enhancement === 'STEEL') {
+              mult *= 1.5;
+          }
       });
 
       // Supporter Effects
@@ -452,10 +486,13 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
 
       const newScore = runState.currentScore + score;
       
-      // Move played cards to discardPile
-      let newHand = runState.hand.filter(c => !selectedCards.includes(c.id));
+      // Move played cards to discardPile (unless destroyed)
+      // Cards that were destroyed are completely removed from game
+      const remainingPlayedCards = playedCards.filter(c => !cardsToDestroy.includes(c.id));
+      
+      let newHand = heldCards;
       let currentDeck = [...runState.deck];
-      let newDiscardPile = [...runState.discardPile, ...playedCards];
+      let newDiscardPile = [...runState.discardPile, ...remainingPlayedCards];
       
       // Boss: The Hook (Discard random)
       if (runState.currentBlind.bossAbility === 'THE_HOOK') {
@@ -481,7 +518,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           hand: newHand,
           deck: currentDeck,
           discardPile: newDiscardPile,
-          handsRemaining: prev.handsRemaining - 1
+          handsRemaining: prev.handsRemaining - 1,
+          money: prev.money + bonusMoney
       }));
       setSelectedCards([]);
       setAnimating(false);
@@ -562,13 +600,15 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       items.push(supporters[0]);
       items.push(supporters[1]);
 
-      // 1 Consumable
+      // 2 Consumables (Increased)
       const consumables = [...CONSUMABLES_LIBRARY].sort(() => Math.random() - 0.5);
       items.push(consumables[0]);
+      items.push(consumables[1]);
 
-      // 1 Pack
+      // 2 Packs (Increased)
       const packs = [...PACK_LIBRARY].sort(() => Math.random() - 0.5);
       items.push(packs[0]);
+      items.push(packs[1]);
 
       setRunState(prev => ({ ...prev, shopInventory: items }));
   };
@@ -716,8 +756,12 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           if (selectedConsumable.id === 'STA_RULER') mod.rank = Math.min(14, mod.rank + 1) as PokerRank;
           if (selectedConsumable.id === 'STA_STICKER') { mod.bonusChips += 50; mod.enhancement = 'BONUS'; }
           if (selectedConsumable.id === 'STA_MARKER') { mod.multMultiplier = 1.5; mod.enhancement = 'MULT'; }
-          if (selectedConsumable.id === 'STA_PAINT') { mod.suit = 'HEART'; mod.enhancement = 'WILD'; } // Or just suit change
+          if (selectedConsumable.id === 'STA_PAINT') { mod.suit = 'HEART'; mod.enhancement = 'WILD'; } 
           if (selectedConsumable.id === 'STA_INK') { mod.suit = 'SPADE'; mod.enhancement = 'WILD'; }
+          if (selectedConsumable.id === 'STA_GOLD_SPRAY') { mod.enhancement = 'GOLD'; }
+          if (selectedConsumable.id === 'STA_GLASS_WORK') { mod.enhancement = 'GLASS'; mod.multMultiplier = 2; } // Assume base mult is 1, so set to 2.
+          if (selectedConsumable.id === 'STA_STEEL_RULER') { mod.enhancement = 'STEEL'; }
+          if (selectedConsumable.id === 'STA_RAINBOW_PEN') { mod.enhancement = 'WILD'; }
           // Eraser handles separately
           return mod;
       });
@@ -727,7 +771,6 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
               ...prev,
               hand: prev.hand.filter(c => !selectedCards.includes(c.id)), // Remove from hand
               deck: prev.deck, // It's gone from draw pile (well, effectively removed from game)
-              // NOTE: Cards removed here are NOT added to discardPile, so they are permanently gone.
               consumables: prev.consumables.filter(c => c !== selectedConsumable)
           }));
       } else {
@@ -849,7 +892,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                                                   <div className={`text-2xl font-bold w-full text-left ${['HEART', 'DIAMOND'].includes((item as PokerCard).suit) ? 'text-red-600' : 'text-black'}`}>
                                                       {getRankDisplay((item as PokerCard).rank)}
                                                   </div>
-                                                  <div className="scale-150">{getSuitIcon((item as PokerCard).suit)}</div>
+                                                  <div className="scale-150">{getSuitIcon((item as PokerCard).suit, (item as PokerCard).enhancement === 'WILD')}</div>
                                                   <div className="text-xs text-center font-bold text-gray-500">
                                                       {(item as PokerCard).enhancement || ''}
                                                   </div>
@@ -1191,7 +1234,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                                 </div>
                                 <div className="flex flex-wrap gap-1 flex-1 ml-4">
                                     {[...runState.deck, ...runState.hand, ...runState.discardPile]
-                                        .filter(c => c.suit === suit)
+                                        .filter(c => c.suit === suit || c.enhancement === 'WILD')
                                         .sort((a, b) => b.rank - a.rank)
                                         .map((card) => {
                                             const isInDeck = runState.deck.some(c => c.id === card.id);
@@ -1209,7 +1252,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                                                     <div className={`font-bold text-sm ${!isInDeck ? 'text-gray-600' : (['HEART', 'DIAMOND'].includes(card.suit) ? 'text-red-600' : 'text-black')}`}>
                                                         {getRankDisplay(card.rank)}
                                                     </div>
-                                                    <div className="scale-75 opacity-50">{getSuitIcon(card.suit)}</div>
+                                                    <div className="scale-75 opacity-50">{getSuitIcon(card.suit, card.enhancement === 'WILD')}</div>
                                                     
                                                     {/* Deck List Badges */}
                                                     {card.bonusChips > 0 && <div className="absolute top-0 right-0 text-[8px] bg-blue-500 text-white leading-none px-0.5 rounded-bl">+</div>}
@@ -1374,9 +1417,13 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                         data-card-id={card.id}
                         onPointerDown={(e) => handlePointerDown(e, card.id)}
                         className={`
-                            w-20 h-32 md:w-28 md:h-40 bg-gray-100 rounded-lg border-2 shadow-xl flex flex-col items-center justify-between p-2 cursor-pointer transition-transform duration-200 -ml-4 first:ml-0 relative
+                            w-20 h-32 md:w-28 md:h-40 rounded-lg border-2 shadow-xl flex flex-col items-center justify-between p-2 cursor-pointer transition-transform duration-200 -ml-4 first:ml-0 relative
                             ${isSelected ? '-translate-y-6 z-20 border-yellow-400 ring-2 ring-yellow-400' : 'border-gray-400 hover:-translate-y-2 z-10'}
                             ${selectedConsumable ? 'hover:ring-2 hover:ring-purple-400' : ''}
+                            ${card.enhancement === 'GOLD' ? 'bg-amber-100 border-amber-500' : ''}
+                            ${card.enhancement === 'STEEL' ? 'bg-slate-300 border-slate-500' : ''}
+                            ${card.enhancement === 'GLASS' ? 'bg-cyan-100/80 border-cyan-300 backdrop-blur-sm' : ''}
+                            ${!card.enhancement ? 'bg-gray-100' : ''}
                         `}
                     >
                         {/* Enhancement Badges */}
@@ -1391,18 +1438,22 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                             </div>
                         )}
 
-                        {/* Visual Styles for Enhancements (Future use) */}
-                        {card.enhancement === 'GOLD' && <div className="absolute inset-0 border-4 border-yellow-400 rounded-lg pointer-events-none opacity-50"></div>}
-
                         <div className="flex justify-between w-full">
                             <div className={`text-xl md:text-2xl font-bold ${['HEART', 'DIAMOND'].includes(card.suit) ? 'text-red-600' : 'text-slate-900'}`}>
                                 {getRankDisplay(card.rank)}
                             </div>
                         </div>
                         
-                        <div className="scale-150">{getSuitIcon(card.suit)}</div>
+                        <div className="scale-150">{getSuitIcon(card.suit, card.enhancement === 'WILD')}</div>
                         
                         <div className="self-end rotate-180 text-xl md:text-2xl font-bold opacity-30">{getRankDisplay(card.rank)}</div>
+                        
+                        {/* Status Label */}
+                        {card.enhancement && card.enhancement !== 'BONUS' && card.enhancement !== 'MULT' && (
+                            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[8px] font-bold uppercase tracking-wide bg-black/10 px-1 rounded">
+                                {card.enhancement}
+                            </div>
+                        )}
                     </div>
                 );
             })}
