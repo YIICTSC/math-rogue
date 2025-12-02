@@ -1,6 +1,7 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package, Search } from 'lucide-react';
+import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { 
@@ -283,7 +284,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   const [selectedConsumable, setSelectedConsumable] = useState<PokerConsumable | null>(null);
 
   // Inspection Modal State
-  const [inspectedItem, setInspectedItem] = useState<PokerSupporter | PokerConsumable | PokerCard | null>(null);
+  const [inspectedItem, setInspectedItem] = useState<PokerSupporter | PokerConsumable | null>(null);
   const longPressTimer = useRef<any>(null);
 
   // Sorting
@@ -342,7 +343,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   };
 
   // --- Tooltip/Inspection Handlers ---
-  const handleTouchStart = (item: PokerSupporter | PokerConsumable | PokerCard) => {
+  const handleTouchStart = (item: PokerSupporter | PokerConsumable) => {
       longPressTimer.current = setTimeout(() => {
           setInspectedItem(item);
       }, 500);
@@ -354,9 +355,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       }
   };
 
-  const handleContextMenu = (e: React.MouseEvent, item: PokerSupporter | PokerConsumable | PokerCard) => {
+  const handleContextMenu = (e: React.MouseEvent, item: PokerSupporter | PokerConsumable) => {
       e.preventDefault();
-      e.stopPropagation();
       setInspectedItem(item);
   };
 
@@ -791,48 +791,6 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   // Inspection Modal
   const renderInspectionModal = () => {
       if (!inspectedItem) return null;
-      
-      // Card Inspection
-      if ('suit' in inspectedItem) {
-          const card = inspectedItem as PokerCard;
-          let enhancementDesc = '';
-          if (card.enhancement === 'BONUS') enhancementDesc = "Bonus: +30 Chips";
-          if (card.enhancement === 'MULT') enhancementDesc = "Mult: +4 Mult"; // Adjusted desc to standard
-          if (card.enhancement === 'WILD') enhancementDesc = "Wild: Counts as any suit";
-          if (card.enhancement === 'GLASS') enhancementDesc = "Glass: X2 Mult, 1/4 chance to destroy";
-          if (card.enhancement === 'STEEL') enhancementDesc = "Steel: X1.5 Mult while in hand";
-          if (card.enhancement === 'STONE') enhancementDesc = "Stone: +50 Chips, no rank/suit";
-          if (card.enhancement === 'GOLD') enhancementDesc = "Gold: $3 if held at end of round";
-
-          return (
-            <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setInspectedItem(null)}>
-                <div className="bg-white border-4 border-slate-300 p-6 rounded-lg max-w-xs w-full shadow-2xl relative text-black text-center" onClick={e => e.stopPropagation()}>
-                    <button onClick={() => setInspectedItem(null)} className="absolute top-2 right-2 text-gray-400 hover:text-black"><X size={24}/></button>
-                    
-                    <div className="flex flex-col items-center mb-4 border-b border-gray-300 pb-4">
-                        <div className={`text-6xl font-bold mb-2 ${['HEART', 'DIAMOND'].includes(card.suit) ? 'text-red-600' : 'text-black'}`}>
-                            {getRankDisplay(card.rank)}
-                        </div>
-                        <div className="scale-200 mb-2">{getSuitIcon(card.suit, card.enhancement === 'WILD')}</div>
-                        <div className="text-sm font-bold text-gray-500 uppercase tracking-widest">{card.suit}</div>
-                    </div>
-
-                    <div className="bg-gray-100 p-2 rounded mb-2 text-sm">
-                        <div><span className="font-bold text-blue-600">Chips:</span> {card.rank} {card.bonusChips > 0 ? `+ ${card.bonusChips}` : ''}</div>
-                        {card.multMultiplier > 1 && <div><span className="font-bold text-red-600">Mult:</span> x{card.multMultiplier}</div>}
-                    </div>
-
-                    {card.enhancement && (
-                        <div className="bg-yellow-100 border border-yellow-300 p-2 rounded text-xs text-yellow-800 font-bold">
-                            {enhancementDesc}
-                        </div>
-                    )}
-                </div>
-            </div>
-          );
-      }
-
-      // Supporter/Consumable Inspection
       return (
           <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setInspectedItem(null)}>
               <div className="bg-slate-800 border-2 border-white p-6 rounded-lg max-w-sm w-full shadow-2xl relative" onClick={e => e.stopPropagation()}>
@@ -889,12 +847,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       if (phase === 'PACK_OPEN' && currentPack) {
           return (
               <div className="flex flex-col h-full w-full bg-slate-900 text-white p-4 items-center justify-center relative font-mono overflow-hidden">
-                  {renderInspectionModal()}
                   <div className="absolute inset-0 bg-black/80 z-0"></div>
                   
                   <div className="z-10 flex flex-col items-center w-full max-w-4xl">
                       <h2 className="text-3xl font-bold mb-8 text-yellow-400 animate-pulse">{isPackOpened ? "Choose One!" : "Open Pack!"}</h2>
-                      <p className="text-xs text-gray-400 mb-4 animate-pulse">(Long Press / Right Click to Inspect)</p>
                       
                       {!isPackOpened ? (
                           <div 
@@ -929,9 +885,6 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                                             ${disabled ? 'opacity-50 grayscale cursor-not-allowed' : ''}
                                         `}
                                         onClick={() => !disabled && selectPackItem(item)}
-                                        onContextMenu={(e) => handleContextMenu(e, item)}
-                                        onTouchStart={() => handleTouchStart(item)}
-                                        onTouchEnd={handleTouchEnd}
                                         style={{ transitionDelay: `${idx * 100}ms` }}
                                       >
                                           {isCard && (
@@ -940,16 +893,11 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                                                       {getRankDisplay((item as PokerCard).rank)}
                                                   </div>
                                                   <div className="scale-150">{getSuitIcon((item as PokerCard).suit, (item as PokerCard).enhancement === 'WILD')}</div>
-                                                  <div className="text-xs text-center font-bold text-gray-500 uppercase">
+                                                  <div className="text-xs text-center font-bold text-gray-500">
                                                       {(item as PokerCard).enhancement || ''}
                                                   </div>
                                                   <div className={`text-2xl font-bold w-full text-right rotate-180 ${['HEART', 'DIAMOND'].includes((item as PokerCard).suit) ? 'text-red-600' : 'text-black'}`}>
                                                       {getRankDisplay((item as PokerCard).rank)}
-                                                  </div>
-                                                  
-                                                  {/* Inspection Hint */}
-                                                  <div className="absolute top-1 right-1 opacity-20 hover:opacity-100 transition-opacity">
-                                                      <Search size={14} className="text-gray-400" />
                                                   </div>
                                               </div>
                                           )}
@@ -958,10 +906,6 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                                                   <PixelSprite seed={(item as any).icon} name={(item as any).icon} className="w-16 h-16 mb-2"/>
                                                   <div className="font-bold text-sm">{(item as any).name}</div>
                                                   <div className="text-[10px] text-gray-400 mt-2 leading-tight">{(item as any).description}</div>
-                                                  {/* Inspection Hint */}
-                                                  <div className="absolute top-1 right-1 opacity-20 hover:opacity-100 transition-opacity">
-                                                      <Search size={14} className="text-gray-400" />
-                                                  </div>
                                               </div>
                                           )}
                                           <button 
