@@ -28,7 +28,7 @@ import { audioService } from './services/audioService';
 import { generateFlavorText, generateEnemyName } from './services/geminiService';
 import { generateDungeonMap } from './services/mapGenerator';
 import { storageService } from './services/storageService';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap } from 'lucide-react';
 
 // --- HELPERS ---
 export const getUpgradedCard = (card: ICard): ICard => {
@@ -353,24 +353,46 @@ const App: React.FC = () => {
 
   const handleDebugStart = (deck: ICard[], relics: Relic[], potions: Potion[]) => {
         const map = generateDungeonMap();
+        setDebugLoadout({ deck, relics, potions });
+        
         setGameState(prev => ({
             ...prev,
             screen: GameScreen.MAP,
             act: 1,
             floor: 0,
+            turn: 0,
             map,
             currentMapNodeId: null,
             player: {
                 ...prev.player,
-                deck: deck.length > 0 ? deck : prev.player.deck,
-                relics: relics.length > 0 ? relics : prev.player.relics,
-                potions: potions.length > 0 ? potions : prev.player.potions,
+                deck: deck.length > 0 ? deck : createDeck(), // Use basic deck if none selected
+                relics: relics.length > 0 ? relics : [], // No relics if none selected
+                potions: potions.length > 0 ? potions : [],
                 maxHp: 999, // Debug buff
                 currentHp: isDebugHpOne ? 1 : 999,
                 maxEnergy: 9,
-                currentEnergy: 9
-            }
+                currentEnergy: 9,
+                gold: 9999,
+                hand: [],
+                discardPile: [],
+                drawPile: [],
+                powers: {},
+                relicCounters: {},
+                turnFlags: {},
+                floatingText: null,
+                nextTurnEnergy: 0,
+                nextTurnDraw: 0,
+                echoes: 0,
+                cardsPlayedThisTurn: 0,
+                attacksPlayedThisTurn: 0,
+            },
+            narrativeLog: ["デバッグモード開始"],
+            enemies: [],
+            selectedEnemyId: null,
+            rewards: [],
+            selectionState: { active: false, type: 'DISCARD', amount: 0 }
         }));
+        audioService.playBGM('menu');
   };
 
   const handleCharacterSelect = (char: Character) => {
@@ -1545,6 +1567,12 @@ const App: React.FC = () => {
                                 <Club className="mr-2" size={16}/> ミニゲーム：放課後ポーカー
                             </button>
 
+                            {(isDebugHpOne || isMathDebugSkipped) && (
+                                <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.DEBUG_MENU }))} className="w-full bg-gray-800 text-red-400 py-2 px-4 text-sm font-bold border border-red-500 hover:bg-gray-700 cursor-pointer flex items-center justify-center shadow-md mb-2">
+                                    <Zap className="mr-2" size={16}/> デバッグメニュー
+                                </button>
+                            )}
+
                             <div className="flex gap-2 w-full justify-between mt-2">
                                 <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.COMPENDIUM }))} className="flex-1 bg-gray-800 text-amber-500 py-2 text-[10px] font-bold border border-gray-600 hover:border-amber-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
                                     <BookOpen className="mb-1" size={18}/> 図鑑
@@ -1558,7 +1586,7 @@ const App: React.FC = () => {
                             </div>
 
                             <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                <Terminal size={10}/> v2.3.0
+                                <Terminal size={10}/> v2.3.1
                             </button>
                         </div>
                     </div>
@@ -1572,9 +1600,16 @@ const App: React.FC = () => {
                             className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2 select-none active:text-green-200"
                             onClick={handleLogTitleClick}
                         >
-                            System Update Log v2.3.0
+                            System Update Log v2.3.1
                         </h2>
                         <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                            <section>
+                                <h3 className="text-white font-bold mb-1">■ 修正 (Fix)</h3>
+                                <ul className="list-disc pl-5 space-y-1">
+                                    <li>デバッグメニューが正しく開始されない問題を修正しました。</li>
+                                    <li>デバッグメニューへのアクセスボタンを追加しました。</li>
+                                </ul>
+                            </section>
                             <section>
                                 <h3 className="text-white font-bold mb-1">■ ミニゲーム追加 (New Mini Game)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
