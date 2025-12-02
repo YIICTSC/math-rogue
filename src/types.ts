@@ -307,20 +307,6 @@ export interface PokerHandResult {
   level: number;
 }
 
-// Animation Step for Score Sequence
-export type ScoreStepType = 'BASE' | 'CARD' | 'SUPPORTER' | 'FINAL';
-export type ScoreOperationType = 'ADD_CHIPS' | 'ADD_MULT' | 'MULT_MULT';
-
-export interface ScoreStep {
-    id: string;
-    sourceName: string; // "High Card", "Ace of Spades", "Teacher", etc.
-    type: ScoreStepType;
-    operation?: ScoreOperationType;
-    value?: number; // Amount to add/multiply
-    triggerCardId?: string; // If related to a specific card on table
-    triggerSupporterId?: string; // If related to a supporter
-}
-
 export interface PokerSupporter { // Joker
   id: string;
   name: string;
@@ -360,8 +346,6 @@ export interface PokerScoringContext {
   handsPlayed: number;
   discardsUsed: number;
   deckState: PokerCard[];
-  // Function to register a scoring step for animation
-  registerStep: (step: Omit<ScoreStep, 'id'>) => void;
 }
 
 export interface PokerBlind {
