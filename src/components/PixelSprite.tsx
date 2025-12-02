@@ -11,7 +11,6 @@ interface PixelSpriteProps {
 // 16x16 Sprite Templates
 // . = Empty, # = Main Color, % = Secondary/Highlight, @ = Outline/Black
 const SPRITE_TEMPLATES: Record<string, string[]> = {
-  // --- EXISTING TEMPLATES ---
   SLIME: [
     "................",
     "................",
@@ -48,7 +47,6 @@ const SPRITE_TEMPLATES: Record<string, string[]> = {
     ".##.......##....",
     "................"
   ],
-  // NEW: Pompadour Hairstyle for "Senior/Delinquent"
   SENIOR: [
     "....########....",
     "...##########...",
@@ -67,7 +65,6 @@ const SPRITE_TEMPLATES: Record<string, string[]> = {
     ".##..........##.",
     "................"
   ],
-  // NEW: Long Hair / Pigtails for "Hanako/Girl"
   GIRL: [
     ".....######.....",
     "....########....",
@@ -86,7 +83,6 @@ const SPRITE_TEMPLATES: Record<string, string[]> = {
     "................",
     "................"
   ],
-  // NEW: Holding a Stick/Book for "Teacher"
   TEACHER: [
     "................",
     "......####......",
@@ -104,7 +100,6 @@ const SPRITE_TEMPLATES: Record<string, string[]> = {
     ".....##..##.#...",
     "....##....##....",
     "...##..........."],
-  // NEW: Bulky for "Gym Teacher / Boss"
   MUSCLE: [
     "................",
     "......####......",
@@ -482,7 +477,43 @@ const SPRITE_TEMPLATES: Record<string, string[]> = {
     "................",
     "................",
     "................"
-  ]
+  ],
+  BOX: [
+    "................",
+    "......####......",
+    ".....#%%%%#.....",
+    "....#%%%%%%#....",
+    "...#%%%%%%%%#...",
+    "...#%%%%%%%%#...",
+    "...#%%%%%%%%#...",
+    "...#%%%%%%%%#...",
+    "...#%%%%%%%%#...",
+    "...#%%%%%%%%#...",
+    "....#%%%%%%#....",
+    ".....#%%%%#.....",
+    "......####......",
+    "................",
+    "................",
+    "................"
+  ],
+  CIRCLE: [
+    "................",
+    "......####......",
+    "....##%%%%##....",
+    "...#%%%%%%%%#...",
+    "..#%%%%%%%%%%#..",
+    "..#%%%%%%%%%%#..",
+    "..#%%%%%%%%%%#..",
+    "..#%%%%%%%%%%#..",
+    "..#%%%%%%%%%%#..",
+    "...#%%%%%%%%#...",
+    "....##%%%%##....",
+    "......####......",
+    "................",
+    "................",
+    "................",
+    "................"
+  ],
 };
 
 const PixelSprite: React.FC<PixelSpriteProps> = ({ seed, name = "", className, size = 16 }) => {
@@ -523,8 +554,8 @@ const PixelSprite: React.FC<PixelSpriteProps> = ({ seed, name = "", className, s
     
     // School / Theme mapping
     if (n.includes('上級生') || n.includes('不良') || n.includes('不審者') || n.includes('番長')) spriteKey = 'SENIOR';
-    else if (n.includes('花子') || n.includes('少女') || n.includes('マネージャー')) spriteKey = 'GIRL';
-    else if (n.includes('体育') || n.includes('教頭') || n.includes('ボス') || n.includes('ガード')) spriteKey = 'MUSCLE';
+    else if (n.includes('花子') || n.includes('少女') || n.includes('マネージャー') || n.includes('アイドル')) spriteKey = 'GIRL';
+    else if (n.includes('体育') || n.includes('教頭') || n.includes('ガード') || n.includes('筋肉')) spriteKey = 'MUSCLE';
     else if (n.includes('先生') || n.includes('校長') || n.includes('顧問') || n.includes('医者')) spriteKey = 'TEACHER';
     else if (n.includes('用務員') || n.includes('PTA') || n.includes('大人')) spriteKey = 'HUMANOID'; // Default humanoid
     else if (n.includes('亡霊') || n.includes('幽霊') || n.includes('魂') || n.includes('影')) spriteKey = 'GHOST';
@@ -534,20 +565,22 @@ const PixelSprite: React.FC<PixelSpriteProps> = ({ seed, name = "", className, s
     else if (n.includes('カラス') || n.includes('ハチ') || n.includes('鳥')) spriteKey = 'FLIER';
     else if (n.includes('コウモリ')) spriteKey = 'BAT';
     else if (n.includes('鎧') || n.includes('三輪車') || n.includes('掃除') || n.includes('マシン')) spriteKey = 'ROBOT';
-    else if (n.includes('ノート') || n.includes('宿題') || n.includes('辞書') || n.includes('本')) spriteKey = 'NOTEBOOK';
-    else if (n.includes('ランドセル') || n.includes('バッグ')) spriteKey = 'BACKPACK';
-    else if (n.includes('上履き') || n.includes('靴')) spriteKey = 'SHOE';
-    else if (n.includes('王') || n.includes('古龍')) spriteKey = 'BOSS';
+    else if (n.includes('ノート') || n.includes('宿題') || n.includes('辞書') || n.includes('本') || n.includes('帳')) spriteKey = 'NOTEBOOK';
+    else if (n.includes('ランドセル') || n.includes('バッグ') || n.includes('箱')) spriteKey = 'BACKPACK';
+    else if (n.includes('上履き') || n.includes('靴') || n.includes('足')) spriteKey = 'SHOE';
+    else if (n.includes('王') || n.includes('古龍') || n.includes('ボス') || n.includes('神')) spriteKey = 'BOSS';
     else if (n.includes('悪魔') || n.includes('狂信者') || n.includes('ピエロ')) spriteKey = 'CULTIST';
     else if (n.includes('司祭') || n.includes('妖精') || n.includes('魔道士')) spriteKey = 'WIZARD';
     else if (n.includes('蜘蛛') || n.includes('ムカデ') || n.includes('虫') || n.includes('甲虫')) spriteKey = 'SPIDER';
     else if (n.includes('蛇') || n.includes('ミミズ') || n.includes('ツチノコ')) spriteKey = 'SNAKE';
-    else if (n.includes('花') || n.includes('草') || n.includes('キノコ') || n.includes('樹')) spriteKey = 'PLANT';
-    else if (n.includes('目玉') || n.includes('監視') || n.includes('ドローン')) spriteKey = 'EYE';
-    else if (n.includes('火の玉') || n.includes('エレメント') || n.includes('精霊')) spriteKey = 'FLAME';
-    else if (n.includes('盾') || n.includes('守り')) spriteKey = 'SHIELD';
-    else if (n.includes('剣') || n.includes('刃') || n.includes('ナイフ') || n.includes('包丁')) spriteKey = 'SWORD';
-    else if (n.includes('薬') || n.includes('瓶')) spriteKey = 'POTION';
+    else if (n.includes('花') || n.includes('草') || n.includes('キノコ') || n.includes('樹') || n.includes('種')) spriteKey = 'PLANT';
+    else if (n.includes('目玉') || n.includes('監視') || n.includes('ドローン') || n.includes('目')) spriteKey = 'EYE';
+    else if (n.includes('火') || n.includes('炎') || n.includes('ビーム') || n.includes('エレメント') || n.includes('精霊') || n.includes('電気') || n.includes('雷') || n.includes('爆発')) spriteKey = 'FLAME';
+    else if (n.includes('盾') || n.includes('守り') || n.includes('防御') || n.includes('ガード') || n.includes('鉄壁')) spriteKey = 'SHIELD';
+    else if (n.includes('剣') || n.includes('刃') || n.includes('ナイフ') || n.includes('包丁') || n.includes('えんぴつ') || n.includes('定規') || n.includes('針') || n.includes('ペン')) spriteKey = 'SWORD';
+    else if (n.includes('薬') || n.includes('瓶') || n.includes('給食') || n.includes('ドリンク') || n.includes('茶')) spriteKey = 'POTION';
+    else if (n.includes('ボール') || n.includes('玉') || n.includes('円')) spriteKey = 'CIRCLE';
+    else if (n.includes('消しゴム') || n.includes('ブロック') || n.includes('四角')) spriteKey = 'BOX';
     
     // Fallback if specific sprite key was passed directly (e.g. from synthesis result)
     if (SPRITE_TEMPLATES[shapeKeySource]) spriteKey = shapeKeySource;
@@ -577,19 +610,16 @@ const PixelSprite: React.FC<PixelSpriteProps> = ({ seed, name = "", className, s
     // Force specific colors for some types (Only if not synthesized)
     let palette = palettes[Math.abs(hash) % palettes.length];
     
-    // Only apply theme colors if we are NOT using a composite key (which implies specific color override)
-    if (nameParts.length === 1) {
-        const c = colorKeySource;
-        if (c.includes('先生') || c.includes('悪魔') || c.includes('怒') || c.includes('ランドセル') || c.includes('炎') || c.includes('リンゴ')) palette = palettes[1]; // Red
-        else if (c.includes('スライム') || c.includes('水') || c.includes('三輪車') || c.includes('氷')) palette = palettes[2]; // Blue
-        else if (c.includes('カス') || c.includes('骸骨') || c.includes('模型') || c.includes('ゴーレム') || c.includes('石')) palette = palettes[3]; // Grey
-        else if (c.includes('花子') || c.includes('幽霊') || c.includes('毒') || c.includes('紫')) palette = palettes[4]; // Purple
-        else if (c.includes('犬') || c.includes('ハムスター') || c.includes('机') || c.includes('木')) palette = palettes[5]; // Brown
-        else if (c.includes('カラス') || c.includes('墨') || c.includes('影') || c.includes('上級生') || c.includes('不良')) palette = ['#212121', '#424242', '#000000']; // Black
-        else if (c.includes('チョーク') || c.includes('ノート') || c.includes('上履き') || c.includes('雪')) palette = ['#EEEEEE', '#FFFFFF', '#BDBDBD']; // White
-        else if (c.includes('虫') || c.includes('草') || c.includes('森')) palette = palettes[0]; // Green
-        else if (c.includes('電気') || c.includes('光') || c.includes('金')) palette = palettes[7]; // Yellow
-    }
+    // Always apply theme colors logic if keywords found in colorKeySource
+    const c = colorKeySource;
+    if (c.includes('火') || c.includes('炎') || c.includes('赤') || c.includes('血') || c.includes('怒') || c.includes('爆') || c.includes('先生') || c.includes('悪魔') || c.includes('ランドセル')) palette = palettes[1]; // Red
+    else if (c.includes('水') || c.includes('青') || c.includes('氷') || c.includes('冷') || c.includes('涙') || c.includes('スライム') || c.includes('三輪車')) palette = palettes[2]; // Blue
+    else if (c.includes('草') || c.includes('緑') || c.includes('毒') || c.includes('カビ') || c.includes('虫') || c.includes('森')) palette = palettes[0]; // Green
+    else if (c.includes('光') || c.includes('雷') || c.includes('金') || c.includes('黄') || c.includes('電気')) palette = palettes[7]; // Yellow
+    else if (c.includes('闇') || c.includes('黒') || c.includes('影') || c.includes('夜') || c.includes('カラス') || c.includes('墨') || c.includes('上級生') || c.includes('不良')) palette = ['#212121', '#424242', '#000000']; // Black/Dark
+    else if (c.includes('白') || c.includes('雪') || c.includes('雲') || c.includes('紙') || c.includes('チョーク') || c.includes('骨') || c.includes('ノート') || c.includes('上履き') || c.includes('カス') || c.includes('骸骨') || c.includes('模型')) palette = ['#EEEEEE', '#FFFFFF', '#BDBDBD']; // White
+    else if (c.includes('紫') || c.includes('魔') || c.includes('呪') || c.includes('花子') || c.includes('幽霊')) palette = palettes[4]; // Purple
+    else if (c.includes('茶') || c.includes('土') || c.includes('犬') || c.includes('ハムスター') || c.includes('机') || c.includes('木')) palette = palettes[5]; // Brown
 
     const mainColor = palette[0];
     const highlightColor = palette[1];

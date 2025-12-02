@@ -20,7 +20,6 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
   const [synthCards, setSynthCards] = useState<ICard[]>([]);
   const [resultCard, setResultCard] = useState<ICard | null>(null);
   
-  // 50% chance for Science Room to be open
   const [isScienceRoomOpen] = useState(() => Math.random() < 0.5);
 
   const healAmount = Math.floor(player.maxHp * 0.3);
@@ -55,7 +54,6 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
           setMessage("このカードを改良しますか？");
       } else if (mode === 'SYNTHESIS') {
           if (synthCards.find(c => c.id === card.id)) {
-              // Deselect
               setSynthCards(synthCards.filter(c => c.id !== card.id));
           } else {
               if (synthCards.length < 2) {
@@ -122,7 +120,6 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
 
             {mode === 'CHOICE' && (
                 <div className="flex flex-wrap justify-center gap-4 md:gap-8">
-                    {/* Health Room (Rest) */}
                     <button 
                         onClick={handleRest}
                         className="group flex flex-col items-center gap-2 p-4 border-2 border-gray-600 hover:border-green-500 rounded-lg hover:bg-gray-800 transition-all w-32 md:w-40"
@@ -132,7 +129,6 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                         <span className="text-xs text-gray-400">HP {healAmount} 回復</span>
                     </button>
 
-                    {/* Art Room (Upgrade) */}
                     <button 
                         onClick={handleSmithChoice}
                         className="group flex flex-col items-center gap-2 p-4 border-2 border-gray-600 hover:border-yellow-500 rounded-lg hover:bg-gray-800 transition-all w-32 md:w-40"
@@ -142,7 +138,6 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                         <span className="text-xs text-gray-400">カード強化</span>
                     </button>
 
-                    {/* Science Room (Synthesis) - 50% Chance */}
                     <button 
                         onClick={handleSynthesizeChoice}
                         disabled={!isScienceRoomOpen}
