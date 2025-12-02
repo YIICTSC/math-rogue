@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight } from 'lucide-react';
+import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { 
@@ -617,10 +617,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           
           let mod = { ...c };
           if (selectedConsumable.id === 'STA_RULER') mod.rank = Math.min(14, mod.rank + 1) as PokerRank;
-          if (selectedConsumable.id === 'STA_STICKER') mod.bonusChips += 50;
-          if (selectedConsumable.id === 'STA_MARKER') mod.multMultiplier = 1.5;
-          if (selectedConsumable.id === 'STA_PAINT') mod.suit = 'HEART';
-          if (selectedConsumable.id === 'STA_INK') mod.suit = 'SPADE';
+          if (selectedConsumable.id === 'STA_STICKER') { mod.bonusChips += 50; mod.enhancement = 'BONUS'; }
+          if (selectedConsumable.id === 'STA_MARKER') { mod.multMultiplier = 1.5; mod.enhancement = 'MULT'; }
+          if (selectedConsumable.id === 'STA_PAINT') { mod.suit = 'HEART'; mod.enhancement = 'WILD'; } // Or just suit change
+          if (selectedConsumable.id === 'STA_INK') { mod.suit = 'SPADE'; mod.enhancement = 'WILD'; }
           // Eraser handles separately
           return mod;
       });
@@ -983,7 +983,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                                                 <div 
                                                     key={card.id} 
                                                     className={`
-                                                        rounded p-1 flex flex-col items-center justify-center h-14 w-10 text-xs border-2 transition-all
+                                                        rounded p-1 flex flex-col items-center justify-center h-14 w-10 text-xs border-2 transition-all relative overflow-hidden
                                                         ${isInDeck 
                                                             ? 'bg-gray-100 border-gray-300 text-black shadow-md' 
                                                             : 'bg-black border-gray-700 text-gray-600 opacity-60 grayscale'}
@@ -994,9 +994,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                                                         {getRankDisplay(card.rank)}
                                                     </div>
                                                     <div className="scale-75 opacity-50">{getSuitIcon(card.suit)}</div>
-                                                    {card.enhancement && (
-                                                        <div className="absolute top-0 right-0 w-2 h-2 bg-purple-500 rounded-full"></div>
-                                                    )}
+                                                    
+                                                    {/* Deck List Badges */}
+                                                    {card.bonusChips > 0 && <div className="absolute top-0 right-0 text-[8px] bg-blue-500 text-white leading-none px-0.5 rounded-bl">+</div>}
+                                                    {card.multMultiplier > 1 && <div className="absolute top-0 left-0 text-[8px] bg-red-500 text-white leading-none px-0.5 rounded-br">x</div>}
                                                 </div>
                                             );
                                         })}
@@ -1162,12 +1163,29 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                             ${selectedConsumable ? 'hover:ring-2 hover:ring-purple-400' : ''}
                         `}
                     >
-                        {card.enhancement === 'BONUS' && <div className="absolute top-1 right-1 text-xs text-blue-600 font-bold">+50</div>}
-                        {card.suit === 'HEART' || card.suit === 'DIAMOND' ? 
-                            <div className="text-red-600 font-bold text-xl md:text-2xl self-start">{getRankDisplay(card.rank)}</div> : 
-                            <div className="text-slate-900 font-bold text-xl md:text-2xl self-start">{getRankDisplay(card.rank)}</div>
-                        }
+                        {/* Enhancement Badges */}
+                        {card.bonusChips > 0 && (
+                            <div className="absolute -top-2 -right-2 bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-md z-30 border border-white">
+                                +{card.bonusChips}
+                            </div>
+                        )}
+                        {card.multMultiplier > 1 && (
+                            <div className="absolute -top-2 -left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-md z-30 border border-white">
+                                x{card.multMultiplier}
+                            </div>
+                        )}
+
+                        {/* Visual Styles for Enhancements (Future use) */}
+                        {card.enhancement === 'GOLD' && <div className="absolute inset-0 border-4 border-yellow-400 rounded-lg pointer-events-none opacity-50"></div>}
+
+                        <div className="flex justify-between w-full">
+                            <div className={`text-xl md:text-2xl font-bold ${['HEART', 'DIAMOND'].includes(card.suit) ? 'text-red-600' : 'text-slate-900'}`}>
+                                {getRankDisplay(card.rank)}
+                            </div>
+                        </div>
+                        
                         <div className="scale-150">{getSuitIcon(card.suit)}</div>
+                        
                         <div className="self-end rotate-180 text-xl md:text-2xl font-bold opacity-30">{getRankDisplay(card.rank)}</div>
                     </div>
                 );
