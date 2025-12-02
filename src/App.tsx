@@ -1692,6 +1692,11 @@ const App: React.FC = () => {
       let description = parts.join("。") + (parts.length > 0 ? "。" : "");
       if (parts.length === 0) description = "効果なし。";
 
+      // New: Composite Texture Logic
+      const shapeSource = c1.textureRef ? c1.textureRef.split('|')[0] : c1.name;
+      const colorSource = c2.textureRef ? (c2.textureRef.split('|')[1] || c2.textureRef.split('|')[0]) : c2.name;
+      const newTextureRef = `${shapeSource}|${colorSource}`;
+
       const newCard: ICard = {
           id: `synth-${Date.now()}`,
           name: newName,
@@ -1712,7 +1717,7 @@ const App: React.FC = () => {
           selfDamage: newSelfDamage || undefined,
           exhaust: newExhaust,
           innate: newInnate,
-          textureRef: c1.textureRef || c1.name 
+          textureRef: newTextureRef
       };
       
       setGameState(prev => ({
@@ -1822,7 +1827,7 @@ const App: React.FC = () => {
                             </div>
 
                             <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                <Terminal size={10}/> v2.3.2
+                                <Terminal size={10}/> v2.4.0
                             </button>
                         </div>
                     </div>
@@ -1836,16 +1841,15 @@ const App: React.FC = () => {
                             className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2 select-none active:text-green-200"
                             onClick={handleLogTitleClick}
                         >
-                            System Update Log v2.3.2
+                            System Update Log v2.4.0
                         </h2>
                         <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
                             <section>
-                                <h3 className="text-white font-bold mb-1">■ 修正 (Fix)</h3>
+                                <h3 className="text-white font-bold mb-1">■ アップデート (Update)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li>戦闘終了時の報酬画面フローを改善しました。</li>
-                                    <li>勝利画面をスキップし、直接算数チャレンジへ移行します。</li>
-                                    <li>獲得ゴールドを合算して表示するように変更しました。</li>
-                                    <li>カード合成時の効果テキストを詳細に表示するように修正しました。</li>
+                                    <li>カード合成時のイラストロジックを一新しました。</li>
+                                    <li>合成カードは、元となるカードの形状と、2枚目のカードの色を受け継ぐようになりました。</li>
+                                    <li>PixelSpriteの生成ロジックを拡張し、より多様なカード名に対応しました。</li>
                                 </ul>
                             </section>
                         </div>
