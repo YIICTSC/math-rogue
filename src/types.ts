@@ -1,5 +1,4 @@
 
-
 export enum CardType {
   ATTACK = 'ATTACK',
   SKILL = 'SKILL',
@@ -328,6 +327,17 @@ export interface PokerConsumable { // Tarot / Planet / Spectral
   icon: string;
 }
 
+export interface PokerPack {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    type: 'STANDARD' | 'BUFF' | 'SUPPORTER';
+    size: number; // How many cards revealed
+    choose: number; // How many to pick
+    icon: string;
+}
+
 export interface PokerScoringContext {
   chips: number;
   mult: number;
@@ -365,5 +375,5 @@ export interface PokerRunState {
     discardPile: PokerCard[]; // Add discardPile to track cards during blind
     
     // Shop state
-    shopInventory: (PokerSupporter | PokerConsumable)[];
+    shopInventory: (PokerSupporter | PokerConsumable | PokerPack)[];
 }

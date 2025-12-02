@@ -1,10 +1,5 @@
 
-
-
-
-
-
-import { Card, CardType, TargetType, Relic, Potion, Character, PokerHandResult, PokerSupporter, PokerConsumable } from './types';
+import { Card, CardType, TargetType, Relic, Potion, Character, PokerHandResult, PokerSupporter, PokerConsumable, PokerPack } from './types';
 
 export const INITIAL_HP = 75;
 export const INITIAL_ENERGY = 3;
@@ -676,4 +671,10 @@ export const CONSUMABLES_LIBRARY: PokerConsumable[] = [
     { id: 'STA_MARKER', type: 'TAROT', name: '赤ペン', description: '選んだカード1枚を倍率x1.5にする', price: 4, icon: 'POTION|#f44336' },
     { id: 'STA_PAINT', type: 'TAROT', name: '絵の具セット', description: '選んだカード3枚をハートに変える', price: 4, icon: 'POTION|#e91e63' },
     { id: 'STA_INK', type: 'TAROT', name: '墨汁', description: '選んだカード3枚をスペードに変える', price: 4, icon: 'POTION|#212121' },
+];
+
+export const PACK_LIBRARY: PokerPack[] = [
+    { id: 'PACK_STD', name: '給食の余り', description: 'ランダムなトランプカード3枚入り。\n1枚選んでデッキに追加。', price: 4, type: 'STANDARD', size: 3, choose: 1, icon: 'BACKPACK|#ffcc80' },
+    { id: 'PACK_BUFF', name: '文房具セット', description: 'ドリルや文房具が3つ入っている。\n1つ選んで手持ちに追加。', price: 6, type: 'BUFF', size: 3, choose: 1, icon: 'NOTEBOOK|#81d4fa' },
+    { id: 'PACK_SUPP', name: '部員勧誘', description: 'サポーターが3人入っている。\n1人選んで仲間にする。', price: 8, type: 'SUPPORTER', size: 3, choose: 1, icon: 'SMILE|#a5d6a7' },
 ];

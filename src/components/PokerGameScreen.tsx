@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { 
-    PokerCard, PokerRunState, PokerBlind, PokerSupporter, PokerConsumable, PokerSuit, PokerRank, PokerScoringContext
+    PokerCard, PokerRunState, PokerBlind, PokerSupporter, PokerConsumable, PokerSuit, PokerRank, PokerScoringContext, PokerPack
 } from '../types';
-import { POKER_HAND_LEVELS, SUPPORTERS_LIBRARY, CONSUMABLES_LIBRARY } from '../constants';
+import { POKER_HAND_LEVELS, SUPPORTERS_LIBRARY, CONSUMABLES_LIBRARY, PACK_LIBRARY } from '../constants';
 
 // --- Constants & Helpers ---
 const SUITS: PokerSuit[] = ['SPADE', 'HEART', 'DIAMOND', 'CLUB'];
@@ -114,6 +114,29 @@ const createDeck = (): PokerCard[] => {
     return deck.sort(() => Math.random() - 0.5);
 };
 
+const generateRandomPlayingCard = (): PokerCard => {
+    const suit = SUITS[Math.floor(Math.random() * SUITS.length)];
+    const rank = RANKS[Math.floor(Math.random() * RANKS.length)];
+    const card: PokerCard = {
+        id: `pack-${suit}-${rank}-${Date.now()}-${Math.random()}`,
+        suit,
+        rank,
+        isSelected: false,
+        bonusChips: 0,
+        multMultiplier: 1
+    };
+    
+    // Chance for enhancement
+    if (Math.random() < 0.1) {
+        const r = Math.random();
+        if (r < 0.3) { card.enhancement = 'BONUS'; card.bonusChips += 30; }
+        else if (r < 0.6) { card.enhancement = 'MULT'; card.multMultiplier += 0.5; }
+        else if (r < 0.8) { card.enhancement = 'GOLD'; } // Give money when played
+        else { card.enhancement = 'STEEL'; } // Mult when held
+    }
+    return card;
+};
+
 const getHandResult = (cards: PokerCard[]): { type: string, cards: PokerCard[] } => {
     if (cards.length === 0) return { type: 'HIGH_CARD', cards: [] };
     const sorted = [...cards].sort((a, b) => a.rank - b.rank);
@@ -210,7 +233,7 @@ interface PokerGameScreenProps {
 
 const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   // --- Game State ---
-  const [phase, setPhase] = useState<'BLIND_SELECT' | 'PLAY' | 'SHOP' | 'GAME_OVER' | 'VICTORY'>('BLIND_SELECT');
+  const [phase, setPhase] = useState<'BLIND_SELECT' | 'PLAY' | 'SHOP' | 'PACK_OPEN' | 'GAME_OVER' | 'VICTORY'>('BLIND_SELECT');
   const [runState, setRunState] = useState<PokerRunState>({
       deck: [],
       money: 4,
@@ -228,6 +251,11 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       discardPile: [],
       shopInventory: []
   });
+
+  // Pack Logic
+  const [currentPack, setCurrentPack] = useState<PokerPack | null>(null);
+  const [packContent, setPackContent] = useState<(PokerCard | PokerSupporter | PokerConsumable)[]>([]);
+  const [isPackOpened, setIsPackOpened] = useState(false);
 
   // Play Animation State
   const [lastHandScore, setLastHandScore] = useState<{chips: number, mult: number, total: number, name: string} | null>(null);
@@ -527,25 +555,35 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
 
   // --- Shop Logic ---
   const generateShop = () => {
-      const items: (PokerSupporter | PokerConsumable)[] = [];
+      const items: (PokerSupporter | PokerConsumable | PokerPack)[] = [];
       
       // 2 Supporters
       const supporters = [...SUPPORTERS_LIBRARY].sort(() => Math.random() - 0.5);
       items.push(supporters[0]);
       items.push(supporters[1]);
 
-      // 2 Consumables
+      // 1 Consumable
       const consumables = [...CONSUMABLES_LIBRARY].sort(() => Math.random() - 0.5);
       items.push(consumables[0]);
-      items.push(consumables[1]);
+
+      // 1 Pack
+      const packs = [...PACK_LIBRARY].sort(() => Math.random() - 0.5);
+      items.push(packs[0]);
 
       setRunState(prev => ({ ...prev, shopInventory: items }));
   };
 
-  const buyItem = (item: PokerSupporter | PokerConsumable, index: number) => {
+  const buyItem = (item: PokerSupporter | PokerConsumable | PokerPack, index: number) => {
       if (runState.money < item.price) return;
       
-      if ('rarity' in item) { // Is Supporter
+      if ('size' in item) { // Is Pack
+          setRunState(prev => ({
+              ...prev,
+              money: prev.money - item.price,
+              shopInventory: prev.shopInventory.filter((_, i) => i !== index)
+          }));
+          openPack(item as PokerPack);
+      } else if ('rarity' in item) { // Is Supporter
           if (runState.supporters.length >= 5) return; // Limit
           setRunState(prev => ({
               ...prev,
@@ -563,6 +601,65 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           }));
       }
       audioService.playSound('select');
+  };
+
+  // --- Pack Logic ---
+  const openPack = (pack: PokerPack) => {
+      setCurrentPack(pack);
+      setIsPackOpened(false);
+      setPhase('PACK_OPEN');
+      setPackContent([]); // Reset content
+  };
+
+  const revealPack = () => {
+      if (!currentPack) return;
+      
+      audioService.playSound('attack'); // Ripping sound
+      setIsPackOpened(true);
+      
+      // Generate Content
+      const content: (PokerCard | PokerSupporter | PokerConsumable)[] = [];
+      for (let i = 0; i < currentPack.size; i++) {
+          if (currentPack.type === 'STANDARD') {
+              content.push(generateRandomPlayingCard());
+          } else if (currentPack.type === 'BUFF') {
+              const pool = [...CONSUMABLES_LIBRARY];
+              content.push(pool[Math.floor(Math.random() * pool.length)]);
+          } else if (currentPack.type === 'SUPPORTER') {
+              const pool = [...SUPPORTERS_LIBRARY];
+              content.push(pool[Math.floor(Math.random() * pool.length)]);
+          }
+      }
+      setPackContent(content);
+  };
+
+  const selectPackItem = (item: PokerCard | PokerSupporter | PokerConsumable) => {
+      // Add item to run state
+      if ('suit' in item) {
+          // Card -> Add to Deck
+          setRunState(prev => ({
+              ...prev,
+              deck: [...prev.deck, item as PokerCard]
+          }));
+      } else if ('rarity' in item) {
+          // Supporter -> Add if space
+          if (runState.supporters.length >= 5) return; // UI should handle disabling
+          setRunState(prev => ({
+              ...prev,
+              supporters: [...prev.supporters, item as PokerSupporter]
+          }));
+      } else {
+          // Consumable -> Add if space
+          if (runState.consumables.length >= 2) return;
+          setRunState(prev => ({
+              ...prev,
+              consumables: [...prev.consumables, item as PokerConsumable]
+          }));
+      }
+      
+      audioService.playSound('select');
+      setPhase('SHOP'); // Return to shop
+      setCurrentPack(null);
   };
 
   const nextBlind = () => {
@@ -701,10 +798,98 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       );
   }
 
-  // 2. Shop Screen
-  if (phase === 'SHOP') {
+  // 2. Shop & Pack Open Screen
+  if (phase === 'SHOP' || phase === 'PACK_OPEN') {
+      // Pack Open Overlay
+      if (phase === 'PACK_OPEN' && currentPack) {
+          return (
+              <div className="flex flex-col h-full w-full bg-slate-900 text-white p-4 items-center justify-center relative font-mono overflow-hidden">
+                  <div className="absolute inset-0 bg-black/80 z-0"></div>
+                  
+                  <div className="z-10 flex flex-col items-center w-full max-w-4xl">
+                      <h2 className="text-3xl font-bold mb-8 text-yellow-400 animate-pulse">{isPackOpened ? "Choose One!" : "Open Pack!"}</h2>
+                      
+                      {!isPackOpened ? (
+                          <div 
+                            className="cursor-pointer hover:scale-110 transition-transform animate-bounce relative"
+                            onClick={revealPack}
+                          >
+                              <div className="w-48 h-64 bg-gradient-to-br from-yellow-600 to-yellow-800 rounded-lg border-4 border-yellow-300 shadow-[0_0_50px_rgba(253,224,71,0.5)] flex flex-col items-center justify-center p-4 text-center">
+                                  <div className="text-6xl mb-4">
+                                      <PixelSprite seed={currentPack.icon} name={currentPack.icon} className="w-24 h-24"/>
+                                  </div>
+                                  <div className="text-2xl font-black text-white drop-shadow-md">{currentPack.name}</div>
+                                  <div className="text-sm text-yellow-200 mt-2">{currentPack.description}</div>
+                              </div>
+                          </div>
+                      ) : (
+                          <div className="flex flex-wrap justify-center gap-6 animate-in zoom-in duration-500">
+                              {packContent.map((item, idx) => {
+                                  const isCard = 'suit' in item;
+                                  const isSupporter = 'rarity' in item;
+                                  const isConsumable = !isCard && !isSupporter;
+                                  
+                                  // Determine disabled state based on limits
+                                  let disabled = false;
+                                  if (isSupporter && runState.supporters.length >= 5) disabled = true;
+                                  if (isConsumable && runState.consumables.length >= 2) disabled = true;
+
+                                  return (
+                                      <div 
+                                        key={idx} 
+                                        className={`
+                                            relative cursor-pointer transition-transform hover:-translate-y-4 duration-300
+                                            ${disabled ? 'opacity-50 grayscale cursor-not-allowed' : ''}
+                                        `}
+                                        onClick={() => !disabled && selectPackItem(item)}
+                                        style={{ transitionDelay: `${idx * 100}ms` }}
+                                      >
+                                          {isCard && (
+                                              <div className="w-32 h-48 bg-white text-black rounded-lg border-4 border-slate-300 shadow-xl flex flex-col items-center justify-between p-2">
+                                                  <div className={`text-2xl font-bold w-full text-left ${['HEART', 'DIAMOND'].includes((item as PokerCard).suit) ? 'text-red-600' : 'text-black'}`}>
+                                                      {getRankDisplay((item as PokerCard).rank)}
+                                                  </div>
+                                                  <div className="scale-150">{getSuitIcon((item as PokerCard).suit)}</div>
+                                                  <div className="text-xs text-center font-bold text-gray-500">
+                                                      {(item as PokerCard).enhancement || ''}
+                                                  </div>
+                                                  <div className={`text-2xl font-bold w-full text-right rotate-180 ${['HEART', 'DIAMOND'].includes((item as PokerCard).suit) ? 'text-red-600' : 'text-black'}`}>
+                                                      {getRankDisplay((item as PokerCard).rank)}
+                                                  </div>
+                                              </div>
+                                          )}
+                                          {!isCard && (
+                                              <div className="w-32 h-48 bg-slate-800 text-white rounded-lg border-4 border-blue-400 shadow-xl flex flex-col items-center justify-center p-2 text-center">
+                                                  <PixelSprite seed={(item as any).icon} name={(item as any).icon} className="w-16 h-16 mb-2"/>
+                                                  <div className="font-bold text-sm">{(item as any).name}</div>
+                                                  <div className="text-[10px] text-gray-400 mt-2 leading-tight">{(item as any).description}</div>
+                                              </div>
+                                          )}
+                                          <button 
+                                            className={`absolute -bottom-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold shadow-lg ${disabled ? 'bg-gray-600 text-gray-300' : 'bg-blue-600 text-white animate-pulse'}`}
+                                          >
+                                              {disabled ? 'FULL' : 'SELECT'}
+                                          </button>
+                                      </div>
+                                  );
+                              })}
+                          </div>
+                      )}
+
+                      <button 
+                        onClick={() => { setPhase('SHOP'); setCurrentPack(null); }}
+                        className="mt-12 text-gray-400 hover:text-white border-b border-transparent hover:border-white transition-colors"
+                      >
+                          Skip
+                      </button>
+                  </div>
+              </div>
+          );
+      }
+
       const shopSupporters = runState.shopInventory.filter(i => 'rarity' in i) as PokerSupporter[];
-      const shopConsumables = runState.shopInventory.filter(i => !('rarity' in i)) as PokerConsumable[];
+      const shopConsumables = runState.shopInventory.filter(i => !('rarity' in i) && !('size' in i)) as PokerConsumable[];
+      const shopPacks = runState.shopInventory.filter(i => 'size' in i) as PokerPack[];
 
       return (
           <div className="flex flex-col h-full w-full bg-slate-900 text-white p-4 font-mono relative">
@@ -721,6 +906,37 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
               <div className="flex-grow flex gap-4 overflow-hidden">
                   <div className="w-2/3 bg-slate-800/50 p-4 rounded-lg border-2 border-slate-700 overflow-y-auto custom-scrollbar">
                       
+                      {/* Packs Section (New) */}
+                      <div className="mb-8">
+                          <h3 className="text-xl font-bold mb-4 text-orange-400 border-b border-slate-600 pb-2 flex items-center">
+                              <Package className="mr-2"/> ブースターパック (Packs)
+                          </h3>
+                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                              {shopPacks.map((item) => (
+                                  <div 
+                                    key={item.id} 
+                                    className="bg-slate-700 p-4 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors"
+                                    onClick={() => buyItem(item, runState.shopInventory.indexOf(item))}
+                                  >
+                                      <div className="w-16 h-16 mb-2">
+                                          <PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/>
+                                      </div>
+                                      <div className="font-bold text-sm mb-1">{item.name}</div>
+                                      <div className="text-xs text-gray-400 mb-2 h-8 overflow-hidden">{item.description}</div>
+                                      <div className="mt-auto w-full">
+                                          <button 
+                                            disabled={runState.money < item.price}
+                                            className={`w-full py-1 rounded font-bold text-sm ${runState.money >= item.price ? 'bg-orange-600 hover:bg-orange-500' : 'bg-gray-600 cursor-not-allowed'}`}
+                                          >
+                                              ${item.price} OPEN
+                                          </button>
+                                      </div>
+                                  </div>
+                              ))}
+                              {shopPacks.length === 0 && <div className="text-gray-500 italic">No Packs Available</div>}
+                          </div>
+                      </div>
+
                       {/* Supporters Section */}
                       <div className="mb-8">
                           <h3 className="text-xl font-bold mb-4 text-blue-300 border-b border-slate-600 pb-2 flex items-center">
