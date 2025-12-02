@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package, Ghost } from 'lucide-react';
+import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { 
@@ -131,8 +131,8 @@ const generateRandomPlayingCard = (): PokerCard => {
         const r = Math.random();
         if (r < 0.3) { card.enhancement = 'BONUS'; card.bonusChips += 30; }
         else if (r < 0.6) { card.enhancement = 'MULT'; card.multMultiplier += 0.5; }
-        else if (r < 0.8) { card.enhancement = 'GOLD'; } 
-        else { card.enhancement = 'STEEL'; } 
+        else if (r < 0.8) { card.enhancement = 'GOLD'; } // Give money when played
+        else { card.enhancement = 'STEEL'; } // Mult when held
     }
     return card;
 };
@@ -164,32 +164,40 @@ const getHandResult = (cards: PokerCard[]): { type: string, cards: PokerCard[] }
         return { type: 'STRAIGHT_FLUSH', cards: sorted };
     }
     
+    // Four of a Kind
     if (countsValues[0] === 4) {
         const rank = Object.keys(counts).find(key => counts[Number(key)] === 4);
         return { type: 'FOUR_OF_A_KIND', cards: sorted.filter(c => c.rank === Number(rank)) };
     }
     
+    // Full House (All cards score)
     if (countsValues[0] === 3 && countsValues[1] >= 2) return { type: 'FULL_HOUSE', cards: sorted };
     
+    // Flush (All cards score)
     if (isFlush) return { type: 'FLUSH', cards: sorted };
     
+    // Straight (All cards score)
     if (isStraight) return { type: 'STRAIGHT', cards: sorted };
     
+    // Three of a Kind
     if (countsValues[0] === 3) {
         const rank = Object.keys(counts).find(key => counts[Number(key)] === 3);
         return { type: 'THREE_OF_A_KIND', cards: sorted.filter(c => c.rank === Number(rank)) };
     }
     
+    // Two Pair
     if (countsValues[0] === 2 && countsValues[1] === 2) {
         const pairRanks = Object.keys(counts).filter(key => counts[Number(key)] === 2).map(Number);
         return { type: 'TWO_PAIR', cards: sorted.filter(c => pairRanks.includes(c.rank)) };
     }
     
+    // Pair
     if (countsValues[0] === 2) {
         const rank = Object.keys(counts).find(key => counts[Number(key)] === 2);
         return { type: 'PAIR', cards: sorted.filter(c => c.rank === Number(rank)) };
     }
     
+    // High Card (Only highest card scores)
     return { type: 'HIGH_CARD', cards: [sorted[sorted.length - 1]] }; 
 };
 
@@ -459,8 +467,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       }
 
       // Draw
-      const handSizeLimit = runState.supporters.some(s => s.id === 'CLASS_REP') ? 9 : 8;
-      const drawCount = handSizeLimit - newHand.length;
+      const drawCount = 8 - newHand.length;
       if (drawCount > 0 && currentDeck.length > 0) {
           const drawn = currentDeck.splice(0, drawCount);
           newHand = [...newHand, ...drawn];
@@ -494,23 +501,13 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   const discardHand = () => {
       if (animating || selectedCards.length === 0 || runState.discardsRemaining <= 0) return;
       
-      // Delinquent Supporter Check
-      const delinquent = runState.supporters.find(s => s.id === 'DELINQUENT');
-      // Note: Delinquent effect is actually triggered here but applied next hand? 
-      // The constant definition applies it on 'DISCARD' trigger, but we need a way to store "temp mult" if it applies to next hand.
-      // For now, let's assume it just works if we had a persistent multiplier context, but simplified: 
-      // The definition says "ctx.mult += ...". This context is transient.
-      // Real Balatro adds a persistent "plus mult" to the joker itself. 
-      // Simplified: Just sound effect here.
-      
       const discardedCards = runState.hand.filter(c => selectedCards.includes(c.id));
       let newHand = runState.hand.filter(c => !selectedCards.includes(c.id));
       let currentDeck = [...runState.deck];
       let newDiscardPile = [...runState.discardPile, ...discardedCards];
       
       // Draw
-      const handSizeLimit = runState.supporters.some(s => s.id === 'CLASS_REP') ? 9 : 8;
-      const drawCount = handSizeLimit - newHand.length;
+      const drawCount = 8 - newHand.length;
       if (drawCount > 0 && currentDeck.length > 0) {
           const drawn = currentDeck.splice(0, drawCount);
           newHand = [...newHand, ...drawn];
@@ -530,6 +527,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   };
 
   const winBlind = () => {
+      // Calculate Interest (10% of money, max 5) + Reward + Hands Left ($1 each)
       const interest = Math.min(5, Math.floor(runState.money / 5));
       const handBonus = runState.handsRemaining;
       const totalEarned = runState.currentBlind.rewardMoney + interest + handBonus;
@@ -539,17 +537,19 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       setRunState(prev => ({
           ...prev,
           money: newMoney,
+          // Restore Deck: Combine remaining deck + current hand + discard pile
           deck: [...prev.deck, ...prev.hand, ...prev.discardPile],
           hand: [],
           discardPile: []
       }));
 
+      // Check for Game Victory
       if (runState.ante === 8 && runState.blindIndex === 2) {
           setPhase('VICTORY');
       } else {
           generateShop();
           setPhase('SHOP');
-          audioService.playBGM('poker_shop');
+          audioService.playBGM('poker_shop'); // Back to Shop/Chill music
       }
   };
 
@@ -584,7 +584,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           }));
           openPack(item as PokerPack);
       } else if ('rarity' in item) { // Is Supporter
-          if (runState.supporters.length >= 5) return;
+          if (runState.supporters.length >= 5) return; // Limit
           setRunState(prev => ({
               ...prev,
               money: prev.money - item.price,
@@ -592,7 +592,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
               shopInventory: prev.shopInventory.filter((_, i) => i !== index)
           }));
       } else { // Is Consumable
-          if (runState.consumables.length >= 2) return;
+          if (runState.consumables.length >= 2) return; // Limit
           setRunState(prev => ({
               ...prev,
               money: prev.money - item.price,
@@ -608,27 +608,25 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       setCurrentPack(pack);
       setIsPackOpened(false);
       setPhase('PACK_OPEN');
-      setPackContent([]);
+      setPackContent([]); // Reset content
   };
 
   const revealPack = () => {
       if (!currentPack) return;
       
-      audioService.playSound('attack');
+      audioService.playSound('attack'); // Ripping sound
       setIsPackOpened(true);
       
+      // Generate Content
       const content: (PokerCard | PokerSupporter | PokerConsumable)[] = [];
       for (let i = 0; i < currentPack.size; i++) {
           if (currentPack.type === 'STANDARD') {
               content.push(generateRandomPlayingCard());
           } else if (currentPack.type === 'BUFF') {
-              const pool = CONSUMABLES_LIBRARY.filter(c => c.type !== 'SPECTRAL'); // Normal packs don't have spectral usually
+              const pool = [...CONSUMABLES_LIBRARY];
               content.push(pool[Math.floor(Math.random() * pool.length)]);
           } else if (currentPack.type === 'SUPPORTER') {
               const pool = [...SUPPORTERS_LIBRARY];
-              content.push(pool[Math.floor(Math.random() * pool.length)]);
-          } else if (currentPack.type === 'SPECTRAL') {
-              const pool = CONSUMABLES_LIBRARY.filter(c => c.type === 'SPECTRAL');
               content.push(pool[Math.floor(Math.random() * pool.length)]);
           }
       }
@@ -636,20 +634,22 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   };
 
   const selectPackItem = (item: PokerCard | PokerSupporter | PokerConsumable) => {
+      // Add item to run state
       if ('suit' in item) {
+          // Card -> Add to Deck
           setRunState(prev => ({
               ...prev,
               deck: [...prev.deck, item as PokerCard]
           }));
       } else if ('rarity' in item) {
-          if (runState.supporters.length >= 5) return;
+          // Supporter -> Add if space
+          if (runState.supporters.length >= 5) return; // UI should handle disabling
           setRunState(prev => ({
               ...prev,
               supporters: [...prev.supporters, item as PokerSupporter]
           }));
-      } else { // Consumable
-          // Immediate use for Spectral? No, adds to inventory usually unless immediate use.
-          // Spectral cards behave like Consumables in Balatro, they take up a consumable slot.
+      } else {
+          // Consumable -> Add if space
           if (runState.consumables.length >= 2) return;
           setRunState(prev => ({
               ...prev,
@@ -658,7 +658,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       }
       
       audioService.playSound('select');
-      setPhase('SHOP'); 
+      setPhase('SHOP'); // Return to shop
       setCurrentPack(null);
   };
 
@@ -677,6 +677,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           currentBlind: getBlindConfig(nextAnte, nextIndex)
       }));
       setPhase('BLIND_SELECT');
+      // BGM stays as shop theme for Blind Select (calm)
   };
 
   // --- Consumable Logic ---
@@ -699,107 +700,44 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
               consumables: prev.consumables.filter(c => c !== consumable)
           }));
           audioService.playSound('win');
-      } else if (consumable.type === 'TAROT' || consumable.type === 'SPECTRAL') {
+      } else if (consumable.type === 'TAROT') {
           // Select cards mode
-          // Some Spectral might not need selection, but most do (destroy random, create copy of selected)
-          if (consumable.id === 'SPC_PIANO') {
-              // Immediate Effect: Convert all hand to clubs
-              // Only works in play? Or just applies to cards in hand?
-              // Assuming consumables are used during play or blind select on "deck"? 
-              // Standard Balatro allows using them anytime. If used in shop, it applies to "currently selected cards"? 
-              // Actually Balatro consumables in shop apply to selected cards from deck view or are immediate.
-              // Here, let's restrict usage to PLAY phase for simplicity, OR if we want shop usage, we need a deck view for selection.
-              // For now, let's assume usage in PLAY phase on current HAND.
-              if (phase !== 'PLAY') {
-                  // If in shop, we can't easily select cards yet without adding complex UI.
-                  // Let's restrict usage to PLAY phase for now.
-                  alert("Can only use during play in this version.");
-                  return;
-              }
-              
-              const newHand = runState.hand.map(c => ({ ...c, suit: 'CLUB' as PokerSuit }));
-              setRunState(prev => ({ ...prev, hand: newHand, consumables: prev.consumables.filter(c => c !== consumable) }));
-              audioService.playSound('win');
-          } else if (consumable.id === 'SPC_ANATOMY') {
-              // Destroy non-face cards
-              if (phase !== 'PLAY') { alert("Use during play."); return; }
-              const newHand = runState.hand.filter(c => c.rank > 10);
-              const removedCount = runState.hand.length - newHand.length;
-              if (removedCount > 0) {
-                  setRunState(prev => ({ ...prev, hand: newHand, money: prev.money + 15, consumables: prev.consumables.filter(c => c !== consumable) }));
-                  audioService.playSound('attack');
-              }
-          } else if (consumable.id === 'SPC_STEPS') {
-              // Upgrade random hand
-              const hands = Object.keys(POKER_HAND_LEVELS);
-              const target = hands[Math.floor(Math.random() * hands.length)];
-              setRunState(prev => ({
-                  ...prev,
-                  handLevels: { ...prev.handLevels, [target]: prev.handLevels[target] + 3 },
-                  consumables: prev.consumables.filter(c => c !== consumable)
-              }));
-              audioService.playSound('win');
-          } else if (consumable.id === 'SPC_HANAKO') {
-              // Destroy 1 random, Seal 1 random
-              if (phase !== 'PLAY') { alert("Use during play."); return; }
-              if (runState.hand.length < 1) return;
-              
-              let hand = [...runState.hand];
-              // Destroy
-              hand.splice(Math.floor(Math.random() * hand.length), 1);
-              
-              // Seal
-              if (hand.length > 0) {
-                  const targetIdx = Math.floor(Math.random() * hand.length);
-                  hand[targetIdx] = { ...hand[targetIdx], enhancement: 'LUCKY' }; // Using Lucky as placeholder for Red Seal functionality visual
-              }
-              setRunState(prev => ({ ...prev, hand, consumables: prev.consumables.filter(c => c !== consumable) }));
-              audioService.playSound('attack');
-          } else {
-              // Requires Selection
-              setSelectedConsumable(consumable);
-          }
+          setSelectedConsumable(consumable);
       }
   };
 
-  const applyModification = () => {
+  const applyTarot = () => {
       if (!selectedConsumable || selectedCards.length === 0) return;
-      if (phase !== 'PLAY') { alert("Use during play."); setSelectedConsumable(null); setSelectedCards([]); return; }
+      
+      const modifiedHand = runState.hand.map(c => {
+          if (!selectedCards.includes(c.id)) return c;
+          
+          let mod = { ...c };
+          if (selectedConsumable.id === 'STA_RULER') mod.rank = Math.min(14, mod.rank + 1) as PokerRank;
+          if (selectedConsumable.id === 'STA_STICKER') { mod.bonusChips += 50; mod.enhancement = 'BONUS'; }
+          if (selectedConsumable.id === 'STA_MARKER') { mod.multMultiplier = 1.5; mod.enhancement = 'MULT'; }
+          if (selectedConsumable.id === 'STA_PAINT') { mod.suit = 'HEART'; mod.enhancement = 'WILD'; } // Or just suit change
+          if (selectedConsumable.id === 'STA_INK') { mod.suit = 'SPADE'; mod.enhancement = 'WILD'; }
+          // Eraser handles separately
+          return mod;
+      });
 
-      let newHand = [...runState.hand];
-      let newConsumables = runState.consumables.filter(c => c !== selectedConsumable);
-      let consumed = true;
-
-      // TAROT Logic
-      if (selectedConsumable.type === 'TAROT') {
-          newHand = newHand.map(c => {
-              if (!selectedCards.includes(c.id)) return c;
-              let mod = { ...c };
-              if (selectedConsumable.id === 'STA_RULER') mod.rank = Math.min(14, mod.rank + 1) as PokerRank;
-              if (selectedConsumable.id === 'STA_STICKER') { mod.bonusChips += 50; mod.enhancement = 'BONUS'; }
-              if (selectedConsumable.id === 'STA_MARKER') { mod.multMultiplier = 1.5; mod.enhancement = 'MULT'; }
-              if (selectedConsumable.id === 'STA_PAINT') { mod.suit = 'HEART'; mod.enhancement = 'WILD'; }
-              if (selectedConsumable.id === 'STA_INK') { mod.suit = 'SPADE'; mod.enhancement = 'WILD'; }
-              return mod;
-          });
-
-          if (selectedConsumable.id === 'STA_ERASER') {
-              newHand = newHand.filter(c => !selectedCards.includes(c.id));
-          }
-      } 
-      // SPECTRAL Logic (Selection based)
-      else if (selectedConsumable.type === 'SPECTRAL') {
-          if (selectedConsumable.id === 'SPC_MIRROR') {
-              // Duplicate selected (limit 1)
-              const target = newHand.find(c => c.id === selectedCards[0]);
-              if (target) {
-                  const copy = { ...target, id: `copy-${Date.now()}-${Math.random()}` };
-                  newHand.push(copy);
-              }
-          }
+      if (selectedConsumable.id === 'STA_ERASER') {
+          setRunState(prev => ({
+              ...prev,
+              hand: prev.hand.filter(c => !selectedCards.includes(c.id)), // Remove from hand
+              deck: prev.deck, // It's gone from draw pile (well, effectively removed from game)
+              // NOTE: Cards removed here are NOT added to discardPile, so they are permanently gone.
+              consumables: prev.consumables.filter(c => c !== selectedConsumable)
+          }));
+      } else {
+          setRunState(prev => ({
+              ...prev,
+              hand: modifiedHand,
+              consumables: prev.consumables.filter(c => c !== selectedConsumable)
+          }));
       }
-
-      setRunState(prev => ({ ...prev, hand: newHand, consumables: newConsumables }));
+      
       setSelectedConsumable(null);
       setSelectedCards([]);
       audioService.playSound('win');
@@ -819,9 +757,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                           <PixelSprite seed={inspectedItem.icon} name={inspectedItem.icon} className="w-full h-full"/>
                       </div>
                       <h3 className="text-2xl font-bold text-yellow-400 mb-2">{inspectedItem.name}</h3>
-                      <div className={`text-sm font-bold text-white px-3 py-1 rounded-full ${
-                          (inspectedItem as PokerConsumable).type === 'SPECTRAL' ? 'bg-purple-900 border border-purple-500' : 'bg-slate-700'
-                      }`}>
+                      <div className="text-sm font-bold text-white bg-slate-700 px-3 py-1 rounded-full">
                           {'rarity' in inspectedItem ? (inspectedItem as PokerSupporter).rarity : (inspectedItem as PokerConsumable).type}
                       </div>
                   </div>
@@ -836,7 +772,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       );
   };
 
-  // 1. Blind Select Screen (Omitted for brevity, same as before)
+  // 1. Blind Select Screen
   if (phase === 'BLIND_SELECT') {
       const config = runState.currentBlind;
       return (
@@ -866,10 +802,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   if (phase === 'SHOP' || phase === 'PACK_OPEN') {
       // Pack Open Overlay
       if (phase === 'PACK_OPEN' && currentPack) {
-          const isSpectralPack = currentPack.type === 'SPECTRAL';
           return (
               <div className="flex flex-col h-full w-full bg-slate-900 text-white p-4 items-center justify-center relative font-mono overflow-hidden">
-                  <div className={`absolute inset-0 z-0 ${isSpectralPack ? 'bg-purple-900/90' : 'bg-black/80'}`}></div>
+                  <div className="absolute inset-0 bg-black/80 z-0"></div>
                   
                   <div className="z-10 flex flex-col items-center w-full max-w-4xl">
                       <h2 className="text-3xl font-bold mb-8 text-yellow-400 animate-pulse">{isPackOpened ? "Choose One!" : "Open Pack!"}</h2>
@@ -879,7 +814,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                             className="cursor-pointer hover:scale-110 transition-transform animate-bounce relative"
                             onClick={revealPack}
                           >
-                              <div className={`w-48 h-64 rounded-lg border-4 shadow-[0_0_50px_rgba(255,255,255,0.2)] flex flex-col items-center justify-center p-4 text-center ${isSpectralPack ? 'bg-gradient-to-br from-indigo-900 to-black border-purple-400 shadow-purple-500/50' : 'bg-gradient-to-br from-yellow-600 to-yellow-800 border-yellow-300 shadow-yellow-500/50'}`}>
+                              <div className="w-48 h-64 bg-gradient-to-br from-yellow-600 to-yellow-800 rounded-lg border-4 border-yellow-300 shadow-[0_0_50px_rgba(253,224,71,0.5)] flex flex-col items-center justify-center p-4 text-center">
                                   <div className="text-6xl mb-4">
                                       <PixelSprite seed={currentPack.icon} name={currentPack.icon} className="w-24 h-24"/>
                                   </div>
@@ -893,8 +828,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                                   const isCard = 'suit' in item;
                                   const isSupporter = 'rarity' in item;
                                   const isConsumable = !isCard && !isSupporter;
-                                  const isSpectral = isConsumable && (item as PokerConsumable).type === 'SPECTRAL';
                                   
+                                  // Determine disabled state based on limits
                                   let disabled = false;
                                   if (isSupporter && runState.supporters.length >= 5) disabled = true;
                                   if (isConsumable && runState.consumables.length >= 2) disabled = true;
@@ -924,10 +859,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                                               </div>
                                           )}
                                           {!isCard && (
-                                              <div className={`w-32 h-48 rounded-lg border-4 shadow-xl flex flex-col items-center justify-center p-2 text-center ${isSpectral ? 'bg-indigo-950 border-purple-400 text-purple-100' : 'bg-slate-800 border-blue-400 text-white'}`}>
+                                              <div className="w-32 h-48 bg-slate-800 text-white rounded-lg border-4 border-blue-400 shadow-xl flex flex-col items-center justify-center p-2 text-center">
                                                   <PixelSprite seed={(item as any).icon} name={(item as any).icon} className="w-16 h-16 mb-2"/>
                                                   <div className="font-bold text-sm">{(item as any).name}</div>
-                                                  <div className="text-[10px] opacity-70 mt-2 leading-tight">{(item as any).description}</div>
+                                                  <div className="text-[10px] text-gray-400 mt-2 leading-tight">{(item as any).description}</div>
                                               </div>
                                           )}
                                           <button 
@@ -971,22 +906,22 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
               <div className="flex-grow flex gap-4 overflow-hidden">
                   <div className="w-2/3 bg-slate-800/50 p-4 rounded-lg border-2 border-slate-700 overflow-y-auto custom-scrollbar">
                       
-                      {/* Packs Section */}
+                      {/* Packs Section (New) */}
                       <div className="mb-8">
                           <h3 className="text-xl font-bold mb-4 text-orange-400 border-b border-slate-600 pb-2 flex items-center">
-                              <Package className="mr-2"/> Packs
+                              <Package className="mr-2"/> ブースターパック (Packs)
                           </h3>
                           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                               {shopPacks.map((item) => (
                                   <div 
                                     key={item.id} 
-                                    className={`p-4 rounded flex flex-col items-center text-center relative group cursor-pointer hover:brightness-110 transition-all ${item.type === 'SPECTRAL' ? 'bg-indigo-900/80 border border-purple-500' : 'bg-slate-700'}`}
+                                    className="bg-slate-700 p-4 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors"
                                     onClick={() => buyItem(item, runState.shopInventory.indexOf(item))}
                                   >
                                       <div className="w-16 h-16 mb-2">
                                           <PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/>
                                       </div>
-                                      <div className={`font-bold text-sm mb-1 ${item.type === 'SPECTRAL' ? 'text-purple-200' : 'text-white'}`}>{item.name}</div>
+                                      <div className="font-bold text-sm mb-1">{item.name}</div>
                                       <div className="text-xs text-gray-400 mb-2 h-8 overflow-hidden">{item.description}</div>
                                       <div className="mt-auto w-full">
                                           <button 
@@ -1006,7 +941,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                       <div className="mb-8">
                           <h3 className="text-xl font-bold mb-4 text-blue-300 border-b border-slate-600 pb-2 flex items-center">
                               <PixelSprite seed="SMILE" name="SMILE" className="w-6 h-6 mr-2" />
-                              Supporters
+                              サポーター (Supporters)
                           </h3>
                           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                               {shopSupporters.map((item) => (
@@ -1041,7 +976,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                       <div>
                           <h3 className="text-xl font-bold mb-4 text-purple-300 border-b border-slate-600 pb-2 flex items-center">
                               <PixelSprite seed="NOTEBOOK" name="NOTEBOOK" className="w-6 h-6 mr-2" />
-                              Stationery
+                              消耗品 (Stationery)
                           </h3>
                           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                               {shopConsumables.map((item) => (
@@ -1101,7 +1036,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                                   {runState.consumables.map((c, i) => (
                                       <div 
                                         key={i} 
-                                        className={`p-2 rounded flex flex-col items-center text-xs cursor-pointer hover:bg-slate-700 ${c.type === 'SPECTRAL' ? 'bg-indigo-950 border border-purple-500' : 'bg-slate-900'}`}
+                                        className="bg-slate-900 p-2 rounded flex flex-col items-center text-xs cursor-pointer hover:bg-slate-700"
                                         onContextMenu={(e) => handleContextMenu(e, c)}
                                         onTouchStart={() => handleTouchStart(c)}
                                         onTouchEnd={handleTouchEnd}
@@ -1136,27 +1071,87 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
     <div className="flex flex-col h-full w-full bg-green-900 text-white font-mono relative overflow-hidden">
         {renderInspectionModal()}
         
-        {/* Rules / Game Info Modal (Same as before) */}
+        {/* Rules / Game Info Modal */}
         {showRulesModal && (
             <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowRulesModal(false)}>
                 <div className="bg-slate-800 border-4 border-yellow-500 rounded-lg p-6 w-full max-w-3xl max-h-[85vh] overflow-y-auto relative shadow-2xl custom-scrollbar" onClick={e => e.stopPropagation()}>
                     <button onClick={() => setShowRulesModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
+                    
+                    {/* New: Game Flow Section */}
                     <h2 className="text-2xl font-bold text-yellow-400 mb-4 flex items-center"><BookOpen className="mr-2"/> 遊び方 (How to Play)</h2>
-                    {/* ... (Rules content omitted for brevity, logic unchanged) ... */}
-                    <div className="mt-4 text-gray-400 text-sm">
-                        Spectral cards (学校の怪談) are rare, high risk/reward items found in Spectral Packs.
+                    <div className="bg-slate-900/80 p-4 rounded-lg border border-slate-600 mb-6 text-sm space-y-4">
+                        <div>
+                            <h3 className="font-bold text-white mb-2 flex items-center"><Flag className="mr-2 text-red-400"/> ゲームの目的</h3>
+                            <p className="text-gray-300">
+                                ポーカーの役を作ってスコアを稼ぎ、設定された<span className="text-red-400 font-bold">目標スコア(Score Goal)</span>を達成しましょう。<br/>
+                                全8ステージ(Ante)をクリアすると卒業(ゲームクリア)です。
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <h3 className="font-bold text-white mb-2 flex items-center"><Calculator className="mr-2 text-blue-400"/> スコア計算</h3>
+                            <div className="flex items-center gap-2 bg-black/40 p-2 rounded justify-center">
+                                <span className="text-blue-400 font-bold text-lg">チップ (Chips)</span>
+                                <X size={16} className="text-gray-500"/>
+                                <span className="text-red-500 font-bold text-lg">倍率 (Mult)</span>
+                                <ArrowRight size={16} className="text-gray-500"/>
+                                <span className="text-yellow-400 font-bold text-lg">スコア</span>
+                            </div>
+                            <p className="text-gray-400 mt-2 text-xs text-center">
+                                役の基本点 + カードの点数 = チップ。<br/>
+                                サポーター(Joker)の効果で倍率を増やして爆発的なスコアを目指せ！
+                            </p>
+                        </div>
+
+                        <div>
+                            <h3 className="font-bold text-white mb-2 flex items-center"><ShoppingBag className="mr-2 text-yellow-400"/> 買い物</h3>
+                            <p className="text-gray-300">
+                                ラウンド勝利後に獲得したお金でアイテムを購入できます。<br/>
+                                <span className="text-blue-300">サポーター:</span> 持っているだけで効果発揮(最大5枠)。<br/>
+                                <span className="text-purple-300">消耗品:</span> 使い切りの強力な効果(最大2枠)。
+                            </p>
+                        </div>
+                    </div>
+
+                    <h2 className="text-2xl font-bold text-yellow-400 mb-4 flex items-center border-t border-slate-600 pt-6"><HelpCircle className="mr-2"/> 役一覧 (Hand Types)</h2>
+                    
+                    <div className="space-y-4 text-sm">
+                        <div className="grid grid-cols-1 gap-3">
+                            {['ROYAL_FLUSH', 'STRAIGHT_FLUSH', 'FOUR_OF_A_KIND', 'FULL_HOUSE', 'FLUSH', 'STRAIGHT', 'THREE_OF_A_KIND', 'TWO_PAIR', 'PAIR', 'HIGH_CARD'].map((key) => {
+                                const def = POKER_HAND_LEVELS[key];
+                                const example = HAND_EXAMPLES[key];
+                                return (
+                                    <div key={key} className="bg-slate-900 p-3 rounded-lg border border-slate-700">
+                                        <div className="flex justify-between items-center mb-1">
+                                            <span className="font-bold text-lg text-white">{def.name}</span>
+                                            <span className="text-blue-300 font-mono text-xs">{def.baseChips} <span className="text-gray-500">x</span> <span className="text-red-400">{def.baseMult}</span></span>
+                                        </div>
+                                        <div className="text-xs text-gray-400 mb-2">{example.desc}</div>
+                                        
+                                        {/* Visual Card Example */}
+                                        <div className="flex gap-1">
+                                            {example.cards.map((c, i) => (
+                                                <div key={i} className="bg-white text-black w-8 h-10 rounded-sm border border-gray-400 flex flex-col items-center justify-center shadow-sm">
+                                                    <div className={`text-[10px] font-bold leading-none ${getSuitColorClass(c.s)}`}>{c.r}</div>
+                                                    <div className="scale-75">{getSuitIcon(c.s)}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
             </div>
         )}
 
-        {/* Hand Levels & Deck List Modals (Omitted for brevity, logic unchanged) */}
+        {/* Hand Levels Modal */}
         {showHandList && (
             <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowHandList(false)}>
-                {/* ... */}
                 <div className="bg-slate-800 border-4 border-slate-600 rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto relative shadow-2xl" onClick={e => e.stopPropagation()}>
                     <button onClick={() => setShowHandList(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
-                    <h2 className="text-2xl font-bold text-white mb-4 flex items-center"><BarChart3 className="mr-2"/> Hand Levels</h2>
+                    <h2 className="text-2xl font-bold text-white mb-4 flex items-center"><BarChart3 className="mr-2"/> Hand Levels (役のレベル)</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {Object.entries(POKER_HAND_LEVELS).map(([key, def]) => {
                             const level = runState.handLevels[key] || 1;
@@ -1180,19 +1175,60 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                 </div>
             </div>
         )}
+
+        {/* Deck List Modal */}
         {showDeckList && (
             <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowDeckList(false)}>
-                {/* ... */}
                 <div className="bg-slate-800 border-4 border-slate-600 rounded-lg p-6 w-full max-w-4xl max-h-[80vh] overflow-y-auto relative shadow-2xl" onClick={e => e.stopPropagation()}>
                     <button onClick={() => setShowDeckList(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
                     <h2 className="text-2xl font-bold text-white mb-6 flex items-center"><Layers className="mr-2"/> Deck List ({runState.deck.length} remaining)</h2>
-                    {/* ... */}
+                    
+                    <div className="space-y-4">
+                        {SUITS.map(suit => (
+                            <div key={suit} className="flex items-center bg-slate-900/50 p-2 rounded">
+                                <div className="w-10 flex-shrink-0 flex justify-center scale-150">
+                                    {getSuitIcon(suit)}
+                                </div>
+                                <div className="flex flex-wrap gap-1 flex-1 ml-4">
+                                    {[...runState.deck, ...runState.hand, ...runState.discardPile]
+                                        .filter(c => c.suit === suit)
+                                        .sort((a, b) => b.rank - a.rank)
+                                        .map((card) => {
+                                            const isInDeck = runState.deck.some(c => c.id === card.id);
+                                            return (
+                                                <div 
+                                                    key={card.id} 
+                                                    className={`
+                                                        rounded p-1 flex flex-col items-center justify-center h-14 w-10 text-xs border-2 transition-all relative overflow-hidden
+                                                        ${isInDeck 
+                                                            ? 'bg-gray-100 border-gray-300 text-black shadow-md' 
+                                                            : 'bg-black border-gray-700 text-gray-600 opacity-60 grayscale'}
+                                                    `}
+                                                    title={isInDeck ? "In Deck" : "Drawn/Discarded"}
+                                                >
+                                                    <div className={`font-bold text-sm ${!isInDeck ? 'text-gray-600' : (['HEART', 'DIAMOND'].includes(card.suit) ? 'text-red-600' : 'text-black')}`}>
+                                                        {getRankDisplay(card.rank)}
+                                                    </div>
+                                                    <div className="scale-75 opacity-50">{getSuitIcon(card.suit)}</div>
+                                                    
+                                                    {/* Deck List Badges */}
+                                                    {card.bonusChips > 0 && <div className="absolute top-0 right-0 text-[8px] bg-blue-500 text-white leading-none px-0.5 rounded-bl">+</div>}
+                                                    {card.multMultiplier > 1 && <div className="absolute top-0 left-0 text-[8px] bg-red-500 text-white leading-none px-0.5 rounded-br">x</div>}
+                                                </div>
+                                            );
+                                        })}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         )}
 
-        {/* Top Info Bar (Omitted for brevity, logic unchanged) */}
+        {/* Top Info Bar - Responsive */}
         <div className="flex flex-col md:flex-row justify-between items-stretch md:items-start p-2 md:p-4 bg-black/60 z-20 shadow-md shrink-0 gap-2">
+            
+            {/* Left Group: Score (and Money on Mobile) */}
             <div className="flex gap-2 w-full md:w-auto">
                 <div className="flex flex-col items-start bg-slate-800 p-2 rounded border border-slate-600 flex-grow md:w-48 shadow-lg justify-center">
                     <div className="flex justify-between w-full md:block">
@@ -1205,12 +1241,17 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                     </div>
                     <div className="text-xs text-gray-400 mt-1 hidden md:block">Current: {runState.currentScore.toLocaleString()}</div>
                 </div>
+
+                {/* Money Mobile */}
                 <div className="bg-slate-800 p-2 rounded border border-yellow-500 flex flex-col items-center justify-center w-20 md:hidden shrink-0">
                     <div className="text-[10px] text-yellow-400 uppercase">Money</div>
                     <div className="text-lg font-bold text-yellow-400">${runState.money}</div>
                 </div>
             </div>
+
+            {/* Right Group: Controls & Stats */}
             <div className="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto">
+                
                 <div className="flex gap-2">
                     <button 
                         onClick={() => { setShowRulesModal(true); audioService.playSound('select'); }}
@@ -1234,6 +1275,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                         <span className="text-[9px] md:text-[10px] leading-none mt-1">Levels</span>
                     </button>
                 </div>
+
                 <div className="flex gap-2">
                     <div className="bg-slate-800 p-1 md:p-2 rounded border border-blue-600 flex flex-col items-center w-14 md:w-20 justify-center">
                         <div className="text-[9px] md:text-[10px] text-blue-400 uppercase">Hands</div>
@@ -1243,6 +1285,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                         <div className="text-[9px] md:text-[10px] text-red-400 uppercase">Disc</div>
                         <div className="text-base md:text-lg font-bold text-red-100">{runState.discardsRemaining}</div>
                     </div>
+                    {/* Money Desktop */}
                     <div className="bg-slate-800 p-2 rounded border border-yellow-500 hidden md:flex flex-col items-center w-20 justify-center">
                         <div className="text-[10px] text-yellow-400 uppercase">Money</div>
                         <div className="text-lg font-bold text-yellow-400">${runState.money}</div>
@@ -1274,7 +1317,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                 {runState.consumables.map((c, i) => (
                     <div 
                         key={i} 
-                        className={`w-10 h-10 md:w-12 md:h-12 border-2 rounded flex items-center justify-center relative group cursor-pointer hover:scale-110 transition-transform ${c.type === 'SPECTRAL' ? 'bg-indigo-950 border-purple-500' : 'bg-slate-800 border-purple-500'}`}
+                        className="w-10 h-10 md:w-12 md:h-12 bg-slate-800 border-2 border-purple-500 rounded flex items-center justify-center relative group cursor-pointer hover:scale-110 transition-transform" 
                         onClick={() => useConsumable(c)}
                         onContextMenu={(e) => handleContextMenu(e, c)}
                         onTouchStart={() => handleTouchStart(c)}
@@ -1304,19 +1347,19 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
             )}
 
             {/* Selected Consumable UI */}
-            {selectedConsumable && (selectedConsumable.type === 'TAROT' || selectedConsumable.type === 'SPECTRAL') && (
-                <div className={`absolute top-4 p-2 rounded text-center border z-40 ${selectedConsumable.type === 'SPECTRAL' ? 'bg-indigo-900/80 border-purple-400' : 'bg-purple-900/80 border-purple-400'}`}>
-                    <div className="text-sm font-bold text-white">Using: {selectedConsumable.name}</div>
-                    <div className="text-xs mb-2 text-gray-200">Select cards then click USE</div>
+            {selectedConsumable && selectedConsumable.type === 'TAROT' && (
+                <div className="absolute top-4 bg-purple-900/80 p-2 rounded text-center border border-purple-400 z-40">
+                    <div className="text-sm font-bold text-purple-200">Using: {selectedConsumable.name}</div>
+                    <div className="text-xs mb-2">Select cards then click USE</div>
                     <div className="flex gap-2 justify-center">
-                        <button onClick={applyModification} className="bg-purple-600 px-3 py-1 rounded text-xs font-bold hover:bg-purple-500">USE</button>
+                        <button onClick={applyTarot} className="bg-purple-600 px-3 py-1 rounded text-xs font-bold hover:bg-purple-500">USE</button>
                         <button onClick={() => { setSelectedConsumable(null); setSelectedCards([]); }} className="bg-gray-600 px-3 py-1 rounded text-xs hover:bg-gray-500">CANCEL</button>
                     </div>
                 </div>
             )}
         </div>
 
-        {/* Hand Area */}
+        {/* Hand Area (With Drag/Trace Support) */}
         <div 
             className="h-40 md:h-56 w-full flex justify-center items-end pb-4 gap-[-20px] touch-none select-none shrink-0"
             onPointerLeave={handlePointerUp}
@@ -1336,6 +1379,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                             ${selectedConsumable ? 'hover:ring-2 hover:ring-purple-400' : ''}
                         `}
                     >
+                        {/* Enhancement Badges */}
                         {card.bonusChips > 0 && (
                             <div className="absolute -top-2 -right-2 bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-md z-30 border border-white">
                                 +{card.bonusChips}
@@ -1346,11 +1390,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                                 x{card.multMultiplier}
                             </div>
                         )}
-                        {card.enhancement === 'LUCKY' && (
-                            <div className="absolute top-1 right-1 text-green-500">
-                                <Sparkles size={12}/>
-                            </div>
-                        )}
+
+                        {/* Visual Styles for Enhancements (Future use) */}
+                        {card.enhancement === 'GOLD' && <div className="absolute inset-0 border-4 border-yellow-400 rounded-lg pointer-events-none opacity-50"></div>}
 
                         <div className="flex justify-between w-full">
                             <div className={`text-xl md:text-2xl font-bold ${['HEART', 'DIAMOND'].includes(card.suit) ? 'text-red-600' : 'text-slate-900'}`}>
@@ -1366,7 +1408,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
             })}
         </div>
 
-        {/* Sort Controls */}
+        {/* Sort Controls (Moved Below Cards) */}
         <div className="flex justify-center gap-4 my-2 z-30 shrink-0">
             <button 
                 onClick={sortHandRank}
