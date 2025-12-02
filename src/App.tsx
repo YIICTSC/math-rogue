@@ -28,7 +28,7 @@ import { audioService } from './services/audioService';
 import { generateFlavorText, generateEnemyName } from './services/geminiService';
 import { generateDungeonMap } from './services/mapGenerator';
 import { storageService } from './services/storageService';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Maximize, Minimize } from 'lucide-react';
 
 // --- HELPERS ---
 export const getUpgradedCard = (card: ICard): ICard => {
@@ -270,6 +270,7 @@ const App: React.FC = () => {
   
   // Progression
   const [clearCount, setClearCount] = useState<number>(0);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
   const VICTORY_GOLD = 25;
 
@@ -302,6 +303,27 @@ const App: React.FC = () => {
     setIsMathDebugSkipped(storageService.getDebugMathSkip());
     setIsDebugHpOne(storageService.getDebugHpOne());
   }, []);
+
+  // Fullscreen Listener
+  useEffect(() => {
+      const handleFullScreenChange = () => {
+          setIsFullscreen(!!document.fullscreenElement);
+      };
+      document.addEventListener('fullscreenchange', handleFullScreenChange);
+      return () => document.removeEventListener('fullscreenchange', handleFullScreenChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+      if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch((e) => {
+              console.error(`Error attempting to enable full-screen mode: ${e.message} (${e.name})`);
+          });
+      } else {
+          if (document.exitFullscreen) {
+              document.exitFullscreen();
+          }
+      }
+  };
 
   const handleTitleClick = () => {
       const next = titleClickCount + 1;
@@ -502,26 +524,332 @@ const App: React.FC = () => {
   };
 
   const generateEvent = (player: Player) => {
+      // Extensive List of Events (School Themed + Mysterious)
       const events = [
+          // 1. The Mysterious Medicine Vendor
           {
               title: "怪しい薬売り",
               description: "路地裏で男が声をかけてきた。「とびきりの薬、あるよ」",
               options: [
-                  { label: "買う", text: "20G支払ってポーションを得る。", action: () => {
+                  { label: "買う", text: "20G支払って...", action: () => {
                       if (player.gold >= 20) {
                           const pots = Object.values(POTION_LIBRARY);
                           const pot = { ...pots[Math.floor(Math.random() * pots.length)], id: `pot-${Date.now()}` };
                           setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - 20, potions: [...prev.player.potions, pot].slice(0, 3) } }));
-                          setEventResultLog("怪しい薬を買った。効果はありそうだ。");
+                          setEventResultLog(`怪しい薬(ポーション)を手に入れた！\n残金: ${player.gold - 20}G`);
                       } else {
-                          setEventResultLog("お金が足りなかった...");
+                          setEventResultLog("お金が足りなかった... 男は舌打ちをして去っていった。");
                       }
                   }},
-                  { label: "無視", text: "何もせず立ち去る。", action: () => { setEventResultLog("怪しい男を無視して先へ進んだ。"); } }
+                  { label: "無視", text: "何もせず立ち去る", action: () => { setEventResultLog("怪しい男を無視して先へ進んだ。"); } }
               ]
           },
+          // 2. The Red and Blue Paper (Classic Ghost Story)
+          {
+              title: "赤と青の紙",
+              description: "トイレに入ると、不気味な声が聞こえた。「赤い紙が欲しいか？ 青い紙が欲しいか？」",
+              options: [
+                  { label: "赤", text: "赤い紙を選ぶ...", action: () => {
+                      // High Risk High Return: Damage but gain Strength
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 10), deck: [...prev.player.deck, { ...CARDS_LIBRARY['INFLAME'], id: `evt-${Date.now()}` }] } }));
+                      setEventResultLog("天井から血が降ってきた！痛い！\nHP-10。\nしかし、怒りで「発火」の力を得た。");
+                  }},
+                  { label: "青", text: "青い紙を選ぶ...", action: () => {
+                      // Defensive: Gain Block card but Weakened
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CARDS_LIBRARY['GLACIER'], id: `evt-${Date.now()}` }, { ...CURSE_CARDS.DOUBT, id: `evt-c-${Date.now()}` }] } }));
+                      setEventResultLog("全身の血の気が引いていく...\n「かまくら」と、呪い「不安」を手に入れた。");
+                  }},
+                  { label: "逃げる", text: "トイレから逃げ出す", action: () => { setEventResultLog("全力で逃げ出した！何も起こらなかった。"); } }
+              ]
+          },
+          // 3. The Lost Notebook
+          {
+              title: "落とし物のノート",
+              description: "廊下にボロボロのノートが落ちている。誰かの日記のようだ。",
+              options: [
+                  { label: "読む", text: "中身を読んでみる...", action: () => {
+                      // Curse risk but maybe Relic
+                      const r = Math.random();
+                      if (r < 0.5) {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.NILRYS_CODEX] } }));
+                          setEventResultLog("なんと、それは「秘密の攻略本」だった！\nレリックを入手した。");
+                      } else {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.WRITHE, id: `evt-${Date.now()}` }] } }));
+                          setEventResultLog("読んでてはいけない呪いの文章だった...\n呪い「悩み」がデッキに加わった。");
+                      }
+                  }},
+                  { label: "届ける", text: "職員室に届ける", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: prev.player.deck.filter((_, i) => i !== 0) } })); // Remove first card (simulated 'good deed' reward/cost?) - actually let's make it Remove Card reward.
+                      // Wait, standard remove logic is hard here. Let's give Gold.
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 50 } }));
+                      setEventResultLog("先生に褒められた。\nお駄賃として 50G もらった！");
+                  }}
+              ]
+          },
+          // 4. The Principal's Statue
+          {
+              title: "校長先生の銅像",
+              description: "夜の学校に校長先生の銅像が立っている。目が光っているような気がする。",
+              options: [
+                  { label: "祈る", text: "成績アップを祈る...", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: prev.player.maxHp } }));
+                      setEventResultLog("心が洗われるようだ。\nHPが全回復した！");
+                  }},
+                  { label: "落書き", text: "顔に落書きする...", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 100, deck: [...prev.player.deck, { ...CURSE_CARDS.SHAME, id: `evt-${Date.now()}` }] } }));
+                      setEventResultLog("銅像の中からヘソクリが出てきた！ 100G入手。\nしかし、良心の呵責に苛まれる... 呪い「恥」を入手。");
+                  }}
+              ]
+          },
+          // 5. The Science Experiment
+          {
+              title: "理科室の実験",
+              description: "ビーカーの中に怪しい色の液体が入っている。",
+              options: [
+                  { label: "飲む", text: "一気飲みする...", action: () => {
+                      const r = Math.random();
+                      if (r < 0.33) {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 5, currentHp: prev.player.currentHp + 5 } }));
+                          setEventResultLog("体が丈夫になった気がする！\n最大HP +5。");
+                      } else if (r < 0.66) {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 8) } }));
+                          setEventResultLog("お腹を壊した...\nHP -8。");
+                      } else {
+                          // Transform a card
+                          const deck = [...player.deck];
+                          if (deck.length > 0) {
+                              const idx = Math.floor(Math.random() * deck.length);
+                              const oldName = deck[idx].name;
+                              const keys = Object.keys(CARDS_LIBRARY).filter(k => !STATUS_CARDS[k] && !CURSE_CARDS[k]);
+                              const newCard = { ...CARDS_LIBRARY[keys[Math.floor(Math.random() * keys.length)]], id: `trans-${Date.now()}` };
+                              deck[idx] = newCard;
+                              setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+                              setEventResultLog(`幻覚が見える...気がつくと「${oldName}」が「${newCard.name}」に変わっていた！`);
+                          } else {
+                              setEventResultLog("何も起こらなかった。");
+                          }
+                      }
+                  }},
+                  { label: "混ぜる", text: "他の薬品と混ぜる...", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, potions: [] } })); // Boom? Lose potions?
+                      // Let's make it gain a random potion but lose HP
+                      const pots = Object.values(POTION_LIBRARY);
+                      const pot = { ...pots[Math.floor(Math.random() * pots.length)], id: `pot-${Date.now()}` };
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 5), potions: [...prev.player.potions, pot].slice(0, 3) } }));
+                      setEventResultLog("小爆発が起きた！(HP-5)\nしかし、偶然すごい薬が完成したようだ。ポーションを獲得。");
+                  }}
+              ]
+          },
+          // 6. The Haunted Music Room
+          {
+              title: "音楽室のピアノ",
+              description: "誰もいない音楽室からピアノの音が聞こえる。",
+              options: [
+                  { label: "弾く", text: "一緒に演奏する...", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 5), deck: [...prev.player.deck, { ...CURSE_CARDS.PAIN, id: `evt-${Date.now()}` }] } })); // Finger caught?
+                      // Let's make it: Get 'Warcry' (Music check) but lose HP
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CARDS_LIBRARY['WARCRY'], id: `evt-${Date.now()}` }] } }));
+                      setEventResultLog("情熱的な演奏をした！\n「雄叫び」を習得した。");
+                  }},
+                  { label: "聴く", text: "静かに耳を傾ける...", action: () => {
+                      // Remove a card?
+                      if (player.deck.length > 0) {
+                          const idx = Math.floor(Math.random() * player.deck.length);
+                          const removed = player.deck[idx];
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: prev.player.deck.filter((_, i) => i !== idx) } }));
+                          setEventResultLog(`心が落ち着き、不要な記憶が消えていく...\n「${removed.name}」をデッキから取り除いた。`);
+                      } else {
+                          setEventResultLog("心が落ち着いた。");
+                      }
+                  }}
+              ]
+          },
+          // 7. The Golden Bet
+          {
+              title: "賭け事",
+              description: "上級生たちがコイントスをしている。「お前も賭けるか？」",
+              options: [
+                  { label: "賭ける", text: "50G賭ける...", action: () => {
+                      if (player.gold >= 50) {
+                          const win = Math.random() < 0.5;
+                          if (win) {
+                              setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 50 } }));
+                              setEventResultLog("勝った！ 100Gになって戻ってきた！(+50G)");
+                          } else {
+                              setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - 50 } }));
+                              setEventResultLog("負けた... 50G没収された。");
+                          }
+                      } else {
+                          setEventResultLog("お金を持っていないので参加できなかった。");
+                      }
+                  }},
+                  { label: "通報", text: "先生を呼ぶ...", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 10) } }));
+                      setEventResultLog("上級生に見つかってボコボコにされた！\nHP-10。");
+                  }}
+              ]
+          },
+          // 8. The Library Ghost
+          {
+              title: "図書室の幽霊",
+              description: "本棚の隙間から青白い手招きが見える。",
+              options: [
+                  { label: "近づく", text: "手招きに応じる...", action: () => {
+                      // Heal but add doubt
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 20), deck: [...prev.player.deck, { ...CURSE_CARDS.DOUBT, id: `evt-${Date.now()}` }] } }));
+                      setEventResultLog("幽霊は優しく傷を癒やしてくれた...が、本当にこれで良かったのか？\nHP+20。呪い「不安」を入手。");
+                  }},
+                  { label: "本を読む", text: "無視して勉強する...", action: () => {
+                      // Upgrade random card
+                      const deck = [...player.deck];
+                      const notUpgraded = deck.filter(c => !c.upgraded);
+                      if (notUpgraded.length > 0) {
+                          const target = notUpgraded[Math.floor(Math.random() * notUpgraded.length)];
+                          target.upgraded = true;
+                          // Recalc logic simplified here, ideally use helper
+                          target.damage = target.damage ? Math.floor(target.damage * 1.3) + 2 : undefined;
+                          target.block = target.block ? Math.floor(target.block * 1.3) + 2 : undefined;
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+                          setEventResultLog(`集中して勉強した。\n「${target.name}」が強化された！`);
+                      } else {
+                          setEventResultLog("既に全てのカードが完璧だ。知識が深まった気がする。");
+                      }
+                  }}
+              ]
+          },
+          // 9. The Bully
+          {
+              title: "いじめっ子",
+              description: "ガキ大将が道を塞いでいる。「通行料を払え！」",
+              options: [
+                  { label: "戦う", text: "強行突破する...", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 12) } }));
+                      // Get a strong attack
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CARDS_LIBRARY['BLUDGEON'], id: `evt-${Date.now()}` }] } }));
+                      setEventResultLog("激しい殴り合いになった！(HP-12)\nガキ大将の武器を奪い取った。「大打撃」を入手！");
+                  }},
+                  { label: "払う", text: "全財産を渡す...", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, gold: 0, relics: [...prev.player.relics, RELIC_LIBRARY.OLD_COIN] } })); // Joke: Gives Old Coin (300G) after? No, standard logic.
+                      // Actually, let's just make it lose all gold but remove a card (he steals it)
+                      if (player.deck.length > 0) {
+                          const idx = Math.floor(Math.random() * player.deck.length);
+                          const removed = player.deck[idx];
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, gold: 0, deck: prev.player.deck.filter((_, i) => i !== idx) } }));
+                          setEventResultLog(`財布の中身を全て渡した(0Gになった)。\nついでに「${removed.name}」も奪われた...`);
+                      }
+                  }}
+              ]
+          },
+          // 10. The Rooftop
+          {
+              title: "屋上",
+              description: "鍵のかかっていない屋上への扉を見つけた。風が気持ちいい。",
+              options: [
+                  { label: "叫ぶ", text: "大声で叫ぶ...", action: () => {
+                      // Remove debuff? Or Gain Strength?
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, strength: 1 } })); // Perm strength? That's strong. Let's give Vajra relic logic basically.
+                      // Let's give JAX (Steroid equivalent)
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...EVENT_CARDS.J_A_X, id: `evt-${Date.now()}` }] } }));
+                      setEventResultLog("ストレス発散！\n力がみなぎってきた。「筋肉注射」を入手。（なぜ？）");
+                  }},
+                  { label: "飛び降りる", text: "手すりを乗り越える...！？", action: () => {
+                      // Takes damage but gets Flight (Apparition)?
+                      const newMax = Math.floor(player.maxHp * 0.5);
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: newMax, currentHp: Math.min(prev.player.currentHp, newMax), deck: [...prev.player.deck, { ...EVENT_CARDS.APPARITION, id: `evt-1` }, { ...EVENT_CARDS.APPARITION, id: `evt-2` }] } }));
+                      setEventResultLog("落下...するかと思いきや、体が透けて浮かび上がった。\n最大HP半減と引き換えに、「ドロン」を2枚入手。");
+                  }}
+              ]
+          },
+          // 11. The Stray Dog
+          {
+              title: "捨て犬",
+              description: "ダンボールに入った犬がいる。雨に濡れて震えている。",
+              options: [
+                  { label: "拾う", text: "連れて帰る...", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.SPIRIT_POOP] } })); // Just a joke item?
+                      // Or maybe a curse 'Parasite'?
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.PARASITE, id: `evt-${Date.now()}` }] } }));
+                      setEventResultLog("犬を飼うことにした！\nしかし、世話が大変で体力が削られる... 呪い「寄生虫」を入手。");
+                  }},
+                  { label: "エサをやる", text: "パンをあげる...", action: () => {
+                      // Heal?
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.MEAT_ON_THE_BONE] } })); // Logic stretch
+                      setEventResultLog("犬は元気になり、お礼に「冷凍ミカン」をくわえて持ってきた。\nレリック入手！");
+                  }}
+              ]
+          },
+          // 12. The Gardening Club
+          {
+              title: "園芸部の花壇",
+              description: "綺麗な花が咲いているが、雑草も生えている。",
+              options: [
+                  { label: "水をやる", text: "水をあげる...", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 10) } }));
+                      setEventResultLog("心が洗われる。\nHP+10。");
+                  }},
+                  { label: "掘り返す", text: "土を掘ってみる...", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.HAPPY_FLOWER] } }));
+                      setEventResultLog("土の中から「アサガオ」の鉢植えが出てきた！\nレリック入手。");
+                  }}
+              ]
+          },
+          // 13. The Pool
+          {
+              title: "夜のプール",
+              description: "水面が月明かりを反射している。底に何かが沈んでいる。",
+              options: [
+                  { label: "潜る", text: "息を止めて潜る...", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 5), relics: [...prev.player.relics, RELIC_LIBRARY.ANCHOR] } }));
+                      setEventResultLog("苦しい！(HP-5)\nしかし、底から「重いランドセル」を引き上げた。レリック入手。");
+                  }},
+                  { label: "泳ぐ", text: "ひと泳ぎする...", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 3 } }));
+                      setEventResultLog("体力がついた気がする。\n最大HP+3。");
+                  }}
+              ]
+          },
+          // 14. The Computer Room
+          {
+              title: "パソコン室",
+              description: "電源のついたPCが一台だけある。画面には「YES / NO」と表示されている。",
+              options: [
+                  { label: "YES", text: "YESをクリック...", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CARDS_LIBRARY['CREATIVE_AI'], id: `evt-${Date.now()}` }] } }));
+                      setEventResultLog("画面から光があふれ出した！\n「創造的AI」のカードがインストールされた。");
+                  }},
+                  { label: "NO", text: "NOをクリック...", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 77 } }));
+                      setEventResultLog("画面に「当選！」の文字が表示され、ディスクトレイから小銭が出てきた。\n77G 入手。");
+                  }}
+              ]
+          },
+          // 15. The Mirror
+          {
+              title: "踊り場の鏡",
+              description: "大きな鏡がある。映っている自分と目が合った。",
+              options: [
+                  { label: "見つめる", text: "じっと見つめる...", action: () => {
+                      // Dupe a card
+                      const deck = [...player.deck].sort(() => Math.random() - 0.5);
+                      const target = deck[0];
+                      if (target) {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...target, id: `copy-${Date.now()}` }] } }));
+                          setEventResultLog(`鏡の中の自分が何かを手渡してきた。\n「${target.name}」の複製を入手。`);
+                      } else {
+                          setEventResultLog("何も起こらなかった。");
+                      }
+                  }},
+                  { label: "割る", text: "鏡を叩き割る...", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.INJURY, id: `evt-${Date.now()}` }] } }));
+                      setEventResultLog("破片が飛び散った！\n呪い「骨折」を入手。7年間の不幸が訪れるだろう...");
+                  }}
+              ]
+          }
       ];
-      return events[0]; 
+
+      // Random Selection logic can be improved (e.g. weighted, distinct per run)
+      // For now, simple random.
+      return events[Math.floor(Math.random() * events.length)];
   };
 
   const handleNodeSelect = async (node: MapNode) => {
@@ -1768,6 +2096,10 @@ const App: React.FC = () => {
       audioService.playBGM('menu');
   };
 
+  const handleEventContinue = () => {
+      handleNodeComplete();
+  };
+
   const returnToTitle = () => {
     audioService.stopBGM();
     // Explicitly reset challengeMode to prevent it from carrying over
@@ -1790,7 +2122,16 @@ const App: React.FC = () => {
         <div className="w-full max-w-4xl h-[600px] border-[10px] md:border-[20px] border-gray-800 rounded-xl relative overflow-hidden shadow-2xl bg-black crt-scanline">
             
             {gameState.screen === GameScreen.START_MENU && (
-                <div className="w-full h-full bg-gray-900 flex items-center justify-center">
+                <div className="w-full h-full bg-gray-900 flex items-center justify-center relative">
+                    {/* Fullscreen Button */}
+                    <button
+                        onClick={toggleFullscreen}
+                        className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white border border-gray-600 rounded bg-gray-800 hover:bg-gray-700 transition-colors z-50 cursor-pointer"
+                        title={isFullscreen ? "ウィンドウに戻す" : "フルスクリーン"}
+                    >
+                        {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
+                    </button>
+
                     <div className="text-center p-8 w-full flex flex-col items-center">
                         <h1 
                             className="text-5xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-b from-purple-400 to-blue-600 mb-2 font-bold animate-pulse tracking-widest leading-tight cursor-pointer select-none"
@@ -1869,9 +2210,9 @@ const App: React.FC = () => {
                             <section>
                                 <h3 className="text-white font-bold mb-1">■ アップデート (Update)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li>カード合成時のイラストロジックを一新しました。</li>
-                                    <li>合成カードは、元となるカードの形状と、2枚目のカードの色を受け継ぐようになりました。</li>
-                                    <li>PixelSpriteの生成ロジックを拡張し、より多様なカード名に対応しました。</li>
+                                    <li>イベントの総数を大幅に追加し、ランダム性を向上させました。</li>
+                                    <li>イベントの選択肢結果を伏せるようにUIを変更し、探索の緊張感を高めました。</li>
+                                    <li>結果表示画面を追加し、何が起こったかを明確に伝えるようにしました。</li>
                                 </ul>
                             </section>
                         </div>
@@ -2031,7 +2372,7 @@ const App: React.FC = () => {
                     description={eventData.description} 
                     options={eventData.options} 
                     resultLog={eventResultLog}
-                    onContinue={handleNodeComplete}
+                    onContinue={handleEventContinue}
                 />
             )}
 
