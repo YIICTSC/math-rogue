@@ -297,7 +297,7 @@ export interface PokerCard {
   isSelected: boolean;
   bonusChips: number;
   multMultiplier: number;
-  enhancement?: 'BONUS' | 'MULT' | 'WILD' | 'STONE' | 'GLASS' | 'GOLD' | 'STEEL';
+  enhancement?: 'BONUS' | 'MULT' | 'WILD' | 'STONE' | 'GLASS' | 'GOLD' | 'STEEL' | 'LUCKY';
 }
 
 export interface PokerHandResult {
@@ -332,7 +332,7 @@ export interface PokerPack {
     name: string;
     description: string;
     price: number;
-    type: 'STANDARD' | 'BUFF' | 'SUPPORTER';
+    type: 'STANDARD' | 'BUFF' | 'SUPPORTER' | 'SPECTRAL';
     size: number; // How many cards revealed
     choose: number; // How many to pick
     icon: string;
