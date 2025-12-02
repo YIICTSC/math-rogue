@@ -132,7 +132,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
       }
   };
 
-  const sortedDeck = [...player.deck].sort((a, b) => {
+  const sortedDrawPile = [...player.drawPile].sort((a, b) => {
     if (a.type !== b.type) return a.type.localeCompare(b.type);
     if (a.cost !== b.cost) return a.cost - b.cost;
     return a.name.localeCompare(b.name);
@@ -434,7 +434,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                   <span className="text-lg font-bold">{player.currentEnergy}/{player.maxEnergy}</span>
               </div>
               <div className="text-[9px] text-gray-400 flex flex-col leading-tight">
-                  <span onClick={() => setShowDeck(true)} className="cursor-pointer hover:text-white flex items-center"><Layers size={10} className="mr-1"/> {player.deck.length}</span>
+                  <span onClick={() => setShowDeck(true)} className="cursor-pointer hover:text-white flex items-center" title="山札 (残り)"><Layers size={10} className="mr-1"/> {player.drawPile.length}</span>
                   <span className="flex items-center" onClick={() => showInfo("捨て札", "使用済みカード。山札が切れるとリシャッフルされる。")}><X size={10} className="mr-1"/> {player.discardPile.length}</span>
               </div>
           </div>
@@ -503,7 +503,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             <div className="bg-gray-800 border-4 border-white w-full max-w-md h-[80vh] flex flex-col relative shadow-2xl" onClick={e => e.stopPropagation()}>
                 <div className="bg-black border-b-2 border-gray-600 p-4 flex justify-between items-center">
                     <h2 className="text-white text-xl font-bold flex items-center">
-                        <Layers className="mr-2"/> デッキ一覧
+                        <Layers className="mr-2"/> 山札 (残り{player.drawPile.length}枚)
                     </h2>
                     <button onClick={() => setShowDeck(false)} className="text-gray-400 hover:text-white p-1">
                         <X size={24} />
@@ -511,7 +511,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 </div>
                 <div className="p-4 overflow-y-auto flex-grow bg-gray-900/90">
                     <div className="grid grid-cols-3 gap-2 justify-items-center">
-                        {sortedDeck.map((card) => (
+                        {sortedDrawPile.map((card) => (
                             <div key={card.id} className="scale-75 origin-top-left w-24 h-36">
                                 <Card card={card} onClick={() => {}} disabled={false} onInspect={() => setInspectedCard(card)} />
                             </div>
