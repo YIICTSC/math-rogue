@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle } from 'lucide-react';
+import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { 
@@ -860,11 +860,47 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
             <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowRulesModal(false)}>
                 <div className="bg-slate-800 border-4 border-yellow-500 rounded-lg p-6 w-full max-w-3xl max-h-[85vh] overflow-y-auto relative shadow-2xl custom-scrollbar" onClick={e => e.stopPropagation()}>
                     <button onClick={() => setShowRulesModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
-                    <h2 className="text-2xl font-bold text-yellow-400 mb-4 flex items-center"><HelpCircle className="mr-2"/> 役一覧 (Hand Types)</h2>
+                    
+                    {/* New: Game Flow Section */}
+                    <h2 className="text-2xl font-bold text-yellow-400 mb-4 flex items-center"><BookOpen className="mr-2"/> 遊び方 (How to Play)</h2>
+                    <div className="bg-slate-900/80 p-4 rounded-lg border border-slate-600 mb-6 text-sm space-y-4">
+                        <div>
+                            <h3 className="font-bold text-white mb-2 flex items-center"><Flag className="mr-2 text-red-400"/> ゲームの目的</h3>
+                            <p className="text-gray-300">
+                                ポーカーの役を作ってスコアを稼ぎ、設定された<span className="text-red-400 font-bold">目標スコア(Score Goal)</span>を達成しましょう。<br/>
+                                全8ステージ(Ante)をクリアすると卒業(ゲームクリア)です。
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <h3 className="font-bold text-white mb-2 flex items-center"><Calculator className="mr-2 text-blue-400"/> スコア計算</h3>
+                            <div className="flex items-center gap-2 bg-black/40 p-2 rounded justify-center">
+                                <span className="text-blue-400 font-bold text-lg">チップ (Chips)</span>
+                                <X size={16} className="text-gray-500"/>
+                                <span className="text-red-500 font-bold text-lg">倍率 (Mult)</span>
+                                <ArrowRight size={16} className="text-gray-500"/>
+                                <span className="text-yellow-400 font-bold text-lg">スコア</span>
+                            </div>
+                            <p className="text-gray-400 mt-2 text-xs text-center">
+                                役の基本点 + カードの点数 = チップ。<br/>
+                                サポーター(Joker)の効果で倍率を増やして爆発的なスコアを目指せ！
+                            </p>
+                        </div>
+
+                        <div>
+                            <h3 className="font-bold text-white mb-2 flex items-center"><ShoppingBag className="mr-2 text-yellow-400"/> 買い物</h3>
+                            <p className="text-gray-300">
+                                ラウンド勝利後に獲得したお金でアイテムを購入できます。<br/>
+                                <span className="text-blue-300">サポーター:</span> 持っているだけで効果発揮(最大5枠)。<br/>
+                                <span className="text-purple-300">消耗品:</span> 使い切りの強力な効果(最大2枠)。
+                            </p>
+                        </div>
+                    </div>
+
+                    <h2 className="text-2xl font-bold text-yellow-400 mb-4 flex items-center border-t border-slate-600 pt-6"><HelpCircle className="mr-2"/> 役一覧 (Hand Types)</h2>
                     
                     <div className="space-y-4 text-sm">
                         <div className="grid grid-cols-1 gap-3">
-                            {/* Sorted by rank strength manually to be helpful */}
                             {['ROYAL_FLUSH', 'STRAIGHT_FLUSH', 'FOUR_OF_A_KIND', 'FULL_HOUSE', 'FLUSH', 'STRAIGHT', 'THREE_OF_A_KIND', 'TWO_PAIR', 'PAIR', 'HIGH_CARD'].map((key) => {
                                 const def = POKER_HAND_LEVELS[key];
                                 const example = HAND_EXAMPLES[key];
