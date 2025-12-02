@@ -1048,17 +1048,46 @@ const App: React.FC = () => {
     setGameState(prev => {
       const p = { ...prev.player };
       
-      // 1. Start of Turn Stat Updates
+      // 1. Start of Turn Stat Updates (Powers)
       if (p.powers['DEMON_FORM']) { 
           p.strength += p.powers['DEMON_FORM']; 
-          p.floatingText = { id: `pow-${Date.now()}`, text: '悪魔化', color: 'text-red-500' }; 
+          p.floatingText = { id: `pow-demon-${Date.now()}`, text: '悪魔化', color: 'text-red-500' }; 
       }
       if (p.powers['ECHO_FORM']) p.echoes = p.powers['ECHO_FORM'];
       if (p.powers['DEVA_FORM']) p.maxEnergy += p.powers['DEVA_FORM'];
+      if (p.powers['NOXIOUS_FUMES']) {
+          const enemies = prev.enemies.map(e => {
+              const newPoison = e.poison + p.powers['NOXIOUS_FUMES'];
+              return { ...e, poison: newPoison };
+          });
+          prev.enemies = enemies; // Modify reference for immediate effect in UI if needed, but best return new state
+      }
       
-      // Relic: Mutagenic Strength (Lose)
-      if (p.relics.find(r => r.id === 'MUTAGENIC_STRENGTH') && p.strength > 0) {
-          // p.strength -= 3; // Kept commented out as per existing code preference or simple logic
+      // Relic: Mutagenic Strength (Lose Strength at end of turn 1, processed here as start of turn 2 cleanup)
+      if (p.relics.find(r => r.id === 'MUTAGENIC_STRENGTH') && prev.turn === 1) {
+          p.strength -= 3;
+          p.floatingText = { id: `relic-mutagen-${Date.now()}`, text: '筋力低下', color: 'text-gray-400' };
+      }
+
+      // Relic: Mercury Hourglass (Start of Turn Damage)
+      if (p.relics.find(r => r.id === 'MERCURY_HOURGLASS')) {
+          prev.enemies.forEach(e => {
+              e.currentHp -= 3;
+              e.floatingText = { id: `dmg-hg-${Date.now()}-${e.id}`, text: '3', color: 'text-gray-400', iconType: 'sword' };
+          });
+          prev.enemies = prev.enemies.filter(e => e.currentHp > 0);
+      }
+
+      // Relic: Horn Cleat (Turn 2 Start Block)
+      if (prev.turn === 1 && p.relics.find(r => r.id === 'HORN_CLEAT')) {
+          p.block += 14;
+          p.floatingText = { id: `relic-horn-${Date.now()}`, text: '+14 Block', color: 'text-blue-400', iconType: 'shield' };
+      }
+
+      // Relic: Happy Flower (Every 3 turns)
+      if (p.relics.find(r => r.id === 'HAPPY_FLOWER') && (prev.turn + 1) % 3 === 0) {
+          p.currentEnergy += 1; // Will be added to base below
+          p.floatingText = { id: `relic-flower-${Date.now()}`, text: '+1 Energy', color: 'text-yellow-400', iconType: 'zap' };
       }
 
       // 2. Prepare Draw & Discard Piles
@@ -1076,7 +1105,7 @@ const App: React.FC = () => {
       }
 
       // 4. Calculate Draw Count
-      const drawCount = HAND_SIZE + (p.powers['TOOLS_OF_THE_TRADE'] ? 1 : 0) + p.nextTurnDraw;
+      let drawCount = HAND_SIZE + (p.powers['TOOLS_OF_THE_TRADE'] ? 1 : 0) + p.nextTurnDraw;
       p.nextTurnDraw = 0;
 
       // 5. Draw Loop
@@ -1105,23 +1134,28 @@ const App: React.FC = () => {
       if (p.powers['INFINITE_BLADES']) {
           newHand.push({ ...CARDS_LIBRARY['SHIV'], id: `inf-${Date.now()}` });
       }
+      
       // Warped Tongs (Upgrade random card in NEW hand)
       if (p.relics.find(r => r.id === 'WARPED_TONGS') && newHand.length > 0) {
           const upgradeable = newHand.filter(c => !c.upgraded);
           if (upgradeable.length > 0) {
               const c = upgradeable[Math.floor(Math.random() * upgradeable.length)];
-              // We need to replace the object in newHand with the upgraded version
               const upgraded = getUpgradedCard(c);
-              // Find index and replace
               const idx = newHand.findIndex(x => x.id === c.id);
               if (idx !== -1) newHand[idx] = upgraded;
           }
       }
 
-      // 7. Update State
-      p.currentEnergy = p.maxEnergy + p.nextTurnEnergy;
+      // 7. Update Energy & Block
+      // Ice Cream Logic: Keep previous energy
+      let baseEnergy = p.maxEnergy + p.nextTurnEnergy;
+      if (p.relics.find(r => r.id === 'ICE_CREAM')) {
+          baseEnergy += p.currentEnergy;
+      }
+      p.currentEnergy = baseEnergy;
       p.nextTurnEnergy = 0;
 
+      // Block Reset Logic (Barricade / Calipers)
       if (!p.powers['BARRICADE']) {
           if (p.relics.find(r => r.id === 'CALIPERS')) {
               p.block = Math.max(0, p.block - 15);
@@ -1137,7 +1171,13 @@ const App: React.FC = () => {
       p.attacksPlayedThisTurn = 0;
       p.turnFlags = {};
 
-      return { ...prev, player: p, turn: prev.turn + 1 };
+      // Selection State for Tools of the Trade (Discard 1)
+      let nextSelection = { ...prev.selectionState };
+      if (p.powers['TOOLS_OF_THE_TRADE']) {
+          nextSelection = { active: true, type: 'DISCARD', amount: 1 };
+      }
+
+      return { ...prev, player: p, enemies: prev.enemies, selectionState: nextSelection, turn: prev.turn + 1 };
     });
   };
 
@@ -1145,13 +1185,27 @@ const App: React.FC = () => {
     audioService.playSound('select');
     setTurnLog("敵のターン...");
     setLastActionType(null);
+    
+    // --- Pre-Enemy Turn Player Effects (End of Turn) ---
+    setGameState(prev => {
+        const p = { ...prev.player };
+        
+        // Metallicize
+        if (p.powers['METALLICIZE']) {
+            p.block += p.powers['METALLICIZE'];
+            p.floatingText = { id: `pow-metal-${Date.now()}`, text: `+${p.powers['METALLICIZE']}`, color: 'text-blue-400', iconType: 'shield' };
+        }
+        
+        return { ...prev, player: p };
+    });
+
     await wait(500);
 
     const enemies = [...gameState.enemies];
     for (const enemy of enemies) {
         if (gameState.player.currentHp <= 0) break;
         
-        // Enemy Status Effects
+        // Enemy Status Effects (Poison)
         if (enemy.poison > 0) {
             enemy.currentHp -= enemy.poison;
             enemy.poison--;
@@ -1223,7 +1277,7 @@ const App: React.FC = () => {
             }
 
             if (intent.type === EnemyIntentType.DEFEND || intent.type === EnemyIntentType.ATTACK_DEFEND) {
-                e.block += intent.value; // For pure defend, value is block. For mixed, secondary is usually block but we map simpler here
+                e.block += intent.value; 
                 if (intent.type === EnemyIntentType.ATTACK_DEFEND && intent.secondaryValue) e.block = intent.secondaryValue;
             }
 
@@ -1241,7 +1295,6 @@ const App: React.FC = () => {
                     if (type === 'VULNERABLE') p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + debuffAmt;
                     if (type === 'POISON') {
                         // Apply Curse/Status card instead? Simple poison for player:
-                        // No player poison field, usually Frail/Weak/Vuln. Let's say Weak for simplicity or implement Poison status.
                         // Implemented: Shuffle Status card into deck
                         const status = { ...STATUS_CARDS.SLIMED, id: `slime-${Date.now()}` };
                         p.discardPile.push(status);
@@ -1262,10 +1315,30 @@ const App: React.FC = () => {
     }
     setActingEnemyId(null);
     
-    // Process End of Turn Curses/Statuses on Player
+    // --- Post-Enemy Turn Player Effects (End of Round) ---
     setGameState(prev => {
         const p = { ...prev.player };
         
+        // Regen
+        if (p.powers['REGEN'] > 0) {
+            const heal = p.powers['REGEN'];
+            p.currentHp = Math.min(p.maxHp, p.currentHp + heal);
+            p.powers['REGEN']--;
+            p.floatingText = { id: `pow-regen-${Date.now()}`, text: `+${heal}`, color: 'text-green-500', iconType: 'heart' };
+        }
+
+        // Nilry's Codex (Add random card to hand)
+        if (p.relics.find(r => r.id === 'NILRYS_CODEX')) {
+            const keys = Object.keys(CARDS_LIBRARY).filter(k => !STATUS_CARDS[k] && !CURSE_CARDS[k]);
+            const k = keys[Math.floor(Math.random() * keys.length)];
+            const c = { ...CARDS_LIBRARY[k], id: `nilry-${Date.now()}` };
+            if (p.hand.length < HAND_SIZE + 5) {
+                p.hand.push(c); // Add to hand directly for simplicity in this UI
+            } else {
+                p.discardPile.push(c);
+            }
+        }
+
         // Decrement Powers
         if (p.powers['INTANGIBLE'] > 0) p.powers['INTANGIBLE']--;
         if (p.powers['STRENGTH_DOWN']) { 
@@ -1281,12 +1354,6 @@ const App: React.FC = () => {
             if (c.name === '恥' || c.name === 'SHAME') p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + 1;
             if (c.name === '後悔' || c.name === 'REGRET') p.currentHp -= p.hand.length;
         });
-
-        // Noxious Fumes
-        if (p.powers['NOXIOUS_FUMES']) {
-            const enemies = prev.enemies.map(e => ({ ...e, poison: e.poison + p.powers['NOXIOUS_FUMES'] }));
-            return { ...prev, player: p, enemies };
-        }
 
         return { ...prev, player: p };
     });
