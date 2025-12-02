@@ -970,9 +970,23 @@ const App: React.FC = () => {
                          }
                          if (card.capture) {
                              // Create card from enemy
-                             const captured = { ...card, name: e.name, id: `captured-${e.id}` }; // Logic simplified, could make specific card
+                             const damageVal = Math.max(5, Math.floor(e.maxHp * 0.5));
+                             const captured: ICard = {
+                                 id: `captured-${e.id}-${Date.now()}`,
+                                 name: e.name,
+                                 type: CardType.ATTACK,
+                                 target: TargetType.ENEMY,
+                                 cost: 1,
+                                 damage: damageVal,
+                                 description: `${damageVal}ダメージ。廃棄。`,
+                                 rarity: 'SPECIAL',
+                                 textureRef: e.name, // Use enemy name to generate sprite on card
+                                 exhaust: true
+                             };
+                             
                              p.deck.push(captured);
                              p.discardPile.push(captured);
+                             e.floatingText = { id: `cap-${Date.now()}`, text: 'GET!', color: 'text-yellow-400' };
                          }
                     }
                 });
