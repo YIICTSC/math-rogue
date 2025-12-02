@@ -709,40 +709,6 @@ const App: React.FC = () => {
       }
   };
 
-  const handleSynthesizeCard = (c1: ICard, c2: ICard) => {
-      const len1 = Math.floor(Math.random() * 3) + 2; 
-      const len2 = Math.floor(Math.random() * 3) + 2; 
-      const part1 = c1.name.substring(0, Math.min(len1, c1.name.length));
-      const part2 = c2.name.substring(Math.max(0, c2.name.length - len2));
-      const newName = part1 + part2;
-      const newCost = Math.max(c1.cost, c2.cost);
-      
-      const sum = (k: keyof ICard) => ((c1[k] as number) || 0) + ((c2[k] as number) || 0);
-      const newDamage = sum('damage');
-      
-      const newCard: ICard = {
-          id: `synth-${Date.now()}`,
-          name: newName,
-          cost: newCost,
-          type: c1.type,
-          description: "合成カード",
-          rarity: 'SPECIAL',
-          damage: newDamage > 0 ? newDamage : undefined,
-          exhaust: c1.exhaust || c2.exhaust,
-          textureRef: c1.textureRef || c1.name // Inherit sprite logic
-      };
-      
-      setGameState(prev => ({
-          ...prev,
-          player: {
-              ...prev.player,
-              deck: [...prev.player.deck.filter(c => c.id !== c1.id && c.id !== c2.id), newCard]
-          }
-      }));
-      
-      return newCard;
-  };
-
   const handleSelectEnemy = (id: string) => setGameState(prev => ({ ...prev, selectedEnemyId: id }));
 
   const applyDebuff = (enemy: Enemy, type: 'WEAK' | 'VULNERABLE' | 'POISON', amount: number) => {
@@ -1665,6 +1631,101 @@ const App: React.FC = () => {
       setGameState(prev => ({ ...prev, player: { ...prev.player, deck: prev.player.deck.map(c => c.id === card.id ? getUpgradedCard(c) : c) } }));
   };
 
+  const handleSynthesizeCard = (c1: ICard, c2: ICard) => {
+      const len1 = Math.floor(Math.random() * 3) + 2; 
+      const len2 = Math.floor(Math.random() * 3) + 2; 
+      const part1 = c1.name.substring(0, Math.min(len1, c1.name.length));
+      const part2 = c2.name.substring(Math.max(0, c2.name.length - len2));
+      const newName = part1 + part2;
+      const newCost = Math.max(c1.cost, c2.cost);
+      
+      // Sum numeric stats
+      const sum = (k: keyof ICard) => ((c1[k] as number) || 0) + ((c2[k] as number) || 0);
+      const newDamage = sum('damage');
+      const newBlock = sum('block');
+      const newDraw = sum('draw');
+      const newEnergy = sum('energy');
+      const newHeal = sum('heal');
+      const newPoison = sum('poison');
+      const newWeak = sum('weak');
+      const newVulnerable = sum('vulnerable');
+      const newStrength = sum('strength');
+      const newSelfDamage = sum('selfDamage');
+
+      // Merge booleans
+      const newExhaust = c1.exhaust || c2.exhaust;
+      const newInnate = c1.innate || c2.innate;
+
+      // Determine Type & Target
+      let newType = c1.type;
+      if (newDamage > 0) newType = CardType.ATTACK;
+      else if (c1.type === CardType.POWER || c2.type === CardType.POWER) newType = CardType.POWER;
+      else newType = CardType.SKILL;
+
+      let newTarget = TargetType.ENEMY;
+      if (c1.target === TargetType.ALL_ENEMIES || c2.target === TargetType.ALL_ENEMIES) newTarget = TargetType.ALL_ENEMIES;
+      else if (c1.target === TargetType.RANDOM_ENEMY || c2.target === TargetType.RANDOM_ENEMY) newTarget = TargetType.RANDOM_ENEMY;
+      else if (c1.target === TargetType.SELF || c2.target === TargetType.SELF) newTarget = TargetType.SELF;
+      
+      // If it deals damage or debuffs, force target to ENEMY if currently SELF
+      if ((newDamage > 0 || newPoison > 0 || newWeak > 0 || newVulnerable > 0) && newTarget === TargetType.SELF) {
+          newTarget = TargetType.ENEMY;
+      }
+
+      // Generate Description
+      const parts: string[] = [];
+      if (newDamage > 0) {
+          if (newTarget === TargetType.ALL_ENEMIES) parts.push(`全体に${newDamage}ダメージ`);
+          else if (newTarget === TargetType.RANDOM_ENEMY) parts.push(`ランダムな敵に${newDamage}ダメージ`);
+          else parts.push(`${newDamage}ダメージ`);
+      }
+      if (newBlock > 0) parts.push(`ブロック${newBlock}`);
+      if (newPoison > 0) parts.push(`ドクドク${newPoison}`);
+      if (newWeak > 0) parts.push(`へろへろ${newWeak}`);
+      if (newVulnerable > 0) parts.push(`びくびく${newVulnerable}`);
+      if (newStrength > 0) parts.push(`ムキムキ${newStrength}`);
+      if (newDraw > 0) parts.push(`${newDraw}枚引く`);
+      if (newEnergy > 0) parts.push(`E${newEnergy}を得る`);
+      if (newHeal > 0) parts.push(`HP${newHeal}回復`);
+      if (newSelfDamage > 0) parts.push(`自分に${newSelfDamage}ダメージ`);
+      
+      let description = parts.join("。") + (parts.length > 0 ? "。" : "");
+      if (parts.length === 0) description = "効果なし。";
+
+      const newCard: ICard = {
+          id: `synth-${Date.now()}`,
+          name: newName,
+          cost: newCost,
+          type: newType,
+          target: newTarget,
+          description: description,
+          rarity: 'SPECIAL',
+          damage: newDamage || undefined,
+          block: newBlock || undefined,
+          draw: newDraw || undefined,
+          energy: newEnergy || undefined,
+          heal: newHeal || undefined,
+          poison: newPoison || undefined,
+          weak: newWeak || undefined,
+          vulnerable: newVulnerable || undefined,
+          strength: newStrength || undefined,
+          selfDamage: newSelfDamage || undefined,
+          exhaust: newExhaust,
+          innate: newInnate,
+          textureRef: c1.textureRef || c1.name 
+      };
+      
+      setGameState(prev => ({
+          ...prev,
+          player: {
+              ...prev.player,
+              deck: [...prev.player.deck.filter(c => c.id !== c1.id && c.id !== c2.id), newCard]
+          }
+      }));
+      
+      return newCard;
+  };
+
   const handleNodeComplete = () => {
       setGameState(prev => {
           const newMap = prev.map.map(n => {
@@ -1784,6 +1845,7 @@ const App: React.FC = () => {
                                     <li>戦闘終了時の報酬画面フローを改善しました。</li>
                                     <li>勝利画面をスキップし、直接算数チャレンジへ移行します。</li>
                                     <li>獲得ゴールドを合算して表示するように変更しました。</li>
+                                    <li>カード合成時の効果テキストを詳細に表示するように修正しました。</li>
                                 </ul>
                             </section>
                         </div>
