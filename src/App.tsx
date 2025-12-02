@@ -1315,11 +1315,20 @@ const App: React.FC = () => {
                  });
                  storageService.incrementClearCount();
             } else {
-                 setGameState(prev => ({ 
-                    ...prev, 
-                    player: { ...prev.player, gold: prev.player.gold + VICTORY_GOLD, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + hpRegen) },
-                    screen: GameScreen.VICTORY
-                }));
+                 if (isMathDebugSkipped) {
+                     // Auto-complete math
+                     const bonus = 3 * 10;
+                     // Need to apply regen as well since we skip the state update that applies it in the else block below
+                     goToRewardPhase(VICTORY_GOLD + bonus, hpRegen);
+                 } else {
+                     // Go directly to math, applying regen to player state
+                     setGameState(prev => ({ 
+                        ...prev, 
+                        player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + hpRegen) },
+                        screen: GameScreen.MATH_CHALLENGE
+                    }));
+                    audioService.playBGM('math');
+                 }
             }
         } else if (gameState.player.currentHp <= 0) {
             // Lizard Tail Check
@@ -1352,24 +1361,20 @@ const App: React.FC = () => {
   const handleMathChallengeComplete = (count: number) => {
       // Bonus based on math score
       const bonusGold = count * 10;
-      setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + bonusGold } }));
-      goToRewardPhase();
+      goToRewardPhase(VICTORY_GOLD + bonusGold);
   };
 
-  const startMathChallenge = () => {
-      if (isMathDebugSkipped) {
-          handleMathChallengeComplete(3); 
-      } else {
-          setGameState(prev => ({ ...prev, screen: GameScreen.MATH_CHALLENGE }));
-      }
-  };
-
-  const goToRewardPhase = () => {
+  const goToRewardPhase = (guaranteedGold: number = 0, hpRegen: number = 0) => {
     const rewards: RewardItem[] = [];
     
+    // 0. Guaranteed Gold (Victory + Math)
+    if (guaranteedGold > 0) {
+        rewards.push({ type: 'GOLD', value: guaranteedGold, id: `rew-gold-victory-${Date.now()}` });
+    }
+
     // 1. Card Reward
     const allCards = Object.values(CARDS_LIBRARY).filter(c => c.type !== CardType.STATUS && c.type !== CardType.CURSE && c.rarity !== 'SPECIAL');
-    while(rewards.length < 3) {
+    while(rewards.length < (guaranteedGold > 0 ? 4 : 3)) { // 3 cards + 1 gold
         const roll = Math.random() * 100;
         let targetRarity = 'COMMON';
         if (roll > 95) targetRarity = 'LEGENDARY'; else if (roll > 65) targetRarity = 'RARE';
@@ -1388,7 +1393,6 @@ const App: React.FC = () => {
         const bossRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'BOSS');
         const relic = bossRelics[Math.floor(Math.random() * bossRelics.length)];
         rewards.push({ type: 'RELIC', value: relic, id: `rew-relic-${Date.now()}` });
-        rewards.push({ type: 'GOLD', value: 100, id: `rew-gold-${Date.now()}` });
     }
 
     // 3. Potion Reward (Chance)
@@ -1406,7 +1410,12 @@ const App: React.FC = () => {
         rewards.push({ type: 'RELIC', value: relic, id: `rew-elite-${Date.now()}` });
     }
 
-    setGameState(prev => ({ ...prev, screen: GameScreen.REWARD, rewards: rewards }));
+    setGameState(prev => ({ 
+        ...prev, 
+        player: hpRegen > 0 ? { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + hpRegen) } : prev.player,
+        screen: GameScreen.REWARD, 
+        rewards: rewards 
+    }));
     audioService.playSound('select');
   };
 
@@ -1599,7 +1608,7 @@ const App: React.FC = () => {
                             </div>
 
                             <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                <Terminal size={10}/> v2.3.1
+                                <Terminal size={10}/> v2.3.2
                             </button>
                         </div>
                     </div>
@@ -1613,21 +1622,15 @@ const App: React.FC = () => {
                             className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2 select-none active:text-green-200"
                             onClick={handleLogTitleClick}
                         >
-                            System Update Log v2.3.1
+                            System Update Log v2.3.2
                         </h2>
                         <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
                             <section>
                                 <h3 className="text-white font-bold mb-1">■ 修正 (Fix)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li>デバッグメニューが正しく開始されない問題を修正しました。</li>
-                                    <li>デバッグメニューへのアクセスボタンを追加しました。</li>
-                                </ul>
-                            </section>
-                            <section>
-                                <h3 className="text-white font-bold mb-1">■ ミニゲーム追加 (New Mini Game)</h3>
-                                <ul className="list-disc pl-5 space-y-1">
-                                    <li>「放課後ポーカー：給食の乱」を追加しました。</li>
-                                    <li>ローグライク要素のあるポーカーゲームです。</li>
+                                    <li>戦闘終了時の報酬画面フローを改善しました。</li>
+                                    <li>勝利画面をスキップし、直接算数チャレンジへ移行します。</li>
+                                    <li>獲得ゴールドを合算して表示するように変更しました。</li>
                                 </ul>
                             </section>
                         </div>
@@ -1714,17 +1717,7 @@ const App: React.FC = () => {
                 />
             )}
 
-            {gameState.screen === GameScreen.VICTORY && (
-                 <div className="w-full h-full bg-green-900 flex items-center justify-center text-center text-white p-4">
-                    <div>
-                        <h1 className="text-4xl md:text-5xl mb-4 text-yellow-400 font-bold">勝利！</h1>
-                        <div className="text-yellow-400 text-2xl font-bold mb-8 flex items-center justify-center"><Coins className="mr-2"/> +{VICTORY_GOLD} G</div>
-                        <button onClick={startMathChallenge} className="bg-blue-600 px-8 py-4 border-2 border-white font-bold animate-bounce cursor-pointer rounded-lg text-xl">
-                            算数ボーナスへ
-                        </button>
-                    </div>
-                 </div>
-            )}
+            {/* Victory Screen is removed as per request to skip directly to Math Challenge */}
 
             {gameState.screen === GameScreen.MATH_CHALLENGE && (
                 <MathChallengeScreen mode={gameState.mode} onComplete={handleMathChallengeComplete} />
