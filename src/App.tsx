@@ -313,15 +313,17 @@ const App: React.FC = () => {
       return () => document.removeEventListener('fullscreenchange', handleFullScreenChange);
   }, []);
 
-  const toggleFullscreen = () => {
-      if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen().catch((e) => {
-              console.error(`Error attempting to enable full-screen mode: ${e.message} (${e.name})`);
-          });
-      } else {
-          if (document.exitFullscreen) {
-              document.exitFullscreen();
-          }
+  const toggleFullscreen = async () => {
+      try {
+        if (!document.fullscreenElement) {
+            await document.documentElement.requestFullscreen();
+        } else {
+            if (document.exitFullscreen) {
+                await document.exitFullscreen();
+            }
+        }
+      } catch (e) {
+          console.warn("Fullscreen toggle failed:", e);
       }
   };
 
@@ -2123,11 +2125,12 @@ const App: React.FC = () => {
             
             {gameState.screen === GameScreen.START_MENU && (
                 <div className="w-full h-full bg-gray-900 flex items-center justify-center relative">
-                    {/* Fullscreen Button */}
+                    {/* Fullscreen Button - Updated Style */}
                     <button
                         onClick={toggleFullscreen}
-                        className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white border border-gray-600 rounded bg-gray-800 hover:bg-gray-700 transition-colors z-50 cursor-pointer"
+                        className="absolute top-4 right-4 p-3 text-gray-300 hover:text-white border-2 border-gray-600 hover:border-gray-400 rounded-lg bg-gray-800 hover:bg-gray-700 transition-all z-50 cursor-pointer shadow-lg active:scale-95"
                         title={isFullscreen ? "ウィンドウに戻す" : "フルスクリーン"}
+                        aria-label="Toggle Fullscreen"
                     >
                         {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
                     </button>
