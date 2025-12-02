@@ -307,13 +307,27 @@ export interface PokerHandResult {
   level: number;
 }
 
+// Scoring Event for Animation Sequence
+export type ScoreEventType = 'BASE' | 'CARD' | 'SUPPORTER' | 'HELD_CARD' | 'TOTAL';
+
+export interface ScoreEvent {
+    type: ScoreEventType;
+    sourceName?: string;
+    sourceId?: string; // For highlighting card/supporter
+    addChips?: number;
+    addMult?: number;
+    multMult?: number; // Multiplicative Mult (x1.5 etc)
+    message?: string; // "+10 Chips", "x1.5 Mult"
+}
+
 export interface PokerSupporter { // Joker
   id: string;
   name: string;
   description: string;
   rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'LEGENDARY';
   price: number;
-  effect: (ctx: PokerScoringContext) => void;
+  // Effect modified to push to event queue instead of direct mutation
+  effect: (ctx: PokerScoringContext, queue: ScoreEvent[]) => void;
   icon: string;
   triggerOn?: 'HAND_PLAYED' | 'DISCARD' | 'HELD_IN_HAND';
 }
@@ -339,8 +353,8 @@ export interface PokerPack {
 }
 
 export interface PokerScoringContext {
-  chips: number;
-  mult: number;
+  chips: number; // Current running total
+  mult: number;  // Current running total
   handType: string;
   cards: PokerCard[];
   handsPlayed: number;
