@@ -12,6 +12,50 @@ import { POKER_HAND_LEVELS, SUPPORTERS_LIBRARY, CONSUMABLES_LIBRARY } from '../c
 const SUITS: PokerSuit[] = ['SPADE', 'HEART', 'DIAMOND', 'CLUB'];
 const RANKS: PokerRank[] = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
 
+// --- HAND EXAMPLES FOR RULES ---
+const HAND_EXAMPLES: Record<string, { desc: string, cards: {r: string, s: PokerSuit}[] }> = {
+    'HIGH_CARD': {
+        desc: '役が何もない状態。一番強いカードで勝負。',
+        cards: [{r:'A',s:'SPADE'}, {r:'10',s:'HEART'}, {r:'7',s:'CLUB'}, {r:'4',s:'DIAMOND'}, {r:'2',s:'SPADE'}]
+    },
+    'PAIR': {
+        desc: '同じ数字のカードが2枚ある状態。',
+        cards: [{r:'8',s:'SPADE'}, {r:'8',s:'HEART'}, {r:'K',s:'CLUB'}, {r:'9',s:'DIAMOND'}, {r:'3',s:'SPADE'}]
+    },
+    'TWO_PAIR': {
+        desc: 'ワンペアが2組ある状態。',
+        cards: [{r:'J',s:'SPADE'}, {r:'J',s:'HEART'}, {r:'5',s:'CLUB'}, {r:'5',s:'DIAMOND'}, {r:'A',s:'SPADE'}]
+    },
+    'THREE_OF_A_KIND': {
+        desc: '同じ数字のカードが3枚ある状態。',
+        cards: [{r:'7',s:'SPADE'}, {r:'7',s:'HEART'}, {r:'7',s:'CLUB'}, {r:'K',s:'DIAMOND'}, {r:'2',s:'SPADE'}]
+    },
+    'STRAIGHT': {
+        desc: 'マークに関係なく、数字が5枚連続している状態。(Aは2ともKとも繋がります)',
+        cards: [{r:'5',s:'SPADE'}, {r:'6',s:'HEART'}, {r:'7',s:'CLUB'}, {r:'8',s:'DIAMOND'}, {r:'9',s:'SPADE'}]
+    },
+    'FLUSH': {
+        desc: '数字に関係なく、同じマークが5枚揃った状態。',
+        cards: [{r:'2',s:'HEART'}, {r:'5',s:'HEART'}, {r:'9',s:'HEART'}, {r:'J',s:'HEART'}, {r:'A',s:'HEART'}]
+    },
+    'FULL_HOUSE': {
+        desc: 'スリーカードとワンペアの組み合わせ。',
+        cards: [{r:'Q',s:'SPADE'}, {r:'Q',s:'HEART'}, {r:'Q',s:'CLUB'}, {r:'9',s:'DIAMOND'}, {r:'9',s:'SPADE'}]
+    },
+    'FOUR_OF_A_KIND': {
+        desc: '同じ数字のカードが4枚ある状態。',
+        cards: [{r:'3',s:'SPADE'}, {r:'3',s:'HEART'}, {r:'3',s:'CLUB'}, {r:'3',s:'DIAMOND'}, {r:'K',s:'SPADE'}]
+    },
+    'STRAIGHT_FLUSH': {
+        desc: '同じマークで、かつ数字が連続している状態。',
+        cards: [{r:'8',s:'CLUB'}, {r:'9',s:'CLUB'}, {r:'10',s:'CLUB'}, {r:'J',s:'CLUB'}, {r:'Q',s:'CLUB'}]
+    },
+    'ROYAL_FLUSH': {
+        desc: '同じマークの 10, J, Q, K, A の組み合わせ。最強。',
+        cards: [{r:'10',s:'SPADE'}, {r:'J',s:'SPADE'}, {r:'Q',s:'SPADE'}, {r:'K',s:'SPADE'}, {r:'A',s:'SPADE'}]
+    }
+};
+
 // Blind scaling logic
 const getBlindConfig = (ante: number, index: number): PokerBlind => {
     const base = 300 * Math.pow(1.5, ante - 1);
@@ -150,6 +194,15 @@ const getSuitIcon = (suit: PokerSuit) => {
         case 'CLUB': return <Club className="text-green-500 fill-current" />;
     }
 };
+
+const getSuitColorClass = (suit: PokerSuit) => {
+    switch(suit) {
+        case 'SPADE': return 'text-blue-900';
+        case 'HEART': return 'text-red-600';
+        case 'DIAMOND': return 'text-orange-500';
+        case 'CLUB': return 'text-green-800';
+    }
+}
 
 interface PokerGameScreenProps {
   onBack: () => void;
@@ -805,49 +858,37 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
         {/* Rules / Game Info Modal */}
         {showRulesModal && (
             <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowRulesModal(false)}>
-                <div className="bg-slate-800 border-4 border-yellow-500 rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto relative shadow-2xl custom-scrollbar" onClick={e => e.stopPropagation()}>
+                <div className="bg-slate-800 border-4 border-yellow-500 rounded-lg p-6 w-full max-w-3xl max-h-[85vh] overflow-y-auto relative shadow-2xl custom-scrollbar" onClick={e => e.stopPropagation()}>
                     <button onClick={() => setShowRulesModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
-                    <h2 className="text-2xl font-bold text-yellow-400 mb-4 flex items-center"><HelpCircle className="mr-2"/> Game Rules (遊び方)</h2>
+                    <h2 className="text-2xl font-bold text-yellow-400 mb-4 flex items-center"><HelpCircle className="mr-2"/> 役一覧 (Hand Types)</h2>
                     
-                    <div className="space-y-6 text-sm text-gray-300">
-                        <section>
-                            <h3 className="text-lg font-bold text-white mb-2">目標</h3>
-                            <p>ポーカーの役を作ってチップを稼ぎ、制限ラウンド内に目標スコア（ブラインド）を達成しましょう。</p>
-                            <ul className="list-disc pl-5 mt-2 space-y-1">
-                                <li>手札から最大5枚選んで「PLAY HAND」でスコア獲得。</li>
-                                <li>「DISCARD」で不要なカードを捨てて引き直せます。</li>
-                                <li>手持ちの「Hands」が0になる前に目標スコアを超えればクリア！</li>
-                            </ul>
-                        </section>
-
-                        <section>
-                            <h3 className="text-lg font-bold text-white mb-2">スコア計算</h3>
-                            <p className="bg-slate-900 p-2 rounded border border-slate-700 font-mono text-center mb-2">
-                                Score = Chips x Mult
-                            </p>
-                            <p>各役には基本のチップと倍率（Mult）があります。カード自体のランク（数字）もチップに加算されます。</p>
-                        </section>
-
-                        <section>
-                            <h3 className="text-lg font-bold text-white mb-2">役一覧 (Base Score)</h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                {Object.values(POKER_HAND_LEVELS).map((h) => (
-                                    <div key={h.name} className="flex justify-between bg-slate-900 p-2 rounded text-xs">
-                                        <span>{h.name}</span>
-                                        <span className="text-blue-300">{h.baseChips} <span className="text-gray-500">x</span> <span className="text-red-400">{h.baseMult}</span></span>
+                    <div className="space-y-4 text-sm">
+                        <div className="grid grid-cols-1 gap-3">
+                            {/* Sorted by rank strength manually to be helpful */}
+                            {['ROYAL_FLUSH', 'STRAIGHT_FLUSH', 'FOUR_OF_A_KIND', 'FULL_HOUSE', 'FLUSH', 'STRAIGHT', 'THREE_OF_A_KIND', 'TWO_PAIR', 'PAIR', 'HIGH_CARD'].map((key) => {
+                                const def = POKER_HAND_LEVELS[key];
+                                const example = HAND_EXAMPLES[key];
+                                return (
+                                    <div key={key} className="bg-slate-900 p-3 rounded-lg border border-slate-700">
+                                        <div className="flex justify-between items-center mb-1">
+                                            <span className="font-bold text-lg text-white">{def.name}</span>
+                                            <span className="text-blue-300 font-mono text-xs">{def.baseChips} <span className="text-gray-500">x</span> <span className="text-red-400">{def.baseMult}</span></span>
+                                        </div>
+                                        <div className="text-xs text-gray-400 mb-2">{example.desc}</div>
+                                        
+                                        {/* Visual Card Example */}
+                                        <div className="flex gap-1">
+                                            {example.cards.map((c, i) => (
+                                                <div key={i} className="bg-white text-black w-8 h-10 rounded-sm border border-gray-400 flex flex-col items-center justify-center shadow-sm">
+                                                    <div className={`text-[10px] font-bold leading-none ${getSuitColorClass(c.s)}`}>{c.r}</div>
+                                                    <div className="scale-75">{getSuitIcon(c.s)}</div>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
-                                ))}
-                            </div>
-                        </section>
-
-                        <section>
-                            <h3 className="text-lg font-bold text-white mb-2">ショップと強化</h3>
-                            <p>ラウンドクリアでお金を獲得し、ショップでアイテムを購入できます。</p>
-                            <ul className="list-disc pl-5 mt-2 space-y-1">
-                                <li><span className="text-blue-400 font-bold">サポーター (Jokers):</span> 所持しているだけで特殊効果を発揮します。</li>
-                                <li><span className="text-purple-400 font-bold">消耗品 (Stationery):</span> 使い切りのアイテム。カード強化や役のレベルアップができます。</li>
-                            </ul>
-                        </section>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -964,7 +1005,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                         className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"
                     >
                         <HelpCircle size={18} className="md:w-5 md:h-5 text-yellow-400"/>
-                        <span className="text-[9px] md:text-[10px] leading-none mt-1">Help</span>
+                        <span className="text-[9px] md:text-[10px] leading-none mt-1">Rules</span>
                     </button>
                     <button 
                         onClick={() => { setShowDeckList(true); audioService.playSound('select'); }}
@@ -978,7 +1019,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                         className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"
                     >
                         <BarChart3 size={18} className="md:w-5 md:h-5"/>
-                        <span className="text-[9px] md:text-[10px] leading-none mt-1">Hands</span>
+                        <span className="text-[9px] md:text-[10px] leading-none mt-1">Levels</span>
                     </button>
                 </div>
 
