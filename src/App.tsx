@@ -84,6 +84,27 @@ const calculateScore = (state: GameState, victory: boolean): number => {
     return score;
 };
 
+// Helper to determine the visual shape of a card for synthesis
+const getShapeFromCard = (card: ICard): string => {
+    // If it has a textureRef (e.g. Captured Monster or already Synthesized), use that shape.
+    if (card.textureRef) return card.textureRef.split('|')[0];
+    
+    // For standard cards, map to a safe Icon ID based on name keywords or Type.
+    const n = card.name;
+    if (n.includes('薬') || n.includes('ポーション')) return 'POTION';
+    if (n.includes('靴') || n.includes('足') || n.includes('ステップ') || n.includes('ダッシュ') || n.includes('ジャンプ')) return 'SHOE';
+    if (n.includes('本') || n.includes('書') || n.includes('研究') || n.includes('学習')) return 'NOTEBOOK';
+    if (n.includes('拳') || n.includes('パンチ') || n.includes('打') || n.includes('頭突き')) return 'FIST';
+    if (n.includes('火') || n.includes('炎') || n.includes('熱')) return 'FLAME';
+    if (n.includes('雷') || n.includes('電')) return 'LIGHTNING';
+    
+    // Default by Type
+    if (card.type === CardType.ATTACK) return 'SWORD';
+    if (card.type === CardType.SKILL) return 'SHIELD';
+    if (card.type === CardType.POWER) return 'FLAME';
+    return 'NOTEBOOK';
+};
+
 // --- ENEMY DEFINITIONS & AI ---
 const determineEnemyType = (name: string, isBoss: boolean): string => {
     if (isBoss) return 'GUARDIAN'; 
@@ -1693,7 +1714,8 @@ const App: React.FC = () => {
       if (parts.length === 0) description = "効果なし。";
 
       // New: Composite Texture Logic with TYPE Hint
-      const shapeSource = c1.textureRef ? c1.textureRef.split('|')[0] : c1.name;
+      // Fix: If c1 is a standard card (no textureRef), map it to a generic Icon ID to prevent it matching Entity sprites.
+      const shapeSource = c1.textureRef ? c1.textureRef.split('|')[0] : getShapeFromCard(c1);
       const colorSource = c2.textureRef ? (c2.textureRef.split('|')[1] || c2.textureRef.split('|')[0]) : c2.name;
       const newTextureRef = `${shapeSource}|${colorSource}|${newType}`;
 
