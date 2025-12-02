@@ -576,7 +576,10 @@ const App: React.FC = () => {
             p.cardsPlayedThisTurn = 0;
             p.attacksPlayedThisTurn = 0;
 
+            // --- START OF BATTLE RELIC EFFECTS ---
             if (p.relics.find(r => r.id === 'VAJRA')) p.strength += 1;
+            if (p.relics.find(r => r.id === 'HACHIMAKI')) p.powers['DEXTERITY'] = 1;
+            if (p.relics.find(r => r.id === 'SEED_PACK')) p.powers['THORNS'] = 3;
             if (p.relics.find(r => r.id === 'BAG_OF_PREP')) p.nextTurnDraw = 2; 
             if (p.relics.find(r => r.id === 'SNAKE_RING')) p.nextTurnDraw = 2; 
             if (p.relics.find(r => r.id === 'HOLY_WATER')) p.currentEnergy += 1; 
@@ -584,7 +587,27 @@ const App: React.FC = () => {
             if (p.relics.find(r => r.id === 'LANTERN')) p.currentEnergy += 1;
             if (p.relics.find(r => r.id === 'BRONZE_SCALES')) p.powers['THORNS'] = 3;
             if (p.relics.find(r => r.id === 'BLOOD_VIAL')) p.currentHp = Math.min(p.maxHp, p.currentHp + 2);
+            if (p.relics.find(r => r.id === 'BIG_LADLE')) p.currentHp = Math.min(p.maxHp, p.currentHp + 4);
             if (node.type === NodeType.BOSS && p.relics.find(r => r.id === 'PENTOGRAPH')) p.currentHp = Math.min(p.maxHp, p.currentHp + 25);
+            if (p.relics.find(r => r.id === 'MEGAPHONE')) {
+                enemies.forEach(e => {
+                    e.vulnerable += 1;
+                    e.floatingText = { id: `rel-mega-${Date.now()}-${e.id}`, text: 'びくびく', color: 'text-pink-400' };
+                });
+            }
+            if (p.relics.find(r => r.id === 'RED_MASK')) {
+                enemies.forEach(e => {
+                    e.weak += 1;
+                    e.floatingText = { id: `rel-mask-${Date.now()}-${e.id}`, text: 'へろへろ', color: 'text-gray-400' };
+                });
+            }
+            if (p.relics.find(r => r.id === 'MUTAGENIC_STRENGTH')) p.strength += 3;
+            if (p.relics.find(r => r.id === 'ENCHIRIDION')) {
+                const powers = Object.values(CARDS_LIBRARY).filter(c => c.type === CardType.POWER);
+                const power = powers[Math.floor(Math.random() * powers.length)];
+                // Note: Enchiridion usually adds to hand at start of combat
+                // We'll process it after draw to ensure hand isn't full/wiped by initial shuffle logic
+            }
             
             let drawCount = HAND_SIZE;
             if (p.relics.find(r => r.id === 'BAG_OF_PREP')) drawCount += 2;
@@ -595,6 +618,29 @@ const App: React.FC = () => {
                 if(c) p.hand.push(c);
             }
             
+            // Post-Draw Relic Effects
+            if (p.relics.find(r => r.id === 'ENCHIRIDION')) {
+                const powers = Object.values(CARDS_LIBRARY).filter(c => c.type === CardType.POWER);
+                const power = powers[Math.floor(Math.random() * powers.length)];
+                p.hand.push({ ...power, id: `ench-${Date.now()}`, cost: 0 });
+            }
+            if (p.relics.find(r => r.id === 'WHISTLE')) {
+                const attacks = p.drawPile.filter(c => c.type === CardType.ATTACK);
+                if (attacks.length > 0) {
+                    const randomAttack = attacks[Math.floor(Math.random() * attacks.length)];
+                    // Remove from draw pile to avoid dupes or logic conflicts? 
+                    // Standard Slay the Spire logic usually generates a copy or seeks it.
+                    // "Whistle" description says "Add random attack (cost 0) to hand". Implies generation.
+                    // We'll generate a fresh copy to avoid messing with deck state directly for this fight instance.
+                    const freeAttack = { ...randomAttack, cost: 0, id: `whistle-${Date.now()}` };
+                    p.hand.push(freeAttack);
+                } else {
+                    // Fallback if no attacks in draw (rare)
+                    const strike = { ...CARDS_LIBRARY['STRIKE'], cost: 0, id: `whistle-fallback-${Date.now()}` };
+                    p.hand.push(strike);
+                }
+            }
+
             const innateCards = p.drawPile.filter(c => c.innate);
             innateCards.forEach(c => {
                  p.drawPile = p.drawPile.filter(dc => dc.id !== c.id);
@@ -808,6 +854,26 @@ const App: React.FC = () => {
     audioService.playSound(card.type === CardType.ATTACK ? 'attack' : 'block');
     setLastActionType(card.type);
     setLastActionTime(Date.now());
+
+    // --- GENETIC ALGORITHM LOGIC ---
+    if (card.name === '学習アルゴリズム' || card.name === 'GENETIC_ALGORITHM') {
+         // Find original in deck and upgrade its block permanently
+         setGameState(prev => {
+             const newDeck = prev.player.deck.map(c => {
+                 if (c.id === card.id) {
+                     const newBlock = (c.block || 0) + 2;
+                     return { 
+                         ...c, 
+                         block: newBlock,
+                         // Update description text roughly
+                         description: c.description.replace(/ブロック(\d+)/, `ブロック${newBlock}`) 
+                     };
+                 }
+                 return c;
+             });
+             return { ...prev, player: { ...prev.player, deck: newDeck } };
+         });
+    }
 
     setGameState(prev => {
       const p = { ...prev.player, hand: [...prev.player.hand], drawPile: [...prev.player.drawPile], discardPile: [...prev.player.discardPile], deck: [...prev.player.deck], powers: { ...prev.player.powers } };
@@ -1319,6 +1385,12 @@ const App: React.FC = () => {
     setGameState(prev => {
         const p = { ...prev.player };
         
+        // End of Battle Relic Checks (Run once per battle end, not turn end) - handled in useEffect
+        // End of Turn Relic Checks
+        if (p.relics.find(r => r.id === 'BURNING_BLOOD') && prev.enemies.length === 0) { // Safety check, mostly handled in useEffect
+             // Logic in useEffect
+        }
+
         // Regen
         if (p.powers['REGEN'] > 0) {
             const heal = p.powers['REGEN'];
@@ -1368,9 +1440,9 @@ const App: React.FC = () => {
             audioService.playSound('win');
             audioService.stopBGM();
             
-            // Relic: Burning Blood
+            // Relic: Burning Blood & Meat on the Bone (End of Battle)
             let hpRegen = 0;
-            if (gameState.player.relics.find(r => r.id === 'BURNING_BLOOD')) hpRegen = 6;
+            if (gameState.player.relics.find(r => r.id === 'BURNING_BLOOD')) hpRegen += 6;
             if (gameState.player.relics.find(r => r.id === 'MEAT_ON_THE_BONE') && gameState.player.currentHp <= gameState.player.maxHp / 2) hpRegen += 12;
             
             // Check for True Ending condition or Victory
