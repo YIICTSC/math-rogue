@@ -1,4 +1,5 @@
 
+
 import { Card, CardType, TargetType, Relic, Potion, Character, PokerHandResult, PokerSupporter, PokerConsumable, PokerPack } from './types';
 
 export const INITIAL_HP = 75;
@@ -642,6 +643,7 @@ export const POKER_HAND_LEVELS: Record<string, PokerHandResult> = {
 };
 
 export const SUPPORTERS_LIBRARY: PokerSupporter[] = [
+  // Existing
   { id: 'TEACHER', name: '担任の先生', description: '倍率+4', price: 4, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.mult += 4, icon: 'TEACHER|#f44336' },
   { id: 'PRINCIPAL', name: '校長先生', description: '倍率x2', price: 10, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.mult *= 2, icon: 'BOSS|#FFD700' },
   { id: 'COOK', name: '給食のおばちゃん', description: 'チップ+50', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.chips += 50, icon: 'CHEF|#ffccbc' },
@@ -651,6 +653,14 @@ export const SUPPORTERS_LIBRARY: PokerSupporter[] = [
   { id: 'DOG', name: '迷い犬', description: '手札のスペード1枚につきチップ+20', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const spades = ctx.cards.filter(c => c.suit === 'SPADE').length; ctx.chips += spades * 20; }, icon: 'DOG|#795548' },
   { id: 'GHOST', name: 'トイレの幽霊', description: 'ペア系役の倍率x1.5', price: 8, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(['PAIR', 'TWO_PAIR', 'THREE_OF_A_KIND', 'FULL_HOUSE', 'FOUR_OF_A_KIND'].includes(ctx.handType)) ctx.mult = Math.floor(ctx.mult * 1.5); }, icon: 'GHOST|#9c27b0' },
   { id: 'ALIEN', name: '転校生(宇宙人)', description: '奇数ランクのカードのチップ+30', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const odds = ctx.cards.filter(c => c.rank % 2 !== 0).length; ctx.chips += odds * 30; }, icon: 'ALIEN|#00bcd4' },
+  // New Additions
+  { id: 'BAND_MEMBER', name: '軽音楽部員', description: 'クラブを含む役で倍率+10', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(ctx.cards.some(c => c.suit === 'CLUB')) ctx.mult += 10; }, icon: 'BARD|#4caf50' },
+  { id: 'MATH_TEACHER', name: '数学教師', description: '偶数ランクのカードの倍率+4', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const evens = ctx.cards.filter(c => c.rank % 2 === 0).length; ctx.mult += evens * 4; }, icon: 'TEACHER|#2196f3' },
+  { id: 'ENGLISH_TEACHER', name: '英語教師', description: '奇数ランクのカードの倍率+4', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const odds = ctx.cards.filter(c => c.rank % 2 !== 0).length; ctx.mult += odds * 4; }, icon: 'TEACHER|#e91e63' },
+  { id: 'GARDENER', name: '用務員さん', description: '絵札(J,Q,K)を含まない役でチップ+80', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(!ctx.cards.some(c => c.rank > 10 && c.rank < 14)) ctx.chips += 80; }, icon: 'GARDENER|#8bc34a' },
+  { id: 'CLASS_REP', name: '学級委員長', description: '手札上限+1', price: 6, rarity: 'UNCOMMON', triggerOn: 'HELD_IN_HAND', effect: (ctx) => {}, icon: 'LIBRARIAN|#ffeb3b' }, // Effect handled in game logic
+  { id: 'DELINQUENT', name: '不良生徒', description: '捨てたカード1枚につき倍率+2', price: 7, rarity: 'UNCOMMON', triggerOn: 'DISCARD', effect: (ctx) => { ctx.mult += ctx.cards.length * 2; }, icon: 'SENIOR|#607d8b' },
+  { id: 'SCHOOL_MYSTERY', name: '学園の七不思議', description: 'ランダムな倍率(+1~+20)', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { ctx.mult += Math.floor(Math.random() * 20) + 1; }, icon: 'GHOST|#673ab7' },
 ];
 
 export const CONSUMABLES_LIBRARY: PokerConsumable[] = [
@@ -671,10 +681,18 @@ export const CONSUMABLES_LIBRARY: PokerConsumable[] = [
     { id: 'STA_MARKER', type: 'TAROT', name: '赤ペン', description: '選んだカード1枚を倍率x1.5にする', price: 4, icon: 'POTION|#f44336' },
     { id: 'STA_PAINT', type: 'TAROT', name: '絵の具セット', description: '選んだカード3枚をハートに変える', price: 4, icon: 'POTION|#e91e63' },
     { id: 'STA_INK', type: 'TAROT', name: '墨汁', description: '選んだカード3枚をスペードに変える', price: 4, icon: 'POTION|#212121' },
+
+    // Spectral (School Mysteries) - High Risk/Reward
+    { id: 'SPC_HANAKO', type: 'SPECTRAL', name: 'トイレの花子さん', description: 'ランダムな手札1枚を破壊し、ランダムな1枚に強力な封印(Red Seal:再トリガー)を施す', price: 6, icon: 'GIRL|#ef5350' },
+    { id: 'SPC_PIANO', type: 'SPECTRAL', name: '呪いのピアノ', description: '手札のカードをすべてクラブ(Club)に変える', price: 6, icon: 'POTION|#4caf50' },
+    { id: 'SPC_MIRROR', type: 'SPECTRAL', name: '合わせ鏡', description: '選んだカードを1枚コピーして増やす', price: 6, icon: 'SHIELD|#90caf9' },
+    { id: 'SPC_ANATOMY', type: 'SPECTRAL', name: '人体模型', description: '手札の絵札(J,Q,K)以外を全て破壊し、$15を得る', price: 6, icon: 'SKELETON|#ef9a9a' },
+    { id: 'SPC_STEPS', type: 'SPECTRAL', name: '13階段', description: 'ランダムな役のレベルを3上げる', price: 6, icon: 'NOTEBOOK|#b39ddb' },
 ];
 
 export const PACK_LIBRARY: PokerPack[] = [
     { id: 'PACK_STD', name: '給食の余り', description: 'ランダムなトランプカード3枚入り。\n1枚選んでデッキに追加。', price: 4, type: 'STANDARD', size: 3, choose: 1, icon: 'BACKPACK|#ffcc80' },
     { id: 'PACK_BUFF', name: '文房具セット', description: 'ドリルや文房具が3つ入っている。\n1つ選んで手持ちに追加。', price: 6, type: 'BUFF', size: 3, choose: 1, icon: 'NOTEBOOK|#81d4fa' },
     { id: 'PACK_SUPP', name: '部員勧誘', description: 'サポーターが3人入っている。\n1人選んで仲間にする。', price: 8, type: 'SUPPORTER', size: 3, choose: 1, icon: 'SMILE|#a5d6a7' },
+    { id: 'PACK_SPEC', name: '七不思議', description: '学校の怪談(スペクトル)カードが1枚入っている。', price: 10, type: 'SPECTRAL', size: 1, choose: 1, icon: 'GHOST|#b39ddb' },
 ];
