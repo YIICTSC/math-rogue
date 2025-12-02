@@ -1022,54 +1022,38 @@ const App: React.FC = () => {
     setGameState(prev => {
       const p = { ...prev.player };
       
-      // Powers Start Turn
-      if (p.powers['DEMON_FORM']) { p.strength += p.powers['DEMON_FORM']; p.floatingText = { id: `pow-${Date.now()}`, text: '悪魔化', color: 'text-red-500' }; }
+      // 1. Start of Turn Stat Updates
+      if (p.powers['DEMON_FORM']) { 
+          p.strength += p.powers['DEMON_FORM']; 
+          p.floatingText = { id: `pow-${Date.now()}`, text: '悪魔化', color: 'text-red-500' }; 
+      }
       if (p.powers['ECHO_FORM']) p.echoes = p.powers['ECHO_FORM'];
-      if (p.powers['DEVA_FORM']) p.maxEnergy += p.powers['DEVA_FORM']; 
-      if (p.powers['CREATIVE_AI']) {
-          const powers = Object.values(CARDS_LIBRARY).filter(c => c.type === CardType.POWER);
-          const power = powers[Math.floor(Math.random() * powers.length)];
-          p.hand.push({ ...power, id: `ai-${Date.now()}`, cost: 0 }); // Creative AI typically gives random power
-      }
-      if (p.powers['TOOLS_OF_THE_TRADE']) {
-          // Draw 1, Discard 1
-          // We'll just draw 1 here and let discard happen if we implement prompt, or simplify to draw 1 random discard 1
-          // Simplified: Draw 1 extra
-      }
-      if (p.powers['INFINITE_BLADES']) {
-          p.hand.push({ ...CARDS_LIBRARY['SHIV'], id: `inf-${Date.now()}` });
-      }
-
+      if (p.powers['DEVA_FORM']) p.maxEnergy += p.powers['DEVA_FORM'];
+      
       // Relic: Mutagenic Strength (Lose)
       if (p.relics.find(r => r.id === 'MUTAGENIC_STRENGTH') && p.strength > 0) {
-          // Usually lose 3, but simplified to reset if only source
-          // Just decrement for now if logic was +3
-      }
-      
-      // Relic: Warped Tongs
-      if (p.relics.find(r => r.id === 'WARPED_TONGS') && p.hand.length > 0) {
-          const c = p.hand[Math.floor(Math.random() * p.hand.length)];
-          Object.assign(c, getUpgradedCard(c));
+          // p.strength -= 3; // Kept commented out as per existing code preference or simple logic
       }
 
-      // Draw
-      const drawCount = HAND_SIZE + (p.powers['TOOLS_OF_THE_TRADE'] ? 1 : 0) + p.nextTurnDraw;
-      p.nextTurnDraw = 0; // Reset
-
+      // 2. Prepare Draw & Discard Piles
       let newDrawPile = [...p.drawPile];
       let newDiscardPile = [...p.discardPile];
       let newHand: ICard[] = [];
-      
-      // Retain cards (Pyramid/Bookmark)
-      // NOTE: Simply clearing hand for now unless logic added for Retain
+
+      // 3. Discard Old Hand
+      // Check for Retain (Bookmark)
       if (p.relics.find(r => r.id === 'BOOKMARK') && p.hand.length > 0) {
-          // Retain 1 card
-          newHand.push(p.hand[0]);
-          p.discardPile = [...p.discardPile, ...p.hand.slice(1)];
+          newHand.push(p.hand[0]); // Keep first
+          newDiscardPile = [...newDiscardPile, ...p.hand.slice(1)];
       } else {
-          p.discardPile = [...p.discardPile, ...p.hand];
+          newDiscardPile = [...newDiscardPile, ...p.hand];
       }
-      
+
+      // 4. Calculate Draw Count
+      const drawCount = HAND_SIZE + (p.powers['TOOLS_OF_THE_TRADE'] ? 1 : 0) + p.nextTurnDraw;
+      p.nextTurnDraw = 0;
+
+      // 5. Draw Loop
       for (let i = 0; i < drawCount; i++) {
         if (newDrawPile.length === 0) {
           if (newDiscardPile.length === 0) break;
@@ -1079,19 +1063,39 @@ const App: React.FC = () => {
         const card = newDrawPile.pop();
         if (card) {
             if (card.name === '虚無' || card.name === 'VOID') p.currentEnergy = Math.max(0, p.currentEnergy - 1);
-            
-            // Snecko Eye effect on draw
             if (p.relics.find(r => r.id === 'SNECKO_EYE') && card.cost >= 0) {
                 card.cost = Math.floor(Math.random() * 4);
             }
             newHand.push(card);
         }
       }
-      
-      p.currentEnergy = p.maxEnergy + p.nextTurnEnergy;
-      p.nextTurnEnergy = 0; // Reset
 
-      // Barricade / Calipers
+      // 6. Post-Draw / Start of Turn Effects (Card Generation/Modification)
+      if (p.powers['CREATIVE_AI']) {
+          const powers = Object.values(CARDS_LIBRARY).filter(c => c.type === CardType.POWER);
+          const power = powers[Math.floor(Math.random() * powers.length)];
+          newHand.push({ ...power, id: `ai-${Date.now()}`, cost: 0 });
+      }
+      if (p.powers['INFINITE_BLADES']) {
+          newHand.push({ ...CARDS_LIBRARY['SHIV'], id: `inf-${Date.now()}` });
+      }
+      // Warped Tongs (Upgrade random card in NEW hand)
+      if (p.relics.find(r => r.id === 'WARPED_TONGS') && newHand.length > 0) {
+          const upgradeable = newHand.filter(c => !c.upgraded);
+          if (upgradeable.length > 0) {
+              const c = upgradeable[Math.floor(Math.random() * upgradeable.length)];
+              // We need to replace the object in newHand with the upgraded version
+              const upgraded = getUpgradedCard(c);
+              // Find index and replace
+              const idx = newHand.findIndex(x => x.id === c.id);
+              if (idx !== -1) newHand[idx] = upgraded;
+          }
+      }
+
+      // 7. Update State
+      p.currentEnergy = p.maxEnergy + p.nextTurnEnergy;
+      p.nextTurnEnergy = 0;
+
       if (!p.powers['BARRICADE']) {
           if (p.relics.find(r => r.id === 'CALIPERS')) {
               p.block = Math.max(0, p.block - 15);
@@ -1105,7 +1109,7 @@ const App: React.FC = () => {
       p.discardPile = newDiscardPile;
       p.cardsPlayedThisTurn = 0;
       p.attacksPlayedThisTurn = 0;
-      p.turnFlags = {}; // Reset turn flags
+      p.turnFlags = {};
 
       return { ...prev, player: p, turn: prev.turn + 1 };
     });
