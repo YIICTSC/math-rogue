@@ -1356,6 +1356,14 @@ const App: React.FC = () => {
       goToRewardPhase();
   };
 
+  const startMathChallenge = () => {
+      if (isMathDebugSkipped) {
+          handleMathChallengeComplete(3); 
+      } else {
+          setGameState(prev => ({ ...prev, screen: GameScreen.MATH_CHALLENGE }));
+      }
+  };
+
   const goToRewardPhase = () => {
     const rewards: RewardItem[] = [];
     
@@ -1711,8 +1719,8 @@ const App: React.FC = () => {
                     <div>
                         <h1 className="text-4xl md:text-5xl mb-4 text-yellow-400 font-bold">勝利！</h1>
                         <div className="text-yellow-400 text-2xl font-bold mb-8 flex items-center justify-center"><Coins className="mr-2"/> +{VICTORY_GOLD} G</div>
-                        <button onClick={() => handleMathChallengeComplete(0)} className="bg-blue-600 px-8 py-4 border-2 border-white font-bold animate-bounce cursor-pointer rounded-lg text-xl">
-                            報酬を確認
+                        <button onClick={startMathChallenge} className="bg-blue-600 px-8 py-4 border-2 border-white font-bold animate-bounce cursor-pointer rounded-lg text-xl">
+                            算数ボーナスへ
                         </button>
                     </div>
                  </div>
