@@ -319,7 +319,11 @@ const App: React.FC = () => {
 
   const startGame = () => {
       audioService.playSound('select');
-      setGameState(prev => ({ ...prev, screen: GameScreen.MODE_SELECTION }));
+      setGameState(prev => ({ 
+          ...prev, 
+          screen: GameScreen.MODE_SELECTION,
+          challengeMode: undefined // Explicitly clear challenge mode
+      }));
   };
 
   const startChallengeGame = () => {
@@ -1508,7 +1512,8 @@ const App: React.FC = () => {
 
   const returnToTitle = () => {
     audioService.stopBGM();
-    setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
+    // Explicitly reset challengeMode to prevent it from carrying over
+    setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined }));
   };
 
   const handleLegacyCardSelect = (card: ICard) => {
