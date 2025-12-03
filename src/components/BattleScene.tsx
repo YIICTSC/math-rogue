@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
-import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info } from 'lucide-react';
+import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText } from 'lucide-react';
 import PixelSprite from './PixelSprite';
 import { audioService } from '../services/audioService';
 
@@ -21,6 +21,7 @@ interface BattleSceneProps {
   selectionState: SelectionState;
   onHandSelection: (card: ICard) => void;
   onUsePotion: (potion: Potion) => void;
+  combatLog: string[]; // New Prop
 }
 
 const POWER_DEFINITIONS: Record<string, {name: string, desc: string}> = {
@@ -94,7 +95,7 @@ const FloatingTextOverlay: React.FC<{ data: FloatingText | null }> = ({ data }) 
 
 const BattleScene: React.FC<BattleSceneProps> = ({ 
   player, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
-  selectionState, onHandSelection, onUsePotion
+  selectionState, onHandSelection, onUsePotion, combatLog
 }) => {
   
   const playerHpPercent = (player.currentHp / player.maxHp) * 100;
@@ -104,6 +105,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   const [tooltip, setTooltip] = useState<{title: string, desc: string} | null>(null);
   const [potionConfirmation, setPotionConfirmation] = useState<Potion | null>(null);
   const [inspectedCard, setInspectedCard] = useState<ICard | null>(null);
+  const [showLog, setShowLog] = useState(false);
+  const logEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (lastActionTime > 0) {
@@ -114,6 +117,13 @@ const BattleScene: React.FC<BattleSceneProps> = ({
       return () => clearTimeout(timer);
     }
   }, [lastActionTime]);
+
+  // Auto-scroll log
+  useEffect(() => {
+      if (showLog && logEndRef.current) {
+          logEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+  }, [combatLog, showLog]);
 
   const getActionClass = () => {
     if (!isActing) return '';
@@ -176,12 +186,39 @@ const BattleScene: React.FC<BattleSceneProps> = ({
       {/* 1. Top Bar: Narrative (Compact) */}
       <div className="h-8 shrink-0 bg-black border-b-2 border-gray-700 flex items-center px-4 text-xs text-green-400 overflow-hidden whitespace-nowrap justify-between z-30">
         <span className="truncate mr-4"><span className="animate-pulse mr-2">&gt;&gt;</span> {narrative}</span>
-        <span className="text-yellow-400">{turnLog}</span>
+        <div className="flex gap-2 items-center">
+            <span className="text-yellow-400 hidden sm:inline">{turnLog}</span>
+            <button 
+                onClick={() => setShowLog(!showLog)}
+                className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border ${showLog ? 'bg-gray-700 border-gray-500 text-white' : 'bg-black border-gray-600 text-gray-400 hover:text-white'}`}
+            >
+                <FileText size={10}/> LOG
+            </button>
+        </div>
       </div>
 
       {/* 2. Battle Viewport (Enemies & Player Sprite) - Scrollable to prevent overlap */}
       <div className="flex-1 relative overflow-y-auto custom-scrollbar flex flex-col justify-between p-2 bg-gray-800/50 gap-4">
         
+        {/* Combat Log Overlay */}
+        {showLog && (
+            <div className="absolute top-2 right-2 z-[45] w-64 max-h-48 bg-black/80 border border-gray-600 rounded p-2 text-xs text-gray-300 font-mono overflow-y-auto custom-scrollbar shadow-xl backdrop-blur-sm pointer-events-auto">
+                <div className="text-center text-gray-500 border-b border-gray-700 pb-1 mb-1 font-bold">Battle Log</div>
+                {combatLog.length === 0 ? (
+                    <div className="text-center italic opacity-50">No actions yet</div>
+                ) : (
+                    <div className="flex flex-col gap-1">
+                        {combatLog.map((log, i) => (
+                            <div key={i} className="border-b border-gray-800 pb-0.5 last:border-0 leading-tight">
+                                {log}
+                            </div>
+                        ))}
+                        <div ref={logEndRef} />
+                    </div>
+                )}
+            </div>
+        )}
+
         {/* Selection Overlay */}
         {selectionState.active && (
             <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/80 z-40 text-center py-2 px-6 border-b-2 border-yellow-500 animate-pulse rounded shadow-xl pointer-events-none">

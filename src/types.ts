@@ -281,6 +281,7 @@ export interface GameState {
   enemies: Enemy[];
   selectedEnemyId: string | null;
   narrativeLog: string[];
+  combatLog: string[]; // New: Combat Log
   rewards: RewardItem[]; 
   selectionState: SelectionState; 
   isEndless?: boolean;

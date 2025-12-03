@@ -234,6 +234,7 @@ const App: React.FC = () => {
     enemies: [],
     selectedEnemyId: null,
     narrativeLog: [],
+    combatLog: [],
     rewards: [],
     selectionState: { active: false, type: 'DISCARD', amount: 0 },
     isEndless: false
@@ -412,6 +413,7 @@ const App: React.FC = () => {
                 attacksPlayedThisTurn: 0,
             },
             narrativeLog: ["デバッグモード開始"],
+            combatLog: [],
             enemies: [],
             selectedEnemyId: null,
             rewards: [],
@@ -483,7 +485,8 @@ const App: React.FC = () => {
               cardsPlayedThisTurn: 0,
               echoes: 0,
           },
-          narrativeLog: ["冒険が始まった。"]
+          narrativeLog: ["冒険が始まった。"],
+          combatLog: [],
       }));
       audioService.playBGM('menu');
   };
@@ -981,6 +984,7 @@ const App: React.FC = () => {
                 enemies: enemies,
                 selectedEnemyId: enemies[0].id,
                 narrativeLog: [...nextState.narrativeLog, flavor],
+                combatLog: [], // Reset Log
                 turn: 1
             });
             setCurrentNarrative(flavor);
@@ -1088,6 +1092,7 @@ const App: React.FC = () => {
       setGameState(prev => {
           const p = { ...prev.player };
           const enemies = [...prev.enemies];
+          const newLogs = [`ポーション使用: ${potion.name}`];
           
           // Remove potion
           p.potions = p.potions.filter(pt => pt.id !== potion.id);
@@ -1098,22 +1103,30 @@ const App: React.FC = () => {
           if (potion.templateId === 'FIRE_POTION' && target) {
               target.currentHp -= 20;
               target.floatingText = { id: `dmg-${Date.now()}`, text: '20', color: 'text-red-500', iconType: 'sword' };
+              newLogs.push(`${target.name}に20ダメージ`);
           } else if (potion.templateId === 'BLOCK_POTION') {
               p.block += 12;
+              newLogs.push("ブロック12を獲得");
           } else if (potion.templateId === 'STRENGTH_POTION') {
               p.strength += 2;
+              newLogs.push("ムキムキ+2");
           } else if (potion.templateId === 'ENERGY_POTION') {
               p.currentEnergy += 2;
+              newLogs.push("エネルギー+2");
           } else if (potion.templateId === 'WEAK_POTION' && target) {
               applyDebuff(target, 'WEAK', 3);
+              newLogs.push(`${target.name}にへろへろ3を付与`);
           } else if (potion.templateId === 'POISON_POTION' && target) {
               applyDebuff(target, 'POISON', 6);
+              newLogs.push(`${target.name}にドクドク6を付与`);
           } else if (potion.templateId === 'HEALTH_POTION') {
               const heal = 15;
               p.currentHp = Math.min(p.maxHp, p.currentHp + heal);
               p.floatingText = { id: `heal-${Date.now()}`, text: `+${heal}`, color: 'text-green-500', iconType: 'heart' };
+              newLogs.push(`HP${heal}回復`);
           } else if (potion.templateId === 'LIQUID_BRONZE') {
               p.powers['THORNS'] = (p.powers['THORNS'] || 0) + 3;
+              newLogs.push("トゲトゲ+3");
           } else if (potion.templateId === 'GAMBLERS_BREW') {
               const discardCount = p.hand.length;
               p.discardPile = [...p.discardPile, ...p.hand];
@@ -1128,12 +1141,13 @@ const App: React.FC = () => {
                   const c = p.drawPile.pop();
                   if (c) p.hand.push(c);
               }
+              newLogs.push("手札を交換");
           }
 
           // Clean up dead enemies
           const remainingEnemies = enemies.filter(e => e.currentHp > 0);
 
-          return { ...prev, player: p, enemies: remainingEnemies };
+          return { ...prev, player: p, enemies: remainingEnemies, combatLog: [...prev.combatLog, ...newLogs] };
       });
   };
 
@@ -1171,6 +1185,7 @@ const App: React.FC = () => {
     setGameState(prev => {
       const p = { ...prev.player, hand: [...prev.player.hand], drawPile: [...prev.player.drawPile], discardPile: [...prev.player.discardPile], deck: [...prev.player.deck], powers: { ...prev.player.powers } };
       let enemies = prev.enemies.map(e => ({ ...e }));
+      const currentLogs: string[] = [`> ${card.name} を使用`];
       
       p.currentEnergy -= card.cost;
       p.cardsPlayedThisTurn++;
@@ -1186,11 +1201,12 @@ const App: React.FC = () => {
 
       // --- Activations Loop (Echo Form, Burst) ---
       let activations = 1;
-      if (p.echoes > 0) { activations++; p.echoes--; }
-      if (card.type === CardType.SKILL && p.powers['BURST'] > 0) { activations++; p.powers['BURST']--; }
+      if (p.echoes > 0) { activations++; p.echoes--; currentLogs.push("反響で再発動！"); }
+      if (card.type === CardType.SKILL && p.powers['BURST'] > 0) { activations++; p.powers['BURST']--; currentLogs.push("バーストで再発動！"); }
       if (card.type === CardType.ATTACK && p.relics.find(r => r.id === 'NECRONOMICON') && card.cost >= 2 && !p.turnFlags['NECRONOMICON_USED']) {
           activations++;
           p.turnFlags['NECRONOMICON_USED'] = true;
+          currentLogs.push("ネクロノミコンで再発動！");
       }
 
       for (let act = 0; act < activations; act++) {
@@ -1227,6 +1243,7 @@ const App: React.FC = () => {
                         if (p.relicCounters['PEN_NIB'] >= 10) {
                             multiplier = 2;
                             p.relicCounters['PEN_NIB'] = 0;
+                            currentLogs.push("ペン先発動！ダメージ2倍");
                         }
                     }
 
@@ -1240,6 +1257,7 @@ const App: React.FC = () => {
                     e.currentHp -= damage;
                     if (damage > 0) {
                         e.floatingText = { id: `dmg-${Date.now()}-${e.id}-${h}`, text: `${damage}`, color: 'text-white', iconType: 'sword' };
+                        currentLogs.push(`${e.name}に${damage}ダメージ`);
                     }
 
                     if (card.lifesteal && damage > 0) {
@@ -1247,6 +1265,7 @@ const App: React.FC = () => {
                     }
                     
                     if (e.currentHp <= 0) {
+                         currentLogs.push(`${e.name}を倒した！`);
                          if (card.fatalEnergy) p.currentEnergy += card.fatalEnergy;
                          if (card.fatalPermanentDamage) {
                              const deckCard = p.deck.find(c => c.id === card.id);
@@ -1258,6 +1277,7 @@ const App: React.FC = () => {
                                  if (other.id !== e.id) {
                                      other.currentHp -= e.maxHp; 
                                      other.floatingText = { id: `expl-${Date.now()}`, text: `${e.maxHp}`, color: 'text-green-400' };
+                                     currentLogs.push(`死体爆破: ${other.name}に${e.maxHp}ダメージ`);
                                  }
                              });
                          }
@@ -1280,6 +1300,7 @@ const App: React.FC = () => {
                              p.deck.push(captured);
                              p.discardPile.push(captured);
                              e.floatingText = { id: `cap-${Date.now()}`, text: 'GET!', color: 'text-yellow-400' };
+                             currentLogs.push(`${e.name}を捕獲した！`);
                          }
                     }
                 });
@@ -1290,34 +1311,43 @@ const App: React.FC = () => {
                   let blk = card.block;
                   if (p.powers['DEXTERITY']) blk += p.powers['DEXTERITY'];
                   p.block += blk;
+                  currentLogs.push(`ブロック${blk}を獲得`);
               }
               if (card.doubleBlock) p.block *= 2;
               if (card.heal) p.currentHp = Math.min(p.currentHp + card.heal, p.maxHp);
               if (card.energy) p.currentEnergy += card.energy;
               if (card.selfDamage) { 
                   p.currentHp -= card.selfDamage; 
+                  currentLogs.push(`自分に${card.selfDamage}ダメージ`);
                   if (p.powers['RUPTURE']) p.strength += p.powers['RUPTURE']; 
               }
-              if (card.strength) p.strength += card.strength;
+              if (card.strength) {
+                  p.strength += card.strength;
+                  currentLogs.push(`ムキムキ+${card.strength}`);
+              }
               if (card.vulnerable) targets.forEach(e => applyDebuff(e, 'VULNERABLE', card.vulnerable!));
               if (card.weak) targets.forEach(e => applyDebuff(e, 'WEAK', card.weak!));
               if (card.poison) {
                   let amt = card.poison;
                   if (p.relics.find(r => r.id === 'SNAKE_SKULL')) amt += 1; // Example relic logic
                   targets.forEach(e => applyDebuff(e, 'POISON', amt));
+                  currentLogs.push(`ドクドク${amt}を付与`);
               }
               if (card.poisonMultiplier && targets.length > 0) {
                   targets.forEach(e => e.poison *= card.poisonMultiplier!);
+                  currentLogs.push("ドクドク倍増！");
               }
               
               if (card.upgradeHand) {
                   p.hand = p.hand.map(c => getUpgradedCard(c));
+                  currentLogs.push("手札を強化");
               }
               if (card.upgradeDeck) {
                   p.hand = p.hand.map(c => getUpgradedCard(c));
                   p.drawPile = p.drawPile.map(c => getUpgradedCard(c));
                   p.discardPile = p.discardPile.map(c => getUpgradedCard(c));
                   p.deck = p.deck.map(c => getUpgradedCard(c));
+                  currentLogs.push("デッキ全体を強化");
               }
               if (card.doubleStrength) p.strength *= 2;
               if (card.shuffleHandToDraw) { p.drawPile = shuffle([...p.drawPile, ...p.hand]); p.hand = []; }
@@ -1412,7 +1442,7 @@ const App: React.FC = () => {
       let nextSelectedId = prev.selectedEnemyId;
       if (!enemies.find(e => e.id === nextSelectedId) && enemies.length > 0) nextSelectedId = enemies[0].id;
 
-      return { ...prev, player: p, enemies: enemies, selectedEnemyId: nextSelectedId, selectionState: nextSelectionState };
+      return { ...prev, player: p, enemies: enemies, selectedEnemyId: nextSelectedId, selectionState: nextSelectionState, combatLog: [...prev.combatLog, ...currentLogs] };
     });
   };
 
@@ -1583,7 +1613,11 @@ const App: React.FC = () => {
             enemy.currentHp -= enemy.poison;
             enemy.poison--;
             enemy.floatingText = { id: `psn-${Date.now()}-${enemy.id}`, text: `${enemy.poison + 1}`, color: 'text-green-500', iconType: 'poison' };
-            setGameState(prev => ({ ...prev, enemies: prev.enemies.map(e => e.id === enemy.id ? { ...e, currentHp: enemy.currentHp, poison: enemy.poison, floatingText: enemy.floatingText } : e) }));
+            setGameState(prev => ({ 
+                ...prev, 
+                enemies: prev.enemies.map(e => e.id === enemy.id ? { ...e, currentHp: enemy.currentHp, poison: enemy.poison, floatingText: enemy.floatingText } : e),
+                combatLog: [...prev.combatLog, `${enemy.name}に毒ダメージ${enemy.poison + 1}`]
+            }));
             if (enemy.currentHp <= 0) continue;
         }
 
@@ -1601,6 +1635,7 @@ const App: React.FC = () => {
             const newEnemies = [...prev.enemies];
             const e = { ...newEnemies[currentEnemyIndex] };
             newEnemies[currentEnemyIndex] = e;
+            const newLogs: string[] = [];
             
             // Execute Intent
             const intent = e.nextIntent;
@@ -1618,12 +1653,14 @@ const App: React.FC = () => {
                     if (p.powers['BUFFER'] > 0) { 
                         p.powers['BUFFER']--; 
                         damage = 0; 
+                        newLogs.push("バッファーでダメージ無効化");
                     } else {
                         // Static Discharge
                         if (p.powers['STATIC_DISCHARGE']) {
                             // Damage random enemy
                             const target = newEnemies[Math.floor(Math.random() * newEnemies.length)];
                             target.currentHp -= p.powers['STATIC_DISCHARGE'];
+                            newLogs.push("静電放電発動！");
                         }
                     }
                 }
@@ -1632,9 +1669,11 @@ const App: React.FC = () => {
                 let unblockedDamage = 0;
                 if (p.block >= damage) { 
                     p.block -= damage; 
+                    newLogs.push(`${e.name}の攻撃(${damage})をブロック`);
                 } else { 
                     unblockedDamage = damage - p.block; 
                     p.block = 0; 
+                    newLogs.push(`${e.name}から${unblockedDamage}ダメージを受けた`);
                 }
                 
                 p.currentHp -= unblockedDamage;
@@ -1646,32 +1685,36 @@ const App: React.FC = () => {
                 if (p.powers['THORNS'] && damage > 0) { // Thorns trigger on attack received
                     e.currentHp -= p.powers['THORNS'];
                     e.floatingText = { id: `thorns-${Date.now()}`, text: `${p.powers['THORNS']}`, color: 'text-orange-500', iconType: 'sword' };
+                    newLogs.push(`トゲトゲで${p.powers['THORNS']}反撃ダメージ`);
                 }
             }
 
             if (intent.type === EnemyIntentType.DEFEND || intent.type === EnemyIntentType.ATTACK_DEFEND) {
                 e.block += intent.value; 
                 if (intent.type === EnemyIntentType.ATTACK_DEFEND && intent.secondaryValue) e.block = intent.secondaryValue;
+                newLogs.push(`${e.name}は防御を固めた`);
             }
 
             if (intent.type === EnemyIntentType.BUFF) {
                 e.strength += (intent.secondaryValue || 2);
+                newLogs.push(`${e.name}は力を溜めた`);
             }
 
             if (intent.type === EnemyIntentType.DEBUFF || intent.type === EnemyIntentType.ATTACK_DEBUFF) {
                 if (p.powers['ARTIFACT'] > 0) {
                     p.powers['ARTIFACT']--;
+                    newLogs.push("アーティファクトでデバフを防いだ");
                 } else {
                     const debuffAmt = intent.secondaryValue || 1;
                     const type = intent.debuffType;
                     if (type === 'WEAK') p.powers['WEAK'] = (p.powers['WEAK'] || 0) + debuffAmt;
                     if (type === 'VULNERABLE') p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + debuffAmt;
                     if (type === 'POISON') {
-                        // Apply Curse/Status card instead? Simple poison for player:
-                        // Implemented: Shuffle Status card into deck
                         const status = { ...STATUS_CARDS.SLIMED, id: `slime-${Date.now()}` };
                         p.discardPile.push(status);
+                        newLogs.push("粘液を混ぜられた");
                     }
+                    if (type) newLogs.push(`${type}を受けました`);
                 }
             }
             
@@ -1682,7 +1725,7 @@ const App: React.FC = () => {
             // Plan Next Intent
             e.nextIntent = getNextEnemyIntent(e, gameState.turn + 1);
 
-            return { ...prev, player: p, enemies: newEnemies };
+            return { ...prev, player: p, enemies: newEnemies, combatLog: [...prev.combatLog, ...newLogs] };
         });
         await wait(600);
     }
@@ -1691,6 +1734,7 @@ const App: React.FC = () => {
     // --- Post-Enemy Turn Player Effects (End of Round) ---
     setGameState(prev => {
         const p = { ...prev.player };
+        const newLogs: string[] = [];
         
         // End of Battle Relic Checks (Run once per battle end, not turn end) - handled in useEffect
         // End of Turn Relic Checks
@@ -1704,6 +1748,7 @@ const App: React.FC = () => {
             p.currentHp = Math.min(p.maxHp, p.currentHp + heal);
             p.powers['REGEN']--;
             p.floatingText = { id: `pow-regen-${Date.now()}`, text: `+${heal}`, color: 'text-green-500', iconType: 'heart' };
+            newLogs.push(`再生で${heal}回復`);
         }
 
         // Nilry's Codex (Add random card to hand)
@@ -1716,6 +1761,7 @@ const App: React.FC = () => {
             } else {
                 p.discardPile.push(c);
             }
+            newLogs.push("コーデックスでカード生成");
         }
 
         // Decrement Powers
@@ -1727,14 +1773,14 @@ const App: React.FC = () => {
         
         // Curse Logic
         p.hand.forEach(c => {
-            if (c.name === 'やけど' || c.name === 'BURN') p.currentHp -= 2;
-            if (c.name === '虫歯' || c.name === 'DECAY') p.currentHp -= 2;
+            if (c.name === 'やけど' || c.name === 'BURN') { p.currentHp -= 2; newLogs.push("やけどダメージ"); }
+            if (c.name === '虫歯' || c.name === 'DECAY') { p.currentHp -= 2; newLogs.push("虫歯ダメージ"); }
             if (c.name === '不安' || c.name === 'DOUBT') p.powers['WEAK'] = (p.powers['WEAK'] || 0) + 1;
             if (c.name === '恥' || c.name === 'SHAME') p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + 1;
-            if (c.name === '後悔' || c.name === 'REGRET') p.currentHp -= p.hand.length;
+            if (c.name === '後悔' || c.name === 'REGRET') { p.currentHp -= p.hand.length; newLogs.push("後悔ダメージ"); }
         });
 
-        return { ...prev, player: p };
+        return { ...prev, player: p, combatLog: [...prev.combatLog, ...newLogs] };
     });
     
     startPlayerTurn();
@@ -1788,13 +1834,15 @@ const App: React.FC = () => {
             if (gameState.player.relics.find(r => r.id === 'LIZARD_TAIL') && !gameState.player.relicCounters['LIZARD_TAIL_USED']) {
                 setGameState(prev => ({
                     ...prev,
-                    player: { ...prev.player, currentHp: Math.floor(prev.player.maxHp * 0.5), relicCounters: { ...prev.player.relicCounters, 'LIZARD_TAIL_USED': 1 } }
+                    player: { ...prev.player, currentHp: Math.floor(prev.player.maxHp * 0.5), relicCounters: { ...prev.player.relicCounters, 'LIZARD_TAIL_USED': 1 } },
+                    combatLog: [...prev.combatLog, "トカゲの尻尾で復活！"]
                 }));
                 // Effect sound/anim here ideally
             } else if (gameState.player.potions.find(p => p.templateId === 'GHOST_IN_JAR')) {
                  setGameState(prev => ({
                     ...prev,
-                    player: { ...prev.player, currentHp: Math.floor(prev.player.maxHp * 0.1), potions: prev.player.potions.filter(p => p.templateId !== 'GHOST_IN_JAR') }
+                    player: { ...prev.player, currentHp: Math.floor(prev.player.maxHp * 0.1), potions: prev.player.potions.filter(p => p.templateId !== 'GHOST_IN_JAR') },
+                    combatLog: [...prev.combatLog, "お守りで復活！"]
                 }));
             } else {
                 audioService.playSound('lose');
@@ -2271,7 +2319,7 @@ const App: React.FC = () => {
             {gameState.screen === GameScreen.BATTLE && (
                 <BattleScene 
                     player={gameState.player} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onEndTurn={handleEndTurn} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={gameState.selectionState} onHandSelection={handleHandSelection}
-                    onUsePotion={handleUsePotion}
+                    onUsePotion={handleUsePotion} combatLog={gameState.combatLog}
                 />
             )}
 
