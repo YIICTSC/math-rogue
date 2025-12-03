@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -2063,8 +2064,9 @@ const App: React.FC = () => {
                             <section>
                                 <h3 className="text-white font-bold mb-1">■ アップデート (Update)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li>新レリック: 竹とんぼ, 金次郎像, 給茶機, 高級布団</li>
-                                    <li>新カード: 八つ当たり, 退学処分</li>
+                                    <li>新レリック: 竹とんぼ, 金次郎像, 給茶機, 高級布団, ペン先, クナイ系, ラムネ</li>
+                                    <li>新カード: 八つ当たり, 退学処分, 神格化, 触媒, 知識の爆発, 堕落</li>
+                                    <li>システム: 復活ロジック, エナジー/ドロー予約処理, ターン経過ごと/攻撃回数ごとのレリック効果実装</li>
                                 </ul>
                             </section>
                         </div>
