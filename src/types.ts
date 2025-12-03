@@ -351,6 +351,7 @@ export interface PokerRunState {
     consumables: PokerConsumable[];
     handLevels: Record<string, number>;
     vouchers: string[]; // IDs of bought vouchers
+    isEndless?: boolean; // New: Endless Mode flag
     
     // Play state
     currentScore: number;
@@ -361,6 +362,14 @@ export interface PokerRunState {
     
     // Shop state
     shopInventory: (PokerSupporter | PokerConsumable | PokerPack)[];
+}
+
+export interface PokerScoreEntry {
+    id: string;
+    date: number;
+    ante: number;
+    money: number;
+    bestHandScore: number;
 }
 
 export interface GameState {

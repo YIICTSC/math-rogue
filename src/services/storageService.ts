@@ -1,6 +1,6 @@
 
 
-import { GameState, GameScreen, RankingEntry, Card } from '../types';
+import { GameState, GameScreen, RankingEntry, Card, PokerScoreEntry } from '../types';
 
 const STORAGE_KEY_UNLOCKED_CARDS = 'pixel_spire_unlocked_cards_v1';
 const STORAGE_KEY_UNLOCKED_RELICS = 'pixel_spire_unlocked_relics_v1';
@@ -10,6 +10,7 @@ const STORAGE_KEY_DEFEATED_ENEMIES = 'pixel_spire_defeated_enemies_v1';
 const STORAGE_KEY_GAME_STATE = 'pixel_spire_save_state_v1';
 const STORAGE_KEY_CLEAR_COUNT = 'pixel_spire_clear_count_v1';
 const STORAGE_KEY_RANKING = 'pixel_spire_ranking_v1';
+const STORAGE_KEY_POKER_RANKING = 'pixel_spire_poker_ranking_v1';
 const STORAGE_KEY_LEGACY_CARD = 'pixel_spire_legacy_card_v1';
 const STORAGE_KEY_DEBUG_MATH_SKIP = 'pixel_spire_debug_math_skip_v1';
 const STORAGE_KEY_DEBUG_HP_ONE = 'pixel_spire_debug_hp_one_v1';
@@ -135,6 +136,26 @@ export const storageService = {
       }
   },
 
+  // --- Poker Scores ---
+  savePokerScore: (entry: PokerScoreEntry) => {
+      try {
+          const current = storageService.getPokerScores();
+          const updated = [entry, ...current].slice(0, 50);
+          localStorage.setItem(STORAGE_KEY_POKER_RANKING, JSON.stringify(updated));
+      } catch (e) {
+          console.warn("Failed to save poker score", e);
+      }
+  },
+
+  getPokerScores: (): PokerScoreEntry[] => {
+      try {
+          const stored = localStorage.getItem(STORAGE_KEY_POKER_RANKING);
+          return stored ? JSON.parse(stored) : [];
+      } catch (e) {
+          return [];
+      }
+  },
+
   // --- Game State (Save/Load) ---
   saveGame: (state: GameState) => {
     try {
@@ -225,6 +246,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_GAME_STATE);
       localStorage.removeItem(STORAGE_KEY_CLEAR_COUNT);
       localStorage.removeItem(STORAGE_KEY_RANKING);
+      localStorage.removeItem(STORAGE_KEY_POKER_RANKING);
       localStorage.removeItem(STORAGE_KEY_LEGACY_CARD);
       localStorage.removeItem(STORAGE_KEY_DEBUG_MATH_SKIP);
       localStorage.removeItem(STORAGE_KEY_DEBUG_HP_ONE);
