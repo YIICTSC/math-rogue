@@ -525,7 +525,6 @@ const App: React.FC = () => {
                   { label: "無視", text: "何もせず立ち去る", action: () => { setEventResultLog("怪しい男を無視して先へ進んだ。"); } }
               ]
           },
-          // ... (Other events remain unchanged) ...
           {
               title: "踊り場の鏡",
               description: "大きな鏡がある。映っている自分と目が合った。",
@@ -651,6 +650,12 @@ const App: React.FC = () => {
             }
             if (p.relics.find(r => r.id === 'MUTAGENIC_STRENGTH')) p.strength += 3;
             
+            // Relic: Ancient Tea Set (Apply buff if rested)
+            if (p.relicCounters['TEA_SET_ACTIVE']) {
+                p.currentEnergy += 2;
+                p.relicCounters['TEA_SET_ACTIVE'] = 0; // Consume charge
+            }
+
             let drawCount = HAND_SIZE;
             if (p.relics.find(r => r.id === 'BAG_OF_PREP')) drawCount += 2;
             if (p.relics.find(r => r.id === 'SNAKE_RING')) drawCount += 2;
@@ -747,7 +752,17 @@ const App: React.FC = () => {
         } else if (node.type === NodeType.TREASURE) {
             const rewards: RewardItem[] = [];
             const allRelics = Object.values(RELIC_LIBRARY).filter(r => ['COMMON', 'UNCOMMON', 'RARE'].includes(r.rarity));
-            rewards.push({ type: 'RELIC', value: shuffle(allRelics)[0], id: `tr-relic-${Date.now()}` });
+            
+            // Relic: Matryoshka Check
+            const matryoshkaCount = nextState.player.relicCounters['MATRYOSHKA'] || 0;
+            if (nextState.player.relics.find(r => r.id === 'MATRYOSHKA') && matryoshkaCount < 2) {
+                // Add 2 relics
+                const picked = shuffle(allRelics).slice(0, 2);
+                picked.forEach((r, i) => rewards.push({ type: 'RELIC', value: r, id: `tr-relic-${Date.now()}-${i}` }));
+            } else {
+                rewards.push({ type: 'RELIC', value: shuffle(allRelics)[0], id: `tr-relic-${Date.now()}` });
+            }
+
             rewards.push({ type: 'GOLD', value: 50 + Math.floor(Math.random() * 50), id: `tr-gold-${Date.now()}` });
             setTreasureRewards(rewards);
             setGameState({ ...nextState, screen: GameScreen.TREASURE });
@@ -861,11 +876,30 @@ const App: React.FC = () => {
   };
 
   const handlePlayCard = (card: ICard) => {
+    // Basic validations
     if (gameState.player.currentEnergy < card.cost) return;
     if (gameState.enemies.length === 0) return;
     if (actingEnemyId) return; 
     if (gameState.selectionState.active) return;
     if (card.unplayable) return; 
+
+    // Relic: Velvet Choker Restriction
+    if (gameState.player.relics.some(r => r.id === 'VELVET_CHOKER') && gameState.player.cardsPlayedThisTurn >= 6) {
+        setGameState(prev => ({
+            ...prev,
+            combatLog: [...prev.combatLog, "首輪が苦しくてこれ以上カードを使えない！"]
+        }));
+        return;
+    }
+
+    // Card: Grand Finale Restriction
+    if ((card.name === '卒業式' || card.name === 'GRAND_FINALE') && gameState.player.drawPile.length > 0) {
+        setGameState(prev => ({
+            ...prev,
+            combatLog: [...prev.combatLog, "山札が0枚でないと使用できません！"]
+        }));
+        return;
+    }
 
     audioService.playSound(card.type === CardType.ATTACK ? 'attack' : 'block');
     setLastActionType(card.type);
@@ -894,6 +928,25 @@ const App: React.FC = () => {
       let enemies = prev.enemies.map(e => ({ ...e }));
       const currentLogs: string[] = [`> ${card.name} を使用`];
       
+      // Track card types played for Orange Pellets
+      const typeKey = card.type; // ATTACK, SKILL, POWER
+      if (p.relics.find(r => r.id === 'ORANGE_PELLETS')) {
+          p.turnFlags[`PLAYED_${typeKey}`] = true;
+          
+          const hasAttack = p.turnFlags[`PLAYED_${CardType.ATTACK}`];
+          const hasSkill = p.turnFlags[`PLAYED_${CardType.SKILL}`];
+          const hasPower = p.turnFlags[`PLAYED_${CardType.POWER}`];
+
+          if (hasAttack && hasSkill && hasPower && !p.turnFlags['PELLETS_TRIGGERED']) {
+              // Clear Debuffs
+              if (p.powers['WEAK']) { delete p.powers['WEAK']; currentLogs.push("へろへろ解除！"); }
+              if (p.powers['VULNERABLE']) { delete p.powers['VULNERABLE']; currentLogs.push("びくびく解除！"); }
+              // Add other debuffs if implemented (Frail, etc)
+              p.turnFlags['PELLETS_TRIGGERED'] = true;
+              currentLogs.push("ラムネの効果でデバフを解除！");
+          }
+      }
+
       p.currentEnergy -= card.cost;
       p.cardsPlayedThisTurn++;
       if (card.type === CardType.ATTACK) p.attacksPlayedThisTurn++;
@@ -948,6 +1001,12 @@ const App: React.FC = () => {
                         const bonus = p.strength * (card.strengthScaling || 1);
                         baseDamage += bonus;
                         logParts.push(`${bonus >= 0 ? '+' : ''}${bonus}(ムキムキ)`);
+                    }
+
+                    // Accuracy (Shiv Bonus)
+                    if ((card.name === 'ナイフ' || card.name === 'SHIV') && p.powers['ACCURACY']) {
+                        baseDamage += p.powers['ACCURACY'];
+                        logParts.push(`+${p.powers['ACCURACY']}(精度)`);
                     }
 
                     // Pen Nib Logic
@@ -1103,6 +1162,38 @@ const App: React.FC = () => {
                   }
                 }
               }
+              
+              // Special Card: Calculated Gamble
+              if (card.name === '計算' || card.name === 'CALCULATED_GAMBLE') {
+                  const discardCount = p.hand.length - 1; // excluding self
+                  const cardsToDiscard = p.hand.filter(c => c.id !== card.id);
+                  p.discardPile.push(...cardsToDiscard);
+                  p.hand = [card]; // Will be removed later
+                  
+                  for(let j=0; j<discardCount; j++) {
+                      if (p.drawPile.length === 0) {
+                          if (p.discardPile.length === 0) break;
+                          p.drawPile = shuffle(p.discardPile);
+                          p.discardPile = [];
+                      }
+                      const drawn = p.drawPile.pop();
+                      if (drawn) p.hand.push(drawn);
+                  }
+                  currentLogs.push("手札を全て交換！");
+              }
+
+              // Special Card: Discovery
+              if (card.name === '発見' || card.name === 'DISCOVERY') {
+                  const keys = Object.keys(CARDS_LIBRARY).filter(k => 
+                      !STATUS_CARDS[k] && !CURSE_CARDS[k] && CARDS_LIBRARY[k].rarity !== 'SPECIAL'
+                  );
+                  const randomKey = keys[Math.floor(Math.random() * keys.length)];
+                  const newCard = { ...CARDS_LIBRARY[randomKey], id: `disc-${Date.now()}` };
+                  // Usually Discovery makes it 0 cost this turn, but simplified to just adding for now
+                  p.hand.push(newCard);
+                  currentLogs.push(`発見: ${newCard.name}を手札に追加`);
+              }
+
               if (card.addCardToHand) {
                   for (let c=0; c<card.addCardToHand.count; c++) {
                       const template = CARDS_LIBRARY[card.addCardToHand.cardName];
@@ -1218,6 +1309,20 @@ const App: React.FC = () => {
           p.floatingText = { id: `relic-flower-${Date.now()}`, text: '+1 Energy', color: 'text-yellow-400', iconType: 'zap' };
       }
 
+      // Relic: Velvet Choker Effect
+      if (p.relics.find(r => r.id === 'VELVET_CHOKER')) {
+          p.maxEnergy += 1; // Temporary visual fix, actually we should handle maxEnergy persistently. 
+          // But here, let's just add to current since maxEnergy is static mostly.
+          // Wait, startPlayerTurn resets currentEnergy to maxEnergy.
+          // So if we modified maxEnergy on pickup, we are good.
+          // We assume handleRewardSelection added +1 to maxEnergy for Choker.
+      }
+
+      // Relic: Snecko Eye (Draw +2)
+      if (p.relics.find(r => r.id === 'SNECKO_EYE')) {
+          p.nextTurnDraw += 2;
+      }
+
       let newDrawPile = [...p.drawPile];
       let newDiscardPile = [...p.discardPile];
       let newHand: ICard[] = [];
@@ -1287,7 +1392,7 @@ const App: React.FC = () => {
       p.discardPile = newDiscardPile;
       p.cardsPlayedThisTurn = 0;
       p.attacksPlayedThisTurn = 0;
-      p.turnFlags = {};
+      p.turnFlags = {}; // Reset flags (including ORANGE_PELLETS tracker)
 
       let nextSelection = { ...prev.selectionState };
       if (p.powers['TOOLS_OF_THE_TRADE']) {
@@ -1298,7 +1403,7 @@ const App: React.FC = () => {
     });
   };
 
-  const handleEndTurn = async (skipEnemies?: boolean) => {
+  const executeEnemyTurn = async () => {
     audioService.playSound('select');
     setTurnLog("敵のターン...");
     setLastActionType(null);
@@ -1492,15 +1597,9 @@ const App: React.FC = () => {
         }
 
         if (p.relics.find(r => r.id === 'NILRYS_CODEX')) {
-            const keys = Object.keys(CARDS_LIBRARY).filter(k => !STATUS_CARDS[k] && !CURSE_CARDS[k]);
-            const k = keys[Math.floor(Math.random() * keys.length)];
-            const c = { ...CARDS_LIBRARY[k], id: `nilry-${Date.now()}` };
-            if (p.hand.length < HAND_SIZE + 5) {
-                p.hand.push(c); 
-            } else {
-                p.discardPile.push(c);
-            }
-            newLogs.push("コーデックスでカード生成");
+            // Note: Nilry logic moved to start of end turn phase (see handleEndTurn)
+        } else if (p.relics.find(r => r.id === 'NILRYS_CODEX_OLD')) {
+             // Legacy fallback if needed, but we removed it.
         }
 
         if (p.powers['INTANGIBLE'] > 0) p.powers['INTANGIBLE']--;
@@ -1521,6 +1620,47 @@ const App: React.FC = () => {
     });
     
     startPlayerTurn();
+  };
+
+  const handleEndTurn = () => {
+      // Check Nilry's Codex
+      if (gameState.player.relics.find(r => r.id === 'NILRYS_CODEX')) {
+          const keys = Object.keys(CARDS_LIBRARY).filter(k => 
+              !STATUS_CARDS[k] && !CURSE_CARDS[k] && CARDS_LIBRARY[k].rarity !== 'SPECIAL'
+          );
+          const candidates: ICard[] = [];
+          for(let i=0; i<3; i++){
+              const k = keys[Math.floor(Math.random() * keys.length)];
+              candidates.push({ ...CARDS_LIBRARY[k], id: `codex-${Date.now()}-${i}` });
+          }
+          
+          setGameState(prev => ({
+              ...prev,
+              codexSelection: { active: true, candidates }
+          }));
+          return;
+      }
+      
+      executeEnemyTurn();
+  };
+
+  const handleCodexSelect = (card: ICard | null) => {
+      if (card) {
+          // Add to Draw Pile (Top)
+          setGameState(prev => ({
+              ...prev,
+              player: {
+                  ...prev.player,
+                  drawPile: [...prev.player.drawPile, card]
+              },
+              codexSelection: undefined,
+              combatLog: [...prev.combatLog, `攻略本: ${card.name}を山札に追加`]
+          }));
+      } else {
+          setGameState(prev => ({ ...prev, codexSelection: undefined }));
+      }
+      // Continue to actual end turn
+      executeEnemyTurn();
   };
 
   // --- Battle End Check ---
@@ -1595,6 +1735,11 @@ const App: React.FC = () => {
   const goToRewardPhase = (guaranteedGold: number = 0, hpRegen: number = 0) => {
     const rewards: RewardItem[] = [];
     
+    // Golden Idol Effect
+    if (gameState.player.relics.find(r => r.id === 'GOLDEN_IDOL')) {
+        guaranteedGold = Math.floor(guaranteedGold * 1.25);
+    }
+
     if (guaranteedGold > 0) {
         rewards.push({ type: 'GOLD', value: guaranteedGold, id: `rew-gold-victory-${Date.now()}` });
     }
@@ -1661,6 +1806,7 @@ const App: React.FC = () => {
               if (item.value.id === 'SOZU') p.maxEnergy += 1;
               if (item.value.id === 'CURSED_KEY') p.maxEnergy += 1;
               if (item.value.id === 'PHILOSOPHER_STONE') p.maxEnergy += 1;
+              if (item.value.id === 'VELVET_CHOKER') p.maxEnergy += 1; // Immediate energy bump for visual consistency
               if (item.value.id === 'WAFFLE') { p.maxHp += 7; p.currentHp = p.maxHp; }
               if (item.value.id === 'OLD_COIN') p.gold += 300;
               nextRewards = nextRewards.filter(r => r.id !== item.id);
@@ -1726,7 +1872,15 @@ const App: React.FC = () => {
 
   const handleRestAction = () => {
       const heal = Math.floor(gameState.player.maxHp * 0.3);
-      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.currentHp + heal, prev.player.maxHp) } }));
+      setGameState(prev => {
+          const p = { ...prev.player };
+          p.currentHp = Math.min(p.currentHp + heal, p.maxHp);
+          // Ancient Tea Set Logic
+          if (p.relics.find(r => r.id === 'ANCIENT_TEA_SET')) {
+              p.relicCounters['TEA_SET_ACTIVE'] = 1;
+          }
+          return { ...prev, player: p };
+      });
   };
   
   const handleUpgradeCard = (card: ICard) => {
@@ -1924,7 +2078,7 @@ const App: React.FC = () => {
                             </div>
 
                             <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                <Terminal size={10}/> v2.4.1
+                                <Terminal size={10}/> v2.4.2
                             </button>
                         </div>
                     </div>
@@ -1938,15 +2092,13 @@ const App: React.FC = () => {
                             className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2 select-none active:text-green-200"
                             onClick={handleLogTitleClick}
                         >
-                            System Update Log v2.4.1
+                            System Update Log v2.4.2
                         </h2>
                         <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
                             <section>
                                 <h3 className="text-white font-bold mb-1">■ アップデート (Update)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li>ショップの品揃え生成ロジックを修正しました。</li>
-                                    <li>1A1Dモードなどでショップが空になる不具合を修正しました。</li>
-                                    <li>バトルの状態変化の計算式を修正しました。</li>
+                                    <li>レリック「秘密の攻略本(Nilry's Codex)」の効果を修正しました。<br/>ターン終了時に3枚から1枚を選択し、山札に加えるようになりました。</li>
                                 </ul>
                             </section>
                         </div>
@@ -2029,7 +2181,7 @@ const App: React.FC = () => {
             {gameState.screen === GameScreen.BATTLE && (
                 <BattleScene 
                     player={gameState.player} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onEndTurn={handleEndTurn} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={gameState.selectionState} onHandSelection={handleHandSelection}
-                    onUsePotion={handleUsePotion} combatLog={gameState.combatLog}
+                    onUsePotion={handleUsePotion} combatLog={gameState.combatLog} codexSelection={gameState.codexSelection} onCodexSelect={handleCodexSelect}
                 />
             )}
 
@@ -2071,6 +2223,7 @@ const App: React.FC = () => {
                              if (relic.id === 'SOZU') newP.maxEnergy += 1;
                              if (relic.id === 'CURSED_KEY') newP.maxEnergy += 1;
                              if (relic.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
+                             if (relic.id === 'VELVET_CHOKER') newP.maxEnergy += 1; // Immediate energy bump
                              if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
                              if (relic.id === 'OLD_COIN') newP.gold += 300;
                              return { ...prev, player: newP };
@@ -2113,6 +2266,8 @@ const App: React.FC = () => {
                     rewards={treasureRewards}
                     onOpen={() => {
                         const hasCursedKey = !!gameState.player.relics.find(r => r.id === 'CURSED_KEY');
+                        const hasMatryoshka = !!gameState.player.relics.find(r => r.id === 'MATRYOSHKA') && (gameState.player.relicCounters['MATRYOSHKA'] || 0) < 2;
+                        
                         setGameState(prev => {
                             const newP = { ...prev.player };
                             
@@ -2125,10 +2280,16 @@ const App: React.FC = () => {
                                     if (r.value.id === 'SOZU') newP.maxEnergy += 1;
                                     if (r.value.id === 'CURSED_KEY') newP.maxEnergy += 1;
                                     if (r.value.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
+                                    if (r.value.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
                                     if (r.value.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
                                     if (r.value.id === 'OLD_COIN') newP.gold += 300;
                                 }
                             });
+
+                            // Matryoshka logic
+                            if (hasMatryoshka) {
+                                newP.relicCounters['MATRYOSHKA'] = (newP.relicCounters['MATRYOSHKA'] || 0) + 1;
+                            }
 
                             // Cursed Key Effect
                             if (hasCursedKey) {

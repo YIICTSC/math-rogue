@@ -1,14 +1,12 @@
 
-
+// ... (imports)
 import { Card, CardType, TargetType, Relic, Potion, Character, PokerHandResult, PokerSupporter, PokerConsumable, PokerPack, PokerSuit } from './types';
 
 export const INITIAL_HP = 75;
 export const INITIAL_ENERGY = 3;
 export const HAND_SIZE = 5;
 
-// --- SVG DATA URIS FOR CHARACTERS (24x24 Pixel Art) ---
-
-// 1. Elementary School Kid (Red Cap) - The Warrior
+// ... (SVG Constants for HERO_IMAGE_DATA) ...
 const WARRIOR_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges">
   <path d="M0 0h24v24H0z" fill="none"/>
@@ -26,7 +24,6 @@ const WARRIOR_SVG = `
   <path d="M8 22h3v2H8zM13 22h3v2h-3z" fill="#ffffff"/>
 </svg>`;
 
-// 2. Transfer Student (Mysterious) - The Assassin
 const ASSASSIN_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges">
   <path d="M0 0h24v24H0z" fill="none"/>
@@ -42,7 +39,6 @@ const ASSASSIN_SVG = `
   <path d="M8 22h3v2H8zM13 22h3v2h-3z" fill="#212121"/>
 </svg>`;
 
-// 3. Science Club Kid (Glasses) - The Mage
 const MAGE_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges">
   <path d="M0 0h24v24H0z" fill="none"/>
@@ -57,7 +53,6 @@ const MAGE_SVG = `
   <path d="M8 22h3v2H8zM13 22h3v2h-3z" fill="#37474f"/>
 </svg>`;
 
-// 4. Broadcasting Club (Mic) - The Bard
 const BARD_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges">
   <path d="M0 0h24v24H0z" fill="none"/>
@@ -75,7 +70,6 @@ const BARD_SVG = `
   <path d="M8 22h3v2H8zM13 22h3v2h-3z" fill="#5d4037"/>
 </svg>`;
 
-// 5. Dodgeball Ace (Replaces Rogue) - Sporty
 const DODGEBALL_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges">
   <path d="M0 0h24v24H0z" fill="none"/>
@@ -83,83 +77,79 @@ const DODGEBALL_SVG = `
   <path d="M6 4h1v2H6zM17 4h1v2h-1z" fill="#ff9800"/>
   <path d="M9 6h6v4H9z" fill="#ffccbc"/>
   <path d="M10 7h1v1h-1zM13 7h1v1h-1z" fill="#3e2723"/>
-  <path d="M8 5h8v1H8z" fill="#ffffff"/> <!-- Headband -->
-  <path d="M20 5h2v4h-2z" fill="#ffffff"/> <!-- Headband tails -->
-  <path d="M8 10h8v6H8z" fill="#ff5722"/> <!-- Jersey -->
+  <path d="M8 5h8v1H8z" fill="#ffffff"/> 
+  <path d="M20 5h2v4h-2z" fill="#ffffff"/> 
+  <path d="M8 10h8v6H8z" fill="#ff5722"/> 
   <path d="M10 11h4v4h-4z" fill="#e64a19"/>
   <path d="M6 10h2v4H6zM16 10h2v4h-2z" fill="#ffccbc"/>
-  <path d="M17 13h4v4h-4z" fill="#eeeeee"/> <!-- Ball -->
+  <path d="M17 13h4v4h-4z" fill="#eeeeee"/> 
   <path d="M18 13h1v4h-1z" fill="#bdbdbd"/>
-  <path d="M8 16h8v3H8z" fill="#333333"/> <!-- Shorts -->
+  <path d="M8 16h8v3H8z" fill="#333333"/> 
   <path d="M9 19h2v3H9zM13 19h2v3h-2z" fill="#ffccbc"/>
   <path d="M8 22h3v2H8zM13 22h3v2h-3z" fill="#ff9800"/>
 </svg>`;
 
-// 6. Library Committee - Quiet
 const LIBRARIAN_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges">
   <path d="M0 0h24v24H0z" fill="none"/>
-  <path d="M7 3h10v4H7z" fill="#3f51b5"/> <!-- Hair -->
+  <path d="M7 3h10v4H7z" fill="#3f51b5"/> 
   <path d="M6 4h1v5H6zM17 4h1v5h-1z" fill="#3f51b5"/>
   <path d="M9 7h6v4H9z" fill="#ffccbc"/>
-  <path d="M9 8h6v1H9z" fill="#212121"/> <!-- Glasses -->
-  <path d="M8 11h8v6H8z" fill="#e8eaf6"/> <!-- Shirt -->
+  <path d="M9 8h6v1H9z" fill="#212121"/> 
+  <path d="M8 11h8v6H8z" fill="#e8eaf6"/> 
   <path d="M10 11h1v6h-1zM13 11h1v6h-1z" fill="#9fa8da"/>
   <path d="M6 11h2v4H6zM16 11h2v4h-2z" fill="#ffccbc"/>
-  <path d="M16 13h4v4h-4z" fill="#5d4037"/> <!-- Book -->
+  <path d="M16 13h4v4h-4z" fill="#5d4037"/> 
   <path d="M17 14h2v2h-2z" fill="#fff"/>
-  <path d="M7 17h10v4H7z" fill="#283593"/> <!-- Skirt -->
+  <path d="M7 17h10v4H7z" fill="#283593"/> 
   <path d="M9 21h2v3H9zM13 21h2v3h-2z" fill="#333"/>
 </svg>`;
 
-// 7. Lunch Duty Leader - Apron
 const CHEF_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges">
   <path d="M0 0h24v24H0z" fill="none"/>
-  <path d="M8 1h8v4H8z" fill="#ffffff"/> <!-- Hat -->
+  <path d="M8 1h8v4H8z" fill="#ffffff"/> 
   <path d="M9 5h6v4H9z" fill="#ffccbc"/>
   <path d="M10 6h1v1h-1zM13 6h1v1h-1z" fill="#3e2723"/>
-  <path d="M9 9h6v1H9z" fill="#ffffff"/> <!-- Mask -->
-  <path d="M7 10h10v7H7z" fill="#ffffff"/> <!-- Apron -->
+  <path d="M9 9h6v1H9z" fill="#ffffff"/> 
+  <path d="M7 10h10v7H7z" fill="#ffffff"/> 
   <path d="M9 11h6v4H9z" fill="#eeeeee"/>
   <path d="M5 10h2v4H5zM17 10h2v4h-2z" fill="#ffccbc"/>
-  <path d="M18 9h2v6h-2z" fill="#b0bec5"/> <!-- Ladle -->
+  <path d="M18 9h2v6h-2z" fill="#b0bec5"/> 
   <path d="M18 15h3v2h-3z" fill="#b0bec5"/>
   <path d="M8 17h8v3H8z" fill="#37474f"/>
   <path d="M9 20h2v4H9zM13 20h2v4h-2z" fill="#ffffff"/>
 </svg>`;
 
-// 8. Animal Caretaker - Green
 const CARETAKER_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges">
   <path d="M0 0h24v24H0z" fill="none"/>
-  <path d="M7 3h10v3H7z" fill="#795548"/> <!-- Hair -->
+  <path d="M7 3h10v3H7z" fill="#795548"/> 
   <path d="M6 4h1v3H6zM17 4h1v3h-1z" fill="#795548"/>
   <path d="M9 6h6v4H9z" fill="#ffccbc"/>
   <path d="M10 7h1v1h-1zM13 7h1v1h-1z" fill="#3e2723"/>
-  <path d="M8 10h8v6H8z" fill="#8d6e63"/> <!-- Overalls -->
+  <path d="M8 10h8v6H8z" fill="#8d6e63"/> 
   <path d="M10 12h4v2h-4z" fill="#a1887f"/>
   <path d="M6 10h2v4H6zM16 10h2v4h-2z" fill="#ffccbc"/>
-  <path d="M16 13h3v3h-3z" fill="#ffffff"/> <!-- Rabbit -->
+  <path d="M16 13h3v3h-3z" fill="#ffffff"/> 
   <path d="M17 12h1v1h-1z" fill="#ffffff"/>
   <path d="M8 16h8v4H8z" fill="#5d4037"/>
   <path d="M9 20h2v4H9zM13 20h2v4h-2z" fill="#3e2723"/>
 </svg>`;
 
-// 9. Gardener - Straw Hat
 const GARDENER_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges">
   <path d="M0 0h24v24H0z" fill="none"/>
-  <path d="M6 3h12v2H6z" fill="#fdd835"/> <!-- Hat -->
+  <path d="M6 3h12v2H6z" fill="#fdd835"/> 
   <path d="M5 5h14v1H5z" fill="#fbc02d"/>
   <path d="M9 6h6v4H9z" fill="#ffccbc"/>
   <path d="M10 7h1v1h-1zM13 7h1v1h-1z" fill="#3e2723"/>
-  <path d="M8 10h8v6H8z" fill="#aed581"/> <!-- Shirt -->
+  <path d="M8 10h8v6H8z" fill="#aed581"/> 
   <path d="M10 11h4v4h-4z" fill="#c5e1a5"/>
   <path d="M6 10h2v4H6zM16 10h2v4h-2z" fill="#ffccbc"/>
-  <path d="M17 12h4v3h-4z" fill="#81c784"/> <!-- Can -->
-  <path d="M8 16h8v3H8z" fill="#558b2f"/> <!-- Pants -->
-  <path d="M9 19h2v3H9zM13 19h2v3h-2z" fill="#795548"/> <!-- Boots -->
+  <path d="M17 12h4v3h-4z" fill="#81c784"/> 
+  <path d="M8 16h8v3H8z" fill="#558b2f"/> 
+  <path d="M9 19h2v3H9zM13 19h2v3h-2z" fill="#795548"/> 
   <path d="M8 22h3v2H8zM13 22h3v2h-3z" fill="#5d4037"/>
 </svg>`;
 
@@ -167,7 +157,7 @@ export const HERO_IMAGE_DATA = `data:image/svg+xml;base64,${btoa(WARRIOR_SVG)}`;
 
 // --- ENEMIES (Compendium Data) ---
 export const ENEMY_LIBRARY: Record<string, { name: string, description: string, tier: 1 | 2 | 3 }> = {
-    // ... (No change to enemy library)
+    // ... (Keep existing enemies)
     "野良犬": { name: "野良犬", description: "校庭を徘徊する犬。腹を空かせている。", tier: 1 },
     "意地悪なカラス": { name: "意地悪なカラス", description: "光るものが好きで、生徒の持ち物を狙っている。", tier: 1 },
     "消しゴムのカス": { name: "消しゴムのカス", description: "勉強の怨念が集合して生まれた存在。", tier: 1 },
@@ -233,7 +223,7 @@ export const ENEMY_LIBRARY: Record<string, { name: string, description: string, 
 
 // --- RELICS (School Theme) ---
 export const RELIC_LIBRARY: Record<string, Relic> = {
-    // ... (No change to relic library)
+    // ... (Keep other relics)
     BURNING_BLOOD: { id: 'BURNING_BLOOD', name: '給食の余り', description: '戦闘終了時、HPを6回復する。', rarity: 'STARTER' },
     SNAKE_RING: { id: 'SNAKE_RING', name: '秘密のメモ帳', description: '戦闘開始時、追加で2枚カードを引く。', rarity: 'STARTER' },
     HOLY_WATER: { id: 'HOLY_WATER', name: 'スポーツドリンク', description: '戦闘開始時、エネルギーを1得る。', rarity: 'STARTER' },
@@ -278,13 +268,13 @@ export const RELIC_LIBRARY: Record<string, Relic> = {
     RED_MASK: { id: 'RED_MASK', name: '戦隊のお面', description: '戦闘開始時、敵全体をへろへろ1にする。', rarity: 'RARE' },
     NECRONOMICON: { id: 'NECRONOMICON', name: '禁断の参考書', description: 'コスト2以上の攻撃を1ターン1回2度発動。', rarity: 'RARE' },
     ENCHIRIDION: { id: 'ENCHIRIDION', name: '分厚い辞書', description: '戦闘開始時、ランダムなパワーカードを手札に加える。', rarity: 'RARE' },
-    NILRYS_CODEX: { id: 'NILRYS_CODEX', name: '秘密の攻略本', description: 'ターン終了時、ランダムな3枚から1枚を選んで手札に加える。', rarity: 'RARE' },
+    // Updated description for Nilry's Codex
+    NILRYS_CODEX: { id: 'NILRYS_CODEX', name: '秘密の攻略本', description: 'ターン終了時、ランダムな3枚から1枚を選んで山札に加える。', rarity: 'RARE' },
     SPIRIT_POOP: { id: 'SPIRIT_POOP', name: '犬のフン', description: 'スコア計算時に1点減点される。', rarity: 'COMMON' }
 };
 
-// --- POTIONS ---
+// ... (Rest of constants)
 export const POTION_LIBRARY: Record<string, Omit<Potion, 'id'>> = {
-    // ... (No change to potion library)
     FIRE_POTION: { templateId: 'FIRE_POTION', name: 'コーラ', description: '敵1体に20ダメージを与える。', rarity: 'COMMON', color: '#f87171', price: 50 },
     BLOCK_POTION: { templateId: 'BLOCK_POTION', name: '牛乳', description: 'ブロック12を得る。', rarity: 'COMMON', color: '#60a5fa', price: 50 },
     STRENGTH_POTION: { templateId: 'STRENGTH_POTION', name: 'プロテイン', description: 'ムキムキ2を得る。', rarity: 'COMMON', color: '#ef4444', price: 75 },
@@ -305,8 +295,6 @@ export const TRUE_BOSS = {
     nextIntent: { type: 'BUFF', value: 0 }
 };
 
-// --- CARDS ---
-// ... (No change to card library)
 export const STATUS_CARDS: Record<string, Omit<Card, 'id'>> = {
     WOUND: { name: 'ケガ', cost: 0, type: CardType.STATUS, description: '使用不可。', unplayable: true, rarity: 'SPECIAL' },
     DAZED: { name: 'めまい', cost: 0, type: CardType.STATUS, description: '使用不可。ターン終了時廃棄。', unplayable: true, exhaust: true, rarity: 'SPECIAL' },

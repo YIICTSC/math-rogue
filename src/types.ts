@@ -250,6 +250,11 @@ export interface SelectionState {
   originCardId?: string; 
 }
 
+export interface CodexSelection {
+    active: boolean;
+    candidates: Card[];
+}
+
 export interface RewardItem {
     type: 'CARD' | 'RELIC' | 'GOLD' | 'POTION';
     value?: any; // Card object, Relic object, Potion object, or number
@@ -284,6 +289,7 @@ export interface GameState {
   combatLog: string[]; // New: Combat Log
   rewards: RewardItem[]; 
   selectionState: SelectionState; 
+  codexSelection?: CodexSelection;
   isEndless?: boolean;
 }
 
