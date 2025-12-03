@@ -1298,7 +1298,7 @@ const App: React.FC = () => {
     });
   };
 
-  const executeEnemyTurn = async () => {
+  const handleEndTurn = async (skipEnemies?: boolean) => {
     audioService.playSound('select');
     setTurnLog("敵のターン...");
     setLastActionType(null);
@@ -1492,9 +1492,15 @@ const App: React.FC = () => {
         }
 
         if (p.relics.find(r => r.id === 'NILRYS_CODEX')) {
-            // Note: Nilry logic moved to start of end turn phase (see handleEndTurn)
-        } else if (p.relics.find(r => r.id === 'NILRYS_CODEX_OLD')) {
-             // Legacy fallback if needed, but we removed it.
+            const keys = Object.keys(CARDS_LIBRARY).filter(k => !STATUS_CARDS[k] && !CURSE_CARDS[k]);
+            const k = keys[Math.floor(Math.random() * keys.length)];
+            const c = { ...CARDS_LIBRARY[k], id: `nilry-${Date.now()}` };
+            if (p.hand.length < HAND_SIZE + 5) {
+                p.hand.push(c); 
+            } else {
+                p.discardPile.push(c);
+            }
+            newLogs.push("コーデックスでカード生成");
         }
 
         if (p.powers['INTANGIBLE'] > 0) p.powers['INTANGIBLE']--;
@@ -1515,47 +1521,6 @@ const App: React.FC = () => {
     });
     
     startPlayerTurn();
-  };
-
-  const handleEndTurn = () => {
-      // Check Nilry's Codex
-      if (gameState.player.relics.find(r => r.id === 'NILRYS_CODEX')) {
-          const keys = Object.keys(CARDS_LIBRARY).filter(k => 
-              !STATUS_CARDS[k] && !CURSE_CARDS[k] && CARDS_LIBRARY[k].rarity !== 'SPECIAL'
-          );
-          const candidates: ICard[] = [];
-          for(let i=0; i<3; i++){
-              const k = keys[Math.floor(Math.random() * keys.length)];
-              candidates.push({ ...CARDS_LIBRARY[k], id: `codex-${Date.now()}-${i}` });
-          }
-          
-          setGameState(prev => ({
-              ...prev,
-              codexSelection: { active: true, candidates }
-          }));
-          return;
-      }
-      
-      executeEnemyTurn();
-  };
-
-  const handleCodexSelect = (card: ICard | null) => {
-      if (card) {
-          // Add to Draw Pile (Top)
-          setGameState(prev => ({
-              ...prev,
-              player: {
-                  ...prev.player,
-                  drawPile: [...prev.player.drawPile, card]
-              },
-              codexSelection: undefined,
-              combatLog: [...prev.combatLog, `攻略本: ${card.name}を山札に追加`]
-          }));
-      } else {
-          setGameState(prev => ({ ...prev, codexSelection: undefined }));
-      }
-      // Continue to actual end turn
-      executeEnemyTurn();
   };
 
   // --- Battle End Check ---
@@ -1959,7 +1924,7 @@ const App: React.FC = () => {
                             </div>
 
                             <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                <Terminal size={10}/> v2.4.2
+                                <Terminal size={10}/> v2.4.1
                             </button>
                         </div>
                     </div>
@@ -1973,13 +1938,15 @@ const App: React.FC = () => {
                             className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2 select-none active:text-green-200"
                             onClick={handleLogTitleClick}
                         >
-                            System Update Log v2.4.2
+                            System Update Log v2.4.1
                         </h2>
                         <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
                             <section>
                                 <h3 className="text-white font-bold mb-1">■ アップデート (Update)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li>レリック「秘密の攻略本(Nilry's Codex)」の効果を修正しました。<br/>ターン終了時に3枚から1枚を選択し、山札に加えるようになりました。</li>
+                                    <li>ショップの品揃え生成ロジックを修正しました。</li>
+                                    <li>1A1Dモードなどでショップが空になる不具合を修正しました。</li>
+                                    <li>バトルの状態変化の計算式を修正しました。</li>
                                 </ul>
                             </section>
                         </div>
@@ -2062,7 +2029,7 @@ const App: React.FC = () => {
             {gameState.screen === GameScreen.BATTLE && (
                 <BattleScene 
                     player={gameState.player} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onEndTurn={handleEndTurn} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={gameState.selectionState} onHandSelection={handleHandSelection}
-                    onUsePotion={handleUsePotion} combatLog={gameState.combatLog} codexSelection={gameState.codexSelection} onCodexSelect={handleCodexSelect}
+                    onUsePotion={handleUsePotion} combatLog={gameState.combatLog}
                 />
             )}
 
