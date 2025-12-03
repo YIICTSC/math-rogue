@@ -224,6 +224,7 @@ const App: React.FC = () => {
       echoes: 0,
       cardsPlayedThisTurn: 0,
       attacksPlayedThisTurn: 0,
+      typesPlayedThisTurn: [],
       relicCounters: {},
       turnFlags: {},
       imageData: HERO_IMAGE_DATA,
@@ -405,6 +406,7 @@ const App: React.FC = () => {
                 powers: {},
                 relicCounters: {},
                 turnFlags: {},
+                typesPlayedThisTurn: [],
                 floatingText: null,
                 nextTurnEnergy: 0,
                 nextTurnDraw: 0,
@@ -478,6 +480,7 @@ const App: React.FC = () => {
               powers: {},
               relicCounters: {},
               turnFlags: {},
+              typesPlayedThisTurn: [],
               floatingText: null,
               nextTurnEnergy: 0,
               nextTurnDraw: 0,
@@ -620,6 +623,7 @@ const App: React.FC = () => {
             p.powers = {};
             p.relicCounters = { ...p.relicCounters }; 
             p.turnFlags = {};
+            p.typesPlayedThisTurn = [];
             p.echoes = 0;
             p.cardsPlayedThisTurn = 0;
             p.attacksPlayedThisTurn = 0;
@@ -897,6 +901,48 @@ const App: React.FC = () => {
       p.currentEnergy -= card.cost;
       p.cardsPlayedThisTurn++;
       if (card.type === CardType.ATTACK) p.attacksPlayedThisTurn++;
+      
+      // Update typesPlayedThisTurn for ORANGE PELLETS
+      if (!p.typesPlayedThisTurn.includes(card.type)) {
+          p.typesPlayedThisTurn.push(card.type);
+      }
+
+      // --- ORANGE PELLETS CHECK ---
+      if (p.relics.find(r => r.id === 'ORANGE_PELLETS')) {
+          if (p.typesPlayedThisTurn.includes(CardType.ATTACK) && 
+              p.typesPlayedThisTurn.includes(CardType.SKILL) && 
+              p.typesPlayedThisTurn.includes(CardType.POWER)) {
+              
+              if (p.powers['WEAK'] > 0) { p.powers['WEAK'] = 0; currentLogs.push("へろへろ解除！"); }
+              if (p.powers['VULNERABLE'] > 0) { p.powers['VULNERABLE'] = 0; currentLogs.push("びくびく解除！"); }
+              if (p.powers['FRAIL'] > 0) { p.powers['FRAIL'] = 0; currentLogs.push("もろい解除！"); } // Future proof
+              
+              // Clear to prevent multi-trigger per turn (Standard Slay the Spire behavior is once per combo? No, it's whenever you complete the set. But usually resets? 
+              // Actually it clears debuffs. If you get debuffed again, you can clear again if you play set again? 
+              // Standard logic: It triggers once the 3rd type is played. You'd need to play 3 types *again* to trigger again?
+              // Simplification: Trigger once per turn or just clear. Let's just clear.
+              // To enable multi-trigger, we'd need to clear the list. But standard is just clear current debuffs.
+              // We'll clear the list to allow re-triggering if user plays another full set (unlikely but logic sound)
+              p.typesPlayedThisTurn = []; 
+              p.floatingText = { id: `pellets-${Date.now()}`, text: 'デバフ解除', color: 'text-white', iconType: 'shield' };
+          }
+      }
+
+      // --- DISCOVERY LOGIC ---
+      if (card.name === '発見' || card.name === 'DISCOVERY') {
+          // Add 3 random cards that cost 0 this turn
+          for (let i = 0; i < 3; i++) {
+              const keys = Object.keys(CARDS_LIBRARY).filter(k => !STATUS_CARDS[k] && !CURSE_CARDS[k]);
+              const key = keys[Math.floor(Math.random() * keys.length)];
+              const newCard = { ...CARDS_LIBRARY[key], id: `disc-${Date.now()}-${i}`, cost: 0, exhaust: true };
+              if (p.hand.length < HAND_SIZE + 5) {
+                  p.hand.push(newCard);
+              } else {
+                  p.discardPile.push(newCard);
+              }
+          }
+          currentLogs.push("発見！カードを3枚生成");
+      }
 
       if (p.powers['AFTER_IMAGE']) p.block += p.powers['AFTER_IMAGE'];
       if (p.powers['THOUSAND_CUTS']) {
@@ -942,6 +988,12 @@ const App: React.FC = () => {
                     if (card.damagePerAttackPlayed) baseDamage += (p.attacksPlayedThisTurn - 1) * card.damagePerAttackPlayed!;
                     if (card.damagePerStrike) baseDamage += (p.deck.filter(c => c.name.includes('ストライク') || c.name.includes('攻撃')).length) * card.damagePerStrike!;
                     if (card.damagePerCardInDraw) baseDamage += p.drawPile.length * card.damagePerCardInDraw!;
+
+                    // --- ACCURACY LOGIC ---
+                    if ((card.name === 'ナイフ' || card.name === 'SHIV') && p.powers['ACCURACY']) {
+                        baseDamage += p.powers['ACCURACY'];
+                        logParts.push(`+${p.powers['ACCURACY']}(精度)`);
+                    }
 
                     // 1. Add Strength
                     if (p.strength !== 0) {
@@ -1232,6 +1284,7 @@ const App: React.FC = () => {
       let drawCount = HAND_SIZE + (p.powers['TOOLS_OF_THE_TRADE'] ? 1 : 0) + p.nextTurnDraw;
       p.nextTurnDraw = 0;
 
+      // Draw Loop (with Evolve Logic)
       for (let i = 0; i < drawCount; i++) {
         if (newDrawPile.length === 0) {
           if (newDiscardPile.length === 0) break;
@@ -1245,6 +1298,29 @@ const App: React.FC = () => {
                 card.cost = Math.floor(Math.random() * 4);
             }
             newHand.push(card);
+
+            // --- EVOLVE LOGIC ---
+            if (p.powers['EVOLVE'] && (card.type === CardType.STATUS || card.type === CardType.CURSE)) {
+                // Trigger extra draw immediately
+                // Note: We increment i? No, just run the draw logic again.
+                // Standard loop count is fixed. We need to extend the draw.
+                // Or just perform an instant draw inside here.
+                for (let k=0; k<p.powers['EVOLVE']; k++) {
+                    if (newDrawPile.length === 0) {
+                        if (newDiscardPile.length === 0) break;
+                        newDrawPile = shuffle(newDiscardPile);
+                        newDiscardPile = [];
+                    }
+                    const extraCard = newDrawPile.pop();
+                    if (extraCard) {
+                        if (extraCard.name === '虚無' || extraCard.name === 'VOID') p.currentEnergy = Math.max(0, p.currentEnergy - 1);
+                        if (p.relics.find(r => r.id === 'SNECKO_EYE') && extraCard.cost >= 0) {
+                            extraCard.cost = Math.floor(Math.random() * 4);
+                        }
+                        newHand.push(extraCard);
+                    }
+                }
+            }
         }
       }
 
@@ -1288,6 +1364,7 @@ const App: React.FC = () => {
       p.cardsPlayedThisTurn = 0;
       p.attacksPlayedThisTurn = 0;
       p.turnFlags = {};
+      p.typesPlayedThisTurn = []; // Reset for Pellets
 
       let nextSelection = { ...prev.selectionState };
       if (p.powers['TOOLS_OF_THE_TRADE']) {
@@ -1924,7 +2001,7 @@ const App: React.FC = () => {
                             </div>
 
                             <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                <Terminal size={10}/> v2.4.1
+                                <Terminal size={10}/> v2.4.2
                             </button>
                         </div>
                     </div>
@@ -1938,15 +2015,16 @@ const App: React.FC = () => {
                             className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2 select-none active:text-green-200"
                             onClick={handleLogTitleClick}
                         >
-                            System Update Log v2.4.1
+                            System Update Log v2.4.2
                         </h2>
                         <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
                             <section>
                                 <h3 className="text-white font-bold mb-1">■ アップデート (Update)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li>ショップの品揃え生成ロジックを修正しました。</li>
-                                    <li>1A1Dモードなどでショップが空になる不具合を修正しました。</li>
-                                    <li>バトルの状態変化の計算式を修正しました。</li>
+                                    <li>Accuracy(精度上昇)の効果を実装しました。</li>
+                                    <li>Orange Pellets(ラムネ)のデバフ解除効果を実装しました。</li>
+                                    <li>Evolve(進化)のドロー効果を実装しました。</li>
+                                    <li>Discovery(発見)のカード生成効果を実装しました。</li>
                                 </ul>
                             </section>
                         </div>

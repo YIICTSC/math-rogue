@@ -179,6 +179,7 @@ export interface Player {
   echoes: number; 
   cardsPlayedThisTurn: number; 
   attacksPlayedThisTurn: number;
+  typesPlayedThisTurn: CardType[]; // New: For Orange Pellets etc.
   
   // Next Turn State
   nextTurnEnergy: number;
