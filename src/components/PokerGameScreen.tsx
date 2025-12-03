@@ -55,6 +55,14 @@ const HAND_EXAMPLES: Record<string, { desc: string, cards: {r: string, s: PokerS
     'ROYAL_FLUSH': {
         desc: '同じマークの 10, J, Q, K, A の組み合わせ。最強。',
         cards: [{r:'10',s:'SPADE'}, {r:'J',s:'SPADE'}, {r:'Q',s:'SPADE'}, {r:'K',s:'SPADE'}, {r:'A',s:'SPADE'}]
+    },
+    'FIVE_OF_A_KIND': {
+        desc: '同じ数字のカードが5枚ある状態。デッキ操作が必要。',
+        cards: [{r:'A',s:'SPADE'}, {r:'A',s:'HEART'}, {r:'A',s:'CLUB'}, {r:'A',s:'DIAMOND'}, {r:'A',s:'HEART'}]
+    },
+    'FLUSH_FIVE': {
+        desc: '同じマークで、かつ同じ数字のカードが5枚ある状態。伝説の役。',
+        cards: [{r:'A',s:'SPADE'}, {r:'A',s:'SPADE'}, {r:'A',s:'SPADE'}, {r:'A',s:'SPADE'}, {r:'A',s:'SPADE'}]
     }
 };
 
@@ -225,6 +233,16 @@ const getHandResult = (cards: PokerCard[], supporters: PokerSupporter[] = []): {
     const counts: Record<number, number> = {};
     ranks.forEach(r => counts[r] = (counts[r] || 0) + 1);
     const countsValues = Object.values(counts).sort((a, b) => b - a);
+
+    // 5-of-a-Kind Logic (Requires Deck Manipulation like Ouija or Death Tarot)
+    if (isFlush && countsValues[0] >= 5) {
+        return { type: 'FLUSH_FIVE', cards: sorted };
+    }
+
+    if (countsValues[0] >= 5) {
+        const rank = Object.keys(counts).find(key => counts[Number(key)] >= 5);
+        return { type: 'FIVE_OF_A_KIND', cards: sorted.filter(c => c.rank === Number(rank)) };
+    }
 
     if (isFlush && isStraight) {
         // Simple Royal check: if straight flush and contains Ace and King (and Q, J, 10 if normal)
@@ -1125,7 +1143,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                         <div><h3 className="font-bold text-white mb-2 flex items-center"><ShoppingBag className="mr-2 text-yellow-400"/> 買い物</h3><p className="text-gray-300">ラウンド勝利後に獲得したお金でアイテムを購入できます。</p></div>
                     </div>
                     <h2 className="text-2xl font-bold text-yellow-400 mb-4 flex items-center border-t border-slate-600 pt-6"><HelpCircle className="mr-2"/> 役一覧 (Hand Types)</h2>
-                    <div className="space-y-4 text-sm"><div className="grid grid-cols-1 gap-3">{['ROYAL_FLUSH', 'STRAIGHT_FLUSH', 'FOUR_OF_A_KIND', 'FULL_HOUSE', 'FLUSH', 'STRAIGHT', 'THREE_OF_A_KIND', 'TWO_PAIR', 'PAIR', 'HIGH_CARD'].map((key) => { const def = POKER_HAND_LEVELS[key]; const example = HAND_EXAMPLES[key]; return (<div key={key} className="bg-slate-900 p-3 rounded-lg border border-slate-700"><div className="flex justify-between items-center mb-1"><span className="font-bold text-lg text-white">{def.name}</span><span className="text-blue-300 font-mono text-xs">{def.baseChips} <span className="text-gray-500">x</span> <span className="text-red-400">{def.baseMult}</span></span></div><div className="text-xs text-gray-400 mb-2">{example.desc}</div><div className="flex gap-1">{example.cards.map((c, i) => (<div key={i} className="bg-white text-black w-8 h-10 rounded-sm border border-gray-400 flex flex-col items-center justify-center shadow-sm"><div className={`text-[10px] font-bold leading-none ${getSuitColorClass(c.s)}`}>{c.r}</div><div className="scale-75">{getSuitIcon(c.s)}</div></div>))}</div></div>); })}</div></div>
+                    <div className="space-y-4 text-sm"><div className="grid grid-cols-1 gap-3">{['FLUSH_FIVE', 'FIVE_OF_A_KIND', 'ROYAL_FLUSH', 'STRAIGHT_FLUSH', 'FOUR_OF_A_KIND', 'FULL_HOUSE', 'FLUSH', 'STRAIGHT', 'THREE_OF_A_KIND', 'TWO_PAIR', 'PAIR', 'HIGH_CARD'].map((key) => { const def = POKER_HAND_LEVELS[key]; const example = HAND_EXAMPLES[key]; return (<div key={key} className="bg-slate-900 p-3 rounded-lg border border-slate-700"><div className="flex justify-between items-center mb-1"><span className="font-bold text-lg text-white">{def.name}</span><span className="text-blue-300 font-mono text-xs">{def.baseChips} <span className="text-gray-500">x</span> <span className="text-red-400">{def.baseMult}</span></span></div><div className="text-xs text-gray-400 mb-2">{example.desc}</div><div className="flex gap-1">{example.cards.map((c, i) => (<div key={i} className="bg-white text-black w-8 h-10 rounded-sm border border-gray-400 flex flex-col items-center justify-center shadow-sm"><div className={`text-[10px] font-bold leading-none ${getSuitColorClass(c.s)}`}>{c.r}</div><div className="scale-75">{getSuitIcon(c.s)}</div></div>))}</div></div>); })}</div></div>
                 </div>
             </div>
         )}

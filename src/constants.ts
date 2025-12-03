@@ -1,6 +1,4 @@
 
-
-
 import { Card, CardType, TargetType, Relic, Potion, Character, PokerHandResult, PokerSupporter, PokerConsumable, PokerPack, PokerSuit } from './types';
 
 export const INITIAL_HP = 75;
@@ -617,6 +615,8 @@ export const POKER_HAND_LEVELS: Record<string, PokerHandResult> = {
   'FOUR_OF_A_KIND': { name: 'フォーカード', baseChips: 60, baseMult: 7, level: 1 },
   'STRAIGHT_FLUSH': { name: 'ストレートフラッシュ', baseChips: 100, baseMult: 8, level: 1 },
   'ROYAL_FLUSH': { name: 'ロイヤルストレートフラッシュ', baseChips: 200, baseMult: 20, level: 1 },
+  'FIVE_OF_A_KIND': { name: 'ファイブカード', baseChips: 120, baseMult: 12, level: 1 },
+  'FLUSH_FIVE': { name: 'フラッシュファイブ', baseChips: 160, baseMult: 16, level: 1 },
 };
 
 // Expanded Supporters (Jokers)
