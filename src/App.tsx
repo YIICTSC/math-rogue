@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -614,7 +615,8 @@ const App: React.FC = () => {
             const flavor = await generateFlavorText(node.type === NodeType.BOSS ? "ボスが現れた！" : "敵と遭遇した。");
             
             const p = { ...nextState.player };
-            p.drawPile = shuffle([...p.deck]);
+            // Deep copy cards for combat to allow temporary modifications (like Rampage)
+            p.drawPile = shuffle(p.deck.map(c => ({ ...c })));
             p.hand = [];
             p.discardPile = [];
             p.currentEnergy = p.maxEnergy;
@@ -641,6 +643,12 @@ const App: React.FC = () => {
             if (p.relics.find(r => r.id === 'BLOOD_VIAL')) p.currentHp = Math.min(p.maxHp, p.currentHp + 2);
             if (p.relics.find(r => r.id === 'BIG_LADLE')) p.currentHp = Math.min(p.maxHp, p.currentHp + 4);
             if (node.type === NodeType.BOSS && p.relics.find(r => r.id === 'PENTOGRAPH')) p.currentHp = Math.min(p.maxHp, p.currentHp + 25);
+            if (p.relics.find(r => r.id === 'TEA_SERVER') && p.relicCounters['TEA_SERVER_ACTIVE']) {
+                p.currentEnergy += 2;
+                p.relicCounters['TEA_SERVER_ACTIVE'] = 0; // Consume charge
+                p.floatingText = { id: `tea-${Date.now()}`, text: 'お茶パワー！', color: 'text-green-400', iconType: 'zap' };
+            }
+
             if (p.relics.find(r => r.id === 'MEGAPHONE')) {
                 enemies.forEach(e => {
                     e.vulnerable += 1;
@@ -703,7 +711,21 @@ const App: React.FC = () => {
             setTurnLog("あなたのターン");
 
         } else if (node.type === NodeType.REST) {
-            setGameState({ ...nextState, screen: GameScreen.REST });
+            setGameState(prev => {
+                const p = { ...prev.player };
+                // Rest Site Entry Effects
+                if (p.relics.find(r => r.id === 'LUXURY_FUTON')) {
+                    const heal = Math.floor(p.deck.length / 5) * 2;
+                    if (heal > 0) {
+                        p.currentHp = Math.min(p.maxHp, p.currentHp + heal);
+                        // We can't show floating text easily here as screen changes, but we can log/notify
+                    }
+                }
+                if (p.relics.find(r => r.id === 'TEA_SERVER')) {
+                    p.relicCounters['TEA_SERVER_ACTIVE'] = 1;
+                }
+                return { ...nextState, player: p, screen: GameScreen.REST };
+            });
             audioService.playBGM('menu');
 
         } else if (node.type === NodeType.SHOP) {
@@ -816,6 +838,13 @@ const App: React.FC = () => {
           p.potions = p.potions.filter(pt => pt.id !== potion.id);
           const target = enemies.find(e => e.id === prev.selectedEnemyId) || enemies[0];
 
+          // Taketombo Effect
+          if (p.relics.find(r => r.id === 'TAKETOMBO')) {
+              p.currentHp = Math.min(p.maxHp, p.currentHp + 5);
+              p.floatingText = { id: `heal-taketombo-${Date.now()}`, text: `+5`, color: 'text-green-500', iconType: 'heart' };
+              newLogs.push("竹とんぼでHP5回復");
+          }
+
           if (potion.templateId === 'FIRE_POTION' && target) {
               target.currentHp -= 20;
               target.floatingText = { id: `dmg-${Date.now()}`, text: '20', color: 'text-red-500', iconType: 'sword' };
@@ -915,14 +944,8 @@ const App: React.FC = () => {
               
               if (p.powers['WEAK'] > 0) { p.powers['WEAK'] = 0; currentLogs.push("へろへろ解除！"); }
               if (p.powers['VULNERABLE'] > 0) { p.powers['VULNERABLE'] = 0; currentLogs.push("びくびく解除！"); }
-              if (p.powers['FRAIL'] > 0) { p.powers['FRAIL'] = 0; currentLogs.push("もろい解除！"); } // Future proof
+              if (p.powers['FRAIL'] > 0) { p.powers['FRAIL'] = 0; currentLogs.push("もろい解除！"); } 
               
-              // Clear to prevent multi-trigger per turn (Standard Slay the Spire behavior is once per combo? No, it's whenever you complete the set. But usually resets? 
-              // Actually it clears debuffs. If you get debuffed again, you can clear again if you play set again? 
-              // Standard logic: It triggers once the 3rd type is played. You'd need to play 3 types *again* to trigger again?
-              // Simplification: Trigger once per turn or just clear. Let's just clear.
-              // To enable multi-trigger, we'd need to clear the list. But standard is just clear current debuffs.
-              // We'll clear the list to allow re-triggering if user plays another full set (unlikely but logic sound)
               p.typesPlayedThisTurn = []; 
               p.floatingText = { id: `pellets-${Date.now()}`, text: 'デバフ解除', color: 'text-white', iconType: 'shield' };
           }
@@ -930,7 +953,6 @@ const App: React.FC = () => {
 
       // --- DISCOVERY LOGIC ---
       if (card.name === '発見' || card.name === 'DISCOVERY') {
-          // Add 3 random cards that cost 0 this turn
           for (let i = 0; i < 3; i++) {
               const keys = Object.keys(CARDS_LIBRARY).filter(k => !STATUS_CARDS[k] && !CURSE_CARDS[k]);
               const key = keys[Math.floor(Math.random() * keys.length)];
@@ -1093,7 +1115,7 @@ const App: React.FC = () => {
                       blk += p.powers['DEXTERITY'];
                       logParts.push(`${p.powers['DEXTERITY'] >= 0 ? '+' : ''}${p.powers['DEXTERITY']}(カチカチ)`);
                   }
-                  if (p.powers['FRAIL'] > 0) { // Future proofing
+                  if (p.powers['FRAIL'] > 0) { 
                       blk = Math.floor(blk * 0.75);
                       logParts.push(`x0.75(もろい)`);
                   }
@@ -1182,6 +1204,19 @@ const App: React.FC = () => {
               if (card.nextTurnDraw) p.nextTurnDraw += card.nextTurnDraw;
               if (card.nextTurnEnergy) p.nextTurnEnergy += card.nextTurnEnergy;
 
+              // EXPULSION (Judgment) Logic
+              if (card.name === '退学処分' || card.name === 'EXPULSION') {
+                  targets.forEach(e => {
+                      if (e.currentHp <= (card.upgraded ? 40 : 30)) {
+                          e.currentHp = 0;
+                          currentLogs.push(`${e.name}は退学になった！`);
+                          e.floatingText = { id: `kill-${Date.now()}`, text: '退学!', color: 'text-red-600', iconType: 'skull' };
+                      } else {
+                          currentLogs.push(`${e.name}は退学を免れた`);
+                      }
+                  });
+              }
+
               // Shuriken / Kunai / Fan Logic
               if (card.type === CardType.ATTACK) {
                   p.relicCounters['ATTACK_COUNT'] = (p.relicCounters['ATTACK_COUNT'] || 0) + 1;
@@ -1200,6 +1235,15 @@ const App: React.FC = () => {
       
       let shouldExhaust = card.exhaust;
       if (card.type === CardType.SKILL && p.powers['CORRUPTION']) shouldExhaust = true;
+
+      // YATSUATARI (Rampage) Logic
+      // Modify the card instance before it enters discard pile.
+      // Since `card` variable holds the instance from hand, modifying it here affects it as it moves to discard.
+      if (card.name === '八つ当たり' || card.name === 'YATSUATARI') {
+          // Increase damage for this combat instance
+          card.damage = (card.damage || 0) + 5;
+          currentLogs.push("八つ当たりの怒りが増した！");
+      }
 
       if (!shouldExhaust && !(card.type === CardType.POWER) && !(card.promptsExhaust === 99)) {
           p.discardPile.push(card);
@@ -1697,7 +1741,10 @@ const App: React.FC = () => {
         rewards.push({ type: 'RELIC', value: relic, id: `rew-relic-${Date.now()}` });
     }
 
-    const potionChance = 0.4 + (gameState.player.relics.find(r => r.id === 'WHITE_BEAST_STATUE') ? 1.0 : 0);
+    // Potion drop logic modified for KINJIRO_STATUE
+    let potionChance = 0.4 + (gameState.player.relics.find(r => r.id === 'WHITE_BEAST_STATUE') ? 1.0 : 0);
+    if (gameState.player.relics.find(r => r.id === 'KINJIRO_STATUE')) potionChance = 1.0;
+
     if (Math.random() < potionChance && !gameState.player.relics.find(r => r.id === 'SOZU')) {
         const allPotions = Object.values(POTION_LIBRARY);
         const potion = allPotions[Math.floor(Math.random() * allPotions.length)];
@@ -2001,7 +2048,7 @@ const App: React.FC = () => {
                             </div>
 
                             <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                <Terminal size={10}/> v2.4.2
+                                <Terminal size={10}/> v2.4.3
                             </button>
                         </div>
                     </div>
@@ -2015,16 +2062,14 @@ const App: React.FC = () => {
                             className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2 select-none active:text-green-200"
                             onClick={handleLogTitleClick}
                         >
-                            System Update Log v2.4.2
+                            System Update Log v2.4.3
                         </h2>
                         <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
                             <section>
                                 <h3 className="text-white font-bold mb-1">■ アップデート (Update)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li>Accuracy(精度上昇)の効果を実装しました。</li>
-                                    <li>Orange Pellets(ラムネ)のデバフ解除効果を実装しました。</li>
-                                    <li>Evolve(進化)のドロー効果を実装しました。</li>
-                                    <li>Discovery(発見)のカード生成効果を実装しました。</li>
+                                    <li>新レリック: 竹とんぼ, 金次郎像, 給茶機, 高級布団</li>
+                                    <li>新カード: 八つ当たり, 退学処分</li>
                                 </ul>
                             </section>
                         </div>

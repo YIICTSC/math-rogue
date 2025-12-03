@@ -1,4 +1,5 @@
 
+
 import React, { useEffect, useState, useRef } from 'react';
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
@@ -88,6 +89,7 @@ const FloatingTextOverlay: React.FC<{ data: FloatingText | null }> = ({ data }) 
             {data.iconType === 'shield' && <Shield size={14} className="mr-0.5 fill-current" />}
             {data.iconType === 'heart' && <Heart size={14} className="mr-0.5 fill-current" />}
             {data.iconType === 'poison' && <Droplets size={14} className="mr-0.5 fill-current" />}
+            {data.iconType === 'skull' && <Skull size={14} className="mr-0.5 fill-current" />}
             {data.text}
         </div>
     );

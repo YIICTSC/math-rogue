@@ -243,6 +243,13 @@ export const RELIC_LIBRARY: Record<string, Relic> = {
     BIG_LADLE: { id: 'BIG_LADLE', name: '巨大なお玉', description: '戦闘開始時、最大HP+4(一時的)を得る。', rarity: 'STARTER' },
     WHISTLE: { id: 'WHISTLE', name: '魔法の笛', description: '戦闘開始時、ランダムな攻撃カード(コスト0)を1枚手札に加える。', rarity: 'STARTER' },
     SEED_PACK: { id: 'SEED_PACK', name: '謎の種', description: '戦闘開始時、トゲトゲ3を得る。', rarity: 'STARTER' },
+    
+    // New Relics
+    TAKETOMBO: { id: 'TAKETOMBO', name: '竹とんぼ', description: 'ポーションを使用する度、HPを5回復する。', rarity: 'COMMON', price: 150 },
+    KINJIRO_STATUE: { id: 'KINJIRO_STATUE', name: '二宮金次郎像', description: '戦闘報酬で必ずポーションが出現する。', rarity: 'UNCOMMON', price: 250 },
+    TEA_SERVER: { id: 'TEA_SERVER', name: '給茶機', description: '休憩所に入ると、次の戦闘開始時にエネルギー+2を得る。', rarity: 'COMMON', price: 150 },
+    LUXURY_FUTON: { id: 'LUXURY_FUTON', name: '高級羽毛布団', description: '休憩所に入った時、デッキ5枚につきHP2回復。', rarity: 'UNCOMMON', price: 200 },
+
     VAJRA: { id: 'VAJRA', name: '金の定規', description: '戦闘開始時、ムキムキ1を得る。', rarity: 'COMMON', price: 150 },
     ANCHOR: { id: 'ANCHOR', name: '重いランドセル', description: '1ターン目の開始時、ブロック10を得る。', rarity: 'COMMON', price: 150 },
     BAG_OF_PREP: { id: 'BAG_OF_PREP', name: '予習セット', description: '戦闘開始時、追加で2枚引く。', rarity: 'COMMON', price: 150 },
@@ -336,6 +343,11 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
   ...STATUS_CARDS,
   ...CURSE_CARDS,
   ...EVENT_CARDS,
+  
+  // New Cards
+  YATSUATARI: { name: '八つ当たり', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '8ダメージ。使用する度、この戦闘中ダメージ+5。', damage: 8, rarity: 'UNCOMMON' },
+  EXPULSION: { name: '退学処分', cost: 1, type: CardType.SKILL, target: TargetType.ENEMY, description: '敵のHPが30以下なら即死させる。', rarity: 'RARE' },
+
   SHIV: { name: 'ナイフ', cost: 0, type: CardType.ATTACK, target: TargetType.ENEMY, description: '4ダメージ。廃棄。', damage: 4, exhaust: true, rarity: 'SPECIAL' },
   CAPTURE_NET: { name: '捕獲網', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '10ダメージ。これで倒すと敵をカード化してデッキに加える。廃棄。', damage: 10, capture: true, exhaust: true, rarity: 'SPECIAL' },
   STRIKE: { name: 'えんぴつ攻撃', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '6ダメージを与える。', damage: 6, rarity: 'COMMON' },
