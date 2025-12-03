@@ -56,6 +56,16 @@ const HAND_EXAMPLES: Record<string, { desc: string, cards: {r: string, s: PokerS
     }
 };
 
+const ENHANCEMENT_INFO: Record<string, string> = {
+    'BONUS': 'チップ+30',
+    'MULT': '倍率+0.5',
+    'WILD': '全てのスートとして扱う',
+    'GLASS': '倍率x2, 1/4の確率で破壊',
+    'STEEL': '手札にある間、倍率x1.5',
+    'GOLD': '使用時、$3獲得',
+    'STONE': 'ランク・スートなし, チップ+50'
+};
+
 // Blind scaling logic
 const getBlindConfig = (ante: number, index: number): PokerBlind => {
     const base = 300 * Math.pow(1.5, ante - 1);
@@ -283,7 +293,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   const [selectedConsumable, setSelectedConsumable] = useState<PokerConsumable | null>(null);
 
   // Inspection Modal State
-  const [inspectedItem, setInspectedItem] = useState<PokerSupporter | PokerConsumable | null>(null);
+  const [inspectedItem, setInspectedItem] = useState<PokerSupporter | PokerConsumable | PokerCard | null>(null);
   const longPressTimer = useRef<any>(null);
 
   // Sorting
@@ -358,7 +368,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   };
 
   // --- Tooltip/Inspection Handlers ---
-  const handleTouchStart = (item: PokerSupporter | PokerConsumable) => {
+  const handleTouchStart = (item: PokerSupporter | PokerConsumable | PokerCard) => {
       longPressTimer.current = setTimeout(() => {
           setInspectedItem(item);
       }, 500);
@@ -370,7 +380,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       }
   };
 
-  const handleContextMenu = (e: React.MouseEvent, item: PokerSupporter | PokerConsumable) => {
+  const handleContextMenu = (e: React.MouseEvent, item: PokerSupporter | PokerConsumable | PokerCard) => {
       e.preventDefault();
       setInspectedItem(item);
   };
@@ -805,25 +815,64 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   // Inspection Modal
   const renderInspectionModal = () => {
       if (!inspectedItem) return null;
+      
+      const isCard = 'suit' in inspectedItem;
+      const cardItem = inspectedItem as PokerCard;
+      const otherItem = inspectedItem as (PokerSupporter | PokerConsumable);
+
       return (
           <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setInspectedItem(null)}>
               <div className="bg-slate-800 border-2 border-white p-6 rounded-lg max-w-sm w-full shadow-2xl relative" onClick={e => e.stopPropagation()}>
                   <button onClick={() => setInspectedItem(null)} className="absolute top-2 right-2 text-gray-400 hover:text-white"><X size={24}/></button>
-                  <div className="flex flex-col items-center mb-4">
-                      <div className="w-24 h-24 mb-4">
-                          <PixelSprite seed={inspectedItem.icon} name={inspectedItem.icon} className="w-full h-full"/>
+                  
+                  {isCard ? (
+                      <div className="flex flex-col items-center mb-4">
+                          {/* Card Visual Reuse */}
+                          <div className="w-32 h-48 bg-white text-black rounded-lg border-4 border-slate-300 shadow-xl flex flex-col items-center justify-between p-2 mb-4">
+                              <div className={`text-2xl font-bold w-full text-left ${['HEART', 'DIAMOND'].includes(cardItem.suit) ? 'text-red-600' : 'text-black'}`}>
+                                  {getRankDisplay(cardItem.rank)}
+                              </div>
+                              <div className="scale-150">{getSuitIcon(cardItem.suit, cardItem.enhancement === 'WILD')}</div>
+                              <div className="text-xs text-center font-bold text-gray-500">
+                                  {cardItem.enhancement || ''}
+                              </div>
+                              <div className={`text-2xl font-bold w-full text-right rotate-180 ${['HEART', 'DIAMOND'].includes(cardItem.suit) ? 'text-red-600' : 'text-black'}`}>
+                                  {getRankDisplay(cardItem.rank)}
+                              </div>
+                          </div>
+                          
+                          <h3 className="text-2xl font-bold text-yellow-400 mb-2">{getRankDisplay(cardItem.rank)} of {cardItem.suit}</h3>
+                          <div className="text-sm font-bold text-white bg-slate-700 px-3 py-1 rounded-full mb-4">Playing Card</div>
+                          
+                          {cardItem.enhancement && (
+                              <div className="text-center">
+                                  <div className="text-yellow-300 font-bold mb-1">{cardItem.enhancement} CARD</div>
+                                  <p className="text-gray-300 text-sm">
+                                      {ENHANCEMENT_INFO[cardItem.enhancement] || 'Special Effect'}
+                                  </p>
+                              </div>
+                          )}
+                          {!cardItem.enhancement && <p className="text-gray-400 text-sm">No Enhancements</p>}
                       </div>
-                      <h3 className="text-2xl font-bold text-yellow-400 mb-2">{inspectedItem.name}</h3>
-                      <div className="text-sm font-bold text-white bg-slate-700 px-3 py-1 rounded-full">
-                          {'rarity' in inspectedItem ? (inspectedItem as PokerSupporter).rarity : (inspectedItem as PokerConsumable).type}
-                      </div>
-                  </div>
-                  <p className="text-lg text-gray-300 text-center leading-relaxed">
-                      {inspectedItem.description}
-                  </p>
-                  <div className="mt-6 text-center text-yellow-500 font-bold text-xl">
-                      ${inspectedItem.price}
-                  </div>
+                  ) : (
+                      <>
+                        <div className="flex flex-col items-center mb-4">
+                            <div className="w-24 h-24 mb-4">
+                                <PixelSprite seed={otherItem.icon} name={otherItem.icon} className="w-full h-full"/>
+                            </div>
+                            <h3 className="text-2xl font-bold text-yellow-400 mb-2">{otherItem.name}</h3>
+                            <div className="text-sm font-bold text-white bg-slate-700 px-3 py-1 rounded-full">
+                                {'rarity' in otherItem ? (otherItem as PokerSupporter).rarity : (otherItem as PokerConsumable).type}
+                            </div>
+                        </div>
+                        <p className="text-lg text-gray-300 text-center leading-relaxed">
+                            {otherItem.description}
+                        </p>
+                        <div className="mt-6 text-center text-yellow-500 font-bold text-xl">
+                            ${otherItem.price}
+                        </div>
+                      </>
+                  )}
               </div>
           </div>
       );
@@ -862,6 +911,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           return (
               <div className="flex flex-col h-full w-full bg-slate-900 text-white p-4 items-center justify-center relative font-mono overflow-hidden">
                   <div className="absolute inset-0 bg-black/80 z-0"></div>
+                  {renderInspectionModal()}
                   
                   <div className="z-10 flex flex-col items-center w-full max-w-4xl">
                       <h2 className="text-3xl font-bold mb-8 text-yellow-400 animate-pulse">{isPackOpened ? "Choose One!" : "Open Pack!"}</h2>
@@ -899,6 +949,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                                             ${disabled ? 'opacity-50 grayscale cursor-not-allowed' : ''}
                                         `}
                                         onClick={() => !disabled && selectPackItem(item)}
+                                        onContextMenu={(e) => handleContextMenu(e, item)}
+                                        onTouchStart={() => handleTouchStart(item)}
+                                        onTouchEnd={handleTouchEnd}
                                         style={{ transitionDelay: `${idx * 100}ms` }}
                                       >
                                           {isCard && (
@@ -1255,12 +1308,14 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                                                 <div 
                                                     key={card.id} 
                                                     className={`
-                                                        rounded p-1 flex flex-col items-center justify-center h-14 w-10 text-xs border-2 transition-all relative overflow-hidden
+                                                        rounded p-1 flex flex-col items-center justify-center h-14 w-10 text-xs border-2 transition-all relative overflow-hidden cursor-pointer
                                                         ${isInDeck 
-                                                            ? 'bg-gray-100 border-gray-300 text-black shadow-md' 
+                                                            ? 'bg-gray-100 border-gray-300 text-black shadow-md hover:scale-110' 
                                                             : 'bg-black border-gray-700 text-gray-600 opacity-60 grayscale'}
                                                     `}
-                                                    title={isInDeck ? "In Deck" : "Drawn/Discarded"}
+                                                    onContextMenu={(e) => handleContextMenu(e, card)}
+                                                    onTouchStart={() => handleTouchStart(card)}
+                                                    onTouchEnd={handleTouchEnd}
                                                 >
                                                     <div className={`font-bold text-sm ${!isInDeck ? 'text-gray-600' : (['HEART', 'DIAMOND'].includes(card.suit) ? 'text-red-600' : 'text-black')}`}>
                                                         {getRankDisplay(card.rank)}
@@ -1443,6 +1498,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                         key={card.id}
                         data-card-id={card.id}
                         onPointerDown={(e) => handlePointerDown(e, card.id)}
+                        onContextMenu={(e) => handleContextMenu(e, card)}
+                        onTouchStart={() => handleTouchStart(card)}
+                        onTouchEnd={handleTouchEnd}
                         className={`
                             w-20 h-32 md:w-28 md:h-40 rounded-lg border-2 shadow-xl flex flex-col items-center justify-between p-2 cursor-pointer transition-transform duration-200 -ml-4 first:ml-0 relative
                             ${isSelected ? '-translate-y-6 z-20 border-yellow-400 ring-2 ring-yellow-400' : 'border-gray-400 hover:-translate-y-2 z-10'}
