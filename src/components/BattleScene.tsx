@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText } from '../types';
+import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
 import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info } from 'lucide-react';
 import PixelSprite from './PixelSprite';
@@ -68,7 +68,7 @@ const FloatingTextOverlay: React.FC<{ data: FloatingText | null }> = ({ data }) 
     return (
         <div 
             key={data.id} // Forces re-mount to restart animation on new ID
-            className={`absolute top-0 left-1/2 -translate-x-1/2 z-50 font-bold text-3xl drop-shadow-[0_2px_2px_rgba(0,0,0,1)] pointer-events-none ${data.color} flex items-center`}
+            className={`absolute -top-4 -left-4 z-50 font-bold text-lg drop-shadow-[0_1px_2px_rgba(0,0,0,1)] pointer-events-none ${data.color} flex items-center bg-black/30 rounded px-1 backdrop-blur-[1px]`}
             style={{ 
                 animation: 'float-up-fade 0.8s ease-out forwards'
             }}
@@ -76,13 +76,17 @@ const FloatingTextOverlay: React.FC<{ data: FloatingText | null }> = ({ data }) 
             <style>
                 {`
                     @keyframes float-up-fade {
-                        0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-                        20% { transform: translate(-50%, -100%) scale(1.2); opacity: 1; }
-                        100% { transform: translate(-50%, -250%) scale(1); opacity: 0; }
+                        0% { transform: translateY(0) scale(0.8); opacity: 0; }
+                        20% { transform: translateY(-10px) scale(1.2); opacity: 1; }
+                        100% { transform: translateY(-25px) scale(1); opacity: 0; }
                     }
                 `}
             </style>
-            {data.iconType === 'zap' && <Zap size={24} className="mr-1 fill-current" />}
+            {data.iconType === 'zap' && <Zap size={14} className="mr-0.5 fill-current" />}
+            {data.iconType === 'sword' && <Sword size={14} className="mr-0.5 fill-current" />}
+            {data.iconType === 'shield' && <Shield size={14} className="mr-0.5 fill-current" />}
+            {data.iconType === 'heart' && <Heart size={14} className="mr-0.5 fill-current" />}
+            {data.iconType === 'poison' && <Droplets size={14} className="mr-0.5 fill-current" />}
             {data.text}
         </div>
     );
@@ -123,7 +127,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
   const getEnemyActionClass = (enemy: Enemy) => {
       if (actingEnemyId !== enemy.id) return '';
-      if (enemy.nextIntent.type === 'ATTACK') {
+      if (enemy.nextIntent.type === 'ATTACK' || enemy.nextIntent.type === 'ATTACK_DEBUFF' || enemy.nextIntent.type === 'ATTACK_DEFEND') {
           return 'translate-y-16 z-50'; 
       } else if (enemy.nextIntent.type === 'DEFEND') {
           return 'scale-90 brightness-150'; 
@@ -274,22 +278,31 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         onClick={() => onSelectEnemy(enemy.id)}
                         className={`flex flex-col items-center z-10 transition-transform duration-200 cursor-pointer relative ${isSelected && !actionClass ? 'scale-105 z-20' : ''} ${!isSelected && !actionClass ? 'hover:scale-105' : ''} ${actionClass}`}
                     >
-                        {/* Damage Popup */}
-                        <FloatingTextOverlay data={enemy.floatingText} />
-
                         {/* Intent Bubble */}
                         <div 
-                            className="absolute -top-10 left-1/2 -translate-x-1/2 z-30 bg-white text-black text-xs font-extrabold px-1.5 py-0.5 rounded border-2 border-red-600 animate-bounce whitespace-nowrap shadow-xl flex items-center justify-center min-w-[40px]"
-                            onClick={(e) => { e.stopPropagation(); showInfo("敵の行動", enemy.nextIntent.type === 'ATTACK' ? `${enemy.nextIntent.value} ダメージを与える攻撃` : enemy.nextIntent.type === 'DEFEND' ? `${enemy.nextIntent.value} ブロックを得る` : "バフまたはデバフを使用"); }}
+                            className="absolute -top-6 left-1/2 -translate-x-1/2 z-30 bg-white text-black text-xs font-extrabold px-1.5 py-0.5 rounded border-2 border-red-600 animate-bounce whitespace-nowrap shadow-xl flex items-center justify-center min-w-[40px]"
+                            onClick={(e) => { e.stopPropagation(); showInfo("敵の行動", "敵の次の行動です。"); }}
                         >
-                            {enemy.nextIntent.type === 'ATTACK' && <><Skull size={12} className="mr-1 text-red-600"/> {enemy.nextIntent.value}</>}
-                            {enemy.nextIntent.type === 'DEFEND' && <><Shield size={12} className="mr-1 text-blue-600"/> {enemy.nextIntent.value}</>}
-                            {(enemy.nextIntent.type === 'BUFF' || enemy.nextIntent.type === 'DEBUFF') && <><Zap size={12} className="mr-1 text-yellow-600"/> !</>}
+                            {/* Attack Intents */}
+                            {(enemy.nextIntent.type === 'ATTACK' || enemy.nextIntent.type === 'ATTACK_DEBUFF' || enemy.nextIntent.type === 'ATTACK_DEFEND') && (
+                                <><Skull size={12} className="mr-1 text-red-600"/> {enemy.nextIntent.value}</>
+                            )}
+                            {/* Defend Intents */}
+                            {enemy.nextIntent.type === 'DEFEND' && (
+                                <><Shield size={12} className="mr-1 text-blue-600"/> {enemy.nextIntent.value}</>
+                            )}
+                            {/* Skill / Buff / Debuff Intents (Zap) */}
+                            {(enemy.nextIntent.type === 'BUFF' || enemy.nextIntent.type === 'DEBUFF' || enemy.nextIntent.type === 'SLEEP') && (
+                                <><Zap size={12} className="mr-1 text-yellow-500 fill-yellow-500"/> !</>
+                            )}
+                            {/* Unknown */}
                             {enemy.nextIntent.type === 'UNKNOWN' && <span className="text-gray-600">?</span>}
                         </div>
 
                         <div className="w-16 h-16 md:w-20 md:h-20 relative mb-1">
                             <PixelSprite seed={enemy.id} name={enemy.name} className="w-full h-full drop-shadow-lg" />
+                            {/* Damage/Status Popup - Positioned relative to sprite */}
+                            <FloatingTextOverlay data={enemy.floatingText} />
                         </div>
 
                         <div className={`w-24 md:w-28 bg-black/90 border-2 px-1 py-0.5 text-white text-[9px] md:text-[10px] transition-colors shadow-md rounded ${isSelected ? 'border-yellow-400 ring-1 ring-yellow-400/50' : 'border-gray-600'}`}>
@@ -338,9 +351,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         {/* Player Area (Bottom Left) */}
         <div className="flex items-end pl-2 pb-2 shrink-0 mt-auto">
             <div className="flex items-end relative">
-                {/* Damage Popup */}
-                <FloatingTextOverlay data={player.floatingText} />
-
+                
                 {/* Player Sprite */}
                 <div className={`w-20 h-20 md:w-24 md:h-24 relative transition-all duration-150 ease-out mr-2 ${getActionClass()}`} onClick={() => showInfo("勇者", "あなたのキャラクター。\nHPが0になるとゲームオーバー。")}>
                      <img 
@@ -349,6 +360,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         className="w-full h-full pixel-art" 
                         style={{ imageRendering: 'pixelated' }}
                      />
+                     {/* Damage Popup - Relative to Player Sprite */}
+                     <FloatingTextOverlay data={player.floatingText} />
                 </div>
 
                 {/* Player Stats Panel */}
