@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -87,10 +86,8 @@ const calculateScore = (state: GameState, victory: boolean): number => {
 
 // Helper to determine the visual shape of a card for synthesis
 const getShapeFromCard = (card: ICard): string => {
-    // If it has a textureRef (e.g. Captured Monster or already Synthesized), use that shape.
     if (card.textureRef) return card.textureRef.split('|')[0];
     
-    // For standard cards, map to a safe Icon ID based on name keywords or Type.
     const n = card.name;
     if (n.includes('薬') || n.includes('ポーション')) return 'POTION';
     if (n.includes('靴') || n.includes('足') || n.includes('ステップ') || n.includes('ダッシュ') || n.includes('ジャンプ')) return 'SHOE';
@@ -99,7 +96,6 @@ const getShapeFromCard = (card: ICard): string => {
     if (n.includes('火') || n.includes('炎') || n.includes('熱')) return 'FLAME';
     if (n.includes('雷') || n.includes('電')) return 'LIGHTNING';
     
-    // Default by Type
     if (card.type === CardType.ATTACK) return 'SWORD';
     if (card.type === CardType.SKILL) return 'SHIELD';
     if (card.type === CardType.POWER) return 'FLAME';
@@ -109,64 +105,64 @@ const getShapeFromCard = (card: ICard): string => {
 // --- ENEMY DEFINITIONS & AI ---
 const determineEnemyType = (name: string, isBoss: boolean): string => {
     if (isBoss) return 'GUARDIAN'; 
-    if (name.includes('先生') || name.includes('用務員') || name.includes('教頭')) return 'TEACHER'; // High dmg, Buffs
-    if (name.includes('ゴーレム') || name.includes('主') || name.includes('守護者') || name.includes('模型')) return 'TANK'; // High block
-    if (name.includes('亡霊') || name.includes('幽霊') || name.includes('花子') || name.includes('影')) return 'GHOST'; // Intangible/Debuff
-    if (name.includes('悪魔') || name.includes('不良') || name.includes('カラス') || name.includes('狂信者')) return 'AGGRESSIVE'; // Multi-hit
-    if (name.includes('宿題') || name.includes('ミミック') || name.includes('泥棒') || name.includes('妖精')) return 'TRICKSTER'; // Debuff/Special
-    if (name.includes('虫') || name.includes('カス') || name.includes('スライム') || name.includes('ハチ')) return 'SWARM'; // Low HP, Group
+    if (name.includes('先生') || name.includes('用務員') || name.includes('教頭')) return 'TEACHER';
+    if (name.includes('ゴーレム') || name.includes('主') || name.includes('守護者') || name.includes('模型')) return 'TANK';
+    if (name.includes('亡霊') || name.includes('幽霊') || name.includes('花子') || name.includes('影')) return 'GHOST';
+    if (name.includes('悪魔') || name.includes('不良') || name.includes('カラス') || name.includes('狂信者')) return 'AGGRESSIVE';
+    if (name.includes('宿題') || name.includes('ミミック') || name.includes('泥棒') || name.includes('妖精')) return 'TRICKSTER';
+    if (name.includes('虫') || name.includes('カス') || name.includes('スライム') || name.includes('ハチ')) return 'SWARM';
     return 'GENERIC';
 };
 
 const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
     const type = enemy.enemyType;
     const localTurn = turn % 3; 
-    const isAct2Plus = (enemy.maxHp > 60); // Roughly check strength
+    const isAct2Plus = (enemy.maxHp > 60);
 
     switch (type) {
-        case 'TEACHER': // Buffs then heavy hits
+        case 'TEACHER':
             if (turn === 1) return { type: EnemyIntentType.BUFF, value: 0, secondaryValue: isAct2Plus ? 3 : 2 }; 
             if (localTurn === 2) return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 18 : 12 };
             return { type: EnemyIntentType.ATTACK_DEBUFF, value: 8, secondaryValue: 2, debuffType: 'VULNERABLE' };
 
-        case 'TANK': // Defend and hit
+        case 'TANK':
             if (localTurn === 0) return { type: EnemyIntentType.DEFEND, value: isAct2Plus ? 20 : 12 };
             if (localTurn === 1) return { type: EnemyIntentType.ATTACK_DEFEND, value: 10, secondaryValue: 10 };
             return { type: EnemyIntentType.ATTACK, value: 15 };
 
-        case 'GHOST': // Debuffs and annoyance
+        case 'GHOST':
             if (localTurn === 0) return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 2, debuffType: 'WEAK' };
             if (localTurn === 1) return { type: EnemyIntentType.ATTACK, value: 6 };
             return { type: EnemyIntentType.ATTACK_DEBUFF, value: 5, secondaryValue: 1, debuffType: 'VULNERABLE' };
 
-        case 'AGGRESSIVE': // Multi-hits
+        case 'AGGRESSIVE':
             if (turn === 1) return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 10 : 6 };
-            if (localTurn === 0) return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 5 : 3 }; // Should mean x2 or x3 in logic if extended, simplified here
+            if (localTurn === 0) return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 5 : 3 };
             return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 14 : 9 };
 
-        case 'TRICKSTER': // Varied
+        case 'TRICKSTER':
             if (localTurn === 0) return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 2, debuffType: 'POISON' };
             if (localTurn === 1) return { type: EnemyIntentType.DEFEND, value: 8 };
             return { type: EnemyIntentType.ATTACK, value: 7 };
 
-        case 'SWARM': // Weak but annoying
+        case 'SWARM':
             if (turn % 2 === 0) return { type: EnemyIntentType.ATTACK, value: 5 };
             return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 1, debuffType: 'WEAK' };
 
-        case 'GUARDIAN': // Boss
+        case 'GUARDIAN':
             const bossTurn = turn % 4;
             if (bossTurn === 1) return { type: EnemyIntentType.BUFF, value: 0, secondaryValue: 9 }; 
             if (bossTurn === 2) return { type: EnemyIntentType.ATTACK, value: 20 }; 
             if (bossTurn === 3) return { type: EnemyIntentType.ATTACK_DEBUFF, value: 8, secondaryValue: 2, debuffType: 'VULNERABLE' }; 
             return { type: EnemyIntentType.DEFEND, value: 15 };
 
-        case 'THE_HEART': // True Boss
+        case 'THE_HEART':
              const heartTurn = turn % 3;
              if (heartTurn === 1) return { type: EnemyIntentType.ATTACK, value: 45 }; 
              if (heartTurn === 2) return { type: EnemyIntentType.BUFF, value: 0, secondaryValue: 2 }; 
              return { type: EnemyIntentType.ATTACK_DEBUFF, value: 2, secondaryValue: 12, debuffType: 'VULNERABLE' }; 
 
-        default: // GENERIC
+        default:
             const r = Math.random();
             if (r < 0.6) return { type: EnemyIntentType.ATTACK, value: 9 + Math.floor(turn/2) };
             if (r < 0.9) return { type: EnemyIntentType.DEFEND, value: 8 };
@@ -244,7 +240,6 @@ const App: React.FC = () => {
 
   const [currentNarrative, setCurrentNarrative] = useState<string>("...");
   const [turnLog, setTurnLog] = useState<string>("プレイヤーターン");
-  const [errorMessage, setErrorMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [lastActionTime, setLastActionTime] = useState<number>(0);
   const [lastActionType, setLastActionType] = useState<CardType | null>(null);
@@ -278,12 +273,11 @@ const App: React.FC = () => {
 
   // --- Auto Save Logic ---
   useEffect(() => {
-      // Save game whenever valid state changes
       if (gameState.screen !== GameScreen.START_MENU && 
           gameState.screen !== GameScreen.GAME_OVER && 
           gameState.screen !== GameScreen.ENDING &&
           gameState.screen !== GameScreen.VICTORY &&
-          gameState.screen !== GameScreen.MATH_CHALLENGE && // Don't save during math
+          gameState.screen !== GameScreen.MATH_CHALLENGE && 
           gameState.screen !== GameScreen.COMPENDIUM && 
           gameState.screen !== GameScreen.HELP &&
           gameState.screen !== GameScreen.RANKING &&
@@ -319,7 +313,7 @@ const App: React.FC = () => {
   };
 
   const handleLogTitleClick = (e: React.MouseEvent) => {
-      e.stopPropagation(); // Prevent closing modal
+      e.stopPropagation(); 
       const next = logClickCount + 1;
       setLogClickCount(next);
       if (next >= 10) {
@@ -330,8 +324,6 @@ const App: React.FC = () => {
           audioService.playSound('select');
       }
   };
-
-  // --- HANDLERS IMPLEMENTATION ---
 
   const continueGame = () => {
       const saved = storageService.loadGame();
@@ -346,7 +338,7 @@ const App: React.FC = () => {
       setGameState(prev => ({ 
           ...prev, 
           screen: GameScreen.MODE_SELECTION,
-          challengeMode: undefined // Explicitly clear challenge mode
+          challengeMode: undefined 
       }));
   };
 
@@ -393,10 +385,10 @@ const App: React.FC = () => {
             currentMapNodeId: null,
             player: {
                 ...prev.player,
-                deck: deck.length > 0 ? deck : createDeck(), // Use basic deck if none selected
-                relics: relics.length > 0 ? relics : [], // No relics if none selected
+                deck: deck.length > 0 ? deck : createDeck(), 
+                relics: relics.length > 0 ? relics : [], 
                 potions: potions.length > 0 ? potions : [],
-                maxHp: 999, // Debug buff
+                maxHp: 999, 
                 currentHp: isDebugHpOne ? 1 : 999,
                 maxEnergy: 9,
                 currentEnergy: 9,
@@ -508,9 +500,7 @@ const App: React.FC = () => {
         }));
   };
 
-  // ... (Event generation logic omitted for brevity, no changes there) ...
   const generateEvent = (player: Player) => {
-      // Extensive List of Events (School Themed + Mysterious)
       const events = [
           {
               title: "怪しい薬売り",
@@ -529,13 +519,11 @@ const App: React.FC = () => {
                   { label: "無視", text: "何もせず立ち去る", action: () => { setEventResultLog("怪しい男を無視して先へ進んだ。"); } }
               ]
           },
-          // ... (Other events remain unchanged) ...
           {
               title: "踊り場の鏡",
               description: "大きな鏡がある。映っている自分と目が合った。",
               options: [
                   { label: "見つめる", text: "じっと見つめる...", action: () => {
-                      // Dupe a card
                       const deck = [...player.deck].sort(() => Math.random() - 0.5);
                       const target = deck[0];
                       if (target) {
@@ -550,7 +538,20 @@ const App: React.FC = () => {
                       setEventResultLog("破片が飛び散った！\n呪い「骨折」を入手。7年間の不幸が訪れるだろう...");
                   }}
               ]
-          }
+          },
+          {
+              title: "呪われた書物",
+              description: "古びた祭壇に一冊の本が置かれている。不吉な気配がする。",
+              options: [
+                  { label: "読む", text: "HPを10失う。特別な本(レリック)を得る。", action: () => {
+                      const books = [RELIC_LIBRARY.NECRONOMICON, RELIC_LIBRARY.ENCHIRIDION, RELIC_LIBRARY.NILRYS_CODEX];
+                      const book = books[Math.floor(Math.random() * books.length)];
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: prev.player.currentHp - 10, relics: [...prev.player.relics, book] } }));
+                      setEventResultLog(`ページをめくると激痛が走った！\nレリック「${book.name}」を入手。`);
+                  }},
+                  { label: "立ち去る", text: "", action: () => setEventResultLog("危険を避けて立ち去った。") }
+              ]
+          },
       ];
       return events[Math.floor(Math.random() * events.length)];
   };
@@ -615,7 +616,7 @@ const App: React.FC = () => {
             const flavor = await generateFlavorText(node.type === NodeType.BOSS ? "ボスが現れた！" : "敵と遭遇した。");
             
             const p = { ...nextState.player };
-            // Deep copy cards for combat to allow temporary modifications (like Rampage)
+            // Deep copy cards for combat
             p.drawPile = shuffle(p.deck.map(c => ({ ...c })));
             p.hand = [];
             p.discardPile = [];
@@ -645,7 +646,7 @@ const App: React.FC = () => {
             if (node.type === NodeType.BOSS && p.relics.find(r => r.id === 'PENTOGRAPH')) p.currentHp = Math.min(p.maxHp, p.currentHp + 25);
             if (p.relics.find(r => r.id === 'TEA_SERVER') && p.relicCounters['TEA_SERVER_ACTIVE']) {
                 p.currentEnergy += 2;
-                p.relicCounters['TEA_SERVER_ACTIVE'] = 0; // Consume charge
+                p.relicCounters['TEA_SERVER_ACTIVE'] = 0; 
                 p.floatingText = { id: `tea-${Date.now()}`, text: 'お茶パワー！', color: 'text-green-400', iconType: 'zap' };
             }
 
@@ -703,7 +704,7 @@ const App: React.FC = () => {
                 enemies: enemies,
                 selectedEnemyId: enemies[0].id,
                 narrativeLog: [...nextState.narrativeLog, flavor],
-                combatLog: [], // Reset Log
+                combatLog: [],
                 turn: 1
             });
             setCurrentNarrative(flavor);
@@ -718,7 +719,6 @@ const App: React.FC = () => {
                     const heal = Math.floor(p.deck.length / 5) * 2;
                     if (heal > 0) {
                         p.currentHp = Math.min(p.maxHp, p.currentHp + heal);
-                        // We can't show floating text easily here as screen changes, but we can log/notify
                     }
                 }
                 if (p.relics.find(r => r.id === 'TEA_SERVER')) {
@@ -729,7 +729,6 @@ const App: React.FC = () => {
             audioService.playBGM('menu');
 
         } else if (node.type === NodeType.SHOP) {
-            // Generate Shop Cards - FIX: Robust filtering
             const shopCandidates = Object.values(CARDS_LIBRARY).filter(c => 
                 c.type !== CardType.STATUS && 
                 c.type !== CardType.CURSE && 
@@ -751,12 +750,10 @@ const App: React.FC = () => {
             }
             setShopCards(cards);
 
-            // Generate Shop Relics
             const allRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'SHOP' || r.rarity === 'COMMON' || r.rarity === 'UNCOMMON' || r.rarity === 'RARE');
             const relicOptions = shuffle(allRelics).slice(0, 2);
             setShopRelics(relicOptions);
 
-            // Generate Shop Potions
             const allPotions = Object.values(POTION_LIBRARY);
             const potionOptions: Potion[] = shuffle(allPotions).slice(0, 3).map(p => ({ ...p, id: `shop-pot-${Date.now()}-${Math.random()}` }));
             setShopPotions(potionOptions);
@@ -800,7 +797,6 @@ const App: React.FC = () => {
   };
 
   const handleHandSelection = (card: ICard) => {
-      // ... (Hand selection logic unchanged)
       setGameState(prev => {
           const p = { ...prev.player };
           const mode = prev.selectionState;
@@ -838,7 +834,6 @@ const App: React.FC = () => {
           p.potions = p.potions.filter(pt => pt.id !== potion.id);
           const target = enemies.find(e => e.id === prev.selectedEnemyId) || enemies[0];
 
-          // Taketombo Effect
           if (p.relics.find(r => r.id === 'TAKETOMBO')) {
               p.currentHp = Math.min(p.maxHp, p.currentHp + 5);
               p.floatingText = { id: `heal-taketombo-${Date.now()}`, text: `+5`, color: 'text-green-500', iconType: 'heart' };
@@ -886,6 +881,15 @@ const App: React.FC = () => {
                   if (c) p.hand.push(c);
               }
               newLogs.push("手札を交換");
+          } else if (potion.templateId === 'ENTROPIC_BREW') {
+              for (let i = 0; i < 3; i++) {
+                  if (p.potions.length < 3) {
+                      const allPotions = Object.values(POTION_LIBRARY);
+                      const randomPot = { ...allPotions[Math.floor(Math.random() * allPotions.length)], id: `entropy-${Date.now()}-${i}` };
+                      p.potions.push(randomPot);
+                  }
+              }
+              newLogs.push("闇鍋ジュースでポーション充填");
           }
 
           const remainingEnemies = enemies.filter(e => e.currentHp > 0);
@@ -904,7 +908,6 @@ const App: React.FC = () => {
     setLastActionType(card.type);
     setLastActionTime(Date.now());
 
-    // --- GENETIC ALGORITHM LOGIC ---
     if (card.name === '学習アルゴリズム' || card.name === 'GENETIC_ALGORITHM') {
          setGameState(prev => {
              const newDeck = prev.player.deck.map(c => {
@@ -931,12 +934,11 @@ const App: React.FC = () => {
       p.cardsPlayedThisTurn++;
       if (card.type === CardType.ATTACK) p.attacksPlayedThisTurn++;
       
-      // Update typesPlayedThisTurn for ORANGE PELLETS
       if (!p.typesPlayedThisTurn.includes(card.type)) {
           p.typesPlayedThisTurn.push(card.type);
       }
 
-      // --- ORANGE PELLETS CHECK ---
+      // ORANGE PELLETS
       if (p.relics.find(r => r.id === 'ORANGE_PELLETS')) {
           if (p.typesPlayedThisTurn.includes(CardType.ATTACK) && 
               p.typesPlayedThisTurn.includes(CardType.SKILL) && 
@@ -951,7 +953,7 @@ const App: React.FC = () => {
           }
       }
 
-      // --- DISCOVERY LOGIC ---
+      // DISCOVERY
       if (card.name === '発見' || card.name === 'DISCOVERY') {
           for (let i = 0; i < 3; i++) {
               const keys = Object.keys(CARDS_LIBRARY).filter(k => !STATUS_CARDS[k] && !CURSE_CARDS[k]);
@@ -974,7 +976,7 @@ const App: React.FC = () => {
           });
       }
 
-      // --- Activations Loop (Echo Form, Burst) ---
+      // Activations Loop
       let activations = 1;
       if (p.echoes > 0) { activations++; p.echoes--; currentLogs.push("反響で再発動！"); }
       if (card.type === CardType.SKILL && p.powers['BURST'] > 0) { activations++; p.powers['BURST']--; currentLogs.push("バーストで再発動！"); }
@@ -985,7 +987,6 @@ const App: React.FC = () => {
       }
 
       for (let act = 0; act < activations; act++) {
-          
           let hits = 1;
           if (card.playCopies) hits += card.playCopies;
 
@@ -998,7 +999,7 @@ const App: React.FC = () => {
                   if (target) targets = [target];
               }
 
-              // Damage Logic with Calculations
+              // Damage Logic
               if (card.damage || card.damageBasedOnBlock || card.damagePerCardInHand || card.damagePerAttackPlayed || card.damagePerStrike || card.damagePerCardInDraw) {
                 targets.forEach(e => {
                     const strengthBonus = p.strength * (card.strengthScaling || 1);
@@ -1011,13 +1012,11 @@ const App: React.FC = () => {
                     if (card.damagePerStrike) baseDamage += (p.deck.filter(c => c.name.includes('ストライク') || c.name.includes('攻撃')).length) * card.damagePerStrike!;
                     if (card.damagePerCardInDraw) baseDamage += p.drawPile.length * card.damagePerCardInDraw!;
 
-                    // --- ACCURACY LOGIC ---
                     if ((card.name === 'ナイフ' || card.name === 'SHIV') && p.powers['ACCURACY']) {
                         baseDamage += p.powers['ACCURACY'];
                         logParts.push(`+${p.powers['ACCURACY']}(精度)`);
                     }
 
-                    // 1. Add Strength
                     if (p.strength !== 0) {
                         const bonus = p.strength * (card.strengthScaling || 1);
                         baseDamage += bonus;
@@ -1028,7 +1027,8 @@ const App: React.FC = () => {
                     let multiplier = 1;
                     if (card.type === CardType.ATTACK) {
                         p.relicCounters['PEN_NIB'] = (p.relicCounters['PEN_NIB'] || 0) + 1;
-                        if (p.relicCounters['PEN_NIB'] >= 10) {
+                        // Trigger on 10th attack
+                        if (p.relicCounters['PEN_NIB'] === 10) {
                             multiplier = 2;
                             p.relicCounters['PEN_NIB'] = 0;
                             logParts.push(`x2(ペン先)`);
@@ -1037,13 +1037,11 @@ const App: React.FC = () => {
 
                     let damage = Math.floor(baseDamage * multiplier);
 
-                    // 2. Apply Weak (Player has Weak)
                     if (p.powers['WEAK'] > 0) {
                         damage = Math.floor(damage * 0.75);
                         logParts.push(`x0.75(へろへろ)`);
                     }
 
-                    // 3. Apply Vulnerable (Target Enemy has Vulnerable)
                     if (e.vulnerable > 0) {
                         damage = Math.floor(damage * 1.5);
                         logParts.push(`x1.5(びくびく)`);
@@ -1057,7 +1055,6 @@ const App: React.FC = () => {
                     e.currentHp -= damage;
                     if (damage > 0 || logParts.length > 1) {
                         e.floatingText = { id: `dmg-${Date.now()}-${e.id}-${h}`, text: `${damage}`, color: 'text-white', iconType: 'sword' };
-                        // Formatting the calc log
                         const formula = logParts.length > 1 ? `(${logParts.join(' ')}) = ` : '';
                         currentLogs.push(`${e.name}に${formula}${damage}ダメージ`);
                     }
@@ -1144,9 +1141,15 @@ const App: React.FC = () => {
                   targets.forEach(e => applyDebuff(e, 'POISON', amt));
                   currentLogs.push(`ドクドク${amt}を付与`);
               }
+              
+              // Catalyst Logic
               if (card.poisonMultiplier && targets.length > 0) {
-                  targets.forEach(e => e.poison *= card.poisonMultiplier!);
-                  currentLogs.push("ドクドク倍増！");
+                  targets.forEach(e => {
+                      if (e.poison > 0) {
+                          e.poison *= card.poisonMultiplier!;
+                          currentLogs.push(`${e.name}の毒が${card.poisonMultiplier}倍になった！`);
+                      }
+                  });
               }
               
               if (card.upgradeHand) {
@@ -1154,6 +1157,7 @@ const App: React.FC = () => {
                   currentLogs.push("手札を強化");
               }
               if (card.upgradeDeck) {
+                  // Apotheosis
                   p.hand = p.hand.map(c => getUpgradedCard(c));
                   p.drawPile = p.drawPile.map(c => getUpgradedCard(c));
                   p.discardPile = p.discardPile.map(c => getUpgradedCard(c));
@@ -1162,7 +1166,13 @@ const App: React.FC = () => {
               }
               if (card.doubleStrength) p.strength *= 2;
               if (card.shuffleHandToDraw) { p.drawPile = shuffle([...p.drawPile, ...p.hand]); p.hand = []; }
-              if (card.applyPower) p.powers[card.applyPower.id] = (p.powers[card.applyPower.id] || 0) + card.applyPower.amount;
+              if (card.applyPower) {
+                  p.powers[card.applyPower.id] = (p.powers[card.applyPower.id] || 0) + card.applyPower.amount;
+                  if (card.applyPower.id === 'CORPSE_EXPLOSION' && targets.length > 0) {
+                      targets.forEach(e => e.corpseExplosion = true);
+                      currentLogs.push("死体爆破を付与");
+                  }
+              }
               if (card.draw) {
                 for (let j = 0; j < card.draw; j++) {
                   if (p.drawPile.length === 0) {
@@ -1206,8 +1216,9 @@ const App: React.FC = () => {
 
               // EXPULSION (Judgment) Logic
               if (card.name === '退学処分' || card.name === 'EXPULSION') {
+                  const threshold = card.upgraded ? 40 : 30;
                   targets.forEach(e => {
-                      if (e.currentHp <= (card.upgraded ? 40 : 30)) {
+                      if (e.currentHp <= threshold) {
                           e.currentHp = 0;
                           currentLogs.push(`${e.name}は退学になった！`);
                           e.floatingText = { id: `kill-${Date.now()}`, text: '退学!', color: 'text-red-600', iconType: 'skull' };
@@ -1217,13 +1228,13 @@ const App: React.FC = () => {
                   });
               }
 
-              // Shuriken / Kunai / Fan Logic
+              // Kunai / Shuriken / Fan Logic
               if (card.type === CardType.ATTACK) {
                   p.relicCounters['ATTACK_COUNT'] = (p.relicCounters['ATTACK_COUNT'] || 0) + 1;
                   if (p.relicCounters['ATTACK_COUNT'] % 3 === 0) {
-                      if (p.relics.find(r => r.id === 'KUNAI')) p.powers['DEXTERITY'] = (p.powers['DEXTERITY'] || 0) + 1;
-                      if (p.relics.find(r => r.id === 'SHURIKEN')) p.strength += 1;
-                      if (p.relics.find(r => r.id === 'ORNAMENTAL_FAN')) p.block += 4;
+                      if (p.relics.find(r => r.id === 'KUNAI')) { p.powers['DEXTERITY'] = (p.powers['DEXTERITY'] || 0) + 1; p.floatingText = { id: `kunai-${Date.now()}`, text: 'カチカチ+1', color: 'text-blue-400', iconType: 'shield' }; }
+                      if (p.relics.find(r => r.id === 'SHURIKEN')) { p.strength += 1; p.floatingText = { id: `shuri-${Date.now()}`, text: 'ムキムキ+1', color: 'text-red-400', iconType: 'sword' }; }
+                      if (p.relics.find(r => r.id === 'ORNAMENTAL_FAN')) { p.block += 4; p.floatingText = { id: `fan-${Date.now()}`, text: '+4 Block', color: 'text-blue-400', iconType: 'shield' }; }
                   }
               }
 
@@ -1236,11 +1247,7 @@ const App: React.FC = () => {
       let shouldExhaust = card.exhaust;
       if (card.type === CardType.SKILL && p.powers['CORRUPTION']) shouldExhaust = true;
 
-      // YATSUATARI (Rampage) Logic
-      // Modify the card instance before it enters discard pile.
-      // Since `card` variable holds the instance from hand, modifying it here affects it as it moves to discard.
       if (card.name === '八つ当たり' || card.name === 'YATSUATARI') {
-          // Increase damage for this combat instance
           card.damage = (card.damage || 0) + 5;
           currentLogs.push("八つ当たりの怒りが増した！");
       }
@@ -1328,7 +1335,7 @@ const App: React.FC = () => {
       let drawCount = HAND_SIZE + (p.powers['TOOLS_OF_THE_TRADE'] ? 1 : 0) + p.nextTurnDraw;
       p.nextTurnDraw = 0;
 
-      // Draw Loop (with Evolve Logic)
+      // Draw Loop
       for (let i = 0; i < drawCount; i++) {
         if (newDrawPile.length === 0) {
           if (newDiscardPile.length === 0) break;
@@ -1343,12 +1350,7 @@ const App: React.FC = () => {
             }
             newHand.push(card);
 
-            // --- EVOLVE LOGIC ---
             if (p.powers['EVOLVE'] && (card.type === CardType.STATUS || card.type === CardType.CURSE)) {
-                // Trigger extra draw immediately
-                // Note: We increment i? No, just run the draw logic again.
-                // Standard loop count is fixed. We need to extend the draw.
-                // Or just perform an instant draw inside here.
                 for (let k=0; k<p.powers['EVOLVE']; k++) {
                     if (newDrawPile.length === 0) {
                         if (newDiscardPile.length === 0) break;
@@ -1408,7 +1410,8 @@ const App: React.FC = () => {
       p.cardsPlayedThisTurn = 0;
       p.attacksPlayedThisTurn = 0;
       p.turnFlags = {};
-      p.typesPlayedThisTurn = []; // Reset for Pellets
+      p.typesPlayedThisTurn = []; 
+      p.relicCounters['ATTACK_COUNT'] = 0; // Reset attack count for Kunai/Fan
 
       let nextSelection = { ...prev.selectionState };
       if (p.powers['TOOLS_OF_THE_TRADE']) {
@@ -1424,18 +1427,15 @@ const App: React.FC = () => {
     setTurnLog("敵のターン...");
     setLastActionType(null);
     
-    // --- End of Player Turn Effects (Decrement Player Debuffs) ---
     setGameState(prev => {
         const p = { ...prev.player };
         const newLogs: string[] = [];
         
-        // Metallicize
         if (p.powers['METALLICIZE']) {
             p.block += p.powers['METALLICIZE'];
             p.floatingText = { id: `pow-metal-${Date.now()}`, text: `+${p.powers['METALLICIZE']}`, color: 'text-blue-400', iconType: 'shield' };
         }
 
-        // Decrement Player Debuffs
         if (p.powers['WEAK'] > 0) {
             p.powers['WEAK']--;
             if (p.powers['WEAK'] === 0) newLogs.push("へろへろから回復した");
@@ -1489,7 +1489,6 @@ const App: React.FC = () => {
                 let baseDamage = intent.value;
                 let logParts = [`${baseDamage}`];
 
-                // 1. Add Enemy Strength
                 if (e.strength !== 0) {
                     baseDamage += e.strength;
                     logParts.push(`${e.strength >= 0 ? '+' : ''}${e.strength}(筋力)`);
@@ -1497,13 +1496,11 @@ const App: React.FC = () => {
 
                 let damage = baseDamage;
 
-                // 2. Apply Enemy Weak
                 if (e.weak > 0) {
                     damage = Math.floor(damage * 0.75);
                     logParts.push(`x0.75(へろへろ)`);
                 }
                 
-                // 3. Apply Player Vulnerable
                 if (p.powers['VULNERABLE'] > 0) {
                     damage = Math.floor(damage * 1.5);
                     logParts.push(`x1.5(びくびく)`);
@@ -1584,7 +1581,6 @@ const App: React.FC = () => {
                 }
             }
             
-            // Enemy Turn End cleanups
             if (e.vulnerable > 0) e.vulnerable--;
             if (e.weak > 0) e.weak--;
 
@@ -1601,9 +1597,6 @@ const App: React.FC = () => {
         const p = { ...prev.player };
         const newLogs: string[] = [];
         
-        if (p.relics.find(r => r.id === 'BURNING_BLOOD') && prev.enemies.length === 0) { 
-        }
-
         if (p.powers['REGEN'] > 0) {
             const heal = p.powers['REGEN'];
             p.currentHp = Math.min(p.maxHp, p.currentHp + heal);
@@ -1654,7 +1647,9 @@ const App: React.FC = () => {
             const timer = setTimeout(() => {
                 let hpRegen = 0;
                 if (gameState.player.relics.find(r => r.id === 'BURNING_BLOOD')) hpRegen += 6;
-                if (gameState.player.relics.find(r => r.id === 'MEAT_ON_THE_BONE') && gameState.player.currentHp <= gameState.player.maxHp / 2) hpRegen += 12;
+                if (gameState.player.relics.find(r => r.id === 'MEAT_ON_THE_BONE') && gameState.player.currentHp <= gameState.player.maxHp / 2) {
+                    hpRegen += 12;
+                }
                 
                 if (gameState.act >= 4 && !gameState.isEndless) {
                      setGameState(prev => ({ ...prev, screen: GameScreen.ENDING }));
@@ -1681,6 +1676,7 @@ const App: React.FC = () => {
             return () => clearTimeout(timer);
 
         } else if (gameState.player.currentHp <= 0) {
+            // Revive Logic
             if (gameState.player.relics.find(r => r.id === 'LIZARD_TAIL') && !gameState.player.relicCounters['LIZARD_TAIL_USED']) {
                 setGameState(prev => ({
                     ...prev,
@@ -1741,8 +1737,7 @@ const App: React.FC = () => {
         rewards.push({ type: 'RELIC', value: relic, id: `rew-relic-${Date.now()}` });
     }
 
-    // Potion drop logic modified for KINJIRO_STATUE
-    let potionChance = 0.4 + (gameState.player.relics.find(r => r.id === 'WHITE_BEAST_STATUE') ? 1.0 : 0);
+    let potionChance = 0.4;
     if (gameState.player.relics.find(r => r.id === 'KINJIRO_STATUE')) potionChance = 1.0;
 
     if (Math.random() < potionChance && !gameState.player.relics.find(r => r.id === 'SOZU')) {
