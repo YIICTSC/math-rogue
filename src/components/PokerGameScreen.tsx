@@ -1,8 +1,6 @@
 
-
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package, Ghost, Trophy, RotateCcw, Play } from 'lucide-react';
+import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package, Ghost, Trophy, RotateCcw, Play, DollarSign } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { 
@@ -67,16 +65,6 @@ const HAND_EXAMPLES: Record<string, { desc: string, cards: {r: string, s: PokerS
     }
 };
 
-const ENHANCEMENT_INFO: Record<string, string> = {
-    'BONUS': 'チップ+30',
-    'MULT': '倍率+0.5',
-    'WILD': '全てのスートとして扱う',
-    'GLASS': '倍率x2, 1/4の確率で破壊',
-    'STEEL': '手札にある間、倍率x1.5',
-    'GOLD': '使用時、$3獲得',
-    'STONE': 'ランク・スートなし, チップ+50'
-};
-
 const getBlindConfig = (ante: number, index: number): PokerBlind => {
     // Scaling Logic
     let goal: number;
@@ -86,8 +74,6 @@ const getBlindConfig = (ante: number, index: number): PokerBlind => {
         goal = base;
     } else {
         // Endless Scaling: Very steep exponential
-        // Base at Ante 8 is ~8000. 
-        // Ante 9 should be significantly harder.
         const baseEndless = 300 * Math.pow(1.6, 7); // Ante 8 base
         goal = baseEndless * Math.pow(2.5, ante - 8);
     }
@@ -181,9 +167,8 @@ const getHandResult = (cards: PokerCard[], supporters: PokerSupporter[] = []): {
     if (cards.length === 0) return { type: 'HIGH_CARD', cards: [] };
     
     // Check for rule-bending supporters
-    const hasFourFingers = supporters.some(s => s.id === 'SUP_CLOVER'); // 4 cards needed for Straight/Flush
-    const hasShortcut = supporters.some(s => s.id === 'SUP_SHORTCUT'); // Gap straight allow
-    const hasYearbook = supporters.some(s => s.id === 'SUP_YEARBOOK'); // All face cards
+    const hasFourFingers = supporters.some(s => s.id === 'SUP_CLOVER'); 
+    const hasShortcut = supporters.some(s => s.id === 'SUP_SHORTCUT'); 
 
     const reqCount = hasFourFingers ? 4 : 5;
 
@@ -192,13 +177,11 @@ const getHandResult = (cards: PokerCard[], supporters: PokerSupporter[] = []): {
     
     // Flush Check
     let isFlush = false;
-    let flushSuit: PokerSuit | null = null;
     if (cards.length >= reqCount) {
         for (const suit of SUITS) {
             const suitCount = cards.filter(c => c.suit === suit || c.enhancement === 'WILD').length;
             if (suitCount >= reqCount) {
                 isFlush = true;
-                flushSuit = suit;
                 break;
             }
         }
@@ -324,7 +307,6 @@ interface PokerGameScreenProps {
 
 const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, onSave }) => {
   
-  // Hydration Helper
   const hydrateState = (state: PokerRunState): PokerRunState => {
       const hydrateSupporters = (list: PokerSupporter[]) => list.map(item => SUPPORTERS_LIBRARY.find(lib => lib.id === item.id) || item);
       const hydrateConsumables = (list: PokerConsumable[]) => list.map(item => CONSUMABLES_LIBRARY.find(lib => lib.id === item.id) || item);
@@ -347,7 +329,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, o
 
   // --- Game State ---
   const [phase, setPhase] = useState<'BLIND_SELECT' | 'PLAY' | 'SHOP' | 'PACK_OPEN' | 'GAME_OVER' | 'VICTORY_WAIT' | 'VICTORY'>('BLIND_SELECT');
-  const [highScore, setHighScore] = useState(0); // Track best hand score for record
+  const [highScore, setHighScore] = useState(0); 
 
   const [runState, setRunState] = useState<PokerRunState>(() => {
       if (savedState) {
@@ -389,8 +371,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, o
   // Consumable Usage
   const [selectedConsumable, setSelectedConsumable] = useState<PokerConsumable | null>(null);
 
-  // Inspection Modal State
-  const [inspectedItem, setInspectedItem] = useState<PokerSupporter | PokerConsumable | PokerCard | null>(null);
+  // Inspection Modal State (Updated to handle Selling)
+  const [inspectedItem, setInspectedItem] = useState<{ item: PokerSupporter | PokerConsumable | PokerCard, type: 'CARD'|'SUPPORTER'|'CONSUMABLE', index?: number, isOwned?: boolean } | null>(null);
   const longPressTimer = useRef<any>(null);
 
   // Sorting
@@ -400,7 +382,6 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, o
   const isDraggingRef = useRef(false);
   const lastProcessedCardIdRef = useRef<string | null>(null);
 
-  // Hand Info Preview Calculation
   const currentHandInfo = useMemo(() => {
       if (selectedCards.length === 0) return null;
       
@@ -429,7 +410,6 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, o
       }
   }, []);
 
-  // Debounced Auto Save
   useEffect(() => {
       const timer = setTimeout(() => {
           onSave(runState);
@@ -480,12 +460,17 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, o
       audioService.playBGM('poker_play');
   };
 
-  // ... (Touch/Pointer handlers remain same as previous) ...
-  const handleTouchStart = (item: PokerSupporter | PokerConsumable | PokerCard) => {
-      longPressTimer.current = setTimeout(() => { setInspectedItem(item); }, 500);
+  const handleTouchStart = (item: any, type: 'CARD'|'SUPPORTER'|'CONSUMABLE', isOwned: boolean, index?: number) => {
+      longPressTimer.current = setTimeout(() => {
+          setInspectedItem({ item, type, isOwned, index });
+      }, 500);
   };
   const handleTouchEnd = () => { if (longPressTimer.current) clearTimeout(longPressTimer.current); };
-  const handleContextMenu = (e: React.MouseEvent, item: PokerSupporter | PokerConsumable | PokerCard) => { e.preventDefault(); setInspectedItem(item); };
+  const handleContextMenu = (e: React.MouseEvent, item: any, type: 'CARD'|'SUPPORTER'|'CONSUMABLE', isOwned: boolean, index?: number) => { 
+      e.preventDefault(); 
+      setInspectedItem({ item, type, isOwned, index }); 
+  };
+
   const toggleSelect = (id: string) => {
       if (animating) return;
       if (selectedCards.includes(id)) { setSelectedCards(prev => prev.filter(c => c !== id)); } 
@@ -651,7 +636,6 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, o
           discardPile: []
       }));
 
-      // Check for Victory (Ante 8 Boss)
       if (runState.ante === 8 && runState.blindIndex === 2 && !runState.isEndless) {
           setPhase('VICTORY_WAIT');
       } else {
@@ -680,11 +664,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, o
           date: Date.now(),
           ante: runState.ante,
           money: runState.money,
-          bestHandScore: highScore > runState.currentScore ? highScore : runState.currentScore // Approximation if not tracked per hand
+          bestHandScore: highScore > runState.currentScore ? highScore : runState.currentScore 
       });
   };
 
-  // ... (Shop logic: generateShop, buyItem, openPack, revealPack, selectPackItem) ...
   const generateShop = () => {
       const items: (PokerSupporter | PokerConsumable | PokerPack)[] = [];
       const supporters = [...SUPPORTERS_LIBRARY].sort(() => Math.random() - 0.5);
@@ -743,7 +726,6 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, o
       setPhase('BLIND_SELECT');
   };
 
-  // ... (useConsumable, handleSpectral, applyTarot, renderInspectionModal - same as previous) ...
   const useConsumable = (consumable: PokerConsumable) => {
       if (consumable.type === 'PLANET') {
           let targetHand = 'HIGH_CARD';
@@ -787,11 +769,39 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, o
       setSelectedConsumable(null); setSelectedCards([]); audioService.playSound('win');
   };
 
+  const sellItem = () => {
+      if (!inspectedItem || !inspectedItem.isOwned || inspectedItem.index === undefined) return;
+      
+      const { item, type, index } = inspectedItem;
+      if (type === 'CARD') return;
+
+      const sellValue = Math.max(1, Math.floor((item as any).price / 2));
+      
+      setRunState(prev => {
+          const newState = { ...prev, money: prev.money + sellValue };
+          if (type === 'SUPPORTER') {
+              newState.supporters = prev.supporters.filter((_, i) => i !== index);
+          } else if (type === 'CONSUMABLE') {
+              if (selectedConsumable === item) {
+                   setSelectedConsumable(null);
+                   setSelectedCards([]);
+              }
+              newState.consumables = prev.consumables.filter((_, i) => i !== index);
+          }
+          return newState;
+      });
+      
+      audioService.playSound('select');
+      setInspectedItem(null);
+  };
+
   const renderInspectionModal = () => {
       if (!inspectedItem) return null;
-      const isCard = 'suit' in inspectedItem;
-      const cardItem = inspectedItem as PokerCard;
-      const otherItem = inspectedItem as (PokerSupporter | PokerConsumable);
+      const { item, type, isOwned } = inspectedItem;
+      const isCard = type === 'CARD';
+      const cardItem = item as PokerCard;
+      const otherItem = item as (PokerSupporter | PokerConsumable);
+      
       return (
           <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setInspectedItem(null)}>
               <div className="bg-slate-800 border-2 border-white p-6 rounded-lg max-w-sm w-full shadow-2xl relative" onClick={e => e.stopPropagation()}>
@@ -799,7 +809,23 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, o
                   {isCard ? (
                       <div className="flex flex-col items-center mb-4"><div className="w-32 h-48 bg-white text-black rounded-lg border-4 border-slate-300 shadow-xl flex flex-col items-center justify-between p-2 mb-4"><div className={`text-2xl font-bold w-full text-left ${['HEART', 'DIAMOND'].includes(cardItem.suit) ? 'text-red-600' : 'text-black'}`}>{getRankDisplay(cardItem.rank)}</div><div className="scale-150">{getSuitIcon(cardItem.suit, cardItem.enhancement === 'WILD')}</div><div className="text-xs text-center font-bold text-gray-500">{cardItem.enhancement || ''}</div><div className={`text-2xl font-bold w-full text-right rotate-180 ${['HEART', 'DIAMOND'].includes(cardItem.suit) ? 'text-red-600' : 'text-black'}`}>{getRankDisplay(cardItem.rank)}</div></div><h3 className="text-2xl font-bold text-yellow-400 mb-2">{getRankDisplay(cardItem.rank)} of {cardItem.suit}</h3></div>
                   ) : (
-                      <> <div className="flex flex-col items-center mb-4"><div className="w-24 h-24 mb-4"><PixelSprite seed={otherItem.icon} name={otherItem.icon} className="w-full h-full"/></div><h3 className="text-2xl font-bold text-yellow-400 mb-2">{otherItem.name}</h3><div className="text-sm font-bold text-white bg-slate-700 px-3 py-1 rounded-full">{'rarity' in otherItem ? (otherItem as PokerSupporter).rarity : (otherItem as PokerConsumable).type}</div></div><p className="text-lg text-gray-300 text-center leading-relaxed">{otherItem.description}</p><div className="mt-6 text-center text-yellow-500 font-bold text-xl">${otherItem.price}</div> </>
+                      <> 
+                        <div className="flex flex-col items-center mb-4">
+                            <div className="w-24 h-24 mb-4"><PixelSprite seed={otherItem.icon} name={otherItem.icon} className="w-full h-full"/></div>
+                            <h3 className="text-2xl font-bold text-yellow-400 mb-2">{otherItem.name}</h3>
+                            <div className="text-sm font-bold text-white bg-slate-700 px-3 py-1 rounded-full">{'rarity' in otherItem ? (otherItem as PokerSupporter).rarity : (otherItem as PokerConsumable).type}</div>
+                        </div>
+                        <p className="text-lg text-gray-300 text-center leading-relaxed">{otherItem.description}</p>
+                        <div className="mt-6 text-center text-yellow-500 font-bold text-xl">${otherItem.price}</div> 
+                      </>
+                  )}
+                  {isOwned && !isCard && (
+                      <button 
+                        onClick={sellItem}
+                        className="mt-6 w-full bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded border-2 border-red-400 shadow-lg flex items-center justify-center animate-pulse"
+                      >
+                          <DollarSign size={16} className="mr-1" /> 売却 (${Math.max(1, Math.floor((otherItem as any).price / 2))})
+                      </button>
                   )}
               </div>
           </div>
@@ -885,8 +911,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, o
                                   let disabled = false;
                                   if (isSupporter && runState.supporters.length >= 5) disabled = true;
                                   if (isConsumable && runState.consumables.length >= 2) disabled = true;
+                                  const type = isCard ? 'CARD' : isSupporter ? 'SUPPORTER' : 'CONSUMABLE';
                                   return (
-                                      <div key={idx} className={`relative cursor-pointer transition-transform hover:-translate-y-4 duration-300 ${disabled ? 'opacity-50 grayscale cursor-not-allowed' : ''}`} onClick={() => !disabled && selectPackItem(item)} onContextMenu={(e) => handleContextMenu(e, item)} onTouchStart={() => handleTouchStart(item)} onTouchEnd={handleTouchEnd}>
+                                      <div key={idx} className={`relative cursor-pointer transition-transform hover:-translate-y-4 duration-300 ${disabled ? 'opacity-50 grayscale cursor-not-allowed' : ''}`} onClick={() => !disabled && selectPackItem(item)} onContextMenu={(e) => handleContextMenu(e, item, type, false)} onTouchStart={() => handleTouchStart(item, type, false)} onTouchEnd={handleTouchEnd}>
                                           {isCard && <div className="w-32 h-48 bg-white text-black rounded-lg border-4 border-slate-300 shadow-xl flex flex-col items-center justify-between p-2"><div className={`text-2xl font-bold w-full text-left ${['HEART', 'DIAMOND'].includes((item as PokerCard).suit) ? 'text-red-600' : 'text-black'}`}>{getRankDisplay((item as PokerCard).rank)}</div><div className="scale-150">{getSuitIcon((item as PokerCard).suit, (item as PokerCard).enhancement === 'WILD')}</div><div className="text-xs text-center font-bold text-gray-500">{(item as PokerCard).enhancement || ''}</div><div className={`text-2xl font-bold w-full text-right rotate-180 ${['HEART', 'DIAMOND'].includes((item as PokerCard).suit) ? 'text-red-600' : 'text-black'}`}>{getRankDisplay((item as PokerCard).rank)}</div></div>}
                                           {!isCard && <div className="w-32 h-48 bg-slate-800 text-white rounded-lg border-4 border-blue-400 shadow-xl flex flex-col items-center justify-center p-2 text-center"><PixelSprite seed={(item as any).icon} name={(item as any).icon} className="w-16 h-16 mb-2"/><div className="font-bold text-sm">{(item as any).name}</div><div className="text-[10px] text-gray-400 mt-2 leading-tight">{(item as any).description}</div></div>}
                                           <button className={`absolute -bottom-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold shadow-lg ${disabled ? 'bg-gray-600 text-gray-300' : 'bg-blue-600 text-white animate-pulse'}`}>{disabled ? 'FULL' : 'SELECT'}</button>
@@ -921,11 +948,11 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, o
                       </div>
                       <div className="mb-8">
                           <h3 className="text-xl font-bold mb-4 text-blue-300 border-b border-slate-600 pb-2 flex items-center"><PixelSprite seed="SMILE" name="SMILE" className="w-6 h-6 mr-2" /> サポーター (Supporters)</h3>
-                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">{shopSupporters.map((item) => (<div key={item.id} className="bg-slate-700 p-4 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors" onClick={() => buyItem(item, runState.shopInventory.indexOf(item))} onContextMenu={(e) => handleContextMenu(e, item)} onTouchStart={() => handleTouchStart(item)} onTouchEnd={handleTouchEnd}><div className="w-16 h-16 mb-2"><PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/></div><div className="font-bold text-sm mb-1">{item.name}</div><div className="text-xs text-gray-400 mb-2 h-8 overflow-hidden">{item.description}</div><div className="mt-auto w-full"><button disabled={runState.money < item.price} className={`w-full py-1 rounded font-bold text-sm ${runState.money >= item.price ? 'bg-blue-600 hover:bg-blue-500' : 'bg-gray-600 cursor-not-allowed'}`}>${item.price} BUY</button></div></div>))}</div>
+                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">{shopSupporters.map((item) => (<div key={item.id} className="bg-slate-700 p-4 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors" onClick={() => buyItem(item, runState.shopInventory.indexOf(item))} onContextMenu={(e) => handleContextMenu(e, item, 'SUPPORTER', false)} onTouchStart={() => handleTouchStart(item, 'SUPPORTER', false)} onTouchEnd={handleTouchEnd}><div className="w-16 h-16 mb-2"><PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/></div><div className="font-bold text-sm mb-1">{item.name}</div><div className="text-xs text-gray-400 mb-2 h-8 overflow-hidden">{item.description}</div><div className="mt-auto w-full"><button disabled={runState.money < item.price} className={`w-full py-1 rounded font-bold text-sm ${runState.money >= item.price ? 'bg-blue-600 hover:bg-blue-500' : 'bg-gray-600 cursor-not-allowed'}`}>${item.price} BUY</button></div></div>))}</div>
                       </div>
                       <div>
                           <h3 className="text-xl font-bold mb-4 text-purple-300 border-b border-slate-600 pb-2 flex items-center"><PixelSprite seed="NOTEBOOK" name="NOTEBOOK" className="w-6 h-6 mr-2" /> 消耗品 (Stationery)</h3>
-                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">{shopConsumables.map((item) => (<div key={item.id} className="bg-slate-700 p-4 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors" onClick={() => buyItem(item, runState.shopInventory.indexOf(item))} onContextMenu={(e) => handleContextMenu(e, item)} onTouchStart={() => handleTouchStart(item)} onTouchEnd={handleTouchEnd}><div className="w-16 h-16 mb-2"><PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/></div><div className="font-bold text-sm mb-1">{item.name}</div><div className="text-xs text-gray-400 mb-2 h-8 overflow-hidden">{item.description}</div><div className="mt-auto w-full"><button disabled={runState.money < item.price} className={`w-full py-1 rounded font-bold text-sm ${runState.money >= item.price ? 'bg-blue-600 hover:bg-blue-500' : 'bg-gray-600 cursor-not-allowed'}`}>${item.price} BUY</button></div></div>))}</div>
+                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">{shopConsumables.map((item) => (<div key={item.id} className="bg-slate-700 p-4 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors" onClick={() => buyItem(item, runState.shopInventory.indexOf(item))} onContextMenu={(e) => handleContextMenu(e, item, 'CONSUMABLE', false)} onTouchStart={() => handleTouchStart(item, 'CONSUMABLE', false)} onTouchEnd={handleTouchEnd}><div className="w-16 h-16 mb-2"><PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/></div><div className="font-bold text-sm mb-1">{item.name}</div><div className="text-xs text-gray-400 mb-2 h-8 overflow-hidden">{item.description}</div><div className="mt-auto w-full"><button disabled={runState.money < item.price} className={`w-full py-1 rounded font-bold text-sm ${runState.money >= item.price ? 'bg-blue-600 hover:bg-blue-500' : 'bg-gray-600 cursor-not-allowed'}`}>${item.price} BUY</button></div></div>))}</div>
                       </div>
                   </div>
                   <div className="w-1/3 flex flex-col gap-4">
@@ -933,11 +960,11 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, o
                           <h3 className="text-lg font-bold mb-2 text-yellow-300">Inventory</h3>
                           <div className="mb-4">
                               <div className="text-xs text-gray-400 mb-1">Supporters ({runState.supporters.length}/5)</div>
-                              <div className="grid grid-cols-2 gap-2">{runState.supporters.map((s, i) => (<div key={i} className="bg-slate-900 p-2 rounded flex flex-col items-center text-xs cursor-pointer hover:bg-slate-700" onContextMenu={(e) => handleContextMenu(e, s)} onTouchStart={() => handleTouchStart(s)} onTouchEnd={handleTouchEnd}><PixelSprite seed={s.icon} name={s.icon} className="w-8 h-8"/><span className="truncate w-full text-center mt-1">{s.name}</span></div>))}</div>
+                              <div className="grid grid-cols-2 gap-2">{runState.supporters.map((s, i) => (<div key={i} className="bg-slate-900 p-2 rounded flex flex-col items-center text-xs cursor-pointer hover:bg-slate-700" onContextMenu={(e) => handleContextMenu(e, s, 'SUPPORTER', true, i)} onTouchStart={() => handleTouchStart(s, 'SUPPORTER', true, i)} onTouchEnd={handleTouchEnd}><PixelSprite seed={s.icon} name={s.icon} className="w-8 h-8"/><span className="truncate w-full text-center mt-1">{s.name}</span></div>))}</div>
                           </div>
                           <div>
                               <div className="text-xs text-gray-400 mb-1">Stationery ({runState.consumables.length}/2)</div>
-                              <div className="grid grid-cols-2 gap-2">{runState.consumables.map((c, i) => (<div key={i} className="bg-slate-900 p-2 rounded flex flex-col items-center text-xs cursor-pointer hover:bg-slate-700" onContextMenu={(e) => handleContextMenu(e, c)} onTouchStart={() => handleTouchStart(c)} onTouchEnd={handleTouchEnd}><PixelSprite seed={c.icon} name={c.icon} className="w-8 h-8"/><span className="truncate w-full text-center mt-1">{c.name}</span></div>))}</div>
+                              <div className="grid grid-cols-2 gap-2">{runState.consumables.map((c, i) => (<div key={i} className="bg-slate-900 p-2 rounded flex flex-col items-center text-xs cursor-pointer hover:bg-slate-700" onContextMenu={(e) => handleContextMenu(e, c, 'CONSUMABLE', true, i)} onTouchStart={() => handleTouchStart(c, 'CONSUMABLE', true, i)} onTouchEnd={handleTouchEnd}><PixelSprite seed={c.icon} name={c.icon} className="w-8 h-8"/><span className="truncate w-full text-center mt-1">{c.name}</span></div>))}</div>
                           </div>
                       </div>
                   </div>
@@ -994,7 +1021,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, o
                 <div className="bg-slate-800 border-4 border-slate-600 rounded-lg p-6 w-full max-w-4xl max-h-[80vh] overflow-y-auto relative shadow-2xl" onClick={e => e.stopPropagation()}>
                     <button onClick={() => setShowDeckList(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
                     <h2 className="text-2xl font-bold text-white mb-6 flex items-center"><Layers className="mr-2"/> Deck List ({runState.deck.length} remaining)</h2>
-                    <div className="space-y-4">{SUITS.map(suit => (<div key={suit} className="flex items-center bg-slate-900/50 p-2 rounded"><div className="w-10 flex-shrink-0 flex justify-center scale-150">{getSuitIcon(suit)}</div><div className="flex flex-wrap gap-1 flex-1 ml-4">{[...runState.deck, ...runState.hand, ...runState.discardPile].filter(c => c.suit === suit || c.enhancement === 'WILD').sort((a, b) => b.rank - a.rank).map((card) => { const isInDeck = runState.deck.some(c => c.id === card.id); return (<div key={card.id} className={`rounded p-1 flex flex-col items-center justify-center h-14 w-10 text-xs border-2 transition-all relative overflow-hidden cursor-pointer ${isInDeck ? 'bg-gray-100 border-gray-300 text-black shadow-md hover:scale-110' : 'bg-black border-gray-700 text-gray-600 opacity-60 grayscale'}`} onContextMenu={(e) => handleContextMenu(e, card)} onTouchStart={() => handleTouchStart(card)} onTouchEnd={handleTouchEnd}><div className={`font-bold text-sm ${!isInDeck ? 'text-gray-600' : (['HEART', 'DIAMOND'].includes(card.suit) ? 'text-red-600' : 'text-black')}`}>{getRankDisplay(card.rank)}</div><div className="scale-75 opacity-50">{getSuitIcon(card.suit, card.enhancement === 'WILD')}</div>{card.bonusChips > 0 && <div className="absolute top-0 right-0 text-[8px] bg-blue-500 text-white leading-none px-0.5 rounded-bl">+</div>}{card.multMultiplier > 1 && <div className="absolute top-0 left-0 text-[8px] bg-red-500 text-white leading-none px-0.5 rounded-br">x</div>}</div>); })}</div></div>))}</div>
+                    <div className="space-y-4">{SUITS.map(suit => (<div key={suit} className="flex items-center bg-slate-900/50 p-2 rounded"><div className="w-10 flex-shrink-0 flex justify-center scale-150">{getSuitIcon(suit)}</div><div className="flex flex-wrap gap-1 flex-1 ml-4">{[...runState.deck, ...runState.hand, ...runState.discardPile].filter(c => c.suit === suit || c.enhancement === 'WILD').sort((a, b) => b.rank - a.rank).map((card) => { const isInDeck = runState.deck.some(c => c.id === card.id); return (<div key={card.id} className={`rounded p-1 flex flex-col items-center justify-center h-14 w-10 text-xs border-2 transition-all relative overflow-hidden cursor-pointer ${isInDeck ? 'bg-gray-100 border-gray-300 text-black shadow-md hover:scale-110' : 'bg-black border-gray-700 text-gray-600 opacity-60 grayscale'}`} onContextMenu={(e) => handleContextMenu(e, card, 'CARD', true)} onTouchStart={() => handleTouchStart(card, 'CARD', true)} onTouchEnd={handleTouchEnd}><div className={`font-bold text-sm ${!isInDeck ? 'text-gray-600' : (['HEART', 'DIAMOND'].includes(card.suit) ? 'text-red-600' : 'text-black')}`}>{getRankDisplay(card.rank)}</div><div className="scale-75 opacity-50">{getSuitIcon(card.suit, card.enhancement === 'WILD')}</div>{card.bonusChips > 0 && <div className="absolute top-0 right-0 text-[8px] bg-blue-500 text-white leading-none px-0.5 rounded-bl">+</div>}{card.multMultiplier > 1 && <div className="absolute top-0 left-0 text-[8px] bg-red-500 text-white leading-none px-0.5 rounded-br">x</div>}</div>); })}</div></div>))}</div>
                 </div>
             </div>
         )}
@@ -1025,11 +1052,11 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, o
 
         <div className="w-full bg-black/40 border-b border-black/50 p-2 flex justify-between items-center z-10 shrink-0 min-h-[64px]">
             <div className="flex gap-2 items-center flex-1 justify-center">
-                {runState.supporters.map((s, i) => (<div key={i} className="w-10 h-10 md:w-12 md:h-12 bg-slate-800 border-2 border-yellow-500 rounded flex items-center justify-center relative group cursor-pointer hover:bg-slate-700 transition-colors" onContextMenu={(e) => handleContextMenu(e, s)} onTouchStart={() => handleTouchStart(s)} onTouchEnd={handleTouchEnd}><PixelSprite seed={s.icon} name={s.icon} className="w-8 h-8"/></div>))}
+                {runState.supporters.map((s, i) => (<div key={i} className="w-10 h-10 md:w-12 md:h-12 bg-slate-800 border-2 border-yellow-500 rounded flex items-center justify-center relative group cursor-pointer hover:bg-slate-700 transition-colors" onContextMenu={(e) => handleContextMenu(e, s, 'SUPPORTER', true, i)} onTouchStart={() => handleTouchStart(s, 'SUPPORTER', true, i)} onTouchEnd={handleTouchEnd}><PixelSprite seed={s.icon} name={s.icon} className="w-8 h-8"/></div>))}
                 {runState.supporters.length === 0 && <div className="text-xs text-gray-500">No Supporters</div>}
             </div>
             <div className="flex gap-2 items-center border-l border-white/20 pl-2">
-                {runState.consumables.map((c, i) => (<div key={i} className="w-10 h-10 md:w-12 md:h-12 bg-slate-800 border-2 border-purple-500 rounded flex items-center justify-center relative group cursor-pointer hover:scale-110 transition-transform" onClick={() => useConsumable(c)} onContextMenu={(e) => handleContextMenu(e, c)} onTouchStart={() => handleTouchStart(c)} onTouchEnd={handleTouchEnd}><PixelSprite seed={c.icon} name={c.icon} className="w-8 h-8"/>{selectedConsumable === c && <div className="absolute inset-0 bg-white/30 rounded animate-pulse"></div>}</div>))}
+                {runState.consumables.map((c, i) => (<div key={i} className="w-10 h-10 md:w-12 md:h-12 bg-slate-800 border-2 border-purple-500 rounded flex items-center justify-center relative group cursor-pointer hover:scale-110 transition-transform" onClick={() => useConsumable(c)} onContextMenu={(e) => handleContextMenu(e, c, 'CONSUMABLE', true, i)} onTouchStart={() => handleTouchStart(c, 'CONSUMABLE', true, i)} onTouchEnd={handleTouchEnd}><PixelSprite seed={c.icon} name={c.icon} className="w-8 h-8"/>{selectedConsumable === c && <div className="absolute inset-0 bg-white/30 rounded animate-pulse"></div>}</div>))}
                 {runState.consumables.length === 0 && <div className="text-xs text-gray-500 w-12 text-center">Empty</div>}
             </div>
         </div>
@@ -1063,7 +1090,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, o
                 const isSelected = selectedCards.includes(card.id);
                 return (
                     <div 
-                        key={card.id} data-card-id={card.id} onPointerDown={(e) => handlePointerDown(e, card.id)} onContextMenu={(e) => handleContextMenu(e, card)} onTouchStart={() => handleTouchStart(card)} onTouchEnd={handleTouchEnd}
+                        key={card.id} data-card-id={card.id} onPointerDown={(e) => handlePointerDown(e, card.id)} onContextMenu={(e) => handleContextMenu(e, card, 'CARD', true)} onTouchStart={() => handleTouchStart(card, 'CARD', true)} onTouchEnd={handleTouchEnd}
                         className={`w-20 h-32 md:w-28 md:h-40 rounded-lg border-2 shadow-xl flex flex-col items-center justify-between p-2 cursor-pointer transition-transform duration-200 -ml-4 first:ml-0 relative ${isSelected ? '-translate-y-6 z-20 border-yellow-400 ring-2 ring-yellow-400' : 'border-gray-400 hover:-translate-y-2 z-10'} ${selectedConsumable ? 'hover:ring-2 hover:ring-purple-400' : ''} ${card.enhancement === 'GOLD' ? 'bg-amber-100 border-amber-500' : ''} ${card.enhancement === 'STEEL' ? 'bg-slate-300 border-slate-500' : ''} ${card.enhancement === 'GLASS' ? 'bg-cyan-100/80 border-cyan-300 backdrop-blur-sm' : ''} ${!card.enhancement ? 'bg-gray-100' : ''}`}
                     >
                         {card.bonusChips > 0 && <div className="absolute -top-2 -right-2 bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-md z-30 border border-white">+{card.bonusChips}</div>}
