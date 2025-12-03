@@ -28,7 +28,7 @@ import { audioService } from './services/audioService';
 import { generateFlavorText, generateEnemyName } from './services/geminiService';
 import { generateDungeonMap } from './services/mapGenerator';
 import { storageService } from './services/storageService';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Maximize, Minimize } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap } from 'lucide-react';
 
 // --- HELPERS ---
 export const getUpgradedCard = (card: ICard): ICard => {
@@ -270,7 +270,6 @@ const App: React.FC = () => {
   
   // Progression
   const [clearCount, setClearCount] = useState<number>(0);
-  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
   const VICTORY_GOLD = 25;
 
@@ -303,29 +302,6 @@ const App: React.FC = () => {
     setIsMathDebugSkipped(storageService.getDebugMathSkip());
     setIsDebugHpOne(storageService.getDebugHpOne());
   }, []);
-
-  // Fullscreen Listener
-  useEffect(() => {
-      const handleFullScreenChange = () => {
-          setIsFullscreen(!!document.fullscreenElement);
-      };
-      document.addEventListener('fullscreenchange', handleFullScreenChange);
-      return () => document.removeEventListener('fullscreenchange', handleFullScreenChange);
-  }, []);
-
-  const toggleFullscreen = async () => {
-      try {
-        if (!document.fullscreenElement) {
-            await document.documentElement.requestFullscreen();
-        } else {
-            if (document.exitFullscreen) {
-                await document.exitFullscreen();
-            }
-        }
-      } catch (e) {
-          console.warn("Fullscreen toggle failed:", e);
-      }
-  };
 
   const handleTitleClick = () => {
       const next = titleClickCount + 1;
@@ -2124,17 +2100,7 @@ const App: React.FC = () => {
         <div className="w-full max-w-4xl h-[600px] border-[10px] md:border-[20px] border-gray-800 rounded-xl relative overflow-hidden shadow-2xl bg-black crt-scanline">
             
             {gameState.screen === GameScreen.START_MENU && (
-                <div className="w-full h-full bg-gray-900 flex items-center justify-center relative">
-                    {/* Fullscreen Button - Updated Style */}
-                    <button
-                        onClick={toggleFullscreen}
-                        className="absolute top-4 right-4 p-3 text-gray-300 hover:text-white border-2 border-gray-600 hover:border-gray-400 rounded-lg bg-gray-800 hover:bg-gray-700 transition-all z-50 cursor-pointer shadow-lg active:scale-95"
-                        title={isFullscreen ? "ウィンドウに戻す" : "フルスクリーン"}
-                        aria-label="Toggle Fullscreen"
-                    >
-                        {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
-                    </button>
-
+                <div className="w-full h-full bg-gray-900 flex items-center justify-center">
                     <div className="text-center p-8 w-full flex flex-col items-center">
                         <h1 
                             className="text-5xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-b from-purple-400 to-blue-600 mb-2 font-bold animate-pulse tracking-widest leading-tight cursor-pointer select-none"
