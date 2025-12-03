@@ -1744,38 +1744,45 @@ const App: React.FC = () => {
   useEffect(() => {
     if (gameState.screen === GameScreen.BATTLE) {
         if (gameState.enemies.length === 0) {
+            // Play victory sound immediately
             audioService.playSound('win');
             audioService.stopBGM();
             
-            // Relic: Burning Blood & Meat on the Bone (End of Battle)
-            let hpRegen = 0;
-            if (gameState.player.relics.find(r => r.id === 'BURNING_BLOOD')) hpRegen += 6;
-            if (gameState.player.relics.find(r => r.id === 'MEAT_ON_THE_BONE') && gameState.player.currentHp <= gameState.player.maxHp / 2) hpRegen += 12;
-            
-            // Check for True Ending condition or Victory
-            if (gameState.act >= 4 && !gameState.isEndless) {
-                 setGameState(prev => ({ ...prev, screen: GameScreen.ENDING }));
-                 storageService.saveScore({ 
-                     id: `score-${Date.now()}`, playerName: 'Player', characterName: selectedCharName,
-                     score: calculateScore(gameState, true), act: gameState.act, floor: gameState.floor, victory: true, date: Date.now(), challengeMode: gameState.challengeMode 
-                 });
-                 storageService.incrementClearCount();
-            } else {
-                 if (isMathDebugSkipped) {
-                     // Auto-complete math
-                     const bonus = 3 * 10;
-                     // Need to apply regen as well since we skip the state update that applies it in the else block below
-                     goToRewardPhase(VICTORY_GOLD + bonus, hpRegen);
-                 } else {
-                     // Go directly to math, applying regen to player state
-                     setGameState(prev => ({ 
-                        ...prev, 
-                        player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + hpRegen) },
-                        screen: GameScreen.MATH_CHALLENGE
-                    }));
-                    audioService.playBGM('math');
-                 }
-            }
+            // Add a delay before transitioning to allow player to see the result
+            const timer = setTimeout(() => {
+                // Relic: Burning Blood & Meat on the Bone (End of Battle)
+                let hpRegen = 0;
+                if (gameState.player.relics.find(r => r.id === 'BURNING_BLOOD')) hpRegen += 6;
+                if (gameState.player.relics.find(r => r.id === 'MEAT_ON_THE_BONE') && gameState.player.currentHp <= gameState.player.maxHp / 2) hpRegen += 12;
+                
+                // Check for True Ending condition or Victory
+                if (gameState.act >= 4 && !gameState.isEndless) {
+                     setGameState(prev => ({ ...prev, screen: GameScreen.ENDING }));
+                     storageService.saveScore({ 
+                         id: `score-${Date.now()}`, playerName: 'Player', characterName: selectedCharName,
+                         score: calculateScore(gameState, true), act: gameState.act, floor: gameState.floor, victory: true, date: Date.now(), challengeMode: gameState.challengeMode 
+                     });
+                     storageService.incrementClearCount();
+                } else {
+                     if (isMathDebugSkipped) {
+                         // Auto-complete math
+                         const bonus = 3 * 10;
+                         // Need to apply regen as well since we skip the state update that applies it in the else block below
+                         goToRewardPhase(VICTORY_GOLD + bonus, hpRegen);
+                     } else {
+                         // Go directly to math, applying regen to player state
+                         setGameState(prev => ({ 
+                            ...prev, 
+                            player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + hpRegen) },
+                            screen: GameScreen.MATH_CHALLENGE
+                        }));
+                        audioService.playBGM('math');
+                     }
+                }
+            }, 1500); // 1.5 seconds delay
+
+            return () => clearTimeout(timer);
+
         } else if (gameState.player.currentHp <= 0) {
             // Lizard Tail Check
             if (gameState.player.relics.find(r => r.id === 'LIZARD_TAIL') && !gameState.player.relicCounters['LIZARD_TAIL_USED']) {
