@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package, Ghost, Trophy, RotateCcw, Play } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -746,7 +747,19 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, o
   const useConsumable = (consumable: PokerConsumable) => {
       if (consumable.type === 'PLANET') {
           let targetHand = 'HIGH_CARD';
-          if (consumable.id === 'TXT_MATH') targetHand = 'HIGH_CARD'; else if (consumable.id === 'TXT_JPN') targetHand = 'PAIR'; else if (consumable.id === 'TXT_SCI') targetHand = 'TWO_PAIR'; else if (consumable.id === 'TXT_SOC') targetHand = 'THREE_OF_A_KIND'; else if (consumable.id === 'TXT_ENG') targetHand = 'STRAIGHT'; else if (consumable.id === 'TXT_ART') targetHand = 'FLUSH'; else if (consumable.id === 'TXT_PE') targetHand = 'FULL_HOUSE'; else if (consumable.id === 'TXT_MUS') targetHand = 'FOUR_OF_A_KIND';
+          if (consumable.id === 'TXT_MATH') targetHand = 'HIGH_CARD'; 
+          else if (consumable.id === 'TXT_JPN') targetHand = 'PAIR'; 
+          else if (consumable.id === 'TXT_SCI') targetHand = 'TWO_PAIR'; 
+          else if (consumable.id === 'TXT_SOC') targetHand = 'THREE_OF_A_KIND'; 
+          else if (consumable.id === 'TXT_ENG') targetHand = 'STRAIGHT'; 
+          else if (consumable.id === 'TXT_ART') targetHand = 'FLUSH'; 
+          else if (consumable.id === 'TXT_PE') targetHand = 'FULL_HOUSE'; 
+          else if (consumable.id === 'TXT_MUS') targetHand = 'FOUR_OF_A_KIND';
+          else if (consumable.id === 'TXT_GEO') targetHand = 'STRAIGHT_FLUSH';
+          else if (consumable.id === 'TXT_AST') targetHand = 'FIVE_OF_A_KIND';
+          else if (consumable.id === 'TXT_MYTH') targetHand = 'FLUSH_FIVE';
+          else if (consumable.id === 'TXT_HIS') targetHand = 'ROYAL_FLUSH';
+          
           setRunState(prev => ({ ...prev, handLevels: { ...prev.handLevels, [targetHand]: prev.handLevels[targetHand] + 1 }, consumables: prev.consumables.filter(c => c !== consumable) }));
           audioService.playSound('win');
       } else if (consumable.type === 'TAROT') { setSelectedConsumable(consumable); } else if (consumable.type === 'SPECTRAL') { handleSpectral(consumable); }

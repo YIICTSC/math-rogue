@@ -665,6 +665,10 @@ export const CONSUMABLES_LIBRARY: PokerConsumable[] = [
     { id: 'TXT_ART', type: 'PLANET', name: '美術の教科書', description: 'フラッシュのレベルアップ', price: 3, icon: 'NOTEBOOK|#e91e63' },
     { id: 'TXT_PE', type: 'PLANET', name: '体育のしおり', description: 'フルハウスのレベルアップ', price: 3, icon: 'NOTEBOOK|#795548' },
     { id: 'TXT_MUS', type: 'PLANET', name: '音楽の教科書', description: 'フォーカードのレベルアップ', price: 3, icon: 'NOTEBOOK|#00bcd4' },
+    { id: 'TXT_GEO', type: 'PLANET', name: '地理の地図帳', description: 'ストレートフラッシュのレベルアップ', price: 3, icon: 'NOTEBOOK|#009688' },
+    { id: 'TXT_AST', type: 'PLANET', name: '天文学書', description: 'ファイブカードのレベルアップ', price: 3, icon: 'NOTEBOOK|#673ab7' },
+    { id: 'TXT_MYTH', type: 'PLANET', name: '神話の絵本', description: 'フラッシュファイブのレベルアップ', price: 3, icon: 'NOTEBOOK|#ffd700' },
+    { id: 'TXT_HIS', type: 'PLANET', name: '歴史年表', description: 'ロイヤルストレートフラッシュのレベルアップ', price: 3, icon: 'NOTEBOOK|#b71c1c' },
     
     // Tarots (Stationery)
     { id: 'STA_RULER', type: 'TAROT', name: '金の定規', description: '選んだカード2枚のランクを上げる', price: 4, icon: 'SWORD|#FFD700' },
