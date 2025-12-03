@@ -298,54 +298,16 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       if (selectedCards.length === 0) return null;
       
       const playedCards = runState.hand.filter(c => selectedCards.includes(c.id));
-      const heldCards = runState.hand.filter(c => !selectedCards.includes(c.id));
-      const { type, cards: scoringCards } = getHandResult(playedCards);
+      const { type } = getHandResult(playedCards);
       
       const level = runState.handLevels[type] || 1;
-      const baseStats = POKER_HAND_LEVELS[type];
-      
-      let chips = baseStats.baseChips + (level - 1) * 10;
-      let mult = baseStats.baseMult + (level - 1) * 1;
-
-      // Card Scoring logic
-      scoringCards.forEach(c => {
-          let val = c.rank;
-          if (val > 10 && val < 14) val = 10;
-          if (val === 14) val = 11;
-          chips += val + c.bonusChips;
-          mult += (c.multMultiplier - 1);
-          
-          if (c.enhancement === 'GLASS') mult *= 2;
-      });
-
-      // Held card effects
-      heldCards.forEach(c => {
-          if (c.enhancement === 'STEEL') mult *= 1.5;
-      });
-
-      // Supporters logic
-      const ctx: PokerScoringContext = {
-          chips, mult, handType: type, cards: scoringCards,
-          handsPlayed: (4 - runState.handsRemaining) + 1,
-          discardsUsed: (3 - runState.discardsRemaining),
-          deckState: runState.deck
-      };
-
-      runState.supporters.forEach(s => {
-          // Skip random effects for preview stability
-          if (s.id === 'SOCCER') return; 
-          if (s.triggerOn === 'HAND_PLAYED' || !s.triggerOn) {
-               s.effect(ctx);
-          }
-      });
 
       return {
           name: POKER_HAND_LEVELS[type].name,
-          chips: Math.floor(ctx.chips),
-          mult: Math.floor(ctx.mult),
-          score: Math.floor(ctx.chips) * Math.floor(ctx.mult)
+          level: level,
+          type: type
       };
-  }, [selectedCards, runState.hand, runState.handLevels, runState.supporters]);
+  }, [selectedCards, runState.hand, runState.handLevels]);
 
   // --- Initialization ---
   useEffect(() => {
@@ -1440,16 +1402,16 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                 </div>
             )}
 
-            {/* Hand Preview (New) */}
+            {/* Hand Preview (Simplified as requested) */}
             {!animating && currentHandInfo && (
-                <div className="bg-black/80 border-2 border-blue-400 p-3 rounded-xl shadow-xl text-center mb-4 z-40 animate-in fade-in slide-in-from-bottom-4">
-                    <div className="text-xl font-bold text-white mb-1">{currentHandInfo.name}</div>
-                    <div className="flex items-center gap-2 justify-center text-lg font-mono">
-                        <span className="text-blue-400 font-bold">{currentHandInfo.chips}</span>
-                        <span className="text-gray-500 text-xs">X</span>
-                        <span className="text-red-500 font-bold">{currentHandInfo.mult}</span>
-                        <ArrowRight size={16} className="text-gray-500"/>
-                        <span className="text-yellow-400 font-black text-2xl">{currentHandInfo.score.toLocaleString()}</span>
+                <div className="absolute bottom-6 z-40">
+                    <div className="bg-slate-900/90 border border-blue-500/50 px-8 py-2 rounded-full shadow-[0_0_15px_rgba(59,130,246,0.5)] backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 pointer-events-none">
+                        <div className="text-xl font-bold text-white tracking-wider flex items-center gap-3">
+                            {currentHandInfo.name}
+                            <span className="bg-blue-600 text-white text-[10px] px-1.5 py-0.5 rounded font-mono">
+                                Lv.{currentHandInfo.level}
+                            </span>
+                        </div>
                     </div>
                 </div>
             )}
