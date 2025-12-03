@@ -106,7 +106,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   const [potionConfirmation, setPotionConfirmation] = useState<Potion | null>(null);
   const [inspectedCard, setInspectedCard] = useState<ICard | null>(null);
   const [showLog, setShowLog] = useState(false);
-  const logEndRef = useRef<HTMLDivElement>(null);
+  const logContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (lastActionTime > 0) {
@@ -120,8 +120,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
   // Auto-scroll log
   useEffect(() => {
-      if (showLog && logEndRef.current) {
-          logEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      if (showLog && logContainerRef.current) {
+          logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
       }
   }, [combatLog, showLog]);
 
@@ -202,18 +202,20 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         
         {/* Combat Log Overlay */}
         {showLog && (
-            <div className="absolute top-2 right-2 z-[45] w-64 max-h-48 bg-black/80 border border-gray-600 rounded p-2 text-xs text-gray-300 font-mono overflow-y-auto custom-scrollbar shadow-xl backdrop-blur-sm pointer-events-auto">
-                <div className="text-center text-gray-500 border-b border-gray-700 pb-1 mb-1 font-bold">Battle Log</div>
+            <div 
+                ref={logContainerRef}
+                className="absolute top-2 right-2 z-[45] w-64 max-h-48 bg-black/80 border border-gray-600 rounded p-2 text-xs text-gray-300 font-mono overflow-y-auto custom-scrollbar shadow-xl backdrop-blur-sm pointer-events-auto overscroll-contain"
+            >
+                <div className="text-center text-gray-500 border-b border-gray-700 pb-1 mb-1 font-bold sticky top-0 bg-black/90 w-full">Battle Log</div>
                 {combatLog.length === 0 ? (
                     <div className="text-center italic opacity-50">No actions yet</div>
                 ) : (
                     <div className="flex flex-col gap-1">
                         {combatLog.map((log, i) => (
-                            <div key={i} className="border-b border-gray-800 pb-0.5 last:border-0 leading-tight">
+                            <div key={i} className="border-b border-gray-800 pb-0.5 last:border-0 leading-tight break-words">
                                 {log}
                             </div>
                         ))}
-                        <div ref={logEndRef} />
                     </div>
                 )}
             </div>
