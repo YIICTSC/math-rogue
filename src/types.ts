@@ -301,6 +301,7 @@ export interface PokerCard {
   bonusChips: number;
   multMultiplier: number;
   enhancement?: 'BONUS' | 'MULT' | 'WILD' | 'STONE' | 'GLASS' | 'GOLD' | 'STEEL';
+  edition?: 'FOIL' | 'HOLOGRAPHIC' | 'POLYCHROME'; // Visual effect & small bonus
 }
 
 export interface PokerHandResult {
@@ -308,6 +309,16 @@ export interface PokerHandResult {
   baseChips: number;
   baseMult: number;
   level: number;
+}
+
+export interface PokerScoringContext {
+  chips: number;
+  mult: number;
+  handType: string;
+  cards: PokerCard[];
+  handsPlayed: number;
+  discardsUsed: number;
+  deckState: PokerCard[];
 }
 
 export interface PokerSupporter { // Joker
@@ -318,7 +329,7 @@ export interface PokerSupporter { // Joker
   price: number;
   effect: (ctx: PokerScoringContext) => void;
   icon: string;
-  triggerOn?: 'HAND_PLAYED' | 'DISCARD' | 'HELD_IN_HAND';
+  triggerOn?: 'HAND_PLAYED' | 'DISCARD' | 'HELD_IN_HAND' | 'PASSIVE';
 }
 
 export interface PokerConsumable { // Tarot / Planet / Spectral
@@ -335,20 +346,10 @@ export interface PokerPack {
     name: string;
     description: string;
     price: number;
-    type: 'STANDARD' | 'BUFF' | 'SUPPORTER';
+    type: 'STANDARD' | 'BUFF' | 'SUPPORTER' | 'SPECTRAL';
     size: number; // How many cards revealed
     choose: number; // How many to pick
     icon: string;
-}
-
-export interface PokerScoringContext {
-  chips: number;
-  mult: number;
-  handType: string;
-  cards: PokerCard[];
-  handsPlayed: number;
-  discardsUsed: number;
-  deckState: PokerCard[];
 }
 
 export interface PokerBlind {

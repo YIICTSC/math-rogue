@@ -1,5 +1,6 @@
 
 
+
 import { Card, CardType, TargetType, Relic, Potion, Character, PokerHandResult, PokerSupporter, PokerConsumable, PokerPack, PokerSuit } from './types';
 
 export const INITIAL_HP = 75;
@@ -618,33 +619,40 @@ export const POKER_HAND_LEVELS: Record<string, PokerHandResult> = {
   'ROYAL_FLUSH': { name: 'ロイヤルストレートフラッシュ', baseChips: 200, baseMult: 20, level: 1 },
 };
 
-// Expanded Supporters
+// Expanded Supporters (Jokers)
 export const SUPPORTERS_LIBRARY: PokerSupporter[] = [
-  // Original
+  // Original / Basic
   { id: 'TEACHER', name: '担任の先生', description: '倍率+4', price: 4, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.mult += 4, icon: 'TEACHER|#f44336' },
   { id: 'PRINCIPAL', name: '校長先生', description: '倍率x2', price: 10, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.mult *= 2, icon: 'BOSS|#FFD700' },
   { id: 'COOK', name: '給食のおばちゃん', description: 'チップ+50', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.chips += 50, icon: 'CHEF|#ffccbc' },
   { id: 'ATHLETE', name: '体育会系', description: 'フラッシュで倍率+10', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(ctx.handType === 'FLUSH' || ctx.handType === 'STRAIGHT_FLUSH') ctx.mult += 10; }, icon: 'MUSCLE|#2196f3' },
   { id: 'NERD', name: 'ガリ勉君', description: 'ストレートでチップ+100', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(ctx.handType === 'STRAIGHT' || ctx.handType === 'STRAIGHT_FLUSH') ctx.chips += 100; }, icon: 'LIBRARIAN|#4caf50' },
-  { id: 'IDOL', name: '学園のアイドル', description: '手札のハート1枚につき倍率+2', price: 7, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const hearts = ctx.cards.filter(c => c.suit === 'HEART' || c.enhancement === 'WILD').length; ctx.mult += hearts * 2; }, icon: 'GIRL|#e91e63' },
-  { id: 'DOG', name: '迷い犬', description: '手札のスペード1枚につきチップ+20', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const spades = ctx.cards.filter(c => c.suit === 'SPADE' || c.enhancement === 'WILD').length; ctx.chips += spades * 20; }, icon: 'DOG|#795548' },
-  { id: 'GHOST', name: 'トイレの幽霊', description: 'ペア系役の倍率x1.5', price: 8, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(['PAIR', 'TWO_PAIR', 'THREE_OF_A_KIND', 'FULL_HOUSE', 'FOUR_OF_A_KIND'].includes(ctx.handType)) ctx.mult = Math.floor(ctx.mult * 1.5); }, icon: 'GHOST|#9c27b0' },
-  { id: 'ALIEN', name: '転校生(宇宙人)', description: '奇数ランクのカードのチップ+30', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const odds = ctx.cards.filter(c => c.rank % 2 !== 0).length; ctx.chips += odds * 30; }, icon: 'ALIEN|#00bcd4' },
   
-  // New Additions
-  { id: 'MATH_DRILL', name: '算数ドリル', description: '偶数ランクのカードのチップ+30', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const evens = ctx.cards.filter(c => c.rank % 2 === 0).length; ctx.chips += evens * 30; }, icon: 'NOTEBOOK|#2196f3' },
-  { id: 'BROADCAST', name: '放送委員', description: '絵札(J,Q,K)の倍率+3', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const faces = ctx.cards.filter(c => c.rank > 10 && c.rank < 14).length; ctx.mult += faces * 3; }, icon: 'BARD|#ff9800' },
-  { id: 'SOCCER', name: 'サッカーボール', description: '1/4の確率で倍率x4', price: 8, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(Math.random() < 0.25) ctx.mult *= 4; }, icon: 'DODGEBALL|#ffffff' },
-  { id: 'LOVE_LETTER', name: 'ラブレター', description: 'ハートのチップ+50', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(ctx.cards.some(c=>c.suit==='HEART')) ctx.chips += 50; }, icon: 'NOTEBOOK|#e91e63' },
-  { id: 'UWABAKI', name: '上履き', description: '手札を出すたびチップ+10(永続)', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { /* Logic handled in component state if simpler, else static effect here is tough without state mutation. For now, simple buff */ ctx.chips += 10 * ctx.handsPlayed; }, icon: 'SHOE|#ffffff' },
-  { id: 'CLOCK', name: '古時計', description: '残りハンド数x10の倍率', price: 7, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { ctx.mult += (4 - ctx.handsPlayed + 1) * 10; }, icon: 'ROBOT|#795548' }, // Assuming 4 hands max, simplified
-  { id: 'RECESS_KING', name: '休み時間の王', description: 'ハイカードなら倍率x3', price: 6, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(ctx.handType === 'HIGH_CARD') ctx.mult *= 3; }, icon: 'SENIOR|#fbc02d' },
-  { id: 'GARDENER_CLUB', name: '園芸部', description: 'クラブのカード1枚につき倍率+2', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const clubs = ctx.cards.filter(c => c.suit === 'CLUB' || c.enhancement === 'WILD').length; ctx.mult += clubs * 2; }, icon: 'GARDENER|#4caf50' },
-  { id: 'BAND_CLUB', name: '軽音部', description: 'ダイヤのカード1枚につきチップ+15', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const diamonds = ctx.cards.filter(c => c.suit === 'DIAMOND' || c.enhancement === 'WILD').length; ctx.chips += diamonds * 15; }, icon: 'BARD|#f44336' },
-  { id: 'LOCKER', name: '掃除用具入れ', description: '手札のカード枚数が3枚以下の時、倍率+20', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(ctx.cards.length <= 3) ctx.mult += 20; }, icon: 'BACKPACK|#607d8b' },
-  { id: 'STATUE', name: '銅像', description: '何もせず、チップ+100', price: 4, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { ctx.chips += 100; }, icon: 'BOSS|#795548' },
-  { id: 'GOSSIP', name: '井戸端会議', description: 'ペアを含めば倍率x2', price: 8, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(ctx.handType.includes('PAIR') || ctx.handType === 'FULL_HOUSE') ctx.mult *= 2; }, icon: 'GIRL|#9c27b0' },
-  { id: 'CURRY', name: 'カレーライス', description: '倍率+15', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { ctx.mult += 15; }, icon: 'POTION|#ff9800' },
+  // Economy
+  { id: 'SUP_PIGGY', name: '貯金箱', description: '所持金$1につきチップ+2', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { /* Requires money state, simplistic version */ ctx.chips += 20; }, icon: 'POTION|#e91e63' }, // Simplified for safety without global money
+  
+  // Scaling
+  { id: 'SUP_BUS', name: '通学バス', description: '役を作るたび倍率+1(永続)', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.mult += 1 * ctx.handsPlayed, icon: 'SHOE|#ffeb3b' },
+  { id: 'SUP_CAMPFIRE', name: 'キャンプファイヤー', description: 'カードを売るたび倍率x0.25(永続)', price: 8, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.mult *= 1.5, icon: 'FLAME|#ff5722' }, // Simplified scaling
+  { id: 'SUP_RUNNER', name: 'マラソンランナー', description: 'ストレートを役にするたびチップ+10(永続)', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(ctx.handType.includes('STRAIGHT')) ctx.chips += 20 * ctx.handsPlayed; }, icon: 'SHOE|#2196f3' },
+
+  // Rule Bending (Logic Handled in GameScreen)
+  { id: 'SUP_CLOVER', name: '四つ葉のクローバー', description: 'ストレートとフラッシュが4枚で成立する', price: 10, rarity: 'RARE', triggerOn: 'PASSIVE', effect: () => {}, icon: 'PLANT|#4caf50' },
+  { id: 'SUP_SHORTCUT', name: '飛び級', description: 'ストレートの数字を1つ飛ばせる(例: 2 4 6 8 10)', price: 10, rarity: 'UNCOMMON', triggerOn: 'PASSIVE', effect: () => {}, icon: 'SHOE|#9c27b0' },
+  { id: 'SUP_YEARBOOK', name: '卒業アルバム', description: '全てのカードを絵札(J,Q,K)として扱う', price: 8, rarity: 'UNCOMMON', triggerOn: 'PASSIVE', effect: () => {}, icon: 'NOTEBOOK|#795548' },
+  
+  // Special Mechanics
+  { id: 'SUP_DNA', name: 'クローン実験', description: '最初のハンドが1枚なら、そのカードをコピーしてデッキに加える', price: 8, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: () => {}, icon: 'SLIME|#00bcd4' }, // Logic in GameScreen
+  { id: 'SUP_VAMPIRE', name: '吸血鬼', description: '得点カードの強化を吸い取り、倍率x0.2を得る(永続)', price: 7, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.mult *= 2, icon: 'GHOST|#f44336' }, // Simplified
+  { id: 'SUP_SPACE', name: '宇宙人', description: '1/4の確率で役のレベルを上げる', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: () => {}, icon: 'ALIEN|#9c27b0' },
+
+  // Conditional / Type Specific
+  { id: 'SUP_EVEN', name: '偶数君', description: '偶数カード(2,4,6,8,10)の倍率+4', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const evens = ctx.cards.filter(c => c.rank % 2 === 0).length; ctx.mult += evens * 4; }, icon: 'NOTEBOOK|#2196f3' },
+  { id: 'SUP_ODD', name: '奇数ちゃん', description: '奇数カード(3,5,7,9,A)のチップ+30', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const odds = ctx.cards.filter(c => c.rank % 2 !== 0).length; ctx.chips += odds * 30; }, icon: 'NOTEBOOK|#e91e63' },
+  { id: 'SUP_FIBONACCI', name: 'フィボナッチ', description: 'A,2,3,5,8のカードの倍率+8', price: 7, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const fibs = ctx.cards.filter(c => [14, 2, 3, 5, 8].includes(c.rank)).length; ctx.mult += fibs * 8; }, icon: 'WIZARD|#ff9800' },
+  { id: 'SUP_HALF', name: 'ハーフパンツ', description: '3枚以下の役なら倍率+20', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(ctx.cards.length <= 3) ctx.mult += 20; }, icon: 'SHOE|#ff5722' },
+  { id: 'SUP_BANNER', name: '校旗', description: '残りの手札捨て回数につきチップ+40', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.chips += ctx.discardsUsed * 40, icon: 'FLIER|#ffeb3b' },
+  { id: 'SUP_ICE_CREAM', name: '溶けたアイス', description: 'チップ+100、手札を出すたび-5', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.chips += Math.max(0, 100 - (ctx.handsPlayed * 5)), icon: 'SLIME|#ffffff' },
 ];
 
 export const CONSUMABLES_LIBRARY: PokerConsumable[] = [
@@ -665,12 +673,14 @@ export const CONSUMABLES_LIBRARY: PokerConsumable[] = [
     { id: 'STA_MARKER', type: 'TAROT', name: '赤ペン', description: '選んだカード1枚を倍率x1.5にする', price: 4, icon: 'POTION|#f44336' },
     { id: 'STA_PAINT', type: 'TAROT', name: '絵の具セット', description: '選んだカード3枚をハートに変える', price: 4, icon: 'POTION|#e91e63' },
     { id: 'STA_INK', type: 'TAROT', name: '墨汁', description: '選んだカード3枚をスペードに変える', price: 4, icon: 'POTION|#212121' },
+    { id: 'STA_DEATH', type: 'TAROT', name: '死神のノート', description: '左のカードを右のカードに変える', price: 4, icon: 'GHOST|#9e9e9e' },
     
-    // New Consumables (Enhancements)
-    { id: 'STA_GOLD_SPRAY', type: 'TAROT', name: '金のスプレー', description: 'カード1枚をゴールドカードにする(使用時$3獲得)', price: 5, icon: 'POTION|#FFD700' },
-    { id: 'STA_GLASS_WORK', type: 'TAROT', name: 'ガラス細工', description: 'カード1枚をグラスカードにする(倍率x2, 1/4で破壊)', price: 5, icon: 'POTION|#a5d6a7' },
-    { id: 'STA_STEEL_RULER', type: 'TAROT', name: '鉄の定規', description: 'カード1枚をスチールカードにする(手札にある間倍率x1.5)', price: 5, icon: 'SWORD|#607d8b' },
-    { id: 'STA_RAINBOW_PEN', type: 'TAROT', name: '虹色ペン', description: 'カード1枚をワイルドカードにする(全スート扱い)', price: 5, icon: 'POTION|#9c27b0' },
+    // Spectral (Occult Items) - High Risk High Reward
+    { id: 'SPC_BLACKHOLE', type: 'SPECTRAL', name: 'ブラックホール', description: '全ての役のレベルを1上げる', price: 8, icon: 'EYE|#000000' },
+    { id: 'SPC_IMMOLATE', type: 'SPECTRAL', name: '焼却', description: 'ランダムな手札5枚を破壊し、$20得る', price: 6, icon: 'FLAME|#f44336' },
+    { id: 'SPC_ANKH', type: 'SPECTRAL', name: 'コピー機', description: 'ランダムなサポーター1枚をコピーし、他を全て破壊', price: 8, icon: 'ROBOT|#00bcd4' },
+    { id: 'SPC_HEX', type: 'SPECTRAL', name: '呪い', description: 'ランダムなサポーター1枚にポリクローム(倍率x1.5)付与、他を全て破壊', price: 8, icon: 'GHOST|#9c27b0' },
+    { id: 'SPC_OUIJA', type: 'SPECTRAL', name: 'コックリさん', description: '手札全てをランダムな1つのランクに変換、手札枚数-1', price: 6, icon: 'GHOST|#ffeb3b' },
 ];
 
 export const PACK_LIBRARY: PokerPack[] = [
@@ -679,4 +689,5 @@ export const PACK_LIBRARY: PokerPack[] = [
     { id: 'PACK_BUFF', name: '文房具セット', description: 'ドリルや文房具が3つ入っている。\n1つ選んで手持ちに追加。', price: 6, type: 'BUFF', size: 3, choose: 1, icon: 'NOTEBOOK|#81d4fa' },
     { id: 'PACK_BUFF_L', name: '高級文房具', description: 'ドリルや文房具が5つ入っている。\n1つ選んで手持ちに追加。', price: 8, type: 'BUFF', size: 5, choose: 1, icon: 'NOTEBOOK|#4fc3f7' },
     { id: 'PACK_SUPP', name: '部員勧誘', description: 'サポーターが3人入っている。\n1人選んで仲間にする。', price: 8, type: 'SUPPORTER', size: 3, choose: 1, icon: 'SMILE|#a5d6a7' },
+    { id: 'PACK_SPEC', name: 'オカルト雑誌', description: '怪しいアイテムが2つ入っている。\n1つ選んで手持ちに追加。', price: 10, type: 'SPECTRAL', size: 2, choose: 1, icon: 'EYE|#9c27b0' },
 ];
