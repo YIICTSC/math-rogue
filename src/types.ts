@@ -270,25 +270,6 @@ export interface RankingEntry {
     challengeMode?: string;
 }
 
-export interface GameState {
-  screen: GameScreen;
-  mode: GameMode; 
-  challengeMode?: string; // e.g. '1A1D'
-  act: number;
-  floor: number;
-  turn: number;
-  map: MapNode[];
-  currentMapNodeId: string | null;
-  player: Player;
-  enemies: Enemy[];
-  selectedEnemyId: string | null;
-  narrativeLog: string[];
-  combatLog: string[]; // New: Combat Log
-  rewards: RewardItem[]; 
-  selectionState: SelectionState; 
-  isEndless?: boolean;
-}
-
 // --- Poker Mini Game Types ---
 export type PokerSuit = 'SPADE' | 'HEART' | 'DIAMOND' | 'CLUB';
 export type PokerRank = 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14; // 14 is Ace
@@ -380,4 +361,24 @@ export interface PokerRunState {
     
     // Shop state
     shopInventory: (PokerSupporter | PokerConsumable | PokerPack)[];
+}
+
+export interface GameState {
+  screen: GameScreen;
+  mode: GameMode; 
+  challengeMode?: string; // e.g. '1A1D'
+  act: number;
+  floor: number;
+  turn: number;
+  map: MapNode[];
+  currentMapNodeId: string | null;
+  player: Player;
+  enemies: Enemy[];
+  selectedEnemyId: string | null;
+  narrativeLog: string[];
+  combatLog: string[]; // New: Combat Log
+  rewards: RewardItem[]; 
+  selectionState: SelectionState; 
+  isEndless?: boolean;
+  pokerState?: PokerRunState; // Added: Auto-save state for Poker Mini Game
 }

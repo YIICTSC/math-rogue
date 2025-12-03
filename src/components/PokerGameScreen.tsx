@@ -1,6 +1,8 @@
 
 
 
+
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package, Ghost } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -156,7 +158,6 @@ const generateRandomPlayingCard = (): PokerCard => {
 };
 
 // --- CORE LOGIC: HAND EVALUATION ---
-// Includes support for rule-bending jokers (4-card straight, gap straight, all face cards)
 const getHandResult = (cards: PokerCard[], supporters: PokerSupporter[] = []): { type: string, cards: PokerCard[] } => {
     if (cards.length === 0) return { type: 'HIGH_CARD', cards: [] };
     
@@ -166,10 +167,6 @@ const getHandResult = (cards: PokerCard[], supporters: PokerSupporter[] = []): {
     const hasYearbook = supporters.some(s => s.id === 'SUP_YEARBOOK'); // All face cards
 
     const reqCount = hasFourFingers ? 4 : 5;
-
-    // Apply "Yearbook" effect virtually for rank calculation (if logic needed)
-    // NOTE: Yearbook usually affects scoring (chips) and trigger conditions (e.g. "played a face card").
-    // For Straight calculation, original ranks matter.
 
     const sorted = [...cards].sort((a, b) => a.rank - b.rank);
     const ranks = sorted.map(c => c.rank);
@@ -192,9 +189,6 @@ const getHandResult = (cards: PokerCard[], supporters: PokerSupporter[] = []): {
     let isStraight = false;
     if (cards.length >= reqCount) {
         const uniqueRanks = Array.from(new Set(ranks)).sort((a,b)=>a-b);
-        // We need to find a sequence of length reqCount
-        // If Shortcut: gaps of 1 are allowed (e.g. 2, 4, 6, 8, 10 is straight)
-        // Logic: Iterate windows of size reqCount.
         
         for (let i = 0; i <= uniqueRanks.length - reqCount; i++) {
             const window = uniqueRanks.slice(i, i + reqCount);
@@ -212,7 +206,6 @@ const getHandResult = (cards: PokerCard[], supporters: PokerSupporter[] = []): {
 
         // Ace Low Check (A, 2, 3, 4...)
         if (!isStraight && uniqueRanks.includes(14)) {
-            // Treat A as 1. Add 1 to set and re-check.
             const lowAceRanks = [1, ...uniqueRanks.filter(r => r !== 14)].sort((a,b)=>a-b);
             for (let i = 0; i <= lowAceRanks.length - reqCount; i++) {
                 const window = lowAceRanks.slice(i, i + reqCount);
@@ -234,7 +227,6 @@ const getHandResult = (cards: PokerCard[], supporters: PokerSupporter[] = []): {
     ranks.forEach(r => counts[r] = (counts[r] || 0) + 1);
     const countsValues = Object.values(counts).sort((a, b) => b - a);
 
-    // 5-of-a-Kind Logic (Requires Deck Manipulation like Ouija or Death Tarot)
     if (isFlush && countsValues[0] >= 5) {
         return { type: 'FLUSH_FIVE', cards: sorted };
     }
@@ -245,9 +237,6 @@ const getHandResult = (cards: PokerCard[], supporters: PokerSupporter[] = []): {
     }
 
     if (isFlush && isStraight) {
-        // Simple Royal check: if straight flush and contains Ace and King (and Q, J, 10 if normal)
-        // With shortcuts, Royal is looser. Let's just check for high Straight Flush.
-        // Standard Royal: A K Q J 10
         if (ranks.includes(14) && ranks.includes(13) && ranks.includes(12)) return { type: 'ROYAL_FLUSH', cards: sorted };
         return { type: 'STRAIGHT_FLUSH', cards: sorted };
     }
@@ -310,27 +299,57 @@ const getSuitColorClass = (suit: PokerSuit) => {
 
 interface PokerGameScreenProps {
   onBack: () => void;
+  savedState?: PokerRunState;
+  onSave: (state: PokerRunState | undefined) => void;
 }
 
-const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
+const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, onSave }) => {
+  
+  // Hydration Helper: Re-attach function refs to Supporters/Consumables after loading from JSON
+  const hydrateState = (state: PokerRunState): PokerRunState => {
+      const hydrateSupporters = (list: PokerSupporter[]) => list.map(item => SUPPORTERS_LIBRARY.find(lib => lib.id === item.id) || item);
+      const hydrateConsumables = (list: PokerConsumable[]) => list.map(item => CONSUMABLES_LIBRARY.find(lib => lib.id === item.id) || item);
+      
+      const hydrateShop = (list: (PokerSupporter | PokerConsumable | PokerPack)[]) => {
+          return list.map(item => {
+              if ('rarity' in item) return SUPPORTERS_LIBRARY.find(lib => lib.id === item.id) || item;
+              if ('size' in item) return PACK_LIBRARY.find(lib => lib.id === item.id) || item;
+              return CONSUMABLES_LIBRARY.find(lib => lib.id === item.id) || item;
+          }) as (PokerSupporter | PokerConsumable | PokerPack)[];
+      };
+
+      return {
+          ...state,
+          supporters: hydrateSupporters(state.supporters),
+          consumables: hydrateConsumables(state.consumables),
+          shopInventory: hydrateShop(state.shopInventory)
+      };
+  };
+
   // --- Game State ---
   const [phase, setPhase] = useState<'BLIND_SELECT' | 'PLAY' | 'SHOP' | 'PACK_OPEN' | 'GAME_OVER' | 'VICTORY'>('BLIND_SELECT');
-  const [runState, setRunState] = useState<PokerRunState>({
-      deck: [],
-      money: 4,
-      ante: 1,
-      blindIndex: 0,
-      currentBlind: getBlindConfig(1, 0),
-      supporters: [],
-      consumables: [],
-      handLevels: { ...Object.keys(POKER_HAND_LEVELS).reduce((acc, key) => ({ ...acc, [key]: 1 }), {}) },
-      vouchers: [],
-      currentScore: 0,
-      handsRemaining: 4,
-      discardsRemaining: 3,
-      hand: [],
-      discardPile: [],
-      shopInventory: []
+  
+  const [runState, setRunState] = useState<PokerRunState>(() => {
+      if (savedState) {
+          return hydrateState(savedState);
+      }
+      return {
+          deck: [],
+          money: 4,
+          ante: 1,
+          blindIndex: 0,
+          currentBlind: getBlindConfig(1, 0),
+          supporters: [],
+          consumables: [],
+          handLevels: { ...Object.keys(POKER_HAND_LEVELS).reduce((acc, key) => ({ ...acc, [key]: 1 }), {}) },
+          vouchers: [],
+          currentScore: 0,
+          handsRemaining: 4,
+          discardsRemaining: 3,
+          hand: [],
+          discardPile: [],
+          shopInventory: []
+      };
   });
 
   // Pack Logic
@@ -376,10 +395,27 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       };
   }, [selectedCards, runState.hand, runState.handLevels, runState.supporters]);
 
-  // --- Initialization ---
+  // --- Initialization & Auto Save ---
   useEffect(() => {
-      initRun();
+      if (!savedState) {
+          initRun();
+      } else {
+          // If loading from save, determine correct phase based on hand state
+          if (savedState.hand.length > 0) setPhase('PLAY');
+          else if (savedState.shopInventory.length > 0) setPhase('SHOP');
+          else setPhase('BLIND_SELECT');
+          
+          audioService.playBGM('poker_shop');
+      }
   }, []);
+
+  // Debounced Auto Save on State Change
+  useEffect(() => {
+      const timer = setTimeout(() => {
+          onSave(runState);
+      }, 200); 
+      return () => clearTimeout(timer);
+  }, [runState, onSave]);
 
   const initRun = () => {
       const deck = createDeck();
@@ -399,7 +435,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           hand: [],
           discardPile: [],
           shopInventory: []
-  });
+      });
       setPhase('BLIND_SELECT');
       audioService.playBGM('poker_shop');
   };
@@ -511,9 +547,6 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       let bonusMoney = 0;
       const cardsToDestroy: string[] = [];
 
-      // Flag for "All Face Cards"
-      const allFace = runState.supporters.some(s => s.id === 'SUP_YEARBOOK');
-
       scoringCards.forEach(c => {
           let val = c.rank;
           if (val > 10 && val < 14) val = 10;
@@ -598,6 +631,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       } else if (runState.handsRemaining - 1 <= 0) {
           audioService.playSound('lose');
           setPhase('GAME_OVER');
+          onSave(undefined); // Clear save on game over
       }
   };
 
@@ -643,6 +677,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
 
       if (runState.ante === 8 && runState.blindIndex === 2) {
           setPhase('VICTORY');
+          onSave(undefined); // Clear save on victory
       } else {
           generateShop();
           setPhase('SHOP');
@@ -813,18 +848,14 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           }
       } else if (consumable.id === 'SPC_HEX') {
           // Random Supporter gets Polychrome, destroy others (Not fully impl yet visually, just a placeholder effect)
-          // For now, treat Polychrome as simple buff? Or skip implementation detail.
-          // Let's make it give huge money for now as fallback.
           newState.money += 50; 
           newState.supporters = []; // Destroys all
       } else if (consumable.id === 'SPC_OUIJA') {
-          // Convert hand to 1 rank, size -1
+          // Convert hand to 1 rank
           if (newState.hand.length > 0) {
               const ranks = newState.hand.map(c => c.rank);
               const targetRank = ranks[Math.floor(Math.random() * ranks.length)];
               newState.hand = newState.hand.map(c => ({ ...c, rank: targetRank }));
-              // Hand size reduction logic usually applies to *max* hand size, which we don't strictly track in state yet.
-              // We'll skip the permanent debuff for this mini-version.
               audioService.playSound('win');
           }
       }
@@ -851,8 +882,6 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           if (selectedConsumable.id === 'STA_RAINBOW_PEN') { mod.enhancement = 'WILD'; }
           
           if (selectedConsumable.id === 'STA_DEATH') {
-              // Convert Left (first selected) to Right (second selected)
-              // Logic: Select 2 cards. Left card becomes copy of right card.
               if (selectedCards.length === 2 && selectedCards[0] === c.id) {
                   const targetCard = runState.hand.find(h => h.id === selectedCards[1]);
                   if (targetCard) {
@@ -869,7 +898,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       if (selectedConsumable.id === 'STA_ERASER') {
           setRunState(prev => ({
               ...prev,
-              hand: prev.hand.filter(c => !selectedCards.includes(c.id)), // Remove from hand
+              hand: prev.hand.filter(c => !selectedCards.includes(c.id)), 
               deck: prev.deck, 
               consumables: prev.consumables.filter(c => c !== selectedConsumable)
           }));
@@ -1122,7 +1151,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           <div className="flex flex-col h-full w-full bg-black text-white items-center justify-center p-8 font-mono text-center">
               <div className={`text-6xl font-bold mb-4 ${phase === 'VICTORY' ? 'text-yellow-400' : 'text-red-500'}`}>{phase === 'VICTORY' ? 'GRADUATED!' : 'EXPELLED'}</div>
               <p className="text-xl text-gray-400 mb-8">Reached Ante {runState.ante}</p>
-              <button onClick={onBack} className="bg-white text-black px-8 py-3 font-bold rounded hover:bg-gray-200">Return to Menu</button>
+              <button onClick={() => { onSave(undefined); onBack(); }} className="bg-white text-black px-8 py-3 font-bold rounded hover:bg-gray-200">Return to Menu</button>
           </div>
       );
   }

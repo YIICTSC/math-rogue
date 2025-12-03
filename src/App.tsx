@@ -1,9 +1,10 @@
 
 
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
-  CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode
+  CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode, PokerRunState
 } from './types';
 import { 
   INITIAL_HP, INITIAL_ENERGY, HAND_SIZE, 
@@ -236,7 +237,8 @@ const App: React.FC = () => {
     combatLog: [],
     rewards: [],
     selectionState: { active: false, type: 'DISCARD', amount: 0 },
-    isEndless: false
+    isEndless: false,
+    pokerState: undefined // Initialize pokerState
   });
 
   const [currentNarrative, setCurrentNarrative] = useState<string>("...");
@@ -284,8 +286,8 @@ const App: React.FC = () => {
           gameState.screen !== GameScreen.RANKING &&
           gameState.screen !== GameScreen.CHARACTER_SELECTION &&
           gameState.screen !== GameScreen.MODE_SELECTION &&
-          gameState.screen !== GameScreen.DEBUG_MENU &&
-          gameState.screen !== GameScreen.MINI_GAME_POKER
+          gameState.screen !== GameScreen.DEBUG_MENU
+          // Removed MINI_GAME_POKER from exclusion to enable auto-save
           ) {
           
           storageService.saveGame(gameState);
@@ -330,7 +332,7 @@ const App: React.FC = () => {
       const saved = storageService.loadGame();
       if (saved) {
           setGameState(saved);
-          audioService.playBGM('menu'); 
+          audioService.playBGM(saved.screen === GameScreen.MINI_GAME_POKER ? 'poker_shop' : 'menu'); 
       }
   };
 
@@ -350,6 +352,7 @@ const App: React.FC = () => {
 
   const startPokerGame = () => {
       audioService.playSound('select');
+      // Do not reset pokerState here. If it exists in gameState, we resume from it.
       setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_POKER }));
   };
 
@@ -2085,7 +2088,11 @@ const App: React.FC = () => {
             )}
 
             {gameState.screen === GameScreen.MINI_GAME_POKER && (
-                <PokerGameScreen onBack={returnToTitle} />
+                <PokerGameScreen 
+                    onBack={returnToTitle} 
+                    savedState={gameState.pokerState}
+                    onSave={(state) => setGameState(prev => ({ ...prev, pokerState: state }))}
+                />
             )}
 
             {gameState.screen === GameScreen.MODE_SELECTION && (
