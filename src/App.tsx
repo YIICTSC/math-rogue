@@ -703,7 +703,38 @@ const App: React.FC = () => {
             audioService.playBGM('menu');
 
         } else if (node.type === NodeType.SHOP) {
-            // ... (Shop logic unchanged)
+            // Generate Shop Cards - FIX: Robust filtering
+            const shopCandidates = Object.values(CARDS_LIBRARY).filter(c => 
+                c.type !== CardType.STATUS && 
+                c.type !== CardType.CURSE && 
+                c.rarity !== 'SPECIAL'
+            );
+
+            const cards: ICard[] = [];
+            for(let i=0; i<5; i++) {
+                if (shopCandidates.length === 0) break;
+                const cTemplate = shopCandidates[Math.floor(Math.random() * shopCandidates.length)];
+                const c = { ...cTemplate };
+                
+                let price = 40 + Math.floor(Math.random() * 60);
+                if (c.rarity === 'UNCOMMON') price += 25;
+                if (c.rarity === 'RARE') price += 50;
+                if (c.rarity === 'LEGENDARY') price += 100;
+                
+                cards.push({ id: `shop-${i}-${Date.now()}`, ...c, price });
+            }
+            setShopCards(cards);
+
+            // Generate Shop Relics
+            const allRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'SHOP' || r.rarity === 'COMMON' || r.rarity === 'UNCOMMON' || r.rarity === 'RARE');
+            const relicOptions = shuffle(allRelics).slice(0, 2);
+            setShopRelics(relicOptions);
+
+            // Generate Shop Potions
+            const allPotions = Object.values(POTION_LIBRARY);
+            const potionOptions: Potion[] = shuffle(allPotions).slice(0, 3).map(p => ({ ...p, id: `shop-pot-${Date.now()}-${Math.random()}` }));
+            setShopPotions(potionOptions);
+
             setGameState({ ...nextState, screen: GameScreen.SHOP });
             audioService.playBGM('poker_shop');
 
@@ -1893,7 +1924,7 @@ const App: React.FC = () => {
                             </div>
 
                             <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                <Terminal size={10}/> v2.4.0
+                                <Terminal size={10}/> v2.4.1
                             </button>
                         </div>
                     </div>
@@ -1907,15 +1938,15 @@ const App: React.FC = () => {
                             className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2 select-none active:text-green-200"
                             onClick={handleLogTitleClick}
                         >
-                            System Update Log v2.4.0
+                            System Update Log v2.4.1
                         </h2>
                         <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
                             <section>
                                 <h3 className="text-white font-bold mb-1">■ アップデート (Update)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
+                                    <li>ショップの品揃え生成ロジックを修正しました。</li>
+                                    <li>1A1Dモードなどでショップが空になる不具合を修正しました。</li>
                                     <li>バトルの状態変化の計算式を修正しました。</li>
-                                    <li>バトルログに計算式が表示されるようになりました。</li>
-                                    <li>状態異常の残りターン処理を改善しました。</li>
                                 </ul>
                             </section>
                         </div>
