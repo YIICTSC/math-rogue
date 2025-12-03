@@ -74,10 +74,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     return a.name.localeCompare(b.name);
   });
 
-  // Relic/Condition Checks
-  const hasVelvetChoker = player.relics.some(r => r.id === 'VELVET_CHOKER');
-  const isChokerLimitReached = hasVelvetChoker && player.cardsPlayedThisTurn >= 6;
-
   return (
     <div className="flex flex-col h-full relative">
       
@@ -187,11 +183,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             {key === 'INTANGIBLE' ? '👻' : key === 'THORNS' ? '🌵' : key === 'REGEN' ? '❤️' : key.substring(0,2)}:{val as number}
                         </span>
                     ))}
-                    {hasVelvetChoker && (
-                        <span className={`text-[9px] border px-0.5 rounded flex items-center ${isChokerLimitReached ? 'text-red-500 border-red-500' : 'text-gray-400 border-gray-600'}`} title="カード使用枚数制限">
-                            Lim:{player.cardsPlayedThisTurn}/6
-                        </span>
-                    )}
                 </div>
 
                 <div className="w-full h-1.5 bg-gray-700 rounded-full border border-gray-500 overflow-hidden">
@@ -342,36 +333,25 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
         {/* Cards */}
         <div className="flex-grow flex items-center justify-start md:justify-center gap-1 md:gap-2 px-2 md:px-8 overflow-x-auto pb-4 pt-2 custom-scrollbar snap-x">
-            {player.hand.map((card) => {
-                const isGrandFinale = (card.name === '卒業式' || card.name === 'GRAND_FINALE');
-                const canPlayGrandFinale = player.drawPile.length === 0;
-                
-                const cardDisabled = selectionState.active 
-                    ? false 
-                    : (
-                        player.currentEnergy < card.cost || 
-                        !!actingEnemyId || 
-                        card.unplayable ||
-                        isChokerLimitReached ||
-                        (isGrandFinale && !canPlayGrandFinale)
-                    );
-
-                return (
-                    <div key={card.id} className={`snap-center shrink-0 ${selectionState.active ? 'cursor-pointer hover:scale-110 transition-transform' : ''}`}>
-                        <Card 
-                            card={card} 
-                            onClick={() => {
-                                if (selectionState.active) {
-                                    onHandSelection(card);
-                                } else {
-                                    onPlayCard(card);
-                                }
-                            }} 
-                            disabled={cardDisabled}
-                        />
-                    </div>
-                );
-            })}
+            {player.hand.map((card) => (
+                <div key={card.id} className={`snap-center shrink-0 ${selectionState.active ? 'cursor-pointer hover:scale-110 transition-transform' : ''}`}>
+                    <Card 
+                        card={card} 
+                        onClick={() => {
+                            if (selectionState.active) {
+                                onHandSelection(card);
+                            } else {
+                                onPlayCard(card);
+                            }
+                        }} 
+                        disabled={
+                            selectionState.active 
+                            ? false 
+                            : (player.currentEnergy < card.cost || !!actingEnemyId || card.unplayable)
+                        }
+                    />
+                </div>
+            ))}
         </div>
       </div>
 
