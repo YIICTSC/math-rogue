@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, Circle, Menu, X, Check, Search } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, Circle, Menu, X, Check, Search, LogOut } from 'lucide-react';
 import { audioService } from '../services/audioService';
 
 interface SchoolDungeonRPGProps {
@@ -542,139 +542,128 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   }, [map, player, enemies, floorItems]);
 
   return (
-    <div className="w-full h-full bg-[#202020] flex flex-col items-center justify-center font-mono select-none overflow-hidden touch-none relative">
+    <div className="w-full h-full bg-[#101010] flex flex-col items-center font-mono select-none overflow-hidden touch-none relative p-4">
         
-        {/* Game Boy Frame */}
-        <div className="w-full max-w-md aspect-[9/16] flex flex-col bg-[#c0c0c0] rounded-xl p-4 shadow-2xl relative border-4 border-[#808080]">
-            
-            {/* Screen Bezel */}
-            <div className="bg-[#505050] p-4 rounded-t-lg rounded-b-3xl mb-4 relative shadow-inner">
-                <div className="flex items-center justify-between text-[#808080] text-[10px] mb-1 px-2">
-                    <span className="animate-pulse text-red-500 flex items-center gap-1"><Circle size={6} fill="currentColor"/> BATTERY</span>
+        {/* Game Screen Area - Simplified, removed outer frame */}
+        <div className="w-full max-w-md aspect-[11/9] relative mb-2 shrink-0">
+             {/* LCD Screen (Green) */}
+             <div className="w-full h-full bg-[#9bbc0f] border-4 border-[#0f380f] relative overflow-hidden shadow-lg rounded-sm">
+                {/* Top Status Bar */}
+                <div className="absolute top-0 left-0 w-full h-6 bg-[#0f380f] text-[#9bbc0f] flex justify-between items-center px-2 text-xs font-bold z-10">
+                    <span>{floor}F</span>
+                    <span>Lv{level}</span>
+                    <span>HP {player.hp}/{player.maxHp}</span>
+                    <span>🍙 {belly}%</span>
                 </div>
-                
-                {/* LCD Screen */}
-                <div className="bg-[#9bbc0f] border-4 border-[#0f380f] w-full aspect-square relative overflow-hidden shadow-inner">
-                    {/* Top Status Bar */}
-                    <div className="absolute top-0 left-0 w-full h-6 bg-[#0f380f] text-[#9bbc0f] flex justify-between items-center px-2 text-xs font-bold z-10">
-                        <span>{floor}F</span>
-                        <span>Lv{level}</span>
-                        <span>HP {player.hp}/{player.maxHp}</span>
-                        <span>🍙 {belly}%</span>
+
+                {/* Canvas Layer */}
+                <canvas 
+                    ref={canvasRef} 
+                    width={VIEW_W * TILE_SIZE * SCALE} 
+                    height={VIEW_H * TILE_SIZE * SCALE}
+                    className="w-full h-full object-contain pixel-art mt-4" 
+                    style={{ imageRendering: 'pixelated' }}
+                />
+
+                {/* Map Overlay */}
+                {showMap && map.length > 0 && (
+                    <div className="absolute inset-0 bg-[#0f380f]/90 z-20 flex items-center justify-center p-8">
+                        <div className="w-full h-full border border-[#9bbc0f] grid" style={{ gridTemplateColumns: `repeat(${MAP_W}, 1fr)` }}>
+                            {map.map((row, y) => row.map((tile, x) => (
+                                <div key={`${x}-${y}`} className={`${tile === 'WALL' ? 'bg-transparent' : (tile === 'STAIRS' ? 'bg-[#9bbc0f]' : 'bg-[#306230]')}`}>
+                                    {x === player.x && y === player.y && <div className="w-full h-full bg-white rounded-full animate-pulse"></div>}
+                                </div>
+                            )))}
+                        </div>
+                        <button onClick={() => setShowMap(false)} className="absolute bottom-4 text-[#9bbc0f] border border-[#9bbc0f] px-2 rounded hover:bg-[#306230]">Close Map</button>
                     </div>
+                )}
 
-                    {/* Canvas Layer */}
-                    <canvas 
-                        ref={canvasRef} 
-                        width={VIEW_W * TILE_SIZE * SCALE} 
-                        height={VIEW_H * TILE_SIZE * SCALE}
-                        className="w-full h-full object-contain pixel-art mt-2"
-                        style={{ imageRendering: 'pixelated' }}
-                    />
-
-                    {/* Map Overlay */}
-                    {showMap && map.length > 0 && (
-                        <div className="absolute inset-0 bg-[#0f380f]/90 z-20 flex items-center justify-center p-8">
-                            <div className="w-full h-full border border-[#9bbc0f] grid" style={{ gridTemplateColumns: `repeat(${MAP_W}, 1fr)` }}>
-                                {map.map((row, y) => row.map((tile, x) => (
-                                    <div key={`${x}-${y}`} className={`${tile === 'WALL' ? 'bg-transparent' : (tile === 'STAIRS' ? 'bg-[#9bbc0f]' : 'bg-[#306230]')}`}>
-                                        {x === player.x && y === player.y && <div className="w-full h-full bg-white rounded-full animate-pulse"></div>}
-                                    </div>
-                                )))}
-                            </div>
-                            <button onClick={() => setShowMap(false)} className="absolute bottom-4 text-[#9bbc0f]">Close Map</button>
+                {/* Menu Overlay */}
+                {menuOpen && (
+                    <div className="absolute right-0 top-0 bottom-0 w-2/3 bg-[#0f380f] border-l-2 border-[#9bbc0f] z-30 p-2 text-[#9bbc0f] text-xs">
+                        <div className="flex justify-between items-center border-b border-[#9bbc0f] mb-2 pb-1">
+                            <h3 className="font-bold">MOCHIMONO</h3>
+                            <button onClick={() => setMenuOpen(false)}><X size={12}/></button>
                         </div>
-                    )}
-
-                    {/* Menu Overlay */}
-                    {menuOpen && (
-                        <div className="absolute right-0 top-0 bottom-0 w-2/3 bg-[#0f380f] border-l-2 border-[#9bbc0f] z-30 p-2 text-[#9bbc0f] text-xs">
-                            <h3 className="border-b border-[#9bbc0f] mb-2 pb-1 font-bold">MOCHIMONO</h3>
-                            <div className="flex flex-col gap-1 overflow-y-auto h-[180px]">
-                                {inventory.map((item, i) => (
-                                    <button 
-                                        key={i} 
-                                        className="text-left px-2 py-1 hover:bg-[#306230] cursor-pointer flex justify-between"
-                                        onClick={() => handleUseItem(i)}
-                                    >
-                                        <span>{item.name}</span>
-                                        {i === 0 && <span className="animate-pulse">◄</span>} 
-                                    </button>
-                                ))}
-                                {inventory.length === 0 && <span className="text-[#306230]">Empty</span>}
-                            </div>
-                            <div className="mt-2 border-t border-[#9bbc0f] pt-1">
-                                <p>ATK: {player.attack}</p>
-                                <p>XP: {player.xp}</p>
-                            </div>
+                        <div className="flex flex-col gap-1 overflow-y-auto h-[180px]">
+                            {inventory.map((item, i) => (
+                                <button 
+                                    key={i} 
+                                    className="text-left px-2 py-1 hover:bg-[#306230] cursor-pointer flex justify-between items-center border border-transparent hover:border-[#9bbc0f]"
+                                    onClick={() => handleUseItem(i)}
+                                >
+                                    <span>{item.name}</span>
+                                    <span className="text-[9px] text-[#8bac0f]">使う</span>
+                                </button>
+                            ))}
+                            {inventory.length === 0 && <span className="text-[#306230]">Empty</span>}
                         </div>
-                    )}
-
-                    {/* Game Over Overlay */}
-                    {gameOver && (
-                        <div className="absolute inset-0 bg-[#0f380f]/80 flex flex-col items-center justify-center text-[#9bbc0f] z-40">
-                            <h2 className="text-2xl font-bold mb-4">GAME OVER</h2>
-                            <p>Floor: {floor}</p>
-                            <p>Level: {level}</p>
-                            <p className="mt-4 animate-pulse">PRESS A TO RETRY</p>
+                        <div className="mt-2 border-t border-[#9bbc0f] pt-1">
+                            <p>ATK: {player.attack}</p>
+                            <p>XP: {player.xp}</p>
                         </div>
-                    )}
-                </div>
-                
-                <div className="text-center text-[#9bbc0f] font-bold italic mt-1 text-xs tracking-widest opacity-30">Nintendo GAME BOY™</div>
+                    </div>
+                )}
+
+                {/* Game Over Overlay */}
+                {gameOver && (
+                    <div className="absolute inset-0 bg-[#0f380f]/90 flex flex-col items-center justify-center text-[#9bbc0f] z-40">
+                        <h2 className="text-2xl font-bold mb-4">GAME OVER</h2>
+                        <p>Floor: {floor}</p>
+                        <p>Level: {level}</p>
+                        <button onClick={startNewGame} className="mt-6 border-2 border-[#9bbc0f] px-4 py-2 hover:bg-[#306230] animate-pulse">RETRY</button>
+                    </div>
+                )}
+             </div>
+        </div>
+
+        {/* Log Area */}
+        <div className="w-full max-w-md bg-[#0f380f] text-[#9bbc0f] h-20 p-2 text-[10px] overflow-hidden mb-2 rounded border-2 border-[#306230] font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner">
+            {logs.map((l) => (
+                <div key={l.id} style={{ color: l.color || '#9bbc0f' }}>{l.message}</div>
+            ))}
+        </div>
+
+        {/* Controls Area - Expanded to fill space, buttons positioned absolutely relative to this container */}
+        <div className="w-full max-w-md flex-grow relative min-h-[180px] bg-[#1a1a1a] rounded-t-xl border-t-2 border-[#333]">
+            {/* D-Pad */}
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 w-32 h-32">
+                <div className="w-10 h-10 bg-[#333] absolute top-0 left-10 rounded-t-md shadow-lg active:mt-1 cursor-pointer border border-[#444]" onClick={() => movePlayer(0, -1)}><ArrowUp className="text-[#888] mx-auto mt-2" size={20}/></div>
+                <div className="w-10 h-10 bg-[#333] absolute bottom-0 left-10 rounded-b-md shadow-lg active:mt-1 cursor-pointer border border-[#444]" onClick={() => movePlayer(0, 1)}><ArrowDown className="text-[#888] mx-auto mt-2" size={20}/></div>
+                <div className="w-10 h-10 bg-[#333] absolute top-10 left-0 rounded-l-md shadow-lg active:mt-1 cursor-pointer border border-[#444]" onClick={() => movePlayer(-1, 0)}><ArrowLeft className="text-[#888] mx-auto mt-2" size={20}/></div>
+                <div className="w-10 h-10 bg-[#333] absolute top-10 right-0 rounded-r-md shadow-lg active:mt-1 cursor-pointer border border-[#444]" onClick={() => movePlayer(1, 0)}><ArrowRight className="text-[#888] mx-auto mt-2" size={20}/></div>
+                <div className="w-10 h-10 bg-[#333] absolute top-10 left-10 flex items-center justify-center border border-[#444]"><div className="w-4 h-4 bg-[#222] rounded-full"></div></div>
             </div>
 
-            {/* Log Area */}
-            <div className="bg-[#0f380f] text-[#9bbc0f] h-20 p-2 text-[10px] overflow-hidden mb-4 rounded border-2 border-[#306230] font-mono leading-tight flex flex-col justify-end">
-                {logs.map((l) => (
-                    <div key={l.id} style={{ color: l.color || '#9bbc0f' }}>{l.message}</div>
-                ))}
-            </div>
-
-            {/* Controls */}
-            <div className="flex-grow relative">
-                {/* D-Pad */}
-                <div className="absolute left-4 top-4 w-32 h-32">
-                    <div className="w-10 h-10 bg-[#333] absolute top-0 left-10 rounded-t-md shadow-lg active:mt-1 cursor-pointer" onClick={() => movePlayer(0, -1)}><ArrowUp className="text-[#555] mx-auto mt-2" size={20}/></div>
-                    <div className="w-10 h-10 bg-[#333] absolute bottom-0 left-10 rounded-b-md shadow-lg active:mt-1 cursor-pointer" onClick={() => movePlayer(0, 1)}><ArrowDown className="text-[#555] mx-auto mt-2" size={20}/></div>
-                    <div className="w-10 h-10 bg-[#333] absolute top-10 left-0 rounded-l-md shadow-lg active:mt-1 cursor-pointer" onClick={() => movePlayer(-1, 0)}><ArrowLeft className="text-[#555] mx-auto mt-2" size={20}/></div>
-                    <div className="w-10 h-10 bg-[#333] absolute top-10 right-0 rounded-r-md shadow-lg active:mt-1 cursor-pointer" onClick={() => movePlayer(1, 0)}><ArrowRight className="text-[#555] mx-auto mt-2" size={20}/></div>
-                    <div className="w-10 h-10 bg-[#333] absolute top-10 left-10 flex items-center justify-center"><div className="w-4 h-4 bg-[#222] rounded-full"></div></div>
+            {/* A/B Buttons */}
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex gap-4 transform -rotate-12">
+                <div className="flex flex-col items-center group">
+                    <button 
+                        className="w-14 h-14 bg-[#8b0000] rounded-full shadow-[0_4px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000]"
+                        onClick={() => setMenuOpen(!menuOpen)}
+                    >
+                        B
+                    </button>
+                    <span className="text-[#666] text-xs font-bold mt-1">MENU</span>
                 </div>
-
-                {/* A/B Buttons */}
-                <div className="absolute right-4 top-8 flex gap-4 transform -rotate-12">
-                    <div className="flex flex-col items-center group">
-                        <button 
-                            className="w-12 h-12 bg-[#8b0000] rounded-full shadow-[0_4px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold"
-                            onClick={() => setMenuOpen(!menuOpen)}
-                        >
-                            B
-                        </button>
-                        <span className="text-[#333] text-xs font-bold mt-1">MENU</span>
-                    </div>
-                    <div className="flex flex-col items-center mt-[-10px] group">
-                        <button 
-                            className="w-12 h-12 bg-[#ff0000] rounded-full shadow-[0_4px_0_#8b0000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold"
-                            onClick={handleInteract}
-                        >
-                            A
-                        </button>
-                        <span className="text-[#333] text-xs font-bold mt-1">ACT</span>
-                    </div>
-                </div>
-
-                {/* Select/Start */}
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-4">
-                    <div className="w-12 h-3 bg-[#555] rounded-full transform rotate-12 shadow cursor-pointer border border-black hover:bg-[#777]" onClick={onBack}></div>
-                    <div className="w-12 h-3 bg-[#555] rounded-full transform rotate-12 shadow cursor-pointer border border-black hover:bg-[#777]" onClick={() => movePlayer(0, 0)}></div>
-                </div>
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex gap-8 text-[10px] text-[#555] font-bold">
-                    <span>EXIT</span>
-                    <span>WAIT</span>
+                <div className="flex flex-col items-center mt-[-15px] group">
+                    <button 
+                        className="w-14 h-14 bg-[#ff0000] rounded-full shadow-[0_4px_0_#8b0000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#cc0000]"
+                        onClick={handleInteract}
+                    >
+                        A
+                    </button>
+                    <span className="text-[#666] text-xs font-bold mt-1">ACT</span>
                 </div>
             </div>
 
+            {/* Quit Button (Bottom Center) */}
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2">
+                 <button onClick={onBack} className="text-[#555] text-[10px] font-bold border border-[#333] px-3 py-1 rounded bg-[#222] hover:text-white hover:border-gray-500 flex items-center gap-1">
+                    <LogOut size={10}/> QUIT
+                 </button>
+            </div>
         </div>
     </div>
   );
