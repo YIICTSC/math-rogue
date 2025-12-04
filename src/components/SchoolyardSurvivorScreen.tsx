@@ -198,9 +198,73 @@ const createFlashSprite = (source: HTMLCanvasElement): HTMLCanvasElement => {
     return c;
 };
 
+// Generate Schoolyard Background
+const createSchoolyardBackground = (): HTMLCanvasElement => {
+    const c = document.createElement('canvas');
+    c.width = WORLD_WIDTH;
+    c.height = WORLD_HEIGHT;
+    const ctx = c.getContext('2d');
+    if (!ctx) return c;
+
+    // Dirt base
+    ctx.fillStyle = '#5d4037'; // Earthy brown
+    ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+
+    // Random pebbles and grass tufts
+    for (let i = 0; i < 2000; i++) {
+        const x = Math.random() * WORLD_WIDTH;
+        const y = Math.random() * WORLD_HEIGHT;
+        const size = Math.random() * 4 + 1;
+        const type = Math.random();
+        
+        if (type < 0.6) {
+            // Darker dirt spec
+            ctx.fillStyle = '#4e342e'; 
+        } else if (type < 0.9) {
+            // Lighter pebble
+            ctx.fillStyle = '#8d6e63';
+        } else {
+            // Grass
+            ctx.fillStyle = '#33691e';
+        }
+        ctx.fillRect(x, y, size, size);
+    }
+
+    // Track Lines (White Chalk)
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.lineWidth = 8;
+    ctx.lineCap = 'round';
+    
+    // Outer Track
+    ctx.beginPath();
+    const margin = 200;
+    const r = 300;
+    ctx.roundRect(margin, margin, WORLD_WIDTH - margin * 2, WORLD_HEIGHT - margin * 2, r);
+    ctx.stroke();
+
+    // Inner markings
+    ctx.beginPath();
+    ctx.moveTo(WORLD_WIDTH / 2, margin);
+    ctx.lineTo(WORLD_WIDTH / 2, margin + 200);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(WORLD_WIDTH / 2, WORLD_HEIGHT - margin);
+    ctx.lineTo(WORLD_WIDTH / 2, WORLD_HEIGHT - margin - 200);
+    ctx.stroke();
+
+    // Center Circle
+    ctx.beginPath();
+    ctx.arc(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, 150, 0, Math.PI * 2);
+    ctx.stroke();
+
+    return c;
+};
+
 const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onBack }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const bgCanvasRef = useRef<HTMLCanvasElement | null>(null);
     
     // Viewport
     const [viewSize, setViewSize] = useState({ width: 800, height: 600 });
@@ -284,6 +348,9 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     useEffect(() => {
         audioService.playBGM('survivor_metal');
 
+        // Prepare Background
+        bgCanvasRef.current = createSchoolyardBackground();
+
         const playerImg = new Image();
         playerImg.src = HERO_IMAGE_DATA;
         playerImg.onload = () => {
@@ -292,11 +359,30 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
              if(ctx) { ctx.drawImage(playerImg, 0, 0, 32, 32); spriteCache.current['PLAYER'] = c; spriteCache.current['PLAYER_FLASH'] = createFlashSprite(c); }
         };
 
-        // Enemy Sprites
+        // Enemy Sprites Generation
+        // ENEMY_1: Slime (Blue)
         const e1 = generateFromTemplate('SLIME', '#3b82f6', '#60a5fa');
         spriteCache.current['ENEMY_1'] = e1; spriteCache.current['ENEMY_1_FLASH'] = createFlashSprite(e1);
+        
+        // ENEMY_2: Bat (Purple)
         const e2 = generateFromTemplate('BAT', '#a855f7', '#c084fc');
         spriteCache.current['ENEMY_2'] = e2; spriteCache.current['ENEMY_2_FLASH'] = createFlashSprite(e2);
+
+        // ENEMY_3: Skeleton (White/Grey)
+        const e3 = generateFromTemplate('SKELETON', '#e5e7eb', '#f3f4f6');
+        spriteCache.current['ENEMY_3'] = e3; spriteCache.current['ENEMY_3_FLASH'] = createFlashSprite(e3);
+
+        // ENEMY_4: Ghost (Cyan/Translucent look)
+        const e4 = generateFromTemplate('GHOST', '#a5f3fc', '#cffafe');
+        spriteCache.current['ENEMY_4'] = e4; spriteCache.current['ENEMY_4_FLASH'] = createFlashSprite(e4);
+
+        // ENEMY_5: Robot (Metal Grey)
+        const e5 = generateFromTemplate('ROBOT', '#6b7280', '#9ca3af');
+        spriteCache.current['ENEMY_5'] = e5; spriteCache.current['ENEMY_5_FLASH'] = createFlashSprite(e5);
+
+        // ENEMY_6: Teacher (Boss, Red)
+        const e6 = generateFromTemplate('TEACHER', '#ef4444', '#fca5a5');
+        spriteCache.current['ENEMY_6'] = e6; spriteCache.current['ENEMY_6_FLASH'] = createFlashSprite(e6);
         
         // Item Sprites (Generated from WEAPONS config)
         Object.values(WEAPONS).forEach(w => {
@@ -543,7 +629,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             if (hit || p.duration <= 0) projectiles.current.splice(i, 1);
         }
 
-        // Spawn Logic
+        // Spawn Logic (Enhanced)
         const spawnRate = Math.max(5, 60 - Math.floor(time.current / 5));
         if (frameCount.current % spawnRate === 0) {
             // Spawn around player, just outside view
@@ -556,11 +642,53 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             const clampX = Math.max(0, Math.min(WORLD_WIDTH, ex));
             const clampY = Math.max(0, Math.min(WORLD_HEIGHT, ey));
 
-            const isStrong = Math.random() < Math.min(0.5, time.current * 0.005);
+            const timeSec = time.current;
+            let enemyType = 'ENEMY_1';
+            let hp = 10;
+            let speed = 1;
+            let width = 24;
+            let height = 24;
+
+            // Progression Logic
+            if (timeSec < 30) {
+                // 0-30s: Slimes (Easy)
+                hp = 10; speed = 1 + Math.random() * 0.5;
+            } else if (timeSec < 60) {
+                // 30-60s: Slimes + Bats (Fast)
+                enemyType = Math.random() < 0.5 ? 'ENEMY_1' : 'ENEMY_2';
+                hp = 15; speed = enemyType === 'ENEMY_2' ? 2.5 : 1.5;
+            } else if (timeSec < 120) {
+                // 60-120s: Skeletons (Tough) + Bats
+                enemyType = Math.random() < 0.4 ? 'ENEMY_2' : 'ENEMY_3';
+                hp = enemyType === 'ENEMY_3' ? 35 : 20; 
+                speed = 1.5;
+            } else if (timeSec < 180) {
+                // 120-180s: Ghosts (Fast) & Robots (Very Fast)
+                const r = Math.random();
+                enemyType = r < 0.3 ? 'ENEMY_3' : (r < 0.6 ? 'ENEMY_4' : 'ENEMY_5');
+                hp = 50; 
+                speed = enemyType === 'ENEMY_5' ? 3.5 : (enemyType === 'ENEMY_4' ? 2 : 1.5);
+            } else {
+                // 180s+: All + Teacher (Boss)
+                const r = Math.random();
+                if (r < 0.05) {
+                    enemyType = 'ENEMY_6'; // Teacher
+                    hp = 300 + (timeSec - 180) * 2; // Scaling Boss HP
+                    speed = 0.8;
+                    width = 48; height = 48; // Big
+                } else if (r < 0.4) {
+                    enemyType = 'ENEMY_5';
+                    hp = 70; speed = 3.5;
+                } else {
+                    enemyType = 'ENEMY_4';
+                    hp = 60; speed = 2.5;
+                }
+            }
+
             enemies.current.push({
-                id: Math.random(), x: clampX, y: clampY, type: isStrong ? 'ENEMY_2' : 'ENEMY_1',
-                width: 24, height: 24, hp: 10 + time.current * (isStrong?2:0.5), maxHp: 10,
-                speed: 1 + Math.random()*0.5, damage: 5, vx: 0, vy: 0, dead: false, flashTime: 0
+                id: Math.random(), x: clampX, y: clampY, type: enemyType,
+                width: width, height: height, hp: hp, maxHp: hp,
+                speed: speed, damage: 5 + Math.floor(timeSec/60), vx: 0, vy: 0, dead: false, flashTime: 0
             });
         }
 
@@ -778,34 +906,14 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         // Translate camera (inverted) to center player
         ctx.translate(-camera.current.x, -camera.current.y);
 
-        // Draw World Bounds
-        ctx.strokeStyle = '#374151';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-        
-        // Draw Grid
-        ctx.strokeStyle = '#1f2937';
-        ctx.lineWidth = 1;
-        
-        const halfW = viewW / (2 * ZOOM_SCALE);
-        const halfH = viewH / (2 * ZOOM_SCALE);
-        
-        // Draw enough grid to cover the visible area even if camera is at edge
-        // Start from slightly before camera bounds to ensure coverage
-        const startX = Math.floor((camera.current.x - halfW - 100) / 50) * 50;
-        const endX = Math.ceil((camera.current.x + halfW + 100) / 50) * 50;
-        const startY = Math.floor((camera.current.y - halfH - 100) / 50) * 50;
-        const endY = Math.ceil((camera.current.y + halfH + 100) / 50) * 50;
-
-        for(let x=startX; x<=endX; x+=50) { 
-            if (x >= 0 && x <= WORLD_WIDTH) {
-                ctx.beginPath(); ctx.moveTo(x, Math.max(0, startY)); ctx.lineTo(x, Math.min(WORLD_HEIGHT, endY)); ctx.stroke(); 
-            }
-        }
-        for(let y=startY; y<=endY; y+=50) { 
-            if (y >= 0 && y <= WORLD_HEIGHT) {
-                ctx.beginPath(); ctx.moveTo(Math.max(0, startX), y); ctx.lineTo(Math.min(WORLD_WIDTH, endX), y); ctx.stroke(); 
-            }
+        // Draw Background (Cached)
+        if (bgCanvasRef.current) {
+            ctx.drawImage(bgCanvasRef.current, 0, 0);
+        } else {
+            // Fallback
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
         }
 
         // Gems
@@ -849,10 +957,14 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         enemies.current.forEach(e => {
             // Cull
             if (Math.abs(e.x - camera.current.x) > (viewW/ZOOM_SCALE + 50) || Math.abs(e.y - camera.current.y) > (viewH/ZOOM_SCALE + 50)) return;
-            const baseKey = e.type === 'ENEMY_2' ? 'ENEMY_2' : 'ENEMY_1';
+            const baseKey = e.type; // ENEMY_1, ENEMY_2 etc.
             const spriteKey = e.flashTime > 0 ? `${baseKey}_FLASH` : baseKey;
-            const sprite = spriteCache.current[spriteKey];
-            if (sprite) ctx.drawImage(sprite, e.x - 16, e.y - 16, 32, 32);
+            const sprite = spriteCache.current[spriteKey] || spriteCache.current['ENEMY_1'];
+            
+            if (sprite) {
+                const size = Math.max(e.width, e.height);
+                ctx.drawImage(sprite, e.x - size/2, e.y - size/2, size * 1.3, size * 1.3);
+            }
         });
 
         // Player
@@ -913,7 +1025,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         pKeys.forEach(key => {
             const level = passivesRef.current[key];
             if (level === 0) {
-                if (Object.values(passivesRef.current).filter(v => v > 0).length < 6) {
+                if (Object.values(passivesRef.current).filter((v: number) => v > 0).length < 6) {
                     candidates.push({ type: 'PASSIVE', id: key, isNew: true });
                 }
             } else if (level < 5) {
@@ -1007,28 +1119,32 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
                 <div className="w-1/3 flex flex-col items-end gap-1 opacity-90 pt-12">
                     <div className="flex flex-wrap justify-end gap-0.5 max-w-[140px]">
-                        {Object.entries(weapons).map(([k,v]) => v && (
+                        {(Object.keys(weapons) as WeaponType[]).map((k) => {
+                            const v = weapons[k];
+                            return v && (
                             <div key={k} className={`w-7 h-7 bg-slate-800 border ${v.level>=8?'border-yellow-400':'border-gray-500'} flex items-center justify-center relative p-0.5`}>
                                 <PixelSprite 
                                     seed={k} 
-                                    name={`${WEAPONS[k as WeaponType].sprite.template}|${WEAPONS[k as WeaponType].sprite.color}`} 
+                                    name={`${WEAPONS[k].sprite.template}|${WEAPONS[k].sprite.color}`} 
                                     className="w-full h-full"
                                 />
                                 <div className="absolute -bottom-1 -right-1 text-[6px] bg-black px-0.5 rounded leading-none text-white border border-gray-700">{v.level}</div>
                             </div>
-                        ))}
+                        )})}
                     </div>
                     <div className="flex flex-wrap justify-end gap-0.5 max-w-[140px]">
-                        {Object.entries(passives).map(([k,v]) => v>0 && (
+                        {(Object.keys(passives) as PassiveType[]).map((k) => {
+                            const v = passives[k];
+                            return v > 0 && (
                             <div key={k} className="w-6 h-6 bg-slate-900 border border-gray-600 flex items-center justify-center relative p-0.5">
                                 <PixelSprite 
                                     seed={k} 
-                                    name={`${PASSIVES[k as PassiveType].sprite.template}|${PASSIVES[k as PassiveType].sprite.color}`} 
+                                    name={`${PASSIVES[k].sprite.template}|${PASSIVES[k].sprite.color}`} 
                                     className="w-full h-full"
                                 />
                                 <div className="absolute -bottom-1 -right-1 text-[6px] bg-black px-0.5 rounded leading-none text-white border border-gray-700">{v}</div>
                             </div>
-                        ))}
+                        )})}
                     </div>
                 </div>
             </div>
