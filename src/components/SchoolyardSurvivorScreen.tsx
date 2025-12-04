@@ -1,5 +1,4 @@
 
-
 import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
 import { ArrowLeft, RotateCcw, Heart, Pause } from 'lucide-react';
 import { HERO_IMAGE_DATA } from '../constants';
@@ -211,7 +210,7 @@ const createSchoolyardBackground = (): HTMLCanvasElement => {
     ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
     // Random pebbles and grass tufts
-    for (let i = 0; i < 2000; i++) {
+    for (let i = 0; i < 4000; i++) {
         const x = Math.random() * WORLD_WIDTH;
         const y = Math.random() * WORLD_HEIGHT;
         const size = Math.random() * 4 + 1;
@@ -230,33 +229,7 @@ const createSchoolyardBackground = (): HTMLCanvasElement => {
         ctx.fillRect(x, y, size, size);
     }
 
-    // Track Lines (White Chalk)
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-    ctx.lineWidth = 8;
-    ctx.lineCap = 'round';
-    
-    // Outer Track
-    ctx.beginPath();
-    const margin = 200;
-    const r = 300;
-    ctx.roundRect(margin, margin, WORLD_WIDTH - margin * 2, WORLD_HEIGHT - margin * 2, r);
-    ctx.stroke();
-
-    // Inner markings
-    ctx.beginPath();
-    ctx.moveTo(WORLD_WIDTH / 2, margin);
-    ctx.lineTo(WORLD_WIDTH / 2, margin + 200);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(WORLD_WIDTH / 2, WORLD_HEIGHT - margin);
-    ctx.lineTo(WORLD_WIDTH / 2, WORLD_HEIGHT - margin - 200);
-    ctx.stroke();
-
-    // Center Circle
-    ctx.beginPath();
-    ctx.arc(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, 150, 0, Math.PI * 2);
-    ctx.stroke();
+    // Track Removed
 
     return c;
 };
