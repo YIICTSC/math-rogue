@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
 import { ArrowLeft, RotateCcw, Swords, Zap, Shield, Heart, Crown, Footprints, Magnet, Book, Calculator, DollarSign, Box, Coffee } from 'lucide-react';
 import { HERO_IMAGE_DATA } from '../constants';
-import { SPRITE_TEMPLATES } from './PixelSprite';
+import PixelSprite, { SPRITE_TEMPLATES } from './PixelSprite';
 import { audioService } from '../services/audioService';
 
 // --- GAME CONSTANTS ---
@@ -10,7 +10,7 @@ const WORLD_WIDTH = 2000;
 const WORLD_HEIGHT = 2000;
 const PLAYER_SPEED = 4;
 const BASE_XP_REQUIREMENT = 10;
-const ZOOM_SCALE = 1.25; // Adjusted zoom
+const ZOOM_SCALE = 1.25;
 
 // --- TYPES ---
 type WeaponType = 
@@ -21,6 +21,12 @@ type PassiveType =
     'PROTEIN' | 'DRILL' | 'PROTRACTOR' | 'SHOES' | 'PAD' | 'LUNCHBOX' | 
     'MAGNET' | 'TEXTBOOK' | 'ABACUS' | 'CONSOLE' | 'MILK' | 'ORIGAMI';
 
+interface ItemSpriteConfig {
+    template: string;
+    color: string;
+    highlight: string;
+}
+
 interface WeaponDef {
     id: WeaponType;
     name: string;
@@ -28,54 +34,93 @@ interface WeaponDef {
     evolvedName: string;
     evolvedDesc: string;
     synergy: PassiveType;
-    icon: any; // Lucide Icon
-    color: string;
+    sprite: ItemSpriteConfig;
 }
 
 interface PassiveDef {
     id: PassiveType;
     name: string;
     desc: string;
-    icon: any;
+    sprite: ItemSpriteConfig;
 }
 
 const WEAPONS: Record<WeaponType, WeaponDef> = {
-    PENCIL: { id: 'PENCIL', name: 'ロケット鉛筆', desc: '近くの敵を攻撃', evolvedName: 'ガトリング・シャープ', evolvedDesc: '超高速連射', synergy: 'LUNCHBOX', icon: Swords, color: '#fbbf24' },
-    ERASER: { id: 'ERASER', name: '消しゴムシールド', desc: '周囲を回転', evolvedName: '修正液バリア', evolvedDesc: '触れた敵を消滅', synergy: 'PAD', icon: Shield, color: '#e5e7eb' },
-    RULER: { id: 'RULER', name: '30cm定規', desc: '横なぎ払い', evolvedName: '三角定規ブーメラン', evolvedDesc: '画面端で跳ね返る', synergy: 'PROTRACTOR', icon: Swords, color: '#22c55e' },
-    HIGHLIGHTER: { id: 'HIGHLIGHTER', name: '蛍光ペン', desc: '直線ビーム', evolvedName: 'レーザーポインター', evolvedDesc: '天からの極太レーザー', synergy: 'TEXTBOOK', icon: Zap, color: '#f0abfc' },
-    FLASK: { id: 'FLASK', name: '理科室のフラスコ', desc: '爆発する瓶を投げる', evolvedName: '実験失敗', evolvedDesc: '毒の霧を撒き散らす', synergy: 'MAGNET', icon: FlaskConical, color: '#3b82f6' },
-    RECORDER: { id: 'RECORDER', name: 'リコーダー', desc: '音波で押し返す', evolvedName: '校内放送(メタル)', evolvedDesc: '画面全体攻撃＆スタン', synergy: 'DRILL', icon: Zap, color: '#fca5a5' },
-    SOCCER: { id: 'SOCCER', name: 'サッカーボール', desc: '跳ね返るボール', evolvedName: 'ドッジボールの神', evolvedDesc: '超高速乱反射', synergy: 'SHOES', icon: Circle, color: '#ffffff' },
-    UWABAKI: { id: 'UWABAKI', name: '上履きミサイル', desc: '強敵を追尾', evolvedName: 'ドローン配送', evolvedDesc: '編隊爆撃', synergy: 'CONSOLE', icon: Footprints, color: '#ef4444' },
-    CURRY: { id: 'CURRY', name: '給食のカレー', desc: 'ダメージ床生成', evolvedName: '激辛麻婆豆腐', evolvedDesc: 'マグマ地帯を生成', synergy: 'MILK', icon: Flame, color: '#d97706' },
-    COMPASS: { id: 'COMPASS', name: 'コンパス針', desc: '進行方向へ突き', evolvedName: 'ドリルスパイラル', evolvedDesc: '無敵突進', synergy: 'PROTEIN', icon: Swords, color: '#94a3b8' },
-    MOP: { id: 'MOP', name: '掃除モップ', desc: '広範囲なぎ払い', evolvedName: '聖なるハタキ', evolvedDesc: '弾消し＆衝撃波', synergy: 'ORIGAMI', icon: Swords, color: '#a8a29e' },
-    MAGNIFIER: { id: 'MAGNIFIER', name: '虫眼鏡', desc: '定点照射攻撃', evolvedName: '天体望遠鏡', evolvedDesc: '巨大な光の柱', synergy: 'ABACUS', icon: Search, color: '#60a5fa' },
+    PENCIL: { 
+        id: 'PENCIL', name: 'ロケット鉛筆', desc: '近くの敵を攻撃', 
+        evolvedName: 'ガトリング・シャープ', evolvedDesc: '超高速連射', synergy: 'LUNCHBOX',
+        sprite: { template: 'SWORD', color: '#fbbf24', highlight: '#fcd34d' } 
+    },
+    ERASER: { 
+        id: 'ERASER', name: '消しゴムシールド', desc: '周囲を回転', 
+        evolvedName: '修正液バリア', evolvedDesc: '触れた敵を消滅', synergy: 'PAD',
+        sprite: { template: 'SHIELD', color: '#f3f4f6', highlight: '#ffffff' } 
+    },
+    RULER: { 
+        id: 'RULER', name: '30cm定規', desc: '横なぎ払い', 
+        evolvedName: '三角定規ブーメラン', evolvedDesc: '画面端で跳ね返る', synergy: 'PROTRACTOR',
+        sprite: { template: 'SWORD', color: '#22c55e', highlight: '#86efac' }
+    },
+    HIGHLIGHTER: { 
+        id: 'HIGHLIGHTER', name: '蛍光ペン', desc: '直線ビーム', 
+        evolvedName: 'レーザーポインター', evolvedDesc: '天からの極太レーザー', synergy: 'TEXTBOOK',
+        sprite: { template: 'SWORD', color: '#f0abfc', highlight: '#fae8ff' }
+    },
+    FLASK: { 
+        id: 'FLASK', name: '理科室のフラスコ', desc: '爆発する瓶を投げる', 
+        evolvedName: '実験失敗', evolvedDesc: '毒の霧を撒き散らす', synergy: 'MAGNET',
+        sprite: { template: 'POTION', color: '#3b82f6', highlight: '#93c5fd' }
+    },
+    RECORDER: { 
+        id: 'RECORDER', name: 'リコーダー', desc: '音波で押し返す', 
+        evolvedName: '校内放送(メタル)', evolvedDesc: '画面全体攻撃＆スタン', synergy: 'DRILL',
+        sprite: { template: 'SWORD', color: '#fca5a5', highlight: '#ffe4e6' }
+    },
+    SOCCER: { 
+        id: 'SOCCER', name: 'サッカーボール', desc: '跳ね返るボール', 
+        evolvedName: 'ドッジボールの神', evolvedDesc: '超高速乱反射', synergy: 'SHOES',
+        sprite: { template: 'SLIME', color: '#ffffff', highlight: '#d1d5db' } // Round shape
+    },
+    UWABAKI: { 
+        id: 'UWABAKI', name: '上履きミサイル', desc: '強敵を追尾', 
+        evolvedName: 'ドローン配送', evolvedDesc: '編隊爆撃', synergy: 'CONSOLE',
+        sprite: { template: 'SHOE', color: '#ef4444', highlight: '#fca5a5' }
+    },
+    CURRY: { 
+        id: 'CURRY', name: '給食のカレー', desc: 'ダメージ床生成', 
+        evolvedName: '激辛麻婆豆腐', evolvedDesc: 'マグマ地帯を生成', synergy: 'MILK',
+        sprite: { template: 'SLIME', color: '#d97706', highlight: '#fbbf24' }
+    },
+    COMPASS: { 
+        id: 'COMPASS', name: 'コンパス針', desc: '進行方向へ突き', 
+        evolvedName: 'ドリルスパイラル', evolvedDesc: '無敵突進', synergy: 'PROTEIN',
+        sprite: { template: 'SWORD', color: '#94a3b8', highlight: '#cbd5e1' }
+    },
+    MOP: { 
+        id: 'MOP', name: '掃除モップ', desc: '広範囲なぎ払い', 
+        evolvedName: '聖なるハタキ', evolvedDesc: '弾消し＆衝撃波', synergy: 'ORIGAMI',
+        sprite: { template: 'PLANT', color: '#a8a29e', highlight: '#e7e5e4' }
+    },
+    MAGNIFIER: { 
+        id: 'MAGNIFIER', name: '虫眼鏡', desc: '定点照射攻撃', 
+        evolvedName: '天体望遠鏡', evolvedDesc: '巨大な光の柱', synergy: 'ABACUS',
+        sprite: { template: 'EYE', color: '#60a5fa', highlight: '#bfdbfe' }
+    },
 };
 
 const PASSIVES: Record<PassiveType, PassiveDef> = {
-    PROTEIN: { id: 'PROTEIN', name: 'ムキムキプロテイン', desc: 'ダメージ +10%', icon: Swords },
-    DRILL: { id: 'DRILL', name: '計算ドリル', desc: 'クールダウン -5%', icon: Calculator },
-    PROTRACTOR: { id: 'PROTRACTOR', name: '分度器', desc: '攻撃範囲 +10%', icon: ArrowUpRight },
-    SHOES: { id: 'SHOES', name: '瞬足シューズ', desc: '移動速度 +10%', icon: Footprints },
-    PAD: { id: 'PAD', name: '硬い下敷き', desc: '被ダメ -1', icon: Shield },
-    LUNCHBOX: { id: 'LUNCHBOX', name: '早弁セット', desc: '弾速 +10%', icon: Box },
-    MAGNET: { id: 'MAGNET', name: 'U字磁石', desc: '回収範囲拡大', icon: Magnet },
-    TEXTBOOK: { id: 'TEXTBOOK', name: '教科書', desc: '効果時間 +10%', icon: Book },
-    ABACUS: { id: 'ABACUS', name: 'そろばん', desc: '発射数 +1', icon: Calculator },
-    CONSOLE: { id: 'CONSOLE', name: 'ゲーム機', desc: 'クリティカル率UP', icon: Gamepad2 },
-    MILK: { id: 'MILK', name: '牛乳', desc: 'HP自然回復', icon: Coffee },
-    ORIGAMI: { id: 'ORIGAMI', name: '金ピカ折り紙', desc: '獲得ゴールドUP', icon: DollarSign },
+    PROTEIN: { id: 'PROTEIN', name: 'ムキムキプロテイン', desc: 'ダメージ +10%', sprite: { template: 'MUSCLE', color: '#ef4444', highlight: '#fca5a5' } },
+    DRILL: { id: 'DRILL', name: '計算ドリル', desc: 'クールダウン -5%', sprite: { template: 'NOTEBOOK', color: '#fcd34d', highlight: '#fef08a' } },
+    PROTRACTOR: { id: 'PROTRACTOR', name: '分度器', desc: '攻撃範囲 +10%', sprite: { template: 'SHIELD', color: '#60a5fa', highlight: '#bfdbfe' } },
+    SHOES: { id: 'SHOES', name: '瞬足シューズ', desc: '移動速度 +10%', sprite: { template: 'SHOE', color: '#3b82f6', highlight: '#93c5fd' } },
+    PAD: { id: 'PAD', name: '硬い下敷き', desc: '被ダメ -1', sprite: { template: 'SHIELD', color: '#a855f7', highlight: '#d8b4fe' } },
+    LUNCHBOX: { id: 'LUNCHBOX', name: '早弁セット', desc: '弾速 +10%', sprite: { template: 'BACKPACK', color: '#f97316', highlight: '#fdba74' } },
+    MAGNET: { id: 'MAGNET', name: 'U字磁石', desc: '回収範囲拡大', sprite: { template: 'SHIELD', color: '#ef4444', highlight: '#d1d5db' } }, // Red/Grey
+    TEXTBOOK: { id: 'TEXTBOOK', name: '教科書', desc: '効果時間 +10%', sprite: { template: 'NOTEBOOK', color: '#22c55e', highlight: '#86efac' } },
+    ABACUS: { id: 'ABACUS', name: 'そろばん', desc: '発射数 +1', sprite: { template: 'NOTEBOOK', color: '#78350f', highlight: '#b45309' } },
+    CONSOLE: { id: 'CONSOLE', name: 'ゲーム機', desc: 'クリティカル率UP', sprite: { template: 'ROBOT', color: '#4b5563', highlight: '#9ca3af' } },
+    MILK: { id: 'MILK', name: '牛乳', desc: 'HP自然回復', sprite: { template: 'POTION', color: '#ffffff', highlight: '#e5e7eb' } },
+    ORIGAMI: { id: 'ORIGAMI', name: '金ピカ折り紙', desc: '獲得ゴールドUP', sprite: { template: 'FLIER', color: '#eab308', highlight: '#fef08a' } },
 };
-
-// Placeholder icons for imports
-function FlaskConical(props:any){return <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 2v7.31"/><path d="M14 2v7.31"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/></svg>}
-function Flame(props:any){return <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.1.2-2.2.6-3.3.7 1.2 2.3 2.5 2.9 3.8z"/></svg>}
-function Search(props:any){return <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>}
-function Circle(props:any){return <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/></svg>}
-function ArrowUpRight(props:any){return <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>}
-function Gamepad2(props:any){return <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="6" y1="11" x2="10" y2="11"/><line x1="8" y1="9" x2="8" y2="13"/><line x1="15" y1="12" x2="15.01" y2="12"/><line x1="18" y1="10" x2="18.01" y2="10"/><rect x="2" y="6" width="20" height="12" rx="2"/></svg>}
 
 interface Entity {
     id: number;
@@ -251,18 +296,12 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         const e2 = generateFromTemplate('BAT', '#a855f7', '#c084fc');
         spriteCache.current['ENEMY_2'] = e2; spriteCache.current['ENEMY_2_FLASH'] = createFlashSprite(e2);
         
-        // Item Sprites
-        spriteCache.current['PENCIL'] = generateFromTemplate('SWORD', '#fbbf24', '#fcd34d');
-        spriteCache.current['ERASER'] = generateFromTemplate('SHIELD', '#ffffff', '#e5e7eb');
-        spriteCache.current['RULER'] = generateFromTemplate('NOTEBOOK', '#22c55e', '#4ade80');
-        spriteCache.current['FLASK'] = generateFromTemplate('POTION', '#3b82f6', '#93c5fd');
-        spriteCache.current['RECORDER'] = generateFromTemplate('SWORD', '#fca5a5', '#fecaca'); 
-        spriteCache.current['SOCCER'] = generateFromTemplate('SLIME', '#ffffff', '#000000');
-        spriteCache.current['UWABAKI'] = generateFromTemplate('SHOE', '#ef4444', '#f87171');
-        spriteCache.current['CURRY'] = generateFromTemplate('SLIME', '#d97706', '#f59e0b');
-        spriteCache.current['COMPASS'] = generateFromTemplate('SWORD', '#94a3b8', '#cbd5e1');
-        spriteCache.current['MOP'] = generateFromTemplate('PLANT', '#a8a29e', '#d6d3d1');
-        spriteCache.current['MAGNIFIER'] = generateFromTemplate('EYE', '#60a5fa', '#93c5fd');
+        // Item Sprites (Generated from WEAPONS config)
+        Object.values(WEAPONS).forEach(w => {
+            spriteCache.current[w.id] = generateFromTemplate(w.sprite.template, w.sprite.color, w.sprite.highlight);
+        });
+        
+        // Gem Sprite
         spriteCache.current['GEM'] = generateFromTemplate('EYE', '#eab308', '#fde047');
 
         const loop = () => {
@@ -952,19 +991,27 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 </div>
 
                 <div className="w-1/3 flex flex-col items-end gap-1 opacity-90">
-                    <div className="flex flex-wrap justify-end gap-0.5 max-w-[120px]">
+                    <div className="flex flex-wrap justify-end gap-0.5 max-w-[140px]">
                         {Object.entries(weapons).map(([k,v]) => v && (
-                            <div key={k} className={`w-6 h-6 bg-slate-800 border ${v.level>=8?'border-yellow-400':'border-gray-500'} flex items-center justify-center relative`}>
-                                {React.createElement(WEAPONS[k as WeaponType].icon, { size: 12, color: WEAPONS[k as WeaponType].color })}
-                                <div className="absolute -bottom-1 -right-1 text-[6px] bg-black px-0.5 rounded leading-none">{v.level}</div>
+                            <div key={k} className={`w-7 h-7 bg-slate-800 border ${v.level>=8?'border-yellow-400':'border-gray-500'} flex items-center justify-center relative p-0.5`}>
+                                <PixelSprite 
+                                    seed={k} 
+                                    name={`${WEAPONS[k as WeaponType].sprite.template}|${WEAPONS[k as WeaponType].sprite.color}`} 
+                                    className="w-full h-full"
+                                />
+                                <div className="absolute -bottom-1 -right-1 text-[6px] bg-black px-0.5 rounded leading-none text-white border border-gray-700">{v.level}</div>
                             </div>
                         ))}
                     </div>
-                    <div className="flex flex-wrap justify-end gap-0.5 max-w-[120px]">
+                    <div className="flex flex-wrap justify-end gap-0.5 max-w-[140px]">
                         {Object.entries(passives).map(([k,v]) => v>0 && (
-                            <div key={k} className="w-5 h-5 bg-slate-900 border border-gray-600 flex items-center justify-center relative">
-                                {React.createElement(PASSIVES[k as PassiveType].icon, { size: 10, color: 'white' })}
-                                <div className="absolute -bottom-1 -right-1 text-[6px] bg-black px-0.5 rounded leading-none">{v}</div>
+                            <div key={k} className="w-6 h-6 bg-slate-900 border border-gray-600 flex items-center justify-center relative p-0.5">
+                                <PixelSprite 
+                                    seed={k} 
+                                    name={`${PASSIVES[k as PassiveType].sprite.template}|${PASSIVES[k as PassiveType].sprite.color}`} 
+                                    className="w-full h-full"
+                                />
+                                <div className="absolute -bottom-1 -right-1 text-[6px] bg-black px-0.5 rounded leading-none text-white border border-gray-700">{v}</div>
                             </div>
                         ))}
                     </div>
@@ -979,12 +1026,16 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                     <h2 className="text-4xl font-bold text-yellow-400 mb-6 animate-pulse text-shadow-lg">LEVEL UP!</h2>
                     <div className="grid grid-cols-1 gap-4 w-full max-w-sm max-h-[70vh] overflow-y-auto custom-scrollbar">
                         {upgradeOptions.map((opt, idx) => {
-                            let itemDef: any = opt.type === 'WEAPON' ? WEAPONS[opt.id as WeaponType] : (opt.type === 'PASSIVE' ? PASSIVES[opt.id as PassiveType] : { name: '給食', desc: 'HP 30回復', icon: Heart, color: 'pink' });
+                            let itemDef: any = opt.type === 'WEAPON' ? WEAPONS[opt.id as WeaponType] : (opt.type === 'PASSIVE' ? PASSIVES[opt.id as PassiveType] : { name: '給食', desc: 'HP 30回復', sprite: { template: 'POTION', color: '#f472b6' } });
                             let isEvo = opt.isEvo;
                             return (
                                 <button key={idx} onClick={() => selectUpgrade(opt)} className={`bg-slate-800 border-2 ${isEvo ? 'border-yellow-400 bg-yellow-900/30' : 'border-slate-600'} hover:bg-slate-700 p-3 rounded-xl flex items-center text-left transition-all group relative overflow-hidden shadow-lg`}>
-                                    <div className={`p-3 rounded-full bg-black/40 mr-4 ${isEvo ? 'animate-bounce' : ''} shrink-0`}>
-                                        {React.createElement(itemDef.icon, { size: 32, color: itemDef.color || 'white' })}
+                                    <div className={`w-12 h-12 bg-black/40 mr-4 ${isEvo ? 'animate-bounce' : ''} shrink-0 p-1 border border-slate-600 rounded`}>
+                                        <PixelSprite 
+                                            seed={opt.id} 
+                                            name={`${itemDef.sprite.template}|${itemDef.sprite.color}`} 
+                                            className="w-full h-full"
+                                        />
                                     </div>
                                     <div className="flex-1">
                                         <div className="flex justify-between items-center mb-1">
