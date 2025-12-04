@@ -229,8 +229,6 @@ const createSchoolyardBackground = (): HTMLCanvasElement => {
         ctx.fillRect(x, y, size, size);
     }
 
-    // Track Removed
-
     return c;
 };
 
@@ -1054,8 +1052,12 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
     // --- RENDER ---
     return (
-        <div className="flex flex-col h-full w-full bg-black text-white relative items-center justify-center font-mono overflow-hidden touch-none" ref={containerRef}
+        <div 
+            className="flex flex-col h-full w-full bg-black text-white relative items-center justify-center font-mono overflow-hidden touch-none select-none"
+            ref={containerRef}
+            style={{ WebkitUserSelect: 'none', WebkitTouchCallout: 'none', userSelect: 'none' }}
             onTouchStart={(e) => {
+                // e.preventDefault(); // Might block some default behaviors but safer to rely on CSS touch-action
                 if (gameState.current !== 'PLAYING') return;
                 const t = e.touches[0];
                 setJoystickUI({ active: true, startX: t.clientX, startY: t.clientY, curX: t.clientX, curY: t.clientY });
