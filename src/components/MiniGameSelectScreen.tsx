@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Club, HelpCircle, Gamepad2 } from 'lucide-react';
+import { ArrowLeft, Club, HelpCircle, Gamepad2, Skull, Sword } from 'lucide-react';
 
 interface MiniGameSelectScreenProps {
   onSelect: (gameId: string) => void;
@@ -32,19 +32,20 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
                 </span>
             </button>
 
-            {/* Placeholder Card */}
-            <div className="relative bg-gray-800/30 border-4 border-gray-700 p-8 rounded-xl flex flex-col items-center select-none overflow-hidden group">
-                <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-10">
-                    <div className="bg-gray-900 border-2 border-gray-600 px-6 py-2 rounded text-gray-400 font-bold -rotate-12 text-2xl shadow-2xl">COMING SOON</div>
+            {/* Survivor Game Card */}
+            <button
+                onClick={() => onSelect('SURVIVOR')}
+                className="group relative bg-slate-800 border-4 border-slate-600 hover:border-red-500 hover:bg-slate-700 p-8 rounded-xl flex flex-col items-center transition-all shadow-xl hover:shadow-[0_0_30px_rgba(239,68,68,0.4)] overflow-hidden"
+            >
+                <div className="absolute top-0 right-0 bg-red-600 text-xs font-bold px-3 py-1 rounded-bl-lg shadow-md">NEW!</div>
+                <div className="bg-red-900/50 p-6 rounded-full mb-6 group-hover:scale-110 transition-transform duration-300 border-2 border-red-500/30">
+                    <Skull size={64} className="text-red-400 fill-current" />
                 </div>
-                <div className="bg-gray-700/50 p-6 rounded-full mb-6 filter blur-[2px]">
-                    <HelpCircle size={64} className="text-gray-600" />
-                </div>
-                <span className="text-2xl font-bold mb-3 text-gray-600 blur-[1px]">???</span>
-                <span className="text-sm text-gray-600 blur-[1px]">
-                    新しいゲームを開発中...
+                <span className="text-2xl font-bold mb-3 text-white group-hover:text-red-300 transition-colors">校庭サバイバー</span>
+                <span className="text-sm text-gray-400 group-hover:text-gray-200">
+                    迫りくる敵の大群から生き残れ！<br/>ヴァンサバ風アクション。
                 </span>
-            </div>
+            </button>
         </div>
 
         <button 

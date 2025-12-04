@@ -24,6 +24,7 @@ import RankingScreen from './components/RankingScreen';
 import MathChallengeScreen from './components/MathChallengeScreen';
 import DebugMenuScreen from './components/DebugMenuScreen';
 import PokerGameScreen from './components/PokerGameScreen';
+import SchoolyardSurvivorScreen from './components/SchoolyardSurvivorScreen';
 import MiniGameSelectScreen from './components/MiniGameSelectScreen';
 import Card from './components/Card';
 import { audioService } from './services/audioService';
@@ -287,10 +288,9 @@ const App: React.FC = () => {
           gameState.screen !== GameScreen.CHARACTER_SELECTION &&
           gameState.screen !== GameScreen.MODE_SELECTION &&
           gameState.screen !== GameScreen.DEBUG_MENU &&
-          gameState.screen !== GameScreen.MINI_GAME_SELECT // Don't save on select screen
-          // Removed MINI_GAME_POKER from exclusion to enable auto-save
-          ) {
-          
+          gameState.screen !== GameScreen.MINI_GAME_SELECT &&
+          gameState.screen !== GameScreen.MINI_GAME_SURVIVOR
+      ) {
           storageService.saveGame(gameState);
       }
   }, [gameState]);
@@ -360,6 +360,8 @@ const App: React.FC = () => {
       audioService.playSound('select');
       if (gameId === 'POKER') {
           setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_POKER }));
+      } else if (gameId === 'SURVIVOR') {
+          setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_SURVIVOR }));
       }
   };
 
@@ -833,7 +835,6 @@ const App: React.FC = () => {
       ];
       return events[Math.floor(Math.random() * events.length)];
   };
-
   const handleNodeSelect = async (node: MapNode) => {
       setIsLoading(true);
       audioService.playSound('select');
@@ -843,7 +844,7 @@ const App: React.FC = () => {
       
       try {
         if (node.type === NodeType.COMBAT || node.type === NodeType.ELITE || node.type === NodeType.BOSS || node.type === NodeType.START) {
-            // ... (combat logic remains unchanged)
+            
             const actMultiplier = gameState.act; 
             const floorDifficulty = node.y * (1 + (actMultiplier * 0.5));
             
@@ -907,7 +908,6 @@ const App: React.FC = () => {
             p.cardsPlayedThisTurn = 0;
             p.attacksPlayedThisTurn = 0;
 
-            // --- RELIC EFFECTS (Start of Battle) ---
             if (p.relics.find(r => r.id === 'VAJRA')) p.strength += 1;
             if (p.relics.find(r => r.id === 'HACHIMAKI')) p.powers['DEXTERITY'] = 1;
             if (p.relics.find(r => r.id === 'SEED_PACK')) p.powers['THORNS'] = 3;
@@ -949,7 +949,6 @@ const App: React.FC = () => {
                 if(c) p.hand.push(c);
             }
             
-            // Post-Draw Relic Effects
             if (p.relics.find(r => r.id === 'ENCHIRIDION')) {
                 const powers = Object.values(CARDS_LIBRARY).filter(c => c.type === CardType.POWER);
                 const power = powers[Math.floor(Math.random() * powers.length)];
@@ -990,7 +989,6 @@ const App: React.FC = () => {
         } else if (node.type === NodeType.REST) {
             setGameState(prev => {
                 const p = { ...prev.player };
-                // Rest Site Entry Effects
                 if (p.relics.find(r => r.id === 'LUXURY_FUTON')) {
                     const heal = Math.floor(p.deck.length / 5) * 2;
                     if (heal > 0) {
@@ -1005,7 +1003,6 @@ const App: React.FC = () => {
             audioService.playBGM('menu');
 
         } else if (node.type === NodeType.SHOP) {
-            // ... (shop generation remains unchanged)
             const shopCandidates = Object.values(CARDS_LIBRARY).filter(c => 
                 c.type !== CardType.STATUS && 
                 c.type !== CardType.CURSE && 
@@ -1063,9 +1060,7 @@ const App: React.FC = () => {
 
   const handleSelectEnemy = (id: string) => setGameState(prev => ({ ...prev, selectedEnemyId: id }));
 
-  // ... (Other handlers: applyDebuff, handleHandSelection, handleUsePotion, handlePlayCard, startPlayerTurn, handleEndTurn, handleSynthesizeCard, handleNodeComplete, handleEventContinue, returnToTitle, handleLegacyCardSelect, handleRetry, useEffect for battle end, goToRewardPhase, handleMathChallengeComplete, handleRewardSelection, finishRewardPhase, handleRestAction, handleUpgradeCard)
-  // Re-inserting required function signatures for completeness context, but body is same as previous
-  
+  // ... (Other handlers are same as provided code, abbreviated) ...
   const applyDebuff = (enemy: Enemy, type: 'WEAK' | 'VULNERABLE' | 'POISON', amount: number) => {
       if (enemy.artifact > 0 && type !== 'POISON') { 
           enemy.artifact--;
@@ -1080,7 +1075,6 @@ const App: React.FC = () => {
       setGameState(prev => {
           const p = { ...prev.player };
           const mode = prev.selectionState;
-          
           if (mode.type === 'DISCARD' || mode.type === 'EXHAUST') {
               p.hand = p.hand.filter(c => c.id !== card.id);
               if (mode.type === 'DISCARD') {
@@ -2361,7 +2355,7 @@ const App: React.FC = () => {
                                 <h3 className="text-white font-bold mb-1">■ アップデート (Update)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
                                     <li>ミニゲーム選択画面を追加しました。</li>
-                                    <li>ポーカーミニゲームへのアクセスを整理しました。</li>
+                                    <li>ミニゲームへのアクセスを整理しました。</li>
                                 </ul>
                             </section>
                         </div>
@@ -2389,6 +2383,25 @@ const App: React.FC = () => {
                     savedState={gameState.pokerState}
                     onSave={(state) => setGameState(prev => ({ ...prev, pokerState: state }))}
                 />
+            )}
+            {gameState.screen === GameScreen.DEBUG_MENU && (
+                <DebugMenuScreen onStart={handleDebugStart} onBack={returnToTitle} />
+            )}
+
+            {gameState.screen === GameScreen.MINI_GAME_SELECT && (
+                <MiniGameSelectScreen onSelect={handleMiniGameSelect} onBack={returnToTitle} />
+            )}
+
+            {gameState.screen === GameScreen.MINI_GAME_POKER && (
+                <PokerGameScreen 
+                    onBack={returnToTitle} 
+                    savedState={gameState.pokerState}
+                    onSave={(state) => setGameState(prev => ({ ...prev, pokerState: state }))}
+                />
+            )}
+
+            {gameState.screen === GameScreen.MINI_GAME_SURVIVOR && (
+                <SchoolyardSurvivorScreen onBack={returnToTitle} />
             )}
 
             {gameState.screen === GameScreen.MODE_SELECTION && (
