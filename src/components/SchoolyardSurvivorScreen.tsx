@@ -10,7 +10,7 @@ const WORLD_WIDTH = 2000;
 const WORLD_HEIGHT = 2000;
 const PLAYER_SPEED = 4;
 const BASE_XP_REQUIREMENT = 10;
-const ZOOM_SCALE = 1.5; // Zoom in for mobile visibility
+const ZOOM_SCALE = 1.25; // Adjusted zoom
 
 // --- TYPES ---
 type WeaponType = 
@@ -157,7 +157,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     
     // Viewport
     const [viewSize, setViewSize] = useState({ width: 800, height: 600 });
-    const camera = useRef({ x: 0, y: 0 });
+    const camera = useRef({ x: WORLD_WIDTH/2, y: WORLD_HEIGHT/2 }); // Start centered
 
     // Game State
     const gameState = useRef<'PLAYING' | 'PAUSED' | 'GAME_OVER' | 'LEVEL_UP'>('PLAYING');
@@ -333,16 +333,19 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         player.current.y = Math.max(16, Math.min(WORLD_HEIGHT - 16, player.current.y));
         if (player.current.flashTime > 0) player.current.flashTime--;
 
-        // Camera Follow
-        // Lerp towards player
-        const targetCamX = player.current.x - viewSize.width / (2 * ZOOM_SCALE);
-        const targetCamY = player.current.y - viewSize.height / (2 * ZOOM_SCALE);
+        // Camera Follow (Center Tracking)
+        const targetCamX = player.current.x;
+        const targetCamY = player.current.y;
+        
         camera.current.x += (targetCamX - camera.current.x) * 0.1;
         camera.current.y += (targetCamY - camera.current.y) * 0.1;
         
-        // Clamp Camera
-        camera.current.x = Math.max(0, Math.min(WORLD_WIDTH - viewSize.width/ZOOM_SCALE, camera.current.x));
-        camera.current.y = Math.max(0, Math.min(WORLD_HEIGHT - viewSize.height/ZOOM_SCALE, camera.current.y));
+        // Clamp Camera (Center Point Constraint)
+        const halfViewW = viewSize.width / (2 * ZOOM_SCALE);
+        const halfViewH = viewSize.height / (2 * ZOOM_SCALE);
+        
+        camera.current.x = Math.max(halfViewW, Math.min(WORLD_WIDTH - halfViewW, camera.current.x));
+        camera.current.y = Math.max(halfViewH, Math.min(WORLD_HEIGHT - halfViewH, camera.current.y));
 
         // Weapon Firing
         Object.keys(weaponsRef.current).forEach((key) => {
@@ -438,7 +441,6 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 p.x += p.dx; p.y += p.dy;
                 // Bounce Logic for Soccer
                 if (p.type === 'SOCCER') {
-                    // Check against camera/view bounds or world bounds? World bounds.
                     if (p.x < 0 || p.x > WORLD_WIDTH) p.dx *= -1;
                     if (p.y < 0 || p.y > WORLD_HEIGHT) p.dy *= -1;
                 }
@@ -447,7 +449,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 }
             }
 
-            // Hit Detect (Simplified optimization: check distance to player first to see if relevant? No, projectiles fly away)
+            // Hit Detect
             let hit = false;
             for (const e of enemies.current) {
                 if (p.hitIds.includes(e.id)) continue;
@@ -484,7 +486,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         if (frameCount.current % spawnRate === 0) {
             // Spawn around player, just outside view
             const angle = Math.random() * Math.PI * 2;
-            const dist = 500; // Just outside 400x300 zoom area
+            const dist = 600; // Adjusted for zoom
             const ex = player.current.x + Math.cos(angle) * dist;
             const ey = player.current.y + Math.sin(angle) * dist;
             
@@ -703,15 +705,13 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
         ctx.save();
         
-        // Camera Transform: Top-Left based logic for stability and easier debugging
-        // 1. Move to center of screen to scale from center? No, standard 2D cams usually scale then translate.
-        // Let's stick to standard 2D Camera:
-        // World -> View:  (WorldPos - CameraPos) * Zoom + CenterOffset (if desired)
-        
-        // We want Camera.x, Camera.y to be the top-left of the viewport in World Space.
-        
+        // Camera Transform (Center on screen)
+        // Move to center of screen
+        ctx.translate(viewSize.width/2, viewSize.height/2);
+        // Apply Zoom
         ctx.scale(ZOOM_SCALE, ZOOM_SCALE);
-        ctx.translate(-Math.floor(camera.current.x), -Math.floor(camera.current.y));
+        // Translate camera (inverted) to center player
+        ctx.translate(-camera.current.x, -camera.current.y);
 
         // Draw World Bounds
         ctx.strokeStyle = '#374151';
@@ -722,23 +722,20 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         ctx.strokeStyle = '#1f2937';
         ctx.lineWidth = 1;
         
-        // Visible area in World Coords
-        const viewW = viewSize.width / ZOOM_SCALE;
-        const viewH = viewSize.height / ZOOM_SCALE;
-        
-        const startX = Math.floor(camera.current.x / 50) * 50;
-        const endX = Math.floor((camera.current.x + viewW) / 50) * 50 + 50;
-        const startY = Math.floor(camera.current.y / 50) * 50;
-        const endY = Math.floor((camera.current.y + viewH) / 50) * 50 + 50;
+        const halfW = viewSize.width / (2 * ZOOM_SCALE);
+        const halfH = viewSize.height / (2 * ZOOM_SCALE);
+        const startX = Math.floor((camera.current.x - halfW) / 50) * 50;
+        const endX = Math.ceil((camera.current.x + halfW) / 50) * 50;
+        const startY = Math.floor((camera.current.y - halfH) / 50) * 50;
+        const endY = Math.ceil((camera.current.y + halfH) / 50) * 50;
 
         for(let x=startX; x<=endX; x+=50) { ctx.beginPath(); ctx.moveTo(x,startY); ctx.lineTo(x,endY); ctx.stroke(); }
         for(let y=startY; y<=endY; y+=50) { ctx.beginPath(); ctx.moveTo(startX,y); ctx.lineTo(endX,y); ctx.stroke(); }
 
         // Gems
-        const margin = 100;
         gems.current.forEach(g => {
-            if (g.x < camera.current.x - margin || g.x > camera.current.x + viewW + margin ||
-                g.y < camera.current.y - margin || g.y > camera.current.y + viewH + margin) return;
+            // Cull
+            if (Math.abs(g.x - camera.current.x) > (viewSize.width/ZOOM_SCALE) || Math.abs(g.y - camera.current.y) > (viewSize.height/ZOOM_SCALE)) return;
             const sprite = spriteCache.current['GEM'];
             if(sprite) ctx.drawImage(sprite, g.x-8, g.y-8, 16, 16);
         });
@@ -774,9 +771,8 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
         // Enemies
         enemies.current.forEach(e => {
-            if (e.x < camera.current.x - margin || e.x > camera.current.x + viewW + margin ||
-                e.y < camera.current.y - margin || e.y > camera.current.y + viewH + margin) return;
-            
+            // Cull
+            if (Math.abs(e.x - camera.current.x) > (viewSize.width/ZOOM_SCALE + 50) || Math.abs(e.y - camera.current.y) > (viewSize.height/ZOOM_SCALE + 50)) return;
             const baseKey = e.type === 'ENEMY_2' ? 'ENEMY_2' : 'ENEMY_1';
             const spriteKey = e.flashTime > 0 ? `${baseKey}_FLASH` : baseKey;
             const sprite = spriteCache.current[spriteKey];
@@ -885,6 +881,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
     const handleRestart = () => {
         player.current = { ...player.current, x: WORLD_WIDTH/2, y: WORLD_HEIGHT/2, hp: 100, dead: false };
+        camera.current = { x: WORLD_WIDTH/2, y: WORLD_HEIGHT/2 };
         enemies.current = []; projectiles.current = []; gems.current = []; damageTexts.current = [];
         score.current = 0; time.current = 0; frameCount.current = 0; level.current = 1; xp.current = 0; nextLevelXp.current = BASE_XP_REQUIREMENT;
         setWeapons({ PENCIL: { level: 1, cooldownTimer: 0 }, ERASER: undefined, RULER: undefined, HIGHLIGHTER: undefined, FLASK: undefined, RECORDER: undefined, SOCCER: undefined, UWABAKI: undefined, CURRY: undefined, COMPASS: undefined, MOP: undefined, MAGNIFIER: undefined });
