@@ -1,14 +1,16 @@
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
 import { ArrowLeft, RotateCcw, Swords, Zap, Shield, Heart, Crown, Footprints, Magnet, Book, Calculator, DollarSign, Box, Coffee } from 'lucide-react';
 import { HERO_IMAGE_DATA } from '../constants';
 import { SPRITE_TEMPLATES } from './PixelSprite';
+import { audioService } from '../services/audioService';
 
 // --- GAME CONSTANTS ---
-const CANVAS_WIDTH = 800;
-const CANVAS_HEIGHT = 600;
-const PLAYER_SPEED = 3;
+const WORLD_WIDTH = 2000;
+const WORLD_HEIGHT = 2000;
+const PLAYER_SPEED = 4;
 const BASE_XP_REQUIREMENT = 10;
+const ZOOM_SCALE = 1.5; // Zoom in for mobile visibility
 
 // --- TYPES ---
 type WeaponType = 
@@ -153,9 +155,13 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     
+    // Viewport
+    const [viewSize, setViewSize] = useState({ width: 800, height: 600 });
+    const camera = useRef({ x: 0, y: 0 });
+
     // Game State
     const gameState = useRef<'PLAYING' | 'PAUSED' | 'GAME_OVER' | 'LEVEL_UP'>('PLAYING');
-    const player = useRef<Entity>({ id: 0, x: CANVAS_WIDTH/2, y: CANVAS_HEIGHT/2, type: 'WARRIOR', width: 24, height: 24, hp: 100, maxHp: 100, speed: PLAYER_SPEED, damage: 0, vx: 0, vy: 0, dead: false, flashTime: 0 });
+    const player = useRef<Entity>({ id: 0, x: WORLD_WIDTH/2, y: WORLD_HEIGHT/2, type: 'WARRIOR', width: 24, height: 24, hp: 100, maxHp: 100, speed: PLAYER_SPEED, damage: 0, vx: 0, vy: 0, dead: false, flashTime: 0 });
     const enemies = useRef<Entity[]>([]);
     const projectiles = useRef<Projectile[]>([]);
     const gems = useRef<Gem[]>([]);
@@ -189,11 +195,23 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     const spriteCache = useRef<Record<string, HTMLCanvasElement>>({});
     const lastDir = useRef<{x:number, y:number}>({x:1, y:0}); // For directional attacks
 
+    // --- Resize Logic ---
+    useLayoutEffect(() => {
+        const updateSize = () => {
+            if (containerRef.current) {
+                setViewSize({ width: containerRef.current.clientWidth, height: containerRef.current.clientHeight });
+            }
+        };
+        window.addEventListener('resize', updateSize);
+        updateSize();
+        return () => window.removeEventListener('resize', updateSize);
+    }, []);
+
     // --- HELPER: Template Gen ---
     const generateFromTemplate = (templateName: string, mainColor: string, highlightColor: string): HTMLCanvasElement => {
         const template = SPRITE_TEMPLATES[templateName] || SPRITE_TEMPLATES['SLIME'];
         const size = 16;
-        const scale = 2; 
+        const scale = 2; // Base texture scale
         const c = document.createElement('canvas');
         c.width = size * scale;
         c.height = size * scale;
@@ -213,6 +231,8 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
     // --- SETUP ---
     useEffect(() => {
+        audioService.playBGM('survivor_metal');
+
         const playerImg = new Image();
         playerImg.src = HERO_IMAGE_DATA;
         playerImg.onload = () => {
@@ -232,8 +252,8 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         spriteCache.current['ERASER'] = generateFromTemplate('SHIELD', '#ffffff', '#e5e7eb');
         spriteCache.current['RULER'] = generateFromTemplate('NOTEBOOK', '#22c55e', '#4ade80');
         spriteCache.current['FLASK'] = generateFromTemplate('POTION', '#3b82f6', '#93c5fd');
-        spriteCache.current['RECORDER'] = generateFromTemplate('SWORD', '#fca5a5', '#fecaca'); // Thin sword-like
-        spriteCache.current['SOCCER'] = generateFromTemplate('SLIME', '#ffffff', '#000000'); // Ball-like
+        spriteCache.current['RECORDER'] = generateFromTemplate('SWORD', '#fca5a5', '#fecaca'); 
+        spriteCache.current['SOCCER'] = generateFromTemplate('SLIME', '#ffffff', '#000000');
         spriteCache.current['UWABAKI'] = generateFromTemplate('SHOE', '#ef4444', '#f87171');
         spriteCache.current['CURRY'] = generateFromTemplate('SLIME', '#d97706', '#f59e0b');
         spriteCache.current['COMPASS'] = generateFromTemplate('SWORD', '#94a3b8', '#cbd5e1');
@@ -257,6 +277,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             cancelAnimationFrame(animId);
             window.removeEventListener('keydown', handleKeyDown);
             window.removeEventListener('keyup', handleKeyUp);
+            audioService.stopBGM();
         };
     }, []); 
 
@@ -308,9 +329,20 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
         player.current.x += dx * player.current.speed * speed;
         player.current.y += dy * player.current.speed * speed;
-        player.current.x = Math.max(16, Math.min(CANVAS_WIDTH - 16, player.current.x));
-        player.current.y = Math.max(16, Math.min(CANVAS_HEIGHT - 16, player.current.y));
+        player.current.x = Math.max(16, Math.min(WORLD_WIDTH - 16, player.current.x));
+        player.current.y = Math.max(16, Math.min(WORLD_HEIGHT - 16, player.current.y));
         if (player.current.flashTime > 0) player.current.flashTime--;
+
+        // Camera Follow
+        // Lerp towards player
+        const targetCamX = player.current.x - viewSize.width / (2 * ZOOM_SCALE);
+        const targetCamY = player.current.y - viewSize.height / (2 * ZOOM_SCALE);
+        camera.current.x += (targetCamX - camera.current.x) * 0.1;
+        camera.current.y += (targetCamY - camera.current.y) * 0.1;
+        
+        // Clamp Camera
+        camera.current.x = Math.max(0, Math.min(WORLD_WIDTH - viewSize.width/ZOOM_SCALE, camera.current.x));
+        camera.current.y = Math.max(0, Math.min(WORLD_HEIGHT - viewSize.height/ZOOM_SCALE, camera.current.y));
 
         // Weapon Firing
         Object.keys(weaponsRef.current).forEach((key) => {
@@ -360,7 +392,11 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 player.current.hp -= finalDmg;
                 player.current.flashTime = 30;
                 damageTexts.current.push({ id: Math.random(), x: player.current.x, y: player.current.y - 20, value: `-${Math.floor(finalDmg)}`, color: 'red', life: 60 });
-                if (player.current.hp <= 0) { gameState.current = 'GAME_OVER'; setUiState(prev => ({ ...prev, gameOver: true })); }
+                if (player.current.hp <= 0) { 
+                    gameState.current = 'GAME_OVER'; 
+                    setUiState(prev => ({ ...prev, gameOver: true })); 
+                    audioService.playSound('lose');
+                }
                 setUiState(prev => ({ ...prev, hp: player.current.hp }));
             }
             if (e.flashTime > 0) e.flashTime--;
@@ -378,14 +414,18 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 p.x = player.current.x + Math.cos(t) * radius;
                 p.y = player.current.y + Math.sin(t) * radius;
             } else if (p.type === 'HIGHLIGHTER') {
-                p.x = player.current.x + Math.cos(p.rotation) * 40; // Offset from player
+                p.x = player.current.x + Math.cos(p.rotation) * 40; 
                 p.y = player.current.y + Math.sin(p.rotation) * 40;
-                // Beam logic: collision handled by line rect, simple implementation here check line
             } else if (p.type === 'UWABAKI') {
                 // Homing
                 let target = null;
                 let maxHp = -1;
-                enemies.current.forEach(e => { if(e.hp > maxHp){ maxHp = e.hp; target = e; } });
+                // Only target visible/close enemies for performance
+                enemies.current.forEach(e => { 
+                    if(Math.abs(e.x - p.x) < 400 && Math.abs(e.y - p.y) < 300) {
+                        if(e.hp > maxHp){ maxHp = e.hp; target = e; } 
+                    }
+                });
                 if (target) {
                     const angle = Math.atan2((target as Entity).y - p.y, (target as Entity).x - p.x);
                     p.dx = Math.cos(angle) * (p.speed || 0);
@@ -393,33 +433,33 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 }
                 p.x += p.dx; p.y += p.dy;
             } else if (p.type === 'CURRY') {
-                // Static, do nothing
+                // Static
             } else {
                 p.x += p.dx; p.y += p.dy;
                 // Bounce Logic for Soccer
                 if (p.type === 'SOCCER') {
-                    if (p.x < 0 || p.x > CANVAS_WIDTH) p.dx *= -1;
-                    if (p.y < 0 || p.y > CANVAS_HEIGHT) p.dy *= -1;
+                    // Check against camera/view bounds or world bounds? World bounds.
+                    if (p.x < 0 || p.x > WORLD_WIDTH) p.dx *= -1;
+                    if (p.y < 0 || p.y > WORLD_HEIGHT) p.dy *= -1;
                 }
                 if (p.type === 'RULER') {
                     p.rotation += 0.2; // Spin
                 }
             }
 
-            // Hit Detect
+            // Hit Detect (Simplified optimization: check distance to player first to see if relevant? No, projectiles fly away)
             let hit = false;
             for (const e of enemies.current) {
                 if (p.hitIds.includes(e.id)) continue;
                 
-                // Simple circle collision
+                // Only check if close enough
+                if (Math.abs(p.x - e.x) > 100 || Math.abs(p.y - e.y) > 100) continue;
+
                 const range = (p.type === 'MOP' || p.type === 'RECORDER' || p.type === 'FLASK') ? 60 : 20;
                 const dist = Math.hypot(p.x - e.x, p.y - e.y);
                 
                 if (dist < range * p.scale) {
                     if (p.type === 'HIGHLIGHTER' || p.type === 'CURRY' || p.type === 'MAGNIFIER') {
-                        // Continuous damage: only hit every X frames? 
-                        // Simplified: Hit once per entity per projectile instance unless specifically coded otherwise
-                        // Re-use hitIds for tick-based damage? For now simple one-hit per projectile instance.
                         if (frameCount.current % 10 === 0) {
                             applyDamage(e, p);
                         }
@@ -442,16 +482,19 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         // Spawn Logic
         const spawnRate = Math.max(5, 60 - Math.floor(time.current / 5));
         if (frameCount.current % spawnRate === 0) {
-            const side = Math.floor(Math.random() * 4);
-            let ex = 0, ey = 0;
-            if (side === 0) { ex = Math.random() * CANVAS_WIDTH; ey = -20; }
-            else if (side === 1) { ex = CANVAS_WIDTH + 20; ey = Math.random() * CANVAS_HEIGHT; }
-            else if (side === 2) { ex = Math.random() * CANVAS_WIDTH; ey = CANVAS_HEIGHT + 20; }
-            else { ex = -20; ey = Math.random() * CANVAS_HEIGHT; }
+            // Spawn around player, just outside view
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 500; // Just outside 400x300 zoom area
+            const ex = player.current.x + Math.cos(angle) * dist;
+            const ey = player.current.y + Math.sin(angle) * dist;
             
+            // Keep within world bounds
+            const clampX = Math.max(0, Math.min(WORLD_WIDTH, ex));
+            const clampY = Math.max(0, Math.min(WORLD_HEIGHT, ey));
+
             const isStrong = Math.random() < Math.min(0.5, time.current * 0.005);
             enemies.current.push({
-                id: Math.random(), x: ex, y: ey, type: isStrong ? 'ENEMY_2' : 'ENEMY_1',
+                id: Math.random(), x: clampX, y: clampY, type: isStrong ? 'ENEMY_2' : 'ENEMY_1',
                 width: 24, height: 24, hp: 10 + time.current * (isStrong?2:0.5), maxHp: 10,
                 speed: 1 + Math.random()*0.5, damage: 5, vx: 0, vy: 0, dead: false, flashTime: 0
             });
@@ -475,6 +518,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                     level.current++;
                     nextLevelXp.current = Math.floor(nextLevelXp.current * 1.2);
                     generateUpgrades();
+                    audioService.playSound('win');
                 }
                 setUiState(prev => ({ ...prev, level: level.current, xpPercent: (xp.current/nextLevelXp.current)*100 }));
             }
@@ -516,6 +560,8 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     const fireWeapon = (type: WeaponType, level: number, evolved: boolean, dmg: number, scale: number, speed: number, duration: number, amount: number, luck: number) => {
         const p = player.current;
         const count = 1 + amount + Math.floor(level/3); // Base count increases with level + passive
+        
+        if (Math.random() < 0.3) audioService.playSound('attack'); // SFX Limiter
 
         switch (type) {
             case 'PENCIL':
@@ -524,7 +570,6 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 enemies.current.forEach(e => { const d = Math.hypot(e.x-p.x, e.y-p.y); if(d<min){ min=d; target=e; } });
                 if (target) {
                     const angle = Math.atan2((target as Entity).y - p.y, (target as Entity).x - p.x);
-                    // Gatling (Evolved) fires more
                     const volleys = evolved ? 3 : 1; 
                     for(let v=0; v<volleys; v++) {
                         setTimeout(() => {
@@ -541,9 +586,6 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 }
                 break;
             case 'ERASER':
-                // Orbiters re-spawned or updated. Simple spawn logic here.
-                // Clear old ones first if needed or manage count. 
-                // Simplified: Spawn new ones that expire when cooldown resets
                 for (let i=0; i<count; i++) {
                     const angle = (Math.PI * 2 / count) * i;
                     projectiles.current.push({
@@ -572,7 +614,6 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 });
                 break;
             case 'FLASK':
-                // Lobbed -> Explosion. Simplified to spawning explosion at random point
                 const tx = p.x + (Math.random()-0.5)*300;
                 const ty = p.y + (Math.random()-0.5)*300;
                 projectiles.current.push({
@@ -582,7 +623,6 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 });
                 break;
             case 'RECORDER':
-                // Radial pulse
                 projectiles.current.push({
                     id: Math.random(), x: p.x, y: p.y, dx: 0, dy: 0,
                     damage: dmg, type: evolved ? 'EVOLVED' : 'RECORDER', subType: 'RECORDER',
@@ -620,7 +660,6 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 break;
             case 'COMPASS':
                 const cAngle = Math.atan2(lastDir.current.y, lastDir.current.x);
-                // Multi-stab
                 for(let i=0; i<count+2; i++) {
                     setTimeout(() => {
                         projectiles.current.push({
@@ -643,7 +682,6 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             case 'MAGNIFIER':
                 const mx = p.x + (Math.random()-0.5)*400;
                 const my = p.y + (Math.random()-0.5)*400;
-                // Warning then hit (simplified to just hit after delay logic in projectile update could be added, but here direct spawn)
                 projectiles.current.push({
                     id: Math.random(), x: mx, y: my, dx: 0, dy: 0,
                     damage: dmg * 5, type: evolved ? 'EVOLVED' : 'MAGNIFIER', subType: 'MAGNIFIER',
@@ -659,21 +697,47 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        // BG
+        // Clear
         ctx.fillStyle = '#111827'; 
-        ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        ctx.fillRect(0, 0, viewSize.width, viewSize.height);
+
+        ctx.save();
+        
+        // Camera Transform (Center on screen)
+        // Move to center of screen
+        ctx.translate(viewSize.width/2, viewSize.height/2);
+        // Apply Zoom
+        ctx.scale(ZOOM_SCALE, ZOOM_SCALE);
+        // Translate camera (inverted) to center player
+        ctx.translate(-camera.current.x, -camera.current.y);
+
+        // Draw World Bounds
+        ctx.strokeStyle = '#374151';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+        
+        // Draw Grid
         ctx.strokeStyle = '#1f2937';
         ctx.lineWidth = 1;
-        for(let x=0; x<=CANVAS_WIDTH; x+=50) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,CANVAS_HEIGHT); ctx.stroke(); }
-        for(let y=0; y<=CANVAS_HEIGHT; y+=50) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(CANVAS_WIDTH,y); ctx.stroke(); }
+        // Optimization: Only draw grid in view? 
+        // Simple optimization: loop through visible area
+        const startX = Math.floor((camera.current.x - viewSize.width/ZOOM_SCALE) / 50) * 50;
+        const endX = Math.ceil((camera.current.x + viewSize.width/ZOOM_SCALE) / 50) * 50;
+        const startY = Math.floor((camera.current.y - viewSize.height/ZOOM_SCALE) / 50) * 50;
+        const endY = Math.ceil((camera.current.y + viewSize.height/ZOOM_SCALE) / 50) * 50;
+
+        for(let x=startX; x<=endX; x+=50) { ctx.beginPath(); ctx.moveTo(x,startY); ctx.lineTo(x,endY); ctx.stroke(); }
+        for(let y=startY; y<=endY; y+=50) { ctx.beginPath(); ctx.moveTo(startX,y); ctx.lineTo(endX,y); ctx.stroke(); }
 
         // Gems
         gems.current.forEach(g => {
+            // Cull off-screen?
+            if (Math.abs(g.x - camera.current.x) > (viewSize.width/ZOOM_SCALE) || Math.abs(g.y - camera.current.y) > (viewSize.height/ZOOM_SCALE)) return;
             const sprite = spriteCache.current['GEM'];
             if(sprite) ctx.drawImage(sprite, g.x-8, g.y-8, 16, 16);
         });
 
-        // Projectiles (Under player/enemies usually, or mixed)
+        // Projectiles
         projectiles.current.forEach(p => {
             ctx.save();
             ctx.translate(p.x, p.y);
@@ -682,7 +746,6 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             let spriteKey = p.type === 'EVOLVED' ? (p.subType || 'PENCIL') : p.type;
             const sprite = spriteCache.current[spriteKey];
             
-            // Special Drawing per Type
             if (p.type === 'HIGHLIGHTER' || p.subType === 'HIGHLIGHTER') {
                 ctx.fillStyle = p.type === 'EVOLVED' ? 'rgba(255,0,0,0.5)' : 'rgba(255,255,0,0.3)';
                 ctx.fillRect(0, -10 * p.scale, 800, 20 * p.scale); // Beam
@@ -705,6 +768,8 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
         // Enemies
         enemies.current.forEach(e => {
+            // Cull
+            if (Math.abs(e.x - camera.current.x) > (viewSize.width/ZOOM_SCALE + 50) || Math.abs(e.y - camera.current.y) > (viewSize.height/ZOOM_SCALE + 50)) return;
             const baseKey = e.type === 'ENEMY_2' ? 'ENEMY_2' : 'ENEMY_1';
             const spriteKey = e.flashTime > 0 ? `${baseKey}_FLASH` : baseKey;
             const sprite = spriteCache.current[spriteKey];
@@ -722,13 +787,15 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             ctx.restore();
         }
 
-        // Text
+        // Damage Text
         ctx.font = 'bold 16px monospace';
         ctx.textAlign = 'center';
         damageTexts.current.forEach(d => {
             ctx.fillStyle = d.color;
             ctx.fillText(d.value.toString(), d.x, d.y);
         });
+
+        ctx.restore();
     };
 
     // --- LEVEL UP ---
@@ -743,7 +810,6 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             if (wData && wData.level >= 8) {
                 const synergy = WEAPONS[key].synergy;
                 if (passivesRef.current[synergy] > 0) {
-                    // EVOLUTION AVAILABLE
                     if (wData.level === 8) {
                         candidates.push({ type: 'WEAPON', id: key, isEvo: true });
                     }
@@ -785,7 +851,6 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             candidates.splice(idx, 1);
         }
         
-        // Add healing if slots full?
         if (picks.length < 3) {
             picks.push({ type: 'HEAL', id: 'HEAL' });
         }
@@ -807,17 +872,19 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         } else if (opt.type === 'HEAL') {
             player.current.hp = Math.min(player.current.maxHp, player.current.hp + 30);
         }
+        audioService.playSound('buff');
         gameState.current = 'PLAYING';
     };
 
     const handleRestart = () => {
-        player.current = { ...player.current, x: CANVAS_WIDTH/2, y: CANVAS_HEIGHT/2, hp: 100, dead: false };
+        player.current = { ...player.current, x: WORLD_WIDTH/2, y: WORLD_HEIGHT/2, hp: 100, dead: false };
         enemies.current = []; projectiles.current = []; gems.current = []; damageTexts.current = [];
         score.current = 0; time.current = 0; frameCount.current = 0; level.current = 1; xp.current = 0; nextLevelXp.current = BASE_XP_REQUIREMENT;
         setWeapons({ PENCIL: { level: 1, cooldownTimer: 0 }, ERASER: undefined, RULER: undefined, HIGHLIGHTER: undefined, FLASK: undefined, RECORDER: undefined, SOCCER: undefined, UWABAKI: undefined, CURRY: undefined, COMPASS: undefined, MOP: undefined, MAGNIFIER: undefined });
         setPassives({ PROTEIN: 0, DRILL: 0, PROTRACTOR: 0, SHOES: 0, PAD: 0, LUNCHBOX: 0, MAGNET: 0, TEXTBOOK: 0, ABACUS: 0, CONSOLE: 0, MILK: 0, ORIGAMI: 0 });
         setUiState({ hp: 100, maxHp: 100, level: 1, time: 0, score: 0, xpPercent: 0, gameOver: false });
         gameState.current = 'PLAYING';
+        audioService.playBGM('survivor_metal');
     };
 
     // --- RENDER ---
@@ -841,63 +908,67 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             }}
             onTouchEnd={() => { setJoystickUI(null); joystickRef.current = { x: 0, y: 0 }; }}
         >
-            {/* UI */}
-            <div className="absolute top-0 left-0 w-full p-4 flex justify-between items-start pointer-events-none z-10">
-                <div className="flex flex-col gap-2">
-                    <div className="bg-black/50 p-2 rounded border border-gray-600">
-                        <div className="text-xl font-bold text-yellow-400">LV {uiState.level}</div>
-                        <div className="w-32 h-2 bg-gray-700 rounded-full mt-1"><div className="h-full bg-blue-500" style={{width: `${uiState.xpPercent}%`}}></div></div>
+            {/* UI Overlay */}
+            <div className="absolute top-0 left-0 w-full p-2 flex justify-between items-start pointer-events-none z-10 text-shadow-md">
+                <div className="flex flex-col gap-1 w-1/3">
+                    <div className="bg-black/60 p-1.5 rounded border border-gray-600 backdrop-blur-sm">
+                        <div className="text-xl font-bold text-yellow-400 leading-none">LV {uiState.level}</div>
+                        <div className="w-full h-2 bg-gray-700 rounded-full mt-1 overflow-hidden"><div className="h-full bg-blue-500 transition-all duration-200" style={{width: `${uiState.xpPercent}%`}}></div></div>
                     </div>
-                    <div className="bg-black/50 p-2 rounded border border-gray-600 text-red-400 font-bold flex items-center">
-                        <Heart size={16} className="mr-2 fill-current"/> {Math.ceil(uiState.hp)}
+                    <div className="bg-black/60 p-1.5 rounded border border-gray-600 text-red-400 font-bold flex items-center backdrop-blur-sm">
+                        <Heart size={16} className="mr-1 fill-current"/> {Math.ceil(uiState.hp)}
                     </div>
                 </div>
-                <div className="bg-black/50 p-2 rounded border border-gray-600 text-center">
-                    <div className="text-2xl font-mono">{Math.floor(uiState.time/60).toString().padStart(2,'0')}:{(uiState.time%60).toString().padStart(2,'0')}</div>
-                    <div className="text-xs text-gray-400">SCORE: {score.current}</div>
+                
+                <div className="bg-black/60 p-1.5 rounded border border-gray-600 text-center backdrop-blur-sm">
+                    <div className="text-2xl font-black text-white tracking-widest">{Math.floor(uiState.time/60).toString().padStart(2,'0')}:{(uiState.time%60).toString().padStart(2,'0')}</div>
+                    <div className="text-[10px] text-gray-300">SCORE: {score.current}</div>
+                </div>
+
+                <div className="w-1/3 flex flex-col items-end gap-1 opacity-90">
+                    <div className="flex flex-wrap justify-end gap-0.5 max-w-[120px]">
+                        {Object.entries(weapons).map(([k,v]) => v && (
+                            <div key={k} className={`w-6 h-6 bg-slate-800 border ${v.level>=8?'border-yellow-400':'border-gray-500'} flex items-center justify-center relative`}>
+                                {React.createElement(WEAPONS[k as WeaponType].icon, { size: 12, color: WEAPONS[k as WeaponType].color })}
+                                <div className="absolute -bottom-1 -right-1 text-[6px] bg-black px-0.5 rounded leading-none">{v.level}</div>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="flex flex-wrap justify-end gap-0.5 max-w-[120px]">
+                        {Object.entries(passives).map(([k,v]) => v>0 && (
+                            <div key={k} className="w-5 h-5 bg-slate-900 border border-gray-600 flex items-center justify-center relative">
+                                {React.createElement(PASSIVES[k as PassiveType].icon, { size: 10, color: 'white' })}
+                                <div className="absolute -bottom-1 -right-1 text-[6px] bg-black px-0.5 rounded leading-none">{v}</div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
 
-            {/* Inventory View (Bottom Right) */}
-            <div className="absolute bottom-4 right-4 flex flex-col items-end gap-1 pointer-events-none opacity-80 z-10">
-                <div className="flex gap-1">
-                    {Object.entries(weapons).map(([k,v]) => v && (
-                        <div key={k} className={`w-8 h-8 bg-slate-800 border ${v.level>=8?'border-yellow-400':'border-gray-500'} flex items-center justify-center relative`}>
-                            {React.createElement(WEAPONS[k as WeaponType].icon, { size: 16, color: WEAPONS[k as WeaponType].color })}
-                            <div className="absolute -bottom-1 -right-1 text-[8px] bg-black px-1 rounded">{v.level}</div>
-                        </div>
-                    ))}
-                </div>
-                <div className="flex gap-1">
-                    {Object.entries(passives).map(([k,v]) => v>0 && (
-                        <div key={k} className="w-6 h-6 bg-slate-900 border border-gray-600 flex items-center justify-center relative">
-                            {React.createElement(PASSIVES[k as PassiveType].icon, { size: 12, color: 'white' })}
-                            <div className="absolute -bottom-1 -right-1 text-[6px] bg-black px-1 rounded">{v}</div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+            <canvas ref={canvasRef} width={viewSize.width} height={viewSize.height} className="block w-full h-full bg-[#111827]" style={{ imageRendering: 'pixelated' }} />
 
-            <canvas ref={canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} className="border-4 border-gray-700 rounded-lg shadow-2xl bg-gray-900 max-w-full max-h-full aspect-video" style={{ imageRendering: 'pixelated' }} />
-
-            {/* Level Up */}
+            {/* Level Up Overlay */}
             {gameState.current === 'LEVEL_UP' && (
                 <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-20 animate-in zoom-in duration-200 pointer-events-auto p-4">
-                    <h2 className="text-4xl font-bold text-yellow-400 mb-6 animate-pulse">LEVEL UP!</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-4xl">
+                    <h2 className="text-4xl font-bold text-yellow-400 mb-6 animate-pulse text-shadow-lg">LEVEL UP!</h2>
+                    <div className="grid grid-cols-1 gap-4 w-full max-w-sm max-h-[70vh] overflow-y-auto custom-scrollbar">
                         {upgradeOptions.map((opt, idx) => {
                             let itemDef: any = opt.type === 'WEAPON' ? WEAPONS[opt.id as WeaponType] : (opt.type === 'PASSIVE' ? PASSIVES[opt.id as PassiveType] : { name: '給食', desc: 'HP 30回復', icon: Heart, color: 'pink' });
                             let isEvo = opt.isEvo;
                             return (
-                                <button key={idx} onClick={() => selectUpgrade(opt)} className={`bg-slate-800 border-2 ${isEvo ? 'border-yellow-400 bg-yellow-900/30' : 'border-slate-600'} hover:bg-slate-700 p-4 rounded-xl flex flex-col items-center text-center transition-all group relative overflow-hidden`}>
-                                    {isEvo && <div className="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-2 py-1">EVOLUTION</div>}
-                                    <div className={`p-4 rounded-full bg-black/40 mb-2 ${isEvo ? 'animate-bounce' : ''}`}>
-                                        {React.createElement(itemDef.icon, { size: 40, color: itemDef.color || 'white' })}
+                                <button key={idx} onClick={() => selectUpgrade(opt)} className={`bg-slate-800 border-2 ${isEvo ? 'border-yellow-400 bg-yellow-900/30' : 'border-slate-600'} hover:bg-slate-700 p-3 rounded-xl flex items-center text-left transition-all group relative overflow-hidden shadow-lg`}>
+                                    <div className={`p-3 rounded-full bg-black/40 mr-4 ${isEvo ? 'animate-bounce' : ''} shrink-0`}>
+                                        {React.createElement(itemDef.icon, { size: 32, color: itemDef.color || 'white' })}
                                     </div>
-                                    <div className={`text-lg font-bold mb-1 ${isEvo ? 'text-yellow-300' : 'text-white'}`}>{isEvo ? itemDef.evolvedName : itemDef.name}</div>
-                                    <div className="text-xs text-gray-400 mb-2">{isEvo ? itemDef.evolvedDesc : itemDef.desc}</div>
-                                    <div className="text-xs text-blue-300 mt-auto">{opt.isNew ? 'New!' : (opt.type === 'HEAL' ? '' : `Lv ${opt.level || 'Max'}`)}</div>
-                                    {opt.type === 'WEAPON' && !isEvo && <div className="text-[10px] text-gray-500 mt-1">Synergy: {PASSIVES[itemDef.synergy as PassiveType].name}</div>}
+                                    <div className="flex-1">
+                                        <div className="flex justify-between items-center mb-1">
+                                            <div className={`text-lg font-bold leading-tight ${isEvo ? 'text-yellow-300' : 'text-white'}`}>{isEvo ? itemDef.evolvedName : itemDef.name}</div>
+                                            <div className="text-xs text-blue-300 font-bold bg-blue-900/50 px-2 py-0.5 rounded">{opt.isNew ? 'New!' : (opt.type === 'HEAL' ? '' : `Lv ${opt.level || 'Max'}`)}</div>
+                                        </div>
+                                        <div className="text-xs text-gray-400 leading-tight">{isEvo ? itemDef.evolvedDesc : itemDef.desc}</div>
+                                        {opt.type === 'WEAPON' && !isEvo && <div className="text-[10px] text-gray-500 mt-1">Syn: {PASSIVES[itemDef.synergy as PassiveType].name}</div>}
+                                    </div>
+                                    {isEvo && <div className="absolute top-0 right-0 bg-yellow-500 text-black text-[9px] font-bold px-2 py-0.5">EVOLUTION</div>}
                                 </button>
                             );
                         })}
@@ -911,15 +982,15 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             {uiState.gameOver && (
                 <div className="absolute inset-0 bg-red-900/90 flex flex-col items-center justify-center z-20 pointer-events-auto">
                     <h2 className="text-6xl font-bold text-white mb-4">GAME OVER</h2>
-                    <div className="text-2xl text-yellow-300 mb-8">Survived: {Math.floor(uiState.time/60)}:{(uiState.time%60).toString().padStart(2,'0')}</div>
-                    <div className="flex gap-4">
-                        <button onClick={handleRestart} className="bg-white text-black px-8 py-3 rounded font-bold text-xl hover:bg-gray-200 flex items-center"><RotateCcw className="mr-2"/> Retry</button>
-                        <button onClick={onBack} className="bg-black text-white px-8 py-3 rounded font-bold text-xl border-2 border-white hover:bg-gray-800 flex items-center"><ArrowLeft className="mr-2"/> Exit</button>
+                    <div className="text-2xl text-yellow-300 mb-8 font-mono">Time: {Math.floor(uiState.time/60)}:{(uiState.time%60).toString().padStart(2,'0')}</div>
+                    <div className="flex flex-col gap-4 w-64">
+                        <button onClick={handleRestart} className="bg-white text-black px-8 py-4 rounded font-bold text-xl hover:bg-gray-200 flex items-center justify-center shadow-xl"><RotateCcw className="mr-2"/> Retry</button>
+                        <button onClick={onBack} className="bg-black text-white px-8 py-4 rounded font-bold text-xl border-2 border-white hover:bg-gray-800 flex items-center justify-center shadow-xl"><ArrowLeft className="mr-2"/> Exit</button>
                     </div>
                 </div>
             )}
             
-            {gameState.current === 'PLAYING' && <button onClick={onBack} className="absolute top-4 right-4 bg-gray-800/50 hover:bg-gray-700 text-white p-2 rounded border border-gray-500 z-10 pointer-events-auto"><ArrowLeft size={20} /></button>}
+            {gameState.current === 'PLAYING' && <button onClick={onBack} className="absolute top-4 right-4 bg-gray-800/50 hover:bg-gray-700 text-white p-2 rounded-full border border-gray-500 z-10 pointer-events-auto shadow-lg backdrop-blur-md"><ArrowLeft size={24} /></button>}
         </div>
     );
 };
