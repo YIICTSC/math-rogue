@@ -334,11 +334,12 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         if (player.current.flashTime > 0) player.current.flashTime--;
 
         // Camera Follow (Center Tracking)
-        const targetCamX = player.current.x;
-        const targetCamY = player.current.y;
-        
-        camera.current.x += (targetCamX - camera.current.x) * 0.1;
-        camera.current.y += (targetCamY - camera.current.y) * 0.1;
+const targetCamX = player.current.x;
+const targetCamY = player.current.y;
+
+// 追従ではなく「常にど真ん中」にする
+camera.current.x = targetCamX;
+camera.current.y = targetCamY;
         
         // Clamp Camera (Center Point Constraint)
         const halfViewW = viewSize.width / (2 * ZOOM_SCALE);
