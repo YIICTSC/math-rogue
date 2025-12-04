@@ -110,7 +110,7 @@ export interface FloatingText {
 
 export interface Enemy {
   id: string;
-  enemyType: string; // For AI Logic (e.g., 'CULTIST', 'SLIME_ACID')
+  enemyType: string; // For AI Logic (eg. 'CULTIST', 'SLIME_ACID')
   name: string;
   maxHp: number;
   currentHp: number;
@@ -195,7 +195,7 @@ export interface Player {
 
 export enum GameScreen {
   START_MENU = 'START_MENU',
-  DEBUG_MENU = 'DEBUG_MENU', // New
+  DEBUG_MENU = 'DEBUG_MENU', 
   MODE_SELECTION = 'MODE_SELECTION', 
   CHARACTER_SELECTION = 'CHARACTER_SELECTION',
   RELIC_SELECTION = 'RELIC_SELECTION', 
@@ -213,6 +213,7 @@ export enum GameScreen {
   HELP = 'HELP',
   TREASURE = 'TREASURE',
   RANKING = 'RANKING',
+  MINI_GAME_SELECT = 'MINI_GAME_SELECT', // Added
   MINI_GAME_POKER = 'MINI_GAME_POKER'
 }
 
