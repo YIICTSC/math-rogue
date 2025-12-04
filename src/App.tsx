@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -24,7 +25,7 @@ import MathChallengeScreen from './components/MathChallengeScreen';
 import DebugMenuScreen from './components/DebugMenuScreen';
 import PokerGameScreen from './components/PokerGameScreen';
 import SchoolyardSurvivorScreen from './components/SchoolyardSurvivorScreen';
-import SchoolStoryScreen from './components/SchoolStoryScreen'; // Import
+import SchoolDungeonRPG from './components/SchoolDungeonRPG'; // REPLACED
 import MiniGameSelectScreen from './components/MiniGameSelectScreen';
 import Card from './components/Card';
 import { audioService } from './services/audioService';
@@ -290,7 +291,7 @@ const App: React.FC = () => {
           gameState.screen !== GameScreen.DEBUG_MENU &&
           gameState.screen !== GameScreen.MINI_GAME_SELECT &&
           gameState.screen !== GameScreen.MINI_GAME_SURVIVOR &&
-          gameState.screen !== GameScreen.MINI_GAME_STORY
+          gameState.screen !== GameScreen.MINI_GAME_DUNGEON
       ) {
           storageService.saveGame(gameState);
       }
@@ -363,8 +364,8 @@ const App: React.FC = () => {
           setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_POKER }));
       } else if (gameId === 'SURVIVOR') {
           setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_SURVIVOR }));
-      } else if (gameId === 'STORY') {
-          setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_STORY }));
+      } else if (gameId === 'DUNGEON') {
+          setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_DUNGEON }));
       }
   };
 
@@ -2359,7 +2360,7 @@ const App: React.FC = () => {
                             <section>
                                 <h3 className="text-white font-bold mb-1">■ アップデート (Update)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li>新ミニゲーム「AI 学校の怪談」を追加しました。</li>
+                                    <li>新ミニゲーム「風来の小学生」を追加しました。</li>
                                 </ul>
                             </section>
                         </div>
@@ -2393,8 +2394,8 @@ const App: React.FC = () => {
                 <SchoolyardSurvivorScreen onBack={returnToTitle} />
             )}
 
-            {gameState.screen === GameScreen.MINI_GAME_STORY && (
-                <SchoolStoryScreen onBack={returnToTitle} playerImageData={gameState.player.imageData} />
+            {gameState.screen === GameScreen.MINI_GAME_DUNGEON && (
+                <SchoolDungeonRPG onBack={returnToTitle} />
             )}
 
             {gameState.screen === GameScreen.MODE_SELECTION && (
