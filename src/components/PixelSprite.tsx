@@ -657,6 +657,11 @@ export const createPixelSpriteCanvas = (seed: string, name: string = "", size: n
     else if (c.includes('虫') || c.includes('草') || c.includes('森') || c.includes('緑') || c.includes('酸')) palette = palettes[0]; // Green
     else if (c.includes('電気') || c.includes('光') || c.includes('金') || c.includes('黄') || c.includes('雷')) palette = palettes[7]; // Yellow
 
+    // Override if hex color is passed directly (for specific styling like in Survivor)
+    if (c.startsWith('#')) {
+        palette = [c, c, c]; 
+    }
+
     const mainColor = palette[0];
     const highlightColor = palette[1];
     const outlineColor = '#000000';

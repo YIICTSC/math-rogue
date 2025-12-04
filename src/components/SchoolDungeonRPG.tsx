@@ -110,7 +110,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   
   // Initialize Player
   const [player, setPlayer] = useState<Entity>({
-    id: 0, type: 'PLAYER', x: 1, y: 1, char: '@', name: '風来の小学生', 
+    id: 0, type: 'PLAYER', x: 1, y: 1, char: '@', name: 'わんぱく小学生', 
     hp: 30, maxHp: 30, baseAttack: 3, baseDefense: 0, attack: 3, defense: 0, xp: 0, dir: {x:0, y:1},
     equipment: { weapon: null, armor: null, ranged: null }
   });
@@ -131,11 +131,13 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
   // Init
   useEffect(() => {
-    // Generate Sprites
-    spriteCache.current['PLAYER_FRONT'] = createPixelSpriteCanvas('P_FRONT', 'HUMANOID|#d32f2f'); // Red
+    // Generate Sprites - Warrior Colors (#f44336 Red Cap, #3e2723 Hair, #ffccbc Skin)
+    // Red clothes: #d32f2f
+    spriteCache.current['PLAYER_FRONT'] = createPixelSpriteCanvas('P_FRONT', 'HUMANOID|#d32f2f'); 
     spriteCache.current['PLAYER_SIDE'] = createPixelSpriteCanvas('P_SIDE', 'HUMANOID_SIDE|#d32f2f'); 
     spriteCache.current['PLAYER_BACK'] = createPixelSpriteCanvas('P_BACK', 'HUMANOID_BACK|#d32f2f');
     
+    // Enemy Sprites from Main Game Palettes
     spriteCache.current['SLIME'] = createPixelSpriteCanvas('SLIME', 'SLIME|#1565C0'); // Blue
     spriteCache.current['GHOST'] = createPixelSpriteCanvas('GHOST', 'GHOST|#6A1B9A'); // Purple
     spriteCache.current['BAT'] = createPixelSpriteCanvas('BAT', 'BAT|#212121'); // Black
@@ -143,7 +145,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
     spriteCache.current['WEAPON'] = createPixelSpriteCanvas('WPN', 'SWORD');
     spriteCache.current['ARMOR'] = createPixelSpriteCanvas('ARM', 'SHIELD');
-    spriteCache.current['RANGED'] = createPixelSpriteCanvas('RNG', 'POTION'); // Use Potion as generic small item
+    spriteCache.current['RANGED'] = createPixelSpriteCanvas('RNG', 'POTION'); 
     spriteCache.current['CONSUMABLE'] = createPixelSpriteCanvas('CON', 'POTION');
 
     startNewGame();
@@ -165,9 +167,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   // Log Logic
   const addLog = (msg: string, color?: string) => {
     setLogs(prev => {
+        // Keep logs for display history
         const nextLogs = [...prev, { message: msg, color, id: Date.now() + Math.random() }];
-        if (nextLogs.length > 6) {
-            return nextLogs.slice(nextLogs.length - 6);
+        // Limit to 20 for history, but display logic handles visibility
+        if (nextLogs.length > 20) {
+            return nextLogs.slice(nextLogs.length - 20);
         }
         return nextLogs;
     });
@@ -185,7 +189,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     setInventory([initItem]);
     
     setPlayer({
-        id: 0, type: 'PLAYER', x: 1, y: 1, char: '@', name: '風来の小学生', 
+        id: 0, type: 'PLAYER', x: 1, y: 1, char: '@', name: 'わんぱく小学生', 
         hp: 30, maxHp: 30, baseAttack: 3, baseDefense: 0, attack: 3, defense: 0, xp: 0, dir: {x:0, y:1},
         equipment: { weapon: null, armor: null, ranged: null }
     });
@@ -325,7 +329,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           if (itemEntity.itemData) {
               const item = itemEntity.itemData;
               
-              // NO AUTO EQUIP - Always add to inventory
               if (inventory.length < MAX_INVENTORY) {
                   setInventory(prev => [...prev, item]);
                   addLog(`${item.name}を拾った！`);
@@ -635,7 +638,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   }
               }
 
-              // Draw Player
+              // Draw Player (Using Warrior Red Palette and Directions)
               if (mx === player.x && my === player.y) {
                   let spriteKey = 'PLAYER_FRONT';
                   let flip = false;
@@ -644,6 +647,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   else if (player.dir.x !== 0) {
                       spriteKey = 'PLAYER_SIDE';
                       if (player.dir.x === -1) flip = true;
+                  } else if (player.dir.y === 1) {
+                      spriteKey = 'PLAYER_FRONT';
                   }
 
                   const sprite = spriteCache.current[spriteKey];
@@ -762,9 +767,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         </div>
 
         {/* Log Area */}
-        <div className="w-full max-w-md bg-[#0f380f] text-[#9bbc0f] h-20 p-1 text-[10px] overflow-hidden mb-2 rounded border-2 border-[#306230] font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner">
-            {logs.map((l) => (
-                <div key={l.id} style={{ color: l.color || '#9bbc0f' }}>{l.message}</div>
+        <div className="w-full max-w-md bg-[#0f380f] text-[#9bbc0f] h-24 p-1 text-[10px] mb-2 rounded border-2 border-[#306230] font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner overflow-hidden">
+            {logs.slice(-6).map((l) => (
+                <div key={l.id} style={{ color: l.color || '#9bbc0f' }} className="truncate">{l.message}</div>
             ))}
         </div>
 
