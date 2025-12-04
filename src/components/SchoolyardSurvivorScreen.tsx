@@ -1,9 +1,11 @@
 
+
 import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
-import { ArrowLeft, RotateCcw, Swords, Zap, Shield, Heart, Crown, Footprints, Magnet, Book, Calculator, DollarSign, Box, Coffee } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Heart, Pause } from 'lucide-react';
 import { HERO_IMAGE_DATA } from '../constants';
 import PixelSprite, { SPRITE_TEMPLATES } from './PixelSprite';
 import { audioService } from '../services/audioService';
+import { storageService } from '../services/storageService';
 
 // --- GAME CONSTANTS ---
 const WORLD_WIDTH = 2000;
@@ -330,6 +332,18 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     const passivesRef = useRef(passives);
     useEffect(() => { passivesRef.current = passives; }, [passives]);
 
+    const saveRecord = () => {
+        // Collect weapons for record
+        const ownedWeapons = (Object.keys(weaponsRef.current) as WeaponType[]).filter(k => weaponsRef.current[k] !== undefined);
+        storageService.saveSurvivorScore({
+            id: `survivor-${Date.now()}`,
+            date: Date.now(),
+            timeSurvived: time.current,
+            levelReached: level.current,
+            weapons: ownedWeapons
+        });
+    };
+
     // --- GAME LOGIC ---
     const update = () => {
         frameCount.current++;
@@ -444,6 +458,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 damageTexts.current.push({ id: Math.random(), x: player.current.x, y: player.current.y - 20, value: `-${Math.floor(finalDmg)}`, color: 'red', life: 60 });
                 if (player.current.hp <= 0) { 
                     gameState.current = 'GAME_OVER'; 
+                    saveRecord();
                     setUiState(prev => ({ ...prev, gameOver: true })); 
                     audioService.playSound('lose');
                 }
@@ -990,7 +1005,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                     <div className="text-[10px] text-gray-300">SCORE: {score.current}</div>
                 </div>
 
-                <div className="w-1/3 flex flex-col items-end gap-1 opacity-90">
+                <div className="w-1/3 flex flex-col items-end gap-1 opacity-90 pt-12">
                     <div className="flex flex-wrap justify-end gap-0.5 max-w-[140px]">
                         {Object.entries(weapons).map(([k,v]) => v && (
                             <div key={k} className={`w-7 h-7 bg-slate-800 border ${v.level>=8?'border-yellow-400':'border-gray-500'} flex items-center justify-center relative p-0.5`}>
@@ -1067,7 +1082,15 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 </div>
             )}
             
-            {gameState.current === 'PLAYING' && <button onClick={onBack} className="absolute top-4 right-4 bg-gray-800/50 hover:bg-gray-700 text-white p-2 rounded-full border border-gray-500 z-10 pointer-events-auto shadow-lg backdrop-blur-md"><ArrowLeft size={24} /></button>}
+            {/* Pause/Back Button - Moved to prevent overlap, but still accessible */}
+            {gameState.current === 'PLAYING' && (
+                <button 
+                    onClick={onBack} 
+                    className="absolute top-2 right-2 bg-gray-800/80 hover:bg-gray-700 text-white p-2 rounded-full border border-gray-500 z-50 pointer-events-auto shadow-lg backdrop-blur-md"
+                >
+                    <Pause size={20} />
+                </button>
+            )}
         </div>
     );
 };

@@ -346,7 +346,7 @@ export interface PokerBlind {
 export interface PokerRunState {
     deck: PokerCard[];
     money: number;
-    ante: number; // 1 to 8
+    ante: number;
     blindIndex: number; // 0=Small, 1=Big, 2=Boss
     currentBlind: PokerBlind;
     supporters: PokerSupporter[];
@@ -372,6 +372,14 @@ export interface PokerScoreEntry {
     ante: number;
     money: number;
     bestHandScore: number;
+}
+
+export interface SurvivorScoreEntry {
+    id: string;
+    date: number;
+    timeSurvived: number; // seconds
+    levelReached: number;
+    weapons: string[]; // IDs of weapons
 }
 
 export interface GameState {
