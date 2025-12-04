@@ -53,8 +53,10 @@ const SCALE = 3; // Upscale for visibility
 const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
-  // Game State
-  const [map, setMap] = useState<TileType[][]>([]);
+  // Game State - Initialize with walls to prevent render crash
+  const [map, setMap] = useState<TileType[][]>(
+      Array(MAP_H).fill(null).map(() => Array(MAP_W).fill('WALL'))
+  );
   const [player, setPlayer] = useState<Entity>({
     id: 0, type: 'PLAYER', pos: {x:0, y:0}, char: '@', name: '風来の小学生', hp: 20, maxHp: 20, attack: 2
   });
@@ -120,26 +122,34 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         // Horizontal then Vertical
         let cx = c1.x;
         let cy = c1.y;
+        let safe = 0;
         while (cx !== c2.x) {
             newMap[cy][cx] = 'FLOOR';
             cx += (c2.x > cx) ? 1 : -1;
+            safe++; if(safe > 100) break;
         }
+        safe = 0;
         while (cy !== c2.y) {
             newMap[cy][cx] = 'FLOOR';
             cy += (c2.y > cy) ? 1 : -1;
+            safe++; if(safe > 100) break;
         }
     }
 
     // Place Stairs
-    const lastRoom = rooms[rooms.length - 1];
-    newMap[Math.floor(lastRoom.y + lastRoom.h/2)][Math.floor(lastRoom.x + lastRoom.w/2)] = 'STAIRS';
+    if (rooms.length > 0) {
+        const lastRoom = rooms[rooms.length - 1];
+        newMap[Math.floor(lastRoom.y + lastRoom.h/2)][Math.floor(lastRoom.x + lastRoom.w/2)] = 'STAIRS';
+    }
 
     setMap(newMap);
     setFloor(newFloor);
 
     // Place Player
-    const firstRoom = rooms[0];
-    setPlayer(prev => ({ ...prev, pos: { x: Math.floor(firstRoom.x + firstRoom.w/2), y: Math.floor(firstRoom.y + firstRoom.h/2) } }));
+    if (rooms.length > 0) {
+        const firstRoom = rooms[0];
+        setPlayer(prev => ({ ...prev, pos: { x: Math.floor(firstRoom.x + firstRoom.w/2), y: Math.floor(firstRoom.y + firstRoom.h/2) } }));
+    }
 
     // Spawn Enemies
     const newEnemies: Entity[] = [];
@@ -270,11 +280,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       });
 
       // Enemy Turn
-      const pPos = player.pos; // This assumes player pos updated synchronously or we use ref. 
-      // In React batching, better use functional update or ref. For this complexity, assume acceptable lag or use effect.
-      // Actually, since we updated state above, we might be using old state here in same cycle.
-      // Simple fix: calculate logic based on current visual state which will update next render.
-      // For instant feedback, we'll do simple AI here based on new player pos.
+      const pPos = player.pos; 
       
       setEnemies(prevEnemies => prevEnemies.map(e => {
           if (Math.abs(e.pos.x - pPos.x) + Math.abs(e.pos.y - pPos.y) < 6) {
@@ -302,7 +308,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               }
               
               // Move if empty
-              if (map[nextEy][nextEx] !== 'WALL' && !prevEnemies.find(o => o.pos.x === nextEx && o.pos.y === nextEy)) {
+              if (map[nextEy] && map[nextEy][nextEx] !== 'WALL' && !prevEnemies.find(o => o.pos.x === nextEx && o.pos.y === nextEy)) {
                   return { ...e, pos: { x: nextEx, y: nextEy } };
               }
           }
@@ -332,7 +338,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       }
 
       // Stairs?
-      if (map[player.pos.y][player.pos.x] === 'STAIRS') {
+      if (map[player.pos.y] && map[player.pos.y][player.pos.x] === 'STAIRS') {
           addLog("階段を降りた！");
           generateFloor(floor + 1);
           return;
@@ -412,6 +418,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               const screenY = y * ts;
 
               if (mx >= 0 && mx < MAP_W && my >= 0 && my < MAP_H) {
+                  if (!map[my]) continue; // Safety check
                   const tile = map[my][mx];
                   if (tile === 'WALL') {
                       ctx.fillStyle = C1;
