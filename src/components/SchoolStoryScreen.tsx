@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI, Type } from '@google/genai';
-import { ArrowLeft, Send, Sparkles, AlertCircle, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Send, Sparkles, AlertCircle, RefreshCw, WifiOff } from 'lucide-react';
 import PixelSprite from './PixelSprite';
 import { audioService } from '../services/audioService';
 
@@ -25,10 +25,63 @@ interface StoryState {
 
 const INITIAL_PROMPT = "あなたは日本の小学校を舞台にしたホラー/ミステリーRPGのゲームマスターです。プレイヤーは夜の学校に迷い込んだ小学生です。物語の導入部分を開始してください。短く、臨場感たっぷりに描写してください。";
 
+// Offline Fallback Scenarios
+const FALLBACK_SCENARIOS = [
+  {
+    story: "廊下の奥から、ペタ...ペタ...と上履きの音が近づいてくる。この時間に生徒がいるはずがない。",
+    locationKeyword: "scary school hallway ghost",
+    suggestions: ["教室に隠れる", "死んだふりをする", "走って逃げる"],
+    emotion: "scared"
+  },
+  {
+    story: "黒板に赤いチョークで『ニゲロ』と書かれている。文字はまだ新しい...",
+    locationKeyword: "blackboard red text horror",
+    suggestions: ["黒板を消す", "周りを見渡す", "教室を出る"],
+    emotion: "scared"
+  },
+  {
+    story: "理科室の人体模型と目が合った気がした。気のせいだろうか？",
+    locationKeyword: "science room anatomy model",
+    suggestions: ["近づいて確認", "挨拶してみる", "見なかったことにする"],
+    emotion: "neutral"
+  },
+  {
+    story: "トイレの鏡に、自分ではない何かが一瞬映り込んだ。",
+    locationKeyword: "school bathroom mirror horror",
+    suggestions: ["鏡を割る", "顔を洗う", "トイレから出る"],
+    emotion: "scared"
+  },
+  {
+    story: "音楽室からピアノの音が聞こえる。曲は『エリーゼのために』だ。",
+    locationKeyword: "music room piano night",
+    suggestions: ["音楽室へ行く", "耳を塞ぐ", "一緒に歌う"],
+    emotion: "neutral"
+  },
+  {
+    story: "下駄箱を開けると、大量の手紙が雪崩れ落ちてきた。全て不幸の手紙だ。",
+    locationKeyword: "shoe locker letters",
+    suggestions: ["燃やす", "読み上げる", "見なかったことにする"],
+    emotion: "surprised"
+  },
+  {
+    story: "体育館でボールをつく音がする。ダン...ダン...ダン...",
+    locationKeyword: "dark school gym basketball",
+    suggestions: ["中を覗く", "電気をつける", "無視して進む"],
+    emotion: "scared"
+  },
+  {
+    story: "放送室のランプがついている。「...あー、マイクのテスト...」",
+    locationKeyword: "broadcasting room school",
+    suggestions: ["放送室に入る", "聞き耳を立てる", "校内放送で叫ぶ"],
+    emotion: "surprised"
+  }
+];
+
 const SchoolStoryScreen: React.FC<SchoolStoryScreenProps> = ({ onBack, playerImageData }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
   const [gameState, setGameState] = useState<StoryState>({
     backgroundKeyword: 'school hallway night',
     backgroundUrl: 'https://picsum.photos/seed/school_night/1024/768',
@@ -53,7 +106,10 @@ const SchoolStoryScreen: React.FC<SchoolStoryScreenProps> = ({ onBack, playerIma
 
   const generateAIResponse = async (userText: string) => {
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const apiKey = process.env.API_KEY;
+      if (!apiKey) throw new Error("API Key is missing");
+
+      const ai = new GoogleGenAI({ apiKey });
       
       const historyText = messages.slice(-6).map(m => `${m.role}: ${m.text}`).join('\n');
       
@@ -94,11 +150,20 @@ const SchoolStoryScreen: React.FC<SchoolStoryScreenProps> = ({ onBack, playerIma
       });
 
       const data = JSON.parse(response.text || '{}');
+      setIsOfflineMode(false);
       return data;
 
     } catch (error) {
-      console.error("AI Error:", error);
-      return null;
+      console.warn("AI Error (Switching to Offline Mode):", error);
+      setIsOfflineMode(true);
+      
+      // Return a random fallback scenario
+      const fallback = FALLBACK_SCENARIOS[Math.floor(Math.random() * FALLBACK_SCENARIOS.length)];
+      
+      // Simulate network delay for realism
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      return fallback;
     }
   };
 
@@ -125,7 +190,8 @@ const SchoolStoryScreen: React.FC<SchoolStoryScreenProps> = ({ onBack, playerIma
         }));
         setMessages(prev => [...prev, { role: 'model', text: data.story }]);
     } else {
-        setGameState(prev => ({ ...prev, storyText: "通信エラーが発生しました... 何かが妨害しているようです。" }));
+        // Fallback for catastrophic failure (should be covered by catch block, but just in case)
+        setGameState(prev => ({ ...prev, storyText: "闇が深すぎて何も見えない... (システムエラー)" }));
     }
 
     setIsLoading(false);
@@ -154,8 +220,15 @@ const SchoolStoryScreen: React.FC<SchoolStoryScreenProps> = ({ onBack, playerIma
         <button onClick={onBack} className="text-white flex items-center bg-black/40 px-4 py-2 rounded-full border border-white/20 hover:bg-black/60 transition-colors backdrop-blur-md">
             <ArrowLeft size={20} className="mr-2"/> 戻る
         </button>
-        <div className="text-white/80 text-xs font-mono bg-black/40 px-3 py-1 rounded border border-white/10 backdrop-blur-md">
-            AI SCHOOL ROGUE
+        <div className="flex items-center gap-2">
+            {isOfflineMode && (
+                <div className="text-gray-400 text-xs flex items-center bg-black/40 px-2 py-1 rounded border border-gray-600 backdrop-blur-md" title="オフラインモードで動作中">
+                    <WifiOff size={12} className="mr-1"/> Offline
+                </div>
+            )}
+            <div className="text-white/80 text-xs font-mono bg-black/40 px-3 py-1 rounded border border-white/10 backdrop-blur-md">
+                AI SCHOOL ROGUE
+            </div>
         </div>
       </div>
 
@@ -180,7 +253,7 @@ const SchoolStoryScreen: React.FC<SchoolStoryScreenProps> = ({ onBack, playerIma
         <div className="bg-black/80 border-2 border-white/30 rounded-xl p-6 mb-4 backdrop-blur-md shadow-2xl relative min-h-[160px] flex flex-col">
             {isLoading && (
                 <div className="absolute top-2 right-2 text-yellow-400 animate-pulse flex items-center text-xs">
-                    <Sparkles size={12} className="mr-1"/> 生成中...
+                    <Sparkles size={12} className="mr-1"/> {isOfflineMode ? "シナリオ読込中..." : "生成中..."}
                 </div>
             )}
             <div className="flex-1 overflow-y-auto custom-scrollbar text-lg md:text-xl leading-relaxed text-gray-100 whitespace-pre-wrap font-serif" ref={scrollRef}>
