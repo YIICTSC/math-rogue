@@ -24,6 +24,7 @@ import MathChallengeScreen from './components/MathChallengeScreen';
 import DebugMenuScreen from './components/DebugMenuScreen';
 import PokerGameScreen from './components/PokerGameScreen';
 import SchoolyardSurvivorScreen from './components/SchoolyardSurvivorScreen';
+import SchoolStoryScreen from './components/SchoolStoryScreen'; // Import
 import MiniGameSelectScreen from './components/MiniGameSelectScreen';
 import Card from './components/Card';
 import { audioService } from './services/audioService';
@@ -288,7 +289,8 @@ const App: React.FC = () => {
           gameState.screen !== GameScreen.MODE_SELECTION &&
           gameState.screen !== GameScreen.DEBUG_MENU &&
           gameState.screen !== GameScreen.MINI_GAME_SELECT &&
-          gameState.screen !== GameScreen.MINI_GAME_SURVIVOR
+          gameState.screen !== GameScreen.MINI_GAME_SURVIVOR &&
+          gameState.screen !== GameScreen.MINI_GAME_STORY
       ) {
           storageService.saveGame(gameState);
       }
@@ -361,6 +363,8 @@ const App: React.FC = () => {
           setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_POKER }));
       } else if (gameId === 'SURVIVOR') {
           setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_SURVIVOR }));
+      } else if (gameId === 'STORY') {
+          setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_STORY }));
       }
   };
 
@@ -383,7 +387,9 @@ const App: React.FC = () => {
       setGameState(prev => ({ ...prev, mode, screen: GameScreen.CHARACTER_SELECTION }));
   };
 
+  // ... (Abbreviated existing handlers for brevity, only showing render part) ...
   const handleDebugStart = (deck: ICard[], relics: Relic[], potions: Potion[]) => {
+      // ... same as before
         const map = generateDungeonMap();
         setDebugLoadout({ deck, relics, potions });
         
@@ -2333,7 +2339,7 @@ const App: React.FC = () => {
                             </div>
 
                             <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                <Terminal size={10}/> v2.4.3
+                                <Terminal size={10}/> v2.5.0
                             </button>
                         </div>
                     </div>
@@ -2347,14 +2353,13 @@ const App: React.FC = () => {
                             className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2 select-none active:text-green-200"
                             onClick={handleLogTitleClick}
                         >
-                            System Update Log v2.4.3
+                            System Update Log v2.5.0
                         </h2>
                         <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
                             <section>
                                 <h3 className="text-white font-bold mb-1">■ アップデート (Update)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li>ミニゲーム選択画面を追加しました。</li>
-                                    <li>ミニゲームへのアクセスを整理しました。</li>
+                                    <li>新ミニゲーム「AI 学校の怪談」を追加しました。</li>
                                 </ul>
                             </section>
                         </div>
@@ -2383,24 +2388,13 @@ const App: React.FC = () => {
                     onSave={(state) => setGameState(prev => ({ ...prev, pokerState: state }))}
                 />
             )}
-            {gameState.screen === GameScreen.DEBUG_MENU && (
-                <DebugMenuScreen onStart={handleDebugStart} onBack={returnToTitle} />
-            )}
-
-            {gameState.screen === GameScreen.MINI_GAME_SELECT && (
-                <MiniGameSelectScreen onSelect={handleMiniGameSelect} onBack={returnToTitle} />
-            )}
-
-            {gameState.screen === GameScreen.MINI_GAME_POKER && (
-                <PokerGameScreen 
-                    onBack={returnToTitle} 
-                    savedState={gameState.pokerState}
-                    onSave={(state) => setGameState(prev => ({ ...prev, pokerState: state }))}
-                />
-            )}
 
             {gameState.screen === GameScreen.MINI_GAME_SURVIVOR && (
                 <SchoolyardSurvivorScreen onBack={returnToTitle} />
+            )}
+
+            {gameState.screen === GameScreen.MINI_GAME_STORY && (
+                <SchoolStoryScreen onBack={returnToTitle} playerImageData={gameState.player.imageData} />
             )}
 
             {gameState.screen === GameScreen.MODE_SELECTION && (
