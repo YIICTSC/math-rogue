@@ -1,6 +1,8 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, Play, RotateCcw, Swords, Zap, Shield, Heart } from 'lucide-react';
-import PixelSprite from './PixelSprite';
+import { HERO_IMAGE_DATA } from '../constants';
+import { SPRITE_TEMPLATES } from './PixelSprite';
 
 // --- GAME CONSTANTS ---
 const CANVAS_WIDTH = 800;
@@ -95,48 +97,66 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     // Sprite Cache
     const spriteCache = useRef<Record<string, HTMLCanvasElement>>({});
 
-    // --- SPRITE GENERATION (Ported for Canvas) ---
-    // Minimal version of PixelSprite logic to generate offscreen canvases
-    const generateSprite = (seed: string, color: string): HTMLCanvasElement => {
+    // --- SPRITE GENERATION (Updated to use templates) ---
+    const generateFromTemplate = (templateName: string, mainColor: string, highlightColor: string): HTMLCanvasElement => {
+        const template = SPRITE_TEMPLATES[templateName] || SPRITE_TEMPLATES['SLIME'];
         const size = 16;
-        const scale = 2; // Internal scale for crispness
+        const scale = 2; 
         const c = document.createElement('canvas');
         c.width = size * scale;
         c.height = size * scale;
         const ctx = c.getContext('2d');
         if(!ctx) return c;
         
-        ctx.fillStyle = color;
-        // Simple procedural generation: Random symmetric 8x16 mirrored
-        let hash = 0;
-        for(let i=0; i<seed.length; i++) hash = seed.charCodeAt(i) + ((hash << 5) - hash);
-        const random = () => { const x = Math.sin(hash++) * 10000; return x - Math.floor(x); };
+        const outlineColor = 'black';
 
-        for(let y=0; y<size; y++) {
-            for(let x=0; x<size/2; x++) {
-                if(random() > 0.5) {
-                    ctx.fillRect(x*scale, y*scale, scale, scale);
-                    ctx.fillRect((size-1-x)*scale, y*scale, scale, scale);
-                }
+        for (let y = 0; y < size; y++) {
+            for (let x = 0; x < size; x++) {
+                const char = template[y][x];
+                if (char === '.') continue;
+                
+                let color = mainColor;
+                if (char === '%') color = highlightColor;
+                if (char === '@') color = outlineColor;
+                
+                ctx.fillStyle = color;
+                ctx.fillRect(x * scale, y * scale, scale, scale);
             }
         }
-        // Add Outline
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(0,0,c.width,c.height);
-        
         return c;
     };
 
     useEffect(() => {
         // Pre-render sprites
-        spriteCache.current['PLAYER'] = generateSprite('WARRIOR', '#ef4444');
-        spriteCache.current['ENEMY_1'] = generateSprite('SLIME', '#3b82f6');
-        spriteCache.current['ENEMY_2'] = generateSprite('BAT', '#a855f7');
-        spriteCache.current['GEM'] = generateSprite('GEM', '#eab308');
-        spriteCache.current['PENCIL'] = generateSprite('SWORD', '#fbbf24');
-        spriteCache.current['ERASER'] = generateSprite('SHIELD', '#ffffff');
-        spriteCache.current['RULER'] = generateSprite('NOTEBOOK', '#22c55e');
+        
+        // 1. Player: Load from SVG
+        const playerImg = new Image();
+        playerImg.src = HERO_IMAGE_DATA;
+        playerImg.onload = () => {
+             const c = document.createElement('canvas');
+             c.width = 32; c.height = 32;
+             const ctx = c.getContext('2d');
+             if(ctx) {
+                 ctx.drawImage(playerImg, 0, 0, 32, 32);
+                 spriteCache.current['PLAYER'] = c;
+             }
+        };
+
+        // 2. Enemies: Use Templates
+        // Slime (Blue)
+        spriteCache.current['ENEMY_1'] = generateFromTemplate('SLIME', '#3b82f6', '#60a5fa');
+        // Bat (Purple)
+        spriteCache.current['ENEMY_2'] = generateFromTemplate('BAT', '#a855f7', '#c084fc');
+        
+        // 3. Items/Weapons
+        // Pencil (Sword shape, yellow)
+        spriteCache.current['PENCIL'] = generateFromTemplate('SWORD', '#fbbf24', '#fcd34d');
+        // Eraser (Shield shape, white/gray)
+        spriteCache.current['ERASER'] = generateFromTemplate('SHIELD', '#e5e7eb', '#ffffff');
+        // Ruler (Notebook/Rect shape, green)
+        spriteCache.current['RULER'] = generateFromTemplate('NOTEBOOK', '#22c55e', '#4ade80');
+        // Gem (Diamond/Eye, yellow)
+        spriteCache.current['GEM'] = generateFromTemplate('EYE', '#eab308', '#fde047');
 
         const loop = () => {
             if (gameState.current === 'PLAYING') {
@@ -157,9 +177,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             window.removeEventListener('keydown', handleKeyDown);
             window.removeEventListener('keyup', handleKeyUp);
         };
-    }, [weapons, stats]); // Re-bind loop if weapons change? No, loop uses refs. But we need to update weapons ref if state changes? 
-    // Actually, weapons state is used inside update. Since update is called in loop, we need to make sure loop sees latest state.
-    // Better to use a Ref for weapons too.
+    }, [weapons, stats]); 
     
     const weaponsRef = useRef(weapons);
     useEffect(() => { weaponsRef.current = weapons; }, [weapons]);
@@ -316,9 +334,6 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             enemies.current.forEach(e => {
                 const dist = Math.hypot(p.x - e.x, p.y - e.y);
                 if (dist < 20 * p.scale) {
-                    // Hit! - Very simple cooldown per projectile per enemy check omitted for perf, just checking existence
-                    // Actually for piercing we need to track hit enemies per projectile to avoid multi-hit per frame
-                    // Simplified: just check distance
                     e.hp -= p.damage;
                     e.flashTime = 5;
                     damageTexts.current.push({ id: Math.random(), x: e.x, y: e.y - 10, value: Math.floor(p.damage), life: 30 });
@@ -385,18 +400,18 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         ctx.fillStyle = '#111827'; // Tailwind gray-900
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         
-        // Grid Lines (for motion reference)
+        // Grid Lines
         ctx.strokeStyle = '#1f2937';
         ctx.lineWidth = 1;
         const gridSize = 50;
-        const offsetX = -player.current.x % gridSize; // Parallax effect if camera moved (camera is static here though)
-        // Static camera for simplicity, player moves on screen
         for(let x=0; x<=CANVAS_WIDTH; x+=gridSize) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,CANVAS_HEIGHT); ctx.stroke(); }
         for(let y=0; y<=CANVAS_HEIGHT; y+=gridSize) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(CANVAS_WIDTH,y); ctx.stroke(); }
 
         // Gems
         gems.current.forEach(g => {
-            ctx.drawImage(spriteCache.current['GEM'] || spriteCache.current['PLAYER'], g.x - 4, g.y - 4, 8, 8);
+            const sprite = spriteCache.current['GEM'];
+            if (sprite) ctx.drawImage(sprite, g.x - 8, g.y - 8, 16, 16);
+            else { ctx.fillStyle = '#fbbf24'; ctx.fillRect(g.x-4, g.y-4, 8, 8); }
         });
 
         // Enemies
@@ -419,6 +434,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         } else {
              const pSprite = spriteCache.current['PLAYER'];
              if(pSprite) ctx.drawImage(pSprite, player.current.x - 16, player.current.y - 16, 32, 32);
+             else { ctx.fillStyle = 'blue'; ctx.fillRect(player.current.x-16, player.current.y-16, 32, 32); }
         }
 
         // Projectiles

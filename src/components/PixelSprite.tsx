@@ -10,7 +10,7 @@ interface PixelSpriteProps {
 
 // 16x16 Sprite Templates
 // . = Empty, # = Main Color, % = Secondary/Highlight, @ = Outline/Black
-const SPRITE_TEMPLATES: Record<string, string[]> = {
+export const SPRITE_TEMPLATES: Record<string, string[]> = {
   // --- EXISTING TEMPLATES ---
   SLIME: [
     "................",
