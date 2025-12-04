@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, Circle, Menu, X, Check, Search, LogOut } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target } from 'lucide-react';
 import { audioService } from '../services/audioService';
 
 interface SchoolDungeonRPGProps {
@@ -20,17 +20,29 @@ const VIEW_W = 11;
 const VIEW_H = 9;
 const TILE_SIZE = 16; 
 const SCALE = 3; 
+const MAX_INVENTORY = 20;
 
 // --- TYPES ---
 type TileType = 'WALL' | 'FLOOR' | 'STAIRS' | 'HALLWAY';
 type Direction = { x: 0 | 1 | -1, y: 0 | 1 | -1 };
+type ItemCategory = 'WEAPON' | 'ARMOR' | 'RANGED' | 'CONSUMABLE';
 
 interface Item {
   id: string;
-  type: 'ONIGIRI' | 'STICK' | 'BOMB' | 'NOTE' | 'POTION';
+  category: ItemCategory;
+  type: string; // Internal ID like 'RULER'
   name: string;
   desc: string;
-  value?: number; // Heal amount or damage
+  value?: number; // Heal amount, etc.
+  power?: number; // Atk or Def bonus
+  range?: number;
+  count?: number; // For ammo
+}
+
+interface EquipmentSlots {
+  weapon: Item | null;
+  armor: Item | null;
+  ranged: Item | null;
 }
 
 interface Entity {
@@ -40,13 +52,25 @@ interface Entity {
   y: number;
   char: string;
   name: string;
+  
+  // Stats
   hp: number;
   maxHp: number;
-  attack: number;
+  baseAttack: number; // Base stats without gear
+  baseDefense: number;
+  attack: number;     // Calculated stats
   defense: number;
+  
   xp: number;
   dir: Direction;
-  itemData?: Item; // For items on floor
+  
+  // Item specific
+  itemData?: Item; 
+  
+  // Player specific
+  equipment?: EquipmentSlots;
+  
+  // Enemy specific
   enemyType?: 'SLIME' | 'GHOST' | 'BAT' | 'BOOK';
 }
 
@@ -56,20 +80,42 @@ interface Log {
   id: number;
 }
 
+// --- ITEM DATABASE ---
+const ITEM_DB: Record<string, Omit<Item, 'id'>> = {
+    // Weapons
+    'STICK': { category: 'WEAPON', type: 'STICK', name: '木の棒', desc: 'ただの棒。攻撃+2', power: 2 },
+    'RULER': { category: 'WEAPON', type: 'RULER', name: '30cm定規', desc: 'よくしなる。攻撃+5', power: 5 },
+    'BROOM': { category: 'WEAPON', type: 'BROOM', name: '竹ぼうき', desc: 'リーチはない。攻撃+8', power: 8 },
+    // Armor
+    'GYM_CLOTHES': { category: 'ARMOR', type: 'GYM_CLOTHES', name: '体操服', desc: '動きやすい。防御+2', power: 2 },
+    'RANDOSERU': { category: 'ARMOR', type: 'RANDOSERU', name: 'ランドセル', desc: '背中を守る。防御+5', power: 5 },
+    'HELMET': { category: 'ARMOR', type: 'HELMET', name: '防災頭巾', desc: '頭を守る。防御+3', power: 3 },
+    // Ranged
+    'CHALK': { category: 'RANGED', type: 'CHALK', name: 'チョーク', desc: '投げると痛い。', power: 3, range: 4, count: 5 },
+    'ERASER': { category: 'RANGED', type: 'ERASER', name: '消しゴム', desc: 'よく飛ぶ。', power: 5, range: 5, count: 3 },
+    // Consumables
+    'ONIGIRI': { category: 'CONSUMABLE', type: 'ONIGIRI', name: 'おにぎり', desc: '満腹度50回復', value: 50 },
+    'POTION': { category: 'CONSUMABLE', type: 'POTION', name: '回復薬', desc: 'HP30回復', value: 30 },
+    'NOTE': { category: 'CONSUMABLE', type: 'NOTE', name: 'たんけんノート', desc: 'マップ構造がわかる', value: 0 },
+    'BOMB': { category: 'CONSUMABLE', type: 'BOMB', name: '爆竹', desc: '部屋全体攻撃', value: 20 },
+};
+
 const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
   // --- STATE ---
   const [map, setMap] = useState<TileType[][]>([]);
+  
+  // Initialize Player
   const [player, setPlayer] = useState<Entity>({
     id: 0, type: 'PLAYER', x: 1, y: 1, char: '@', name: '風来の小学生', 
-    hp: 30, maxHp: 30, attack: 3, defense: 0, xp: 0, dir: {x:0, y:1}
+    hp: 30, maxHp: 30, baseAttack: 3, baseDefense: 0, attack: 3, defense: 0, xp: 0, dir: {x:0, y:1},
+    equipment: { weapon: null, armor: null, ranged: null }
   });
+
   const [enemies, setEnemies] = useState<Entity[]>([]);
   const [floorItems, setFloorItems] = useState<Entity[]>([]);
-  const [inventory, setInventory] = useState<Item[]>([
-    { id: 'start-1', type: 'ONIGIRI', name: 'おにぎり', desc: '満腹度を50回復' }
-  ]);
+  const [inventory, setInventory] = useState<Item[]>([]);
   const [logs, setLogs] = useState<Log[]>([]);
   
   // Game Status
@@ -79,12 +125,25 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const [maxBelly, setMaxBelly] = useState(100);
   const [gameOver, setGameOver] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [showMap, setShowMap] = useState(false); // For Exploration Note
+  const [showMap, setShowMap] = useState(false); 
 
   // Init
   useEffect(() => {
     startNewGame();
   }, []);
+
+  // Update Stats whenever Equipment changes
+  useEffect(() => {
+      setPlayer(p => {
+          const wPow = p.equipment?.weapon?.power || 0;
+          const aPow = p.equipment?.armor?.power || 0;
+          return {
+              ...p,
+              attack: p.baseAttack + wPow,
+              defense: p.baseDefense + aPow
+          };
+      });
+  }, [player.equipment]);
 
   const addLog = (msg: string, color?: string) => {
     setLogs(prev => [{ message: msg, color, id: Date.now() + Math.random() }, ...prev].slice(0, 6));
@@ -96,11 +155,17 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     setBelly(100);
     setMaxBelly(100);
     setGameOver(false);
-    setInventory([{ id: 'start-1', type: 'ONIGIRI', name: 'おにぎり', desc: '満腹度を50回復' }]);
+    
+    // Initial Item
+    const initItem: Item = { ...ITEM_DB['ONIGIRI'], id: `start-${Date.now()}` };
+    setInventory([initItem]);
+    
     setPlayer({
         id: 0, type: 'PLAYER', x: 1, y: 1, char: '@', name: '風来の小学生', 
-        hp: 30, maxHp: 30, attack: 3, defense: 0, xp: 0, dir: {x:0, y:1}
+        hp: 30, maxHp: 30, baseAttack: 3, baseDefense: 0, attack: 3, defense: 0, xp: 0, dir: {x:0, y:1},
+        equipment: { weapon: null, armor: null, ranged: null }
     });
+    
     generateFloor(1);
     addLog("風来の旅が始まった！");
   };
@@ -110,30 +175,23 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     const newMap: TileType[][] = Array(MAP_H).fill(null).map(() => Array(MAP_W).fill('WALL'));
     const rooms: {x:number, y:number, w:number, h:number}[] = [];
     
-    // Room Gen - Retry loop to ensure at least 2 rooms for interesting gameplay
+    // Simple Room Gen
     let attempts = 0;
-    while(rooms.length < 2 && attempts < 100) {
+    while(rooms.length < 3 && attempts < 100) {
         attempts++;
-        // Reset if too many fails
-        if (attempts % 20 === 0) rooms.length = 0;
-
-        for(let i=0; i<6; i++) {
-            const w = Math.floor(Math.random() * 4) + 4;
-            const h = Math.floor(Math.random() * 4) + 4;
-            const x = Math.floor(Math.random() * (MAP_W - w - 2)) + 1;
-            const y = Math.floor(Math.random() * (MAP_H - h - 2)) + 1;
-            
-            const overlap = rooms.some(r => x < r.x + r.w + 1 && x + w + 1 > r.x && y < r.y + r.h + 1 && y + h + 1 > r.y);
-            if(!overlap) {
-                rooms.push({x, y, w, h});
-                for(let ry=y; ry<y+h; ry++) {
-                    for(let rx=x; rx<x+w; rx++) newMap[ry][rx] = 'FLOOR';
-                }
+        const w = Math.floor(Math.random() * 4) + 4;
+        const h = Math.floor(Math.random() * 4) + 4;
+        const x = Math.floor(Math.random() * (MAP_W - w - 2)) + 1;
+        const y = Math.floor(Math.random() * (MAP_H - h - 2)) + 1;
+        
+        const overlap = rooms.some(r => x < r.x + r.w + 1 && x + w + 1 > r.x && y < r.y + r.h + 1 && y + h + 1 > r.y);
+        if(!overlap) {
+            rooms.push({x, y, w, h});
+            for(let ry=y; ry<y+h; ry++) {
+                for(let rx=x; rx<x+w; rx++) newMap[ry][rx] = 'FLOOR';
             }
         }
     }
-
-    // Sort rooms to make corridors cleaner
     rooms.sort((a,b) => (a.x + a.y) - (b.x + b.y));
 
     // Corridors
@@ -144,15 +202,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         let cy = Math.floor(r1.y + r1.h/2);
         const tx = Math.floor(r2.x + r2.w/2);
         const ty = Math.floor(r2.y + r2.h/2);
-        
-        while(cx !== tx) {
-            newMap[cy][cx] = 'FLOOR';
-            cx += (tx > cx) ? 1 : -1;
-        }
-        while(cy !== ty) {
-            newMap[cy][cx] = 'FLOOR';
-            cy += (ty > cy) ? 1 : -1;
-        }
+        while(cx !== tx) { newMap[cy][cx] = 'FLOOR'; cx += (tx > cx) ? 1 : -1; }
+        while(cy !== ty) { newMap[cy][cx] = 'FLOOR'; cy += (ty > cy) ? 1 : -1; }
     }
 
     // Stairs
@@ -173,7 +224,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     for(let y=0; y<MAP_H; y++) {
         for(let x=0; x<MAP_W; x++) {
             if(newMap[y][x] === 'FLOOR' && (x !== px || y !== py)) {
-                if(Math.random() < 0.04) {
+                if(Math.random() < 0.05) {
                     // Enemy
                     const types: ('SLIME'|'GHOST'|'BAT'|'BOOK')[] = ['SLIME', 'GHOST', 'BAT', 'BOOK'];
                     const t = types[Math.floor(Math.random() * types.length)];
@@ -184,23 +235,18 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                     if(t==='BOOK'){ name="教科書"; hp=20+f*4; atk=3+f; xp=12+f*2; }
                     newEnemies.push({
                         id: Date.now() + Math.random(), type: 'ENEMY', x, y, char: t[0], 
-                        name, hp, maxHp: hp, attack: atk, defense: Math.floor(f/3), xp, dir: {x:0, y:0}, enemyType: t
+                        name, hp, maxHp: hp, baseAttack: atk, baseDefense: Math.floor(f/3), attack: atk, defense: Math.floor(f/3), xp, dir: {x:0, y:0}, enemyType: t
                     });
-                } else if(Math.random() < 0.02) {
+                } else if(Math.random() < 0.04) {
                     // Item
-                    const iTypes: Item['type'][] = ['ONIGIRI', 'STICK', 'BOMB', 'NOTE', 'POTION'];
-                    const it = iTypes[Math.floor(Math.random() * iTypes.length)];
-                    let iname = "アイテム", desc = "", val = 0;
-                    if(it==='ONIGIRI'){ iname="おにぎり"; desc="満腹度回復"; val=50; }
-                    if(it==='STICK'){ iname="木の棒"; desc="攻撃力が上がる(消費)"; val=3; }
-                    if(it==='BOMB'){ iname="消しゴム爆弾"; desc="部屋全体攻撃"; val=20; }
-                    if(it==='NOTE'){ iname="たんけんノート"; desc="マップ構造がわかる"; }
-                    if(it==='POTION'){ iname="回復薬"; desc="HP回復"; val=30; }
+                    const keys = Object.keys(ITEM_DB);
+                    const key = keys[Math.floor(Math.random() * keys.length)];
+                    const template = ITEM_DB[key];
                     
                     newItems.push({
                         id: Date.now() + Math.random(), type: 'ITEM', x, y, char: '!', 
-                        name: iname, hp:0, maxHp:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
-                        itemData: { id: `item-${Date.now()}-${Math.random()}`, type: it, name: iname, desc, value: val }
+                        name: template.name, hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
+                        itemData: { ...template, id: `item-${Date.now()}-${Math.random()}` }
                     });
                 }
             }
@@ -218,13 +264,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const movePlayer = (dx: 0|1|-1, dy: 0|1|-1) => {
       if(gameOver) return;
       if(dx === 0 && dy === 0) {
-          // Wait turn
           addLog("足踏みした。");
           processTurn(player.x, player.y);
           return;
       }
 
-      // Update direction always
       setPlayer(p => ({ ...p, dir: {x: dx, y: dy} }));
 
       const tx = player.x + dx;
@@ -232,43 +276,83 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
       // 1. Check Wall
       if (tx < 0 || tx >= MAP_W || ty < 0 || ty >= MAP_H || map[ty][tx] === 'WALL') {
-          return; // Blocked
+          return;
       }
 
       // 2. Check Enemy (Attack)
       const target = enemies.find(e => e.x === tx && e.y === ty);
       if (target) {
           attackEnemy(target);
-          processTurn(player.x, player.y); // Player didn't move
+          processTurn(player.x, player.y); 
           return;
       }
 
-      // 3. Move
-      setPlayer(p => ({ ...p, x: tx, y: ty }));
+      // 3. Move & Pickup Check
+      let finalX = tx;
+      let finalY = ty;
       
-      // Check Floor Item (Log only)
-      const item = floorItems.find(i => i.x === tx && i.y === ty);
-      if (item) {
-          addLog(`${item.name}の上に乗った。`);
+      // Move logic first
+      setPlayer(p => ({ ...p, x: finalX, y: finalY }));
+      
+      // Check for Item Pickup (Instant Logic)
+      const itemIdx = floorItems.findIndex(i => i.x === finalX && i.y === finalY);
+      if (itemIdx !== -1) {
+          const itemEntity = floorItems[itemIdx];
+          if (itemEntity.itemData) {
+              const item = itemEntity.itemData;
+              let pickedUp = false;
+              let equipMsg = "";
+
+              // Auto-Equip Logic
+              if (item.category === 'WEAPON' && !player.equipment?.weapon) {
+                  setPlayer(p => ({ ...p, equipment: { ...p.equipment!, weapon: item } }));
+                  equipMsg = " (装備した)";
+                  pickedUp = true;
+              } else if (item.category === 'ARMOR' && !player.equipment?.armor) {
+                  setPlayer(p => ({ ...p, equipment: { ...p.equipment!, armor: item } }));
+                  equipMsg = " (装備した)";
+                  pickedUp = true;
+              } else if (item.category === 'RANGED' && !player.equipment?.ranged) {
+                  setPlayer(p => ({ ...p, equipment: { ...p.equipment!, ranged: item } }));
+                  equipMsg = " (装備した)";
+                  pickedUp = true;
+              } else {
+                  // Inventory Fallback
+                  if (inventory.length < MAX_INVENTORY) {
+                      setInventory(prev => [...prev, item]);
+                      pickedUp = true;
+                  } else {
+                      addLog("持ち物がいっぱいで拾えない！", "red");
+                  }
+              }
+
+              if (pickedUp) {
+                  addLog(`${item.name}を拾った！${equipMsg}`);
+                  setFloorItems(prev => prev.filter((_, i) => i !== itemIdx));
+                  audioService.playSound('select');
+              }
+          }
       }
       
-      processTurn(tx, ty);
+      // Check Stairs
+      if (map[ty][tx] === 'STAIRS') {
+          addLog("階段がある。", C2);
+      }
+
+      processTurn(finalX, finalY);
   };
 
   const attackEnemy = (target: Entity) => {
-      // Damage Formula
       const dmg = Math.max(1, player.attack - target.defense);
-      
       const newEnemies = enemies.map(e => {
           if (e.id === target.id) {
               const nhp = e.hp - dmg;
-              addLog(`${e.name}に${dmg}ダメージを与えた！`);
+              addLog(`${e.name}に${dmg}ダメージ！`);
               return { ...e, hp: nhp };
           }
           return e;
       });
 
-      // Death Check
       const dead = newEnemies.find(e => e.id === target.id && e.hp <= 0);
       if (dead) {
           addLog(`${dead.name}を倒した！ (${dead.xp} XP)`);
@@ -283,7 +367,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       let nextXp = player.xp + amount;
       let nextLv = level;
       let nextMaxHp = player.maxHp;
-      let nextAtk = player.attack;
+      let nextAtk = player.baseAttack;
       
       const needed = nextLv * 10;
       if (nextXp >= needed) {
@@ -291,42 +375,43 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           nextLv++;
           nextMaxHp += 5;
           nextAtk += 1;
-          setPlayer(p => ({ ...p, hp: nextMaxHp })); 
+          setPlayer(p => ({ ...p, hp: nextMaxHp, baseAttack: nextAtk, maxHp: nextMaxHp })); 
           addLog(`レベルが${nextLv}に上がった！`);
           audioService.playSound('buff');
       }
       
-      setPlayer(p => ({ ...p, xp: nextXp, maxHp: nextMaxHp, attack: nextAtk }));
+      setPlayer(p => ({ ...p, xp: nextXp }));
       setLevel(nextLv);
   };
 
-  // Passed current player position to ensure enemies react to the NEW position
   const processTurn = (px: number, py: number) => {
-      // 1. Belly Decrease
       let nextBelly = belly - 1;
       let nextHp = player.hp;
+      
       if (nextBelly <= 0) {
           nextBelly = 0;
           nextHp -= 1;
           if (nextHp <= 0) {
               setGameOver(true);
-              addLog("空腹で倒れた...");
+              addLog("空腹で倒れた...", "red");
               return;
           }
-          addLog("お腹が空いて倒れそうだ...", "red");
+          if (frameCountRef.current % 5 === 0) addLog("お腹が空いて倒れそうだ...", "red");
+      } else {
+          // Natural healing logic could go here
       }
+      
       setBelly(nextBelly);
       setPlayer(p => ({ ...p, hp: nextHp }));
 
-      // 2. Enemy Turn
+      // Enemy Turn
       setEnemies(prevEnemies => {
           return prevEnemies.map(e => {
-              // Move towards player
               const dx = px - e.x;
               const dy = py - e.y;
               const dist = Math.abs(dx) + Math.abs(dy);
               
-              if (dist <= 8) { // Aggro range
+              if (dist <= 8) { 
                   let mx = 0, my = 0;
                   if (Math.abs(dx) > Math.abs(dy)) mx = dx > 0 ? 1 : -1;
                   else my = dy > 0 ? 1 : -1;
@@ -334,7 +419,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   const tx = e.x + mx;
                   const ty = e.y + my;
                   
-                  // Attack Player?
                   if (tx === px && ty === py) {
                       const dmg = Math.max(1, e.attack - player.defense);
                       addLog(`${e.name}の攻撃！${dmg}ダメージ！`, "red");
@@ -346,7 +430,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                       return e; 
                   }
                   
-                  // Move if empty
                   if (map[ty][tx] !== 'WALL' && !prevEnemies.some(o => o.x === tx && o.y === ty)) {
                       return { ...e, x: tx, y: ty };
                   }
@@ -356,12 +439,15 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       });
   };
 
-  const handleInteract = () => {
+  // --- INTERACTION ---
+  const handleActionBtn = () => {
       if (gameOver) { startNewGame(); return; }
-      if (menuOpen) { setMenuOpen(false); return; }
+      if (menuOpen) { 
+          // In Menu: Select / Use
+          return; 
+      }
 
-      // 1. Attack Forward (Air swing or valid)
-      // Check tile in front
+      // 1. Attack Forward
       const tx = player.x + player.dir.x;
       const ty = player.y + player.dir.y;
       
@@ -372,25 +458,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           return;
       }
 
-      // 2. Item Pickup / Stairs
-      // Prioritize Item under foot
-      const itemIdx = floorItems.findIndex(i => i.x === player.x && i.y === player.y);
-      if (itemIdx !== -1) {
-          const itemEnt = floorItems[itemIdx];
-          if (itemEnt.itemData) {
-              if (inventory.length < 8) {
-                  setInventory([...inventory, itemEnt.itemData]);
-                  setFloorItems(floorItems.filter((_, i) => i !== itemIdx));
-                  addLog(`${itemEnt.name}を拾った。`);
-                  processTurn(player.x, player.y);
-                  return;
-              } else {
-                  addLog("持ち物がいっぱいだ！");
-              }
-          }
-      }
-
-      // Stairs
+      // 2. Stairs
       if (map[player.y][player.x] === 'STAIRS') {
           addLog("階段を降りた！");
           setFloor(f => f + 1);
@@ -398,69 +466,108 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           return;
       }
 
-      // Nothing
+      // Air Swing
       addLog("素振りをした。");
+      audioService.playSound('select');
       processTurn(player.x, player.y);
   };
 
-  const handleUseItem = (index: number) => {
+  // --- INVENTORY / EQUIPMENT ACTIONS ---
+  const handleItemAction = (index: number) => {
       const item = inventory[index];
       if (!item) return;
 
-      let used = false;
-      if (item.type === 'ONIGIRI') {
-          setBelly(Math.min(maxBelly, belly + (item.value || 50)));
-          addLog("おにぎりを食べた。おいしい！");
-          used = true;
-      } else if (item.type === 'POTION') {
-          setPlayer(p => ({ ...p, hp: Math.min(p.maxHp, p.hp + (item.value || 30)) }));
-          addLog("回復薬を飲んだ。");
-          used = true;
-      } else if (item.type === 'STICK') {
-          setPlayer(p => ({ ...p, attack: p.attack + (item.value || 1) }));
-          addLog("木の棒を装備した気がする。(攻撃UP)"); // Consumable buff for simplicity
-          used = true;
-      } else if (item.type === 'NOTE') {
-          setShowMap(true);
-          addLog("マップの構造が頭に入った！");
-          used = true;
-      } else if (item.type === 'BOMB') {
-          // Damage all enemies in room? Or generic AOE
-          setEnemies(prev => prev.map(e => ({...e, hp: e.hp - (item.value || 20)})).filter(e => {
-              if (e.hp <= 0) {
-                  gainXp(e.xp);
-                  addLog(`${e.name}を爆破！`);
-                  return false;
-              }
-              return true;
-          }));
-          addLog("爆弾を使った！全体攻撃！");
-          audioService.playSound('attack');
-          used = true;
+      let actionDone = false;
+
+      // EQUIP LOGIC
+      if (item.category === 'WEAPON' || item.category === 'ARMOR' || item.category === 'RANGED') {
+          // Swap logic
+          setPlayer(p => {
+              const currentEquip = p.equipment ? p.equipment[item.category === 'WEAPON' ? 'weapon' : item.category === 'ARMOR' ? 'armor' : 'ranged'] : null;
+              const newEquipment = { ...p.equipment!, [item.category === 'WEAPON' ? 'weapon' : item.category === 'ARMOR' ? 'armor' : 'ranged']: item };
+              
+              // Return old equip to inventory
+              const newInv = [...inventory];
+              newInv.splice(index, 1); // Remove new item
+              if (currentEquip) newInv.push(currentEquip); // Add old item
+              
+              setInventory(newInv);
+              addLog(`${item.name}を装備した。`);
+              return { ...p, equipment: newEquipment };
+          });
+          actionDone = true;
+      } 
+      // CONSUMABLE LOGIC
+      else if (item.category === 'CONSUMABLE') {
+          if (item.type === 'ONIGIRI') {
+              setBelly(Math.min(maxBelly, belly + (item.value || 50)));
+              addLog("おにぎりを食べた。");
+              actionDone = true;
+          } else if (item.type === 'POTION') {
+              setPlayer(p => ({ ...p, hp: Math.min(p.maxHp, p.hp + (item.value || 30)) }));
+              addLog("回復薬を飲んだ。");
+              actionDone = true;
+          } else if (item.type === 'NOTE') {
+              setShowMap(true);
+              addLog("マップを覚えた！");
+              actionDone = true;
+          } else if (item.type === 'BOMB') {
+              setEnemies(prev => prev.map(e => ({...e, hp: e.hp - (item.value || 20)})).filter(e => {
+                  if (e.hp <= 0) { gainXp(e.xp); addLog(`${e.name}を爆破！`); return false; }
+                  return true;
+              }));
+              addLog("爆竹を使った！");
+              audioService.playSound('attack');
+              actionDone = true;
+          }
+          if (actionDone) {
+              setInventory(prev => prev.filter((_, i) => i !== index));
+          }
       }
 
-      if (used) {
-          setInventory(prev => prev.filter((_, i) => i !== index));
+      if (actionDone) {
           setMenuOpen(false);
           processTurn(player.x, player.y);
+          audioService.playSound('select');
+      }
+  };
+
+  const handleUnequip = (slot: 'weapon'|'armor'|'ranged') => {
+      const item = player.equipment?.[slot];
+      if (item) {
+          if (inventory.length < MAX_INVENTORY) {
+              setPlayer(p => ({ ...p, equipment: { ...p.equipment!, [slot]: null } }));
+              setInventory(prev => [...prev, item]);
+              addLog(`${item.name}を外した。`);
+              processTurn(player.x, player.y);
+          } else {
+              addLog("持ち物がいっぱいで外せない！");
+          }
       }
   };
 
   // --- RENDER ---
+  const frameCountRef = useRef(0);
   useEffect(() => {
+      const loop = setInterval(() => {
+          frameCountRef.current++;
+          renderGame();
+      }, 100); // 10 FPS mainly for rendering
+      return () => clearInterval(loop);
+  }, [map, player, enemies, floorItems, menuOpen]); // Re-bind on state change
+
+  const renderGame = () => {
       const canvas = canvasRef.current;
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
-
-      // CRITICAL FIX: Ensure map is loaded before rendering to prevent crash
       if (!map || map.length === 0) return;
 
       const w = canvas.width;
       const h = canvas.height;
       const ts = TILE_SIZE * SCALE;
 
-      // Fill BG
+      // BG
       ctx.fillStyle = C0;
       ctx.fillRect(0, 0, w, h);
 
@@ -475,7 +582,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               const sx = x * ts;
               const sy = y * ts;
 
-              // Bounds
               if (mx < 0 || mx >= MAP_W || my < 0 || my >= MAP_H) {
                   ctx.fillStyle = C0;
                   ctx.fillRect(sx, sy, ts, ts);
@@ -484,17 +590,14 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
               const tile = map[my][mx];
               
-              // Floor / Wall
               if (tile === 'WALL') {
                   ctx.fillStyle = C1;
                   ctx.fillRect(sx, sy, ts, ts);
-                  // Pattern
                   ctx.fillStyle = C0;
                   ctx.fillRect(sx+ts/4, sy+ts/4, ts/2, ts/2);
               } else {
                   ctx.fillStyle = C3;
-                  ctx.fillRect(sx, sy, ts, ts); // Floor
-                  
+                  ctx.fillRect(sx, sy, ts, ts);
                   if (tile === 'STAIRS') {
                       ctx.fillStyle = C1;
                       for(let i=0; i<3; i++) ctx.fillRect(sx, sy + i*(ts/3), ts, 2);
@@ -505,10 +608,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               const item = floorItems.find(i => i.x === mx && i.y === my);
               if (item) {
                   ctx.fillStyle = C1;
-                  // Simple bag shape
-                  ctx.fillRect(sx + 4*SCALE, sy + 4*SCALE, 8*SCALE, 8*SCALE);
+                  ctx.fillRect(sx + 4*SCALE, sy + 4*SCALE, 8*SCALE, 8*SCALE); // Bag
                   ctx.fillStyle = C3;
-                  ctx.fillText("?", sx + 6*SCALE, sy + 10*SCALE);
+                  if (item.itemData?.category === 'WEAPON') ctx.fillText("剣", sx + 4*SCALE, sy + 10*SCALE);
+                  else if (item.itemData?.category === 'ARMOR') ctx.fillText("盾", sx + 4*SCALE, sy + 10*SCALE);
+                  else ctx.fillText("?", sx + 6*SCALE, sy + 10*SCALE);
               }
 
               // Enemies
@@ -516,7 +620,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               if (enemy) {
                   ctx.fillStyle = C1;
                   ctx.fillRect(sx + 2*SCALE, sy + 2*SCALE, 12*SCALE, 12*SCALE);
-                  // Eyes
                   ctx.fillStyle = C3;
                   ctx.fillRect(sx + 4*SCALE, sy + 5*SCALE, 2*SCALE, 2*SCALE);
                   ctx.fillRect(sx + 10*SCALE, sy + 5*SCALE, 2*SCALE, 2*SCALE);
@@ -525,35 +628,42 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               // Player
               if (mx === player.x && my === player.y) {
                   ctx.fillStyle = C0;
-                  // Body
                   ctx.fillRect(sx + 3*SCALE, sy + 3*SCALE, 10*SCALE, 10*SCALE);
-                  // Face (direction)
                   ctx.fillStyle = C3;
-                  if (player.dir.y === 1) ctx.fillRect(sx + 4*SCALE, sy + 8*SCALE, 8*SCALE, 4*SCALE); // Down
-                  if (player.dir.y === -1) ctx.fillRect(sx + 4*SCALE, sy + 4*SCALE, 8*SCALE, 4*SCALE); // Up
-                  if (player.dir.x === 1) ctx.fillRect(sx + 8*SCALE, sy + 4*SCALE, 4*SCALE, 8*SCALE); // Right
-                  if (player.dir.x === -1) ctx.fillRect(sx + 4*SCALE, sy + 4*SCALE, 4*SCALE, 8*SCALE); // Left
+                  // Direction face
+                  if (player.dir.y === 1) ctx.fillRect(sx + 4*SCALE, sy + 8*SCALE, 8*SCALE, 4*SCALE); 
+                  if (player.dir.y === -1) ctx.fillRect(sx + 4*SCALE, sy + 4*SCALE, 8*SCALE, 4*SCALE); 
+                  if (player.dir.x === 1) ctx.fillRect(sx + 8*SCALE, sy + 4*SCALE, 4*SCALE, 8*SCALE); 
+                  if (player.dir.x === -1) ctx.fillRect(sx + 4*SCALE, sy + 4*SCALE, 4*SCALE, 8*SCALE); 
               }
           }
       }
-
-      // UI Overlay (Health / Belly)
-      // Done via HTML overlay for crisp text
-  }, [map, player, enemies, floorItems]);
+  };
 
   return (
     <div className="w-full h-full bg-[#101010] flex flex-col items-center font-mono select-none overflow-hidden touch-none relative p-4">
         
-        {/* Game Screen Area - Simplified, removed outer frame */}
+        {/* Game Screen Area */}
         <div className="w-full max-w-md aspect-[11/9] relative mb-2 shrink-0">
              {/* LCD Screen (Green) */}
              <div className="w-full h-full bg-[#9bbc0f] border-4 border-[#0f380f] relative overflow-hidden shadow-lg rounded-sm">
-                {/* Top Status Bar */}
-                <div className="absolute top-0 left-0 w-full h-6 bg-[#0f380f] text-[#9bbc0f] flex justify-between items-center px-2 text-xs font-bold z-10">
+                
+                {/* Equipment Status Bar (Top) */}
+                <div className="absolute top-0 left-0 w-full h-8 bg-[#0f380f] text-[#9bbc0f] flex justify-between items-center px-2 text-[10px] z-10 border-b border-[#306230]">
+                    <div className="flex gap-2">
+                        <span className="flex items-center"><Sword size={8} className="mr-1"/>{player.equipment?.weapon?.name || '-'}</span>
+                        <span className="flex items-center"><Shield size={8} className="mr-1"/>{player.equipment?.armor?.name || '-'}</span>
+                        <span className="flex items-center"><Target size={8} className="mr-1"/>{player.equipment?.ranged?.name || '-'}</span>
+                    </div>
+                </div>
+
+                {/* Main Status Bar (Bottom of Top) */}
+                <div className="absolute top-8 left-0 w-full h-5 bg-[#306230] text-[#9bbc0f] flex justify-between items-center px-2 text-xs font-bold z-10">
                     <span>{floor}F</span>
                     <span>Lv{level}</span>
-                    <span>HP {player.hp}/{player.maxHp}</span>
-                    <span>🍙 {belly}%</span>
+                    <span>HP{player.hp}/{player.maxHp}</span>
+                    <span>Atk{player.attack} Def{player.defense}</span>
+                    <span>🍙{belly}%</span>
                 </div>
 
                 {/* Canvas Layer */}
@@ -561,13 +671,13 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                     ref={canvasRef} 
                     width={VIEW_W * TILE_SIZE * SCALE} 
                     height={VIEW_H * TILE_SIZE * SCALE}
-                    className="w-full h-full object-contain pixel-art mt-4" 
+                    className="w-full h-full object-contain pixel-art mt-6" 
                     style={{ imageRendering: 'pixelated' }}
                 />
 
                 {/* Map Overlay */}
                 {showMap && map.length > 0 && (
-                    <div className="absolute inset-0 bg-[#0f380f]/90 z-20 flex items-center justify-center p-8">
+                    <div className="absolute inset-0 bg-[#0f380f]/90 z-20 flex items-center justify-center p-8 mt-12">
                         <div className="w-full h-full border border-[#9bbc0f] grid" style={{ gridTemplateColumns: `repeat(${MAP_W}, 1fr)` }}>
                             {map.map((row, y) => row.map((tile, x) => (
                                 <div key={`${x}-${y}`} className={`${tile === 'WALL' ? 'bg-transparent' : (tile === 'STAIRS' ? 'bg-[#9bbc0f]' : 'bg-[#306230]')}`}>
@@ -575,33 +685,40 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                 </div>
                             )))}
                         </div>
-                        <button onClick={() => setShowMap(false)} className="absolute bottom-4 text-[#9bbc0f] border border-[#9bbc0f] px-2 rounded hover:bg-[#306230]">Close Map</button>
+                        <button onClick={() => setShowMap(false)} className="absolute bottom-4 text-[#9bbc0f] border border-[#9bbc0f] px-2 rounded hover:bg-[#306230]">Close</button>
                     </div>
                 )}
 
-                {/* Menu Overlay */}
+                {/* Inventory Menu */}
                 {menuOpen && (
-                    <div className="absolute right-0 top-0 bottom-0 w-2/3 bg-[#0f380f] border-l-2 border-[#9bbc0f] z-30 p-2 text-[#9bbc0f] text-xs">
+                    <div className="absolute right-0 top-0 bottom-0 w-3/4 bg-[#0f380f] border-l-2 border-[#9bbc0f] z-30 p-2 text-[#9bbc0f] text-xs flex flex-col">
                         <div className="flex justify-between items-center border-b border-[#9bbc0f] mb-2 pb-1">
-                            <h3 className="font-bold">MOCHIMONO</h3>
+                            <h3 className="font-bold">MOCHIMONO ({inventory.length}/{MAX_INVENTORY})</h3>
                             <button onClick={() => setMenuOpen(false)}><X size={12}/></button>
                         </div>
-                        <div className="flex flex-col gap-1 overflow-y-auto h-[180px]">
+                        
+                        {/* Equipment Management */}
+                        <div className="mb-2 border-b border-[#306230] pb-2">
+                            <div className="text-[#8bac0f] mb-1">装備中:</div>
+                            {player.equipment?.weapon && <div onClick={()=>handleUnequip('weapon')} className="cursor-pointer hover:text-white">[武] {player.equipment.weapon.name} (外す)</div>}
+                            {player.equipment?.armor && <div onClick={()=>handleUnequip('armor')} className="cursor-pointer hover:text-white">[防] {player.equipment.armor.name} (外す)</div>}
+                            {player.equipment?.ranged && <div onClick={()=>handleUnequip('ranged')} className="cursor-pointer hover:text-white">[投] {player.equipment.ranged.name} (外す)</div>}
+                        </div>
+
+                        <div className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar">
                             {inventory.map((item, i) => (
                                 <button 
                                     key={i} 
                                     className="text-left px-2 py-1 hover:bg-[#306230] cursor-pointer flex justify-between items-center border border-transparent hover:border-[#9bbc0f]"
-                                    onClick={() => handleUseItem(i)}
+                                    onClick={() => handleItemAction(i)}
                                 >
                                     <span>{item.name}</span>
-                                    <span className="text-[9px] text-[#8bac0f]">使う</span>
+                                    <span className="text-[9px] text-[#8bac0f]">
+                                        {['WEAPON','ARMOR','RANGED'].includes(item.category) ? '装備' : '使う'}
+                                    </span>
                                 </button>
                             ))}
-                            {inventory.length === 0 && <span className="text-[#306230]">Empty</span>}
-                        </div>
-                        <div className="mt-2 border-t border-[#9bbc0f] pt-1">
-                            <p>ATK: {player.attack}</p>
-                            <p>XP: {player.xp}</p>
+                            {inventory.length === 0 && <span className="text-[#306230] text-center">Empty</span>}
                         </div>
                     </div>
                 )}
@@ -619,25 +736,31 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         </div>
 
         {/* Log Area */}
-        <div className="w-full max-w-md bg-[#0f380f] text-[#9bbc0f] h-20 p-2 text-[10px] overflow-hidden mb-2 rounded border-2 border-[#306230] font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner">
+        <div className="w-full max-w-md bg-[#0f380f] text-[#9bbc0f] h-16 p-1 text-[10px] overflow-hidden mb-2 rounded border-2 border-[#306230] font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner">
             {logs.map((l) => (
                 <div key={l.id} style={{ color: l.color || '#9bbc0f' }}>{l.message}</div>
             ))}
         </div>
 
-        {/* Controls Area - Expanded to fill space, buttons positioned absolutely relative to this container */}
+        {/* Controls Area */}
         <div className="w-full max-w-md flex-grow relative min-h-[180px] bg-[#1a1a1a] rounded-t-xl border-t-2 border-[#333]">
-            {/* D-Pad */}
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 w-32 h-32">
-                <div className="w-10 h-10 bg-[#333] absolute top-0 left-10 rounded-t-md shadow-lg active:mt-1 cursor-pointer border border-[#444]" onClick={() => movePlayer(0, -1)}><ArrowUp className="text-[#888] mx-auto mt-2" size={20}/></div>
-                <div className="w-10 h-10 bg-[#333] absolute bottom-0 left-10 rounded-b-md shadow-lg active:mt-1 cursor-pointer border border-[#444]" onClick={() => movePlayer(0, 1)}><ArrowDown className="text-[#888] mx-auto mt-2" size={20}/></div>
-                <div className="w-10 h-10 bg-[#333] absolute top-10 left-0 rounded-l-md shadow-lg active:mt-1 cursor-pointer border border-[#444]" onClick={() => movePlayer(-1, 0)}><ArrowLeft className="text-[#888] mx-auto mt-2" size={20}/></div>
-                <div className="w-10 h-10 bg-[#333] absolute top-10 right-0 rounded-r-md shadow-lg active:mt-1 cursor-pointer border border-[#444]" onClick={() => movePlayer(1, 0)}><ArrowRight className="text-[#888] mx-auto mt-2" size={20}/></div>
-                <div className="w-10 h-10 bg-[#333] absolute top-10 left-10 flex items-center justify-center border border-[#444]"><div className="w-4 h-4 bg-[#222] rounded-full"></div></div>
+            
+            {/* Unified D-Pad */}
+            <div className="absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32">
+                <div className="relative w-full h-full">
+                    {/* Cross Base */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-[#333]"></div>
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-12 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-start justify-center pt-2" onClick={() => movePlayer(0, -1)}><ArrowUp className="text-[#666]" size={20}/></div>
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-12 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-end justify-center pb-2" onClick={() => movePlayer(0, 1)}><ArrowDown className="text-[#666]" size={20}/></div>
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-12 h-10 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-start pl-2" onClick={() => movePlayer(-1, 0)}><ArrowLeft className="text-[#666]" size={20}/></div>
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-12 h-10 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2" onClick={() => movePlayer(1, 0)}><ArrowRight className="text-[#666]" size={20}/></div>
+                    {/* Center Cap */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-[#2a2a2a] rounded-full radial-gradient"></div>
+                </div>
             </div>
 
             {/* A/B Buttons */}
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex gap-4 transform -rotate-12">
+            <div className="absolute right-6 top-1/2 -translate-y-1/2 flex gap-4 transform -rotate-12">
                 <div className="flex flex-col items-center group">
                     <button 
                         className="w-14 h-14 bg-[#8b0000] rounded-full shadow-[0_4px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000]"
@@ -650,7 +773,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                 <div className="flex flex-col items-center mt-[-15px] group">
                     <button 
                         className="w-14 h-14 bg-[#ff0000] rounded-full shadow-[0_4px_0_#8b0000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#cc0000]"
-                        onClick={handleInteract}
+                        onClick={handleActionBtn}
                     >
                         A
                     </button>
@@ -658,7 +781,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                 </div>
             </div>
 
-            {/* Quit Button (Bottom Center) */}
+            {/* Quit Button */}
             <div className="absolute bottom-2 left-1/2 -translate-x-1/2">
                  <button onClick={onBack} className="text-[#555] text-[10px] font-bold border border-[#333] px-3 py-1 rounded bg-[#222] hover:text-white hover:border-gray-500 flex items-center gap-1">
                     <LogOut size={10}/> QUIT
