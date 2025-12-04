@@ -110,21 +110,31 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     const newMap: TileType[][] = Array(MAP_H).fill(null).map(() => Array(MAP_W).fill('WALL'));
     const rooms: {x:number, y:number, w:number, h:number}[] = [];
     
-    // Room Gen
-    for(let i=0; i<6; i++) {
-        const w = Math.floor(Math.random() * 4) + 4;
-        const h = Math.floor(Math.random() * 4) + 4;
-        const x = Math.floor(Math.random() * (MAP_W - w - 2)) + 1;
-        const y = Math.floor(Math.random() * (MAP_H - h - 2)) + 1;
-        
-        const overlap = rooms.some(r => x < r.x + r.w + 1 && x + w + 1 > r.x && y < r.y + r.h + 1 && y + h + 1 > r.y);
-        if(!overlap) {
-            rooms.push({x, y, w, h});
-            for(let ry=y; ry<y+h; ry++) {
-                for(let rx=x; rx<x+w; rx++) newMap[ry][rx] = 'FLOOR';
+    // Room Gen - Retry loop to ensure at least 2 rooms for interesting gameplay
+    let attempts = 0;
+    while(rooms.length < 2 && attempts < 100) {
+        attempts++;
+        // Reset if too many fails
+        if (attempts % 20 === 0) rooms.length = 0;
+
+        for(let i=0; i<6; i++) {
+            const w = Math.floor(Math.random() * 4) + 4;
+            const h = Math.floor(Math.random() * 4) + 4;
+            const x = Math.floor(Math.random() * (MAP_W - w - 2)) + 1;
+            const y = Math.floor(Math.random() * (MAP_H - h - 2)) + 1;
+            
+            const overlap = rooms.some(r => x < r.x + r.w + 1 && x + w + 1 > r.x && y < r.y + r.h + 1 && y + h + 1 > r.y);
+            if(!overlap) {
+                rooms.push({x, y, w, h});
+                for(let ry=y; ry<y+h; ry++) {
+                    for(let rx=x; rx<x+w; rx++) newMap[ry][rx] = 'FLOOR';
+                }
             }
         }
     }
+
+    // Sort rooms to make corridors cleaner
+    rooms.sort((a,b) => (a.x + a.y) - (b.x + b.y));
 
     // Corridors
     for (let i = 0; i < rooms.length - 1; i++) {
@@ -163,7 +173,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     for(let y=0; y<MAP_H; y++) {
         for(let x=0; x<MAP_W; x++) {
             if(newMap[y][x] === 'FLOOR' && (x !== px || y !== py)) {
-                if(Math.random() < 0.03) {
+                if(Math.random() < 0.04) {
                     // Enemy
                     const types: ('SLIME'|'GHOST'|'BAT'|'BOOK')[] = ['SLIME', 'GHOST', 'BAT', 'BOOK'];
                     const t = types[Math.floor(Math.random() * types.length)];
@@ -210,7 +220,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       if(dx === 0 && dy === 0) {
           // Wait turn
           addLog("足踏みした。");
-          processTurn();
+          processTurn(player.x, player.y);
           return;
       }
 
@@ -229,7 +239,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       const target = enemies.find(e => e.x === tx && e.y === ty);
       if (target) {
           attackEnemy(target);
-          processTurn();
+          processTurn(player.x, player.y); // Player didn't move
           return;
       }
 
@@ -242,7 +252,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           addLog(`${item.name}の上に乗った。`);
       }
       
-      processTurn();
+      processTurn(tx, ty);
   };
 
   const attackEnemy = (target: Entity) => {
@@ -281,7 +291,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           nextLv++;
           nextMaxHp += 5;
           nextAtk += 1;
-          setPlayer(p => ({ ...p, hp: nextMaxHp })); // Full heal on level up? Or partial? Let's do full heal logic or +5
+          setPlayer(p => ({ ...p, hp: nextMaxHp })); 
           addLog(`レベルが${nextLv}に上がった！`);
           audioService.playSound('buff');
       }
@@ -290,7 +300,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       setLevel(nextLv);
   };
 
-  const processTurn = () => {
+  // Passed current player position to ensure enemies react to the NEW position
+  const processTurn = (px: number, py: number) => {
       // 1. Belly Decrease
       let nextBelly = belly - 1;
       let nextHp = player.hp;
@@ -308,50 +319,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       setPlayer(p => ({ ...p, hp: nextHp }));
 
       // 2. Enemy Turn
-      const pPos = { x: player.x, y: player.y }; // Use current pos (even if just updated)
-      // Actually we need to use the state setter callback or ref for accurate sequential logic in React
-      // Simplified: Assume React batching allows us to calculate AI based on "intended" player pos
-      // Since movePlayer updated state, re-render hasn't happened yet, so `player` is old.
-      // Fix: We need to calculate AI based on WHERE PLAYER IS GOING.
-      // BUT simpler: In `movePlayer`, we called `setPlayer`.
-      // The `processTurn` should really just calculate updates and `setEnemies` once.
-      // We will access player position via a temp variable or pass it.
-      // To make it robust without huge refactor: we will use a ref for player pos or just accept 1 frame lag visual or use functional updates carefully.
-      
-      // Let's use functional update for enemies to ensure they see latest player if possible, 
-      // but they can't see the functional update of player...
-      // OK, for this mini-game, simple approach: Player moves -> Render -> Effect calls AI? No, strict turn order.
-      // Better: pass newPlayerPos to processTurn.
-      
-      // Since I can't easily change signature in `movePlayer` without passing args around, 
-      // I will assume `player` variable inside `movePlayer` is old, but I know the delta.
-      // Let's just execute AI based on current state (which is technically "Player moved, now enemies move relative to that").
-      // Actually `player` in scope is old.
-      
-      // For simplicity in this React component: 
-      // AI will act based on the PREVIOUS player position visually or I assume the player stays close.
-      // Correct way: Calculate everything in one go or use Refs.
-      // Let's use `setEnemies` with logic inside.
-      
       setEnemies(prevEnemies => {
-          // We need the *latest* player position. 
-          // Since we can't get it easily inside this callback without refs, let's look at the `movePlayer` logic again.
-          // `movePlayer` calls `processTurn` immediately.
-          // Let's cheat: AI acts on "player" state which is technically Frame N. Player moves to Frame N+1.
-          // This means enemies react to where player WAS. This is sometimes acceptable or creates "following" behavior.
-          // To fix: "Player moves, THEN Enemies move". 
-          // If I use a Ref for player position, it solves this.
-          
           return prevEnemies.map(e => {
-              // Simple AI: Move towards player
-              // Note: Using `player` from closure (Frame N). 
-              // If player moved, this `player` is where they were.
-              // To make it feel responsive, let's assume player is at `player` (old) + delta? No, too complex.
-              // Let's just use `player`. It means enemies have reaction delay of 1 frame logic, which is fine for a simple RPG.
-              // WAIT! If I use functional update for player in `movePlayer`, `player` var is definitely old.
-              
-              const dx = player.x - e.x;
-              const dy = player.y - e.y;
+              // Move towards player
+              const dx = px - e.x;
+              const dy = py - e.y;
               const dist = Math.abs(dx) + Math.abs(dy);
               
               if (dist <= 8) { // Aggro range
@@ -363,18 +335,14 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   const ty = e.y + my;
                   
                   // Attack Player?
-                  // We need to know if (tx, ty) is the NEW player position.
-                  // Since we don't have it, let's check against `player` (old) and maybe current input?
-                  // Let's just allow overlap visually or fix logic?
-                  // Best fix: Check collision with Player's *State* in next render? No.
-                  
-                  // Let's check collision against `player` variable. 
-                  if (tx === player.x && ty === player.y) {
-                      // Attack
+                  if (tx === px && ty === py) {
                       const dmg = Math.max(1, e.attack - player.defense);
                       addLog(`${e.name}の攻撃！${dmg}ダメージ！`, "red");
-                      setPlayer(p => ({ ...p, hp: p.hp - dmg })); // This queues another update
-                      if (player.hp - dmg <= 0) setGameOver(true);
+                      setPlayer(p => {
+                          const newHp = p.hp - dmg;
+                          if (newHp <= 0) setGameOver(true);
+                          return { ...p, hp: newHp };
+                      });
                       return e; 
                   }
                   
@@ -400,7 +368,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       const target = enemies.find(e => e.x === tx && e.y === ty);
       if (target) {
           attackEnemy(target);
-          processTurn();
+          processTurn(player.x, player.y);
           return;
       }
 
@@ -414,7 +382,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   setInventory([...inventory, itemEnt.itemData]);
                   setFloorItems(floorItems.filter((_, i) => i !== itemIdx));
                   addLog(`${itemEnt.name}を拾った。`);
-                  processTurn();
+                  processTurn(player.x, player.y);
                   return;
               } else {
                   addLog("持ち物がいっぱいだ！");
@@ -432,7 +400,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
       // Nothing
       addLog("素振りをした。");
-      processTurn();
+      processTurn(player.x, player.y);
   };
 
   const handleUseItem = (index: number) => {
@@ -474,7 +442,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       if (used) {
           setInventory(prev => prev.filter((_, i) => i !== index));
           setMenuOpen(false);
-          processTurn();
+          processTurn(player.x, player.y);
       }
   };
 
@@ -484,6 +452,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
+
+      // CRITICAL FIX: Ensure map is loaded before rendering to prevent crash
+      if (!map || map.length === 0) return;
 
       const w = canvas.width;
       const h = canvas.height;
@@ -602,7 +573,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                     />
 
                     {/* Map Overlay */}
-                    {showMap && (
+                    {showMap && map.length > 0 && (
                         <div className="absolute inset-0 bg-[#0f380f]/90 z-20 flex items-center justify-center p-8">
                             <div className="w-full h-full border border-[#9bbc0f] grid" style={{ gridTemplateColumns: `repeat(${MAP_W}, 1fr)` }}>
                                 {map.map((row, y) => row.map((tile, x) => (
