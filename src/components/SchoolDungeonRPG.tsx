@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target } from 'lucide-react';
 import { audioService } from '../services/audioService';
+import { createPixelSpriteCanvas } from './PixelSprite';
 
 interface SchoolDungeonRPGProps {
   onBack: () => void;
@@ -105,6 +106,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   
   // --- STATE ---
   const [map, setMap] = useState<TileType[][]>([]);
+  const spriteCache = useRef<Record<string, HTMLCanvasElement>>({});
   
   // Initialize Player
   const [player, setPlayer] = useState<Entity>({
@@ -129,6 +131,21 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
   // Init
   useEffect(() => {
+    // Generate Sprites
+    spriteCache.current['PLAYER_FRONT'] = createPixelSpriteCanvas('P_FRONT', 'HUMANOID|#d32f2f'); // Red
+    spriteCache.current['PLAYER_SIDE'] = createPixelSpriteCanvas('P_SIDE', 'HUMANOID_SIDE|#d32f2f'); 
+    spriteCache.current['PLAYER_BACK'] = createPixelSpriteCanvas('P_BACK', 'HUMANOID_BACK|#d32f2f');
+    
+    spriteCache.current['SLIME'] = createPixelSpriteCanvas('SLIME', 'SLIME|#1565C0'); // Blue
+    spriteCache.current['GHOST'] = createPixelSpriteCanvas('GHOST', 'GHOST|#6A1B9A'); // Purple
+    spriteCache.current['BAT'] = createPixelSpriteCanvas('BAT', 'BAT|#212121'); // Black
+    spriteCache.current['BOOK'] = createPixelSpriteCanvas('BOOK', 'NOTEBOOK|#5D4037'); // Brown
+
+    spriteCache.current['WEAPON'] = createPixelSpriteCanvas('WPN', 'SWORD');
+    spriteCache.current['ARMOR'] = createPixelSpriteCanvas('ARM', 'SHIELD');
+    spriteCache.current['RANGED'] = createPixelSpriteCanvas('RNG', 'POTION'); // Use Potion as generic small item
+    spriteCache.current['CONSUMABLE'] = createPixelSpriteCanvas('CON', 'POTION');
+
     startNewGame();
   }, []);
 
@@ -145,7 +162,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       });
   }, [player.equipment]);
 
-  // Log Logic: Append to end, slice from end to keep latest 6
+  // Log Logic
   const addLog = (msg: string, color?: string) => {
     setLogs(prev => {
         const nextLogs = [...prev, { message: msg, color, id: Date.now() + Math.random() }];
@@ -172,7 +189,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         hp: 30, maxHp: 30, baseAttack: 3, baseDefense: 0, attack: 3, defense: 0, xp: 0, dir: {x:0, y:1},
         equipment: { weapon: null, armor: null, ranged: null }
     });
-    setLogs([]); // Clear logs
+    setLogs([]);
     
     generateFloor(1);
     addLog("風来の旅が始まった！");
@@ -268,7 +285,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 };
 
   // --- ACTIONS ---
-  
   const movePlayer = (dx: 0|1|-1, dy: 0|1|-1) => {
       if(gameOver) return;
       if(dx === 0 && dy === 0) {
@@ -430,10 +446,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   // --- INTERACTION ---
   const handleActionBtn = () => {
       if (gameOver) { startNewGame(); return; }
-      if (menuOpen) { 
-          // In Menu: Select / Use
-          return; 
-      }
+      if (menuOpen) { return; }
 
       // 1. Attack Forward
       const tx = player.x + player.dir.x;
@@ -460,7 +473,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       processTurn(player.x, player.y);
   };
 
-  // --- INVENTORY / EQUIPMENT ACTIONS ---
+  // --- INVENTORY ACTIONS ---
   const handleItemAction = (index: number) => {
       const item = inventory[index];
       if (!item) return;
@@ -469,15 +482,13 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
       // EQUIP LOGIC
       if (item.category === 'WEAPON' || item.category === 'ARMOR' || item.category === 'RANGED') {
-          // Swap logic
           setPlayer(p => {
               const currentEquip = p.equipment ? p.equipment[item.category === 'WEAPON' ? 'weapon' : item.category === 'ARMOR' ? 'armor' : 'ranged'] : null;
               const newEquipment = { ...p.equipment!, [item.category === 'WEAPON' ? 'weapon' : item.category === 'ARMOR' ? 'armor' : 'ranged']: item };
               
-              // Return old equip to inventory
               const newInv = [...inventory];
-              newInv.splice(index, 1); // Remove new item
-              if (currentEquip) newInv.push(currentEquip); // Add old item
+              newInv.splice(index, 1); 
+              if (currentEquip) newInv.push(currentEquip); 
               
               setInventory(newInv);
               addLog(`${item.name}を装備した。`);
@@ -579,6 +590,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
               const tile = map[my][mx];
               
+              // Draw Floor/Wall
               if (tile === 'WALL') {
                   ctx.fillStyle = C1;
                   ctx.fillRect(sx, sy, ts, ts);
@@ -593,37 +605,62 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   }
               }
 
-              // Items
+              // Draw Items
               const item = floorItems.find(i => i.x === mx && i.y === my);
               if (item) {
-                  ctx.fillStyle = C1;
-                  ctx.fillRect(sx + 4*SCALE, sy + 4*SCALE, 8*SCALE, 8*SCALE); // Bag
-                  ctx.fillStyle = C3;
-                  if (item.itemData?.category === 'WEAPON') ctx.fillText("剣", sx + 4*SCALE, sy + 10*SCALE);
-                  else if (item.itemData?.category === 'ARMOR') ctx.fillText("盾", sx + 4*SCALE, sy + 10*SCALE);
-                  else ctx.fillText("?", sx + 6*SCALE, sy + 10*SCALE);
+                  const cat = item.itemData?.category;
+                  let spriteKey = 'CONSUMABLE';
+                  if (cat === 'WEAPON') spriteKey = 'WEAPON';
+                  if (cat === 'ARMOR') spriteKey = 'ARMOR';
+                  if (cat === 'RANGED') spriteKey = 'RANGED';
+                  const sprite = spriteCache.current[spriteKey];
+                  if (sprite) {
+                      ctx.drawImage(sprite, sx, sy, ts, ts);
+                  } else {
+                      ctx.fillStyle = C1;
+                      ctx.fillRect(sx + 4*SCALE, sy + 4*SCALE, 8*SCALE, 8*SCALE);
+                  }
               }
 
-              // Enemies
+              // Draw Enemies
               const enemy = enemies.find(e => e.x === mx && e.y === my);
               if (enemy) {
-                  ctx.fillStyle = C1;
-                  ctx.fillRect(sx + 2*SCALE, sy + 2*SCALE, 12*SCALE, 12*SCALE);
-                  ctx.fillStyle = C3;
-                  ctx.fillRect(sx + 4*SCALE, sy + 5*SCALE, 2*SCALE, 2*SCALE);
-                  ctx.fillRect(sx + 10*SCALE, sy + 5*SCALE, 2*SCALE, 2*SCALE);
+                  const spriteKey = enemy.enemyType || 'SLIME';
+                  const sprite = spriteCache.current[spriteKey];
+                  if (sprite) {
+                      ctx.drawImage(sprite, sx, sy, ts, ts);
+                  } else {
+                      ctx.fillStyle = C1;
+                      ctx.fillRect(sx + 2*SCALE, sy + 2*SCALE, 12*SCALE, 12*SCALE);
+                  }
               }
 
-              // Player
+              // Draw Player
               if (mx === player.x && my === player.y) {
-                  ctx.fillStyle = C0;
-                  ctx.fillRect(sx + 3*SCALE, sy + 3*SCALE, 10*SCALE, 10*SCALE);
-                  ctx.fillStyle = C3;
-                  // Direction face
-                  if (player.dir.y === 1) ctx.fillRect(sx + 4*SCALE, sy + 8*SCALE, 8*SCALE, 4*SCALE); 
-                  if (player.dir.y === -1) ctx.fillRect(sx + 4*SCALE, sy + 4*SCALE, 8*SCALE, 4*SCALE); 
-                  if (player.dir.x === 1) ctx.fillRect(sx + 8*SCALE, sy + 4*SCALE, 4*SCALE, 8*SCALE); 
-                  if (player.dir.x === -1) ctx.fillRect(sx + 4*SCALE, sy + 4*SCALE, 4*SCALE, 8*SCALE); 
+                  let spriteKey = 'PLAYER_FRONT';
+                  let flip = false;
+                  
+                  if (player.dir.y === -1) spriteKey = 'PLAYER_BACK';
+                  else if (player.dir.x !== 0) {
+                      spriteKey = 'PLAYER_SIDE';
+                      if (player.dir.x === -1) flip = true;
+                  }
+
+                  const sprite = spriteCache.current[spriteKey];
+                  if (sprite) {
+                      if (flip) {
+                          ctx.save();
+                          ctx.translate(sx + ts, sy);
+                          ctx.scale(-1, 1);
+                          ctx.drawImage(sprite, 0, 0, ts, ts);
+                          ctx.restore();
+                      } else {
+                          ctx.drawImage(sprite, sx, sy, ts, ts);
+                      }
+                  } else {
+                      ctx.fillStyle = C0;
+                      ctx.fillRect(sx + 3*SCALE, sy + 3*SCALE, 10*SCALE, 10*SCALE);
+                  }
               }
           }
       }

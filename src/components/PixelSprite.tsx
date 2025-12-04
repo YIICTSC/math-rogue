@@ -48,6 +48,42 @@ export const SPRITE_TEMPLATES: Record<string, string[]> = {
     ".##.......##....",
     "................"
   ],
+  HUMANOID_BACK: [
+    "................",
+    ".....####.......",
+    "....#%%%%#......",
+    "...#%%%%%%#.....",
+    "....#%%%%#......",
+    ".....####.......",
+    "...#######......",
+    "..#%#####%#.....",
+    "..#%#####%#.....",
+    "..#%#####%#.....",
+    "...#######......",
+    "...##...##......",
+    "..##.....##.....",
+    "..##.....##.....",
+    ".##.......##....",
+    "................"
+  ],
+  HUMANOID_SIDE: [
+    "................",
+    "......###.......",
+    ".....#%%%#......",
+    "....#%%%%#......",
+    ".....#%##.......",
+    "......###.......",
+    ".....#####......",
+    "....#%###%#.....",
+    "...#%####%#.....",
+    "...#%####%#.....",
+    "...#######......",
+    "....##..##......",
+    "....##..##......",
+    "....##..##......",
+    "....##..##......",
+    "................"
+  ],
   SENIOR: [
     "....########....",
     "...##########...",
@@ -100,7 +136,8 @@ export const SPRITE_TEMPLATES: Record<string, string[]> = {
     ".....##..##.#...",
     ".....##..##.#...",
     "....##....##....",
-    "...##..........."],
+    "...##..........."
+  ],
   MUSCLE: [
     "................",
     "......####......",
@@ -517,47 +554,32 @@ export const SPRITE_TEMPLATES: Record<string, string[]> = {
   ]
 };
 
-const PixelSprite: React.FC<PixelSpriteProps> = ({ seed, name = "", className, size = 16 }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Configuration
-    const pixelScale = 8; // Scale up 16x16 to 128x128
+// Exported Helper for other components to use (e.g. SchoolDungeonRPG)
+export const createPixelSpriteCanvas = (seed: string, name: string = "", size: number = 16): HTMLCanvasElement => {
+    const canvas = document.createElement('canvas');
+    const pixelScale = 8;
     const border = 1;
-    
-    // Set Canvas Size
     canvas.width = (size + border * 2) * pixelScale;
     canvas.height = (size + border * 2) * pixelScale;
     
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return canvas;
+
     ctx.imageSmoothingEnabled = false;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const drawPixel = (x: number, y: number, color: string) => {
-        ctx.fillStyle = color;
-        ctx.fillRect((x + border) * pixelScale, (y + border) * pixelScale, pixelScale, pixelScale);
-    };
-
-    // --- LOGIC UPDATE: Handle Composite Names (Shape|Color|Type) ---
+    // --- LOGIC: Handle Composite Names (Shape|Color|Type) ---
     const nameParts = name.split('|');
-    const shapeKeySource = nameParts[0]; // "SNAKE", "先生", etc.
-    const colorKeySource = nameParts.length > 1 ? nameParts[1] : (seed || name); // If split, use part 2, else use seed/name
-    const typeKey = nameParts.length > 2 ? nameParts[2] : null; // NEW: Card Type Hint
+    const shapeKeySource = nameParts[0]; 
+    const colorKeySource = nameParts.length > 1 ? nameParts[1] : (seed || name); 
+    const typeKey = nameParts.length > 2 ? nameParts[2] : null; 
 
     let spriteKey = null;
     const n = shapeKeySource;
     
-    // 1. Direct key match (e.g. from debug menu manual override or existing keys)
+    // Direct or Keyword Matching
     if (SPRITE_TEMPLATES[shapeKeySource]) {
         spriteKey = shapeKeySource;
-    } 
-    // 2. Keyword matching for known entities (Enemies/Characters)
-    else if (n.includes('上級生') || n.includes('不良') || n.includes('不審者') || n.includes('番長')) spriteKey = 'SENIOR';
+    } else if (n.includes('上級生') || n.includes('不良') || n.includes('不審者') || n.includes('番長')) spriteKey = 'SENIOR';
     else if (n.includes('花子') || n.includes('少女') || n.includes('マネージャー')) spriteKey = 'GIRL';
     else if (n.includes('体育') || n.includes('教頭') || n.includes('ボス') || n.includes('ガード')) spriteKey = 'MUSCLE';
     else if (n.includes('先生') || n.includes('校長') || n.includes('顧問') || n.includes('医者')) spriteKey = 'TEACHER';
@@ -576,7 +598,7 @@ const PixelSprite: React.FC<PixelSpriteProps> = ({ seed, name = "", className, s
     else if (n.includes('蛇') || n.includes('ミミズ') || n.includes('ツチノコ')) spriteKey = 'SNAKE';
     else if (n.includes('花') || n.includes('草') || n.includes('キノコ') || n.includes('樹')) spriteKey = 'PLANT';
     
-    // 3. Keyword matching for Cards (Items/Effects) - Expanded List
+    // Cards
     else if (n.includes('ノート') || n.includes('宿題') || n.includes('辞書') || n.includes('本') || n.includes('学習') || n.includes('予習') || n.includes('計算') || n.includes('研究') || n.includes('速読') || n.includes('計画') || n.includes('作戦') || n.includes('勉強') || n.includes('書') || n.includes('読') || n.includes('誌') || n.includes('帳')) spriteKey = 'NOTEBOOK';
     else if (n.includes('ランドセル') || n.includes('バッグ') || n.includes('道具') || n.includes('準備')) spriteKey = 'BACKPACK';
     else if (n.includes('上履き') || n.includes('靴') || n.includes('足') || n.includes('ダッシュ') || n.includes('ステップ') || n.includes('ジャンプ') || n.includes('側転') || n.includes('バック転') || n.includes('歩') || n.includes('走') || n.includes('跳') || n.includes('逃')) spriteKey = 'SHOE';
@@ -589,31 +611,26 @@ const PixelSprite: React.FC<PixelSpriteProps> = ({ seed, name = "", className, s
     else if (n.includes('雷') || n.includes('電気') || n.includes('ビーム') || n.includes('光') || n.includes('サンダー') || n.includes('ショック') || n.includes('大声') || n.includes('レーザー') || n.includes('静電気') || n.includes('雄叫び') || n.includes('泣き叫ぶ') || n.includes('充電') || n.includes('怒号') || n.includes('叫') || n.includes('鳴') || n.includes('電')) spriteKey = 'LIGHTNING';
     else if (n.includes('筋肉') || n.includes('ムキムキ') || n.includes('頭突き') || n.includes('体')) spriteKey = 'MUSCLE';
 
-    // 4. Fallback Logic using Type Hint
     if (!spriteKey) {
         if (typeKey) {
-            // Default appearance based on Card Type
             if (typeKey === 'ATTACK') spriteKey = 'SWORD'; 
             else if (typeKey === 'SKILL') spriteKey = 'SHIELD'; 
             else if (typeKey === 'POWER') spriteKey = 'FLAME'; 
             else if (typeKey === 'STATUS') spriteKey = 'SLIME';
             else if (typeKey === 'CURSE') spriteKey = 'GHOST';
-            else spriteKey = 'NOTEBOOK'; // Generic
+            else spriteKey = 'NOTEBOOK'; 
         } else {
-            // No type hint and no keyword match -> Assume Entity (Enemy/Character)
             spriteKey = 'HUMANOID'; 
         }
     }
 
     const template = SPRITE_TEMPLATES[spriteKey] || SPRITE_TEMPLATES.HUMANOID;
 
-    // 2. Determine Palette based on Color Source
     let hash = 0;
     for (let i = 0; i < colorKeySource.length; i++) {
       hash = colorKeySource.charCodeAt(i) + ((hash << 5) - hash);
     }
     
-    // Palettes: [Main, Highlight, Outline]
     const palettes = [
       ['#2E7D32', '#66BB6A', '#1B5E20'], // Green
       ['#C62828', '#EF5350', '#B71C1C'], // Red
@@ -627,13 +644,8 @@ const PixelSprite: React.FC<PixelSpriteProps> = ({ seed, name = "", className, s
       ['#D81B60', '#F48FB1', '#880E4F'], // Pink
     ];
 
-    // Force specific colors for some types (Only if not synthesized or synthesis color source contains keyword)
-    // When synthesized, colorKeySource is the 2nd card name.
-    
-    // Base palette
     let palette = palettes[Math.abs(hash) % palettes.length];
     
-    // Keyword based overrides for consistent coloring
     const c = colorKeySource;
     if (c.includes('先生') || c.includes('悪魔') || c.includes('怒') || c.includes('ランドセル') || c.includes('炎') || c.includes('リンゴ') || c.includes('赤') || c.includes('血') || c.includes('攻撃')) palette = palettes[1]; // Red
     else if (c.includes('スライム') || c.includes('水') || c.includes('三輪車') || c.includes('氷') || c.includes('青') || c.includes('冷') || c.includes('防御') || c.includes('ブロック')) palette = palettes[2]; // Blue
@@ -647,9 +659,8 @@ const PixelSprite: React.FC<PixelSpriteProps> = ({ seed, name = "", className, s
 
     const mainColor = palette[0];
     const highlightColor = palette[1];
-    const outlineColor = '#000000'; // Always black for contrast
+    const outlineColor = '#000000';
 
-    // 3. Render
     for (let y = 0; y < 16; y++) {
       for (let x = 0; x < 16; x++) {
         const char = template[y][x];
@@ -659,9 +670,26 @@ const PixelSprite: React.FC<PixelSpriteProps> = ({ seed, name = "", className, s
         if (char === '%') color = highlightColor;
         if (char === '@') color = outlineColor;
         
-        drawPixel(x, y, color);
+        ctx.fillStyle = color;
+        ctx.fillRect((x + border) * pixelScale, (y + border) * pixelScale, pixelScale, pixelScale);
       }
     }
+    return canvas;
+};
+
+const PixelSprite: React.FC<PixelSpriteProps> = ({ seed, name = "", className, size = 16 }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const generated = createPixelSpriteCanvas(seed, name, size);
+    
+    // Copy content
+    canvas.width = generated.width;
+    canvas.height = generated.height;
+    const ctx = canvas.getContext('2d');
+    if (ctx) ctx.drawImage(generated, 0, 0);
     
   }, [seed, name, size]);
 
