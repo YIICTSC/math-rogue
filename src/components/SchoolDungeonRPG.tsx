@@ -145,8 +145,15 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       });
   }, [player.equipment]);
 
+  // Log Logic: Append to end, slice from end to keep latest 6
   const addLog = (msg: string, color?: string) => {
-    setLogs(prev => [{ message: msg, color, id: Date.now() + Math.random() }, ...prev].slice(0, 6));
+    setLogs(prev => {
+        const nextLogs = [...prev, { message: msg, color, id: Date.now() + Math.random() }];
+        if (nextLogs.length > 6) {
+            return nextLogs.slice(nextLogs.length - 6);
+        }
+        return nextLogs;
+    });
   };
 
   const startNewGame = () => {
@@ -165,6 +172,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         hp: 30, maxHp: 30, baseAttack: 3, baseDefense: 0, attack: 3, defense: 0, xp: 0, dir: {x:0, y:1},
         equipment: { weapon: null, armor: null, ranged: null }
     });
+    setLogs([]); // Clear logs
     
     generateFloor(1);
     addLog("風来の旅が始まった！");
@@ -257,7 +265,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     setEnemies(newEnemies);
     setFloorItems(newItems);
     setShowMap(false);
-  };
+};
 
   // --- ACTIONS ---
   
@@ -294,42 +302,22 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       // Move logic first
       setPlayer(p => ({ ...p, x: finalX, y: finalY }));
       
-      // Check for Item Pickup (Instant Logic)
+      // Check for Item Pickup
       const itemIdx = floorItems.findIndex(i => i.x === finalX && i.y === finalY);
       if (itemIdx !== -1) {
           const itemEntity = floorItems[itemIdx];
           if (itemEntity.itemData) {
               const item = itemEntity.itemData;
-              let pickedUp = false;
-              let equipMsg = "";
-
-              // Auto-Equip Logic
-              if (item.category === 'WEAPON' && !player.equipment?.weapon) {
-                  setPlayer(p => ({ ...p, equipment: { ...p.equipment!, weapon: item } }));
-                  equipMsg = " (装備した)";
-                  pickedUp = true;
-              } else if (item.category === 'ARMOR' && !player.equipment?.armor) {
-                  setPlayer(p => ({ ...p, equipment: { ...p.equipment!, armor: item } }));
-                  equipMsg = " (装備した)";
-                  pickedUp = true;
-              } else if (item.category === 'RANGED' && !player.equipment?.ranged) {
-                  setPlayer(p => ({ ...p, equipment: { ...p.equipment!, ranged: item } }));
-                  equipMsg = " (装備した)";
-                  pickedUp = true;
-              } else {
-                  // Inventory Fallback
-                  if (inventory.length < MAX_INVENTORY) {
-                      setInventory(prev => [...prev, item]);
-                      pickedUp = true;
-                  } else {
-                      addLog("持ち物がいっぱいで拾えない！", "red");
-                  }
-              }
-
-              if (pickedUp) {
-                  addLog(`${item.name}を拾った！${equipMsg}`);
+              
+              // NO AUTO EQUIP - Always add to inventory
+              if (inventory.length < MAX_INVENTORY) {
+                  setInventory(prev => [...prev, item]);
+                  addLog(`${item.name}を拾った！`);
                   setFloorItems(prev => prev.filter((_, i) => i !== itemIdx));
                   audioService.playSound('select');
+              } else {
+                  addLog("持ち物がいっぱいで拾えない！", "red");
+                  // Item stays on floor
               }
           }
       }
@@ -398,7 +386,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           }
           if (frameCountRef.current % 5 === 0) addLog("お腹が空いて倒れそうだ...", "red");
       } else {
-          // Natural healing logic could go here
+          // Natural healing could go here
       }
       
       setBelly(nextBelly);
@@ -520,6 +508,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               audioService.playSound('attack');
               actionDone = true;
           }
+          
           if (actionDone) {
               setInventory(prev => prev.filter((_, i) => i !== index));
           }
@@ -552,9 +541,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       const loop = setInterval(() => {
           frameCountRef.current++;
           renderGame();
-      }, 100); // 10 FPS mainly for rendering
+      }, 100); 
       return () => clearInterval(loop);
-  }, [map, player, enemies, floorItems, menuOpen]); // Re-bind on state change
+  }, [map, player, enemies, floorItems, menuOpen]);
 
   const renderGame = () => {
       const canvas = canvasRef.current;
@@ -736,7 +725,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         </div>
 
         {/* Log Area */}
-        <div className="w-full max-w-md bg-[#0f380f] text-[#9bbc0f] h-16 p-1 text-[10px] overflow-hidden mb-2 rounded border-2 border-[#306230] font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner">
+        <div className="w-full max-w-md bg-[#0f380f] text-[#9bbc0f] h-20 p-1 text-[10px] overflow-hidden mb-2 rounded border-2 border-[#306230] font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner">
             {logs.map((l) => (
                 <div key={l.id} style={{ color: l.color || '#9bbc0f' }}>{l.message}</div>
             ))}
@@ -746,17 +735,21 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         <div className="w-full max-w-md flex-grow relative min-h-[180px] bg-[#1a1a1a] rounded-t-xl border-t-2 border-[#333]">
             
             {/* Unified D-Pad */}
-            <div className="absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32">
-                <div className="relative w-full h-full">
-                    {/* Cross Base */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-[#333]"></div>
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-12 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-start justify-center pt-2" onClick={() => movePlayer(0, -1)}><ArrowUp className="text-[#666]" size={20}/></div>
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-12 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-end justify-center pb-2" onClick={() => movePlayer(0, 1)}><ArrowDown className="text-[#666]" size={20}/></div>
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-12 h-10 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-start pl-2" onClick={() => movePlayer(-1, 0)}><ArrowLeft className="text-[#666]" size={20}/></div>
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-12 h-10 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2" onClick={() => movePlayer(1, 0)}><ArrowRight className="text-[#666]" size={20}/></div>
-                    {/* Center Cap */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-[#2a2a2a] rounded-full radial-gradient"></div>
-                </div>
+            <div className="absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32 flex items-center justify-center">
+                {/* Center */}
+                <div className="w-10 h-10 bg-[#333] z-10"></div>
+                
+                {/* UP */}
+                <div className="absolute top-0 w-10 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0" onClick={() => movePlayer(0, -1)}><ArrowUp className="text-[#666]" size={20}/></div>
+                {/* DOWN */}
+                <div className="absolute bottom-0 w-10 h-16 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-0" onClick={() => movePlayer(0, 1)}><ArrowDown className="text-[#666]" size={20}/></div>
+                {/* LEFT */}
+                <div className="absolute left-0 w-16 h-10 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-0" onClick={() => movePlayer(-1, 0)}><ArrowLeft className="text-[#666]" size={20}/></div>
+                {/* RIGHT */}
+                <div className="absolute right-0 w-16 h-10 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-0" onClick={() => movePlayer(1, 0)}><ArrowRight className="text-[#666]" size={20}/></div>
+                
+                {/* Center Cap */}
+                <div className="absolute w-8 h-8 bg-[#2a2a2a] rounded-full z-20 shadow-inner"></div>
             </div>
 
             {/* A/B Buttons */}
