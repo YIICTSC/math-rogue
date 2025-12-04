@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Play, RotateCcw, Swords, Zap, Shield, Heart } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Swords, Zap, Shield, Heart } from 'lucide-react';
 import { HERO_IMAGE_DATA } from '../constants';
 import { SPRITE_TEMPLATES } from './PixelSprite';
 
@@ -65,6 +65,7 @@ interface SchoolyardSurvivorScreenProps {
 
 const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onBack }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
     
     // Game State Refs (Mutable for loop)
     const gameState = useRef<'PLAYING' | 'PAUSED' | 'GAME_OVER' | 'LEVEL_UP'>('PLAYING');
@@ -93,6 +94,10 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
     // Input
     const keys = useRef<Record<string, boolean>>({});
+    
+    // Joystick State
+    const joystickRef = useRef<{ x: number, y: number }>({ x: 0, y: 0 });
+    const [joystickUI, setJoystickUI] = useState<{ active: boolean, startX: number, startY: number, curX: number, curY: number } | null>(null);
     
     // Sprite Cache
     const spriteCache = useRef<Record<string, HTMLCanvasElement>>({});
@@ -194,23 +199,31 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
         // --- Player Movement ---
         let dx = 0; let dy = 0;
+        
+        // Keyboard Input
         if (keys.current['ArrowUp'] || keys.current['KeyW']) dy = -1;
         if (keys.current['ArrowDown'] || keys.current['KeyS']) dy = 1;
         if (keys.current['ArrowLeft'] || keys.current['KeyA']) dx = -1;
         if (keys.current['ArrowRight'] || keys.current['KeyD']) dx = 1;
         
-        // Normalize diagonal
-        if (dx !== 0 && dy !== 0) {
-            const len = Math.sqrt(dx*dx + dy*dy);
-            dx /= len; dy /= len;
+        // Joystick Input (Override if active)
+        if (joystickRef.current.x !== 0 || joystickRef.current.y !== 0) {
+            dx = joystickRef.current.x;
+            dy = joystickRef.current.y;
+        } else {
+            // Normalize keyboard diagonal
+            if (dx !== 0 && dy !== 0) {
+                const len = Math.sqrt(dx*dx + dy*dy);
+                dx /= len; dy /= len;
+            }
         }
         
         player.current.x += dx * player.current.speed * statsRef.current.speed;
         player.current.y += dy * player.current.speed * statsRef.current.speed;
         
         // Bounds
-        player.current.x = Math.max(10, Math.min(CANVAS_WIDTH - 10, player.current.x));
-        player.current.y = Math.max(10, Math.min(CANVAS_HEIGHT - 10, player.current.y));
+        player.current.x = Math.max(16, Math.min(CANVAS_WIDTH - 16, player.current.x));
+        player.current.y = Math.max(16, Math.min(CANVAS_HEIGHT - 16, player.current.y));
 
         // --- Spawning ---
         // Spawn rate increases with time
@@ -379,6 +392,8 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                     level.current++;
                     nextLevelXp.current = Math.floor(nextLevelXp.current * 1.5);
                     gameState.current = 'LEVEL_UP';
+                    joystickRef.current = { x: 0, y: 0 }; // Reset movement on level up
+                    setJoystickUI(null);
                     generateUpgrades();
                 }
                 setUiState(prev => ({ ...prev, level: level.current, xpPercent: (xp.current / nextLevelXp.current) * 100 }));
@@ -464,6 +479,57 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         }
     };
 
+    // --- Touch Handlers for Joystick ---
+    const handleTouchStart = (e: React.TouchEvent) => {
+        if (gameState.current !== 'PLAYING') return;
+        const touch = e.touches[0];
+        // Ensure touch is within container (handled by event binding)
+        const startX = touch.clientX;
+        const startY = touch.clientY;
+        
+        setJoystickUI({ active: true, startX, startY, curX: startX, curY: startY });
+        joystickRef.current = { x: 0, y: 0 };
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (!joystickUI?.active) return;
+        const touch = e.touches[0];
+        
+        const deltaX = touch.clientX - joystickUI.startX;
+        const deltaY = touch.clientY - joystickUI.startY;
+        
+        // Clamp distance for UI
+        const maxDist = 50;
+        const dist = Math.hypot(deltaX, deltaY);
+        let moveX = deltaX;
+        let moveY = deltaY;
+        
+        if (dist > maxDist) {
+            const ratio = maxDist / dist;
+            moveX *= ratio;
+            moveY *= ratio;
+        }
+
+        setJoystickUI(prev => prev ? ({ ...prev, curX: prev.startX + moveX, curY: prev.startY + moveY }) : null);
+
+        // Normalize for Game Logic (-1 to 1)
+        const normX = deltaX / maxDist;
+        const normY = deltaY / maxDist;
+        
+        // Cap at 1.0 length
+        const normLen = Math.hypot(normX, normY);
+        if (normLen > 1) {
+            joystickRef.current = { x: normX / normLen, y: normY / normLen };
+        } else {
+            joystickRef.current = { x: normX, y: normY };
+        }
+    };
+
+    const handleTouchEnd = () => {
+        setJoystickUI(null);
+        joystickRef.current = { x: 0, y: 0 };
+    };
+
     const generateUpgrades = () => {
         const options = [
             { id: 'WEAPON_PENCIL', name: '鉛筆ミサイル', desc: '近くの敵を攻撃', icon: Swords },
@@ -521,10 +587,18 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         setStats({ might: 1, speed: 1, cooldownReduction: 0, area: 1 });
         setUiState({ hp: 100, maxHp: 100, level: 1, time: 0, score: 0, xpPercent: 0, gameOver: false });
         gameState.current = 'PLAYING';
+        joystickRef.current = { x: 0, y: 0 };
+        setJoystickUI(null);
     };
 
     return (
-        <div className="flex flex-col h-full w-full bg-black text-white relative items-center justify-center font-mono">
+        <div 
+            className="flex flex-col h-full w-full bg-black text-white relative items-center justify-center font-mono overflow-hidden touch-none"
+            ref={containerRef}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+        >
             {/* UI Overlay */}
             <div className="absolute top-0 left-0 w-full p-4 flex justify-between items-start pointer-events-none z-10">
                 <div className="flex flex-col gap-2">
@@ -546,6 +620,25 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 </div>
             </div>
 
+            {/* Virtual Joystick UI */}
+            {joystickUI && joystickUI.active && (
+                <div 
+                    className="absolute z-30 pointer-events-none"
+                    style={{ left: joystickUI.startX, top: joystickUI.startY, transform: 'translate(-50%, -50%)' }}
+                >
+                    {/* Base */}
+                    <div className="w-24 h-24 rounded-full border-4 border-white/30 bg-white/10"></div>
+                    {/* Knob */}
+                    <div 
+                        className="absolute w-12 h-12 rounded-full bg-white/50 shadow-lg"
+                        style={{ 
+                            left: '50%', top: '50%',
+                            transform: `translate(calc(-50% + ${joystickUI.curX - joystickUI.startX}px), calc(-50% + ${joystickUI.curY - joystickUI.startY}px))` 
+                        }}
+                    ></div>
+                </div>
+            )}
+
             {/* Canvas */}
             <canvas 
                 ref={canvasRef} 
@@ -557,7 +650,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
             {/* Level Up Modal */}
             {gameState.current === 'LEVEL_UP' && (
-                <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-20 animate-in zoom-in duration-200">
+                <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-20 animate-in zoom-in duration-200 pointer-events-auto">
                     <h2 className="text-4xl font-bold text-yellow-400 mb-8 animate-pulse">LEVEL UP!</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-4xl px-4">
                         {upgradeOptions.map((opt, idx) => (
@@ -577,7 +670,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
             {/* Game Over Modal */}
             {uiState.gameOver && (
-                <div className="absolute inset-0 bg-red-900/90 flex flex-col items-center justify-center z-20 animate-in zoom-in duration-300">
+                <div className="absolute inset-0 bg-red-900/90 flex flex-col items-center justify-center z-20 animate-in zoom-in duration-300 pointer-events-auto">
                     <h2 className="text-6xl font-bold text-white mb-4">GAME OVER</h2>
                     <div className="text-2xl text-yellow-300 mb-8">Survived: {Math.floor(uiState.time / 60)}:{(uiState.time % 60).toString().padStart(2, '0')}</div>
                     <div className="flex gap-4">
@@ -593,14 +686,14 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
             {/* Back Button (Only visible if not game over/level up) */}
             {gameState.current === 'PLAYING' && (
-                <button onClick={onBack} className="absolute top-4 right-4 bg-gray-800/50 hover:bg-gray-700 text-white p-2 rounded border border-gray-500 z-10">
+                <button onClick={onBack} className="absolute top-4 right-4 bg-gray-800/50 hover:bg-gray-700 text-white p-2 rounded border border-gray-500 z-10 pointer-events-auto">
                     <ArrowLeft size={20} />
                 </button>
             )}
             
             {/* Mobile Controls Hint */}
             <div className="absolute bottom-4 text-xs text-gray-500 pointer-events-none opacity-50">
-                WASD / Arrows to Move
+                WASD / Arrows / Touch to Move
             </div>
         </div>
     );
