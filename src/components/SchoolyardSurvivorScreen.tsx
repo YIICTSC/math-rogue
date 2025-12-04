@@ -63,6 +63,21 @@ interface SchoolyardSurvivorScreenProps {
     onBack: () => void;
 }
 
+// Helper to create a white silhouette version of a sprite
+const createFlashSprite = (source: HTMLCanvasElement): HTMLCanvasElement => {
+    const c = document.createElement('canvas');
+    c.width = source.width;
+    c.height = source.height;
+    const ctx = c.getContext('2d');
+    if (ctx) {
+        ctx.drawImage(source, 0, 0);
+        ctx.globalCompositeOperation = 'source-in';
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, c.width, c.height);
+    }
+    return c;
+};
+
 const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onBack }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -144,14 +159,21 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
              if(ctx) {
                  ctx.drawImage(playerImg, 0, 0, 32, 32);
                  spriteCache.current['PLAYER'] = c;
+                 // Generate Flash Version
+                 spriteCache.current['PLAYER_FLASH'] = createFlashSprite(c);
              }
         };
 
         // 2. Enemies: Use Templates
         // Slime (Blue)
-        spriteCache.current['ENEMY_1'] = generateFromTemplate('SLIME', '#3b82f6', '#60a5fa');
+        const enemy1 = generateFromTemplate('SLIME', '#3b82f6', '#60a5fa');
+        spriteCache.current['ENEMY_1'] = enemy1;
+        spriteCache.current['ENEMY_1_FLASH'] = createFlashSprite(enemy1);
+
         // Bat (Purple)
-        spriteCache.current['ENEMY_2'] = generateFromTemplate('BAT', '#a855f7', '#c084fc');
+        const enemy2 = generateFromTemplate('BAT', '#a855f7', '#c084fc');
+        spriteCache.current['ENEMY_2'] = enemy2;
+        spriteCache.current['ENEMY_2_FLASH'] = createFlashSprite(enemy2);
         
         // 3. Items/Weapons
         // Pencil (Sword shape, yellow)
@@ -431,25 +453,26 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
         // Enemies
         enemies.current.forEach(e => {
-            const sprite = e.type === 'ENEMY_2' ? spriteCache.current['ENEMY_2'] : spriteCache.current['ENEMY_1'];
-            if (e.flashTime > 0) {
-                ctx.globalCompositeOperation = 'source-over';
-                ctx.fillStyle = 'white';
-                ctx.fillRect(e.x - e.width/2, e.y - e.height/2, e.width, e.height);
+            const baseKey = e.type === 'ENEMY_2' ? 'ENEMY_2' : 'ENEMY_1';
+            const spriteKey = e.flashTime > 0 ? `${baseKey}_FLASH` : baseKey;
+            const sprite = spriteCache.current[spriteKey];
+            
+            if (sprite) {
+                ctx.drawImage(sprite, e.x - 16, e.y - 16, 32, 32);
             } else {
-                if (sprite) ctx.drawImage(sprite, e.x - 16, e.y - 16, 32, 32);
-                else { ctx.fillStyle = 'red'; ctx.fillRect(e.x - 10, e.y - 10, 20, 20); }
+                ctx.fillStyle = e.flashTime > 0 ? 'white' : 'red';
+                ctx.fillRect(e.x - 10, e.y - 10, 20, 20);
             }
         });
 
         // Player
-        if (player.current.flashTime > 0) {
-             ctx.fillStyle = 'white';
-             ctx.fillRect(player.current.x - 16, player.current.y - 16, 32, 32);
+        const pKey = player.current.flashTime > 0 ? 'PLAYER_FLASH' : 'PLAYER';
+        const pSprite = spriteCache.current[pKey];
+        if (pSprite) {
+             ctx.drawImage(pSprite, player.current.x - 16, player.current.y - 16, 32, 32);
         } else {
-             const pSprite = spriteCache.current['PLAYER'];
-             if(pSprite) ctx.drawImage(pSprite, player.current.x - 16, player.current.y - 16, 32, 32);
-             else { ctx.fillStyle = 'blue'; ctx.fillRect(player.current.x-16, player.current.y-16, 32, 32); }
+             ctx.fillStyle = player.current.flashTime > 0 ? 'white' : 'blue'; 
+             ctx.fillRect(player.current.x-16, player.current.y-16, 32, 32); 
         }
 
         // Projectiles
