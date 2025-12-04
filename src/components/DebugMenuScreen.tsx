@@ -118,6 +118,12 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
       const newVulnerable = sum('vulnerable');
       const newStrength = sum('strength');
       const newSelfDamage = sum('selfDamage');
+      const newPoisonMultiplier = sum('poisonMultiplier');
+
+      // Play Copies Logic
+      const copies1 = c1.playCopies || 1;
+      const copies2 = c2.playCopies || 1;
+      const newPlayCopies = (copies1 - 1) + (copies2 - 1) + 1;
 
       // Merge booleans
       const newExhaust = c1.exhaust || c2.exhaust;
@@ -132,7 +138,8 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
       let newTarget = TargetType.ENEMY;
       if (c1.target === TargetType.ALL_ENEMIES || c2.target === TargetType.ALL_ENEMIES) newTarget = TargetType.ALL_ENEMIES;
       else if (c1.target === TargetType.RANDOM_ENEMY || c2.target === TargetType.RANDOM_ENEMY) newTarget = TargetType.RANDOM_ENEMY;
-      else if (c1.target === TargetType.SELF || c2.target === TargetType.SELF) newTarget = TargetType.SELF;
+      else if (c1.target === TargetType.ENEMY || c2.target === TargetType.ENEMY) newTarget = TargetType.ENEMY;
+      else newTarget = TargetType.SELF;
       
       if ((newDamage > 0 || newPoison > 0 || newWeak > 0 || newVulnerable > 0) && newTarget === TargetType.SELF) {
           newTarget = TargetType.ENEMY;
@@ -141,15 +148,20 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
       // Generate Description
       const parts: string[] = [];
       if (newDamage > 0) {
-          if (newTarget === TargetType.ALL_ENEMIES) parts.push(`全体に${newDamage}ダメージ`);
-          else if (newTarget === TargetType.RANDOM_ENEMY) parts.push(`ランダムな敵に${newDamage}ダメージ`);
-          else parts.push(`${newDamage}ダメージ`);
+          let text = `${newDamage}ダメージ`;
+          if (newTarget === TargetType.ALL_ENEMIES) text = `全体に${text}`;
+          else if (newTarget === TargetType.RANDOM_ENEMY) text = `ランダムな敵に${text}`;
+          else if (newTarget === TargetType.SELF) text = `自分に${text}`;
+          
+          if (newPlayCopies > 1) text += `を${newPlayCopies}回`;
+          parts.push(text);
       }
       if (newBlock > 0) parts.push(`ブロック${newBlock}`);
       if (newPoison > 0) parts.push(`ドクドク${newPoison}`);
       if (newWeak > 0) parts.push(`へろへろ${newWeak}`);
       if (newVulnerable > 0) parts.push(`びくびく${newVulnerable}`);
       if (newStrength > 0) parts.push(`ムキムキ${newStrength}`);
+      if (newPoisonMultiplier > 0) parts.push(`毒を${newPoisonMultiplier}倍`);
       if (newDraw > 0) parts.push(`${newDraw}枚引く`);
       if (newEnergy > 0) parts.push(`E${newEnergy}を得る`);
       if (newHeal > 0) parts.push(`HP${newHeal}回復`);
@@ -181,6 +193,8 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
           vulnerable: newVulnerable || undefined,
           strength: newStrength || undefined,
           selfDamage: newSelfDamage || undefined,
+          poisonMultiplier: newPoisonMultiplier || undefined,
+          playCopies: newPlayCopies > 1 ? newPlayCopies : undefined,
           exhaust: newExhaust,
           innate: newInnate,
           textureRef: newTextureRef
