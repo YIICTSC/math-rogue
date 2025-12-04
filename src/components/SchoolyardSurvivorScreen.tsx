@@ -247,6 +247,11 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         player.current.x = Math.max(16, Math.min(CANVAS_WIDTH - 16, player.current.x));
         player.current.y = Math.max(16, Math.min(CANVAS_HEIGHT - 16, player.current.y));
 
+        // Player Flash Logic (Fix: Decrement flash time)
+        if (player.current.flashTime > 0) {
+            player.current.flashTime--;
+        }
+
         // --- Spawning ---
         // Spawn rate increases with time
         const currentSpawnRate = Math.max(10, ENEMY_SPAWN_RATE - Math.floor(time.current / 10));
@@ -603,6 +608,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         damageTexts.current = [];
         score.current = 0;
         time.current = 0;
+        frameCount.current = 0; // Fix: Reset frame count to reset difficulty scaling
         level.current = 1;
         xp.current = 0;
         nextLevelXp.current = 5;
