@@ -703,13 +703,15 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
         ctx.save();
         
-        // Camera Transform (Center on screen)
-        // Move to center of screen
-        ctx.translate(viewSize.width/2, viewSize.height/2);
-        // Apply Zoom
+        // Camera Transform: Top-Left based logic for stability and easier debugging
+        // 1. Move to center of screen to scale from center? No, standard 2D cams usually scale then translate.
+        // Let's stick to standard 2D Camera:
+        // World -> View:  (WorldPos - CameraPos) * Zoom + CenterOffset (if desired)
+        
+        // We want Camera.x, Camera.y to be the top-left of the viewport in World Space.
+        
         ctx.scale(ZOOM_SCALE, ZOOM_SCALE);
-        // Translate camera (inverted) to center player
-        ctx.translate(-camera.current.x, -camera.current.y);
+        ctx.translate(-Math.floor(camera.current.x), -Math.floor(camera.current.y));
 
         // Draw World Bounds
         ctx.strokeStyle = '#374151';
@@ -719,20 +721,24 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         // Draw Grid
         ctx.strokeStyle = '#1f2937';
         ctx.lineWidth = 1;
-        // Optimization: Only draw grid in view? 
-        // Simple optimization: loop through visible area
-        const startX = Math.floor((camera.current.x - viewSize.width/ZOOM_SCALE) / 50) * 50;
-        const endX = Math.ceil((camera.current.x + viewSize.width/ZOOM_SCALE) / 50) * 50;
-        const startY = Math.floor((camera.current.y - viewSize.height/ZOOM_SCALE) / 50) * 50;
-        const endY = Math.ceil((camera.current.y + viewSize.height/ZOOM_SCALE) / 50) * 50;
+        
+        // Visible area in World Coords
+        const viewW = viewSize.width / ZOOM_SCALE;
+        const viewH = viewSize.height / ZOOM_SCALE;
+        
+        const startX = Math.floor(camera.current.x / 50) * 50;
+        const endX = Math.floor((camera.current.x + viewW) / 50) * 50 + 50;
+        const startY = Math.floor(camera.current.y / 50) * 50;
+        const endY = Math.floor((camera.current.y + viewH) / 50) * 50 + 50;
 
         for(let x=startX; x<=endX; x+=50) { ctx.beginPath(); ctx.moveTo(x,startY); ctx.lineTo(x,endY); ctx.stroke(); }
         for(let y=startY; y<=endY; y+=50) { ctx.beginPath(); ctx.moveTo(startX,y); ctx.lineTo(endX,y); ctx.stroke(); }
 
         // Gems
+        const margin = 100;
         gems.current.forEach(g => {
-            // Cull off-screen?
-            if (Math.abs(g.x - camera.current.x) > (viewSize.width/ZOOM_SCALE) || Math.abs(g.y - camera.current.y) > (viewSize.height/ZOOM_SCALE)) return;
+            if (g.x < camera.current.x - margin || g.x > camera.current.x + viewW + margin ||
+                g.y < camera.current.y - margin || g.y > camera.current.y + viewH + margin) return;
             const sprite = spriteCache.current['GEM'];
             if(sprite) ctx.drawImage(sprite, g.x-8, g.y-8, 16, 16);
         });
@@ -768,8 +774,9 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
         // Enemies
         enemies.current.forEach(e => {
-            // Cull
-            if (Math.abs(e.x - camera.current.x) > (viewSize.width/ZOOM_SCALE + 50) || Math.abs(e.y - camera.current.y) > (viewSize.height/ZOOM_SCALE + 50)) return;
+            if (e.x < camera.current.x - margin || e.x > camera.current.x + viewW + margin ||
+                e.y < camera.current.y - margin || e.y > camera.current.y + viewH + margin) return;
+            
             const baseKey = e.type === 'ENEMY_2' ? 'ENEMY_2' : 'ENEMY_1';
             const spriteKey = e.flashTime > 0 ? `${baseKey}_FLASH` : baseKey;
             const sprite = spriteCache.current[spriteKey];
