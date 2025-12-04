@@ -157,6 +157,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     
     // Viewport
     const [viewSize, setViewSize] = useState({ width: 800, height: 600 });
+    const viewSizeRef = useRef({ width: 800, height: 600 }); // Ref for loop access
     const camera = useRef({ x: WORLD_WIDTH/2, y: WORLD_HEIGHT/2 }); // Start centered
 
     // Game State
@@ -199,7 +200,10 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     useLayoutEffect(() => {
         const updateSize = () => {
             if (containerRef.current) {
-                setViewSize({ width: containerRef.current.clientWidth, height: containerRef.current.clientHeight });
+                const w = containerRef.current.clientWidth;
+                const h = containerRef.current.clientHeight;
+                setViewSize({ width: w, height: h });
+                viewSizeRef.current = { width: w, height: h };
             }
         };
         window.addEventListener('resize', updateSize);
@@ -333,20 +337,23 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         player.current.y = Math.max(16, Math.min(WORLD_HEIGHT - 16, player.current.y));
         if (player.current.flashTime > 0) player.current.flashTime--;
 
-        // Camera Follow (Center Tracking)
-const targetCamX = player.current.x;
-const targetCamY = player.current.y;
+        // Camera Follow (Use viewSizeRef to prevent stale closure)
+        const vw = viewSizeRef.current.width / ZOOM_SCALE;
+        const vh = viewSizeRef.current.height / ZOOM_SCALE;
 
-// 追従ではなく「常にど真ん中」にする
-camera.current.x = targetCamX;
-camera.current.y = targetCamY;
-        
-        // Clamp Camera (Center Point Constraint)
-        const halfViewW = viewSize.width / (2 * ZOOM_SCALE);
-        const halfViewH = viewSize.height / (2 * ZOOM_SCALE);
-        
-        camera.current.x = Math.max(halfViewW, Math.min(WORLD_WIDTH - halfViewW, camera.current.x));
-        camera.current.y = Math.max(halfViewH, Math.min(WORLD_HEIGHT - halfViewH, camera.current.y));
+        // X Axis Camera
+        if (vw >= WORLD_WIDTH) {
+            camera.current.x = WORLD_WIDTH / 2;
+        } else {
+            camera.current.x = Math.max(vw/2, Math.min(WORLD_WIDTH - vw/2, player.current.x));
+        }
+
+        // Y Axis Camera
+        if (vh >= WORLD_HEIGHT) {
+            camera.current.y = WORLD_HEIGHT / 2;
+        } else {
+            camera.current.y = Math.max(vh/2, Math.min(WORLD_HEIGHT - vh/2, player.current.y));
+        }
 
         // Weapon Firing
         Object.keys(weaponsRef.current).forEach((key) => {
@@ -700,15 +707,18 @@ camera.current.y = targetCamY;
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
+        // Use ref for view size to avoid stale closures
+        const { width: viewW, height: viewH } = viewSizeRef.current;
+
         // Clear
         ctx.fillStyle = '#111827'; 
-        ctx.fillRect(0, 0, viewSize.width, viewSize.height);
+        ctx.fillRect(0, 0, viewW, viewH);
 
         ctx.save();
         
         // Camera Transform (Center on screen)
         // Move to center of screen
-        ctx.translate(viewSize.width/2, viewSize.height/2);
+        ctx.translate(viewW/2, viewH/2);
         // Apply Zoom
         ctx.scale(ZOOM_SCALE, ZOOM_SCALE);
         // Translate camera (inverted) to center player
@@ -723,20 +733,31 @@ camera.current.y = targetCamY;
         ctx.strokeStyle = '#1f2937';
         ctx.lineWidth = 1;
         
-        const halfW = viewSize.width / (2 * ZOOM_SCALE);
-        const halfH = viewSize.height / (2 * ZOOM_SCALE);
-        const startX = Math.floor((camera.current.x - halfW) / 50) * 50;
-        const endX = Math.ceil((camera.current.x + halfW) / 50) * 50;
-        const startY = Math.floor((camera.current.y - halfH) / 50) * 50;
-        const endY = Math.ceil((camera.current.y + halfH) / 50) * 50;
+        const halfW = viewW / (2 * ZOOM_SCALE);
+        const halfH = viewH / (2 * ZOOM_SCALE);
+        
+        // Draw enough grid to cover the visible area even if camera is at edge
+        // Start from slightly before camera bounds to ensure coverage
+        const startX = Math.floor((camera.current.x - halfW - 100) / 50) * 50;
+        const endX = Math.ceil((camera.current.x + halfW + 100) / 50) * 50;
+        const startY = Math.floor((camera.current.y - halfH - 100) / 50) * 50;
+        const endY = Math.ceil((camera.current.y + halfH + 100) / 50) * 50;
 
-        for(let x=startX; x<=endX; x+=50) { ctx.beginPath(); ctx.moveTo(x,startY); ctx.lineTo(x,endY); ctx.stroke(); }
-        for(let y=startY; y<=endY; y+=50) { ctx.beginPath(); ctx.moveTo(startX,y); ctx.lineTo(endX,y); ctx.stroke(); }
+        for(let x=startX; x<=endX; x+=50) { 
+            if (x >= 0 && x <= WORLD_WIDTH) {
+                ctx.beginPath(); ctx.moveTo(x, Math.max(0, startY)); ctx.lineTo(x, Math.min(WORLD_HEIGHT, endY)); ctx.stroke(); 
+            }
+        }
+        for(let y=startY; y<=endY; y+=50) { 
+            if (y >= 0 && y <= WORLD_HEIGHT) {
+                ctx.beginPath(); ctx.moveTo(Math.max(0, startX), y); ctx.lineTo(Math.min(WORLD_WIDTH, endX), y); ctx.stroke(); 
+            }
+        }
 
         // Gems
         gems.current.forEach(g => {
             // Cull
-            if (Math.abs(g.x - camera.current.x) > (viewSize.width/ZOOM_SCALE) || Math.abs(g.y - camera.current.y) > (viewSize.height/ZOOM_SCALE)) return;
+            if (Math.abs(g.x - camera.current.x) > (viewW/ZOOM_SCALE) || Math.abs(g.y - camera.current.y) > (viewH/ZOOM_SCALE)) return;
             const sprite = spriteCache.current['GEM'];
             if(sprite) ctx.drawImage(sprite, g.x-8, g.y-8, 16, 16);
         });
@@ -773,7 +794,7 @@ camera.current.y = targetCamY;
         // Enemies
         enemies.current.forEach(e => {
             // Cull
-            if (Math.abs(e.x - camera.current.x) > (viewSize.width/ZOOM_SCALE + 50) || Math.abs(e.y - camera.current.y) > (viewSize.height/ZOOM_SCALE + 50)) return;
+            if (Math.abs(e.x - camera.current.x) > (viewW/ZOOM_SCALE + 50) || Math.abs(e.y - camera.current.y) > (viewH/ZOOM_SCALE + 50)) return;
             const baseKey = e.type === 'ENEMY_2' ? 'ENEMY_2' : 'ENEMY_1';
             const spriteKey = e.flashTime > 0 ? `${baseKey}_FLASH` : baseKey;
             const sprite = spriteCache.current[spriteKey];
