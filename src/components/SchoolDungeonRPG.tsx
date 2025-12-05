@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -251,7 +252,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   
   // Shop State
   const [shopState, setShopState] = useState<{ active: boolean, merchantId: number | null, mode: 'BUY' | 'SELL' }>({ active: false, merchantId: null, mode: 'BUY' });
-  const [confirmation, setConfirmation] = useState<{ title: string, message: string, onConfirm: () => void } | null>(null);
 
   // VFX State
   const visualEffects = useRef<VisualEffect[]>([]);
@@ -439,7 +439,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     turnCounter.current = 0;
     visualEffects.current = [];
     setIsFastForwarding(false);
-    setConfirmation(null);
     
     // Init ID Map for Staffs (Umbrellas)
     const shuffledNames = [...UNIDENTIFIED_NAMES].sort(() => Math.random() - 0.5);
@@ -829,7 +828,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   };
 
   const movePlayer = (dx: 0|1|-1, dy: 0|1|-1) => {
-      if(gameOver || gameClear || confirmation) return;
+      if(gameOver || gameClear) return;
 
       if (shopState.active) {
           if (dy !== 0) {
@@ -936,7 +935,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   // --- ACTIONS ---
   
   const fireRangedWeapon = () => {
-      if (menuOpen || shopState.active || confirmation) return;
+      if (menuOpen || shopState.active) return;
       const rangedItem = player.equipment?.ranged;
       if (!rangedItem) {
           addLog("飛び道具を装備していない！");
@@ -994,12 +993,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const handleActionBtn = () => {
       if (gameOver) { handleRestart(); return; }
       if (gameClear) return;
-      
-      if (confirmation) {
-          confirmation.onConfirm();
-          return;
-      }
-
       if (shopState.active) { handleShopAction(); return; }
       if (menuOpen) {
           if (synthState.active) handleSynthesisStep();
@@ -1027,6 +1020,58 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       addLog("素振りをした。");
       audioService.playSound('select');
       processTurn(player.x, player.y);
+  };
+
+  const handleShopAction = () => {
+      const shopkeeper = enemies.find(e => e.id === shopState.merchantId);
+      if (!shopkeeper) { setShopState(prev => ({ ...prev, active: false })); return; }
+
+      if (shopState.mode === 'BUY') {
+          if (!shopkeeper.shopItems || shopkeeper.shopItems.length === 0) return;
+          const item = shopkeeper.shopItems[selectedItemIndex];
+          if (!item) return;
+          
+          if ((player.gold || 0) >= (item.price || 0)) {
+              if (inventory.length < MAX_INVENTORY) {
+                  setPlayer(p => ({ ...p, gold: (p.gold || 0) - (item.price || 0) }));
+                  setInventory(prev => [...prev, item]);
+                  
+                  // Remove from shop
+                  const newShopItems = shopkeeper.shopItems.filter((_, i) => i !== selectedItemIndex);
+                  setEnemies(prev => prev.map(e => e.id === shopkeeper.id ? { ...e, shopItems: newShopItems } : e));
+                  
+                  addLog(`${getItemName(item)}を買った！`, C2);
+                  audioService.playSound('buff');
+                  if (newShopItems.length === 0) setShopState(prev => ({ ...prev, active: false }));
+                  else setSelectedItemIndex(prev => Math.min(prev, newShopItems.length - 1));
+              } else {
+                  addLog("持ち物がいっぱいで拾えない！", "red");
+                  audioService.playSound('wrong');
+              }
+          } else {
+              addLog("お金が足りない！", "red");
+              audioService.playSound('wrong');
+          }
+      } else {
+          // SELL
+          if (inventory.length === 0) return;
+          const item = inventory[selectedItemIndex];
+          if (!item) return;
+          
+          // Cannot sell equipped items directly (simple safeguard)
+          if (player.equipment?.weapon === item || player.equipment?.armor === item || player.equipment?.ranged === item) {
+              addLog("装備中のアイテムは売れません。", "red");
+              audioService.playSound('wrong');
+              return;
+          }
+
+          const sellPrice = Math.max(1, Math.floor((item.value || 100) / 2));
+          setPlayer(p => ({ ...p, gold: (p.gold || 0) + sellPrice }));
+          setInventory(prev => prev.filter((_, i) => i !== selectedItemIndex));
+          addLog(`${getItemName(item)}を${sellPrice}円で売った。`, C2);
+          audioService.playSound('select');
+          setSelectedItemIndex(prev => Math.max(0, Math.min(prev, inventory.length - 2)));
+      }
   };
 
   const triggerPlayerAttackAnim = (dir: Direction) => {
@@ -1110,7 +1155,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
   // --- LONG PRESS LOGIC (FAST FORWARD) ---
   const handlePressStart = () => {
-      if (menuOpen || shopState.active || gameOver || gameClear || confirmation) return;
+      if (menuOpen || shopState.active || gameOver || gameClear) return;
       // Start waiting detection
       fastForwardInterval.current = setTimeout(() => {
           setIsFastForwarding(true);
@@ -1133,7 +1178,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   // Fast Forward Loop
   useEffect(() => {
       let interval: any = null;
-      if (isFastForwarding && !gameOver && !gameClear && !menuOpen && !shopState.active && !confirmation) {
+      if (isFastForwarding && !gameOver && !gameClear && !menuOpen && !shopState.active) {
           interval = setInterval(() => {
               // Safety check: Stop if enemies nearby
               const nearby = enemies.some(e => Math.abs(e.x - player.x) <= 2 && Math.abs(e.y - player.y) <= 2);
@@ -1162,14 +1207,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       return () => {
           if (interval) clearInterval(interval);
       };
-  }, [isFastForwarding, enemies, player.hp, belly, gameOver, gameClear, confirmation]);
+  }, [isFastForwarding, enemies, player.hp, belly, gameOver, gameClear]);
 
 
   const toggleMenu = () => {
-      if (confirmation) {
-          setConfirmation(null);
-          return;
-      }
       if (shopState.active) {
           setShopState(prev => ({ ...prev, active: false }));
           return;
@@ -1678,16 +1719,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) { e.preventDefault(); }
         if (gameOver) { if (['z', 'Enter', ' '].includes(e.key)) handleRestart(); return; }
         if (gameClear) { if (['z', 'Enter', ' '].includes(e.key)) startEndlessMode(); return; }
-        
-        if (confirmation) {
-            if (['z', 'Enter', ' '].includes(e.key)) {
-                confirmation.onConfirm();
-            } else if (['x', 'c', 'Escape'].includes(e.key)) {
-                setConfirmation(null);
-            }
-            return;
-        }
-
         if (['x', 'c', 'Escape'].includes(e.key)) { toggleMenu(); return; }
         if ((menuOpen || shopState.active) && (e.key === 'Backspace' || e.key === 'x')) {
             if (shopState.active) { setShopState(prev => ({...prev, active: false})); return; }
@@ -1718,7 +1749,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [player, map, enemies, floorItems, menuOpen, gameOver, gameClear, inventory, selectedItemIndex, synthState, shopState, confirmation]);
+  }, [player, map, enemies, floorItems, menuOpen, gameOver, gameClear, inventory, selectedItemIndex, synthState, shopState]);
 
   // --- RENDER LOOP ---
   const frameCountRef = useRef(0);
@@ -1958,30 +1989,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   return (
     <div className="w-full h-full bg-[#101010] flex flex-col md:flex-row items-center justify-center font-mono select-none overflow-hidden touch-none relative p-4 gap-4">
         
-        {/* Confirmation Dialog */}
-        {confirmation && (
-            <div className="absolute inset-0 z-50 bg-[#0f380f]/90 flex items-center justify-center p-4">
-                <div className="bg-[#9bbc0f] border-4 border-[#306230] p-4 shadow-xl text-[#0f380f] w-full max-w-xs text-center">
-                    <h3 className="font-bold text-lg mb-2">{confirmation.title}</h3>
-                    <p className="whitespace-pre-wrap mb-6">{confirmation.message}</p>
-                    <div className="flex gap-4 justify-center">
-                        <button 
-                            className="bg-[#306230] text-[#9bbc0f] px-6 py-2 rounded font-bold hover:bg-[#0f380f]"
-                            onClick={confirmation.onConfirm}
-                        >
-                            はい
-                        </button>
-                        <button 
-                            className="border-2 border-[#306230] px-6 py-2 rounded font-bold hover:bg-[#8bac0f]"
-                            onClick={() => setConfirmation(null)}
-                        >
-                            いいえ
-                        </button>
-                    </div>
-                </div>
-            </div>
-        )}
-
         {inspectedItem && (
             <div className="absolute inset-0 z-50 bg-[#0f380f]/95 flex items-center justify-center p-4" onClick={() => setInspectedItem(null)}>
                 <div className="w-full max-w-xs bg-[#9bbc0f] border-4 border-[#306230] p-4 shadow-xl text-[#0f380f]" onClick={e => e.stopPropagation()}>
@@ -2083,7 +2090,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                     )}
 
                     {/* Shop Menu */}
-                    {shopState.active && !confirmation && (
+                    {shopState.active && (
                         <div className="absolute right-0 top-0 bottom-0 w-3/4 bg-[#0f380f] border-l-2 border-[#9bbc0f] z-30 p-2 text-[#9bbc0f] text-xs flex flex-col">
                             <div className="flex justify-between items-center border-b border-[#9bbc0f] mb-2 pb-1">
                                 <h3 className="font-bold flex items-center"><ShoppingBag size={12} className="mr-1"/> 購買部</h3>
@@ -2164,7 +2171,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                         </div>
                     )}
 
-                    {menuOpen && !confirmation && (
+                    {menuOpen && (
                         <div className="absolute right-0 top-0 bottom-0 w-3/4 bg-[#0f380f] border-l-2 border-[#9bbc0f] z-30 p-2 text-[#9bbc0f] text-xs flex flex-col">
                             <div className="flex justify-between items-center border-b border-[#9bbc0f] mb-2 pb-1">
                                 <h3 className="font-bold">
