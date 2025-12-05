@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
@@ -278,9 +277,13 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const [inspectedItem, setInspectedItem] = useState<Item | null>(null);
   const longPressTimer = useRef<any>(null);
   
-  // Fast Forward State
+  // Fast Forward & Continuous Movement State
   const [isFastForwarding, setIsFastForwarding] = useState(false);
   const fastForwardInterval = useRef<any>(null);
+  
+  const movePlayerRef = useRef<any>(null);
+  const moveIntervalRef = useRef<any>(null);
+  const moveTimeoutRef = useRef<any>(null);
 
   // Init
   useEffect(() => {
@@ -326,6 +329,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     
     return () => {
         audioService.stopBGM();
+        if (moveTimeoutRef.current) clearTimeout(moveTimeoutRef.current);
+        if (moveIntervalRef.current) clearInterval(moveIntervalRef.current);
     };
   }, []);
 
@@ -1169,7 +1174,36 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       audioService.playSound('attack');
   };
 
-  // --- LONG PRESS LOGIC (FAST FORWARD) ---
+  // --- CONTINUOUS MOVEMENT LOGIC ---
+  useLayoutEffect(() => { movePlayerRef.current = movePlayer; }); // Keep ref updated
+
+  const handleDirectionStart = (e: React.PointerEvent | undefined, dx: 0|1|-1, dy: 0|1|-1) => {
+      if (e) e.preventDefault();
+      if (gameOver || gameClear || menuOpen || shopState.active) return;
+      
+      // Clear existing movement to be safe
+      handleDirectionEnd();
+
+      // 1. Instant Move
+      movePlayer(dx, dy);
+
+      // 2. Setup Repeat
+      moveTimeoutRef.current = setTimeout(() => {
+          moveIntervalRef.current = setInterval(() => {
+              movePlayerRef.current(dx, dy);
+          }, 120); // 120ms interval speed
+      }, 400); // 400ms initial hold delay
+  };
+
+  const handleDirectionEnd = (e?: React.PointerEvent) => {
+      if (e) e.preventDefault();
+      if (moveTimeoutRef.current) clearTimeout(moveTimeoutRef.current);
+      if (moveIntervalRef.current) clearInterval(moveIntervalRef.current);
+      moveTimeoutRef.current = null;
+      moveIntervalRef.current = null;
+  };
+
+  // --- LONG PRESS LOGIC (FAST FORWARD - Button A) ---
   const handlePressStart = () => {
       if (menuOpen || shopState.active || gameOver || gameClear) return;
       // Start waiting detection
@@ -2019,6 +2053,38 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       return item.desc;
   };
 
+  // --- CONTINUOUS MOVEMENT REFS & LOGIC ---
+  useLayoutEffect(() => { movePlayerRef.current = movePlayer; }); // Sync ref on render
+
+  const moveIntervalRef = useRef<any>(null);
+  const moveTimeoutRef = useRef<any>(null);
+
+  const handleDirectionStart = (e: React.PointerEvent | undefined, dx: 0|1|-1, dy: 0|1|-1) => {
+      if (e) e.preventDefault();
+      if (gameOver || gameClear || menuOpen || shopState.active) return;
+      
+      // Clear existing movement to be safe
+      handleDirectionEnd();
+
+      // 1. Instant Move
+      movePlayer(dx, dy);
+
+      // 2. Setup Repeat
+      moveTimeoutRef.current = setTimeout(() => {
+          moveIntervalRef.current = setInterval(() => {
+              movePlayerRef.current(dx, dy);
+          }, 120); // 120ms interval speed
+      }, 400); // 400ms initial hold delay
+  };
+
+  const handleDirectionEnd = (e?: React.PointerEvent) => {
+      if (e) e.preventDefault();
+      if (moveTimeoutRef.current) clearTimeout(moveTimeoutRef.current);
+      if (moveIntervalRef.current) clearInterval(moveIntervalRef.current);
+      moveTimeoutRef.current = null;
+      moveIntervalRef.current = null;
+  };
+
   return (
     <div className="w-full h-full bg-[#101010] flex flex-col md:flex-row items-center justify-center font-mono select-none overflow-hidden touch-none relative p-4 gap-4">
         
@@ -2055,7 +2121,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                         <section>
                             <h3 className="font-bold border-b border-[#306230] mb-1">操作方法</h3>
                             <ul className="list-disc pl-5">
-                                <li><strong>移動:</strong> 十字キー または 画面パッド</li>
+                                <li><strong>移動:</strong> 十字キー または 画面パッド(長押しで連続移動)</li>
                                 <li><strong>攻撃:</strong> Aボタン または Zキー</li>
                                 <li><strong>メニュー:</strong> Bボタン または Xキー</li>
                                 <li><strong>飛び道具:</strong> <Crosshair size={12} className="inline"/>ボタン または Rキー</li>
@@ -2354,14 +2420,78 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         <div className="w-full max-w-md md:w-64 md:h-[400px] flex-grow md:flex-grow-0 relative min-h-[220px] bg-[#1a1a1a] rounded-t-xl md:rounded-xl border-t-2 md:border-2 border-[#333]">
             <div className="absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32 md:left-1/2 md:-translate-x-1/2 md:top-1/4 flex items-center justify-center">
                 <div className="w-10 h-10 bg-[#333] z-10"></div>
-                <div className="absolute top-0 w-10 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0 touch-none select-none" onClick={() => movePlayer(0, -1)}><ArrowUp className="text-[#666]" size={20}/></div>
-                <div className="absolute bottom-0 w-10 h-16 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-0 touch-none select-none" onClick={() => movePlayer(0, 1)}><ArrowDown className="text-[#666]" size={20}/></div>
-                <div className="absolute left-0 w-16 h-10 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-0 touch-none select-none" onClick={() => movePlayer(-1, 0)}><ArrowLeft className="text-[#666]" size={20}/></div>
-                <div className="absolute right-0 w-16 h-10 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-0 touch-none select-none" onClick={() => movePlayer(1, 0)}><ArrowRight className="text-[#666]" size={20}/></div>
-                <div className="absolute top-0 left-0 w-10 h-10 bg-[#333] rounded-tl-xl border-t border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => movePlayer(-1, -1)}><ArrowUpLeft className="text-[#666]" size={20}/></div>
-                <div className="absolute top-0 right-0 w-10 h-10 bg-[#333] rounded-tr-xl border-t border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => movePlayer(1, -1)}><ArrowUpRight className="text-[#666]" size={20}/></div>
-                <div className="absolute bottom-0 left-0 w-10 h-10 bg-[#333] rounded-bl-xl border-b border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => movePlayer(-1, 1)}><ArrowDownLeft className="text-[#666]" size={20}/></div>
-                <div className="absolute bottom-0 right-0 w-10 h-10 bg-[#333] rounded-br-xl border-b border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => movePlayer(1, 1)}><ArrowDownRight className="text-[#666]" size={20}/></div>
+                {/* UP */}
+                <div 
+                    className="absolute top-0 w-10 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0 touch-none select-none" 
+                    onPointerDown={(e) => handleDirectionStart(e, 0, -1)}
+                    onPointerUp={(e) => handleDirectionEnd(e)}
+                    onPointerLeave={(e) => handleDirectionEnd(e)}
+                >
+                    <ArrowUp className="text-[#666]" size={20}/>
+                </div>
+                {/* DOWN */}
+                <div 
+                    className="absolute bottom-0 w-10 h-16 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-0 touch-none select-none" 
+                    onPointerDown={(e) => handleDirectionStart(e, 0, 1)}
+                    onPointerUp={(e) => handleDirectionEnd(e)}
+                    onPointerLeave={(e) => handleDirectionEnd(e)}
+                >
+                    <ArrowDown className="text-[#666]" size={20}/>
+                </div>
+                {/* LEFT */}
+                <div 
+                    className="absolute left-0 w-16 h-10 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-0 touch-none select-none" 
+                    onPointerDown={(e) => handleDirectionStart(e, -1, 0)}
+                    onPointerUp={(e) => handleDirectionEnd(e)}
+                    onPointerLeave={(e) => handleDirectionEnd(e)}
+                >
+                    <ArrowLeft className="text-[#666]" size={20}/>
+                </div>
+                {/* RIGHT */}
+                <div 
+                    className="absolute right-0 w-16 h-10 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-0 touch-none select-none" 
+                    onPointerDown={(e) => handleDirectionStart(e, 1, 0)}
+                    onPointerUp={(e) => handleDirectionEnd(e)}
+                    onPointerLeave={(e) => handleDirectionEnd(e)}
+                >
+                    <ArrowRight className="text-[#666]" size={20}/>
+                </div>
+                {/* UP-LEFT */}
+                <div 
+                    className="absolute top-0 left-0 w-10 h-10 bg-[#333] rounded-tl-xl border-t border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" 
+                    onPointerDown={(e) => handleDirectionStart(e, -1, -1)}
+                    onPointerUp={(e) => handleDirectionEnd(e)}
+                    onPointerLeave={(e) => handleDirectionEnd(e)}
+                >
+                    <ArrowUpLeft className="text-[#666]" size={20}/>
+                </div>
+                {/* UP-RIGHT */}
+                <div 
+                    className="absolute top-0 right-0 w-10 h-10 bg-[#333] rounded-tr-xl border-t border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" 
+                    onPointerDown={(e) => handleDirectionStart(e, 1, -1)}
+                    onPointerUp={(e) => handleDirectionEnd(e)}
+                    onPointerLeave={(e) => handleDirectionEnd(e)}
+                >
+                    <ArrowUpRight className="text-[#666]" size={20}/>
+                </div>
+                {/* DOWN-LEFT */}
+                <div 
+                    className="absolute bottom-0 left-0 w-10 h-10 bg-[#333] rounded-bl-xl border-b border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" 
+                    onPointerDown={(e) => handleDirectionStart(e, -1, 1)}
+                    onPointerUp={(e) => handleDirectionEnd(e)}
+                    onPointerLeave={(e) => handleDirectionEnd(e)}
+                >
+                    <ArrowDownLeft className="text-[#666]" size={20}/>
+                </div>
+                {/* DOWN-RIGHT */}
+                <div 
+                    className="absolute bottom-0 right-0 w-10 h-10 bg-[#333] rounded-br-xl border-b border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" 
+                    onPointerDown={(e) => handleDirectionStart(e, 1, 1)}
+                    onPointerUp={(e) => handleDirectionEnd(e)}
+                    onPointerLeave={(e) => handleDirectionEnd(e)}
+                >
+                    <ArrowDownRight className="text-[#666]" size={20}/>
+                </div>
                 <div className="absolute w-8 h-8 bg-[#2a2a2a] rounded-full z-20 shadow-inner"></div>
             </div>
 
