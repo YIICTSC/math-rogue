@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2 } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
 
@@ -589,6 +589,44 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       }
   };
 
+  const handleDropItem = (index: number) => {
+      const item = inventory[index];
+      if (!item) return;
+
+      // Unequip check
+      let newEquip = player.equipment;
+      let changed = false;
+      if (player.equipment?.weapon === item) { newEquip = { ...newEquip!, weapon: null }; changed = true; }
+      else if (player.equipment?.armor === item) { newEquip = { ...newEquip!, armor: null }; changed = true; }
+      else if (player.equipment?.ranged === item) { newEquip = { ...newEquip!, ranged: null }; changed = true; }
+
+      if (changed) setPlayer(p => ({ ...p, equipment: newEquip }));
+
+      // Drop
+      const newInv = inventory.filter((_, i) => i !== index);
+      setInventory(newInv);
+
+      // Add to floor
+      const droppedEntity: Entity = {
+          id: Date.now() + Math.random(),
+          type: 'ITEM',
+          x: player.x,
+          y: player.y,
+          char: '!',
+          name: item.name,
+          hp: 0, maxHp: 0, baseAttack: 0, baseDefense: 0, attack: 0, defense: 0, xp: 0, dir: { x: 0, y: 0 },
+          itemData: item
+      };
+      setFloorItems(prev => [...prev, droppedEntity]);
+
+      addLog(`${item.name}を足元に置いた。`);
+      audioService.playSound('select');
+      
+      // Adjust cursor
+      setSelectedItemIndex(prev => Math.min(prev, newInv.length - 1));
+      if (newInv.length === 0) setMenuOpen(false); // Close if empty? Optional.
+  };
+
   const handleUnequip = (slot: 'weapon'|'armor'|'ranged') => {
       const item = player.equipment?.[slot];
       if (item) {
@@ -830,17 +868,25 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
                         <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar">
                             {inventory.map((item, i) => (
-                                <button 
-                                    key={i} 
-                                    className={`text-left px-2 py-1 cursor-pointer flex justify-between items-center border ${selectedItemIndex === i ? 'bg-[#8bac0f] text-[#0f380f] border-[#9bbc0f] font-bold' : 'hover:bg-[#306230] border-transparent hover:border-[#9bbc0f]'}`}
-                                    onClick={() => handleItemAction(i)}
-                                    onMouseEnter={() => setSelectedItemIndex(i)}
-                                >
-                                    <span>{item.name}</span>
-                                    <span className={`text-[9px] ${selectedItemIndex === i ? 'text-[#0f380f]' : 'text-[#8bac0f]'}`}>
-                                        {['WEAPON','ARMOR','RANGED'].includes(item.category) ? '装備' : '使う'}
-                                    </span>
-                                </button>
+                                <div key={i} className={`flex items-center border ${selectedItemIndex === i ? 'bg-[#8bac0f] text-[#0f380f] border-[#9bbc0f]' : 'border-transparent hover:border-[#9bbc0f]'}`}>
+                                    <button 
+                                        className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center"
+                                        onClick={() => handleItemAction(i)}
+                                        onMouseEnter={() => setSelectedItemIndex(i)}
+                                    >
+                                        <span>{item.name}</span>
+                                        <span className={`text-[9px] ${selectedItemIndex === i ? 'text-[#0f380f]' : 'text-[#8bac0f]'}`}>
+                                            {['WEAPON','ARMOR','RANGED'].includes(item.category) ? '装備' : '使う'}
+                                        </span>
+                                    </button>
+                                    <button 
+                                        className="px-2 py-1 border-l border-[#306230] hover:bg-[#306230] hover:text-[#9bbc0f] flex items-center justify-center"
+                                        onClick={(e) => { e.stopPropagation(); handleDropItem(i); }}
+                                        title="足元に置く"
+                                    >
+                                        <ArrowDown size={10} />
+                                    </button>
+                                </div>
                             ))}
                             {inventory.length === 0 && <span className="text-[#306230] text-center">Empty</span>}
                         </div>
