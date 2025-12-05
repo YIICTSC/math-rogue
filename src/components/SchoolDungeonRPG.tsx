@@ -313,6 +313,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     spriteCache.current['GOLD_BAG'] = createPixelSpriteCanvas('GOLD_BAG', 'GOLD_BAG|#FFD700');
     spriteCache.current['MAGIC_BULLET'] = createPixelSpriteCanvas('MAGIC_BULLET', 'MAGIC_BULLET|#00BCD4');
 
+    // Set BGM to new School Psyche track
+    audioService.playBGM('school_psyche');
+
     // Load Game State
     const savedState = storageService.loadDungeonState();
     if (savedState) {
@@ -320,6 +323,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     } else {
         startNewGame();
     }
+    
+    return () => {
+        audioService.stopBGM();
+    };
   }, []);
 
   const restoreState = (save: any) => {
