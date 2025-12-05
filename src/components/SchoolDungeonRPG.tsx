@@ -128,6 +128,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const [gameOver, setGameOver] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showMap, setShowMap] = useState(false); 
+  
+  // Menu Navigation
+  const [selectedItemIndex, setSelectedItemIndex] = useState(0);
+  const menuListRef = useRef<HTMLDivElement>(null);
 
   // Init
   useEffect(() => {
@@ -164,6 +168,22 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       });
   }, [player.equipment]);
 
+  // Scroll effect for menu
+  useEffect(() => {
+    if (menuOpen && menuListRef.current) {
+        const itemEl = menuListRef.current.children[selectedItemIndex] as HTMLElement;
+        if (itemEl) {
+            // Simple scroll into view logic
+            const container = menuListRef.current;
+            if (itemEl.offsetTop < container.scrollTop) {
+                container.scrollTop = itemEl.offsetTop;
+            } else if (itemEl.offsetTop + itemEl.offsetHeight > container.scrollTop + container.clientHeight) {
+                container.scrollTop = itemEl.offsetTop + itemEl.offsetHeight - container.clientHeight;
+            }
+        }
+    }
+  }, [selectedItemIndex, menuOpen]);
+
   // Log Logic
   const addLog = (msg: string, color?: string) => {
     setLogs(prev => {
@@ -183,6 +203,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     setBelly(100);
     setMaxBelly(100);
     setGameOver(false);
+    setMenuOpen(false);
     
     // Initial Item
     const initItem: Item = { ...ITEM_DB['ONIGIRI'], id: `start-${Date.now()}` };
@@ -291,6 +312,20 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   // --- ACTIONS ---
   const movePlayer = (dx: 0|1|-1, dy: 0|1|-1) => {
       if(gameOver) return;
+
+      // MENU NAVIGATION
+      if (menuOpen) {
+          if (dy !== 0) {
+              setSelectedItemIndex(prev => {
+                  const next = prev + dy;
+                  return Math.max(0, Math.min(inventory.length - 1, next));
+              });
+              audioService.playSound('select');
+          }
+          return;
+      }
+
+      // NORMAL MOVEMENT
       if(dx === 0 && dy === 0) {
           addLog("足踏みした。");
           processTurn(player.x, player.y);
@@ -449,7 +484,14 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   // --- INTERACTION ---
   const handleActionBtn = () => {
       if (gameOver) { startNewGame(); return; }
-      if (menuOpen) { return; }
+      
+      // MENU ACTION
+      if (menuOpen) {
+          if (inventory.length > 0) {
+              handleItemAction(selectedItemIndex);
+          }
+          return;
+      }
 
       // 1. Attack Forward
       const tx = player.x + player.dir.x;
@@ -474,6 +516,16 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       addLog("素振りをした。");
       audioService.playSound('select');
       processTurn(player.x, player.y);
+  };
+
+  const toggleMenu = () => {
+      if (menuOpen) {
+          setMenuOpen(false);
+      } else {
+          setMenuOpen(true);
+          setSelectedItemIndex(0);
+      }
+      audioService.playSound('select');
   };
 
   // --- INVENTORY ACTIONS ---
@@ -525,6 +577,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           
           if (actionDone) {
               setInventory(prev => prev.filter((_, i) => i !== index));
+              // Adjust selection if it goes out of bounds
+              setSelectedItemIndex(prev => Math.min(prev, inventory.length - 2)); 
           }
       }
 
@@ -562,8 +616,15 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             return;
         }
 
-        if (menuOpen) {
-            if (['x', 'Escape', 'Backspace'].includes(e.key)) setMenuOpen(false);
+        // Handle B / Menu Toggle
+        if (['x', 'c', 'Escape'].includes(e.key)) {
+            toggleMenu();
+            return;
+        }
+        
+        // Handle Cancel inside menu
+        if (menuOpen && e.key === 'Backspace') {
+            setMenuOpen(false);
             return;
         }
 
@@ -573,13 +634,12 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             case 'ArrowLeft': case 'a': movePlayer(-1, 0); break;
             case 'ArrowRight': case 'd': movePlayer(1, 0); break;
             case 'z': case ' ': case 'Enter': handleActionBtn(); break;
-            case 'x': case 'c': case 'Escape': setMenuOpen(true); break;
         }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [player, map, enemies, floorItems, menuOpen, gameOver, inventory]);
+  }, [player, map, enemies, floorItems, menuOpen, gameOver, inventory, selectedItemIndex]);
 
   // --- RENDER ---
   const frameCountRef = useRef(0);
@@ -757,7 +817,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                     <div className="absolute right-0 top-0 bottom-0 w-3/4 bg-[#0f380f] border-l-2 border-[#9bbc0f] z-30 p-2 text-[#9bbc0f] text-xs flex flex-col">
                         <div className="flex justify-between items-center border-b border-[#9bbc0f] mb-2 pb-1">
                             <h3 className="font-bold">MOCHIMONO ({inventory.length}/{MAX_INVENTORY})</h3>
-                            <button onClick={() => setMenuOpen(false)}><X size={12}/></button>
+                            <button onClick={toggleMenu}><X size={12}/></button>
                         </div>
                         
                         {/* Equipment Management */}
@@ -768,15 +828,16 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                             {player.equipment?.ranged && <div onClick={()=>handleUnequip('ranged')} className="cursor-pointer hover:text-white">[投] {player.equipment.ranged.name} (外す)</div>}
                         </div>
 
-                        <div className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar">
+                        <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar">
                             {inventory.map((item, i) => (
                                 <button 
                                     key={i} 
-                                    className="text-left px-2 py-1 hover:bg-[#306230] cursor-pointer flex justify-between items-center border border-transparent hover:border-[#9bbc0f]"
+                                    className={`text-left px-2 py-1 cursor-pointer flex justify-between items-center border ${selectedItemIndex === i ? 'bg-[#8bac0f] text-[#0f380f] border-[#9bbc0f] font-bold' : 'hover:bg-[#306230] border-transparent hover:border-[#9bbc0f]'}`}
                                     onClick={() => handleItemAction(i)}
+                                    onMouseEnter={() => setSelectedItemIndex(i)}
                                 >
                                     <span>{item.name}</span>
-                                    <span className="text-[9px] text-[#8bac0f]">
+                                    <span className={`text-[9px] ${selectedItemIndex === i ? 'text-[#0f380f]' : 'text-[#8bac0f]'}`}>
                                         {['WEAPON','ARMOR','RANGED'].includes(item.category) ? '装備' : '使う'}
                                     </span>
                                 </button>
@@ -831,7 +892,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                 <div className="flex flex-col items-center group">
                     <button 
                         className="w-14 h-14 bg-[#8b0000] rounded-full shadow-[0_4px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000]"
-                        onClick={() => setMenuOpen(!menuOpen)}
+                        onClick={toggleMenu}
                     >
                         B
                     </button>
