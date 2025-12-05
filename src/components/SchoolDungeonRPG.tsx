@@ -549,6 +549,38 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       }
   };
 
+  // --- KEYBOARD SUPPORT ---
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+        // Prevent scrolling
+        if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+            e.preventDefault();
+        }
+
+        if (gameOver) {
+            if (['z', 'Enter', ' '].includes(e.key)) startNewGame();
+            return;
+        }
+
+        if (menuOpen) {
+            if (['x', 'Escape', 'Backspace'].includes(e.key)) setMenuOpen(false);
+            return;
+        }
+
+        switch(e.key) {
+            case 'ArrowUp': case 'w': movePlayer(0, -1); break;
+            case 'ArrowDown': case 's': movePlayer(0, 1); break;
+            case 'ArrowLeft': case 'a': movePlayer(-1, 0); break;
+            case 'ArrowRight': case 'd': movePlayer(1, 0); break;
+            case 'z': case ' ': case 'Enter': handleActionBtn(); break;
+            case 'x': case 'c': case 'Escape': setMenuOpen(true); break;
+        }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [player, map, enemies, floorItems, menuOpen, gameOver, inventory]);
+
   // --- RENDER ---
   const frameCountRef = useRef(0);
   useEffect(() => {
