@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -247,6 +248,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const [showHelp, setShowHelp] = useState(false);
   const turnCounter = useRef(0);
   const [isEndless, setIsEndless] = useState(false);
+  const saveDebounceRef = useRef<any>(null);
   
   // Shop State
   const [shopState, setShopState] = useState<{ active: boolean, merchantId: number | null, mode: 'BUY' | 'SELL' }>({ active: false, merchantId: null, mode: 'BUY' });
@@ -311,8 +313,53 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     spriteCache.current['GOLD_BAG'] = createPixelSpriteCanvas('GOLD_BAG', 'GOLD_BAG|#FFD700');
     spriteCache.current['MAGIC_BULLET'] = createPixelSpriteCanvas('MAGIC_BULLET', 'MAGIC_BULLET|#00BCD4');
 
-    startNewGame();
+    // Load Game State
+    const savedState = storageService.loadDungeonState();
+    if (savedState) {
+        restoreState(savedState);
+    } else {
+        startNewGame();
+    }
   }, []);
+
+  const restoreState = (save: any) => {
+      setMap(save.map);
+      setPlayer(save.player);
+      setEnemies(save.enemies);
+      setFloorItems(save.floorItems);
+      setInventory(save.inventory);
+      setFloor(save.floor);
+      setLevel(save.level);
+      setBelly(save.belly);
+      setMaxBelly(save.maxBelly);
+      setIdMap(save.idMap);
+      setIdentifiedTypes(new Set(save.identifiedTypes));
+      setIsEndless(save.isEndless);
+      turnCounter.current = save.turnCounter;
+      addLog("冒険を再開した。", C2);
+  };
+
+  const saveData = useCallback(() => {
+      if (gameOver) return;
+      if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
+      
+      saveDebounceRef.current = setTimeout(() => {
+          const state = {
+              map, player, enemies, floorItems, inventory,
+              floor, level, belly, maxBelly,
+              idMap, identifiedTypes: Array.from(identifiedTypes),
+              isEndless, turnCounter: turnCounter.current
+          };
+          storageService.saveDungeonState(state);
+      }, 500); // 500ms debounce
+  }, [map, player, enemies, floorItems, inventory, floor, level, belly, maxBelly, idMap, identifiedTypes, isEndless, gameOver]);
+
+  // Auto-save effect on key state changes
+  useEffect(() => {
+      if (!gameOver && !gameClear) {
+          saveData();
+      }
+  }, [player, inventory, floor, level, belly, enemies, floorItems, gameOver, gameClear, saveData]);
 
   // Update Stats
   useEffect(() => {
@@ -417,6 +464,16 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     setLogs([]);
     generateFloor(1);
     addLog("風来の旅が始まった！");
+  };
+
+  const handleRestart = () => {
+      storageService.clearDungeonState();
+      startNewGame();
+  };
+
+  const handleQuit = () => {
+      saveData();
+      onBack();
   };
 
   const spawnEnemy = (x: number, y: number, floorLevel: number): Entity => {
@@ -627,6 +684,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   setGameOver(true); 
                   saveDungeonScore("Starved"); 
                   addLog("空腹で倒れた...", "red"); 
+                  storageService.clearDungeonState(); // Clear save on death
               } else {
                   if (turnCounter.current % 5 === 0) addLog("お腹が空いて倒れそうだ...", "red");
               }
@@ -681,7 +739,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   addLog(`${e.name}の炎！`, "red");
                   let dmg = 15;
                   if (player.equipment?.armor?.type === 'FIREFIGHTER') dmg = Math.floor(dmg / 2);
-                  setPlayer(p => { const nhp = p.hp - dmg; if(nhp<=0) { setGameOver(true); saveDungeonScore(`Killed by ${e.name}`); } return {...p, hp:nhp}; });
+                  setPlayer(p => { const nhp = p.hp - dmg; if(nhp<=0) { setGameOver(true); saveDungeonScore(`Killed by ${e.name}`); storageService.clearDungeonState(); } return {...p, hp:nhp}; });
                   occupied.add(`${e.x},${e.y}`); nextEnemies.push(e);
                   addVisualEffect('EXPLOSION', px, py); addVisualEffect('TEXT', px, py, { value: `${dmg}`, color: 'red' });
                   continue;
@@ -745,7 +803,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
                   if (dmg > 0) {
                       addLog(`${e.name}の攻撃！${dmg}ダメージ！`, "red");
-                      setPlayer(p => { const newHp = p.hp - dmg; if (newHp <= 0) { setGameOver(true); saveDungeonScore(`Killed by ${e.name}`); } return { ...p, hp: newHp }; });
+                      setPlayer(p => { const newHp = p.hp - dmg; if (newHp <= 0) { setGameOver(true); saveDungeonScore(`Killed by ${e.name}`); storageService.clearDungeonState(); } return { ...p, hp: newHp }; });
                       nextEnemies.push({ ...e, offset: { x: (tx - e.x) * 6, y: (ty - e.y) * 6 } });
                       attackingEnemyIds.push(e.id);
                       triggerShake(5);
@@ -933,7 +991,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   };
 
   const handleActionBtn = () => {
-      if (gameOver) { startNewGame(); return; }
+      if (gameOver) { handleRestart(); return; }
       if (gameClear) return;
       if (shopState.active) { handleShopAction(); return; }
       if (menuOpen) {
@@ -1084,6 +1142,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               setGameClear(true);
               audioService.playSound('win');
               saveDungeonScore("Cleared");
+              storageService.clearDungeonState();
               addVisualEffect('FLASH', 0, 0, { duration: 30, maxDuration: 30 });
           } else {
               addLog(`${d.name}を倒した！ (${d.xp} XP)`);
@@ -1658,7 +1717,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
         if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) { e.preventDefault(); }
-        if (gameOver) { if (['z', 'Enter', ' '].includes(e.key)) startNewGame(); return; }
+        if (gameOver) { if (['z', 'Enter', ' '].includes(e.key)) handleRestart(); return; }
         if (gameClear) { if (['z', 'Enter', ' '].includes(e.key)) startEndlessMode(); return; }
         if (['x', 'c', 'Escape'].includes(e.key)) { toggleMenu(); return; }
         if ((menuOpen || shopState.active) && (e.key === 'Backspace' || e.key === 'x')) {
@@ -2224,7 +2283,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                 <button onClick={startEndlessMode} className="border-2 border-[#9bbc0f] px-4 py-3 hover:bg-[#306230] animate-pulse font-bold">
                                     中学生編へ (エンドレス)
                                 </button>
-                                <button onClick={onBack} className="border-2 border-[#306230] px-4 py-2 hover:bg-[#306230] text-sm">
+                                <button onClick={handleQuit} className="border-2 border-[#306230] px-4 py-2 hover:bg-[#306230] text-sm">
                                     タイトルへ戻る
                                 </button>
                             </div>
@@ -2237,10 +2296,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                             <h2 className="text-2xl font-bold mb-4">GAME OVER</h2>
                             <p>Floor: {floor}</p>
                             <p>Level: {level}</p>
-                            <button onClick={startNewGame} className="mt-6 border-2 border-[#9bbc0f] px-4 py-2 hover:bg-[#306230] animate-pulse flex items-center">
+                            <button onClick={handleRestart} className="mt-6 border-2 border-[#9bbc0f] px-4 py-2 hover:bg-[#306230] animate-pulse flex items-center">
                                 <RotateCcw size={16} className="mr-2"/> RETRY
                             </button>
-                            <button onClick={onBack} className="mt-4 text-sm hover:underline">
+                            <button onClick={handleQuit} className="mt-4 text-sm hover:underline">
                                 EXIT
                             </button>
                         </div>
@@ -2301,7 +2360,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             </div>
 
             <div className="absolute bottom-2 left-1/2 -translate-x-1/2 md:bottom-4">
-                 <button onClick={onBack} className="text-[#555] text-[10px] font-bold border border-[#333] px-3 py-1 rounded bg-[#222] hover:text-white hover:border-gray-500 flex items-center gap-1"><LogOut size={10}/> QUIT</button>
+                 <button onClick={handleQuit} className="text-[#555] text-[10px] font-bold border border-[#333] px-3 py-1 rounded bg-[#222] hover:text-white hover:border-gray-500 flex items-center gap-1"><LogOut size={10}/> QUIT</button>
             </div>
         </div>
     </div>

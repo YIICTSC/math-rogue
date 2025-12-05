@@ -17,6 +17,8 @@ const STORAGE_KEY_LEGACY_CARD = 'pixel_spire_legacy_card_v1';
 const STORAGE_KEY_DEBUG_MATH_SKIP = 'pixel_spire_debug_math_skip_v1';
 const STORAGE_KEY_DEBUG_HP_ONE = 'pixel_spire_debug_hp_one_v1';
 
+const STORAGE_KEY_DUNGEON_STATE = 'pixel_spire_dungeon_state_v1';
+
 export const storageService = {
   // --- Unlocked Items (Cards, Relics, Potions, Enemies) ---
   
@@ -178,7 +180,7 @@ export const storageService = {
       }
   },
 
-  // --- Dungeon Scores ---
+  // --- Dungeon Scores & State ---
   saveDungeonScore: (entry: DungeonScoreEntry) => {
       try {
           const current = storageService.getDungeonScores();
@@ -196,6 +198,23 @@ export const storageService = {
       } catch (e) {
           return [];
       }
+  },
+
+  saveDungeonState: (state: any) => {
+      try {
+          localStorage.setItem(STORAGE_KEY_DUNGEON_STATE, JSON.stringify(state));
+      } catch (e) { console.warn("Failed to save dungeon state", e); }
+  },
+
+  loadDungeonState: (): any => {
+      try {
+          const stored = localStorage.getItem(STORAGE_KEY_DUNGEON_STATE);
+          return stored ? JSON.parse(stored) : null;
+      } catch { return null; }
+  },
+
+  clearDungeonState: () => {
+      localStorage.removeItem(STORAGE_KEY_DUNGEON_STATE);
   },
 
   // --- Game State (Save/Load) ---
@@ -291,6 +310,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_POKER_RANKING);
       localStorage.removeItem(STORAGE_KEY_SURVIVOR_RANKING);
       localStorage.removeItem(STORAGE_KEY_DUNGEON_RANKING);
+      localStorage.removeItem(STORAGE_KEY_DUNGEON_STATE);
       localStorage.removeItem(STORAGE_KEY_LEGACY_CARD);
       localStorage.removeItem(STORAGE_KEY_DEBUG_MATH_SKIP);
       localStorage.removeItem(STORAGE_KEY_DEBUG_HP_ONE);
