@@ -1,7 +1,6 @@
 
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
 import { storageService } from '../services/storageService';
@@ -17,8 +16,8 @@ const C2 = '#8bac0f'; // Light
 const C3 = '#9bbc0f'; // White
 
 // --- CONSTANTS ---
-const MAP_W = 40; // Expanded from 20
-const MAP_H = 40; // Expanded from 20
+const MAP_W = 40; 
+const MAP_H = 40; 
 const VIEW_W = 11; 
 const VIEW_H = 9;
 const TILE_SIZE = 16; 
@@ -39,7 +38,7 @@ const UNIDENTIFIED_NAMES = [
 type TileType = 'WALL' | 'FLOOR' | 'STAIRS' | 'HALLWAY';
 type Direction = { x: 0 | 1 | -1, y: 0 | 1 | -1 };
 type ItemCategory = 'WEAPON' | 'ARMOR' | 'RANGED' | 'CONSUMABLE' | 'SYNTH' | 'STAFF';
-type EnemyType = 'SLIME' | 'GHOST' | 'DRAIN' | 'DRAGON' | 'METAL' | 'FLOATING' | 'THIEF' | 'BAT' | 'BOSS' | 'MANDRAKE' | 'GOLEM' | 'NINJA' | 'MAGE';
+type EnemyType = 'SLIME' | 'GHOST' | 'DRAIN' | 'DRAGON' | 'METAL' | 'FLOATING' | 'THIEF' | 'BAT' | 'BOSS' | 'MANDRAKE' | 'GOLEM' | 'NINJA' | 'MAGE' | 'SHOPKEEPER';
 type VisualEffectType = 'SLASH' | 'THUNDER' | 'EXPLOSION' | 'TEXT' | 'FLASH' | 'PROJECTILE' | 'WARP' | 'BEAM';
 
 interface VisualEffect {
@@ -61,13 +60,14 @@ interface Item {
   type: string; 
   name: string;
   desc: string;
-  value?: number; 
+  value?: number; // Base price / effect value
   power?: number; 
   range?: number;
   count?: number; 
   plus?: number;
   charges?: number; 
   maxCharges?: number;
+  price?: number; // Calculated price for shop
 }
 
 interface EquipmentSlots {
@@ -78,7 +78,7 @@ interface EquipmentSlots {
 
 interface Entity {
   id: number;
-  type: 'PLAYER' | 'ENEMY' | 'ITEM';
+  type: 'PLAYER' | 'ENEMY' | 'ITEM' | 'GOLD';
   x: number;
   y: number;
   char: string;
@@ -92,6 +92,7 @@ interface Entity {
   defense: number;
   
   xp: number;
+  gold?: number; // For GOLD entities or Player gold
   dir: Direction;
   
   status: {
@@ -107,6 +108,7 @@ interface Entity {
   itemData?: Item; 
   equipment?: EquipmentSlots;
   enemyType?: EnemyType;
+  shopItems?: Item[]; // For Shopkeeper
 }
 
 interface Log {
@@ -118,64 +120,64 @@ interface Log {
 // --- ITEM DATABASE ---
 const ITEM_DB: Record<string, Omit<Item, 'id'>> = {
     // WEAPONS
-    'PENCIL_SWORD': { category: 'WEAPON', type: 'PENCIL_SWORD', name: 'えんぴつソード', desc: '削りたて。攻撃+4', power: 4 },
-    'METAL_BAT': { category: 'WEAPON', type: 'METAL_BAT', name: '金属バット', desc: 'どうたぬき級。攻撃+8', power: 8 },
-    'PROTRACTOR_EDGE': { category: 'WEAPON', type: 'PROTRACTOR_EDGE', name: '分度器エッジ', desc: '前方3方向を攻撃できる。攻撃+3', power: 3 },
-    'OFUDA_RULER': { category: 'WEAPON', type: 'OFUDA_RULER', name: 'お札定規', desc: 'ゴースト系に大ダメージ。攻撃+4', power: 4 },
-    'VITAMIN_INJECT': { category: 'WEAPON', type: 'VITAMIN_INJECT', name: 'ビタミン注射', desc: 'ドレイン系に大ダメージ。攻撃+5', power: 5 },
-    'LADLE': { category: 'WEAPON', type: 'LADLE', name: '給食のおたま', desc: '敵を肉(回復)に変えることがある。攻撃+2', power: 2 },
-    'STAINLESS_PEN': { category: 'WEAPON', type: 'STAINLESS_PEN', name: 'ステンレスペン', desc: 'サビの罠にかからない。攻撃+6', power: 6 },
-    'RICH_WATCH': { category: 'WEAPON', type: 'RICH_WATCH', name: '金持ちの時計', desc: 'お金を消費して大ダメージ。攻撃+10', power: 10 },
+    'PENCIL_SWORD': { category: 'WEAPON', type: 'PENCIL_SWORD', name: 'えんぴつソード', desc: '削りたて。攻撃+4', power: 4, value: 200 },
+    'METAL_BAT': { category: 'WEAPON', type: 'METAL_BAT', name: '金属バット', desc: 'どうたぬき級。攻撃+8', power: 8, value: 500 },
+    'PROTRACTOR_EDGE': { category: 'WEAPON', type: 'PROTRACTOR_EDGE', name: '分度器エッジ', desc: '前方3方向を攻撃できる。攻撃+3', power: 3, value: 400 },
+    'OFUDA_RULER': { category: 'WEAPON', type: 'OFUDA_RULER', name: 'お札定規', desc: 'ゴースト系に大ダメージ。攻撃+4', power: 4, value: 350 },
+    'VITAMIN_INJECT': { category: 'WEAPON', type: 'VITAMIN_INJECT', name: 'ビタミン注射', desc: 'ドレイン系に大ダメージ。攻撃+5', power: 5, value: 350 },
+    'LADLE': { category: 'WEAPON', type: 'LADLE', name: '給食のおたま', desc: '敵を肉(回復)に変えることがある。攻撃+2', power: 2, value: 600 },
+    'STAINLESS_PEN': { category: 'WEAPON', type: 'STAINLESS_PEN', name: 'ステンレスペン', desc: 'サビの罠にかからない。攻撃+6', power: 6, value: 450 },
+    'RICH_WATCH': { category: 'WEAPON', type: 'RICH_WATCH', name: '金持ちの時計', desc: 'お金を消費して大ダメージ。攻撃+10', power: 10, value: 800 },
 
     // ARMOR
-    'GYM_CLOTHES': { category: 'ARMOR', type: 'GYM_CLOTHES', name: '体操服', desc: '動きやすい。回避率UP。防御+3', power: 3 },
-    'RANDO_SERU': { category: 'ARMOR', type: 'RANDO_SERU', name: 'ランドセル', desc: '硬いが重い。腹減りが早まる。防御+12', power: 12 },
-    'PRINCIPAL_SHIELD': { category: 'ARMOR', type: 'PRINCIPAL_SHIELD', name: '校長の盾', desc: '最強の盾。防御+15', power: 15 },
-    'VINYL_APRON': { category: 'ARMOR', type: 'VINYL_APRON', name: 'ビニールエプロン', desc: 'サビや汚れを防ぐ。防御+4', power: 4 },
-    'NAME_TAG': { category: 'ARMOR', type: 'NAME_TAG', name: '名札', desc: '盗難を防ぐ。防御+5', power: 5 },
-    'DISASTER_HOOD': { category: 'ARMOR', type: 'DISASTER_HOOD', name: '防災頭巾', desc: '爆発ダメージ減少。防御+6', power: 6 },
-    'FIREFIGHTER': { category: 'ARMOR', type: 'FIREFIGHTER', name: '防火ヘルメット', desc: '炎ダメージ減少。防御+7', power: 7 },
-    'GOLD_BADGE': { category: 'ARMOR', type: 'GOLD_BADGE', name: '純金の校章', desc: 'サビない。防御+8', power: 8 },
+    'GYM_CLOTHES': { category: 'ARMOR', type: 'GYM_CLOTHES', name: '体操服', desc: '動きやすい。回避率UP。防御+3', power: 3, value: 200 },
+    'RANDO_SERU': { category: 'ARMOR', type: 'RANDO_SERU', name: 'ランドセル', desc: '硬いが重い。腹減りが早まる。防御+12', power: 12, value: 500 },
+    'PRINCIPAL_SHIELD': { category: 'ARMOR', type: 'PRINCIPAL_SHIELD', name: '校長の盾', desc: '最強の盾。防御+15', power: 15, value: 1000 },
+    'VINYL_APRON': { category: 'ARMOR', type: 'VINYL_APRON', name: 'ビニールエプロン', desc: 'サビや汚れを防ぐ。防御+4', power: 4, value: 300 },
+    'NAME_TAG': { category: 'ARMOR', type: 'NAME_TAG', name: '名札', desc: '盗難を防ぐ。防御+5', power: 5, value: 250 },
+    'DISASTER_HOOD': { category: 'ARMOR', type: 'DISASTER_HOOD', name: '防災頭巾', desc: '爆発ダメージ減少。防御+6', power: 6, value: 350 },
+    'FIREFIGHTER': { category: 'ARMOR', type: 'FIREFIGHTER', name: '防火ヘルメット', desc: '炎ダメージ減少。防御+7', power: 7, value: 400 },
+    'GOLD_BADGE': { category: 'ARMOR', type: 'GOLD_BADGE', name: '純金の校章', desc: 'サビない。防御+8', power: 8, value: 600 },
 
     // RANGED
-    'CHALK': { category: 'RANGED', type: 'CHALK', name: 'チョーク', desc: '普通の飛び道具。', power: 3, range: 5, count: 8 },
-    'STONES': { category: 'RANGED', type: 'STONES', name: '石ころ', desc: '必中。範囲攻撃。', power: 2, range: 4, count: 5 },
-    'SHADOW_PIN': { category: 'RANGED', type: 'SHADOW_PIN', name: '影縫いの画鋲', desc: '当たると移動不可にする。', power: 1, range: 5, count: 3 },
+    'CHALK': { category: 'RANGED', type: 'CHALK', name: 'チョーク', desc: '普通の飛び道具。', power: 3, range: 5, count: 8, value: 100 },
+    'STONES': { category: 'RANGED', type: 'STONES', name: '石ころ', desc: '必中。範囲攻撃。', power: 2, range: 4, count: 5, value: 80 },
+    'SHADOW_PIN': { category: 'RANGED', type: 'SHADOW_PIN', name: '影縫いの画鋲', desc: '当たると移動不可にする。', power: 1, range: 5, count: 3, value: 150 },
 
     // STAFF (UMBRELLAS) - Requires ID
-    'UMB_FIRE': { category: 'STAFF', type: 'UMB_FIRE', name: '火炎放射傘', desc: '振ると前方に炎を放つ。', maxCharges: 5 },
-    'UMB_THUNDER': { category: 'STAFF', type: 'UMB_THUNDER', name: '避雷針の傘', desc: '振ると前方の敵に雷ダメージ。', maxCharges: 5 },
-    'UMB_SLEEP': { category: 'STAFF', type: 'UMB_SLEEP', name: '子守唄の傘', desc: '振ると前方の敵を眠らせる。', maxCharges: 5 },
-    'UMB_BLOW': { category: 'STAFF', type: 'UMB_BLOW', name: '突風の傘', desc: '振ると敵を吹き飛ばす。', maxCharges: 6 },
-    'UMB_WARP': { category: 'STAFF', type: 'UMB_WARP', name: '早退の傘', desc: '振ると敵をどこかへワープさせる。', maxCharges: 5 },
-    'UMB_CHANGE': { category: 'STAFF', type: 'UMB_CHANGE', name: '席替えの傘', desc: '振ると敵と場所を入れ替わる。', maxCharges: 6 },
-    'UMB_BIND': { category: 'STAFF', type: 'UMB_BIND', name: '金縛りの傘', desc: '振ると敵を動けなくする。', maxCharges: 5 },
-    'UMB_HEAL': { category: 'STAFF', type: 'UMB_HEAL', name: '回復の傘', desc: '振るとHPを回復する(敵に当てると敵が回復)。', maxCharges: 5 },
+    'UMB_FIRE': { category: 'STAFF', type: 'UMB_FIRE', name: '火炎放射傘', desc: '振ると前方に炎を放つ。', maxCharges: 5, value: 400 },
+    'UMB_THUNDER': { category: 'STAFF', type: 'UMB_THUNDER', name: '避雷針の傘', desc: '振ると前方の敵に雷ダメージ。', maxCharges: 5, value: 400 },
+    'UMB_SLEEP': { category: 'STAFF', type: 'UMB_SLEEP', name: '子守唄の傘', desc: '振ると前方の敵を眠らせる。', maxCharges: 5, value: 400 },
+    'UMB_BLOW': { category: 'STAFF', type: 'UMB_BLOW', name: '突風の傘', desc: '振ると敵を吹き飛ばす。', maxCharges: 6, value: 350 },
+    'UMB_WARP': { category: 'STAFF', type: 'UMB_WARP', name: '早退の傘', desc: '振ると敵をどこかへワープさせる。', maxCharges: 5, value: 350 },
+    'UMB_CHANGE': { category: 'STAFF', type: 'UMB_CHANGE', name: '席替えの傘', desc: '振ると敵と場所を入れ替わる。', maxCharges: 6, value: 350 },
+    'UMB_BIND': { category: 'STAFF', type: 'UMB_BIND', name: '金縛りの傘', desc: '振ると敵を動けなくする。', maxCharges: 5, value: 400 },
+    'UMB_HEAL': { category: 'STAFF', type: 'UMB_HEAL', name: '回復の傘', desc: '振るとHPを回復する(敵に当てると敵が回復)。', maxCharges: 5, value: 500 },
 
-    // CONSUMABLE (Notebooks - ID Not Required anymore)
-    'SCROLL_SLEEP': { category: 'CONSUMABLE', type: 'SCROLL_SLEEP', name: '居眠りノート', desc: '部屋の敵が眠る。', value: 0 },
-    'SCROLL_THUNDER': { category: 'CONSUMABLE', type: 'SCROLL_THUNDER', name: '理科の実験ノート', desc: 'フロア全体の敵に雷ダメージ。', value: 25 },
-    'SCROLL_CRISIS': { category: 'CONSUMABLE', type: 'SCROLL_CRISIS', name: '先生への反省文', desc: '困った時の神頼み(全回復等)。', value: 0 },
-    'SCROLL_BERSERK': { category: 'CONSUMABLE', type: 'SCROLL_BERSERK', name: '学級崩壊ノート', desc: '敵が暴走する。', value: 0 },
-    'SCROLL_MAP': { category: 'CONSUMABLE', type: 'SCROLL_MAP', name: '学校の案内図', desc: 'フロア構造がわかる。', value: 0 },
-    'SCROLL_UP_W': { category: 'CONSUMABLE', type: 'SCROLL_UP_W', name: '表彰状(武)', desc: '武器を強化する(+1)。', value: 1 },
-    'SCROLL_UP_A': { category: 'CONSUMABLE', type: 'SCROLL_UP_A', name: '表彰状(防)', desc: '防具を強化する(+1)。', value: 1 },
-    'SCROLL_BLANK': { category: 'CONSUMABLE', type: 'SCROLL_BLANK', name: '白紙のノート', desc: '一度読んだノートの効果を書き込める。', value: 0 },
-    'SCROLL_WARP': { category: 'CONSUMABLE', type: 'SCROLL_WARP', name: '早退届', desc: 'フロアのどこかへワープする。', value: 0 },
-    'SCROLL_CONFUSE': { category: 'CONSUMABLE', type: 'SCROLL_CONFUSE', name: '学級閉鎖ノート', desc: '部屋の敵が混乱する。', value: 0 },
-    'SCROLL_IDENTIFY': { category: 'CONSUMABLE', type: 'SCROLL_IDENTIFY', name: '解法のノート', desc: '所持しているアイテムを全て識別する。', value: 0 },
+    // CONSUMABLE (Notebooks)
+    'SCROLL_SLEEP': { category: 'CONSUMABLE', type: 'SCROLL_SLEEP', name: '居眠りノート', desc: '部屋の敵が眠る。', value: 300 },
+    'SCROLL_THUNDER': { category: 'CONSUMABLE', type: 'SCROLL_THUNDER', name: '理科の実験ノート', desc: 'フロア全体の敵に雷ダメージ。', value: 400 },
+    'SCROLL_CRISIS': { category: 'CONSUMABLE', type: 'SCROLL_CRISIS', name: '先生への反省文', desc: '困った時の神頼み(全回復等)。', value: 500 },
+    'SCROLL_BERSERK': { category: 'CONSUMABLE', type: 'SCROLL_BERSERK', name: '学級崩壊ノート', desc: '敵が暴走する。', value: 200 },
+    'SCROLL_MAP': { category: 'CONSUMABLE', type: 'SCROLL_MAP', name: '学校の案内図', desc: 'フロア構造がわかる。', value: 300 },
+    'SCROLL_UP_W': { category: 'CONSUMABLE', type: 'SCROLL_UP_W', name: '表彰状(武)', desc: '武器を強化する(+1)。', value: 400 },
+    'SCROLL_UP_A': { category: 'CONSUMABLE', type: 'SCROLL_UP_A', name: '表彰状(防)', desc: '防具を強化する(+1)。', value: 400 },
+    'SCROLL_BLANK': { category: 'CONSUMABLE', type: 'SCROLL_BLANK', name: '白紙のノート', desc: '一度読んだノートの効果を書き込める。', value: 800 },
+    'SCROLL_WARP': { category: 'CONSUMABLE', type: 'SCROLL_WARP', name: '早退届', desc: 'フロアのどこかへワープする。', value: 100 },
+    'SCROLL_CONFUSE': { category: 'CONSUMABLE', type: 'SCROLL_CONFUSE', name: '学級閉鎖ノート', desc: '部屋の敵が混乱する。', value: 300 },
+    'SCROLL_IDENTIFY': { category: 'CONSUMABLE', type: 'SCROLL_IDENTIFY', name: '解法のノート', desc: '所持しているアイテムを全て識別する。', value: 300 },
 
     // FOOD/OTHERS
     'FOOD_ONIGIRI': { category: 'CONSUMABLE', type: 'FOOD_ONIGIRI', name: 'おにぎり', desc: 'お腹が50回復。', value: 50 },
     'FOOD_MEAT': { category: 'CONSUMABLE', type: 'FOOD_MEAT', name: '謎の肉', desc: 'お腹100、HP50回復。', value: 100 },
     'GRASS_HEAL': { category: 'CONSUMABLE', type: 'GRASS_HEAL', name: '給食の残り', desc: 'HP100回復。', value: 100 },
-    'GRASS_LIFE': { category: 'CONSUMABLE', type: 'GRASS_LIFE', name: '命の野菜', desc: '最大HP+5。', value: 5 },
-    'GRASS_SPEED': { category: 'CONSUMABLE', type: 'GRASS_SPEED', name: 'エナドリ', desc: '倍速になる。', value: 0 },
-    'GRASS_EYE': { category: 'CONSUMABLE', type: 'GRASS_EYE', name: '目薬', desc: '罠が見える。', value: 0 },
-    'GRASS_POISON': { category: 'CONSUMABLE', type: 'GRASS_POISON', name: '腐ったパン', desc: '毒を受ける/敵に投げると毒。', value: 0 },
-    'POT_GLUE': { category: 'SYNTH', type: 'POT_GLUE', name: '工作のり', desc: '装備を合成する。', value: 0 },
-    'POT_CHANGE': { category: 'CONSUMABLE', type: 'POT_CHANGE', name: 'びっくり箱', desc: '中身を別のアイテムに変化させる。', value: 0 },
-    'BOMB': { category: 'CONSUMABLE', type: 'BOMB', name: '爆弾', desc: '周囲を爆破する。', value: 40 },
+    'GRASS_LIFE': { category: 'CONSUMABLE', type: 'GRASS_LIFE', name: '命の野菜', desc: '最大HP+5。', value: 500 },
+    'GRASS_SPEED': { category: 'CONSUMABLE', type: 'GRASS_SPEED', name: 'エナドリ', desc: '倍速になる。', value: 200 },
+    'GRASS_EYE': { category: 'CONSUMABLE', type: 'GRASS_EYE', name: '目薬', desc: '罠が見える。', value: 200 },
+    'GRASS_POISON': { category: 'CONSUMABLE', type: 'GRASS_POISON', name: '腐ったパン', desc: '毒を受ける/敵に投げると毒。', value: 50 },
+    'POT_GLUE': { category: 'SYNTH', type: 'POT_GLUE', name: '工作のり', desc: '装備を合成する。', value: 500 },
+    'POT_CHANGE': { category: 'CONSUMABLE', type: 'POT_CHANGE', name: 'びっくり箱', desc: '中身を別のアイテムに変化させる。', value: 400 },
+    'BOMB': { category: 'CONSUMABLE', type: 'BOMB', name: '爆弾', desc: '周囲を爆破する。', value: 200 },
 };
 
 const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
@@ -187,7 +189,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   
   const [player, setPlayer] = useState<Entity>({
     id: 0, type: 'PLAYER', x: 1, y: 1, char: '@', name: 'わんぱく小学生', 
-    hp: 50, maxHp: 50, baseAttack: 3, baseDefense: 0, attack: 3, defense: 0, xp: 0, dir: {x:0, y:1},
+    hp: 50, maxHp: 50, baseAttack: 3, baseDefense: 0, attack: 3, defense: 0, xp: 0, gold: 0, dir: {x:0, y:1},
     equipment: { weapon: null, armor: null, ranged: null },
     status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
     offset: { x: 0, y: 0 }
@@ -211,6 +213,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const turnCounter = useRef(0);
   const [isEndless, setIsEndless] = useState(false);
   
+  // Shop State
+  const [shopState, setShopState] = useState<{ active: boolean, merchantId: number | null, mode: 'BUY' | 'SELL' }>({ active: false, merchantId: null, mode: 'BUY' });
+
   // VFX State
   const visualEffects = useRef<VisualEffect[]>([]);
   const shake = useRef<{x: number, y: number, duration: number}>({x: 0, y: 0, duration: 0});
@@ -259,12 +264,15 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     spriteCache.current['RANGED'] = createPixelSpriteCanvas('RNG', 'POTION'); 
     spriteCache.current['CONSUMABLE'] = createPixelSpriteCanvas('CON', 'NOTEBOOK');
     spriteCache.current['SYNTH'] = createPixelSpriteCanvas('SYNTH', 'POTION|#FFFFFF'); 
-    spriteCache.current['STAFF'] = createPixelSpriteCanvas('STAFF', 'UMBRELLA|#00BCD4'); // New Staff Sprite
-    // New Enemies
+    spriteCache.current['STAFF'] = createPixelSpriteCanvas('STAFF', 'UMBRELLA|#00BCD4'); 
     spriteCache.current['MANDRAKE'] = createPixelSpriteCanvas('MANDRAKE', 'PLANT|#33691e');
     spriteCache.current['GOLEM'] = createPixelSpriteCanvas('GOLEM', 'SKELETON|#b0bec5');
     spriteCache.current['NINJA'] = createPixelSpriteCanvas('NINJA', 'FLIER|#1a237e');
     spriteCache.current['MAGE'] = createPixelSpriteCanvas('MAGE', 'WIZARD|#7b1fa2');
+    
+    // New Sprites
+    spriteCache.current['COIN'] = createPixelSpriteCanvas('COIN', 'GEM|#FFD700');
+    spriteCache.current['SHOPKEEPER'] = createPixelSpriteCanvas('SHOPKEEPER', 'HUMANOID|#33691e'); // Green merchant
 
     startNewGame();
   }, []);
@@ -286,7 +294,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
   // Scroll effect
   useEffect(() => {
-    if (menuOpen && menuListRef.current) {
+    if ((menuOpen || shopState.active) && menuListRef.current) {
         const idx = synthState.mode === 'BLANK' ? blankScrollSelectionIndex : selectedItemIndex;
         const itemEl = menuListRef.current.children[idx] as HTMLElement;
         if (itemEl) {
@@ -298,7 +306,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             }
         }
     }
-  }, [selectedItemIndex, menuOpen, blankScrollSelectionIndex, synthState.mode]);
+  }, [selectedItemIndex, menuOpen, shopState.active, blankScrollSelectionIndex, synthState.mode]);
 
   const addVisualEffect = (type: VisualEffectType, x: number, y: number, options: Partial<VisualEffect> = {}) => {
       visualEffects.current.push({
@@ -323,7 +331,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   };
 
   const saveDungeonScore = (reason: string) => {
-      const score = floor * 100 + level * 50 + (inventory.length * 10);
+      const score = floor * 100 + level * 50 + (inventory.length * 10) + (player.gold || 0);
       storageService.saveDungeonScore({
           id: `dungeon-${Date.now()}`,
           date: Date.now(),
@@ -342,6 +350,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     setGameOver(false);
     setGameClear(false);
     setMenuOpen(false);
+    setShopState({ active: false, merchantId: null, mode: 'BUY' });
     setIsEndless(false);
     turnCounter.current = 0;
     visualEffects.current = [];
@@ -363,7 +372,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     
     setPlayer({
         id: 0, type: 'PLAYER', x: 1, y: 1, char: '@', name: 'わんぱく小学生', 
-        hp: 50, maxHp: 50, baseAttack: 3, baseDefense: 0, attack: 3, defense: 0, xp: 0, dir: {x:0, y:1},
+        hp: 50, maxHp: 50, baseAttack: 3, baseDefense: 0, attack: 3, defense: 0, xp: 0, gold: 0, dir: {x:0, y:1},
         equipment: { weapon: null, armor: null, ranged: null },
         status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
         offset: { x: 0, y: 0 }
@@ -385,7 +394,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           if (r < 0.6) { t = 'SLIME'; name="スライム"; hp=10; atk=3; xp=5; }
           else { t = 'BAT'; name="コウモリ"; hp=8; atk=4; xp=6; }
       } else {
-          if (r < 0.20) { t = 'SLIME'; name="スライム"; hp=10+hpScale; atk=3+scaling; xp=5+xpScale; }
+          if (r < 0.05 && !isEndless) { t = 'SHOPKEEPER'; name="購買部員"; hp=1000; atk=50; xp=0; def=20; }
+          else if (r < 0.20) { t = 'SLIME'; name="スライム"; hp=10+hpScale; atk=3+scaling; xp=5+xpScale; }
           else if (r < 0.35) { t = 'BAT'; name="コウモリ"; hp=8+hpScale; atk=5+scaling; xp=7+xpScale; }
           else if (r < 0.45 && floorLevel > 2) { t = 'MANDRAKE'; name="人食い植物"; hp=20+hpScale; atk=5+scaling; xp=12+xpScale; }
           else if (r < 0.60) { t = 'GHOST'; name="浮遊霊"; hp=15+hpScale; atk=4+scaling; xp=10+xpScale; def=2+Math.floor(floorLevel/2); }
@@ -398,11 +408,29 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           else if (floorLevel > 6) { t = 'METAL'; name="メタル生徒"; hp=4+Math.floor(floorLevel/5); atk=1+scaling; xp=100+xpScale*3; def=999; }
       }
 
+      // Generate Shop Items if Shopkeeper
+      let shopItems: Item[] = [];
+      if (t === 'SHOPKEEPER') {
+          for(let i=0; i<5; i++) {
+              const keys = Object.keys(ITEM_DB);
+              const key = keys[Math.floor(Math.random() * keys.length)];
+              const template = ITEM_DB[key];
+              const price = (template.value || 100) * (Math.random() * 0.5 + 0.8);
+              shopItems.push({ 
+                  ...template, 
+                  id: `shop-${Date.now()}-${i}`, 
+                  price: Math.floor(price),
+                  plus: 0, charges: template.maxCharges
+              });
+          }
+      }
+
       return {
           id: Date.now() + Math.random(), type: 'ENEMY', x, y, char: t[0], 
           name, hp, maxHp: hp, baseAttack: Math.floor(atk), baseDefense: Math.floor(def), attack: Math.floor(atk), defense: Math.floor(def), xp: Math.floor(xp), dir: {x:0, y:0}, enemyType: t,
           status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
-          offset: { x: 0, y: 0 }
+          offset: { x: 0, y: 0 },
+          shopItems
       };
   };
 
@@ -411,7 +439,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     const rooms: {x:number, y:number, w:number, h:number}[] = [];
     
     let attempts = 0;
-    // Increase room count and max attempts for larger map
     while(rooms.length < 8 && attempts < 200) {
         attempts++;
         const w = Math.floor(Math.random() * 4) + 4;
@@ -465,29 +492,42 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                 if(Math.random() < 0.06) {
                     newEnemies.push(spawnEnemy(x, y, f));
                 } else if(Math.random() < 0.04) {
-                    const keys = Object.keys(ITEM_DB);
-                    const key = keys[Math.floor(Math.random() * keys.length)];
-                    const template = ITEM_DB[key];
-                    let plus = 0;
-                    let charges = template.maxCharges || 0;
-                    if ((template.category === 'WEAPON' || template.category === 'ARMOR') && Math.random() < 0.2) {
-                        plus = Math.floor(Math.random() * 2) + 1;
-                    }
-                    if (template.category === 'STAFF') {
-                        charges = Math.floor(Math.random() * 4) + 2; // Randomize charges a bit
-                    }
-                    newItems.push({
-                        id: Date.now() + Math.random(), type: 'ITEM', x, y, char: '!', 
-                        name: template.name, hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
-                        status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
-                        itemData: { 
-                            ...template, 
-                            id: `item-${Date.now()}-${Math.random()}`, 
-                            plus,
-                            charges,
-                            name: plus > 0 ? `${template.name}+${plus}` : template.name
+                    const r = Math.random();
+                    if (r < 0.2) {
+                        // Gold
+                        newItems.push({
+                            id: Date.now() + Math.random(), type: 'GOLD', x, y, char: '$', name: 'お金',
+                            hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
+                            status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+                            gold: Math.floor(Math.random() * 50 + 10 * f)
+                        });
+                    } else {
+                        // Items
+                        const keys = Object.keys(ITEM_DB);
+                        const key = keys[Math.floor(Math.random() * keys.length)];
+                        const template = ITEM_DB[key];
+                        let plus = 0;
+                        let charges = template.maxCharges || 0;
+                        if ((template.category === 'WEAPON' || template.category === 'ARMOR') && Math.random() < 0.2) {
+                            plus = Math.floor(Math.random() * 2) + 1;
                         }
-                    });
+                        if (template.category === 'STAFF') {
+                            charges = Math.floor(Math.random() * 4) + 2; 
+                        }
+                        newItems.push({
+                            id: Date.now() + Math.random(), type: 'ITEM', x, y, char: '!', 
+                            name: template.name, hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
+                            status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+                            itemData: { 
+                                ...template, 
+                                id: `item-${Date.now()}-${Math.random()}`, 
+                                plus,
+                                charges,
+                                name: plus > 0 ? `${template.name}+${plus}` : template.name,
+                                price: Math.floor((template.value || 100) * 0.5) // Sell price is usually half base
+                            }
+                        });
+                    }
                 }
             }
         }
@@ -502,6 +542,16 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
   const movePlayer = (dx: 0|1|-1, dy: 0|1|-1) => {
       if(gameOver || gameClear) return;
+
+      if (shopState.active) {
+          if (dy !== 0) {
+              const shopkeeper = enemies.find(e => e.id === shopState.merchantId);
+              const listLength = shopState.mode === 'BUY' ? (shopkeeper?.shopItems?.length || 0) : inventory.length;
+              setSelectedItemIndex(prev => Math.max(0, Math.min(listLength - 1, prev + dy)));
+              audioService.playSound('select');
+          }
+          return;
+      }
 
       if (menuOpen) {
           if (synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT') {
@@ -544,18 +594,33 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
       const target = enemies.find(e => e.x === tx && e.y === ty);
       if (target) {
-          attackEnemy(target);
-          processTurn(player.x, player.y); 
+          if (target.enemyType === 'SHOPKEEPER') {
+              addLog("「へいらっしゃい！何にする？」", C2);
+              setShopState({ active: true, merchantId: target.id, mode: 'BUY' });
+              setSelectedItemIndex(0);
+              audioService.playSound('select');
+          } else {
+              attackEnemy(target);
+              processTurn(player.x, player.y); 
+          }
           return;
       }
 
       let finalX = tx; let finalY = ty;
       setPlayer(p => ({ ...p, x: finalX, y: finalY }));
       
+      // Item Pickup
       const itemIdx = floorItems.findIndex(i => i.x === finalX && i.y === finalY);
       if (itemIdx !== -1) {
           const itemEntity = floorItems[itemIdx];
-          if (itemEntity.itemData) {
+          
+          if (itemEntity.type === 'GOLD') {
+              const amount = itemEntity.gold || 0;
+              setPlayer(p => ({ ...p, gold: (p.gold || 0) + amount }));
+              addLog(`${amount}円を拾った！`, "yellow");
+              setFloorItems(prev => prev.filter((_, i) => i !== itemIdx));
+              audioService.playSound('select');
+          } else if (itemEntity.itemData) {
               const item = itemEntity.itemData;
               if (inventory.length < MAX_INVENTORY) {
                   setInventory(prev => [...prev, item]);
@@ -570,6 +635,58 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       
       if (map[ty][tx] === 'STAIRS') addLog("階段がある。", C2);
       processTurn(finalX, finalY);
+  };
+
+  const handleShopAction = () => {
+      const shopkeeper = enemies.find(e => e.id === shopState.merchantId);
+      if (!shopkeeper) { setShopState(prev => ({ ...prev, active: false })); return; }
+
+      if (shopState.mode === 'BUY') {
+          if (!shopkeeper.shopItems || shopkeeper.shopItems.length === 0) return;
+          const item = shopkeeper.shopItems[selectedItemIndex];
+          if (!item) return;
+          
+          if ((player.gold || 0) >= (item.price || 0)) {
+              if (inventory.length < MAX_INVENTORY) {
+                  setPlayer(p => ({ ...p, gold: (p.gold || 0) - (item.price || 0) }));
+                  setInventory(prev => [...prev, item]);
+                  
+                  // Remove from shop
+                  const newShopItems = shopkeeper.shopItems.filter((_, i) => i !== selectedItemIndex);
+                  setEnemies(prev => prev.map(e => e.id === shopkeeper.id ? { ...e, shopItems: newShopItems } : e));
+                  
+                  addLog(`${getItemName(item)}を買った！`, C2);
+                  audioService.playSound('buff');
+                  if (newShopItems.length === 0) setShopState(prev => ({ ...prev, active: false }));
+                  else setSelectedItemIndex(prev => Math.min(prev, newShopItems.length - 1));
+              } else {
+                  addLog("持ち物がいっぱいだ！", "red");
+                  audioService.playSound('wrong');
+              }
+          } else {
+              addLog("お金が足りない！", "red");
+              audioService.playSound('wrong');
+          }
+      } else {
+          // SELL
+          if (inventory.length === 0) return;
+          const item = inventory[selectedItemIndex];
+          if (!item) return;
+          
+          // Cannot sell equipped items directly (simple safeguard)
+          if (player.equipment?.weapon === item || player.equipment?.armor === item || player.equipment?.ranged === item) {
+              addLog("装備中のアイテムは売れません。", "red");
+              audioService.playSound('wrong');
+              return;
+          }
+
+          const sellPrice = Math.max(1, Math.floor((item.value || 100) / 2));
+          setPlayer(p => ({ ...p, gold: (p.gold || 0) + sellPrice }));
+          setInventory(prev => prev.filter((_, i) => i !== selectedItemIndex));
+          addLog(`${getItemName(item)}を${sellPrice}円で売った。`, C2);
+          audioService.playSound('select');
+          setSelectedItemIndex(prev => Math.max(0, Math.min(prev, inventory.length - 2)));
+      }
   };
 
   const triggerPlayerAttackAnim = (dir: Direction) => {
@@ -610,12 +727,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       targets.forEach(t => {
           let dmg = Math.max(1, player.attack - t.defense);
           
-          // Special Effects based on Type
           const wType = player.equipment?.weapon?.type;
           if (wType === 'OFUDA_RULER' && t.enemyType === 'GHOST') { dmg = Math.floor(dmg * 1.5); addLog("成仏！", "yellow"); }
           if (wType === 'VITAMIN_INJECT' && t.enemyType === 'DRAIN') { dmg = Math.floor(dmg * 1.5); addLog("特効！", "yellow"); }
-          if (wType === 'STAINLESS_PEN' && t.enemyType === 'METAL') { dmg = 1; } // Should pierce? Or just regular.
-          if (wType === 'RICH_WATCH' && player.xp > 0) { dmg += 10; setPlayer(p => ({...p, xp: Math.max(0, p.xp - 10)})); } 
+          if (wType === 'STAINLESS_PEN' && t.enemyType === 'METAL') { dmg = 1; }
+          if (wType === 'RICH_WATCH' && player.gold && player.gold >= 10) { dmg += 10; setPlayer(p => ({...p, gold: (p.gold||0) - 10})); } 
           
           if (Math.random() < 0.1) { dmg *= 2; addLog("会心の一撃！", "red"); triggerShake(5); }
 
@@ -715,6 +831,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           const attackingEnemyIds: number[] = [];
 
           for (const e of prevEnemies) {
+              if (e.enemyType === 'SHOPKEEPER') { occupied.add(`${e.x},${e.y}`); nextEnemies.push(e); continue; }
+
               if (e.status.sleep > 0) { e.status.sleep--; nextEnemies.push(e); occupied.add(`${e.x},${e.y}`); addVisualEffect('TEXT', e.x, e.y, {value:'Zzz', color:'blue'}); continue; }
               if (e.status.frozen > 0) { e.status.frozen--; nextEnemies.push(e); occupied.add(`${e.x},${e.y}`); continue; }
               
@@ -786,6 +904,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   // --- ACTIONS ---
   
   const fireRangedWeapon = () => {
+      if (menuOpen || shopState.active) return;
       const rangedItem = player.equipment?.ranged;
       if (!rangedItem) {
           addLog("飛び道具を装備していない！");
@@ -843,6 +962,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const handleActionBtn = () => {
       if (gameOver) { startNewGame(); return; }
       if (gameClear) return;
+      if (shopState.active) { handleShopAction(); return; }
       if (menuOpen) {
           if (synthState.active) handleSynthesisStep();
           else if (inventory.length > 0) handleItemAction(selectedItemIndex);
@@ -851,7 +971,18 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       const tx = player.x + player.dir.x;
       const ty = player.y + player.dir.y;
       const target = enemies.find(e => e.x === tx && e.y === ty);
-      if (target) { attackEnemy(target); processTurn(player.x, player.y); return; }
+      if (target) { 
+          if (target.enemyType === 'SHOPKEEPER') {
+              addLog("「へいらっしゃい！何にする？」", C2);
+              setShopState({ active: true, merchantId: target.id, mode: 'BUY' });
+              setSelectedItemIndex(0);
+              audioService.playSound('select');
+          } else {
+              attackEnemy(target);
+              processTurn(player.x, player.y);
+          }
+          return;
+      }
       if (map[player.y][player.x] === 'STAIRS') { addLog("階段を降りた！"); setFloor(f => f + 1); generateFloor(floor + 1); return; }
       triggerPlayerAttackAnim(player.dir);
       addVisualEffect('SLASH', tx, ty, { dir: player.dir });
@@ -862,7 +993,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
   // --- LONG PRESS LOGIC (FAST FORWARD) ---
   const handlePressStart = () => {
-      if (menuOpen || gameOver || gameClear) return;
+      if (menuOpen || shopState.active || gameOver || gameClear) return;
       // Start waiting detection
       fastForwardInterval.current = setTimeout(() => {
           setIsFastForwarding(true);
@@ -885,7 +1016,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   // Fast Forward Loop
   useEffect(() => {
       let interval: any = null;
-      if (isFastForwarding && !gameOver && !gameClear && !menuOpen) {
+      if (isFastForwarding && !gameOver && !gameClear && !menuOpen && !shopState.active) {
           interval = setInterval(() => {
               // Safety check: Stop if enemies nearby
               const nearby = enemies.some(e => Math.abs(e.x - player.x) <= 2 && Math.abs(e.y - player.y) <= 2);
@@ -896,8 +1027,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               }
               // Stop if full HP and hunger is ok
               if (player.hp >= player.maxHp && belly > 20) {
-                  // Keep going to heal? Usually yes. But maybe stop if full.
-                  // Actually standard rogue behavior is stop on enemy or full health.
                   if (player.hp === player.maxHp) {
                       setIsFastForwarding(false);
                       addLog("HPが回復した。", C2);
@@ -920,6 +1049,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
 
   const toggleMenu = () => {
+      if (shopState.active) {
+          setShopState(prev => ({ ...prev, active: false }));
+          return;
+      }
       if (menuOpen) {
           setMenuOpen(false);
           setSynthState({ active: false, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null });
@@ -1393,13 +1526,17 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         if (gameOver) { if (['z', 'Enter', ' '].includes(e.key)) startNewGame(); return; }
         if (gameClear) { if (['z', 'Enter', ' '].includes(e.key)) startEndlessMode(); return; }
         if (['x', 'c', 'Escape'].includes(e.key)) { toggleMenu(); return; }
-        if (menuOpen && (e.key === 'Backspace' || e.key === 'x')) {
+        if ((menuOpen || shopState.active) && (e.key === 'Backspace' || e.key === 'x')) {
+            if (shopState.active) { setShopState(prev => ({...prev, active: false})); return; }
             if (synthState.active) { setSynthState({ active: false, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null }); } else { setMenuOpen(false); }
             return;
         }
-        if (menuOpen) {
+        if (menuOpen || shopState.active) {
+            const listLength = shopState.active && shopState.mode === 'BUY' 
+                ? (enemies.find(e=>e.id===shopState.merchantId)?.shopItems?.length||0) 
+                : inventory.length;
             if (e.key === 'ArrowUp') setSelectedItemIndex(prev => Math.max(0, prev - 1));
-            if (e.key === 'ArrowDown') setSelectedItemIndex(prev => Math.min(inventory.length - 1, prev + 1));
+            if (e.key === 'ArrowDown') setSelectedItemIndex(prev => Math.min(listLength - 1, prev + 1));
             if (e.key === 'z' || e.key === 'Enter' || e.key === ' ') handleActionBtn();
             return;
         }
@@ -1418,7 +1555,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [player, map, enemies, floorItems, menuOpen, gameOver, gameClear, inventory, selectedItemIndex, synthState]);
+  }, [player, map, enemies, floorItems, menuOpen, gameOver, gameClear, inventory, selectedItemIndex, synthState, shopState]);
 
   // --- RENDER LOOP ---
   const frameCountRef = useRef(0);
@@ -1489,13 +1626,18 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
               const item = floorItems.find(i => i.x === mx && i.y === my);
               if (item) {
-                  const cat = item.itemData?.category;
                   let spriteKey = 'CONSUMABLE';
-                  if (cat === 'WEAPON') spriteKey = 'WEAPON';
-                  if (cat === 'ARMOR') spriteKey = 'ARMOR';
-                  if (cat === 'RANGED') spriteKey = 'RANGED';
-                  if (cat === 'STAFF') spriteKey = 'STAFF';
-                  if (item.itemData?.type === 'POT_GLUE') spriteKey = 'SYNTH';
+                  if (item.type === 'GOLD') {
+                      spriteKey = 'COIN';
+                  } else if (item.itemData) {
+                      const cat = item.itemData.category;
+                      if (cat === 'WEAPON') spriteKey = 'WEAPON';
+                      if (cat === 'ARMOR') spriteKey = 'ARMOR';
+                      if (cat === 'RANGED') spriteKey = 'RANGED';
+                      if (cat === 'STAFF') spriteKey = 'STAFF';
+                      if (item.itemData.type === 'POT_GLUE') spriteKey = 'SYNTH';
+                  }
+                  
                   const sprite = spriteCache.current[spriteKey];
                   if (sprite) {
                       ctx.drawImage(sprite, sx, sy, ts, ts);
@@ -1587,14 +1729,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               }
           }
           else if (fx.type === 'BEAM') {
-              // Simple beam drawing, directional? For now just red circle/line
               if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
                   ctx.strokeStyle = fx.color || 'red';
                   ctx.lineWidth = 5;
                   ctx.beginPath();
                   ctx.moveTo(sx + ts/2, sy + ts/2);
-                  // Assume dir is player dir or generic
-                  // Just draw a circle burst for now
                   ctx.arc(sx + ts/2, sy + ts/2, 20, 0, Math.PI*2);
                   ctx.stroke();
               }
@@ -1681,6 +1820,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                 <li><strong className="text-red-700">傘(杖)</strong>は振ると魔法が出ますが、回数制限があります。使い切ったら投げましょう。</li>
                                 <li>「工作のり」を使うと、装備を合成して強くできます。</li>
                                 <li>敵に囲まれたら通路に逃げ込みましょう。</li>
+                                <li>まれに購買部員(店)が現れます。アイテム売買が可能です。</li>
                             </ul>
                         </section>
                     </div>
@@ -1706,7 +1846,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                         <span>{floor}F</span>
                         <span>Lv{level}</span>
                         <span>HP{player.hp}/{player.maxHp}</span>
-                        <span>A{player.attack} D{player.defense}</span>
+                        <span className="flex items-center"><Coins size={10} className="mr-0.5"/>{player.gold}</span>
                         <span>🍙{belly}%</span>
                     </div>
 
@@ -1729,6 +1869,88 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                 )))}
                             </div>
                             <button onClick={() => setShowMap(false)} className="absolute bottom-4 text-[#9bbc0f] border border-[#9bbc0f] px-2 rounded hover:bg-[#306230]">Close</button>
+                        </div>
+                    )}
+
+                    {/* Shop Menu */}
+                    {shopState.active && (
+                        <div className="absolute right-0 top-0 bottom-0 w-3/4 bg-[#0f380f] border-l-2 border-[#9bbc0f] z-30 p-2 text-[#9bbc0f] text-xs flex flex-col">
+                            <div className="flex justify-between items-center border-b border-[#9bbc0f] mb-2 pb-1">
+                                <h3 className="font-bold flex items-center"><ShoppingBag size={12} className="mr-1"/> 購買部</h3>
+                                <button onClick={() => setShopState(prev => ({...prev, active: false}))}><X size={12}/></button>
+                            </div>
+                            
+                            <div className="flex gap-2 mb-2">
+                                <button 
+                                    className={`flex-1 py-1 text-center border ${shopState.mode === 'BUY' ? 'bg-[#9bbc0f] text-[#0f380f]' : 'border-[#9bbc0f]'}`}
+                                    onClick={() => { setShopState(prev => ({ ...prev, mode: 'BUY' })); setSelectedItemIndex(0); }}
+                                >
+                                    買う
+                                </button>
+                                <button 
+                                    className={`flex-1 py-1 text-center border ${shopState.mode === 'SELL' ? 'bg-[#9bbc0f] text-[#0f380f]' : 'border-[#9bbc0f]'}`}
+                                    onClick={() => { setShopState(prev => ({ ...prev, mode: 'SELL' })); setSelectedItemIndex(0); }}
+                                >
+                                    売る
+                                </button>
+                            </div>
+
+                            <div className="flex justify-end mb-2 border-b border-[#306230] pb-1">
+                                <span className="flex items-center"><Coins size={10} className="mr-1"/> {player.gold} G</span>
+                            </div>
+
+                            <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar">
+                                {shopState.mode === 'BUY' ? (
+                                    enemies.find(e => e.id === shopState.merchantId)?.shopItems?.map((item, i) => (
+                                        <div 
+                                            key={i} 
+                                            className={`flex items-center border ${selectedItemIndex === i ? 'bg-[#8bac0f] text-[#0f380f] border-[#9bbc0f]' : 'border-transparent hover:border-[#9bbc0f]'}`}
+                                            onMouseEnter={() => setSelectedItemIndex(i)}
+                                        >
+                                            <button 
+                                                className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center"
+                                                onClick={() => handleShopAction()}
+                                            >
+                                                <span>{getItemName(item)}</span>
+                                                <span className="flex items-center gap-1">
+                                                    {item.price} G
+                                                </span>
+                                            </button>
+                                            <button 
+                                                className="px-2 py-1 border-l border-[#306230] hover:bg-[#306230] hover:text-[#9bbc0f] flex items-center justify-center"
+                                                onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}
+                                            >
+                                                <Info size={10} />
+                                            </button>
+                                        </div>
+                                    )) || <div className="text-center">売り切れ</div>
+                                ) : (
+                                    inventory.map((item, i) => (
+                                        <div 
+                                            key={i} 
+                                            className={`flex items-center border ${selectedItemIndex === i ? 'bg-[#8bac0f] text-[#0f380f] border-[#9bbc0f]' : 'border-transparent hover:border-[#9bbc0f]'}`}
+                                            onMouseEnter={() => setSelectedItemIndex(i)}
+                                        >
+                                            <button 
+                                                className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center"
+                                                onClick={() => handleShopAction()}
+                                            >
+                                                <span>{getItemName(item)}</span>
+                                                <span className="flex items-center gap-1">
+                                                    {Math.floor((item.price || (item.value || 100)) / 2)} G
+                                                </span>
+                                            </button>
+                                            <button 
+                                                className="px-2 py-1 border-l border-[#306230] hover:bg-[#306230] hover:text-[#9bbc0f] flex items-center justify-center"
+                                                onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}
+                                            >
+                                                <Info size={10} />
+                                            </button>
+                                        </div>
+                                    ))
+                                )}
+                                {shopState.mode === 'SELL' && inventory.length === 0 && <div className="text-center">持ち物なし</div>}
+                            </div>
                         </div>
                     )}
 
@@ -1889,6 +2111,17 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                 <div className="absolute w-8 h-8 bg-[#2a2a2a] rounded-full z-20 shadow-inner"></div>
             </div>
 
+            {/* Ranged Button - Moved Higher */}
+            <div className="absolute right-20 top-1/2 -translate-y-[100px] md:right-24 md:-translate-y-24 flex flex-col items-center z-10 group">
+                <button 
+                    className="w-10 h-10 bg-[#333] rounded-full shadow-[0_2px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555] touch-none select-none" 
+                    onClick={fireRangedWeapon}
+                >
+                    <Crosshair size={16}/>
+                </button>
+                <span className="text-[#666] text-[10px] font-bold mt-1">SHOOT</span>
+            </div>
+
             <div className="absolute right-2 top-1/2 -translate-y-1/2 md:right-auto md:left-1/2 md:-translate-x-1/2 md:top-3/4 flex gap-4 transform -rotate-12 md:rotate-0">
                 <div className="flex flex-col items-center group">
                     <button className="w-14 h-14 bg-[#8b0000] rounded-full shadow-[0_4px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000] touch-none select-none" onClick={toggleMenu}>B</button>
@@ -1907,17 +2140,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                     </button>
                     <span className="text-[#666] text-xs font-bold mt-1">ACT</span>
                 </div>
-            </div>
-
-            {/* Ranged Button - Moved between A/B and above */}
-            <div className="absolute right-20 bottom-24 md:right-24 md:bottom-28 flex flex-col items-center z-10">
-                <button 
-                    className="w-10 h-10 bg-[#333] rounded-full shadow-[0_2px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555] touch-none select-none" 
-                    onClick={fireRangedWeapon}
-                >
-                    <Crosshair size={16}/>
-                </button>
-                <span className="text-[#666] text-[10px] font-bold mt-1">RNG</span>
             </div>
 
             <div className="absolute bottom-2 left-1/2 -translate-x-1/2 md:bottom-4">
