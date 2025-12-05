@@ -1295,7 +1295,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   };
 
   return (
-    <div className="w-full h-full bg-[#101010] flex flex-col items-center font-mono select-none overflow-hidden touch-none relative p-4">
+    <div className="w-full h-full bg-[#101010] flex flex-col md:flex-row items-center justify-center font-mono select-none overflow-hidden touch-none relative p-4 gap-4">
         
         {/* Inspection Modal */}
         {inspectedItem && (
@@ -1316,179 +1316,182 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             </div>
         )}
 
-        {/* Game Screen Area */}
-        <div className="w-full max-w-md aspect-[11/9] relative mb-2 shrink-0">
-             {/* LCD Screen (Green) */}
-             <div className="w-full h-full bg-[#9bbc0f] border-4 border-[#0f380f] relative overflow-hidden shadow-lg rounded-sm">
-                
-                {/* Equipment Status Bar (Top) */}
-                <div className="absolute top-0 left-0 w-full h-8 bg-[#0f380f] text-[#9bbc0f] flex justify-between items-center px-2 text-[10px] z-10 border-b border-[#306230]">
-                    <div className="flex gap-2">
-                        <span className="flex items-center"><Sword size={8} className="mr-1"/>{player.equipment?.weapon?.name || '-'}</span>
-                        <span className="flex items-center"><Shield size={8} className="mr-1"/>{player.equipment?.armor?.name || '-'}</span>
-                        <span className="flex items-center"><Target size={8} className="mr-1"/>{player.equipment?.ranged?.name || '-'}</span>
-                    </div>
-                </div>
-
-                {/* Main Status Bar (Bottom of Top) */}
-                <div className="absolute top-8 left-0 w-full h-5 bg-[#306230] text-[#9bbc0f] flex justify-between items-center px-2 text-xs font-bold z-10">
-                    <span>{floor}F</span>
-                    <span>Lv{level}</span>
-                    <span>HP{player.hp}/{player.maxHp}</span>
-                    <span>Atk{player.attack} Def{player.defense}</span>
-                    <span>🍙{belly}%</span>
-                </div>
-
-                {/* Canvas Layer */}
-                <canvas 
-                    ref={canvasRef} 
-                    width={VIEW_W * TILE_SIZE * SCALE} 
-                    height={VIEW_H * TILE_SIZE * SCALE}
-                    className="w-full h-full object-contain pixel-art mt-6" 
-                    style={{ imageRendering: 'pixelated' }}
-                />
-
-                {/* Map Overlay */}
-                {showMap && map.length > 0 && (
-                    <div className="absolute inset-0 bg-[#0f380f]/90 z-20 flex items-center justify-center p-8 mt-12">
-                        <div className="w-full h-full border border-[#9bbc0f] grid" style={{ gridTemplateColumns: `repeat(${MAP_W}, 1fr)` }}>
-                            {map.map((row, y) => row.map((tile, x) => (
-                                <div key={`${x}-${y}`} className={`${tile === 'WALL' ? 'bg-transparent' : (tile === 'STAIRS' ? 'bg-[#9bbc0f]' : 'bg-[#306230]')}`}>
-                                    {x === player.x && y === player.y && <div className="w-full h-full bg-white rounded-full animate-pulse"></div>}
-                                </div>
-                            )))}
+        {/* LEFT COLUMN: Screen + Log */}
+        <div className="w-full max-w-md flex flex-col items-center gap-2">
+            {/* Game Screen Area */}
+            <div className="w-full aspect-[11/9] relative shrink-0">
+                {/* LCD Screen (Green) */}
+                <div className="w-full h-full bg-[#9bbc0f] border-4 border-[#0f380f] relative overflow-hidden shadow-lg rounded-sm">
+                    
+                    {/* Equipment Status Bar (Top) */}
+                    <div className="absolute top-0 left-0 w-full h-8 bg-[#0f380f] text-[#9bbc0f] flex justify-between items-center px-2 text-[10px] z-10 border-b border-[#306230]">
+                        <div className="flex gap-2">
+                            <span className="flex items-center"><Sword size={8} className="mr-1"/>{player.equipment?.weapon?.name || '-'}</span>
+                            <span className="flex items-center"><Shield size={8} className="mr-1"/>{player.equipment?.armor?.name || '-'}</span>
+                            <span className="flex items-center"><Target size={8} className="mr-1"/>{player.equipment?.ranged?.name || '-'}</span>
                         </div>
-                        <button onClick={() => setShowMap(false)} className="absolute bottom-4 text-[#9bbc0f] border border-[#9bbc0f] px-2 rounded hover:bg-[#306230]">Close</button>
                     </div>
-                )}
 
-                {/* Inventory Menu */}
-                {menuOpen && (
-                    <div className="absolute right-0 top-0 bottom-0 w-3/4 bg-[#0f380f] border-l-2 border-[#9bbc0f] z-30 p-2 text-[#9bbc0f] text-xs flex flex-col">
-                        <div className="flex justify-between items-center border-b border-[#9bbc0f] mb-2 pb-1">
-                            <h3 className="font-bold">
-                                {synthState.active 
-                                    ? (synthState.step === 'SELECT_BASE' ? (synthState.mode==='CHANGE'?'変化させる物':'ベースを選択') : (synthState.mode==='CHANGE'?'変化':'素材を選択'))
-                                    : `MOCHIMONO (${inventory.length}/${MAX_INVENTORY})`
-                                }
-                            </h3>
-                            <button onClick={toggleMenu}><X size={12}/></button>
-                        </div>
-                        
-                        {!synthState.active && (
-                            <div className="mb-2 border-b border-[#306230] pb-2">
-                                <div className="text-[#8bac0f] mb-1">装備中:</div>
-                                {player.equipment?.weapon && <div onClick={()=>handleUnequip('weapon')} className="cursor-pointer hover:text-white">[武] {player.equipment.weapon.name}</div>}
-                                {player.equipment?.armor && <div onClick={()=>handleUnequip('armor')} className="cursor-pointer hover:text-white">[防] {player.equipment.armor.name}</div>}
-                                {player.equipment?.ranged && <div onClick={()=>handleUnequip('ranged')} className="cursor-pointer hover:text-white">[投] {player.equipment.ranged.name}</div>}
+                    {/* Main Status Bar (Bottom of Top) */}
+                    <div className="absolute top-8 left-0 w-full h-5 bg-[#306230] text-[#9bbc0f] flex justify-between items-center px-2 text-xs font-bold z-10">
+                        <span>{floor}F</span>
+                        <span>Lv{level}</span>
+                        <span>HP{player.hp}/{player.maxHp}</span>
+                        <span>Atk{player.attack} Def{player.defense}</span>
+                        <span>🍙{belly}%</span>
+                    </div>
+
+                    {/* Canvas Layer */}
+                    <canvas 
+                        ref={canvasRef} 
+                        width={VIEW_W * TILE_SIZE * SCALE} 
+                        height={VIEW_H * TILE_SIZE * SCALE}
+                        className="w-full h-full object-contain pixel-art mt-6" 
+                        style={{ imageRendering: 'pixelated' }}
+                    />
+
+                    {/* Map Overlay */}
+                    {showMap && map.length > 0 && (
+                        <div className="absolute inset-0 bg-[#0f380f]/90 z-20 flex items-center justify-center p-8 mt-12">
+                            <div className="w-full h-full border border-[#9bbc0f] grid" style={{ gridTemplateColumns: `repeat(${MAP_W}, 1fr)` }}>
+                                {map.map((row, y) => row.map((tile, x) => (
+                                    <div key={`${x}-${y}`} className={`${tile === 'WALL' ? 'bg-transparent' : (tile === 'STAIRS' ? 'bg-[#9bbc0f]' : 'bg-[#306230]')}`}>
+                                        {x === player.x && y === player.y && <div className="w-full h-full bg-white rounded-full animate-pulse"></div>}
+                                    </div>
+                                )))}
                             </div>
-                        )}
+                            <button onClick={() => setShowMap(false)} className="absolute bottom-4 text-[#9bbc0f] border border-[#9bbc0f] px-2 rounded hover:bg-[#306230]">Close</button>
+                        </div>
+                    )}
 
-                        <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar">
-                            {inventory.map((item, i) => {
-                                const isSynthTarget = synthState.active && (
-                                    (synthState.step === 'SELECT_BASE' && synthState.mode === 'SYNTH' && !['WEAPON','ARMOR'].includes(item.category)) ||
-                                    (synthState.step === 'SELECT_MAT' && synthState.baseIndex === i)
-                                );
-                                
-                                return (
-                                    <div 
-                                        key={i} 
-                                        className={`flex items-center border ${selectedItemIndex === i ? 'bg-[#8bac0f] text-[#0f380f] border-[#9bbc0f]' : 'border-transparent hover:border-[#9bbc0f]'} ${isSynthTarget ? 'opacity-30' : ''}`}
-                                        onContextMenu={(e) => { e.preventDefault(); setInspectedItem(item); }}
-                                        onTouchStart={() => handleTouchStart(item)}
-                                        onTouchEnd={handleTouchEnd}
-                                    >
-                                        <button 
-                                            className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center"
-                                            onClick={() => !isSynthTarget && (synthState.active ? handleSynthesisStep() : handleItemAction(i))}
-                                            onMouseEnter={() => setSelectedItemIndex(i)}
+                    {/* Inventory Menu */}
+                    {menuOpen && (
+                        <div className="absolute right-0 top-0 bottom-0 w-3/4 bg-[#0f380f] border-l-2 border-[#9bbc0f] z-30 p-2 text-[#9bbc0f] text-xs flex flex-col">
+                            <div className="flex justify-between items-center border-b border-[#9bbc0f] mb-2 pb-1">
+                                <h3 className="font-bold">
+                                    {synthState.active 
+                                        ? (synthState.step === 'SELECT_BASE' ? (synthState.mode==='CHANGE'?'変化させる物':'ベースを選択') : (synthState.mode==='CHANGE'?'変化':'素材を選択'))
+                                        : `MOCHIMONO (${inventory.length}/${MAX_INVENTORY})`
+                                    }
+                                </h3>
+                                <button onClick={toggleMenu}><X size={12}/></button>
+                            </div>
+                            
+                            {!synthState.active && (
+                                <div className="mb-2 border-b border-[#306230] pb-2">
+                                    <div className="text-[#8bac0f] mb-1">装備中:</div>
+                                    {player.equipment?.weapon && <div onClick={()=>handleUnequip('weapon')} className="cursor-pointer hover:text-white">[武] {player.equipment.weapon.name}</div>}
+                                    {player.equipment?.armor && <div onClick={()=>handleUnequip('armor')} className="cursor-pointer hover:text-white">[防] {player.equipment.armor.name}</div>}
+                                    {player.equipment?.ranged && <div onClick={()=>handleUnequip('ranged')} className="cursor-pointer hover:text-white">[投] {player.equipment.ranged.name}</div>}
+                                </div>
+                            )}
+
+                            <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar">
+                                {inventory.map((item, i) => {
+                                    const isSynthTarget = synthState.active && (
+                                        (synthState.step === 'SELECT_BASE' && synthState.mode === 'SYNTH' && !['WEAPON','ARMOR'].includes(item.category)) ||
+                                        (synthState.step === 'SELECT_MAT' && synthState.baseIndex === i)
+                                    );
+                                    
+                                    return (
+                                        <div 
+                                            key={i} 
+                                            className={`flex items-center border ${selectedItemIndex === i ? 'bg-[#8bac0f] text-[#0f380f] border-[#9bbc0f]' : 'border-transparent hover:border-[#9bbc0f]'} ${isSynthTarget ? 'opacity-30' : ''}`}
+                                            onContextMenu={(e) => { e.preventDefault(); setInspectedItem(item); }}
+                                            onTouchStart={() => handleTouchStart(item)}
+                                            onTouchEnd={handleTouchEnd}
                                         >
-                                            <span>
-                                                {item.name} 
-                                                {item.plus ? `+${item.plus}` : ''} 
-                                                {item.count ? `(${item.count})` : ''}
-                                                {item.effects && item.effects.length > 0 && <span className="ml-1 text-[9px]">[{item.effects.join('')}]</span>}
-                                            </span>
-                                            <span className={`text-[9px] ${selectedItemIndex === i ? 'text-[#0f380f]' : 'text-[#8bac0f]'}`}>
-                                                {synthState.active 
-                                                    ? '選択' 
-                                                    : (['WEAPON','ARMOR','RANGED'].includes(item.category) ? '装備' : '使う')
-                                                }
-                                            </span>
-                                        </button>
-                                        {!synthState.active && (
+                                            <button 
+                                                className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center"
+                                                onClick={() => !isSynthTarget && (synthState.active ? handleSynthesisStep() : handleItemAction(i))}
+                                                onMouseEnter={() => setSelectedItemIndex(i)}
+                                            >
+                                                <span>
+                                                    {item.name} 
+                                                    {item.plus ? `+${item.plus}` : ''} 
+                                                    {item.count ? `(${item.count})` : ''}
+                                                    {item.effects && item.effects.length > 0 && <span className="ml-1 text-[9px]">[{item.effects.join('')}]</span>}
+                                                </span>
+                                                <span className={`text-[9px] ${selectedItemIndex === i ? 'text-[#0f380f]' : 'text-[#8bac0f]'}`}>
+                                                    {synthState.active 
+                                                        ? '選択' 
+                                                        : (['WEAPON','ARMOR','RANGED'].includes(item.category) ? '装備' : '使う')
+                                                    }
+                                                </span>
+                                            </button>
+                                            {!synthState.active && (
+                                                <button 
+                                                    className="px-2 py-1 border-l border-[#306230] hover:bg-[#306230] hover:text-[#9bbc0f] flex items-center justify-center"
+                                                    onClick={(e) => { e.stopPropagation(); handleDropItem(i); }}
+                                                    title="足元に置く"
+                                                >
+                                                    <ArrowDown size={10} />
+                                                </button>
+                                            )}
                                             <button 
                                                 className="px-2 py-1 border-l border-[#306230] hover:bg-[#306230] hover:text-[#9bbc0f] flex items-center justify-center"
-                                                onClick={(e) => { e.stopPropagation(); handleDropItem(i); }}
-                                                title="足元に置く"
+                                                onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}
+                                                title="詳細"
                                             >
-                                                <ArrowDown size={10} />
+                                                <Info size={10} />
                                             </button>
-                                        )}
-                                        <button 
-                                            className="px-2 py-1 border-l border-[#306230] hover:bg-[#306230] hover:text-[#9bbc0f] flex items-center justify-center"
-                                            onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}
-                                            title="詳細"
-                                        >
-                                            <Info size={10} />
-                                        </button>
-                                    </div>
-                                );
-                            })}
-                            {inventory.length === 0 && <span className="text-[#306230] text-center">Empty</span>}
+                                        </div>
+                                    );
+                                })}
+                                {inventory.length === 0 && <span className="text-[#306230] text-center">Empty</span>}
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {/* Game Clear Overlay */}
-                {gameClear && (
-                    <div className="absolute inset-0 bg-[#0f380f]/95 flex flex-col items-center justify-center text-[#9bbc0f] z-40 p-4 text-center">
-                        <Award size={48} className="mb-4 text-[#8bac0f]"/>
-                        <h2 className="text-2xl font-bold mb-4">GRADUATION!</h2>
-                        <p className="mb-2">ついに校長を説得した！</p>
-                        <p className="mb-8">君は伝説の小学生となった。</p>
-                        <div className="flex flex-col gap-4 w-full">
-                            <button onClick={startEndlessMode} className="border-2 border-[#9bbc0f] px-4 py-3 hover:bg-[#306230] animate-pulse font-bold">
-                                中学生編へ (エンドレス)
+                    {/* Game Clear Overlay */}
+                    {gameClear && (
+                        <div className="absolute inset-0 bg-[#0f380f]/95 flex flex-col items-center justify-center text-[#9bbc0f] z-40 p-4 text-center">
+                            <Award size={48} className="mb-4 text-[#8bac0f]"/>
+                            <h2 className="text-2xl font-bold mb-4">GRADUATION!</h2>
+                            <p className="mb-2">ついに校長を説得した！</p>
+                            <p className="mb-8">君は伝説の小学生となった。</p>
+                            <div className="flex flex-col gap-4 w-full">
+                                <button onClick={startEndlessMode} className="border-2 border-[#9bbc0f] px-4 py-3 hover:bg-[#306230] animate-pulse font-bold">
+                                    中学生編へ (エンドレス)
+                                </button>
+                                <button onClick={onBack} className="border-2 border-[#306230] px-4 py-2 hover:bg-[#306230] text-sm">
+                                    タイトルへ戻る
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Game Over Overlay */}
+                    {gameOver && (
+                        <div className="absolute inset-0 bg-[#0f380f]/90 flex flex-col items-center justify-center text-[#9bbc0f] z-40">
+                            <Skull size={48} className="mb-4 text-[#306230]"/>
+                            <h2 className="text-2xl font-bold mb-4">GAME OVER</h2>
+                            <p>Floor: {floor}</p>
+                            <p>Level: {level}</p>
+                            <button onClick={startNewGame} className="mt-6 border-2 border-[#9bbc0f] px-4 py-2 hover:bg-[#306230] animate-pulse flex items-center">
+                                <RotateCcw size={16} className="mr-2"/> RETRY
                             </button>
-                            <button onClick={onBack} className="border-2 border-[#306230] px-4 py-2 hover:bg-[#306230] text-sm">
-                                タイトルへ戻る
+                            <button onClick={onBack} className="mt-4 text-sm hover:underline">
+                                EXIT
                             </button>
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
+            </div>
 
-                {/* Game Over Overlay */}
-                {gameOver && (
-                    <div className="absolute inset-0 bg-[#0f380f]/90 flex flex-col items-center justify-center text-[#9bbc0f] z-40">
-                        <Skull size={48} className="mb-4 text-[#306230]"/>
-                        <h2 className="text-2xl font-bold mb-4">GAME OVER</h2>
-                        <p>Floor: {floor}</p>
-                        <p>Level: {level}</p>
-                        <button onClick={startNewGame} className="mt-6 border-2 border-[#9bbc0f] px-4 py-2 hover:bg-[#306230] animate-pulse flex items-center">
-                            <RotateCcw size={16} className="mr-2"/> RETRY
-                        </button>
-                        <button onClick={onBack} className="mt-4 text-sm hover:underline">
-                            EXIT
-                        </button>
-                    </div>
-                )}
-             </div>
+            {/* Log Area */}
+            <div className="w-full bg-[#0f380f] text-[#9bbc0f] h-24 p-1 text-[10px] mb-2 rounded border-2 border-[#306230] font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner overflow-hidden">
+                {logs.slice(-6).map((l) => (
+                    <div key={l.id} style={{ color: l.color || '#9bbc0f' }} className="truncate">{l.message}</div>
+                ))}
+            </div>
         </div>
 
-        {/* Log Area */}
-        <div className="w-full max-w-md bg-[#0f380f] text-[#9bbc0f] h-24 p-1 text-[10px] mb-2 rounded border-2 border-[#306230] font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner overflow-hidden">
-            {logs.slice(-6).map((l) => (
-                <div key={l.id} style={{ color: l.color || '#9bbc0f' }} className="truncate">{l.message}</div>
-            ))}
-        </div>
-
-        {/* Controls Area */}
-        <div className="w-full max-w-md flex-grow relative min-h-[180px] bg-[#1a1a1a] rounded-t-xl border-t-2 border-[#333]">
+        {/* RIGHT COLUMN (Controls) */}
+        <div className="w-full max-w-md md:w-64 md:h-[400px] flex-grow md:flex-grow-0 relative min-h-[180px] bg-[#1a1a1a] rounded-t-xl md:rounded-xl border-t-2 md:border-2 border-[#333]">
             
             {/* Unified D-Pad */}
-            <div className="absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32 flex items-center justify-center">
+            <div className="absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32 md:left-1/2 md:-translate-x-1/2 md:top-1/3 flex items-center justify-center">
                 {/* Center */}
                 <div className="w-10 h-10 bg-[#333] z-10"></div>
                 
@@ -1524,7 +1527,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             </div>
 
             {/* A/B Buttons */}
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-4 transform -rotate-12">
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 md:right-auto md:left-1/2 md:-translate-x-1/2 md:top-3/4 flex gap-4 transform -rotate-12 md:rotate-0">
                 <div className="flex flex-col items-center group">
                     <button 
                         className="w-14 h-14 bg-[#8b0000] rounded-full shadow-[0_4px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000]"
@@ -1534,7 +1537,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                     </button>
                     <span className="text-[#666] text-xs font-bold mt-1">MENU</span>
                 </div>
-                <div className="flex flex-col items-center mt-[-15px] group">
+                <div className="flex flex-col items-center mt-[-15px] md:mt-0 group">
                     <button 
                         className="w-14 h-14 bg-[#ff0000] rounded-full shadow-[0_4px_0_#8b0000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#cc0000]"
                         onClick={handleActionBtn}
@@ -1546,7 +1549,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             </div>
 
             {/* Quit Button */}
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2">
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 md:bottom-4">
                  <button onClick={onBack} className="text-[#555] text-[10px] font-bold border border-[#333] px-3 py-1 rounded bg-[#222] hover:text-white hover:border-gray-500 flex items-center gap-1">
                     <LogOut size={10}/> QUIT
                  </button>
