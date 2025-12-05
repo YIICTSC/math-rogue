@@ -383,6 +383,14 @@ export interface SurvivorScoreEntry {
     weapons: string[]; // IDs of weapons
 }
 
+export interface DungeonScoreEntry {
+    id: string;
+    date: number;
+    floor: number;
+    level: number;
+    cause: string;
+}
+
 export interface GameState {
   screen: GameScreen;
   mode: GameMode; 

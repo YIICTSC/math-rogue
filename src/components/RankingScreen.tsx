@@ -1,8 +1,8 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, ScrollText, Calendar, Skull, Trophy, Club, Swords, Timer, Zap } from 'lucide-react';
-import { RankingEntry, PokerScoreEntry, SurvivorScoreEntry } from '../types';
+import { ArrowLeft, ScrollText, Calendar, Skull, Trophy, Club, Swords, Timer, Zap, Compass } from 'lucide-react';
+import { RankingEntry, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry } from '../types';
 import { storageService } from '../services/storageService';
 
 interface RankingScreenProps {
@@ -10,15 +10,17 @@ interface RankingScreenProps {
 }
 
 const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
-  const [activeTab, setActiveTab] = useState<'ADVENTURE' | 'POKER' | 'SURVIVOR'>('ADVENTURE');
+  const [activeTab, setActiveTab] = useState<'ADVENTURE' | 'POKER' | 'SURVIVOR' | 'DUNGEON'>('ADVENTURE');
   const [adventureData, setAdventureData] = useState<RankingEntry[]>([]);
   const [pokerData, setPokerData] = useState<PokerScoreEntry[]>([]);
   const [survivorData, setSurvivorData] = useState<SurvivorScoreEntry[]>([]);
+  const [dungeonData, setDungeonData] = useState<DungeonScoreEntry[]>([]);
 
   useEffect(() => {
       setAdventureData(storageService.getLocalScores());
       setPokerData(storageService.getPokerScores());
       setSurvivorData(storageService.getSurvivorScores());
+      setDungeonData(storageService.getDungeonScores());
   }, []);
 
   const formatDate = (ts: number) => {
@@ -40,24 +42,30 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
                 <h2 className="text-xl font-bold text-gray-100">記録 (Records)</h2>
             </div>
             
-            <div className="flex bg-gray-800 rounded p-1">
+            <div className="flex bg-gray-800 rounded p-1 overflow-x-auto max-w-full">
                 <button 
                     onClick={() => setActiveTab('ADVENTURE')}
-                    className={`flex items-center px-3 py-2 rounded text-xs md:text-sm font-bold transition-colors ${activeTab === 'ADVENTURE' ? 'bg-blue-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
+                    className={`flex items-center px-3 py-2 rounded text-xs md:text-sm font-bold transition-colors whitespace-nowrap ${activeTab === 'ADVENTURE' ? 'bg-blue-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
                 >
                     <Swords className="mr-1 md:mr-2" size={16}/> Adv
                 </button>
                 <button 
                     onClick={() => setActiveTab('POKER')}
-                    className={`flex items-center px-3 py-2 rounded text-xs md:text-sm font-bold transition-colors ${activeTab === 'POKER' ? 'bg-purple-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
+                    className={`flex items-center px-3 py-2 rounded text-xs md:text-sm font-bold transition-colors whitespace-nowrap ${activeTab === 'POKER' ? 'bg-purple-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
                 >
                     <Club className="mr-1 md:mr-2" size={16}/> Poker
                 </button>
                 <button 
                     onClick={() => setActiveTab('SURVIVOR')}
-                    className={`flex items-center px-3 py-2 rounded text-xs md:text-sm font-bold transition-colors ${activeTab === 'SURVIVOR' ? 'bg-red-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
+                    className={`flex items-center px-3 py-2 rounded text-xs md:text-sm font-bold transition-colors whitespace-nowrap ${activeTab === 'SURVIVOR' ? 'bg-red-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
                 >
                     <Skull className="mr-1 md:mr-2" size={16}/> Survivor
+                </button>
+                <button 
+                    onClick={() => setActiveTab('DUNGEON')}
+                    className={`flex items-center px-3 py-2 rounded text-xs md:text-sm font-bold transition-colors whitespace-nowrap ${activeTab === 'DUNGEON' ? 'bg-[#306230] text-[#9bbc0f] shadow' : 'text-gray-400 hover:text-white'}`}
+                >
+                    <Compass className="mr-1 md:mr-2" size={16}/> Dungeon
                 </button>
             </div>
 
@@ -222,6 +230,54 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
                                 {/* Right: Icon */}
                                 <div className="w-full md:w-32 text-right flex justify-end">
                                     <Zap size={24} className="text-gray-600" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )
+            )}
+
+            {activeTab === 'DUNGEON' && (
+                dungeonData.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+                        <Compass size={48} className="mb-4 opacity-50" />
+                        <p>風来の小学生の記録はありません。</p>
+                    </div>
+                ) : (
+                    <div className="max-w-4xl mx-auto space-y-3">
+                        {dungeonData.map((entry, idx) => (
+                            <div 
+                                key={idx} 
+                                className="flex flex-col md:flex-row items-start md:items-center p-4 rounded-lg border-l-4 border-[#306230] bg-[#0f380f] hover:bg-[#1a401a] shadow-lg transition-colors text-[#9bbc0f]"
+                            >
+                                {/* Left: Floor & Date */}
+                                <div className="flex items-center w-full md:w-48 mb-2 md:mb-0 shrink-0">
+                                    <div className="p-2 rounded-full mr-3 bg-[#306230]">
+                                        <Compass size={20} className="text-[#9bbc0f]" />
+                                    </div>
+                                    <div>
+                                        <div className="font-bold text-lg">
+                                            {entry.floor}F Reached
+                                        </div>
+                                        <div className="flex items-center text-[10px] opacity-70">
+                                            <Calendar size={10} className="mr-1" />
+                                            {formatDate(entry.date)}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Middle: Cause */}
+                                <div className="flex-grow mb-2 md:mb-0 px-0 md:px-4">
+                                    <div className="text-xs opacity-70">死因 / 結果</div>
+                                    <div className="text-sm font-bold">
+                                        {entry.cause}
+                                    </div>
+                                    <div className="text-xs mt-1 bg-[#306230] px-2 py-0.5 rounded inline-block">Lv {entry.level}</div>
+                                </div>
+
+                                {/* Right: Icon */}
+                                <div className="w-full md:w-32 text-right flex justify-end">
+                                    <div className="text-[#8bac0f] opacity-50"><Skull size={24}/></div>
                                 </div>
                             </div>
                         ))}
