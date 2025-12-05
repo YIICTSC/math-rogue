@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Hand } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
 import { storageService } from '../services/storageService';
@@ -264,9 +264,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       baseIndex: number | null 
   }>({ active: false, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null });
 
-  // Action Menu State
-  const [itemSubMenu, setItemSubMenu] = useState<{ active: boolean, actionIndex: number }>({ active: false, actionIndex: 0 });
-
   // Identification State
   const [idMap, setIdMap] = useState<Record<string, string>>({}); // RealType -> RandomName
   const [identifiedTypes, setIdentifiedTypes] = useState<Set<string>>(new Set());
@@ -393,7 +390,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     setMenuOpen(false);
     setShopState({ active: false, merchantId: null, mode: 'BUY' });
     setIsEndless(false);
-    setItemSubMenu({ active: false, actionIndex: 0 });
     turnCounter.current = 0;
     visualEffects.current = [];
     setIsFastForwarding(false);
@@ -773,7 +769,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           if (wType === 'OFUDA_RULER' && t.enemyType === 'GHOST') { dmg = Math.floor(dmg * 1.5); addLog("成仏！", "yellow"); }
           if (wType === 'VITAMIN_INJECT' && t.enemyType === 'DRAIN') { dmg = Math.floor(dmg * 1.5); addLog("特効！", "yellow"); }
           if (wType === 'STAINLESS_PEN' && t.enemyType === 'METAL') { dmg = 1; }
-          if (wType === 'RICH_WATCH' && player.gold && player.gold >= 10) { dmg += 10; setPlayer(p => ({...p, gold: (p.gold || 0) - 10})); } 
+          if (wType === 'RICH_WATCH' && player.gold && player.gold >= 10) { dmg += 10; setPlayer(p => ({...p, gold: (p.gold||0) - 10})); } 
           
           if (Math.random() < 0.1) { dmg *= 2; addLog("会心の一撃！", "red"); triggerShake(5); }
 
@@ -917,6 +913,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               } 
               // Standard Pathfinding (Dijkstra) if "awake"
               else if (dist <= 15) {
+                  // If adjacent to player, attack logic below will handle it, but pathfinding leads there too
                   const neighbors = [
                       {x:e.x, y:e.y-1}, {x:e.x, y:e.y+1}, {x:e.x-1, y:e.y}, {x:e.x+1, y:e.y},
                       {x:e.x-1, y:e.y-1}, {x:e.x+1, y:e.y-1}, {x:e.x-1, y:e.y+1}, {x:e.x+1, y:e.y+1}
@@ -927,6 +924,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
                   for (const n of neighbors) {
                       if (n.x >= 0 && n.x < MAP_W && n.y >= 0 && n.y < MAP_H && map[n.y][n.x] !== 'WALL') {
+                          // Allow moving to player tile to trigger attack logic
                           if (!occupied.has(`${n.x},${n.y}`) || (n.x === px && n.y === py)) {
                               if (dMap[n.y][n.x] < bestDist) {
                                   bestDist = dMap[n.y][n.x];
@@ -979,6 +977,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
   const getItemName = (item: Item) => {
       if (item.category === 'WEAPON' || item.category === 'ARMOR' || item.category === 'RANGED' || item.category === 'SYNTH' || item.category === 'CONSUMABLE') return item.name;
+      // Staffs are now the only thing needing identification
       if (item.type.includes('MEAT')) return item.name;
       if (identifiedTypes.has(item.type)) return item.name;
       return idMap[item.type] || item.name;
@@ -986,19 +985,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
   // --- ACTIONS ---
   
-  const executeItemAction = (index: number, actionType: 'USE' | 'THROW' | 'DROP' | 'INFO') => {
-      if (actionType === 'USE') {
-          handleItemAction(index); // Default logic
-      } else if (actionType === 'THROW') {
-          handleThrowItem(index);
-      } else if (actionType === 'DROP') {
-          handleDropItem(index);
-      } else if (actionType === 'INFO') {
-          setInspectedItem(inventory[index]);
-      }
-      setItemSubMenu({ active: false, actionIndex: 0 }); // Close sub menu
-  };
-
   const fireRangedWeapon = () => {
       if (menuOpen || shopState.active) return;
       const rangedItem = player.equipment?.ranged;
@@ -1057,24 +1043,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
   const handleActionBtn = () => {
       if (gameOver) { startNewGame(); return; }
-      if (gameClear) { startEndlessMode(); return; }
+      if (gameClear) return;
       if (shopState.active) { handleShopAction(); return; }
       if (menuOpen) {
-          if (synthState.active) {
-              handleSynthesisStep();
-          } else {
-              // Sub Menu Logic
-              if (!itemSubMenu.active) {
-                  if (inventory.length > 0) {
-                      setItemSubMenu({ active: true, actionIndex: 0 });
-                      audioService.playSound('select');
-                  }
-              } else {
-                  // Execute Sub Action
-                  const actions: ('USE' | 'THROW' | 'DROP' | 'INFO')[] = ['USE', 'THROW', 'DROP', 'INFO'];
-                  executeItemAction(selectedItemIndex, actions[itemSubMenu.actionIndex]);
-              }
-          }
+          if (synthState.active) handleSynthesisStep();
+          else if (inventory.length > 0) handleItemAction(selectedItemIndex);
           return;
       }
       const tx = player.x + player.dir.x;
@@ -1163,16 +1136,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           return;
       }
       if (menuOpen) {
-          if (itemSubMenu.active) {
-              setItemSubMenu({ active: false, actionIndex: 0 }); // Close sub menu first
-          } else {
-              setMenuOpen(false);
-              setSynthState({ active: false, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null });
-          }
+          setMenuOpen(false);
+          setSynthState({ active: false, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null });
       } else {
           setMenuOpen(true);
           setSelectedItemIndex(0);
-          setItemSubMenu({ active: false, actionIndex: 0 });
       }
       audioService.playSound('select');
   };
@@ -1185,7 +1153,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       
       if (synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT') {
           // Identify known scrolls
-          const knownTypes = Array.from(identifiedTypes).filter(t => t.startsWith('SCROLL')).sort();
+          const knownTypes = Array.from(identifiedTypes).filter(t => t.startsWith('SCROLL'));
           const targetType = knownTypes[idx];
           const template = ITEM_DB[targetType];
           
@@ -1260,6 +1228,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       let hit = false;
       let msg = "";
 
+      // Visual Effect for Staff: Moving Projectile
       addVisualEffect('MAGIC_PROJ', 0, 0, {
           startX: player.x,
           startY: player.y,
@@ -1300,7 +1269,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           if (target) {
               // Knockback 5 tiles
               let tx = target.x; let ty = target.y;
-              const dx = target.x - player.x; const dy = target.y - player.y; 
+              const dx = target.x - player.x; const dy = target.y - player.y; // Simplified dir
+              const dist = Math.max(1, Math.abs(dx) + Math.abs(dy)); // Manhattan
               const ndx = Math.sign(dx); const ndy = Math.sign(dy);
               
               for (let i=0; i<5; i++) {
@@ -1342,9 +1312,14 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           if (target) {
               setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: e.maxHp } : e));
               msg = `${target.name}が回復してしまった！`; hit = true;
+          } else {
+              // Self heal if no target? But staff usually target enemy. 
+              // Standard rogue: wave hits front. 
+              // Let's say if no enemy, wave fails to do anything special (waste charge).
           }
       }
 
+      // Self target staffs (Unusual but possible for Warp/Heal if logic allowed, but staying classic)
       return { hit, msg };
   };
 
@@ -1369,7 +1344,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       setInventory(prev => prev.filter((_, i) => i !== index));
 
       if (hitEntity) {
+          // Effect on Hit
           let dmg = 2; // Base throw dmg
+          let msg = "";
           
           if (item.category === 'WEAPON' || item.category === 'RANGED') dmg = 5 + (item.power || 0);
           if (item.category === 'ARMOR') dmg = 3 + (item.power || 0);
@@ -1378,8 +1355,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           if (item.type === 'SCROLL_SLEEP') { hitEntity.status.sleep = 10; addLog(`${hitEntity.name}は眠ってしまった！`); }
           
           if (item.category === 'STAFF') {
+              // Thrown staff activates effect
               const res = executeStaffEffect(item, hitEntity, hitEntity.x, hitEntity.y);
               if (res.msg) addLog(res.msg);
+              // Identify if hit
               if (!identifiedTypes.has(item.type)) {
                   setIdentifiedTypes(prev => new Set(prev).add(item.type));
                   addLog(`${idMap[item.type]}は${item.name}だった！`, "yellow");
@@ -1400,6 +1379,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           
           audioService.playSound('attack');
       } else {
+          // Drop on floor at lx, ly
           if (map[ly][lx] !== 'WALL' && !floorItems.find(i=>i.x===lx && i.y===ly)) {
               setFloorItems(prev => [...prev, {
                   id: Date.now() + Math.random(), type: 'ITEM', x: lx, y: ly, char: '!', name: item.name, 
@@ -1412,13 +1392,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               addLog("彼方へ消え去った。");
           }
       }
-      // If we threw an item, we might need to adjust selectedItemIndex or keep it safe
-      setSelectedItemIndex(prev => Math.min(prev, inventory.length - 2)); 
-      
-      // Close menu if inventory empty, else maybe stay in list?
-      // Usually throw exits menu.
       setMenuOpen(false);
-      setItemSubMenu({ active: false, actionIndex: 0 });
       processTurn(player.x, player.y);
   };
 
@@ -1426,9 +1400,13 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       const item = inventory[index];
       if (!item) return;
 
+      // Staff (Umbrella) Logic
       if (item.category === 'STAFF') {
+          // Action is "Wave" (振る)
+          // Find target in front
           const { x: dx, y: dy } = player.dir;
           let target: Entity | null = null;
+          // Simple beam range? Standard is usually unlimited or visible range. Let's do 10 tiles.
           let tx = player.x, ty = player.y;
           for(let i=1; i<=10; i++) {
               tx += dx; ty += dy;
@@ -1437,11 +1415,13 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               if (e) { target = e; break; }
           }
 
+          // Decrease charge
           if ((item.charges || 0) > 0) {
-              const res = executeStaffEffect(item, target, player.x + dx, player.y + dy);
+              const res = executeStaffEffect(item, target, player.x + dx, player.y + dy); // Visual start from adj
               if (res.msg) addLog(res.msg);
-              else addLog("しかし何も起こらなかった。");
+              else addLog("しかし何も起こらなかった。"); // Missed or resisted
 
+              // Decrement charge
               const newCharges = (item.charges || 0) - 1;
               const newItem = { ...item, charges: newCharges };
               setInventory(prev => prev.map((it, i) => i === index ? newItem : it));
@@ -1455,7 +1435,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               setMenuOpen(false);
               processTurn(player.x, player.y);
           } else {
-              addLog("魔力が尽きている！");
+              addLog("魔力が尽きている！"); // No turn passed
           }
           return;
       }
@@ -1503,6 +1483,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           if (item.type.includes('ONIGIRI') || item.type.includes('MEAT')) { 
               setBelly(Math.min(maxBelly, belly + (item.value || 50)));
               if (item.type.includes('MEAT')) {
+                  // Meat Bonus Effect
                   setPlayer(p => ({ ...p, hp: Math.min(p.maxHp, p.hp + 50) }));
                   addLog(`${item.name}を食べた。元気が出た！`); 
               } else {
@@ -1594,10 +1575,14 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const handleDropItem = (index: number) => {
       const item = inventory[index];
       if (!item || synthState.active) return;
-      
+      let newEquip = player.equipment;
+      let changed = false;
+      if (player.equipment?.weapon === item) { newEquip = { ...newEquip!, weapon: null }; changed = true; }
+      else if (player.equipment?.armor === item) { newEquip = { ...newEquip!, armor: null }; changed = true; }
+      else if (player.equipment?.ranged === item) { newEquip = { ...newEquip!, ranged: null }; changed = true; }
+      if (changed) setPlayer(p => ({ ...p, equipment: newEquip }));
       const newInv = inventory.filter((_, i) => i !== index);
       setInventory(newInv);
-      
       const droppedEntity: Entity = {
           id: Date.now() + Math.random(), type: 'ITEM', x: player.x, y: player.y, char: '!', name: item.name,
           hp: 0, maxHp: 0, baseAttack: 0, baseDefense: 0, attack: 0, defense: 0, xp: 0, dir: { x: 0, y: 0 },
@@ -1607,14 +1592,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       setFloorItems(prev => [...prev, droppedEntity]);
       addLog(`${getItemName(item)}を足元に置いた。`);
       audioService.playSound('select');
-      
-      // Update Selection
       setSelectedItemIndex(prev => Math.min(prev, newInv.length - 1));
-      
-      // Keep menu open for convenience unless empty? Standard roguelike behavior: stays open.
-      setItemSubMenu({ active: false, actionIndex: 0 }); // Close sub menu
       if (newInv.length === 0) setMenuOpen(false);
-      processTurn(player.x, player.y);
   };
 
   const handleUnequip = (slot: 'weapon'|'armor'|'ranged') => {
@@ -1641,20 +1620,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         if (['x', 'c', 'Escape'].includes(e.key)) { toggleMenu(); return; }
         if ((menuOpen || shopState.active) && (e.key === 'Backspace' || e.key === 'x')) {
             if (shopState.active) { setShopState(prev => ({...prev, active: false})); return; }
-            if (synthState.active) { setSynthState({ active: false, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null }); return; }
-            if (itemSubMenu.active) { setItemSubMenu({ active: false, actionIndex: 0 }); return; }
-            setMenuOpen(false);
+            if (synthState.active) { setSynthState({ active: false, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null }); } else { setMenuOpen(false); }
             return;
         }
         if (menuOpen || shopState.active) {
-            // Sub Menu Navigation
-            if (itemSubMenu.active) {
-                if (e.key === 'ArrowLeft') setItemSubMenu(prev => ({ ...prev, actionIndex: (prev.actionIndex - 1 + 4) % 4 }));
-                if (e.key === 'ArrowRight') setItemSubMenu(prev => ({ ...prev, actionIndex: (prev.actionIndex + 1) % 4 }));
-                if (e.key === 'z' || e.key === 'Enter' || e.key === ' ') handleActionBtn();
-                return;
-            }
-
             const listLength = shopState.active && shopState.mode === 'BUY' 
                 ? (enemies.find(e=>e.id===shopState.merchantId)?.shopItems?.length||0) 
                 : inventory.length;
@@ -1678,7 +1647,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [player, map, enemies, floorItems, menuOpen, gameOver, gameClear, inventory, selectedItemIndex, synthState, shopState, itemSubMenu]);
+  }, [player, map, enemies, floorItems, menuOpen, gameOver, gameClear, inventory, selectedItemIndex, synthState, shopState]);
 
   // --- RENDER LOOP ---
   const frameCountRef = useRef(0);
@@ -1701,6 +1670,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       const h = canvas.height;
       const ts = TILE_SIZE * SCALE;
 
+      // FIX: Fill background FIRST to prevent artifacts during shake
       ctx.fillStyle = C0;
       ctx.fillRect(0, 0, w, h);
 
@@ -1823,6 +1793,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           let currentX = fx.x;
           let currentY = fx.y;
 
+          // Moving Projectile Logic
           if (fx.type === 'MAGIC_PROJ' && fx.startX !== undefined && fx.targetX !== undefined && fx.startY !== undefined && fx.targetY !== undefined) {
               const progress = 1 - (fx.duration / fx.maxDuration);
               currentX = fx.startX + (fx.targetX - fx.startX) * progress;
@@ -1837,7 +1808,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                        ctx.drawImage(sprite, sx, sy, ts, ts);
                    }
               }
-              return; 
+              return; // Skip standard rendering for this special type
           }
 
           const sx = (fx.x - startX) * ts;
@@ -2138,28 +2109,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                                 (synthState.step === 'SELECT_MAT' && synthState.baseIndex === i)
                                             );
                                             
-                                            // ACTION SELECTOR UI
-                                            if (itemSubMenu.active && i === selectedItemIndex) {
-                                                const actionLabels = {
-                                                    'USE': ['WEAPON','ARMOR','RANGED'].includes(item.category) ? '装備' : (item.category==='STAFF' ? '振る' : '使う'),
-                                                    'THROW': '投げる',
-                                                    'DROP': '置く',
-                                                    'INFO': '説明'
-                                                };
-                                                const actions: ('USE' | 'THROW' | 'DROP' | 'INFO')[] = ['USE', 'THROW', 'DROP', 'INFO'];
-                                                
-                                                return (
-                                                    <div 
-                                                        key={i} 
-                                                        className="flex items-center border bg-[#8bac0f] text-[#0f380f] border-[#9bbc0f] justify-between px-2 py-1 font-bold"
-                                                    >
-                                                        <span className="text-xs">◀</span>
-                                                        <span className="mx-2 flex-grow text-center">{actionLabels[actions[itemSubMenu.actionIndex]]}</span>
-                                                        <span className="text-xs">▶</span>
-                                                    </div>
-                                                );
-                                            }
-
                                             return (
                                                 <div 
                                                     key={i} 
@@ -2170,16 +2119,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                                 >
                                                     <button 
                                                         className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center"
-                                                        onClick={() => {
-                                                            if (!isSynthTarget) {
-                                                                if (synthState.active) {
-                                                                    handleSynthesisStep();
-                                                                } else {
-                                                                    setSelectedItemIndex(i);
-                                                                    setItemSubMenu({ active: true, actionIndex: 0 }); // Open sub-menu on click
-                                                                }
-                                                            }
-                                                        }}
+                                                        onClick={() => !isSynthTarget && (synthState.active ? handleSynthesisStep() : handleItemAction(i))}
                                                         onMouseEnter={() => setSelectedItemIndex(i)}
                                                     >
                                                         <span>
@@ -2188,14 +2128,37 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                                             {item.count ? `(${item.count})` : ''}
                                                             {item.category === 'STAFF' ? `[${item.charges}]` : ''}
                                                         </span>
-                                                        {!itemSubMenu.active && (
-                                                            <span className={`text-[9px] ${selectedItemIndex === i ? 'text-[#0f380f]' : 'text-[#8bac0f]'}`}>
-                                                                {synthState.active 
-                                                                    ? '選択' 
-                                                                    : (['WEAPON','ARMOR','RANGED'].includes(item.category) ? '装備' : (item.category==='STAFF' ? '振る' : '使う'))
-                                                                }
-                                                            </span>
-                                                        )}
+                                                        <span className={`text-[9px] ${selectedItemIndex === i ? 'text-[#0f380f]' : 'text-[#8bac0f]'}`}>
+                                                            {synthState.active 
+                                                                ? '選択' 
+                                                                : (['WEAPON','ARMOR','RANGED'].includes(item.category) ? '装備' : (item.category==='STAFF' ? '振る' : '使う'))
+                                                            }
+                                                        </span>
+                                                    </button>
+                                                    {!synthState.active && (
+                                                        <button 
+                                                            className="px-2 py-1 border-l border-[#306230] hover:bg-[#306230] hover:text-[#9bbc0f] flex items-center justify-center"
+                                                            onClick={(e) => { e.stopPropagation(); handleThrowItem(i); }}
+                                                            title="投げる"
+                                                        >
+                                                            <Send size={10} />
+                                                        </button>
+                                                    )}
+                                                    {!synthState.active && (
+                                                        <button 
+                                                            className="px-2 py-1 border-l border-[#306230] hover:bg-[#306230] hover:text-[#9bbc0f] flex items-center justify-center"
+                                                            onClick={(e) => { e.stopPropagation(); handleDropItem(i); }}
+                                                            title="足元に置く"
+                                                        >
+                                                            <ArrowDown size={10} />
+                                                        </button>
+                                                    )}
+                                                    <button 
+                                                        className="px-2 py-1 border-l border-[#306230] hover:bg-[#306230] hover:text-[#9bbc0f] flex items-center justify-center"
+                                                        onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}
+                                                        title="詳細"
+                                                    >
+                                                        <Info size={10} />
                                                     </button>
                                                 </div>
                                             );
