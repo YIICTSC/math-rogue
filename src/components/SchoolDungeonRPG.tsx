@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3 } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
 
@@ -36,7 +36,7 @@ const UNIDENTIFIED_NAMES = [
 type TileType = 'WALL' | 'FLOOR' | 'STAIRS' | 'HALLWAY';
 type Direction = { x: 0 | 1 | -1, y: 0 | 1 | -1 };
 type ItemCategory = 'WEAPON' | 'ARMOR' | 'RANGED' | 'CONSUMABLE' | 'SYNTH';
-type EnemyType = 'SLIME' | 'GHOST' | 'DRAIN' | 'DRAGON' | 'METAL' | 'FLOATING' | 'THIEF' | 'BAT' | 'BOSS';
+type EnemyType = 'SLIME' | 'GHOST' | 'DRAIN' | 'DRAGON' | 'METAL' | 'FLOATING' | 'THIEF' | 'BAT' | 'BOSS' | 'MANDRAKE' | 'GOLEM' | 'NINJA' | 'MAGE';
 type VisualEffectType = 'SLASH' | 'THUNDER' | 'EXPLOSION' | 'TEXT' | 'FLASH' | 'PROJECTILE' | 'WARP';
 
 interface VisualEffect {
@@ -153,6 +153,7 @@ const ITEM_DB: Record<string, Omit<Item, 'id'>> = {
 
     // FOOD/OTHERS
     'FOOD_ONIGIRI': { category: 'CONSUMABLE', type: 'FOOD_ONIGIRI', name: 'おにぎり', desc: 'お腹が50回復。', value: 50 },
+    'FOOD_MEAT': { category: 'CONSUMABLE', type: 'FOOD_MEAT', name: '謎の肉', desc: 'お腹100、HP50回復。', value: 100 },
     'GRASS_HEAL': { category: 'CONSUMABLE', type: 'GRASS_HEAL', name: '給食の残り', desc: 'HP100回復(弟切草)。', value: 100 },
     'GRASS_LIFE': { category: 'CONSUMABLE', type: 'GRASS_LIFE', name: '命の野菜', desc: '最大HP+5(命の草)。', value: 5 },
     'GRASS_SPEED': { category: 'CONSUMABLE', type: 'GRASS_SPEED', name: 'エナドリ', desc: '倍速になる(すばやさ)。', value: 0 },
@@ -194,6 +195,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const [gameClear, setGameClear] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showMap, setShowMap] = useState(false); 
+  const [showHelp, setShowHelp] = useState(false);
   const turnCounter = useRef(0);
   const [isEndless, setIsEndless] = useState(false);
   
@@ -241,6 +243,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     spriteCache.current['RANGED'] = createPixelSpriteCanvas('RNG', 'POTION'); 
     spriteCache.current['CONSUMABLE'] = createPixelSpriteCanvas('CON', 'NOTEBOOK');
     spriteCache.current['SYNTH'] = createPixelSpriteCanvas('SYNTH', 'POTION|#FFFFFF'); 
+    // New Enemies
+    spriteCache.current['MANDRAKE'] = createPixelSpriteCanvas('MANDRAKE', 'PLANT|#33691e');
+    spriteCache.current['GOLEM'] = createPixelSpriteCanvas('GOLEM', 'SKELETON|#b0bec5');
+    spriteCache.current['NINJA'] = createPixelSpriteCanvas('NINJA', 'FLIER|#1a237e');
+    spriteCache.current['MAGE'] = createPixelSpriteCanvas('MAGE', 'WIZARD|#7b1fa2');
 
     startNewGame();
   }, []);
@@ -348,13 +355,17 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           if (r < 0.6) { t = 'SLIME'; name="スライム"; hp=10; atk=3; xp=5; }
           else { t = 'BAT'; name="コウモリ"; hp=8; atk=4; xp=6; }
       } else {
-          if (r < 0.25) { t = 'SLIME'; name="スライム"; hp=10+hpScale; atk=3+scaling; xp=5+xpScale; }
-          else if (r < 0.45) { t = 'BAT'; name="コウモリ"; hp=8+hpScale; atk=5+scaling; xp=7+xpScale; }
+          if (r < 0.20) { t = 'SLIME'; name="スライム"; hp=10+hpScale; atk=3+scaling; xp=5+xpScale; }
+          else if (r < 0.35) { t = 'BAT'; name="コウモリ"; hp=8+hpScale; atk=5+scaling; xp=7+xpScale; }
+          else if (r < 0.45 && floorLevel > 2) { t = 'MANDRAKE'; name="人食い植物"; hp=20+hpScale; atk=5+scaling; xp=12+xpScale; }
           else if (r < 0.60) { t = 'GHOST'; name="浮遊霊"; hp=15+hpScale; atk=4+scaling; xp=10+xpScale; def=2+Math.floor(floorLevel/2); }
           else if (r < 0.70) { t = 'THIEF'; name="トド"; hp=20+hpScale; atk=2+scaling; xp=15+xpScale; }
-          else if (r < 0.85) { t = 'DRAIN'; name="くさった死体"; hp=30+hpScale; atk=6+scaling; xp=20+xpScale; }
-          else if (r < 0.95 && floorLevel > 3) { t = 'DRAGON'; name="ドラゴン"; hp=50+hpScale*2; atk=10+scaling*1.5; xp=50+xpScale*2; }
-          else if (floorLevel > 5) { t = 'METAL'; name="メタル生徒"; hp=4+Math.floor(floorLevel/5); atk=1+scaling; xp=100+xpScale*3; def=999; }
+          else if (r < 0.80) { t = 'DRAIN'; name="くさった死体"; hp=30+hpScale; atk=6+scaling; xp=20+xpScale; }
+          else if (r < 0.85 && floorLevel > 5) { t = 'NINJA'; name="忍者ごっこ"; hp=25+hpScale; atk=8+scaling; xp=25+xpScale; }
+          else if (r < 0.90 && floorLevel > 7) { t = 'GOLEM'; name="人体模型"; hp=60+hpScale*1.5; atk=12+scaling; xp=40+xpScale; def=5; }
+          else if (r < 0.95 && floorLevel > 10) { t = 'MAGE'; name="魔法使い"; hp=30+hpScale; atk=10+scaling; xp=35+xpScale; }
+          else if (r < 0.98 && floorLevel > 4) { t = 'DRAGON'; name="ドラゴン"; hp=50+hpScale*2; atk=10+scaling*1.5; xp=50+xpScale*2; }
+          else if (floorLevel > 6) { t = 'METAL'; name="メタル生徒"; hp=4+Math.floor(floorLevel/5); atk=1+scaling; xp=100+xpScale*3; def=999; }
       }
 
       return {
@@ -581,7 +592,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   addLog(`${e.name}に${dmg}ダメージ！`);
                   addVisualEffect('TEXT', e.x, e.y, { value: `${dmg}`, color: 'white' });
                   if (nhp <= 0 && effects.includes('肉') && Math.random() < 0.3) {
-                      const meat = { ...ITEM_DB['FOOD_ONIGIRI'], name: `${e.name}の肉`, value: 30, id: `meat-${Date.now()}` };
+                      const meat = { ...ITEM_DB['FOOD_MEAT'], name: `${e.name}の肉`, value: 100, id: `meat-${Date.now()}` };
                       setFloorItems(prev => [...prev, { id: Date.now()+Math.random(), type:'ITEM', x: e.x, y: e.y, char: '!', name: meat.name, hp:0,maxHp:0,baseAttack:0,baseDefense:0,attack:0,defense:0,xp:0,dir:{x:0,y:0}, status:e.status, itemData: meat }]);
                       addLog(`${e.name}を肉に変えた！`, C2);
                   }
@@ -683,6 +694,14 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   continue;
               }
 
+              if (e.enemyType === 'MAGE' && dist <= 4 && dist > 0 && Math.random() < 0.2) {
+                  addLog(`${e.name}の魔法！混乱した！`, "yellow");
+                  setPlayer(p => ({ ...p, status: { ...p.status, confused: 5 } }));
+                  occupied.add(`${e.x},${e.y}`); nextEnemies.push(e);
+                  addVisualEffect('FLASH', px, py);
+                  continue;
+              }
+
               if (dist <= 8) { 
                   let mx = 0, my = 0;
                   if (e.status.confused > 0) { mx = Math.floor(Math.random()*3)-1; my = Math.floor(Math.random()*3)-1; e.status.confused--; } 
@@ -723,6 +742,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       // Logic: If identified, show true name. Else show unknown name from map.
       // Equipment is always identified for simplicity in this mini-game, only consumables masked.
       if (item.category === 'WEAPON' || item.category === 'ARMOR' || item.category === 'RANGED' || item.category === 'SYNTH') return item.name;
+      if (item.type.includes('MEAT')) return item.name; // Meat is always known
       if (identifiedTypes.has(item.type)) return item.name;
       return idMap[item.type] || item.name;
   };
@@ -945,10 +965,20 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           // Identify on use
           if (!identifiedTypes.has(item.type)) {
               setIdentifiedTypes(prev => new Set(prev).add(item.type));
-              addLog(`${idMap[item.type]}は${item.name}だった！`, "yellow");
+              if (idMap[item.type]) addLog(`${idMap[item.type]}は${item.name}だった！`, "yellow");
           }
 
-          if (item.type.includes('ONIGIRI')) { setBelly(Math.min(maxBelly, belly + (item.value || 50))); addLog(`${item.name}を食べた。満腹！`); actionDone = true; }
+          if (item.type.includes('ONIGIRI') || item.type.includes('MEAT')) { 
+              setBelly(Math.min(maxBelly, belly + (item.value || 50)));
+              if (item.type.includes('MEAT')) {
+                  // Meat Bonus Effect
+                  setPlayer(p => ({ ...p, hp: Math.min(p.maxHp, p.hp + 50) }));
+                  addLog(`${item.name}を食べた。元気が出た！`); 
+              } else {
+                  addLog(`${item.name}を食べた。満腹！`); 
+              }
+              actionDone = true; 
+          }
           else if (item.type.includes('HEAL')) { setPlayer(p => ({ ...p, hp: Math.min(p.maxHp, p.hp + (item.value || 30)) })); addLog("HPが回復した！"); actionDone = true; addVisualEffect('TEXT', player.x, player.y, {value: 'Heal', color: 'green'}); }
           else if (item.type === 'SCROLL_MAP') { setShowMap(true); addLog("校内図が頭に入った！"); actionDone = true; addVisualEffect('FLASH', 0, 0); }
           else if (item.type === 'SCROLL_THUNDER' || item.type === 'BOMB') {
@@ -1313,6 +1343,43 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             </div>
         )}
 
+        {/* Help Screen */}
+        {showHelp && (
+            <div className="absolute inset-0 z-50 bg-[#0f380f]/95 flex items-center justify-center p-4" onClick={() => setShowHelp(false)}>
+                <div className="w-full max-w-md bg-[#9bbc0f] border-4 border-[#306230] p-6 shadow-xl text-[#0f380f] overflow-y-auto max-h-[80vh] custom-scrollbar" onClick={e => e.stopPropagation()}>
+                    <div className="flex justify-between items-center mb-4 border-b-2 border-[#306230] pb-2">
+                        <h2 className="font-bold text-xl flex items-center"><HelpCircle className="mr-2"/> 遊び方</h2>
+                        <button onClick={() => setShowHelp(false)}><X size={24}/></button>
+                    </div>
+                    <div className="space-y-4 text-sm">
+                        <section>
+                            <h3 className="font-bold border-b border-[#306230] mb-1">目的</h3>
+                            <p>地下20階を目指し、校長先生を説得(撃破)してください。<br/>道中で落ちている武器や道具を駆使して生き残りましょう。</p>
+                        </section>
+                        <section>
+                            <h3 className="font-bold border-b border-[#306230] mb-1">操作方法</h3>
+                            <ul className="list-disc pl-5">
+                                <li><strong>移動:</strong> 十字キー または 画面パッド</li>
+                                <li><strong>攻撃:</strong> Aボタン または Zキー</li>
+                                <li><strong>メニュー:</strong> Bボタン または Xキー</li>
+                                <li><strong>斜め移動:</strong> パッドの角をタップ</li>
+                            </ul>
+                        </section>
+                        <section>
+                            <h3 className="font-bold border-b border-[#306230] mb-1">ヒント</h3>
+                            <ul className="list-disc pl-5">
+                                <li>お腹が減るとHPが減ります。おにぎりやパンを食べましょう。</li>
+                                <li>巻物は使うまで効果が分かりません（識別が必要です）。</li>
+                                <li>「工作のり」を使うと、装備を合成して強くできます。</li>
+                                <li>敵に囲まれたら通路に逃げ込みましょう。</li>
+                            </ul>
+                        </section>
+                    </div>
+                    <button onClick={() => setShowHelp(false)} className="mt-6 w-full py-2 bg-[#306230] text-[#9bbc0f] font-bold rounded">閉じる</button>
+                </div>
+            </div>
+        )}
+
         <div className="w-full max-w-md flex flex-col items-center gap-2">
             <div className="w-full aspect-[11/9] relative shrink-0">
                 <div className="w-full h-full bg-[#9bbc0f] border-4 border-[#0f380f] relative overflow-hidden shadow-lg rounded-sm">
@@ -1323,6 +1390,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                             <span className="flex items-center"><Shield size={8} className="mr-1"/>{player.equipment?.armor ? getItemName(player.equipment.armor) : '-'}</span>
                             <span className="flex items-center"><Target size={8} className="mr-1"/>{player.equipment?.ranged ? getItemName(player.equipment.ranged) : '-'}</span>
                         </div>
+                        <button onClick={() => setShowHelp(true)} className="flex items-center gap-1 hover:text-white"><HelpCircle size={10}/> Help</button>
                     </div>
 
                     <div className="absolute top-8 left-0 w-full h-5 bg-[#306230] text-[#9bbc0f] flex justify-between items-center px-2 text-xs font-bold z-10">
