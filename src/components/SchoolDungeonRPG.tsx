@@ -17,8 +17,8 @@ const C2 = '#8bac0f'; // Light
 const C3 = '#9bbc0f'; // White
 
 // --- CONSTANTS ---
-const MAP_W = 20;
-const MAP_H = 20;
+const MAP_W = 40; // Expanded from 20
+const MAP_H = 40; // Expanded from 20
 const VIEW_W = 11; 
 const VIEW_H = 9;
 const TILE_SIZE = 16; 
@@ -411,7 +411,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     const rooms: {x:number, y:number, w:number, h:number}[] = [];
     
     let attempts = 0;
-    while(rooms.length < 3 && attempts < 100) {
+    // Increase room count and max attempts for larger map
+    while(rooms.length < 8 && attempts < 200) {
         attempts++;
         const w = Math.floor(Math.random() * 4) + 4;
         const h = Math.floor(Math.random() * 4) + 4;
@@ -1109,7 +1110,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           const tx = player.x + dx * i;
           const ty = player.y + dy * i;
           lx = tx; ly = ty;
-          if (map[ty][tx] === 'WALL') { addLog("壁に当たって落ちた。"); break; }
+          if (map[ty][tx] === 'WALL') { addLog("壁に当たった。"); break; }
           const target = enemies.find(e => e.x === tx && e.y === ty);
           if (target) { hitEntity = target; break; }
       }
@@ -1908,8 +1909,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                 </div>
             </div>
 
-            {/* Ranged Button */}
-            <div className="absolute right-4 bottom-16 md:bottom-20 flex flex-col items-center">
+            {/* Ranged Button - Moved between A/B and above */}
+            <div className="absolute right-20 bottom-24 md:right-24 md:bottom-28 flex flex-col items-center z-10">
                 <button 
                     className="w-10 h-10 bg-[#333] rounded-full shadow-[0_2px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555] touch-none select-none" 
                     onClick={fireRangedWeapon}
