@@ -1,6 +1,5 @@
 
-
-import { GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry } from '../types';
+import { GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState } from '../types';
 
 const STORAGE_KEY_UNLOCKED_CARDS = 'pixel_spire_unlocked_cards_v1';
 const STORAGE_KEY_UNLOCKED_RELICS = 'pixel_spire_unlocked_relics_v1';
@@ -18,6 +17,7 @@ const STORAGE_KEY_DEBUG_MATH_SKIP = 'pixel_spire_debug_math_skip_v1';
 const STORAGE_KEY_DEBUG_HP_ONE = 'pixel_spire_debug_hp_one_v1';
 
 const STORAGE_KEY_DUNGEON_STATE = 'pixel_spire_dungeon_state_v1';
+const STORAGE_KEY_POKER_STATE = 'pixel_spire_poker_state_v1';
 
 export const storageService = {
   // --- Unlocked Items (Cards, Relics, Potions, Enemies) ---
@@ -158,6 +158,23 @@ export const storageService = {
       } catch (e) {
           return [];
       }
+  },
+
+  savePokerState: (state: PokerRunState) => {
+      try {
+          localStorage.setItem(STORAGE_KEY_POKER_STATE, JSON.stringify(state));
+      } catch (e) { console.warn("Failed to save poker state", e); }
+  },
+
+  loadPokerState: (): PokerRunState | null => {
+      try {
+          const stored = localStorage.getItem(STORAGE_KEY_POKER_STATE);
+          return stored ? JSON.parse(stored) : null;
+      } catch { return null; }
+  },
+
+  clearPokerState: () => {
+      localStorage.removeItem(STORAGE_KEY_POKER_STATE);
   },
 
   // --- Survivor Scores ---
@@ -308,6 +325,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_CLEAR_COUNT);
       localStorage.removeItem(STORAGE_KEY_RANKING);
       localStorage.removeItem(STORAGE_KEY_POKER_RANKING);
+      localStorage.removeItem(STORAGE_KEY_POKER_STATE);
       localStorage.removeItem(STORAGE_KEY_SURVIVOR_RANKING);
       localStorage.removeItem(STORAGE_KEY_DUNGEON_RANKING);
       localStorage.removeItem(STORAGE_KEY_DUNGEON_STATE);

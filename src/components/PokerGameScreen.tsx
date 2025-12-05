@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package, Ghost, Trophy, RotateCcw, Play, DollarSign } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
@@ -301,11 +301,9 @@ const getSuitColorClass = (suit: PokerSuit) => {
 
 interface PokerGameScreenProps {
   onBack: () => void;
-  savedState?: PokerRunState;
-  onSave: (state: PokerRunState | undefined) => void;
 }
 
-const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, onSave }) => {
+const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   
   const hydrateState = (state: PokerRunState): PokerRunState => {
       const hydrateSupporters = (list: PokerSupporter[]) => list.map(item => SUPPORTERS_LIBRARY.find(lib => lib.id === item.id) || item);
@@ -330,10 +328,12 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, o
   // --- Game State ---
   const [phase, setPhase] = useState<'BLIND_SELECT' | 'PLAY' | 'SHOP' | 'PACK_OPEN' | 'GAME_OVER' | 'VICTORY_WAIT' | 'VICTORY'>('BLIND_SELECT');
   const [highScore, setHighScore] = useState(0); 
+  const saveDebounceRef = useRef<any>(null);
 
   const [runState, setRunState] = useState<PokerRunState>(() => {
-      if (savedState) {
-          return hydrateState(savedState);
+      const saved = storageService.loadPokerState();
+      if (saved) {
+          return hydrateState(saved);
       }
       return {
           deck: [],
@@ -399,23 +399,31 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, o
 
   // --- Initialization & Auto Save ---
   useEffect(() => {
-      if (!savedState) {
+      const saved = storageService.loadPokerState();
+      if (!saved) {
           initRun();
       } else {
-          if (savedState.hand.length > 0) setPhase('PLAY');
-          else if (savedState.shopInventory.length > 0) setPhase('SHOP');
+          setRunState(hydrateState(saved));
+          if (saved.hand.length > 0) setPhase('PLAY');
+          else if (saved.shopInventory.length > 0) setPhase('SHOP');
           else setPhase('BLIND_SELECT');
           
           audioService.playBGM('poker_shop');
       }
   }, []);
 
+  const saveData = useCallback(() => {
+      if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
+      saveDebounceRef.current = setTimeout(() => {
+          storageService.savePokerState(runState);
+      }, 500); 
+  }, [runState]);
+
   useEffect(() => {
-      const timer = setTimeout(() => {
-          onSave(runState);
-      }, 200); 
-      return () => clearTimeout(timer);
-  }, [runState, onSave]);
+      if (phase !== 'GAME_OVER' && phase !== 'VICTORY') {
+          saveData();
+      }
+  }, [runState, phase, saveData]);
 
   const initRun = () => {
       const deck = createDeck();
@@ -440,6 +448,11 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, o
       setHighScore(0);
       setPhase('BLIND_SELECT');
       audioService.playBGM('poker_shop');
+  };
+
+  const handleQuit = () => {
+      saveData();
+      onBack();
   };
 
   const startBlind = () => {
@@ -592,7 +605,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, o
           audioService.playSound('lose');
           saveRecord();
           setPhase('GAME_OVER');
-          onSave(undefined); 
+          storageService.clearPokerState();
       }
   };
 
@@ -654,7 +667,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, o
 
   const finishRunVictory = () => {
       saveRecord();
-      onSave(undefined);
+      storageService.clearPokerState();
       onBack();
   };
 
@@ -862,7 +875,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, o
       return (
           <div className="flex flex-col h-full w-full bg-slate-900 text-white p-8 items-center justify-center relative font-mono">
               <div className="absolute top-4 left-4">
-                  <button onClick={onBack} className="text-gray-400 hover:text-white flex items-center"><ArrowLeft className="mr-2"/> Quit</button>
+                  <button onClick={handleQuit} className="text-gray-400 hover:text-white flex items-center"><ArrowLeft className="mr-2"/> Quit</button>
               </div>
               <div className="text-center animate-in zoom-in duration-300">
                   <div className="text-2xl text-yellow-500 mb-2 font-bold">ANTE {runState.ante} / 8</div>
@@ -978,7 +991,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, savedState, o
           <div className="flex flex-col h-full w-full bg-black text-white items-center justify-center p-8 font-mono text-center">
               <div className={`text-6xl font-bold mb-4 ${phase === 'VICTORY' ? 'text-yellow-400' : 'text-red-500'}`}>{phase === 'VICTORY' ? 'GRADUATED!' : 'EXPELLED'}</div>
               <p className="text-xl text-gray-400 mb-8">Reached Ante {runState.ante}</p>
-              <button onClick={() => { onSave(undefined); onBack(); }} className="bg-white text-black px-8 py-3 font-bold rounded hover:bg-gray-200">Return to Menu</button>
+              <button onClick={() => { storageService.clearPokerState(); onBack(); }} className="bg-white text-black px-8 py-3 font-bold rounded hover:bg-gray-200">Return to Menu</button>
           </div>
       );
   }
