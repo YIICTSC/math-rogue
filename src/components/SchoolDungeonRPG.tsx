@@ -4,9 +4,15 @@ import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, A
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
 import { storageService } from '../services/storageService';
+import { 
+    DungeonTileType, DungeonDirection, DungeonItemCategory, DungeonEnemyType, DungeonItem, 
+    DungeonEquipmentSlots, DungeonEntity, DungeonLog, DungeonRunState 
+} from '../types';
 
 interface SchoolDungeonRPGProps {
   onBack: () => void;
+  savedState?: DungeonRunState;
+  onSave: (state: DungeonRunState | undefined) => void;
 }
 
 // --- GBC PALETTE ---
@@ -35,10 +41,6 @@ const UNIDENTIFIED_NAMES = [
 ];
 
 // --- TYPES ---
-type TileType = 'WALL' | 'FLOOR' | 'STAIRS' | 'HALLWAY';
-type Direction = { x: 0 | 1 | -1, y: 0 | 1 | -1 };
-type ItemCategory = 'WEAPON' | 'ARMOR' | 'RANGED' | 'CONSUMABLE' | 'SYNTH' | 'STAFF';
-type EnemyType = 'SLIME' | 'GHOST' | 'DRAIN' | 'DRAGON' | 'METAL' | 'FLOATING' | 'THIEF' | 'BAT' | 'BOSS' | 'MANDRAKE' | 'GOLEM' | 'NINJA' | 'MAGE' | 'SHOPKEEPER';
 type VisualEffectType = 'SLASH' | 'THUNDER' | 'EXPLOSION' | 'TEXT' | 'FLASH' | 'PROJECTILE' | 'WARP' | 'BEAM';
 
 interface VisualEffect {
@@ -50,75 +52,12 @@ interface VisualEffect {
   maxDuration: number;
   value?: string;
   color?: string;
-  dir?: Direction;
+  dir?: DungeonDirection;
   scale?: number;
 }
 
-interface Item {
-  id: string;
-  category: ItemCategory;
-  type: string; 
-  name: string;
-  desc: string;
-  value?: number; // Base price / effect value
-  power?: number; 
-  range?: number;
-  count?: number; 
-  plus?: number;
-  charges?: number; 
-  maxCharges?: number;
-  price?: number; // Calculated price for shop
-}
-
-interface EquipmentSlots {
-  weapon: Item | null;
-  armor: Item | null;
-  ranged: Item | null;
-}
-
-interface Entity {
-  id: number;
-  type: 'PLAYER' | 'ENEMY' | 'ITEM' | 'GOLD';
-  x: number;
-  y: number;
-  char: string;
-  name: string;
-  
-  hp: number;
-  maxHp: number;
-  baseAttack: number; 
-  baseDefense: number;
-  attack: number;     
-  defense: number;
-  
-  xp: number;
-  gold?: number; // For GOLD entities or Player gold
-  dir: Direction;
-  
-  status: {
-      sleep: number;
-      confused: number;
-      frozen: number;
-      blind: number;
-      speed: number;
-  };
-  
-  dead?: boolean;
-  offset?: { x: number, y: number }; 
-  itemData?: Item; 
-  equipment?: EquipmentSlots;
-  enemyType?: EnemyType;
-  shopItems?: Item[]; // For Shopkeeper
-}
-
-interface Log {
-  message: string;
-  color?: string;
-  id: number;
-}
-
 // --- ITEM DATABASE ---
-const ITEM_DB: Record<string, Omit<Item, 'id'>> = {
+const ITEM_DB: Record<string, Omit<DungeonItem, 'id'>> = {
     // WEAPONS
     'PENCIL_SWORD': { category: 'WEAPON', type: 'PENCIL_SWORD', name: 'えんぴつソード', desc: '削りたて。攻撃+4', power: 4, value: 200 },
     'METAL_BAT': { category: 'WEAPON', type: 'METAL_BAT', name: '金属バット', desc: 'どうたぬき級。攻撃+8', power: 8, value: 500 },
@@ -180,14 +119,14 @@ const ITEM_DB: Record<string, Omit<Item, 'id'>> = {
     'BOMB': { category: 'CONSUMABLE', type: 'BOMB', name: '爆弾', desc: '周囲を爆破する。', value: 200 },
 };
 
-const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
+const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, savedState, onSave }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
   // --- STATE ---
-  const [map, setMap] = useState<TileType[][]>([]);
+  const [map, setMap] = useState<DungeonTileType[][]>([]);
   const spriteCache = useRef<Record<string, HTMLCanvasElement>>({});
   
-  const [player, setPlayer] = useState<Entity>({
+  const [player, setPlayer] = useState<DungeonEntity>({
     id: 0, type: 'PLAYER', x: 1, y: 1, char: '@', name: 'わんぱく小学生', 
     hp: 50, maxHp: 50, baseAttack: 3, baseDefense: 0, attack: 3, defense: 0, xp: 0, gold: 0, dir: {x:0, y:1},
     equipment: { weapon: null, armor: null, ranged: null },
@@ -195,10 +134,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     offset: { x: 0, y: 0 }
   });
 
-  const [enemies, setEnemies] = useState<Entity[]>([]);
-  const [floorItems, setFloorItems] = useState<Entity[]>([]);
-  const [inventory, setInventory] = useState<Item[]>([]);
-  const [logs, setLogs] = useState<Log[]>([]);
+  const [enemies, setEnemies] = useState<DungeonEntity[]>([]);
+  const [floorItems, setFloorItems] = useState<DungeonEntity[]>([]);
+  const [inventory, setInventory] = useState<DungeonItem[]>([]);
+  const [logs, setLogs] = useState<DungeonLog[]>([]);
   
   // Game Status
   const [floor, setFloor] = useState(1);
@@ -238,12 +177,15 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const menuListRef = useRef<HTMLDivElement>(null);
 
   // Inspection
-  const [inspectedItem, setInspectedItem] = useState<Item | null>(null);
+  const [inspectedItem, setInspectedItem] = useState<DungeonItem | null>(null);
   const longPressTimer = useRef<any>(null);
   
   // Fast Forward State
   const [isFastForwarding, setIsFastForwarding] = useState(false);
   const fastForwardInterval = useRef<any>(null);
+
+  // Loaded Flag
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   // Init
   useEffect(() => {
@@ -270,11 +212,33 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     spriteCache.current['NINJA'] = createPixelSpriteCanvas('NINJA', 'FLIER|#1a237e');
     spriteCache.current['MAGE'] = createPixelSpriteCanvas('MAGE', 'WIZARD|#7b1fa2');
     
-    // New Sprites
     spriteCache.current['COIN'] = createPixelSpriteCanvas('COIN', 'GEM|#FFD700');
-    spriteCache.current['SHOPKEEPER'] = createPixelSpriteCanvas('SHOPKEEPER', 'HUMANOID|#33691e'); // Green merchant
+    spriteCache.current['SHOPKEEPER'] = createPixelSpriteCanvas('SHOPKEEPER', 'HUMANOID|#33691e');
 
-    startNewGame();
+    if (!hasLoaded) {
+        if (savedState) {
+            setFloor(savedState.floor);
+            setLevel(savedState.level);
+            setBelly(savedState.belly);
+            setMaxBelly(savedState.maxBelly);
+            setPlayer(savedState.player);
+            setMap(savedState.map);
+            setEnemies(savedState.enemies);
+            setFloorItems(savedState.floorItems);
+            setInventory(savedState.inventory);
+            setLogs(savedState.logs);
+            turnCounter.current = savedState.turnCounter;
+            setIsEndless(savedState.isEndless);
+            setIdMap(savedState.idMap);
+            setIdentifiedTypes(new Set(savedState.identifiedTypes));
+            setShopState(savedState.shopState);
+            setGameClear(savedState.gameClear);
+            addLog("冒険を再開した。", "cyan");
+        } else {
+            startNewGame();
+        }
+        setHasLoaded(true);
+    }
   }, []);
 
   // Update Stats
@@ -291,6 +255,26 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           };
       });
   }, [player.equipment]);
+
+  // Auto-save logic
+  useEffect(() => {
+      if (!hasLoaded) return;
+      if (gameOver) {
+          onSave(undefined);
+          return;
+      }
+      
+      const timer = setTimeout(() => {
+          const currentState: DungeonRunState = {
+              floor, level, belly, maxBelly, player, map, enemies, floorItems, inventory, logs,
+              turnCounter: turnCounter.current, isEndless, idMap, 
+              identifiedTypes: Array.from(identifiedTypes), shopState, gameClear
+          };
+          onSave(currentState);
+      }, 500);
+      return () => clearTimeout(timer);
+
+  }, [floor, level, belly, player, enemies, floorItems, inventory, logs, isEndless, shopState, gameOver, gameClear]);
 
   // Scroll effect
   useEffect(() => {
@@ -366,8 +350,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     setIdMap(newIdMap);
     setIdentifiedTypes(new Set());
 
-    const initItem: Item = { ...ITEM_DB['FOOD_ONIGIRI'], id: `start-${Date.now()}` };
-    const initWeapon: Item = { ...ITEM_DB['PENCIL_SWORD'], id: `start-w-${Date.now()}` };
+    const initItem: DungeonItem = { ...ITEM_DB['FOOD_ONIGIRI'], id: `start-${Date.now()}` };
+    const initWeapon: DungeonItem = { ...ITEM_DB['PENCIL_SWORD'], id: `start-w-${Date.now()}` };
     setInventory([initItem, initWeapon]);
     
     setPlayer({
@@ -382,9 +366,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     addLog("風来の旅が始まった！");
   };
 
-  const spawnEnemy = (x: number, y: number, floorLevel: number): Entity => {
+  const spawnEnemy = (x: number, y: number, floorLevel: number): DungeonEntity => {
       const r = Math.random();
-      let t: EnemyType = 'SLIME';
+      let t: DungeonEnemyType = 'SLIME';
       let name="敵", hp=10, atk=2, xp=5, def=0;
       const scaling = Math.floor((floorLevel - 1) * 2); 
       const hpScale = Math.floor(floorLevel * 3);
@@ -409,7 +393,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       }
 
       // Generate Shop Items if Shopkeeper
-      let shopItems: Item[] = [];
+      let shopItems: DungeonItem[] = [];
       if (t === 'SHOPKEEPER') {
           for(let i=0; i<5; i++) {
               const keys = Object.keys(ITEM_DB);
@@ -435,7 +419,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   };
 
   const generateFloor = (f: number) => {
-    const newMap: TileType[][] = Array(MAP_H).fill(null).map(() => Array(MAP_W).fill('WALL'));
+    const newMap: DungeonTileType[][] = Array(MAP_H).fill(null).map(() => Array(MAP_W).fill('WALL'));
     const rooms: {x:number, y:number, w:number, h:number}[] = [];
     
     let attempts = 0;
@@ -466,8 +450,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     const py = Math.floor(startRoom.y + startRoom.h/2);
     setPlayer(prev => ({ ...prev, x: px, y: py }));
 
-    const newEnemies: Entity[] = [];
-    const newItems: Entity[] = [];
+    const newEnemies: DungeonEntity[] = [];
+    const newItems: DungeonEntity[] = [];
     const lastRoom = rooms[rooms.length - 1];
     const sx = Math.floor(lastRoom.x + lastRoom.w/2);
     const sy = Math.floor(lastRoom.y + lastRoom.h/2);
@@ -689,13 +673,13 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       }
   };
 
-  const triggerPlayerAttackAnim = (dir: Direction) => {
+  const triggerPlayerAttackAnim = (dir: DungeonDirection) => {
       const shift = 6; 
       setPlayer(p => ({ ...p, offset: { x: dir.x * shift, y: dir.y * shift } }));
       setTimeout(() => setPlayer(p => ({ ...p, offset: { x: 0, y: 0 } })), 100);
   };
 
-  const attackEnemy = (target: Entity) => {
+  const attackEnemy = (target: DungeonEntity) => {
       triggerPlayerAttackAnim(player.dir);
       const targets = [target];
       addVisualEffect('SLASH', target.x, target.y, { dir: player.dir });
@@ -716,7 +700,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           others.forEach(offset => {
               const tx = player.x + offset.x;
               const ty = player.y + offset.y;
-              addVisualEffect('SLASH', tx, ty, { dir: offset as Direction }); 
+              addVisualEffect('SLASH', tx, ty, { dir: offset as DungeonDirection }); 
               addVisualEffect('EXPLOSION', tx, ty, { duration: 10, maxDuration: 10, scale: 0.5 });
               const t = enemies.find(e => e.x === tx && e.y === ty);
               if (t) targets.push(t);
@@ -825,7 +809,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       }
 
       setEnemies(prevEnemies => {
-          const nextEnemies: Entity[] = [];
+          const nextEnemies: DungeonEntity[] = [];
           const occupied = new Set<string>();
           occupied.add(`${px},${py}`);
           const attackingEnemyIds: number[] = [];
@@ -893,7 +877,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       });
   };
 
-  const getItemName = (item: Item) => {
+  const getItemName = (item: DungeonItem) => {
       if (item.category === 'WEAPON' || item.category === 'ARMOR' || item.category === 'RANGED' || item.category === 'SYNTH' || item.category === 'CONSUMABLE') return item.name;
       // Staffs are now the only thing needing identification
       if (item.type.includes('MEAT')) return item.name;
@@ -923,7 +907,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       
       const { x: dx, y: dy } = player.dir;
       let lx = player.x, ly = player.y;
-      let hitEntity: Entity | null = null;
+      let hitEntity: DungeonEntity | null = null;
 
       for (let i=1; i<=8; i++) {
           const tx = player.x + dx * i;
@@ -1111,7 +1095,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               
               // Synthesis Logic: Base Type determines nature. Adds Plus values.
               const newPlus = (baseItem.plus || 0) + (matItem.plus || 0) + 1;
-              const newItem: Item = { ...baseItem, plus: newPlus, name: `${baseItem.name.split('+')[0]}+${newPlus}` };
+              const newItem: DungeonItem = { ...baseItem, plus: newPlus, name: `${baseItem.name.split('+')[0]}+${newPlus}` };
               
               const glueIdx = inventory.findIndex(i => i.type === 'POT_GLUE');
               if (glueIdx === -1) { setSynthState({ ...synthState, active: false }); return; }
@@ -1130,7 +1114,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           const keys = Object.keys(ITEM_DB);
           const key = keys[Math.floor(Math.random() * keys.length)];
           const template = ITEM_DB[key];
-          const newItem: Item = { ...template, id: `changed-${Date.now()}`, plus: 0 };
+          const newItem: DungeonItem = { ...template, id: `changed-${Date.now()}`, plus: 0 };
           let newInv = inventory.map((it, i) => i === idx ? newItem : it).filter((_, i) => i !== potIdx);
           setInventory(newInv);
           addLog(`アイテムが${newItem.name}に変化した！`, "yellow");
@@ -1142,7 +1126,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       }
   };
 
-  const executeStaffEffect = (item: Item, target: Entity | null, x: number, y: number): { hit: boolean, msg?: string } => {
+  const executeStaffEffect = (item: DungeonItem, target: DungeonEntity | null, x: number, y: number): { hit: boolean, msg?: string } => {
       let hit = false;
       let msg = "";
 
@@ -1237,7 +1221,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       
       const { x: dx, y: dy } = player.dir;
       let lx = player.x, ly = player.y;
-      let hitEntity: Entity | null = null;
+      let hitEntity: DungeonEntity | null = null;
 
       for (let i=1; i<=10; i++) {
           const tx = player.x + dx * i;
@@ -1313,7 +1297,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           // Action is "Wave" (振る)
           // Find target in front
           const { x: dx, y: dy } = player.dir;
-          let target: Entity | null = null;
+          let target: DungeonEntity | null = null;
           // Simple beam range? Standard is usually unlimited or visible range. Let's do 10 tiles.
           let tx = player.x, ty = player.y;
           for(let i=1; i<=10; i++) {
@@ -1491,7 +1475,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       if (changed) setPlayer(p => ({ ...p, equipment: newEquip }));
       const newInv = inventory.filter((_, i) => i !== index);
       setInventory(newInv);
-      const droppedEntity: Entity = {
+      const droppedEntity: DungeonEntity = {
           id: Date.now() + Math.random(), type: 'ITEM', x: player.x, y: player.y, char: '!', name: item.name,
           hp: 0, maxHp: 0, baseAttack: 0, baseDefense: 0, attack: 0, defense: 0, xp: 0, dir: { x: 0, y: 0 },
           status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
@@ -1516,7 +1500,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       }
   };
 
-  const handleTouchStart = (item: Item) => { longPressTimer.current = setTimeout(() => { setInspectedItem(item); }, 500); };
+  const handleTouchStart = (item: DungeonItem) => { longPressTimer.current = setTimeout(() => { setInspectedItem(item); }, 500); };
   const handleTouchEnd = () => { if (longPressTimer.current) clearTimeout(longPressTimer.current); };
 
   // --- KEYBOARD ---
@@ -1763,7 +1747,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       ctx.restore();
   };
 
-  const getInspectedDescription = (item: Item) => {
+  const getInspectedDescription = (item: DungeonItem) => {
       if (item.category === 'STAFF' && !identifiedTypes.has(item.type)) {
           return "振ってみるまで分からない。";
       }
@@ -2066,7 +2050,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                 <button onClick={startEndlessMode} className="border-2 border-[#9bbc0f] px-4 py-3 hover:bg-[#306230] animate-pulse font-bold">
                                     中学生編へ (エンドレス)
                                 </button>
-                                <button onClick={onBack} className="border-2 border-[#306230] px-4 py-2 hover:bg-[#306230] text-sm">
+                                <button onClick={() => { onSave(undefined); onBack(); }} className="border-2 border-[#306230] px-4 py-2 hover:bg-[#306230] text-sm">
                                     タイトルへ戻る
                                 </button>
                             </div>
@@ -2082,7 +2066,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                             <button onClick={startNewGame} className="mt-6 border-2 border-[#9bbc0f] px-4 py-2 hover:bg-[#306230] animate-pulse flex items-center">
                                 <RotateCcw size={16} className="mr-2"/> RETRY
                             </button>
-                            <button onClick={onBack} className="mt-4 text-sm hover:underline">
+                            <button onClick={() => { onSave(undefined); onBack(); }} className="mt-4 text-sm hover:underline">
                                 EXIT
                             </button>
                         </div>
@@ -2112,7 +2096,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             </div>
 
             {/* Ranged Button - Moved Higher */}
-            <div className="absolute right-20 top-1/2 -translate-y-[100px] md:right-24 md:-translate-y-24 flex flex-col items-center z-10 group">
+            <div className="absolute right-20 top-auto bottom-24 md:bottom-auto md:top-24 md:right-24 flex flex-col items-center z-10 group translate-y-[-60px]">
                 <button 
                     className="w-10 h-10 bg-[#333] rounded-full shadow-[0_2px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555] touch-none select-none" 
                     onClick={fireRangedWeapon}

@@ -216,7 +216,7 @@ export enum GameScreen {
   MINI_GAME_SELECT = 'MINI_GAME_SELECT', 
   MINI_GAME_POKER = 'MINI_GAME_POKER',
   MINI_GAME_SURVIVOR = 'MINI_GAME_SURVIVOR',
-  MINI_GAME_DUNGEON = 'MINI_GAME_DUNGEON' // Replaced STORY with DUNGEON
+  MINI_GAME_DUNGEON = 'MINI_GAME_DUNGEON'
 }
 
 export enum GameMode {
@@ -392,6 +392,94 @@ export interface DungeonScoreEntry {
     reason: string; // "Cleared", "Starved", "Killed by X"
 }
 
+// --- Dungeon RPG Types ---
+export type DungeonTileType = 'WALL' | 'FLOOR' | 'STAIRS' | 'HALLWAY';
+export type DungeonDirection = { x: 0 | 1 | -1, y: 0 | 1 | -1 };
+export type DungeonItemCategory = 'WEAPON' | 'ARMOR' | 'RANGED' | 'CONSUMABLE' | 'SYNTH' | 'STAFF';
+export type DungeonEnemyType = 'SLIME' | 'GHOST' | 'DRAIN' | 'DRAGON' | 'METAL' | 'FLOATING' | 'THIEF' | 'BAT' | 'BOSS' | 'MANDRAKE' | 'GOLEM' | 'NINJA' | 'MAGE' | 'SHOPKEEPER';
+
+export interface DungeonItem {
+  id: string;
+  category: DungeonItemCategory;
+  type: string; 
+  name: string;
+  desc: string;
+  value?: number;
+  power?: number; 
+  range?: number;
+  count?: number; 
+  plus?: number;
+  charges?: number; 
+  maxCharges?: number;
+  price?: number;
+}
+
+export interface DungeonEquipmentSlots {
+  weapon: DungeonItem | null;
+  armor: DungeonItem | null;
+  ranged: DungeonItem | null;
+}
+
+export interface DungeonEntity {
+  id: number;
+  type: 'PLAYER' | 'ENEMY' | 'ITEM' | 'GOLD';
+  x: number;
+  y: number;
+  char: string;
+  name: string;
+  
+  hp: number;
+  maxHp: number;
+  baseAttack: number; 
+  baseDefense: number;
+  attack: number;     
+  defense: number;
+  
+  xp: number;
+  gold?: number;
+  dir: DungeonDirection;
+  
+  status: {
+      sleep: number;
+      confused: number;
+      frozen: number;
+      blind: number;
+      speed: number;
+  };
+  
+  dead?: boolean;
+  offset?: { x: number, y: number }; 
+  itemData?: DungeonItem; 
+  equipment?: DungeonEquipmentSlots;
+  enemyType?: DungeonEnemyType;
+  shopItems?: DungeonItem[];
+}
+
+export interface DungeonLog {
+  message: string;
+  color?: string;
+  id: number;
+}
+
+export interface DungeonRunState {
+  floor: number;
+  level: number;
+  belly: number;
+  maxBelly: number;
+  player: DungeonEntity;
+  map: DungeonTileType[][];
+  enemies: DungeonEntity[];
+  floorItems: DungeonEntity[];
+  inventory: DungeonItem[];
+  logs: DungeonLog[];
+  turnCounter: number;
+  isEndless: boolean;
+  idMap: Record<string, string>;
+  identifiedTypes: string[];
+  shopState: { active: boolean, merchantId: number | null, mode: 'BUY' | 'SELL' };
+  gameClear: boolean;
+}
+
 export interface GameState {
   screen: GameScreen;
   mode: GameMode; 
@@ -409,5 +497,6 @@ export interface GameState {
   rewards: RewardItem[]; 
   selectionState: SelectionState; 
   isEndless?: boolean;
-  pokerState?: PokerRunState; // Added: Auto-save state for Poker Mini Game
+  pokerState?: PokerRunState;
+  dungeonState?: DungeonRunState; // Added: Auto-save state for Dungeon RPG
 }
