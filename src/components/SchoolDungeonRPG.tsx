@@ -603,22 +603,19 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       const isHungerTurn = turnCounter.current % (heavy ? HUNGER_INTERVAL/2 : HUNGER_INTERVAL) === 0;
       const isRegenTurn = turnCounter.current % REGEN_INTERVAL === 0;
 
-      let starveDamage = 0;
+      let currentBelly = overrides?.belly !== undefined ? overrides.belly : belly;
       
-      setBelly(prevBelly => {
-          let currentBelly = overrides?.belly !== undefined ? overrides.belly : prevBelly;
-          
-          if (isHungerTurn) {
-              currentBelly -= 1;
-          }
-          
-          if (currentBelly <= 0) {
-              currentBelly = 0;
-              starveDamage = 1;
-          }
-          
-          return currentBelly;
-      });
+      if (isHungerTurn) {
+          currentBelly -= 1;
+      }
+      
+      let starveDamage = 0;
+      if (currentBelly <= 0) {
+          currentBelly = 0;
+          starveDamage = 1;
+      }
+      
+      setBelly(currentBelly);
 
       setPlayer(prevPlayer => {
           let currentHp = overrides?.hp !== undefined ? overrides.hp : prevPlayer.hp;
@@ -631,7 +628,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   saveDungeonScore("Starved"); 
                   addLog("空腹で倒れた...", "red"); 
               } else {
-                  addLog("お腹が空いて倒れそうだ...", "red");
+                  if (turnCounter.current % 5 === 0) addLog("お腹が空いて倒れそうだ...", "red");
               }
           } else if (isRegenTurn && currentHp < prevPlayer.maxHp && currentHp > 0) {
               currentHp += 1;
@@ -2006,6 +2003,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                         <span>{floor}F</span>
                         <span>Lv{level}</span>
                         <span>HP{player.hp}/{player.maxHp}</span>
+                        <span>A{player.attack}D{player.defense}</span>
                         <span className="flex items-center"><Coins size={10} className="mr-0.5"/>{player.gold}</span>
                         <span>🍙{belly}%</span>
                     </div>
