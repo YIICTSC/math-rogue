@@ -34,6 +34,22 @@ type Direction = { x: 0 | 1 | -1, y: 0 | 1 | -1 };
 type ItemCategory = 'WEAPON' | 'ARMOR' | 'RANGED' | 'CONSUMABLE' | 'SYNTH';
 type EnemyType = 'SLIME' | 'GHOST' | 'DRAIN' | 'DRAGON' | 'METAL' | 'FLOATING' | 'THIEF' | 'BAT' | 'BOSS';
 
+// Visual Effect Types
+type VisualEffectType = 'SLASH' | 'THUNDER' | 'EXPLOSION' | 'TEXT' | 'FLASH' | 'PROJECTILE';
+
+interface VisualEffect {
+  id: number;
+  type: VisualEffectType;
+  x: number; // Map Grid X or Screen X (depending on logic, using Map Grid usually easier)
+  y: number; // Map Grid Y
+  duration: number; // Frames remaining
+  maxDuration: number;
+  value?: string; // For Text
+  color?: string;
+  dir?: Direction; // For Slash/Projectile
+  scale?: number;
+}
+
 interface Item {
   id: string;
   category: ItemCategory;
@@ -198,6 +214,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const turnCounter = useRef(0); // Track turns for hunger/regen/spawn
   const [isEndless, setIsEndless] = useState(false);
   
+  // VFX State
+  const visualEffects = useRef<VisualEffect[]>([]);
+  const shake = useRef<{x: number, y: number, duration: number}>({x: 0, y: 0, duration: 0});
+  
   // Synthesis/Change State
   const [synthState, setSynthState] = useState<{ 
       active: boolean, 
@@ -271,6 +291,21 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     }
   }, [selectedItemIndex, menuOpen]);
 
+  // VFX Helpers
+  const addVisualEffect = (type: VisualEffectType, x: number, y: number, options: Partial<VisualEffect> = {}) => {
+      visualEffects.current.push({
+          id: Date.now() + Math.random(),
+          type, x, y,
+          duration: type === 'TEXT' ? 30 : 15,
+          maxDuration: type === 'TEXT' ? 30 : 15,
+          ...options
+      });
+  };
+
+  const triggerShake = (duration: number) => {
+      shake.current.duration = duration;
+  };
+
   // Log Logic
   const addLog = (msg: string, color?: string) => {
     setLogs(prev => {
@@ -292,6 +327,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     setMenuOpen(false);
     setIsEndless(false);
     turnCounter.current = 0;
+    visualEffects.current = [];
     
     // Initial Items
     const initItem: Item = { ...ITEM_DB['FOOD_ONIGIRI'], id: `start-${Date.now()}` };
@@ -346,12 +382,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           } else if (floorLevel > 5) {
               t = 'METAL'; name="メタル生徒"; hp=4+Math.floor(floorLevel/5); atk=1+scaling; xp=100+xpScale*3; def=999;
           }
-      }
-
-      // Boss Logic (Floor 20 only)
-      if (floorLevel === 20 && !isEndless) {
-          // Only spawn generic if boss isn't the target here. 
-          // Actually, this function is for generic spawning. Boss is handled separately in gen.
       }
 
       return {
@@ -415,6 +445,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     if (f === 20 && !isEndless) {
         // Boss Floor
         addLog("強烈な殺気を感じる...", "red");
+        triggerShake(20);
         // Boss Entity
         newEnemies.push({
             id: Date.now(), type: 'ENEMY', x: sx, y: sy, char: 'B',
@@ -465,6 +496,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     setEnemies(newEnemies);
     setFloorItems(newItems);
     setShowMap(false);
+    // Floor start effect
+    addVisualEffect('FLASH', 0, 0, {duration: 10, maxDuration: 10});
 };
 
   // --- ACTIONS ---
@@ -564,6 +597,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const attackEnemy = (target: Entity) => {
       triggerPlayerAttackAnim(player.dir);
       const targets = [target];
+      addVisualEffect('SLASH', target.x, target.y, { dir: player.dir });
 
       // 3-Way Attack Logic
       if (player.equipment?.weapon?.effects?.includes('三')) {
@@ -581,6 +615,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           others.forEach(offset => {
               const tx = player.x + offset.x;
               const ty = player.y + offset.y;
+              addVisualEffect('SLASH', tx, ty, { dir: offset as Direction }); // Visual only
               const t = enemies.find(e => e.x === tx && e.y === ty);
               if (t) targets.push(t);
           });
@@ -599,12 +634,13 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           if (effects.includes('金') && t.enemyType === 'METAL') { dmg = 1; }
           if (effects.includes('費') && player.xp > 0) { dmg += 10; setPlayer(p => ({...p, xp: Math.max(0, p.xp - 10)})); } 
 
-          if (Math.random() < 0.1) { dmg *= 2; addLog("会心の一撃！", "red"); }
+          if (Math.random() < 0.1) { dmg *= 2; addLog("会心の一撃！", "red"); triggerShake(5); }
 
           newEnemies = newEnemies.map(e => {
               if (e.id === t.id) {
                   const nhp = e.hp - dmg;
                   addLog(`${e.name}に${dmg}ダメージ！`);
+                  addVisualEffect('TEXT', e.x, e.y, { value: `${dmg}`, color: 'white' });
                   
                   // Meat Processing
                   if (nhp <= 0 && effects.includes('肉') && Math.random() < 0.3) {
@@ -629,6 +665,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           if (d.enemyType === 'BOSS') {
               setGameClear(true);
               audioService.playSound('win');
+              addVisualEffect('FLASH', 0, 0, { duration: 30, maxDuration: 30 });
           } else {
               addLog(`${d.name}を倒した！ (${d.xp} XP)`);
               gainXp(d.xp);
@@ -654,6 +691,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           setPlayer(p => ({ ...p, hp: nextMaxHp, baseAttack: nextAtk, maxHp: nextMaxHp })); 
           addLog(`レベルが${nextLv}に上がった！`);
           audioService.playSound('buff');
+          addVisualEffect('FLASH', 0, 0);
+          addVisualEffect('TEXT', player.x, player.y, { value: 'LEVEL UP!', color: 'yellow' });
       }
       
       setPlayer(p => ({ ...p, xp: nextXp }));
@@ -719,7 +758,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           const attackingEnemyIds: number[] = [];
 
           for (const e of prevEnemies) {
-              if (e.status.sleep > 0) { e.status.sleep--; nextEnemies.push(e); occupied.add(`${e.x},${e.y}`); continue; }
+              if (e.status.sleep > 0) { e.status.sleep--; nextEnemies.push(e); occupied.add(`${e.x},${e.y}`); addVisualEffect('TEXT', e.x, e.y, {value:'Zzz', color:'blue'}); continue; }
               if (e.status.frozen > 0) { e.status.frozen--; nextEnemies.push(e); occupied.add(`${e.x},${e.y}`); continue; }
               
               const dx = px - e.x;
@@ -738,6 +777,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                       });
                       occupied.add(`${e.x},${e.y}`);
                       nextEnemies.push(e);
+                      addVisualEffect('EXPLOSION', px, py); // Using explosion visual for fire
+                      addVisualEffect('TEXT', px, py, { value: `${dmg}`, color: 'red' });
                       continue;
                   }
               }
@@ -763,6 +804,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                       if (player.equipment?.armor?.effects?.includes('見') && Math.random() < 0.3) {
                           addLog("ひらりと身をかわした！", C2);
                           dmg = 0;
+                          addVisualEffect('TEXT', px, py, { value: 'MISS', color: 'blue' });
                       }
                       if (player.equipment?.armor?.effects?.includes('盗') && e.enemyType === 'THIEF') {
                           addLog("名札が盗みを防いだ！");
@@ -781,6 +823,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                           });
                           nextEnemies.push({ ...e, offset: { x: mx * 6, y: my * 6 } });
                           attackingEnemyIds.push(e.id);
+                          triggerShake(5);
+                          addVisualEffect('TEXT', px, py, { value: `${dmg}`, color: 'red' });
                       } else {
                           nextEnemies.push(e);
                       }
@@ -853,6 +897,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
       // Air Swing
       triggerPlayerAttackAnim(player.dir);
+      addVisualEffect('SLASH', tx, ty, { dir: player.dir });
       addLog("素振りをした。");
       audioService.playSound('select');
       processTurn(player.x, player.y);
@@ -936,6 +981,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
               setInventory(newInv);
               addLog(`合成成功！${newItem.name}になった！`, "yellow");
+              addVisualEffect('FLASH', 0, 0);
               audioService.playSound('buff');
               setSynthState({ ...synthState, active: false });
               setMenuOpen(false);
@@ -964,6 +1010,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
           setInventory(newInv);
           addLog(`${targetItem.name}が${newItem.name}に変化した！`, "yellow");
+          addVisualEffect('FLASH', 0, 0);
           audioService.playSound('buff');
           setSynthState({ ...synthState, active: false });
           setMenuOpen(false);
@@ -1009,17 +1056,33 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       } else if (item.category === 'CONSUMABLE') {
           // ... (Consumable logic same as before, simplified for brevity)
           if (item.type.includes('ONIGIRI')) { setBelly(Math.min(maxBelly, belly + (item.value || 50))); addLog(`${item.name}を食べた。満腹！`); actionDone = true; }
-          else if (item.type.includes('HEAL')) { setPlayer(p => ({ ...p, hp: Math.min(p.maxHp, p.hp + (item.value || 30)) })); addLog("HPが回復した！"); actionDone = true; }
-          else if (item.type === 'SCROLL_MAP') { setShowMap(true); addLog("校内図が頭に入った！"); actionDone = true; }
+          else if (item.type.includes('HEAL')) { setPlayer(p => ({ ...p, hp: Math.min(p.maxHp, p.hp + (item.value || 30)) })); addLog("HPが回復した！"); actionDone = true; addVisualEffect('TEXT', player.x, player.y, {value: 'Heal', color: 'green'}); }
+          else if (item.type === 'SCROLL_MAP') { setShowMap(true); addLog("校内図が頭に入った！"); actionDone = true; addVisualEffect('FLASH', 0, 0); }
           else if (item.type === 'SCROLL_THUNDER' || item.type === 'BOMB') {
+              const isBomb = item.type === 'BOMB';
+              if (isBomb) {
+                  addVisualEffect('EXPLOSION', player.x, player.y);
+              } else {
+                  addVisualEffect('THUNDER', 0, 0);
+                  triggerShake(10);
+              }
               setEnemies(prev => prev.map(e => {
                   const dist = Math.abs(e.x - player.x) + Math.abs(e.y - player.y);
                   if (item.type === 'BOMB' && dist > 2) return e;
                   const nhp = e.hp - (item.value || 20);
+                  addVisualEffect('TEXT', e.x, e.y, {value: `${item.value||20}`, color:'yellow'});
                   if (nhp <= 0) { gainXp(e.xp); return { ...e, hp: 0, dead: true }; }
                   return { ...e, hp: nhp };
               }).filter(e => !e.dead));
               addLog(item.type === 'BOMB' ? "爆発した！" : "雷が落ちた！");
+              actionDone = true;
+          } else if (item.type === 'SCROLL_SLEEP') {
+              setEnemies(prev => prev.map(e => {
+                  addVisualEffect('TEXT', e.x, e.y, {value: 'Zzz', color:'blue'});
+                  return { ...e, status: { ...e.status, sleep: 10 } };
+              }));
+              addLog("魔物が眠りについた。");
+              addVisualEffect('FLASH', 0, 0);
               actionDone = true;
           }
           
@@ -1030,9 +1093,12 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       } else if (item.category === 'RANGED') {
           const { x: dx, y: dy } = player.dir;
           let hit = false;
+          let lx = player.x, ly = player.y;
+          // Simulate projectile visual (simplified)
           for (let i=1; i<= (item.range || 5); i++) {
               const tx = player.x + dx * i;
               const ty = player.y + dy * i;
+              lx = tx; ly = ty;
               if (map[ty][tx] === 'WALL') { addLog("壁に当たった。"); break; }
               const target = enemies.find(e => e.x === tx && e.y === ty);
               if (target) {
@@ -1046,7 +1112,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   });
                   const dead = newEnemies.find(e => e.id === target.id && e.hp <= 0);
                   if(dead) { gainXp(dead.xp); addLog(`${dead.name}を倒した！`); }
-                  else { addLog(`${target.name}に${dmg}ダメージ！`); }
+                  else { addLog(`${target.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', target.x, target.y, {value:`${dmg}`}); }
                   
                   setEnemies(newEnemies.filter(e => e.hp > 0));
                   audioService.playSound('attack');
@@ -1054,6 +1120,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   break;
               }
           }
+          // Visual for throw
+          addVisualEffect('PROJECTILE', lx, ly, { dir: player.dir });
           if (!hit) addLog("外れた...");
           
           if (item.count && item.count > 1) {
@@ -1172,7 +1240,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       const loop = setInterval(() => {
           frameCountRef.current++;
           renderGame();
-      }, 100); 
+      }, 50); // 20fps for better VFX
       return () => clearInterval(loop);
   }, [map, player, enemies, floorItems, menuOpen]);
 
@@ -1186,6 +1254,17 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       const w = canvas.width;
       const h = canvas.height;
       const ts = TILE_SIZE * SCALE;
+
+      ctx.save();
+
+      // Screen Shake
+      if (shake.current.duration > 0) {
+          const mag = 4;
+          const sx = (Math.random() - 0.5) * mag;
+          const sy = (Math.random() - 0.5) * mag;
+          ctx.translate(sx, sy);
+          shake.current.duration--;
+      }
 
       // BG
       ctx.fillStyle = C0;
@@ -1252,7 +1331,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                       if (enemy.status.sleep > 0) ctx.globalAlpha = 0.5;
                       ctx.drawImage(sprite, sx + offX, sy + offY, ts, ts);
                       ctx.globalAlpha = 1.0;
-                      if (enemy.status.sleep > 0) { ctx.fillStyle='white'; ctx.fillText('Zzz', sx, sy); }
+                      if (enemy.status.sleep > 0) { ctx.fillStyle='white'; ctx.font='10px monospace'; ctx.fillText('Zzz', sx, sy); }
                   } else {
                       ctx.fillStyle = C1;
                       ctx.fillRect(sx + 2*SCALE + offX, sy + 2*SCALE + offY, 12*SCALE, 12*SCALE);
@@ -1292,6 +1371,59 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               }
           }
       }
+
+      // Draw VFX
+      visualEffects.current.forEach((fx, i) => {
+          fx.duration--;
+          // Calculate screen position relative to camera
+          const sx = (fx.x - startX) * ts;
+          const sy = (fx.y - startY) * ts;
+          
+          if (fx.type === 'FLASH' || fx.type === 'THUNDER') {
+              ctx.fillStyle = fx.type === 'THUNDER' ? 'yellow' : 'white';
+              ctx.globalAlpha = fx.duration / (fx.maxDuration || 20);
+              ctx.fillRect(0, 0, w, h);
+              ctx.globalAlpha = 1.0;
+          }
+          else if (fx.type === 'SLASH') {
+              // Only draw if visible
+              if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
+                  ctx.strokeStyle = 'white';
+                  ctx.lineWidth = 4;
+                  ctx.beginPath();
+                  const d = fx.dir || {x:1, y:0};
+                  // Draw arc or line based on dir
+                  const cx = sx + ts/2;
+                  const cy = sy + ts/2;
+                  ctx.moveTo(cx - d.y*10 - d.x*10, cy - d.x*10 + d.y*10);
+                  ctx.lineTo(cx + d.y*10 + d.x*10, cy + d.x*10 - d.y*10);
+                  ctx.stroke();
+              }
+          }
+          else if (fx.type === 'EXPLOSION') {
+              if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
+                  ctx.fillStyle = ['white', 'orange', 'red'][Math.floor(Math.random()*3)];
+                  const rad = (1 - fx.duration / fx.maxDuration) * ts * 2;
+                  ctx.beginPath();
+                  ctx.arc(sx + ts/2, sy + ts/2, rad, 0, Math.PI*2);
+                  ctx.fill();
+              }
+          }
+          else if (fx.type === 'TEXT') {
+              if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
+                  ctx.fillStyle = fx.color || 'white';
+                  ctx.font = 'bold 16px monospace';
+                  ctx.strokeStyle = 'black';
+                  ctx.lineWidth = 2;
+                  const lift = (1 - fx.duration / fx.maxDuration) * 20;
+                  ctx.strokeText(fx.value || '', sx + ts/2, sy - lift + ts);
+                  ctx.fillText(fx.value || '', sx + ts/2, sy - lift + ts);
+              }
+          }
+      });
+      visualEffects.current = visualEffects.current.filter(fx => fx.duration > 0);
+
+      ctx.restore();
   };
 
   return (
@@ -1490,7 +1622,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         {/* RIGHT COLUMN (Controls) */}
         <div className="w-full max-w-md md:w-64 md:h-[400px] flex-grow md:flex-grow-0 relative min-h-[180px] bg-[#1a1a1a] rounded-t-xl md:rounded-xl border-t-2 md:border-2 border-[#333]">
             
-            {/* Unified D-Pad */}
+            {/* Unified D-Pad - Responsive Position */}
             <div className="absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32 md:left-1/2 md:-translate-x-1/2 md:top-1/3 flex items-center justify-center">
                 {/* Center */}
                 <div className="w-10 h-10 bg-[#333] z-10"></div>
