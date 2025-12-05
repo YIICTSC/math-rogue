@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -377,21 +376,28 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       });
   }, [player.equipment]);
 
-  // Scroll effect
+  // Scroll effect (Refined)
   useEffect(() => {
     if (lastInputType.current === 'KEY' && (menuOpen || shopState.active) && menuListRef.current) {
         const idx = synthState.mode === 'BLANK' ? blankScrollSelectionIndex : selectedItemIndex;
-        const itemEl = menuListRef.current.children[idx] as HTMLElement;
-        if (itemEl) {
-            const container = menuListRef.current;
-            if (itemEl.offsetTop < container.scrollTop) {
-                container.scrollTop = itemEl.offsetTop;
-            } else if (itemEl.offsetTop + itemEl.offsetHeight > container.scrollTop + container.clientHeight) {
-                container.scrollTop = itemEl.offsetTop + itemEl.offsetHeight - container.clientHeight;
+        const container = menuListRef.current;
+        
+        if (container.children.length > idx) {
+            const itemEl = container.children[idx] as HTMLElement;
+            // Simple robust check relative to container's scrollTop
+            const itemTop = itemEl.offsetTop;
+            const itemBottom = itemTop + itemEl.clientHeight;
+            const containerTop = container.scrollTop;
+            const containerBottom = containerTop + container.clientHeight;
+
+            if (itemTop < containerTop) {
+                container.scrollTop = itemTop;
+            } else if (itemBottom > containerBottom) {
+                container.scrollTop = itemBottom - container.clientHeight;
             }
         }
     }
-  }, [selectedItemIndex, menuOpen, shopState.active, blankScrollSelectionIndex, synthState.mode]);
+  }, [selectedItemIndex, menuOpen, shopState.active, shopState.mode, blankScrollSelectionIndex, synthState.mode]);
 
   const addVisualEffect = (type: VisualEffectType, x: number, y: number, options: Partial<VisualEffect> = {}) => {
       visualEffects.current.push({
@@ -1734,8 +1740,23 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             const listLength = shopState.active && shopState.mode === 'BUY' 
                 ? (enemies.find(e=>e.id===shopState.merchantId)?.shopItems?.length||0) 
                 : inventory.length;
+            
             if (e.key === 'ArrowUp') setSelectedItemIndex(prev => Math.max(0, prev - 1));
             if (e.key === 'ArrowDown') setSelectedItemIndex(prev => Math.min(listLength - 1, prev + 1));
+            
+            if (shopState.active) {
+                if (e.key === 'ArrowLeft' && shopState.mode === 'SELL') {
+                    setShopState(prev => ({ ...prev, mode: 'BUY' }));
+                    setSelectedItemIndex(0);
+                    audioService.playSound('select');
+                }
+                if (e.key === 'ArrowRight' && shopState.mode === 'BUY') {
+                    setShopState(prev => ({ ...prev, mode: 'SELL' }));
+                    setSelectedItemIndex(0);
+                    audioService.playSound('select');
+                }
+            }
+
             if (e.key === 'z' || e.key === 'Enter' || e.key === ' ') handleActionBtn();
             return;
         }
@@ -2121,7 +2142,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                 <span className="flex items-center"><Coins size={10} className="mr-1"/> {player.gold} G</span>
                             </div>
 
-                            <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar">
+                            <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
                                 {shopState.mode === 'BUY' ? (
                                     enemies.find(e => e.id === shopState.merchantId)?.shopItems?.map((item, i) => (
                                         <div 
@@ -2189,7 +2210,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                             </div>
                             
                             {synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT' ? (
-                                <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar">
+                                <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
                                     {Array.from(identifiedTypes).filter(t => t.startsWith('SCROLL')).map((type, i) => (
                                         <div key={i} className={`flex items-center border ${blankScrollSelectionIndex === i ? 'bg-[#8bac0f] text-[#0f380f] border-[#9bbc0f]' : 'border-transparent'}`}>
                                             <button 
@@ -2214,7 +2235,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                         </div>
                                     )}
 
-                                    <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar">
+                                    <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
                                         {inventory.map((item, i) => {
                                             const isSynthTarget = synthState.active && (
                                                 (synthState.step === 'SELECT_BASE' && synthState.mode === 'SYNTH' && !['WEAPON','ARMOR'].includes(item.category)) ||
