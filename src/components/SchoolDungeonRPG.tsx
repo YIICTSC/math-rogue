@@ -184,6 +184,38 @@ const ITEM_DB: Record<string, Omit<Item, 'id'>> = {
     'BOMB': { category: 'CONSUMABLE', type: 'BOMB', name: '爆弾', desc: '周囲を爆破する。', value: 200 },
 };
 
+// --- DIJKSTRA PATHFINDING HELPER ---
+// Calculates distance map from target (Player) to all accessible tiles
+const computeDijkstraMap = (map: TileType[][], targetX: number, targetY: number): number[][] => {
+    const dMap = Array(MAP_H).fill(0).map(() => Array(MAP_W).fill(9999));
+    const queue: {x: number, y: number}[] = [{x: targetX, y: targetY}];
+    dMap[targetY][targetX] = 0;
+
+    while(queue.length > 0) {
+        const {x, y} = queue.shift()!;
+        const dist = dMap[y][x];
+
+        // 8 Neighbors (Cardinal + Diagonal)
+        const neighbors = [
+            {x:x, y:y-1}, {x:x, y:y+1}, {x:x-1, y:y}, {x:x+1, y:y},
+            {x:x-1, y:y-1}, {x:x+1, y:y-1}, {x:x-1, y:y+1}, {x:x+1, y:y+1}
+        ];
+
+        for(const n of neighbors) {
+            if(n.x >= 0 && n.x < MAP_W && n.y >= 0 && n.y < MAP_H) {
+                // Treat Walls as impassable
+                if (map[n.y][n.x] !== 'WALL') {
+                    if (dMap[n.y][n.x] > dist + 1) {
+                        dMap[n.y][n.x] = dist + 1;
+                        queue.push(n);
+                    }
+                }
+            }
+        }
+    }
+    return dMap;
+};
+
 const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
@@ -830,6 +862,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           }
       }
 
+      // Compute Dijkstra Map for enemy pathfinding
+      const dMap = computeDijkstraMap(map, px, py);
+
       setEnemies(prevEnemies => {
           const nextEnemies: Entity[] = [];
           const occupied = new Set<string>();
@@ -845,6 +880,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               const dx = px - e.x; const dy = py - e.y;
               const dist = Math.abs(dx) + Math.abs(dy);
               
+              // Special Attacks
               if (e.enemyType === 'DRAGON' && dist <= 2 && dist > 0 && Math.random() < 0.3) {
                   addLog(`${e.name}の炎！`, "red");
                   let dmg = 15;
@@ -863,36 +899,76 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   continue;
               }
 
-              if (dist <= 8) { 
-                  let mx = 0, my = 0;
-                  if (e.status.confused > 0) { mx = Math.floor(Math.random()*3)-1; my = Math.floor(Math.random()*3)-1; e.status.confused--; } 
-                  else { if (Math.abs(dx) > Math.abs(dy)) mx = dx > 0 ? 1 : -1; else my = dy > 0 ? 1 : -1; }
-                  
-                  const tx = e.x + mx; const ty = e.y + my;
-                  if (tx === px && ty === py) {
-                      let dmg = Math.max(1, e.attack - player.defense);
-                      if (player.equipment?.armor?.type === 'GYM_CLOTHES' && Math.random() < 0.3) { addLog("ひらりと身をかわした！", C2); dmg = 0; addVisualEffect('TEXT', px, py, { value: 'MISS', color: 'blue' }); }
-                      if (player.equipment?.armor?.type === 'NAME_TAG' && e.enemyType === 'THIEF') addLog("名札が盗みを防いだ！");
-                      else if (e.enemyType === 'THIEF' && dmg > 0 && Math.random() < 0.3 && inventory.length > 0) { addLog("アイテムを盗まれた！", "red"); const idx = Math.floor(Math.random() * inventory.length); setInventory(inv => inv.filter((_, i) => i !== idx)); }
+              let tx = e.x;
+              let ty = e.y;
+              let moved = false;
 
-                      if (dmg > 0) {
-                          addLog(`${e.name}の攻撃！${dmg}ダメージ！`, "red");
-                          setPlayer(p => { const newHp = p.hp - dmg; if (newHp <= 0) { setGameOver(true); saveDungeonScore(`Killed by ${e.name}`); } return { ...p, hp: newHp }; });
-                          nextEnemies.push({ ...e, offset: { x: mx * 6, y: my * 6 } });
-                          attackingEnemyIds.push(e.id);
-                          triggerShake(5);
-                          addVisualEffect('TEXT', px, py, { value: `${dmg}`, color: 'red' });
-                      } else { nextEnemies.push(e); }
-                      occupied.add(`${e.x},${e.y}`);
-                      continue;
-                  }
+              // Confused Movement
+              if (e.status.confused > 0) {
+                  e.status.confused--;
+                  const dirs = [[0,1], [0,-1], [1,0], [-1,0]];
+                  const r = dirs[Math.floor(Math.random()*4)];
+                  tx = e.x + r[0]; ty = e.y + r[1];
+                  moved = true; // Attempt random move
+              } 
+              // Standard Pathfinding (Dijkstra) if "awake"
+              else if (dist <= 15) {
+                  // If adjacent to player, attack logic below will handle it, but pathfinding leads there too
+                  const neighbors = [
+                      {x:e.x, y:e.y-1}, {x:e.x, y:e.y+1}, {x:e.x-1, y:e.y}, {x:e.x+1, y:e.y},
+                      {x:e.x-1, y:e.y-1}, {x:e.x+1, y:e.y-1}, {x:e.x-1, y:e.y+1}, {x:e.x+1, y:e.y+1}
+                  ];
                   
+                  let bestDist = dMap[e.y][e.x];
+                  let bestMove = null;
+
+                  for (const n of neighbors) {
+                      if (n.x >= 0 && n.x < MAP_W && n.y >= 0 && n.y < MAP_H && map[n.y][n.x] !== 'WALL') {
+                          // Allow moving to player tile to trigger attack logic
+                          if (!occupied.has(`${n.x},${n.y}`) || (n.x === px && n.y === py)) {
+                              if (dMap[n.y][n.x] < bestDist) {
+                                  bestDist = dMap[n.y][n.x];
+                                  bestMove = n;
+                              }
+                          }
+                      }
+                  }
+
+                  if (bestMove) {
+                      tx = bestMove.x;
+                      ty = bestMove.y;
+                      moved = true;
+                  }
+              }
+
+              // Attack or Move Execution
+              if (tx === px && ty === py) {
+                  // Attack
+                  let dmg = Math.max(1, e.attack - player.defense);
+                  if (player.equipment?.armor?.type === 'GYM_CLOTHES' && Math.random() < 0.3) { addLog("ひらりと身をかわした！", C2); dmg = 0; addVisualEffect('TEXT', px, py, { value: 'MISS', color: 'blue' }); }
+                  if (player.equipment?.armor?.type === 'NAME_TAG' && e.enemyType === 'THIEF') addLog("名札が盗みを防いだ！");
+                  else if (e.enemyType === 'THIEF' && dmg > 0 && Math.random() < 0.3 && inventory.length > 0) { addLog("アイテムを盗まれた！", "red"); const idx = Math.floor(Math.random() * inventory.length); setInventory(inv => inv.filter((_, i) => i !== idx)); }
+
+                  if (dmg > 0) {
+                      addLog(`${e.name}の攻撃！${dmg}ダメージ！`, "red");
+                      setPlayer(p => { const newHp = p.hp - dmg; if (newHp <= 0) { setGameOver(true); saveDungeonScore(`Killed by ${e.name}`); } return { ...p, hp: newHp }; });
+                      nextEnemies.push({ ...e, offset: { x: (tx - e.x) * 6, y: (ty - e.y) * 6 } });
+                      attackingEnemyIds.push(e.id);
+                      triggerShake(5);
+                      addVisualEffect('TEXT', px, py, { value: `${dmg}`, color: 'red' });
+                  } else { nextEnemies.push(e); }
+                  occupied.add(`${e.x},${e.y}`);
+              } else if (moved) {
+                  // Attempt Move
                   if (!map[ty][tx] || map[ty][tx] === 'WALL' || occupied.has(`${tx},${ty}`) || prevEnemies.some(o => o.id !== e.id && o.x === tx && o.y === ty)) {
-                      occupied.add(`${e.x},${e.y}`); nextEnemies.push(e);
+                      occupied.add(`${e.x},${e.y}`); nextEnemies.push(e); // Blocked
                   } else {
                       occupied.add(`${tx},${ty}`); nextEnemies.push({ ...e, x: tx, y: ty });
                   }
-              } else { occupied.add(`${e.x},${e.y}`); nextEnemies.push(e); }
+              } else {
+                  // Idle
+                  occupied.add(`${e.x},${e.y}`); nextEnemies.push(e);
+              }
           }
           if (attackingEnemyIds.length > 0) setTimeout(() => setEnemies(curr => curr.map(en => attackingEnemyIds.includes(en.id) ? { ...en, offset: { x: 0, y: 0 } } : en)), 150);
           return nextEnemies;
