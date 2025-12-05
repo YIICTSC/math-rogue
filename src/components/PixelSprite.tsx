@@ -606,6 +606,24 @@ export const SPRITE_TEMPLATES: Record<string, string[]> = {
     "................",
     "................",
     "................"
+  ],
+  UMBRELLA: [
+    "................",
+    ".......##.......",
+    "......####......",
+    ".....#%%%%#.....",
+    "....#%%%%%%#....",
+    "...#%%%%%%%%#...",
+    "....#%####%#....",
+    "....#%####%#....",
+    ".......##.......",
+    ".......##.......",
+    ".......##.......",
+    ".......##.......",
+    ".......##.......",
+    ".......##.......",
+    ".....###........",
+    "................"
   ]
 };
 
@@ -654,6 +672,7 @@ export const createPixelSpriteCanvas = (seed: string, name: string = "", size: n
     else if (n.includes('花') || n.includes('草') || n.includes('キノコ') || n.includes('樹')) spriteKey = 'PLANT';
     
     // Cards
+    else if (n.includes('傘') || n.includes('杖') || n.includes('パラソル')) spriteKey = 'UMBRELLA';
     else if (n.includes('ノート') || n.includes('宿題') || n.includes('辞書') || n.includes('本') || n.includes('学習') || n.includes('予習') || n.includes('計算') || n.includes('研究') || n.includes('速読') || n.includes('計画') || n.includes('作戦') || n.includes('勉強') || n.includes('書') || n.includes('読') || n.includes('誌') || n.includes('帳')) spriteKey = 'NOTEBOOK';
     else if (n.includes('ランドセル') || n.includes('バッグ') || n.includes('道具') || n.includes('準備')) spriteKey = 'BACKPACK';
     else if (n.includes('上履き') || n.includes('靴') || n.includes('足') || n.includes('ダッシュ') || n.includes('ステップ') || n.includes('ジャンプ') || n.includes('側転') || n.includes('バック転') || n.includes('歩') || n.includes('走') || n.includes('跳') || n.includes('逃')) spriteKey = 'SHOE';
