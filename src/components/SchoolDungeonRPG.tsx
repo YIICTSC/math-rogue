@@ -131,11 +131,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
   // Init
   useEffect(() => {
-    // Generate Sprites - Warrior Colors (#f44336 Red Cap, #3e2723 Hair, #ffccbc Skin)
-    // Red clothes: #d32f2f
-    spriteCache.current['PLAYER_FRONT'] = createPixelSpriteCanvas('P_FRONT', 'HUMANOID|#d32f2f'); 
-    spriteCache.current['PLAYER_SIDE'] = createPixelSpriteCanvas('P_SIDE', 'HUMANOID_SIDE|#d32f2f'); 
-    spriteCache.current['PLAYER_BACK'] = createPixelSpriteCanvas('P_BACK', 'HUMANOID_BACK|#d32f2f');
+    // Generate Sprites - Use HERO templates with Red/Skin palette
+    // '赤' triggers red clothes, 'HERO' triggers skin face
+    spriteCache.current['PLAYER_FRONT'] = createPixelSpriteCanvas('P_FRONT', 'HERO_FRONT|赤'); 
+    spriteCache.current['PLAYER_SIDE'] = createPixelSpriteCanvas('P_SIDE', 'HERO_SIDE|赤'); 
+    spriteCache.current['PLAYER_BACK'] = createPixelSpriteCanvas('P_BACK', 'HERO_BACK|赤');
     
     // Enemy Sprites from Main Game Palettes
     spriteCache.current['SLIME'] = createPixelSpriteCanvas('SLIME', 'SLIME|#1565C0'); // Blue
@@ -795,7 +795,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             </div>
 
             {/* A/B Buttons */}
-            <div className="absolute right-6 top-1/2 -translate-y-1/2 flex gap-4 transform -rotate-12">
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-4 transform -rotate-12">
                 <div className="flex flex-col items-center group">
                     <button 
                         className="w-14 h-14 bg-[#8b0000] rounded-full shadow-[0_4px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000]"
