@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
 
@@ -153,6 +153,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   // Menu Navigation
   const [selectedItemIndex, setSelectedItemIndex] = useState(0);
   const menuListRef = useRef<HTMLDivElement>(null);
+
+  // Inspection
+  const [inspectedItem, setInspectedItem] = useState<Item | null>(null);
+  const longPressTimer = useRef<any>(null);
 
   // Init
   useEffect(() => {
@@ -492,7 +496,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
       // Enemy Turn
       setEnemies(prevEnemies => {
-          return prevEnemies.map(e => {
+          const nextEnemies: Entity[] = [];
+          const occupied = new Set<string>();
+          occupied.add(`${px},${py}`);
+
+          for (const e of prevEnemies) {
               // Enemy Logic (Simple Tracking)
               const dx = px - e.x;
               const dy = py - e.y;
@@ -505,7 +513,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   
                   const tx = e.x + mx;
                   const ty = e.y + my;
+                  const targetKey = `${tx},${ty}`;
                   
+                  // Attack Player
                   if (tx === px && ty === py) {
                       const dmg = Math.max(1, e.attack - player.defense);
                       addLog(`${e.name}の攻撃！${dmg}ダメージ！`, "red");
@@ -514,15 +524,29 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                           if (newHp <= 0) setGameOver(true);
                           return { ...p, hp: newHp };
                       });
-                      return e; 
+                      occupied.add(`${e.x},${e.y}`);
+                      nextEnemies.push(e); // Stay
+                      continue;
                   }
                   
-                  if (map[ty][tx] !== 'WALL' && !prevEnemies.some(o => o.x === tx && o.y === ty)) {
-                      return { ...e, x: tx, y: ty };
+                  // Move Check: Not Wall, Not Occupied by another Enemy (Current OR Future)
+                  const isWall = map[ty][tx] === 'WALL';
+                  const isOccupiedByNew = occupied.has(targetKey);
+                  const isOccupiedByOld = prevEnemies.some(o => o.id !== e.id && o.x === tx && o.y === ty); // Check current positions to avoid swapping/stacking
+                  
+                  if (!isWall && !isOccupiedByNew && !isOccupiedByOld) {
+                      occupied.add(targetKey);
+                      nextEnemies.push({ ...e, x: tx, y: ty });
+                  } else {
+                      occupied.add(`${e.x},${e.y}`);
+                      nextEnemies.push(e);
                   }
+              } else {
+                  occupied.add(`${e.x},${e.y}`);
+                  nextEnemies.push(e);
               }
-              return e;
-          });
+          }
+          return nextEnemies;
       });
   };
 
@@ -608,8 +632,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   return;
               }
 
-              // Logic: Power adds half, Effects merge, Plus adds
-              const newPower = (baseItem.power || 0); // Base power doesn't increase, only 'plus' value does in standard roguelikes, but let's simplify
+              const newPower = (baseItem.power || 0); 
               const newPlus = (baseItem.plus || 0) + (matItem.plus || 0) + 1;
               const newEffects = Array.from(new Set([...(baseItem.effects || []), ...(matItem.effects || [])]));
               
@@ -620,29 +643,16 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   name: `${baseItem.name.split('+')[0]}+${newPlus}`
               };
 
-              // Update Inventory: Remove glue (if used? assuming Glue triggered this), remove material, update base
-              // Note: The "Glue" item that triggered this mode should be removed.
-              // We need to track which "Glue" started this.
-              // Simplification: We assume the Glue was consumed when entering mode? No, better consume now.
-              // But we need the index of the glue. 
-              // Refactor: handleItemAction sets up state. We need to know *which* glue.
-              // For now, let's just find the first GLUE and remove it.
-              
               const glueIdx = inventory.findIndex(i => i.type === 'GLUE');
               if (glueIdx === -1) {
-                  // Should not happen
                   setSynthState({ active: false, step: 'SELECT_BASE', baseIndex: null });
                   return;
               }
 
               let newInv = [...inventory];
-              // Remove material first (highest index first to avoid shift issues?)
-              // Indices: baseIdx, idx (mat), glueIdx
               const indicesToRemove = [idx, glueIdx].sort((a,b) => b-a);
               indicesToRemove.forEach(i => newInv.splice(i, 1));
               
-              // Find where base is now (indices shifted)
-              // Actually, easier to map and filter
               newInv = inventory.map((it, i) => {
                   if (i === baseIdx) return newItem;
                   return it;
@@ -716,7 +726,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               audioService.playSound('attack');
               actionDone = true;
           } else if (item.type === 'SCROLL_SLEEP') {
-              // Not implemented status effects yet, just skip turn
               addLog("敵は眠ってしまった！");
               actionDone = true;
           } else if (item.type === 'SCROLL_POWER') {
@@ -728,7 +737,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   actionDone = true;
               } else {
                   addLog("装備していないと効果がない！");
-                  actionDone = true; // Consumed anyway
+                  actionDone = true; 
               }
           }
           
@@ -800,6 +809,16 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       }
   };
 
+  const handleTouchStart = (item: Item) => {
+      longPressTimer.current = setTimeout(() => {
+          setInspectedItem(item);
+      }, 500);
+  };
+
+  const handleTouchEnd = () => {
+      if (longPressTimer.current) clearTimeout(longPressTimer.current);
+  };
+
   // --- KEYBOARD SUPPORT ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -820,7 +839,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         }
         
         // Handle Cancel inside menu
-        if (menuOpen && e.key === 'Backspace') {
+        if (menuOpen && (e.key === 'Backspace' || e.key === 'x')) {
             if (synthState.active) {
                 setSynthState({ active: false, step: 'SELECT_BASE', baseIndex: null });
             } else {
@@ -829,11 +848,24 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             return;
         }
 
+        if (menuOpen) {
+            if (e.key === 'ArrowUp') setSelectedItemIndex(prev => Math.max(0, prev - 1));
+            if (e.key === 'ArrowDown') setSelectedItemIndex(prev => Math.min(inventory.length - 1, prev + 1));
+            if (e.key === 'z' || e.key === 'Enter' || e.key === ' ') handleActionBtn();
+            return;
+        }
+
         switch(e.key) {
-            case 'ArrowUp': case 'w': movePlayer(0, -1); break;
-            case 'ArrowDown': case 's': movePlayer(0, 1); break;
-            case 'ArrowLeft': case 'a': movePlayer(-1, 0); break;
-            case 'ArrowRight': case 'd': movePlayer(1, 0); break;
+            case 'ArrowUp': case 'w': case '8': case 'k': movePlayer(0, -1); break;
+            case 'ArrowDown': case 's': case '2': case 'j': movePlayer(0, 1); break;
+            case 'ArrowLeft': case 'a': case '4': case 'h': movePlayer(-1, 0); break;
+            case 'ArrowRight': case 'd': case '6': case 'l': movePlayer(1, 0); break;
+            // Diagonals
+            case 'Home': case '7': case 'y': movePlayer(-1, -1); break;
+            case 'PageUp': case '9': case 'u': movePlayer(1, -1); break;
+            case 'End': case '1': case 'b': movePlayer(-1, 1); break;
+            case 'PageDown': case '3': case 'n': movePlayer(1, 1); break;
+            
             case 'z': case ' ': case 'Enter': handleActionBtn(); break;
         }
     };
@@ -968,6 +1000,25 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   return (
     <div className="w-full h-full bg-[#101010] flex flex-col items-center font-mono select-none overflow-hidden touch-none relative p-4">
         
+        {/* Inspection Modal */}
+        {inspectedItem && (
+            <div className="absolute inset-0 z-50 bg-[#0f380f]/95 flex items-center justify-center p-4" onClick={() => setInspectedItem(null)}>
+                <div className="w-full max-w-xs bg-[#9bbc0f] border-4 border-[#306230] p-4 shadow-xl text-[#0f380f]" onClick={e => e.stopPropagation()}>
+                    <div className="flex justify-between items-start mb-2 border-b-2 border-[#306230] pb-1">
+                        <h3 className="font-bold text-lg">{inspectedItem.name} {inspectedItem.plus ? `+${inspectedItem.plus}` : ''}</h3>
+                        <button onClick={() => setInspectedItem(null)}><X size={20}/></button>
+                    </div>
+                    <div className="text-sm mb-4 min-h-[3rem]">{inspectedItem.desc}</div>
+                    <div className="text-xs font-bold grid grid-cols-2 gap-2">
+                        <div>分類: {inspectedItem.category}</div>
+                        {inspectedItem.power && <div>威力: {inspectedItem.power}</div>}
+                        {inspectedItem.value && <div>効果値: {inspectedItem.value}</div>}
+                        {inspectedItem.effects && inspectedItem.effects.length > 0 && <div className="col-span-2">印: [{inspectedItem.effects.join('')}]</div>}
+                    </div>
+                </div>
+            </div>
+        )}
+
         {/* Game Screen Area */}
         <div className="w-full max-w-md aspect-[11/9] relative mb-2 shrink-0">
              {/* LCD Screen (Green) */}
@@ -1044,7 +1095,13 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                 );
                                 
                                 return (
-                                    <div key={i} className={`flex items-center border ${selectedItemIndex === i ? 'bg-[#8bac0f] text-[#0f380f] border-[#9bbc0f]' : 'border-transparent hover:border-[#9bbc0f]'} ${isSynthTarget ? 'opacity-30' : ''}`}>
+                                    <div 
+                                        key={i} 
+                                        className={`flex items-center border ${selectedItemIndex === i ? 'bg-[#8bac0f] text-[#0f380f] border-[#9bbc0f]' : 'border-transparent hover:border-[#9bbc0f]'} ${isSynthTarget ? 'opacity-30' : ''}`}
+                                        onContextMenu={(e) => { e.preventDefault(); setInspectedItem(item); }}
+                                        onTouchStart={() => handleTouchStart(item)}
+                                        onTouchEnd={handleTouchEnd}
+                                    >
                                         <button 
                                             className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center"
                                             onClick={() => !isSynthTarget && (synthState.active ? handleSynthesisStep() : handleItemAction(i))}
@@ -1071,6 +1128,13 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                                 <ArrowDown size={10} />
                                             </button>
                                         )}
+                                        <button 
+                                            className="px-2 py-1 border-l border-[#306230] hover:bg-[#306230] hover:text-[#9bbc0f] flex items-center justify-center"
+                                            onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}
+                                            title="詳細"
+                                        >
+                                            <Info size={10} />
+                                        </button>
                                     </div>
                                 );
                             })}
