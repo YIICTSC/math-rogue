@@ -185,7 +185,6 @@ const ITEM_DB: Record<string, Omit<Item, 'id'>> = {
 };
 
 // --- DIJKSTRA PATHFINDING HELPER ---
-// Calculates distance map from target (Player) to all accessible tiles
 const computeDijkstraMap = (map: TileType[][], targetX: number, targetY: number): number[][] => {
     const dMap = Array(MAP_H).fill(0).map(() => Array(MAP_W).fill(9999));
     const queue: {x: number, y: number}[] = [{x: targetX, y: targetY}];
@@ -578,6 +577,201 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     addVisualEffect('FLASH', 0, 0, {duration: 10, maxDuration: 10});
 };
 
+  const gainXp = (amount: number) => {
+      let nextXp = player.xp + amount;
+      let nextLv = level;
+      let nextMaxHp = player.maxHp;
+      let nextAtk = player.baseAttack;
+      const needed = nextLv * 10;
+      if (nextXp >= needed) {
+          nextXp -= needed; nextLv++; nextMaxHp += 5; nextAtk += 1;
+          setPlayer(p => ({ ...p, hp: nextMaxHp, baseAttack: nextAtk, maxHp: nextMaxHp })); 
+          addLog(`レベルが${nextLv}に上がった！`);
+          audioService.playSound('buff');
+          addVisualEffect('FLASH', 0, 0);
+          addVisualEffect('TEXT', player.x, player.y, { value: 'LEVEL UP!', color: 'yellow' });
+      }
+      setPlayer(p => ({ ...p, xp: nextXp }));
+      setLevel(nextLv);
+  };
+
+  const processTurn = (px: number, py: number, overrides?: { belly?: number, hp?: number }) => {
+      turnCounter.current += 1;
+      
+      const aType = player.equipment?.armor?.type;
+      const heavy = aType === 'RANDO_SERU';
+      const isHungerTurn = turnCounter.current % (heavy ? HUNGER_INTERVAL/2 : HUNGER_INTERVAL) === 0;
+      const isRegenTurn = turnCounter.current % REGEN_INTERVAL === 0;
+
+      let starveDamage = 0;
+      
+      setBelly(prevBelly => {
+          let currentBelly = overrides?.belly !== undefined ? overrides.belly : prevBelly;
+          
+          if (isHungerTurn) {
+              currentBelly -= 1;
+          }
+          
+          if (currentBelly <= 0) {
+              currentBelly = 0;
+              starveDamage = 1;
+          }
+          
+          return currentBelly;
+      });
+
+      setPlayer(prevPlayer => {
+          let currentHp = overrides?.hp !== undefined ? overrides.hp : prevPlayer.hp;
+          let nextStatus = { ...prevPlayer.status };
+          
+          if (starveDamage > 0) {
+              currentHp -= 1;
+              if (currentHp <= 0) {
+                  setGameOver(true); 
+                  saveDungeonScore("Starved"); 
+                  addLog("空腹で倒れた...", "red"); 
+              } else {
+                  addLog("お腹が空いて倒れそうだ...", "red");
+              }
+          } else if (isRegenTurn && currentHp < prevPlayer.maxHp && currentHp > 0) {
+              currentHp += 1;
+          }
+          
+          // Status updates
+          if (nextStatus.sleep > 0) { nextStatus.sleep--; if (nextStatus.sleep<=0) addLog("目が覚めた！"); }
+          if (nextStatus.confused > 0) nextStatus.confused--;
+          if (nextStatus.blind > 0) nextStatus.blind--;
+          if (nextStatus.frozen > 0) nextStatus.frozen--;
+
+          currentHp = Math.min(prevPlayer.maxHp, currentHp);
+          
+          return { ...prevPlayer, hp: currentHp, status: nextStatus };
+      });
+
+      if (turnCounter.current % ENEMY_SPAWN_RATE === 0) {
+          let attempts = 0;
+          while (attempts < 5) {
+              attempts++;
+              const rx = Math.floor(Math.random() * MAP_W);
+              const ry = Math.floor(Math.random() * MAP_H);
+              if (map[ry][rx] === 'FLOOR' && !enemies.find(e => e.x === rx && e.y === ry) && (rx !== px || ry !== py)) {
+                  setEnemies(prev => [...prev, spawnEnemy(rx, ry, floor)]);
+                  break;
+              }
+          }
+      }
+
+      // Compute Dijkstra Map for enemy pathfinding
+      const dMap = computeDijkstraMap(map, px, py);
+
+      setEnemies(prevEnemies => {
+          const nextEnemies: Entity[] = [];
+          const occupied = new Set<string>();
+          occupied.add(`${px},${py}`);
+          const attackingEnemyIds: number[] = [];
+
+          for (const e of prevEnemies) {
+              if (e.enemyType === 'SHOPKEEPER') { occupied.add(`${e.x},${e.y}`); nextEnemies.push(e); continue; }
+
+              if (e.status.sleep > 0) { e.status.sleep--; nextEnemies.push(e); occupied.add(`${e.x},${e.y}`); addVisualEffect('TEXT', e.x, e.y, {value:'Zzz', color:'blue'}); continue; }
+              if (e.status.frozen > 0) { e.status.frozen--; nextEnemies.push(e); occupied.add(`${e.x},${e.y}`); continue; }
+              
+              const dx = px - e.x; const dy = py - e.y;
+              const dist = Math.abs(dx) + Math.abs(dy);
+              
+              // Special Attacks
+              if (e.enemyType === 'DRAGON' && dist <= 2 && dist > 0 && Math.random() < 0.3) {
+                  addLog(`${e.name}の炎！`, "red");
+                  let dmg = 15;
+                  if (player.equipment?.armor?.type === 'FIREFIGHTER') dmg = Math.floor(dmg / 2);
+                  setPlayer(p => { const nhp = p.hp - dmg; if(nhp<=0) { setGameOver(true); saveDungeonScore(`Killed by ${e.name}`); } return {...p, hp:nhp}; });
+                  occupied.add(`${e.x},${e.y}`); nextEnemies.push(e);
+                  addVisualEffect('EXPLOSION', px, py); addVisualEffect('TEXT', px, py, { value: `${dmg}`, color: 'red' });
+                  continue;
+              }
+
+              if (e.enemyType === 'MAGE' && dist <= 4 && dist > 0 && Math.random() < 0.2) {
+                  addLog(`${e.name}の魔法！混乱した！`, "yellow");
+                  setPlayer(p => ({ ...p, status: { ...p.status, confused: 5 } }));
+                  occupied.add(`${e.x},${e.y}`); nextEnemies.push(e);
+                  addVisualEffect('FLASH', px, py);
+                  continue;
+              }
+
+              let tx = e.x;
+              let ty = e.y;
+              let moved = false;
+
+              // Confused Movement
+              if (e.status.confused > 0) {
+                  e.status.confused--;
+                  const dirs = [[0,1], [0,-1], [1,0], [-1,0]];
+                  const r = dirs[Math.floor(Math.random()*4)];
+                  tx = e.x + r[0]; ty = e.y + r[1];
+                  moved = true; // Attempt random move
+              } 
+              // Standard Pathfinding (Dijkstra) if "awake"
+              else if (dist <= 15) {
+                  const neighbors = [
+                      {x:e.x, y:e.y-1}, {x:e.x, y:e.y+1}, {x:e.x-1, y:e.y}, {x:e.x+1, y:e.y},
+                      {x:e.x-1, y:e.y-1}, {x:e.x+1, y:e.y-1}, {x:e.x-1, y:e.y+1}, {x:e.x+1, y:e.y+1}
+                  ];
+                  
+                  let bestDist = dMap[e.y][e.x];
+                  let bestMove = null;
+
+                  for (const n of neighbors) {
+                      if (n.x >= 0 && n.x < MAP_W && n.y >= 0 && n.y < MAP_H && map[n.y][n.x] !== 'WALL') {
+                          if (!occupied.has(`${n.x},${n.y}`) || (n.x === px && n.y === py)) {
+                              if (dMap[n.y][n.x] < bestDist) {
+                                  bestDist = dMap[n.y][n.x];
+                                  bestMove = n;
+                              }
+                          }
+                      }
+                  }
+
+                  if (bestMove) {
+                      tx = bestMove.x;
+                      ty = bestMove.y;
+                      moved = true;
+                  }
+              }
+
+              // Attack or Move Execution
+              if (tx === px && ty === py) {
+                  // Attack
+                  let dmg = Math.max(1, e.attack - player.defense);
+                  if (player.equipment?.armor?.type === 'GYM_CLOTHES' && Math.random() < 0.3) { addLog("ひらりと身をかわした！", C2); dmg = 0; addVisualEffect('TEXT', px, py, { value: 'MISS', color: 'blue' }); }
+                  if (player.equipment?.armor?.type === 'NAME_TAG' && e.enemyType === 'THIEF') addLog("名札が盗みを防いだ！");
+                  else if (e.enemyType === 'THIEF' && dmg > 0 && Math.random() < 0.3 && inventory.length > 0) { addLog("アイテムを盗まれた！", "red"); const idx = Math.floor(Math.random() * inventory.length); setInventory(inv => inv.filter((_, i) => i !== idx)); }
+
+                  if (dmg > 0) {
+                      addLog(`${e.name}の攻撃！${dmg}ダメージ！`, "red");
+                      setPlayer(p => { const newHp = p.hp - dmg; if (newHp <= 0) { setGameOver(true); saveDungeonScore(`Killed by ${e.name}`); } return { ...p, hp: newHp }; });
+                      nextEnemies.push({ ...e, offset: { x: (tx - e.x) * 6, y: (ty - e.y) * 6 } });
+                      attackingEnemyIds.push(e.id);
+                      triggerShake(5);
+                      addVisualEffect('TEXT', px, py, { value: `${dmg}`, color: 'red' });
+                  } else { nextEnemies.push(e); }
+                  occupied.add(`${e.x},${e.y}`);
+              } else if (moved) {
+                  // Attempt Move
+                  if (!map[ty][tx] || map[ty][tx] === 'WALL' || occupied.has(`${tx},${ty}`) || prevEnemies.some(o => o.id !== e.id && o.x === tx && o.y === ty)) {
+                      occupied.add(`${e.x},${e.y}`); nextEnemies.push(e); // Blocked
+                  } else {
+                      occupied.add(`${tx},${ty}`); nextEnemies.push({ ...e, x: tx, y: ty });
+                  }
+              } else {
+                  // Idle
+                  occupied.add(`${e.x},${e.y}`); nextEnemies.push(e);
+              }
+          }
+          if (attackingEnemyIds.length > 0) setTimeout(() => setEnemies(curr => curr.map(en => attackingEnemyIds.includes(en.id) ? { ...en, offset: { x: 0, y: 0 } } : en)), 150);
+          return nextEnemies;
+      });
+  };
+
   const movePlayer = (dx: 0|1|-1, dy: 0|1|-1) => {
       if(gameOver || gameClear) return;
 
@@ -675,6 +869,104 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       processTurn(finalX, finalY);
   };
 
+  const getItemName = (item: Item) => {
+      if (item.category === 'WEAPON' || item.category === 'ARMOR' || item.category === 'RANGED' || item.category === 'SYNTH' || item.category === 'CONSUMABLE') return item.name;
+      // Staffs are now the only thing needing identification
+      if (item.type.includes('MEAT')) return item.name;
+      if (identifiedTypes.has(item.type)) return item.name;
+      return idMap[item.type] || item.name;
+  };
+
+  // --- ACTIONS ---
+  
+  const fireRangedWeapon = () => {
+      if (menuOpen || shopState.active) return;
+      const rangedItem = player.equipment?.ranged;
+      if (!rangedItem) {
+          addLog("飛び道具を装備していない！");
+          return;
+      }
+      if ((rangedItem.count || 0) <= 0) {
+          addLog(`${rangedItem.name}が無くなった！`);
+          // Unequip/Remove
+          setPlayer(p => ({ ...p, equipment: { ...p.equipment!, ranged: null } }));
+          return;
+      }
+
+      // Decrement
+      const newRanged = { ...rangedItem, count: (rangedItem.count || 0) - 1 };
+      setPlayer(p => ({ ...p, equipment: { ...p.equipment!, ranged: newRanged } }));
+      
+      const { x: dx, y: dy } = player.dir;
+      let lx = player.x, ly = player.y;
+      let hitEntity: Entity | null = null;
+
+      for (let i=1; i<=8; i++) {
+          const tx = player.x + dx * i;
+          const ty = player.y + dy * i;
+          lx = tx; ly = ty;
+          if (map[ty][tx] === 'WALL') { addLog("壁に当たった。"); break; }
+          const target = enemies.find(e => e.x === tx && e.y === ty);
+          if (target) { hitEntity = target; break; }
+      }
+
+      addVisualEffect('PROJECTILE', lx, ly, { dir: player.dir, duration: 10 });
+      triggerPlayerAttackAnim(player.dir);
+
+      if (hitEntity) {
+          let dmg = 5 + (newRanged.power || 0);
+          if (newRanged.type === 'SHADOW_PIN') { hitEntity.status.frozen = 5; addLog("影を縫いつけた！"); }
+          
+          const newEnemies = enemies.map(e => {
+              if (e.id === hitEntity!.id) {
+                  const nhp = e.hp - dmg;
+                  return { ...e, hp: nhp };
+              }
+              return e;
+          });
+          const dead = newEnemies.find(e => e.id === hitEntity!.id && e.hp <= 0);
+          if(dead) { gainXp(dead.xp); addLog(`${dead.name}を倒した！`); }
+          else { addLog(`${hitEntity.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', hitEntity.x, hitEntity.y, {value:`${dmg}`}); }
+          setEnemies(newEnemies.filter(e => e.hp > 0));
+          audioService.playSound('attack');
+      } else {
+          addLog("外した！");
+      }
+      processTurn(player.x, player.y);
+  };
+
+  const handleActionBtn = () => {
+      if (gameOver) { startNewGame(); return; }
+      if (gameClear) return;
+      if (shopState.active) { handleShopAction(); return; }
+      if (menuOpen) {
+          if (synthState.active) handleSynthesisStep();
+          else if (inventory.length > 0) handleItemAction(selectedItemIndex);
+          return;
+      }
+      const tx = player.x + player.dir.x;
+      const ty = player.y + player.dir.y;
+      const target = enemies.find(e => e.x === tx && e.y === ty);
+      if (target) { 
+          if (target.enemyType === 'SHOPKEEPER') {
+              addLog("「へいらっしゃい！何にする？」", C2);
+              setShopState({ active: true, merchantId: target.id, mode: 'BUY' });
+              setSelectedItemIndex(0);
+              audioService.playSound('select');
+          } else {
+              attackEnemy(target);
+              processTurn(player.x, player.y);
+          }
+          return;
+      }
+      if (map[player.y][player.x] === 'STAIRS') { addLog("階段を降りた！"); setFloor(f => f + 1); generateFloor(floor + 1); return; }
+      triggerPlayerAttackAnim(player.dir);
+      addVisualEffect('SLASH', tx, ty, { dir: player.dir });
+      addLog("素振りをした。");
+      audioService.playSound('select');
+      processTurn(player.x, player.y);
+  };
+
   const handleShopAction = () => {
       const shopkeeper = enemies.find(e => e.id === shopState.merchantId);
       if (!shopkeeper) { setShopState(prev => ({ ...prev, active: false })); return; }
@@ -698,7 +990,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   if (newShopItems.length === 0) setShopState(prev => ({ ...prev, active: false }));
                   else setSelectedItemIndex(prev => Math.min(prev, newShopItems.length - 1));
               } else {
-                  addLog("持ち物がいっぱいだ！", "red");
+                  addLog("持ち物がいっぱいで拾えない！", "red");
                   audioService.playSound('wrong');
               }
           } else {
@@ -803,274 +1095,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       });
       setEnemies(newEnemies.filter(e => e.hp > 0));
       audioService.playSound('attack');
-  };
-
-  const gainXp = (amount: number) => {
-      let nextXp = player.xp + amount;
-      let nextLv = level;
-      let nextMaxHp = player.maxHp;
-      let nextAtk = player.baseAttack;
-      const needed = nextLv * 10;
-      if (nextXp >= needed) {
-          nextXp -= needed; nextLv++; nextMaxHp += 5; nextAtk += 1;
-          setPlayer(p => ({ ...p, hp: nextMaxHp, baseAttack: nextAtk, maxHp: nextMaxHp })); 
-          addLog(`レベルが${nextLv}に上がった！`);
-          audioService.playSound('buff');
-          addVisualEffect('FLASH', 0, 0);
-          addVisualEffect('TEXT', player.x, player.y, { value: 'LEVEL UP!', color: 'yellow' });
-      }
-      setPlayer(p => ({ ...p, xp: nextXp }));
-      setLevel(nextLv);
-  };
-
-  const processTurn = (px: number, py: number) => {
-      turnCounter.current += 1;
-      let nextBelly = belly;
-      let nextHp = player.hp;
-      let nextStatus = { ...player.status };
-      
-      const aType = player.equipment?.armor?.type;
-      const heavy = aType === 'RANDO_SERU';
-      
-      if (turnCounter.current % (heavy ? HUNGER_INTERVAL/2 : HUNGER_INTERVAL) === 0) {
-          nextBelly -= 1;
-          if (nextBelly <= 0) {
-              nextBelly = 0; nextHp -= 1;
-              if (nextHp <= 0) { setGameOver(true); saveDungeonScore("Starved"); addLog("空腹で倒れた...", "red"); return; }
-              addLog("お腹が空いて倒れそうだ...", "red");
-          }
-      }
-      if (turnCounter.current % REGEN_INTERVAL === 0 && nextBelly > 0 && nextHp < player.maxHp) nextHp += 1;
-      if (nextStatus.sleep > 0) { nextStatus.sleep--; if (nextStatus.sleep<=0) addLog("目が覚めた！"); }
-      if (nextStatus.confused > 0) nextStatus.confused--;
-      if (nextStatus.blind > 0) nextStatus.blind--;
-      if (nextStatus.frozen > 0) nextStatus.frozen--;
-      
-      setBelly(nextBelly);
-      setPlayer(p => ({ ...p, hp: nextHp, status: nextStatus }));
-
-      if (turnCounter.current % ENEMY_SPAWN_RATE === 0) {
-          let attempts = 0;
-          while (attempts < 5) {
-              attempts++;
-              const rx = Math.floor(Math.random() * MAP_W);
-              const ry = Math.floor(Math.random() * MAP_H);
-              if (map[ry][rx] === 'FLOOR' && !enemies.find(e => e.x === rx && e.y === ry) && (rx !== px || ry !== py)) {
-                  setEnemies(prev => [...prev, spawnEnemy(rx, ry, floor)]);
-                  break;
-              }
-          }
-      }
-
-      // Compute Dijkstra Map for enemy pathfinding
-      const dMap = computeDijkstraMap(map, px, py);
-
-      setEnemies(prevEnemies => {
-          const nextEnemies: Entity[] = [];
-          const occupied = new Set<string>();
-          occupied.add(`${px},${py}`);
-          const attackingEnemyIds: number[] = [];
-
-          for (const e of prevEnemies) {
-              if (e.enemyType === 'SHOPKEEPER') { occupied.add(`${e.x},${e.y}`); nextEnemies.push(e); continue; }
-
-              if (e.status.sleep > 0) { e.status.sleep--; nextEnemies.push(e); occupied.add(`${e.x},${e.y}`); addVisualEffect('TEXT', e.x, e.y, {value:'Zzz', color:'blue'}); continue; }
-              if (e.status.frozen > 0) { e.status.frozen--; nextEnemies.push(e); occupied.add(`${e.x},${e.y}`); continue; }
-              
-              const dx = px - e.x; const dy = py - e.y;
-              const dist = Math.abs(dx) + Math.abs(dy);
-              
-              // Special Attacks
-              if (e.enemyType === 'DRAGON' && dist <= 2 && dist > 0 && Math.random() < 0.3) {
-                  addLog(`${e.name}の炎！`, "red");
-                  let dmg = 15;
-                  if (player.equipment?.armor?.type === 'FIREFIGHTER') dmg = Math.floor(dmg / 2);
-                  setPlayer(p => { const nhp = p.hp - dmg; if(nhp<=0) { setGameOver(true); saveDungeonScore(`Killed by ${e.name}`); } return {...p, hp:nhp}; });
-                  occupied.add(`${e.x},${e.y}`); nextEnemies.push(e);
-                  addVisualEffect('EXPLOSION', px, py); addVisualEffect('TEXT', px, py, { value: `${dmg}`, color: 'red' });
-                  continue;
-              }
-
-              if (e.enemyType === 'MAGE' && dist <= 4 && dist > 0 && Math.random() < 0.2) {
-                  addLog(`${e.name}の魔法！混乱した！`, "yellow");
-                  setPlayer(p => ({ ...p, status: { ...p.status, confused: 5 } }));
-                  occupied.add(`${e.x},${e.y}`); nextEnemies.push(e);
-                  addVisualEffect('FLASH', px, py);
-                  continue;
-              }
-
-              let tx = e.x;
-              let ty = e.y;
-              let moved = false;
-
-              // Confused Movement
-              if (e.status.confused > 0) {
-                  e.status.confused--;
-                  const dirs = [[0,1], [0,-1], [1,0], [-1,0]];
-                  const r = dirs[Math.floor(Math.random()*4)];
-                  tx = e.x + r[0]; ty = e.y + r[1];
-                  moved = true; // Attempt random move
-              } 
-              // Standard Pathfinding (Dijkstra) if "awake"
-              else if (dist <= 15) {
-                  // If adjacent to player, attack logic below will handle it, but pathfinding leads there too
-                  const neighbors = [
-                      {x:e.x, y:e.y-1}, {x:e.x, y:e.y+1}, {x:e.x-1, y:e.y}, {x:e.x+1, y:e.y},
-                      {x:e.x-1, y:e.y-1}, {x:e.x+1, y:e.y-1}, {x:e.x-1, y:e.y+1}, {x:e.x+1, y:e.y+1}
-                  ];
-                  
-                  let bestDist = dMap[e.y][e.x];
-                  let bestMove = null;
-
-                  for (const n of neighbors) {
-                      if (n.x >= 0 && n.x < MAP_W && n.y >= 0 && n.y < MAP_H && map[n.y][n.x] !== 'WALL') {
-                          // Allow moving to player tile to trigger attack logic
-                          if (!occupied.has(`${n.x},${n.y}`) || (n.x === px && n.y === py)) {
-                              if (dMap[n.y][n.x] < bestDist) {
-                                  bestDist = dMap[n.y][n.x];
-                                  bestMove = n;
-                              }
-                          }
-                      }
-                  }
-
-                  if (bestMove) {
-                      tx = bestMove.x;
-                      ty = bestMove.y;
-                      moved = true;
-                  }
-              }
-
-              // Attack or Move Execution
-              if (tx === px && ty === py) {
-                  // Attack
-                  let dmg = Math.max(1, e.attack - player.defense);
-                  if (player.equipment?.armor?.type === 'GYM_CLOTHES' && Math.random() < 0.3) { addLog("ひらりと身をかわした！", C2); dmg = 0; addVisualEffect('TEXT', px, py, { value: 'MISS', color: 'blue' }); }
-                  if (player.equipment?.armor?.type === 'NAME_TAG' && e.enemyType === 'THIEF') addLog("名札が盗みを防いだ！");
-                  else if (e.enemyType === 'THIEF' && dmg > 0 && Math.random() < 0.3 && inventory.length > 0) { addLog("アイテムを盗まれた！", "red"); const idx = Math.floor(Math.random() * inventory.length); setInventory(inv => inv.filter((_, i) => i !== idx)); }
-
-                  if (dmg > 0) {
-                      addLog(`${e.name}の攻撃！${dmg}ダメージ！`, "red");
-                      setPlayer(p => { const newHp = p.hp - dmg; if (newHp <= 0) { setGameOver(true); saveDungeonScore(`Killed by ${e.name}`); } return { ...p, hp: newHp }; });
-                      nextEnemies.push({ ...e, offset: { x: (tx - e.x) * 6, y: (ty - e.y) * 6 } });
-                      attackingEnemyIds.push(e.id);
-                      triggerShake(5);
-                      addVisualEffect('TEXT', px, py, { value: `${dmg}`, color: 'red' });
-                  } else { nextEnemies.push(e); }
-                  occupied.add(`${e.x},${e.y}`);
-              } else if (moved) {
-                  // Attempt Move
-                  if (!map[ty][tx] || map[ty][tx] === 'WALL' || occupied.has(`${tx},${ty}`) || prevEnemies.some(o => o.id !== e.id && o.x === tx && o.y === ty)) {
-                      occupied.add(`${e.x},${e.y}`); nextEnemies.push(e); // Blocked
-                  } else {
-                      occupied.add(`${tx},${ty}`); nextEnemies.push({ ...e, x: tx, y: ty });
-                  }
-              } else {
-                  // Idle
-                  occupied.add(`${e.x},${e.y}`); nextEnemies.push(e);
-              }
-          }
-          if (attackingEnemyIds.length > 0) setTimeout(() => setEnemies(curr => curr.map(en => attackingEnemyIds.includes(en.id) ? { ...en, offset: { x: 0, y: 0 } } : en)), 150);
-          return nextEnemies;
-      });
-  };
-
-  const getItemName = (item: Item) => {
-      if (item.category === 'WEAPON' || item.category === 'ARMOR' || item.category === 'RANGED' || item.category === 'SYNTH' || item.category === 'CONSUMABLE') return item.name;
-      // Staffs are now the only thing needing identification
-      if (item.type.includes('MEAT')) return item.name;
-      if (identifiedTypes.has(item.type)) return item.name;
-      return idMap[item.type] || item.name;
-  };
-
-  // --- ACTIONS ---
-  
-  const fireRangedWeapon = () => {
-      if (menuOpen || shopState.active) return;
-      const rangedItem = player.equipment?.ranged;
-      if (!rangedItem) {
-          addLog("飛び道具を装備していない！");
-          return;
-      }
-      if ((rangedItem.count || 0) <= 0) {
-          addLog(`${rangedItem.name}が無くなった！`);
-          // Unequip/Remove
-          setPlayer(p => ({ ...p, equipment: { ...p.equipment!, ranged: null } }));
-          return;
-      }
-
-      // Decrement
-      const newRanged = { ...rangedItem, count: (rangedItem.count || 0) - 1 };
-      setPlayer(p => ({ ...p, equipment: { ...p.equipment!, ranged: newRanged } }));
-      
-      const { x: dx, y: dy } = player.dir;
-      let lx = player.x, ly = player.y;
-      let hitEntity: Entity | null = null;
-
-      for (let i=1; i<=8; i++) {
-          const tx = player.x + dx * i;
-          const ty = player.y + dy * i;
-          lx = tx; ly = ty;
-          if (map[ty][tx] === 'WALL') { addLog("壁に当たった。"); break; }
-          const target = enemies.find(e => e.x === tx && e.y === ty);
-          if (target) { hitEntity = target; break; }
-      }
-
-      addVisualEffect('PROJECTILE', lx, ly, { dir: player.dir, duration: 10 });
-      triggerPlayerAttackAnim(player.dir);
-
-      if (hitEntity) {
-          let dmg = 5 + (newRanged.power || 0);
-          if (newRanged.type === 'SHADOW_PIN') { hitEntity.status.frozen = 5; addLog("影を縫いつけた！"); }
-          
-          const newEnemies = enemies.map(e => {
-              if (e.id === hitEntity!.id) {
-                  const nhp = e.hp - dmg;
-                  return { ...e, hp: nhp };
-              }
-              return e;
-          });
-          const dead = newEnemies.find(e => e.id === hitEntity!.id && e.hp <= 0);
-          if(dead) { gainXp(dead.xp); addLog(`${dead.name}を倒した！`); }
-          else { addLog(`${hitEntity.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', hitEntity.x, hitEntity.y, {value:`${dmg}`}); }
-          setEnemies(newEnemies.filter(e => e.hp > 0));
-          audioService.playSound('attack');
-      } else {
-          addLog("外した！");
-      }
-      processTurn(player.x, player.y);
-  };
-
-  const handleActionBtn = () => {
-      if (gameOver) { startNewGame(); return; }
-      if (gameClear) return;
-      if (shopState.active) { handleShopAction(); return; }
-      if (menuOpen) {
-          if (synthState.active) handleSynthesisStep();
-          else if (inventory.length > 0) handleItemAction(selectedItemIndex);
-          return;
-      }
-      const tx = player.x + player.dir.x;
-      const ty = player.y + player.dir.y;
-      const target = enemies.find(e => e.x === tx && e.y === ty);
-      if (target) { 
-          if (target.enemyType === 'SHOPKEEPER') {
-              addLog("「へいらっしゃい！何にする？」", C2);
-              setShopState({ active: true, merchantId: target.id, mode: 'BUY' });
-              setSelectedItemIndex(0);
-              audioService.playSound('select');
-          } else {
-              attackEnemy(target);
-              processTurn(player.x, player.y);
-          }
-          return;
-      }
-      if (map[player.y][player.x] === 'STAIRS') { addLog("階段を降りた！"); setFloor(f => f + 1); generateFloor(floor + 1); return; }
-      triggerPlayerAttackAnim(player.dir);
-      addVisualEffect('SLASH', tx, ty, { dir: player.dir });
-      addLog("素振りをした。");
-      audioService.playSound('select');
-      processTurn(player.x, player.y);
   };
 
   // --- LONG PRESS LOGIC (FAST FORWARD) ---
@@ -1481,17 +1505,39 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           actionDone = true;
       } else if (item.category === 'CONSUMABLE') {
           if (item.type.includes('ONIGIRI') || item.type.includes('MEAT')) { 
-              setBelly(Math.min(maxBelly, belly + (item.value || 50)));
+              const val = item.value || 50;
+              let nextBelly = Math.min(maxBelly, belly + val);
+              let nextHp = player.hp;
+              
               if (item.type.includes('MEAT')) {
-                  // Meat Bonus Effect
-                  setPlayer(p => ({ ...p, hp: Math.min(p.maxHp, p.hp + 50) }));
+                  nextHp = Math.min(player.maxHp, player.hp + 50);
                   addLog(`${item.name}を食べた。元気が出た！`); 
               } else {
                   addLog(`${item.name}を食べた。満腹！`); 
               }
-              actionDone = true; 
+              
+              // Remove item
+              setInventory(prev => prev.filter((_, i) => i !== index));
+              setSelectedItemIndex(prev => Math.min(prev, inventory.length - 2));
+              setMenuOpen(false);
+              
+              // Pass overrides to processTurn
+              processTurn(player.x, player.y, { belly: nextBelly, hp: nextHp });
+              audioService.playSound('select');
+              return; // Return early
           }
-          else if (item.type.includes('HEAL')) { setPlayer(p => ({ ...p, hp: Math.min(p.maxHp, p.hp + (item.value || 30)) })); addLog("HPが回復した！"); actionDone = true; addVisualEffect('TEXT', player.x, player.y, {value: 'Heal', color: 'green'}); }
+          else if (item.type.includes('HEAL')) { 
+              let nextHp = Math.min(player.maxHp, player.hp + (item.value || 30));
+              addLog("HPが回復した！");
+              addVisualEffect('TEXT', player.x, player.y, {value: 'Heal', color: 'green'});
+              
+              setInventory(prev => prev.filter((_, i) => i !== index));
+              setSelectedItemIndex(prev => Math.min(prev, inventory.length - 2));
+              setMenuOpen(false);
+              processTurn(player.x, player.y, { hp: nextHp });
+              audioService.playSound('select');
+              return;
+          }
           else if (item.type === 'SCROLL_MAP') { setShowMap(true); addLog("校内図が頭に入った！"); actionDone = true; addVisualEffect('FLASH', 0, 0); }
           else if (item.type === 'SCROLL_THUNDER' || item.type === 'BOMB') {
               const isBomb = item.type === 'BOMB';
