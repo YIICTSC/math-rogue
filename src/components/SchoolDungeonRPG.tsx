@@ -2347,11 +2347,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                 <div className="flex flex-col items-center mt-[-15px] md:mt-0 group">
                     <button 
                         className="w-14 h-14 bg-[#ff0000] rounded-full shadow-[0_4px_0_#8b0000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#cc0000] touch-none select-none" 
-                        onMouseDown={handlePressStart} 
-                        onMouseUp={handlePressEnd} 
-                        onMouseLeave={handlePressEnd}
-                        onTouchStart={handlePressStart}
-                        onTouchEnd={handlePressEnd}
+                        onMouseDown={() => handlePressStart()} 
+                        onMouseUp={() => handlePressEnd()} 
+                        onMouseLeave={() => handlePressEnd()}
+                        onTouchStart={(e) => { e.preventDefault(); handlePressStart(); }}
+                        onTouchEnd={(e) => { e.preventDefault(); handlePressEnd(); }}
                     >
                         A
                     </button>
