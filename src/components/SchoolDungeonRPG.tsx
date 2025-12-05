@@ -1,10 +1,9 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Swords, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
 import { storageService } from '../services/storageService';
-import { DungeonRunState } from '../types';
 
 interface SchoolDungeonRPGProps {
   onBack: () => void;
@@ -233,14 +232,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const [idMap, setIdMap] = useState<Record<string, string>>({}); // RealType -> RandomName
   const [identifiedTypes, setIdentifiedTypes] = useState<Set<string>>(new Set());
 
-  // Helper function for Item Name
-  const getItemName = (item: Item) => {
-      if (item.category === 'STAFF' && !identifiedTypes.has(item.type)) {
-          return idMap[item.type] || "謎の傘";
-      }
-      return item.name;
-  };
-
   // Menu Navigation
   const [selectedItemIndex, setSelectedItemIndex] = useState(0);
   const [blankScrollSelectionIndex, setBlankScrollSelectionIndex] = useState(0);
@@ -253,26 +244,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   // Fast Forward State
   const [isFastForwarding, setIsFastForwarding] = useState(false);
   const fastForwardInterval = useRef<any>(null);
-
-  // --- REFS FOR GAME LOOP ---
-  const playerRef = useRef(player);
-  const enemiesRef = useRef(enemies);
-  const mapRef = useRef(map);
-  const gameOverRef = useRef(gameOver);
-  const gameClearRef = useRef(gameClear);
-  const menuOpenRef = useRef(menuOpen);
-  const shopStateRef = useRef(shopState);
-  const bellyRef = useRef(belly);
-
-  // Sync Refs
-  useEffect(() => { playerRef.current = player; }, [player]);
-  useEffect(() => { enemiesRef.current = enemies; }, [enemies]);
-  useEffect(() => { mapRef.current = map; }, [map]);
-  useEffect(() => { gameOverRef.current = gameOver; }, [gameOver]);
-  useEffect(() => { gameClearRef.current = gameClear; }, [gameClear]);
-  useEffect(() => { menuOpenRef.current = menuOpen; }, [menuOpen]);
-  useEffect(() => { shopStateRef.current = shopState; }, [shopState]);
-  useEffect(() => { bellyRef.current = belly; }, [belly]);
 
   // Init
   useEffect(() => {
@@ -298,22 +269,12 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     spriteCache.current['GOLEM'] = createPixelSpriteCanvas('GOLEM', 'SKELETON|#b0bec5');
     spriteCache.current['NINJA'] = createPixelSpriteCanvas('NINJA', 'FLIER|#1a237e');
     spriteCache.current['MAGE'] = createPixelSpriteCanvas('MAGE', 'WIZARD|#7b1fa2');
-    spriteCache.current['COIN'] = createPixelSpriteCanvas('COIN', 'GEM|#FFD700');
-    spriteCache.current['SHOPKEEPER'] = createPixelSpriteCanvas('SHOPKEEPER', 'HUMANOID|#33691e'); 
-
-    // Start
-    if (storageService.hasDungeonRun()) {
-        loadGame();
-    } else {
-        startNewGame();
-    }
     
-    // Play BGM
-    audioService.playBGM('dungeon');
+    // New Sprites
+    spriteCache.current['COIN'] = createPixelSpriteCanvas('COIN', 'GEM|#FFD700');
+    spriteCache.current['SHOPKEEPER'] = createPixelSpriteCanvas('SHOPKEEPER', 'HUMANOID|#33691e'); // Green merchant
 
-    return () => {
-        audioService.stopBGM();
-    };
+    startNewGame();
   }, []);
 
   // Update Stats
@@ -346,55 +307,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         }
     }
   }, [selectedItemIndex, menuOpen, shopState.active, blankScrollSelectionIndex, synthState.mode]);
-
-  // --- SAVE & LOAD ---
-  const saveGame = () => {
-      if (gameOver || gameClear) return; 
-      const state: DungeonRunState = {
-          map: map.map(row => row.map(t => t)),
-          player,
-          enemies,
-          floorItems,
-          inventory,
-          floor,
-          level,
-          belly,
-          maxBelly,
-          turnCounter: turnCounter.current,
-          isEndless,
-          logs,
-          identifiedTypes: Array.from(identifiedTypes),
-          idMap
-      };
-      storageService.saveDungeonRun(state);
-  };
-
-  const loadGame = () => {
-      const state = storageService.loadDungeonRun();
-      if (!state) return;
-      
-      setMap(state.map as TileType[][]);
-      setPlayer(state.player);
-      setEnemies(state.enemies);
-      setFloorItems(state.floorItems);
-      setInventory(state.inventory);
-      setFloor(state.floor);
-      setLevel(state.level);
-      setBelly(state.belly);
-      setMaxBelly(state.maxBelly);
-      turnCounter.current = state.turnCounter;
-      setIsEndless(state.isEndless);
-      setLogs(state.logs);
-      setIdentifiedTypes(new Set(state.identifiedTypes));
-      setIdMap(state.idMap);
-      
-      addLog("冒険を再開した。", C2);
-      audioService.playBGM('dungeon');
-  };
-
-  const deleteSave = () => {
-      storageService.clearDungeonRun();
-  };
 
   const addVisualEffect = (type: VisualEffectType, x: number, y: number, options: Partial<VisualEffect> = {}) => {
       visualEffects.current.push({
@@ -431,7 +343,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   };
 
   const startNewGame = () => {
-    storageService.clearDungeonRun(); // Clear old run
     setFloor(1);
     setLevel(1);
     setBelly(100);
@@ -445,7 +356,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     visualEffects.current = [];
     setIsFastForwarding(false);
     
-    // Init ID Map
+    // Init ID Map for Staffs (Umbrellas)
     const shuffledNames = [...UNIDENTIFIED_NAMES].sort(() => Math.random() - 0.5);
     const staffTypes = Object.keys(ITEM_DB).filter(k => ITEM_DB[k].category === 'STAFF');
     const newIdMap: Record<string, string> = {};
@@ -469,8 +380,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     setLogs([]);
     generateFloor(1);
     addLog("風来の旅が始まった！");
-    audioService.playBGM('dungeon');
-    setTimeout(saveGame, 100);
   };
 
   const spawnEnemy = (x: number, y: number, floorLevel: number): Entity => {
@@ -499,6 +408,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           else if (floorLevel > 6) { t = 'METAL'; name="メタル生徒"; hp=4+Math.floor(floorLevel/5); atk=1+scaling; xp=100+xpScale*3; def=999; }
       }
 
+      // Generate Shop Items if Shopkeeper
       let shopItems: Item[] = [];
       if (t === 'SHOPKEEPER') {
           for(let i=0; i<5; i++) {
@@ -584,6 +494,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                 } else if(Math.random() < 0.04) {
                     const r = Math.random();
                     if (r < 0.2) {
+                        // Gold
                         newItems.push({
                             id: Date.now() + Math.random(), type: 'GOLD', x, y, char: '$', name: 'お金',
                             hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
@@ -591,6 +502,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                             gold: Math.floor(Math.random() * 50 + 10 * f)
                         });
                     } else {
+                        // Items
                         const keys = Object.keys(ITEM_DB);
                         const key = keys[Math.floor(Math.random() * keys.length)];
                         const template = ITEM_DB[key];
@@ -612,7 +524,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                 plus,
                                 charges,
                                 name: plus > 0 ? `${template.name}+${plus}` : template.name,
-                                price: Math.floor((template.value || 100) * 0.5)
+                                price: Math.floor((template.value || 100) * 0.5) // Sell price is usually half base
                             }
                         });
                     }
@@ -626,9 +538,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     setFloorItems(newItems);
     setShowMap(false);
     addVisualEffect('FLASH', 0, 0, {duration: 10, maxDuration: 10});
-    audioService.playSound('stairs');
-    setTimeout(saveGame, 100);
-  };
+};
 
   const movePlayer = (dx: 0|1|-1, dy: 0|1|-1) => {
       if(gameOver || gameClear) return;
@@ -667,7 +577,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       }
 
       setPlayer(p => ({ ...p, dir: {x: dx, y: dy} }));
-      audioService.playSound('step');
 
       let tx = player.x + dx;
       let ty = player.y + dy;
@@ -700,6 +609,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       let finalX = tx; let finalY = ty;
       setPlayer(p => ({ ...p, x: finalX, y: finalY }));
       
+      // Item Pickup
       const itemIdx = floorItems.findIndex(i => i.x === finalX && i.y === finalY);
       if (itemIdx !== -1) {
           const itemEntity = floorItems[itemIdx];
@@ -741,6 +651,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   setPlayer(p => ({ ...p, gold: (p.gold || 0) - (item.price || 0) }));
                   setInventory(prev => [...prev, item]);
                   
+                  // Remove from shop
                   const newShopItems = shopkeeper.shopItems.filter((_, i) => i !== selectedItemIndex);
                   setEnemies(prev => prev.map(e => e.id === shopkeeper.id ? { ...e, shopItems: newShopItems } : e));
                   
@@ -749,7 +660,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   if (newShopItems.length === 0) setShopState(prev => ({ ...prev, active: false }));
                   else setSelectedItemIndex(prev => Math.min(prev, newShopItems.length - 1));
               } else {
-                  addLog("持ち物がいっぱいで買えない！", "red");
+                  addLog("持ち物がいっぱいだ！", "red");
                   audioService.playSound('wrong');
               }
           } else {
@@ -757,10 +668,12 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               audioService.playSound('wrong');
           }
       } else {
+          // SELL
           if (inventory.length === 0) return;
           const item = inventory[selectedItemIndex];
           if (!item) return;
           
+          // Cannot sell equipped items directly (simple safeguard)
           if (player.equipment?.weapon === item || player.equipment?.armor === item || player.equipment?.ranged === item) {
               addLog("装備中のアイテムは売れません。", "red");
               audioService.playSound('wrong');
@@ -787,6 +700,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       const targets = [target];
       addVisualEffect('SLASH', target.x, target.y, { dir: player.dir });
 
+      // 3-Way Attack Logic (Inherited from Type)
       if (player.equipment?.weapon?.type === 'PROTRACTOR_EDGE') {
           const {x: dx, y: dy} = player.dir;
           const others = [];
@@ -843,7 +757,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               setGameClear(true);
               audioService.playSound('win');
               saveDungeonScore("Cleared");
-              deleteSave();
               addVisualEffect('FLASH', 0, 0, { duration: 30, maxDuration: 30 });
           } else {
               addLog(`${d.name}を倒した！ (${d.xp} XP)`);
@@ -874,29 +787,22 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
   const processTurn = (px: number, py: number) => {
       turnCounter.current += 1;
+      let nextBelly = belly;
+      let nextHp = player.hp;
+      let nextStatus = { ...player.status };
       
-      let nextBelly = bellyRef.current;
-      let nextHp = playerRef.current.hp;
-      let nextStatus = { ...playerRef.current.status };
-      const aType = playerRef.current.equipment?.armor?.type;
+      const aType = player.equipment?.armor?.type;
       const heavy = aType === 'RANDO_SERU';
       
       if (turnCounter.current % (heavy ? HUNGER_INTERVAL/2 : HUNGER_INTERVAL) === 0) {
           nextBelly -= 1;
           if (nextBelly <= 0) {
               nextBelly = 0; nextHp -= 1;
-              if (nextHp <= 0) { 
-                  setGameOver(true); 
-                  saveDungeonScore("Starved"); 
-                  deleteSave();
-                  addLog("空腹で倒れた...", "red"); 
-                  audioService.playSound('lose');
-                  return; 
-              }
+              if (nextHp <= 0) { setGameOver(true); saveDungeonScore("Starved"); addLog("空腹で倒れた...", "red"); return; }
               addLog("お腹が空いて倒れそうだ...", "red");
           }
       }
-      if (turnCounter.current % REGEN_INTERVAL === 0 && nextBelly > 0 && nextHp < playerRef.current.maxHp) nextHp += 1;
+      if (turnCounter.current % REGEN_INTERVAL === 0 && nextBelly > 0 && nextHp < player.maxHp) nextHp += 1;
       if (nextStatus.sleep > 0) { nextStatus.sleep--; if (nextStatus.sleep<=0) addLog("目が覚めた！"); }
       if (nextStatus.confused > 0) nextStatus.confused--;
       if (nextStatus.blind > 0) nextStatus.blind--;
@@ -911,7 +817,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               attempts++;
               const rx = Math.floor(Math.random() * MAP_W);
               const ry = Math.floor(Math.random() * MAP_H);
-              if (mapRef.current[ry][rx] === 'FLOOR' && !enemiesRef.current.find(e => e.x === rx && e.y === ry) && (rx !== px || ry !== py)) {
+              if (map[ry][rx] === 'FLOOR' && !enemies.find(e => e.x === rx && e.y === ry) && (rx !== px || ry !== py)) {
                   setEnemies(prev => [...prev, spawnEnemy(rx, ry, floor)]);
                   break;
               }
@@ -936,12 +842,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               if (e.enemyType === 'DRAGON' && dist <= 2 && dist > 0 && Math.random() < 0.3) {
                   addLog(`${e.name}の炎！`, "red");
                   let dmg = 15;
-                  if (playerRef.current.equipment?.armor?.type === 'FIREFIGHTER') dmg = Math.floor(dmg / 2);
-                  setPlayer(p => { 
-                      const nhp = p.hp - dmg; 
-                      if(nhp<=0) { setGameOver(true); saveDungeonScore(`Killed by ${e.name}`); deleteSave(); audioService.playSound('lose'); } 
-                      return {...p, hp:nhp}; 
-                  });
+                  if (player.equipment?.armor?.type === 'FIREFIGHTER') dmg = Math.floor(dmg / 2);
+                  setPlayer(p => { const nhp = p.hp - dmg; if(nhp<=0) { setGameOver(true); saveDungeonScore(`Killed by ${e.name}`); } return {...p, hp:nhp}; });
                   occupied.add(`${e.x},${e.y}`); nextEnemies.push(e);
                   addVisualEffect('EXPLOSION', px, py); addVisualEffect('TEXT', px, py, { value: `${dmg}`, color: 'red' });
                   continue;
@@ -961,31 +863,25 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   else { if (Math.abs(dx) > Math.abs(dy)) mx = dx > 0 ? 1 : -1; else my = dy > 0 ? 1 : -1; }
                   
                   const tx = e.x + mx; const ty = e.y + my;
-                  
                   if (tx === px && ty === py) {
-                      let dmg = Math.max(1, e.attack - playerRef.current.defense);
-                      if (playerRef.current.equipment?.armor?.type === 'GYM_CLOTHES' && Math.random() < 0.3) { addLog("ひらりと身をかわした！", C2); dmg = 0; addVisualEffect('TEXT', px, py, { value: 'MISS', color: 'blue' }); }
-                      if (playerRef.current.equipment?.armor?.type === 'NAME_TAG' && e.enemyType === 'THIEF') addLog("名札が盗みを防いだ！");
+                      let dmg = Math.max(1, e.attack - player.defense);
+                      if (player.equipment?.armor?.type === 'GYM_CLOTHES' && Math.random() < 0.3) { addLog("ひらりと身をかわした！", C2); dmg = 0; addVisualEffect('TEXT', px, py, { value: 'MISS', color: 'blue' }); }
+                      if (player.equipment?.armor?.type === 'NAME_TAG' && e.enemyType === 'THIEF') addLog("名札が盗みを防いだ！");
                       else if (e.enemyType === 'THIEF' && dmg > 0 && Math.random() < 0.3 && inventory.length > 0) { addLog("アイテムを盗まれた！", "red"); const idx = Math.floor(Math.random() * inventory.length); setInventory(inv => inv.filter((_, i) => i !== idx)); }
 
                       if (dmg > 0) {
                           addLog(`${e.name}の攻撃！${dmg}ダメージ！`, "red");
-                          setPlayer(p => { 
-                              const newHp = p.hp - dmg; 
-                              if (newHp <= 0) { setGameOver(true); saveDungeonScore(`Killed by ${e.name}`); deleteSave(); audioService.playSound('lose'); } 
-                              return { ...p, hp: newHp }; 
-                          });
+                          setPlayer(p => { const newHp = p.hp - dmg; if (newHp <= 0) { setGameOver(true); saveDungeonScore(`Killed by ${e.name}`); } return { ...p, hp: newHp }; });
                           nextEnemies.push({ ...e, offset: { x: mx * 6, y: my * 6 } });
                           attackingEnemyIds.push(e.id);
                           triggerShake(5);
                           addVisualEffect('TEXT', px, py, { value: `${dmg}`, color: 'red' });
-                          audioService.playSound('step'); // Hit sound proxy
                       } else { nextEnemies.push(e); }
                       occupied.add(`${e.x},${e.y}`);
                       continue;
                   }
                   
-                  if (!mapRef.current[ty][tx] || mapRef.current[ty][tx] === 'WALL' || occupied.has(`${tx},${ty}`) || prevEnemies.some(o => o.id !== e.id && o.x === tx && o.y === ty)) {
+                  if (!map[ty][tx] || map[ty][tx] === 'WALL' || occupied.has(`${tx},${ty}`) || prevEnemies.some(o => o.id !== e.id && o.x === tx && o.y === ty)) {
                       occupied.add(`${e.x},${e.y}`); nextEnemies.push(e);
                   } else {
                       occupied.add(`${tx},${ty}`); nextEnemies.push({ ...e, x: tx, y: ty });
@@ -995,18 +891,33 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           if (attackingEnemyIds.length > 0) setTimeout(() => setEnemies(curr => curr.map(en => attackingEnemyIds.includes(en.id) ? { ...en, offset: { x: 0, y: 0 } } : en)), 150);
           return nextEnemies;
       });
-      
-      saveGame();
   };
 
+  const getItemName = (item: Item) => {
+      if (item.category === 'WEAPON' || item.category === 'ARMOR' || item.category === 'RANGED' || item.category === 'SYNTH' || item.category === 'CONSUMABLE') return item.name;
+      // Staffs are now the only thing needing identification
+      if (item.type.includes('MEAT')) return item.name;
+      if (identifiedTypes.has(item.type)) return item.name;
+      return idMap[item.type] || item.name;
+  };
+
+  // --- ACTIONS ---
+  
   const fireRangedWeapon = () => {
+      if (menuOpen || shopState.active) return;
       const rangedItem = player.equipment?.ranged;
-      if (!rangedItem) { addLog("飛び道具を装備していない！"); return; }
+      if (!rangedItem) {
+          addLog("飛び道具を装備していない！");
+          return;
+      }
       if ((rangedItem.count || 0) <= 0) {
           addLog(`${rangedItem.name}が無くなった！`);
+          // Unequip/Remove
           setPlayer(p => ({ ...p, equipment: { ...p.equipment!, ranged: null } }));
           return;
       }
+
+      // Decrement
       const newRanged = { ...rangedItem, count: (rangedItem.count || 0) - 1 };
       setPlayer(p => ({ ...p, equipment: { ...p.equipment!, ranged: newRanged } }));
       
@@ -1025,7 +936,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
       addVisualEffect('PROJECTILE', lx, ly, { dir: player.dir, duration: 10 });
       triggerPlayerAttackAnim(player.dir);
-      audioService.playSound('throw');
 
       if (hitEntity) {
           let dmg = 5 + (newRanged.power || 0);
@@ -1050,7 +960,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   };
 
   const handleActionBtn = () => {
-      if (gameOver) { deleteSave(); startNewGame(); return; }
+      if (gameOver) { startNewGame(); return; }
       if (gameClear) return;
       if (shopState.active) { handleShopAction(); return; }
       if (menuOpen) {
@@ -1073,18 +983,252 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           }
           return;
       }
-      if (map[player.y][player.x] === 'STAIRS') { 
-          addLog("階段を降りた！"); 
-          audioService.playSound('stairs');
-          setFloor(f => f + 1); 
-          generateFloor(floor + 1); 
-          return; 
-      }
+      if (map[player.y][player.x] === 'STAIRS') { addLog("階段を降りた！"); setFloor(f => f + 1); generateFloor(floor + 1); return; }
       triggerPlayerAttackAnim(player.dir);
       addVisualEffect('SLASH', tx, ty, { dir: player.dir });
       addLog("素振りをした。");
       audioService.playSound('select');
       processTurn(player.x, player.y);
+  };
+
+  // --- LONG PRESS LOGIC (FAST FORWARD) ---
+  const handlePressStart = () => {
+      if (menuOpen || shopState.active || gameOver || gameClear) return;
+      // Start waiting detection
+      fastForwardInterval.current = setTimeout(() => {
+          setIsFastForwarding(true);
+      }, 400); // 400ms hold to trigger
+  };
+
+  const handlePressEnd = () => {
+      if (fastForwardInterval.current) {
+          clearTimeout(fastForwardInterval.current);
+          fastForwardInterval.current = null;
+      }
+      
+      if (!isFastForwarding) {
+          handleActionBtn();
+      } else {
+          setIsFastForwarding(false);
+      }
+  };
+
+  // Fast Forward Loop
+  useEffect(() => {
+      let interval: any = null;
+      if (isFastForwarding && !gameOver && !gameClear && !menuOpen && !shopState.active) {
+          interval = setInterval(() => {
+              // Safety check: Stop if enemies nearby
+              const nearby = enemies.some(e => Math.abs(e.x - player.x) <= 2 && Math.abs(e.y - player.y) <= 2);
+              if (nearby) {
+                  setIsFastForwarding(false);
+                  addLog("敵が近くにいる！", "red");
+                  return;
+              }
+              // Stop if full HP and hunger is ok
+              if (player.hp >= player.maxHp && belly > 20) {
+                  if (player.hp === player.maxHp) {
+                      setIsFastForwarding(false);
+                      addLog("HPが回復した。", C2);
+                      return;
+                  }
+              }
+              // Stop if starving
+              if (belly <= 0) {
+                  setIsFastForwarding(false);
+                  return;
+              }
+
+              processTurn(player.x, player.y);
+          }, 50); // Fast speed
+      }
+      return () => {
+          if (interval) clearInterval(interval);
+      };
+  }, [isFastForwarding, enemies, player.hp, belly, gameOver, gameClear]);
+
+
+  const toggleMenu = () => {
+      if (shopState.active) {
+          setShopState(prev => ({ ...prev, active: false }));
+          return;
+      }
+      if (menuOpen) {
+          setMenuOpen(false);
+          setSynthState({ active: false, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null });
+      } else {
+          setMenuOpen(true);
+          setSelectedItemIndex(0);
+      }
+      audioService.playSound('select');
+  };
+
+  const startEndlessMode = () => { setIsEndless(true); setGameClear(false); setFloor(f => f + 1); generateFloor(floor + 1); addLog("中学生編(エンドレス)開始！"); };
+
+  const handleSynthesisStep = () => {
+      const idx = synthState.mode === 'BLANK' ? blankScrollSelectionIndex : selectedItemIndex;
+      const item = inventory[idx];
+      
+      if (synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT') {
+          // Identify known scrolls
+          const knownTypes = Array.from(identifiedTypes).filter(t => t.startsWith('SCROLL'));
+          const targetType = knownTypes[idx];
+          const template = ITEM_DB[targetType];
+          
+          if (template) {
+              const blankIdx = synthState.baseIndex!;
+              // Replace Blank with target scroll
+              const newItem = { ...template, id: `scribed-${Date.now()}` };
+              const newInv = [...inventory];
+              newInv[blankIdx] = newItem;
+              setInventory(newInv);
+              addLog("名前を書き込んだ！");
+              setSynthState({ ...synthState, active: false });
+              setMenuOpen(false);
+              processTurn(player.x, player.y);
+          }
+          return;
+      }
+
+      if (synthState.step === 'SELECT_BASE') {
+          if (synthState.mode === 'SYNTH') {
+              if (['WEAPON', 'ARMOR'].includes(item.category)) {
+                  setSynthState({ ...synthState, step: 'SELECT_MAT', baseIndex: idx });
+                  addLog("合成する素材を選んでください");
+                  audioService.playSound('select');
+              } else { addLog("それはベースにできません", "red"); audioService.playSound('wrong'); }
+          } else if (synthState.mode === 'CHANGE') {
+              setSynthState({ ...synthState, step: 'SELECT_TARGET', baseIndex: idx });
+              addLog("変化させるアイテムを選んでください");
+          }
+      } else if (synthState.step === 'SELECT_MAT') {
+          if (idx === synthState.baseIndex) { addLog("同じアイテムは選べません", "red"); audioService.playSound('wrong'); return; }
+          if (['WEAPON', 'ARMOR'].includes(item.category)) {
+              const baseIdx = synthState.baseIndex!;
+              const baseItem = inventory[baseIdx];
+              const matItem = item;
+              if (baseItem.category !== matItem.category) { addLog("種類が違うと合成できません", "red"); audioService.playSound('wrong'); return; }
+              
+              // Synthesis Logic: Base Type determines nature. Adds Plus values.
+              const newPlus = (baseItem.plus || 0) + (matItem.plus || 0) + 1;
+              const newItem: Item = { ...baseItem, plus: newPlus, name: `${baseItem.name.split('+')[0]}+${newPlus}` };
+              
+              const glueIdx = inventory.findIndex(i => i.type === 'POT_GLUE');
+              if (glueIdx === -1) { setSynthState({ ...synthState, active: false }); return; }
+              let newInv = inventory.map((it, i) => i === baseIdx ? newItem : it).filter((_, i) => i !== idx && i !== glueIdx);
+              setInventory(newInv);
+              addLog(`合成成功！${newItem.name}になった！`, "yellow");
+              addVisualEffect('FLASH', 0, 0);
+              audioService.playSound('buff');
+              setSynthState({ ...synthState, active: false });
+              setMenuOpen(false);
+              processTurn(player.x, player.y);
+          } else { addLog("それは素材にできません", "red"); audioService.playSound('wrong'); }
+      } else if (synthState.step === 'SELECT_TARGET') {
+          const potIdx = synthState.baseIndex!;
+          if (idx === potIdx) { addLog("壺自身は選べません", "red"); return; }
+          const keys = Object.keys(ITEM_DB);
+          const key = keys[Math.floor(Math.random() * keys.length)];
+          const template = ITEM_DB[key];
+          const newItem: Item = { ...template, id: `changed-${Date.now()}`, plus: 0 };
+          let newInv = inventory.map((it, i) => i === idx ? newItem : it).filter((_, i) => i !== potIdx);
+          setInventory(newInv);
+          addLog(`アイテムが${newItem.name}に変化した！`, "yellow");
+          addVisualEffect('FLASH', 0, 0);
+          audioService.playSound('buff');
+          setSynthState({ ...synthState, active: false });
+          setMenuOpen(false);
+          processTurn(player.x, player.y);
+      }
+  };
+
+  const executeStaffEffect = (item: Item, target: Entity | null, x: number, y: number): { hit: boolean, msg?: string } => {
+      let hit = false;
+      let msg = "";
+
+      if (item.type === 'UMB_FIRE') {
+          addVisualEffect('BEAM', x, y, { color: 'red' });
+          if (target) {
+              const dmg = 20;
+              const nhp = target.hp - dmg;
+              setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0));
+              if (nhp <= 0) { gainXp(target.xp); msg = `${target.name}を燃やした！`; }
+              else { msg = `${target.name}に${dmg}ダメージ！`; }
+              hit = true;
+          }
+      } else if (item.type === 'UMB_THUNDER') {
+          addVisualEffect('THUNDER', x, y);
+          if (target) {
+              const dmg = 25;
+              const nhp = target.hp - dmg;
+              setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0));
+              if (nhp <= 0) { gainXp(target.xp); msg = `${target.name}に落雷！`; }
+              else { msg = `${target.name}に${dmg}ダメージ！`; }
+              hit = true;
+          }
+      } else if (item.type === 'UMB_SLEEP') {
+          addVisualEffect('TEXT', x, y, {value: 'Zzz', color: 'blue'});
+          if (target) {
+              setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, status: { ...e.status, sleep: 10 } } : e));
+              msg = `${target.name}は眠ってしまった。`;
+              hit = true;
+          }
+      } else if (item.type === 'UMB_BLOW') {
+          if (target) {
+              // Knockback 5 tiles
+              let tx = target.x; let ty = target.y;
+              const dx = target.x - player.x; const dy = target.y - player.y; // Simplified dir
+              const dist = Math.max(1, Math.abs(dx) + Math.abs(dy)); // Manhattan
+              const ndx = Math.sign(dx); const ndy = Math.sign(dy);
+              
+              for (let i=0; i<5; i++) {
+                  if (map[ty+ndy][tx+ndx] !== 'WALL' && !enemies.some(e=>e.x===tx+ndx && e.y===ty+ndy)) {
+                      tx += ndx; ty += ndy;
+                  } else { break; }
+              }
+              if (tx !== target.x || ty !== target.y) {
+                  setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, x: tx, y: ty } : e));
+                  msg = `${target.name}を吹き飛ばした！`;
+                  hit = true;
+              } else { msg = "吹き飛ばなかった。"; hit = true; }
+          }
+      } else if (item.type === 'UMB_WARP') {
+          if (target) {
+              let attempts = 0;
+              while (attempts < 20) {
+                  attempts++;
+                  const rx = Math.floor(Math.random() * MAP_W); const ry = Math.floor(Math.random() * MAP_H);
+                  if (map[ry][rx] === 'FLOOR' && !enemies.find(e => e.x === rx && e.y === ry) && (rx !== player.x || ry !== player.y)) {
+                      setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, x: rx, y: ry } : e));
+                      msg = `${target.name}はどこかへ消えた。`; hit = true; break;
+                  }
+              }
+          }
+      } else if (item.type === 'UMB_CHANGE') {
+          if (target) {
+              const px = player.x; const py = player.y;
+              setPlayer(p => ({...p, x: target.x, y: target.y }));
+              setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, x: px, y: py } : e));
+              msg = `${target.name}と入れ替わった！`; hit = true;
+          }
+      } else if (item.type === 'UMB_BIND') {
+          if (target) {
+              setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, status: { ...e.status, frozen: 10 } } : e));
+              msg = `${target.name}は金縛りにあった！`; hit = true;
+          }
+      } else if (item.type === 'UMB_HEAL') {
+          if (target) {
+              setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: e.maxHp } : e));
+              msg = `${target.name}が回復してしまった！`; hit = true;
+          } else {
+              // Self heal if no target? But staff usually target enemy. 
+              // Standard rogue: wave hits front. 
+              // Let's say if no enemy, wave fails to do anything special (waste charge).
+          }
+      }
+
+      // Self target staffs (Unusual but possible for Warp/Heal if logic allowed, but staying classic)
+      return { hit, msg };
   };
 
   const handleThrowItem = (index: number) => {
@@ -1106,10 +1250,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
       addVisualEffect('PROJECTILE', lx, ly, { dir: player.dir, duration: 10 });
       setInventory(prev => prev.filter((_, i) => i !== index));
-      audioService.playSound('throw');
 
       if (hitEntity) {
+          // Effect on Hit
           let dmg = 2; // Base throw dmg
+          let msg = "";
           
           if (item.category === 'WEAPON' || item.category === 'RANGED') dmg = 5 + (item.power || 0);
           if (item.category === 'ARMOR') dmg = 3 + (item.power || 0);
@@ -1118,8 +1263,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           if (item.type === 'SCROLL_SLEEP') { hitEntity.status.sleep = 10; addLog(`${hitEntity.name}は眠ってしまった！`); }
           
           if (item.category === 'STAFF') {
+              // Thrown staff activates effect
               const res = executeStaffEffect(item, hitEntity, hitEntity.x, hitEntity.y);
               if (res.msg) addLog(res.msg);
+              // Identify if hit
               if (!identifiedTypes.has(item.type)) {
                   setIdentifiedTypes(prev => new Set(prev).add(item.type));
                   addLog(`${idMap[item.type]}は${item.name}だった！`, "yellow");
@@ -1137,8 +1284,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               else { addLog(`${hitEntity.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', hitEntity.x, hitEntity.y, {value:`${dmg}`}); }
               setEnemies(newEnemies.filter(e => e.hp > 0));
           }
+          
           audioService.playSound('attack');
       } else {
+          // Drop on floor at lx, ly
           if (map[ly][lx] !== 'WALL' && !floorItems.find(i=>i.x===lx && i.y===ly)) {
               setFloorItems(prev => [...prev, {
                   id: Date.now() + Math.random(), type: 'ITEM', x: lx, y: ly, char: '!', name: item.name, 
@@ -1159,9 +1308,13 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       const item = inventory[index];
       if (!item) return;
 
+      // Staff (Umbrella) Logic
       if (item.category === 'STAFF') {
+          // Action is "Wave" (振る)
+          // Find target in front
           const { x: dx, y: dy } = player.dir;
           let target: Entity | null = null;
+          // Simple beam range? Standard is usually unlimited or visible range. Let's do 10 tiles.
           let tx = player.x, ty = player.y;
           for(let i=1; i<=10; i++) {
               tx += dx; ty += dy;
@@ -1170,11 +1323,13 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               if (e) { target = e; break; }
           }
 
+          // Decrease charge
           if ((item.charges || 0) > 0) {
-              const res = executeStaffEffect(item, target, player.x + dx, player.y + dy); 
+              const res = executeStaffEffect(item, target, player.x + dx, player.y + dy); // Visual start from adj
               if (res.msg) addLog(res.msg);
-              else addLog("しかし何も起こらなかった。"); 
+              else addLog("しかし何も起こらなかった。"); // Missed or resisted
 
+              // Decrement charge
               const newCharges = (item.charges || 0) - 1;
               const newItem = { ...item, charges: newCharges };
               setInventory(prev => prev.map((it, i) => i === index ? newItem : it));
@@ -1188,15 +1343,40 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               setMenuOpen(false);
               processTurn(player.x, player.y);
           } else {
-              addLog("魔力が尽きている！"); 
+              addLog("魔力が尽きている！"); // No turn passed
           }
           return;
       }
-      
+
+      if (item.type === 'POT_GLUE') {
+          setSynthState({ active: true, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null });
+          addLog("合成のベースとなる装備を選んでください");
+          audioService.playSound('select');
+          return; 
+      }
+      if (item.type === 'POT_CHANGE') {
+          setSynthState({ active: true, mode: 'CHANGE', step: 'SELECT_BASE', baseIndex: index }); 
+          setSynthState(prev => ({...prev, step: 'SELECT_TARGET'}));
+          addLog("変化させるアイテムを選んでください");
+          audioService.playSound('select');
+          return;
+      }
+      if (item.type === 'SCROLL_BLANK') {
+          if (identifiedTypes.size === 0) {
+              addLog("書き込める内容を知らない...", "red");
+              return;
+          }
+          setSynthState({ active: true, mode: 'BLANK', step: 'SELECT_EFFECT', baseIndex: index });
+          addLog("何を書き込みますか？");
+          audioService.playSound('select');
+          return;
+      }
+
       let actionDone = false;
-      if (item.category === 'WEAPON' || item.category === 'ARMOR' || item.category === 'RANGED') {
+
+      if (item.category === 'WEAPON' || item.category === 'ARMOR') {
           setPlayer(p => {
-              const slot = item.category === 'WEAPON' ? 'weapon' : (item.category === 'ARMOR' ? 'armor' : 'ranged');
+              const slot = item.category === 'WEAPON' ? 'weapon' : 'armor';
               const currentEquip = p.equipment ? p.equipment[slot] : null;
               const newEquipment = { ...p.equipment!, [slot]: item };
               const newInv = [...inventory];
@@ -1206,40 +1386,97 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               addLog(`${getItemName(item)}を装備した。`);
               return { ...p, equipment: newEquipment };
           });
-          audioService.playSound('equip');
           actionDone = true;
-      } else if (item.type === 'POT_GLUE') {
-          setSynthState({ active: true, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null });
-          addLog("合成のベースとなる装備を選んでください");
-          audioService.playSound('select');
-      } else if (item.type === 'POT_CHANGE') {
-          setSynthState({ active: true, mode: 'CHANGE', step: 'SELECT_BASE', baseIndex: index }); 
-          setSynthState(prev => ({...prev, step: 'SELECT_TARGET'}));
-          addLog("変化させるアイテムを選んでください");
-          audioService.playSound('select');
-      } else if (item.type === 'SCROLL_BLANK') {
-          if (identifiedTypes.size === 0) { addLog("書き込める内容を知らない...", "red"); return; }
-          setSynthState({ active: true, mode: 'BLANK', step: 'SELECT_EFFECT', baseIndex: index });
-          addLog("何を書き込みますか？"); audioService.playSound('select');
       } else if (item.category === 'CONSUMABLE') {
           if (item.type.includes('ONIGIRI') || item.type.includes('MEAT')) { 
               setBelly(Math.min(maxBelly, belly + (item.value || 50)));
-              if (item.type.includes('MEAT')) { setPlayer(p => ({ ...p, hp: Math.min(p.maxHp, p.hp + 50) })); addLog(`${item.name}を食べた。元気が出た！`); } else { addLog(`${item.name}を食べた。満腹！`); }
-              audioService.playSound('eat');
+              if (item.type.includes('MEAT')) {
+                  // Meat Bonus Effect
+                  setPlayer(p => ({ ...p, hp: Math.min(p.maxHp, p.hp + 50) }));
+                  addLog(`${item.name}を食べた。元気が出た！`); 
+              } else {
+                  addLog(`${item.name}を食べた。満腹！`); 
+              }
               actionDone = true; 
           }
-          else if (item.type === 'SCROLL_MAP') { setShowMap(true); addLog("校内図が頭に入った！"); actionDone = true; addVisualEffect('FLASH', 0, 0); audioService.playSound('buff'); }
-          else if (item.type.includes('HEAL')) { setPlayer(p => ({ ...p, hp: Math.min(p.maxHp, p.hp + (item.value || 30)) })); addLog("HPが回復した！"); actionDone = true; addVisualEffect('TEXT', player.x, player.y, {value: 'Heal', color: 'green'}); audioService.playSound('eat'); }
+          else if (item.type.includes('HEAL')) { setPlayer(p => ({ ...p, hp: Math.min(p.maxHp, p.hp + (item.value || 30)) })); addLog("HPが回復した！"); actionDone = true; addVisualEffect('TEXT', player.x, player.y, {value: 'Heal', color: 'green'}); }
+          else if (item.type === 'SCROLL_MAP') { setShowMap(true); addLog("校内図が頭に入った！"); actionDone = true; addVisualEffect('FLASH', 0, 0); }
+          else if (item.type === 'SCROLL_THUNDER' || item.type === 'BOMB') {
+              const isBomb = item.type === 'BOMB';
+              if (isBomb) { addVisualEffect('EXPLOSION', player.x, player.y); } else { addVisualEffect('THUNDER', 0, 0); triggerShake(10); }
+              setEnemies(prev => prev.map(e => {
+                  const dist = Math.abs(e.x - player.x) + Math.abs(e.y - player.y);
+                  if (item.type === 'BOMB' && dist > 2) return e;
+                  const nhp = e.hp - (item.value || 20);
+                  addVisualEffect('TEXT', e.x, e.y, {value: `${item.value||20}`, color:'yellow'});
+                  if (nhp <= 0) { gainXp(e.xp); return { ...e, hp: 0, dead: true }; }
+                  return { ...e, hp: nhp };
+              }).filter(e => !e.dead));
+              addLog(item.type === 'BOMB' ? "爆発した！" : "雷が落ちた！");
+              actionDone = true;
+          } else if (item.type === 'SCROLL_SLEEP') {
+              setEnemies(prev => prev.map(e => { addVisualEffect('TEXT', e.x, e.y, {value: 'Zzz', color:'blue'}); return { ...e, status: { ...e.status, sleep: 10 } }; }));
+              addLog("魔物が眠りについた。"); addVisualEffect('FLASH', 0, 0); actionDone = true;
+          } else if (item.type === 'SCROLL_WARP') {
+              let attempts = 0;
+              while (attempts < 20) {
+                  attempts++;
+                  const rx = Math.floor(Math.random() * MAP_W); const ry = Math.floor(Math.random() * MAP_H);
+                  if (map[ry][rx] === 'FLOOR' && !enemies.find(e => e.x === rx && e.y === ry)) {
+                      setPlayer(p => ({ ...p, x: rx, y: ry }));
+                      addLog("ワープした！"); addVisualEffect('FLASH', 0, 0); break;
+                  }
+              }
+              actionDone = true;
+          } else if (item.type === 'SCROLL_CONFUSE') {
+              setEnemies(prev => prev.map(e => ({ ...e, status: { ...e.status, confused: 10 } })));
+              addLog("魔物が混乱した！"); addVisualEffect('FLASH', 0, 0); actionDone = true;
+          } else if (item.type === 'SCROLL_IDENTIFY') {
+              setIdentifiedTypes(prev => {
+                  const next = new Set(prev);
+                  inventory.forEach(i => next.add(i.type));
+                  return next;
+              });
+              addLog("持ち物が識別された！"); addVisualEffect('FLASH', 0, 0); actionDone = true;
+          } else if (item.type === 'SCROLL_UP_W') {
+              if (player.equipment?.weapon) {
+                  const w = player.equipment.weapon;
+                  const newW = { ...w, plus: (w.plus || 0) + 1, name: w.name.split('+')[0] + '+' + ((w.plus || 0) + 1) };
+                  setPlayer(p => ({ ...p, equipment: { ...p.equipment!, weapon: newW } }));
+                  addLog("武器が強化された！"); actionDone = true;
+              } else { addLog("武器を装備していない。"); }
+          } else if (item.type === 'SCROLL_UP_A') {
+              if (player.equipment?.armor) {
+                  const a = player.equipment.armor;
+                  const newA = { ...a, plus: (a.plus || 0) + 1, name: a.name.split('+')[0] + '+' + ((a.plus || 0) + 1) };
+                  setPlayer(p => ({ ...p, equipment: { ...p.equipment!, armor: newA } }));
+                  addLog("防具が強化された！"); actionDone = true;
+              } else { addLog("防具を装備していない。"); }
+          }
           
           if (actionDone) {
               setInventory(prev => prev.filter((_, i) => i !== index));
               setSelectedItemIndex(prev => Math.min(prev, inventory.length - 2)); 
           }
+      } else if (item.category === 'RANGED') {
+          // Equip Logic for Ranged
+          setPlayer(p => {
+              const currentEquip = p.equipment ? p.equipment.ranged : null;
+              const newEquipment = { ...p.equipment!, ranged: item };
+              const newInv = [...inventory];
+              newInv.splice(index, 1); 
+              if (currentEquip) newInv.push(currentEquip); 
+              setInventory(newInv);
+              addLog(`${item.name}を装備した。`);
+              return { ...p, equipment: newEquipment };
+          });
+          actionDone = true;
       }
 
       if (actionDone) {
           setMenuOpen(false);
           processTurn(player.x, player.y);
+          audioService.playSound('select');
       }
   };
 
@@ -1279,160 +1516,14 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       }
   };
 
-  const handlePressStart = () => {
-      if (menuOpen || shopState.active || gameOver || gameClear) return;
-      fastForwardInterval.current = setTimeout(() => {
-          setIsFastForwarding(true);
-      }, 400); 
-  };
+  const handleTouchStart = (item: Item) => { longPressTimer.current = setTimeout(() => { setInspectedItem(item); }, 500); };
+  const handleTouchEnd = () => { if (longPressTimer.current) clearTimeout(longPressTimer.current); };
 
-  const handlePressEnd = () => {
-      if (fastForwardInterval.current) {
-          clearTimeout(fastForwardInterval.current);
-          fastForwardInterval.current = null;
-      }
-      
-      if (!isFastForwarding) {
-          handleActionBtn();
-      } else {
-          setIsFastForwarding(false);
-      }
-  };
-
-  useEffect(() => {
-      let interval: any = null;
-      if (isFastForwarding && !gameOverRef.current && !gameClearRef.current && !menuOpenRef.current && !shopStateRef.current.active) {
-          interval = setInterval(() => {
-              const p = playerRef.current;
-              const enemiesList = enemiesRef.current;
-              
-              const nearby = enemiesList.some(e => Math.abs(e.x - p.x) <= 2 && Math.abs(e.y - p.y) <= 2);
-              if (nearby) {
-                  setIsFastForwarding(false);
-                  addLog("敵が近くにいる！", "red");
-                  return;
-              }
-              if (p.hp >= p.maxHp && bellyRef.current > 20) {
-                  if (p.hp === p.maxHp) {
-                      setIsFastForwarding(false);
-                      addLog("HPが回復した。", C2);
-                      return;
-                  }
-              }
-              if (bellyRef.current <= 0) {
-                  setIsFastForwarding(false);
-                  return;
-              }
-
-              processTurn(p.x, p.y);
-          }, 50); 
-      }
-      return () => {
-          if (interval) clearInterval(interval);
-      };
-  }, [isFastForwarding]); 
-
-  const toggleMenu = () => {
-      if (shopState.active) { setShopState(prev => ({...prev, active: false})); return; }
-      if (menuOpen) {
-          setMenuOpen(false);
-          setSynthState({ active: false, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null });
-      } else {
-          setMenuOpen(true);
-          setSelectedItemIndex(0);
-      }
-      audioService.playSound('select');
-  };
-
-  const startEndlessMode = () => { setIsEndless(true); setGameClear(false); setFloor(f => f + 1); generateFloor(floor + 1); addLog("中学生編(エンドレス)開始！"); };
-
-  const handleSynthesisStep = () => {
-      const idx = synthState.mode === 'BLANK' ? blankScrollSelectionIndex : selectedItemIndex;
-      const item = inventory[idx];
-      
-      if (synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT') {
-          const knownTypes = Array.from(identifiedTypes).filter((t: string) => t.startsWith('SCROLL'));
-          const targetType = knownTypes[idx];
-          const template = ITEM_DB[targetType];
-          if (template) {
-              const blankIdx = synthState.baseIndex!;
-              const newItem = { ...template, id: `scribed-${Date.now()}` };
-              const newInv = [...inventory];
-              newInv[blankIdx] = newItem;
-              setInventory(newInv);
-              addLog("名前を書き込んだ！");
-              setSynthState({ ...synthState, active: false });
-              setMenuOpen(false);
-              processTurn(player.x, player.y);
-          }
-          return;
-      }
-
-      if (synthState.step === 'SELECT_BASE') {
-          if (synthState.mode === 'SYNTH') {
-              if (['WEAPON', 'ARMOR'].includes(item.category)) {
-                  setSynthState({ ...synthState, step: 'SELECT_MAT', baseIndex: idx });
-                  addLog("合成する素材を選んでください");
-                  audioService.playSound('select');
-              } else { addLog("それはベースにできません", "red"); audioService.playSound('wrong'); }
-          } else if (synthState.mode === 'CHANGE') {
-              setSynthState({ ...synthState, step: 'SELECT_TARGET', baseIndex: idx });
-              addLog("変化させるアイテムを選んでください");
-          }
-      } else if (synthState.step === 'SELECT_MAT') {
-          if (idx === synthState.baseIndex) { addLog("同じアイテムは選べません", "red"); audioService.playSound('wrong'); return; }
-          if (['WEAPON', 'ARMOR'].includes(item.category)) {
-              const baseIdx = synthState.baseIndex!;
-              const baseItem = inventory[baseIdx];
-              const matItem = item;
-              if (baseItem.category !== matItem.category) { addLog("種類が違うと合成できません", "red"); audioService.playSound('wrong'); return; }
-              const newPlus = (baseItem.plus || 0) + (matItem.plus || 0) + 1;
-              const newItem: Item = { ...baseItem, plus: newPlus, name: `${baseItem.name.split('+')[0]}+${newPlus}` };
-              const glueIdx = inventory.findIndex(i => i.type === 'POT_GLUE');
-              if (glueIdx === -1) { setSynthState({ ...synthState, active: false }); return; }
-              let newInv = inventory.map((it, i) => i === baseIdx ? newItem : it).filter((_, i) => i !== idx && i !== glueIdx);
-              setInventory(newInv);
-              addLog(`合成成功！${newItem.name}になった！`, "yellow");
-              addVisualEffect('FLASH', 0, 0);
-              audioService.playSound('buff');
-              setSynthState({ ...synthState, active: false });
-              setMenuOpen(false);
-              processTurn(player.x, player.y);
-          } else { addLog("それは素材にできません", "red"); audioService.playSound('wrong'); }
-      } else if (synthState.step === 'SELECT_TARGET') {
-          const potIdx = synthState.baseIndex!;
-          if (idx === potIdx) { addLog("壺自身は選べません", "red"); return; }
-          const keys = Object.keys(ITEM_DB);
-          const key = keys[Math.floor(Math.random() * keys.length)];
-          const template = ITEM_DB[key];
-          const newItem: Item = { ...template, id: `changed-${Date.now()}`, plus: 0 };
-          let newInv = inventory.map((it, i) => i === idx ? newItem : it).filter((_, i) => i !== potIdx);
-          setInventory(newInv);
-          addLog(`アイテムが${newItem.name}に変化した！`, "yellow");
-          addVisualEffect('FLASH', 0, 0);
-          audioService.playSound('buff');
-          setSynthState({ ...synthState, active: false });
-          setMenuOpen(false);
-          processTurn(player.x, player.y);
-      }
-  };
-
-  const executeStaffEffect = (item: Item, target: Entity | null, x: number, y: number): { hit: boolean, msg?: string } => {
-      let hit = false;
-      let msg = "";
-      if (item.type === 'UMB_FIRE') { addVisualEffect('BEAM', x, y, { color: 'red' }); if(target){ target.hp -= 20; msg=`${target.name}を燃やした！`; hit=true; setEnemies(prev => prev.map(e => e.id === target.id ? target : e).filter(e => e.hp > 0)); } }
-      else if (item.type === 'UMB_THUNDER') { addVisualEffect('THUNDER', x, y); if(target){ target.hp -= 25; msg=`${target.name}に落雷！`; hit=true; setEnemies(prev => prev.map(e => e.id === target.id ? target : e).filter(e => e.hp > 0)); } }
-      else if (item.type === 'UMB_SLEEP') { addVisualEffect('TEXT', x, y, { value: 'Zzz', color: 'blue' }); if(target){ target.status.sleep = 10; msg=`${target.name}は眠った。`; hit=true; } }
-      else if (item.type === 'UMB_BLOW') { addVisualEffect('EXPLOSION', x, y); if(target){ const dx = target.x - player.x; const dy = target.y - player.y; target.x += dx*3; target.y += dy*3; msg=`${target.name}を吹き飛ばした！`; hit=true; setEnemies(prev => prev.map(e => e.id === target.id ? target : e)); } }
-      else if (item.type === 'UMB_WARP') { addVisualEffect('WARP', x, y); if(target){ target.x = Math.floor(Math.random()*MAP_W); target.y = Math.floor(Math.random()*MAP_H); msg=`${target.name}はワープした。`; hit=true; setEnemies(prev => prev.map(e => e.id === target.id ? target : e)); } }
-      else if (item.type === 'UMB_HEAL') { addVisualEffect('TEXT', x, y, {value: 'Heal', color: 'green'}); if(target){ target.hp += 50; msg=`${target.name}を回復させた。`; hit=true; } else { setPlayer(p => ({...p, hp: Math.min(p.maxHp, p.hp+50)})); msg="HPが回復した！"; hit=true; } }
-      return { hit, msg };
-  };
-
+  // --- KEYBOARD ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
         if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) { e.preventDefault(); }
-        if (gameOver) { if (['z', 'Enter', ' '].includes(e.key)) { deleteSave(); startNewGame(); } return; }
+        if (gameOver) { if (['z', 'Enter', ' '].includes(e.key)) startNewGame(); return; }
         if (gameClear) { if (['z', 'Enter', ' '].includes(e.key)) startEndlessMode(); return; }
         if (['x', 'c', 'Escape'].includes(e.key)) { toggleMenu(); return; }
         if ((menuOpen || shopState.active) && (e.key === 'Backspace' || e.key === 'x')) {
@@ -1459,13 +1550,14 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             case 'End': case '1': case 'b': movePlayer(-1, 1); break;
             case 'PageDown': case '3': case 'n': movePlayer(1, 1); break;
             case 'z': case ' ': case 'Enter': handleActionBtn(); break;
-            case 'r': fireRangedWeapon(); break; 
+            case 'r': fireRangedWeapon(); break; // Keyboard shortcut for ranged
         }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [player, map, enemies, floorItems, menuOpen, gameOver, gameClear, inventory, selectedItemIndex, synthState, shopState, identifiedTypes, idMap]);
+  }, [player, map, enemies, floorItems, menuOpen, gameOver, gameClear, inventory, selectedItemIndex, synthState, shopState]);
 
+  // --- RENDER LOOP ---
   const frameCountRef = useRef(0);
   useEffect(() => {
       const loop = setInterval(() => {
@@ -1486,6 +1578,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       const h = canvas.height;
       const ts = TILE_SIZE * SCALE;
 
+      // FIX: Fill background FIRST to prevent artifacts during shake
       ctx.fillStyle = C0;
       ctx.fillRect(0, 0, w, h);
 
@@ -1613,6 +1706,46 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               ctx.fillRect(0, 0, w, h);
               ctx.globalAlpha = 1.0;
           }
+          else if (fx.type === 'SLASH') {
+              if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
+                  ctx.strokeStyle = 'white';
+                  ctx.lineWidth = 4;
+                  ctx.beginPath();
+                  const d = fx.dir || {x:1, y:0};
+                  const cx = sx + ts/2;
+                  const cy = sy + ts/2;
+                  ctx.moveTo(cx - d.y*10 - d.x*10, cy - d.x*10 + d.y*10);
+                  ctx.lineTo(cx + d.y*10 + d.x*10, cy + d.x*10 - d.y*10);
+                  ctx.stroke();
+              }
+          }
+          else if (fx.type === 'EXPLOSION') {
+              if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
+                  ctx.fillStyle = ['white', 'orange', 'red'][Math.floor(Math.random()*3)];
+                  const rad = (1 - fx.duration / fx.maxDuration) * ts * (fx.scale || 2);
+                  ctx.beginPath();
+                  ctx.arc(sx + ts/2, sy + ts/2, rad, 0, Math.PI*2);
+                  ctx.fill();
+              }
+          }
+          else if (fx.type === 'BEAM') {
+              if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
+                  ctx.strokeStyle = fx.color || 'red';
+                  ctx.lineWidth = 5;
+                  ctx.beginPath();
+                  ctx.moveTo(sx + ts/2, sy + ts/2);
+                  ctx.arc(sx + ts/2, sy + ts/2, 20, 0, Math.PI*2);
+                  ctx.stroke();
+              }
+          }
+          else if (fx.type === 'PROJECTILE') {
+              if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
+                  ctx.fillStyle = '#9bbc0f';
+                  ctx.beginPath();
+                  ctx.arc(sx + ts/2, sy + ts/2, 4 * SCALE, 0, Math.PI*2);
+                  ctx.fill();
+              }
+          }
           else if (fx.type === 'TEXT') {
               if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
                   ctx.fillStyle = fx.color || 'white';
@@ -1623,12 +1756,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   ctx.strokeText(fx.value || '', sx + ts/2, sy - lift + ts);
                   ctx.fillText(fx.value || '', sx + ts/2, sy - lift + ts);
               }
-          }
-          else if (fx.type === 'PROJECTILE') {
-              ctx.fillStyle = 'white';
-              ctx.beginPath();
-              ctx.arc(sx + ts/2, sy + ts/2, 5, 0, Math.PI*2);
-              ctx.fill();
           }
       });
       visualEffects.current = visualEffects.current.filter(fx => fx.duration > 0);
@@ -1663,138 +1790,42 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             </div>
         )}
 
+        {/* Help Screen */}
         {showHelp && (
-            <div className="absolute inset-0 z-50 bg-[#0f380f]/95 p-4 flex flex-col items-center justify-center" onClick={() => setShowHelp(false)}>
-                <div className="bg-[#9bbc0f] border-4 border-[#306230] p-6 max-w-lg w-full text-[#0f380f] overflow-y-auto max-h-[80vh] shadow-2xl" onClick={e => e.stopPropagation()}>
-                    <h2 className="text-2xl font-bold mb-4 border-b-2 border-[#306230] pb-2 flex justify-between">遊び方 <button onClick={() => setShowHelp(false)}><X/></button></h2>
-                    <div className="space-y-4 text-sm font-bold">
-                        <p>◆ 目的: 地下20階のボスを倒そう！</p>
-                        <p>◆ 移動: 矢印キー / 十字ボタン</p>
-                        <p>◆ 攻撃: 敵の方向へ移動すると攻撃</p>
-                        <p>◆ 斜め移動: 7,9,1,3キー / 斜めボタン</p>
-                        <p>◆ メニュー: Xキー / Bボタン (アイテム使用)</p>
-                        <p>◆ 足踏み: Zキー長押し / Aボタン長押し (HP回復)</p>
-                        <p>◆ 満腹度: 0になるとHPが減る。おにぎりを食べよう。</p>
-                        <div className="bg-[#8bac0f] p-2 rounded">
-                            <p>★合成の壺(工作のり): 装備を強化できる。</p>
-                            <p>★未識別の傘: 使ってみるまで効果不明。</p>
-                        </div>
+            <div className="absolute inset-0 z-50 bg-[#0f380f]/95 flex items-center justify-center p-4" onClick={() => setShowHelp(false)}>
+                <div className="w-full max-w-md bg-[#9bbc0f] border-4 border-[#306230] p-6 shadow-xl text-[#0f380f] overflow-y-auto max-h-[80vh] custom-scrollbar" onClick={e => e.stopPropagation()}>
+                    <div className="flex justify-between items-center mb-4 border-b-2 border-[#306230] pb-2">
+                        <h2 className="font-bold text-xl flex items-center"><HelpCircle className="mr-2"/> 遊び方</h2>
+                        <button onClick={() => setShowHelp(false)}><X size={24}/></button>
                     </div>
+                    <div className="space-y-4 text-sm">
+                        <section>
+                            <h3 className="font-bold border-b border-[#306230] mb-1">目的</h3>
+                            <p>地下20階を目指し、校長先生を説得(撃破)してください。<br/>道中で落ちている武器や道具を駆使して生き残りましょう。</p>
+                        </section>
+                        <section>
+                            <h3 className="font-bold border-b border-[#306230] mb-1">操作方法</h3>
+                            <ul className="list-disc pl-5">
+                                <li><strong>移動:</strong> 十字キー または 画面パッド</li>
+                                <li><strong>攻撃:</strong> Aボタン または Zキー</li>
+                                <li><strong>メニュー:</strong> Bボタン または Xキー</li>
+                                <li><strong>飛び道具:</strong> <Crosshair size={12} className="inline"/>ボタン または Rキー</li>
+                                <li><strong>早送り:</strong> Aボタン長押し (敵がいない時)</li>
+                            </ul>
+                        </section>
+                        <section>
+                            <h3 className="font-bold border-b border-[#306230] mb-1">ヒント</h3>
+                            <ul className="list-disc pl-5">
+                                <li>お腹が減るとHPが減ります。おにぎりやパンを食べましょう。</li>
+                                <li><strong className="text-red-700">傘(杖)</strong>は振ると魔法が出ますが、回数制限があります。使い切ったら投げましょう。</li>
+                                <li>「工作のり」を使うと、装備を合成して強くできます。</li>
+                                <li>敵に囲まれたら通路に逃げ込みましょう。</li>
+                                <li>まれに購買部員(店)が現れます。アイテム売買が可能です。</li>
+                            </ul>
+                        </section>
+                    </div>
+                    <button onClick={() => setShowHelp(false)} className="mt-6 w-full py-2 bg-[#306230] text-[#9bbc0f] font-bold rounded">閉じる</button>
                 </div>
-            </div>
-        )}
-
-        {shopState.active && (
-            <div className="absolute inset-0 z-40 bg-black/80 flex items-center justify-center p-4">
-                <div className="bg-[#9bbc0f] border-4 border-[#306230] w-full max-w-md h-[500px] flex flex-col text-[#0f380f] shadow-2xl relative">
-                    <div className="bg-[#306230] text-[#9bbc0f] p-2 font-bold flex justify-between items-center">
-                        <span>購買部 ({shopState.mode === 'BUY' ? '購入' : '売却'})</span>
-                        <span>所持金: {player.gold}G</span>
-                    </div>
-                    <div className="flex-1 overflow-y-auto p-2 space-y-1" ref={menuListRef}>
-                        {shopState.mode === 'BUY' ? (
-                            enemies.find(e => e.id === shopState.merchantId)?.shopItems?.map((item, idx) => (
-                                <div key={idx} className={`p-2 border-b border-[#8bac0f] flex justify-between items-center cursor-pointer ${idx === selectedItemIndex ? 'bg-[#306230] text-[#9bbc0f]' : ''}`} onClick={() => { setSelectedItemIndex(idx); handleShopAction(); }}>
-                                    <span>{getItemName(item)}</span>
-                                    <span className="font-bold">{item.price}G</span>
-                                </div>
-                            ))
-                        ) : (
-                            inventory.map((item, idx) => (
-                                <div key={idx} className={`p-2 border-b border-[#8bac0f] flex justify-between items-center cursor-pointer ${idx === selectedItemIndex ? 'bg-[#306230] text-[#9bbc0f]' : ''}`} onClick={() => { setSelectedItemIndex(idx); handleShopAction(); }}>
-                                    <span>{getItemName(item)}</span>
-                                    <span className="font-bold">{Math.floor((item.value || 100)/2)}G</span>
-                                </div>
-                            ))
-                        )}
-                        {(shopState.mode === 'BUY' && (!enemies.find(e => e.id === shopState.merchantId)?.shopItems?.length)) && <div className="p-4 text-center">売り切れ！</div>}
-                        {(shopState.mode === 'SELL' && inventory.length === 0) && <div className="p-4 text-center">売るものがない！</div>}
-                    </div>
-                    <div className="p-2 flex gap-2 border-t border-[#306230] bg-[#8bac0f]">
-                        <button onClick={() => setShopState(prev => ({...prev, mode: 'BUY'}))} className={`flex-1 py-2 font-bold ${shopState.mode==='BUY' ? 'bg-[#0f380f] text-[#9bbc0f]' : 'bg-[#9bbc0f] border border-[#0f380f]'}`}>買う</button>
-                        <button onClick={() => setShopState(prev => ({...prev, mode: 'SELL'}))} className={`flex-1 py-2 font-bold ${shopState.mode==='SELL' ? 'bg-[#0f380f] text-[#9bbc0f]' : 'bg-[#9bbc0f] border border-[#0f380f]'}`}>売る</button>
-                        <button onClick={() => setShopState(prev => ({...prev, active: false}))} className="px-4 py-2 font-bold border border-[#0f380f] bg-[#9bbc0f]">出る</button>
-                    </div>
-                </div>
-            </div>
-        )}
-
-        {menuOpen && !shopState.active && (
-            <div className="absolute inset-0 z-40 bg-black/50 flex items-center justify-center p-4">
-                <div className="bg-[#9bbc0f] border-4 border-[#306230] w-full max-w-sm h-[400px] flex flex-col text-[#0f380f] shadow-2xl relative">
-                    <div className="bg-[#306230] text-[#9bbc0f] p-2 font-bold flex justify-between">
-                        <span>持ち物 ({inventory.length}/{MAX_INVENTORY})</span>
-                        <button onClick={() => setMenuOpen(false)}><X size={16}/></button>
-                    </div>
-                    
-                    {synthState.active && (
-                        <div className="bg-[#8bac0f] p-2 text-center font-bold border-b border-[#306230] animate-pulse text-[#0f380f]">
-                            {synthState.mode === 'SYNTH' ? '合成' : (synthState.mode === 'CHANGE' ? '変化' : '書き込み')}: 
-                            {synthState.step === 'SELECT_BASE' ? 'ベースを選択' : (synthState.step === 'SELECT_MAT' ? '素材を選択' : (synthState.step === 'SELECT_TARGET' ? '対象を選択' : '効果を選択'))}
-                        </div>
-                    )}
-
-                    <div className="flex-1 overflow-y-auto custom-scrollbar" ref={menuListRef}>
-                        {synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT' ? (
-                            Array.from(identifiedTypes).filter((t: string) => t.startsWith('SCROLL')).map((type: string, idx: number) => (
-                                <div 
-                                    key={idx} 
-                                    className={`p-2 border-b border-[#8bac0f] cursor-pointer flex justify-between items-center ${idx === blankScrollSelectionIndex ? 'bg-[#306230] text-[#9bbc0f]' : 'hover:bg-[#8bac0f]'}`}
-                                    onClick={() => handleSynthesisStep()}
-                                    onMouseEnter={() => setBlankScrollSelectionIndex(idx)}
-                                >
-                                    <span>{ITEM_DB[type]?.name}</span>
-                                </div>
-                            ))
-                        ) : (
-                            inventory.map((item, idx) => {
-                                const isEquipped = player.equipment?.weapon === item || player.equipment?.armor === item || player.equipment?.ranged === item;
-                                const isSynthBase = synthState.baseIndex === idx;
-                                return (
-                                    <div 
-                                        key={idx} 
-                                        className={`p-2 border-b border-[#8bac0f] cursor-pointer flex justify-between items-center ${idx === selectedItemIndex ? 'bg-[#306230] text-[#9bbc0f]' : 'hover:bg-[#8bac0f]'} ${isSynthBase ? 'bg-yellow-500 text-black' : ''}`}
-                                        onClick={() => synthState.active ? handleSynthesisStep() : handleItemAction(idx)}
-                                        onMouseEnter={() => !synthState.active && setSelectedItemIndex(idx)}
-                                        onContextMenu={(e) => { e.preventDefault(); setInspectedItem(item); }}
-                                    >
-                                        <div className="flex items-center gap-2 overflow-hidden">
-                                            {isEquipped && <div className="text-[10px] bg-[#0f380f] text-[#9bbc0f] px-1 rounded">E</div>}
-                                            <span className="truncate">{getItemName(item)} {item.plus ? `+${item.plus}` : ''} {item.count ? `(${item.count})` : ''} {item.category === 'STAFF' ? `[${item.charges}]` : ''}</span>
-                                        </div>
-                                        {idx === selectedItemIndex && !synthState.active && (
-                                            <div className="flex gap-2 shrink-0">
-                                                {(item.category === 'WEAPON' || item.category === 'ARMOR' || item.category === 'RANGED') && !isEquipped && <span className="text-[10px] border px-1">装備</span>}
-                                                {isEquipped && <span className="text-[10px] border px-1" onClick={(e) => { e.stopPropagation(); handleUnequip(item.category === 'WEAPON' ? 'weapon' : item.category === 'ARMOR' ? 'armor' : 'ranged'); }}>外す</span>}
-                                                {(item.category === 'CONSUMABLE' || item.category === 'STAFF') && <span className="text-[10px] border px-1">使う</span>}
-                                                {(item.type === 'POT_GLUE' || item.type === 'POT_CHANGE' || item.type === 'SCROLL_BLANK') && <span className="text-[10px] border px-1">入れる</span>}
-                                                <button onClick={(e) => { e.stopPropagation(); handleDropItem(idx); }} className="p-1 hover:bg-red-500 rounded"><Trash2 size={12}/></button>
-                                                <button onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }} className="p-1 hover:bg-blue-500 rounded"><Info size={12}/></button>
-                                            </div>
-                                        )}
-                                    </div>
-                                );
-                            })
-                        )}
-                        {inventory.length === 0 && <div className="p-4 text-center text-sm">何も持っていない</div>}
-                    </div>
-                </div>
-            </div>
-        )}
-
-        {(gameOver || gameClear) && (
-            <div className="absolute inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4 text-[#9bbc0f]">
-                <h2 className="text-6xl font-bold mb-4">{gameClear ? 'THE END' : 'GAME OVER'}</h2>
-                <div className="text-2xl font-mono mb-8">
-                    {gameClear ? 'ダンジョン制覇！' : `倒れた階層: ${floor}F`}
-                </div>
-                <div className="bg-[#0f380f] p-4 rounded border-2 border-[#306230] mb-8 w-64 text-center">
-                    <div>Level: {level}</div>
-                    <div>Score: {floor*100 + level*50}</div>
-                </div>
-                <button onClick={() => { deleteSave(); startNewGame(); }} className="bg-[#9bbc0f] text-[#0f380f] px-8 py-3 rounded font-bold text-xl hover:bg-[#8bac0f] mb-4 w-64 flex items-center justify-center"><RotateCcw className="mr-2"/> 最初から</button>
-                {gameClear && <button onClick={startEndlessMode} className="bg-[#306230] text-[#9bbc0f] px-8 py-3 rounded font-bold text-xl hover:bg-[#0f380f] w-64 flex items-center justify-center border border-[#9bbc0f]"><Swords className="mr-2"/> もっと潜る</button>}
-                <button onClick={onBack} className="mt-4 text-[#8bac0f] hover:text-[#9bbc0f] underline">タイトルへ戻る</button>
             </div>
         )}
 
@@ -1821,9 +1852,239 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
                     <canvas ref={canvasRef} width={VIEW_W * TILE_SIZE * SCALE} height={VIEW_H * TILE_SIZE * SCALE} className="w-full h-full object-contain pixel-art mt-6" style={{ imageRendering: 'pixelated' }} />
 
+                    {/* Fast Forward Indicator */}
                     {isFastForwarding && (
                         <div className="absolute top-16 right-2 text-[#9bbc0f] animate-pulse flex items-center bg-[#0f380f]/50 rounded px-2">
                             <FastForward size={16} className="mr-1"/> 早送り中
+                        </div>
+                    )}
+
+                    {showMap && map.length > 0 && (
+                        <div className="absolute inset-0 bg-[#0f380f]/90 z-20 flex items-center justify-center p-8 mt-12">
+                            <div className="w-full h-full border border-[#9bbc0f] grid" style={{ gridTemplateColumns: `repeat(${MAP_W}, 1fr)` }}>
+                                {map.map((row, y) => row.map((tile, x) => (
+                                    <div key={`${x}-${y}`} className={`${tile === 'WALL' ? 'bg-transparent' : (tile === 'STAIRS' ? 'bg-[#9bbc0f]' : 'bg-[#306230]')}`}>
+                                        {x === player.x && y === player.y && <div className="w-full h-full bg-white rounded-full animate-pulse"></div>}
+                                    </div>
+                                )))}
+                            </div>
+                            <button onClick={() => setShowMap(false)} className="absolute bottom-4 text-[#9bbc0f] border border-[#9bbc0f] px-2 rounded hover:bg-[#306230]">Close</button>
+                        </div>
+                    )}
+
+                    {/* Shop Menu */}
+                    {shopState.active && (
+                        <div className="absolute right-0 top-0 bottom-0 w-3/4 bg-[#0f380f] border-l-2 border-[#9bbc0f] z-30 p-2 text-[#9bbc0f] text-xs flex flex-col">
+                            <div className="flex justify-between items-center border-b border-[#9bbc0f] mb-2 pb-1">
+                                <h3 className="font-bold flex items-center"><ShoppingBag size={12} className="mr-1"/> 購買部</h3>
+                                <button onClick={() => setShopState(prev => ({...prev, active: false}))}><X size={12}/></button>
+                            </div>
+                            
+                            <div className="flex gap-2 mb-2">
+                                <button 
+                                    className={`flex-1 py-1 text-center border ${shopState.mode === 'BUY' ? 'bg-[#9bbc0f] text-[#0f380f]' : 'border-[#9bbc0f]'}`}
+                                    onClick={() => { setShopState(prev => ({ ...prev, mode: 'BUY' })); setSelectedItemIndex(0); }}
+                                >
+                                    買う
+                                </button>
+                                <button 
+                                    className={`flex-1 py-1 text-center border ${shopState.mode === 'SELL' ? 'bg-[#9bbc0f] text-[#0f380f]' : 'border-[#9bbc0f]'}`}
+                                    onClick={() => { setShopState(prev => ({ ...prev, mode: 'SELL' })); setSelectedItemIndex(0); }}
+                                >
+                                    売る
+                                </button>
+                            </div>
+
+                            <div className="flex justify-end mb-2 border-b border-[#306230] pb-1">
+                                <span className="flex items-center"><Coins size={10} className="mr-1"/> {player.gold} G</span>
+                            </div>
+
+                            <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar">
+                                {shopState.mode === 'BUY' ? (
+                                    enemies.find(e => e.id === shopState.merchantId)?.shopItems?.map((item, i) => (
+                                        <div 
+                                            key={i} 
+                                            className={`flex items-center border ${selectedItemIndex === i ? 'bg-[#8bac0f] text-[#0f380f] border-[#9bbc0f]' : 'border-transparent hover:border-[#9bbc0f]'}`}
+                                            onMouseEnter={() => setSelectedItemIndex(i)}
+                                        >
+                                            <button 
+                                                className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center"
+                                                onClick={() => handleShopAction()}
+                                            >
+                                                <span>{getItemName(item)}</span>
+                                                <span className="flex items-center gap-1">
+                                                    {item.price} G
+                                                </span>
+                                            </button>
+                                            <button 
+                                                className="px-2 py-1 border-l border-[#306230] hover:bg-[#306230] hover:text-[#9bbc0f] flex items-center justify-center"
+                                                onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}
+                                            >
+                                                <Info size={10} />
+                                            </button>
+                                        </div>
+                                    )) || <div className="text-center">売り切れ</div>
+                                ) : (
+                                    inventory.map((item, i) => (
+                                        <div 
+                                            key={i} 
+                                            className={`flex items-center border ${selectedItemIndex === i ? 'bg-[#8bac0f] text-[#0f380f] border-[#9bbc0f]' : 'border-transparent hover:border-[#9bbc0f]'}`}
+                                            onMouseEnter={() => setSelectedItemIndex(i)}
+                                        >
+                                            <button 
+                                                className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center"
+                                                onClick={() => handleShopAction()}
+                                            >
+                                                <span>{getItemName(item)}</span>
+                                                <span className="flex items-center gap-1">
+                                                    {Math.floor((item.price || (item.value || 100)) / 2)} G
+                                                </span>
+                                            </button>
+                                            <button 
+                                                className="px-2 py-1 border-l border-[#306230] hover:bg-[#306230] hover:text-[#9bbc0f] flex items-center justify-center"
+                                                onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}
+                                            >
+                                                <Info size={10} />
+                                            </button>
+                                        </div>
+                                    ))
+                                )}
+                                {shopState.mode === 'SELL' && inventory.length === 0 && <div className="text-center">持ち物なし</div>}
+                            </div>
+                        </div>
+                    )}
+
+                    {menuOpen && (
+                        <div className="absolute right-0 top-0 bottom-0 w-3/4 bg-[#0f380f] border-l-2 border-[#9bbc0f] z-30 p-2 text-[#9bbc0f] text-xs flex flex-col">
+                            <div className="flex justify-between items-center border-b border-[#9bbc0f] mb-2 pb-1">
+                                <h3 className="font-bold">
+                                    {synthState.active 
+                                        ? (synthState.mode === 'BLANK' ? '書き込む内容を選択' : (synthState.step === 'SELECT_BASE' ? (synthState.mode==='CHANGE'?'変化させる物':'ベースを選択') : (synthState.mode==='CHANGE'?'変化':'素材を選択')))
+                                        : `MOCHIMONO (${inventory.length}/${MAX_INVENTORY})`
+                                    }
+                                </h3>
+                                <button onClick={toggleMenu}><X size={12}/></button>
+                            </div>
+                            
+                            {synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT' ? (
+                                <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar">
+                                    {Array.from(identifiedTypes).filter(t => t.startsWith('SCROLL')).map((type, i) => (
+                                        <div key={i} className={`flex items-center border ${blankScrollSelectionIndex === i ? 'bg-[#8bac0f] text-[#0f380f] border-[#9bbc0f]' : 'border-transparent'}`}>
+                                            <button className="flex-grow text-left px-2 py-1 cursor-pointer" onClick={() => handleSynthesisStep()} onMouseEnter={() => setBlankScrollSelectionIndex(i)}>
+                                                {ITEM_DB[type].name}
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {Array.from(identifiedTypes).filter(t => t.startsWith('SCROLL')).length === 0 && <div className="text-red-500">識別済みのノートがありません</div>}
+                                </div>
+                            ) : (
+                                <>
+                                    {!synthState.active && (
+                                        <div className="mb-2 border-b border-[#306230] pb-2">
+                                            <div className="text-[#8bac0f] mb-1">装備中:</div>
+                                            {player.equipment?.weapon && <div onClick={()=>handleUnequip('weapon')} className="cursor-pointer hover:text-white">[武] {getItemName(player.equipment.weapon)}</div>}
+                                            {player.equipment?.armor && <div onClick={()=>handleUnequip('armor')} className="cursor-pointer hover:text-white">[防] {getItemName(player.equipment.armor)}</div>}
+                                            {player.equipment?.ranged && <div onClick={()=>handleUnequip('ranged')} className="cursor-pointer hover:text-white">[投] {getItemName(player.equipment.ranged)}</div>}
+                                        </div>
+                                    )}
+
+                                    <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar">
+                                        {inventory.map((item, i) => {
+                                            const isSynthTarget = synthState.active && (
+                                                (synthState.step === 'SELECT_BASE' && synthState.mode === 'SYNTH' && !['WEAPON','ARMOR'].includes(item.category)) ||
+                                                (synthState.step === 'SELECT_MAT' && synthState.baseIndex === i)
+                                            );
+                                            
+                                            return (
+                                                <div 
+                                                    key={i} 
+                                                    className={`flex items-center border ${selectedItemIndex === i ? 'bg-[#8bac0f] text-[#0f380f] border-[#9bbc0f]' : 'border-transparent hover:border-[#9bbc0f]'} ${isSynthTarget ? 'opacity-30' : ''}`}
+                                                    onContextMenu={(e) => { e.preventDefault(); setInspectedItem(item); }}
+                                                    onTouchStart={() => handleTouchStart(item)}
+                                                    onTouchEnd={handleTouchEnd}
+                                                >
+                                                    <button 
+                                                        className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center"
+                                                        onClick={() => !isSynthTarget && (synthState.active ? handleSynthesisStep() : handleItemAction(i))}
+                                                        onMouseEnter={() => setSelectedItemIndex(i)}
+                                                    >
+                                                        <span>
+                                                            {getItemName(item)} 
+                                                            {item.plus ? `+${item.plus}` : ''} 
+                                                            {item.count ? `(${item.count})` : ''}
+                                                            {item.category === 'STAFF' ? `[${item.charges}]` : ''}
+                                                        </span>
+                                                        <span className={`text-[9px] ${selectedItemIndex === i ? 'text-[#0f380f]' : 'text-[#8bac0f]'}`}>
+                                                            {synthState.active 
+                                                                ? '選択' 
+                                                                : (['WEAPON','ARMOR','RANGED'].includes(item.category) ? '装備' : (item.category==='STAFF' ? '振る' : '使う'))
+                                                            }
+                                                        </span>
+                                                    </button>
+                                                    {!synthState.active && (
+                                                        <button 
+                                                            className="px-2 py-1 border-l border-[#306230] hover:bg-[#306230] hover:text-[#9bbc0f] flex items-center justify-center"
+                                                            onClick={(e) => { e.stopPropagation(); handleThrowItem(i); }}
+                                                            title="投げる"
+                                                        >
+                                                            <Send size={10} />
+                                                        </button>
+                                                    )}
+                                                    {!synthState.active && (
+                                                        <button 
+                                                            className="px-2 py-1 border-l border-[#306230] hover:bg-[#306230] hover:text-[#9bbc0f] flex items-center justify-center"
+                                                            onClick={(e) => { e.stopPropagation(); handleDropItem(i); }}
+                                                            title="足元に置く"
+                                                        >
+                                                            <ArrowDown size={10} />
+                                                        </button>
+                                                    )}
+                                                    <button 
+                                                        className="px-2 py-1 border-l border-[#306230] hover:bg-[#306230] hover:text-[#9bbc0f] flex items-center justify-center"
+                                                        onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}
+                                                        title="詳細"
+                                                    >
+                                                        <Info size={10} />
+                                                    </button>
+                                                </div>
+                                            );
+                                        })}
+                                        {inventory.length === 0 && <span className="text-[#306230] text-center">Empty</span>}
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    )}
+
+                    {gameClear && (
+                        <div className="absolute inset-0 bg-[#0f380f]/95 flex flex-col items-center justify-center text-[#9bbc0f] z-40 p-4 text-center">
+                            <Award size={48} className="mb-4 text-[#8bac0f]"/>
+                            <h2 className="text-2xl font-bold mb-4">GRADUATION!</h2>
+                            <p className="mb-2">ついに校長を説得した！</p>
+                            <p className="mb-8">君は伝説の小学生となった。</p>
+                            <div className="flex flex-col gap-4 w-full">
+                                <button onClick={startEndlessMode} className="border-2 border-[#9bbc0f] px-4 py-3 hover:bg-[#306230] animate-pulse font-bold">
+                                    中学生編へ (エンドレス)
+                                </button>
+                                <button onClick={onBack} className="border-2 border-[#306230] px-4 py-2 hover:bg-[#306230] text-sm">
+                                    タイトルへ戻る
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {gameOver && (
+                        <div className="absolute inset-0 bg-[#0f380f]/90 flex flex-col items-center justify-center text-[#9bbc0f] z-40">
+                            <Skull size={48} className="mb-4 text-[#306230]"/>
+                            <h2 className="text-2xl font-bold mb-4">GAME OVER</h2>
+                            <p>Floor: {floor}</p>
+                            <p>Level: {level}</p>
+                            <button onClick={startNewGame} className="mt-6 border-2 border-[#9bbc0f] px-4 py-2 hover:bg-[#306230] animate-pulse flex items-center">
+                                <RotateCcw size={16} className="mr-2"/> RETRY
+                            </button>
+                            <button onClick={onBack} className="mt-4 text-sm hover:underline">
+                                EXIT
+                            </button>
                         </div>
                     )}
                 </div>
@@ -1837,21 +2098,20 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         </div>
 
         <div className="w-full max-w-md md:w-64 md:h-[400px] flex-grow md:flex-grow-0 relative min-h-[220px] bg-[#1a1a1a] rounded-t-xl md:rounded-xl border-t-2 md:border-2 border-[#333]">
-            {/* D-Pad */}
             <div className="absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32 md:left-1/2 md:-translate-x-1/2 md:top-1/4 flex items-center justify-center">
                 <div className="w-10 h-10 bg-[#333] z-10"></div>
                 <div className="absolute top-0 w-10 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0 touch-none select-none" onClick={() => movePlayer(0, -1)}><ArrowUp className="text-[#666]" size={20}/></div>
                 <div className="absolute bottom-0 w-10 h-16 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-0 touch-none select-none" onClick={() => movePlayer(0, 1)}><ArrowDown className="text-[#666]" size={20}/></div>
                 <div className="absolute left-0 w-16 h-10 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-0 touch-none select-none" onClick={() => movePlayer(-1, 0)}><ArrowLeft className="text-[#666]" size={20}/></div>
                 <div className="absolute right-0 w-16 h-10 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-0 touch-none select-none" onClick={() => movePlayer(1, 0)}><ArrowRight className="text-[#666]" size={20}/></div>
-                {/* Diagonals */}
                 <div className="absolute top-0 left-0 w-10 h-10 bg-[#333] rounded-tl-xl border-t border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => movePlayer(-1, -1)}><ArrowUpLeft className="text-[#666]" size={20}/></div>
                 <div className="absolute top-0 right-0 w-10 h-10 bg-[#333] rounded-tr-xl border-t border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => movePlayer(1, -1)}><ArrowUpRight className="text-[#666]" size={20}/></div>
                 <div className="absolute bottom-0 left-0 w-10 h-10 bg-[#333] rounded-bl-xl border-b border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => movePlayer(-1, 1)}><ArrowDownLeft className="text-[#666]" size={20}/></div>
                 <div className="absolute bottom-0 right-0 w-10 h-10 bg-[#333] rounded-br-xl border-b border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => movePlayer(1, 1)}><ArrowDownRight className="text-[#666]" size={20}/></div>
+                <div className="absolute w-8 h-8 bg-[#2a2a2a] rounded-full z-20 shadow-inner"></div>
             </div>
 
-            {/* Ranged Button */}
+            {/* Ranged Button - Adjusted Position */}
             <div className="absolute right-20 top-1/2 -translate-y-[100px] md:right-auto md:left-1/2 md:-translate-x-1/2 md:top-1/2 md:-translate-y-1/2 flex flex-col items-center z-10 group">
                 <button 
                     className="w-10 h-10 bg-[#333] rounded-full shadow-[0_2px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555] touch-none select-none" 
@@ -1883,7 +2143,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             </div>
 
             <div className="absolute bottom-2 left-1/2 -translate-x-1/2 md:bottom-4">
-                 <button onClick={() => { saveGame(); onBack(); }} className="text-[#555] text-[10px] font-bold border border-[#333] px-3 py-1 rounded bg-[#222] hover:text-white hover:border-gray-500 flex items-center gap-1"><LogOut size={10}/> SAVE & QUIT</button>
+                 <button onClick={onBack} className="text-[#555] text-[10px] font-bold border border-[#333] px-3 py-1 rounded bg-[#222] hover:text-white hover:border-gray-500 flex items-center gap-1"><LogOut size={10}/> QUIT</button>
             </div>
         </div>
     </div>
