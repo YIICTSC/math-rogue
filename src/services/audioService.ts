@@ -7,7 +7,7 @@ class AudioService {
   
   private isMuted: boolean = false;
   private isPlayingBGM: boolean = false;
-  private currentBgmType: 'battle' | 'menu' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | null = null;
+  private currentBgmType: 'battle' | 'menu' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'dungeon' | null = null;
   
   // Sequencer State
   private nextNoteTime: number = 0;
@@ -182,46 +182,70 @@ class AudioService {
 
       } else if (this.currentBgmType === 'survivor_metal') {
           // --- SURVIVOR METAL (Heavy 8-bit) ---
-          // BPM 160-ish (set in playBGM)
-          // Measure handling
           const measure = Math.floor(beatNumber / 16) % 4;
-          
-          // Drums: Driving Rock
-          // Kick on 0, 2, 8, 10 (every beat is 4 steps in 16th grid. 0,4,8,12)
-          // Fast kick: 0, 2, 4, 6... (Gallop)
           if (beatNumber % 4 === 0) this.playNoise(actualTime, 0.05, 0.9, 'kick');
           if (beatNumber % 16 === 4 || beatNumber % 16 === 12) this.playNoise(actualTime, 0.1, 0.7, 'snare');
           if (beatNumber % 2 === 0) this.playNoise(actualTime, 0.02, 0.3, 'hat');
 
-          // Bass: Galloping (root note pumping)
-          // 0 . 2 3 4 . 6 7 ... (E E E E)
-          // Root notes: E2(82) -> C2(65) -> G2(98) -> D2(73)
           let root = 82.41;
           if (measure === 1) root = 65.41;
           if (measure === 2) root = 98.00;
           if (measure === 3) root = 73.42;
 
           if (beatNumber % 2 === 0) {
-              // Palm mute effect: short decay, sawtooth
               this.playOsc(root, actualTime, 0.1, 'sawtooth', 0.6, this.bgmGain);
-              // Sub osc
               this.playOsc(root/2, actualTime, 0.1, 'square', 0.4, this.bgmGain);
           }
 
-          // Lead Guitar: Arpeggios or Fast melody
-          // A minor pentatonic: A, C, D, E, G (220, 261, 293, 329, 392)
           const arp = [
-              220, 329, 440, 329, 261, 392, 293, 220, // A min
-              174, 261, 349, 261, 174, 349, 261, 174, // F Maj7ish
-              196, 293, 392, 293, 196, 392, 293, 196, // G Maj
-              164, 246, 329, 246, 164, 329, 246, 164  // E min
+              220, 329, 440, 329, 261, 392, 293, 220, 
+              174, 261, 349, 261, 174, 349, 261, 174, 
+              196, 293, 392, 293, 196, 392, 293, 196, 
+              164, 246, 329, 246, 164, 329, 246, 164  
           ];
           const melodyNote = arp[beatNumber % 32];
           
           if (melodyNote) {
-              // Lead tone: Square with slight vibrato (simulated by dual osc detune in real synth, here just raw)
               this.playOsc(melodyNote, actualTime, 0.12, 'square', 0.15, this.bgmGain);
-              this.playOsc(melodyNote * 1.005, actualTime, 0.12, 'sawtooth', 0.1, this.bgmGain); // Detune
+              this.playOsc(melodyNote * 1.005, actualTime, 0.12, 'sawtooth', 0.1, this.bgmGain); 
+          }
+      } else if (this.currentBgmType === 'dungeon') {
+          // --- DUNGEON AMBIENT (Mystery Dungeon Style) ---
+          // Bass Pulse (Triplets feeling in 4/4)
+          // Pattern: 1 . . 1 . . 1 . 
+          
+          const measure = Math.floor(beatNumber / 16) % 4;
+          
+          // Bass: Slow, deep
+          if (beatNumber % 4 === 0) {
+              let bassNote = 73.42; // D2
+              if (measure === 1) bassNote = 65.41; // C2
+              if (measure === 2) bassNote = 69.30; // C#2
+              if (measure === 3) bassNote = 61.74; // B1
+              
+              this.playOsc(bassNote, actualTime, 0.3, 'triangle', 0.4, this.bgmGain);
+          }
+
+          // Melody: Sparse, echoing
+          // D Minor Pentatonic: D F G A C (293, 349, 392, 440, 523)
+          const melody = [
+              293, 0, 0, 349, 0, 0, 0, 0, 
+              392, 0, 0, 0, 0, 293, 0, 0,
+              523, 0, 0, 440, 0, 0, 0, 0,
+              0, 0, 0, 0, 349, 0, 293, 0
+          ];
+          
+          // Slight randomization for "rogue" feel
+          const note = melody[beatNumber % 32];
+          if (note && Math.random() > 0.1) {
+              this.playOsc(note, actualTime, 0.1, 'square', 0.15, this.bgmGain);
+              // Echo effect handled by master delay, but let's add a detuned layer for creepiness
+              this.playOsc(note * 1.01, actualTime, 0.1, 'sawtooth', 0.05, this.bgmGain);
+          }
+
+          // Occasional eerie noise
+          if (beatNumber % 32 === 28 && Math.random() < 0.5) {
+              this.playNoise(actualTime, 0.5, 0.1, 'snare'); // Filtered noise burst
           }
       }
   }
@@ -294,7 +318,7 @@ class AudioService {
   }
 
   // --- Public API ---
-  public playBGM(type: 'battle' | 'menu' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal') {
+  public playBGM(type: 'battle' | 'menu' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'dungeon') {
       if (this.isPlayingBGM && this.currentBgmType === type) return;
       
       this.init(); 
@@ -309,6 +333,7 @@ class AudioService {
       else if (type === 'poker_play') { this.tempo = 120; this.swing = 0.6; }
       else if (type === 'poker_shop') { this.tempo = 90; }
       else if (type === 'survivor_metal') { this.tempo = 170; } // Fast Metal
+      else if (type === 'dungeon') { this.tempo = 100; } // Mystery Dungeon Tempo
       else { this.tempo = 90; }
 
       this.current16thNote = 0;
@@ -329,7 +354,7 @@ class AudioService {
       }
   }
 
-  public playSound(effect: 'select' | 'attack' | 'block' | 'win' | 'lose' | 'correct' | 'wrong' | 'buff') {
+  public playSound(effect: 'select' | 'attack' | 'block' | 'win' | 'lose' | 'correct' | 'wrong' | 'buff' | 'step' | 'stairs' | 'eat' | 'throw' | 'equip') {
       this.init();
       if (!this.ctx || !this.sfxGain || this.isMuted) return;
       const t = this.ctx.currentTime;
@@ -396,6 +421,34 @@ class AudioService {
               this.playOsc(400, t, 0.1, 'sine', 0.3, this.sfxGain);
               this.playOsc(600, t + 0.1, 0.1, 'sine', 0.3, this.sfxGain);
               this.playOsc(1000, t + 0.2, 0.3, 'sine', 0.2, this.sfxGain);
+              break;
+          case 'step':
+              this.playNoise(t, 0.02, 0.05, 'hat'); // Quiet click
+              break;
+          case 'stairs':
+              this.playOsc(150, t, 0.1, 'square', 0.2, this.sfxGain);
+              this.playOsc(100, t + 0.1, 0.2, 'square', 0.2, this.sfxGain);
+              break;
+          case 'eat':
+              this.playNoise(t, 0.05, 0.3, 'snare');
+              this.playNoise(t+0.06, 0.05, 0.3, 'snare');
+              this.playNoise(t+0.12, 0.05, 0.3, 'snare');
+              break;
+          case 'throw':
+              const throwOsc = this.ctx.createOscillator();
+              const throwGain = this.ctx.createGain();
+              throwOsc.frequency.setValueAtTime(400, t);
+              throwOsc.frequency.exponentialRampToValueAtTime(100, t + 0.2);
+              throwGain.gain.setValueAtTime(0.3, t);
+              throwGain.gain.linearRampToValueAtTime(0, t + 0.2);
+              throwOsc.connect(throwGain);
+              throwGain.connect(this.sfxGain);
+              throwOsc.start(t);
+              throwOsc.stop(t + 0.2);
+              break;
+          case 'equip':
+              this.playOsc(600, t, 0.05, 'triangle', 0.3, this.sfxGain);
+              this.playOsc(800, t + 0.05, 0.05, 'triangle', 0.3, this.sfxGain);
               break;
       }
   }
