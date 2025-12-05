@@ -59,13 +59,13 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
                     onClick={() => setActiveTab('SURVIVOR')}
                     className={`flex items-center px-3 py-2 rounded text-xs md:text-sm font-bold transition-colors whitespace-nowrap ${activeTab === 'SURVIVOR' ? 'bg-red-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
                 >
-                    <Skull className="mr-1 md:mr-2" size={16}/> Survivor
+                    <Skull className="mr-1 md:mr-2" size={16}/> Surv
                 </button>
                 <button 
                     onClick={() => setActiveTab('DUNGEON')}
                     className={`flex items-center px-3 py-2 rounded text-xs md:text-sm font-bold transition-colors whitespace-nowrap ${activeTab === 'DUNGEON' ? 'bg-[#306230] text-[#9bbc0f] shadow' : 'text-gray-400 hover:text-white'}`}
                 >
-                    <Compass className="mr-1 md:mr-2" size={16}/> Dungeon
+                    <Compass className="mr-1 md:mr-2" size={16}/> Dung
                 </button>
             </div>
 
@@ -248,36 +248,40 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
                         {dungeonData.map((entry, idx) => (
                             <div 
                                 key={idx} 
-                                className="flex flex-col md:flex-row items-start md:items-center p-4 rounded-lg border-l-4 border-[#306230] bg-[#0f380f] hover:bg-[#1a401a] shadow-lg transition-colors text-[#9bbc0f]"
+                                className="flex flex-col md:flex-row items-start md:items-center p-4 rounded-lg border-l-4 border-[#306230] bg-gray-800 hover:bg-gray-700 shadow-lg transition-colors font-mono"
                             >
                                 {/* Left: Floor & Date */}
                                 <div className="flex items-center w-full md:w-48 mb-2 md:mb-0 shrink-0">
-                                    <div className="p-2 rounded-full mr-3 bg-[#306230]">
-                                        <Compass size={20} className="text-[#9bbc0f]" />
+                                    <div className="p-2 rounded-full mr-3 bg-[#0f380f] border border-[#306230] text-[#9bbc0f]">
+                                        <Compass size={20} />
                                     </div>
                                     <div>
-                                        <div className="font-bold text-lg">
-                                            {entry.floor}F Reached
+                                        <div className="font-bold text-[#9bbc0f]">
+                                            {entry.floor} F
                                         </div>
-                                        <div className="flex items-center text-[10px] opacity-70">
+                                        <div className="flex items-center text-[10px] text-gray-500">
                                             <Calendar size={10} className="mr-1" />
                                             {formatDate(entry.date)}
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Middle: Cause */}
+                                {/* Middle: Level & Reason */}
                                 <div className="flex-grow mb-2 md:mb-0 px-0 md:px-4">
-                                    <div className="text-xs opacity-70">死因 / 結果</div>
-                                    <div className="text-sm font-bold">
-                                        {entry.cause}
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="text-xs bg-[#0f380f] border border-[#306230] px-2 py-0.5 rounded text-[#9bbc0f] font-bold">LV {entry.level}</span>
                                     </div>
-                                    <div className="text-xs mt-1 bg-[#306230] px-2 py-0.5 rounded inline-block">Lv {entry.level}</div>
+                                    <div className="text-xs text-gray-300">
+                                        {entry.reason}
+                                    </div>
                                 </div>
 
-                                {/* Right: Icon */}
-                                <div className="w-full md:w-32 text-right flex justify-end">
-                                    <div className="text-[#8bac0f] opacity-50"><Skull size={24}/></div>
+                                {/* Right: Score */}
+                                <div className="w-full md:w-32 text-right">
+                                    <div className="text-xs text-gray-500">SCORE</div>
+                                    <div className="text-xl font-mono font-bold text-[#9bbc0f]">
+                                        {entry.score.toLocaleString()}
+                                    </div>
                                 </div>
                             </div>
                         ))}

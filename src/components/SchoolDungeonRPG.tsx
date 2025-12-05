@@ -1,7 +1,7 @@
 
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, FastForward } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
 import { storageService } from '../services/storageService';
@@ -210,8 +210,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const [showHelp, setShowHelp] = useState(false);
   const turnCounter = useRef(0);
   const [isEndless, setIsEndless] = useState(false);
-  const [isFastForwarding, setIsFastForwarding] = useState(false);
-  const fastForwardIntervalRef = useRef<any>(null);
   
   // VFX State
   const visualEffects = useRef<VisualEffect[]>([]);
@@ -237,6 +235,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   // Inspection
   const [inspectedItem, setInspectedItem] = useState<Item | null>(null);
   const longPressTimer = useRef<any>(null);
+  
+  // Fast Forward State
+  const [isFastForwarding, setIsFastForwarding] = useState(false);
+  const fastForwardInterval = useRef<any>(null);
 
   // Init
   useEffect(() => {
@@ -320,6 +322,18 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     });
   };
 
+  const saveDungeonScore = (reason: string) => {
+      const score = floor * 100 + level * 50 + (inventory.length * 10);
+      storageService.saveDungeonScore({
+          id: `dungeon-${Date.now()}`,
+          date: Date.now(),
+          floor: floor,
+          level: level,
+          score: score,
+          reason: reason
+      });
+  };
+
   const startNewGame = () => {
     setFloor(1);
     setLevel(1);
@@ -331,6 +345,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     setIsEndless(false);
     turnCounter.current = 0;
     visualEffects.current = [];
+    setIsFastForwarding(false);
     
     // Init ID Map for Staffs (Umbrellas)
     const shuffledNames = [...UNIDENTIFIED_NAMES].sort(() => Math.random() - 0.5);
@@ -358,7 +373,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     addLog("風来の旅が始まった！");
   };
 
-  // ... (spawnEnemy code omitted, same as before) ...
   const spawnEnemy = (x: number, y: number, floorLevel: number): Entity => {
       const r = Math.random();
       let t: EnemyType = 'SLIME';
@@ -459,7 +473,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                         plus = Math.floor(Math.random() * 2) + 1;
                     }
                     if (template.category === 'STAFF') {
-                        charges = Math.floor(Math.random() * 4) + 2; 
+                        charges = Math.floor(Math.random() * 4) + 2; // Randomize charges a bit
                     }
                     newItems.push({
                         id: Date.now() + Math.random(), type: 'ITEM', x, y, char: '!', 
@@ -486,7 +500,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 };
 
   const movePlayer = (dx: 0|1|-1, dy: 0|1|-1) => {
-      if(gameOver || gameClear || isFastForwarding) return;
+      if(gameOver || gameClear) return;
 
       if (menuOpen) {
           if (synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT') {
@@ -563,12 +577,12 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       setTimeout(() => setPlayer(p => ({ ...p, offset: { x: 0, y: 0 } })), 100);
   };
 
-  // ... (attackEnemy same as before) ...
   const attackEnemy = (target: Entity) => {
       triggerPlayerAttackAnim(player.dir);
       const targets = [target];
       addVisualEffect('SLASH', target.x, target.y, { dir: player.dir });
 
+      // 3-Way Attack Logic (Inherited from Type)
       if (player.equipment?.weapon?.type === 'PROTRACTOR_EDGE') {
           const {x: dx, y: dy} = player.dir;
           const others = [];
@@ -595,10 +609,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       targets.forEach(t => {
           let dmg = Math.max(1, player.attack - t.defense);
           
+          // Special Effects based on Type
           const wType = player.equipment?.weapon?.type;
           if (wType === 'OFUDA_RULER' && t.enemyType === 'GHOST') { dmg = Math.floor(dmg * 1.5); addLog("成仏！", "yellow"); }
           if (wType === 'VITAMIN_INJECT' && t.enemyType === 'DRAIN') { dmg = Math.floor(dmg * 1.5); addLog("特効！", "yellow"); }
-          if (wType === 'STAINLESS_PEN' && t.enemyType === 'METAL') { dmg = 1; }
+          if (wType === 'STAINLESS_PEN' && t.enemyType === 'METAL') { dmg = 1; } // Should pierce? Or just regular.
           if (wType === 'RICH_WATCH' && player.xp > 0) { dmg += 10; setPlayer(p => ({...p, xp: Math.max(0, p.xp - 10)})); } 
           
           if (Math.random() < 0.1) { dmg *= 2; addLog("会心の一撃！", "red"); triggerShake(5); }
@@ -624,8 +639,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           if (d.enemyType === 'BOSS') {
               setGameClear(true);
               audioService.playSound('win');
+              saveDungeonScore("Cleared");
               addVisualEffect('FLASH', 0, 0, { duration: 30, maxDuration: 30 });
-              saveRanking(true);
           } else {
               addLog(`${d.name}を倒した！ (${d.xp} XP)`);
               gainXp(d.xp);
@@ -666,12 +681,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           nextBelly -= 1;
           if (nextBelly <= 0) {
               nextBelly = 0; nextHp -= 1;
-              if (nextHp <= 0) { 
-                  setGameOver(true); 
-                  addLog("空腹で倒れた...", "red"); 
-                  saveRanking(false, "空腹");
-                  return; 
-              }
+              if (nextHp <= 0) { setGameOver(true); saveDungeonScore("Starved"); addLog("空腹で倒れた...", "red"); return; }
               addLog("お腹が空いて倒れそうだ...", "red");
           }
       }
@@ -684,7 +694,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       setBelly(nextBelly);
       setPlayer(p => ({ ...p, hp: nextHp, status: nextStatus }));
 
-      // Spawn Logic ... (same)
       if (turnCounter.current % ENEMY_SPAWN_RATE === 0) {
           let attempts = 0;
           while (attempts < 5) {
@@ -711,16 +720,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               const dx = px - e.x; const dy = py - e.y;
               const dist = Math.abs(dx) + Math.abs(dy);
               
-              // Enemy AI ... (same)
               if (e.enemyType === 'DRAGON' && dist <= 2 && dist > 0 && Math.random() < 0.3) {
                   addLog(`${e.name}の炎！`, "red");
                   let dmg = 15;
                   if (player.equipment?.armor?.type === 'FIREFIGHTER') dmg = Math.floor(dmg / 2);
-                  setPlayer(p => { 
-                      const nhp = p.hp - dmg; 
-                      if(nhp<=0) { setGameOver(true); saveRanking(false, e.name); }
-                      return {...p, hp:nhp}; 
-                  });
+                  setPlayer(p => { const nhp = p.hp - dmg; if(nhp<=0) { setGameOver(true); saveDungeonScore(`Killed by ${e.name}`); } return {...p, hp:nhp}; });
                   occupied.add(`${e.x},${e.y}`); nextEnemies.push(e);
                   addVisualEffect('EXPLOSION', px, py); addVisualEffect('TEXT', px, py, { value: `${dmg}`, color: 'red' });
                   continue;
@@ -748,11 +752,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
                       if (dmg > 0) {
                           addLog(`${e.name}の攻撃！${dmg}ダメージ！`, "red");
-                          setPlayer(p => { 
-                              const newHp = p.hp - dmg; 
-                              if (newHp <= 0) { setGameOver(true); saveRanking(false, e.name); }
-                              return { ...p, hp: newHp }; 
-                          });
+                          setPlayer(p => { const newHp = p.hp - dmg; if (newHp <= 0) { setGameOver(true); saveDungeonScore(`Killed by ${e.name}`); } return { ...p, hp: newHp }; });
                           nextEnemies.push({ ...e, offset: { x: mx * 6, y: my * 6 } });
                           attackingEnemyIds.push(e.id);
                           triggerShake(5);
@@ -776,9 +776,67 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
   const getItemName = (item: Item) => {
       if (item.category === 'WEAPON' || item.category === 'ARMOR' || item.category === 'RANGED' || item.category === 'SYNTH' || item.category === 'CONSUMABLE') return item.name;
+      // Staffs are now the only thing needing identification
       if (item.type.includes('MEAT')) return item.name;
       if (identifiedTypes.has(item.type)) return item.name;
       return idMap[item.type] || item.name;
+  };
+
+  // --- ACTIONS ---
+  
+  const fireRangedWeapon = () => {
+      const rangedItem = player.equipment?.ranged;
+      if (!rangedItem) {
+          addLog("飛び道具を装備していない！");
+          return;
+      }
+      if ((rangedItem.count || 0) <= 0) {
+          addLog(`${rangedItem.name}が無くなった！`);
+          // Unequip/Remove
+          setPlayer(p => ({ ...p, equipment: { ...p.equipment!, ranged: null } }));
+          return;
+      }
+
+      // Decrement
+      const newRanged = { ...rangedItem, count: (rangedItem.count || 0) - 1 };
+      setPlayer(p => ({ ...p, equipment: { ...p.equipment!, ranged: newRanged } }));
+      
+      const { x: dx, y: dy } = player.dir;
+      let lx = player.x, ly = player.y;
+      let hitEntity: Entity | null = null;
+
+      for (let i=1; i<=8; i++) {
+          const tx = player.x + dx * i;
+          const ty = player.y + dy * i;
+          lx = tx; ly = ty;
+          if (map[ty][tx] === 'WALL') { addLog("壁に当たった。"); break; }
+          const target = enemies.find(e => e.x === tx && e.y === ty);
+          if (target) { hitEntity = target; break; }
+      }
+
+      addVisualEffect('PROJECTILE', lx, ly, { dir: player.dir, duration: 10 });
+      triggerPlayerAttackAnim(player.dir);
+
+      if (hitEntity) {
+          let dmg = 5 + (newRanged.power || 0);
+          if (newRanged.type === 'SHADOW_PIN') { hitEntity.status.frozen = 5; addLog("影を縫いつけた！"); }
+          
+          const newEnemies = enemies.map(e => {
+              if (e.id === hitEntity!.id) {
+                  const nhp = e.hp - dmg;
+                  return { ...e, hp: nhp };
+              }
+              return e;
+          });
+          const dead = newEnemies.find(e => e.id === hitEntity!.id && e.hp <= 0);
+          if(dead) { gainXp(dead.xp); addLog(`${dead.name}を倒した！`); }
+          else { addLog(`${hitEntity.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', hitEntity.x, hitEntity.y, {value:`${dmg}`}); }
+          setEnemies(newEnemies.filter(e => e.hp > 0));
+          audioService.playSound('attack');
+      } else {
+          addLog("外した！");
+      }
+      processTurn(player.x, player.y);
   };
 
   const handleActionBtn = () => {
@@ -801,154 +859,64 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       processTurn(player.x, player.y);
   };
 
-  // --- Ranged Attack Logic ---
-  const handleFireRanged = () => {
-      if (gameOver || gameClear || menuOpen || isFastForwarding) return;
-      const item = player.equipment?.ranged;
-      if (!item) return;
-
-      const { x: dx, y: dy } = player.dir;
-      let lx = player.x, ly = player.y;
-      let hitEntity: Entity | null = null;
-
-      // Projectile travel logic (raycast)
-      for (let i=1; i<=(item.range || 5); i++) {
-          const tx = player.x + dx * i;
-          const ty = player.y + dy * i;
-          lx = tx; ly = ty;
-          if (map[ty][tx] === 'WALL') { addLog("壁に当たった。"); break; }
-          const target = enemies.find(e => e.x === tx && e.y === ty);
-          if (target) { hitEntity = target; break; }
-      }
-
-      addVisualEffect('PROJECTILE', lx, ly, { dir: player.dir, duration: 10 });
-      audioService.playSound('attack');
-
-      // Consume ammo
-      if (item.count !== undefined) {
-          const newCount = item.count - 1;
-          if (newCount <= 0) {
-              setPlayer(p => ({ ...p, equipment: { ...p.equipment!, ranged: null } }));
-              addLog(`${item.name}を使い切った！`);
-          } else {
-              setPlayer(p => ({ ...p, equipment: { ...p.equipment!, ranged: { ...item, count: newCount } } }));
-          }
-      }
-
-      if (hitEntity) {
-          let dmg = (item.power || 2) + 2; 
-          // Effect
-          if (item.type === 'SHADOW_PIN') { 
-              // Stop enemy movement? Not implemented in enemy AI yet, so just damage/stun
-              dmg += 1;
-              // Maybe add stun status later
-          }
-          
-          const newEnemies = enemies.map(e => {
-              if (e.id === hitEntity!.id) {
-                  const nhp = e.hp - dmg;
-                  return { ...e, hp: nhp };
-              }
-              return e;
-          });
-          const dead = newEnemies.find(e => e.id === hitEntity!.id && e.hp <= 0);
-          if(dead) { 
-              gainXp(dead.xp); 
-              addLog(`${dead.name}を倒した！`); 
-          } else { 
-              addLog(`${hitEntity.name}に${dmg}ダメージ！`); 
-              addVisualEffect('TEXT', hitEntity.x, hitEntity.y, {value:`${dmg}`, color: 'cyan'}); 
-          }
-          setEnemies(newEnemies.filter(e => e.hp > 0));
-      } else {
-          addLog(`${item.name}を撃った。`);
-      }
-      processTurn(player.x, player.y);
+  // --- LONG PRESS LOGIC (FAST FORWARD) ---
+  const handlePressStart = () => {
+      if (menuOpen || gameOver || gameClear) return;
+      // Start waiting detection
+      fastForwardInterval.current = setTimeout(() => {
+          setIsFastForwarding(true);
+      }, 400); // 400ms hold to trigger
   };
 
-  // --- Fast Forward Logic ---
-  const startFastForward = (e: React.TouchEvent | React.MouseEvent) => {
-      e.preventDefault(); 
-      if (gameOver || gameClear || menuOpen || isFastForwarding) return;
+  const handlePressEnd = () => {
+      if (fastForwardInterval.current) {
+          clearTimeout(fastForwardInterval.current);
+          fastForwardInterval.current = null;
+      }
       
-      // Check safety: No enemies within view range (radius 5)
-      const nearbyEnemy = enemies.find(e => Math.abs(e.x - player.x) <= 5 && Math.abs(e.y - player.y) <= 5);
-      if (nearbyEnemy) {
-          // If enemy nearby, just do one action
+      if (!isFastForwarding) {
           handleActionBtn();
-          return;
+      } else {
+          setIsFastForwarding(false);
       }
-
-      setIsFastForwarding(true);
-      handleActionBtn(); // Initial action
-      
-      fastForwardIntervalRef.current = setInterval(() => {
-          // Re-check safety inside loop
-          setEnemies(currentEnemies => {
-              const nearby = currentEnemies.some(e => Math.abs(e.x - player.x) <= 5 && Math.abs(e.y - player.y) <= 5);
-              if (nearby) {
-                  stopFastForward();
-                  return currentEnemies;
-              }
-              // If safe, execute turn logic manually to avoid closure staleness issues with handleActionBtn
-              // But handleActionBtn relies on state. We need to be careful.
-              // Actually, simply triggering the button logic via ref or similar mechanism is hard in functional loop.
-              // Let's rely on component re-render for checks, but interval might be fast.
-              // Safer approach: Use a ref to track "should continue" and let the effect drive it? 
-              // Or just blindly call handleActionBtn? 
-              // Since handleActionBtn uses state closures, calling it inside setInterval will use STALE state.
-              // We need to use functional updates or refs.
-              // Given the complexity of refactoring everything to refs, let's just trigger a flag that useEffect watches?
-              // Or simpler: Just stop if user lifts finger. The safety check is tricky with stale state.
-              // Let's implement a "Turn Skip" instead of full action logic inside interval.
-              // Just call processTurn? But that skips player regen/move.
-              // Let's just do "Wait" (foot stomp) repeatedly.
-              // We'll use a `useRef` based approach for the loop to access current state if possible, or just limit speed.
-              return currentEnemies;
-          });
-          
-          // Actually, standard handleActionBtn with stale state is bad.
-          // Let's just use a simple "Repeat" flag that the main loop handles?
-          // No, main loop is render loop.
-          // Let's just clear interval and restart it? No.
-          // Solution: `handleActionBtn` is stable if deps are correct? No, it changes on every render.
-          // We can use a ref to hold the latest `handleActionBtn` function.
-      }, 100);
   };
 
-  const savedHandleActionBtn = useRef(handleActionBtn);
-  useEffect(() => { savedHandleActionBtn.current = handleActionBtn; }, [handleActionBtn]);
-
-  const savedEnemies = useRef(enemies);
-  useEffect(() => { savedEnemies.current = enemies; }, [enemies]);
-  const savedPlayer = useRef(player);
-  useEffect(() => { savedPlayer.current = player; }, [player]);
-
+  // Fast Forward Loop
   useEffect(() => {
-      if (isFastForwarding) {
-          fastForwardIntervalRef.current = setInterval(() => {
-              // Safety Check with latest data
-              const p = savedPlayer.current;
-              const es = savedEnemies.current;
-              const nearby = es.some(e => Math.abs(e.x - p.x) <= 5 && Math.abs(e.y - p.y) <= 5);
-              
-              if (nearby || p.hp < p.maxHp * 0.3) {
-                  stopFastForward();
-              } else {
-                  savedHandleActionBtn.current();
+      let interval: any = null;
+      if (isFastForwarding && !gameOver && !gameClear && !menuOpen) {
+          interval = setInterval(() => {
+              // Safety check: Stop if enemies nearby
+              const nearby = enemies.some(e => Math.abs(e.x - player.x) <= 2 && Math.abs(e.y - player.y) <= 2);
+              if (nearby) {
+                  setIsFastForwarding(false);
+                  addLog("敵が近くにいる！", "red");
+                  return;
               }
-          }, 80); // Fast speed
-      }
-      return () => clearInterval(fastForwardIntervalRef.current);
-  }, [isFastForwarding]);
+              // Stop if full HP and hunger is ok
+              if (player.hp >= player.maxHp && belly > 20) {
+                  // Keep going to heal? Usually yes. But maybe stop if full.
+                  // Actually standard rogue behavior is stop on enemy or full health.
+                  if (player.hp === player.maxHp) {
+                      setIsFastForwarding(false);
+                      addLog("HPが回復した。", C2);
+                      return;
+                  }
+              }
+              // Stop if starving
+              if (belly <= 0) {
+                  setIsFastForwarding(false);
+                  return;
+              }
 
-  const stopFastForward = () => {
-      setIsFastForwarding(false);
-      if (fastForwardIntervalRef.current) {
-          clearInterval(fastForwardIntervalRef.current);
-          fastForwardIntervalRef.current = null;
+              processTurn(player.x, player.y);
+          }, 50); // Fast speed
       }
-  };
+      return () => {
+          if (interval) clearInterval(interval);
+      };
+  }, [isFastForwarding, enemies, player.hp, belly, gameOver, gameClear]);
+
 
   const toggleMenu = () => {
       if (menuOpen) {
@@ -963,19 +931,19 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
   const startEndlessMode = () => { setIsEndless(true); setGameClear(false); setFloor(f => f + 1); generateFloor(floor + 1); addLog("中学生編(エンドレス)開始！"); };
 
-  // ... (Synthesis logic remains same) ...
   const handleSynthesisStep = () => {
-      // (Abbreviated to keep file size manageable, reusing existing logic)
-      // Assume same logic as provided in prompt's file content
-      // ...
       const idx = synthState.mode === 'BLANK' ? blankScrollSelectionIndex : selectedItemIndex;
       const item = inventory[idx];
+      
       if (synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT') {
+          // Identify known scrolls
           const knownTypes = Array.from(identifiedTypes).filter(t => t.startsWith('SCROLL'));
           const targetType = knownTypes[idx];
           const template = ITEM_DB[targetType];
+          
           if (template) {
               const blankIdx = synthState.baseIndex!;
+              // Replace Blank with target scroll
               const newItem = { ...template, id: `scribed-${Date.now()}` };
               const newInv = [...inventory];
               newInv[blankIdx] = newItem;
@@ -987,6 +955,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           }
           return;
       }
+
       if (synthState.step === 'SELECT_BASE') {
           if (synthState.mode === 'SYNTH') {
               if (['WEAPON', 'ARMOR'].includes(item.category)) {
@@ -1005,8 +974,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               const baseItem = inventory[baseIdx];
               const matItem = item;
               if (baseItem.category !== matItem.category) { addLog("種類が違うと合成できません", "red"); audioService.playSound('wrong'); return; }
+              
+              // Synthesis Logic: Base Type determines nature. Adds Plus values.
               const newPlus = (baseItem.plus || 0) + (matItem.plus || 0) + 1;
               const newItem: Item = { ...baseItem, plus: newPlus, name: `${baseItem.name.split('+')[0]}+${newPlus}` };
+              
               const glueIdx = inventory.findIndex(i => i.type === 'POT_GLUE');
               if (glueIdx === -1) { setSynthState({ ...synthState, active: false }); return; }
               let newInv = inventory.map((it, i) => i === baseIdx ? newItem : it).filter((_, i) => i !== idx && i !== glueIdx);
@@ -1036,42 +1008,103 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       }
   };
 
-  // ... (Staff Effect logic same as before) ...
   const executeStaffEffect = (item: Item, target: Entity | null, x: number, y: number): { hit: boolean, msg?: string } => {
       let hit = false;
       let msg = "";
-      // Re-implementing simplified for space
-      if (item.type === 'UMB_FIRE' && target) {
+
+      if (item.type === 'UMB_FIRE') {
           addVisualEffect('BEAM', x, y, { color: 'red' });
-          const dmg = 20; const nhp = target.hp - dmg;
-          setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0));
-          if (nhp <= 0) gainXp(target.xp);
-          msg = `${target.name}を燃やした！`; hit = true;
-      } else if (item.type === 'UMB_THUNDER' && target) {
+          if (target) {
+              const dmg = 20;
+              const nhp = target.hp - dmg;
+              setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0));
+              if (nhp <= 0) { gainXp(target.xp); msg = `${target.name}を燃やした！`; }
+              else { msg = `${target.name}に${dmg}ダメージ！`; }
+              hit = true;
+          }
+      } else if (item.type === 'UMB_THUNDER') {
           addVisualEffect('THUNDER', x, y);
-          const dmg = 25; const nhp = target.hp - dmg;
-          setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0));
-          if (nhp <= 0) gainXp(target.xp);
-          msg = `${target.name}に落雷！`; hit = true;
-      } else if (item.type === 'UMB_SLEEP' && target) {
+          if (target) {
+              const dmg = 25;
+              const nhp = target.hp - dmg;
+              setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0));
+              if (nhp <= 0) { gainXp(target.xp); msg = `${target.name}に落雷！`; }
+              else { msg = `${target.name}に${dmg}ダメージ！`; }
+              hit = true;
+          }
+      } else if (item.type === 'UMB_SLEEP') {
           addVisualEffect('TEXT', x, y, {value: 'Zzz', color: 'blue'});
-          setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, status: { ...e.status, sleep: 10 } } : e));
-          msg = `${target.name}は眠ってしまった。`; hit = true;
-      } else if (item.type === 'UMB_WARP' && target) {
-          setEnemies(prev => prev.filter(e => e.id !== target.id)); // Poof
-          msg = `${target.name}はどこかへ消えた。`; hit = true;
+          if (target) {
+              setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, status: { ...e.status, sleep: 10 } } : e));
+              msg = `${target.name}は眠ってしまった。`;
+              hit = true;
+          }
+      } else if (item.type === 'UMB_BLOW') {
+          if (target) {
+              // Knockback 5 tiles
+              let tx = target.x; let ty = target.y;
+              const dx = target.x - player.x; const dy = target.y - player.y; // Simplified dir
+              const dist = Math.max(1, Math.abs(dx) + Math.abs(dy)); // Manhattan
+              const ndx = Math.sign(dx); const ndy = Math.sign(dy);
+              
+              for (let i=0; i<5; i++) {
+                  if (map[ty+ndy][tx+ndx] !== 'WALL' && !enemies.some(e=>e.x===tx+ndx && e.y===ty+ndy)) {
+                      tx += ndx; ty += ndy;
+                  } else { break; }
+              }
+              if (tx !== target.x || ty !== target.y) {
+                  setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, x: tx, y: ty } : e));
+                  msg = `${target.name}を吹き飛ばした！`;
+                  hit = true;
+              } else { msg = "吹き飛ばなかった。"; hit = true; }
+          }
+      } else if (item.type === 'UMB_WARP') {
+          if (target) {
+              let attempts = 0;
+              while (attempts < 20) {
+                  attempts++;
+                  const rx = Math.floor(Math.random() * MAP_W); const ry = Math.floor(Math.random() * MAP_H);
+                  if (map[ry][rx] === 'FLOOR' && !enemies.find(e => e.x === rx && e.y === ry) && (rx !== player.x || ry !== player.y)) {
+                      setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, x: rx, y: ry } : e));
+                      msg = `${target.name}はどこかへ消えた。`; hit = true; break;
+                  }
+              }
+          }
+      } else if (item.type === 'UMB_CHANGE') {
+          if (target) {
+              const px = player.x; const py = player.y;
+              setPlayer(p => ({...p, x: target.x, y: target.y }));
+              setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, x: px, y: py } : e));
+              msg = `${target.name}と入れ替わった！`; hit = true;
+          }
+      } else if (item.type === 'UMB_BIND') {
+          if (target) {
+              setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, status: { ...e.status, frozen: 10 } } : e));
+              msg = `${target.name}は金縛りにあった！`; hit = true;
+          }
+      } else if (item.type === 'UMB_HEAL') {
+          if (target) {
+              setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: e.maxHp } : e));
+              msg = `${target.name}が回復してしまった！`; hit = true;
+          } else {
+              // Self heal if no target? But staff usually target enemy. 
+              // Standard rogue: wave hits front. 
+              // Let's say if no enemy, wave fails to do anything special (waste charge).
+          }
       }
+
+      // Self target staffs (Unusual but possible for Warp/Heal if logic allowed, but staying classic)
       return { hit, msg };
   };
 
-  // ... (handleThrowItem, handleItemAction, handleDropItem, handleUnequip same as before) ...
   const handleThrowItem = (index: number) => {
-      // Reusing logic from previous implementation
       const item = inventory[index];
       if (!item) return;
+      
       const { x: dx, y: dy } = player.dir;
       let lx = player.x, ly = player.y;
       let hitEntity: Entity | null = null;
+
       for (let i=1; i<=10; i++) {
           const tx = player.x + dx * i;
           const ty = player.y + dy * i;
@@ -1080,52 +1113,104 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           const target = enemies.find(e => e.x === tx && e.y === ty);
           if (target) { hitEntity = target; break; }
       }
+
       addVisualEffect('PROJECTILE', lx, ly, { dir: player.dir, duration: 10 });
       setInventory(prev => prev.filter((_, i) => i !== index));
+
       if (hitEntity) {
-          let dmg = 2;
+          // Effect on Hit
+          let dmg = 2; // Base throw dmg
+          let msg = "";
+          
           if (item.category === 'WEAPON' || item.category === 'RANGED') dmg = 5 + (item.power || 0);
           if (item.category === 'ARMOR') dmg = 3 + (item.power || 0);
           if (item.type === 'POT_GLUE') { hitEntity.status.frozen = 10; addLog(`${hitEntity.name}はのりで固まった！`); }
+          if (item.type.includes('POISON')) { addLog(`${hitEntity.name}に毒を与えた！`); dmg += 10; }
+          if (item.type === 'SCROLL_SLEEP') { hitEntity.status.sleep = 10; addLog(`${hitEntity.name}は眠ってしまった！`); }
+          
           if (item.category === 'STAFF') {
+              // Thrown staff activates effect
               const res = executeStaffEffect(item, hitEntity, hitEntity.x, hitEntity.y);
               if (res.msg) addLog(res.msg);
-              if (!identifiedTypes.has(item.type)) { setIdentifiedTypes(prev => new Set(prev).add(item.type)); addLog(`${idMap[item.type]}は${item.name}だった！`, "yellow"); }
+              // Identify if hit
+              if (!identifiedTypes.has(item.type)) {
+                  setIdentifiedTypes(prev => new Set(prev).add(item.type));
+                  addLog(`${idMap[item.type]}は${item.name}だった！`, "yellow");
+              }
           } else {
-              const newEnemies = enemies.map(e => { if (e.id === hitEntity!.id) { return { ...e, hp: e.hp - dmg }; } return e; });
+              const newEnemies = enemies.map(e => {
+                  if (e.id === hitEntity!.id) {
+                      const nhp = e.hp - dmg;
+                      return { ...e, hp: nhp };
+                  }
+                  return e;
+              });
               const dead = newEnemies.find(e => e.id === hitEntity!.id && e.hp <= 0);
-              if(dead) { gainXp(dead.xp); addLog(`${dead.name}を倒した！`); } else { addLog(`${hitEntity.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', hitEntity.x, hitEntity.y, {value:`${dmg}`}); }
+              if(dead) { gainXp(dead.xp); addLog(`${dead.name}を倒した！`); }
+              else { addLog(`${hitEntity.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', hitEntity.x, hitEntity.y, {value:`${dmg}`}); }
               setEnemies(newEnemies.filter(e => e.hp > 0));
           }
+          
           audioService.playSound('attack');
       } else {
+          // Drop on floor at lx, ly
           if (map[ly][lx] !== 'WALL' && !floorItems.find(i=>i.x===lx && i.y===ly)) {
-              setFloorItems(prev => [...prev, { id: Date.now() + Math.random(), type: 'ITEM', x: lx, y: ly, char: '!', name: item.name, hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0}, status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 }, itemData: item }]);
+              setFloorItems(prev => [...prev, {
+                  id: Date.now() + Math.random(), type: 'ITEM', x: lx, y: ly, char: '!', name: item.name, 
+                  hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
+                  status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+                  itemData: item
+              }]);
               addLog("飛んでいった。");
-          } else { addLog("彼方へ消え去った。"); }
+          } else {
+              addLog("彼方へ消え去った。");
+          }
       }
       setMenuOpen(false);
       processTurn(player.x, player.y);
   };
 
   const handleItemAction = (index: number) => {
-      // Reusing logic ...
       const item = inventory[index];
       if (!item) return;
+
+      // Staff (Umbrella) Logic
       if (item.category === 'STAFF') {
+          // Action is "Wave" (振る)
+          // Find target in front
           const { x: dx, y: dy } = player.dir;
           let target: Entity | null = null;
+          // Simple beam range? Standard is usually unlimited or visible range. Let's do 10 tiles.
           let tx = player.x, ty = player.y;
-          for(let i=1; i<=10; i++) { tx += dx; ty += dy; if (map[ty][tx] === 'WALL') break; const e = enemies.find(en => en.x === tx && en.y === ty); if (e) { target = e; break; } }
+          for(let i=1; i<=10; i++) {
+              tx += dx; ty += dy;
+              if (map[ty][tx] === 'WALL') break;
+              const e = enemies.find(en => en.x === tx && en.y === ty);
+              if (e) { target = e; break; }
+          }
+
+          // Decrease charge
           if ((item.charges || 0) > 0) {
-              const res = executeStaffEffect(item, target, player.x + dx, player.y + dy);
-              if (res.msg) addLog(res.msg); else addLog("しかし何も起こらなかった。");
+              const res = executeStaffEffect(item, target, player.x + dx, player.y + dy); // Visual start from adj
+              if (res.msg) addLog(res.msg);
+              else addLog("しかし何も起こらなかった。"); // Missed or resisted
+
+              // Decrement charge
               const newCharges = (item.charges || 0) - 1;
               const newItem = { ...item, charges: newCharges };
               setInventory(prev => prev.map((it, i) => i === index ? newItem : it));
-              if (!identifiedTypes.has(item.type)) { setIdentifiedTypes(prev => new Set(prev).add(item.type)); addLog(`${idMap[item.type]}は${item.name}だった！`, "yellow"); }
-              audioService.playSound('buff'); setMenuOpen(false); processTurn(player.x, player.y);
-          } else { addLog("魔力が尽きている！"); }
+              
+              if (!identifiedTypes.has(item.type)) {
+                  setIdentifiedTypes(prev => new Set(prev).add(item.type));
+                  addLog(`${idMap[item.type]}は${item.name}だった！`, "yellow");
+              }
+              
+              audioService.playSound('buff');
+              setMenuOpen(false);
+              processTurn(player.x, player.y);
+          } else {
+              addLog("魔力が尽きている！"); // No turn passed
+          }
           return;
       }
 
@@ -1169,12 +1254,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           });
           actionDone = true;
       } else if (item.category === 'CONSUMABLE') {
-          // Identify on use (if consumable is hidden)
-          // Notebooks are now identified by default, but let's keep the logic for future proofing or specific ones.
-          // In this request, Notebooks are NOT hidden. Only Staffs.
-          // But to be safe, if we have identified set logic for Consumables, trigger it. 
-          // The request says "Notebooks identification not needed". So we just don't mask them in getItemName.
-
           if (item.type.includes('ONIGIRI') || item.type.includes('MEAT')) { 
               setBelly(Math.min(maxBelly, belly + (item.value || 50)));
               if (item.type.includes('MEAT')) {
@@ -1265,6 +1344,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           processTurn(player.x, player.y);
           audioService.playSound('select');
       }
+  };
 
   const handleDropItem = (index: number) => {
       const item = inventory[index];
@@ -1277,7 +1357,12 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       if (changed) setPlayer(p => ({ ...p, equipment: newEquip }));
       const newInv = inventory.filter((_, i) => i !== index);
       setInventory(newInv);
-      const droppedEntity: Entity = { id: Date.now() + Math.random(), type: 'ITEM', x: player.x, y: player.y, char: '!', name: item.name, hp: 0, maxHp: 0, baseAttack: 0, baseDefense: 0, attack: 0, defense: 0, xp: 0, dir: { x: 0, y: 0 }, status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 }, itemData: item };
+      const droppedEntity: Entity = {
+          id: Date.now() + Math.random(), type: 'ITEM', x: player.x, y: player.y, char: '!', name: item.name,
+          hp: 0, maxHp: 0, baseAttack: 0, baseDefense: 0, attack: 0, defense: 0, xp: 0, dir: { x: 0, y: 0 },
+          status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+          itemData: item
+      };
       setFloorItems(prev => [...prev, droppedEntity]);
       addLog(`${getItemName(item)}を足元に置いた。`);
       audioService.playSound('select');
@@ -1299,16 +1384,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
   const handleTouchStart = (item: Item) => { longPressTimer.current = setTimeout(() => { setInspectedItem(item); }, 500); };
   const handleTouchEnd = () => { if (longPressTimer.current) clearTimeout(longPressTimer.current); };
-
-  const saveRanking = (victory: boolean, cause: string = "クリア") => {
-      storageService.saveDungeonScore({
-          id: `dungeon-${Date.now()}`,
-          date: Date.now(),
-          floor: floor,
-          level: level,
-          cause: victory ? "校長説得" : cause
-      });
-  };
 
   // --- KEYBOARD ---
   useEffect(() => {
@@ -1337,7 +1412,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             case 'End': case '1': case 'b': movePlayer(-1, 1); break;
             case 'PageDown': case '3': case 'n': movePlayer(1, 1); break;
             case 'z': case ' ': case 'Enter': handleActionBtn(); break;
-            case 'r': handleFireRanged(); break; // Keyboard shortcut for ranged
+            case 'r': fireRangedWeapon(); break; // Keyboard shortcut for ranged
         }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -1355,7 +1430,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   }, [map, player, enemies, floorItems, menuOpen]);
 
   const renderGame = () => {
-      // (Rendering Logic mostly same as before, simplified for brevity but functionally identical)
       const canvas = canvasRef.current;
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
@@ -1366,6 +1440,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       const h = canvas.height;
       const ts = TILE_SIZE * SCALE;
 
+      // FIX: Fill background FIRST to prevent artifacts during shake
       ctx.fillStyle = C0;
       ctx.fillRect(0, 0, w, h);
 
@@ -1511,11 +1586,14 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               }
           }
           else if (fx.type === 'BEAM') {
+              // Simple beam drawing, directional? For now just red circle/line
               if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
                   ctx.strokeStyle = fx.color || 'red';
                   ctx.lineWidth = 5;
                   ctx.beginPath();
                   ctx.moveTo(sx + ts/2, sy + ts/2);
+                  // Assume dir is player dir or generic
+                  // Just draw a circle burst for now
                   ctx.arc(sx + ts/2, sy + ts/2, 20, 0, Math.PI*2);
                   ctx.stroke();
               }
@@ -1545,15 +1623,16 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       ctx.restore();
   };
 
+  const getInspectedDescription = (item: Item) => {
+      if (item.category === 'STAFF' && !identifiedTypes.has(item.type)) {
+          return "振ってみるまで分からない。";
+      }
+      return item.desc;
+  };
+
   return (
     <div className="w-full h-full bg-[#101010] flex flex-col md:flex-row items-center justify-center font-mono select-none overflow-hidden touch-none relative p-4 gap-4">
         
-        {/* Style injection for tap highlight removal */}
-        <style>{`
-            * { -webkit-tap-highlight-color: transparent; }
-            button:active { background-color: rgba(255,255,255,0.1); }
-        `}</style>
-
         {inspectedItem && (
             <div className="absolute inset-0 z-50 bg-[#0f380f]/95 flex items-center justify-center p-4" onClick={() => setInspectedItem(null)}>
                 <div className="w-full max-w-xs bg-[#9bbc0f] border-4 border-[#306230] p-4 shadow-xl text-[#0f380f]" onClick={e => e.stopPropagation()}>
@@ -1561,7 +1640,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                         <h3 className="font-bold text-lg">{getItemName(inspectedItem)} {inspectedItem.plus ? `+${inspectedItem.plus}` : ''} {inspectedItem.count ? `(${inspectedItem.count})` : ''} {inspectedItem.category === 'STAFF' ? `[${inspectedItem.charges}]` : ''}</h3>
                         <button onClick={() => setInspectedItem(null)}><X size={20}/></button>
                     </div>
-                    <div className="text-sm mb-4 min-h-[3rem]">{inspectedItem.desc}</div>
+                    <div className="text-sm mb-4 min-h-[3rem]">{getInspectedDescription(inspectedItem)}</div>
                     <div className="text-xs font-bold grid grid-cols-2 gap-2">
                         <div>分類: {inspectedItem.category}</div>
                         {inspectedItem.power && <div>威力: {inspectedItem.power}</div>}
@@ -1588,9 +1667,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                             <h3 className="font-bold border-b border-[#306230] mb-1">操作方法</h3>
                             <ul className="list-disc pl-5">
                                 <li><strong>移動:</strong> 十字キー または 画面パッド</li>
-                                <li><strong>攻撃:</strong> Aボタン または Zキー (長押しで早送り)</li>
+                                <li><strong>攻撃:</strong> Aボタン または Zキー</li>
                                 <li><strong>メニュー:</strong> Bボタン または Xキー</li>
-                                <li><strong>射撃:</strong> 飛び道具装備時に射撃ボタン出現</li>
+                                <li><strong>飛び道具:</strong> <Crosshair size={12} className="inline"/>ボタン または Rキー</li>
+                                <li><strong>早送り:</strong> Aボタン長押し (敵がいない時)</li>
                             </ul>
                         </section>
                         <section>
@@ -1631,6 +1711,13 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
                     <canvas ref={canvasRef} width={VIEW_W * TILE_SIZE * SCALE} height={VIEW_H * TILE_SIZE * SCALE} className="w-full h-full object-contain pixel-art mt-6" style={{ imageRendering: 'pixelated' }} />
 
+                    {/* Fast Forward Indicator */}
+                    {isFastForwarding && (
+                        <div className="absolute top-16 right-2 text-[#9bbc0f] animate-pulse flex items-center bg-[#0f380f]/50 rounded px-2">
+                            <FastForward size={16} className="mr-1"/> 早送り中
+                        </div>
+                    )}
+
                     {showMap && map.length > 0 && (
                         <div className="absolute inset-0 bg-[#0f380f]/90 z-20 flex items-center justify-center p-8 mt-12">
                             <div className="w-full h-full border border-[#9bbc0f] grid" style={{ gridTemplateColumns: `repeat(${MAP_W}, 1fr)` }}>
@@ -1642,25 +1729,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                             </div>
                             <button onClick={() => setShowMap(false)} className="absolute bottom-4 text-[#9bbc0f] border border-[#9bbc0f] px-2 rounded hover:bg-[#306230]">Close</button>
                         </div>
-                    )}
-
-                    {/* Fast Forward Indicator */}
-                    {isFastForwarding && (
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white bg-black/50 p-2 rounded-full animate-pulse z-20">
-                            <FastForward size={32} />
-                        </div>
-                    )}
-
-                    {/* Ranged Weapon Button (Only if Equipped) */}
-                    {player.equipment?.ranged && !menuOpen && !gameOver && !gameClear && (
-                        <button 
-                            className="absolute bottom-16 right-4 z-20 bg-[#306230] border-2 border-[#9bbc0f] w-12 h-12 rounded-full flex items-center justify-center text-[#9bbc0f] shadow-lg active:scale-95"
-                            onClick={handleFireRanged}
-                            style={{ WebkitTapHighlightColor: 'transparent' }}
-                        >
-                            <Target size={24} />
-                            <span className="absolute -bottom-4 text-[10px] font-bold bg-black px-1 rounded">{player.equipment.ranged.count}</span>
-                        </button>
                     )}
 
                     {menuOpen && (
@@ -1806,39 +1874,49 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             </div>
         </div>
 
-        <div className="w-full max-w-md md:w-64 md:h-[400px] flex-grow md:flex-grow-0 relative min-h-[180px] bg-[#1a1a1a] rounded-t-xl md:rounded-xl border-t-2 md:border-2 border-[#333]">
-            <div className="absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32 md:left-1/2 md:-translate-x-1/2 md:top-1/3 flex items-center justify-center">
+        <div className="w-full max-w-md md:w-64 md:h-[400px] flex-grow md:flex-grow-0 relative min-h-[220px] bg-[#1a1a1a] rounded-t-xl md:rounded-xl border-t-2 md:border-2 border-[#333]">
+            <div className="absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32 md:left-1/2 md:-translate-x-1/2 md:top-1/4 flex items-center justify-center">
                 <div className="w-10 h-10 bg-[#333] z-10"></div>
-                <div className="absolute top-0 w-10 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0" onClick={() => movePlayer(0, -1)} style={{ WebkitTapHighlightColor: 'transparent' }}><ArrowUp className="text-[#666]" size={20}/></div>
-                <div className="absolute bottom-0 w-10 h-16 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-0" onClick={() => movePlayer(0, 1)} style={{ WebkitTapHighlightColor: 'transparent' }}><ArrowDown className="text-[#666]" size={20}/></div>
-                <div className="absolute left-0 w-16 h-10 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-0" onClick={() => movePlayer(-1, 0)} style={{ WebkitTapHighlightColor: 'transparent' }}><ArrowLeft className="text-[#666]" size={20}/></div>
-                <div className="absolute right-0 w-16 h-10 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-0" onClick={() => movePlayer(1, 0)} style={{ WebkitTapHighlightColor: 'transparent' }}><ArrowRight className="text-[#666]" size={20}/></div>
-                <div className="absolute top-0 left-0 w-10 h-10 bg-[#333] rounded-tl-xl border-t border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0" onClick={() => movePlayer(-1, -1)} style={{ WebkitTapHighlightColor: 'transparent' }}><ArrowUpLeft className="text-[#666]" size={20}/></div>
-                <div className="absolute top-0 right-0 w-10 h-10 bg-[#333] rounded-tr-xl border-t border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0" onClick={() => movePlayer(1, -1)} style={{ WebkitTapHighlightColor: 'transparent' }}><ArrowUpRight className="text-[#666]" size={20}/></div>
-                <div className="absolute bottom-0 left-0 w-10 h-10 bg-[#333] rounded-bl-xl border-b border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0" onClick={() => movePlayer(-1, 1)} style={{ WebkitTapHighlightColor: 'transparent' }}><ArrowDownLeft className="text-[#666]" size={20}/></div>
-                <div className="absolute bottom-0 right-0 w-10 h-10 bg-[#333] rounded-br-xl border-b border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0" onClick={() => movePlayer(1, 1)} style={{ WebkitTapHighlightColor: 'transparent' }}><ArrowDownRight className="text-[#666]" size={20}/></div>
+                <div className="absolute top-0 w-10 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0 touch-none select-none" onClick={() => movePlayer(0, -1)}><ArrowUp className="text-[#666]" size={20}/></div>
+                <div className="absolute bottom-0 w-10 h-16 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-0 touch-none select-none" onClick={() => movePlayer(0, 1)}><ArrowDown className="text-[#666]" size={20}/></div>
+                <div className="absolute left-0 w-16 h-10 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-0 touch-none select-none" onClick={() => movePlayer(-1, 0)}><ArrowLeft className="text-[#666]" size={20}/></div>
+                <div className="absolute right-0 w-16 h-10 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-0 touch-none select-none" onClick={() => movePlayer(1, 0)}><ArrowRight className="text-[#666]" size={20}/></div>
+                <div className="absolute top-0 left-0 w-10 h-10 bg-[#333] rounded-tl-xl border-t border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => movePlayer(-1, -1)}><ArrowUpLeft className="text-[#666]" size={20}/></div>
+                <div className="absolute top-0 right-0 w-10 h-10 bg-[#333] rounded-tr-xl border-t border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => movePlayer(1, -1)}><ArrowUpRight className="text-[#666]" size={20}/></div>
+                <div className="absolute bottom-0 left-0 w-10 h-10 bg-[#333] rounded-bl-xl border-b border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => movePlayer(-1, 1)}><ArrowDownLeft className="text-[#666]" size={20}/></div>
+                <div className="absolute bottom-0 right-0 w-10 h-10 bg-[#333] rounded-br-xl border-b border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => movePlayer(1, 1)}><ArrowDownRight className="text-[#666]" size={20}/></div>
                 <div className="absolute w-8 h-8 bg-[#2a2a2a] rounded-full z-20 shadow-inner"></div>
             </div>
 
             <div className="absolute right-2 top-1/2 -translate-y-1/2 md:right-auto md:left-1/2 md:-translate-x-1/2 md:top-3/4 flex gap-4 transform -rotate-12 md:rotate-0">
                 <div className="flex flex-col items-center group">
-                    <button className="w-14 h-14 bg-[#8b0000] rounded-full shadow-[0_4px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000]" onClick={toggleMenu} style={{ WebkitTapHighlightColor: 'transparent' }}>B</button>
+                    <button className="w-14 h-14 bg-[#8b0000] rounded-full shadow-[0_4px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000] touch-none select-none" onClick={toggleMenu}>B</button>
                     <span className="text-[#666] text-xs font-bold mt-1">MENU</span>
                 </div>
                 <div className="flex flex-col items-center mt-[-15px] md:mt-0 group">
                     <button 
-                        className="w-14 h-14 bg-[#ff0000] rounded-full shadow-[0_4px_0_#8b0000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#cc0000]" 
-                        onTouchStart={(e) => startFastForward(e)}
-                        onMouseDown={(e) => startFastForward(e)}
-                        onTouchEnd={stopFastForward}
-                        onMouseUp={stopFastForward}
-                        onMouseLeave={stopFastForward}
-                        style={{ WebkitTapHighlightColor: 'transparent' }}
+                        className="w-14 h-14 bg-[#ff0000] rounded-full shadow-[0_4px_0_#8b0000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#cc0000] touch-none select-none" 
+                        onMouseDown={handlePressStart} 
+                        onMouseUp={handlePressEnd} 
+                        onMouseLeave={handlePressEnd}
+                        onTouchStart={handlePressStart}
+                        onTouchEnd={handlePressEnd}
                     >
                         A
                     </button>
                     <span className="text-[#666] text-xs font-bold mt-1">ACT</span>
                 </div>
+            </div>
+
+            {/* Ranged Button */}
+            <div className="absolute right-4 bottom-16 md:bottom-20 flex flex-col items-center">
+                <button 
+                    className="w-10 h-10 bg-[#333] rounded-full shadow-[0_2px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555] touch-none select-none" 
+                    onClick={fireRangedWeapon}
+                >
+                    <Crosshair size={16}/>
+                </button>
+                <span className="text-[#666] text-[10px] font-bold mt-1">RNG</span>
             </div>
 
             <div className="absolute bottom-2 left-1/2 -translate-x-1/2 md:bottom-4">

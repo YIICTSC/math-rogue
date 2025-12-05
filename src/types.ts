@@ -388,7 +388,8 @@ export interface DungeonScoreEntry {
     date: number;
     floor: number;
     level: number;
-    cause: string;
+    score: number;
+    reason: string; // "Cleared", "Starved", "Killed by X"
 }
 
 export interface GameState {
