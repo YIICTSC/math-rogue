@@ -273,6 +273,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const [selectedItemIndex, setSelectedItemIndex] = useState(0);
   const [blankScrollSelectionIndex, setBlankScrollSelectionIndex] = useState(0);
   const menuListRef = useRef<HTMLDivElement>(null);
+  const lastInputType = useRef<'KEY' | 'MOUSE'>('KEY');
 
   // Inspection
   const [inspectedItem, setInspectedItem] = useState<Item | null>(null);
@@ -378,7 +379,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
   // Scroll effect
   useEffect(() => {
-    if ((menuOpen || shopState.active) && menuListRef.current) {
+    if (lastInputType.current === 'KEY' && (menuOpen || shopState.active) && menuListRef.current) {
         const idx = synthState.mode === 'BLANK' ? blankScrollSelectionIndex : selectedItemIndex;
         const itemEl = menuListRef.current.children[idx] as HTMLElement;
         if (itemEl) {
@@ -1022,13 +1023,15 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       processTurn(player.x, player.y);
   };
 
-  const handleShopAction = () => {
+  const handleShopAction = (indexOverride?: number) => {
       const shopkeeper = enemies.find(e => e.id === shopState.merchantId);
       if (!shopkeeper) { setShopState(prev => ({ ...prev, active: false })); return; }
 
+      const idx = indexOverride !== undefined ? indexOverride : selectedItemIndex;
+
       if (shopState.mode === 'BUY') {
           if (!shopkeeper.shopItems || shopkeeper.shopItems.length === 0) return;
-          const item = shopkeeper.shopItems[selectedItemIndex];
+          const item = shopkeeper.shopItems[idx];
           if (!item) return;
           
           if ((player.gold || 0) >= (item.price || 0)) {
@@ -1037,7 +1040,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   setInventory(prev => [...prev, item]);
                   
                   // Remove from shop
-                  const newShopItems = shopkeeper.shopItems.filter((_, i) => i !== selectedItemIndex);
+                  const newShopItems = shopkeeper.shopItems.filter((_, i) => i !== idx);
                   setEnemies(prev => prev.map(e => e.id === shopkeeper.id ? { ...e, shopItems: newShopItems } : e));
                   
                   addLog(`${getItemName(item)}を買った！`, C2);
@@ -1055,7 +1058,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       } else {
           // SELL
           if (inventory.length === 0) return;
-          const item = inventory[selectedItemIndex];
+          const item = inventory[idx];
           if (!item) return;
           
           // Cannot sell equipped items directly (simple safeguard)
@@ -1067,7 +1070,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
           const sellPrice = Math.max(1, Math.floor((item.value || 100) / 2));
           setPlayer(p => ({ ...p, gold: (p.gold || 0) + sellPrice }));
-          setInventory(prev => prev.filter((_, i) => i !== selectedItemIndex));
+          setInventory(prev => prev.filter((_, i) => i !== idx));
           addLog(`${getItemName(item)}を${sellPrice}円で売った。`, C2);
           audioService.playSound('select');
           setSelectedItemIndex(prev => Math.max(0, Math.min(prev, inventory.length - 2)));
@@ -1162,7 +1165,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       }, 400); // 400ms hold to trigger
   };
 
-  const handlePressEnd = () => {
+  const handlePressEnd = (e?: React.TouchEvent | React.MouseEvent) => {
+      if (e) e.preventDefault(); // Prevents double firing
       if (fastForwardInterval.current) {
           clearTimeout(fastForwardInterval.current);
           fastForwardInterval.current = null;
@@ -1716,6 +1720,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   // --- KEYBOARD ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+        lastInputType.current = 'KEY'; // Track input type
         if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) { e.preventDefault(); }
         if (gameOver) { if (['z', 'Enter', ' '].includes(e.key)) handleRestart(); return; }
         if (gameClear) { if (['z', 'Enter', ' '].includes(e.key)) startEndlessMode(); return; }
@@ -2122,11 +2127,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                         <div 
                                             key={i} 
                                             className={`flex items-center border ${selectedItemIndex === i ? 'bg-[#8bac0f] text-[#0f380f] border-[#9bbc0f]' : 'border-transparent hover:border-[#9bbc0f]'}`}
-                                            onMouseEnter={() => setSelectedItemIndex(i)}
+                                            onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}
                                         >
                                             <button 
                                                 className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center"
-                                                onClick={() => handleShopAction()}
+                                                onClick={() => handleShopAction(i)}
                                             >
                                                 <span>{getItemName(item)}</span>
                                                 <span className="flex items-center gap-1">
@@ -2146,11 +2151,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                         <div 
                                             key={i} 
                                             className={`flex items-center border ${selectedItemIndex === i ? 'bg-[#8bac0f] text-[#0f380f] border-[#9bbc0f]' : 'border-transparent hover:border-[#9bbc0f]'}`}
-                                            onMouseEnter={() => setSelectedItemIndex(i)}
+                                            onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}
                                         >
                                             <button 
                                                 className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center"
-                                                onClick={() => handleShopAction()}
+                                                onClick={() => handleShopAction(i)}
                                             >
                                                 <span>{getItemName(item)}</span>
                                                 <span className="flex items-center gap-1">
@@ -2187,7 +2192,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                 <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar">
                                     {Array.from(identifiedTypes).filter(t => t.startsWith('SCROLL')).map((type, i) => (
                                         <div key={i} className={`flex items-center border ${blankScrollSelectionIndex === i ? 'bg-[#8bac0f] text-[#0f380f] border-[#9bbc0f]' : 'border-transparent'}`}>
-                                            <button className="flex-grow text-left px-2 py-1 cursor-pointer" onClick={() => handleSynthesisStep()} onMouseEnter={() => setBlankScrollSelectionIndex(i)}>
+                                            <button 
+                                                className="flex-grow text-left px-2 py-1 cursor-pointer" 
+                                                onClick={() => handleSynthesisStep()} 
+                                                onMouseEnter={() => { lastInputType.current = 'MOUSE'; setBlankScrollSelectionIndex(i); }}
+                                            >
                                                 {ITEM_DB[type].name}
                                             </button>
                                         </div>
@@ -2223,7 +2232,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                                     <button 
                                                         className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center"
                                                         onClick={() => !isSynthTarget && (synthState.active ? handleSynthesisStep() : handleItemAction(i))}
-                                                        onMouseEnter={() => setSelectedItemIndex(i)}
+                                                        onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}
                                                     >
                                                         <span>
                                                             {getItemName(item)} 
@@ -2348,10 +2357,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                     <button 
                         className="w-14 h-14 bg-[#ff0000] rounded-full shadow-[0_4px_0_#8b0000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#cc0000] touch-none select-none" 
                         onMouseDown={() => handlePressStart()} 
-                        onMouseUp={() => handlePressEnd()} 
-                        onMouseLeave={() => handlePressEnd()}
+                        onMouseUp={(e) => handlePressEnd(e)} 
+                        onMouseLeave={(e) => handlePressEnd(e)}
                         onTouchStart={(e) => { e.preventDefault(); handlePressStart(); }}
-                        onTouchEnd={(e) => { e.preventDefault(); handlePressEnd(); }}
+                        onTouchEnd={(e) => { e.preventDefault(); handlePressEnd(e); }}
                     >
                         A
                     </button>
