@@ -39,7 +39,7 @@ type TileType = 'WALL' | 'FLOOR' | 'STAIRS' | 'HALLWAY';
 type Direction = { x: 0 | 1 | -1, y: 0 | 1 | -1 };
 type ItemCategory = 'WEAPON' | 'ARMOR' | 'RANGED' | 'CONSUMABLE' | 'SYNTH' | 'STAFF';
 type EnemyType = 'SLIME' | 'GHOST' | 'DRAIN' | 'DRAGON' | 'METAL' | 'FLOATING' | 'THIEF' | 'BAT' | 'BOSS' | 'MANDRAKE' | 'GOLEM' | 'NINJA' | 'MAGE' | 'SHOPKEEPER';
-type VisualEffectType = 'SLASH' | 'THUNDER' | 'EXPLOSION' | 'TEXT' | 'FLASH' | 'PROJECTILE' | 'WARP' | 'BEAM';
+type VisualEffectType = 'SLASH' | 'THUNDER' | 'EXPLOSION' | 'TEXT' | 'FLASH' | 'PROJECTILE' | 'WARP' | 'BEAM' | 'MAGIC_PROJ';
 
 interface VisualEffect {
   id: number;
@@ -52,6 +52,10 @@ interface VisualEffect {
   color?: string;
   dir?: Direction;
   scale?: number;
+  startX?: number;
+  startY?: number;
+  targetX?: number;
+  targetY?: number;
 }
 
 interface Item {
@@ -273,6 +277,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     // New Sprites
     spriteCache.current['COIN'] = createPixelSpriteCanvas('COIN', 'GEM|#FFD700');
     spriteCache.current['SHOPKEEPER'] = createPixelSpriteCanvas('SHOPKEEPER', 'HUMANOID|#33691e'); // Green merchant
+    spriteCache.current['GOLD_BAG'] = createPixelSpriteCanvas('GOLD_BAG', 'GOLD_BAG|#FFD700');
+    spriteCache.current['MAGIC_BULLET'] = createPixelSpriteCanvas('MAGIC_BULLET', 'MAGIC_BULLET|#00BCD4');
 
     startNewGame();
   }, []);
@@ -1146,6 +1152,16 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       let hit = false;
       let msg = "";
 
+      // Visual Effect for Staff: Moving Projectile
+      addVisualEffect('MAGIC_PROJ', 0, 0, {
+          startX: player.x,
+          startY: player.y,
+          targetX: target ? target.x : x, 
+          targetY: target ? target.y : y,
+          duration: 5,
+          maxDuration: 5
+      });
+
       if (item.type === 'UMB_FIRE') {
           addVisualEffect('BEAM', x, y, { color: 'red' });
           if (target) {
@@ -1628,7 +1644,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               if (item) {
                   let spriteKey = 'CONSUMABLE';
                   if (item.type === 'GOLD') {
-                      spriteKey = 'COIN';
+                      spriteKey = 'GOLD_BAG';
                   } else if (item.itemData) {
                       const cat = item.itemData.category;
                       if (cat === 'WEAPON') spriteKey = 'WEAPON';
@@ -1697,6 +1713,28 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
       visualEffects.current.forEach((fx, i) => {
           fx.duration--;
+          
+          let currentX = fx.x;
+          let currentY = fx.y;
+
+          // Moving Projectile Logic
+          if (fx.type === 'MAGIC_PROJ' && fx.startX !== undefined && fx.targetX !== undefined && fx.startY !== undefined && fx.targetY !== undefined) {
+              const progress = 1 - (fx.duration / fx.maxDuration);
+              currentX = fx.startX + (fx.targetX - fx.startX) * progress;
+              currentY = fx.startY + (fx.targetY - fx.startY) * progress;
+              
+              const sprite = spriteCache.current['MAGIC_BULLET'];
+              const sx = (currentX - startX) * ts;
+              const sy = (currentY - startY) * ts;
+              
+              if (sprite) {
+                   if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
+                       ctx.drawImage(sprite, sx, sy, ts, ts);
+                   }
+              }
+              return; // Skip standard rendering for this special type
+          }
+
           const sx = (fx.x - startX) * ts;
           const sy = (fx.y - startY) * ts;
           
