@@ -1,6 +1,6 @@
 
 
-import { GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry } from '../types';
+import { GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, DungeonRunState } from '../types';
 
 const STORAGE_KEY_UNLOCKED_CARDS = 'pixel_spire_unlocked_cards_v1';
 const STORAGE_KEY_UNLOCKED_RELICS = 'pixel_spire_unlocked_relics_v1';
@@ -13,6 +13,7 @@ const STORAGE_KEY_RANKING = 'pixel_spire_ranking_v1';
 const STORAGE_KEY_POKER_RANKING = 'pixel_spire_poker_ranking_v1';
 const STORAGE_KEY_SURVIVOR_RANKING = 'pixel_spire_survivor_ranking_v1';
 const STORAGE_KEY_DUNGEON_RANKING = 'pixel_spire_dungeon_ranking_v1';
+const STORAGE_KEY_DUNGEON_RUN = 'pixel_spire_dungeon_run_state_v1';
 const STORAGE_KEY_LEGACY_CARD = 'pixel_spire_legacy_card_v1';
 const STORAGE_KEY_DEBUG_MATH_SKIP = 'pixel_spire_debug_math_skip_v1';
 const STORAGE_KEY_DEBUG_HP_ONE = 'pixel_spire_debug_hp_one_v1';
@@ -198,6 +199,32 @@ export const storageService = {
       }
   },
 
+  // --- Dungeon Run State (Independent Save) ---
+  saveDungeonRun: (state: DungeonRunState) => {
+      try {
+          localStorage.setItem(STORAGE_KEY_DUNGEON_RUN, JSON.stringify(state));
+      } catch (e) {
+          console.warn("Failed to save dungeon run", e);
+      }
+  },
+
+  loadDungeonRun: (): DungeonRunState | null => {
+      try {
+          const stored = localStorage.getItem(STORAGE_KEY_DUNGEON_RUN);
+          return stored ? JSON.parse(stored) : null;
+      } catch (e) {
+          return null;
+      }
+  },
+
+  hasDungeonRun: (): boolean => {
+      return !!localStorage.getItem(STORAGE_KEY_DUNGEON_RUN);
+  },
+
+  clearDungeonRun: () => {
+      localStorage.removeItem(STORAGE_KEY_DUNGEON_RUN);
+  },
+
   // --- Game State (Save/Load) ---
   saveGame: (state: GameState) => {
     try {
@@ -291,6 +318,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_POKER_RANKING);
       localStorage.removeItem(STORAGE_KEY_SURVIVOR_RANKING);
       localStorage.removeItem(STORAGE_KEY_DUNGEON_RANKING);
+      localStorage.removeItem(STORAGE_KEY_DUNGEON_RUN);
       localStorage.removeItem(STORAGE_KEY_LEGACY_CARD);
       localStorage.removeItem(STORAGE_KEY_DEBUG_MATH_SKIP);
       localStorage.removeItem(STORAGE_KEY_DEBUG_HP_ONE);

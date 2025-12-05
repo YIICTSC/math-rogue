@@ -392,6 +392,24 @@ export interface DungeonScoreEntry {
     reason: string; // "Cleared", "Starved", "Killed by X"
 }
 
+// --- Dungeon RPG Types ---
+export interface DungeonRunState {
+    map: string[][]; // Serialize TileType as string
+    player: any; // Using any for brevity in persistence, casts to Entity
+    enemies: any[];
+    floorItems: any[];
+    inventory: any[];
+    floor: number;
+    level: number;
+    belly: number;
+    maxBelly: number;
+    turnCounter: number;
+    isEndless: boolean;
+    logs: { message: string, color?: string, id: number }[];
+    identifiedTypes: string[];
+    idMap: Record<string, string>;
+}
+
 export interface GameState {
   screen: GameScreen;
   mode: GameMode; 
