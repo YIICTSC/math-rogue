@@ -1534,7 +1534,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       
       if (synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT') {
           // Identify known scrolls
-          const knownTypes = Array.from(identifiedTypes).filter((t: string) => t.startsWith('SCROLL')) as string[];
+          const knownTypes = Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')) as string[];
           const targetType = knownTypes[idx];
           const template = ITEM_DB[targetType];
           
@@ -2654,7 +2654,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                                 onClick={() => handleSynthesisStep()} 
                                                 onMouseEnter={() => { lastInputType.current = 'MOUSE'; setBlankScrollSelectionIndex(i); }}
                                             >
-                                                {ITEM_DB[type].name}
+                                                {ITEM_DB[type as string].name}
                                             </button>
                                         </div>
                                     ))}
@@ -2822,7 +2822,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                     <button className="w-14 h-14 bg-[#8b0000] rounded-full shadow-[0_4px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000] touch-none select-none" onClick={toggleMenu}>B</button>
                     <span className="text-[#666] text-xs font-bold mt-1">MENU</span>
                 </div>
-                <div className="flex flex-col items-center mt-[-15px] md:mt-0 group">
+                <div className="flex flex-col items-center group">
                     <button 
                         className="w-14 h-14 bg-[#ff0000] rounded-full shadow-[0_4px_0_#8b0000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#cc0000] touch-none select-none" 
                         onMouseDown={() => handlePressStart()} 
