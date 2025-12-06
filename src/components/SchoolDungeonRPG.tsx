@@ -434,6 +434,20 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       }
   }, [player, inventory, floor, level, belly, enemies, floorItems, traps, gameOver, gameClear, saveData]);
 
+  // Auto-scroll menu
+  useEffect(() => {
+      if (lastInputType.current === 'KEY' && menuListRef.current) {
+          let activeIndex = selectedItemIndex;
+          if (menuOpen && synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT') {
+              activeIndex = blankScrollSelectionIndex;
+          }
+          const items = menuListRef.current.children;
+          if (items && items[activeIndex]) {
+              items[activeIndex].scrollIntoView({ block: 'nearest', behavior: 'instant' }); 
+          }
+      }
+  }, [selectedItemIndex, blankScrollSelectionIndex, menuOpen, shopState.active, synthState.step]);
+
   // Update Stats
   useEffect(() => {
       setPlayer(p => {
@@ -1963,6 +1977,23 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           movePlayer(dx, dy);
       }
   };
+
+  // --- AUTO SCROLL MENU ---
+  useEffect(() => {
+      if (lastInputType.current === 'KEY' && menuListRef.current) {
+          // Determine effective index based on current mode
+          let activeIndex = selectedItemIndex;
+          if (menuOpen && synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT') {
+              activeIndex = blankScrollSelectionIndex;
+          }
+          
+          const items = menuListRef.current.children;
+          if (items && items[activeIndex]) {
+              // Use scrollIntoView with block: 'nearest' to minimize jumpiness
+              items[activeIndex].scrollIntoView({ block: 'nearest', behavior: 'instant' }); 
+          }
+      }
+  }, [selectedItemIndex, blankScrollSelectionIndex, menuOpen, shopState.active, synthState.step]);
 
   // --- KEYBOARD ---
   useEffect(() => {
