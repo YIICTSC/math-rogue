@@ -664,59 +664,83 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         newMap[sy][sx] = 'STAIRS';
     }
     
+    // Collect valid floor tiles for entity placement
+    const candidates: {x: number, y: number}[] = [];
     for(let y=0; y<MAP_H; y++) {
         for(let x=0; x<MAP_W; x++) {
-            if(newMap[y][x] === 'FLOOR' && (x !== px || y !== py) && (x !== sx || y !== sy)) {
-                const inRoom = isPointInRoom(x, y);
-                
-                if(Math.random() < 0.06) {
-                    newEnemies.push(spawnEnemy(x, y, f, inRoom));
-                } else if(Math.random() < 0.04) {
-                    const r = Math.random();
-                    if (r < 0.2) {
-                        newItems.push({
-                            id: Date.now() + Math.random(), type: 'GOLD', x, y, char: '$', name: 'お金',
-                            hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
-                            status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
-                            gold: Math.floor(Math.random() * 50 + 10 * f)
-                        });
-                    } else {
-                        const keys = Object.keys(ITEM_DB);
-                        const key = keys[Math.floor(Math.random() * keys.length)];
-                        const template = ITEM_DB[key];
-                        let plus = 0;
-                        let charges = template.maxCharges || 0;
-                        if ((template.category === 'WEAPON' || template.category === 'ARMOR') && Math.random() < 0.2) {
-                            plus = Math.floor(Math.random() * 2) + 1;
-                        }
-                        if (template.category === 'STAFF') {
-                            charges = Math.floor(Math.random() * 4) + 2; 
-                        }
-                        newItems.push({
-                            id: Date.now() + Math.random(), type: 'ITEM', x, y, char: '!', 
-                            name: template.name, hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
-                            status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
-                            itemData: { 
-                                ...template, 
-                                id: `item-${Date.now()}-${Math.random()}`, 
-                                plus,
-                                charges,
-                                name: plus > 0 ? `${template.name}+${plus}` : template.name,
-                                price: Math.floor((template.value || 100) * 0.5)
-                            }
-                        });
-                    }
-                } else if (inRoom && Math.random() < 0.02) {
-                    const trapTypes: TrapType[] = ['BOMB', 'SLEEP', 'POISON', 'WARP', 'RUST', 'SUMMON'];
-                    const tType = trapTypes[Math.floor(Math.random() * trapTypes.length)];
-                    newTraps.push({
-                        id: Date.now() + Math.random(), type: 'TRAP', x, y, char: 'X', name: '罠',
-                        hp: 0, maxHp: 0, baseAttack: 0, baseDefense: 0, attack: 0, defense: 0, xp: 0, dir: {x:0, y:0},
-                        status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
-                        trapType: tType, visible: false
-                    });
-                }
+            if (newMap[y][x] === 'FLOOR' && (x !== px || y !== py) && (x !== sx || y !== sy)) {
+                candidates.push({x, y});
             }
+        }
+    }
+    // Shuffle candidates
+    candidates.sort(() => Math.random() - 0.5);
+
+    // 1. Spawn Enemies (~5% of floor tiles)
+    const enemyCount = Math.floor(candidates.length * 0.05);
+    for (let i = 0; i < enemyCount; i++) {
+        const t = candidates.pop();
+        if (t) {
+            newEnemies.push(spawnEnemy(t.x, t.y, f, isPointInRoom(t.x, t.y)));
+        }
+    }
+
+    // 2. Spawn Items (Max 10, usually 5-8)
+    const itemCount = Math.floor(Math.random() * 4) + 5; 
+    for (let i = 0; i < itemCount; i++) {
+        const t = candidates.pop();
+        if (t) {
+            const r = Math.random();
+            if (r < 0.2) {
+                newItems.push({
+                    id: Date.now() + Math.random(), type: 'GOLD', x: t.x, y: t.y, char: '$', name: 'お金',
+                    hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
+                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+                    gold: Math.floor(Math.random() * 50 + 10 * f)
+                });
+            } else {
+                const keys = Object.keys(ITEM_DB);
+                const key = keys[Math.floor(Math.random() * keys.length)];
+                const template = ITEM_DB[key];
+                let plus = 0;
+                let charges = template.maxCharges || 0;
+                if ((template.category === 'WEAPON' || template.category === 'ARMOR') && Math.random() < 0.2) {
+                    plus = Math.floor(Math.random() * 2) + 1;
+                }
+                if (template.category === 'STAFF') {
+                    charges = Math.floor(Math.random() * 4) + 2; 
+                }
+                newItems.push({
+                    id: Date.now() + Math.random(), type: 'ITEM', x: t.x, y: t.y, char: '!', 
+                    name: template.name, hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
+                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+                    itemData: { 
+                        ...template, 
+                        id: `item-${Date.now()}-${Math.random()}`, 
+                        plus,
+                        charges,
+                        name: plus > 0 ? `${template.name}+${plus}` : template.name,
+                        price: Math.floor((template.value || 100) * 0.5)
+                    }
+                });
+            }
+        }
+    }
+
+    // 3. Spawn Traps (~2% chance in rooms)
+    const roomCandidates = candidates.filter(c => isPointInRoom(c.x, c.y));
+    const trapCount = Math.floor(roomCandidates.length * 0.1); // ~10% of room tiles only
+    for (let i = 0; i < trapCount; i++) {
+        const t = roomCandidates.pop();
+        if (t) {
+            const trapTypes: TrapType[] = ['BOMB', 'SLEEP', 'POISON', 'WARP', 'RUST', 'SUMMON'];
+            const tType = trapTypes[Math.floor(Math.random() * trapTypes.length)];
+            newTraps.push({
+                id: Date.now() + Math.random(), type: 'TRAP', x: t.x, y: t.y, char: 'X', name: '罠',
+                hp: 0, maxHp: 0, baseAttack: 0, baseDefense: 0, attack: 0, defense: 0, xp: 0, dir: {x:0, y:0},
+                status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+                trapType: tType, visible: false
+            });
         }
     }
 
@@ -2412,12 +2436,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             <div className="w-full aspect-[11/9] relative shrink-0">
                 <div className="w-full h-full bg-[#9bbc0f] border-4 border-[#0f380f] relative overflow-hidden shadow-lg rounded-sm">
                     
-                    <div className="absolute top-0 left-0 w-full h-8 bg-[#0f380f] text-[#9bbc0f] flex justify-between items-center px-2 text-[10px] z-10 border-b border-[#306230]">
-                        <div className="flex gap-2">
-                            <span className="flex items-center"><Sword size={8} className="mr-1"/>{player.equipment?.weapon ? getItemName(player.equipment.weapon) : '-'}</span>
-                            <span className="flex items-center"><Shield size={8} className="mr-1"/>{player.equipment?.armor ? getItemName(player.equipment.armor) : '-'}</span>
-                            <span className="flex items-center"><Target size={8} className="mr-1"/>{player.equipment?.ranged ? getItemName(player.equipment.ranged) : '-'}</span>
-                        </div>
+                    <div className="absolute top-0 left-0 w-full h-8 bg-[#0f380f] text-[#9bbc0f] flex justify-end items-center px-2 text-[10px] z-10 border-b border-[#306230]">
                         <div className="flex gap-2">
                             <button onClick={() => setShowMap(!showMap)} className="flex items-center gap-1 hover:text-white border border-[#9bbc0f] px-1 rounded"><MapIcon size={10}/> Map</button>
                             <button onClick={() => setShowStatus(true)} className="flex items-center gap-1 hover:text-white border border-[#9bbc0f] px-1 rounded"><User size={10}/> Sts</button>
