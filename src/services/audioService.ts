@@ -7,7 +7,7 @@ class AudioService {
   
   private isMuted: boolean = false;
   private isPlayingBGM: boolean = false;
-  private currentBgmType: 'battle' | 'menu' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | null = null;
+  private currentBgmType: 'battle' | 'menu' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | null = null;
   
   // Sequencer State
   private nextNoteTime: number = 0;
@@ -218,67 +218,81 @@ class AudioService {
           }
       } else if (this.currentBgmType === 'school_psyche') {
           // --- SCHOOL PSYCHE (Ambient, Irregular, Chime) ---
-          // 4 Sections (64 steps each)
-          // 0: Ambient Intro
-          // 1: Poly-rhythm Drift
-          // 2: Nervous Glitch
-          // 3: Deep Warp
           const section = Math.floor((t % 256) / 64);
-          
-          // 1. Base Drone (Always present but shifting)
           if (t % 32 === 0) {
-              const droneNote = (section % 2 === 0) ? 98.00 : 87.31; // G2 -> F2
+              const droneNote = (section % 2 === 0) ? 98.00 : 87.31; 
               this.playOsc(droneNote, actualTime, 6.0, 'sine', 0.1, this.bgmGain);
-              // Detuned layer
               this.playOsc(droneNote * 1.01 + (Math.random()*2), actualTime, 5.0, 'triangle', 0.05, this.bgmGain);
           }
-
-          // 2. The Chime (Sparse, irregular placement)
-          // Original Pattern: E4, C4, D4, G3 (Rest) G3, D4, E4, C4
-          // Freqs: 329.6, 261.6, 293.7, 196.0
-          // Play a note every 8 steps (2 beats), but shifted by prime numbers to drift
           if (t % 8 === 0) {
               const noteIdx = (t / 8) % this.chimeMelody.length;
               let freq = this.chimeMelody[noteIdx];
-              
               if (freq > 0) {
-                  // Add psyche warping
                   let wave: OscillatorType = 'sine';
                   let detune = 0;
-                  
                   if (section >= 1) detune = (Math.random() - 0.5) * 10;
                   if (section === 2) wave = 'triangle';
-                  if (section === 3) { wave = 'sawtooth'; freq /= 2; } // Drop octave in final section
-
+                  if (section === 3) { wave = 'sawtooth'; freq /= 2; }
                   this.playOsc(freq + detune, actualTime, 2.0, wave, 0.1, this.bgmGain);
-                  
-                  // Delay echo
-                  if (section > 0) {
-                      this.playOsc((freq + detune) * 2, actualTime + 0.3, 1.0, 'sine', 0.05, this.bgmGain);
-                  }
+                  if (section > 0) this.playOsc((freq + detune) * 2, actualTime + 0.3, 1.0, 'sine', 0.05, this.bgmGain);
               }
           }
-
-          // 3. Irregular Rhythms (Polymetric Blips)
-          // Prime number intervals: 5, 7, 11, 13
           if (section >= 1) {
-              if (t % 7 === 0) {
-                  this.playOsc(1500, actualTime, 0.05, 'square', 0.02, this.bgmGain);
-              }
-              if (t % 11 === 0 && section >= 2) {
-                  this.playNoise(actualTime, 0.02, 0.05, 'hat');
-              }
-              if (t % 13 === 0 && section === 3) {
-                  this.playOsc(196 * 4, actualTime, 0.1, 'sawtooth', 0.03, this.bgmGain);
-              }
+              if (t % 7 === 0) this.playOsc(1500, actualTime, 0.05, 'square', 0.02, this.bgmGain);
+              if (t % 11 === 0 && section >= 2) this.playNoise(actualTime, 0.02, 0.05, 'hat');
+              if (t % 13 === 0 && section === 3) this.playOsc(196 * 4, actualTime, 0.1, 'sawtooth', 0.03, this.bgmGain);
           }
-
-          // 4. Random Atmosphere events
           if (Math.random() < 0.02) {
-              // Ghostly swell
               const freq = 400 + Math.random() * 400;
               this.playOsc(freq, actualTime, 3.0, 'triangle', 0.05, this.bgmGain);
           }
+      } else if (this.currentBgmType === 'dungeon_gym') {
+          // Upbeat, Marching
+          if (beatNumber % 4 === 0) this.playNoise(actualTime, 0.1, 0.5, 'kick');
+          if (beatNumber % 4 === 2) this.playNoise(actualTime, 0.1, 0.3, 'snare');
+          if (beatNumber % 2 === 0) this.playOsc(110, actualTime, 0.1, 'sawtooth', 0.1, this.bgmGain); // Bass
+          if (beatNumber % 8 === 0) {
+              this.playOsc(440, actualTime, 0.2, 'square', 0.1, this.bgmGain); // Whistle
+              this.playOsc(660, actualTime + 0.1, 0.1, 'square', 0.1, this.bgmGain);
+          }
+      } else if (this.currentBgmType === 'dungeon_science') {
+          // Weird, Bleepy
+          if (beatNumber % 2 === 0) this.playOsc(150, actualTime, 0.05, 'sine', 0.2, this.bgmGain);
+          if (Math.random() < 0.3) {
+              const freq = 800 + Math.random() * 1000;
+              this.playOsc(freq, actualTime, 0.05, 'square', 0.05, this.bgmGain);
+          }
+          if (beatNumber % 8 === 0) {
+              this.playOsc(220, actualTime, 0.5, 'triangle', 0.1, this.bgmGain);
+          }
+      } else if (this.currentBgmType === 'dungeon_music') {
+          // Waltz feel (3/4 simulation on 4/4 grid or just flowy)
+          // Arpeggios
+          const arp = [261, 329, 392, 523];
+          const note = arp[beatNumber % 4];
+          if (note) this.playOsc(note, actualTime, 0.3, 'sine', 0.1, this.bgmGain);
+          if (beatNumber % 16 === 0) this.playChord([261, 329, 392], actualTime, 1.0, 'triangle', 0.1);
+      } else if (this.currentBgmType === 'dungeon_library') {
+          // Quiet, sparse
+          if (beatNumber % 16 === 0) this.playNoise(actualTime, 0.05, 0.05, 'hat'); // Tick
+          if (Math.random() < 0.1) {
+              this.playOsc(300, actualTime, 0.5, 'sine', 0.05, this.bgmGain);
+          }
+      } else if (this.currentBgmType === 'dungeon_roof') {
+          // Windy, Melancholic
+          if (beatNumber % 32 === 0) {
+              this.playNoise(actualTime, 2.0, 0.05, 'snare'); // Wind noise simulation
+          }
+          if (beatNumber % 8 === 0) {
+              const melody = [440, 392, 349, 329];
+              const note = melody[Math.floor(beatNumber / 8) % 4];
+              this.playOsc(note, actualTime, 0.8, 'triangle', 0.1, this.bgmGain);
+          }
+      } else if (this.currentBgmType === 'dungeon_boss') {
+          // Intense
+          if (beatNumber % 2 === 0) this.playNoise(actualTime, 0.1, 0.6, 'kick');
+          if (beatNumber % 4 === 0) this.playChord([110, 164, 196], actualTime, 0.2, 'sawtooth', 0.3); // Hit
+          if (beatNumber % 2 !== 0) this.playOsc(110, actualTime, 0.1, 'square', 0.2, this.bgmGain); // Bass running
       }
   }
 
@@ -350,7 +364,7 @@ class AudioService {
   }
 
   // --- Public API ---
-  public playBGM(type: 'battle' | 'menu' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche') {
+  public playBGM(type: 'battle' | 'menu' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss') {
       if (this.isPlayingBGM && this.currentBgmType === type) return;
       
       this.init(); 
@@ -364,8 +378,14 @@ class AudioService {
       else if (type === 'math') { this.tempo = 110; }
       else if (type === 'poker_play') { this.tempo = 120; this.swing = 0.6; }
       else if (type === 'poker_shop') { this.tempo = 90; }
-      else if (type === 'survivor_metal') { this.tempo = 170; } // Fast Metal
-      else if (type === 'school_psyche') { this.tempo = 100; } // Ambient
+      else if (type === 'survivor_metal') { this.tempo = 170; }
+      else if (type === 'school_psyche') { this.tempo = 100; }
+      else if (type === 'dungeon_gym') { this.tempo = 110; }
+      else if (type === 'dungeon_science') { this.tempo = 125; }
+      else if (type === 'dungeon_music') { this.tempo = 90; } // Waltz-ish
+      else if (type === 'dungeon_library') { this.tempo = 60; }
+      else if (type === 'dungeon_roof') { this.tempo = 80; }
+      else if (type === 'dungeon_boss') { this.tempo = 150; }
       else { this.tempo = 90; }
 
       this.current16thNote = 0;

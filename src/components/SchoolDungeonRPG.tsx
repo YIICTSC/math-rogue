@@ -9,11 +9,31 @@ interface SchoolDungeonRPGProps {
   onBack: () => void;
 }
 
-// --- GBC PALETTE ---
-const C0 = '#0f380f'; // Blackest
-const C1 = '#306230'; // Dark
-const C2 = '#8bac0f'; // Light
-const C3 = '#9bbc0f'; // White
+// --- GBC PALETTE (Dynamic based on Floor) ---
+// Default: Green
+const PALETTE_DEFAULT = { C0: '#0f380f', C1: '#306230', C2: '#8bac0f', C3: '#9bbc0f' };
+const PALETTE_GYM = { C0: '#2d1b0e', C1: '#56341a', C2: '#af7846', C3: '#dfb783' }; // Brown/Wood
+const PALETTE_SCIENCE = { C0: '#0b1e2d', C1: '#1b4a6e', C2: '#4a90b8', C3: '#9cd1e8' }; // Cyan/Blue
+const PALETTE_MUSIC = { C0: '#2d0b26', C1: '#6e1b5c', C2: '#b84a9e', C3: '#e89ccf' }; // Purple/Pink
+const PALETTE_LIBRARY = { C0: '#3e2723', C1: '#5d4037', C2: '#a1887f', C3: '#d7ccc8' }; // Sepia
+const PALETTE_ROOF = { C0: '#050a14', C1: '#122442', C2: '#3b5a8c', C3: '#7aa3cc' }; // Dark Blue/Night
+const PALETTE_BOSS = { C0: '#290000', C1: '#630000', C2: '#b57b00', C3: '#ffdb4d' }; // Red/Gold
+
+interface ThemeConfig {
+    name: string;
+    colors: { C0: string, C1: string, C2: string, C3: string };
+    bgm: 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss';
+}
+
+const getTheme = (floor: number): ThemeConfig => {
+    if (floor >= 20) return { name: "校長室", colors: PALETTE_BOSS, bgm: 'dungeon_boss' };
+    if (floor >= 16) return { name: "屋上", colors: PALETTE_ROOF, bgm: 'dungeon_roof' };
+    if (floor >= 13) return { name: "図書室", colors: PALETTE_LIBRARY, bgm: 'dungeon_library' };
+    if (floor >= 10) return { name: "音楽室", colors: PALETTE_MUSIC, bgm: 'dungeon_music' };
+    if (floor >= 7) return { name: "理科室", colors: PALETTE_SCIENCE, bgm: 'dungeon_science' };
+    if (floor >= 4) return { name: "体育館", colors: PALETTE_GYM, bgm: 'dungeon_gym' };
+    return { name: "一般教室", colors: PALETTE_DEFAULT, bgm: 'school_psyche' };
+};
 
 // --- CONSTANTS ---
 const MAP_W = 40; 
@@ -275,6 +295,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const [isEndless, setIsEndless] = useState(false);
   const saveDebounceRef = useRef<any>(null);
   
+  const currentTheme = getTheme(floor);
+
   // Dash State
   const [dashMode, setDashMode] = useState(false);
   const [isAutoMoving, setIsAutoMoving] = useState(false);
@@ -347,9 +369,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     spriteCache.current['TRAP'] = createPixelSpriteCanvas('TRAP', 'CROSS|#0f380f'); // Black cross trap
     spriteCache.current['ACCESSORY'] = createPixelSpriteCanvas('ACCESSORY', 'SHIELD|#FFD700'); // Bracelet/Ring
 
-    // Set BGM to new School Psyche track
-    audioService.playBGM('school_psyche');
-
     // Load Game State
     const savedState = storageService.loadDungeonState();
     if (savedState) {
@@ -362,6 +381,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         audioService.stopBGM();
     };
   }, []);
+
+  // Update BGM when theme changes
+  useEffect(() => {
+      audioService.playBGM(currentTheme.bgm);
+  }, [currentTheme.bgm]);
 
   const restoreState = (save: any) => {
       setMap(save.map);
@@ -381,7 +405,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       setIdentifiedTypes(new Set(save.identifiedTypes));
       setIsEndless(save.isEndless);
       turnCounter.current = save.turnCounter;
-      addLog("冒険を再開した。", C2);
+      addLog("冒険を再開した。", currentTheme.colors.C2);
   };
 
   const saveData = useCallback(() => {
@@ -780,7 +804,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           addLog(`レベルが${nextLv}に上がった！`);
           audioService.playSound('buff');
           addVisualEffect('FLASH', 0, 0);
-          addVisualEffect('TEXT', player.x, player.y, { value: 'LEVEL UP!', color: 'yellow' });
+          addVisualEffect('TEXT', player.x, player.y, { value: 'LEVEL UP!', color: currentTheme.colors.C3 });
       }
       setPlayer(p => ({ ...p, xp: nextXp }));
       setLevel(nextLv);
@@ -874,7 +898,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           for (const e of prevEnemies) {
               if (e.enemyType === 'SHOPKEEPER') { occupied.add(`${e.x},${e.y}`); nextEnemies.push(e); continue; }
 
-              if (e.status.sleep > 0) { e.status.sleep--; nextEnemies.push(e); occupied.add(`${e.x},${e.y}`); addVisualEffect('TEXT', e.x, e.y, {value:'Zzz', color:'blue'}); continue; }
+              if (e.status.sleep > 0) { e.status.sleep--; nextEnemies.push(e); occupied.add(`${e.x},${e.y}`); addVisualEffect('TEXT', e.x, e.y, {value:'Zzz', color:currentTheme.colors.C3}); continue; }
               if (e.status.frozen > 0) { e.status.frozen--; nextEnemies.push(e); occupied.add(`${e.x},${e.y}`); continue; }
               
               const dx = px - e.x; const dy = py - e.y;
@@ -941,7 +965,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
               if (tx === px && ty === py) {
                   let dmg = Math.max(1, e.attack - player.defense);
-                  if (player.equipment?.armor?.type === 'GYM_CLOTHES' && Math.random() < 0.3) { addLog("ひらりと身をかわした！", C2); dmg = 0; addVisualEffect('TEXT', px, py, { value: 'MISS', color: 'blue' }); }
+                  if (player.equipment?.armor?.type === 'GYM_CLOTHES' && Math.random() < 0.3) { addLog("ひらりと身をかわした！", currentTheme.colors.C2); dmg = 0; addVisualEffect('TEXT', px, py, { value: 'MISS', color: currentTheme.colors.C3 }); }
                   if (player.equipment?.armor?.type === 'NAME_TAG' && e.enemyType === 'THIEF') addLog("名札が盗みを防いだ！");
                   else if (e.enemyType === 'THIEF' && dmg > 0 && Math.random() < 0.3 && inventory.length > 0) { addLog("アイテムを盗まれた！", "red"); const idx = Math.floor(Math.random() * inventory.length); setInventory(inv => inv.filter((_, i) => i !== idx)); }
 
@@ -1024,7 +1048,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       const target = enemies.find(e => e.x === tx && e.y === ty);
       if (target) {
           if (target.enemyType === 'SHOPKEEPER') {
-              addLog("「へいらっしゃい！何にする？」", C2);
+              addLog("「へいらっしゃい！何にする？」", currentTheme.colors.C2);
               setShopState({ active: true, merchantId: target.id, mode: 'BUY' });
               setSelectedItemIndex(0);
               audioService.playSound('select');
@@ -1092,7 +1116,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           }
       }
       
-      if (map[ty][tx] === 'STAIRS') addLog("階段がある。", C2);
+      if (map[ty][tx] === 'STAIRS') addLog("階段がある。", currentTheme.colors.C2);
       processTurn(finalX, finalY);
   };
 
@@ -1110,7 +1134,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       const target = enemies.find(e => e.x === tx && e.y === ty);
       if (target) { 
           if (target.enemyType === 'SHOPKEEPER') {
-              addLog("「へいらっしゃい！何にする？」", C2);
+              addLog("「へいらっしゃい！何にする？」", currentTheme.colors.C2);
               setShopState({ active: true, merchantId: target.id, mode: 'BUY' });
               setSelectedItemIndex(0);
               audioService.playSound('select');
@@ -1343,7 +1367,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   const newShopItems = shopkeeper.shopItems.filter((_, i) => i !== idx);
                   setEnemies(prev => prev.map(e => e.id === shopkeeper.id ? { ...e, shopItems: newShopItems } : e));
                   
-                  addLog(`${getItemName(item)}を買った！`, C2);
+                  addLog(`${getItemName(item)}を買った！`, currentTheme.colors.C2);
                   audioService.playSound('buff');
                   if (newShopItems.length === 0) setShopState(prev => ({ ...prev, active: false }));
                   else setSelectedItemIndex(prev => Math.min(prev, newShopItems.length - 1));
@@ -1369,7 +1393,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           const sellPrice = Math.max(1, Math.floor((item.value || 100) / 2));
           setPlayer(p => ({ ...p, gold: (p.gold || 0) + sellPrice }));
           setInventory(prev => prev.filter((_, i) => i !== idx));
-          addLog(`${getItemName(item)}を${sellPrice}円で売った。`, C2);
+          addLog(`${getItemName(item)}を${sellPrice}円で売った。`, currentTheme.colors.C2);
           audioService.playSound('select');
           setSelectedItemIndex(prev => Math.max(0, Math.min(prev, inventory.length - 2)));
       }
@@ -1428,7 +1452,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   if (nhp <= 0 && wType === 'LADLE' && Math.random() < 0.3) {
                       const meat = { ...ITEM_DB['FOOD_MEAT'], name: `${e.name}の肉`, value: 100, id: `meat-${Date.now()}` };
                       setFloorItems(prev => [...prev, { id: Date.now()+Math.random(), type:'ITEM', x: e.x, y: e.y, char: '!', name: meat.name, hp:0,maxHp:0,baseAttack:0,baseDefense:0,attack:0,defense:0,xp:0,dir:{x:0,y:0}, status:e.status, itemData: meat }]);
-                      addLog(`${e.name}を肉に変えた！`, C2);
+                      addLog(`${e.name}を肉に変えた！`, currentTheme.colors.C2);
                   }
                   return { ...e, hp: nhp };
               }
@@ -1489,7 +1513,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               if (player.hp >= player.maxHp && belly > 20) {
                   if (player.hp === player.maxHp) {
                       setIsFastForwarding(false);
-                      addLog("HPが回復した。", C2);
+                      addLog("HPが回復した。", currentTheme.colors.C2);
                       return;
                   }
               }
@@ -2005,7 +2029,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   // --- AUTO SCROLL MENU ---
   useEffect(() => {
       if (lastInputType.current === 'KEY' && menuListRef.current) {
-          // Determine effective index based on current mode
           let activeIndex = selectedItemIndex;
           if (menuOpen && synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT') {
               activeIndex = blankScrollSelectionIndex;
@@ -2013,7 +2036,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           
           const items = menuListRef.current.children;
           if (items && items[activeIndex]) {
-              // Use scrollIntoView with block: 'nearest' to minimize jumpiness
               items[activeIndex].scrollIntoView({ block: 'nearest', behavior: 'instant' }); 
           }
       }
@@ -2081,7 +2103,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           renderGame();
       }, 50); 
       return () => clearInterval(loop);
-  }, [map, player, enemies, floorItems, traps, menuOpen, visitedMap, floorMapRevealed]);
+  }, [map, player, enemies, floorItems, traps, menuOpen, visitedMap, floorMapRevealed, currentTheme]);
 
   const renderGame = () => {
       const canvas = canvasRef.current;
@@ -2093,6 +2115,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       const w = canvas.width;
       const h = canvas.height;
       const ts = TILE_SIZE * SCALE;
+
+      // Use Theme Colors
+      const { C0, C1, C2, C3 } = currentTheme.colors;
 
       ctx.fillStyle = C0;
       ctx.fillRect(0, 0, w, h);
@@ -2296,7 +2321,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           }
           else if (fx.type === 'PROJECTILE') {
               if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
-                  ctx.fillStyle = '#9bbc0f';
+                  ctx.fillStyle = currentTheme.colors.C3;
                   ctx.beginPath();
                   ctx.arc(sx + ts/2, sy + ts/2, 4 * SCALE, 0, Math.PI*2);
                   ctx.fill();
@@ -2326,13 +2351,16 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       return item.desc;
   };
 
+  // --- STYLE VARIABLES FOR THEME ---
+  const { C0, C1, C2, C3 } = currentTheme.colors;
+
   return (
     <div className="w-full h-full bg-[#101010] flex flex-col md:flex-row items-center justify-center font-mono select-none overflow-hidden touch-none relative p-4 gap-4">
         
         {inspectedItem && (
-            <div className="absolute inset-0 z-50 bg-[#0f380f]/95 flex items-center justify-center p-4" onClick={() => setInspectedItem(null)}>
-                <div className="w-full max-w-xs bg-[#9bbc0f] border-4 border-[#306230] p-4 shadow-xl text-[#0f380f]" onClick={e => e.stopPropagation()}>
-                    <div className="flex justify-between items-start mb-2 border-b-2 border-[#306230] pb-1">
+            <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setInspectedItem(null)}>
+                <div className="w-full max-w-xs border-4 p-4 shadow-xl" style={{ backgroundColor: C3, borderColor: C1, color: C0 }} onClick={e => e.stopPropagation()}>
+                    <div className="flex justify-between items-start mb-2 border-b-2 pb-1" style={{ borderColor: C1 }}>
                         <h3 className="font-bold text-lg">{getItemName(inspectedItem)} {inspectedItem.plus ? `+${inspectedItem.plus}` : ''} {inspectedItem.count ? `(${inspectedItem.count})` : ''} {inspectedItem.category === 'STAFF' ? `[${inspectedItem.charges}]` : ''}</h3>
                         <button onClick={() => setInspectedItem(null)}><X size={20}/></button>
                     </div>
@@ -2348,25 +2376,25 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
         {/* Status Screen */}
         {showStatus && (
-            <div className="absolute inset-0 z-50 bg-[#0f380f]/95 flex items-center justify-center p-4" onClick={() => setShowStatus(false)}>
-                <div className="w-full max-w-md bg-[#9bbc0f] border-4 border-[#306230] p-6 shadow-xl text-[#0f380f] overflow-y-auto max-h-[80vh] custom-scrollbar" onClick={e => e.stopPropagation()}>
-                    <div className="flex justify-between items-center mb-4 border-b-2 border-[#306230] pb-2">
+            <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setShowStatus(false)}>
+                <div className="w-full max-w-md border-4 p-6 shadow-xl overflow-y-auto max-h-[80vh] custom-scrollbar" style={{ backgroundColor: C3, borderColor: C1, color: C0 }} onClick={e => e.stopPropagation()}>
+                    <div className="flex justify-between items-center mb-4 border-b-2 pb-2" style={{ borderColor: C1 }}>
                         <h2 className="font-bold text-xl flex items-center"><User className="mr-2"/> ステータス</h2>
                         <button onClick={() => setShowStatus(false)}><X size={24}/></button>
                     </div>
                     <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                            <div><span className="text-[#306230] font-bold">名前:</span> {player.name}</div>
-                            <div><span className="text-[#306230] font-bold">称号:</span> {level < 5 ? '新入生' : (level < 10 ? '一般生徒' : '番長')}</div>
-                            <div><span className="text-[#306230] font-bold">Lv:</span> {level}</div>
-                            <div><span className="text-[#306230] font-bold">経験値:</span> {player.xp}</div>
-                            <div><span className="text-[#306230] font-bold">HP:</span> {player.hp}/{player.maxHp}</div>
-                            <div><span className="text-[#306230] font-bold">満腹度:</span> {belly}/{maxBelly}</div>
-                            <div><span className="text-[#306230] font-bold">攻撃力:</span> {player.attack}</div>
-                            <div><span className="text-[#306230] font-bold">防御力:</span> {player.defense}</div>
-                            <div><span className="text-[#306230] font-bold">所持金:</span> {player.gold} G</div>
+                            <div><span style={{ color: C1 }} className="font-bold">名前:</span> {player.name}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">称号:</span> {level < 5 ? '新入生' : (level < 10 ? '一般生徒' : '番長')}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">Lv:</span> {level}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">経験値:</span> {player.xp}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">HP:</span> {player.hp}/{player.maxHp}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">満腹度:</span> {belly}/{maxBelly}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">攻撃力:</span> {player.attack}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">防御力:</span> {player.defense}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">所持金:</span> {player.gold} G</div>
                         </div>
-                        <div className="border-t-2 border-[#306230] pt-2">
+                        <div className="border-t-2 pt-2" style={{ borderColor: C1 }}>
                             <h3 className="font-bold mb-2">装備</h3>
                             <div className="grid grid-cols-1 gap-1 text-sm">
                                 <div><span className="font-bold mr-2">[武]</span> {player.equipment?.weapon ? `${getItemName(player.equipment.weapon)} ${player.equipment.weapon.plus?'+'+player.equipment.weapon.plus:''}` : 'なし'}</div>
@@ -2375,37 +2403,37 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                 <div><span className="font-bold mr-2">[腕]</span> {player.equipment?.accessory ? `${getItemName(player.equipment.accessory)}` : 'なし'}</div>
                             </div>
                         </div>
-                        <div className="border-t-2 border-[#306230] pt-2">
+                        <div className="border-t-2 pt-2" style={{ borderColor: C1 }}>
                             <h3 className="font-bold mb-2">状態</h3>
                             <div className="flex flex-wrap gap-2 text-xs">
-                                {player.status.sleep > 0 && <span className="bg-[#306230] text-[#9bbc0f] px-2 rounded">睡眠</span>}
-                                {player.status.confused > 0 && <span className="bg-[#306230] text-[#9bbc0f] px-2 rounded">混乱</span>}
-                                {player.status.frozen > 0 && <span className="bg-[#306230] text-[#9bbc0f] px-2 rounded">金縛り</span>}
-                                {player.status.blind > 0 && <span className="bg-[#306230] text-[#9bbc0f] px-2 rounded">目潰し</span>}
+                                {player.status.sleep > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>睡眠</span>}
+                                {player.status.confused > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>混乱</span>}
+                                {player.status.frozen > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>金縛り</span>}
+                                {player.status.blind > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>目潰し</span>}
                                 {Object.values(player.status).every((v: number) => v <= 0) && <span>健康</span>}
                             </div>
                         </div>
                     </div>
-                    <button onClick={() => setShowStatus(false)} className="mt-6 w-full py-2 bg-[#306230] text-[#9bbc0f] font-bold rounded">閉じる</button>
+                    <button onClick={() => setShowStatus(false)} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>閉じる</button>
                 </div>
             </div>
         )}
 
         {/* Help Screen */}
         {showHelp && (
-            <div className="absolute inset-0 z-50 bg-[#0f380f]/95 flex items-center justify-center p-4" onClick={() => setShowHelp(false)}>
-                <div className="w-full max-w-md bg-[#9bbc0f] border-4 border-[#306230] p-6 shadow-xl text-[#0f380f] overflow-y-auto max-h-[80vh] custom-scrollbar" onClick={e => e.stopPropagation()}>
-                    <div className="flex justify-between items-center mb-4 border-b-2 border-[#306230] pb-2">
+            <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setShowHelp(false)}>
+                <div className="w-full max-w-md border-4 p-6 shadow-xl overflow-y-auto max-h-[80vh] custom-scrollbar" style={{ backgroundColor: C3, borderColor: C1, color: C0 }} onClick={e => e.stopPropagation()}>
+                    <div className="flex justify-between items-center mb-4 border-b-2 pb-2" style={{ borderColor: C1 }}>
                         <h2 className="font-bold text-xl flex items-center"><HelpCircle className="mr-2"/> 遊び方</h2>
                         <button onClick={() => setShowHelp(false)}><X size={24}/></button>
                     </div>
                     <div className="space-y-4 text-sm">
                         <section>
-                            <h3 className="font-bold border-b border-[#306230] mb-1">目的</h3>
+                            <h3 className="font-bold border-b mb-1" style={{ borderColor: C1 }}>目的</h3>
                             <p>地下20階を目指し、校長先生を説得(撃破)してください。<br/>道中で落ちている武器や道具を駆使して生き残りましょう。</p>
                         </section>
                         <section>
-                            <h3 className="font-bold border-b border-[#306230] mb-1">操作方法</h3>
+                            <h3 className="font-bold border-b mb-1" style={{ borderColor: C1 }}>操作方法</h3>
                             <ul className="list-disc pl-5">
                                 <li><strong>移動:</strong> 十字キー または 画面パッド</li>
                                 <li><strong>攻撃:</strong> Aボタン または Zキー</li>
@@ -2416,7 +2444,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                             </ul>
                         </section>
                         <section>
-                            <h3 className="font-bold border-b border-[#306230] mb-1">ヒント</h3>
+                            <h3 className="font-bold border-b mb-1" style={{ borderColor: C1 }}>ヒント</h3>
                             <ul className="list-disc pl-5">
                                 <li>お腹が減るとHPが減ります。おにぎりやパンを食べましょう。</li>
                                 <li><strong className="text-red-700">傘(杖)</strong>は振ると魔法が出ますが、回数制限があります。使い切ったら投げましょう。</li>
@@ -2427,24 +2455,25 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                             </ul>
                         </section>
                     </div>
-                    <button onClick={() => setShowHelp(false)} className="mt-6 w-full py-2 bg-[#306230] text-[#9bbc0f] font-bold rounded">閉じる</button>
+                    <button onClick={() => setShowHelp(false)} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>閉じる</button>
                 </div>
             </div>
         )}
 
         <div className="w-full max-w-md flex flex-col items-center gap-2">
             <div className="w-full aspect-[11/9] relative shrink-0">
-                <div className="w-full h-full bg-[#9bbc0f] border-4 border-[#0f380f] relative overflow-hidden shadow-lg rounded-sm">
+                <div className="w-full h-full border-4 relative overflow-hidden shadow-lg rounded-sm" style={{ backgroundColor: C3, borderColor: C0 }}>
                     
-                    <div className="absolute top-0 left-0 w-full h-8 bg-[#0f380f] text-[#9bbc0f] flex justify-end items-center px-2 text-[10px] z-10 border-b border-[#306230]">
+                    <div className="absolute top-0 left-0 w-full h-8 flex justify-between items-center px-2 text-[10px] z-10 border-b" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
+                        <span className="font-bold tracking-widest">{currentTheme.name}</span>
                         <div className="flex gap-2">
-                            <button onClick={() => setShowMap(!showMap)} className="flex items-center gap-1 hover:text-white border border-[#9bbc0f] px-1 rounded"><MapIcon size={10}/> Map</button>
-                            <button onClick={() => setShowStatus(true)} className="flex items-center gap-1 hover:text-white border border-[#9bbc0f] px-1 rounded"><User size={10}/> Sts</button>
-                            <button onClick={() => setShowHelp(true)} className="flex items-center gap-1 hover:text-white border border-[#9bbc0f] px-1 rounded"><HelpCircle size={10}/> Help</button>
+                            <button onClick={() => setShowMap(!showMap)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><MapIcon size={10}/> Map</button>
+                            <button onClick={() => setShowStatus(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><User size={10}/> Sts</button>
+                            <button onClick={() => setShowHelp(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><HelpCircle size={10}/> Help</button>
                         </div>
                     </div>
 
-                    <div className="absolute top-8 left-0 w-full h-5 bg-[#306230] text-[#9bbc0f] flex justify-between items-center px-2 text-xs font-bold z-10">
+                    <div className="absolute top-8 left-0 w-full h-5 flex justify-between items-center px-2 text-xs font-bold z-10" style={{ backgroundColor: C1, color: C3 }}>
                         <span>{floor}F</span>
                         <span>Lv{level}</span>
                         <span>HP{player.hp}/{player.maxHp}</span>
@@ -2457,15 +2486,15 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
                     {/* Fast Forward Indicator */}
                     {isFastForwarding && (
-                        <div className="absolute top-16 right-2 text-[#9bbc0f] animate-pulse flex items-center bg-[#0f380f]/50 rounded px-2">
+                        <div className="absolute top-16 right-2 animate-pulse flex items-center rounded px-2" style={{ backgroundColor: `${C0}80`, color: C3 }}>
                             <FastForward size={16} className="mr-1"/> 早送り中
                         </div>
                     )}
 
                     {/* Map Overlay: Now with Fog of War */}
                     {showMap && map.length > 0 && (
-                        <div className="absolute inset-0 bg-[#0f380f]/90 z-20 flex items-center justify-center p-8 mt-12">
-                            <div className="w-full h-full border border-[#9bbc0f] grid" style={{ gridTemplateColumns: `repeat(${MAP_W}, 1fr)` }}>
+                        <div className="absolute inset-0 z-20 flex items-center justify-center p-8 mt-12" style={{ backgroundColor: `${C0}E6` }}>
+                            <div className="w-full h-full border grid" style={{ borderColor: C3, gridTemplateColumns: `repeat(${MAP_W}, 1fr)` }}>
                                 {map.map((row, y) => row.map((tile, x) => {
                                     // Check visibility: Visited OR Revealed via scroll
                                     const isRevealed = floorMapRevealed || (visitedMap[y] && visitedMap[y][x]);
@@ -2478,15 +2507,15 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                     const hasEnemy = enemies.some(e => e.x===x && e.y===y);
                                     
                                     // Render logic
-                                    let bgClass = 'bg-transparent';
+                                    let bgStyle = { backgroundColor: 'transparent' };
                                     let content = null;
 
                                     if (isPlayer) {
                                         content = <div className="w-full h-full bg-white rounded-full animate-pulse"></div>;
                                     } else if (isRevealed) {
                                         // Terrain
-                                        if (tile === 'STAIRS') bgClass = 'bg-[#9bbc0f]';
-                                        else if (tile !== 'WALL') bgClass = 'bg-[#306230]';
+                                        if (tile === 'STAIRS') bgStyle = { backgroundColor: C3 };
+                                        else if (tile !== 'WALL') bgStyle = { backgroundColor: C1 };
                                         
                                         // Objects on revealed tiles
                                         if (tile !== 'WALL') {
@@ -2508,40 +2537,50 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                     }
 
                                     return (
-                                        <div key={`${x}-${y}`} className={bgClass}>
+                                        <div key={`${x}-${y}`} style={bgStyle}>
                                             {content}
                                         </div>
                                     );
                                 }))}
                             </div>
-                            <button onClick={() => setShowMap(false)} className="absolute bottom-4 text-[#9bbc0f] border border-[#9bbc0f] px-2 rounded hover:bg-[#306230]">Close</button>
+                            <button onClick={() => setShowMap(false)} className="absolute bottom-4 border px-2 rounded hover:opacity-80" style={{ color: C3, borderColor: C3 }}>Close</button>
                         </div>
                     )}
 
                     {/* Shop Menu */}
                     {shopState.active && (
-                        <div className="absolute right-0 top-0 bottom-0 w-3/4 bg-[#0f380f] border-l-2 border-[#9bbc0f] z-30 p-2 text-[#9bbc0f] text-xs flex flex-col">
-                            <div className="flex justify-between items-center border-b border-[#9bbc0f] mb-2 pb-1">
+                        <div className="absolute right-0 top-0 bottom-0 w-3/4 border-l-2 z-30 p-2 text-xs flex flex-col" style={{ backgroundColor: C0, borderColor: C3, color: C3 }}>
+                            <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}>
                                 <h3 className="font-bold flex items-center"><ShoppingBag size={12} className="mr-1"/> 購買部</h3>
                                 <button onClick={() => setShopState(prev => ({...prev, active: false}))}><X size={12}/></button>
                             </div>
                             
                             <div className="flex gap-2 mb-2">
                                 <button 
-                                    className={`flex-1 py-1 text-center border ${shopState.mode === 'BUY' ? 'bg-[#9bbc0f] text-[#0f380f]' : 'border-[#9bbc0f]'}`}
+                                    className={`flex-1 py-1 text-center border`}
+                                    style={{ 
+                                        borderColor: C3, 
+                                        backgroundColor: shopState.mode === 'BUY' ? C3 : 'transparent',
+                                        color: shopState.mode === 'BUY' ? C0 : C3
+                                    }}
                                     onClick={() => { setShopState(prev => ({ ...prev, mode: 'BUY' })); setSelectedItemIndex(0); }}
                                 >
                                     買う
                                 </button>
                                 <button 
-                                    className={`flex-1 py-1 text-center border ${shopState.mode === 'SELL' ? 'bg-[#9bbc0f] text-[#0f380f]' : 'border-[#9bbc0f]'}`}
+                                    className={`flex-1 py-1 text-center border`}
+                                    style={{ 
+                                        borderColor: C3, 
+                                        backgroundColor: shopState.mode === 'SELL' ? C3 : 'transparent',
+                                        color: shopState.mode === 'SELL' ? C0 : C3
+                                    }}
                                     onClick={() => { setShopState(prev => ({ ...prev, mode: 'SELL' })); setSelectedItemIndex(0); }}
                                 >
                                     売る
                                 </button>
                             </div>
 
-                            <div className="flex justify-end mb-2 border-b border-[#306230] pb-1">
+                            <div className="flex justify-end mb-2 border-b pb-1" style={{ borderColor: C1 }}>
                                 <span className="flex items-center"><Coins size={10} className="mr-1"/> {player.gold} G</span>
                             </div>
 
@@ -2550,7 +2589,12 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                     enemies.find(e => e.id === shopState.merchantId)?.shopItems?.map((item, i) => (
                                         <div 
                                             key={i} 
-                                            className={`flex items-center border ${selectedItemIndex === i ? 'bg-[#8bac0f] text-[#0f380f] border-[#9bbc0f]' : 'border-transparent hover:border-[#9bbc0f]'}`}
+                                            className="flex items-center border"
+                                            style={{ 
+                                                borderColor: selectedItemIndex === i ? C3 : 'transparent',
+                                                backgroundColor: selectedItemIndex === i ? C2 : 'transparent',
+                                                color: selectedItemIndex === i ? C0 : C3
+                                            }}
                                             onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}
                                         >
                                             <button 
@@ -2563,7 +2607,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                                 </span>
                                             </button>
                                             <button 
-                                                className="px-2 py-1 border-l border-[#306230] hover:bg-[#306230] hover:text-[#9bbc0f] flex items-center justify-center"
+                                                className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80"
+                                                style={{ borderColor: C1 }}
                                                 onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}
                                             >
                                                 <Info size={10} />
@@ -2574,7 +2619,12 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                     inventory.map((item, i) => (
                                         <div 
                                             key={i} 
-                                            className={`flex items-center border ${selectedItemIndex === i ? 'bg-[#8bac0f] text-[#0f380f] border-[#9bbc0f]' : 'border-transparent hover:border-[#9bbc0f]'}`}
+                                            className="flex items-center border"
+                                            style={{ 
+                                                borderColor: selectedItemIndex === i ? C3 : 'transparent',
+                                                backgroundColor: selectedItemIndex === i ? C2 : 'transparent',
+                                                color: selectedItemIndex === i ? C0 : C3
+                                            }}
                                             onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}
                                         >
                                             <button 
@@ -2587,7 +2637,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                                 </span>
                                             </button>
                                             <button 
-                                                className="px-2 py-1 border-l border-[#306230] hover:bg-[#306230] hover:text-[#9bbc0f] flex items-center justify-center"
+                                                className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80"
+                                                style={{ borderColor: C1 }}
                                                 onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}
                                             >
                                                 <Info size={10} />
@@ -2601,8 +2652,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                     )}
 
                     {menuOpen && (
-                        <div className="absolute right-0 top-0 bottom-0 w-3/4 bg-[#0f380f] border-l-2 border-[#9bbc0f] z-30 p-2 text-[#9bbc0f] text-xs flex flex-col">
-                            <div className="flex justify-between items-center border-b border-[#9bbc0f] mb-2 pb-1">
+                        <div className="absolute right-0 top-0 bottom-0 w-3/4 border-l-2 z-30 p-2 text-xs flex flex-col" style={{ backgroundColor: C0, borderColor: C3, color: C3 }}>
+                            <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}>
                                 <h3 className="font-bold">
                                     {synthState.active 
                                         ? (synthState.mode === 'BLANK' ? '書き込む内容を選択' : (synthState.step === 'SELECT_BASE' ? (synthState.mode==='CHANGE'?'変化させる物':'ベースを選択') : (synthState.mode==='CHANGE'?'変化':'素材を選択')))
@@ -2615,7 +2666,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                             {synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT' ? (
                                 <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
                                     {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).map((type, i) => (
-                                        <div key={i} className={`flex items-center border ${blankScrollSelectionIndex === i ? 'bg-[#8bac0f] text-[#0f380f] border-[#9bbc0f]' : 'border-transparent'}`}>
+                                        <div key={i} className="flex items-center border" style={{ borderColor: blankScrollSelectionIndex === i ? C3 : 'transparent', backgroundColor: blankScrollSelectionIndex === i ? C2 : 'transparent', color: blankScrollSelectionIndex === i ? C0 : C3 }}>
                                             <button 
                                                 className="flex-grow text-left px-2 py-1 cursor-pointer" 
                                                 onClick={() => handleSynthesisStep()} 
@@ -2630,8 +2681,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                             ) : (
                                 <>
                                     {!synthState.active && (
-                                        <div className="mb-2 border-b border-[#306230] pb-2">
-                                            <div className="text-[#8bac0f] mb-1">装備中:</div>
+                                        <div className="mb-2 border-b pb-2" style={{ borderColor: C1 }}>
+                                            <div className="mb-1" style={{ color: C2 }}>装備中:</div>
                                             {player.equipment?.weapon && <div onClick={()=>handleUnequip('weapon')} className="cursor-pointer hover:text-white">[武] {getItemName(player.equipment.weapon)}</div>}
                                             {player.equipment?.armor && <div onClick={()=>handleUnequip('armor')} className="cursor-pointer hover:text-white">[防] {getItemName(player.equipment.armor)}</div>}
                                             {player.equipment?.ranged && <div onClick={()=>handleUnequip('ranged')} className="cursor-pointer hover:text-white">[投] {getItemName(player.equipment.ranged)}</div>}
@@ -2649,7 +2700,12 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                             return (
                                                 <div 
                                                     key={i} 
-                                                    className={`flex items-center border ${selectedItemIndex === i ? 'bg-[#8bac0f] text-[#0f380f] border-[#9bbc0f]' : 'border-transparent hover:border-[#9bbc0f]'} ${isSynthTarget ? 'opacity-30' : ''}`}
+                                                    className={`flex items-center border ${isSynthTarget ? 'opacity-30' : ''}`}
+                                                    style={{ 
+                                                        borderColor: selectedItemIndex === i ? C3 : 'transparent',
+                                                        backgroundColor: selectedItemIndex === i ? C2 : 'transparent',
+                                                        color: selectedItemIndex === i ? C0 : C3
+                                                    }}
                                                     onContextMenu={(e) => { e.preventDefault(); setInspectedItem(item); }}
                                                     onTouchStart={() => handleTouchStart(item)}
                                                     onTouchEnd={handleTouchEnd}
@@ -2665,7 +2721,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                                             {item.count ? `(${item.count})` : ''}
                                                             {item.category === 'STAFF' ? `[${item.charges}]` : ''}
                                                         </span>
-                                                        <span className={`text-[9px] ${selectedItemIndex === i ? 'text-[#0f380f]' : 'text-[#8bac0f]'}`}>
+                                                        <span className="text-[9px]" style={{ color: selectedItemIndex === i ? C0 : C2 }}>
                                                             {synthState.active 
                                                                 ? '選択' 
                                                                 : (['WEAPON','ARMOR','RANGED','ACCESSORY'].includes(item.category) ? '装備' : (item.category==='STAFF' ? '振る' : '使う'))
@@ -2674,7 +2730,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                                     </button>
                                                     {!synthState.active && (
                                                         <button 
-                                                            className="px-2 py-1 border-l border-[#306230] hover:bg-[#306230] hover:text-[#9bbc0f] flex items-center justify-center"
+                                                            className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80"
+                                                            style={{ borderColor: C1 }}
                                                             onClick={(e) => { e.stopPropagation(); handleThrowItem(i); }}
                                                             title="投げる"
                                                         >
@@ -2683,7 +2740,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                                     )}
                                                     {!synthState.active && (
                                                         <button 
-                                                            className="px-2 py-1 border-l border-[#306230] hover:bg-[#306230] hover:text-[#9bbc0f] flex items-center justify-center"
+                                                            className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80"
+                                                            style={{ borderColor: C1 }}
                                                             onClick={(e) => { e.stopPropagation(); handleDropItem(i); }}
                                                             title="足元に置く"
                                                         >
@@ -2691,7 +2749,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                                         </button>
                                                     )}
                                                     <button 
-                                                        className="px-2 py-1 border-l border-[#306230] hover:bg-[#306230] hover:text-[#9bbc0f] flex items-center justify-center"
+                                                        className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80"
+                                                        style={{ borderColor: C1 }}
                                                         onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}
                                                         title="詳細"
                                                     >
@@ -2700,7 +2759,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                                 </div>
                                             );
                                         })}
-                                        {inventory.length === 0 && <span className="text-[#306230] text-center">Empty</span>}
+                                        {inventory.length === 0 && <span className="text-center" style={{ color: C1 }}>Empty</span>}
                                     </div>
                                 </>
                             )}
@@ -2708,16 +2767,16 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                     )}
 
                     {gameClear && (
-                        <div className="absolute inset-0 bg-[#0f380f]/95 flex flex-col items-center justify-center text-[#9bbc0f] z-40 p-4 text-center">
-                            <Award size={48} className="mb-4 text-[#8bac0f]"/>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center z-40 p-4 text-center" style={{ backgroundColor: `${C0}F2`, color: C3 }}>
+                            <Award size={48} className="mb-4" style={{ color: C2 }}/>
                             <h2 className="text-2xl font-bold mb-4">GRADUATION!</h2>
                             <p className="mb-2">ついに校長を説得した！</p>
                             <p className="mb-8">君は伝説の小学生となった。</p>
                             <div className="flex flex-col gap-4 w-full">
-                                <button onClick={startEndlessMode} className="border-2 border-[#9bbc0f] px-4 py-3 hover:bg-[#306230] animate-pulse font-bold">
+                                <button onClick={startEndlessMode} className="border-2 px-4 py-3 animate-pulse font-bold" style={{ borderColor: C3, color: C3, backgroundColor: 'transparent' }}>
                                     中学生編へ (エンドレス)
                                 </button>
-                                <button onClick={handleQuit} className="border-2 border-[#306230] px-4 py-2 hover:bg-[#306230] text-sm">
+                                <button onClick={handleQuit} className="border-2 px-4 py-2 text-sm" style={{ borderColor: C1, color: C3 }}>
                                     タイトルへ戻る
                                 </button>
                             </div>
@@ -2725,12 +2784,12 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                     )}
 
                     {gameOver && (
-                        <div className="absolute inset-0 bg-[#0f380f]/90 flex flex-col items-center justify-center text-[#9bbc0f] z-40">
-                            <Skull size={48} className="mb-4 text-[#306230]"/>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center z-40" style={{ backgroundColor: `${C0}E6`, color: C3 }}>
+                            <Skull size={48} className="mb-4" style={{ color: C1 }}/>
                             <h2 className="text-2xl font-bold mb-4">GAME OVER</h2>
                             <p>Floor: {floor}</p>
                             <p>Level: {level}</p>
-                            <button onClick={handleRestart} className="mt-6 border-2 border-[#9bbc0f] px-4 py-2 hover:bg-[#306230] animate-pulse flex items-center">
+                            <button onClick={handleRestart} className="mt-6 border-2 px-4 py-2 animate-pulse flex items-center" style={{ borderColor: C3, color: C3 }}>
                                 <RotateCcw size={16} className="mr-2"/> RETRY
                             </button>
                             <button onClick={handleQuit} className="mt-4 text-sm hover:underline">
@@ -2741,14 +2800,14 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                 </div>
             </div>
 
-            <div className="w-full bg-[#0f380f] text-[#9bbc0f] h-24 p-1 text-[10px] mb-2 rounded border-2 border-[#306230] font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner overflow-hidden">
+            <div className="w-full h-24 p-1 text-[10px] mb-2 rounded border-2 font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner overflow-hidden" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
                 {logs.slice(-6).map((l) => (
-                    <div key={l.id} style={{ color: l.color || '#9bbc0f' }} className="truncate">{l.message}</div>
+                    <div key={l.id} style={{ color: l.color || C3 }} className="truncate">{l.message}</div>
                 ))}
             </div>
         </div>
 
-        <div className="w-full max-w-md md:w-64 md:h-[400px] flex-grow md:flex-grow-0 relative min-h-[220px] bg-[#1a1a1a] rounded-t-xl md:rounded-xl border-t-2 md:border-2 border-[#333]">
+        <div className="w-full max-w-md md:w-64 md:h-[400px] flex-grow md:flex-grow-0 relative min-h-[220px] rounded-t-xl md:rounded-xl border-t-2 md:border-2 border-[#333] bg-[#1a1a1a]">
             <div className="absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32 md:left-1/2 md:-translate-x-1/2 md:top-1/4 flex items-center justify-center">
                 <div className="w-10 h-10 bg-[#333] z-10"></div>
                 <div className="absolute top-0 w-10 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0 touch-none select-none" onClick={() => handleMoveInput(0, -1)}><ArrowUp className="text-[#666]" size={20}/></div>
