@@ -7,6 +7,7 @@ import { GameMode } from '../types';
 interface MathChallengeScreenProps {
   onComplete: (correctCount: number) => void;
   mode: GameMode;
+  debugSkip?: boolean;
 }
 
 interface MathProblem {
@@ -15,7 +16,7 @@ interface MathProblem {
   answer: number;
 }
 
-const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, mode }) => {
+const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, mode, debugSkip }) => {
   const [problems, setProblems] = useState<MathProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -24,6 +25,11 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
   const [feedback, setFeedback] = useState<'CORRECT' | 'WRONG' | null>(null);
 
   useEffect(() => {
+    if (debugSkip) {
+        onComplete(1); // Auto-complete for 15G reward
+        return;
+    }
+
     try {
         audioService.playBGM('math');
     } catch (e) {
@@ -88,7 +94,7 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
       });
     }
     setProblems(generatedProblems);
-  }, [mode]);
+  }, [mode, debugSkip]);
 
   const handleAnswer = (option: number) => {
     if (isAnswered) return;
@@ -117,6 +123,8 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
       }
     }, 1000);
   };
+
+  if (debugSkip) return <div className="w-full h-full bg-black"></div>;
 
   if (problems.length === 0) return (
       <div className="flex flex-col h-full w-full bg-green-900 text-white items-center justify-center p-8 font-mono">

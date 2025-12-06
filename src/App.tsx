@@ -2196,7 +2196,12 @@ const App: React.FC = () => {
   };
 
   const handleMathChallengeComplete = (correctCount: number) => {
-      const bonusGold = correctCount * 15;
+      // Reward scaling: 1->15G, 2->30G, 3->50G
+      let bonusGold = 0;
+      if (correctCount === 1) bonusGold = 15;
+      else if (correctCount === 2) bonusGold = 30;
+      else if (correctCount === 3) bonusGold = 50;
+      
       if (bonusGold > 0) {
           setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + bonusGold } }));
       }
@@ -2461,7 +2466,11 @@ const App: React.FC = () => {
             )}
 
             {gameState.screen === GameScreen.MATH_CHALLENGE && (
-                <MathChallengeScreen mode={gameState.mode} onComplete={handleMathChallengeComplete} />
+                <MathChallengeScreen 
+                    mode={gameState.mode} 
+                    onComplete={handleMathChallengeComplete} 
+                    debugSkip={isMathDebugSkipped}
+                />
             )}
 
             {gameState.screen === GameScreen.REWARD && (
