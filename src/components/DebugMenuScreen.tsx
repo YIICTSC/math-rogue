@@ -120,10 +120,11 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
       const newSelfDamage = sum('selfDamage');
       const newPoisonMultiplier = sum('poisonMultiplier');
 
-      // Play Copies Logic
-      const copies1 = c1.playCopies || 1;
-      const copies2 = c2.playCopies || 1;
-      const newPlayCopies = (copies1 - 1) + (copies2 - 1) + 1;
+      // Play Copies Logic (Sum extra hits)
+      const extraHits1 = c1.playCopies || 0;
+      const extraHits2 = c2.playCopies || 0;
+      const newExtraHits = extraHits1 + extraHits2;
+      const newTotalHits = 1 + newExtraHits;
 
       // Merge booleans
       const newExhaust = c1.exhaust || c2.exhaust;
@@ -153,7 +154,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
           else if (newTarget === TargetType.RANDOM_ENEMY) text = `ランダムな敵に${text}`;
           else if (newTarget === TargetType.SELF) text = `自分に${text}`;
           
-          if (newPlayCopies > 1) text += `を${newPlayCopies}回`;
+          if (newTotalHits > 1) text += `を${newTotalHits}回`;
           parts.push(text);
       }
       if (newBlock > 0) parts.push(`ブロック${newBlock}`);
@@ -194,7 +195,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
           strength: newStrength || undefined,
           selfDamage: newSelfDamage || undefined,
           poisonMultiplier: newPoisonMultiplier || undefined,
-          playCopies: newPlayCopies > 1 ? newPlayCopies : undefined,
+          playCopies: newExtraHits > 0 ? newExtraHits : undefined,
           exhaust: newExhaust,
           innate: newInnate,
           textureRef: newTextureRef

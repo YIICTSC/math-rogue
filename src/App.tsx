@@ -1943,12 +1943,11 @@ const App: React.FC = () => {
       const newSelfDamage = sum('selfDamage');
       const newPoisonMultiplier = sum('poisonMultiplier');
 
-      // Play Copies Logic (Combine extra hits)
-      // If C1 has 2 hits and C2 has 1 hit -> 2 hits.
-      // If C1 has 2 hits and C2 has 2 hits -> 3 hits.
-      const copies1 = c1.playCopies || 1;
-      const copies2 = c2.playCopies || 1;
-      const newPlayCopies = (copies1 - 1) + (copies2 - 1) + 1;
+      // Play Copies Logic (Sum extra hits)
+      const extraHits1 = c1.playCopies || 0;
+      const extraHits2 = c2.playCopies || 0;
+      const newExtraHits = extraHits1 + extraHits2;
+      const newTotalHits = 1 + newExtraHits;
 
       const newExhaust = c1.exhaust || c2.exhaust;
       const newInnate = c1.innate || c2.innate;
@@ -1977,8 +1976,8 @@ const App: React.FC = () => {
           else if (newTarget === TargetType.RANDOM_ENEMY) text = `ランダムな敵に${text}`;
           else if (newTarget === TargetType.SELF) text = `自分に${text}`;
           
-          if (newPlayCopies > 1) {
-              text += `を${newPlayCopies}回`;
+          if (newTotalHits > 1) {
+              text += `を${newTotalHits}回`;
           }
           parts.push(text);
       }
@@ -2019,7 +2018,7 @@ const App: React.FC = () => {
           strength: newStrength || undefined,
           poisonMultiplier: newPoisonMultiplier || undefined,
           selfDamage: newSelfDamage || undefined,
-          playCopies: newPlayCopies > 1 ? newPlayCopies : undefined,
+          playCopies: newExtraHits > 0 ? newExtraHits : undefined,
           exhaust: newExhaust,
           innate: newInnate,
           textureRef: newTextureRef
