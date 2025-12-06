@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch, ChevronsRight } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
 import { storageService } from '../services/storageService';
@@ -267,6 +267,12 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const [isEndless, setIsEndless] = useState(false);
   const saveDebounceRef = useRef<any>(null);
   
+  // Dash State
+  const [dashMode, setDashMode] = useState(false);
+  const [isAutoMoving, setIsAutoMoving] = useState(false);
+  const autoMoveDir = useRef<Direction>({x:0, y:0});
+  const prevPlayerPos = useRef({x:0, y:0});
+
   // Shop State
   const [shopState, setShopState] = useState<{ active: boolean, merchantId: number | null, mode: 'BUY' | 'SELL' }>({ active: false, merchantId: null, mode: 'BUY' });
 
@@ -387,6 +393,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
   // Update Visited Map when player moves
   useEffect(() => {
+      prevPlayerPos.current = { x: player.x, y: player.y };
       setVisitedMap(prev => {
           // Optimization: check if current visible area is already fully visited?
           // For simplicity, we just update the viewport rect.
@@ -508,6 +515,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     turnCounter.current = 0;
     visualEffects.current = [];
     setIsFastForwarding(false);
+    setDashMode(false);
+    setIsAutoMoving(false);
     
     // Init ID Map for Staffs (Umbrellas)
     const shuffledNames = [...UNIDENTIFIED_NAMES].sort(() => Math.random() - 0.5);
@@ -1074,6 +1083,103 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       processTurn(finalX, finalY);
   };
 
+  const handleActionBtn = () => {
+      if (gameOver) { handleRestart(); return; }
+      if (gameClear) return;
+      if (shopState.active) { handleShopAction(); return; }
+      if (menuOpen) {
+          if (synthState.active) handleSynthesisStep();
+          else if (inventory.length > 0) handleItemAction(selectedItemIndex);
+          return;
+      }
+      const tx = player.x + player.dir.x;
+      const ty = player.y + player.dir.y;
+      const target = enemies.find(e => e.x === tx && e.y === ty);
+      if (target) { 
+          if (target.enemyType === 'SHOPKEEPER') {
+              addLog("「へいらっしゃい！何にする？」", C2);
+              setShopState({ active: true, merchantId: target.id, mode: 'BUY' });
+              setSelectedItemIndex(0);
+              audioService.playSound('select');
+          } else {
+              attackEnemy(target);
+              processTurn(player.x, player.y);
+          }
+          return;
+      }
+      if (map[player.y][player.x] === 'STAIRS') { addLog("階段を降りた！"); setFloor(f => f + 1); generateFloor(floor + 1); return; }
+      triggerPlayerAttackAnim(player.dir);
+      addVisualEffect('SLASH', tx, ty, { dir: player.dir });
+      addLog("素振りをした。");
+      audioService.playSound('select');
+      processTurn(player.x, player.y);
+  };
+
+  // --- AUTO MOVE EFFECT (DASH) ---
+  useEffect(() => {
+      let timer: any;
+      if (isAutoMoving && !gameOver && !gameClear && !menuOpen) {
+          timer = setTimeout(() => {
+              const {x: dx, y: dy} = autoMoveDir.current;
+              
+              // 1. Stop if adjacent to enemy
+              if (enemies.some(e => Math.abs(e.x - player.x) <= 1 && Math.abs(e.y - player.y) <= 1)) {
+                  setIsAutoMoving(false);
+                  return;
+              }
+
+              // 2. Stop if on item/stairs/trap (assuming we arrived here)
+              // But we might have just started.
+              // To avoid instant stop on start, we rely on checking if we CAN continue.
+              // Actually, if we are currently ON something interesting, we should stop.
+              if (map[player.y][player.x] === 'STAIRS' || 
+                  floorItems.some(i => i.x === player.x && i.y === player.y) || 
+                  traps.some(t => t.x === player.x && t.y === player.y && t.visible)) {
+                  
+                  // Check if we moved from prev pos (to ensure we didn't just start dash ON an item)
+                  if (prevPlayerPos.current.x !== player.x || prevPlayerPos.current.y !== player.y) {
+                      setIsAutoMoving(false);
+                      return;
+                  }
+              }
+
+              // 3. Stop if next tile is blocked
+              const tx = player.x + dx;
+              const ty = player.y + dy;
+              if (map[ty][tx] === 'WALL' || enemies.some(e => e.x === tx && e.y === ty)) {
+                  setIsAutoMoving(false);
+                  return;
+              }
+
+              // 4. Room/Hallway Logic (Stop at entrance/junction)
+              const getNeighbors = (cx: number, cy: number) => {
+                  let c = 0;
+                  if (map[cy-1]?.[cx] !== 'WALL') c++;
+                  if (map[cy+1]?.[cx] !== 'WALL') c++;
+                  if (map[cy]?.[cx-1] !== 'WALL') c++;
+                  if (map[cy]?.[cx+1] !== 'WALL') c++;
+                  return c;
+              };
+              
+              const currentNeighbors = getNeighbors(player.x, player.y);
+              const prevNeighbors = getNeighbors(prevPlayerPos.current.x, prevPlayerPos.current.y);
+              
+              // If we were in a "Hallway" (<=2 exits) and moved to "Room/Intersection" (>2 exits)
+              if (prevNeighbors <= 2 && currentNeighbors > 2) {
+                  // But allow the move into the room/junction to happen first (we are AT the junction now).
+                  // So stop now before taking next step.
+                  if (prevPlayerPos.current.x !== player.x || prevPlayerPos.current.y !== player.y) {
+                      setIsAutoMoving(false);
+                      return;
+                  }
+              }
+
+              movePlayer(dx, dy);
+          }, 30);
+      }
+      return () => clearTimeout(timer);
+  }, [isAutoMoving, player, enemies, floorItems, traps, map, gameOver, gameClear, menuOpen]);
+
   const activateTrap = (trap: Entity) => {
       audioService.playSound('wrong');
       const t = trap.trapType;
@@ -1211,38 +1317,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       } else {
           addLog("外した！");
       }
-      processTurn(player.x, player.y);
-  };
-
-  const handleActionBtn = () => {
-      if (gameOver) { handleRestart(); return; }
-      if (gameClear) return;
-      if (shopState.active) { handleShopAction(); return; }
-      if (menuOpen) {
-          if (synthState.active) handleSynthesisStep();
-          else if (inventory.length > 0) handleItemAction(selectedItemIndex);
-          return;
-      }
-      const tx = player.x + player.dir.x;
-      const ty = player.y + player.dir.y;
-      const target = enemies.find(e => e.x === tx && e.y === ty);
-      if (target) { 
-          if (target.enemyType === 'SHOPKEEPER') {
-              addLog("「へいらっしゃい！何にする？」", C2);
-              setShopState({ active: true, merchantId: target.id, mode: 'BUY' });
-              setSelectedItemIndex(0);
-              audioService.playSound('select');
-          } else {
-              attackEnemy(target);
-              processTurn(player.x, player.y);
-          }
-          return;
-      }
-      if (map[player.y][player.x] === 'STAIRS') { addLog("階段を降りた！"); setFloor(f => f + 1); generateFloor(floor + 1); return; }
-      triggerPlayerAttackAnim(player.dir);
-      addVisualEffect('SLASH', tx, ty, { dir: player.dir });
-      addLog("素振りをした。");
-      audioService.playSound('select');
       processTurn(player.x, player.y);
   };
 
@@ -1460,7 +1534,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       
       if (synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT') {
           // Identify known scrolls
-          const knownTypes = Array.from(identifiedTypes).filter(t => t.startsWith('SCROLL'));
+          const knownTypes = Array.from(identifiedTypes).filter((t: string) => t.startsWith('SCROLL')) as string[];
           const targetType = knownTypes[idx];
           const template = ITEM_DB[targetType];
           
@@ -1944,6 +2018,20 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const handleTouchStart = (item: Item) => { longPressTimer.current = setTimeout(() => { setInspectedItem(item); }, 500); };
   const handleTouchEnd = () => { if (longPressTimer.current) clearTimeout(longPressTimer.current); };
 
+  const handleMoveInput = (dx: 0|1|-1, dy: 0|1|-1) => {
+      if (dashMode) {
+          if (isAutoMoving) {
+              setIsAutoMoving(false);
+          } else {
+              autoMoveDir.current = {x: dx, y: dy};
+              setIsAutoMoving(true);
+              movePlayer(dx, dy); 
+          }
+      } else {
+          movePlayer(dx, dy);
+      }
+  };
+
   // --- KEYBOARD ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -1982,21 +2070,21 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             return;
         }
         switch(e.key) {
-            case 'ArrowUp': case 'w': case '8': case 'k': movePlayer(0, -1); break;
-            case 'ArrowDown': case 's': case '2': case 'j': movePlayer(0, 1); break;
-            case 'ArrowLeft': case 'a': case '4': case 'h': movePlayer(-1, 0); break;
-            case 'ArrowRight': case 'd': case '6': case 'l': movePlayer(1, 0); break;
-            case 'Home': case '7': case 'y': movePlayer(-1, -1); break;
-            case 'PageUp': case '9': case 'u': movePlayer(1, -1); break;
-            case 'End': case '1': case 'b': movePlayer(-1, 1); break;
-            case 'PageDown': case '3': case 'n': movePlayer(1, 1); break;
+            case 'ArrowUp': case 'w': case '8': case 'k': handleMoveInput(0, -1); break;
+            case 'ArrowDown': case 's': case '2': case 'j': handleMoveInput(0, 1); break;
+            case 'ArrowLeft': case 'a': case '4': case 'h': handleMoveInput(-1, 0); break;
+            case 'ArrowRight': case 'd': case '6': case 'l': handleMoveInput(1, 0); break;
+            case 'Home': case '7': case 'y': handleMoveInput(-1, -1); break;
+            case 'PageUp': case '9': case 'u': handleMoveInput(1, -1); break;
+            case 'End': case '1': case 'b': handleMoveInput(-1, 1); break;
+            case 'PageDown': case '3': case 'n': handleMoveInput(1, 1); break;
             case 'z': case ' ': case 'Enter': handleActionBtn(); break;
             case 'r': fireRangedWeapon(); break; // Keyboard shortcut for ranged
         }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [player, map, enemies, floorItems, menuOpen, gameOver, gameClear, inventory, selectedItemIndex, synthState, shopState]);
+  }, [player, map, enemies, floorItems, menuOpen, gameOver, gameClear, inventory, selectedItemIndex, synthState, shopState, dashMode, isAutoMoving]);
 
   // --- RENDER LOOP ---
   const frameCountRef = useRef(0);
@@ -2322,7 +2410,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                 {player.status.confused > 0 && <span className="bg-[#306230] text-[#9bbc0f] px-2 rounded">混乱</span>}
                                 {player.status.frozen > 0 && <span className="bg-[#306230] text-[#9bbc0f] px-2 rounded">金縛り</span>}
                                 {player.status.blind > 0 && <span className="bg-[#306230] text-[#9bbc0f] px-2 rounded">目潰し</span>}
-                                {Object.values(player.status).every(v => v <= 0) && <span>健康</span>}
+                                {Object.values(player.status).every((v: number) => v <= 0) && <span>健康</span>}
                             </div>
                         </div>
                     </div>
@@ -2351,6 +2439,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                 <li><strong>攻撃:</strong> Aボタン または Zキー</li>
                                 <li><strong>メニュー:</strong> Bボタン または Xキー</li>
                                 <li><strong>飛び道具:</strong> <Crosshair size={12} className="inline"/>ボタン または Rキー</li>
+                                <li><strong>ダッシュ:</strong> <ChevronsRight size={12} className="inline"/>ボタンで切替。十字キーで自動移動。</li>
                                 <li><strong>早送り:</strong> Aボタン長押し (敵がいない時)</li>
                             </ul>
                         </section>
@@ -2558,7 +2647,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                             
                             {synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT' ? (
                                 <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
-                                    {Array.from(identifiedTypes).filter(t => t.startsWith('SCROLL')).map((type, i) => (
+                                    {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).map((type, i) => (
                                         <div key={i} className={`flex items-center border ${blankScrollSelectionIndex === i ? 'bg-[#8bac0f] text-[#0f380f] border-[#9bbc0f]' : 'border-transparent'}`}>
                                             <button 
                                                 className="flex-grow text-left px-2 py-1 cursor-pointer" 
@@ -2569,7 +2658,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                             </button>
                                         </div>
                                     ))}
-                                    {Array.from(identifiedTypes).filter(t => t.startsWith('SCROLL')).length === 0 && <div className="text-red-500">識別済みのノートがありません</div>}
+                                    {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).length === 0 && <div className="text-red-500">識別済みのノートがありません</div>}
                                 </div>
                             ) : (
                                 <>
@@ -2695,19 +2784,19 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         <div className="w-full max-w-md md:w-64 md:h-[400px] flex-grow md:flex-grow-0 relative min-h-[220px] bg-[#1a1a1a] rounded-t-xl md:rounded-xl border-t-2 md:border-2 border-[#333]">
             <div className="absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32 md:left-1/2 md:-translate-x-1/2 md:top-1/4 flex items-center justify-center">
                 <div className="w-10 h-10 bg-[#333] z-10"></div>
-                <div className="absolute top-0 w-10 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0 touch-none select-none" onClick={() => movePlayer(0, -1)}><ArrowUp className="text-[#666]" size={20}/></div>
-                <div className="absolute bottom-0 w-10 h-16 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-0 touch-none select-none" onClick={() => movePlayer(0, 1)}><ArrowDown className="text-[#666]" size={20}/></div>
-                <div className="absolute left-0 w-16 h-10 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-0 touch-none select-none" onClick={() => movePlayer(-1, 0)}><ArrowLeft className="text-[#666]" size={20}/></div>
-                <div className="absolute right-0 w-16 h-10 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-0 touch-none select-none" onClick={() => movePlayer(1, 0)}><ArrowRight className="text-[#666]" size={20}/></div>
-                <div className="absolute top-0 left-0 w-10 h-10 bg-[#333] rounded-tl-xl border-t border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => movePlayer(-1, -1)}><ArrowUpLeft className="text-[#666]" size={20}/></div>
-                <div className="absolute top-0 right-0 w-10 h-10 bg-[#333] rounded-tr-xl border-t border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => movePlayer(1, -1)}><ArrowUpRight className="text-[#666]" size={20}/></div>
-                <div className="absolute bottom-0 left-0 w-10 h-10 bg-[#333] rounded-bl-xl border-b border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => movePlayer(-1, 1)}><ArrowDownLeft className="text-[#666]" size={20}/></div>
-                <div className="absolute bottom-0 right-0 w-10 h-10 bg-[#333] rounded-br-xl border-b border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => movePlayer(1, 1)}><ArrowDownRight className="text-[#666]" size={20}/></div>
+                <div className="absolute top-0 w-10 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0 touch-none select-none" onClick={() => handleMoveInput(0, -1)}><ArrowUp className="text-[#666]" size={20}/></div>
+                <div className="absolute bottom-0 w-10 h-16 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-0 touch-none select-none" onClick={() => handleMoveInput(0, 1)}><ArrowDown className="text-[#666]" size={20}/></div>
+                <div className="absolute left-0 w-16 h-10 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-0 touch-none select-none" onClick={() => handleMoveInput(-1, 0)}><ArrowLeft className="text-[#666]" size={20}/></div>
+                <div className="absolute right-0 w-16 h-10 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-0 touch-none select-none" onClick={() => handleMoveInput(1, 0)}><ArrowRight className="text-[#666]" size={20}/></div>
+                <div className="absolute top-0 left-0 w-10 h-10 bg-[#333] rounded-tl-xl border-t border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => handleMoveInput(-1, -1)}><ArrowUpLeft className="text-[#666]" size={20}/></div>
+                <div className="absolute top-0 right-0 w-10 h-10 bg-[#333] rounded-tr-xl border-t border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => handleMoveInput(1, -1)}><ArrowUpRight className="text-[#666]" size={20}/></div>
+                <div className="absolute bottom-0 left-0 w-10 h-10 bg-[#333] rounded-bl-xl border-b border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => handleMoveInput(-1, 1)}><ArrowDownLeft className="text-[#666]" size={20}/></div>
+                <div className="absolute bottom-0 right-0 w-10 h-10 bg-[#333] rounded-br-xl border-b border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => handleMoveInput(1, 1)}><ArrowDownRight className="text-[#666]" size={20}/></div>
                 <div className="absolute w-8 h-8 bg-[#2a2a2a] rounded-full z-20 shadow-inner"></div>
             </div>
 
-            {/* Ranged Button - Adjusted Position */}
-            <div className="absolute right-20 top-1/2 -translate-y-[100px] md:right-auto md:left-1/2 md:-translate-x-1/2 md:top-1/2 md:-translate-y-1/2 flex flex-col items-center z-10 group">
+            {/* Shoot Button */}
+            <div className="absolute right-24 top-1/2 -translate-y-[100px] md:right-auto md:left-1/2 md:-translate-x-[20px] md:top-1/2 md:-translate-y-1/2 flex flex-col items-center z-10 group">
                 <button 
                     className="w-10 h-10 bg-[#333] rounded-full shadow-[0_2px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555] touch-none select-none" 
                     onClick={fireRangedWeapon}
@@ -2715,6 +2804,17 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                     <Crosshair size={16}/>
                 </button>
                 <span className="text-[#666] text-[10px] font-bold mt-1">SHOOT</span>
+            </div>
+
+            {/* Dash Button */}
+            <div className="absolute right-6 top-1/2 -translate-y-[100px] md:right-auto md:left-1/2 md:translate-x-[60px] md:top-1/2 md:-translate-y-1/2 flex flex-col items-center z-10 group">
+                <button 
+                    className={`w-10 h-10 rounded-full shadow-[0_2px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555] touch-none select-none ${dashMode ? 'bg-[#9bbc0f] text-[#0f380f] animate-pulse' : 'bg-[#333]'}`}
+                    onClick={() => setDashMode(prev => !prev)}
+                >
+                    <ChevronsRight size={16}/>
+                </button>
+                <span className={`text-[10px] font-bold mt-1 ${dashMode ? 'text-[#9bbc0f]' : 'text-[#666]'}`}>DASH</span>
             </div>
 
             <div className="absolute right-2 top-1/2 -translate-y-1/2 md:right-auto md:left-1/2 md:-translate-x-1/2 md:top-3/4 flex gap-4 transform -rotate-12 md:rotate-0">
