@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch, ChevronsRight } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
 import { storageService } from '../services/storageService';
@@ -297,12 +297,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   
   const currentTheme = getTheme(floor);
 
-  // Dash State
-  const [dashMode, setDashMode] = useState(false);
-  const [isAutoMoving, setIsAutoMoving] = useState(false);
-  const autoMoveDir = useRef<Direction>({x:0, y:0});
-  const prevPlayerPos = useRef({x:0, y:0});
-
   // Shop State
   const [shopState, setShopState] = useState<{ active: boolean, merchantId: number | null, mode: 'BUY' | 'SELL' }>({ active: false, merchantId: null, mode: 'BUY' });
 
@@ -427,7 +421,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
   // Update Visited Map when player moves
   useEffect(() => {
-      prevPlayerPos.current = { x: player.x, y: player.y };
       setVisitedMap(prev => {
           const next = prev.map(row => [...row]);
           let changed = false;
@@ -538,8 +531,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     turnCounter.current = 0;
     visualEffects.current = [];
     setIsFastForwarding(false);
-    setDashMode(false);
-    setIsAutoMoving(false);
     roomsRef.current = []; // Reset rooms
     
     const shuffledNames = [...UNIDENTIFIED_NAMES].sort(() => Math.random() - 0.5);
@@ -1151,73 +1142,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       audioService.playSound('select');
       processTurn(player.x, player.y);
   };
-
-  // --- AUTO MOVE EFFECT (DASH) ---
-  useEffect(() => {
-      let timer: any;
-      if (isAutoMoving && !gameOver && !gameClear && !menuOpen) {
-          timer = setTimeout(() => {
-              const {x: dx, y: dy} = autoMoveDir.current;
-              
-              if (enemies.some(e => Math.abs(e.x - player.x) <= 1 && Math.abs(e.y - player.y) <= 1)) {
-                  setIsAutoMoving(false);
-                  return;
-              }
-
-              if (map[player.y][player.x] === 'STAIRS' || 
-                  floorItems.some(i => i.x === player.x && i.y === player.y) || 
-                  traps.some(t => t.x === player.x && t.y === player.y && t.visible)) {
-                  
-                  if (prevPlayerPos.current.x !== player.x || prevPlayerPos.current.y !== player.y) {
-                      setIsAutoMoving(false);
-                      return;
-                  }
-              }
-
-              const tx = player.x + dx;
-              const ty = player.y + dy;
-              if (map[ty][tx] === 'WALL' || enemies.some(e => e.x === tx && e.y === ty)) {
-                  setIsAutoMoving(false);
-                  return;
-              }
-
-              // Updated: Stop if entering a room from a hallway
-              const currentInRoom = isPointInRoom(player.x, player.y);
-              const prevInRoom = isPointInRoom(prevPlayerPos.current.x, prevPlayerPos.current.y);
-
-              // If just entered a room (was not in room, now is in room)
-              if (!prevInRoom && currentInRoom) {
-                  // Allow the step into the room to complete, then stop
-                  if (prevPlayerPos.current.x !== player.x || prevPlayerPos.current.y !== player.y) {
-                      setIsAutoMoving(false);
-                      return;
-                  }
-              }
-
-              // Hallway Junction Stop Logic
-              const getNeighbors = (cx: number, cy: number) => {
-                  let c = 0;
-                  if (map[cy-1]?.[cx] !== 'WALL') c++;
-                  if (map[cy+1]?.[cx] !== 'WALL') c++;
-                  if (map[cy]?.[cx-1] !== 'WALL') c++;
-                  if (map[cy]?.[cx+1] !== 'WALL') c++;
-                  return c;
-              };
-              const currentNeighbors = getNeighbors(player.x, player.y);
-              const prevNeighbors = getNeighbors(prevPlayerPos.current.x, prevPlayerPos.current.y);
-              
-              if (prevNeighbors <= 2 && currentNeighbors > 2) {
-                  if (prevPlayerPos.current.x !== player.x || prevPlayerPos.current.y !== player.y) {
-                      setIsAutoMoving(false);
-                      return;
-                  }
-              }
-
-              movePlayer(dx, dy);
-          }, 30);
-      }
-      return () => clearTimeout(timer);
-  }, [isAutoMoving, player, enemies, floorItems, traps, map, gameOver, gameClear, menuOpen]);
 
   const activateTrap = (trap: Entity) => {
       audioService.playSound('wrong');
@@ -2013,17 +1937,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const handleTouchEnd = () => { if (longPressTimer.current) clearTimeout(longPressTimer.current); };
 
   const handleMoveInput = (dx: 0|1|-1, dy: 0|1|-1) => {
-      if (dashMode) {
-          if (isAutoMoving) {
-              setIsAutoMoving(false);
-          } else {
-              autoMoveDir.current = {x: dx, y: dy};
-              setIsAutoMoving(true);
-              movePlayer(dx, dy); 
-          }
-      } else {
-          movePlayer(dx, dy);
-      }
+      movePlayer(dx, dy);
   };
 
   // --- AUTO SCROLL MENU ---
@@ -2093,7 +2007,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [player, map, enemies, floorItems, menuOpen, gameOver, gameClear, inventory, selectedItemIndex, synthState, shopState, dashMode, isAutoMoving]);
+  }, [player, map, enemies, floorItems, menuOpen, gameOver, gameClear, inventory, selectedItemIndex, synthState, shopState]);
 
   // --- RENDER LOOP ---
   const frameCountRef = useRef(0);
@@ -2439,7 +2353,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                 <li><strong>攻撃:</strong> Aボタン または Zキー</li>
                                 <li><strong>メニュー:</strong> Bボタン または Xキー</li>
                                 <li><strong>飛び道具:</strong> <Crosshair size={12} className="inline"/>ボタン または Rキー</li>
-                                <li><strong>ダッシュ:</strong> <ChevronsRight size={12} className="inline"/>ボタンで切替。十字キーで自動移動。</li>
                                 <li><strong>早送り:</strong> Aボタン長押し (敵がいない時)</li>
                             </ul>
                         </section>
@@ -2822,7 +2735,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             </div>
 
             {/* Shoot Button */}
-            <div className="absolute right-24 top-1/2 -translate-y-[100px] md:right-auto md:left-1/2 md:-translate-x-[20px] md:top-1/2 md:-translate-y-1/2 flex flex-col items-center z-10 group">
+            <div className="absolute right-6 top-1/2 -translate-y-[100px] md:right-auto md:left-1/2 md:-translate-x-[20px] md:top-1/2 md:-translate-y-1/2 flex flex-col items-center z-10 group">
                 <button 
                     className="w-10 h-10 bg-[#333] rounded-full shadow-[0_2px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555] touch-none select-none" 
                     onClick={fireRangedWeapon}
@@ -2830,17 +2743,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                     <Crosshair size={16}/>
                 </button>
                 <span className="text-[#666] text-[10px] font-bold mt-1">SHOOT</span>
-            </div>
-
-            {/* Dash Button */}
-            <div className="absolute right-6 top-1/2 -translate-y-[100px] md:right-auto md:left-1/2 md:translate-x-[60px] md:top-1/2 md:-translate-y-1/2 flex flex-col items-center z-10 group">
-                <button 
-                    className={`w-10 h-10 rounded-full shadow-[0_2px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555] touch-none select-none ${dashMode ? 'bg-[#9bbc0f] text-[#0f380f] animate-pulse' : 'bg-[#333]'}`}
-                    onClick={() => setDashMode(prev => !prev)}
-                >
-                    <ChevronsRight size={16}/>
-                </button>
-                <span className={`text-[10px] font-bold mt-1 ${dashMode ? 'text-[#9bbc0f]' : 'text-[#666]'}`}>DASH</span>
             </div>
 
             <div className="absolute right-2 top-1/2 -translate-y-1/2 md:right-auto md:left-1/2 md:-translate-x-1/2 md:top-3/4 flex gap-4 transform -rotate-12 md:rotate-0">
