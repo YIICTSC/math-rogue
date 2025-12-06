@@ -234,6 +234,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   
   // --- STATE ---
   const [map, setMap] = useState<TileType[][]>([]);
+  const [visitedMap, setVisitedMap] = useState<boolean[][]>([]); // New: Fog of War state
+  const [floorMapRevealed, setFloorMapRevealed] = useState(false); // New: Map Scroll effect
   const spriteCache = useRef<Record<string, HTMLCanvasElement>>({});
   
   const [player, setPlayer] = useState<Entity>({
@@ -349,6 +351,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
   const restoreState = (save: any) => {
       setMap(save.map);
+      setVisitedMap(save.visitedMap || Array(MAP_H).fill(null).map(() => Array(MAP_W).fill(false))); // Fallback for old saves
+      setFloorMapRevealed(save.floorMapRevealed || false);
       setPlayer(save.player);
       setEnemies(save.enemies);
       setFloorItems(save.floorItems);
@@ -371,14 +375,42 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       
       saveDebounceRef.current = setTimeout(() => {
           const state = {
-              map, player, enemies, floorItems, traps, inventory,
+              map, visitedMap, floorMapRevealed, // Added new states
+              player, enemies, floorItems, traps, inventory,
               floor, level, belly, maxBelly,
               idMap, identifiedTypes: Array.from(identifiedTypes),
               isEndless, turnCounter: turnCounter.current
           };
           storageService.saveDungeonState(state);
       }, 500); // 500ms debounce
-  }, [map, player, enemies, floorItems, traps, inventory, floor, level, belly, maxBelly, idMap, identifiedTypes, isEndless, gameOver]);
+  }, [map, visitedMap, floorMapRevealed, player, enemies, floorItems, traps, inventory, floor, level, belly, maxBelly, idMap, identifiedTypes, isEndless, gameOver]);
+
+  // Update Visited Map when player moves
+  useEffect(() => {
+      setVisitedMap(prev => {
+          // Optimization: check if current visible area is already fully visited?
+          // For simplicity, we just update the viewport rect.
+          const next = prev.map(row => [...row]);
+          let changed = false;
+          
+          const startX = player.x - Math.floor(VIEW_W/2);
+          const startY = player.y - Math.floor(VIEW_H/2);
+          
+          for (let y = 0; y < VIEW_H; y++) {
+              for (let x = 0; x < VIEW_W; x++) {
+                  const mx = startX + x;
+                  const my = startY + y;
+                  if (mx >= 0 && mx < MAP_W && my >= 0 && my < MAP_H) {
+                      if (!next[my][mx]) {
+                          next[my][mx] = true;
+                          changed = true;
+                      }
+                  }
+              }
+          }
+          return changed ? next : prev;
+      });
+  }, [player.x, player.y]);
 
   // Auto-save effect on key state changes
   useEffect(() => {
@@ -675,7 +707,25 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         }
     }
 
+    // Reset Fog of War
     setMap(newMap);
+    setVisitedMap(Array(MAP_H).fill(null).map(() => Array(MAP_W).fill(false)));
+    setFloorMapRevealed(false);
+    
+    // Initial Visited Update
+    setVisitedMap(prev => {
+        const next = prev.map(row => [...row]);
+        const startX = px - Math.floor(VIEW_W/2);
+        const startY = py - Math.floor(VIEW_H/2);
+        for(let y=0; y<VIEW_H; y++){
+            for(let x=0; x<VIEW_W; x++){
+                const mx = startX + x; const my = startY + y;
+                if(mx>=0 && mx<MAP_W && my>=0 && my<MAP_H) next[my][mx] = true;
+            }
+        }
+        return next;
+    });
+
     setEnemies(newEnemies);
     setFloorItems(newItems);
     setTraps(newTraps);
@@ -958,6 +1008,29 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       let finalX = tx; let finalY = ty;
       setPlayer(p => ({ ...p, x: finalX, y: finalY }));
       
+      // Update Visited Map logic here (Update Fog of War)
+      setVisitedMap(prev => {
+          const next = prev.map(row => [...row]);
+          let changed = false;
+          
+          const startX = finalX - Math.floor(VIEW_W/2);
+          const startY = finalY - Math.floor(VIEW_H/2);
+          
+          for (let y = 0; y < VIEW_H; y++) {
+              for (let x = 0; x < VIEW_W; x++) {
+                  const mx = startX + x;
+                  const my = startY + y;
+                  if (mx >= 0 && mx < MAP_W && my >= 0 && my < MAP_H) {
+                      if (!next[my][mx]) {
+                          next[my][mx] = true;
+                          changed = true;
+                      }
+                  }
+              }
+          }
+          return changed ? next : prev;
+      });
+
       // Trap Check
       const trap = traps.find(t => t.x === finalX && t.y === finalY);
       if (trap) {
@@ -1751,7 +1824,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               audioService.playSound('select');
               return;
           }
-          else if (item.type === 'SCROLL_MAP') { setShowMap(true); addLog("校内図が頭に入った！"); actionDone = true; addVisualEffect('FLASH', 0, 0); }
+          else if (item.type === 'SCROLL_MAP') { setFloorMapRevealed(true); setShowMap(true); addLog("校内図が頭に入った！"); actionDone = true; addVisualEffect('FLASH', 0, 0); }
           else if (item.type === 'SCROLL_THUNDER' || item.type === 'BOMB') {
               const isBomb = item.type === 'BOMB';
               if (isBomb) { addVisualEffect('EXPLOSION', player.x, player.y); } else { addVisualEffect('THUNDER', 0, 0); triggerShake(10); }
@@ -1933,7 +2006,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           renderGame();
       }, 50); 
       return () => clearInterval(loop);
-  }, [map, player, enemies, floorItems, traps, menuOpen]);
+  }, [map, player, enemies, floorItems, traps, menuOpen, visitedMap, floorMapRevealed]);
 
   const renderGame = () => {
       const canvas = canvasRef.current;
@@ -1979,71 +2052,93 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   continue;
               }
 
+              // Visibility Check
+              // Is revealed if: floorMapRevealed is true OR visitedMap[my][mx] is true
+              const isRevealed = floorMapRevealed || (visitedMap[my] && visitedMap[my][mx]);
+
               const tile = map[my][mx];
               
-              if (tile === 'WALL') {
-                  ctx.fillStyle = C1;
-                  ctx.fillRect(sx, sy, ts, ts);
-                  ctx.fillStyle = C0;
-                  ctx.fillRect(sx+ts/4, sy+ts/4, ts/2, ts/2);
-              } else {
-                  ctx.fillStyle = C3;
-                  ctx.fillRect(sx, sy, ts, ts);
-                  if (tile === 'STAIRS') {
+              if (isRevealed) {
+                  if (tile === 'WALL') {
                       ctx.fillStyle = C1;
-                      for(let i=0; i<3; i++) ctx.fillRect(sx, sy + i*(ts/3), ts, 2);
-                  }
-              }
-
-              // Traps
-              const trap = traps.find(t => t.x === mx && t.y === my);
-              if (trap && (trap.visible || hasTrapSight)) {
-                  const sprite = spriteCache.current['TRAP'];
-                  if (sprite) ctx.drawImage(sprite, sx, sy, ts, ts);
-              }
-
-              const item = floorItems.find(i => i.x === mx && i.y === my);
-              if (item) {
-                  let spriteKey = 'CONSUMABLE';
-                  if (item.type === 'GOLD') {
-                      spriteKey = 'GOLD_BAG';
-                  } else if (item.itemData) {
-                      const cat = item.itemData.category;
-                      if (cat === 'WEAPON') spriteKey = 'WEAPON';
-                      if (cat === 'ARMOR') spriteKey = 'ARMOR';
-                      if (cat === 'RANGED') spriteKey = 'RANGED';
-                      if (cat === 'STAFF') spriteKey = 'STAFF';
-                      if (cat === 'ACCESSORY') spriteKey = 'ACCESSORY';
-                      if (item.itemData.type === 'POT_GLUE') spriteKey = 'SYNTH';
+                      ctx.fillRect(sx, sy, ts, ts);
+                      ctx.fillStyle = C0;
+                      ctx.fillRect(sx+ts/4, sy+ts/4, ts/2, ts/2);
+                  } else {
+                      ctx.fillStyle = C3;
+                      ctx.fillRect(sx, sy, ts, ts);
+                      if (tile === 'STAIRS') {
+                          ctx.fillStyle = C1;
+                          for(let i=0; i<3; i++) ctx.fillRect(sx, sy + i*(ts/3), ts, 2);
+                      }
                   }
                   
-                  const sprite = spriteCache.current[spriteKey];
-                  if (sprite) {
-                      ctx.drawImage(sprite, sx, sy, ts, ts);
-                  } else {
-                      ctx.fillStyle = C1;
-                      ctx.fillRect(sx + 4*SCALE, sy + 4*SCALE, 8*SCALE, 8*SCALE);
+                  // Traps (Only visible if revealed AND (visible flag OR trap sight))
+                  const trap = traps.find(t => t.x === mx && t.y === my);
+                  if (trap && (trap.visible || hasTrapSight)) {
+                      const sprite = spriteCache.current['TRAP'];
+                      if (sprite) ctx.drawImage(sprite, sx, sy, ts, ts);
+                  }
+              } else {
+                  // Not revealed: Draw black/fog
+                  ctx.fillStyle = C0;
+                  ctx.fillRect(sx, sy, ts, ts);
+              }
+
+              // Entities are drawn regardless of tile visibility if nearby (usually),
+              // OR strictly follow visibility. 
+              // Shiren: You can see enemies in the viewport even if unvisited if you have Sight.
+              // Without Sight, you only see enemies in lighted rooms or adj in hallways.
+              // For simplicity here: If tile is visible OR hasSight, show entities.
+              // Also show items if tile is visible OR hasSight.
+              
+              const canSeeEntities = isRevealed || hasSight;
+
+              if (canSeeEntities) {
+                  const item = floorItems.find(i => i.x === mx && i.y === my);
+                  if (item) {
+                      let spriteKey = 'CONSUMABLE';
+                      if (item.type === 'GOLD') {
+                          spriteKey = 'GOLD_BAG';
+                      } else if (item.itemData) {
+                          const cat = item.itemData.category;
+                          if (cat === 'WEAPON') spriteKey = 'WEAPON';
+                          if (cat === 'ARMOR') spriteKey = 'ARMOR';
+                          if (cat === 'RANGED') spriteKey = 'RANGED';
+                          if (cat === 'STAFF') spriteKey = 'STAFF';
+                          if (cat === 'ACCESSORY') spriteKey = 'ACCESSORY';
+                          if (item.itemData.type === 'POT_GLUE') spriteKey = 'SYNTH';
+                      }
+                      
+                      const sprite = spriteCache.current[spriteKey];
+                      if (sprite) {
+                          ctx.drawImage(sprite, sx, sy, ts, ts);
+                      } else {
+                          ctx.fillStyle = C1;
+                          ctx.fillRect(sx + 4*SCALE, sy + 4*SCALE, 8*SCALE, 8*SCALE);
+                      }
+                  }
+
+                  const enemy = enemies.find(e => e.x === mx && e.y === my);
+                  if (enemy) {
+                      const spriteKey = enemy.enemyType || 'SLIME';
+                      const sprite = spriteCache.current[spriteKey];
+                      const offX = (enemy.offset?.x || 0) * SCALE;
+                      const offY = (enemy.offset?.y || 0) * SCALE;
+
+                      if (sprite) {
+                          if (enemy.status.sleep > 0) ctx.globalAlpha = 0.5;
+                          ctx.drawImage(sprite, sx + offX, sy + offY, ts, ts);
+                          ctx.globalAlpha = 1.0;
+                          if (enemy.status.sleep > 0) { ctx.fillStyle='white'; ctx.font='10px monospace'; ctx.fillText('Zzz', sx, sy); }
+                      } else {
+                          ctx.fillStyle = C1;
+                          ctx.fillRect(sx + 2*SCALE + offX, sy + 2*SCALE + offY, 12*SCALE, 12*SCALE);
+                      }
                   }
               }
 
-              const enemy = enemies.find(e => e.x === mx && e.y === my);
-              if (enemy) {
-                  const spriteKey = enemy.enemyType || 'SLIME';
-                  const sprite = spriteCache.current[spriteKey];
-                  const offX = (enemy.offset?.x || 0) * SCALE;
-                  const offY = (enemy.offset?.y || 0) * SCALE;
-
-                  if (sprite) {
-                      if (enemy.status.sleep > 0) ctx.globalAlpha = 0.5;
-                      ctx.drawImage(sprite, sx + offX, sy + offY, ts, ts);
-                      ctx.globalAlpha = 1.0;
-                      if (enemy.status.sleep > 0) { ctx.fillStyle='white'; ctx.font='10px monospace'; ctx.fillText('Zzz', sx, sy); }
-                  } else {
-                      ctx.fillStyle = C1;
-                      ctx.fillRect(sx + 2*SCALE + offX, sy + 2*SCALE + offY, 12*SCALE, 12*SCALE);
-                  }
-              }
-
+              // Player is always visible (centered)
               if (mx === player.x && my === player.y) {
                   let spriteKey = 'PLAYER_FRONT';
                   let flip = false;
@@ -2311,17 +2406,57 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                         </div>
                     )}
 
+                    {/* Map Overlay: Now with Fog of War */}
                     {showMap && map.length > 0 && (
                         <div className="absolute inset-0 bg-[#0f380f]/90 z-20 flex items-center justify-center p-8 mt-12">
                             <div className="w-full h-full border border-[#9bbc0f] grid" style={{ gridTemplateColumns: `repeat(${MAP_W}, 1fr)` }}>
-                                {map.map((row, y) => row.map((tile, x) => (
-                                    <div key={`${x}-${y}`} className={`${tile === 'WALL' ? 'bg-transparent' : (tile === 'STAIRS' ? 'bg-[#9bbc0f]' : 'bg-[#306230]')}`}>
-                                        {x === player.x && y === player.y && <div className="w-full h-full bg-white rounded-full animate-pulse"></div>}
-                                        {tile !== 'WALL' && traps.some(t => t.x===x && t.y===y && (t.visible || player.equipment?.accessory?.type === 'RING_TRAP')) && <div className="w-full h-full flex items-center justify-center text-[4px] text-red-500 font-bold">X</div>}
-                                        {tile !== 'WALL' && enemies.some(e => e.x===x && e.y===y) && (player.equipment?.accessory?.type === 'RING_SIGHT' ? <div className="w-full h-full bg-red-500 rounded-full"></div> : null)}
-                                        {tile !== 'WALL' && floorItems.some(i => i.x===x && i.y===y) && (player.equipment?.accessory?.type === 'RING_SIGHT' ? <div className="w-full h-full bg-blue-400 rounded-sm"></div> : null)}
-                                    </div>
-                                )))}
+                                {map.map((row, y) => row.map((tile, x) => {
+                                    // Check visibility: Visited OR Revealed via scroll
+                                    const isRevealed = floorMapRevealed || (visitedMap[y] && visitedMap[y][x]);
+                                    
+                                    // Player and Sight Ring items are exceptions handled by logic below
+                                    const isPlayer = x === player.x && y === player.y;
+                                    const hasSight = player.equipment?.accessory?.type === 'RING_SIGHT';
+                                    const hasTrapSight = player.equipment?.accessory?.type === 'RING_TRAP';
+                                    const hasItem = floorItems.some(i => i.x===x && i.y===y);
+                                    const hasEnemy = enemies.some(e => e.x===x && e.y===y);
+                                    
+                                    // Render logic
+                                    let bgClass = 'bg-transparent';
+                                    let content = null;
+
+                                    if (isPlayer) {
+                                        content = <div className="w-full h-full bg-white rounded-full animate-pulse"></div>;
+                                    } else if (isRevealed) {
+                                        // Terrain
+                                        if (tile === 'STAIRS') bgClass = 'bg-[#9bbc0f]';
+                                        else if (tile !== 'WALL') bgClass = 'bg-[#306230]';
+                                        
+                                        // Objects on revealed tiles
+                                        if (tile !== 'WALL') {
+                                            if (traps.some(t => t.x===x && t.y===y && (t.visible || hasTrapSight))) {
+                                                content = <div className="w-full h-full flex items-center justify-center text-[4px] text-red-500 font-bold">X</div>;
+                                            } else if (hasEnemy && hasSight) {
+                                                content = <div className="w-full h-full bg-red-500 rounded-full"></div>;
+                                            } else if (hasItem && hasSight) {
+                                                content = <div className="w-full h-full bg-blue-400 rounded-sm"></div>;
+                                            }
+                                        }
+                                    } else {
+                                        // Not Revealed: Only show Sight items
+                                        if (hasEnemy && hasSight) {
+                                            content = <div className="w-full h-full bg-red-500 rounded-full"></div>;
+                                        } else if (hasItem && hasSight) {
+                                            content = <div className="w-full h-full bg-blue-400 rounded-sm"></div>;
+                                        }
+                                    }
+
+                                    return (
+                                        <div key={`${x}-${y}`} className={bgClass}>
+                                            {content}
+                                        </div>
+                                    );
+                                }))}
                             </div>
                             <button onClick={() => setShowMap(false)} className="absolute bottom-4 text-[#9bbc0f] border border-[#9bbc0f] px-2 rounded hover:bg-[#306230]">Close</button>
                         </div>
