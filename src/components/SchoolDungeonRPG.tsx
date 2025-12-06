@@ -127,6 +127,13 @@ interface Log {
   id: number;
 }
 
+interface RoomRect {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+}
+
 // --- ITEM DATABASE ---
 const ITEM_DB: Record<string, Omit<Item, 'id'>> = {
     // WEAPONS
@@ -234,8 +241,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   
   // --- STATE ---
   const [map, setMap] = useState<TileType[][]>([]);
-  const [visitedMap, setVisitedMap] = useState<boolean[][]>([]); // New: Fog of War state
-  const [floorMapRevealed, setFloorMapRevealed] = useState(false); // New: Map Scroll effect
+  const [visitedMap, setVisitedMap] = useState<boolean[][]>([]); // Fog of War state
+  const [floorMapRevealed, setFloorMapRevealed] = useState(false); // Map Scroll effect
+  const roomsRef = useRef<RoomRect[]>([]); // Keep track of rooms for logic
   const spriteCache = useRef<Record<string, HTMLCanvasElement>>({});
   
   const [player, setPlayer] = useState<Entity>({
@@ -359,6 +367,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       setMap(save.map);
       setVisitedMap(save.visitedMap || Array(MAP_H).fill(null).map(() => Array(MAP_W).fill(false))); // Fallback for old saves
       setFloorMapRevealed(save.floorMapRevealed || false);
+      roomsRef.current = save.rooms || []; // Restore rooms meta
       setPlayer(save.player);
       setEnemies(save.enemies);
       setFloorItems(save.floorItems);
@@ -381,7 +390,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       
       saveDebounceRef.current = setTimeout(() => {
           const state = {
-              map, visitedMap, floorMapRevealed, // Added new states
+              map, visitedMap, floorMapRevealed, 
+              rooms: roomsRef.current, // Save rooms
               player, enemies, floorItems, traps, inventory,
               floor, level, belly, maxBelly,
               idMap, identifiedTypes: Array.from(identifiedTypes),
@@ -395,8 +405,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   useEffect(() => {
       prevPlayerPos.current = { x: player.x, y: player.y };
       setVisitedMap(prev => {
-          // Optimization: check if current visible area is already fully visited?
-          // For simplicity, we just update the viewport rect.
           const next = prev.map(row => [...row]);
           let changed = false;
           
@@ -444,29 +452,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           };
       });
   }, [player.equipment]);
-
-  // Scroll effect (Refined)
-  useEffect(() => {
-    if (lastInputType.current === 'KEY' && (menuOpen || shopState.active) && menuListRef.current) {
-        const idx = synthState.mode === 'BLANK' ? blankScrollSelectionIndex : selectedItemIndex;
-        const container = menuListRef.current;
-        
-        if (container.children.length > idx) {
-            const itemEl = container.children[idx] as HTMLElement;
-            // Simple robust check relative to container's scrollTop
-            const itemTop = itemEl.offsetTop;
-            const itemBottom = itemTop + itemEl.clientHeight;
-            const containerTop = container.scrollTop;
-            const containerBottom = containerTop + container.clientHeight;
-
-            if (itemTop < containerTop) {
-                container.scrollTop = itemTop;
-            } else if (itemBottom > containerBottom) {
-                container.scrollTop = itemBottom - container.clientHeight;
-            }
-        }
-    }
-  }, [selectedItemIndex, menuOpen, shopState.active, shopState.mode, blankScrollSelectionIndex, synthState.mode]);
 
   const addVisualEffect = (type: VisualEffectType, x: number, y: number, options: Partial<VisualEffect> = {}) => {
       visualEffects.current.push({
@@ -517,8 +502,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     setIsFastForwarding(false);
     setDashMode(false);
     setIsAutoMoving(false);
+    roomsRef.current = []; // Reset rooms
     
-    // Init ID Map for Staffs (Umbrellas)
     const shuffledNames = [...UNIDENTIFIED_NAMES].sort(() => Math.random() - 0.5);
     const staffTypes = Object.keys(ITEM_DB).filter(k => ITEM_DB[k].category === 'STAFF');
     const newIdMap: Record<string, string> = {};
@@ -554,7 +539,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       onBack();
   };
 
-  const spawnEnemy = (x: number, y: number, floorLevel: number): Entity => {
+  const isPointInRoom = (x: number, y: number) => {
+      return roomsRef.current.some(r => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h);
+  };
+
+  const spawnEnemy = (x: number, y: number, floorLevel: number, inRoom: boolean = false): Entity => {
       const r = Math.random();
       let t: EnemyType = 'SLIME';
       let name="敵", hp=10, atk=2, xp=5, def=0;
@@ -566,7 +555,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           if (r < 0.6) { t = 'SLIME'; name="スライム"; hp=10; atk=3; xp=5; }
           else { t = 'BAT'; name="コウモリ"; hp=8; atk=4; xp=6; }
       } else {
-          if (r < 0.05 && !isEndless) { t = 'SHOPKEEPER'; name="購買部員"; hp=1000; atk=50; xp=0; def=20; }
+          // Shopkeeper ONLY spawns in rooms
+          if (r < 0.05 && !isEndless && inRoom) { t = 'SHOPKEEPER'; name="購買部員"; hp=1000; atk=50; xp=0; def=20; }
           else if (r < 0.20) { t = 'SLIME'; name="スライム"; hp=10+hpScale; atk=3+scaling; xp=5+xpScale; }
           else if (r < 0.35) { t = 'BAT'; name="コウモリ"; hp=8+hpScale; atk=5+scaling; xp=7+xpScale; }
           else if (r < 0.45 && floorLevel > 2) { t = 'MANDRAKE'; name="人食い植物"; hp=20+hpScale; atk=5+scaling; xp=12+xpScale; }
@@ -624,6 +614,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         }
     }
     rooms.sort((a,b) => (a.x + a.y) - (b.x + b.y));
+    roomsRef.current = rooms; // Save room metadata
 
     for (let i = 0; i < rooms.length - 1; i++) {
         const r1 = rooms[i]; const r2 = rooms[i+1];
@@ -662,12 +653,13 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     for(let y=0; y<MAP_H; y++) {
         for(let x=0; x<MAP_W; x++) {
             if(newMap[y][x] === 'FLOOR' && (x !== px || y !== py) && (x !== sx || y !== sy)) {
+                const inRoom = isPointInRoom(x, y);
+                
                 if(Math.random() < 0.06) {
-                    newEnemies.push(spawnEnemy(x, y, f));
+                    newEnemies.push(spawnEnemy(x, y, f, inRoom));
                 } else if(Math.random() < 0.04) {
                     const r = Math.random();
                     if (r < 0.2) {
-                        // Gold
                         newItems.push({
                             id: Date.now() + Math.random(), type: 'GOLD', x, y, char: '$', name: 'お金',
                             hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
@@ -675,7 +667,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                             gold: Math.floor(Math.random() * 50 + 10 * f)
                         });
                     } else {
-                        // Items
                         const keys = Object.keys(ITEM_DB);
                         const key = keys[Math.floor(Math.random() * keys.length)];
                         const template = ITEM_DB[key];
@@ -697,12 +688,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                 plus,
                                 charges,
                                 name: plus > 0 ? `${template.name}+${plus}` : template.name,
-                                price: Math.floor((template.value || 100) * 0.5) // Sell price is usually half base
+                                price: Math.floor((template.value || 100) * 0.5)
                             }
                         });
                     }
                 } else if (Math.random() < 0.02) {
-                    // Traps
                     const trapTypes: TrapType[] = ['BOMB', 'SLEEP', 'POISON', 'WARP', 'RUST', 'SUMMON'];
                     const tType = trapTypes[Math.floor(Math.random() * trapTypes.length)];
                     newTraps.push({
@@ -716,12 +706,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         }
     }
 
-    // Reset Fog of War
     setMap(newMap);
     setVisitedMap(Array(MAP_H).fill(null).map(() => Array(MAP_W).fill(false)));
     setFloorMapRevealed(false);
     
-    // Initial Visited Update
     setVisitedMap(prev => {
         const next = prev.map(row => [...row]);
         const startX = px - Math.floor(VIEW_W/2);
@@ -769,12 +757,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       const isHungerResist = accType === 'RING_HUNGER';
       const isHealRing = accType === 'RING_HEAL';
 
-      let hungerRate = heavy ? 0.5 : 1; // Heavy armor makes hunger go 2x faster (0.5 interval)
-      if (isHungerResist) hungerRate *= 0.5; // Hunger Ring reduces hunger speed
-      if (isHealRing) hungerRate *= 2; // Heal Ring increases hunger speed
+      let hungerRate = heavy ? 0.5 : 1; 
+      if (isHungerResist) hungerRate *= 0.5; 
+      if (isHealRing) hungerRate *= 2; 
 
-      // Standard interval is 10. 
-      // Heavy: 5. HungerRing: 20. HealRing: 5. Heavy+Heal: 2.5
       const interval = Math.floor(HUNGER_INTERVAL / hungerRate);
       const isHungerTurn = turnCounter.current % Math.max(1, interval) === 0;
       
@@ -813,7 +799,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               currentHp += 1;
           }
           
-          // Status updates
           if (nextStatus.sleep > 0) { nextStatus.sleep--; if (nextStatus.sleep<=0) addLog("目が覚めた！"); }
           if (nextStatus.confused > 0) nextStatus.confused--;
           if (nextStatus.blind > 0) nextStatus.blind--;
@@ -831,7 +816,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               const rx = Math.floor(Math.random() * MAP_W);
               const ry = Math.floor(Math.random() * MAP_H);
               if (map[ry][rx] === 'FLOOR' && !enemies.find(e => e.x === rx && e.y === ry) && (rx !== px || ry !== py)) {
-                  setEnemies(prev => [...prev, spawnEnemy(rx, ry, floor)]);
+                  // Pass inRoom check to spawnEnemy for random spawns too
+                  const inRoom = isPointInRoom(rx, ry);
+                  setEnemies(prev => [...prev, spawnEnemy(rx, ry, floor, inRoom)]);
                   break;
               }
           }
@@ -884,7 +871,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   const dirs = [[0,1], [0,-1], [1,0], [-1,0]];
                   const r = dirs[Math.floor(Math.random()*4)];
                   tx = e.x + r[0]; ty = e.y + r[1];
-                  moved = true; // Attempt random move
+                  moved = true; 
               } 
               // Standard Pathfinding (Dijkstra) if "awake"
               else if (dist <= 15) {
@@ -914,9 +901,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   }
               }
 
-              // Attack or Move Execution
               if (tx === px && ty === py) {
-                  // Attack
                   let dmg = Math.max(1, e.attack - player.defense);
                   if (player.equipment?.armor?.type === 'GYM_CLOTHES' && Math.random() < 0.3) { addLog("ひらりと身をかわした！", C2); dmg = 0; addVisualEffect('TEXT', px, py, { value: 'MISS', color: 'blue' }); }
                   if (player.equipment?.armor?.type === 'NAME_TAG' && e.enemyType === 'THIEF') addLog("名札が盗みを防いだ！");
@@ -932,14 +917,12 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   } else { nextEnemies.push(e); }
                   occupied.add(`${e.x},${e.y}`);
               } else if (moved) {
-                  // Attempt Move
                   if (!map[ty][tx] || map[ty][tx] === 'WALL' || occupied.has(`${tx},${ty}`) || prevEnemies.some(o => o.id !== e.id && o.x === tx && o.y === ty)) {
-                      occupied.add(`${e.x},${e.y}`); nextEnemies.push(e); // Blocked
+                      occupied.add(`${e.x},${e.y}`); nextEnemies.push(e); 
                   } else {
                       occupied.add(`${tx},${ty}`); nextEnemies.push({ ...e, x: tx, y: ty });
                   }
               } else {
-                  // Idle
                   occupied.add(`${e.x},${e.y}`); nextEnemies.push(e);
               }
           }
@@ -1017,14 +1000,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       let finalX = tx; let finalY = ty;
       setPlayer(p => ({ ...p, x: finalX, y: finalY }));
       
-      // Update Visited Map logic here (Update Fog of War)
       setVisitedMap(prev => {
           const next = prev.map(row => [...row]);
           let changed = false;
-          
           const startX = finalX - Math.floor(VIEW_W/2);
           const startY = finalY - Math.floor(VIEW_H/2);
-          
           for (let y = 0; y < VIEW_H; y++) {
               for (let x = 0; x < VIEW_W; x++) {
                   const mx = startX + x;
@@ -1040,26 +1020,21 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           return changed ? next : prev;
       });
 
-      // Trap Check
       const trap = traps.find(t => t.x === finalX && t.y === finalY);
       if (trap) {
           if (trap.visible) {
-              // Stepped on visible trap
               addLog(`${trap.name}を踏んでしまった！`, "red");
               activateTrap(trap);
           } else {
-              // Hidden trap
               addLog("罠だ！", "red");
-              trap.visible = true; // Reveal
+              trap.visible = true; 
               activateTrap(trap);
           }
       }
 
-      // Item Pickup
       const itemIdx = floorItems.findIndex(i => i.x === finalX && i.y === finalY);
       if (itemIdx !== -1) {
           const itemEntity = floorItems[itemIdx];
-          
           if (itemEntity.type === 'GOLD') {
               const amount = itemEntity.gold || 0;
               setPlayer(p => ({ ...p, gold: (p.gold || 0) + amount }));
@@ -1122,28 +1097,21 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           timer = setTimeout(() => {
               const {x: dx, y: dy} = autoMoveDir.current;
               
-              // 1. Stop if adjacent to enemy
               if (enemies.some(e => Math.abs(e.x - player.x) <= 1 && Math.abs(e.y - player.y) <= 1)) {
                   setIsAutoMoving(false);
                   return;
               }
 
-              // 2. Stop if on item/stairs/trap (assuming we arrived here)
-              // But we might have just started.
-              // To avoid instant stop on start, we rely on checking if we CAN continue.
-              // Actually, if we are currently ON something interesting, we should stop.
               if (map[player.y][player.x] === 'STAIRS' || 
                   floorItems.some(i => i.x === player.x && i.y === player.y) || 
                   traps.some(t => t.x === player.x && t.y === player.y && t.visible)) {
                   
-                  // Check if we moved from prev pos (to ensure we didn't just start dash ON an item)
                   if (prevPlayerPos.current.x !== player.x || prevPlayerPos.current.y !== player.y) {
                       setIsAutoMoving(false);
                       return;
                   }
               }
 
-              // 3. Stop if next tile is blocked
               const tx = player.x + dx;
               const ty = player.y + dy;
               if (map[ty][tx] === 'WALL' || enemies.some(e => e.x === tx && e.y === ty)) {
@@ -1151,7 +1119,20 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   return;
               }
 
-              // 4. Room/Hallway Logic (Stop at entrance/junction)
+              // Updated: Stop if entering a room from a hallway
+              const currentInRoom = isPointInRoom(player.x, player.y);
+              const prevInRoom = isPointInRoom(prevPlayerPos.current.x, prevPlayerPos.current.y);
+
+              // If just entered a room (was not in room, now is in room)
+              if (!prevInRoom && currentInRoom) {
+                  // Allow the step into the room to complete, then stop
+                  if (prevPlayerPos.current.x !== player.x || prevPlayerPos.current.y !== player.y) {
+                      setIsAutoMoving(false);
+                      return;
+                  }
+              }
+
+              // Hallway Junction Stop Logic
               const getNeighbors = (cx: number, cy: number) => {
                   let c = 0;
                   if (map[cy-1]?.[cx] !== 'WALL') c++;
@@ -1160,14 +1141,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   if (map[cy]?.[cx+1] !== 'WALL') c++;
                   return c;
               };
-              
               const currentNeighbors = getNeighbors(player.x, player.y);
               const prevNeighbors = getNeighbors(prevPlayerPos.current.x, prevPlayerPos.current.y);
               
-              // If we were in a "Hallway" (<=2 exits) and moved to "Room/Intersection" (>2 exits)
               if (prevNeighbors <= 2 && currentNeighbors > 2) {
-                  // But allow the move into the room/junction to happen first (we are AT the junction now).
-                  // So stop now before taking next step.
                   if (prevPlayerPos.current.x !== player.x || prevPlayerPos.current.y !== player.y) {
                       setIsAutoMoving(false);
                       return;
@@ -1197,8 +1174,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           addVisualEffect('TEXT', player.x, player.y, { value: 'Zzz', color: 'blue' });
       } else if (t === 'POISON') {
           addLog("毒を受けた！", "purple");
-          // Poison in roguelike usually drains strength or HP over time. Let's do simple HP dmg or belly drop.
-          // Let's reduce belly significantly.
           setBelly(prev => Math.max(0, prev - 20));
       } else if (t === 'WARP') {
           addLog("ワープした！", "yellow");
@@ -1233,7 +1208,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       } else if (t === 'SUMMON') {
           addLog("モンスターハウスだ！", "red");
           addVisualEffect('FLASH', 0, 0, { color: 'red', duration: 10 });
-          // Spawn 3 enemies nearby
           const newEnemies = [];
           for (let i=0; i<3; i++) {
               let attempts = 0;
@@ -1249,21 +1223,15 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           }
           setEnemies(prev => [...prev, ...newEnemies]);
       }
-      
-      // Remove trap after activation? Usually traps stay.
-      // In Shiren, they stay but become visible.
   };
 
   const getItemName = (item: Item) => {
       if (item.category === 'WEAPON' || item.category === 'ARMOR' || item.category === 'RANGED' || item.category === 'SYNTH' || item.category === 'CONSUMABLE' || item.category === 'ACCESSORY') return item.name;
-      // Staffs are now the only thing needing identification
       if (item.type.includes('MEAT')) return item.name;
       if (identifiedTypes.has(item.type)) return item.name;
       return idMap[item.type] || item.name;
   };
 
-  // --- ACTIONS ---
-  
   const fireRangedWeapon = () => {
       if (menuOpen || shopState.active) return;
       const rangedItem = player.equipment?.ranged;
@@ -1273,12 +1241,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       }
       if ((rangedItem.count || 0) <= 0) {
           addLog(`${rangedItem.name}が無くなった！`);
-          // Unequip/Remove
           setPlayer(p => ({ ...p, equipment: { ...p.equipment!, ranged: null } }));
           return;
       }
 
-      // Decrement
       const newRanged = { ...rangedItem, count: (rangedItem.count || 0) - 1 };
       setPlayer(p => ({ ...p, equipment: { ...p.equipment!, ranged: newRanged } }));
       
@@ -1336,7 +1302,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   setPlayer(p => ({ ...p, gold: (p.gold || 0) - (item.price || 0) }));
                   setInventory(prev => [...prev, item]);
                   
-                  // Remove from shop
                   const newShopItems = shopkeeper.shopItems.filter((_, i) => i !== idx);
                   setEnemies(prev => prev.map(e => e.id === shopkeeper.id ? { ...e, shopItems: newShopItems } : e));
                   
@@ -1353,12 +1318,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               audioService.playSound('wrong');
           }
       } else {
-          // SELL
           if (inventory.length === 0) return;
           const item = inventory[idx];
           if (!item) return;
           
-          // Cannot sell equipped items directly (simple safeguard)
           if (player.equipment?.weapon === item || player.equipment?.armor === item || player.equipment?.ranged === item || player.equipment?.accessory === item) {
               addLog("装備中のアイテムは売れません。", "red");
               audioService.playSound('wrong');
@@ -1385,7 +1348,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       const targets = [target];
       addVisualEffect('SLASH', target.x, target.y, { dir: player.dir });
 
-      // 3-Way Attack Logic (Inherited from Type)
       if (player.equipment?.weapon?.type === 'PROTRACTOR_EDGE') {
           const {x: dx, y: dy} = player.dir;
           const others = [];
@@ -1456,14 +1418,13 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   // --- LONG PRESS LOGIC (FAST FORWARD) ---
   const handlePressStart = () => {
       if (menuOpen || shopState.active || gameOver || gameClear) return;
-      // Start waiting detection
       fastForwardInterval.current = setTimeout(() => {
           setIsFastForwarding(true);
-      }, 400); // 400ms hold to trigger
+      }, 400); 
   };
 
   const handlePressEnd = (e?: React.TouchEvent | React.MouseEvent) => {
-      if (e) e.preventDefault(); // Prevents double firing
+      if (e) e.preventDefault(); 
       if (fastForwardInterval.current) {
           clearTimeout(fastForwardInterval.current);
           fastForwardInterval.current = null;
@@ -1481,14 +1442,12 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       let interval: any = null;
       if (isFastForwarding && !gameOver && !gameClear && !menuOpen && !shopState.active) {
           interval = setInterval(() => {
-              // Safety check: Stop if enemies nearby
               const nearby = enemies.some(e => Math.abs(e.x - player.x) <= 2 && Math.abs(e.y - player.y) <= 2);
               if (nearby) {
                   setIsFastForwarding(false);
                   addLog("敵が近くにいる！", "red");
                   return;
               }
-              // Stop if full HP and hunger is ok
               if (player.hp >= player.maxHp && belly > 20) {
                   if (player.hp === player.maxHp) {
                       setIsFastForwarding(false);
@@ -1496,14 +1455,13 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                       return;
                   }
               }
-              // Stop if starving
               if (belly <= 0) {
                   setIsFastForwarding(false);
                   return;
               }
 
               processTurn(player.x, player.y);
-          }, 50); // Fast speed
+          }, 50); 
       }
       return () => {
           if (interval) clearInterval(interval);
@@ -1533,14 +1491,12 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       const item = inventory[idx];
       
       if (synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT') {
-          // Identify known scrolls
           const knownTypes = Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')) as string[];
           const targetType = knownTypes[idx];
           const template = ITEM_DB[targetType];
           
           if (template) {
               const blankIdx = synthState.baseIndex!;
-              // Replace Blank with target scroll
               const newItem = { ...template, id: `scribed-${Date.now()}` };
               const newInv = [...inventory];
               newInv[blankIdx] = newItem;
@@ -1572,7 +1528,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               const matItem = item;
               if (baseItem.category !== matItem.category) { addLog("種類が違うと合成できません", "red"); audioService.playSound('wrong'); return; }
               
-              // Synthesis Logic: Base Type determines nature. Adds Plus values.
               const newPlus = (baseItem.plus || 0) + (matItem.plus || 0) + 1;
               const newItem: Item = { ...baseItem, plus: newPlus, name: `${baseItem.name.split('+')[0]}+${newPlus}` };
               
@@ -1609,7 +1564,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       let hit = false;
       let msg = "";
 
-      // Visual Effect for Staff: Moving Projectile
       addVisualEffect('MAGIC_PROJ', 0, 0, {
           startX: player.x,
           startY: player.y,
@@ -1648,10 +1602,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           }
       } else if (item.type === 'UMB_BLOW') {
           if (target) {
-              // Knockback 5 tiles
               let tx = target.x; let ty = target.y;
-              const dx = target.x - player.x; const dy = target.y - player.y; // Simplified dir
-              const dist = Math.max(1, Math.abs(dx) + Math.abs(dy)); // Manhattan
+              const dx = target.x - player.x; const dy = target.y - player.y; 
               const ndx = Math.sign(dx); const ndy = Math.sign(dy);
               
               for (let i=0; i<5; i++) {
@@ -1693,14 +1645,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           if (target) {
               setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: e.maxHp } : e));
               msg = `${target.name}が回復してしまった！`; hit = true;
-          } else {
-              // Self heal if no target? But staff usually target enemy. 
-              // Standard rogue: wave hits front. 
-              // Let's say if no enemy, wave fails to do anything special (waste charge).
           }
       }
 
-      // Self target staffs (Unusual but possible for Warp/Heal if logic allowed, but staying classic)
       return { hit, msg };
   };
 
@@ -1725,9 +1672,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       setInventory(prev => prev.filter((_, i) => i !== index));
 
       if (hitEntity) {
-          // Effect on Hit
-          let dmg = 2; // Base throw dmg
-          let msg = "";
+          let dmg = 2; 
           
           if (item.category === 'WEAPON' || item.category === 'RANGED') dmg = 5 + (item.power || 0);
           if (item.category === 'ARMOR') dmg = 3 + (item.power || 0);
@@ -1736,10 +1681,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           if (item.type === 'SCROLL_SLEEP') { hitEntity.status.sleep = 10; addLog(`${hitEntity.name}は眠ってしまった！`); }
           
           if (item.category === 'STAFF') {
-              // Thrown staff activates effect
               const res = executeStaffEffect(item, hitEntity, hitEntity.x, hitEntity.y);
               if (res.msg) addLog(res.msg);
-              // Identify if hit
               if (!identifiedTypes.has(item.type)) {
                   setIdentifiedTypes(prev => new Set(prev).add(item.type));
                   addLog(`${idMap[item.type]}は${item.name}だった！`, "yellow");
@@ -1760,7 +1703,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           
           audioService.playSound('attack');
       } else {
-          // Drop on floor at lx, ly
           if (map[ly][lx] !== 'WALL' && !floorItems.find(i=>i.x===lx && i.y===ly)) {
               setFloorItems(prev => [...prev, {
                   id: Date.now() + Math.random(), type: 'ITEM', x: lx, y: ly, char: '!', name: item.name, 
@@ -1781,13 +1723,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       const item = inventory[index];
       if (!item) return;
 
-      // Staff (Umbrella) Logic
       if (item.category === 'STAFF') {
-          // Action is "Wave" (振る)
-          // Find target in front
           const { x: dx, y: dy } = player.dir;
           let target: Entity | null = null;
-          // Simple beam range? Standard is usually unlimited or visible range. Let's do 10 tiles.
           let tx = player.x, ty = player.y;
           for(let i=1; i<=10; i++) {
               tx += dx; ty += dy;
@@ -1796,13 +1734,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               if (e) { target = e; break; }
           }
 
-          // Decrease charge
           if ((item.charges || 0) > 0) {
-              const res = executeStaffEffect(item, target, player.x + dx, player.y + dy); // Visual start from adj
+              const res = executeStaffEffect(item, target, player.x + dx, player.y + dy); 
               if (res.msg) addLog(res.msg);
-              else addLog("しかし何も起こらなかった。"); // Missed or resisted
+              else addLog("しかし何も起こらなかった。"); 
 
-              // Decrement charge
               const newCharges = (item.charges || 0) - 1;
               const newItem = { ...item, charges: newCharges };
               setInventory(prev => prev.map((it, i) => i === index ? newItem : it));
@@ -1816,7 +1752,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               setMenuOpen(false);
               processTurn(player.x, player.y);
           } else {
-              addLog("魔力が尽きている！"); // No turn passed
+              addLog("魔力が尽きている！"); 
           }
           return;
       }
@@ -1876,15 +1812,12 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   addLog(`${item.name}を食べた。満腹！`); 
               }
               
-              // Remove item
               setInventory(prev => prev.filter((_, i) => i !== index));
               setSelectedItemIndex(prev => Math.min(prev, inventory.length - 2));
               setMenuOpen(false);
-              
-              // Pass overrides to processTurn
               processTurn(player.x, player.y, { belly: nextBelly, hp: nextHp });
               audioService.playSound('select');
-              return; // Return early
+              return; 
           }
           else if (item.type.includes('HEAL')) { 
               let nextHp = Math.min(player.maxHp, player.hp + (item.value || 30));
@@ -1957,7 +1890,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               setSelectedItemIndex(prev => Math.min(prev, inventory.length - 2)); 
           }
       } else if (item.category === 'RANGED') {
-          // Equip Logic for Ranged
           setPlayer(p => {
               const currentEquip = p.equipment ? p.equipment.ranged : null;
               const newEquipment = { ...p.equipment!, ranged: item };
@@ -2035,7 +1967,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   // --- KEYBOARD ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-        lastInputType.current = 'KEY'; // Track input type
+        lastInputType.current = 'KEY';
         if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) { e.preventDefault(); }
         if (gameOver) { if (['z', 'Enter', ' '].includes(e.key)) handleRestart(); return; }
         if (gameClear) { if (['z', 'Enter', ' '].includes(e.key)) startEndlessMode(); return; }
@@ -2079,7 +2011,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             case 'End': case '1': case 'b': handleMoveInput(-1, 1); break;
             case 'PageDown': case '3': case 'n': handleMoveInput(1, 1); break;
             case 'z': case ' ': case 'Enter': handleActionBtn(); break;
-            case 'r': fireRangedWeapon(); break; // Keyboard shortcut for ranged
+            case 'r': fireRangedWeapon(); break;
         }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -2107,7 +2039,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       const h = canvas.height;
       const ts = TILE_SIZE * SCALE;
 
-      // FIX: Fill background FIRST to prevent artifacts during shake
       ctx.fillStyle = C0;
       ctx.fillRect(0, 0, w, h);
 
@@ -2140,10 +2071,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   continue;
               }
 
-              // Visibility Check
-              // Is revealed if: floorMapRevealed is true OR visitedMap[my][mx] is true
               const isRevealed = floorMapRevealed || (visitedMap[my] && visitedMap[my][mx]);
-
               const tile = map[my][mx];
               
               if (isRevealed) {
@@ -2161,25 +2089,16 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                       }
                   }
                   
-                  // Traps (Only visible if revealed AND (visible flag OR trap sight))
                   const trap = traps.find(t => t.x === mx && t.y === my);
                   if (trap && (trap.visible || hasTrapSight)) {
                       const sprite = spriteCache.current['TRAP'];
                       if (sprite) ctx.drawImage(sprite, sx, sy, ts, ts);
                   }
               } else {
-                  // Not revealed: Draw black/fog
                   ctx.fillStyle = C0;
                   ctx.fillRect(sx, sy, ts, ts);
               }
 
-              // Entities are drawn regardless of tile visibility if nearby (usually),
-              // OR strictly follow visibility. 
-              // Shiren: You can see enemies in the viewport even if unvisited if you have Sight.
-              // Without Sight, you only see enemies in lighted rooms or adj in hallways.
-              // For simplicity here: If tile is visible OR hasSight, show entities.
-              // Also show items if tile is visible OR hasSight.
-              
               const canSeeEntities = isRevealed || hasSight;
 
               if (canSeeEntities) {
@@ -2226,7 +2145,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   }
               }
 
-              // Player is always visible (centered)
               if (mx === player.x && my === player.y) {
                   let spriteKey = 'PLAYER_FRONT';
                   let flip = false;
@@ -2263,7 +2181,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           let currentX = fx.x;
           let currentY = fx.y;
 
-          // Moving Projectile Logic
           if (fx.type === 'MAGIC_PROJ' && fx.startX !== undefined && fx.targetX !== undefined && fx.startY !== undefined && fx.targetY !== undefined) {
               const progress = 1 - (fx.duration / fx.maxDuration);
               currentX = fx.startX + (fx.targetX - fx.startX) * progress;
@@ -2278,7 +2195,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                        ctx.drawImage(sprite, sx, sy, ts, ts);
                    }
               }
-              return; // Skip standard rendering for this special type
+              return; 
           }
 
           const sx = (fx.x - startX) * ts;
