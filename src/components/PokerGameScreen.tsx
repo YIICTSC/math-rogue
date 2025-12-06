@@ -139,7 +139,7 @@ const createDeck = (): PokerCard[] => {
     return deck.sort(() => Math.random() - 0.5);
 };
 
-const generateRandomPlayingCard = (): PokerCard => {
+const generateRandomPlayingCard = (enhancementChance: number = 0.1): PokerCard => {
     const suit = SUITS[Math.floor(Math.random() * SUITS.length)];
     const rank = RANKS[Math.floor(Math.random() * RANKS.length)];
     const card: PokerCard = {
@@ -150,7 +150,7 @@ const generateRandomPlayingCard = (): PokerCard => {
         bonusChips: 0,
         multMultiplier: 1
     };
-    if (Math.random() < 0.1) {
+    if (Math.random() < enhancementChance) {
         const r = Math.random();
         if (r < 0.2) { card.enhancement = 'BONUS'; card.bonusChips += 30; }
         else if (r < 0.4) { card.enhancement = 'MULT'; card.multMultiplier += 0.5; }
@@ -372,7 +372,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   const [selectedConsumable, setSelectedConsumable] = useState<PokerConsumable | null>(null);
 
   // Inspection Modal State (Updated to handle Selling)
-  const [inspectedItem, setInspectedItem] = useState<{ item: PokerSupporter | PokerConsumable | PokerCard, type: 'CARD'|'SUPPORTER'|'CONSUMABLE', index?: number, isOwned?: boolean } | null>(null);
+  const [inspectedItem, setInspectedItem] = useState<{ item: PokerSupporter | PokerConsumable | PokerCard | PokerPack, type: 'CARD'|'SUPPORTER'|'CONSUMABLE'|'PACK', index?: number, isOwned?: boolean } | null>(null);
   const longPressTimer = useRef<any>(null);
 
   // Sorting
@@ -473,13 +473,13 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       audioService.playBGM('poker_play');
   };
 
-  const handleTouchStart = (item: any, type: 'CARD'|'SUPPORTER'|'CONSUMABLE', isOwned: boolean, index?: number) => {
+  const handleTouchStart = (item: any, type: 'CARD'|'SUPPORTER'|'CONSUMABLE'|'PACK', isOwned: boolean, index?: number) => {
       longPressTimer.current = setTimeout(() => {
           setInspectedItem({ item, type, isOwned, index });
       }, 500);
   };
   const handleTouchEnd = () => { if (longPressTimer.current) clearTimeout(longPressTimer.current); };
-  const handleContextMenu = (e: React.MouseEvent, item: any, type: 'CARD'|'SUPPORTER'|'CONSUMABLE', isOwned: boolean, index?: number) => { 
+  const handleContextMenu = (e: React.MouseEvent, item: any, type: 'CARD'|'SUPPORTER'|'CONSUMABLE'|'PACK', isOwned: boolean, index?: number) => { 
       e.preventDefault(); 
       setInspectedItem({ item, type, isOwned, index }); 
   };
@@ -711,19 +711,49 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   };
 
   const openPack = (pack: PokerPack) => { setCurrentPack(pack); setIsPackOpened(false); setPhase('PACK_OPEN'); setPackContent([]); };
+  
   const revealPack = () => {
       if (!currentPack) return;
       audioService.playSound('attack'); 
       setIsPackOpened(true);
       const content: (PokerCard | PokerSupporter | PokerConsumable)[] = [];
-      for (let i = 0; i < currentPack.size; i++) {
-          if (currentPack.type === 'STANDARD') { content.push(generateRandomPlayingCard()); } 
-          else if (currentPack.type === 'BUFF') { const pool = [...CONSUMABLES_LIBRARY.filter(c => c.type === 'PLANET' || c.type === 'TAROT')]; content.push(pool[Math.floor(Math.random() * pool.length)]); } 
-          else if (currentPack.type === 'SUPPORTER') { const pool = [...SUPPORTERS_LIBRARY]; content.push(pool[Math.floor(Math.random() * pool.length)]); } 
-          else if (currentPack.type === 'SPECTRAL') { const pool = [...CONSUMABLES_LIBRARY.filter(c => c.type === 'SPECTRAL')]; content.push(pool[Math.floor(Math.random() * pool.length)]); }
+      
+      if (currentPack.type === 'STANDARD') {
+          // Increase enhancement chance for packs (default was 0.1)
+          const ENHANCEMENT_RATE = 0.4;
+          
+          for (let i = 0; i < currentPack.size; i++) {
+             // Generate card
+             let card = generateRandomPlayingCard(ENHANCEMENT_RATE);
+             // Ensure uniqueness in the same pack offer
+             let retries = 0;
+             while (content.some(c => 'suit' in c && c.suit === card.suit && c.rank === card.rank) && retries < 10) {
+                 card = generateRandomPlayingCard(ENHANCEMENT_RATE);
+                 retries++;
+             }
+             content.push(card);
+          }
+      } else {
+          // For items from libraries
+          let pool: (PokerSupporter | PokerConsumable)[] = [];
+          if (currentPack.type === 'BUFF') {
+              pool = [...CONSUMABLES_LIBRARY.filter(c => c.type === 'PLANET' || c.type === 'TAROT')];
+          } else if (currentPack.type === 'SUPPORTER') {
+              pool = [...SUPPORTERS_LIBRARY];
+          } else if (currentPack.type === 'SPECTRAL') {
+              pool = [...CONSUMABLES_LIBRARY.filter(c => c.type === 'SPECTRAL')];
+          }
+          
+          // Shuffle pool and take unique items
+          pool = pool.sort(() => Math.random() - 0.5);
+          for (let i = 0; i < Math.min(currentPack.size, pool.length); i++) {
+              content.push(pool[i]);
+          }
       }
+      
       setPackContent(content);
   };
+
   const selectPackItem = (item: PokerCard | PokerSupporter | PokerConsumable) => {
       if ('suit' in item) { setRunState(prev => ({ ...prev, deck: [...prev.deck, item as PokerCard] })); } 
       else if ('rarity' in item) { if (runState.supporters.length >= 5) return; setRunState(prev => ({ ...prev, supporters: [...prev.supporters, item as PokerSupporter] })); } 
@@ -812,8 +842,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       if (!inspectedItem) return null;
       const { item, type, isOwned } = inspectedItem;
       const isCard = type === 'CARD';
+      const isPack = type === 'PACK';
       const cardItem = item as PokerCard;
-      const otherItem = item as (PokerSupporter | PokerConsumable);
       
       return (
           <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setInspectedItem(null)}>
@@ -821,23 +851,33 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                   <button onClick={() => setInspectedItem(null)} className="absolute top-2 right-2 text-gray-400 hover:text-white"><X size={24}/></button>
                   {isCard ? (
                       <div className="flex flex-col items-center mb-4"><div className="w-32 h-48 bg-white text-black rounded-lg border-4 border-slate-300 shadow-xl flex flex-col items-center justify-between p-2 mb-4"><div className={`text-2xl font-bold w-full text-left ${['HEART', 'DIAMOND'].includes(cardItem.suit) ? 'text-red-600' : 'text-black'}`}>{getRankDisplay(cardItem.rank)}</div><div className="scale-150">{getSuitIcon(cardItem.suit, cardItem.enhancement === 'WILD')}</div><div className="text-xs text-center font-bold text-gray-500">{cardItem.enhancement || ''}</div><div className={`text-2xl font-bold w-full text-right rotate-180 ${['HEART', 'DIAMOND'].includes(cardItem.suit) ? 'text-red-600' : 'text-black'}`}>{getRankDisplay(cardItem.rank)}</div></div><h3 className="text-2xl font-bold text-yellow-400 mb-2">{getRankDisplay(cardItem.rank)} of {cardItem.suit}</h3></div>
+                  ) : isPack ? (
+                      <>
+                        <div className="flex flex-col items-center mb-4">
+                            <div className="w-24 h-24 mb-4"><PixelSprite seed={(item as PokerPack).icon} name={(item as PokerPack).icon} className="w-full h-full"/></div>
+                            <h3 className="text-2xl font-bold text-yellow-400 mb-2">{(item as PokerPack).name}</h3>
+                            <div className="text-sm font-bold text-white bg-orange-700 px-3 py-1 rounded-full">PACK</div>
+                        </div>
+                        <p className="text-lg text-gray-300 text-center leading-relaxed">{(item as PokerPack).description}</p>
+                        <div className="mt-6 text-center text-yellow-500 font-bold text-xl">${(item as PokerPack).price}</div> 
+                      </>
                   ) : (
                       <> 
                         <div className="flex flex-col items-center mb-4">
-                            <div className="w-24 h-24 mb-4"><PixelSprite seed={otherItem.icon} name={otherItem.icon} className="w-full h-full"/></div>
-                            <h3 className="text-2xl font-bold text-yellow-400 mb-2">{otherItem.name}</h3>
-                            <div className="text-sm font-bold text-white bg-slate-700 px-3 py-1 rounded-full">{'rarity' in otherItem ? (otherItem as PokerSupporter).rarity : (otherItem as PokerConsumable).type}</div>
+                            <div className="w-24 h-24 mb-4"><PixelSprite seed={(item as any).icon} name={(item as any).icon} className="w-full h-full"/></div>
+                            <h3 className="text-2xl font-bold text-yellow-400 mb-2">{(item as any).name}</h3>
+                            <div className="text-sm font-bold text-white bg-slate-700 px-3 py-1 rounded-full">{'rarity' in item ? (item as PokerSupporter).rarity : (item as PokerConsumable).type}</div>
                         </div>
-                        <p className="text-lg text-gray-300 text-center leading-relaxed">{otherItem.description}</p>
-                        <div className="mt-6 text-center text-yellow-500 font-bold text-xl">${otherItem.price}</div> 
+                        <p className="text-lg text-gray-300 text-center leading-relaxed">{(item as any).description}</p>
+                        <div className="mt-6 text-center text-yellow-500 font-bold text-xl">${(item as any).price}</div> 
                       </>
                   )}
-                  {isOwned && !isCard && (
+                  {isOwned && !isCard && !isPack && (
                       <button 
                         onClick={sellItem}
                         className="mt-6 w-full bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded border-2 border-red-400 shadow-lg flex items-center justify-center animate-pulse"
                       >
-                          <DollarSign size={16} className="mr-1" /> 売却 (${Math.max(1, Math.floor((otherItem as any).price / 2))})
+                          <DollarSign size={16} className="mr-1" /> 売却 (${Math.max(1, Math.floor((item as any).price / 2))})
                       </button>
                   )}
               </div>
@@ -957,7 +997,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                   <div className="w-2/3 bg-slate-800/50 p-4 rounded-lg border-2 border-slate-700 overflow-y-auto custom-scrollbar">
                       <div className="mb-8">
                           <h3 className="text-xl font-bold mb-4 text-orange-400 border-b border-slate-600 pb-2 flex items-center"><Package className="mr-2"/> ブースターパック (Packs)</h3>
-                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">{shopPacks.map((item) => (<div key={item.id} className="bg-slate-700 p-4 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors" onClick={() => buyItem(item, runState.shopInventory.indexOf(item))}><div className="w-16 h-16 mb-2"><PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/></div><div className="font-bold text-sm mb-1">{item.name}</div><div className="text-xs text-gray-400 mb-2 h-8 overflow-hidden">{item.description}</div><div className="mt-auto w-full"><button disabled={runState.money < item.price} className={`w-full py-1 rounded font-bold text-sm ${runState.money >= item.price ? 'bg-orange-600 hover:bg-orange-500' : 'bg-gray-600 cursor-not-allowed'}`}>${item.price} OPEN</button></div></div>))}</div>
+                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">{shopPacks.map((item) => (<div key={item.id} className="bg-slate-700 p-4 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors" onClick={() => buyItem(item, runState.shopInventory.indexOf(item))} onContextMenu={(e) => handleContextMenu(e, item, 'PACK', false)} onTouchStart={() => handleTouchStart(item, 'PACK', false)} onTouchEnd={handleTouchEnd}><div className="w-16 h-16 mb-2"><PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/></div><div className="font-bold text-sm mb-1">{item.name}</div><div className="text-xs text-gray-400 mb-2 h-8 overflow-hidden">{item.description}</div><div className="mt-auto w-full"><button disabled={runState.money < item.price} className={`w-full py-1 rounded font-bold text-sm ${runState.money >= item.price ? 'bg-orange-600 hover:bg-orange-500' : 'bg-gray-600 cursor-not-allowed'}`}>${item.price} OPEN</button></div></div>))}</div>
                       </div>
                       <div className="mb-8">
                           <h3 className="text-xl font-bold mb-4 text-blue-300 border-b border-slate-600 pb-2 flex items-center"><PixelSprite seed="SMILE" name="SMILE" className="w-6 h-6 mr-2" /> サポーター (Supporters)</h3>
