@@ -303,6 +303,7 @@ export interface PokerScoringContext {
   handsPlayed: number;
   discardsUsed: number;
   deckState: PokerCard[];
+  money: number; // Added to calculate interest/jokers based on gold
 }
 
 export interface PokerSupporter { // Joker
@@ -312,6 +313,7 @@ export interface PokerSupporter { // Joker
   rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'LEGENDARY';
   price: number;
   effect: (ctx: PokerScoringContext) => void;
+  getDynamicDescription?: (state: PokerRunState) => string; // Returns dynamic stats like "(Currently: +200)"
   icon: string;
   triggerOn?: 'HAND_PLAYED' | 'DISCARD' | 'HELD_IN_HAND' | 'PASSIVE';
 }

@@ -1,4 +1,5 @@
 
+
 import { Card, CardType, TargetType, Relic, Potion, Character, PokerHandResult, PokerSupporter, PokerConsumable, PokerPack, PokerSuit } from './types';
 
 export const INITIAL_HP = 75;
@@ -619,6 +620,17 @@ export const POKER_HAND_LEVELS: Record<string, PokerHandResult> = {
   'FLUSH_FIVE': { name: 'フラッシュファイブ', baseChips: 160, baseMult: 16, level: 1 },
 };
 
+// Card Enhancements Definitions
+export const POKER_ENHANCEMENTS: Record<string, {name: string, desc: string}> = {
+    BONUS: { name: 'ボーナス', desc: 'チップ +30' },
+    MULT: { name: 'マルチ', desc: '倍率 +0.5' }, // Game logic adds 0.5 to multiplier
+    WILD: { name: 'ワイルド', desc: '全てのマークとして扱われる' },
+    STONE: { name: 'ストーン', desc: 'ランクなし。チップ+50' },
+    GLASS: { name: 'ガラス', desc: '倍率 x2。1/4の確率で壊れる' },
+    GOLD: { name: 'ゴールド', desc: '使用/所持で $3 獲得' },
+    STEEL: { name: 'スチール', desc: '手札にある間、倍率 x1.5' }
+};
+
 // Expanded Supporters (Jokers)
 export const SUPPORTERS_LIBRARY: PokerSupporter[] = [
   // Original / Basic
@@ -629,11 +641,16 @@ export const SUPPORTERS_LIBRARY: PokerSupporter[] = [
   { id: 'NERD', name: 'ガリ勉君', description: 'ストレートでチップ+100', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(ctx.handType === 'STRAIGHT' || ctx.handType === 'STRAIGHT_FLUSH') ctx.chips += 100; }, icon: 'LIBRARIAN|#4caf50' },
   
   // Economy
-  { id: 'SUP_PIGGY', name: '貯金箱', description: '所持金$1につきチップ+2', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { /* Requires money state, simplistic version */ ctx.chips += 20; }, icon: 'POTION|#e91e63' }, // Simplified for safety without global money
+  { 
+      id: 'SUP_PIGGY', name: '貯金箱', description: '所持金$1につきチップ+2', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', 
+      effect: (ctx) => { ctx.chips += ctx.money * 2; }, 
+      getDynamicDescription: (state) => `(Current: +${state.money * 2})`,
+      icon: 'POTION|#e91e63' 
+  }, 
   
   // Scaling
   { id: 'SUP_BUS', name: '通学バス', description: '役を作るたび倍率+1(永続)', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.mult += 1 * ctx.handsPlayed, icon: 'SHOE|#ffeb3b' },
-  { id: 'SUP_CAMPFIRE', name: 'キャンプファイヤー', description: 'カードを売るたび倍率x0.25(永続)', price: 8, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.mult *= 1.5, icon: 'FLAME|#ff5722' }, // Simplified scaling
+  { id: 'SUP_CAMPFIRE', name: 'キャンプファイヤー', description: 'カードを売るたび倍率x0.25(永続)', price: 8, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.mult *= 1.5, icon: 'FLAME|#ff5722' }, 
   { id: 'SUP_RUNNER', name: 'マラソンランナー', description: 'ストレートを役にするたびチップ+10(永続)', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(ctx.handType.includes('STRAIGHT')) ctx.chips += 20 * ctx.handsPlayed; }, icon: 'SHOE|#2196f3' },
 
   // Rule Bending (Logic Handled in GameScreen)
@@ -642,8 +659,8 @@ export const SUPPORTERS_LIBRARY: PokerSupporter[] = [
   { id: 'SUP_YEARBOOK', name: '卒業アルバム', description: '全てのカードを絵札(J,Q,K)として扱う', price: 8, rarity: 'UNCOMMON', triggerOn: 'PASSIVE', effect: () => {}, icon: 'NOTEBOOK|#795548' },
   
   // Special Mechanics
-  { id: 'SUP_DNA', name: 'クローン実験', description: '最初のハンドが1枚なら、そのカードをコピーしてデッキに加える', price: 8, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: () => {}, icon: 'SLIME|#00bcd4' }, // Logic in GameScreen
-  { id: 'SUP_VAMPIRE', name: '吸血鬼', description: '得点カードの強化を吸い取り、倍率x0.2を得る(永続)', price: 7, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.mult *= 2, icon: 'GHOST|#f44336' }, // Simplified
+  { id: 'SUP_DNA', name: 'クローン実験', description: '最初のハンドが1枚なら、そのカードをコピーしてデッキに加える', price: 8, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: () => {}, icon: 'SLIME|#00bcd4' }, 
+  { id: 'SUP_VAMPIRE', name: '吸血鬼', description: '得点カードの強化を吸い取り、倍率x0.2を得る(永続)', price: 7, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.mult *= 2, icon: 'GHOST|#f44336' },
   { id: 'SUP_SPACE', name: '宇宙人', description: '1/4の確率で役のレベルを上げる', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: () => {}, icon: 'ALIEN|#9c27b0' },
 
   // Conditional / Type Specific
@@ -651,8 +668,18 @@ export const SUPPORTERS_LIBRARY: PokerSupporter[] = [
   { id: 'SUP_ODD', name: '奇数ちゃん', description: '奇数カード(3,5,7,9,A)のチップ+30', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const odds = ctx.cards.filter(c => c.rank % 2 !== 0).length; ctx.chips += odds * 30; }, icon: 'NOTEBOOK|#e91e63' },
   { id: 'SUP_FIBONACCI', name: 'フィボナッチ', description: 'A,2,3,5,8のカードの倍率+8', price: 7, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const fibs = ctx.cards.filter(c => [14, 2, 3, 5, 8].includes(c.rank)).length; ctx.mult += fibs * 8; }, icon: 'WIZARD|#ff9800' },
   { id: 'SUP_HALF', name: 'ハーフパンツ', description: '3枚以下の役なら倍率+20', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(ctx.cards.length <= 3) ctx.mult += 20; }, icon: 'SHOE|#ff5722' },
-  { id: 'SUP_BANNER', name: '校旗', description: '残りの手札捨て回数につきチップ+40', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.chips += ctx.discardsUsed * 40, icon: 'FLIER|#ffeb3b' },
-  { id: 'SUP_ICE_CREAM', name: '溶けたアイス', description: 'チップ+100、手札を出すたび-5', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.chips += Math.max(0, 100 - (ctx.handsPlayed * 5)), icon: 'SLIME|#ffffff' },
+  { 
+      id: 'SUP_BANNER', name: '校旗', description: '残りの手札捨て回数につきチップ+40', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', 
+      effect: (ctx) => ctx.chips += ctx.discardsUsed * 40,
+      getDynamicDescription: (state) => `(Current: +${state.discardsRemaining * 40})`, // NOTE: ctx.discardsUsed passed from playHand is actually remaining count logic in current implementation
+      icon: 'FLIER|#ffeb3b' 
+  },
+  { 
+      id: 'SUP_ICE_CREAM', name: '溶けたアイス', description: 'チップ+100、手札を出すたび-5', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', 
+      effect: (ctx) => ctx.chips += Math.max(0, 100 - (ctx.handsPlayed * 5)),
+      getDynamicDescription: (state) => `(Current: +${Math.max(0, 100 - ((state.currentBlind.bossAbility==='THE_NEEDLE' ? 1 : 4) - state.handsRemaining) * 5)})`, // Rough estimate based on hands played
+      icon: 'SLIME|#ffffff' 
+  },
 ];
 
 export const CONSUMABLES_LIBRARY: PokerConsumable[] = [

@@ -1,12 +1,13 @@
 
+
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package, Ghost, Trophy, RotateCcw, Play, DollarSign } from 'lucide-react';
+import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package, Ghost, Trophy, RotateCcw, Play, DollarSign, Info } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { 
     PokerCard, PokerRunState, PokerBlind, PokerSupporter, PokerConsumable, PokerSuit, PokerRank, PokerScoringContext, PokerPack
 } from '../types';
-import { POKER_HAND_LEVELS, SUPPORTERS_LIBRARY, CONSUMABLES_LIBRARY, PACK_LIBRARY } from '../constants';
+import { POKER_HAND_LEVELS, SUPPORTERS_LIBRARY, CONSUMABLES_LIBRARY, PACK_LIBRARY, POKER_ENHANCEMENTS } from '../constants';
 import { storageService } from '../services/storageService';
 
 // --- Constants & Helpers ---
@@ -547,7 +548,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           chips, mult, handType: type, cards: scoringCards,
           handsPlayed: (4 - runState.handsRemaining) + 1,
           discardsUsed: (3 - runState.discardsRemaining),
-          deckState: runState.deck
+          deckState: runState.deck,
+          money: runState.money
       };
       
       runState.supporters.forEach(s => { if (s.triggerOn === 'HAND_PLAYED' || !s.triggerOn) s.effect(ctx); });
@@ -719,13 +721,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       const content: (PokerCard | PokerSupporter | PokerConsumable)[] = [];
       
       if (currentPack.type === 'STANDARD') {
-          // Increase enhancement chance for packs (default was 0.1)
           const ENHANCEMENT_RATE = 0.4;
-          
           for (let i = 0; i < currentPack.size; i++) {
-             // Generate card
              let card = generateRandomPlayingCard(ENHANCEMENT_RATE);
-             // Ensure uniqueness in the same pack offer
              let retries = 0;
              while (content.some(c => 'suit' in c && c.suit === card.suit && c.rank === card.rank) && retries < 10) {
                  card = generateRandomPlayingCard(ENHANCEMENT_RATE);
@@ -734,7 +732,6 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
              content.push(card);
           }
       } else {
-          // For items from libraries
           let pool: (PokerSupporter | PokerConsumable)[] = [];
           if (currentPack.type === 'BUFF') {
               pool = [...CONSUMABLES_LIBRARY.filter(c => c.type === 'PLANET' || c.type === 'TAROT')];
@@ -743,8 +740,6 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           } else if (currentPack.type === 'SPECTRAL') {
               pool = [...CONSUMABLES_LIBRARY.filter(c => c.type === 'SPECTRAL')];
           }
-          
-          // Shuffle pool and take unique items
           pool = pool.sort(() => Math.random() - 0.5);
           for (let i = 0; i < Math.min(currentPack.size, pool.length); i++) {
               content.push(pool[i]);
@@ -843,14 +838,33 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       const { item, type, isOwned } = inspectedItem;
       const isCard = type === 'CARD';
       const isPack = type === 'PACK';
+      const isSupporter = type === 'SUPPORTER';
       const cardItem = item as PokerCard;
+      const supporterItem = item as PokerSupporter;
       
+      const cardEnhancement = isCard && cardItem.enhancement ? POKER_ENHANCEMENTS[cardItem.enhancement] : null;
+
       return (
           <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setInspectedItem(null)}>
               <div className="bg-slate-800 border-2 border-white p-6 rounded-lg max-w-sm w-full shadow-2xl relative" onClick={e => e.stopPropagation()}>
                   <button onClick={() => setInspectedItem(null)} className="absolute top-2 right-2 text-gray-400 hover:text-white"><X size={24}/></button>
                   {isCard ? (
-                      <div className="flex flex-col items-center mb-4"><div className="w-32 h-48 bg-white text-black rounded-lg border-4 border-slate-300 shadow-xl flex flex-col items-center justify-between p-2 mb-4"><div className={`text-2xl font-bold w-full text-left ${['HEART', 'DIAMOND'].includes(cardItem.suit) ? 'text-red-600' : 'text-black'}`}>{getRankDisplay(cardItem.rank)}</div><div className="scale-150">{getSuitIcon(cardItem.suit, cardItem.enhancement === 'WILD')}</div><div className="text-xs text-center font-bold text-gray-500">{cardItem.enhancement || ''}</div><div className={`text-2xl font-bold w-full text-right rotate-180 ${['HEART', 'DIAMOND'].includes(cardItem.suit) ? 'text-red-600' : 'text-black'}`}>{getRankDisplay(cardItem.rank)}</div></div><h3 className="text-2xl font-bold text-yellow-400 mb-2">{getRankDisplay(cardItem.rank)} of {cardItem.suit}</h3></div>
+                      <div className="flex flex-col items-center mb-4">
+                          <div className="w-32 h-48 bg-white text-black rounded-lg border-4 border-slate-300 shadow-xl flex flex-col items-center justify-between p-2 mb-4">
+                              <div className={`text-2xl font-bold w-full text-left ${['HEART', 'DIAMOND'].includes(cardItem.suit) ? 'text-red-600' : 'text-black'}`}>{getRankDisplay(cardItem.rank)}</div>
+                              <div className="scale-150">{getSuitIcon(cardItem.suit, cardItem.enhancement === 'WILD')}</div>
+                              <div className="text-xs text-center font-bold text-gray-500">{cardItem.enhancement || ''}</div>
+                              <div className={`text-2xl font-bold w-full text-right rotate-180 ${['HEART', 'DIAMOND'].includes(cardItem.suit) ? 'text-red-600' : 'text-black'}`}>{getRankDisplay(cardItem.rank)}</div>
+                          </div>
+                          <h3 className="text-2xl font-bold text-yellow-400 mb-2">{getRankDisplay(cardItem.rank)} of {cardItem.suit}</h3>
+                          
+                          {cardEnhancement && (
+                              <div className="bg-black/50 p-2 rounded w-full text-center mt-2 border border-yellow-500/30">
+                                  <div className="text-yellow-400 font-bold">{cardEnhancement.name}</div>
+                                  <div className="text-gray-300 text-xs">{cardEnhancement.desc}</div>
+                              </div>
+                          )}
+                      </div>
                   ) : isPack ? (
                       <>
                         <div className="flex flex-col items-center mb-4">
@@ -868,8 +882,18 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                             <h3 className="text-2xl font-bold text-yellow-400 mb-2">{(item as any).name}</h3>
                             <div className="text-sm font-bold text-white bg-slate-700 px-3 py-1 rounded-full">{'rarity' in item ? (item as PokerSupporter).rarity : (item as PokerConsumable).type}</div>
                         </div>
-                        <p className="text-lg text-gray-300 text-center leading-relaxed">{(item as any).description}</p>
-                        <div className="mt-6 text-center text-yellow-500 font-bold text-xl">${(item as any).price}</div> 
+                        <p className="text-lg text-gray-300 text-center leading-relaxed mb-4">{(item as any).description}</p>
+                        
+                        {/* Dynamic Bonus Display for Supporters */}
+                        {isSupporter && supporterItem.getDynamicDescription && (
+                            <div className="bg-slate-900/80 p-2 rounded text-center border border-cyan-500/50 mb-4 animate-pulse">
+                                <div className="text-cyan-400 font-bold text-sm">
+                                    {supporterItem.getDynamicDescription(runState)}
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="mt-2 text-center text-yellow-500 font-bold text-xl">${(item as any).price}</div> 
                       </>
                   )}
                   {isOwned && !isCard && !isPack && (
@@ -1047,7 +1071,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                     <button onClick={() => setShowRulesModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
                     <h2 className="text-2xl font-bold text-yellow-400 mb-4 flex items-center"><BookOpen className="mr-2"/> 遊び方 (How to Play)</h2>
                     <div className="bg-slate-900/80 p-4 rounded-lg border border-slate-600 mb-6 text-sm space-y-4">
-                        <div><h3 className="font-bold text-white mb-2 flex items-center"><Flag className="mr-2 text-red-400"/> ゲームの目的</h3><p className="text-gray-300">ポーカーの役を作ってスコアを稼ぎ、設定された<span className="text-red-400 font-bold">目標スコア(Score Goal)</span>を達成しましょう。<br/>全8ステージ(Ante)をクリアすると卒業(ゲームクリア)です。</p></div>
+                        <div><h3 className="font-bold text-white mb-2 flex items-center"><Flag className="mr-2 text-red-400"/> ゲームの目的</h3><p className="text-gray-300">ポーカーの役を作ってスコアを稼げ！<span className="text-red-400 font-bold">目標スコア(Score Goal)</span>を達成しましょう。<br/>全8ステージ(Ante)をクリアすると卒業(ゲームクリア)です。</p></div>
                         <div><h3 className="font-bold text-white mb-2 flex items-center"><Calculator className="mr-2 text-blue-400"/> スコア計算</h3><div className="flex items-center gap-2 bg-black/40 p-2 rounded justify-center"><span className="text-blue-400 font-bold text-lg">チップ (Chips)</span><X size={16} className="text-gray-500"/><span className="text-red-500 font-bold text-lg">倍率 (Mult)</span><ArrowRight size={16} className="text-gray-500"/><span className="text-yellow-400 font-bold text-lg">スコア</span></div></div>
                         <div><h3 className="font-bold text-white mb-2 flex items-center"><ShoppingBag className="mr-2 text-yellow-400"/> 買い物</h3><p className="text-gray-300">ラウンド勝利後に獲得したお金でアイテムを購入できます。</p></div>
                     </div>
