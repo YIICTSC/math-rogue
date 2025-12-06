@@ -344,7 +344,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     spriteCache.current['SHOPKEEPER'] = createPixelSpriteCanvas('SHOPKEEPER', 'HUMANOID|#33691e'); 
     spriteCache.current['GOLD_BAG'] = createPixelSpriteCanvas('GOLD_BAG', 'GOLD_BAG|#FFD700');
     spriteCache.current['MAGIC_BULLET'] = createPixelSpriteCanvas('MAGIC_BULLET', 'MAGIC_BULLET|#00BCD4');
-    spriteCache.current['TRAP'] = createPixelSpriteCanvas('TRAP', 'X|#306230'); // Simple trap marker
+    spriteCache.current['TRAP'] = createPixelSpriteCanvas('TRAP', 'CROSS|#0f380f'); // Black cross trap
     spriteCache.current['ACCESSORY'] = createPixelSpriteCanvas('ACCESSORY', 'SHIELD|#FFD700'); // Bracelet/Ring
 
     // Set BGM to new School Psyche track
@@ -692,7 +692,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                             }
                         });
                     }
-                } else if (Math.random() < 0.02) {
+                } else if (inRoom && Math.random() < 0.02) {
                     const trapTypes: TrapType[] = ['BOMB', 'SLEEP', 'POISON', 'WARP', 'RUST', 'SUMMON'];
                     const tType = trapTypes[Math.floor(Math.random() * trapTypes.length)];
                     newTraps.push({

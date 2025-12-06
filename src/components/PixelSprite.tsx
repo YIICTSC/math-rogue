@@ -661,6 +661,24 @@ export const SPRITE_TEMPLATES: Record<string, string[]> = {
     "................",
     "................"
   ],
+  CROSS: [
+    "#.............#.",
+    ".##.........##..",
+    "..##.......##...",
+    "...##.....##....",
+    "....##...##.....",
+    ".....##.##......",
+    "......###.......",
+    "......###.......",
+    ".....##.##......",
+    "....##...##.....",
+    "...##.....##....",
+    "..##.......##...",
+    ".##.........##..",
+    "#.............#.",
+    "................",
+    "................"
+  ],
 };
 
 // Exported Helper for other components to use (e.g. SchoolDungeonRPG)
@@ -707,7 +725,7 @@ export const createPixelSpriteCanvas = (seed: string, name: string = "", size: n
     else if (n.includes('蛇') || n.includes('ミミズ') || n.includes('ツチノコ')) spriteKey = 'SNAKE';
     else if (n.includes('花') || n.includes('草') || n.includes('キノコ') || n.includes('樹')) spriteKey = 'PLANT';
     
-    // Cards
+    // Cards & Items
     else if (n.includes('傘') || n.includes('杖') || n.includes('パラソル')) spriteKey = 'UMBRELLA';
     else if (n.includes('ノート') || n.includes('宿題') || n.includes('辞書') || n.includes('本') || n.includes('学習') || n.includes('予習') || n.includes('計算') || n.includes('研究') || n.includes('速読') || n.includes('計画') || n.includes('作戦') || n.includes('勉強') || n.includes('書') || n.includes('読') || n.includes('誌') || n.includes('帳')) spriteKey = 'NOTEBOOK';
     else if (n.includes('ランドセル') || n.includes('バッグ') || n.includes('道具') || n.includes('準備')) spriteKey = 'BACKPACK';
@@ -720,6 +738,7 @@ export const createPixelSpriteCanvas = (seed: string, name: string = "", size: n
     else if (n.includes('拳') || n.includes('パンチ') || n.includes('打撃') || n.includes('殴') || n.includes('手') || n.includes('つかむ') || n.includes('ビンタ') || n.includes('叩く') || n.includes('ボディスラム') || n.includes('暴れる') || n.includes('膝蹴り') || n.includes('口喧嘩') || n.includes('タックル') || n.includes('打') || n.includes('締め')) spriteKey = 'FIST';
     else if (n.includes('雷') || n.includes('電気') || n.includes('ビーム') || n.includes('光') || n.includes('サンダー') || n.includes('ショック') || n.includes('大声') || n.includes('レーザー') || n.includes('静電気') || n.includes('雄叫び') || n.includes('泣き叫ぶ') || n.includes('充電') || n.includes('怒号') || n.includes('叫') || n.includes('鳴') || n.includes('電')) spriteKey = 'LIGHTNING';
     else if (n.includes('筋肉') || n.includes('ムキムキ') || n.includes('頭突き') || n.includes('体')) spriteKey = 'MUSCLE';
+    else if (n.includes('罠') || n.includes('トラップ') || n.includes('TRAP') || n.includes('X') || n.includes('バツ') || n.includes('クロス')) spriteKey = 'CROSS';
 
     if (!spriteKey) {
         if (typeKey) {
