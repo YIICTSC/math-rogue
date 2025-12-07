@@ -749,9 +749,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         }
     }
 
-    // 3. Spawn Traps (~2% chance in rooms)
+    // 3. Spawn Traps (Fixed range: 2-4 per floor)
     const roomCandidates = candidates.filter(c => isPointInRoom(c.x, c.y));
-    const trapCount = Math.floor(roomCandidates.length * 0.1); // ~10% of room tiles only
+    const trapCount = Math.floor(Math.random() * 3) + 2; // Reduced trap count
     for (let i = 0; i < trapCount; i++) {
         const t = roomCandidates.pop();
         if (t) {
@@ -2295,7 +2295,12 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                     <div className="text-sm mb-4 min-h-[3rem]">{getInspectedDescription(inspectedItem)}</div>
                     <div className="text-xs font-bold grid grid-cols-2 gap-2">
                         <div>分類: {inspectedItem.category}</div>
-                        {inspectedItem.power && <div>威力: {inspectedItem.power}</div>}
+                        {inspectedItem.power && (
+                            <div>
+                                {inspectedItem.category === 'ARMOR' ? '防御' : '威力'}: {inspectedItem.power + (inspectedItem.plus || 0)}
+                                {inspectedItem.plus ? <span className="text-[9px] font-normal ml-1">({inspectedItem.power}+{inspectedItem.plus})</span> : ''}
+                            </div>
+                        )}
                         {inspectedItem.value && <div>効果: {inspectedItem.value}</div>}
                     </div>
                 </div>
@@ -2325,8 +2330,30 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                         <div className="border-t-2 pt-2" style={{ borderColor: C1 }}>
                             <h3 className="font-bold mb-2">装備</h3>
                             <div className="grid grid-cols-1 gap-1 text-sm">
-                                <div><span className="font-bold mr-2">[武]</span> {player.equipment?.weapon ? `${getItemName(player.equipment.weapon)} ${player.equipment.weapon.plus?'+'+player.equipment.weapon.plus:''}` : 'なし'}</div>
-                                <div><span className="font-bold mr-2">[防]</span> {player.equipment?.armor ? `${getItemName(player.equipment.armor)} ${player.equipment.armor.plus?'+'+player.equipment.armor.plus:''}` : 'なし'}</div>
+                                <div>
+                                    <span className="font-bold mr-2">[武]</span> 
+                                    {player.equipment?.weapon ? (
+                                        <span>
+                                            {getItemName(player.equipment.weapon)} 
+                                            {player.equipment.weapon.plus ? `+${player.equipment.weapon.plus}` : ''}
+                                            <span className="text-[10px] ml-1 opacity-70">
+                                                ({(player.equipment.weapon.power||0) + (player.equipment.weapon.plus||0)})
+                                            </span>
+                                        </span>
+                                    ) : 'なし'}
+                                </div>
+                                <div>
+                                    <span className="font-bold mr-2">[防]</span> 
+                                    {player.equipment?.armor ? (
+                                        <span>
+                                            {getItemName(player.equipment.armor)} 
+                                            {player.equipment.armor.plus ? `+${player.equipment.armor.plus}` : ''}
+                                            <span className="text-[10px] ml-1 opacity-70">
+                                                ({(player.equipment.armor.power||0) + (player.equipment.armor.plus||0)})
+                                            </span>
+                                        </span>
+                                    ) : 'なし'}
+                                </div>
                                 <div><span className="font-bold mr-2">[投]</span> {player.equipment?.ranged ? `${getItemName(player.equipment.ranged)} (${player.equipment.ranged.count})` : 'なし'}</div>
                                 <div><span className="font-bold mr-2">[腕]</span> {player.equipment?.accessory ? `${getItemName(player.equipment.accessory)}` : 'なし'}</div>
                             </div>
