@@ -1,6 +1,4 @@
 
-
-
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package, Ghost, Trophy, RotateCcw, Play, DollarSign, Info } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -482,8 +480,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
 
       // Boss Logic Override
       if (runState.currentBlind.bossAbility === 'THE_NEEDLE') baseHands = 1;
-      if (runState.currentBlind.bossAbility === 'THE_MANACLE') initialHandSize -= 1; // Hand size reduced logic would need to be applied above, but standard Balatro applies it to max draw. 
-      // Simplified: Just draw less initially if manacle?
+      if (runState.currentBlind.bossAbility === 'THE_MANACLE') initialHandSize -= 1; 
       
       setRunState(prev => ({
           ...prev,
@@ -1080,126 +1077,117 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
               
               <div className="flex-grow flex flex-col gap-4 overflow-hidden">
                   
-                  {/* INVENTORY SECTION (TOP) */}
-                  <div className="w-full bg-slate-800/80 p-3 rounded-lg border-2 border-slate-700 shrink-0">
-                      <div className="flex flex-col md:flex-row gap-4 h-full">
+                  {/* INVENTORY SECTION (TOP) - COMPACT REDESIGN */}
+                  <div className="w-full bg-slate-800/90 p-2 rounded-lg border border-slate-600 shrink-0 shadow-sm">
+                      <div className="flex gap-2 h-16 md:h-20 items-stretch">
                           {/* Supporters */}
-                          <div className="flex-1">
-                              <div className="text-xs text-blue-300 mb-1 font-bold flex items-center gap-2">
-                                  <span className="bg-blue-900/50 px-2 py-0.5 rounded">SUPPORTERS ({runState.supporters.length}/5)</span>
-                              </div>
-                              <div className="flex gap-2 min-h-[64px] items-center bg-slate-900/50 p-2 rounded">
+                          <div className="flex-1 bg-black/20 rounded border border-slate-700 flex flex-col px-2 py-1 min-w-0">
+                              <div className="text-[9px] text-blue-300 font-bold mb-0.5 flex items-center"><span className="w-2 h-2 bg-blue-500 rounded-full mr-1 inline-block"></span>JOKERS ({runState.supporters.length}/5)</div>
+                              <div className="flex-1 flex items-center gap-1 overflow-x-auto custom-scrollbar">
                                   {runState.supporters.map((s, i) => (
-                                      <div key={i} className="bg-slate-800 p-1 rounded flex flex-col items-center text-xs cursor-pointer hover:bg-slate-700 w-12 border border-slate-600 relative group" onContextMenu={(e) => handleContextMenu(e, s, 'SUPPORTER', true, i)} onTouchStart={() => handleTouchStart(s, 'SUPPORTER', true, i)} onTouchEnd={handleTouchEnd}>
-                                          <PixelSprite seed={s.icon} name={s.icon} className="w-8 h-8"/>
-                                          {/* Hover Tooltip */}
-                                          <div className="absolute bottom-full mb-2 hidden group-hover:block bg-black text-white text-[10px] p-2 rounded z-50 whitespace-nowrap border border-gray-500 pointer-events-none">{s.name}</div>
+                                      <div key={i} className="bg-slate-800 p-0.5 rounded flex-shrink-0 border border-slate-600 cursor-pointer hover:bg-slate-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center relative group" onContextMenu={(e) => handleContextMenu(e, s, 'SUPPORTER', true, i)} onTouchStart={() => handleTouchStart(s, 'SUPPORTER', true, i)} onTouchEnd={handleTouchEnd}>
+                                          <PixelSprite seed={s.icon} name={s.icon} className="w-full h-full"/>
                                       </div>
                                   ))}
-                                  {runState.supporters.length === 0 && <div className="text-xs text-gray-600 italic px-2">None</div>}
+                                  {[...Array(5 - runState.supporters.length)].map((_, i) => (
+                                      <div key={`empty-${i}`} className="w-8 h-8 md:w-10 md:h-10 rounded border border-slate-700/50 bg-slate-900/30 flex-shrink-0"></div>
+                                  ))}
                               </div>
                           </div>
                           
                           {/* Consumables */}
-                          <div className="w-full md:w-auto md:min-w-[120px]">
-                              <div className="text-xs text-purple-300 mb-1 font-bold flex items-center gap-2">
-                                  <span className="bg-purple-900/50 px-2 py-0.5 rounded">CONSUMABLES ({runState.consumables.length}/2)</span>
-                              </div>
-                              <div className="flex gap-2 min-h-[64px] items-center bg-slate-900/50 p-2 rounded">
+                          <div className="w-24 md:w-32 bg-black/20 rounded border border-slate-700 flex flex-col px-2 py-1 shrink-0">
+                              <div className="text-[9px] text-purple-300 font-bold mb-0.5 flex items-center"><span className="w-2 h-2 bg-purple-500 rounded-full mr-1 inline-block"></span>CARDS ({runState.consumables.length}/2)</div>
+                              <div className="flex-1 flex items-center gap-1 justify-center">
                                   {runState.consumables.map((c, i) => (
-                                      <div key={i} className="bg-slate-800 p-1 rounded flex flex-col items-center text-xs cursor-pointer hover:bg-slate-700 w-12 border border-slate-600 relative group" onContextMenu={(e) => handleContextMenu(e, c, 'CONSUMABLE', true, i)} onTouchStart={() => handleTouchStart(c, 'CONSUMABLE', true, i)} onTouchEnd={handleTouchEnd}>
-                                          <PixelSprite seed={c.icon} name={c.icon} className="w-8 h-8"/>
-                                          <div className="absolute bottom-full mb-2 hidden group-hover:block bg-black text-white text-[10px] p-2 rounded z-50 whitespace-nowrap border border-gray-500 pointer-events-none">{c.name}</div>
+                                      <div key={i} className="bg-slate-800 p-0.5 rounded flex-shrink-0 border border-slate-600 cursor-pointer hover:bg-slate-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center relative group" onContextMenu={(e) => handleContextMenu(e, c, 'CONSUMABLE', true, i)} onTouchStart={() => handleTouchStart(c, 'CONSUMABLE', true, i)} onTouchEnd={handleTouchEnd}>
+                                          <PixelSprite seed={c.icon} name={c.icon} className="w-full h-full"/>
                                       </div>
                                   ))}
-                                  {runState.consumables.length === 0 && <div className="text-xs text-gray-600 italic px-2">None</div>}
-                              </div>
-                          </div>
-
-                          {/* Vouchers */}
-                          <div className="w-full md:w-auto md:min-w-[120px]">
-                              <div className="text-xs text-gray-300 mb-1 font-bold flex items-center gap-2">
-                                  <span className="bg-gray-700 px-2 py-0.5 rounded">VOUCHERS</span>
-                              </div>
-                              <div className="flex flex-wrap gap-1 min-h-[64px] items-center bg-slate-900/50 p-2 rounded">
-                                  {runState.vouchers.map((vid, i) => {
-                                      const v = VOUCHERS_LIBRARY.find(lib => lib.id === vid);
-                                      if (!v) return null;
-                                      return (
-                                          <div key={i} className="w-6 h-6 bg-slate-800 rounded flex items-center justify-center border border-slate-600 relative group" onContextMenu={(e) => handleContextMenu(e, v, 'VOUCHER', true)} onTouchStart={() => handleTouchStart(v, 'VOUCHER', true)} onTouchEnd={handleTouchEnd}>
-                                              <PixelSprite seed={v.icon} name={v.icon} className="w-4 h-4"/>
-                                              <div className="absolute bottom-full mb-2 hidden group-hover:block bg-black text-white text-[10px] p-2 rounded z-50 whitespace-nowrap border border-gray-500 pointer-events-none right-0">{v.name}</div>
-                                          </div>
-                                      );
-                                  })}
-                                  {runState.vouchers.length === 0 && <div className="text-xs text-gray-600 italic px-2">None</div>}
+                                  {[...Array(2 - runState.consumables.length)].map((_, i) => (
+                                      <div key={`empty-c-${i}`} className="w-8 h-8 md:w-10 md:h-10 rounded border border-slate-700/50 bg-slate-900/30 flex-shrink-0"></div>
+                                  ))}
                               </div>
                           </div>
                       </div>
+                      
+                      {/* Vouchers Row (Tiny) */}
+                      {runState.vouchers.length > 0 && (
+                          <div className="flex gap-1 mt-1 overflow-x-auto h-5 items-center px-1">
+                              {runState.vouchers.map((vid, i) => {
+                                  const v = VOUCHERS_LIBRARY.find(lib => lib.id === vid);
+                                  if (!v) return null;
+                                  return (
+                                      <div key={i} className="h-4 w-4 rounded-full bg-slate-700 border border-slate-500 flex items-center justify-center flex-shrink-0 cursor-help" title={v.name} onClick={() => setInspectedItem({ item: v, type: 'VOUCHER', isOwned: true })}>
+                                          <PixelSprite seed={v.icon} name={v.icon} className="w-3 h-3"/>
+                                      </div>
+                                  );
+                              })}
+                          </div>
+                      )}
                   </div>
 
-                  {/* SHOP ITEMS SECTION (BOTTOM) */}
-                  <div className="flex-grow bg-slate-800/50 p-4 rounded-lg border-2 border-slate-700 overflow-y-auto custom-scrollbar">
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  {/* SHOP ITEMS SECTION (BOTTOM) - MAXIMIZED */}
+                  <div className="flex-grow bg-slate-800/30 p-2 md:p-4 rounded-lg border-2 border-slate-700 overflow-y-auto custom-scrollbar">
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                           
                           {/* Voucher Slot */}
-                          <div className="md:col-span-1">
+                          <div className="col-span-2 md:col-span-1 row-span-1">
                               {voucher ? (
                                   <div 
-                                    className="bg-slate-900 border-2 border-slate-600 p-4 rounded-lg flex flex-col items-center text-center h-full relative group cursor-pointer hover:border-white transition-colors"
+                                    className="bg-slate-900 border-2 border-slate-600 p-2 rounded-lg flex flex-col items-center text-center h-full relative group cursor-pointer hover:border-white transition-colors justify-between min-h-[160px]"
                                     onClick={() => buyItem(voucher, -1, 'VOUCHER')}
                                     onContextMenu={(e) => handleContextMenu(e, voucher, 'VOUCHER', false)}
                                     onTouchStart={() => handleTouchStart(voucher, 'VOUCHER', false)}
                                     onTouchEnd={handleTouchEnd}
                                   >
-                                      <div className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-widest w-full border-b border-gray-700 pb-1">Voucher</div>
-                                      <div className="w-20 h-20 mb-4 bg-slate-800 rounded-full flex items-center justify-center border-4 border-slate-700">
-                                          <PixelSprite seed={voucher.icon} name={voucher.icon} className="w-12 h-12"/>
+                                      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest w-full border-b border-gray-700 pb-1">Voucher</div>
+                                      <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center border-2 border-slate-700 mt-2">
+                                          <PixelSprite seed={voucher.icon} name={voucher.icon} className="w-8 h-8"/>
                                       </div>
-                                      <div className="font-bold text-sm mb-2">{voucher.name}</div>
-                                      <div className="text-xs text-gray-400 mb-4 flex-grow">{voucher.description}</div>
-                                      <button disabled={runState.money < getPrice(voucher.price)} className={`w-full py-2 rounded font-bold text-sm ${runState.money >= getPrice(voucher.price) ? 'bg-slate-100 text-black hover:bg-white' : 'bg-gray-700 text-gray-500 cursor-not-allowed'}`}>${getPrice(voucher.price)} BUY</button>
+                                      <div className="font-bold text-xs">{voucher.name}</div>
+                                      <div className="text-[9px] text-gray-400 leading-tight h-8 overflow-hidden">{voucher.description}</div>
+                                      <button disabled={runState.money < getPrice(voucher.price)} className={`w-full py-1 rounded font-bold text-xs ${runState.money >= getPrice(voucher.price) ? 'bg-slate-100 text-black hover:bg-white' : 'bg-gray-700 text-gray-500 cursor-not-allowed'}`}>${getPrice(voucher.price)}</button>
                                   </div>
                               ) : (
-                                  <div className="bg-slate-900/50 border-2 border-slate-700 border-dashed p-4 rounded-lg flex flex-col items-center justify-center h-full text-gray-600 text-sm italic">
+                                  <div className="bg-slate-900/50 border-2 border-slate-700 border-dashed p-4 rounded-lg flex flex-col items-center justify-center h-full text-gray-600 text-xs italic min-h-[160px]">
                                       Sold Out
                                   </div>
                               )}
                           </div>
 
-                          {/* Items Grid */}
-                          <div className="md:col-span-3 grid grid-cols-2 md:grid-cols-3 gap-4">
-                              {/* Packs */}
-                              {shopPacks.map((item) => (
-                                  <div key={item.id} className="bg-slate-700 p-4 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'PACK', false)} onTouchStart={() => handleTouchStart(item, 'PACK', false)} onTouchEnd={handleTouchEnd}>
-                                      <div className="absolute top-2 left-2 text-[10px] font-bold text-orange-300 bg-orange-900/50 px-2 py-0.5 rounded">PACK</div>
-                                      <div className="w-16 h-16 mb-2 mt-4"><PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/></div>
-                                      <div className="font-bold text-sm mb-1">{item.name}</div>
-                                      <div className="text-xs text-gray-400 mb-2 h-8 overflow-hidden leading-tight">{item.description}</div>
-                                      <div className="mt-auto w-full"><button disabled={runState.money < getPrice(item.price)} className={`w-full py-1 rounded font-bold text-sm ${runState.money >= getPrice(item.price) ? 'bg-orange-600 hover:bg-orange-500 shadow-md' : 'bg-gray-600 cursor-not-allowed'}`}>${getPrice(item.price)}</button></div>
-                                  </div>
-                              ))}
-                              {/* Supporters */}
-                              {shopSupporters.map((item) => (
-                                  <div key={item.id} className="bg-slate-700 p-4 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'SUPPORTER', false)} onTouchStart={() => handleTouchStart(item, 'SUPPORTER', false)} onTouchEnd={handleTouchEnd}>
-                                      <div className="absolute top-2 left-2 text-[10px] font-bold text-blue-300 bg-blue-900/50 px-2 py-0.5 rounded">JOKER</div>
-                                      <div className="w-16 h-16 mb-2 mt-4"><PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/></div>
-                                      <div className="font-bold text-sm mb-1">{item.name}</div>
-                                      <div className="text-xs text-gray-400 mb-2 h-8 overflow-hidden leading-tight">{item.description}</div>
-                                      <div className="mt-auto w-full"><button disabled={runState.money < getPrice(item.price)} className={`w-full py-1 rounded font-bold text-sm ${runState.money >= getPrice(item.price) ? 'bg-blue-600 hover:bg-blue-500 shadow-md' : 'bg-gray-600 cursor-not-allowed'}`}>${getPrice(item.price)}</button></div>
-                                  </div>
-                              ))}
-                              {/* Consumables */}
-                              {shopConsumables.map((item) => (
-                                  <div key={item.id} className="bg-slate-700 p-4 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'CONSUMABLE', false)} onTouchStart={() => handleTouchStart(item, 'CONSUMABLE', false)} onTouchEnd={handleTouchEnd}>
-                                      <div className="absolute top-2 left-2 text-[10px] font-bold text-purple-300 bg-purple-900/50 px-2 py-0.5 rounded">CARD</div>
-                                      <div className="w-16 h-16 mb-2 mt-4"><PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/></div>
-                                      <div className="font-bold text-sm mb-1">{item.name}</div>
-                                      <div className="text-xs text-gray-400 mb-2 h-8 overflow-hidden leading-tight">{item.description}</div>
-                                      <div className="mt-auto w-full"><button disabled={runState.money < getPrice(item.price)} className={`w-full py-1 rounded font-bold text-sm ${runState.money >= getPrice(item.price) ? 'bg-purple-600 hover:bg-purple-500 shadow-md' : 'bg-gray-600 cursor-not-allowed'}`}>${getPrice(item.price)}</button></div>
-                                  </div>
-                              ))}
-                          </div>
+                          {/* Packs */}
+                          {shopPacks.map((item) => (
+                              <div key={item.id} className="bg-slate-700 p-2 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg justify-between min-h-[160px]" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'PACK', false)} onTouchStart={() => handleTouchStart(item, 'PACK', false)} onTouchEnd={handleTouchEnd}>
+                                  <div className="absolute top-1 left-1 text-[8px] font-bold text-orange-300 bg-orange-900/50 px-1.5 py-0.5 rounded">PACK</div>
+                                  <div className="w-12 h-12 mt-4"><PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/></div>
+                                  <div className="font-bold text-xs">{item.name}</div>
+                                  <div className="text-[9px] text-gray-400 h-8 overflow-hidden leading-tight">{item.description}</div>
+                                  <button disabled={runState.money < getPrice(item.price)} className={`w-full py-1 rounded font-bold text-xs ${runState.money >= getPrice(item.price) ? 'bg-orange-600 hover:bg-orange-500 shadow-md' : 'bg-gray-600 cursor-not-allowed'}`}>${getPrice(item.price)}</button>
+                              </div>
+                          ))}
+                          
+                          {/* Supporters */}
+                          {shopSupporters.map((item) => (
+                              <div key={item.id} className="bg-slate-700 p-2 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg justify-between min-h-[160px]" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'SUPPORTER', false)} onTouchStart={() => handleTouchStart(item, 'SUPPORTER', false)} onTouchEnd={handleTouchEnd}>
+                                  <div className="absolute top-1 left-1 text-[8px] font-bold text-blue-300 bg-blue-900/50 px-1.5 py-0.5 rounded">JOKER</div>
+                                  <div className="w-12 h-12 mt-4"><PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/></div>
+                                  <div className="font-bold text-xs">{item.name}</div>
+                                  <div className="text-[9px] text-gray-400 h-8 overflow-hidden leading-tight">{item.description}</div>
+                                  <button disabled={runState.money < getPrice(item.price)} className={`w-full py-1 rounded font-bold text-xs ${runState.money >= getPrice(item.price) ? 'bg-blue-600 hover:bg-blue-500 shadow-md' : 'bg-gray-600 cursor-not-allowed'}`}>${getPrice(item.price)}</button>
+                              </div>
+                          ))}
+                          
+                          {/* Consumables */}
+                          {shopConsumables.map((item) => (
+                              <div key={item.id} className="bg-slate-700 p-2 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg justify-between min-h-[160px]" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'CONSUMABLE', false)} onTouchStart={() => handleTouchStart(item, 'CONSUMABLE', false)} onTouchEnd={handleTouchEnd}>
+                                  <div className="absolute top-1 left-1 text-[8px] font-bold text-purple-300 bg-purple-900/50 px-1.5 py-0.5 rounded">CARD</div>
+                                  <div className="w-12 h-12 mt-4"><PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/></div>
+                                  <div className="font-bold text-xs">{item.name}</div>
+                                  <div className="text-[9px] text-gray-400 h-8 overflow-hidden leading-tight">{item.description}</div>
+                                  <button disabled={runState.money < getPrice(item.price)} className={`w-full py-1 rounded font-bold text-xs ${runState.money >= getPrice(item.price) ? 'bg-purple-600 hover:bg-purple-500 shadow-md' : 'bg-gray-600 cursor-not-allowed'}`}>${getPrice(item.price)}</button>
+                              </div>
+                          ))}
                       </div>
                   </div>
               </div>
