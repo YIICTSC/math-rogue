@@ -1,6 +1,4 @@
 
-
-
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package, Ghost, Trophy, RotateCcw, Play, DollarSign, Info } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -856,7 +854,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       setPhase('BLIND_SELECT');
   };
 
-  const useConsumable = (consumable: PokerConsumable) => {
+  const useConsumable = (consumable: PokerConsumable, index: number) => {
       if (consumable.type === 'PLANET') {
           let targetHand = 'HIGH_CARD';
           if (consumable.id === 'TXT_MATH') targetHand = 'HIGH_CARD'; 
@@ -872,18 +870,18 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           else if (consumable.id === 'TXT_MYTH') targetHand = 'FLUSH_FIVE';
           else if (consumable.id === 'TXT_HIS') targetHand = 'ROYAL_FLUSH';
           
-          setRunState(prev => ({ ...prev, handLevels: { ...prev.handLevels, [targetHand]: prev.handLevels[targetHand] + 1 }, consumables: prev.consumables.filter(c => c !== consumable) }));
+          setRunState(prev => ({ ...prev, handLevels: { ...prev.handLevels, [targetHand]: prev.handLevels[targetHand] + 1 }, consumables: prev.consumables.filter((_, i) => i !== index) }));
           audioService.playSound('win');
-      } else if (consumable.type === 'TAROT') { setSelectedConsumable(consumable); } else if (consumable.type === 'SPECTRAL') { handleSpectral(consumable); }
+      } else if (consumable.type === 'TAROT') { setSelectedConsumable(consumable); } else if (consumable.type === 'SPECTRAL') { handleSpectral(consumable, index); }
   };
-  const handleSpectral = (consumable: PokerConsumable) => {
+  const handleSpectral = (consumable: PokerConsumable, index: number) => {
       let newState = { ...runState };
       if (consumable.id === 'SPC_BLACKHOLE') { Object.keys(newState.handLevels).forEach(k => newState.handLevels[k] += 1); audioService.playSound('win'); } 
       else if (consumable.id === 'SPC_IMMOLATE') { if (newState.hand.length > 0) { const shuffled = [...newState.hand].sort(() => Math.random() - 0.5); const destroyed = shuffled.slice(0, 5).map(c => c.id); newState.hand = newState.hand.filter(c => !destroyed.includes(c.id)); newState.money += 20; audioService.playSound('attack'); } } 
       else if (consumable.id === 'SPC_ANKH') { if (newState.supporters.length > 0) { const target = newState.supporters[Math.floor(Math.random() * newState.supporters.length)]; newState.supporters = [target, { ...target, id: `copy-${Date.now()}` }]; audioService.playSound('win'); } } 
       else if (consumable.id === 'SPC_HEX') { newState.money += 50; newState.supporters = []; } 
       else if (consumable.id === 'SPC_OUIJA') { if (newState.hand.length > 0) { const ranks = newState.hand.map(c => c.rank); const targetRank = ranks[Math.floor(Math.random() * ranks.length)]; newState.hand = newState.hand.map(c => ({ ...c, rank: targetRank })); audioService.playSound('win'); } }
-      newState.consumables = newState.consumables.filter(c => c !== consumable); setRunState(newState);
+      newState.consumables = newState.consumables.filter((_, i) => i !== index); setRunState(newState);
   };
   const applyTarot = () => {
       if (!selectedConsumable || selectedCards.length === 0) return;
@@ -930,13 +928,15 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
 
   const renderInspectionModal = () => {
       if (!inspectedItem) return null;
-      const { item, type, isOwned } = inspectedItem;
+      const { item, type, isOwned, index } = inspectedItem;
       const isCard = type === 'CARD';
       const isPack = type === 'PACK';
       const isSupporter = type === 'SUPPORTER';
+      const isConsumable = type === 'CONSUMABLE';
       const isVoucher = type === 'VOUCHER';
       const cardItem = item as PokerCard;
       const supporterItem = item as PokerSupporter;
+      const consumableItem = item as PokerConsumable;
       
       const cardEnhancement = isCard && cardItem.enhancement ? POKER_ENHANCEMENTS[cardItem.enhancement] : null;
 
@@ -993,12 +993,31 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                         {!isOwned && <div className="mt-2 text-center text-yellow-500 font-bold text-xl">${getPrice((item as any).price)}</div>} 
                       </>
                   )}
-                  {isOwned && !isCard && !isPack && !isVoucher && (
+                  
+                  {/* Owned Item Actions */}
+                  {isOwned && isConsumable && index !== undefined && (
+                      <div className="flex gap-2 mt-6">
+                          <button 
+                              onClick={() => { useConsumable(consumableItem, index); setInspectedItem(null); }}
+                              className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded border-2 border-blue-400 shadow-lg flex items-center justify-center animate-pulse"
+                          >
+                              <Sparkles size={16} className="mr-1" /> USE
+                          </button>
+                          <button 
+                              onClick={sellItem}
+                              className="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded border-2 border-red-400 shadow-lg flex items-center justify-center"
+                          >
+                              <DollarSign size={16} className="mr-1" /> SELL (${Math.max(1, Math.floor((item as any).price / 2))})
+                          </button>
+                      </div>
+                  )}
+                  
+                  {isOwned && isSupporter && index !== undefined && (
                       <button 
                         onClick={sellItem}
-                        className="mt-6 w-full bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded border-2 border-red-400 shadow-lg flex items-center justify-center animate-pulse"
+                        className="mt-6 w-full bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded border-2 border-red-400 shadow-lg flex items-center justify-center"
                       >
-                          <DollarSign size={16} className="mr-1" /> 売却 (${Math.max(1, Math.floor((item as any).price / 2))})
+                          <DollarSign size={16} className="mr-1" /> SELL (${Math.max(1, Math.floor((item as any).price / 2))})
                       </button>
                   )}
               </div>
@@ -1126,7 +1145,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                               <div className="text-[9px] text-blue-300 font-bold mb-0.5 flex items-center"><span className="w-2 h-2 bg-blue-500 rounded-full mr-1 inline-block"></span>JOKERS ({runState.supporters.length}/5)</div>
                               <div className="flex-1 flex items-center gap-1 overflow-x-auto custom-scrollbar">
                                   {runState.supporters.map((s, i) => (
-                                      <div key={i} className="bg-slate-800 p-0.5 rounded flex-shrink-0 border border-slate-600 cursor-pointer hover:bg-slate-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center relative group" onContextMenu={(e) => handleContextMenu(e, s, 'SUPPORTER', true, i)} onTouchStart={() => handleTouchStart(s, 'SUPPORTER', true, i)} onTouchEnd={handleTouchEnd}>
+                                      <div key={i} className="bg-slate-800 p-0.5 rounded flex-shrink-0 border border-slate-600 cursor-pointer hover:bg-slate-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center relative group" onClick={() => setInspectedItem({ item: s, type: 'SUPPORTER', isOwned: true, index: i })} onContextMenu={(e) => handleContextMenu(e, s, 'SUPPORTER', true, i)} onTouchStart={() => handleTouchStart(s, 'SUPPORTER', true, i)} onTouchEnd={handleTouchEnd}>
                                           <PixelSprite seed={s.icon} name={s.icon} className="w-full h-full"/>
                                       </div>
                                   ))}
@@ -1141,7 +1160,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                               <div className="text-[9px] text-purple-300 font-bold mb-0.5 flex items-center"><span className="w-2 h-2 bg-purple-500 rounded-full mr-1 inline-block"></span>CARDS ({runState.consumables.length}/2)</div>
                               <div className="flex-1 flex items-center gap-1 justify-center">
                                   {runState.consumables.map((c, i) => (
-                                      <div key={i} className="bg-slate-800 p-0.5 rounded flex-shrink-0 border border-slate-600 cursor-pointer hover:bg-slate-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center relative group" onContextMenu={(e) => handleContextMenu(e, c, 'CONSUMABLE', true, i)} onTouchStart={() => handleTouchStart(c, 'CONSUMABLE', true, i)} onTouchEnd={handleTouchEnd}>
+                                      <div key={i} className="bg-slate-800 p-0.5 rounded flex-shrink-0 border border-slate-600 cursor-pointer hover:bg-slate-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center relative group" onClick={() => setInspectedItem({ item: c, type: 'CONSUMABLE', isOwned: true, index: i })} onContextMenu={(e) => handleContextMenu(e, c, 'CONSUMABLE', true, i)} onTouchStart={() => handleTouchStart(c, 'CONSUMABLE', true, i)} onTouchEnd={handleTouchEnd}>
                                           <PixelSprite seed={c.icon} name={c.icon} className="w-full h-full"/>
                                       </div>
                                   ))}
@@ -1315,11 +1334,11 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
 
         <div className="w-full bg-black/40 border-b border-black/50 p-2 flex justify-between items-center z-10 shrink-0 min-h-[64px]">
             <div className="flex gap-2 items-center flex-1 justify-center">
-                {runState.supporters.map((s, i) => (<div key={i} className="w-10 h-10 md:w-12 md:h-12 bg-slate-800 border-2 border-yellow-500 rounded flex items-center justify-center relative group cursor-pointer hover:bg-slate-700 transition-colors" onContextMenu={(e) => handleContextMenu(e, s, 'SUPPORTER', true, i)} onTouchStart={() => handleTouchStart(s, 'SUPPORTER', true, i)} onTouchEnd={handleTouchEnd}><PixelSprite seed={s.icon} name={s.icon} className="w-8 h-8"/></div>))}
+                {runState.supporters.map((s, i) => (<div key={i} className="w-10 h-10 md:w-12 md:h-12 bg-slate-800 border-2 border-yellow-500 rounded flex items-center justify-center relative group cursor-pointer hover:bg-slate-700 transition-colors" onClick={() => setInspectedItem({ item: s, type: 'SUPPORTER', isOwned: true, index: i })} onContextMenu={(e) => handleContextMenu(e, s, 'SUPPORTER', true, i)} onTouchStart={() => handleTouchStart(s, 'SUPPORTER', true, i)} onTouchEnd={handleTouchEnd}><PixelSprite seed={s.icon} name={s.icon} className="w-8 h-8"/></div>))}
                 {runState.supporters.length === 0 && <div className="text-xs text-gray-500">No Supporters</div>}
             </div>
             <div className="flex gap-2 items-center border-l border-white/20 pl-2">
-                {runState.consumables.map((c, i) => (<div key={i} className="w-10 h-10 md:w-12 md:h-12 bg-slate-800 border-2 border-purple-500 rounded flex items-center justify-center relative group cursor-pointer hover:scale-110 transition-transform" onClick={() => useConsumable(c)} onContextMenu={(e) => handleContextMenu(e, c, 'CONSUMABLE', true, i)} onTouchStart={() => handleTouchStart(c, 'CONSUMABLE', true, i)} onTouchEnd={handleTouchEnd}><PixelSprite seed={c.icon} name={c.icon} className="w-8 h-8"/>{selectedConsumable === c && <div className="absolute inset-0 bg-white/30 rounded animate-pulse"></div>}</div>))}
+                {runState.consumables.map((c, i) => (<div key={i} className="w-10 h-10 md:w-12 md:h-12 bg-slate-800 border-2 border-purple-500 rounded flex items-center justify-center relative group cursor-pointer hover:scale-110 transition-transform" onClick={() => setInspectedItem({ item: c, type: 'CONSUMABLE', isOwned: true, index: i })} onContextMenu={(e) => handleContextMenu(e, c, 'CONSUMABLE', true, i)} onTouchStart={() => handleTouchStart(c, 'CONSUMABLE', true, i)} onTouchEnd={handleTouchEnd}><PixelSprite seed={c.icon} name={c.icon} className="w-8 h-8"/>{selectedConsumable === c && <div className="absolute inset-0 bg-white/30 rounded animate-pulse"></div>}</div>))}
                 {runState.consumables.length === 0 && <div className="text-xs text-gray-500 w-12 text-center">Empty</div>}
             </div>
         </div>
