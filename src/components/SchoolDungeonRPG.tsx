@@ -245,6 +245,16 @@ const computeDijkstraMap = (map: TileType[][], targetX: number, targetY: number)
             if(n.x >= 0 && n.x < MAP_W && n.y >= 0 && n.y < MAP_H) {
                 // Treat Walls as impassable
                 if (map[n.y][n.x] !== 'WALL') {
+                    // --- CORNER CUTTING CHECK (DIJKSTRA) ---
+                    const dx = n.x - x;
+                    const dy = n.y - y;
+                    if (dx !== 0 && dy !== 0) {
+                        if (map[y][x + dx] === 'WALL' || map[y + dy][x] === 'WALL') {
+                            continue; // Blocked by corner
+                        }
+                    }
+                    // ---------------------------------------
+
                     if (dMap[n.y][n.x] > dist + 1) {
                         dMap[n.y][n.x] = dist + 1;
                         queue.push(n);
@@ -952,6 +962,16 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
                   for (const n of neighbors) {
                       if (n.x >= 0 && n.x < MAP_W && n.y >= 0 && n.y < MAP_H && map[n.y][n.x] !== 'WALL') {
+                          // CORNER CHECK FOR ENEMY
+                          const dx = n.x - e.x;
+                          const dy = n.y - e.y;
+                          if (dx !== 0 && dy !== 0) {
+                              if (map[e.y][e.x + dx] === 'WALL' || map[e.y + dy][e.x] === 'WALL') {
+                                  continue; 
+                              }
+                          }
+                          // ----------------------
+
                           if (!occupied.has(`${n.x},${n.y}`) || (n.x === px && n.y === py)) {
                               if (dMap[n.y][n.x] < bestDist) {
                                   bestDist = dMap[n.y][n.x];
@@ -1048,7 +1068,18 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           }
       }
 
+      // Calculate actual movement delta
+      const rdx = tx - player.x;
+      const rdy = ty - player.y;
+
       if (tx < 0 || tx >= MAP_W || ty < 0 || ty >= MAP_H || map[ty][tx] === 'WALL') return;
+
+      // Corner Check
+      if (rdx !== 0 && rdy !== 0) {
+          if (map[player.y][player.x + rdx] === 'WALL' || map[player.y + rdy][player.x] === 'WALL') {
+              return;
+          }
+      }
 
       const target = enemies.find(e => e.x === tx && e.y === ty);
       if (target) {
