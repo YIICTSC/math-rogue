@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package, Ghost, Trophy, RotateCcw, Play, DollarSign, Info } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -329,7 +330,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           consumables: hydrateConsumables(state.consumables),
           shopInventory: hydrateShop(state.shopInventory),
           shopVoucher: hydrateVoucher(state.shopVoucher),
-          voucherRestockedAnte: state.voucherRestockedAnte ?? 0 // Migration default
+          voucherRestockedAnte: state.voucherRestockedAnte ?? 0, // Migration default
+          persistentCounters: state.persistentCounters || {} // Ensure initialized
       };
   };
 
@@ -361,7 +363,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           shopInventory: [],
           shopVoucher: null,
           isEndless: false,
-          voucherRestockedAnte: 0
+          voucherRestockedAnte: 0,
+          persistentCounters: {}
       };
   });
 
@@ -455,7 +458,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           shopInventory: [],
           shopVoucher: null,
           isEndless: false,
-          voucherRestockedAnte: 0
+          voucherRestockedAnte: 0,
+          persistentCounters: {}
       });
       setHighScore(0);
       setPhase('BLIND_SELECT');
@@ -574,7 +578,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           handsPlayed: (4 - runState.handsRemaining) + 1,
           discardsUsed: (3 - runState.discardsRemaining),
           deckState: runState.deck,
-          money: runState.money
+          money: runState.money,
+          persistentCounters: runState.persistentCounters
       };
       
       runState.supporters.forEach(s => { if (s.triggerOn === 'HAND_PLAYED' || !s.triggerOn) s.effect(ctx); });
@@ -615,15 +620,24 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       }
       newHand.sort((a, b) => b.rank - a.rank);
 
-      setRunState(prev => ({
-          ...prev,
-          currentScore: newScore,
-          hand: newHand,
-          deck: currentDeck,
-          discardPile: newDiscardPile,
-          handsRemaining: prev.handsRemaining - 1,
-          money: prev.money + bonusMoney
-      }));
+      setRunState(prev => {
+          const newCounters = { ...prev.persistentCounters };
+          newCounters['HANDS_PLAYED'] = (newCounters['HANDS_PLAYED'] || 0) + 1;
+          if (type === 'STRAIGHT' || type === 'STRAIGHT_FLUSH' || type === 'ROYAL_FLUSH') {
+              newCounters['STRAIGHTS_PLAYED'] = (newCounters['STRAIGHTS_PLAYED'] || 0) + 1;
+          }
+
+          return {
+            ...prev,
+            currentScore: newScore,
+            hand: newHand,
+            deck: currentDeck,
+            discardPile: newDiscardPile,
+            handsRemaining: prev.handsRemaining - 1,
+            money: prev.money + bonusMoney,
+            persistentCounters: newCounters
+          }
+      });
       setSelectedCards([]);
       setAnimating(false);
 
@@ -894,7 +908,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       const sellValue = Math.max(1, Math.floor((item as any).price / 2));
       
       setRunState(prev => {
-          const newState = { ...prev, money: prev.money + sellValue };
+          const newCounters = { ...prev.persistentCounters };
+          newCounters['CARDS_SOLD'] = (newCounters['CARDS_SOLD'] || 0) + 1;
+
+          const newState = { ...prev, money: prev.money + sellValue, persistentCounters: newCounters };
           if (type === 'SUPPORTER') {
               newState.supporters = prev.supporters.filter((_, i) => i !== index);
           } else if (type === 'CONSUMABLE') {

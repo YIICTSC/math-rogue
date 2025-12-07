@@ -304,6 +304,7 @@ export interface PokerScoringContext {
   discardsUsed: number;
   deckState: PokerCard[];
   money: number; // Added to calculate interest/jokers based on gold
+  persistentCounters: Record<string, number>; // New: Track actions across runs
 }
 
 export interface PokerSupporter { // Joker
@@ -365,6 +366,7 @@ export interface PokerRunState {
     handLevels: Record<string, number>;
     vouchers: string[]; // IDs of bought vouchers
     isEndless?: boolean; // New: Endless Mode flag
+    persistentCounters: Record<string, number>; // New: Track actions like "Cards Sold"
     
     // Play state
     currentScore: number;

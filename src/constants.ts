@@ -1,6 +1,7 @@
 
 
 
+
 import { Card, CardType, TargetType, Relic, Potion, Character, PokerHandResult, PokerSupporter, PokerConsumable, PokerPack, PokerSuit, PokerVoucher } from './types';
 
 export const INITIAL_HP = 75;
@@ -650,9 +651,24 @@ export const SUPPORTERS_LIBRARY: PokerSupporter[] = [
   }, 
   
   // Scaling
-  { id: 'SUP_BUS', name: '通学バス', description: '役を作るたび倍率+1(永続)', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.mult += 1 * ctx.handsPlayed, icon: 'SHOE|#ffeb3b' },
-  { id: 'SUP_CAMPFIRE', name: 'キャンプファイヤー', description: 'カードを売るたび倍率x0.25(永続)', price: 8, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.mult *= 1.5, icon: 'FLAME|#ff5722' }, 
-  { id: 'SUP_RUNNER', name: 'マラソンランナー', description: 'ストレートを役にするたびチップ+10(永続)', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(ctx.handType.includes('STRAIGHT')) ctx.chips += 20 * ctx.handsPlayed; }, icon: 'SHOE|#2196f3' },
+  { 
+      id: 'SUP_BUS', name: '通学バス', description: '役を作るたび倍率+1(永続)', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', 
+      effect: (ctx) => ctx.mult += (ctx.persistentCounters['HANDS_PLAYED'] || 0), 
+      getDynamicDescription: (state) => `(現在: +${state.persistentCounters['HANDS_PLAYED'] || 0})`,
+      icon: 'SHOE|#ffeb3b' 
+  },
+  { 
+      id: 'SUP_CAMPFIRE', name: 'キャンプファイヤー', description: 'カードを売るたび倍率x0.25(永続)', price: 8, rarity: 'RARE', triggerOn: 'HAND_PLAYED', 
+      effect: (ctx) => ctx.mult *= (1 + 0.25 * (ctx.persistentCounters['CARDS_SOLD'] || 0)), 
+      getDynamicDescription: (state) => `(現在: x${1 + 0.25 * (state.persistentCounters['CARDS_SOLD'] || 0)})`,
+      icon: 'FLAME|#ff5722' 
+  }, 
+  { 
+      id: 'SUP_RUNNER', name: 'マラソンランナー', description: 'ストレートを役にするたびチップ+10(永続)', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', 
+      effect: (ctx) => { if(ctx.handType.includes('STRAIGHT')) ctx.chips += 10 * (ctx.persistentCounters['STRAIGHTS_PLAYED'] || 0); }, 
+      getDynamicDescription: (state) => `(現在: +${10 * (state.persistentCounters['STRAIGHTS_PLAYED'] || 0)})`,
+      icon: 'SHOE|#2196f3' 
+  },
 
   // Rule Bending (Logic Handled in GameScreen)
   { id: 'SUP_CLOVER', name: '四つ葉のクローバー', description: 'ストレートとフラッシュが4枚で成立する', price: 10, rarity: 'RARE', triggerOn: 'PASSIVE', effect: () => {}, icon: 'PLANT|#4caf50' },
