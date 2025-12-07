@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package, Ghost, Trophy, RotateCcw, Play, DollarSign, Info } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -327,7 +328,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           supporters: hydrateSupporters(state.supporters),
           consumables: hydrateConsumables(state.consumables),
           shopInventory: hydrateShop(state.shopInventory),
-          shopVoucher: hydrateVoucher(state.shopVoucher)
+          shopVoucher: hydrateVoucher(state.shopVoucher),
+          voucherRestockedAnte: state.voucherRestockedAnte ?? 0 // Migration default
       };
   };
 
@@ -358,7 +360,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           discardPile: [],
           shopInventory: [],
           shopVoucher: null,
-          isEndless: false
+          isEndless: false,
+          voucherRestockedAnte: 0
       };
   });
 
@@ -451,7 +454,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           discardPile: [],
           shopInventory: [],
           shopVoucher: null,
-          isEndless: false
+          isEndless: false,
+          voucherRestockedAnte: 0
       });
       setHighScore(0);
       setPhase('BLIND_SELECT');
@@ -723,15 +727,35 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       items.push(packs[0]);
       items.push(packs[1]);
 
-      // Select a voucher
-      let voucher: PokerVoucher | null = null;
-      // Get unpurchased vouchers
-      const availableVouchers = VOUCHERS_LIBRARY.filter(v => !runState.vouchers.includes(v.id));
-      if (availableVouchers.length > 0) {
-          voucher = availableVouchers[Math.floor(Math.random() * availableVouchers.length)];
+      // V_OVERSTOCK Logic: +1 Shop Slot
+      if (runState.vouchers.includes('V_OVERSTOCK')) {
+          if (Math.random() < 0.5) {
+              items.push(supporters[2]);
+          } else {
+              items.push(consumables[2]);
+          }
       }
 
-      setRunState(prev => ({ ...prev, shopInventory: items, shopVoucher: voucher }));
+      // Voucher Logic (Fixed per Ante)
+      let voucher = runState.shopVoucher;
+      let restockedAnte = runState.voucherRestockedAnte;
+
+      if (runState.ante > restockedAnte) {
+          const availableVouchers = VOUCHERS_LIBRARY.filter(v => !runState.vouchers.includes(v.id));
+          if (availableVouchers.length > 0) {
+              voucher = availableVouchers[Math.floor(Math.random() * availableVouchers.length)];
+          } else {
+              voucher = null;
+          }
+          restockedAnte = runState.ante;
+      }
+
+      setRunState(prev => ({ 
+          ...prev, 
+          shopInventory: items, 
+          shopVoucher: voucher,
+          voucherRestockedAnte: restockedAnte 
+      }));
   };
 
   const getPrice = (basePrice: number) => {

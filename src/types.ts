@@ -376,6 +376,7 @@ export interface PokerRunState {
     // Shop state
     shopInventory: (PokerSupporter | PokerConsumable | PokerPack)[];
     shopVoucher: PokerVoucher | null; // The voucher available in the current shop
+    voucherRestockedAnte: number; // Tracks when the voucher was last restocked (per Ante)
 }
 
 export interface PokerScoreEntry {
