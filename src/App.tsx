@@ -2147,13 +2147,14 @@ const App: React.FC = () => {
     }
   }, [gameState.enemies, gameState.player.currentHp, gameState.screen, gameState.act, selectedCharName, gameState.challengeMode]);
 
-  const goToRewardPhase = () => {
+  const goToRewardPhase = (mathGold: number = 0) => {
       const rewards: RewardItem[] = [];
       
-      const baseGold = 25 + Math.floor(Math.random() * 10) + (gameState.act * 5);
-      let goldReward = baseGold;
-      if (gameState.player.relics.find(r => r.id === 'GOLDEN_IDOL')) goldReward = Math.floor(goldReward * 1.25);
-      rewards.push({ type: 'GOLD', value: goldReward, id: `rew-gold-${Date.now()}` });
+      if (mathGold > 0) {
+          let goldReward = mathGold;
+          if (gameState.player.relics.find(r => r.id === 'GOLDEN_IDOL')) goldReward = Math.floor(goldReward * 1.25);
+          rewards.push({ type: 'GOLD', value: goldReward, id: `rew-gold-${Date.now()}` });
+      }
 
       const allCards = Object.values(CARDS_LIBRARY).filter(c => c.type !== CardType.STATUS && c.type !== CardType.CURSE && c.rarity !== 'SPECIAL');
       for(let i=0; i<3; i++) {
@@ -2201,10 +2202,7 @@ const App: React.FC = () => {
       else if (correctCount === 2) bonusGold = 30;
       else if (correctCount === 3) bonusGold = 50;
       
-      if (bonusGold > 0) {
-          setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + bonusGold } }));
-      }
-      goToRewardPhase();
+      goToRewardPhase(bonusGold);
   };
 
   const handleRewardSelection = (item: RewardItem, replacePotionId?: string) => {
