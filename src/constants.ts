@@ -1,6 +1,7 @@
 
 
-import { Card, CardType, TargetType, Relic, Potion, Character, PokerHandResult, PokerSupporter, PokerConsumable, PokerPack, PokerSuit } from './types';
+
+import { Card, CardType, TargetType, Relic, Potion, Character, PokerHandResult, PokerSupporter, PokerConsumable, PokerPack, PokerSuit, PokerVoucher } from './types';
 
 export const INITIAL_HP = 75;
 export const INITIAL_ENERGY = 3;
@@ -721,4 +722,13 @@ export const PACK_LIBRARY: PokerPack[] = [
     { id: 'PACK_BUFF_L', name: '高級文房具', description: 'ドリルや文房具が5つ入っている。\n1つ選んで手持ちに追加。', price: 8, type: 'BUFF', size: 5, choose: 1, icon: 'NOTEBOOK|#4fc3f7' },
     { id: 'PACK_SUPP', name: '部員勧誘', description: 'サポーターが3人入っている。\n1人選んで仲間にする。', price: 8, type: 'SUPPORTER', size: 3, choose: 1, icon: 'SMILE|#a5d6a7' },
     { id: 'PACK_SPEC', name: 'オカルト雑誌', description: '怪しいアイテムが2つ入っている。\n1つ選んで手持ちに追加。', price: 10, type: 'SPECTRAL', size: 2, choose: 1, icon: 'EYE|#9c27b0' },
+];
+
+export const VOUCHERS_LIBRARY: PokerVoucher[] = [
+    { id: 'V_GRABBER', name: 'マジックハンド', description: '毎ラウンド、手札を出す回数 +1', price: 10, icon: 'FIST|#3b82f6' },
+    { id: 'V_WASTE', name: 'リサイクル箱', description: '毎ラウンド、捨てられる回数 +1', price: 10, icon: 'BACKPACK|#ef4444' },
+    { id: 'V_SEED_MONEY', name: '投資信託', description: '利子の上限が $10 になる(通常$5)', price: 10, icon: 'PLANT|#22c55e' },
+    { id: 'V_CLEARANCE', name: '閉店セール', description: 'ショップの商品が 25% OFF', price: 10, icon: 'FLIER|#f59e0b' },
+    { id: 'V_PAINT_BRUSH', name: 'パレット', description: '手札の上限枚数 +1', price: 10, icon: 'NOTEBOOK|#a855f7' },
+    { id: 'V_OVERSTOCK', name: '在庫処分', description: 'ショップの商品枠 +1', price: 10, icon: 'BACKPACK|#64748b' }
 ];

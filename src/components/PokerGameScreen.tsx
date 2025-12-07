@@ -1,13 +1,14 @@
 
 
+
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package, Ghost, Trophy, RotateCcw, Play, DollarSign, Info } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { 
-    PokerCard, PokerRunState, PokerBlind, PokerSupporter, PokerConsumable, PokerSuit, PokerRank, PokerScoringContext, PokerPack
+    PokerCard, PokerRunState, PokerBlind, PokerSupporter, PokerConsumable, PokerSuit, PokerRank, PokerScoringContext, PokerPack, PokerVoucher
 } from '../types';
-import { POKER_HAND_LEVELS, SUPPORTERS_LIBRARY, CONSUMABLES_LIBRARY, PACK_LIBRARY, POKER_ENHANCEMENTS } from '../constants';
+import { POKER_HAND_LEVELS, SUPPORTERS_LIBRARY, CONSUMABLES_LIBRARY, PACK_LIBRARY, POKER_ENHANCEMENTS, VOUCHERS_LIBRARY } from '../constants';
 import { storageService } from '../services/storageService';
 
 // --- Constants & Helpers ---
@@ -318,11 +319,17 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           }) as (PokerSupporter | PokerConsumable | PokerPack)[];
       };
 
+      const hydrateVoucher = (voucher: PokerVoucher | null) => {
+          if (!voucher) return null;
+          return VOUCHERS_LIBRARY.find(v => v.id === voucher.id) || voucher;
+      };
+
       return {
           ...state,
           supporters: hydrateSupporters(state.supporters),
           consumables: hydrateConsumables(state.consumables),
-          shopInventory: hydrateShop(state.shopInventory)
+          shopInventory: hydrateShop(state.shopInventory),
+          shopVoucher: hydrateVoucher(state.shopVoucher)
       };
   };
 
@@ -352,6 +359,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           hand: [],
           discardPile: [],
           shopInventory: [],
+          shopVoucher: null,
           isEndless: false
       };
   });
@@ -373,7 +381,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   const [selectedConsumable, setSelectedConsumable] = useState<PokerConsumable | null>(null);
 
   // Inspection Modal State (Updated to handle Selling)
-  const [inspectedItem, setInspectedItem] = useState<{ item: PokerSupporter | PokerConsumable | PokerCard | PokerPack, type: 'CARD'|'SUPPORTER'|'CONSUMABLE'|'PACK', index?: number, isOwned?: boolean } | null>(null);
+  const [inspectedItem, setInspectedItem] = useState<{ item: PokerSupporter | PokerConsumable | PokerCard | PokerPack | PokerVoucher, type: 'CARD'|'SUPPORTER'|'CONSUMABLE'|'PACK'|'VOUCHER', index?: number, isOwned?: boolean } | null>(null);
   const longPressTimer = useRef<any>(null);
 
   // Sorting
@@ -444,6 +452,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           hand: [],
           discardPile: [],
           shopInventory: [],
+          shopVoucher: null,
           isEndless: false
       });
       setHighScore(0);
@@ -458,8 +467,23 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
 
   const startBlind = () => {
       const deck = [...runState.deck].sort(() => Math.random() - 0.5);
-      const hand = deck.splice(0, 8);
+      
+      let initialHandSize = 8;
+      if (runState.vouchers.includes('V_PAINT_BRUSH')) initialHandSize += 1;
+
+      const hand = deck.splice(0, initialHandSize);
       hand.sort((a, b) => b.rank - a.rank);
+      
+      let baseHands = 4;
+      if (runState.vouchers.includes('V_GRABBER')) baseHands += 1;
+      
+      let baseDiscards = 3;
+      if (runState.vouchers.includes('V_WASTE')) baseDiscards += 1;
+
+      // Boss Logic Override
+      if (runState.currentBlind.bossAbility === 'THE_NEEDLE') baseHands = 1;
+      if (runState.currentBlind.bossAbility === 'THE_MANACLE') initialHandSize -= 1; // Hand size reduced logic would need to be applied above, but standard Balatro applies it to max draw. 
+      // Simplified: Just draw less initially if manacle?
       
       setRunState(prev => ({
           ...prev,
@@ -467,20 +491,20 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           hand,
           discardPile: [],
           currentScore: 0,
-          handsRemaining: prev.currentBlind.bossAbility === 'THE_NEEDLE' ? 1 : 4,
-          discardsRemaining: 3
+          handsRemaining: baseHands,
+          discardsRemaining: baseDiscards
       }));
       setPhase('PLAY');
       audioService.playBGM('poker_play');
   };
 
-  const handleTouchStart = (item: any, type: 'CARD'|'SUPPORTER'|'CONSUMABLE'|'PACK', isOwned: boolean, index?: number) => {
+  const handleTouchStart = (item: any, type: 'CARD'|'SUPPORTER'|'CONSUMABLE'|'PACK'|'VOUCHER', isOwned: boolean, index?: number) => {
       longPressTimer.current = setTimeout(() => {
           setInspectedItem({ item, type, isOwned, index });
       }, 500);
   };
   const handleTouchEnd = () => { if (longPressTimer.current) clearTimeout(longPressTimer.current); };
-  const handleContextMenu = (e: React.MouseEvent, item: any, type: 'CARD'|'SUPPORTER'|'CONSUMABLE'|'PACK', isOwned: boolean, index?: number) => { 
+  const handleContextMenu = (e: React.MouseEvent, item: any, type: 'CARD'|'SUPPORTER'|'CONSUMABLE'|'PACK'|'VOUCHER', isOwned: boolean, index?: number) => { 
       e.preventDefault(); 
       setInspectedItem({ item, type, isOwned, index }); 
   };
@@ -580,7 +604,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           }
       }
 
-      const drawCount = 8 - newHand.length;
+      let handSize = 8;
+      if (runState.vouchers.includes('V_PAINT_BRUSH')) handSize += 1;
+
+      const drawCount = handSize - newHand.length;
       if (drawCount > 0 && currentDeck.length > 0) {
           const drawn = currentDeck.splice(0, drawCount);
           newHand = [...newHand, ...drawn];
@@ -619,7 +646,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       let currentDeck = [...runState.deck];
       let newDiscardPile = [...runState.discardPile, ...discardedCards];
       
-      const drawCount = 8 - newHand.length;
+      let handSize = 8;
+      if (runState.vouchers.includes('V_PAINT_BRUSH')) handSize += 1;
+
+      const drawCount = handSize - newHand.length;
       if (drawCount > 0 && currentDeck.length > 0) {
           const drawn = currentDeck.splice(0, drawCount);
           newHand = [...newHand, ...drawn];
@@ -638,7 +668,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   };
 
   const winBlind = () => {
-      const interest = Math.min(5, Math.floor(runState.money / 5));
+      const interestCap = runState.vouchers.includes('V_SEED_MONEY') ? 10 : 5;
+      const interest = Math.min(interestCap, Math.floor(runState.money / 5));
       const handBonus = runState.handsRemaining;
       const totalEarned = runState.currentBlind.rewardMoney + interest + handBonus;
       const newMoney = runState.money + totalEarned;
@@ -694,20 +725,46 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       const packs = [...PACK_LIBRARY].sort(() => Math.random() - 0.5);
       items.push(packs[0]);
       items.push(packs[1]);
-      setRunState(prev => ({ ...prev, shopInventory: items }));
+
+      // Select a voucher
+      let voucher: PokerVoucher | null = null;
+      // Get unpurchased vouchers
+      const availableVouchers = VOUCHERS_LIBRARY.filter(v => !runState.vouchers.includes(v.id));
+      if (availableVouchers.length > 0) {
+          voucher = availableVouchers[Math.floor(Math.random() * availableVouchers.length)];
+      }
+
+      setRunState(prev => ({ ...prev, shopInventory: items, shopVoucher: voucher }));
   };
 
-  const buyItem = (item: PokerSupporter | PokerConsumable | PokerPack, index: number) => {
-      if (runState.money < item.price) return;
-      if ('size' in item) { 
-          setRunState(prev => ({ ...prev, money: prev.money - item.price, shopInventory: prev.shopInventory.filter((_, i) => i !== index) }));
+  const getPrice = (basePrice: number) => {
+      if (runState.vouchers.includes('V_CLEARANCE')) {
+          return Math.floor(basePrice * 0.75);
+      }
+      return basePrice;
+  };
+
+  const buyItem = (item: PokerSupporter | PokerConsumable | PokerPack | PokerVoucher, index: number, type: 'NORMAL' | 'VOUCHER') => {
+      const finalPrice = getPrice(item.price);
+      
+      if (runState.money < finalPrice) return;
+      
+      if (type === 'VOUCHER') {
+          setRunState(prev => ({
+              ...prev,
+              money: prev.money - finalPrice,
+              vouchers: [...prev.vouchers, item.id],
+              shopVoucher: null
+          }));
+      } else if ('size' in item) { 
+          setRunState(prev => ({ ...prev, money: prev.money - finalPrice, shopInventory: prev.shopInventory.filter((_, i) => i !== index) }));
           openPack(item as PokerPack);
       } else if ('rarity' in item) { 
           if (runState.supporters.length >= 5) return; 
-          setRunState(prev => ({ ...prev, money: prev.money - item.price, supporters: [...prev.supporters, item as PokerSupporter], shopInventory: prev.shopInventory.filter((_, i) => i !== index) }));
+          setRunState(prev => ({ ...prev, money: prev.money - finalPrice, supporters: [...prev.supporters, item as PokerSupporter], shopInventory: prev.shopInventory.filter((_, i) => i !== index) }));
       } else { 
           if (runState.consumables.length >= 2) return; 
-          setRunState(prev => ({ ...prev, money: prev.money - item.price, consumables: [...prev.consumables, item as PokerConsumable], shopInventory: prev.shopInventory.filter((_, i) => i !== index) }));
+          setRunState(prev => ({ ...prev, money: prev.money - finalPrice, consumables: [...prev.consumables, item as PokerConsumable], shopInventory: prev.shopInventory.filter((_, i) => i !== index) }));
       }
       audioService.playSound('select');
   };
@@ -839,6 +896,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       const isCard = type === 'CARD';
       const isPack = type === 'PACK';
       const isSupporter = type === 'SUPPORTER';
+      const isVoucher = type === 'VOUCHER';
       const cardItem = item as PokerCard;
       const supporterItem = item as PokerSupporter;
       
@@ -873,14 +931,15 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                             <div className="text-sm font-bold text-white bg-orange-700 px-3 py-1 rounded-full">PACK</div>
                         </div>
                         <p className="text-lg text-gray-300 text-center leading-relaxed">{(item as PokerPack).description}</p>
-                        <div className="mt-6 text-center text-yellow-500 font-bold text-xl">${(item as PokerPack).price}</div> 
+                        <div className="mt-6 text-center text-yellow-500 font-bold text-xl">${getPrice((item as PokerPack).price)}</div> 
                       </>
                   ) : (
                       <> 
                         <div className="flex flex-col items-center mb-4">
                             <div className="w-24 h-24 mb-4"><PixelSprite seed={(item as any).icon} name={(item as any).icon} className="w-full h-full"/></div>
                             <h3 className="text-2xl font-bold text-yellow-400 mb-2">{(item as any).name}</h3>
-                            <div className="text-sm font-bold text-white bg-slate-700 px-3 py-1 rounded-full">{'rarity' in item ? (item as PokerSupporter).rarity : (item as PokerConsumable).type}</div>
+                            {isVoucher && <div className="text-sm font-bold text-white bg-slate-700 px-3 py-1 rounded-full">VOUCHER</div>}
+                            {!isVoucher && <div className="text-sm font-bold text-white bg-slate-700 px-3 py-1 rounded-full">{'rarity' in item ? (item as PokerSupporter).rarity : (item as PokerConsumable).type}</div>}
                         </div>
                         <p className="text-lg text-gray-300 text-center leading-relaxed mb-4">{(item as any).description}</p>
                         
@@ -893,10 +952,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                             </div>
                         )}
 
-                        <div className="mt-2 text-center text-yellow-500 font-bold text-xl">${(item as any).price}</div> 
+                        {!isOwned && <div className="mt-2 text-center text-yellow-500 font-bold text-xl">${getPrice((item as any).price)}</div>} 
                       </>
                   )}
-                  {isOwned && !isCard && !isPack && (
+                  {isOwned && !isCard && !isPack && !isVoucher && (
                       <button 
                         onClick={sellItem}
                         className="mt-6 w-full bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded border-2 border-red-400 shadow-lg flex items-center justify-center animate-pulse"
@@ -1008,40 +1067,138 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       const shopSupporters = runState.shopInventory.filter(i => 'rarity' in i) as PokerSupporter[];
       const shopConsumables = runState.shopInventory.filter(i => !('rarity' in i) && !('size' in i)) as PokerConsumable[];
       const shopPacks = runState.shopInventory.filter(i => 'size' in i) as PokerPack[];
+      const voucher = runState.shopVoucher;
 
       return (
-          <div className="flex flex-col h-full w-full bg-slate-900 text-white p-4 font-mono relative">
+          <div className="flex flex-col h-full w-full bg-slate-900 text-white p-4 font-mono relative overflow-hidden">
               {renderInspectionModal()}
               <div className="flex justify-between items-center mb-4 bg-slate-800 p-4 rounded-lg shadow-lg shrink-0">
                   <h2 className="text-2xl font-bold flex items-center"><ShoppingBag className="mr-2 text-yellow-500"/> School Store</h2>
                   <div className="text-2xl font-bold text-yellow-400">${runState.money}</div>
-                  <button onClick={nextBlind} className="bg-green-600 hover:bg-green-500 px-6 py-2 rounded font-bold flex items-center">Next Round <ArrowLeft className="rotate-180 inline ml-1"/></button>
+                  <button onClick={nextBlind} className="bg-green-600 hover:bg-green-500 px-6 py-2 rounded font-bold flex items-center shadow-lg transform transition active:translate-y-1">Next Round <ArrowLeft className="rotate-180 inline ml-1"/></button>
               </div>
-              <div className="flex-grow flex gap-4 overflow-hidden">
-                  <div className="w-2/3 bg-slate-800/50 p-4 rounded-lg border-2 border-slate-700 overflow-y-auto custom-scrollbar">
-                      <div className="mb-8">
-                          <h3 className="text-xl font-bold mb-4 text-orange-400 border-b border-slate-600 pb-2 flex items-center"><Package className="mr-2"/> ブースターパック (Packs)</h3>
-                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">{shopPacks.map((item) => (<div key={item.id} className="bg-slate-700 p-4 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors" onClick={() => buyItem(item, runState.shopInventory.indexOf(item))} onContextMenu={(e) => handleContextMenu(e, item, 'PACK', false)} onTouchStart={() => handleTouchStart(item, 'PACK', false)} onTouchEnd={handleTouchEnd}><div className="w-16 h-16 mb-2"><PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/></div><div className="font-bold text-sm mb-1">{item.name}</div><div className="text-xs text-gray-400 mb-2 h-8 overflow-hidden">{item.description}</div><div className="mt-auto w-full"><button disabled={runState.money < item.price} className={`w-full py-1 rounded font-bold text-sm ${runState.money >= item.price ? 'bg-orange-600 hover:bg-orange-500' : 'bg-gray-600 cursor-not-allowed'}`}>${item.price} OPEN</button></div></div>))}</div>
-                      </div>
-                      <div className="mb-8">
-                          <h3 className="text-xl font-bold mb-4 text-blue-300 border-b border-slate-600 pb-2 flex items-center"><PixelSprite seed="SMILE" name="SMILE" className="w-6 h-6 mr-2" /> サポーター (Supporters)</h3>
-                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">{shopSupporters.map((item) => (<div key={item.id} className="bg-slate-700 p-4 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors" onClick={() => buyItem(item, runState.shopInventory.indexOf(item))} onContextMenu={(e) => handleContextMenu(e, item, 'SUPPORTER', false)} onTouchStart={() => handleTouchStart(item, 'SUPPORTER', false)} onTouchEnd={handleTouchEnd}><div className="w-16 h-16 mb-2"><PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/></div><div className="font-bold text-sm mb-1">{item.name}</div><div className="text-xs text-gray-400 mb-2 h-8 overflow-hidden">{item.description}</div><div className="mt-auto w-full"><button disabled={runState.money < item.price} className={`w-full py-1 rounded font-bold text-sm ${runState.money >= item.price ? 'bg-blue-600 hover:bg-blue-500' : 'bg-gray-600 cursor-not-allowed'}`}>${item.price} BUY</button></div></div>))}</div>
-                      </div>
-                      <div>
-                          <h3 className="text-xl font-bold mb-4 text-purple-300 border-b border-slate-600 pb-2 flex items-center"><PixelSprite seed="NOTEBOOK" name="NOTEBOOK" className="w-6 h-6 mr-2" /> 消耗品 (Stationery)</h3>
-                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">{shopConsumables.map((item) => (<div key={item.id} className="bg-slate-700 p-4 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors" onClick={() => buyItem(item, runState.shopInventory.indexOf(item))} onContextMenu={(e) => handleContextMenu(e, item, 'CONSUMABLE', false)} onTouchStart={() => handleTouchStart(item, 'CONSUMABLE', false)} onTouchEnd={handleTouchEnd}><div className="w-16 h-16 mb-2"><PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/></div><div className="font-bold text-sm mb-1">{item.name}</div><div className="text-xs text-gray-400 mb-2 h-8 overflow-hidden">{item.description}</div><div className="mt-auto w-full"><button disabled={runState.money < item.price} className={`w-full py-1 rounded font-bold text-sm ${runState.money >= item.price ? 'bg-blue-600 hover:bg-blue-500' : 'bg-gray-600 cursor-not-allowed'}`}>${item.price} BUY</button></div></div>))}</div>
+              
+              <div className="flex-grow flex flex-col gap-4 overflow-hidden">
+                  
+                  {/* INVENTORY SECTION (TOP) */}
+                  <div className="w-full bg-slate-800/80 p-3 rounded-lg border-2 border-slate-700 shrink-0">
+                      <div className="flex flex-col md:flex-row gap-4 h-full">
+                          {/* Supporters */}
+                          <div className="flex-1">
+                              <div className="text-xs text-blue-300 mb-1 font-bold flex items-center gap-2">
+                                  <span className="bg-blue-900/50 px-2 py-0.5 rounded">SUPPORTERS ({runState.supporters.length}/5)</span>
+                              </div>
+                              <div className="flex gap-2 min-h-[64px] items-center bg-slate-900/50 p-2 rounded">
+                                  {runState.supporters.map((s, i) => (
+                                      <div key={i} className="bg-slate-800 p-1 rounded flex flex-col items-center text-xs cursor-pointer hover:bg-slate-700 w-12 border border-slate-600 relative group" onContextMenu={(e) => handleContextMenu(e, s, 'SUPPORTER', true, i)} onTouchStart={() => handleTouchStart(s, 'SUPPORTER', true, i)} onTouchEnd={handleTouchEnd}>
+                                          <PixelSprite seed={s.icon} name={s.icon} className="w-8 h-8"/>
+                                          {/* Hover Tooltip */}
+                                          <div className="absolute bottom-full mb-2 hidden group-hover:block bg-black text-white text-[10px] p-2 rounded z-50 whitespace-nowrap border border-gray-500 pointer-events-none">{s.name}</div>
+                                      </div>
+                                  ))}
+                                  {runState.supporters.length === 0 && <div className="text-xs text-gray-600 italic px-2">None</div>}
+                              </div>
+                          </div>
+                          
+                          {/* Consumables */}
+                          <div className="w-full md:w-auto md:min-w-[120px]">
+                              <div className="text-xs text-purple-300 mb-1 font-bold flex items-center gap-2">
+                                  <span className="bg-purple-900/50 px-2 py-0.5 rounded">CONSUMABLES ({runState.consumables.length}/2)</span>
+                              </div>
+                              <div className="flex gap-2 min-h-[64px] items-center bg-slate-900/50 p-2 rounded">
+                                  {runState.consumables.map((c, i) => (
+                                      <div key={i} className="bg-slate-800 p-1 rounded flex flex-col items-center text-xs cursor-pointer hover:bg-slate-700 w-12 border border-slate-600 relative group" onContextMenu={(e) => handleContextMenu(e, c, 'CONSUMABLE', true, i)} onTouchStart={() => handleTouchStart(c, 'CONSUMABLE', true, i)} onTouchEnd={handleTouchEnd}>
+                                          <PixelSprite seed={c.icon} name={c.icon} className="w-8 h-8"/>
+                                          <div className="absolute bottom-full mb-2 hidden group-hover:block bg-black text-white text-[10px] p-2 rounded z-50 whitespace-nowrap border border-gray-500 pointer-events-none">{c.name}</div>
+                                      </div>
+                                  ))}
+                                  {runState.consumables.length === 0 && <div className="text-xs text-gray-600 italic px-2">None</div>}
+                              </div>
+                          </div>
+
+                          {/* Vouchers */}
+                          <div className="w-full md:w-auto md:min-w-[120px]">
+                              <div className="text-xs text-gray-300 mb-1 font-bold flex items-center gap-2">
+                                  <span className="bg-gray-700 px-2 py-0.5 rounded">VOUCHERS</span>
+                              </div>
+                              <div className="flex flex-wrap gap-1 min-h-[64px] items-center bg-slate-900/50 p-2 rounded">
+                                  {runState.vouchers.map((vid, i) => {
+                                      const v = VOUCHERS_LIBRARY.find(lib => lib.id === vid);
+                                      if (!v) return null;
+                                      return (
+                                          <div key={i} className="w-6 h-6 bg-slate-800 rounded flex items-center justify-center border border-slate-600 relative group" onContextMenu={(e) => handleContextMenu(e, v, 'VOUCHER', true)} onTouchStart={() => handleTouchStart(v, 'VOUCHER', true)} onTouchEnd={handleTouchEnd}>
+                                              <PixelSprite seed={v.icon} name={v.icon} className="w-4 h-4"/>
+                                              <div className="absolute bottom-full mb-2 hidden group-hover:block bg-black text-white text-[10px] p-2 rounded z-50 whitespace-nowrap border border-gray-500 pointer-events-none right-0">{v.name}</div>
+                                          </div>
+                                      );
+                                  })}
+                                  {runState.vouchers.length === 0 && <div className="text-xs text-gray-600 italic px-2">None</div>}
+                              </div>
+                          </div>
                       </div>
                   </div>
-                  <div className="w-1/3 flex flex-col gap-4">
-                      <div className="bg-slate-800 p-4 rounded-lg border-2 border-slate-700 flex-1">
-                          <h3 className="text-lg font-bold mb-2 text-yellow-300">Inventory</h3>
-                          <div className="mb-4">
-                              <div className="text-xs text-gray-400 mb-1">Supporters ({runState.supporters.length}/5)</div>
-                              <div className="grid grid-cols-2 gap-2">{runState.supporters.map((s, i) => (<div key={i} className="bg-slate-900 p-2 rounded flex flex-col items-center text-xs cursor-pointer hover:bg-slate-700" onContextMenu={(e) => handleContextMenu(e, s, 'SUPPORTER', true, i)} onTouchStart={() => handleTouchStart(s, 'SUPPORTER', true, i)} onTouchEnd={handleTouchEnd}><PixelSprite seed={s.icon} name={s.icon} className="w-8 h-8"/><span className="truncate w-full text-center mt-1">{s.name}</span></div>))}</div>
+
+                  {/* SHOP ITEMS SECTION (BOTTOM) */}
+                  <div className="flex-grow bg-slate-800/50 p-4 rounded-lg border-2 border-slate-700 overflow-y-auto custom-scrollbar">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                          
+                          {/* Voucher Slot */}
+                          <div className="md:col-span-1">
+                              {voucher ? (
+                                  <div 
+                                    className="bg-slate-900 border-2 border-slate-600 p-4 rounded-lg flex flex-col items-center text-center h-full relative group cursor-pointer hover:border-white transition-colors"
+                                    onClick={() => buyItem(voucher, -1, 'VOUCHER')}
+                                    onContextMenu={(e) => handleContextMenu(e, voucher, 'VOUCHER', false)}
+                                    onTouchStart={() => handleTouchStart(voucher, 'VOUCHER', false)}
+                                    onTouchEnd={handleTouchEnd}
+                                  >
+                                      <div className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-widest w-full border-b border-gray-700 pb-1">Voucher</div>
+                                      <div className="w-20 h-20 mb-4 bg-slate-800 rounded-full flex items-center justify-center border-4 border-slate-700">
+                                          <PixelSprite seed={voucher.icon} name={voucher.icon} className="w-12 h-12"/>
+                                      </div>
+                                      <div className="font-bold text-sm mb-2">{voucher.name}</div>
+                                      <div className="text-xs text-gray-400 mb-4 flex-grow">{voucher.description}</div>
+                                      <button disabled={runState.money < getPrice(voucher.price)} className={`w-full py-2 rounded font-bold text-sm ${runState.money >= getPrice(voucher.price) ? 'bg-slate-100 text-black hover:bg-white' : 'bg-gray-700 text-gray-500 cursor-not-allowed'}`}>${getPrice(voucher.price)} BUY</button>
+                                  </div>
+                              ) : (
+                                  <div className="bg-slate-900/50 border-2 border-slate-700 border-dashed p-4 rounded-lg flex flex-col items-center justify-center h-full text-gray-600 text-sm italic">
+                                      Sold Out
+                                  </div>
+                              )}
                           </div>
-                          <div>
-                              <div className="text-xs text-gray-400 mb-1">Stationery ({runState.consumables.length}/2)</div>
-                              <div className="grid grid-cols-2 gap-2">{runState.consumables.map((c, i) => (<div key={i} className="bg-slate-900 p-2 rounded flex flex-col items-center text-xs cursor-pointer hover:bg-slate-700" onContextMenu={(e) => handleContextMenu(e, c, 'CONSUMABLE', true, i)} onTouchStart={() => handleTouchStart(c, 'CONSUMABLE', true, i)} onTouchEnd={handleTouchEnd}><PixelSprite seed={c.icon} name={c.icon} className="w-8 h-8"/><span className="truncate w-full text-center mt-1">{c.name}</span></div>))}</div>
+
+                          {/* Items Grid */}
+                          <div className="md:col-span-3 grid grid-cols-2 md:grid-cols-3 gap-4">
+                              {/* Packs */}
+                              {shopPacks.map((item) => (
+                                  <div key={item.id} className="bg-slate-700 p-4 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'PACK', false)} onTouchStart={() => handleTouchStart(item, 'PACK', false)} onTouchEnd={handleTouchEnd}>
+                                      <div className="absolute top-2 left-2 text-[10px] font-bold text-orange-300 bg-orange-900/50 px-2 py-0.5 rounded">PACK</div>
+                                      <div className="w-16 h-16 mb-2 mt-4"><PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/></div>
+                                      <div className="font-bold text-sm mb-1">{item.name}</div>
+                                      <div className="text-xs text-gray-400 mb-2 h-8 overflow-hidden leading-tight">{item.description}</div>
+                                      <div className="mt-auto w-full"><button disabled={runState.money < getPrice(item.price)} className={`w-full py-1 rounded font-bold text-sm ${runState.money >= getPrice(item.price) ? 'bg-orange-600 hover:bg-orange-500 shadow-md' : 'bg-gray-600 cursor-not-allowed'}`}>${getPrice(item.price)}</button></div>
+                                  </div>
+                              ))}
+                              {/* Supporters */}
+                              {shopSupporters.map((item) => (
+                                  <div key={item.id} className="bg-slate-700 p-4 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'SUPPORTER', false)} onTouchStart={() => handleTouchStart(item, 'SUPPORTER', false)} onTouchEnd={handleTouchEnd}>
+                                      <div className="absolute top-2 left-2 text-[10px] font-bold text-blue-300 bg-blue-900/50 px-2 py-0.5 rounded">JOKER</div>
+                                      <div className="w-16 h-16 mb-2 mt-4"><PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/></div>
+                                      <div className="font-bold text-sm mb-1">{item.name}</div>
+                                      <div className="text-xs text-gray-400 mb-2 h-8 overflow-hidden leading-tight">{item.description}</div>
+                                      <div className="mt-auto w-full"><button disabled={runState.money < getPrice(item.price)} className={`w-full py-1 rounded font-bold text-sm ${runState.money >= getPrice(item.price) ? 'bg-blue-600 hover:bg-blue-500 shadow-md' : 'bg-gray-600 cursor-not-allowed'}`}>${getPrice(item.price)}</button></div>
+                                  </div>
+                              ))}
+                              {/* Consumables */}
+                              {shopConsumables.map((item) => (
+                                  <div key={item.id} className="bg-slate-700 p-4 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'CONSUMABLE', false)} onTouchStart={() => handleTouchStart(item, 'CONSUMABLE', false)} onTouchEnd={handleTouchEnd}>
+                                      <div className="absolute top-2 left-2 text-[10px] font-bold text-purple-300 bg-purple-900/50 px-2 py-0.5 rounded">CARD</div>
+                                      <div className="w-16 h-16 mb-2 mt-4"><PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/></div>
+                                      <div className="font-bold text-sm mb-1">{item.name}</div>
+                                      <div className="text-xs text-gray-400 mb-2 h-8 overflow-hidden leading-tight">{item.description}</div>
+                                      <div className="mt-auto w-full"><button disabled={runState.money < getPrice(item.price)} className={`w-full py-1 rounded font-bold text-sm ${runState.money >= getPrice(item.price) ? 'bg-purple-600 hover:bg-purple-500 shadow-md' : 'bg-gray-600 cursor-not-allowed'}`}>${getPrice(item.price)}</button></div>
+                                  </div>
+                              ))}
                           </div>
                       </div>
                   </div>

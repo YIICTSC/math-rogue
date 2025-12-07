@@ -338,6 +338,14 @@ export interface PokerPack {
     icon: string;
 }
 
+export interface PokerVoucher {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    icon: string;
+}
+
 export interface PokerBlind {
     name: string; // e.g. "Small Blind", "Big Blind", "The Wall"
     scoreGoal: number;
@@ -367,6 +375,7 @@ export interface PokerRunState {
     
     // Shop state
     shopInventory: (PokerSupporter | PokerConsumable | PokerPack)[];
+    shopVoucher: PokerVoucher | null; // The voucher available in the current shop
 }
 
 export interface PokerScoreEntry {
