@@ -463,7 +463,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               items[activeIndex].scrollIntoView({ block: 'nearest', behavior: 'instant' }); 
           }
       }
-  }, [selectedItemIndex, blankScrollSelectionIndex, menuOpen, shopState.active, synthState.step]);
+  }, [selectedItemIndex, blankScrollSelectionIndex, menuOpen, shopState.active, shopState.mode, synthState.step, inventory, enemies]);
 
   // Update Stats
   useEffect(() => {
@@ -572,7 +572,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       return roomsRef.current.some(r => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h);
   };
 
-  const spawnEnemy = (x: number, y: number, floorLevel: number, inRoom: boolean = false): Entity => {
+  const spawnEnemy = (x: number, y: number, floorLevel: number, inRoom: boolean = false, isSafeForShop: boolean = false): Entity => {
       const r = Math.random();
       let t: EnemyType = 'SLIME';
       let name="敵", hp=10, atk=2, xp=5, def=0;
@@ -584,8 +584,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           if (r < 0.6) { t = 'SLIME'; name="スライム"; hp=10; atk=3; xp=5; }
           else { t = 'BAT'; name="コウモリ"; hp=8; atk=4; xp=6; }
       } else {
-          // Shopkeeper ONLY spawns in rooms
-          if (r < 0.05 && !isEndless && inRoom) { t = 'SHOPKEEPER'; name="購買部員"; hp=1000; atk=50; xp=0; def=20; }
+          // Shopkeeper ONLY spawns in rooms and safe spots
+          if (r < 0.05 && !isEndless && inRoom && isSafeForShop) { t = 'SHOPKEEPER'; name="購買部員"; hp=1000; atk=50; xp=0; def=20; }
           else if (r < 0.20) { t = 'SLIME'; name="スライム"; hp=10+hpScale; atk=3+scaling; xp=5+xpScale; }
           else if (r < 0.35) { t = 'BAT'; name="コウモリ"; hp=8+hpScale; atk=5+scaling; xp=7+xpScale; }
           else if (r < 0.45 && floorLevel > 2) { t = 'MANDRAKE'; name="人食い植物"; hp=20+hpScale; atk=5+scaling; xp=12+xpScale; }
@@ -696,7 +696,14 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     for (let i = 0; i < enemyCount; i++) {
         const t = candidates.pop();
         if (t) {
-            newEnemies.push(spawnEnemy(t.x, t.y, f, isPointInRoom(t.x, t.y)));
+            // Check safe spot for shopkeeper (has 4 neighbors)
+            const nN = newMap[t.y-1] && newMap[t.y-1][t.x] === 'FLOOR';
+            const nS = newMap[t.y+1] && newMap[t.y+1][t.x] === 'FLOOR';
+            const nW = newMap[t.y][t.x-1] === 'FLOOR';
+            const nE = newMap[t.y][t.x+1] === 'FLOOR';
+            const isSafe = nN && nS && nW && nE;
+            
+            newEnemies.push(spawnEnemy(t.x, t.y, f, isPointInRoom(t.x, t.y), isSafe));
         }
     }
 
@@ -871,7 +878,14 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               if (map[ry][rx] === 'FLOOR' && !enemies.find(e => e.x === rx && e.y === ry) && (rx !== px || ry !== py)) {
                   // Pass inRoom check to spawnEnemy for random spawns too
                   const inRoom = isPointInRoom(rx, ry);
-                  setEnemies(prev => [...prev, spawnEnemy(rx, ry, floor, inRoom)]);
+                  // Random spawns can be shopkeepers if room is safe
+                  const nN = map[ry-1] && map[ry-1][rx] === 'FLOOR';
+                  const nS = map[ry+1] && map[ry+1][rx] === 'FLOOR';
+                  const nW = map[ry][rx-1] === 'FLOOR';
+                  const nE = map[ry][rx+1] === 'FLOOR';
+                  const isSafe = nN && nS && nW && nE;
+                  
+                  setEnemies(prev => [...prev, spawnEnemy(rx, ry, floor, inRoom, isSafe)]);
                   break;
               }
           }
@@ -1953,7 +1967,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               items[activeIndex].scrollIntoView({ block: 'nearest', behavior: 'instant' }); 
           }
       }
-  }, [selectedItemIndex, blankScrollSelectionIndex, menuOpen, shopState.active, synthState.step]);
+  }, [selectedItemIndex, blankScrollSelectionIndex, menuOpen, shopState.active, shopState.mode, synthState.step, inventory, enemies]);
 
   // --- KEYBOARD ---
   useEffect(() => {
