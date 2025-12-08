@@ -850,7 +850,7 @@ const App: React.FC = () => {
             const floorDifficulty = node.y * (1 + (actMultiplier * 0.5));
             
             let enemies: Enemy[] = [];
-            let bgmType: 'battle' | 'menu' | 'math' | 'poker_shop' | 'poker_play' = 'battle'; 
+            let bgmType: 'battle' | 'menu' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' = 'battle'; 
 
             if (gameState.act === 4 && node.type === NodeType.BOSS) {
                 enemies.push({
@@ -912,8 +912,6 @@ const App: React.FC = () => {
             if (p.relics.find(r => r.id === 'VAJRA')) p.strength += 1;
             if (p.relics.find(r => r.id === 'HACHIMAKI')) p.powers['DEXTERITY'] = 1;
             if (p.relics.find(r => r.id === 'SEED_PACK')) p.powers['THORNS'] = 3;
-            if (p.relics.find(r => r.id === 'BAG_OF_PREP')) p.nextTurnDraw = 2; 
-            if (p.relics.find(r => r.id === 'SNAKE_RING')) p.nextTurnDraw = 2; 
             if (p.relics.find(r => r.id === 'HOLY_WATER')) p.currentEnergy += 1; 
             if (p.relics.find(r => r.id === 'ANCHOR')) p.block += 10;
             if (p.relics.find(r => r.id === 'LANTERN')) p.currentEnergy += 1;
@@ -1568,7 +1566,7 @@ const App: React.FC = () => {
           prev.enemies = enemies; 
       }
       
-      if (p.relics.find(r => r.id === 'MUTAGENIC_STRENGTH') && prev.turn === 1) {
+      if (prev.turn === 1 && p.relics.find(r => r.id === 'MUTAGENIC_STRENGTH')) {
           p.strength -= 3;
           p.floatingText = { id: `relic-mutagen-${Date.now()}`, text: '筋力低下', color: 'text-gray-400' };
       }
