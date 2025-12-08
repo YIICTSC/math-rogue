@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Card as CardType, CardType as EnumCardType } from '../types';
 import PixelSprite from './PixelSprite';
@@ -43,9 +42,6 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect }) => {
     }
     if (isLongPress.current) {
       if (e.cancelable) e.preventDefault();
-      // If we didn't inspect (no handler), we might want to hide tooltip on release?
-      // Keeping it simple: touch move hides it.
-      // setShowTooltip(false); 
     }
   };
 
@@ -94,18 +90,23 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect }) => {
   })();
 
   const renderCardArt = (card: CardType) => {
+    if (card.textureRef) {
+        return (
+            <PixelSprite 
+                seed={card.id} 
+                name={card.textureRef} 
+                className="w-16 h-16 opacity-90 drop-shadow-md z-0" 
+                size={16} 
+            />
+        );
+    }
+
     const commonProps = {
       xmlns: "http://www.w3.org/2000/svg",
       viewBox: "0 0 16 16",
       className: "w-12 h-12 drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)]",
       shapeRendering: "crispEdges"
     };
-
-    if (card.textureRef) {
-        return (
-            <PixelSprite seed={card.textureRef} name={card.textureRef} className="w-16 h-16 opacity-90 drop-shadow-md" size={16} />
-        );
-    }
 
     if (card.type === EnumCardType.ATTACK) {
       return (
@@ -137,26 +138,12 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect }) => {
 
   const renderDescription = () => {
       let desc = card.description;
-      
-      // Dynamic replacement logic
-      if (card.damage !== undefined) {
-          desc = desc.replace(/(\d+)ダメージ/g, `${card.damage}ダメージ`);
-      }
-      if (card.block !== undefined) {
-          desc = desc.replace(/ブロック(\d+)/g, `ブロック${card.block}`);
-      }
-      if (card.poison !== undefined) {
-          desc = desc.replace(/ドクドク(\d+)/g, `ドクドク${card.poison}`);
-      }
-      if (card.weak !== undefined) {
-          desc = desc.replace(/へろへろ(\d+)/g, `へろへろ${card.weak}`);
-      }
-      if (card.vulnerable !== undefined) {
-          desc = desc.replace(/びくびく(\d+)/g, `びくびく${card.vulnerable}`);
-      }
-      if (card.strength !== undefined) {
-          desc = desc.replace(/ムキムキ(\d+)/g, `ムキムキ${card.strength}`);
-      }
+      if (card.damage !== undefined) desc = desc.replace(/(\d+)ダメージ/g, `${card.damage}ダメージ`);
+      if (card.block !== undefined) desc = desc.replace(/ブロック(\d+)/g, `ブロック${card.block}`);
+      if (card.poison !== undefined) desc = desc.replace(/ドクドク(\d+)/g, `ドクドク${card.poison}`);
+      if (card.weak !== undefined) desc = desc.replace(/へろへろ(\d+)/g, `へろへろ${card.weak}`);
+      if (card.vulnerable !== undefined) desc = desc.replace(/びくびく(\d+)/g, `びくびく${card.vulnerable}`);
+      if (card.strength !== undefined) desc = desc.replace(/ムキムキ(\d+)/g, `ムキムキ${card.strength}`);
 
       return (
         <span className={card.upgraded ? "text-green-300 font-bold" : ""}>
@@ -205,13 +192,12 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect }) => {
       </div>
 
       {/* Art */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-80 z-0">
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-80 z-0 overflow-hidden">
         {renderCardArt(card)}
       </div>
 
       {/* Description */}
       <div className="relative z-10 mt-auto flex flex-col items-center w-full">
-        {/* Adjusted padding and font size for better fit */}
         <div className="bg-black/70 p-1 rounded border border-white/10 backdrop-blur-[1px] w-full min-h-[2.5rem] flex items-center justify-center flex-col overflow-hidden">
             <div className="text-[7px] text-white leading-tight text-center whitespace-pre-wrap break-words w-full">
                 {renderDescription()}
