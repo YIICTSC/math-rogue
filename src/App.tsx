@@ -31,7 +31,7 @@ import { audioService } from './services/audioService';
 import { generateFlavorText, generateEnemyName } from './services/geminiService';
 import { generateDungeonMap } from './services/mapGenerator';
 import { storageService } from './services/storageService';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2 } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain } from 'lucide-react';
 
 // --- HELPERS ---
 export const getUpgradedCard = (card: ICard): ICard => {
@@ -387,9 +387,7 @@ const App: React.FC = () => {
       setGameState(prev => ({ ...prev, mode, screen: GameScreen.CHARACTER_SELECTION }));
   };
 
-  // ... (Abbreviated existing handlers for brevity, only showing render part) ...
   const handleDebugStart = (deck: ICard[], relics: Relic[], potions: Potion[]) => {
-      // ... same as before
         const map = generateDungeonMap();
         setDebugLoadout({ deck, relics, potions });
         
@@ -518,10 +516,7 @@ const App: React.FC = () => {
         }));
   };
 
-  // ... (generateEvent code remains unchanged)
   const generateEvent = (player: Player) => {
-      // ... same content as before
-      // Simplified for brevity, assume content is preserved
       const events = [
           // 既存イベント（怪しい薬売り）
           {
@@ -840,6 +835,7 @@ const App: React.FC = () => {
       ];
       return events[Math.floor(Math.random() * events.length)];
   };
+
   const handleNodeSelect = async (node: MapNode) => {
       setIsLoading(true);
       audioService.playSound('select');
@@ -1065,7 +1061,6 @@ const App: React.FC = () => {
 
   const handleSelectEnemy = (id: string) => setGameState(prev => ({ ...prev, selectedEnemyId: id }));
 
-  // ... (Other handlers are same as provided code, abbreviated) ...
   const applyDebuff = (enemy: Enemy, type: 'WEAK' | 'VULNERABLE' | 'POISON', amount: number) => {
       if (enemy.artifact > 0 && type !== 'POISON') { 
           enemy.artifact--;
@@ -1113,7 +1108,6 @@ const App: React.FC = () => {
           p.potions = p.potions.filter(pt => pt.id !== potion.id);
           const target = enemies.find(e => e.id === prev.selectedEnemyId) || enemies[0];
 
-          // ... (potion logic)
           if (p.relics.find(r => r.id === 'TAKETOMBO')) {
               p.currentHp = Math.min(p.maxHp, p.currentHp + 5);
               p.floatingText = { id: `heal-taketombo-${Date.now()}`, text: `+5`, color: 'text-green-500', iconType: 'heart' };
@@ -1178,7 +1172,6 @@ const App: React.FC = () => {
   };
 
   const handlePlayCard = (card: ICard) => {
-    // ... (logic handled previously, assumed same)
     if (gameState.player.currentEnergy < card.cost) return;
     if (gameState.enemies.length === 0) return;
     if (actingEnemyId) return; 
@@ -1210,10 +1203,6 @@ const App: React.FC = () => {
       const p = { ...prev.player, hand: [...prev.player.hand], drawPile: [...prev.player.drawPile], discardPile: [...prev.player.discardPile], deck: [...prev.player.deck], powers: { ...prev.player.powers } };
       let enemies = prev.enemies.map(e => ({ ...e }));
       const currentLogs: string[] = [`> ${card.name} を使用`];
-      
-      // ... (Rest of card logic, abbreviated for safety as file is large, assuming no changes here)
-      // Including energy deduction, activations, damage calc, etc.
-      // Simply copying the entire logic block from previous version to ensure consistency
       
       p.currentEnergy -= card.cost;
       p.cardsPlayedThisTurn++;
@@ -1427,7 +1416,6 @@ const App: React.FC = () => {
                   currentLogs.push(`ドクドク${amt}を付与`);
               }
               
-              // Catalyst Logic
               if (card.poisonMultiplier && targets.length > 0) {
                   targets.forEach(e => {
                       if (e.poison > 0) {
@@ -1442,7 +1430,6 @@ const App: React.FC = () => {
                   currentLogs.push("手札を強化");
               }
               if (card.upgradeDeck) {
-                  // Apotheosis
                   p.hand = p.hand.map(c => getUpgradedCard(c));
                   p.drawPile = p.drawPile.map(c => getUpgradedCard(c));
                   p.discardPile = p.discardPile.map(c => getUpgradedCard(c));
@@ -1499,7 +1486,6 @@ const App: React.FC = () => {
               if (card.nextTurnDraw) p.nextTurnDraw += card.nextTurnDraw;
               if (card.nextTurnEnergy) p.nextTurnEnergy += card.nextTurnEnergy;
 
-              // EXPULSION (Judgment) Logic
               if (card.name === '退学処分' || card.name === 'EXPULSION') {
                   const threshold = card.upgraded ? 40 : 30;
                   targets.forEach(e => {
@@ -1513,7 +1499,6 @@ const App: React.FC = () => {
                   });
               }
 
-              // Kunai / Shuriken / Fan Logic
               if (card.type === CardType.ATTACK) {
                   p.relicCounters['ATTACK_COUNT'] = (p.relicCounters['ATTACK_COUNT'] || 0) + 1;
                   if (p.relicCounters['ATTACK_COUNT'] % 3 === 0) {
@@ -1620,7 +1605,6 @@ const App: React.FC = () => {
       let drawCount = HAND_SIZE + (p.powers['TOOLS_OF_THE_TRADE'] ? 1 : 0) + p.nextTurnDraw;
       p.nextTurnDraw = 0;
 
-      // Draw Loop
       for (let i = 0; i < drawCount; i++) {
         if (newDrawPile.length === 0) {
           if (newDiscardPile.length === 0) break;
@@ -1696,7 +1680,7 @@ const App: React.FC = () => {
       p.attacksPlayedThisTurn = 0;
       p.turnFlags = {};
       p.typesPlayedThisTurn = []; 
-      p.relicCounters['ATTACK_COUNT'] = 0; // Reset attack count for Kunai/Fan
+      p.relicCounters['ATTACK_COUNT'] = 0; 
 
       let nextSelection = { ...prev.selectionState };
       if (p.powers['TOOLS_OF_THE_TRADE']) {
@@ -1877,7 +1861,6 @@ const App: React.FC = () => {
     }
     setActingEnemyId(null);
     
-    // --- Post-Enemy Turn Player Effects ---
     setGameState(prev => {
         const p = { ...prev.player };
         const newLogs: string[] = [];
@@ -1909,7 +1892,7 @@ const App: React.FC = () => {
         }
         
         p.hand.forEach(c => {
-            if (c.name === 'やけど' || c.name === 'BURN') { p.currentHp -= 2; newLogs.push("やけどダメージ"); }
+            if (c.name === 'やほど' || c.name === 'BURN') { p.currentHp -= 2; newLogs.push("やほどダメージ"); }
             if (c.name === '虫歯' || c.name === 'DECAY') { p.currentHp -= 2; newLogs.push("虫歯ダメージ"); }
             if (c.name === '不安' || c.name === 'DOUBT') p.powers['WEAK'] = (p.powers['WEAK'] || 0) + 1;
             if (c.name === '恥' || c.name === 'SHAME') p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + 1;
@@ -1943,7 +1926,6 @@ const App: React.FC = () => {
       const newSelfDamage = sum('selfDamage');
       const newPoisonMultiplier = sum('poisonMultiplier');
 
-      // Play Copies Logic (Sum extra hits)
       const extraHits1 = c1.playCopies || 0;
       const extraHits2 = c2.playCopies || 0;
       const newExtraHits = extraHits1 + extraHits2;
@@ -1957,14 +1939,12 @@ const App: React.FC = () => {
       else if (c1.type === CardType.POWER || c2.type === CardType.POWER) newType = CardType.POWER;
       else newType = CardType.SKILL;
 
-      // Target Logic: Priority ALL > RANDOM > ENEMY > SELF
       let newTarget = TargetType.ENEMY;
       if (c1.target === TargetType.ALL_ENEMIES || c2.target === TargetType.ALL_ENEMIES) newTarget = TargetType.ALL_ENEMIES;
       else if (c1.target === TargetType.RANDOM_ENEMY || c2.target === TargetType.RANDOM_ENEMY) newTarget = TargetType.RANDOM_ENEMY;
       else if (c1.target === TargetType.ENEMY || c2.target === TargetType.ENEMY) newTarget = TargetType.ENEMY;
       else newTarget = TargetType.SELF;
       
-      // If harmful effects but target self, switch to enemy
       if ((newDamage > 0 || newPoison > 0 || newWeak > 0 || newVulnerable > 0) && newTarget === TargetType.SELF) {
           newTarget = TargetType.ENEMY;
       }
@@ -2069,17 +2049,14 @@ const App: React.FC = () => {
       startGame(); 
   };
 
-  // --- Battle End & Rewards Check ---
   useEffect(() => {
     if (gameState.screen === GameScreen.BATTLE) {
         if (gameState.enemies.length === 0) {
             audioService.stopBGM();
             audioService.playSound('win');
             
-            // Relic: Burning Blood
             let hpRegen = 0;
             if (gameState.player.relics.find(r => r.id === 'BURNING_BLOOD')) hpRegen = 6;
-            // Relic: Meat on the Bone
             if (gameState.player.relics.find(r => r.id === 'MEAT_ON_THE_BONE') && gameState.player.currentHp <= gameState.player.maxHp / 2) hpRegen += 12;
             
             if (hpRegen > 0) {
@@ -2092,10 +2069,9 @@ const App: React.FC = () => {
             if (gameState.act === 4) {
                  setGameState(prev => ({ ...prev, screen: GameScreen.ENDING }));
             } else {
-                 setGameState(prev => ({ ...prev, screen: GameScreen.MATH_CHALLENGE }));
+                 setGameState(prev => ({ ...prev, screen: GameScreen.VICTORY }));
             }
         } else if (gameState.player.currentHp <= 0) {
-            // Lizard Tail
             if (gameState.player.relics.find(r => r.id === 'LIZARD_TAIL') && !gameState.player.relicCounters['LIZARD_TAIL_USED']) {
                 audioService.playSound('buff');
                 setGameState(prev => ({ 
@@ -2110,7 +2086,6 @@ const App: React.FC = () => {
                 return;
             }
             
-            // Ghost Potion
             const ghostPotIndex = gameState.player.potions.findIndex(p => p.templateId === 'GHOST_IN_JAR');
             if (ghostPotIndex !== -1) {
                  audioService.playSound('buff');
@@ -2196,7 +2171,6 @@ const App: React.FC = () => {
   };
 
   const handleMathChallengeComplete = (correctCount: number) => {
-      // Reward scaling: 1->15G, 2->30G, 3->50G
       let bonusGold = 0;
       if (correctCount === 1) bonusGold = 15;
       else if (correctCount === 2) bonusGold = 30;
@@ -2575,6 +2549,22 @@ const App: React.FC = () => {
                     onLeave={handleNodeComplete}
                     hasCursedKey={!!gameState.player.relics.find(r => r.id === 'CURSED_KEY')}
                 />
+            )}
+
+            {gameState.screen === GameScreen.VICTORY && (
+                 <div className="w-full h-full bg-green-900 flex items-center justify-center text-center text-white p-4">
+                    <div className="max-w-xs w-full bg-black/60 p-8 border-4 border-yellow-500 rounded-xl shadow-2xl animate-in zoom-in duration-300">
+                        <Trophy size={64} className="text-yellow-400 mx-auto mb-4 animate-bounce" />
+                        <h1 className="text-4xl mb-4 text-yellow-400 font-bold tracking-widest">勝利！</h1>
+                        <p className="text-gray-300 mb-8 font-bold leading-relaxed">放課後の試練を一つ乗り越えた。<br/>次はボーナステストだ！</p>
+                        <button 
+                            onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.MATH_CHALLENGE }))} 
+                            className="bg-yellow-600 hover:bg-yellow-500 px-8 py-4 border-2 border-white font-bold animate-pulse cursor-pointer w-full flex items-center justify-center shadow-lg transform transition-transform active:scale-95"
+                        >
+                            <Brain className="mr-2" /> テストを受ける
+                        </button>
+                    </div>
+                 </div>
             )}
 
             {gameState.screen === GameScreen.GAME_OVER && (
