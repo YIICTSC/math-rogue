@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch, Sparkles, BookOpen, Layers } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
@@ -331,7 +331,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   const [isEndless, setIsEndless] = useState(false);
   const saveDebounceRef = useRef<any>(null);
   
-  const currentTheme = getTheme(floor);
+  const currentTheme = useMemo(() => getTheme(floor), [floor]);
 
   // Shop State
   const [shopState, setShopState] = useState<{ active: boolean, merchantId: number | null, mode: 'BUY' | 'SELL' }>({ active: false, merchantId: null, mode: 'BUY' });
@@ -613,10 +613,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                       if (card) nextHand.push(card);
                   }
                   
-                  // Need to update state via setters, so doing this in a slightly roundabout way due to closures
-                  // Actually simplest is just to return logic here but since we need to update 3 states...
-                  // Better logic: calculate everything outside and set all.
-                  return currentHand; // Placeholder, real logic in handleCardUse
+                  return currentHand; 
               });
               return currentDiscard;
           });
@@ -683,9 +680,6 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           used = true;
       } else if (card.type === 'DEFENSE') {
           setPlayer(p => ({ ...p, status: { ...p.status, defenseBuff: (p.status.defenseBuff || 0) + card.power } }));
-          // Note: Needs logic to clear defenseBuff after turn.
-          // For simplicity, let's treat defense buff as temporary HP or high defense for 1 turn.
-          // Currently status.defenseBuff isn't decremented. We should add decrement logic in processTurn.
           msg = "防御を固めた！";
           audioService.playSound('block');
           used = true;
@@ -714,13 +708,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           used = true;
       } else if (card.templateId === 'DASH') {
           setPlayer(p => ({ ...p, status: { ...p.status, speed: 5 } })); // Speed buff (needs impl in move)
-          // Since speed isn't fully implemented in movePlayer, let's make it grant Energy/Action. 
-          // Or strictly adhere: "Use card = 1 turn".
-          // Let's make DASH give 2 free moves (instant).
           msg = "ダッシュ！";
           used = true; 
-          // For simplicity in this turn-based logic, maybe just skip enemy turn?
-          // processTurn isn't called yet.
       }
 
       if (used) {
@@ -805,7 +794,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   };
 
   const isPointInRoom = (x: number, y: number) => {
-      return roomsRef.current.some(r => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h);
+      return (roomsRef.current || []).some(r => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h);
   };
 
   const spawnEnemy = (x: number, y: number, floorLevel: number, inRoom: boolean = false, isSafeForShop: boolean = false): Entity => {
@@ -887,6 +876,16 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
         const tx = Math.floor(r2.x + r2.w/2); const ty = Math.floor(r2.y + r2.h/2);
         while(cx !== tx) { newMap[cy][cx] = 'FLOOR'; cx += (tx > cx) ? 1 : -1; }
         while(cy !== ty) { newMap[cy][cx] = 'FLOOR'; cy += (ty > cy) ? 1 : -1; }
+    }
+
+    if (rooms.length === 0) {
+        // Fallback if no rooms (extremely unlikely)
+        console.warn("Failed to generate rooms");
+        // Force at least one room
+        const cx = Math.floor(MAP_W/2); const cy = Math.floor(MAP_H/2);
+        rooms.push({x: cx-2, y: cy-2, w: 5, h: 5});
+        roomsRef.current = rooms;
+        for(let ry=cy-2; ry<cy+3; ry++) for(let rx=cx-2; rx<cx+3; rx++) newMap[ry][rx] = 'FLOOR';
     }
 
     const startRoom = rooms[0];
@@ -3081,25 +3080,28 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
 
             {/* Hand Area */}
             <div className="absolute bottom-[-90px] md:bottom-[-100px] left-0 right-0 h-24 flex justify-center items-center gap-2 p-2 bg-[#1a1a1a] rounded-b-xl border-t-2 border-[#333]">
-                {dungeonHand.map((card, i) => (
-                    <button 
-                        key={card.id} 
-                        className="w-20 h-24 bg-[#333] border-2 border-white rounded-lg flex flex-col items-center justify-center text-white relative shadow-lg hover:bg-[#444] active:scale-95 transition-transform"
-                        onClick={() => handleCardUse(i)}
-                    >
-                        <div className={`absolute top-1 right-1 text-[8px] font-bold px-1 rounded ${card.type === 'ATTACK' ? 'bg-red-600' : card.type === 'DEFENSE' ? 'bg-blue-600' : card.type === 'BUFF' ? 'bg-green-600' : 'bg-purple-600'}`}>
-                            {card.type.substring(0,3)}
-                        </div>
-                        <div className="mb-1">{card.icon}</div>
-                        <div className="text-[9px] font-bold text-center leading-tight px-1">{card.name}</div>
-                        <div className="text-[8px] text-gray-400 mt-1">{card.power > 0 ? `Pow: ${card.power}` : 'Effect'}</div>
-                    </button>
-                ))}
-                {dungeonHand.length === 0 && <div className="text-gray-500 text-xs">Reloading...</div>}
+                {dungeonHand.length > 0 ? (
+                    dungeonHand.map((card, i) => (
+                        <button 
+                            key={card.id} 
+                            className="w-20 h-24 bg-[#333] border-2 border-white rounded-lg flex flex-col items-center justify-center text-white relative shadow-lg hover:bg-[#444] active:scale-95 transition-transform"
+                            onClick={() => handleCardUse(i)}
+                        >
+                            <div className={`absolute top-1 right-1 text-[8px] font-bold px-1 rounded ${card.type === 'ATTACK' ? 'bg-red-600' : card.type === 'DEFENSE' ? 'bg-blue-600' : card.type === 'BUFF' ? 'bg-green-600' : 'bg-purple-600'}`}>
+                                {card.type.substring(0,3)}
+                            </div>
+                            <div className="mb-1">{card.icon}</div>
+                            <div className="text-[9px] font-bold text-center leading-tight px-1">{card.name}</div>
+                            <div className="text-[8px] text-gray-400 mt-1">{card.power > 0 ? `Pow: ${card.power}` : 'Effect'}</div>
+                        </button>
+                    ))
+                ) : (
+                    <div className="text-gray-500 text-xs">Reloading...</div>
+                )}
                 
                 <div className="absolute top-[-15px] right-2 flex flex-col items-end pointer-events-none">
                     <div className="text-[9px] text-[#666] flex items-center bg-[#1a1a1a] px-1 rounded border border-[#333]">
-                        <Layers size={8} className="mr-1"/> Deck: {dungeonDeck.length}
+                        <Layers size={8} className="mr-1"/> Deck: {dungeonDeck ? dungeonDeck.length : 0}
                     </div>
                 </div>
             </div>
