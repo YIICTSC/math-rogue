@@ -1,6 +1,8 @@
 
 
 
+
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -27,7 +29,7 @@ import DebugMenuScreen from './components/DebugMenuScreen';
 import PokerGameScreen from './components/PokerGameScreen';
 import SchoolyardSurvivorScreen from './components/SchoolyardSurvivorScreen';
 import SchoolDungeonRPG from './components/SchoolDungeonRPG'; 
-import SchoolRhythmGame from './components/SchoolRhythmGame'; // New
+import SchoolDungeonRPG2 from './components/SchoolDungeonRPG2'; 
 import MiniGameSelectScreen from './components/MiniGameSelectScreen';
 import Card from './components/Card';
 import { audioService } from './services/audioService';
@@ -294,7 +296,7 @@ const App: React.FC = () => {
           gameState.screen !== GameScreen.MINI_GAME_POKER && 
           gameState.screen !== GameScreen.MINI_GAME_SURVIVOR &&
           gameState.screen !== GameScreen.MINI_GAME_DUNGEON &&
-          gameState.screen !== GameScreen.MINI_GAME_RHYTHM
+          gameState.screen !== GameScreen.MINI_GAME_DUNGEON_2
       ) {
           storageService.saveGame(gameState);
       }
@@ -369,8 +371,8 @@ const App: React.FC = () => {
           setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_SURVIVOR }));
       } else if (gameId === 'DUNGEON') {
           setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_DUNGEON }));
-      } else if (gameId === 'RHYTHM') {
-          setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_RHYTHM }));
+      } else if (gameId === 'DUNGEON_2') {
+          setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_DUNGEON_2 }));
       }
   };
 
@@ -2375,8 +2377,8 @@ const App: React.FC = () => {
                 <SchoolDungeonRPG onBack={returnToTitle} />
             )}
 
-            {gameState.screen === GameScreen.MINI_GAME_RHYTHM && (
-                <SchoolRhythmGame onBack={returnToTitle} />
+            {gameState.screen === GameScreen.MINI_GAME_DUNGEON_2 && (
+                <SchoolDungeonRPG2 onBack={returnToTitle} />
             )}
 
             {gameState.screen === GameScreen.MODE_SELECTION && (

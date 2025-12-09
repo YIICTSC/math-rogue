@@ -1,4 +1,5 @@
 
+
 import { GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState } from '../types';
 
 const STORAGE_KEY_UNLOCKED_CARDS = 'pixel_spire_unlocked_cards_v1';
@@ -18,6 +19,10 @@ const STORAGE_KEY_DEBUG_HP_ONE = 'pixel_spire_debug_hp_one_v1';
 
 const STORAGE_KEY_DUNGEON_STATE = 'pixel_spire_dungeon_state_v1';
 const STORAGE_KEY_POKER_STATE = 'pixel_spire_poker_state_v1';
+
+// For School Dungeon 2
+const STORAGE_KEY_DUNGEON_STATE_2 = 'pixel_spire_dungeon_state_2_v1';
+const STORAGE_KEY_DUNGEON_RANKING_2 = 'pixel_spire_dungeon_ranking_2_v1';
 
 export const storageService = {
   // --- Unlocked Items (Cards, Relics, Potions, Enemies) ---
@@ -197,7 +202,7 @@ export const storageService = {
       }
   },
 
-  // --- Dungeon Scores & State ---
+  // --- Dungeon Scores & State (Dungeon 1) ---
   saveDungeonScore: (entry: DungeonScoreEntry) => {
       try {
           const current = storageService.getDungeonScores();
@@ -232,6 +237,43 @@ export const storageService = {
 
   clearDungeonState: () => {
       localStorage.removeItem(STORAGE_KEY_DUNGEON_STATE);
+  },
+
+  // --- Dungeon Scores & State (Dungeon 2) ---
+  saveDungeonScore2: (entry: DungeonScoreEntry) => {
+      try {
+          const current = storageService.getDungeonScores2();
+          const updated = [entry, ...current].slice(0, 50);
+          localStorage.setItem(STORAGE_KEY_DUNGEON_RANKING_2, JSON.stringify(updated));
+      } catch (e) {
+          console.warn("Failed to save dungeon 2 score", e);
+      }
+  },
+
+  getDungeonScores2: (): DungeonScoreEntry[] => {
+      try {
+          const stored = localStorage.getItem(STORAGE_KEY_DUNGEON_RANKING_2);
+          return stored ? JSON.parse(stored) : [];
+      } catch (e) {
+          return [];
+      }
+  },
+
+  saveDungeonState2: (state: any) => {
+      try {
+          localStorage.setItem(STORAGE_KEY_DUNGEON_STATE_2, JSON.stringify(state));
+      } catch (e) { console.warn("Failed to save dungeon 2 state", e); }
+  },
+
+  loadDungeonState2: (): any => {
+      try {
+          const stored = localStorage.getItem(STORAGE_KEY_DUNGEON_STATE_2);
+          return stored ? JSON.parse(stored) : null;
+      } catch { return null; }
+  },
+
+  clearDungeonState2: () => {
+      localStorage.removeItem(STORAGE_KEY_DUNGEON_STATE_2);
   },
 
   // --- Game State (Save/Load) ---
@@ -329,6 +371,8 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_SURVIVOR_RANKING);
       localStorage.removeItem(STORAGE_KEY_DUNGEON_RANKING);
       localStorage.removeItem(STORAGE_KEY_DUNGEON_STATE);
+      localStorage.removeItem(STORAGE_KEY_DUNGEON_RANKING_2);
+      localStorage.removeItem(STORAGE_KEY_DUNGEON_STATE_2);
       localStorage.removeItem(STORAGE_KEY_LEGACY_CARD);
       localStorage.removeItem(STORAGE_KEY_DEBUG_MATH_SKIP);
       localStorage.removeItem(STORAGE_KEY_DEBUG_HP_ONE);
