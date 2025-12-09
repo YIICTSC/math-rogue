@@ -432,14 +432,23 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
       setBelly(save.belly);
       setMaxBelly(save.maxBelly);
       setIdMap(save.idMap);
-      setIdentifiedTypes(new Set(save.identifiedTypes));
+      setIdentifiedTypes(new Set(save.identifiedTypes || [])); // Safe fallback
       setIsEndless(save.isEndless);
       turnCounter.current = save.turnCounter;
-      // Restore Deck State
+      
+      // Restore Deck State with Icon Hydration (React Nodes don't survive JSON serialization)
       if (save.dungeonDeck) {
-          setDungeonDeck(save.dungeonDeck);
-          setDungeonHand(save.dungeonHand);
-          setDungeonDiscard(save.dungeonDiscard);
+          const hydrateCards = (cards: any[]) => cards.map(c => {
+              const template = DUNGEON_CARD_DB.find(t => t.templateId === c.templateId);
+              return { 
+                  ...c, 
+                  icon: template ? template.icon : <HelpCircle size={16}/> 
+              };
+          });
+
+          setDungeonDeck(hydrateCards(save.dungeonDeck));
+          setDungeonHand(hydrateCards(save.dungeonHand));
+          setDungeonDiscard(hydrateCards(save.dungeonDiscard));
       } else {
           // If loading old save without deck, init deck
           initDeck();
