@@ -1,5 +1,3 @@
-
-
 import { ENEMY_LIBRARY } from '../constants';
 
 const FLAVOR_TEXTS = [
@@ -18,10 +16,7 @@ export const generateFlavorText = async (context: string): Promise<string> => {
 };
 
 export const generateEnemyName = async (floor: number): Promise<string> => {
-  // Get keys from library
-  const names = Object.keys(ENEMY_LIBRARY);
-  // Simple Tier Logic based on floor? 
-  // Currently geminiService just picks random. We can keep it random or filter by tier.
-  // Let's just pick random for now to match previous behavior, but using the keys.
+  // Get all enemy names but exclude the boss name so it doesn't appear as a standard mob
+  const names = Object.keys(ENEMY_LIBRARY).filter(name => name !== "校長先生");
   return getRandom(names);
 };
