@@ -1,12 +1,325 @@
+
 import React, { useRef, useEffect } from 'react';
 
 interface PixelSpriteProps {
   seed: string;
+  name?: string;
   className?: string;
   size?: number; // Internal grid size (default 16)
 }
 
-const PixelSprite: React.FC<PixelSpriteProps> = ({ seed, className, size = 16 }) => {
+// 16x16 Pixel Art Templates
+// . = Empty, # = Main Color, % = Highlight, @ = Black Outline/Eyes
+export const SPRITE_TEMPLATES: Record<string, string[]> = {
+  SLIME: [
+    "................",
+    "................",
+    "................",
+    "................",
+    "......####......",
+    "....##%%%%##....",
+    "...#%%%%%%%%#...",
+    "..#%%%%%%%%%%#..",
+    ".#@#%%%%%%%%#@#.",
+    ".#%#%%%%%%%%#%#.",
+    ".#%%%%%%%%%%%%#.",
+    "..#%%%%%%%%%%#..",
+    "...##########...",
+    "................",
+    "................",
+    "................"
+  ],
+  HUMANOID: [
+    "................",
+    ".....####.......",
+    "....#%%%%#......",
+    "...#%@%%@%#.....",
+    "....#%%%%#......",
+    ".....####.......",
+    "...#######......",
+    "..#%#####%#.....",
+    "..#%#####%#...#.",
+    "..#%#####%#..##.",
+    "...#######..###.",
+    "...##...##...#..",
+    "..##.....##.....",
+    "..##.....##.....",
+    ".##.......##....",
+    "................"
+  ],
+  SENIOR: [
+    "....########....",
+    "...##########...",
+    "...##%%%%%%##...",
+    "....#@%%@%##....",
+    ".....#%%%%#.....",
+    "......####......",
+    ".....##..##.....",
+    "....#%####%#....",
+    "...#%######%#...",
+    "...#%##..##%#...",
+    "...####..####...",
+    "...##......##...",
+    "..##........##..",
+    "..##........##..",
+    ".##..........##.",
+    "................"
+  ],
+  GIRL: [
+    ".....######.....",
+    "....########....",
+    "...##%@%%@%##...",
+    "...##%%%%%%##...",
+    "...###%%%%###...",
+    "..####%%%%####..",
+    "..#..######..#..",
+    ".....#%##%#.....",
+    "....#%####%#....",
+    "....#%####%#....",
+    "....########....",
+    ".....##..##.....",
+    ".....##..##.....",
+    "....##....##....",
+    "................",
+    "................"
+  ],
+  TEACHER: [
+    "................",
+    "......####......",
+    ".....#%%%%#.....",
+    "....#%@%@%%#....",
+    ".....#%%%%#.....",
+    "......####......",
+    ".....##..##.....",
+    "....#%####%#....",
+    "....#%####%#....",
+    "...#%#####%#....",
+    "...##########...",
+    "..##.##..##.....",
+    ".....##..##.#...",
+    ".....##..##.#...",
+    "....##....##....",
+    "...##..........."
+  ],
+  MUSCLE: [
+    "................",
+    "......####......",
+    ".....#%%%%#.....",
+    "....#%@%%@%#....",
+    ".....#%%%%#.....",
+    "....########....",
+    "...##########...",
+    "..#%########%#..",
+    "..#%########%#..",
+    "..#%###..###%#..",
+    "...####..####...",
+    "...##......##...",
+    "..##........##..",
+    "..##........##..",
+    ".##..........##.",
+    "................"
+  ],
+  CULTIST: [
+    "................",
+    "......##........",
+    ".....#%#........",
+    "....#%@%#.......",
+    "...#%%%%%#......",
+    "..#%%%%%%%#.....",
+    "....#%#%#.......",
+    "....#%#%#.......",
+    "....#####.......",
+    "...#%###%#......",
+    "..#%#...#%#.....",
+    "..#%#...#%#.....",
+    "................",
+    "................",
+    "................",
+    "................"
+  ],
+  SKELETON: [
+    "................",
+    ".....####.......",
+    "....#%%%%#......",
+    "...#%@%%@%#.....",
+    "....#%##%#......",
+    ".....####.......",
+    "....#%##%#......",
+    "...#%#..#%#.....",
+    "...#%#..#%#..#..",
+    "....#%##%#..##..",
+    "....#%##%#......",
+    "...##....##.....",
+    "...##....##.....",
+    "..##......##....",
+    "................",
+    "................"
+  ],
+  WIZARD: [
+    "......##........",
+    ".....#%#........",
+    "....#%@%#.......",
+    "....#%@%#.......",
+    "...#%%%%%#......",
+    "..#%%%%%%%#.....",
+    "....#%#%#.......",
+    "....#%#%#.......",
+    "...#%%%%%#......",
+    "..#%%%%%%%#.....",
+    "..#%#...#%#.....",
+    "..#%#...#%#.....",
+    "................",
+    "................",
+    "................",
+    "................"
+  ],
+  ROBOT: [
+    "................",
+    ".....####.......",
+    "....#%%%%#......",
+    "....#@%%@#......",
+    "....######......",
+    ".....####.......",
+    "....######......",
+    "...#%####%#.....",
+    "...#%####%#.....",
+    "...#%####%#.....",
+    "....######......",
+    "....#....#......",
+    "....#....#......",
+    "....##..##......",
+    "................",
+    "................"
+  ],
+  GHOST: [
+    "................",
+    ".....####.......",
+    "...##%%%%##.....",
+    "..#%%%%%%%%#....",
+    ".#%@%%%%%%@%#...",
+    ".#%%%%%%%%%%#...",
+    ".#%%%%%%%%%%#...",
+    ".#%%%%%%%%%%#...",
+    ".#%%%%%%%%%%#...",
+    "..#%%%%%%%%#....",
+    "...#%%%%%%#.....",
+    "....#%##%#......",
+    ".....#..#.......",
+    "................",
+    "................",
+    "................"
+  ],
+  BEAST: [
+    "................",
+    "................",
+    "..#..........#..",
+    "..##........##..",
+    "..#%########%#..",
+    ".#%%%%%%%%%%%%#.",
+    ".#%@%%%%%%%%@%#.",
+    ".#%%%%%%%%%%%%#.",
+    "..#%%%%%%%%%%#..",
+    "..#%###%%###%#..",
+    ".#%#...##...#%#.",
+    ".#%#...##...#%#.",
+    ".##....##....##.",
+    "................",
+    "................",
+    "................"
+  ],
+  FLIER: [
+    "................",
+    "................",
+    "..#..........#..",
+    "..##........##..",
+    ".###........###.",
+    ".###..####..###.",
+    "..#############.",
+    "..#%#%@%%@%#%#..",
+    "...#%%%%%%%%#...",
+    "...#%##%%##%#...",
+    "....#%%%%%%#....",
+    ".....#%%%%#.....",
+    "......#..#......",
+    "................",
+    "................",
+    "................"
+  ],
+  NOTEBOOK: [
+    "................",
+    ".....######.....",
+    "....#%%%%%%#....",
+    "....#%@%%%%#....",
+    "....#%%%%%%#....",
+    "....#%%%%%%#....",
+    "....#%%%%%%#....",
+    "....#@%%@%%#....",
+    "....#%%%%%%#....",
+    "....#%%%%%%#....",
+    "....#%%%%%%#....",
+    "....#%####%#....",
+    "....#%#%%#%#....",
+    ".....######.....",
+    "................",
+    "................"
+  ],
+  BACKPACK: [
+    "................",
+    "......####......",
+    ".....#%%%%#.....",
+    "....#%%%%%%#....",
+    "....#%%%%%%#....",
+    "...#%######%#...",
+    "...#%%%%%%%%#...",
+    "...#%@%%%%@%#...",
+    "...#%%%%%%%%#...",
+    "...#%%%%%%%%#...",
+    "...#%######%#...",
+    "...#%%%%%%%%#...",
+    "....########....",
+    "....##....##....",
+    "................",
+    "................"
+  ],
+  SHOE: [
+    "................",
+    "................",
+    "................",
+    "................",
+    ".......####.....",
+    ".....##%%%%#....",
+    "....#%%%%%%%#...",
+    "...#%%%%%%%%%#..",
+    "..#%%%%%%%%%%#..",
+    "..#%%%%%%%%%%#..",
+    ".#%%%%%%%%%%%%#.",
+    ".#%%%%%%%%%%%%#.",
+    ".##############.",
+    "..############..",
+    "................",
+    "................"
+  ],
+  BOSS: [
+    "................",
+    "......####......",
+    "....##%%%%##....",
+    "...#%%%%%%%%#...",
+    "..#%@%%%%%%@%#..",
+    "..#%%%%%%%%%%#..",
+    "..#%%%%%%%%%%#..",
+    "....###%%###....",
+    "...#%#%##%#%#...",
+    "..#%#%####%#%#..",
+    "..#%%####%#%#...",
+    "..###########...",
+    "....##....##....",
+    "...####..####...",
+    "..##..##.##..##.",
+    "................"
+  ]
+};
+
+const PixelSprite: React.FC<PixelSpriteProps> = ({ seed, name = "", className, size = 16 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -16,99 +329,84 @@ const PixelSprite: React.FC<PixelSpriteProps> = ({ seed, className, size = 16 })
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Configuration
     const pixelScale = 8;
     const border = 1;
-    
-    // Set Canvas Size
     canvas.width = (size + border * 2) * pixelScale;
     canvas.height = (size + border * 2) * pixelScale;
     
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const drawPixel = (x: number, y: number, color: string) => {
+    // --- SPRITE SELECTION ---
+    let spriteKey = 'HUMANOID';
+    const n = (name || seed).toUpperCase();
+    
+    // Keyword Matching
+    if (n.includes('上級生') || n.includes('不良') || n.includes('不審者') || n.includes('番長')) spriteKey = 'SENIOR';
+    else if (n.includes('花子') || n.includes('少女') || n.includes('マネージャー')) spriteKey = 'GIRL';
+    else if (n.includes('体育') || n.includes('教頭') || n.includes('BOSS') || n.includes('ガード')) spriteKey = 'MUSCLE';
+    else if (n.includes('先生') || n.includes('校長') || n.includes('顧問') || n.includes('医者')) spriteKey = 'TEACHER';
+    else if (n.includes('亡霊') || n.includes('幽霊') || n.includes('魂') || n.includes('影')) spriteKey = 'GHOST';
+    else if (n.includes('人体模型') || n.includes('ゴーレム') || n.includes('像') || n.includes('ロボ')) spriteKey = 'SKELETON';
+    else if (n.includes('ミミック') || n.includes('スライム') || n.includes('塊') || n.includes('カス') || n.includes('ヘドロ')) spriteKey = 'SLIME';
+    else if (n.includes('犬') || n.includes('ハムスター') || n.includes('獣') || n.includes('動物')) spriteKey = 'BEAST';
+    else if (n.includes('カラス') || n.includes('ハチ') || n.includes('鳥')) spriteKey = 'FLIER';
+    else if (n.includes('マシン') || n.includes('ドローン') || n.includes('三輪車')) spriteKey = 'ROBOT';
+    else if (n.includes('ノート') || n.includes('宿題') || n.includes('辞書') || n.includes('教科書')) spriteKey = 'NOTEBOOK';
+    else if (n.includes('ランドセル') || n.includes('バッグ')) spriteKey = 'BACKPACK';
+    else if (n.includes('上履き') || n.includes('靴') || n.includes('ステップ')) spriteKey = 'SHOE';
+    else if (n.includes('王') || n.includes('竜') || n.includes('支配')) spriteKey = 'BOSS';
+    else if (n.includes('悪魔') || n.includes('狂信者')) spriteKey = 'CULTIST';
+    else if (n.includes('司祭') || n.includes('妖精') || n.includes('魔道士')) spriteKey = 'WIZARD';
+
+    const template = SPRITE_TEMPLATES[spriteKey] || SPRITE_TEMPLATES.HUMANOID;
+
+    // --- PALETTE GENERATION ---
+    let hash = 0;
+    const colorSeed = name || seed;
+    for (let i = 0; i < colorSeed.length; i++) {
+      hash = colorSeed.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    
+    const palettes = [
+      ['#2E7D32', '#66BB6A', '#1B5E20'], // Green
+      ['#C62828', '#EF5350', '#B71C1C'], // Red
+      ['#1565C0', '#42A5F5', '#0D47A1'], // Blue
+      ['#424242', '#BDBDBD', '#212121'], // Grey
+      ['#6A1B9A', '#AB47BC', '#4A148C'], // Purple
+      ['#5D4037', '#8D6E63', '#3E2723'], // Brown
+      ['#00ACC1', '#26C6DA', '#006064'], // Cyan
+      ['#F57F17', '#FBC02D', '#F57F17'], // Yellow/Orange
+    ];
+
+    let paletteIndex = Math.floor(Math.abs(hash) % palettes.length);
+    
+    // Logic Overrides for better visuals
+    if (n.includes('先生') || n.includes('悪魔') || n.includes('怒') || n.includes('ランドセル')) paletteIndex = 1; // Red
+    else if (n.includes('スライム') || n.includes('水') || n.includes('三輪車')) paletteIndex = 2; // Blue
+    else if (n.includes('骸骨') || n.includes('模型') || n.includes('ゴーレム')) paletteIndex = 3; // Grey
+    else if (n.includes('花子') || n.includes('幽霊') || n.includes('毒')) paletteIndex = 4; // Purple
+    else if (n.includes('犬') || n.includes('ハムスター')) paletteIndex = 5; // Brown
+
+    const mainColor = palettes[paletteIndex][0];
+    const highlightColor = palettes[paletteIndex][1];
+    const outlineColor = '#1a1a1a';
+
+    for (let y = 0; y < 16; y++) {
+      for (let x = 0; x < 16; x++) {
+        const char = template[y][x];
+        if (char === '.') continue;
+        
+        let color = mainColor;
+        if (char === '%') color = highlightColor;
+        if (char === '@') color = outlineColor;
+        
         ctx.fillStyle = color;
         ctx.fillRect((x + border) * pixelScale, (y + border) * pixelScale, pixelScale, pixelScale);
-    };
-
-    // ENEMY: Procedural Generation (Symmetrical 16x16)
-    // Seeded RNG
-    let hash = 0;
-    for (let i = 0; i < seed.length; i++) {
-      hash = seed.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    
-    const random = () => {
-      const x = Math.sin(hash++) * 10000;
-      return x - Math.floor(x);
-    };
-
-    // Enemy Palettes (NES style)
-    const palettes = [
-      ['#F8F8F8', '#FC9838', '#80D010'], // Orange/Green
-      ['#F8F8F8', '#3CBCFC', '#0078F8'], // Blue/LightBlue
-      ['#F8F8F8', '#D32F2F', '#5D4037'], // Red/DarkBrown
-      ['#F8F8F8', '#7CB342', '#33691E'], // Lime/Forest
-      ['#F8F8F8', '#AB47BC', '#4A148C'], // Purple/DarkPurple
-      ['#F8F8F8', '#BDBDBD', '#424242'], // Grayscale
-    ];
-    
-    const paletteIndex = Math.floor(Math.abs(random()) * palettes.length) % palettes.length;
-    const mainColor = palettes[paletteIndex][1];
-    const secondaryColor = palettes[paletteIndex][2];
-    const outlineColor = '#1a1a1a'; // Black outline for unification
-    
-    // Generate Grid (Half Width for symmetry)
-    const gridW = size;
-    const gridH = size;
-    const halfW = Math.ceil(gridW / 2);
-    const grid = new Array(gridH).fill(0).map(() => new Array(halfW).fill(0));
-
-    for (let y = 0; y < gridH; y++) {
-      for (let x = 0; x < halfW; x++) {
-        const r = random();
-        let threshold = 0.5; 
-        
-        // Shape constraints for better sprites
-        if (y < 2 || y > gridH - 3) threshold = 0.7; // Taper top/bottom
-        if (x === 0) threshold = 0.2; // Solid center
-        
-        if (r > threshold) {
-            // 1 = Main, 2 = Secondary, 3 = Empty (internal)
-            grid[y][x] = r > threshold + 0.3 ? 2 : 1;
-        }
-      }
-    }
-
-    // Render with outline effect (simplified)
-    const getPixel = (x: number, y: number) => {
-        if (x < 0 || y < 0 || y >= gridH || x >= gridW) return 0;
-        const mapX = x >= halfW ? gridW - 1 - x : x;
-        return grid[y][mapX];
-    };
-
-    for (let y = 0; y < gridH; y++) {
-      for (let x = 0; x < gridW; x++) {
-        const val = getPixel(x, y);
-        if (val > 0) {
-          const color = val === 1 ? mainColor : secondaryColor;
-          drawPixel(x, y, color);
-        } else {
-            // Check neighbors to draw outline
-            // If current is empty but neighbor is solid, draw outline
-            const hasNeighbor = 
-                getPixel(x+1, y) > 0 || getPixel(x-1, y) > 0 ||
-                getPixel(x, y+1) > 0 || getPixel(x, y-1) > 0;
-            
-            if (hasNeighbor) {
-                drawPixel(x, y, outlineColor);
-            }
-        }
       }
     }
     
-  }, [seed, size]);
+  }, [seed, name, size]);
 
   return <canvas ref={canvasRef} className={className} style={{ imageRendering: 'pixelated' }} />;
 };
