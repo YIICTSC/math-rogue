@@ -1,6 +1,7 @@
 
+
 import React from 'react';
-import { ArrowLeft, Club, Gamepad2, Skull, Compass } from 'lucide-react';
+import { ArrowLeft, Club, Gamepad2, Skull, Compass, Music } from 'lucide-react';
 
 interface MiniGameSelectScreenProps {
   onSelect: (gameId: string) => void;
@@ -53,7 +54,7 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
                     </div>
                 </button>
 
-                {/* Dungeon Game Card (Replaced Story) */}
+                {/* Dungeon Game Card */}
                 <button
                     onClick={() => onSelect('DUNGEON')}
                     className="group relative bg-[#0f380f] border-4 border-[#306230] hover:border-[#8bac0f] p-6 rounded-xl flex flex-row items-center transition-all shadow-xl hover:shadow-[0_0_30px_rgba(139,172,15,0.4)] overflow-hidden text-left"
@@ -66,6 +67,23 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
                         <span className="text-xl font-bold mb-1 text-[#9bbc0f] font-mono transition-colors block">風来の小学生</span>
                         <span className="text-xs text-[#8bac0f] leading-tight block font-mono">
                             1000回遊べるランダムダンジョン。<br/>GB風ローグライクRPG。
+                        </span>
+                    </div>
+                </button>
+
+                {/* Rhythm Game Card (Placeholder) */}
+                <button
+                    onClick={() => onSelect('RHYTHM')}
+                    className="group relative bg-slate-800 border-4 border-slate-600 hover:border-pink-500 hover:bg-slate-700 p-6 rounded-xl flex flex-row items-center transition-all shadow-xl hover:shadow-[0_0_30px_rgba(236,72,153,0.4)] overflow-hidden text-left"
+                >
+                    <div className="absolute top-0 right-0 bg-pink-600 text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-md">NEW</div>
+                    <div className="bg-pink-900/50 p-4 rounded-full mr-4 group-hover:scale-110 transition-transform duration-300 border-2 border-pink-500/30 shrink-0">
+                        <Music size={32} className="text-pink-400 fill-current" />
+                    </div>
+                    <div>
+                        <span className="text-xl font-bold mb-1 text-white group-hover:text-pink-300 transition-colors block">音楽室リズム</span>
+                        <span className="text-xs text-gray-400 group-hover:text-gray-200 leading-tight block">
+                            ビートに合わせてノーツを叩け！<br/>校歌斉唱からヘビメタまで。
                         </span>
                     </div>
                 </button>

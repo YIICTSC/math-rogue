@@ -1,4 +1,6 @@
 
+
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -25,6 +27,7 @@ import DebugMenuScreen from './components/DebugMenuScreen';
 import PokerGameScreen from './components/PokerGameScreen';
 import SchoolyardSurvivorScreen from './components/SchoolyardSurvivorScreen';
 import SchoolDungeonRPG from './components/SchoolDungeonRPG'; 
+import SchoolRhythmGame from './components/SchoolRhythmGame'; // New
 import MiniGameSelectScreen from './components/MiniGameSelectScreen';
 import Card from './components/Card';
 import { audioService } from './services/audioService';
@@ -290,7 +293,8 @@ const App: React.FC = () => {
           gameState.screen !== GameScreen.MINI_GAME_SELECT &&
           gameState.screen !== GameScreen.MINI_GAME_POKER && 
           gameState.screen !== GameScreen.MINI_GAME_SURVIVOR &&
-          gameState.screen !== GameScreen.MINI_GAME_DUNGEON
+          gameState.screen !== GameScreen.MINI_GAME_DUNGEON &&
+          gameState.screen !== GameScreen.MINI_GAME_RHYTHM
       ) {
           storageService.saveGame(gameState);
       }
@@ -365,6 +369,8 @@ const App: React.FC = () => {
           setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_SURVIVOR }));
       } else if (gameId === 'DUNGEON') {
           setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_DUNGEON }));
+      } else if (gameId === 'RHYTHM') {
+          setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_RHYTHM }));
       }
   };
 
@@ -2367,6 +2373,10 @@ const App: React.FC = () => {
 
             {gameState.screen === GameScreen.MINI_GAME_DUNGEON && (
                 <SchoolDungeonRPG onBack={returnToTitle} />
+            )}
+
+            {gameState.screen === GameScreen.MINI_GAME_RHYTHM && (
+                <SchoolRhythmGame onBack={returnToTitle} />
             )}
 
             {gameState.screen === GameScreen.MODE_SELECTION && (
