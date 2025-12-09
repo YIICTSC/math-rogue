@@ -2691,7 +2691,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
             </div>
         )}
 
-        <div className="w-full max-w-md flex flex-col items-center gap-2">
+        <div className="w-full max-w-md flex flex-col items-center gap-2 shrink-0">
             <div className="w-full aspect-[11/9] relative shrink-0">
                 <div className="w-full h-full border-4 relative overflow-hidden shadow-lg rounded-sm" style={{ backgroundColor: C3, borderColor: C0 }}>
                     
@@ -3038,32 +3038,41 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
             </div>
         </div>
 
-        <div className="w-full max-w-md md:w-64 md:h-[400px] flex-grow md:flex-grow-0 relative min-h-[220px] rounded-t-xl md:rounded-xl border-t-2 md:border-2 border-[#333] bg-[#1a1a1a]">
-            <div className="absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32 md:left-1/2 md:-translate-x-1/2 md:top-1/4 flex items-center justify-center">
+        <div className="w-full max-w-md md:w-64 md:h-[520px] flex-grow md:flex-grow-0 relative min-h-[340px] rounded-t-xl md:rounded-xl border-t-2 md:border-2 border-[#333] bg-[#1a1a1a] shadow-2xl">
+            
+            {/* Quit Button (Top Right) */}
+            <div className="absolute top-2 right-2 z-20">
+                 <button onClick={handleQuit} className="text-[#555] text-[10px] font-bold border border-[#333] px-2 py-1 rounded bg-[#222] hover:text-white hover:border-gray-500 flex items-center gap-1"><LogOut size={10}/> QUIT</button>
+            </div>
+
+            {/* Shoot Button (Top Center) */}
+            <div className="absolute left-1/2 -translate-x-1/2 top-4 flex flex-col items-center z-10 group">
+                <button 
+                    className="w-12 h-12 bg-[#333] rounded-full shadow-[0_2px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555] touch-none select-none" 
+                    onClick={fireRangedWeapon}
+                >
+                    <Crosshair size={20}/>
+                </button>
+                <span className="text-[#666] text-[9px] font-bold mt-1">SHOOT</span>
+            </div>
+
+            {/* D-Pad (Left Side) */}
+            <div className="absolute left-4 top-12 w-32 h-32 md:left-1/2 md:-translate-x-1/2 md:top-24 flex items-center justify-center">
                 <div className="w-10 h-10 bg-[#333] z-10"></div>
                 <div className="absolute top-0 w-10 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0 touch-none select-none" onClick={() => handleMoveInput(0, -1)}><ArrowUp className="text-[#666]" size={20}/></div>
                 <div className="absolute bottom-0 w-10 h-16 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-0 touch-none select-none" onClick={() => handleMoveInput(0, 1)}><ArrowDown className="text-[#666]" size={20}/></div>
                 <div className="absolute left-0 w-16 h-10 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-0 touch-none select-none" onClick={() => handleMoveInput(-1, 0)}><ArrowLeft className="text-[#666]" size={20}/></div>
                 <div className="absolute right-0 w-16 h-10 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-0 touch-none select-none" onClick={() => handleMoveInput(1, 0)}><ArrowRight className="text-[#666]" size={20}/></div>
-                <div className="absolute top-0 left-0 w-10 h-10 bg-[#333] rounded-tl-xl border-t border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => handleMoveInput(-1, -1)}><ArrowUpLeft className="text-[#666]" size={20}/></div>
-                <div className="absolute top-0 right-0 w-10 h-10 bg-[#333] rounded-tr-xl border-t border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => handleMoveInput(1, -1)}><ArrowUpRight className="text-[#666]" size={20}/></div>
-                <div className="absolute bottom-0 left-0 w-10 h-10 bg-[#333] rounded-bl-xl border-b border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => handleMoveInput(-1, 1)}><ArrowDownLeft className="text-[#666]" size={20}/></div>
-                <div className="absolute bottom-0 right-0 w-10 h-10 bg-[#333] rounded-br-xl border-b border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => handleMoveInput(1, 1)}><ArrowDownRight className="text-[#666]" size={20}/></div>
+                {/* Diagonals */}
+                <div className="absolute top-0 left-0 w-10 h-10 bg-[#333] rounded-tl-xl border-t border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer z-0 touch-none select-none" onClick={() => handleMoveInput(-1, -1)}></div>
+                <div className="absolute top-0 right-0 w-10 h-10 bg-[#333] rounded-tr-xl border-t border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer z-0 touch-none select-none" onClick={() => handleMoveInput(1, -1)}></div>
+                <div className="absolute bottom-0 left-0 w-10 h-10 bg-[#333] rounded-bl-xl border-b border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer z-0 touch-none select-none" onClick={() => handleMoveInput(-1, 1)}></div>
+                <div className="absolute bottom-0 right-0 w-10 h-10 bg-[#333] rounded-br-xl border-b border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer z-0 touch-none select-none" onClick={() => handleMoveInput(1, 1)}></div>
                 <div className="absolute w-8 h-8 bg-[#2a2a2a] rounded-full z-20 shadow-inner"></div>
             </div>
 
-            {/* Shoot Button */}
-            <div className="absolute right-6 top-1/2 -translate-y-[100px] md:right-auto md:left-1/2 md:-translate-x-[20px] md:top-1/2 md:-translate-y-1/2 flex flex-col items-center z-10 group">
-                <button 
-                    className="w-10 h-10 bg-[#333] rounded-full shadow-[0_2px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555] touch-none select-none" 
-                    onClick={fireRangedWeapon}
-                >
-                    <Crosshair size={16}/>
-                </button>
-                <span className="text-[#666] text-[10px] font-bold mt-1">SHOOT</span>
-            </div>
-
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 md:right-auto md:left-1/2 md:-translate-x-1/2 md:top-3/4 flex gap-4 transform -rotate-12 md:rotate-0">
+            {/* A/B Buttons (Right Side) */}
+            <div className="absolute right-4 top-20 md:right-auto md:left-1/2 md:-translate-x-1/2 md:top-[280px] flex gap-4 transform -rotate-12 md:rotate-0">
                 <div className="flex flex-col items-center group">
                     <button className="w-14 h-14 bg-[#8b0000] rounded-full shadow-[0_4px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000] touch-none select-none" onClick={toggleMenu}>B</button>
                     <span className="text-[#666] text-xs font-bold mt-1">MENU</span>
@@ -3083,32 +3092,28 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                 </div>
             </div>
 
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 md:bottom-4">
-                 <button onClick={handleQuit} className="text-[#555] text-[10px] font-bold border border-[#333] px-3 py-1 rounded bg-[#222] hover:text-white hover:border-gray-500 flex items-center gap-1"><LogOut size={10}/> QUIT</button>
-            </div>
-
-            {/* Hand Area */}
-            <div className="absolute bottom-[-90px] md:bottom-[-100px] left-0 right-0 h-24 flex justify-center items-center gap-2 p-2 bg-[#1a1a1a] rounded-b-xl border-t-2 border-[#333]">
+            {/* Hand Area (Bottom) */}
+            <div className="absolute bottom-2 left-0 right-0 h-28 flex justify-center items-end gap-2 px-2 z-30">
                 {dungeonHand.length > 0 ? (
                     dungeonHand.map((card, i) => (
                         <button 
                             key={card.id} 
-                            className="w-20 h-24 bg-[#333] border-2 border-white rounded-lg flex flex-col items-center justify-center text-white relative shadow-lg hover:bg-[#444] active:scale-95 transition-transform"
+                            className="w-20 h-28 bg-[#2a2a2a] border-2 border-[#555] rounded-lg flex flex-col items-center justify-start text-white relative shadow-lg hover:bg-[#333] hover:border-white hover:-translate-y-2 active:scale-95 transition-all p-1"
                             onClick={() => handleCardUse(i)}
                         >
-                            <div className={`absolute top-1 right-1 text-[8px] font-bold px-1 rounded ${card.type === 'ATTACK' ? 'bg-red-600' : card.type === 'DEFENSE' ? 'bg-blue-600' : card.type === 'BUFF' ? 'bg-green-600' : 'bg-purple-600'}`}>
-                                {card.type.substring(0,3)}
+                            <div className={`w-full text-[8px] font-bold px-1 rounded-t mb-1 text-center ${card.type === 'ATTACK' ? 'bg-red-900 text-red-200' : card.type === 'DEFENSE' ? 'bg-blue-900 text-blue-200' : card.type === 'BUFF' ? 'bg-green-900 text-green-200' : 'bg-purple-900 text-purple-200'}`}>
+                                {card.type}
                             </div>
-                            <div className="mb-1">{card.icon}</div>
-                            <div className="text-[9px] font-bold text-center leading-tight px-1">{card.name}</div>
-                            <div className="text-[8px] text-gray-400 mt-1">{card.power > 0 ? `Pow: ${card.power}` : 'Effect'}</div>
+                            <div className="mb-1 p-1 bg-black/50 rounded-full">{card.icon}</div>
+                            <div className="text-[10px] font-bold text-center leading-tight w-full break-words px-0.5">{card.name}</div>
+                            <div className="text-[9px] text-gray-400 mt-auto border-t border-[#444] w-full text-center pt-0.5">{card.power > 0 ? `Pow:${card.power}` : 'Effect'}</div>
                         </button>
                     ))
                 ) : (
-                    <div className="text-gray-500 text-xs">Reloading...</div>
+                    <div className="text-gray-500 text-xs mb-4 animate-pulse">Reloading...</div>
                 )}
                 
-                <div className="absolute top-[-15px] right-2 flex flex-col items-end pointer-events-none">
+                <div className="absolute top-0 right-4 flex flex-col items-end pointer-events-none">
                     <div className="text-[9px] text-[#666] flex items-center bg-[#1a1a1a] px-1 rounded border border-[#333]">
                         <Layers size={8} className="mr-1"/> Deck: {dungeonDeck ? dungeonDeck.length : 0}
                     </div>
