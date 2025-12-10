@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package, Ghost, Trophy, RotateCcw, Play, DollarSign, Info } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -306,7 +307,11 @@ interface PokerGameScreenProps {
 const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   
   const hydrateState = (state: PokerRunState): PokerRunState => {
-      const hydrateSupporters = (list: PokerSupporter[]) => list.map(item => SUPPORTERS_LIBRARY.find(lib => lib.id === item.id) || item);
+      const hydrateSupporters = (list: PokerSupporter[]) => list.map(item => {
+          const libItem = SUPPORTERS_LIBRARY.find(lib => lib.id === item.id) || item;
+          // Preserve edition if it exists in the saved item
+          return { ...libItem, edition: item.edition }; 
+      });
       const hydrateConsumables = (list: PokerConsumable[]) => list.map(item => CONSUMABLES_LIBRARY.find(lib => lib.id === item.id) || item);
       
       const hydrateShop = (list: (PokerSupporter | PokerConsumable | PokerPack)[]) => {
@@ -328,8 +333,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           consumables: hydrateConsumables(state.consumables),
           shopInventory: hydrateShop(state.shopInventory),
           shopVoucher: hydrateVoucher(state.shopVoucher),
-          voucherRestockedAnte: state.voucherRestockedAnte ?? 0, // Migration default
-          persistentCounters: state.persistentCounters || {} // Ensure initialized
+          voucherRestockedAnte: state.voucherRestockedAnte ?? 0,
+          persistentCounters: state.persistentCounters || {},
+          handSizeModifier: state.handSizeModifier || 0 // New field init
       };
   };
 
@@ -362,7 +368,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           shopVoucher: null,
           isEndless: false,
           voucherRestockedAnte: 0,
-          persistentCounters: {}
+          persistentCounters: {},
+          handSizeModifier: 0
       };
   });
 
@@ -457,7 +464,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           shopVoucher: null,
           isEndless: false,
           voucherRestockedAnte: 0,
-          persistentCounters: {}
+          persistentCounters: {},
+          handSizeModifier: 0
       });
       setHighScore(0);
       setPhase('BLIND_SELECT');
@@ -472,7 +480,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   const startBlind = () => {
       const deck = [...runState.deck].sort(() => Math.random() - 0.5);
       
-      let initialHandSize = 8;
+      let initialHandSize = 8 + (runState.handSizeModifier || 0); // Apply modifier
       if (runState.vouchers.includes('V_PAINT_BRUSH')) initialHandSize += 1;
 
       const hand = deck.splice(0, initialHandSize);
@@ -486,7 +494,13 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
 
       // Boss Logic Override
       if (runState.currentBlind.bossAbility === 'THE_NEEDLE') baseHands = 1;
-      if (runState.currentBlind.bossAbility === 'THE_MANACLE') initialHandSize -= 1; 
+      if (runState.currentBlind.bossAbility === 'THE_MANACLE') {
+          // Manacle reduces hand size by 1 for this fight
+          if (hand.length > 0) {
+              const removed = hand.pop();
+              if (removed) deck.push(removed); // Return to deck
+          }
+      } 
       
       setRunState(prev => ({
           ...prev,
@@ -582,6 +596,13 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       
       runState.supporters.forEach(s => { if (s.triggerOn === 'HAND_PLAYED' || !s.triggerOn) s.effect(ctx); });
 
+      // Apply Supporter Edition Bonuses
+      runState.supporters.forEach(s => {
+          if (s.edition === 'FOIL') ctx.chips += 50;
+          if (s.edition === 'HOLOGRAPHIC') ctx.mult += 10;
+          if (s.edition === 'POLYCHROME') ctx.mult *= 1.5;
+      });
+
       chips = Math.floor(ctx.chips);
       mult = Math.floor(ctx.mult);
       const score = chips * mult;
@@ -608,10 +629,11 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           }
       }
 
-      let handSize = 8;
+      let handSize = 8 + (runState.handSizeModifier || 0);
       if (runState.vouchers.includes('V_PAINT_BRUSH')) handSize += 1;
+      if (runState.currentBlind.bossAbility === 'THE_MANACLE') handSize -= 1;
 
-      const drawCount = handSize - newHand.length;
+      const drawCount = Math.max(0, handSize - newHand.length);
       if (drawCount > 0 && currentDeck.length > 0) {
           const drawn = currentDeck.splice(0, drawCount);
           newHand = [...newHand, ...drawn];
@@ -659,10 +681,11 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       let currentDeck = [...runState.deck];
       let newDiscardPile = [...runState.discardPile, ...discardedCards];
       
-      let handSize = 8;
+      let handSize = 8 + (runState.handSizeModifier || 0);
       if (runState.vouchers.includes('V_PAINT_BRUSH')) handSize += 1;
+      if (runState.currentBlind.bossAbility === 'THE_MANACLE') handSize -= 1;
 
-      const drawCount = handSize - newHand.length;
+      const drawCount = Math.max(0, handSize - newHand.length);
       if (drawCount > 0 && currentDeck.length > 0) {
           const drawn = currentDeck.splice(0, drawCount);
           newHand = [...newHand, ...drawn];
@@ -874,15 +897,55 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           audioService.playSound('win');
       } else if (consumable.type === 'TAROT') { setSelectedConsumable(consumable); } else if (consumable.type === 'SPECTRAL') { handleSpectral(consumable, index); }
   };
+  
   const handleSpectral = (consumable: PokerConsumable, index: number) => {
       let newState = { ...runState };
-      if (consumable.id === 'SPC_BLACKHOLE') { Object.keys(newState.handLevels).forEach(k => newState.handLevels[k] += 1); audioService.playSound('win'); } 
-      else if (consumable.id === 'SPC_IMMOLATE') { if (newState.hand.length > 0) { const shuffled = [...newState.hand].sort(() => Math.random() - 0.5); const destroyed = shuffled.slice(0, 5).map(c => c.id); newState.hand = newState.hand.filter(c => !destroyed.includes(c.id)); newState.money += 20; audioService.playSound('attack'); } } 
-      else if (consumable.id === 'SPC_ANKH') { if (newState.supporters.length > 0) { const target = newState.supporters[Math.floor(Math.random() * newState.supporters.length)]; newState.supporters = [target, { ...target, id: `copy-${Date.now()}` }]; audioService.playSound('win'); } } 
-      else if (consumable.id === 'SPC_HEX') { newState.money += 50; newState.supporters = []; } 
-      else if (consumable.id === 'SPC_OUIJA') { if (newState.hand.length > 0) { const ranks = newState.hand.map(c => c.rank); const targetRank = ranks[Math.floor(Math.random() * ranks.length)]; newState.hand = newState.hand.map(c => ({ ...c, rank: targetRank })); audioService.playSound('win'); } }
-      newState.consumables = newState.consumables.filter((_, i) => i !== index); setRunState(newState);
+      
+      if (consumable.id === 'SPC_BLACKHOLE') { 
+          Object.keys(newState.handLevels).forEach(k => newState.handLevels[k] += 1); 
+          audioService.playSound('win'); 
+      } 
+      else if (consumable.id === 'SPC_IMMOLATE') { 
+          if (newState.hand.length > 0) { 
+              const shuffled = [...newState.hand].sort(() => Math.random() - 0.5); 
+              const destroyed = shuffled.slice(0, 5).map(c => c.id); 
+              newState.hand = newState.hand.filter(c => !destroyed.includes(c.id)); 
+              newState.money += 20; 
+              audioService.playSound('attack'); 
+          } 
+      } 
+      else if (consumable.id === 'SPC_ANKH') { 
+          if (newState.supporters.length > 0) { 
+              const target = newState.supporters[Math.floor(Math.random() * newState.supporters.length)]; 
+              newState.supporters = [target, { ...target, id: `copy-${Date.now()}` }]; 
+              audioService.playSound('win'); 
+          } 
+      } 
+      else if (consumable.id === 'SPC_HEX') { 
+          if (newState.supporters.length > 0) {
+              const target = newState.supporters[Math.floor(Math.random() * newState.supporters.length)];
+              const polychromeSupporter: PokerSupporter = { ...target, edition: 'POLYCHROME' };
+              newState.supporters = [polychromeSupporter];
+              audioService.playSound('win');
+          }
+      } 
+      else if (consumable.id === 'SPC_OUIJA') { 
+          if (newState.hand.length > 0) { 
+              const ranks = newState.hand.map(c => c.rank); 
+              const targetRank = ranks[Math.floor(Math.random() * ranks.length)]; 
+              newState.hand = newState.hand.map(c => ({ ...c, rank: targetRank })); 
+              newState.handSizeModifier = (newState.handSizeModifier || 0) - 1;
+              if (newState.hand.length > 0) {
+                  newState.hand.pop(); // Remove one card immediately from hand to respect new size
+              }
+              audioService.playSound('win'); 
+          } 
+      }
+      
+      newState.consumables = newState.consumables.filter((_, i) => i !== index); 
+      setRunState(newState);
   };
+
   const applyTarot = () => {
       if (!selectedConsumable || selectedCards.length === 0) return;
       const modifiedHand = runState.hand.map(c => {
@@ -940,6 +1003,12 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       
       const cardEnhancement = isCard && cardItem.enhancement ? POKER_ENHANCEMENTS[cardItem.enhancement] : null;
 
+      // Edition Logic
+      const edition = isSupporter ? supporterItem.edition : undefined;
+      const editionName = edition === 'FOIL' ? 'Foil' : edition === 'HOLOGRAPHIC' ? 'Holographic' : edition === 'POLYCHROME' ? 'Polychrome' : '';
+      const editionColor = edition === 'FOIL' ? 'text-blue-300 border-blue-400' : edition === 'HOLOGRAPHIC' ? 'text-red-300 border-red-400' : edition === 'POLYCHROME' ? 'text-yellow-300 border-yellow-400 animate-pulse' : 'text-gray-400 border-gray-600';
+      const editionEffect = edition === 'FOIL' ? '+50 Chips' : edition === 'HOLOGRAPHIC' ? '+10 Mult' : edition === 'POLYCHROME' ? 'x1.5 Mult' : '';
+
       return (
           <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setInspectedItem(null)}>
               <div className="bg-slate-800 border-2 border-white p-6 rounded-lg max-w-sm w-full shadow-2xl relative" onClick={e => e.stopPropagation()}>
@@ -974,8 +1043,17 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                   ) : (
                       <> 
                         <div className="flex flex-col items-center mb-4">
-                            <div className="w-24 h-24 mb-4"><PixelSprite seed={(item as any).icon} name={(item as any).icon} className="w-full h-full"/></div>
-                            <h3 className="text-2xl font-bold text-yellow-400 mb-2">{(item as any).name}</h3>
+                            <div className={`w-24 h-24 mb-4 rounded-lg overflow-hidden border-4 ${edition ? editionColor : 'border-transparent'}`}>
+                                <PixelSprite seed={(item as any).icon} name={(item as any).icon} className="w-full h-full"/>
+                            </div>
+                            <h3 className="text-2xl font-bold text-yellow-400 mb-1">{(item as any).name}</h3>
+                            
+                            {edition && (
+                                <div className={`text-xs font-bold mb-2 border px-2 py-0.5 rounded ${editionColor} bg-black/50`}>
+                                    {editionName} ({editionEffect})
+                                </div>
+                            )}
+
                             {isVoucher && <div className="text-sm font-bold text-white bg-slate-700 px-3 py-1 rounded-full">VOUCHER</div>}
                             {!isVoucher && <div className="text-sm font-bold text-white bg-slate-700 px-3 py-1 rounded-full">{'rarity' in item ? (item as PokerSupporter).rarity : (item as PokerConsumable).type}</div>}
                         </div>
@@ -1145,7 +1223,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                               <div className="text-[9px] text-blue-300 font-bold mb-0.5 flex items-center"><span className="w-2 h-2 bg-blue-500 rounded-full mr-1 inline-block"></span>JOKERS ({runState.supporters.length}/5)</div>
                               <div className="flex-1 flex items-center gap-1 overflow-x-auto custom-scrollbar">
                                   {runState.supporters.map((s, i) => (
-                                      <div key={i} className="bg-slate-800 p-0.5 rounded flex-shrink-0 border border-slate-600 cursor-pointer hover:bg-slate-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center relative group" onClick={() => setInspectedItem({ item: s, type: 'SUPPORTER', isOwned: true, index: i })} onContextMenu={(e) => handleContextMenu(e, s, 'SUPPORTER', true, i)} onTouchStart={() => handleTouchStart(s, 'SUPPORTER', true, i)} onTouchEnd={handleTouchEnd}>
+                                      <div key={i} className={`bg-slate-800 p-0.5 rounded flex-shrink-0 border cursor-pointer hover:bg-slate-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center relative group ${s.edition === 'POLYCHROME' ? 'border-yellow-400 animate-pulse' : s.edition === 'HOLOGRAPHIC' ? 'border-red-400' : s.edition === 'FOIL' ? 'border-blue-400' : 'border-slate-600'}`} onClick={() => setInspectedItem({ item: s, type: 'SUPPORTER', isOwned: true, index: i })} onContextMenu={(e) => handleContextMenu(e, s, 'SUPPORTER', true, i)} onTouchStart={() => handleTouchStart(s, 'SUPPORTER', true, i)} onTouchEnd={handleTouchEnd}>
                                           <PixelSprite seed={s.icon} name={s.icon} className="w-full h-full"/>
                                       </div>
                                   ))}
@@ -1334,7 +1412,18 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
 
         <div className="w-full bg-black/40 border-b border-black/50 p-2 flex justify-between items-center z-10 shrink-0 min-h-[64px]">
             <div className="flex gap-2 items-center flex-1 justify-center">
-                {runState.supporters.map((s, i) => (<div key={i} className="w-10 h-10 md:w-12 md:h-12 bg-slate-800 border-2 border-yellow-500 rounded flex items-center justify-center relative group cursor-pointer hover:bg-slate-700 transition-colors" onClick={() => setInspectedItem({ item: s, type: 'SUPPORTER', isOwned: true, index: i })} onContextMenu={(e) => handleContextMenu(e, s, 'SUPPORTER', true, i)} onTouchStart={() => handleTouchStart(s, 'SUPPORTER', true, i)} onTouchEnd={handleTouchEnd}><PixelSprite seed={s.icon} name={s.icon} className="w-8 h-8"/></div>))}
+                {runState.supporters.map((s, i) => (
+                    <div 
+                        key={i} 
+                        className={`w-10 h-10 md:w-12 md:h-12 bg-slate-800 border-2 rounded flex items-center justify-center relative group cursor-pointer hover:bg-slate-700 transition-colors ${s.edition === 'POLYCHROME' ? 'border-yellow-400 animate-pulse' : s.edition === 'HOLOGRAPHIC' ? 'border-red-400' : s.edition === 'FOIL' ? 'border-blue-400' : 'border-slate-600'}`} 
+                        onClick={() => setInspectedItem({ item: s, type: 'SUPPORTER', isOwned: true, index: i })} 
+                        onContextMenu={(e) => handleContextMenu(e, s, 'SUPPORTER', true, i)} 
+                        onTouchStart={() => handleTouchStart(s, 'SUPPORTER', true, i)} 
+                        onTouchEnd={handleTouchEnd}
+                    >
+                        <PixelSprite seed={s.icon} name={s.icon} className="w-8 h-8"/>
+                    </div>
+                ))}
                 {runState.supporters.length === 0 && <div className="text-xs text-gray-500">No Supporters</div>}
             </div>
             <div className="flex gap-2 items-center border-l border-white/20 pl-2">

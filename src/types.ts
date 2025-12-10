@@ -320,6 +320,7 @@ export interface PokerSupporter { // Joker
   getDynamicDescription?: (state: PokerRunState) => string; // Returns dynamic stats like "(Currently: +200)"
   icon: string;
   triggerOn?: 'HAND_PLAYED' | 'DISCARD' | 'HELD_IN_HAND' | 'PASSIVE';
+  edition?: 'FOIL' | 'HOLOGRAPHIC' | 'POLYCHROME';
 }
 
 export interface PokerConsumable { // Tarot / Planet / Spectral
@@ -370,6 +371,7 @@ export interface PokerRunState {
     vouchers: string[]; // IDs of bought vouchers
     isEndless?: boolean; // New: Endless Mode flag
     persistentCounters: Record<string, number>; // New: Track actions like "Cards Sold"
+    handSizeModifier: number; // Track permanent hand size changes (e.g. Spectral)
     
     // Play state
     currentScore: number;
