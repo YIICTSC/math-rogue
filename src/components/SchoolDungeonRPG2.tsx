@@ -3309,25 +3309,50 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                     {showDeck && (
                         <div className="absolute inset-0 z-30 flex items-center justify-center p-4 mt-12 bg-black/90 text-white">
                             <div className="w-full h-full flex flex-col relative" onClick={e => e.stopPropagation()}>
-                                <button onClick={() => setShowDeck(false)} className="absolute top-0 right-0 p-2"><X size={24}/></button>
-                                <h3 className="font-bold text-center mb-4 flex items-center justify-center"><Layers size={16} className="mr-2"/> デッキ ({dungeonDeck.length})</h3>
-                                <div className="grid grid-cols-4 gap-2 overflow-y-auto custom-scrollbar flex-1 content-start">
-                                    {dungeonDeck.map((c) => (
-                                        <div key={c.id} className="bg-slate-800 p-2 rounded border border-slate-600 flex flex-col items-center text-center text-[8px]">
-                                            <div className="mb-1 text-cyan-400">{c.icon}</div>
-                                            <div className="truncate w-full">{c.name}</div>
-                                        </div>
-                                    ))}
+                                <div className="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
+                                    <h3 className="font-bold text-lg flex items-center"><Layers size={20} className="mr-2"/> 山札 ({dungeonDeck.length})</h3>
+                                    <button onClick={() => setShowDeck(false)} className="p-2 text-gray-400 hover:text-white"><X size={24}/></button>
                                 </div>
-                                <div className="mt-4 border-t border-gray-700 pt-2">
-                                    <div className="text-xs font-bold mb-2">手札 ({dungeonHand.length})</div>
-                                    <div className="flex gap-2 justify-center">
+                                
+                                <div className="flex flex-col gap-2 overflow-y-auto custom-scrollbar flex-1 pb-4">
+                                    {dungeonDeck.length === 0 ? (
+                                        <div className="text-center text-gray-500 py-8 italic">山札は空です</div>
+                                    ) : (
+                                        dungeonDeck.map((c) => (
+                                            <div key={c.id} className="bg-slate-800 p-3 rounded border border-slate-600 flex items-start gap-3 shadow-sm shrink-0">
+                                                <div className={`p-2 rounded-full border-2 shrink-0 ${
+                                                    c.type === 'ATTACK' ? 'border-red-500 bg-red-900/20 text-red-400' :
+                                                    c.type === 'DEFENSE' ? 'border-blue-500 bg-blue-900/20 text-blue-400' :
+                                                    c.type === 'BUFF' ? 'border-green-500 bg-green-900/20 text-green-400' :
+                                                    'border-yellow-500 bg-yellow-900/20 text-yellow-400'
+                                                }`}>
+                                                    {c.icon}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex justify-between items-center mb-1">
+                                                        <span className="font-bold text-sm text-white truncate mr-2">{c.name}</span>
+                                                        {c.power > 0 && <span className="font-mono font-bold text-yellow-400 text-sm">Pow:{c.power}</span>}
+                                                    </div>
+                                                    <div className="text-[10px] text-gray-300 leading-tight">{c.description}</div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+
+                                <div className="mt-auto border-t border-gray-700 pt-2 bg-black">
+                                    <div className="text-xs font-bold mb-2 text-gray-400 flex justify-between">
+                                        <span>手札 ({dungeonHand.length})</span>
+                                        <span>捨て札 ({dungeonDiscard.length})</span>
+                                    </div>
+                                    <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
                                         {dungeonHand.map((c) => (
-                                            <div key={c.id} className="bg-slate-700 p-1 rounded border border-slate-500 w-12 h-16 flex flex-col items-center justify-center text-[8px] text-center">
-                                                {c.icon}
-                                                <div className="mt-1 leading-tight">{c.name}</div>
+                                            <div key={c.id} className="bg-slate-700 p-1.5 rounded border border-slate-500 w-16 h-20 flex flex-col items-center justify-center text-[9px] text-center shrink-0">
+                                                <div className="mb-1 scale-75">{c.icon}</div>
+                                                <div className="leading-tight line-clamp-2">{c.name}</div>
                                             </div>
                                         ))}
+                                        {dungeonHand.length === 0 && <div className="text-[10px] text-gray-600 italic p-2">手札なし</div>}
                                     </div>
                                 </div>
                             </div>
