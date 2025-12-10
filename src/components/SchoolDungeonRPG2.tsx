@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch, Sparkles, BookOpen, Layers, ChevronsUp, Droplets, Flame, Activity, Eye, ArrowLeftRight } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch, Sparkles, BookOpen, Layers, ChevronsUp, Droplets, Flame, Activity, Eye, ArrowLeftRight, CloudLightning, Snowflake, Anchor, Wind, EyeOff, Bomb } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
 import { storageService } from '../services/storageService';
@@ -139,6 +139,7 @@ interface Entity {
       speed: number;
       defenseBuff?: number; // Temporary Defense Buff from cards
       attackBuff?: number; // Temporary Attack Buff from cards
+      invisible?: number; // Player invisible status
   };
   
   dead?: boolean;
@@ -250,7 +251,6 @@ const DUNGEON_CARD_DB: Omit<DungeonCard, 'id'>[] = [
     { templateId: 'POISON', name: '腐ったパン', type: 'SPECIAL', power: 0, description: '周囲に毒を撒く', icon: <Skull size={16}/> },
     { templateId: 'SLEEP', name: '子守唄', type: 'SPECIAL', power: 0, description: '周囲を眠らせる', icon: <Ghost size={16}/> },
     { templateId: 'CROSS', name: 'クロス斬り', type: 'ATTACK', power: 15, description: '斜め4方向を2回攻撃(武器依存)', icon: <X size={16}/> },
-    // New Cards
     { templateId: 'JUMP', name: '高跳び', type: 'SPECIAL', power: 0, description: '向いている方向に1マス飛ばして移動。敵がいると踏みつけダメージ', icon: <ChevronsUp size={16}/> },
     { templateId: 'SHOT', name: '定規飛ばし', type: 'ATTACK', power: 8, description: '遠距離攻撃(4マス)', icon: <Crosshair size={16}/> },
     { templateId: 'DRAIN', name: '吸血', type: 'ATTACK', power: 6, description: 'ダメージを与えてHP回復', icon: <Droplets size={16}/> },
@@ -259,6 +259,17 @@ const DUNGEON_CARD_DB: Omit<DungeonCard, 'id'>[] = [
     { templateId: 'FEAR', name: '威圧', type: 'SPECIAL', power: 0, description: '周囲の敵を混乱させる', icon: <Eye size={16}/> },
     { templateId: 'SWAP', name: '場所替え', type: 'SPECIAL', power: 0, description: '目の前の敵と入れ替わる', icon: <ArrowLeftRight size={16}/> },
     { templateId: 'PIERCE', name: '貫通レーザー', type: 'ATTACK', power: 15, description: '直線上の敵を全て攻撃', icon: <Zap size={16}/> },
+    // New Cards
+    { templateId: 'THUNDER', name: '落雷', type: 'SPECIAL', power: 15, description: '視界内の敵ランダム3体に雷撃', icon: <CloudLightning size={16}/> },
+    { templateId: 'FREEZE', name: '氷結波動', type: 'SPECIAL', power: 0, description: '周囲の敵を凍らせる', icon: <Snowflake size={16}/> },
+    { templateId: 'HOOK', name: 'フック', type: 'SPECIAL', power: 5, description: '遠くの敵を引き寄せる', icon: <Anchor size={16}/> },
+    { templateId: 'BLAST', name: '突風', type: 'SPECIAL', power: 5, description: '周囲の敵を吹き飛ばす', icon: <Wind size={16}/> },
+    { templateId: 'SNEAK', name: '隠れ蓑', type: 'BUFF', power: 0, description: '10ターン敵に気づかれなくなる', icon: <EyeOff size={16}/> },
+    { templateId: 'MUG', name: 'カツアゲ', type: 'ATTACK', power: 5, description: '攻撃して小銭を奪う', icon: <Coins size={16}/> },
+    { templateId: 'SNIPE', name: '狙撃', type: 'ATTACK', power: 25, description: '超遠距離攻撃(8マス)', icon: <Crosshair size={16}/> },
+    { templateId: 'SACRIFICE', name: '自爆', type: 'SPECIAL', power: 50, description: 'HP10消費して部屋全体攻撃', icon: <Skull size={16}/> },
+    { templateId: 'TELEPORT', name: 'テレポート', type: 'SPECIAL', power: 0, description: 'ランダムな場所にワープ', icon: <Sparkles size={16}/> },
+    { templateId: 'TRAP', name: '罠設置', type: 'SPECIAL', power: 0, description: '足元に爆弾罠を仕掛ける', icon: <Bomb size={16}/> },
 ];
 
 // --- DIJKSTRA PATHFINDING HELPER ---
@@ -316,7 +327,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
     id: 0, type: 'PLAYER', x: 1, y: 1, char: '@', name: 'わんぱく小学生', 
     hp: 50, maxHp: 50, baseAttack: 3, baseDefense: 0, attack: 3, defense: 0, xp: 0, gold: 0, dir: {x:0, y:1},
     equipment: { weapon: null, armor: null, ranged: null, accessory: null },
-    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, invisible: 0 },
     offset: { x: 0, y: 0 }
   });
 
@@ -728,13 +739,10 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           used = true;
 
       } else if (card.templateId === 'SHOT') {
-          // Ranged Projectile
           const { x: dx, y: dy } = player.dir;
           let hit = false;
-          // Travel animation
           addVisualEffect('PROJECTILE', player.x + dx, player.y + dy, { dir: player.dir, duration: 10 });
-          
-          for(let i=1; i<=4; i++) {
+          for(let i=1; i<=8; i++) {
               const tx = player.x + dx * i;
               const ty = player.y + dy * i;
               if (map[ty][tx] === 'WALL') break;
@@ -755,20 +763,15 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           used = true;
 
       } else if (card.templateId === 'PIERCE') {
-          // Ranged Beam
           const { x: dx, y: dy } = player.dir;
           addVisualEffect('BEAM', player.x + dx*2, player.y + dy*2, { dir: player.dir });
           let hitCount = 0;
-          
           setEnemies(prev => prev.map(e => {
               const dxE = e.x - player.x;
               const dyE = e.y - player.y;
-              // Check alignment
               if ((dx !== 0 && dy === 0 && dyE === 0 && Math.sign(dxE) === dx) || 
                   (dy !== 0 && dx === 0 && dxE === 0 && Math.sign(dyE) === dy) ||
                   (dx !== 0 && dy !== 0 && Math.sign(dxE) === dx && Math.sign(dyE) === dy && Math.abs(dxE) === Math.abs(dyE))) {
-                  
-                  // Simple line of sight check (ignore walls for beam piercing goodness for now or implement)
                   let dmg = player.attack + card.power;
                   const nhp = e.hp - dmg;
                   if (nhp <= 0) { gainXp(e.xp); return { ...e, hp: 0, dead: true }; }
@@ -778,13 +781,11 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               }
               return e;
           }).filter(e => !e.dead));
-          
           msg = hitCount > 0 ? "レーザー発射！" : "空を切り裂いた。";
           audioService.playSound('attack');
           used = true;
 
       } else if (card.templateId === 'DRAIN') {
-          // Attack and Heal
           const { x: dx, y: dy } = player.dir;
           const tx = player.x + dx;
           const ty = player.y + dy;
@@ -794,7 +795,6 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               const nhp = target.hp - dmg;
               setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0));
               if (nhp <= 0) gainXp(target.xp);
-              
               const heal = Math.floor(dmg / 2);
               setPlayer(p => ({ ...p, hp: Math.min(p.maxHp, p.hp + heal) }));
               addVisualEffect('TEXT', player.x, player.y, { value: `+${heal}`, color: 'green' });
@@ -858,7 +858,6 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           used = true;
 
       } else if (card.templateId === 'KNOCK') {
-          // Knockback Attack
           const { x: dx, y: dy } = player.dir;
           const tx = player.x + dx;
           const ty = player.y + dy;
@@ -878,7 +877,6 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                   }).filter(e => e.hp > 0));
                   msg = `${target.name}を吹き飛ばした！`;
               } else {
-                  // Blocked knockback deals extra damage
                   dmg += 5;
                   const nhp = target.hp - dmg;
                   setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0));
@@ -897,19 +895,14 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           }
 
       } else if (card.templateId === 'CROSS') {
-          // Cross Cut (Diagonals) - Double Hit
           const dirs = [{x:-1,y:-1}, {x:1,y:-1}, {x:-1,y:1}, {x:1,y:1}];
           let hits = 0;
-          
-          // Visuals
           dirs.forEach(d => {
               const tx = player.x + d.x; const ty = player.y + d.y;
               addVisualEffect('SLASH', tx, ty, { dir: d as Direction });
           });
-
           setEnemies(prev => prev.map(e => {
               if (Math.abs(e.x - player.x) === 1 && Math.abs(e.y - player.y) === 1) {
-                  // Hit twice
                   let dmg = player.attack + card.power;
                   let totalDmg = dmg * 2;
                   hits++;
@@ -920,13 +913,11 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               }
               return e;
           }).filter(e => !e.dead));
-          
           msg = hits > 0 ? "クロス乱舞！" : "空を切った。";
           audioService.playSound('attack');
           used = true;
 
       } else if (card.templateId === 'POISON') {
-          // Poison Mist
           setEnemies(prev => prev.map(e => {
               if (Math.abs(e.x - player.x) <= 2 && Math.abs(e.y - player.y) <= 2) {
                   addVisualEffect('TEXT', e.x, e.y, { value: 'Psn', color: 'purple' });
@@ -942,7 +933,6 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           used = true;
 
       } else if (card.templateId === 'SLEEP') {
-          // Lullaby
           setEnemies(prev => prev.map(e => {
               if (Math.abs(e.x - player.x) <= 2 && Math.abs(e.y - player.y) <= 2) {
                   addVisualEffect('TEXT', e.x, e.y, { value: 'Zzz', color: 'blue' });
@@ -953,6 +943,169 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           addVisualEffect('TEXT', player.x, player.y, { value: '♪', color: 'pink' });
           msg = "子守唄を歌った。";
           audioService.playSound('buff');
+          used = true;
+
+      } else if (card.templateId === 'THUNDER') {
+          addVisualEffect('THUNDER', 0, 0);
+          let hitCount = 0;
+          setEnemies(prev => prev.map(e => {
+             if (Math.abs(e.x - player.x) < VIEW_W && Math.abs(e.y - player.y) < VIEW_H) {
+                 if (Math.random() < 0.7) { 
+                     const dmg = 15 + card.power;
+                     const nhp = e.hp - dmg;
+                     addVisualEffect('TEXT', e.x, e.y, { value: `${dmg}`, color: 'yellow' });
+                     if (nhp <= 0) { gainXp(e.xp); return { ...e, hp: 0, dead: true }; }
+                     hitCount++;
+                     return { ...e, hp: nhp };
+                 }
+             }
+             return e;
+          }).filter(e => !e.dead));
+          msg = hitCount > 0 ? "雷が落ちた！" : "雷は誰にも当たらなかった。";
+          audioService.playSound('attack');
+          used = true;
+
+      } else if (card.templateId === 'FREEZE') {
+          addVisualEffect('FLASH', 0, 0, { color: 'cyan', duration: 10 });
+          setEnemies(prev => prev.map(e => {
+              if (Math.abs(e.x - player.x) <= 1 && Math.abs(e.y - player.y) <= 1) {
+                  return { ...e, status: { ...e.status, frozen: 10 } };
+              }
+              return e;
+          }));
+          msg = "周囲を凍らせた！";
+          audioService.playSound('buff');
+          used = true;
+
+      } else if (card.templateId === 'HOOK') {
+          const { x: dx, y: dy } = player.dir;
+          let target = null;
+          for(let i=1; i<=6; i++) {
+              const tx = player.x + dx*i; const ty = player.y + dy*i;
+              if (map[ty][tx] === 'WALL') break;
+              const e = enemies.find(en => en.x === tx && en.y === ty);
+              if (e) { target = e; break; }
+          }
+          if (target) {
+              const tx = player.x + dx; const ty = player.y + dy;
+              if (!enemies.some(e=>e.x===tx && e.y===ty)) {
+                  setEnemies(prev => prev.map(e => e.id === target!.id ? { ...e, x: tx, y: ty } : e));
+                  let dmg = card.power;
+                  const nhp = target.hp - dmg;
+                  setEnemies(prev => prev.map(e => e.id === target!.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0));
+                  if (nhp <= 0) gainXp(target.xp);
+                  msg = `${target.name}を引き寄せた！`;
+              } else { msg = "引き寄せられない！"; }
+          } else { msg = "何も引っかからなかった。"; }
+          audioService.playSound('select');
+          used = true;
+
+      } else if (card.templateId === 'BLAST') {
+          const dirs = [{x:0,y:-1}, {x:1,y:-1}, {x:1,y:0}, {x:1,y:1}, {x:0,y:1}, {x:-1,y:1}, {x:-1,y:0}, {x:-1,y:-1}];
+          let hit = false;
+          setEnemies(prev => prev.map(e => {
+              if (Math.abs(e.x - player.x) <= 1 && Math.abs(e.y - player.y) <= 1) {
+                  const dx = e.x - player.x; const dy = e.y - player.y;
+                  let tx = e.x + dx*2; let ty = e.y + dy*2;
+                  if (tx >= 0 && tx < MAP_W && ty >= 0 && ty < MAP_H && map[ty][tx] !== 'WALL') {
+                      hit = true;
+                      return { ...e, x: tx, y: ty };
+                  }
+              }
+              return e;
+          }));
+          msg = hit ? "吹き飛ばした！" : "風が吹いた。";
+          audioService.playSound('buff');
+          used = true;
+
+      } else if (card.templateId === 'SNEAK') {
+          setPlayer(p => ({...p, status: {...p.status, invisible: 10}}));
+          msg = "気配を消した！";
+          addVisualEffect('FLASH', 0, 0, { color: 'gray', duration: 10 });
+          audioService.playSound('buff');
+          used = true;
+
+      } else if (card.templateId === 'MUG') {
+          const { x: dx, y: dy } = player.dir;
+          const tx = player.x + dx; const ty = player.y + dy;
+          const target = enemies.find(e => e.x === tx && e.y === ty);
+          if (target) {
+              let dmg = player.attack + card.power;
+              const nhp = target.hp - dmg;
+              setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0));
+              if (nhp <= 0) gainXp(target.xp);
+              if (Math.random() < 0.5) {
+                  const gold = Math.floor(Math.random() * 20) + 10;
+                  setPlayer(p => ({...p, gold: (p.gold||0) + gold}));
+                  addVisualEffect('TEXT', target.x, target.y, {value: `+${gold}G`, color: 'yellow'});
+                  msg = `${target.name}から${gold}G奪った！`;
+              } else { msg = `${target.name}に${dmg}ダメージ！`; }
+              audioService.playSound('attack');
+          } else { msg = "空振り！"; audioService.playSound('select'); }
+          used = true;
+
+      } else if (card.templateId === 'SNIPE') {
+          const { x: dx, y: dy } = player.dir;
+          let target = null;
+          let hitX = player.x, hitY = player.y;
+          for(let i=1; i<=8; i++) {
+              hitX += dx; hitY += dy;
+              if (map[hitY][hitX] === 'WALL') break;
+              const e = enemies.find(en => en.x === hitX && en.y === hitY);
+              if (e) { target = e; break; }
+          }
+          addVisualEffect('PROJECTILE', hitX, hitY, { dir: player.dir, duration: 5 });
+          if (target) {
+              let dmg = player.attack + card.power;
+              const nhp = target.hp - dmg;
+              setEnemies(prev => prev.map(e => e.id === target!.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0));
+              if (nhp <= 0) gainXp(target.xp);
+              addVisualEffect('TEXT', target.x, target.y, { value: `${dmg}`, color: 'red' });
+              msg = `ヘッドショット！${dmg}ダメージ！`;
+              audioService.playSound('attack');
+          } else { msg = "外した！"; audioService.playSound('select'); }
+          used = true;
+
+      } else if (card.templateId === 'SACRIFICE') {
+          setPlayer(p => ({ ...p, hp: Math.max(1, p.hp - 10) }));
+          addVisualEffect('EXPLOSION', player.x, player.y, { scale: 5 });
+          let hits = 0;
+          setEnemies(prev => prev.map(e => {
+              if (Math.abs(e.x - player.x) < VIEW_W/2 && Math.abs(e.y - player.y) < VIEW_H/2) {
+                  const dmg = card.power;
+                  const nhp = e.hp - dmg;
+                  if (nhp <= 0) { gainXp(e.xp); return { ...e, hp: 0, dead: true }; }
+                  hits++;
+                  return { ...e, hp: nhp };
+              }
+              return e;
+          }).filter(e => !e.dead));
+          msg = hits > 0 ? "自爆攻撃！" : "自爆したが誰もいなかった。";
+          audioService.playSound('attack');
+          used = true;
+
+      } else if (card.templateId === 'TELEPORT') {
+          let attempts = 0;
+          while (attempts < 20) {
+              attempts++;
+              const rx = Math.floor(Math.random() * MAP_W); const ry = Math.floor(Math.random() * MAP_H);
+              if (map[ry][rx] === 'FLOOR' && !enemies.find(e => e.x === rx && e.y === ry)) {
+                  setPlayer(p => ({ ...p, x: rx, y: ry }));
+                  msg = "ワープした！"; addVisualEffect('FLASH', 0, 0); break;
+              }
+          }
+          audioService.playSound('buff');
+          used = true;
+
+      } else if (card.templateId === 'TRAP') {
+          setTraps(prev => [...prev, {
+              id: Date.now(), type: 'TRAP', x: player.x, y: player.y, char: 'X', name: '即席爆弾',
+              hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
+              status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+              trapType: 'BOMB', visible: true
+          }]);
+          msg = "爆弾を仕掛けた！";
+          audioService.playSound('select');
           used = true;
 
       } else if (card.type === 'ATTACK') {
@@ -1081,7 +1234,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
         id: 0, type: 'PLAYER', x: 1, y: 1, char: '@', name: 'わんぱく小学生', 
         hp: 50, maxHp: 50, baseAttack: 3, baseDefense: 0, attack: 3, defense: 0, xp: 0, gold: 0, dir: {x:0, y:1},
         equipment: { weapon: null, armor: null, ranged: null, accessory: null },
-        status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+        status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, invisible: 0 },
         offset: { x: 0, y: 0 }
     });
     setLogs([]);
@@ -1402,6 +1555,12 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           if (nextStatus.attackBuff && nextStatus.attackBuff > 0) {
               nextStatus.attackBuff = Math.max(0, nextStatus.attackBuff - 1); // Decay attack buff
           }
+          
+          // Invisible decay
+          if (nextStatus.invisible && nextStatus.invisible > 0) {
+              nextStatus.invisible--;
+              if (nextStatus.invisible <= 0) addLog("姿が現れた！");
+          }
 
           if (starveDamage > 0) {
               currentHp -= 1;
@@ -1451,6 +1610,9 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
 
       // Compute Dijkstra Map for enemy pathfinding
       const dMap = computeDijkstraMap(map, px, py);
+      
+      // Check invisibility for AI
+      const isInvisible = player.status.invisible && player.status.invisible > 0;
 
       setEnemies(prevEnemies => {
           const nextEnemies: Entity[] = [];
@@ -1468,7 +1630,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               const dist = Math.abs(dx) + Math.abs(dy);
               
               // Special Attacks
-              if (e.enemyType === 'DRAGON' && dist <= 2 && dist > 0 && Math.random() < 0.3) {
+              if (!isInvisible && e.enemyType === 'DRAGON' && dist <= 2 && dist > 0 && Math.random() < 0.3) {
                   addLog(`${e.name}の炎！`, "red");
                   let dmg = 15;
                   if (player.equipment?.armor?.type === 'FIREFIGHTER') dmg = Math.floor(dmg / 2);
@@ -1478,7 +1640,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                   continue;
               }
 
-              if (e.enemyType === 'MAGE' && dist <= 4 && dist > 0 && Math.random() < 0.2) {
+              if (!isInvisible && e.enemyType === 'MAGE' && dist <= 4 && dist > 0 && Math.random() < 0.2) {
                   addLog(`${e.name}の魔法！混乱した！`, "yellow");
                   setPlayer(p => ({ ...p, status: { ...p.status, confused: 5 } }));
                   occupied.add(`${e.x},${e.y}`); nextEnemies.push(e);
@@ -1490,13 +1652,17 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               let ty = e.y;
               let moved = false;
 
-              // Confused Movement
-              if (e.status.confused > 0) {
-                  e.status.confused--;
+              // Confused Movement or Invisible Wander
+              if (e.status.confused > 0 || isInvisible) {
+                  if (e.status.confused > 0) e.status.confused--;
                   const dirs = [[0,1], [0,-1], [1,0], [-1,0]];
                   const r = dirs[Math.floor(Math.random()*4)];
-                  tx = e.x + r[0]; ty = e.y + r[1];
-                  moved = true; 
+                  // Check bounds for random move
+                  const rx = e.x + r[0]; const ry = e.y + r[1];
+                  if (rx >= 0 && rx < MAP_W && ry >= 0 && ry < MAP_H && map[ry][rx] !== 'WALL') {
+                      tx = rx; ty = ry;
+                      moved = true;
+                  }
               } 
               // Standard Pathfinding (Dijkstra) if "awake"
               else if (dist <= 15) {
@@ -1537,20 +1703,26 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               }
 
               if (tx === px && ty === py) {
-                  let dmg = Math.max(1, e.attack - player.defense);
-                  if (player.equipment?.armor?.type === 'GYM_CLOTHES' && Math.random() < 0.3) { addLog("ひらりと身をかわした！", currentTheme.colors.C2); dmg = 0; addVisualEffect('TEXT', px, py, { value: 'MISS', color: currentTheme.colors.C3 }); }
-                  if (player.equipment?.armor?.type === 'NAME_TAG' && e.enemyType === 'THIEF') addLog("名札が盗みを防いだ！");
-                  else if (e.enemyType === 'THIEF' && dmg > 0 && Math.random() < 0.3 && inventory.length > 0) { addLog("アイテムを盗まれた！", "red"); const idx = Math.floor(Math.random() * inventory.length); setInventory(inv => inv.filter((_, i) => i !== idx)); }
+                  // Only attack if player is visible
+                  if (!isInvisible) {
+                      let dmg = Math.max(1, e.attack - player.defense);
+                      if (player.equipment?.armor?.type === 'GYM_CLOTHES' && Math.random() < 0.3) { addLog("ひらりと身をかわした！", currentTheme.colors.C2); dmg = 0; addVisualEffect('TEXT', px, py, { value: 'MISS', color: currentTheme.colors.C3 }); }
+                      if (player.equipment?.armor?.type === 'NAME_TAG' && e.enemyType === 'THIEF') addLog("名札が盗みを防いだ！");
+                      else if (e.enemyType === 'THIEF' && dmg > 0 && Math.random() < 0.3 && inventory.length > 0) { addLog("アイテムを盗まれた！", "red"); const idx = Math.floor(Math.random() * inventory.length); setInventory(inv => inv.filter((_, i) => i !== idx)); }
 
-                  if (dmg > 0) {
-                      addLog(`${e.name}の攻撃！${dmg}ダメージ！`, "red");
-                      setPlayer(p => { const newHp = p.hp - dmg; if (newHp <= 0) { setGameOver(true); saveDungeonScore(`Killed by ${e.name}`); storageService.clearDungeonState2(); } return { ...p, hp: newHp }; });
-                      nextEnemies.push({ ...e, offset: { x: (tx - e.x) * 6, y: (ty - e.y) * 6 } });
-                      attackingEnemyIds.push(e.id);
-                      triggerShake(5);
-                      addVisualEffect('TEXT', px, py, { value: `${dmg}`, color: 'red' });
-                  } else { nextEnemies.push(e); }
-                  occupied.add(`${e.x},${e.y}`);
+                      if (dmg > 0) {
+                          addLog(`${e.name}の攻撃！${dmg}ダメージ！`, "red");
+                          setPlayer(p => { const newHp = p.hp - dmg; if (newHp <= 0) { setGameOver(true); saveDungeonScore(`Killed by ${e.name}`); storageService.clearDungeonState2(); } return { ...p, hp: newHp }; });
+                          nextEnemies.push({ ...e, offset: { x: (tx - e.x) * 6, y: (ty - e.y) * 6 } });
+                          attackingEnemyIds.push(e.id);
+                          triggerShake(5);
+                          addVisualEffect('TEXT', px, py, { value: `${dmg}`, color: 'red' });
+                      } else { nextEnemies.push(e); }
+                      occupied.add(`${e.x},${e.y}`);
+                  } else {
+                      // Player is invisible, enemy waits or moves randomly if space occupied
+                      occupied.add(`${e.x},${e.y}`); nextEnemies.push(e);
+                  }
               } else if (moved) {
                   if (!map[ty][tx] || map[ty][tx] === 'WALL' || occupied.has(`${tx},${ty}`) || prevEnemies.some(o => o.id !== e.id && o.x === tx && o.y === ty)) {
                       occupied.add(`${e.x},${e.y}`); nextEnemies.push(e); 
@@ -2766,6 +2938,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
 
                       if (sprite) {
                           if (enemy.status.sleep > 0) ctx.globalAlpha = 0.5;
+                          if (enemy.status.invisible && enemy.status.invisible > 0) ctx.globalAlpha = 0.3; // If enemy has invisible (player doesn't, but for consistency)
                           ctx.drawImage(sprite, sx + offX, sy + offY, ts, ts);
                           ctx.globalAlpha = 1.0;
                           if (enemy.status.sleep > 0) { ctx.fillStyle='white'; ctx.font='10px monospace'; ctx.fillText('Zzz', sx, sy); }
@@ -2788,6 +2961,11 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                   const offX = (player.offset?.x || 0) * SCALE;
                   const offY = (player.offset?.y || 0) * SCALE;
 
+                  // Handle invisibility transparency
+                  if (player.status.invisible && player.status.invisible > 0) {
+                      ctx.globalAlpha = 0.5;
+                  }
+
                   if (sprite) {
                       if (flip) {
                           ctx.save();
@@ -2802,6 +2980,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                       ctx.fillStyle = C0;
                       ctx.fillRect(sx + 3*SCALE + offX, sy + 3*SCALE + offY, 10*SCALE, 10*SCALE);
                   }
+                  ctx.globalAlpha = 1.0;
               }
           }
       }
@@ -2833,7 +3012,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           const sy = (fx.y - startY) * ts;
           
           if (fx.type === 'FLASH' || fx.type === 'THUNDER') {
-              ctx.fillStyle = fx.type === 'THUNDER' ? 'yellow' : 'white';
+              ctx.fillStyle = fx.type === 'THUNDER' ? 'yellow' : (fx.color || 'white');
               ctx.globalAlpha = fx.duration / (fx.maxDuration || 20);
               ctx.fillRect(0, 0, w, h);
               ctx.globalAlpha = 1.0;
@@ -2853,7 +3032,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           }
           else if (fx.type === 'EXPLOSION') {
               if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
-                  ctx.fillStyle = ['white', 'orange', 'red'][Math.floor(Math.random()*3)];
+                  ctx.fillStyle = fx.color || ['white', 'orange', 'red'][Math.floor(Math.random()*3)];
                   const rad = (1 - fx.duration / fx.maxDuration) * ts * (fx.scale || 2);
                   ctx.beginPath();
                   ctx.arc(sx + ts/2, sy + ts/2, rad, 0, Math.PI*2);
@@ -2988,7 +3167,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                                 {player.status.confused > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>混乱</span>}
                                 {player.status.frozen > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>金縛り</span>}
                                 {player.status.blind > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>目潰し</span>}
-                                {Object.values(player.status).every((v: number) => v <= 0) && <span>健康</span>}
+                                {player.status.invisible && player.status.invisible > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>透明</span>}
+                                {Object.values(player.status).every((v: number | undefined) => (v || 0) <= 0) && <span>健康</span>}
                             </div>
                         </div>
                     </div>
