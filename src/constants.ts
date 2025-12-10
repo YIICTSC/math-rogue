@@ -682,15 +682,29 @@ export const SUPPORTERS_LIBRARY: PokerSupporter[] = [
   { 
       id: 'SUP_BANNER', name: '校旗', description: '残りの手札捨て回数につきチップ+40', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', 
       effect: (ctx) => ctx.chips += ctx.discardsUsed * 40,
-      getDynamicDescription: (state) => `(Current: +${state.discardsRemaining * 40})`, // NOTE: ctx.discardsUsed passed from playHand is actually remaining count logic in current implementation
+      getDynamicDescription: (state) => `(Current: +${state.discardsRemaining * 40})`, 
       icon: 'FLIER|#ffeb3b' 
   },
   { 
       id: 'SUP_ICE_CREAM', name: '溶けたアイス', description: 'チップ+100、手札を出すたび-5', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', 
       effect: (ctx) => ctx.chips += Math.max(0, 100 - (ctx.handsPlayed * 5)),
-      getDynamicDescription: (state) => `(Current: +${Math.max(0, 100 - ((state.currentBlind.bossAbility==='THE_NEEDLE' ? 1 : 4) - state.handsRemaining) * 5)})`, // Rough estimate based on hands played
+      getDynamicDescription: (state) => `(Current: +${Math.max(0, 100 - ((state.currentBlind.bossAbility==='THE_NEEDLE' ? 1 : 4) - state.handsRemaining) * 5)})`,
       icon: 'SLIME|#ffffff' 
   },
+
+  // --- NEW SUPPORTERS (Moritto Edition) ---
+  { id: 'SUP_ART_STUDENT', name: '美術部員', description: '得点カードの絵札(J,Q,K)1枚につき倍率+5', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const faces = ctx.cards.filter(c => [11, 12, 13].includes(c.rank)).length; ctx.mult += faces * 5; }, icon: 'NOTEBOOK|#e91e63' },
+  { id: 'SUP_BRASS_BAND', name: '吹奏楽部', description: '得点カードのランク3, 6, 9 1枚につき倍率+6', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const count = ctx.cards.filter(c => [3, 6, 9].includes(c.rank)).length; ctx.mult += count * 6; }, icon: 'FLIER|#ff9800' },
+  { id: 'SUP_JANITOR', name: '用務員さん', description: '得点カードのストーンカード1枚につきチップ+100', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const count = ctx.cards.filter(c => c.enhancement === 'STONE').length; ctx.chips += count * 100; }, icon: 'HUMANOID|#795548' },
+  { id: 'SUP_TRANSFER', name: '転校生', description: '得点カードのワイルドカード1枚につき倍率+15', price: 7, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const count = ctx.cards.filter(c => c.enhancement === 'WILD').length; ctx.mult += count * 15; }, icon: 'GHOST|#00bcd4' },
+  { id: 'SUP_HONOR', name: '優等生', description: '得点カードの高ランク(Q,K,A)1枚につきチップ+20', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const count = ctx.cards.filter(c => [12, 13, 14].includes(c.rank)).length; ctx.chips += count * 20; }, icon: 'TEACHER|#ffd700' },
+  { id: 'SUP_FAILING', name: '赤点', description: '得点カードの低ランク(2,3,4,5)1枚につき倍率+4', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const count = ctx.cards.filter(c => [2, 3, 4, 5].includes(c.rank)).length; ctx.mult += count * 4; }, icon: 'SLIME|#f44336' },
+  { id: 'SUP_DAY_DUTY', name: '日直', description: 'ラウンドの最初のハンドなら倍率x2', price: 7, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if (ctx.handsPlayed === 1) ctx.mult *= 2; }, icon: 'CHEF|#4caf50' },
+  { id: 'SUP_QUEEN_HEART', name: 'ハートの女王', description: '得点カードのハート1枚につき倍率+4', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const count = ctx.cards.filter(c => c.suit === 'HEART').length; ctx.mult += count * 4; }, icon: 'SWORD|#f44336' },
+  { id: 'SUP_KING_DIAMOND', name: 'ダイヤのキング', description: '得点カードのダイヤ1枚につき倍率+4', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const count = ctx.cards.filter(c => c.suit === 'DIAMOND').length; ctx.mult += count * 4; }, icon: 'SHIELD|#ff9800' },
+  { id: 'SUP_JACK_CLUB', name: 'クラブのジャック', description: '得点カードのクラブ1枚につき倍率+4', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const count = ctx.cards.filter(c => c.suit === 'CLUB').length; ctx.mult += count * 4; }, icon: 'FLIER|#4caf50' },
+  { id: 'SUP_ACE_SPADE', name: 'スペードのエース', description: '得点カードのスペード1枚につき倍率+4', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const count = ctx.cards.filter(c => c.suit === 'SPADE').length; ctx.mult += count * 4; }, icon: 'POTION|#2196f3' },
+  { id: 'SUP_GRADUATION', name: '卒業式', description: 'ストレート以上の役なら倍率x1.5', price: 8, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if (['STRAIGHT', 'FLUSH', 'FULL_HOUSE', 'STRAIGHT_FLUSH', 'ROYAL_FLUSH', 'FIVE_OF_A_KIND', 'FLUSH_FIVE'].includes(ctx.handType)) ctx.mult *= 1.5; }, icon: 'NOTEBOOK|#9c27b0' },
 ];
 
 export const CONSUMABLES_LIBRARY: PokerConsumable[] = [
