@@ -119,7 +119,6 @@ const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
             if (r < 0.9) return { type: EnemyIntentType.DEFEND, value: 8 };
             return { type: EnemyIntentType.BUFF, value: 0, secondaryValue: 2 }; 
     }
-}
 };
 
 const App: React.FC = () => {
