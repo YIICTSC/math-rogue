@@ -139,6 +139,7 @@ interface Entity {
       speed: number;
       defenseBuff?: number; // Temporary Defense Buff from cards
       attackBuff?: number; // Temporary Attack Buff
+      poison?: number; // Poison DoT duration
   };
   
   dead?: boolean;
@@ -271,7 +272,7 @@ const DUNGEON_CARD_DB: Omit<DungeonCard, 'id'>[] = [
     { templateId: 'CROSS', name: '十字定規', type: 'ATTACK', power: 5, description: '前後左右4マスの敵を攻撃', icon: <Plus size={16}/> },
     { templateId: 'X_ATK', name: 'バッテン', type: 'ATTACK', power: 5, description: '斜め4方向の敵を攻撃', icon: <X size={16}/> },
     { templateId: 'DRAIN', name: '給食当番', type: 'ATTACK', power: 4, description: '敵にダメージを与え、半分回復', icon: <Dna size={16}/> },
-    { templateId: 'POISON', name: '毒舌', type: 'SPECIAL', power: 0, description: '目の前の敵を猛毒にする', icon: <Skull size={16}/> },
+    { templateId: 'POISON', name: '毒舌', type: 'SPECIAL', power: 0, description: '目の前の敵を猛毒にする(継続ダメ)', icon: <Skull size={16}/> },
     { templateId: 'SLEEP', name: '校長の話', type: 'SPECIAL', power: 0, description: '部屋全体の敵を眠らせる', icon: <Moon size={16}/> },
     { templateId: 'FREEZE', name: '寒いギャグ', type: 'ATTACK', power: 2, description: '目の前の敵を凍らせる', icon: <Snowflake size={16}/> },
     { templateId: 'MAGNET', name: '落とし物', type: 'SPECIAL', power: 0, description: 'フロア中のアイテムを引き寄せる', icon: <Magnet size={16}/> },
@@ -335,7 +336,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
     id: 0, type: 'PLAYER', x: 1, y: 1, char: '@', name: 'わんぱく小学生', 
     hp: 50, maxHp: 50, baseAttack: 3, baseDefense: 0, attack: 3, defense: 0, xp: 0, gold: 0, dir: {x:0, y:1},
     equipment: { weapon: null, armor: null, ranged: null, accessory: null },
-    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
     offset: { x: 0, y: 0 }
   });
 
@@ -1016,7 +1017,10 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                   if (card.templateId === 'DRAIN') {
                       const heal = Math.floor(dmg / 2);
                       if (heal > 0) {
-                          setPlayer(p => ({...p, hp: Math.min(p.maxHp, p.hp + heal)}));
+                          setPlayer(p => {
+                              const newHp = Math.min(p.maxHp, p.hp + heal);
+                              return {...p, hp: newHp};
+                          });
                           addVisualEffect('TEXT', player.x, player.y, { value: `+${heal}`, color: 'green' });
                       }
                   }
@@ -1110,16 +1114,14 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           const { x: dx, y: dy } = player.dir;
           const target = enemies.find(e => e.x === player.x + dx && e.y === player.y + dy);
           if (target) {
-              // Implement Poison logic (needs turn update support, simplifying to instant dmg or status if supported)
-              // Currently status only has sleep/confuse/frozen/blind. Adding visual text.
-              addVisualEffect('TEXT', target.x, target.y, { value: 'POISON', color: 'purple' });
+              setEnemies(prev => prev.map(e => {
+                  if (e.id === target.id) {
+                      addVisualEffect('TEXT', e.x, e.y, { value: 'POISON', color: 'purple' });
+                      return { ...e, status: { ...e.status, poison: (e.status.poison || 0) + 5 } };
+                  }
+                  return e;
+              }));
               msg = `${target.name}に毒を吐いた！`;
-              // Hacky poison: Deal delayed damage or instant heavy damage?
-              // Let's do heavy damage for now as "Instant Poison"
-              const dmg = 10;
-              const nhp = target.hp - dmg;
-              setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0));
-              if (nhp <= 0) gainXp(target.xp);
               used = true;
           } else {
               msg = "空振り。";
@@ -1239,7 +1241,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
         id: 0, type: 'PLAYER', x: 1, y: 1, char: '@', name: 'わんぱく小学生', 
         hp: 50, maxHp: 50, baseAttack: 3, baseDefense: 0, attack: 3, defense: 0, xp: 0, gold: 0, dir: {x:0, y:1},
         equipment: { weapon: null, armor: null, ranged: null, accessory: null },
-        status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+        status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
         offset: { x: 0, y: 0 }
     });
     setLogs([]);
@@ -1309,7 +1311,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
       return {
           id: Date.now() + Math.random(), type: 'ENEMY', x, y, char: t[0], 
           name, hp, maxHp: hp, baseAttack: Math.floor(atk), baseDefense: Math.floor(def), attack: Math.floor(atk), defense: Math.floor(def), xp: Math.floor(xp), dir: {x:0, y:0}, enemyType: t,
-          status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+          status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
           offset: { x: 0, y: 0 },
           shopItems
       };
@@ -1403,7 +1405,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                 newItems.push({
                     id: Date.now() + Math.random(), type: 'GOLD', x: hx, y: hy, char: '$', name: 'お金',
                     hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
-                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
                     gold: Math.floor(Math.random() * 200 + 50 * f)
                 });
             } else {
@@ -1413,7 +1415,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                 newItems.push({
                     id: Date.now() + Math.random(), type: 'ITEM', x: hx, y: hy, char: '!', 
                     name: template.name, hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
-                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
                     itemData: { 
                         ...template, 
                         id: `hidden-item-${Date.now()}-${Math.random()}`, 
@@ -1437,7 +1439,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
             id: Date.now(), type: 'ENEMY', x: sx, y: sy, char: 'B',
             name: "校長先生(真)", hp: 500, maxHp: 500, baseAttack: 30, baseDefense: 10, attack: 30, defense: 10, xp: 5000, 
             dir: {x:0, y:0}, enemyType: 'BOSS',
-            status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+            status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
             offset: { x: 0, y: 0 }
         });
     } else {
@@ -1493,7 +1495,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                 newItems.push({
                     id: Date.now() + Math.random(), type: 'GOLD', x: t.x, y: t.y, char: '$', name: 'お金',
                     hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
-                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
                     gold: Math.floor(Math.random() * 50 + 10 * f)
                 });
             } else if (type === 'CARD') {
@@ -1501,7 +1503,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                 newItems.push({
                     id: Date.now() + Math.random(), type: 'ITEM', x: t.x, y: t.y, char: 'C', name: cardTemplate.name,
                     hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
-                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
                     itemData: { 
                         id: `card-drop-${Date.now()}-${Math.random()}`, 
                         category: 'DECK_CARD',
@@ -1526,7 +1528,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                 newItems.push({
                     id: Date.now() + Math.random(), type: 'ITEM', x: t.x, y: t.y, char: '!', 
                     name: template.name, hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
-                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
                     itemData: { 
                         ...template, 
                         id: `item-${Date.now()}-${Math.random()}`, 
@@ -1551,7 +1553,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
             newTraps.push({
                 id: Date.now() + Math.random(), type: 'TRAP', x: t.x, y: t.y, char: 'X', name: '罠',
                 hp: 0, maxHp: 0, baseAttack: 0, baseDefense: 0, attack: 0, defense: 0, xp: 0, dir: {x:0, y:0},
-                status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+                status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
                 trapType: tType, visible: false
             });
         }
@@ -1699,6 +1701,21 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           const attackingEnemyIds: number[] = [];
 
           for (const e of prevEnemies) {
+              // --- POISON DoT LOGIC ---
+              if (e.status.poison && e.status.poison > 0) {
+                  const poisonDmg = 5;
+                  const nhp = e.hp - poisonDmg;
+                  e.status.poison--;
+                  addVisualEffect('TEXT', e.x, e.y, { value: `${poisonDmg}`, color: 'purple' });
+                  if (nhp <= 0) {
+                      gainXp(e.xp);
+                      // Skip adding to nextEnemies so it dies
+                      continue;
+                  }
+                  e.hp = nhp;
+              }
+              // -----------------------
+
               if (e.enemyType === 'SHOPKEEPER') { occupied.add(`${e.x},${e.y}`); nextEnemies.push(e); continue; }
 
               if (e.status.sleep > 0) { e.status.sleep--; nextEnemies.push(e); occupied.add(`${e.x},${e.y}`); addVisualEffect('TEXT', e.x, e.y, {value:'Zzz', color:currentTheme.colors.C3}); continue; }
@@ -2564,7 +2581,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               setFloorItems(prev => [...prev, {
                   id: Date.now() + Math.random(), type: 'ITEM', x: lx, y: ly, char: '!', name: item.name, 
                   hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
-                  status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+                  status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
                   itemData: item
               }]);
               addLog("飛んでいった。");
@@ -2679,7 +2696,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           else if (item.type.includes('HEAL')) { 
               let nextHp = Math.min(player.maxHp, player.hp + (item.value || 30));
               addLog("HPが回復した！");
-              addVisualEffect('TEXT', player.x, player.y, {value: 'Heal', color: 'green'});
+              addVisualEffect('TEXT', player.x, player.y, { value: 'Heal', color: 'green' });
               
               setInventory(prev => prev.filter((_, i) => i !== index));
               setSelectedItemIndex(prev => Math.min(prev, inventory.length - 2));
@@ -2782,7 +2799,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
       const droppedEntity: Entity = {
           id: Date.now() + Math.random(), type: 'ITEM', x: player.x, y: player.y, char: '!', name: item.name,
           hp: 0, maxHp: 0, baseAttack: 0, baseDefense: 0, attack: 0, defense: 0, xp: 0, dir: { x: 0, y: 0 },
-          status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+          status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
           itemData: item
       };
       setFloorItems(prev => [...prev, droppedEntity]);
@@ -3283,6 +3300,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                                 {player.status.confused > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>混乱</span>}
                                 {player.status.frozen > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>金縛り</span>}
                                 {player.status.blind > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>目潰し</span>}
+                                {player.status.poison && player.status.poison > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>毒</span>}
                                 {player.status.defenseBuff && player.status.defenseBuff > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>防御UP</span>}
                                 {player.status.attackBuff && player.status.attackBuff > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>攻撃UP</span>}
                                 {Object.values(player.status).every((v: number) => v <= 0) && <span>健康</span>}
