@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch, Sparkles, BookOpen, Layers, Move, Minimize2, Maximize2, Volume2, ShieldAlert, ArrowUpCircle } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch, Sparkles, BookOpen, Layers, Move, Minimize2, Maximize2, Volume2, ShieldAlert, ArrowUpCircle, Plus, Magnet, Moon, Snowflake, Activity, Eye, Dna, Dice5 } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
 import { storageService } from '../services/storageService';
@@ -266,6 +266,18 @@ const DUNGEON_CARD_DB: Omit<DungeonCard, 'id'>[] = [
     { templateId: 'RAGE', name: '逆ギレ', type: 'BUFF', power: 5, description: '攻撃力を一時的に上げる', icon: <Sword size={16}/> },
     { templateId: 'INVINCIBLE', name: '無敵スター', type: 'BUFF', power: 99, description: '一時的に防御力極大アップ', icon: <ShieldAlert size={16}/> },
     { templateId: 'DISARM', name: '武器奪取', type: 'SPECIAL', power: 0, description: '周囲の敵の攻撃力を下げる', icon: <X size={16}/> },
+
+    // NEW CARDS
+    { templateId: 'CROSS', name: '十字定規', type: 'ATTACK', power: 5, description: '前後左右4マスの敵を攻撃', icon: <Plus size={16}/> },
+    { templateId: 'X_ATK', name: 'バッテン', type: 'ATTACK', power: 5, description: '斜め4方向の敵を攻撃', icon: <X size={16}/> },
+    { templateId: 'DRAIN', name: '給食当番', type: 'ATTACK', power: 4, description: '敵にダメージを与え、半分回復', icon: <Dna size={16}/> },
+    { templateId: 'POISON', name: '毒舌', type: 'SPECIAL', power: 0, description: '目の前の敵を猛毒にする', icon: <Skull size={16}/> },
+    { templateId: 'SLEEP', name: '校長の話', type: 'SPECIAL', power: 0, description: '部屋全体の敵を眠らせる', icon: <Moon size={16}/> },
+    { templateId: 'FREEZE', name: '寒いギャグ', type: 'ATTACK', power: 2, description: '目の前の敵を凍らせる', icon: <Snowflake size={16}/> },
+    { templateId: 'MAGNET', name: '落とし物', type: 'SPECIAL', power: 0, description: 'フロア中のアイテムを引き寄せる', icon: <Magnet size={16}/> },
+    { templateId: 'MAP', name: 'カンニング', type: 'SPECIAL', power: 0, description: 'フロアのマップ構造をあばく', icon: <Eye size={16}/> },
+    { templateId: 'EARTHQUAKE', name: '貧乏ゆすり', type: 'ATTACK', power: 5, description: '部屋全体の敵にダメージ', icon: <Activity size={16}/> },
+    { templateId: 'GAMBLE', name: '運試し', type: 'SPECIAL', power: 0, description: '所持金増加か、ダメージか', icon: <Dice5 size={16}/> },
 ];
 
 // --- DIJKSTRA PATHFINDING HELPER ---
@@ -943,6 +955,42 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               if (!hit) targets = []; // If no enemy hit, visualize projectile anyway?
               // Let's visualize projectile
               addVisualEffect('PROJECTILE', player.x, player.y, { dir: player.dir, duration: 10 });
+          } else if (card.templateId === 'CROSS') {
+              // Cross Cut (Front/Back/Left/Right)
+              targets = [
+                  {x: player.x, y: player.y-1}, {x: player.x, y: player.y+1},
+                  {x: player.x-1, y: player.y}, {x: player.x+1, y: player.y}
+              ];
+              targets.forEach(t => addVisualEffect('SLASH', t.x, t.y, { dir: {x: Math.sign(t.x-player.x) as any, y: Math.sign(t.y-player.y) as any} }));
+          } else if (card.templateId === 'X_ATK') {
+              // X Cut (Diagonals)
+              targets = [
+                  {x: player.x-1, y: player.y-1}, {x: player.x+1, y: player.y-1},
+                  {x: player.x-1, y: player.y+1}, {x: player.x+1, y: player.y+1}
+              ];
+              targets.forEach(t => addVisualEffect('SLASH', t.x, t.y, { dir: {x:0, y:0} }));
+          } else if (card.templateId === 'DRAIN') {
+              // Attack front, heal player
+              targets = [{x: player.x+dx, y: player.y+dy}];
+              addVisualEffect('SLASH', targets[0].x, targets[0].y, { dir: player.dir });
+          } else if (card.templateId === 'FREEZE') {
+              targets = [{x: player.x+dx, y: player.y+dy}];
+              addVisualEffect('SLASH', targets[0].x, targets[0].y, { dir: player.dir });
+          } else if (card.templateId === 'EARTHQUAKE') {
+              // Room wide damage + stun
+              if (isPointInRoom(player.x, player.y)) {
+                  const currentRoom = roomsRef.current.find(r => player.x >= r.x && player.x < r.x + r.w && player.y >= r.y && player.y < r.y + r.h);
+                  if (currentRoom) {
+                      addVisualEffect('THUNDER', 0, 0); // Shake visual
+                      triggerShake(15);
+                      // Collect all enemies in room
+                      enemies.forEach(e => {
+                          if (e.x >= currentRoom.x && e.x < currentRoom.x + currentRoom.w && e.y >= currentRoom.y && e.y < currentRoom.y + currentRoom.h) {
+                              targets.push({x:e.x, y:e.y});
+                          }
+                      });
+                  }
+              }
           } else {
               // Default single front
               targets = [{x: player.x+dx, y: player.y+dy}];
@@ -955,9 +1003,28 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           setEnemies(prev => prev.map(e => {
               if (targets.some(t => t.x === e.x && t.y === e.y)) {
                   let dmg = Math.max(1, baseDmg - e.defense);
+                  
+                  if (card.templateId === 'EARTHQUAKE') {
+                      dmg = Math.max(1, Math.floor(dmg / 2)); // Reduced damage for room wide
+                      // e.status.frozen = 3; // Stun
+                  }
+
                   hits++;
                   const nhp = e.hp - dmg;
                   addVisualEffect('TEXT', e.x, e.y, { value: `${dmg}`, color: 'yellow' });
+                  
+                  if (card.templateId === 'DRAIN') {
+                      const heal = Math.floor(dmg / 2);
+                      if (heal > 0) {
+                          setPlayer(p => ({...p, hp: Math.min(p.maxHp, p.hp + heal)}));
+                          addVisualEffect('TEXT', player.x, player.y, { value: `+${heal}`, color: 'green' });
+                      }
+                  }
+                  if (card.templateId === 'FREEZE') {
+                      e.status.frozen = 5;
+                      addLog(`${e.name}は凍りついた！`);
+                  }
+
                   if (nhp <= 0) { gainXp(e.xp); return { ...e, hp: 0, dead: true }; }
                   return { ...e, hp: nhp };
               }
@@ -1038,6 +1105,74 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               return e;
           }));
           msg = "周囲の敵の攻撃力を下げた！";
+          used = true;
+      } else if (card.templateId === 'POISON') {
+          const { x: dx, y: dy } = player.dir;
+          const target = enemies.find(e => e.x === player.x + dx && e.y === player.y + dy);
+          if (target) {
+              // Implement Poison logic (needs turn update support, simplifying to instant dmg or status if supported)
+              // Currently status only has sleep/confuse/frozen/blind. Adding visual text.
+              addVisualEffect('TEXT', target.x, target.y, { value: 'POISON', color: 'purple' });
+              msg = `${target.name}に毒を吐いた！`;
+              // Hacky poison: Deal delayed damage or instant heavy damage?
+              // Let's do heavy damage for now as "Instant Poison"
+              const dmg = 10;
+              const nhp = target.hp - dmg;
+              setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0));
+              if (nhp <= 0) gainXp(target.xp);
+              used = true;
+          } else {
+              msg = "空振り。";
+              audioService.playSound('wrong');
+          }
+      } else if (card.templateId === 'SLEEP') {
+          // Room wide sleep
+          if (isPointInRoom(player.x, player.y)) {
+              const currentRoom = roomsRef.current.find(r => player.x >= r.x && player.x < r.x + r.w && player.y >= r.y && player.y < r.y + r.h);
+              if (currentRoom) {
+                  addVisualEffect('FLASH', 0, 0, { color: 'blue', duration: 10 });
+                  setEnemies(prev => prev.map(e => {
+                      if (e.x >= currentRoom.x && e.x < currentRoom.x + currentRoom.w && e.y >= currentRoom.y && e.y < currentRoom.y + currentRoom.h) {
+                          addVisualEffect('TEXT', e.x, e.y, {value: 'Zzz', color:'blue'});
+                          return { ...e, status: { ...e.status, sleep: 10 } };
+                      }
+                      return e;
+                  }));
+                  msg = "校長の話が始まった...敵は眠った！";
+                  audioService.playSound('buff');
+                  used = true;
+              } else msg = "ここでは使えない。";
+          } else msg = "ここでは使えない。";
+      } else if (card.templateId === 'MAGNET') {
+          // Floor wide magnet
+          addVisualEffect('FLASH', 0, 0, { color: 'yellow', duration: 5 });
+          const newItems = floorItems.map(i => {
+              // Move all to player
+              return { ...i, x: player.x, y: player.y };
+          });
+          setFloorItems(newItems);
+          msg = "アイテムを引き寄せた！";
+          audioService.playSound('buff');
+          used = true;
+      } else if (card.templateId === 'MAP') {
+          setFloorMapRevealed(true);
+          setShowMap(true);
+          msg = "地図をカンニングした！";
+          audioService.playSound('buff');
+          used = true;
+      } else if (card.templateId === 'GAMBLE') {
+          if (Math.random() < 0.5) {
+              const gain = 100 * floor;
+              setPlayer(p => ({...p, gold: (p.gold||0) + gain}));
+              msg = `大吉！${gain}G手に入れた！`;
+              audioService.playSound('win');
+          } else {
+              const dmg = Math.floor(player.hp / 2);
+              setPlayer(p => ({...p, hp: p.hp - dmg}));
+              msg = `大凶...${dmg}ダメージ！`;
+              addVisualEffect('EXPLOSION', player.x, player.y);
+              audioService.playSound('lose');
+          }
           used = true;
       }
 
