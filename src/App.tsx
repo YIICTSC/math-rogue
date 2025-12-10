@@ -26,6 +26,7 @@ import PokerGameScreen from './components/PokerGameScreen';
 import SchoolyardSurvivorScreen from './components/SchoolyardSurvivorScreen';
 import SchoolDungeonRPG from './components/SchoolDungeonRPG'; 
 import SchoolDungeonRPG2 from './components/SchoolDungeonRPG2'; 
+import KochoShowdown from './components/KochoShowdown'; // New
 import MiniGameSelectScreen from './components/MiniGameSelectScreen';
 import Card from './components/Card';
 import { audioService } from './services/audioService';
@@ -51,6 +52,7 @@ const calculateScore = (state: GameState, victory: boolean): number => {
     return score;
 };
 
+// ... (Rest of existing AI logic for BattleScene omitted for brevity as it is unchanged) ...
 // --- ENEMY DEFINITIONS & AI ---
 const determineEnemyType = (name: string, isBoss: boolean): string => {
     if (isBoss) return 'GUARDIAN'; 
@@ -117,6 +119,7 @@ const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
             if (r < 0.9) return { type: EnemyIntentType.DEFEND, value: 8 };
             return { type: EnemyIntentType.BUFF, value: 0, secondaryValue: 2 }; 
     }
+}
 };
 
 const App: React.FC = () => {
@@ -237,7 +240,8 @@ const App: React.FC = () => {
           gameState.screen !== GameScreen.MINI_GAME_POKER && 
           gameState.screen !== GameScreen.MINI_GAME_SURVIVOR &&
           gameState.screen !== GameScreen.MINI_GAME_DUNGEON &&
-          gameState.screen !== GameScreen.MINI_GAME_DUNGEON_2
+          gameState.screen !== GameScreen.MINI_GAME_DUNGEON_2 &&
+          gameState.screen !== GameScreen.MINI_GAME_KOCHO
       ) {
           storageService.saveGame(gameState);
       }
@@ -314,6 +318,8 @@ const App: React.FC = () => {
           setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_DUNGEON }));
       } else if (gameId === 'DUNGEON_2') {
           setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_DUNGEON_2 }));
+      } else if (gameId === 'KOCHO') {
+          setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_KOCHO }));
       }
   };
 
@@ -336,7 +342,9 @@ const App: React.FC = () => {
       setGameState(prev => ({ ...prev, mode, screen: GameScreen.CHARACTER_SELECTION }));
   };
 
+  // ... (Other handlers like handleDebugStart, handleCharacterSelect remain same) ...
   const handleDebugStart = (deck: ICard[], relics: Relic[], potions: Potion[]) => {
+        // Implementation omitted for brevity, identical to previous
         const map = generateDungeonMap();
         setDebugLoadout({ deck, relics, potions });
         
@@ -383,6 +391,7 @@ const App: React.FC = () => {
   };
 
   const handleCharacterSelect = (char: Character) => {
+      // Identical to previous implementation
       audioService.playSound('select');
       setSelectedCharName(char.name);
       
@@ -2166,7 +2175,7 @@ const App: React.FC = () => {
                             </div>
 
                             <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                <Terminal size={10}/> v2.5.0
+                                <Terminal size={10}/> v2.5.1
                             </button>
                         </div>
                     </div>
@@ -2180,13 +2189,13 @@ const App: React.FC = () => {
                             className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2 select-none active:text-green-200"
                             onClick={handleLogTitleClick}
                         >
-                            System Update Log v2.5.0
+                            System Update Log v2.5.1
                         </h2>
                         <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
                             <section>
                                 <h3 className="text-white font-bold mb-1">■ アップデート (Update)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li>新ミニゲーム「風来の小学生」を追加しました。</li>
+                                    <li>新ミニゲーム「校長対決」を追加しました。</li>
                                 </ul>
                             </section>
                         </div>
@@ -2226,8 +2235,15 @@ const App: React.FC = () => {
                 <SchoolDungeonRPG2 onBack={returnToTitle} />
             )}
 
+            {gameState.screen === GameScreen.MINI_GAME_KOCHO && (
+                <KochoShowdown onBack={returnToTitle} />
+            )}
+
+            {/* Other screens (Mode, Character, Battle, etc.) logic remains similar but routed properly */}
+            
             {gameState.screen === GameScreen.MODE_SELECTION && (
                 <div className="w-full h-full bg-gray-900 flex flex-col items-center text-white p-4 overflow-y-auto custom-scrollbar">
+                    {/* ... (Existing Mode Selection UI) ... */}
                     <div className="w-full max-w-2xl flex flex-col items-center my-auto">
                         <h2 className="text-3xl font-bold mb-2 text-yellow-400 mt-4">計算モード選択</h2>
                         {gameState.challengeMode === '1A1D' && <p className="text-red-400 mb-6 font-bold animate-pulse">※1A1Dチャレンジモード適用中</p>}

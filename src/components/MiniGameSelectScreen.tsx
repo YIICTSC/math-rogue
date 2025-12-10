@@ -1,6 +1,6 @@
 
 import React, { useState, useRef } from 'react';
-import { ArrowLeft, Club, Gamepad2, Skull, Compass, Mountain, AlertTriangle, Trash2 } from 'lucide-react';
+import { ArrowLeft, Club, Gamepad2, Skull, Compass, Mountain, AlertTriangle, Trash2, Sword } from 'lucide-react';
 import { storageService } from '../services/storageService';
 import { audioService } from '../services/audioService';
 
@@ -55,7 +55,7 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
       } else if (deleteTarget === 'DUNGEON_2') {
           storageService.clearDungeonState2();
       }
-      // Survivor has no suspend state to clear
+      // Survivor & Kocho has no suspend state to clear currently
       
       audioService.playSound('buff');
       setDeleteTarget(null);
@@ -67,6 +67,7 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
           case 'SURVIVOR': return '校庭サバイバー';
           case 'DUNGEON': return '風来の小学生';
           case 'DUNGEON_2': return '風来の小学生2';
+          case 'KOCHO': return '校長対決';
           default: return '';
       }
   };
@@ -120,6 +121,24 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
             <p className="text-xs text-gray-500 mb-4 animate-pulse">※ボタン長押しでセーブデータを削除できます</p>
             
             <div className="grid grid-cols-1 gap-4 w-full mb-8 shrink-0">
+                
+                {/* Kocho Showdown Game Card (NEW) */}
+                <button
+                    {...bindPress('KOCHO')}
+                    className="group relative bg-[#1a1a2e] border-4 border-indigo-500 hover:border-pink-500 hover:bg-indigo-900 p-6 rounded-xl flex flex-row items-center transition-all shadow-xl hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] overflow-hidden text-left"
+                >
+                    <div className="absolute top-0 right-0 bg-pink-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-md flex items-center gap-1">NEW!</div>
+                    <div className="bg-indigo-900/50 p-4 rounded-full mr-4 group-hover:scale-110 transition-transform duration-300 border-2 border-indigo-500/30 shrink-0">
+                        <Sword size={32} className="text-pink-400 fill-current" />
+                    </div>
+                    <div>
+                        <span className="text-xl font-bold mb-1 text-indigo-200 group-hover:text-white font-mono transition-colors block">校長対決</span>
+                        <span className="text-xs text-indigo-300 leading-tight block font-mono">
+                            ターン制戦略バトル。<br/>行動を予約して敵を倒せ！
+                        </span>
+                    </div>
+                </button>
+
                 {/* Poker Game Card */}
                 <button
                     {...bindPress('POKER')}
