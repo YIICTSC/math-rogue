@@ -1054,20 +1054,25 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
     }
 
     // 2. Spawn Items (Max 10, usually 5-8)
+    // 1 Card per floor fixed
     const itemCount = Math.floor(Math.random() * 4) + 5; 
-    for (let i = 0; i < itemCount; i++) {
+    const spawnTypes: ('CARD' | 'GOLD' | 'ITEM')[] = ['CARD'];
+    for(let i = 1; i < itemCount; i++) {
+        spawnTypes.push(Math.random() < 0.25 ? 'GOLD' : 'ITEM');
+    }
+    spawnTypes.sort(() => Math.random() - 0.5);
+
+    for (const type of spawnTypes) {
         const t = candidates.pop();
         if (t) {
-            const r = Math.random();
-            if (r < 0.2) {
+            if (type === 'GOLD') {
                 newItems.push({
                     id: Date.now() + Math.random(), type: 'GOLD', x: t.x, y: t.y, char: '$', name: 'お金',
                     hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
                     status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
                     gold: Math.floor(Math.random() * 50 + 10 * f)
                 });
-            } else if (r < 0.3) {
-                // Card Drop
+            } else if (type === 'CARD') {
                 const cardTemplate = DUNGEON_CARD_DB[Math.floor(Math.random() * DUNGEON_CARD_DB.length)];
                 newItems.push({
                     id: Date.now() + Math.random(), type: 'ITEM', x: t.x, y: t.y, char: 'C', name: cardTemplate.name,
