@@ -2730,8 +2730,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
         )}
 
         {/* Game Area (Top) */}
-        <div className="w-full aspect-[4/3] relative shrink-0 shadow-lg border-2 max-h-[45vh]" style={{ backgroundColor: C3, borderColor: C0 }}>
-            <div className="absolute top-0 left-0 w-full h-8 flex justify-between items-center px-2 text-[10px] z-10 border-b" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
+        <div className="w-full aspect-[4/3] relative shrink-0 shadow-lg border-2 max-h-[45vh] flex flex-col overflow-hidden" style={{ backgroundColor: C3, borderColor: C0 }}>
+            <div className="w-full h-8 flex justify-between items-center px-2 text-[10px] z-10 border-b shrink-0" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
                 <span className="font-bold tracking-widest">{currentTheme.name}</span>
                 <div className="flex gap-2">
                     <button onClick={() => setShowMap(!showMap)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><MapIcon size={10}/> Map</button>
@@ -2741,7 +2741,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                 </div>
             </div>
 
-            <div className="absolute top-8 left-0 w-full h-5 flex justify-between items-center px-2 text-xs font-bold z-10" style={{ backgroundColor: C1, color: C3 }}>
+            <div className="w-full h-5 flex justify-between items-center px-2 text-xs font-bold z-10 shrink-0" style={{ backgroundColor: C1, color: C3 }}>
                 <span>{floor}F</span>
                 <span>Lv{level}</span>
                 <span>HP{player.hp}/{player.maxHp}</span>
@@ -2750,63 +2750,65 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                 <span>🍙{belly}%</span>
             </div>
 
-            <canvas ref={canvasRef} width={VIEW_W * TILE_SIZE * SCALE} height={VIEW_H * TILE_SIZE * SCALE} className="w-full h-full object-contain pixel-art mt-6" style={{ imageRendering: 'pixelated' }} />
+            <div className="relative flex-1 min-h-0 w-full bg-[#111827]">
+                <canvas ref={canvasRef} width={VIEW_W * TILE_SIZE * SCALE} height={VIEW_H * TILE_SIZE * SCALE} className="w-full h-full object-contain pixel-art" style={{ imageRendering: 'pixelated' }} />
 
-            {/* Fast Forward Indicator */}
-            {isFastForwarding && (
-                <div className="absolute top-16 right-2 animate-pulse flex items-center rounded px-2" style={{ backgroundColor: `${C0}80`, color: C3 }}>
-                    <FastForward size={16} className="mr-1"/> 早送り中
-                </div>
-            )}
+                {/* Fast Forward Indicator */}
+                {isFastForwarding && (
+                    <div className="absolute top-2 right-2 animate-pulse flex items-center rounded px-2" style={{ backgroundColor: `${C0}80`, color: C3 }}>
+                        <FastForward size={16} className="mr-1"/> 早送り中
+                    </div>
+                )}
 
-            {/* Map Overlay: Now with Fog of War */}
-            {showMap && map.length > 0 && (
-                <div className="absolute inset-0 z-20 flex items-center justify-center p-8 mt-12" style={{ backgroundColor: `${C0}E6` }}>
-                    <div className="w-full h-full border grid" style={{ borderColor: C3, gridTemplateColumns: `repeat(${MAP_W}, 1fr)` }}>
-                        {map.map((row, y) => row.map((tile, x) => {
-                            const isRevealed = floorMapRevealed || (visitedMap[y] && visitedMap[y][x]);
-                            const isPlayer = x === player.x && y === player.y;
-                            const hasSight = player.equipment?.accessory?.type === 'RING_SIGHT';
-                            const hasTrapSight = player.equipment?.accessory?.type === 'RING_TRAP';
-                            const hasItem = floorItems.some(i => i.x===x && i.y===y);
-                            const hasEnemy = enemies.some(e => e.x===x && e.y===y);
-                            
-                            let bgStyle = { backgroundColor: 'transparent' };
-                            let content = null;
-
-                            if (isPlayer) {
-                                content = <div className="w-full h-full bg-white rounded-full animate-pulse"></div>;
-                            } else if (isRevealed) {
-                                if (tile === 'STAIRS') bgStyle = { backgroundColor: C3 };
-                                else if (tile !== 'WALL') bgStyle = { backgroundColor: C1 };
+                {/* Map Overlay: Now with Fog of War */}
+                {showMap && map.length > 0 && (
+                    <div className="absolute inset-0 z-20 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}E6` }}>
+                        <div className="w-full h-full border grid" style={{ borderColor: C3, gridTemplateColumns: `repeat(${MAP_W}, 1fr)` }}>
+                            {map.map((row, y) => row.map((tile, x) => {
+                                const isRevealed = floorMapRevealed || (visitedMap[y] && visitedMap[y][x]);
+                                const isPlayer = x === player.x && y === player.y;
+                                const hasSight = player.equipment?.accessory?.type === 'RING_SIGHT';
+                                const hasTrapSight = player.equipment?.accessory?.type === 'RING_TRAP';
+                                const hasItem = floorItems.some(i => i.x===x && i.y===y);
+                                const hasEnemy = enemies.some(e => e.x===x && e.y===y);
                                 
-                                if (tile !== 'WALL') {
-                                    if (traps.some(t => t.x===x && t.y===y && (t.visible || hasTrapSight))) {
-                                        content = <div className="w-full h-full flex items-center justify-center text-[4px] text-red-500 font-bold">X</div>;
-                                    } else if (hasEnemy && hasSight) {
+                                let bgStyle = { backgroundColor: 'transparent' };
+                                let content = null;
+
+                                if (isPlayer) {
+                                    content = <div className="w-full h-full bg-white rounded-full animate-pulse"></div>;
+                                } else if (isRevealed) {
+                                    if (tile === 'STAIRS') bgStyle = { backgroundColor: C3 };
+                                    else if (tile !== 'WALL') bgStyle = { backgroundColor: C1 };
+                                    
+                                    if (tile !== 'WALL') {
+                                        if (traps.some(t => t.x===x && t.y===y && (t.visible || hasTrapSight))) {
+                                            content = <div className="w-full h-full flex items-center justify-center text-[4px] text-red-500 font-bold">X</div>;
+                                        } else if (hasEnemy && hasSight) {
+                                            content = <div className="w-full h-full bg-red-500 rounded-full"></div>;
+                                        } else if (hasItem && hasSight) {
+                                            content = <div className="w-full h-full bg-blue-400 rounded-sm"></div>;
+                                        }
+                                    }
+                                } else {
+                                    if (hasEnemy && hasSight) {
                                         content = <div className="w-full h-full bg-red-500 rounded-full"></div>;
                                     } else if (hasItem && hasSight) {
                                         content = <div className="w-full h-full bg-blue-400 rounded-sm"></div>;
                                     }
                                 }
-                            } else {
-                                if (hasEnemy && hasSight) {
-                                    content = <div className="w-full h-full bg-red-500 rounded-full"></div>;
-                                } else if (hasItem && hasSight) {
-                                    content = <div className="w-full h-full bg-blue-400 rounded-sm"></div>;
-                                }
-                            }
 
-                            return (
-                                <div key={`${x}-${y}`} style={bgStyle}>
-                                    {content}
-                                </div>
-                            );
-                        }))}
+                                return (
+                                    <div key={`${x}-${y}`} style={bgStyle}>
+                                        {content}
+                                    </div>
+                                );
+                            }))}
+                        </div>
+                        <button onClick={() => setShowMap(false)} className="absolute bottom-4 border px-2 rounded hover:opacity-80 bg-black/50" style={{ color: C3, borderColor: C3 }}>Close</button>
                     </div>
-                    <button onClick={() => setShowMap(false)} className="absolute bottom-4 border px-2 rounded hover:opacity-80" style={{ color: C3, borderColor: C3 }}>Close</button>
-                </div>
-            )}
+                )}
+            </div>
 
             {/* Shop Menu */}
             {shopState.active && (
