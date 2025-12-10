@@ -1,8 +1,4 @@
 
-
-
-
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -1912,13 +1908,17 @@ const App: React.FC = () => {
   };
 
   const handleSynthesizeCard = (c1: ICard, c2: ICard) => {
+      // 1. Name Synthesis
       const len1 = Math.floor(Math.random() * 3) + 2; 
       const len2 = Math.floor(Math.random() * 3) + 2; 
       const part1 = c1.name.substring(0, Math.min(len1, c1.name.length));
       const part2 = c2.name.substring(Math.max(0, c2.name.length - len2));
       const newName = part1 + part2;
+      
+      // 2. Cost Logic
       const newCost = Math.max(c1.cost, c2.cost);
       
+      // 3. Stats Summation
       const sum = (k: keyof ICard) => ((c1[k] as number) || 0) + ((c2[k] as number) || 0);
       const newDamage = sum('damage');
       const newBlock = sum('block');
@@ -1931,16 +1931,35 @@ const App: React.FC = () => {
       const newStrength = sum('strength');
       const newSelfDamage = sum('selfDamage');
       const newPoisonMultiplier = sum('poisonMultiplier');
+      
+      // Advanced Logic Summation/Max
+      const newStrengthScaling = Math.max((c1.strengthScaling || 0), (c2.strengthScaling || 0));
+      const newFatalEnergy = sum('fatalEnergy');
+      const newFatalPermanentDamage = sum('fatalPermanentDamage');
+      const newFatalMaxHp = sum('fatalMaxHp');
+      const newDamagePerStrike = sum('damagePerStrike');
+      const newDamagePerCardInHand = sum('damagePerCardInHand');
+      const newDamagePerAttackPlayed = sum('damagePerAttackPlayed');
 
+      // 4. Boolean/Flag Merging (OR)
+      const newExhaust = c1.exhaust || c2.exhaust;
+      const newInnate = c1.innate || c2.innate;
+      const newEthereal = c1.unplayable || c2.unplayable; // Simplify unplayable logic for now
+      const newLifesteal = c1.lifesteal || c2.lifesteal;
+      const newUpgradeHand = c1.upgradeHand || c2.upgradeHand;
+      const newDoubleBlock = c1.doubleBlock || c2.doubleBlock;
+      const newDoubleStrength = c1.doubleStrength || c2.doubleStrength;
+      const newCapture = c1.capture || c2.capture;
+
+      // 5. Multi-hit Logic (Additive)
       const extraHits1 = c1.playCopies || 0;
       const extraHits2 = c2.playCopies || 0;
       const newExtraHits = extraHits1 + extraHits2;
       const newTotalHits = 1 + newExtraHits;
 
-      const newExhaust = c1.exhaust || c2.exhaust;
-      const newInnate = c1.innate || c2.innate;
-
+      // 6. Type & Target Logic
       let newType = c1.type;
+      // Priority: Attack > Power > Skill > Status > Curse
       if (newDamage > 0) newType = CardType.ATTACK;
       else if (c1.type === CardType.POWER || c2.type === CardType.POWER) newType = CardType.POWER;
       else newType = CardType.SKILL;
@@ -1951,20 +1970,23 @@ const App: React.FC = () => {
       else if (c1.target === TargetType.ENEMY || c2.target === TargetType.ENEMY) newTarget = TargetType.ENEMY;
       else newTarget = TargetType.SELF;
       
+      // Override target if damage exists but was originally self-targeting
       if ((newDamage > 0 || newPoison > 0 || newWeak > 0 || newVulnerable > 0) && newTarget === TargetType.SELF) {
           newTarget = TargetType.ENEMY;
       }
 
+      // 7. Dynamic Description Generation
       const parts: string[] = [];
       if (newDamage > 0) {
           let text = `${newDamage}ダメージ`;
           if (newTarget === TargetType.ALL_ENEMIES) text = `全体に${text}`;
           else if (newTarget === TargetType.RANDOM_ENEMY) text = `ランダムな敵に${text}`;
-          else if (newTarget === TargetType.SELF) text = `自分に${text}`;
+          else if (newTarget === TargetType.SELF) text = `自分に${text}`; // Reflection?
           
           if (newTotalHits > 1) {
               text += `を${newTotalHits}回`;
           }
+          if (newStrengthScaling > 1) text += `(筋力${newStrengthScaling}倍)`;
           parts.push(text);
       }
       if (newBlock > 0) parts.push(`ブロック${newBlock}`);
@@ -1978,9 +2000,20 @@ const App: React.FC = () => {
       if (newHeal > 0) parts.push(`HP${newHeal}回復`);
       if (newSelfDamage > 0) parts.push(`自分に${newSelfDamage}ダメージ`);
       
+      // Special logic descriptions
+      if (newDamagePerStrike > 0) parts.push(`デッキの攻撃カード数x${newDamagePerStrike}ダメージ追加`);
+      if (newDamagePerCardInHand > 0) parts.push(`手札枚数x${newDamagePerCardInHand}ダメージ追加`);
+      if (newDamagePerAttackPlayed > 0) parts.push(`使用攻撃数x${newDamagePerAttackPlayed}ダメージ追加`);
+      if (newLifesteal) parts.push("HP吸収");
+      if (newDoubleBlock) parts.push("ブロック2倍");
+      if (newDoubleStrength) parts.push("筋力2倍");
+      if (newCapture) parts.push("捕獲");
+      
       let description = parts.join("。") + (parts.length > 0 ? "。" : "");
       if (parts.length === 0) description = "効果なし。";
 
+      // 8. Visual Synthesis (Texture Ref)
+      // Shape from C1, Color from C2
       const shapeSource = c1.textureRef ? c1.textureRef.split('|')[0] : getShapeFromCard(c1);
       const colorSource = c2.textureRef ? (c2.textureRef.split('|')[1] || c2.textureRef.split('|')[0]) : c2.name;
       const newTextureRef = `${shapeSource}|${colorSource}|${newType}`;
@@ -2007,6 +2040,20 @@ const App: React.FC = () => {
           playCopies: newExtraHits > 0 ? newExtraHits : undefined,
           exhaust: newExhaust,
           innate: newInnate,
+          // Advanced props
+          strengthScaling: newStrengthScaling > 1 ? newStrengthScaling : undefined,
+          lifesteal: newLifesteal,
+          upgradeHand: newUpgradeHand,
+          doubleBlock: newDoubleBlock,
+          doubleStrength: newDoubleStrength,
+          capture: newCapture,
+          fatalEnergy: newFatalEnergy || undefined,
+          fatalPermanentDamage: newFatalPermanentDamage || undefined,
+          fatalMaxHp: newFatalMaxHp || undefined,
+          damagePerStrike: newDamagePerStrike || undefined,
+          damagePerCardInHand: newDamagePerCardInHand || undefined,
+          damagePerAttackPlayed: newDamagePerAttackPlayed || undefined,
+          
           textureRef: newTextureRef
       };
       
