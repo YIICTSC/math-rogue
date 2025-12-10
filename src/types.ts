@@ -79,6 +79,8 @@ export interface Card {
   addCardToDraw?: { cardName: string, count: number }; 
   addCardToDiscard?: { cardName: string, count: number };
   
+  playCondition?: 'DRAW_PILE_EMPTY' | 'HAND_ONLY_ATTACKS';
+
   rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'LEGENDARY' | 'SPECIAL';
   price?: number;       
 }
