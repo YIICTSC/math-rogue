@@ -485,7 +485,283 @@ const App: React.FC = () => {
                   { label: "無視", text: "何もせず立ち去る", action: () => { setEventResultLog("怪しい男を無視して先へ進んだ。"); } }
               ]
           },
-          // ... (omitted similar events for brevity) ...
+
+          // 既存イベント（鏡）
+          {
+              title: "踊り場の鏡",
+              description: "大きな鏡がある。映っている自分と目が合った。",
+              options: [
+                  { label: "見つめる", text: "じっと見つめる...", action: () => {
+                      const deck = [...player.deck].sort(() => Math.random() - 0.5);
+                      const target = deck[0];
+                      if (target) {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...target, id: `copy-${Date.now()}` }] } }));
+                          setEventResultLog(`鏡の中の自分が何かを手渡してきた。\n「${target.name}」の複製を入手。`);
+                      } else {
+                          setEventResultLog("何も起こらなかった。");
+                      }
+                  }},
+                  { label: "割る", text: "鏡を叩き割る！", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.INJURY, id: `evt-${Date.now()}` }] } }));
+                      setEventResultLog("破片が飛び散った！\n呪い「骨折」を入手。7年間の不幸が訪れるだろう...");
+                  }}
+              ]
+          },
+          // 既存イベント（本）
+          {
+              title: "呪われた書物",
+              description: "古びた祭壇に一冊の本が置かれている。不吉な気配がする。",
+              options: [
+                  { label: "読む", text: "勇気を出して読む", action: () => {
+                      const books = [RELIC_LIBRARY.NECRONOMICON, RELIC_LIBRARY.ENCHIRIDION, RELIC_LIBRARY.NILRYS_CODEX];
+                      const book = books[Math.floor(Math.random() * books.length)];
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 10), relics: [...prev.player.relics, book] } }));
+                      setEventResultLog(`ページをめくると激痛が走った！(HP-10)\nレリック「${book.name}」を入手。`);
+                  }},
+                  { label: "立ち去る", text: "危険を避ける", action: () => setEventResultLog("危険を避けて立ち去った。") }
+              ]
+          },
+          // 新規イベント 1: 給食の余り (Fried Bread War)
+          {
+              title: "伝説の給食",
+              description: "今日は揚げパンの日だ！しかし、最後に一つだけ余っている。\nクラスメートとジャンケンで勝負だ。",
+              options: [
+                  { label: "グー", text: "力強く出す！", action: () => {
+                      if (Math.random() < 0.5) {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 5, currentHp: prev.player.currentHp + 5 } }));
+                          setEventResultLog("勝った！揚げパンをゲット！\n最大HPが5上がった。");
+                      } else {
+                          setEventResultLog("負けた... \n悲しみに包まれた。");
+                      }
+                  }},
+                  { label: "パー", text: "大きく広げる！", action: () => {
+                      if (Math.random() < 0.5) {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 50 } }));
+                          setEventResultLog("勝った！譲ってあげたらお礼に50Gもらった。");
+                      } else {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 5) } }));
+                          setEventResultLog("負けた上、指を突き指した。(HP-5)");
+                      }
+                  }},
+                  { label: "チョキ", text: "鋭く出す！", action: () => {
+                      const potion = POTION_LIBRARY['STRENGTH_POTION'];
+                      if (Math.random() < 0.5) {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, potions: [...prev.player.potions, { ...potion, id: `pot-${Date.now()}` }].slice(0, 3) } }));
+                          setEventResultLog("勝った！揚げパンの代わりにプロテインをもらった。");
+                      } else {
+                          setEventResultLog("負けた... みんな美味しそうに食べている。");
+                      }
+                  }}
+              ]
+          },
+          // 新規イベント 2: 校庭の野良犬 (Stray Dog)
+          {
+              title: "校庭の野良犬",
+              description: "授業中、校庭に野良犬が迷い込んできた！\n首輪はなく、お腹を空かせているようだ。",
+              options: [
+                  { label: "なでる", text: "優しく近づく", action: () => {
+                      if (Math.random() < 0.7) {
+                          setEventResultLog("犬は嬉しそうに尻尾を振って去っていった。\n心が癒やされた。(HP全回復)");
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: prev.player.maxHp } }));
+                      } else {
+                          setEventResultLog("ガブッ！噛まれた！(HP-10)\n犬は走り去った。");
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 10) } }));
+                      }
+                  }},
+                  { label: "餌をやる", text: "何かあげる", action: () => {
+                      if (player.gold >= 30) {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - 30, relics: [...prev.player.relics, RELIC_LIBRARY.SPIRIT_POOP] } }));
+                          setEventResultLog("パンを買ってあげた(30G消費)。\nお礼に「犬のフン(レリック)」を置いていった...いらない。");
+                      } else {
+                          setEventResultLog("あげるものがなかった。\n犬は悲しそうな目で去っていった。");
+                      }
+                  }}
+              ]
+          },
+          // 新規イベント 3: 魔の掃除時間 (Cleaning Time)
+          {
+              title: "魔の掃除時間",
+              description: "廊下のワックスがけの時間だ。\nツルツル滑る床は危険だが、滑れば速く移動できるかも？",
+              options: [
+                  { label: "滑る", text: "スライディング！", action: () => {
+                      if (Math.random() < 0.5) {
+                          const card = { ...CARDS_LIBRARY.DASH, id: `evt-dash-${Date.now()}` };
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, card] } }));
+                          setEventResultLog("素晴らしい滑りだ！\n「ダッシュ」のカードを習得した。");
+                      } else {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.INJURY, id: `evt-${Date.now()}` }] } }));
+                          setEventResultLog("派手に転んだ！痛い！\n呪い「骨折」を入手。");
+                      }
+                  }},
+                  { label: "磨く", text: "真面目に磨く", action: () => {
+                      const removeIndex = Math.floor(Math.random() * player.deck.length);
+                      const removedCard = player.deck[removeIndex];
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: prev.player.deck.filter((_, i) => i !== removeIndex) } }));
+                      setEventResultLog(`心を込めて磨いたら、心が洗われた。\nデッキから「${removedCard.name}」が取り除かれた。`);
+                  }}
+              ]
+          },
+          // 新規イベント 4: テスト返却 (Test Return)
+          {
+              title: "運命のテスト返却",
+              description: "今日は算数のテストが返却される日だ。\n自信はあるか？",
+              options: [
+                  { label: "自信あり", text: "100点の予感！", action: () => {
+                      if (Math.random() < 0.4) {
+                          // Upgrade random card
+                          const deck = [...player.deck];
+                          const idx = deck.findIndex(c => !c.upgraded);
+                          if (idx !== -1) {
+                              deck[idx] = getUpgradedCard(deck[idx]);
+                              setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+                              setEventResultLog(`100点満点だ！\n「${deck[idx].name}」が強化された！`);
+                          } else {
+                              setEventResultLog("100点だったが、これ以上学ぶことはないようだ。");
+                          }
+                      } else {
+                          setEventResultLog("名前を書き忘れていた！0点だ！\n精神的ダメージを受けた。(HP-5)");
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 5) } }));
+                      }
+                  }},
+                  { label: "隠す", text: "カバンに隠す", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.SHAME, id: `evt-${Date.now()}` }] } }));
+                      setEventResultLog("親に見つからないように隠した。\n呪い「恥」を入手。");
+                  }}
+              ]
+          },
+          // 新規イベント 5: 放送室のジャック (Broadcasting Room)
+          {
+              title: "放送室のジャック",
+              description: "放送室に誰もいない。マイクの電源が入っている。\nイタズラするチャンス？",
+              options: [
+                  { label: "歌う", text: "大熱唱する", action: () => {
+                      if (Math.random() < 0.5) {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 4 } }));
+                          setEventResultLog("生徒たちに大ウケだ！人気者になった。\n最大HP+4。");
+                      } else {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.SHAME, id: `evt-${Date.now()}` }] } }));
+                          setEventResultLog("音痴すぎて笑い者になった。\n呪い「恥」を入手。");
+                      }
+                  }},
+                  { label: "告白", text: "好きな人の名前を叫ぶ", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.REGRET, id: `evt-${Date.now()}` }] } }));
+                      setEventResultLog("校長先生の名前を叫んでしまった。\n後悔の念に襲われる。呪い「後悔」を入手。");
+                  }}
+              ]
+          },
+          // 新規イベント 6: 理科室の人体模型 (Anatomy Model)
+          {
+              title: "理科室の人体模型",
+              description: "夜の理科室。人体模型が動いている気がする。\n「心臓ヲ...クレ...」と聞こえた。",
+              options: [
+                  { label: "あげる", text: "HPを少し分ける", action: () => {
+                      const damage = Math.floor(player.maxHp * 0.3);
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - damage), relics: [...prev.player.relics, RELIC_LIBRARY.BLOOD_VIAL] } }));
+                      setEventResultLog(`自分の血を分け与えた(HP-${damage})。\nお礼に「保健室の飴(レリック)」を貰った。`);
+                  }},
+                  { label: "逃げる", text: "ダッシュで逃げる", action: () => {
+                      if (Math.random() < 0.5) {
+                          setEventResultLog("なんとか逃げ切った。怖かった...");
+                      } else {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.DOUBT, id: `evt-${Date.now()}` }] } }));
+                          setEventResultLog("背後から視線を感じる...\n呪い「不安」を入手。");
+                      }
+                  }}
+              ]
+          },
+          // 新規イベント 7: 図書室の居眠り (Library Nap)
+          {
+              title: "図書室の静寂",
+              description: "放課後の図書室はとても静かだ。\n心地よい眠気が襲ってくる...",
+              options: [
+                  { label: "寝る", text: "少し仮眠する", action: () => {
+                      const heal = Math.floor(player.maxHp * 0.25);
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + heal) } }));
+                      setEventResultLog(`ぐっすり眠れた。HPが${heal}回復した。\nよだれで本が少し濡れた。`);
+                  }},
+                  { label: "勉強", text: "必死に勉強する", action: () => {
+                      const card = { ...CARDS_LIBRARY.SCRY, id: `evt-scry-${Date.now()}` };
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, card] } }));
+                      setEventResultLog("集中して勉強した。\n「先読み」のカードを習得した。");
+                  }}
+              ]
+          },
+          // 新規イベント 8: 終わらない朝礼 (Endless Assembly)
+          {
+              title: "終わらない朝礼",
+              description: "校長先生の話が長い...もう30分も続いている。\n貧血で倒れそうだ。",
+              options: [
+                  { label: "耐える", text: "歯を食いしばる", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 5, currentHp: Math.max(1, prev.player.currentHp - 5) } }));
+                      setEventResultLog("なんとか耐え抜いた！精神力が鍛えられた。\n最大HP+5, HP-5。");
+                  }},
+                  { label: "座る", text: "こっそり座る", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.CLUMSINESS, id: `evt-${Date.now()}` }] } }));
+                      setEventResultLog("先生に見つかって怒られた。\n呪い「ドジ」を入手。");
+                  }}
+              ]
+          },
+          // 新規イベント 9: 置き勉 (Leaving Books)
+          {
+              title: "置き勉の誘惑",
+              description: "カバンが重すぎる。教科書を学校に置いて帰ろうか...",
+              options: [
+                  { label: "置く", text: "身軽になる", action: () => {
+                      if (player.deck.length > 0) {
+                          const removeIndex = Math.floor(Math.random() * player.deck.length);
+                          const removedCard = player.deck[removeIndex];
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: prev.player.deck.filter((_, i) => i !== removeIndex) } }));
+                          setEventResultLog(`教科書(カード: ${removedCard.name})を机の中に隠した。\n体が軽くなった！`);
+                      } else {
+                          setEventResultLog("置く教科書がなかった。");
+                      }
+                  }},
+                  { label: "持つ", text: "真面目に持ち帰る", action: () => {
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, strength: prev.player.strength + 1 } })); // Note: Strength resets after combat usually, but maybe this is persistent? Actually strictly simplistic here: just add temporary buff for next fight or change deck? 
+                      // Let's add a card instead.
+                      const card = { ...CARDS_LIBRARY.HEADBUTT, id: `evt-head-${Date.now()}` };
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, card] } }));
+                      setEventResultLog("重いカバンで足腰が鍛えられた。\n「頭突き」を習得した。");
+                  }}
+              ]
+          },
+          // 新規イベント 10: 伝説の木の下 (Legendary Tree)
+          {
+              title: "伝説の木の下",
+              description: "この木の下で告白すると結ばれるという伝説がある。\n誰かが待っているようだ。",
+              options: [
+                  { label: "行く", text: "ドキドキしながら行く", action: () => {
+                      if (Math.random() < 0.5) {
+                          const rareCard = Object.values(CARDS_LIBRARY).filter(c => c.rarity === 'RARE')[0]; // Simplify
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...rareCard, id: `love-${Date.now()}` }] } }));
+                          setEventResultLog(`なんと！欲しかったレアカード「${rareCard.name}」をもらえた！\nこれは愛の告白...？`);
+                      } else {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.PAIN, id: `evt-${Date.now()}` }] } }));
+                          setEventResultLog("誰もいなかった... イタズラだったようだ。\n胸が痛む。呪い「腹痛」を入手。");
+                      }
+                  }},
+                  { label: "無視", text: "興味ない", action: () => {
+                      setEventResultLog("恋愛より冒険だ。\n通り過ぎた。");
+                  }}
+              ]
+          },
+          // 新規イベント 11: 体育倉庫のマット (Gym Mats)
+          {
+              title: "体育倉庫のマット",
+              description: "体育倉庫のマットの間に何かが挟まっている。\n腐った匂いもするが...",
+              options: [
+                  { label: "探る", text: "手を突っ込む", action: () => {
+                      if (Math.random() < 0.6) {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 80 } }));
+                          setEventResultLog("ラッキー！誰かのへそくり80Gを見つけた！");
+                      } else {
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...STATUS_CARDS.SLIMED, id: `evt-${Date.now()}` }] } }));
+                          setEventResultLog("うわっ！腐ったバナナを掴んでしまった。\n「鼻水(粘液)」カードがデッキに入った。");
+                      }
+                  }},
+                  { label: "放置", text: "見なかったことにする", action: () => setEventResultLog("賢明な判断だ。") }
+              ]
+          },
           // 新規イベント 12: 謎の転校生 (Mystery Transfer Student)        
           {
               title: "謎の転校生",
