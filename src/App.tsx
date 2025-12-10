@@ -32,6 +32,493 @@ import { audioService } from './services/audioService';
 import { generateFlavorText, generateEnemyName } from './services/geminiService';
 import { generateDungeonMap } from './services/mapGenerator';
 import { storageService } from './services/storageService';
+import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain } from 'lucide-react';
+
+const calculateScore = (state: GameState, victory: boolean): number => {
+    let score = 0;
+    const floorPoints = (state.act - 1) * 150 + state.floor * 10;
+    score += floorPoints;
+    if (victory) score += 1000;
+    if (state.act >= 4) score += 500; 
+    score += state.player.gold;
+    score += state.player.relics.length * 25;
+    const rares = state.player.deck.filter(c => c.rarity === 'RARE' || c.rarity === 'LEGENDARY').length;
+    score += rares * 20;
+    if (victory) {
+        score += Math.floor((state.player.currentHp / state.player.maxHp) * 200);
+    }
+    return score;
+};
+
+// --- ENEMY DEFINITIONS & AI ---
+const determineEnemyType = (name: string, isBoss: boolean): string => {
+    if (isBoss) return 'GUARDIAN'; 
+    if (name.includes('先生') || name.includes('用務員') || name.includes('教頭')) return 'TEACHER';
+    if (name.includes('ゴーレム') || name.includes('主') || name.includes('守護者') || name.includes('模型')) return 'TANK';
+    if (name.includes('亡霊') || name.includes('幽霊') || name.includes('花子') || name.includes('影')) return 'GHOST';
+    if (name.includes('悪魔') || name.includes('不良') || name.includes('カラス') || name.includes('狂信者')) return 'AGGRESSIVE';
+    if (name.includes('宿題') || name.includes('ミミック') || name.includes('泥棒') || name.includes('妖精')) return 'TRICKSTER';
+    if (name.includes('虫') || name.includes('カス') || name.includes('スライム') || name.includes('ハチ')) return 'SWARM';
+    return 'GENERIC';
+};
+
+const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
+    const type = enemy.enemyType;
+    const localTurn = turn % 3; 
+    const isAct2Plus = (enemy.maxHp > 60);
+
+    switch (type) {
+        case 'TEACHER':
+            if (turn === 1) return { type: EnemyIntentType.BUFF, value: 0, secondaryValue: isAct2Plus ? 3 : 2 }; 
+            if (localTurn === 2) return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 18 : 12 };
+            return { type: EnemyIntentType.ATTACK_DEBUFF, value: 8, secondaryValue: 2, debuffType: 'VULNERABLE' };
+
+        case 'TANK':
+            if (localTurn === 0) return { type: EnemyIntentType.DEFEND, value: isAct2Plus ? 20 : 12 };
+            if (localTurn === 1) return { type: EnemyIntentType.ATTACK_DEFEND, value: 10, secondaryValue: 10 };
+            return { type: EnemyIntentType.ATTACK, value: 15 };
+
+        case 'GHOST':
+            if (localTurn === 0) return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 2, debuffType: 'WEAK' };
+            if (localTurn === 1) return { type: EnemyIntentType.ATTACK, value: 6 };
+            return { type: EnemyIntentType.ATTACK_DEBUFF, value: 5, secondaryValue: 1, debuffType: 'VULNERABLE' };
+
+        case 'AGGRESSIVE':
+            if (turn === 1) return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 10 : 6 };
+            if (localTurn === 0) return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 5 : 3 };
+            return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 14 : 9 };
+
+        case 'TRICKSTER':
+            if (localTurn === 0) return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 2, debuffType: 'POISON' };
+            if (localTurn === 1) return { type: EnemyIntentType.DEFEND, value: 8 };
+            return { type: EnemyIntentType.ATTACK, value: 7 };
+
+        case 'SWARM':
+            if (turn % 2 === 0) return { type: EnemyIntentType.ATTACK, value: 5 };
+            return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 1, debuffType: 'WEAK' };
+
+        case 'GUARDIAN':
+            const bossTurn = turn % 4;
+            if (bossTurn === 1) return { type: EnemyIntentType.BUFF, value: 0, secondaryValue: 9 }; 
+            if (bossTurn === 2) return { type: EnemyIntentType.ATTACK, value: 20 }; 
+            if (bossTurn === 3) return { type: EnemyIntentType.ATTACK_DEBUFF, value: 8, secondaryValue: 2, debuffType: 'VULNERABLE' }; 
+            return { type: EnemyIntentType.DEFEND, value: 15 };
+
+        case 'THE_HEART':
+             const heartTurn = turn % 3;
+             if (heartTurn === 1) return { type: EnemyIntentType.ATTACK, value: 45 }; 
+             if (heartTurn === 2) return { type: EnemyIntentType.BUFF, value: 0, secondaryValue: 2 }; 
+             return { type: EnemyIntentType.ATTACK_DEBUFF, value: 2, secondaryValue: 12, debuffType: 'VULNERABLE' }; 
+
+        default:
+            const r = Math.random();
+            if (r < 0.6) return { type: EnemyIntentType.ATTACK, value: 9 + Math.floor(turn/2) };
+            if (r < 0.9) return { type: EnemyIntentType.DEFEND, value: 8 };
+            return { type: EnemyIntentType.BUFF, value: 0, secondaryValue: 2 }; 
+    }
+};
+
+const App: React.FC = () => {
+  const createDeck = (template: string[] = STARTING_DECK_TEMPLATE): ICard[] => {
+    return template.map((key, index) => {
+        const cardTemplate = CARDS_LIBRARY[key];
+        if (!cardTemplate) {
+            console.warn(`Card template not found: ${key}, using Strike`);
+            return {
+                id: `deck-${index}-${Math.random()}`,
+                ...CARDS_LIBRARY['STRIKE']
+            }
+        }
+        return {
+            id: `deck-${index}-${Math.random().toString(36).substr(2, 9)}`,
+            ...cardTemplate
+        };
+    });
+  };
+
+  const shuffle = (array: any[]) => {
+    return array.sort(() => Math.random() - 0.5);
+  };
+
+  const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+  // --- State ---
+  const [gameState, setGameState] = useState<GameState>({
+    screen: GameScreen.START_MENU,
+    mode: GameMode.MULTIPLICATION,
+    act: 1,
+    floor: 0,
+    turn: 0,
+    map: [],
+    currentMapNodeId: null,
+    player: {
+      maxHp: INITIAL_HP,
+      currentHp: INITIAL_HP,
+      maxEnergy: INITIAL_ENERGY,
+      currentEnergy: INITIAL_ENERGY,
+      block: 0,
+      strength: 0,
+      gold: 99,
+      deck: createDeck(),
+      hand: [],
+      discardPile: [],
+      drawPile: [],
+      relics: [],
+      potions: [],
+      powers: {},
+      echoes: 0,
+      cardsPlayedThisTurn: 0,
+      attacksPlayedThisTurn: 0,
+      typesPlayedThisTurn: [],
+      relicCounters: {},
+      turnFlags: {},
+      imageData: HERO_IMAGE_DATA,
+      floatingText: null,
+      nextTurnEnergy: 0,
+      nextTurnDraw: 0
+    },
+    enemies: [],
+    selectedEnemyId: null,
+    narrativeLog: [],
+    combatLog: [],
+    rewards: [],
+    selectionState: { active: false, type: 'DISCARD', amount: 0 },
+    isEndless: false,
+  });
+
+  const [currentNarrative, setCurrentNarrative] = useState<string>("...");
+  const [turnLog, setTurnLog] = useState<string>("プレイヤーターン");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [lastActionTime, setLastActionTime] = useState<number>(0);
+  const [lastActionType, setLastActionType] = useState<CardType | null>(null);
+  const [actingEnemyId, setActingEnemyId] = useState<string | null>(null);
+  const [hasSave, setHasSave] = useState<boolean>(false);
+  const [selectedCharName, setSelectedCharName] = useState<string>("戦士");
+  const [legacyCardSelected, setLegacyCardSelected] = useState<boolean>(false);
+  const [showDebugLog, setShowDebugLog] = useState<boolean>(false);
+  
+  // Debug Logic
+  const [isMathDebugSkipped, setIsMathDebugSkipped] = useState<boolean>(false);
+  const [isDebugHpOne, setIsDebugHpOne] = useState<boolean>(false);
+  const [titleClickCount, setTitleClickCount] = useState<number>(0);
+  const [logClickCount, setLogClickCount] = useState<number>(0);
+  const [debugLoadout, setDebugLoadout] = useState<{deck: ICard[], relics: Relic[], potions: Potion[]} | null>(null);
+
+  // Shop & Event
+  const [shopCards, setShopCards] = useState<ICard[]>([]);
+  const [shopRelics, setShopRelics] = useState<Relic[]>([]);
+  const [shopPotions, setShopPotions] = useState<Potion[]>([]);
+  const [eventData, setEventData] = useState<any>(null);
+  const [eventResultLog, setEventResultLog] = useState<string | null>(null); 
+  const [unlockedCardNames, setUnlockedCardNames] = useState<string[]>([]);
+  const [starterRelics, setStarterRelics] = useState<Relic[]>([]);
+  const [treasureRewards, setTreasureRewards] = useState<RewardItem[]>([]);
+  
+  // Progression
+  const [clearCount, setClearCount] = useState<number>(0);
+
+  const VICTORY_GOLD = 25;
+
+  // --- Auto Save Logic ---
+  useEffect(() => {
+      if (gameState.screen !== GameScreen.START_MENU && 
+          gameState.screen !== GameScreen.GAME_OVER && 
+          gameState.screen !== GameScreen.ENDING &&
+          gameState.screen !== GameScreen.VICTORY &&
+          gameState.screen !== GameScreen.MATH_CHALLENGE && 
+          gameState.screen !== GameScreen.COMPENDIUM && 
+          gameState.screen !== GameScreen.HELP &&
+          gameState.screen !== GameScreen.RANKING &&
+          gameState.screen !== GameScreen.CHARACTER_SELECTION &&
+          gameState.screen !== GameScreen.MODE_SELECTION &&
+          gameState.screen !== GameScreen.DEBUG_MENU &&
+          gameState.screen !== GameScreen.MINI_GAME_SELECT &&
+          gameState.screen !== GameScreen.MINI_GAME_POKER && 
+          gameState.screen !== GameScreen.MINI_GAME_SURVIVOR &&
+          gameState.screen !== GameScreen.MINI_GAME_DUNGEON &&
+          gameState.screen !== GameScreen.MINI_GAME_DUNGEON_2
+      ) {
+          storageService.saveGame(gameState);
+      }
+  }, [gameState]);
+
+  useEffect(() => {
+    const unlocked = storageService.getUnlockedCards();
+    setUnlockedCardNames(unlocked);
+    setHasSave(storageService.hasSaveFile());
+    setClearCount(storageService.getClearCount());
+    setIsMathDebugSkipped(storageService.getDebugMathSkip());
+    setIsDebugHpOne(storageService.getDebugHpOne());
+  }, []);
+
+  const handleTitleClick = () => {
+      const next = titleClickCount + 1;
+      setTitleClickCount(next);
+      if (next >= 10) {
+          const newState = !isMathDebugSkipped;
+          setIsMathDebugSkipped(newState);
+          storageService.saveDebugMathSkip(newState);
+          setTitleClickCount(0);
+          audioService.playSound('select');
+      }
+  };
+
+  const handleLogTitleClick = (e: React.MouseEvent) => {
+      e.stopPropagation(); 
+      const next = logClickCount + 1;
+      setLogClickCount(next);
+      if (next >= 10) {
+          const newState = !isDebugHpOne;
+          setIsDebugHpOne(newState);
+          storageService.saveDebugHpOne(newState);
+          setLogClickCount(0);
+          audioService.playSound('select');
+      }
+  };
+
+  const continueGame = () => {
+      const saved = storageService.loadGame();
+      if (saved) {
+          setGameState(saved);
+          audioService.playBGM('menu'); 
+      }
+  };
+
+  const startGame = () => {
+      audioService.playSound('select');
+      setGameState(prev => ({ 
+          ...prev, 
+          screen: GameScreen.MODE_SELECTION,
+          challengeMode: undefined 
+      }));
+  };
+
+  const startChallengeGame = () => {
+      audioService.playSound('select');
+      setGameState(prev => ({ ...prev, screen: GameScreen.MODE_SELECTION, challengeMode: '1A1D' }));
+  };
+
+  const openMiniGameMenu = () => {
+      audioService.playSound('select');
+      setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_SELECT }));
+  };
+
+  const handleMiniGameSelect = (gameId: string) => {
+      audioService.playSound('select');
+      if (gameId === 'POKER') {
+          setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_POKER }));
+      } else if (gameId === 'SURVIVOR') {
+          setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_SURVIVOR }));
+      } else if (gameId === 'DUNGEON') {
+          setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_DUNGEON }));
+      } else if (gameId === 'DUNGEON_2') {
+          setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_DUNGEON_2 }));
+      }
+  };
+
+  const startEndlessMode = () => {
+      audioService.playSound('select');
+      setGameState(prev => ({ 
+          ...prev, 
+          act: prev.act + 1, 
+          floor: 0, 
+          map: generateDungeonMap(), 
+          currentMapNodeId: null, 
+          screen: GameScreen.MAP, 
+          isEndless: true,
+          narrativeLog: [...prev.narrativeLog, "終わらない冒険が始まる..."]
+      }));
+  };
+
+  const handleModeSelect = (mode: GameMode) => {
+      audioService.playSound('select');
+      setGameState(prev => ({ ...prev, mode, screen: GameScreen.CHARACTER_SELECTION }));
+  };
+
+  const handleDebugStart = (deck: ICard[], relics: Relic[], potions: Potion[]) => {
+        const map = generateDungeonMap();
+        setDebugLoadout({ deck, relics, potions });
+        
+        setGameState(prev => ({
+            ...prev,
+            screen: GameScreen.MAP,
+            act: 1,
+            floor: 0,
+            turn: 0,
+            map,
+            currentMapNodeId: null,
+            player: {
+                ...prev.player,
+                deck: deck.length > 0 ? deck : createDeck(), 
+                relics: relics.length > 0 ? relics : [], 
+                potions: potions.length > 0 ? potions : [],
+                maxHp: 999, 
+                currentHp: isDebugHpOne ? 1 : 999,
+                maxEnergy: 9,
+                currentEnergy: 9,
+                gold: 9999,
+                hand: [],
+                discardPile: [],
+                drawPile: [],
+                powers: {},
+                relicCounters: {},
+                turnFlags: {},
+                typesPlayedThisTurn: [],
+                floatingText: null,
+                nextTurnEnergy: 0,
+                nextTurnDraw: 0,
+                echoes: 0,
+                cardsPlayedThisTurn: 0,
+                attacksPlayedThisTurn: 0,
+            },
+            narrativeLog: ["デバッグモード開始"],
+            combatLog: [],
+            enemies: [],
+            selectedEnemyId: null,
+            rewards: [],
+            selectionState: { active: false, type: 'DISCARD', amount: 0 }
+        }));
+        audioService.playBGM('menu');
+  };
+
+  const handleCharacterSelect = (char: Character) => {
+      audioService.playSound('select');
+      setSelectedCharName(char.name);
+      
+      let initialDeck: ICard[] = [];
+      
+      if (gameState.challengeMode === '1A1D') {
+          const attacks = Object.values(CARDS_LIBRARY).filter(c => c.type === CardType.ATTACK && c.rarity === 'COMMON');
+          const skills = Object.values(CARDS_LIBRARY).filter(c => c.type === CardType.SKILL && c.rarity === 'COMMON');
+          const a = attacks[Math.floor(Math.random() * attacks.length)];
+          const s = skills[Math.floor(Math.random() * skills.length)];
+          initialDeck = [
+              { ...a, id: `start-0` },
+              { ...s, id: `start-1` }
+          ];
+      } else {
+          initialDeck = createDeck(char.deckTemplate);
+      }
+
+      const legacyCard = storageService.getLegacyCard();
+      if (legacyCard) {
+          initialDeck.push({ ...legacyCard, id: `legacy-${Date.now()}` });
+          storageService.clearLegacyCard();
+      }
+
+      const starterRelic = RELIC_LIBRARY[char.startingRelicId];
+      const relics = starterRelic ? [starterRelic] : [];
+
+      const map = generateDungeonMap();
+
+      setGameState(prev => ({
+          ...prev,
+          screen: GameScreen.MAP,
+          act: 1,
+          floor: 0,
+          map,
+          currentMapNodeId: null,
+          player: {
+              ...prev.player,
+              maxHp: char.maxHp,
+              currentHp: char.maxHp,
+              gold: char.gold,
+              deck: initialDeck,
+              relics: relics,
+              potions: [],
+              imageData: char.imageData,
+              maxEnergy: INITIAL_ENERGY,
+              currentEnergy: INITIAL_ENERGY,
+              block: 0,
+              strength: 0,
+              hand: [],
+              discardPile: [],
+              drawPile: [],
+              powers: {},
+              relicCounters: {},
+              turnFlags: {},
+              typesPlayedThisTurn: [],
+              floatingText: null,
+              nextTurnEnergy: 0,
+              nextTurnDraw: 0,
+              attacksPlayedThisTurn: 0,
+              cardsPlayedThisTurn: 0,
+              echoes: 0,
+          },
+          narrativeLog: ["冒険が始まった。"],
+          combatLog: [],
+      }));
+      audioService.playBGM('menu');
+  };
+
+  const handleRelicSelect = (relic: Relic) => {
+        const map = generateDungeonMap();
+        setGameState(prev => ({
+            ...prev,
+            screen: GameScreen.MAP,
+            map: map,
+            player: {
+                ...prev.player,
+                relics: [...prev.player.relics, relic]
+            }
+        }));
+  };
+
+  const generateEvent = (player: Player) => {
+      const events = [
+          // 既存イベント（怪しい薬売り）
+          {
+              title: "怪しい薬売り",
+              description: "路地裏で男が声をかけてきた。「とびきりの薬、あるよ」",
+              options: [
+                  { label: "買う", text: "20G支払って試す", action: () => {
+                      if (player.gold >= 20) {
+                          const pots = Object.values(POTION_LIBRARY);
+                          const pot = { ...pots[Math.floor(Math.random() * pots.length)], id: `pot-${Date.now()}` };
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - 20, potions: [...prev.player.potions, pot].slice(0, 3) } }));
+                          setEventResultLog(`怪しい薬(ポーション: ${pot.name})を手に入れた！\n残金: ${player.gold - 20}G`);
+                      } else {
+                          setEventResultLog("お金が足りなかった... 男は舌打ちをして去っていった。");
+                      }
+                  }},
+                  { label: "無視", text: "何もせず立ち去る", action: () => { setEventResultLog("怪しい男を無視して先へ進んだ。"); } }
+              ]
+          },
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { 
+  GameState, GameScreen, Enemy, Card as ICard, 
+  CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode
+} from './types';
+import { 
+  INITIAL_HP, INITIAL_ENERGY, HAND_SIZE, 
+  CARDS_LIBRARY, STARTING_DECK_TEMPLATE, STATUS_CARDS, CURSE_CARDS, EVENT_CARDS, RELIC_LIBRARY, TRUE_BOSS, POTION_LIBRARY, CHARACTERS, HERO_IMAGE_DATA, ENEMY_LIBRARY
+} from './constants';
+import BattleScene from './components/BattleScene';
+import RewardScreen from './components/RewardScreen';
+import MapScreen from './components/MapScreen';
+import RestScreen from './components/RestScreen';
+import ShopScreen from './components/ShopScreen';
+import EventScreen from './components/EventScreen';
+import CompendiumScreen from './components/CompendiumScreen';
+import RelicSelectionScreen from './components/RelicSelectionScreen';
+import HelpScreen from './components/HelpScreen';
+import TreasureScreen from './components/TreasureScreen';
+import CharacterSelectionScreen from './components/CharacterSelectionScreen';
+import RankingScreen from './components/RankingScreen';
+import MathChallengeScreen from './components/MathChallengeScreen';
+import DebugMenuScreen from './components/DebugMenuScreen';
+import PokerGameScreen from './components/PokerGameScreen';
+import SchoolyardSurvivorScreen from './components/SchoolyardSurvivorScreen';
+import SchoolDungeonRPG from './components/SchoolDungeonRPG'; 
+import SchoolDungeonRPG2 from './components/SchoolDungeonRPG2'; 
+import MiniGameSelectScreen from './components/MiniGameSelectScreen';
+import Card from './components/Card';
+import { audioService } from './services/audioService';
+import { generateFlavorText, generateEnemyName } from './services/geminiService';
+import { generateDungeonMap } from './services/mapGenerator';
+import { storageService } from './services/storageService';
 import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain } from 'lucide-react';
 
 // --- HELPERS ---
@@ -1908,154 +2395,7 @@ const App: React.FC = () => {
   };
 
   const handleSynthesizeCard = (c1: ICard, c2: ICard) => {
-      // 1. Name Synthesis
-      const len1 = Math.floor(Math.random() * 3) + 2; 
-      const len2 = Math.floor(Math.random() * 3) + 2; 
-      const part1 = c1.name.substring(0, Math.min(len1, c1.name.length));
-      const part2 = c2.name.substring(Math.max(0, c2.name.length - len2));
-      const newName = part1 + part2;
-      
-      // 2. Cost Logic
-      const newCost = Math.max(c1.cost, c2.cost);
-      
-      // 3. Stats Summation
-      const sum = (k: keyof ICard) => ((c1[k] as number) || 0) + ((c2[k] as number) || 0);
-      const newDamage = sum('damage');
-      const newBlock = sum('block');
-      const newDraw = sum('draw');
-      const newEnergy = sum('energy');
-      const newHeal = sum('heal');
-      const newPoison = sum('poison');
-      const newWeak = sum('weak');
-      const newVulnerable = sum('vulnerable');
-      const newStrength = sum('strength');
-      const newSelfDamage = sum('selfDamage');
-      const newPoisonMultiplier = sum('poisonMultiplier');
-      
-      // Advanced Logic Summation/Max
-      const newStrengthScaling = Math.max((c1.strengthScaling || 0), (c2.strengthScaling || 0));
-      const newFatalEnergy = sum('fatalEnergy');
-      const newFatalPermanentDamage = sum('fatalPermanentDamage');
-      const newFatalMaxHp = sum('fatalMaxHp');
-      const newDamagePerStrike = sum('damagePerStrike');
-      const newDamagePerCardInHand = sum('damagePerCardInHand');
-      const newDamagePerAttackPlayed = sum('damagePerAttackPlayed');
-
-      // 4. Boolean/Flag Merging (OR)
-      const newExhaust = c1.exhaust || c2.exhaust;
-      const newInnate = c1.innate || c2.innate;
-      const newEthereal = c1.unplayable || c2.unplayable; // Simplify unplayable logic for now
-      const newLifesteal = c1.lifesteal || c2.lifesteal;
-      const newUpgradeHand = c1.upgradeHand || c2.upgradeHand;
-      const newDoubleBlock = c1.doubleBlock || c2.doubleBlock;
-      const newDoubleStrength = c1.doubleStrength || c2.doubleStrength;
-      const newCapture = c1.capture || c2.capture;
-
-      // 5. Multi-hit Logic (Additive)
-      const extraHits1 = c1.playCopies || 0;
-      const extraHits2 = c2.playCopies || 0;
-      const newExtraHits = extraHits1 + extraHits2;
-      const newTotalHits = 1 + newExtraHits;
-
-      // 6. Type & Target Logic
-      let newType = c1.type;
-      // Priority: Attack > Power > Skill > Status > Curse
-      if (newDamage > 0) newType = CardType.ATTACK;
-      else if (c1.type === CardType.POWER || c2.type === CardType.POWER) newType = CardType.POWER;
-      else newType = CardType.SKILL;
-
-      let newTarget = TargetType.ENEMY;
-      if (c1.target === TargetType.ALL_ENEMIES || c2.target === TargetType.ALL_ENEMIES) newTarget = TargetType.ALL_ENEMIES;
-      else if (c1.target === TargetType.RANDOM_ENEMY || c2.target === TargetType.RANDOM_ENEMY) newTarget = TargetType.RANDOM_ENEMY;
-      else if (c1.target === TargetType.ENEMY || c2.target === TargetType.ENEMY) newTarget = TargetType.ENEMY;
-      else newTarget = TargetType.SELF;
-      
-      // Override target if damage exists but was originally self-targeting
-      if ((newDamage > 0 || newPoison > 0 || newWeak > 0 || newVulnerable > 0) && newTarget === TargetType.SELF) {
-          newTarget = TargetType.ENEMY;
-      }
-
-      // 7. Dynamic Description Generation
-      const parts: string[] = [];
-      if (newDamage > 0) {
-          let text = `${newDamage}ダメージ`;
-          if (newTarget === TargetType.ALL_ENEMIES) text = `全体に${text}`;
-          else if (newTarget === TargetType.RANDOM_ENEMY) text = `ランダムな敵に${text}`;
-          else if (newTarget === TargetType.SELF) text = `自分に${text}`; // Reflection?
-          
-          if (newTotalHits > 1) {
-              text += `を${newTotalHits}回`;
-          }
-          if (newStrengthScaling > 1) text += `(筋力${newStrengthScaling}倍)`;
-          parts.push(text);
-      }
-      if (newBlock > 0) parts.push(`ブロック${newBlock}`);
-      if (newPoison > 0) parts.push(`ドクドク${newPoison}`);
-      if (newWeak > 0) parts.push(`へろへろ${newWeak}`);
-      if (newVulnerable > 0) parts.push(`びくびく${newVulnerable}`);
-      if (newStrength > 0) parts.push(`ムキムキ${newStrength}`);
-      if (newPoisonMultiplier > 0) parts.push(`毒を${newPoisonMultiplier}倍`);
-      if (newDraw > 0) parts.push(`${newDraw}枚引く`);
-      if (newEnergy > 0) parts.push(`E${newEnergy}を得る`);
-      if (newHeal > 0) parts.push(`HP${newHeal}回復`);
-      if (newSelfDamage > 0) parts.push(`自分に${newSelfDamage}ダメージ`);
-      
-      // Special logic descriptions
-      if (newDamagePerStrike > 0) parts.push(`デッキの攻撃カード数x${newDamagePerStrike}ダメージ追加`);
-      if (newDamagePerCardInHand > 0) parts.push(`手札枚数x${newDamagePerCardInHand}ダメージ追加`);
-      if (newDamagePerAttackPlayed > 0) parts.push(`使用攻撃数x${newDamagePerAttackPlayed}ダメージ追加`);
-      if (newLifesteal) parts.push("HP吸収");
-      if (newDoubleBlock) parts.push("ブロック2倍");
-      if (newDoubleStrength) parts.push("筋力2倍");
-      if (newCapture) parts.push("捕獲");
-      
-      let description = parts.join("。") + (parts.length > 0 ? "。" : "");
-      if (parts.length === 0) description = "効果なし。";
-
-      // 8. Visual Synthesis (Texture Ref)
-      // Shape from C1, Color from C2
-      const shapeSource = c1.textureRef ? c1.textureRef.split('|')[0] : getShapeFromCard(c1);
-      const colorSource = c2.textureRef ? (c2.textureRef.split('|')[1] || c2.textureRef.split('|')[0]) : c2.name;
-      const newTextureRef = `${shapeSource}|${colorSource}|${newType}`;
-
-      const newCard: ICard = {
-          id: `synth-${Date.now()}`,
-          name: newName,
-          cost: newCost,
-          type: newType,
-          target: newTarget,
-          description: description,
-          rarity: 'SPECIAL',
-          damage: newDamage || undefined,
-          block: newBlock || undefined,
-          draw: newDraw || undefined,
-          energy: newEnergy || undefined,
-          heal: newHeal || undefined,
-          poison: newPoison || undefined,
-          weak: newWeak || undefined,
-          vulnerable: newVulnerable || undefined,
-          strength: newStrength || undefined,
-          poisonMultiplier: newPoisonMultiplier || undefined,
-          selfDamage: newSelfDamage || undefined,
-          playCopies: newExtraHits > 0 ? newExtraHits : undefined,
-          exhaust: newExhaust,
-          innate: newInnate,
-          // Advanced props
-          strengthScaling: newStrengthScaling > 1 ? newStrengthScaling : undefined,
-          lifesteal: newLifesteal,
-          upgradeHand: newUpgradeHand,
-          doubleBlock: newDoubleBlock,
-          doubleStrength: newDoubleStrength,
-          capture: newCapture,
-          fatalEnergy: newFatalEnergy || undefined,
-          fatalPermanentDamage: newFatalPermanentDamage || undefined,
-          fatalMaxHp: newFatalMaxHp || undefined,
-          damagePerStrike: newDamagePerStrike || undefined,
-          damagePerCardInHand: newDamagePerCardInHand || undefined,
-          damagePerAttackPlayed: newDamagePerAttackPlayed || undefined,
-          
-          textureRef: newTextureRef
-      };
+      const newCard = synthesizeCards(c1, c2);
       
       setGameState(prev => ({
           ...prev,

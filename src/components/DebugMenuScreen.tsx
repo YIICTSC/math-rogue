@@ -4,6 +4,7 @@ import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY } from '../constants';
 import { Card as ICard, Relic, Potion, CardType, TargetType } from '../types';
 import Card from './Card';
 import { ArrowRight, Trash2, Plus, Gem, FlaskConical, Swords, Shield, Zap, Search, Beaker, RotateCcw } from 'lucide-react';
+import { synthesizeCards } from '../utils/cardUtils';
 
 interface DebugMenuScreenProps {
   onStart: (deck: ICard[], relics: Relic[], potions: Potion[]) => void;
@@ -74,133 +75,10 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
 
   const clearDeck = () => setSelectedDeck([]);
 
-  // --- Helper Duplicated from App.tsx ---
-  const getShapeFromCard = (card: ICard): string => {
-    if (card.textureRef) return card.textureRef.split('|')[0];
-    
-    const n = card.name;
-    if (n.includes('薬') || n.includes('ポーション')) return 'POTION';
-    if (n.includes('靴') || n.includes('足') || n.includes('ステップ') || n.includes('ダッシュ') || n.includes('ジャンプ')) return 'SHOE';
-    if (n.includes('本') || n.includes('書') || n.includes('研究') || n.includes('学習')) return 'NOTEBOOK';
-    if (n.includes('拳') || n.includes('パンチ') || n.includes('打') || n.includes('頭突き')) return 'FIST';
-    if (n.includes('火') || n.includes('炎') || n.includes('熱')) return 'FLAME';
-    if (n.includes('雷') || n.includes('電')) return 'LIGHTNING';
-    
-    // Default by Type
-    if (card.type === CardType.ATTACK) return 'SWORD';
-    if (card.type === CardType.SKILL) return 'SHIELD';
-    if (card.type === CardType.POWER) return 'FLAME';
-    return 'NOTEBOOK';
-  };
-
   // --- Synthesis Logic ---
   const performSynthesis = () => {
       if (!synthSlot1 || !synthSlot2) return;
-      const c1 = synthSlot1;
-      const c2 = synthSlot2;
-
-      const len1 = Math.floor(Math.random() * 3) + 2; 
-      const len2 = Math.floor(Math.random() * 3) + 2; 
-      const part1 = c1.name.substring(0, Math.min(len1, c1.name.length));
-      const part2 = c2.name.substring(Math.max(0, c2.name.length - len2));
-      const newName = part1 + part2;
-      const newCost = Math.max(c1.cost, c2.cost);
-      
-      // Sum numeric stats
-      const sum = (k: keyof ICard) => ((c1[k] as number) || 0) + ((c2[k] as number) || 0);
-      const newDamage = sum('damage');
-      const newBlock = sum('block');
-      const newDraw = sum('draw');
-      const newEnergy = sum('energy');
-      const newHeal = sum('heal');
-      const newPoison = sum('poison');
-      const newWeak = sum('weak');
-      const newVulnerable = sum('vulnerable');
-      const newStrength = sum('strength');
-      const newSelfDamage = sum('selfDamage');
-      const newPoisonMultiplier = sum('poisonMultiplier');
-
-      // Play Copies Logic (Sum extra hits)
-      const extraHits1 = c1.playCopies || 0;
-      const extraHits2 = c2.playCopies || 0;
-      const newExtraHits = extraHits1 + extraHits2;
-      const newTotalHits = 1 + newExtraHits;
-
-      // Merge booleans
-      const newExhaust = c1.exhaust || c2.exhaust;
-      const newInnate = c1.innate || c2.innate;
-
-      // Determine Type & Target
-      let newType = c1.type;
-      if (newDamage > 0) newType = CardType.ATTACK;
-      else if (c1.type === CardType.POWER || c2.type === CardType.POWER) newType = CardType.POWER;
-      else newType = CardType.SKILL;
-
-      let newTarget = TargetType.ENEMY;
-      if (c1.target === TargetType.ALL_ENEMIES || c2.target === TargetType.ALL_ENEMIES) newTarget = TargetType.ALL_ENEMIES;
-      else if (c1.target === TargetType.RANDOM_ENEMY || c2.target === TargetType.RANDOM_ENEMY) newTarget = TargetType.RANDOM_ENEMY;
-      else if (c1.target === TargetType.ENEMY || c2.target === TargetType.ENEMY) newTarget = TargetType.ENEMY;
-      else newTarget = TargetType.SELF;
-      
-      if ((newDamage > 0 || newPoison > 0 || newWeak > 0 || newVulnerable > 0) && newTarget === TargetType.SELF) {
-          newTarget = TargetType.ENEMY;
-      }
-
-      // Generate Description
-      const parts: string[] = [];
-      if (newDamage > 0) {
-          let text = `${newDamage}ダメージ`;
-          if (newTarget === TargetType.ALL_ENEMIES) text = `全体に${text}`;
-          else if (newTarget === TargetType.RANDOM_ENEMY) text = `ランダムな敵に${text}`;
-          else if (newTarget === TargetType.SELF) text = `自分に${text}`;
-          
-          if (newTotalHits > 1) text += `を${newTotalHits}回`;
-          parts.push(text);
-      }
-      if (newBlock > 0) parts.push(`ブロック${newBlock}`);
-      if (newPoison > 0) parts.push(`ドクドク${newPoison}`);
-      if (newWeak > 0) parts.push(`へろへろ${newWeak}`);
-      if (newVulnerable > 0) parts.push(`びくびく${newVulnerable}`);
-      if (newStrength > 0) parts.push(`ムキムキ${newStrength}`);
-      if (newPoisonMultiplier > 0) parts.push(`毒を${newPoisonMultiplier}倍`);
-      if (newDraw > 0) parts.push(`${newDraw}枚引く`);
-      if (newEnergy > 0) parts.push(`E${newEnergy}を得る`);
-      if (newHeal > 0) parts.push(`HP${newHeal}回復`);
-      if (newSelfDamage > 0) parts.push(`自分に${newSelfDamage}ダメージ`);
-      
-      let description = parts.join("。") + (parts.length > 0 ? "。" : "");
-      if (parts.length === 0) description = "効果なし。";
-
-      // Fix: If c1 is a standard card (no textureRef), map it to a generic Icon ID to prevent it matching Entity sprites.
-      const shapeSource = c1.textureRef ? c1.textureRef.split('|')[0] : getShapeFromCard(c1);
-      const colorSource = c2.textureRef ? (c2.textureRef.split('|')[1] || c2.textureRef.split('|')[0]) : c2.name;
-      const newTextureRef = `${shapeSource}|${colorSource}|${newType}`;
-
-      const newCard: ICard = {
-          id: `synth-debug-${Date.now()}`,
-          name: newName,
-          cost: newCost,
-          type: newType,
-          target: newTarget,
-          description: description,
-          rarity: 'SPECIAL',
-          damage: newDamage || undefined,
-          block: newBlock || undefined,
-          draw: newDraw || undefined,
-          energy: newEnergy || undefined,
-          heal: newHeal || undefined,
-          poison: newPoison || undefined,
-          weak: newWeak || undefined,
-          vulnerable: newVulnerable || undefined,
-          strength: newStrength || undefined,
-          selfDamage: newSelfDamage || undefined,
-          poisonMultiplier: newPoisonMultiplier || undefined,
-          playCopies: newExtraHits > 0 ? newExtraHits : undefined,
-          exhaust: newExhaust,
-          innate: newInnate,
-          textureRef: newTextureRef
-      };
-
+      const newCard = synthesizeCards(synthSlot1, synthSlot2);
       setSynthResult(newCard);
   };
 

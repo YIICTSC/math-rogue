@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Player, Card as ICard } from '../types';
 import Card from './Card';
 import { BedDouble, Hammer, ArrowRight, FlaskConical, Plus, Shuffle, Check, DoorOpen } from 'lucide-react';
-import { getUpgradedCard } from '../App';
+import { getUpgradedCard } from '../utils/cardUtils';
 
 interface RestScreenProps {
   player: Player;
