@@ -327,6 +327,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   const [showMap, setShowMap] = useState(false); 
   const [showHelp, setShowHelp] = useState(false);
   const [showStatus, setShowStatus] = useState(false);
+  const [showDeck, setShowDeck] = useState(false); // New: Deck View
   const turnCounter = useRef(0);
   const [isEndless, setIsEndless] = useState(false);
   const saveDebounceRef = useRef<any>(null);
@@ -2576,6 +2577,43 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
             </div>
         )}
 
+        {/* Deck View Modal */}
+        {showDeck && (
+            <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setShowDeck(false)}>
+                <div className="w-full max-w-md border-4 p-6 shadow-xl overflow-y-auto max-h-[80vh] custom-scrollbar" style={{ backgroundColor: C3, borderColor: C1, color: C0 }} onClick={e => e.stopPropagation()}>
+                    <div className="flex justify-between items-center mb-4 border-b-2 pb-2" style={{ borderColor: C1 }}>
+                        <h2 className="font-bold text-xl flex items-center"><Layers className="mr-2"/> デッキ一覧 ({dungeonDeck.length})</h2>
+                        <button onClick={() => setShowDeck(false)}><X size={24}/></button>
+                    </div>
+                    
+                    <div className="space-y-2">
+                        {dungeonDeck.length === 0 ? (
+                            <div className="text-center text-sm py-4 opacity-50">デッキは空です</div>
+                        ) : (
+                            dungeonDeck.map((card, idx) => (
+                                <div key={card.id} className="border p-2 rounded flex items-center gap-3" style={{ borderColor: C1 }}>
+                                    <div className="bg-black/10 p-2 rounded-full border border-current">{card.icon}</div>
+                                    <div className="flex-grow">
+                                        <div className="font-bold flex justify-between">
+                                            <span>{card.name}</span>
+                                            <span className="text-xs opacity-70 font-normal">{card.type}</span>
+                                        </div>
+                                        <div className="text-xs opacity-80">{card.description} {card.power > 0 && `(Pow:${card.power})`}</div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                    
+                    <div className="mt-4 pt-4 border-t-2 text-xs opacity-70" style={{ borderColor: C1 }}>
+                        <p>手札: {dungeonHand.length}枚 / 捨て札: {dungeonDiscard.length}枚</p>
+                    </div>
+                    
+                    <button onClick={() => setShowDeck(false)} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>閉じる</button>
+                </div>
+            </div>
+        )}
+
         {/* Status Screen */}
         {showStatus && (
             <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setShowStatus(false)}>
@@ -2698,6 +2736,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                 <div className="flex gap-2">
                     <button onClick={() => setShowMap(!showMap)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><MapIcon size={10}/> Map</button>
                     <button onClick={() => setShowStatus(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><User size={10}/> Sts</button>
+                    <button onClick={() => setShowDeck(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><Layers size={10}/> Deck</button>
                     <button onClick={() => setShowHelp(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><HelpCircle size={10}/> Help</button>
                 </div>
             </div>
