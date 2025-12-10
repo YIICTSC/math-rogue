@@ -2712,7 +2712,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   const { C0, C1, C2, C3 } = currentTheme.colors;
 
   return (
-    <div className="w-full h-full bg-[#101010] flex flex-col md:flex-row items-center justify-center font-mono select-none overflow-hidden touch-none relative p-4 gap-4">
+    <div className="w-full h-full bg-[#101010] flex flex-col md:flex-row items-center md:items-stretch justify-center font-mono select-none overflow-hidden touch-none relative p-4 gap-4">
         
         {inspectedItem && (
             <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setInspectedItem(null)}>
@@ -2903,250 +2903,253 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
             </div>
         )}
 
-        {/* Game Area (Top) */}
-        <div className="w-full aspect-[4/3] relative shrink-0 shadow-lg border-2 max-h-[45vh] flex flex-col overflow-hidden" style={{ backgroundColor: C3, borderColor: C0 }}>
-            <div className="w-full h-8 flex justify-between items-center px-2 text-[10px] z-10 border-b shrink-0" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
-                <span className="font-bold tracking-widest">{currentTheme.name}</span>
-                <div className="flex gap-2">
-                    <button onClick={() => setShowMap(!showMap)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><MapIcon size={10}/> Map</button>
-                    <button onClick={() => setShowStatus(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><User size={10}/> Sts</button>
-                    <button onClick={() => { setDeckViewMode('VIEW'); setShowDeck(true); }} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><Layers size={10}/> Deck</button>
-                    <button onClick={() => setShowHelp(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><HelpCircle size={10}/> Help</button>
-                </div>
-            </div>
-
-            <div className="w-full h-5 flex justify-between items-center px-2 text-xs font-bold z-10 shrink-0" style={{ backgroundColor: C1, color: C3 }}>
-                <span>{floor}F</span>
-                <span>Lv{level}</span>
-                <span>HP{player.hp}/{player.maxHp}</span>
-                <span>A{player.attack}D{player.defense}</span>
-                <span className="flex items-center"><Coins size={10} className="mr-0.5"/>{player.gold}</span>
-                <span>🍙{belly}%</span>
-            </div>
-
-            <div className="relative flex-1 min-h-0 w-full bg-[#111827]">
-                <canvas ref={canvasRef} width={VIEW_W * TILE_SIZE * SCALE} height={VIEW_H * TILE_SIZE * SCALE} className="w-full h-full object-contain pixel-art" style={{ imageRendering: 'pixelated' }} />
-
-                {/* Fast Forward Indicator */}
-                {isFastForwarding && (
-                    <div className="absolute top-2 right-2 animate-pulse flex items-center rounded px-2" style={{ backgroundColor: `${C0}80`, color: C3 }}>
-                        <FastForward size={16} className="mr-1"/> 早送り中
+        {/* --- LEFT COL (Game Screen + Logs) --- */}
+        <div className="w-full max-w-md md:max-w-full md:flex-1 flex flex-col gap-2 min-h-0">
+            {/* Game Area (Top) */}
+            <div className="w-full aspect-[4/3] md:aspect-auto md:flex-1 relative shrink-0 shadow-lg border-2 max-h-[45vh] md:max-h-full flex flex-col overflow-hidden" style={{ backgroundColor: C3, borderColor: C0 }}>
+                <div className="w-full h-8 flex justify-between items-center px-2 text-[10px] z-10 border-b shrink-0" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
+                    <span className="font-bold tracking-widest">{currentTheme.name}</span>
+                    <div className="flex gap-2">
+                        <button onClick={() => setShowMap(!showMap)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><MapIcon size={10}/> Map</button>
+                        <button onClick={() => setShowStatus(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><User size={10}/> Sts</button>
+                        <button onClick={() => { setDeckViewMode('VIEW'); setShowDeck(true); }} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><Layers size={10}/> Deck</button>
+                        <button onClick={() => setShowHelp(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><HelpCircle size={10}/> Help</button>
                     </div>
-                )}
+                </div>
 
-                {/* Map Overlay: Now with Fog of War */}
-                {showMap && map.length > 0 && (
-                    <div className="absolute inset-0 z-20 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}E6` }}>
-                        <div className="w-full h-full border grid" style={{ borderColor: C3, gridTemplateColumns: `repeat(${MAP_W}, 1fr)` }}>
-                            {map.map((row, y) => row.map((tile, x) => {
-                                const isRevealed = floorMapRevealed || (visitedMap[y] && visitedMap[y][x]);
-                                const isPlayer = x === player.x && y === player.y;
-                                const hasSight = player.equipment?.accessory?.type === 'RING_SIGHT';
-                                const hasTrapSight = player.equipment?.accessory?.type === 'RING_TRAP';
-                                const hasItem = floorItems.some(i => i.x===x && i.y===y);
-                                const hasEnemy = enemies.some(e => e.x===x && e.y===y);
-                                
-                                let bgStyle = { backgroundColor: 'transparent' };
-                                let content = null;
+                <div className="w-full h-5 flex justify-between items-center px-2 text-xs font-bold z-10 shrink-0" style={{ backgroundColor: C1, color: C3 }}>
+                    <span>{floor}F</span>
+                    <span>Lv{level}</span>
+                    <span>HP{player.hp}/{player.maxHp}</span>
+                    <span>A{player.attack}D{player.defense}</span>
+                    <span className="flex items-center"><Coins size={10} className="mr-0.5"/>{player.gold}</span>
+                    <span>🍙{belly}%</span>
+                </div>
 
-                                if (isPlayer) {
-                                    content = <div className="w-full h-full bg-white rounded-full animate-pulse"></div>;
-                                } else if (isRevealed) {
-                                    if (tile === 'STAIRS') bgStyle = { backgroundColor: C3 };
-                                    else if (tile !== 'WALL') bgStyle = { backgroundColor: C1 };
+                <div className="relative flex-1 min-h-0 w-full bg-[#111827]">
+                    <canvas ref={canvasRef} width={VIEW_W * TILE_SIZE * SCALE} height={VIEW_H * TILE_SIZE * SCALE} className="w-full h-full object-contain pixel-art" style={{ imageRendering: 'pixelated' }} />
+
+                    {/* Fast Forward Indicator */}
+                    {isFastForwarding && (
+                        <div className="absolute top-2 right-2 animate-pulse flex items-center rounded px-2" style={{ backgroundColor: `${C0}80`, color: C3 }}>
+                            <FastForward size={16} className="mr-1"/> 早送り中
+                        </div>
+                    )}
+
+                    {/* Map Overlay: Now with Fog of War */}
+                    {showMap && map.length > 0 && (
+                        <div className="absolute inset-0 z-20 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}E6` }}>
+                            <div className="w-full h-full border grid" style={{ borderColor: C3, gridTemplateColumns: `repeat(${MAP_W}, 1fr)` }}>
+                                {map.map((row, y) => row.map((tile, x) => {
+                                    const isRevealed = floorMapRevealed || (visitedMap[y] && visitedMap[y][x]);
+                                    const isPlayer = x === player.x && y === player.y;
+                                    const hasSight = player.equipment?.accessory?.type === 'RING_SIGHT';
+                                    const hasTrapSight = player.equipment?.accessory?.type === 'RING_TRAP';
+                                    const hasItem = floorItems.some(i => i.x===x && i.y===y);
+                                    const hasEnemy = enemies.some(e => e.x===x && e.y===y);
                                     
-                                    if (tile !== 'WALL') {
-                                        if (traps.some(t => t.x===x && t.y===y && (t.visible || hasTrapSight))) {
-                                            content = <div className="w-full h-full flex items-center justify-center text-[4px] text-red-500 font-bold">X</div>;
-                                        } else if (hasEnemy && hasSight) {
+                                    let bgStyle = { backgroundColor: 'transparent' };
+                                    let content = null;
+
+                                    if (isPlayer) {
+                                        content = <div className="w-full h-full bg-white rounded-full animate-pulse"></div>;
+                                    } else if (isRevealed) {
+                                        if (tile === 'STAIRS') bgStyle = { backgroundColor: C3 };
+                                        else if (tile !== 'WALL') bgStyle = { backgroundColor: C1 };
+                                        
+                                        if (tile !== 'WALL') {
+                                            if (traps.some(t => t.x===x && t.y===y && (t.visible || hasTrapSight))) {
+                                                content = <div className="w-full h-full flex items-center justify-center text-[4px] text-red-500 font-bold">X</div>;
+                                            } else if (hasEnemy && hasSight) {
+                                                content = <div className="w-full h-full bg-red-500 rounded-full"></div>;
+                                            } else if (hasItem && hasSight) {
+                                                content = <div className="w-full h-full bg-blue-400 rounded-sm"></div>;
+                                            }
+                                        }
+                                    } else {
+                                        if (hasEnemy && hasSight) {
                                             content = <div className="w-full h-full bg-red-500 rounded-full"></div>;
                                         } else if (hasItem && hasSight) {
                                             content = <div className="w-full h-full bg-blue-400 rounded-sm"></div>;
                                         }
                                     }
-                                } else {
-                                    if (hasEnemy && hasSight) {
-                                        content = <div className="w-full h-full bg-red-500 rounded-full"></div>;
-                                    } else if (hasItem && hasSight) {
-                                        content = <div className="w-full h-full bg-blue-400 rounded-sm"></div>;
-                                    }
-                                }
 
-                                return (
-                                    <div key={`${x}-${y}`} style={bgStyle}>
-                                        {content}
-                                    </div>
-                                );
-                            }))}
+                                    return (
+                                        <div key={`${x}-${y}`} style={bgStyle}>
+                                            {content}
+                                        </div>
+                                    );
+                                }))}
+                            </div>
+                            <button onClick={() => setShowMap(false)} className="absolute bottom-4 border px-2 rounded hover:opacity-80 bg-black/50" style={{ color: C3, borderColor: C3 }}>Close</button>
                         </div>
-                        <button onClick={() => setShowMap(false)} className="absolute bottom-4 border px-2 rounded hover:opacity-80 bg-black/50" style={{ color: C3, borderColor: C3 }}>Close</button>
+                    )}
+                </div>
+
+                {/* Shop Menu */}
+                {shopState.active && (
+                    <div className="absolute right-0 top-0 bottom-0 w-3/4 border-l-2 z-30 p-2 text-xs flex flex-col" style={{ backgroundColor: C0, borderColor: C3, color: C3 }}>
+                        <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}>
+                            <h3 className="font-bold flex items-center"><ShoppingBag size={12} className="mr-1"/> 購買部</h3>
+                            <button onClick={() => setShopState(prev => ({...prev, active: false}))}><X size={12}/></button>
+                        </div>
+                        
+                        <div className="flex gap-2 mb-2">
+                            <button 
+                                className={`flex-1 py-1 text-center border`}
+                                style={{ borderColor: C3, backgroundColor: shopState.mode === 'BUY' ? C3 : 'transparent', color: shopState.mode === 'BUY' ? C0 : C3 }}
+                                onClick={() => { setShopState(prev => ({ ...prev, mode: 'BUY' })); setSelectedItemIndex(0); }}
+                            >
+                                買う
+                            </button>
+                            <button 
+                                className={`flex-1 py-1 text-center border`}
+                                style={{ borderColor: C3, backgroundColor: shopState.mode === 'SELL' ? C3 : 'transparent', color: shopState.mode === 'SELL' ? C0 : C3 }}
+                                onClick={() => { setShopState(prev => ({ ...prev, mode: 'SELL' })); setSelectedItemIndex(0); }}
+                            >
+                                売る
+                            </button>
+                        </div>
+
+                        <div className="flex justify-end mb-2 border-b pb-1" style={{ borderColor: C1 }}>
+                            <span className="flex items-center"><Coins size={10} className="mr-1"/> {player.gold} G</span>
+                        </div>
+
+                        {/* Card Removal Button (Only if not used) */}
+                        {!shopRemovedThisFloor && (
+                            <button 
+                                className="w-full border mb-2 py-1 flex items-center justify-center gap-2 hover:opacity-80"
+                                style={{ borderColor: C1, color: C3 }}
+                                onClick={() => { setDeckViewMode('REMOVE'); setShowDeck(true); }}
+                            >
+                                <Trash2 size={12} /> カード除外 (100 G)
+                            </button>
+                        )}
+
+                        <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
+                            {shopState.mode === 'BUY' ? (
+                                enemies.find(e => e.id === shopState.merchantId)?.shopItems?.map((item, i) => (
+                                    <div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}>
+                                        <button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>
+                                            <span>{getItemName(item)}</span>
+                                            <span className="flex items-center gap-1">{item.price} G</span>
+                                        </button>
+                                        <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button>
+                                    </div>
+                                )) || <div className="text-center">売り切れ</div>
+                            ) : (
+                                inventory.map((item, i) => (
+                                    <div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}>
+                                        <button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>
+                                            <span>{getItemName(item)}</span>
+                                            <span className="flex items-center gap-1">{Math.floor((item.price || (item.value || 100)) / 2)} G</span>
+                                        </button>
+                                        <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button>
+                                    </div>
+                                ))
+                            )}
+                            {shopState.mode === 'SELL' && inventory.length === 0 && <div className="text-center">持ち物なし</div>}
+                        </div>
+                    </div>
+                )}
+
+                {menuOpen && (
+                    <div className="absolute right-0 top-0 bottom-0 w-3/4 border-l-2 z-30 p-2 text-xs flex flex-col" style={{ backgroundColor: C0, borderColor: C3, color: C3 }}>
+                        <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}>
+                            <h3 className="font-bold">
+                                {synthState.active 
+                                    ? (synthState.mode === 'BLANK' ? '書き込む内容を選択' : (synthState.step === 'SELECT_BASE' ? (synthState.mode==='CHANGE'?'変化させる物':'ベースを選択') : (synthState.mode==='CHANGE'?'変化':'素材を選択')))
+                                    : `MOCHIMONO (${inventory.length}/${MAX_INVENTORY})`
+                                }
+                            </h3>
+                            <button onClick={toggleMenu}><X size={12}/></button>
+                        </div>
+                        
+                        {synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT' ? (
+                            <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
+                                {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).map((type, i) => (
+                                    <div key={i} className="flex items-center border" style={{ borderColor: blankScrollSelectionIndex === i ? C3 : 'transparent', backgroundColor: blankScrollSelectionIndex === i ? C2 : 'transparent', color: blankScrollSelectionIndex === i ? C0 : C3 }}>
+                                        <button className="flex-grow text-left px-2 py-1 cursor-pointer" onClick={() => handleSynthesisStep()} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setBlankScrollSelectionIndex(i); }}>{ITEM_DB[type as string].name}</button>
+                                    </div>
+                                ))}
+                                {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).length === 0 && <div className="text-red-500">識別済みのノートがありません</div>}
+                            </div>
+                        ) : (
+                            <>
+                                {!synthState.active && (
+                                    <div className="mb-2 border-b pb-2" style={{ borderColor: C1 }}>
+                                        <div className="mb-1" style={{ color: C2 }}>装備中:</div>
+                                        {player.equipment?.weapon && <div onClick={()=>handleUnequip('weapon')} className="cursor-pointer hover:text-white">[武] {getItemName(player.equipment.weapon)}</div>}
+                                        {player.equipment?.armor && <div onClick={()=>handleUnequip('armor')} className="cursor-pointer hover:text-white">[防] {getItemName(player.equipment.armor)}</div>}
+                                        {player.equipment?.ranged && <div onClick={()=>handleUnequip('ranged')} className="cursor-pointer hover:text-white">[投] {getItemName(player.equipment.ranged)}</div>}
+                                        {player.equipment?.accessory && <div onClick={()=>handleUnequip('accessory')} className="cursor-pointer hover:text-white">[腕] {getItemName(player.equipment.accessory)}</div>}
+                                    </div>
+                                )}
+
+                                <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
+                                    {inventory.map((item, i) => {
+                                        const isSynthTarget = synthState.active && (
+                                            (synthState.step === 'SELECT_BASE' && synthState.mode === 'SYNTH' && !['WEAPON','ARMOR'].includes(item.category)) ||
+                                            (synthState.step === 'SELECT_MAT' && synthState.baseIndex === i)
+                                        );
+                                        
+                                        return (
+                                            <div key={i} className={`flex items-center border ${isSynthTarget ? 'opacity-30' : ''}`} style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onContextMenu={(e) => { e.preventDefault(); setInspectedItem(item); }} onTouchStart={() => handleTouchStart(item)} onTouchEnd={handleTouchEnd}>
+                                                <button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => !isSynthTarget && (synthState.active ? handleSynthesisStep() : handleItemAction(i))} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}>
+                                                    <span>{getItemName(item)} {item.plus ? `+${item.plus}` : ''} {item.count ? `(${item.count})` : ''}{item.category === 'STAFF' ? `[${item.charges}]` : ''}</span>
+                                                    <span className="text-[9px]" style={{ color: selectedItemIndex === i ? C0 : C2 }}>{synthState.active ? '選択' : (['WEAPON','ARMOR','RANGED','ACCESSORY'].includes(item.category) ? '装備' : (item.category==='STAFF' ? '振る' : '使う'))}</span>
+                                                </button>
+                                                {!synthState.active && (
+                                                    <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); handleThrowItem(i); }} title="投げる"><Send size={10} /></button>
+                                                )}
+                                                {!synthState.active && (
+                                                    <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); handleDropItem(i); }} title="足元に置く"><ArrowDown size={10} /></button>
+                                                )}
+                                                <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }} title="詳細"><Info size={10} /></button>
+                                            </div>
+                                        );
+                                    })}
+                                    {inventory.length === 0 && <span className="text-center" style={{ color: C1 }}>Empty</span>}
+                                </div>
+                            </>
+                        )}
+                    </div>
+                )}
+
+                {gameClear && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center z-40 p-4 text-center" style={{ backgroundColor: `${C0}F2`, color: C3 }}>
+                        <Award size={48} className="mb-4" style={{ color: C2 }}/>
+                        <h2 className="text-2xl font-bold mb-4">GRADUATION!</h2>
+                        <p className="mb-2">ついに校長を説得した！</p>
+                        <p className="mb-8">君は伝説の小学生となった。</p>
+                        <div className="flex flex-col gap-4 w-full">
+                            <button onClick={startEndlessMode} className="border-2 px-4 py-3 animate-pulse font-bold" style={{ borderColor: C3, color: C3, backgroundColor: 'transparent' }}>中学生編へ (エンドレス)</button>
+                            <button onClick={handleQuit} className="border-2 px-4 py-2 text-sm" style={{ borderColor: C1, color: C3 }}>タイトルへ戻る</button>
+                        </div>
+                    </div>
+                )}
+
+                {gameOver && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center z-40" style={{ backgroundColor: `${C0}E6`, color: C3 }}>
+                        <Skull size={48} className="mb-4" style={{ color: C1 }}/>
+                        <h2 className="text-2xl font-bold mb-4">GAME OVER</h2>
+                        <p>Floor: {floor}</p>
+                        <p>Level: {level}</p>
+                        <button onClick={handleRestart} className="mt-6 border-2 px-4 py-2 animate-pulse flex items-center" style={{ borderColor: C3, color: C3 }}><RotateCcw size={16} className="mr-2"/> RETRY</button>
+                        <button onClick={handleQuit} className="mt-4 text-sm hover:underline">EXIT</button>
                     </div>
                 )}
             </div>
 
-            {/* Shop Menu */}
-            {shopState.active && (
-                <div className="absolute right-0 top-0 bottom-0 w-3/4 border-l-2 z-30 p-2 text-xs flex flex-col" style={{ backgroundColor: C0, borderColor: C3, color: C3 }}>
-                    <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}>
-                        <h3 className="font-bold flex items-center"><ShoppingBag size={12} className="mr-1"/> 購買部</h3>
-                        <button onClick={() => setShopState(prev => ({...prev, active: false}))}><X size={12}/></button>
-                    </div>
-                    
-                    <div className="flex gap-2 mb-2">
-                        <button 
-                            className={`flex-1 py-1 text-center border`}
-                            style={{ borderColor: C3, backgroundColor: shopState.mode === 'BUY' ? C3 : 'transparent', color: shopState.mode === 'BUY' ? C0 : C3 }}
-                            onClick={() => { setShopState(prev => ({ ...prev, mode: 'BUY' })); setSelectedItemIndex(0); }}
-                        >
-                            買う
-                        </button>
-                        <button 
-                            className={`flex-1 py-1 text-center border`}
-                            style={{ borderColor: C3, backgroundColor: shopState.mode === 'SELL' ? C3 : 'transparent', color: shopState.mode === 'SELL' ? C0 : C3 }}
-                            onClick={() => { setShopState(prev => ({ ...prev, mode: 'SELL' })); setSelectedItemIndex(0); }}
-                        >
-                            売る
-                        </button>
-                    </div>
-
-                    <div className="flex justify-end mb-2 border-b pb-1" style={{ borderColor: C1 }}>
-                        <span className="flex items-center"><Coins size={10} className="mr-1"/> {player.gold} G</span>
-                    </div>
-
-                    {/* Card Removal Button (Only if not used) */}
-                    {!shopRemovedThisFloor && (
-                        <button 
-                            className="w-full border mb-2 py-1 flex items-center justify-center gap-2 hover:opacity-80"
-                            style={{ borderColor: C1, color: C3 }}
-                            onClick={() => { setDeckViewMode('REMOVE'); setShowDeck(true); }}
-                        >
-                            <Trash2 size={12} /> カード除外 (100 G)
-                        </button>
-                    )}
-
-                    <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
-                        {shopState.mode === 'BUY' ? (
-                            enemies.find(e => e.id === shopState.merchantId)?.shopItems?.map((item, i) => (
-                                <div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}>
-                                    <button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>
-                                        <span>{getItemName(item)}</span>
-                                        <span className="flex items-center gap-1">{item.price} G</span>
-                                    </button>
-                                    <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button>
-                                </div>
-                            )) || <div className="text-center">売り切れ</div>
-                        ) : (
-                            inventory.map((item, i) => (
-                                <div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}>
-                                    <button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>
-                                        <span>{getItemName(item)}</span>
-                                        <span className="flex items-center gap-1">{Math.floor((item.price || (item.value || 100)) / 2)} G</span>
-                                    </button>
-                                    <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button>
-                                </div>
-                            ))
-                        )}
-                        {shopState.mode === 'SELL' && inventory.length === 0 && <div className="text-center">持ち物なし</div>}
-                    </div>
-                </div>
-            )}
-
-            {menuOpen && (
-                <div className="absolute right-0 top-0 bottom-0 w-3/4 border-l-2 z-30 p-2 text-xs flex flex-col" style={{ backgroundColor: C0, borderColor: C3, color: C3 }}>
-                    <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}>
-                        <h3 className="font-bold">
-                            {synthState.active 
-                                ? (synthState.mode === 'BLANK' ? '書き込む内容を選択' : (synthState.step === 'SELECT_BASE' ? (synthState.mode==='CHANGE'?'変化させる物':'ベースを選択') : (synthState.mode==='CHANGE'?'変化':'素材を選択')))
-                                : `MOCHIMONO (${inventory.length}/${MAX_INVENTORY})`
-                            }
-                        </h3>
-                        <button onClick={toggleMenu}><X size={12}/></button>
-                    </div>
-                    
-                    {synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT' ? (
-                        <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
-                            {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).map((type, i) => (
-                                <div key={i} className="flex items-center border" style={{ borderColor: blankScrollSelectionIndex === i ? C3 : 'transparent', backgroundColor: blankScrollSelectionIndex === i ? C2 : 'transparent', color: blankScrollSelectionIndex === i ? C0 : C3 }}>
-                                    <button className="flex-grow text-left px-2 py-1 cursor-pointer" onClick={() => handleSynthesisStep()} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setBlankScrollSelectionIndex(i); }}>{ITEM_DB[type as string].name}</button>
-                                </div>
-                            ))}
-                            {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).length === 0 && <div className="text-red-500">識別済みのノートがありません</div>}
-                        </div>
-                    ) : (
-                        <>
-                            {!synthState.active && (
-                                <div className="mb-2 border-b pb-2" style={{ borderColor: C1 }}>
-                                    <div className="mb-1" style={{ color: C2 }}>装備中:</div>
-                                    {player.equipment?.weapon && <div onClick={()=>handleUnequip('weapon')} className="cursor-pointer hover:text-white">[武] {getItemName(player.equipment.weapon)}</div>}
-                                    {player.equipment?.armor && <div onClick={()=>handleUnequip('armor')} className="cursor-pointer hover:text-white">[防] {getItemName(player.equipment.armor)}</div>}
-                                    {player.equipment?.ranged && <div onClick={()=>handleUnequip('ranged')} className="cursor-pointer hover:text-white">[投] {getItemName(player.equipment.ranged)}</div>}
-                                    {player.equipment?.accessory && <div onClick={()=>handleUnequip('accessory')} className="cursor-pointer hover:text-white">[腕] {getItemName(player.equipment.accessory)}</div>}
-                                </div>
-                            )}
-
-                            <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
-                                {inventory.map((item, i) => {
-                                    const isSynthTarget = synthState.active && (
-                                        (synthState.step === 'SELECT_BASE' && synthState.mode === 'SYNTH' && !['WEAPON','ARMOR'].includes(item.category)) ||
-                                        (synthState.step === 'SELECT_MAT' && synthState.baseIndex === i)
-                                    );
-                                    
-                                    return (
-                                        <div key={i} className={`flex items-center border ${isSynthTarget ? 'opacity-30' : ''}`} style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onContextMenu={(e) => { e.preventDefault(); setInspectedItem(item); }} onTouchStart={() => handleTouchStart(item)} onTouchEnd={handleTouchEnd}>
-                                            <button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => !isSynthTarget && (synthState.active ? handleSynthesisStep() : handleItemAction(i))} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}>
-                                                <span>{getItemName(item)} {item.plus ? `+${item.plus}` : ''} {item.count ? `(${item.count})` : ''}{item.category === 'STAFF' ? `[${item.charges}]` : ''}</span>
-                                                <span className="text-[9px]" style={{ color: selectedItemIndex === i ? C0 : C2 }}>{synthState.active ? '選択' : (['WEAPON','ARMOR','RANGED','ACCESSORY'].includes(item.category) ? '装備' : (item.category==='STAFF' ? '振る' : '使う'))}</span>
-                                            </button>
-                                            {!synthState.active && (
-                                                <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); handleThrowItem(i); }} title="投げる"><Send size={10} /></button>
-                                            )}
-                                            {!synthState.active && (
-                                                <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); handleDropItem(i); }} title="足元に置く"><ArrowDown size={10} /></button>
-                                            )}
-                                            <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }} title="詳細"><Info size={10} /></button>
-                                        </div>
-                                    );
-                                })}
-                                {inventory.length === 0 && <span className="text-center" style={{ color: C1 }}>Empty</span>}
-                            </div>
-                        </>
-                    )}
-                </div>
-            )}
-
-            {gameClear && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center z-40 p-4 text-center" style={{ backgroundColor: `${C0}F2`, color: C3 }}>
-                    <Award size={48} className="mb-4" style={{ color: C2 }}/>
-                    <h2 className="text-2xl font-bold mb-4">GRADUATION!</h2>
-                    <p className="mb-2">ついに校長を説得した！</p>
-                    <p className="mb-8">君は伝説の小学生となった。</p>
-                    <div className="flex flex-col gap-4 w-full">
-                        <button onClick={startEndlessMode} className="border-2 px-4 py-3 animate-pulse font-bold" style={{ borderColor: C3, color: C3, backgroundColor: 'transparent' }}>中学生編へ (エンドレス)</button>
-                        <button onClick={handleQuit} className="border-2 px-4 py-2 text-sm" style={{ borderColor: C1, color: C3 }}>タイトルへ戻る</button>
-                    </div>
-                </div>
-            )}
-
-            {gameOver && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center z-40" style={{ backgroundColor: `${C0}E6`, color: C3 }}>
-                    <Skull size={48} className="mb-4" style={{ color: C1 }}/>
-                    <h2 className="text-2xl font-bold mb-4">GAME OVER</h2>
-                    <p>Floor: {floor}</p>
-                    <p>Level: {level}</p>
-                    <button onClick={handleRestart} className="mt-6 border-2 px-4 py-2 animate-pulse flex items-center" style={{ borderColor: C3, color: C3 }}><RotateCcw size={16} className="mr-2"/> RETRY</button>
-                    <button onClick={handleQuit} className="mt-4 text-sm hover:underline">EXIT</button>
-                </div>
-            )}
+            <div className="w-full h-16 p-1 text-[9px] mb-1 rounded border-2 font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner overflow-hidden" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
+                {logs.slice(-4).map((l) => (
+                    <div key={l.id} style={{ color: l.color || C3 }} className="truncate">{l.message}</div>
+                ))}
+            </div>
         </div>
 
-        <div className="w-full h-16 p-1 text-[9px] mb-1 rounded border-2 font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner overflow-hidden" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
-            {logs.slice(-4).map((l) => (
-                <div key={l.id} style={{ color: l.color || C3 }} className="truncate">{l.message}</div>
-            ))}
-        </div>
-
-        {/* Controls Container */}
-        <div className="w-full flex-1 relative bg-[#1a1a1a] rounded-t-xl border-t-2 border-l-2 border-r-2 border-[#333] shadow-2xl flex overflow-hidden">
+        {/* --- RIGHT COL (Controls) --- */}
+        <div className="w-full max-w-md md:w-72 flex-1 md:h-full shrink-0 relative bg-[#1a1a1a] rounded-t-xl md:rounded-xl border-t-2 md:border-2 border-[#333] shadow-2xl flex overflow-hidden">
             
             {/* Left: D-Pad */}
             <div className="w-1/2 h-full relative flex items-center justify-center border-r border-[#333] bg-[#111]">
