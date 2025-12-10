@@ -485,7 +485,6 @@ const App: React.FC = () => {
                   { label: "無視", text: "何もせず立ち去る", action: () => { setEventResultLog("怪しい男を無視して先へ進んだ。"); } }
               ]
           },
-
           // 既存イベント（鏡）
           {
               title: "踊り場の鏡",
