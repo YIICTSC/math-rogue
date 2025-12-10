@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch, Sparkles, BookOpen, Layers, Move } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch, Sparkles, BookOpen, Layers, Move, Minimize2, Maximize2, Volume2, ShieldAlert, ArrowUpCircle } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
 import { storageService } from '../services/storageService';
@@ -239,16 +239,32 @@ const ITEM_DB: Record<string, Omit<Item, 'id'>> = {
 
 // --- DUNGEON CARD DATABASE ---
 const DUNGEON_CARD_DB: Omit<DungeonCard, 'id'>[] = [
+    // BASIC
     { templateId: 'THRUST', name: 'えんぴつ突き', type: 'ATTACK', power: 3, description: '前方2マスの敵を貫通攻撃', icon: <Sword size={16}/> },
     { templateId: 'SPIN', name: 'コンパス回転', type: 'ATTACK', power: 2, description: '周囲8マスの敵にダメージ', icon: <RotateCcw size={16}/> },
     { templateId: 'HEAL', name: '給食休憩', type: 'BUFF', power: 30, description: 'HPを回復する', icon: <FlaskConical size={16}/> },
     { templateId: 'GUARD', name: 'ノート盾', type: 'DEFENSE', power: 10, description: '防御力を一時的に上げる', icon: <Shield size={16}/> },
+    
+    // UTILITY
+    { templateId: 'JUMP', name: '幅跳び', type: 'SPECIAL', power: 0, description: '前方2マス先へジャンプ移動', icon: <Move size={16}/> },
+    { templateId: 'SWAP', name: '場所替え', type: 'SPECIAL', power: 0, description: '目の前の敵と入れ替わる', icon: <RotateCcw size={16}/> },
+    { templateId: 'PULL', name: '引き寄せ', type: 'SPECIAL', power: 0, description: '遠くの敵を目の前に引き寄せる', icon: <Minimize2 size={16}/> },
+    { templateId: 'PUSH', name: '吹き飛ばし', type: 'ATTACK', power: 2, description: '敵を5マス吹き飛ばす', icon: <Maximize2 size={16}/> },
+    { templateId: 'DIG', name: '穴掘り', type: 'SPECIAL', power: 0, description: '目の前の壁を壊す', icon: <Hammer size={16}/> },
+    { templateId: 'TELEPORT', name: '早退', type: 'SPECIAL', power: 0, description: 'フロアのどこかへワープ', icon: <Ghost size={16}/> },
+    
+    // ATTACK
     { templateId: 'FIRE', name: '理科実験', type: 'SPECIAL', power: 15, description: '遠距離の敵に炎ダメージ', icon: <Zap size={16}/> },
-    { templateId: 'DASH', name: '廊下ダッシュ', type: 'BUFF', power: 0, description: '倍速状態になる', icon: <FastForward size={16}/> },
+    { templateId: 'EXPLOSION', name: '化学爆発', type: 'ATTACK', power: 20, description: '周囲8マスの敵に大ダメージ', icon: <Sparkles size={16}/> },
+    { templateId: 'ROOM_ATK', name: '全校放送', type: 'ATTACK', power: 8, description: '部屋全体の敵にダメージ', icon: <Volume2 size={16}/> },
     { templateId: 'WAVE', name: '定規なぎ払い', type: 'ATTACK', power: 4, description: '前方3方向にダメージ', icon: <Move size={16}/> },
     { templateId: 'SNIPE', name: '狙い撃ち', type: 'ATTACK', power: 10, description: '遠くの敵1体に大ダメージ', icon: <Crosshair size={16}/> },
+    { templateId: 'PIERCE', name: '貫通弾', type: 'ATTACK', power: 6, description: '直線上の敵すべてにダメージ', icon: <ArrowUpCircle size={16}/> },
+    
+    // BUFF
+    { templateId: 'DASH', name: '廊下ダッシュ', type: 'BUFF', power: 0, description: '倍速状態になる', icon: <FastForward size={16}/> },
     { templateId: 'RAGE', name: '逆ギレ', type: 'BUFF', power: 5, description: '攻撃力を一時的に上げる', icon: <Sword size={16}/> },
-    { templateId: 'TELEPORT', name: '早退', type: 'SPECIAL', power: 0, description: 'フロアのどこかへワープ', icon: <Ghost size={16}/> },
+    { templateId: 'INVINCIBLE', name: '無敵スター', type: 'BUFF', power: 99, description: '一時的に防御力極大アップ', icon: <ShieldAlert size={16}/> },
     { templateId: 'DISARM', name: '武器奪取', type: 'SPECIAL', power: 0, description: '周囲の敵の攻撃力を下げる', icon: <X size={16}/> },
 ];
 
@@ -637,7 +653,153 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
       // For buffs/heals, use card.power as fixed value usually
       const baseDmg = player.attack + card.power;
 
-      if (card.templateId === 'THRUST') {
+      if (card.templateId === 'JUMP') {
+          const { x: dx, y: dy } = player.dir;
+          const tx = player.x + dx * 2;
+          const ty = player.y + dy * 2;
+          
+          if (tx >= 0 && tx < MAP_W && ty >= 0 && ty < MAP_H && map[ty][tx] !== 'WALL' && !enemies.some(e => e.x === tx && e.y === ty)) {
+              addVisualEffect('WARP', player.x, player.y, { duration: 10 });
+              setPlayer(prev => ({...prev, x: tx, y: ty}));
+              addVisualEffect('WARP', tx, ty, { duration: 10 });
+              msg = "大きくジャンプ！";
+              audioService.playSound('select');
+              used = true;
+          } else {
+              msg = "そこには飛べない。";
+              audioService.playSound('wrong');
+          }
+      } else if (card.templateId === 'DIG') {
+          const { x: dx, y: dy } = player.dir;
+          const tx = player.x + dx;
+          const ty = player.y + dy;
+          if (map[ty][tx] === 'WALL' && tx > 0 && tx < MAP_W-1 && ty > 0 && ty < MAP_H-1) { // Prevent border break
+              const newMap = map.map(row => [...row]);
+              newMap[ty][tx] = 'FLOOR';
+              setMap(newMap);
+              addVisualEffect('EXPLOSION', tx, ty, { scale: 0.5 });
+              msg = "壁を掘った！";
+              audioService.playSound('attack');
+              used = true;
+          } else {
+              msg = "そこは掘れない。";
+              audioService.playSound('wrong');
+          }
+      } else if (card.templateId === 'SWAP') {
+          const { x: dx, y: dy } = player.dir;
+          const tx = player.x + dx;
+          const ty = player.y + dy;
+          const target = enemies.find(e => e.x === tx && e.y === ty);
+          if (target) {
+              const px = player.x; const py = player.y;
+              setPlayer(prev => ({...prev, x: tx, y: ty}));
+              setEnemies(prev => prev.map(e => e.id === target.id ? {...e, x: px, y: py} : e));
+              addVisualEffect('WARP', px, py);
+              addVisualEffect('WARP', tx, ty);
+              msg = `${target.name}と入れ替わった！`;
+              audioService.playSound('select');
+              used = true;
+          } else {
+              msg = "誰もいない。";
+              audioService.playSound('wrong');
+          }
+      } else if (card.templateId === 'PULL') {
+          const { x: dx, y: dy } = player.dir;
+          let target = null;
+          let lx = player.x, ly = player.y;
+          for(let i=1; i<=10; i++) {
+              const tx = player.x + dx * i; const ty = player.y + dy * i;
+              if (map[ty][tx] === 'WALL') break;
+              lx = tx; ly = ty;
+              const e = enemies.find(en => en.x === tx && en.y === ty);
+              if (e) { target = e; break; }
+          }
+          if (target) {
+              const destX = player.x + dx;
+              const destY = player.y + dy;
+              if (!enemies.some(e => e.x === destX && e.y === destY) && map[destY][destX] !== 'WALL') {
+                  setEnemies(prev => prev.map(e => e.id === target.id ? {...e, x: destX, y: destY} : e));
+                  addVisualEffect('PROJECTILE', lx, ly, { dir: {x: -dx as any, y: -dy as any}, duration: 10 });
+                  msg = `${target.name}を引き寄せた！`;
+                  used = true;
+              } else {
+                  msg = "引き寄せられない！";
+              }
+          } else {
+              msg = "誰もいない。";
+          }
+      } else if (card.templateId === 'PUSH') {
+          const { x: dx, y: dy } = player.dir;
+          const tx = player.x + dx;
+          const ty = player.y + dy;
+          const target = enemies.find(e => e.x === tx && e.y === ty);
+          if (target) {
+              let ex = target.x; let ey = target.y;
+              for(let i=0; i<5; i++) {
+                  const nex = ex + dx; const ney = ey + dy;
+                  if (map[ney][nex] !== 'WALL' && !enemies.some(e => e.x === nex && e.y === ney)) {
+                      ex = nex; ey = ney;
+                  } else break;
+              }
+              if (ex !== target.x || ey !== target.y) {
+                  setEnemies(prev => prev.map(e => e.id === target.id ? {...e, x: ex, y: ey} : e));
+                  addVisualEffect('SLASH', tx, ty, { dir: player.dir });
+                  msg = `${target.name}を吹き飛ばした！`;
+              } else {
+                  msg = "吹き飛ばなかった。";
+              }
+              // Deal damage regardless
+              const dmg = Math.max(1, baseDmg - target.defense);
+              const nhp = target.hp - dmg;
+              setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0));
+              if (nhp <= 0) gainXp(target.xp);
+              used = true;
+          } else {
+              msg = "空振り。";
+          }
+      } else if (card.templateId === 'EXPLOSION') {
+          addVisualEffect('EXPLOSION', player.x, player.y, { scale: 3 });
+          setEnemies(prev => prev.map(e => {
+              if (Math.abs(e.x - player.x) <= 1 && Math.abs(e.y - player.y) <= 1) {
+                  const dmg = card.power; // Fixed damage for explosion
+                  const nhp = e.hp - dmg;
+                  addVisualEffect('TEXT', e.x, e.y, { value: `${dmg}`, color: 'red' });
+                  if (nhp <= 0) { gainXp(e.xp); return { ...e, hp: 0, dead: true }; }
+                  return { ...e, hp: nhp };
+              }
+              return e;
+          }).filter(e => !e.dead));
+          msg = "大爆発！";
+          triggerShake(10);
+          audioService.playSound('attack');
+          used = true;
+      } else if (card.templateId === 'ROOM_ATK') {
+          if (isPointInRoom(player.x, player.y)) {
+              const currentRoom = roomsRef.current.find(r => player.x >= r.x && player.x < r.x + r.w && player.y >= r.y && player.y < r.y + r.h);
+              if (currentRoom) {
+                  addVisualEffect('FLASH', 0, 0, { color: 'white', duration: 10 });
+                  setEnemies(prev => prev.map(e => {
+                      if (e.x >= currentRoom.x && e.x < currentRoom.x + currentRoom.w && e.y >= currentRoom.y && e.y < currentRoom.y + currentRoom.h) {
+                          const dmg = card.power;
+                          const nhp = e.hp - dmg;
+                          addVisualEffect('THUNDER', e.x, e.y);
+                          if (nhp <= 0) { gainXp(e.xp); return { ...e, hp: 0, dead: true }; }
+                          return { ...e, hp: nhp };
+                      }
+                      return e;
+                  }).filter(e => !e.dead));
+                  msg = "全校放送：下校時刻です！";
+                  audioService.playSound('attack');
+                  used = true;
+              } else {
+                  msg = "部屋の外では使えない。";
+                  audioService.playSound('wrong');
+              }
+          } else {
+              msg = "通路では使えない。";
+              audioService.playSound('wrong');
+          }
+      } else if (card.templateId === 'THRUST') {
           // 2-tile piercing Thrust
           const { x: dx, y: dy } = player.dir;
           let hitCount = 0;
@@ -675,6 +837,42 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               audioService.playSound('attack');
           } else {
               msg = "空を突いた。";
+              audioService.playSound('select');
+          }
+          used = true;
+
+      } else if (card.templateId === 'PIERCE') {
+          // Long range piercing
+          const { x: dx, y: dy } = player.dir;
+          const targets: Entity[] = [];
+          for (let i=1; i<=8; i++) {
+              const tx = player.x + dx * i;
+              const ty = player.y + dy * i;
+              if (map[ty][tx] === 'WALL') break;
+              addVisualEffect('PROJECTILE', tx, ty, { dir: player.dir });
+              const target = enemies.find(e => e.x === tx && e.y === ty);
+              if (target) targets.push(target);
+          }
+          
+          triggerPlayerAttackAnim(player.dir);
+          if (targets.length > 0) {
+              setEnemies(prev => {
+                  return prev.map(e => {
+                      if (targets.some(t => t.id === e.id)) {
+                          let dmg = baseDmg - e.defense;
+                          dmg = Math.max(1, dmg);
+                          const nhp = e.hp - dmg;
+                          addVisualEffect('TEXT', e.x, e.y, { value: `${dmg}`, color: 'yellow' });
+                          if (nhp <= 0) { gainXp(e.xp); return { ...e, hp: 0, dead: true }; }
+                          return { ...e, hp: nhp };
+                      }
+                      return e;
+                  }).filter(e => !e.dead);
+              });
+              msg = "貫通弾！";
+              audioService.playSound('attack');
+          } else {
+              msg = "空を裂いた。";
               audioService.playSound('select');
           }
           used = true;
@@ -796,6 +994,12 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
       } else if (card.templateId === 'RAGE') {
           setPlayer(p => ({ ...p, status: { ...p.status, attackBuff: (p.status.attackBuff || 0) + card.power } }));
           msg = "攻撃力が上がった！";
+          audioService.playSound('buff');
+          used = true;
+      } else if (card.templateId === 'INVINCIBLE') {
+          setPlayer(p => ({ ...p, status: { ...p.status, defenseBuff: (p.status.defenseBuff || 0) + 999 } }));
+          msg = "無敵状態になった！";
+          addVisualEffect('FLASH', 0, 0, { color: 'yellow', duration: 20 });
           audioService.playSound('buff');
           used = true;
       } else if (card.templateId === 'TELEPORT') {
@@ -2687,6 +2891,17 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                   ctx.beginPath();
                   ctx.arc(sx + ts/2, sy + ts/2, 4 * SCALE, 0, Math.PI*2);
                   ctx.fill();
+              }
+          }
+          else if (fx.type === 'WARP') {
+              if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
+                  ctx.fillStyle = 'cyan';
+                  const alpha = fx.duration / (fx.maxDuration || 10);
+                  ctx.globalAlpha = alpha;
+                  ctx.beginPath();
+                  ctx.arc(sx + ts/2, sy + ts/2, 10 * SCALE, 0, Math.PI*2);
+                  ctx.fill();
+                  ctx.globalAlpha = 1.0;
               }
           }
           else if (fx.type === 'TEXT') {
