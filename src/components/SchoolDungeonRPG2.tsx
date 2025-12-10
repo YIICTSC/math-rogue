@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch, Sparkles, BookOpen, Layers } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch, Sparkles, BookOpen, Layers, ChevronsUp, Droplets, Flame, Activity, Eye, ArrowLeftRight } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
 import { storageService } from '../services/storageService';
@@ -138,11 +138,13 @@ interface Entity {
       blind: number;
       speed: number;
       defenseBuff?: number; // Temporary Defense Buff from cards
+      attackBuff?: number; // Temporary Attack Buff from cards
   };
   
   dead?: boolean;
   offset?: { x: number, y: number }; 
-  itemData?: Item; 
+  itemData?: Item;
+  cardData?: DungeonCard; // New: Card Drops 
   equipment?: EquipmentSlots;
   enemyType?: EnemyType;
   shopItems?: Item[]; // For Shopkeeper
@@ -238,12 +240,25 @@ const ITEM_DB: Record<string, Omit<Item, 'id'>> = {
 
 // --- DUNGEON CARD DATABASE ---
 const DUNGEON_CARD_DB: Omit<DungeonCard, 'id'>[] = [
-    { templateId: 'SLASH', name: 'えんぴつ斬り', type: 'ATTACK', power: 8, description: '前方の敵にダメージ', icon: <Sword size={16}/> },
-    { templateId: 'SPIN', name: 'コンパス回転', type: 'ATTACK', power: 5, description: '周囲8マスの敵にダメージ', icon: <RotateCcw size={16}/> },
+    { templateId: 'STAB', name: 'えんぴつ突き', type: 'ATTACK', power: 10, description: '前方2マスの貫通攻撃(武器依存)', icon: <Sword size={16}/> },
+    { templateId: 'SPIN', name: 'コンパス回転', type: 'ATTACK', power: 5, description: '周囲8マスの敵にダメージ(武器依存)', icon: <RotateCcw size={16}/> },
     { templateId: 'HEAL', name: '給食休憩', type: 'BUFF', power: 30, description: 'HPを回復する', icon: <FlaskConical size={16}/> },
     { templateId: 'GUARD', name: 'ノート盾', type: 'DEFENSE', power: 10, description: '防御力を一時的に上げる', icon: <Shield size={16}/> },
-    { templateId: 'FIRE', name: '理科実験', type: 'SPECIAL', power: 15, description: '遠距離の敵に炎ダメージ', icon: <Zap size={16}/> },
+    { templateId: 'FIRE', name: '理科実験', type: 'SPECIAL', power: 20, description: '遠距離の敵に炎ダメージ', icon: <Zap size={16}/> },
     { templateId: 'DASH', name: '廊下ダッシュ', type: 'BUFF', power: 0, description: '倍速状態になる', icon: <FastForward size={16}/> },
+    { templateId: 'KNOCK', name: 'タックル', type: 'ATTACK', power: 12, description: '敵を吹き飛ばす攻撃(武器依存)', icon: <ArrowUp size={16}/> },
+    { templateId: 'POISON', name: '腐ったパン', type: 'SPECIAL', power: 0, description: '周囲に毒を撒く', icon: <Skull size={16}/> },
+    { templateId: 'SLEEP', name: '子守唄', type: 'SPECIAL', power: 0, description: '周囲を眠らせる', icon: <Ghost size={16}/> },
+    { templateId: 'CROSS', name: 'クロス斬り', type: 'ATTACK', power: 15, description: '斜め4方向を2回攻撃(武器依存)', icon: <X size={16}/> },
+    // New Cards
+    { templateId: 'JUMP', name: '高跳び', type: 'SPECIAL', power: 0, description: '向いている方向に1マス飛ばして移動。敵がいると踏みつけダメージ', icon: <ChevronsUp size={16}/> },
+    { templateId: 'SHOT', name: '定規飛ばし', type: 'ATTACK', power: 8, description: '遠距離攻撃(4マス)', icon: <Crosshair size={16}/> },
+    { templateId: 'DRAIN', name: '吸血', type: 'ATTACK', power: 6, description: 'ダメージを与えてHP回復', icon: <Droplets size={16}/> },
+    { templateId: 'RAGE', name: '激昂', type: 'BUFF', power: 5, description: '一時的に攻撃力アップ', icon: <Flame size={16}/> },
+    { templateId: 'QUAKE', name: '地団駄', type: 'ATTACK', power: 12, description: '周囲2マスにダメージ', icon: <Activity size={16}/> },
+    { templateId: 'FEAR', name: '威圧', type: 'SPECIAL', power: 0, description: '周囲の敵を混乱させる', icon: <Eye size={16}/> },
+    { templateId: 'SWAP', name: '場所替え', type: 'SPECIAL', power: 0, description: '目の前の敵と入れ替わる', icon: <ArrowLeftRight size={16}/> },
+    { templateId: 'PIERCE', name: '貫通レーザー', type: 'ATTACK', power: 15, description: '直線上の敵を全て攻撃', icon: <Zap size={16}/> },
 ];
 
 // --- DIJKSTRA PATHFINDING HELPER ---
@@ -309,6 +324,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   const [dungeonDeck, setDungeonDeck] = useState<DungeonCard[]>([]);
   const [dungeonHand, setDungeonHand] = useState<DungeonCard[]>([]);
   const [dungeonDiscard, setDungeonDiscard] = useState<DungeonCard[]>([]);
+  const [cardRemovalUsed, setCardRemovalUsed] = useState(false); // New: Track shop usage
 
   const [enemies, setEnemies] = useState<Entity[]>([]);
   const [floorItems, setFloorItems] = useState<Entity[]>([]);
@@ -327,7 +343,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   const [showMap, setShowMap] = useState(false); 
   const [showHelp, setShowHelp] = useState(false);
   const [showStatus, setShowStatus] = useState(false);
-  const [showDeck, setShowDeck] = useState(false); // New: Deck View
+  const [showDeck, setShowDeck] = useState(false);
   const turnCounter = useRef(0);
   const [isEndless, setIsEndless] = useState(false);
   const saveDebounceRef = useRef<any>(null);
@@ -335,7 +351,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   const currentTheme = useMemo(() => getTheme(floor), [floor]);
 
   // Shop State
-  const [shopState, setShopState] = useState<{ active: boolean, merchantId: number | null, mode: 'BUY' | 'SELL' }>({ active: false, merchantId: null, mode: 'BUY' });
+  const [shopState, setShopState] = useState<{ active: boolean, merchantId: number | null, mode: 'BUY' | 'SELL' | 'REMOVE_DECK' }>({ active: false, merchantId: null, mode: 'BUY' });
 
   // VFX State
   const visualEffects = useRef<VisualEffect[]>([]);
@@ -397,9 +413,9 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
     spriteCache.current['SHOPKEEPER'] = createPixelSpriteCanvas('SHOPKEEPER', 'HUMANOID|#33691e'); 
     spriteCache.current['GOLD_BAG'] = createPixelSpriteCanvas('GOLD_BAG', 'GOLD_BAG|#FFD700');
     spriteCache.current['MAGIC_BULLET'] = createPixelSpriteCanvas('MAGIC_BULLET', 'MAGIC_BULLET|#00BCD4');
-    spriteCache.current['TRAP'] = createPixelSpriteCanvas('TRAP', 'CROSS|#0f380f'); // Black cross trap
-    spriteCache.current['ACCESSORY'] = createPixelSpriteCanvas('ACCESSORY', 'SHIELD|#FFD700'); // Bracelet/Ring
-
+    spriteCache.current['TRAP'] = createPixelSpriteCanvas('TRAP', 'CROSS|#0f380f');
+    spriteCache.current['ACCESSORY'] = createPixelSpriteCanvas('ACCESSORY', 'SHIELD|#FFD700');
+    
     // Load Game State
     const savedState = storageService.loadDungeonState2();
     if (savedState) {
@@ -436,6 +452,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
       setIdentifiedTypes(new Set(save.identifiedTypes || [])); // Safe fallback
       setIsEndless(save.isEndless);
       turnCounter.current = save.turnCounter;
+      setCardRemovalUsed(save.cardRemovalUsed || false);
       
       // Restore Deck State with Icon Hydration (React Nodes don't survive JSON serialization)
       if (save.dungeonDeck) {
@@ -451,7 +468,6 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           setDungeonHand(hydrateCards(save.dungeonHand));
           setDungeonDiscard(hydrateCards(save.dungeonDiscard));
       } else {
-          // If loading old save without deck, init deck
           initDeck();
       }
       addLog("冒険を再開した。", currentTheme.colors.C2);
@@ -469,11 +485,12 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               floor, level, belly, maxBelly,
               idMap, identifiedTypes: Array.from(identifiedTypes),
               isEndless, turnCounter: turnCounter.current,
-              dungeonDeck, dungeonHand, dungeonDiscard // Save Deck
+              dungeonDeck, dungeonHand, dungeonDiscard,
+              cardRemovalUsed
           };
           storageService.saveDungeonState2(state);
       }, 500); // 500ms debounce
-  }, [map, visitedMap, floorMapRevealed, player, enemies, floorItems, traps, inventory, floor, level, belly, maxBelly, idMap, identifiedTypes, isEndless, gameOver, dungeonDeck, dungeonHand, dungeonDiscard]);
+  }, [map, visitedMap, floorMapRevealed, player, enemies, floorItems, traps, inventory, floor, level, belly, maxBelly, idMap, identifiedTypes, isEndless, gameOver, dungeonDeck, dungeonHand, dungeonDiscard, cardRemovalUsed]);
 
   // Update Visited Map when player moves
   useEffect(() => {
@@ -532,16 +549,17 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           const accPow = (accItem?.type === 'RING_POWER' ? (accItem.power || 0) : 0);
           const accDef = (accItem?.type === 'RING_GUARD' ? (accItem.power || 0) : 0);
           
-          // Defense buff from cards
+          // Defense & Attack buff from cards
           const buffDef = p.status.defenseBuff || 0;
+          const buffAtk = p.status.attackBuff || 0;
 
           return {
               ...p,
-              attack: p.baseAttack + wPow + accPow,
+              attack: p.baseAttack + wPow + accPow + buffAtk,
               defense: p.baseDefense + aPow + accDef + buffDef
           };
       });
-  }, [player.equipment, player.status.defenseBuff]);
+  }, [player.equipment, player.status.defenseBuff, player.status.attackBuff]);
 
   const addVisualEffect = (type: VisualEffectType, x: number, y: number, options: Partial<VisualEffect> = {}) => {
       visualEffects.current.push({
@@ -578,57 +596,27 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   };
 
   const initDeck = () => {
-      // Create initial deck of 10 cards
-      const newDeck: DungeonCard[] = [];
-      for(let i=0; i<10; i++) {
-          // Weighted random
-          const r = Math.random();
-          let template;
-          if (r < 0.5) template = DUNGEON_CARD_DB[0]; // Attack
-          else if (r < 0.7) template = DUNGEON_CARD_DB[1]; // Spin
-          else if (r < 0.85) template = DUNGEON_CARD_DB[3]; // Guard
-          else template = DUNGEON_CARD_DB[2]; // Heal
-          
-          newDeck.push({
-              ...template,
-              id: `card-${Date.now()}-${i}`
-          });
-      }
+      const deck: DungeonCard[] = [];
+      const createCard = (tid: string) => {
+          const t = DUNGEON_CARD_DB.find(c => c.templateId === tid);
+          if (!t) return null;
+          return { ...t, id: `init-${tid}-${Date.now()}-${Math.random()}` };
+      };
+
+      // 5 Stabs, 1 Jump, 1 Spin, 1 Guard = 8 Cards
+      for(let i=0; i<5; i++) { const c = createCard('STAB'); if(c) deck.push(c); }
+      const jump = createCard('JUMP'); if(jump) deck.push(jump);
+      const spin = createCard('SPIN'); if(spin) deck.push(spin);
+      const guard = createCard('GUARD'); if(guard) deck.push(guard);
       
       // Shuffle
-      newDeck.sort(() => Math.random() - 0.5);
+      deck.sort(() => Math.random() - 0.5);
       
       // Draw 3
-      const hand = newDeck.splice(0, 3);
+      const hand = deck.splice(0, 3);
       setDungeonHand(hand);
-      setDungeonDeck(newDeck);
+      setDungeonDeck(deck);
       setDungeonDiscard([]);
-  };
-
-  const drawCard = (count: number = 1) => {
-      setDungeonDeck(currentDeck => {
-          setDungeonDiscard(currentDiscard => {
-              setDungeonHand(currentHand => {
-                  let nextDeck = [...currentDeck];
-                  let nextDiscard = [...currentDiscard];
-                  const nextHand = [...currentHand];
-
-                  for(let i=0; i<count; i++) {
-                      if (nextDeck.length === 0) {
-                          if (nextDiscard.length === 0) break; // Empty
-                          nextDeck = nextDiscard.sort(() => Math.random() - 0.5);
-                          nextDiscard = [];
-                      }
-                      const card = nextDeck.pop();
-                      if (card) nextHand.push(card);
-                  }
-                  
-                  return currentHand; 
-              });
-              return currentDiscard;
-          });
-          return currentDeck;
-      });
   };
 
   const handleCardUse = (index: number) => {
@@ -639,8 +627,336 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
       let msg = "";
       let used = false;
 
-      if (card.type === 'ATTACK') {
-          // Attack Front
+      if (card.templateId === 'JUMP') {
+          const { x: dx, y: dy } = player.dir;
+          const tx = player.x + dx * 2;
+          const ty = player.y + dy * 2;
+          
+          // Check landing
+          if (tx >= 0 && tx < MAP_W && ty >= 0 && ty < MAP_H && map[ty][tx] !== 'WALL') {
+              const enemy = enemies.find(e => e.x === tx && e.y === ty);
+              if (enemy) {
+                  // Jump Attack
+                  let dmg = Math.floor(player.attack * 1.5) + card.power;
+                  const nhp = enemy.hp - dmg;
+                  setEnemies(prev => prev.map(e => e.id === enemy.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0));
+                  if (nhp <= 0) gainXp(enemy.xp);
+                  addVisualEffect('TEXT', tx, ty, { value: `${dmg}`, color: 'red' });
+                  addVisualEffect('EXPLOSION', tx, ty);
+                  setPlayer(p => ({ ...p, x: tx, y: ty }));
+                  msg = `${enemy.name}を踏みつけた！`;
+              } else {
+                  setPlayer(p => ({ ...p, x: tx, y: ty }));
+                  msg = "高跳び！";
+              }
+              audioService.playSound('buff');
+              used = true;
+          } else {
+              addLog("そこには跳べない！");
+              audioService.playSound('wrong');
+              return; // Don't consume card
+          }
+
+      } else if (card.templateId === 'STAB') {
+          // Piercing Attack (2 Tiles) - Scales with weapon
+          const { x: dx, y: dy } = player.dir;
+          triggerPlayerAttackAnim(player.dir);
+          
+          const targets: Entity[] = [];
+          for(let i=1; i<=2; i++) {
+              const tx = player.x + dx * i;
+              const ty = player.y + dy * i;
+              
+              // Visual Slash effect delayed for second tile
+              setTimeout(() => {
+                  addVisualEffect('SLASH', tx, ty, { dir: player.dir });
+              }, (i-1) * 100);
+
+              if (map[ty][tx] === 'WALL') break; // Wall stops piercing
+
+              const t = enemies.find(e => e.x === tx && e.y === ty);
+              if (t) targets.push(t);
+          }
+
+          if (targets.length > 0) {
+              setEnemies(prev => prev.map(e => {
+                  if (targets.some(t => t.id === e.id)) {
+                      let dmg = player.attack + card.power; // Weapon Scaling
+                      const nhp = e.hp - dmg;
+                      addVisualEffect('TEXT', e.x, e.y, { value: `${dmg}`, color: 'yellow' });
+                      if (nhp <= 0) gainXp(e.xp);
+                      return { ...e, hp: nhp };
+                  }
+                  return e;
+              }).filter(e => e.hp > 0));
+              
+              msg = `${targets.length}体を貫いた！`;
+              audioService.playSound('attack');
+              used = true;
+          } else {
+              msg = "空を突いた。";
+              audioService.playSound('select');
+              used = true;
+          }
+
+      } else if (card.templateId === 'SPIN') {
+          // Enhanced Spin Attack - Scales with weapon
+          addVisualEffect('EXPLOSION', player.x, player.y, { scale: 1.5 });
+          
+          const dirs = [
+              {x:0, y:-1}, {x:1, y:-1}, {x:1, y:0}, {x:1, y:1},
+              {x:0, y:1}, {x:-1, y:1}, {x:-1, y:0}, {x:-1, y:-1}
+          ];
+          dirs.forEach((d) => {
+               addVisualEffect('SLASH', player.x + d.x, player.y + d.y, { dir: d as Direction });
+          });
+
+          let hits = 0;
+          setEnemies(prev => prev.map(e => {
+              if (Math.abs(e.x - player.x) <= 1 && Math.abs(e.y - player.y) <= 1) {
+                  let dmg = Math.floor(player.attack * 0.8) + card.power; // Weapon Scaling
+                  hits++;
+                  const nhp = e.hp - dmg;
+                  addVisualEffect('TEXT', e.x, e.y, { value: `${dmg}`, color: 'yellow' });
+                  if (nhp <= 0) { gainXp(e.xp); return { ...e, hp: 0, dead: true }; }
+                  return { ...e, hp: nhp };
+              }
+              return e;
+          }).filter(e => !e.dead));
+          msg = hits > 0 ? "回転斬り！" : "周りに誰もいない。";
+          audioService.playSound('attack');
+          used = true;
+
+      } else if (card.templateId === 'SHOT') {
+          // Ranged Projectile
+          const { x: dx, y: dy } = player.dir;
+          let hit = false;
+          // Travel animation
+          addVisualEffect('PROJECTILE', player.x + dx, player.y + dy, { dir: player.dir, duration: 10 });
+          
+          for(let i=1; i<=4; i++) {
+              const tx = player.x + dx * i;
+              const ty = player.y + dy * i;
+              if (map[ty][tx] === 'WALL') break;
+              const t = enemies.find(e => e.x === tx && e.y === ty);
+              if (t) {
+                  let dmg = player.attack + card.power;
+                  const nhp = t.hp - dmg;
+                  setEnemies(prev => prev.map(e => e.id === t.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0));
+                  if (nhp <= 0) gainXp(t.xp);
+                  addVisualEffect('TEXT', tx, ty, { value: `${dmg}`, color: 'white' });
+                  msg = `${t.name}に命中！`;
+                  hit = true;
+                  break;
+              }
+          }
+          if (!hit) msg = "遠くへ飛んでいった。";
+          audioService.playSound('attack');
+          used = true;
+
+      } else if (card.templateId === 'PIERCE') {
+          // Ranged Beam
+          const { x: dx, y: dy } = player.dir;
+          addVisualEffect('BEAM', player.x + dx*2, player.y + dy*2, { dir: player.dir });
+          let hitCount = 0;
+          
+          setEnemies(prev => prev.map(e => {
+              const dxE = e.x - player.x;
+              const dyE = e.y - player.y;
+              // Check alignment
+              if ((dx !== 0 && dy === 0 && dyE === 0 && Math.sign(dxE) === dx) || 
+                  (dy !== 0 && dx === 0 && dxE === 0 && Math.sign(dyE) === dy) ||
+                  (dx !== 0 && dy !== 0 && Math.sign(dxE) === dx && Math.sign(dyE) === dy && Math.abs(dxE) === Math.abs(dyE))) {
+                  
+                  // Simple line of sight check (ignore walls for beam piercing goodness for now or implement)
+                  let dmg = player.attack + card.power;
+                  const nhp = e.hp - dmg;
+                  if (nhp <= 0) { gainXp(e.xp); return { ...e, hp: 0, dead: true }; }
+                  addVisualEffect('TEXT', e.x, e.y, { value: `${dmg}`, color: 'cyan' });
+                  hitCount++;
+                  return { ...e, hp: nhp };
+              }
+              return e;
+          }).filter(e => !e.dead));
+          
+          msg = hitCount > 0 ? "レーザー発射！" : "空を切り裂いた。";
+          audioService.playSound('attack');
+          used = true;
+
+      } else if (card.templateId === 'DRAIN') {
+          // Attack and Heal
+          const { x: dx, y: dy } = player.dir;
+          const tx = player.x + dx;
+          const ty = player.y + dy;
+          const target = enemies.find(e => e.x === tx && e.y === ty);
+          if (target) {
+              let dmg = player.attack + card.power;
+              const nhp = target.hp - dmg;
+              setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0));
+              if (nhp <= 0) gainXp(target.xp);
+              
+              const heal = Math.floor(dmg / 2);
+              setPlayer(p => ({ ...p, hp: Math.min(p.maxHp, p.hp + heal) }));
+              addVisualEffect('TEXT', player.x, player.y, { value: `+${heal}`, color: 'green' });
+              msg = `HPを吸い取った！`;
+              audioService.playSound('attack');
+          } else {
+              msg = "吸う相手がいない。";
+              audioService.playSound('select');
+          }
+          used = true;
+
+      } else if (card.templateId === 'RAGE') {
+          setPlayer(p => ({ ...p, status: { ...p.status, attackBuff: (p.status.attackBuff || 0) + card.power } }));
+          addVisualEffect('TEXT', player.x, player.y, { value: 'ATK UP', color: 'red' });
+          msg = "攻撃力が上がった！";
+          audioService.playSound('buff');
+          used = true;
+
+      } else if (card.templateId === 'QUAKE') {
+          addVisualEffect('EXPLOSION', player.x, player.y, { scale: 2 });
+          setEnemies(prev => prev.map(e => {
+              if (Math.abs(e.x - player.x) <= 2 && Math.abs(e.y - player.y) <= 2) {
+                  let dmg = card.power;
+                  const nhp = e.hp - dmg;
+                  if (nhp <= 0) { gainXp(e.xp); return { ...e, hp: 0, dead: true }; }
+                  return { ...e, hp: nhp };
+              }
+              return e;
+          }).filter(e => !e.dead));
+          msg = "地団駄を踏んだ！";
+          audioService.playSound('attack');
+          used = true;
+
+      } else if (card.templateId === 'FEAR') {
+          setEnemies(prev => prev.map(e => {
+              if (Math.abs(e.x - player.x) <= 3 && Math.abs(e.y - player.y) <= 3) {
+                  return { ...e, status: { ...e.status, confused: 10 } };
+              }
+              return e;
+          }));
+          addVisualEffect('FLASH', 0, 0, { color: 'purple' });
+          msg = "敵を威圧した！";
+          audioService.playSound('buff');
+          used = true;
+
+      } else if (card.templateId === 'SWAP') {
+          const { x: dx, y: dy } = player.dir;
+          const tx = player.x + dx;
+          const ty = player.y + dy;
+          const target = enemies.find(e => e.x === tx && e.y === ty);
+          if (target) {
+              const px = player.x; const py = player.y;
+              setPlayer(p => ({ ...p, x: tx, y: ty }));
+              setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, x: px, y: py } : e));
+              msg = "場所を入れ替えた！";
+              audioService.playSound('buff');
+          } else {
+              msg = "誰もいない。";
+              audioService.playSound('select');
+          }
+          used = true;
+
+      } else if (card.templateId === 'KNOCK') {
+          // Knockback Attack
+          const { x: dx, y: dy } = player.dir;
+          const tx = player.x + dx;
+          const ty = player.y + dy;
+          const target = enemies.find(e => e.x === tx && e.y === ty);
+          if (target) {
+              let dmg = player.attack + card.power;
+              let kx = target.x + dx * 2;
+              let ky = target.y + dy * 2;
+              if (kx >= 0 && kx < MAP_W && ky >= 0 && ky < MAP_H && map[ky][kx] !== 'WALL' && !enemies.some(e=>e.x===kx && e.y===ky)) {
+                  setEnemies(prev => prev.map(e => {
+                      if (e.id === target.id) {
+                          const nhp = e.hp - dmg;
+                          if (nhp <= 0) gainXp(e.xp);
+                          return { ...e, hp: nhp, x: kx, y: ky };
+                      }
+                      return e;
+                  }).filter(e => e.hp > 0));
+                  msg = `${target.name}を吹き飛ばした！`;
+              } else {
+                  // Blocked knockback deals extra damage
+                  dmg += 5;
+                  const nhp = target.hp - dmg;
+                  setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0));
+                  if (nhp <= 0) gainXp(target.xp);
+                  msg = `${target.name}を壁に叩きつけた！`;
+              }
+              addVisualEffect('TEXT', tx, ty, { value: `${dmg}`, color: 'red' });
+              triggerPlayerAttackAnim(player.dir);
+              addVisualEffect('SLASH', tx, ty, { dir: player.dir });
+              audioService.playSound('attack');
+              used = true;
+          } else {
+              triggerPlayerAttackAnim(player.dir);
+              msg = "空振り！";
+              used = true;
+          }
+
+      } else if (card.templateId === 'CROSS') {
+          // Cross Cut (Diagonals) - Double Hit
+          const dirs = [{x:-1,y:-1}, {x:1,y:-1}, {x:-1,y:1}, {x:1,y:1}];
+          let hits = 0;
+          
+          // Visuals
+          dirs.forEach(d => {
+              const tx = player.x + d.x; const ty = player.y + d.y;
+              addVisualEffect('SLASH', tx, ty, { dir: d as Direction });
+          });
+
+          setEnemies(prev => prev.map(e => {
+              if (Math.abs(e.x - player.x) === 1 && Math.abs(e.y - player.y) === 1) {
+                  // Hit twice
+                  let dmg = player.attack + card.power;
+                  let totalDmg = dmg * 2;
+                  hits++;
+                  const nhp = e.hp - totalDmg;
+                  addVisualEffect('TEXT', e.x, e.y, { value: `${totalDmg}`, color: 'yellow' });
+                  if (nhp <= 0) { gainXp(e.xp); return { ...e, hp: 0, dead: true }; }
+                  return { ...e, hp: nhp };
+              }
+              return e;
+          }).filter(e => !e.dead));
+          
+          msg = hits > 0 ? "クロス乱舞！" : "空を切った。";
+          audioService.playSound('attack');
+          used = true;
+
+      } else if (card.templateId === 'POISON') {
+          // Poison Mist
+          setEnemies(prev => prev.map(e => {
+              if (Math.abs(e.x - player.x) <= 2 && Math.abs(e.y - player.y) <= 2) {
+                  addVisualEffect('TEXT', e.x, e.y, { value: 'Psn', color: 'purple' });
+                  const nhp = e.hp - 10;
+                  if (nhp <= 0) { gainXp(e.xp); return { ...e, hp: 0, dead: true }; }
+                  return { ...e, hp: nhp };
+              }
+              return e;
+          }).filter(e => !e.dead));
+          addVisualEffect('EXPLOSION', player.x, player.y, { color: 'purple' });
+          msg = "毒の霧を撒いた！";
+          audioService.playSound('attack');
+          used = true;
+
+      } else if (card.templateId === 'SLEEP') {
+          // Lullaby
+          setEnemies(prev => prev.map(e => {
+              if (Math.abs(e.x - player.x) <= 2 && Math.abs(e.y - player.y) <= 2) {
+                  addVisualEffect('TEXT', e.x, e.y, { value: 'Zzz', color: 'blue' });
+                  return { ...e, status: { ...e.status, sleep: 10 } };
+              }
+              return e;
+          }));
+          addVisualEffect('TEXT', player.x, player.y, { value: '♪', color: 'pink' });
+          msg = "子守唄を歌った。";
+          audioService.playSound('buff');
+          used = true;
+
+      } else if (card.type === 'ATTACK') {
+          // Standard Attack Fallback
           const { x: dx, y: dy } = player.dir;
           const tx = player.x + dx;
           const ty = player.y + dy;
@@ -656,31 +972,13 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               audioService.playSound('attack');
               used = true;
           } else {
-              // Empty swing
               triggerPlayerAttackAnim(player.dir);
               addVisualEffect('SLASH', tx, ty, { dir: player.dir });
               msg = "空を切った。";
               audioService.playSound('select');
               used = true;
           }
-      } else if (card.templateId === 'SPIN') {
-          // Area Attack
-          addVisualEffect('EXPLOSION', player.x, player.y, { scale: 1.5 });
-          let hits = 0;
-          setEnemies(prev => prev.map(e => {
-              if (Math.abs(e.x - player.x) <= 1 && Math.abs(e.y - player.y) <= 1) {
-                  let dmg = card.power + Math.floor(player.attack / 3);
-                  hits++;
-                  const nhp = e.hp - dmg;
-                  addVisualEffect('TEXT', e.x, e.y, { value: `${dmg}`, color: 'yellow' });
-                  if (nhp <= 0) { gainXp(e.xp); return { ...e, hp: 0, dead: true }; }
-                  return { ...e, hp: nhp };
-              }
-              return e;
-          }).filter(e => !e.dead));
-          msg = hits > 0 ? "回転攻撃！" : "周りに誰もいない。";
-          audioService.playSound('attack');
-          used = true;
+
       } else if (card.type === 'BUFF' && card.templateId === 'HEAL') {
           const heal = card.power;
           setPlayer(p => ({ ...p, hp: Math.min(p.maxHp, p.hp + heal) }));
@@ -694,7 +992,6 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           audioService.playSound('block');
           used = true;
       } else if (card.templateId === 'FIRE') {
-          // Ranged attack
           const { x: dx, y: dy } = player.dir;
           let tx = player.x, ty = player.y;
           let target = null;
@@ -704,7 +1001,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               const e = enemies.find(en => en.x === tx && en.y === ty);
               if (e) { target = e; break; }
           }
-          addVisualEffect('BEAM', player.x + dx*2, player.y + dy*2, { dir: player.dir }); // Sim visual
+          addVisualEffect('BEAM', player.x + dx*2, player.y + dy*2, { dir: player.dir });
           if (target) {
               const dmg = card.power;
               const nhp = target.hp - dmg;
@@ -717,7 +1014,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           audioService.playSound('attack');
           used = true;
       } else if (card.templateId === 'DASH') {
-          setPlayer(p => ({ ...p, status: { ...p.status, speed: 5 } })); // Speed buff (needs impl in move)
+          setPlayer(p => ({ ...p, status: { ...p.status, speed: 5 } })); 
           msg = "ダッシュ！";
           used = true; 
       }
@@ -725,7 +1022,6 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
       if (used) {
           addLog(msg);
           
-          // Discard & Draw Logic
           let nextHand = [...dungeonHand];
           nextHand.splice(index, 1);
           let nextDeck = [...dungeonDeck];
@@ -762,6 +1058,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
     setMenuOpen(false);
     setShopState({ active: false, merchantId: null, mode: 'BUY' });
     setIsEndless(false);
+    setCardRemovalUsed(false);
     turnCounter.current = 0;
     visualEffects.current = [];
     setIsFastForwarding(false);
@@ -863,6 +1160,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   const generateFloor = (f: number) => {
     const newMap: TileType[][] = Array(MAP_H).fill(null).map(() => Array(MAP_W).fill('WALL'));
     const rooms: {x:number, y:number, w:number, h:number}[] = [];
+    setCardRemovalUsed(false); // Reset shop use for new floor
     
     let attempts = 0;
     while(rooms.length < 8 && attempts < 200) {
@@ -964,6 +1262,14 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                     hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
                     status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
                     gold: Math.floor(Math.random() * 50 + 10 * f)
+                });
+            } else if (r < 0.25) { // 5% chance for Card Drop
+                const template = DUNGEON_CARD_DB[Math.floor(Math.random() * DUNGEON_CARD_DB.length)];
+                newItems.push({
+                    id: Date.now() + Math.random(), type: 'ITEM', x: t.x, y: t.y, char: 'C', name: template.name,
+                    hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
+                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+                    cardData: { ...template, id: `loot-card-${Date.now()}` } // Add cardData to Entity type
                 });
             } else {
                 const keys = Object.keys(ITEM_DB);
@@ -1092,6 +1398,9 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           
           if (nextStatus.defenseBuff && nextStatus.defenseBuff > 0) {
               nextStatus.defenseBuff = Math.max(0, nextStatus.defenseBuff - 2); // Decay defense buff
+          }
+          if (nextStatus.attackBuff && nextStatus.attackBuff > 0) {
+              nextStatus.attackBuff = Math.max(0, nextStatus.attackBuff - 1); // Decay attack buff
           }
 
           if (starveDamage > 0) {
@@ -1263,7 +1572,11 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
       if (shopState.active) {
           if (dy !== 0) {
               const shopkeeper = enemies.find(e => e.id === shopState.merchantId);
-              const listLength = shopState.mode === 'BUY' ? (shopkeeper?.shopItems?.length || 0) : inventory.length;
+              // Handle REMOVE_DECK mode list length
+              const listLength = shopState.mode === 'REMOVE_DECK'
+                  ? dungeonDeck.length 
+                  : (shopState.mode === 'BUY' ? (shopkeeper?.shopItems?.length || 0) : inventory.length);
+              
               setSelectedItemIndex(prev => Math.max(0, Math.min(listLength - 1, prev + dy)));
               audioService.playSound('select');
           }
@@ -1376,6 +1689,12 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               const amount = itemEntity.gold || 0;
               setPlayer(p => ({ ...p, gold: (p.gold || 0) + amount }));
               addLog(`${amount}円を拾った！`, "yellow");
+              setFloorItems(prev => prev.filter((_, i) => i !== itemIdx));
+              audioService.playSound('select');
+          } else if (itemEntity.cardData) {
+              const card = itemEntity.cardData;
+              setDungeonDeck(prev => [...prev, card]);
+              addLog(`カード「${card.name}」を拾った！`, "cyan");
               setFloorItems(prev => prev.filter((_, i) => i !== itemIdx));
               audioService.playSound('select');
           } else if (itemEntity.itemData) {
@@ -1562,6 +1881,33 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
 
       const idx = indexOverride !== undefined ? indexOverride : selectedItemIndex;
 
+      if (shopState.mode === 'REMOVE_DECK') {
+          if (idx < 0 || idx >= dungeonDeck.length) return;
+          const cardToRemove = dungeonDeck[idx];
+          const removeCost = 300;
+
+          if (cardRemovalUsed) {
+              addLog("このフロアではもう除外できません。", "red");
+              audioService.playSound('wrong');
+              return;
+          }
+
+          if ((player.gold || 0) < removeCost) {
+              addLog("お金が足りない！", "red");
+              audioService.playSound('wrong');
+              return;
+          }
+
+          setPlayer(p => ({ ...p, gold: (p.gold || 0) - removeCost }));
+          setDungeonDeck(prev => prev.filter((_, i) => i !== idx));
+          setCardRemovalUsed(true);
+          addLog(`カード「${cardToRemove.name}」を除外した。`, "red");
+          audioService.playSound('select');
+          setShopState(prev => ({ ...prev, mode: 'BUY' }));
+          setSelectedItemIndex(0);
+          return;
+      }
+
       if (shopState.mode === 'BUY') {
           if (!shopkeeper.shopItems || shopkeeper.shopItems.length === 0) return;
           const item = shopkeeper.shopItems[idx];
@@ -1587,7 +1933,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               addLog("お金が足りない！", "red");
               audioService.playSound('wrong');
           }
-      } else {
+      } else if (shopState.mode === 'SELL') {
           if (inventory.length === 0) return;
           const item = inventory[idx];
           if (!item) return;
@@ -2385,6 +2731,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                       let spriteKey = 'CONSUMABLE';
                       if (item.type === 'GOLD') {
                           spriteKey = 'GOLD_BAG';
+                      } else if (item.cardData) {
+                          spriteKey = 'CONSUMABLE'; // Cards look like notebooks
                       } else if (item.itemData) {
                           const cat = item.itemData.category;
                           if (cat === 'WEAPON') spriteKey = 'WEAPON';
@@ -2398,6 +2746,11 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                       const sprite = spriteCache.current[spriteKey];
                       if (sprite) {
                           ctx.drawImage(sprite, sx, sy, ts, ts);
+                          if (item.cardData) { // Card visual distinction
+                              ctx.fillStyle = 'cyan';
+                              ctx.font = '10px monospace';
+                              ctx.fillText("C", sx + ts - 10, sy + ts - 2);
+                          }
                       } else {
                           ctx.fillStyle = C1;
                           ctx.fillRect(sx + 4*SCALE, sy + 4*SCALE, 8*SCALE, 8*SCALE);
@@ -2553,7 +2906,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   const { C0, C1, C2, C3 } = currentTheme.colors;
 
   return (
-    <div className="w-full h-full bg-[#101010] flex flex-col items-center justify-center font-mono select-none overflow-hidden touch-none relative p-1 gap-1">
+    <div className="w-full h-full bg-[#101010] flex flex-col md:flex-row items-center justify-center font-mono select-none overflow-hidden touch-none relative p-4 gap-4">
         
         {inspectedItem && (
             <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setInspectedItem(null)}>
@@ -2573,43 +2926,6 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                         )}
                         {inspectedItem.value && <div>効果: {inspectedItem.value}</div>}
                     </div>
-                </div>
-            </div>
-        )}
-
-        {/* Deck View Modal */}
-        {showDeck && (
-            <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setShowDeck(false)}>
-                <div className="w-full max-w-md border-4 p-6 shadow-xl overflow-y-auto max-h-[80vh] custom-scrollbar" style={{ backgroundColor: C3, borderColor: C1, color: C0 }} onClick={e => e.stopPropagation()}>
-                    <div className="flex justify-between items-center mb-4 border-b-2 pb-2" style={{ borderColor: C1 }}>
-                        <h2 className="font-bold text-xl flex items-center"><Layers className="mr-2"/> デッキ一覧 ({dungeonDeck.length})</h2>
-                        <button onClick={() => setShowDeck(false)}><X size={24}/></button>
-                    </div>
-                    
-                    <div className="space-y-2">
-                        {dungeonDeck.length === 0 ? (
-                            <div className="text-center text-sm py-4 opacity-50">デッキは空です</div>
-                        ) : (
-                            dungeonDeck.map((card, idx) => (
-                                <div key={card.id} className="border p-2 rounded flex items-center gap-3" style={{ borderColor: C1 }}>
-                                    <div className="bg-black/10 p-2 rounded-full border border-current">{card.icon}</div>
-                                    <div className="flex-grow">
-                                        <div className="font-bold flex justify-between">
-                                            <span>{card.name}</span>
-                                            <span className="text-xs opacity-70 font-normal">{card.type}</span>
-                                        </div>
-                                        <div className="text-xs opacity-80">{card.description} {card.power > 0 && `(Pow:${card.power})`}</div>
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                    
-                    <div className="mt-4 pt-4 border-t-2 text-xs opacity-70" style={{ borderColor: C1 }}>
-                        <p>手札: {dungeonHand.length}枚 / 捨て札: {dungeonDiscard.length}枚</p>
-                    </div>
-                    
-                    <button onClick={() => setShowDeck(false)} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>閉じる</button>
                 </div>
             </div>
         )}
@@ -2705,14 +3021,6 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                             </ul>
                         </section>
                         <section>
-                            <h3 className="font-bold border-b mb-1" style={{ borderColor: C1 }}>カードシステム</h3>
-                            <ul className="list-disc pl-5">
-                                <li>コントローラー下のカードをタップして発動します。</li>
-                                <li>使用するとターンを消費し、新たなカードを引きます。</li>
-                                <li>山札が尽きると捨て札から補充されます。</li>
-                            </ul>
-                        </section>
-                        <section>
                             <h3 className="font-bold border-b mb-1" style={{ borderColor: C1 }}>ヒント</h3>
                             <ul className="list-disc pl-5">
                                 <li>お腹が減るとHPが減ります。おにぎりやパンを食べましょう。</li>
@@ -2729,290 +3037,463 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
             </div>
         )}
 
-        {/* Game Area (Top) */}
-        <div className="w-full aspect-[4/3] relative shrink-0 shadow-lg border-2 max-h-[45vh] flex flex-col overflow-hidden" style={{ backgroundColor: C3, borderColor: C0 }}>
-            <div className="w-full h-8 flex justify-between items-center px-2 text-[10px] z-10 border-b shrink-0" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
-                <span className="font-bold tracking-widest">{currentTheme.name}</span>
-                <div className="flex gap-2">
-                    <button onClick={() => setShowMap(!showMap)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><MapIcon size={10}/> Map</button>
-                    <button onClick={() => setShowStatus(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><User size={10}/> Sts</button>
-                    <button onClick={() => setShowDeck(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><Layers size={10}/> Deck</button>
-                    <button onClick={() => setShowHelp(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><HelpCircle size={10}/> Help</button>
-                </div>
-            </div>
-
-            <div className="w-full h-5 flex justify-between items-center px-2 text-xs font-bold z-10 shrink-0" style={{ backgroundColor: C1, color: C3 }}>
-                <span>{floor}F</span>
-                <span>Lv{level}</span>
-                <span>HP{player.hp}/{player.maxHp}</span>
-                <span>A{player.attack}D{player.defense}</span>
-                <span className="flex items-center"><Coins size={10} className="mr-0.5"/>{player.gold}</span>
-                <span>🍙{belly}%</span>
-            </div>
-
-            <div className="relative flex-1 min-h-0 w-full bg-[#111827]">
-                <canvas ref={canvasRef} width={VIEW_W * TILE_SIZE * SCALE} height={VIEW_H * TILE_SIZE * SCALE} className="w-full h-full object-contain pixel-art" style={{ imageRendering: 'pixelated' }} />
-
-                {/* Fast Forward Indicator */}
-                {isFastForwarding && (
-                    <div className="absolute top-2 right-2 animate-pulse flex items-center rounded px-2" style={{ backgroundColor: `${C0}80`, color: C3 }}>
-                        <FastForward size={16} className="mr-1"/> 早送り中
+        <div className="w-full max-w-md flex flex-col items-center gap-2">
+            <div className="w-full aspect-[11/9] relative shrink-0">
+                <div className="w-full h-full border-4 relative overflow-hidden shadow-lg rounded-sm" style={{ backgroundColor: C3, borderColor: C0 }}>
+                    
+                    <div className="absolute top-0 left-0 w-full h-8 flex justify-between items-center px-2 text-[10px] z-10 border-b" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
+                        <span className="font-bold tracking-widest">{currentTheme.name}</span>
+                        <div className="flex gap-2">
+                            <button onClick={() => setShowMap(!showMap)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><MapIcon size={10}/> Map</button>
+                            <button onClick={() => setShowStatus(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><User size={10}/> Sts</button>
+                            <button onClick={() => setShowDeck(!showDeck)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><Layers size={10}/> Deck</button>
+                            <button onClick={() => setShowHelp(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><HelpCircle size={10}/> Help</button>
+                        </div>
                     </div>
-                )}
 
-                {/* Map Overlay: Now with Fog of War */}
-                {showMap && map.length > 0 && (
-                    <div className="absolute inset-0 z-20 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}E6` }}>
-                        <div className="w-full h-full border grid" style={{ borderColor: C3, gridTemplateColumns: `repeat(${MAP_W}, 1fr)` }}>
-                            {map.map((row, y) => row.map((tile, x) => {
-                                const isRevealed = floorMapRevealed || (visitedMap[y] && visitedMap[y][x]);
-                                const isPlayer = x === player.x && y === player.y;
-                                const hasSight = player.equipment?.accessory?.type === 'RING_SIGHT';
-                                const hasTrapSight = player.equipment?.accessory?.type === 'RING_TRAP';
-                                const hasItem = floorItems.some(i => i.x===x && i.y===y);
-                                const hasEnemy = enemies.some(e => e.x===x && e.y===y);
-                                
-                                let bgStyle = { backgroundColor: 'transparent' };
-                                let content = null;
+                    <div className="absolute top-8 left-0 w-full h-5 flex justify-between items-center px-2 text-xs font-bold z-10" style={{ backgroundColor: C1, color: C3 }}>
+                        <span>{floor}F</span>
+                        <span>Lv{level}</span>
+                        <span>HP{player.hp}/{player.maxHp}</span>
+                        <span>A{player.attack}D{player.defense}</span>
+                        <span className="flex items-center"><Coins size={10} className="mr-0.5"/>{player.gold}</span>
+                        <span>🍙{belly}%</span>
+                    </div>
 
-                                if (isPlayer) {
-                                    content = <div className="w-full h-full bg-white rounded-full animate-pulse"></div>;
-                                } else if (isRevealed) {
-                                    if (tile === 'STAIRS') bgStyle = { backgroundColor: C3 };
-                                    else if (tile !== 'WALL') bgStyle = { backgroundColor: C1 };
+                    <canvas ref={canvasRef} width={VIEW_W * TILE_SIZE * SCALE} height={VIEW_H * TILE_SIZE * SCALE} className="w-full h-full object-contain pixel-art mt-6" style={{ imageRendering: 'pixelated' }} />
+
+                    {/* Fast Forward Indicator */}
+                    {isFastForwarding && (
+                        <div className="absolute top-16 right-2 animate-pulse flex items-center rounded px-2" style={{ backgroundColor: `${C0}80`, color: C3 }}>
+                            <FastForward size={16} className="mr-1"/> 早送り中
+                        </div>
+                    )}
+
+                    {/* Map Overlay: Now with Fog of War */}
+                    {showMap && map.length > 0 && (
+                        <div className="absolute inset-0 z-20 flex items-center justify-center p-8 mt-12" style={{ backgroundColor: `${C0}E6` }}>
+                            <div className="w-full h-full border grid" style={{ borderColor: C3, gridTemplateColumns: `repeat(${MAP_W}, 1fr)` }}>
+                                {map.map((row, y) => row.map((tile, x) => {
+                                    // Check visibility: Visited OR Revealed via scroll
+                                    const isRevealed = floorMapRevealed || (visitedMap[y] && visitedMap[y][x]);
                                     
-                                    if (tile !== 'WALL') {
-                                        if (traps.some(t => t.x===x && t.y===y && (t.visible || hasTrapSight))) {
-                                            content = <div className="w-full h-full flex items-center justify-center text-[4px] text-red-500 font-bold">X</div>;
-                                        } else if (hasEnemy && hasSight) {
+                                    // Player and Sight Ring items are exceptions handled by logic below
+                                    const isPlayer = x === player.x && y === player.y;
+                                    const hasSight = player.equipment?.accessory?.type === 'RING_SIGHT';
+                                    const hasTrapSight = player.equipment?.accessory?.type === 'RING_TRAP';
+                                    const hasItem = floorItems.some(i => i.x===x && i.y===y);
+                                    const hasEnemy = enemies.some(e => e.x===x && e.y===y);
+                                    
+                                    // Render logic
+                                    let bgStyle = { backgroundColor: 'transparent' };
+                                    let content = null;
+
+                                    if (isPlayer) {
+                                        content = <div className="w-full h-full bg-white rounded-full animate-pulse"></div>;
+                                    } else if (isRevealed) {
+                                        // Terrain
+                                        if (tile === 'STAIRS') bgStyle = { backgroundColor: C3 };
+                                        else if (tile !== 'WALL') bgStyle = { backgroundColor: C1 };
+                                        
+                                        // Objects on revealed tiles
+                                        if (tile !== 'WALL') {
+                                            if (traps.some(t => t.x===x && t.y===y && (t.visible || hasTrapSight))) {
+                                                content = <div className="w-full h-full flex items-center justify-center text-[4px] text-red-500 font-bold">X</div>;
+                                            } else if (hasEnemy && hasSight) {
+                                                content = <div className="w-full h-full bg-red-500 rounded-full"></div>;
+                                            } else if (hasItem && hasSight) {
+                                                content = <div className="w-full h-full bg-blue-400 rounded-sm"></div>;
+                                            }
+                                        }
+                                    } else {
+                                        // Not Revealed: Only show Sight items
+                                        if (hasEnemy && hasSight) {
                                             content = <div className="w-full h-full bg-red-500 rounded-full"></div>;
                                         } else if (hasItem && hasSight) {
                                             content = <div className="w-full h-full bg-blue-400 rounded-sm"></div>;
                                         }
                                     }
-                                } else {
-                                    if (hasEnemy && hasSight) {
-                                        content = <div className="w-full h-full bg-red-500 rounded-full"></div>;
-                                    } else if (hasItem && hasSight) {
-                                        content = <div className="w-full h-full bg-blue-400 rounded-sm"></div>;
-                                    }
-                                }
 
-                                return (
-                                    <div key={`${x}-${y}`} style={bgStyle}>
-                                        {content}
-                                    </div>
-                                );
-                            }))}
-                        </div>
-                        <button onClick={() => setShowMap(false)} className="absolute bottom-4 border px-2 rounded hover:opacity-80 bg-black/50" style={{ color: C3, borderColor: C3 }}>Close</button>
-                    </div>
-                )}
-            </div>
-
-            {/* Shop Menu */}
-            {shopState.active && (
-                <div className="absolute right-0 top-0 bottom-0 w-3/4 border-l-2 z-30 p-2 text-xs flex flex-col" style={{ backgroundColor: C0, borderColor: C3, color: C3 }}>
-                    <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}>
-                        <h3 className="font-bold flex items-center"><ShoppingBag size={12} className="mr-1"/> 購買部</h3>
-                        <button onClick={() => setShopState(prev => ({...prev, active: false}))}><X size={12}/></button>
-                    </div>
-                    
-                    <div className="flex gap-2 mb-2">
-                        <button 
-                            className={`flex-1 py-1 text-center border`}
-                            style={{ borderColor: C3, backgroundColor: shopState.mode === 'BUY' ? C3 : 'transparent', color: shopState.mode === 'BUY' ? C0 : C3 }}
-                            onClick={() => { setShopState(prev => ({ ...prev, mode: 'BUY' })); setSelectedItemIndex(0); }}
-                        >
-                            買う
-                        </button>
-                        <button 
-                            className={`flex-1 py-1 text-center border`}
-                            style={{ borderColor: C3, backgroundColor: shopState.mode === 'SELL' ? C3 : 'transparent', color: shopState.mode === 'SELL' ? C0 : C3 }}
-                            onClick={() => { setShopState(prev => ({ ...prev, mode: 'SELL' })); setSelectedItemIndex(0); }}
-                        >
-                            売る
-                        </button>
-                    </div>
-
-                    <div className="flex justify-end mb-2 border-b pb-1" style={{ borderColor: C1 }}>
-                        <span className="flex items-center"><Coins size={10} className="mr-1"/> {player.gold} G</span>
-                    </div>
-
-                    <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
-                        {shopState.mode === 'BUY' ? (
-                            enemies.find(e => e.id === shopState.merchantId)?.shopItems?.map((item, i) => (
-                                <div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}>
-                                    <button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>
-                                        <span>{getItemName(item)}</span>
-                                        <span className="flex items-center gap-1">{item.price} G</span>
-                                    </button>
-                                    <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button>
-                                </div>
-                            )) || <div className="text-center">売り切れ</div>
-                        ) : (
-                            inventory.map((item, i) => (
-                                <div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}>
-                                    <button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>
-                                        <span>{getItemName(item)}</span>
-                                        <span className="flex items-center gap-1">{Math.floor((item.price || (item.value || 100)) / 2)} G</span>
-                                    </button>
-                                    <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button>
-                                </div>
-                            ))
-                        )}
-                        {shopState.mode === 'SELL' && inventory.length === 0 && <div className="text-center">持ち物なし</div>}
-                    </div>
-                </div>
-            )}
-
-            {menuOpen && (
-                <div className="absolute right-0 top-0 bottom-0 w-3/4 border-l-2 z-30 p-2 text-xs flex flex-col" style={{ backgroundColor: C0, borderColor: C3, color: C3 }}>
-                    <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}>
-                        <h3 className="font-bold">
-                            {synthState.active 
-                                ? (synthState.mode === 'BLANK' ? '書き込む内容を選択' : (synthState.step === 'SELECT_BASE' ? (synthState.mode==='CHANGE'?'変化させる物':'ベースを選択') : (synthState.mode==='CHANGE'?'変化':'素材を選択')))
-                                : `MOCHIMONO (${inventory.length}/${MAX_INVENTORY})`
-                            }
-                        </h3>
-                        <button onClick={toggleMenu}><X size={12}/></button>
-                    </div>
-                    
-                    {synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT' ? (
-                        <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
-                            {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).map((type, i) => (
-                                <div key={i} className="flex items-center border" style={{ borderColor: blankScrollSelectionIndex === i ? C3 : 'transparent', backgroundColor: blankScrollSelectionIndex === i ? C2 : 'transparent', color: blankScrollSelectionIndex === i ? C0 : C3 }}>
-                                    <button className="flex-grow text-left px-2 py-1 cursor-pointer" onClick={() => handleSynthesisStep()} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setBlankScrollSelectionIndex(i); }}>{ITEM_DB[type as string].name}</button>
-                                </div>
-                            ))}
-                            {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).length === 0 && <div className="text-red-500">識別済みのノートがありません</div>}
-                        </div>
-                    ) : (
-                        <>
-                            {!synthState.active && (
-                                <div className="mb-2 border-b pb-2" style={{ borderColor: C1 }}>
-                                    <div className="mb-1" style={{ color: C2 }}>装備中:</div>
-                                    {player.equipment?.weapon && <div onClick={()=>handleUnequip('weapon')} className="cursor-pointer hover:text-white">[武] {getItemName(player.equipment.weapon)}</div>}
-                                    {player.equipment?.armor && <div onClick={()=>handleUnequip('armor')} className="cursor-pointer hover:text-white">[防] {getItemName(player.equipment.armor)}</div>}
-                                    {player.equipment?.ranged && <div onClick={()=>handleUnequip('ranged')} className="cursor-pointer hover:text-white">[投] {getItemName(player.equipment.ranged)}</div>}
-                                    {player.equipment?.accessory && <div onClick={()=>handleUnequip('accessory')} className="cursor-pointer hover:text-white">[腕] {getItemName(player.equipment.accessory)}</div>}
-                                </div>
-                            )}
-
-                            <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
-                                {inventory.map((item, i) => {
-                                    const isSynthTarget = synthState.active && (
-                                        (synthState.step === 'SELECT_BASE' && synthState.mode === 'SYNTH' && !['WEAPON','ARMOR'].includes(item.category)) ||
-                                        (synthState.step === 'SELECT_MAT' && synthState.baseIndex === i)
-                                    );
-                                    
                                     return (
-                                        <div key={i} className={`flex items-center border ${isSynthTarget ? 'opacity-30' : ''}`} style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onContextMenu={(e) => { e.preventDefault(); setInspectedItem(item); }} onTouchStart={() => handleTouchStart(item)} onTouchEnd={handleTouchEnd}>
-                                            <button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => !isSynthTarget && (synthState.active ? handleSynthesisStep() : handleItemAction(i))} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}>
-                                                <span>{getItemName(item)} {item.plus ? `+${item.plus}` : ''} {item.count ? `(${item.count})` : ''}{item.category === 'STAFF' ? `[${item.charges}]` : ''}</span>
-                                                <span className="text-[9px]" style={{ color: selectedItemIndex === i ? C0 : C2 }}>{synthState.active ? '選択' : (['WEAPON','ARMOR','RANGED','ACCESSORY'].includes(item.category) ? '装備' : (item.category==='STAFF' ? '振る' : '使う'))}</span>
-                                            </button>
-                                            {!synthState.active && (
-                                                <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); handleThrowItem(i); }} title="投げる"><Send size={10} /></button>
-                                            )}
-                                            {!synthState.active && (
-                                                <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); handleDropItem(i); }} title="足元に置く"><ArrowDown size={10} /></button>
-                                            )}
-                                            <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }} title="詳細"><Info size={10} /></button>
+                                        <div key={`${x}-${y}`} style={bgStyle}>
+                                            {content}
                                         </div>
                                     );
-                                })}
-                                {inventory.length === 0 && <span className="text-center" style={{ color: C1 }}>Empty</span>}
+                                }))}
                             </div>
-                        </>
+                            <button onClick={() => setShowMap(false)} className="absolute bottom-4 border px-2 rounded hover:opacity-80" style={{ color: C3, borderColor: C3 }}>Close</button>
+                        </div>
                     )}
-                </div>
-            )}
 
-            {gameClear && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center z-40 p-4 text-center" style={{ backgroundColor: `${C0}F2`, color: C3 }}>
-                    <Award size={48} className="mb-4" style={{ color: C2 }}/>
-                    <h2 className="text-2xl font-bold mb-4">GRADUATION!</h2>
-                    <p className="mb-2">ついに校長を説得した！</p>
-                    <p className="mb-8">君は伝説の小学生となった。</p>
-                    <div className="flex flex-col gap-4 w-full">
-                        <button onClick={startEndlessMode} className="border-2 px-4 py-3 animate-pulse font-bold" style={{ borderColor: C3, color: C3, backgroundColor: 'transparent' }}>中学生編へ (エンドレス)</button>
-                        <button onClick={handleQuit} className="border-2 px-4 py-2 text-sm" style={{ borderColor: C1, color: C3 }}>タイトルへ戻る</button>
-                    </div>
-                </div>
-            )}
+                    {/* Deck View Overlay */}
+                    {showDeck && (
+                        <div className="absolute inset-0 z-30 flex items-center justify-center p-4 mt-12 bg-black/90 text-white">
+                            <div className="w-full h-full flex flex-col relative" onClick={e => e.stopPropagation()}>
+                                <button onClick={() => setShowDeck(false)} className="absolute top-0 right-0 p-2"><X size={24}/></button>
+                                <h3 className="font-bold text-center mb-4 flex items-center justify-center"><Layers size={16} className="mr-2"/> デッキ ({dungeonDeck.length})</h3>
+                                <div className="grid grid-cols-4 gap-2 overflow-y-auto custom-scrollbar flex-1 content-start">
+                                    {dungeonDeck.map((c) => (
+                                        <div key={c.id} className="bg-slate-800 p-2 rounded border border-slate-600 flex flex-col items-center text-center text-[8px]">
+                                            <div className="mb-1 text-cyan-400">{c.icon}</div>
+                                            <div className="truncate w-full">{c.name}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="mt-4 border-t border-gray-700 pt-2">
+                                    <div className="text-xs font-bold mb-2">手札 ({dungeonHand.length})</div>
+                                    <div className="flex gap-2 justify-center">
+                                        {dungeonHand.map((c) => (
+                                            <div key={c.id} className="bg-slate-700 p-1 rounded border border-slate-500 w-12 h-16 flex flex-col items-center justify-center text-[8px] text-center">
+                                                {c.icon}
+                                                <div className="mt-1 leading-tight">{c.name}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
-            {gameOver && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center z-40" style={{ backgroundColor: `${C0}E6`, color: C3 }}>
-                    <Skull size={48} className="mb-4" style={{ color: C1 }}/>
-                    <h2 className="text-2xl font-bold mb-4">GAME OVER</h2>
-                    <p>Floor: {floor}</p>
-                    <p>Level: {level}</p>
-                    <button onClick={handleRestart} className="mt-6 border-2 px-4 py-2 animate-pulse flex items-center" style={{ borderColor: C3, color: C3 }}><RotateCcw size={16} className="mr-2"/> RETRY</button>
-                    <button onClick={handleQuit} className="mt-4 text-sm hover:underline">EXIT</button>
-                </div>
-            )}
-        </div>
+                    {/* Card Hand UI (Overlay at bottom) */}
+                    {!showDeck && !menuOpen && !shopState.active && (
+                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+                            {dungeonHand.map((card, idx) => (
+                                <button 
+                                    key={card.id}
+                                    onClick={() => handleCardUse(idx)}
+                                    className="w-12 h-16 bg-slate-900/90 border-2 border-slate-500 rounded hover:border-cyan-400 hover:-translate-y-1 transition-transform flex flex-col items-center justify-center shadow-lg relative group"
+                                    title={card.description}
+                                >
+                                    <div className={`text-cyan-300 mb-1 ${card.type==='ATTACK'?'text-red-400':card.type==='DEFENSE'?'text-blue-400':'text-green-400'}`}>
+                                        {card.icon}
+                                    </div>
+                                    <div className="text-[8px] text-white font-bold leading-tight text-center px-0.5 line-clamp-2">
+                                        {card.name}
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    )}
 
-        <div className="w-full h-16 p-1 text-[9px] mb-1 rounded border-2 font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner overflow-hidden" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
-            {logs.slice(-4).map((l) => (
-                <div key={l.id} style={{ color: l.color || C3 }} className="truncate">{l.message}</div>
-            ))}
-        </div>
+                    {/* Shop Menu */}
+                    {shopState.active && (
+                        <div className="absolute right-0 top-0 bottom-0 w-3/4 border-l-2 z-30 p-2 text-xs flex flex-col" style={{ backgroundColor: C0, borderColor: C3, color: C3 }}>
+                            <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}>
+                                <h3 className="font-bold flex items-center"><ShoppingBag size={12} className="mr-1"/> 購買部</h3>
+                                <button onClick={() => setShopState(prev => ({...prev, active: false}))}><X size={12}/></button>
+                            </div>
+                            
+                            <div className="flex gap-2 mb-2">
+                                <button 
+                                    className={`flex-1 py-1 text-center border`}
+                                    style={{ 
+                                        borderColor: C3, 
+                                        backgroundColor: shopState.mode === 'BUY' ? C3 : 'transparent',
+                                        color: shopState.mode === 'BUY' ? C0 : C3
+                                    }}
+                                    onClick={() => { setShopState(prev => ({ ...prev, mode: 'BUY' })); setSelectedItemIndex(0); }}
+                                >
+                                    買う
+                                </button>
+                                <button 
+                                    className={`flex-1 py-1 text-center border`}
+                                    style={{ 
+                                        borderColor: C3, 
+                                        backgroundColor: shopState.mode === 'SELL' ? C3 : 'transparent',
+                                        color: shopState.mode === 'SELL' ? C0 : C3
+                                    }}
+                                    onClick={() => { setShopState(prev => ({ ...prev, mode: 'SELL' })); setSelectedItemIndex(0); }}
+                                >
+                                    売る
+                                </button>
+                            </div>
 
-        {/* Controls Container */}
-        <div className="w-full flex-1 relative bg-[#1a1a1a] rounded-t-xl border-t-2 border-l-2 border-r-2 border-[#333] shadow-2xl flex overflow-hidden">
-            
-            {/* Left: D-Pad */}
-            <div className="w-1/2 h-full relative flex items-center justify-center border-r border-[#333] bg-[#111]">
-                <div className="w-40 h-40 relative">
-                    {/* Diagonal Inputs (Visible) */}
-                    <div className="absolute top-4 left-4 w-10 h-10 bg-[#333] rounded-tl-lg border-t border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer z-0 flex items-center justify-center" onClick={() => handleMoveInput(-1, -1)}>
-                        <ArrowUpLeft size={16} className="text-[#555]" />
-                    </div>
-                    <div className="absolute top-4 right-4 w-10 h-10 bg-[#333] rounded-tr-lg border-t border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer z-0 flex items-center justify-center" onClick={() => handleMoveInput(1, -1)}>
-                        <ArrowUpRight size={16} className="text-[#555]" />
-                    </div>
-                    <div className="absolute bottom-4 left-4 w-10 h-10 bg-[#333] rounded-bl-lg border-b border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer z-0 flex items-center justify-center" onClick={() => handleMoveInput(-1, 1)}>
-                        <ArrowDownLeft size={16} className="text-[#555]" />
-                    </div>
-                    <div className="absolute bottom-4 right-4 w-10 h-10 bg-[#333] rounded-br-lg border-b border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer z-0 flex items-center justify-center" onClick={() => handleMoveInput(1, 1)}>
-                        <ArrowDownRight size={16} className="text-[#555]" />
-                    </div>
+                            {/* Card Removal Button */}
+                            {shopState.mode === 'BUY' && (
+                                <button 
+                                    className="w-full mb-2 py-1 border flex items-center justify-center gap-1 hover:opacity-80"
+                                    style={{ borderColor: 'red', color: 'red' }}
+                                    onClick={() => { setShopState(prev => ({ ...prev, mode: 'REMOVE_DECK' })); setSelectedItemIndex(0); }}
+                                >
+                                    <Trash2 size={10}/> カード整理 (300G)
+                                </button>
+                            )}
 
-                    {/* D-Pad Buttons */}
-                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-[#333] z-10"></div>
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-10 touch-none select-none" onClick={() => handleMoveInput(0, -1)}><ArrowUp className="text-[#666]" size={20}/></div>
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-16 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-10 touch-none select-none" onClick={() => handleMoveInput(0, 1)}><ArrowDown className="text-[#666]" size={20}/></div>
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-16 h-10 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-10 touch-none select-none" onClick={() => handleMoveInput(-1, 0)}><ArrowLeft className="text-[#666]" size={20}/></div>
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-16 h-10 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-10 touch-none select-none" onClick={() => handleMoveInput(1, 0)}><ArrowRight className="text-[#666]" size={20}/></div>
-                    
-                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-[#2a2a2a] rounded-full z-20 shadow-inner"></div>
+                            <div className="flex justify-end mb-2 border-b pb-1" style={{ borderColor: C1 }}>
+                                <span className="flex items-center"><Coins size={10} className="mr-1"/> {player.gold} G</span>
+                            </div>
+
+                            <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
+                                {shopState.mode === 'REMOVE_DECK' ? (
+                                    <>
+                                        <div className="text-center mb-1 text-red-400">除外するカードを選択</div>
+                                        {dungeonDeck.map((card, i) => (
+                                            <div 
+                                                key={card.id} 
+                                                className="flex items-center border"
+                                                style={{ 
+                                                    borderColor: selectedItemIndex === i ? 'red' : 'transparent',
+                                                    backgroundColor: selectedItemIndex === i ? '#300' : 'transparent',
+                                                    color: selectedItemIndex === i ? 'red' : C3
+                                                }}
+                                                onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}
+                                            >
+                                                <button 
+                                                    className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center"
+                                                    onClick={() => handleShopAction(i)}
+                                                >
+                                                    <span className="flex items-center gap-1">{card.icon} {card.name}</span>
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </>
+                                ) : shopState.mode === 'BUY' ? (
+                                    enemies.find(e => e.id === shopState.merchantId)?.shopItems?.map((item, i) => (
+                                        <div 
+                                            key={i} 
+                                            className="flex items-center border"
+                                            style={{ 
+                                                borderColor: selectedItemIndex === i ? C3 : 'transparent',
+                                                backgroundColor: selectedItemIndex === i ? C2 : 'transparent',
+                                                color: selectedItemIndex === i ? C0 : C3
+                                            }}
+                                            onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}
+                                        >
+                                            <button 
+                                                className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center"
+                                                onClick={() => handleShopAction(i)}
+                                            >
+                                                <span>{getItemName(item)}</span>
+                                                <span className="flex items-center gap-1">
+                                                    {item.price} G
+                                                </span>
+                                            </button>
+                                            <button 
+                                                className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80"
+                                                style={{ borderColor: C1 }}
+                                                onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}
+                                            >
+                                                <Info size={10} />
+                                            </button>
+                                        </div>
+                                    )) || <div className="text-center">売り切れ</div>
+                                ) : (
+                                    inventory.map((item, i) => (
+                                        <div 
+                                            key={i} 
+                                            className="flex items-center border"
+                                            style={{ 
+                                                borderColor: selectedItemIndex === i ? C3 : 'transparent',
+                                                backgroundColor: selectedItemIndex === i ? C2 : 'transparent',
+                                                color: selectedItemIndex === i ? C0 : C3
+                                            }}
+                                            onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}
+                                        >
+                                            <button 
+                                                className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center"
+                                                onClick={() => handleShopAction(i)}
+                                            >
+                                                <span>{getItemName(item)}</span>
+                                                <span className="flex items-center gap-1">
+                                                    {Math.floor((item.price || (item.value || 100)) / 2)} G
+                                                </span>
+                                            </button>
+                                            <button 
+                                                className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80"
+                                                style={{ borderColor: C1 }}
+                                                onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}
+                                            >
+                                                <Info size={10} />
+                                            </button>
+                                        </div>
+                                    ))
+                                )}
+                                {shopState.mode === 'SELL' && inventory.length === 0 && <div className="text-center">持ち物なし</div>}
+                            </div>
+                        </div>
+                    )}
+
+                    {menuOpen && (
+                        <div className="absolute right-0 top-0 bottom-0 w-3/4 border-l-2 z-30 p-2 text-xs flex flex-col" style={{ backgroundColor: C0, borderColor: C3, color: C3 }}>
+                            <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}>
+                                <h3 className="font-bold">
+                                    {synthState.active 
+                                        ? (synthState.mode === 'BLANK' ? '書き込む内容を選択' : (synthState.step === 'SELECT_BASE' ? (synthState.mode==='CHANGE'?'変化させる物':'ベースを選択') : (synthState.mode==='CHANGE'?'変化':'素材を選択')))
+                                        : `MOCHIMONO (${inventory.length}/${MAX_INVENTORY})`
+                                    }
+                                </h3>
+                                <button onClick={toggleMenu}><X size={12}/></button>
+                            </div>
+                            
+                            {synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT' ? (
+                                <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
+                                    {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).map((type, i) => (
+                                        <div key={i} className="flex items-center border" style={{ borderColor: blankScrollSelectionIndex === i ? C3 : 'transparent', backgroundColor: blankScrollSelectionIndex === i ? C2 : 'transparent', color: blankScrollSelectionIndex === i ? C0 : C3 }}>
+                                            <button 
+                                                className="flex-grow text-left px-2 py-1 cursor-pointer" 
+                                                onClick={() => handleSynthesisStep()} 
+                                                onMouseEnter={() => { lastInputType.current = 'MOUSE'; setBlankScrollSelectionIndex(i); }}
+                                            >
+                                                {ITEM_DB[type as string].name}
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).length === 0 && <div className="text-red-500">識別済みのノートがありません</div>}
+                                </div>
+                            ) : (
+                                <>
+                                    {!synthState.active && (
+                                        <div className="mb-2 border-b pb-2" style={{ borderColor: C1 }}>
+                                            <div className="mb-1" style={{ color: C2 }}>装備中:</div>
+                                            {player.equipment?.weapon && <div onClick={()=>handleUnequip('weapon')} className="cursor-pointer hover:text-white">[武] {getItemName(player.equipment.weapon)}</div>}
+                                            {player.equipment?.armor && <div onClick={()=>handleUnequip('armor')} className="cursor-pointer hover:text-white">[防] {getItemName(player.equipment.armor)}</div>}
+                                            {player.equipment?.ranged && <div onClick={()=>handleUnequip('ranged')} className="cursor-pointer hover:text-white">[投] {getItemName(player.equipment.ranged)}</div>}
+                                            {player.equipment?.accessory && <div onClick={()=>handleUnequip('accessory')} className="cursor-pointer hover:text-white">[腕] {getItemName(player.equipment.accessory)}</div>}
+                                        </div>
+                                    )}
+
+                                    <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
+                                        {inventory.map((item, i) => {
+                                            const isSynthTarget = synthState.active && (
+                                                (synthState.step === 'SELECT_BASE' && synthState.mode === 'SYNTH' && !['WEAPON','ARMOR'].includes(item.category)) ||
+                                                (synthState.step === 'SELECT_MAT' && synthState.baseIndex === i)
+                                            );
+                                            
+                                            return (
+                                                <div 
+                                                    key={i} 
+                                                    className={`flex items-center border ${isSynthTarget ? 'opacity-30' : ''}`}
+                                                    style={{ 
+                                                        borderColor: selectedItemIndex === i ? C3 : 'transparent',
+                                                        backgroundColor: selectedItemIndex === i ? C2 : 'transparent',
+                                                        color: selectedItemIndex === i ? C0 : C3
+                                                    }}
+                                                    onContextMenu={(e) => { e.preventDefault(); setInspectedItem(item); }}
+                                                    onTouchStart={() => handleTouchStart(item)}
+                                                    onTouchEnd={handleTouchEnd}
+                                                >
+                                                    <button 
+                                                        className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center"
+                                                        onClick={() => !isSynthTarget && (synthState.active ? handleSynthesisStep() : handleItemAction(i))}
+                                                        onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}
+                                                    >
+                                                        <span>
+                                                            {getItemName(item)} 
+                                                            {item.plus ? `+${item.plus}` : ''} 
+                                                            {item.count ? `(${item.count})` : ''}
+                                                            {item.category === 'STAFF' ? `[${item.charges}]` : ''}
+                                                        </span>
+                                                        <span className="text-[9px]" style={{ color: selectedItemIndex === i ? C0 : C2 }}>
+                                                            {synthState.active 
+                                                                ? '選択' 
+                                                                : (['WEAPON','ARMOR','RANGED','ACCESSORY'].includes(item.category) ? '装備' : (item.category==='STAFF' ? '振る' : '使う'))
+                                                            }
+                                                        </span>
+                                                    </button>
+                                                    {!synthState.active && (
+                                                        <button 
+                                                            className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80"
+                                                            style={{ borderColor: C1 }}
+                                                            onClick={(e) => { e.stopPropagation(); handleThrowItem(i); }}
+                                                            title="投げる"
+                                                        >
+                                                            <Send size={10} />
+                                                        </button>
+                                                    )}
+                                                    {!synthState.active && (
+                                                        <button 
+                                                            className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80"
+                                                            style={{ borderColor: C1 }}
+                                                            onClick={(e) => { e.stopPropagation(); handleDropItem(i); }}
+                                                            title="足元に置く"
+                                                        >
+                                                            <ArrowDown size={10} />
+                                                        </button>
+                                                    )}
+                                                    <button 
+                                                        className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80"
+                                                        style={{ borderColor: C1 }}
+                                                        onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}
+                                                        title="詳細"
+                                                    >
+                                                        <Info size={10} />
+                                                    </button>
+                                                </div>
+                                            );
+                                        })}
+                                        {inventory.length === 0 && <span className="text-center" style={{ color: C1 }}>Empty</span>}
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    )}
+
+                    {gameClear && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center z-40 p-4 text-center" style={{ backgroundColor: `${C0}F2`, color: C3 }}>
+                            <Award size={48} className="mb-4" style={{ color: C2 }}/>
+                            <h2 className="text-2xl font-bold mb-4">GRADUATION!</h2>
+                            <p className="mb-2">ついに校長を説得した！</p>
+                            <p className="mb-8">君は伝説の小学生となった。</p>
+                            <div className="flex flex-col gap-4 w-full">
+                                <button onClick={startEndlessMode} className="border-2 px-4 py-3 animate-pulse font-bold" style={{ borderColor: C3, color: C3, backgroundColor: 'transparent' }}>中学生編へ (エンドレス)</button>
+                                <button onClick={handleQuit} className="border-2 px-4 py-2 text-sm" style={{ borderColor: C1, color: C3 }}>タイトルへ戻る</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {gameOver && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center z-40" style={{ backgroundColor: `${C0}E6`, color: C3 }}>
+                            <Skull size={48} className="mb-4" style={{ color: C1 }}/>
+                            <h2 className="text-2xl font-bold mb-4">GAME OVER</h2>
+                            <p>Floor: {floor}</p>
+                            <p>Level: {level}</p>
+                            <button onClick={handleRestart} className="mt-6 border-2 px-4 py-2 animate-pulse flex items-center" style={{ borderColor: C3, color: C3 }}><RotateCcw size={16} className="mr-2"/> RETRY</button>
+                            <button onClick={handleQuit} className="mt-4 text-sm hover:underline">EXIT</button>
+                        </div>
+                    )}
                 </div>
             </div>
 
-            {/* Right: Actions */}
-            <div className="w-1/2 h-full relative bg-[#161616]">
-                {/* SHOOT (R) - Top Right */}
-                <div className="absolute top-2 right-2 z-20 flex flex-col items-center">
-                    <button 
-                        className="w-10 h-10 bg-[#333] rounded-full shadow-inner active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555] touch-none select-none" 
-                        onClick={fireRangedWeapon}
-                    >
-                        <Crosshair size={16}/>
-                    </button>
-                    <span className="text-[#666] text-[8px] font-bold mt-0.5">R</span>
-                </div>
+            <div className="w-full h-24 p-1 text-[10px] mb-2 rounded border-2 font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner overflow-hidden" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
+                {logs.slice(-6).map((l) => (
+                    <div key={l.id} style={{ color: l.color || C3 }} className="truncate">{l.message}</div>
+                ))}
+            </div>
+        </div>
 
-                {/* Quit (Top Left of this panel) */}
-                <div className="absolute top-2 left-2 z-20">
-                     <button onClick={handleQuit} className="text-[#555] text-[10px] font-bold border border-[#333] px-2 py-1 rounded bg-[#222] hover:text-white hover:border-gray-500 flex items-center gap-1"><LogOut size={10}/> QUIT</button>
-                </div>
+        <div className="w-full max-w-md md:w-64 md:h-[400px] flex-grow md:flex-grow-0 relative min-h-[220px] rounded-t-xl md:rounded-xl border-t-2 md:border-2 border-[#333] bg-[#1a1a1a]">
+            <div className="absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32 md:left-1/2 md:-translate-x-1/2 md:top-1/4 flex items-center justify-center">
+                <div className="w-10 h-10 bg-[#333] z-10"></div>
+                <div className="absolute top-0 w-10 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0 touch-none select-none" onClick={() => handleMoveInput(0, -1)}><ArrowUp className="text-[#666]" size={20}/></div>
+                <div className="absolute bottom-0 w-10 h-16 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-0 touch-none select-none" onClick={() => handleMoveInput(0, 1)}><ArrowDown className="text-[#666]" size={20}/></div>
+                <div className="absolute left-0 w-16 h-10 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-0 touch-none select-none" onClick={() => handleMoveInput(-1, 0)}><ArrowLeft className="text-[#666]" size={20}/></div>
+                <div className="absolute right-0 w-16 h-10 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-0 touch-none select-none" onClick={() => handleMoveInput(1, 0)}><ArrowRight className="text-[#666]" size={20}/></div>
+                <div className="absolute top-0 left-0 w-10 h-10 bg-[#333] rounded-tl-xl border-t border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => handleMoveInput(-1, -1)}><ArrowUpLeft className="text-[#666]" size={20}/></div>
+                <div className="absolute top-0 right-0 w-10 h-10 bg-[#333] rounded-tr-xl border-t border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => handleMoveInput(1, -1)}><ArrowUpRight className="text-[#666]" size={20}/></div>
+                <div className="absolute bottom-0 left-0 w-10 h-10 bg-[#333] rounded-bl-xl border-b border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => handleMoveInput(-1, 1)}><ArrowDownLeft className="text-[#666]" size={20}/></div>
+                <div className="absolute bottom-0 right-0 w-10 h-10 bg-[#333] rounded-br-xl border-b border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => handleMoveInput(1, 1)}><ArrowDownRight className="text-[#666]" size={20}/></div>
+                <div className="absolute w-8 h-8 bg-[#2a2a2a] rounded-full z-20 shadow-inner"></div>
+            </div>
 
-                {/* Actions (A / B) */}
-                <div className="absolute bottom-[80px] right-4 z-10 flex flex-col items-center group">
+            {/* Shoot Button */}
+            <div className="absolute right-6 top-1/2 -translate-y-[100px] md:right-auto md:left-1/2 md:-translate-x-[20px] md:top-1/2 md:-translate-y-1/2 flex flex-col items-center z-10 group">
+                <button 
+                    className="w-10 h-10 bg-[#333] rounded-full shadow-[0_2px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555] touch-none select-none" 
+                    onClick={fireRangedWeapon}
+                >
+                    <Crosshair size={16}/>
+                </button>
+                <span className="text-[#666] text-[10px] font-bold mt-1">SHOOT</span>
+            </div>
+
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 md:right-auto md:left-1/2 md:-translate-x-1/2 md:top-3/4 flex gap-4 transform -rotate-12 md:rotate-0">
+                <div className="flex flex-col items-center group">
+                    <button className="w-14 h-14 bg-[#8b0000] rounded-full shadow-[0_4px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000] touch-none select-none" onClick={toggleMenu}>B</button>
+                    <span className="text-[#666] text-xs font-bold mt-1">MENU</span>
+                </div>
+                <div className="flex flex-col items-center group">
                     <button 
-                        className="w-14 h-14 bg-[#ff0000] rounded-full shadow-[0_4px_0_#8b0000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#cc0000] touch-none select-none text-xl" 
+                        className="w-14 h-14 bg-[#ff0000] rounded-full shadow-[0_4px_0_#8b0000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#cc0000] touch-none select-none" 
                         onMouseDown={() => handlePressStart()} 
                         onMouseUp={(e) => handlePressEnd(e)} 
                         onMouseLeave={(e) => handlePressEnd(e)}
@@ -3023,39 +3504,10 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                     </button>
                     <span className="text-[#666] text-xs font-bold mt-1">ACT</span>
                 </div>
+            </div>
 
-                <div className="absolute bottom-[110px] right-24 z-10 flex flex-col items-center group">
-                    <button className="w-12 h-12 bg-[#8b0000] rounded-full shadow-[0_4px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000] touch-none select-none" onClick={toggleMenu}>B</button>
-                    <span className="text-[#666] text-xs font-bold mt-1">MENU</span>
-                </div>
-
-                {/* Cards Row (Bottom) */}
-                <div className="absolute bottom-1 right-1 left-1 h-20 flex items-end justify-end gap-1 pointer-events-none pr-1">
-                     {dungeonHand.length > 0 ? (
-                        dungeonHand.map((card, i) => (
-                            <button 
-                                key={card.id} 
-                                className="w-14 h-20 bg-[#2a2a2a] border-2 border-[#555] rounded-lg flex flex-col items-center justify-start text-white relative shadow-lg hover:bg-[#333] hover:border-white hover:-translate-y-2 active:scale-95 transition-all p-0.5 overflow-hidden pointer-events-auto"
-                                onClick={() => handleCardUse(i)}
-                            >
-                                <div className={`w-full text-[6px] font-bold px-1 rounded-t mb-0.5 text-center ${card.type === 'ATTACK' ? 'bg-red-900 text-red-200' : card.type === 'DEFENSE' ? 'bg-blue-900 text-blue-200' : card.type === 'BUFF' ? 'bg-green-900 text-green-200' : 'bg-purple-900 text-purple-200'}`}>
-                                    {card.type}
-                                </div>
-                                <div className="mb-0.5 p-0.5 bg-black/50 rounded-full scale-75">{card.icon}</div>
-                                <div className="text-[7px] font-bold text-center leading-tight w-full break-words px-0.5">{card.name}</div>
-                                <div className="text-[6px] text-gray-400 mt-auto border-t border-[#444] w-full text-center pt-0.5">{card.power > 0 ? `Pow:${card.power}` : 'Effect'}</div>
-                            </button>
-                        ))
-                    ) : (
-                        <div className="text-gray-500 text-xs mb-4 animate-pulse w-full text-center">Reloading...</div>
-                    )}
-                    
-                    <div className="absolute bottom-1 right-1 pointer-events-none opacity-50">
-                        <div className="text-[8px] text-[#666] flex items-center bg-[#1a1a1a] px-1 rounded border border-[#333]">
-                            <Layers size={8} className="mr-1"/> {dungeonDeck ? dungeonDeck.length : 0}
-                        </div>
-                    </div>
-                </div>
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 md:bottom-4">
+                 <button onClick={handleQuit} className="text-[#555] text-[10px] font-bold border border-[#333] px-3 py-1 rounded bg-[#222] hover:text-white hover:border-gray-500 flex items-center gap-1"><LogOut size={10}/> QUIT</button>
             </div>
         </div>
     </div>
