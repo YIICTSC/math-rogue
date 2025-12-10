@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch, Sparkles, BookOpen, Layers } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch, Sparkles, BookOpen, Layers, Move } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
 import { storageService } from '../services/storageService';
@@ -55,7 +55,7 @@ const UNIDENTIFIED_NAMES = [
 // --- TYPES ---
 type TileType = 'WALL' | 'FLOOR' | 'STAIRS' | 'HALLWAY';
 type Direction = { x: 0 | 1 | -1, y: 0 | 1 | -1 };
-type ItemCategory = 'WEAPON' | 'ARMOR' | 'RANGED' | 'CONSUMABLE' | 'SYNTH' | 'STAFF' | 'ACCESSORY';
+type ItemCategory = 'WEAPON' | 'ARMOR' | 'RANGED' | 'CONSUMABLE' | 'SYNTH' | 'STAFF' | 'ACCESSORY' | 'DECK_CARD';
 type EnemyType = 'SLIME' | 'GHOST' | 'DRAIN' | 'DRAGON' | 'METAL' | 'FLOATING' | 'THIEF' | 'BAT' | 'BOSS' | 'MANDRAKE' | 'GOLEM' | 'NINJA' | 'MAGE' | 'SHOPKEEPER';
 type VisualEffectType = 'SLASH' | 'THUNDER' | 'EXPLOSION' | 'TEXT' | 'FLASH' | 'PROJECTILE' | 'WARP' | 'BEAM' | 'MAGIC_PROJ';
 type TrapType = 'BOMB' | 'SLEEP' | 'POISON' | 'WARP' | 'RUST' | 'SUMMON';
@@ -138,6 +138,7 @@ interface Entity {
       blind: number;
       speed: number;
       defenseBuff?: number; // Temporary Defense Buff from cards
+      attackBuff?: number; // Temporary Attack Buff
   };
   
   dead?: boolean;
@@ -238,12 +239,17 @@ const ITEM_DB: Record<string, Omit<Item, 'id'>> = {
 
 // --- DUNGEON CARD DATABASE ---
 const DUNGEON_CARD_DB: Omit<DungeonCard, 'id'>[] = [
-    { templateId: 'SLASH', name: 'えんぴつ斬り', type: 'ATTACK', power: 8, description: '前方の敵にダメージ', icon: <Sword size={16}/> },
-    { templateId: 'SPIN', name: 'コンパス回転', type: 'ATTACK', power: 5, description: '周囲8マスの敵にダメージ', icon: <RotateCcw size={16}/> },
+    { templateId: 'THRUST', name: 'えんぴつ突き', type: 'ATTACK', power: 3, description: '前方2マスの敵を貫通攻撃', icon: <Sword size={16}/> },
+    { templateId: 'SPIN', name: 'コンパス回転', type: 'ATTACK', power: 2, description: '周囲8マスの敵にダメージ', icon: <RotateCcw size={16}/> },
     { templateId: 'HEAL', name: '給食休憩', type: 'BUFF', power: 30, description: 'HPを回復する', icon: <FlaskConical size={16}/> },
     { templateId: 'GUARD', name: 'ノート盾', type: 'DEFENSE', power: 10, description: '防御力を一時的に上げる', icon: <Shield size={16}/> },
     { templateId: 'FIRE', name: '理科実験', type: 'SPECIAL', power: 15, description: '遠距離の敵に炎ダメージ', icon: <Zap size={16}/> },
     { templateId: 'DASH', name: '廊下ダッシュ', type: 'BUFF', power: 0, description: '倍速状態になる', icon: <FastForward size={16}/> },
+    { templateId: 'WAVE', name: '定規なぎ払い', type: 'ATTACK', power: 4, description: '前方3方向にダメージ', icon: <Move size={16}/> },
+    { templateId: 'SNIPE', name: '狙い撃ち', type: 'ATTACK', power: 10, description: '遠くの敵1体に大ダメージ', icon: <Crosshair size={16}/> },
+    { templateId: 'RAGE', name: '逆ギレ', type: 'BUFF', power: 5, description: '攻撃力を一時的に上げる', icon: <Sword size={16}/> },
+    { templateId: 'TELEPORT', name: '早退', type: 'SPECIAL', power: 0, description: 'フロアのどこかへワープ', icon: <Ghost size={16}/> },
+    { templateId: 'DISARM', name: '武器奪取', type: 'SPECIAL', power: 0, description: '周囲の敵の攻撃力を下げる', icon: <X size={16}/> },
 ];
 
 // --- DIJKSTRA PATHFINDING HELPER ---
@@ -331,11 +337,13 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   const turnCounter = useRef(0);
   const [isEndless, setIsEndless] = useState(false);
   const saveDebounceRef = useRef<any>(null);
+  const [shopRemovedThisFloor, setShopRemovedThisFloor] = useState(false); // New: Track shop removal
   
   const currentTheme = useMemo(() => getTheme(floor), [floor]);
 
   // Shop State
   const [shopState, setShopState] = useState<{ active: boolean, merchantId: number | null, mode: 'BUY' | 'SELL' }>({ active: false, merchantId: null, mode: 'BUY' });
+  const [deckViewMode, setDeckViewMode] = useState<'VIEW' | 'REMOVE'>('VIEW');
 
   // VFX State
   const visualEffects = useRef<VisualEffect[]>([]);
@@ -399,6 +407,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
     spriteCache.current['MAGIC_BULLET'] = createPixelSpriteCanvas('MAGIC_BULLET', 'MAGIC_BULLET|#00BCD4');
     spriteCache.current['TRAP'] = createPixelSpriteCanvas('TRAP', 'CROSS|#0f380f'); // Black cross trap
     spriteCache.current['ACCESSORY'] = createPixelSpriteCanvas('ACCESSORY', 'SHIELD|#FFD700'); // Bracelet/Ring
+    
+    spriteCache.current['DECK_CARD'] = createPixelSpriteCanvas('DECK_CARD', 'NOTEBOOK|#FFFFFF|SKILL'); // New: Card Sprite
 
     // Load Game State
     const savedState = storageService.loadDungeonState2();
@@ -534,14 +544,16 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           
           // Defense buff from cards
           const buffDef = p.status.defenseBuff || 0;
+          // Attack buff from cards
+          const buffAtk = p.status.attackBuff || 0;
 
           return {
               ...p,
-              attack: p.baseAttack + wPow + accPow,
+              attack: p.baseAttack + wPow + accPow + buffAtk,
               defense: p.baseDefense + aPow + accDef + buffDef
           };
       });
-  }, [player.equipment, player.status.defenseBuff]);
+  }, [player.equipment, player.status.defenseBuff, player.status.attackBuff]);
 
   const addVisualEffect = (type: VisualEffectType, x: number, y: number, options: Partial<VisualEffect> = {}) => {
       visualEffects.current.push({
@@ -605,32 +617,6 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
       setDungeonDiscard([]);
   };
 
-  const drawCard = (count: number = 1) => {
-      setDungeonDeck(currentDeck => {
-          setDungeonDiscard(currentDiscard => {
-              setDungeonHand(currentHand => {
-                  let nextDeck = [...currentDeck];
-                  let nextDiscard = [...currentDiscard];
-                  const nextHand = [...currentHand];
-
-                  for(let i=0; i<count; i++) {
-                      if (nextDeck.length === 0) {
-                          if (nextDiscard.length === 0) break; // Empty
-                          nextDeck = nextDiscard.sort(() => Math.random() - 0.5);
-                          nextDiscard = [];
-                      }
-                      const card = nextDeck.pop();
-                      if (card) nextHand.push(card);
-                  }
-                  
-                  return currentHand; 
-              });
-              return currentDiscard;
-          });
-          return currentDeck;
-      });
-  };
-
   const handleCardUse = (index: number) => {
       if (gameOver || gameClear || menuOpen || shopState.active) return;
       if (index >= dungeonHand.length) return;
@@ -639,37 +625,65 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
       let msg = "";
       let used = false;
 
-      if (card.type === 'ATTACK') {
-          // Attack Front
+      // Base Damage: Player Total Attack + Card Power
+      // For buffs/heals, use card.power as fixed value usually
+      const baseDmg = player.attack + card.power;
+
+      if (card.templateId === 'THRUST') {
+          // 2-tile piercing Thrust
           const { x: dx, y: dy } = player.dir;
-          const tx = player.x + dx;
-          const ty = player.y + dy;
-          const target = enemies.find(e => e.x === tx && e.y === ty);
-          if (target) {
-              let dmg = card.power + Math.floor(player.attack / 2);
-              const nhp = target.hp - dmg;
-              setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0));
-              if (nhp <= 0) { gainXp(target.xp); msg = `${target.name}を倒した！`; }
-              else { msg = `${target.name}に${dmg}ダメージ！`; addVisualEffect('TEXT', tx, ty, { value: `${dmg}`, color: 'yellow' }); }
-              triggerPlayerAttackAnim(player.dir);
+          let hitCount = 0;
+          const targets: Entity[] = [];
+          
+          // Check 2 tiles
+          for (let i=1; i<=2; i++) {
+              const tx = player.x + dx * i;
+              const ty = player.y + dy * i;
+              if (map[ty][tx] === 'WALL') break; // Wall stops piercing
+              
+              // Visual Slash
               addVisualEffect('SLASH', tx, ty, { dir: player.dir });
-              audioService.playSound('attack');
-              used = true;
-          } else {
-              // Empty swing
-              triggerPlayerAttackAnim(player.dir);
-              addVisualEffect('SLASH', tx, ty, { dir: player.dir });
-              msg = "空を切った。";
-              audioService.playSound('select');
-              used = true;
+              
+              const target = enemies.find(e => e.x === tx && e.y === ty);
+              if (target) targets.push(target);
           }
+
+          triggerPlayerAttackAnim(player.dir);
+          if (targets.length > 0) {
+              setEnemies(prev => {
+                  return prev.map(e => {
+                      if (targets.some(t => t.id === e.id)) {
+                          let dmg = baseDmg - e.defense;
+                          dmg = Math.max(1, dmg);
+                          const nhp = e.hp - dmg;
+                          addVisualEffect('TEXT', e.x, e.y, { value: `${dmg}`, color: 'yellow' });
+                          if (nhp <= 0) { gainXp(e.xp); return { ...e, hp: 0, dead: true }; }
+                          return { ...e, hp: nhp };
+                      }
+                      return e;
+                  }).filter(e => !e.dead);
+              });
+              msg = targets.length > 1 ? "2枚抜き！" : `${targets[0].name}に攻撃！`;
+              audioService.playSound('attack');
+          } else {
+              msg = "空を突いた。";
+              audioService.playSound('select');
+          }
+          used = true;
+
       } else if (card.templateId === 'SPIN') {
-          // Area Attack
-          addVisualEffect('EXPLOSION', player.x, player.y, { scale: 1.5 });
+          // Spin Attack with improved visual
+          // Add 4 slashes around player
+          addVisualEffect('SLASH', player.x + 1, player.y, { dir: {x:1, y:0} });
+          addVisualEffect('SLASH', player.x - 1, player.y, { dir: {x:-1, y:0} });
+          addVisualEffect('SLASH', player.x, player.y + 1, { dir: {x:0, y:1} });
+          addVisualEffect('SLASH', player.x, player.y - 1, { dir: {x:0, y:-1} });
+          addVisualEffect('EXPLOSION', player.x, player.y, { scale: 1.5 }); // Center blast
+
           let hits = 0;
           setEnemies(prev => prev.map(e => {
               if (Math.abs(e.x - player.x) <= 1 && Math.abs(e.y - player.y) <= 1) {
-                  let dmg = card.power + Math.floor(player.attack / 3);
+                  let dmg = Math.max(1, baseDmg - e.defense);
                   hits++;
                   const nhp = e.hp - dmg;
                   addVisualEffect('TEXT', e.x, e.y, { value: `${dmg}`, color: 'yellow' });
@@ -678,9 +692,60 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               }
               return e;
           }).filter(e => !e.dead));
-          msg = hits > 0 ? "回転攻撃！" : "周りに誰もいない。";
+          msg = hits > 0 ? "回転斬り！" : "周りに誰もいない。";
           audioService.playSound('attack');
           used = true;
+
+      } else if (card.type === 'ATTACK') {
+          // Generic Attack (Wave, Snipe, etc)
+          // Simple front attack for now if not specialized
+          const { x: dx, y: dy } = player.dir;
+          let targets: {x:number, y:number}[] = [];
+          
+          if (card.templateId === 'WAVE') {
+              targets = [
+                  {x: player.x+dx, y: player.y+dy},
+                  {x: player.x+dx+dy, y: player.y+dy+dx}, // Side 1
+                  {x: player.x+dx-dy, y: player.y+dy-dx}  // Side 2
+              ];
+              targets.forEach(t => addVisualEffect('SLASH', t.x, t.y, { dir: player.dir }));
+          } else if (card.templateId === 'SNIPE') {
+              // Long range single target
+              let hit = false;
+              for(let i=1; i<=6; i++) {
+                  const tx = player.x + dx*i; const ty = player.y + dy*i;
+                  if (map[ty][tx] === 'WALL') break;
+                  targets.push({x:tx, y:ty});
+                  if (enemies.some(e => e.x === tx && e.y === ty)) { hit = true; break; } // Stop at first hit
+              }
+              if (!hit) targets = []; // If no enemy hit, visualize projectile anyway?
+              // Let's visualize projectile
+              addVisualEffect('PROJECTILE', player.x, player.y, { dir: player.dir, duration: 10 });
+          } else {
+              // Default single front
+              targets = [{x: player.x+dx, y: player.y+dy}];
+              addVisualEffect('SLASH', targets[0].x, targets[0].y, { dir: player.dir });
+          }
+
+          triggerPlayerAttackAnim(player.dir);
+          
+          let hits = 0;
+          setEnemies(prev => prev.map(e => {
+              if (targets.some(t => t.x === e.x && t.y === e.y)) {
+                  let dmg = Math.max(1, baseDmg - e.defense);
+                  hits++;
+                  const nhp = e.hp - dmg;
+                  addVisualEffect('TEXT', e.x, e.y, { value: `${dmg}`, color: 'yellow' });
+                  if (nhp <= 0) { gainXp(e.xp); return { ...e, hp: 0, dead: true }; }
+                  return { ...e, hp: nhp };
+              }
+              return e;
+          }).filter(e => !e.dead));
+          
+          msg = hits > 0 ? "攻撃命中！" : "空振り。";
+          audioService.playSound(hits > 0 ? 'attack' : 'select');
+          used = true;
+
       } else if (card.type === 'BUFF' && card.templateId === 'HEAL') {
           const heal = card.power;
           setPlayer(p => ({ ...p, hp: Math.min(p.maxHp, p.hp + heal) }));
@@ -706,7 +771,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           }
           addVisualEffect('BEAM', player.x + dx*2, player.y + dy*2, { dir: player.dir }); // Sim visual
           if (target) {
-              const dmg = card.power;
+              const dmg = baseDmg; // Use scale damage
               const nhp = target.hp - dmg;
               setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0));
               if (nhp <= 0) { gainXp(target.xp); msg = `${target.name}を燃やした！`; }
@@ -720,6 +785,32 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           setPlayer(p => ({ ...p, status: { ...p.status, speed: 5 } })); // Speed buff (needs impl in move)
           msg = "ダッシュ！";
           used = true; 
+      } else if (card.templateId === 'RAGE') {
+          setPlayer(p => ({ ...p, status: { ...p.status, attackBuff: (p.status.attackBuff || 0) + card.power } }));
+          msg = "攻撃力が上がった！";
+          audioService.playSound('buff');
+          used = true;
+      } else if (card.templateId === 'TELEPORT') {
+          let attempts = 0;
+          while (attempts < 20) {
+              attempts++;
+              const rx = Math.floor(Math.random() * MAP_W); const ry = Math.floor(Math.random() * MAP_H);
+              if (map[ry][rx] === 'FLOOR' && !enemies.find(e => e.x === rx && e.y === ry)) {
+                  setPlayer(p => ({ ...p, x: rx, y: ry }));
+                  addLog("ワープした！"); addVisualEffect('FLASH', 0, 0); break;
+              }
+          }
+          used = true;
+      } else if (card.templateId === 'DISARM') {
+          addVisualEffect('FLASH', 0, 0, { color: 'blue' });
+          setEnemies(prev => prev.map(e => {
+              if (Math.abs(e.x - player.x) <= 3 && Math.abs(e.y - player.y) <= 3) {
+                  return { ...e, attack: Math.max(1, Math.floor(e.attack * 0.7)) };
+              }
+              return e;
+          }));
+          msg = "周囲の敵の攻撃力を下げた！";
+          used = true;
       }
 
       if (used) {
@@ -762,6 +853,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
     setMenuOpen(false);
     setShopState({ active: false, merchantId: null, mode: 'BUY' });
     setIsEndless(false);
+    setShopRemovedThisFloor(false);
     turnCounter.current = 0;
     visualEffects.current = [];
     setIsFastForwarding(false);
@@ -861,6 +953,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   };
 
   const generateFloor = (f: number) => {
+    setShopRemovedThisFloor(false);
     const newMap: TileType[][] = Array(MAP_H).fill(null).map(() => Array(MAP_W).fill('WALL'));
     const rooms: {x:number, y:number, w:number, h:number}[] = [];
     
@@ -964,6 +1057,22 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                     hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
                     status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
                     gold: Math.floor(Math.random() * 50 + 10 * f)
+                });
+            } else if (r < 0.3) {
+                // Card Drop
+                const cardTemplate = DUNGEON_CARD_DB[Math.floor(Math.random() * DUNGEON_CARD_DB.length)];
+                newItems.push({
+                    id: Date.now() + Math.random(), type: 'ITEM', x: t.x, y: t.y, char: 'C', name: cardTemplate.name,
+                    hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
+                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+                    itemData: { 
+                        id: `card-drop-${Date.now()}-${Math.random()}`, 
+                        category: 'DECK_CARD',
+                        type: cardTemplate.templateId,
+                        name: cardTemplate.name,
+                        desc: cardTemplate.description,
+                        value: 0
+                    }
                 });
             } else {
                 const keys = Object.keys(ITEM_DB);
@@ -1092,6 +1201,9 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           
           if (nextStatus.defenseBuff && nextStatus.defenseBuff > 0) {
               nextStatus.defenseBuff = Math.max(0, nextStatus.defenseBuff - 2); // Decay defense buff
+          }
+          if (nextStatus.attackBuff && nextStatus.attackBuff > 0) {
+              nextStatus.attackBuff = Math.max(0, nextStatus.attackBuff - 2);
           }
 
           if (starveDamage > 0) {
@@ -1287,6 +1399,10 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           return;
       }
 
+      if (deckViewMode === 'REMOVE' && showDeck) {
+          return; // Block movement if in removal mode
+      }
+
       if(dx === 0 && dy === 0) {
           addLog("足踏みした。");
           processTurn(player.x, player.y);
@@ -1380,13 +1496,28 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               audioService.playSound('select');
           } else if (itemEntity.itemData) {
               const item = itemEntity.itemData;
-              if (inventory.length < MAX_INVENTORY) {
-                  setInventory(prev => [...prev, item]);
-                  addLog(`${getItemName(item)}を拾った！`);
-                  setFloorItems(prev => prev.filter((_, i) => i !== itemIdx));
-                  audioService.playSound('select');
+              
+              if (item.category === 'DECK_CARD') {
+                  const template = DUNGEON_CARD_DB.find(t => t.templateId === item.type);
+                  if (template) {
+                      const newCard: DungeonCard = {
+                          ...template,
+                          id: `card-loot-${Date.now()}`
+                      };
+                      setDungeonDeck(prev => [...prev, newCard]);
+                      addLog(`${item.name}のカードを拾った！`, "yellow");
+                      setFloorItems(prev => prev.filter((_, i) => i !== itemIdx));
+                      audioService.playSound('buff');
+                  }
               } else {
-                  addLog("持ち物がいっぱいで拾えない！", "red");
+                  if (inventory.length < MAX_INVENTORY) {
+                      setInventory(prev => [...prev, item]);
+                      addLog(`${getItemName(item)}を拾った！`);
+                      setFloorItems(prev => prev.filter((_, i) => i !== itemIdx));
+                      audioService.playSound('select');
+                  } else {
+                      addLog("持ち物がいっぱいで拾えない！", "red");
+                  }
               }
           }
       }
@@ -1496,7 +1627,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   };
 
   const getItemName = (item: Item) => {
-      if (item.category === 'WEAPON' || item.category === 'ARMOR' || item.category === 'RANGED' || item.category === 'SYNTH' || item.category === 'CONSUMABLE' || item.category === 'ACCESSORY') return item.name;
+      if (item.category === 'WEAPON' || item.category === 'ARMOR' || item.category === 'RANGED' || item.category === 'SYNTH' || item.category === 'CONSUMABLE' || item.category === 'ACCESSORY' || item.category === 'DECK_CARD') return item.name;
       if (item.type.includes('MEAT')) return item.name;
       if (identifiedTypes.has(item.type)) return item.name;
       return idMap[item.type] || item.name;
@@ -1604,6 +1735,25 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           addLog(`${getItemName(item)}を${sellPrice}円で売った。`, currentTheme.colors.C2);
           audioService.playSound('select');
           setSelectedItemIndex(prev => Math.max(0, Math.min(prev, inventory.length - 2)));
+      }
+  };
+
+  const handleCardRemoval = (cardId: string) => {
+      if (player.gold && player.gold >= 100) {
+          setPlayer(p => ({ ...p, gold: (p.gold || 0) - 100 }));
+          
+          setDungeonDeck(prev => prev.filter(c => c.id !== cardId));
+          setDungeonHand(prev => prev.filter(c => c.id !== cardId));
+          setDungeonDiscard(prev => prev.filter(c => c.id !== cardId));
+          
+          setShopRemovedThisFloor(true);
+          setDeckViewMode('VIEW');
+          setShowDeck(false);
+          addLog("カードを除外した。", currentTheme.colors.C2);
+          audioService.playSound('select');
+      } else {
+          addLog("お金が足りない！", "red");
+          audioService.playSound('wrong');
       }
   };
 
@@ -2393,6 +2543,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                           if (cat === 'STAFF') spriteKey = 'STAFF';
                           if (cat === 'ACCESSORY') spriteKey = 'ACCESSORY';
                           if (item.itemData.type === 'POT_GLUE') spriteKey = 'SYNTH';
+                          if (cat === 'DECK_CARD') spriteKey = 'DECK_CARD'; // New Sprite
                       }
                       
                       const sprite = spriteCache.current[spriteKey];
@@ -2553,7 +2704,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   const { C0, C1, C2, C3 } = currentTheme.colors;
 
   return (
-    <div className="w-full h-full bg-[#101010] flex flex-col items-center justify-center font-mono select-none overflow-hidden touch-none relative p-1 gap-1">
+    <div className="w-full h-full bg-[#101010] flex flex-col md:flex-row items-center justify-center font-mono select-none overflow-hidden touch-none relative p-4 gap-4">
         
         {inspectedItem && (
             <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setInspectedItem(null)}>
@@ -2586,12 +2737,23 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                         <button onClick={() => setShowDeck(false)}><X size={24}/></button>
                     </div>
                     
+                    {deckViewMode === 'REMOVE' && (
+                        <div className="bg-red-900/50 p-2 mb-4 text-center border-2 border-red-500 rounded text-red-200 font-bold">
+                            除外するカードを選択してください
+                        </div>
+                    )}
+
                     <div className="space-y-2">
                         {dungeonDeck.length === 0 ? (
                             <div className="text-center text-sm py-4 opacity-50">デッキは空です</div>
                         ) : (
                             dungeonDeck.map((card, idx) => (
-                                <div key={card.id} className="border p-2 rounded flex items-center gap-3" style={{ borderColor: C1 }}>
+                                <div 
+                                    key={card.id} 
+                                    className={`border p-2 rounded flex items-center gap-3 ${deckViewMode === 'REMOVE' ? 'cursor-pointer hover:bg-red-500 hover:text-white' : ''}`}
+                                    style={{ borderColor: C1 }}
+                                    onClick={() => deckViewMode === 'REMOVE' && handleCardRemoval(card.id)}
+                                >
                                     <div className="bg-black/10 p-2 rounded-full border border-current">{card.icon}</div>
                                     <div className="flex-grow">
                                         <div className="font-bold flex justify-between">
@@ -2600,6 +2762,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                                         </div>
                                         <div className="text-xs opacity-80">{card.description} {card.power > 0 && `(Pow:${card.power})`}</div>
                                     </div>
+                                    {deckViewMode === 'REMOVE' && <Trash2 size={16} />}
                                 </div>
                             ))
                         )}
@@ -2672,6 +2835,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                                 {player.status.confused > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>混乱</span>}
                                 {player.status.frozen > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>金縛り</span>}
                                 {player.status.blind > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>目潰し</span>}
+                                {player.status.defenseBuff && player.status.defenseBuff > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>防御UP</span>}
+                                {player.status.attackBuff && player.status.attackBuff > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>攻撃UP</span>}
                                 {Object.values(player.status).every((v: number) => v <= 0) && <span>健康</span>}
                             </div>
                         </div>
@@ -2709,7 +2874,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                             <ul className="list-disc pl-5">
                                 <li>コントローラー下のカードをタップして発動します。</li>
                                 <li>使用するとターンを消費し、新たなカードを引きます。</li>
-                                <li>山札が尽きると捨て札から補充されます。</li>
+                                <li>カードはフロアに落ちていることもあります。</li>
+                                <li>ダメージは<strong>(攻撃力 + カード威力) - 敵防御力</strong>で計算されます。</li>
                             </ul>
                         </section>
                         <section>
@@ -2736,7 +2902,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                 <div className="flex gap-2">
                     <button onClick={() => setShowMap(!showMap)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><MapIcon size={10}/> Map</button>
                     <button onClick={() => setShowStatus(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><User size={10}/> Sts</button>
-                    <button onClick={() => setShowDeck(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><Layers size={10}/> Deck</button>
+                    <button onClick={() => { setDeckViewMode('VIEW'); setShowDeck(true); }} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><Layers size={10}/> Deck</button>
                     <button onClick={() => setShowHelp(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><HelpCircle size={10}/> Help</button>
                 </div>
             </div>
@@ -2838,6 +3004,17 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                     <div className="flex justify-end mb-2 border-b pb-1" style={{ borderColor: C1 }}>
                         <span className="flex items-center"><Coins size={10} className="mr-1"/> {player.gold} G</span>
                     </div>
+
+                    {/* Card Removal Button (Only if not used) */}
+                    {!shopRemovedThisFloor && (
+                        <button 
+                            className="w-full border mb-2 py-1 flex items-center justify-center gap-2 hover:opacity-80"
+                            style={{ borderColor: C1, color: C3 }}
+                            onClick={() => { setDeckViewMode('REMOVE'); setShowDeck(true); }}
+                        >
+                            <Trash2 size={12} /> カード除外 (100 G)
+                        </button>
+                    )}
 
                     <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
                         {shopState.mode === 'BUY' ? (
