@@ -127,6 +127,8 @@ interface Entity {
       frozen: number;
       blind: number;
       speed: number;
+      trapSight?: number; // Added
+      poison?: number; // Added
   };
   
   dead?: boolean;
@@ -216,10 +218,10 @@ const ITEM_DB: Record<string, Omit<Item, 'id'>> = {
     'FOOD_ONIGIRI': { category: 'CONSUMABLE', type: 'FOOD_ONIGIRI', name: 'おにぎり', desc: 'お腹が50回復。', value: 50 },
     'FOOD_MEAT': { category: 'CONSUMABLE', type: 'FOOD_MEAT', name: '謎の肉', desc: 'お腹100、HP50回復。', value: 100 },
     'GRASS_HEAL': { category: 'CONSUMABLE', type: 'GRASS_HEAL', name: '給食の残り', desc: 'HP100回復。', value: 100 },
-    'GRASS_LIFE': { category: 'CONSUMABLE', type: 'GRASS_LIFE', name: '命の野菜', desc: '最大HP+5。', value: 500 },
-    'GRASS_SPEED': { category: 'CONSUMABLE', type: 'GRASS_SPEED', name: 'エナドリ', desc: '倍速になる。', value: 200 },
-    'GRASS_EYE': { category: 'CONSUMABLE', type: 'GRASS_EYE', name: '目薬', desc: '罠が見える。', value: 200 },
-    'GRASS_POISON': { category: 'CONSUMABLE', type: 'GRASS_POISON', name: '腐ったパン', desc: '毒を受ける/敵に投げると毒。', value: 50 },
+    'GRASS_LIFE': { category: 'CONSUMABLE', type: 'GRASS_LIFE', name: '命の野菜', desc: '最大HP+5。HP5回復。', value: 500 },
+    'GRASS_SPEED': { category: 'CONSUMABLE', type: 'GRASS_SPEED', name: 'エナドリ', desc: '20ターンの間、倍速になる。', value: 200 },
+    'GRASS_EYE': { category: 'CONSUMABLE', type: 'GRASS_EYE', name: '目薬', desc: '50ターンの間、罠が見える。', value: 200 },
+    'GRASS_POISON': { category: 'CONSUMABLE', type: 'GRASS_POISON', name: '腐ったパン', desc: '毒を受ける(継続ダメ)＆腹痛。', value: 50 },
     'POT_GLUE': { category: 'SYNTH', type: 'POT_GLUE', name: '工作のり', desc: '装備を合成する。', value: 500 },
     'POT_CHANGE': { category: 'CONSUMABLE', type: 'POT_CHANGE', name: 'びっくり箱', desc: '中身を別のアイテムに変化させる。', value: 400 },
     'BOMB': { category: 'CONSUMABLE', type: 'BOMB', name: '爆弾', desc: '周囲を爆破する。', value: 200 },
@@ -280,7 +282,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     id: 0, type: 'PLAYER', x: 1, y: 1, char: '@', name: 'わんぱく小学生', 
     hp: 50, maxHp: 50, baseAttack: 3, baseDefense: 0, attack: 3, defense: 0, xp: 0, gold: 0, dir: {x:0, y:1},
     equipment: { weapon: null, armor: null, ranged: null, accessory: null },
-    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, trapSight: 0, poison: 0 },
     offset: { x: 0, y: 0 }
   });
 
@@ -560,7 +562,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         id: 0, type: 'PLAYER', x: 1, y: 1, char: '@', name: 'わんぱく小学生', 
         hp: 50, maxHp: 50, baseAttack: 3, baseDefense: 0, attack: 3, defense: 0, xp: 0, gold: 0, dir: {x:0, y:1},
         equipment: { weapon: null, armor: null, ranged: null, accessory: null },
-        status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+        status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, trapSight: 0, poison: 0 },
         offset: { x: 0, y: 0 }
     });
     setLogs([]);
@@ -629,7 +631,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       return {
           id: Date.now() + Math.random(), type: 'ENEMY', x, y, char: t[0], 
           name, hp, maxHp: hp, baseAttack: Math.floor(atk), baseDefense: Math.floor(def), attack: Math.floor(atk), defense: Math.floor(def), xp: Math.floor(xp), dir: {x:0, y:0}, enemyType: t,
-          status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+          status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
           offset: { x: 0, y: 0 },
           shopItems
       };
@@ -682,7 +684,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             id: Date.now(), type: 'ENEMY', x: sx, y: sy, char: 'B',
             name: "校長先生(真)", hp: 500, maxHp: 500, baseAttack: 30, baseDefense: 10, attack: 30, defense: 10, xp: 5000, 
             dir: {x:0, y:0}, enemyType: 'BOSS',
-            status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+            status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
             offset: { x: 0, y: 0 }
         });
     } else {
@@ -727,7 +729,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                 newItems.push({
                     id: Date.now() + Math.random(), type: 'GOLD', x: t.x, y: t.y, char: '$', name: 'お金',
                     hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
-                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
                     gold: Math.floor(Math.random() * 50 + 10 * f)
                 });
             } else {
@@ -745,7 +747,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                 newItems.push({
                     id: Date.now() + Math.random(), type: 'ITEM', x: t.x, y: t.y, char: '!', 
                     name: template.name, hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
-                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
                     itemData: { 
                         ...template, 
                         id: `item-${Date.now()}-${Math.random()}`, 
@@ -770,7 +772,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             newTraps.push({
                 id: Date.now() + Math.random(), type: 'TRAP', x: t.x, y: t.y, char: 'X', name: '罠',
                 hp: 0, maxHp: 0, baseAttack: 0, baseDefense: 0, attack: 0, defense: 0, xp: 0, dir: {x:0, y:0},
-                status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+                status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
                 trapType: tType, visible: false
             });
         }
@@ -854,6 +856,20 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       setPlayer(prevPlayer => {
           let currentHp = overrides?.hp !== undefined ? overrides.hp : prevPlayer.hp;
           let nextStatus = { ...prevPlayer.status };
+          
+          if (nextStatus.trapSight && nextStatus.trapSight > 0) {
+              nextStatus.trapSight--;
+              if (nextStatus.trapSight === 0) addLog("目が元に戻った。", currentTheme.colors.C2);
+          }
+
+          if (nextStatus.poison && nextStatus.poison > 0) {
+              const poisonDmg = 5;
+              currentHp -= poisonDmg;
+              nextStatus.poison--;
+              addVisualEffect('TEXT', px, py, { value: `${poisonDmg}`, color: 'purple' });
+              addLog("毒のダメージを受けた！", "purple");
+              if (nextStatus.poison === 0) addLog("毒が消えた。", currentTheme.colors.C2);
+          }
           
           if (starveDamage > 0) {
               currentHp -= 1;
@@ -1206,6 +1222,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       } else if (t === 'POISON') {
           addLog("毒を受けた！", "purple");
           setBelly(prev => Math.max(0, prev - 20));
+          setPlayer(p => ({ ...p, status: { ...p.status, poison: (p.status.poison || 0) + 10 } }));
       } else if (t === 'WARP') {
           addLog("ワープした！", "yellow");
           addVisualEffect('WARP', player.x, player.y);
@@ -1738,7 +1755,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               setFloorItems(prev => [...prev, {
                   id: Date.now() + Math.random(), type: 'ITEM', x: lx, y: ly, char: '!', name: item.name, 
                   hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
-                  status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+                  status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
                   itemData: item
               }]);
               addLog("飛んでいった。");
@@ -1850,10 +1867,18 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               audioService.playSound('select');
               return; 
           }
-          else if (item.type.includes('HEAL')) { 
-              let nextHp = Math.min(player.maxHp, player.hp + (item.value || 30));
-              addLog("HPが回復した！");
-              addVisualEffect('TEXT', player.x, player.y, {value: 'Heal', color: 'green'});
+          else if (item.type.includes('HEAL') || item.type === 'GRASS_LIFE') { 
+              let healVal = item.value || 30;
+              if (item.type === 'GRASS_LIFE') {
+                  // Max HP +5, Heal +5
+                  setPlayer(p => ({ ...p, maxHp: p.maxHp + 5 }));
+                  healVal = 5;
+                  addLog("最大HPが上がった！", "yellow");
+              }
+              
+              let nextHp = Math.min(player.maxHp, player.hp + healVal);
+              addLog(`HPが${healVal}回復した！`);
+              addVisualEffect('TEXT', player.x, player.y, { value: `+${healVal}`, color: 'green' });
               
               setInventory(prev => prev.filter((_, i) => i !== index));
               setSelectedItemIndex(prev => Math.min(prev, inventory.length - 2));
@@ -1861,6 +1886,24 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               processTurn(player.x, player.y, { hp: nextHp });
               audioService.playSound('select');
               return;
+          }
+          else if (item.type === 'GRASS_SPEED') {
+              setPlayer(p => ({ ...p, status: { ...p.status, speed: 20 } }));
+              addLog("動きが素早くなった！", "yellow");
+              addVisualEffect('FLASH', 0, 0, { color: 'blue', duration: 5 });
+              actionDone = true;
+          }
+          else if (item.type === 'GRASS_EYE') {
+              setPlayer(p => ({ ...p, status: { ...p.status, trapSight: 50, blind: 0 } }));
+              addLog("目が良くなった！", "yellow");
+              addVisualEffect('FLASH', 0, 0, { color: 'yellow', duration: 5 });
+              actionDone = true;
+          }
+          else if (item.type === 'GRASS_POISON') {
+              setPlayer(p => ({ ...p, status: { ...p.status, poison: (p.status.poison || 0) + 10 } }));
+              setBelly(prev => Math.max(0, prev - 10)); // Belly reduce
+              addLog("ぐはっ！毒だ！", "purple");
+              actionDone = true;
           }
           else if (item.type === 'SCROLL_MAP') { setFloorMapRevealed(true); setShowMap(true); addLog("校内図が頭に入った！"); actionDone = true; addVisualEffect('FLASH', 0, 0); }
           else if (item.type === 'SCROLL_THUNDER' || item.type === 'BOMB') {
@@ -1956,7 +1999,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       const droppedEntity: Entity = {
           id: Date.now() + Math.random(), type: 'ITEM', x: player.x, y: player.y, char: '!', name: item.name,
           hp: 0, maxHp: 0, baseAttack: 0, baseDefense: 0, attack: 0, defense: 0, xp: 0, dir: { x: 0, y: 0 },
-          status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+          status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
           itemData: item
       };
       setFloorItems(prev => [...prev, droppedEntity]);
@@ -2095,7 +2138,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       const startY = player.y - Math.floor(VIEW_H/2);
 
       const hasSight = player.equipment?.accessory?.type === 'RING_SIGHT';
-      const hasTrapSight = player.equipment?.accessory?.type === 'RING_TRAP';
+      const hasTrapSight = (player.equipment?.accessory?.type === 'RING_TRAP') || (player.status.trapSight && player.status.trapSight > 0);
 
       for (let y = 0; y < VIEW_H; y++) {
           for (let x = 0; x < VIEW_W; x++) {
@@ -2286,6 +2329,17 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   ctx.fill();
               }
           }
+          else if (fx.type === 'WARP') {
+              if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
+                  ctx.fillStyle = 'cyan';
+                  const alpha = fx.duration / (fx.maxDuration || 10);
+                  ctx.globalAlpha = alpha;
+                  ctx.beginPath();
+                  ctx.arc(sx + ts/2, sy + ts/2, 10 * SCALE, 0, Math.PI*2);
+                  ctx.fill();
+                  ctx.globalAlpha = 1.0;
+              }
+          }
           else if (fx.type === 'TEXT') {
               if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
                   ctx.fillStyle = fx.color || 'white';
@@ -2396,6 +2450,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                 {player.status.confused > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>混乱</span>}
                                 {player.status.frozen > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>金縛り</span>}
                                 {player.status.blind > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>目潰し</span>}
+                                {player.status.poison && player.status.poison > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>毒</span>}
                                 {Object.values(player.status).every((v: number) => v <= 0) && <span>健康</span>}
                             </div>
                         </div>
@@ -2487,7 +2542,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                     // Player and Sight Ring items are exceptions handled by logic below
                                     const isPlayer = x === player.x && y === player.y;
                                     const hasSight = player.equipment?.accessory?.type === 'RING_SIGHT';
-                                    const hasTrapSight = player.equipment?.accessory?.type === 'RING_TRAP';
+                                    const hasTrapSight = (player.equipment?.accessory?.type === 'RING_TRAP') || (player.status.trapSight && player.status.trapSight > 0);
                                     const hasItem = floorItems.some(i => i.x===x && i.y===y);
                                     const hasEnemy = enemies.some(e => e.x===x && e.y===y);
                                     
