@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package, Ghost, Trophy, RotateCcw, Play, DollarSign, Info } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -1220,7 +1219,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                       <div className="flex gap-2 h-16 md:h-20 items-stretch">
                           {/* Supporters */}
                           <div className="flex-1 bg-black/20 rounded border border-slate-700 flex flex-col px-2 py-1 min-w-0">
-                              <div className="text-[9px] text-blue-300 font-bold mb-0.5 flex items-center"><span className="w-2 h-2 bg-blue-500 rounded-full mr-1 inline-block"></span>JOKERS ({runState.supporters.length}/5)</div>
+                              <div className="text-[9px] text-blue-300 font-bold mb-0.5 flex items-center"><span className="w-2 h-2 bg-blue-500 rounded-full mr-1 inline-block"></span>SUPPORTERS ({runState.supporters.length}/5)</div>
                               <div className="flex-1 flex items-center gap-1 overflow-x-auto custom-scrollbar">
                                   {runState.supporters.map((s, i) => (
                                       <div key={i} className={`bg-slate-800 p-0.5 rounded flex-shrink-0 border cursor-pointer hover:bg-slate-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center relative group ${s.edition === 'POLYCHROME' ? 'border-yellow-400 animate-pulse' : s.edition === 'HOLOGRAPHIC' ? 'border-red-400' : s.edition === 'FOIL' ? 'border-blue-400' : 'border-slate-600'}`} onClick={() => setInspectedItem({ item: s, type: 'SUPPORTER', isOwned: true, index: i })} onContextMenu={(e) => handleContextMenu(e, s, 'SUPPORTER', true, i)} onTouchStart={() => handleTouchStart(s, 'SUPPORTER', true, i)} onTouchEnd={handleTouchEnd}>
@@ -1308,7 +1307,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                           {/* Supporters */}
                           {shopSupporters.map((item) => (
                               <div key={item.id} className="bg-slate-700 p-2 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg justify-between min-h-[160px]" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'SUPPORTER', false)} onTouchStart={() => handleTouchStart(item, 'SUPPORTER', false)} onTouchEnd={handleTouchEnd}>
-                                  <div className="absolute top-1 left-1 text-[8px] font-bold text-blue-300 bg-blue-900/50 px-1.5 py-0.5 rounded">JOKER</div>
+                                  <div className="absolute top-1 left-1 text-[8px] font-bold text-blue-300 bg-blue-900/50 px-1.5 py-0.5 rounded">SUPPORTER</div>
                                   <div className="w-12 h-12 mt-4"><PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/></div>
                                   <div className="font-bold text-xs">{item.name}</div>
                                   <div className="text-[9px] text-gray-400 h-8 overflow-hidden leading-tight">{item.description}</div>
