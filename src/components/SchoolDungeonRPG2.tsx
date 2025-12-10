@@ -590,22 +590,30 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   };
 
   const initDeck = () => {
-      // Create initial deck of 10 cards
       const newDeck: DungeonCard[] = [];
-      for(let i=0; i<10; i++) {
-          // Weighted random
-          const r = Math.random();
-          let template;
-          if (r < 0.5) template = DUNGEON_CARD_DB[0]; // Attack
-          else if (r < 0.7) template = DUNGEON_CARD_DB[1]; // Spin
-          else if (r < 0.85) template = DUNGEON_CARD_DB[3]; // Guard
-          else template = DUNGEON_CARD_DB[2]; // Heal
-          
+      
+      // 6x Pencil Thrust
+      const thrustTemplate = DUNGEON_CARD_DB.find(t => t.templateId === 'THRUST')!;
+      for(let i=0; i<6; i++) {
           newDeck.push({
-              ...template,
-              id: `card-${Date.now()}-${i}`
+              ...thrustTemplate,
+              id: `card-init-thrust-${Date.now()}-${i}-${Math.random()}`
           });
       }
+      
+      // 1x Compass Spin
+      const spinTemplate = DUNGEON_CARD_DB.find(t => t.templateId === 'SPIN')!;
+      newDeck.push({
+          ...spinTemplate,
+          id: `card-init-spin-${Date.now()}-${Math.random()}`
+      });
+
+      // 1x Notebook Shield
+      const guardTemplate = DUNGEON_CARD_DB.find(t => t.templateId === 'GUARD')!;
+      newDeck.push({
+          ...guardTemplate,
+          id: `card-init-guard-${Date.now()}-${Math.random()}`
+      });
       
       // Shuffle
       newDeck.sort(() => Math.random() - 0.5);
