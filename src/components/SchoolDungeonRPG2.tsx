@@ -250,7 +250,7 @@ const DUNGEON_CARD_DB: Omit<DungeonCard, 'id'>[] = [
     { templateId: 'SWAP', name: '場所替え', type: 'SPECIAL', power: 0, description: '目の前の敵と入れ替わる', icon: <RotateCcw size={16}/> },
     { templateId: 'PULL', name: '引き寄せ', type: 'SPECIAL', power: 0, description: '遠くの敵を目の前に引き寄せる', icon: <Minimize2 size={16}/> },
     { templateId: 'PUSH', name: '吹き飛ばし', type: 'ATTACK', power: 2, description: '敵を5マス吹き飛ばす', icon: <Maximize2 size={16}/> },
-    { templateId: 'DIG', name: '穴掘り', type: 'SPECIAL', power: 0, description: '目の前の壁を壊す', icon: <Hammer size={16}/> },
+    { templateId: 'DIG', name: '穴掘り', type: 'SPECIAL', power: 0, description: '目の前の壁を掘って進む', icon: <Hammer size={16}/> },
     { templateId: 'TELEPORT', name: '早退', type: 'SPECIAL', power: 0, description: 'フロアのどこかへワープ', icon: <Ghost size={16}/> },
     
     // ATTACK
@@ -671,14 +671,30 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           }
       } else if (card.templateId === 'DIG') {
           const { x: dx, y: dy } = player.dir;
-          const tx = player.x + dx;
-          const ty = player.y + dy;
-          if (map[ty][tx] === 'WALL' && tx > 0 && tx < MAP_W-1 && ty > 0 && ty < MAP_H-1) { // Prevent border break
-              const newMap = map.map(row => [...row]);
-              newMap[ty][tx] = 'FLOOR';
+          let cx = player.x + dx;
+          let cy = player.y + dy;
+          let dugCount = 0;
+          const newMap = map.map(row => [...row]);
+          const dugPath = [];
+
+          // Dig forward until we hit floor, bounds, or max limit
+          while (cx > 0 && cx < MAP_W-1 && cy > 0 && cy < MAP_H-1 && dugCount < 20) {
+              if (newMap[cy][cx] === 'FLOOR') {
+                  // Hit an open space (room or hallway)
+                  break;
+              }
+              // It is a WALL, dig it
+              newMap[cy][cx] = 'FLOOR';
+              dugPath.push({x: cx, y: cy});
+              cx += dx;
+              cy += dy;
+              dugCount++;
+          }
+
+          if (dugCount > 0) {
               setMap(newMap);
-              addVisualEffect('EXPLOSION', tx, ty, { scale: 0.5 });
-              msg = "壁を掘った！";
+              dugPath.forEach(p => addVisualEffect('EXPLOSION', p.x, p.y, { scale: 0.5 }));
+              msg = "通路を掘り進んだ！";
               audioService.playSound('attack');
               used = true;
           } else {
@@ -1185,6 +1201,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
     rooms.sort((a,b) => (a.x + a.y) - (b.x + b.y));
     roomsRef.current = rooms; // Save room metadata
 
+    // Connect rooms
     for (let i = 0; i < rooms.length - 1; i++) {
         const r1 = rooms[i]; const r2 = rooms[i+1];
         let cx = Math.floor(r1.x + r1.w/2); let cy = Math.floor(r1.y + r1.h/2);
@@ -1194,13 +1211,38 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
     }
 
     if (rooms.length === 0) {
-        // Fallback if no rooms (extremely unlikely)
-        console.warn("Failed to generate rooms");
-        // Force at least one room
+        // Fallback
         const cx = Math.floor(MAP_W/2); const cy = Math.floor(MAP_H/2);
         rooms.push({x: cx-2, y: cy-2, w: 5, h: 5});
         roomsRef.current = rooms;
         for(let ry=cy-2; ry<cy+3; ry++) for(let rx=cx-2; rx<cx+3; rx++) newMap[ry][rx] = 'FLOOR';
+    }
+
+    // --- Generate Hidden Room (30% chance) ---
+    let hiddenRoomRect: RoomRect | null = null;
+    if (Math.random() < 0.3) {
+        let hAttempts = 0;
+        while(hAttempts < 50) {
+            hAttempts++;
+            const w = Math.floor(Math.random() * 3) + 3; // 3-5 size
+            const h = Math.floor(Math.random() * 3) + 3;
+            const x = Math.floor(Math.random() * (MAP_W - w - 2)) + 1;
+            const y = Math.floor(Math.random() * (MAP_H - h - 2)) + 1;
+            
+            // Check overlap with existing rooms AND some buffer
+            const overlap = rooms.some(r => x < r.x + r.w + 2 && x + w + 2 > r.x && y < r.y + r.h + 2 && y + h + 2 > r.y);
+            
+            // Also check that it doesn't accidentally overlap existing corridors (heuristic: check corners)
+            const onCorridor = newMap[y][x] === 'FLOOR' || newMap[y+h][x+w] === 'FLOOR';
+
+            if (!overlap && !onCorridor) {
+                // Create Hidden Room (Isolated)
+                for(let ry=y; ry<y+h; ry++) { for(let rx=x; rx<x+w; rx++) newMap[ry][rx] = 'FLOOR'; }
+                hiddenRoomRect = {x, y, w, h};
+                // We do NOT connect it.
+                break;
+            }
+        }
     }
 
     const startRoom = rooms[0];
@@ -1211,6 +1253,44 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
     const newEnemies: Entity[] = [];
     const newItems: Entity[] = [];
     const newTraps: Entity[] = [];
+    
+    // Spawn in Hidden Room
+    if (hiddenRoomRect) {
+        const hr = hiddenRoomRect;
+        const itemCount = Math.floor(Math.random() * 3) + 3; // 3-5 items
+        for(let i=0; i<itemCount; i++) {
+            const hx = Math.floor(hr.x + Math.random() * hr.w);
+            const hy = Math.floor(hr.y + Math.random() * hr.h);
+            
+            // High value items mostly
+            const r = Math.random();
+            if (r < 0.3) {
+                newItems.push({
+                    id: Date.now() + Math.random(), type: 'GOLD', x: hx, y: hy, char: '$', name: 'お金',
+                    hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
+                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+                    gold: Math.floor(Math.random() * 200 + 50 * f)
+                });
+            } else {
+                const keys = Object.keys(ITEM_DB);
+                const key = keys[Math.floor(Math.random() * keys.length)];
+                const template = ITEM_DB[key];
+                newItems.push({
+                    id: Date.now() + Math.random(), type: 'ITEM', x: hx, y: hy, char: '!', 
+                    name: template.name, hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
+                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0 },
+                    itemData: { 
+                        ...template, 
+                        id: `hidden-item-${Date.now()}-${Math.random()}`, 
+                        plus: template.category === 'WEAPON' || template.category === 'ARMOR' ? Math.floor(Math.random()*3)+1 : 0,
+                        charges: template.maxCharges,
+                        price: 0
+                    }
+                });
+            }
+        }
+    }
+
     const lastRoom = rooms[rooms.length - 1];
     const sx = Math.floor(lastRoom.x + lastRoom.w/2);
     const sy = Math.floor(lastRoom.y + lastRoom.h/2);
@@ -1229,11 +1309,13 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
         newMap[sy][sx] = 'STAIRS';
     }
     
-    // Collect valid floor tiles for entity placement
+    // Collect valid floor tiles for entity placement (excluding hidden room if possible, but random placement is fine too)
     const candidates: {x: number, y: number}[] = [];
     for(let y=0; y<MAP_H; y++) {
         for(let x=0; x<MAP_W; x++) {
+            // Avoid player/stairs start pos
             if (newMap[y][x] === 'FLOOR' && (x !== px || y !== py) && (x !== sx || y !== sy)) {
+                // If it is in hidden room, we allow it (random mob in secret room is fun)
                 candidates.push({x, y});
             }
         }
@@ -1253,7 +1335,10 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
             const nE = newMap[t.y][t.x+1] === 'FLOOR';
             const isSafe = nN && nS && nW && nE;
             
-            newEnemies.push(spawnEnemy(t.x, t.y, f, isPointInRoom(t.x, t.y), isSafe));
+            // Avoid Shopkeeper in hidden room (no way to enter easily)
+            const isHidden = hiddenRoomRect && t.x >= hiddenRoomRect.x && t.x < hiddenRoomRect.x + hiddenRoomRect.w && t.y >= hiddenRoomRect.y && t.y < hiddenRoomRect.y + hiddenRoomRect.h;
+            
+            newEnemies.push(spawnEnemy(t.x, t.y, f, isPointInRoom(t.x, t.y), isSafe && !isHidden));
         }
     }
 
