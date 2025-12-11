@@ -527,7 +527,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             hand: newHand,
             queue: [...current.queue, card]
         };
-        addLog(`${card.name}を計画...`);
+        // Log removed as requested
 
         // 2. Enemy Reaction (Planning consumes a turn) - KEEPING THIS AS REQUESTED
         await new Promise(r => setTimeout(r, 300));
