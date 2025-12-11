@@ -455,14 +455,15 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setGameState(prev => {
             if (prev.status === 'GAME_OVER') return prev;
             
-            let newHand = [...prev.hand, ...cardsReturningToHand];
-            
-            // Decrease cooldown of all cards in hand by 1 (simulating time passed during execution phase)
-            // Note: The cards just returned are set to Max Cooldown. They also get -1 tick immediately as part of the "Turn End".
-            newHand = newHand.map(c => ({
+            // Decrease cooldown of cards THAT STAYED IN HAND (not the ones just returning)
+            const tickedHand = prev.hand.map(c => ({
                 ...c,
                 currentCooldown: Math.max(0, c.currentCooldown - 1)
             }));
+
+            // Return executed cards to hand (they restart with full cooldown)
+            // They do NOT get a tick down immediately
+            let newHand = [...tickedHand, ...cardsReturningToHand];
 
             if (prev.enemies.length === 0) {
                 // Wave Clear
@@ -534,31 +535,30 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     return (
         <div className="flex flex-col h-full w-full bg-[#1a1a2e] text-white font-mono relative overflow-hidden">
             {/* Header */}
-            <div className="flex justify-between items-center p-4 bg-black/40 border-b border-indigo-500/30">
+            <div className="flex justify-between items-center p-4 bg-black/40 border-b border-indigo-500/30 shrink-0">
                 <button onClick={onBack} className="flex items-center text-gray-400 hover:text-white"><ArrowLeft className="mr-2"/> Quit</button>
-                <h2 className="text-xl font-bold text-indigo-100 tracking-widest">KOCHO SHOWDOWN <span className="text-sm text-pink-400 ml-2">Wave {gameState.wave}</span></h2>
+                <h2 className="text-xl font-bold text-indigo-100 tracking-widest hidden md:block">KOCHO SHOWDOWN <span className="text-sm text-pink-400 ml-2">Wave {gameState.wave}</span></h2>
                 <div className="text-xs text-gray-500 flex gap-4">
-                    {/* Replaced Deck Info with Instructions */}
-                    <span>Move/Act to reduce Cooldowns</span>
+                    <span>Move/Act to reduce CD</span>
                 </div>
             </div>
 
-            {/* Game Area */}
-            <div className="flex-grow flex flex-col items-center justify-center p-4 relative">
+            {/* Game Area (Grid) */}
+            <div className="flex-grow flex flex-col items-center justify-center p-4 relative overflow-y-auto custom-scrollbar">
                 
                 {/* Logs */}
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 w-full max-w-lg text-center pointer-events-none">
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 w-full max-w-lg text-center pointer-events-none z-10">
                     {gameState.logs.map((log, i) => (
                         <div key={i} className={`text-sm ${i===0 ? 'text-white font-bold text-shadow-md' : 'text-gray-500'} transition-opacity duration-500`}>{log}</div>
                     ))}
                 </div>
 
                 {/* Grid */}
-                <div className="grid grid-cols-7 gap-1 md:gap-2 mb-8 w-full max-w-4xl px-2">
+                <div className="grid grid-cols-7 gap-1 w-full max-w-4xl px-2 mb-4 shrink-0">
                     {[...Array(GRID_SIZE)].map((_, i) => (
-                        <div key={i} className={`aspect-square border-2 ${isDangerZone(i) ? 'border-red-500 bg-red-900/20' : 'border-indigo-800 bg-black/30'} rounded-lg flex items-end justify-center relative`}>
+                        <div key={i} className={`aspect-[1/2] md:aspect-square border-2 ${isDangerZone(i) ? 'border-red-500 bg-red-900/20' : 'border-indigo-800 bg-black/30'} rounded-lg flex items-end justify-center relative`}>
                             {getGridContent(i)}
-                            <div className="absolute bottom-1 right-1 text-[10px] text-gray-700">{i}</div>
+                            <div className="absolute bottom-1 right-1 text-[8px] md:text-[10px] text-gray-700">{i}</div>
                         </div>
                     ))}
                 </div>
@@ -581,73 +581,72 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
             </div>
 
-            {/* Controls Area (Bottom) */}
-            <div className="bg-[#0f0f1b] border-t-4 border-indigo-900 p-4 shrink-0">
+            {/* Controls Area (Bottom) - Portrait Optimized */}
+            <div className="bg-[#0f0f1b] border-t-4 border-indigo-900 p-2 md:p-4 shrink-0 flex flex-col gap-2">
                 
-                {/* Queue Display */}
-                <div className="flex justify-center items-center gap-4 mb-4 min-h-[80px]">
-                    <div className="text-xs text-gray-500 font-bold uppercase tracking-widest writing-mode-vertical rotate-180">QUEUE</div>
-                    <div className="flex gap-2 bg-black/50 p-2 rounded-lg border border-indigo-900/50 min-w-[300px] justify-center items-center">
-                        {gameState.queue.map((card, i) => (
-                            <div key={i} className="w-16 h-20 bg-slate-800 border border-slate-600 rounded flex flex-col items-center justify-center relative group cursor-pointer hover:border-red-400" onClick={() => handleUnqueueCard(i)}>
-                                <div className={`w-full h-1 ${card.color} absolute top-0`}></div>
-                                <div className="text-xs text-center font-bold px-1 overflow-hidden whitespace-nowrap text-ellipsis w-full">{card.name}</div>
-                                <div className="text-gray-400 scale-75">{card.icon}</div>
-                                <X size={12} className="absolute -top-1 -right-1 bg-red-500 rounded-full text-white opacity-0 group-hover:opacity-100"/>
-                            </div>
-                        ))}
-                        {[...Array(3 - gameState.queue.length)].map((_, i) => (
-                            <div key={`empty-${i}`} className="w-16 h-20 border border-dashed border-gray-700 rounded flex items-center justify-center text-gray-700 text-xs">Empty</div>
-                        ))}
+                {/* 1. Queue Display */}
+                <div className="flex justify-between items-center gap-2 bg-black/30 p-2 rounded-lg border border-indigo-900/30">
+                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest writing-mode-vertical rotate-180 hidden md:block">QUEUE</div>
+                    <div className="flex gap-1 md:gap-2 justify-start items-center flex-grow overflow-x-auto">
+                        {[...Array(3)].map((_, i) => {
+                            const card = gameState.queue[i];
+                            return card ? (
+                                <div key={i} className="w-12 h-16 md:w-16 md:h-20 bg-slate-800 border border-slate-600 rounded flex flex-col items-center justify-center relative group cursor-pointer hover:border-red-400 shrink-0" onClick={() => handleUnqueueCard(i)}>
+                                    <div className={`w-full h-1 ${card.color} absolute top-0`}></div>
+                                    <div className="text-[9px] md:text-xs text-center font-bold px-1 overflow-hidden whitespace-nowrap text-ellipsis w-full">{card.name}</div>
+                                    <div className="text-gray-400 scale-75">{card.icon}</div>
+                                    <X size={12} className="absolute -top-1 -right-1 bg-red-500 rounded-full text-white opacity-0 group-hover:opacity-100"/>
+                                </div>
+                            ) : (
+                                <div key={`empty-${i}`} className="w-12 h-16 md:w-16 md:h-20 border border-dashed border-gray-700 rounded flex items-center justify-center text-gray-700 text-[9px] shrink-0">Empty</div>
+                            );
+                        })}
                     </div>
                     <button 
                         onClick={executeQueue} 
                         disabled={gameState.queue.length === 0 || animating}
-                        className={`w-20 h-20 rounded-full border-4 flex flex-col items-center justify-center font-bold shadow-lg transition-all ${gameState.queue.length > 0 ? 'bg-indigo-600 border-indigo-400 text-white hover:scale-105 active:scale-95 cursor-pointer animate-pulse' : 'bg-gray-800 border-gray-600 text-gray-500 cursor-not-allowed'}`}
+                        className={`w-16 h-16 md:w-20 md:h-20 rounded-full border-4 flex flex-col items-center justify-center font-bold shadow-lg transition-all shrink-0 ${gameState.queue.length > 0 ? 'bg-indigo-600 border-indigo-400 text-white hover:scale-105 active:scale-95 cursor-pointer animate-pulse' : 'bg-gray-800 border-gray-600 text-gray-500 cursor-not-allowed'}`}
                     >
-                        <Play size={24} className="fill-current mb-1"/> EXEC
+                        <Play size={20} className="fill-current mb-1"/> EXEC
                     </button>
                 </div>
 
-                {/* Hand & Actions */}
-                <div className="flex justify-between items-end">
-                    {/* Movement Controls */}
-                    <div className="flex flex-col gap-2">
-                        <div className="flex gap-2">
-                            <button onClick={() => handleMove(-1)} className="bg-slate-700 hover:bg-slate-600 p-3 rounded border border-slate-500"><ChevronLeft/></button>
-                            <button onClick={handleTurn} className="bg-slate-700 hover:bg-slate-600 p-3 rounded border border-slate-500 text-xs font-bold w-12 flex items-center justify-center">TURN</button>
-                            <button onClick={() => handleMove(1)} className="bg-slate-700 hover:bg-slate-600 p-3 rounded border border-slate-500"><ChevronRight/></button>
-                        </div>
-                        <div className="text-center text-[10px] text-gray-500">MOVEMENT (1 Tick)</div>
-                    </div>
-
-                    {/* Hand Cards */}
-                    <div className="flex gap-2 overflow-x-auto pb-2 px-2 custom-scrollbar max-w-xl">
-                        {gameState.hand.map((card, i) => (
-                            <div 
-                                key={card.id} 
-                                className={`w-24 h-32 bg-slate-800 border-2 rounded-lg flex flex-col justify-between p-2 cursor-pointer transition-transform relative shadow-lg ${selectedCardIdx === i ? 'border-yellow-400' : 'border-slate-600'} ${card.currentCooldown > 0 ? 'opacity-50 grayscale' : 'hover:-translate-y-2'}`}
-                                onClick={() => handleQueueCard(card, i)}
-                            >
-                                <div className={`absolute top-0 left-0 w-full h-1.5 ${card.color} rounded-t-sm`}></div>
-                                <div className="mt-1 text-xs font-bold text-center leading-tight">{card.name}</div>
-                                <div className="flex justify-center my-1 text-indigo-300">{card.icon}</div>
-                                <div className="text-[9px] text-gray-400 text-center leading-tight h-8 overflow-hidden">{card.description}</div>
-                                <div className="flex justify-between items-center text-[10px] text-gray-500 mt-1 font-mono">
-                                    <span>CD:{card.cooldown}</span>
-                                    <span>{card.type}</span>
-                                </div>
-                                
-                                {/* Cooldown Overlay */}
-                                {card.currentCooldown > 0 && (
-                                    <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center rounded-lg z-10">
-                                        <Clock size={24} className="text-gray-400 mb-1"/>
-                                        <span className="text-2xl font-bold text-white">{card.currentCooldown}</span>
-                                    </div>
-                                )}
+                {/* 2. Hand Cards (Scrollable) */}
+                <div className="flex gap-2 overflow-x-auto pb-2 px-1 custom-scrollbar min-h-[100px] items-center">
+                    {gameState.hand.map((card, i) => (
+                        <div 
+                            key={card.id} 
+                            className={`w-20 h-28 md:w-24 md:h-32 bg-slate-800 border-2 rounded-lg flex flex-col justify-between p-1 md:p-2 cursor-pointer transition-transform relative shadow-lg shrink-0 ${selectedCardIdx === i ? 'border-yellow-400' : 'border-slate-600'} ${card.currentCooldown > 0 ? 'opacity-50 grayscale' : 'hover:-translate-y-2'}`}
+                            onClick={() => handleQueueCard(card, i)}
+                        >
+                            <div className={`absolute top-0 left-0 w-full h-1 ${card.color} rounded-t-sm`}></div>
+                            <div className="mt-1 text-[9px] md:text-xs font-bold text-center leading-tight truncate">{card.name}</div>
+                            <div className="flex justify-center my-0.5 text-indigo-300 scale-75 md:scale-100">{card.icon}</div>
+                            <div className="text-[8px] md:text-[9px] text-gray-400 text-center leading-tight h-6 overflow-hidden">{card.description}</div>
+                            <div className="flex justify-between items-center text-[8px] md:text-[10px] text-gray-500 mt-auto font-mono">
+                                <span>CD:{card.cooldown}</span>
+                                <span>{card.type}</span>
                             </div>
-                        ))}
+                            
+                            {/* Cooldown Overlay */}
+                            {card.currentCooldown > 0 && (
+                                <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center rounded-lg z-10">
+                                    <Clock size={20} className="text-gray-400 mb-1"/>
+                                    <span className="text-xl font-bold text-white">{card.currentCooldown}</span>
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+
+                {/* 3. Movement Controls */}
+                <div className="flex justify-center items-center gap-4 py-2 border-t border-indigo-900/30">
+                    <button onClick={() => handleMove(-1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors"><ChevronLeft size={24}/></button>
+                    <div className="flex flex-col items-center gap-1">
+                        <button onClick={handleTurn} className="bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-lg border border-slate-500 text-sm font-bold flex items-center justify-center active:bg-slate-800 transition-colors w-24">TURN</button>
+                        <div className="text-[8px] text-gray-500">1 Tick</div>
                     </div>
+                    <button onClick={() => handleMove(1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors"><ChevronRight size={24}/></button>
                 </div>
             </div>
         </div>
