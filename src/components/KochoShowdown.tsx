@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 
@@ -117,11 +117,11 @@ const getInitialDeck = (): KCard[] => {
 };
 
 const ENEMY_TYPES = [
-    { name: '不良生徒', maxHp: 6, sprite: 'SENIOR|#a855f7', attackDmg: 2, range: [1], speed: 3 }, 
-    { name: '熱血教師', maxHp: 12, sprite: 'TEACHER|#ef4444', attackDmg: 4, range: [1], speed: 4 },
-    { name: '用務員', maxHp: 8, sprite: 'HUMANOID|#3e2723', attackDmg: 3, range: [1, 2], speed: 5 },
-    { name: '教頭', maxHp: 15, sprite: 'MUSCLE|#1565c0', attackDmg: 5, range: [1], speed: 6 },
-    { name: '校長', maxHp: 50, sprite: 'BOSS|#FFD700', attackDmg: 8, range: [1, 2, 3], speed: 4 },
+    { name: '不良生徒', maxHp: 6, sprite: 'SENIOR|#a855f7', attackDmg: 2, range: [1], speed: 3, attackCooldown: 1 }, 
+    { name: '熱血教師', maxHp: 12, sprite: 'TEACHER|#ef4444', attackDmg: 4, range: [1], speed: 4, attackCooldown: 2 },
+    { name: '用務員', maxHp: 8, sprite: 'HUMANOID|#3e2723', attackDmg: 3, range: [1, 2], speed: 5, attackCooldown: 1 },
+    { name: '教頭', maxHp: 15, sprite: 'MUSCLE|#1565c0', attackDmg: 5, range: [1], speed: 6, attackCooldown: 2 },
+    { name: '校長', maxHp: 50, sprite: 'BOSS|#FFD700', attackDmg: 8, range: [1, 2, 3], speed: 4, attackCooldown: 3 },
 ];
 
 const GRID_SIZE = 7;
@@ -337,8 +337,11 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         logs = [`${e.name}の攻撃は空を切った。`, ...logs];
                     }
                     
-                    e.intent = { type: 'WAIT', timer: 1 };
+                    // Trigger Cooldown
+                    const template = ENEMY_TYPES.find(t => t.name === e.name) || ENEMY_TYPES[0];
+                    e.intent = { type: 'WAIT', timer: template.attackCooldown || 1 };
                 } else {
+                    // AI Decision Phase (MOVE or WAIT ended)
                     const template = ENEMY_TYPES.find(t => t.name === e.name) || ENEMY_TYPES[0];
                     const validRanges = template.range;
 
@@ -766,7 +769,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             );
         }
         if (e) {
-            const isAttacking = e.intent && e.intent.type === 'ATTACK' && e.intent.timer === 1; 
+            const isAttacking = e.intent && e.intent.type === 'ATTACK' && e.intent.timer === 1;
+            const isWaiting = e.intent && e.intent.type === 'WAIT';
             return (
                 <div className="relative w-full h-full flex items-end justify-center">
                     <div className={`transition-transform duration-200 ${e.facing === -1 ? 'scale-x-[-1]' : ''}`}>
@@ -776,6 +780,13 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce z-20">
                             <div className="bg-red-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center">
                                 <Swords size={12} className="mr-1"/> !
+                            </div>
+                        </div>
+                    )}
+                    {isWaiting && (
+                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center z-20">
+                            <div className="bg-gray-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center">
+                                <Hourglass size={12} className="mr-1"/> {e.intent!.timer}
                             </div>
                         </div>
                     )}
