@@ -461,22 +461,18 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             return;
         }
         
-        setAnimating(true);
-
-        let intermediateState = { ...stateRef.current };
-        const newHand = [...intermediateState.hand];
-        newHand.splice(idx, 1);
-        intermediateState.hand = newHand;
-        intermediateState.queue = [...intermediateState.queue, card];
-        
         audioService.playSound('select');
 
-        await new Promise(r => setTimeout(r, 150)); 
-        let finalState = resolveEnemyTurn(intermediateState);
-        finalState = tickCooldowns(finalState);
-        
-        setGameState(finalState);
-        setAnimating(false);
+        // Add to queue and remove from hand immediately
+        setGameState(prev => {
+            const newHand = [...prev.hand];
+            newHand.splice(idx, 1);
+            return {
+                ...prev,
+                hand: newHand,
+                queue: [...prev.queue, card]
+            };
+        });
     };
 
     const handleUnqueueCard = (idx: number) => {
@@ -501,21 +497,24 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const queue = [...stateRef.current.queue];
         const cardsReturningToHand: KCard[] = [];
         
-        for (const card of queue) {
-            let current = stateRef.current;
-            if (current.status === 'GAME_OVER') break;
+        // --- PLAYER COMBO PHASE ---
+        let currentState = { ...stateRef.current };
 
-            addLog(`${card.name} を実行！`);
+        for (const card of queue) {
+            if (currentState.status === 'GAME_OVER') break;
+
+            addLog(`${card.name}！`);
             
-            const p = current.player;
-            let pPos = p.pos;
+            const p = currentState.player;
+            const pPos = p.pos;
             let nextPlayer = { ...p };
-            let nextEnemies = [...current.enemies];
+            let nextEnemies = currentState.enemies.map(e => ({...e}));
+            
             let hit = false;
 
             // Relic Buffs
             let dmgBonus = 0;
-            if (current.relics.some(r => r.id === 'R_GLOVES')) dmgBonus += 1;
+            if (currentState.relics.some(r => r.id === 'R_GLOVES')) dmgBonus += 1;
 
             if (card.type === 'ATTACK') {
                 const targets = card.range.map(r => pPos + (r * p.facing));
@@ -553,45 +552,55 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 }
             }
 
-            let intermediateState = {
-                ...current,
+            // Update intermediate state
+            currentState = {
+                ...currentState,
                 player: nextPlayer,
                 enemies: nextEnemies.filter(e => e.hp > 0)
             };
 
+            // Card will return to hand after combo
             cardsReturningToHand.push({
                 ...card,
                 currentCooldown: card.cooldown
             });
 
-            await new Promise(r => setTimeout(r, 500));
-
-            let finalState = resolveEnemyTurn(intermediateState);
-            setGameState(finalState);
-            await new Promise(r => setTimeout(r, 200));
+            // Update UI to show step
+            setGameState(currentState);
+            
+            // Wait for animation/visual
+            await new Promise(r => setTimeout(r, 400));
         }
 
+        // --- ENEMY TURN PHASE ---
+        if (currentState.status !== 'GAME_OVER' && currentState.enemies.length > 0) {
+            addLog("敵のターン！");
+            await new Promise(r => setTimeout(r, 300));
+            currentState = resolveEnemyTurn(currentState);
+            setGameState(currentState); // Update UI for enemy moves/attacks
+            await new Promise(r => setTimeout(r, 500));
+        }
+
+        // --- CLEANUP PHASE ---
         setGameState(prev => {
             if (prev.status === 'GAME_OVER') return prev;
             
+            // Cooldowns tick ONCE per combo turn
             const tickedHand = prev.hand.map(c => ({
                 ...c,
                 currentCooldown: Math.max(0, c.currentCooldown - 1)
             }));
 
+            // Return executed cards to hand
             let newHand = [...tickedHand, ...cardsReturningToHand];
 
             // WAVE CLEAR LOGIC
-            if (prev.enemies.length === 0) {
-                // Award Money
+            if (currentState.enemies.length === 0) {
                 const rewardMoney = 10;
-                
-                // If waves remaining, next wave. Else phase transition.
                 if (prev.wave < prev.maxWaves) {
                     setTimeout(() => startWave(prev.wave + 1, prev.phase), 1000);
                     return { ...prev, status: 'WAVE_CLEAR', queue: [], hand: newHand, money: prev.money + rewardMoney, logs: [...prev.logs, `Wave Clear! +${rewardMoney}G`] };
                 } else {
-                    // Phase Complete
                     setTimeout(() => handlePhaseComplete(), 1000);
                     return { ...prev, status: 'PHASE_CLEAR', queue: [], hand: newHand, money: prev.money + rewardMoney, logs: [...prev.logs, `Battle Clear! +${rewardMoney}G`] };
                 }
@@ -600,8 +609,9 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             return {
                 ...prev,
                 status: 'PLAYING',
-                queue: [],
+                queue: [], // Queue cleared
                 hand: newHand,
+                specialActionCooldown: Math.max(0, prev.specialActionCooldown - 1) // Global CD tick
             };
         });
 
