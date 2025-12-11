@@ -117,11 +117,11 @@ const getInitialDeck = (): KCard[] => {
 };
 
 const ENEMY_TYPES = [
-    { name: '不良生徒', maxHp: 6, sprite: 'SENIOR|#a855f7', attackDmg: 2, range: [1], speed: 3, attackCooldown: 1 }, 
-    { name: '熱血教師', maxHp: 12, sprite: 'TEACHER|#ef4444', attackDmg: 4, range: [1], speed: 4, attackCooldown: 2 },
-    { name: '用務員', maxHp: 8, sprite: 'HUMANOID|#3e2723', attackDmg: 3, range: [1, 2], speed: 5, attackCooldown: 1 },
-    { name: '教頭', maxHp: 15, sprite: 'MUSCLE|#1565c0', attackDmg: 5, range: [1], speed: 6, attackCooldown: 2 },
-    { name: '校長', maxHp: 50, sprite: 'BOSS|#FFD700', attackDmg: 8, range: [1, 2, 3], speed: 4, attackCooldown: 3 },
+    { name: '不良生徒', maxHp: 3, sprite: 'SENIOR|#a855f7', attackDmg: 2, range: [1], speed: 3, attackCooldown: 1 }, 
+    { name: '熱血教師', maxHp: 6, sprite: 'TEACHER|#ef4444', attackDmg: 4, range: [1], speed: 4, attackCooldown: 2 },
+    { name: '用務員', maxHp: 4, sprite: 'HUMANOID|#3e2723', attackDmg: 3, range: [1, 2], speed: 5, attackCooldown: 1 },
+    { name: '教頭', maxHp: 8, sprite: 'MUSCLE|#1565c0', attackDmg: 5, range: [1], speed: 6, attackCooldown: 2 },
+    { name: '校長', maxHp: 25, sprite: 'BOSS|#FFD700', attackDmg: 8, range: [1, 2, 3], speed: 4, attackCooldown: 3 },
 ];
 
 const GRID_SIZE = 7;
@@ -136,7 +136,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         maxWaves: 1,
         turn: 1,
         gridSize: GRID_SIZE,
-        player: { id: 'p1', type: 'PLAYER', name: '勇者', pos: 3, facing: 1, maxHp: 20, hp: 20, spriteName: 'HERO_SIDE|赤', shield: 0 },
+        player: { id: 'p1', type: 'PLAYER', name: '勇者', pos: 3, facing: 1, maxHp: 10, hp: 10, spriteName: 'HERO_SIDE|赤', shield: 0 },
         enemies: [],
         hand: [],
         queue: [],
