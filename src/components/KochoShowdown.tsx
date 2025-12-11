@@ -133,7 +133,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [gameState, setGameState] = useState<KochoGameState>({
         phase: 'BATTLE_1',
         wave: 1,
-        maxWaves: 3,
+        maxWaves: 1,
         turn: 1,
         gridSize: GRID_SIZE,
         player: { id: 'p1', type: 'PLAYER', name: '勇者', pos: 3, facing: 1, maxHp: 20, hp: 20, spriteName: 'HERO_SIDE|赤', shield: 0 },
@@ -171,7 +171,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const startWave = (wave: number, phase: GamePhase) => {
         // Difficulty Scaling
         let enemyCount = 1;
-        if (phase === 'BATTLE_1') enemyCount = Math.min(2, 1 + Math.floor(wave / 2));
+        if (phase === 'BATTLE_1') enemyCount = 1; // Tutorial
         if (phase === 'BATTLE_2') enemyCount = Math.min(3, 1 + Math.floor(wave / 1.5));
         if (phase === 'BOSS') enemyCount = 1;
 
@@ -219,7 +219,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             ...prev,
             phase: phase,
             wave: wave,
-            maxWaves: phase === 'BATTLE_1' ? 3 : (phase === 'BATTLE_2' ? 4 : 1),
+            maxWaves: phase === 'BATTLE_1' ? 1 : (phase === 'BATTLE_2' ? 4 : 1),
             turn: 1,
             player: { 
                 ...prev.player, 
@@ -234,7 +234,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             hand: handWithCD,
             queue: [],
             status: 'PLAYING',
-            logs: [`${phase === 'BOSS' ? '決戦' : `Wave ${wave}`} 開始！`],
+            logs: phase === 'BATTLE_1' ? ['準備運動だ！ (Tutorial)'] : [`${phase === 'BOSS' ? '決戦' : `Wave ${wave}`} 開始！`],
             specialActionCooldown: isFreshStart ? 0 : prev.specialActionCooldown,
             money: isFreshStart ? 0 : prev.money
         }));
