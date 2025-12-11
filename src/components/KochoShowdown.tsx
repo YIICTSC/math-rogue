@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, Footprints, RefreshCw, Zap, Trophy, Skull, Info, ChevronsRight, ChevronLeft, ChevronRight, PlusCircle, Trash2, Clock } from 'lucide-react';
+import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, Footprints, RefreshCw, Zap, Trophy, Skull, Info, ChevronsRight, ChevronLeft, ChevronRight, PlusCircle, Trash2, Clock, Ghost } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 
@@ -57,6 +57,7 @@ interface KochoGameState {
     discard: KCard[]; // Kept for structure but unused in CD mode
     status: 'PLAYING' | 'EXECUTING' | 'GAME_OVER' | 'VICTORY' | 'WAVE_CLEAR';
     logs: string[];
+    specialActionCooldown: number; // Added: Slip Through Cooldown
 }
 
 // --- DATA ---
@@ -109,7 +110,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         deck: [],
         discard: [],
         status: 'PLAYING',
-        logs: ['校長室への道が開かれた...']
+        logs: ['校長室への道が開かれた...'],
+        specialActionCooldown: 0
     });
 
     // Ref to hold current state for async loops (avoiding stale closures)
@@ -177,7 +179,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             discard: [],
             queue: [],
             status: 'PLAYING',
-            logs: [`Wave ${wave} 開始！`]
+            logs: [`Wave ${wave} 開始！`],
+            specialActionCooldown: 0
         }));
     };
 
@@ -307,7 +310,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             hand: prev.hand.map(c => ({
                 ...c,
                 currentCooldown: Math.max(0, c.currentCooldown - 1)
-            }))
+            })),
+            specialActionCooldown: Math.max(0, prev.specialActionCooldown - 1)
         }));
     };
 
@@ -343,13 +347,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         setAnimating(true);
         setGameState(prev => ({ ...prev, player: { ...prev.player, facing: (prev.player.facing * -1) as Facing } }));
-        // Turning is a free action? Or takes time? Let's make it instant for now to allow tactics without penalty
-        // audioService.playSound('select');
-        // setAnimating(false);
-        // User requested Wait button, so Turn should probably just change facing.
-        // Actually, let's make Turn act as Wait for consistency if we want time to pass.
-        // But usually turning is preparation.
-        // Let's make turn free.
         setAnimating(false);
     };
 
@@ -359,6 +356,58 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         addLog("待機した。");
         audioService.playSound('select');
         await tickWorld('WAIT');
+        tickCooldowns();
+        setAnimating(false);
+    };
+
+    const handleSlipThrough = async () => {
+        if (stateRef.current.status !== 'PLAYING' || animating) return;
+        
+        const current = stateRef.current;
+        if (current.specialActionCooldown > 0) {
+            audioService.playSound('wrong');
+            addLog("すり抜け: クールダウン中");
+            return;
+        }
+
+        const p = current.player;
+        const targetPos = p.pos + p.facing;
+        const destPos = p.pos + (p.facing * 2);
+
+        // Check 1: Enemy exists in front
+        const enemyInFront = current.enemies.find(e => e.pos === targetPos);
+        if (!enemyInFront) {
+            addLog("目の前に敵がいません");
+            audioService.playSound('wrong');
+            return;
+        }
+
+        // Check 2: Dest valid and empty
+        if (destPos < 0 || destPos >= GRID_SIZE) {
+            addLog("行き止まりです");
+            audioService.playSound('wrong');
+            return;
+        }
+        const blocked = current.enemies.some(e => e.pos === destPos);
+        if (blocked) {
+            addLog("移動先が塞がっています");
+            audioService.playSound('wrong');
+            return;
+        }
+
+        // Execute
+        setAnimating(true);
+        addLog("すり抜け！");
+        audioService.playSound('select');
+        
+        setGameState(prev => ({
+            ...prev,
+            player: { ...prev.player, pos: destPos },
+            specialActionCooldown: 3 + 1 // +1 because tickCooldowns will reduce it immediately after this action
+        }));
+
+        await new Promise(r => setTimeout(r, 200)); 
+        await tickWorld('MOVE'); 
         tickCooldowns();
         setAnimating(false);
     };
@@ -683,13 +732,26 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 </div>
 
                 {/* 3. Movement Controls */}
-                <div className="flex justify-center items-center gap-4 py-2 border-t border-indigo-900/30">
+                <div className="flex justify-center items-center gap-4 py-2 border-t border-indigo-900/30 relative">
                     <button onClick={() => handleMove(-1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors"><ChevronLeft size={24}/></button>
                     <div className="flex flex-col items-center gap-1">
                         <button onClick={handleTurn} className="bg-slate-700 hover:bg-slate-600 px-6 py-2 rounded-lg border border-slate-500 text-sm font-bold flex items-center justify-center active:bg-slate-800 transition-colors w-24">TURN</button>
                         <button onClick={handleWait} className="bg-gray-800 hover:bg-gray-700 px-6 py-1 rounded-lg border border-gray-600 text-xs flex items-center justify-center active:bg-gray-900 transition-colors w-24 text-gray-400"><Clock size={12} className="mr-1"/> WAIT</button>
                     </div>
                     <button onClick={() => handleMove(1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors"><ChevronRight size={24}/></button>
+                    
+                    {/* Special Action Button: Slip Through */}
+                    <button 
+                        onClick={handleSlipThrough}
+                        className={`absolute right-4 bottom-2 w-12 h-12 rounded-full border-2 flex items-center justify-center shadow-lg transition-all ${gameState.specialActionCooldown > 0 ? 'bg-gray-800 border-gray-600 text-gray-500' : 'bg-cyan-700 border-cyan-400 text-cyan-100 hover:bg-cyan-600 active:scale-95'}`}
+                        title="すり抜け (CD: 3)"
+                    >
+                        {gameState.specialActionCooldown > 0 ? (
+                            <span className="text-lg font-bold">{gameState.specialActionCooldown}</span>
+                        ) : (
+                            <Ghost size={20} />
+                        )}
+                    </button>
                 </div>
             </div>
         </div>
