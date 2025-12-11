@@ -623,12 +623,21 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 }
             }
 
-            // Update intermediate state
+            // Update intermediate state (Player effect applied)
             currentState = {
                 ...currentState,
                 player: nextPlayer,
                 enemies: nextEnemies.filter(e => e.hp > 0)
             };
+
+            // --- ADDED LOGIC: TIME PASSES DURING EXECUTION ---
+            await new Promise(r => setTimeout(r, 200)); // Delay for readability
+            
+            // Trigger enemy turn & cooldowns
+            // IMPORTANT: We must update currentState with the result of these functions
+            currentState = resolveEnemyTurn(currentState);
+            currentState = tickCooldowns(currentState);
+            // -------------------------------------------------
 
             // Card will return to hand after combo
             cardsReturningToHand.push({
@@ -651,6 +660,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             let newHand = [...prev.hand, ...cardsReturningToHand];
 
             // WAVE CLEAR LOGIC
+            // Use currentState enemies as they are the most up to date after the loop
             if (currentState.enemies.length === 0) {
                 const rewardMoney = 10;
                 if (prev.wave < prev.maxWaves) {
@@ -667,7 +677,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 status: 'PLAYING',
                 queue: [], // Queue cleared
                 hand: newHand,
-                // specialActionCooldown ticked during planning
+                // specialActionCooldown ticked during planning AND execution loop
             };
         });
 
