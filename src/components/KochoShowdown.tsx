@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, Footprints, RefreshCw, Zap, Trophy, Skull, Info, ChevronsRight, ChevronLeft, ChevronRight, PlusCircle, Trash2 } from 'lucide-react';
+import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, Footprints, RefreshCw, Zap, Trophy, Skull, Info, ChevronsRight, ChevronLeft, ChevronRight, PlusCircle, Trash2, Clock } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 
@@ -14,11 +14,12 @@ interface KCard {
     type: 'ATTACK' | 'MOVE' | 'UTILITY';
     range: number[]; // Relative range, e.g. [1, 2] means 1 and 2 tiles in front
     damage: number;
-    cooldown: number; // Display only for now (Deck cycle simulates cooldown)
+    cooldown: number; 
+    currentCooldown: number; // Runtime state
     color: string;
     icon: React.ReactNode;
     description: string;
-    energyCost: number; // Consumes 'Time' in execution? Or simple slot cost? Shogun uses execution turns.
+    energyCost: number; 
 }
 
 interface KEntity {
@@ -52,41 +53,39 @@ interface KochoGameState {
     enemies: KEntity[];
     hand: KCard[];
     queue: KCard[]; // Max 3
-    deck: KCard[];
-    discard: KCard[]; // Added Discard Pile
+    deck: KCard[]; // Kept for structure but unused in CD mode
+    discard: KCard[]; // Kept for structure but unused in CD mode
     status: 'PLAYING' | 'EXECUTING' | 'GAME_OVER' | 'VICTORY' | 'WAVE_CLEAR';
     logs: string[];
 }
 
 // --- DATA ---
-const CARD_DB: KCard[] = [
-    { id: 'slash', name: '定規スラッシュ', type: 'ATTACK', range: [1], damage: 3, cooldown: 0, color: 'bg-red-600', icon: <Swords size={16}/>, description: '目の前の敵を斬る', energyCost: 1 },
-    { id: 'poke', name: 'コンパス突き', type: 'ATTACK', range: [2], damage: 2, cooldown: 0, color: 'bg-orange-600', icon: <Zap size={16}/>, description: '2マス先を攻撃', energyCost: 1 },
-    { id: 'dash', name: 'ダッシュ', type: 'MOVE', range: [2], damage: 0, cooldown: 0, color: 'bg-blue-600', icon: <ChevronsRight size={16}/>, description: '前方に2マス移動', energyCost: 1 },
-    { id: 'backstep', name: 'バックステップ', type: 'UTILITY', range: [-1], damage: 0, cooldown: 0, color: 'bg-gray-600', icon: <RotateCcw size={16}/>, description: '1マス下がる', energyCost: 1 },
-    { id: 'shout', name: '大声', type: 'ATTACK', range: [1, 2, 3], damage: 1, cooldown: 0, color: 'bg-yellow-600', icon: <Zap size={16}/>, description: '前方3マスに音波攻撃', energyCost: 1 },
-    { id: 'bow', name: 'お辞儀', type: 'UTILITY', range: [0], damage: 0, cooldown: 0, color: 'bg-green-600', icon: <Shield size={16}/>, description: '待機してシールド+1', energyCost: 1 },
+const CARD_DB: Omit<KCard, 'id' | 'currentCooldown'>[] = [
+    { name: '定規スラッシュ', type: 'ATTACK', range: [1], damage: 3, cooldown: 2, color: 'bg-red-600', icon: <Swords size={16}/>, description: '目の前の敵を斬る', energyCost: 1 },
+    { name: 'コンパス突き', type: 'ATTACK', range: [2], damage: 2, cooldown: 2, color: 'bg-orange-600', icon: <Zap size={16}/>, description: '2マス先を攻撃', energyCost: 1 },
+    { name: 'ダッシュ', type: 'MOVE', range: [2], damage: 0, cooldown: 3, color: 'bg-blue-600', icon: <ChevronsRight size={16}/>, description: '前方に2マス移動', energyCost: 1 },
+    { name: 'バックステップ', type: 'UTILITY', range: [-1], damage: 0, cooldown: 2, color: 'bg-gray-600', icon: <RotateCcw size={16}/>, description: '1マス下がる', energyCost: 1 },
+    { name: '大声', type: 'ATTACK', range: [1, 2, 3], damage: 1, cooldown: 4, color: 'bg-yellow-600', icon: <Zap size={16}/>, description: '前方3マスに音波攻撃', energyCost: 1 },
+    { name: 'お辞儀', type: 'UTILITY', range: [0], damage: 0, cooldown: 3, color: 'bg-green-600', icon: <Shield size={16}/>, description: '待機してシールド+1', energyCost: 1 },
     
     // New Requested Cards
-    { id: 'roundhouse', name: '回し蹴り', type: 'ATTACK', range: [-1, 1], damage: 2, cooldown: 3, color: 'bg-purple-600', icon: <RefreshCw size={16}/>, description: '前後1マスを攻撃', energyCost: 1 },
-    { id: 'chalk', name: 'チョーク投げ', type: 'ATTACK', range: [1, 2, 3], damage: 2, cooldown: 5, color: 'bg-cyan-600', icon: <Zap size={16}/>, description: '遠距離攻撃', energyCost: 1 },
+    { name: '回し蹴り', type: 'ATTACK', range: [-1, 1], damage: 3, cooldown: 2, color: 'bg-purple-600', icon: <RefreshCw size={16}/>, description: '前後1マスを攻撃', energyCost: 1 },
+    { name: 'チョーク投げ', type: 'ATTACK', range: [1, 2, 3, 4], damage: 2, cooldown: 3, color: 'bg-cyan-600', icon: <Zap size={16}/>, description: '遠距離攻撃', energyCost: 1 },
 ];
 
 const getInitialDeck = (): KCard[] => {
-    // 3ターンに1回 = Deck cycle approx 3-4 cards. 
-    // 5ターンに1回 = Rare card.
-    // Initial Deck: 1x Roundhouse, 1x Chalk, 1x Slash, 1x Backstep, 1x Dash
+    // Initial Deck: Roundhouse Kick & Chalk Throw ONLY
+    const roundhouse = CARD_DB.find(c => c.name === '回し蹴り')!;
+    const chalk = CARD_DB.find(c => c.name === 'チョーク投げ')!;
+
     return [
-        { ...CARD_DB.find(c => c.id === 'roundhouse')!, id: 'c1' },
-        { ...CARD_DB.find(c => c.id === 'chalk')!, id: 'c2' },
-        { ...CARD_DB.find(c => c.id === 'slash')!, id: 'c3' },
-        { ...CARD_DB.find(c => c.id === 'backstep')!, id: 'c4' },
-        { ...CARD_DB.find(c => c.id === 'dash')!, id: 'c5' },
+        { ...roundhouse, id: 'c1', currentCooldown: 0 },
+        { ...chalk, id: 'c2', currentCooldown: 0 },
     ];
 };
 
 const ENEMY_TYPES = [
-    { name: '不良生徒', maxHp: 5, sprite: 'SENIOR|#a855f7', attackDmg: 2, range: [1], speed: 3 }, // Changed color to visible Purple
+    { name: '不良生徒', maxHp: 5, sprite: 'SENIOR|#a855f7', attackDmg: 2, range: [1], speed: 3 }, 
     { name: '熱血教師', maxHp: 10, sprite: 'TEACHER|#ef4444', attackDmg: 4, range: [1], speed: 4 },
     { name: '用務員', maxHp: 8, sprite: 'HUMANOID|#3e2723', attackDmg: 3, range: [1, 2], speed: 5 },
     { name: '教頭', maxHp: 15, sprite: 'MUSCLE|#1565c0', attackDmg: 5, range: [1], speed: 6 },
@@ -107,7 +106,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         enemies: [],
         hand: [],
         queue: [],
-        deck: getInitialDeck(),
+        deck: [],
         discard: [],
         status: 'PLAYING',
         logs: ['校長室への道が開かれた...']
@@ -162,14 +161,12 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             });
         }
 
-        // Reshuffle ALL cards back to deck
-        const current = stateRef.current;
-        const allCards = [...current.deck, ...current.hand, ...current.discard, ...current.queue];
-        const newDeck = allCards.sort(() => Math.random() - 0.5);
+        // Reuse existing hand/deck or init
+        const currentHand = stateRef.current.hand.length > 0 ? stateRef.current.hand : getInitialDeck();
         
-        // Draw 5
-        const drawCount = 5;
-        const newHand = newDeck.splice(0, drawCount);
+        // Reset cooldowns on new wave? Let's say yes for fairness or keep them? 
+        // Let's reset them to give a fresh start feel.
+        const resetHand = currentHand.map(c => ({ ...c, currentCooldown: 0 }));
 
         setGameState(prev => ({
             ...prev,
@@ -177,8 +174,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             turn: 1,
             player: { ...prev.player, pos: 3, facing: 1, shield: 0 }, // Reset pos
             enemies: newEnemies,
-            hand: newHand,
-            deck: newDeck,
+            hand: resetHand,
+            deck: [],
             discard: [],
             queue: [],
             status: 'PLAYING',
@@ -293,6 +290,17 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setGameState(prev => ({ ...prev, enemies }));
     };
 
+    // Helper to reduce cooldowns
+    const tickCooldowns = () => {
+        setGameState(prev => ({
+            ...prev,
+            hand: prev.hand.map(c => ({
+                ...c,
+                currentCooldown: Math.max(0, c.currentCooldown - 1)
+            }))
+        }));
+    };
+
     const handleMove = async (dir: -1 | 1) => {
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         setAnimating(true);
@@ -307,6 +315,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             }));
             audioService.playSound('select');
             await tickWorld('MOVE');
+            tickCooldowns(); // Action took time
         } else {
             // Blocked or OOB
             audioService.playSound('wrong');
@@ -325,11 +334,17 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setAnimating(true);
         setGameState(prev => ({ ...prev, player: { ...prev.player, facing: (prev.player.facing * -1) as Facing } }));
         await tickWorld('WAIT');
+        tickCooldowns(); // Action took time
         setAnimating(false);
     };
 
     const handleQueueCard = (card: KCard, idx: number) => {
         if (stateRef.current.status !== 'PLAYING' || animating) return;
+        if (card.currentCooldown > 0) {
+            audioService.playSound('wrong');
+            addLog("クールダウン中！");
+            return;
+        }
         if (stateRef.current.queue.length >= 3) {
             addLog("キューが一杯です！");
             return;
@@ -367,6 +382,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setGameState(prev => ({ ...prev, status: 'EXECUTING' }));
 
         const queue = [...stateRef.current.queue];
+        const cardsReturningToHand: KCard[] = [];
         
         for (const card of queue) {
             // Highlight current card (not implemented visually but logical delay)
@@ -419,6 +435,12 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 enemies: prev.enemies.filter(e => e.hp > 0)
             }));
 
+            // Prepare to return to hand with cooldown
+            cardsReturningToHand.push({
+                ...card,
+                currentCooldown: card.cooldown
+            });
+
             // Wait a bit
             await new Promise(r => setTimeout(r, 500));
 
@@ -429,33 +451,25 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             if ((stateRef.current as KochoGameState).status === 'GAME_OVER') break;
         }
 
-        // Draw and Shuffle Logic
+        // Return cards to hand and tick cooldowns of ALL cards
         setGameState(prev => {
             if (prev.status === 'GAME_OVER') return prev;
             
-            let newDeck = [...prev.deck];
-            let newDiscard = [...prev.discard, ...queue];
-            let newHand = [...prev.hand];
+            let newHand = [...prev.hand, ...cardsReturningToHand];
             
-            const needed = 5 - newHand.length;
-            
-            if (needed > 0) {
-                // If deck is smaller than needed, recycle discard
-                if (newDeck.length < needed) {
-                    newDeck = [...newDeck, ...newDiscard].sort(() => Math.random() - 0.5);
-                    newDiscard = [];
-                }
-                
-                const drawn = newDeck.splice(0, needed);
-                newHand = [...newHand, ...drawn];
-            }
+            // Decrease cooldown of all cards in hand by 1 (simulating time passed during execution phase)
+            // Note: The cards just returned are set to Max Cooldown. They also get -1 tick immediately as part of the "Turn End".
+            newHand = newHand.map(c => ({
+                ...c,
+                currentCooldown: Math.max(0, c.currentCooldown - 1)
+            }));
 
             if (prev.enemies.length === 0) {
                 // Wave Clear
-                if (prev.wave === 5) return { ...prev, status: 'VICTORY', queue: [], hand: newHand, deck: newDeck, discard: newDiscard };
+                if (prev.wave === 5) return { ...prev, status: 'VICTORY', queue: [], hand: newHand };
                 else {
                     setTimeout(() => startWave(prev.wave + 1), 1000);
-                    return { ...prev, status: 'WAVE_CLEAR', queue: [] };
+                    return { ...prev, status: 'WAVE_CLEAR', queue: [], hand: newHand };
                 }
             }
 
@@ -464,8 +478,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 status: 'PLAYING',
                 queue: [],
                 hand: newHand,
-                deck: newDeck,
-                discard: newDiscard
             };
         });
 
@@ -526,8 +538,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 <button onClick={onBack} className="flex items-center text-gray-400 hover:text-white"><ArrowLeft className="mr-2"/> Quit</button>
                 <h2 className="text-xl font-bold text-indigo-100 tracking-widest">KOCHO SHOWDOWN <span className="text-sm text-pink-400 ml-2">Wave {gameState.wave}</span></h2>
                 <div className="text-xs text-gray-500 flex gap-4">
-                    <span>Deck: {gameState.deck.length}</span>
-                    <span>Discard: {gameState.discard.length}</span>
+                    {/* Replaced Deck Info with Instructions */}
+                    <span>Move/Act to reduce Cooldowns</span>
                 </div>
             </div>
 
@@ -606,7 +618,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             <button onClick={handleTurn} className="bg-slate-700 hover:bg-slate-600 p-3 rounded border border-slate-500 text-xs font-bold w-12 flex items-center justify-center">TURN</button>
                             <button onClick={() => handleMove(1)} className="bg-slate-700 hover:bg-slate-600 p-3 rounded border border-slate-500"><ChevronRight/></button>
                         </div>
-                        <div className="text-center text-[10px] text-gray-500">MOVEMENT</div>
+                        <div className="text-center text-[10px] text-gray-500">MOVEMENT (1 Tick)</div>
                     </div>
 
                     {/* Hand Cards */}
@@ -614,14 +626,25 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         {gameState.hand.map((card, i) => (
                             <div 
                                 key={card.id} 
-                                className={`w-24 h-32 bg-slate-800 border-2 rounded-lg flex flex-col justify-between p-2 cursor-pointer transition-transform hover:-translate-y-2 relative shadow-lg ${selectedCardIdx === i ? 'border-yellow-400' : 'border-slate-600'}`}
+                                className={`w-24 h-32 bg-slate-800 border-2 rounded-lg flex flex-col justify-between p-2 cursor-pointer transition-transform relative shadow-lg ${selectedCardIdx === i ? 'border-yellow-400' : 'border-slate-600'} ${card.currentCooldown > 0 ? 'opacity-50 grayscale' : 'hover:-translate-y-2'}`}
                                 onClick={() => handleQueueCard(card, i)}
                             >
                                 <div className={`absolute top-0 left-0 w-full h-1.5 ${card.color} rounded-t-sm`}></div>
                                 <div className="mt-1 text-xs font-bold text-center leading-tight">{card.name}</div>
                                 <div className="flex justify-center my-1 text-indigo-300">{card.icon}</div>
                                 <div className="text-[9px] text-gray-400 text-center leading-tight h-8 overflow-hidden">{card.description}</div>
-                                <div className="text-[10px] text-gray-500 text-right mt-1 font-mono">{card.type}</div>
+                                <div className="flex justify-between items-center text-[10px] text-gray-500 mt-1 font-mono">
+                                    <span>CD:{card.cooldown}</span>
+                                    <span>{card.type}</span>
+                                </div>
+                                
+                                {/* Cooldown Overlay */}
+                                {card.currentCooldown > 0 && (
+                                    <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center rounded-lg z-10">
+                                        <Clock size={24} className="text-gray-400 mb-1"/>
+                                        <span className="text-2xl font-bold text-white">{card.currentCooldown}</span>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>
