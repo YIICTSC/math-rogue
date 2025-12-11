@@ -247,7 +247,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     // --- GAME LOGIC ---
 
     const tickCooldowns = (state: KochoGameState): KochoGameState => {
-        let cdReduction = 1;
         // Relic: Boots (Move CD -1)
         const hasBoots = state.relics.some(r => r.id === 'R_BOOTS');
 
@@ -410,12 +409,14 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const newPos = current.player.pos + dir;
         
         if (newPos >= 0 && newPos < GRID_SIZE && !current.enemies.some(e => e.pos === newPos)) {
+            // 1. Move Player
             let intermediateState = {
                 ...current,
                 player: { ...current.player, pos: newPos }
             };
             audioService.playSound('select');
             
+            // 2. Enemy Reaction
             await new Promise(r => setTimeout(r, 200)); 
             let finalState = resolveEnemyTurn(intermediateState);
             finalState = tickCooldowns(finalState);
@@ -429,7 +430,19 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const handleTurn = async () => {
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         setAnimating(true);
-        setGameState(prev => ({ ...prev, player: { ...prev.player, facing: (prev.player.facing * -1) as Facing } }));
+        
+        // 1. Player Action (Turn)
+        let current = stateRef.current;
+        current = { ...current, player: { ...current.player, facing: (current.player.facing * -1) as Facing } };
+        addLog("向きを変えた。");
+        audioService.playSound('select');
+
+        // 2. Enemy Reaction (Turn consumes a turn)
+        await new Promise(r => setTimeout(r, 200));
+        current = resolveEnemyTurn(current);
+        current = tickCooldowns(current);
+        
+        setGameState(current);
         setAnimating(false);
     };
 
@@ -473,6 +486,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             e.id === enemyInFront.id ? { ...e, pos: p.pos } : e
         );
 
+        // 1. Player Action
         let intermediateState = {
             ...current,
             player: { ...current.player, pos: targetPos },
@@ -480,6 +494,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             specialActionCooldown: 3 + 1
         };
 
+        // 2. Enemy Reaction
         await new Promise(r => setTimeout(r, 200)); 
         let finalState = resolveEnemyTurn(intermediateState);
         finalState = tickCooldowns(finalState);
@@ -500,23 +515,33 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             return;
         }
         
+        setAnimating(true);
         audioService.playSound('select');
 
-        // Add to queue and remove from hand immediately
-        setGameState(prev => {
-            const newHand = [...prev.hand];
-            newHand.splice(idx, 1);
-            return {
-                ...prev,
-                hand: newHand,
-                queue: [...prev.queue, card]
-            };
-        });
+        // 1. Queue Card (Player Action)
+        let current = stateRef.current;
+        const newHand = [...current.hand];
+        newHand.splice(idx, 1);
+        current = {
+            ...current,
+            hand: newHand,
+            queue: [...current.queue, card]
+        };
+        addLog(`${card.name}を計画...`);
+
+        // 2. Enemy Reaction (Planning consumes a turn)
+        await new Promise(r => setTimeout(r, 300));
+        current = resolveEnemyTurn(current);
+        current = tickCooldowns(current);
+
+        setGameState(current);
+        setAnimating(false);
     };
 
     const handleUnqueueCard = (idx: number) => {
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         
+        // Unqueue does NOT consume a turn
         const card = stateRef.current.queue[idx];
         const newQueue = [...stateRef.current.queue];
         newQueue.splice(idx, 1);
@@ -618,27 +643,12 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             await new Promise(r => setTimeout(r, 400));
         }
 
-        // --- ENEMY TURN PHASE ---
-        if (currentState.status !== 'GAME_OVER' && currentState.enemies.length > 0) {
-            addLog("敵のターン！");
-            await new Promise(r => setTimeout(r, 300));
-            currentState = resolveEnemyTurn(currentState);
-            setGameState(currentState); // Update UI for enemy moves/attacks
-            await new Promise(r => setTimeout(r, 500));
-        }
-
         // --- CLEANUP PHASE ---
         setGameState(prev => {
             if (prev.status === 'GAME_OVER') return prev;
             
-            // Cooldowns tick ONCE per combo turn
-            const tickedHand = prev.hand.map(c => ({
-                ...c,
-                currentCooldown: Math.max(0, c.currentCooldown - 1)
-            }));
-
             // Return executed cards to hand
-            let newHand = [...tickedHand, ...cardsReturningToHand];
+            let newHand = [...prev.hand, ...cardsReturningToHand];
 
             // WAVE CLEAR LOGIC
             if (currentState.enemies.length === 0) {
@@ -657,7 +667,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 status: 'PLAYING',
                 queue: [], // Queue cleared
                 hand: newHand,
-                specialActionCooldown: Math.max(0, prev.specialActionCooldown - 1) // Global CD tick
+                // specialActionCooldown ticked during planning
             };
         });
 
