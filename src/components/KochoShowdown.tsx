@@ -223,12 +223,19 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 
                 // EXECUTE ATTACK (Telegraph finished)
                 if (e.intent.type === 'ATTACK') {
-                    // Check if player is STILL in range (using updated player pos)
-                    const dist = Math.abs(e.pos - player.pos);
-                    const rangeHit = e.intent.range?.includes(dist);
-                    const facingHit = (e.pos < player.pos && e.facing === 1) || (e.pos > player.pos && e.facing === -1);
-                    
-                    if (rangeHit && facingHit) {
+                    // Friendly Fire Logic
+                    const attackTiles: number[] = [];
+                    const range = e.intent.range || [];
+                    // Calculate absolute target tiles based on facing
+                    range.forEach(r => {
+                        const tile = e.pos + (r * e.facing);
+                        if (tile >= 0 && tile < GRID_SIZE) attackTiles.push(tile);
+                    });
+
+                    let hitSomething = false;
+
+                    // A. Hit Player
+                    if (attackTiles.includes(player.pos)) {
                         const dmg = e.intent.damage || 0;
                         const blocked = Math.min(dmg, player.shield);
                         const finalDmg = dmg - blocked;
@@ -238,11 +245,31 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         
                         logs = [`${e.name}の攻撃！ ${finalDmg}ダメージ！`, ...logs];
                         audioService.playSound('lose');
+                        hitSomething = true;
                         
                         if (player.hp <= 0) {
                             status = 'GAME_OVER';
                         }
-                    } else {
+                    }
+
+                    // B. Hit Other Enemies (Friendly Fire)
+                    enemies.forEach((victim, vIdx) => {
+                        if (victim.id !== e.id && victim.hp > 0 && attackTiles.includes(victim.pos)) {
+                            const dmg = e.intent?.damage || 0;
+                            const blocked = Math.min(dmg, victim.shield);
+                            const finalDmg = dmg - blocked;
+
+                            // Update victim in the main array directly
+                            const newVictim = { ...victim, hp: Math.max(0, victim.hp - finalDmg), shield: victim.shield - blocked };
+                            enemies[vIdx] = newVictim;
+
+                            logs = [`${e.name}が${victim.name}に誤爆！ ${finalDmg}ダメージ！`, ...logs];
+                            audioService.playSound('attack');
+                            hitSomething = true;
+                        }
+                    });
+
+                    if (!hitSomething) {
                         logs = [`${e.name}の攻撃は空を切った。`, ...logs];
                     }
                     
@@ -340,10 +367,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         } else {
             // Blocked
             audioService.playSound('wrong');
-            // If blocked, maybe just update facing if we wanted to turn, but request says "don't change facing on move" usually implies "don't auto-turn".
-            // If player explicitly wants to turn, they use the turn button.
-            // So if blocked, do nothing or just shake?
-            // Let's just do nothing/shake.
         }
         
         setAnimating(false);
