@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, Footprints, RefreshCw, Zap, Trophy, Skull, Info, ChevronsRight, ChevronLeft, ChevronRight, PlusCircle, Trash2 } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -53,6 +52,7 @@ interface KochoGameState {
     hand: KCard[];
     queue: KCard[]; // Max 3
     deck: KCard[];
+    discard: KCard[]; // Added Discard Pile
     status: 'PLAYING' | 'EXECUTING' | 'GAME_OVER' | 'VICTORY' | 'WAVE_CLEAR';
     logs: string[];
 }
@@ -67,13 +67,15 @@ const CARD_DB: KCard[] = [
     { id: 'bow', name: 'お辞儀', type: 'UTILITY', range: [0], damage: 0, cooldown: 0, color: 'bg-green-600', icon: <Shield size={16}/>, description: '待機してシールド+1', energyCost: 1 },
 ];
 
-const INITIAL_DECK = [
-    { ...CARD_DB[0], id: 'c1' },
-    { ...CARD_DB[0], id: 'c2' },
-    { ...CARD_DB[1], id: 'c3' },
-    { ...CARD_DB[3], id: 'c4' },
-    { ...CARD_DB[5], id: 'c5' },
-];
+const getInitialDeck = (): KCard[] => {
+    return [
+        { ...CARD_DB[0], id: 'c1' },
+        { ...CARD_DB[0], id: 'c2' },
+        { ...CARD_DB[1], id: 'c3' },
+        { ...CARD_DB[3], id: 'c4' },
+        { ...CARD_DB[5], id: 'c5' },
+    ];
+};
 
 const ENEMY_TYPES = [
     { name: '不良生徒', maxHp: 5, sprite: 'SENIOR|#212121', attackDmg: 2, range: [1], speed: 3 },
@@ -97,7 +99,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         enemies: [],
         hand: [],
         queue: [],
-        deck: JSON.parse(JSON.stringify(INITIAL_DECK)),
+        deck: getInitialDeck(),
+        discard: [],
         status: 'PLAYING',
         logs: ['校長室への道が開かれた...']
     });
@@ -151,9 +154,14 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             });
         }
 
-        // Draw Hand (Simple: Fill to 5)
+        // Reshuffle ALL cards back to deck
+        const current = stateRef.current;
+        const allCards = [...current.deck, ...current.hand, ...current.discard, ...current.queue];
+        const newDeck = allCards.sort(() => Math.random() - 0.5);
+        
+        // Draw 5
         const drawCount = 5;
-        const newHand = [...stateRef.current.deck].sort(() => Math.random() - 0.5).slice(0, drawCount);
+        const newHand = newDeck.splice(0, drawCount);
 
         setGameState(prev => ({
             ...prev,
@@ -162,6 +170,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             player: { ...prev.player, pos: 3, facing: 1, shield: 0 }, // Reset pos
             enemies: newEnemies,
             hand: newHand,
+            deck: newDeck,
+            discard: [],
             queue: [],
             status: 'PLAYING',
             logs: [`Wave ${wave} 開始！`]
@@ -376,8 +386,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 const dist = card.range[0];
                 const target = pPos + (dist * p.facing);
                 if (target >= 0 && target < GRID_SIZE && !stateRef.current.enemies.some(e => e.pos === target)) {
-                    // Update stateRef immediately for local logic? 
-                    // No, setGameState is enough if we await/sync but here we just push update
                     setGameState(prev => ({ ...prev, player: { ...prev.player, pos: target } }));
                     audioService.playSound('select');
                 } else {
@@ -410,21 +418,33 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             await tickWorld('EXECUTE');
             
             // Check Game Over using Ref (updated by tickWorld effect or setGameState)
-            if (stateRef.current.status === 'GAME_OVER') break;
+            if ((stateRef.current as KochoGameState).status === 'GAME_OVER') break;
         }
 
-        // Clear Queue, Refill Hand
-        const currentHand = stateRef.current.hand;
-        const deck = stateRef.current.deck;
-        const needed = 5 - currentHand.length;
-        const drawn = deck.sort(() => Math.random() - 0.5).slice(0, needed);
-        
+        // Draw and Shuffle Logic
         setGameState(prev => {
             if (prev.status === 'GAME_OVER') return prev;
             
+            let newDeck = [...prev.deck];
+            let newDiscard = [...prev.discard, ...queue];
+            let newHand = [...prev.hand];
+            
+            const needed = 5 - newHand.length;
+            
+            if (needed > 0) {
+                // If deck is smaller than needed, recycle discard
+                if (newDeck.length < needed) {
+                    newDeck = [...newDeck, ...newDiscard].sort(() => Math.random() - 0.5);
+                    newDiscard = [];
+                }
+                
+                const drawn = newDeck.splice(0, needed);
+                newHand = [...newHand, ...drawn];
+            }
+
             if (prev.enemies.length === 0) {
                 // Wave Clear
-                if (prev.wave === 5) return { ...prev, status: 'VICTORY', queue: [], hand: [...currentHand, ...drawn] };
+                if (prev.wave === 5) return { ...prev, status: 'VICTORY', queue: [], hand: newHand, deck: newDeck, discard: newDiscard };
                 else {
                     setTimeout(() => startWave(prev.wave + 1), 1000);
                     return { ...prev, status: 'WAVE_CLEAR', queue: [] };
@@ -435,7 +455,9 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 ...prev,
                 status: 'PLAYING',
                 queue: [],
-                hand: [...currentHand, ...drawn]
+                hand: newHand,
+                deck: newDeck,
+                discard: newDiscard
             };
         });
 
@@ -495,7 +517,10 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             <div className="flex justify-between items-center p-4 bg-black/40 border-b border-indigo-500/30">
                 <button onClick={onBack} className="flex items-center text-gray-400 hover:text-white"><ArrowLeft className="mr-2"/> Quit</button>
                 <h2 className="text-xl font-bold text-indigo-100 tracking-widest">KOCHO SHOWDOWN <span className="text-sm text-pink-400 ml-2">Wave {gameState.wave}</span></h2>
-                <div className="w-20"></div>
+                <div className="text-xs text-gray-500 flex gap-4">
+                    <span>Deck: {gameState.deck.length}</span>
+                    <span>Discard: {gameState.discard.length}</span>
+                </div>
             </div>
 
             {/* Game Area */}
