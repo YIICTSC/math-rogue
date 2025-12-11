@@ -51,10 +51,9 @@ interface KochoGameState {
     player: KEntity;
     enemies: KEntity[];
     hand: KCard[];
-    // queue: KCard[]; // Removed
-    // deck: KCard[]; // Unused
-    // discard: KCard[]; // Unused
-    status: 'PLAYING' | 'GAME_OVER' | 'VICTORY' | 'WAVE_CLEAR';
+    deck: KCard[]; 
+    discard: KCard[]; 
+    status: 'PLAYING' | 'EXECUTING' | 'GAME_OVER' | 'VICTORY' | 'WAVE_CLEAR';
     logs: string[];
 }
 
@@ -73,17 +72,13 @@ const CARD_DB: Omit<KCard, 'id' | 'currentCooldown'>[] = [
 ];
 
 const getInitialDeck = (): KCard[] => {
-    // Initial Deck
+    // Initial Deck: Roundhouse Kick & Chalk Throw ONLY
     const roundhouse = CARD_DB.find(c => c.name === '回し蹴り')!;
     const chalk = CARD_DB.find(c => c.name === 'チョーク投げ')!;
-    const ruler = CARD_DB.find(c => c.name === '定規スラッシュ')!;
-    const backstep = CARD_DB.find(c => c.name === 'バックステップ')!;
 
     return [
-        { ...ruler, id: 'c1', currentCooldown: 0 },
+        { ...roundhouse, id: 'c1', currentCooldown: 0 },
         { ...chalk, id: 'c2', currentCooldown: 0 },
-        { ...roundhouse, id: 'c3', currentCooldown: 0 },
-        { ...backstep, id: 'c4', currentCooldown: 0 },
     ];
 };
 
@@ -108,6 +103,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         player: { id: 'p1', type: 'PLAYER', name: '勇者', pos: 3, facing: 1, maxHp: 20, hp: 20, spriteName: 'HERO_SIDE|赤', shield: 0 },
         enemies: [],
         hand: [],
+        deck: [],
+        discard: [],
         status: 'PLAYING',
         logs: ['校長室への道が開かれた...']
     });
@@ -173,6 +170,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             player: { ...prev.player, pos: 3, facing: 1, shield: 0 }, // Reset pos
             enemies: newEnemies,
             hand: resetHand,
+            deck: [],
+            discard: [],
             status: 'PLAYING',
             logs: [`Wave ${wave} 開始！`]
         }));
@@ -246,6 +245,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         audioService.playSound('lose'); // hurt sound
                         await new Promise(r => setTimeout(r, 200));
                         
+                        // Check gameOver against calculating value
                         if (current.player.hp - finalDmg <= 0) {
                             setGameState(prev => ({ ...prev, status: 'GAME_OVER' }));
                             return; // Stop processing
@@ -284,19 +284,13 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     // Helper to reduce cooldowns
-    const tickCooldowns = (usedCardIndex?: number) => {
+    const tickCooldowns = () => {
         setGameState(prev => ({
             ...prev,
-            hand: prev.hand.map((c, idx) => {
-                // If this is the card we just used, it is already set to MAX cooldown by handleUseCard
-                // But generally, cooldown ticks DOWN at end of turn.
-                // If I just used a card, it shouldn't tick down immediately.
-                if (idx === usedCardIndex) return c;
-                return {
-                    ...c,
-                    currentCooldown: Math.max(0, c.currentCooldown - 1)
-                };
-            })
+            hand: prev.hand.map(c => ({
+                ...c,
+                currentCooldown: Math.max(0, c.currentCooldown - 1)
+            }))
         }));
     };
 
@@ -313,12 +307,16 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 player: { ...prev.player, pos: newPos, facing: dir } // Face movement direction
             }));
             audioService.playSound('select');
+            
+            // Allow state to update before ticking
+            await new Promise(r => setTimeout(r, 50));
             await tickWorld();
             tickCooldowns(); // Action took time
         } else {
             // Blocked or OOB
             audioService.playSound('wrong');
-            // Just change facing if blocked
+            // Just change facing if blocked (Does not pass turn?)
+            // Let's make facing change free
             setGameState(prev => ({
                 ...prev,
                 player: { ...prev.player, facing: dir }
@@ -337,10 +335,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setAnimating(false);
     };
 
-    const handleUseCard = async (index: number) => {
+    const handlePlayCard = async (card: KCard, idx: number) => {
         if (stateRef.current.status !== 'PLAYING' || animating) return;
-        
-        const card = stateRef.current.hand[index];
         if (card.currentCooldown > 0) {
             audioService.playSound('wrong');
             addLog("クールダウン中！");
@@ -348,12 +344,12 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }
 
         setAnimating(true);
-        audioService.playSound('select');
-        addLog(`${card.name}！`);
-
-        // Execute Effect
+        addLog(`${card.name} を発動！`);
+        
+        // Use latest ref state
         const p = stateRef.current.player;
         let pPos = p.pos;
+        let actionSuccessful = true;
         
         if (card.type === 'ATTACK') {
             const targets = card.range.map(r => pPos + (r * p.facing));
@@ -367,14 +363,17 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 audioService.playSound('attack');
             } else {
                 addLog("空振り...");
+                audioService.playSound('select');
             }
         } else if (card.type === 'MOVE') {
             const dist = card.range[0];
             const target = pPos + (dist * p.facing);
             if (target >= 0 && target < GRID_SIZE && !stateRef.current.enemies.some(e => e.pos === target)) {
                 setGameState(prev => ({ ...prev, player: { ...prev.player, pos: target } }));
+                audioService.playSound('select');
             } else {
                 addLog("移動できない！");
+                actionSuccessful = false;
             }
         } else if (card.type === 'UTILITY') {
             if (card.name === 'お辞儀') {
@@ -385,37 +384,41 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 const target = pPos - p.facing;
                 if (target >= 0 && target < GRID_SIZE && !stateRef.current.enemies.some(e => e.pos === target)) {
                     setGameState(prev => ({ ...prev, player: { ...prev.player, pos: target } }));
+                    audioService.playSound('select');
+                } else {
+                    addLog("下がれない！");
+                    actionSuccessful = false;
                 }
             }
         }
 
-        // Apply Cooldown to USED card immediately
-        setGameState(prev => ({
-            ...prev,
-            hand: prev.hand.map((c, i) => i === index ? { ...c, currentCooldown: c.cooldown } : c),
-            enemies: prev.enemies.filter(e => e.hp > 0) // Cleanup dead
-        }));
+        if (actionSuccessful) {
+            // Apply Cooldown to THIS card
+            setGameState(prev => ({
+                ...prev,
+                // Clean dead enemies first
+                enemies: prev.enemies.filter(e => e.hp > 0),
+                hand: prev.hand.map((c, i) => i === idx ? { ...c, currentCooldown: c.cooldown + 1 } : c) // +1 because tickCooldowns will reduce it immediately after
+            }));
 
-        await new Promise(r => setTimeout(r, 400));
-
-        // Tick World (Enemies move)
-        await tickWorld();
-        
-        // Tick Cooldowns (Decrease others)
-        tickCooldowns(index);
-
-        // Check Victory
-        setGameState(prev => {
-            if (prev.status === 'GAME_OVER') return prev;
-            if (prev.enemies.length === 0) {
-                if (prev.wave === 5) return { ...prev, status: 'VICTORY' };
-                else {
-                    setTimeout(() => startWave(prev.wave + 1), 1000);
-                    return { ...prev, status: 'WAVE_CLEAR' };
+            // Check wave clear immediate
+            if (stateRef.current.enemies.filter(e => e.hp > 0).length === 0) {
+                setGameState(prev => ({ ...prev, enemies: [] })); // Clear visually
+                await new Promise(r => setTimeout(r, 500));
+                
+                if (gameState.wave === 5) {
+                    setGameState(prev => ({ ...prev, status: 'VICTORY' }));
+                } else {
+                    setGameState(prev => ({ ...prev, status: 'WAVE_CLEAR' }));
+                    setTimeout(() => startWave(gameState.wave + 1), 1500);
                 }
+            } else {
+                // Pass Time
+                await new Promise(r => setTimeout(r, 300));
+                await tickWorld();
+                tickCooldowns();
             }
-            return prev;
-        });
+        }
 
         setAnimating(false);
     };
@@ -445,8 +448,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     {/* Intent Overlay */}
                     {e.intent && e.intent.timer <= 1 && (
                         <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce">
-                            {e.intent.type === 'ATTACK' && <div className="bg-red-600 text-white text-xs px-1 rounded flex items-center"><Swords size={12} className="mr-1"/> {e.intent.damage} <span className="ml-1 text-[10px] bg-black/30 rounded px-1">!</span></div>}
-                            {e.intent.type === 'MOVE' && <div className="bg-blue-600 text-white text-xs px-1 rounded flex items-center"><Footprints size={12} className="mr-1"/> <span className="text-[10px] bg-black/30 rounded px-1">!</span></div>}
+                            {e.intent.type === 'ATTACK' && <div className="bg-red-600 text-white text-xs px-1 rounded flex items-center"><Swords size={12} className="mr-1"/> {e.intent.damage} <span className="ml-1 text-[10px]">({e.intent.timer})</span></div>}
+                            {e.intent.type === 'MOVE' && <div className="bg-blue-600 text-white text-xs px-1 rounded flex items-center"><Footprints size={12} className="mr-1"/> <span className="text-[10px]">({e.intent.timer})</span></div>}
                         </div>
                     )}
                     <div className="absolute -bottom-6 w-16 text-center bg-black/50 text-white text-xs rounded border border-red-500">{e.hp}/{e.maxHp}</div>
@@ -506,6 +509,11 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         <button onClick={onBack} className="bg-indigo-600 px-8 py-3 rounded text-xl font-bold hover:bg-indigo-500">Return</button>
                     </div>
                 )}
+                {gameState.status === 'WAVE_CLEAR' && (
+                    <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center z-50 animate-in zoom-in pointer-events-none">
+                        <h2 className="text-4xl font-bold text-yellow-400 mb-4">WAVE CLEAR!</h2>
+                    </div>
+                )}
                 {gameState.status === 'GAME_OVER' && (
                     <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-50 animate-in zoom-in">
                         <Skull size={64} className="text-red-500 mb-4"/>
@@ -516,38 +524,37 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
             </div>
 
-            {/* Controls Area (Bottom) - Hand Focused */}
+            {/* Controls Area (Bottom) - Portrait Optimized */}
             <div className="bg-[#0f0f1b] border-t-4 border-indigo-900 p-2 md:p-4 shrink-0 flex flex-col gap-2">
                 
                 {/* 1. Hand Cards (Scrollable) */}
-                <div className="flex gap-2 overflow-x-auto pb-4 px-1 custom-scrollbar min-h-[140px] items-center justify-start">
+                <div className="flex gap-2 overflow-x-auto pb-2 px-1 custom-scrollbar min-h-[100px] items-center">
                     {gameState.hand.map((card, i) => (
                         <div 
                             key={card.id} 
-                            className={`w-24 h-36 md:w-28 md:h-40 bg-slate-800 border-2 rounded-lg flex flex-col justify-between p-1 md:p-2 cursor-pointer transition-transform relative shadow-lg shrink-0 ${card.currentCooldown > 0 ? 'opacity-50 grayscale border-slate-600' : 'hover:-translate-y-4 hover:shadow-xl hover:border-yellow-400 border-slate-500'}`}
-                            onClick={() => handleUseCard(i)}
+                            className={`w-20 h-28 md:w-24 md:h-32 bg-slate-800 border-2 rounded-lg flex flex-col justify-between p-1 md:p-2 cursor-pointer transition-transform relative shadow-lg shrink-0 ${card.currentCooldown > 0 || animating ? 'opacity-50 grayscale cursor-not-allowed border-slate-600' : 'hover:-translate-y-2 border-yellow-400'}`}
+                            onClick={() => handlePlayCard(card, i)}
                         >
                             <div className={`absolute top-0 left-0 w-full h-1 ${card.color} rounded-t-sm`}></div>
-                            <div className="mt-2 text-[10px] md:text-xs font-bold text-center leading-tight truncate">{card.name}</div>
-                            <div className="flex justify-center my-1 text-indigo-300 scale-100">{card.icon}</div>
-                            <div className="text-[8px] md:text-[9px] text-gray-400 text-center leading-tight h-8 overflow-hidden">{card.description}</div>
-                            
-                            <div className="flex justify-between items-center text-[9px] md:text-[10px] text-gray-500 mt-auto font-mono w-full px-1 border-t border-white/10 pt-1">
-                                <span className={card.currentCooldown > 0 ? 'text-red-400 font-bold' : 'text-green-400'}>
-                                    CD:{card.currentCooldown > 0 ? card.currentCooldown : 'OK'}
-                                </span>
-                                {card.damage > 0 && (
+                            <div className="mt-1 text-[9px] md:text-xs font-bold text-center leading-tight truncate">{card.name}</div>
+                            <div className="flex justify-center my-0.5 text-indigo-300 scale-75 md:scale-100">{card.icon}</div>
+                            <div className="text-[8px] md:text-[9px] text-gray-400 text-center leading-tight h-6 overflow-hidden">{card.description}</div>
+                            <div className="flex justify-between items-center text-[8px] md:text-[10px] text-gray-500 mt-auto font-mono w-full">
+                                <span>CD:{card.cooldown}</span>
+                                {card.damage > 0 ? (
                                     <span className="text-red-400 font-bold flex items-center">
                                         <Swords size={10} className="mr-0.5"/>{card.damage}
                                     </span>
+                                ) : (
+                                    <span className="opacity-70">{card.type}</span>
                                 )}
                             </div>
                             
                             {/* Cooldown Overlay */}
                             {card.currentCooldown > 0 && (
-                                <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center rounded-lg z-10 backdrop-blur-[1px]">
-                                    <Clock size={24} className="text-gray-400 mb-1"/>
-                                    <span className="text-2xl font-bold text-white">{card.currentCooldown}</span>
+                                <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center rounded-lg z-10">
+                                    <Clock size={20} className="text-gray-400 mb-1"/>
+                                    <span className="text-xl font-bold text-white">{card.currentCooldown}</span>
                                 </div>
                             )}
                         </div>
@@ -556,11 +563,12 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                 {/* 2. Movement Controls */}
                 <div className="flex justify-center items-center gap-4 py-2 border-t border-indigo-900/30">
-                    <button onClick={() => handleMove(-1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors shadow-lg active:scale-95"><ChevronLeft size={24}/></button>
+                    <button onClick={() => handleMove(-1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors"><ChevronLeft size={24}/></button>
                     <div className="flex flex-col items-center gap-1">
-                        <button onClick={handleTurn} className="bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-lg border border-slate-500 text-sm font-bold flex items-center justify-center active:bg-slate-800 transition-colors w-24 shadow-lg active:scale-95">TURN</button>
+                        <button onClick={handleTurn} className="bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-lg border border-slate-500 text-sm font-bold flex items-center justify-center active:bg-slate-800 transition-colors w-24">TURN</button>
+                        <div className="text-[8px] text-gray-500">1 Tick</div>
                     </div>
-                    <button onClick={() => handleMove(1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors shadow-lg active:scale-95"><ChevronRight size={24}/></button>
+                    <button onClick={() => handleMove(1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors"><ChevronRight size={24}/></button>
                 </div>
             </div>
         </div>
