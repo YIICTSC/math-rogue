@@ -1,12 +1,13 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass } from 'lucide-react';
+import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 
 // --- TYPES ---
 type Facing = 1 | -1; // 1: Right, -1: Left
 type GamePhase = 'BATTLE_1' | 'REWARD' | 'BATTLE_2' | 'SHOP' | 'BOSS';
+type CardEffectType = 'NORMAL' | 'COUNTER' | 'PUSH' | 'PULL' | 'RECOIL' | 'DASH_ATTACK' | 'FURTHEST' | 'PIERCE' | 'TELEPORT';
 
 interface KCard {
     id: string;
@@ -22,6 +23,7 @@ interface KCard {
     description: string;
     energyCost: number; 
     upgraded?: boolean;
+    effectType?: CardEffectType;
 }
 
 interface KEntity {
@@ -89,13 +91,17 @@ const CARD_DB: Omit<KCard, 'id' | 'currentCooldown'>[] = [
 
     // New Weapons / Actions
     { name: '竹刀', type: 'ATTACK', range: [1], damage: 2, cooldown: 0, color: 'bg-emerald-600', icon: <Swords size={16}/>, description: 'CT0。隙のない連撃', energyCost: 0 },
-    { name: '釘バット', type: 'ATTACK', range: [1], damage: 5, cooldown: 3, color: 'bg-red-800', icon: <Hammer size={16}/>, description: '高火力の一撃', energyCost: 1 },
-    { name: '鉄の定規', type: 'ATTACK', range: [1], damage: 2, shield: 2, cooldown: 2, color: 'bg-slate-500', icon: <Shield size={16}/>, description: '攻防一体。シールド+2', energyCost: 1 },
+    { name: '金属バット', type: 'ATTACK', range: [1], damage: 4, cooldown: 4, color: 'bg-stone-600', icon: <Hammer size={16}/>, description: '重い一撃(高威力)', energyCost: 1 },
+    { name: 'カウンター定規', type: 'ATTACK', range: [1], damage: 2, cooldown: 3, color: 'bg-rose-700', icon: <Swords size={16}/>, description: '敵が攻撃態勢なら2倍ダメージ', energyCost: 1, effectType: 'COUNTER' },
+    { name: '張り手', type: 'ATTACK', range: [1], damage: 1, cooldown: 3, color: 'bg-orange-700', icon: <Maximize2 size={16}/>, description: '敵を2マス吹き飛ばす', energyCost: 1, effectType: 'PUSH' },
+    { name: '後ろ蹴り', type: 'ATTACK', range: [-1], damage: 3, cooldown: 3, color: 'bg-violet-700', icon: <ArrowLeft size={16}/>, description: '背後の敵を攻撃', energyCost: 1 },
+    { name: '釣り竿', type: 'ATTACK', range: [2, 3, 4], damage: 1, cooldown: 4, color: 'bg-sky-600', icon: <Minimize2 size={16}/>, description: '敵を目の前に引き寄せる', energyCost: 1, effectType: 'PULL' },
+    { name: '消火器', type: 'ATTACK', range: [1, 2], damage: 4, cooldown: 5, color: 'bg-red-500', icon: <Wind size={16}/>, description: '高威力だが反動で下がる', energyCost: 1, effectType: 'RECOIL' },
+    { name: 'タックル', type: 'ATTACK', range: [1, 2, 3], damage: 2, cooldown: 3, color: 'bg-amber-600', icon: <Activity size={16}/>, description: '敵にぶつかるまで突進攻撃', energyCost: 1, effectType: 'DASH_ATTACK' },
+    { name: '雷', type: 'ATTACK', range: [1,2,3,4,5,6], damage: 2, cooldown: 4, color: 'bg-yellow-500 text-black', icon: <Zap size={16}/>, description: '一番遠くの敵を狙い撃つ', energyCost: 1, effectType: 'FURTHEST' },
     { name: '回転モップ', type: 'ATTACK', range: [-1, 1], damage: 2, cooldown: 2, color: 'bg-cyan-700', icon: <RefreshCw size={16}/>, description: '前後を同時に攻撃', energyCost: 1 },
-    { name: '竹箒', type: 'ATTACK', range: [2], damage: 3, cooldown: 2, color: 'bg-amber-700', icon: <Move size={16}/>, description: '2マス先を突く(リーチ)', energyCost: 1 },
-    { name: '消しゴム手裏剣', type: 'ATTACK', range: [3, 4], damage: 2, cooldown: 1, color: 'bg-white text-black', icon: <Crosshair size={16}/>, description: '遠距離速射', energyCost: 1 },
+    { name: '竹箒', type: 'ATTACK', range: [1, 2], damage: 2, cooldown: 3, color: 'bg-amber-700', icon: <Move size={16}/>, description: '前方2マスを貫通攻撃', energyCost: 1, effectType: 'PIERCE' },
     { name: '絶対防御', type: 'UTILITY', range: [0], damage: 0, shield: 6, cooldown: 5, color: 'bg-yellow-500 text-black', icon: <Shield size={16}/>, description: 'シールド+6', energyCost: 1 },
-    { name: '校長像召喚', type: 'UTILITY', range: [1], damage: 0, shield: 0, cooldown: 6, color: 'bg-stone-500', icon: <AlertTriangle size={16}/>, description: '盾となる像を置く(未実装)', energyCost: 1 }, // Placeholder concept
 ];
 
 const SHOP_RELICS: KRelic[] = [
@@ -607,17 +613,101 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             let dmgBonus = 0;
             if (currentState.relics.some(r => r.id === 'R_GLOVES')) dmgBonus += 1;
 
+            // Determine targets based on range/effect
+            let targets: number[] = [];
+            if (card.effectType === 'FURTHEST') {
+                // Find furthest enemy in range (all grid)
+                let furthestDist = -1;
+                let targetPos = -1;
+                nextEnemies.forEach(e => {
+                    const dist = Math.abs(e.pos - pPos);
+                    if (dist > furthestDist) {
+                        furthestDist = dist;
+                        targetPos = e.pos;
+                    }
+                });
+                if (targetPos !== -1) targets = [targetPos];
+            } else {
+                targets = card.range.map(r => pPos + (r * p.facing));
+            }
+
             if (card.type === 'ATTACK') {
-                const targets = card.range.map(r => pPos + (r * p.facing));
+                // DASH_ATTACK logic: Move until hit
+                if (card.effectType === 'DASH_ATTACK') {
+                    let finalPos = pPos;
+                    for (let i = 1; i <= Math.max(...card.range); i++) {
+                        const checkPos = pPos + (i * p.facing);
+                        if (checkPos < 0 || checkPos >= GRID_SIZE) break;
+                        
+                        const hitEnemy = nextEnemies.find(e => e.pos === checkPos);
+                        if (hitEnemy) {
+                            // Hit enemy!
+                            targets = [checkPos]; // Only hit this one
+                            break; 
+                        }
+                        finalPos = checkPos; // Keep moving if empty
+                    }
+                    nextPlayer.pos = finalPos; // Update position
+                }
+
                 const hits = nextEnemies.filter(e => targets.includes(e.pos));
+                
                 if (hits.length > 0) {
                     hit = true;
                     hits.forEach(e => {
-                        e.hp -= (card.damage + dmgBonus);
-                        addLog(`${e.name} に ${card.damage + dmgBonus} ダメージ！`);
+                        let finalDmg = card.damage + dmgBonus;
+                        
+                        // Counter Logic
+                        if (card.effectType === 'COUNTER') {
+                            if (e.intent && (e.intent.type === 'ATTACK' || e.intent.timer <= 1)) {
+                                finalDmg *= 2;
+                                addLog("カウンター成功！");
+                            }
+                        }
+
+                        e.hp -= finalDmg;
+                        addLog(`${e.name} に ${finalDmg} ダメージ！`);
+
+                        // Push Logic
+                        if (card.effectType === 'PUSH') {
+                            const pushDir = p.facing;
+                            let targetPos = e.pos;
+                            // Push 2 tiles max
+                            for(let k=0; k<2; k++) {
+                                const next = targetPos + pushDir;
+                                const isBlocked = nextEnemies.some(o => o.pos === next) || nextPlayer.pos === next || next < 0 || next >= GRID_SIZE;
+                                if (!isBlocked) targetPos = next;
+                                else break;
+                            }
+                            if (targetPos !== e.pos) {
+                                e.pos = targetPos;
+                                addLog(`${e.name}を吹き飛ばした！`);
+                            }
+                        }
+
+                        // Pull Logic
+                        if (card.effectType === 'PULL') {
+                            const pullDir = -p.facing; // Towards player
+                            const dest = p.pos + p.facing; // Immediately in front
+                            const isBlocked = nextEnemies.some(o => o.pos === dest && o.id !== e.id) || nextPlayer.pos === dest;
+                            if (!isBlocked && dest >= 0 && dest < GRID_SIZE) {
+                                e.pos = dest;
+                                addLog(`${e.name}を引き寄せた！`);
+                            }
+                        }
                     });
                     
-                    // Add shield from attack cards
+                    // Recoil Logic
+                    if (card.effectType === 'RECOIL') {
+                        const recoilPos = p.pos - p.facing;
+                        const isBlocked = nextEnemies.some(e => e.pos === recoilPos) || recoilPos < 0 || recoilPos >= GRID_SIZE;
+                        if (!isBlocked) {
+                            nextPlayer.pos = recoilPos;
+                            addLog("反動で後退！");
+                        }
+                    }
+
+                    // Add shield from attack cards (Iron Ruler etc)
                     if (card.shield && card.shield > 0) {
                         nextPlayer.shield += card.shield;
                         addLog(`シールド +${card.shield}`);
