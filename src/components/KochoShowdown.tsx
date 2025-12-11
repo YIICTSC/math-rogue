@@ -237,38 +237,67 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 // AI DECISION TIME (Instant Move or Plan Attack)
                 else {
                     const p = current.player;
+                    const template = ENEMY_TYPES.find(t => t.name === e.name) || ENEMY_TYPES[0];
+                    const validRanges = template.range;
+
+                    // Determine current state
                     const dist = e.pos - p.pos;
                     const absDist = Math.abs(dist);
-                    const template = ENEMY_TYPES.find(t => t.name === e.name) || ENEMY_TYPES[0];
                     
-                    const inRange = template.range.includes(absDist);
-                    const facingPlayer = (dist < 0 && e.facing === 1) || (dist > 0 && e.facing === -1);
+                    // Check if current position allows attacking (Range valid & Facing valid)
+                    const inRange = validRanges.includes(absDist);
+                    const neededFacing = dist < 0 ? 1 : -1;
+                    const facingCorrect = e.facing === neededFacing;
 
-                    if (inRange && facingPlayer) {
-                        // Priority 1: Plan Attack (Telegraphing required)
+                    if (inRange && facingCorrect) {
+                        // Plan Attack (Telegraph)
                         e.intent = { 
                             type: 'ATTACK', 
                             damage: template.attackDmg, 
                             range: template.range, 
-                            timer: Math.max(2, template.speed) // Give player reaction time
+                            timer: Math.max(2, template.speed) 
                         };
                     } else {
-                        // Priority 2: Move Instantly (No telegraphing)
-                        const moveDir = dist < 0 ? 1 : -1;
-                        const target = e.pos + moveDir;
-                        
-                        // Check bounds & collision
-                        if (target >= 0 && target < GRID_SIZE) {
-                            const blocked = enemies.some(other => other.id !== e.id && other.pos === target) || p.pos === target;
-                            if (!blocked) {
-                                e.pos = target;
+                        // Move Phase - Pathfind to optimal attack spot
+                        let bestTargetPos = e.pos;
+                        let minCost = 999;
+
+                        // Check all optimal positions relative to player
+                        for (const r of validRanges) {
+                            // Left side target
+                            const t1 = p.pos - r;
+                            if (t1 >= 0 && t1 < GRID_SIZE) {
+                                const cost = Math.abs(e.pos - t1);
+                                if (cost < minCost) { minCost = cost; bestTargetPos = t1; }
                             }
-                            // Face movement
-                            if (target > e.pos) e.facing = 1;
-                            else if (target < e.pos) e.facing = -1;
+                            // Right side target
+                            const t2 = p.pos + r;
+                            if (t2 >= 0 && t2 < GRID_SIZE) {
+                                const cost = Math.abs(e.pos - t2);
+                                if (cost < minCost) { minCost = cost; bestTargetPos = t2; }
+                            }
+                        }
+
+                        // Determine move direction towards best target
+                        let moveDir = 0;
+                        if (bestTargetPos > e.pos) moveDir = 1;
+                        else if (bestTargetPos < e.pos) moveDir = -1;
+
+                        if (moveDir !== 0) {
+                            const nextPos = e.pos + moveDir;
+                            // Check collision
+                            const blocked = enemies.some(other => other.id !== e.id && other.pos === nextPos) || p.pos === nextPos;
+                            if (!blocked) {
+                                e.pos = nextPos;
+                            }
+                            // Update facing to move direction
+                            e.facing = moveDir as Facing;
+                        } else {
+                            // Already at spot or blocked, ensure correct facing towards player
+                            e.facing = neededFacing;
                         }
                         
-                        // Set Cooldown
+                        // Set Cooldown for movement
                         e.intent = { type: 'WAIT', timer: Math.floor(template.speed / 2) || 1 };
                     }
                 }
