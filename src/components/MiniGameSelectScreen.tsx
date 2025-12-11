@@ -114,26 +114,26 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
       )}
 
       <div className="z-10 w-full h-full flex flex-col items-center p-4 overflow-y-auto custom-scrollbar">
-        <div className="w-full max-w-lg flex flex-col items-center min-h-full justify-center py-8">
-            <h2 className="text-2xl md:text-4xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 animate-pulse flex items-center shrink-0">
-                <Gamepad2 className="mr-2 md:mr-3 text-yellow-400" size={32} /> ミニゲーム選択
+        <div className="w-full max-w-5xl flex flex-col items-center min-h-full justify-center py-4">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 animate-pulse flex items-center shrink-0">
+                <Gamepad2 className="mr-2 md:mr-3 text-yellow-400" size={28} /> ミニゲーム選択
             </h2>
-            <p className="text-xs text-gray-500 mb-4 animate-pulse">※ボタン長押しでセーブデータを削除できます</p>
+            <p className="text-xs text-gray-500 mb-6 animate-pulse">※ボタン長押しでセーブデータを削除できます</p>
             
-            <div className="grid grid-cols-1 gap-4 w-full mb-8 shrink-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 w-full mb-8 shrink-0 px-2">
                 
                 {/* Kocho Showdown Game Card (NEW) */}
                 <button
                     {...bindPress('KOCHO')}
-                    className="group relative bg-[#1a1a2e] border-4 border-indigo-500 hover:border-pink-500 hover:bg-indigo-900 p-6 rounded-xl flex flex-row items-center transition-all shadow-xl hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] overflow-hidden text-left"
+                    className="group relative bg-[#1a1a2e] border-4 border-indigo-500 hover:border-pink-500 hover:bg-indigo-900 p-4 rounded-xl flex flex-row items-center transition-all shadow-xl hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] overflow-hidden text-left h-32"
                 >
                     <div className="absolute top-0 right-0 bg-pink-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-md flex items-center gap-1">NEW!</div>
-                    <div className="bg-indigo-900/50 p-4 rounded-full mr-4 group-hover:scale-110 transition-transform duration-300 border-2 border-indigo-500/30 shrink-0">
-                        <Sword size={32} className="text-pink-400 fill-current" />
+                    <div className="bg-indigo-900/50 p-3 rounded-full mr-3 group-hover:scale-110 transition-transform duration-300 border-2 border-indigo-500/30 shrink-0">
+                        <Sword size={28} className="text-pink-400 fill-current" />
                     </div>
                     <div>
-                        <span className="text-xl font-bold mb-1 text-indigo-200 group-hover:text-white font-mono transition-colors block">校長対決</span>
-                        <span className="text-xs text-indigo-300 leading-tight block font-mono">
+                        <span className="text-lg font-bold mb-1 text-indigo-200 group-hover:text-white font-mono transition-colors block">校長対決</span>
+                        <span className="text-[10px] text-indigo-300 leading-tight block font-mono">
                             ターン制戦略バトル。<br/>行動を予約して敵を倒せ！
                         </span>
                     </div>
@@ -142,15 +142,15 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
                 {/* Poker Game Card */}
                 <button
                     {...bindPress('POKER')}
-                    className="group relative bg-slate-800 border-4 border-slate-600 hover:border-purple-500 hover:bg-slate-700 p-6 rounded-xl flex flex-row items-center transition-all shadow-xl hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] overflow-hidden text-left"
+                    className="group relative bg-slate-800 border-4 border-slate-600 hover:border-purple-500 hover:bg-slate-700 p-4 rounded-xl flex flex-row items-center transition-all shadow-xl hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] overflow-hidden text-left h-32"
                 >
                     <div className="absolute top-0 right-0 bg-purple-600 text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-md">POPULAR</div>
-                    <div className="bg-purple-900/50 p-4 rounded-full mr-4 group-hover:scale-110 transition-transform duration-300 border-2 border-purple-500/30 shrink-0">
-                        <Club size={32} className="text-purple-400 fill-current" />
+                    <div className="bg-purple-900/50 p-3 rounded-full mr-3 group-hover:scale-110 transition-transform duration-300 border-2 border-purple-500/30 shrink-0">
+                        <Club size={28} className="text-purple-400 fill-current" />
                     </div>
                     <div>
-                        <span className="text-xl font-bold mb-1 text-white group-hover:text-purple-300 transition-colors block">放課後ポーカー</span>
-                        <span className="text-xs text-gray-400 group-hover:text-gray-200 leading-tight block">
+                        <span className="text-lg font-bold mb-1 text-white group-hover:text-purple-300 transition-colors block">放課後ポーカー</span>
+                        <span className="text-[10px] text-gray-400 group-hover:text-gray-200 leading-tight block">
                             役を作ってスコアを稼げ！<br/>アイテムを駆使するローグライク。
                         </span>
                     </div>
@@ -159,15 +159,15 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
                 {/* Survivor Game Card */}
                 <button
                     {...bindPress('SURVIVOR')}
-                    className="group relative bg-slate-800 border-4 border-slate-600 hover:border-red-500 hover:bg-slate-700 p-6 rounded-xl flex flex-row items-center transition-all shadow-xl hover:shadow-[0_0_30px_rgba(239,68,68,0.4)] overflow-hidden text-left"
+                    className="group relative bg-slate-800 border-4 border-slate-600 hover:border-red-500 hover:bg-slate-700 p-4 rounded-xl flex flex-row items-center transition-all shadow-xl hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] overflow-hidden text-left h-32"
                 >
                     <div className="absolute top-0 right-0 bg-red-600 text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-md">ACTION</div>
-                    <div className="bg-red-900/50 p-4 rounded-full mr-4 group-hover:scale-110 transition-transform duration-300 border-2 border-red-500/30 shrink-0">
-                        <Skull size={32} className="text-red-400 fill-current" />
+                    <div className="bg-red-900/50 p-3 rounded-full mr-3 group-hover:scale-110 transition-transform duration-300 border-2 border-red-500/30 shrink-0">
+                        <Skull size={28} className="text-red-400 fill-current" />
                     </div>
                     <div>
-                        <span className="text-xl font-bold mb-1 text-white group-hover:text-red-300 transition-colors block">校庭サバイバー</span>
-                        <span className="text-xs text-gray-400 group-hover:text-gray-200 leading-tight block">
+                        <span className="text-lg font-bold mb-1 text-white group-hover:text-red-300 transition-colors block">校庭サバイバー</span>
+                        <span className="text-[10px] text-gray-400 group-hover:text-gray-200 leading-tight block">
                             迫りくる敵の大群から生き残れ！<br/>ヴァンサバ風アクション。
                         </span>
                     </div>
@@ -176,15 +176,15 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
                 {/* Dungeon Game Card */}
                 <button
                     {...bindPress('DUNGEON')}
-                    className="group relative bg-[#0f380f] border-4 border-[#306230] hover:border-[#8bac0f] p-6 rounded-xl flex flex-row items-center transition-all shadow-xl hover:shadow-[0_0_30px_rgba(139,172,15,0.4)] overflow-hidden text-left"
+                    className="group relative bg-[#0f380f] border-4 border-[#306230] hover:border-[#8bac0f] p-4 rounded-xl flex flex-row items-center transition-all shadow-xl hover:shadow-[0_0_20px_rgba(139,172,15,0.4)] overflow-hidden text-left h-32"
                 >
                     <div className="absolute top-0 right-0 bg-[#306230] text-[#9bbc0f] text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-md flex items-center gap-1">RETRO</div>
-                    <div className="bg-[#306230] p-4 rounded-full mr-4 group-hover:scale-110 transition-transform duration-300 border-2 border-[#8bac0f] shrink-0">
-                        <Compass size={32} className="text-[#9bbc0f] fill-current" />
+                    <div className="bg-[#306230] p-3 rounded-full mr-3 group-hover:scale-110 transition-transform duration-300 border-2 border-[#8bac0f] shrink-0">
+                        <Compass size={28} className="text-[#9bbc0f] fill-current" />
                     </div>
                     <div>
-                        <span className="text-xl font-bold mb-1 text-[#9bbc0f] font-mono transition-colors block">風来の小学生</span>
-                        <span className="text-xs text-[#8bac0f] leading-tight block font-mono">
+                        <span className="text-lg font-bold mb-1 text-[#9bbc0f] font-mono transition-colors block">風来の小学生</span>
+                        <span className="text-[10px] text-[#8bac0f] leading-tight block font-mono">
                             1000回遊べるランダムダンジョン。<br/>GB風ローグライクRPG。
                         </span>
                     </div>
@@ -193,15 +193,15 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
                 {/* Dungeon 2 Game Card */}
                 <button
                     {...bindPress('DUNGEON_2')}
-                    className="group relative bg-[#202020] border-4 border-cyan-700 hover:border-cyan-400 p-6 rounded-xl flex flex-row items-center transition-all shadow-xl hover:shadow-[0_0_30px_rgba(34,211,238,0.4)] overflow-hidden text-left"
+                    className="group relative bg-[#202020] border-4 border-cyan-700 hover:border-cyan-400 p-4 rounded-xl flex flex-row items-center transition-all shadow-xl hover:shadow-[0_0_20px_rgba(34,211,238,0.4)] overflow-hidden text-left h-32"
                 >
                     <div className="absolute top-0 right-0 bg-cyan-700 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-md flex items-center gap-1">SEQUEL</div>
-                    <div className="bg-cyan-900 p-4 rounded-full mr-4 group-hover:scale-110 transition-transform duration-300 border-2 border-cyan-500 shrink-0">
-                        <Mountain size={32} className="text-cyan-400 fill-current" />
+                    <div className="bg-cyan-900 p-3 rounded-full mr-3 group-hover:scale-110 transition-transform duration-300 border-2 border-cyan-500 shrink-0">
+                        <Mountain size={28} className="text-cyan-400 fill-current" />
                     </div>
                     <div>
-                        <span className="text-xl font-bold mb-1 text-cyan-200 font-mono transition-colors block">風来の小学生2</span>
-                        <span className="text-xs text-gray-400 leading-tight block font-mono">
+                        <span className="text-lg font-bold mb-1 text-cyan-200 font-mono transition-colors block">風来の小学生2</span>
+                        <span className="text-[10px] text-gray-400 leading-tight block font-mono">
                             更なる深淵へ...<br/>進化したローグライクRPG。
                         </span>
                     </div>
