@@ -1,11 +1,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, X, RotateCcw, Swords, Shield, Footprints, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
+import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, Footprints, RefreshCw, Zap, Trophy, Skull, Info, ChevronsRight, ChevronLeft, ChevronRight, PlusCircle, Trash2, Clock } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 
 // --- TYPES ---
 type Facing = 1 | -1; // 1: Right, -1: Left
+type TileEffect = 'ATTACK' | 'BUFF' | 'NONE';
 
 interface KCard {
     id: string;
@@ -51,8 +52,9 @@ interface KochoGameState {
     player: KEntity;
     enemies: KEntity[];
     hand: KCard[];
-    deck: KCard[]; 
-    discard: KCard[]; 
+    queue: KCard[]; // Max 3
+    deck: KCard[]; // Kept for structure but unused in CD mode
+    discard: KCard[]; // Kept for structure but unused in CD mode
     status: 'PLAYING' | 'EXECUTING' | 'GAME_OVER' | 'VICTORY' | 'WAVE_CLEAR';
     logs: string[];
 }
@@ -103,6 +105,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         player: { id: 'p1', type: 'PLAYER', name: '勇者', pos: 3, facing: 1, maxHp: 20, hp: 20, spriteName: 'HERO_SIDE|赤', shield: 0 },
         enemies: [],
         hand: [],
+        queue: [],
         deck: [],
         discard: [],
         status: 'PLAYING',
@@ -116,6 +119,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     }, [gameState]);
 
     const [animating, setAnimating] = useState(false);
+    const [selectedCardIdx, setSelectedCardIdx] = useState<number | null>(null);
 
     // Initialization
     useEffect(() => {
@@ -160,7 +164,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         // Reuse existing hand/deck or init
         const currentHand = stateRef.current.hand.length > 0 ? stateRef.current.hand : getInitialDeck();
         
-        // Reset cooldowns on new wave
+        // Reset cooldowns on new wave? Let's say yes for fairness or keep them? 
+        // Let's reset them to give a fresh start feel.
         const resetHand = currentHand.map(c => ({ ...c, currentCooldown: 0 }));
 
         setGameState(prev => ({
@@ -172,6 +177,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             hand: resetHand,
             deck: [],
             discard: [],
+            queue: [],
             status: 'PLAYING',
             logs: [`Wave ${wave} 開始！`]
         }));
@@ -210,7 +216,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     // --- ACTIONS ---
-    const tickWorld = async () => {
+    const tickWorld = async (actionType: 'MOVE' | 'WAIT' | 'EXECUTE') => {
         // Use Ref to get the latest state for logic calculation
         const current = stateRef.current;
         
@@ -237,6 +243,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         const blocked = Math.min(dmg, p.shield);
                         const finalDmg = dmg - blocked;
                         
+                        // NOTE: Updating React state here, but we must update our local tracking too if we were doing complex chain
                         setGameState(prev => ({
                             ...prev,
                             player: { ...prev.player, hp: Math.max(0, prev.player.hp - finalDmg), shield: prev.player.shield - blocked }
@@ -307,16 +314,12 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 player: { ...prev.player, pos: newPos, facing: dir } // Face movement direction
             }));
             audioService.playSound('select');
-            
-            // Allow state to update before ticking
-            await new Promise(r => setTimeout(r, 50));
-            await tickWorld();
+            await tickWorld('MOVE');
             tickCooldowns(); // Action took time
         } else {
             // Blocked or OOB
             audioService.playSound('wrong');
-            // Just change facing if blocked (Does not pass turn?)
-            // Let's make facing change free
+            // Just change facing if blocked
             setGameState(prev => ({
                 ...prev,
                 player: { ...prev.player, facing: dir }
@@ -330,95 +333,154 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         setAnimating(true);
         setGameState(prev => ({ ...prev, player: { ...prev.player, facing: (prev.player.facing * -1) as Facing } }));
-        await tickWorld();
+        await tickWorld('WAIT');
         tickCooldowns(); // Action took time
         setAnimating(false);
     };
 
-    const handlePlayCard = async (card: KCard, idx: number) => {
+    const handleQueueCard = (card: KCard, idx: number) => {
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         if (card.currentCooldown > 0) {
             audioService.playSound('wrong');
             addLog("クールダウン中！");
             return;
         }
+        if (stateRef.current.queue.length >= 3) {
+            addLog("キューが一杯です！");
+            return;
+        }
+        
+        // Move from Hand to Queue
+        const newHand = [...stateRef.current.hand];
+        newHand.splice(idx, 1);
+        
+        setGameState(prev => ({
+            ...prev,
+            hand: newHand,
+            queue: [...prev.queue, card]
+        }));
+        audioService.playSound('select');
+    };
 
+    const handleUnqueueCard = (idx: number) => {
+        if (stateRef.current.status !== 'PLAYING' || animating) return;
+        
+        const card = stateRef.current.queue[idx];
+        const newQueue = [...stateRef.current.queue];
+        newQueue.splice(idx, 1);
+        
+        setGameState(prev => ({
+            ...prev,
+            queue: newQueue,
+            hand: [...prev.hand, card]
+        }));
+    };
+
+    const executeQueue = async () => {
+        if (stateRef.current.status !== 'PLAYING' || animating || stateRef.current.queue.length === 0) return;
         setAnimating(true);
-        addLog(`${card.name} を発動！`);
+        setGameState(prev => ({ ...prev, status: 'EXECUTING' }));
+
+        const queue = [...stateRef.current.queue];
+        const cardsReturningToHand: KCard[] = [];
         
-        // Use latest ref state
-        const p = stateRef.current.player;
-        let pPos = p.pos;
-        let actionSuccessful = true;
-        
-        if (card.type === 'ATTACK') {
-            const targets = card.range.map(r => pPos + (r * p.facing));
-            const hits = stateRef.current.enemies.filter(e => targets.includes(e.pos));
+        for (const card of queue) {
+            // Highlight current card (not implemented visually but logical delay)
+            addLog(`${card.name} を実行！`);
             
-            if (hits.length > 0) {
-                hits.forEach(e => {
-                    e.hp -= card.damage;
-                    addLog(`${e.name} に ${card.damage} ダメージ！`);
-                });
-                audioService.playSound('attack');
-            } else {
-                addLog("空振り...");
-                audioService.playSound('select');
-            }
-        } else if (card.type === 'MOVE') {
-            const dist = card.range[0];
-            const target = pPos + (dist * p.facing);
-            if (target >= 0 && target < GRID_SIZE && !stateRef.current.enemies.some(e => e.pos === target)) {
-                setGameState(prev => ({ ...prev, player: { ...prev.player, pos: target } }));
-                audioService.playSound('select');
-            } else {
-                addLog("移動できない！");
-                actionSuccessful = false;
-            }
-        } else if (card.type === 'UTILITY') {
-            if (card.name === 'お辞儀') {
-                setGameState(prev => ({ ...prev, player: { ...prev.player, shield: prev.player.shield + 1 } }));
-                addLog("防御を固めた。");
-                audioService.playSound('block');
-            } else if (card.name === 'バックステップ') {
-                const target = pPos - p.facing;
+            // Execute Card Effect (Use latest ref state)
+            const p = stateRef.current.player;
+            let pPos = p.pos;
+            
+            if (card.type === 'ATTACK') {
+                const targets = card.range.map(r => pPos + (r * p.facing));
+                const hits = stateRef.current.enemies.filter(e => targets.includes(e.pos));
+                
+                if (hits.length > 0) {
+                    hits.forEach(e => {
+                        e.hp -= card.damage;
+                        addLog(`${e.name} に ${card.damage} ダメージ！`);
+                    });
+                    audioService.playSound('attack');
+                } else {
+                    addLog("空振り...");
+                    audioService.playSound('select');
+                }
+            } else if (card.type === 'MOVE') {
+                const dist = card.range[0];
+                const target = pPos + (dist * p.facing);
                 if (target >= 0 && target < GRID_SIZE && !stateRef.current.enemies.some(e => e.pos === target)) {
                     setGameState(prev => ({ ...prev, player: { ...prev.player, pos: target } }));
                     audioService.playSound('select');
                 } else {
-                    addLog("下がれない！");
-                    actionSuccessful = false;
+                    addLog("移動できない！");
+                }
+            } else if (card.type === 'UTILITY') {
+                if (card.id.startsWith('bow')) {
+                    setGameState(prev => ({ ...prev, player: { ...prev.player, shield: prev.player.shield + 1 } }));
+                    addLog("防御を固めた。");
+                    audioService.playSound('block');
+                } else if (card.id.startsWith('backstep')) {
+                    const target = pPos - p.facing;
+                    if (target >= 0 && target < GRID_SIZE && !stateRef.current.enemies.some(e => e.pos === target)) {
+                        setGameState(prev => ({ ...prev, player: { ...prev.player, pos: target } }));
+                        audioService.playSound('select');
+                    }
                 }
             }
-        }
 
-        if (actionSuccessful) {
-            // Apply Cooldown to THIS card
+            // Clean up dead enemies
             setGameState(prev => ({
                 ...prev,
-                // Clean dead enemies first
-                enemies: prev.enemies.filter(e => e.hp > 0),
-                hand: prev.hand.map((c, i) => i === idx ? { ...c, currentCooldown: c.cooldown + 1 } : c) // +1 because tickCooldowns will reduce it immediately after
+                enemies: prev.enemies.filter(e => e.hp > 0)
             }));
 
-            // Check wave clear immediate
-            if (stateRef.current.enemies.filter(e => e.hp > 0).length === 0) {
-                setGameState(prev => ({ ...prev, enemies: [] })); // Clear visually
-                await new Promise(r => setTimeout(r, 500));
-                
-                if (gameState.wave === 5) {
-                    setGameState(prev => ({ ...prev, status: 'VICTORY' }));
-                } else {
-                    setGameState(prev => ({ ...prev, status: 'WAVE_CLEAR' }));
-                    setTimeout(() => startWave(gameState.wave + 1), 1500);
-                }
-            } else {
-                // Pass Time
-                await new Promise(r => setTimeout(r, 300));
-                await tickWorld();
-                tickCooldowns();
-            }
+            // Prepare to return to hand with cooldown
+            cardsReturningToHand.push({
+                ...card,
+                currentCooldown: card.cooldown
+            });
+
+            // Wait a bit
+            await new Promise(r => setTimeout(r, 500));
+
+            // Enemy Turn Tick
+            await tickWorld('EXECUTE');
+            
+            // Check Game Over using Ref (updated by tickWorld effect or setGameState)
+            if ((stateRef.current as KochoGameState).status === 'GAME_OVER') break;
         }
+
+        // Return cards to hand and tick cooldowns of ALL cards
+        setGameState(prev => {
+            if (prev.status === 'GAME_OVER') return prev;
+            
+            // Decrease cooldown of cards THAT STAYED IN HAND (not the ones just returning)
+            const tickedHand = prev.hand.map(c => ({
+                ...c,
+                currentCooldown: Math.max(0, c.currentCooldown - 1)
+            }));
+
+            // Return executed cards to hand (they restart with full cooldown)
+            // They do NOT get a tick down immediately
+            let newHand = [...tickedHand, ...cardsReturningToHand];
+
+            if (prev.enemies.length === 0) {
+                // Wave Clear
+                if (prev.wave === 5) return { ...prev, status: 'VICTORY', queue: [], hand: newHand };
+                else {
+                    setTimeout(() => startWave(prev.wave + 1), 1000);
+                    return { ...prev, status: 'WAVE_CLEAR', queue: [], hand: newHand };
+                }
+            }
+
+            return {
+                ...prev,
+                status: 'PLAYING',
+                queue: [],
+                hand: newHand,
+            };
+        });
 
         setAnimating(false);
     };
@@ -446,7 +508,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         <PixelSprite seed={e.id} name={e.spriteName} className="w-16 h-16"/>
                     </div>
                     {/* Intent Overlay */}
-                    {e.intent && e.intent.timer <= 1 && (
+                    {e.intent && e.intent.timer <= 2 && (
                         <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce">
                             {e.intent.type === 'ATTACK' && <div className="bg-red-600 text-white text-xs px-1 rounded flex items-center"><Swords size={12} className="mr-1"/> {e.intent.damage} <span className="ml-1 text-[10px]">({e.intent.timer})</span></div>}
                             {e.intent.type === 'MOVE' && <div className="bg-blue-600 text-white text-xs px-1 rounded flex items-center"><Footprints size={12} className="mr-1"/> <span className="text-[10px]">({e.intent.timer})</span></div>}
@@ -477,7 +539,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 <button onClick={onBack} className="flex items-center text-gray-400 hover:text-white"><ArrowLeft className="mr-2"/> Quit</button>
                 <h2 className="text-xl font-bold text-indigo-100 tracking-widest hidden md:block">KOCHO SHOWDOWN <span className="text-sm text-pink-400 ml-2">Wave {gameState.wave}</span></h2>
                 <div className="text-xs text-gray-500 flex gap-4">
-                    <span>Turn: {gameState.turn}</span>
+                    <span>Move/Act to reduce CD</span>
                 </div>
             </div>
 
@@ -509,11 +571,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         <button onClick={onBack} className="bg-indigo-600 px-8 py-3 rounded text-xl font-bold hover:bg-indigo-500">Return</button>
                     </div>
                 )}
-                {gameState.status === 'WAVE_CLEAR' && (
-                    <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center z-50 animate-in zoom-in pointer-events-none">
-                        <h2 className="text-4xl font-bold text-yellow-400 mb-4">WAVE CLEAR!</h2>
-                    </div>
-                )}
                 {gameState.status === 'GAME_OVER' && (
                     <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-50 animate-in zoom-in">
                         <Skull size={64} className="text-red-500 mb-4"/>
@@ -527,13 +584,40 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             {/* Controls Area (Bottom) - Portrait Optimized */}
             <div className="bg-[#0f0f1b] border-t-4 border-indigo-900 p-2 md:p-4 shrink-0 flex flex-col gap-2">
                 
-                {/* 1. Hand Cards (Scrollable) */}
+                {/* 1. Queue Display */}
+                <div className="flex justify-between items-center gap-2 bg-black/30 p-2 rounded-lg border border-indigo-900/30">
+                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest writing-mode-vertical rotate-180 hidden md:block">QUEUE</div>
+                    <div className="flex gap-1 md:gap-2 justify-start items-center flex-grow overflow-x-auto">
+                        {[...Array(3)].map((_, i) => {
+                            const card = gameState.queue[i];
+                            return card ? (
+                                <div key={i} className="w-12 h-16 md:w-16 md:h-20 bg-slate-800 border border-slate-600 rounded flex flex-col items-center justify-center relative group cursor-pointer hover:border-red-400 shrink-0" onClick={() => handleUnqueueCard(i)}>
+                                    <div className={`w-full h-1 ${card.color} absolute top-0`}></div>
+                                    <div className="text-[9px] md:text-xs text-center font-bold px-1 overflow-hidden whitespace-nowrap text-ellipsis w-full">{card.name}</div>
+                                    <div className="text-gray-400 scale-75">{card.icon}</div>
+                                    <X size={12} className="absolute -top-1 -right-1 bg-red-500 rounded-full text-white opacity-0 group-hover:opacity-100"/>
+                                </div>
+                            ) : (
+                                <div key={`empty-${i}`} className="w-12 h-16 md:w-16 md:h-20 border border-dashed border-gray-700 rounded flex items-center justify-center text-gray-700 text-[9px] shrink-0">Empty</div>
+                            );
+                        })}
+                    </div>
+                    <button 
+                        onClick={executeQueue} 
+                        disabled={gameState.queue.length === 0 || animating}
+                        className={`w-16 h-16 md:w-20 md:h-20 rounded-full border-4 flex flex-col items-center justify-center font-bold shadow-lg transition-all shrink-0 ${gameState.queue.length > 0 ? 'bg-indigo-600 border-indigo-400 text-white hover:scale-105 active:scale-95 cursor-pointer animate-pulse' : 'bg-gray-800 border-gray-600 text-gray-500 cursor-not-allowed'}`}
+                    >
+                        <Play size={20} className="fill-current mb-1"/> EXEC
+                    </button>
+                </div>
+
+                {/* 2. Hand Cards (Scrollable) */}
                 <div className="flex gap-2 overflow-x-auto pb-2 px-1 custom-scrollbar min-h-[100px] items-center">
                     {gameState.hand.map((card, i) => (
                         <div 
                             key={card.id} 
-                            className={`w-20 h-28 md:w-24 md:h-32 bg-slate-800 border-2 rounded-lg flex flex-col justify-between p-1 md:p-2 cursor-pointer transition-transform relative shadow-lg shrink-0 ${card.currentCooldown > 0 || animating ? 'opacity-50 grayscale cursor-not-allowed border-slate-600' : 'hover:-translate-y-2 border-yellow-400'}`}
-                            onClick={() => handlePlayCard(card, i)}
+                            className={`w-20 h-28 md:w-24 md:h-32 bg-slate-800 border-2 rounded-lg flex flex-col justify-between p-1 md:p-2 cursor-pointer transition-transform relative shadow-lg shrink-0 ${selectedCardIdx === i ? 'border-yellow-400' : 'border-slate-600'} ${card.currentCooldown > 0 ? 'opacity-50 grayscale' : 'hover:-translate-y-2'}`}
+                            onClick={() => handleQueueCard(card, i)}
                         >
                             <div className={`absolute top-0 left-0 w-full h-1 ${card.color} rounded-t-sm`}></div>
                             <div className="mt-1 text-[9px] md:text-xs font-bold text-center leading-tight truncate">{card.name}</div>
@@ -561,7 +645,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     ))}
                 </div>
 
-                {/* 2. Movement Controls */}
+                {/* 3. Movement Controls */}
                 <div className="flex justify-center items-center gap-4 py-2 border-t border-indigo-900/30">
                     <button onClick={() => handleMove(-1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors"><ChevronLeft size={24}/></button>
                     <div className="flex flex-col items-center gap-1">
