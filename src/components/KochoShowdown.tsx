@@ -1,12 +1,11 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, Footprints, RefreshCw, Zap, Trophy, Skull, Info, ChevronsRight, ChevronLeft, ChevronRight, PlusCircle, Trash2, Clock, Ghost } from 'lucide-react';
+import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 
 // --- TYPES ---
 type Facing = 1 | -1; // 1: Right, -1: Left
-type TileEffect = 'ATTACK' | 'BUFF' | 'NONE';
 
 interface KCard {
     id: string;
@@ -57,7 +56,7 @@ interface KochoGameState {
     discard: KCard[]; // Kept for structure but unused in CD mode
     status: 'PLAYING' | 'EXECUTING' | 'GAME_OVER' | 'VICTORY' | 'WAVE_CLEAR';
     logs: string[];
-    specialActionCooldown: number; // Added: Slip Through Cooldown
+    specialActionCooldown: number;
 }
 
 // --- DATA ---
@@ -68,8 +67,6 @@ const CARD_DB: Omit<KCard, 'id' | 'currentCooldown'>[] = [
     { name: 'バックステップ', type: 'UTILITY', range: [-1], damage: 0, cooldown: 2, color: 'bg-gray-600', icon: <RotateCcw size={16}/>, description: '1マス下がる', energyCost: 1 },
     { name: '大声', type: 'ATTACK', range: [1, 2, 3], damage: 1, cooldown: 4, color: 'bg-yellow-600', icon: <Zap size={16}/>, description: '前方3マスに音波攻撃', energyCost: 1 },
     { name: 'お辞儀', type: 'UTILITY', range: [0], damage: 0, cooldown: 3, color: 'bg-green-600', icon: <Shield size={16}/>, description: '待機してシールド+1', energyCost: 1 },
-    
-    // New Requested Cards
     { name: '回し蹴り', type: 'ATTACK', range: [-1, 1], damage: 3, cooldown: 2, color: 'bg-purple-600', icon: <RefreshCw size={16}/>, description: '前後1マスを攻撃', energyCost: 1 },
     { name: 'チョーク投げ', type: 'ATTACK', range: [1, 2, 3, 4], damage: 2, cooldown: 3, color: 'bg-cyan-600', icon: <Zap size={16}/>, description: '遠距離攻撃', energyCost: 1 },
 ];
@@ -164,8 +161,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         // Reuse existing hand/deck or init
         const currentHand = stateRef.current.hand.length > 0 ? stateRef.current.hand : getInitialDeck();
-        
-        // Reset cooldowns on new wave
         const resetHand = currentHand.map(c => ({ ...c, currentCooldown: 0 }));
 
         setGameState(prev => ({
@@ -184,19 +179,35 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }));
     };
 
-    // --- ACTIONS ---
-    const tickWorld = async (actionType: 'MOVE' | 'WAIT' | 'EXECUTE') => {
-        // Use Ref to get the latest state for logic calculation
-        const current = stateRef.current;
-        const enemies = [...current.enemies];
-        
+    // --- GAME LOGIC ---
+
+    // Decrements all cooldowns (Hand cards and Special Action)
+    const tickCooldowns = (state: KochoGameState): KochoGameState => {
+        return {
+            ...state,
+            hand: state.hand.map(c => ({
+                ...c,
+                currentCooldown: Math.max(0, c.currentCooldown - 1)
+            })),
+            specialActionCooldown: Math.max(0, state.specialActionCooldown - 1)
+        };
+    };
+
+    // Resolves Enemy Actions based on the current state.
+    // IMPORTANT: It takes a state object, so it can see the Player's position *after* the player's move.
+    const resolveEnemyTurn = (current: KochoGameState): KochoGameState => {
+        let nextState = { ...current };
+        let enemies = [...nextState.enemies];
+        let player = { ...nextState.player };
+        let logs = [...nextState.logs];
+        let status = nextState.status;
+
         // 1. Decrement Enemy Timers
-        enemies.forEach(e => {
-            if (e.intent) e.intent.timer = Math.max(0, e.intent.timer - 1);
-        });
-        
-        // 2. Resolve Enemy Actions
-        for (const e of enemies) {
+        enemies = enemies.map(e => e.intent ? { ...e, intent: { ...e.intent, timer: Math.max(0, e.intent.timer - 1) } } : e);
+
+        // 2. Resolve Actions
+        for (let i = 0; i < enemies.length; i++) {
+            let e = { ...enemies[i] };
             if (e.hp <= 0) continue;
 
             // Timer Reached 0: Execution Phase or Decision Phase
@@ -204,55 +215,45 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 
                 // EXECUTE ATTACK (Telegraph finished)
                 if (e.intent.type === 'ATTACK') {
-                    // Check if player is STILL in range
-                    const p = current.player;
-                    const dist = Math.abs(e.pos - p.pos);
+                    // Check if player is STILL in range (using updated player pos)
+                    const dist = Math.abs(e.pos - player.pos);
                     const rangeHit = e.intent.range?.includes(dist);
-                    const facingHit = (e.pos < p.pos && e.facing === 1) || (e.pos > p.pos && e.facing === -1);
+                    const facingHit = (e.pos < player.pos && e.facing === 1) || (e.pos > player.pos && e.facing === -1);
                     
                     if (rangeHit && facingHit) {
-                        // Hit Player
                         const dmg = e.intent.damage || 0;
-                        const blocked = Math.min(dmg, p.shield);
+                        const blocked = Math.min(dmg, player.shield);
                         const finalDmg = dmg - blocked;
                         
-                        // Update state immediately for next checks
-                        setGameState(prev => ({
-                            ...prev,
-                            player: { ...prev.player, hp: Math.max(0, prev.player.hp - finalDmg), shield: prev.player.shield - blocked }
-                        }));
-                        addLog(`${e.name}の攻撃！ ${finalDmg}ダメージ！`);
-                        audioService.playSound('lose'); // hurt sound
+                        player.hp = Math.max(0, player.hp - finalDmg);
+                        player.shield -= blocked;
                         
-                        // Check gameOver
-                        if (current.player.hp - finalDmg <= 0) {
-                            setGameState(prev => ({ ...prev, status: 'GAME_OVER' }));
-                            return; // Stop processing
+                        logs = [`${e.name}の攻撃！ ${finalDmg}ダメージ！`, ...logs];
+                        audioService.playSound('lose');
+                        
+                        if (player.hp <= 0) {
+                            status = 'GAME_OVER';
                         }
                     } else {
-                        // Miss
-                        addLog(`${e.name}の攻撃は空を切った。`);
+                        logs = [`${e.name}の攻撃は空を切った。`, ...logs];
                     }
                     
-                    // Action Completed -> Cooldown (Wait 1 turn)
                     e.intent = { type: 'WAIT', timer: 1 };
                 } 
                 // DECISION PHASE (After Move or Wait Cooldown)
                 else {
-                    const p = current.player;
                     const template = ENEMY_TYPES.find(t => t.name === e.name) || ENEMY_TYPES[0];
                     const validRanges = template.range;
 
-                    // Current state
-                    const dist = e.pos - p.pos;
+                    // Current state check
+                    const dist = e.pos - player.pos;
                     const absDist = Math.abs(dist);
                     const inRange = validRanges.includes(absDist);
                     const neededFacing = dist < 0 ? 1 : -1;
                     const facingCorrect = e.facing === neededFacing;
 
                     if (inRange && facingCorrect) {
-                        // PLAN ATTACK (Telegraph Phase)
-                        // timer = 1 means it will execute AFTER the player's next action
+                        // PLAN ATTACK
                         e.intent = { 
                             type: 'ATTACK', 
                             damage: template.attackDmg, 
@@ -264,14 +265,13 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         let bestTargetPos = e.pos;
                         let minCost = 999;
 
-                        // Find optimal spot
                         for (const r of validRanges) {
-                            const t1 = p.pos - r;
+                            const t1 = player.pos - r;
                             if (t1 >= 0 && t1 < GRID_SIZE) {
                                 const cost = Math.abs(e.pos - t1);
                                 if (cost < minCost) { minCost = cost; bestTargetPos = t1; }
                             }
-                            const t2 = p.pos + r;
+                            const t2 = player.pos + r;
                             if (t2 >= 0 && t2 < GRID_SIZE) {
                                 const cost = Math.abs(e.pos - t2);
                                 if (cost < minCost) { minCost = cost; bestTargetPos = t2; }
@@ -284,60 +284,55 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                         if (moveDir !== 0) {
                             const nextPos = e.pos + moveDir;
-                            const blocked = enemies.some(other => other.id !== e.id && other.pos === nextPos) || p.pos === nextPos;
+                            const blocked = enemies.some((other, idx) => idx !== i && other.pos === nextPos) || player.pos === nextPos;
                             if (!blocked) {
                                 e.pos = nextPos;
                             }
                             e.facing = moveDir as Facing;
                         } else {
-                            e.facing = neededFacing; // Turn to face player if blocked
+                            e.facing = neededFacing as Facing; 
                         }
-                        
-                        // Moving takes 1 turn
                         e.intent = { type: 'MOVE', timer: 1 };
                     }
                 }
             }
+            enemies[i] = e; // Save back
+            if (status === 'GAME_OVER') break;
         }
         
-        setGameState(prev => ({ ...prev, enemies }));
+        return { ...nextState, enemies, player, logs: logs.slice(0, 4), status };
     };
 
-    // Helper to reduce cooldowns
-    const tickCooldowns = () => {
-        setGameState(prev => ({
-            ...prev,
-            hand: prev.hand.map(c => ({
-                ...c,
-                currentCooldown: Math.max(0, c.currentCooldown - 1)
-            })),
-            specialActionCooldown: Math.max(0, prev.specialActionCooldown - 1)
-        }));
-    };
+    // --- PLAYER ACTIONS ---
 
     const handleMove = async (dir: -1 | 1) => {
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         setAnimating(true);
 
-        const newPos = stateRef.current.player.pos + dir;
+        const current = stateRef.current;
+        const newPos = current.player.pos + dir;
         
-        // Check bounds & collision
-        if (newPos >= 0 && newPos < GRID_SIZE && !stateRef.current.enemies.some(e => e.pos === newPos)) {
-            setGameState(prev => ({
-                ...prev,
-                player: { ...prev.player, pos: newPos, facing: dir } // Face movement direction
-            }));
+        // 1. Player Action
+        if (newPos >= 0 && newPos < GRID_SIZE && !current.enemies.some(e => e.pos === newPos)) {
+            // Valid Move
+            let intermediateState = {
+                ...current,
+                player: { ...current.player, pos: newPos, facing: dir }
+            };
             audioService.playSound('select');
-            await tickWorld('MOVE');
-            tickCooldowns(); // Action took time
+            
+            // 2. Enemy Reaction (Tick World with updated player pos)
+            await new Promise(r => setTimeout(r, 200)); // Small delay for visual pacing
+            let finalState = resolveEnemyTurn(intermediateState);
+            
+            // 3. Cooldowns
+            finalState = tickCooldowns(finalState);
+            
+            setGameState(finalState);
         } else {
-            // Blocked or OOB
+            // Blocked -> Just turn
             audioService.playSound('wrong');
-            // Just change facing if blocked
-            setGameState(prev => ({
-                ...prev,
-                player: { ...prev.player, facing: dir }
-            }));
+            setGameState(prev => ({ ...prev, player: { ...prev.player, facing: dir } }));
         }
         
         setAnimating(false);
@@ -355,8 +350,11 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setAnimating(true);
         addLog("待機した。");
         audioService.playSound('select');
-        await tickWorld('WAIT');
-        tickCooldowns();
+        
+        let finalState = resolveEnemyTurn(stateRef.current);
+        finalState = tickCooldowns(finalState);
+        setGameState(finalState);
+        
         setAnimating(false);
     };
 
@@ -400,15 +398,21 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         addLog("すり抜け！");
         audioService.playSound('select');
         
-        setGameState(prev => ({
-            ...prev,
-            player: { ...prev.player, pos: destPos },
-            specialActionCooldown: 3 + 1 // +1 because tickCooldowns will reduce it immediately after this action
-        }));
+        // 1. Move Player
+        let intermediateState = {
+            ...current,
+            player: { ...current.player, pos: destPos },
+            specialActionCooldown: 3 + 1 // +1 because tickCooldowns will reduce it immediately
+        };
 
+        // 2. Enemy Reaction
         await new Promise(r => setTimeout(r, 200)); 
-        await tickWorld('MOVE'); 
-        tickCooldowns();
+        let finalState = resolveEnemyTurn(intermediateState);
+        
+        // 3. Cooldowns
+        finalState = tickCooldowns(finalState);
+        
+        setGameState(finalState);
         setAnimating(false);
     };
 
@@ -424,26 +428,25 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             return;
         }
         
-        setAnimating(true); // Lock input
+        setAnimating(true);
 
-        // 1. Move from Hand to Queue
-        setGameState(prev => {
-            const newHand = [...prev.hand];
-            newHand.splice(idx, 1);
-            
-            return {
-                ...prev,
-                hand: newHand,
-                queue: [...prev.queue, card]
-            };
-        });
+        // 1. Move from Hand to Queue & Remove from hand
+        let intermediateState = { ...stateRef.current };
+        const newHand = [...intermediateState.hand];
+        newHand.splice(idx, 1);
+        intermediateState.hand = newHand;
+        intermediateState.queue = [...intermediateState.queue, card];
+        
         audioService.playSound('select');
 
-        // 2. Process World Turn (Time Passes when planning)
-        await new Promise(r => setTimeout(r, 150)); // Short delay for visual feedback
-        await tickWorld('WAIT');
-        tickCooldowns();
+        // 2. Enemy Reaction (Planning takes time)
+        await new Promise(r => setTimeout(r, 150)); 
+        let finalState = resolveEnemyTurn(intermediateState);
         
+        // 3. Cooldowns
+        finalState = tickCooldowns(finalState);
+        
+        setGameState(finalState);
         setAnimating(false);
     };
 
@@ -470,17 +473,24 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const cardsReturningToHand: KCard[] = [];
         
         for (const card of queue) {
+            // Execute 1 Card
+            let current = stateRef.current; // Get latest
+            if (current.status === 'GAME_OVER') break;
+
             addLog(`${card.name} を実行！`);
             
-            // Execute Card Effect (Use latest ref state)
-            const p = stateRef.current.player;
+            // Logic
+            const p = current.player;
             let pPos = p.pos;
-            
+            let nextPlayer = { ...p };
+            let nextEnemies = [...current.enemies];
+            let hit = false;
+
             if (card.type === 'ATTACK') {
                 const targets = card.range.map(r => pPos + (r * p.facing));
-                const hits = stateRef.current.enemies.filter(e => targets.includes(e.pos));
-                
+                const hits = nextEnemies.filter(e => targets.includes(e.pos));
                 if (hits.length > 0) {
+                    hit = true;
                     hits.forEach(e => {
                         e.hp -= card.damage;
                         addLog(`${e.name} に ${card.damage} ダメージ！`);
@@ -493,63 +503,64 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             } else if (card.type === 'MOVE') {
                 const dist = card.range[0];
                 const target = pPos + (dist * p.facing);
-                if (target >= 0 && target < GRID_SIZE && !stateRef.current.enemies.some(e => e.pos === target)) {
-                    setGameState(prev => ({ ...prev, player: { ...prev.player, pos: target } }));
+                if (target >= 0 && target < GRID_SIZE && !nextEnemies.some(e => e.pos === target)) {
+                    nextPlayer.pos = target;
                     audioService.playSound('select');
                 } else {
                     addLog("移動できない！");
                 }
             } else if (card.type === 'UTILITY') {
-                if (card.id.startsWith('bow')) {
-                    setGameState(prev => ({ ...prev, player: { ...prev.player, shield: prev.player.shield + 1 } }));
-                    addLog("防御を固めた。");
-                    audioService.playSound('block');
-                } else if (card.id.startsWith('backstep')) {
-                    const target = pPos - p.facing;
-                    if (target >= 0 && target < GRID_SIZE && !stateRef.current.enemies.some(e => e.pos === target)) {
-                        setGameState(prev => ({ ...prev, player: { ...prev.player, pos: target } }));
-                        audioService.playSound('select');
+                if (card.id.startsWith('c3')) { // Dash/Backstep IDs are mocked here but logic relies on type usually
+                    // Simplified utility logic based on name for now
+                    if (card.name === 'バックステップ') {
+                        const target = pPos - p.facing;
+                        if (target >= 0 && target < GRID_SIZE && !nextEnemies.some(e => e.pos === target)) {
+                            nextPlayer.pos = target;
+                            audioService.playSound('select');
+                        }
+                    } else if (card.name === 'お辞儀') {
+                        nextPlayer.shield += 1;
+                        audioService.playSound('block');
                     }
                 }
             }
 
-            // Clean up dead enemies
-            setGameState(prev => ({
-                ...prev,
-                enemies: prev.enemies.filter(e => e.hp > 0)
-            }));
+            // Update State after Player Action
+            let intermediateState = {
+                ...current,
+                player: nextPlayer,
+                enemies: nextEnemies.filter(e => e.hp > 0)
+            };
 
-            // Prepare to return to hand with cooldown
+            // Prepare card return
             cardsReturningToHand.push({
                 ...card,
                 currentCooldown: card.cooldown
             });
 
-            // Wait a bit
+            // Wait
             await new Promise(r => setTimeout(r, 500));
 
-            // Enemy Turn Tick (Execution phase also consumes time)
-            await tickWorld('EXECUTE');
+            // Enemy Turn
+            let finalState = resolveEnemyTurn(intermediateState);
+            setGameState(finalState);
             
-            // Check Game Over
-            if ((stateRef.current as KochoGameState).status === 'GAME_OVER') break;
+            // Wait
+            await new Promise(r => setTimeout(r, 200));
         }
 
-        // Return cards to hand and tick cooldowns of ALL cards
+        // Finish Execution
         setGameState(prev => {
             if (prev.status === 'GAME_OVER') return prev;
             
-            // Decrease cooldown of cards THAT STAYED IN HAND
             const tickedHand = prev.hand.map(c => ({
                 ...c,
                 currentCooldown: Math.max(0, c.currentCooldown - 1)
             }));
 
-            // Return executed cards to hand (restart full cooldown)
             let newHand = [...tickedHand, ...cardsReturningToHand];
 
             if (prev.enemies.length === 0) {
-                // Wave Clear
                 if (prev.wave === 5) return { ...prev, status: 'VICTORY', queue: [], hand: newHand };
                 else {
                     setTimeout(() => startWave(prev.wave + 1), 1000);
@@ -592,7 +603,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     <div className={`transition-transform duration-200 ${e.facing === -1 ? 'scale-x-[-1]' : ''}`}>
                         <PixelSprite seed={e.id} name={e.spriteName} className="w-16 h-16"/>
                     </div>
-                    {/* Intent Overlay */}
                     {isAttacking && (
                         <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce z-20">
                             <div className="bg-red-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center">
@@ -733,25 +743,29 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                 {/* 3. Movement Controls */}
                 <div className="flex justify-center items-center gap-4 py-2 border-t border-indigo-900/30 relative">
-                    <button onClick={() => handleMove(-1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors"><ChevronLeft size={24}/></button>
-                    <div className="flex flex-col items-center gap-1">
-                        <button onClick={handleTurn} className="bg-slate-700 hover:bg-slate-600 px-6 py-2 rounded-lg border border-slate-500 text-sm font-bold flex items-center justify-center active:bg-slate-800 transition-colors w-24">TURN</button>
-                        <button onClick={handleWait} className="bg-gray-800 hover:bg-gray-700 px-6 py-1 rounded-lg border border-gray-600 text-xs flex items-center justify-center active:bg-gray-900 transition-colors w-24 text-gray-400"><Clock size={12} className="mr-1"/> WAIT</button>
-                    </div>
-                    <button onClick={() => handleMove(1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors"><ChevronRight size={24}/></button>
+                    <button onClick={() => handleMove(-1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors shadow-lg"><ChevronLeft size={24}/></button>
                     
-                    {/* Special Action Button: Slip Through */}
-                    <button 
-                        onClick={handleSlipThrough}
-                        className={`absolute right-4 bottom-2 w-12 h-12 rounded-full border-2 flex items-center justify-center shadow-lg transition-all ${gameState.specialActionCooldown > 0 ? 'bg-gray-800 border-gray-600 text-gray-500' : 'bg-cyan-700 border-cyan-400 text-cyan-100 hover:bg-cyan-600 active:scale-95'}`}
-                        title="すり抜け (CD: 3)"
-                    >
-                        {gameState.specialActionCooldown > 0 ? (
-                            <span className="text-lg font-bold">{gameState.specialActionCooldown}</span>
-                        ) : (
-                            <Ghost size={20} />
-                        )}
-                    </button>
+                    <div className="flex flex-col items-center gap-1">
+                        {/* Turn / Slip Group */}
+                        <div className="flex gap-1">
+                            <button onClick={handleTurn} className="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-lg border border-slate-500 text-sm font-bold flex items-center justify-center active:bg-slate-800 transition-colors w-16">TURN</button>
+                            <button 
+                                onClick={handleSlipThrough}
+                                className={`px-2 py-2 rounded-lg border flex items-center justify-center transition-colors w-12 ${gameState.specialActionCooldown > 0 ? 'bg-gray-800 border-gray-600 text-gray-500' : 'bg-cyan-700 border-cyan-400 text-cyan-100 hover:bg-cyan-600 active:scale-95'}`}
+                                title="すり抜け (CD: 3)"
+                            >
+                                {gameState.specialActionCooldown > 0 ? (
+                                    <span className="text-xs font-bold">{gameState.specialActionCooldown}</span>
+                                ) : (
+                                    <Ghost size={16} />
+                                )}
+                            </button>
+                        </div>
+                        {/* Wait Button */}
+                        <button onClick={handleWait} className="bg-gray-800 hover:bg-gray-700 px-6 py-2 rounded-lg border border-gray-600 text-xs flex items-center justify-center active:bg-gray-900 transition-colors w-28 text-gray-400"><Clock size={12} className="mr-1"/> WAIT</button>
+                    </div>
+
+                    <button onClick={() => handleMove(1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors shadow-lg"><ChevronRight size={24}/></button>
                 </div>
             </div>
         </div>
