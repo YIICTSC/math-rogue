@@ -965,7 +965,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 {p.pos === idx && (
                     <div className="relative w-full h-full flex items-end justify-center">
                         <div className={`transition-transform duration-200 ${p.facing === -1 ? 'scale-x-[-1]' : ''}`}>
-                            <PixelSprite seed="HERO" name={p.spriteName} className="w-16 h-16"/>
+                            <PixelSprite seed="HERO" name={p.spriteName} className="w-16 h-16 md:w-24 md:h-24"/>
                         </div>
                         {p.shield > 0 && <div className="absolute top-0 right-0 bg-blue-600 text-white text-xs px-1 rounded border border-white">{p.shield}</div>}
                         <div className="absolute -bottom-6 w-20 text-center bg-black/50 text-white text-xs rounded border border-green-500">HP {p.hp}/{p.maxHp}</div>
@@ -974,7 +974,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 {e && (
                     <div className="relative w-full h-full flex items-end justify-center">
                         <div className={`transition-transform duration-200 ${e.facing === -1 ? 'scale-x-[-1]' : ''}`}>
-                            <PixelSprite seed={e.id} name={e.spriteName} className="w-16 h-16"/>
+                            <PixelSprite seed={e.id} name={e.spriteName} className="w-16 h-16 md:w-24 md:h-24"/>
                         </div>
                         {e.intent && e.intent.type === 'ATTACK' && e.intent.timer === 1 && (
                             <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce z-20">
@@ -1096,7 +1096,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             ))}
                         </div>
 
-                        <div className="grid grid-cols-7 gap-1 w-full max-w-4xl px-2 mb-4 shrink-0">
+                        <div className="grid grid-cols-7 gap-1 md:gap-2 w-full max-w-6xl px-2 mb-4 shrink-0">
                             {[...Array(GRID_SIZE)].map((_, i) => (
                                 <div key={i} className={`aspect-[1/2] md:aspect-square border-2 ${isDangerZone(i) ? 'border-red-500 bg-red-900/20' : 'border-indigo-800 bg-black/30'} rounded-lg flex items-end justify-center relative`}>
                                     {getGridContent(i)}
