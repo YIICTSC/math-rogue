@@ -196,10 +196,12 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         for (const e of enemies) {
             if (e.hp <= 0) continue;
 
+            // Timer Reached 0: Execution Phase or Decision Phase
             if (e.intent && e.intent.timer === 0) {
-                // Execute Pre-planned Attack
+                
+                // EXECUTE ATTACK (Telegraph finished)
                 if (e.intent.type === 'ATTACK') {
-                    // Check if player is in range
+                    // Check if player is STILL in range
                     const p = current.player;
                     const dist = Math.abs(e.pos - p.pos);
                     const rangeHit = e.intent.range?.includes(dist);
@@ -211,16 +213,15 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         const blocked = Math.min(dmg, p.shield);
                         const finalDmg = dmg - blocked;
                         
-                        // Update state
+                        // Update state immediately for next checks
                         setGameState(prev => ({
                             ...prev,
                             player: { ...prev.player, hp: Math.max(0, prev.player.hp - finalDmg), shield: prev.player.shield - blocked }
                         }));
                         addLog(`${e.name}の攻撃！ ${finalDmg}ダメージ！`);
                         audioService.playSound('lose'); // hurt sound
-                        await new Promise(r => setTimeout(r, 200));
                         
-                        // Check gameOver against calculating value
+                        // Check gameOver
                         if (current.player.hp - finalDmg <= 0) {
                             setGameState(prev => ({ ...prev, status: 'GAME_OVER' }));
                             return; // Stop processing
@@ -230,47 +231,43 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         addLog(`${e.name}の攻撃は空を切った。`);
                     }
                     
-                    // Reset Intent to Wait
-                    const template = ENEMY_TYPES.find(t => t.name === e.name) || ENEMY_TYPES[0];
-                    e.intent = { type: 'WAIT', timer: template.speed }; // Cooldown
+                    // Action Completed -> Cooldown (Wait 1 turn)
+                    e.intent = { type: 'WAIT', timer: 1 };
                 } 
-                // AI DECISION TIME (Instant Move or Plan Attack)
+                // DECISION PHASE (After Move or Wait Cooldown)
                 else {
                     const p = current.player;
                     const template = ENEMY_TYPES.find(t => t.name === e.name) || ENEMY_TYPES[0];
                     const validRanges = template.range;
 
-                    // Determine current state
+                    // Current state
                     const dist = e.pos - p.pos;
                     const absDist = Math.abs(dist);
-                    
-                    // Check if current position allows attacking (Range valid & Facing valid)
                     const inRange = validRanges.includes(absDist);
                     const neededFacing = dist < 0 ? 1 : -1;
                     const facingCorrect = e.facing === neededFacing;
 
                     if (inRange && facingCorrect) {
-                        // Plan Attack (Telegraph)
+                        // PLAN ATTACK (Telegraph Phase)
+                        // timer = 1 means it will execute AFTER the player's next action
                         e.intent = { 
                             type: 'ATTACK', 
                             damage: template.attackDmg, 
                             range: template.range, 
-                            timer: Math.max(2, template.speed) 
+                            timer: 1 
                         };
                     } else {
-                        // Move Phase - Pathfind to optimal attack spot
+                        // MOVE PHASE
                         let bestTargetPos = e.pos;
                         let minCost = 999;
 
-                        // Check all optimal positions relative to player
+                        // Find optimal spot
                         for (const r of validRanges) {
-                            // Left side target
                             const t1 = p.pos - r;
                             if (t1 >= 0 && t1 < GRID_SIZE) {
                                 const cost = Math.abs(e.pos - t1);
                                 if (cost < minCost) { minCost = cost; bestTargetPos = t1; }
                             }
-                            // Right side target
                             const t2 = p.pos + r;
                             if (t2 >= 0 && t2 < GRID_SIZE) {
                                 const cost = Math.abs(e.pos - t2);
@@ -278,27 +275,23 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             }
                         }
 
-                        // Determine move direction towards best target
                         let moveDir = 0;
                         if (bestTargetPos > e.pos) moveDir = 1;
                         else if (bestTargetPos < e.pos) moveDir = -1;
 
                         if (moveDir !== 0) {
                             const nextPos = e.pos + moveDir;
-                            // Check collision
                             const blocked = enemies.some(other => other.id !== e.id && other.pos === nextPos) || p.pos === nextPos;
                             if (!blocked) {
                                 e.pos = nextPos;
                             }
-                            // Update facing to move direction
                             e.facing = moveDir as Facing;
                         } else {
-                            // Already at spot or blocked, ensure correct facing towards player
-                            e.facing = neededFacing;
+                            e.facing = neededFacing; // Turn to face player if blocked
                         }
                         
-                        // Set Cooldown for movement
-                        e.intent = { type: 'WAIT', timer: Math.floor(template.speed / 2) || 1 };
+                        // Moving takes 1 turn
+                        e.intent = { type: 'MOVE', timer: 1 };
                     }
                 }
             }
@@ -350,8 +343,23 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         setAnimating(true);
         setGameState(prev => ({ ...prev, player: { ...prev.player, facing: (prev.player.facing * -1) as Facing } }));
+        // Turning is a free action? Or takes time? Let's make it instant for now to allow tactics without penalty
+        // audioService.playSound('select');
+        // setAnimating(false);
+        // User requested Wait button, so Turn should probably just change facing.
+        // Actually, let's make Turn act as Wait for consistency if we want time to pass.
+        // But usually turning is preparation.
+        // Let's make turn free.
+        setAnimating(false);
+    };
+
+    const handleWait = async () => {
+        if (stateRef.current.status !== 'PLAYING' || animating) return;
+        setAnimating(true);
+        addLog("待機した。");
+        audioService.playSound('select');
         await tickWorld('WAIT');
-        tickCooldowns(); // Action took time
+        tickCooldowns();
         setAnimating(false);
     };
 
@@ -528,15 +536,19 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             );
         }
         if (e) {
+            const isAttacking = e.intent && e.intent.type === 'ATTACK' && e.intent.timer === 1; // Timer=1 means attacking NEXT tick
+            
             return (
                 <div className="relative w-full h-full flex items-end justify-center">
                     <div className={`transition-transform duration-200 ${e.facing === -1 ? 'scale-x-[-1]' : ''}`}>
                         <PixelSprite seed={e.id} name={e.spriteName} className="w-16 h-16"/>
                     </div>
                     {/* Intent Overlay */}
-                    {e.intent && e.intent.timer <= 2 && e.intent.type === 'ATTACK' && (
-                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce">
-                            <div className="bg-red-600 text-white text-xs px-1 rounded flex items-center"><Swords size={12} className="mr-1"/> {e.intent.damage} <span className="ml-1 text-[10px]">({e.intent.timer})</span></div>
+                    {isAttacking && (
+                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce z-20">
+                            <div className="bg-red-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center">
+                                <Swords size={12} className="mr-1"/> !
+                            </div>
                         </div>
                     )}
                     <div className="absolute -bottom-6 w-16 text-center bg-black/50 text-white text-xs rounded border border-red-500">{e.hp}/{e.maxHp}</div>
@@ -548,7 +560,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     const isDangerZone = (idx: number) => {
         return gameState.enemies.some(e => {
-            if (e.intent?.type === 'ATTACK' && e.intent.timer === 0) { // Will attack THIS execution step
+            if (e.intent?.type === 'ATTACK' && e.intent.timer === 1) { // Will attack NEXT tick
                 const range = e.intent.range || [];
                 const targets = range.map(r => e.pos + (r * e.facing));
                 return targets.includes(idx);
@@ -674,8 +686,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 <div className="flex justify-center items-center gap-4 py-2 border-t border-indigo-900/30">
                     <button onClick={() => handleMove(-1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors"><ChevronLeft size={24}/></button>
                     <div className="flex flex-col items-center gap-1">
-                        <button onClick={handleTurn} className="bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-lg border border-slate-500 text-sm font-bold flex items-center justify-center active:bg-slate-800 transition-colors w-24">TURN</button>
-                        <div className="text-[8px] text-gray-500">1 Tick</div>
+                        <button onClick={handleTurn} className="bg-slate-700 hover:bg-slate-600 px-6 py-2 rounded-lg border border-slate-500 text-sm font-bold flex items-center justify-center active:bg-slate-800 transition-colors w-24">TURN</button>
+                        <button onClick={handleWait} className="bg-gray-800 hover:bg-gray-700 px-6 py-1 rounded-lg border border-gray-600 text-xs flex items-center justify-center active:bg-gray-900 transition-colors w-24 text-gray-400"><Clock size={12} className="mr-1"/> WAIT</button>
                     </div>
                     <button onClick={() => handleMove(1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors"><ChevronRight size={24}/></button>
                 </div>
