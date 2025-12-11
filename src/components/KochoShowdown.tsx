@@ -164,8 +164,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         // Reuse existing hand/deck or init
         const currentHand = stateRef.current.hand.length > 0 ? stateRef.current.hand : getInitialDeck();
         
-        // Reset cooldowns on new wave? Let's say yes for fairness or keep them? 
-        // Let's reset them to give a fresh start feel.
+        // Reset cooldowns on new wave
         const resetHand = currentHand.map(c => ({ ...c, currentCooldown: 0 }));
 
         setGameState(prev => ({
@@ -194,24 +193,30 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             if (e.intent.timer > 0) return;
 
             // Timer hit 0 last turn, now plan next move
-            // Simple AI:
             const dist = e.pos - playerPos;
             const absDist = Math.abs(dist);
             const template = ENEMY_TYPES.find(t => t.name === e.name) || ENEMY_TYPES[0];
             
-            // Can attack?
-            if (template.range.includes(absDist)) {
-                // Check facing
-                const correctFacing = (dist < 0 && e.facing === 1) || (dist > 0 && e.facing === -1);
-                if (correctFacing) {
-                    e.intent = { type: 'ATTACK', damage: template.attackDmg, range: template.range, timer: template.speed };
-                    return;
-                }
-            }
+            const inRange = template.range.includes(absDist);
+            const facingPlayer = (dist < 0 && e.facing === 1) || (dist > 0 && e.facing === -1);
 
-            // Move towards player
-            const moveDir = dist < 0 ? 1 : -1;
-            e.intent = { type: 'MOVE', targetPos: e.pos + moveDir, timer: Math.floor(template.speed / 2) };
+            if (inRange && facingPlayer) {
+                // Priority 1: Attack if in range and facing correct
+                e.intent = { 
+                    type: 'ATTACK', 
+                    damage: template.attackDmg, 
+                    range: template.range, 
+                    timer: template.speed 
+                };
+            } else {
+                // Priority 2: Move to adjust distance
+                const moveDir = dist < 0 ? 1 : -1;
+                e.intent = { 
+                    type: 'MOVE', 
+                    targetPos: e.pos + moveDir, 
+                    timer: Math.floor(template.speed / 2) || 1
+                };
+            }
         });
     };
 
@@ -243,7 +248,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         const blocked = Math.min(dmg, p.shield);
                         const finalDmg = dmg - blocked;
                         
-                        // NOTE: Updating React state here, but we must update our local tracking too if we were doing complex chain
+                        // Update state
                         setGameState(prev => ({
                             ...prev,
                             player: { ...prev.player, hp: Math.max(0, prev.player.hp - finalDmg), shield: prev.player.shield - blocked }
@@ -274,9 +279,10 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         const blocked = enemies.some(other => other.id !== e.id && other.pos === target) || current.player.pos === target;
                         if (!blocked) {
                             e.pos = target;
-                            // Update facing
-                            if (target < current.player.pos) e.facing = 1; else e.facing = -1;
                         }
+                        // Update facing towards move direction (even if blocked, try to face target)
+                        if (target > e.pos) e.facing = 1;
+                        else if (target < e.pos) e.facing = -1;
                     }
                     // Reset Intent (Plan attack or move next)
                     const template = ENEMY_TYPES.find(t => t.name === e.name) || ENEMY_TYPES[0];
@@ -338,7 +344,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setAnimating(false);
     };
 
-    const handleQueueCard = (card: KCard, idx: number) => {
+    const handleQueueCard = async (card: KCard, idx: number) => {
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         if (card.currentCooldown > 0) {
             audioService.playSound('wrong');
@@ -350,16 +356,27 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             return;
         }
         
-        // Move from Hand to Queue
-        const newHand = [...stateRef.current.hand];
-        newHand.splice(idx, 1);
-        
-        setGameState(prev => ({
-            ...prev,
-            hand: newHand,
-            queue: [...prev.queue, card]
-        }));
+        setAnimating(true); // Lock input
+
+        // 1. Move from Hand to Queue
+        setGameState(prev => {
+            const newHand = [...prev.hand];
+            newHand.splice(idx, 1);
+            
+            return {
+                ...prev,
+                hand: newHand,
+                queue: [...prev.queue, card]
+            };
+        });
         audioService.playSound('select');
+
+        // 2. Process World Turn (Time Passes when planning)
+        await new Promise(r => setTimeout(r, 150)); // Short delay for visual feedback
+        await tickWorld('WAIT');
+        tickCooldowns();
+        
+        setAnimating(false);
     };
 
     const handleUnqueueCard = (idx: number) => {
@@ -385,7 +402,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const cardsReturningToHand: KCard[] = [];
         
         for (const card of queue) {
-            // Highlight current card (not implemented visually but logical delay)
             addLog(`${card.name} を実行！`);
             
             // Execute Card Effect (Use latest ref state)
@@ -444,10 +460,10 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             // Wait a bit
             await new Promise(r => setTimeout(r, 500));
 
-            // Enemy Turn Tick
+            // Enemy Turn Tick (Execution phase also consumes time)
             await tickWorld('EXECUTE');
             
-            // Check Game Over using Ref (updated by tickWorld effect or setGameState)
+            // Check Game Over
             if ((stateRef.current as KochoGameState).status === 'GAME_OVER') break;
         }
 
@@ -455,14 +471,13 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setGameState(prev => {
             if (prev.status === 'GAME_OVER') return prev;
             
-            // Decrease cooldown of cards THAT STAYED IN HAND (not the ones just returning)
+            // Decrease cooldown of cards THAT STAYED IN HAND
             const tickedHand = prev.hand.map(c => ({
                 ...c,
                 currentCooldown: Math.max(0, c.currentCooldown - 1)
             }));
 
-            // Return executed cards to hand (they restart with full cooldown)
-            // They do NOT get a tick down immediately
+            // Return executed cards to hand (restart full cooldown)
             let newHand = [...tickedHand, ...cardsReturningToHand];
 
             if (prev.enemies.length === 0) {
