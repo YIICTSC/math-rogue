@@ -280,6 +280,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                     let hitSomething = false;
 
+                    // Hit Player
                     if (attackTiles.includes(player.pos)) {
                         const dmg = e.intent.damage || 0;
                         const blocked = Math.min(dmg, player.shield);
@@ -294,6 +295,30 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         
                         if (player.hp <= 0) {
                             status = 'GAME_OVER';
+                        }
+                    }
+
+                    // Hit Other Enemies (Friendly Fire)
+                    for (let j = 0; j < enemies.length; j++) {
+                        if (i === j) continue; // Don't hit self
+                        let target = { ...enemies[j] }; // Copy target
+                        if (target.hp <= 0) continue;
+
+                        if (attackTiles.includes(target.pos)) {
+                            const dmg = e.intent.damage || 0;
+                            const blocked = Math.min(dmg, target.shield); // Enemies use shield too
+                            const finalDmg = dmg - blocked;
+
+                            target.hp = Math.max(0, target.hp - finalDmg);
+                            target.shield = Math.max(0, target.shield - blocked);
+
+                            logs = [`${e.name}の流れ弾が${target.name}にヒット！ ${finalDmg}ダメージ！`, ...logs];
+                            // Play attack sound for friendly fire?
+                            // audioService.playSound('attack'); 
+                            hitSomething = true;
+                            
+                            // Update the enemy in the array
+                            enemies[j] = target;
                         }
                     }
 
