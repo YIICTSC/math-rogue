@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, Footprints, RefreshCw, Zap, Trophy, Skull, Info, ChevronsRight, ChevronLeft, ChevronRight, PlusCircle, Trash2 } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -13,7 +14,7 @@ interface KCard {
     type: 'ATTACK' | 'MOVE' | 'UTILITY';
     range: number[]; // Relative range, e.g. [1, 2] means 1 and 2 tiles in front
     damage: number;
-    cooldown: number; // Not used in queue execution logic directly but maybe for deck building?
+    cooldown: number; // Display only for now (Deck cycle simulates cooldown)
     color: string;
     icon: React.ReactNode;
     description: string;
@@ -65,20 +66,27 @@ const CARD_DB: KCard[] = [
     { id: 'backstep', name: 'バックステップ', type: 'UTILITY', range: [-1], damage: 0, cooldown: 0, color: 'bg-gray-600', icon: <RotateCcw size={16}/>, description: '1マス下がる', energyCost: 1 },
     { id: 'shout', name: '大声', type: 'ATTACK', range: [1, 2, 3], damage: 1, cooldown: 0, color: 'bg-yellow-600', icon: <Zap size={16}/>, description: '前方3マスに音波攻撃', energyCost: 1 },
     { id: 'bow', name: 'お辞儀', type: 'UTILITY', range: [0], damage: 0, cooldown: 0, color: 'bg-green-600', icon: <Shield size={16}/>, description: '待機してシールド+1', energyCost: 1 },
+    
+    // New Requested Cards
+    { id: 'roundhouse', name: '回し蹴り', type: 'ATTACK', range: [-1, 1], damage: 2, cooldown: 3, color: 'bg-purple-600', icon: <RefreshCw size={16}/>, description: '前後1マスを攻撃', energyCost: 1 },
+    { id: 'chalk', name: 'チョーク投げ', type: 'ATTACK', range: [1, 2, 3], damage: 2, cooldown: 5, color: 'bg-cyan-600', icon: <Zap size={16}/>, description: '遠距離攻撃', energyCost: 1 },
 ];
 
 const getInitialDeck = (): KCard[] => {
+    // 3ターンに1回 = Deck cycle approx 3-4 cards. 
+    // 5ターンに1回 = Rare card.
+    // Initial Deck: 1x Roundhouse, 1x Chalk, 1x Slash, 1x Backstep, 1x Dash
     return [
-        { ...CARD_DB[0], id: 'c1' },
-        { ...CARD_DB[0], id: 'c2' },
-        { ...CARD_DB[1], id: 'c3' },
-        { ...CARD_DB[3], id: 'c4' },
-        { ...CARD_DB[5], id: 'c5' },
+        { ...CARD_DB.find(c => c.id === 'roundhouse')!, id: 'c1' },
+        { ...CARD_DB.find(c => c.id === 'chalk')!, id: 'c2' },
+        { ...CARD_DB.find(c => c.id === 'slash')!, id: 'c3' },
+        { ...CARD_DB.find(c => c.id === 'backstep')!, id: 'c4' },
+        { ...CARD_DB.find(c => c.id === 'dash')!, id: 'c5' },
     ];
 };
 
 const ENEMY_TYPES = [
-    { name: '不良生徒', maxHp: 5, sprite: 'SENIOR|#212121', attackDmg: 2, range: [1], speed: 3 },
+    { name: '不良生徒', maxHp: 5, sprite: 'SENIOR|#a855f7', attackDmg: 2, range: [1], speed: 3 }, // Changed color to visible Purple
     { name: '熱血教師', maxHp: 10, sprite: 'TEACHER|#ef4444', attackDmg: 4, range: [1], speed: 4 },
     { name: '用務員', maxHp: 8, sprite: 'HUMANOID|#3e2723', attackDmg: 3, range: [1, 2], speed: 5 },
     { name: '教頭', maxHp: 15, sprite: 'MUSCLE|#1565c0', attackDmg: 5, range: [1], speed: 6 },
@@ -392,11 +400,11 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     addLog("移動できない！");
                 }
             } else if (card.type === 'UTILITY') {
-                if (card.id === 'bow') {
+                if (card.id.startsWith('bow')) {
                     setGameState(prev => ({ ...prev, player: { ...prev.player, shield: prev.player.shield + 1 } }));
                     addLog("防御を固めた。");
                     audioService.playSound('block');
-                } else if (card.id === 'backstep') {
+                } else if (card.id.startsWith('backstep')) {
                     const target = pPos - p.facing;
                     if (target >= 0 && target < GRID_SIZE && !stateRef.current.enemies.some(e => e.pos === target)) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, pos: target } }));
