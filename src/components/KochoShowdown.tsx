@@ -56,6 +56,14 @@ interface KRelic {
     price: number;
 }
 
+interface KochoVFX {
+    id: string;
+    type: 'SLASH' | 'BLAST' | 'TEXT' | 'BLOCK' | 'HEAL' | 'BUFF' | 'COUNTER' | 'IMPACT' | 'WARP';
+    pos: number;
+    text?: string | number;
+    color?: string;
+}
+
 interface KochoGameState {
     phase: GamePhase;
     wave: number;
@@ -155,6 +163,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         relics: []
     });
 
+    const [vfxList, setVfxList] = useState<KochoVFX[]>([]);
+
     // Ref to hold current state for async loops (avoiding stale closures)
     const stateRef = useRef(gameState);
     useEffect(() => {
@@ -172,6 +182,14 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     const addLog = (msg: string) => {
         setGameState(prev => ({ ...prev, logs: [msg, ...prev.logs.slice(0, 4)] }));
+    };
+
+    const addVfx = (type: KochoVFX['type'], pos: number, options: Partial<KochoVFX> = {}) => {
+        const id = Math.random().toString(36).substr(2, 9);
+        setVfxList(prev => [...prev, { id, type, pos, ...options }]);
+        setTimeout(() => {
+            setVfxList(prev => prev.filter(v => v.id !== id));
+        }, 800); // Effect duration
     };
 
     const startWave = (wave: number, phase: GamePhase) => {
@@ -266,12 +284,13 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         };
     };
 
-    const resolveEnemyTurn = (current: KochoGameState): KochoGameState => {
+    const resolveEnemyTurn = (current: KochoGameState): { nextState: KochoGameState, vfx: KochoVFX[] } => {
         let nextState = { ...current };
         let enemies = [...nextState.enemies];
         let player = { ...nextState.player };
         let logs = [...nextState.logs];
         let status = nextState.status;
+        const generatedVfx: KochoVFX[] = [];
 
         // Relic: Shield (Passive Shield)
         const hasShieldRelic = current.relics.some(r => r.id === 'R_SHIELD');
@@ -306,6 +325,11 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         player.shield -= blocked;
                         
                         logs = [`${e.name}の攻撃！ ${finalDmg}ダメージ！`, ...logs];
+                        
+                        generatedVfx.push({ id: `v_atk_p_${Date.now()}_${i}`, type: 'SLASH', pos: player.pos });
+                        if (blocked > 0) generatedVfx.push({ id: `v_blk_p_${Date.now()}_${i}`, type: 'BLOCK', pos: player.pos });
+                        if (finalDmg > 0) generatedVfx.push({ id: `v_dmg_p_${Date.now()}_${i}`, type: 'TEXT', pos: player.pos, text: finalDmg, color: 'text-red-500' });
+
                         audioService.playSound('lose');
                         hitSomething = true;
                         
@@ -329,8 +353,10 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             target.shield = Math.max(0, target.shield - blocked);
 
                             logs = [`${e.name}の流れ弾が${target.name}にヒット！ ${finalDmg}ダメージ！`, ...logs];
-                            // Play attack sound for friendly fire?
-                            // audioService.playSound('attack'); 
+                            
+                            generatedVfx.push({ id: `v_atk_e_${Date.now()}_${j}`, type: 'SLASH', pos: target.pos });
+                            if (finalDmg > 0) generatedVfx.push({ id: `v_dmg_e_${Date.now()}_${j}`, type: 'TEXT', pos: target.pos, text: finalDmg, color: 'text-yellow-400' });
+
                             hitSomething = true;
                             
                             // Update the enemy in the array
@@ -402,7 +428,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             if (status === 'GAME_OVER') break;
         }
         
-        return { ...nextState, enemies, player, logs: logs.slice(0, 4), status };
+        return { nextState: { ...nextState, enemies, player, logs: logs.slice(0, 4), status }, vfx: generatedVfx };
     };
 
     // --- ACTION HANDLERS ---
@@ -425,16 +451,14 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             setGameState(intermediateState);
             audioService.playSound('select');
             
-            // 2. Enemy Reaction Logic
-            // If any enemy is acting (timer <= 1), use longer delay to show action
-            // If no enemy is acting (just waiting), use minimal delay
             const anyEnemyActing = current.enemies.some(e => e.hp > 0 && e.intent && e.intent.timer <= 1);
             const delay = anyEnemyActing ? 250 : 30;
 
             await new Promise(r => setTimeout(r, delay)); 
             
-            let finalState = resolveEnemyTurn(intermediateState);
-            finalState = tickCooldowns(finalState);
+            const { nextState, vfx } = resolveEnemyTurn(intermediateState);
+            vfx.forEach(v => addVfx(v.type, v.pos, v));
+            let finalState = tickCooldowns(nextState);
             setGameState(finalState);
         } else {
             audioService.playSound('wrong');
@@ -458,8 +482,9 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const delay = anyEnemyActing ? 250 : 30;
 
         await new Promise(r => setTimeout(r, delay));
-        let finalState = resolveEnemyTurn(intermediateState);
-        finalState = tickCooldowns(finalState);
+        const { nextState, vfx } = resolveEnemyTurn(intermediateState);
+        vfx.forEach(v => addVfx(v.type, v.pos, v));
+        let finalState = tickCooldowns(nextState);
         
         setGameState(finalState);
         setAnimating(false);
@@ -476,8 +501,9 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         await new Promise(r => setTimeout(r, delay));
         
-        let finalState = resolveEnemyTurn(stateRef.current);
-        finalState = tickCooldowns(finalState);
+        const { nextState, vfx } = resolveEnemyTurn(stateRef.current);
+        vfx.forEach(v => addVfx(v.type, v.pos, v));
+        let finalState = tickCooldowns(nextState);
         setGameState(finalState);
         setAnimating(false);
     };
@@ -505,6 +531,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setAnimating(true);
         addLog("位置交換！");
         audioService.playSound('select');
+        addVfx('WARP', p.pos);
+        addVfx('WARP', targetPos);
         
         const newEnemies = current.enemies.map(e => 
             e.id === enemyInFront.id ? { ...e, pos: p.pos } : e
@@ -524,8 +552,9 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const delay = anyEnemyActing ? 250 : 30;
 
         await new Promise(r => setTimeout(r, delay)); 
-        let finalState = resolveEnemyTurn(intermediateState);
-        finalState = tickCooldowns(finalState);
+        const { nextState, vfx } = resolveEnemyTurn(intermediateState);
+        vfx.forEach(v => addVfx(v.type, v.pos, v));
+        let finalState = tickCooldowns(nextState);
         
         setGameState(finalState);
         setAnimating(false);
@@ -563,8 +592,9 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const delay = anyEnemyActing ? 250 : 30;
 
         await new Promise(r => setTimeout(r, delay));
-        let finalState = resolveEnemyTurn(intermediateState);
-        finalState = tickCooldowns(finalState);
+        const { nextState, vfx } = resolveEnemyTurn(intermediateState);
+        vfx.forEach(v => addVfx(v.type, v.pos, v));
+        let finalState = tickCooldowns(nextState);
 
         setGameState(finalState);
         setAnimating(false);
@@ -652,6 +682,14 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                 const hits = nextEnemies.filter(e => targets.includes(e.pos));
                 
+                // Visuals based on range type
+                const isRanged = card.range.some(r => r > 1);
+                if (isRanged && hits.length === 0) {
+                    targets.forEach(t => {
+                        if (t >= 0 && t < GRID_SIZE) addVfx('BLAST', t, { color: 'text-gray-500' });
+                    });
+                }
+
                 if (hits.length > 0) {
                     hit = true;
                     hits.forEach(e => {
@@ -662,11 +700,16 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             if (e.intent && (e.intent.type === 'ATTACK' || e.intent.timer <= 1)) {
                                 finalDmg *= 3;
                                 addLog("カウンター成功！");
+                                addVfx('COUNTER', e.pos);
                             }
                         }
 
                         e.hp -= finalDmg;
                         addLog(`${e.name} に ${finalDmg} ダメージ！`);
+                        
+                        // Attack VFX
+                        addVfx(isRanged ? 'BLAST' : 'SLASH', e.pos);
+                        addVfx('TEXT', e.pos, { text: finalDmg, color: 'text-yellow-400' });
 
                         // Push Logic
                         if (card.effectType === 'PUSH') {
@@ -682,6 +725,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             if (targetPos !== e.pos) {
                                 e.pos = targetPos;
                                 addLog(`${e.name}を吹き飛ばした！`);
+                                addVfx('IMPACT', e.pos);
                             }
                         }
 
@@ -692,6 +736,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             if (!isBlocked && dest >= 0 && dest < GRID_SIZE) {
                                 e.pos = dest;
                                 addLog(`${e.name}を引き寄せた！`);
+                                addVfx('IMPACT', e.pos);
                             }
                         }
                     });
@@ -710,6 +755,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     if (card.shield && card.shield > 0) {
                         nextPlayer.shield += card.shield;
                         addLog(`シールド +${card.shield}`);
+                        addVfx('BLOCK', p.pos);
                     }
 
                     audioService.playSound('attack');
@@ -735,6 +781,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     }
                 } else if (card.shield && card.shield > 0) {
                     nextPlayer.shield += card.shield;
+                    addVfx('BLOCK', p.pos);
                     audioService.playSound('block');
                 }
             }
@@ -766,8 +813,9 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
              const delay = anyEnemyActing ? 250 : 30;
              await new Promise(r => setTimeout(r, delay));
              
-             currentState = resolveEnemyTurn(currentState);
-             currentState = tickCooldowns(currentState);
+             const { nextState, vfx } = resolveEnemyTurn(currentState);
+             vfx.forEach(v => addVfx(v.type, v.pos, v));
+             currentState = tickCooldowns(nextState);
              setGameState(currentState);
              
              if (anyEnemyActing) {
@@ -897,45 +945,56 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const getGridContent = (idx: number) => {
         const p = gameState.player;
         const e = gameState.enemies.find(en => en.pos === idx);
+        const cellVfx = vfxList.filter(v => v.pos === idx);
         
-        if (p.pos === idx) {
-            return (
-                <div className="relative w-full h-full flex items-end justify-center">
-                    <div className={`transition-transform duration-200 ${p.facing === -1 ? 'scale-x-[-1]' : ''}`}>
-                        <PixelSprite seed="HERO" name={p.spriteName} className="w-16 h-16"/>
+        return (
+            <div className="relative w-full h-full flex items-end justify-center">
+                {/* VFX Layer */}
+                {cellVfx.map(v => (
+                    <div key={v.id} className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
+                        {v.type === 'SLASH' && <div className="w-full h-1 bg-white rotate-45 animate-ping shadow-[0_0_10px_white]"></div>}
+                        {v.type === 'BLAST' && <div className="w-full h-full rounded-full border-4 border-orange-500 animate-ping"></div>}
+                        {v.type === 'BLOCK' && <div className="text-blue-400 animate-bounce"><Shield size={32} /></div>}
+                        {v.type === 'TEXT' && <div className={`text-xl font-bold animate-bounce ${v.color || 'text-white'} drop-shadow-md`}>{v.text}</div>}
+                        {v.type === 'COUNTER' && <div className="text-yellow-400 font-bold text-xs animate-pulse">COUNTER!</div>}
+                        {v.type === 'IMPACT' && <div className="absolute w-full h-full bg-white/50 animate-ping rounded-full"></div>}
+                        {v.type === 'WARP' && <div className="text-cyan-400 animate-spin"><Move size={24}/></div>}
                     </div>
-                    {p.shield > 0 && <div className="absolute top-0 right-0 bg-blue-600 text-white text-xs px-1 rounded border border-white">{p.shield}</div>}
-                    <div className="absolute -bottom-6 w-20 text-center bg-black/50 text-white text-xs rounded border border-green-500">HP {p.hp}/{p.maxHp}</div>
-                </div>
-            );
-        }
-        if (e) {
-            const isAttacking = e.intent && e.intent.type === 'ATTACK' && e.intent.timer === 1;
-            const isWaiting = e.intent && e.intent.type === 'WAIT';
-            return (
-                <div className="relative w-full h-full flex items-end justify-center">
-                    <div className={`transition-transform duration-200 ${e.facing === -1 ? 'scale-x-[-1]' : ''}`}>
-                        <PixelSprite seed={e.id} name={e.spriteName} className="w-16 h-16"/>
+                ))}
+
+                {p.pos === idx && (
+                    <div className="relative w-full h-full flex items-end justify-center">
+                        <div className={`transition-transform duration-200 ${p.facing === -1 ? 'scale-x-[-1]' : ''}`}>
+                            <PixelSprite seed="HERO" name={p.spriteName} className="w-16 h-16"/>
+                        </div>
+                        {p.shield > 0 && <div className="absolute top-0 right-0 bg-blue-600 text-white text-xs px-1 rounded border border-white">{p.shield}</div>}
+                        <div className="absolute -bottom-6 w-20 text-center bg-black/50 text-white text-xs rounded border border-green-500">HP {p.hp}/{p.maxHp}</div>
                     </div>
-                    {isAttacking && (
-                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce z-20">
-                            <div className="bg-red-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center">
-                                <Swords size={12} className="mr-1"/> !
-                            </div>
+                )}
+                {e && (
+                    <div className="relative w-full h-full flex items-end justify-center">
+                        <div className={`transition-transform duration-200 ${e.facing === -1 ? 'scale-x-[-1]' : ''}`}>
+                            <PixelSprite seed={e.id} name={e.spriteName} className="w-16 h-16"/>
                         </div>
-                    )}
-                    {isWaiting && (
-                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center z-20">
-                            <div className="bg-gray-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center">
-                                <Hourglass size={12} className="mr-1"/> {e.intent!.timer}
+                        {e.intent && e.intent.type === 'ATTACK' && e.intent.timer === 1 && (
+                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce z-20">
+                                <div className="bg-red-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center">
+                                    <Swords size={12} className="mr-1"/> !
+                                </div>
                             </div>
-                        </div>
-                    )}
-                    <div className="absolute -bottom-6 w-16 text-center bg-black/50 text-white text-xs rounded border border-red-500">{e.hp}/{e.maxHp}</div>
-                </div>
-            );
-        }
-        return null;
+                        )}
+                        {e.intent && e.intent.type === 'WAIT' && (
+                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center z-20">
+                                <div className="bg-gray-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center">
+                                    <Hourglass size={12} className="mr-1"/> {e.intent.timer}
+                                </div>
+                            </div>
+                        )}
+                        <div className="absolute -bottom-6 w-16 text-center bg-black/50 text-white text-xs rounded border border-red-500">{e.hp}/{e.maxHp}</div>
+                    </div>
+                )}
+            </div>
+        );
     };
 
     const isDangerZone = (idx: number) => {
