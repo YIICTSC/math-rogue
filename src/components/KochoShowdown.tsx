@@ -515,18 +515,27 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             return;
         }
         
+        setAnimating(true);
         audioService.playSound('select');
 
-        // Queue Card (Plan Action - Free)
+        // 1. Queue Card (Player Action)
         let current = stateRef.current;
         const newHand = [...current.hand];
         newHand.splice(idx, 1);
-        
-        setGameState({
+        current = {
             ...current,
             hand: newHand,
             queue: [...current.queue, card]
-        });
+        };
+        addLog(`${card.name}を計画...`);
+
+        // 2. Enemy Reaction (Planning consumes a turn)
+        await new Promise(r => setTimeout(r, 300));
+        current = resolveEnemyTurn(current);
+        current = tickCooldowns(current);
+
+        setGameState(current);
+        setAnimating(false);
     };
 
     const handleUnqueueCard = (idx: number) => {
@@ -639,56 +648,28 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             if (prev.status === 'GAME_OVER') return prev;
             
             // Return executed cards to hand
-            let newHand = [...currentState.hand, ...cardsReturningToHand];
-            
-            // Re-sync state for turn processing (enemies might have died, player moved)
-            let nextState = {
-                ...currentState,
-                hand: newHand,
-                queue: []
-            };
+            let newHand = [...prev.hand, ...cardsReturningToHand];
 
             // WAVE CLEAR LOGIC
             if (currentState.enemies.length === 0) {
                 const rewardMoney = 10;
                 if (prev.wave < prev.maxWaves) {
                     setTimeout(() => startWave(prev.wave + 1, prev.phase), 1000);
-                    return { ...nextState, status: 'WAVE_CLEAR', money: prev.money + rewardMoney, logs: [...prev.logs, `Wave Clear! +${rewardMoney}G`] };
+                    return { ...prev, status: 'WAVE_CLEAR', queue: [], hand: newHand, money: prev.money + rewardMoney, logs: [...prev.logs, `Wave Clear! +${rewardMoney}G`] };
                 } else {
                     setTimeout(() => handlePhaseComplete(), 1000);
-                    return { ...nextState, status: 'PHASE_CLEAR', money: prev.money + rewardMoney, logs: [...prev.logs, `Battle Clear! +${rewardMoney}G`] };
+                    return { ...prev, status: 'PHASE_CLEAR', queue: [], hand: newHand, money: prev.money + rewardMoney, logs: [...prev.logs, `Battle Clear! +${rewardMoney}G`] };
                 }
             }
 
             return {
-                ...nextState,
+                ...prev,
                 status: 'PLAYING',
+                queue: [], // Queue cleared
+                hand: newHand,
+                // specialActionCooldown ticked during planning
             };
         });
-
-        // Trigger Enemy Turn (Single Turn per Combo)
-        // We need to wait a moment then trigger the enemy turn logic
-        // But we must do it on the updated state.
-        // Since setGameState is async, we can use a small timeout or useEffect, 
-        // but here we can just update local var and set final state.
-        
-        // If enemies are still alive, they get a turn
-        if (currentState.enemies.length > 0 && currentState.status !== 'GAME_OVER') {
-             await new Promise(r => setTimeout(r, 200));
-             
-             // We need to fetch the state with returned cards first, but `resolveEnemyTurn` expects a state.
-             // We can manually assemble it here.
-             let stateForTurn = {
-                 ...currentState,
-                 hand: [...currentState.hand, ...cardsReturningToHand],
-                 queue: []
-             };
-             
-             stateForTurn = resolveEnemyTurn(stateForTurn);
-             stateForTurn = tickCooldowns(stateForTurn);
-             
-             setGameState(stateForTurn);
-        }
 
         setAnimating(false);
     };
