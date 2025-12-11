@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus } from 'lucide-react';
+import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 
@@ -75,6 +75,7 @@ interface KochoGameState {
 
 // --- DATA ---
 const CARD_DB: Omit<KCard, 'id' | 'currentCooldown'>[] = [
+    // Standard Set
     { name: '定規スラッシュ', type: 'ATTACK', range: [1], damage: 3, cooldown: 2, color: 'bg-red-600', icon: <Swords size={16}/>, description: '目の前の敵を斬る', energyCost: 1 },
     { name: 'コンパス突き', type: 'ATTACK', range: [2], damage: 2, cooldown: 2, color: 'bg-orange-600', icon: <Zap size={16}/>, description: '2マス先を攻撃', energyCost: 1 },
     { name: 'ダッシュ', type: 'MOVE', range: [2], damage: 0, cooldown: 3, color: 'bg-blue-600', icon: <ChevronsRight size={16}/>, description: '前方に2マス移動', energyCost: 1 },
@@ -85,6 +86,16 @@ const CARD_DB: Omit<KCard, 'id' | 'currentCooldown'>[] = [
     { name: 'チョーク投げ', type: 'ATTACK', range: [1, 2, 3, 4], damage: 2, cooldown: 3, color: 'bg-cyan-600', icon: <Zap size={16}/>, description: '遠距離攻撃', energyCost: 1 },
     { name: 'スライディング', type: 'ATTACK', range: [1, 2], damage: 2, cooldown: 3, color: 'bg-indigo-600', icon: <ChevronsRight size={16}/>, description: '移動しながら攻撃', energyCost: 1 },
     { name: '教科書ガード', type: 'UTILITY', range: [0], damage: 0, shield: 4, cooldown: 4, color: 'bg-slate-600', icon: <Shield size={16}/>, description: 'シールド+4', energyCost: 1 },
+
+    // New Weapons / Actions
+    { name: '竹刀', type: 'ATTACK', range: [1], damage: 2, cooldown: 0, color: 'bg-emerald-600', icon: <Swords size={16}/>, description: 'CT0。隙のない連撃', energyCost: 0 },
+    { name: '釘バット', type: 'ATTACK', range: [1], damage: 5, cooldown: 3, color: 'bg-red-800', icon: <Hammer size={16}/>, description: '高火力の一撃', energyCost: 1 },
+    { name: '鉄の定規', type: 'ATTACK', range: [1], damage: 2, shield: 2, cooldown: 2, color: 'bg-slate-500', icon: <Shield size={16}/>, description: '攻防一体。シールド+2', energyCost: 1 },
+    { name: '回転モップ', type: 'ATTACK', range: [-1, 1], damage: 2, cooldown: 2, color: 'bg-cyan-700', icon: <RefreshCw size={16}/>, description: '前後を同時に攻撃', energyCost: 1 },
+    { name: '竹箒', type: 'ATTACK', range: [2], damage: 3, cooldown: 2, color: 'bg-amber-700', icon: <Move size={16}/>, description: '2マス先を突く(リーチ)', energyCost: 1 },
+    { name: '消しゴム手裏剣', type: 'ATTACK', range: [3, 4], damage: 2, cooldown: 1, color: 'bg-white text-black', icon: <Crosshair size={16}/>, description: '遠距離速射', energyCost: 1 },
+    { name: '絶対防御', type: 'UTILITY', range: [0], damage: 0, shield: 6, cooldown: 5, color: 'bg-yellow-500 text-black', icon: <Shield size={16}/>, description: 'シールド+6', energyCost: 1 },
+    { name: '校長像召喚', type: 'UTILITY', range: [1], damage: 0, shield: 0, cooldown: 6, color: 'bg-stone-500', icon: <AlertTriangle size={16}/>, description: '盾となる像を置く(未実装)', energyCost: 1 }, // Placeholder concept
 ];
 
 const SHOP_RELICS: KRelic[] = [
@@ -550,6 +561,13 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         e.hp -= (card.damage + dmgBonus);
                         addLog(`${e.name} に ${card.damage + dmgBonus} ダメージ！`);
                     });
+                    
+                    // Add shield from attack cards (e.g. Iron Ruler)
+                    if (card.shield && card.shield > 0) {
+                        nextPlayer.shield += card.shield;
+                        addLog(`シールド +${card.shield}`);
+                    }
+
                     audioService.playSound('attack');
                 } else {
                     addLog("空振り...");
@@ -571,8 +589,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         nextPlayer.pos = target;
                         audioService.playSound('select');
                     }
-                } else if (card.name === 'お辞儀' || card.name === '教科書ガード') {
-                    nextPlayer.shield += (card.shield || 0);
+                } else if (card.shield && card.shield > 0) {
+                    nextPlayer.shield += card.shield;
                     audioService.playSound('block');
                 }
             }
@@ -662,7 +680,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const pool = CARD_DB.filter(c => !stateRef.current.hand.some(h => h.name === c.name)); // Avoid dupes if possible
         const options: KCard[] = [];
         for (let i = 0; i < 2; i++) {
-            const template = pool[Math.floor(Math.random() * pool.length)];
+            const template = pool[Math.floor(Math.random() * pool.length)] || pool[0];
             options.push({ ...template, id: `rew_${Date.now()}_${i}`, currentCooldown: 0 });
         }
         setRewardCards(options);
