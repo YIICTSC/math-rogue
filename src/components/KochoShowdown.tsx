@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft } from 'lucide-react';
+import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ShoppingBag, Plus, ArrowUpCircle, Heart, Coins, Forward, ArrowLeftRight } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 
@@ -11,14 +11,14 @@ interface KCard {
     id: string;
     name: string;
     type: 'ATTACK' | 'MOVE' | 'UTILITY';
-    range: number[]; // Relative range, e.g. [1, 2] means 1 and 2 tiles in front
+    range: number[]; // Relative range
     damage: number;
     cooldown: number; 
-    currentCooldown: number; // Runtime state
+    currentCooldown: number;
     color: string;
     icon: React.ReactNode;
     description: string;
-    energyCost: number; 
+    level: number; // For upgrades
 }
 
 interface KEntity {
@@ -33,492 +33,535 @@ interface KEntity {
     
     // Enemy AI
     intent?: {
-        type: 'ATTACK' | 'MOVE' | 'WAIT';
+        type: 'ATTACK' | 'MOVE' | 'WAIT' | 'SUMMON' | 'HEAL';
         damage?: number;
         range?: number[];
         targetPos?: number;
-        timer: number; // Turns until execution
+        timer: number;
     };
     
     // Status
     shield: number;
+    goldDrop: number;
+    isBoss?: boolean;
+    bossPhase?: number; // 1, 2, 3
 }
 
+type GamePhase = 'STORY' | 'BATTLE' | 'REWARD' | 'SHOP' | 'GAME_OVER' | 'VICTORY';
+
 interface KochoGameState {
-    wave: number;
+    stage: number; // 1-5
+    wave: number; // 1-3 (3 is Boss usually)
     turn: number;
     gridSize: number;
+    
     player: KEntity;
     enemies: KEntity[];
-    hand: KCard[];
-    queue: KCard[]; // Max 3
-    deck: KCard[]; // Kept for structure but unused in CD mode
-    discard: KCard[]; // Kept for structure but unused in CD mode
-    status: 'PLAYING' | 'EXECUTING' | 'GAME_OVER' | 'VICTORY' | 'WAVE_CLEAR';
+    
+    hand: KCard[]; // Active skills
+    queue: KCard[]; // Action queue
+    
+    gold: number;
+    
+    phase: GamePhase;
     logs: string[];
     specialActionCooldown: number;
 }
 
 // --- DATA ---
-const CARD_DB: Omit<KCard, 'id' | 'currentCooldown'>[] = [
-    { name: '定規スラッシュ', type: 'ATTACK', range: [1], damage: 3, cooldown: 2, color: 'bg-red-600', icon: <Swords size={16}/>, description: '目の前の敵を斬る', energyCost: 1 },
-    { name: 'コンパス突き', type: 'ATTACK', range: [2], damage: 2, cooldown: 2, color: 'bg-orange-600', icon: <Zap size={16}/>, description: '2マス先を攻撃', energyCost: 1 },
-    { name: 'ダッシュ', type: 'MOVE', range: [2], damage: 0, cooldown: 3, color: 'bg-blue-600', icon: <ChevronsRight size={16}/>, description: '前方に2マス移動', energyCost: 1 },
-    { name: 'バックステップ', type: 'UTILITY', range: [-1], damage: 0, cooldown: 2, color: 'bg-gray-600', icon: <RotateCcw size={16}/>, description: '1マス下がる', energyCost: 1 },
-    { name: '大声', type: 'ATTACK', range: [1, 2, 3], damage: 1, cooldown: 4, color: 'bg-yellow-600', icon: <Zap size={16}/>, description: '前方3マスに音波攻撃', energyCost: 1 },
-    { name: 'お辞儀', type: 'UTILITY', range: [0], damage: 0, cooldown: 3, color: 'bg-green-600', icon: <Shield size={16}/>, description: '待機してシールド+1', energyCost: 1 },
-    { name: '回し蹴り', type: 'ATTACK', range: [-1, 1], damage: 3, cooldown: 2, color: 'bg-purple-600', icon: <RefreshCw size={16}/>, description: '前後1マスを攻撃', energyCost: 1 },
-    { name: 'チョーク投げ', type: 'ATTACK', range: [1, 2, 3, 4], damage: 2, cooldown: 3, color: 'bg-cyan-600', icon: <Zap size={16}/>, description: '遠距離攻撃', energyCost: 1 },
+const CARD_DB: Omit<KCard, 'id' | 'currentCooldown' | 'level'>[] = [
+    { name: '定規スラッシュ', type: 'ATTACK', range: [1], damage: 4, cooldown: 2, color: 'bg-red-600', icon: <Swords size={16}/>, description: '目の前の敵を斬る' },
+    { name: 'コンパス突き', type: 'ATTACK', range: [2], damage: 3, cooldown: 2, color: 'bg-orange-600', icon: <Zap size={16}/>, description: '2マス先を攻撃' },
+    { name: 'ダッシュ', type: 'MOVE', range: [2], damage: 0, cooldown: 3, color: 'bg-blue-600', icon: <ChevronsRight size={16}/>, description: '前方に2マス移動' },
+    { name: 'バックステップ', type: 'UTILITY', range: [-1], damage: 0, cooldown: 2, color: 'bg-gray-600', icon: <RotateCcw size={16}/>, description: '1マス下がる' },
+    { name: '大声', type: 'ATTACK', range: [1, 2, 3], damage: 2, cooldown: 4, color: 'bg-yellow-600', icon: <Zap size={16}/>, description: '前方3マスに音波攻撃' },
+    { name: 'お辞儀', type: 'UTILITY', range: [0], damage: 0, cooldown: 3, color: 'bg-green-600', icon: <Shield size={16}/>, description: '待機してシールド+3' },
+    { name: '回し蹴り', type: 'ATTACK', range: [-1, 1], damage: 4, cooldown: 2, color: 'bg-purple-600', icon: <RefreshCw size={16}/>, description: '前後1マスを攻撃' },
+    { name: 'チョーク投げ', type: 'ATTACK', range: [1, 2, 3, 4], damage: 3, cooldown: 3, color: 'bg-cyan-600', icon: <Zap size={16}/>, description: '遠距離攻撃' },
+    { name: '給食当番', type: 'ATTACK', range: [1], damage: 2, cooldown: 4, color: 'bg-pink-600', icon: <Heart size={16}/>, description: '攻撃してHP1回復' },
+    { name: '居残り', type: 'UTILITY', range: [0], damage: 0, cooldown: 5, color: 'bg-indigo-600', icon: <Clock size={16}/>, description: '全CDを1短縮' },
 ];
 
-const getInitialDeck = (): KCard[] => {
-    // Initial Deck: Roundhouse Kick & Chalk Throw ONLY
-    const roundhouse = CARD_DB.find(c => c.name === '回し蹴り')!;
-    const chalk = CARD_DB.find(c => c.name === 'チョーク投げ')!;
+const STAGE_CONFIG = [
+    { id: 1, name: "校門 (The Gate)", bg: "bg-slate-900", enemies: ['SLIME', 'BAT'], boss: 'SENIOR', waves: 3 },
+    { id: 2, name: "廊下 (Hallway)", bg: "bg-stone-900", enemies: ['BAT', 'SKELETON'], boss: 'TEACHER', waves: 3 },
+    { id: 3, name: "理科室 (Science Room)", bg: "bg-teal-950", enemies: ['SLIME', 'GHOST'], boss: 'MAGE', waves: 4 },
+    { id: 4, name: "職員室 (Staff Room)", bg: "bg-blue-950", enemies: ['TEACHER', 'MUSCLE'], boss: 'VICE_PRINCIPAL', waves: 4 },
+    { id: 5, name: "校長室 (Final Showdown)", bg: "bg-red-950", enemies: ['GHOST', 'ROBOT'], boss: 'PRINCIPAL', waves: 3 },
+];
 
-    return [
-        { ...roundhouse, id: 'c1', currentCooldown: 0 },
-        { ...chalk, id: 'c2', currentCooldown: 0 },
-    ];
+const ENEMY_TEMPLATES: Record<string, any> = {
+    'SLIME': { name: 'スライム', maxHp: 6, sprite: 'SLIME|#3b82f6', dmg: 2, range: [1], speed: 3, gold: 2 },
+    'BAT': { name: 'コウモリ', maxHp: 4, sprite: 'BAT|#a855f7', dmg: 2, range: [1, 2], speed: 5, gold: 3 },
+    'SENIOR': { name: '不良生徒', maxHp: 15, sprite: 'SENIOR|#5d4037', dmg: 3, range: [1], speed: 3, gold: 10 },
+    'SKELETON': { name: '理科室の骨', maxHp: 10, sprite: 'SKELETON|#e5e7eb', dmg: 4, range: [1], speed: 3, gold: 5 },
+    'TEACHER': { name: '熱血教師', maxHp: 20, sprite: 'TEACHER|#ef4444', dmg: 5, range: [1], speed: 4, gold: 8 },
+    'GHOST': { name: '浮遊霊', maxHp: 8, sprite: 'GHOST|#a5f3fc', dmg: 3, range: [1, 2, 3], speed: 4, gold: 6 },
+    'MUSCLE': { name: '体育教師', maxHp: 30, sprite: 'MUSCLE|#f97316', dmg: 6, range: [1], speed: 3, gold: 12 },
+    'ROBOT': { name: '警備ロボ', maxHp: 25, sprite: 'ROBOT|#64748b', dmg: 4, range: [1, 2], speed: 2, gold: 15 },
+    'MAGE': { name: '実験狂', maxHp: 40, sprite: 'WIZARD|#a21caf', dmg: 5, range: [2, 3], speed: 2, gold: 20 },
+    'VICE_PRINCIPAL': { name: '教頭先生', maxHp: 60, sprite: 'BOSS|#1e40af', dmg: 7, range: [1, 2], speed: 4, gold: 50 },
+    'PRINCIPAL': { name: '校長先生', maxHp: 100, sprite: 'BOSS|#FFD700', dmg: 8, range: [1, 2, 3], speed: 3, gold: 100 },
 };
-
-const ENEMY_TYPES = [
-    { name: '不良生徒', maxHp: 5, sprite: 'SENIOR|#a855f7', attackDmg: 2, range: [1], speed: 3 }, 
-    { name: '熱血教師', maxHp: 10, sprite: 'TEACHER|#ef4444', attackDmg: 4, range: [1], speed: 4 },
-    { name: '用務員', maxHp: 8, sprite: 'HUMANOID|#3e2723', attackDmg: 3, range: [1, 2], speed: 5 },
-    { name: '教頭', maxHp: 15, sprite: 'MUSCLE|#1565c0', attackDmg: 5, range: [1], speed: 6 },
-    { name: '校長', maxHp: 30, sprite: 'BOSS|#FFD700', attackDmg: 8, range: [1, 2, 3], speed: 4 },
-];
 
 const GRID_SIZE = 7;
 
 // --- COMPONENT ---
 const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     
-    // State
+    // --- STATE ---
     const [gameState, setGameState] = useState<KochoGameState>({
-        wave: 1,
+        stage: 1,
+        wave: 0,
         turn: 1,
         gridSize: GRID_SIZE,
-        player: { id: 'p1', type: 'PLAYER', name: '勇者', pos: 3, facing: 1, maxHp: 20, hp: 20, spriteName: 'HERO_SIDE|赤', shield: 0 },
+        player: { id: 'p1', type: 'PLAYER', name: '勇者', pos: 3, facing: 1, maxHp: 30, hp: 30, spriteName: 'HERO_SIDE|赤', shield: 0, goldDrop: 0 },
         enemies: [],
         hand: [],
         queue: [],
-        deck: [],
-        discard: [],
-        status: 'PLAYING',
-        logs: ['校長室への道が開かれた...'],
+        gold: 0,
+        phase: 'STORY',
+        logs: [],
         specialActionCooldown: 0
     });
 
-    // Ref to hold current state for async loops (avoiding stale closures)
     const stateRef = useRef(gameState);
-    useEffect(() => {
-        stateRef.current = gameState;
-    }, [gameState]);
+    useEffect(() => { stateRef.current = gameState; }, [gameState]);
 
     const [animating, setAnimating] = useState(false);
-    const [selectedCardIdx, setSelectedCardIdx] = useState<number | null>(null);
-
-    // Initialization
+    const [rewardOptions, setRewardOptions] = useState<KCard[]>([]);
+    
+    // BGM Control
     useEffect(() => {
-        startWave(1);
-        audioService.playBGM('dungeon_boss');
+        if (gameState.phase === 'BATTLE') {
+            const bgm = gameState.stage === 5 ? 'dungeon_boss' : 
+                        gameState.stage === 4 ? 'dungeon_music' :
+                        gameState.stage === 3 ? 'dungeon_science' : 
+                        'dungeon_gym';
+            audioService.playBGM(bgm);
+        } else if (gameState.phase === 'SHOP' || gameState.phase === 'REWARD') {
+            audioService.playBGM('poker_shop');
+        } else if (gameState.phase === 'VICTORY') {
+            audioService.playBGM('menu');
+        }
+    }, [gameState.phase, gameState.stage]);
+
+    // Initial Setup
+    useEffect(() => {
+        // Initial Deck
+        const initialCards = [
+            CARD_DB.find(c => c.name === '定規スラッシュ')!,
+            CARD_DB.find(c => c.name === 'バックステップ')!,
+            CARD_DB.find(c => c.name === 'チョーク投げ')!,
+        ].map((c, i) => ({ ...c, id: `init_${i}`, currentCooldown: 0, level: 1 }));
+
+        setGameState(prev => ({
+            ...prev,
+            hand: initialCards,
+            logs: ["校長先生の野望を阻止せよ！", "学校の平和を取り戻す戦いが始まる..."]
+        }));
     }, []);
 
     const addLog = (msg: string) => {
         setGameState(prev => ({ ...prev, logs: [msg, ...prev.logs.slice(0, 4)] }));
     };
 
-    const startWave = (wave: number) => {
-        const enemyCount = Math.min(3, 1 + Math.floor(wave / 2));
-        const newEnemies: KEntity[] = [];
-        
-        // Spawn Enemies
-        for (let i = 0; i < enemyCount; i++) {
-            const isBoss = wave === 5 && i === 0;
-            const template = isBoss ? ENEMY_TYPES[4] : ENEMY_TYPES[Math.floor(Math.random() * (Math.min(ENEMY_TYPES.length - 1, wave)))];
-            
-            let pos = i === 0 ? 0 : 6; // Simple spawn logic (ends)
-            if (newEnemies.some(e => e.pos === pos)) pos = pos === 0 ? 1 : 5; // Avoid overlap
-            
-            newEnemies.push({
-                id: `e_${wave}_${i}`,
-                type: 'ENEMY',
-                name: template.name,
-                pos: pos,
-                facing: pos < 3 ? 1 : -1,
-                maxHp: template.maxHp,
-                hp: template.maxHp,
-                spriteName: template.sprite,
-                shield: 0,
-                intent: {
-                    type: 'WAIT',
-                    timer: Math.floor(Math.random() * 2) + 1, // Staggered start
-                }
-            });
-        }
+    // --- GAME LOOP FUNCTIONS ---
 
-        // Reuse existing hand/deck or init
-        // Reset deck on wave 1 (Retry)
-        const currentHand = (wave === 1 || stateRef.current.hand.length === 0) ? getInitialDeck() : stateRef.current.hand;
-        const resetHand = currentHand.map(c => ({ ...c, currentCooldown: 0 }));
-
+    const startStage = (stageNum: number) => {
         setGameState(prev => ({
             ...prev,
-            wave: wave,
-            turn: 1,
-            player: { 
-                ...prev.player, 
-                pos: 3, 
-                facing: 1, 
-                shield: 0,
-                // Reset HP on wave 1
-                hp: wave === 1 ? prev.player.maxHp : prev.player.hp
-            }, 
-            enemies: newEnemies,
-            hand: resetHand,
-            deck: [],
-            discard: [],
-            queue: [],
-            status: 'PLAYING',
-            logs: [`Wave ${wave} 開始！`],
-            specialActionCooldown: 0
+            stage: stageNum,
+            wave: 0,
+            phase: 'STORY',
+            logs: [`ステージ ${stageNum}: ${STAGE_CONFIG[stageNum-1].name} に到達！`]
         }));
     };
 
-    // --- GAME LOGIC ---
+    const nextWave = () => {
+        const currentConfig = STAGE_CONFIG[gameState.stage - 1];
+        const nextWaveNum = gameState.wave + 1;
 
-    // Decrements all cooldowns (Hand cards and Special Action)
-    const tickCooldowns = (state: KochoGameState): KochoGameState => {
-        return {
-            ...state,
-            hand: state.hand.map(c => ({
-                ...c,
-                currentCooldown: Math.max(0, c.currentCooldown - 1)
-            })),
-            specialActionCooldown: Math.max(0, state.specialActionCooldown - 1)
-        };
+        // Reset Player Position
+        const p = { ...gameState.player, pos: 2, facing: 1 as Facing, shield: 0 };
+
+        // Generate Enemies
+        const newEnemies: KEntity[] = [];
+        
+        if (nextWaveNum > currentConfig.waves) {
+            // Should not happen if logic is correct, but safety net
+            handleStageClear();
+            return;
+        }
+
+        const isBossWave = nextWaveNum === currentConfig.waves;
+        
+        if (isBossWave) {
+            // Boss Spawn
+            const bossKey = currentConfig.boss;
+            const t = ENEMY_TEMPLATES[bossKey];
+            newEnemies.push({
+                id: `boss_${gameState.stage}`,
+                type: 'ENEMY',
+                name: t.name,
+                pos: 6,
+                facing: -1,
+                maxHp: t.maxHp,
+                hp: t.maxHp,
+                spriteName: t.sprite,
+                shield: 0,
+                goldDrop: t.gold,
+                isBoss: true,
+                bossPhase: 1,
+                intent: { type: 'WAIT', timer: 2 }
+            });
+        } else {
+            // Minion Spawn
+            const count = 1 + Math.floor(Math.random() * 2); // 1 or 2 enemies
+            for(let i=0; i<count; i++) {
+                const key = currentConfig.enemies[Math.floor(Math.random() * currentConfig.enemies.length)];
+                const t = ENEMY_TEMPLATES[key];
+                let pos = 4 + i * 2;
+                if (pos >= GRID_SIZE) pos = 5;
+                
+                newEnemies.push({
+                    id: `e_${gameState.stage}_${gameState.wave}_${i}`,
+                    type: 'ENEMY',
+                    name: t.name,
+                    pos: pos,
+                    facing: -1,
+                    maxHp: t.maxHp,
+                    hp: t.maxHp,
+                    spriteName: t.sprite,
+                    shield: 0,
+                    goldDrop: t.gold,
+                    intent: { type: 'WAIT', timer: 1 + i }
+                });
+            }
+        }
+
+        setGameState(prev => ({
+            ...prev,
+            wave: nextWaveNum,
+            turn: 1,
+            player: p,
+            enemies: newEnemies,
+            phase: 'BATTLE',
+            queue: [],
+            hand: prev.hand.map(c => ({ ...c, currentCooldown: 0 })), // Reset cooldowns on new wave
+            specialActionCooldown: 0,
+            logs: isBossWave ? ["BOSS BATTLE!", `${newEnemies[0].name}が現れた！`] : [`Wave ${nextWaveNum}/${currentConfig.waves} 開始！`]
+        }));
     };
 
-    // Resolves Enemy Actions based on the current state.
-    // IMPORTANT: It takes a state object, so it can see the Player's position *after* the player's move.
+    const handleBattleEnd = () => {
+        const currentConfig = STAGE_CONFIG[gameState.stage - 1];
+        
+        if (gameState.wave === currentConfig.waves) {
+            // Boss Defeated -> Stage Clear
+            handleStageClear();
+        } else {
+            // Wave Clear
+            // Check if mid-stage reward (e.g. after wave 1 or 2)
+            if (gameState.wave === 1 || (currentConfig.waves > 3 && gameState.wave === 2)) {
+                generateCardRewards();
+            } else if (gameState.wave === currentConfig.waves - 1) {
+                // Before Boss -> Shop/Rest
+                setGameState(prev => ({ ...prev, phase: 'SHOP', logs: ["休憩ポイントに到達した。", "装備を整えよう。"] }));
+            } else {
+                // Direct to next wave
+                nextWave();
+            }
+        }
+    };
+
+    const handleStageClear = () => {
+        if (gameState.stage === 5) {
+            setGameState(prev => ({ ...prev, phase: 'VICTORY' }));
+        } else {
+            startStage(gameState.stage + 1);
+        }
+    };
+
+    // --- REWARD & SHOP ---
+
+    const generateCardRewards = () => {
+        const options: KCard[] = [];
+        for(let i=0; i<2; i++) {
+            const template = CARD_DB[Math.floor(Math.random() * CARD_DB.length)];
+            options.push({
+                ...template,
+                id: `reward_${Date.now()}_${i}`,
+                currentCooldown: 0,
+                level: 1
+            });
+        }
+        setRewardOptions(options);
+        setGameState(prev => ({ ...prev, phase: 'REWARD', logs: ["新たな技を閃いた！"] }));
+    };
+
+    const selectReward = (card: KCard) => {
+        setGameState(prev => ({
+            ...prev,
+            hand: [...prev.hand, card],
+            phase: 'BATTLE' // Transient state, will trigger nextWave in effect or manually
+        }));
+        nextWave();
+    };
+
+    const upgradeCard = (cardId: string, cost: number) => {
+        if (gameState.gold < cost) {
+            audioService.playSound('wrong');
+            return;
+        }
+        audioService.playSound('buff');
+        setGameState(prev => ({
+            ...prev,
+            gold: prev.gold - cost,
+            hand: prev.hand.map(c => c.id === cardId ? {
+                ...c,
+                level: c.level + 1,
+                damage: c.damage + 1,
+                // cooldown: Math.max(1, c.cooldown - (c.level % 2 === 0 ? 1 : 0)) // Every 2 levels reduce CD? Maybe too strong. Just dmg for now.
+            } : c)
+        }));
+    };
+
+    const buyItem = (type: 'HEAL' | 'MAXHP' | 'SHIELD', cost: number) => {
+        if (gameState.gold < cost) {
+            audioService.playSound('wrong');
+            return;
+        }
+        audioService.playSound('buff');
+        setGameState(prev => {
+            const p = { ...prev.player };
+            if (type === 'HEAL') p.hp = Math.min(p.maxHp, p.hp + 10);
+            if (type === 'MAXHP') { p.maxHp += 5; p.hp += 5; }
+            if (type === 'SHIELD') { /* Logic handled in battle usually, maybe passive? Skip for now or make it start shield */ }
+            return { ...prev, gold: prev.gold - cost, player: p };
+        });
+    };
+
+    // --- BATTLE LOGIC ---
+
+    const tickCooldowns = (state: KochoGameState): KochoGameState => ({
+        ...state,
+        hand: state.hand.map(c => ({ ...c, currentCooldown: Math.max(0, c.currentCooldown - 1) })),
+        specialActionCooldown: Math.max(0, state.specialActionCooldown - 1)
+    });
+
     const resolveEnemyTurn = (current: KochoGameState): KochoGameState => {
         let nextState = { ...current };
         let enemies = [...nextState.enemies];
         let player = { ...nextState.player };
         let logs = [...nextState.logs];
-        let status = nextState.status;
+        let status = nextState.phase;
 
-        // 1. Decrement Enemy Timers
+        // Decrement Enemy Timers
         enemies = enemies.map(e => e.intent ? { ...e, intent: { ...e.intent, timer: Math.max(0, e.intent.timer - 1) } } : e);
 
-        // 2. Resolve Actions
+        // Resolve Actions
         for (let i = 0; i < enemies.length; i++) {
             let e = { ...enemies[i] };
             if (e.hp <= 0) continue;
 
-            // Timer Reached 0: Execution Phase or Decision Phase
             if (e.intent && e.intent.timer === 0) {
-                
-                // EXECUTE ATTACK (Telegraph finished)
+                // ACTION EXECUTION
                 if (e.intent.type === 'ATTACK') {
-                    // Friendly Fire Logic
-                    const attackTiles: number[] = [];
                     const range = e.intent.range || [];
-                    // Calculate absolute target tiles based on facing
-                    range.forEach(r => {
-                        const tile = e.pos + (r * e.facing);
-                        if (tile >= 0 && tile < GRID_SIZE) attackTiles.push(tile);
-                    });
-
-                    let hitSomething = false;
-
-                    // A. Hit Player
+                    const attackTiles = range.map(r => e.pos + (r * e.facing));
+                    
                     if (attackTiles.includes(player.pos)) {
                         const dmg = e.intent.damage || 0;
                         const blocked = Math.min(dmg, player.shield);
                         const finalDmg = dmg - blocked;
-                        
                         player.hp = Math.max(0, player.hp - finalDmg);
                         player.shield -= blocked;
-                        
                         logs = [`${e.name}の攻撃！ ${finalDmg}ダメージ！`, ...logs];
                         audioService.playSound('lose');
-                        hitSomething = true;
-                        
-                        if (player.hp <= 0) {
-                            status = 'GAME_OVER';
-                        }
-                    }
-
-                    // B. Hit Other Enemies (Friendly Fire)
-                    enemies.forEach((victim, vIdx) => {
-                        if (victim.id !== e.id && victim.hp > 0 && attackTiles.includes(victim.pos)) {
-                            const dmg = e.intent?.damage || 0;
-                            const blocked = Math.min(dmg, victim.shield);
-                            const finalDmg = dmg - blocked;
-
-                            // Update victim in the main array directly
-                            const newVictim = { ...victim, hp: Math.max(0, victim.hp - finalDmg), shield: victim.shield - blocked };
-                            enemies[vIdx] = newVictim;
-
-                            logs = [`${e.name}が${victim.name}に誤爆！ ${finalDmg}ダメージ！`, ...logs];
-                            audioService.playSound('attack');
-                            hitSomething = true;
-                        }
-                    });
-
-                    if (!hitSomething) {
+                        if (player.hp <= 0) status = 'GAME_OVER';
+                    } else {
                         logs = [`${e.name}の攻撃は空を切った。`, ...logs];
                     }
-                    
                     e.intent = { type: 'WAIT', timer: 1 };
+                } else if (e.intent.type === 'HEAL') {
+                    e.hp = Math.min(e.maxHp, e.hp + 10);
+                    logs = [`${e.name}は回復した！`, ...logs];
+                    e.intent = { type: 'WAIT', timer: 2 };
+                } else if (e.intent.type === 'SUMMON') {
+                    // Only for boss logic usually
+                    logs = [`${e.name}は部下を呼んだ！`, ...logs];
+                    e.intent = { type: 'WAIT', timer: 2 };
                 } 
-                // DECISION PHASE (After Move or Wait Cooldown)
+                // AI DECISION (After Move/Wait)
                 else {
-                    const template = ENEMY_TYPES.find(t => t.name === e.name) || ENEMY_TYPES[0];
-                    const validRanges = template.range;
+                    const template = e.isBoss ? ENEMY_TEMPLATES[e.name === '校長先生' ? 'PRINCIPAL' : 'VICE_PRINCIPAL'] : ENEMY_TEMPLATES[Object.keys(ENEMY_TEMPLATES).find(k => ENEMY_TEMPLATES[k].name === e.name) || 'SLIME'];
+                    
+                    // Boss Phase Logic
+                    if (e.isBoss && e.name === '校長先生') {
+                        if (e.bossPhase === 2) template.dmg = 12; // Phase 2 boost
+                        if (e.bossPhase === 3) { template.dmg = 15; template.speed = 2; } // Phase 3 boost
+                    }
 
-                    // Current state check
                     const dist = e.pos - player.pos;
                     const absDist = Math.abs(dist);
+                    const validRanges = template.range || [1];
                     const inRange = validRanges.includes(absDist);
-                    const neededFacing = dist < 0 ? 1 : -1;
-                    const facingCorrect = e.facing === neededFacing;
+                    const correctFacing = (dist < 0 && e.facing === 1) || (dist > 0 && e.facing === -1);
 
-                    if (inRange && facingCorrect) {
-                        // PLAN ATTACK
-                        e.intent = { 
-                            type: 'ATTACK', 
-                            damage: template.attackDmg, 
-                            range: template.range, 
-                            timer: 1 
-                        };
+                    if (inRange && correctFacing) {
+                        e.intent = { type: 'ATTACK', damage: template.dmg, range: template.range, timer: Math.max(1, template.speed - 1) };
                     } else {
-                        // MOVE PHASE
-                        let bestTargetPos = e.pos;
-                        let minCost = 999;
-
-                        for (const r of validRanges) {
-                            const t1 = player.pos - r;
-                            if (t1 >= 0 && t1 < GRID_SIZE) {
-                                const cost = Math.abs(e.pos - t1);
-                                if (cost < minCost) { minCost = cost; bestTargetPos = t1; }
-                            }
-                            const t2 = player.pos + r;
-                            if (t2 >= 0 && t2 < GRID_SIZE) {
-                                const cost = Math.abs(e.pos - t2);
-                                if (cost < minCost) { minCost = cost; bestTargetPos = t2; }
-                            }
+                        // Move
+                        const dir = dist < 0 ? 1 : -1;
+                        if (!enemies.some(other => other.pos === e.pos + dir) && player.pos !== e.pos + dir) {
+                            e.pos += dir;
                         }
-
-                        let moveDir = 0;
-                        if (bestTargetPos > e.pos) moveDir = 1;
-                        else if (bestTargetPos < e.pos) moveDir = -1;
-
-                        if (moveDir !== 0) {
-                            const nextPos = e.pos + moveDir;
-                            const blocked = enemies.some((other, idx) => idx !== i && other.pos === nextPos) || player.pos === nextPos;
-                            if (!blocked) {
-                                e.pos = nextPos;
-                            }
-                            e.facing = moveDir as Facing;
-                        } else {
-                            e.facing = neededFacing as Facing; 
-                        }
+                        e.facing = dir as Facing;
                         e.intent = { type: 'MOVE', timer: 1 };
                     }
                 }
             }
-            enemies[i] = e; // Save back
+            enemies[i] = e;
             if (status === 'GAME_OVER') break;
         }
-        
-        return { ...nextState, enemies, player, logs: logs.slice(0, 4), status };
+
+        // Clean dead enemies & drop gold
+        const livingEnemies = [];
+        for (const e of enemies) {
+            if (e.hp > 0) {
+                livingEnemies.push(e);
+            } else {
+                // Enemy Died
+                // Special: Final Boss Phases
+                if (e.isBoss && e.name === '校長先生' && e.bossPhase && e.bossPhase < 3) {
+                    e.bossPhase++;
+                    e.hp = e.maxHp; // Full Heal
+                    e.spriteName = e.bossPhase === 2 ? 'ROBOT|#555' : 'BOSS|#000'; // Change Sprite
+                    e.name = e.bossPhase === 2 ? 'メカ校長' : '真・魔王校長';
+                    logs = [`${e.name}に変身した！`, ...logs];
+                    audioService.playSound('buff');
+                    livingEnemies.push(e);
+                } else {
+                    nextState.gold += e.goldDrop;
+                    logs = [`${e.name}を倒した！ ${e.goldDrop}G獲得。`, ...logs];
+                    audioService.playSound('win');
+                }
+            }
+        }
+
+        return { ...nextState, enemies: livingEnemies, player, logs: logs.slice(0, 4), phase: status };
     };
 
-    // --- PLAYER ACTIONS ---
+    // --- PLAYER ACTION HANDLERS ---
 
-    const handleMove = async (dir: -1 | 1) => {
-        if (stateRef.current.status !== 'PLAYING' || animating) return;
+    const handleQueueCard = async (card: KCard, idx: number) => {
+        if (stateRef.current.phase !== 'BATTLE' || animating) return;
+        if (card.currentCooldown > 0) { audioService.playSound('wrong'); return; }
+        if (stateRef.current.queue.length >= 3) return;
+
         setAnimating(true);
+        let current = { ...stateRef.current };
+        
+        // Move to Queue
+        const newHand = [...current.hand];
+        newHand.splice(idx, 1);
+        current.hand = newHand;
+        current.queue = [...current.queue, card];
+        audioService.playSound('select');
 
-        const current = stateRef.current;
-        const newPos = current.player.pos + dir;
+        // Enemy Reaction
+        await new Promise(r => setTimeout(r, 150));
+        current = resolveEnemyTurn(current);
+        current = tickCooldowns(current);
         
-        // 1. Player Action
-        if (newPos >= 0 && newPos < GRID_SIZE && !current.enemies.some(e => e.pos === newPos)) {
-            // Valid Move
-            let intermediateState = {
-                ...current,
-                player: { ...current.player, pos: newPos } // Removed facing change
-            };
-            audioService.playSound('select');
-            
-            // 2. Enemy Reaction (Tick World with updated player pos)
-            await new Promise(r => setTimeout(r, 200)); // Small delay for visual pacing
-            let finalState = resolveEnemyTurn(intermediateState);
-            
-            // 3. Cooldowns
-            finalState = tickCooldowns(finalState);
-            
-            setGameState(finalState);
-        } else {
-            // Blocked
-            audioService.playSound('wrong');
-        }
-        
+        setGameState(current);
         setAnimating(false);
     };
 
-    const handleTurn = async () => {
-        if (stateRef.current.status !== 'PLAYING' || animating) return;
+    const handleMove = async (dir: -1 | 1) => {
+        if (stateRef.current.phase !== 'BATTLE' || animating) return;
         setAnimating(true);
-        setGameState(prev => ({ ...prev, player: { ...prev.player, facing: (prev.player.facing * -1) as Facing } }));
+        let current = stateRef.current;
+        const newPos = current.player.pos + dir;
+
+        if (newPos >= 0 && newPos < GRID_SIZE && !current.enemies.some(e => e.pos === newPos)) {
+            current.player.pos = newPos;
+            audioService.playSound('select');
+            await new Promise(r => setTimeout(r, 200));
+            current = resolveEnemyTurn(current);
+            current = tickCooldowns(current);
+            setGameState(current);
+        } else {
+            audioService.playSound('wrong');
+        }
         setAnimating(false);
     };
 
     const handleWait = async () => {
-        if (stateRef.current.status !== 'PLAYING' || animating) return;
+        if (stateRef.current.phase !== 'BATTLE' || animating) return;
         setAnimating(true);
         addLog("待機した。");
         audioService.playSound('select');
-        
-        let finalState = resolveEnemyTurn(stateRef.current);
-        finalState = tickCooldowns(finalState);
-        setGameState(finalState);
-        
+        let current = resolveEnemyTurn(stateRef.current);
+        current = tickCooldowns(current);
+        setGameState(current);
         setAnimating(false);
+    };
+
+    const handleTurn = async () => {
+        if (stateRef.current.phase !== 'BATTLE' || animating) return;
+        setGameState(prev => ({ ...prev, player: { ...prev.player, facing: (prev.player.facing * -1) as Facing } }));
     };
 
     const handleSwapPosition = async () => {
-        if (stateRef.current.status !== 'PLAYING' || animating) return;
-        
+        if (stateRef.current.phase !== 'BATTLE' || animating) return;
         const current = stateRef.current;
-        if (current.specialActionCooldown > 0) {
-            audioService.playSound('wrong');
-            addLog("位置交換: クールダウン中");
-            return;
-        }
+        if (current.specialActionCooldown > 0) { audioService.playSound('wrong'); return; }
 
-        const p = current.player;
-        const targetPos = p.pos + p.facing;
+        const targetPos = current.player.pos + current.player.facing;
+        const enemy = current.enemies.find(e => e.pos === targetPos);
+        if (!enemy) { audioService.playSound('wrong'); return; }
 
-        // Check 1: Enemy exists in front
-        const enemyInFront = current.enemies.find(e => e.pos === targetPos);
-        if (!enemyInFront) {
-            addLog("目の前に敵がいません");
-            audioService.playSound('wrong');
-            return;
-        }
-
-        // Execute Swap
         setAnimating(true);
         addLog("位置交換！");
         audioService.playSound('select');
-        
-        // 1. Swap positions
-        const newEnemies = current.enemies.map(e => 
-            e.id === enemyInFront.id ? { ...e, pos: p.pos } : e
-        );
 
-        let intermediateState = {
-            ...current,
-            player: { ...current.player, pos: targetPos },
-            enemies: newEnemies,
-            specialActionCooldown: 3 + 1 // +1 because tickCooldowns will reduce it immediately
-        };
-
-        // 2. Enemy Reaction
-        await new Promise(r => setTimeout(r, 200)); 
-        let finalState = resolveEnemyTurn(intermediateState);
+        const newEnemies = current.enemies.map(e => e.id === enemy.id ? { ...e, pos: current.player.pos } : e);
+        let newState = { ...current, player: { ...current.player, pos: targetPos }, enemies: newEnemies, specialActionCooldown: 4 }; // +1 for tick
         
-        // 3. Cooldowns
-        finalState = tickCooldowns(finalState);
-        
-        setGameState(finalState);
+        await new Promise(r => setTimeout(r, 200));
+        newState = resolveEnemyTurn(newState);
+        newState = tickCooldowns(newState);
+        setGameState(newState);
         setAnimating(false);
-    };
-
-    const handleQueueCard = async (card: KCard, idx: number) => {
-        if (stateRef.current.status !== 'PLAYING' || animating) return;
-        if (card.currentCooldown > 0) {
-            audioService.playSound('wrong');
-            addLog("クールダウン中！");
-            return;
-        }
-        if (stateRef.current.queue.length >= 3) {
-            addLog("キューが一杯です！");
-            return;
-        }
-        
-        setAnimating(true);
-
-        // 1. Move from Hand to Queue & Remove from hand
-        let intermediateState = { ...stateRef.current };
-        const newHand = [...intermediateState.hand];
-        newHand.splice(idx, 1);
-        intermediateState.hand = newHand;
-        intermediateState.queue = [...intermediateState.queue, card];
-        
-        audioService.playSound('select');
-
-        // 2. Enemy Reaction (Planning takes time)
-        await new Promise(r => setTimeout(r, 150)); 
-        let finalState = resolveEnemyTurn(intermediateState);
-        
-        // 3. Cooldowns
-        finalState = tickCooldowns(finalState);
-        
-        setGameState(finalState);
-        setAnimating(false);
-    };
-
-    const handleUnqueueCard = (idx: number) => {
-        if (stateRef.current.status !== 'PLAYING' || animating) return;
-        
-        const card = stateRef.current.queue[idx];
-        const newQueue = [...stateRef.current.queue];
-        newQueue.splice(idx, 1);
-        
-        setGameState(prev => ({
-            ...prev,
-            queue: newQueue,
-            hand: [...prev.hand, card]
-        }));
     };
 
     const executeQueue = async () => {
-        if (stateRef.current.status !== 'PLAYING' || animating || stateRef.current.queue.length === 0) return;
+        if (stateRef.current.phase !== 'BATTLE' || animating || stateRef.current.queue.length === 0) return;
         setAnimating(true);
-        setGameState(prev => ({ ...prev, status: 'EXECUTING' }));
-
-        const queue = [...stateRef.current.queue];
-        const cardsReturningToHand: KCard[] = [];
         
+        const queue = [...stateRef.current.queue];
+        const returnCards: KCard[] = [];
+
         for (const card of queue) {
-            // Execute 1 Card
-            let current = stateRef.current; // Get latest
-            if (current.status === 'GAME_OVER') break;
-
-            addLog(`${card.name} を実行！`);
+            let current = stateRef.current;
+            if (current.phase === 'GAME_OVER') break;
             
-            // Logic
+            addLog(`${card.name}！`);
+            
+            // Execute Card
             const p = current.player;
-            let pPos = p.pos;
-            let nextPlayer = { ...p };
-            let nextEnemies = [...current.enemies];
-            let hit = false;
-
+            let hits = false;
+            
             if (card.type === 'ATTACK') {
-                const targets = card.range.map(r => pPos + (r * p.facing));
-                const hits = nextEnemies.filter(e => targets.includes(e.pos));
-                if (hits.length > 0) {
-                    hit = true;
-                    hits.forEach(e => {
-                        e.hp -= card.damage;
-                        addLog(`${e.name} に ${card.damage} ダメージ！`);
+                const targets = card.range.map(r => p.pos + (r * p.facing));
+                const victims = current.enemies.filter(e => targets.includes(e.pos));
+                if (victims.length > 0) {
+                    hits = true;
+                    victims.forEach(v => {
+                        v.hp -= card.damage; // Simple calculation for now
+                        addLog(`${v.name}に${card.damage}ダメージ`);
                     });
                     audioService.playSound('attack');
                 } else {
@@ -526,85 +569,63 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     audioService.playSound('select');
                 }
             } else if (card.type === 'MOVE') {
-                const dist = card.range[0];
-                const target = pPos + (dist * p.facing);
-                if (target >= 0 && target < GRID_SIZE && !nextEnemies.some(e => e.pos === target)) {
-                    nextPlayer.pos = target;
+                const target = p.pos + (card.range[0] * p.facing);
+                if (target >= 0 && target < GRID_SIZE && !current.enemies.some(e => e.pos === target)) {
+                    current.player.pos = target;
                     audioService.playSound('select');
-                } else {
-                    addLog("移動できない！");
-                }
+                } else addLog("移動できない");
             } else if (card.type === 'UTILITY') {
-                if (card.id.startsWith('c3')) { // Dash/Backstep IDs are mocked here but logic relies on type usually
-                    // Simplified utility logic based on name for now
-                    if (card.name === 'バックステップ') {
-                        const target = pPos - p.facing;
-                        if (target >= 0 && target < GRID_SIZE && !nextEnemies.some(e => e.pos === target)) {
-                            nextPlayer.pos = target;
-                            audioService.playSound('select');
-                        }
-                    } else if (card.name === 'お辞儀') {
-                        nextPlayer.shield += 1;
-                        audioService.playSound('block');
-                    }
+                if (card.name === 'バックステップ') {
+                    const target = p.pos - p.facing;
+                    if (target >= 0 && target < GRID_SIZE && !current.enemies.some(e => e.pos === target)) current.player.pos = target;
+                } else if (card.name === 'お辞儀') {
+                    current.player.shield += 3;
+                    audioService.playSound('block');
+                } else if (card.name === '居残り') {
+                    returnCards.forEach(c => c.currentCooldown = Math.max(0, c.currentCooldown - 1));
+                    current.hand.forEach(c => c.currentCooldown = Math.max(0, c.currentCooldown - 1));
+                    audioService.playSound('buff');
                 }
             }
 
-            // Update State after Player Action
-            let intermediateState = {
-                ...current,
-                player: nextPlayer,
-                enemies: nextEnemies.filter(e => e.hp > 0)
-            };
-
-            // Prepare card return
-            cardsReturningToHand.push({
-                ...card,
-                currentCooldown: card.cooldown
-            });
-
-            // Wait
-            await new Promise(r => setTimeout(r, 500));
-
-            // Enemy Turn
-            let finalState = resolveEnemyTurn(intermediateState);
-            setGameState(finalState);
+            // Sync State
+            current.enemies = current.enemies.filter(e => e.hp > 0);
             
-            // Wait
+            // Return card
+            returnCards.push({ ...card, currentCooldown: card.cooldown });
+            
+            // Wait & Enemy Turn
+            await new Promise(r => setTimeout(r, 400));
+            current = resolveEnemyTurn(current);
+            setGameState(current);
             await new Promise(r => setTimeout(r, 200));
         }
 
-        // Finish Execution
+        // Cleanup
         setGameState(prev => {
-            if (prev.status === 'GAME_OVER') return prev;
+            if (prev.phase === 'GAME_OVER') return prev;
+            // Return cards to hand
+            const newHand = [...prev.hand.map(c => ({...c, currentCooldown: Math.max(0, c.currentCooldown - 1)})), ...returnCards];
             
-            const tickedHand = prev.hand.map(c => ({
-                ...c,
-                currentCooldown: Math.max(0, c.currentCooldown - 1)
-            }));
-
-            let newHand = [...tickedHand, ...cardsReturningToHand];
-
+            // Check Win Condition
             if (prev.enemies.length === 0) {
-                if (prev.wave === 5) return { ...prev, status: 'VICTORY', queue: [], hand: newHand };
-                else {
-                    setTimeout(() => startWave(prev.wave + 1), 1000);
-                    return { ...prev, status: 'WAVE_CLEAR', queue: [], hand: newHand };
-                }
+                setTimeout(handleBattleEnd, 1000);
+                return { ...prev, queue: [], hand: newHand };
             }
-
-            return {
-                ...prev,
-                status: 'PLAYING',
-                queue: [],
-                hand: newHand,
-            };
+            return { ...prev, queue: [], hand: newHand };
         });
-
         setAnimating(false);
     };
 
-    // --- RENDER HELPERS ---
+    const handleUnqueueCard = (idx: number) => {
+        if (stateRef.current.phase !== 'BATTLE' || animating) return;
+        const card = stateRef.current.queue[idx];
+        const newQueue = [...stateRef.current.queue];
+        newQueue.splice(idx, 1);
+        setGameState(prev => ({ ...prev, queue: newQueue, hand: [...prev.hand, card] }));
+    };
+
+    // --- RENDER ---
     const getGridContent = (idx: number) => {
         const p = gameState.player;
         const e = gameState.enemies.find(en => en.pos === idx);
@@ -621,11 +642,10 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             );
         }
         if (e) {
-            const isAttacking = e.intent && e.intent.type === 'ATTACK' && e.intent.timer === 1; // Timer=1 means attacking NEXT tick
-            
+            const isAttacking = e.intent && e.intent.type === 'ATTACK' && e.intent.timer === 1;
             return (
                 <div className="relative w-full h-full flex items-end justify-center">
-                    <div className={`transition-transform duration-200 ${e.facing === -1 ? 'scale-x-[-1]' : ''}`}>
+                    <div className={`transition-transform duration-200 ${e.facing === -1 ? 'scale-x-[-1]' : ''} ${e.isBoss ? 'scale-125' : ''}`}>
                         <PixelSprite seed={e.id} name={e.spriteName} className="w-16 h-16"/>
                     </div>
                     {isAttacking && (
@@ -644,7 +664,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     const isDangerZone = (idx: number) => {
         return gameState.enemies.some(e => {
-            if (e.intent?.type === 'ATTACK' && e.intent.timer === 1) { // Will attack NEXT tick
+            if (e.intent?.type === 'ATTACK' && e.intent.timer === 1) {
                 const range = e.intent.range || [];
                 const targets = range.map(r => e.pos + (r * e.facing));
                 return targets.includes(idx);
@@ -653,144 +673,212 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         });
     };
 
-    return (
-        <div className="flex flex-col h-full w-full bg-[#1a1a2e] text-white font-mono relative overflow-hidden">
-            {/* Header */}
-            <div className="flex justify-between items-center p-4 bg-black/40 border-b border-indigo-500/30 shrink-0">
-                <button onClick={onBack} className="flex items-center text-gray-400 hover:text-white"><ArrowLeft className="mr-2"/> Quit</button>
-                <h2 className="text-xl font-bold text-indigo-100 tracking-widest hidden md:block">KOCHO SHOWDOWN <span className="text-sm text-pink-400 ml-2">Wave {gameState.wave}</span></h2>
-                <div className="text-xs text-gray-500 flex gap-4">
-                    <span>Move/Act to reduce CD</span>
+    // --- SUB-SCREENS ---
+
+    if (gameState.phase === 'STORY') {
+        return (
+            <div className="flex flex-col h-full w-full bg-black text-white items-center justify-center p-8 text-center animate-in fade-in">
+                <div className="text-2xl font-bold mb-4 text-yellow-400">STAGE {gameState.stage}</div>
+                <h1 className="text-4xl font-black mb-8">{STAGE_CONFIG[gameState.stage - 1].name}</h1>
+                <p className="text-gray-400 mb-8 max-w-md">{gameState.logs[0]}</p>
+                <button onClick={nextWave} className="bg-white text-black px-8 py-3 rounded font-bold hover:bg-gray-200 flex items-center">
+                    <Forward className="mr-2"/> 進む
+                </button>
+            </div>
+        );
+    }
+
+    if (gameState.phase === 'REWARD') {
+        return (
+            <div className="flex flex-col h-full w-full bg-indigo-950 text-white items-center justify-center p-4 relative">
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none"></div>
+                <h2 className="text-3xl font-bold mb-8 text-yellow-300">スキル習得</h2>
+                <div className="flex gap-4 mb-8">
+                    {rewardOptions.map((card, i) => (
+                        <div key={i} className="bg-slate-800 p-4 rounded-lg border-2 border-slate-600 w-40 flex flex-col items-center cursor-pointer hover:scale-105 transition-transform hover:border-yellow-400" onClick={() => selectReward(card)}>
+                            <div className="text-4xl mb-2">{card.icon}</div>
+                            <div className="font-bold mb-2 text-center">{card.name}</div>
+                            <div className="text-xs text-gray-400 text-center">{card.description}</div>
+                            <div className="mt-4 text-xs font-mono bg-black px-2 py-1 rounded">CD: {card.cooldown}</div>
+                        </div>
+                    ))}
                 </div>
             </div>
+        );
+    }
 
-            {/* Game Area (Grid) */}
+    if (gameState.phase === 'SHOP') {
+        return (
+            <div className="flex flex-col h-full w-full bg-slate-900 text-white items-center p-4 relative">
+                <div className="w-full max-w-4xl h-full flex flex-col">
+                    <div className="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
+                        <h2 className="text-3xl font-bold flex items-center"><ShoppingBag className="mr-3 text-yellow-500"/> 強化室</h2>
+                        <div className="text-2xl font-bold text-yellow-400 flex items-center"><Coins className="mr-2"/> {gameState.gold} G</div>
+                    </div>
+                    
+                    <div className="flex gap-8 h-full overflow-hidden">
+                        {/* Upgrades */}
+                        <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
+                            <h3 className="font-bold text-gray-400 mb-2">スキル強化 (威力UP)</h3>
+                            <div className="space-y-2">
+                                {gameState.hand.map((card, i) => {
+                                    const cost = 10 * (card.level || 1);
+                                    const canAfford = gameState.gold >= cost;
+                                    return (
+                                        <div key={i} className="bg-slate-800 p-2 rounded flex justify-between items-center border border-slate-700">
+                                            <div className="flex items-center gap-2">
+                                                <div className="bg-black p-1 rounded">{card.icon}</div>
+                                                <div>
+                                                    <div className="font-bold text-sm">{card.name} <span className="text-blue-400 text-xs">Lv{card.level}</span></div>
+                                                    <div className="text-[10px] text-gray-400">威力: {card.damage}</div>
+                                                </div>
+                                            </div>
+                                            <button 
+                                                onClick={() => upgradeCard(card.id, cost)} 
+                                                disabled={!canAfford}
+                                                className={`px-3 py-1 rounded text-xs font-bold ${canAfford ? 'bg-yellow-600 hover:bg-yellow-500' : 'bg-gray-700 text-gray-500'}`}
+                                            >
+                                                強化 {cost}G
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Items */}
+                        <div className="w-1/3 border-l border-gray-700 pl-4">
+                            <h3 className="font-bold text-gray-400 mb-2">アイテム購入</h3>
+                            <div className="space-y-4">
+                                <div className="bg-slate-800 p-4 rounded border border-slate-600 text-center cursor-pointer hover:bg-slate-700" onClick={() => buyItem('HEAL', 15)}>
+                                    <div className="font-bold text-green-400 mb-1">HP回復 (+10)</div>
+                                    <div className="text-yellow-400 font-mono">15 G</div>
+                                </div>
+                                <div className="bg-slate-800 p-4 rounded border border-slate-600 text-center cursor-pointer hover:bg-slate-700" onClick={() => buyItem('MAXHP', 30)}>
+                                    <div className="font-bold text-red-400 mb-1">最大HPアップ (+5)</div>
+                                    <div className="text-yellow-400 font-mono">30 G</div>
+                                </div>
+                            </div>
+                            <button onClick={nextWave} className="mt-8 w-full bg-blue-600 py-3 rounded font-bold hover:bg-blue-500 flex items-center justify-center">
+                                <Swords className="mr-2"/> 次へ進む
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (gameState.phase === 'VICTORY') {
+        return (
+            <div className="flex flex-col h-full w-full bg-black text-white items-center justify-center p-8 text-center animate-in zoom-in">
+                <Trophy size={80} className="text-yellow-400 mb-6 animate-bounce" />
+                <h1 className="text-5xl font-black text-white mb-4">完全制覇！</h1>
+                <p className="text-xl text-gray-300 mb-12">校長先生を説得し、学園に平和が戻った。</p>
+                <button onClick={onBack} className="bg-white text-black px-8 py-3 font-bold rounded hover:bg-gray-200">タイトルへ</button>
+            </div>
+        );
+    }
+
+    if (gameState.phase === 'GAME_OVER') {
+        return (
+            <div className="flex flex-col h-full w-full bg-black text-white items-center justify-center p-8 text-center animate-in zoom-in">
+                <Skull size={80} className="text-red-500 mb-6" />
+                <h1 className="text-5xl font-black text-red-500 mb-4">停学処分</h1>
+                <p className="text-xl text-gray-300 mb-12">Stage {gameState.stage} で力尽きた...</p>
+                <button onClick={onBack} className="bg-white text-black px-8 py-3 font-bold rounded hover:bg-gray-200">タイトルへ</button>
+            </div>
+        );
+    }
+
+    // MAIN BATTLE UI
+    const currentTheme = STAGE_CONFIG[gameState.stage - 1];
+
+    return (
+        <div className={`flex flex-col h-full w-full ${currentTheme.bg} text-white font-mono relative overflow-hidden transition-colors duration-1000`}>
+            {/* Header */}
+            <div className="flex justify-between items-center p-2 bg-black/40 border-b border-white/10 shrink-0">
+                <button onClick={onBack} className="flex items-center text-gray-400 hover:text-white text-xs"><ArrowLeft size={14} className="mr-1"/> 戻る</button>
+                <div className="text-sm font-bold tracking-widest">{currentTheme.name} <span className="text-xs text-gray-400">Wave {gameState.wave}/{currentTheme.waves}</span></div>
+                <div className="flex items-center text-yellow-400 text-sm font-bold"><Coins size={14} className="mr-1"/> {gameState.gold}</div>
+            </div>
+
+            {/* Battle Field */}
             <div className="flex-grow flex flex-col items-center justify-center p-4 relative overflow-y-auto custom-scrollbar">
-                
                 {/* Logs */}
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 w-full max-w-lg text-center pointer-events-none z-10">
+                <div className="absolute top-2 w-full text-center pointer-events-none z-10 flex flex-col items-center">
                     {gameState.logs.map((log, i) => (
-                        <div key={i} className={`text-sm ${i===0 ? 'text-white font-bold text-shadow-md' : 'text-gray-500'} transition-opacity duration-500`}>{log}</div>
+                        <div key={i} className={`text-xs md:text-sm ${i===0 ? 'text-white font-bold bg-black/50 px-2 rounded' : 'text-gray-400 opacity-70'} transition-all`}>{log}</div>
                     ))}
                 </div>
 
                 {/* Grid */}
                 <div className="grid grid-cols-7 gap-1 w-full max-w-4xl px-2 mb-4 shrink-0">
                     {[...Array(GRID_SIZE)].map((_, i) => (
-                        <div key={i} className={`aspect-[1/2] md:aspect-square border-2 ${isDangerZone(i) ? 'border-red-500 bg-red-900/20' : 'border-indigo-800 bg-black/30'} rounded-lg flex items-end justify-center relative`}>
+                        <div key={i} className={`aspect-[3/4] md:aspect-square border-b-4 ${isDangerZone(i) ? 'border-red-500 bg-red-900/20' : 'border-slate-600 bg-black/20'} rounded-lg flex items-end justify-center relative`}>
                             {getGridContent(i)}
-                            <div className="absolute bottom-1 right-1 text-[8px] md:text-[10px] text-gray-700">{i}</div>
+                            <div className="absolute bottom-0 right-1 text-[8px] text-gray-600">{i}</div>
                         </div>
                     ))}
                 </div>
-
-                {/* Status Overlay */}
-                {gameState.status === 'VICTORY' && (
-                    <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-50 animate-in zoom-in">
-                        <Trophy size={64} className="text-yellow-400 mb-4 animate-bounce"/>
-                        <h2 className="text-4xl font-bold text-white mb-4">GRADUATION!</h2>
-                        <button onClick={onBack} className="bg-indigo-600 px-8 py-3 rounded text-xl font-bold hover:bg-indigo-500">Return</button>
-                    </div>
-                )}
-                {gameState.status === 'GAME_OVER' && (
-                    <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-50 animate-in zoom-in">
-                        <Skull size={64} className="text-red-500 mb-4"/>
-                        <h2 className="text-4xl font-bold text-red-500 mb-4">EXPELLED</h2>
-                        <button onClick={() => startWave(1)} className="bg-white text-black px-8 py-3 rounded text-xl font-bold hover:bg-gray-200">Retry</button>
-                    </div>
-                )}
-
             </div>
 
-            {/* Controls Area (Bottom) - Portrait Optimized */}
-            <div className="bg-[#0f0f1b] border-t-4 border-indigo-900 p-2 md:p-4 shrink-0 flex flex-col gap-2">
-                
-                {/* 1. Queue Display */}
-                <div className="flex justify-between items-center gap-2 bg-black/30 p-2 rounded-lg border border-indigo-900/30">
-                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest writing-mode-vertical rotate-180 hidden md:block">QUEUE</div>
-                    <div className="flex gap-1 md:gap-2 justify-start items-center flex-grow overflow-x-auto">
-                        {[...Array(3)].map((_, i) => {
-                            const card = gameState.queue[i];
-                            return card ? (
-                                <div key={i} className="w-12 h-16 md:w-16 md:h-20 bg-slate-800 border border-slate-600 rounded flex flex-col items-center justify-center relative group cursor-pointer hover:border-red-400 shrink-0" onClick={() => handleUnqueueCard(i)}>
-                                    <div className={`w-full h-1 ${card.color} absolute top-0`}></div>
-                                    <div className="text-[9px] md:text-xs text-center font-bold px-1 overflow-hidden whitespace-nowrap text-ellipsis w-full">{card.name}</div>
-                                    <div className="text-gray-400 scale-75">{card.icon}</div>
-                                    <X size={12} className="absolute -top-1 -right-1 bg-red-500 rounded-full text-white opacity-0 group-hover:opacity-100"/>
-                                </div>
-                            ) : (
-                                <div key={`empty-${i}`} className="w-12 h-16 md:w-16 md:h-20 border border-dashed border-gray-700 rounded flex items-center justify-center text-gray-700 text-[9px] shrink-0">Empty</div>
-                            );
-                        })}
+            {/* Controls Area */}
+            <div className="bg-[#0f0f1b] border-t-4 border-slate-700 p-2 shrink-0 flex flex-col gap-2 shadow-up">
+                {/* Queue */}
+                <div className="flex items-center gap-2 bg-black/30 p-1 rounded border border-white/10 h-16">
+                    <div className="text-[10px] text-gray-500 writing-mode-vertical hidden md:block">QUEUE</div>
+                    <div className="flex gap-1 flex-grow">
+                        {[...Array(3)].map((_, i) => (
+                            <div key={i} className="flex-1 bg-slate-800 rounded border border-slate-600 flex items-center justify-center relative cursor-pointer" onClick={() => handleUnqueueCard(i)}>
+                                {gameState.queue[i] ? (
+                                    <>
+                                        <div className={`absolute top-0 w-full h-1 ${gameState.queue[i].color}`}></div>
+                                        <div className="text-xs text-center">{gameState.queue[i].name}</div>
+                                        <X size={10} className="absolute top-1 right-1 opacity-50"/>
+                                    </>
+                                ) : <div className="text-gray-700 text-xs">Empty</div>}
+                            </div>
+                        ))}
                     </div>
-                    <button 
-                        onClick={executeQueue} 
-                        disabled={gameState.queue.length === 0 || animating}
-                        className={`w-16 h-16 md:w-20 md:h-20 rounded-full border-4 flex flex-col items-center justify-center font-bold shadow-lg transition-all shrink-0 ${gameState.queue.length > 0 ? 'bg-indigo-600 border-indigo-400 text-white hover:scale-105 active:scale-95 cursor-pointer animate-pulse' : 'bg-gray-800 border-gray-600 text-gray-500 cursor-not-allowed'}`}
-                    >
-                        <Play size={20} className="fill-current mb-1"/> EXEC
+                    <button onClick={executeQueue} disabled={gameState.queue.length === 0 || animating} className={`w-14 h-full rounded font-bold text-xs flex flex-col items-center justify-center ${gameState.queue.length > 0 ? 'bg-blue-600 text-white animate-pulse' : 'bg-gray-800 text-gray-500'}`}>
+                        <Play size={16}/> GO
                     </button>
                 </div>
 
-                {/* 2. Hand Cards (Scrollable) */}
-                <div className="flex gap-2 overflow-x-auto pb-2 px-1 custom-scrollbar min-h-[100px] items-center">
+                {/* Hand */}
+                <div className="flex gap-2 overflow-x-auto pb-1 px-1 custom-scrollbar min-h-[90px] items-center">
                     {gameState.hand.map((card, i) => (
                         <div 
                             key={card.id} 
-                            className={`w-20 h-28 md:w-24 md:h-32 bg-slate-800 border-2 rounded-lg flex flex-col justify-between p-1 md:p-2 cursor-pointer transition-transform relative shadow-lg shrink-0 ${selectedCardIdx === i ? 'border-yellow-400' : 'border-slate-600'} ${card.currentCooldown > 0 ? 'opacity-50 grayscale' : 'hover:-translate-y-2'}`}
+                            className={`w-20 h-24 bg-slate-800 border-2 rounded flex flex-col justify-between p-1 cursor-pointer relative shrink-0 ${card.currentCooldown > 0 ? 'opacity-50 grayscale' : 'hover:-translate-y-1 border-slate-500'}`}
                             onClick={() => handleQueueCard(card, i)}
                         >
                             <div className={`absolute top-0 left-0 w-full h-1 ${card.color} rounded-t-sm`}></div>
-                            <div className="mt-1 text-[9px] md:text-xs font-bold text-center leading-tight truncate">{card.name}</div>
-                            <div className="flex justify-center my-0.5 text-indigo-300 scale-75 md:scale-100">{card.icon}</div>
-                            <div className="text-[8px] md:text-[9px] text-gray-400 text-center leading-tight h-6 overflow-hidden">{card.description}</div>
-                            <div className="flex justify-between items-center text-[8px] md:text-[10px] text-gray-500 mt-auto font-mono w-full">
+                            <div className="mt-1 text-[9px] font-bold text-center leading-tight truncate">{card.name}</div>
+                            <div className="flex justify-center my-0.5 text-slate-400 scale-75">{card.icon}</div>
+                            <div className="flex justify-between items-center text-[8px] text-gray-500 mt-auto font-mono w-full">
                                 <span>CD:{card.cooldown}</span>
-                                {card.damage > 0 ? (
-                                    <span className="text-red-400 font-bold flex items-center">
-                                        <Swords size={10} className="mr-0.5"/>{card.damage}
-                                    </span>
-                                ) : (
-                                    <span className="opacity-70">{card.type}</span>
-                                )}
+                                {card.damage > 0 && <span className="text-red-400 font-bold">{card.damage}dmg</span>}
                             </div>
-                            
-                            {/* Cooldown Overlay */}
                             {card.currentCooldown > 0 && (
-                                <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center rounded-lg z-10">
-                                    <Clock size={20} className="text-gray-400 mb-1"/>
-                                    <span className="text-xl font-bold text-white">{card.currentCooldown}</span>
-                                </div>
+                                <div className="absolute inset-0 bg-black/70 flex items-center justify-center rounded text-xl font-bold">{card.currentCooldown}</div>
                             )}
                         </div>
                     ))}
                 </div>
 
-                {/* 3. Movement Controls */}
-                <div className="flex justify-center items-center gap-4 py-2 border-t border-indigo-900/30 relative">
-                    <button onClick={() => handleMove(-1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors shadow-lg"><ChevronLeft size={24}/></button>
-                    
-                    <div className="flex flex-col items-center gap-1">
-                        {/* Turn / Swap Group */}
-                        <div className="flex gap-1">
-                            <button onClick={handleTurn} className="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-lg border border-slate-500 text-sm font-bold flex items-center justify-center active:bg-slate-800 transition-colors w-16">TURN</button>
-                            <button 
-                                onClick={handleSwapPosition}
-                                className={`px-2 py-2 rounded-lg border flex items-center justify-center transition-colors w-12 ${gameState.specialActionCooldown > 0 ? 'bg-gray-800 border-gray-600 text-gray-500' : 'bg-cyan-700 border-cyan-400 text-cyan-100 hover:bg-cyan-600 active:scale-95'}`}
-                                title="位置交換 (CD: 3)"
-                            >
-                                {gameState.specialActionCooldown > 0 ? (
-                                    <span className="text-xs font-bold">{gameState.specialActionCooldown}</span>
-                                ) : (
-                                    <RefreshCw size={16} />
-                                )}
-                            </button>
-                        </div>
-                        {/* Wait Button */}
-                        <button onClick={handleWait} className="bg-gray-800 hover:bg-gray-700 px-6 py-2 rounded-lg border border-gray-600 text-xs flex items-center justify-center active:bg-gray-900 transition-colors w-28 text-gray-400"><Clock size={12} className="mr-1"/> WAIT</button>
+                {/* Movement */}
+                <div className="flex justify-center items-center gap-4 py-1 border-t border-white/10">
+                    <button onClick={() => handleMove(-1)} className="bg-slate-700 p-3 rounded-full active:bg-slate-600"><ChevronLeft size={20}/></button>
+                    <div className="flex gap-2">
+                        <button onClick={handleTurn} className="bg-slate-700 px-3 py-2 rounded text-xs font-bold w-16">TURN</button>
+                        <button onClick={handleSwapPosition} className={`px-2 py-2 rounded border transition-colors w-12 flex items-center justify-center ${gameState.specialActionCooldown > 0 ? 'bg-gray-800 border-gray-600 text-gray-500' : 'bg-cyan-700 border-cyan-400 text-cyan-100'}`}>
+                            {gameState.specialActionCooldown > 0 ? <span className="text-xs font-bold">{gameState.specialActionCooldown}</span> : <ArrowLeftRight size={16}/>}
+                        </button>
+                        <button onClick={handleWait} className="bg-gray-800 px-4 py-2 rounded border border-gray-600 text-xs text-gray-400 w-20">WAIT</button>
                     </div>
-
-                    <button onClick={() => handleMove(1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors shadow-lg"><ChevronRight size={24}/></button>
+                    <button onClick={() => handleMove(1)} className="bg-slate-700 p-3 rounded-full active:bg-slate-600"><ChevronRight size={20}/></button>
                 </div>
             </div>
         </div>
