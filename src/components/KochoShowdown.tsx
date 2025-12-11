@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost } from 'lucide-react';
+import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 
@@ -160,14 +160,22 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }
 
         // Reuse existing hand/deck or init
-        const currentHand = stateRef.current.hand.length > 0 ? stateRef.current.hand : getInitialDeck();
+        // Reset deck on wave 1 (Retry)
+        const currentHand = (wave === 1 || stateRef.current.hand.length === 0) ? getInitialDeck() : stateRef.current.hand;
         const resetHand = currentHand.map(c => ({ ...c, currentCooldown: 0 }));
 
         setGameState(prev => ({
             ...prev,
             wave: wave,
             turn: 1,
-            player: { ...prev.player, pos: 3, facing: 1, shield: 0 }, // Reset pos
+            player: { 
+                ...prev.player, 
+                pos: 3, 
+                facing: 1, 
+                shield: 0,
+                // Reset HP on wave 1
+                hp: wave === 1 ? prev.player.maxHp : prev.player.hp
+            }, 
             enemies: newEnemies,
             hand: resetHand,
             deck: [],
@@ -317,7 +325,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             // Valid Move
             let intermediateState = {
                 ...current,
-                player: { ...current.player, pos: newPos, facing: dir }
+                player: { ...current.player, pos: newPos } // Removed facing change
             };
             audioService.playSound('select');
             
@@ -330,9 +338,12 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             
             setGameState(finalState);
         } else {
-            // Blocked -> Just turn
+            // Blocked
             audioService.playSound('wrong');
-            setGameState(prev => ({ ...prev, player: { ...prev.player, facing: dir } }));
+            // If blocked, maybe just update facing if we wanted to turn, but request says "don't change facing on move" usually implies "don't auto-turn".
+            // If player explicitly wants to turn, they use the turn button.
+            // So if blocked, do nothing or just shake?
+            // Let's just do nothing/shake.
         }
         
         setAnimating(false);
@@ -358,19 +369,18 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setAnimating(false);
     };
 
-    const handleSlipThrough = async () => {
+    const handleSwapPosition = async () => {
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         
         const current = stateRef.current;
         if (current.specialActionCooldown > 0) {
             audioService.playSound('wrong');
-            addLog("すり抜け: クールダウン中");
+            addLog("位置交換: クールダウン中");
             return;
         }
 
         const p = current.player;
         const targetPos = p.pos + p.facing;
-        const destPos = p.pos + (p.facing * 2);
 
         // Check 1: Enemy exists in front
         const enemyInFront = current.enemies.find(e => e.pos === targetPos);
@@ -380,28 +390,20 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             return;
         }
 
-        // Check 2: Dest valid and empty
-        if (destPos < 0 || destPos >= GRID_SIZE) {
-            addLog("行き止まりです");
-            audioService.playSound('wrong');
-            return;
-        }
-        const blocked = current.enemies.some(e => e.pos === destPos);
-        if (blocked) {
-            addLog("移動先が塞がっています");
-            audioService.playSound('wrong');
-            return;
-        }
-
-        // Execute
+        // Execute Swap
         setAnimating(true);
-        addLog("すり抜け！");
+        addLog("位置交換！");
         audioService.playSound('select');
         
-        // 1. Move Player
+        // 1. Swap positions
+        const newEnemies = current.enemies.map(e => 
+            e.id === enemyInFront.id ? { ...e, pos: p.pos } : e
+        );
+
         let intermediateState = {
             ...current,
-            player: { ...current.player, pos: destPos },
+            player: { ...current.player, pos: targetPos },
+            enemies: newEnemies,
             specialActionCooldown: 3 + 1 // +1 because tickCooldowns will reduce it immediately
         };
 
@@ -746,18 +748,18 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     <button onClick={() => handleMove(-1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors shadow-lg"><ChevronLeft size={24}/></button>
                     
                     <div className="flex flex-col items-center gap-1">
-                        {/* Turn / Slip Group */}
+                        {/* Turn / Swap Group */}
                         <div className="flex gap-1">
                             <button onClick={handleTurn} className="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-lg border border-slate-500 text-sm font-bold flex items-center justify-center active:bg-slate-800 transition-colors w-16">TURN</button>
                             <button 
-                                onClick={handleSlipThrough}
+                                onClick={handleSwapPosition}
                                 className={`px-2 py-2 rounded-lg border flex items-center justify-center transition-colors w-12 ${gameState.specialActionCooldown > 0 ? 'bg-gray-800 border-gray-600 text-gray-500' : 'bg-cyan-700 border-cyan-400 text-cyan-100 hover:bg-cyan-600 active:scale-95'}`}
-                                title="すり抜け (CD: 3)"
+                                title="位置交換 (CD: 3)"
                             >
                                 {gameState.specialActionCooldown > 0 ? (
                                     <span className="text-xs font-bold">{gameState.specialActionCooldown}</span>
                                 ) : (
-                                    <Ghost size={16} />
+                                    <RefreshCw size={16} />
                                 )}
                             </button>
                         </div>
