@@ -1098,7 +1098,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                         <div className="grid grid-cols-7 gap-1 md:gap-2 w-full max-w-6xl px-2 mb-4 shrink-0">
                             {[...Array(GRID_SIZE)].map((_, i) => (
-                                <div key={i} className={`aspect-[1/2] md:aspect-square border-2 ${isDangerZone(i) ? 'border-red-500 bg-red-900/20' : 'border-indigo-800 bg-black/30'} rounded-lg flex items-end justify-center relative`}>
+                                <div key={i} className={`aspect-[1/2] md:aspect-[2/3] border-2 ${isDangerZone(i) ? 'border-red-500 bg-red-900/20' : 'border-indigo-800 bg-black/30'} rounded-lg flex items-end justify-center relative`}>
                                     {getGridContent(i)}
                                     <div className="absolute bottom-1 right-1 text-[8px] md:text-[10px] text-gray-700">{i}</div>
                                 </div>
