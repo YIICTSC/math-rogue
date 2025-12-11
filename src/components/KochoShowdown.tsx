@@ -529,7 +529,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         };
         addLog(`${card.name}を計画...`);
 
-        // 2. Enemy Reaction (Planning consumes a turn)
+        // 2. Enemy Reaction (Planning consumes a turn) - KEEPING THIS AS REQUESTED
         await new Promise(r => setTimeout(r, 300));
         current = resolveEnemyTurn(current);
         current = tickCooldowns(current);
@@ -564,8 +564,10 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         // --- PLAYER COMBO PHASE ---
         let currentState = { ...stateRef.current };
 
+        // Execute all player cards sequentially
         for (const card of queue) {
             if (currentState.status === 'GAME_OVER') break;
+            // Optim: Check if all enemies dead? No, might want to move/shield anyway.
 
             addLog(`${card.name}！`);
             
@@ -590,7 +592,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         addLog(`${e.name} に ${card.damage + dmgBonus} ダメージ！`);
                     });
                     
-                    // Add shield from attack cards (e.g. Iron Ruler)
+                    // Add shield from attack cards
                     if (card.shield && card.shield > 0) {
                         nextPlayer.shield += card.shield;
                         addLog(`シールド +${card.shield}`);
@@ -630,15 +632,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 enemies: nextEnemies.filter(e => e.hp > 0)
             };
 
-            // --- ADDED LOGIC: TIME PASSES DURING EXECUTION ---
-            await new Promise(r => setTimeout(r, 200)); // Delay for readability
-            
-            // Trigger enemy turn & cooldowns
-            // IMPORTANT: We must update currentState with the result of these functions
-            currentState = resolveEnemyTurn(currentState);
-            currentState = tickCooldowns(currentState);
-            // -------------------------------------------------
-
             // Card will return to hand after combo
             cardsReturningToHand.push({
                 ...card,
@@ -648,8 +641,18 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             // Update UI to show step
             setGameState(currentState);
             
-            // Wait for animation/visual
+            // Wait for visual pacing
             await new Promise(r => setTimeout(r, 400));
+        }
+
+        // --- ENEMY TURN & COOLDOWN (ONCE AFTER COMBO) ---
+        // Only if game is active and enemies remain
+        if (currentState.status !== 'GAME_OVER' && currentState.enemies.length > 0) {
+             await new Promise(r => setTimeout(r, 200));
+             currentState = resolveEnemyTurn(currentState);
+             currentState = tickCooldowns(currentState);
+             setGameState(currentState);
+             await new Promise(r => setTimeout(r, 400));
         }
 
         // --- CLEANUP PHASE ---
@@ -660,7 +663,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             let newHand = [...prev.hand, ...cardsReturningToHand];
 
             // WAVE CLEAR LOGIC
-            // Use currentState enemies as they are the most up to date after the loop
             if (currentState.enemies.length === 0) {
                 const rewardMoney = 10;
                 if (prev.wave < prev.maxWaves) {
@@ -677,7 +679,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 status: 'PLAYING',
                 queue: [], // Queue cleared
                 hand: newHand,
-                // specialActionCooldown ticked during planning AND execution loop
+                // specialActionCooldown already ticked if applied
             };
         });
 
