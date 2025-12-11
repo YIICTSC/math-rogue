@@ -45,6 +45,10 @@ interface KEntity {
     
     // Status
     shield: number;
+    
+    // Cooldowns
+    attackCooldown: number;
+    maxAttackCooldown: number;
 }
 
 interface KRelic {
@@ -117,11 +121,11 @@ const getInitialDeck = (): KCard[] => {
 };
 
 const ENEMY_TYPES = [
-    { name: '不良生徒', maxHp: 6, sprite: 'SENIOR|#a855f7', attackDmg: 2, range: [1], speed: 3 }, 
-    { name: '熱血教師', maxHp: 12, sprite: 'TEACHER|#ef4444', attackDmg: 4, range: [1], speed: 4 },
-    { name: '用務員', maxHp: 8, sprite: 'HUMANOID|#3e2723', attackDmg: 3, range: [1, 2], speed: 5 },
-    { name: '教頭', maxHp: 15, sprite: 'MUSCLE|#1565c0', attackDmg: 5, range: [1], speed: 6 },
-    { name: '校長', maxHp: 50, sprite: 'BOSS|#FFD700', attackDmg: 8, range: [1, 2, 3], speed: 4 },
+    { name: '不良生徒', maxHp: 6, sprite: 'SENIOR|#a855f7', attackDmg: 2, range: [1], speed: 3, cooldown: 2 }, 
+    { name: '熱血教師', maxHp: 12, sprite: 'TEACHER|#ef4444', attackDmg: 4, range: [1], speed: 4, cooldown: 2 },
+    { name: '用務員', maxHp: 8, sprite: 'HUMANOID|#3e2723', attackDmg: 3, range: [1, 2], speed: 5, cooldown: 2 },
+    { name: '教頭', maxHp: 15, sprite: 'MUSCLE|#1565c0', attackDmg: 5, range: [1], speed: 6, cooldown: 2 },
+    { name: '校長', maxHp: 50, sprite: 'BOSS|#FFD700', attackDmg: 8, range: [1, 2, 3], speed: 4, cooldown: 2 },
 ];
 
 const GRID_SIZE = 7;
@@ -136,7 +140,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         maxWaves: 3,
         turn: 1,
         gridSize: GRID_SIZE,
-        player: { id: 'p1', type: 'PLAYER', name: '勇者', pos: 3, facing: 1, maxHp: 20, hp: 20, spriteName: 'HERO_SIDE|赤', shield: 0 },
+        player: { id: 'p1', type: 'PLAYER', name: '勇者', pos: 3, facing: 1, maxHp: 20, hp: 20, spriteName: 'HERO_SIDE|赤', shield: 0, attackCooldown: 0, maxAttackCooldown: 0 },
         enemies: [],
         hand: [],
         queue: [],
@@ -202,6 +206,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 hp: template.maxHp,
                 spriteName: template.sprite,
                 shield: 0,
+                attackCooldown: 0,
+                maxAttackCooldown: template.cooldown,
                 intent: {
                     type: 'WAIT',
                     timer: Math.floor(Math.random() * 2) + 1, // Staggered start
@@ -272,14 +278,18 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const hasShieldRelic = current.relics.some(r => r.id === 'R_SHIELD');
         if (hasShieldRelic) player.shield += 1;
 
-        // 1. Decrement Enemy Timers
-        enemies = enemies.map(e => e.intent ? { ...e, intent: { ...e.intent, timer: Math.max(0, e.intent.timer - 1) } } : e);
-
-        // 2. Resolve Actions
+        // Process each enemy
         for (let i = 0; i < enemies.length; i++) {
             let e = { ...enemies[i] };
             if (e.hp <= 0) continue;
 
+            // 1. Decrement Cooldowns & Timers
+            e.attackCooldown = Math.max(0, e.attackCooldown - 1);
+            if (e.intent) {
+                e.intent.timer = Math.max(0, e.intent.timer - 1);
+            }
+
+            // 2. Execute Action if Timer Reached 0
             if (e.intent && e.intent.timer === 0) {
                 if (e.intent.type === 'ATTACK') {
                     const attackTiles: number[] = [];
@@ -324,8 +334,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             target.shield = Math.max(0, target.shield - blocked);
 
                             logs = [`${e.name}の流れ弾が${target.name}にヒット！ ${finalDmg}ダメージ！`, ...logs];
-                            // Play attack sound for friendly fire?
-                            // audioService.playSound('attack'); 
                             hitSomething = true;
                             
                             // Update the enemy in the array
@@ -337,59 +345,83 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         logs = [`${e.name}の攻撃は空を切った。`, ...logs];
                     }
                     
-                    e.intent = { type: 'WAIT', timer: 1 };
-                } else {
-                    const template = ENEMY_TYPES.find(t => t.name === e.name) || ENEMY_TYPES[0];
-                    const validRanges = template.range;
+                    // Reset to cooldown
+                    e.attackCooldown = e.maxAttackCooldown;
+                    e.intent = null; 
 
-                    const dist = e.pos - player.pos;
-                    const absDist = Math.abs(dist);
-                    const inRange = validRanges.includes(absDist);
-                    const neededFacing = dist < 0 ? 1 : -1;
-                    const facingCorrect = e.facing === neededFacing;
-
-                    if (inRange && facingCorrect) {
-                        e.intent = { 
-                            type: 'ATTACK', 
-                            damage: template.attackDmg, 
-                            range: template.range, 
-                            timer: 1 
-                        };
-                    } else {
-                        let bestTargetPos = e.pos;
-                        let minCost = 999;
-
-                        for (const r of validRanges) {
-                            const t1 = player.pos - r;
-                            if (t1 >= 0 && t1 < GRID_SIZE) {
-                                const cost = Math.abs(e.pos - t1);
-                                if (cost < minCost) { minCost = cost; bestTargetPos = t1; }
-                            }
-                            const t2 = player.pos + r;
-                            if (t2 >= 0 && t2 < GRID_SIZE) {
-                                const cost = Math.abs(e.pos - t2);
-                                if (cost < minCost) { minCost = cost; bestTargetPos = t2; }
-                            }
-                        }
-
-                        let moveDir = 0;
-                        if (bestTargetPos > e.pos) moveDir = 1;
-                        else if (bestTargetPos < e.pos) moveDir = -1;
-
-                        if (moveDir !== 0) {
-                            const nextPos = e.pos + moveDir;
-                            const blocked = enemies.some((other, idx) => idx !== i && other.pos === nextPos) || player.pos === nextPos;
-                            if (!blocked) {
-                                e.pos = nextPos;
-                            }
-                            e.facing = moveDir as Facing;
-                        } else {
-                            e.facing = neededFacing as Facing; 
-                        }
-                        e.intent = { type: 'MOVE', timer: 1 };
+                } else if (e.intent.type === 'MOVE') {
+                    // Execute move
+                    if (e.intent.targetPos !== undefined) {
+                        e.pos = e.intent.targetPos;
+                        // Update facing if moved
+                        const moveDir = e.intent.targetPos > e.pos ? 1 : -1; // Wait, old logic was different.
+                        // Actually let's assume facing update happened at generation
                     }
+                    e.intent = null;
+                } else {
+                    // WAIT
+                    e.intent = null;
                 }
             }
+
+            // 3. Generate New Intent if None
+            if (!e.intent) {
+                const template = ENEMY_TYPES.find(t => t.name === e.name) || ENEMY_TYPES[0];
+                const validRanges = template.range;
+
+                const dist = e.pos - player.pos;
+                const absDist = Math.abs(dist);
+                const inRange = validRanges.includes(absDist);
+                const neededFacing = dist < 0 ? 1 : -1;
+                const facingCorrect = e.facing === neededFacing;
+
+                // Attack Logic: Must have 0 CD, be in range, and facing correctly
+                if (e.attackCooldown === 0 && inRange && facingCorrect) {
+                    e.intent = { 
+                        type: 'ATTACK', 
+                        damage: template.attackDmg, 
+                        range: template.range, 
+                        timer: 1 
+                    };
+                } else {
+                    // Move Logic
+                    let bestTargetPos = e.pos;
+                    let minCost = 999;
+
+                    for (const r of validRanges) {
+                        const t1 = player.pos - r;
+                        if (t1 >= 0 && t1 < GRID_SIZE) {
+                            const cost = Math.abs(e.pos - t1);
+                            if (cost < minCost) { minCost = cost; bestTargetPos = t1; }
+                        }
+                        const t2 = player.pos + r;
+                        if (t2 >= 0 && t2 < GRID_SIZE) {
+                            const cost = Math.abs(e.pos - t2);
+                            if (cost < minCost) { minCost = cost; bestTargetPos = t2; }
+                        }
+                    }
+
+                    let moveDir = 0;
+                    if (bestTargetPos > e.pos) moveDir = 1;
+                    else if (bestTargetPos < e.pos) moveDir = -1;
+
+                    let targetPos = e.pos;
+
+                    if (moveDir !== 0) {
+                        const nextPos = e.pos + moveDir;
+                        const blocked = enemies.some((other, idx) => idx !== i && other.pos === nextPos) || player.pos === nextPos;
+                        if (!blocked) {
+                            targetPos = nextPos;
+                        }
+                        e.facing = moveDir as Facing;
+                    } else {
+                        e.facing = neededFacing as Facing; 
+                    }
+                    
+                    e.intent = { type: 'MOVE', timer: 1, targetPos: targetPos };
+                }
+            }
+
             enemies[i] = e;
             if (status === 'GAME_OVER') break;
         }
@@ -426,7 +458,18 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const handleTurn = async () => {
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         setAnimating(true);
+        // Turning is a free action or takes a turn? Usually free in grid RPGs, but let's make it take a turn for tactical weight?
+        // Current implementation: Instant visual change, no turn passed.
+        // Requested change: "Turn ... counts as 1 turn". If "Turn" means the "Turn Button", yes.
         setGameState(prev => ({ ...prev, player: { ...prev.player, facing: (prev.player.facing * -1) as Facing } }));
+        
+        // Wait, is "Turn" button just visual? The logic `resolveEnemyTurn` isn't called.
+        // If "Turn" is an action that passes time:
+        await new Promise(r => setTimeout(r, 200));
+        let finalState = resolveEnemyTurn({ ...stateRef.current, player: { ...stateRef.current.player, facing: (stateRef.current.player.facing * -1) as Facing } });
+        finalState = tickCooldowns(finalState);
+        setGameState(finalState);
+        
         setAnimating(false);
     };
 
@@ -533,7 +576,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const queue = [...stateRef.current.queue];
         const cardsReturningToHand: KCard[] = [];
         
-        // --- PLAYER COMBO PHASE ---
+        // --- EXECUTION LOOP (1 Card = 1 Turn) ---
         let currentState = { ...stateRef.current };
 
         for (const card of queue) {
@@ -541,6 +584,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
             addLog(`${card.name}！`);
             
+            // 1. PLAYER ACTION
             const p = currentState.player;
             const pPos = p.pos;
             let nextPlayer = { ...p };
@@ -562,7 +606,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         addLog(`${e.name} に ${card.damage + dmgBonus} ダメージ！`);
                     });
                     
-                    // Add shield from attack cards (e.g. Iron Ruler)
                     if (card.shield && card.shield > 0) {
                         nextPlayer.shield += card.shield;
                         addLog(`シールド +${card.shield}`);
@@ -595,12 +638,20 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 }
             }
 
-            // Update intermediate state
+            // Update state after player action
             currentState = {
                 ...currentState,
                 player: nextPlayer,
                 enemies: nextEnemies.filter(e => e.hp > 0)
             };
+
+            // 2. ENEMY TURN (Interleaved)
+            if (currentState.status !== 'GAME_OVER' && currentState.enemies.length > 0) {
+                currentState = resolveEnemyTurn(currentState);
+            }
+
+            // 3. TICK COOLDOWNS (Player & Global)
+            currentState = tickCooldowns(currentState);
 
             // Card will return to hand after combo
             cardsReturningToHand.push({
@@ -608,37 +659,23 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 currentCooldown: card.cooldown
             });
 
-            // Update UI to show step
+            // Visual Update & Delay
             setGameState(currentState);
-            
-            // Wait for animation/visual
-            await new Promise(r => setTimeout(r, 400));
-        }
-
-        // --- ENEMY TURN PHASE ---
-        if (currentState.status !== 'GAME_OVER' && currentState.enemies.length > 0) {
-            addLog("敵のターン！");
-            await new Promise(r => setTimeout(r, 300));
-            currentState = resolveEnemyTurn(currentState);
-            setGameState(currentState); // Update UI for enemy moves/attacks
-            await new Promise(r => setTimeout(r, 500));
+            await new Promise(r => setTimeout(r, 600));
         }
 
         // --- CLEANUP PHASE ---
         setGameState(prev => {
             if (prev.status === 'GAME_OVER') return prev;
             
-            // Cooldowns tick ONCE per combo turn
-            const tickedHand = prev.hand.map(c => ({
-                ...c,
-                currentCooldown: Math.max(0, c.currentCooldown - 1)
-            }));
-
             // Return executed cards to hand
-            let newHand = [...tickedHand, ...cardsReturningToHand];
+            // NOTE: currentCooldowns were already ticked inside the loop via tickCooldowns() call on state,
+            // but the `cardsReturningToHand` have fixed cooldowns set at push time.
+            // We need to merge them back.
+            let newHand = [...prev.hand, ...cardsReturningToHand];
 
             // WAVE CLEAR LOGIC
-            if (currentState.enemies.length === 0) {
+            if (prev.enemies.length === 0) {
                 const rewardMoney = 10;
                 if (prev.wave < prev.maxWaves) {
                     setTimeout(() => startWave(prev.wave + 1, prev.phase), 1000);
@@ -653,8 +690,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 ...prev,
                 status: 'PLAYING',
                 queue: [], // Queue cleared
-                hand: newHand,
-                specialActionCooldown: Math.max(0, prev.specialActionCooldown - 1) // Global CD tick
+                hand: newHand
             };
         });
 
@@ -767,6 +803,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }
         if (e) {
             const isAttacking = e.intent && e.intent.type === 'ATTACK' && e.intent.timer === 1; 
+            const isMoving = e.intent && e.intent.type === 'MOVE';
+            
             return (
                 <div className="relative w-full h-full flex items-end justify-center">
                     <div className={`transition-transform duration-200 ${e.facing === -1 ? 'scale-x-[-1]' : ''}`}>
@@ -776,6 +814,13 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce z-20">
                             <div className="bg-red-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center">
                                 <Swords size={12} className="mr-1"/> !
+                            </div>
+                        </div>
+                    )}
+                    {isMoving && (
+                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center z-20">
+                            <div className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center">
+                                <Move size={12} className="mr-1"/>
                             </div>
                         </div>
                     )}
