@@ -154,9 +154,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 spriteName: template.sprite,
                 shield: 0,
                 intent: {
-                    type: 'MOVE',
-                    timer: Math.floor(Math.random() * 2) + 1,
-                    targetPos: 3 // Aim for center initially
+                    type: 'WAIT',
+                    timer: Math.floor(Math.random() * 2) + 1, // Staggered start
                 }
             });
         }
@@ -180,61 +179,25 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             status: 'PLAYING',
             logs: [`Wave ${wave} 開始！`]
         }));
-        
-        updateEnemyIntents(newEnemies, 3); // Calculate initial intents based on player pos 3
-    };
-
-    // --- GAME LOGIC HELPER ---
-    const updateEnemyIntents = (enemies: KEntity[], playerPos: number) => {
-        enemies.forEach(e => {
-            if (!e.intent) e.intent = { type: 'WAIT', timer: 1 };
-            
-            // If timer > 0, just wait (it decrements on player action)
-            if (e.intent.timer > 0) return;
-
-            // Timer hit 0 last turn, now plan next move
-            const dist = e.pos - playerPos;
-            const absDist = Math.abs(dist);
-            const template = ENEMY_TYPES.find(t => t.name === e.name) || ENEMY_TYPES[0];
-            
-            const inRange = template.range.includes(absDist);
-            const facingPlayer = (dist < 0 && e.facing === 1) || (dist > 0 && e.facing === -1);
-
-            if (inRange && facingPlayer) {
-                // Priority 1: Attack if in range and facing correct
-                e.intent = { 
-                    type: 'ATTACK', 
-                    damage: template.attackDmg, 
-                    range: template.range, 
-                    timer: template.speed 
-                };
-            } else {
-                // Priority 2: Move to adjust distance
-                const moveDir = dist < 0 ? 1 : -1;
-                e.intent = { 
-                    type: 'MOVE', 
-                    targetPos: e.pos + moveDir, 
-                    timer: Math.floor(template.speed / 2) || 1
-                };
-            }
-        });
     };
 
     // --- ACTIONS ---
     const tickWorld = async (actionType: 'MOVE' | 'WAIT' | 'EXECUTE') => {
         // Use Ref to get the latest state for logic calculation
         const current = stateRef.current;
+        const enemies = [...current.enemies];
         
         // 1. Decrement Enemy Timers
-        const enemies = [...current.enemies];
         enemies.forEach(e => {
             if (e.intent) e.intent.timer = Math.max(0, e.intent.timer - 1);
         });
         
-        // 2. Resolve Enemy Actions (Zero Timer)
+        // 2. Resolve Enemy Actions
         for (const e of enemies) {
-            if (e.intent && e.intent.timer === 0 && e.hp > 0) {
-                // Execute Intent
+            if (e.hp <= 0) continue;
+
+            if (e.intent && e.intent.timer === 0) {
+                // Execute Pre-planned Attack
                 if (e.intent.type === 'ATTACK') {
                     // Check if player is in range
                     const p = current.player;
@@ -267,32 +230,51 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         addLog(`${e.name}の攻撃は空を切った。`);
                     }
                     
-                    // Reset Intent
+                    // Reset Intent to Wait
                     const template = ENEMY_TYPES.find(t => t.name === e.name) || ENEMY_TYPES[0];
                     e.intent = { type: 'WAIT', timer: template.speed }; // Cooldown
                 } 
-                else if (e.intent.type === 'MOVE') {
-                    // Move logic
-                    const target = e.intent.targetPos;
-                    if (target !== undefined && target >= 0 && target < GRID_SIZE) {
-                        // Check collision
-                        const blocked = enemies.some(other => other.id !== e.id && other.pos === target) || current.player.pos === target;
-                        if (!blocked) {
-                            e.pos = target;
-                        }
-                        // Update facing towards move direction (even if blocked, try to face target)
-                        if (target > e.pos) e.facing = 1;
-                        else if (target < e.pos) e.facing = -1;
-                    }
-                    // Reset Intent (Plan attack or move next)
+                // AI DECISION TIME (Instant Move or Plan Attack)
+                else {
+                    const p = current.player;
+                    const dist = e.pos - p.pos;
+                    const absDist = Math.abs(dist);
                     const template = ENEMY_TYPES.find(t => t.name === e.name) || ENEMY_TYPES[0];
-                    e.intent = { type: 'WAIT', timer: Math.floor(template.speed/2) }; // Shorter wait after move
+                    
+                    const inRange = template.range.includes(absDist);
+                    const facingPlayer = (dist < 0 && e.facing === 1) || (dist > 0 && e.facing === -1);
+
+                    if (inRange && facingPlayer) {
+                        // Priority 1: Plan Attack (Telegraphing required)
+                        e.intent = { 
+                            type: 'ATTACK', 
+                            damage: template.attackDmg, 
+                            range: template.range, 
+                            timer: Math.max(2, template.speed) // Give player reaction time
+                        };
+                    } else {
+                        // Priority 2: Move Instantly (No telegraphing)
+                        const moveDir = dist < 0 ? 1 : -1;
+                        const target = e.pos + moveDir;
+                        
+                        // Check bounds & collision
+                        if (target >= 0 && target < GRID_SIZE) {
+                            const blocked = enemies.some(other => other.id !== e.id && other.pos === target) || p.pos === target;
+                            if (!blocked) {
+                                e.pos = target;
+                            }
+                            // Face movement
+                            if (target > e.pos) e.facing = 1;
+                            else if (target < e.pos) e.facing = -1;
+                        }
+                        
+                        // Set Cooldown
+                        e.intent = { type: 'WAIT', timer: Math.floor(template.speed / 2) || 1 };
+                    }
                 }
             }
         }
         
-        // Update intents based on new positions
-        updateEnemyIntents(enemies, current.player.pos);
         setGameState(prev => ({ ...prev, enemies }));
     };
 
@@ -523,10 +505,9 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         <PixelSprite seed={e.id} name={e.spriteName} className="w-16 h-16"/>
                     </div>
                     {/* Intent Overlay */}
-                    {e.intent && e.intent.timer <= 2 && (
+                    {e.intent && e.intent.timer <= 2 && e.intent.type === 'ATTACK' && (
                         <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce">
-                            {e.intent.type === 'ATTACK' && <div className="bg-red-600 text-white text-xs px-1 rounded flex items-center"><Swords size={12} className="mr-1"/> {e.intent.damage} <span className="ml-1 text-[10px]">({e.intent.timer})</span></div>}
-                            {e.intent.type === 'MOVE' && <div className="bg-blue-600 text-white text-xs px-1 rounded flex items-center"><Footprints size={12} className="mr-1"/> <span className="text-[10px]">({e.intent.timer})</span></div>}
+                            <div className="bg-red-600 text-white text-xs px-1 rounded flex items-center"><Swords size={12} className="mr-1"/> {e.intent.damage} <span className="ml-1 text-[10px]">({e.intent.timer})</span></div>
                         </div>
                     )}
                     <div className="absolute -bottom-6 w-16 text-center bg-black/50 text-white text-xs rounded border border-red-500">{e.hp}/{e.maxHp}</div>
