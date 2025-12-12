@@ -332,15 +332,20 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         // 1. Clash Resolution
         let enemyStunDmg = 0; // Counts how many rows player WON
+        
+        // Track temp enemy hp for immediate game over check
+        let tempEnemyHp = enemy.hp;
 
         // Iterate Rows (0 to MAX_ROWS-1)
         for (let r = 0; r < MAX_ROWS; r++) {
+            if (tempEnemyHp <= 0) break; // End if enemy defeated
+
             // Check Player Part at this absolute row
             const pRelIdx = r - player.yOffset;
             const pPart = (pRelIdx >= 0 && pRelIdx < SHIP_HEIGHT) ? player.parts[pRelIdx] : null;
 
             // Check Enemy Part
-            const eRelIdx = r - enemy.yOffset;
+            // const eRelIdx = r - enemy.yOffset;
             
             // Enemy Intent on this row
             const intent = enemyIntents.find(i => (i.row + enemy.yOffset) === r);
@@ -357,30 +362,34 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             }
 
             // Resolve Clash
-            let rowLog = "";
-            
             if (pPower > 0 || ePower > 0) {
                 if (pPower > ePower) {
                     const diff = pPower - ePower;
-                    setEnemy(prev => ({...prev, hp: Math.max(0, prev.hp - diff)}));
-                    // Player Wins Row -> Enemy Durability Down
+                    tempEnemyHp = Math.max(0, tempEnemyHp - diff);
+                    setEnemy(prev => ({...prev, hp: tempEnemyHp}));
+                    
+                    // Player Wins Row -> Enemy Durability Down (Even if attacking empty slot)
                     enemyStunDmg++;
-                    rowLog = `Row ${r+1}: 撃ち合い勝利! ${diff}ダメ`;
+                    
+                    if (ePower === 0) {
+                        // rowLog = `Row ${r+1}: 隙を攻撃! ${diff}ダメ`;
+                    } else {
+                        // rowLog = `Row ${r+1}: 撃ち合い勝利! ${diff}ダメ`;
+                    }
                 } else if (ePower > pPower) {
                     const diff = ePower - pPower;
                     setPlayer(prev => ({...prev, hp: Math.max(0, prev.hp - diff)}));
-                    rowLog = `Row ${r+1}: 被弾! ${diff}ダメ`;
+                    // rowLog = `Row ${r+1}: 被弾! ${diff}ダメ`;
                 } else {
-                    rowLog = `Row ${r+1}: 相殺`;
+                    // rowLog = `Row ${r+1}: 相殺`;
                 }
             }
             
-            // if (rowLog) addLog(rowLog);
             await new Promise(r => setTimeout(r, 200));
         }
 
         // Stun Logic
-        if (enemyStunDmg > 0) {
+        if (enemyStunDmg > 0 && tempEnemyHp > 0) {
             const newDur = Math.max(0, enemy.durability - enemyStunDmg);
             if (newDur === 0 && !enemy.isStunned) {
                 // Apply Stun for NEXT turn
@@ -389,12 +398,14 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 audioService.playSound('win');
             } else {
                 setEnemy(prev => ({...prev, durability: newDur}));
-                addLog(`敵の防御値を${enemyStunDmg}削った！`);
+                if (enemyStunDmg > 1) addLog(`敵の防御値を${enemyStunDmg}削った！`);
+                else addLog(`敵の防御値を1削った！`);
             }
-        } else if (enemy.isStunned) {
-            // Recover from stun
+        } else if (enemy.isStunned && tempEnemyHp > 0) {
+            // Recover from stun (Full recovery)
             setEnemy(prev => ({...prev, isStunned: false, durability: prev.maxDurability}));
-            addLog("敵はスタンから回復した。");
+            addLog("敵システム再起動！防御値全快！");
+            audioService.playSound('buff');
         }
 
         // Cleanup
@@ -406,7 +417,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         if (player.hp <= 0) {
             setPhase('GAME_OVER');
             audioService.playSound('lose');
-        } else if (enemy.hp <= 0) {
+        } else if (tempEnemyHp <= 0) {
             audioService.playSound('win');
             if (stage === 12) {
                 setPhase('VICTORY');
