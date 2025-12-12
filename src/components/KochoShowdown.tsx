@@ -311,9 +311,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     const [vfxList, setVfxList] = useState<KochoVFX[]>([]);
     
-    // UI Interactions
-    const [hoveredCard, setHoveredCard] = useState<KCard | null>(null);
-
     // Ref to hold current state for async loops (avoiding stale closures)
     const stateRef = useRef(gameState);
     useEffect(() => {
@@ -536,118 +533,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 timer: Math.floor(Math.random() * 2) + 1, // Staggered start
             }
         };
-    };
-
-    // --- HELPER: Identify Tiles Affected by Card ---
-    const calculateImpactZone = (card: KCard, player: KEntity, enemies: KEntity[]) => {
-        const tiles: number[] = [];
-        const targets: number[] = [];
-        
-        if (card.type === 'MOVE') {
-            const maxR = Math.max(...card.range);
-            for (let i = 1; i <= maxR; i++) {
-                const dest = player.pos + (i * player.facing);
-                if (dest >= 0 && dest < GRID_SIZE) {
-                    tiles.push(dest);
-                    if (enemies.some(e => e.pos === dest && e.hp > 0)) break; // Blocked visual
-                }
-            }
-        } else if (card.type === 'ATTACK') {
-            // Determine covered range
-            if (card.effectType === 'DASH_ATTACK') {
-                for (let i = 1; i <= Math.max(...card.range); i++) {
-                    const checkPos = player.pos + (i * player.facing);
-                    if (checkPos >= 0 && checkPos < GRID_SIZE) {
-                        tiles.push(checkPos);
-                        const hitEnemy = enemies.find(e => e.pos === checkPos && e.hp > 0);
-                        if (hitEnemy) { targets.push(checkPos); break; } // Stop at first enemy
-                    }
-                }
-            } else if (card.effectType === 'PIERCE_DASH') {
-                // Sliding: Hit first enemy AND the one behind them
-                let firstEnemyFound = false;
-                for (let i = 1; i <= Math.max(...card.range); i++) {
-                    const checkPos = player.pos + (i * player.facing);
-                    if (checkPos >= 0 && checkPos < GRID_SIZE) {
-                        tiles.push(checkPos);
-                        const hitEnemy = enemies.find(e => e.pos === checkPos && e.hp > 0);
-                        
-                        if (!firstEnemyFound) {
-                            if (hitEnemy) {
-                                targets.push(checkPos);
-                                firstEnemyFound = true;
-                                // Add next tile for potential second hit visual
-                                const nextPos = checkPos + player.facing;
-                                if (nextPos >= 0 && nextPos < GRID_SIZE) tiles.push(nextPos);
-                            }
-                        } else {
-                            // After first hit, check if there is an enemy in the next slot
-                            if (hitEnemy) targets.push(checkPos);
-                            break; // Stop after passing through one
-                        }
-                    }
-                }
-            } else if (card.effectType === 'PIERCE') {
-                card.range.forEach(r => {
-                    const tPos = player.pos + (r * player.facing);
-                    if (tPos >= 0 && tPos < GRID_SIZE) {
-                        tiles.push(tPos);
-                        const hitEnemy = enemies.find(e => e.pos === tPos && e.hp > 0);
-                        if (hitEnemy) targets.push(tPos);
-                    }
-                });
-            } else if (card.effectType === 'FURTHEST') {
-                 // Highlights all potential range, but target is specific
-                 let furthestDist = -1;
-                 let targetPos = -1;
-                 
-                 enemies.forEach(e => {
-                     if (e.hp > 0) {
-                         const dist = Math.abs(e.pos - player.pos);
-                         // Check if distance matches any range
-                         if (dist > furthestDist) { 
-                             furthestDist = dist; 
-                             targetPos = e.pos;
-                         }
-                     }
-                 });
-
-                 if (targetPos !== -1) {
-                     tiles.push(targetPos);
-                     targets.push(targetPos);
-                 } else {
-                     // Nothing to hit, show range?
-                     card.range.forEach(r => {
-                         const tPos = player.pos + (r * player.facing);
-                         if (tPos >= 0 && tPos < GRID_SIZE) tiles.push(tPos);
-                     });
-                 }
-            } else {
-                // NORMAL ATTACK
-                let hitFound = false;
-                const sortedRange = [...card.range].sort((a,b) => a-b);
-                
-                for(const r of sortedRange) {
-                    const tPos = player.pos + (r * player.facing);
-                    if (tPos >= 0 && tPos < GRID_SIZE) {
-                        tiles.push(tPos); // Add to impact zone visual
-                        if (!hitFound) {
-                            const hitEnemy = enemies.find(e => e.pos === tPos && e.hp > 0);
-                            if (hitEnemy) {
-                                targets.push(tPos);
-                                hitFound = true; 
-                                // Don't break if we want to show full range, but targets list stops here
-                            }
-                        }
-                    }
-                }
-            }
-        } else if (card.type === 'UTILITY' && card.name === 'バックステップ') {
-             const dest = player.pos - player.facing;
-             if (dest >= 0 && dest < GRID_SIZE) tiles.push(dest);
-        }
-
-        return { tiles, targets };
     };
 
     // --- GAME LOGIC ---
@@ -1773,72 +1658,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const cellVfx = vfxList.filter(v => v.pos === idx);
         const groundItem = gameState.fieldItems.find(i => i.pos === idx);
         
-        // --- RANGE PREVIEW LOGIC ---
-        let isHighlighted = false;
-        let isTargeted = false;
-
-        if (hoveredCard) {
-            // Re-calculate the range just like in executeQueue but purely for visual
-            let ranges = hoveredCard.range;
-            if (hoveredCard.type === 'MOVE') {
-                // Show full potential move range
-                const path = [];
-                for(let i=1; i<=Math.max(...ranges); i++) path.push(i);
-                ranges = path;
-            } else if (hoveredCard.effectType === 'DASH_ATTACK' || hoveredCard.effectType === 'PIERCE_DASH') {
-                // Dash highlights path
-                const path = [];
-                for(let i=1; i<=Math.max(...ranges); i++) path.push(i);
-                ranges = path;
-            }
-            
-            // Find if this idx matches any range point relative to player
-            const isValidTile = ranges.some(r => (p.pos + (r * p.facing)) === idx);
-            
-            if (isValidTile) {
-                isHighlighted = true;
-                
-                // Determine if it is a valid target based on card logic (Normal vs Pierce)
-                if (hoveredCard.type === 'ATTACK') {
-                    if (e) {
-                         if (hoveredCard.effectType === 'PIERCE' || hoveredCard.effectType === 'FURTHEST' || hoveredCard.effectType === 'PIERCE_DASH') {
-                             // Sliding/Pierce highlights all enemies in path generally (simplified visual)
-                             isTargeted = true;
-                         } else if (hoveredCard.effectType === 'DASH_ATTACK') {
-                             // Tackle targets ONLY first enemy
-                             const sortedRanges = [...ranges].sort((a,b) => Math.abs(a) - Math.abs(b));
-                             for (const r of sortedRanges) {
-                                 const tPos = p.pos + (r * p.facing);
-                                 if (tPos >= 0 && tPos < GRID_SIZE) {
-                                     const hitEnemy = gameState.enemies.find(en => en.pos === tPos && en.hp > 0);
-                                     if (hitEnemy) {
-                                         if (hitEnemy.id === e.id) isTargeted = true;
-                                         break; // Stop at first
-                                     }
-                                 }
-                             }
-                         } else {
-                             // Normal: Hits first enemy.
-                             const sortedRanges = [...ranges].sort((a,b) => Math.abs(a) - Math.abs(b));
-                             for (const r of sortedRanges) {
-                                 const tPos = p.pos + (r * p.facing);
-                                 if (tPos >= 0 && tPos < GRID_SIZE) {
-                                     const hitEnemy = gameState.enemies.find(en => en.pos === tPos && en.hp > 0);
-                                     if (hitEnemy) {
-                                         if (hitEnemy.id === e.id) isTargeted = true;
-                                         break; // Stop at first
-                                     }
-                                 }
-                             }
-                         }
-                    }
-                }
-            }
-        }
-        // ---------------------------
-        
         return (
-            <div className={`relative w-full h-full flex items-end justify-center transition-colors duration-200 ${isTargeted ? 'bg-red-900/60' : (isHighlighted ? (hoveredCard?.type === 'MOVE' ? 'bg-blue-900/40' : 'bg-red-900/30') : '')}`}>
+            <div className="relative w-full h-full flex items-end justify-center transition-colors duration-200">
                 {/* VFX */}
                 {cellVfx.map(v => (
                     <div key={v.id} className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
@@ -1867,13 +1688,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     </div>
                 )}
                 
-                {/* Target Indicator */}
-                {isTargeted && (
-                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 text-red-500 animate-ping">
-                         <Target size={32} />
-                     </div>
-                )}
-
                 {p.pos === idx && (
                     <div className="relative w-full h-full flex items-end justify-center z-20">
                         <div className={`transition-transform duration-200 ${p.facing === -1 ? 'scale-x-[-1]' : ''}`}>
@@ -2300,9 +2114,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     key={card.id} 
                                     className={`w-20 h-28 md:w-full md:h-auto bg-slate-800 border-2 rounded-lg flex flex-col md:flex-row justify-between p-1 md:p-2 cursor-pointer transition-transform relative shadow-lg shrink-0 md:shrink ${card.usedSlots > 0 ? 'border-yellow-400' : 'border-slate-600'} ${card.currentCooldown > 0 ? 'opacity-50 grayscale' : 'hover:-translate-y-2 md:hover:translate-y-0 md:hover:translate-x-2'}`} 
                                     onClick={() => handleQueueCard(card, i)}
-                                    onMouseEnter={() => setHoveredCard(card)}
-                                    onMouseLeave={() => setHoveredCard(null)}
-                                    onTouchStart={() => setHoveredCard(card)}
                                 >
                                     <div className={`absolute top-0 left-0 w-full h-1 md:w-1 md:h-full ${card.color} rounded-t-sm md:rounded-l-sm`}></div>
                                     
