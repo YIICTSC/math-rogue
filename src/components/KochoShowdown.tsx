@@ -1008,6 +1008,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         });
     };
 
+    // --- MAIN RENDER ---
     return (
         <div className="flex flex-col h-full w-full bg-[#1a1a2e] text-white font-mono relative overflow-hidden">
             {/* Header */}
@@ -1021,201 +1022,218 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 </div>
             </div>
 
-            {/* Game Area (Grid) */}
-            <div className="flex-grow flex flex-col items-center justify-center p-4 relative overflow-y-auto custom-scrollbar">
+            {/* Main Content Area (Split Layout for PC Landscape) */}
+            <div className="flex-grow flex flex-col md:flex-row overflow-hidden relative">
                 
-                {/* Reward Phase UI */}
-                {gameState.phase === 'REWARD' && (
-                    <div className="absolute inset-0 bg-black/90 z-40 flex flex-col items-center justify-center p-8">
-                        <h2 className="text-3xl font-bold text-yellow-400 mb-8 flex items-center"><Gift className="mr-2"/> Card Reward</h2>
-                        <div className="flex gap-8 justify-center flex-wrap">
-                            {rewardCards.map((card, i) => (
-                                <div key={i} className="w-40 bg-slate-800 border-4 border-yellow-500 rounded-xl p-4 flex flex-col items-center hover:scale-105 transition-transform cursor-pointer" onClick={() => selectReward(card)}>
-                                    <div className="text-4xl mb-4 text-indigo-400">{card.icon}</div>
-                                    <div className="font-bold text-white mb-2 text-center">{card.name}</div>
-                                    <div className="text-xs text-gray-400 text-center">{card.description}</div>
-                                    <button className="mt-4 bg-yellow-600 text-black font-bold px-4 py-1 rounded-full">Select</button>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* Shop Phase UI */}
-                {gameState.phase === 'SHOP' && (
-                    <div className="absolute inset-0 bg-black/95 z-40 flex flex-col p-4 md:p-8 overflow-y-auto">
-                        <h2 className="text-3xl font-bold text-indigo-400 mb-6 flex items-center shrink-0"><ShoppingBag className="mr-2"/> Shop & Upgrade</h2>
-                        <div className="flex flex-col md:flex-row gap-8 flex-grow">
-                            {/* Upgrade Section */}
-                            <div className="flex-1 bg-slate-900 border border-slate-600 rounded-lg p-4 overflow-y-auto custom-scrollbar">
-                                <h3 className="text-xl font-bold text-white mb-4 flex items-center"><Hammer className="mr-2 text-red-400"/> Upgrade Deck (20G)</h3>
-                                <div className="grid grid-cols-2 gap-4">
-                                    {gameState.hand.map((card, i) => (
-                                        <div key={i} className="bg-slate-800 p-3 rounded border border-slate-600 relative">
-                                            <div className="font-bold text-sm text-white">{card.name} {card.upgraded && <span className="text-yellow-400 text-xs">+1</span>}</div>
-                                            <div className="text-xs text-gray-400">{card.description}</div>
-                                            {card.damage > 0 && <div className="text-xs text-red-400">DMG: {card.damage}</div>}
-                                            {card.shield && <div className="text-xs text-blue-400">SHIELD: {card.shield}</div>}
-                                            <button onClick={() => buyUpgrade(i)} className="absolute top-2 right-2 bg-green-700 text-white text-xs px-2 py-1 rounded hover:bg-green-600">UP</button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            
-                            {/* Items Section */}
-                            <div className="w-full md:w-80 bg-slate-900 border border-slate-600 rounded-lg p-4 shrink-0">
-                                <h3 className="text-xl font-bold text-white mb-4 flex items-center"><Gift className="mr-2 text-yellow-400"/> Relics</h3>
-                                <div className="space-y-4">
-                                    {SHOP_RELICS.map(item => {
-                                        const owned = gameState.relics.some(r => r.id === item.id) && item.id !== 'R_POTION';
-                                        return (
-                                            <div key={item.id} className={`bg-slate-800 p-3 rounded border flex justify-between items-center ${owned ? 'opacity-50 border-gray-700' : 'border-slate-500'}`}>
-                                                <div>
-                                                    <div className="font-bold text-sm text-yellow-200">{item.name}</div>
-                                                    <div className="text-xs text-gray-400">{item.desc}</div>
-                                                </div>
-                                                <button disabled={owned} onClick={() => buyShopItem(item)} className={`px-3 py-1 rounded text-sm font-bold ${owned ? 'bg-gray-600 text-gray-400' : 'bg-yellow-600 text-black hover:bg-yellow-500'}`}>{owned ? 'Sold' : `${item.price}G`}</button>
+                {/* LEFT COLUMN: Game Field (Full width on Mobile, Flex-1 on PC) */}
+                <div className="flex-1 relative bg-[#1a1a2e] flex flex-col items-center justify-center p-4 overflow-hidden">
+                    {/* Status Overlay */}
+                    {(gameState.status === 'VICTORY' || gameState.status === 'GAME_OVER' || gameState.phase === 'REWARD' || gameState.phase === 'SHOP') && (
+                        <div className="absolute inset-0 bg-black/90 z-40 flex flex-col items-center justify-center p-4">
+                            {/* REWARD UI */}
+                            {gameState.phase === 'REWARD' && (
+                                <div className="text-center w-full">
+                                    <h2 className="text-3xl font-bold text-yellow-400 mb-8 flex items-center justify-center"><Gift className="mr-2"/> Card Reward</h2>
+                                    <div className="flex gap-4 md:gap-8 justify-center flex-wrap">
+                                        {rewardCards.map((card, i) => (
+                                            <div key={i} className="w-32 md:w-40 bg-slate-800 border-4 border-yellow-500 rounded-xl p-4 flex flex-col items-center hover:scale-105 transition-transform cursor-pointer" onClick={() => selectReward(card)}>
+                                                <div className="text-4xl mb-4 text-indigo-400">{card.icon}</div>
+                                                <div className="font-bold text-white mb-2 text-center text-sm md:text-base">{card.name}</div>
+                                                <div className="text-xs text-gray-400 text-center">{card.description}</div>
+                                                <button className="mt-4 bg-yellow-600 text-black font-bold px-4 py-1 rounded-full text-xs">Select</button>
                                             </div>
-                                        );
-                                    })}
-                                </div>
-                                <button onClick={goToBoss} className="mt-8 w-full bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-lg text-xl flex items-center justify-center animate-pulse border-2 border-red-400">
-                                    <Skull className="mr-2"/> CHALLENGE BOSS
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Standard Gameplay View */}
-                {(gameState.phase === 'BATTLE_1' || gameState.phase === 'BATTLE_2' || gameState.phase === 'BOSS') && (
-                    <>
-                        <div className="absolute top-4 left-1/2 -translate-x-1/2 w-full max-w-lg text-center pointer-events-none z-10">
-                            {gameState.logs.map((log, i) => (
-                                <div key={i} className={`text-sm ${i===0 ? 'text-white font-bold text-shadow-md' : 'text-gray-500'} transition-opacity duration-500`}>{log}</div>
-                            ))}
-                        </div>
-
-                        <div className="grid grid-cols-7 gap-1 md:gap-2 w-full max-w-full md:max-w-7xl px-2 mb-4 shrink-0">
-                            {[...Array(GRID_SIZE)].map((_, i) => (
-                                <div key={i} className={`aspect-[1/2] md:aspect-[3/4] border-2 ${isDangerZone(i) ? 'border-red-500 bg-red-900/20' : 'border-indigo-800 bg-black/30'} rounded-lg flex items-end justify-center relative`}>
-                                    {getGridContent(i)}
-                                    <div className="absolute bottom-1 right-1 text-[8px] md:text-[10px] text-gray-700">{i}</div>
-                                </div>
-                            ))}
-                        </div>
-                    </>
-                )}
-
-                {/* Status Overlay */}
-                {gameState.status === 'VICTORY' && (
-                    <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-50 animate-in zoom-in">
-                        <Trophy size={64} className="text-yellow-400 mb-4 animate-bounce"/>
-                        <h2 className="text-4xl font-bold text-white mb-4">GRADUATION!</h2>
-                        <p className="text-gray-300 mb-8">You defeated the Principal.</p>
-                        <button onClick={onBack} className="bg-indigo-600 px-8 py-3 rounded text-xl font-bold hover:bg-indigo-500">Return</button>
-                    </div>
-                )}
-                {gameState.status === 'GAME_OVER' && (
-                    <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-50 animate-in zoom-in">
-                        <Skull size={64} className="text-red-500 mb-4"/>
-                        <h2 className="text-4xl font-bold text-red-500 mb-4">EXPELLED</h2>
-                        <button onClick={() => startWave(1, 'BATTLE_1')} className="bg-white text-black px-8 py-3 rounded text-xl font-bold hover:bg-gray-200">Retry</button>
-                    </div>
-                )}
-
-            </div>
-
-            {/* Controls Area (Bottom) - Only show during Gameplay */}
-            {gameState.status !== 'GAME_OVER' && gameState.status !== 'VICTORY' && gameState.phase !== 'SHOP' && gameState.phase !== 'REWARD' && (
-                <div className="bg-[#0f0f1b] border-t-4 border-indigo-900 p-2 md:p-4 shrink-0 flex flex-col gap-2">
-                    
-                    {/* 1. Queue Display */}
-                    <div className="flex justify-between items-center gap-2 bg-black/30 p-2 rounded-lg border border-indigo-900/30">
-                        <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest writing-mode-vertical rotate-180 hidden md:block">QUEUE</div>
-                        <div className="flex gap-1 md:gap-2 justify-start items-center flex-grow overflow-x-auto">
-                            {[...Array(3)].map((_, i) => {
-                                const card = gameState.queue[i];
-                                return card ? (
-                                    <div key={i} className="w-12 h-16 md:w-16 md:h-20 bg-slate-800 border border-slate-600 rounded flex flex-col items-center justify-center relative group cursor-pointer hover:border-red-400 shrink-0" onClick={() => handleUnqueueCard(i)}>
-                                        <div className={`w-full h-1 ${card.color} absolute top-0`}></div>
-                                        <div className="text-[9px] md:text-xs text-center font-bold px-1 overflow-hidden whitespace-nowrap text-ellipsis w-full">{card.name}</div>
-                                        <div className="text-gray-400 scale-75">{card.icon}</div>
-                                        <X size={12} className="absolute -top-1 -right-1 bg-red-500 rounded-full text-white opacity-0 group-hover:opacity-100"/>
+                                        ))}
                                     </div>
-                                ) : (
-                                    <div key={`empty-${i}`} className="w-12 h-16 md:w-16 md:h-20 border border-dashed border-gray-700 rounded flex items-center justify-center text-gray-700 text-[9px] shrink-0">Empty</div>
-                                );
-                            })}
-                        </div>
-                        <button 
-                            onClick={executeQueue} 
-                            disabled={gameState.queue.length === 0 || animating}
-                            className={`w-16 h-16 md:w-20 md:h-20 rounded-full border-4 flex flex-col items-center justify-center font-bold shadow-lg transition-all shrink-0 ${gameState.queue.length > 0 ? 'bg-indigo-600 border-indigo-400 text-white hover:scale-105 active:scale-95 cursor-pointer animate-pulse' : 'bg-gray-800 border-gray-600 text-gray-500 cursor-not-allowed'}`}
-                        >
-                            <Play size={20} className="fill-current mb-1"/> EXEC
-                        </button>
-                    </div>
-
-                    {/* 2. Hand Cards (Scrollable) */}
-                    <div className="flex gap-2 overflow-x-auto pb-2 px-1 custom-scrollbar min-h-[100px] items-center">
-                        {gameState.hand.map((card, i) => (
-                            <div 
-                                key={card.id} 
-                                className={`w-20 h-28 md:w-24 md:h-32 bg-slate-800 border-2 rounded-lg flex flex-col justify-between p-1 md:p-2 cursor-pointer transition-transform relative shadow-lg shrink-0 ${card.upgraded ? 'border-yellow-400' : 'border-slate-600'} ${card.currentCooldown > 0 ? 'opacity-50 grayscale' : 'hover:-translate-y-2'}`}
-                                onClick={() => handleQueueCard(card, i)}
-                            >
-                                <div className={`absolute top-0 left-0 w-full h-1 ${card.color} rounded-t-sm`}></div>
-                                <div className="mt-1 text-[9px] md:text-xs font-bold text-center leading-tight truncate">{card.name}</div>
-                                <div className="flex justify-center my-0.5 text-indigo-300 scale-75 md:scale-100">{card.icon}</div>
-                                <div className="text-[8px] md:text-[9px] text-gray-400 text-center leading-tight h-6 overflow-hidden">{card.description}</div>
-                                <div className="flex justify-between items-center text-[8px] md:text-[10px] text-gray-500 mt-auto font-mono w-full">
-                                    <span>CD:{card.cooldown}</span>
-                                    {card.damage > 0 ? (
-                                        <span className="text-red-400 font-bold flex items-center">
-                                            <Swords size={10} className="mr-0.5"/>{card.damage}
-                                        </span>
-                                    ) : (
-                                        <span className="opacity-70">{card.type}</span>
-                                    )}
                                 </div>
-                                
-                                {card.currentCooldown > 0 && (
-                                    <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center rounded-lg z-10">
-                                        <Clock size={20} className="text-gray-400 mb-1"/>
-                                        <span className="text-xl font-bold text-white">{card.currentCooldown}</span>
+                            )}
+
+                            {/* SHOP UI */}
+                            {gameState.phase === 'SHOP' && (
+                                <div className="w-full h-full flex flex-col p-4 md:p-8 overflow-y-auto">
+                                    <h2 className="text-3xl font-bold text-indigo-400 mb-6 flex items-center shrink-0"><ShoppingBag className="mr-2"/> Shop & Upgrade</h2>
+                                    <div className="flex flex-col md:flex-row gap-8 flex-grow">
+                                        <div className="flex-1 bg-slate-900 border border-slate-600 rounded-lg p-4 overflow-y-auto custom-scrollbar">
+                                            <h3 className="text-xl font-bold text-white mb-4 flex items-center"><Hammer className="mr-2 text-red-400"/> Upgrade Deck (20G)</h3>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                {gameState.hand.map((card, i) => (
+                                                    <div key={i} className="bg-slate-800 p-3 rounded border border-slate-600 relative">
+                                                        <div className="font-bold text-sm text-white">{card.name} {card.upgraded && <span className="text-yellow-400 text-xs">+1</span>}</div>
+                                                        <div className="text-xs text-gray-400">{card.description}</div>
+                                                        {card.damage > 0 && <div className="text-xs text-red-400">DMG: {card.damage}</div>}
+                                                        {card.shield && <div className="text-xs text-blue-400">SHIELD: {card.shield}</div>}
+                                                        <button onClick={() => buyUpgrade(i)} className="absolute top-2 right-2 bg-green-700 text-white text-xs px-2 py-1 rounded hover:bg-green-600">UP</button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="w-full md:w-80 bg-slate-900 border border-slate-600 rounded-lg p-4 shrink-0">
+                                            <h3 className="text-xl font-bold text-white mb-4 flex items-center"><Gift className="mr-2 text-yellow-400"/> Relics</h3>
+                                            <div className="space-y-4">
+                                                {SHOP_RELICS.map(item => {
+                                                    const owned = gameState.relics.some(r => r.id === item.id) && item.id !== 'R_POTION';
+                                                    return (
+                                                        <div key={item.id} className={`bg-slate-800 p-3 rounded border flex justify-between items-center ${owned ? 'opacity-50 border-gray-700' : 'border-slate-500'}`}>
+                                                            <div>
+                                                                <div className="font-bold text-sm text-yellow-200">{item.name}</div>
+                                                                <div className="text-xs text-gray-400">{item.desc}</div>
+                                                            </div>
+                                                            <button disabled={owned} onClick={() => buyShopItem(item)} className={`px-3 py-1 rounded text-sm font-bold ${owned ? 'bg-gray-600 text-gray-400' : 'bg-yellow-600 text-black hover:bg-yellow-500'}`}>{owned ? 'Sold' : `${item.price}G`}</button>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                            <button onClick={goToBoss} className="mt-8 w-full bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-lg text-xl flex items-center justify-center animate-pulse border-2 border-red-400">
+                                                <Skull className="mr-2"/> CHALLENGE BOSS
+                                            </button>
+                                        </div>
                                     </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
+                                </div>
+                            )}
 
-                    {/* 3. Movement Controls */}
-                    <div className="flex justify-center items-center gap-4 py-2 border-t border-indigo-900/30 relative">
-                        <button onClick={() => handleMove(-1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors shadow-lg"><ChevronLeft size={24}/></button>
-                        
-                        <div className="flex flex-col items-center gap-1">
-                            <div className="flex gap-1">
-                                <button onClick={handleTurn} className="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-lg border border-slate-500 text-sm font-bold flex items-center justify-center active:bg-slate-800 transition-colors w-16">TURN</button>
-                                <button 
-                                    onClick={handleSwapPosition}
-                                    className={`px-2 py-2 rounded-lg border flex items-center justify-center transition-colors w-12 ${gameState.specialActionCooldown > 0 ? 'bg-gray-800 border-gray-600 text-gray-500' : 'bg-cyan-700 border-cyan-400 text-cyan-100 hover:bg-cyan-600 active:scale-95'}`}
-                                    title="位置交換 (CD: 3)"
-                                >
-                                    {gameState.specialActionCooldown > 0 ? (
-                                        <span className="text-xs font-bold">{gameState.specialActionCooldown}</span>
-                                    ) : (
-                                        <RefreshCw size={16} />
-                                    )}
-                                </button>
-                            </div>
-                            <button onClick={handleWait} className="bg-gray-800 hover:bg-gray-700 px-6 py-2 rounded-lg border border-gray-600 text-xs flex items-center justify-center active:bg-gray-900 transition-colors w-28 text-gray-400"><Clock size={12} className="mr-1"/> WAIT</button>
+                            {/* VICTORY UI */}
+                            {gameState.status === 'VICTORY' && (
+                                <div className="text-center animate-in zoom-in">
+                                    <Trophy size={64} className="text-yellow-400 mb-4 animate-bounce mx-auto"/>
+                                    <h2 className="text-4xl font-bold text-white mb-4">GRADUATION!</h2>
+                                    <p className="text-gray-300 mb-8">You defeated the Principal.</p>
+                                    <button onClick={onBack} className="bg-indigo-600 px-8 py-3 rounded text-xl font-bold hover:bg-indigo-500">Return</button>
+                                </div>
+                            )}
+
+                            {/* GAME OVER UI */}
+                            {gameState.status === 'GAME_OVER' && (
+                                <div className="text-center animate-in zoom-in">
+                                    <Skull size={64} className="text-red-500 mb-4 mx-auto"/>
+                                    <h2 className="text-4xl font-bold text-red-500 mb-4">EXPELLED</h2>
+                                    <button onClick={() => startWave(1, 'BATTLE_1')} className="bg-white text-black px-8 py-3 rounded text-xl font-bold hover:bg-gray-200">Retry</button>
+                                </div>
+                            )}
                         </div>
+                    )}
 
-                        <button onClick={() => handleMove(1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors shadow-lg"><ChevronRight size={24}/></button>
-                    </div>
+                    {/* Standard Gameplay View (Grid & Logs) */}
+                    {(gameState.phase === 'BATTLE_1' || gameState.phase === 'BATTLE_2' || gameState.phase === 'BOSS') && (
+                        <>
+                            <div className="absolute top-4 left-1/2 -translate-x-1/2 w-full max-w-lg text-center pointer-events-none z-10">
+                                {gameState.logs.map((log, i) => (
+                                    <div key={i} className={`text-sm ${i===0 ? 'text-white font-bold text-shadow-md' : 'text-gray-500'} transition-opacity duration-500`}>{log}</div>
+                                ))}
+                            </div>
+
+                            <div className="grid grid-cols-7 gap-1 md:gap-2 w-full max-w-full md:max-w-5xl px-2 mb-4 shrink-0 max-h-full aspect-[7/2] md:aspect-auto">
+                                {[...Array(GRID_SIZE)].map((_, i) => (
+                                    <div key={i} className={`aspect-[1/2] md:aspect-[3/4] border-2 ${isDangerZone(i) ? 'border-red-500 bg-red-900/20' : 'border-indigo-800 bg-black/30'} rounded-lg flex items-end justify-center relative`}>
+                                        {getGridContent(i)}
+                                        <div className="absolute bottom-1 right-1 text-[8px] md:text-[10px] text-gray-700">{i}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
                 </div>
-            )}
+
+                {/* RIGHT COLUMN: Controls (Sidebar on PC) */}
+                {gameState.status !== 'GAME_OVER' && gameState.status !== 'VICTORY' && gameState.phase !== 'SHOP' && gameState.phase !== 'REWARD' && (
+                    <div className="w-full md:w-80 bg-[#0f0f1b] border-t md:border-t-0 md:border-l border-indigo-900 p-2 md:p-4 shrink-0 flex flex-col gap-2 md:h-full md:overflow-y-auto custom-scrollbar">
+                        
+                        {/* 1. Queue Display */}
+                        <div className="flex justify-between items-center gap-2 bg-black/30 p-2 rounded-lg border border-indigo-900/30 shrink-0">
+                            <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest writing-mode-vertical rotate-180 hidden md:block">QUEUE</div>
+                            <div className="flex gap-1 md:gap-2 justify-start items-center flex-grow overflow-x-auto custom-scrollbar">
+                                {[...Array(3)].map((_, i) => {
+                                    const card = gameState.queue[i];
+                                    return card ? (
+                                        <div key={i} className="w-12 h-16 md:w-16 md:h-20 bg-slate-800 border border-slate-600 rounded flex flex-col items-center justify-center relative group cursor-pointer hover:border-red-400 shrink-0" onClick={() => handleUnqueueCard(i)}>
+                                            <div className={`w-full h-1 ${card.color} absolute top-0`}></div>
+                                            <div className="text-[9px] md:text-xs text-center font-bold px-1 overflow-hidden whitespace-nowrap text-ellipsis w-full">{card.name}</div>
+                                            <div className="text-gray-400 scale-75">{card.icon}</div>
+                                            <X size={12} className="absolute -top-1 -right-1 bg-red-500 rounded-full text-white opacity-0 group-hover:opacity-100"/>
+                                        </div>
+                                    ) : (
+                                        <div key={`empty-${i}`} className="w-12 h-16 md:w-16 md:h-20 border border-dashed border-gray-700 rounded flex items-center justify-center text-gray-700 text-[9px] shrink-0">Empty</div>
+                                    );
+                                })}
+                            </div>
+                            <button 
+                                onClick={executeQueue} 
+                                disabled={gameState.queue.length === 0 || animating}
+                                className={`w-16 h-16 md:w-20 md:h-20 rounded-full border-4 flex flex-col items-center justify-center font-bold shadow-lg transition-all shrink-0 ${gameState.queue.length > 0 ? 'bg-indigo-600 border-indigo-400 text-white hover:scale-105 active:scale-95 cursor-pointer animate-pulse' : 'bg-gray-800 border-gray-600 text-gray-500 cursor-not-allowed'}`}
+                            >
+                                <Play size={20} className="fill-current mb-1"/> EXEC
+                            </button>
+                        </div>
+
+                        {/* 2. Hand Cards (Scrollable) */}
+                        <div className="flex md:flex-col md:flex-nowrap gap-2 overflow-x-auto md:overflow-x-hidden md:overflow-y-auto pb-2 px-1 custom-scrollbar min-h-[100px] md:min-h-0 md:flex-grow items-center md:items-stretch">
+                            {gameState.hand.map((card, i) => (
+                                <div 
+                                    key={card.id} 
+                                    className={`w-20 h-28 md:w-full md:h-auto bg-slate-800 border-2 rounded-lg flex flex-col md:flex-row justify-between p-1 md:p-2 cursor-pointer transition-transform relative shadow-lg shrink-0 md:shrink ${card.upgraded ? 'border-yellow-400' : 'border-slate-600'} ${card.currentCooldown > 0 ? 'opacity-50 grayscale' : 'hover:-translate-y-2 md:hover:translate-y-0 md:hover:translate-x-2'}`}
+                                    onClick={() => handleQueueCard(card, i)}
+                                >
+                                    <div className={`absolute top-0 left-0 w-full h-1 md:w-1 md:h-full ${card.color} rounded-t-sm md:rounded-l-sm`}></div>
+                                    
+                                    {/* Mobile Card Layout */}
+                                    <div className="flex flex-col h-full w-full md:hidden">
+                                        <div className="mt-1 text-[9px] font-bold text-center leading-tight truncate">{card.name}</div>
+                                        <div className="flex justify-center my-0.5 text-indigo-300 scale-75">{card.icon}</div>
+                                        <div className="text-[8px] text-gray-400 text-center leading-tight h-6 overflow-hidden">{card.description}</div>
+                                        <div className="flex justify-between items-center text-[8px] text-gray-500 mt-auto font-mono w-full">
+                                            <span>CD:{card.cooldown}</span>
+                                            {card.damage > 0 ? <span className="text-red-400 font-bold">{card.damage}</span> : <span className="opacity-70">{card.type}</span>}
+                                        </div>
+                                    </div>
+
+                                    {/* Desktop Card Layout (Row) */}
+                                    <div className="hidden md:flex flex-row items-center w-full pl-2 gap-2">
+                                        <div className="text-indigo-300">{card.icon}</div>
+                                        <div className="flex-grow min-w-0">
+                                            <div className="text-xs font-bold truncate">{card.name}</div>
+                                            <div className="text-[10px] text-gray-400 truncate">{card.description}</div>
+                                        </div>
+                                        <div className="flex flex-col items-end text-[10px] font-mono shrink-0">
+                                            <span className="text-gray-500">CD:{card.cooldown}</span>
+                                            {card.damage > 0 && <span className="text-red-400 font-bold flex items-center"><Swords size={10} className="mr-0.5"/>{card.damage}</span>}
+                                        </div>
+                                    </div>
+                                    
+                                    {card.currentCooldown > 0 && (
+                                        <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center rounded-lg z-10">
+                                            <Clock size={20} className="text-gray-400 mb-1"/>
+                                            <span className="text-xl font-bold text-white">{card.currentCooldown}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* 3. Movement Controls */}
+                        <div className="flex justify-center items-center gap-4 py-2 border-t border-indigo-900/30 relative shrink-0">
+                            <button onClick={() => handleMove(-1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors shadow-lg"><ChevronLeft size={24}/></button>
+                            
+                            <div className="flex flex-col items-center gap-1">
+                                <div className="flex gap-1">
+                                    <button onClick={handleTurn} className="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-lg border border-slate-500 text-sm font-bold flex items-center justify-center active:bg-slate-800 transition-colors w-16">TURN</button>
+                                    <button 
+                                        onClick={handleSwapPosition}
+                                        className={`px-2 py-2 rounded-lg border flex items-center justify-center transition-colors w-12 ${gameState.specialActionCooldown > 0 ? 'bg-gray-800 border-gray-600 text-gray-500' : 'bg-cyan-700 border-cyan-400 text-cyan-100 hover:bg-cyan-600 active:scale-95'}`}
+                                        title="位置交換 (CD: 3)"
+                                    >
+                                        {gameState.specialActionCooldown > 0 ? (
+                                            <span className="text-xs font-bold">{gameState.specialActionCooldown}</span>
+                                        ) : (
+                                            <RefreshCw size={16} />
+                                        )}
+                                    </button>
+                                </div>
+                                <button onClick={handleWait} className="bg-gray-800 hover:bg-gray-700 px-6 py-2 rounded-lg border border-gray-600 text-xs flex items-center justify-center active:bg-gray-900 transition-colors w-28 text-gray-400"><Clock size={12} className="mr-1"/> WAIT</button>
+                            </div>
+
+                            <button onClick={() => handleMove(1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors shadow-lg"><ChevronRight size={24}/></button>
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
