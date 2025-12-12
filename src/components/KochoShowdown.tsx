@@ -1138,8 +1138,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         
                         {/* 1. Queue Display */}
                         <div className="flex justify-between items-center gap-2 bg-black/30 p-2 rounded-lg border border-indigo-900/30 shrink-0">
-                            <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest writing-mode-vertical rotate-180 hidden md:block">QUEUE</div>
-                            <div className="flex gap-1 md:gap-2 justify-start items-center flex-grow overflow-x-auto custom-scrollbar">
+                            <div className="flex gap-1 justify-center items-center flex-grow">
                                 {[...Array(3)].map((_, i) => {
                                     const card = gameState.queue[i];
                                     return card ? (
