@@ -174,7 +174,7 @@ const SHOP_RELICS: KRelic[] = [
     { id: 'R_POTION', name: '回復セット', desc: 'HPを全回復', price: 20 },
     { id: 'R_FANG', name: '吸血の牙', desc: '敵を倒すとHP1回復', price: 50 },
     { id: 'R_THORN', name: 'トゲトゲ肩パッド', desc: '被ダメ時、敵に1ダメージ', price: 45 },
-    { id: 'R_DISCOUNT', name: 'クーポン券', desc: 'ショップの商品が安くなる(気分)', price: 30 },
+    { id: 'R_DISCOUNT', name: 'クーポン券', desc: 'ショップの商品が30%OFF', price: 30 },
     { id: 'R_RECYCLE', name: 'リサイクル箱', desc: 'アイテム使用時20%で消費しない', price: 50 },
 ];
 
@@ -374,6 +374,13 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     const getRandomOffer = () => UPGRADE_POOLS[Math.floor(Math.random() * UPGRADE_POOLS.length)];
 
+    const getShopPrice = (price: number) => {
+        if (gameState.relics.some(r => r.id === 'R_DISCOUNT')) {
+            return Math.floor(price * 0.7);
+        }
+        return price;
+    };
+
     // Initialize upgrade offer on phase change
     useEffect(() => {
         if ((gameState.phase === 'SHOP' || gameState.phase === 'UPGRADE_EVENT') && !gameState.currentUpgradeOffer) {
@@ -557,7 +564,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             barrier: 0,
             strength: 0,
             bossPhase: bossPhase,
-            specialCD: 3, // Initial special CD for bosses
+            specialCD: template.special ? 5 : undefined, // Initialize Boss Special CD to 5 (Delay initial special)
             intent: {
                 type: 'WAIT',
                 timer: Math.floor(Math.random() * 2) + 1, // Staggered start
@@ -749,7 +756,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         nextState.money = Math.max(0, nextState.money - 10);
                         generatedVfx.push({ id: `v_spec_${Date.now()}`, type: 'TEXT', pos: player.pos, text: '-10G', color: 'text-yellow-500' });
                     }
-
+                    
+                    e.specialCD = 6; // Reset Special CD to 6 (forcing normal attacks)
                     e.intent = { type: 'WAIT', timer: 2 };
 
                 } else if (e.intent.type === 'SUMMON') {
@@ -795,7 +803,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     let isSpecial = false;
                     if (template.special && e.specialCD !== undefined && e.specialCD <= 0) {
                         e.intent = { type: 'SPECIAL', timer: 1, specialName: template.special };
-                        e.specialCD = 3; // Reset CD
                         isSpecial = true;
                     }
 
@@ -1632,11 +1639,12 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     const buyShopItem = (item: KRelic) => {
-        if (gameState.money >= item.price) {
+        const finalPrice = getShopPrice(item.price);
+        if (gameState.money >= finalPrice) {
             if (item.id === 'R_POTION') {
                 setGameState(prev => ({
                     ...prev,
-                    money: prev.money - item.price,
+                    money: prev.money - finalPrice,
                     player: { ...prev.player, hp: Math.min(prev.player.maxHp, prev.player.hp + 10) }
                 }));
                 audioService.playSound('buff');
@@ -1645,7 +1653,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 if (gameState.relics.some(r => r.id === item.id)) return;
                 setGameState(prev => ({
                     ...prev,
-                    money: prev.money - item.price,
+                    money: prev.money - finalPrice,
                     relics: [...prev.relics, item]
                 }));
                 audioService.playSound('select');
@@ -2071,10 +2079,11 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                             <div className="space-y-4">
                                                 {gameState.shopInventory.map(item => {
                                                     const owned = gameState.relics.some(r => r.id === item.id) && item.id !== 'R_POTION';
+                                                    const finalPrice = getShopPrice(item.price);
                                                     return (
                                                         <div key={item.id} className={`bg-slate-800 p-3 rounded border flex justify-between items-center ${owned ? 'opacity-50 border-gray-700' : 'border-slate-500'}`}>
                                                             <div><div className="font-bold text-sm text-yellow-200">{item.name}</div><div className="text-xs text-gray-400">{item.desc}</div></div>
-                                                            <button disabled={owned} onClick={() => buyShopItem(item)} className={`px-3 py-1 rounded text-sm font-bold ${owned ? 'bg-gray-600 text-gray-400' : 'bg-yellow-600 text-black hover:bg-yellow-500'}`}>{owned ? 'Sold' : `${item.price}G`}</button>
+                                                            <button disabled={owned} onClick={() => buyShopItem(item)} className={`px-3 py-1 rounded text-sm font-bold ${owned ? 'bg-gray-600 text-gray-400' : 'bg-yellow-600 text-black hover:bg-yellow-500'}`}>{owned ? 'Sold' : `${finalPrice}G`}</button>
                                                         </div>
                                                     );
                                                 })}
