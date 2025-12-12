@@ -377,6 +377,26 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }
     }, [gameState.phase]);
 
+    const spawnConsumable = (pos: number) => {
+        // 15% chance or if Recycle relic procs
+        let dropChance = 0.15;
+        if (stateRef.current.relics.some(r => r.id === 'R_FANG')) dropChance = 0; // Fang consumes chance? No, Fang heals.
+        
+        if (Math.random() > dropChance) return;
+        
+        const template = CONSUMABLE_DB[Math.floor(Math.random() * CONSUMABLE_DB.length)];
+        const newItem: KFieldItem = {
+            id: `drop_${Date.now()}`,
+            pos,
+            data: template
+        };
+        
+        setGameState(prev => ({
+            ...prev,
+            fieldItems: [...prev.fieldItems, newItem]
+        }));
+    };
+
     const startWave = (stage: number, sequence: number, wave: number) => {
         let newEnemies: KEntity[] = [];
         let logMsg = "";
@@ -480,7 +500,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             logs: [logMsg],
             specialActionCooldown: 0,
             shopUpgradeUsed: false,
-            fieldItems: [] // Clear previous drops on new wave? Actually maybe keep them? Let's clear to be safe/clean
+            fieldItems: prev.fieldItems
         }));
 
         audioService.playBGM(bgm);
@@ -626,26 +646,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     // --- GAME LOGIC ---
-
-    const spawnConsumable = (pos: number) => {
-        // 30% chance or if Recycle relic procs
-        let dropChance = 0.3;
-        if (stateRef.current.relics.some(r => r.id === 'R_FANG')) dropChance = 0; // Fang consumes chance? No, Fang heals.
-        
-        if (Math.random() > dropChance) return;
-        
-        const template = CONSUMABLE_DB[Math.floor(Math.random() * CONSUMABLE_DB.length)];
-        const newItem: KFieldItem = {
-            id: `drop_${Date.now()}`,
-            pos,
-            data: template
-        };
-        
-        setGameState(prev => ({
-            ...prev,
-            fieldItems: [...prev.fieldItems, newItem]
-        }));
-    };
 
     const handlePickup = (pos: number, currentState: KochoGameState): KochoGameState => {
         const itemIdx = currentState.fieldItems.findIndex(i => i.pos === pos);
