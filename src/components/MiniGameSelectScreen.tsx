@@ -116,11 +116,11 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
       )}
 
       <div className="z-10 w-full h-full flex flex-col items-center p-4 overflow-y-auto custom-scrollbar">
-        <div className="w-full max-w-5xl flex flex-col items-center min-h-full justify-center py-4">
+        <div className="w-full max-w-5xl flex flex-col items-center min-h-full justify-start md:justify-center py-8 md:py-4">
             <h2 className="text-2xl md:text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 animate-pulse flex items-center shrink-0">
                 <Gamepad2 className="mr-2 md:mr-3 text-yellow-400" size={28} /> ミニゲーム選択
             </h2>
-            <p className="text-xs text-gray-500 mb-6 animate-pulse">※ボタン長押しでセーブデータを削除できます</p>
+            <p className="text-xs text-gray-500 mb-6 animate-pulse text-center">※ボタン長押しでセーブデータを削除できます</p>
             
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 w-full mb-8 shrink-0 px-1 md:px-2">
                 
@@ -212,7 +212,7 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
 
             <button 
                 onClick={onBack} 
-                className="text-gray-400 hover:text-white flex items-center border-b border-transparent hover:border-white transition-colors text-base py-2 mt-auto"
+                className="text-gray-400 hover:text-white flex items-center border-b border-transparent hover:border-white transition-colors text-base py-2 mt-auto shrink-0"
             >
                 <ArrowLeft className="mr-2" size={20} /> タイトルへ戻る
             </button>
