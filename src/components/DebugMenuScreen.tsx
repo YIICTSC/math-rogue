@@ -3,7 +3,7 @@ import React, { useMemo, useState } from 'react';
 import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY } from '../constants';
 import { Card as ICard, Relic, Potion, CardType, TargetType } from '../types';
 import Card from './Card';
-import { ArrowRight, Trash2, Plus, Gem, FlaskConical, Swords, Shield, Zap, Search, Beaker, RotateCcw, X } from 'lucide-react';
+import { ArrowRight, Trash2, Plus, Gem, FlaskConical, Swords, Shield, Zap, Search, Beaker, RotateCcw } from 'lucide-react';
 import { synthesizeCards } from '../utils/cardUtils';
 
 interface DebugMenuScreenProps {
@@ -303,5 +303,9 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
     </div>
   );
 };
+
+const X = ({size}:{size:number}) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+);
 
 export default DebugMenuScreen;
