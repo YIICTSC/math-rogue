@@ -132,16 +132,16 @@ const SHOP_RELICS: KRelic[] = [
 ];
 
 const UPGRADE_POOLS: UpgradeOffer[] = [
-    { type: 'DMG_1', description: 'ダメージ +1', icon: <Swords size={16}/>, color: 'text-red-400' },
-    { type: 'DMG_1_CD_1', description: 'ダメージ +1, クールダウン +1', icon: <Swords size={16}/>, color: 'text-orange-400' },
-    { type: 'DMG_2_CD_3', description: 'ダメージ +2, クールダウン +3', icon: <Hammer size={16}/>, color: 'text-red-500' },
-    { type: 'CD_MINUS_1', description: 'クールダウン -1', icon: <Clock size={16}/>, color: 'text-blue-400' },
-    { type: 'CD_MINUS_2', description: 'クールダウン -2', icon: <Clock size={16}/>, color: 'text-cyan-400' },
-    { type: 'CD_MINUS_4_DMG_MINUS_1', description: 'クールダウン -4, ダメージ -1', icon: <Wind size={16}/>, color: 'text-sky-300' },
-    { type: 'SLOT_1', description: 'アップグレードスロット +1', icon: <Plus size={16}/>, color: 'text-green-400' },
-    { type: 'SLOT_1_CD_MINUS_1', description: 'スロット +1, クールダウン -1', icon: <Plus size={16}/>, color: 'text-emerald-400' },
-    { type: 'SACRIFICE', description: 'カードを犠牲にして40G獲得', icon: <Skull size={16}/>, color: 'text-gray-400' },
-    { type: 'GAMBLE', description: '戦士の賭け（ランダム変化）', icon: <Shuffle size={16}/>, color: 'text-purple-400' },
+    { type: 'DMG_1', description: 'ダメージ +1', icon: <Swords size={32}/>, color: 'text-red-400' },
+    { type: 'DMG_1_CD_1', description: 'ダメージ +1 / CD +1', icon: <Swords size={32}/>, color: 'text-orange-400' },
+    { type: 'DMG_2_CD_3', description: 'ダメージ +2 / CD +3', icon: <Hammer size={32}/>, color: 'text-red-500' },
+    { type: 'CD_MINUS_1', description: 'クールダウン -1', icon: <Clock size={32}/>, color: 'text-blue-400' },
+    { type: 'CD_MINUS_2', description: 'クールダウン -2', icon: <Clock size={32}/>, color: 'text-cyan-400' },
+    { type: 'CD_MINUS_4_DMG_MINUS_1', description: 'CD -4 / ダメージ -1', icon: <Wind size={32}/>, color: 'text-sky-300' },
+    { type: 'SLOT_1', description: 'スロット +1', icon: <Plus size={32}/>, color: 'text-green-400' },
+    { type: 'SLOT_1_CD_MINUS_1', description: 'スロット +1 / CD -1', icon: <Plus size={32}/>, color: 'text-emerald-400' },
+    { type: 'SACRIFICE', description: 'カード売却 (+40G)', icon: <Skull size={32}/>, color: 'text-gray-400' },
+    { type: 'GAMBLE', description: '戦士の賭け（ランダム変化）', icon: <Shuffle size={32}/>, color: 'text-purple-400' },
 ];
 
 const getInitialDeck = (): KCard[] => {
@@ -1035,29 +1035,27 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     // --- UPGRADE SYSTEM LOGIC ---
+    const getRandomOffer = () => UPGRADE_POOLS[Math.floor(Math.random() * UPGRADE_POOLS.length)];
+
     const selectCardForUpgrade = (index: number) => {
         if (gameState.shopUpgradeUsed) {
             addLog("強化は1回までです。");
             audioService.playSound('wrong');
             return;
         }
-        generateUpgradeOffer();
-        setUpgradeSelection({ active: true, cardIndex: index, rerollCount: 0, currentOffer: null });
+        const offer = getRandomOffer();
+        setUpgradeSelection({ active: true, cardIndex: index, rerollCount: 0, currentOffer: offer });
         audioService.playSound('select');
-    };
-
-    const generateUpgradeOffer = () => {
-        const offer = UPGRADE_POOLS[Math.floor(Math.random() * UPGRADE_POOLS.length)];
-        setUpgradeSelection(prev => ({ ...prev, currentOffer: offer }));
     };
 
     const rerollUpgrade = () => {
         if (gameState.money < 10) { audioService.playSound('wrong'); return; }
         if (upgradeSelection.rerollCount >= 3) { audioService.playSound('wrong'); return; }
 
+        const offer = getRandomOffer();
+        
         setGameState(prev => ({ ...prev, money: prev.money - 10 }));
-        generateUpgradeOffer();
-        setUpgradeSelection(prev => ({ ...prev, rerollCount: prev.rerollCount + 1 }));
+        setUpgradeSelection(prev => ({ ...prev, rerollCount: prev.rerollCount + 1, currentOffer: offer }));
         audioService.playSound('select');
     };
 
@@ -1181,7 +1179,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         });
     };
 
-    // Helper to render the upgrade modal (used in both SHOP and UPGRADE_EVENT)
+    // Helper to render the upgrade modal
     const renderUpgradeModal = () => {
         if (!upgradeSelection.active || !upgradeSelection.currentOffer) return null;
         return (
