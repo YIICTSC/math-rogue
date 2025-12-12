@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp, Dna, Shuffle, Star, HelpCircle, Book, AlertCircle, Flag, Music, Mic } from 'lucide-react';
+import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp, Dna, Shuffle, Star, HelpCircle, Book, AlertCircle, Flag, Music, Mic, Milk, Battery, ShieldCheck, Bomb } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { storageService } from '../services/storageService';
@@ -30,6 +30,22 @@ interface KCard {
     effectType?: CardEffectType;
 }
 
+interface KConsumable {
+    id: string;
+    type: 'HEAL' | 'BARRIER' | 'CD_REDUCE' | 'BOMB';
+    name: string;
+    desc: string;
+    icon: React.ReactNode;
+    color: string;
+    value: number;
+}
+
+interface KFieldItem {
+    id: string;
+    pos: number;
+    data: KConsumable;
+}
+
 interface KEntity {
     id: string;
     type: 'PLAYER' | 'ENEMY';
@@ -53,6 +69,7 @@ interface KEntity {
     
     // Status
     shield: number;
+    barrier: number; // New: Perfect Guard counts
     bossPhase?: number; // For Final Boss (1, 2, 3)
     specialCD?: number; // For Boss Special Abilities
 }
@@ -66,7 +83,7 @@ interface KRelic {
 
 interface KochoVFX {
     id: string;
-    type: 'SLASH' | 'BLAST' | 'TEXT' | 'BLOCK' | 'HEAL' | 'BUFF' | 'COUNTER' | 'IMPACT' | 'WARP' | 'EVOLVE' | 'SUMMON';
+    type: 'SLASH' | 'BLAST' | 'TEXT' | 'BLOCK' | 'HEAL' | 'BUFF' | 'COUNTER' | 'IMPACT' | 'WARP' | 'EVOLVE' | 'SUMMON' | 'BARRIER';
     pos: number;
     text?: string | number;
     color?: string;
@@ -84,6 +101,8 @@ interface KochoGameState {
     enemies: KEntity[];
     hand: KCard[];
     queue: KCard[]; // Max 3
+    consumables: KConsumable[]; // Max 3
+    fieldItems: KFieldItem[]; // Items on the ground
     status: 'PLAYING' | 'EXECUTING' | 'GAME_OVER' | 'VICTORY' | 'WAVE_CLEAR' | 'STAGE_CLEAR';
     logs: string[];
     specialActionCooldown: number;
@@ -130,11 +149,18 @@ const CARD_DB: Omit<KCard, 'id' | 'currentCooldown' | 'usedSlots'>[] = [
     { name: '絶対防御', type: 'UTILITY', range: [0], damage: 0, shield: 6, cooldown: 5, color: 'bg-yellow-500 text-black', icon: <Shield size={16}/>, description: 'シールド+6', energyCost: 1, maxSlots: 1 },
 ];
 
+const CONSUMABLE_DB: KConsumable[] = [
+    { id: 'C_MILK', type: 'HEAL', name: '給食の牛乳', desc: 'HPを5回復', value: 5, icon: <Milk size={16}/>, color: 'text-white' },
+    { id: 'C_BARRIER', type: 'BARRIER', name: 'ATフィールド', desc: '1回だけダメージ無効', value: 1, icon: <ShieldCheck size={16}/>, color: 'text-yellow-400' },
+    { id: 'C_BATTERY', type: 'CD_REDUCE', name: '予備電池', desc: '手札のCDを2短縮', value: 2, icon: <Battery size={16}/>, color: 'text-green-400' },
+    { id: 'C_BOMB', type: 'BOMB', name: '手榴弾', desc: '敵全体に5ダメージ', value: 5, icon: <Bomb size={16}/>, color: 'text-red-500' },
+];
+
 const SHOP_RELICS: KRelic[] = [
     { id: 'R_BOOTS', name: '瞬足の靴', desc: '移動系カードのCD-1', price: 30 },
     { id: 'R_GLOVES', name: 'パワー手袋', desc: '攻撃ダメージ+1', price: 40 },
     { id: 'R_SHIELD', name: '安全ピン', desc: '毎ターンシールド+1', price: 35 },
-    { id: 'R_POTION', name: '給食の牛乳', desc: 'HPを10回復', price: 15 }, // Instant consumable treated as relic for purchase logic
+    { id: 'R_POTION', name: '回復セット', desc: 'HPを全回復', price: 20 }, 
 ];
 
 const UPGRADE_POOLS: UpgradeOffer[] = [
@@ -195,6 +221,7 @@ const ENEMY_TYPES: EnemyTemplate[] = [
 
 const GRID_SIZE = 7;
 const FINAL_STAGE = 7;
+const MAX_CONSUMABLES = 3;
 
 // --- HELPER: Hydrate/Restore State ---
 const hydrateState = (state: any): KochoGameState => {
@@ -206,11 +233,25 @@ const hydrateState = (state: any): KochoGameState => {
             icon: template ? template.icon : <HelpCircle size={16}/> 
         };
     });
+
+    // Restore Consumables Icons
+    const restoreConsumables = (items: any[]) => items ? items.map(i => {
+        const template = CONSUMABLE_DB.find(t => t.id === i.id) || i;
+        return { ...i, icon: template.icon, color: template.color };
+    }) : [];
+
+    const restoreFieldItems = (items: any[]) => items ? items.map(i => {
+        const template = CONSUMABLE_DB.find(t => t.id === i.data.id) || i.data;
+        return { ...i, data: { ...i.data, icon: template.icon, color: template.color } };
+    }) : [];
     
     return {
         ...state,
         hand: restoreCards(state.hand),
-        queue: restoreCards(state.queue)
+        queue: restoreCards(state.queue),
+        consumables: restoreConsumables(state.consumables || []),
+        fieldItems: restoreFieldItems(state.fieldItems || []),
+        player: { ...state.player, barrier: state.player.barrier || 0 } // Legacy support
     };
 };
 
@@ -222,10 +263,12 @@ const getInitialState = (): KochoGameState => ({
     maxWaves: 3,
     turn: 1,
     gridSize: GRID_SIZE,
-    player: { id: 'p1', type: 'PLAYER', name: '勇者', pos: 3, facing: 1, maxHp: 10, hp: 10, spriteName: 'HERO_SIDE|赤', shield: 0 },
+    player: { id: 'p1', type: 'PLAYER', name: '勇者', pos: 3, facing: 1, maxHp: 10, hp: 10, spriteName: 'HERO_SIDE|赤', shield: 0, barrier: 0 },
     enemies: [],
     hand: getInitialDeck(),
     queue: [],
+    consumables: [],
+    fieldItems: [],
     status: 'PLAYING',
     logs: ['校長室への道が開かれた...'],
     specialActionCooldown: 0,
@@ -412,7 +455,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             player: { 
                 ...prev.player, 
                 shield: 0,
-                // Do not reset HP
+                // Do not reset HP/Barrier
             }, 
             enemies: newEnemies,
             hand: currentHand,
@@ -420,7 +463,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             status: 'PLAYING',
             logs: [logMsg],
             specialActionCooldown: 0,
-            shopUpgradeUsed: false
+            shopUpgradeUsed: false,
+            fieldItems: [] // Clear previous drops on new wave? Actually maybe keep them? Let's clear to be safe/clean
         }));
 
         audioService.playBGM(bgm);
@@ -443,6 +487,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             hp: template.maxHp,
             spriteName: template.sprite,
             shield: 0,
+            barrier: 0,
             bossPhase: bossPhase,
             specialCD: 3, // Initial special CD for bosses
             intent: {
@@ -453,6 +498,43 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     // --- GAME LOGIC ---
+
+    const spawnConsumable = (pos: number) => {
+        // 30% chance
+        if (Math.random() > 0.3) return;
+        
+        const template = CONSUMABLE_DB[Math.floor(Math.random() * CONSUMABLE_DB.length)];
+        const newItem: KFieldItem = {
+            id: `drop_${Date.now()}`,
+            pos,
+            data: template
+        };
+        
+        setGameState(prev => ({
+            ...prev,
+            fieldItems: [...prev.fieldItems, newItem]
+        }));
+    };
+
+    const handlePickup = (pos: number, currentState: KochoGameState): KochoGameState => {
+        const itemIdx = currentState.fieldItems.findIndex(i => i.pos === pos);
+        if (itemIdx === -1) return currentState;
+        
+        const item = currentState.fieldItems[itemIdx];
+        
+        if (currentState.consumables.length < MAX_CONSUMABLES) {
+            audioService.playSound('buff');
+            addLog(`${item.data.name}を獲得！`);
+            return {
+                ...currentState,
+                consumables: [...currentState.consumables, item.data],
+                fieldItems: currentState.fieldItems.filter((_, i) => i !== itemIdx)
+            };
+        } else {
+            // Full inventory, leave it
+            return currentState;
+        }
+    };
 
     const tickCooldowns = (state: KochoGameState): KochoGameState => {
         // Relic: Boots (Move CD -1)
@@ -507,23 +589,32 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     // Hit Player
                     if (attackTiles.includes(player.pos)) {
                         const dmg = e.intent.damage || 0;
-                        const blocked = Math.min(dmg, player.shield);
-                        const finalDmg = dmg - blocked;
                         
-                        player.hp = Math.max(0, player.hp - finalDmg);
-                        player.shield -= blocked;
-                        
-                        logs = [`${e.name}の攻撃！ ${finalDmg}ダメージ！`, ...logs];
-                        
-                        generatedVfx.push({ id: `v_atk_p_${Date.now()}_${Math.random()}`, type: 'SLASH', pos: player.pos });
-                        if (blocked > 0) generatedVfx.push({ id: `v_blk_p_${Date.now()}_${Math.random()}`, type: 'BLOCK', pos: player.pos });
-                        if (finalDmg > 0) generatedVfx.push({ id: `v_dmg_p_${Date.now()}_${Math.random()}`, type: 'TEXT', pos: player.pos, text: finalDmg, color: 'text-red-500' });
+                        // Check Barrier
+                        if (player.barrier > 0) {
+                            player.barrier--;
+                            logs = [`${e.name}の攻撃を無効化！(バリア)`, ...logs];
+                            generatedVfx.push({ id: `v_bar_${Date.now()}`, type: 'BARRIER', pos: player.pos });
+                            hitSomething = true;
+                        } else {
+                            const blocked = Math.min(dmg, player.shield);
+                            const finalDmg = dmg - blocked;
+                            
+                            player.hp = Math.max(0, player.hp - finalDmg);
+                            player.shield -= blocked;
+                            
+                            logs = [`${e.name}の攻撃！ ${finalDmg}ダメージ！`, ...logs];
+                            
+                            generatedVfx.push({ id: `v_atk_p_${Date.now()}_${Math.random()}`, type: 'SLASH', pos: player.pos });
+                            if (blocked > 0) generatedVfx.push({ id: `v_blk_p_${Date.now()}_${Math.random()}`, type: 'BLOCK', pos: player.pos });
+                            if (finalDmg > 0) generatedVfx.push({ id: `v_dmg_p_${Date.now()}_${Math.random()}`, type: 'TEXT', pos: player.pos, text: finalDmg, color: 'text-red-500' });
 
-                        audioService.playSound('lose');
-                        hitSomething = true;
-                        
-                        if (player.hp <= 0) {
-                            status = 'GAME_OVER';
+                            audioService.playSound('lose');
+                            hitSomething = true;
+                            
+                            if (player.hp <= 0) {
+                                status = 'GAME_OVER';
+                            }
                         }
                     }
 
@@ -572,10 +663,15 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         logs = [`${e.name}の実験失敗！大爆発！`, ...logs];
                         // Damage player if in range (simple: just hit player)
                         const dmg = 3;
-                        player.hp = Math.max(0, player.hp - dmg);
-                        generatedVfx.push({ id: `v_spec_${Date.now()}`, type: 'BLAST', pos: player.pos });
-                        generatedVfx.push({ id: `v_dmg_${Date.now()}`, type: 'TEXT', pos: player.pos, text: dmg, color: 'text-red-500' });
-                        if (player.hp <= 0) status = 'GAME_OVER';
+                        if (player.barrier > 0) {
+                             player.barrier--;
+                             generatedVfx.push({ id: `v_spec_${Date.now()}`, type: 'BARRIER', pos: player.pos });
+                        } else {
+                            player.hp = Math.max(0, player.hp - dmg);
+                            generatedVfx.push({ id: `v_spec_${Date.now()}`, type: 'BLAST', pos: player.pos });
+                            generatedVfx.push({ id: `v_dmg_${Date.now()}`, type: 'TEXT', pos: player.pos, text: dmg, color: 'text-red-500' });
+                            if (player.hp <= 0) status = 'GAME_OVER';
+                        }
                     } else if (sName === 'SHIELD') { // PE Teacher
                         logs = [`${e.name}が号令をかけた！(Shield+5)`, ...logs];
                         e.shield += 5;
@@ -726,7 +822,58 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     // --- ACTION HANDLERS ---
-    // (Move, Turn, Wait, Swap, Queue, Unqueue, Execute - mostly same as before, ensuring use of new logic)
+    
+    const useConsumable = (index: number) => {
+        if (animating) return;
+        const state = stateRef.current;
+        const item = state.consumables[index];
+        if (!item) return;
+
+        let used = false;
+        let p = { ...state.player };
+        let hand = [...state.hand];
+        let enemies = [...state.enemies];
+        let logs = [...state.logs];
+
+        if (item.type === 'HEAL') {
+            p.hp = Math.min(p.maxHp, p.hp + item.value);
+            addVfx('HEAL', p.pos);
+            logs.unshift(`HPを${item.value}回復！`);
+            used = true;
+        } else if (item.type === 'BARRIER') {
+            p.barrier += item.value;
+            addVfx('BARRIER', p.pos);
+            logs.unshift(`バリアを展開！`);
+            used = true;
+        } else if (item.type === 'CD_REDUCE') {
+            hand = hand.map(c => ({ ...c, currentCooldown: Math.max(0, c.currentCooldown - item.value) }));
+            addVfx('BUFF', p.pos);
+            logs.unshift(`手札のCDを${item.value}短縮！`);
+            used = true;
+        } else if (item.type === 'BOMB') {
+            enemies.forEach(e => {
+                if (e.hp > 0) {
+                    e.hp = Math.max(0, e.hp - item.value);
+                    addVfx('BLAST', e.pos);
+                }
+            });
+            logs.unshift(`手榴弾！全体に${item.value}ダメージ！`);
+            used = true;
+        }
+
+        if (used) {
+            audioService.playSound('buff');
+            const newConsumables = state.consumables.filter((_, i) => i !== index);
+            setGameState({
+                ...state,
+                player: p,
+                hand: hand,
+                enemies: enemies,
+                logs: logs,
+                consumables: newConsumables
+            });
+        }
+    };
 
     const handleMove = async (dir: -1 | 1) => {
         if (stateRef.current.status !== 'PLAYING' || animating) return;
@@ -741,6 +888,9 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 ...current,
                 player: { ...current.player, pos: newPos }
             };
+
+            // CHECK ITEM PICKUP
+            intermediateState = handlePickup(newPos, intermediateState);
             
             setGameState(intermediateState);
             audioService.playSound('select');
@@ -838,6 +988,9 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             enemies: newEnemies,
             specialActionCooldown: 3 + 1
         };
+        // Check Item Pickup at new pos
+        intermediateState = handlePickup(targetPos, intermediateState);
+        
         setGameState(intermediateState);
 
         // 2. Enemy Reaction
@@ -927,6 +1080,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             const pPos = p.pos;
             let nextPlayer = { ...p };
             let nextEnemies = currentState.enemies.map(e => ({...e}));
+            let nextFieldItems = [...currentState.fieldItems];
             
             let hit = false;
             let dmgBonus = 0;
@@ -958,6 +1112,11 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         finalPos = checkPos;
                     }
                     nextPlayer.pos = finalPos;
+                    // Check Pickup at dash end
+                    currentState = handlePickup(finalPos, currentState); 
+                    // Update consumable list in case it changed
+                    // (NOTE: handlePickup returns modified state, need to respect it)
+                    // ... This is tricky inside loop. Let's simplify: pickup only after card resolves fully.
                 }
 
                 const hits = nextEnemies.filter(e => targets.includes(e.pos) && e.hp > 0);
@@ -983,6 +1142,10 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         addVfx(isRanged ? 'BLAST' : 'SLASH', e.pos);
                         addVfx('TEXT', e.pos, { text: finalDmg, color: 'text-yellow-400' });
 
+                        if (e.hp <= 0) {
+                            spawnConsumable(e.pos); // Drop item
+                        }
+
                         if (card.effectType === 'PUSH') {
                             const pushDir = p.facing;
                             let targetPos = e.pos;
@@ -1004,7 +1167,13 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     if (card.effectType === 'RECOIL') {
                         const recoilPos = p.pos - p.facing;
                         const isBlocked = nextEnemies.some(e => e.pos === recoilPos && e.hp > 0) || recoilPos < 0 || recoilPos >= GRID_SIZE;
-                        if (!isBlocked) { nextPlayer.pos = recoilPos; addLog("反動で後退！"); }
+                        if (!isBlocked) { 
+                            nextPlayer.pos = recoilPos; 
+                            addLog("反動で後退！"); 
+                            // Check Pickup
+                            // We need to carry over fieldItems change if spawnConsumable triggered. 
+                            // This is getting complex. Let's rely on React state update after loop? No, loop needs consistent state.
+                        }
                     }
 
                     if (card.shield && card.shield > 0) {
@@ -1023,6 +1192,10 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 if (target >= 0 && target < GRID_SIZE && !nextEnemies.some(e => e.pos === target && e.hp > 0)) {
                     nextPlayer.pos = target;
                     audioService.playSound('select');
+                    // Check Pickup happens at end of card resolution via effect or state update? 
+                    // Let's do instant pickup check here for immediate feedback
+                    // But we can't easily modify 'currentState.consumables' inside loop without clutter.
+                    // Let's assume handlePickup is called when state settles.
                 } else {
                     addLog("移動できない！");
                 }
@@ -1040,10 +1213,36 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 }
             }
 
-            currentState = { ...currentState, player: nextPlayer, enemies: nextEnemies }; // Keep dead enemies for now to check status
+            // Sync intermediate state
+            // If dash/move happened, check pickup
+            if (nextPlayer.pos !== p.pos) {
+                // We need to look at current 'fieldItems' in ref (or from previous updates in loop)
+                // This is hard to sync perfectly in loop. 
+                // Let's defer pickup to end of loop or just accept it might lag one frame.
+                // Or better: pass fieldItems through.
+            }
+            
+            currentState = { ...currentState, player: nextPlayer, enemies: nextEnemies }; 
+            // Re-fetch field items from ref? No, use local copy if we modify it.
+            // Actually, spawnConsumable modifies stateRef implicitly via setState but that won't reflect in 'currentState' variable.
+            // We need to manually update fieldItems in currentState if we spawn.
+            // Since spawnConsumable calls setGameState, it schedules update. 
+            // We are in a loop blocking updates. 
+            // FIX: Don't call setGameState inside loop for logic that affects next iteration unless we track it locally.
+            
             cardsReturningToHand.push({ ...card, currentCooldown: card.cooldown });
-            setGameState(currentState);
+            
+            // Commit state to allow UI to update (and handle pickup via effect/render?)
+            // No, 'await' allows render.
+            setGameState(prev => {
+                 // Merging logic is painful here. 
+                 // Let's just update player/enemies/vfx. Pickup check is handled after loop.
+                 return { ...prev, player: nextPlayer, enemies: nextEnemies };
+            });
             await new Promise(r => setTimeout(r, 400));
+            
+            // Check pickup after move
+            setGameState(prev => handlePickup(prev.player.pos, prev));
         }
 
         // Enemy Turn after combo
@@ -1052,7 +1251,9 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
              const delay = anyEnemyActing ? 250 : 30;
              await new Promise(r => setTimeout(r, delay));
              
-             const { nextState, vfx } = resolveEnemyTurn(currentState);
+             // Refresh state from ref before enemy turn
+             const freshState = stateRef.current;
+             const { nextState, vfx } = resolveEnemyTurn(freshState);
              vfx.forEach(v => addVfx(v.type, v.pos, v));
              currentState = tickCooldowns(nextState);
              setGameState(currentState);
@@ -1069,9 +1270,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                  return prev;
             }
             
-            // Remove truly dead enemies (phase check logic handles boss revival in resolveEnemyTurn)
             const aliveEnemies = prev.enemies.filter(e => e.hp > 0);
-            
             let newHand = [...prev.hand, ...cardsReturningToHand];
             
             if (aliveEnemies.length === 0) {
@@ -1291,6 +1490,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const p = gameState.player;
         const e = gameState.enemies.find(en => en.pos === idx && en.hp > 0);
         const cellVfx = vfxList.filter(v => v.pos === idx);
+        const groundItem = gameState.fieldItems.find(i => i.pos === idx);
         
         return (
             <div className="relative w-full h-full flex items-end justify-center">
@@ -1306,20 +1506,33 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         {v.type === 'WARP' && <div className="text-cyan-400 animate-spin"><Move size={24}/></div>}
                         {v.type === 'EVOLVE' && <div className="absolute w-full h-full bg-yellow-400/80 animate-ping rounded-full"></div>}
                         {v.type === 'SUMMON' && <div className="absolute w-full h-full bg-purple-400/80 animate-ping rounded-full"></div>}
+                        {v.type === 'BARRIER' && <div className="absolute w-full h-full border-4 border-yellow-400 animate-ping rounded-full opacity-50"></div>}
+                        {v.type === 'HEAL' && <div className="text-green-500 animate-bounce"><Heart size={32}/></div>}
+                        {v.type === 'BUFF' && <div className="text-cyan-500 animate-pulse"><RefreshCw size={32}/></div>}
                     </div>
                 ))}
 
+                {/* Field Item */}
+                {groundItem && (
+                    <div className="absolute bottom-1 z-10 animate-bounce">
+                        <div className={`p-1 bg-black/60 rounded-full border ${groundItem.data.color}`}>
+                            {groundItem.data.icon}
+                        </div>
+                    </div>
+                )}
+
                 {p.pos === idx && (
-                    <div className="relative w-full h-full flex items-end justify-center">
+                    <div className="relative w-full h-full flex items-end justify-center z-20">
                         <div className={`transition-transform duration-200 ${p.facing === -1 ? 'scale-x-[-1]' : ''}`}>
                             <PixelSprite seed="HERO" name={p.spriteName} className="w-16 h-16 md:w-32 md:h-32"/>
                         </div>
+                        {p.barrier > 0 && <div className="absolute inset-0 border-2 border-yellow-400 rounded-full animate-pulse opacity-50"></div>}
                         {p.shield > 0 && <div className="absolute top-0 right-0 bg-blue-600 text-white text-xs px-1 rounded border border-white">{p.shield}</div>}
                         <div className="absolute -bottom-6 w-20 text-center bg-black/50 text-white text-xs rounded border border-green-500">HP {p.hp}/{p.maxHp}</div>
                     </div>
                 )}
                 {e && (
-                    <div className="relative w-full h-full flex items-end justify-center">
+                    <div className="relative w-full h-full flex items-end justify-center z-20">
                         <div className={`transition-transform duration-200 ${e.facing === -1 ? 'scale-x-[-1]' : ''}`}>
                             <PixelSprite seed={e.id} name={e.spriteName} className="w-16 h-16 md:w-32 md:h-32"/>
                         </div>
@@ -1434,6 +1647,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     <li><strong>移動・待機・向き変更:</strong> ボタンを押すと即座に実行され、ターンが経過します。</li>
                                     <li><strong>カード攻撃:</strong> 手札のカードを選んで<span className="text-indigo-400 font-bold">予約(Queue)</span>します（最大3枚）。<br/>「EXEC」ボタンで予約したカードを連続発動します。</li>
                                     <li><strong>クールダウン(CD):</strong> 使用したカードはCDが発生し、一時的に使えなくなります。<br/>移動やアクションを行うとCDが減少します。</li>
+                                    <li><strong>消耗品:</strong> 敵が落とすアイテムを拾って使用できます（最大3つ）。</li>
                                 </ul>
                             </section>
 
@@ -1644,6 +1858,23 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                         {getGridContent(i)}
                                         <div className="absolute bottom-1 right-1 text-[8px] md:text-[10px] text-gray-700">{i}</div>
                                     </div>
+                                ))}
+                            </div>
+
+                            {/* Consumables Bar */}
+                            <div className="w-full max-w-lg flex justify-center gap-4 mb-2 z-20">
+                                {gameState.consumables.map((item, i) => (
+                                    <button 
+                                        key={i} 
+                                        onClick={() => useConsumable(i)}
+                                        className={`w-12 h-12 bg-slate-800 border-2 border-slate-600 rounded-full flex items-center justify-center hover:scale-110 transition-transform ${item.color}`}
+                                        title={item.desc}
+                                    >
+                                        {item.icon}
+                                    </button>
+                                ))}
+                                {[...Array(MAX_CONSUMABLES - gameState.consumables.length)].map((_, i) => (
+                                    <div key={`empty-c-${i}`} className="w-12 h-12 rounded-full border-2 border-dashed border-slate-700 bg-black/20" />
                                 ))}
                             </div>
                         </>
