@@ -1,6 +1,6 @@
 
 import React, { useState, useRef } from 'react';
-import { ArrowLeft, Club, Gamepad2, Skull, Compass, Mountain, AlertTriangle, Trash2, Sword } from 'lucide-react';
+import { ArrowLeft, Club, Gamepad2, Skull, Compass, Mountain, AlertTriangle, Trash2, Sword, Send } from 'lucide-react';
 import { storageService } from '../services/storageService';
 import { audioService } from '../services/audioService';
 
@@ -56,6 +56,8 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
           storageService.clearDungeonState2();
       } else if (deleteTarget === 'KOCHO') {
           storageService.clearKochoState();
+      } else if (deleteTarget === 'PAPER_PLANE') {
+          // No save state for paper plane yet, but keep logic
       }
       // Survivor has no suspend state to clear currently
       
@@ -70,6 +72,7 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
           case 'DUNGEON': return '風来の小学生';
           case 'DUNGEON_2': return '風来の小学生2';
           case 'KOCHO': return '校長対決';
+          case 'PAPER_PLANE': return '紙飛行機バトル';
           default: return '';
       }
   };
@@ -124,12 +127,29 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
             
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 w-full mb-8 shrink-0 px-1 md:px-2">
                 
-                {/* Kocho Showdown Game Card (NEW) */}
+                {/* Paper Plane Game Card (NEW) */}
+                <button
+                    {...bindPress('PAPER_PLANE')}
+                    className="group relative bg-sky-900 border-4 border-sky-500 hover:border-white hover:bg-sky-800 p-2 md:p-4 rounded-xl flex flex-col md:flex-row items-center justify-center md:justify-start text-center md:text-left transition-all shadow-xl hover:shadow-[0_0_20px_rgba(14,165,233,0.4)] overflow-hidden h-36 md:h-32"
+                >
+                    <div className="absolute top-0 right-0 bg-sky-600 text-white text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-md flex items-center gap-1 z-10">FLIGHT</div>
+                    <div className="bg-sky-950/50 p-2 md:p-3 rounded-full mb-2 md:mb-0 md:mr-3 group-hover:scale-110 transition-transform duration-300 border-2 border-sky-500/30 shrink-0">
+                        <Send size={24} className="text-sky-300 fill-current md:w-7 md:h-7" />
+                    </div>
+                    <div className="flex flex-col items-center md:items-start w-full">
+                        <span className="text-sm md:text-lg font-bold mb-1 text-sky-100 group-hover:text-white font-mono transition-colors block">紙飛行機バトル</span>
+                        <span className="text-[9px] md:text-[10px] text-sky-200/70 leading-tight block font-mono">
+                            風に乗ってどこまでも。<br className="hidden md:inline"/>障害物を避けるフライトアクション。
+                        </span>
+                    </div>
+                </button>
+
+                {/* Kocho Showdown Game Card */}
                 <button
                     {...bindPress('KOCHO')}
                     className="group relative bg-[#1a1a2e] border-4 border-indigo-500 hover:border-pink-500 hover:bg-indigo-900 p-2 md:p-4 rounded-xl flex flex-col md:flex-row items-center justify-center md:justify-start text-center md:text-left transition-all shadow-xl hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] overflow-hidden h-36 md:h-32"
                 >
-                    <div className="absolute top-0 right-0 bg-pink-600 text-white text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-md flex items-center gap-1 z-10">NEW!</div>
+                    <div className="absolute top-0 right-0 bg-pink-600 text-white text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-md flex items-center gap-1 z-10">STRATEGY</div>
                     <div className="bg-indigo-900/50 p-2 md:p-3 rounded-full mb-2 md:mb-0 md:mr-3 group-hover:scale-110 transition-transform duration-300 border-2 border-indigo-500/30 shrink-0">
                         <Sword size={24} className="text-pink-400 fill-current md:w-7 md:h-7" />
                     </div>

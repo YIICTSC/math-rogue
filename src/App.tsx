@@ -26,7 +26,8 @@ import PokerGameScreen from './components/PokerGameScreen';
 import SchoolyardSurvivorScreen from './components/SchoolyardSurvivorScreen';
 import SchoolDungeonRPG from './components/SchoolDungeonRPG'; 
 import SchoolDungeonRPG2 from './components/SchoolDungeonRPG2'; 
-import KochoShowdown from './components/KochoShowdown'; // New
+import KochoShowdown from './components/KochoShowdown'; 
+import PaperPlaneBattle from './components/PaperPlaneBattle';
 import MiniGameSelectScreen from './components/MiniGameSelectScreen';
 import Card from './components/Card';
 import { audioService } from './services/audioService';
@@ -52,7 +53,6 @@ const calculateScore = (state: GameState, victory: boolean): number => {
     return score;
 };
 
-// ... (Rest of existing AI logic for BattleScene omitted for brevity as it is unchanged) ...
 // --- ENEMY DEFINITIONS & AI ---
 const determineEnemyType = (name: string, isBoss: boolean): string => {
     if (isBoss) return 'GUARDIAN'; 
@@ -240,7 +240,8 @@ const App: React.FC = () => {
           gameState.screen !== GameScreen.MINI_GAME_SURVIVOR &&
           gameState.screen !== GameScreen.MINI_GAME_DUNGEON &&
           gameState.screen !== GameScreen.MINI_GAME_DUNGEON_2 &&
-          gameState.screen !== GameScreen.MINI_GAME_KOCHO
+          gameState.screen !== GameScreen.MINI_GAME_KOCHO &&
+          gameState.screen !== GameScreen.MINI_GAME_PAPER_PLANE
       ) {
           storageService.saveGame(gameState);
       }
@@ -278,6 +279,28 @@ const App: React.FC = () => {
           setLogClickCount(0);
           audioService.playSound('select');
       }
+  };
+
+  const returnToTitle = () => {
+      audioService.stopBGM();
+      setShopCards([]);
+      setEventData(null);
+      setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
+  };
+
+  const handleNodeComplete = () => {
+      setGameState(prev => {
+          const newMap = prev.map.map(n => {
+              if (n.id === prev.currentMapNodeId) return { ...n, completed: true };
+              return n;
+          });
+          return {
+              ...prev,
+              map: newMap,
+              screen: GameScreen.MAP
+          };
+      });
+      audioService.playBGM('menu');
   };
 
   const continueGame = () => {
@@ -319,6 +342,8 @@ const App: React.FC = () => {
           setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_DUNGEON_2 }));
       } else if (gameId === 'KOCHO') {
           setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_KOCHO }));
+      } else if (gameId === 'PAPER_PLANE') {
+          setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_PAPER_PLANE }));
       }
   };
 
@@ -341,9 +366,7 @@ const App: React.FC = () => {
       setGameState(prev => ({ ...prev, mode, screen: GameScreen.CHARACTER_SELECTION }));
   };
 
-  // ... (Other handlers like handleDebugStart, handleCharacterSelect remain same) ...
   const handleDebugStart = (deck: ICard[], relics: Relic[], potions: Potion[]) => {
-        // Implementation omitted for brevity, identical to previous
         const map = generateDungeonMap();
         setDebugLoadout({ deck, relics, potions });
         
@@ -390,7 +413,6 @@ const App: React.FC = () => {
   };
 
   const handleCharacterSelect = (char: Character) => {
-      // Identical to previous implementation
       audioService.playSound('select');
       setSelectedCharName(char.name);
       
@@ -475,7 +497,6 @@ const App: React.FC = () => {
 
   const generateEvent = (player: Player) => {
       const events = [
-          // 既存イベント（怪しい薬売り）
           {
               title: "怪しい薬売り",
               description: "路地裏で男が声をかけてきた。「とびきりの薬、あるよ」",
@@ -493,14 +514,13 @@ const App: React.FC = () => {
                   { label: "無視", text: "何もせず立ち去る", action: () => { setEventResultLog("怪しい男を無視して先へ進んだ。"); } }
               ]
           },
-          // 既存イベント（鏡）
           {
               title: "踊り場の鏡",
               description: "大きな鏡がある。映っている自分と目が合った。",
               options: [
                   { label: "見つめる", text: "じっと見つめる...", action: () => {
-                      const deck = [...player.deck].sort(() => Math.random() - 0.5);
-                      const target = deck[0];
+                      const deck = [...player.deck];
+                      const target = deck[Math.floor(Math.random() * deck.length)];
                       if (target) {
                           setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...target, id: `copy-${Date.now()}` }] } }));
                           setEventResultLog(`鏡の中の自分が何かを手渡してきた。\n「${target.name}」の複製を入手。`);
@@ -510,7 +530,7 @@ const App: React.FC = () => {
                   }},
                   { label: "割る", text: "鏡を叩き割る！", action: () => {
                       setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.INJURY, id: `evt-${Date.now()}` }] } }));
-                      setEventResultLog("破片が飛び散った！\n呪い「骨折」を入手。7年間の不幸が訪れるだろう...");
+                      setEventResultLog("破片が飛び散った！\n呪い「骨折」を入手。");
                   }}
               ]
           },
@@ -2194,7 +2214,7 @@ const App: React.FC = () => {
                             <section>
                                 <h3 className="text-white font-bold mb-1">■ アップデート (Update)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li>新ミニゲーム「校長対決」を追加しました。</li>
+                                    <li>新ミニゲーム「紙飛行機バトル」を追加しました。</li>
                                 </ul>
                             </section>
                         </div>
@@ -2238,15 +2258,16 @@ const App: React.FC = () => {
                 <KochoShowdown onBack={returnToTitle} />
             )}
 
-            {/* Other screens (Mode, Character, Battle, etc.) logic remains similar but routed properly */}
+            {gameState.screen === GameScreen.MINI_GAME_PAPER_PLANE && (
+                <PaperPlaneBattle onBack={returnToTitle} />
+            )}
             
             {gameState.screen === GameScreen.MODE_SELECTION && (
                 <div className="w-full h-full bg-gray-900 flex flex-col items-center text-white p-4 overflow-y-auto custom-scrollbar">
-                    {/* ... (Existing Mode Selection UI) ... */}
+                    {/* ... (Mode Selection UI) ... */}
                     <div className="w-full max-w-2xl flex flex-col items-center my-auto">
                         <h2 className="text-3xl font-bold mb-2 text-yellow-400 mt-4">計算モード選択</h2>
                         {gameState.challengeMode === '1A1D' && <p className="text-red-400 mb-6 font-bold animate-pulse">※1A1Dチャレンジモード適用中</p>}
-                        {debugLoadout && <p className="text-green-400 mb-6 font-bold animate-pulse font-mono">※DEBUG LOADOUT ACTIVE</p>}
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
                             <button onClick={() => handleModeSelect(GameMode.ADDITION)} className="bg-red-900 border-2 border-red-500 p-4 md:p-6 rounded-xl hover:bg-red-800 flex flex-col items-center transition-transform hover:scale-105 active:scale-95 shadow-lg">
@@ -2324,7 +2345,7 @@ const App: React.FC = () => {
                     onRest={handleRestAction} 
                     onUpgrade={handleUpgradeCard} 
                     onSynthesize={handleSynthesizeCard}
-                    onLeave={handleNodeComplete} 
+                    onLeave={handleNodeCompleteWrapper} 
                 />
             )}
 
@@ -2371,7 +2392,7 @@ const App: React.FC = () => {
                     onRemoveCard={(cardId, cost) => {
                          setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - cost, deck: prev.player.deck.filter(c => c.id !== cardId) } }));
                     }}
-                    onLeave={handleNodeComplete}
+                    onLeave={handleNodeCompleteWrapper}
                 />
             )}
 
@@ -2416,7 +2437,7 @@ const App: React.FC = () => {
                             return { ...prev, player: newP };
                         });
                     }}
-                    onLeave={handleNodeComplete}
+                    onLeave={handleNodeCompleteWrapper}
                     hasCursedKey={!!gameState.player.relics.find(r => r.id === 'CURSED_KEY')}
                 />
             )}
