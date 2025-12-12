@@ -120,6 +120,7 @@ interface KochoGameState {
     relics: KRelic[];
     shopUpgradeUsed: boolean; // Tracks if upgrade was used in current shop/event
     currentUpgradeOffer: UpgradeOffer | null; // Persist current upgrade offer
+    shopInventory: KRelic[]; // New: Store specific relics for the shop
 }
 
 // --- DATA ---
@@ -273,7 +274,8 @@ const hydrateState = (state: any): KochoGameState => {
         consumables: restoreConsumables(state.consumables || []),
         fieldItems: restoreFieldItems(state.fieldItems || []),
         player: { ...state.player, barrier: state.player.barrier || 0, strength: state.player.strength || 0 }, // Legacy support
-        currentUpgradeOffer: restoredOffer
+        currentUpgradeOffer: restoredOffer,
+        shopInventory: state.shopInventory || []
     };
 };
 
@@ -297,7 +299,8 @@ const getInitialState = (): KochoGameState => ({
     money: 0,
     relics: [],
     shopUpgradeUsed: false,
-    currentUpgradeOffer: null
+    currentUpgradeOffer: null,
+    shopInventory: []
 });
 
 // --- COMPONENT ---
@@ -404,11 +407,42 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         let bgm: any = 'dungeon_gym';
         let maxW = 3;
 
+        // Keep track of occupied positions (starting with player)
+        const occupiedPositions = new Set<number>();
+        occupiedPositions.add(stateRef.current.player.pos);
+
+        // Helper to find a safe spawn position
+        const getSafeSpawnPos = (preferredPos: number): number => {
+            if (!occupiedPositions.has(preferredPos)) {
+                occupiedPositions.add(preferredPos);
+                return preferredPos;
+            }
+            // Search outward for free spot
+            // Prioritize further from player if possible, but simplicity: check all
+            for (let i = 0; i < GRID_SIZE; i++) {
+                if (!occupiedPositions.has(i)) {
+                    occupiedPositions.add(i);
+                    return i;
+                }
+            }
+            // If grid is totally full (should be rare), fallback to original (will overlap but better than crash)
+            return preferredPos; 
+        };
+
+        const createEnemySafe = (template: EnemyTemplate, index: number, bossPhase?: number) => {
+             const pPos = stateRef.current.player.pos;
+             let pos = index === 0 ? (pPos > 3 ? 0 : 6) : (pPos > 3 ? 1 + index : 5 - index);
+             pos = Math.max(0, Math.min(GRID_SIZE - 1, pos));
+             
+             const safePos = getSafeSpawnPos(pos);
+             return createEnemy(template, safePos, bossPhase);
+        };
+
         // Stage Logic
         if (stage === FINAL_STAGE) {
             // Final Boss (Sequence doesn't really matter here, but let's keep it clean)
             const boss = ENEMY_TYPES.find(e => e.name === '校長')!;
-            newEnemies.push(createEnemy(boss, 0, 1)); // Phase 1
+            newEnemies.push(createEnemySafe(boss, 0, 1)); // Phase 1
             logMsg = "最終決戦！校長室";
             bgm = 'dungeon_boss';
             maxW = 1;
@@ -418,7 +452,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             // Standard Mobs
             const count = Math.min(3, Math.floor(wave / 2) + 1);
             for(let i=0; i<count; i++) {
-                newEnemies.push(createEnemy(ENEMY_TYPES[0], i)); // Senior
+                newEnemies.push(createEnemySafe(ENEMY_TYPES[0], i)); // Senior
             }
             logMsg = `Tutorial - Wave ${wave}/${maxW}`;
             bgm = 'school_psyche';
@@ -446,7 +480,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     if (stage > 4 && r < 0.2) eType = 2; // Janitor
                     if (stage > 1 && r < 0.1) eType = 3; // Nerd
                     
-                    newEnemies.push(createEnemy(ENEMY_TYPES[eType], i));
+                    newEnemies.push(createEnemySafe(ENEMY_TYPES[eType], i));
                 }
                 logMsg = `Stage ${stage}-${sequence+1} Wave ${wave}/${maxW}`;
                 
@@ -465,12 +499,12 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 if (stage === 6) midBossName = '生活指導';
                 
                 const mb = ENEMY_TYPES.find(e => e.name === midBossName) || ENEMY_TYPES[1];
-                newEnemies.push(createEnemy(mb, 0));
+                newEnemies.push(createEnemySafe(mb, 0));
                 
                 // Minion
                 const minionName = stage > 4 ? '熱血教師' : '不良生徒';
                 const minion = ENEMY_TYPES.find(e => e.name === minionName) || ENEMY_TYPES[0];
-                newEnemies.push(createEnemy(minion, 1));
+                newEnemies.push(createEnemySafe(minion, 1));
 
                 logMsg = `強敵 ${mb.name} が現れた！`;
                 bgm = 'dungeon_boss';
@@ -507,15 +541,11 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         audioService.playBGM(bgm);
     };
 
-    const createEnemy = (template: EnemyTemplate, index: number, bossPhase?: number): KEntity => {
-        // Find valid spawn pos
-        const pPos = stateRef.current.player.pos;
-        let pos = index === 0 ? (pPos > 3 ? 0 : 6) : (pPos > 3 ? 1 + index : 5 - index);
-        // Ensure within bounds
-        pos = Math.max(0, Math.min(GRID_SIZE - 1, pos));
-        
+    // Modified createEnemy to accept explicit pos instead of calculating internally based on index 
+    // (Calculation moved to createEnemySafe in startWave)
+    const createEnemy = (template: EnemyTemplate, pos: number, bossPhase?: number): KEntity => {
         return {
-            id: `e_${Date.now()}_${index}`,
+            id: `e_${Date.now()}_${pos}`,
             type: 'ENEMY',
             name: template.name,
             pos: pos,
@@ -1249,6 +1279,39 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             }
                         }
                     }
+                    
+                    // PUSH MECHANIC (New)
+                    const overlappingEnemy = nextEnemies.find(e => e.pos === finalPos && e.hp > 0);
+                    if (overlappingEnemy) {
+                        // Try push same direction
+                        let pushPos = finalPos + p.facing;
+                        let pushed = false;
+                        if (pushPos >= 0 && pushPos < GRID_SIZE && !nextEnemies.some(e => e.pos === pushPos && e.hp > 0) && pushPos !== pPos) {
+                             overlappingEnemy.pos = pushPos;
+                             addLog(`${overlappingEnemy.name}を押し出した！`);
+                             addVfx('IMPACT', pushPos);
+                             pushed = true;
+                        } 
+                        
+                        if (!pushed) {
+                            // Try push opposite
+                            pushPos = finalPos - p.facing;
+                            if (pushPos >= 0 && pushPos < GRID_SIZE && !nextEnemies.some(e => e.pos === pushPos && e.hp > 0) && pushPos !== pPos) {
+                                overlappingEnemy.pos = pushPos;
+                                addLog(`${overlappingEnemy.name}を背後に押し出した！`);
+                                addVfx('IMPACT', pushPos);
+                                pushed = true;
+                            }
+                        }
+
+                        if (!pushed) {
+                            // Failed to push, player steps back
+                            finalPos = finalPos - p.facing;
+                            // Ensure bounds
+                            finalPos = Math.max(0, Math.min(GRID_SIZE - 1, finalPos));
+                        }
+                    }
+
                     nextPlayer.pos = finalPos;
                     currentState = handlePickup(finalPos, currentState);
                 }
@@ -1512,7 +1575,28 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
              setGameState(prev => ({ ...prev, phase: 'REWARD', status: 'PLAYING' }));
              audioService.playSound('win');
         } else if (nextPhase === 'SHOP' || nextPhase === 'UPGRADE_EVENT') {
-             setGameState(prev => ({ ...prev, phase: nextPhase as GamePhase, status: 'PLAYING', shopUpgradeUsed: false, currentUpgradeOffer: getRandomOffer() }));
+             // Generate random inventory for shop
+             let newInventory: KRelic[] = [];
+             if (nextPhase === 'SHOP') {
+                 // Filter out owned relics
+                 const available = SHOP_RELICS.filter(r => !current.relics.some(owned => owned.id === r.id));
+                 // Pick 2 random
+                 for (let i = 0; i < 2; i++) {
+                     if (available.length === 0) break;
+                     const idx = Math.floor(Math.random() * available.length);
+                     newInventory.push(available[idx]);
+                     available.splice(idx, 1);
+                 }
+             }
+             
+             setGameState(prev => ({ 
+                 ...prev, 
+                 phase: nextPhase as GamePhase, 
+                 status: 'PLAYING', 
+                 shopUpgradeUsed: false, 
+                 currentUpgradeOffer: getRandomOffer(),
+                 shopInventory: newInventory 
+            }));
              audioService.playBGM(nextPhase === 'SHOP' ? 'poker_shop' : 'menu');
         } else if (nextPhase === 'VICTORY') {
              setGameState(prev => ({ ...prev, status: 'VICTORY' }));
@@ -1983,9 +2067,9 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                             </div>
                                         </div>
                                         <div className="w-full md:w-80 bg-slate-900 border border-slate-600 rounded-lg p-4 shrink-0">
-                                            <h3 className="text-xl font-bold text-white mb-4 flex items-center"><Gift className="mr-2 text-yellow-400"/> Relics</h3>
+                                            <h3 className="text-xl font-bold text-white mb-4 flex items-center"><Gift className="mr-2 text-yellow-400"/> Relics (2 Random)</h3>
                                             <div className="space-y-4">
-                                                {SHOP_RELICS.map(item => {
+                                                {gameState.shopInventory.map(item => {
                                                     const owned = gameState.relics.some(r => r.id === item.id) && item.id !== 'R_POTION';
                                                     return (
                                                         <div key={item.id} className={`bg-slate-800 p-3 rounded border flex justify-between items-center ${owned ? 'opacity-50 border-gray-700' : 'border-slate-500'}`}>
@@ -1994,6 +2078,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                                         </div>
                                                     );
                                                 })}
+                                                {gameState.shopInventory.length === 0 && <div className="text-gray-500 text-center py-4">売り切れ</div>}
                                             </div>
                                             <button onClick={finishShopOrEvent} className="mt-8 w-full bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-lg text-xl flex items-center justify-center animate-pulse border-2 border-red-400">次へ進む <ArrowUp className="ml-2"/></button>
                                         </div>
