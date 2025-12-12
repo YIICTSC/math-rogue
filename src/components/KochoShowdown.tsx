@@ -6,7 +6,7 @@ import PixelSprite from './PixelSprite';
 
 // --- TYPES ---
 type Facing = 1 | -1; // 1: Right, -1: Left
-type GamePhase = 'BATTLE_1' | 'REWARD_1' | 'BATTLE_2_1' | 'REWARD_2' | 'BATTLE_2_2' | 'UPGRADE_EVENT' | 'MID_BOSS' | 'SHOP' | 'BOSS';
+type GamePhase = 'BATTLE' | 'REWARD' | 'UPGRADE_EVENT' | 'SHOP' | 'VICTORY' | 'GAME_OVER';
 type CardEffectType = 'NORMAL' | 'COUNTER' | 'PUSH' | 'PULL' | 'RECOIL' | 'DASH_ATTACK' | 'FURTHEST' | 'PIERCE' | 'TELEPORT';
 
 interface KCard {
@@ -39,15 +39,17 @@ interface KEntity {
     
     // Enemy AI
     intent?: {
-        type: 'ATTACK' | 'MOVE' | 'WAIT';
+        type: 'ATTACK' | 'MOVE' | 'WAIT' | 'SUMMON';
         damage?: number;
         range?: number[];
         targetPos?: number;
         timer: number; // Turns until execution
+        summonTarget?: string; // Name of enemy to summon
     };
     
     // Status
     shield: number;
+    bossPhase?: number; // For Final Boss (1, 2, 3)
 }
 
 interface KRelic {
@@ -59,7 +61,7 @@ interface KRelic {
 
 interface KochoVFX {
     id: string;
-    type: 'SLASH' | 'BLAST' | 'TEXT' | 'BLOCK' | 'HEAL' | 'BUFF' | 'COUNTER' | 'IMPACT' | 'WARP';
+    type: 'SLASH' | 'BLAST' | 'TEXT' | 'BLOCK' | 'HEAL' | 'BUFF' | 'COUNTER' | 'IMPACT' | 'WARP' | 'EVOLVE' | 'SUMMON';
     pos: number;
     text?: string | number;
     color?: string;
@@ -67,6 +69,7 @@ interface KochoVFX {
 
 interface KochoGameState {
     phase: GamePhase;
+    battleStage: number; // 1 to 7
     wave: number;
     maxWaves: number;
     turn: number;
@@ -75,9 +78,7 @@ interface KochoGameState {
     enemies: KEntity[];
     hand: KCard[];
     queue: KCard[]; // Max 3
-    deck: KCard[]; // Kept for structure but unused in CD mode
-    discard: KCard[]; // Kept for structure but unused in CD mode
-    status: 'PLAYING' | 'EXECUTING' | 'GAME_OVER' | 'VICTORY' | 'WAVE_CLEAR' | 'PHASE_CLEAR';
+    status: 'PLAYING' | 'EXECUTING' | 'GAME_OVER' | 'VICTORY' | 'WAVE_CLEAR' | 'STAGE_CLEAR';
     logs: string[];
     specialActionCooldown: number;
     money: number;
@@ -147,39 +148,49 @@ const getInitialDeck = (): KCard[] => {
     // Initial Deck: Roundhouse Kick & Chalk Throw ONLY
     const roundhouse = CARD_DB.find(c => c.name === '回し蹴り')!;
     const chalk = CARD_DB.find(c => c.name === 'チョーク投げ')!;
+    const ruler = CARD_DB.find(c => c.name === '定規スラッシュ')!;
 
     return [
         { ...roundhouse, id: 'c1', currentCooldown: 0, slots: 0 },
         { ...chalk, id: 'c2', currentCooldown: 0, slots: 0 },
+        { ...ruler, id: 'c3', currentCooldown: 0, slots: 0 },
     ];
 };
 
 const ENEMY_TYPES = [
     { name: '不良生徒', maxHp: 3, sprite: 'SENIOR|#a855f7', attackDmg: 2, range: [1], speed: 3, attackCooldown: 1 }, 
     { name: '熱血教師', maxHp: 6, sprite: 'TEACHER|#ef4444', attackDmg: 4, range: [1], speed: 4, attackCooldown: 2 },
-    { name: '用務員', maxHp: 4, sprite: 'HUMANOID|#3e2723', attackDmg: 3, range: [1, 2], speed: 5, attackCooldown: 1 },
-    { name: '教頭', maxHp: 12, sprite: 'MUSCLE|#1565c0', attackDmg: 5, range: [1], speed: 6, attackCooldown: 2 }, // Mid Boss
-    { name: '校長', maxHp: 30, sprite: 'BOSS|#FFD700', attackDmg: 8, range: [1, 2, 3], speed: 4, attackCooldown: 3 }, // Final Boss
+    { name: '用務員', maxHp: 5, sprite: 'HUMANOID|#3e2723', attackDmg: 3, range: [1, 2], speed: 5, attackCooldown: 1 },
+    { name: 'ガリ勉', maxHp: 3, sprite: 'HUMANOID|#4caf50', attackDmg: 2, range: [3, 4], speed: 3, attackCooldown: 2 },
+    // Mid Bosses
+    { name: '理科の先生', maxHp: 15, sprite: 'WIZARD|#1565c0', attackDmg: 3, range: [1, 2, 3], speed: 5, attackCooldown: 2 },
+    { name: '体育の先生', maxHp: 18, sprite: 'MUSCLE|#c62828', attackDmg: 6, range: [1], speed: 7, attackCooldown: 1 },
+    // Final Boss Phases
+    { name: '校長', maxHp: 20, sprite: 'BOSS|#FFD700', attackDmg: 5, range: [1, 2], speed: 4, attackCooldown: 2 },
+    { name: '激怒校長', maxHp: 25, sprite: 'BOSS|#d32f2f', attackDmg: 8, range: [1, 2, 3], speed: 6, attackCooldown: 1 },
+    { name: '真・校長', maxHp: 40, sprite: 'BOSS|#212121', attackDmg: 10, range: [1, 2, 3, 4], speed: 5, attackCooldown: 2 },
+    // Summon Minion
+    { name: '教頭', maxHp: 8, sprite: 'TEACHER|#1565c0', attackDmg: 4, range: [1, 2], speed: 5, attackCooldown: 2 },
 ];
 
 const GRID_SIZE = 7;
+const FINAL_STAGE = 7;
 
 // --- COMPONENT ---
 const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     
     // State
     const [gameState, setGameState] = useState<KochoGameState>({
-        phase: 'BATTLE_1',
+        phase: 'BATTLE',
+        battleStage: 1,
         wave: 1,
-        maxWaves: 1,
+        maxWaves: 3,
         turn: 1,
         gridSize: GRID_SIZE,
         player: { id: 'p1', type: 'PLAYER', name: '勇者', pos: 3, facing: 1, maxHp: 10, hp: 10, spriteName: 'HERO_SIDE|赤', shield: 0 },
         enemies: [],
         hand: [],
         queue: [],
-        deck: [],
-        discard: [],
         status: 'PLAYING',
         logs: ['校長室への道が開かれた...'],
         specialActionCooldown: 0,
@@ -209,9 +220,32 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     // Initialization
     useEffect(() => {
-        startWave(1, 'BATTLE_1');
-        audioService.playBGM('dungeon_gym');
+        initGame();
     }, []);
+
+    const initGame = () => {
+        const initialState: KochoGameState = {
+            phase: 'BATTLE',
+            battleStage: 1,
+            wave: 1,
+            maxWaves: 3,
+            turn: 1,
+            gridSize: GRID_SIZE,
+            player: { id: 'p1', type: 'PLAYER', name: '勇者', pos: 3, facing: 1, maxHp: 10, hp: 10, spriteName: 'HERO_SIDE|赤', shield: 0 },
+            enemies: [],
+            hand: getInitialDeck(),
+            queue: [],
+            status: 'PLAYING',
+            logs: ['校長室への道が開かれた...'],
+            specialActionCooldown: 0,
+            money: 0,
+            relics: [],
+            shopUpgradeUsed: false
+        };
+        setGameState(initialState);
+        stateRef.current = initialState; // Sync ref immediately
+        startWave(1, 1);
+    };
 
     const addLog = (msg: string) => {
         setGameState(prev => ({ ...prev, logs: [msg, ...prev.logs.slice(0, 4)] }));
@@ -225,87 +259,90 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }, 800); // Effect duration
     };
 
-    const startWave = (wave: number, phase: GamePhase) => {
-        // Difficulty Scaling logic based on requested structure
-        // Flow: BATTLE_1 -> REWARD_1 -> BATTLE_2_1 -> REWARD_2 -> BATTLE_2_2 -> UPGRADE_EVENT -> MID_BOSS -> SHOP -> BOSS
-        
-        const newEnemies: KEntity[] = [];
+    const startWave = (stage: number, wave: number) => {
+        let newEnemies: KEntity[] = [];
         let logMsg = "";
         let bgm: any = 'dungeon_gym';
+        let maxW = 3;
 
-        if (phase === 'BATTLE_1') {
-            // Tutorial / Wave 1
-            const template = ENEMY_TYPES[0]; // Senior
-            newEnemies.push(createEnemy(template, 0));
-            logMsg = "準備運動だ！ (Tutorial)";
-        } else if (phase === 'BATTLE_2_1') {
-            // Wave 3 Logic: 2-3 Mobs
-            const count = Math.floor(Math.random() * 2) + 2;
-            for(let i=0; i<count; i++) {
-                const template = ENEMY_TYPES[Math.floor(Math.random() * 2)]; // Senior or Teacher
-                newEnemies.push(createEnemy(template, i));
-            }
-            logMsg = "敵の集団が現れた！ (Wave 3)";
-            bgm = 'dungeon_science';
-        } else if (phase === 'BATTLE_2_2') {
-             // Wave 4 Logic: 3-4 Mobs, stronger
-             const count = Math.floor(Math.random() * 2) + 3;
-             for(let i=0; i<count; i++) {
-                 const template = ENEMY_TYPES[Math.floor(Math.random() * 3)]; // Senior, Teacher, or Janitor
-                 newEnemies.push(createEnemy(template, i));
-             }
-             logMsg = "増援が来たぞ！ (Wave 4)";
-             bgm = 'dungeon_science';
-        } else if (phase === 'MID_BOSS') {
-            // Mid Boss (Vice Principal) + 1 Minion
-            const boss = ENEMY_TYPES[3]; // Vice Principal
-            const minion = ENEMY_TYPES[0];
-            newEnemies.push(createEnemy(boss, 0));
-            newEnemies.push(createEnemy(minion, 1));
-            logMsg = "教頭先生が立ちはだかる！";
-            bgm = 'dungeon_boss';
-        } else if (phase === 'BOSS') {
+        // Stage Logic
+        if (stage === FINAL_STAGE) {
             // Final Boss
-            const boss = ENEMY_TYPES[4]; // Principal
-            newEnemies.push(createEnemy(boss, 0));
+            const boss = ENEMY_TYPES.find(e => e.name === '校長')!;
+            newEnemies.push(createEnemy(boss, 0, 1)); // Phase 1
             logMsg = "最終決戦！校長室";
             bgm = 'dungeon_boss';
+            maxW = 1; // Boss battle is 1 wave (with phases)
+        } else {
+            // Determine Max Waves for this stage (Random 3-8)
+            // But stick to current maxWaves if we are mid-stage
+            if (wave === 1) {
+                maxW = Math.floor(Math.random() * 6) + 3;
+            } else {
+                maxW = stateRef.current.maxWaves;
+            }
+
+            // Mid Boss Check
+            if ((stage === 3 || stage === 5) && wave === maxW) {
+                const midBossName = stage === 3 ? '理科の先生' : '体育の先生';
+                const mb = ENEMY_TYPES.find(e => e.name === midBossName)!;
+                newEnemies.push(createEnemy(mb, 0));
+                // Add a minion
+                const minion = ENEMY_TYPES[0];
+                newEnemies.push(createEnemy(minion, 1));
+                
+                logMsg = `強敵 ${midBossName} が現れた！`;
+                bgm = 'dungeon_boss';
+            } else {
+                // Normal Wave
+                const diff = stage + Math.floor(wave / 2);
+                const count = Math.min(4, Math.floor(diff / 2) + 1);
+                
+                for(let i=0; i<count; i++) {
+                    // Weighted random enemy
+                    const r = Math.random();
+                    let eType = 0; // Senior
+                    if (stage > 2 && r < 0.4) eType = 1; // Teacher
+                    if (stage > 4 && r < 0.2) eType = 2; // Janitor
+                    if (stage > 1 && r < 0.1) eType = 3; // Nerd
+                    
+                    newEnemies.push(createEnemy(ENEMY_TYPES[eType], i));
+                }
+                logMsg = `Stage ${stage} - Wave ${wave}/${maxW}`;
+                if (stage >= 3) bgm = 'dungeon_science';
+                if (stage >= 5) bgm = 'dungeon_roof';
+            }
         }
 
-        const isFreshStart = (phase === 'BATTLE_1' && wave === 1);
-        const currentHand = isFreshStart ? getInitialDeck() : stateRef.current.hand;
-        
-        // Only reset CD on fresh start or full map transition if desired, but typical roguelike deckbuilders reset per combat.
-        // Let's reset CD at start of each Battle Phase to be fair.
-        const handWithCD = currentHand.map(c => ({ ...c, currentCooldown: 0 }));
+        // Reset Card Cooldowns at start of a BATTLE phase (wave 1)
+        const isBattleStart = wave === 1;
+        const currentHand = isBattleStart ? stateRef.current.hand.map(c => ({...c, currentCooldown: 0})) : stateRef.current.hand;
 
         setGameState(prev => ({
             ...prev,
-            phase: phase,
+            phase: 'BATTLE',
+            battleStage: stage,
             wave: wave,
-            // maxWaves is just for display context if needed, but phase logic drives flow now
+            maxWaves: maxW,
             turn: 1,
             player: { 
                 ...prev.player, 
-                pos: isFreshStart ? 3 : prev.player.pos,
-                facing: isFreshStart ? 1 : prev.player.facing,
+                // Reset shield each wave? Usually yes in StS style.
                 shield: 0,
-                hp: isFreshStart ? prev.player.maxHp : prev.player.hp
             }, 
             enemies: newEnemies,
-            hand: handWithCD,
+            hand: currentHand,
             queue: [],
             status: 'PLAYING',
             logs: [logMsg],
             specialActionCooldown: 0,
-            money: isFreshStart ? 0 : prev.money,
             shopUpgradeUsed: false
         }));
 
         audioService.playBGM(bgm);
     };
 
-    const createEnemy = (template: typeof ENEMY_TYPES[0], index: number): KEntity => {
+    const createEnemy = (template: typeof ENEMY_TYPES[0], index: number, bossPhase?: number): KEntity => {
         // Find valid spawn pos
         const pPos = stateRef.current.player.pos;
         let pos = index === 0 ? (pPos > 3 ? 0 : 6) : (pPos > 3 ? 1 + index : 5 - index);
@@ -322,6 +359,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             hp: template.maxHp,
             spriteName: template.sprite,
             shield: 0,
+            bossPhase: bossPhase,
             intent: {
                 type: 'WAIT',
                 timer: Math.floor(Math.random() * 2) + 1, // Staggered start
@@ -407,7 +445,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                         if (attackTiles.includes(target.pos)) {
                             const dmg = e.intent.damage || 0;
-                            const blocked = Math.min(dmg, target.shield); // Enemies use shield too
+                            const blocked = Math.min(dmg, target.shield); 
                             const finalDmg = dmg - blocked;
 
                             target.hp = Math.max(0, target.hp - finalDmg);
@@ -419,8 +457,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             if (finalDmg > 0) generatedVfx.push({ id: `v_dmg_e_${Date.now()}_${Math.random()}`, type: 'TEXT', pos: target.pos, text: finalDmg, color: 'text-yellow-400' });
 
                             hitSomething = true;
-                            
-                            // Update the enemy in the array
                             enemies[j] = target;
                         }
                     }
@@ -432,6 +468,26 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     // Trigger Cooldown
                     const template = ENEMY_TYPES.find(t => t.name === e.name) || ENEMY_TYPES[0];
                     e.intent = { type: 'WAIT', timer: template.attackCooldown || 1 };
+
+                } else if (e.intent.type === 'SUMMON') {
+                    // Boss Summon Logic
+                    const emptyPos = [0,1,2,3,4,5,6].filter(p => !enemies.some(en => en.pos === p && en.hp > 0) && p !== player.pos);
+                    if (emptyPos.length > 0) {
+                        // Prioritize further from player
+                        emptyPos.sort((a,b) => Math.abs(b - player.pos) - Math.abs(a - player.pos));
+                        const spawnPos = emptyPos[0];
+                        const minionName = e.intent.summonTarget || '教頭';
+                        const minionTemplate = ENEMY_TYPES.find(t => t.name === minionName) || ENEMY_TYPES[0];
+                        const newMinion = createEnemy(minionTemplate, 0); // index doesn't matter much here
+                        newMinion.pos = spawnPos;
+                        newMinion.facing = spawnPos < 3 ? 1 : -1;
+                        
+                        enemies.push(newMinion);
+                        addVfx('SUMMON', spawnPos);
+                        logs = [`${e.name}が${minionName}を呼び出した！`, ...logs];
+                    }
+                    e.intent = { type: 'WAIT', timer: 2 };
+                    
                 } else {
                     // AI Decision Phase (MOVE or WAIT ended)
                     const template = ENEMY_TYPES.find(t => t.name === e.name) || ENEMY_TYPES[0];
@@ -443,56 +499,97 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     const neededFacing = dist < 0 ? 1 : -1;
                     const facingCorrect = e.facing === neededFacing;
 
-                    if (inRange && facingCorrect) {
-                        e.intent = { 
-                            type: 'ATTACK', 
-                            damage: template.attackDmg, 
-                            range: template.range, 
-                            timer: 1 
-                        };
-                    } else {
-                        let bestTargetPos = e.pos;
-                        let minCost = 999;
+                    // Boss Phase 3 Special Logic: Chance to Summon
+                    let isSummoning = false;
+                    if (e.bossPhase === 3 && Math.random() < 0.3) {
+                         // Summon
+                         e.intent = { type: 'SUMMON', timer: 1, summonTarget: '教頭' };
+                         isSummoning = true;
+                    }
 
-                        for (const r of validRanges) {
-                            const t1 = player.pos - r;
-                            if (t1 >= 0 && t1 < GRID_SIZE) {
-                                const cost = Math.abs(e.pos - t1);
-                                if (cost < minCost) { minCost = cost; bestTargetPos = t1; }
-                            }
-                            const t2 = player.pos + r;
-                            if (t2 >= 0 && t2 < GRID_SIZE) {
-                                const cost = Math.abs(e.pos - t2);
-                                if (cost < minCost) { minCost = cost; bestTargetPos = t2; }
-                            }
-                        }
-
-                        let moveDir = 0;
-                        if (bestTargetPos > e.pos) moveDir = 1;
-                        else if (bestTargetPos < e.pos) moveDir = -1;
-
-                        if (moveDir !== 0) {
-                            const nextPos = e.pos + moveDir;
-                            const blocked = enemies.some((other, idx) => idx !== i && other.pos === nextPos) || player.pos === nextPos;
-                            if (!blocked) {
-                                e.pos = nextPos;
-                            }
-                            e.facing = moveDir as Facing;
+                    if (!isSummoning) {
+                        if (inRange && facingCorrect) {
+                            e.intent = { 
+                                type: 'ATTACK', 
+                                damage: template.attackDmg, 
+                                range: template.range, 
+                                timer: 1 
+                            };
                         } else {
-                            e.facing = neededFacing as Facing; 
+                            let bestTargetPos = e.pos;
+                            let minCost = 999;
+
+                            for (const r of validRanges) {
+                                const t1 = player.pos - r;
+                                if (t1 >= 0 && t1 < GRID_SIZE) {
+                                    const cost = Math.abs(e.pos - t1);
+                                    if (cost < minCost) { minCost = cost; bestTargetPos = t1; }
+                                }
+                                const t2 = player.pos + r;
+                                if (t2 >= 0 && t2 < GRID_SIZE) {
+                                    const cost = Math.abs(e.pos - t2);
+                                    if (cost < minCost) { minCost = cost; bestTargetPos = t2; }
+                                }
+                            }
+
+                            let moveDir = 0;
+                            if (bestTargetPos > e.pos) moveDir = 1;
+                            else if (bestTargetPos < e.pos) moveDir = -1;
+
+                            if (moveDir !== 0) {
+                                const nextPos = e.pos + moveDir;
+                                const blocked = enemies.some((other, idx) => idx !== i && other.pos === nextPos) || player.pos === nextPos;
+                                if (!blocked) {
+                                    e.pos = nextPos;
+                                }
+                                e.facing = moveDir as Facing;
+                            } else {
+                                e.facing = neededFacing as Facing; 
+                            }
+                            e.intent = { type: 'MOVE', timer: 1 };
                         }
-                        e.intent = { type: 'MOVE', timer: 1 };
                     }
                 }
             }
             enemies[i] = e;
             if (status === 'GAME_OVER') break;
         }
+
+        // BOSS EVOLUTION CHECK
+        for (let i = 0; i < enemies.length; i++) {
+             const e = enemies[i];
+             if (e.hp <= 0 && e.bossPhase !== undefined) {
+                 if (e.bossPhase < 3) {
+                     // Evolve!
+                     const nextPhase = e.bossPhase + 1;
+                     const nextName = nextPhase === 2 ? '激怒校長' : '真・校長';
+                     const template = ENEMY_TYPES.find(t => t.name === nextName)!;
+                     
+                     enemies[i] = {
+                         ...e,
+                         name: template.name,
+                         spriteName: template.sprite,
+                         maxHp: template.maxHp,
+                         hp: template.maxHp,
+                         bossPhase: nextPhase,
+                         shield: 10, // Evolution bonus shield
+                         intent: { type: 'WAIT', timer: 1 } // Pause a bit
+                     };
+                     
+                     addVfx('EVOLVE', e.pos);
+                     addVfx('TEXT', e.pos, { text: 'EVOLUTION!', color: 'text-purple-400' });
+                     logs = [`${e.name}が真の姿を現した！`, ...logs];
+                     audioService.playSound('buff');
+                 }
+                 // If Phase 3 dies, it dies for real (HP remains <= 0)
+             }
+        }
         
         return { nextState: { ...nextState, enemies, player, logs: logs.slice(0, 4), status }, vfx: generatedVfx };
     };
 
     // --- ACTION HANDLERS ---
+    // (Move, Turn, Wait, Swap, Queue, Unqueue, Execute - mostly same as before, ensuring use of new logic)
 
     const handleMove = async (dir: -1 | 1) => {
         if (stateRef.current.status !== 'PLAYING' || animating) return;
@@ -501,14 +598,13 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const current = stateRef.current;
         const newPos = current.player.pos + dir;
         
-        if (newPos >= 0 && newPos < GRID_SIZE && !current.enemies.some(e => e.pos === newPos)) {
+        if (newPos >= 0 && newPos < GRID_SIZE && !current.enemies.some(e => e.pos === newPos && e.hp > 0)) {
             // 1. Move Player
             let intermediateState = {
                 ...current,
                 player: { ...current.player, pos: newPos }
             };
             
-            // Render movement immediately for responsive feel
             setGameState(intermediateState);
             audioService.playSound('select');
             
@@ -531,7 +627,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         setAnimating(true);
         
-        // 1. Player Action (Turn)
         let current = stateRef.current;
         const intermediateState = { ...current, player: { ...current.player, facing: (current.player.facing * -1) as Facing } };
         
@@ -581,7 +676,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         const p = current.player;
         const targetPos = p.pos + p.facing;
-        const enemyInFront = current.enemies.find(e => e.pos === targetPos);
+        const enemyInFront = current.enemies.find(e => e.pos === targetPos && e.hp > 0);
         
         if (!enemyInFront) {
             addLog("目の前に敵がいません");
@@ -664,7 +759,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const handleUnqueueCard = (idx: number) => {
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         
-        // Unqueue does NOT consume a turn
         const card = stateRef.current.queue[idx];
         const newQueue = [...stateRef.current.queue];
         newQueue.splice(idx, 1);
@@ -684,10 +778,9 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const queue = [...stateRef.current.queue];
         const cardsReturningToHand: KCard[] = [];
         
-        // --- PLAYER COMBO PHASE ---
         let currentState = { ...stateRef.current };
 
-        // Execute all player cards sequentially
+        // Execute all player cards
         for (const card of queue) {
             if (currentState.status === 'GAME_OVER') break;
             
@@ -699,22 +792,17 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             let nextEnemies = currentState.enemies.map(e => ({...e}));
             
             let hit = false;
-
-            // Relic Buffs
             let dmgBonus = 0;
             if (currentState.relics.some(r => r.id === 'R_GLOVES')) dmgBonus += 1;
 
-            // Determine targets based on range/effect
             let targets: number[] = [];
             if (card.effectType === 'FURTHEST') {
-                // Find furthest enemy in range (all grid)
                 let furthestDist = -1;
                 let targetPos = -1;
                 nextEnemies.forEach(e => {
-                    const dist = Math.abs(e.pos - pPos);
-                    if (dist > furthestDist) {
-                        furthestDist = dist;
-                        targetPos = e.pos;
+                    if (e.hp > 0) {
+                        const dist = Math.abs(e.pos - pPos);
+                        if (dist > furthestDist) { furthestDist = dist; targetPos = e.pos; }
                     }
                 });
                 if (targetPos !== -1) targets = [targetPos];
@@ -723,40 +811,28 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             }
 
             if (card.type === 'ATTACK') {
-                // DASH_ATTACK logic: Move until hit
                 if (card.effectType === 'DASH_ATTACK') {
                     let finalPos = pPos;
                     for (let i = 1; i <= Math.max(...card.range); i++) {
                         const checkPos = pPos + (i * p.facing);
                         if (checkPos < 0 || checkPos >= GRID_SIZE) break;
-                        
-                        const hitEnemy = nextEnemies.find(e => e.pos === checkPos);
-                        if (hitEnemy) {
-                            // Hit enemy!
-                            targets = [checkPos]; // Only hit this one
-                            break; 
-                        }
-                        finalPos = checkPos; // Keep moving if empty
+                        const hitEnemy = nextEnemies.find(e => e.pos === checkPos && e.hp > 0);
+                        if (hitEnemy) { targets = [checkPos]; break; }
+                        finalPos = checkPos;
                     }
-                    nextPlayer.pos = finalPos; // Update position
+                    nextPlayer.pos = finalPos;
                 }
 
-                const hits = nextEnemies.filter(e => targets.includes(e.pos));
-                
-                // Visuals based on range type
+                const hits = nextEnemies.filter(e => targets.includes(e.pos) && e.hp > 0);
                 const isRanged = card.range.some(r => r > 1);
                 if (isRanged && hits.length === 0) {
-                    targets.forEach(t => {
-                        if (t >= 0 && t < GRID_SIZE) addVfx('BLAST', t, { color: 'text-gray-500' });
-                    });
+                    targets.forEach(t => { if (t >= 0 && t < GRID_SIZE) addVfx('BLAST', t, { color: 'text-gray-500' }); });
                 }
 
                 if (hits.length > 0) {
                     hit = true;
                     hits.forEach(e => {
                         let finalDmg = card.damage + dmgBonus;
-                        
-                        // Counter Logic
                         if (card.effectType === 'COUNTER') {
                             if (e.intent && (e.intent.type === 'ATTACK' || e.intent.timer <= 1)) {
                                 finalDmg *= 3;
@@ -767,58 +843,38 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                         e.hp -= finalDmg;
                         addLog(`${e.name} に ${finalDmg} ダメージ！`);
-                        
-                        // Attack VFX
                         addVfx(isRanged ? 'BLAST' : 'SLASH', e.pos);
                         addVfx('TEXT', e.pos, { text: finalDmg, color: 'text-yellow-400' });
 
-                        // Push Logic
                         if (card.effectType === 'PUSH') {
                             const pushDir = p.facing;
                             let targetPos = e.pos;
-                            // Push 2 tiles max
                             for(let k=0; k<2; k++) {
                                 const next = targetPos + pushDir;
-                                const isBlocked = nextEnemies.some(o => o.pos === next) || nextPlayer.pos === next || next < 0 || next >= GRID_SIZE;
-                                if (!isBlocked) targetPos = next;
-                                else break;
+                                const isBlocked = nextEnemies.some(o => o.pos === next && o.hp > 0) || nextPlayer.pos === next || next < 0 || next >= GRID_SIZE;
+                                if (!isBlocked) targetPos = next; else break;
                             }
-                            if (targetPos !== e.pos) {
-                                e.pos = targetPos;
-                                addLog(`${e.name}を吹き飛ばした！`);
-                                addVfx('IMPACT', e.pos);
-                            }
+                            if (targetPos !== e.pos) { e.pos = targetPos; addLog(`${e.name}を吹き飛ばした！`); addVfx('IMPACT', e.pos); }
                         }
 
-                        // Pull Logic
                         if (card.effectType === 'PULL') {
-                            const dest = p.pos + p.facing; // Immediately in front
-                            const isBlocked = nextEnemies.some(o => o.pos === dest && o.id !== e.id) || nextPlayer.pos === dest;
-                            if (!isBlocked && dest >= 0 && dest < GRID_SIZE) {
-                                e.pos = dest;
-                                addLog(`${e.name}を引き寄せた！`);
-                                addVfx('IMPACT', e.pos);
-                            }
+                            const dest = p.pos + p.facing; 
+                            const isBlocked = nextEnemies.some(o => o.pos === dest && o.id !== e.id && o.hp > 0) || nextPlayer.pos === dest;
+                            if (!isBlocked && dest >= 0 && dest < GRID_SIZE) { e.pos = dest; addLog(`${e.name}を引き寄せた！`); addVfx('IMPACT', e.pos); }
                         }
                     });
                     
-                    // Recoil Logic
                     if (card.effectType === 'RECOIL') {
                         const recoilPos = p.pos - p.facing;
-                        const isBlocked = nextEnemies.some(e => e.pos === recoilPos) || recoilPos < 0 || recoilPos >= GRID_SIZE;
-                        if (!isBlocked) {
-                            nextPlayer.pos = recoilPos;
-                            addLog("反動で後退！");
-                        }
+                        const isBlocked = nextEnemies.some(e => e.pos === recoilPos && e.hp > 0) || recoilPos < 0 || recoilPos >= GRID_SIZE;
+                        if (!isBlocked) { nextPlayer.pos = recoilPos; addLog("反動で後退！"); }
                     }
 
-                    // Add shield from attack cards (Iron Ruler etc)
                     if (card.shield && card.shield > 0) {
                         nextPlayer.shield += card.shield;
                         addLog(`シールド +${card.shield}`);
                         addVfx('BLOCK', p.pos);
                     }
-
                     audioService.playSound('attack');
                 } else {
                     addLog("空振り...");
@@ -827,7 +883,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             } else if (card.type === 'MOVE') {
                 const dist = card.range[0];
                 const target = pPos + (dist * p.facing);
-                if (target >= 0 && target < GRID_SIZE && !nextEnemies.some(e => e.pos === target)) {
+                if (target >= 0 && target < GRID_SIZE && !nextEnemies.some(e => e.pos === target && e.hp > 0)) {
                     nextPlayer.pos = target;
                     audioService.playSound('select');
                 } else {
@@ -836,7 +892,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             } else if (card.type === 'UTILITY') {
                 if (card.name === 'バックステップ') {
                     const target = pPos - p.facing;
-                    if (target >= 0 && target < GRID_SIZE && !nextEnemies.some(e => e.pos === target)) {
+                    if (target >= 0 && target < GRID_SIZE && !nextEnemies.some(e => e.pos === target && e.hp > 0)) {
                         nextPlayer.pos = target;
                         audioService.playSound('select');
                     }
@@ -847,29 +903,14 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 }
             }
 
-            // Update intermediate state (Player effect applied)
-            currentState = {
-                ...currentState,
-                player: nextPlayer,
-                enemies: nextEnemies.filter(e => e.hp > 0)
-            };
-
-            // Card will return to hand after combo
-            cardsReturningToHand.push({
-                ...card,
-                currentCooldown: card.cooldown
-            });
-
-            // Update UI to show step
+            currentState = { ...currentState, player: nextPlayer, enemies: nextEnemies }; // Keep dead enemies for now to check status
+            cardsReturningToHand.push({ ...card, currentCooldown: card.cooldown });
             setGameState(currentState);
-            
-            // Wait for visual pacing
             await new Promise(r => setTimeout(r, 400));
         }
 
-        // --- ENEMY TURN & COOLDOWN (ONCE AFTER COMBO) ---
-        // Only if game is active and enemies remain
-        if (currentState.status !== 'GAME_OVER' && currentState.enemies.length > 0) {
+        // Enemy Turn after combo
+        if (currentState.status !== 'GAME_OVER' && currentState.enemies.some(e => e.hp > 0)) {
              const anyEnemyActing = currentState.enemies.some(e => e.hp > 0 && e.intent && e.intent.timer <= 1);
              const delay = anyEnemyActing ? 250 : 30;
              await new Promise(r => setTimeout(r, delay));
@@ -884,26 +925,22 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
              }
         }
 
-        // --- CLEANUP PHASE ---
+        // Cleanup
         setGameState(prev => {
             if (prev.status === 'GAME_OVER') return prev;
             
-            // Return executed cards to hand
+            // Remove truly dead enemies (phase check logic handles boss revival in resolveEnemyTurn)
+            const aliveEnemies = prev.enemies.filter(e => e.hp > 0);
+            
             let newHand = [...prev.hand, ...cardsReturningToHand];
-
-            // WAVE CLEAR LOGIC
-            if (currentState.enemies.length === 0) {
-                const rewardMoney = 15;
+            
+            if (aliveEnemies.length === 0) {
+                const rewardMoney = 10 + prev.battleStage * 5;
                 setTimeout(() => handlePhaseComplete(), 1000);
-                return { ...prev, status: 'PHASE_CLEAR', queue: [], hand: newHand, money: prev.money + rewardMoney, logs: [...prev.logs, `Area Clear! +${rewardMoney}G`] };
+                return { ...prev, status: 'WAVE_CLEAR', queue: [], hand: newHand, money: prev.money + rewardMoney, logs: [...prev.logs, `Wave Clear! +${rewardMoney}G`], enemies: aliveEnemies };
             }
 
-            return {
-                ...prev,
-                status: 'PLAYING',
-                queue: [], // Queue cleared
-                hand: newHand,
-            };
+            return { ...prev, status: 'PLAYING', queue: [], hand: newHand, enemies: aliveEnemies };
         });
 
         setAnimating(false);
@@ -911,40 +948,45 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     const handlePhaseComplete = () => {
         const current = stateRef.current;
-        let nextPhase: GamePhase | null = null;
-        
-        switch (current.phase) {
-            case 'BATTLE_1': nextPhase = 'REWARD_1'; break;
-            case 'REWARD_1': nextPhase = 'BATTLE_2_1'; break; // Handled by selection
-            case 'BATTLE_2_1': nextPhase = 'REWARD_2'; break;
-            case 'REWARD_2': nextPhase = 'BATTLE_2_2'; break; // Handled by selection
-            case 'BATTLE_2_2': nextPhase = 'UPGRADE_EVENT'; break;
-            case 'UPGRADE_EVENT': nextPhase = 'MID_BOSS'; break;
-            case 'MID_BOSS': nextPhase = 'SHOP'; break;
-            case 'SHOP': nextPhase = 'BOSS'; break;
-            case 'BOSS': nextPhase = null; break; // Victory handled separately
+        let nextPhase = current.phase;
+        let nextWave = current.wave + 1;
+
+        if (nextWave > current.maxWaves) {
+            // End of Battle Stage
+            switch (current.battleStage) {
+                case 1: nextPhase = 'REWARD'; break;
+                case 2: nextPhase = 'SHOP'; break;
+                case 3: nextPhase = 'REWARD'; break;
+                case 4: nextPhase = 'UPGRADE_EVENT'; break;
+                case 5: nextPhase = 'SHOP'; break;
+                case 6: nextPhase = 'REWARD'; break; // Before Boss
+                case 7: nextPhase = 'VICTORY'; break;
+            }
         }
 
-        if (nextPhase === 'REWARD_1' || nextPhase === 'REWARD_2') {
-            generateRewards();
-            setGameState(prev => ({ ...prev, phase: nextPhase as GamePhase, status: 'PLAYING' }));
-            audioService.playSound('win');
-        } else if (nextPhase === 'UPGRADE_EVENT' || nextPhase === 'SHOP') {
-            setGameState(prev => ({ ...prev, phase: nextPhase as GamePhase, status: 'PLAYING', shopUpgradeUsed: false }));
-            if (nextPhase === 'SHOP') audioService.playBGM('poker_shop');
-            else audioService.playBGM('menu'); // Upgrade event music
-        } else if (nextPhase === 'BOSS' || nextPhase === 'MID_BOSS') {
-            // Need a button press to proceed usually, but here we can automate or show a "Next" button
-            // For now, let's auto-start if not shop
-             startWave(1, nextPhase);
-        } else if (current.phase === 'BOSS') {
-            setGameState(prev => ({ ...prev, status: 'VICTORY' }));
-            audioService.playSound('win');
+        if (nextPhase === 'REWARD') {
+             generateRewards();
+             setGameState(prev => ({ ...prev, phase: 'REWARD', status: 'PLAYING' }));
+             audioService.playSound('win');
+        } else if (nextPhase === 'SHOP' || nextPhase === 'UPGRADE_EVENT') {
+             setGameState(prev => ({ ...prev, phase: nextPhase as GamePhase, status: 'PLAYING', shopUpgradeUsed: false }));
+             audioService.playBGM(nextPhase === 'SHOP' ? 'poker_shop' : 'menu');
+        } else if (nextPhase === 'VICTORY') {
+             setGameState(prev => ({ ...prev, status: 'VICTORY' }));
+             audioService.playSound('win');
+        } else {
+             // Continue Battle
+             startWave(current.battleStage, nextWave);
         }
     };
 
+    const nextStage = () => {
+        const nextStg = stateRef.current.battleStage + 1;
+        startWave(nextStg, 1);
+    };
+
     const generateRewards = () => {
-        const pool = CARD_DB.filter(c => !stateRef.current.hand.some(h => h.name === c.name)); // Avoid dupes if possible
+        const pool = CARD_DB.filter(c => !stateRef.current.hand.some(h => h.name === c.name)); 
         const options: KCard[] = [];
         for (let i = 0; i < 2; i++) {
             const template = pool[Math.floor(Math.random() * pool.length)] || pool[0];
@@ -954,15 +996,12 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     const selectReward = (card: KCard) => {
-        const nextPhase = stateRef.current.phase === 'REWARD_1' ? 'BATTLE_2_1' : 'BATTLE_2_2';
-        
         setGameState(prev => ({
             ...prev,
             hand: [...prev.hand, card],
-            phase: nextPhase,
             status: 'PLAYING'
         }));
-        setTimeout(() => startWave(1, nextPhase), 100);
+        setTimeout(() => nextStage(), 100);
     };
 
     const buyShopItem = (item: KRelic) => {
@@ -997,14 +1036,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             audioService.playSound('wrong');
             return;
         }
-        
         generateUpgradeOffer();
-        setUpgradeSelection({
-            active: true,
-            cardIndex: index,
-            rerollCount: 0,
-            currentOffer: null // Will be set by generate
-        });
+        setUpgradeSelection({ active: true, cardIndex: index, rerollCount: 0, currentOffer: null });
         audioService.playSound('select');
     };
 
@@ -1014,14 +1047,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     const rerollUpgrade = () => {
-        if (gameState.money < 10) {
-            audioService.playSound('wrong');
-            return;
-        }
-        if (upgradeSelection.rerollCount >= 3) {
-            audioService.playSound('wrong');
-            return;
-        }
+        if (gameState.money < 10) { audioService.playSound('wrong'); return; }
+        if (upgradeSelection.rerollCount >= 3) { audioService.playSound('wrong'); return; }
 
         setGameState(prev => ({ ...prev, money: prev.money - 10 }));
         generateUpgradeOffer();
@@ -1038,39 +1065,15 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         let msg = "強化完了！";
 
         switch (currentOffer.type) {
-            case 'DMG_1':
-                card.damage += 1;
-                break;
-            case 'DMG_1_CD_1':
-                card.damage += 1;
-                card.cooldown += 1;
-                break;
-            case 'DMG_2_CD_3':
-                card.damage += 2;
-                card.cooldown += 3;
-                break;
-            case 'CD_MINUS_1':
-                card.cooldown = Math.max(0, card.cooldown - 1);
-                break;
-            case 'CD_MINUS_2':
-                card.cooldown = Math.max(0, card.cooldown - 2);
-                break;
-            case 'CD_MINUS_4_DMG_MINUS_1':
-                card.cooldown = Math.max(0, card.cooldown - 4);
-                card.damage = Math.max(0, card.damage - 1);
-                break;
-            case 'SLOT_1':
-                card.slots = (card.slots || 0) + 1;
-                break;
-            case 'SLOT_1_CD_MINUS_1':
-                card.slots = (card.slots || 0) + 1;
-                card.cooldown = Math.max(0, card.cooldown - 1);
-                break;
-            case 'SACRIFICE':
-                newHand.splice(cardIndex, 1);
-                setGameState(prev => ({ ...prev, money: prev.money + 40 }));
-                msg = "カードを犠牲にした...";
-                break;
+            case 'DMG_1': card.damage += 1; break;
+            case 'DMG_1_CD_1': card.damage += 1; card.cooldown += 1; break;
+            case 'DMG_2_CD_3': card.damage += 2; card.cooldown += 3; break;
+            case 'CD_MINUS_1': card.cooldown = Math.max(0, card.cooldown - 1); break;
+            case 'CD_MINUS_2': card.cooldown = Math.max(0, card.cooldown - 2); break;
+            case 'CD_MINUS_4_DMG_MINUS_1': card.cooldown = Math.max(0, card.cooldown - 4); card.damage = Math.max(0, card.damage - 1); break;
+            case 'SLOT_1': card.slots = (card.slots || 0) + 1; break;
+            case 'SLOT_1_CD_MINUS_1': card.slots = (card.slots || 0) + 1; card.cooldown = Math.max(0, card.cooldown - 1); break;
+            case 'SACRIFICE': newHand.splice(cardIndex, 1); setGameState(prev => ({ ...prev, money: prev.money + 40 })); msg = "カードを犠牲にした..."; break;
             case 'GAMBLE':
                 const pool = CARD_DB.filter(c => c.name !== card.name);
                 const randomCard = pool[Math.floor(Math.random() * pool.length)];
@@ -1084,54 +1087,27 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             newHand[cardIndex] = card;
         }
 
-        setGameState(prev => ({
-            ...prev,
-            hand: newHand,
-            shopUpgradeUsed: true
-        }));
-        
+        setGameState(prev => ({ ...prev, hand: newHand, shopUpgradeUsed: true }));
         setUpgradeSelection({ active: false, cardIndex: null, currentOffer: null, rerollCount: 0 });
         audioService.playSound('buff');
         addLog(msg);
     };
 
-    const cancelUpgrade = () => {
-        setUpgradeSelection({ active: false, cardIndex: null, currentOffer: null, rerollCount: 0 });
-    };
+    const cancelUpgrade = () => { setUpgradeSelection({ active: false, cardIndex: null, currentOffer: null, rerollCount: 0 }); };
     
-    // Proceed from Upgrade Event to Mid Boss
-    const finishUpgradeEvent = () => {
-        startWave(1, 'MID_BOSS');
-    };
-
-    const goToBoss = () => {
-        startWave(1, 'BOSS');
-    };
-
-    const getPhaseName = (phase: GamePhase) => {
-        switch(phase) {
-            case 'BATTLE_1': return 'Tutorial';
-            case 'REWARD_1': return 'Reward';
-            case 'BATTLE_2_1': return 'Battle 1';
-            case 'REWARD_2': return 'Reward';
-            case 'BATTLE_2_2': return 'Battle 2';
-            case 'UPGRADE_EVENT': return 'Rest';
-            case 'MID_BOSS': return 'Mid Boss';
-            case 'SHOP': return 'Shop';
-            case 'BOSS': return 'FINAL';
-            default: return '';
-        }
+    const finishShopOrEvent = () => {
+        nextStage();
     };
 
     // --- RENDER HELPERS ---
     const getGridContent = (idx: number) => {
         const p = gameState.player;
-        const e = gameState.enemies.find(en => en.pos === idx);
+        const e = gameState.enemies.find(en => en.pos === idx && en.hp > 0);
         const cellVfx = vfxList.filter(v => v.pos === idx);
         
         return (
             <div className="relative w-full h-full flex items-end justify-center">
-                {/* VFX Layer */}
+                {/* VFX */}
                 {cellVfx.map(v => (
                     <div key={v.id} className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
                         {v.type === 'SLASH' && <div className="w-full h-1 bg-white rotate-45 animate-ping shadow-[0_0_10px_white]"></div>}
@@ -1141,6 +1117,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         {v.type === 'COUNTER' && <div className="text-yellow-400 font-bold text-xs animate-pulse">COUNTER!</div>}
                         {v.type === 'IMPACT' && <div className="absolute w-full h-full bg-white/50 animate-ping rounded-full"></div>}
                         {v.type === 'WARP' && <div className="text-cyan-400 animate-spin"><Move size={24}/></div>}
+                        {v.type === 'EVOLVE' && <div className="absolute w-full h-full bg-yellow-400/80 animate-ping rounded-full"></div>}
+                        {v.type === 'SUMMON' && <div className="absolute w-full h-full bg-purple-400/80 animate-ping rounded-full"></div>}
                     </div>
                 ))}
 
@@ -1172,7 +1150,15 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 </div>
                             </div>
                         )}
+                        {e.intent && e.intent.type === 'SUMMON' && (
+                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center z-20">
+                                <div className="bg-purple-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center">
+                                    <Ghost size={12} className="mr-1"/> !
+                                </div>
+                            </div>
+                        )}
                         <div className="absolute -bottom-6 w-16 text-center bg-black/50 text-white text-xs rounded border border-red-500">{e.hp}/{e.maxHp}</div>
+                        {e.bossPhase && <div className="absolute top-0 left-0 bg-yellow-600 text-black text-[10px] px-1 rounded font-bold">P{e.bossPhase}</div>}
                     </div>
                 )}
             </div>
@@ -1181,7 +1167,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     const isDangerZone = (idx: number) => {
         return gameState.enemies.some(e => {
-            if (e.intent?.type === 'ATTACK' && e.intent.timer === 1) {
+            if (e.hp > 0 && e.intent?.type === 'ATTACK' && e.intent.timer === 1) {
                 const range = e.intent.range || [];
                 const targets = range.map(r => e.pos + (r * e.facing));
                 return targets.includes(idx);
@@ -1197,23 +1183,24 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             <div className="flex justify-between items-center p-4 bg-black/40 border-b border-indigo-500/30 shrink-0">
                 <button onClick={onBack} className="flex items-center text-gray-400 hover:text-white"><ArrowLeft className="mr-2"/> Quit</button>
                 <h2 className="text-xl font-bold text-indigo-100 tracking-widest hidden md:block">
-                    KOCHO SHOWDOWN <span className="text-sm text-pink-400 ml-2">{getPhaseName(gameState.phase)}</span>
+                    KOCHO SHOWDOWN <span className="text-sm text-pink-400 ml-2">Stage {gameState.battleStage}/7</span>
                 </h2>
                 <div className="text-sm font-bold text-yellow-400 flex items-center gap-2">
                     <Coins size={16}/> {gameState.money} G
                 </div>
             </div>
 
-            {/* Main Content Area (Split Layout for PC Landscape) */}
+            {/* Main Content */}
             <div className="flex-grow flex flex-col md:flex-row overflow-hidden relative">
                 
-                {/* LEFT COLUMN: Game Field (Full width on Mobile, Flex-1 on PC) */}
+                {/* Game Field */}
                 <div className="flex-1 relative bg-[#1a1a2e] flex flex-col items-center justify-center p-4 overflow-hidden">
                     {/* Status Overlay */}
-                    {(gameState.status === 'VICTORY' || gameState.status === 'GAME_OVER' || gameState.phase === 'REWARD_1' || gameState.phase === 'REWARD_2' || gameState.phase === 'SHOP' || gameState.phase === 'UPGRADE_EVENT') && (
+                    {(gameState.status === 'VICTORY' || gameState.status === 'GAME_OVER' || gameState.phase === 'REWARD' || gameState.phase === 'SHOP' || gameState.phase === 'UPGRADE_EVENT') && (
                         <div className="absolute inset-0 bg-black/90 z-40 flex flex-col items-center justify-center p-4">
+                            
                             {/* REWARD UI */}
-                            {(gameState.phase === 'REWARD_1' || gameState.phase === 'REWARD_2') && (
+                            {gameState.phase === 'REWARD' && (
                                 <div className="text-center w-full">
                                     <h2 className="text-3xl font-bold text-yellow-400 mb-8 flex items-center justify-center"><Gift className="mr-2"/> Card Reward</h2>
                                     <div className="flex gap-4 md:gap-8 justify-center flex-wrap">
@@ -1232,133 +1219,77 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             {/* UPGRADE EVENT UI */}
                             {gameState.phase === 'UPGRADE_EVENT' && (
                                 <div className="w-full h-full flex flex-col items-center justify-center p-4">
-                                     {/* Upgrade Modal Overlay (Reused) */}
+                                     {/* Upgrade Modal */}
                                      {upgradeSelection.active && upgradeSelection.currentOffer && (
                                         <div className="absolute inset-0 bg-black/95 z-50 flex flex-col items-center justify-center p-6 animate-in zoom-in duration-200 rounded-lg">
                                             <h3 className="text-2xl font-bold text-yellow-400 mb-6 border-b border-yellow-600 pb-2">鍛冶屋の提案</h3>
-                                            
                                             <div className="bg-slate-800 border-2 border-indigo-500 p-6 rounded-xl text-center mb-8 w-full max-w-sm">
                                                 <div className={`text-6xl mb-4 flex justify-center ${upgradeSelection.currentOffer.color}`}>
                                                     {upgradeSelection.currentOffer.icon}
                                                 </div>
                                                 <div className="text-xl font-bold mb-2">{upgradeSelection.currentOffer.description}</div>
-                                                <div className="text-gray-400 text-sm">適用されるカード: {gameState.hand[upgradeSelection.cardIndex!]?.name}</div>
+                                                <div className="text-gray-400 text-sm">適用: {gameState.hand[upgradeSelection.cardIndex!]?.name}</div>
                                             </div>
-
                                             <div className="flex flex-col gap-4 w-full max-w-xs">
-                                                <button 
-                                                    onClick={confirmUpgrade}
-                                                    className="bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg flex items-center justify-center shadow-lg transform active:scale-95 transition-transform"
-                                                >
-                                                    <Hammer className="mr-2"/> 適用する
-                                                </button>
-                                                
-                                                <button 
-                                                    onClick={cancelUpgrade}
-                                                    className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg"
-                                                >
-                                                    キャンセル
-                                                </button>
+                                                <button onClick={confirmUpgrade} className="bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg flex items-center justify-center shadow-lg"><Hammer className="mr-2"/> 適用する</button>
+                                                <button onClick={cancelUpgrade} className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg">キャンセル</button>
                                             </div>
                                         </div>
                                     )}
 
-                                    <h2 className="text-3xl font-bold text-emerald-400 mb-4 flex items-center animate-pulse"><Hammer className="mr-2"/> Maintenance Time</h2>
+                                    <h2 className="text-3xl font-bold text-emerald-400 mb-4 flex items-center animate-pulse"><Hammer className="mr-2"/> Maintenance</h2>
                                     <p className="text-gray-300 mb-8">カードを1枚、無料で強化できます。</p>
                                     
                                     <div className="bg-slate-900 border border-slate-600 rounded-lg p-4 w-full max-w-2xl overflow-y-auto custom-scrollbar mb-8">
                                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                             {gameState.hand.map((card, i) => (
-                                                <div 
-                                                    key={i} 
-                                                    className={`bg-slate-800 p-3 rounded border relative transition-all ${gameState.shopUpgradeUsed ? 'opacity-50 cursor-not-allowed border-slate-600' : 'hover:border-yellow-400 cursor-pointer border-slate-600'}`}
-                                                    onClick={() => selectCardForUpgrade(i)}
-                                                >
+                                                <div key={i} className={`bg-slate-800 p-3 rounded border relative transition-all ${gameState.shopUpgradeUsed ? 'opacity-50 cursor-not-allowed border-slate-600' : 'hover:border-yellow-400 cursor-pointer border-slate-600'}`} onClick={() => selectCardForUpgrade(i)}>
                                                     <div className="font-bold text-sm text-white mb-1">{card.name} {card.upgraded && <span className="text-yellow-400 text-xs">★</span>}</div>
                                                     <div className="text-xs text-gray-400 mb-2">{card.description}</div>
                                                     <div className="flex gap-2 text-[10px]">
                                                         {card.damage > 0 && <span className="text-red-400 bg-red-900/30 px-1 rounded">ATK:{card.damage}</span>}
                                                         <span className="text-blue-400 bg-blue-900/30 px-1 rounded">CD:{card.cooldown}</span>
                                                     </div>
+                                                    {!gameState.shopUpgradeUsed && <div className="absolute top-2 right-2 text-yellow-500"><Plus size={16}/></div>}
                                                 </div>
                                             ))}
                                         </div>
                                     </div>
                                     
-                                    <button 
-                                        onClick={finishUpgradeEvent} 
-                                        className="bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg flex items-center border-2 border-red-400"
-                                    >
-                                        中ボスへ挑む <Skull className="ml-2"/>
-                                    </button>
+                                    <button onClick={finishShopOrEvent} className="bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg flex items-center border-2 border-red-400">次へ進む <ArrowUp className="ml-2"/></button>
                                 </div>
                             )}
 
                             {/* SHOP UI */}
                             {gameState.phase === 'SHOP' && (
                                 <div className="w-full h-full flex flex-col p-4 md:p-8 overflow-y-auto relative">
-                                    {/* Upgrade Modal Overlay */}
+                                    {/* (Upgrade Modal Overlay reused) */}
                                     {upgradeSelection.active && upgradeSelection.currentOffer && (
                                         <div className="absolute inset-0 bg-black/95 z-50 flex flex-col items-center justify-center p-6 animate-in zoom-in duration-200 rounded-lg">
-                                            <h3 className="text-2xl font-bold text-yellow-400 mb-6 border-b border-yellow-600 pb-2">鍛冶屋の提案</h3>
-                                            
+                                             <h3 className="text-2xl font-bold text-yellow-400 mb-6 border-b border-yellow-600 pb-2">鍛冶屋の提案</h3>
                                             <div className="bg-slate-800 border-2 border-indigo-500 p-6 rounded-xl text-center mb-8 w-full max-w-sm">
-                                                <div className={`text-6xl mb-4 flex justify-center ${upgradeSelection.currentOffer.color}`}>
-                                                    {upgradeSelection.currentOffer.icon}
-                                                </div>
+                                                <div className={`text-6xl mb-4 flex justify-center ${upgradeSelection.currentOffer.color}`}>{upgradeSelection.currentOffer.icon}</div>
                                                 <div className="text-xl font-bold mb-2">{upgradeSelection.currentOffer.description}</div>
-                                                <div className="text-gray-400 text-sm">適用されるカード: {gameState.hand[upgradeSelection.cardIndex!]?.name}</div>
+                                                <div className="text-gray-400 text-sm">適用: {gameState.hand[upgradeSelection.cardIndex!]?.name}</div>
                                             </div>
-
                                             <div className="flex flex-col gap-4 w-full max-w-xs">
-                                                <button 
-                                                    onClick={confirmUpgrade}
-                                                    className="bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg flex items-center justify-center shadow-lg transform active:scale-95 transition-transform"
-                                                >
-                                                    <Hammer className="mr-2"/> 適用する
-                                                </button>
-                                                
-                                                <button 
-                                                    onClick={rerollUpgrade}
-                                                    disabled={upgradeSelection.rerollCount >= 3 || gameState.money < 10}
-                                                    className={`bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg flex items-center justify-center shadow-lg transition-colors ${upgradeSelection.rerollCount >= 3 || gameState.money < 10 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                                >
-                                                    <RefreshCw className="mr-2"/> 再抽選 (10G) [{3 - upgradeSelection.rerollCount}回]
-                                                </button>
-
-                                                <button 
-                                                    onClick={cancelUpgrade}
-                                                    className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg"
-                                                >
-                                                    キャンセル
-                                                </button>
+                                                <button onClick={confirmUpgrade} className="bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg flex items-center justify-center shadow-lg"><Hammer className="mr-2"/> 適用する</button>
+                                                <button onClick={rerollUpgrade} disabled={upgradeSelection.rerollCount >= 3 || gameState.money < 10} className={`bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg flex items-center justify-center shadow-lg transition-colors ${upgradeSelection.rerollCount >= 3 || gameState.money < 10 ? 'opacity-50 cursor-not-allowed' : ''}`}><RefreshCw className="mr-2"/> 再抽選 (10G)</button>
+                                                <button onClick={cancelUpgrade} className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg">キャンセル</button>
                                             </div>
                                         </div>
                                     )}
 
-                                    <h2 className="text-3xl font-bold text-indigo-400 mb-6 flex items-center shrink-0"><ShoppingBag className="mr-2"/> Shop & Upgrade</h2>
+                                    <h2 className="text-3xl font-bold text-indigo-400 mb-6 flex items-center shrink-0"><ShoppingBag className="mr-2"/> Shop</h2>
                                     <div className="flex flex-col md:flex-row gap-8 flex-grow">
                                         <div className="flex-1 bg-slate-900 border border-slate-600 rounded-lg p-4 overflow-y-auto custom-scrollbar">
-                                            <h3 className="text-xl font-bold text-white mb-4 flex items-center justify-between">
-                                                <span className="flex items-center"><Hammer className="mr-2 text-red-400"/> Deck Upgrade</span>
-                                                <span className={`text-xs ${gameState.shopUpgradeUsed ? 'text-red-500' : 'text-green-400'}`}>
-                                                    {gameState.shopUpgradeUsed ? '(済)' : '(1回のみ)'}
-                                                </span>
-                                            </h3>
+                                            <h3 className="text-xl font-bold text-white mb-4 flex items-center justify-between"><span className="flex items-center"><Hammer className="mr-2 text-red-400"/> Deck Upgrade</span><span className={`text-xs ${gameState.shopUpgradeUsed ? 'text-red-500' : 'text-green-400'}`}>{gameState.shopUpgradeUsed ? '(済)' : '(1回のみ)'}</span></h3>
                                             <div className="grid grid-cols-2 gap-4">
                                                 {gameState.hand.map((card, i) => (
-                                                    <div 
-                                                        key={i} 
-                                                        className={`bg-slate-800 p-3 rounded border relative transition-all ${gameState.shopUpgradeUsed ? 'opacity-50 cursor-not-allowed border-slate-600' : 'hover:border-yellow-400 cursor-pointer border-slate-600'}`}
-                                                        onClick={() => selectCardForUpgrade(i)}
-                                                    >
+                                                    <div key={i} className={`bg-slate-800 p-3 rounded border relative transition-all ${gameState.shopUpgradeUsed ? 'opacity-50 cursor-not-allowed border-slate-600' : 'hover:border-yellow-400 cursor-pointer border-slate-600'}`} onClick={() => selectCardForUpgrade(i)}>
                                                         <div className="font-bold text-sm text-white mb-1">{card.name} {card.upgraded && <span className="text-yellow-400 text-xs">★</span>}</div>
                                                         <div className="text-xs text-gray-400 mb-2">{card.description}</div>
-                                                        <div className="flex gap-2 text-[10px]">
-                                                            {card.damage > 0 && <span className="text-red-400 bg-red-900/30 px-1 rounded">ATK:{card.damage}</span>}
-                                                            <span className="text-blue-400 bg-blue-900/30 px-1 rounded">CD:{card.cooldown}</span>
-                                                            {card.slots !== undefined && card.slots > 0 && <span className="text-green-400 bg-green-900/30 px-1 rounded">SLOT:{card.slots}</span>}
-                                                        </div>
+                                                        <div className="flex gap-2 text-[10px]">{card.damage > 0 && <span className="text-red-400 bg-red-900/30 px-1 rounded">ATK:{card.damage}</span>}<span className="text-blue-400 bg-blue-900/30 px-1 rounded">CD:{card.cooldown}</span></div>
                                                         {!gameState.shopUpgradeUsed && <div className="absolute top-2 right-2 text-yellow-500"><Plus size={16}/></div>}
                                                     </div>
                                                 ))}
@@ -1371,18 +1302,13 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                                     const owned = gameState.relics.some(r => r.id === item.id) && item.id !== 'R_POTION';
                                                     return (
                                                         <div key={item.id} className={`bg-slate-800 p-3 rounded border flex justify-between items-center ${owned ? 'opacity-50 border-gray-700' : 'border-slate-500'}`}>
-                                                            <div>
-                                                                <div className="font-bold text-sm text-yellow-200">{item.name}</div>
-                                                                <div className="text-xs text-gray-400">{item.desc}</div>
-                                                            </div>
+                                                            <div><div className="font-bold text-sm text-yellow-200">{item.name}</div><div className="text-xs text-gray-400">{item.desc}</div></div>
                                                             <button disabled={owned} onClick={() => buyShopItem(item)} className={`px-3 py-1 rounded text-sm font-bold ${owned ? 'bg-gray-600 text-gray-400' : 'bg-yellow-600 text-black hover:bg-yellow-500'}`}>{owned ? 'Sold' : `${item.price}G`}</button>
                                                         </div>
                                                     );
                                                 })}
                                             </div>
-                                            <button onClick={goToBoss} className="mt-8 w-full bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-lg text-xl flex items-center justify-center animate-pulse border-2 border-red-400">
-                                                <Skull className="mr-2"/> 決戦へ
-                                            </button>
+                                            <button onClick={finishShopOrEvent} className="mt-8 w-full bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-lg text-xl flex items-center justify-center animate-pulse border-2 border-red-400">次へ進む <ArrowUp className="ml-2"/></button>
                                         </div>
                                     </div>
                                 </div>
@@ -1403,14 +1329,15 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 <div className="text-center animate-in zoom-in">
                                     <Skull size={64} className="text-red-500 mb-4 mx-auto"/>
                                     <h2 className="text-4xl font-bold text-red-500 mb-4">EXPELLED</h2>
-                                    <button onClick={() => startWave(1, 'BATTLE_1')} className="bg-white text-black px-8 py-3 rounded text-xl font-bold hover:bg-gray-200">Retry</button>
+                                    <p className="text-gray-400 mb-4">Stage {gameState.battleStage}</p>
+                                    <button onClick={() => initGame()} className="bg-white text-black px-8 py-3 rounded text-xl font-bold hover:bg-gray-200">Retry</button>
                                 </div>
                             )}
                         </div>
                     )}
 
-                    {/* Standard Gameplay View (Grid & Logs) */}
-                    {(gameState.phase === 'BATTLE_1' || gameState.phase === 'BATTLE_2_1' || gameState.phase === 'BATTLE_2_2' || gameState.phase === 'MID_BOSS' || gameState.phase === 'BOSS') && (
+                    {/* Standard Gameplay View */}
+                    {gameState.phase === 'BATTLE' && (
                         <>
                             <div className="absolute top-4 left-1/2 -translate-x-1/2 w-full max-w-lg text-center pointer-events-none z-10">
                                 {gameState.logs.map((log, i) => (
@@ -1430,11 +1357,11 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     )}
                 </div>
 
-                {/* RIGHT COLUMN: Controls (Sidebar on PC) */}
-                {gameState.status !== 'GAME_OVER' && gameState.status !== 'VICTORY' && gameState.phase !== 'SHOP' && gameState.phase !== 'REWARD_1' && gameState.phase !== 'REWARD_2' && gameState.phase !== 'UPGRADE_EVENT' && (
+                {/* Controls (Sidebar) */}
+                {gameState.status !== 'GAME_OVER' && gameState.status !== 'VICTORY' && gameState.phase === 'BATTLE' && (
                     <div className="w-full md:w-80 bg-[#0f0f1b] border-t md:border-t-0 md:border-l border-indigo-900 p-2 md:p-4 shrink-0 flex flex-col gap-2 md:h-full md:overflow-y-auto custom-scrollbar">
                         
-                        {/* 1. Queue Display */}
+                        {/* Queue Display */}
                         <div className="flex justify-between items-center gap-2 bg-black/30 p-2 rounded-lg border border-indigo-900/30 shrink-0">
                             <div className="flex gap-1 justify-center items-center flex-grow">
                                 {[...Array(3)].map((_, i) => {
@@ -1451,37 +1378,22 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     );
                                 })}
                             </div>
-                            <button 
-                                onClick={executeQueue} 
-                                disabled={gameState.queue.length === 0 || animating}
-                                className={`w-16 h-16 md:w-20 md:h-20 rounded-full border-4 flex flex-col items-center justify-center font-bold shadow-lg transition-all shrink-0 ${gameState.queue.length > 0 ? 'bg-indigo-600 border-indigo-400 text-white hover:scale-105 active:scale-95 cursor-pointer animate-pulse' : 'bg-gray-800 border-gray-600 text-gray-500 cursor-not-allowed'}`}
-                            >
+                            <button onClick={executeQueue} disabled={gameState.queue.length === 0 || animating} className={`w-16 h-16 md:w-20 md:h-20 rounded-full border-4 flex flex-col items-center justify-center font-bold shadow-lg transition-all shrink-0 ${gameState.queue.length > 0 ? 'bg-indigo-600 border-indigo-400 text-white hover:scale-105 active:scale-95 cursor-pointer animate-pulse' : 'bg-gray-800 border-gray-600 text-gray-500 cursor-not-allowed'}`}>
                                 <Play size={20} className="fill-current mb-1"/> EXEC
                             </button>
                         </div>
 
-                        {/* 2. Hand Cards (Scrollable) */}
+                        {/* Hand Cards */}
                         <div className="flex md:flex-col md:flex-nowrap gap-2 overflow-x-auto md:overflow-x-hidden md:overflow-y-auto pb-2 px-1 custom-scrollbar min-h-[100px] md:min-h-0 md:flex-grow items-center md:items-stretch">
                             {gameState.hand.map((card, i) => (
-                                <div 
-                                    key={card.id} 
-                                    className={`w-20 h-28 md:w-full md:h-auto bg-slate-800 border-2 rounded-lg flex flex-col md:flex-row justify-between p-1 md:p-2 cursor-pointer transition-transform relative shadow-lg shrink-0 md:shrink ${card.upgraded ? 'border-yellow-400' : 'border-slate-600'} ${card.currentCooldown > 0 ? 'opacity-50 grayscale' : 'hover:-translate-y-2 md:hover:translate-y-0 md:hover:translate-x-2'}`}
-                                    onClick={() => handleQueueCard(card, i)}
-                                >
+                                <div key={card.id} className={`w-20 h-28 md:w-full md:h-auto bg-slate-800 border-2 rounded-lg flex flex-col md:flex-row justify-between p-1 md:p-2 cursor-pointer transition-transform relative shadow-lg shrink-0 md:shrink ${card.upgraded ? 'border-yellow-400' : 'border-slate-600'} ${card.currentCooldown > 0 ? 'opacity-50 grayscale' : 'hover:-translate-y-2 md:hover:translate-y-0 md:hover:translate-x-2'}`} onClick={() => handleQueueCard(card, i)}>
                                     <div className={`absolute top-0 left-0 w-full h-1 md:w-1 md:h-full ${card.color} rounded-t-sm md:rounded-l-sm`}></div>
-                                    
-                                    {/* Mobile Card Layout */}
                                     <div className="flex flex-col h-full w-full md:hidden">
                                         <div className="mt-1 text-[9px] font-bold text-center leading-tight truncate">{card.name}</div>
                                         <div className="flex justify-center my-0.5 text-indigo-300 scale-75">{card.icon}</div>
                                         <div className="text-[8px] text-gray-400 text-center leading-tight h-6 overflow-hidden">{card.description}</div>
-                                        <div className="flex justify-between items-center text-[8px] text-gray-500 mt-auto font-mono w-full">
-                                            <span>CD:{card.cooldown}</span>
-                                            {card.damage > 0 ? <span className="text-red-400 font-bold">{card.damage}</span> : <span className="opacity-70">{card.type}</span>}
-                                        </div>
+                                        <div className="flex justify-between items-center text-[8px] text-gray-500 mt-auto font-mono w-full"><span>CD:{card.cooldown}</span>{card.damage > 0 ? <span className="text-red-400 font-bold">{card.damage}</span> : <span className="opacity-70">{card.type}</span>}</div>
                                     </div>
-
-                                    {/* Desktop Card Layout (Row) */}
                                     <div className="hidden md:flex flex-row items-center w-full pl-2 gap-2">
                                         <div className="text-indigo-300">{card.icon}</div>
                                         <div className="flex-grow min-w-0">
@@ -1493,39 +1405,21 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                             {card.damage > 0 && <span className="text-red-400 font-bold flex items-center"><Swords size={10} className="mr-0.5"/>{card.damage}</span>}
                                         </div>
                                     </div>
-                                    
-                                    {card.currentCooldown > 0 && (
-                                        <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center rounded-lg z-10">
-                                            <Clock size={20} className="text-gray-400 mb-1"/>
-                                            <span className="text-xl font-bold text-white">{card.currentCooldown}</span>
-                                        </div>
-                                    )}
+                                    {card.currentCooldown > 0 && <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center rounded-lg z-10"><Clock size={20} className="text-gray-400 mb-1"/><span className="text-xl font-bold text-white">{card.currentCooldown}</span></div>}
                                 </div>
                             ))}
                         </div>
 
-                        {/* 3. Movement Controls */}
+                        {/* Movement Controls */}
                         <div className="flex justify-center items-center gap-4 py-2 border-t border-indigo-900/30 relative shrink-0">
                             <button onClick={() => handleMove(-1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors shadow-lg"><ChevronLeft size={24}/></button>
-                            
                             <div className="flex flex-col items-center gap-1">
                                 <div className="flex gap-1">
                                     <button onClick={handleTurn} className="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-lg border border-slate-500 text-sm font-bold flex items-center justify-center active:bg-slate-800 transition-colors w-16">TURN</button>
-                                    <button 
-                                        onClick={handleSwapPosition}
-                                        className={`px-2 py-2 rounded-lg border flex items-center justify-center transition-colors w-12 ${gameState.specialActionCooldown > 0 ? 'bg-gray-800 border-gray-600 text-gray-500' : 'bg-cyan-700 border-cyan-400 text-cyan-100 hover:bg-cyan-600 active:scale-95'}`}
-                                        title="位置交換 (CD: 3)"
-                                    >
-                                        {gameState.specialActionCooldown > 0 ? (
-                                            <span className="text-xs font-bold">{gameState.specialActionCooldown}</span>
-                                        ) : (
-                                            <RefreshCw size={16} />
-                                        )}
-                                    </button>
+                                    <button onClick={handleSwapPosition} className={`px-2 py-2 rounded-lg border flex items-center justify-center transition-colors w-12 ${gameState.specialActionCooldown > 0 ? 'bg-gray-800 border-gray-600 text-gray-500' : 'bg-cyan-700 border-cyan-400 text-cyan-100 hover:bg-cyan-600 active:scale-95'}`} title="位置交換 (CD: 3)">{gameState.specialActionCooldown > 0 ? <span className="text-xs font-bold">{gameState.specialActionCooldown}</span> : <RefreshCw size={16} />}</button>
                                 </div>
                                 <button onClick={handleWait} className="bg-gray-800 hover:bg-gray-700 px-6 py-2 rounded-lg border border-gray-600 text-xs flex items-center justify-center active:bg-gray-900 transition-colors w-28 text-gray-400"><Clock size={12} className="mr-1"/> WAIT</button>
                             </div>
-
                             <button onClick={() => handleMove(1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors shadow-lg"><ChevronRight size={24}/></button>
                         </div>
                     </div>
