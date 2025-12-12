@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp, Dna, Shuffle, Star, HelpCircle, Book, AlertCircle, Flag, Music, Mic, Milk, Battery, ShieldCheck, Bomb, Utensils, PenTool, Circle, ArrowRight, Target } from 'lucide-react';
+import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp, Dna, Shuffle, Star, HelpCircle, Book, AlertCircle, Flag, Music, Mic, Milk, Battery, ShieldCheck, Bomb, Utensils, PenTool, Circle, ArrowRight, Target, Package } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { storageService } from '../services/storageService';
@@ -317,6 +317,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     // UI State
     const [showRelicModal, setShowRelicModal] = useState(false);
     const [showHelpModal, setShowHelpModal] = useState(false); // Help Modal
+    const [showItemModal, setShowItemModal] = useState(false); // Item Modal
 
     // Shop Upgrade State
     const [currentUpgradeOffer, setCurrentUpgradeOffer] = useState<UpgradeOffer | null>(null);
@@ -540,7 +541,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     }
                 }
             } else if (card.effectType === 'PIERCE_DASH') {
-                // Sliding logic: Hit first enemy AND the one behind them
+                // Sliding: Hit first enemy AND the one behind them
                 let firstEnemyFound = false;
                 for (let i = 1; i <= Math.max(...card.range); i++) {
                     const checkPos = player.pos + (i * player.facing);
@@ -1953,6 +1954,9 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     KOCHO SHOWDOWN <span className="text-sm text-pink-400 ml-2">Stage {gameState.battleStage}/7 {gameState.battleStage > 1 ? `- ${gameState.battleSequence === 0 ? 'Part 1' : gameState.battleSequence === 1 ? 'Part 2' : 'MidBoss'}` : ''}</span>
                 </h2>
                 <div className="flex items-center gap-4">
+                    <button onClick={() => setShowItemModal(true)} className="flex items-center gap-2 text-green-200 hover:text-white transition-colors text-sm font-bold border border-green-500/30 px-3 py-1 rounded bg-black/20">
+                        <Package size={16}/> Items ({gameState.consumables.length})
+                    </button>
                     <button onClick={() => setShowHelpModal(true)} className="flex items-center gap-2 text-indigo-200 hover:text-white transition-colors text-sm font-bold border border-indigo-500/30 px-3 py-1 rounded bg-black/20">
                         <HelpCircle size={16}/> Help
                     </button>
@@ -2006,6 +2010,44 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         </div>
                         
                         <button onClick={() => setShowHelpModal(false)} className="mt-8 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg transition-colors border border-indigo-400">閉じる</button>
+                    </div>
+                </div>
+            )}
+            
+            {/* Item Modal */}
+            {showItemModal && (
+                <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowItemModal(false)}>
+                    <div className="bg-slate-800 border-4 border-green-500 rounded-lg p-6 w-full max-w-lg shadow-2xl relative" onClick={e => e.stopPropagation()}>
+                        <button onClick={() => setShowItemModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
+                        <h2 className="text-2xl font-bold text-green-400 mb-6 flex items-center"><Package className="mr-2"/> アイテム一覧 ({gameState.consumables.length}/{MAX_CONSUMABLES})</h2>
+                        
+                        {gameState.consumables.length === 0 ? (
+                            <div className="text-gray-500 text-center py-8 border-2 border-dashed border-gray-700 rounded-lg">アイテムを持っていません</div>
+                        ) : (
+                            <div className="grid grid-cols-1 gap-4">
+                                {gameState.consumables.map((item, i) => (
+                                    <div key={i} className="bg-slate-900 border border-slate-600 p-4 rounded-lg flex items-center justify-between">
+                                        <div className="flex items-center gap-4">
+                                            <div className={`w-12 h-12 bg-slate-800 border-2 border-slate-600 rounded-full flex items-center justify-center ${item.color}`}>
+                                                {item.icon}
+                                            </div>
+                                            <div>
+                                                <div className="font-bold text-white text-lg">{item.name}</div>
+                                                <div className="text-sm text-gray-400">{item.desc}</div>
+                                            </div>
+                                        </div>
+                                        <button 
+                                            onClick={() => { useConsumable(i); setShowItemModal(false); }}
+                                            className="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded transition-colors shadow-lg"
+                                        >
+                                            使う
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        
+                        <button onClick={() => setShowItemModal(false)} className="mt-8 w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition-colors border border-slate-500">閉じる</button>
                     </div>
                 </div>
             )}
@@ -2203,23 +2245,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                         {getGridContent(i)}
                                         <div className="absolute bottom-1 right-1 text-[8px] md:text-[10px] text-gray-700">{i}</div>
                                     </div>
-                                ))}
-                            </div>
-
-                            {/* Consumables Bar */}
-                            <div className="w-full max-w-lg flex justify-center gap-4 mb-2 z-20">
-                                {gameState.consumables.map((item, i) => (
-                                    <button 
-                                        key={i} 
-                                        onClick={() => useConsumable(i)}
-                                        className={`w-12 h-12 bg-slate-800 border-2 border-slate-600 rounded-full flex items-center justify-center hover:scale-110 transition-transform ${item.color}`}
-                                        title={item.desc}
-                                    >
-                                        {item.icon}
-                                    </button>
-                                ))}
-                                {[...Array(MAX_CONSUMABLES - gameState.consumables.length)].map((_, i) => (
-                                    <div key={`empty-c-${i}`} className="w-12 h-12 rounded-full border-2 border-dashed border-slate-700 bg-black/20" />
                                 ))}
                             </div>
                         </>
