@@ -209,6 +209,9 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     const [animating, setAnimating] = useState(false);
     const [rewardCards, setRewardCards] = useState<KCard[]>([]);
+    
+    // UI State
+    const [showRelicModal, setShowRelicModal] = useState(false);
 
     // Shop Upgrade State
     const [currentUpgradeOffer, setCurrentUpgradeOffer] = useState<UpgradeOffer | null>(null);
@@ -1212,8 +1215,13 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 <h2 className="text-xl font-bold text-indigo-100 tracking-widest hidden md:block">
                     KOCHO SHOWDOWN <span className="text-sm text-pink-400 ml-2">Stage {gameState.battleStage}/7</span>
                 </h2>
-                <div className="text-sm font-bold text-yellow-400 flex items-center gap-2">
-                    <Coins size={16}/> {gameState.money} G
+                <div className="flex items-center gap-4">
+                    <button onClick={() => setShowRelicModal(true)} className="flex items-center gap-2 text-yellow-200 hover:text-white transition-colors text-sm font-bold border border-yellow-500/30 px-3 py-1 rounded bg-black/20">
+                        <Gift size={16}/> <span className="hidden md:inline">Relics</span> ({gameState.relics.length})
+                    </button>
+                    <div className="text-sm font-bold text-yellow-400 flex items-center gap-2">
+                        <Coins size={16}/> {gameState.money} G
+                    </div>
                 </div>
             </div>
 
@@ -1330,6 +1338,36 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     <button onClick={() => initGame()} className="bg-white text-black px-8 py-3 rounded text-xl font-bold hover:bg-gray-200">Retry</button>
                                 </div>
                             )}
+                        </div>
+                    )}
+                    
+                    {/* RELIC MODAL */}
+                    {showRelicModal && (
+                        <div className="absolute inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowRelicModal(false)}>
+                            <div className="bg-slate-800 border-4 border-yellow-500 rounded-lg p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto relative shadow-2xl custom-scrollbar" onClick={e => e.stopPropagation()}>
+                                <button onClick={() => setShowRelicModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
+                                <h2 className="text-2xl font-bold text-yellow-400 mb-6 flex items-center"><Gift className="mr-2"/> 所持レリック</h2>
+                                
+                                {gameState.relics.length === 0 ? (
+                                    <div className="text-center text-gray-500 py-12 border-2 border-dashed border-gray-700 rounded-lg">レリックを持っていません。</div>
+                                ) : (
+                                    <div className="grid grid-cols-1 gap-3">
+                                        {gameState.relics.map((relic, i) => (
+                                            <div key={i} className="bg-slate-900 p-3 rounded border border-slate-600 flex items-center gap-4 shadow-sm">
+                                                <div className="w-12 h-12 bg-slate-800 rounded-full border-2 border-yellow-600 flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(234,179,8,0.3)]">
+                                                    <Gift size={24} className="text-yellow-400"/>
+                                                </div>
+                                                <div>
+                                                    <div className="font-bold text-white text-base mb-1">{relic.name}</div>
+                                                    <div className="text-xs text-gray-400 leading-tight">{relic.desc}</div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                
+                                <button onClick={() => setShowRelicModal(false)} className="mt-8 w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition-colors border border-slate-500">閉じる</button>
+                            </div>
                         </div>
                     )}
 
