@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp, Dna, Shuffle, Star, HelpCircle, Book, AlertCircle, Flag } from 'lucide-react';
+import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp, Dna, Shuffle, Star, HelpCircle, Book, AlertCircle, Flag, Music, Mic } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { storageService } from '../services/storageService';
@@ -42,17 +42,19 @@ interface KEntity {
     
     // Enemy AI
     intent?: {
-        type: 'ATTACK' | 'MOVE' | 'WAIT' | 'SUMMON';
+        type: 'ATTACK' | 'MOVE' | 'WAIT' | 'SUMMON' | 'SPECIAL';
         damage?: number;
         range?: number[];
         targetPos?: number;
         timer: number; // Turns until execution
         summonTarget?: string; // Name of enemy to summon
+        specialName?: string; // Name of special ability
     };
     
     // Status
     shield: number;
     bossPhase?: number; // For Final Boss (1, 2, 3)
+    specialCD?: number; // For Boss Special Abilities
 }
 
 interface KRelic {
@@ -161,20 +163,34 @@ const getInitialDeck = (): KCard[] => {
     ];
 };
 
-const ENEMY_TYPES = [
+interface EnemyTemplate {
+    name: string;
+    maxHp: number;
+    sprite: string;
+    attackDmg: number;
+    range: number[];
+    speed: number;
+    attackCooldown: number;
+    special?: 'LECTURE' | 'EXPLOSION' | 'SHIELD' | 'LULLABY' | 'CONFISCATE'; // Boss abilities
+}
+
+const ENEMY_TYPES: EnemyTemplate[] = [
     { name: '不良生徒', maxHp: 3, sprite: 'SENIOR|#a855f7', attackDmg: 2, range: [1], speed: 3, attackCooldown: 1 }, 
     { name: '熱血教師', maxHp: 6, sprite: 'TEACHER|#ef4444', attackDmg: 4, range: [1], speed: 4, attackCooldown: 2 },
     { name: '用務員', maxHp: 5, sprite: 'HUMANOID|#3e2723', attackDmg: 3, range: [1, 2], speed: 5, attackCooldown: 1 },
     { name: 'ガリ勉', maxHp: 3, sprite: 'HUMANOID|#4caf50', attackDmg: 2, range: [3, 4], speed: 3, attackCooldown: 2 },
-    // Mid Bosses
-    { name: '理科の先生', maxHp: 15, sprite: 'WIZARD|#1565c0', attackDmg: 3, range: [1, 2, 3], speed: 5, attackCooldown: 2 },
-    { name: '体育の先生', maxHp: 18, sprite: 'MUSCLE|#c62828', attackDmg: 6, range: [1], speed: 7, attackCooldown: 1 },
+    
+    // Bosses
+    { name: '教頭', maxHp: 12, sprite: 'TEACHER|#1565c0', attackDmg: 3, range: [1, 2, 3], speed: 5, attackCooldown: 2, special: 'LECTURE' },
+    { name: '理科の先生', maxHp: 15, sprite: 'WIZARD|#00bcd4', attackDmg: 3, range: [1, 2, 3], speed: 5, attackCooldown: 2, special: 'EXPLOSION' },
+    { name: '体育の先生', maxHp: 18, sprite: 'MUSCLE|#c62828', attackDmg: 6, range: [1], speed: 7, attackCooldown: 1, special: 'SHIELD' },
+    { name: '音楽の先生', maxHp: 14, sprite: 'GIRL|#e91e63', attackDmg: 2, range: [1,2,3,4], speed: 4, attackCooldown: 2, special: 'LULLABY' },
+    { name: '生活指導', maxHp: 20, sprite: 'TEACHER|#212121', attackDmg: 5, range: [1, 2], speed: 6, attackCooldown: 1, special: 'CONFISCATE' },
+
     // Final Boss Phases
-    { name: '校長', maxHp: 20, sprite: 'BOSS|#FFD700', attackDmg: 5, range: [1, 2], speed: 4, attackCooldown: 2 },
-    { name: '激怒校長', maxHp: 25, sprite: 'BOSS|#d32f2f', attackDmg: 8, range: [1, 2, 3], speed: 6, attackCooldown: 1 },
-    { name: '真・校長', maxHp: 40, sprite: 'BOSS|#212121', attackDmg: 10, range: [1, 2, 3, 4], speed: 5, attackCooldown: 2 },
-    // Summon Minion
-    { name: '教頭', maxHp: 8, sprite: 'TEACHER|#1565c0', attackDmg: 4, range: [1, 2], speed: 5, attackCooldown: 2 },
+    { name: '校長', maxHp: 25, sprite: 'BOSS|#FFD700', attackDmg: 5, range: [1, 2], speed: 4, attackCooldown: 2 },
+    { name: '激怒校長', maxHp: 30, sprite: 'BOSS|#d32f2f', attackDmg: 8, range: [1, 2, 3], speed: 6, attackCooldown: 1 },
+    { name: '真・校長', maxHp: 50, sprite: 'BOSS|#212121', attackDmg: 10, range: [1, 2, 3, 4], speed: 5, attackCooldown: 2 },
 ];
 
 const GRID_SIZE = 7;
@@ -362,10 +378,11 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 maxW = 1;
                 
                 // Cycle bosses based on stage to ensure variety
-                // Stages 2, 3, 4, 5, 6
-                let midBossName = '理科の先生';
-                if (stage === 2) midBossName = '教頭'; // Use Vice Principal as boss
-                if (stage === 4 || stage === 6) midBossName = '体育の先生';
+                let midBossName = '教頭'; // Stage 2
+                if (stage === 3) midBossName = '理科の先生';
+                if (stage === 4) midBossName = '体育の先生';
+                if (stage === 5) midBossName = '音楽の先生';
+                if (stage === 6) midBossName = '生活指導';
                 
                 const mb = ENEMY_TYPES.find(e => e.name === midBossName) || ENEMY_TYPES[1];
                 newEnemies.push(createEnemy(mb, 0));
@@ -395,6 +412,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             player: { 
                 ...prev.player, 
                 shield: 0,
+                // Do not reset HP
             }, 
             enemies: newEnemies,
             hand: currentHand,
@@ -408,7 +426,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         audioService.playBGM(bgm);
     };
 
-    const createEnemy = (template: typeof ENEMY_TYPES[0], index: number, bossPhase?: number): KEntity => {
+    const createEnemy = (template: EnemyTemplate, index: number, bossPhase?: number): KEntity => {
         // Find valid spawn pos
         const pPos = stateRef.current.player.pos;
         let pos = index === 0 ? (pPos > 3 ? 0 : 6) : (pPos > 3 ? 1 + index : 5 - index);
@@ -426,6 +444,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             spriteName: template.sprite,
             shield: 0,
             bossPhase: bossPhase,
+            specialCD: 3, // Initial special CD for bosses
             intent: {
                 type: 'WAIT',
                 timer: Math.floor(Math.random() * 2) + 1, // Staggered start
@@ -453,6 +472,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         let nextState = { ...current };
         let enemies = [...nextState.enemies];
         let player = { ...nextState.player };
+        let hand = [...nextState.hand];
         let logs = [...nextState.logs];
         let status = nextState.status;
         const generatedVfx: KochoVFX[] = [];
@@ -461,8 +481,12 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const hasShieldRelic = current.relics.some(r => r.id === 'R_SHIELD');
         if (hasShieldRelic) player.shield += 1;
 
-        // 1. Decrement Enemy Timers
-        enemies = enemies.map(e => e.intent ? { ...e, intent: { ...e.intent, timer: Math.max(0, e.intent.timer - 1) } } : e);
+        // 1. Decrement Enemy Timers & Special CD
+        enemies = enemies.map(e => ({ 
+            ...e, 
+            intent: e.intent ? { ...e.intent, timer: Math.max(0, e.intent.timer - 1) } : undefined,
+            specialCD: e.specialCD !== undefined ? Math.max(0, e.specialCD - 1) : undefined
+        }));
 
         // 2. Resolve Actions
         for (let i = 0; i < enemies.length; i++) {
@@ -535,21 +559,63 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     const template = ENEMY_TYPES.find(t => t.name === e.name) || ENEMY_TYPES[0];
                     e.intent = { type: 'WAIT', timer: template.attackCooldown || 1 };
 
+                } else if (e.intent.type === 'SPECIAL') {
+                    // Boss Special Execution
+                    const sName = e.intent.specialName;
+                    
+                    if (sName === 'LECTURE') { // Vice Principal
+                        logs = [`${e.name}の長話！(CD+1)`, ...logs];
+                        hand = hand.map(c => ({ ...c, currentCooldown: c.currentCooldown + 1 }));
+                        generatedVfx.push({ id: `v_spec_${Date.now()}`, type: 'TEXT', pos: e.pos, text: 'Lecture!', color: 'text-purple-400' });
+                        audioService.playSound('wrong');
+                    } else if (sName === 'EXPLOSION') { // Science Teacher
+                        logs = [`${e.name}の実験失敗！大爆発！`, ...logs];
+                        // Damage player if in range (simple: just hit player)
+                        const dmg = 3;
+                        player.hp = Math.max(0, player.hp - dmg);
+                        generatedVfx.push({ id: `v_spec_${Date.now()}`, type: 'BLAST', pos: player.pos });
+                        generatedVfx.push({ id: `v_dmg_${Date.now()}`, type: 'TEXT', pos: player.pos, text: dmg, color: 'text-red-500' });
+                        if (player.hp <= 0) status = 'GAME_OVER';
+                    } else if (sName === 'SHIELD') { // PE Teacher
+                        logs = [`${e.name}が号令をかけた！(Shield+5)`, ...logs];
+                        e.shield += 5;
+                        generatedVfx.push({ id: `v_spec_${Date.now()}`, type: 'BLOCK', pos: e.pos });
+                        audioService.playSound('block');
+                    } else if (sName === 'LULLABY') { // Music Teacher
+                        logs = [`${e.name}の子守唄... (Action CD+2)`, ...logs];
+                        nextState.specialActionCooldown += 2;
+                        generatedVfx.push({ id: `v_spec_${Date.now()}`, type: 'TEXT', pos: player.pos, text: 'Zzz...', color: 'text-blue-400' });
+                    } else if (sName === 'CONFISCATE') { // Guidance Counselor
+                        logs = [`${e.name}に10G没収された！`, ...logs];
+                        nextState.money = Math.max(0, nextState.money - 10);
+                        generatedVfx.push({ id: `v_spec_${Date.now()}`, type: 'TEXT', pos: player.pos, text: '-10G', color: 'text-yellow-500' });
+                    }
+
+                    e.intent = { type: 'WAIT', timer: 2 };
+
                 } else if (e.intent.type === 'SUMMON') {
-                    // Boss Summon Logic
+                    // Summon Logic
                     const emptyPos = [0,1,2,3,4,5,6].filter(p => !enemies.some(en => en.pos === p && en.hp > 0) && p !== player.pos);
                     if (emptyPos.length > 0) {
-                        // Prioritize further from player
                         emptyPos.sort((a,b) => Math.abs(b - player.pos) - Math.abs(a - player.pos));
                         const spawnPos = emptyPos[0];
-                        const minionName = e.intent.summonTarget || '教頭';
+                        const minionName = e.intent.summonTarget || 'スライム'; // Fallback
                         const minionTemplate = ENEMY_TYPES.find(t => t.name === minionName) || ENEMY_TYPES[0];
-                        const newMinion = createEnemy(minionTemplate, 0); // index doesn't matter much here
-                        newMinion.pos = spawnPos;
-                        newMinion.facing = spawnPos < 3 ? 1 : -1;
+                        const newMinion = {
+                            id: `e_${Date.now()}_minion`,
+                            type: 'ENEMY',
+                            name: minionTemplate.name,
+                            pos: spawnPos,
+                            facing: spawnPos < 3 ? 1 : -1,
+                            maxHp: minionTemplate.maxHp,
+                            hp: minionTemplate.maxHp,
+                            spriteName: minionTemplate.sprite,
+                            shield: 0,
+                            intent: { type: 'WAIT', timer: 1 }
+                        } as KEntity;
                         
                         enemies.push(newMinion);
-                        addVfx('SUMMON', spawnPos);
+                        generatedVfx.push({ id: `v_sum_${Date.now()}`, type: 'SUMMON', pos: spawnPos });
                         logs = [`${e.name}が${minionName}を呼び出した！`, ...logs];
                     }
                     e.intent = { type: 'WAIT', timer: 2 };
@@ -565,15 +631,21 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     const neededFacing = dist < 0 ? 1 : -1;
                     const facingCorrect = e.facing === neededFacing;
 
-                    // Boss Phase 3 Special Logic: Chance to Summon
-                    let isSummoning = false;
-                    if (e.bossPhase === 3 && Math.random() < 0.3) {
-                         // Summon
-                         e.intent = { type: 'SUMMON', timer: 1, summonTarget: '教頭' };
-                         isSummoning = true;
+                    // Boss Special Logic Check
+                    let isSpecial = false;
+                    if (template.special && e.specialCD !== undefined && e.specialCD <= 0) {
+                        e.intent = { type: 'SPECIAL', timer: 1, specialName: template.special };
+                        e.specialCD = 3; // Reset CD
+                        isSpecial = true;
                     }
 
-                    if (!isSummoning) {
+                    // Boss Phase 3 Special Logic: Chance to Summon
+                    if (!isSpecial && e.bossPhase === 3 && Math.random() < 0.3) {
+                         e.intent = { type: 'SUMMON', timer: 1, summonTarget: '教頭' };
+                         isSpecial = true;
+                    }
+
+                    if (!isSpecial) {
                         if (inRange && facingCorrect) {
                             e.intent = { 
                                 type: 'ATTACK', 
@@ -642,16 +714,15 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                          intent: { type: 'WAIT', timer: 1 } // Pause a bit
                      };
                      
-                     addVfx('EVOLVE', e.pos);
-                     addVfx('TEXT', e.pos, { text: 'EVOLUTION!', color: 'text-purple-400' });
+                     generatedVfx.push({ id: `v_evo_${Date.now()}`, type: 'EVOLVE', pos: e.pos });
+                     generatedVfx.push({ id: `v_txt_evo_${Date.now()}`, type: 'TEXT', pos: e.pos, text: 'EVOLUTION!', color: 'text-purple-400' });
                      logs = [`${e.name}が真の姿を現した！`, ...logs];
                      audioService.playSound('buff');
                  }
-                 // If Phase 3 dies, it dies for real (HP remains <= 0)
              }
         }
         
-        return { nextState: { ...nextState, enemies, player, logs: logs.slice(0, 4), status }, vfx: generatedVfx };
+        return { nextState: { ...nextState, enemies, player, hand, logs: logs.slice(0, 4), status }, vfx: generatedVfx };
     };
 
     // --- ACTION HANDLERS ---
@@ -1273,6 +1344,13 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 </div>
                             </div>
                         )}
+                        {e.intent && e.intent.type === 'SPECIAL' && (
+                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center z-20 animate-pulse">
+                                <div className="bg-orange-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center">
+                                    <AlertTriangle size={12} className="mr-1"/> SP!
+                                </div>
+                            </div>
+                        )}
                         <div className="absolute -bottom-6 w-16 text-center bg-black/50 text-white text-xs rounded border border-red-500">{e.hp}/{e.maxHp}</div>
                         {e.bossPhase && <div className="absolute top-0 left-0 bg-yellow-600 text-black text-[10px] px-1 rounded font-bold">P{e.bossPhase}</div>}
                     </div>
@@ -1339,7 +1417,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
             {/* Help Modal */}
             {showHelpModal && (
-                <div className="absolute inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowHelpModal(false)}>
+                <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowHelpModal(false)}>
                     <div className="bg-slate-800 border-4 border-indigo-500 rounded-lg p-6 w-full max-w-2xl max-h-[85vh] overflow-y-auto relative shadow-2xl custom-scrollbar" onClick={e => e.stopPropagation()}>
                         <button onClick={() => setShowHelpModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
                         <h2 className="text-2xl font-bold text-indigo-300 mb-6 flex items-center"><Book className="mr-2"/> 校長対決の遊び方</h2>
@@ -1365,7 +1443,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                     <div className="flex items-center gap-2 bg-black/30 p-2 rounded"><Swords className="text-red-500" size={16}/> <span className="text-red-400">攻撃</span> (カウント0で発動)</div>
                                     <div className="flex items-center gap-2 bg-black/30 p-2 rounded"><Hourglass className="text-gray-400" size={16}/> <span className="text-gray-300">待機</span> (数字は残りターン)</div>
-                                    <div className="flex items-center gap-2 bg-black/30 p-2 rounded"><Ghost className="text-purple-400" size={16}/> <span className="text-purple-300">召喚/特殊</span></div>
+                                    <div className="flex items-center gap-2 bg-black/30 p-2 rounded"><Ghost className="text-purple-400" size={16}/> <span className="text-purple-300">召喚</span></div>
+                                    <div className="flex items-center gap-2 bg-black/30 p-2 rounded"><AlertTriangle className="text-orange-500" size={16}/> <span className="text-orange-400">特殊行動</span> (ボススキル)</div>
                                 </div>
                             </section>
 
@@ -1513,32 +1592,39 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         </div>
                     )}
                     
-                    {/* RELIC MODAL */}
+                    {/* RELIC MODAL (FULL SCREEN) */}
                     {showRelicModal && (
-                        <div className="absolute inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowRelicModal(false)}>
-                            <div className="bg-slate-800 border-4 border-yellow-500 rounded-lg p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto relative shadow-2xl custom-scrollbar" onClick={e => e.stopPropagation()}>
-                                <button onClick={() => setShowRelicModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
-                                <h2 className="text-2xl font-bold text-yellow-400 mb-6 flex items-center"><Gift className="mr-2"/> 所持レリック</h2>
+                        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowRelicModal(false)}>
+                            <div className="w-full h-full max-w-4xl flex flex-col" onClick={e => e.stopPropagation()}>
+                                <div className="flex justify-between items-center mb-6 border-b border-indigo-500 pb-4">
+                                    <h2 className="text-3xl font-bold text-yellow-400 flex items-center"><Gift className="mr-3" size={32}/> 所持レリック一覧</h2>
+                                    <button onClick={() => setShowRelicModal(false)} className="text-gray-400 hover:text-white p-2 border-2 border-transparent hover:border-white rounded-full transition-colors"><X size={32}/></button>
+                                </div>
                                 
-                                {gameState.relics.length === 0 ? (
-                                    <div className="text-center text-gray-500 py-12 border-2 border-dashed border-gray-700 rounded-lg">レリックを持っていません。</div>
-                                ) : (
-                                    <div className="grid grid-cols-1 gap-3">
-                                        {gameState.relics.map((relic, i) => (
-                                            <div key={i} className="bg-slate-900 p-3 rounded border border-slate-600 flex items-center gap-4 shadow-sm">
-                                                <div className="w-12 h-12 bg-slate-800 rounded-full border-2 border-yellow-600 flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(234,179,8,0.3)]">
-                                                    <Gift size={24} className="text-yellow-400"/>
+                                <div className="flex-grow overflow-y-auto custom-scrollbar pr-2">
+                                    {gameState.relics.length === 0 ? (
+                                        <div className="flex flex-col items-center justify-center h-64 text-gray-500 border-2 border-dashed border-gray-700 rounded-lg">
+                                            <Gift size={48} className="mb-4 opacity-50"/>
+                                            <p className="text-xl">レリックを持っていません。</p>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                            {gameState.relics.map((relic, i) => (
+                                                <div key={i} className="bg-slate-900 p-6 rounded-xl border-2 border-slate-600 flex items-start gap-4 shadow-lg hover:border-yellow-500 transition-colors">
+                                                    <div className="w-16 h-16 bg-slate-800 rounded-full border-4 border-yellow-600 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(234,179,8,0.3)]">
+                                                        <Gift size={32} className="text-yellow-400"/>
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-bold text-white text-xl mb-2">{relic.name}</div>
+                                                        <div className="text-sm text-gray-300 leading-relaxed">{relic.desc}</div>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <div className="font-bold text-white text-base mb-1">{relic.name}</div>
-                                                    <div className="text-xs text-gray-400 leading-tight">{relic.desc}</div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                                 
-                                <button onClick={() => setShowRelicModal(false)} className="mt-8 w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition-colors border border-slate-500">閉じる</button>
+                                <button onClick={() => setShowRelicModal(false)} className="mt-6 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-lg text-xl transition-colors border-2 border-indigo-400 shadow-lg">閉じる</button>
                             </div>
                         </div>
                     )}
