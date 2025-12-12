@@ -70,6 +70,7 @@ interface KEntity {
     // Status
     shield: number;
     barrier: number; // New: Perfect Guard counts
+    strength: number; // New: Temporary Strength buff
     bossPhase?: number; // For Final Boss (1, 2, 3)
     specialCD?: number; // For Boss Special Abilities
 }
@@ -87,6 +88,15 @@ interface KochoVFX {
     pos: number;
     text?: string | number;
     color?: string;
+}
+
+type UpgradeType = 'DMG_1' | 'DMG_1_CD_1' | 'DMG_2_CD_3' | 'CD_MINUS_1' | 'CD_MINUS_2' | 'CD_MINUS_4_DMG_MINUS_1' | 'SLOT_1' | 'SLOT_1_CD_MINUS_1' | 'SACRIFICE' | 'GAMBLE';
+
+interface UpgradeOffer {
+    type: UpgradeType;
+    description: string;
+    icon: React.ReactNode;
+    color: string;
 }
 
 interface KochoGameState {
@@ -109,15 +119,7 @@ interface KochoGameState {
     money: number;
     relics: KRelic[];
     shopUpgradeUsed: boolean; // Tracks if upgrade was used in current shop/event
-}
-
-type UpgradeType = 'DMG_1' | 'DMG_1_CD_1' | 'DMG_2_CD_3' | 'CD_MINUS_1' | 'CD_MINUS_2' | 'CD_MINUS_4_DMG_MINUS_1' | 'SLOT_1' | 'SLOT_1_CD_MINUS_1' | 'SACRIFICE' | 'GAMBLE';
-
-interface UpgradeOffer {
-    type: UpgradeType;
-    description: string;
-    icon: React.ReactNode;
-    color: string;
+    currentUpgradeOffer: UpgradeOffer | null; // Persist current upgrade offer
 }
 
 // --- DATA ---
@@ -256,6 +258,13 @@ const hydrateState = (state: any): KochoGameState => {
         const template = CONSUMABLE_DB.find(t => t.id === i.data.id) || i.data;
         return { ...i, data: { ...i.data, icon: template.icon, color: template.color } };
     }) : [];
+
+    // Restore Upgrade Offer (Icon restoration)
+    let restoredOffer = null;
+    if (state.currentUpgradeOffer) {
+        const template = UPGRADE_POOLS.find(p => p.type === state.currentUpgradeOffer.type);
+        if (template) restoredOffer = template;
+    }
     
     return {
         ...state,
@@ -263,7 +272,8 @@ const hydrateState = (state: any): KochoGameState => {
         queue: restoreCards(state.queue),
         consumables: restoreConsumables(state.consumables || []),
         fieldItems: restoreFieldItems(state.fieldItems || []),
-        player: { ...state.player, barrier: state.player.barrier || 0 } // Legacy support
+        player: { ...state.player, barrier: state.player.barrier || 0, strength: state.player.strength || 0 }, // Legacy support
+        currentUpgradeOffer: restoredOffer
     };
 };
 
@@ -275,7 +285,7 @@ const getInitialState = (): KochoGameState => ({
     maxWaves: 3,
     turn: 1,
     gridSize: GRID_SIZE,
-    player: { id: 'p1', type: 'PLAYER', name: '勇者', pos: 3, facing: 1, maxHp: 10, hp: 10, spriteName: 'HERO_SIDE|赤', shield: 0, barrier: 0 },
+    player: { id: 'p1', type: 'PLAYER', name: '勇者', pos: 3, facing: 1, maxHp: 10, hp: 10, spriteName: 'HERO_SIDE|赤', shield: 0, barrier: 0, strength: 0 },
     enemies: [],
     hand: getInitialDeck(),
     queue: [],
@@ -286,7 +296,8 @@ const getInitialState = (): KochoGameState => ({
     specialActionCooldown: 0,
     money: 0,
     relics: [],
-    shopUpgradeUsed: false
+    shopUpgradeUsed: false,
+    currentUpgradeOffer: null
 });
 
 // --- COMPONENT ---
@@ -316,9 +327,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [showRelicModal, setShowRelicModal] = useState(false);
     const [showHelpModal, setShowHelpModal] = useState(false); // Help Modal
     const [showItemModal, setShowItemModal] = useState(false); // Item Modal
-
-    // Shop Upgrade State
-    const [currentUpgradeOffer, setCurrentUpgradeOffer] = useState<UpgradeOffer | null>(null);
 
     // Auto-Save Effect
     const saveDebounceRef = useRef<any>(null);
@@ -368,12 +376,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     // Initialize upgrade offer on phase change
     useEffect(() => {
-        if (gameState.phase === 'SHOP' || gameState.phase === 'UPGRADE_EVENT') {
-            if (!currentUpgradeOffer) {
-                setCurrentUpgradeOffer(getRandomOffer());
-            }
-        } else {
-            setCurrentUpgradeOffer(null);
+        if ((gameState.phase === 'SHOP' || gameState.phase === 'UPGRADE_EVENT') && !gameState.currentUpgradeOffer) {
+             setGameState(prev => ({ ...prev, currentUpgradeOffer: getRandomOffer() }));
         }
     }, [gameState.phase]);
 
@@ -524,6 +528,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             spriteName: template.sprite,
             shield: 0,
             barrier: 0,
+            strength: 0,
             bossPhase: bossPhase,
             specialCD: 3, // Initial special CD for bosses
             intent: {
@@ -850,6 +855,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             hp: minionTemplate.maxHp,
                             spriteName: minionTemplate.sprite,
                             shield: 0,
+                            strength: 0,
                             intent: { type: 'WAIT', timer: 1 }
                         } as KEntity;
                         
@@ -1008,8 +1014,9 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             logs.unshift(`手榴弾！全体に${item.value}ダメージ！`);
             used = true;
         } else if (item.type === 'STRENGTH') {
-            p.hp = Math.min(p.maxHp, p.hp + 1);
-            logs.unshift(`カレーを食べた。元気が出た！(HP+1)`);
+            p.strength += 3;
+            addVfx('BUFF', p.pos);
+            logs.unshift(`激辛カレー！次の攻撃力+3！`);
             used = true;
         }
 
@@ -1243,6 +1250,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             let hit = false;
             let dmgBonus = 0;
             if (currentState.relics.some(r => r.id === 'R_GLOVES')) dmgBonus += 1;
+            dmgBonus += p.strength;
 
             let targets: number[] = [];
             if (card.effectType === 'FURTHEST') {
@@ -1377,6 +1385,11 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                 if (hits.length > 0) {
                     hit = true;
+                    // Consume strength after first successful hit
+                    if (nextPlayer.strength > 0) {
+                        nextPlayer.strength = 0;
+                    }
+
                     hits.forEach(e => {
                         let finalDmg = card.damage + dmgBonus;
                         if (card.effectType === 'COUNTER') {
@@ -1614,7 +1627,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
              setGameState(prev => ({ ...prev, phase: 'REWARD', status: 'PLAYING' }));
              audioService.playSound('win');
         } else if (nextPhase === 'SHOP' || nextPhase === 'UPGRADE_EVENT') {
-             setGameState(prev => ({ ...prev, phase: nextPhase as GamePhase, status: 'PLAYING', shopUpgradeUsed: false }));
+             setGameState(prev => ({ ...prev, phase: nextPhase as GamePhase, status: 'PLAYING', shopUpgradeUsed: false, currentUpgradeOffer: getRandomOffer() }));
              audioService.playBGM(nextPhase === 'SHOP' ? 'poker_shop' : 'menu');
         } else if (nextPhase === 'VICTORY') {
              setGameState(prev => ({ ...prev, status: 'VICTORY' }));
@@ -1684,26 +1697,30 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }
         
         const newOffer = getRandomOffer();
-        setGameState(prev => ({ ...prev, money: prev.money - 10 }));
-        setCurrentUpgradeOffer(newOffer);
+        setGameState(prev => ({ 
+            ...prev, 
+            money: prev.money - 10,
+            currentUpgradeOffer: newOffer
+        }));
         audioService.playSound('select');
     };
 
     // Apply the active upgrade to a selected card
     const handleApplyUpgrade = (cardIndex: number) => {
+        const offer = gameState.currentUpgradeOffer;
         if (gameState.shopUpgradeUsed) {
             addLog("強化は1回までです。");
             audioService.playSound('wrong');
             return;
         }
         
-        if (!currentUpgradeOffer) return;
+        if (!offer) return;
 
         let newHand = [...gameState.hand];
         const card = { ...newHand[cardIndex] };
         
-        const isSlotUpgrade = currentUpgradeOffer.type.startsWith('SLOT');
-        const isSpecial = ['SACRIFICE', 'GAMBLE'].includes(currentUpgradeOffer.type);
+        const isSlotUpgrade = offer.type.startsWith('SLOT');
+        const isSpecial = ['SACRIFICE', 'GAMBLE'].includes(offer.type);
 
         // Check slots limit
         if (!isSlotUpgrade && !isSpecial && card.usedSlots >= card.maxSlots) {
@@ -1714,7 +1731,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         let msg = "強化完了！";
 
-        switch (currentUpgradeOffer.type) {
+        switch (offer.type) {
             case 'DMG_1': card.damage += 1; break;
             case 'DMG_1_CD_1': card.damage += 1; card.cooldown += 1; break;
             case 'DMG_2_CD_3': card.damage += 2; card.cooldown += 3; break;
@@ -1921,14 +1938,15 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     // Component for rendering the active upgrade offer
     const UpgradeOfferDisplay = () => {
-        if (!currentUpgradeOffer) return null;
+        const offer = gameState.currentUpgradeOffer;
+        if (!offer) return null;
         return (
             <div className="bg-slate-800 border-2 border-indigo-500 p-4 rounded-xl text-center mb-6 w-full max-w-sm mx-auto shadow-lg relative">
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-600 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow">Active Technique</div>
-                <div className={`text-5xl mb-2 flex justify-center ${currentUpgradeOffer.color} mt-2`}>
-                    {currentUpgradeOffer.icon}
+                <div className={`text-5xl mb-2 flex justify-center ${offer.color} mt-2`}>
+                    {offer.icon}
                 </div>
-                <div className="text-lg font-bold mb-1">{currentUpgradeOffer.description}</div>
+                <div className="text-lg font-bold mb-1">{offer.description}</div>
                 <div className="text-gray-400 text-xs mb-4">Click a card below to apply</div>
                 
                 <button 
@@ -1946,23 +1964,23 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     return (
         <div className="flex flex-col h-full w-full bg-[#1a1a2e] text-white font-mono relative overflow-hidden">
             {/* Header */}
-            <div className="flex justify-between items-center p-4 bg-black/40 border-b border-indigo-500/30 shrink-0">
-                <button onClick={handleQuit} className="flex items-center text-gray-400 hover:text-white"><ArrowLeft className="mr-2"/> Quit</button>
-                <h2 className="text-xl font-bold text-indigo-100 tracking-widest hidden md:block">
-                    KOCHO SHOWDOWN <span className="text-sm text-pink-400 ml-2">Stage {gameState.battleStage}/7 {gameState.battleStage > 1 ? `- ${gameState.battleSequence === 0 ? 'Part 1' : gameState.battleSequence === 1 ? 'Part 2' : 'MidBoss'}` : ''}</span>
+            <div className="flex justify-between items-center p-2 md:p-4 bg-black/40 border-b border-indigo-500/30 shrink-0">
+                <button onClick={handleQuit} className="flex items-center text-gray-400 hover:text-white"><ArrowLeft className="mr-2"/> <span className="hidden md:inline">Quit</span></button>
+                <h2 className="text-sm md:text-xl font-bold text-indigo-100 tracking-widest hidden md:block">
+                    KOCHO SHOWDOWN <span className="text-xs text-pink-400 ml-2">Stage {gameState.battleStage}</span>
                 </h2>
-                <div className="flex items-center gap-4">
-                    <button onClick={() => setShowItemModal(true)} className="flex items-center gap-2 text-green-200 hover:text-white transition-colors text-sm font-bold border border-green-500/30 px-3 py-1 rounded bg-black/20">
-                        <Package size={16}/> Items ({gameState.consumables.length})
+                <div className="flex items-center gap-2 md:gap-4">
+                    <button onClick={() => setShowItemModal(true)} className="flex items-center gap-2 text-green-200 hover:text-white transition-colors text-xs md:text-sm font-bold border border-green-500/30 px-2 py-1 rounded bg-black/20">
+                        <Package size={14}/> <span className="hidden md:inline">Items</span> ({gameState.consumables.length})
                     </button>
-                    <button onClick={() => setShowHelpModal(true)} className="flex items-center gap-2 text-indigo-200 hover:text-white transition-colors text-sm font-bold border border-indigo-500/30 px-3 py-1 rounded bg-black/20">
-                        <HelpCircle size={16}/> Help
+                    <button onClick={() => setShowHelpModal(true)} className="flex items-center gap-2 text-indigo-200 hover:text-white transition-colors text-xs md:text-sm font-bold border border-indigo-500/30 px-2 py-1 rounded bg-black/20">
+                        <HelpCircle size={14}/> <span className="hidden md:inline">Help</span>
                     </button>
-                    <button onClick={() => setShowRelicModal(true)} className="flex items-center gap-2 text-yellow-200 hover:text-white transition-colors text-sm font-bold border border-yellow-500/30 px-3 py-1 rounded bg-black/20">
-                        <Gift size={16}/> <span className="hidden md:inline">Relics</span> ({gameState.relics.length})
+                    <button onClick={() => setShowRelicModal(true)} className="flex items-center gap-2 text-yellow-200 hover:text-white transition-colors text-xs md:text-sm font-bold border border-yellow-500/30 px-2 py-1 rounded bg-black/20">
+                        <Gift size={14}/> <span className="hidden md:inline">Relics</span> ({gameState.relics.length})
                     </button>
-                    <div className="text-sm font-bold text-yellow-400 flex items-center gap-2">
-                        <Coins size={16}/> {gameState.money} G
+                    <div className="text-xs md:text-sm font-bold text-yellow-400 flex items-center gap-2 bg-black/40 px-2 py-1 rounded border border-yellow-500/50">
+                        <Coins size={14}/> {gameState.money} G
                     </div>
                 </div>
             </div>
