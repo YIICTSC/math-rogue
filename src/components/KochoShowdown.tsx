@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp } from 'lucide-react';
+import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp, Dna, Shuffle } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 
@@ -24,6 +24,7 @@ interface KCard {
     energyCost: number; 
     upgraded?: boolean;
     effectType?: CardEffectType;
+    slots?: number; // Extra upgrade slots (visual mainly in this logic, implying future potential)
 }
 
 interface KEntity {
@@ -81,6 +82,16 @@ interface KochoGameState {
     specialActionCooldown: number;
     money: number;
     relics: KRelic[];
+    shopUpgradeUsed: boolean; // Tracks if upgrade was used in current shop
+}
+
+type UpgradeType = 'DMG_1' | 'DMG_1_CD_1' | 'DMG_2_CD_3' | 'CD_MINUS_1' | 'CD_MINUS_2' | 'CD_MINUS_4_DMG_MINUS_1' | 'SLOT_1' | 'SLOT_1_CD_MINUS_1' | 'SACRIFICE' | 'GAMBLE';
+
+interface UpgradeOffer {
+    type: UpgradeType;
+    description: string;
+    icon: React.ReactNode;
+    color: string;
 }
 
 // --- DATA ---
@@ -119,14 +130,27 @@ const SHOP_RELICS: KRelic[] = [
     { id: 'R_POTION', name: '給食の牛乳', desc: 'HPを10回復', price: 15 }, // Instant consumable treated as relic for purchase logic
 ];
 
+const UPGRADE_POOLS: UpgradeOffer[] = [
+    { type: 'DMG_1', description: 'ダメージ +1', icon: <Swords size={16}/>, color: 'text-red-400' },
+    { type: 'DMG_1_CD_1', description: 'ダメージ +1, クールダウン +1', icon: <Swords size={16}/>, color: 'text-orange-400' },
+    { type: 'DMG_2_CD_3', description: 'ダメージ +2, クールダウン +3', icon: <Hammer size={16}/>, color: 'text-red-500' },
+    { type: 'CD_MINUS_1', description: 'クールダウン -1', icon: <Clock size={16}/>, color: 'text-blue-400' },
+    { type: 'CD_MINUS_2', description: 'クールダウン -2', icon: <Clock size={16}/>, color: 'text-cyan-400' },
+    { type: 'CD_MINUS_4_DMG_MINUS_1', description: 'クールダウン -4, ダメージ -1', icon: <Wind size={16}/>, color: 'text-sky-300' },
+    { type: 'SLOT_1', description: 'アップグレードスロット +1', icon: <Plus size={16}/>, color: 'text-green-400' },
+    { type: 'SLOT_1_CD_MINUS_1', description: 'スロット +1, クールダウン -1', icon: <Plus size={16}/>, color: 'text-emerald-400' },
+    { type: 'SACRIFICE', description: 'カードを犠牲にして40G獲得', icon: <Skull size={16}/>, color: 'text-gray-400' },
+    { type: 'GAMBLE', description: '戦士の賭け（ランダム変化）', icon: <Shuffle size={16}/>, color: 'text-purple-400' },
+];
+
 const getInitialDeck = (): KCard[] => {
     // Initial Deck: Roundhouse Kick & Chalk Throw ONLY
     const roundhouse = CARD_DB.find(c => c.name === '回し蹴り')!;
     const chalk = CARD_DB.find(c => c.name === 'チョーク投げ')!;
 
     return [
-        { ...roundhouse, id: 'c1', currentCooldown: 0 },
-        { ...chalk, id: 'c2', currentCooldown: 0 },
+        { ...roundhouse, id: 'c1', currentCooldown: 0, slots: 0 },
+        { ...chalk, id: 'c2', currentCooldown: 0, slots: 0 },
     ];
 };
 
@@ -160,7 +184,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         logs: ['校長室への道が開かれた...'],
         specialActionCooldown: 0,
         money: 0,
-        relics: []
+        relics: [],
+        shopUpgradeUsed: false
     });
 
     const [vfxList, setVfxList] = useState<KochoVFX[]>([]);
@@ -173,6 +198,14 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     const [animating, setAnimating] = useState(false);
     const [rewardCards, setRewardCards] = useState<KCard[]>([]);
+
+    // Shop Upgrade State
+    const [upgradeSelection, setUpgradeSelection] = useState<{
+        active: boolean;
+        cardIndex: number | null;
+        currentOffer: UpgradeOffer | null;
+        rerollCount: number;
+    }>({ active: false, cardIndex: null, currentOffer: null, rerollCount: 0 });
 
     // Initialization
     useEffect(() => {
@@ -260,7 +293,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             status: 'PLAYING',
             logs: phase === 'BATTLE_1' ? ['準備運動だ！ (Tutorial)'] : [`${phase === 'BOSS' ? '決戦' : `Wave ${wave}`} 開始！`],
             specialActionCooldown: isFreshStart ? 0 : prev.specialActionCooldown,
-            money: isFreshStart ? 0 : prev.money
+            money: isFreshStart ? 0 : prev.money,
+            shopUpgradeUsed: false // Reset upgrade usage on fresh start
         }));
 
         if (phase === 'BOSS') audioService.playBGM('dungeon_boss');
@@ -860,7 +894,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             setGameState(prev => ({ ...prev, phase: 'REWARD', status: 'PLAYING' }));
             audioService.playSound('win');
         } else if (current.phase === 'BATTLE_2') {
-            setGameState(prev => ({ ...prev, phase: 'SHOP', status: 'PLAYING' }));
+            setGameState(prev => ({ ...prev, phase: 'SHOP', status: 'PLAYING', shopUpgradeUsed: false })); // Reset upgrade use
             audioService.playBGM('poker_shop');
         } else if (current.phase === 'BOSS') {
             setGameState(prev => ({ ...prev, status: 'VICTORY' }));
@@ -873,7 +907,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const options: KCard[] = [];
         for (let i = 0; i < 2; i++) {
             const template = pool[Math.floor(Math.random() * pool.length)] || pool[0];
-            options.push({ ...template, id: `rew_${Date.now()}_${i}`, currentCooldown: 0 });
+            options.push({ ...template, id: `rew_${Date.now()}_${i}`, currentCooldown: 0, slots: 0 });
         }
         setRewardCards(options);
     };
@@ -886,30 +920,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             status: 'PLAYING'
         }));
         setTimeout(() => startWave(1, 'BATTLE_2'), 100);
-    };
-
-    const buyUpgrade = (idx: number) => {
-        const cost = 20;
-        if (gameState.money >= cost) {
-            const newHand = [...gameState.hand];
-            const card = newHand[idx];
-            if (card) {
-                // Simple Upgrade: Dmg+1 or Shield+1
-                if (card.damage > 0) card.damage += 1;
-                if (card.shield && card.shield > 0) card.shield += 1;
-                card.upgraded = true;
-                
-                setGameState(prev => ({
-                    ...prev,
-                    money: prev.money - cost,
-                    hand: newHand
-                }));
-                audioService.playSound('buff');
-                addLog(`${card.name}を強化した！`);
-            }
-        } else {
-            audioService.playSound('wrong');
-        }
     };
 
     const buyShopItem = (item: KRelic) => {
@@ -935,6 +945,115 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         } else {
             audioService.playSound('wrong');
         }
+    };
+
+    // --- UPGRADE SYSTEM LOGIC ---
+    const selectCardForUpgrade = (index: number) => {
+        if (gameState.shopUpgradeUsed) {
+            addLog("アップグレードは1回までです。");
+            audioService.playSound('wrong');
+            return;
+        }
+        
+        generateUpgradeOffer();
+        setUpgradeSelection({
+            active: true,
+            cardIndex: index,
+            rerollCount: 0,
+            currentOffer: null // Will be set by generate
+        });
+        audioService.playSound('select');
+    };
+
+    const generateUpgradeOffer = () => {
+        const offer = UPGRADE_POOLS[Math.floor(Math.random() * UPGRADE_POOLS.length)];
+        setUpgradeSelection(prev => ({ ...prev, currentOffer: offer }));
+    };
+
+    const rerollUpgrade = () => {
+        if (gameState.money < 10) {
+            audioService.playSound('wrong');
+            return;
+        }
+        if (upgradeSelection.rerollCount >= 3) {
+            audioService.playSound('wrong');
+            return;
+        }
+
+        setGameState(prev => ({ ...prev, money: prev.money - 10 }));
+        generateUpgradeOffer();
+        setUpgradeSelection(prev => ({ ...prev, rerollCount: prev.rerollCount + 1 }));
+        audioService.playSound('select');
+    };
+
+    const confirmUpgrade = () => {
+        const { cardIndex, currentOffer } = upgradeSelection;
+        if (cardIndex === null || !currentOffer) return;
+
+        let newHand = [...gameState.hand];
+        const card = { ...newHand[cardIndex] };
+        let msg = "アップグレード完了！";
+
+        switch (currentOffer.type) {
+            case 'DMG_1':
+                card.damage += 1;
+                break;
+            case 'DMG_1_CD_1':
+                card.damage += 1;
+                card.cooldown += 1;
+                break;
+            case 'DMG_2_CD_3':
+                card.damage += 2;
+                card.cooldown += 3;
+                break;
+            case 'CD_MINUS_1':
+                card.cooldown = Math.max(0, card.cooldown - 1);
+                break;
+            case 'CD_MINUS_2':
+                card.cooldown = Math.max(0, card.cooldown - 2);
+                break;
+            case 'CD_MINUS_4_DMG_MINUS_1':
+                card.cooldown = Math.max(0, card.cooldown - 4);
+                card.damage = Math.max(0, card.damage - 1);
+                break;
+            case 'SLOT_1':
+                card.slots = (card.slots || 0) + 1;
+                break;
+            case 'SLOT_1_CD_MINUS_1':
+                card.slots = (card.slots || 0) + 1;
+                card.cooldown = Math.max(0, card.cooldown - 1);
+                break;
+            case 'SACRIFICE':
+                newHand.splice(cardIndex, 1);
+                setGameState(prev => ({ ...prev, money: prev.money + 40 }));
+                msg = "カードを犠牲にした...";
+                break;
+            case 'GAMBLE':
+                const pool = CARD_DB.filter(c => c.name !== card.name);
+                const randomCard = pool[Math.floor(Math.random() * pool.length)];
+                newHand[cardIndex] = { ...randomCard, id: card.id, currentCooldown: 0, slots: 0 };
+                msg = `カードが${randomCard.name}に変化した！`;
+                break;
+        }
+
+        if (currentOffer.type !== 'SACRIFICE' && currentOffer.type !== 'GAMBLE') {
+            card.upgraded = true;
+            newHand[cardIndex] = card;
+        }
+
+        setGameState(prev => ({
+            ...prev,
+            hand: newHand,
+            shopUpgradeUsed: true
+        }));
+        
+        setUpgradeSelection({ active: false, cardIndex: null, currentOffer: null, rerollCount: 0 });
+        audioService.playSound('buff');
+        addLog(msg);
+    };
+
+    const cancelUpgrade = () => {
+        setUpgradeSelection({ active: false, cardIndex: null, currentOffer: null, rerollCount: 0 });
     };
 
     const goToBoss = () => {
@@ -1049,19 +1168,70 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                             {/* SHOP UI */}
                             {gameState.phase === 'SHOP' && (
-                                <div className="w-full h-full flex flex-col p-4 md:p-8 overflow-y-auto">
+                                <div className="w-full h-full flex flex-col p-4 md:p-8 overflow-y-auto relative">
+                                    {/* Upgrade Modal Overlay */}
+                                    {upgradeSelection.active && upgradeSelection.currentOffer && (
+                                        <div className="absolute inset-0 bg-black/95 z-50 flex flex-col items-center justify-center p-6 animate-in zoom-in duration-200 rounded-lg">
+                                            <h3 className="text-2xl font-bold text-yellow-400 mb-6 border-b border-yellow-600 pb-2">鍛冶屋の提案</h3>
+                                            
+                                            <div className="bg-slate-800 border-2 border-indigo-500 p-6 rounded-xl text-center mb-8 w-full max-w-sm">
+                                                <div className={`text-6xl mb-4 flex justify-center ${upgradeSelection.currentOffer.color}`}>
+                                                    {upgradeSelection.currentOffer.icon}
+                                                </div>
+                                                <div className="text-xl font-bold mb-2">{upgradeSelection.currentOffer.description}</div>
+                                                <div className="text-gray-400 text-sm">適用されるカード: {gameState.hand[upgradeSelection.cardIndex!]?.name}</div>
+                                            </div>
+
+                                            <div className="flex flex-col gap-4 w-full max-w-xs">
+                                                <button 
+                                                    onClick={confirmUpgrade}
+                                                    className="bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg flex items-center justify-center shadow-lg transform active:scale-95 transition-transform"
+                                                >
+                                                    <Hammer className="mr-2"/> 適用する
+                                                </button>
+                                                
+                                                <button 
+                                                    onClick={rerollUpgrade}
+                                                    disabled={upgradeSelection.rerollCount >= 3 || gameState.money < 10}
+                                                    className={`bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg flex items-center justify-center shadow-lg transition-colors ${upgradeSelection.rerollCount >= 3 || gameState.money < 10 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                >
+                                                    <RefreshCw className="mr-2"/> 再抽選 (10G) [{3 - upgradeSelection.rerollCount}回]
+                                                </button>
+
+                                                <button 
+                                                    onClick={cancelUpgrade}
+                                                    className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg"
+                                                >
+                                                    キャンセル
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <h2 className="text-3xl font-bold text-indigo-400 mb-6 flex items-center shrink-0"><ShoppingBag className="mr-2"/> Shop & Upgrade</h2>
                                     <div className="flex flex-col md:flex-row gap-8 flex-grow">
                                         <div className="flex-1 bg-slate-900 border border-slate-600 rounded-lg p-4 overflow-y-auto custom-scrollbar">
-                                            <h3 className="text-xl font-bold text-white mb-4 flex items-center"><Hammer className="mr-2 text-red-400"/> Upgrade Deck (20G)</h3>
+                                            <h3 className="text-xl font-bold text-white mb-4 flex items-center justify-between">
+                                                <span className="flex items-center"><Hammer className="mr-2 text-red-400"/> Deck Upgrade</span>
+                                                <span className={`text-xs ${gameState.shopUpgradeUsed ? 'text-red-500' : 'text-green-400'}`}>
+                                                    {gameState.shopUpgradeUsed ? '(済)' : '(1回のみ)'}
+                                                </span>
+                                            </h3>
                                             <div className="grid grid-cols-2 gap-4">
                                                 {gameState.hand.map((card, i) => (
-                                                    <div key={i} className="bg-slate-800 p-3 rounded border border-slate-600 relative">
-                                                        <div className="font-bold text-sm text-white">{card.name} {card.upgraded && <span className="text-yellow-400 text-xs">+1</span>}</div>
-                                                        <div className="text-xs text-gray-400">{card.description}</div>
-                                                        {card.damage > 0 && <div className="text-xs text-red-400">DMG: {card.damage}</div>}
-                                                        {card.shield && <div className="text-xs text-blue-400">SHIELD: {card.shield}</div>}
-                                                        <button onClick={() => buyUpgrade(i)} className="absolute top-2 right-2 bg-green-700 text-white text-xs px-2 py-1 rounded hover:bg-green-600">UP</button>
+                                                    <div 
+                                                        key={i} 
+                                                        className={`bg-slate-800 p-3 rounded border relative transition-all ${gameState.shopUpgradeUsed ? 'opacity-50 cursor-not-allowed border-slate-600' : 'hover:border-yellow-400 cursor-pointer border-slate-600'}`}
+                                                        onClick={() => selectCardForUpgrade(i)}
+                                                    >
+                                                        <div className="font-bold text-sm text-white mb-1">{card.name} {card.upgraded && <span className="text-yellow-400 text-xs">★</span>}</div>
+                                                        <div className="text-xs text-gray-400 mb-2">{card.description}</div>
+                                                        <div className="flex gap-2 text-[10px]">
+                                                            {card.damage > 0 && <span className="text-red-400 bg-red-900/30 px-1 rounded">ATK:{card.damage}</span>}
+                                                            <span className="text-blue-400 bg-blue-900/30 px-1 rounded">CD:{card.cooldown}</span>
+                                                            {card.slots !== undefined && card.slots > 0 && <span className="text-green-400 bg-green-900/30 px-1 rounded">SLOT:{card.slots}</span>}
+                                                        </div>
+                                                        {!gameState.shopUpgradeUsed && <div className="absolute top-2 right-2 text-yellow-500"><Plus size={16}/></div>}
                                                     </div>
                                                 ))}
                                             </div>
