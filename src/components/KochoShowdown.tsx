@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp, Dna, Shuffle, Star } from 'lucide-react';
+import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp, Dna, Shuffle, Star, ArrowDown } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 
@@ -1176,6 +1176,48 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         });
     };
 
+    const renderUpgradeModal = () => {
+        if (!upgradeSelection.active || !upgradeSelection.currentOffer || upgradeSelection.cardIndex === null) return null;
+        
+        const targetCard = gameState.hand[upgradeSelection.cardIndex];
+        const offer = upgradeSelection.currentOffer;
+
+        return (
+            <div className="absolute inset-0 bg-black/95 z-50 flex flex-col items-center justify-center p-6 animate-in zoom-in duration-200 rounded-lg">
+                <h3 className="text-3xl font-bold text-yellow-400 mb-8 border-b-2 border-yellow-600 pb-2">鍛冶屋の提案</h3>
+                
+                {/* Target Card Display */}
+                <div className="flex flex-col items-center mb-6 animate-pulse">
+                    <div className="text-gray-400 text-sm mb-1 font-bold">▼ 強化対象 ▼</div>
+                    <div className={`w-40 bg-slate-800 border-2 rounded-xl p-3 flex flex-col items-center shadow-lg ${targetCard.color ? targetCard.color.replace('bg-', 'border-') : 'border-slate-500'}`}>
+                        <div className={`text-4xl mb-2 p-2 rounded-full bg-black/30 ${targetCard.color.replace('bg-', 'text-')}`}>{targetCard.icon}</div>
+                        <div className="font-bold text-white text-center text-lg">{targetCard.name}</div>
+                        <div className="flex gap-2 text-xs mt-2 text-gray-300 font-mono bg-black/50 px-2 py-1 rounded">
+                            <span className="text-red-300">ATK:{targetCard.damage}</span>
+                            <span className="text-blue-300">CD:{targetCard.cooldown}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mb-4 text-white opacity-50 animate-bounce"><ArrowDown size={32} /></div>
+
+                {/* Offer Display */}
+                <div className="bg-slate-800 border-2 border-indigo-500 p-6 rounded-xl text-center mb-8 w-full max-w-sm shadow-[0_0_20px_rgba(99,102,241,0.3)]">
+                    <div className={`text-6xl mb-4 flex justify-center ${offer.color}`}>
+                        {offer.icon}
+                    </div>
+                    <div className="text-xl font-bold mb-2 text-white">{offer.description}</div>
+                </div>
+
+                <div className="flex flex-col gap-4 w-full max-w-xs">
+                    <button onClick={confirmUpgrade} className="bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg flex items-center justify-center shadow-lg border-2 border-green-400 transform hover:scale-105 transition-transform"><Hammer className="mr-2"/> 適用する</button>
+                    <button onClick={rerollUpgrade} disabled={upgradeSelection.rerollCount >= 3 || gameState.money < 10} className={`bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg flex items-center justify-center shadow-lg transition-colors border-2 border-indigo-400 ${upgradeSelection.rerollCount >= 3 || gameState.money < 10 ? 'opacity-50 cursor-not-allowed' : ''}`}><RefreshCw className="mr-2"/> 再抽選 (10G)</button>
+                    <button onClick={cancelUpgrade} className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg border-2 border-gray-500">キャンセル</button>
+                </div>
+            </div>
+        );
+    }
+
     // --- MAIN RENDER ---
     return (
         <div className="flex flex-col h-full w-full bg-[#1a1a2e] text-white font-mono relative overflow-hidden">
@@ -1219,23 +1261,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             {/* UPGRADE EVENT UI */}
                             {gameState.phase === 'UPGRADE_EVENT' && (
                                 <div className="w-full h-full flex flex-col items-center justify-center p-4">
-                                     {/* Upgrade Modal */}
-                                     {upgradeSelection.active && upgradeSelection.currentOffer && (
-                                        <div className="absolute inset-0 bg-black/95 z-50 flex flex-col items-center justify-center p-6 animate-in zoom-in duration-200 rounded-lg">
-                                            <h3 className="text-2xl font-bold text-yellow-400 mb-6 border-b border-yellow-600 pb-2">鍛冶屋の提案</h3>
-                                            <div className="bg-slate-800 border-2 border-indigo-500 p-6 rounded-xl text-center mb-8 w-full max-w-sm">
-                                                <div className={`text-6xl mb-4 flex justify-center ${upgradeSelection.currentOffer.color}`}>
-                                                    {upgradeSelection.currentOffer.icon}
-                                                </div>
-                                                <div className="text-xl font-bold mb-2">{upgradeSelection.currentOffer.description}</div>
-                                                <div className="text-gray-400 text-sm">適用: {gameState.hand[upgradeSelection.cardIndex!]?.name}</div>
-                                            </div>
-                                            <div className="flex flex-col gap-4 w-full max-w-xs">
-                                                <button onClick={confirmUpgrade} className="bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg flex items-center justify-center shadow-lg"><Hammer className="mr-2"/> 適用する</button>
-                                                <button onClick={cancelUpgrade} className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg">キャンセル</button>
-                                            </div>
-                                        </div>
-                                    )}
+                                     {renderUpgradeModal()}
 
                                     <h2 className="text-3xl font-bold text-emerald-400 mb-4 flex items-center animate-pulse"><Hammer className="mr-2"/> Maintenance</h2>
                                     <p className="text-gray-300 mb-8">カードを1枚、無料で強化できます。</p>
@@ -1263,22 +1289,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             {/* SHOP UI */}
                             {gameState.phase === 'SHOP' && (
                                 <div className="w-full h-full flex flex-col p-4 md:p-8 overflow-y-auto relative">
-                                    {/* (Upgrade Modal Overlay reused) */}
-                                    {upgradeSelection.active && upgradeSelection.currentOffer && (
-                                        <div className="absolute inset-0 bg-black/95 z-50 flex flex-col items-center justify-center p-6 animate-in zoom-in duration-200 rounded-lg">
-                                             <h3 className="text-2xl font-bold text-yellow-400 mb-6 border-b border-yellow-600 pb-2">鍛冶屋の提案</h3>
-                                            <div className="bg-slate-800 border-2 border-indigo-500 p-6 rounded-xl text-center mb-8 w-full max-w-sm">
-                                                <div className={`text-6xl mb-4 flex justify-center ${upgradeSelection.currentOffer.color}`}>{upgradeSelection.currentOffer.icon}</div>
-                                                <div className="text-xl font-bold mb-2">{upgradeSelection.currentOffer.description}</div>
-                                                <div className="text-gray-400 text-sm">適用: {gameState.hand[upgradeSelection.cardIndex!]?.name}</div>
-                                            </div>
-                                            <div className="flex flex-col gap-4 w-full max-w-xs">
-                                                <button onClick={confirmUpgrade} className="bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg flex items-center justify-center shadow-lg"><Hammer className="mr-2"/> 適用する</button>
-                                                <button onClick={rerollUpgrade} disabled={upgradeSelection.rerollCount >= 3 || gameState.money < 10} className={`bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg flex items-center justify-center shadow-lg transition-colors ${upgradeSelection.rerollCount >= 3 || gameState.money < 10 ? 'opacity-50 cursor-not-allowed' : ''}`}><RefreshCw className="mr-2"/> 再抽選 (10G)</button>
-                                                <button onClick={cancelUpgrade} className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg">キャンセル</button>
-                                            </div>
-                                        </div>
-                                    )}
+                                    {renderUpgradeModal()}
 
                                     <h2 className="text-3xl font-bold text-indigo-400 mb-6 flex items-center shrink-0"><ShoppingBag className="mr-2"/> Shop</h2>
                                     <div className="flex flex-col md:flex-row gap-8 flex-grow">
