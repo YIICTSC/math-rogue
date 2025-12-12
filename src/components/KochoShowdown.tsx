@@ -8,7 +8,7 @@ import { storageService } from '../services/storageService';
 // --- TYPES ---
 type Facing = 1 | -1; // 1: Right, -1: Left
 type GamePhase = 'BATTLE' | 'REWARD' | 'UPGRADE_EVENT' | 'SHOP' | 'VICTORY' | 'GAME_OVER';
-type CardEffectType = 'NORMAL' | 'COUNTER' | 'PUSH' | 'PULL' | 'RECOIL' | 'DASH_ATTACK' | 'FURTHEST' | 'PIERCE' | 'TELEPORT' | 'STUN' | 'HEAL' | 'DRAIN';
+type CardEffectType = 'NORMAL' | 'COUNTER' | 'PUSH' | 'PULL' | 'RECOIL' | 'DASH_ATTACK' | 'FURTHEST' | 'PIERCE' | 'TELEPORT' | 'STUN' | 'HEAL' | 'DRAIN' | 'PIERCE_DASH';
 
 interface KCard {
     id: string;
@@ -125,13 +125,13 @@ const CARD_DB: Omit<KCard, 'id' | 'currentCooldown' | 'usedSlots'>[] = [
     // Standard Set
     { name: '定規スラッシュ', type: 'ATTACK', range: [1], damage: 3, cooldown: 2, color: 'bg-red-600', icon: <Swords size={16}/>, description: '目の前の敵を斬る', energyCost: 1, maxSlots: 3, effectType: 'NORMAL' },
     { name: 'コンパス突き', type: 'ATTACK', range: [2], damage: 2, cooldown: 2, color: 'bg-orange-600', icon: <Zap size={16}/>, description: '2マス先を攻撃(間を無視)', energyCost: 1, maxSlots: 3, effectType: 'NORMAL' },
-    { name: 'ダッシュ', type: 'MOVE', range: [2], damage: 0, cooldown: 3, color: 'bg-blue-600', icon: <ChevronsRight size={16}/>, description: '前方に2マス移動', energyCost: 1, maxSlots: 2 },
+    { name: 'ダッシュ', type: 'MOVE', range: [1, 2], damage: 0, cooldown: 3, color: 'bg-blue-600', icon: <ChevronsRight size={16}/>, description: '敵にぶつかるまで移動', energyCost: 1, maxSlots: 2 },
     { name: 'バックステップ', type: 'UTILITY', range: [-1], damage: 0, cooldown: 2, color: 'bg-gray-600', icon: <RotateCcw size={16}/>, description: '1マス下がる', energyCost: 1, maxSlots: 2 },
     { name: '大声', type: 'ATTACK', range: [1, 2, 3], damage: 1, cooldown: 4, color: 'bg-yellow-600', icon: <Zap size={16}/>, description: '前方3マスに音波攻撃(貫通)', energyCost: 1, maxSlots: 3, effectType: 'PIERCE' },
     { name: 'お辞儀', type: 'UTILITY', range: [0], damage: 0, shield: 2, cooldown: 3, color: 'bg-green-600', icon: <Shield size={16}/>, description: '待機してシールド+2', energyCost: 1, maxSlots: 3 },
     { name: '回し蹴り', type: 'ATTACK', range: [-1, 1], damage: 3, cooldown: 2, color: 'bg-purple-600', icon: <RefreshCw size={16}/>, description: '前後1マスを攻撃', energyCost: 1, maxSlots: 3, effectType: 'PIERCE' }, // Multi-target implicitly via range logic update
     { name: 'チョーク投げ', type: 'ATTACK', range: [1, 2, 3, 4], damage: 2, cooldown: 3, color: 'bg-cyan-600', icon: <Zap size={16}/>, description: '遠距離攻撃(単体)', energyCost: 1, maxSlots: 3, effectType: 'NORMAL' },
-    { name: 'スライディング', type: 'ATTACK', range: [1, 2], damage: 2, cooldown: 3, color: 'bg-indigo-600', icon: <ChevronsRight size={16}/>, description: '移動しながら攻撃', energyCost: 1, maxSlots: 3, effectType: 'DASH_ATTACK' },
+    { name: 'スライディング', type: 'ATTACK', range: [1, 2, 3], damage: 2, cooldown: 3, color: 'bg-indigo-600', icon: <ChevronsRight size={16}/>, description: '敵1体をすり抜けて攻撃', energyCost: 1, maxSlots: 3, effectType: 'PIERCE_DASH' },
     { name: '教科書ガード', type: 'UTILITY', range: [0], damage: 0, shield: 4, cooldown: 4, color: 'bg-slate-600', icon: <Book size={16}/>, description: 'シールド+4', energyCost: 1, maxSlots: 2 },
 
     // Expanded Weapons / Actions
@@ -154,7 +154,7 @@ const CARD_DB: Omit<KCard, 'id' | 'currentCooldown' | 'usedSlots'>[] = [
     { name: '三角定規', type: 'ATTACK', range: [1], damage: 4, cooldown: 2, color: 'bg-teal-600', icon: <PenTool size={16}/>, description: '鋭い一撃(単体)', energyCost: 1, maxSlots: 3, effectType: 'NORMAL' },
     { name: 'バレーボール', type: 'ATTACK', range: [3, 4, 5, 6], damage: 3, cooldown: 3, color: 'bg-white text-black', icon: <Circle size={16}/>, description: '超遠距離スパイク(貫通)', energyCost: 1, effectType: 'PIERCE', maxSlots: 3 },
     { name: '吸血', type: 'ATTACK', range: [1], damage: 2, cooldown: 4, color: 'bg-red-900', icon: <Dna size={16}/>, description: 'ダメージ分HP回復', energyCost: 1, effectType: 'DRAIN', maxSlots: 2 },
-    { name: '雑巾がけ', type: 'ATTACK', range: [1, 2], damage: 2, cooldown: 3, color: 'bg-gray-400 text-black', icon: <ChevronsRight size={16}/>, description: 'ダッシュ攻撃', energyCost: 1, effectType: 'DASH_ATTACK', maxSlots: 2 },
+    { name: '雑巾がけ', type: 'ATTACK', range: [1, 2, 3], damage: 2, cooldown: 3, color: 'bg-gray-400 text-black', icon: <ChevronsRight size={16}/>, description: 'ダッシュ攻撃', energyCost: 1, effectType: 'DASH_ATTACK', maxSlots: 2 },
 ];
 
 const CONSUMABLE_DB: KConsumable[] = [
@@ -520,10 +520,13 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const targets: number[] = [];
         
         if (card.type === 'MOVE') {
-            const dest = player.pos + (card.range[0] * player.facing);
-            if (dest >= 0 && dest < GRID_SIZE) {
-                tiles.push(dest);
-                // Move logic usually doesn't "hit" enemies unless it's a dash attack
+            const maxR = Math.max(...card.range);
+            for (let i = 1; i <= maxR; i++) {
+                const dest = player.pos + (i * player.facing);
+                if (dest >= 0 && dest < GRID_SIZE) {
+                    tiles.push(dest);
+                    if (enemies.some(e => e.pos === dest && e.hp > 0)) break; // Blocked visual
+                }
             }
         } else if (card.type === 'ATTACK') {
             // Determine covered range
@@ -534,6 +537,30 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         tiles.push(checkPos);
                         const hitEnemy = enemies.find(e => e.pos === checkPos && e.hp > 0);
                         if (hitEnemy) { targets.push(checkPos); break; } // Stop at first enemy
+                    }
+                }
+            } else if (card.effectType === 'PIERCE_DASH') {
+                // Sliding logic: Hit first enemy AND the one behind them
+                let firstEnemyFound = false;
+                for (let i = 1; i <= Math.max(...card.range); i++) {
+                    const checkPos = player.pos + (i * player.facing);
+                    if (checkPos >= 0 && checkPos < GRID_SIZE) {
+                        tiles.push(checkPos);
+                        const hitEnemy = enemies.find(e => e.pos === checkPos && e.hp > 0);
+                        
+                        if (!firstEnemyFound) {
+                            if (hitEnemy) {
+                                targets.push(checkPos);
+                                firstEnemyFound = true;
+                                // Add next tile for potential second hit visual
+                                const nextPos = checkPos + player.facing;
+                                if (nextPos >= 0 && nextPos < GRID_SIZE) tiles.push(nextPos);
+                            }
+                        } else {
+                            // After first hit, check if there is an enemy in the next slot
+                            if (hitEnemy) targets.push(checkPos);
+                            break; // Stop after passing through one
+                        }
                     }
                 }
             } else if (card.effectType === 'PIERCE') {
@@ -1235,7 +1262,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     const tPos = pPos + (r * p.facing);
                     if (tPos >= 0 && tPos < GRID_SIZE) targets.push(tPos);
                 });
-            } else if (card.type === 'ATTACK' && card.effectType !== 'DASH_ATTACK') {
+            } else if (card.type === 'ATTACK' && card.effectType !== 'DASH_ATTACK' && card.effectType !== 'PIERCE_DASH') {
                 // Standard or Push/Pull etc.
                 // If NORMAL, only target the FIRST valid enemy in range
                 if (card.effectType === 'NORMAL' || !card.effectType || card.effectType === 'COUNTER' || card.effectType === 'PUSH' || card.effectType === 'PULL' || card.effectType === 'RECOIL' || card.effectType === 'STUN' || card.effectType === 'DRAIN') {
@@ -1254,23 +1281,84 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     // Fallback (e.g. area specific)
                     targets = card.range.map(r => pPos + (r * p.facing));
                 }
-            } else {
+            } else if (card.effectType !== 'DASH_ATTACK' && card.effectType !== 'PIERCE_DASH') {
                  targets = card.range.map(r => pPos + (r * p.facing));
             }
 
             if (card.type === 'ATTACK') {
                 if (card.effectType === 'DASH_ATTACK') {
+                    // Dash Attack (Tackle): Move until hitting enemy
                     let finalPos = pPos;
+                    let pathBlocked = false;
                     for (let i = 1; i <= Math.max(...card.range); i++) {
                         const checkPos = pPos + (i * p.facing);
                         if (checkPos < 0 || checkPos >= GRID_SIZE) break;
+                        
+                        // Visual effect for movement
+                        addVfx('WARP', checkPos, { color: 'text-cyan-500' });
+
                         const hitEnemy = nextEnemies.find(e => e.pos === checkPos && e.hp > 0);
-                        if (hitEnemy) { targets = [checkPos]; break; }
-                        finalPos = checkPos;
+                        if (hitEnemy) { 
+                            targets = [checkPos]; 
+                            pathBlocked = true;
+                            // Stop *before* enemy
+                            const stopPos = checkPos - p.facing;
+                            // Ensure stopPos is valid and not player start pos (if i=1, stopPos = pPos, which is fine)
+                            if (stopPos >= 0 && stopPos < GRID_SIZE && stopPos !== pPos) {
+                                finalPos = stopPos;
+                            }
+                            break; 
+                        }
+                        finalPos = checkPos; // Keep moving if empty
                     }
                     nextPlayer.pos = finalPos;
-                    // Check Pickup at dash end
                     currentState = handlePickup(finalPos, currentState); 
+                }
+                
+                if (card.effectType === 'PIERCE_DASH') {
+                    // Sliding: Move through first enemy, hit them, land behind, possibly hit second
+                    let firstEnemyFound = false;
+                    let finalPos = pPos;
+
+                    for (let i = 1; i <= Math.max(...card.range); i++) {
+                        const checkPos = pPos + (i * p.facing);
+                        if (checkPos < 0 || checkPos >= GRID_SIZE) break;
+                        
+                        addVfx('WARP', checkPos, { color: 'text-indigo-400' }); // Trail
+
+                        const hitEnemy = nextEnemies.find(e => e.pos === checkPos && e.hp > 0);
+                        
+                        if (!firstEnemyFound) {
+                            if (hitEnemy) {
+                                // Hit first enemy
+                                targets.push(checkPos);
+                                firstEnemyFound = true;
+                                // Try to land BEHIND them
+                                const landPos = checkPos + p.facing;
+                                if (landPos >= 0 && landPos < GRID_SIZE) {
+                                    // Move to landPos regardless of enemy? 
+                                    // If landPos has enemy, we hit them too and stop there.
+                                    finalPos = landPos;
+                                    const secondEnemy = nextEnemies.find(e => e.pos === landPos && e.hp > 0);
+                                    if (secondEnemy) {
+                                        targets.push(landPos);
+                                        // Stop after hitting second
+                                    }
+                                } else {
+                                    // Can't move past, stop at enemy? No, sliding stops *before* if blocked by wall?
+                                    // Or stops at enemy tile (collision)? Let's assume stops before if can't pierce.
+                                    // But logic says "pierce". If wall behind, stay at enemy pos (overlap)? No, grid rules.
+                                    // Fallback: stay at checkPos - facing
+                                    finalPos = checkPos - p.facing; 
+                                }
+                                break; // Sequence end
+                            } else {
+                                finalPos = checkPos; // Empty space, continue sliding
+                            }
+                        }
+                    }
+                    nextPlayer.pos = finalPos;
+                    currentState = handlePickup(finalPos, currentState);
                 }
 
                 // Filter for enemies hit based on targets calculated above
@@ -1279,8 +1367,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 const isRanged = card.range.some(r => r > 1);
                 // Visual blast on empty tiles if missed or ranged area effect
                 if (isRanged && hits.length === 0) {
-                     // If it was a 'NORMAL' attack that missed, targets[] is likely empty.
-                     // Show effect on max range?
                      if (card.effectType === 'NORMAL') {
                          const maxR = Math.max(...card.range);
                          const tPos = pPos + (maxR * p.facing);
@@ -1309,7 +1395,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                         // DRAIN Effect
                         if (card.effectType === 'DRAIN') {
-                            // Let's cap at damage dealt to existing HP
                             nextPlayer.hp = Math.min(nextPlayer.maxHp, nextPlayer.hp + 1);
                             addVfx('HEAL', nextPlayer.pos);
                         }
@@ -1370,11 +1455,27 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     audioService.playSound('select');
                 }
             } else if (card.type === 'MOVE') {
-                const dist = card.range[0];
-                const target = pPos + (dist * p.facing);
-                if (target >= 0 && target < GRID_SIZE && !nextEnemies.some(e => e.pos === target && e.hp > 0)) {
-                    nextPlayer.pos = target;
+                // Modified MOVE logic: Slide until blocked
+                let finalPos = pPos;
+                const dist = Math.max(...card.range);
+                
+                for (let i = 1; i <= dist; i++) {
+                    const checkPos = pPos + (i * p.facing);
+                    if (checkPos < 0 || checkPos >= GRID_SIZE) break;
+                    
+                    addVfx('WARP', checkPos, { color: 'text-blue-500' }); // Trail
+
+                    const isBlocked = nextEnemies.some(e => e.pos === checkPos && e.hp > 0);
+                    if (isBlocked) break;
+                    
+                    finalPos = checkPos;
+                }
+                
+                if (finalPos !== pPos) {
+                    nextPlayer.pos = finalPos;
                     audioService.playSound('select');
+                    // Check Pickup
+                    currentState = handlePickup(finalPos, currentState);
                 } else {
                     addLog("移動できない！");
                 }
@@ -1663,24 +1764,19 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         if (hoveredCard) {
             // Re-calculate the range just like in executeQueue but purely for visual
             let ranges = hoveredCard.range;
-            if (hoveredCard.effectType === 'DASH_ATTACK') {
+            if (hoveredCard.type === 'MOVE') {
+                // Show full potential move range
+                const path = [];
+                for(let i=1; i<=Math.max(...ranges); i++) path.push(i);
+                ranges = path;
+            } else if (hoveredCard.effectType === 'DASH_ATTACK' || hoveredCard.effectType === 'PIERCE_DASH') {
                 // Dash highlights path
                 const path = [];
                 for(let i=1; i<=Math.max(...ranges); i++) path.push(i);
                 ranges = path;
             }
             
-            // Check if this tile is in range
-            const dist = idx - p.pos;
-            const distAbs = Math.abs(dist);
-            // Must check direction relative to player
-            const dir = Math.sign(dist);
-            
-            // Only highlight if direction matches player facing OR it's a card that hits backwards too
-            // But 'range' in KCard is defined relative (e.g. 1 means front 1, -1 means back 1)
-            // So tile index calculation: p.pos + (r * p.facing)
-            
-            // Find if this idx matches any range point
+            // Find if this idx matches any range point relative to player
             const isValidTile = ranges.some(r => (p.pos + (r * p.facing)) === idx);
             
             if (isValidTile) {
@@ -1689,11 +1785,24 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 // Determine if it is a valid target based on card logic (Normal vs Pierce)
                 if (hoveredCard.type === 'ATTACK') {
                     if (e) {
-                         if (hoveredCard.effectType === 'PIERCE' || hoveredCard.effectType === 'FURTHEST') {
+                         if (hoveredCard.effectType === 'PIERCE' || hoveredCard.effectType === 'FURTHEST' || hoveredCard.effectType === 'PIERCE_DASH') {
+                             // Sliding/Pierce highlights all enemies in path generally (simplified visual)
                              isTargeted = true;
+                         } else if (hoveredCard.effectType === 'DASH_ATTACK') {
+                             // Tackle targets ONLY first enemy
+                             const sortedRanges = [...ranges].sort((a,b) => Math.abs(a) - Math.abs(b));
+                             for (const r of sortedRanges) {
+                                 const tPos = p.pos + (r * p.facing);
+                                 if (tPos >= 0 && tPos < GRID_SIZE) {
+                                     const hitEnemy = gameState.enemies.find(en => en.pos === tPos && en.hp > 0);
+                                     if (hitEnemy) {
+                                         if (hitEnemy.id === e.id) isTargeted = true;
+                                         break; // Stop at first
+                                     }
+                                 }
+                             }
                          } else {
-                             // Normal: Hits first enemy. We need to check if 'e' is the first enemy in range sequence.
-                             // Sort valid range tiles by distance from player
+                             // Normal: Hits first enemy.
                              const sortedRanges = [...ranges].sort((a,b) => Math.abs(a) - Math.abs(b));
                              for (const r of sortedRanges) {
                                  const tPos = p.pos + (r * p.facing);
@@ -2158,7 +2267,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     
                                     {/* Icon Badge for Effect Type */}
                                     <div className="absolute top-1 right-1 text-[8px] bg-black/60 px-1 rounded text-white font-mono">
-                                        {(card.effectType === 'PIERCE' || card.effectType === 'FURTHEST') ? '>>>' : (card.type === 'MOVE' ? 'MOVE' : '>|')}
+                                        {(card.effectType === 'PIERCE' || card.effectType === 'FURTHEST') ? '>>>' : (card.type === 'MOVE' ? 'MOVE' : (card.effectType === 'PIERCE_DASH' ? 'THRU' : '>|'))}
                                     </div>
 
                                     <div className="flex flex-col h-full w-full md:hidden">
