@@ -285,7 +285,7 @@ const App: React.FC = () => {
       audioService.stopBGM();
       setShopCards([]);
       setEventData(null);
-      setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
+      setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined }));
   };
 
   const handleNodeComplete = () => {
@@ -1894,28 +1894,8 @@ const App: React.FC = () => {
       return newCard;
   };
 
-  const handleNodeComplete = () => {
-      setGameState(prev => {
-          const newMap = prev.map.map(n => {
-              if (n.id === prev.currentMapNodeId) return { ...n, completed: true };
-              return n;
-          });
-          return {
-              ...prev,
-              map: newMap,
-              screen: GameScreen.MAP
-          };
-      });
-      audioService.playBGM('menu');
-  };
-
   const handleEventContinue = () => {
       handleNodeComplete();
-  };
-
-  const returnToTitle = () => {
-    audioService.stopBGM();
-    setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined }));
   };
 
   const handleLegacyCardSelect = (card: ICard) => {
@@ -2345,7 +2325,7 @@ const App: React.FC = () => {
                     onRest={handleRestAction} 
                     onUpgrade={handleUpgradeCard} 
                     onSynthesize={handleSynthesizeCard}
-                    onLeave={handleNodeCompleteWrapper} 
+                    onLeave={handleNodeComplete} 
                 />
             )}
 
@@ -2392,7 +2372,7 @@ const App: React.FC = () => {
                     onRemoveCard={(cardId, cost) => {
                          setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - cost, deck: prev.player.deck.filter(c => c.id !== cardId) } }));
                     }}
-                    onLeave={handleNodeCompleteWrapper}
+                    onLeave={handleNodeComplete}
                 />
             )}
 
@@ -2437,7 +2417,7 @@ const App: React.FC = () => {
                             return { ...prev, player: newP };
                         });
                     }}
-                    onLeave={handleNodeCompleteWrapper}
+                    onLeave={handleNodeComplete}
                     hasCursedKey={!!gameState.player.relics.find(r => r.id === 'CURSED_KEY')}
                 />
             )}
