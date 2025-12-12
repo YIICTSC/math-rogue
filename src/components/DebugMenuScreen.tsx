@@ -91,71 +91,69 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
   return (
     <div className="flex flex-col h-full w-full bg-gray-900 text-white relative">
         {/* Header */}
-        <div className="bg-red-900/90 border-b-2 border-red-500 p-4 flex justify-between items-center shrink-0">
-            <h2 className="text-xl font-bold text-red-100 flex items-center">
-                <Zap size={24} className="mr-2" /> DEBUG LOADOUT
+        <div className="bg-red-900/90 border-b-2 border-red-500 p-2 md:p-4 flex justify-between items-center shrink-0">
+            <h2 className="text-lg md:text-xl font-bold text-red-100 flex items-center">
+                <Zap size={20} className="mr-2" /> DEBUG
             </h2>
-            <div className="flex gap-4">
+            <div className="flex gap-2 md:gap-4 text-sm md:text-base">
                 <button onClick={onBack} className="text-gray-300 hover:text-white underline">戻る</button>
                 <button 
                     onClick={() => onStart(selectedDeck, selectedRelics, selectedPotions)}
-                    className="bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded font-bold flex items-center shadow-lg border-2 border-white animate-pulse"
+                    className="bg-green-600 hover:bg-green-500 text-white px-4 py-1 md:px-6 md:py-2 rounded font-bold flex items-center shadow-lg border-2 border-white animate-pulse text-xs md:text-sm"
                 >
-                    GAME START <ArrowRight size={16} className="ml-2"/>
+                    START <ArrowRight size={14} className="ml-1"/>
                 </button>
             </div>
         </div>
 
         <div className="flex flex-grow overflow-hidden">
             {/* Left Panel: Library & Synthesis */}
-            <div className="w-1/2 md:w-2/3 border-r border-gray-700 flex flex-col bg-gray-800/50">
+            <div className="w-[65%] md:w-3/4 border-r border-gray-700 flex flex-col bg-gray-800/50">
                 {/* Tabs */}
-                <div className="flex bg-gray-800 border-b border-gray-700">
-                    <button onClick={() => setActiveTab('CARDS')} className={`flex-1 py-3 font-bold ${activeTab === 'CARDS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>CARDS</button>
-                    <button onClick={() => setActiveTab('RELICS')} className={`flex-1 py-3 font-bold ${activeTab === 'RELICS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>RELICS</button>
-                    <button onClick={() => setActiveTab('POTIONS')} className={`flex-1 py-3 font-bold ${activeTab === 'POTIONS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>POTIONS</button>
-                    <button onClick={() => setActiveTab('SYNTHESIS')} className={`flex-1 py-3 font-bold ${activeTab === 'SYNTHESIS' ? 'bg-purple-900 text-white' : 'text-purple-400 hover:bg-gray-750'}`}>SYNTHESIS</button>
+                <div className="flex bg-gray-800 border-b border-gray-700 overflow-x-auto">
+                    <button onClick={() => setActiveTab('CARDS')} className={`flex-1 py-2 px-1 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'CARDS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>CARDS</button>
+                    <button onClick={() => setActiveTab('RELICS')} className={`flex-1 py-2 px-1 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'RELICS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>RELICS</button>
+                    <button onClick={() => setActiveTab('POTIONS')} className={`flex-1 py-2 px-1 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'POTIONS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>POT</button>
+                    <button onClick={() => setActiveTab('SYNTHESIS')} className={`flex-1 py-2 px-1 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'SYNTHESIS' ? 'bg-purple-900 text-white' : 'text-purple-400 hover:bg-gray-750'}`}>SYNTH</button>
                 </div>
 
                 {/* Content */}
-                <div className="flex-grow overflow-y-auto p-4 custom-scrollbar">
+                <div className="flex-grow overflow-y-auto p-2 md:p-4 custom-scrollbar">
                     
                     {activeTab === 'SYNTHESIS' && (
                         <div className="mb-8 border-b-2 border-purple-500 pb-4">
-                            <h3 className="text-purple-300 font-bold mb-4 flex items-center"><Beaker className="mr-2"/> SYNTHESIS LAB</h3>
-                            <div className="flex items-center justify-center gap-4 mb-4 bg-black/40 p-4 rounded-xl">
-                                <div className="flex flex-col items-center">
+                            <h3 className="text-purple-300 font-bold mb-4 flex items-center text-sm md:text-base"><Beaker className="mr-2"/> SYNTHESIS LAB</h3>
+                            <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-4 bg-black/40 p-4 rounded-xl">
+                                <div className="flex gap-4">
                                     <div 
-                                        className="w-24 h-36 border-2 border-dashed border-gray-500 rounded flex items-center justify-center cursor-pointer hover:border-purple-400 bg-gray-900"
+                                        className="w-20 h-32 md:w-24 md:h-36 border-2 border-dashed border-gray-500 rounded flex items-center justify-center cursor-pointer hover:border-purple-400 bg-gray-900"
                                         onClick={() => setSynthSlot1(null)}
                                     >
                                         {synthSlot1 ? (
-                                            <div className="scale-75 pointer-events-none"><Card card={synthSlot1} onClick={()=>{}} disabled={false}/></div>
+                                            <div className="scale-[0.6] md:scale-75 pointer-events-none"><Card card={synthSlot1} onClick={()=>{}} disabled={false}/></div>
                                         ) : (
                                             <span className="text-gray-600 text-xs">Slot 1</span>
                                         )}
                                     </div>
-                                </div>
-                                <Plus size={24} className="text-gray-500" />
-                                <div className="flex flex-col items-center">
+                                    <div className="flex items-center"><Plus size={20} className="text-gray-500" /></div>
                                     <div 
-                                        className="w-24 h-36 border-2 border-dashed border-gray-500 rounded flex items-center justify-center cursor-pointer hover:border-purple-400 bg-gray-900"
+                                        className="w-20 h-32 md:w-24 md:h-36 border-2 border-dashed border-gray-500 rounded flex items-center justify-center cursor-pointer hover:border-purple-400 bg-gray-900"
                                         onClick={() => setSynthSlot2(null)}
                                     >
                                         {synthSlot2 ? (
-                                            <div className="scale-75 pointer-events-none"><Card card={synthSlot2} onClick={()=>{}} disabled={false}/></div>
+                                            <div className="scale-[0.6] md:scale-75 pointer-events-none"><Card card={synthSlot2} onClick={()=>{}} disabled={false}/></div>
                                         ) : (
                                             <span className="text-gray-600 text-xs">Slot 2</span>
                                         )}
                                     </div>
                                 </div>
-                                <div className="flex flex-col gap-2">
+                                <div className="flex flex-row md:flex-col gap-2 items-center">
                                     <button 
                                         onClick={performSynthesis}
                                         disabled={!synthSlot1 || !synthSlot2}
-                                        className={`px-4 py-2 rounded font-bold text-sm ${!synthSlot1 || !synthSlot2 ? 'bg-gray-700 text-gray-500' : 'bg-purple-600 text-white hover:bg-purple-500 animate-pulse'}`}
+                                        className={`px-4 py-2 rounded font-bold text-xs md:text-sm ${!synthSlot1 || !synthSlot2 ? 'bg-gray-700 text-gray-500' : 'bg-purple-600 text-white hover:bg-purple-500 animate-pulse'}`}
                                     >
-                                        Synthesize
+                                        Mix
                                     </button>
                                     <button 
                                         onClick={() => { setSynthSlot1(null); setSynthSlot2(null); setSynthResult(null); }}
@@ -167,39 +165,39 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
                                 
                                 {synthResult && (
                                     <>
-                                        <ArrowRight size={24} className="text-purple-400" />
+                                        <ArrowRight size={24} className="text-purple-400 rotate-90 md:rotate-0" />
                                         <div className="flex flex-col items-center gap-2">
-                                            <div className="scale-90"><Card card={synthResult} onClick={()=>{}} disabled={false} /></div>
+                                            <div className="scale-[0.8] md:scale-90"><Card card={synthResult} onClick={()=>{}} disabled={false} /></div>
                                             <button 
                                                 onClick={addSynthToDeck}
                                                 className="bg-blue-600 hover:bg-blue-500 text-white px-2 py-1 rounded text-xs font-bold w-full"
                                             >
-                                                Add to Deck
+                                                Add
                                             </button>
                                         </div>
                                     </>
                                 )}
                             </div>
-                            <div className="text-center text-xs text-gray-400 mb-2">Select cards below to fill slots</div>
+                            <div className="text-center text-xs text-gray-400 mb-2">Select cards below</div>
                         </div>
                     )}
 
                     {(activeTab === 'CARDS' || activeTab === 'SYNTHESIS') && (
                         <>
                             <div className="relative mb-4">
-                                <Search className="absolute left-3 top-2.5 text-gray-400" size={16}/>
+                                <Search className="absolute left-3 top-2 text-gray-400" size={14}/>
                                 <input 
                                     type="text" 
-                                    placeholder="Search cards..." 
-                                    className="w-full bg-black border border-gray-600 rounded pl-10 p-2 text-white focus:border-blue-500 outline-none"
+                                    placeholder="Search..." 
+                                    className="w-full bg-black border border-gray-600 rounded pl-9 p-1.5 text-sm text-white focus:border-blue-500 outline-none"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
                             </div>
-                            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
                                 {filteredCards.map((c, idx) => (
-                                    <div key={idx} className="cursor-pointer hover:scale-105 transition-transform" onClick={() => handleAddCard(c)}>
-                                        <div className="scale-75 origin-top-left pointer-events-none">
+                                    <div key={idx} className="cursor-pointer hover:scale-105 transition-transform flex justify-center" onClick={() => handleAddCard(c)}>
+                                        <div className="scale-90 origin-top pointer-events-none -mb-4">
                                             <Card card={{...c, id: 'temp'}} onClick={()=>{}} disabled={false} />
                                         </div>
                                     </div>
@@ -209,17 +207,17 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
                     )}
 
                     {activeTab === 'RELICS' && (
-                        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
                             {allRelics.map((r) => {
                                 const isSelected = selectedRelics.some(sr => sr.id === r.id);
                                 return (
                                     <div 
                                         key={r.id} 
                                         onClick={() => toggleRelic(r)}
-                                        className={`p-3 rounded border-2 cursor-pointer flex flex-col items-center text-center ${isSelected ? 'bg-yellow-900/50 border-yellow-400' : 'bg-black/40 border-gray-700 hover:border-gray-500'}`}
+                                        className={`p-2 rounded border cursor-pointer flex flex-col items-center text-center ${isSelected ? 'bg-yellow-900/50 border-yellow-400' : 'bg-black/40 border-gray-700 hover:border-gray-500'}`}
                                     >
-                                        <Gem size={24} className={isSelected ? "text-yellow-400" : "text-gray-500"} />
-                                        <span className="text-xs mt-2 font-bold">{r.name}</span>
+                                        <Gem size={20} className={isSelected ? "text-yellow-400" : "text-gray-500"} />
+                                        <span className="text-[10px] mt-1 font-bold leading-tight">{r.name}</span>
                                     </div>
                                 );
                             })}
@@ -227,15 +225,15 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
                     )}
 
                     {activeTab === 'POTIONS' && (
-                        <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                             {allPotions.map((p, idx) => (
                                 <div 
                                     key={idx} 
                                     onClick={() => togglePotion(p)}
-                                    className="p-3 rounded border-2 border-gray-700 hover:border-white bg-black/40 cursor-pointer flex flex-col items-center text-center"
+                                    className="p-2 rounded border border-gray-700 hover:border-white bg-black/40 cursor-pointer flex flex-col items-center text-center"
                                 >
-                                    <FlaskConical size={24} style={{ color: p.color }} />
-                                    <span className="text-xs mt-2 font-bold">{p.name}</span>
+                                    <FlaskConical size={20} style={{ color: p.color }} />
+                                    <span className="text-[10px] mt-1 font-bold">{p.name}</span>
                                 </div>
                             ))}
                         </div>
@@ -244,41 +242,41 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
             </div>
 
             {/* Right Panel: Current Loadout */}
-            <div className="w-1/2 md:w-1/3 flex flex-col bg-black/20">
-                <div className="p-3 bg-black/50 border-b border-gray-700 font-bold text-gray-300">
-                    CURRENT LOADOUT
+            <div className="w-[35%] md:w-1/4 flex flex-col bg-black/20 text-xs">
+                <div className="p-2 bg-black/50 border-b border-gray-700 font-bold text-gray-300 text-[10px] md:text-xs">
+                    LOADOUT
                 </div>
-                <div className="flex-grow overflow-y-auto p-4 custom-scrollbar space-y-6">
+                <div className="flex-grow overflow-y-auto p-1 md:p-3 custom-scrollbar space-y-4">
                     
                     {/* Deck */}
                     <div>
-                        <div className="flex justify-between items-center mb-2">
-                            <h3 className="font-bold text-blue-300 flex items-center"><Swords size={16} className="mr-2"/> Deck ({selectedDeck.length})</h3>
-                            <button onClick={clearDeck} className="text-xs text-red-400 hover:text-red-200">Clear All</button>
+                        <div className="flex justify-between items-center mb-1">
+                            <h3 className="font-bold text-blue-300 flex items-center text-[10px] md:text-xs"><Swords size={12} className="mr-1"/> Deck ({selectedDeck.length})</h3>
+                            <button onClick={clearDeck} className="text-[10px] text-red-400 hover:text-red-200">Clear</button>
                         </div>
                         <div className="space-y-1">
                             {selectedDeck.map((c, idx) => (
-                                <div key={idx} className="flex justify-between items-center bg-gray-800 p-2 rounded border border-gray-700 text-xs group">
-                                    <span className={c.type === CardType.ATTACK ? 'text-red-300' : c.type === CardType.SKILL ? 'text-blue-300' : 'text-yellow-300'}>
+                                <div key={idx} className="flex justify-between items-center bg-gray-800 p-1 rounded border border-gray-700 group">
+                                    <span className={`truncate text-[10px] ${c.type === CardType.ATTACK ? 'text-red-300' : c.type === CardType.SKILL ? 'text-blue-300' : 'text-yellow-300'}`}>
                                         {c.name}
                                     </span>
-                                    <button onClick={() => handleRemoveCard(idx)} className="text-gray-500 hover:text-red-500">
-                                        <Trash2 size={14} />
+                                    <button onClick={() => handleRemoveCard(idx)} className="text-gray-500 hover:text-red-500 ml-1 shrink-0">
+                                        <Trash2 size={12} />
                                     </button>
                                 </div>
                             ))}
-                            {selectedDeck.length === 0 && <div className="text-gray-600 text-xs italic">No cards selected</div>}
+                            {selectedDeck.length === 0 && <div className="text-gray-600 text-[10px] italic">Empty</div>}
                         </div>
                     </div>
 
                     {/* Relics */}
                     <div>
-                        <h3 className="font-bold text-yellow-300 mb-2 flex items-center"><Gem size={16} className="mr-2"/> Relics ({selectedRelics.length})</h3>
-                        <div className="flex flex-wrap gap-2">
+                        <h3 className="font-bold text-yellow-300 mb-1 flex items-center text-[10px] md:text-xs"><Gem size={12} className="mr-1"/> Relics ({selectedRelics.length})</h3>
+                        <div className="flex flex-wrap gap-1">
                             {selectedRelics.map(r => (
-                                <div key={r.id} className="bg-gray-800 p-2 rounded border border-yellow-700 flex items-center text-xs" title={r.description}>
-                                    <span className="truncate max-w-[100px]">{r.name}</span>
-                                    <button onClick={() => toggleRelic(r)} className="ml-2 text-gray-500 hover:text-red-500"><X size={12}/></button>
+                                <div key={r.id} className="bg-gray-800 p-1 rounded border border-yellow-700 flex items-center" title={r.description}>
+                                    <span className="truncate max-w-[60px] text-[9px]">{r.name}</span>
+                                    <button onClick={() => toggleRelic(r)} className="ml-1 text-gray-500 hover:text-red-500"><X size={10}/></button>
                                 </div>
                             ))}
                         </div>
@@ -286,13 +284,13 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
 
                     {/* Potions */}
                     <div>
-                        <h3 className="font-bold text-purple-300 mb-2 flex items-center"><FlaskConical size={16} className="mr-2"/> Potions ({selectedPotions.length}/3)</h3>
+                        <h3 className="font-bold text-purple-300 mb-1 flex items-center text-[10px] md:text-xs"><FlaskConical size={12} className="mr-1"/> Potions ({selectedPotions.length})</h3>
                         <div className="space-y-1">
                             {selectedPotions.map((p, idx) => (
-                                <div key={idx} className="flex justify-between items-center bg-gray-800 p-2 rounded border border-gray-700 text-xs">
-                                    <span style={{color: p.color}}>{p.name}</span>
-                                    <button onClick={() => removePotion(idx)} className="text-gray-500 hover:text-red-500">
-                                        <Trash2 size={14} />
+                                <div key={idx} className="flex justify-between items-center bg-gray-800 p-1 rounded border border-gray-700">
+                                    <span style={{color: p.color}} className="truncate text-[10px]">{p.name}</span>
+                                    <button onClick={() => removePotion(idx)} className="text-gray-500 hover:text-red-500 ml-1 shrink-0">
+                                        <Trash2 size={12} />
                                     </button>
                                 </div>
                             ))}
