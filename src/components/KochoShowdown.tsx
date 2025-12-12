@@ -1,8 +1,9 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp, Dna, Shuffle, Star } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp, Dna, Shuffle, Star, HelpCircle } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
+import { storageService } from '../services/storageService';
 
 // --- TYPES ---
 type Facing = 1 | -1; // 1: Right, -1: Left
@@ -72,6 +73,7 @@ interface KochoVFX {
 interface KochoGameState {
     phase: GamePhase;
     battleStage: number; // 1 to 7
+    battleSequence: number; // 0: 1st Mob Wave, 1: 2nd Mob Wave, 2: MidBoss (Used for Stage 2+)
     wave: number;
     maxWaves: number;
     turn: number;
@@ -178,27 +180,51 @@ const ENEMY_TYPES = [
 const GRID_SIZE = 7;
 const FINAL_STAGE = 7;
 
+// --- HELPER: Hydrate/Restore State ---
+const hydrateState = (state: any): KochoGameState => {
+    // Restore React Nodes for Cards (Icons)
+    const restoreCards = (cards: any[]) => cards.map(c => {
+        const template = CARD_DB.find(t => t.name === c.name);
+        return { 
+            ...c, 
+            icon: template ? template.icon : <HelpCircle size={16}/> 
+        };
+    });
+    
+    return {
+        ...state,
+        hand: restoreCards(state.hand),
+        queue: restoreCards(state.queue)
+    };
+};
+
+const getInitialState = (): KochoGameState => ({
+    phase: 'BATTLE',
+    battleStage: 1,
+    battleSequence: 0,
+    wave: 1,
+    maxWaves: 3,
+    turn: 1,
+    gridSize: GRID_SIZE,
+    player: { id: 'p1', type: 'PLAYER', name: '勇者', pos: 3, facing: 1, maxHp: 10, hp: 10, spriteName: 'HERO_SIDE|赤', shield: 0 },
+    enemies: [],
+    hand: getInitialDeck(),
+    queue: [],
+    status: 'PLAYING',
+    logs: ['校長室への道が開かれた...'],
+    specialActionCooldown: 0,
+    money: 0,
+    relics: [],
+    shopUpgradeUsed: false
+});
+
 // --- COMPONENT ---
 const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     
     // State
-    const [gameState, setGameState] = useState<KochoGameState>({
-        phase: 'BATTLE',
-        battleStage: 1,
-        wave: 1,
-        maxWaves: 3,
-        turn: 1,
-        gridSize: GRID_SIZE,
-        player: { id: 'p1', type: 'PLAYER', name: '勇者', pos: 3, facing: 1, maxHp: 10, hp: 10, spriteName: 'HERO_SIDE|赤', shield: 0 },
-        enemies: [],
-        hand: [],
-        queue: [],
-        status: 'PLAYING',
-        logs: ['校長室への道が開かれた...'],
-        specialActionCooldown: 0,
-        money: 0,
-        relics: [],
-        shopUpgradeUsed: false
+    const [gameState, setGameState] = useState<KochoGameState>(() => {
+        const saved = storageService.loadKochoState();
+        return saved ? hydrateState(saved) : getInitialState();
     });
 
     const [vfxList, setVfxList] = useState<KochoVFX[]>([]);
@@ -218,33 +244,39 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     // Shop Upgrade State
     const [currentUpgradeOffer, setCurrentUpgradeOffer] = useState<UpgradeOffer | null>(null);
 
-    // Initialization
+    // Auto-Save Effect
+    const saveDebounceRef = useRef<any>(null);
     useEffect(() => {
-        initGame();
+        if (gameState.status !== 'GAME_OVER' && gameState.status !== 'VICTORY') {
+            if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
+            saveDebounceRef.current = setTimeout(() => {
+                const stateToSave = { ...gameState };
+                // Also save current upgrade offer if exists (store it in gameState or handle separately? 
+                // Simplest is to assume it's transient or add it to state. 
+                // For now let's just save game state. Offer rerolls on load is acceptable minor exploit.)
+                storageService.saveKochoState(stateToSave);
+            }, 500);
+        }
+    }, [gameState]);
+
+    // Initialization (Only if starting fresh or reset)
+    useEffect(() => {
+        if (gameState.wave === 1 && gameState.enemies.length === 0 && gameState.status === 'PLAYING' && gameState.battleStage === 1 && gameState.turn === 1) {
+            startWave(1, 0, 1);
+        }
     }, []);
 
     const initGame = () => {
-        const initialState: KochoGameState = {
-            phase: 'BATTLE',
-            battleStage: 1,
-            wave: 1,
-            maxWaves: 3,
-            turn: 1,
-            gridSize: GRID_SIZE,
-            player: { id: 'p1', type: 'PLAYER', name: '勇者', pos: 3, facing: 1, maxHp: 10, hp: 10, spriteName: 'HERO_SIDE|赤', shield: 0 },
-            enemies: [],
-            hand: getInitialDeck(),
-            queue: [],
-            status: 'PLAYING',
-            logs: ['校長室への道が開かれた...'],
-            specialActionCooldown: 0,
-            money: 0,
-            relics: [],
-            shopUpgradeUsed: false
-        };
+        const initialState = getInitialState();
         setGameState(initialState);
-        stateRef.current = initialState; // Sync ref immediately
-        startWave(1, 1);
+        stateRef.current = initialState;
+        storageService.saveKochoState(initialState);
+        startWave(1, 0, 1);
+    };
+
+    const handleQuit = () => {
+        // Save handled by effect, ensure cleared if needed or just save current state
+        onBack();
     };
 
     const addLog = (msg: string) => {
@@ -272,7 +304,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }
     }, [gameState.phase]);
 
-    const startWave = (stage: number, wave: number) => {
+    const startWave = (stage: number, sequence: number, wave: number) => {
         let newEnemies: KEntity[] = [];
         let logMsg = "";
         let bgm: any = 'dungeon_gym';
@@ -280,44 +312,40 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         // Stage Logic
         if (stage === FINAL_STAGE) {
-            // Final Boss
+            // Final Boss (Sequence doesn't really matter here, but let's keep it clean)
             const boss = ENEMY_TYPES.find(e => e.name === '校長')!;
             newEnemies.push(createEnemy(boss, 0, 1)); // Phase 1
             logMsg = "最終決戦！校長室";
             bgm = 'dungeon_boss';
-            maxW = 1; // Boss battle is 1 wave (with phases)
-        } else {
-            // Determine Max Waves for this stage (Random 3-8)
-            // But stick to current maxWaves if we are mid-stage
-            if (wave === 1) {
-                // Tutorial / Stage 1 fixed to 3
-                if (stage === 1) {
-                    maxW = 3;
-                } else {
-                    maxW = Math.floor(Math.random() * 6) + 3;
-                }
-            } else {
-                maxW = stateRef.current.maxWaves;
+            maxW = 1;
+        } else if (stage === 1) {
+            // Tutorial Stage: Simple 3 waves -> Reward -> Next
+            maxW = 3;
+            // Standard Mobs
+            const count = Math.min(3, Math.floor(wave / 2) + 1);
+            for(let i=0; i<count; i++) {
+                newEnemies.push(createEnemy(ENEMY_TYPES[0], i)); // Senior
             }
+            logMsg = `Tutorial - Wave ${wave}/${maxW}`;
+            bgm = 'school_psyche';
+        } else {
+            // Complex Stages (2-6)
+            // Sequence 0: First Mobs (3-5 waves)
+            // Sequence 1: Second Mobs (3-5 waves)
+            // Sequence 2: Mid Boss (1 wave)
 
-            // Mid Boss Check
-            if ((stage === 3 || stage === 5) && wave === maxW) {
-                const midBossName = stage === 3 ? '理科の先生' : '体育の先生';
-                const mb = ENEMY_TYPES.find(e => e.name === midBossName)!;
-                newEnemies.push(createEnemy(mb, 0));
-                // Add a minion
-                const minion = ENEMY_TYPES[0];
-                newEnemies.push(createEnemy(minion, 1));
-                
-                logMsg = `強敵 ${midBossName} が現れた！`;
-                bgm = 'dungeon_boss';
-            } else {
-                // Normal Wave
-                const diff = stage + Math.floor(wave / 2);
+            if (sequence === 0 || sequence === 1) {
+                if (wave === 1) {
+                    // Randomize max waves for this sequence
+                    maxW = Math.floor(Math.random() * 3) + 3; // 3 to 5
+                } else {
+                    maxW = stateRef.current.maxWaves;
+                }
+
+                const diff = stage + (sequence * 2) + Math.floor(wave / 2);
                 const count = Math.min(4, Math.floor(diff / 2) + 1);
                 
                 for(let i=0; i<count; i++) {
-                    // Weighted random enemy
                     const r = Math.random();
                     let eType = 0; // Senior
                     if (stage > 2 && r < 0.4) eType = 1; // Teacher
@@ -326,13 +354,35 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     
                     newEnemies.push(createEnemy(ENEMY_TYPES[eType], i));
                 }
-                logMsg = `Stage ${stage} - Wave ${wave}/${maxW}`;
+                logMsg = `Stage ${stage}-${sequence+1} Wave ${wave}/${maxW}`;
+                
                 if (stage >= 3) bgm = 'dungeon_science';
                 if (stage >= 5) bgm = 'dungeon_roof';
+
+            } else if (sequence === 2) {
+                // Mid Boss
+                maxW = 1;
+                
+                // Cycle bosses based on stage to ensure variety
+                // Stages 2, 3, 4, 5, 6
+                let midBossName = '理科の先生';
+                if (stage === 2) midBossName = '教頭'; // Use Vice Principal as boss
+                if (stage === 4 || stage === 6) midBossName = '体育の先生';
+                
+                const mb = ENEMY_TYPES.find(e => e.name === midBossName) || ENEMY_TYPES[1];
+                newEnemies.push(createEnemy(mb, 0));
+                
+                // Minion
+                const minionName = stage > 4 ? '熱血教師' : '不良生徒';
+                const minion = ENEMY_TYPES.find(e => e.name === minionName) || ENEMY_TYPES[0];
+                newEnemies.push(createEnemy(minion, 1));
+
+                logMsg = `強敵 ${mb.name} が現れた！`;
+                bgm = 'dungeon_boss';
             }
         }
 
-        // Reset Card Cooldowns at start of a BATTLE phase (wave 1)
+        // Reset Card Cooldowns at start of a new battle sequence/wave 1
         const isBattleStart = wave === 1;
         const currentHand = isBattleStart ? stateRef.current.hand.map(c => ({...c, currentCooldown: 0})) : stateRef.current.hand;
 
@@ -340,12 +390,12 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             ...prev,
             phase: 'BATTLE',
             battleStage: stage,
+            battleSequence: sequence,
             wave: wave,
             maxWaves: maxW,
             turn: 1,
             player: { 
                 ...prev.player, 
-                // Reset shield each wave? Usually yes in StS style.
                 shield: 0,
             }, 
             enemies: newEnemies,
@@ -945,7 +995,10 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         // Cleanup
         setGameState(prev => {
-            if (prev.status === 'GAME_OVER') return prev;
+            if (prev.status === 'GAME_OVER') {
+                 storageService.clearKochoState();
+                 return prev;
+            }
             
             // Remove truly dead enemies (phase check logic handles boss revival in resolveEnemyTurn)
             const aliveEnemies = prev.enemies.filter(e => e.hp > 0);
@@ -968,20 +1021,62 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const current = stateRef.current;
         let nextPhase = current.phase;
         let nextWave = current.wave + 1;
+        let nextStageVal = current.battleStage;
+        let nextSequence = current.battleSequence;
 
-        if (nextWave > current.maxWaves) {
-            // End of Battle Stage
-            switch (current.battleStage) {
-                case 1: nextPhase = 'REWARD'; break;
-                case 2: nextPhase = 'SHOP'; break;
-                case 3: nextPhase = 'REWARD'; break;
-                case 4: nextPhase = 'UPGRADE_EVENT'; break;
-                case 5: nextPhase = 'SHOP'; break;
-                case 6: nextPhase = 'REWARD'; break; // Before Boss
-                case 7: nextPhase = 'VICTORY'; break;
+        // Stage 1: Tutorial (Linear)
+        if (current.battleStage === 1) {
+            if (nextWave > current.maxWaves) {
+                if (current.phase === 'BATTLE') nextPhase = 'REWARD';
+                else if (current.phase === 'REWARD') { nextStageVal++; nextSequence = 0; nextWave = 1; nextPhase = 'BATTLE'; }
+            } else {
+                nextPhase = 'BATTLE';
+            }
+        } 
+        // Stage 7: Final Boss (Linear)
+        else if (current.battleStage === FINAL_STAGE) {
+            if (nextWave > current.maxWaves) {
+                nextPhase = 'VICTORY';
+            } else {
+                nextPhase = 'BATTLE';
             }
         }
+        // Stages 2-6: Complex Loop
+        else {
+             if (current.phase === 'BATTLE') {
+                 if (nextWave > current.maxWaves) {
+                     // End of Current Sequence's Waves
+                     if (current.battleSequence === 0) {
+                         nextPhase = 'REWARD';
+                     } else if (current.battleSequence === 1) {
+                         nextPhase = 'UPGRADE_EVENT';
+                     } else if (current.battleSequence === 2) {
+                         nextPhase = 'SHOP';
+                     }
+                 } else {
+                     // Continue waves
+                     nextPhase = 'BATTLE';
+                 }
+             } else if (current.phase === 'REWARD') {
+                 // Reward -> Battle Sequence 1 (2nd Mob Wave)
+                 nextSequence = 1;
+                 nextWave = 1;
+                 nextPhase = 'BATTLE';
+             } else if (current.phase === 'UPGRADE_EVENT') {
+                 // Upgrade -> Battle Sequence 2 (MidBoss)
+                 nextSequence = 2;
+                 nextWave = 1;
+                 nextPhase = 'BATTLE';
+             } else if (current.phase === 'SHOP') {
+                 // Shop -> Next Stage
+                 nextStageVal++;
+                 nextSequence = 0;
+                 nextWave = 1;
+                 nextPhase = 'BATTLE';
+             }
+        }
 
+        // Apply Transition
         if (nextPhase === 'REWARD') {
              generateRewards();
              setGameState(prev => ({ ...prev, phase: 'REWARD', status: 'PLAYING' }));
@@ -991,16 +1086,16 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
              audioService.playBGM(nextPhase === 'SHOP' ? 'poker_shop' : 'menu');
         } else if (nextPhase === 'VICTORY') {
              setGameState(prev => ({ ...prev, status: 'VICTORY' }));
+             storageService.clearKochoState();
              audioService.playSound('win');
-        } else {
-             // Continue Battle
-             startWave(current.battleStage, nextWave);
+        } else if (nextPhase === 'BATTLE') {
+             startWave(nextStageVal, nextSequence, nextWave);
         }
     };
 
     const nextStage = () => {
-        const nextStg = stateRef.current.battleStage + 1;
-        startWave(nextStg, 1);
+        // Just trigger phase completion logic which handles stage increment
+        handlePhaseComplete();
     };
 
     const generateRewards = () => {
@@ -1019,7 +1114,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             hand: [...prev.hand, card],
             status: 'PLAYING'
         }));
-        setTimeout(() => nextStage(), 100);
+        setTimeout(() => handlePhaseComplete(), 100);
     };
 
     const buyShopItem = (item: KRelic) => {
@@ -1119,7 +1214,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     const finishShopOrEvent = () => {
-        nextStage();
+        handlePhaseComplete();
     };
 
     // --- RENDER HELPERS ---
@@ -1227,9 +1322,9 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         <div className="flex flex-col h-full w-full bg-[#1a1a2e] text-white font-mono relative overflow-hidden">
             {/* Header */}
             <div className="flex justify-between items-center p-4 bg-black/40 border-b border-indigo-500/30 shrink-0">
-                <button onClick={onBack} className="flex items-center text-gray-400 hover:text-white"><ArrowLeft className="mr-2"/> Quit</button>
+                <button onClick={handleQuit} className="flex items-center text-gray-400 hover:text-white"><ArrowLeft className="mr-2"/> Quit</button>
                 <h2 className="text-xl font-bold text-indigo-100 tracking-widest hidden md:block">
-                    KOCHO SHOWDOWN <span className="text-sm text-pink-400 ml-2">Stage {gameState.battleStage}/7</span>
+                    KOCHO SHOWDOWN <span className="text-sm text-pink-400 ml-2">Stage {gameState.battleStage}/7 {gameState.battleStage > 1 ? `- ${gameState.battleSequence === 0 ? 'Part 1' : gameState.battleSequence === 1 ? 'Part 2' : 'MidBoss'}` : ''}</span>
                 </h2>
                 <div className="flex items-center gap-4">
                     <button onClick={() => setShowRelicModal(true)} className="flex items-center gap-2 text-yellow-200 hover:text-white transition-colors text-sm font-bold border border-yellow-500/30 px-3 py-1 rounded bg-black/20">

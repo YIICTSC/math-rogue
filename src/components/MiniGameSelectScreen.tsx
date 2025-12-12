@@ -54,8 +54,10 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
           storageService.clearDungeonState();
       } else if (deleteTarget === 'DUNGEON_2') {
           storageService.clearDungeonState2();
+      } else if (deleteTarget === 'KOCHO') {
+          storageService.clearKochoState();
       }
-      // Survivor & Kocho has no suspend state to clear currently
+      // Survivor has no suspend state to clear currently
       
       audioService.playSound('buff');
       setDeleteTarget(null);

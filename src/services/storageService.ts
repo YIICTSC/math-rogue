@@ -1,5 +1,4 @@
 
-
 import { GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState } from '../types';
 
 const STORAGE_KEY_UNLOCKED_CARDS = 'pixel_spire_unlocked_cards_v1';
@@ -23,6 +22,9 @@ const STORAGE_KEY_POKER_STATE = 'pixel_spire_poker_state_v1';
 // For School Dungeon 2
 const STORAGE_KEY_DUNGEON_STATE_2 = 'pixel_spire_dungeon_state_2_v1';
 const STORAGE_KEY_DUNGEON_RANKING_2 = 'pixel_spire_dungeon_ranking_2_v1';
+
+// For Kocho Showdown
+const STORAGE_KEY_KOCHO_STATE = 'pixel_spire_kocho_state_v1';
 
 export const storageService = {
   // --- Unlocked Items (Cards, Relics, Potions, Enemies) ---
@@ -276,6 +278,24 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_DUNGEON_STATE_2);
   },
 
+  // --- Kocho Showdown State ---
+  saveKochoState: (state: any) => {
+      try {
+          localStorage.setItem(STORAGE_KEY_KOCHO_STATE, JSON.stringify(state));
+      } catch (e) { console.warn("Failed to save kocho state", e); }
+  },
+
+  loadKochoState: (): any => {
+      try {
+          const stored = localStorage.getItem(STORAGE_KEY_KOCHO_STATE);
+          return stored ? JSON.parse(stored) : null;
+      } catch { return null; }
+  },
+
+  clearKochoState: () => {
+      localStorage.removeItem(STORAGE_KEY_KOCHO_STATE);
+  },
+
   // --- Game State (Save/Load) ---
   saveGame: (state: GameState) => {
     try {
@@ -373,6 +393,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_DUNGEON_STATE);
       localStorage.removeItem(STORAGE_KEY_DUNGEON_RANKING_2);
       localStorage.removeItem(STORAGE_KEY_DUNGEON_STATE_2);
+      localStorage.removeItem(STORAGE_KEY_KOCHO_STATE);
       localStorage.removeItem(STORAGE_KEY_LEGACY_CARD);
       localStorage.removeItem(STORAGE_KEY_DEBUG_MATH_SKIP);
       localStorage.removeItem(STORAGE_KEY_DEBUG_HP_ONE);
