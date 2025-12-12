@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, AlertTriangle, RefreshCw, Layers, Crosshair, Skull, Heart, Battery, ChevronsRight, Info, Check, Play } from 'lucide-react';
+import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, AlertTriangle, RefreshCw, Layers, Crosshair, Skull, Heart, Battery, ChevronsRight, ChevronsLeft, Info, Check, Play, X } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 
@@ -20,32 +20,29 @@ interface EnergyCard {
 
 interface ShipPart {
     id: string;
-    type: 'CANNON' | 'SHIELD' | 'ENGINE' | 'EMPTY' | 'MISSILE';
+    type: 'CANNON' | 'ENGINE' | 'EMPTY' | 'MISSILE'; // Removed SHIELD for player
     name: string;
     colorReq: EnergyColor | 'ANY'; // Requirement to load
     loadedValue: number | null; // Currently loaded energy
     multiplier: number; // Effect multiplier
-    baseShield: number; // Passive shield provided
-    hp: number; // Part HP (if destroyed, unusable) - Simplified: Hull HP is global, but parts can be disabled? Keeping simple: Hull HP global.
+    hp: number; // Part HP (Visual mainly)
 }
 
 interface ShipState {
     yOffset: number; // 0 to MAX_ROWS - SHIP_HEIGHT
     hp: number;
     maxHp: number;
-    shield: number; // Temporary shield for the turn
     fuel: number;
     maxFuel: number;
-    durability: number; // Enemy only: Stun threshold
+    durability: number; // Enemy only: Stun threshold (Defense Value)
     maxDurability: number;
     isStunned: boolean;
     parts: ShipPart[]; // Array of parts corresponding to ship rows (0 to SHIP_HEIGHT-1)
-    weaknessRevealed?: boolean;
 }
 
 interface EnemyIntent {
     row: number; // Relative to enemy ship
-    type: 'ATTACK' | 'SHIELD' | 'BUFF' | 'DEBUFF';
+    type: 'ATTACK' | 'BUFF' | 'DEBUFF';
     value: number;
 }
 
@@ -61,16 +58,16 @@ type GamePhase = 'TUTORIAL' | 'SETUP' | 'BATTLE' | 'REWARD' | 'VACATION' | 'GAME
 // --- DATABASE ---
 
 const STARTING_PARTS: ShipPart[] = [
-    { id: 'p1', type: 'CANNON', name: '鉛筆キャノン', colorReq: 'ANY', loadedValue: null, multiplier: 1, baseShield: 0, hp: 10 },
-    { id: 'p2', type: 'SHIELD', name: '消しゴム装甲', colorReq: 'ANY', loadedValue: null, multiplier: 1, baseShield: 0, hp: 10 },
-    { id: 'p3', type: 'ENGINE', name: '紙ブースター', colorReq: 'ANY', loadedValue: null, multiplier: 1, baseShield: 0, hp: 10 },
+    { id: 'p1', type: 'CANNON', name: '鉛筆キャノン', colorReq: 'ANY', loadedValue: null, multiplier: 1, hp: 10 },
+    { id: 'p2', type: 'CANNON', name: '定規ブラスター', colorReq: 'ANY', loadedValue: null, multiplier: 1, hp: 10 },
+    { id: 'p3', type: 'ENGINE', name: '紙ブースター', colorReq: 'ANY', loadedValue: null, multiplier: 1, hp: 10 },
 ];
 
 const ENEMY_DATA = [
-    { name: "折り紙偵察機", hp: 20, durability: 3, parts: ['CANNON', 'EMPTY', 'SHIELD'] },
+    { name: "折り紙偵察機", hp: 20, durability: 3, parts: ['CANNON', 'EMPTY', 'CANNON'] },
     { name: "ノート爆撃機", hp: 30, durability: 4, parts: ['CANNON', 'CANNON', 'EMPTY'] },
-    { name: "定規戦艦", hp: 50, durability: 5, parts: ['SHIELD', 'CANNON', 'CANNON'] }, // Elite
-    { name: "コンパス要塞", hp: 80, durability: 8, parts: ['CANNON', 'SHIELD', 'CANNON'] }, // Boss
+    { name: "定規戦艦", hp: 50, durability: 5, parts: ['CANNON', 'CANNON', 'CANNON'] }, // Elite
+    { name: "コンパス要塞", hp: 80, durability: 8, parts: ['CANNON', 'MISSILE', 'CANNON'] }, // Boss
 ];
 
 // --- COMPONENTS ---
@@ -104,7 +101,6 @@ const ShipPartView: React.FC<{ part: ShipPart, isActive: boolean, onClick?: () =
     let colorClass = 'bg-slate-700';
     
     if (part.type === 'CANNON') { icon = <Crosshair size={20}/>; colorClass = 'bg-red-900/80 border-red-500'; }
-    if (part.type === 'SHIELD') { icon = <Shield size={20}/>; colorClass = 'bg-blue-900/80 border-blue-500'; }
     if (part.type === 'ENGINE') { icon = <Move size={20}/>; colorClass = 'bg-emerald-900/80 border-emerald-500'; }
     if (part.type === 'MISSILE') { icon = <Send size={20}/>; colorClass = 'bg-orange-900/80 border-orange-500'; }
     if (part.type === 'EMPTY') { icon = <div className="w-4 h-4 bg-black/50 rounded-full"/>; colorClass = 'bg-gray-800 border-gray-600'; }
@@ -124,7 +120,7 @@ const ShipPartView: React.FC<{ part: ShipPart, isActive: boolean, onClick?: () =
             {/* Value Display */}
             {part.loadedValue !== null && (
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl font-black text-white drop-shadow-md z-10 flex items-center">
-                    {part.type === 'SHIELD' ? <Shield size={16} className="mr-1 text-blue-300"/> : <Zap size={16} className="mr-1 text-yellow-300"/>}
+                    <Zap size={16} className="mr-1 text-yellow-300"/>
                     {part.loadedValue * part.multiplier}
                 </div>
             )}
@@ -170,13 +166,13 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     // Ships
     const [player, setPlayer] = useState<ShipState>({
         yOffset: 1, // Start middle
-        hp: 30, maxHp: 30, shield: 0, fuel: MAX_FUEL, maxFuel: MAX_FUEL, durability: 0, maxDurability: 0, isStunned: false,
+        hp: 30, maxHp: 30, fuel: MAX_FUEL, maxFuel: MAX_FUEL, durability: 0, maxDurability: 0, isStunned: false,
         parts: [...STARTING_PARTS]
     });
 
     const [enemy, setEnemy] = useState<ShipState>({
         yOffset: 1,
-        hp: 20, maxHp: 20, shield: 0, fuel: 0, maxFuel: 0, durability: 3, maxDurability: 3, isStunned: false,
+        hp: 20, maxHp: 20, fuel: 0, maxFuel: 0, durability: 3, maxDurability: 3, isStunned: false,
         parts: []
     });
 
@@ -198,46 +194,40 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const eParts: ShipPart[] = template.parts.map((t, i) => ({
             id: `ep_${i}`,
             type: t as any,
-            name: t === 'CANNON' ? '敵砲台' : t === 'SHIELD' ? '敵装甲' : '空きスロット',
-            colorReq: 'ANY', loadedValue: null, multiplier: 1, baseShield: 0, hp: 10
+            name: t === 'CANNON' ? '敵砲台' : t === 'MISSILE' ? 'ミサイル' : '空き',
+            colorReq: 'ANY', loadedValue: null, multiplier: 1, hp: 10
         }));
 
         setEnemy({
             yOffset: 1,
             hp: template.hp, maxHp: template.hp,
             durability: template.durability, maxDurability: template.durability,
-            shield: 0, fuel: 0, maxFuel: 0, isStunned: false,
+            fuel: 0, maxFuel: 0, isStunned: false,
             parts: eParts
         });
 
         // Reset Player Temp Stats
         setPlayer(prev => ({
             ...prev,
-            shield: 0,
             yOffset: 1, // Reset position
             parts: prev.parts.map(p => ({ ...p, loadedValue: null }))
         }));
 
         setTurn(1);
         setHand([]);
-        generateEnemyIntents(1, eParts, template.durability); // Initial Intent
+        generateEnemyIntents(1, eParts); 
         drawEnergy(4); // Turn 1 draw
         setPhase('BATTLE');
         addLog(`バトル開始！ 敵: ${template.name}`);
         audioService.playBGM('battle');
     };
 
-    const generateEnemyIntents = (turnNum: number, parts: ShipPart[], durability: number) => {
-        // Simple AI: Randomly load cannons or shield
+    const generateEnemyIntents = (turnNum: number, parts: ShipPart[]) => {
         const intents: EnemyIntent[] = [];
         parts.forEach((p, idx) => {
-            if (p.type === 'CANNON') {
+            if (p.type === 'CANNON' || p.type === 'MISSILE') {
                 if (Math.random() < 0.7) {
-                    intents.push({ row: idx, type: 'ATTACK', value: 2 + Math.floor(turnNum/3) });
-                }
-            } else if (p.type === 'SHIELD') {
-                if (Math.random() < 0.5) {
-                    intents.push({ row: idx, type: 'SHIELD', value: 3 });
+                    intents.push({ row: idx, type: 'ATTACK', value: 2 + Math.floor(turnNum/2) });
                 }
             }
         });
@@ -257,7 +247,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 if (nextGenNums.length === 0) { nextGenNums = [...nextCoolNums]; nextCoolNums = []; }
                 if (nextGenCols.length === 0) { nextGenCols = [...nextCoolCols]; nextCoolCols = []; }
                 
-                // Shuffle if refilled
                 if (current.genNumbers.length === 0) nextGenNums.sort(() => Math.random() - 0.5);
                 if (current.genColors.length === 0) nextGenCols.sort(() => Math.random() - 0.5);
 
@@ -271,10 +260,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     nextGenCols.splice(colIdx, 1);
 
                     newCards.push({ id: `e_${Date.now()}_${i}`, value: val, color: col });
-                    
-                    // Add to cooling immediately (conceptually used when card is played, but for simplicity cycle them here or on play? 
-                    // Cobalt Core recycles on play/discard. Let's do on play/discard.)
-                    // Wait, if I remove from Gen now, I should hold them in "Hand" state, then move to Cool on use.
                 }
             }
             
@@ -345,129 +330,71 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         hand.forEach(c => recycleCard(c));
         setHand([]);
 
-        // 1. Player Action Resolution
-        let totalPlayerDmg = 0;
-        let totalEnemyDmg = 0;
-        let enemyStunDmg = 0;
+        // 1. Clash Resolution
+        let enemyStunDmg = 0; // Counts how many rows player WON
 
         // Iterate Rows (0 to MAX_ROWS-1)
         for (let r = 0; r < MAX_ROWS; r++) {
             // Check Player Part at this absolute row
-            // Player occupies rows: player.yOffset to player.yOffset + SHIP_HEIGHT - 1
             const pRelIdx = r - player.yOffset;
             const pPart = (pRelIdx >= 0 && pRelIdx < SHIP_HEIGHT) ? player.parts[pRelIdx] : null;
 
             // Check Enemy Part
             const eRelIdx = r - enemy.yOffset;
-            const ePart = (eRelIdx >= 0 && eRelIdx < SHIP_HEIGHT) ? enemy.parts[eRelIdx] : null;
-
+            
             // Enemy Intent on this row
             const intent = enemyIntents.find(i => (i.row + enemy.yOffset) === r);
 
             // Calculate Powers
             let pPower = 0;
-            let pShield = 0;
             if (pPart && pPart.loadedValue !== null) {
-                if (pPart.type === 'CANNON') pPower = pPart.loadedValue * pPart.multiplier;
-                if (pPart.type === 'SHIELD') pShield = pPart.loadedValue * pPart.multiplier;
+                if (pPart.type === 'CANNON' || pPart.type === 'MISSILE') pPower = pPart.loadedValue * pPart.multiplier;
             }
-            if (pPart) pShield += pPart.baseShield; // Passive shield
 
             let ePower = 0;
-            let eShield = 0;
-            if (intent) {
-                if (intent.type === 'ATTACK') ePower = intent.value;
-                if (intent.type === 'SHIELD') eShield = intent.value;
+            if (intent && intent.type === 'ATTACK') {
+                ePower = intent.value;
             }
-            // Add existing enemy shield if any? Simplified: Intent executes immediately
-            
+
             // Resolve Clash
-            // Attack vs Attack = Difference
-            // Attack vs Shield = Blocked
-            // Attack vs Hull = Damage
-
-            let rowLog = `Row ${r+1}: `;
+            let rowLog = "";
             
-            // Player Attack
-            if (pPower > 0) {
-                // If enemy attacking, clash
-                if (ePower > 0) {
-                    if (pPower > ePower) {
-                        const diff = pPower - ePower;
-                        ePower = 0; // Enemy attack neutralized
-                        // Remaining hits hull
-                        enemyStunDmg += 1; // Winning a clash counts for stun? Or just damage? 
-                        // Prompt: "Higher total power deals difference... Wins X rows > Durability -> Stun"
-                        // Let's assume winning a row contributes to stun
-                        
-                        // Deal diff damage to enemy
-                        const dmg = Math.max(0, diff - eShield); // Shield blocks remainder
-                        if (dmg > 0) {
-                            setEnemy(prev => ({...prev, hp: Math.max(0, prev.hp - dmg)}));
-                            rowLog += `P Hit ${dmg}! `;
-                        } else {
-                            rowLog += `P Blocked. `;
-                        }
-                        enemyStunDmg++;
-                    } else if (ePower > pPower) {
-                        const diff = ePower - pPower;
-                        pPower = 0; // Player attack neutralized
-                        ePower = diff; // Remaining enemy power
-                        rowLog += `Clash Lose. `;
-                    } else {
-                        pPower = 0; ePower = 0;
-                        rowLog += `Clash Draw. `;
-                    }
-                } else {
-                    // Direct hit on enemy
-                    const dmg = Math.max(0, pPower - eShield);
-                    if (dmg > 0) {
-                        setEnemy(prev => ({...prev, hp: Math.max(0, prev.hp - dmg)}));
-                        rowLog += `P Hit ${dmg}! `;
-                    } else {
-                        rowLog += `P Blocked. `;
-                    }
+            if (pPower > 0 || ePower > 0) {
+                if (pPower > ePower) {
+                    const diff = pPower - ePower;
+                    setEnemy(prev => ({...prev, hp: Math.max(0, prev.hp - diff)}));
+                    // Player Wins Row -> Enemy Durability Down
                     enemyStunDmg++;
-                }
-            }
-
-            // Enemy Attack (Remaining)
-            if (ePower > 0) {
-                // Check if Player Shield exists in this row (Loaded shield)
-                const dmg = Math.max(0, ePower - pShield);
-                if (dmg > 0) {
-                    // Global Shield check? "Shield" part usually adds to row, but maybe global?
-                    // Let's assume row-based shield for tactical depth
-                    setPlayer(prev => ({...prev, hp: Math.max(0, prev.hp - dmg)}));
-                    rowLog += `E Hit ${dmg}! `;
+                    rowLog = `Row ${r+1}: 撃ち合い勝利! ${diff}ダメ`;
+                } else if (ePower > pPower) {
+                    const diff = ePower - pPower;
+                    setPlayer(prev => ({...prev, hp: Math.max(0, prev.hp - diff)}));
+                    rowLog = `Row ${r+1}: 被弾! ${diff}ダメ`;
                 } else {
-                    rowLog += `E Blocked. `;
+                    rowLog = `Row ${r+1}: 相殺`;
                 }
             }
             
-            // if (rowLog !== `Row ${r+1}: `) addLog(rowLog);
+            // if (rowLog) addLog(rowLog);
             await new Promise(r => setTimeout(r, 200));
         }
 
         // Stun Logic
-        if (enemyStunDmg >= enemy.durability && !enemy.isStunned) {
-            addLog("敵をスタンさせた！(次ターン行動不能)");
-            setEnemy(prev => ({...prev, isStunned: true}));
-            audioService.playSound('win');
+        if (enemyStunDmg > 0) {
+            const newDur = Math.max(0, enemy.durability - enemyStunDmg);
+            if (newDur === 0 && !enemy.isStunned) {
+                // Apply Stun for NEXT turn
+                setEnemy(prev => ({...prev, durability: newDur, isStunned: true}));
+                addLog("敵の防御値を削りきった！次ターンスタン！");
+                audioService.playSound('win');
+            } else {
+                setEnemy(prev => ({...prev, durability: newDur}));
+                addLog(`敵の防御値を${enemyStunDmg}削った！`);
+            }
         } else if (enemy.isStunned) {
-            addLog("敵はスタンから回復した。");
+            // Recover from stun
             setEnemy(prev => ({...prev, isStunned: false, durability: prev.maxDurability}));
-        } else {
-             // Reduce durability? Or reset? "Durability... decrements... if 0 stun... resets next turn"
-             // Implies cumulative over turn? No, "Wins row count > Durability".
-             // Let's reduce durability by wins
-             const newDur = Math.max(0, enemy.durability - enemyStunDmg);
-             setEnemy(prev => ({...prev, durability: newDur}));
-             if (newDur === 0) {
-                 // Stun applied for NEXT turn
-                 setEnemy(prev => ({...prev, isStunned: true}));
-                 addLog("敵の体勢を崩した！");
-             }
+            addLog("敵はスタンから回復した。");
         }
 
         // Cleanup
@@ -489,14 +416,17 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         } else {
             // Next Turn
             setTurn(prev => prev + 1);
-            generateEnemyIntents(turn + 1, enemy.parts, enemy.durability);
+            if (!enemy.isStunned) {
+                generateEnemyIntents(turn + 1, enemy.parts);
+            } else {
+                setEnemyIntents([]); // Stunned -> No action
+            }
             drawEnergy(3);
         }
     };
 
     const handleReward = () => {
         // Simple reward: Heal or Fuel Max Up
-        // In full ver: Add Parts
         if (Math.random() > 0.5) {
             setPlayer(p => ({...p, hp: Math.min(p.maxHp, p.hp + 10)}));
             addLog("修理キットでHP回復！");
@@ -505,10 +435,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             addLog("燃料タンク拡張！");
         }
         setStage(s => s + 1);
-        
-        // Vacation check?
-        // 12 battles, 11 vacations.
-        // For simplicity in this minigame, just go next battle
         initBattle(stage + 1);
     };
 
@@ -525,6 +451,24 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         
         // Enemy Intent
         const intent = enemyIntents.find(i => (i.row + enemy.yOffset) === rowIndex);
+        
+        // Prediction
+        let prediction = null;
+        let pPower = 0;
+        let ePower = 0;
+        
+        if (pPart && pPart.loadedValue !== null) pPower = pPart.loadedValue * pPart.multiplier;
+        if (intent && intent.type === 'ATTACK' && !enemy.isStunned) ePower = intent.value;
+        
+        if (pPower > 0 || ePower > 0) {
+            if (pPower > ePower) {
+                prediction = <div className="text-cyan-400 font-bold flex items-center animate-pulse"><span className="text-xl">{pPower - ePower}</span> <ChevronsRight size={24}/></div>;
+            } else if (ePower > pPower) {
+                prediction = <div className="text-red-500 font-bold flex items-center animate-pulse"><ChevronsLeft size={24}/> <span className="text-xl">{ePower - pPower}</span></div>;
+            } else {
+                prediction = <div className="text-gray-400 font-bold text-xl">X</div>;
+            }
+        }
 
         return (
             <div key={rowIndex} className="flex items-center h-16 border-b border-white/10 relative">
@@ -541,18 +485,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     )}
                 </div>
 
-                {/* Middle Lane (Projectiles/Intent) */}
+                {/* Middle Lane (Prediction) */}
                 <div className="w-1/3 relative flex items-center justify-center">
-                    {intent && !enemy.isStunned && (
-                        <div className="flex items-center gap-1 text-red-400 animate-pulse">
-                            <ChevronsRight size={24} className="rotate-180"/> 
-                            <span className="font-bold text-xl">{intent.value}</span>
-                            {intent.type === 'ATTACK' && <Crosshair size={16}/>}
-                            {intent.type === 'SHIELD' && <Shield size={16}/>}
-                        </div>
-                    )}
-                    {enemy.isStunned && ePart && (
-                         <div className="text-yellow-500 font-bold text-sm">STUNNED</div>
+                    {prediction ? prediction : (
+                        enemy.isStunned && ePart ? <div className="text-yellow-500 font-bold text-sm">STUNNED</div> : null
                     )}
                 </div>
 
@@ -576,11 +512,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 <Send size={64} className="text-cyan-400 mb-4 animate-bounce"/>
                 <h1 className="text-4xl font-bold mb-4">紙飛行機バトル</h1>
                 <div className="max-w-md text-sm text-gray-300 space-y-2 mb-8 bg-slate-800 p-4 rounded border border-slate-600">
-                    <p>・エネルギーカードをパーツに装填して攻撃！</p>
-                    <p>・同じ行の敵パーツと威力を競います。</p>
-                    <p>・勝てば差分がダメージに。負ければ被弾。</p>
+                    <p>・エネルギーを装填して撃ち合おう！</p>
+                    <p>・同じ行の敵より数値が高ければダメージ！</p>
+                    <p>・勝つと敵の<span className="text-blue-300 font-bold">防御値(Durability)</span>を削れます。</p>
+                    <p>・防御値を0にすると次ターン<span className="text-yellow-400 font-bold">スタン</span>します。</p>
                     <p>・燃料を使って上下に回避しよう。</p>
-                    <p>・敵の耐久を削りきるとスタンします。</p>
                 </div>
                 <button onClick={() => initBattle(1)} className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-8 rounded shadow-lg animate-pulse flex items-center">
                     <Play className="mr-2"/> 出撃
@@ -614,7 +550,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     <div className="text-xs text-red-200">{enemy.isStunned ? "STUNNED" : "ENEMY"}</div>
                     <div className="text-lg font-bold">{enemy.hp} HP</div>
                     <div className="text-xs flex justify-end items-center gap-1 text-blue-300">
-                        <Shield size={12}/> Durability: {enemy.durability}
+                        <Shield size={12}/> Def: {enemy.durability}/{enemy.maxDurability}
                     </div>
                 </div>
 
@@ -657,7 +593,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     className="w-20 md:w-24 bg-red-900 hover:bg-red-800 border-2 border-red-600 rounded-lg flex flex-col items-center justify-center text-red-100 font-bold shadow-lg active:translate-y-1 transition-all"
                 >
                     <RefreshCw size={24} className={animating ? "animate-spin" : ""}/>
-                    <span className="text-xs mt-1">ENGAGE</span>
+                    <span className="text-xs mt-1">FIRE</span>
                 </button>
             </div>
 
