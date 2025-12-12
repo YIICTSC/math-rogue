@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp, Dna, Shuffle, Star, HelpCircle, Book, AlertCircle, Flag, Music, Mic, Milk, Battery, ShieldCheck, Bomb, Utensils, PenTool, Circle } from 'lucide-react';
+import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp, Dna, Shuffle, Star, HelpCircle, Book, AlertCircle, Flag, Music, Mic, Milk, Battery, ShieldCheck, Bomb, Utensils, PenTool, Circle, ArrowRight, Target } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { storageService } from '../services/storageService';
@@ -123,36 +123,36 @@ interface UpgradeOffer {
 // --- DATA ---
 const CARD_DB: Omit<KCard, 'id' | 'currentCooldown' | 'usedSlots'>[] = [
     // Standard Set
-    { name: '定規スラッシュ', type: 'ATTACK', range: [1], damage: 3, cooldown: 2, color: 'bg-red-600', icon: <Swords size={16}/>, description: '目の前の敵を斬る', energyCost: 1, maxSlots: 3 },
-    { name: 'コンパス突き', type: 'ATTACK', range: [2], damage: 2, cooldown: 2, color: 'bg-orange-600', icon: <Zap size={16}/>, description: '2マス先を攻撃', energyCost: 1, maxSlots: 3 },
+    { name: '定規スラッシュ', type: 'ATTACK', range: [1], damage: 3, cooldown: 2, color: 'bg-red-600', icon: <Swords size={16}/>, description: '目の前の敵を斬る', energyCost: 1, maxSlots: 3, effectType: 'NORMAL' },
+    { name: 'コンパス突き', type: 'ATTACK', range: [2], damage: 2, cooldown: 2, color: 'bg-orange-600', icon: <Zap size={16}/>, description: '2マス先を攻撃(間を無視)', energyCost: 1, maxSlots: 3, effectType: 'NORMAL' },
     { name: 'ダッシュ', type: 'MOVE', range: [2], damage: 0, cooldown: 3, color: 'bg-blue-600', icon: <ChevronsRight size={16}/>, description: '前方に2マス移動', energyCost: 1, maxSlots: 2 },
     { name: 'バックステップ', type: 'UTILITY', range: [-1], damage: 0, cooldown: 2, color: 'bg-gray-600', icon: <RotateCcw size={16}/>, description: '1マス下がる', energyCost: 1, maxSlots: 2 },
-    { name: '大声', type: 'ATTACK', range: [1, 2, 3], damage: 1, cooldown: 4, color: 'bg-yellow-600', icon: <Zap size={16}/>, description: '前方3マスに音波攻撃', energyCost: 1, maxSlots: 3 },
+    { name: '大声', type: 'ATTACK', range: [1, 2, 3], damage: 1, cooldown: 4, color: 'bg-yellow-600', icon: <Zap size={16}/>, description: '前方3マスに音波攻撃(貫通)', energyCost: 1, maxSlots: 3, effectType: 'PIERCE' },
     { name: 'お辞儀', type: 'UTILITY', range: [0], damage: 0, shield: 2, cooldown: 3, color: 'bg-green-600', icon: <Shield size={16}/>, description: '待機してシールド+2', energyCost: 1, maxSlots: 3 },
-    { name: '回し蹴り', type: 'ATTACK', range: [-1, 1], damage: 3, cooldown: 2, color: 'bg-purple-600', icon: <RefreshCw size={16}/>, description: '前後1マスを攻撃', energyCost: 1, maxSlots: 3 },
-    { name: 'チョーク投げ', type: 'ATTACK', range: [1, 2, 3, 4], damage: 2, cooldown: 3, color: 'bg-cyan-600', icon: <Zap size={16}/>, description: '遠距離攻撃', energyCost: 1, maxSlots: 3 },
-    { name: 'スライディング', type: 'ATTACK', range: [1, 2], damage: 2, cooldown: 3, color: 'bg-indigo-600', icon: <ChevronsRight size={16}/>, description: '移動しながら攻撃', energyCost: 1, maxSlots: 3 },
+    { name: '回し蹴り', type: 'ATTACK', range: [-1, 1], damage: 3, cooldown: 2, color: 'bg-purple-600', icon: <RefreshCw size={16}/>, description: '前後1マスを攻撃', energyCost: 1, maxSlots: 3, effectType: 'PIERCE' }, // Multi-target implicitly via range logic update
+    { name: 'チョーク投げ', type: 'ATTACK', range: [1, 2, 3, 4], damage: 2, cooldown: 3, color: 'bg-cyan-600', icon: <Zap size={16}/>, description: '遠距離攻撃(単体)', energyCost: 1, maxSlots: 3, effectType: 'NORMAL' },
+    { name: 'スライディング', type: 'ATTACK', range: [1, 2], damage: 2, cooldown: 3, color: 'bg-indigo-600', icon: <ChevronsRight size={16}/>, description: '移動しながら攻撃', energyCost: 1, maxSlots: 3, effectType: 'DASH_ATTACK' },
     { name: '教科書ガード', type: 'UTILITY', range: [0], damage: 0, shield: 4, cooldown: 4, color: 'bg-slate-600', icon: <Book size={16}/>, description: 'シールド+4', energyCost: 1, maxSlots: 2 },
 
     // Expanded Weapons / Actions
-    { name: '竹刀', type: 'ATTACK', range: [1], damage: 2, cooldown: 0, color: 'bg-emerald-600', icon: <Swords size={16}/>, description: 'CD0。隙のない連撃', energyCost: 0, maxSlots: 1 },
-    { name: '金属バット', type: 'ATTACK', range: [1], damage: 5, cooldown: 4, color: 'bg-stone-600', icon: <Hammer size={16}/>, description: '重い一撃(高威力)', energyCost: 1, maxSlots: 2 },
+    { name: '竹刀', type: 'ATTACK', range: [1], damage: 2, cooldown: 0, color: 'bg-emerald-600', icon: <Swords size={16}/>, description: 'CD0。隙のない連撃', energyCost: 0, maxSlots: 1, effectType: 'NORMAL' },
+    { name: '金属バット', type: 'ATTACK', range: [1], damage: 5, cooldown: 4, color: 'bg-stone-600', icon: <Hammer size={16}/>, description: '重い一撃(高威力)', energyCost: 1, maxSlots: 2, effectType: 'NORMAL' },
     { name: 'カウンター定規', type: 'ATTACK', range: [1], damage: 2, cooldown: 3, color: 'bg-rose-700', icon: <Swords size={16}/>, description: '敵が攻撃態勢なら3倍ダメ', energyCost: 1, effectType: 'COUNTER', maxSlots: 3 },
     { name: '張り手', type: 'ATTACK', range: [1], damage: 1, cooldown: 3, color: 'bg-orange-700', icon: <Maximize2 size={16}/>, description: '敵を2マス吹き飛ばす', energyCost: 1, effectType: 'PUSH', maxSlots: 3 },
-    { name: '後ろ蹴り', type: 'ATTACK', range: [-1], damage: 3, cooldown: 3, color: 'bg-violet-700', icon: <ArrowLeft size={16}/>, description: '背後の敵を攻撃', energyCost: 1, maxSlots: 3 },
+    { name: '後ろ蹴り', type: 'ATTACK', range: [-1], damage: 3, cooldown: 3, color: 'bg-violet-700', icon: <ArrowLeft size={16}/>, description: '背後の敵を攻撃', energyCost: 1, maxSlots: 3, effectType: 'NORMAL' },
     { name: '釣り竿', type: 'ATTACK', range: [2, 3, 4], damage: 1, cooldown: 4, color: 'bg-sky-600', icon: <Minimize2 size={16}/>, description: '敵を目の前に引き寄せる', energyCost: 1, effectType: 'PULL', maxSlots: 3 },
     { name: '消火器', type: 'ATTACK', range: [1, 2], damage: 4, cooldown: 5, color: 'bg-red-500', icon: <Wind size={16}/>, description: '高威力だが反動で下がる', energyCost: 1, effectType: 'RECOIL', maxSlots: 2 },
     { name: 'タックル', type: 'ATTACK', range: [1, 2, 3], damage: 2, cooldown: 3, color: 'bg-amber-600', icon: <Activity size={16}/>, description: '敵にぶつかるまで突進攻撃', energyCost: 1, effectType: 'DASH_ATTACK', maxSlots: 3 },
     { name: '雷', type: 'ATTACK', range: [1,2,3,4,5,6], damage: 2, cooldown: 4, color: 'bg-yellow-500 text-black', icon: <Zap size={16}/>, description: '一番遠くの敵を狙い撃つ', energyCost: 1, effectType: 'FURTHEST', maxSlots: 2 },
-    { name: '回転モップ', type: 'ATTACK', range: [-1, 1], damage: 2, cooldown: 2, color: 'bg-cyan-700', icon: <RefreshCw size={16}/>, description: '前後を同時に攻撃', energyCost: 1, maxSlots: 3 },
+    { name: '回転モップ', type: 'ATTACK', range: [-1, 1], damage: 2, cooldown: 2, color: 'bg-cyan-700', icon: <RefreshCw size={16}/>, description: '前後を同時に攻撃', energyCost: 1, maxSlots: 3, effectType: 'PIERCE' },
     { name: '竹箒', type: 'ATTACK', range: [1, 2], damage: 2, cooldown: 3, color: 'bg-amber-700', icon: <Move size={16}/>, description: '前方2マスを貫通攻撃', energyCost: 1, effectType: 'PIERCE', maxSlots: 3 },
     { name: '絶対防御', type: 'UTILITY', range: [0], damage: 0, shield: 6, cooldown: 5, color: 'bg-yellow-500 text-black', icon: <Shield size={16}/>, description: 'シールド+6', energyCost: 1, maxSlots: 1 },
 
     // New Additions
     { name: '給食パン', type: 'UTILITY', range: [0], damage: 0, cooldown: 6, color: 'bg-orange-300 text-black', icon: <Utensils size={16}/>, description: 'HPを3回復', energyCost: 1, effectType: 'HEAL', maxSlots: 1 },
-    { name: 'リコーダー', type: 'ATTACK', range: [1, 2], damage: 1, cooldown: 4, color: 'bg-pink-400', icon: <Music size={16}/>, description: '敵をスタンさせる(Wait+1)', energyCost: 1, effectType: 'STUN', maxSlots: 2 },
-    { name: '三角定規', type: 'ATTACK', range: [1], damage: 4, cooldown: 2, color: 'bg-teal-600', icon: <PenTool size={16}/>, description: '鋭い一撃', energyCost: 1, maxSlots: 3 },
-    { name: 'バレーボール', type: 'ATTACK', range: [3, 4, 5, 6], damage: 3, cooldown: 3, color: 'bg-white text-black', icon: <Circle size={16}/>, description: '超遠距離スパイク', energyCost: 1, effectType: 'FURTHEST', maxSlots: 3 },
+    { name: 'リコーダー', type: 'ATTACK', range: [1, 2], damage: 1, cooldown: 4, color: 'bg-pink-400', icon: <Music size={16}/>, description: '敵をスタン(Wait+1)', energyCost: 1, effectType: 'STUN', maxSlots: 2 },
+    { name: '三角定規', type: 'ATTACK', range: [1], damage: 4, cooldown: 2, color: 'bg-teal-600', icon: <PenTool size={16}/>, description: '鋭い一撃(単体)', energyCost: 1, maxSlots: 3, effectType: 'NORMAL' },
+    { name: 'バレーボール', type: 'ATTACK', range: [3, 4, 5, 6], damage: 3, cooldown: 3, color: 'bg-white text-black', icon: <Circle size={16}/>, description: '超遠距離スパイク(貫通)', energyCost: 1, effectType: 'PIERCE', maxSlots: 3 },
     { name: '吸血', type: 'ATTACK', range: [1], damage: 2, cooldown: 4, color: 'bg-red-900', icon: <Dna size={16}/>, description: 'ダメージ分HP回復', energyCost: 1, effectType: 'DRAIN', maxSlots: 2 },
     { name: '雑巾がけ', type: 'ATTACK', range: [1, 2], damage: 2, cooldown: 3, color: 'bg-gray-400 text-black', icon: <ChevronsRight size={16}/>, description: 'ダッシュ攻撃', energyCost: 1, effectType: 'DASH_ATTACK', maxSlots: 2 },
 ];
@@ -301,6 +301,9 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     });
 
     const [vfxList, setVfxList] = useState<KochoVFX[]>([]);
+    
+    // UI Interactions
+    const [hoveredCard, setHoveredCard] = useState<KCard | null>(null);
 
     // Ref to hold current state for async loops (avoiding stale closures)
     const stateRef = useRef(gameState);
@@ -509,6 +512,91 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 timer: Math.floor(Math.random() * 2) + 1, // Staggered start
             }
         };
+    };
+
+    // --- HELPER: Identify Tiles Affected by Card ---
+    const calculateImpactZone = (card: KCard, player: KEntity, enemies: KEntity[]) => {
+        const tiles: number[] = [];
+        const targets: number[] = [];
+        
+        if (card.type === 'MOVE') {
+            const dest = player.pos + (card.range[0] * player.facing);
+            if (dest >= 0 && dest < GRID_SIZE) {
+                tiles.push(dest);
+                // Move logic usually doesn't "hit" enemies unless it's a dash attack
+            }
+        } else if (card.type === 'ATTACK') {
+            // Determine covered range
+            if (card.effectType === 'DASH_ATTACK') {
+                for (let i = 1; i <= Math.max(...card.range); i++) {
+                    const checkPos = player.pos + (i * player.facing);
+                    if (checkPos >= 0 && checkPos < GRID_SIZE) {
+                        tiles.push(checkPos);
+                        const hitEnemy = enemies.find(e => e.pos === checkPos && e.hp > 0);
+                        if (hitEnemy) { targets.push(checkPos); break; } // Stop at first enemy
+                    }
+                }
+            } else if (card.effectType === 'PIERCE') {
+                card.range.forEach(r => {
+                    const tPos = player.pos + (r * player.facing);
+                    if (tPos >= 0 && tPos < GRID_SIZE) {
+                        tiles.push(tPos);
+                        const hitEnemy = enemies.find(e => e.pos === tPos && e.hp > 0);
+                        if (hitEnemy) targets.push(tPos);
+                    }
+                });
+            } else if (card.effectType === 'FURTHEST') {
+                 // Highlights all potential range, but target is specific
+                 let furthestDist = -1;
+                 let targetPos = -1;
+                 
+                 enemies.forEach(e => {
+                     if (e.hp > 0) {
+                         const dist = Math.abs(e.pos - player.pos);
+                         // Check if distance matches any range
+                         if (dist > furthestDist) { 
+                             furthestDist = dist; 
+                             targetPos = e.pos;
+                         }
+                     }
+                 });
+
+                 if (targetPos !== -1) {
+                     tiles.push(targetPos);
+                     targets.push(targetPos);
+                 } else {
+                     // Nothing to hit, show range?
+                     card.range.forEach(r => {
+                         const tPos = player.pos + (r * player.facing);
+                         if (tPos >= 0 && tPos < GRID_SIZE) tiles.push(tPos);
+                     });
+                 }
+            } else {
+                // NORMAL ATTACK
+                let hitFound = false;
+                const sortedRange = [...card.range].sort((a,b) => a-b);
+                
+                for(const r of sortedRange) {
+                    const tPos = player.pos + (r * player.facing);
+                    if (tPos >= 0 && tPos < GRID_SIZE) {
+                        tiles.push(tPos); // Add to impact zone visual
+                        if (!hitFound) {
+                            const hitEnemy = enemies.find(e => e.pos === tPos && e.hp > 0);
+                            if (hitEnemy) {
+                                targets.push(tPos);
+                                hitFound = true; 
+                                // Don't break if we want to show full range, but targets list stops here
+                            }
+                        }
+                    }
+                }
+            }
+        } else if (card.type === 'UTILITY' && card.name === 'バックステップ') {
+             const dest = player.pos - player.facing;
+             if (dest >= 0 && dest < GRID_SIZE) tiles.push(dest);
+        }
+
+        return { tiles, targets };
     };
 
     // --- GAME LOGIC ---
@@ -894,12 +982,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             logs.unshift(`手榴弾！全体に${item.value}ダメージ！`);
             used = true;
         } else if (item.type === 'STRENGTH') {
-            // Need temp buff logic. For simplicity, let's treat it as a permanent minor upgrade or instant effect?
-            // "Next attack +3" logic would require status tracking.
-            // Let's implement simpler: Add temporary buff status
-            // But KEntity doesn't have status object for player buffs easily.
-            // Let's modify logic: Just heal and add log for now, or skip unimplemented types?
-            // Actually, let's skip implementation complexity and make it small heal + log "Delicious!"
             p.hp = Math.min(p.maxHp, p.hp + 1);
             logs.unshift(`カレーを食べた。元気が出た！(HP+1)`);
             used = true;
@@ -1153,8 +1235,27 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     const tPos = pPos + (r * p.facing);
                     if (tPos >= 0 && tPos < GRID_SIZE) targets.push(tPos);
                 });
+            } else if (card.type === 'ATTACK' && card.effectType !== 'DASH_ATTACK') {
+                // Standard or Push/Pull etc.
+                // If NORMAL, only target the FIRST valid enemy in range
+                if (card.effectType === 'NORMAL' || !card.effectType || card.effectType === 'COUNTER' || card.effectType === 'PUSH' || card.effectType === 'PULL' || card.effectType === 'RECOIL' || card.effectType === 'STUN' || card.effectType === 'DRAIN') {
+                    // Sort ranges by distance from player
+                    const sortedRange = [...card.range].sort((a,b) => a - b);
+                    for (const r of sortedRange) {
+                        const tPos = pPos + (r * p.facing);
+                        if (tPos >= 0 && tPos < GRID_SIZE) {
+                            if (nextEnemies.some(e => e.pos === tPos && e.hp > 0)) {
+                                targets = [tPos];
+                                break; // Hit first only
+                            }
+                        }
+                    }
+                } else {
+                    // Fallback (e.g. area specific)
+                    targets = card.range.map(r => pPos + (r * p.facing));
+                }
             } else {
-                targets = card.range.map(r => pPos + (r * p.facing));
+                 targets = card.range.map(r => pPos + (r * p.facing));
             }
 
             if (card.type === 'ATTACK') {
@@ -1172,20 +1273,21 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     currentState = handlePickup(finalPos, currentState); 
                 }
 
-                // Filter for enemies hit
-                let hits: KEntity[] = [];
-                if (card.effectType === 'PIERCE') {
-                    // Pierce hits ALL in targets
-                    hits = nextEnemies.filter(e => targets.includes(e.pos) && e.hp > 0);
-                } else {
-                    // Normal behavior: only hits if pos is in targets
-                    // Note: 'targets' array built differently for PIERCE above.
-                    hits = nextEnemies.filter(e => targets.includes(e.pos) && e.hp > 0);
-                }
+                // Filter for enemies hit based on targets calculated above
+                let hits = nextEnemies.filter(e => targets.includes(e.pos) && e.hp > 0);
 
                 const isRanged = card.range.some(r => r > 1);
+                // Visual blast on empty tiles if missed or ranged area effect
                 if (isRanged && hits.length === 0) {
-                    targets.forEach(t => { if (t >= 0 && t < GRID_SIZE) addVfx('BLAST', t, { color: 'text-gray-500' }); });
+                     // If it was a 'NORMAL' attack that missed, targets[] is likely empty.
+                     // Show effect on max range?
+                     if (card.effectType === 'NORMAL') {
+                         const maxR = Math.max(...card.range);
+                         const tPos = pPos + (maxR * p.facing);
+                         if (tPos >= 0 && tPos < GRID_SIZE) addVfx('BLAST', tPos, { color: 'text-gray-500' });
+                     } else {
+                         targets.forEach(t => { if (t >= 0 && t < GRID_SIZE) addVfx('BLAST', t, { color: 'text-gray-500' }); });
+                     }
                 }
 
                 if (hits.length > 0) {
@@ -1207,7 +1309,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                         // DRAIN Effect
                         if (card.effectType === 'DRAIN') {
-                            const healAmt = Math.min(finalDmg, e.hp + finalDmg); // don't heal more than damage dealt? Or just damage value
                             // Let's cap at damage dealt to existing HP
                             nextPlayer.hp = Math.min(nextPlayer.maxHp, nextPlayer.hp + 1);
                             addVfx('HEAL', nextPlayer.pos);
@@ -1555,8 +1656,64 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const cellVfx = vfxList.filter(v => v.pos === idx);
         const groundItem = gameState.fieldItems.find(i => i.pos === idx);
         
+        // --- RANGE PREVIEW LOGIC ---
+        let isHighlighted = false;
+        let isTargeted = false;
+
+        if (hoveredCard) {
+            // Re-calculate the range just like in executeQueue but purely for visual
+            let ranges = hoveredCard.range;
+            if (hoveredCard.effectType === 'DASH_ATTACK') {
+                // Dash highlights path
+                const path = [];
+                for(let i=1; i<=Math.max(...ranges); i++) path.push(i);
+                ranges = path;
+            }
+            
+            // Check if this tile is in range
+            const dist = idx - p.pos;
+            const distAbs = Math.abs(dist);
+            // Must check direction relative to player
+            const dir = Math.sign(dist);
+            
+            // Only highlight if direction matches player facing OR it's a card that hits backwards too
+            // But 'range' in KCard is defined relative (e.g. 1 means front 1, -1 means back 1)
+            // So tile index calculation: p.pos + (r * p.facing)
+            
+            // Find if this idx matches any range point
+            const isValidTile = ranges.some(r => (p.pos + (r * p.facing)) === idx);
+            
+            if (isValidTile) {
+                isHighlighted = true;
+                
+                // Determine if it is a valid target based on card logic (Normal vs Pierce)
+                if (hoveredCard.type === 'ATTACK') {
+                    if (e) {
+                         if (hoveredCard.effectType === 'PIERCE' || hoveredCard.effectType === 'FURTHEST') {
+                             isTargeted = true;
+                         } else {
+                             // Normal: Hits first enemy. We need to check if 'e' is the first enemy in range sequence.
+                             // Sort valid range tiles by distance from player
+                             const sortedRanges = [...ranges].sort((a,b) => Math.abs(a) - Math.abs(b));
+                             for (const r of sortedRanges) {
+                                 const tPos = p.pos + (r * p.facing);
+                                 if (tPos >= 0 && tPos < GRID_SIZE) {
+                                     const hitEnemy = gameState.enemies.find(en => en.pos === tPos && en.hp > 0);
+                                     if (hitEnemy) {
+                                         if (hitEnemy.id === e.id) isTargeted = true;
+                                         break; // Stop at first
+                                     }
+                                 }
+                             }
+                         }
+                    }
+                }
+            }
+        }
+        // ---------------------------
+        
         return (
-            <div className="relative w-full h-full flex items-end justify-center">
+            <div className={`relative w-full h-full flex items-end justify-center transition-colors duration-200 ${isTargeted ? 'bg-red-900/60' : (isHighlighted ? (hoveredCard?.type === 'MOVE' ? 'bg-blue-900/40' : 'bg-red-900/30') : '')}`}>
                 {/* VFX */}
                 {cellVfx.map(v => (
                     <div key={v.id} className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
@@ -1583,6 +1740,13 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             {groundItem.data.icon}
                         </div>
                     </div>
+                )}
+                
+                {/* Target Indicator */}
+                {isTargeted && (
+                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 text-red-500 animate-ping">
+                         <Target size={32} />
+                     </div>
                 )}
 
                 {p.pos === idx && (
@@ -1982,8 +2146,21 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         {/* Hand Cards */}
                         <div className="flex md:flex-col md:flex-nowrap gap-2 overflow-x-auto md:overflow-x-hidden md:overflow-y-auto pb-2 px-1 custom-scrollbar min-h-[100px] md:min-h-0 md:flex-grow items-center md:items-stretch">
                             {gameState.hand.map((card, i) => (
-                                <div key={card.id} className={`w-20 h-28 md:w-full md:h-auto bg-slate-800 border-2 rounded-lg flex flex-col md:flex-row justify-between p-1 md:p-2 cursor-pointer transition-transform relative shadow-lg shrink-0 md:shrink ${card.usedSlots > 0 ? 'border-yellow-400' : 'border-slate-600'} ${card.currentCooldown > 0 ? 'opacity-50 grayscale' : 'hover:-translate-y-2 md:hover:translate-y-0 md:hover:translate-x-2'}`} onClick={() => handleQueueCard(card, i)}>
+                                <div 
+                                    key={card.id} 
+                                    className={`w-20 h-28 md:w-full md:h-auto bg-slate-800 border-2 rounded-lg flex flex-col md:flex-row justify-between p-1 md:p-2 cursor-pointer transition-transform relative shadow-lg shrink-0 md:shrink ${card.usedSlots > 0 ? 'border-yellow-400' : 'border-slate-600'} ${card.currentCooldown > 0 ? 'opacity-50 grayscale' : 'hover:-translate-y-2 md:hover:translate-y-0 md:hover:translate-x-2'}`} 
+                                    onClick={() => handleQueueCard(card, i)}
+                                    onMouseEnter={() => setHoveredCard(card)}
+                                    onMouseLeave={() => setHoveredCard(null)}
+                                    onTouchStart={() => setHoveredCard(card)}
+                                >
                                     <div className={`absolute top-0 left-0 w-full h-1 md:w-1 md:h-full ${card.color} rounded-t-sm md:rounded-l-sm`}></div>
+                                    
+                                    {/* Icon Badge for Effect Type */}
+                                    <div className="absolute top-1 right-1 text-[8px] bg-black/60 px-1 rounded text-white font-mono">
+                                        {(card.effectType === 'PIERCE' || card.effectType === 'FURTHEST') ? '>>>' : (card.type === 'MOVE' ? 'MOVE' : '>|')}
+                                    </div>
+
                                     <div className="flex flex-col h-full w-full md:hidden">
                                         <div className="mt-1 text-[9px] font-bold text-center leading-tight truncate">{card.name}</div>
                                         <div className="flex justify-center my-0.5 text-indigo-300 scale-75">{card.icon}</div>
