@@ -185,8 +185,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     const addVfx = (type: KochoVFX['type'], pos: number, options: Partial<KochoVFX> = {}) => {
-        const id = Math.random().toString(36).substr(2, 9);
-        setVfxList(prev => [...prev, { id, type, pos, ...options }]);
+        const id = options.id || Math.random().toString(36).substr(2, 9);
+        setVfxList(prev => [...prev, { ...options, id, type, pos }]);
         setTimeout(() => {
             setVfxList(prev => prev.filter(v => v.id !== id));
         }, 800); // Effect duration
@@ -326,9 +326,9 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         
                         logs = [`${e.name}の攻撃！ ${finalDmg}ダメージ！`, ...logs];
                         
-                        generatedVfx.push({ id: `v_atk_p_${Date.now()}_${i}`, type: 'SLASH', pos: player.pos });
-                        if (blocked > 0) generatedVfx.push({ id: `v_blk_p_${Date.now()}_${i}`, type: 'BLOCK', pos: player.pos });
-                        if (finalDmg > 0) generatedVfx.push({ id: `v_dmg_p_${Date.now()}_${i}`, type: 'TEXT', pos: player.pos, text: finalDmg, color: 'text-red-500' });
+                        generatedVfx.push({ id: `v_atk_p_${Date.now()}_${Math.random()}`, type: 'SLASH', pos: player.pos });
+                        if (blocked > 0) generatedVfx.push({ id: `v_blk_p_${Date.now()}_${Math.random()}`, type: 'BLOCK', pos: player.pos });
+                        if (finalDmg > 0) generatedVfx.push({ id: `v_dmg_p_${Date.now()}_${Math.random()}`, type: 'TEXT', pos: player.pos, text: finalDmg, color: 'text-red-500' });
 
                         audioService.playSound('lose');
                         hitSomething = true;
@@ -354,8 +354,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                             logs = [`${e.name}の流れ弾が${target.name}にヒット！ ${finalDmg}ダメージ！`, ...logs];
                             
-                            generatedVfx.push({ id: `v_atk_e_${Date.now()}_${j}`, type: 'SLASH', pos: target.pos });
-                            if (finalDmg > 0) generatedVfx.push({ id: `v_dmg_e_${Date.now()}_${j}`, type: 'TEXT', pos: target.pos, text: finalDmg, color: 'text-yellow-400' });
+                            generatedVfx.push({ id: `v_atk_e_${Date.now()}_${Math.random()}`, type: 'SLASH', pos: target.pos });
+                            if (finalDmg > 0) generatedVfx.push({ id: `v_dmg_e_${Date.now()}_${Math.random()}`, type: 'TEXT', pos: target.pos, text: finalDmg, color: 'text-yellow-400' });
 
                             hitSomething = true;
                             
