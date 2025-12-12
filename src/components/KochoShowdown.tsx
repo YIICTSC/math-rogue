@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp, Dna, Shuffle, Star, HelpCircle } from 'lucide-react';
+import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp, Dna, Shuffle, Star, HelpCircle, Book, AlertCircle, Flag } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { storageService } from '../services/storageService';
@@ -240,6 +240,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     
     // UI State
     const [showRelicModal, setShowRelicModal] = useState(false);
+    const [showHelpModal, setShowHelpModal] = useState(false); // Help Modal
 
     // Shop Upgrade State
     const [currentUpgradeOffer, setCurrentUpgradeOffer] = useState<UpgradeOffer | null>(null);
@@ -251,9 +252,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
             saveDebounceRef.current = setTimeout(() => {
                 const stateToSave = { ...gameState };
-                // Also save current upgrade offer if exists (store it in gameState or handle separately? 
-                // Simplest is to assume it's transient or add it to state. 
-                // For now let's just save game state. Offer rerolls on load is acceptable minor exploit.)
                 storageService.saveKochoState(stateToSave);
             }, 500);
         }
@@ -1327,6 +1325,9 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     KOCHO SHOWDOWN <span className="text-sm text-pink-400 ml-2">Stage {gameState.battleStage}/7 {gameState.battleStage > 1 ? `- ${gameState.battleSequence === 0 ? 'Part 1' : gameState.battleSequence === 1 ? 'Part 2' : 'MidBoss'}` : ''}</span>
                 </h2>
                 <div className="flex items-center gap-4">
+                    <button onClick={() => setShowHelpModal(true)} className="flex items-center gap-2 text-indigo-200 hover:text-white transition-colors text-sm font-bold border border-indigo-500/30 px-3 py-1 rounded bg-black/20">
+                        <HelpCircle size={16}/> Help
+                    </button>
                     <button onClick={() => setShowRelicModal(true)} className="flex items-center gap-2 text-yellow-200 hover:text-white transition-colors text-sm font-bold border border-yellow-500/30 px-3 py-1 rounded bg-black/20">
                         <Gift size={16}/> <span className="hidden md:inline">Relics</span> ({gameState.relics.length})
                     </button>
@@ -1335,6 +1336,49 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     </div>
                 </div>
             </div>
+
+            {/* Help Modal */}
+            {showHelpModal && (
+                <div className="absolute inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowHelpModal(false)}>
+                    <div className="bg-slate-800 border-4 border-indigo-500 rounded-lg p-6 w-full max-w-2xl max-h-[85vh] overflow-y-auto relative shadow-2xl custom-scrollbar" onClick={e => e.stopPropagation()}>
+                        <button onClick={() => setShowHelpModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
+                        <h2 className="text-2xl font-bold text-indigo-300 mb-6 flex items-center"><Book className="mr-2"/> 校長対決の遊び方</h2>
+                        
+                        <div className="space-y-6 text-sm text-gray-300">
+                            <section>
+                                <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><Flag className="mr-2 text-yellow-400"/> 基本ルール</h3>
+                                <p>7つのステージを攻略し、最深部の<span className="text-red-400 font-bold">校長先生</span>を倒すことが目的です。<br/>HPが0になるとゲームオーバーです。</p>
+                            </section>
+
+                            <section>
+                                <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><Swords className="mr-2 text-red-400"/> バトルシステム</h3>
+                                <ul className="list-disc pl-5 space-y-2">
+                                    <li><strong>移動・待機・向き変更:</strong> ボタンを押すと即座に実行され、ターンが経過します。</li>
+                                    <li><strong>カード攻撃:</strong> 手札のカードを選んで<span className="text-indigo-400 font-bold">予約(Queue)</span>します（最大3枚）。<br/>「EXEC」ボタンで予約したカードを連続発動します。</li>
+                                    <li><strong>クールダウン(CD):</strong> 使用したカードはCDが発生し、一時的に使えなくなります。<br/>移動やアクションを行うとCDが減少します。</li>
+                                </ul>
+                            </section>
+
+                            <section>
+                                <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><AlertCircle className="mr-2 text-red-500"/> 敵の行動予測</h3>
+                                <p className="mb-2">敵の頭上のアイコンで次の行動がわかります。</p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                    <div className="flex items-center gap-2 bg-black/30 p-2 rounded"><Swords className="text-red-500" size={16}/> <span className="text-red-400">攻撃</span> (カウント0で発動)</div>
+                                    <div className="flex items-center gap-2 bg-black/30 p-2 rounded"><Hourglass className="text-gray-400" size={16}/> <span className="text-gray-300">待機</span> (数字は残りターン)</div>
+                                    <div className="flex items-center gap-2 bg-black/30 p-2 rounded"><Ghost className="text-purple-400" size={16}/> <span className="text-purple-300">召喚/特殊</span></div>
+                                </div>
+                            </section>
+
+                            <section>
+                                <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><Hammer className="mr-2 text-emerald-400"/> 強化 (Upgrade)</h3>
+                                <p>ステージクリア後やショップでカードを強化できます。<br/>スロット拡張、威力アップ、CD短縮などを組み合わせて最強のデッキを作りましょう。</p>
+                            </section>
+                        </div>
+                        
+                        <button onClick={() => setShowHelpModal(false)} className="mt-8 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg transition-colors border border-indigo-400">閉じる</button>
+                    </div>
+                </div>
+            )}
 
             {/* Main Content */}
             <div className="flex-grow flex flex-col md:flex-row overflow-hidden relative">
