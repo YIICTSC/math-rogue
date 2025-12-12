@@ -149,7 +149,6 @@ const CARD_DB: Omit<KCard, 'id' | 'currentCooldown' | 'usedSlots'>[] = [
     { name: '絶対防御', type: 'UTILITY', range: [0], damage: 0, shield: 6, cooldown: 5, color: 'bg-yellow-500 text-black', icon: <Shield size={16}/>, description: 'シールド+6', energyCost: 1, maxSlots: 1 },
 
     // New Additions
-    { name: '給食パン', type: 'UTILITY', range: [0], damage: 0, cooldown: 6, color: 'bg-orange-300 text-black', icon: <Utensils size={16}/>, description: 'HPを3回復', energyCost: 1, effectType: 'HEAL', maxSlots: 1 },
     { name: 'リコーダー', type: 'ATTACK', range: [1, 2], damage: 1, cooldown: 4, color: 'bg-pink-400', icon: <Music size={16}/>, description: '敵をスタン(Wait+1)', energyCost: 1, effectType: 'STUN', maxSlots: 2 },
     { name: '三角定規', type: 'ATTACK', range: [1], damage: 4, cooldown: 2, color: 'bg-teal-600', icon: <PenTool size={16}/>, description: '鋭い一撃(単体)', energyCost: 1, maxSlots: 3, effectType: 'NORMAL' },
     { name: 'バレーボール', type: 'ATTACK', range: [3, 4, 5, 6], damage: 3, cooldown: 3, color: 'bg-white text-black', icon: <Circle size={16}/>, description: '超遠距離スパイク(貫通)', energyCost: 1, effectType: 'PIERCE', maxSlots: 3 },
@@ -161,7 +160,6 @@ const CONSUMABLE_DB: KConsumable[] = [
     { id: 'C_MILK', type: 'HEAL', name: '給食の牛乳', desc: 'HPを5回復', value: 5, icon: <Milk size={16}/>, color: 'text-white' },
     { id: 'C_BARRIER', type: 'BARRIER', name: 'ATフィールド', desc: '1回だけダメージ無効', value: 1, icon: <ShieldCheck size={16}/>, color: 'text-yellow-400' },
     { id: 'C_BATTERY', type: 'CD_REDUCE', name: '予備電池', desc: '手札のCDを2短縮', value: 2, icon: <Battery size={16}/>, color: 'text-green-400' },
-    { id: 'C_BOMB', type: 'BOMB', name: '手榴弾', desc: '敵全体に5ダメージ', value: 5, icon: <Bomb size={16}/>, color: 'text-red-500' },
     { id: 'C_CURRY', type: 'STRENGTH', name: '激辛カレー', desc: '次の攻撃ダメージ+3', value: 3, icon: <Flame size={16}/>, color: 'text-orange-500' },
     { id: 'C_DRINK', type: 'CD_REDUCE', name: 'エナドリ', desc: '手札のCDを全解消', value: 99, icon: <Zap size={16}/>, color: 'text-blue-400' },
 ];
