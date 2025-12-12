@@ -1,5 +1,6 @@
 
 
+
 import React, { useEffect, useState, useRef } from 'react';
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
@@ -37,30 +38,33 @@ const POWER_DEFINITIONS: Record<string, {name: string, desc: string}> = {
     METALLICIZE: { name: "金属化", desc: "ターン終了時、その数値分のブロックを得る。" },
     REGEN: { name: "じわじわ回復", desc: "ターン終了時、その数値分HPを回復し、数値が1減る。" },
     STRENGTH_DOWN: { name: "ムキムキダウン", desc: "ターン終了時、ムキムキが通常の値に戻る。" },
-    DEMON_FORM: { name: "悪魔化", desc: "ターン開始時、ムキムキになる。" },
-    ECHO_FORM: { name: "反響", desc: "各ターン、最初にプレイしたカードを2回使用する。" },
-    BARRICADE: { name: "バリケード", desc: "ターン開始時にブロックが消えなくなる。" },
-    NOXIOUS_FUMES: { name: "有毒ガス", desc: "ターン開始時、敵全体をドクドクにする。" },
-    INFINITE_BLADES: { name: '無限の刃', desc: 'ターン開始時、手札にナイフを加える。' },
-    AFTER_IMAGE: { name: '残像', desc: 'カードを使用する度、ブロック1を得る。' },
-    THOUSAND_CUTS: { name: '千切れ', desc: 'カードを使用する度、敵全体にダメージを与える。' },
-    TOOLS_OF_THE_TRADE: { name: '商売道具', desc: 'ターン開始時、1枚引いて1枚捨てる。' },
-    ENVENOM: { name: '猛毒', desc: '攻撃でダメージを与えた時、ドクドク1を与える。' },
-    STATIC_DISCHARGE: { name: '静電放電', desc: '攻撃を受けた時、ランダムな敵にダメージを与える。' },
-    BUFFER: { name: 'バッファー', desc: '次に受けるHPダメージを0にする。' },
-    CREATIVE_AI: { name: '創造的AI', desc: 'ターン開始時、ランダムなパワーカードを加える。' },
-    DEVA_FORM: { name: 'デバ化', desc: 'ターン開始時、エネルギーを得る。' },
-    MASTER_REALITY: { name: '真なる理', desc: 'カードが生成された時、それをアップグレードする。' },
+    
+    // Renamed Powers
+    DEMON_FORM: { name: "反抗期", desc: "ターン開始時、ムキムキになる。" },
+    ECHO_FORM: { name: "予習復習", desc: "各ターン、最初にプレイしたカードを2回使用する。" },
+    BARRICADE: { name: "秘密基地", desc: "ターン開始時にブロックが消えなくなる。" },
+    NOXIOUS_FUMES: { name: "異臭騒ぎ", desc: "ターン開始時、敵全体をドクドクにする。" },
+    INFINITE_BLADES: { name: '鉛筆削り', desc: 'ターン開始時、手札にナイフを加える。' },
+    AFTER_IMAGE: { name: '反復横跳び', desc: 'カードを使用する度、ブロック1を得る。' },
+    THOUSAND_CUTS: { name: '千本ノック', desc: 'カードを使用する度、敵全体にダメージを与える。' },
+    TOOLS_OF_THE_TRADE: { name: '整理整頓', desc: 'ターン開始時、1枚引いて1枚捨てる。' },
+    ENVENOM: { name: '悪口', desc: '攻撃でダメージを与えた時、ドクドク1を与える。' },
+    STATIC_DISCHARGE: { name: '摩擦熱', desc: '攻撃を受けた時、ランダムな敵にダメージを与える。' },
+    BUFFER: { name: '心の壁', desc: '次に受けるHPダメージを0にする。' },
+    CREATIVE_AI: { name: '自由研究', desc: 'ターン開始時、ランダムなパワーカードを加える。' },
+    DEVA_FORM: { name: '受験勉強', desc: 'ターン開始時、エネルギーを得る。' },
+    MASTER_REALITY: { name: '模範解答', desc: 'カードが生成された時、それをアップグレードする。' },
     BURST: { name: 'バースト', desc: '次にプレイするスキルカードが2回発動する。' },
-    DOUBLE_POISON: { name: '触媒', desc: 'ドクドクの効果を増幅させる。' },
+    DOUBLE_POISON: { name: '化学反応', desc: 'ドクドクの効果を増幅させる。' },
     LOSE_STRENGTH: { name: 'ムキムキダウン', desc: 'ターン終了時、ムキムキを失う。' },
-    CORRUPTION: { name: '堕落', desc: 'スキルカードのコストが0になり、使用時に廃棄される。' },
-    FEEL_NO_PAIN: { name: '無痛', desc: 'カードが廃棄される度、ブロックを得る。' },
-    RUPTURE: { name: '破裂', desc: 'HPを失った時、ムキムキを得る。' },
-    EVOLVE: { name: '進化', desc: '状態異常カードを引いた時、カードを引く。' },
-    APOTHEOSIS: { name: '神格化', desc: 'デッキの全てのカードがアップグレードされる。' },
-    ACCURACY: { name: '精度上昇', desc: 'ナイフのダメージが増加する。' },
-    STRATEGIST: { name: '戦略家', desc: 'このカードが捨てられた時、エネルギーを得る。' },
+    CORRUPTION: { name: '学級崩壊', desc: 'スキルカードのコストが0になり、使用時に廃棄される。' },
+    FEEL_NO_PAIN: { name: '我慢大会', desc: 'カードが廃棄される度、ブロックを得る。' },
+    RUPTURE: { name: '成長痛', desc: 'HPを失った時、ムキムキを得る。' },
+    EVOLVE: { name: '進級', desc: '状態異常カードを引いた時、カードを引く。' },
+    APOTHEOSIS: { name: '覚醒', desc: 'デッキの全てのカードがアップグレードされる。' },
+    ACCURACY: { name: '集中力', desc: 'ナイフのダメージが増加する。' },
+    STRATEGIST: { name: 'カンニングペーパー', desc: 'このカードが捨てられた時、エネルギーを得る。' },
+    INFLAME: { name: 'やる気スイッチ', desc: 'ムキムキを得る。' },
 };
 
 // Component for handling floating damage/heal numbers
