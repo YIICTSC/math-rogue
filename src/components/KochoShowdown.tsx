@@ -22,9 +22,11 @@ interface KCard {
     icon: React.ReactNode;
     description: string;
     energyCost: number; 
-    upgraded?: boolean;
+    
+    // Upgrade System
+    maxSlots: number; // Max upgrade capacity
+    usedSlots: number; // Current upgrades count
     effectType?: CardEffectType;
-    slots?: number; // Extra upgrade slots (visual mainly in this logic, implying future potential)
 }
 
 interface KEntity {
@@ -96,32 +98,32 @@ interface UpgradeOffer {
 }
 
 // --- DATA ---
-const CARD_DB: Omit<KCard, 'id' | 'currentCooldown'>[] = [
+const CARD_DB: Omit<KCard, 'id' | 'currentCooldown' | 'usedSlots'>[] = [
     // Standard Set
-    { name: '定規スラッシュ', type: 'ATTACK', range: [1], damage: 3, cooldown: 2, color: 'bg-red-600', icon: <Swords size={16}/>, description: '目の前の敵を斬る', energyCost: 1 },
-    { name: 'コンパス突き', type: 'ATTACK', range: [2], damage: 2, cooldown: 2, color: 'bg-orange-600', icon: <Zap size={16}/>, description: '2マス先を攻撃', energyCost: 1 },
-    { name: 'ダッシュ', type: 'MOVE', range: [2], damage: 0, cooldown: 3, color: 'bg-blue-600', icon: <ChevronsRight size={16}/>, description: '前方に2マス移動', energyCost: 1 },
-    { name: 'バックステップ', type: 'UTILITY', range: [-1], damage: 0, cooldown: 2, color: 'bg-gray-600', icon: <RotateCcw size={16}/>, description: '1マス下がる', energyCost: 1 },
-    { name: '大声', type: 'ATTACK', range: [1, 2, 3], damage: 1, cooldown: 4, color: 'bg-yellow-600', icon: <Zap size={16}/>, description: '前方3マスに音波攻撃', energyCost: 1 },
-    { name: 'お辞儀', type: 'UTILITY', range: [0], damage: 0, shield: 2, cooldown: 3, color: 'bg-green-600', icon: <Shield size={16}/>, description: '待機してシールド+2', energyCost: 1 },
-    { name: '回し蹴り', type: 'ATTACK', range: [-1, 1], damage: 3, cooldown: 2, color: 'bg-purple-600', icon: <RefreshCw size={16}/>, description: '前後1マスを攻撃', energyCost: 1 },
-    { name: 'チョーク投げ', type: 'ATTACK', range: [1, 2, 3, 4], damage: 2, cooldown: 3, color: 'bg-cyan-600', icon: <Zap size={16}/>, description: '遠距離攻撃', energyCost: 1 },
-    { name: 'スライディング', type: 'ATTACK', range: [1, 2], damage: 2, cooldown: 3, color: 'bg-indigo-600', icon: <ChevronsRight size={16}/>, description: '移動しながら攻撃', energyCost: 1 },
-    { name: '教科書ガード', type: 'UTILITY', range: [0], damage: 0, shield: 4, cooldown: 4, color: 'bg-slate-600', icon: <Shield size={16}/>, description: 'シールド+4', energyCost: 1 },
+    { name: '定規スラッシュ', type: 'ATTACK', range: [1], damage: 3, cooldown: 2, color: 'bg-red-600', icon: <Swords size={16}/>, description: '目の前の敵を斬る', energyCost: 1, maxSlots: 3 },
+    { name: 'コンパス突き', type: 'ATTACK', range: [2], damage: 2, cooldown: 2, color: 'bg-orange-600', icon: <Zap size={16}/>, description: '2マス先を攻撃', energyCost: 1, maxSlots: 3 },
+    { name: 'ダッシュ', type: 'MOVE', range: [2], damage: 0, cooldown: 3, color: 'bg-blue-600', icon: <ChevronsRight size={16}/>, description: '前方に2マス移動', energyCost: 1, maxSlots: 2 },
+    { name: 'バックステップ', type: 'UTILITY', range: [-1], damage: 0, cooldown: 2, color: 'bg-gray-600', icon: <RotateCcw size={16}/>, description: '1マス下がる', energyCost: 1, maxSlots: 2 },
+    { name: '大声', type: 'ATTACK', range: [1, 2, 3], damage: 1, cooldown: 4, color: 'bg-yellow-600', icon: <Zap size={16}/>, description: '前方3マスに音波攻撃', energyCost: 1, maxSlots: 3 },
+    { name: 'お辞儀', type: 'UTILITY', range: [0], damage: 0, shield: 2, cooldown: 3, color: 'bg-green-600', icon: <Shield size={16}/>, description: '待機してシールド+2', energyCost: 1, maxSlots: 3 },
+    { name: '回し蹴り', type: 'ATTACK', range: [-1, 1], damage: 3, cooldown: 2, color: 'bg-purple-600', icon: <RefreshCw size={16}/>, description: '前後1マスを攻撃', energyCost: 1, maxSlots: 3 },
+    { name: 'チョーク投げ', type: 'ATTACK', range: [1, 2, 3, 4], damage: 2, cooldown: 3, color: 'bg-cyan-600', icon: <Zap size={16}/>, description: '遠距離攻撃', energyCost: 1, maxSlots: 3 },
+    { name: 'スライディング', type: 'ATTACK', range: [1, 2], damage: 2, cooldown: 3, color: 'bg-indigo-600', icon: <ChevronsRight size={16}/>, description: '移動しながら攻撃', energyCost: 1, maxSlots: 3 },
+    { name: '教科書ガード', type: 'UTILITY', range: [0], damage: 0, shield: 4, cooldown: 4, color: 'bg-slate-600', icon: <Shield size={16}/>, description: 'シールド+4', energyCost: 1, maxSlots: 2 },
 
     // New Weapons / Actions
-    { name: '竹刀', type: 'ATTACK', range: [1], damage: 2, cooldown: 0, color: 'bg-emerald-600', icon: <Swords size={16}/>, description: 'CD0。隙のない連撃', energyCost: 0 },
-    { name: '金属バット', type: 'ATTACK', range: [1], damage: 5, cooldown: 4, color: 'bg-stone-600', icon: <Hammer size={16}/>, description: '重い一撃(高威力)', energyCost: 1 },
-    { name: 'カウンター定規', type: 'ATTACK', range: [1], damage: 2, cooldown: 3, color: 'bg-rose-700', icon: <Swords size={16}/>, description: '敵が攻撃態勢なら3倍ダメ', energyCost: 1, effectType: 'COUNTER' },
-    { name: '張り手', type: 'ATTACK', range: [1], damage: 1, cooldown: 3, color: 'bg-orange-700', icon: <Maximize2 size={16}/>, description: '敵を2マス吹き飛ばす', energyCost: 1, effectType: 'PUSH' },
-    { name: '後ろ蹴り', type: 'ATTACK', range: [-1], damage: 3, cooldown: 3, color: 'bg-violet-700', icon: <ArrowLeft size={16}/>, description: '背後の敵を攻撃', energyCost: 1 },
-    { name: '釣り竿', type: 'ATTACK', range: [2, 3, 4], damage: 1, cooldown: 4, color: 'bg-sky-600', icon: <Minimize2 size={16}/>, description: '敵を目の前に引き寄せる', energyCost: 1, effectType: 'PULL' },
-    { name: '消火器', type: 'ATTACK', range: [1, 2], damage: 4, cooldown: 5, color: 'bg-red-500', icon: <Wind size={16}/>, description: '高威力だが反動で下がる', energyCost: 1, effectType: 'RECOIL' },
-    { name: 'タックル', type: 'ATTACK', range: [1, 2, 3], damage: 2, cooldown: 3, color: 'bg-amber-600', icon: <Activity size={16}/>, description: '敵にぶつかるまで突進攻撃', energyCost: 1, effectType: 'DASH_ATTACK' },
-    { name: '雷', type: 'ATTACK', range: [1,2,3,4,5,6], damage: 2, cooldown: 4, color: 'bg-yellow-500 text-black', icon: <Zap size={16}/>, description: '一番遠くの敵を狙い撃つ', energyCost: 1, effectType: 'FURTHEST' },
-    { name: '回転モップ', type: 'ATTACK', range: [-1, 1], damage: 2, cooldown: 2, color: 'bg-cyan-700', icon: <RefreshCw size={16}/>, description: '前後を同時に攻撃', energyCost: 1 },
-    { name: '竹箒', type: 'ATTACK', range: [1, 2], damage: 2, cooldown: 3, color: 'bg-amber-700', icon: <Move size={16}/>, description: '前方2マスを貫通攻撃', energyCost: 1, effectType: 'PIERCE' },
-    { name: '絶対防御', type: 'UTILITY', range: [0], damage: 0, shield: 6, cooldown: 5, color: 'bg-yellow-500 text-black', icon: <Shield size={16}/>, description: 'シールド+6', energyCost: 1 },
+    { name: '竹刀', type: 'ATTACK', range: [1], damage: 2, cooldown: 0, color: 'bg-emerald-600', icon: <Swords size={16}/>, description: 'CD0。隙のない連撃', energyCost: 0, maxSlots: 1 },
+    { name: '金属バット', type: 'ATTACK', range: [1], damage: 5, cooldown: 4, color: 'bg-stone-600', icon: <Hammer size={16}/>, description: '重い一撃(高威力)', energyCost: 1, maxSlots: 2 },
+    { name: 'カウンター定規', type: 'ATTACK', range: [1], damage: 2, cooldown: 3, color: 'bg-rose-700', icon: <Swords size={16}/>, description: '敵が攻撃態勢なら3倍ダメ', energyCost: 1, effectType: 'COUNTER', maxSlots: 3 },
+    { name: '張り手', type: 'ATTACK', range: [1], damage: 1, cooldown: 3, color: 'bg-orange-700', icon: <Maximize2 size={16}/>, description: '敵を2マス吹き飛ばす', energyCost: 1, effectType: 'PUSH', maxSlots: 3 },
+    { name: '後ろ蹴り', type: 'ATTACK', range: [-1], damage: 3, cooldown: 3, color: 'bg-violet-700', icon: <ArrowLeft size={16}/>, description: '背後の敵を攻撃', energyCost: 1, maxSlots: 3 },
+    { name: '釣り竿', type: 'ATTACK', range: [2, 3, 4], damage: 1, cooldown: 4, color: 'bg-sky-600', icon: <Minimize2 size={16}/>, description: '敵を目の前に引き寄せる', energyCost: 1, effectType: 'PULL', maxSlots: 3 },
+    { name: '消火器', type: 'ATTACK', range: [1, 2], damage: 4, cooldown: 5, color: 'bg-red-500', icon: <Wind size={16}/>, description: '高威力だが反動で下がる', energyCost: 1, effectType: 'RECOIL', maxSlots: 2 },
+    { name: 'タックル', type: 'ATTACK', range: [1, 2, 3], damage: 2, cooldown: 3, color: 'bg-amber-600', icon: <Activity size={16}/>, description: '敵にぶつかるまで突進攻撃', energyCost: 1, effectType: 'DASH_ATTACK', maxSlots: 3 },
+    { name: '雷', type: 'ATTACK', range: [1,2,3,4,5,6], damage: 2, cooldown: 4, color: 'bg-yellow-500 text-black', icon: <Zap size={16}/>, description: '一番遠くの敵を狙い撃つ', energyCost: 1, effectType: 'FURTHEST', maxSlots: 2 },
+    { name: '回転モップ', type: 'ATTACK', range: [-1, 1], damage: 2, cooldown: 2, color: 'bg-cyan-700', icon: <RefreshCw size={16}/>, description: '前後を同時に攻撃', energyCost: 1, maxSlots: 3 },
+    { name: '竹箒', type: 'ATTACK', range: [1, 2], damage: 2, cooldown: 3, color: 'bg-amber-700', icon: <Move size={16}/>, description: '前方2マスを貫通攻撃', energyCost: 1, effectType: 'PIERCE', maxSlots: 3 },
+    { name: '絶対防御', type: 'UTILITY', range: [0], damage: 0, shield: 6, cooldown: 5, color: 'bg-yellow-500 text-black', icon: <Shield size={16}/>, description: 'シールド+6', energyCost: 1, maxSlots: 1 },
 ];
 
 const SHOP_RELICS: KRelic[] = [
@@ -138,7 +140,7 @@ const UPGRADE_POOLS: UpgradeOffer[] = [
     { type: 'CD_MINUS_1', description: 'クールダウン -1', icon: <Clock size={32}/>, color: 'text-blue-400' },
     { type: 'CD_MINUS_2', description: 'クールダウン -2', icon: <Clock size={32}/>, color: 'text-cyan-400' },
     { type: 'CD_MINUS_4_DMG_MINUS_1', description: 'CD -4 / ダメージ -1', icon: <Wind size={32}/>, color: 'text-sky-300' },
-    { type: 'SLOT_1', description: 'スロット +1', icon: <Plus size={32}/>, color: 'text-green-400' },
+    { type: 'SLOT_1', description: 'スロット +1 (上限突破)', icon: <Plus size={32}/>, color: 'text-green-400' },
     { type: 'SLOT_1_CD_MINUS_1', description: 'スロット +1 / CD -1', icon: <Plus size={32}/>, color: 'text-emerald-400' },
     { type: 'SACRIFICE', description: 'カード売却 (+40G)', icon: <Skull size={32}/>, color: 'text-gray-400' },
     { type: 'GAMBLE', description: '戦士の賭け（ランダム変化）', icon: <Shuffle size={32}/>, color: 'text-purple-400' },
@@ -151,9 +153,9 @@ const getInitialDeck = (): KCard[] => {
     const ruler = CARD_DB.find(c => c.name === '定規スラッシュ')!;
 
     return [
-        { ...roundhouse, id: 'c1', currentCooldown: 0, slots: 0 },
-        { ...chalk, id: 'c2', currentCooldown: 0, slots: 0 },
-        { ...ruler, id: 'c3', currentCooldown: 0, slots: 0 },
+        { ...roundhouse, id: 'c1', currentCooldown: 0, usedSlots: 0 },
+        { ...chalk, id: 'c2', currentCooldown: 0, usedSlots: 0 },
+        { ...ruler, id: 'c3', currentCooldown: 0, usedSlots: 0 },
     ];
 };
 
@@ -1006,7 +1008,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const options: KCard[] = [];
         for (let i = 0; i < 2; i++) {
             const template = pool[Math.floor(Math.random() * pool.length)] || pool[0];
-            options.push({ ...template, id: `rew_${Date.now()}_${i}`, currentCooldown: 0, slots: 0 });
+            options.push({ ...template, id: `rew_${Date.now()}_${i}`, currentCooldown: 0, usedSlots: 0 });
         }
         setRewardCards(options);
     };
@@ -1072,6 +1074,17 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         let newHand = [...gameState.hand];
         const card = { ...newHand[cardIndex] };
+        
+        const isSlotUpgrade = currentUpgradeOffer.type.startsWith('SLOT');
+        const isSpecial = ['SACRIFICE', 'GAMBLE'].includes(currentUpgradeOffer.type);
+
+        // Check slots limit
+        if (!isSlotUpgrade && !isSpecial && card.usedSlots >= card.maxSlots) {
+            audioService.playSound('wrong');
+            addLog("スロットが一杯です！");
+            return;
+        }
+
         let msg = "強化完了！";
 
         switch (currentUpgradeOffer.type) {
@@ -1081,20 +1094,23 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             case 'CD_MINUS_1': card.cooldown = Math.max(0, card.cooldown - 1); break;
             case 'CD_MINUS_2': card.cooldown = Math.max(0, card.cooldown - 2); break;
             case 'CD_MINUS_4_DMG_MINUS_1': card.cooldown = Math.max(0, card.cooldown - 4); card.damage = Math.max(0, card.damage - 1); break;
-            case 'SLOT_1': card.slots = (card.slots || 0) + 1; break;
-            case 'SLOT_1_CD_MINUS_1': card.slots = (card.slots || 0) + 1; card.cooldown = Math.max(0, card.cooldown - 1); break;
+            case 'SLOT_1': card.maxSlots += 1; msg = "スロット拡張！"; break;
+            case 'SLOT_1_CD_MINUS_1': card.maxSlots += 1; card.cooldown = Math.max(0, card.cooldown - 1); msg = "スロット拡張＆CD短縮！"; break;
             case 'SACRIFICE': newHand.splice(cardIndex, 1); setGameState(prev => ({ ...prev, money: prev.money + 40 })); msg = "カードを犠牲にした..."; break;
             case 'GAMBLE':
                 const pool = CARD_DB.filter(c => c.name !== card.name);
                 const randomCard = pool[Math.floor(Math.random() * pool.length)];
-                newHand[cardIndex] = { ...randomCard, id: card.id, currentCooldown: 0, slots: 0 };
+                // Reset slots for new card
+                newHand[cardIndex] = { ...randomCard, id: card.id, currentCooldown: 0, usedSlots: 0 };
                 msg = `カードが${randomCard.name}に変化した！`;
                 break;
         }
 
-        if (currentUpgradeOffer.type !== 'SACRIFICE' && currentUpgradeOffer.type !== 'GAMBLE') {
-            card.upgraded = true;
-            newHand[cardIndex] = card;
+        if (!isSpecial) {
+             if (!isSlotUpgrade) {
+                 card.usedSlots++;
+             }
+             newHand[cardIndex] = card;
         }
 
         setGameState(prev => ({ ...prev, hand: newHand, shopUpgradeUsed: true }));
@@ -1244,6 +1260,11 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                                 <div className="text-4xl mb-4 text-indigo-400">{card.icon}</div>
                                                 <div className="font-bold text-white mb-2 text-center text-sm md:text-base">{card.name}</div>
                                                 <div className="text-xs text-gray-400 text-center">{card.description}</div>
+                                                <div className="flex gap-0.5 justify-center mt-2">
+                                                    {[...Array(card.maxSlots)].map((_, idx) => (
+                                                        <div key={idx} className="w-1.5 h-1.5 rounded-full bg-gray-600 border border-gray-400" />
+                                                    ))}
+                                                </div>
                                                 <button className="mt-4 bg-yellow-600 text-black font-bold px-4 py-1 rounded-full text-xs">Select</button>
                                             </div>
                                         ))}
@@ -1263,11 +1284,17 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                             {gameState.hand.map((card, i) => (
                                                 <div key={i} className={`bg-slate-800 p-3 rounded border relative transition-all ${gameState.shopUpgradeUsed ? 'opacity-50 cursor-not-allowed border-slate-600' : 'hover:border-yellow-400 cursor-pointer border-slate-600'}`} onClick={() => handleApplyUpgrade(i)}>
-                                                    <div className="font-bold text-sm text-white mb-1">{card.name} {card.upgraded && <span className="text-yellow-400 text-xs">★</span>}</div>
+                                                    <div className="font-bold text-sm text-white mb-1">{card.name}</div>
                                                     <div className="text-xs text-gray-400 mb-2">{card.description}</div>
-                                                    <div className="flex gap-2 text-[10px]">
+                                                    <div className="flex gap-2 text-[10px] mb-1">
                                                         {card.damage > 0 && <span className="text-red-400 bg-red-900/30 px-1 rounded">ATK:{card.damage}</span>}
                                                         <span className="text-blue-400 bg-blue-900/30 px-1 rounded">CD:{card.cooldown}</span>
+                                                    </div>
+                                                    {/* Slots Visual */}
+                                                    <div className="flex gap-1">
+                                                        {[...Array(card.maxSlots)].map((_, idx) => (
+                                                            <div key={idx} className={`w-2 h-2 rounded-full border border-gray-500 ${idx < card.usedSlots ? 'bg-yellow-400' : 'bg-black/50'}`} />
+                                                        ))}
                                                     </div>
                                                     {!gameState.shopUpgradeUsed && <div className="absolute top-2 right-2 text-yellow-500"><Plus size={16}/></div>}
                                                 </div>
@@ -1292,9 +1319,15 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                             <div className="grid grid-cols-2 gap-4">
                                                 {gameState.hand.map((card, i) => (
                                                     <div key={i} className={`bg-slate-800 p-3 rounded border relative transition-all ${gameState.shopUpgradeUsed ? 'opacity-50 cursor-not-allowed border-slate-600' : 'hover:border-yellow-400 cursor-pointer border-slate-600'}`} onClick={() => handleApplyUpgrade(i)}>
-                                                        <div className="font-bold text-sm text-white mb-1">{card.name} {card.upgraded && <span className="text-yellow-400 text-xs">★</span>}</div>
+                                                        <div className="font-bold text-sm text-white mb-1">{card.name}</div>
                                                         <div className="text-xs text-gray-400 mb-2">{card.description}</div>
-                                                        <div className="flex gap-2 text-[10px]">{card.damage > 0 && <span className="text-red-400 bg-red-900/30 px-1 rounded">ATK:{card.damage}</span>}<span className="text-blue-400 bg-blue-900/30 px-1 rounded">CD:{card.cooldown}</span></div>
+                                                        <div className="flex gap-2 text-[10px] mb-1">{card.damage > 0 && <span className="text-red-400 bg-red-900/30 px-1 rounded">ATK:{card.damage}</span>}<span className="text-blue-400 bg-blue-900/30 px-1 rounded">CD:{card.cooldown}</span></div>
+                                                        {/* Slots Visual */}
+                                                        <div className="flex gap-1">
+                                                            {[...Array(card.maxSlots)].map((_, idx) => (
+                                                                <div key={idx} className={`w-2 h-2 rounded-full border border-gray-500 ${idx < card.usedSlots ? 'bg-yellow-400' : 'bg-black/50'}`} />
+                                                            ))}
+                                                        </div>
                                                         {!gameState.shopUpgradeUsed && <div className="absolute top-2 right-2 text-yellow-500"><Plus size={16}/></div>}
                                                     </div>
                                                 ))}
@@ -1421,7 +1454,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         {/* Hand Cards */}
                         <div className="flex md:flex-col md:flex-nowrap gap-2 overflow-x-auto md:overflow-x-hidden md:overflow-y-auto pb-2 px-1 custom-scrollbar min-h-[100px] md:min-h-0 md:flex-grow items-center md:items-stretch">
                             {gameState.hand.map((card, i) => (
-                                <div key={card.id} className={`w-20 h-28 md:w-full md:h-auto bg-slate-800 border-2 rounded-lg flex flex-col md:flex-row justify-between p-1 md:p-2 cursor-pointer transition-transform relative shadow-lg shrink-0 md:shrink ${card.upgraded ? 'border-yellow-400' : 'border-slate-600'} ${card.currentCooldown > 0 ? 'opacity-50 grayscale' : 'hover:-translate-y-2 md:hover:translate-y-0 md:hover:translate-x-2'}`} onClick={() => handleQueueCard(card, i)}>
+                                <div key={card.id} className={`w-20 h-28 md:w-full md:h-auto bg-slate-800 border-2 rounded-lg flex flex-col md:flex-row justify-between p-1 md:p-2 cursor-pointer transition-transform relative shadow-lg shrink-0 md:shrink ${card.usedSlots > 0 ? 'border-yellow-400' : 'border-slate-600'} ${card.currentCooldown > 0 ? 'opacity-50 grayscale' : 'hover:-translate-y-2 md:hover:translate-y-0 md:hover:translate-x-2'}`} onClick={() => handleQueueCard(card, i)}>
                                     <div className={`absolute top-0 left-0 w-full h-1 md:w-1 md:h-full ${card.color} rounded-t-sm md:rounded-l-sm`}></div>
                                     <div className="flex flex-col h-full w-full md:hidden">
                                         <div className="mt-1 text-[9px] font-bold text-center leading-tight truncate">{card.name}</div>
@@ -1434,6 +1467,11 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                         <div className="flex-grow min-w-0">
                                             <div className="text-xs font-bold truncate">{card.name}</div>
                                             <div className="text-[10px] text-gray-400 truncate">{card.description}</div>
+                                            <div className="flex gap-0.5 mt-0.5">
+                                                {[...Array(card.maxSlots)].map((_, idx) => (
+                                                    <div key={idx} className={`w-1 h-1 rounded-full ${idx < card.usedSlots ? 'bg-yellow-400' : 'bg-gray-600'}`} />
+                                                ))}
+                                            </div>
                                         </div>
                                         <div className="flex flex-col items-end text-[10px] font-mono shrink-0">
                                             <span className="text-gray-500">CD:{card.cooldown}</span>
