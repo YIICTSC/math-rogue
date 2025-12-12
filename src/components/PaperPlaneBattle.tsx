@@ -371,41 +371,53 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     // Player Wins Row -> Enemy Durability Down (Even if attacking empty slot)
                     enemyStunDmg++;
                     
-                    if (ePower === 0) {
-                        // rowLog = `Row ${r+1}: 隙を攻撃! ${diff}ダメ`;
-                    } else {
-                        // rowLog = `Row ${r+1}: 撃ち合い勝利! ${diff}ダメ`;
-                    }
                 } else if (ePower > pPower) {
                     const diff = ePower - pPower;
                     setPlayer(prev => ({...prev, hp: Math.max(0, prev.hp - diff)}));
-                    // rowLog = `Row ${r+1}: 被弾! ${diff}ダメ`;
                 } else {
-                    // rowLog = `Row ${r+1}: 相殺`;
+                    // Draw
                 }
             }
             
             await new Promise(r => setTimeout(r, 200));
         }
 
-        // Stun Logic
-        if (enemyStunDmg > 0 && tempEnemyHp > 0) {
-            const newDur = Math.max(0, enemy.durability - enemyStunDmg);
-            if (newDur === 0 && !enemy.isStunned) {
-                // Apply Stun for NEXT turn
-                setEnemy(prev => ({...prev, durability: newDur, isStunned: true}));
-                addLog("敵の防御値を削りきった！次ターンスタン！");
-                audioService.playSound('win');
-            } else {
-                setEnemy(prev => ({...prev, durability: newDur}));
-                if (enemyStunDmg > 1) addLog(`敵の防御値を${enemyStunDmg}削った！`);
-                else addLog(`敵の防御値を1削った！`);
+        // Stun Logic Update
+        let nextIsStunned = enemy.isStunned;
+        let nextDurability = enemy.durability;
+
+        if (tempEnemyHp > 0) {
+            // Apply Stun Damage
+            if (enemyStunDmg > 0) {
+                if (!enemy.isStunned) {
+                    nextDurability = Math.max(0, nextDurability - enemyStunDmg);
+                    if (nextDurability === 0) {
+                        nextIsStunned = true;
+                        addLog("敵の防御値を削りきった！次ターンスタン！");
+                        audioService.playSound('win');
+                    } else {
+                        if (enemyStunDmg > 1) addLog(`敵の防御値を${enemyStunDmg}削った！`);
+                        else addLog(`敵の防御値を1削った！`);
+                    }
+                } else {
+                    addLog("スタン中の敵を追撃！");
+                }
             }
-        } else if (enemy.isStunned && tempEnemyHp > 0) {
-            // Recover from stun (Full recovery)
-            setEnemy(prev => ({...prev, isStunned: false, durability: prev.maxDurability}));
-            addLog("敵システム再起動！防御値全快！");
-            audioService.playSound('buff');
+
+            // Recover from Stun (End of turn check)
+            if (enemy.isStunned) {
+                nextIsStunned = false;
+                nextDurability = enemy.maxDurability;
+                addLog("敵システム再起動！防御値全快！");
+                audioService.playSound('buff');
+            }
+            
+            setEnemy(prev => ({
+                ...prev,
+                hp: tempEnemyHp,
+                durability: nextDurability,
+                isStunned: nextIsStunned
+            }));
         }
 
         // Cleanup
@@ -427,7 +439,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         } else {
             // Next Turn
             setTurn(prev => prev + 1);
-            if (!enemy.isStunned) {
+            if (!nextIsStunned) {
                 generateEnemyIntents(turn + 1, enemy.parts);
             } else {
                 setEnemyIntents([]); // Stunned -> No action
