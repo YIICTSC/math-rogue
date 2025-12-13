@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download } from 'lucide-react';
+import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 
@@ -26,7 +26,7 @@ interface EnergySlot {
 
 interface ShipPart {
     id: string;
-    type: 'CANNON' | 'ENGINE' | 'EMPTY' | 'MISSILE' | 'SHIELD';
+    type: 'CANNON' | 'ENGINE' | 'EMPTY' | 'MISSILE' | 'SHIELD' | 'AMPLIFIER'; // Added AMPLIFIER
     name: string;
     description?: string;
     slots: EnergySlot[]; // Multiple slots per part
@@ -162,6 +162,11 @@ const PART_TEMPLATES: Omit<ShipPart, 'id'>[] = [
     { type: 'CANNON', name: 'スナイパー', description: '2スロットで精密射撃。', slots: [{req:'BLUE', value:null}, {req:'WHITE', value:null}], multiplier: 2.0, basePower: 5, hp: 10 },
     { type: 'MISSILE', name: '拡散ポッド', description: '多数の白スロットを持つ。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 0.8, basePower: 3, hp: 10 },
     { type: 'SHIELD', name: 'ミラーコート', description: '青エネルギーで特殊防御。', slots: [{req:'BLUE', value:null}, {req:'ANY', value:null}], multiplier: 1.3, basePower: 4, hp: 12 },
+    
+    // Amplifiers
+    { type: 'AMPLIFIER', name: 'エネルギー増幅器', description: '隣接するパーツの出力を強化する(要:白エネ)。', slots: [{req:'WHITE', value:null}], multiplier: 0, basePower: 2, hp: 8 },
+    { type: 'AMPLIFIER', name: 'ハイパーブースター', description: '隣接するパーツを大幅強化(要:橙エネ)。', slots: [{req:'ORANGE', value:null}], multiplier: 0, basePower: 5, hp: 8 },
+    { type: 'AMPLIFIER', name: 'デュアルアンプ', description: '2スロットで安定した強化。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 0, basePower: 3, hp: 8 },
 ];
 
 // --- COMPONENTS ---
@@ -226,6 +231,7 @@ const ShipPartView: React.FC<{
     if (part.type === 'ENGINE') { icon = <Move size={14}/>; colorClass = 'bg-emerald-900/60 border-emerald-500/50'; textColor='text-emerald-200'; }
     if (part.type === 'MISSILE') { icon = <Send size={14}/>; colorClass = 'bg-orange-900/60 border-orange-500/50'; textColor='text-orange-200'; }
     if (part.type === 'SHIELD') { icon = <Shield size={14}/>; colorClass = 'bg-blue-900/60 border-blue-500/50'; textColor='text-blue-200'; }
+    if (part.type === 'AMPLIFIER') { icon = <Activity size={14}/>; colorClass = 'bg-purple-900/60 border-purple-500/50'; textColor='text-purple-200'; }
     
     // Special highlight for generator
     if (part.specialEffect === 'RANK_UP') { colorClass = 'bg-purple-900/60 border-purple-500/50'; textColor='text-purple-200'; icon = <Zap size={14}/>; }
@@ -242,14 +248,13 @@ const ShipPartView: React.FC<{
         );
     }
 
-    // Calculate Power
+    // Calculate Power (Visual Only)
     const loadedCount = part.slots.filter(s => s.value !== null).length;
     const isFull = loadedCount === part.slots.length && part.slots.length > 0;
     
     let totalPower = 0;
     const energySum = part.slots.reduce((sum, s) => sum + (s.value || 0), 0);
     
-    // Partial load adds power, Full load adds basePower bonus
     if (energySum > 0) {
         totalPower = Math.floor(energySum * part.multiplier);
         if (isFull) totalPower += part.basePower;
@@ -273,7 +278,8 @@ const ShipPartView: React.FC<{
         >
             <div className="flex justify-between items-center">
                 <div className={`${textColor}`}>{icon}</div>
-                {totalPower > 0 && showPower && <div className="text-[10px] font-bold text-white shadow-black drop-shadow-md">{totalPower}</div>}
+                {totalPower > 0 && showPower && part.type !== 'AMPLIFIER' && <div className="text-[10px] font-bold text-white shadow-black drop-shadow-md">{totalPower}</div>}
+                {part.type === 'AMPLIFIER' && isFull && <div className="text-[8px] font-bold text-yellow-300">UP!</div>}
             </div>
 
             <div className="flex gap-0.5 justify-center mt-1">
@@ -555,7 +561,30 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 const startIdx = pRelIdx * SHIP_WIDTH;
                 const rowParts = player.parts.slice(startIdx, startIdx + SHIP_WIDTH);
                 
-                rowParts.forEach(p => {
+                rowParts.forEach((p, colIdx) => {
+                    // Check if Amplified (Neighbor Check)
+                    let buffBonus = 0;
+                    
+                    // Neighbors in grid: (pRelIdx, colIdx)
+                    const neighbors = [
+                        {r: pRelIdx - 1, c: colIdx}, {r: pRelIdx + 1, c: colIdx},
+                        {r: pRelIdx, c: colIdx - 1}, {r: pRelIdx, c: colIdx + 1}
+                    ];
+
+                    neighbors.forEach(n => {
+                        if (n.r >= 0 && n.r < SHIP_HEIGHT && n.c >= 0 && n.c < SHIP_WIDTH) {
+                            const nPart = player.parts[n.r * SHIP_WIDTH + n.c];
+                            if (nPart.type === 'AMPLIFIER') {
+                                // Check if amplifier is active (fully loaded usually, or just loaded)
+                                // Let's say needs to be fully loaded to work for balance
+                                const isAmpActive = nPart.slots.every(s => s.value !== null) && nPart.slots.length > 0;
+                                if (isAmpActive) {
+                                    buffBonus += nPart.basePower;
+                                }
+                            }
+                        }
+                    });
+
                     const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
                     if (energySum > 0) {
                         let output = Math.floor(energySum * p.multiplier);
@@ -563,7 +592,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         if (isFull) output += p.basePower;
                         
                         // Passive power buff
-                        if ((p.type === 'CANNON' || p.type === 'MISSILE')) output += player.passivePower;
+                        output += player.passivePower;
+                        
+                        // Apply Neighbor Buffs
+                        output += buffBonus;
 
                         if (p.type === 'CANNON' || p.type === 'MISSILE') pPower += output;
                         if (p.type === 'SHIELD') pShield += output;
@@ -951,13 +983,35 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         
         let prediction = null;
         let pPower = 0;
-        partsToRender.forEach(p => {
+        
+        partsToRender.forEach((p, colIdx) => {
+             // Calculate potential buff from neighbors (for prediction)
+             // This needs to access the full grid, so we use player.parts
+             let buffBonus = 0;
+             if (inShip) {
+                 const neighbors = [
+                    {r: pRelIdx - 1, c: colIdx}, {r: pRelIdx + 1, c: colIdx},
+                    {r: pRelIdx, c: colIdx - 1}, {r: pRelIdx, c: colIdx + 1}
+                 ];
+                 neighbors.forEach(n => {
+                    if (n.r >= 0 && n.r < SHIP_HEIGHT && n.c >= 0 && n.c < SHIP_WIDTH) {
+                        const nPart = player.parts[n.r * SHIP_WIDTH + n.c];
+                        // Assumption for prediction: Amplifiers are active if they exist
+                        // In real combat, they need to be loaded. Here we assume potential.
+                        if (nPart.type === 'AMPLIFIER') {
+                            buffBonus += nPart.basePower;
+                        }
+                    }
+                 });
+             }
+
              const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
              if (energySum > 0 && (p.type === 'CANNON' || p.type === 'MISSILE')) {
                  let output = Math.floor(energySum * p.multiplier);
                  const isFull = p.slots.every(s => s.value !== null) && p.slots.length > 0;
                  if(isFull) output += p.basePower;
-                 output += player.passivePower; // Apply Passive
+                 output += player.passivePower; 
+                 output += buffBonus; // Add buff to prediction
                  pPower += output;
              }
         });
@@ -1015,12 +1069,24 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     <h3 className="text-xl font-bold text-yellow-400 mb-2 border-b border-gray-600 pb-2">{tooltipPart.name}</h3>
                     <div className="text-sm text-gray-300 mb-4">{tooltipPart.description || "詳細なし"}</div>
                     <div className="bg-black/40 p-2 rounded text-xs text-cyan-300 font-mono">
-                        <div>倍率: x{tooltipPart.multiplier}</div>
-                        <div>起動ボーナス: +{tooltipPart.basePower}</div>
-                        <div className="mt-2 text-gray-500">
-                            Output = (Energy * {tooltipPart.multiplier}) + {tooltipPart.basePower}(if full)
-                            {player.passivePower > 0 && <div className="text-purple-400">+ {player.passivePower} (Passive)</div>}
-                        </div>
+                        {tooltipPart.type !== 'AMPLIFIER' ? (
+                            <>
+                                <div>倍率: x{tooltipPart.multiplier}</div>
+                                <div>起動ボーナス: +{tooltipPart.basePower}</div>
+                                <div className="mt-2 text-gray-500">
+                                    Output = (Energy * {tooltipPart.multiplier}) + {tooltipPart.basePower}(if full)
+                                    {player.passivePower > 0 && <div className="text-purple-400">+ {player.passivePower} (Passive)</div>}
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div>強化ボーナス: +{tooltipPart.basePower}</div>
+                                <div className="mt-2 text-gray-500">
+                                    隣接するパーツ(上下左右)の出力を加算します。<br/>
+                                    ※エネルギー充填時のみ有効
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
@@ -1033,13 +1099,14 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         return (
             <div className="w-full h-full bg-slate-900 text-white p-8 flex flex-col items-center justify-center font-mono">
                 <Send size={64} className="text-cyan-400 mb-4 animate-bounce"/>
-                <h1 className="text-4xl font-bold mb-4">紙飛行機バトル v2.1</h1>
+                <h1 className="text-4xl font-bold mb-4">紙飛行機バトル v2.2</h1>
                 <div className="max-w-md text-sm text-gray-300 space-y-2 mb-8 bg-slate-800 p-4 rounded border border-slate-600">
                     <p>・機体は3x3のモジュールで構成されています。</p>
                     <p>・エネルギーの色には相性があります。</p>
                     <p className="text-yellow-400 font-bold">・オレンジ &gt; 青 &gt; 白 (白スロットには何色でもOK！)</p>
                     <p>・エネルギーを入れるだけで出力が出ます。</p>
                     <p>・全スロットを埋めると起動ボーナスが加算されます！</p>
+                    <p className="text-purple-400 font-bold">・新パーツ「増幅器」は隣接パーツを強化します！</p>
                     <p>・モジュール長押しで詳細を確認できます。</p>
                     <p className="text-green-400 font-bold">・戦闘後は「休暇」で機体を強化しよう！</p>
                 </div>
@@ -1341,12 +1408,24 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         <h3 className="text-xl font-bold text-yellow-400 mb-2 border-b border-gray-600 pb-2">{tooltipPart.name}</h3>
                         <div className="text-sm text-gray-300 mb-4">{tooltipPart.description || "詳細なし"}</div>
                         <div className="bg-black/40 p-2 rounded text-xs text-cyan-300 font-mono">
-                            <div>倍率: x{tooltipPart.multiplier}</div>
-                            <div>起動ボーナス: +{tooltipPart.basePower}</div>
-                            <div className="mt-2 text-gray-500">
-                                Output = (Energy * {tooltipPart.multiplier}) + {tooltipPart.basePower}(if full)
-                                {player.passivePower > 0 && <div className="text-purple-400">+ {player.passivePower} (Passive)</div>}
-                            </div>
+                            {tooltipPart.type !== 'AMPLIFIER' ? (
+                                <>
+                                    <div>倍率: x{tooltipPart.multiplier}</div>
+                                    <div>起動ボーナス: +{tooltipPart.basePower}</div>
+                                    <div className="mt-2 text-gray-500">
+                                        Output = (Energy * {tooltipPart.multiplier}) + {tooltipPart.basePower}(if full)
+                                        {player.passivePower > 0 && <div className="text-purple-400">+ {player.passivePower} (Passive)</div>}
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div>強化ボーナス: +{tooltipPart.basePower}</div>
+                                    <div className="mt-2 text-gray-500">
+                                        隣接するパーツ(上下左右)の出力を加算します。<br/>
+                                        ※エネルギー充填時のみ有効
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
