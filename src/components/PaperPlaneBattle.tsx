@@ -273,6 +273,44 @@ const PART_TEMPLATES: Omit<ShipPart, 'id'>[] = [
 
 // --- COMPONENTS ---
 
+const PoolView: React.FC<{ pool: PoolState, onClose: () => void }> = ({ pool, onClose }) => (
+    <div className="absolute inset-0 bg-black/90 z-50 flex items-center justify-center p-8" onClick={onClose}>
+        <div className="bg-slate-800 p-6 rounded-lg max-w-lg w-full border border-slate-600 shadow-2xl relative" onClick={e => e.stopPropagation()}>
+            <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
+            <h3 className="text-xl font-bold mb-6 flex items-center text-white"><Layers className="mr-2"/> Energy Pools</h3>
+            <div className="grid grid-cols-2 gap-8">
+                <div>
+                    <div className="text-cyan-400 font-bold mb-3 border-b border-cyan-700 pb-1">山札 (生成中)</div>
+                    <div className="text-xs text-gray-400 mb-1">数値:</div>
+                    <div className="flex flex-wrap gap-1 font-mono text-sm mb-3">
+                        {pool.genNumbers.length > 0 ? pool.genNumbers.map((n, i) => <span key={i} className="bg-slate-700 px-1.5 rounded">{n}</span>) : <span className="text-gray-600">Empty</span>}
+                    </div>
+                    <div className="text-xs text-gray-400 mb-1">色:</div>
+                    <div className="flex flex-wrap gap-1">
+                        {pool.genColors.length > 0 ? pool.genColors.map((c, i) => (
+                            <div key={i} className={`w-4 h-4 rounded-full border border-black/50 ${c==='ORANGE'?'bg-orange-500':c==='BLUE'?'bg-blue-500':'bg-slate-200'}`} title={c}></div>
+                        )) : <span className="text-gray-600 text-xs">Empty</span>}
+                    </div>
+                </div>
+                <div>
+                    <div className="text-orange-400 font-bold mb-3 border-b border-orange-700 pb-1">捨て札 (冷却中)</div>
+                    <div className="text-xs text-gray-400 mb-1">数値:</div>
+                    <div className="flex flex-wrap gap-1 font-mono text-sm mb-3">
+                        {pool.coolNumbers.length > 0 ? pool.coolNumbers.map((n, i) => <span key={i} className="bg-slate-700 px-1.5 rounded">{n}</span>) : <span className="text-gray-600">Empty</span>}
+                    </div>
+                    <div className="text-xs text-gray-400 mb-1">色:</div>
+                    <div className="flex flex-wrap gap-1">
+                        {pool.coolColors.length > 0 ? pool.coolColors.map((c, i) => (
+                            <div key={i} className={`w-4 h-4 rounded-full border border-black/50 ${c==='ORANGE'?'bg-orange-500':c==='BLUE'?'bg-blue-500':'bg-slate-200'}`} title={c}></div>
+                        )) : <span className="text-gray-600 text-xs">Empty</span>}
+                    </div>
+                </div>
+            </div>
+            <button onClick={onClose} className="mt-8 w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition-colors">閉じる</button>
+        </div>
+    </div>
+);
+
 const EnergyCardView: React.FC<{ card: EnergyCard, onClick?: () => void, selected?: boolean, small?: boolean }> = ({ card, onClick, selected, small }) => {
     const bgColor = card.color === 'ORANGE' ? 'bg-orange-500' : card.color === 'BLUE' ? 'bg-blue-500' : 'bg-slate-200 text-black';
     const borderColor = card.color === 'ORANGE' ? 'border-orange-700' : card.color === 'BLUE' ? 'border-blue-700' : 'border-slate-400';
@@ -1735,9 +1773,15 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         return (
             <div className="w-full h-full bg-slate-900 text-white p-2 md:p-4 font-mono relative overflow-hidden flex flex-col">
                 <RenderTooltip />
+                {/* Pool View Modal */}
+                {showPool && <PoolView pool={pool} onClose={() => setShowPool(false)} />}
+                
                 <div className="flex justify-between items-center mb-2 bg-slate-800 p-3 rounded-lg shadow-lg shrink-0">
                     <h2 className="text-lg md:text-2xl font-bold flex items-center text-cyan-300"><Calendar className="mr-2" size={20}/> <span className="hidden md:inline">休暇モード</span><span className="md:hidden">休暇</span></h2>
                     <div className="flex gap-2 md:gap-4 text-sm">
+                        <button onClick={() => setShowPool(true)} className="flex items-center gap-1 bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded text-xs border border-indigo-400 transition-colors shadow-sm font-bold">
+                            <Layers size={14} /> <span className="hidden md:inline">POOL</span>
+                        </button>
                         <div className="flex items-center text-yellow-400 font-bold"><Star className="mr-1" size={16}/> {player.starCoins}</div>
                         <div className="flex items-center text-orange-400 font-bold bg-black/40 px-2 py-0.5 rounded border border-orange-500/50">残{player.vacationDays}日</div>
                     </div>
@@ -1855,6 +1899,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     return (
         <div className="w-full h-full bg-[#101018] text-white flex flex-col font-mono relative overflow-hidden">
+            <RenderTooltip />
+            {/* Pool Overlay */}
+            {showPool && <PoolView pool={pool} onClose={() => setShowPool(false)} />}
             
             {/* Header */}
             <div className="h-12 bg-black border-b border-cyan-900 flex justify-between items-center px-4 shrink-0 z-10">
@@ -1892,40 +1939,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     {logs.map((l, i) => <div key={i} className="text-[10px] text-right bg-black/50 mb-0.5 px-1 rounded">{l}</div>)}
                 </div>
             </div>
-
-            {/* Tooltip Overlay */}
-            {tooltipPart && (
-                <div className="absolute inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={() => setTooltipPart(null)}>
-                    <div className="bg-slate-800 border-2 border-white p-6 rounded-lg max-w-sm w-full shadow-2xl relative" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => setTooltipPart(null)} className="absolute top-2 right-2 text-gray-400 hover:text-white"><X size={24}/></button>
-                        <h3 className="text-xl font-bold text-yellow-400 mb-2 border-b border-gray-600 pb-2">{tooltipPart.name}</h3>
-                        <div className="text-sm text-gray-300 mb-4">{tooltipPart.description || "詳細なし"}</div>
-                        <div className="bg-black/40 p-2 rounded text-xs text-cyan-300 font-mono">
-                            {tooltipPart.type !== 'AMPLIFIER' ? (
-                                <>
-                                    <div>倍率: x{tooltipPart.multiplier}</div>
-                                    <div>起動ボーナス: +{tooltipPart.basePower}</div>
-                                    <div className="mt-2 text-gray-500">
-                                        Output = (Energy * {tooltipPart.multiplier}) + {tooltipPart.basePower}(if full)
-                                        {player.passivePower > 0 && <div className="text-purple-400">+ {player.passivePower} (Passive)</div>}
-                                    </div>
-                                </>
-                            ) : (
-                                <>
-                                    <div>強化ボーナス: +{tooltipPart.basePower}</div>
-                                    <div className="mt-2 text-gray-500">
-                                        隣接するパーツ(上下左右)の出力を加算します。<br/>
-                                        ※エネルギー充填時のみ有効
-                                    </div>
-                                </>
-                            )}
-                            {tooltipPart.specialEffect === 'HEAL' && <div className="text-green-400 mt-2 font-bold">HP自動回復機能付き</div>}
-                            {tooltipPart.specialEffect === 'RECYCLE' && <div className="text-teal-400 mt-2 font-bold">エネルギー回収機能付き</div>}
-                            {tooltipPart.specialEffect === 'THORNS' && <div className="text-red-400 mt-2 font-bold">反撃ダメージ (被弾時、防御出力の半分を敵に返す)</div>}
-                        </div>
-                    </div>
-                </div>
-            )}
             
             {/* Hand Help Tooltip */}
             {showHandHelp && (
@@ -1983,28 +1996,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     <span className="text-[10px] mt-1">FIRE</span>
                 </button>
             </div>
-
-            {/* Pool Overlay */}
-            {showPool && (
-                <div className="absolute inset-0 bg-black/90 z-50 flex items-center justify-center p-8" onClick={() => setShowPool(false)}>
-                    <div className="bg-slate-800 p-6 rounded-lg max-w-lg w-full border border-slate-600" onClick={e => e.stopPropagation()}>
-                        <h3 className="text-xl font-bold mb-4 flex items-center"><Layers className="mr-2"/> Energy Pools</h3>
-                        <div className="grid grid-cols-2 gap-8">
-                            <div>
-                                <div className="text-cyan-400 font-bold mb-2 border-b border-cyan-700 pb-1">山札 (生成中)</div>
-                                <div className="text-xs text-gray-400 mb-2">数値: {pool.genNumbers.join(', ')}</div>
-                                <div className="text-xs text-gray-400">色: {pool.genColors.map(c => c === 'WHITE' ? '白' : c === 'BLUE' ? '青' : '橙').join('')}</div>
-                            </div>
-                            <div>
-                                <div className="text-orange-400 font-bold mb-2 border-b border-orange-700 pb-1">捨て札 (冷却中)</div>
-                                <div className="text-xs text-gray-400 mb-2">数値: {pool.coolNumbers.join(', ')}</div>
-                                <div className="text-xs text-gray-400">色: {pool.coolColors.map(c => c === 'WHITE' ? '白' : c === 'BLUE' ? '青' : '橙').join('')}</div>
-                            </div>
-                        </div>
-                        <button onClick={() => setShowPool(false)} className="mt-6 w-full bg-slate-700 py-2 rounded text-sm">Close</button>
-                    </div>
-                </div>
-            )}
 
             {(phase === 'VICTORY' || phase === 'GAME_OVER') && (
                 <div className="absolute inset-0 bg-black/80 z-50 flex items-center justify-center p-4 animate-in fade-in zoom-in duration-300">
