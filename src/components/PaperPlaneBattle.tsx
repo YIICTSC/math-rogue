@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation, Droplets, Recycle } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
+import { storageService } from '../services/storageService';
 
 // --- TYPES & CONSTANTS ---
 
@@ -466,26 +467,33 @@ const ClashOverlay: React.FC<{ clashState: ClashState }> = ({ clashState }) => {
     );
 };
 
+// Helper function to load initial state safely
+const loadInitialState = () => {
+    return storageService.loadPaperPlaneState();
+};
 
 const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-    // --- STATE ---
-    const [phase, setPhase] = useState<GamePhase>('TUTORIAL');
-    const [stage, setStage] = useState(1); 
-    const [turn, setTurn] = useState(1);
+    // --- STATE INITIALIZATION ---
+    // Try to load saved state, otherwise use default
+    const savedData = loadInitialState();
+
+    const [phase, setPhase] = useState<GamePhase>(savedData?.phase || 'TUTORIAL');
+    const [stage, setStage] = useState(savedData?.stage || 1); 
+    const [turn, setTurn] = useState(savedData?.turn || 1);
     
     // Pools
-    const [pool, setPool] = useState<PoolState>({
+    const [pool, setPool] = useState<PoolState>(savedData?.pool || {
         genNumbers: [1,2,3,4,5,6,3,4,5], 
         genColors: ['WHITE','WHITE','WHITE','BLUE','BLUE','ORANGE','ORANGE'], 
         coolNumbers: [],
         coolColors: []
     });
 
-    const [hand, setHand] = useState<EnergyCard[]>([]);
+    const [hand, setHand] = useState<EnergyCard[]>(savedData?.hand || []);
     const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
 
     // Ships
-    const [player, setPlayer] = useState<ShipState>({
+    const [player, setPlayer] = useState<ShipState>(savedData?.player || {
         yOffset: 1, // Start middle
         hp: 40, maxHp: 40, fuel: MAX_FUEL, maxFuel: MAX_FUEL, durability: 0, maxDurability: 0, isStunned: false,
         parts: JSON.parse(JSON.stringify(STARTING_PARTS_LAYOUT)),
@@ -495,7 +503,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         partInventory: []
     });
 
-    const [enemy, setEnemy] = useState<ShipState>({
+    const [enemy, setEnemy] = useState<ShipState>(savedData?.enemy || {
         yOffset: 1,
         hp: 20, maxHp: 20, fuel: 0, maxFuel: 0, durability: 3, maxDurability: 3, isStunned: false,
         parts: [], // Enemy parts are simplified (1 per row usually)
@@ -503,7 +511,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         partInventory: []
     });
 
-    const [enemyIntents, setEnemyIntents] = useState<EnemyIntent[]>([]);
+    const [enemyIntents, setEnemyIntents] = useState<EnemyIntent[]>(savedData?.enemyIntents || []);
     const [logs, setLogs] = useState<string[]>([]);
     const [showPool, setShowPool] = useState(false);
     const [animating, setAnimating] = useState(false);
@@ -513,14 +521,43 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [clashState, setClashState] = useState<ClashState>({ active: false, phase: 'INIT', data: [] });
     
     // Vacation State
-    const [vacationEvents, setVacationEvents] = useState<VacationEvent[]>([]);
-    const [vacationLog, setVacationLog] = useState<string>("休暇を楽しんでください。");
-    const [pendingPart, setPendingPart] = useState<ShipPart | null>(null); // Part waiting to be equipped
+    const [vacationEvents, setVacationEvents] = useState<VacationEvent[]>(savedData?.vacationEvents || []);
+    const [vacationLog, setVacationLog] = useState<string>(savedData?.vacationLog || "休暇を楽しんでください。");
+    const [pendingPart, setPendingPart] = useState<ShipPart | null>(savedData?.pendingPart || null); // Part waiting to be equipped
     const [hangarSelection, setHangarSelection] = useState<{loc: 'SHIP'|'INV', idx: number}|null>(null);
 
     // Reward State
-    const [rewardOptions, setRewardOptions] = useState<ShipPart[]>([]);
-    const [earnedCoins, setEarnedCoins] = useState(0);
+    const [rewardOptions, setRewardOptions] = useState<ShipPart[]>(savedData?.rewardOptions || []);
+    const [earnedCoins, setEarnedCoins] = useState(savedData?.earnedCoins || 0);
+
+    // --- AUTO SAVE LOGIC ---
+    const saveDebounceRef = useRef<any>(null);
+
+    useEffect(() => {
+        // Don't save on transient or terminal states immediately (though we clear on terminal)
+        // We clear save on GAME_OVER or VICTORY
+        if (phase === 'GAME_OVER' || phase === 'VICTORY') {
+            storageService.clearPaperPlaneState();
+        } else if (phase !== 'TUTORIAL') {
+            if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
+            saveDebounceRef.current = setTimeout(() => {
+                const stateToSave = {
+                    phase, stage, turn, pool, hand, player, enemy, enemyIntents,
+                    vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins
+                };
+                storageService.savePaperPlaneState(stateToSave);
+            }, 1000); // 1 second debounce
+        }
+    }, [phase, stage, turn, pool, hand, player, enemy, enemyIntents, vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins]);
+
+    // On Mount BGM check
+    useEffect(() => {
+        if (phase === 'BATTLE') {
+            audioService.playBGM('battle');
+        } else if (phase !== 'TUTORIAL') {
+            audioService.playBGM('menu'); // Relaxing bgm for vacation? reusing menu
+        }
+    }, []);
 
     // --- GAME LOGIC ---
 
@@ -1334,6 +1371,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     <p className="text-purple-400 font-bold">・新パーツ多数！回復機能や増幅器を使いこなせ！</p>
                     <p>・モジュール長押しで詳細を確認できます。</p>
                     <p className="text-green-400 font-bold">・戦闘後は「休暇」で機体を強化しよう！</p>
+                    <p className="text-blue-400 font-bold mt-2">※オートセーブ機能搭載！</p>
                 </div>
                 <button onClick={() => initBattle(1)} className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-8 rounded shadow-lg animate-pulse flex items-center">
                     <Play className="mr-2"/> 出撃

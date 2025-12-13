@@ -26,6 +26,9 @@ const STORAGE_KEY_DUNGEON_RANKING_2 = 'pixel_spire_dungeon_ranking_2_v1';
 // For Kocho Showdown
 const STORAGE_KEY_KOCHO_STATE = 'pixel_spire_kocho_state_v1';
 
+// For Paper Plane Battle
+const STORAGE_KEY_PAPER_PLANE_STATE = 'pixel_spire_paper_plane_state_v1';
+
 export const storageService = {
   // --- Unlocked Items (Cards, Relics, Potions, Enemies) ---
   
@@ -296,6 +299,24 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_KOCHO_STATE);
   },
 
+  // --- Paper Plane Battle State ---
+  savePaperPlaneState: (state: any) => {
+      try {
+          localStorage.setItem(STORAGE_KEY_PAPER_PLANE_STATE, JSON.stringify(state));
+      } catch (e) { console.warn("Failed to save paper plane state", e); }
+  },
+
+  loadPaperPlaneState: (): any => {
+      try {
+          const stored = localStorage.getItem(STORAGE_KEY_PAPER_PLANE_STATE);
+          return stored ? JSON.parse(stored) : null;
+      } catch { return null; }
+  },
+
+  clearPaperPlaneState: () => {
+      localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_STATE);
+  },
+
   // --- Game State (Save/Load) ---
   saveGame: (state: GameState) => {
     try {
@@ -394,6 +415,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_DUNGEON_RANKING_2);
       localStorage.removeItem(STORAGE_KEY_DUNGEON_STATE_2);
       localStorage.removeItem(STORAGE_KEY_KOCHO_STATE);
+      localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_STATE);
       localStorage.removeItem(STORAGE_KEY_LEGACY_CARD);
       localStorage.removeItem(STORAGE_KEY_DEBUG_MATH_SKIP);
       localStorage.removeItem(STORAGE_KEY_DEBUG_HP_ONE);

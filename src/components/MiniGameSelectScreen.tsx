@@ -57,7 +57,7 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
       } else if (deleteTarget === 'KOCHO') {
           storageService.clearKochoState();
       } else if (deleteTarget === 'PAPER_PLANE') {
-          // No save state for paper plane yet, but keep logic
+          storageService.clearPaperPlaneState();
       }
       // Survivor has no suspend state to clear currently
       
