@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, AlertTriangle, RefreshCw, Layers, Crosshair, Skull, Heart, Battery, ChevronsRight, ChevronsLeft, Info, Check, Play, X, Box, Grid, Calendar, Hammer, ShoppingBag, Search, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings } from 'lucide-react';
+import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 
@@ -50,6 +50,7 @@ interface ShipState {
     starCoins: number;
     vacationDays: number;
     passivePower: number; // From Treasures
+    partInventory: ShipPart[]; // New: Inventory
 }
 
 interface EnemyIntent {
@@ -179,8 +180,9 @@ const ShipPartView: React.FC<{
     onLongPress?: (part: ShipPart) => void,
     isEnemy?: boolean, 
     highlight?: boolean,
-    pendingReplace?: boolean
-}> = ({ part, onClick, onLongPress, isEnemy, highlight, pendingReplace }) => {
+    pendingReplace?: boolean,
+    showPower?: boolean
+}> = ({ part, onClick, onLongPress, isEnemy, highlight, pendingReplace, showPower = true }) => {
     
     const longPressTimer = useRef<any>(null);
 
@@ -251,7 +253,7 @@ const ShipPartView: React.FC<{
         >
             <div className="flex justify-between items-center">
                 <div className={`${textColor}`}>{icon}</div>
-                {totalPower > 0 && <div className="text-[10px] font-bold text-white shadow-black drop-shadow-md">{totalPower}</div>}
+                {totalPower > 0 && showPower && <div className="text-[10px] font-bold text-white shadow-black drop-shadow-md">{totalPower}</div>}
             </div>
 
             <div className="flex gap-0.5 justify-center mt-1">
@@ -302,14 +304,16 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         parts: JSON.parse(JSON.stringify(STARTING_PARTS_LAYOUT)),
         starCoins: 0,
         vacationDays: 0,
-        passivePower: 0
+        passivePower: 0,
+        partInventory: []
     });
 
     const [enemy, setEnemy] = useState<ShipState>({
         yOffset: 1,
         hp: 20, maxHp: 20, fuel: 0, maxFuel: 0, durability: 3, maxDurability: 3, isStunned: false,
         parts: [], // Enemy parts are simplified (1 per row usually)
-        starCoins: 0, vacationDays: 0, passivePower: 0
+        starCoins: 0, vacationDays: 0, passivePower: 0,
+        partInventory: []
     });
 
     const [enemyIntents, setEnemyIntents] = useState<EnemyIntent[]>([]);
@@ -322,7 +326,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [vacationEvents, setVacationEvents] = useState<VacationEvent[]>([]);
     const [vacationLog, setVacationLog] = useState<string>("休暇を楽しんでください。");
     const [pendingPart, setPendingPart] = useState<ShipPart | null>(null); // Part waiting to be equipped
-    const [swapSource, setSwapSource] = useState<number | null>(null); // For Hangar swap
+    const [hangarSelection, setHangarSelection] = useState<{loc: 'SHIP'|'INV', idx: number}|null>(null);
 
     // Reward State
     const [rewardOptions, setRewardOptions] = useState<ShipPart[]>([]);
@@ -351,7 +355,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             durability: template.durability + Math.floor(stageNum/2), maxDurability: template.durability + Math.floor(stageNum/2),
             fuel: 0, maxFuel: 0, isStunned: false,
             parts: eParts,
-            starCoins: 0, vacationDays: 0, passivePower: 0
+            starCoins: 0, vacationDays: 0, passivePower: 0,
+            partInventory: []
         });
 
         // Reset Player Parts Loaded Values
@@ -669,6 +674,22 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         audioService.playSound('select');
     };
 
+    const handleStorePart = () => {
+        if (!pendingPart) return;
+        setPlayer(prev => ({
+            ...prev,
+            partInventory: [...prev.partInventory, pendingPart]
+        }));
+        setPendingPart(null);
+        audioService.playSound('select');
+        
+        if (phase === 'REWARD_EQUIP') {
+             startVacation();
+        } else {
+             setVacationLog(`パーツを「${pendingPart.name}」を格納庫へ送りました。`);
+        }
+    };
+
     // --- VACATION LOGIC ---
 
     const generateVacationEvents = () => {
@@ -792,23 +813,70 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }
     };
 
-    const handleHangarClick = (index: number) => {
-        if (swapSource === null) {
-            setSwapSource(index);
+    const handleHangarAction = (loc: 'SHIP' | 'INV', idx: number) => {
+        if (!hangarSelection) {
+            setHangarSelection({ loc, idx });
             audioService.playSound('select');
-        } else {
-            if (swapSource === index) {
-                setSwapSource(null);
+            return;
+        }
+
+        // If clicking same slot, deselect
+        if (hangarSelection.loc === loc && hangarSelection.idx === idx) {
+            setHangarSelection(null);
+            return;
+        }
+
+        const newPlayer = { ...player };
+        const parts = [...newPlayer.parts];
+        const inventory = [...newPlayer.partInventory];
+
+        const sourcePart = hangarSelection.loc === 'SHIP' ? parts[hangarSelection.idx] : inventory[hangarSelection.idx];
+        const targetPart = loc === 'SHIP' ? parts[idx] : inventory[idx];
+
+        // Swap Logic
+        if (hangarSelection.loc === 'SHIP' && loc === 'SHIP') {
+            // Ship <-> Ship
+            parts[hangarSelection.idx] = targetPart;
+            parts[idx] = sourcePart;
+        } else if (hangarSelection.loc === 'INV' && loc === 'INV') {
+            // Inv <-> Inv
+            inventory[hangarSelection.idx] = targetPart;
+            inventory[idx] = sourcePart;
+        } else if (hangarSelection.loc === 'INV' && loc === 'SHIP') {
+            // Equip: Inv -> Ship
+            parts[idx] = sourcePart;
+            
+            if (targetPart.type === 'EMPTY') {
+                inventory.splice(hangarSelection.idx, 1);
             } else {
-                // Swap
-                const newParts = [...player.parts];
-                const temp = newParts[swapSource];
-                newParts[swapSource] = newParts[index];
-                newParts[index] = temp;
-                setPlayer(prev => ({ ...prev, parts: newParts }));
-                setSwapSource(null);
-                audioService.playSound('buff');
+                inventory[hangarSelection.idx] = targetPart;
             }
+        } else if (hangarSelection.loc === 'SHIP' && loc === 'INV') {
+            // Unequip/Swap: Ship -> Inv
+            if (sourcePart.type === 'EMPTY') {
+                setHangarSelection(null);
+                return;
+            }
+            parts[hangarSelection.idx] = targetPart;
+            inventory[idx] = sourcePart;
+        }
+        
+        setPlayer({ ...newPlayer, parts, partInventory: inventory });
+        setHangarSelection(null);
+        audioService.playSound('buff');
+    };
+
+    const handleUnequip = () => {
+        if (hangarSelection && hangarSelection.loc === 'SHIP') {
+            const newPlayer = { ...player };
+            const part = newPlayer.parts[hangarSelection.idx];
+            if (part.type !== 'EMPTY') {
+                newPlayer.parts[hangarSelection.idx] = createEmptyPart(`empty_${Date.now()}`);
+                newPlayer.partInventory.push(part);
+                setPlayer(newPlayer);
+                audioService.playSound('select');
+            }
+            setHangarSelection(null);
         }
     };
 
@@ -998,40 +1066,79 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                      </div>
                  </div>
 
-                 <button onClick={handleDiscardReward} className="bg-red-600 hover:bg-red-500 text-white px-8 py-3 rounded-lg font-bold shadow-lg flex items-center">
-                     <Trash2 size={20} className="mr-2"/> 破棄して進む
-                 </button>
+                 <div className="flex gap-4">
+                     <button onClick={handleStorePart} className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-lg font-bold shadow-lg flex items-center">
+                         <Archive size={20} className="mr-2"/> 格納庫に保管
+                     </button>
+                     <button onClick={handleDiscardReward} className="bg-red-600 hover:bg-red-500 text-white px-8 py-3 rounded-lg font-bold shadow-lg flex items-center">
+                         <Trash2 size={20} className="mr-2"/> 破棄して進む
+                     </button>
+                 </div>
              </div>
          );
     }
 
     if (phase === 'HANGAR') {
         return (
-            <div className="w-full h-full bg-slate-900 text-white p-4 font-mono flex flex-col items-center relative">
+            <div className="w-full h-full bg-slate-900 text-white p-4 font-mono flex flex-col items-center relative overflow-hidden">
                 <RenderTooltip />
-                <div className="text-center mb-4 mt-2">
+                <div className="text-center mb-4 mt-2 shrink-0">
                     <h2 className="text-2xl font-bold text-orange-400 mb-2 flex items-center justify-center"><Settings className="mr-2"/> 機体改造 (Hangar)</h2>
-                    <p className="text-sm text-gray-300">パーツをタップして入れ替える場所を選択してください</p>
+                    <p className="text-sm text-gray-300">船と格納庫のパーツを入れ替えます</p>
                 </div>
 
-                <div className="bg-black/40 p-6 rounded-xl border-4 border-orange-700/50 mb-8 shadow-2xl relative">
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-orange-800 text-orange-100 text-xs px-2 py-0.5 rounded">FRONT</div>
-                    <div className="grid grid-cols-3 gap-3">
-                        {player.parts.map((p, i) => (
-                            <div key={i} className="w-20 h-20 md:w-24 md:h-24">
-                                <ShipPartView 
-                                    part={p} 
-                                    onClick={() => handleHangarClick(i)} 
-                                    onLongPress={(p) => setTooltipPart(p)}
-                                    pendingReplace={swapSource === i}
-                                    highlight={swapSource !== null && swapSource !== i}
-                                />
+                <div className="flex-grow flex flex-col md:flex-row gap-8 w-full max-w-5xl overflow-hidden min-h-0">
+                    {/* Ship Grid */}
+                    <div className="flex-1 flex flex-col items-center bg-black/40 p-4 rounded-xl border-2 border-slate-700 overflow-y-auto">
+                        <div className="text-cyan-300 font-bold mb-4 flex items-center"><Send className="mr-2"/> SHIP</div>
+                        <div className="grid grid-cols-3 gap-3">
+                            {player.parts.map((p, i) => (
+                                <div key={i} className="w-20 h-20 md:w-24 md:h-24 relative">
+                                    <ShipPartView 
+                                        part={p} 
+                                        onClick={() => handleHangarAction('SHIP', i)} 
+                                        onLongPress={(p) => setTooltipPart(p)}
+                                        highlight={hangarSelection?.loc === 'SHIP' && hangarSelection.idx === i}
+                                    />
+                                    {hangarSelection?.loc === 'SHIP' && hangarSelection.idx === i && (
+                                        <div className="absolute inset-0 border-4 border-yellow-400 animate-pulse pointer-events-none rounded"></div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                        {hangarSelection?.loc === 'SHIP' && player.parts[hangarSelection.idx].type !== 'EMPTY' && (
+                             <button onClick={handleUnequip} className="mt-6 bg-red-800 hover:bg-red-700 text-white px-6 py-2 rounded font-bold text-sm border border-red-500 flex items-center">
+                                 <Download className="mr-2" size={16}/> 外す (Unequip)
+                             </button>
+                        )}
+                    </div>
+
+                    {/* Inventory */}
+                    <div className="flex-1 flex flex-col items-center bg-black/40 p-4 rounded-xl border-2 border-slate-700 overflow-y-auto custom-scrollbar">
+                        <div className="text-orange-300 font-bold mb-4 flex items-center"><Archive className="mr-2"/> INVENTORY</div>
+                        {player.partInventory.length === 0 ? (
+                            <div className="text-gray-500 italic mt-8">Empty</div>
+                        ) : (
+                            <div className="flex flex-wrap gap-3 justify-center">
+                                {player.partInventory.map((p, i) => (
+                                    <div key={i} className="w-20 h-20 md:w-24 md:h-24 relative">
+                                        <ShipPartView 
+                                            part={p} 
+                                            onClick={() => handleHangarAction('INV', i)} 
+                                            onLongPress={(p) => setTooltipPart(p)}
+                                            highlight={hangarSelection?.loc === 'INV' && hangarSelection.idx === i}
+                                        />
+                                        {hangarSelection?.loc === 'INV' && hangarSelection.idx === i && (
+                                            <div className="absolute inset-0 border-4 border-yellow-400 animate-pulse pointer-events-none rounded"></div>
+                                        )}
+                                    </div>
+                                ))}
                             </div>
-                        ))}
+                        )}
                     </div>
                 </div>
 
-                <button onClick={() => { setPhase('VACATION'); setSwapSource(null); }} className="bg-gray-600 hover:bg-gray-500 text-white px-8 py-3 rounded-lg font-bold shadow-lg flex items-center">
+                <button onClick={() => { setPhase('VACATION'); setHangarSelection(null); }} className="bg-gray-600 hover:bg-gray-500 text-white px-8 py-3 rounded-lg font-bold shadow-lg flex items-center mt-4 shrink-0">
                     <ArrowLeft size={20} className="mr-2"/> 休暇に戻る
                 </button>
             </div>
@@ -1075,10 +1182,15 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                         </div>
                                     ))}
                                 </div>
-
-                                <button onClick={() => setPendingPart(null)} className="w-full max-w-xs bg-gray-600 text-sm py-3 rounded hover:bg-gray-500 font-bold flex items-center justify-center shadow-lg">
-                                    <Trash2 size={16} className="mr-2"/> 破棄する
-                                </button>
+                                
+                                <div className="flex gap-4">
+                                    <button onClick={handleStorePart} className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg font-bold shadow-lg flex items-center">
+                                        <Archive size={20} className="mr-2"/> 保管
+                                    </button>
+                                    <button onClick={() => setPendingPart(null)} className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-500 font-bold flex items-center justify-center shadow-lg">
+                                        <Trash2 size={20} className="mr-2"/> 破棄
+                                    </button>
+                                </div>
                             </div>
                         ) : (
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pb-20">
@@ -1118,11 +1230,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     {/* Bottom Controls */}
                     <div className="md:w-80 flex flex-col gap-2 shrink-0">
                         <button 
-                            onClick={() => { setPhase('HANGAR'); setSwapSource(null); }} 
+                            onClick={() => { setPhase('HANGAR'); setHangarSelection(null); }} 
                             disabled={!!pendingPart}
                             className={`w-full py-3 rounded-lg font-bold text-md shadow-lg flex items-center justify-center border-2 border-orange-700/50 ${!!pendingPart ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-slate-700 hover:bg-slate-600 text-orange-300'}`}
                         >
-                            <Hammer className="mr-2" size={18}/> 機体改造 (配置変更)
+                            <Settings className="mr-2" size={18}/> 機体改造 (Hangar)
                         </button>
 
                         <div className="bg-slate-900 border border-slate-700 p-2 rounded h-20 md:h-24 overflow-y-auto text-xs text-cyan-200 font-mono custom-scrollbar shadow-inner">
