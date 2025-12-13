@@ -406,7 +406,7 @@ const ShipPartView: React.FC<{
     let totalPower = 0;
     const energySum = part.slots.reduce((sum, s) => sum + (s.value || 0), 0);
     
-    if (energySum > 0) {
+    if (energySum > 0 || (part.slots.length === 0)) { // Show power for amplifier even if slots empty (if it has base power)
         totalPower = Math.floor(energySum * part.multiplier);
         if (isFull) totalPower += part.basePower;
     }
@@ -641,7 +641,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     useEffect(() => {
         // Don't save on transient or terminal states immediately (though we clear on terminal)
-        // We clear save on GAME_OVER or VICTORY (but Victory can transition to endless, handled manually)
         if (phase === 'GAME_OVER') {
             storageService.clearPaperPlaneState();
         } else if (phase !== 'TUTORIAL') {
@@ -723,6 +722,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         
         // --- MODIFIED: Pool Reset & Initial Draw ---
         // Gather all resources (Hand + Discard + Deck)
+        // Note: Hand should be empty here if cleared properly in reward phase, but we include it for robustness.
         let allNumbers = [...pool.genNumbers, ...pool.coolNumbers, ...hand.map(c => c.value)];
         let allColors = [...pool.genColors, ...pool.coolColors, ...hand.map(c => c.color)];
 
@@ -907,10 +907,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setAnimating(true);
         setSelectedCardId(null);
         
-        // Modified: Hand is NOT discarded at end of turn to allow saving
-        // hand.forEach(c => recycleCard(c));
-        // setHand([]);
-
         // --- PRE-CALCULATION PHASE ---
         const clashData: ClashRowData[] = [];
         let tempEnemyHp = enemy.hp;
@@ -1102,7 +1098,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             }));
         }
 
-        // Cleanup
+        // Cleanup: Clear part slots
         setPlayer(prev => ({ 
             ...prev, 
             parts: prev.parts.map(p => ({...p, slots: p.slots.map(s => ({...s, value: null})) })) 
@@ -1117,6 +1113,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             audioService.playSound('win');
             if (stage === FINAL_STAGE_NORMAL && !isEndless) {
                 setPhase('VICTORY');
+                handlePhaseComplete(true); // Victory case, clear hand too
             } else {
                 setupRewardPhase();
             }
@@ -1137,6 +1134,16 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setEarnedCoins(coins);
         setPlayer(p => ({...p, starCoins: p.starCoins + coins}));
         
+        // --- FIX: Consolidate Pool & Clear Hand ---
+        // Ensure that any cards currently in hand are returned to the pool (cool pile) so they are available next battle/vacation.
+        setPool(current => ({
+            ...current,
+            coolNumbers: [...current.coolNumbers, ...hand.map(c => c.value)],
+            coolColors: [...current.coolColors, ...hand.map(c => c.color)]
+        }));
+        setHand([]);
+        // -------------------------------------------
+
         const opts: ShipPart[] = [];
         const pool = [...PART_TEMPLATES]; // Copy to allow splicing for unique selection
 
@@ -1462,6 +1469,18 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }
         setStage(s => s + 1);
         initBattle(stage + 1);
+    };
+
+    // Helper for clearing hand on final victory
+    const handlePhaseComplete = (isVictory: boolean = false) => {
+        if (isVictory) {
+            setPool(current => ({
+                ...current,
+                coolNumbers: [...current.coolNumbers, ...hand.map(c => c.value)],
+                coolColors: [...current.coolColors, ...hand.map(c => c.color)]
+            }));
+            setHand([]);
+        }
     };
 
     const activateEndlessMode = () => {
