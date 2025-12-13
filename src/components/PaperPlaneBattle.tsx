@@ -856,8 +856,20 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         if (part.type === 'EMPTY') { addLog("そこには何もありません"); return; }
         
-        // Find first empty COMPATIBLE slot
-        const slotIdx = part.slots.findIndex(s => s.value === null && isColorCompatible(card.color, s.req));
+        // Find best empty COMPATIBLE slot (Highest Requirement Rank first)
+        let slotIdx = -1;
+        let bestRank = -1;
+
+        part.slots.forEach((s, idx) => {
+            if (s.value === null && isColorCompatible(card.color, s.req)) {
+                const rank = getColorRank(s.req);
+                // Prioritize higher rank slots to save lower rank slots for weaker cards
+                if (rank > bestRank) {
+                    bestRank = rank;
+                    slotIdx = idx;
+                }
+            }
+        });
         
         if (slotIdx === -1) {
             if (part.slots.every(s => s.value !== null)) addLog("エネルギー充填完了しています");
