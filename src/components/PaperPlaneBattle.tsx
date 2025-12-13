@@ -33,6 +33,7 @@ interface ShipPart {
     multiplier: number; // Effect multiplier per energy
     basePower: number; // Flat bonus when activated (Full slots)
     hp: number; // Part HP (Visual mainly)
+    specialEffect?: 'RANK_UP'; // New special effect type
 }
 
 interface ShipState {
@@ -102,18 +103,20 @@ const createEmptyPart = (id: string): ShipPart => ({
 });
 
 const STARTING_PARTS_LAYOUT: ShipPart[] = [
-    // Row 0
-    { id: 'p0', type: 'CANNON', name: '連装キャノン', description: '装填されたエネルギーの合計値を攻撃力とします。フル装填でボーナス+2。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1, basePower: 2, hp: 10 },
+    // Row 0 (Top)
+    { id: 'p0', type: 'EMPTY', name: '空き', slots: [], multiplier: 0, basePower: 0, hp: 0 },
     { id: 'p1', type: 'EMPTY', name: '空き', slots: [], multiplier: 0, basePower: 0, hp: 0 },
-    { id: 'p2', type: 'ENGINE', name: '補助スラスター', description: 'エネルギー値がそのまま回避/燃料回復力になります。', slots: [{req:'BLUE', value:null}], multiplier: 1, basePower: 0, hp: 10 },
-    // Row 1
-    { id: 'p3', type: 'CANNON', name: '主砲', description: 'オレンジ以上のエネルギーが必要。装填値の1.5倍の威力。フル装填で+5。', slots: [{req:'ORANGE', value:null}, {req:'ANY', value:null}], multiplier: 1.5, basePower: 5, hp: 10 },
-    { id: 'p4', type: 'CANNON', name: '機関銃', description: '小型の機銃。装填値がそのまま威力に。フル装填+1。', slots: [{req:'ANY', value:null}], multiplier: 1, basePower: 1, hp: 10 },
-    { id: 'p5', type: 'EMPTY', name: '空き', slots: [], multiplier: 0, basePower: 0, hp: 0 },
-    // Row 2
-    { id: 'p6', type: 'CANNON', name: '連装キャノン', description: '装填されたエネルギーの合計値を攻撃力とします。フル装填でボーナス+2。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1, basePower: 2, hp: 10 },
+    { id: 'p2', type: 'CANNON', name: '軽量砲', description: '前方。白エネルギー1つで稼働。', slots: [{req:'WHITE', value:null}], multiplier: 1, basePower: 1, hp: 10 },
+    
+    // Row 1 (Center)
+    { id: 'p3', type: 'ENGINE', name: '増幅炉', description: '青以上のエネルギーで稼働。ランク+1のカードを即生成する。', slots: [{req:'BLUE', value:null}], multiplier: 0, basePower: 0, hp: 10, specialEffect: 'RANK_UP' },
+    { id: 'p4', type: 'EMPTY', name: '空き', slots: [], multiplier: 0, basePower: 0, hp: 0 },
+    { id: 'p5', type: 'CANNON', name: '連装砲', description: '前方。白エネルギー2つで稼働。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1, basePower: 2, hp: 10 },
+    
+    // Row 2 (Bottom)
+    { id: 'p6', type: 'EMPTY', name: '空き', slots: [], multiplier: 0, basePower: 0, hp: 0 },
     { id: 'p7', type: 'EMPTY', name: '空き', slots: [], multiplier: 0, basePower: 0, hp: 0 },
-    { id: 'p8', type: 'ENGINE', name: '補助スラスター', description: 'エネルギー値がそのまま回避/燃料回復力になります。', slots: [{req:'BLUE', value:null}], multiplier: 1, basePower: 0, hp: 10 },
+    { id: 'p8', type: 'CANNON', name: '軽量砲', description: '前方。白エネルギー1つで稼働。', slots: [{req:'WHITE', value:null}], multiplier: 1, basePower: 1, hp: 10 },
 ];
 
 const ENEMY_DATA = [
@@ -145,6 +148,7 @@ const PART_TEMPLATES: Omit<ShipPart, 'id'>[] = [
     { type: 'SHIELD', name: 'エネルギー盾', description: '高い防御力を発揮。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 5, hp: 15 },
     { type: 'ENGINE', name: '高機動スラスター', description: '回避率と燃料効率が高い。', slots: [{req:'BLUE', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 2, hp: 10 },
     { type: 'CANNON', name: '波動砲', description: 'オレンジ必須。超高火力。', slots: [{req:'ORANGE', value:null}, {req:'ORANGE', value:null}], multiplier: 2.0, basePower: 10, hp: 10 },
+    { type: 'ENGINE', name: '増幅炉', description: 'ランク+1のカードを生成する。', slots: [{req:'BLUE', value:null}], multiplier: 0, basePower: 0, hp: 10, specialEffect: 'RANK_UP' },
 ];
 
 // --- COMPONENTS ---
@@ -210,6 +214,9 @@ const ShipPartView: React.FC<{
     if (part.type === 'MISSILE') { icon = <Send size={14}/>; colorClass = 'bg-orange-900/60 border-orange-500/50'; textColor='text-orange-200'; }
     if (part.type === 'SHIELD') { icon = <Shield size={14}/>; colorClass = 'bg-blue-900/60 border-blue-500/50'; textColor='text-blue-200'; }
     
+    // Special highlight for generator
+    if (part.specialEffect === 'RANK_UP') { colorClass = 'bg-purple-900/60 border-purple-500/50'; textColor='text-purple-200'; icon = <Zap size={14}/>; }
+
     if (part.type === 'EMPTY') {
         return (
             <div 
@@ -265,6 +272,8 @@ const ShipPartView: React.FC<{
                         slotColor = 'bg-orange-900 border-orange-600';
                     } else if (slot.req === 'BLUE') {
                         slotColor = 'bg-blue-900 border-blue-600';
+                    } else if (slot.req === 'WHITE') {
+                        slotColor = 'bg-slate-200 border-slate-400';
                     }
                     
                     return (
@@ -459,8 +468,24 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         
         if (slotIdx === -1) {
             if (part.slots.every(s => s.value !== null)) addLog("エネルギー充填完了しています");
-            else addLog("色が合いません！(白<青<オレンジ)");
+            else addLog("色が合いません！");
             return;
+        }
+
+        // Special Effect: RANK_UP
+        if (part.specialEffect === 'RANK_UP') {
+            // Generate new card
+            const newValue = card.value + 1;
+            const newCard: EnergyCard = {
+                id: `e_gen_${Date.now()}`,
+                value: newValue,
+                color: card.color // Inherit color
+            };
+            setHand(prev => [...prev, newCard]);
+            addLog(`増幅！ランク${newValue}のカードを生成！`);
+            audioService.playSound('buff');
+            
+            // Note: The original card is consumed into the slot normally below
         }
 
         // Load
@@ -653,7 +678,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 slots: template.slots,
                 multiplier: template.multiplier * quality,
                 basePower: Math.floor(template.basePower * quality),
-                hp: 10
+                hp: 10,
+                specialEffect: template.specialEffect
             };
             opts.push(newPart);
         }
@@ -771,7 +797,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     slots: template.slots,
                     multiplier: template.multiplier * quality,
                     basePower: Math.floor(template.basePower * quality),
-                    hp: 10
+                    hp: 10,
+                    specialEffect: template.specialEffect
                 };
                 setPendingPart(newPart);
                 resultMsg = `「${newPart.name}」を獲得！交換するスロットを選んでください。`;
