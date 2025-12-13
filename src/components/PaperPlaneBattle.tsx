@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, AlertTriangle, RefreshCw, Layers, Crosshair, Skull, Heart, Battery, ChevronsRight, ChevronsLeft, Info, Check, Play, X, Box, Grid, Calendar, Hammer, ShoppingBag, Search, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2 } from 'lucide-react';
+import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, AlertTriangle, RefreshCw, Layers, Crosshair, Skull, Heart, Battery, ChevronsRight, ChevronsLeft, Info, Check, Play, X, Box, Grid, Calendar, Hammer, ShoppingBag, Search, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 
@@ -65,7 +65,7 @@ interface PoolState {
     coolColors: EnergyColor[];
 }
 
-type GamePhase = 'TUTORIAL' | 'SETUP' | 'BATTLE' | 'REWARD_SELECT' | 'REWARD_EQUIP' | 'VACATION' | 'GAME_OVER' | 'VICTORY';
+type GamePhase = 'TUTORIAL' | 'SETUP' | 'BATTLE' | 'REWARD_SELECT' | 'REWARD_EQUIP' | 'VACATION' | 'GAME_OVER' | 'VICTORY' | 'HANGAR';
 
 type VacationEventType = 'REPAIR' | 'PARTS' | 'ENERGY' | 'COIN' | 'TREASURE' | 'FUEL' | 'ENHANCE' | 'UNKNOWN' | 'SHOP' | 'MODIFY';
 
@@ -317,6 +317,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [vacationEvents, setVacationEvents] = useState<VacationEvent[]>([]);
     const [vacationLog, setVacationLog] = useState<string>("休暇を楽しんでください。");
     const [pendingPart, setPendingPart] = useState<ShipPart | null>(null); // Part waiting to be equipped
+    const [swapSource, setSwapSource] = useState<number | null>(null); // For Hangar swap
 
     // Reward State
     const [rewardOptions, setRewardOptions] = useState<ShipPart[]>([]);
@@ -786,6 +787,26 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }
     };
 
+    const handleHangarClick = (index: number) => {
+        if (swapSource === null) {
+            setSwapSource(index);
+            audioService.playSound('select');
+        } else {
+            if (swapSource === index) {
+                setSwapSource(null);
+            } else {
+                // Swap
+                const newParts = [...player.parts];
+                const temp = newParts[swapSource];
+                newParts[swapSource] = newParts[index];
+                newParts[index] = temp;
+                setPlayer(prev => ({ ...prev, parts: newParts }));
+                setSwapSource(null);
+                audioService.playSound('buff');
+            }
+        }
+    };
+
     const endVacation = () => {
         if (pendingPart) {
             setVacationLog("パーツ交換を完了するかキャンセルしてください！");
@@ -863,6 +884,27 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         );
     };
 
+    const RenderTooltip = () => {
+        if (!tooltipPart) return null;
+        return (
+            <div className="absolute inset-0 bg-black/80 z-[60] flex items-center justify-center p-4" onClick={() => setTooltipPart(null)}>
+                <div className="bg-slate-800 border-2 border-white p-6 rounded-lg max-w-sm w-full shadow-2xl relative" onClick={e => e.stopPropagation()}>
+                    <button onClick={() => setTooltipPart(null)} className="absolute top-2 right-2 text-gray-400 hover:text-white"><X size={24}/></button>
+                    <h3 className="text-xl font-bold text-yellow-400 mb-2 border-b border-gray-600 pb-2">{tooltipPart.name}</h3>
+                    <div className="text-sm text-gray-300 mb-4">{tooltipPart.description || "詳細なし"}</div>
+                    <div className="bg-black/40 p-2 rounded text-xs text-cyan-300 font-mono">
+                        <div>倍率: x{tooltipPart.multiplier}</div>
+                        <div>起動ボーナス: +{tooltipPart.basePower}</div>
+                        <div className="mt-2 text-gray-500">
+                            Output = (Energy * {tooltipPart.multiplier}) + {tooltipPart.basePower}(if full)
+                            {player.passivePower > 0 && <div className="text-purple-400">+ {player.passivePower} (Passive)</div>}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     // --- MAIN RENDER ---
 
     if (phase === 'TUTORIAL') {
@@ -889,14 +931,15 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     if (phase === 'REWARD_SELECT') {
          return (
-             <div className="w-full h-full bg-black/90 text-white p-4 flex flex-col items-center justify-center font-mono z-50">
+             <div className="w-full h-full bg-black/90 text-white p-4 flex flex-col items-center justify-center font-mono z-50 relative">
+                 <RenderTooltip />
                  <Trophy size={64} className="text-yellow-400 mb-4 animate-bounce"/>
                  <h2 className="text-4xl font-bold mb-4 text-white">VICTORY!</h2>
                  <div className="text-yellow-300 text-2xl font-bold mb-8 flex items-center bg-black/50 px-6 py-2 rounded-full border border-yellow-500">
                      <Star size={24} className="mr-2 fill-current"/> +{earnedCoins}
                  </div>
                  
-                 <p className="text-gray-300 mb-4">戦利品を選択してください</p>
+                 <p className="text-gray-300 mb-4">戦利品を選択してください (長押しで詳細)</p>
                  
                  <div className="flex flex-wrap gap-4 justify-center">
                      {rewardOptions.map((part, i) => (
@@ -906,7 +949,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             className="bg-slate-800 border-2 border-cyan-500 p-4 rounded-xl w-48 flex flex-col items-center cursor-pointer hover:scale-105 hover:bg-slate-700 transition-all shadow-lg group"
                          >
                              <div className="w-16 h-16 mb-2">
-                                 <ShipPartView part={part} />
+                                 <ShipPartView part={part} onLongPress={(p) => setTooltipPart(p)} />
                              </div>
                              <div className="font-bold text-cyan-300 mb-1">{part.name}</div>
                              <div className="text-xs text-gray-400 text-center h-10 overflow-hidden leading-tight">{part.description}</div>
@@ -920,17 +963,18 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     if (phase === 'REWARD_EQUIP') {
          return (
-             <div className="w-full h-full bg-slate-900 text-white p-4 font-mono flex flex-col items-center">
+             <div className="w-full h-full bg-slate-900 text-white p-4 font-mono flex flex-col items-center relative">
+                 <RenderTooltip />
                  <div className="text-center mb-6 mt-4">
                      <h2 className="text-2xl font-bold text-green-400 mb-2">パーツ換装</h2>
-                     <p className="text-sm text-gray-300">新しいパーツをセットする場所を選んでください</p>
+                     <p className="text-sm text-gray-300">新しいパーツをセットする場所を選んでください (長押しで詳細)</p>
                  </div>
 
                  {pendingPart && (
                      <div className="flex items-center gap-4 mb-8 bg-slate-800 p-3 rounded-lg border border-slate-600">
                          <div className="text-xs text-gray-400">NEW:</div>
                          <div className="w-20 h-20">
-                             <ShipPartView part={pendingPart} />
+                             <ShipPartView part={pendingPart} onLongPress={(p) => setTooltipPart(p)} />
                          </div>
                          <div className="text-left">
                              <div className="font-bold text-white">{pendingPart.name}</div>
@@ -943,7 +987,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                      <div className="grid grid-cols-3 gap-2">
                          {player.parts.map((p, i) => (
                              <div key={i} className="w-20 h-20" onClick={() => handlePartEquip(i)}>
-                                 <ShipPartView part={p} pendingReplace={true} />
+                                 <ShipPartView part={p} pendingReplace={true} onLongPress={(p) => setTooltipPart(p)} />
                              </div>
                          ))}
                      </div>
@@ -956,9 +1000,43 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
          );
     }
 
+    if (phase === 'HANGAR') {
+        return (
+            <div className="w-full h-full bg-slate-900 text-white p-4 font-mono flex flex-col items-center relative">
+                <RenderTooltip />
+                <div className="text-center mb-4 mt-2">
+                    <h2 className="text-2xl font-bold text-orange-400 mb-2 flex items-center justify-center"><Settings className="mr-2"/> 機体改造 (Hangar)</h2>
+                    <p className="text-sm text-gray-300">パーツをタップして入れ替える場所を選択してください</p>
+                </div>
+
+                <div className="bg-black/40 p-6 rounded-xl border-4 border-orange-700/50 mb-8 shadow-2xl relative">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-orange-800 text-orange-100 text-xs px-2 py-0.5 rounded">FRONT</div>
+                    <div className="grid grid-cols-3 gap-3">
+                        {player.parts.map((p, i) => (
+                            <div key={i} className="w-20 h-20 md:w-24 md:h-24">
+                                <ShipPartView 
+                                    part={p} 
+                                    onClick={() => handleHangarClick(i)} 
+                                    onLongPress={(p) => setTooltipPart(p)}
+                                    pendingReplace={swapSource === i}
+                                    highlight={swapSource !== null && swapSource !== i}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <button onClick={() => { setPhase('VACATION'); setSwapSource(null); }} className="bg-gray-600 hover:bg-gray-500 text-white px-8 py-3 rounded-lg font-bold shadow-lg flex items-center">
+                    <ArrowLeft size={20} className="mr-2"/> 休暇に戻る
+                </button>
+            </div>
+        );
+    }
+
     if (phase === 'VACATION') {
         return (
             <div className="w-full h-full bg-slate-900 text-white p-2 md:p-4 font-mono relative overflow-hidden flex flex-col">
+                <RenderTooltip />
                 <div className="flex justify-between items-center mb-2 bg-slate-800 p-3 rounded-lg shadow-lg shrink-0">
                     <h2 className="text-lg md:text-2xl font-bold flex items-center text-cyan-300"><Calendar className="mr-2" size={20}/> <span className="hidden md:inline">休暇モード</span><span className="md:hidden">休暇</span></h2>
                     <div className="flex gap-2 md:gap-4 text-sm">
@@ -981,14 +1059,14 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             <div className="bg-slate-800 border-2 border-green-500 p-4 rounded-lg animate-in zoom-in flex flex-col items-center justify-center min-h-full">
                                 <div className="text-center font-bold text-green-400 mb-2 text-lg">NEW PARTS!</div>
                                 <div className="w-24 h-24 mb-4">
-                                    <ShipPartView part={pendingPart} />
+                                    <ShipPartView part={pendingPart} onLongPress={(p) => setTooltipPart(p)} />
                                 </div>
                                 <div className="text-sm text-center mb-4">入れ替えるスロットを選択してください</div>
                                 
                                 <div className="grid grid-cols-3 gap-2 mb-6 p-3 bg-black/50 rounded border border-slate-600">
                                     {player.parts.map((p, i) => (
                                         <div key={i} className="w-16 h-16 md:w-20 md:h-20" onClick={() => handlePartEquip(i)}>
-                                            <ShipPartView part={p} pendingReplace={true} />
+                                            <ShipPartView part={p} pendingReplace={true} onLongPress={(p) => setTooltipPart(p)} />
                                         </div>
                                     ))}
                                 </div>
@@ -1034,7 +1112,15 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                     {/* Bottom Controls */}
                     <div className="md:w-80 flex flex-col gap-2 shrink-0">
-                        <div className="bg-slate-900 border border-slate-700 p-2 rounded h-20 md:h-32 overflow-y-auto text-xs text-cyan-200 font-mono custom-scrollbar shadow-inner">
+                        <button 
+                            onClick={() => { setPhase('HANGAR'); setSwapSource(null); }} 
+                            disabled={!!pendingPart}
+                            className={`w-full py-3 rounded-lg font-bold text-md shadow-lg flex items-center justify-center border-2 border-orange-700/50 ${!!pendingPart ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-slate-700 hover:bg-slate-600 text-orange-300'}`}
+                        >
+                            <Hammer className="mr-2" size={18}/> 機体改造 (配置変更)
+                        </button>
+
+                        <div className="bg-slate-900 border border-slate-700 p-2 rounded h-20 md:h-24 overflow-y-auto text-xs text-cyan-200 font-mono custom-scrollbar shadow-inner">
                             {vacationLog}
                         </div>
 
