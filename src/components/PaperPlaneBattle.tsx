@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, AlertTriangle, RefreshCw, Layers, Crosshair, Skull, Heart, Battery, ChevronsRight, ChevronsLeft, Info, Check, Play, X, Box, Grid, Calendar, Hammer, ShoppingBag, Search, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight } from 'lucide-react';
+import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, AlertTriangle, RefreshCw, Layers, Crosshair, Skull, Heart, Battery, ChevronsRight, ChevronsLeft, Info, Check, Play, X, Box, Grid, Calendar, Hammer, ShoppingBag, Search, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2 } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 
@@ -64,7 +65,7 @@ interface PoolState {
     coolColors: EnergyColor[];
 }
 
-type GamePhase = 'TUTORIAL' | 'SETUP' | 'BATTLE' | 'VACATION' | 'GAME_OVER' | 'VICTORY';
+type GamePhase = 'TUTORIAL' | 'SETUP' | 'BATTLE' | 'REWARD_SELECT' | 'REWARD_EQUIP' | 'VACATION' | 'GAME_OVER' | 'VICTORY';
 
 type VacationEventType = 'REPAIR' | 'PARTS' | 'ENERGY' | 'COIN' | 'TREASURE' | 'FUEL' | 'ENHANCE' | 'UNKNOWN' | 'SHOP' | 'MODIFY';
 
@@ -317,6 +318,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [vacationLog, setVacationLog] = useState<string>("休暇を楽しんでください。");
     const [pendingPart, setPendingPart] = useState<ShipPart | null>(null); // Part waiting to be equipped
 
+    // Reward State
+    const [rewardOptions, setRewardOptions] = useState<ShipPart[]>([]);
+    const [earnedCoins, setEarnedCoins] = useState(0);
+
     // --- GAME LOGIC ---
 
     const addLog = (msg: string) => setLogs(prev => [msg, ...prev.slice(0, 4)]);
@@ -424,7 +429,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     const handlePartClick = (partIndex: number) => {
-        if (phase === 'VACATION') {
+        if (phase === 'VACATION' || phase === 'REWARD_EQUIP') {
             handlePartEquip(partIndex);
             return;
         }
@@ -606,7 +611,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             if (stage === 12) {
                 setPhase('VICTORY');
             } else {
-                startVacation();
+                setupRewardPhase();
             }
         } else {
             setTurn(prev => prev + 1);
@@ -617,6 +622,45 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             }
             drawEnergy(5);
         }
+    };
+
+    // --- REWARD LOGIC ---
+    const setupRewardPhase = () => {
+        const coins = 50 + (stage * 10) + Math.floor(Math.random() * 20);
+        setEarnedCoins(coins);
+        setPlayer(p => ({...p, starCoins: p.starCoins + coins}));
+        
+        const opts: ShipPart[] = [];
+        for(let i=0; i<2; i++){
+            const template = PART_TEMPLATES[Math.floor(Math.random()*PART_TEMPLATES.length)];
+            let quality = Math.random() < 0.2 ? 1.5 : 1.0;
+            const newPart: ShipPart = {
+                id: `rew_p_${Date.now()}_${i}`,
+                type: template.type,
+                name: template.name + (quality > 1 ? '+' : ''),
+                description: template.description,
+                slots: template.slots,
+                multiplier: template.multiplier * quality,
+                basePower: Math.floor(template.basePower * quality),
+                hp: 10
+            };
+            opts.push(newPart);
+        }
+        setRewardOptions(opts);
+        setPhase('REWARD_SELECT');
+        audioService.playSound('win');
+    };
+
+    const handleRewardSelect = (part: ShipPart) => {
+        setPendingPart(part);
+        setPhase('REWARD_EQUIP');
+        audioService.playSound('select');
+    };
+
+    const handleDiscardReward = () => {
+        setPendingPart(null);
+        startVacation();
+        audioService.playSound('select');
     };
 
     // --- VACATION LOGIC ---
@@ -733,8 +777,13 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         
         setPlayer(prev => ({ ...prev, parts: newParts }));
         setPendingPart(null);
-        setVacationLog(`パーツを「${pendingPart.name}」に換装しました！`);
         audioService.playSound('buff');
+
+        if (phase === 'REWARD_EQUIP') {
+             startVacation();
+        } else {
+             setVacationLog(`パーツを「${pendingPart.name}」に換装しました！`);
+        }
     };
 
     const endVacation = () => {
@@ -836,6 +885,75 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 <button onClick={onBack} className="mt-4 text-gray-500 hover:text-white underline text-xs">戻る</button>
             </div>
         );
+    }
+
+    if (phase === 'REWARD_SELECT') {
+         return (
+             <div className="w-full h-full bg-black/90 text-white p-4 flex flex-col items-center justify-center font-mono z-50">
+                 <Trophy size={64} className="text-yellow-400 mb-4 animate-bounce"/>
+                 <h2 className="text-4xl font-bold mb-4 text-white">VICTORY!</h2>
+                 <div className="text-yellow-300 text-2xl font-bold mb-8 flex items-center bg-black/50 px-6 py-2 rounded-full border border-yellow-500">
+                     <Star size={24} className="mr-2 fill-current"/> +{earnedCoins}
+                 </div>
+                 
+                 <p className="text-gray-300 mb-4">戦利品を選択してください</p>
+                 
+                 <div className="flex flex-wrap gap-4 justify-center">
+                     {rewardOptions.map((part, i) => (
+                         <div 
+                            key={i} 
+                            onClick={() => handleRewardSelect(part)}
+                            className="bg-slate-800 border-2 border-cyan-500 p-4 rounded-xl w-48 flex flex-col items-center cursor-pointer hover:scale-105 hover:bg-slate-700 transition-all shadow-lg group"
+                         >
+                             <div className="w-16 h-16 mb-2">
+                                 <ShipPartView part={part} />
+                             </div>
+                             <div className="font-bold text-cyan-300 mb-1">{part.name}</div>
+                             <div className="text-xs text-gray-400 text-center h-10 overflow-hidden leading-tight">{part.description}</div>
+                             <button className="mt-2 bg-cyan-600 px-4 py-1 rounded text-xs font-bold group-hover:bg-cyan-500">獲得</button>
+                         </div>
+                     ))}
+                 </div>
+             </div>
+         );
+    }
+
+    if (phase === 'REWARD_EQUIP') {
+         return (
+             <div className="w-full h-full bg-slate-900 text-white p-4 font-mono flex flex-col items-center">
+                 <div className="text-center mb-6 mt-4">
+                     <h2 className="text-2xl font-bold text-green-400 mb-2">パーツ換装</h2>
+                     <p className="text-sm text-gray-300">新しいパーツをセットする場所を選んでください</p>
+                 </div>
+
+                 {pendingPart && (
+                     <div className="flex items-center gap-4 mb-8 bg-slate-800 p-3 rounded-lg border border-slate-600">
+                         <div className="text-xs text-gray-400">NEW:</div>
+                         <div className="w-20 h-20">
+                             <ShipPartView part={pendingPart} />
+                         </div>
+                         <div className="text-left">
+                             <div className="font-bold text-white">{pendingPart.name}</div>
+                             <div className="text-xs text-gray-400">{pendingPart.description}</div>
+                         </div>
+                     </div>
+                 )}
+
+                 <div className="bg-black/40 p-4 rounded-xl border-2 border-slate-700 mb-8">
+                     <div className="grid grid-cols-3 gap-2">
+                         {player.parts.map((p, i) => (
+                             <div key={i} className="w-20 h-20" onClick={() => handlePartEquip(i)}>
+                                 <ShipPartView part={p} pendingReplace={true} />
+                             </div>
+                         ))}
+                     </div>
+                 </div>
+
+                 <button onClick={handleDiscardReward} className="bg-red-600 hover:bg-red-500 text-white px-8 py-3 rounded-lg font-bold shadow-lg flex items-center">
+                     <Trash2 size={20} className="mr-2"/> 破棄して進む
+                 </button>
+             </div>
+         );
     }
 
     if (phase === 'VACATION') {
