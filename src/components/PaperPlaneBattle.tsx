@@ -833,9 +833,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setAnimating(true);
         setSelectedCardId(null);
         
-        // Discard remaining hand
-        hand.forEach(c => recycleCard(c));
-        setHand([]);
+        // Modified: Hand is NOT discarded at end of turn to allow saving
+        // hand.forEach(c => recycleCard(c));
+        // setHand([]);
 
         // --- PRE-CALCULATION PHASE ---
         const clashData: ClashRowData[] = [];
