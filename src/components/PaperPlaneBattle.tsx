@@ -682,9 +682,38 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }));
 
         setTurn(1);
-        setHand([]);
+        
+        // --- MODIFIED: Pool Reset & Initial Draw ---
+        // Gather all resources (Hand + Discard + Deck)
+        let allNumbers = [...pool.genNumbers, ...pool.coolNumbers, ...hand.map(c => c.value)];
+        let allColors = [...pool.genColors, ...pool.coolColors, ...hand.map(c => c.color)];
+
+        const initialHand: EnergyCard[] = [];
+        const drawCount = 5;
+
+        // Shuffle
+        allNumbers.sort(() => Math.random() - 0.5);
+        allColors.sort(() => Math.random() - 0.5);
+
+        for (let i = 0; i < drawCount; i++) {
+            if (allNumbers.length > 0 && allColors.length > 0) {
+                // Pop from end for simplicity/performance or random index
+                const val = allNumbers.pop()!;
+                const col = allColors.pop()!;
+                initialHand.push({ id: `e_init_${Date.now()}_${i}`, value: val, color: col });
+            }
+        }
+
+        setPool({
+            genNumbers: allNumbers,
+            genColors: allColors,
+            coolNumbers: [],
+            coolColors: []
+        });
+        setHand(initialHand);
+        // -------------------------------------------
+
         generateEnemyIntents(1, eParts, stageNum); 
-        drawEnergy(5); // Initial draw
         setPhase('BATTLE');
         addLog(`バトル開始！ 敵: ${template.name}`);
         audioService.playBGM('battle');
