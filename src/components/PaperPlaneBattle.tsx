@@ -71,7 +71,7 @@ interface PoolState {
 
 type GamePhase = 'TUTORIAL' | 'SETUP' | 'BATTLE' | 'REWARD_SELECT' | 'REWARD_EQUIP' | 'VACATION' | 'GAME_OVER' | 'VICTORY' | 'HANGAR';
 
-type VacationEventType = 'REPAIR' | 'PARTS' | 'ENERGY' | 'COIN' | 'TREASURE' | 'FUEL' | 'ENHANCE' | 'UNKNOWN' | 'SHOP' | 'MODIFY';
+type VacationEventType = 'REPAIR' | 'PARTS' | 'ENERGY' | 'COIN' | 'TREASURE' | 'FUEL' | 'ENHANCE' | 'UNKNOWN' | 'SHOP' | 'MODIFY' | 'TRAINING';
 
 interface VacationEvent {
     id: string;
@@ -79,6 +79,7 @@ interface VacationEvent {
     name: string;
     description: string;
     cost: number; // Days
+    coinCost?: number; // Star Coins (Optional)
     tier: 1 | 2 | 3; // Value tier
 }
 
@@ -181,6 +182,7 @@ const ENEMY_DATA = [
 ];
 
 const VACATION_EVENTS_DB: Omit<VacationEvent, 'id'>[] = [
+    // Standard Events (Day Cost)
     { type: 'REPAIR', name: '応急修理', description: 'HPを10回復する。', cost: 1, tier: 1 },
     { type: 'REPAIR', name: 'ドック入り', description: 'HPを全回復し、最大HPを+5する。', cost: 3, tier: 3 },
     { type: 'FUEL', name: '燃料補給', description: '燃料を最大まで回復。', cost: 1, tier: 1 },
@@ -192,8 +194,13 @@ const VACATION_EVENTS_DB: Omit<VacationEvent, 'id'>[] = [
     { type: 'COIN', name: 'アルバイト', description: 'スターコインを50獲得。', cost: 1, tier: 1 },
     { type: 'COIN', name: '臨時ボーナス', description: 'スターコインを150獲得。', cost: 2, tier: 2 },
     { type: 'TREASURE', name: '謎の宝箱', description: '永続的な攻撃力ボーナスを得る。', cost: 3, tier: 3 },
-    { type: 'ENHANCE', name: 'チューニング', description: 'HP上限+10。', cost: 2, tier: 2 },
     { type: 'UNKNOWN', name: '謎のイベント', description: '何が起こるかわからない...', cost: 2, tier: 2 },
+    
+    // Coin Spender Events (0 Days, Coin Cost)
+    { type: 'SHOP', name: '闇市', description: '高品質なパーツを裏ルートで入手する。', cost: 0, coinCost: 150, tier: 3 },
+    { type: 'ENHANCE', name: '特別改造', description: '船体を強化。最大HP+20。', cost: 0, coinCost: 100, tier: 2 },
+    { type: 'TRAINING', name: '極秘訓練', description: 'パッシブパワー(全出力)+1。', cost: 0, coinCost: 200, tier: 3 },
+    { type: 'FUEL', name: 'プレミアム燃料', description: '最大燃料+2、全回復。', cost: 0, coinCost: 80, tier: 2 },
 ];
 
 const PART_TEMPLATES: Omit<ShipPart, 'id'>[] = [
@@ -1103,6 +1110,41 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         startVacation();
         audioService.playSound('select');
     };
+    
+    // NEW: Reroll Rewards
+    const handleRerollRewards = () => {
+        if (player.starCoins < 50) {
+            audioService.playSound('wrong');
+            return;
+        }
+        setPlayer(p => ({...p, starCoins: p.starCoins - 50}));
+        
+        // Regenerate Options
+        const opts: ShipPart[] = [];
+        const pool = [...PART_TEMPLATES];
+
+        for(let i=0; i<2; i++){
+            if (pool.length === 0) break;
+            const idx = Math.floor(Math.random() * pool.length);
+            const template = pool[idx];
+            pool.splice(idx, 1);
+            let quality = Math.random() < 0.2 ? 1.5 : 1.0;
+            const newPart: ShipPart = {
+                id: `rew_p_${Date.now()}_reroll_${i}`,
+                type: template.type,
+                name: template.name + (quality > 1 ? '+' : ''),
+                description: template.description,
+                slots: template.slots,
+                multiplier: template.multiplier * quality,
+                basePower: Math.floor(template.basePower * quality),
+                hp: 10,
+                specialEffect: template.specialEffect
+            };
+            opts.push(newPart);
+        }
+        setRewardOptions(opts);
+        audioService.playSound('select');
+    };
 
     const handleStorePart = () => {
         if (!pendingPart) return;
@@ -1145,13 +1187,29 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     const executeVacationEvent = (event: VacationEvent) => {
+        // Coin Cost Check
+        if (event.coinCost && event.coinCost > 0) {
+            if (player.starCoins < event.coinCost) {
+                setVacationLog(`スターコインが足りません！ (${event.coinCost}必要)`);
+                audioService.playSound('wrong');
+                return;
+            }
+        }
+        
+        // Day Cost Check
         if (player.vacationDays < event.cost) {
             setVacationLog("休暇日数が足りません！");
             audioService.playSound('wrong');
             return;
         }
 
-        setPlayer(prev => ({ ...prev, vacationDays: prev.vacationDays - event.cost }));
+        // Deduct
+        setPlayer(prev => ({ 
+            ...prev, 
+            vacationDays: prev.vacationDays - event.cost,
+            starCoins: prev.starCoins - (event.coinCost || 0)
+        }));
+        
         let resultMsg = "";
         
         // Logic Switch
@@ -1197,8 +1255,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 audioService.playSound('win');
                 break;
             case 'PARTS':
+            case 'SHOP': // Shop gives a part (simulated)
                 const template = PART_TEMPLATES[Math.floor(Math.random() * PART_TEMPLATES.length)];
                 let quality = event.tier === 3 ? 1.5 : 1.0;
+                if (event.type === 'SHOP') quality = 1.3; // Shop items are decent
                 const newPart: ShipPart = {
                     id: `new_p_${Date.now()}`,
                     type: template.type,
@@ -1211,12 +1271,17 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     specialEffect: template.specialEffect
                 };
                 setPendingPart(newPart);
-                resultMsg = `「${newPart.name}」を獲得！交換するスロットを選んでください。`;
+                resultMsg = `「${newPart.name}」を入手！交換するスロットを選んでください。`;
                 audioService.playSound('select');
                 break;
             case 'ENHANCE':
-                setPlayer(prev => ({ ...prev, maxHp: prev.maxHp + 10 }));
-                resultMsg = "船体を強化しました！HP上限+10";
+                setPlayer(prev => ({ ...prev, maxHp: prev.maxHp + 20 })); // Better Enhance for paid
+                resultMsg = "特別改造完了！HP上限+20";
+                audioService.playSound('buff');
+                break;
+            case 'TRAINING':
+                setPlayer(prev => ({ ...prev, passivePower: prev.passivePower + 1 }));
+                resultMsg = "厳しい訓練の成果！全出力+1";
                 audioService.playSound('buff');
                 break;
             case 'UNKNOWN':
@@ -1235,6 +1300,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }
 
         setVacationLog(resultMsg);
+        // Only remove if it was not a persistent type? No, remove all used events for now.
         setVacationEvents(prev => prev.filter(e => e.id !== event.id));
     };
 
@@ -1454,7 +1520,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         return (
             <div className="w-full h-full bg-slate-900 text-white p-8 flex flex-col items-center justify-center font-mono">
                 <Send size={64} className="text-cyan-400 mb-4 animate-bounce"/>
-                <h1 className="text-4xl font-bold mb-4">紙飛行機バトル v2.6</h1>
+                <h1 className="text-4xl font-bold mb-4">紙飛行機バトル v2.7</h1>
                 <div className="max-w-md text-sm text-gray-300 space-y-2 mb-8 bg-slate-800 p-4 rounded border border-slate-600">
                     <p>・機体は3x3のモジュールで構成されています。</p>
                     <p>・エネルギーの色には相性があります。</p>
@@ -1480,8 +1546,18 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                  <RenderTooltip />
                  <Trophy size={64} className="text-yellow-400 mb-4 animate-bounce"/>
                  <h2 className="text-4xl font-bold mb-4 text-white">VICTORY!</h2>
-                 <div className="text-yellow-300 text-2xl font-bold mb-8 flex items-center bg-black/50 px-6 py-2 rounded-full border border-yellow-500">
+                 <div className="text-yellow-300 text-2xl font-bold mb-4 flex items-center bg-black/50 px-6 py-2 rounded-full border border-yellow-500">
                      <Star size={24} className="mr-2 fill-current"/> +{earnedCoins}
+                 </div>
+                 
+                 <div className="flex gap-4 mb-8">
+                     <button 
+                        onClick={handleRerollRewards} 
+                        disabled={player.starCoins < 50} 
+                        className={`bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded font-bold flex items-center transition-colors border border-indigo-400 ${player.starCoins < 50 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                     >
+                         <RefreshCw className="mr-2" size={16}/> リロール (50 Coin)
+                     </button>
                  </div>
                  
                  <p className="text-gray-300 mb-4">戦利品を選択してください (長押しで詳細)</p>
@@ -1683,13 +1759,25 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     <button 
                                         key={event.id}
                                         onClick={() => executeVacationEvent(event)}
-                                        disabled={player.vacationDays < event.cost}
+                                        disabled={player.vacationDays < event.cost || (event.coinCost ? player.starCoins < event.coinCost : false)}
                                         className={`
                                             bg-slate-800 border-2 rounded-xl p-3 flex flex-col items-center text-center relative group transition-all min-h-[120px] justify-between
-                                            ${player.vacationDays < event.cost ? 'border-gray-700 opacity-50 cursor-not-allowed' : 'border-slate-600 hover:border-cyan-400 hover:bg-slate-700 hover:-translate-y-1 shadow-lg'}
+                                            ${(player.vacationDays < event.cost || (event.coinCost ? player.starCoins < event.coinCost : false)) ? 'border-gray-700 opacity-50 cursor-not-allowed' : 'border-slate-600 hover:border-cyan-400 hover:bg-slate-700 hover:-translate-y-1 shadow-lg'}
                                         `}
                                     >
-                                        <div className="absolute top-2 right-2 text-[10px] font-bold bg-black/50 px-2 py-0.5 rounded text-orange-300 border border-orange-500/30">{event.cost}日</div>
+                                        <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
+                                            {event.cost > 0 && (
+                                                <div className="text-[10px] font-bold bg-black/50 px-2 py-0.5 rounded text-orange-300 border border-orange-500/30">
+                                                    {event.cost}日
+                                                </div>
+                                            )}
+                                            {event.coinCost && event.coinCost > 0 && (
+                                                <div className="text-[10px] font-bold bg-black/50 px-2 py-0.5 rounded text-yellow-300 border border-yellow-500/30 flex items-center gap-1">
+                                                    <Star size={8} fill="currentColor"/> {event.coinCost}
+                                                </div>
+                                            )}
+                                        </div>
+
                                         <div className="mt-4 mb-2 p-2 bg-black/30 rounded-full border border-slate-600">
                                             {event.type === 'REPAIR' && <Hammer size={20} className="text-green-400"/>}
                                             {event.type === 'FUEL' && <Fuel size={20} className="text-orange-400"/>}
@@ -1701,6 +1789,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                             {event.type === 'ENHANCE' && <RefreshCw size={20} className="text-pink-400"/>}
                                             {event.type === 'SHOP' && <ShoppingBag size={20} className="text-blue-400"/>}
                                             {event.type === 'MODIFY' && <Palette size={20} className="text-indigo-400"/>}
+                                            {event.type === 'TRAINING' && <Activity size={20} className="text-red-400"/>}
                                         </div>
                                         <div className="w-full">
                                             <div className="font-bold text-sm mb-1 truncate text-cyan-100">{event.name}</div>
