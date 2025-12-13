@@ -472,6 +472,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             return;
         }
 
+        // Prepare new hand state locally to avoid state update race conditions
+        let currentHandList = [...hand];
+
         // Special Effect: RANK_UP
         if (part.specialEffect === 'RANK_UP') {
             // Generate new card
@@ -481,11 +484,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 value: newValue,
                 color: card.color // Inherit color
             };
-            setHand(prev => [...prev, newCard]);
+            currentHandList.push(newCard); // Add new card to the list
             addLog(`増幅！ランク${newValue}のカードを生成！`);
             audioService.playSound('buff');
-            
-            // Note: The original card is consumed into the slot normally below
         }
 
         // Load
@@ -496,13 +497,16 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         
         setPlayer(prev => ({ ...prev, parts: newParts }));
         
-        // Remove card, Recycle
-        const newHand = [...hand];
-        newHand.splice(cardIndex, 1);
-        setHand(newHand);
+        // Remove original card from hand
+        // Note: cardIndex is based on original 'hand'. 
+        // currentHandList is 'hand' + potential new card at end.
+        // So cardIndex is valid removal index.
+        currentHandList.splice(cardIndex, 1);
+        
+        setHand(currentHandList);
         recycleCard(card);
         setSelectedCardId(null);
-        audioService.playSound('buff');
+        if (part.specialEffect !== 'RANK_UP') audioService.playSound('buff');
     };
 
     const handleMove = (dir: -1 | 1) => {
