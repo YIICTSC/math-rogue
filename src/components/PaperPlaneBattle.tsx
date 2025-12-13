@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation } from 'lucide-react';
+import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation, Droplets, Recycle } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 
@@ -26,14 +26,14 @@ interface EnergySlot {
 
 interface ShipPart {
     id: string;
-    type: 'CANNON' | 'ENGINE' | 'EMPTY' | 'MISSILE' | 'SHIELD' | 'AMPLIFIER'; // Added AMPLIFIER
+    type: 'CANNON' | 'ENGINE' | 'EMPTY' | 'MISSILE' | 'SHIELD' | 'AMPLIFIER'; 
     name: string;
     description?: string;
     slots: EnergySlot[]; // Multiple slots per part
     multiplier: number; // Effect multiplier per energy
     basePower: number; // Flat bonus when activated (Full slots)
     hp: number; // Part HP (Visual mainly)
-    specialEffect?: 'RANK_UP'; // New special effect type
+    specialEffect?: 'RANK_UP' | 'HEAL' | 'RECYCLE'; // New special effect types
 }
 
 interface ShipState {
@@ -143,30 +143,71 @@ const VACATION_EVENTS_DB: Omit<VacationEvent, 'id'>[] = [
 ];
 
 const PART_TEMPLATES: Omit<ShipPart, 'id'>[] = [
-    // Existing
+    // --- BASIC ---
     { type: 'CANNON', name: 'バスター砲', description: '標準的な威力の大砲。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 3, hp: 10 },
     { type: 'MISSILE', name: '誘導ミサイル', description: '青エネルギーで高出力。', slots: [{req:'BLUE', value:null}, {req:'BLUE', value:null}], multiplier: 1.5, basePower: 5, hp: 10 },
     { type: 'SHIELD', name: 'エネルギー盾', description: '高い防御力を発揮。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 5, hp: 15 },
     { type: 'ENGINE', name: '高機動スラスター', description: '回避率と燃料効率が高い。', slots: [{req:'BLUE', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 2, hp: 10 },
+    
+    // --- ADVANCED ---
     { type: 'CANNON', name: '波動砲', description: 'オレンジ必須。超高火力。', slots: [{req:'ORANGE', value:null}, {req:'ORANGE', value:null}], multiplier: 2.0, basePower: 10, hp: 10 },
     { type: 'ENGINE', name: '増幅炉', description: 'ランク+1のカードを生成する。', slots: [{req:'BLUE', value:null}], multiplier: 0, basePower: 0, hp: 10, specialEffect: 'RANK_UP' },
-
-    // New Additions
     { type: 'CANNON', name: 'バルカン砲', description: '白エネルギーで手軽に連射。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.0, basePower: 2, hp: 10 },
     { type: 'CANNON', name: 'レールガン', description: '青エネルギー専用。貫通力重視。', slots: [{req:'BLUE', value:null}], multiplier: 3.0, basePower: 6, hp: 10 },
     { type: 'MISSILE', name: 'ナパーム弾', description: 'オレンジ専用。広範囲高火力。', slots: [{req:'ORANGE', value:null}], multiplier: 2.5, basePower: 5, hp: 10 },
     { type: 'SHIELD', name: 'スパイク装甲', description: '防御と同時に反撃(イメージ)。', slots: [{req:'ANY', value:null}], multiplier: 1.5, basePower: 2, hp: 20 },
     { type: 'SHIELD', name: 'リペアキット', description: '白エネルギーで効率よく防御。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.5, basePower: 4, hp: 10 },
+    
+    // --- ENGINES ---
     { type: 'ENGINE', name: 'ソーラー帆', description: '白エネルギーを効率よく変換。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.5, basePower: 0, hp: 5 },
     { type: 'ENGINE', name: '核融合炉', description: 'オレンジ専用。莫大な出力。', slots: [{req:'ORANGE', value:null}], multiplier: 4.0, basePower: 6, hp: 15 },
+    
+    // --- SPECIALIZED ---
     { type: 'CANNON', name: 'スナイパー', description: '2スロットで精密射撃。', slots: [{req:'BLUE', value:null}, {req:'WHITE', value:null}], multiplier: 2.0, basePower: 5, hp: 10 },
     { type: 'MISSILE', name: '拡散ポッド', description: '多数の白スロットを持つ。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 0.8, basePower: 3, hp: 10 },
     { type: 'SHIELD', name: 'ミラーコート', description: '青エネルギーで特殊防御。', slots: [{req:'BLUE', value:null}, {req:'ANY', value:null}], multiplier: 1.3, basePower: 4, hp: 12 },
-    
-    // Amplifiers
+
+    // --- AMPLIFIERS ---
     { type: 'AMPLIFIER', name: 'エネルギー増幅器', description: '隣接するパーツの出力を強化する(要:白エネ)。', slots: [{req:'WHITE', value:null}], multiplier: 0, basePower: 2, hp: 8 },
     { type: 'AMPLIFIER', name: 'ハイパーブースター', description: '隣接するパーツを大幅強化(要:橙エネ)。', slots: [{req:'ORANGE', value:null}], multiplier: 0, basePower: 5, hp: 8 },
     { type: 'AMPLIFIER', name: 'デュアルアンプ', description: '2スロットで安定した強化。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 0, basePower: 3, hp: 8 },
+
+    // --- STATIONERY ARSENAL (文房具シリーズ) ---
+    { type: 'CANNON', name: 'ホッチキス銃', description: '4連白スロット。数で勝負。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 0.8, basePower: 4, hp: 10 },
+    { type: 'CANNON', name: 'カッターナイフ', description: '近距離高火力。1スロット橙。', slots: [{req:'ORANGE', value:null}], multiplier: 4.5, basePower: 2, hp: 5 },
+    { type: 'MISSILE', name: 'コンパスドリル', description: '1スロットだが貫通力が高い。', slots: [{req:'BLUE', value:null}], multiplier: 3.5, basePower: 4, hp: 10 },
+    { type: 'SHIELD', name: '修正液バリア', description: '白エネルギーで堅牢な守り。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.8, basePower: 6, hp: 15 },
+    { type: 'SHIELD', name: '鉄壁の筆箱', description: '3スロットで鉄壁の防御。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.5, basePower: 8, hp: 20 },
+    { type: 'CANNON', name: '黒板消しキャノン', description: '粉塵爆発。白と青を使用。', slots: [{req:'WHITE', value:null}, {req:'BLUE', value:null}], multiplier: 1.8, basePower: 5, hp: 12 },
+    { type: 'MISSILE', name: '三角定規ブーメラン', description: '戻ってくる衝撃波。', slots: [{req:'WHITE', value:null}, {req:'ORANGE', value:null}], multiplier: 2.0, basePower: 6, hp: 10 },
+    { type: 'AMPLIFIER', name: '黄金比コンパス', description: '青エネルギーで隣接パーツを強化。', slots: [{req:'BLUE', value:null}], multiplier: 0, basePower: 4, hp: 8 },
+    { type: 'AMPLIFIER', name: '下敷き静電気', description: '隣接強化。白エネルギー。', slots: [{req:'WHITE', value:null}], multiplier: 0, basePower: 3, hp: 5 },
+    { type: 'CANNON', name: 'シャーペンスナイパー', description: '超遠距離精密射撃。', slots: [{req:'BLUE', value:null}, {req:'BLUE', value:null}], multiplier: 2.5, basePower: 7, hp: 8 },
+    { type: 'CANNON', name: '液状のりスプレー', description: '敵の動きを鈍らせる(イメージ)。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.2, basePower: 3, hp: 12 },
+    { type: 'CANNON', name: '彫刻刀セット', description: '5本の刃を一斉射出。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 0.5, basePower: 10, hp: 10 },
+
+    // --- SCHOOL EQUIPMENT (学校設備) ---
+    { type: 'CANNON', name: '放送室スピーカー', description: '音波攻撃。白エネで高出力。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 2.0, basePower: 5, hp: 15 },
+    { type: 'ENGINE', name: '焼却炉エンジン', description: '橙エネルギー専用。爆発的推進力。', slots: [{req:'ORANGE', value:null}, {req:'ORANGE', value:null}], multiplier: 5.0, basePower: 10, hp: 20 },
+    { type: 'SHIELD', name: '理科室の人体模型', description: '不気味なオーラで守る。', slots: [{req:'BLUE', value:null}, {req:'ORANGE', value:null}], multiplier: 2.0, basePower: 8, hp: 25 },
+    { type: 'MISSILE', name: '消火栓放水', description: '青エネルギー3つで超高圧放水。', slots: [{req:'BLUE', value:null}, {req:'BLUE', value:null}, {req:'BLUE', value:null}], multiplier: 3.0, basePower: 12, hp: 18 },
+    { type: 'AMPLIFIER', name: '校長先生の銅像', description: '圧倒的威圧感で隣接パーツを強化。', slots: [{req:'ORANGE', value:null}], multiplier: 0, basePower: 6, hp: 30 },
+    { type: 'CANNON', name: 'チャイム音波砲', description: 'キーンコーンカーンコーン(破壊音)。', slots: [{req:'WHITE', value:null}, {req:'BLUE', value:null}], multiplier: 1.5, basePower: 6, hp: 10 },
+
+    // --- LUNCH & SURVIVAL (給食・サバイバル) ---
+    { type: 'SHIELD', name: '自己修復ナノ', description: '起動時に船体HPを5回復する。', slots: [{req:'ORANGE', value:null}], multiplier: 0, basePower: 0, hp: 10, specialEffect: 'HEAL' },
+    { type: 'ENGINE', name: 'エネルギー吸収装置', description: '使用したカードを冷却プールへ即回収。', slots: [{req:'BLUE', value:null}], multiplier: 1.0, basePower: 2, hp: 10, specialEffect: 'RECYCLE' },
+    { type: 'ENGINE', name: 'あしたのジョーロ', description: '水力エンジン。白のみで高効率。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.8, basePower: 1, hp: 8 },
+    { type: 'SHIELD', name: '揚げパンアーマー', description: '砂糖のコーティングで衝撃吸収。', slots: [{req:'WHITE', value:null}, {req:'ORANGE', value:null}], multiplier: 1.5, basePower: 5, hp: 15 },
+    { type: 'MISSILE', name: '冷凍ミカン爆弾', description: 'カチカチのミカンを投下。', slots: [{req:'BLUE', value:null}], multiplier: 3.0, basePower: 3, hp: 8 },
+    { type: 'CANNON', name: '牛乳瓶キャノン', description: 'カルシウムパワーで攻撃。', slots: [{req:'WHITE', value:null}], multiplier: 1.5, basePower: 2, hp: 10 },
+    { type: 'SHIELD', name: '0点のテスト用紙', description: '紙装甲だがHPだけは無駄に高い。', slots: [{req:'WHITE', value:null}], multiplier: 0.1, basePower: 1, hp: 50 },
+
+    // --- LEGENDARY (伝説) ---
+    { type: 'CANNON', name: 'プリズムレーザー', description: '青と橙の混合エネルギーが必要。', slots: [{req:'BLUE', value:null}, {req:'ORANGE', value:null}], multiplier: 2.5, basePower: 8, hp: 10 },
+    { type: 'CANNON', name: '伝説のソード', description: '勇者が使っていた剣の切っ先。', slots: [{req:'ORANGE', value:null}, {req:'ORANGE', value:null}, {req:'ORANGE', value:null}], multiplier: 3.0, basePower: 20, hp: 30 },
+    { type: 'MISSILE', name: 'ドラゴン花火', description: '龍の形をした花火ミサイル。', slots: [{req:'ORANGE', value:null}, {req:'WHITE', value:null}, {req:'BLUE', value:null}], multiplier: 2.5, basePower: 15, hp: 15 },
+    { type: 'ENGINE', name: '無限の心臓', description: '永久機関。ランクアップ効果付き。', slots: [{req:'ORANGE', value:null}, {req:'BLUE', value:null}], multiplier: 2.0, basePower: 5, hp: 40, specialEffect: 'RANK_UP' },
 ];
 
 // --- COMPONENTS ---
@@ -233,8 +274,10 @@ const ShipPartView: React.FC<{
     if (part.type === 'SHIELD') { icon = <Shield size={14}/>; colorClass = 'bg-blue-900/60 border-blue-500/50'; textColor='text-blue-200'; }
     if (part.type === 'AMPLIFIER') { icon = <Activity size={14}/>; colorClass = 'bg-purple-900/60 border-purple-500/50'; textColor='text-purple-200'; }
     
-    // Special highlight for generator
+    // Special highlight for generator / healer
     if (part.specialEffect === 'RANK_UP') { colorClass = 'bg-purple-900/60 border-purple-500/50'; textColor='text-purple-200'; icon = <Zap size={14}/>; }
+    if (part.specialEffect === 'HEAL') { colorClass = 'bg-green-900/60 border-green-500/50'; textColor='text-green-200'; icon = <Droplets size={14}/>; }
+    if (part.specialEffect === 'RECYCLE') { colorClass = 'bg-teal-900/60 border-teal-500/50'; textColor='text-teal-200'; icon = <Recycle size={14}/>; }
 
     if (part.type === 'EMPTY') {
         return (
@@ -280,6 +323,7 @@ const ShipPartView: React.FC<{
                 <div className={`${textColor}`}>{icon}</div>
                 {totalPower > 0 && showPower && part.type !== 'AMPLIFIER' && <div className="text-[10px] font-bold text-white shadow-black drop-shadow-md">{totalPower}</div>}
                 {part.type === 'AMPLIFIER' && isFull && <div className="text-[8px] font-bold text-yellow-300">UP!</div>}
+                {part.specialEffect === 'HEAL' && isFull && <div className="text-[8px] font-bold text-green-300">HEAL</div>}
             </div>
 
             <div className="flex gap-0.5 justify-center mt-1">
@@ -491,19 +535,18 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             return;
         }
 
-        // Prepare new hand state locally to avoid state update race conditions
+        // Prepare new hand state locally
         let currentHandList = [...hand];
 
         // Special Effect: RANK_UP
         if (part.specialEffect === 'RANK_UP') {
-            // Generate new card
             const newValue = card.value + 1;
             const newCard: EnergyCard = {
                 id: `e_gen_${Date.now()}`,
                 value: newValue,
-                color: card.color // Inherit color
+                color: card.color 
             };
-            currentHandList.push(newCard); // Add new card to the list
+            currentHandList.push(newCard); 
             addLog(`増幅！ランク${newValue}のカードを生成！`);
             audioService.playSound('buff');
         }
@@ -561,6 +604,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 const startIdx = pRelIdx * SHIP_WIDTH;
                 const rowParts = player.parts.slice(startIdx, startIdx + SHIP_WIDTH);
                 
+                // First pass for Amplifier calculation
+                const amplifiers = player.parts.filter(p => p.type === 'AMPLIFIER');
+                // (Logic simplified: calculate active amplifiers based on their slots)
+
                 rowParts.forEach((p, colIdx) => {
                     // Check if Amplified (Neighbor Check)
                     let buffBonus = 0;
@@ -575,8 +622,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         if (n.r >= 0 && n.r < SHIP_HEIGHT && n.c >= 0 && n.c < SHIP_WIDTH) {
                             const nPart = player.parts[n.r * SHIP_WIDTH + n.c];
                             if (nPart.type === 'AMPLIFIER') {
-                                // Check if amplifier is active (fully loaded usually, or just loaded)
-                                // Let's say needs to be fully loaded to work for balance
                                 const isAmpActive = nPart.slots.every(s => s.value !== null) && nPart.slots.length > 0;
                                 if (isAmpActive) {
                                     buffBonus += nPart.basePower;
@@ -589,12 +634,23 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     if (energySum > 0) {
                         let output = Math.floor(energySum * p.multiplier);
                         const isFull = p.slots.every(s => s.value !== null) && p.slots.length > 0;
-                        if (isFull) output += p.basePower;
+                        if (isFull) {
+                            output += p.basePower;
+                            // Special Effect: HEAL
+                            if (p.specialEffect === 'HEAL') {
+                                tempPlayerHp = Math.min(player.maxHp, tempPlayerHp + 5);
+                            }
+                            // Special Effect: RECYCLE (Immediate cool pool return is standard, maybe this adds extra fuel?)
+                            if (p.specialEffect === 'RECYCLE') {
+                                // Add bonus energy cards to cooling pool?
+                                // Let's make it add a card to hand for next turn
+                                // Not implemented in current logic structure easily.
+                                // Instead: Recover 1 Fuel?
+                                tempFuel = Math.min(player.maxFuel, tempFuel + 1);
+                            }
+                        }
                         
-                        // Passive power buff
-                        output += player.passivePower;
-                        
-                        // Apply Neighbor Buffs
+                        output += player.passivePower; 
                         output += buffBonus;
 
                         if (p.type === 'CANNON' || p.type === 'MISSILE') pPower += output;
@@ -720,7 +776,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             const idx = Math.floor(Math.random() * pool.length);
             const template = pool[idx];
             
-            // Remove selected from pool to prevent duplicate
             pool.splice(idx, 1);
             
             let quality = Math.random() < 0.2 ? 1.5 : 1.0;
@@ -986,7 +1041,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         
         partsToRender.forEach((p, colIdx) => {
              // Calculate potential buff from neighbors (for prediction)
-             // This needs to access the full grid, so we use player.parts
              let buffBonus = 0;
              if (inShip) {
                  const neighbors = [
@@ -996,8 +1050,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                  neighbors.forEach(n => {
                     if (n.r >= 0 && n.r < SHIP_HEIGHT && n.c >= 0 && n.c < SHIP_WIDTH) {
                         const nPart = player.parts[n.r * SHIP_WIDTH + n.c];
-                        // Assumption for prediction: Amplifiers are active if they exist
-                        // In real combat, they need to be loaded. Here we assume potential.
                         if (nPart.type === 'AMPLIFIER') {
                             buffBonus += nPart.basePower;
                         }
@@ -1087,6 +1139,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 </div>
                             </>
                         )}
+                        {tooltipPart.specialEffect === 'HEAL' && <div className="text-green-400 mt-2 font-bold">HP自動回復機能付き</div>}
+                        {tooltipPart.specialEffect === 'RECYCLE' && <div className="text-teal-400 mt-2 font-bold">エネルギー回収機能付き</div>}
                     </div>
                 </div>
             </div>
@@ -1099,14 +1153,14 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         return (
             <div className="w-full h-full bg-slate-900 text-white p-8 flex flex-col items-center justify-center font-mono">
                 <Send size={64} className="text-cyan-400 mb-4 animate-bounce"/>
-                <h1 className="text-4xl font-bold mb-4">紙飛行機バトル v2.2</h1>
+                <h1 className="text-4xl font-bold mb-4">紙飛行機バトル v2.5</h1>
                 <div className="max-w-md text-sm text-gray-300 space-y-2 mb-8 bg-slate-800 p-4 rounded border border-slate-600">
                     <p>・機体は3x3のモジュールで構成されています。</p>
                     <p>・エネルギーの色には相性があります。</p>
                     <p className="text-yellow-400 font-bold">・オレンジ &gt; 青 &gt; 白 (白スロットには何色でもOK！)</p>
                     <p>・エネルギーを入れるだけで出力が出ます。</p>
                     <p>・全スロットを埋めると起動ボーナスが加算されます！</p>
-                    <p className="text-purple-400 font-bold">・新パーツ「増幅器」は隣接パーツを強化します！</p>
+                    <p className="text-purple-400 font-bold">・新パーツ多数！回復機能や増幅器を使いこなせ！</p>
                     <p>・モジュール長押しで詳細を確認できます。</p>
                     <p className="text-green-400 font-bold">・戦闘後は「休暇」で機体を強化しよう！</p>
                 </div>
@@ -1426,6 +1480,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     </div>
                                 </>
                             )}
+                            {tooltipPart.specialEffect === 'HEAL' && <div className="text-green-400 mt-2 font-bold">HP自動回復機能付き</div>}
+                            {tooltipPart.specialEffect === 'RECYCLE' && <div className="text-teal-400 mt-2 font-bold">エネルギー回収機能付き</div>}
                         </div>
                     </div>
                 </div>
