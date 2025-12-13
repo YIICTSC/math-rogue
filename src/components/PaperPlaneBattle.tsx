@@ -1516,8 +1516,15 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         if (!tooltipPart) return null;
         
         // Helper to get type description
-        const getTypeDescription = (type: ShipPart['type']) => {
-            switch(type) {
+        const getTypeDescription = (part: ShipPart) => {
+            if (part.specialEffect === 'RANK_UP') {
+                 return 'エネルギーを消費して「カード」を生成します。\nシールドや攻撃力は発生しません。';
+            }
+            if (part.specialEffect === 'HEAL') {
+                return '出力は「シールド」になります。\nさらに、スロットが埋まると船体のHPを回復します。';
+            }
+
+            switch(part.type) {
                 case 'CANNON': return '出力は「攻撃力」になります。\n敵の耐久値を削り、HPにダメージを与えます。';
                 case 'MISSILE': return '出力は「攻撃力」になります。\nキャノンと同様ですが、青/橙エネルギーを使う高火力なものが多いです。';
                 case 'SHIELD': return '出力は「シールド」になります。\n敵の攻撃ダメージを軽減します。';
@@ -1551,11 +1558,18 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     
                     {/* Type specific description */}
                     <div className="bg-slate-700/50 p-2 rounded mb-4 text-xs text-white whitespace-pre-wrap border-l-2 border-yellow-500">
-                        {getTypeDescription(tooltipPart.type)}
+                        {getTypeDescription(tooltipPart)}
                     </div>
 
                     <div className="bg-black/40 p-2 rounded text-xs text-cyan-300 font-mono">
-                        {tooltipPart.type !== 'AMPLIFIER' ? (
+                        {tooltipPart.specialEffect === 'RANK_UP' ? (
+                             <>
+                                <div>生成ランク補正: +{tooltipPart.basePower}</div>
+                                <div className="mt-2 text-gray-500">
+                                    投入したカードを消費せず、<br/>ランクを上げて手札に加えます(一時的)。
+                                </div>
+                             </>
+                        ) : tooltipPart.type !== 'AMPLIFIER' ? (
                             <>
                                 <div>倍率: x{tooltipPart.multiplier}</div>
                                 <div>起動ボーナス: +{tooltipPart.basePower}</div>
@@ -1847,7 +1861,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         return (
             <div className="w-full h-full bg-slate-900 text-white p-2 md:p-4 font-mono relative overflow-hidden flex flex-col">
                 <RenderTooltip />
-                {/* Pool View Modal */}
+                {/* Pool Overlay */}
                 {showPool && <PoolView pool={pool} onClose={() => setShowPool(false)} />}
                 
                 <div className="flex justify-between items-center mb-2 bg-slate-800 p-3 rounded-lg shadow-lg shrink-0">
