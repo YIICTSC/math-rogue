@@ -172,7 +172,7 @@ const PART_TEMPLATES: Omit<ShipPart, 'id'>[] = [
     { type: 'CANNON', name: 'バルカン砲', description: '白エネルギーで手軽に連射。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.0, basePower: 2, hp: 10 },
     { type: 'CANNON', name: 'レールガン', description: '青エネルギー専用。貫通力重視。', slots: [{req:'BLUE', value:null}], multiplier: 3.0, basePower: 6, hp: 10 },
     { type: 'MISSILE', name: 'ナパーム弾', description: 'オレンジ専用。広範囲高火力。', slots: [{req:'ORANGE', value:null}], multiplier: 2.5, basePower: 5, hp: 10 },
-    { type: 'SHIELD', name: 'スパイク装甲', description: '防御と同時に反撃(イメージ)。', slots: [{req:'ANY', value:null}], multiplier: 1.5, basePower: 2, hp: 20, specialEffect: 'THORNS' },
+    { type: 'SHIELD', name: 'スパイク装甲', description: '被弾時、防御出力の半分を敵に返す。', slots: [{req:'ANY', value:null}], multiplier: 1.5, basePower: 2, hp: 20, specialEffect: 'THORNS' },
     { type: 'SHIELD', name: 'リペアキット', description: '白エネルギーで効率よく防御。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.5, basePower: 4, hp: 10 },
     
     // --- ENGINES ---
@@ -407,6 +407,7 @@ const ClashOverlay: React.FC<{ clashState: ClashState }> = ({ clashState }) => {
 
                 // Show shields if blocking
                 const pShieldVis = clash.pShield > 0 && (clash.result === 'PLAYER_HIT' || clash.result === 'DRAW');
+                const pThornVis = clash.pThorns > 0 && clash.result === 'PLAYER_HIT';
 
                 return (
                     <div key={rowIdx} className="h-20 md:h-24 relative flex items-center transition-all duration-300" style={{ opacity }}>
@@ -450,6 +451,13 @@ const ClashOverlay: React.FC<{ clashState: ClashState }> = ({ clashState }) => {
                             <div className="absolute left-10 md:left-20 top-1/2 -translate-y-1/2 z-40 animate-pulse text-blue-400">
                                 <Shield size={48} className="fill-blue-900/50 stroke-2"/>
                             </div>
+                        )}
+
+                        {/* Thorn Visuals */}
+                        {pThornVis && (
+                             <div className="absolute left-10 md:left-20 top-1/2 -translate-y-1/2 z-50 text-red-500 font-bold animate-ping flex items-center">
+                                 <Radiation size={32} /> THORNS!
+                             </div>
                         )}
                     </div>
                 );
@@ -842,6 +850,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 
                 if (c.pThorns > 0) {
                     tempEnemyHp = Math.max(0, tempEnemyHp - c.pThorns);
+                    addLog(`【反撃】スパイク装甲！敵に${c.pThorns}ダメージ！`);
                 }
             }
         });
@@ -1302,7 +1311,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         )}
                         {tooltipPart.specialEffect === 'HEAL' && <div className="text-green-400 mt-2 font-bold">HP自動回復機能付き</div>}
                         {tooltipPart.specialEffect === 'RECYCLE' && <div className="text-teal-400 mt-2 font-bold">エネルギー回収機能付き</div>}
-                        {tooltipPart.specialEffect === 'THORNS' && <div className="text-red-400 mt-2 font-bold">反撃ダメージ (Thorns)</div>}
+                        {tooltipPart.specialEffect === 'THORNS' && <div className="text-red-400 mt-2 font-bold">反撃ダメージ (被弾時、防御出力の半分を敵に返す)</div>}
                     </div>
                 </div>
             </div>
@@ -1647,7 +1656,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             )}
                             {tooltipPart.specialEffect === 'HEAL' && <div className="text-green-400 mt-2 font-bold">HP自動回復機能付き</div>}
                             {tooltipPart.specialEffect === 'RECYCLE' && <div className="text-teal-400 mt-2 font-bold">エネルギー回収機能付き</div>}
-                            {tooltipPart.specialEffect === 'THORNS' && <div className="text-red-400 mt-2 font-bold">反撃ダメージ (Thorns)</div>}
+                            {tooltipPart.specialEffect === 'THORNS' && <div className="text-red-400 mt-2 font-bold">反撃ダメージ (被弾時、防御出力の半分を敵に返す)</div>}
                         </div>
                     </div>
                 </div>
