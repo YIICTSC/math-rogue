@@ -80,6 +80,23 @@ interface VacationEvent {
     tier: 1 | 2 | 3; // Value tier
 }
 
+// Clash Animation Types
+interface ClashRowData {
+    row: number;
+    pPower: number;
+    ePower: number;
+    pShield: number;
+    pThorns: number;
+    result: 'PLAYER_HIT' | 'ENEMY_HIT' | 'DRAW' | 'NONE';
+    damage: number;
+}
+
+interface ClashState {
+    active: boolean;
+    phase: 'INIT' | 'CLASH' | 'IMPACT' | 'DONE';
+    data: ClashRowData[];
+}
+
 // --- HELPERS ---
 
 const getColorRank = (color: EnergyColor | 'ANY'): number => {
@@ -353,6 +370,95 @@ const ShipPartView: React.FC<{
     );
 };
 
+// --- CLASH ANIMATION OVERLAY ---
+const ClashOverlay: React.FC<{ clashState: ClashState }> = ({ clashState }) => {
+    if (!clashState.active) return null;
+
+    return (
+        <div className="absolute inset-0 z-30 pointer-events-none flex flex-col justify-center py-4">
+            {[0, 1, 2, 3, 4].map((rowIdx) => {
+                const clash = clashState.data.find(d => d.row === rowIdx);
+                if (!clash) return <div key={rowIdx} className="h-20 md:h-24"></div>;
+
+                // Calculate beam widths based on phase
+                let pWidth = 50;
+                let eWidth = 50;
+                let opacity = 1;
+
+                if (clashState.phase === 'INIT') {
+                    pWidth = 0; eWidth = 0;
+                } else if (clashState.phase === 'CLASH') {
+                    pWidth = 50; eWidth = 50; // Meet in middle
+                } else if (clashState.phase === 'IMPACT') {
+                    // Push logic
+                    if (clash.result === 'ENEMY_HIT') {
+                        pWidth = 100; eWidth = 0;
+                    } else if (clash.result === 'PLAYER_HIT') {
+                        pWidth = 0; eWidth = 100;
+                    } else if (clash.result === 'DRAW') {
+                        pWidth = 50; eWidth = 50; // Spark in middle
+                    } else {
+                        // None? Should fade out
+                        opacity = 0;
+                    }
+                } else {
+                    opacity = 0;
+                }
+
+                // Show shields if blocking
+                const pShieldVis = clash.pShield > 0 && (clash.result === 'PLAYER_HIT' || clash.result === 'DRAW');
+
+                return (
+                    <div key={rowIdx} className="h-20 md:h-24 relative flex items-center transition-all duration-300" style={{ opacity }}>
+                        {/* Player Beam */}
+                        {clash.pPower > 0 && (
+                            <div 
+                                className="absolute left-0 h-4 md:h-6 bg-gradient-to-r from-cyan-600 via-cyan-400 to-white shadow-[0_0_15px_cyan] rounded-r-full transition-all duration-500 ease-out"
+                                style={{ width: `${pWidth}%`, left: 0 }}
+                            >
+                                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 md:w-12 md:h-12 bg-white rounded-full blur-md opacity-80"></div>
+                            </div>
+                        )}
+                        
+                        {/* Enemy Beam */}
+                        {clash.ePower > 0 && (
+                            <div 
+                                className="absolute right-0 h-4 md:h-6 bg-gradient-to-l from-red-600 via-purple-500 to-white shadow-[0_0_15px_red] rounded-l-full transition-all duration-500 ease-out"
+                                style={{ width: `${eWidth}%`, right: 0 }}
+                            >
+                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 md:w-12 md:h-12 bg-white rounded-full blur-md opacity-80"></div>
+                            </div>
+                        )}
+
+                        {/* Impact Effect */}
+                        {clashState.phase === 'IMPACT' && (
+                            <div className="absolute top-1/2 -translate-y-1/2 w-full flex justify-center pointer-events-none">
+                                {clash.result === 'DRAW' && (
+                                    <div className="absolute left-1/2 -translate-x-1/2 w-16 h-16 bg-white rounded-full animate-ping z-40"></div>
+                                )}
+                                {clash.result === 'ENEMY_HIT' && (
+                                    <div className="absolute right-0 translate-x-1/2 w-24 h-24 bg-orange-400 rounded-full animate-ping z-40 shadow-[0_0_30px_orange]"></div>
+                                )}
+                                {clash.result === 'PLAYER_HIT' && (
+                                    <div className="absolute left-0 -translate-x-1/2 w-24 h-24 bg-red-500 rounded-full animate-ping z-40 shadow-[0_0_30px_red]"></div>
+                                )}
+                            </div>
+                        )}
+                        
+                        {/* Shield Visuals */}
+                        {pShieldVis && (
+                            <div className="absolute left-10 md:left-20 top-1/2 -translate-y-1/2 z-40 animate-pulse text-blue-400">
+                                <Shield size={48} className="fill-blue-900/50 stroke-2"/>
+                            </div>
+                        )}
+                    </div>
+                );
+            })}
+        </div>
+    );
+};
+
+
 const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     // --- STATE ---
     const [phase, setPhase] = useState<GamePhase>('TUTORIAL');
@@ -394,6 +500,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [showPool, setShowPool] = useState(false);
     const [animating, setAnimating] = useState(false);
     const [tooltipPart, setTooltipPart] = useState<ShipPart | null>(null);
+    
+    // Clash Animation State
+    const [clashState, setClashState] = useState<ClashState>({ active: false, phase: 'INIT', data: [] });
     
     // Vacation State
     const [vacationEvents, setVacationEvents] = useState<VacationEvent[]>([]);
@@ -587,11 +696,13 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         hand.forEach(c => recycleCard(c));
         setHand([]);
 
-        let enemyStunDmg = 0; 
+        // --- PRE-CALCULATION PHASE ---
+        const clashData: ClashRowData[] = [];
         let tempEnemyHp = enemy.hp;
         let tempPlayerHp = player.hp;
         let tempFuel = player.fuel;
-        
+        let enemyStunDmg = 0;
+
         // PASS 1: Calculate Amplifier Buffs
         const buffGrid = Array(SHIP_HEIGHT).fill(0).map(() => Array(SHIP_WIDTH).fill(0));
         player.parts.forEach((part, idx) => {
@@ -601,7 +712,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 
                 // Only provide bonus if active (has energy)
                 if (energySum > 0 || (part.slots.length === 0)) { 
-                    // Amplifiers usually have slots. If no slots, always active?
                     let power = Math.floor(energySum * part.multiplier);
                     if (isFull) power += part.basePower;
                     
@@ -619,10 +729,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             }
         });
 
-        // Iterate Rows for Combat
+        // PASS 2: Calculate Row Powers
         for (let r = 0; r < MAX_ROWS; r++) {
-            if (tempEnemyHp <= 0) break;
-
             const pRelIdx = r - player.yOffset;
             let pPower = 0;
             let pShield = 0;
@@ -634,7 +742,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 const rowParts = player.parts.slice(startIdx, startIdx + SHIP_WIDTH);
                 
                 rowParts.forEach((p, colIdx) => {
-                    // Skip Empty or Amplifier (Amplifiers don't fire themselves usually, just buff)
                     if (p.type === 'EMPTY' || p.type === 'AMPLIFIER') return;
 
                     const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
@@ -643,41 +750,23 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         const isFull = p.slots.every(s => s.value !== null) && p.slots.length > 0;
                         if (isFull) {
                             output += p.basePower;
-                            // Special Effect: HEAL
-                            if (p.specialEffect === 'HEAL') {
-                                tempPlayerHp = Math.min(player.maxHp, tempPlayerHp + 5);
-                            }
-                            // Special Effect: RECYCLE
-                            if (p.specialEffect === 'RECYCLE') {
-                                tempFuel = Math.min(player.maxFuel, tempFuel + 1);
-                            }
+                            if (p.specialEffect === 'HEAL') tempPlayerHp = Math.min(player.maxHp, tempPlayerHp + 5);
+                            if (p.specialEffect === 'RECYCLE') tempFuel = Math.min(player.maxFuel, tempFuel + 1);
                         }
                         
-                        // Add Buffs
                         output += buffGrid[pRelIdx][colIdx];
                         output += player.passivePower; 
 
-                        // Route Output
                         if (p.type === 'CANNON' || p.type === 'MISSILE') pPower += output;
                         if (p.type === 'SHIELD') {
                             pShield += output;
-                            if (p.specialEffect === 'THORNS') {
-                                pThorns += p.basePower; // Thorns deals base damage back?
-                                // Let's scale thorns with output? 
-                                // Actually let's just add output to thorns if it's thorns type?
-                                // Shield usually adds to Defense.
-                                // Let's say Thorns deals half of Shield value as damage?
-                                // Or just basePower. Let's use basePower + buff for simplicity.
-                                // Actually, use output.
-                                pThorns += Math.ceil(output / 2);
-                            }
+                            if (p.specialEffect === 'THORNS') pThorns += Math.ceil(output / 2);
                         }
                         if (p.type === 'ENGINE') pEngine += output;
                     }
                 });
             }
 
-            // Engine Output: Recover Fuel / Add Shield (Evasion)
             if (pEngine > 0) {
                 pShield += pEngine;
                 let fuelRecovered = Math.ceil(pEngine / 2); 
@@ -692,37 +781,76 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 ePower = intent.value;
             }
 
-            // Combat Resolution for this Row
-            if (pPower > 0 || ePower > 0 || pThorns > 0) {
-                // Player Attack
+            // Determine Clash Result
+            let result: ClashRowData['result'] = 'NONE';
+            let damage = 0;
+
+            if (pPower > 0 || ePower > 0) {
                 if (pPower > ePower) {
-                    const diff = pPower - ePower;
-                    tempEnemyHp = Math.max(0, tempEnemyHp - diff);
-                    enemyStunDmg++;
-                } 
-                
-                // Enemy Attack
-                if (ePower > pPower) {
-                    let diff = ePower - pPower;
-                    // Apply Shield
-                    const blocked = Math.min(diff, pShield);
-                    diff -= blocked;
-                    
-                    if (diff > 0) {
-                        tempPlayerHp = Math.max(0, tempPlayerHp - diff);
-                    }
-                    
-                    // Thorns Damage (if player was attacked)
-                    if (pThorns > 0) {
-                        tempEnemyHp = Math.max(0, tempEnemyHp - pThorns);
-                    }
+                    result = 'ENEMY_HIT';
+                    damage = pPower - ePower;
+                } else if (ePower > pPower) {
+                    result = 'PLAYER_HIT';
+                    let rawDmg = ePower - pPower;
+                    // Shield logic handled in application phase to show correct damage numbers
+                    // But here we calculate raw difference for beam logic
+                    damage = rawDmg; 
+                } else {
+                    result = 'DRAW';
                 }
             }
 
-            setEnemy(prev => ({...prev, hp: tempEnemyHp}));
-            setPlayer(prev => ({...prev, hp: tempPlayerHp, fuel: tempFuel}));
-            await new Promise(r => setTimeout(r, 200));
+            if (pPower > 0 || ePower > 0 || pShield > 0) {
+                clashData.push({ row: r, pPower, ePower, pShield, pThorns, result, damage });
+            }
         }
+
+        // --- ANIMATION PHASE ---
+        setClashState({ active: true, phase: 'INIT', data: clashData });
+        
+        // 1. Extend Beams
+        audioService.playSound('attack'); // Beam charge/fire sound
+        setTimeout(() => setClashState(prev => ({ ...prev, phase: 'CLASH' })), 100);
+        
+        // 2. Resolve/Impact
+        await new Promise(r => setTimeout(r, 600)); // Wait for beam extension
+        setClashState(prev => ({ ...prev, phase: 'IMPACT' }));
+        
+        // Play impact sounds based on results
+        let playerHit = false;
+        let enemyHit = false;
+        clashData.forEach(c => {
+             if (c.result === 'PLAYER_HIT') playerHit = true;
+             if (c.result === 'ENEMY_HIT') enemyHit = true;
+             if (c.result === 'DRAW') audioService.playSound('block');
+        });
+        if (playerHit) { audioService.playSound('lose'); }
+        if (enemyHit) { audioService.playSound('attack'); }
+
+        // --- APPLY RESULTS ---
+        await new Promise(r => setTimeout(r, 400)); // Impact lingering
+        
+        clashData.forEach(c => {
+            if (c.result === 'ENEMY_HIT') {
+                tempEnemyHp = Math.max(0, tempEnemyHp - c.damage);
+                enemyStunDmg++;
+                // Add hit flash logic or specific coordinate effect here if needed
+            } else if (c.result === 'PLAYER_HIT') {
+                const blocked = Math.min(c.damage, c.pShield);
+                const finalDmg = c.damage - blocked;
+                if (finalDmg > 0) tempPlayerHp = Math.max(0, tempPlayerHp - finalDmg);
+                
+                if (c.pThorns > 0) {
+                    tempEnemyHp = Math.max(0, tempEnemyHp - c.pThorns);
+                }
+            }
+        });
+
+        // Hide clash UI
+        setClashState({ active: false, phase: 'DONE', data: [] });
+
+        setEnemy(prev => ({...prev, hp: tempEnemyHp}));
+        setPlayer(prev => ({...prev, hp: tempPlayerHp, fuel: tempFuel}));
 
         // Stun Logic
         let nextIsStunned = enemy.isStunned;
@@ -765,7 +893,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             parts: prev.parts.map(p => ({...p, slots: p.slots.map(s => ({...s, value: null})) })) 
         }));
         
-        await new Promise(r => setTimeout(r, 500));
         setAnimating(false);
 
         if (tempPlayerHp <= 0) {
@@ -1470,6 +1597,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
             {/* Battle Grid */}
             <div className="flex-1 relative bg-[#1a1a24] overflow-y-auto custom-scrollbar">
+                {/* Clash Overlay */}
+                <ClashOverlay clashState={clashState} />
+
                 <div className="absolute inset-0 flex flex-col justify-center py-4 min-h-[400px]">
                     {[0,1,2,3,4].map(row => renderGridRow(row))}
                 </div>
