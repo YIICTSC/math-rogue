@@ -230,26 +230,33 @@ const PART_TEMPLATES: Omit<ShipPart, 'id'>[] = [
 
 // --- COMPONENTS ---
 
-const EnergyCardView: React.FC<{ card: EnergyCard, onClick?: () => void, selected?: boolean }> = ({ card, onClick, selected }) => {
+const EnergyCardView: React.FC<{ card: EnergyCard, onClick?: () => void, selected?: boolean, small?: boolean }> = ({ card, onClick, selected, small }) => {
     const bgColor = card.color === 'ORANGE' ? 'bg-orange-500' : card.color === 'BLUE' ? 'bg-blue-500' : 'bg-slate-200 text-black';
     const borderColor = card.color === 'ORANGE' ? 'border-orange-700' : card.color === 'BLUE' ? 'border-blue-700' : 'border-slate-400';
+    
+    const sizeClasses = small 
+        ? "w-8 h-10 md:w-10 md:h-12 rounded border-b-2 border-r-1 text-xs" 
+        : "w-14 h-20 md:w-16 md:h-24 rounded-lg border-b-4 border-r-2 text-xl";
+
+    const textSize = small ? "text-base font-bold" : "text-xl md:text-3xl font-black";
+    const iconSize = small ? 8 : 10;
     
     return (
         <div 
             onClick={onClick}
             className={`
-                w-14 h-20 md:w-16 md:h-24 rounded-lg border-b-4 border-r-2 ${borderColor} ${bgColor} 
-                flex flex-col items-center justify-center cursor-pointer transition-transform relative shadow-md shrink-0
-                ${selected ? '-translate-y-4 ring-2 ring-yellow-400 z-10' : 'hover:-translate-y-1'}
+                ${sizeClasses} ${borderColor} ${bgColor} 
+                flex flex-col items-center justify-center cursor-pointer transition-transform relative shadow-sm shrink-0
+                ${selected ? '-translate-y-1 ring-2 ring-yellow-400 z-10' : 'hover:-translate-y-0.5'}
                 select-none touch-none
             `}
             style={{ WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
         >
-            <div className={`text-xl md:text-3xl font-black ${card.color === 'WHITE' ? 'text-slate-800' : 'text-white'}`}>{card.value}</div>
+            <div className={`${textSize} ${card.color === 'WHITE' ? 'text-slate-800' : 'text-white'}`}>{card.value}</div>
             {/* Color Icon */}
-            <div className="absolute top-1 right-1">
-                {card.color === 'ORANGE' && <Zap size={10} className="text-yellow-200 fill-current"/>}
-                {card.color === 'BLUE' && <Wind size={10} className="text-cyan-200 fill-current"/>}
+            <div className="absolute top-0.5 right-0.5">
+                {card.color === 'ORANGE' && <Zap size={iconSize} className="text-yellow-200 fill-current"/>}
+                {card.color === 'BLUE' && <Wind size={iconSize} className="text-cyan-200 fill-current"/>}
             </div>
         </div>
     );
@@ -1713,16 +1720,17 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 </div>
 
                 {/* Hand */}
-                <div className="flex-1 flex gap-2 overflow-x-auto items-center px-2 custom-scrollbar bg-black/20 rounded-lg border border-white/5">
+                <div className="flex-1 flex flex-wrap gap-1 content-start overflow-y-auto px-2 py-1 custom-scrollbar bg-black/20 rounded-lg border border-white/5">
                     {hand.map(card => (
                         <EnergyCardView 
                             key={card.id} 
                             card={card} 
                             onClick={() => handleCardSelect(card.id)} 
                             selected={selectedCardId === card.id}
+                            small={true}
                         />
                     ))}
-                    {hand.length === 0 && <div className="text-gray-600 text-xs w-full text-center">NO ENERGY</div>}
+                    {hand.length === 0 && <div className="text-gray-600 text-xs w-full text-center mt-2">NO ENERGY</div>}
                 </div>
 
                 {/* End Turn */}
