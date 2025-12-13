@@ -7,7 +7,7 @@ class AudioService {
   
   private isMuted: boolean = false;
   private isPlayingBGM: boolean = false;
-  private currentBgmType: 'battle' | 'menu' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | null = null;
+  private currentBgmType: 'battle' | 'menu' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane' | null = null;
   
   // Sequencer State
   private nextNoteTime: number = 0;
@@ -293,6 +293,38 @@ class AudioService {
           if (beatNumber % 2 === 0) this.playNoise(actualTime, 0.1, 0.6, 'kick');
           if (beatNumber % 4 === 0) this.playChord([110, 164, 196], actualTime, 0.2, 'sawtooth', 0.3); // Hit
           if (beatNumber % 2 !== 0) this.playOsc(110, actualTime, 0.1, 'square', 0.2, this.bgmGain); // Bass running
+      } else if (this.currentBgmType === 'paper_plane') {
+        // --- PAPER PLANE BATTLE: Spacey Ambient Western ---
+        // Scale: E Minor Pentatonic (E G A B D)
+        const scale = [164.81, 196.00, 220.00, 246.94, 293.66]; // E3 G3 A3 B3 D4
+        
+        // 1. Vast Drone (every 2 bars - Deep Space)
+        if (t % 32 === 0) {
+            const root = 82.41; // E2
+            this.playOsc(root, actualTime, 4.0, 'sine', 0.15, this.bgmGain);
+            this.playOsc(root * 1.5, actualTime, 4.0, 'triangle', 0.03, this.bgmGain); // Fifth
+        }
+
+        // 2. Sparse Guitar (Western - Random plucks)
+        if (beatNumber % 4 === 0) {
+            if (Math.random() < 0.4) {
+                 const note = scale[Math.floor(Math.random() * scale.length)];
+                 // Sawtooth with short release simulates a plucked string roughly
+                 this.playOsc(note, actualTime, 0.4, 'sawtooth', 0.08, this.bgmGain);
+            }
+        }
+
+        // 3. High "Whistle" / Synth (Melodic fragment)
+        if (t % 64 === 16) {
+            this.playOsc(659.25, actualTime, 1.0, 'sine', 0.1, this.bgmGain); // E5
+            this.playOsc(587.33, actualTime + 1.0, 0.5, 'sine', 0.1, this.bgmGain); // D5
+            this.playOsc(493.88, actualTime + 1.5, 2.0, 'sine', 0.1, this.bgmGain); // B4
+        }
+
+        // 4. Wind/Atmosphere
+        if (beatNumber === 0 && Math.random() < 0.3) {
+            this.playNoise(actualTime, 2.0, 0.03, 'hat'); // Hiss-like noise
+        }
       }
   }
 
@@ -364,7 +396,7 @@ class AudioService {
   }
 
   // --- Public API ---
-  public playBGM(type: 'battle' | 'menu' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss') {
+  public playBGM(type: 'battle' | 'menu' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane') {
       if (this.isPlayingBGM && this.currentBgmType === type) return;
       
       this.init(); 
@@ -386,6 +418,7 @@ class AudioService {
       else if (type === 'dungeon_library') { this.tempo = 60; }
       else if (type === 'dungeon_roof') { this.tempo = 80; }
       else if (type === 'dungeon_boss') { this.tempo = 150; }
+      else if (type === 'paper_plane') { this.tempo = 90; } // Slow space western
       else { this.tempo = 90; }
 
       this.current16thNote = 0;

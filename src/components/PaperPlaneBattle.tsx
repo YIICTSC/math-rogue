@@ -659,11 +659,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     // On Mount BGM check
     useEffect(() => {
-        if (phase === 'BATTLE') {
-            audioService.playBGM('battle');
-        } else if (phase !== 'TUTORIAL') {
-            audioService.playBGM('menu'); // Relaxing bgm for vacation? reusing menu
-        }
+        // Use the new ambient space western track for all phases of this game
+        audioService.playBGM('paper_plane');
     }, []);
 
     // --- GAME LOGIC ---
@@ -756,7 +753,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         generateEnemyIntents(1, eParts, stageNum); 
         setPhase('BATTLE');
         addLog(`バトル開始！ 敵: ${template.name}`);
-        audioService.playBGM('battle');
+        // Ensure BGM is playing
+        audioService.playBGM('paper_plane');
     };
 
     const generateEnemyIntents = (turnNum: number, parts: ShipPart[], currentStage: number) => {
@@ -1037,12 +1035,13 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setClashState({ active: true, phase: 'INIT', data: clashData });
         
         // 1. Extend Beams
-        audioService.playSound('attack'); // Beam charge/fire sound
+        audioService.playSound('buff'); // Charge/Prepare sound
         setTimeout(() => setClashState(prev => ({ ...prev, phase: 'CLASH' })), 100);
         
         // 2. Resolve/Impact
         await new Promise(r => setTimeout(r, 600)); // Wait for beam extension
         setClashState(prev => ({ ...prev, phase: 'IMPACT' }));
+        audioService.playSound('attack'); // Beam Fire
         
         // Play impact sounds based on results
         let playerHit = false;
