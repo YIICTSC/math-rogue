@@ -28,9 +28,10 @@ interface ShipPart {
     id: string;
     type: 'CANNON' | 'ENGINE' | 'EMPTY' | 'MISSILE' | 'SHIELD';
     name: string;
+    description?: string;
     slots: EnergySlot[]; // Multiple slots per part
     multiplier: number; // Effect multiplier per energy
-    basePower: number; // Flat bonus when activated
+    basePower: number; // Flat bonus when activated (Full slots)
     hp: number; // Part HP (Visual mainly)
 }
 
@@ -61,6 +62,22 @@ interface PoolState {
 
 type GamePhase = 'TUTORIAL' | 'SETUP' | 'BATTLE' | 'REWARD' | 'VACATION' | 'GAME_OVER' | 'VICTORY';
 
+// --- HELPERS ---
+
+const getColorRank = (color: EnergyColor | 'ANY'): number => {
+    switch (color) {
+        case 'ORANGE': return 3;
+        case 'BLUE': return 2;
+        case 'WHITE': return 1;
+        case 'ANY': return 0;
+        default: return 0;
+    }
+};
+
+const isColorCompatible = (cardColor: EnergyColor, slotReq: EnergyColor | 'ANY'): boolean => {
+    return getColorRank(cardColor) >= getColorRank(slotReq);
+};
+
 // --- DATABASE ---
 
 const createEmptyPart = (id: string): ShipPart => ({
@@ -69,17 +86,17 @@ const createEmptyPart = (id: string): ShipPart => ({
 
 const STARTING_PARTS_LAYOUT: ShipPart[] = [
     // Row 0
-    { id: 'p0', type: 'CANNON', name: '連装キャノン', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1, basePower: 2, hp: 10 },
+    { id: 'p0', type: 'CANNON', name: '連装キャノン', description: '装填されたエネルギーの合計値を攻撃力とします。フル装填でボーナス+2。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1, basePower: 2, hp: 10 },
     { id: 'p1', type: 'EMPTY', name: '空き', slots: [], multiplier: 0, basePower: 0, hp: 0 },
-    { id: 'p2', type: 'ENGINE', name: '補助スラスター', slots: [{req:'BLUE', value:null}], multiplier: 1, basePower: 0, hp: 10 },
+    { id: 'p2', type: 'ENGINE', name: '補助スラスター', description: 'エネルギー値がそのまま回避/燃料回復力になります。', slots: [{req:'BLUE', value:null}], multiplier: 1, basePower: 0, hp: 10 },
     // Row 1
-    { id: 'p3', type: 'CANNON', name: '主砲', slots: [{req:'ORANGE', value:null}, {req:'ANY', value:null}], multiplier: 1.5, basePower: 5, hp: 10 },
-    { id: 'p4', type: 'CANNON', name: '機関銃', slots: [{req:'ANY', value:null}], multiplier: 1, basePower: 1, hp: 10 },
+    { id: 'p3', type: 'CANNON', name: '主砲', description: 'オレンジ以上のエネルギーが必要。装填値の1.5倍の威力。フル装填で+5。', slots: [{req:'ORANGE', value:null}, {req:'ANY', value:null}], multiplier: 1.5, basePower: 5, hp: 10 },
+    { id: 'p4', type: 'CANNON', name: '機関銃', description: '小型の機銃。装填値がそのまま威力に。フル装填+1。', slots: [{req:'ANY', value:null}], multiplier: 1, basePower: 1, hp: 10 },
     { id: 'p5', type: 'EMPTY', name: '空き', slots: [], multiplier: 0, basePower: 0, hp: 0 },
     // Row 2
-    { id: 'p6', type: 'CANNON', name: '連装キャノン', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1, basePower: 2, hp: 10 },
+    { id: 'p6', type: 'CANNON', name: '連装キャノン', description: '装填されたエネルギーの合計値を攻撃力とします。フル装填でボーナス+2。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1, basePower: 2, hp: 10 },
     { id: 'p7', type: 'EMPTY', name: '空き', slots: [], multiplier: 0, basePower: 0, hp: 0 },
-    { id: 'p8', type: 'ENGINE', name: '補助スラスター', slots: [{req:'BLUE', value:null}], multiplier: 1, basePower: 0, hp: 10 },
+    { id: 'p8', type: 'ENGINE', name: '補助スラスター', description: 'エネルギー値がそのまま回避/燃料回復力になります。', slots: [{req:'BLUE', value:null}], multiplier: 1, basePower: 0, hp: 10 },
 ];
 
 const ENEMY_DATA = [
@@ -114,7 +131,31 @@ const EnergyCardView: React.FC<{ card: EnergyCard, onClick?: () => void, selecte
     );
 };
 
-const ShipPartView: React.FC<{ part: ShipPart, onClick?: () => void, isEnemy?: boolean, highlight?: boolean }> = ({ part, onClick, isEnemy, highlight }) => {
+const ShipPartView: React.FC<{ 
+    part: ShipPart, 
+    onClick?: () => void, 
+    onLongPress?: (part: ShipPart) => void,
+    isEnemy?: boolean, 
+    highlight?: boolean 
+}> = ({ part, onClick, onLongPress, isEnemy, highlight }) => {
+    
+    const longPressTimer = useRef<any>(null);
+
+    const handleTouchStart = () => {
+        longPressTimer.current = setTimeout(() => {
+            if (onLongPress) onLongPress(part);
+        }, 500);
+    };
+
+    const handleTouchEnd = () => {
+        if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    };
+
+    const handleContextMenu = (e: React.MouseEvent) => {
+        e.preventDefault();
+        if (onLongPress) onLongPress(part);
+    }
+
     let icon = <Box size={14}/>;
     let colorClass = 'bg-slate-800 border-slate-600';
     let textColor = 'text-slate-400';
@@ -132,19 +173,25 @@ const ShipPartView: React.FC<{ part: ShipPart, onClick?: () => void, isEnemy?: b
         );
     }
 
-    // Calculate total loaded value
+    // Calculate Power
     const loadedCount = part.slots.filter(s => s.value !== null).length;
     const isFull = loadedCount === part.slots.length && part.slots.length > 0;
     
     let totalPower = 0;
-    if (isFull) {
-        const energySum = part.slots.reduce((sum, s) => sum + (s.value || 0), 0);
-        totalPower = Math.floor(part.basePower + energySum * part.multiplier);
+    const energySum = part.slots.reduce((sum, s) => sum + (s.value || 0), 0);
+    
+    // Partial load adds power, Full load adds basePower bonus
+    if (energySum > 0) {
+        totalPower = Math.floor(energySum * part.multiplier);
+        if (isFull) totalPower += part.basePower;
     }
 
     return (
         <div 
             onClick={onClick}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            onContextMenu={handleContextMenu}
             className={`
                 relative w-full h-full border rounded flex flex-col justify-between p-1 transition-all overflow-hidden
                 ${colorClass} ${highlight ? 'ring-2 ring-yellow-400 brightness-125' : ''}
@@ -154,7 +201,7 @@ const ShipPartView: React.FC<{ part: ShipPart, onClick?: () => void, isEnemy?: b
         >
             <div className="flex justify-between items-center">
                 <div className={`${textColor}`}>{icon}</div>
-                {isFull && <div className="text-[10px] font-bold text-white shadow-black drop-shadow-md">{totalPower}</div>}
+                {totalPower > 0 && <div className="text-[10px] font-bold text-white shadow-black drop-shadow-md">{totalPower}</div>}
             </div>
 
             <div className="flex gap-0.5 justify-center mt-1">
@@ -215,6 +262,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [logs, setLogs] = useState<string[]>([]);
     const [showPool, setShowPool] = useState(false);
     const [animating, setAnimating] = useState(false);
+    const [tooltipPart, setTooltipPart] = useState<ShipPart | null>(null);
 
     // --- GAME LOGIC ---
 
@@ -331,12 +379,14 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         if (part.type === 'EMPTY') { addLog("そこには何もありません"); return; }
         
-        // Find first empty compatible slot
-        const slotIdx = part.slots.findIndex(s => s.value === null && (s.req === 'ANY' || s.req === card.color));
+        // Find first empty COMPATIBLE slot
+        // Rule: Card Color >= Slot Req Color
+        // White(1) < Blue(2) < Orange(3)
+        const slotIdx = part.slots.findIndex(s => s.value === null && isColorCompatible(card.color, s.req));
         
         if (slotIdx === -1) {
             if (part.slots.every(s => s.value !== null)) addLog("エネルギー充填完了しています");
-            else addLog("色が合いません！");
+            else addLog("色が合いません！(白<青<オレンジ)");
             return;
         }
 
@@ -395,12 +445,13 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 const rowParts = player.parts.slice(startIdx, startIdx + SHIP_WIDTH);
                 
                 rowParts.forEach(p => {
-                    const loadedCount = p.slots.filter(s => s.value !== null).length;
-                    const isFull = loadedCount === p.slots.length && p.slots.length > 0;
-                    
-                    if (isFull) {
-                        const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
-                        const output = Math.floor(p.basePower + energySum * p.multiplier);
+                    const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
+                    // Partial Power is valid
+                    if (energySum > 0) {
+                        let output = Math.floor(energySum * p.multiplier);
+                        // Full Charge Bonus
+                        const isFull = p.slots.every(s => s.value !== null) && p.slots.length > 0;
+                        if (isFull) output += p.basePower;
                         
                         if (p.type === 'CANNON' || p.type === 'MISSILE') pPower += output;
                         if (p.type === 'SHIELD') pShield += output;
@@ -541,11 +592,12 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         // Simplified prediction: Sum up currently loaded power in this row vs enemy power
         let pPower = 0;
         partsToRender.forEach(p => {
-             const loadedCount = p.slots.filter(s => s.value !== null).length;
-             const isFull = loadedCount === p.slots.length && p.slots.length > 0;
-             if (isFull && (p.type === 'CANNON' || p.type === 'MISSILE')) {
-                 const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
-                 pPower += Math.floor(p.basePower + energySum * p.multiplier);
+             const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
+             if (energySum > 0 && (p.type === 'CANNON' || p.type === 'MISSILE')) {
+                 let output = Math.floor(energySum * p.multiplier);
+                 const isFull = p.slots.every(s => s.value !== null) && p.slots.length > 0;
+                 if(isFull) output += p.basePower;
+                 pPower += output;
              }
         });
 
@@ -574,6 +626,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     <ShipPartView 
                                         part={part} 
                                         onClick={() => handlePartClick((pRelIdx * 3) + i)} 
+                                        onLongPress={(p) => setTooltipPart(p)}
                                         highlight={!!selectedCardId}
                                     />
                                 </div>
@@ -612,10 +665,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 <h1 className="text-4xl font-bold mb-4">紙飛行機バトル v2</h1>
                 <div className="max-w-md text-sm text-gray-300 space-y-2 mb-8 bg-slate-800 p-4 rounded border border-slate-600">
                     <p>・機体は3x3のモジュールで構成されています。</p>
-                    <p>・各行の合計出力で敵と競い合います。</p>
-                    <p>・モジュールにはエネルギーカードを装填します。</p>
-                    <p>・スロットの色に合ったカードしか入りません（白は任意）。</p>
-                    <p>・全てのスロットを埋めるとモジュールが起動します！</p>
+                    <p>・エネルギーの色には相性があります。</p>
+                    <p className="text-yellow-400 font-bold">・オレンジ &gt; 青 &gt; 白 (白スロットには何色でもOK！)</p>
+                    <p>・エネルギーを入れるだけで出力が出ます。</p>
+                    <p>・全スロットを埋めると起動ボーナスが加算されます！</p>
+                    <p>・モジュール長押しで詳細を確認できます。</p>
                 </div>
                 <button onClick={() => initBattle(1)} className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-8 rounded shadow-lg animate-pulse flex items-center">
                     <Play className="mr-2"/> 出撃
@@ -658,6 +712,24 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     {logs.map((l, i) => <div key={i} className="text-[10px] text-right bg-black/50 mb-0.5 px-1 rounded">{l}</div>)}
                 </div>
             </div>
+
+            {/* Tooltip Overlay */}
+            {tooltipPart && (
+                <div className="absolute inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={() => setTooltipPart(null)}>
+                    <div className="bg-slate-800 border-2 border-white p-6 rounded-lg max-w-sm w-full shadow-2xl relative" onClick={e => e.stopPropagation()}>
+                        <button onClick={() => setTooltipPart(null)} className="absolute top-2 right-2 text-gray-400 hover:text-white"><X size={24}/></button>
+                        <h3 className="text-xl font-bold text-yellow-400 mb-2 border-b border-gray-600 pb-2">{tooltipPart.name}</h3>
+                        <div className="text-sm text-gray-300 mb-4">{tooltipPart.description || "詳細なし"}</div>
+                        <div className="bg-black/40 p-2 rounded text-xs text-cyan-300 font-mono">
+                            <div>倍率: x{tooltipPart.multiplier}</div>
+                            <div>起動ボーナス: +{tooltipPart.basePower}</div>
+                            <div className="mt-2 text-gray-500">
+                                Output = (Energy * {tooltipPart.multiplier}) + {tooltipPart.basePower}(if full)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Bottom Controls */}
             <div className="h-44 md:h-52 bg-[#0a0a10] border-t border-cyan-900 p-2 flex gap-2 shrink-0 z-20">
