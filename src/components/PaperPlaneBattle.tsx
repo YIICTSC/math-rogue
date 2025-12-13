@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, AlertTriangle, RefreshCw, Layers, Crosshair, Skull, Heart, Battery, ChevronsRight, ChevronsLeft, Info, Check, Play, X, Box, Grid } from 'lucide-react';
+import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, AlertTriangle, RefreshCw, Layers, Crosshair, Skull, Heart, Battery, ChevronsRight, ChevronsLeft, Info, Check, Play, X, Box, Grid, Calendar, Hammer, ShoppingBag, Search, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 
@@ -45,6 +44,11 @@ interface ShipState {
     maxDurability: number;
     isStunned: boolean;
     parts: ShipPart[]; // Array of 9 parts (Row-major: 0,1,2 is Row0)
+    
+    // New Stats
+    starCoins: number;
+    vacationDays: number;
+    passivePower: number; // From Treasures
 }
 
 interface EnemyIntent {
@@ -60,7 +64,18 @@ interface PoolState {
     coolColors: EnergyColor[];
 }
 
-type GamePhase = 'TUTORIAL' | 'SETUP' | 'BATTLE' | 'REWARD' | 'VACATION' | 'GAME_OVER' | 'VICTORY';
+type GamePhase = 'TUTORIAL' | 'SETUP' | 'BATTLE' | 'VACATION' | 'GAME_OVER' | 'VICTORY';
+
+type VacationEventType = 'REPAIR' | 'PARTS' | 'ENERGY' | 'COIN' | 'TREASURE' | 'FUEL' | 'ENHANCE' | 'UNKNOWN' | 'SHOP' | 'MODIFY';
+
+interface VacationEvent {
+    id: string;
+    type: VacationEventType;
+    name: string;
+    description: string;
+    cost: number; // Days
+    tier: 1 | 2 | 3; // Value tier
+}
 
 // --- HELPERS ---
 
@@ -106,6 +121,30 @@ const ENEMY_DATA = [
     { name: "コンパス要塞", hp: 100, durability: 10, parts: ['CANNON', 'MISSILE', 'CANNON'] }, 
 ];
 
+const VACATION_EVENTS_DB: Omit<VacationEvent, 'id'>[] = [
+    { type: 'REPAIR', name: '応急修理', description: 'HPを10回復する。', cost: 1, tier: 1 },
+    { type: 'REPAIR', name: 'ドック入り', description: 'HPを全回復し、最大HPを+5する。', cost: 3, tier: 3 },
+    { type: 'FUEL', name: '燃料補給', description: '燃料を最大まで回復。', cost: 1, tier: 1 },
+    { type: 'FUEL', name: 'タンク増設', description: '最大燃料+1、燃料全回復。', cost: 3, tier: 3 },
+    { type: 'ENERGY', name: 'エネルギー採掘', description: 'エネルギー生成プールに「6」を追加。', cost: 2, tier: 2 },
+    { type: 'ENERGY', name: 'リアクター調整', description: '生成プールに「オレンジ」を追加。', cost: 2, tier: 2 },
+    { type: 'PARTS', name: 'パーツ回収', description: 'ランダムなパーツを1つ獲得する。', cost: 2, tier: 2 },
+    { type: 'PARTS', name: '軍需物資', description: '高性能なパーツを獲得する。', cost: 4, tier: 3 },
+    { type: 'COIN', name: 'アルバイト', description: 'スターコインを50獲得。', cost: 1, tier: 1 },
+    { type: 'COIN', name: '臨時ボーナス', description: 'スターコインを150獲得。', cost: 2, tier: 2 },
+    { type: 'TREASURE', name: '謎の宝箱', description: '永続的な攻撃力ボーナスを得る。', cost: 3, tier: 3 },
+    { type: 'ENHANCE', name: 'チューニング', description: 'HP上限+10。', cost: 2, tier: 2 },
+    { type: 'UNKNOWN', name: '謎のイベント', description: '何が起こるかわからない...', cost: 2, tier: 2 },
+];
+
+const PART_TEMPLATES: Omit<ShipPart, 'id'>[] = [
+    { type: 'CANNON', name: 'バスター砲', description: '標準的な威力の大砲。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 3, hp: 10 },
+    { type: 'MISSILE', name: '誘導ミサイル', description: '青エネルギーで高出力。', slots: [{req:'BLUE', value:null}, {req:'BLUE', value:null}], multiplier: 1.5, basePower: 5, hp: 10 },
+    { type: 'SHIELD', name: 'エネルギー盾', description: '高い防御力を発揮。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 5, hp: 15 },
+    { type: 'ENGINE', name: '高機動スラスター', description: '回避率と燃料効率が高い。', slots: [{req:'BLUE', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 2, hp: 10 },
+    { type: 'CANNON', name: '波動砲', description: 'オレンジ必須。超高火力。', slots: [{req:'ORANGE', value:null}, {req:'ORANGE', value:null}], multiplier: 2.0, basePower: 10, hp: 10 },
+];
+
 // --- COMPONENTS ---
 
 const EnergyCardView: React.FC<{ card: EnergyCard, onClick?: () => void, selected?: boolean }> = ({ card, onClick, selected }) => {
@@ -136,8 +175,9 @@ const ShipPartView: React.FC<{
     onClick?: () => void, 
     onLongPress?: (part: ShipPart) => void,
     isEnemy?: boolean, 
-    highlight?: boolean 
-}> = ({ part, onClick, onLongPress, isEnemy, highlight }) => {
+    highlight?: boolean,
+    pendingReplace?: boolean
+}> = ({ part, onClick, onLongPress, isEnemy, highlight, pendingReplace }) => {
     
     const longPressTimer = useRef<any>(null);
 
@@ -167,8 +207,11 @@ const ShipPartView: React.FC<{
     
     if (part.type === 'EMPTY') {
         return (
-            <div className="w-full h-full border border-dashed border-slate-700 bg-black/20 rounded flex items-center justify-center">
-                <div className="w-1 h-1 bg-slate-700 rounded-full"/>
+            <div 
+                onClick={onClick}
+                className={`w-full h-full border border-dashed ${pendingReplace ? 'border-yellow-400 bg-yellow-900/30 animate-pulse' : 'border-slate-700 bg-black/20'} rounded flex items-center justify-center cursor-pointer`}
+            >
+                {pendingReplace ? <div className="text-xs text-yellow-400 font-bold">HERE</div> : <div className="w-1 h-1 bg-slate-700 rounded-full"/>}
             </div>
         );
     }
@@ -196,6 +239,7 @@ const ShipPartView: React.FC<{
                 relative w-full h-full border rounded flex flex-col justify-between p-1 transition-all overflow-hidden
                 ${colorClass} ${highlight ? 'ring-2 ring-yellow-400 brightness-125' : ''}
                 ${isFull ? 'brightness-110 shadow-[inset_0_0_10px_rgba(255,255,255,0.2)]' : ''}
+                ${pendingReplace ? 'ring-2 ring-green-400 animate-pulse opacity-80' : ''}
                 cursor-pointer hover:bg-opacity-80
             `}
         >
@@ -249,13 +293,17 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [player, setPlayer] = useState<ShipState>({
         yOffset: 1, // Start middle
         hp: 40, maxHp: 40, fuel: MAX_FUEL, maxFuel: MAX_FUEL, durability: 0, maxDurability: 0, isStunned: false,
-        parts: JSON.parse(JSON.stringify(STARTING_PARTS_LAYOUT))
+        parts: JSON.parse(JSON.stringify(STARTING_PARTS_LAYOUT)),
+        starCoins: 0,
+        vacationDays: 0,
+        passivePower: 0
     });
 
     const [enemy, setEnemy] = useState<ShipState>({
         yOffset: 1,
         hp: 20, maxHp: 20, fuel: 0, maxFuel: 0, durability: 3, maxDurability: 3, isStunned: false,
-        parts: [] // Enemy parts are simplified (1 per row usually)
+        parts: [], // Enemy parts are simplified (1 per row usually)
+        starCoins: 0, vacationDays: 0, passivePower: 0
     });
 
     const [enemyIntents, setEnemyIntents] = useState<EnemyIntent[]>([]);
@@ -263,6 +311,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [showPool, setShowPool] = useState(false);
     const [animating, setAnimating] = useState(false);
     const [tooltipPart, setTooltipPart] = useState<ShipPart | null>(null);
+    
+    // Vacation State
+    const [vacationEvents, setVacationEvents] = useState<VacationEvent[]>([]);
+    const [vacationLog, setVacationLog] = useState<string>("休暇を楽しんでください。");
+    const [pendingPart, setPendingPart] = useState<ShipPart | null>(null); // Part waiting to be equipped
 
     // --- GAME LOGIC ---
 
@@ -286,7 +339,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             hp: template.hp + (stageNum * 5), maxHp: template.hp + (stageNum * 5),
             durability: template.durability + Math.floor(stageNum/2), maxDurability: template.durability + Math.floor(stageNum/2),
             fuel: 0, maxFuel: 0, isStunned: false,
-            parts: eParts
+            parts: eParts,
+            starCoins: 0, vacationDays: 0, passivePower: 0
         });
 
         // Reset Player Parts Loaded Values
@@ -370,6 +424,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     const handlePartClick = (partIndex: number) => {
+        if (phase === 'VACATION') {
+            handlePartEquip(partIndex);
+            return;
+        }
+
         if (!selectedCardId) return;
         const cardIndex = hand.findIndex(c => c.id === selectedCardId);
         if (cardIndex === -1) return;
@@ -380,8 +439,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         if (part.type === 'EMPTY') { addLog("そこには何もありません"); return; }
         
         // Find first empty COMPATIBLE slot
-        // Rule: Card Color >= Slot Req Color
-        // White(1) < Blue(2) < Orange(3)
         const slotIdx = part.slots.findIndex(s => s.value === null && isColorCompatible(card.color, s.req));
         
         if (slotIdx === -1) {
@@ -428,40 +485,45 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         let enemyStunDmg = 0; 
         let tempEnemyHp = enemy.hp;
         let tempPlayerHp = player.hp;
+        let tempFuel = player.fuel;
 
-        // Iterate Rows (0 to MAX_ROWS-1)
+        // Iterate Rows
         for (let r = 0; r < MAX_ROWS; r++) {
             if (tempEnemyHp <= 0) break;
 
-            // --- Player Power Calculation ---
-            // A row on the field might correspond to Ship Row 0, 1, or 2.
             const pRelIdx = r - player.yOffset;
             let pPower = 0;
             let pShield = 0;
+            let pEngine = 0;
             
             if (pRelIdx >= 0 && pRelIdx < SHIP_HEIGHT) {
-                // Get all parts in this row (e.g. indices 0,1,2 for Row 0)
                 const startIdx = pRelIdx * SHIP_WIDTH;
                 const rowParts = player.parts.slice(startIdx, startIdx + SHIP_WIDTH);
                 
                 rowParts.forEach(p => {
                     const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
-                    // Partial Power is valid
                     if (energySum > 0) {
                         let output = Math.floor(energySum * p.multiplier);
-                        // Full Charge Bonus
                         const isFull = p.slots.every(s => s.value !== null) && p.slots.length > 0;
                         if (isFull) output += p.basePower;
                         
+                        // Passive power buff
+                        if ((p.type === 'CANNON' || p.type === 'MISSILE')) output += player.passivePower;
+
                         if (p.type === 'CANNON' || p.type === 'MISSILE') pPower += output;
                         if (p.type === 'SHIELD') pShield += output;
-                        // Engine logic could go here (e.g. dodge chance or fuel restore)
+                        if (p.type === 'ENGINE') pEngine += output;
                     }
                 });
             }
 
-            // --- Enemy Power Calculation ---
-            // Simple mapping: Enemy Part Index matches relative row
+            let fuelRecovered = 0;
+            if (pEngine > 0) {
+                pShield += pEngine;
+                fuelRecovered = Math.ceil(pEngine / 2); 
+                tempFuel = Math.min(player.maxFuel, tempFuel + fuelRecovered);
+            }
+
             const eRelIdx = r - enemy.yOffset;
             const intent = enemyIntents.find(i => (i.row + enemy.yOffset) === r);
             let ePower = 0;
@@ -470,7 +532,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 ePower = intent.value;
             }
 
-            // --- Resolve Clash ---
             if (pPower > 0 || ePower > 0) {
                 if (pPower > ePower) {
                     const diff = pPower - ePower;
@@ -480,17 +541,16 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     
                 } else if (ePower > pPower) {
                     let diff = ePower - pPower;
-                    // Apply Shield
                     const blocked = Math.min(diff, pShield);
                     diff -= blocked;
                     
                     if (diff > 0) {
                         tempPlayerHp = Math.max(0, tempPlayerHp - diff);
-                        setPlayer(prev => ({...prev, hp: tempPlayerHp}));
                     }
                 }
             }
-            
+
+            setPlayer(prev => ({...prev, hp: tempPlayerHp, fuel: tempFuel}));
             await new Promise(r => setTimeout(r, 200));
         }
 
@@ -529,7 +589,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             }));
         }
 
-        // Cleanup: Clear loaded values
+        // Cleanup
         setPlayer(prev => ({ 
             ...prev, 
             parts: prev.parts.map(p => ({...p, slots: p.slots.map(s => ({...s, value: null})) })) 
@@ -546,7 +606,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             if (stage === 12) {
                 setPhase('VICTORY');
             } else {
-                setPhase('REWARD');
+                startVacation();
             }
         } else {
             setTurn(prev => prev + 1);
@@ -559,14 +619,128 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }
     };
 
-    const handleReward = () => {
-        // Simple reward for now
-        if (Math.random() > 0.5) {
-            setPlayer(p => ({...p, hp: Math.min(p.maxHp, p.hp + 10)}));
-            addLog("修理キットでHP回復！");
-        } else {
-            setPlayer(p => ({...p, maxFuel: p.maxFuel + 1, fuel: p.maxFuel + 1}));
-            addLog("燃料タンク拡張！");
+    // --- VACATION LOGIC ---
+
+    const generateVacationEvents = () => {
+        const events: VacationEvent[] = [];
+        const count = 3 + Math.floor(Math.random() * 2); // 3-4 events
+        
+        for (let i = 0; i < count; i++) {
+            const template = VACATION_EVENTS_DB[Math.floor(Math.random() * VACATION_EVENTS_DB.length)];
+            events.push({
+                ...template,
+                id: `vac_${Date.now()}_${i}`
+            });
+        }
+        setVacationEvents(events);
+    };
+
+    const startVacation = () => {
+        const days = 4 + Math.floor(Math.random() * 3); // 4-6 days
+        setPlayer(prev => ({ ...prev, vacationDays: days }));
+        setVacationLog("戦闘お疲れ様！休暇を楽しんでください。");
+        generateVacationEvents();
+        setPhase('VACATION');
+    };
+
+    const executeVacationEvent = (event: VacationEvent) => {
+        if (player.vacationDays < event.cost) {
+            setVacationLog("休暇日数が足りません！");
+            audioService.playSound('wrong');
+            return;
+        }
+
+        setPlayer(prev => ({ ...prev, vacationDays: prev.vacationDays - event.cost }));
+        let resultMsg = "";
+        
+        // Logic Switch
+        switch (event.type) {
+            case 'REPAIR':
+                const heal = event.tier === 1 ? 10 : 999;
+                if (event.tier === 3) setPlayer(p => ({ ...p, maxHp: p.maxHp + 5 }));
+                setPlayer(p => ({ ...p, hp: Math.min(p.maxHp, p.hp + heal) }));
+                resultMsg = "機体を修理しました。リフレッシュ！";
+                audioService.playSound('buff');
+                break;
+            case 'FUEL':
+                const fuel = event.tier === 1 ? MAX_FUEL : MAX_FUEL;
+                if (event.tier === 3) setPlayer(p => ({ ...p, maxFuel: p.maxFuel + 1 }));
+                setPlayer(p => ({ ...p, fuel: Math.min(p.maxFuel, p.fuel + fuel) }));
+                resultMsg = "燃料タンクを満タンにしました！";
+                audioService.playSound('buff');
+                break;
+            case 'COIN':
+                const coin = event.tier * 50;
+                setPlayer(p => ({ ...p, starCoins: p.starCoins + coin }));
+                resultMsg = `スターコインを ${coin} 獲得！`;
+                audioService.playSound('select');
+                break;
+            case 'ENERGY':
+                setPool(prev => ({
+                    ...prev,
+                    genNumbers: [...prev.genNumbers, event.tier === 2 ? 6 : 5],
+                    genColors: [...prev.genColors, event.tier === 2 ? 'ORANGE' : 'BLUE']
+                }));
+                resultMsg = "エネルギー生成プールを強化しました！";
+                audioService.playSound('buff');
+                break;
+            case 'TREASURE':
+                setPlayer(p => ({ ...p, passivePower: p.passivePower + 1 }));
+                resultMsg = "謎の宝物により、全パーツの出力が+1されました！";
+                audioService.playSound('win');
+                break;
+            case 'PARTS':
+                const template = PART_TEMPLATES[Math.floor(Math.random() * PART_TEMPLATES.length)];
+                let quality = event.tier === 3 ? 1.5 : 1.0;
+                const newPart: ShipPart = {
+                    id: `new_p_${Date.now()}`,
+                    type: template.type,
+                    name: template.name + (quality > 1 ? '+' : ''),
+                    description: template.description,
+                    slots: template.slots,
+                    multiplier: template.multiplier * quality,
+                    basePower: Math.floor(template.basePower * quality),
+                    hp: 10
+                };
+                setPendingPart(newPart);
+                resultMsg = `「${newPart.name}」を獲得！交換するスロットを選んでください。`;
+                audioService.playSound('select');
+                break;
+            case 'UNKNOWN':
+                if (Math.random() < 0.5) {
+                    setPlayer(p => ({...p, hp: Math.min(p.maxHp, p.hp + 20)}));
+                    resultMsg = "温泉を見つけた！HP回復。";
+                } else {
+                    setPlayer(p => ({...p, starCoins: p.starCoins + 100}));
+                    resultMsg = "埋蔵金を発掘！100コイン。";
+                }
+                audioService.playSound('select');
+                break;
+            default:
+                resultMsg = "リフレッシュしました。";
+                break;
+        }
+
+        setVacationLog(resultMsg);
+        setVacationEvents(prev => prev.filter(e => e.id !== event.id));
+    };
+
+    const handlePartEquip = (slotIdx: number) => {
+        if (!pendingPart) return;
+        
+        const newParts = [...player.parts];
+        newParts[slotIdx] = { ...pendingPart, id: `p_${Date.now()}_${slotIdx}` }; // Reset ID to ensure uniqueness in slot
+        
+        setPlayer(prev => ({ ...prev, parts: newParts }));
+        setPendingPart(null);
+        setVacationLog(`パーツを「${pendingPart.name}」に換装しました！`);
+        audioService.playSound('buff');
+    };
+
+    const endVacation = () => {
+        if (pendingPart) {
+            setVacationLog("パーツ交換を完了するかキャンセルしてください！");
+            return;
         }
         setStage(s => s + 1);
         initBattle(stage + 1);
@@ -578,18 +752,12 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         // --- Player Parts in this relative row ---
         const pRelIdx = rowIndex - player.yOffset;
         const inShip = pRelIdx >= 0 && pRelIdx < SHIP_HEIGHT;
-        
-        // Indices of parts in this row: (pRelIdx * 3) to (pRelIdx * 3 + 2)
         const partsToRender = inShip ? player.parts.slice(pRelIdx * 3, pRelIdx * 3 + 3) : [];
-
-        // Enemy Part (Simplified to 1 per row for enemy visual)
         const eRelIdx = rowIndex - enemy.yOffset;
         const ePart = (eRelIdx >= 0 && eRelIdx < SHIP_HEIGHT) ? enemy.parts[eRelIdx] : null;
-        
         const intent = enemyIntents.find(i => (i.row + enemy.yOffset) === rowIndex);
         
         let prediction = null;
-        // Simplified prediction: Sum up currently loaded power in this row vs enemy power
         let pPower = 0;
         partsToRender.forEach(p => {
              const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
@@ -597,6 +765,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                  let output = Math.floor(energySum * p.multiplier);
                  const isFull = p.slots.every(s => s.value !== null) && p.slots.length > 0;
                  if(isFull) output += p.basePower;
+                 output += player.passivePower; // Apply Passive
                  pPower += output;
              }
         });
@@ -616,8 +785,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         return (
             <div key={rowIndex} className="flex items-center h-20 md:h-24 border-b border-white/10 relative">
-                
-                {/* Player Side (3 Slots) */}
                 <div className="w-1/2 flex justify-end pr-2 border-r border-dashed border-white/20 relative">
                     {inShip ? (
                         <div className="flex gap-1 w-full justify-end">
@@ -628,6 +795,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                         onClick={() => handlePartClick((pRelIdx * 3) + i)} 
                                         onLongPress={(p) => setTooltipPart(p)}
                                         highlight={!!selectedCardId}
+                                        pendingReplace={!!pendingPart}
                                     />
                                 </div>
                             ))}
@@ -636,21 +804,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         <div className="w-full h-full opacity-10 bg-grid-pattern"></div>
                     )}
                 </div>
-
-                {/* Middle Lane (Prediction) */}
                 <div className="w-16 md:w-24 relative flex items-center justify-center shrink-0">
-                    {prediction ? prediction : (
-                        enemy.isStunned && ePart ? <div className="text-yellow-500 font-bold text-xs">STUNNED</div> : null
-                    )}
+                    {prediction ? prediction : (enemy.isStunned && ePart ? <div className="text-yellow-500 font-bold text-xs">STUNNED</div> : null)}
                 </div>
-
-                {/* Enemy Side */}
                 <div className="w-1/3 pl-2 border-l border-dashed border-white/20">
-                    {ePart && (
-                        <div className="w-full opacity-80">
-                            <ShipPartView part={ePart} isEnemy={true} />
-                        </div>
-                    )}
+                    {ePart && <div className="w-full opacity-80"><ShipPartView part={ePart} isEnemy={true} /></div>}
                 </div>
             </div>
         );
@@ -662,7 +820,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         return (
             <div className="w-full h-full bg-slate-900 text-white p-8 flex flex-col items-center justify-center font-mono">
                 <Send size={64} className="text-cyan-400 mb-4 animate-bounce"/>
-                <h1 className="text-4xl font-bold mb-4">紙飛行機バトル v2</h1>
+                <h1 className="text-4xl font-bold mb-4">紙飛行機バトル v2.1</h1>
                 <div className="max-w-md text-sm text-gray-300 space-y-2 mb-8 bg-slate-800 p-4 rounded border border-slate-600">
                     <p>・機体は3x3のモジュールで構成されています。</p>
                     <p>・エネルギーの色には相性があります。</p>
@@ -670,11 +828,93 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     <p>・エネルギーを入れるだけで出力が出ます。</p>
                     <p>・全スロットを埋めると起動ボーナスが加算されます！</p>
                     <p>・モジュール長押しで詳細を確認できます。</p>
+                    <p className="text-green-400 font-bold">・戦闘後は「休暇」で機体を強化しよう！</p>
                 </div>
                 <button onClick={() => initBattle(1)} className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-8 rounded shadow-lg animate-pulse flex items-center">
                     <Play className="mr-2"/> 出撃
                 </button>
                 <button onClick={onBack} className="mt-4 text-gray-500 hover:text-white underline text-xs">戻る</button>
+            </div>
+        );
+    }
+
+    if (phase === 'VACATION') {
+        return (
+            <div className="w-full h-full bg-slate-900 text-white p-4 font-mono relative overflow-hidden flex flex-col">
+                <div className="flex justify-between items-center mb-6 bg-slate-800 p-4 rounded-lg shadow-lg">
+                    <h2 className="text-2xl font-bold flex items-center text-cyan-300"><Calendar className="mr-2"/> 休暇モード</h2>
+                    <div className="flex gap-4">
+                        <div className="flex items-center text-yellow-400 font-bold"><Star className="mr-1" size={16}/> {player.starCoins}</div>
+                        <div className="flex items-center text-orange-400 font-bold bg-black/40 px-3 py-1 rounded border border-orange-500/50">残り {player.vacationDays} 日</div>
+                    </div>
+                </div>
+
+                <div className="flex-grow flex flex-col md:flex-row gap-6 overflow-hidden">
+                    {/* Event Selection */}
+                    <div className="flex-1 overflow-y-auto custom-scrollbar">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pb-20">
+                            {vacationEvents.map(event => (
+                                <button 
+                                    key={event.id}
+                                    onClick={() => !pendingPart && executeVacationEvent(event)}
+                                    disabled={!!pendingPart || player.vacationDays < event.cost}
+                                    className={`
+                                        bg-slate-800 border-2 rounded-xl p-4 flex flex-col items-center text-center relative group transition-all
+                                        ${pendingPart ? 'opacity-30 cursor-not-allowed' : (player.vacationDays < event.cost ? 'border-gray-700 opacity-50 cursor-not-allowed' : 'border-slate-600 hover:border-cyan-400 hover:bg-slate-700 hover:-translate-y-1 shadow-lg')}
+                                    `}
+                                >
+                                    <div className="absolute top-2 right-2 text-xs font-bold bg-black/50 px-2 py-0.5 rounded text-orange-300">{event.cost}日</div>
+                                    <div className="mb-2 p-3 bg-black/30 rounded-full">
+                                        {event.type === 'REPAIR' && <Hammer size={24} className="text-green-400"/>}
+                                        {event.type === 'FUEL' && <Fuel size={24} className="text-orange-400"/>}
+                                        {event.type === 'ENERGY' && <Zap size={24} className="text-yellow-400"/>}
+                                        {event.type === 'PARTS' && <Box size={24} className="text-cyan-400"/>}
+                                        {event.type === 'COIN' && <Star size={24} className="text-yellow-200"/>}
+                                        {event.type === 'TREASURE' && <Gift size={24} className="text-purple-400"/>}
+                                        {event.type === 'UNKNOWN' && <HelpCircle size={24} className="text-gray-400"/>}
+                                        {event.type === 'ENHANCE' && <RefreshCw size={24} className="text-pink-400"/>}
+                                    </div>
+                                    <div className="font-bold text-sm mb-1">{event.name}</div>
+                                    <div className="text-[10px] text-gray-400 leading-tight">{event.description}</div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Status / Log / Replace UI */}
+                    <div className="md:w-80 flex flex-col gap-4 shrink-0">
+                        {/* Status */}
+                        <div className="bg-black/40 p-4 rounded-lg border border-slate-700 text-sm space-y-2">
+                            <div className="flex justify-between"><span>HP:</span> <span className="text-green-400 font-bold">{player.hp}/{player.maxHp}</span></div>
+                            <div className="flex justify-between"><span>燃料:</span> <span className="text-orange-400 font-bold">{player.fuel}/{player.maxFuel}</span></div>
+                            <div className="flex justify-between"><span>パッシブ:</span> <span className="text-purple-400 font-bold">+{player.passivePower}</span></div>
+                        </div>
+
+                        {/* Parts Swap UI */}
+                        {pendingPart && (
+                            <div className="bg-slate-800 border-2 border-green-500 p-4 rounded-lg animate-pulse">
+                                <div className="text-center font-bold text-green-400 mb-2">パーツ獲得！</div>
+                                <div className="text-xs text-center mb-4">入れ替えるスロットを選択してください</div>
+                                <div className="grid grid-cols-3 gap-1 mb-4">
+                                    {player.parts.map((p, i) => (
+                                        <div key={i} className="aspect-square" onClick={() => handlePartEquip(i)}>
+                                            <ShipPartView part={p} pendingReplace={true} />
+                                        </div>
+                                    ))}
+                                </div>
+                                <button onClick={() => setPendingPart(null)} className="w-full bg-gray-600 text-xs py-2 rounded hover:bg-gray-500">破棄する</button>
+                            </div>
+                        )}
+
+                        <div className="bg-slate-900 border border-slate-700 p-3 rounded h-32 overflow-y-auto text-xs text-cyan-200 font-mono">
+                            {vacationLog}
+                        </div>
+
+                        <button onClick={endVacation} disabled={!!pendingPart} className={`w-full py-4 rounded-lg font-bold text-lg shadow-lg flex items-center justify-center ${pendingPart ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-cyan-600 hover:bg-cyan-500 text-white animate-pulse'}`}>
+                            出発する <ArrowRight className="ml-2"/>
+                        </button>
+                    </div>
+                </div>
             </div>
         );
     }
@@ -725,6 +965,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             <div>起動ボーナス: +{tooltipPart.basePower}</div>
                             <div className="mt-2 text-gray-500">
                                 Output = (Energy * {tooltipPart.multiplier}) + {tooltipPart.basePower}(if full)
+                                {player.passivePower > 0 && <div className="text-purple-400">+ {player.passivePower} (Passive)</div>}
                             </div>
                         </div>
                     </div>
@@ -789,7 +1030,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 </div>
             )}
 
-            {(phase === 'VICTORY' || phase === 'GAME_OVER' || phase === 'REWARD') && (
+            {(phase === 'VICTORY' || phase === 'GAME_OVER') && (
                 <div className="absolute inset-0 bg-black/80 z-50 flex items-center justify-center p-4 animate-in fade-in zoom-in duration-300">
                     <div className="bg-slate-800 p-8 rounded-xl border-4 border-slate-600 text-center shadow-2xl">
                         {phase === 'VICTORY' && (
@@ -805,17 +1046,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 <h2 className="text-4xl font-bold text-red-500 mb-2">DESTROYED</h2>
                                 <p className="text-gray-400">Stage {stage}</p>
                                 <button onClick={onBack} className="mt-8 bg-gray-600 px-8 py-3 rounded text-xl font-bold">Return</button>
-                            </>
-                        )}
-                        {phase === 'REWARD' && (
-                            <>
-                                <Check size={64} className="text-green-500 mx-auto mb-4"/>
-                                <h2 className="text-2xl font-bold text-white mb-2">BATTLE WON</h2>
-                                <div className="flex gap-4 mt-8">
-                                    <button onClick={handleReward} className="bg-yellow-600 hover:bg-yellow-500 px-6 py-3 rounded font-bold text-black flex items-center">
-                                        <Battery className="mr-2"/> 修理 & 補給
-                                    </button>
-                                </div>
                             </>
                         )}
                     </div>
