@@ -19,6 +19,7 @@ interface EnergyCard {
     id: string;
     value: number;
     color: EnergyColor;
+    isTemporary?: boolean; // New: If true, removed after battle
 }
 
 interface EnergySlot {
@@ -273,43 +274,42 @@ const PART_TEMPLATES: Omit<ShipPart, 'id'>[] = [
 
 // --- COMPONENTS ---
 
-const PoolView: React.FC<{ pool: PoolState, onClose: () => void }> = ({ pool, onClose }) => (
-    <div className="absolute inset-0 bg-black/90 z-50 flex items-center justify-center p-8" onClick={onClose}>
-        <div className="bg-slate-800 p-6 rounded-lg max-w-lg w-full border border-slate-600 shadow-2xl relative" onClick={e => e.stopPropagation()}>
-            <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
-            <h3 className="text-xl font-bold mb-6 flex items-center text-white"><Layers className="mr-2"/> Energy Pools</h3>
-            <div className="grid grid-cols-2 gap-8">
-                <div>
-                    <div className="text-cyan-400 font-bold mb-3 border-b border-cyan-700 pb-1">山札 (生成中)</div>
-                    <div className="text-xs text-gray-400 mb-1">数値:</div>
+const PoolView: React.FC<{ pool: PoolState, onClose: () => void }> = ({ pool, onClose }) => {
+    // Merge all numbers and colors for a simpler "Inventory" view
+    const allNumbers = [...pool.genNumbers, ...pool.coolNumbers].sort((a,b) => a - b);
+    const allColors = [...pool.genColors, ...pool.coolColors].sort((a,b) => getColorRank(b) - getColorRank(a));
+
+    return (
+        <div className="absolute inset-0 bg-black/90 z-50 flex items-center justify-center p-8" onClick={onClose}>
+            <div className="bg-slate-800 p-6 rounded-lg max-w-lg w-full border border-slate-600 shadow-2xl relative" onClick={e => e.stopPropagation()}>
+                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
+                <h3 className="text-xl font-bold mb-6 flex items-center text-white"><Layers className="mr-2"/> Energy Inventory</h3>
+                
+                <div className="mb-6">
+                    <div className="text-cyan-400 font-bold mb-3 border-b border-cyan-700 pb-1">所持エネルギー数値</div>
                     <div className="flex flex-wrap gap-1 font-mono text-sm mb-3">
-                        {pool.genNumbers.length > 0 ? pool.genNumbers.map((n, i) => <span key={i} className="bg-slate-700 px-1.5 rounded">{n}</span>) : <span className="text-gray-600">Empty</span>}
+                        {allNumbers.length > 0 ? allNumbers.map((n, i) => <span key={i} className="bg-slate-700 px-1.5 rounded">{n}</span>) : <span className="text-gray-600">Empty</span>}
                     </div>
-                    <div className="text-xs text-gray-400 mb-1">色:</div>
+                </div>
+                
+                <div>
+                    <div className="text-orange-400 font-bold mb-3 border-b border-orange-700 pb-1">所持エネルギー色</div>
                     <div className="flex flex-wrap gap-1">
-                        {pool.genColors.length > 0 ? pool.genColors.map((c, i) => (
-                            <div key={i} className={`w-4 h-4 rounded-full border border-black/50 ${c==='ORANGE'?'bg-orange-500':c==='BLUE'?'bg-blue-500':'bg-slate-200'}`} title={c}></div>
+                        {allColors.length > 0 ? allColors.map((c, i) => (
+                            <div key={i} className={`w-6 h-6 rounded border-2 border-black/50 ${c==='ORANGE'?'bg-orange-500':c==='BLUE'?'bg-blue-500':'bg-slate-200'}`} title={c}></div>
                         )) : <span className="text-gray-600 text-xs">Empty</span>}
                     </div>
                 </div>
-                <div>
-                    <div className="text-orange-400 font-bold mb-3 border-b border-orange-700 pb-1">捨て札 (冷却中)</div>
-                    <div className="text-xs text-gray-400 mb-1">数値:</div>
-                    <div className="flex flex-wrap gap-1 font-mono text-sm mb-3">
-                        {pool.coolNumbers.length > 0 ? pool.coolNumbers.map((n, i) => <span key={i} className="bg-slate-700 px-1.5 rounded">{n}</span>) : <span className="text-gray-600">Empty</span>}
-                    </div>
-                    <div className="text-xs text-gray-400 mb-1">色:</div>
-                    <div className="flex flex-wrap gap-1">
-                        {pool.coolColors.length > 0 ? pool.coolColors.map((c, i) => (
-                            <div key={i} className={`w-4 h-4 rounded-full border border-black/50 ${c==='ORANGE'?'bg-orange-500':c==='BLUE'?'bg-blue-500':'bg-slate-200'}`} title={c}></div>
-                        )) : <span className="text-gray-600 text-xs">Empty</span>}
-                    </div>
+                
+                <div className="text-xs text-gray-500 mt-6 text-center">
+                    合計: {allNumbers.length} 枚
                 </div>
+
+                <button onClick={onClose} className="mt-4 w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition-colors">閉じる</button>
             </div>
-            <button onClick={onClose} className="mt-8 w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition-colors">閉じる</button>
         </div>
-    </div>
-);
+    );
+};
 
 const EnergyCardView: React.FC<{ card: EnergyCard, onClick?: () => void, selected?: boolean, small?: boolean }> = ({ card, onClick, selected, small }) => {
     const bgColor = card.color === 'ORANGE' ? 'bg-orange-500' : card.color === 'BLUE' ? 'bg-blue-500' : 'bg-slate-200 text-black';
@@ -329,6 +329,7 @@ const EnergyCardView: React.FC<{ card: EnergyCard, onClick?: () => void, selecte
                 ${sizeClasses} ${borderColor} ${bgColor} 
                 flex flex-col items-center justify-center cursor-pointer transition-transform relative shadow-sm shrink-0
                 ${selected ? '-translate-y-1 ring-2 ring-yellow-400 z-10' : 'hover:-translate-y-0.5'}
+                ${card.isTemporary ? 'opacity-90 ring-1 ring-purple-400' : ''}
                 select-none touch-none
             `}
             style={{ WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
@@ -339,6 +340,7 @@ const EnergyCardView: React.FC<{ card: EnergyCard, onClick?: () => void, selecte
                 {card.color === 'ORANGE' && <Zap size={iconSize} className="text-yellow-200 fill-current"/>}
                 {card.color === 'BLUE' && <Wind size={iconSize} className="text-cyan-200 fill-current"/>}
             </div>
+            {card.isTemporary && <div className="absolute bottom-0 right-0 text-[6px] bg-purple-600 text-white px-0.5 rounded-tl">TEMP</div>}
         </div>
     );
 };
@@ -821,6 +823,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     const recycleCard = (card: EnergyCard) => {
+        // Skip recycling if it's temporary (generated by amplifier)
+        if (card.isTemporary) return;
+
         setPool(prev => ({
             ...prev,
             coolNumbers: [...prev.coolNumbers, card.value],
@@ -869,10 +874,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             const newCard: EnergyCard = {
                 id: `e_gen_${Date.now()}`,
                 value: newValue,
-                color: card.color 
+                color: card.color,
+                isTemporary: true // Generated cards are temporary for this battle
             };
             currentHandList.push(newCard); 
-            addLog(`増幅！ランク${newValue}のカードを生成！`);
+            addLog(`増幅！ランク${newValue}のカードを生成！(一時的)`);
             audioService.playSound('buff');
         }
 
@@ -1135,11 +1141,13 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setPlayer(p => ({...p, starCoins: p.starCoins + coins}));
         
         // --- FIX: Consolidate Pool & Clear Hand ---
-        // Ensure that any cards currently in hand are returned to the pool (cool pile) so they are available next battle/vacation.
+        // Clean up temporary cards from hand before returning to pool
+        const persistentHand = hand.filter(c => !c.isTemporary);
+
         setPool(current => ({
             ...current,
-            coolNumbers: [...current.coolNumbers, ...hand.map(c => c.value)],
-            coolColors: [...current.coolColors, ...hand.map(c => c.color)]
+            coolNumbers: [...current.coolNumbers, ...persistentHand.map(c => c.value)],
+            coolColors: [...current.coolColors, ...persistentHand.map(c => c.color)]
         }));
         setHand([]);
         // -------------------------------------------
@@ -1474,10 +1482,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     // Helper for clearing hand on final victory
     const handlePhaseComplete = (isVictory: boolean = false) => {
         if (isVictory) {
+            const persistentHand = hand.filter(c => !c.isTemporary);
             setPool(current => ({
                 ...current,
-                coolNumbers: [...current.coolNumbers, ...hand.map(c => c.value)],
-                coolColors: [...current.coolColors, ...hand.map(c => c.color)]
+                coolNumbers: [...current.coolNumbers, ...persistentHand.map(c => c.value)],
+                coolColors: [...current.coolColors, ...persistentHand.map(c => c.color)]
             }));
             setHand([]);
         }
