@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation, Droplets, Recycle } from 'lucide-react';
+import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation, Droplets, Recycle, Repeat } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { storageService } from '../services/storageService';
@@ -11,6 +11,7 @@ const MAX_ROWS = 5; // Battle grid height
 const SHIP_HEIGHT = 3; // Player ship height (Rows)
 const SHIP_WIDTH = 3; // Player ship width (Cols) -> Total 9 slots
 const MAX_FUEL = 3;
+const FINAL_STAGE_NORMAL = 12;
 
 type EnergyColor = 'WHITE' | 'BLUE' | 'ORANGE';
 
@@ -166,10 +167,17 @@ const STARTING_PARTS_LAYOUT: ShipPart[] = [
 ];
 
 const ENEMY_DATA = [
-    { name: "折り紙偵察機", hp: 30, durability: 4, parts: ['CANNON', 'EMPTY', 'CANNON'] }, // Simple 3-row mapping for enemy
-    { name: "ノート爆撃機", hp: 45, durability: 5, parts: ['CANNON', 'CANNON', 'EMPTY'] },
-    { name: "定規戦艦", hp: 70, durability: 6, parts: ['CANNON', 'CANNON', 'CANNON'] }, 
-    { name: "コンパス要塞", hp: 100, durability: 10, parts: ['CANNON', 'MISSILE', 'CANNON'] }, 
+    { name: "折り紙偵察機", hp: 30, durability: 4, parts: ['CANNON', 'EMPTY', 'CANNON'] }, // Stage 1-3
+    { name: "ノート爆撃機", hp: 45, durability: 5, parts: ['CANNON', 'CANNON', 'EMPTY'] }, // Stage 4-6
+    { name: "定規戦艦", hp: 70, durability: 6, parts: ['CANNON', 'CANNON', 'CANNON'] }, // Stage 7-9
+    { name: "コンパス要塞", hp: 100, durability: 10, parts: ['CANNON', 'MISSILE', 'CANNON'] }, // Stage 10-12
+    // New Enemies
+    { name: "修正液タンク", hp: 150, durability: 15, parts: ['SHIELD', 'CANNON', 'SHIELD'] }, // Tanky
+    { name: "カッター迎撃機", hp: 50, durability: 3, parts: ['MISSILE', 'MISSILE', 'MISSILE'] }, // High Firepower
+    { name: "分度器マザー", hp: 120, durability: 8, parts: ['CANNON', 'ENGINE', 'CANNON'] }, // Balanced
+    { name: "ホッチキス機動兵", hp: 80, durability: 6, parts: ['CANNON', 'EMPTY', 'MISSILE'] }, 
+    { name: "彫刻刀デストロイヤー", hp: 180, durability: 12, parts: ['MISSILE', 'CANNON', 'MISSILE'] },
+    { name: "暗黒文房具王", hp: 300, durability: 20, parts: ['MISSILE', 'MISSILE', 'MISSILE'] }, // Boss class
 ];
 
 const VACATION_EVENTS_DB: Omit<VacationEvent, 'id'>[] = [
@@ -531,6 +539,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [phase, setPhase] = useState<GamePhase>(savedData?.phase || 'TUTORIAL');
     const [stage, setStage] = useState(savedData?.stage || 1); 
     const [turn, setTurn] = useState(savedData?.turn || 1);
+    const [isEndless, setIsEndless] = useState(savedData?.isEndless || false);
     
     // Pools
     const [pool, setPool] = useState<PoolState>(savedData?.pool || {
@@ -565,6 +574,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [enemyIntents, setEnemyIntents] = useState<EnemyIntent[]>(savedData?.enemyIntents || []);
     const [logs, setLogs] = useState<string[]>([]);
     const [showPool, setShowPool] = useState(false);
+    const [showHandHelp, setShowHandHelp] = useState(false);
     const [animating, setAnimating] = useState(false);
     const [tooltipPart, setTooltipPart] = useState<ShipPart | null>(null);
     
@@ -586,20 +596,20 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     useEffect(() => {
         // Don't save on transient or terminal states immediately (though we clear on terminal)
-        // We clear save on GAME_OVER or VICTORY
-        if (phase === 'GAME_OVER' || phase === 'VICTORY') {
+        // We clear save on GAME_OVER or VICTORY (but Victory can transition to endless, handled manually)
+        if (phase === 'GAME_OVER') {
             storageService.clearPaperPlaneState();
         } else if (phase !== 'TUTORIAL') {
             if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
             saveDebounceRef.current = setTimeout(() => {
                 const stateToSave = {
-                    phase, stage, turn, pool, hand, player, enemy, enemyIntents,
+                    phase, stage, turn, pool, hand, player, enemy, enemyIntents, isEndless,
                     vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins
                 };
                 storageService.savePaperPlaneState(stateToSave);
             }, 1000); // 1 second debounce
         }
-    }, [phase, stage, turn, pool, hand, player, enemy, enemyIntents, vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins]);
+    }, [phase, stage, turn, pool, hand, player, enemy, enemyIntents, vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins, isEndless]);
 
     // On Mount BGM check
     useEffect(() => {
@@ -615,22 +625,42 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const addLog = (msg: string) => setLogs(prev => [msg, ...prev.slice(0, 4)]);
 
     const initBattle = (stageNum: number) => {
-        // Enemy Gen
-        const enemyIdx = Math.min(ENEMY_DATA.length - 1, Math.floor((stageNum - 1) / 3));
-        const template = ENEMY_DATA[enemyIdx];
-        
+        let enemyIdx;
+        let template;
+
+        if (stageNum <= 4) {
+            enemyIdx = Math.min(ENEMY_DATA.length - 1, Math.floor((stageNum - 1) / 1.5));
+            // Ensure bounds
+            enemyIdx = Math.max(0, Math.min(enemyIdx, ENEMY_DATA.length - 1));
+            template = ENEMY_DATA[enemyIdx];
+        } else {
+            // Random enemy from pool for later stages or endless
+            enemyIdx = Math.floor(Math.random() * ENEMY_DATA.length);
+            template = ENEMY_DATA[enemyIdx];
+        }
+
+        // Difficulty Scaling
+        let hp = template.hp + (stageNum * 8);
+        let dur = template.durability + Math.floor(stageNum / 2);
+
+        if (isEndless) {
+             const loop = Math.max(1, stageNum - FINAL_STAGE_NORMAL);
+             hp += loop * 30;
+             dur += loop * 2;
+        }
+
         // Enemy Parts (Simplified: Just assign to 3 rows)
         const eParts: ShipPart[] = template.parts.map((t, i) => ({
             id: `ep_${i}`,
             type: t as any,
-            name: t === 'CANNON' ? '敵砲台' : t === 'MISSILE' ? 'ミサイル' : '空き',
+            name: t === 'CANNON' ? '敵砲台' : t === 'MISSILE' ? 'ミサイル' : t === 'SHIELD' ? 'シールド' : t === 'ENGINE' ? 'エンジン' : '空き',
             slots: [], multiplier: 1, basePower: 0, hp: 10
         }));
 
         setEnemy({
             yOffset: 1,
-            hp: template.hp + (stageNum * 5), maxHp: template.hp + (stageNum * 5),
-            durability: template.durability + Math.floor(stageNum/2), maxDurability: template.durability + Math.floor(stageNum/2),
+            hp: hp, maxHp: hp,
+            durability: dur, maxDurability: dur,
             fuel: 0, maxFuel: 0, isStunned: false,
             parts: eParts,
             starCoins: 0, vacationDays: 0, passivePower: 0,
@@ -646,20 +676,35 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         setTurn(1);
         setHand([]);
-        generateEnemyIntents(1, eParts); 
+        generateEnemyIntents(1, eParts, stageNum); 
         drawEnergy(5); // Initial draw
         setPhase('BATTLE');
         addLog(`バトル開始！ 敵: ${template.name}`);
         audioService.playBGM('battle');
     };
 
-    const generateEnemyIntents = (turnNum: number, parts: ShipPart[]) => {
+    const generateEnemyIntents = (turnNum: number, parts: ShipPart[], currentStage: number) => {
         const intents: EnemyIntent[] = [];
+        const intensity = 0.5 + (currentStage * 0.05); // Increases attack frequency
+
         parts.forEach((p, idx) => {
-            if (p.type === 'CANNON' || p.type === 'MISSILE') {
-                if (Math.random() < 0.7) {
-                    const val = 3 + Math.floor(turnNum/2) + Math.floor(stage/2);
-                    intents.push({ row: idx, type: 'ATTACK', value: val });
+            const roll = Math.random();
+            const baseVal = 3 + Math.floor(turnNum/2) + Math.floor(currentStage/2);
+
+            if (p.type === 'CANNON') {
+                if (roll < Math.min(0.8, intensity)) {
+                    intents.push({ row: idx, type: 'ATTACK', value: baseVal });
+                }
+            } else if (p.type === 'MISSILE') {
+                // Missiles fire less often but harder
+                if (roll < Math.min(0.5, intensity * 0.7)) {
+                    intents.push({ row: idx, type: 'ATTACK', value: Math.floor(baseVal * 1.5) });
+                }
+            } else if (p.type === 'SHIELD') {
+                // Shields might buff durability? Currently not implemented in clash, so just occasional attack or skip
+                // Let's make shields occasionally attack weakly (bash)
+                if (roll < 0.2) {
+                     intents.push({ row: idx, type: 'ATTACK', value: Math.floor(baseVal * 0.5) });
                 }
             }
         });
@@ -863,9 +908,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             // Determine Enemy Hitbox
             let isEnemyHitbox = false;
             // Enemy parts are stored in a simple array (1 per row effectively, or mapped)
-            // The ENEMY_DATA structure uses an array of strings representing rows.
-            // When initializing, we create parts array matching that length.
-            // So eRelIdx maps directly to enemy.parts index if within bounds.
             if (eRelIdx >= 0 && eRelIdx < enemy.parts.length) {
                 const ep = enemy.parts[eRelIdx];
                 if (ep && ep.type !== 'EMPTY') {
@@ -999,7 +1041,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             audioService.playSound('lose');
         } else if (tempEnemyHp <= 0) {
             audioService.playSound('win');
-            if (stage === 12) {
+            if (stage === FINAL_STAGE_NORMAL && !isEndless) {
                 setPhase('VICTORY');
             } else {
                 setupRewardPhase();
@@ -1007,7 +1049,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         } else {
             setTurn(prev => prev + 1);
             if (!nextIsStunned) {
-                generateEnemyIntents(turn + 1, enemy.parts);
+                generateEnemyIntents(turn + 1, enemy.parts, stage);
             } else {
                 setEnemyIntents([]);
             }
@@ -1289,6 +1331,12 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         initBattle(stage + 1);
     };
 
+    const activateEndlessMode = () => {
+        setIsEndless(true);
+        setPhase('REWARD_SELECT');
+        setupRewardPhase();
+    };
+
     // --- RENDER HELPERS ---
 
     const renderGridRow = (rowIndex: number) => {
@@ -1406,7 +1454,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         return (
             <div className="w-full h-full bg-slate-900 text-white p-8 flex flex-col items-center justify-center font-mono">
                 <Send size={64} className="text-cyan-400 mb-4 animate-bounce"/>
-                <h1 className="text-4xl font-bold mb-4">紙飛行機バトル v2.5</h1>
+                <h1 className="text-4xl font-bold mb-4">紙飛行機バトル v2.6</h1>
                 <div className="max-w-md text-sm text-gray-300 space-y-2 mb-8 bg-slate-800 p-4 rounded border border-slate-600">
                     <p>・機体は3x3のモジュールで構成されています。</p>
                     <p>・エネルギーの色には相性があります。</p>
@@ -1696,7 +1744,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     <div className="flex items-center text-green-400 font-bold"><Heart size={16} className="mr-1"/> {player.hp}/{player.maxHp}</div>
                     <div className="flex items-center text-orange-400 font-bold"><Wind size={16} className="mr-1"/> {player.fuel}/{player.maxFuel}</div>
                 </div>
-                <div className="text-cyan-200 font-bold tracking-widest text-sm">STAGE {stage}-1</div>
+                <div className="text-cyan-200 font-bold tracking-widest text-sm flex items-center">
+                    STAGE {stage}
+                    {isEndless && <span className="ml-2 text-purple-400 text-xs border border-purple-500 px-1 rounded">ENDLESS</span>}
+                </div>
                 <button onClick={() => setShowPool(!showPool)} className="bg-slate-800 border border-slate-600 px-2 py-1 rounded text-xs hover:bg-slate-700">POOL</button>
             </div>
 
@@ -1757,6 +1808,21 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     </div>
                 </div>
             )}
+            
+            {/* Hand Help Tooltip */}
+            {showHandHelp && (
+                 <div className="absolute inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={() => setShowHandHelp(false)}>
+                    <div className="bg-slate-800 border-2 border-cyan-500 p-6 rounded-lg max-w-sm w-full shadow-2xl relative text-sm" onClick={e => e.stopPropagation()}>
+                        <h3 className="text-lg font-bold text-cyan-400 mb-4 flex items-center"><Info className="mr-2"/> エネルギーカードの仕組み</h3>
+                        <ul className="list-disc pl-5 space-y-2 text-gray-300">
+                            <li><span className="text-white font-bold">数値</span>: スロットに入れた時の出力パワーになります。</li>
+                            <li><span className="text-white font-bold">色</span>: スロットの要求色に合わせる必要があります。</li>
+                            <li><span className="text-orange-400 font-bold">オレンジ</span> &gt; <span className="text-blue-400 font-bold">青</span> &gt; <span className="text-slate-200 font-bold">白</span> の順でランクが高く、上位色は下位色のスロットにも使用可能です。</li>
+                        </ul>
+                        <button onClick={() => setShowHandHelp(false)} className="mt-6 w-full bg-cyan-700 py-2 rounded text-white font-bold">閉じる</button>
+                    </div>
+                </div>
+            )}
 
             {/* Bottom Controls */}
             <div className="h-44 md:h-52 bg-[#0a0a10] border-t border-cyan-900 p-2 flex gap-2 shrink-0 z-20">
@@ -1771,17 +1837,22 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 </div>
 
                 {/* Hand */}
-                <div className="flex-1 flex flex-wrap gap-1 content-start overflow-y-auto px-2 py-1 custom-scrollbar bg-black/20 rounded-lg border border-white/5">
-                    {hand.map(card => (
-                        <EnergyCardView 
-                            key={card.id} 
-                            card={card} 
-                            onClick={() => handleCardSelect(card.id)} 
-                            selected={selectedCardId === card.id}
-                            small={true}
-                        />
-                    ))}
-                    {hand.length === 0 && <div className="text-gray-600 text-xs w-full text-center mt-2">NO ENERGY</div>}
+                <div className="flex-1 relative flex flex-col bg-black/20 rounded-lg border border-white/5 overflow-hidden">
+                    <div className="absolute top-1 right-1 z-20">
+                         <button onClick={() => setShowHandHelp(true)} className="text-gray-500 hover:text-white"><HelpCircle size={14}/></button>
+                    </div>
+                    <div className="flex-1 flex flex-wrap gap-1 content-start overflow-y-auto px-2 py-1 custom-scrollbar">
+                        {hand.map(card => (
+                            <EnergyCardView 
+                                key={card.id} 
+                                card={card} 
+                                onClick={() => handleCardSelect(card.id)} 
+                                selected={selectedCardId === card.id}
+                                small={true}
+                            />
+                        ))}
+                        {hand.length === 0 && <div className="text-gray-600 text-xs w-full text-center mt-8">NO ENERGY</div>}
+                    </div>
                 </div>
 
                 {/* End Turn */}
@@ -1802,14 +1873,14 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         <h3 className="text-xl font-bold mb-4 flex items-center"><Layers className="mr-2"/> Energy Pools</h3>
                         <div className="grid grid-cols-2 gap-8">
                             <div>
-                                <div className="text-cyan-400 font-bold mb-2 border-b border-cyan-700 pb-1">Generating</div>
-                                <div className="text-xs text-gray-400 mb-2">Nums: {pool.genNumbers.join(', ')}</div>
-                                <div className="text-xs text-gray-400">Cols: {pool.genColors.map(c => c[0]).join('')}</div>
+                                <div className="text-cyan-400 font-bold mb-2 border-b border-cyan-700 pb-1">山札 (生成中)</div>
+                                <div className="text-xs text-gray-400 mb-2">数値: {pool.genNumbers.join(', ')}</div>
+                                <div className="text-xs text-gray-400">色: {pool.genColors.map(c => c === 'WHITE' ? '白' : c === 'BLUE' ? '青' : '橙').join('')}</div>
                             </div>
                             <div>
-                                <div className="text-orange-400 font-bold mb-2 border-b border-orange-700 pb-1">Cooling</div>
-                                <div className="text-xs text-gray-400 mb-2">Nums: {pool.coolNumbers.join(', ')}</div>
-                                <div className="text-xs text-gray-400">Cols: {pool.coolColors.map(c => c[0]).join('')}</div>
+                                <div className="text-orange-400 font-bold mb-2 border-b border-orange-700 pb-1">捨て札 (冷却中)</div>
+                                <div className="text-xs text-gray-400 mb-2">数値: {pool.coolNumbers.join(', ')}</div>
+                                <div className="text-xs text-gray-400">色: {pool.coolColors.map(c => c === 'WHITE' ? '白' : c === 'BLUE' ? '青' : '橙').join('')}</div>
                             </div>
                         </div>
                         <button onClick={() => setShowPool(false)} className="mt-6 w-full bg-slate-700 py-2 rounded text-sm">Close</button>
@@ -1824,7 +1895,13 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             <>
                                 <Trophy size={64} className="text-yellow-400 mx-auto mb-4 animate-bounce"/>
                                 <h2 className="text-4xl font-bold text-white mb-2">MISSION COMPLETE</h2>
-                                <button onClick={onBack} className="mt-8 bg-cyan-600 px-8 py-3 rounded text-xl font-bold">Return</button>
+                                <p className="text-gray-400 mb-6">全ステージクリアおめでとう！</p>
+                                <div className="flex flex-col gap-4">
+                                    <button onClick={activateEndlessMode} className="bg-purple-600 px-8 py-3 rounded text-xl font-bold hover:bg-purple-500 border-2 border-purple-400 flex items-center justify-center animate-pulse">
+                                        <Repeat className="mr-2" /> エンドレスモードへ
+                                    </button>
+                                    <button onClick={onBack} className="bg-cyan-600 px-8 py-3 rounded text-xl font-bold border-2 border-cyan-400">タイトルへ戻る</button>
+                                </div>
                             </>
                         )}
                         {phase === 'GAME_OVER' && (
