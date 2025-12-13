@@ -1004,7 +1004,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     if (phase === 'REWARD_SELECT') {
          return (
-             <div className="w-full h-full bg-black/90 text-white p-4 flex flex-col items-center justify-center font-mono z-50 relative">
+             <div className="w-full h-full bg-black/90 text-white p-4 flex flex-col items-center justify-start md:justify-center font-mono z-50 relative overflow-y-auto py-8">
                  <RenderTooltip />
                  <Trophy size={64} className="text-yellow-400 mb-4 animate-bounce"/>
                  <h2 className="text-4xl font-bold mb-4 text-white">VICTORY!</h2>
@@ -1014,18 +1014,18 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                  
                  <p className="text-gray-300 mb-4">戦利品を選択してください (長押しで詳細)</p>
                  
-                 <div className="flex flex-wrap gap-4 justify-center">
+                 <div className="flex flex-wrap gap-4 md:gap-8 justify-center mb-8 shrink-0">
                      {rewardOptions.map((part, i) => (
                          <div 
                             key={i} 
                             onClick={() => handleRewardSelect(part)}
-                            className="bg-slate-800 border-2 border-cyan-500 p-4 rounded-xl w-48 flex flex-col items-center cursor-pointer hover:scale-105 hover:bg-slate-700 transition-all shadow-lg group"
+                            className="bg-slate-800 border-2 border-cyan-500 p-4 rounded-xl w-32 md:w-48 flex flex-col items-center cursor-pointer hover:scale-105 hover:bg-slate-700 transition-all shadow-lg group"
                          >
                              <div className="w-16 h-16 mb-2">
                                  <ShipPartView part={part} onLongPress={(p) => setTooltipPart(p)} />
                              </div>
-                             <div className="font-bold text-cyan-300 mb-1">{part.name}</div>
-                             <div className="text-xs text-gray-400 text-center h-10 overflow-hidden leading-tight">{part.description}</div>
+                             <div className="font-bold text-cyan-300 mb-1 text-sm md:text-base">{part.name}</div>
+                             <div className="text-[10px] text-gray-400 text-center h-10 overflow-hidden leading-tight">{part.description}</div>
                              <button className="mt-2 bg-cyan-600 px-4 py-1 rounded text-xs font-bold group-hover:bg-cyan-500">獲得</button>
                          </div>
                      ))}
@@ -1036,7 +1036,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     if (phase === 'REWARD_EQUIP') {
          return (
-             <div className="w-full h-full bg-slate-900 text-white p-4 font-mono flex flex-col items-center relative">
+             <div className="w-full h-full bg-slate-900 text-white p-4 font-mono flex flex-col items-center relative overflow-y-auto">
                  <RenderTooltip />
                  <div className="text-center mb-6 mt-4">
                      <h2 className="text-2xl font-bold text-green-400 mb-2">パーツ換装</h2>
@@ -1046,7 +1046,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                  {pendingPart && (
                      <div className="flex items-center gap-4 mb-8 bg-slate-800 p-3 rounded-lg border border-slate-600">
                          <div className="text-xs text-gray-400">NEW:</div>
-                         <div className="w-20 h-20">
+                         <div className="w-16 h-16 md:w-20 md:h-20">
                              <ShipPartView part={pendingPart} onLongPress={(p) => setTooltipPart(p)} />
                          </div>
                          <div className="text-left">
@@ -1056,17 +1056,17 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                      </div>
                  )}
 
-                 <div className="bg-black/40 p-4 rounded-xl border-2 border-slate-700 mb-8">
+                 <div className="bg-black/40 p-4 rounded-xl border-2 border-slate-700 mb-8 shrink-0">
                      <div className="grid grid-cols-3 gap-2">
                          {player.parts.map((p, i) => (
-                             <div key={i} className="w-20 h-20" onClick={() => handlePartEquip(i)}>
+                             <div key={i} className="w-16 h-16 md:w-20 md:h-20" onClick={() => handlePartEquip(i)}>
                                  <ShipPartView part={p} pendingReplace={true} onLongPress={(p) => setTooltipPart(p)} />
                              </div>
                          ))}
                      </div>
                  </div>
 
-                 <div className="flex gap-4">
+                 <div className="flex gap-4 shrink-0 pb-8">
                      <button onClick={handleStorePart} className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-lg font-bold shadow-lg flex items-center">
                          <Archive size={20} className="mr-2"/> 格納庫に保管
                      </button>
@@ -1087,13 +1087,13 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     <p className="text-sm text-gray-300">船と格納庫のパーツを入れ替えます</p>
                 </div>
 
-                <div className="flex-grow flex flex-col md:flex-row gap-8 w-full max-w-5xl overflow-hidden min-h-0">
+                <div className="flex-grow flex flex-col md:flex-row gap-4 md:gap-8 w-full max-w-5xl overflow-hidden min-h-0">
                     {/* Ship Grid */}
-                    <div className="flex-1 flex flex-col items-center bg-black/40 p-4 rounded-xl border-2 border-slate-700 overflow-y-auto">
+                    <div className="flex-shrink-0 md:flex-1 flex flex-col items-center bg-black/40 p-2 md:p-4 rounded-xl border-2 border-slate-700 overflow-y-auto md:overflow-visible">
                         <div className="text-cyan-300 font-bold mb-4 flex items-center"><Send className="mr-2"/> SHIP</div>
-                        <div className="grid grid-cols-3 gap-3">
+                        <div className="grid grid-cols-3 gap-2 md:gap-3">
                             {player.parts.map((p, i) => (
-                                <div key={i} className="w-20 h-20 md:w-24 md:h-24 relative">
+                                <div key={i} className="w-16 h-16 md:w-24 md:h-24 relative">
                                     <ShipPartView 
                                         part={p} 
                                         onClick={() => handleHangarAction('SHIP', i)} 
@@ -1114,14 +1114,14 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     </div>
 
                     {/* Inventory */}
-                    <div className="flex-1 flex flex-col items-center bg-black/40 p-4 rounded-xl border-2 border-slate-700 overflow-y-auto custom-scrollbar">
+                    <div className="flex-1 flex flex-col items-center bg-black/40 p-2 md:p-4 rounded-xl border-2 border-slate-700 overflow-y-auto custom-scrollbar min-h-0">
                         <div className="text-orange-300 font-bold mb-4 flex items-center"><Archive className="mr-2"/> INVENTORY</div>
                         {player.partInventory.length === 0 ? (
                             <div className="text-gray-500 italic mt-8">Empty</div>
                         ) : (
-                            <div className="flex flex-wrap gap-3 justify-center">
+                            <div className="flex flex-wrap gap-2 md:gap-3 justify-center">
                                 {player.partInventory.map((p, i) => (
-                                    <div key={i} className="w-20 h-20 md:w-24 md:h-24 relative">
+                                    <div key={i} className="w-16 h-16 md:w-24 md:h-24 relative">
                                         <ShipPartView 
                                             part={p} 
                                             onClick={() => handleHangarAction('INV', i)} 
