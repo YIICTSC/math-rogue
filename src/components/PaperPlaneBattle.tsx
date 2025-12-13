@@ -114,6 +114,34 @@ const isColorCompatible = (cardColor: EnergyColor, slotReq: EnergyColor | 'ANY')
     return getColorRank(cardColor) >= getColorRank(slotReq);
 };
 
+const calculateBuffGrid = (parts: ShipPart[]): number[][] => {
+    const grid = Array(SHIP_HEIGHT).fill(0).map(() => Array(SHIP_WIDTH).fill(0));
+    parts.forEach((part, idx) => {
+        if (part.type === 'AMPLIFIER') {
+            const energySum = part.slots.reduce((s, slot) => s + (slot.value || 0), 0);
+            const isFull = part.slots.every(s => s.value !== null) && part.slots.length > 0;
+            
+            // Only provide bonus if active (has energy) or no slots required
+            if (energySum > 0 || (part.slots.length === 0)) { 
+                let power = Math.floor(energySum * part.multiplier);
+                if (isFull) power += part.basePower;
+                
+                const r = Math.floor(idx / SHIP_WIDTH);
+                const c = idx % SHIP_WIDTH;
+                
+                // Apply to adjacent
+                const neighbors = [{r:r-1,c}, {r:r+1,c}, {r,c:c-1}, {r,c:c+1}];
+                neighbors.forEach(n => {
+                    if (n.r >= 0 && n.r < SHIP_HEIGHT && n.c >= 0 && n.c < SHIP_WIDTH) {
+                        grid[n.r][n.c] += power;
+                    }
+                });
+            }
+        }
+    });
+    return grid;
+};
+
 // --- DATABASE ---
 
 const createEmptyPart = (id: string): ShipPart => ({
@@ -178,7 +206,7 @@ const PART_TEMPLATES: Omit<ShipPart, 'id'>[] = [
     
     // --- ENGINES ---
     { type: 'ENGINE', name: 'ソーラー帆', description: '白エネルギーを効率よく変換。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.5, basePower: 0, hp: 5 },
-    { type: 'ENGINE', name: '核融合炉', description: 'オレンジ専用。莫大な出力。', slots: [{req:'ORANGE', value:null}], multiplier: 4.0, basePower: 6, hp: 15 },
+    { type: 'ENGINE', name: '核融合炉', description: 'オレンジ専用。莫大な出力(シールド・燃料)。', slots: [{req:'ORANGE', value:null}], multiplier: 4.0, basePower: 6, hp: 15 },
     
     // --- SPECIALIZED ---
     { type: 'CANNON', name: 'スナイパー', description: '2スロットで精密射撃。', slots: [{req:'BLUE', value:null}, {req:'WHITE', value:null}], multiplier: 2.0, basePower: 5, hp: 10 },
@@ -269,8 +297,9 @@ const ShipPartView: React.FC<{
     isEnemy?: boolean, 
     highlight?: boolean,
     pendingReplace?: boolean,
-    showPower?: boolean
-}> = ({ part, onClick, onLongPress, isEnemy, highlight, pendingReplace, showPower = true }) => {
+    showPower?: boolean,
+    bonusPower?: number // NEW: Display Synergy
+}> = ({ part, onClick, onLongPress, isEnemy, highlight, pendingReplace, showPower = true, bonusPower = 0 }) => {
     
     const longPressTimer = useRef<any>(null);
 
@@ -328,6 +357,9 @@ const ShipPartView: React.FC<{
         totalPower = Math.floor(energySum * part.multiplier);
         if (isFull) totalPower += part.basePower;
     }
+    
+    // Add Bonus Power to display
+    const displayPower = totalPower + bonusPower;
 
     return (
         <div 
@@ -347,7 +379,13 @@ const ShipPartView: React.FC<{
         >
             <div className="flex justify-between items-center">
                 <div className={`${textColor}`}>{icon}</div>
-                {totalPower > 0 && showPower && part.type !== 'AMPLIFIER' && <div className="text-[10px] font-bold text-white shadow-black drop-shadow-md">{totalPower}</div>}
+                {/* Power Display */}
+                {((totalPower > 0) || (bonusPower > 0)) && showPower && part.type !== 'AMPLIFIER' && (
+                    <div className="text-[10px] font-bold text-white shadow-black drop-shadow-md flex items-center">
+                        {displayPower}
+                        {bonusPower > 0 && <span className="text-[8px] text-green-400 ml-0.5">+{bonusPower}</span>}
+                    </div>
+                )}
                 {part.type === 'AMPLIFIER' && isFull && <div className="text-[8px] font-bold text-yellow-300">UP!</div>}
                 {part.specialEffect === 'HEAL' && isFull && <div className="text-[8px] font-bold text-green-300">HEAL</div>}
             </div>
@@ -762,30 +800,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         let enemyStunDmg = 0;
 
         // PASS 1: Calculate Amplifier Buffs
-        const buffGrid = Array(SHIP_HEIGHT).fill(0).map(() => Array(SHIP_WIDTH).fill(0));
-        player.parts.forEach((part, idx) => {
-            if (part.type === 'AMPLIFIER') {
-                const energySum = part.slots.reduce((s, slot) => s + (slot.value || 0), 0);
-                const isFull = part.slots.every(s => s.value !== null) && part.slots.length > 0;
-                
-                // Only provide bonus if active (has energy)
-                if (energySum > 0 || (part.slots.length === 0)) { 
-                    let power = Math.floor(energySum * part.multiplier);
-                    if (isFull) power += part.basePower;
-                    
-                    const r = Math.floor(idx / SHIP_WIDTH);
-                    const c = idx % SHIP_WIDTH;
-                    
-                    // Apply to adjacent
-                    const neighbors = [{r:r-1,c}, {r:r+1,c}, {r,c:c-1}, {r,c:c+1}];
-                    neighbors.forEach(n => {
-                        if (n.r >= 0 && n.r < SHIP_HEIGHT && n.c >= 0 && n.c < SHIP_WIDTH) {
-                            buffGrid[n.r][n.c] += power;
-                        }
-                    });
-                }
-            }
-        });
+        const buffGrid = calculateBuffGrid(player.parts);
 
         // PASS 2: Calculate Row Powers
         for (let r = 0; r < MAX_ROWS; r++) {
@@ -1100,16 +1115,22 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         // Logic Switch
         switch (event.type) {
             case 'REPAIR':
-                const heal = event.tier === 1 ? 10 : 999;
-                if (event.tier === 3) setPlayer(p => ({ ...p, maxHp: p.maxHp + 5 }));
-                setPlayer(p => ({ ...p, hp: Math.min(p.maxHp, p.hp + heal) }));
+                setPlayer(prev => {
+                    let newMax = prev.maxHp;
+                    const heal = event.tier === 1 ? 10 : 999;
+                    if (event.tier === 3) newMax += 5;
+                    return { ...prev, maxHp: newMax, hp: Math.min(newMax, prev.hp + heal) };
+                });
                 resultMsg = "機体を修理しました。リフレッシュ！";
                 audioService.playSound('buff');
                 break;
             case 'FUEL':
-                const fuel = event.tier === 1 ? MAX_FUEL : MAX_FUEL;
-                if (event.tier === 3) setPlayer(p => ({ ...p, maxFuel: p.maxFuel + 1 }));
-                setPlayer(p => ({ ...p, fuel: Math.min(p.maxFuel, p.fuel + fuel) }));
+                setPlayer(prev => {
+                    let newMax = prev.maxFuel;
+                    const fuel = MAX_FUEL; 
+                    if (event.tier === 3) newMax += 1;
+                    return { ...prev, maxFuel: newMax, fuel: Math.min(newMax, prev.fuel + fuel) };
+                });
                 resultMsg = "燃料タンクを満タンにしました！";
                 audioService.playSound('buff');
                 break;
@@ -1150,6 +1171,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 setPendingPart(newPart);
                 resultMsg = `「${newPart.name}」を獲得！交換するスロットを選んでください。`;
                 audioService.playSound('select');
+                break;
+            case 'ENHANCE':
+                setPlayer(prev => ({ ...prev, maxHp: prev.maxHp + 10 }));
+                resultMsg = "船体を強化しました！HP上限+10";
+                audioService.playSound('buff');
                 break;
             case 'UNKNOWN':
                 if (Math.random() < 0.5) {
@@ -1278,27 +1304,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         let pPower = 0;
         
         // Pass 1: Calc Amps for Prediction
-        const buffGrid = Array(SHIP_HEIGHT).fill(0).map(() => Array(SHIP_WIDTH).fill(0));
-        if (inShip) {
-             player.parts.forEach((part, idx) => {
-                if (part.type === 'AMPLIFIER') {
-                    const energySum = part.slots.reduce((s, slot) => s + (slot.value || 0), 0);
-                    const isFull = part.slots.every(s => s.value !== null) && part.slots.length > 0;
-                    if (energySum > 0 || part.slots.length === 0) { 
-                        let power = Math.floor(energySum * part.multiplier);
-                        if (isFull) power += part.basePower;
-                        const r = Math.floor(idx / SHIP_WIDTH);
-                        const c = idx % SHIP_WIDTH;
-                        const neighbors = [{r:r-1,c}, {r:r+1,c}, {r,c:c-1}, {r,c:c+1}];
-                        neighbors.forEach(n => {
-                            if (n.r >= 0 && n.r < SHIP_HEIGHT && n.c >= 0 && n.c < SHIP_WIDTH) {
-                                buffGrid[n.r][n.c] += power;
-                            }
-                        });
-                    }
-                }
-            });
-        }
+        const buffGrid = calculateBuffGrid(player.parts);
         
         // Pass 2: Calc output
         partsToRender.forEach((p, colIdx) => {
@@ -1339,6 +1345,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                         onLongPress={(p) => setTooltipPart(p)}
                                         highlight={!!selectedCardId}
                                         pendingReplace={!!pendingPart}
+                                        bonusPower={buffGrid[pRelIdx][i]}
                                     />
                                 </div>
                             ))}
@@ -1496,6 +1503,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     }
 
     if (phase === 'HANGAR') {
+        const buffGrid = calculateBuffGrid(player.parts);
+
         return (
             <div className="w-full h-full bg-slate-900 text-white p-4 font-mono flex flex-col items-center relative overflow-hidden">
                 <RenderTooltip />
@@ -1509,19 +1518,24 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     <div className="flex-shrink-0 md:flex-1 flex flex-col items-center bg-black/40 p-2 md:p-4 rounded-xl border-2 border-slate-700 overflow-y-auto md:overflow-visible">
                         <div className="text-cyan-300 font-bold mb-4 flex items-center"><Send className="mr-2"/> SHIP</div>
                         <div className="grid grid-cols-3 gap-2 md:gap-3">
-                            {player.parts.map((p, i) => (
-                                <div key={i} className="w-16 h-16 md:w-24 md:h-24 relative">
-                                    <ShipPartView 
-                                        part={p} 
-                                        onClick={() => handleHangarAction('SHIP', i)} 
-                                        onLongPress={(p) => setTooltipPart(p)}
-                                        highlight={hangarSelection?.loc === 'SHIP' && hangarSelection.idx === i}
-                                    />
-                                    {hangarSelection?.loc === 'SHIP' && hangarSelection.idx === i && (
-                                        <div className="absolute inset-0 border-4 border-yellow-400 animate-pulse pointer-events-none rounded"></div>
-                                    )}
-                                </div>
-                            ))}
+                            {player.parts.map((p, i) => {
+                                const r = Math.floor(i / SHIP_WIDTH);
+                                const c = i % SHIP_WIDTH;
+                                return (
+                                    <div key={i} className="w-16 h-16 md:w-24 md:h-24 relative">
+                                        <ShipPartView 
+                                            part={p} 
+                                            onClick={() => handleHangarAction('SHIP', i)} 
+                                            onLongPress={(p) => setTooltipPart(p)}
+                                            highlight={hangarSelection?.loc === 'SHIP' && hangarSelection.idx === i}
+                                            bonusPower={buffGrid[r][c]}
+                                        />
+                                        {hangarSelection?.loc === 'SHIP' && hangarSelection.idx === i && (
+                                            <div className="absolute inset-0 border-4 border-yellow-400 animate-pulse pointer-events-none rounded"></div>
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
                         {hangarSelection?.loc === 'SHIP' && player.parts[hangarSelection.idx].type !== 'EMPTY' && (
                              <button onClick={handleUnequip} className="mt-6 bg-red-800 hover:bg-red-700 text-white px-6 py-2 rounded font-bold text-sm border border-red-500 flex items-center">
@@ -1563,6 +1577,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     }
 
     if (phase === 'VACATION') {
+        const buffGrid = calculateBuffGrid(player.parts);
+
         return (
             <div className="w-full h-full bg-slate-900 text-white p-2 md:p-4 font-mono relative overflow-hidden flex flex-col">
                 <RenderTooltip />
@@ -1593,11 +1609,15 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 <div className="text-sm text-center mb-4">入れ替えるスロットを選択してください</div>
                                 
                                 <div className="grid grid-cols-3 gap-2 mb-6 p-3 bg-black/50 rounded border border-slate-600">
-                                    {player.parts.map((p, i) => (
-                                        <div key={i} className="w-16 h-16 md:w-20 md:h-20" onClick={() => handlePartEquip(i)}>
-                                            <ShipPartView part={p} pendingReplace={true} onLongPress={(p) => setTooltipPart(p)} />
-                                        </div>
-                                    ))}
+                                    {player.parts.map((p, i) => {
+                                        const r = Math.floor(i / SHIP_WIDTH);
+                                        const c = i % SHIP_WIDTH;
+                                        return (
+                                            <div key={i} className="w-16 h-16 md:w-20 md:h-20" onClick={() => handlePartEquip(i)}>
+                                                <ShipPartView part={p} pendingReplace={true} onLongPress={(p) => setTooltipPart(p)} bonusPower={buffGrid[r][c]}/>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                                 
                                 <div className="flex gap-4">
