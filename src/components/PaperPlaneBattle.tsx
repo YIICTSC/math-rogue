@@ -406,8 +406,14 @@ const ClashOverlay: React.FC<{ clashState: ClashState }> = ({ clashState }) => {
                     } else if (clash.result === 'DRAW') {
                         pWidth = 50; eWidth = 50; // Spark in middle
                     } else {
-                        // None? Should fade out
-                        opacity = 0;
+                        // NONE (Pass through visual)
+                        if (clash.pPower > 0) {
+                            pWidth = 100; eWidth = 0; // Player beam goes through
+                        } else if (clash.ePower > 0) {
+                            pWidth = 0; eWidth = 100; // Enemy beam goes through
+                        } else {
+                            opacity = 0; // No power involved
+                        }
                     }
                 } else {
                     opacity = 0;
@@ -788,11 +794,17 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             let pShield = 0;
             let pEngine = 0;
             let pThorns = 0;
+
+            // Determine Player Hitbox (Is there any solid part in this row?)
+            let isPlayerHitbox = false;
             
             if (pRelIdx >= 0 && pRelIdx < SHIP_HEIGHT) {
                 const startIdx = pRelIdx * SHIP_WIDTH;
                 const rowParts = player.parts.slice(startIdx, startIdx + SHIP_WIDTH);
                 
+                // If any part in the row is NOT empty, it counts as a hitbox.
+                isPlayerHitbox = rowParts.some(p => p.type !== 'EMPTY');
+
                 rowParts.forEach((p, colIdx) => {
                     if (p.type === 'EMPTY' || p.type === 'AMPLIFIER') return;
 
@@ -833,20 +845,39 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 ePower = intent.value;
             }
 
+            // Determine Enemy Hitbox
+            let isEnemyHitbox = false;
+            // Enemy parts are stored in a simple array (1 per row effectively, or mapped)
+            // The ENEMY_DATA structure uses an array of strings representing rows.
+            // When initializing, we create parts array matching that length.
+            // So eRelIdx maps directly to enemy.parts index if within bounds.
+            if (eRelIdx >= 0 && eRelIdx < enemy.parts.length) {
+                const ep = enemy.parts[eRelIdx];
+                if (ep && ep.type !== 'EMPTY') {
+                    isEnemyHitbox = true;
+                }
+            }
+
             // Determine Clash Result
             let result: ClashRowData['result'] = 'NONE';
             let damage = 0;
 
             if (pPower > 0 || ePower > 0) {
                 if (pPower > ePower) {
-                    result = 'ENEMY_HIT';
-                    damage = pPower - ePower;
+                    if (isEnemyHitbox) {
+                        result = 'ENEMY_HIT';
+                        damage = pPower - ePower;
+                    } else {
+                        result = 'NONE'; // Pass through
+                    }
                 } else if (ePower > pPower) {
-                    result = 'PLAYER_HIT';
-                    let rawDmg = ePower - pPower;
-                    // Shield logic handled in application phase to show correct damage numbers
-                    // But here we calculate raw difference for beam logic
-                    damage = rawDmg; 
+                    if (isPlayerHitbox) {
+                        result = 'PLAYER_HIT';
+                        let rawDmg = ePower - pPower;
+                        damage = rawDmg; 
+                    } else {
+                        result = 'NONE'; // Pass through
+                    }
                 } else {
                     result = 'DRAW';
                 }
