@@ -143,12 +143,25 @@ const VACATION_EVENTS_DB: Omit<VacationEvent, 'id'>[] = [
 ];
 
 const PART_TEMPLATES: Omit<ShipPart, 'id'>[] = [
+    // Existing
     { type: 'CANNON', name: 'バスター砲', description: '標準的な威力の大砲。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 3, hp: 10 },
     { type: 'MISSILE', name: '誘導ミサイル', description: '青エネルギーで高出力。', slots: [{req:'BLUE', value:null}, {req:'BLUE', value:null}], multiplier: 1.5, basePower: 5, hp: 10 },
     { type: 'SHIELD', name: 'エネルギー盾', description: '高い防御力を発揮。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 5, hp: 15 },
     { type: 'ENGINE', name: '高機動スラスター', description: '回避率と燃料効率が高い。', slots: [{req:'BLUE', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 2, hp: 10 },
     { type: 'CANNON', name: '波動砲', description: 'オレンジ必須。超高火力。', slots: [{req:'ORANGE', value:null}, {req:'ORANGE', value:null}], multiplier: 2.0, basePower: 10, hp: 10 },
     { type: 'ENGINE', name: '増幅炉', description: 'ランク+1のカードを生成する。', slots: [{req:'BLUE', value:null}], multiplier: 0, basePower: 0, hp: 10, specialEffect: 'RANK_UP' },
+
+    // New Additions
+    { type: 'CANNON', name: 'バルカン砲', description: '白エネルギーで手軽に連射。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.0, basePower: 2, hp: 10 },
+    { type: 'CANNON', name: 'レールガン', description: '青エネルギー専用。貫通力重視。', slots: [{req:'BLUE', value:null}], multiplier: 3.0, basePower: 6, hp: 10 },
+    { type: 'MISSILE', name: 'ナパーム弾', description: 'オレンジ専用。広範囲高火力。', slots: [{req:'ORANGE', value:null}], multiplier: 2.5, basePower: 5, hp: 10 },
+    { type: 'SHIELD', name: 'スパイク装甲', description: '防御と同時に反撃(イメージ)。', slots: [{req:'ANY', value:null}], multiplier: 1.5, basePower: 2, hp: 20 },
+    { type: 'SHIELD', name: 'リペアキット', description: '白エネルギーで効率よく防御。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.5, basePower: 4, hp: 10 },
+    { type: 'ENGINE', name: 'ソーラー帆', description: '白エネルギーを効率よく変換。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.5, basePower: 0, hp: 5 },
+    { type: 'ENGINE', name: '核融合炉', description: 'オレンジ専用。莫大な出力。', slots: [{req:'ORANGE', value:null}], multiplier: 4.0, basePower: 6, hp: 15 },
+    { type: 'CANNON', name: 'スナイパー', description: '2スロットで精密射撃。', slots: [{req:'BLUE', value:null}, {req:'WHITE', value:null}], multiplier: 2.0, basePower: 5, hp: 10 },
+    { type: 'MISSILE', name: '拡散ポッド', description: '多数の白スロットを持つ。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 0.8, basePower: 3, hp: 10 },
+    { type: 'SHIELD', name: 'ミラーコート', description: '青エネルギーで特殊防御。', slots: [{req:'BLUE', value:null}, {req:'ANY', value:null}], multiplier: 1.3, basePower: 4, hp: 12 },
 ];
 
 // --- COMPONENTS ---
@@ -498,9 +511,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setPlayer(prev => ({ ...prev, parts: newParts }));
         
         // Remove original card from hand
-        // Note: cardIndex is based on original 'hand'. 
-        // currentHandList is 'hand' + potential new card at end.
-        // So cardIndex is valid removal index.
         currentHandList.splice(cardIndex, 1);
         
         setHand(currentHandList);
@@ -671,8 +681,16 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setPlayer(p => ({...p, starCoins: p.starCoins + coins}));
         
         const opts: ShipPart[] = [];
+        const pool = [...PART_TEMPLATES]; // Copy to allow splicing for unique selection
+
         for(let i=0; i<2; i++){
-            const template = PART_TEMPLATES[Math.floor(Math.random()*PART_TEMPLATES.length)];
+            if (pool.length === 0) break;
+            const idx = Math.floor(Math.random() * pool.length);
+            const template = pool[idx];
+            
+            // Remove selected from pool to prevent duplicate
+            pool.splice(idx, 1);
+            
             let quality = Math.random() < 0.2 ? 1.5 : 1.0;
             const newPart: ShipPart = {
                 id: `rew_p_${Date.now()}_${i}`,
