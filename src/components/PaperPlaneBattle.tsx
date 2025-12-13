@@ -958,77 +958,87 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     if (phase === 'VACATION') {
         return (
-            <div className="w-full h-full bg-slate-900 text-white p-4 font-mono relative overflow-hidden flex flex-col">
-                <div className="flex justify-between items-center mb-6 bg-slate-800 p-4 rounded-lg shadow-lg">
-                    <h2 className="text-2xl font-bold flex items-center text-cyan-300"><Calendar className="mr-2"/> 休暇モード</h2>
-                    <div className="flex gap-4">
+            <div className="w-full h-full bg-slate-900 text-white p-2 md:p-4 font-mono relative overflow-hidden flex flex-col">
+                <div className="flex justify-between items-center mb-2 bg-slate-800 p-3 rounded-lg shadow-lg shrink-0">
+                    <h2 className="text-lg md:text-2xl font-bold flex items-center text-cyan-300"><Calendar className="mr-2" size={20}/> <span className="hidden md:inline">休暇モード</span><span className="md:hidden">休暇</span></h2>
+                    <div className="flex gap-2 md:gap-4 text-sm">
                         <div className="flex items-center text-yellow-400 font-bold"><Star className="mr-1" size={16}/> {player.starCoins}</div>
-                        <div className="flex items-center text-orange-400 font-bold bg-black/40 px-3 py-1 rounded border border-orange-500/50">残り {player.vacationDays} 日</div>
+                        <div className="flex items-center text-orange-400 font-bold bg-black/40 px-2 py-0.5 rounded border border-orange-500/50">残{player.vacationDays}日</div>
                     </div>
                 </div>
 
-                <div className="flex-grow flex flex-col md:flex-row gap-6 overflow-hidden">
-                    {/* Event Selection */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar">
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pb-20">
-                            {vacationEvents.map(event => (
-                                <button 
-                                    key={event.id}
-                                    onClick={() => !pendingPart && executeVacationEvent(event)}
-                                    disabled={!!pendingPart || player.vacationDays < event.cost}
-                                    className={`
-                                        bg-slate-800 border-2 rounded-xl p-4 flex flex-col items-center text-center relative group transition-all
-                                        ${pendingPart ? 'opacity-30 cursor-not-allowed' : (player.vacationDays < event.cost ? 'border-gray-700 opacity-50 cursor-not-allowed' : 'border-slate-600 hover:border-cyan-400 hover:bg-slate-700 hover:-translate-y-1 shadow-lg')}
-                                    `}
-                                >
-                                    <div className="absolute top-2 right-2 text-xs font-bold bg-black/50 px-2 py-0.5 rounded text-orange-300">{event.cost}日</div>
-                                    <div className="mb-2 p-3 bg-black/30 rounded-full">
-                                        {event.type === 'REPAIR' && <Hammer size={24} className="text-green-400"/>}
-                                        {event.type === 'FUEL' && <Fuel size={24} className="text-orange-400"/>}
-                                        {event.type === 'ENERGY' && <Zap size={24} className="text-yellow-400"/>}
-                                        {event.type === 'PARTS' && <Box size={24} className="text-cyan-400"/>}
-                                        {event.type === 'COIN' && <Star size={24} className="text-yellow-200"/>}
-                                        {event.type === 'TREASURE' && <Gift size={24} className="text-purple-400"/>}
-                                        {event.type === 'UNKNOWN' && <HelpCircle size={24} className="text-gray-400"/>}
-                                        {event.type === 'ENHANCE' && <RefreshCw size={24} className="text-pink-400"/>}
-                                    </div>
-                                    <div className="font-bold text-sm mb-1">{event.name}</div>
-                                    <div className="text-[10px] text-gray-400 leading-tight">{event.description}</div>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+                {/* Status Strip */}
+                <div className="bg-black/40 p-2 rounded-lg border border-slate-700 text-xs md:text-sm flex justify-around mb-2 shrink-0 shadow-inner">
+                    <div className="flex items-center gap-1"><span>HP:</span> <span className="text-green-400 font-bold">{player.hp}/{player.maxHp}</span></div>
+                    <div className="flex items-center gap-1"><span>燃料:</span> <span className="text-orange-400 font-bold">{player.fuel}/{player.maxFuel}</span></div>
+                    <div className="flex items-center gap-1"><span>Pwr:</span> <span className="text-purple-400 font-bold">+{player.passivePower}</span></div>
+                </div>
 
-                    {/* Status / Log / Replace UI */}
-                    <div className="md:w-80 flex flex-col gap-4 shrink-0">
-                        {/* Status */}
-                        <div className="bg-black/40 p-4 rounded-lg border border-slate-700 text-sm space-y-2">
-                            <div className="flex justify-between"><span>HP:</span> <span className="text-green-400 font-bold">{player.hp}/{player.maxHp}</span></div>
-                            <div className="flex justify-between"><span>燃料:</span> <span className="text-orange-400 font-bold">{player.fuel}/{player.maxFuel}</span></div>
-                            <div className="flex justify-between"><span>パッシブ:</span> <span className="text-purple-400 font-bold">+{player.passivePower}</span></div>
-                        </div>
-
-                        {/* Parts Swap UI */}
-                        {pendingPart && (
-                            <div className="bg-slate-800 border-2 border-green-500 p-4 rounded-lg animate-pulse">
-                                <div className="text-center font-bold text-green-400 mb-2">パーツ獲得！</div>
-                                <div className="text-xs text-center mb-4">入れ替えるスロットを選択してください</div>
-                                <div className="grid grid-cols-3 gap-1 mb-4">
+                <div className="flex-grow flex flex-col md:flex-row gap-4 overflow-hidden min-h-0">
+                    {/* Event Selection Area */}
+                    <div className="flex-1 overflow-y-auto custom-scrollbar relative bg-black/20 rounded-lg p-2 border border-slate-800/50">
+                        {pendingPart ? (
+                            <div className="bg-slate-800 border-2 border-green-500 p-4 rounded-lg animate-in zoom-in flex flex-col items-center justify-center min-h-full">
+                                <div className="text-center font-bold text-green-400 mb-2 text-lg">NEW PARTS!</div>
+                                <div className="w-24 h-24 mb-4">
+                                    <ShipPartView part={pendingPart} />
+                                </div>
+                                <div className="text-sm text-center mb-4">入れ替えるスロットを選択してください</div>
+                                
+                                <div className="grid grid-cols-3 gap-2 mb-6 p-3 bg-black/50 rounded border border-slate-600">
                                     {player.parts.map((p, i) => (
-                                        <div key={i} className="aspect-square" onClick={() => handlePartEquip(i)}>
+                                        <div key={i} className="w-16 h-16 md:w-20 md:h-20" onClick={() => handlePartEquip(i)}>
                                             <ShipPartView part={p} pendingReplace={true} />
                                         </div>
                                     ))}
                                 </div>
-                                <button onClick={() => setPendingPart(null)} className="w-full bg-gray-600 text-xs py-2 rounded hover:bg-gray-500">破棄する</button>
+
+                                <button onClick={() => setPendingPart(null)} className="w-full max-w-xs bg-gray-600 text-sm py-3 rounded hover:bg-gray-500 font-bold flex items-center justify-center shadow-lg">
+                                    <Trash2 size={16} className="mr-2"/> 破棄する
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pb-20">
+                                {vacationEvents.map(event => (
+                                    <button 
+                                        key={event.id}
+                                        onClick={() => executeVacationEvent(event)}
+                                        disabled={player.vacationDays < event.cost}
+                                        className={`
+                                            bg-slate-800 border-2 rounded-xl p-3 flex flex-col items-center text-center relative group transition-all min-h-[120px] justify-between
+                                            ${player.vacationDays < event.cost ? 'border-gray-700 opacity-50 cursor-not-allowed' : 'border-slate-600 hover:border-cyan-400 hover:bg-slate-700 hover:-translate-y-1 shadow-lg'}
+                                        `}
+                                    >
+                                        <div className="absolute top-2 right-2 text-[10px] font-bold bg-black/50 px-2 py-0.5 rounded text-orange-300 border border-orange-500/30">{event.cost}日</div>
+                                        <div className="mt-4 mb-2 p-2 bg-black/30 rounded-full border border-slate-600">
+                                            {event.type === 'REPAIR' && <Hammer size={20} className="text-green-400"/>}
+                                            {event.type === 'FUEL' && <Fuel size={20} className="text-orange-400"/>}
+                                            {event.type === 'ENERGY' && <Zap size={20} className="text-yellow-400"/>}
+                                            {event.type === 'PARTS' && <Box size={20} className="text-cyan-400"/>}
+                                            {event.type === 'COIN' && <Star size={20} className="text-yellow-200"/>}
+                                            {event.type === 'TREASURE' && <Gift size={20} className="text-purple-400"/>}
+                                            {event.type === 'UNKNOWN' && <HelpCircle size={20} className="text-gray-400"/>}
+                                            {event.type === 'ENHANCE' && <RefreshCw size={20} className="text-pink-400"/>}
+                                            {event.type === 'SHOP' && <ShoppingBag size={20} className="text-blue-400"/>}
+                                            {event.type === 'MODIFY' && <Palette size={20} className="text-indigo-400"/>}
+                                        </div>
+                                        <div className="w-full">
+                                            <div className="font-bold text-sm mb-1 truncate text-cyan-100">{event.name}</div>
+                                            <div className="text-[10px] text-gray-400 leading-tight line-clamp-2 min-h-[2.5em]">{event.description}</div>
+                                        </div>
+                                    </button>
+                                ))}
                             </div>
                         )}
+                    </div>
 
-                        <div className="bg-slate-900 border border-slate-700 p-3 rounded h-32 overflow-y-auto text-xs text-cyan-200 font-mono">
+                    {/* Bottom Controls */}
+                    <div className="md:w-80 flex flex-col gap-2 shrink-0">
+                        <div className="bg-slate-900 border border-slate-700 p-2 rounded h-20 md:h-32 overflow-y-auto text-xs text-cyan-200 font-mono custom-scrollbar shadow-inner">
                             {vacationLog}
                         </div>
 
-                        <button onClick={endVacation} disabled={!!pendingPart} className={`w-full py-4 rounded-lg font-bold text-lg shadow-lg flex items-center justify-center ${pendingPart ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-cyan-600 hover:bg-cyan-500 text-white animate-pulse'}`}>
+                        <button onClick={endVacation} disabled={!!pendingPart} className={`w-full py-3 md:py-4 rounded-lg font-bold text-lg shadow-lg flex items-center justify-center border-b-4 border-black/20 active:border-0 active:translate-y-1 transition-all ${!!pendingPart ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-cyan-600 hover:bg-cyan-500 text-white animate-pulse'}`}>
                             出発する <ArrowRight className="ml-2"/>
                         </button>
                     </div>
