@@ -1512,6 +1512,76 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     // --- RENDER HELPERS ---
 
+    const RenderTooltip = () => {
+        if (!tooltipPart) return null;
+        
+        // Helper to get type description
+        const getTypeDescription = (type: ShipPart['type']) => {
+            switch(type) {
+                case 'CANNON': return '出力は「攻撃力」になります。\n敵の耐久値を削り、HPにダメージを与えます。';
+                case 'MISSILE': return '出力は「攻撃力」になります。\nキャノンと同様ですが、青/橙エネルギーを使う高火力なものが多いです。';
+                case 'SHIELD': return '出力は「シールド」になります。\n敵の攻撃ダメージを軽減します。';
+                case 'ENGINE': return '出力は「シールド」に変換され、さらに出力の50%分「燃料」を回復します。\n回避と防御を両立する重要パーツです。';
+                case 'AMPLIFIER': return '隣接するパーツ(上下左右)の出力を強化します。\nこれ自体は攻撃や防御を行いません。';
+                default: return '';
+            }
+        };
+
+        return (
+            <div className="absolute inset-0 bg-black/80 z-[60] flex items-center justify-center p-4" onClick={() => setTooltipPart(null)}>
+                <div className="bg-slate-800 border-2 border-white p-6 rounded-lg max-w-sm w-full shadow-2xl relative" onClick={e => e.stopPropagation()}>
+                    <button onClick={() => setTooltipPart(null)} className="absolute top-2 right-2 text-gray-400 hover:text-white"><X size={24}/></button>
+                    
+                    {/* Type Badge */}
+                    <div className="mb-2">
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded ${
+                            tooltipPart.type === 'CANNON' ? 'bg-red-900 text-red-200' :
+                            tooltipPart.type === 'MISSILE' ? 'bg-orange-900 text-orange-200' :
+                            tooltipPart.type === 'SHIELD' ? 'bg-blue-900 text-blue-200' :
+                            tooltipPart.type === 'ENGINE' ? 'bg-emerald-900 text-emerald-200' :
+                            'bg-purple-900 text-purple-200'
+                        }`}>
+                            {tooltipPart.type} TYPE
+                        </span>
+                    </div>
+
+                    <h3 className="text-xl font-bold text-yellow-400 mb-2 border-b border-gray-600 pb-2">{tooltipPart.name}</h3>
+                    
+                    <div className="text-sm text-gray-300 mb-4 min-h-[3em]">{tooltipPart.description || "詳細なし"}</div>
+                    
+                    {/* Type specific description */}
+                    <div className="bg-slate-700/50 p-2 rounded mb-4 text-xs text-white whitespace-pre-wrap border-l-2 border-yellow-500">
+                        {getTypeDescription(tooltipPart.type)}
+                    </div>
+
+                    <div className="bg-black/40 p-2 rounded text-xs text-cyan-300 font-mono">
+                        {tooltipPart.type !== 'AMPLIFIER' ? (
+                            <>
+                                <div>倍率: x{tooltipPart.multiplier}</div>
+                                <div>起動ボーナス: +{tooltipPart.basePower}</div>
+                                <div className="mt-2 text-gray-500">
+                                    Output = (Energy * {tooltipPart.multiplier}) + {tooltipPart.basePower}(if full)
+                                    {player.passivePower > 0 && <div className="text-purple-400">+ {player.passivePower} (Passive)</div>}
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div>強化ボーナス: +{tooltipPart.basePower}</div>
+                                <div className="mt-2 text-gray-500">
+                                    隣接するパーツ(上下左右)の出力を加算します。<br/>
+                                    ※エネルギー充填時のみ有効
+                                </div>
+                            </>
+                        )}
+                        {tooltipPart.specialEffect === 'HEAL' && <div className="text-green-400 mt-2 font-bold">HP自動回復機能付き</div>}
+                        {tooltipPart.specialEffect === 'RECYCLE' && <div className="text-teal-400 mt-2 font-bold">エネルギー回収機能付き</div>}
+                        {tooltipPart.specialEffect === 'THORNS' && <div className="text-red-400 mt-2 font-bold">反撃ダメージ (被弾時、防御出力の半分を敵に返す)</div>}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     const renderGridRow = (rowIndex: number) => {
         // --- Player Parts in this relative row ---
         const pRelIdx = rowIndex - player.yOffset;
@@ -1580,42 +1650,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 </div>
                 <div className="w-1/3 pl-2 border-l border-dashed border-white/20">
                     {ePart && <div className="w-full opacity-80"><ShipPartView part={ePart} isEnemy={true} /></div>}
-                </div>
-            </div>
-        );
-    };
-
-    const RenderTooltip = () => {
-        if (!tooltipPart) return null;
-        return (
-            <div className="absolute inset-0 bg-black/80 z-[60] flex items-center justify-center p-4" onClick={() => setTooltipPart(null)}>
-                <div className="bg-slate-800 border-2 border-white p-6 rounded-lg max-w-sm w-full shadow-2xl relative" onClick={e => e.stopPropagation()}>
-                    <button onClick={() => setTooltipPart(null)} className="absolute top-2 right-2 text-gray-400 hover:text-white"><X size={24}/></button>
-                    <h3 className="text-xl font-bold text-yellow-400 mb-2 border-b border-gray-600 pb-2">{tooltipPart.name}</h3>
-                    <div className="text-sm text-gray-300 mb-4">{tooltipPart.description || "詳細なし"}</div>
-                    <div className="bg-black/40 p-2 rounded text-xs text-cyan-300 font-mono">
-                        {tooltipPart.type !== 'AMPLIFIER' ? (
-                            <>
-                                <div>倍率: x{tooltipPart.multiplier}</div>
-                                <div>起動ボーナス: +{tooltipPart.basePower}</div>
-                                <div className="mt-2 text-gray-500">
-                                    Output = (Energy * {tooltipPart.multiplier}) + {tooltipPart.basePower}(if full)
-                                    {player.passivePower > 0 && <div className="text-purple-400">+ {player.passivePower} (Passive)</div>}
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <div>強化ボーナス: +{tooltipPart.basePower}</div>
-                                <div className="mt-2 text-gray-500">
-                                    隣接するパーツ(上下左右)の出力を加算します。<br/>
-                                    ※エネルギー充填時のみ有効
-                                </div>
-                            </>
-                        )}
-                        {tooltipPart.specialEffect === 'HEAL' && <div className="text-green-400 mt-2 font-bold">HP自動回復機能付き</div>}
-                        {tooltipPart.specialEffect === 'RECYCLE' && <div className="text-teal-400 mt-2 font-bold">エネルギー回収機能付き</div>}
-                        {tooltipPart.specialEffect === 'THORNS' && <div className="text-red-400 mt-2 font-bold">反撃ダメージ (被弾時、防御出力の半分を敵に返す)</div>}
-                    </div>
                 </div>
             </div>
         );
