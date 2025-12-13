@@ -33,7 +33,7 @@ interface ShipPart {
     multiplier: number; // Effect multiplier per energy
     basePower: number; // Flat bonus when activated (Full slots)
     hp: number; // Part HP (Visual mainly)
-    specialEffect?: 'RANK_UP' | 'HEAL' | 'RECYCLE'; // New special effect types
+    specialEffect?: 'RANK_UP' | 'HEAL' | 'RECYCLE' | 'THORNS'; // New special effect types
 }
 
 interface ShipState {
@@ -155,7 +155,7 @@ const PART_TEMPLATES: Omit<ShipPart, 'id'>[] = [
     { type: 'CANNON', name: 'バルカン砲', description: '白エネルギーで手軽に連射。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.0, basePower: 2, hp: 10 },
     { type: 'CANNON', name: 'レールガン', description: '青エネルギー専用。貫通力重視。', slots: [{req:'BLUE', value:null}], multiplier: 3.0, basePower: 6, hp: 10 },
     { type: 'MISSILE', name: 'ナパーム弾', description: 'オレンジ専用。広範囲高火力。', slots: [{req:'ORANGE', value:null}], multiplier: 2.5, basePower: 5, hp: 10 },
-    { type: 'SHIELD', name: 'スパイク装甲', description: '防御と同時に反撃(イメージ)。', slots: [{req:'ANY', value:null}], multiplier: 1.5, basePower: 2, hp: 20 },
+    { type: 'SHIELD', name: 'スパイク装甲', description: '防御と同時に反撃(イメージ)。', slots: [{req:'ANY', value:null}], multiplier: 1.5, basePower: 2, hp: 20, specialEffect: 'THORNS' },
     { type: 'SHIELD', name: 'リペアキット', description: '白エネルギーで効率よく防御。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.5, basePower: 4, hp: 10 },
     
     // --- ENGINES ---
@@ -196,7 +196,7 @@ const PART_TEMPLATES: Omit<ShipPart, 'id'>[] = [
 
     // --- LUNCH & SURVIVAL (給食・サバイバル) ---
     { type: 'SHIELD', name: '自己修復ナノ', description: '起動時に船体HPを5回復する。', slots: [{req:'ORANGE', value:null}], multiplier: 0, basePower: 0, hp: 10, specialEffect: 'HEAL' },
-    { type: 'ENGINE', name: 'エネルギー吸収装置', description: '使用したカードを冷却プールへ即回収。', slots: [{req:'BLUE', value:null}], multiplier: 1.0, basePower: 2, hp: 10, specialEffect: 'RECYCLE' },
+    { type: 'ENGINE', name: 'エネルギー吸収装置', description: '起動時、燃料を1回復する。', slots: [{req:'BLUE', value:null}], multiplier: 1.0, basePower: 2, hp: 10, specialEffect: 'RECYCLE' },
     { type: 'ENGINE', name: 'あしたのジョーロ', description: '水力エンジン。白のみで高効率。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.8, basePower: 1, hp: 8 },
     { type: 'SHIELD', name: '揚げパンアーマー', description: '砂糖のコーティングで衝撃吸収。', slots: [{req:'WHITE', value:null}, {req:'ORANGE', value:null}], multiplier: 1.5, basePower: 5, hp: 15 },
     { type: 'MISSILE', name: '冷凍ミカン爆弾', description: 'カチカチのミカンを投下。', slots: [{req:'BLUE', value:null}], multiplier: 3.0, basePower: 3, hp: 8 },
@@ -278,6 +278,7 @@ const ShipPartView: React.FC<{
     if (part.specialEffect === 'RANK_UP') { colorClass = 'bg-purple-900/60 border-purple-500/50'; textColor='text-purple-200'; icon = <Zap size={14}/>; }
     if (part.specialEffect === 'HEAL') { colorClass = 'bg-green-900/60 border-green-500/50'; textColor='text-green-200'; icon = <Droplets size={14}/>; }
     if (part.specialEffect === 'RECYCLE') { colorClass = 'bg-teal-900/60 border-teal-500/50'; textColor='text-teal-200'; icon = <Recycle size={14}/>; }
+    if (part.specialEffect === 'THORNS') { colorClass = 'bg-slate-700 border-red-500'; textColor='text-red-300'; icon = <Radiation size={14}/>; }
 
     if (part.type === 'EMPTY') {
         return (
@@ -590,8 +591,35 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         let tempEnemyHp = enemy.hp;
         let tempPlayerHp = player.hp;
         let tempFuel = player.fuel;
+        
+        // PASS 1: Calculate Amplifier Buffs
+        const buffGrid = Array(SHIP_HEIGHT).fill(0).map(() => Array(SHIP_WIDTH).fill(0));
+        player.parts.forEach((part, idx) => {
+            if (part.type === 'AMPLIFIER') {
+                const energySum = part.slots.reduce((s, slot) => s + (slot.value || 0), 0);
+                const isFull = part.slots.every(s => s.value !== null) && part.slots.length > 0;
+                
+                // Only provide bonus if active (has energy)
+                if (energySum > 0 || (part.slots.length === 0)) { 
+                    // Amplifiers usually have slots. If no slots, always active?
+                    let power = Math.floor(energySum * part.multiplier);
+                    if (isFull) power += part.basePower;
+                    
+                    const r = Math.floor(idx / SHIP_WIDTH);
+                    const c = idx % SHIP_WIDTH;
+                    
+                    // Apply to adjacent
+                    const neighbors = [{r:r-1,c}, {r:r+1,c}, {r,c:c-1}, {r,c:c+1}];
+                    neighbors.forEach(n => {
+                        if (n.r >= 0 && n.r < SHIP_HEIGHT && n.c >= 0 && n.c < SHIP_WIDTH) {
+                            buffGrid[n.r][n.c] += power;
+                        }
+                    });
+                }
+            }
+        });
 
-        // Iterate Rows
+        // Iterate Rows for Combat
         for (let r = 0; r < MAX_ROWS; r++) {
             if (tempEnemyHp <= 0) break;
 
@@ -599,36 +627,15 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             let pPower = 0;
             let pShield = 0;
             let pEngine = 0;
+            let pThorns = 0;
             
             if (pRelIdx >= 0 && pRelIdx < SHIP_HEIGHT) {
                 const startIdx = pRelIdx * SHIP_WIDTH;
                 const rowParts = player.parts.slice(startIdx, startIdx + SHIP_WIDTH);
                 
-                // First pass for Amplifier calculation
-                const amplifiers = player.parts.filter(p => p.type === 'AMPLIFIER');
-                // (Logic simplified: calculate active amplifiers based on their slots)
-
                 rowParts.forEach((p, colIdx) => {
-                    // Check if Amplified (Neighbor Check)
-                    let buffBonus = 0;
-                    
-                    // Neighbors in grid: (pRelIdx, colIdx)
-                    const neighbors = [
-                        {r: pRelIdx - 1, c: colIdx}, {r: pRelIdx + 1, c: colIdx},
-                        {r: pRelIdx, c: colIdx - 1}, {r: pRelIdx, c: colIdx + 1}
-                    ];
-
-                    neighbors.forEach(n => {
-                        if (n.r >= 0 && n.r < SHIP_HEIGHT && n.c >= 0 && n.c < SHIP_WIDTH) {
-                            const nPart = player.parts[n.r * SHIP_WIDTH + n.c];
-                            if (nPart.type === 'AMPLIFIER') {
-                                const isAmpActive = nPart.slots.every(s => s.value !== null) && nPart.slots.length > 0;
-                                if (isAmpActive) {
-                                    buffBonus += nPart.basePower;
-                                }
-                            }
-                        }
-                    });
+                    // Skip Empty or Amplifier (Amplifiers don't fire themselves usually, just buff)
+                    if (p.type === 'EMPTY' || p.type === 'AMPLIFIER') return;
 
                     const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
                     if (energySum > 0) {
@@ -640,30 +647,40 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             if (p.specialEffect === 'HEAL') {
                                 tempPlayerHp = Math.min(player.maxHp, tempPlayerHp + 5);
                             }
-                            // Special Effect: RECYCLE (Immediate cool pool return is standard, maybe this adds extra fuel?)
+                            // Special Effect: RECYCLE
                             if (p.specialEffect === 'RECYCLE') {
-                                // Add bonus energy cards to cooling pool?
-                                // Let's make it add a card to hand for next turn
-                                // Not implemented in current logic structure easily.
-                                // Instead: Recover 1 Fuel?
                                 tempFuel = Math.min(player.maxFuel, tempFuel + 1);
                             }
                         }
                         
+                        // Add Buffs
+                        output += buffGrid[pRelIdx][colIdx];
                         output += player.passivePower; 
-                        output += buffBonus;
 
+                        // Route Output
                         if (p.type === 'CANNON' || p.type === 'MISSILE') pPower += output;
-                        if (p.type === 'SHIELD') pShield += output;
+                        if (p.type === 'SHIELD') {
+                            pShield += output;
+                            if (p.specialEffect === 'THORNS') {
+                                pThorns += p.basePower; // Thorns deals base damage back?
+                                // Let's scale thorns with output? 
+                                // Actually let's just add output to thorns if it's thorns type?
+                                // Shield usually adds to Defense.
+                                // Let's say Thorns deals half of Shield value as damage?
+                                // Or just basePower. Let's use basePower + buff for simplicity.
+                                // Actually, use output.
+                                pThorns += Math.ceil(output / 2);
+                            }
+                        }
                         if (p.type === 'ENGINE') pEngine += output;
                     }
                 });
             }
 
-            let fuelRecovered = 0;
+            // Engine Output: Recover Fuel / Add Shield (Evasion)
             if (pEngine > 0) {
                 pShield += pEngine;
-                fuelRecovered = Math.ceil(pEngine / 2); 
+                let fuelRecovered = Math.ceil(pEngine / 2); 
                 tempFuel = Math.min(player.maxFuel, tempFuel + fuelRecovered);
             }
 
@@ -675,24 +692,34 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 ePower = intent.value;
             }
 
-            if (pPower > 0 || ePower > 0) {
+            // Combat Resolution for this Row
+            if (pPower > 0 || ePower > 0 || pThorns > 0) {
+                // Player Attack
                 if (pPower > ePower) {
                     const diff = pPower - ePower;
                     tempEnemyHp = Math.max(0, tempEnemyHp - diff);
-                    setEnemy(prev => ({...prev, hp: tempEnemyHp}));
                     enemyStunDmg++;
-                    
-                } else if (ePower > pPower) {
+                } 
+                
+                // Enemy Attack
+                if (ePower > pPower) {
                     let diff = ePower - pPower;
+                    // Apply Shield
                     const blocked = Math.min(diff, pShield);
                     diff -= blocked;
                     
                     if (diff > 0) {
                         tempPlayerHp = Math.max(0, tempPlayerHp - diff);
                     }
+                    
+                    // Thorns Damage (if player was attacked)
+                    if (pThorns > 0) {
+                        tempEnemyHp = Math.max(0, tempEnemyHp - pThorns);
+                    }
                 }
             }
 
+            setEnemy(prev => ({...prev, hp: tempEnemyHp}));
             setPlayer(prev => ({...prev, hp: tempPlayerHp, fuel: tempFuel}));
             await new Promise(r => setTimeout(r, 200));
         }
@@ -1039,31 +1066,38 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         let prediction = null;
         let pPower = 0;
         
-        partsToRender.forEach((p, colIdx) => {
-             // Calculate potential buff from neighbors (for prediction)
-             let buffBonus = 0;
-             if (inShip) {
-                 const neighbors = [
-                    {r: pRelIdx - 1, c: colIdx}, {r: pRelIdx + 1, c: colIdx},
-                    {r: pRelIdx, c: colIdx - 1}, {r: pRelIdx, c: colIdx + 1}
-                 ];
-                 neighbors.forEach(n => {
-                    if (n.r >= 0 && n.r < SHIP_HEIGHT && n.c >= 0 && n.c < SHIP_WIDTH) {
-                        const nPart = player.parts[n.r * SHIP_WIDTH + n.c];
-                        if (nPart.type === 'AMPLIFIER') {
-                            buffBonus += nPart.basePower;
-                        }
+        // Pass 1: Calc Amps for Prediction
+        const buffGrid = Array(SHIP_HEIGHT).fill(0).map(() => Array(SHIP_WIDTH).fill(0));
+        if (inShip) {
+             player.parts.forEach((part, idx) => {
+                if (part.type === 'AMPLIFIER') {
+                    const energySum = part.slots.reduce((s, slot) => s + (slot.value || 0), 0);
+                    const isFull = part.slots.every(s => s.value !== null) && part.slots.length > 0;
+                    if (energySum > 0 || part.slots.length === 0) { 
+                        let power = Math.floor(energySum * part.multiplier);
+                        if (isFull) power += part.basePower;
+                        const r = Math.floor(idx / SHIP_WIDTH);
+                        const c = idx % SHIP_WIDTH;
+                        const neighbors = [{r:r-1,c}, {r:r+1,c}, {r,c:c-1}, {r,c:c+1}];
+                        neighbors.forEach(n => {
+                            if (n.r >= 0 && n.r < SHIP_HEIGHT && n.c >= 0 && n.c < SHIP_WIDTH) {
+                                buffGrid[n.r][n.c] += power;
+                            }
+                        });
                     }
-                 });
-             }
-
+                }
+            });
+        }
+        
+        // Pass 2: Calc output
+        partsToRender.forEach((p, colIdx) => {
              const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
              if (energySum > 0 && (p.type === 'CANNON' || p.type === 'MISSILE')) {
                  let output = Math.floor(energySum * p.multiplier);
                  const isFull = p.slots.every(s => s.value !== null) && p.slots.length > 0;
                  if(isFull) output += p.basePower;
                  output += player.passivePower; 
-                 output += buffBonus; // Add buff to prediction
+                 output += buffGrid[pRelIdx][colIdx];
                  pPower += output;
              }
         });
@@ -1141,6 +1175,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         )}
                         {tooltipPart.specialEffect === 'HEAL' && <div className="text-green-400 mt-2 font-bold">HP自動回復機能付き</div>}
                         {tooltipPart.specialEffect === 'RECYCLE' && <div className="text-teal-400 mt-2 font-bold">エネルギー回収機能付き</div>}
+                        {tooltipPart.specialEffect === 'THORNS' && <div className="text-red-400 mt-2 font-bold">反撃ダメージ (Thorns)</div>}
                     </div>
                 </div>
             </div>
@@ -1482,6 +1517,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             )}
                             {tooltipPart.specialEffect === 'HEAL' && <div className="text-green-400 mt-2 font-bold">HP自動回復機能付き</div>}
                             {tooltipPart.specialEffect === 'RECYCLE' && <div className="text-teal-400 mt-2 font-bold">エネルギー回収機能付き</div>}
+                            {tooltipPart.specialEffect === 'THORNS' && <div className="text-red-400 mt-2 font-bold">反撃ダメージ (Thorns)</div>}
                         </div>
                     </div>
                 </div>
