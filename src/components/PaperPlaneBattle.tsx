@@ -159,7 +159,9 @@ const EnergyCardView: React.FC<{ card: EnergyCard, onClick?: () => void, selecte
                 w-14 h-20 md:w-16 md:h-24 rounded-lg border-b-4 border-r-2 ${borderColor} ${bgColor} 
                 flex flex-col items-center justify-center cursor-pointer transition-transform relative shadow-md shrink-0
                 ${selected ? '-translate-y-4 ring-2 ring-yellow-400 z-10' : 'hover:-translate-y-1'}
+                select-none touch-none
             `}
+            style={{ WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
         >
             <div className={`text-xl md:text-3xl font-black ${card.color === 'WHITE' ? 'text-slate-800' : 'text-white'}`}>{card.value}</div>
             {/* Color Icon */}
@@ -210,7 +212,8 @@ const ShipPartView: React.FC<{
         return (
             <div 
                 onClick={onClick}
-                className={`w-full h-full border border-dashed ${pendingReplace ? 'border-yellow-400 bg-yellow-900/30 animate-pulse' : 'border-slate-700 bg-black/20'} rounded flex items-center justify-center cursor-pointer`}
+                className={`w-full h-full border border-dashed ${pendingReplace ? 'border-yellow-400 bg-yellow-900/30 animate-pulse' : 'border-slate-700 bg-black/20'} rounded flex items-center justify-center cursor-pointer select-none touch-none`}
+                style={{ WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
             >
                 {pendingReplace ? <div className="text-xs text-yellow-400 font-bold">HERE</div> : <div className="w-1 h-1 bg-slate-700 rounded-full"/>}
             </div>
@@ -242,7 +245,9 @@ const ShipPartView: React.FC<{
                 ${isFull ? 'brightness-110 shadow-[inset_0_0_10px_rgba(255,255,255,0.2)]' : ''}
                 ${pendingReplace ? 'ring-2 ring-green-400 animate-pulse opacity-80' : ''}
                 cursor-pointer hover:bg-opacity-80
+                select-none touch-none
             `}
+            style={{ WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
         >
             <div className="flex justify-between items-center">
                 <div className={`${textColor}`}>{icon}</div>
