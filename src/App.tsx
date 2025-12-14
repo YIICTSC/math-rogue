@@ -1258,7 +1258,7 @@ const App: React.FC = () => {
                     if (card.damageBasedOnBlock) { baseDamage += p.block; logParts[0] = `${baseDamage}(Block)`; }
                     if (card.damagePerCardInHand) baseDamage += (p.hand.filter(c => c.id !== card.id).length) * card.damagePerCardInHand!;
                     if (card.damagePerAttackPlayed) baseDamage += (p.attacksPlayedThisTurn - 1) * card.damagePerAttackPlayed!;
-                    if (card.damagePerStrike) baseDamage += (p.deck.filter(c => c.name.includes('ストライク') || c.name.includes('攻撃')).length) * card.damagePerStrike!;
+                    if (card.damagePerStrike) baseDamage += (p.deck.filter(c => c.name.includes('えんぴつ攻撃') || c.name.includes('攻撃')).length) * card.damagePerStrike!;
                     if (card.damagePerCardInDraw) baseDamage += p.drawPile.length * card.damagePerCardInDraw!;
 
                     if ((card.name === 'ナイフ' || card.name === 'SHIV') && p.powers['ACCURACY']) {
@@ -2112,8 +2112,8 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-screen bg-black flex items-center justify-center p-4">
-        <div className="w-full max-w-4xl h-[600px] border-[10px] md:border-[20px] border-gray-800 rounded-xl relative overflow-hidden shadow-2xl bg-black crt-scanline">
+    <div className="w-full h-[100dvh] bg-black flex items-center justify-center p-0 md:p-4 overflow-hidden">
+        <div className="w-full h-full md:max-w-4xl md:h-[600px] border-0 md:border-[10px] lg:border-[20px] border-gray-800 md:rounded-xl relative overflow-hidden shadow-2xl bg-black crt-scanline">
             
             {gameState.screen === GameScreen.START_MENU && (
                 <div className="w-full h-full bg-gray-900 flex items-center justify-center">
