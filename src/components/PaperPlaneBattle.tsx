@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation, Droplets, Recycle, Repeat, User, Lock, Users, Target, UserPlus, Gauge } from 'lucide-react';
+import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation, Droplets, Recycle, Repeat, User, Lock, Users, Target, UserPlus, Gauge, Swords } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { storageService, PaperPlaneProgress } from '../services/storageService';
@@ -663,6 +663,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [logs, setLogs] = useState<string[]>([]);
     const [showPool, setShowPool] = useState(false);
     const [showHandHelp, setShowHandHelp] = useState(false);
+    const [showGameHelp, setShowGameHelp] = useState(false); // Added Game Help State
     const [animating, setAnimating] = useState(false);
     const [tooltipPart, setTooltipPart] = useState<ShipPart | null>(null);
     
@@ -2276,6 +2277,50 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             {/* Pool Overlay */}
             {showPool && <PoolView pool={pool} onClose={() => setShowPool(false)} />}
             
+            {/* Game Help Modal */}
+            {showGameHelp && (
+                 <div className="absolute inset-0 bg-black/90 z-[60] flex items-center justify-center p-4" onClick={() => setShowGameHelp(false)}>
+                    <div className="bg-slate-800 border-2 border-yellow-500 p-6 rounded-lg max-w-lg w-full shadow-2xl relative text-sm max-h-[85vh] overflow-y-auto custom-scrollbar" onClick={e => e.stopPropagation()}>
+                        <button onClick={() => setShowGameHelp(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
+                        <h2 className="text-2xl font-bold text-yellow-400 mb-6 flex items-center"><HelpCircle className="mr-2"/> ゲームマニュアル</h2>
+                        
+                        <div className="space-y-6 text-gray-300">
+                            <section>
+                                <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><Settings className="mr-2 text-cyan-400"/> 機体構築</h3>
+                                <ul className="list-disc pl-5 space-y-1">
+                                    <li>機体は<strong>3x3</strong>のグリッドで構成されます。</li>
+                                    <li>パーツには<strong>スロット</strong>があり、手札のエネルギーカードをはめることで起動します。</li>
+                                    <li><strong>色相性:</strong> <span className="text-orange-400 font-bold">橙</span> &gt; <span className="text-blue-400 font-bold">青</span> &gt; <span className="text-slate-200 font-bold">白</span>。上位の色は下位のスロットにも使えます。</li>
+                                    <li>スロットを全て埋めると<strong>起動ボーナス</strong>が発生します。</li>
+                                </ul>
+                            </section>
+
+                            <section>
+                                <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><Swords className="mr-2 text-red-400"/> 戦闘システム</h3>
+                                <ul className="list-disc pl-5 space-y-1">
+                                    <li><strong>クラッシュバトル:</strong> 自機と敵機の同じ行(Row)同士がぶつかり合います。</li>
+                                    <li>出力の高い方が、差分をダメージとして相手に与えます。</li>
+                                    <li><strong>FIREボタン:</strong> 攻撃を実行し、ターンを進めます。</li>
+                                    <li><strong>移動:</strong> 上下に移動して敵の攻撃を避けたり、有利な位置を取りましょう（燃料消費）。</li>
+                                </ul>
+                            </section>
+
+                            <section>
+                                <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><ShoppingBag className="mr-2 text-green-400"/> 休暇パート</h3>
+                                <ul className="list-disc pl-5 space-y-1">
+                                    <li>ステージクリア後は休暇パートに入ります。</li>
+                                    <li><strong>日数</strong>を消費して修理や強化を行います。</li>
+                                    <li><strong>ショップ:</strong> スターコインを使って強力なパーツを購入できます。</li>
+                                    <li><strong>格納庫:</strong> パーツの配置換えや保管ができます。</li>
+                                </ul>
+                            </section>
+                        </div>
+                        
+                        <button onClick={() => setShowGameHelp(false)} className="mt-8 w-full bg-cyan-700 hover:bg-cyan-600 py-3 rounded text-white font-bold">閉じる</button>
+                    </div>
+                </div>
+            )}
+            
             {/* Header */}
             <div className="h-12 bg-black border-b border-cyan-900 flex justify-between items-center px-4 shrink-0 z-10">
                 <div className="flex items-center gap-4">
@@ -2286,7 +2331,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     STAGE {stage}
                     {isEndless && <span className="ml-2 text-purple-400 text-xs border border-purple-500 px-1 rounded">ENDLESS</span>}
                 </div>
-                <button onClick={() => setShowPool(!showPool)} className="bg-slate-800 border border-slate-600 px-2 py-1 rounded text-xs hover:bg-slate-700">POOL</button>
+                <div className="flex gap-2">
+                    <button onClick={() => setShowGameHelp(true)} className="bg-slate-800 border border-slate-600 px-2 py-1 rounded text-xs hover:bg-slate-700 flex items-center"><HelpCircle size={14} className="mr-1"/> HELP</button>
+                    <button onClick={() => setShowPool(!showPool)} className="bg-slate-800 border border-slate-600 px-2 py-1 rounded text-xs hover:bg-slate-700">POOL</button>
+                </div>
             </div>
 
             {/* Battle Grid */}
@@ -2321,7 +2369,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         <ul className="list-disc pl-5 space-y-2 text-gray-300">
                             <li><span className="text-white font-bold">数値</span>: スロットに入れた時の出力パワーになります。</li>
                             <li><span className="text-white font-bold">色</span>: スロットの要求色に合わせる必要があります。</li>
-                            <li><span className="text-orange-400 font-bold">オレンジ</span> &gt; <span className="text-blue-400 font-bold">青</span> &gt; <span className="text-slate-200 font-bold">白</span> の順でランクが高く、上位色は下位色のスロットにも使用可能です。</li>
+                            <li><span className="text-orange-400 font-bold">オレンジ</span> &gt; <span className="text-blue-400 font-bold">青</span> &gt; <span className="text-slate-200 font-bold">白</span> の順でランクが高く、上位色は下位のスロットにも使用可能です。</li>
                         </ul>
                         <button onClick={() => setShowHandHelp(false)} className="mt-6 w-full bg-cyan-700 py-2 rounded text-white font-bold">閉じる</button>
                     </div>
