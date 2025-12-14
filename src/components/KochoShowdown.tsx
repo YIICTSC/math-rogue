@@ -170,7 +170,7 @@ const CONSUMABLE_DB: KConsumable[] = [
 const SHOP_RELICS: KRelic[] = [
     { id: 'R_BOOTS', name: '瞬足の靴', desc: '移動系カードのCD-1', price: 60 },
     { id: 'R_GLOVES', name: 'パワー手袋', desc: '攻撃ダメージ+1', price: 120 },
-    { id: 'R_SHIELD', name: '安全ピン', desc: '毎ターンシールド+1', price: 100 },
+    { id: 'R_SHIELD', name: '安全ピン', desc: '戦闘開始時、シールド+4', price: 100 },
     { id: 'R_POTION', name: '回復セット', desc: 'HPを全回復', price: 50 },
     { id: 'R_FANG', name: '吸血の牙', desc: '敵を倒すとHP1回復', price: 150 },
     { id: 'R_THORN', name: 'トゲトゲ肩パッド', desc: '被ダメ時、敵に1ダメージ', price: 90 },
@@ -532,7 +532,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             turn: 1,
             player: { 
                 ...prev.player, 
-                shield: 0,
+                shield: prev.relics.some(r => r.id === 'R_SHIELD') ? 4 : 0,
                 // Do not reset HP/Barrier
             }, 
             enemies: newEnemies,
@@ -617,9 +617,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         let status = nextState.status;
         const generatedVfx: KochoVFX[] = [];
 
-        // Relic: Shield (Passive Shield)
-        const hasShieldRelic = current.relics.some(r => r.id === 'R_SHIELD');
-        if (hasShieldRelic) player.shield += 1;
         // Relic: Thorn
         const hasThornRelic = current.relics.some(r => r.id === 'R_THORN');
 
