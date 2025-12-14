@@ -440,7 +440,7 @@ class AudioService {
       }
   }
 
-  public playSound(effect: 'select' | 'attack' | 'block' | 'win' | 'lose' | 'correct' | 'wrong' | 'buff') {
+  public playSound(effect: 'select' | 'attack' | 'block' | 'win' | 'lose' | 'correct' | 'wrong' | 'buff' | 'debuff') {
       this.init();
       if (!this.ctx || !this.sfxGain || this.isMuted) return;
       const t = this.ctx.currentTime;
@@ -507,6 +507,11 @@ class AudioService {
               this.playOsc(400, t, 0.1, 'sine', 0.3, this.sfxGain);
               this.playOsc(600, t + 0.1, 0.1, 'sine', 0.3, this.sfxGain);
               this.playOsc(1000, t + 0.2, 0.3, 'sine', 0.2, this.sfxGain);
+              break;
+          case 'debuff':
+              this.playOsc(500, t, 0.1, 'sawtooth', 0.3, this.sfxGain);
+              this.playOsc(400, t + 0.1, 0.1, 'sawtooth', 0.3, this.sfxGain);
+              this.playOsc(300, t + 0.2, 0.3, 'sawtooth', 0.2, this.sfxGain);
               break;
       }
   }

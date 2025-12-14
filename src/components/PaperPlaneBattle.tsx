@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation, Droplets, Recycle, Repeat, User, Lock, Users, Target, UserPlus, Gauge, Swords } from 'lucide-react';
+import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation, Droplets, Recycle, Repeat, User, Lock, Users, Target, UserPlus, Gauge, Swords, Dice5, Ghost } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { storageService, PaperPlaneProgress } from '../services/storageService';
@@ -88,7 +88,7 @@ interface PoolState {
 
 type GamePhase = 'TUTORIAL' | 'SETUP' | 'BATTLE' | 'REWARD_SELECT' | 'REWARD_EQUIP' | 'VACATION' | 'GAME_OVER' | 'VICTORY' | 'HANGAR';
 
-type VacationEventType = 'REPAIR' | 'PARTS' | 'ENERGY' | 'COIN' | 'TREASURE' | 'FUEL' | 'ENHANCE' | 'UNKNOWN' | 'SHOP' | 'MODIFY' | 'TRAINING';
+type VacationEventType = 'REPAIR' | 'PARTS' | 'ENERGY' | 'COIN' | 'TREASURE' | 'FUEL' | 'ENHANCE' | 'UNKNOWN' | 'SHOP' | 'MODIFY' | 'TRAINING' | 'SACRIFICE' | 'GAMBLE';
 
 interface VacationEvent {
     id: string;
@@ -98,6 +98,7 @@ interface VacationEvent {
     cost: number; // Days
     coinCost?: number; // Star Coins (Optional)
     tier: 1 | 2 | 3; // Value tier
+    value?: number; // Specific value increment (e.g. max fuel +1)
 }
 
 // Clash Animation Types
@@ -207,7 +208,7 @@ const VACATION_EVENTS_DB: Omit<VacationEvent, 'id'>[] = [
     { type: 'REPAIR', name: '応急修理', description: 'HPを10回復する。', cost: 1, tier: 1 },
     { type: 'REPAIR', name: 'ドック入り', description: 'HPを全回復し、最大HPを+5する。', cost: 3, tier: 3 },
     { type: 'FUEL', name: '燃料補給', description: '燃料を最大まで回復。', cost: 1, tier: 1 },
-    { type: 'FUEL', name: 'タンク増設', description: '最大燃料+1、燃料全回復。', cost: 3, tier: 3 },
+    { type: 'FUEL', name: 'タンク増設', description: '最大燃料+1、燃料全回復。', cost: 3, tier: 3, value: 1 },
     { type: 'ENERGY', name: 'エネルギー採掘', description: 'エネルギー生成プールに「6」を追加。', cost: 2, tier: 2 },
     { type: 'ENERGY', name: 'リアクター調整', description: '生成プールに「オレンジ」を追加。', cost: 2, tier: 2 },
     { type: 'PARTS', name: 'パーツ回収', description: 'ランダムなパーツを1つ獲得する。', cost: 2, tier: 2 },
@@ -219,7 +220,9 @@ const VACATION_EVENTS_DB: Omit<VacationEvent, 'id'>[] = [
     { type: 'SHOP', name: '闇市', description: '高品質なパーツを裏ルートで入手する。', cost: 0, coinCost: 150, tier: 3 },
     { type: 'ENHANCE', name: '特別改造', description: '船体を強化。最大HP+20。', cost: 0, coinCost: 100, tier: 2 },
     { type: 'TRAINING', name: '極秘訓練', description: 'パッシブパワー(全出力)+1。', cost: 0, coinCost: 200, tier: 3 },
-    { type: 'FUEL', name: 'プレミアム燃料', description: '最大燃料+2、全回復。', cost: 0, coinCost: 80, tier: 2 },
+    { type: 'FUEL', name: 'プレミアム燃料', description: '最大燃料+2、全回復。', cost: 0, coinCost: 80, tier: 2, value: 2 },
+    { type: 'SACRIFICE', name: '悪魔の契約', description: '最大燃料を1犠牲にし、全出力を+2する。', cost: 0, tier: 3, value: 2 },
+    { type: 'GAMBLE', name: '裏カジノ', description: 'コインを賭ける(100G)。勝てば3倍。', cost: 1, coinCost: 100, tier: 2, value: 300 },
 ];
 
 const PART_TEMPLATES: Omit<ShipPart, 'id'>[] = [
@@ -1434,10 +1437,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 setPlayer(prev => {
                     let newMax = prev.maxFuel;
                     const fuel = MAX_FUEL; 
-                    if (event.tier === 3) newMax += 1;
+                    if (event.value) newMax += event.value;
                     return { ...prev, maxFuel: newMax, fuel: Math.min(newMax, prev.fuel + fuel) };
                 });
-                resultMsg = "燃料タンクを満タンにしました！";
+                resultMsg = "燃料タンクを満タンにしました！" + (event.value ? ` (上限+${event.value})` : "");
                 audioService.playSound('buff');
                 break;
             case 'COIN':
@@ -1489,6 +1492,32 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 setPlayer(prev => ({ ...prev, passivePower: prev.passivePower + 1 }));
                 resultMsg = "厳しい訓練の成果！全出力+1";
                 audioService.playSound('buff');
+                break;
+            case 'SACRIFICE':
+                if (player.maxFuel <= 1) {
+                     setVacationLog("これ以上燃料を減らせません！");
+                     audioService.playSound('wrong');
+                     return; // Don't consume event
+                }
+                setPlayer(prev => ({
+                    ...prev,
+                    maxFuel: prev.maxFuel - 1,
+                    fuel: Math.min(prev.maxFuel - 1, prev.fuel),
+                    passivePower: prev.passivePower + (event.value || 1)
+                }));
+                resultMsg = "燃料タンクを代償に、禁断の力を得た...";
+                audioService.playSound('debuff'); // Use debuff sound for sacrifice feel
+                break;
+            case 'GAMBLE':
+                if (Math.random() < 0.5) {
+                     const reward = event.value || 100;
+                     setPlayer(p => ({ ...p, starCoins: p.starCoins + reward }));
+                     resultMsg = `大勝利！コインを${reward}獲得！`;
+                     audioService.playSound('win');
+                } else {
+                     resultMsg = "賭けに負けた... 何も得られなかった。";
+                     audioService.playSound('lose');
+                }
                 break;
             case 'UNKNOWN':
                 if (Math.random() < 0.5) {
@@ -2237,6 +2266,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                             {event.type === 'SHOP' && <ShoppingBag size={20} className="text-blue-400"/>}
                                             {event.type === 'MODIFY' && <Palette size={20} className="text-indigo-400"/>}
                                             {event.type === 'TRAINING' && <Activity size={20} className="text-red-400"/>}
+                                            {event.type === 'SACRIFICE' && <Skull size={20} className="text-red-600"/>}
+                                            {event.type === 'GAMBLE' && <Dice5 size={20} className="text-violet-400"/>}
                                         </div>
                                         <div className="w-full">
                                             <div className="font-bold text-sm mb-1 truncate text-cyan-100">{event.name}</div>
