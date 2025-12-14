@@ -170,7 +170,7 @@ const CONSUMABLE_DB: KConsumable[] = [
 const SHOP_RELICS: KRelic[] = [
     { id: 'R_BOOTS', name: '瞬足の靴', desc: '移動系カードのCD-1', price: 60 },
     { id: 'R_GLOVES', name: 'パワー手袋', desc: '攻撃ダメージ+1', price: 120 },
-    { id: 'R_SHIELD', name: '安全ピン', desc: 'ターン開始時、シールドが0なら+1', price: 100 },
+    { id: 'R_SHIELD', name: '安全ピン', desc: '毎ターンシールド+1', price: 100 },
     { id: 'R_POTION', name: '回復セット', desc: 'HPを全回復', price: 50 },
     { id: 'R_FANG', name: '吸血の牙', desc: '敵を倒すとHP1回復', price: 150 },
     { id: 'R_THORN', name: 'トゲトゲ肩パッド', desc: '被ダメ時、敵に1ダメージ', price: 90 },
@@ -619,7 +619,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         // Relic: Shield (Passive Shield)
         const hasShieldRelic = current.relics.some(r => r.id === 'R_SHIELD');
-        if (hasShieldRelic && player.shield === 0) player.shield += 1;
+        if (hasShieldRelic) player.shield += 1;
         // Relic: Thorn
         const hasThornRelic = current.relics.some(r => r.id === 'R_THORN');
 
@@ -2118,132 +2118,151 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     <h2 className="text-4xl font-bold text-red-500 mb-4">EXPELLED</h2>
                                     <p className="text-gray-400 mb-4">Stage {gameState.battleStage}</p>
                                     <button onClick={() => initGame()} className="bg-white text-black px-8 py-3 rounded text-xl font-bold hover:bg-gray-200">Retry</button>
-                                    <button onClick={onBack} className="block mt-4 text-gray-400 hover:text-white mx-auto underline">Quit</button>
                                 </div>
                             )}
                         </div>
                     )}
                     
-                    {/* Grid Render */}
-                    <div className="grid grid-cols-7 gap-1 md:gap-2 mb-20 md:mb-0 w-full max-w-4xl relative">
-                        {Array.from({ length: GRID_SIZE }).map((_, i) => (
-                            <div 
-                                key={i} 
-                                className={`aspect-square border-2 border-dashed relative group cursor-pointer transition-all ${isDangerZone(i) ? 'border-red-500/50 bg-red-900/20 animate-pulse' : 'border-slate-700 hover:border-slate-500'} ${gameState.player.pos === i ? 'border-green-500/50 bg-green-900/10' : ''}`}
-                            >
-                                <div className="absolute top-1 left-1 text-[10px] text-gray-600">{i}</div>
-                                {getGridContent(i)}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Right Panel (Mobile Bottom) */}
-                <div className="w-full md:w-80 bg-slate-800 border-l border-indigo-500/30 flex flex-col md:h-full shrink-0 relative z-20 shadow-2xl">
-                    {/* Action Bar */}
-                    <div className="p-4 bg-black/20 border-b border-white/10 shrink-0">
-                        <div className="grid grid-cols-2 gap-3 mb-3">
-                            <button onClick={() => handleMove(-1)} className="bg-slate-700 hover:bg-slate-600 text-white py-3 rounded font-bold shadow active:translate-y-0.5 transition-all flex items-center justify-center"><ArrowLeft className="mr-2"/> 左へ (Left)</button>
-                            <button onClick={() => handleMove(1)} className="bg-slate-700 hover:bg-slate-600 text-white py-3 rounded font-bold shadow active:translate-y-0.5 transition-all flex items-center justify-center">右へ (Right) <ArrowRight className="ml-2"/></button>
-                            <button onClick={handleTurn} className="bg-slate-700 hover:bg-slate-600 text-white py-3 rounded font-bold shadow active:translate-y-0.5 transition-all flex items-center justify-center col-span-2 md:col-span-1"><RefreshCw className="mr-2"/> 反転 (Turn)</button>
-                            <button onClick={handleWait} className="bg-slate-700 hover:bg-slate-600 text-white py-3 rounded font-bold shadow active:translate-y-0.5 transition-all flex items-center justify-center col-span-2 md:col-span-1"><Clock className="mr-2"/> 待機 (Wait)</button>
-                            
-                            <button 
-                                onClick={handleSwapPosition}
-                                disabled={gameState.specialActionCooldown > 0} 
-                                className={`col-span-2 bg-purple-700 hover:bg-purple-600 text-white py-3 rounded font-bold shadow active:translate-y-0.5 transition-all flex items-center justify-center relative overflow-hidden ${gameState.specialActionCooldown > 0 ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
-                            >
-                                <ArrowRightLeft className="mr-2"/> 位置交換 (Swap)
-                                {gameState.specialActionCooldown > 0 && <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-mono text-xl">{gameState.specialActionCooldown}</div>}
-                            </button>
-                        </div>
-                        
-                        <div className="flex justify-between items-center bg-black/40 px-3 py-1 rounded text-xs text-gray-400 mb-2">
-                            <span>AP: {1} / Turn</span>
-                            <span>Queue: {gameState.queue.length}/3</span>
-                        </div>
-                        
-                        <button 
-                            onClick={executeQueue} 
-                            disabled={gameState.queue.length === 0 || animating}
-                            className={`w-full py-4 rounded-lg font-bold text-xl shadow-lg flex items-center justify-center transition-all ${gameState.queue.length > 0 ? 'bg-indigo-600 hover:bg-indigo-500 text-white animate-pulse' : 'bg-slate-700 text-gray-500 cursor-not-allowed'}`}
-                        >
-                            <Zap className="mr-2" size={24}/> EXECUTE
-                        </button>
-                    </div>
-
-                    {/* Queue Display */}
-                    <div className="p-2 border-b border-white/10 bg-black/10 shrink-0">
-                        <div className="text-xs text-gray-500 mb-1 font-bold tracking-wider">ACTION QUEUE</div>
-                        <div className="flex gap-2 overflow-x-auto min-h-[60px] items-center">
-                            {gameState.queue.map((card, i) => (
-                                <div key={i} className={`flex-shrink-0 w-12 h-12 ${card.color} rounded border border-white/20 flex items-center justify-center text-white relative cursor-pointer hover:scale-110 transition-transform`} onClick={() => handleUnqueueCard(i)}>
-                                    {card.icon}
-                                    <div className="absolute -top-1 -right-1 bg-red-500 rounded-full w-4 h-4 flex items-center justify-center text-[10px] shadow">X</div>
+                    {/* RELIC MODAL (FULL SCREEN) */}
+                    {showRelicModal && (
+                        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowRelicModal(false)}>
+                            <div className="w-full h-full max-w-4xl flex flex-col" onClick={e => e.stopPropagation()}>
+                                <div className="flex justify-between items-center mb-6 border-b border-indigo-500 pb-4">
+                                    <h2 className="text-3xl font-bold text-yellow-400 flex items-center"><Gift className="mr-3" size={32}/> 所持レリック一覧</h2>
+                                    <button onClick={() => setShowRelicModal(false)} className="text-gray-400 hover:text-white p-2 border-2 border-transparent hover:border-white rounded-full transition-colors"><X size={32}/></button>
                                 </div>
-                            ))}
-                            {gameState.queue.length === 0 && <span className="text-xs text-gray-600 italic">No actions queued</span>}
-                        </div>
-                    </div>
-
-                    {/* Hand */}
-                    <div className="flex-1 overflow-y-auto p-2 md:p-4 custom-scrollbar bg-slate-900/50">
-                        <div className="text-xs text-gray-500 mb-2 font-bold tracking-wider">HAND ({gameState.hand.length})</div>
-                        <div className="grid grid-cols-1 gap-2">
-                            {gameState.hand.map((card, i) => (
-                                <button 
-                                    key={i} 
-                                    onClick={() => handleQueueCard(card, i)}
-                                    disabled={card.currentCooldown > 0}
-                                    className={`
-                                        flex items-center p-2 rounded border-l-4 text-left transition-all relative overflow-hidden group
-                                        ${card.color.replace('bg-', 'border-')} 
-                                        ${card.currentCooldown > 0 ? 'bg-slate-800 opacity-60 cursor-not-allowed' : 'bg-slate-700 hover:bg-slate-600 hover:translate-x-1 shadow-md'}
-                                    `}
-                                >
-                                    <div className={`p-2 rounded-full mr-3 ${card.color} text-white shadow-sm shrink-0`}>
-                                        {card.icon}
-                                    </div>
-                                    <div className="flex-grow min-w-0">
-                                        <div className="font-bold text-sm text-gray-100 truncate">{card.name}</div>
-                                        <div className="text-[10px] text-gray-400 truncate">{card.description}</div>
-                                        {/* STATS BADGES */}
-                                        <div className="flex gap-1 mt-1">
-                                            {card.damage > 0 && <span className="text-[9px] bg-red-900/50 text-red-200 px-1 rounded border border-red-500/30">ATK {card.damage}</span>}
-                                            <span className="text-[9px] bg-blue-900/50 text-blue-200 px-1 rounded border border-blue-500/30">CD {card.cooldown}</span>
-                                            {card.shield && card.shield > 0 && <span className="text-[9px] bg-cyan-900/50 text-cyan-200 px-1 rounded border border-cyan-500/30">DEF {card.shield}</span>}
+                                
+                                <div className="flex-grow overflow-y-auto custom-scrollbar pr-2">
+                                    {gameState.relics.length === 0 ? (
+                                        <div className="flex flex-col items-center justify-center h-64 text-gray-500 border-2 border-dashed border-gray-700 rounded-lg">
+                                            <Gift size={48} className="mb-4 opacity-50"/>
+                                            <p className="text-xl">レリックを持っていません。</p>
                                         </div>
-                                    </div>
-                                    
-                                    {/* Slots Indicator */}
-                                    <div className="absolute top-2 right-2 flex gap-0.5">
-                                        {[...Array(card.maxSlots)].map((_, idx) => (
-                                            <div key={idx} className={`w-1.5 h-1.5 rounded-full border border-gray-500 ${idx < card.usedSlots ? 'bg-yellow-400' : 'bg-black/50'}`} />
-                                        ))}
-                                    </div>
-
-                                    {card.currentCooldown > 0 && (
-                                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center font-bold text-red-400 text-lg backdrop-blur-[1px]">
-                                            {card.currentCooldown}
+                                    ) : (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                            {gameState.relics.map((relic, i) => (
+                                                <div key={i} className="bg-slate-900 p-6 rounded-xl border-2 border-slate-600 flex items-start gap-4 shadow-lg hover:border-yellow-500 transition-colors">
+                                                    <div className="w-16 h-16 bg-slate-800 rounded-full border-4 border-yellow-600 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(234,179,8,0.3)]">
+                                                        <Gift size={32} className="text-yellow-400"/>
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-bold text-white text-xl mb-2">{relic.name}</div>
+                                                        <div className="text-sm text-gray-300 leading-relaxed">{relic.desc}</div>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     )}
-                                </button>
+                                </div>
+                                
+                                <button onClick={() => setShowRelicModal(false)} className="mt-6 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-lg text-xl transition-colors border-2 border-indigo-400 shadow-lg">閉じる</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Standard Gameplay View */}
+                    {gameState.phase === 'BATTLE' && (
+                        <>
+                            <div className="absolute top-4 left-1/2 -translate-x-1/2 w-full max-w-lg text-center pointer-events-none z-10">
+                                {gameState.logs.map((log, i) => (
+                                    <div key={i} className={`text-sm ${i===0 ? 'text-white font-bold text-shadow-md' : 'text-gray-500'} transition-opacity duration-500`}>{log}</div>
+                                ))}
+                            </div>
+
+                            <div className="grid grid-cols-7 gap-1 md:gap-2 w-full max-w-full md:max-w-5xl px-2 mb-4 shrink-0 max-h-full aspect-[7/2] md:aspect-auto">
+                                {[...Array(GRID_SIZE)].map((_, i) => (
+                                    <div key={i} className={`aspect-[1/2] md:aspect-[3/4] border-2 ${isDangerZone(i) ? 'border-red-500 bg-red-900/20' : 'border-indigo-800 bg-black/30'} rounded-lg flex items-end justify-center relative`}>
+                                        {getGridContent(i)}
+                                        <div className="absolute bottom-1 right-1 text-[8px] md:text-[10px] text-gray-700">{i}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </div>
+
+                {/* Controls (Sidebar) */}
+                {gameState.status !== 'GAME_OVER' && gameState.status !== 'VICTORY' && gameState.phase === 'BATTLE' && (
+                    <div className="w-full md:w-80 bg-[#0f0f1b] border-t md:border-t-0 md:border-l border-indigo-900 p-2 md:p-4 shrink-0 flex flex-col gap-2 md:h-full md:overflow-y-auto custom-scrollbar">
+                        
+                        {/* Queue Display */}
+                        <div className="flex justify-between items-center gap-2 bg-black/30 p-2 rounded-lg border border-indigo-900/30 shrink-0">
+                            <div className="flex gap-1 justify-center items-center flex-grow">
+                                {[...Array(3)].map((_, i) => {
+                                    const card = gameState.queue[i];
+                                    return card ? (
+                                        <div key={i} className="w-12 h-16 md:w-16 md:h-20 bg-slate-800 border border-slate-600 rounded flex flex-col items-center justify-center relative group cursor-pointer hover:border-red-400 shrink-0" onClick={() => handleUnqueueCard(i)}>
+                                            <div className={`w-full h-1 ${card.color} absolute top-0`}></div>
+                                            <div className="text-[9px] md:text-xs text-center font-bold px-1 overflow-hidden whitespace-nowrap text-ellipsis w-full">{card.name}</div>
+                                            <div className="text-gray-400 scale-75">{card.icon}</div>
+                                            <X size={12} className="absolute -top-1 -right-1 bg-red-500 rounded-full text-white opacity-0 group-hover:opacity-100"/>
+                                        </div>
+                                    ) : (
+                                        <div key={`empty-${i}`} className="w-12 h-16 md:w-16 md:h-20 border border-dashed border-gray-700 rounded flex items-center justify-center text-gray-700 text-[9px] shrink-0">Empty</div>
+                                    );
+                                })}
+                            </div>
+                            <button onClick={executeQueue} disabled={gameState.queue.length === 0 || animating} className={`w-16 h-16 md:w-20 md:h-20 rounded-full border-4 flex flex-col items-center justify-center font-bold shadow-lg transition-all shrink-0 ${gameState.queue.length > 0 ? 'bg-indigo-600 border-indigo-400 text-white hover:scale-105 active:scale-95 cursor-pointer animate-pulse' : 'bg-gray-800 border-gray-600 text-gray-500 cursor-not-allowed'}`}>
+                                <Play size={20} className="fill-current mb-1"/> EXEC
+                            </button>
+                        </div>
+
+                        {/* Hand Cards */}
+                        <div className="flex md:flex-col md:flex-nowrap gap-2 overflow-x-auto md:overflow-x-hidden md:overflow-y-auto pb-2 px-1 custom-scrollbar min-h-[100px] md:min-h-0 md:flex-grow items-center md:items-stretch">
+                            {gameState.hand.map((card, i) => (
+                                <div 
+                                    key={card.id} 
+                                    className={`w-20 h-28 md:w-full md:h-auto bg-slate-800 border-2 rounded-lg flex flex-col md:flex-row justify-between p-1 md:p-2 cursor-pointer transition-transform relative shadow-lg shrink-0 md:shrink ${card.usedSlots > 0 ? 'border-yellow-400' : 'border-slate-600'} ${card.currentCooldown > 0 ? 'opacity-50 grayscale' : 'hover:-translate-y-2 md:hover:translate-y-0 md:hover:translate-x-2'}`} 
+                                    onClick={() => handleQueueCard(card, i)}
+                                >
+                                    <div className={`absolute top-0 left-0 w-full h-1 md:w-1 md:h-full ${card.color} rounded-t-sm md:rounded-l-sm`}></div>
+                                    
+                                    {/* Icon Badge for Effect Type */}
+                                    <div className="absolute top-1 right-1 text-[8px] bg-black/60 px-1 rounded text-white font-mono">
+                                        {(card.effectType === 'PIERCE' || card.effectType === 'FURTHEST') ? '>>>' : (card.type === 'MOVE' ? 'MOVE' : (card.effectType === 'PIERCE_DASH' ? 'THRU' : '>|'))}
+                                    </div>
+
+                                    <div className="flex flex-col h-full w-full md:hidden">
+                                        <div className="mt-1 text-[9px] font-bold text-center leading-tight truncate">{card.name}</div>
+                                        <div className="flex justify-center my-0.5 text-indigo-300 scale-75">{card.icon}</div>
+                                        <div className="text-[8px] text-gray-400 text-center leading-tight h-6 overflow-hidden">{card.description}</div>
+                                        <div className="flex justify-between items-center text-[8px] text-gray-500 mt-auto font-mono w-full"><span>CD:{card.cooldown}</span>{card.damage > 0 ? <span className="text-red-400 font-bold">{card.damage}</span> : <span className="opacity-70">{card.type}</span>}</div>
+                                    </div>
+                                    <div className="hidden md:flex flex-row items-center w-full pl-2 gap-2">
+                                        <div className="text-indigo-300">{card.icon}</div>
+                                        <div className="flex-grow min-w-0">
+                                            <div className="text-xs font-bold truncate">{card.name}</div>
+                                            <div className="text-[10px] text-gray-400 truncate">{card.description}</div>
+                                            <div className="flex gap-0.5 mt-0.5">
+                                                {[...Array(card.maxSlots)].map((_, idx) => (
+                                                    <div key={idx} className={`w-1 h-1 rounded-full ${idx < card.usedSlots ? 'bg-yellow-400' : 'bg-gray-600'}`} />
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col items-end text-[10px] font-mono shrink-0">
+                                            <span className="text-gray-500">CD:{card.cooldown}</span>
+                                            {card.damage > 0 && <span className="text-red-400 font-bold flex items-center"><Swords size={10} className="mr-0.5"/>{card.damage}</span>}
+                                        </div>
+                                    </div>
+                                    {card.currentCooldown > 0 && <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center rounded-lg z-10"><Clock size={20} className="text-gray-400 mb-1"/><span className="text-xl font-bold text-white">{card.currentCooldown}</span></div>}
+                                </div>
                             ))}
                         </div>
+
+                        {/* Movement Controls */}
+                        <div className="flex justify-center items-center gap-4 py-2 border-t border-indigo-900/30 relative shrink-0">
+                            <button onClick={() => handleMove(-1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors shadow-lg"><ChevronLeft size={24}/></button>
+                            <div className="flex flex-col items-center gap-1">
+                                <div className="flex gap-1">
+                                    <button onClick={handleTurn} className="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-lg border border-slate-500 text-sm font-bold flex items-center justify-center active:bg-slate-800 transition-colors w-16">TURN</button>
+                                    <button onClick={handleSwapPosition} className={`px-2 py-2 rounded-lg border flex items-center justify-center transition-colors w-12 ${gameState.specialActionCooldown > 0 ? 'bg-gray-800 border-gray-600 text-gray-500' : 'bg-cyan-700 border-cyan-400 text-cyan-100 hover:bg-cyan-600 active:scale-95'}`} title="位置交換 (CD: 3)">{gameState.specialActionCooldown > 0 ? <span className="text-xs font-bold">{gameState.specialActionCooldown}</span> : <RefreshCw size={16} />}</button>
+                                </div>
+                                <button onClick={handleWait} className="bg-gray-800 hover:bg-gray-700 px-6 py-2 rounded-lg border border-gray-600 text-xs flex items-center justify-center active:bg-gray-900 transition-colors w-28 text-gray-400"><Clock size={12} className="mr-1"/> WAIT</button>
+                            </div>
+                            <button onClick={() => handleMove(1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors shadow-lg"><ChevronRight size={24}/></button>
+                        </div>
                     </div>
-                </div>
-
-                {/* Log Overlay (Bottom Left on Desktop, Absolute on Mobile) */}
-                <div className="absolute bottom-4 left-4 w-64 md:w-80 pointer-events-none opacity-80 z-30">
-                     <div className="flex flex-col gap-1">
-                         {gameState.logs.map((log, i) => (
-                             <div key={i} className="bg-black/70 text-white text-xs p-1.5 rounded border-l-2 border-indigo-500 shadow-md backdrop-blur-sm animate-in slide-in-from-left-2 fade-in duration-300">
-                                 {log}
-                             </div>
-                         ))}
-                     </div>
-                </div>
-
+                )}
             </div>
         </div>
     );
