@@ -440,7 +440,7 @@ class AudioService {
       }
   }
 
-  public playSound(effect: 'select' | 'attack' | 'block' | 'win' | 'lose' | 'correct' | 'wrong' | 'buff' | 'debuff') {
+  public playSound(effect: 'select' | 'attack' | 'block' | 'win' | 'lose' | 'correct' | 'wrong' | 'buff' | 'debuff' | 'damage') {
       this.init();
       if (!this.ctx || !this.sfxGain || this.isMuted) return;
       const t = this.ctx.currentTime;
@@ -512,6 +512,12 @@ class AudioService {
               this.playOsc(500, t, 0.1, 'sawtooth', 0.3, this.sfxGain);
               this.playOsc(400, t + 0.1, 0.1, 'sawtooth', 0.3, this.sfxGain);
               this.playOsc(300, t + 0.2, 0.3, 'sawtooth', 0.2, this.sfxGain);
+              break;
+          case 'damage':
+              // Less harsh damage sound: Low thud + short buzz
+              this.playOsc(150, t, 0.1, 'square', 0.3, this.sfxGain);
+              this.playOsc(100, t, 0.15, 'sawtooth', 0.3, this.sfxGain);
+              this.playNoise(t, 0.1, 0.5, 'kick');
               break;
       }
   }

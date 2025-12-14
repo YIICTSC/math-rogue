@@ -168,14 +168,14 @@ const CONSUMABLE_DB: KConsumable[] = [
 ];
 
 const SHOP_RELICS: KRelic[] = [
-    { id: 'R_BOOTS', name: '瞬足の靴', desc: '移動系カードのCD-1', price: 30 },
-    { id: 'R_GLOVES', name: 'パワー手袋', desc: '攻撃ダメージ+1', price: 40 },
-    { id: 'R_SHIELD', name: '安全ピン', desc: '毎ターンシールド+1', price: 35 },
-    { id: 'R_POTION', name: '回復セット', desc: 'HPを全回復', price: 20 },
-    { id: 'R_FANG', name: '吸血の牙', desc: '敵を倒すとHP1回復', price: 50 },
-    { id: 'R_THORN', name: 'トゲトゲ肩パッド', desc: '被ダメ時、敵に1ダメージ', price: 45 },
-    { id: 'R_DISCOUNT', name: 'クーポン券', desc: 'ショップの商品が30%OFF', price: 30 },
-    { id: 'R_RECYCLE', name: 'リサイクル箱', desc: 'アイテム使用時20%で消費しない', price: 50 },
+    { id: 'R_BOOTS', name: '瞬足の靴', desc: '移動系カードのCD-1', price: 60 },
+    { id: 'R_GLOVES', name: 'パワー手袋', desc: '攻撃ダメージ+1', price: 120 },
+    { id: 'R_SHIELD', name: '安全ピン', desc: '毎ターンシールド+1', price: 100 },
+    { id: 'R_POTION', name: '回復セット', desc: 'HPを全回復', price: 50 },
+    { id: 'R_FANG', name: '吸血の牙', desc: '敵を倒すとHP1回復', price: 150 },
+    { id: 'R_THORN', name: 'トゲトゲ肩パッド', desc: '被ダメ時、敵に1ダメージ', price: 90 },
+    { id: 'R_DISCOUNT', name: 'クーポン券', desc: 'ショップの商品が30%OFF', price: 80 },
+    { id: 'R_RECYCLE', name: 'リサイクル箱', desc: 'アイテム使用時20%で消費しない', price: 110 },
 ];
 
 const UPGRADE_POOLS: UpgradeOffer[] = [
@@ -679,12 +679,13 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 }
                             }
 
-                            audioService.playSound('lose');
-                            hitSomething = true;
-                            
                             if (player.hp <= 0) {
                                 status = 'GAME_OVER';
+                                audioService.playSound('lose'); // Play distinct lose sound only on death
+                            } else {
+                                audioService.playSound('damage'); // Play less harsh damage sound
                             }
+                            hitSomething = true;
                         }
                     }
 
@@ -740,7 +741,12 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             player.hp = Math.max(0, player.hp - dmg);
                             generatedVfx.push({ id: `v_spec_${Date.now()}`, type: 'BLAST', pos: player.pos });
                             generatedVfx.push({ id: `v_dmg_${Date.now()}`, type: 'TEXT', pos: player.pos, text: dmg, color: 'text-red-500' });
-                            if (player.hp <= 0) status = 'GAME_OVER';
+                            if (player.hp <= 0) {
+                                status = 'GAME_OVER';
+                                audioService.playSound('lose');
+                            } else {
+                                audioService.playSound('damage');
+                            }
                         }
                     } else if (sName === 'SHIELD') { // PE Teacher
                         logs = [`${e.name}が号令をかけた！(Shield+5)`, ...logs];
