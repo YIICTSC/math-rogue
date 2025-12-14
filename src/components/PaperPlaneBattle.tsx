@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation, Droplets, Recycle, Repeat } from 'lucide-react';
+import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation, Droplets, Recycle, Repeat, User, Lock, Users, Target, UserPlus, Gauge } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
-import { storageService } from '../services/storageService';
+import { storageService, PaperPlaneProgress } from '../services/storageService';
 
 // --- TYPES & CONSTANTS ---
 
@@ -19,7 +19,7 @@ interface EnergyCard {
     id: string;
     value: number;
     color: EnergyColor;
-    isTemporary?: boolean; // New: If true, removed after battle
+    isTemporary?: boolean; 
 }
 
 interface EnergySlot {
@@ -36,7 +36,22 @@ interface ShipPart {
     multiplier: number; // Effect multiplier per energy
     basePower: number; // Flat bonus when activated (Full slots)
     hp: number; // Part HP (Visual mainly)
-    specialEffect?: 'RANK_UP' | 'HEAL' | 'RECYCLE' | 'THORNS'; // New special effect types
+    specialEffect?: 'RANK_UP' | 'HEAL' | 'RECYCLE' | 'THORNS'; 
+}
+
+interface Talent {
+    id: string;
+    name: string;
+    description: string;
+    effectType: 'PASSIVE_POWER' | 'MAX_HP' | 'FUEL' | 'SHOP_DISCOUNT' | 'START_ENERGY';
+    value: number;
+}
+
+interface Pilot {
+    id: string;
+    name: string;
+    spriteName: string;
+    intrinsicTalent: Talent;
 }
 
 interface ShipState {
@@ -53,8 +68,9 @@ interface ShipState {
     // New Stats
     starCoins: number;
     vacationDays: number;
-    passivePower: number; // From Treasures
-    partInventory: ShipPart[]; // New: Inventory
+    passivePower: number; // From Treasures & Talents
+    partInventory: ShipPart[]; 
+    talents: Talent[]; // Active talents
 }
 
 interface EnemyIntent {
@@ -101,6 +117,162 @@ interface ClashState {
     data: ClashRowData[];
 }
 
+interface ShipTemplate {
+    id: string;
+    name: string;
+    unlockRank: number;
+    layout: ShipPart[]; // 9 slots
+    description: string;
+    baseHp: number;
+    color: string;
+}
+
+// --- DATA ---
+
+const GENERIC_TALENTS: Talent[] = [
+    { id: 'T_HEALTH', name: '体力自慢', description: '最大HP+5', effectType: 'MAX_HP', value: 5 },
+    { id: 'T_FUEL', name: '省エネ', description: '最大燃料+1', effectType: 'FUEL', value: 1 },
+    { id: 'T_BARGAIN', name: '交渉術', description: 'ショップ割引(10%)', effectType: 'SHOP_DISCOUNT', value: 10 },
+    { id: 'T_POWER', name: '筋トレ', description: 'パッシブ出力+1', effectType: 'PASSIVE_POWER', value: 1 },
+    { id: 'T_ENERGY', name: '準備', description: '開始時エネルギーカード+1', effectType: 'START_ENERGY', value: 1 },
+];
+
+const PILOTS: Pilot[] = [
+    { id: 'PL_HERO', name: '元気な転校生', spriteName: 'HERO_SIDE|赤', intrinsicTalent: { id: 'IT_GUTS', name: 'ド根性', description: '最大HP+10', effectType: 'MAX_HP', value: 10 } },
+    { id: 'PL_NERD', name: 'メカニック', spriteName: 'HUMANOID|緑', intrinsicTalent: { id: 'IT_TUNE', name: 'チューニング', description: 'パッシブ出力+2', effectType: 'PASSIVE_POWER', value: 2 } },
+    { id: 'PL_GIRL', name: '委員長', spriteName: 'GIRL|青', intrinsicTalent: { id: 'IT_BUDGET', name: '予算管理', description: 'ショップ割引(20%)', effectType: 'SHOP_DISCOUNT', value: 20 } },
+    { id: 'PL_SPORT', name: 'エース', spriteName: 'MUSCLE|橙', intrinsicTalent: { id: 'IT_STAMINA', name: 'スタミナ', description: '最大燃料+2', effectType: 'FUEL', value: 2 } },
+    { id: 'PL_SENIOR', name: '謎の上級生', spriteName: 'SENIOR|紫', intrinsicTalent: { id: 'IT_SECRET', name: '裏ルート', description: '開始時エネルギー+2', effectType: 'START_ENERGY', value: 2 } },
+];
+
+// Define Ships
+const createEmptyPart = (id: string): ShipPart => ({ id, type: 'EMPTY', name: '空き', slots: [], multiplier: 0, basePower: 0, hp: 0 });
+
+const SHIPS: ShipTemplate[] = [
+    {
+        id: 'SHIP_DEFAULT',
+        name: 'チラシ号',
+        unlockRank: 0,
+        description: 'バランスの良い標準機体。',
+        baseHp: 40,
+        color: 'bg-emerald-800',
+        layout: [
+            createEmptyPart('p0'), createEmptyPart('p1'), { id: 'p2', type: 'CANNON', name: '軽量砲', slots: [{req:'WHITE', value:null}], multiplier: 1, basePower: 1, hp: 10 },
+            { id: 'p3', type: 'ENGINE', name: '増幅炉', slots: [{req:'BLUE', value:null}], multiplier: 0, basePower: 0, hp: 10, specialEffect: 'RANK_UP' }, createEmptyPart('p4'), { id: 'p5', type: 'CANNON', name: '連装砲', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1, basePower: 2, hp: 10 },
+            createEmptyPart('p6'), createEmptyPart('p7'), { id: 'p8', type: 'CANNON', name: '軽量砲', slots: [{req:'WHITE', value:null}], multiplier: 1, basePower: 1, hp: 10 },
+        ]
+    },
+    {
+        id: 'SHIP_SPEED',
+        name: 'テスト用紙号',
+        unlockRank: 5,
+        description: '青スロットが多い高機動型。',
+        baseHp: 30,
+        color: 'bg-blue-800',
+        layout: [
+            createEmptyPart('p0'), { id: 'p1', type: 'MISSILE', name: '誘導弾', slots: [{req:'BLUE', value:null}], multiplier: 1.5, basePower: 2, hp: 10 }, createEmptyPart('p2'),
+            { id: 'p3', type: 'ENGINE', name: '高機動', slots: [{req:'BLUE', value:null}], multiplier: 1.2, basePower: 2, hp: 10 }, createEmptyPart('p4'), { id: 'p5', type: 'ENGINE', name: '高機動', slots: [{req:'BLUE', value:null}], multiplier: 1.2, basePower: 2, hp: 10 },
+            createEmptyPart('p6'), { id: 'p7', type: 'MISSILE', name: '誘導弾', slots: [{req:'BLUE', value:null}], multiplier: 1.5, basePower: 2, hp: 10 }, createEmptyPart('p8'),
+        ]
+    },
+    {
+        id: 'SHIP_POWER',
+        name: '画用紙号',
+        unlockRank: 10,
+        description: '橙スロットが多い重装甲型。',
+        baseHp: 50,
+        color: 'bg-orange-800',
+        layout: [
+            { id: 'p0', type: 'CANNON', name: '重砲', slots: [{req:'ORANGE', value:null}], multiplier: 2, basePower: 3, hp: 15 }, createEmptyPart('p1'), createEmptyPart('p2'),
+            createEmptyPart('p3'), { id: 'p4', type: 'SHIELD', name: '装甲板', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 5, hp: 20 }, createEmptyPart('p5'),
+            { id: 'p6', type: 'CANNON', name: '重砲', slots: [{req:'ORANGE', value:null}], multiplier: 2, basePower: 3, hp: 15 }, createEmptyPart('p7'), createEmptyPart('p8'),
+        ]
+    }
+];
+
+const ENEMY_DATA = [
+    { name: "折り紙偵察機", hp: 30, durability: 4, parts: ['CANNON', 'EMPTY', 'CANNON'] }, // Stage 1-3
+    { name: "ノート爆撃機", hp: 45, durability: 5, parts: ['CANNON', 'CANNON', 'EMPTY'] }, // Stage 4-6
+    { name: "定規戦艦", hp: 70, durability: 6, parts: ['CANNON', 'CANNON', 'CANNON'] }, // Stage 7-9
+    { name: "コンパス要塞", hp: 100, durability: 10, parts: ['CANNON', 'MISSILE', 'CANNON'] }, // Stage 10-12
+    { name: "修正液タンク", hp: 150, durability: 15, parts: ['SHIELD', 'CANNON', 'SHIELD'] }, 
+    { name: "カッター迎撃機", hp: 50, durability: 3, parts: ['MISSILE', 'MISSILE', 'MISSILE'] }, 
+    { name: "分度器マザー", hp: 120, durability: 8, parts: ['CANNON', 'ENGINE', 'CANNON'] }, 
+    { name: "ホッチキス機動兵", hp: 80, durability: 6, parts: ['CANNON', 'EMPTY', 'MISSILE'] }, 
+    { name: "彫刻刀デストロイヤー", hp: 180, durability: 12, parts: ['MISSILE', 'CANNON', 'MISSILE'] },
+    { name: "暗黒文房具王", hp: 300, durability: 20, parts: ['MISSILE', 'MISSILE', 'MISSILE'] }, // Boss class
+];
+
+const VACATION_EVENTS_DB: Omit<VacationEvent, 'id'>[] = [
+    { type: 'REPAIR', name: '応急修理', description: 'HPを10回復する。', cost: 1, tier: 1 },
+    { type: 'REPAIR', name: 'ドック入り', description: 'HPを全回復し、最大HPを+5する。', cost: 3, tier: 3 },
+    { type: 'FUEL', name: '燃料補給', description: '燃料を最大まで回復。', cost: 1, tier: 1 },
+    { type: 'FUEL', name: 'タンク増設', description: '最大燃料+1、燃料全回復。', cost: 3, tier: 3 },
+    { type: 'ENERGY', name: 'エネルギー採掘', description: 'エネルギー生成プールに「6」を追加。', cost: 2, tier: 2 },
+    { type: 'ENERGY', name: 'リアクター調整', description: '生成プールに「オレンジ」を追加。', cost: 2, tier: 2 },
+    { type: 'PARTS', name: 'パーツ回収', description: 'ランダムなパーツを1つ獲得する。', cost: 2, tier: 2 },
+    { type: 'PARTS', name: '軍需物資', description: '高性能なパーツを獲得する。', cost: 4, tier: 3 },
+    { type: 'COIN', name: 'アルバイト', description: 'スターコインを50獲得。', cost: 1, tier: 1 },
+    { type: 'COIN', name: '臨時ボーナス', description: 'スターコインを150獲得。', cost: 2, tier: 2 },
+    { type: 'TREASURE', name: '謎の宝箱', description: '永続的な攻撃力ボーナスを得る。', cost: 3, tier: 3 },
+    { type: 'UNKNOWN', name: '謎のイベント', description: '何が起こるかわからない...', cost: 2, tier: 2 },
+    { type: 'SHOP', name: '闇市', description: '高品質なパーツを裏ルートで入手する。', cost: 0, coinCost: 150, tier: 3 },
+    { type: 'ENHANCE', name: '特別改造', description: '船体を強化。最大HP+20。', cost: 0, coinCost: 100, tier: 2 },
+    { type: 'TRAINING', name: '極秘訓練', description: 'パッシブパワー(全出力)+1。', cost: 0, coinCost: 200, tier: 3 },
+    { type: 'FUEL', name: 'プレミアム燃料', description: '最大燃料+2、全回復。', cost: 0, coinCost: 80, tier: 2 },
+];
+
+const PART_TEMPLATES: Omit<ShipPart, 'id'>[] = [
+    { type: 'CANNON', name: 'バスター砲', description: '標準的な威力の大砲。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 3, hp: 10 },
+    { type: 'MISSILE', name: '誘導ミサイル', description: '青エネルギーで高出力。', slots: [{req:'BLUE', value:null}, {req:'BLUE', value:null}], multiplier: 1.5, basePower: 5, hp: 10 },
+    { type: 'SHIELD', name: 'エネルギー盾', description: '高い防御力を発揮。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 5, hp: 15 },
+    { type: 'ENGINE', name: '高機動スラスター', description: '回避率と燃料効率が高い。', slots: [{req:'BLUE', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 2, hp: 10 },
+    { type: 'CANNON', name: '波動砲', description: 'オレンジ必須。超高火力。', slots: [{req:'ORANGE', value:null}, {req:'ORANGE', value:null}], multiplier: 2.0, basePower: 10, hp: 10 },
+    { type: 'ENGINE', name: '増幅炉', description: 'ランク+1のカードを生成する。', slots: [{req:'BLUE', value:null}], multiplier: 0, basePower: 0, hp: 10, specialEffect: 'RANK_UP' },
+    { type: 'CANNON', name: 'バルカン砲', description: '白エネルギーで手軽に連射。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.0, basePower: 2, hp: 10 },
+    { type: 'CANNON', name: 'レールガン', description: '青エネルギー専用。貫通力重視。', slots: [{req:'BLUE', value:null}], multiplier: 3.0, basePower: 6, hp: 10 },
+    { type: 'MISSILE', name: 'ナパーム弾', description: 'オレンジ専用。広範囲高火力。', slots: [{req:'ORANGE', value:null}], multiplier: 2.5, basePower: 5, hp: 10 },
+    { type: 'SHIELD', name: 'スパイク装甲', description: '被弾時、防御出力の半分を敵に返す。', slots: [{req:'ANY', value:null}], multiplier: 1.5, basePower: 2, hp: 20, specialEffect: 'THORNS' },
+    { type: 'SHIELD', name: 'リペアキット', description: '白エネルギーで効率よく防御。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.5, basePower: 4, hp: 10 },
+    { type: 'ENGINE', name: 'ソーラー帆', description: '白エネルギーを効率よく変換。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.5, basePower: 0, hp: 5 },
+    { type: 'ENGINE', name: '核融合炉', description: 'オレンジ専用。莫大な出力(シールド・燃料)。', slots: [{req:'ORANGE', value:null}], multiplier: 4.0, basePower: 6, hp: 15 },
+    { type: 'CANNON', name: 'スナイパー', description: '2スロットで精密射撃。', slots: [{req:'BLUE', value:null}, {req:'WHITE', value:null}], multiplier: 2.0, basePower: 5, hp: 10 },
+    { type: 'MISSILE', name: '拡散ポッド', description: '多数の白スロットを持つ。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 0.8, basePower: 3, hp: 10 },
+    { type: 'SHIELD', name: 'ミラーコート', description: '青エネルギーで特殊防御。', slots: [{req:'BLUE', value:null}, {req:'ANY', value:null}], multiplier: 1.3, basePower: 4, hp: 12 },
+    { type: 'AMPLIFIER', name: 'エネルギー増幅器', description: '隣接するパーツの出力を強化する(要:白エネ)。', slots: [{req:'WHITE', value:null}], multiplier: 0, basePower: 2, hp: 8 },
+    { type: 'AMPLIFIER', name: 'ハイパーブースター', description: '隣接するパーツを大幅強化(要:橙エネ)。', slots: [{req:'ORANGE', value:null}], multiplier: 0, basePower: 5, hp: 8 },
+    { type: 'AMPLIFIER', name: 'デュアルアンプ', description: '2スロットで安定した強化。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 0, basePower: 3, hp: 8 },
+    { type: 'CANNON', name: 'ホッチキス銃', description: '4連白スロット。数で勝負。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 0.8, basePower: 4, hp: 10 },
+    { type: 'CANNON', name: 'カッターナイフ', description: '近距離高火力。1スロット橙。', slots: [{req:'ORANGE', value:null}], multiplier: 4.5, basePower: 2, hp: 5 },
+    { type: 'MISSILE', name: 'コンパスドリル', description: '1スロットだが貫通力が高い。', slots: [{req:'BLUE', value:null}], multiplier: 3.5, basePower: 4, hp: 10 },
+    { type: 'SHIELD', name: '修正液バリア', description: '白エネルギーで堅牢な守り。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.8, basePower: 6, hp: 15 },
+    { type: 'SHIELD', name: '鉄壁の筆箱', description: '3スロットで鉄壁の防御。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.5, basePower: 8, hp: 20 },
+    { type: 'CANNON', name: '黒板消しキャノン', description: '粉塵爆発。白と青を使用。', slots: [{req:'WHITE', value:null}, {req:'BLUE', value:null}], multiplier: 1.8, basePower: 5, hp: 12 },
+    { type: 'MISSILE', name: '三角定規ブーメラン', description: '戻ってくる衝撃波。', slots: [{req:'WHITE', value:null}, {req:'ORANGE', value:null}], multiplier: 2.0, basePower: 6, hp: 10 },
+    { type: 'AMPLIFIER', name: '黄金比コンパス', description: '青エネルギーで隣接パーツを強化。', slots: [{req:'BLUE', value:null}], multiplier: 0, basePower: 4, hp: 8 },
+    { type: 'AMPLIFIER', name: '下敷き静電気', description: '隣接強化。白エネルギー。', slots: [{req:'WHITE', value:null}], multiplier: 0, basePower: 3, hp: 5 },
+    { type: 'CANNON', name: 'シャーペンスナイパー', description: '超遠距離精密射撃。', slots: [{req:'BLUE', value:null}, {req:'BLUE', value:null}], multiplier: 2.5, basePower: 7, hp: 8 },
+    { type: 'CANNON', name: '液状のりスプレー', description: '敵の動きを鈍らせる(イメージ)。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.2, basePower: 3, hp: 12 },
+    { type: 'CANNON', name: '彫刻刀セット', description: '5本の刃を一斉射出。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 0.5, basePower: 10, hp: 10 },
+    { type: 'CANNON', name: '放送室スピーカー', description: '音波攻撃。白エネで高出力。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 2.0, basePower: 5, hp: 15 },
+    { type: 'ENGINE', name: '焼却炉エンジン', description: '橙エネルギー専用。爆発的推進力。', slots: [{req:'ORANGE', value:null}, {req:'ORANGE', value:null}], multiplier: 5.0, basePower: 10, hp: 20 },
+    { type: 'SHIELD', name: '理科室の人体模型', description: '不気味なオーラで守る。', slots: [{req:'BLUE', value:null}, {req:'ORANGE', value:null}], multiplier: 2.0, basePower: 8, hp: 25 },
+    { type: 'MISSILE', name: '消火栓放水', description: '青エネルギー3つで超高圧放水。', slots: [{req:'BLUE', value:null}, {req:'BLUE', value:null}, {req:'BLUE', value:null}], multiplier: 3.0, basePower: 12, hp: 18 },
+    { type: 'AMPLIFIER', name: '校長先生の銅像', description: '圧倒的威圧感で隣接パーツを強化。', slots: [{req:'ORANGE', value:null}], multiplier: 0, basePower: 6, hp: 30 },
+    { type: 'CANNON', name: 'チャイム音波砲', description: 'キーンコーンカーンコーン(破壊音)。', slots: [{req:'WHITE', value:null}, {req:'BLUE', value:null}], multiplier: 1.5, basePower: 6, hp: 10 },
+    { type: 'SHIELD', name: '自己修復ナノ', description: '起動時に船体HPを5回復する。', slots: [{req:'ORANGE', value:null}], multiplier: 0, basePower: 0, hp: 10, specialEffect: 'HEAL' },
+    { type: 'ENGINE', name: 'エネルギー吸収装置', description: '起動時、燃料を1回復する。', slots: [{req:'BLUE', value:null}], multiplier: 1.0, basePower: 2, hp: 10, specialEffect: 'RECYCLE' },
+    { type: 'ENGINE', name: 'あしたのジョーロ', description: '水力エンジン。白のみで高効率。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.8, basePower: 1, hp: 8 },
+    { type: 'SHIELD', name: '揚げパンアーマー', description: '砂糖のコーティングで衝撃吸収。', slots: [{req:'WHITE', value:null}, {req:'ORANGE', value:null}], multiplier: 1.5, basePower: 5, hp: 15 },
+    { type: 'MISSILE', name: '冷凍ミカン爆弾', description: 'カチカチのミカンを投下。', slots: [{req:'BLUE', value:null}], multiplier: 3.0, basePower: 3, hp: 8 },
+    { type: 'CANNON', name: '牛乳瓶キャノン', description: 'カルシウムパワーで攻撃。', slots: [{req:'WHITE', value:null}], multiplier: 1.5, basePower: 2, hp: 10 },
+    { type: 'SHIELD', name: '0点のテスト用紙', description: '紙装甲だがHPだけは無駄に高い。', slots: [{req:'WHITE', value:null}], multiplier: 0.1, basePower: 1, hp: 50 },
+    { type: 'CANNON', name: 'プリズムレーザー', description: '青と橙の混合エネルギーが必要。', slots: [{req:'BLUE', value:null}, {req:'ORANGE', value:null}], multiplier: 2.5, basePower: 8, hp: 10 },
+    { type: 'CANNON', name: '伝説のソード', description: '勇者が使っていた剣の切っ先。', slots: [{req:'ORANGE', value:null}, {req:'ORANGE', value:null}, {req:'ORANGE', value:null}], multiplier: 3.0, basePower: 20, hp: 30 },
+    { type: 'MISSILE', name: 'ドラゴン花火', description: '龍の形をした花火ミサイル。', slots: [{req:'ORANGE', value:null}, {req:'WHITE', value:null}, {req:'BLUE', value:null}], multiplier: 2.5, basePower: 15, hp: 15 },
+    { type: 'ENGINE', name: '無限の心臓', description: '永久機関。ランクアップ効果付き。', slots: [{req:'ORANGE', value:null}, {req:'BLUE', value:null}], multiplier: 2.0, basePower: 5, hp: 40, specialEffect: 'RANK_UP' },
+];
+
 // --- HELPERS ---
 
 const getColorRank = (color: EnergyColor | 'ANY'): number => {
@@ -145,137 +317,9 @@ const calculateBuffGrid = (parts: ShipPart[]): number[][] => {
     return grid;
 };
 
-// --- DATABASE ---
-
-const createEmptyPart = (id: string): ShipPart => ({
-    id, type: 'EMPTY', name: '空きスロット', slots: [], multiplier: 0, basePower: 0, hp: 0
-});
-
-const STARTING_PARTS_LAYOUT: ShipPart[] = [
-    // Row 0 (Top)
-    { id: 'p0', type: 'EMPTY', name: '空き', slots: [], multiplier: 0, basePower: 0, hp: 0 },
-    { id: 'p1', type: 'EMPTY', name: '空き', slots: [], multiplier: 0, basePower: 0, hp: 0 },
-    { id: 'p2', type: 'CANNON', name: '軽量砲', description: '前方。白エネルギー1つで稼働。', slots: [{req:'WHITE', value:null}], multiplier: 1, basePower: 1, hp: 10 },
-    
-    // Row 1 (Center)
-    { id: 'p3', type: 'ENGINE', name: '増幅炉', description: '青以上のエネルギーで稼働。ランク+1のカードを即生成する。', slots: [{req:'BLUE', value:null}], multiplier: 0, basePower: 0, hp: 10, specialEffect: 'RANK_UP' },
-    { id: 'p4', type: 'EMPTY', name: '空き', slots: [], multiplier: 0, basePower: 0, hp: 0 },
-    { id: 'p5', type: 'CANNON', name: '連装砲', description: '前方。白エネルギー2つで稼働。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1, basePower: 2, hp: 10 },
-    
-    // Row 2 (Bottom)
-    { id: 'p6', type: 'EMPTY', name: '空き', slots: [], multiplier: 0, basePower: 0, hp: 0 },
-    { id: 'p7', type: 'EMPTY', name: '空き', slots: [], multiplier: 0, basePower: 0, hp: 0 },
-    { id: 'p8', type: 'CANNON', name: '軽量砲', description: '前方。白エネルギー1つで稼働。', slots: [{req:'WHITE', value:null}], multiplier: 1, basePower: 1, hp: 10 },
-];
-
-const ENEMY_DATA = [
-    { name: "折り紙偵察機", hp: 30, durability: 4, parts: ['CANNON', 'EMPTY', 'CANNON'] }, // Stage 1-3
-    { name: "ノート爆撃機", hp: 45, durability: 5, parts: ['CANNON', 'CANNON', 'EMPTY'] }, // Stage 4-6
-    { name: "定規戦艦", hp: 70, durability: 6, parts: ['CANNON', 'CANNON', 'CANNON'] }, // Stage 7-9
-    { name: "コンパス要塞", hp: 100, durability: 10, parts: ['CANNON', 'MISSILE', 'CANNON'] }, // Stage 10-12
-    // New Enemies
-    { name: "修正液タンク", hp: 150, durability: 15, parts: ['SHIELD', 'CANNON', 'SHIELD'] }, // Tanky
-    { name: "カッター迎撃機", hp: 50, durability: 3, parts: ['MISSILE', 'MISSILE', 'MISSILE'] }, // High Firepower
-    { name: "分度器マザー", hp: 120, durability: 8, parts: ['CANNON', 'ENGINE', 'CANNON'] }, // Balanced
-    { name: "ホッチキス機動兵", hp: 80, durability: 6, parts: ['CANNON', 'EMPTY', 'MISSILE'] }, 
-    { name: "彫刻刀デストロイヤー", hp: 180, durability: 12, parts: ['MISSILE', 'CANNON', 'MISSILE'] },
-    { name: "暗黒文房具王", hp: 300, durability: 20, parts: ['MISSILE', 'MISSILE', 'MISSILE'] }, // Boss class
-];
-
-const VACATION_EVENTS_DB: Omit<VacationEvent, 'id'>[] = [
-    // Standard Events (Day Cost)
-    { type: 'REPAIR', name: '応急修理', description: 'HPを10回復する。', cost: 1, tier: 1 },
-    { type: 'REPAIR', name: 'ドック入り', description: 'HPを全回復し、最大HPを+5する。', cost: 3, tier: 3 },
-    { type: 'FUEL', name: '燃料補給', description: '燃料を最大まで回復。', cost: 1, tier: 1 },
-    { type: 'FUEL', name: 'タンク増設', description: '最大燃料+1、燃料全回復。', cost: 3, tier: 3 },
-    { type: 'ENERGY', name: 'エネルギー採掘', description: 'エネルギー生成プールに「6」を追加。', cost: 2, tier: 2 },
-    { type: 'ENERGY', name: 'リアクター調整', description: '生成プールに「オレンジ」を追加。', cost: 2, tier: 2 },
-    { type: 'PARTS', name: 'パーツ回収', description: 'ランダムなパーツを1つ獲得する。', cost: 2, tier: 2 },
-    { type: 'PARTS', name: '軍需物資', description: '高性能なパーツを獲得する。', cost: 4, tier: 3 },
-    { type: 'COIN', name: 'アルバイト', description: 'スターコインを50獲得。', cost: 1, tier: 1 },
-    { type: 'COIN', name: '臨時ボーナス', description: 'スターコインを150獲得。', cost: 2, tier: 2 },
-    { type: 'TREASURE', name: '謎の宝箱', description: '永続的な攻撃力ボーナスを得る。', cost: 3, tier: 3 },
-    { type: 'UNKNOWN', name: '謎のイベント', description: '何が起こるかわからない...', cost: 2, tier: 2 },
-    
-    // Coin Spender Events (0 Days, Coin Cost)
-    { type: 'SHOP', name: '闇市', description: '高品質なパーツを裏ルートで入手する。', cost: 0, coinCost: 150, tier: 3 },
-    { type: 'ENHANCE', name: '特別改造', description: '船体を強化。最大HP+20。', cost: 0, coinCost: 100, tier: 2 },
-    { type: 'TRAINING', name: '極秘訓練', description: 'パッシブパワー(全出力)+1。', cost: 0, coinCost: 200, tier: 3 },
-    { type: 'FUEL', name: 'プレミアム燃料', description: '最大燃料+2、全回復。', cost: 0, coinCost: 80, tier: 2 },
-];
-
-const PART_TEMPLATES: Omit<ShipPart, 'id'>[] = [
-    // --- BASIC ---
-    { type: 'CANNON', name: 'バスター砲', description: '標準的な威力の大砲。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 3, hp: 10 },
-    { type: 'MISSILE', name: '誘導ミサイル', description: '青エネルギーで高出力。', slots: [{req:'BLUE', value:null}, {req:'BLUE', value:null}], multiplier: 1.5, basePower: 5, hp: 10 },
-    { type: 'SHIELD', name: 'エネルギー盾', description: '高い防御力を発揮。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 5, hp: 15 },
-    { type: 'ENGINE', name: '高機動スラスター', description: '回避率と燃料効率が高い。', slots: [{req:'BLUE', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 2, hp: 10 },
-    
-    // --- ADVANCED ---
-    { type: 'CANNON', name: '波動砲', description: 'オレンジ必須。超高火力。', slots: [{req:'ORANGE', value:null}, {req:'ORANGE', value:null}], multiplier: 2.0, basePower: 10, hp: 10 },
-    { type: 'ENGINE', name: '増幅炉', description: 'ランク+1のカードを生成する。', slots: [{req:'BLUE', value:null}], multiplier: 0, basePower: 0, hp: 10, specialEffect: 'RANK_UP' },
-    { type: 'CANNON', name: 'バルカン砲', description: '白エネルギーで手軽に連射。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.0, basePower: 2, hp: 10 },
-    { type: 'CANNON', name: 'レールガン', description: '青エネルギー専用。貫通力重視。', slots: [{req:'BLUE', value:null}], multiplier: 3.0, basePower: 6, hp: 10 },
-    { type: 'MISSILE', name: 'ナパーム弾', description: 'オレンジ専用。広範囲高火力。', slots: [{req:'ORANGE', value:null}], multiplier: 2.5, basePower: 5, hp: 10 },
-    { type: 'SHIELD', name: 'スパイク装甲', description: '被弾時、防御出力の半分を敵に返す。', slots: [{req:'ANY', value:null}], multiplier: 1.5, basePower: 2, hp: 20, specialEffect: 'THORNS' },
-    { type: 'SHIELD', name: 'リペアキット', description: '白エネルギーで効率よく防御。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.5, basePower: 4, hp: 10 },
-    
-    // --- ENGINES ---
-    { type: 'ENGINE', name: 'ソーラー帆', description: '白エネルギーを効率よく変換。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.5, basePower: 0, hp: 5 },
-    { type: 'ENGINE', name: '核融合炉', description: 'オレンジ専用。莫大な出力(シールド・燃料)。', slots: [{req:'ORANGE', value:null}], multiplier: 4.0, basePower: 6, hp: 15 },
-    
-    // --- SPECIALIZED ---
-    { type: 'CANNON', name: 'スナイパー', description: '2スロットで精密射撃。', slots: [{req:'BLUE', value:null}, {req:'WHITE', value:null}], multiplier: 2.0, basePower: 5, hp: 10 },
-    { type: 'MISSILE', name: '拡散ポッド', description: '多数の白スロットを持つ。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 0.8, basePower: 3, hp: 10 },
-    { type: 'SHIELD', name: 'ミラーコート', description: '青エネルギーで特殊防御。', slots: [{req:'BLUE', value:null}, {req:'ANY', value:null}], multiplier: 1.3, basePower: 4, hp: 12 },
-
-    // --- AMPLIFIERS ---
-    { type: 'AMPLIFIER', name: 'エネルギー増幅器', description: '隣接するパーツの出力を強化する(要:白エネ)。', slots: [{req:'WHITE', value:null}], multiplier: 0, basePower: 2, hp: 8 },
-    { type: 'AMPLIFIER', name: 'ハイパーブースター', description: '隣接するパーツを大幅強化(要:橙エネ)。', slots: [{req:'ORANGE', value:null}], multiplier: 0, basePower: 5, hp: 8 },
-    { type: 'AMPLIFIER', name: 'デュアルアンプ', description: '2スロットで安定した強化。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 0, basePower: 3, hp: 8 },
-
-    // --- STATIONERY ARSENAL (文房具シリーズ) ---
-    { type: 'CANNON', name: 'ホッチキス銃', description: '4連白スロット。数で勝負。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 0.8, basePower: 4, hp: 10 },
-    { type: 'CANNON', name: 'カッターナイフ', description: '近距離高火力。1スロット橙。', slots: [{req:'ORANGE', value:null}], multiplier: 4.5, basePower: 2, hp: 5 },
-    { type: 'MISSILE', name: 'コンパスドリル', description: '1スロットだが貫通力が高い。', slots: [{req:'BLUE', value:null}], multiplier: 3.5, basePower: 4, hp: 10 },
-    { type: 'SHIELD', name: '修正液バリア', description: '白エネルギーで堅牢な守り。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.8, basePower: 6, hp: 15 },
-    { type: 'SHIELD', name: '鉄壁の筆箱', description: '3スロットで鉄壁の防御。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.5, basePower: 8, hp: 20 },
-    { type: 'CANNON', name: '黒板消しキャノン', description: '粉塵爆発。白と青を使用。', slots: [{req:'WHITE', value:null}, {req:'BLUE', value:null}], multiplier: 1.8, basePower: 5, hp: 12 },
-    { type: 'MISSILE', name: '三角定規ブーメラン', description: '戻ってくる衝撃波。', slots: [{req:'WHITE', value:null}, {req:'ORANGE', value:null}], multiplier: 2.0, basePower: 6, hp: 10 },
-    { type: 'AMPLIFIER', name: '黄金比コンパス', description: '青エネルギーで隣接パーツを強化。', slots: [{req:'BLUE', value:null}], multiplier: 0, basePower: 4, hp: 8 },
-    { type: 'AMPLIFIER', name: '下敷き静電気', description: '隣接強化。白エネルギー。', slots: [{req:'WHITE', value:null}], multiplier: 0, basePower: 3, hp: 5 },
-    { type: 'CANNON', name: 'シャーペンスナイパー', description: '超遠距離精密射撃。', slots: [{req:'BLUE', value:null}, {req:'BLUE', value:null}], multiplier: 2.5, basePower: 7, hp: 8 },
-    { type: 'CANNON', name: '液状のりスプレー', description: '敵の動きを鈍らせる(イメージ)。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.2, basePower: 3, hp: 12 },
-    { type: 'CANNON', name: '彫刻刀セット', description: '5本の刃を一斉射出。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 0.5, basePower: 10, hp: 10 },
-
-    // --- SCHOOL EQUIPMENT (学校設備) ---
-    { type: 'CANNON', name: '放送室スピーカー', description: '音波攻撃。白エネで高出力。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 2.0, basePower: 5, hp: 15 },
-    { type: 'ENGINE', name: '焼却炉エンジン', description: '橙エネルギー専用。爆発的推進力。', slots: [{req:'ORANGE', value:null}, {req:'ORANGE', value:null}], multiplier: 5.0, basePower: 10, hp: 20 },
-    { type: 'SHIELD', name: '理科室の人体模型', description: '不気味なオーラで守る。', slots: [{req:'BLUE', value:null}, {req:'ORANGE', value:null}], multiplier: 2.0, basePower: 8, hp: 25 },
-    { type: 'MISSILE', name: '消火栓放水', description: '青エネルギー3つで超高圧放水。', slots: [{req:'BLUE', value:null}, {req:'BLUE', value:null}, {req:'BLUE', value:null}], multiplier: 3.0, basePower: 12, hp: 18 },
-    { type: 'AMPLIFIER', name: '校長先生の銅像', description: '圧倒的威圧感で隣接パーツを強化。', slots: [{req:'ORANGE', value:null}], multiplier: 0, basePower: 6, hp: 30 },
-    { type: 'CANNON', name: 'チャイム音波砲', description: 'キーンコーンカーンコーン(破壊音)。', slots: [{req:'WHITE', value:null}, {req:'BLUE', value:null}], multiplier: 1.5, basePower: 6, hp: 10 },
-
-    // --- LUNCH & SURVIVAL (給食・サバイバル) ---
-    { type: 'SHIELD', name: '自己修復ナノ', description: '起動時に船体HPを5回復する。', slots: [{req:'ORANGE', value:null}], multiplier: 0, basePower: 0, hp: 10, specialEffect: 'HEAL' },
-    { type: 'ENGINE', name: 'エネルギー吸収装置', description: '起動時、燃料を1回復する。', slots: [{req:'BLUE', value:null}], multiplier: 1.0, basePower: 2, hp: 10, specialEffect: 'RECYCLE' },
-    { type: 'ENGINE', name: 'あしたのジョーロ', description: '水力エンジン。白のみで高効率。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.8, basePower: 1, hp: 8 },
-    { type: 'SHIELD', name: '揚げパンアーマー', description: '砂糖のコーティングで衝撃吸収。', slots: [{req:'WHITE', value:null}, {req:'ORANGE', value:null}], multiplier: 1.5, basePower: 5, hp: 15 },
-    { type: 'MISSILE', name: '冷凍ミカン爆弾', description: 'カチカチのミカンを投下。', slots: [{req:'BLUE', value:null}], multiplier: 3.0, basePower: 3, hp: 8 },
-    { type: 'CANNON', name: '牛乳瓶キャノン', description: 'カルシウムパワーで攻撃。', slots: [{req:'WHITE', value:null}], multiplier: 1.5, basePower: 2, hp: 10 },
-    { type: 'SHIELD', name: '0点のテスト用紙', description: '紙装甲だがHPだけは無駄に高い。', slots: [{req:'WHITE', value:null}], multiplier: 0.1, basePower: 1, hp: 50 },
-
-    // --- LEGENDARY (伝説) ---
-    { type: 'CANNON', name: 'プリズムレーザー', description: '青と橙の混合エネルギーが必要。', slots: [{req:'BLUE', value:null}, {req:'ORANGE', value:null}], multiplier: 2.5, basePower: 8, hp: 10 },
-    { type: 'CANNON', name: '伝説のソード', description: '勇者が使っていた剣の切っ先。', slots: [{req:'ORANGE', value:null}, {req:'ORANGE', value:null}, {req:'ORANGE', value:null}], multiplier: 3.0, basePower: 20, hp: 30 },
-    { type: 'MISSILE', name: 'ドラゴン花火', description: '龍の形をした花火ミサイル。', slots: [{req:'ORANGE', value:null}, {req:'WHITE', value:null}, {req:'BLUE', value:null}], multiplier: 2.5, basePower: 15, hp: 15 },
-    { type: 'ENGINE', name: '無限の心臓', description: '永久機関。ランクアップ効果付き。', slots: [{req:'ORANGE', value:null}, {req:'BLUE', value:null}], multiplier: 2.0, basePower: 5, hp: 40, specialEffect: 'RANK_UP' },
-];
-
 // --- COMPONENTS ---
 
 const PoolView: React.FC<{ pool: PoolState, onClose: () => void }> = ({ pool, onClose }) => {
-    // Merge all numbers and colors for a simpler "Inventory" view
     const allNumbers = [...pool.genNumbers, ...pool.coolNumbers].sort((a,b) => a - b);
     const allColors = [...pool.genColors, ...pool.coolColors].sort((a,b) => getColorRank(b) - getColorRank(a));
 
@@ -335,7 +379,6 @@ const EnergyCardView: React.FC<{ card: EnergyCard, onClick?: () => void, selecte
             style={{ WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
         >
             <div className={`${textSize} ${card.color === 'WHITE' ? 'text-slate-800' : 'text-white'}`}>{card.value}</div>
-            {/* Color Icon */}
             <div className="absolute top-0.5 right-0.5">
                 {card.color === 'ORANGE' && <Zap size={iconSize} className="text-yellow-200 fill-current"/>}
                 {card.color === 'BLUE' && <Wind size={iconSize} className="text-cyan-200 fill-current"/>}
@@ -353,7 +396,7 @@ const ShipPartView: React.FC<{
     highlight?: boolean,
     pendingReplace?: boolean,
     showPower?: boolean,
-    bonusPower?: number // NEW: Display Synergy
+    bonusPower?: number
 }> = ({ part, onClick, onLongPress, isEnemy, highlight, pendingReplace, showPower = true, bonusPower = 0 }) => {
     
     const longPressTimer = useRef<any>(null);
@@ -383,7 +426,6 @@ const ShipPartView: React.FC<{
     if (part.type === 'SHIELD') { icon = <Shield size={14}/>; colorClass = 'bg-blue-900/60 border-blue-500/50'; textColor='text-blue-200'; }
     if (part.type === 'AMPLIFIER') { icon = <Activity size={14}/>; colorClass = 'bg-purple-900/60 border-purple-500/50'; textColor='text-purple-200'; }
     
-    // Special highlight for generator / healer
     if (part.specialEffect === 'RANK_UP') { colorClass = 'bg-purple-900/60 border-purple-500/50'; textColor='text-purple-200'; icon = <Zap size={14}/>; }
     if (part.specialEffect === 'HEAL') { colorClass = 'bg-green-900/60 border-green-500/50'; textColor='text-green-200'; icon = <Droplets size={14}/>; }
     if (part.specialEffect === 'RECYCLE') { colorClass = 'bg-teal-900/60 border-teal-500/50'; textColor='text-teal-200'; icon = <Recycle size={14}/>; }
@@ -401,19 +443,17 @@ const ShipPartView: React.FC<{
         );
     }
 
-    // Calculate Power (Visual Only)
     const loadedCount = part.slots.filter(s => s.value !== null).length;
     const isFull = loadedCount === part.slots.length && part.slots.length > 0;
     
     let totalPower = 0;
     const energySum = part.slots.reduce((sum, s) => sum + (s.value || 0), 0);
     
-    if (energySum > 0 || (part.slots.length === 0)) { // Show power for amplifier even if slots empty (if it has base power)
+    if (energySum > 0 || (part.slots.length === 0)) { 
         totalPower = Math.floor(energySum * part.multiplier);
         if (isFull) totalPower += part.basePower;
     }
     
-    // Add Bonus Power to display
     const displayPower = totalPower + bonusPower;
 
     return (
@@ -434,7 +474,6 @@ const ShipPartView: React.FC<{
         >
             <div className="flex justify-between items-center">
                 <div className={`${textColor}`}>{icon}</div>
-                {/* Power Display */}
                 {((totalPower > 0) || (bonusPower > 0)) && showPower && part.type !== 'AMPLIFIER' && (
                     <div className="text-[10px] font-bold text-white shadow-black drop-shadow-md flex items-center">
                         {displayPower}
@@ -449,7 +488,7 @@ const ShipPartView: React.FC<{
                 {part.slots.map((slot, i) => {
                     let slotColor = 'bg-slate-900 border-slate-600';
                     if (slot.value !== null) {
-                        slotColor = 'bg-white border-white animate-pulse'; // Loaded
+                        slotColor = 'bg-white border-white animate-pulse'; 
                     } else if (slot.req === 'ORANGE') {
                         slotColor = 'bg-orange-900 border-orange-600';
                     } else if (slot.req === 'BLUE') {
@@ -481,7 +520,6 @@ const ClashOverlay: React.FC<{ clashState: ClashState }> = ({ clashState }) => {
                 const clash = clashState.data.find(d => d.row === rowIdx);
                 if (!clash) return <div key={rowIdx} className="h-20 md:h-24"></div>;
 
-                // Calculate beam widths based on phase
                 let pWidth = 50;
                 let eWidth = 50;
                 let opacity = 1;
@@ -489,36 +527,32 @@ const ClashOverlay: React.FC<{ clashState: ClashState }> = ({ clashState }) => {
                 if (clashState.phase === 'INIT') {
                     pWidth = 0; eWidth = 0;
                 } else if (clashState.phase === 'CLASH') {
-                    pWidth = 50; eWidth = 50; // Meet in middle
+                    pWidth = 50; eWidth = 50; 
                 } else if (clashState.phase === 'IMPACT') {
-                    // Push logic
                     if (clash.result === 'ENEMY_HIT') {
                         pWidth = 100; eWidth = 0;
                     } else if (clash.result === 'PLAYER_HIT') {
                         pWidth = 0; eWidth = 100;
                     } else if (clash.result === 'DRAW') {
-                        pWidth = 50; eWidth = 50; // Spark in middle
+                        pWidth = 50; eWidth = 50; 
                     } else {
-                        // NONE (Pass through visual)
                         if (clash.pPower > 0) {
-                            pWidth = 100; eWidth = 0; // Player beam goes through
+                            pWidth = 100; eWidth = 0; 
                         } else if (clash.ePower > 0) {
-                            pWidth = 0; eWidth = 100; // Enemy beam goes through
+                            pWidth = 0; eWidth = 100; 
                         } else {
-                            opacity = 0; // No power involved
+                            opacity = 0; 
                         }
                     }
                 } else {
                     opacity = 0;
                 }
 
-                // Show shields if blocking
                 const pShieldVis = clash.pShield > 0 && (clash.result === 'PLAYER_HIT' || clash.result === 'DRAW');
                 const pThornVis = clash.pThorns > 0 && clash.result === 'PLAYER_HIT';
 
                 return (
                     <div key={rowIdx} className="h-20 md:h-24 relative flex items-center transition-all duration-300" style={{ opacity }}>
-                        {/* Player Beam */}
                         {clash.pPower > 0 && (
                             <div 
                                 className="absolute left-0 h-4 md:h-6 bg-gradient-to-r from-cyan-600 via-cyan-400 to-white shadow-[0_0_15px_cyan] rounded-r-full transition-all duration-500 ease-out"
@@ -528,7 +562,6 @@ const ClashOverlay: React.FC<{ clashState: ClashState }> = ({ clashState }) => {
                             </div>
                         )}
                         
-                        {/* Enemy Beam */}
                         {clash.ePower > 0 && (
                             <div 
                                 className="absolute right-0 h-4 md:h-6 bg-gradient-to-l from-red-600 via-purple-500 to-white shadow-[0_0_15px_red] rounded-l-full transition-all duration-500 ease-out"
@@ -538,7 +571,6 @@ const ClashOverlay: React.FC<{ clashState: ClashState }> = ({ clashState }) => {
                             </div>
                         )}
 
-                        {/* Impact Effect */}
                         {clashState.phase === 'IMPACT' && (
                             <div className="absolute top-1/2 -translate-y-1/2 w-full flex justify-center pointer-events-none">
                                 {clash.result === 'DRAW' && (
@@ -553,14 +585,12 @@ const ClashOverlay: React.FC<{ clashState: ClashState }> = ({ clashState }) => {
                             </div>
                         )}
                         
-                        {/* Shield Visuals */}
                         {pShieldVis && (
                             <div className="absolute left-10 md:left-20 top-1/2 -translate-y-1/2 z-40 animate-pulse text-blue-400">
                                 <Shield size={48} className="fill-blue-900/50 stroke-2"/>
                             </div>
                         )}
 
-                        {/* Thorn Visuals */}
                         {pThornVis && (
                              <div className="absolute left-10 md:left-20 top-1/2 -translate-y-1/2 z-50 text-red-500 font-bold animate-ping flex items-center">
                                  <Radiation size={32} /> THORNS!
@@ -573,22 +603,32 @@ const ClashOverlay: React.FC<{ clashState: ClashState }> = ({ clashState }) => {
     );
 };
 
-// Helper function to load initial state safely
 const loadInitialState = () => {
     return storageService.loadPaperPlaneState();
 };
 
-const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-    // --- STATE INITIALIZATION ---
-    // Try to load saved state, otherwise use default
-    const savedData = loadInitialState();
+const loadProgress = () => {
+    return storageService.loadPaperPlaneProgress();
+};
 
-    const [phase, setPhase] = useState<GamePhase>(savedData?.phase || 'TUTORIAL');
+const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+    const savedData = loadInitialState();
+    const [progress, setProgress] = useState<PaperPlaneProgress>(loadProgress());
+
+    const [phase, setPhase] = useState<GamePhase>(savedData?.phase || 'SETUP');
     const [stage, setStage] = useState(savedData?.stage || 1); 
     const [turn, setTurn] = useState(savedData?.turn || 1);
     const [isEndless, setIsEndless] = useState(savedData?.isEndless || false);
     
-    // Pools
+    // --- SETUP PHASE STATES ---
+    const [setupStep, setSetupStep] = useState<'SHIP'|'PILOT'|'MISSION'>('SHIP');
+    const [selectedShipId, setSelectedShipId] = useState<string>('SHIP_DEFAULT');
+    const [pilotOptions, setPilotOptions] = useState<Pilot[]>([]);
+    const [selectedPilotIndex, setSelectedPilotIndex] = useState<number>(-1);
+    const [pinnedPilotIndex, setPinnedPilotIndex] = useState<number | null>(null);
+    const [randomTalents, setRandomTalents] = useState<Talent[]>([]);
+    const [selectedMissionLevel, setSelectedMissionLevel] = useState<number>(0);
+
     const [pool, setPool] = useState<PoolState>(savedData?.pool || {
         genNumbers: [1,2,3,4,5,6,3,4,5], 
         genColors: ['WHITE','WHITE','WHITE','BLUE','BLUE','ORANGE','ORANGE'], 
@@ -599,23 +639,24 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [hand, setHand] = useState<EnergyCard[]>(savedData?.hand || []);
     const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
 
-    // Ships
     const [player, setPlayer] = useState<ShipState>(savedData?.player || {
-        yOffset: 1, // Start middle
+        yOffset: 1, 
         hp: 40, maxHp: 40, fuel: MAX_FUEL, maxFuel: MAX_FUEL, durability: 0, maxDurability: 0, isStunned: false,
-        parts: JSON.parse(JSON.stringify(STARTING_PARTS_LAYOUT)),
+        parts: [], // Set in init
         starCoins: 0,
         vacationDays: 0,
         passivePower: 0,
-        partInventory: []
+        partInventory: [],
+        talents: []
     });
 
     const [enemy, setEnemy] = useState<ShipState>(savedData?.enemy || {
         yOffset: 1,
         hp: 20, maxHp: 20, fuel: 0, maxFuel: 0, durability: 3, maxDurability: 3, isStunned: false,
-        parts: [], // Enemy parts are simplified (1 per row usually)
+        parts: [], 
         starCoins: 0, vacationDays: 0, passivePower: 0,
-        partInventory: []
+        partInventory: [],
+        talents: []
     });
 
     const [enemyIntents, setEnemyIntents] = useState<EnemyIntent[]>(savedData?.enemyIntents || []);
@@ -625,27 +666,23 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [animating, setAnimating] = useState(false);
     const [tooltipPart, setTooltipPart] = useState<ShipPart | null>(null);
     
-    // Clash Animation State
     const [clashState, setClashState] = useState<ClashState>({ active: false, phase: 'INIT', data: [] });
     
-    // Vacation State
     const [vacationEvents, setVacationEvents] = useState<VacationEvent[]>(savedData?.vacationEvents || []);
     const [vacationLog, setVacationLog] = useState<string>(savedData?.vacationLog || "休暇を楽しんでください。");
-    const [pendingPart, setPendingPart] = useState<ShipPart | null>(savedData?.pendingPart || null); // Part waiting to be equipped
+    const [pendingPart, setPendingPart] = useState<ShipPart | null>(savedData?.pendingPart || null); 
     const [hangarSelection, setHangarSelection] = useState<{loc: 'SHIP'|'INV', idx: number}|null>(null);
 
-    // Reward State
     const [rewardOptions, setRewardOptions] = useState<ShipPart[]>(savedData?.rewardOptions || []);
     const [earnedCoins, setEarnedCoins] = useState(savedData?.earnedCoins || 0);
 
-    // --- AUTO SAVE LOGIC ---
+    // --- AUTO SAVE ---
     const saveDebounceRef = useRef<any>(null);
 
     useEffect(() => {
-        // Don't save on transient or terminal states immediately (though we clear on terminal)
         if (phase === 'GAME_OVER') {
             storageService.clearPaperPlaneState();
-        } else if (phase !== 'TUTORIAL') {
+        } else if (phase !== 'TUTORIAL' && phase !== 'SETUP') {
             if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
             saveDebounceRef.current = setTimeout(() => {
                 const stateToSave = {
@@ -653,15 +690,112 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins
                 };
                 storageService.savePaperPlaneState(stateToSave);
-            }, 1000); // 1 second debounce
+            }, 1000); 
         }
     }, [phase, stage, turn, pool, hand, player, enemy, enemyIntents, vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins, isEndless]);
 
-    // On Mount BGM check
     useEffect(() => {
-        // Use the new ambient space western track for all phases of this game
         audioService.playBGM('paper_plane');
+        if (phase === 'SETUP') {
+             initPilotRoll();
+        }
     }, []);
+
+    // --- SETUP LOGIC ---
+    const initPilotRoll = () => {
+        const slots: Pilot[] = [];
+        for (let i=0; i<3; i++) {
+             slots.push(PILOTS[Math.floor(Math.random() * PILOTS.length)]);
+        }
+        setPilotOptions(slots);
+        
+        // Random Talents for higher ranks
+        const talents: Talent[] = [];
+        if (progress.rank >= 5) {
+            talents.push(GENERIC_TALENTS[Math.floor(Math.random() * GENERIC_TALENTS.length)]);
+        }
+        if (progress.rank >= 10) {
+             talents.push(GENERIC_TALENTS[Math.floor(Math.random() * GENERIC_TALENTS.length)]);
+        }
+        setRandomTalents(talents);
+    };
+
+    const handleRerollPilots = () => {
+        if (progress.rerollCount <= 0) {
+            audioService.playSound('wrong');
+            return;
+        }
+        
+        // Update Progress
+        const newProgress = { ...progress, rerollCount: progress.rerollCount - 1 };
+        setProgress(newProgress);
+        storageService.savePaperPlaneProgress(newProgress);
+        
+        // Roll Pilots
+        const newOpts = [...pilotOptions];
+        for (let i=0; i<3; i++) {
+            if (pinnedPilotIndex === i) continue;
+            newOpts[i] = PILOTS[Math.floor(Math.random() * PILOTS.length)];
+        }
+        setPilotOptions(newOpts);
+
+        // Roll Random Talents
+        const newTalents: Talent[] = [];
+        if (progress.rank >= 5) newTalents.push(GENERIC_TALENTS[Math.floor(Math.random() * GENERIC_TALENTS.length)]);
+        if (progress.rank >= 10) newTalents.push(GENERIC_TALENTS[Math.floor(Math.random() * GENERIC_TALENTS.length)]);
+        setRandomTalents(newTalents);
+        
+        audioService.playSound('select');
+    };
+    
+    const confirmSetup = () => {
+        if (selectedPilotIndex === -1) {
+            audioService.playSound('wrong');
+            return;
+        }
+        
+        audioService.playSound('win');
+        
+        // Init Game Data
+        const shipTemplate = SHIPS.find(s => s.id === selectedShipId)!;
+        const pilot = pilotOptions[selectedPilotIndex];
+        
+        // Apply Modifiers
+        let pMaxHp = shipTemplate.baseHp;
+        let pPassivePower = 0;
+        let pMaxFuel = MAX_FUEL;
+        let pStartMoney = 0;
+        
+        // Apply Talents
+        const allTalents = [pilot.intrinsicTalent, ...randomTalents];
+        allTalents.forEach(t => {
+            if (t.effectType === 'MAX_HP') pMaxHp += t.value;
+            if (t.effectType === 'PASSIVE_POWER') pPassivePower += t.value;
+            if (t.effectType === 'FUEL') pMaxFuel += t.value;
+        });
+
+        // Apply Ascension Modifiers (simplified)
+        // Lvl 1: -
+        if (selectedMissionLevel >= 2) pMaxHp -= 5;
+        // ... more can be added
+
+        setPlayer({
+            yOffset: 1,
+            hp: pMaxHp, maxHp: pMaxHp,
+            fuel: pMaxFuel, maxFuel: pMaxFuel,
+            durability: 0, maxDurability: 0, isStunned: false,
+            parts: JSON.parse(JSON.stringify(shipTemplate.layout)),
+            starCoins: pStartMoney,
+            vacationDays: 0,
+            passivePower: pPassivePower,
+            partInventory: [],
+            talents: allTalents
+        });
+        
+        setStage(1);
+        setIsEndless(false);
+        initBattle(1);
+    };
 
     // --- GAME LOGIC ---
 
@@ -673,18 +807,22 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         if (stageNum <= 4) {
             enemyIdx = Math.min(ENEMY_DATA.length - 1, Math.floor((stageNum - 1) / 1.5));
-            // Ensure bounds
             enemyIdx = Math.max(0, Math.min(enemyIdx, ENEMY_DATA.length - 1));
             template = ENEMY_DATA[enemyIdx];
         } else {
-            // Random enemy from pool for later stages or endless
             enemyIdx = Math.floor(Math.random() * ENEMY_DATA.length);
             template = ENEMY_DATA[enemyIdx];
         }
 
-        // Difficulty Scaling
+        // Difficulty Scaling with Ascension
         let hp = template.hp + (stageNum * 8);
         let dur = template.durability + Math.floor(stageNum / 2);
+        
+        // Ascension Scaling
+        if (selectedMissionLevel >= 1) { /* Enemy Dmg Up handled in calculation */ }
+        if (selectedMissionLevel >= 3) hp = Math.floor(hp * 1.1);
+        if (selectedMissionLevel >= 5) dur += 2;
+        if (selectedMissionLevel >= 7) hp = Math.floor(hp * 1.2);
 
         if (isEndless) {
              const loop = Math.max(1, stageNum - FINAL_STAGE_NORMAL);
@@ -692,7 +830,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
              dur += loop * 2;
         }
 
-        // Enemy Parts (Simplified: Just assign to 3 rows)
         const eParts: ShipPart[] = template.parts.map((t, i) => ({
             id: `ep_${i}`,
             type: t as any,
@@ -707,39 +844,46 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             fuel: 0, maxFuel: 0, isStunned: false,
             parts: eParts,
             starCoins: 0, vacationDays: 0, passivePower: 0,
-            partInventory: []
+            partInventory: [],
+            talents: []
         });
 
-        // Reset Player Parts Loaded Values
         setPlayer(prev => ({
             ...prev,
             yOffset: 1,
-            parts: prev.parts.map(p => ({ ...p, slots: p.slots.map(s => ({...s, value: null})) }))
+            parts: prev.parts.map(p => ({ ...p, slots: p.slots.map(s => ({...s, value: null})) })),
+            // Ascension 4: Start damaged
+            hp: selectedMissionLevel >= 4 ? Math.floor(prev.hp * 0.8) : prev.hp
         }));
 
         setTurn(1);
         
-        // --- MODIFIED: Pool Reset & Initial Draw ---
-        // Gather all resources (Hand + Discard + Deck)
-        // Note: Hand should be empty here if cleared properly in reward phase, but we include it for robustness.
         let allNumbers = [...pool.genNumbers, ...pool.coolNumbers, ...hand.map(c => c.value)];
         let allColors = [...pool.genColors, ...pool.coolColors, ...hand.map(c => c.color)];
 
         const initialHand: EnergyCard[] = [];
         const drawCount = 5;
 
-        // Shuffle
         allNumbers.sort(() => Math.random() - 0.5);
         allColors.sort(() => Math.random() - 0.5);
 
         for (let i = 0; i < drawCount; i++) {
             if (allNumbers.length > 0 && allColors.length > 0) {
-                // Pop from end for simplicity/performance or random index
                 const val = allNumbers.pop()!;
                 const col = allColors.pop()!;
                 initialHand.push({ id: `e_init_${Date.now()}_${i}`, value: val, color: col });
             }
         }
+        
+        // Talent: Start Energy
+        player.talents.forEach(t => {
+             if (t.effectType === 'START_ENERGY') {
+                 for(let k=0; k<t.value; k++) {
+                     // Add extra white energy
+                     initialHand.push({ id: `e_talent_${Date.now()}_${k}`, value: 3, color: 'WHITE' });
+                 }
+             }
+        });
 
         setPool({
             genNumbers: allNumbers,
@@ -748,37 +892,37 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             coolColors: []
         });
         setHand(initialHand);
-        // -------------------------------------------
 
         generateEnemyIntents(1, eParts, stageNum); 
         setPhase('BATTLE');
         addLog(`バトル開始！ 敵: ${template.name}`);
-        // Ensure BGM is playing
         audioService.playBGM('paper_plane');
     };
 
     const generateEnemyIntents = (turnNum: number, parts: ShipPart[], currentStage: number) => {
         const intents: EnemyIntent[] = [];
-        const intensity = 0.5 + (currentStage * 0.05); // Increases attack frequency
+        const intensity = 0.5 + (currentStage * 0.05); 
 
         parts.forEach((p, idx) => {
             const roll = Math.random();
             const baseVal = 3 + Math.floor(turnNum/2) + Math.floor(currentStage/2);
+            let finalVal = baseVal;
+            // Ascension 1: Enemy Dmg +1
+            if (selectedMissionLevel >= 1) finalVal += 1;
+            // Ascension 6: Enemy Dmg +2
+            if (selectedMissionLevel >= 6) finalVal += 1;
 
             if (p.type === 'CANNON') {
                 if (roll < Math.min(0.8, intensity)) {
-                    intents.push({ row: idx, type: 'ATTACK', value: baseVal });
+                    intents.push({ row: idx, type: 'ATTACK', value: finalVal });
                 }
             } else if (p.type === 'MISSILE') {
-                // Missiles fire less often but harder
                 if (roll < Math.min(0.5, intensity * 0.7)) {
-                    intents.push({ row: idx, type: 'ATTACK', value: Math.floor(baseVal * 1.5) });
+                    intents.push({ row: idx, type: 'ATTACK', value: Math.floor(finalVal * 1.5) });
                 }
             } else if (p.type === 'SHIELD') {
-                // Shields might buff durability? Currently not implemented in clash, so just occasional attack or skip
-                // Let's make shields occasionally attack weakly (bash)
                 if (roll < 0.2) {
-                     intents.push({ row: idx, type: 'ATTACK', value: Math.floor(baseVal * 0.5) });
+                     intents.push({ row: idx, type: 'ATTACK', value: Math.floor(finalVal * 0.5) });
                 }
             }
         });
@@ -821,7 +965,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     const recycleCard = (card: EnergyCard) => {
-        // Skip recycling if it's temporary (generated by amplifier)
         if (card.isTemporary) return;
 
         setPool(prev => ({
@@ -854,14 +997,12 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         if (part.type === 'EMPTY') { addLog("そこには何もありません"); return; }
         
-        // Find best empty COMPATIBLE slot (Highest Requirement Rank first)
         let slotIdx = -1;
         let bestRank = -1;
 
         part.slots.forEach((s, idx) => {
             if (s.value === null && isColorCompatible(card.color, s.req)) {
                 const rank = getColorRank(s.req);
-                // Prioritize higher rank slots to save lower rank slots for weaker cards
                 if (rank > bestRank) {
                     bestRank = rank;
                     slotIdx = idx;
@@ -875,32 +1016,27 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             return;
         }
 
-        // Prepare new hand state locally
         let currentHandList = [...hand];
 
-        // Special Effect: RANK_UP
         if (part.specialEffect === 'RANK_UP') {
             const newValue = card.value + 1;
             const newCard: EnergyCard = {
                 id: `e_gen_${Date.now()}`,
                 value: newValue,
                 color: card.color,
-                isTemporary: true // Generated cards are temporary for this battle
+                isTemporary: true 
             };
             currentHandList.push(newCard); 
             addLog(`増幅！ランク${newValue}のカードを生成！(一時的)`);
             audioService.playSound('buff');
         }
 
-        // Load
         const newParts = [...player.parts];
         const newSlots = [...part.slots];
         newSlots[slotIdx] = { ...newSlots[slotIdx], value: card.value };
         newParts[partIndex] = { ...part, slots: newSlots };
         
         setPlayer(prev => ({ ...prev, parts: newParts }));
-        
-        // Remove original card from hand
         currentHandList.splice(cardIndex, 1);
         
         setHand(currentHandList);
@@ -923,17 +1059,14 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setAnimating(true);
         setSelectedCardId(null);
         
-        // --- PRE-CALCULATION PHASE ---
         const clashData: ClashRowData[] = [];
         let tempEnemyHp = enemy.hp;
         let tempPlayerHp = player.hp;
         let tempFuel = player.fuel;
         let enemyStunDmg = 0;
 
-        // PASS 1: Calculate Amplifier Buffs
         const buffGrid = calculateBuffGrid(player.parts);
 
-        // PASS 2: Calculate Row Powers
         for (let r = 0; r < MAX_ROWS; r++) {
             const pRelIdx = r - player.yOffset;
             let pPower = 0;
@@ -941,14 +1074,12 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             let pEngine = 0;
             let pThorns = 0;
 
-            // Determine Player Hitbox (Is there any solid part in this row?)
             let isPlayerHitbox = false;
             
             if (pRelIdx >= 0 && pRelIdx < SHIP_HEIGHT) {
                 const startIdx = pRelIdx * SHIP_WIDTH;
                 const rowParts = player.parts.slice(startIdx, startIdx + SHIP_WIDTH);
                 
-                // If any part in the row is NOT empty, it counts as a hitbox.
                 isPlayerHitbox = rowParts.some(p => p.type !== 'EMPTY');
 
                 rowParts.forEach((p, colIdx) => {
@@ -991,9 +1122,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 ePower = intent.value;
             }
 
-            // Determine Enemy Hitbox
             let isEnemyHitbox = false;
-            // Enemy parts are stored in a simple array (1 per row effectively, or mapped)
             if (eRelIdx >= 0 && eRelIdx < enemy.parts.length) {
                 const ep = enemy.parts[eRelIdx];
                 if (ep && ep.type !== 'EMPTY') {
@@ -1001,7 +1130,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 }
             }
 
-            // Determine Clash Result
             let result: ClashRowData['result'] = 'NONE';
             let damage = 0;
 
@@ -1011,7 +1139,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         result = 'ENEMY_HIT';
                         damage = pPower - ePower;
                     } else {
-                        result = 'NONE'; // Pass through
+                        result = 'NONE'; 
                     }
                 } else if (ePower > pPower) {
                     if (isPlayerHitbox) {
@@ -1019,7 +1147,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         let rawDmg = ePower - pPower;
                         damage = rawDmg; 
                     } else {
-                        result = 'NONE'; // Pass through
+                        result = 'NONE'; 
                     }
                 } else {
                     result = 'DRAW';
@@ -1031,19 +1159,15 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             }
         }
 
-        // --- ANIMATION PHASE ---
         setClashState({ active: true, phase: 'INIT', data: clashData });
         
-        // 1. Extend Beams
-        audioService.playSound('buff'); // Charge/Prepare sound
+        audioService.playSound('buff'); 
         setTimeout(() => setClashState(prev => ({ ...prev, phase: 'CLASH' })), 100);
         
-        // 2. Resolve/Impact
-        await new Promise(r => setTimeout(r, 600)); // Wait for beam extension
+        await new Promise(r => setTimeout(r, 600)); 
         setClashState(prev => ({ ...prev, phase: 'IMPACT' }));
-        audioService.playSound('attack'); // Beam Fire
+        audioService.playSound('attack'); 
         
-        // Play impact sounds based on results
         let playerHit = false;
         let enemyHit = false;
         clashData.forEach(c => {
@@ -1054,14 +1178,12 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         if (playerHit) { audioService.playSound('lose'); }
         if (enemyHit) { audioService.playSound('attack'); }
 
-        // --- APPLY RESULTS ---
-        await new Promise(r => setTimeout(r, 400)); // Impact lingering
+        await new Promise(r => setTimeout(r, 400)); 
         
         clashData.forEach(c => {
             if (c.result === 'ENEMY_HIT') {
                 tempEnemyHp = Math.max(0, tempEnemyHp - c.damage);
                 enemyStunDmg++;
-                // Add hit flash logic or specific coordinate effect here if needed
             } else if (c.result === 'PLAYER_HIT') {
                 const blocked = Math.min(c.damage, c.pShield);
                 const finalDmg = c.damage - blocked;
@@ -1074,13 +1196,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             }
         });
 
-        // Hide clash UI
         setClashState({ active: false, phase: 'DONE', data: [] });
 
         setEnemy(prev => ({...prev, hp: tempEnemyHp}));
         setPlayer(prev => ({...prev, hp: tempPlayerHp, fuel: tempFuel}));
 
-        // Stun Logic
         let nextIsStunned = enemy.isStunned;
         let nextDurability = enemy.durability;
 
@@ -1115,7 +1235,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             }));
         }
 
-        // Cleanup: Clear part slots
         setPlayer(prev => ({ 
             ...prev, 
             parts: prev.parts.map(p => ({...p, slots: p.slots.map(s => ({...s, value: null})) })) 
@@ -1130,7 +1249,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             audioService.playSound('win');
             if (stage === FINAL_STAGE_NORMAL && !isEndless) {
                 setPhase('VICTORY');
-                handlePhaseComplete(true); // Victory case, clear hand too
+                handlePhaseComplete(true); 
             } else {
                 setupRewardPhase();
             }
@@ -1145,14 +1264,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }
     };
 
-    // --- REWARD LOGIC ---
     const setupRewardPhase = () => {
         const coins = 50 + (stage * 10) + Math.floor(Math.random() * 20);
         setEarnedCoins(coins);
         setPlayer(p => ({...p, starCoins: p.starCoins + coins}));
         
-        // --- FIX: Consolidate Pool & Clear Hand ---
-        // Clean up temporary cards from hand before returning to pool
         const persistentHand = hand.filter(c => !c.isTemporary);
 
         setPool(current => ({
@@ -1161,10 +1277,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             coolColors: [...current.coolColors, ...persistentHand.map(c => c.color)]
         }));
         setHand([]);
-        // -------------------------------------------
 
         const opts: ShipPart[] = [];
-        const pool = [...PART_TEMPLATES]; // Copy to allow splicing for unique selection
+        const pool = [...PART_TEMPLATES]; 
 
         for(let i=0; i<2; i++){
             if (pool.length === 0) break;
@@ -1204,7 +1319,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         audioService.playSound('select');
     };
     
-    // NEW: Reroll Rewards
     const handleRerollRewards = () => {
         if (player.starCoins < 50) {
             audioService.playSound('wrong');
@@ -1212,7 +1326,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }
         setPlayer(p => ({...p, starCoins: p.starCoins - 50}));
         
-        // Regenerate Options
         const opts: ShipPart[] = [];
         const pool = [...PART_TEMPLATES];
 
@@ -1255,11 +1368,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }
     };
 
-    // --- VACATION LOGIC ---
-
     const generateVacationEvents = () => {
         const events: VacationEvent[] = [];
-        const count = 3 + Math.floor(Math.random() * 2); // 3-4 events
+        const count = 3 + Math.floor(Math.random() * 2); 
         
         for (let i = 0; i < count; i++) {
             const template = VACATION_EVENTS_DB[Math.floor(Math.random() * VACATION_EVENTS_DB.length)];
@@ -1272,7 +1383,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     const startVacation = () => {
-        const days = 4 + Math.floor(Math.random() * 3); // 4-6 days
+        const days = 4 + Math.floor(Math.random() * 3); 
         setPlayer(prev => ({ ...prev, vacationDays: days }));
         setVacationLog("戦闘お疲れ様！休暇を楽しんでください。");
         generateVacationEvents();
@@ -1280,7 +1391,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     const executeVacationEvent = (event: VacationEvent) => {
-        // Coin Cost Check
         if (event.coinCost && event.coinCost > 0) {
             if (player.starCoins < event.coinCost) {
                 setVacationLog(`スターコインが足りません！ (${event.coinCost}必要)`);
@@ -1289,23 +1399,25 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             }
         }
         
-        // Day Cost Check
         if (player.vacationDays < event.cost) {
             setVacationLog("休暇日数が足りません！");
             audioService.playSound('wrong');
             return;
         }
 
-        // Deduct
+        let discount = 1;
+        player.talents.forEach(t => { if(t.effectType==='SHOP_DISCOUNT') discount -= (t.value/100); });
+        discount = Math.max(0.1, discount);
+        const finalCoinCost = event.coinCost ? Math.floor(event.coinCost * discount) : 0;
+
         setPlayer(prev => ({ 
             ...prev, 
             vacationDays: prev.vacationDays - event.cost,
-            starCoins: prev.starCoins - (event.coinCost || 0)
+            starCoins: prev.starCoins - finalCoinCost
         }));
         
         let resultMsg = "";
         
-        // Logic Switch
         switch (event.type) {
             case 'REPAIR':
                 setPlayer(prev => {
@@ -1348,10 +1460,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 audioService.playSound('win');
                 break;
             case 'PARTS':
-            case 'SHOP': // Shop gives a part (simulated)
+            case 'SHOP': 
                 const template = PART_TEMPLATES[Math.floor(Math.random() * PART_TEMPLATES.length)];
                 let quality = event.tier === 3 ? 1.5 : 1.0;
-                if (event.type === 'SHOP') quality = 1.3; // Shop items are decent
+                if (event.type === 'SHOP') quality = 1.3; 
                 const newPart: ShipPart = {
                     id: `new_p_${Date.now()}`,
                     type: template.type,
@@ -1368,7 +1480,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 audioService.playSound('select');
                 break;
             case 'ENHANCE':
-                setPlayer(prev => ({ ...prev, maxHp: prev.maxHp + 20 })); // Better Enhance for paid
+                setPlayer(prev => ({ ...prev, maxHp: prev.maxHp + 20 })); 
                 resultMsg = "特別改造完了！HP上限+20";
                 audioService.playSound('buff');
                 break;
@@ -1393,7 +1505,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }
 
         setVacationLog(resultMsg);
-        // Only remove if it was not a persistent type? No, remove all used events for now.
         setVacationEvents(prev => prev.filter(e => e.id !== event.id));
     };
 
@@ -1401,7 +1512,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         if (!pendingPart) return;
         
         const newParts = [...player.parts];
-        newParts[slotIdx] = { ...pendingPart, id: `p_${Date.now()}_${slotIdx}` }; // Reset ID to ensure uniqueness in slot
+        newParts[slotIdx] = { ...pendingPart, id: `p_${Date.now()}_${slotIdx}` }; 
         
         setPlayer(prev => ({ ...prev, parts: newParts }));
         setPendingPart(null);
@@ -1421,7 +1532,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             return;
         }
 
-        // If clicking same slot, deselect
         if (hangarSelection.loc === loc && hangarSelection.idx === idx) {
             setHangarSelection(null);
             return;
@@ -1434,17 +1544,13 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const sourcePart = hangarSelection.loc === 'SHIP' ? parts[hangarSelection.idx] : inventory[hangarSelection.idx];
         const targetPart = loc === 'SHIP' ? parts[idx] : inventory[idx];
 
-        // Swap Logic
         if (hangarSelection.loc === 'SHIP' && loc === 'SHIP') {
-            // Ship <-> Ship
             parts[hangarSelection.idx] = targetPart;
             parts[idx] = sourcePart;
         } else if (hangarSelection.loc === 'INV' && loc === 'INV') {
-            // Inv <-> Inv
             inventory[hangarSelection.idx] = targetPart;
             inventory[idx] = sourcePart;
         } else if (hangarSelection.loc === 'INV' && loc === 'SHIP') {
-            // Equip: Inv -> Ship
             parts[idx] = sourcePart;
             
             if (targetPart.type === 'EMPTY') {
@@ -1453,7 +1559,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 inventory[hangarSelection.idx] = targetPart;
             }
         } else if (hangarSelection.loc === 'SHIP' && loc === 'INV') {
-            // Unequip/Swap: Ship -> Inv
             if (sourcePart.type === 'EMPTY') {
                 setHangarSelection(null);
                 return;
@@ -1490,7 +1595,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         initBattle(stage + 1);
     };
 
-    // Helper for clearing hand on final victory
     const handlePhaseComplete = (isVictory: boolean = false) => {
         if (isVictory) {
             const persistentHand = hand.filter(c => !c.isTemporary);
@@ -1500,6 +1604,23 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 coolColors: [...current.coolColors, ...persistentHand.map(c => c.color)]
             }));
             setHand([]);
+            
+            // Save Meta Progress
+            const newProgress = { ...progress };
+            newProgress.rank += 1;
+            
+            // Record Max Level
+            const shipId = selectedShipId;
+            const currentMax = newProgress.maxClearedLevel[shipId] || -1;
+            if (selectedMissionLevel > currentMax) {
+                newProgress.maxClearedLevel[shipId] = selectedMissionLevel;
+                // Award Rerolls for high level clear
+                if (selectedMissionLevel >= 1) newProgress.rerollCount += 1;
+                if (selectedMissionLevel >= 5) newProgress.rerollCount += 2;
+            }
+            
+            setProgress(newProgress);
+            storageService.savePaperPlaneProgress(newProgress);
         }
     };
 
@@ -1514,7 +1635,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const RenderTooltip = () => {
         if (!tooltipPart) return null;
         
-        // Helper to get type description
         const getTypeDescription = (part: ShipPart) => {
             if (part.specialEffect === 'RANK_UP') {
                  return 'エネルギーを消費して「カード」を生成します。\nシールドや攻撃力は発生しません。';
@@ -1538,7 +1658,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 <div className="bg-slate-800 border-2 border-white p-6 rounded-lg max-w-sm w-full shadow-2xl relative" onClick={e => e.stopPropagation()}>
                     <button onClick={() => setTooltipPart(null)} className="absolute top-2 right-2 text-gray-400 hover:text-white"><X size={24}/></button>
                     
-                    {/* Type Badge */}
                     <div className="mb-2">
                         <span className={`text-xs font-bold px-2 py-0.5 rounded ${
                             tooltipPart.type === 'CANNON' ? 'bg-red-900 text-red-200' :
@@ -1555,7 +1674,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     
                     <div className="text-sm text-gray-300 mb-4 min-h-[3em]">{tooltipPart.description || "詳細なし"}</div>
                     
-                    {/* Type specific description */}
                     <div className="bg-slate-700/50 p-2 rounded mb-4 text-xs text-white whitespace-pre-wrap border-l-2 border-yellow-500">
                         {getTypeDescription(tooltipPart)}
                     </div>
@@ -1596,7 +1714,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     const renderGridRow = (rowIndex: number) => {
-        // --- Player Parts in this relative row ---
         const pRelIdx = rowIndex - player.yOffset;
         const inShip = pRelIdx >= 0 && pRelIdx < SHIP_HEIGHT;
         const partsToRender = inShip ? player.parts.slice(pRelIdx * 3, pRelIdx * 3 + 3) : [];
@@ -1607,10 +1724,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         let prediction = null;
         let pPower = 0;
         
-        // Pass 1: Calc Amps for Prediction
         const buffGrid = calculateBuffGrid(player.parts);
         
-        // Pass 2: Calc output
         partsToRender.forEach((p, colIdx) => {
              const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
              if (energySum > 0 && (p.type === 'CANNON' || p.type === 'MISSILE')) {
@@ -1669,25 +1784,196 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     // --- MAIN RENDER ---
+    
+    if (phase === 'SETUP') {
+        const unlockedShips = SHIPS.filter(s => progress.rank >= s.unlockRank);
+
+        return (
+            <div className="w-full h-full bg-slate-900 text-white p-4 flex flex-col font-mono overflow-y-auto">
+                <div className="flex items-center mb-6">
+                     <button onClick={onBack} className="text-gray-400 hover:text-white mr-4"><ArrowLeft/></button>
+                     <h2 className="text-2xl font-bold text-cyan-400">MISSION BRIEFING</h2>
+                     <div className="ml-auto text-sm bg-indigo-900 px-3 py-1 rounded-full border border-indigo-500 flex items-center">
+                         <Star size={14} className="mr-1 text-yellow-400"/> ランク: {progress.rank}
+                     </div>
+                </div>
+
+                <div className="flex justify-center mb-8 gap-4 border-b border-gray-700 pb-2">
+                     <button onClick={() => setSetupStep('SHIP')} className={`px-4 py-2 rounded-t-lg font-bold transition-colors ${setupStep==='SHIP'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>機体</button>
+                     <button onClick={() => setSetupStep('PILOT')} className={`px-4 py-2 rounded-t-lg font-bold transition-colors ${setupStep==='PILOT'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>パイロット</button>
+                     <button onClick={() => setSetupStep('MISSION')} className={`px-4 py-2 rounded-t-lg font-bold transition-colors ${setupStep==='MISSION'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>任務</button>
+                </div>
+
+                <div className="flex-1 max-w-4xl mx-auto w-full">
+                    {setupStep === 'SHIP' && (
+                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                             {SHIPS.map(ship => {
+                                 const isUnlocked = progress.rank >= ship.unlockRank;
+                                 return (
+                                     <div 
+                                        key={ship.id} 
+                                        onClick={() => isUnlocked && setSelectedShipId(ship.id)}
+                                        className={`border-2 p-6 rounded-xl flex flex-col items-center cursor-pointer transition-all relative overflow-hidden ${selectedShipId === ship.id ? 'border-cyan-400 bg-slate-800 shadow-[0_0_20px_rgba(34,211,238,0.3)]' : 'border-slate-600 bg-slate-900 hover:bg-slate-800'} ${!isUnlocked ? 'opacity-50 grayscale' : ''}`}
+                                     >
+                                         <div className={`w-full h-32 ${ship.color} mb-4 rounded-lg flex items-center justify-center relative`}>
+                                             <Send size={48} className="text-white"/>
+                                             {!isUnlocked && <Lock size={32} className="absolute text-gray-300"/>}
+                                         </div>
+                                         <h3 className="text-xl font-bold mb-2">{ship.name}</h3>
+                                         <p className="text-sm text-gray-400 text-center mb-4 min-h-[3em]">{ship.description}</p>
+                                         {!isUnlocked ? (
+                                             <div className="text-red-400 text-xs font-bold">ランク {ship.unlockRank} で解放</div>
+                                         ) : (
+                                             <div className="text-green-400 text-xs font-bold">選択可能</div>
+                                         )}
+                                     </div>
+                                 )
+                             })}
+                             <div className="col-span-full text-center mt-4">
+                                <button onClick={() => setSetupStep('PILOT')} className="bg-cyan-600 hover:bg-cyan-500 px-12 py-3 rounded-full font-bold text-lg shadow-lg animate-pulse">次へ</button>
+                             </div>
+                         </div>
+                    )}
+
+                    {setupStep === 'PILOT' && (
+                        <div className="flex flex-col items-center">
+                            <div className="flex justify-between w-full mb-4 px-4 bg-slate-800 p-2 rounded">
+                                <span className="text-sm text-gray-400">現在のリロール回数</span>
+                                <span className="font-bold text-yellow-400 flex items-center"><RefreshCw size={14} className="mr-1"/> {progress.rerollCount}</span>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mb-8">
+                                {pilotOptions.map((pilot, i) => (
+                                    <div 
+                                        key={i}
+                                        className={`relative border-2 p-4 rounded-xl cursor-pointer transition-all ${selectedPilotIndex === i ? 'border-yellow-400 bg-slate-800 shadow-lg scale-105' : 'border-slate-600 bg-slate-900 hover:border-slate-400'}`}
+                                        onClick={() => setSelectedPilotIndex(i)}
+                                    >
+                                        <div className="absolute top-2 right-2">
+                                            <button 
+                                                onClick={(e) => { e.stopPropagation(); setPinnedPilotIndex(pinnedPilotIndex === i ? null : i); }}
+                                                className={`p-1.5 rounded-full ${pinnedPilotIndex === i ? 'bg-yellow-500 text-black' : 'bg-slate-700 text-gray-400 hover:text-white'}`}
+                                                title="固定する"
+                                            >
+                                                <User size={14}/>
+                                            </button>
+                                        </div>
+
+                                        <div className="flex flex-col items-center mb-4">
+                                            <div className="w-16 h-16 mb-2">
+                                                 <PixelSprite seed={pilot.id} name={pilot.spriteName} className="w-full h-full"/>
+                                            </div>
+                                            <div className="font-bold">{pilot.name}</div>
+                                        </div>
+                                        
+                                        <div className="text-xs bg-black/40 p-2 rounded mb-2">
+                                            <div className="font-bold text-yellow-300 mb-1">得意科目: {pilot.intrinsicTalent.name}</div>
+                                            <div className="text-gray-400">{pilot.intrinsicTalent.description}</div>
+                                        </div>
+                                        
+                                        {randomTalents.length > 0 && (
+                                            <div className="text-xs bg-indigo-900/40 p-2 rounded">
+                                                <div className="font-bold text-indigo-300 mb-1">委員会スキル</div>
+                                                {randomTalents.map((t, idx) => (
+                                                    <div key={idx} className="mb-1 last:mb-0">
+                                                        <span className="text-white">{t.name}</span>: <span className="text-gray-400">{t.description}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="flex gap-4">
+                                <button 
+                                    onClick={handleRerollPilots} 
+                                    disabled={progress.rerollCount <= 0}
+                                    className={`bg-gray-700 hover:bg-gray-600 text-white px-8 py-3 rounded-lg font-bold flex items-center ${progress.rerollCount <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                    <RefreshCw className="mr-2"/> 呼び直す
+                                </button>
+                                <button 
+                                    onClick={() => setSetupStep('MISSION')} 
+                                    disabled={selectedPilotIndex === -1}
+                                    className={`bg-cyan-600 hover:bg-cyan-500 px-12 py-3 rounded-lg font-bold text-lg shadow-lg ${selectedPilotIndex === -1 ? 'opacity-50 cursor-not-allowed' : 'animate-pulse'}`}
+                                >
+                                    次へ
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {setupStep === 'MISSION' && (
+                        <div className="flex flex-col items-center max-w-lg mx-auto">
+                            <div className="w-full bg-slate-800 p-6 rounded-xl border border-slate-600 text-center mb-8">
+                                <h3 className="text-xl font-bold text-red-400 mb-2">難易度設定</h3>
+                                <div className="flex items-center justify-center gap-6 my-6">
+                                    <button 
+                                        onClick={() => setSelectedMissionLevel(l => Math.max(0, l - 1))}
+                                        className="bg-slate-700 p-3 rounded-full hover:bg-slate-600"
+                                    >
+                                        <ChevronsLeft/>
+                                    </button>
+                                    <div className="text-6xl font-black text-white w-20">{selectedMissionLevel}</div>
+                                    <button 
+                                        onClick={() => {
+                                            const shipMax = progress.maxClearedLevel[selectedShipId] || -1;
+                                            // Can select up to Max Cleared + 1
+                                            if (selectedMissionLevel <= shipMax) {
+                                                setSelectedMissionLevel(l => Math.min(9, l + 1));
+                                            } else {
+                                                audioService.playSound('wrong');
+                                            }
+                                        }}
+                                        className={`bg-slate-700 p-3 rounded-full hover:bg-slate-600 ${(selectedMissionLevel > (progress.maxClearedLevel[selectedShipId]|| -1)) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    >
+                                        <ChevronsRight/>
+                                    </button>
+                                </div>
+                                <div className="text-sm text-gray-400 mb-4">
+                                    {(progress.maxClearedLevel[selectedShipId] || -1) < selectedMissionLevel && selectedMissionLevel > 0 ? 
+                                        <span className="text-red-500 font-bold">未クリア (挑戦中)</span> : 
+                                        <span className="text-green-500 font-bold">クリア済み</span>
+                                    }
+                                </div>
+                                
+                                <div className="bg-black/40 p-4 rounded text-left text-sm space-y-2">
+                                    <div className="flex justify-between"><span className="text-gray-400">敵攻撃力:</span> <span className="text-red-400">+{selectedMissionLevel >= 1 ? (selectedMissionLevel >= 6 ? '2' : '1') : '0'}</span></div>
+                                    <div className="flex justify-between"><span className="text-gray-400">開始HP:</span> <span className="text-red-400">{selectedMissionLevel >= 2 ? (selectedMissionLevel >= 4 ? '-20%' : '-5') : '通常'}</span></div>
+                                    <div className="flex justify-between"><span className="text-gray-400">敵耐久:</span> <span className="text-red-400">+{selectedMissionLevel >= 5 ? '強化' : '通常'}</span></div>
+                                    <div className="border-t border-gray-600 pt-2 flex justify-between font-bold"><span className="text-yellow-400">クリア報酬:</span> <span className="text-white">リロール +{selectedMissionLevel >= 5 ? '2' : (selectedMissionLevel >= 1 ? '1' : '0')}</span></div>
+                                </div>
+                            </div>
+                            
+                            <button onClick={confirmSetup} className="bg-red-600 hover:bg-red-500 text-white w-full py-4 rounded-xl font-bold text-2xl shadow-[0_0_20px_rgba(220,38,38,0.6)] animate-pulse flex items-center justify-center">
+                                <Target className="mr-2"/> 出撃開始
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    }
 
     if (phase === 'TUTORIAL') {
         return (
             <div className="w-full h-full bg-slate-900 text-white p-8 flex flex-col items-center justify-center font-mono">
                 <Send size={64} className="text-cyan-400 mb-4 animate-bounce"/>
-                <h1 className="text-4xl font-bold mb-4">紙飛行機バトル v2.7</h1>
+                <h1 className="text-4xl font-bold mb-4">紙飛行機バトル v3.0</h1>
                 <div className="max-w-md text-sm text-gray-300 space-y-2 mb-8 bg-slate-800 p-4 rounded border border-slate-600">
                     <p>・機体は3x3のモジュールで構成されています。</p>
                     <p>・エネルギーの色には相性があります。</p>
                     <p className="text-yellow-400 font-bold">・オレンジ &gt; 青 &gt; 白 (白スロットには何色でもOK！)</p>
                     <p>・エネルギーを入れるだけで出力が出ます。</p>
                     <p>・全スロットを埋めると起動ボーナスが加算されます！</p>
-                    <p className="text-purple-400 font-bold">・新パーツ多数！回復機能や増幅器を使いこなせ！</p>
+                    <p className="text-purple-400 font-bold">・パイロットの才能で戦略が変わる！</p>
                     <p>・モジュール長押しで詳細を確認できます。</p>
                     <p className="text-green-400 font-bold">・戦闘後は「休暇」で機体を強化しよう！</p>
                     <p className="text-blue-400 font-bold mt-2">※オートセーブ機能搭載！</p>
                 </div>
-                <button onClick={() => initBattle(1)} className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-8 rounded shadow-lg animate-pulse flex items-center">
-                    <Play className="mr-2"/> 出撃
+                <button onClick={() => setPhase('SETUP')} className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-8 rounded shadow-lg animate-pulse flex items-center">
+                    <Play className="mr-2"/> 出撃準備
                 </button>
                 <button onClick={onBack} className="mt-4 text-gray-500 hover:text-white underline text-xs">戻る</button>
             </div>

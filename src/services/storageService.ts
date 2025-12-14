@@ -1,5 +1,5 @@
 
-import { GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState } from '../types';
+import { GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState } from '../src/types';
 
 const STORAGE_KEY_UNLOCKED_CARDS = 'pixel_spire_unlocked_cards_v1';
 const STORAGE_KEY_UNLOCKED_RELICS = 'pixel_spire_unlocked_relics_v1';
@@ -28,6 +28,13 @@ const STORAGE_KEY_KOCHO_STATE = 'pixel_spire_kocho_state_v1';
 
 // For Paper Plane Battle
 const STORAGE_KEY_PAPER_PLANE_STATE = 'pixel_spire_paper_plane_state_v1';
+const STORAGE_KEY_PAPER_PLANE_PROGRESS = 'pixel_spire_paper_plane_progress_v1';
+
+export interface PaperPlaneProgress {
+    rank: number; // Association Level (Clear Count equivalent)
+    rerollCount: number; // Consumable rerolls
+    maxClearedLevel: Record<string, number>; // Map of Ship ID -> Max Ascension Level cleared
+}
 
 export const storageService = {
   // --- Unlocked Items (Cards, Relics, Potions, Enemies) ---
@@ -299,7 +306,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_KOCHO_STATE);
   },
 
-  // --- Paper Plane Battle State ---
+  // --- Paper Plane Battle State & Progress ---
   savePaperPlaneState: (state: any) => {
       try {
           localStorage.setItem(STORAGE_KEY_PAPER_PLANE_STATE, JSON.stringify(state));
@@ -315,6 +322,20 @@ export const storageService = {
 
   clearPaperPlaneState: () => {
       localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_STATE);
+  },
+
+  savePaperPlaneProgress: (progress: PaperPlaneProgress) => {
+      try {
+          localStorage.setItem(STORAGE_KEY_PAPER_PLANE_PROGRESS, JSON.stringify(progress));
+      } catch (e) { console.warn("Failed to save paper plane progress", e); }
+  },
+
+  loadPaperPlaneProgress: (): PaperPlaneProgress => {
+      try {
+          const stored = localStorage.getItem(STORAGE_KEY_PAPER_PLANE_PROGRESS);
+          if (stored) return JSON.parse(stored);
+      } catch (e) { /* ignore */ }
+      return { rank: 1, rerollCount: 3, maxClearedLevel: {} };
   },
 
   // --- Game State (Save/Load) ---
@@ -416,6 +437,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_DUNGEON_STATE_2);
       localStorage.removeItem(STORAGE_KEY_KOCHO_STATE);
       localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_STATE);
+      localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_PROGRESS);
       localStorage.removeItem(STORAGE_KEY_LEGACY_CARD);
       localStorage.removeItem(STORAGE_KEY_DEBUG_MATH_SKIP);
       localStorage.removeItem(STORAGE_KEY_DEBUG_HP_ONE);
