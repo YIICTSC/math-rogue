@@ -24,7 +24,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
             </h2>
             {challengeMode === '1A1D' ? (
                 <div className="bg-red-900/50 border border-red-500 p-2 rounded inline-block animate-in fade-in zoom-in duration-300">
-                    <p className="text-sm text-red-200 font-bold mb-1">【1A1D{trans("モード", languageMode)}】</p>
+                    <p className="text-sm text-red-200 font-bold mb-1">【{trans("1A1Dモード", languageMode)}】</p>
                     <p className="text-xs text-red-100">{trans("初期レリックのみ所持。デッキはランダムなアタック1枚・スキル1枚でスタート。", languageMode)}</p>
                 </div>
             ) : (
@@ -64,7 +64,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                         {!isUnlocked && (
                             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 z-20 rounded-lg">
                                 <Lock size={48} className="text-gray-400 mb-2" />
-                                <span className="text-gray-400 font-bold">LOCKED</span>
+                                <span className="text-gray-400 font-bold">{trans("LOCKED", languageMode)}</span>
                                 <span className="text-xs text-gray-500 mt-1">{trans("クリア回数", languageMode)}: {index}{trans("回で解放", languageMode)}</span>
                             </div>
                         )}
