@@ -1,12 +1,12 @@
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode } from '../types';
+import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode, TargetType } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
 import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText } from 'lucide-react';
 import PixelSprite from './PixelSprite';
 import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
-import { HERO_IMAGE_DATA } from '../constants';
+import { HERO_IMAGE_DATA, HAND_SIZE } from '../constants';
 
 interface BattleSceneProps {
   player: Player;
