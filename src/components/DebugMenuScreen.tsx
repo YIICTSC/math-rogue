@@ -91,7 +91,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
   return (
     <div className="flex flex-col h-full w-full bg-gray-900 text-white relative">
         {/* Header */}
-        <div className="bg-red-900/90 border-b-2 border-red-500 p-2 md:p-4 flex justify-between items-center shrink-0">
+        <div className="bg-red-900/90 border-b-2 border-red-500 p-2 md:p-4 flex justify-between items-center shrink-0 z-20">
             <h2 className="text-lg md:text-xl font-bold text-red-100 flex items-center">
                 <Zap size={20} className="mr-2" /> DEBUG
             </h2>
@@ -106,19 +106,35 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
             </div>
         </div>
 
-        <div className="flex flex-grow overflow-hidden">
+        <div className="flex flex-col md:flex-row flex-grow overflow-hidden">
             {/* Left Panel: Library & Synthesis */}
-            <div className="w-[65%] md:w-3/4 border-r border-gray-700 flex flex-col bg-gray-800/50">
+            <div className="w-full md:w-3/4 h-[60%] md:h-full border-b md:border-b-0 md:border-r border-gray-700 flex flex-col bg-gray-800/50 min-h-0">
                 {/* Tabs */}
-                <div className="flex bg-gray-800 border-b border-gray-700 overflow-x-auto">
-                    <button onClick={() => setActiveTab('CARDS')} className={`flex-1 py-2 px-1 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'CARDS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>CARDS</button>
-                    <button onClick={() => setActiveTab('RELICS')} className={`flex-1 py-2 px-1 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'RELICS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>RELICS</button>
-                    <button onClick={() => setActiveTab('POTIONS')} className={`flex-1 py-2 px-1 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'POTIONS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>POT</button>
-                    <button onClick={() => setActiveTab('SYNTHESIS')} className={`flex-1 py-2 px-1 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'SYNTHESIS' ? 'bg-purple-900 text-white' : 'text-purple-400 hover:bg-gray-750'}`}>SYNTH</button>
+                <div className="flex bg-gray-800 border-b border-gray-700 overflow-x-auto shrink-0">
+                    <button onClick={() => setActiveTab('CARDS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'CARDS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>CARDS</button>
+                    <button onClick={() => setActiveTab('RELICS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'RELICS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>RELICS</button>
+                    <button onClick={() => setActiveTab('POTIONS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'POTIONS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>POT</button>
+                    <button onClick={() => setActiveTab('SYNTHESIS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'SYNTHESIS' ? 'bg-purple-900 text-white' : 'text-purple-400 hover:bg-gray-750'}`}>SYNTH</button>
                 </div>
 
+                {/* Fixed Search Bar Area */}
+                {(activeTab === 'CARDS' || activeTab === 'SYNTHESIS') && (
+                    <div className="p-2 bg-gray-800/80 border-b border-gray-700 shrink-0">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-2 text-gray-400" size={14}/>
+                            <input 
+                                type="text" 
+                                placeholder="Search..." 
+                                className="w-full bg-black border border-gray-600 rounded pl-9 p-1.5 text-sm text-white focus:border-blue-500 outline-none"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                )}
+
                 {/* Content */}
-                <div className="flex-grow overflow-y-auto p-2 md:p-4 custom-scrollbar">
+                <div className="flex-grow overflow-y-auto p-2 md:p-4 custom-scrollbar min-h-0">
                     
                     {activeTab === 'SYNTHESIS' && (
                         <div className="mb-8 border-b-2 border-purple-500 pb-4">
@@ -183,27 +199,15 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
                     )}
 
                     {(activeTab === 'CARDS' || activeTab === 'SYNTHESIS') && (
-                        <>
-                            <div className="relative mb-4">
-                                <Search className="absolute left-3 top-2 text-gray-400" size={14}/>
-                                <input 
-                                    type="text" 
-                                    placeholder="Search..." 
-                                    className="w-full bg-black border border-gray-600 rounded pl-9 p-1.5 text-sm text-white focus:border-blue-500 outline-none"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-                                {filteredCards.map((c, idx) => (
-                                    <div key={idx} className="cursor-pointer hover:scale-105 transition-transform flex justify-center" onClick={() => handleAddCard(c)}>
-                                        <div className="scale-90 origin-top pointer-events-none -mb-4">
-                                            <Card card={{...c, id: 'temp'}} onClick={()=>{}} disabled={false} />
-                                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                            {filteredCards.map((c, idx) => (
+                                <div key={idx} className="cursor-pointer hover:scale-105 transition-transform flex justify-center" onClick={() => handleAddCard(c)}>
+                                    <div className="scale-90 origin-top pointer-events-none -mb-4">
+                                        <Card card={{...c, id: 'temp'}} onClick={()=>{}} disabled={false} />
                                     </div>
-                                ))}
-                            </div>
-                        </>
+                                </div>
+                            ))}
+                        </div>
                     )}
 
                     {activeTab === 'RELICS' && (
@@ -242,11 +246,11 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
             </div>
 
             {/* Right Panel: Current Loadout */}
-            <div className="w-[35%] md:w-1/4 flex flex-col bg-black/20 text-xs">
-                <div className="p-2 bg-black/50 border-b border-gray-700 font-bold text-gray-300 text-[10px] md:text-xs">
+            <div className="w-full md:w-1/4 h-[40%] md:h-full flex flex-col bg-black/20 text-xs min-h-0">
+                <div className="p-2 bg-black/50 border-b border-gray-700 font-bold text-gray-300 text-[10px] md:text-xs shrink-0">
                     LOADOUT
                 </div>
-                <div className="flex-grow overflow-y-auto p-1 md:p-3 custom-scrollbar space-y-4">
+                <div className="flex-grow overflow-y-auto p-2 md:p-3 custom-scrollbar space-y-4">
                     
                     {/* Deck */}
                     <div>
