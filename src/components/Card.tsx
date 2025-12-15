@@ -157,8 +157,8 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
 
   // --- Scrolling Text Logic ---
   const displayName = trans(card.name, languageMode) + (card.upgraded ? '+' : '');
-  // Threshold: 8 characters fits comfortably in card header. Hiragana is wider, so strict checking is good.
-  const needsScroll = displayName.length > 8;
+  // Threshold: Lowered to 6 to fix 2-char hidden issue with wider JP fonts
+  const needsScroll = displayName.length > 6;
 
   return (
     <div 
@@ -192,14 +192,14 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
       {/* Header */}
       <div className="flex justify-between items-center relative z-10 mb-1 h-5 overflow-hidden">
         {needsScroll ? (
-            <div className="w-20 overflow-hidden relative text-[11px] font-bold drop-shadow-md">
+            <div className="flex-1 overflow-hidden relative text-[11px] font-bold drop-shadow-md min-w-0 mr-1">
                 <div className={`flex w-max animate-marquee-scroll ${card.upgraded ? 'text-green-400' : 'text-white'}`}>
                     <span className="pr-4">{displayName}</span>
                     <span className="pr-4">{displayName}</span>
                 </div>
             </div>
         ) : (
-            <span className={`text-[11px] font-bold truncate w-20 drop-shadow-md ${card.upgraded ? 'text-green-400' : 'text-white'}`}>
+            <span className={`text-[11px] font-bold truncate flex-1 drop-shadow-md mr-1 ${card.upgraded ? 'text-green-400' : 'text-white'}`}>
                 {displayName}
             </span>
         )}

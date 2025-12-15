@@ -314,7 +314,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 const isSelected = selectedEnemyId === enemy.id;
                 const actionClass = getEnemyActionClass(enemy);
                 const enemyName = trans(enemy.name, languageMode);
-                const enemyNameNeedsScroll = enemyName.length > 8;
+                // Lowered threshold for marquee
+                const enemyNameNeedsScroll = enemyName.length > 5;
                 
                 return (
                     <div 
@@ -350,20 +351,18 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         </div>
 
                         <div className={`w-24 md:w-28 bg-black/90 border-2 px-1 py-0.5 text-white text-[9px] md:text-[10px] transition-colors shadow-md rounded ${isSelected ? 'border-yellow-400 ring-1 ring-yellow-400/50' : 'border-gray-600'}`}>
-                            <div className="flex items-center justify-between mb-0.5 h-4 overflow-hidden">
-                                {enemyNameNeedsScroll ? (
-                                    <div className="w-16 overflow-hidden whitespace-nowrap relative flex text-red-200 font-bold">
-                                        <div className="animate-marquee pr-4">
-                                            {enemyName}
-                                        </div>
-                                        <div className="animate-marquee pr-4 absolute top-0 left-full">
-                                            {enemyName}
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <span className="text-red-200 font-bold truncate flex-1">{enemyName}</span>
-                                )}
-                                {enemy.block > 0 && <span className="text-blue-300 flex items-center bg-blue-900/80 px-1 rounded text-[8px] font-bold ml-1" onClick={(e)=>{e.stopPropagation(); showInfo(trans("ブロック", languageMode), trans("次のターン開始時までダメージを防ぐ。", languageMode));}}><Shield size={8} className="mr-0.5"/> {enemy.block}</span>}
+                            <div className="flex items-center justify-between mb-0.5 h-4 w-full overflow-hidden">
+                                <div className="flex-1 min-w-0 overflow-hidden relative h-full">
+                                    {enemyNameNeedsScroll ? (
+                                         <div className="flex w-max animate-marquee-scroll text-red-200 font-bold">
+                                             <span className="pr-4">{enemyName}</span>
+                                             <span className="pr-4">{enemyName}</span>
+                                         </div>
+                                    ) : (
+                                         <div className="text-red-200 font-bold truncate">{enemyName}</div>
+                                    )}
+                                </div>
+                                {enemy.block > 0 && <span className="text-blue-300 flex items-center bg-blue-900/80 px-1 rounded text-[8px] font-bold ml-1 shrink-0" onClick={(e)=>{e.stopPropagation(); showInfo(trans("ブロック", languageMode), trans("次のターン開始時までダメージを防ぐ。", languageMode));}}><Shield size={8} className="mr-0.5"/> {enemy.block}</span>}
                             </div>
                             
                             {/* HP Bar & Text */}
@@ -470,14 +469,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 <Sword size={8} className="mr-0.5"/> {player.strength}
                             </span>
                         )}
-                        {hasChoker && (
-                            <span 
-                                className={`flex items-center ${player.cardsPlayedThisTurn >= 6 ? 'text-red-500' : 'text-yellow-400'} text-[9px] font-bold border border-gray-700 px-1 rounded bg-black cursor-pointer`}
-                                onClick={() => showInfo("制服のカラー", "カードを1ターンに6枚までしか使えない。")}
-                            >
-                                <Info size={8} className="mr-0.5"/> {player.cardsPlayedThisTurn}/6
-                            </span>
-                        )}
                         {Object.entries(player.powers).map(([key, val]) => {
                             if ((val as number) <= 0) return null;
                             const def = POWER_DEFINITIONS[key] || { name: key, desc: "効果不明" };
@@ -528,8 +519,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 // Check for special disabling conditions
                 const isClashDisabled = card.playCondition === 'HAND_ONLY_ATTACKS' && player.hand.some(c => c.type !== CardType.ATTACK && c.id !== card.id);
                 const isGrandFinaleDisabled = card.playCondition === 'DRAW_PILE_EMPTY' && player.drawPile.length > 0;
-                
-                const isChokerDisabled = hasChoker && player.cardsPlayedThisTurn >= 6;
+                const isChokerDisabled = player.relics.some(r => r.id === 'VELVET_CHOKER') && player.cardsPlayedThisTurn >= 6;
                 const specialDisabled = isClashDisabled || isGrandFinaleDisabled || isChokerDisabled;
                 
                 // Visual Cost Override for Corruption
