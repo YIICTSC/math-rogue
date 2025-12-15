@@ -132,14 +132,14 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
                     {...bindPress('PAPER_PLANE')}
                     className="group relative bg-sky-900 border-4 border-sky-500 hover:border-white hover:bg-sky-800 p-2 md:p-4 rounded-xl flex flex-col md:flex-row items-center justify-center md:justify-start text-center md:text-left transition-all shadow-xl hover:shadow-[0_0_20px_rgba(14,165,233,0.4)] overflow-hidden h-36 md:h-32"
                 >
-                    <div className="absolute top-0 right-0 bg-sky-600 text-white text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-md flex items-center gap-1 z-10">FLIGHT</div>
+                    <div className="absolute top-0 right-0 bg-sky-600 text-white text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-md flex items-center gap-1 z-10">FIGHT</div>
                     <div className="bg-sky-950/50 p-2 md:p-3 rounded-full mb-2 md:mb-0 md:mr-3 group-hover:scale-110 transition-transform duration-300 border-2 border-sky-500/30 shrink-0">
                         <Send size={24} className="text-sky-300 fill-current md:w-7 md:h-7" />
                     </div>
                     <div className="flex flex-col items-center md:items-start w-full">
                         <span className="text-sm md:text-lg font-bold mb-1 text-sky-100 group-hover:text-white font-mono transition-colors block">紙飛行機バトル</span>
                         <span className="text-[9px] md:text-[10px] text-sky-200/70 leading-tight block font-mono">
-                            風に乗ってどこまでも。<br className="hidden md:inline"/>障害物を避けるフライトアクション。
+                            自分だけの紙飛行機で勝ち進め！<br className="hidden md:inline"/>ビルド＆撃ち合いバトル。
                         </span>
                     </div>
                 </button>
