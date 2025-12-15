@@ -86,7 +86,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       if (selectedCard) {
           onUpgrade(selectedCard);
           setMode('DONE');
-          setMessage(`${trans(selectedCard.name, languageMode)} の改良に成功した！`);
+          setMessage(`${trans(selectedCard.name, languageMode)} が強化された！切れ味が増したようだ。`);
           setSelectedCard(null);
       }
   };
