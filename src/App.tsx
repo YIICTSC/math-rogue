@@ -1935,7 +1935,8 @@ const App: React.FC = () => {
             if (gameState.act === 4) {
                  setGameState(prev => ({ ...prev, screen: GameScreen.ENDING }));
             } else {
-                 setGameState(prev => ({ ...prev, screen: GameScreen.VICTORY }));
+                 // Skip VICTORY screen, go directly to math challenge
+                 setGameState(prev => ({ ...prev, screen: GameScreen.MATH_CHALLENGE }));
             }
         } else if (gameState.player.currentHp <= 0) {
             if (gameState.player.relics.find(r => r.id === 'LIZARD_TAIL') && !gameState.player.relicCounters['LIZARD_TAIL_USED']) {

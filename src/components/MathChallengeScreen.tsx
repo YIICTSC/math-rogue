@@ -128,7 +128,7 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
 
   if (problems.length === 0) return (
       <div className="flex flex-col h-full w-full bg-green-900 text-white items-center justify-center p-8 font-mono">
-          <div className="animate-pulse text-2xl">準備中...</div>
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-yellow-300"></div>
       </div>
   );
 
@@ -139,27 +139,22 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/blackboard.png')] opacity-20 pointer-events-none"></div>
         
         <div className="z-10 w-full max-w-md text-center">
-            <div className="mb-8">
-                <Brain size={48} className="mx-auto mb-2 text-yellow-300 animate-pulse" />
-                <h2 className="text-3xl font-bold text-white mb-2">算数バトル！</h2>
-                <p className="text-gray-300">正解すると良い報酬がもらえるかも？ ({currentProblemIndex + 1}/3)</p>
+            <div className="mb-8 flex flex-col items-center justify-center">
+                <Brain size={64} className="mb-4 text-yellow-300 animate-pulse" />
+                <div className="text-4xl font-bold text-white tracking-widest font-mono border-b-4 border-white pb-2">
+                    {currentProblemIndex + 1} / {problems.length}
+                </div>
             </div>
 
-            <div className="bg-black/40 border-4 border-white p-8 rounded-lg mb-8 shadow-2xl relative overflow-hidden">
-                <h3 className="text-5xl font-bold text-white tracking-widest">{currentProblem.question}</h3>
+            <div className="bg-black/40 border-4 border-white p-8 rounded-lg mb-8 shadow-2xl relative overflow-hidden flex items-center justify-center min-h-[160px]">
+                <h3 className="text-5xl font-bold text-white tracking-widest font-mono">{currentProblem.question}</h3>
                 
                 {feedback && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-20 animate-in zoom-in duration-200">
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-20 animate-in zoom-in duration-200">
                         {feedback === 'CORRECT' ? (
-                            <div className="text-center">
-                                <CheckCircle size={80} className="text-green-400 mx-auto mb-2" />
-                                <span className="text-2xl font-bold text-green-400">せいかい！</span>
-                            </div>
+                            <CheckCircle size={120} className="text-green-400 drop-shadow-[0_0_15px_rgba(74,222,128,0.8)]" />
                         ) : (
-                            <div className="text-center">
-                                <XCircle size={80} className="text-red-500 mx-auto mb-2" />
-                                <span className="text-2xl font-bold text-red-500">ざんねん...</span>
-                            </div>
+                            <XCircle size={120} className="text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)]" />
                         )}
                     </div>
                 )}
@@ -173,7 +168,7 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
                         disabled={isAnswered}
                         className={`
                             py-4 text-2xl font-bold rounded-lg border-b-4 transition-all active:border-b-0 active:translate-y-1
-                            ${isAnswered && opt === currentProblem.answer ? 'bg-green-600 border-green-800' : ''}
+                            ${isAnswered && opt === currentProblem.answer ? 'bg-green-600 border-green-800 scale-105' : ''}
                             ${isAnswered && opt === selectedOption && opt !== currentProblem.answer ? 'bg-red-600 border-red-800' : ''}
                             ${!isAnswered ? 'bg-blue-600 border-blue-800 hover:bg-blue-500 cursor-pointer' : 'opacity-80'}
                         `}
