@@ -1,7 +1,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { MapNode, NodeType, Player, LanguageMode } from '../types';
-import { Swords, Skull, BedDouble, ShoppingBag, HelpCircle, AlertTriangle, PlayCircle, Coins, Heart, Layers, X } from 'lucide-react';
+import { Swords, Skull, BedDouble, ShoppingBag, HelpCircle, AlertTriangle, PlayCircle, Coins, Heart, Layers, X, Map as MapIcon } from 'lucide-react';
 import { MAP_WIDTH, MAP_HEIGHT } from '../services/mapGenerator';
 import Card from './Card';
 import { trans } from '../utils/textUtils';
@@ -113,7 +113,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                 className="flex items-center text-blue-300 border border-blue-500 bg-blue-900/20 px-2 py-1 rounded hover:bg-blue-900/50 cursor-pointer text-xs md:text-sm"
              >
                  <Layers size={14} className="mr-1" />
-                 <span>({player.deck.length})</span>
+                 <span>{trans("デッキ", languageMode)} ({player.deck.length})</span>
              </button>
         </div>
 
@@ -169,7 +169,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                     return (
                         <div 
                             key={node.id}
-                            className={`absolute w-12 h-12 -ml-6 flex items-center justify-center rounded-full border-2 transition-all duration-300 z-10 ${bgClass}`}
+                            className={`absolute w-10 h-10 -ml-5 flex items-center justify-center rounded-full border-2 transition-all duration-300 z-10 ${bgClass}`}
                             style={{ left, bottom }}
                             onClick={() => isAvailable ? onNodeSelect(node) : null}
                         >
@@ -184,21 +184,26 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
         {/* Deck View Modal */}
         {showDeck && (
             <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setShowDeck(false)}>
-                <div className="bg-gray-800 border-4 border-white w-full max-w-md h-[80vh] flex flex-col relative shadow-2xl" onClick={e => e.stopPropagation()}>
+                <div className="bg-gray-800 border-4 border-white w-full max-w-4xl h-[80vh] flex flex-col relative shadow-2xl" onClick={e => e.stopPropagation()}>
                     <div className="bg-black border-b-2 border-gray-600 p-4 flex justify-between items-center">
                         <h2 className="text-white text-xl font-bold flex items-center">
-                            <Layers className="mr-2"/> {trans("デッキ", languageMode)}
+                            <Layers className="mr-2"/> {trans("山札", languageMode)} ({trans("残り", languageMode)}{player.deck.length}{trans("枚", languageMode)})
                         </h2>
-                        <button onClick={() => setShowDeck(false)} className="text-gray-400 hover:text-white p-1">
+                        <button onClick={() => setShowDeck(false)} className="text-gray-400 hover:text-white p-1 border border-transparent hover:border-white rounded cursor-pointer">
                             <X size={24} />
                         </button>
                     </div>
                     
-                    <div className="p-4 overflow-y-auto flex-grow bg-gray-900/90 custom-scrollbar">
-                        <div className="grid grid-cols-3 gap-2 justify-items-center">
+                    <div className="p-8 overflow-y-auto flex-grow bg-gray-900/90 custom-scrollbar">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 justify-items-center">
                             {sortedDeck.map((card) => (
-                                <div key={card.id} className="scale-75 origin-top-left w-24 h-36">
-                                    <Card card={card} onClick={() => {}} disabled={false} languageMode={languageMode}/>
+                                <div key={card.id} className="scale-90 hover:scale-100 transition-transform">
+                                    <Card 
+                                        card={card} 
+                                        onClick={() => {}} 
+                                        disabled={false}
+                                        languageMode={languageMode}
+                                    />
                                 </div>
                             ))}
                         </div>

@@ -1,5 +1,4 @@
 
-
 export enum CardType {
   ATTACK = 'ATTACK',
   SKILL = 'SKILL',
