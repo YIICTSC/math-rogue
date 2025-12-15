@@ -59,7 +59,6 @@ export interface Card {
   
   // Special Mechanics
   capture?: boolean; // If fatal, adds enemy as card to deck
-  stealEnemyCard?: boolean; // Copy enemy as card immediately
   textureRef?: string; // Seed/Name for generating PixelSprite on card
   
   // Next Turn Effects
