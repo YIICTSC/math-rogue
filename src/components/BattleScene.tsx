@@ -6,6 +6,7 @@ import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown,
 import PixelSprite from './PixelSprite';
 import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
+import { HERO_IMAGE_DATA } from '../constants';
 
 interface BattleSceneProps {
   player: Player;
@@ -68,7 +69,7 @@ const POWER_DEFINITIONS: Record<string, {name: string, desc: string}> = {
 };
 
 // Component for handling floating damage/heal numbers
-const FloatingTextOverlay: React.FC<{ data: FloatingText | null }> = ({ data }) => {
+const FloatingTextOverlay: React.FC<{ data: FloatingText | null, languageMode: LanguageMode }> = ({ data, languageMode }) => {
     if (!data) return null;
 
     return (
@@ -94,7 +95,7 @@ const FloatingTextOverlay: React.FC<{ data: FloatingText | null }> = ({ data }) 
             {data.iconType === 'heart' && <Heart size={14} className="mr-0.5 fill-current" />}
             {data.iconType === 'poison' && <Droplets size={14} className="mr-0.5 fill-current" />}
             {data.iconType === 'skull' && <Skull size={14} className="mr-0.5 fill-current" />}
-            {data.text}
+            {trans(data.text, languageMode)}
         </div>
     );
 };
@@ -163,10 +164,9 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   };
 
   const getProcessedDescription = (card: ICard) => {
-      let desc = card.description;
+      let desc = trans(card.description, languageMode);
       if (card.damage !== undefined) desc = desc.replace(/(\d+)ダメージ/g, `${card.damage}${trans("ダメージ", languageMode)}`);
       if (card.block !== undefined) desc = desc.replace(/ブロック(\d+)/g, `${trans("ブロック", languageMode)}${card.block}`);
-      // Simple replacements, ideally should use trans() for all parts but regex is tricky
       return desc;
   };
 
@@ -245,9 +245,9 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     <button onClick={() => setInspectedCard(null)} className="absolute top-2 right-2 text-gray-400 hover:text-white p-2">
                         <X size={24} />
                     </button>
-                    <h3 className="text-2xl font-bold text-yellow-400 mb-2 border-b border-gray-600 pb-2">{inspectedCard.name}</h3>
+                    <h3 className="text-2xl font-bold text-yellow-400 mb-2 border-b border-gray-600 pb-2">{trans(inspectedCard.name, languageMode)}</h3>
                     <div className="flex gap-2 mb-4 text-xs text-gray-400 font-mono">
-                        <span className="bg-blue-900/50 px-2 py-1 rounded border border-blue-500/30">コスト: {inspectedCard.cost}</span>
+                        <span className="bg-blue-900/50 px-2 py-1 rounded border border-blue-500/30">{trans("コスト", languageMode)}: {inspectedCard.cost}</span>
                         <span className="bg-purple-900/50 px-2 py-1 rounded border border-purple-500/30">{trans(inspectedCard.type, languageMode)}</span>
                     </div>
                     <p className="text-lg text-white mb-6 leading-relaxed whitespace-pre-wrap font-bold bg-black/30 p-3 rounded">
@@ -259,7 +259,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         {getCardKeywords(inspectedCard).map((k, idx) => (
                             <div key={idx} className="flex flex-col text-left text-sm bg-gray-700/50 p-2 rounded">
                                 <span className="font-bold text-yellow-300 mb-0.5">{trans(k.title, languageMode)}</span>
-                                <span className="text-gray-300 text-xs">{k.desc}</span>
+                                <span className="text-gray-300 text-xs">{trans(k.desc, languageMode)}</span>
                             </div>
                         ))}
                     </div>
@@ -287,8 +287,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             <FlaskConical size={32} style={{color: potionConfirmation.color}} />
                         </div>
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-2">{potionConfirmation.name}</h3>
-                    <p className="text-gray-300 mb-6 text-sm whitespace-pre-wrap">{potionConfirmation.description}</p>
+                    <h3 className="text-xl font-bold text-white mb-2">{trans(potionConfirmation.name, languageMode)}</h3>
+                    <p className="text-gray-300 mb-6 text-sm whitespace-pre-wrap">{trans(potionConfirmation.description, languageMode)}</p>
                     <div className="flex gap-4 justify-center">
                         <button 
                             onClick={() => { onUsePotion(potionConfirmation); setPotionConfirmation(null); }} 
@@ -323,7 +323,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         {/* Intent Bubble */}
                         <div 
                             className="absolute -top-6 left-1/2 -translate-x-1/2 z-30 bg-white text-black text-xs font-extrabold px-1.5 py-0.5 rounded border-2 border-red-600 animate-bounce whitespace-nowrap shadow-xl flex items-center justify-center min-w-[40px]"
-                            onClick={(e) => { e.stopPropagation(); showInfo(trans("敵", languageMode), "敵の次の行動です。"); }}
+                            onClick={(e) => { e.stopPropagation(); showInfo(trans("敵", languageMode), trans("敵の次の行動です。", languageMode)); }}
                         >
                             {/* Attack Intents */}
                             {(enemy.nextIntent.type === 'ATTACK' || enemy.nextIntent.type === 'ATTACK_DEBUFF' || enemy.nextIntent.type === 'ATTACK_DEFEND') && (
@@ -344,13 +344,13 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         <div className="w-16 h-16 md:w-20 md:h-20 relative mb-1">
                             <PixelSprite seed={enemy.id} name={enemy.name} className="w-full h-full drop-shadow-lg" />
                             {/* Damage/Status Popup - Positioned relative to sprite */}
-                            <FloatingTextOverlay data={enemy.floatingText} />
+                            <FloatingTextOverlay data={enemy.floatingText} languageMode={languageMode} />
                         </div>
 
                         <div className={`w-24 md:w-28 bg-black/90 border-2 px-1 py-0.5 text-white text-[9px] md:text-[10px] transition-colors shadow-md rounded ${isSelected ? 'border-yellow-400 ring-1 ring-yellow-400/50' : 'border-gray-600'}`}>
                             <div className="flex items-center justify-between mb-0.5">
-                                <span className="text-red-200 font-bold truncate flex-1">{enemy.name}</span>
-                                {enemy.block > 0 && <span className="text-blue-300 flex items-center bg-blue-900/80 px-1 rounded text-[8px] font-bold ml-1" onClick={(e)=>{e.stopPropagation(); showInfo("ブロック", "次のターン開始時までダメージを防ぐ。");}}><Shield size={8} className="mr-0.5"/> {enemy.block}</span>}
+                                <span className="text-red-200 font-bold truncate flex-1">{trans(enemy.name, languageMode)}</span>
+                                {enemy.block > 0 && <span className="text-blue-300 flex items-center bg-blue-900/80 px-1 rounded text-[8px] font-bold ml-1" onClick={(e)=>{e.stopPropagation(); showInfo(trans("ブロック", languageMode), trans("次のターン開始時までダメージを防ぐ。", languageMode));}}><Shield size={8} className="mr-0.5"/> {enemy.block}</span>}
                             </div>
                             
                             {/* HP Bar & Text */}
@@ -364,22 +364,22 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             {/* Status Icons */}
                             <div className="flex flex-wrap gap-0.5 justify-center min-h-[14px]">
                                 {enemy.vulnerable > 0 && (
-                                    <div className="flex items-center bg-pink-900/80 rounded px-0.5 border border-pink-500/50 cursor-pointer" onClick={(e)=>{e.stopPropagation(); showInfo(trans("脆弱", languageMode), "攻撃から受けるダメージが50%増加。");}}>
+                                    <div className="flex items-center bg-pink-900/80 rounded px-0.5 border border-pink-500/50 cursor-pointer" onClick={(e)=>{e.stopPropagation(); showInfo(trans("脆弱", languageMode), trans("攻撃から受けるダメージが50%増加。", languageMode));}}>
                                         <AlertCircle size={8} className="text-pink-300"/> <span className="text-[8px] ml-0.5 font-bold">{enemy.vulnerable}</span>
                                     </div>
                                 )}
                                 {enemy.weak > 0 && (
-                                    <div className="flex items-center bg-gray-700/80 rounded px-0.5 border border-gray-500/50 cursor-pointer" onClick={(e)=>{e.stopPropagation(); showInfo(trans("弱体", languageMode), "攻撃で与えるダメージが25%減少。");}}>
+                                    <div className="flex items-center bg-gray-700/80 rounded px-0.5 border border-gray-500/50 cursor-pointer" onClick={(e)=>{e.stopPropagation(); showInfo(trans("弱体", languageMode), trans("攻撃で与えるダメージが25%減少。", languageMode));}}>
                                         <TrendingDown size={8} className="text-gray-300"/> <span className="text-[8px] ml-0.5 font-bold">{enemy.weak}</span>
                                     </div>
                                 )}
                                 {enemy.poison > 0 && (
-                                    <div className="flex items-center bg-green-900/80 rounded px-0.5 border border-green-500/50 cursor-pointer" onClick={(e)=>{e.stopPropagation(); showInfo("ドクドク", "ターン終了時にHPダメージを受け、数値が1減る。");}}>
+                                    <div className="flex items-center bg-green-900/80 rounded px-0.5 border border-green-500/50 cursor-pointer" onClick={(e)=>{e.stopPropagation(); showInfo(trans("ドクドク", languageMode), trans("ターン終了時にHPダメージを受け、数値が1減る。", languageMode));}}>
                                         <Droplets size={8} className="text-green-300"/> <span className="text-[8px] ml-0.5 font-bold">{enemy.poison}</span>
                                     </div>
                                 )}
                                 {enemy.artifact > 0 && (
-                                    <div className="flex items-center bg-yellow-900/80 rounded px-0.5 border border-yellow-500/50 cursor-pointer" onClick={(e)=>{e.stopPropagation(); showInfo("キラキラ", "デバフを無効化する。");}}>
+                                    <div className="flex items-center bg-yellow-900/80 rounded px-0.5 border border-yellow-500/50 cursor-pointer" onClick={(e)=>{e.stopPropagation(); showInfo(trans("キラキラ", languageMode), trans("デバフを無効化する。", languageMode));}}>
                                         <Hexagon size={8} className="text-yellow-200"/> <span className="text-[8px] ml-0.5 font-bold">{enemy.artifact}</span>
                                     </div>
                                 )}
@@ -395,7 +395,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             <div className="flex items-end relative">
                 
                 {/* Player Sprite */}
-                <div className={`w-20 h-20 md:w-24 md:h-24 relative transition-all duration-150 ease-out mr-2 ${getActionClass()}`} onClick={() => showInfo(trans("自分", languageMode), "あなたのキャラクター。\nHPが0になるとゲームオーバー。")}>
+                <div className={`w-20 h-20 md:w-24 md:h-24 relative transition-all duration-150 ease-out mr-2 ${getActionClass()}`} onClick={() => showInfo(trans("自分", languageMode), trans("あなたのキャラクター。\nHPが0になるとゲームオーバー。", languageMode))}>
                      <img 
                         src={player.imageData} 
                         alt="Hero" 
@@ -403,14 +403,14 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         style={{ imageRendering: 'pixelated' }}
                      />
                      {/* Damage Popup - Relative to Player Sprite */}
-                     <FloatingTextOverlay data={player.floatingText} />
+                     <FloatingTextOverlay data={player.floatingText} languageMode={languageMode} />
                 </div>
 
                 {/* Player Stats Panel */}
                 <div className="bg-black/80 border-2 border-white p-1 text-white text-xs w-36 md:w-40 mb-2 shadow-lg rounded z-20">
                     <div className="flex items-center justify-between mb-1">
-                        <span className="text-red-400 flex items-center font-bold" onClick={() => showInfo("HP", "ヒットポイント。0になると死亡する。")}><Heart size={12} className="mr-1"/> {player.currentHp}/{player.maxHp}</span>
-                        <span className="text-blue-400 flex items-center font-bold" onClick={() => showInfo(trans("ブロック", languageMode), "敵の攻撃ダメージを防ぐ。ターン終了時に消滅する。")}><Shield size={12} className="mr-1"/> {player.block}</span>
+                        <span className="text-red-400 flex items-center font-bold" onClick={() => showInfo("HP", trans("ヒットポイント。0になると死亡する。", languageMode))}><Heart size={12} className="mr-1"/> {player.currentHp}/{player.maxHp}</span>
+                        <span className="text-blue-400 flex items-center font-bold" onClick={() => showInfo(trans("ブロック", languageMode), trans("次のターン開始時までダメージを防ぐ。", languageMode))}><Shield size={12} className="mr-1"/> {player.block}</span>
                     </div>
                     <div className="w-full h-1.5 bg-gray-700 rounded-full border border-gray-500 overflow-hidden mb-1">
                         <div className="h-full bg-green-500 transition-all duration-500" style={{width: `${playerHpPercent}%`}}></div>
@@ -420,7 +420,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     <div className="flex items-center justify-between border-t border-gray-700 pt-1">
                         <div className="flex -space-x-1 overflow-hidden w-20">
                             {player.relics.slice(0,5).map(r => (
-                                <div key={r.id} className="w-4 h-4 md:w-5 md:h-5 bg-gray-700 rounded-full border border-yellow-600 flex items-center justify-center shrink-0 cursor-pointer relative group" onClick={() => showInfo(r.name, r.description)}>
+                                <div key={r.id} className="w-4 h-4 md:w-5 md:h-5 bg-gray-700 rounded-full border border-yellow-600 flex items-center justify-center shrink-0 cursor-pointer relative group" onClick={() => showInfo(trans(r.name, languageMode), trans(r.description, languageMode))}>
                                     <Gem size={10} className="text-yellow-400" />
                                     {player.relicCounters[r.id] !== undefined && player.relicCounters[r.id] > 0 && (
                                         <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold border-2 border-gray-900 shadow-md z-10 pointer-events-none">
@@ -440,6 +440,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                         }
                                     }}
                                     className="w-4 h-4 md:w-5 md:h-5 bg-gray-800 rounded border border-white flex items-center justify-center cursor-pointer hover:scale-110"
+                                    title={trans(p.description, languageMode)}
                                  >
                                     <FlaskConical size={10} style={{ color: p.color }} />
                                 </div>
@@ -451,7 +452,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         {player.strength !== 0 && (
                             <span 
                                 className={`flex items-center ${player.strength > 0 ? 'text-red-400' : 'text-gray-400'} text-[9px] font-bold border border-gray-700 px-1 rounded bg-black cursor-pointer`}
-                                onClick={() => showInfo(trans("筋力", languageMode), "攻撃カードのダメージを増加させる。")}
+                                onClick={() => showInfo(trans("筋力", languageMode), trans("攻撃カードのダメージを増加させる。", languageMode))}
                             >
                                 <Sword size={8} className="mr-0.5"/> {player.strength}
                             </span>
@@ -468,8 +469,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             if ((val as number) <= 0) return null;
                             const def = POWER_DEFINITIONS[key] || { name: key, desc: "効果不明" };
                             return (
-                                <span key={key} className="text-yellow-400 text-[8px] border border-yellow-600 px-0.5 rounded bg-black/50 cursor-pointer" onClick={() => showInfo(def.name, def.desc)}>
-                                    {def.name}:{val as number}
+                                <span key={key} className="text-yellow-400 text-[8px] border border-yellow-600 px-0.5 rounded bg-black/50 cursor-pointer" onClick={() => showInfo(trans(def.name, languageMode), trans(def.desc, languageMode))}>
+                                    {trans(def.name, languageMode)}:{val as number}
                                 </span>
                             );
                         })}
@@ -484,13 +485,13 @@ const BattleScene: React.FC<BattleSceneProps> = ({
           
           {/* Energy */}
           <div className="flex items-center">
-              <div className="bg-black border-2 border-yellow-500 text-yellow-400 px-2 py-0.5 rounded-full flex items-center shadow-lg mr-2" onClick={() => showInfo("エネルギー", "カードを使用するために必要。ターン毎に回復する。")}>
+              <div className="bg-black border-2 border-yellow-500 text-yellow-400 px-2 py-0.5 rounded-full flex items-center shadow-lg mr-2" onClick={() => showInfo(trans("エネルギー", languageMode), trans("カードを使用するために必要。ターン毎に回復する。", languageMode))}>
                   <Zap size={14} className="mr-1 fill-yellow-400"/>
                   <span className="text-lg font-bold">{player.currentEnergy}/{player.maxEnergy}</span>
               </div>
               <div className="text-[9px] text-gray-400 flex flex-col leading-tight">
                   <span onClick={() => setShowDeck(true)} className="cursor-pointer hover:text-white flex items-center" title={trans("山札", languageMode)}><Layers size={10} className="mr-1"/> {player.drawPile.length}</span>
-                  <span className="flex items-center" onClick={() => showInfo(trans("捨て札", languageMode), "使用済みカード。山札が切れるとリシャッフルされる。")}><X size={10} className="mr-1"/> {player.discardPile.length}</span>
+                  <span className="flex items-center" onClick={() => showInfo(trans("捨て札", languageMode), trans("使用済みカード。山札が切れるとリシャッフルされる。", languageMode))}><X size={10} className="mr-1"/> {player.discardPile.length}</span>
               </div>
           </div>
 
