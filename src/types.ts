@@ -413,6 +413,23 @@ export interface DungeonScoreEntry {
     reason: string; // "Cleared", "Starved", "Killed by X"
 }
 
+// New Score Types for additional mini-games
+export interface KochoScoreEntry {
+    id: string;
+    date: number;
+    stage: number;
+    victory: boolean;
+    turns: number; 
+}
+
+export interface PaperPlaneScoreEntry {
+    id: string;
+    date: number;
+    stage: number;
+    rank: number; // Ascension/Difficulty level
+    score: number; // Calculated score
+}
+
 export interface GameState {
   screen: GameScreen;
   mode: GameMode; 

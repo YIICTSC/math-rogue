@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation, Droplets, Recycle, Repeat, User, Lock, Users, Target, UserPlus, Gauge, Swords, Dice5, Ghost } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -630,7 +631,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [selectedPilotIndex, setSelectedPilotIndex] = useState<number>(-1);
     const [pinnedPilotIndex, setPinnedPilotIndex] = useState<number | null>(null);
     const [randomTalents, setRandomTalents] = useState<Talent[]>([]);
-    const [selectedMissionLevel, setSelectedMissionLevel] = useState<number>(0);
+    const [selectedMissionLevel, setSelectedMissionLevel] = useState<number>(savedData?.selectedMissionLevel || 0);
 
     const [pool, setPool] = useState<PoolState>(savedData?.pool || {
         genNumbers: [1,2,3,4,5,6,3,4,5], 
@@ -691,12 +692,36 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             saveDebounceRef.current = setTimeout(() => {
                 const stateToSave = {
                     phase, stage, turn, pool, hand, player, enemy, enemyIntents, isEndless,
-                    vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins
+                    vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins, selectedMissionLevel
                 };
                 storageService.savePaperPlaneState(stateToSave);
             }, 1000); 
         }
-    }, [phase, stage, turn, pool, hand, player, enemy, enemyIntents, vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins, isEndless]);
+    }, [phase, stage, turn, pool, hand, player, enemy, enemyIntents, vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins, isEndless, selectedMissionLevel]);
+
+    // --- SCORE SAVING ---
+    const scoreSavedRef = useRef(false);
+    useEffect(() => {
+        if (phase === 'VICTORY' || phase === 'GAME_OVER') {
+            if (scoreSavedRef.current) return;
+            scoreSavedRef.current = true;
+            
+            const calculatedScore = (stage * 100) + player.starCoins + (player.hp * 10) + (selectedMissionLevel * 500);
+            storageService.savePaperPlaneScore({
+                id: `plane-${Date.now()}`,
+                date: Date.now(),
+                stage: stage,
+                rank: selectedMissionLevel,
+                score: Math.floor(calculatedScore)
+            });
+            
+            if (phase === 'VICTORY') {
+                storageService.clearPaperPlaneState();
+            }
+        } else {
+            scoreSavedRef.current = false;
+        }
+    }, [phase, stage, player.starCoins, player.hp, selectedMissionLevel]);
 
     useEffect(() => {
         audioService.playBGM('paper_plane');

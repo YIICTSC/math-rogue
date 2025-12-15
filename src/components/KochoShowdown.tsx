@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp, Dna, Shuffle, Star, HelpCircle, Book, AlertCircle, Flag, Music, Mic, Milk, Battery, ShieldCheck, Bomb, Utensils, PenTool, Circle, ArrowRight, Target, Package } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -105,7 +106,8 @@ interface KochoGameState {
     battleSequence: number; // 0: 1st Mob Wave, 1: 2nd Mob Wave, 2: MidBoss (Used for Stage 2+)
     wave: number;
     maxWaves: number;
-    turn: number;
+    turn: number; // Total turns in current battle
+    totalTurns: number; // New: Total turns across the run
     gridSize: number;
     player: KEntity;
     enemies: KEntity[];
@@ -275,7 +277,8 @@ const hydrateState = (state: any): KochoGameState => {
         fieldItems: restoreFieldItems(state.fieldItems || []),
         player: { ...state.player, barrier: state.player.barrier || 0, strength: state.player.strength || 0 }, // Legacy support
         currentUpgradeOffer: restoredOffer,
-        shopInventory: state.shopInventory || []
+        shopInventory: state.shopInventory || [],
+        totalTurns: state.totalTurns || 0 // Restore Total Turns
     };
 };
 
@@ -286,6 +289,7 @@ const getInitialState = (): KochoGameState => ({
     wave: 1,
     maxWaves: 3,
     turn: 1,
+    totalTurns: 0, // Init
     gridSize: GRID_SIZE,
     player: { id: 'p1', type: 'PLAYER', name: '勇者', pos: 3, facing: 1, maxHp: 10, hp: 10, spriteName: 'HERO_SIDE|赤', shield: 0, barrier: 0, strength: 0 },
     enemies: [],
@@ -359,6 +363,20 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         // Save handled by effect, ensure cleared if needed or just save current state
         onBack();
     };
+    
+    // --- Save Score on End Game ---
+    useEffect(() => {
+        if (gameState.status === 'VICTORY' || gameState.status === 'GAME_OVER') {
+            storageService.saveKochoScore({
+                id: `kocho-${Date.now()}`,
+                date: Date.now(),
+                stage: gameState.battleStage,
+                victory: gameState.status === 'VICTORY',
+                turns: gameState.totalTurns
+            });
+            storageService.clearKochoState();
+        }
+    }, [gameState.status]);
 
     const addLog = (msg: string) => {
         setGameState(prev => ({ ...prev, logs: [msg, ...prev.logs.slice(0, 4)] }));
@@ -604,7 +622,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 ...c,
                 currentCooldown: Math.max(0, c.currentCooldown - (c.type === 'MOVE' && hasBoots ? 2 : 1))
             })),
-            specialActionCooldown: Math.max(0, state.specialActionCooldown - 1)
+            specialActionCooldown: Math.max(0, state.specialActionCooldown - 1),
+            totalTurns: state.totalTurns + 1 // Increment Total Turn Count
         };
     };
 
@@ -1501,7 +1520,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         // Cleanup
         setGameState(prev => {
             if (prev.status === 'GAME_OVER') {
-                 storageService.clearKochoState();
+                 // The useEffect hook will catch status change and save score
                  return prev;
             }
             
@@ -1610,7 +1629,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
              audioService.playBGM(nextPhase === 'SHOP' ? 'poker_shop' : 'menu');
         } else if (nextPhase === 'VICTORY') {
              setGameState(prev => ({ ...prev, status: 'VICTORY' }));
-             storageService.clearKochoState();
+             // Score saving is handled by useEffect on status change
              audioService.playSound('win');
         } else if (nextPhase === 'BATTLE') {
              startWave(nextStageVal, nextSequence, nextWave);

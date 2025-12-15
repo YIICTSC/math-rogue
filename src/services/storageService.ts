@@ -1,5 +1,6 @@
 
-import { GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState } from '../types';
+
+import { GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState, KochoScoreEntry, PaperPlaneScoreEntry } from '../types';
 
 const STORAGE_KEY_UNLOCKED_CARDS = 'pixel_spire_unlocked_cards_v1';
 const STORAGE_KEY_UNLOCKED_RELICS = 'pixel_spire_unlocked_relics_v1';
@@ -25,10 +26,12 @@ const STORAGE_KEY_DUNGEON_RANKING_2 = 'pixel_spire_dungeon_ranking_2_v1';
 
 // For Kocho Showdown
 const STORAGE_KEY_KOCHO_STATE = 'pixel_spire_kocho_state_v1';
+const STORAGE_KEY_KOCHO_RANKING = 'pixel_spire_kocho_ranking_v1';
 
 // For Paper Plane Battle
 const STORAGE_KEY_PAPER_PLANE_STATE = 'pixel_spire_paper_plane_state_v1';
 const STORAGE_KEY_PAPER_PLANE_PROGRESS = 'pixel_spire_paper_plane_progress_v1';
+const STORAGE_KEY_PAPER_PLANE_RANKING = 'pixel_spire_paper_plane_ranking_v1';
 
 export interface PaperPlaneProgress {
     rank: number; // Association Level (Clear Count equivalent)
@@ -288,7 +291,26 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_DUNGEON_STATE_2);
   },
 
-  // --- Kocho Showdown State ---
+  // --- Kocho Showdown State & Scores ---
+  saveKochoScore: (entry: KochoScoreEntry) => {
+      try {
+          const current = storageService.getKochoScores();
+          const updated = [entry, ...current].slice(0, 50);
+          localStorage.setItem(STORAGE_KEY_KOCHO_RANKING, JSON.stringify(updated));
+      } catch (e) {
+          console.warn("Failed to save kocho score", e);
+      }
+  },
+
+  getKochoScores: (): KochoScoreEntry[] => {
+      try {
+          const stored = localStorage.getItem(STORAGE_KEY_KOCHO_RANKING);
+          return stored ? JSON.parse(stored) : [];
+      } catch (e) {
+          return [];
+      }
+  },
+
   saveKochoState: (state: any) => {
       try {
           localStorage.setItem(STORAGE_KEY_KOCHO_STATE, JSON.stringify(state));
@@ -306,7 +328,26 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_KOCHO_STATE);
   },
 
-  // --- Paper Plane Battle State & Progress ---
+  // --- Paper Plane Battle State & Progress & Scores ---
+  savePaperPlaneScore: (entry: PaperPlaneScoreEntry) => {
+      try {
+          const current = storageService.getPaperPlaneScores();
+          const updated = [entry, ...current].slice(0, 50);
+          localStorage.setItem(STORAGE_KEY_PAPER_PLANE_RANKING, JSON.stringify(updated));
+      } catch (e) {
+          console.warn("Failed to save paper plane score", e);
+      }
+  },
+
+  getPaperPlaneScores: (): PaperPlaneScoreEntry[] => {
+      try {
+          const stored = localStorage.getItem(STORAGE_KEY_PAPER_PLANE_RANKING);
+          return stored ? JSON.parse(stored) : [];
+      } catch (e) {
+          return [];
+      }
+  },
+
   savePaperPlaneState: (state: any) => {
       try {
           localStorage.setItem(STORAGE_KEY_PAPER_PLANE_STATE, JSON.stringify(state));
@@ -436,8 +477,10 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_DUNGEON_RANKING_2);
       localStorage.removeItem(STORAGE_KEY_DUNGEON_STATE_2);
       localStorage.removeItem(STORAGE_KEY_KOCHO_STATE);
+      localStorage.removeItem(STORAGE_KEY_KOCHO_RANKING);
       localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_STATE);
       localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_PROGRESS);
+      localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_RANKING);
       localStorage.removeItem(STORAGE_KEY_LEGACY_CARD);
       localStorage.removeItem(STORAGE_KEY_DEBUG_MATH_SKIP);
       localStorage.removeItem(STORAGE_KEY_DEBUG_HP_ONE);

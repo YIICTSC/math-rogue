@@ -1,8 +1,8 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, ScrollText, Calendar, Skull, Trophy, Club, Swords, Timer, Zap, Compass } from 'lucide-react';
-import { RankingEntry, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry } from '../types';
+import { ArrowLeft, ScrollText, Calendar, Skull, Trophy, Club, Swords, Timer, Zap, Compass, Mountain, Send, Crown } from 'lucide-react';
+import { RankingEntry, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, KochoScoreEntry, PaperPlaneScoreEntry } from '../types';
 import { storageService } from '../services/storageService';
 
 interface RankingScreenProps {
@@ -10,17 +10,23 @@ interface RankingScreenProps {
 }
 
 const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
-  const [activeTab, setActiveTab] = useState<'ADVENTURE' | 'POKER' | 'SURVIVOR' | 'DUNGEON'>('ADVENTURE');
+  const [activeTab, setActiveTab] = useState<'ADVENTURE' | 'POKER' | 'SURVIVOR' | 'DUNGEON' | 'DUNGEON_2' | 'KOCHO' | 'PLANE'>('ADVENTURE');
   const [adventureData, setAdventureData] = useState<RankingEntry[]>([]);
   const [pokerData, setPokerData] = useState<PokerScoreEntry[]>([]);
   const [survivorData, setSurvivorData] = useState<SurvivorScoreEntry[]>([]);
   const [dungeonData, setDungeonData] = useState<DungeonScoreEntry[]>([]);
+  const [dungeon2Data, setDungeon2Data] = useState<DungeonScoreEntry[]>([]);
+  const [kochoData, setKochoData] = useState<KochoScoreEntry[]>([]);
+  const [planeData, setPlaneData] = useState<PaperPlaneScoreEntry[]>([]);
 
   useEffect(() => {
       setAdventureData(storageService.getLocalScores());
       setPokerData(storageService.getPokerScores());
       setSurvivorData(storageService.getSurvivorScores());
       setDungeonData(storageService.getDungeonScores());
+      setDungeon2Data(storageService.getDungeonScores2());
+      setKochoData(storageService.getKochoScores());
+      setPlaneData(storageService.getPaperPlaneScores());
   }, []);
 
   const formatDate = (ts: number) => {
@@ -42,7 +48,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
                 <h2 className="text-xl font-bold text-gray-100">記録 (Records)</h2>
             </div>
             
-            <div className="flex bg-gray-800 rounded p-1 overflow-x-auto max-w-full">
+            <div className="flex bg-gray-800 rounded p-1 overflow-x-auto max-w-full custom-scrollbar">
                 <button 
                     onClick={() => setActiveTab('ADVENTURE')}
                     className={`flex items-center px-3 py-2 rounded text-xs md:text-sm font-bold transition-colors whitespace-nowrap ${activeTab === 'ADVENTURE' ? 'bg-blue-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
@@ -66,6 +72,24 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
                     className={`flex items-center px-3 py-2 rounded text-xs md:text-sm font-bold transition-colors whitespace-nowrap ${activeTab === 'DUNGEON' ? 'bg-[#306230] text-[#9bbc0f] shadow' : 'text-gray-400 hover:text-white'}`}
                 >
                     <Compass className="mr-1 md:mr-2" size={16}/> Dung
+                </button>
+                <button 
+                    onClick={() => setActiveTab('DUNGEON_2')}
+                    className={`flex items-center px-3 py-2 rounded text-xs md:text-sm font-bold transition-colors whitespace-nowrap ${activeTab === 'DUNGEON_2' ? 'bg-[#202020] border border-cyan-500 text-cyan-400 shadow' : 'text-gray-400 hover:text-white'}`}
+                >
+                    <Mountain className="mr-1 md:mr-2" size={16}/> Dung2
+                </button>
+                <button 
+                    onClick={() => setActiveTab('KOCHO')}
+                    className={`flex items-center px-3 py-2 rounded text-xs md:text-sm font-bold transition-colors whitespace-nowrap ${activeTab === 'KOCHO' ? 'bg-indigo-900 text-pink-300 shadow' : 'text-gray-400 hover:text-white'}`}
+                >
+                    <Crown className="mr-1 md:mr-2" size={16}/> Kocho
+                </button>
+                <button 
+                    onClick={() => setActiveTab('PLANE')}
+                    className={`flex items-center px-3 py-2 rounded text-xs md:text-sm font-bold transition-colors whitespace-nowrap ${activeTab === 'PLANE' ? 'bg-sky-700 text-white shadow' : 'text-gray-400 hover:text-white'}`}
+                >
+                    <Send className="mr-1 md:mr-2" size={16}/> Plane
                 </button>
             </div>
 
@@ -288,6 +312,157 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
                     </div>
                 )
             )}
+
+            {activeTab === 'DUNGEON_2' && (
+                dungeon2Data.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+                        <Mountain size={48} className="mb-4 opacity-50 text-cyan-800" />
+                        <p>風来の小学生2の記録はありません。</p>
+                    </div>
+                ) : (
+                    <div className="max-w-4xl mx-auto space-y-3">
+                        {dungeon2Data.map((entry, idx) => (
+                            <div 
+                                key={idx} 
+                                className="flex flex-col md:flex-row items-start md:items-center p-4 rounded-lg border-l-4 border-cyan-600 bg-gray-800 hover:bg-gray-700 shadow-lg transition-colors font-mono"
+                            >
+                                {/* Left: Floor & Date */}
+                                <div className="flex items-center w-full md:w-48 mb-2 md:mb-0 shrink-0">
+                                    <div className="p-2 rounded-full mr-3 bg-cyan-900/50 border border-cyan-500 text-cyan-400">
+                                        <Mountain size={20} />
+                                    </div>
+                                    <div>
+                                        <div className="font-bold text-cyan-300">
+                                            {entry.floor} F
+                                        </div>
+                                        <div className="flex items-center text-[10px] text-gray-500">
+                                            <Calendar size={10} className="mr-1" />
+                                            {formatDate(entry.date)}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Middle: Level & Reason */}
+                                <div className="flex-grow mb-2 md:mb-0 px-0 md:px-4">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="text-xs bg-cyan-900 border border-cyan-500 px-2 py-0.5 rounded text-cyan-100 font-bold">LV {entry.level}</span>
+                                    </div>
+                                    <div className="text-xs text-gray-300">
+                                        {entry.reason}
+                                    </div>
+                                </div>
+
+                                {/* Right: Score */}
+                                <div className="w-full md:w-32 text-right">
+                                    <div className="text-xs text-gray-500">SCORE</div>
+                                    <div className="text-xl font-mono font-bold text-cyan-400">
+                                        {entry.score.toLocaleString()}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )
+            )}
+
+            {activeTab === 'KOCHO' && (
+                kochoData.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+                        <Crown size={48} className="mb-4 opacity-50 text-indigo-400" />
+                        <p>校長対決の記録はありません。</p>
+                    </div>
+                ) : (
+                    <div className="max-w-4xl mx-auto space-y-3">
+                        {kochoData.map((entry, idx) => (
+                            <div 
+                                key={idx} 
+                                className="flex flex-col md:flex-row items-start md:items-center p-4 rounded-lg border-l-4 border-indigo-500 bg-gray-800 hover:bg-gray-700 shadow-lg transition-colors font-mono"
+                            >
+                                {/* Left: Stage & Date */}
+                                <div className="flex items-center w-full md:w-48 mb-2 md:mb-0 shrink-0">
+                                    <div className="p-2 rounded-full mr-3 bg-indigo-900/50 border border-indigo-500 text-indigo-300">
+                                        <Crown size={20} />
+                                    </div>
+                                    <div>
+                                        <div className="font-bold text-indigo-300">
+                                            Stage {entry.stage}
+                                        </div>
+                                        <div className="flex items-center text-[10px] text-gray-500">
+                                            <Calendar size={10} className="mr-1" />
+                                            {formatDate(entry.date)}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Middle: Victory */}
+                                <div className="flex-grow mb-2 md:mb-0 px-0 md:px-4">
+                                    <div className={`text-sm font-bold ${entry.victory ? 'text-yellow-400' : 'text-gray-400'}`}>
+                                        {entry.victory ? 'GRADUATION (Victory)' : 'EXPELLED (Defeat)'}
+                                    </div>
+                                </div>
+
+                                {/* Right: Turns */}
+                                <div className="w-full md:w-32 text-right">
+                                    <div className="text-xs text-gray-500">TURNS</div>
+                                    <div className="text-xl font-mono font-bold text-pink-300">
+                                        {entry.turns}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )
+            )}
+
+            {activeTab === 'PLANE' && (
+                planeData.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+                        <Send size={48} className="mb-4 opacity-50 text-sky-400" />
+                        <p>紙飛行機バトルの記録はありません。</p>
+                    </div>
+                ) : (
+                    <div className="max-w-4xl mx-auto space-y-3">
+                        {planeData.map((entry, idx) => (
+                            <div 
+                                key={idx} 
+                                className="flex flex-col md:flex-row items-start md:items-center p-4 rounded-lg border-l-4 border-sky-500 bg-gray-800 hover:bg-gray-700 shadow-lg transition-colors font-mono"
+                            >
+                                {/* Left: Stage & Date */}
+                                <div className="flex items-center w-full md:w-48 mb-2 md:mb-0 shrink-0">
+                                    <div className="p-2 rounded-full mr-3 bg-sky-900/50 border border-sky-500 text-sky-300">
+                                        <Send size={20} />
+                                    </div>
+                                    <div>
+                                        <div className="font-bold text-sky-300">
+                                            Stage {entry.stage}
+                                        </div>
+                                        <div className="flex items-center text-[10px] text-gray-500">
+                                            <Calendar size={10} className="mr-1" />
+                                            {formatDate(entry.date)}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Middle: Rank */}
+                                <div className="flex-grow mb-2 md:mb-0 px-0 md:px-4">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs bg-sky-900 border border-sky-500 px-2 py-0.5 rounded text-sky-100 font-bold">ASCENSION {entry.rank}</span>
+                                    </div>
+                                </div>
+
+                                {/* Right: Score */}
+                                <div className="w-full md:w-32 text-right">
+                                    <div className="text-xs text-gray-500">SCORE</div>
+                                    <div className="text-xl font-mono font-bold text-yellow-400">
+                                        {entry.score.toLocaleString()}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )
+            )}
+
         </div>
         
         {/* Footer */}
