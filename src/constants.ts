@@ -391,7 +391,6 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
   ACROBATICS: { name: '側転', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '3枚引く。1枚捨てる。', draw: 3, promptsDiscard: 1, rarity: 'COMMON', textureRef: 'SHOE|灰|SKILL' },
   BACKFLIP: { name: 'バック転', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック5。2枚引く。', block: 5, draw: 2, rarity: 'COMMON', textureRef: 'SHOE|灰|SKILL' },
   PREPARED: { name: '準備', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '1枚引く。1枚捨てる。', draw: 1, promptsDiscard: 1, rarity: 'COMMON', textureRef: 'NOTEBOOK|黄|SKILL' },
-  HOLOGRAM: { name: 'カンニング', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック3。手札に捨て札から1枚戻す。', block: 3, rarity: 'COMMON', textureRef: 'NOTEBOOK|青|SKILL' },
   THIRD_EYE: { name: '予習', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック7。2枚ドロー。', block: 7, draw: 2, rarity: 'COMMON', textureRef: 'EYE|青|SKILL' },
   EMPTY_BODY: { name: '瞑想', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック10。', block: 10, rarity: 'COMMON', textureRef: 'HUMANOID|青|SKILL' },
   PROSTRATE: { name: '土下座', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック4。エネルギー1を得る。', block: 4, energy: 1, rarity: 'COMMON', textureRef: 'HUMANOID|黄|SKILL' },
