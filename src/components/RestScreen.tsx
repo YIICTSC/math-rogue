@@ -1,9 +1,10 @@
 
 import React, { useState } from 'react';
-import { Player, Card as ICard } from '../types';
+import { Player, Card as ICard, LanguageMode } from '../types';
 import Card from './Card';
 import { BedDouble, Hammer, ArrowRight, FlaskConical, Plus, Shuffle, Check, DoorOpen } from 'lucide-react';
 import { getUpgradedCard } from '../utils/cardUtils';
+import { trans } from '../utils/textUtils';
 
 interface RestScreenProps {
   player: Player;
@@ -11,9 +12,10 @@ interface RestScreenProps {
   onUpgrade: (card: ICard) => void;
   onSynthesize: (c1: ICard, c2: ICard) => ICard;
   onLeave: () => void;
+  languageMode: LanguageMode;
 }
 
-const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSynthesize, onLeave }) => {
+const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSynthesize, onLeave, languageMode }) => {
   const [mode, setMode] = useState<'CHOICE' | 'UPGRADE' | 'SYNTHESIS' | 'PREVIEW_UPGRADE' | 'PREVIEW_SYNTHESIS' | 'RESULT' | 'DONE'>('CHOICE');
   const [message, setMessage] = useState("放課後の校舎だ。どこへ行こう？");
   const [selectedCard, setSelectedCard] = useState<ICard | null>(null);
@@ -84,7 +86,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       if (selectedCard) {
           onUpgrade(selectedCard);
           setMode('DONE');
-          setMessage(`${selectedCard.name} の改良に成功した！`);
+          setMessage(`${trans(selectedCard.name, languageMode)} の改良に成功した！`);
           setSelectedCard(null);
       }
   };
@@ -116,9 +118,9 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
         
         <div className="z-10 bg-black p-6 md:p-8 border-4 border-orange-800 rounded-lg max-w-4xl w-full text-center shadow-2xl flex flex-col max-h-[90vh]">
             <h2 className="text-3xl md:text-4xl text-orange-500 font-bold mb-4 flex items-center justify-center shrink-0">
-                <DoorOpen className="mr-3" /> 放課後の探索
+                <DoorOpen className="mr-3" /> {trans("放課後の探索", languageMode)}
             </h2>
-            <p className="text-lg md:text-xl text-gray-300 mb-6 min-h-[3rem] shrink-0 whitespace-pre-wrap">{message}</p>
+            <p className="text-lg md:text-xl text-gray-300 mb-6 min-h-[3rem] shrink-0 whitespace-pre-wrap">{trans(message, languageMode)}</p>
 
             {mode === 'CHOICE' && (
                 <div className="flex flex-wrap justify-center gap-4 md:gap-8">
@@ -128,8 +130,8 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                         className="group flex flex-col items-center gap-2 p-4 border-2 border-gray-600 hover:border-green-500 rounded-lg hover:bg-gray-800 transition-all w-32 md:w-40"
                     >
                         <BedDouble size={40} className="text-green-500 group-hover:scale-110 transition-transform" />
-                        <span className="font-bold text-lg">保健室</span>
-                        <span className="text-xs text-gray-400">HP {healAmount} 回復</span>
+                        <span className="font-bold text-lg">{trans("保健室", languageMode)}</span>
+                        <span className="text-xs text-gray-400">HP {healAmount} {trans("回復", languageMode)}</span>
                     </button>
 
                     {/* Art Room (Upgrade) */}
@@ -138,8 +140,8 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                         className="group flex flex-col items-center gap-2 p-4 border-2 border-gray-600 hover:border-yellow-500 rounded-lg hover:bg-gray-800 transition-all w-32 md:w-40"
                     >
                         <Hammer size={40} className="text-yellow-500 group-hover:rotate-12 transition-transform" />
-                        <span className="font-bold text-lg">図工室</span>
-                        <span className="text-xs text-gray-400">カード強化</span>
+                        <span className="font-bold text-lg">{trans("図工室", languageMode)}</span>
+                        <span className="text-xs text-gray-400">{trans("カード強化", languageMode)}</span>
                     </button>
 
                     {/* Science Room (Synthesis) - 50% Chance */}
@@ -153,9 +155,9 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                         `}
                     >
                         <FlaskConical size={40} className={`text-purple-500 ${isScienceRoomOpen ? 'group-hover:shake' : ''} transition-transform`} />
-                        <span className="font-bold text-lg">理科室</span>
+                        <span className="font-bold text-lg">{trans("理科室", languageMode)}</span>
                         <span className="text-xs text-gray-400">
-                            {isScienceRoomOpen ? "カード合成" : "鍵がかかってる"}
+                            {isScienceRoomOpen ? trans("カード合成", languageMode) : trans("鍵がかかってる", languageMode)}
                         </span>
                     </button>
                 </div>
@@ -168,7 +170,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                             onClick={handleRandomSynthesis}
                             className="mb-4 flex items-center bg-purple-900/50 hover:bg-purple-800/50 text-purple-200 px-4 py-2 rounded-full border border-purple-500 transition-colors text-sm"
                          >
-                             <Shuffle size={14} className="mr-2" /> ランダムな2枚を選ぶ
+                             <Shuffle size={14} className="mr-2" /> {trans("ランダムな2枚を選ぶ", languageMode)}
                          </button>
                      )}
                      <div className="flex flex-wrap justify-center gap-4 overflow-y-auto w-full p-4 border-inner bg-gray-900/50 rounded custom-scrollbar">
@@ -180,14 +182,14 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                                     className={`scale-75 md:scale-90 transition-transform cursor-pointer relative ${isSelected ? 'ring-4 ring-purple-500 rounded-lg scale-95' : 'hover:scale-100'}`} 
                                     onClick={() => handleCardClick(card)}
                                 >
-                                    <Card card={card} onClick={() => handleCardClick(card)} disabled={false} />
+                                    <Card card={card} onClick={() => handleCardClick(card)} disabled={false} languageMode={languageMode}/>
                                     {isSelected && <div className="absolute top-0 right-0 bg-purple-600 text-white rounded-full p-1"><FlaskConical size={16}/></div>}
                                 </div>
                             );
                         })}
-                        {mode === 'UPGRADE' && player.deck.every(c => c.upgraded) && <p className="text-gray-500">強化できるカードがない...</p>}
+                        {mode === 'UPGRADE' && player.deck.every(c => c.upgraded) && <p className="text-gray-500">{trans("強化できるカードがない...", languageMode)}</p>}
                      </div>
-                     <button onClick={() => { setMode('CHOICE'); setSynthCards([]); setMessage("放課後の校舎だ。どこへ行こう？"); }} className="mt-4 text-gray-400 underline hover:text-white shrink-0">戻る</button>
+                     <button onClick={() => { setMode('CHOICE'); setSynthCards([]); setMessage("放課後の校舎だ。どこへ行こう？"); }} className="mt-4 text-gray-400 underline hover:text-white shrink-0">{trans("戻る", languageMode)}</button>
                 </div>
             )}
 
@@ -195,21 +197,21 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                 <div className="flex flex-col items-center">
                     <div className="flex items-center justify-center gap-4 md:gap-8 mb-8">
                         <div className="scale-90 md:scale-100">
-                             <Card card={selectedCard} onClick={() => {}} disabled={false} />
-                             <div className="text-center mt-2 text-gray-400">強化前</div>
+                             <Card card={selectedCard} onClick={() => {}} disabled={false} languageMode={languageMode}/>
+                             <div className="text-center mt-2 text-gray-400">{trans("強化前", languageMode)}</div>
                         </div>
                         <ArrowRight size={32} className="text-yellow-500 animate-pulse" />
                         <div className="scale-100 md:scale-110">
-                             <Card card={getUpgradedCard(selectedCard)} onClick={() => {}} disabled={false} />
-                             <div className="text-center mt-2 text-green-400 font-bold">強化後</div>
+                             <Card card={getUpgradedCard(selectedCard)} onClick={() => {}} disabled={false} languageMode={languageMode}/>
+                             <div className="text-center mt-2 text-green-400 font-bold">{trans("強化後", languageMode)}</div>
                         </div>
                     </div>
                     <div className="flex gap-4">
                         <button onClick={confirmUpgrade} className="bg-green-600 hover:bg-green-500 text-white px-8 py-2 rounded font-bold border border-white">
-                            改良する
+                            {trans("改良する", languageMode)}
                         </button>
                         <button onClick={cancelPreview} className="bg-gray-600 hover:bg-gray-500 text-white px-8 py-2 rounded border border-gray-400">
-                            やめる
+                            {trans("やめる", languageMode)}
                         </button>
                     </div>
                 </div>
@@ -219,26 +221,26 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                 <div className="flex flex-col items-center flex-grow overflow-y-auto custom-scrollbar w-full">
                     <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 mb-4 flex-grow content-center">
                         <div className="scale-[0.65] md:scale-90 origin-center">
-                             <Card card={synthCards[0]} onClick={() => {}} disabled={false} />
+                             <Card card={synthCards[0]} onClick={() => {}} disabled={false} languageMode={languageMode}/>
                         </div>
                         <Plus size={20} className="text-gray-500" />
                         <div className="scale-[0.65] md:scale-90 origin-center">
-                             <Card card={synthCards[1]} onClick={() => {}} disabled={false} />
+                             <Card card={synthCards[1]} onClick={() => {}} disabled={false} languageMode={languageMode}/>
                         </div>
                         <ArrowRight size={24} className="text-purple-500 animate-pulse mx-1 md:mx-2" />
                         
                         <div className="w-24 h-36 md:w-32 md:h-48 border-4 border-purple-500 bg-black rounded-lg flex flex-col items-center justify-center animate-bounce shadow-[0_0_20px_rgba(168,85,247,0.6)] shrink-0">
                             <FlaskConical size={32} className="text-purple-400 mb-2" />
                             <div className="text-purple-200 font-bold text-sm">???</div>
-                            <div className="text-[10px] text-purple-400 mt-1">実験中...</div>
+                            <div className="text-[10px] text-purple-400 mt-1">{trans("実験中...", languageMode)}</div>
                         </div>
                     </div>
                     <div className="flex gap-4 pb-4 shrink-0 justify-center">
                         <button onClick={confirmSynthesize} className="bg-purple-600 hover:bg-purple-500 text-white px-6 py-3 rounded-lg font-bold border border-white shadow-lg whitespace-nowrap">
-                            実験開始！
+                            {trans("実験開始！", languageMode)}
                         </button>
                         <button onClick={cancelPreview} className="bg-gray-600 hover:bg-gray-500 text-white px-6 py-3 rounded-lg border border-gray-400 whitespace-nowrap">
-                            戻る
+                            {trans("戻る", languageMode)}
                         </button>
                     </div>
                 </div>
@@ -247,7 +249,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
             {mode === 'RESULT' && resultCard && (
                 <div className="flex flex-col items-center animate-in zoom-in duration-300">
                     <div className="scale-110 mb-8">
-                        <Card card={resultCard} onClick={() => {}} disabled={false} />
+                        <Card card={resultCard} onClick={() => {}} disabled={false} languageMode={languageMode}/>
                     </div>
                     <button 
                         onClick={() => { setMode('DONE'); setResultCard(null); }}
@@ -263,7 +265,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                     onClick={onLeave}
                     className="bg-orange-700 hover:bg-orange-600 text-white px-8 py-3 rounded text-xl font-bold border-2 border-white shadow-lg animate-bounce mt-8 mx-auto"
                 >
-                    出発する
+                    {trans("出発する", languageMode)}
                 </button>
             )}
         </div>

@@ -1,17 +1,20 @@
+
 import React, { useEffect, useRef, useState } from 'react';
-import { MapNode, NodeType, Player } from '../types';
+import { MapNode, NodeType, Player, LanguageMode } from '../types';
 import { Swords, Skull, BedDouble, ShoppingBag, HelpCircle, AlertTriangle, PlayCircle, Coins, Heart, Layers, X } from 'lucide-react';
 import { MAP_WIDTH, MAP_HEIGHT } from '../services/mapGenerator';
 import Card from './Card';
+import { trans } from '../utils/textUtils';
 
 interface MapScreenProps {
   nodes: MapNode[];
   currentNodeId: string | null;
   onNodeSelect: (node: MapNode) => void;
   player: Player;
+  languageMode: LanguageMode;
 }
 
-const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelect, player }) => {
+const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelect, player, languageMode }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showDeck, setShowDeck] = useState(false);
 
@@ -103,7 +106,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                  </div>
              </div>
 
-             <h2 className="text-sm md:text-xl text-yellow-400 font-bold tracking-widest truncate mx-2">MAP</h2>
+             <h2 className="text-sm md:text-xl text-yellow-400 font-bold tracking-widest truncate mx-2">{trans("ダンジョンマップ", languageMode)}</h2>
 
              <button 
                 onClick={() => setShowDeck(true)}
@@ -184,7 +187,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                 <div className="bg-gray-800 border-4 border-white w-full max-w-md h-[80vh] flex flex-col relative shadow-2xl" onClick={e => e.stopPropagation()}>
                     <div className="bg-black border-b-2 border-gray-600 p-4 flex justify-between items-center">
                         <h2 className="text-white text-xl font-bold flex items-center">
-                            <Layers className="mr-2"/> デッキ
+                            <Layers className="mr-2"/> {trans("デッキ", languageMode)}
                         </h2>
                         <button onClick={() => setShowDeck(false)} className="text-gray-400 hover:text-white p-1">
                             <X size={24} />
@@ -195,7 +198,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                         <div className="grid grid-cols-3 gap-2 justify-items-center">
                             {sortedDeck.map((card) => (
                                 <div key={card.id} className="scale-75 origin-top-left w-24 h-36">
-                                    <Card card={card} onClick={() => {}} disabled={false} />
+                                    <Card card={card} onClick={() => {}} disabled={false} languageMode={languageMode}/>
                                 </div>
                             ))}
                         </div>

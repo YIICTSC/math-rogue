@@ -1,12 +1,15 @@
+
 import React, { useState, useRef } from 'react';
-import { Card as CardType, CardType as EnumCardType } from '../types';
+import { Card as CardType, CardType as EnumCardType, LanguageMode } from '../types';
 import PixelSprite from './PixelSprite';
+import { trans } from '../utils/textUtils';
 
 interface CardProps {
   card: CardType;
   onClick: () => void;
   disabled: boolean;
   onInspect?: (card: CardType) => void;
+  languageMode?: LanguageMode;
 }
 
 export const KEYWORD_DEFINITIONS: Record<string, { title: string; desc: string }> = {
@@ -18,7 +21,7 @@ export const KEYWORD_DEFINITIONS: Record<string, { title: string; desc: string }
   DRAW: { title: 'ドロー', desc: '山札からカードを引く。' },
 };
 
-const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect }) => {
+const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languageMode = 'JAPANESE' }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   const longPressTimer = useRef<any>(null);
   const isLongPress = useRef(false);
@@ -71,10 +74,10 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect }) => {
 
   const getTypeText = (type: EnumCardType) => {
     switch (type) {
-      case EnumCardType.ATTACK: return '攻撃';
-      case EnumCardType.SKILL: return 'スキル';
-      case EnumCardType.POWER: return 'パワー';
-      default: return 'その他';
+      case EnumCardType.ATTACK: return trans('攻撃', languageMode);
+      case EnumCardType.SKILL: return trans('スキル', languageMode);
+      case EnumCardType.POWER: return trans('パワー', languageMode);
+      default: return trans('その他', languageMode);
     }
   };
 
@@ -137,13 +140,13 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect }) => {
   };
 
   const renderDescription = () => {
-      let desc = card.description;
-      if (card.damage !== undefined) desc = desc.replace(/(\d+)ダメージ/g, `${card.damage}ダメージ`);
-      if (card.block !== undefined) desc = desc.replace(/ブロック(\d+)/g, `ブロック${card.block}`);
-      if (card.poison !== undefined) desc = desc.replace(/ドクドク(\d+)/g, `ドクドク${card.poison}`);
-      if (card.weak !== undefined) desc = desc.replace(/へろへろ(\d+)/g, `へろへろ${card.weak}`);
-      if (card.vulnerable !== undefined) desc = desc.replace(/びくびく(\d+)/g, `びくびく${card.vulnerable}`);
-      if (card.strength !== undefined) desc = desc.replace(/ムキムキ(\d+)/g, `ムキムキ${card.strength}`);
+      let desc = trans(card.description, languageMode);
+      if (card.damage !== undefined) desc = desc.replace(/(\d+)ダメージ/g, `${card.damage}${trans("ダメージ", languageMode)}`);
+      if (card.block !== undefined) desc = desc.replace(/ブロック(\d+)/g, `${trans("ブロック", languageMode)}${card.block}`);
+      if (card.poison !== undefined) desc = desc.replace(/ドクドク(\d+)/g, `${trans("ドクドク", languageMode)}${card.poison}`);
+      if (card.weak !== undefined) desc = desc.replace(/へろへろ(\d+)/g, `${trans("へろへろ", languageMode)}${card.weak}`);
+      if (card.vulnerable !== undefined) desc = desc.replace(/びくびく(\d+)/g, `${trans("びくびく", languageMode)}${card.vulnerable}`);
+      if (card.strength !== undefined) desc = desc.replace(/ムキムキ(\d+)/g, `${trans("ムキムキ", languageMode)}${card.strength}`);
 
       return (
         <span className={card.upgraded ? "text-green-300 font-bold" : ""}>
@@ -173,8 +176,8 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect }) => {
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-56 bg-black border-4 border-white p-3 z-[100] shadow-2xl pointer-events-none rounded-lg">
           {activeKeywords.map((k, idx) => (
             <div key={k.title} className={`text-left ${idx !== activeKeywords.length - 1 ? 'mb-2 border-b border-gray-700 pb-1' : ''}`}>
-              <div className="text-yellow-400 font-bold text-sm">{k.title}</div>
-              <div className="text-gray-300 text-xs leading-relaxed">{k.desc}</div>
+              <div className="text-yellow-400 font-bold text-sm">{trans(k.title, languageMode)}</div>
+              <div className="text-gray-300 text-xs leading-relaxed">{trans(k.desc, languageMode)}</div>
             </div>
           ))}
           <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-white"></div>
@@ -184,7 +187,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect }) => {
       {/* Header */}
       <div className="flex justify-between items-center relative z-10 mb-1">
         <span className={`text-[11px] font-bold truncate w-20 drop-shadow-md ${card.upgraded ? 'text-green-400' : 'text-white'}`}>
-            {card.name}{card.upgraded ? '+' : ''}
+            {trans(card.name, languageMode)}{card.upgraded ? '+' : ''}
         </span>
         <div className={`w-5 h-5 flex items-center justify-center rounded text-[10px] border border-white font-bold shrink-0 shadow-sm ${card.upgraded && card.cost < 99 ? 'bg-green-600 text-white' : 'bg-blue-600 text-white'}`}>
           {card.cost}
@@ -201,7 +204,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect }) => {
         <div className="bg-black/70 p-1 rounded border border-white/10 backdrop-blur-[1px] w-full min-h-[2.5rem] flex items-center justify-center flex-col overflow-hidden">
             <div className="text-[7px] text-white leading-tight text-center whitespace-pre-wrap break-words w-full">
                 {renderDescription()}
-                {card.exhaust && <span className="text-gray-400 block font-bold text-[6px] mt-0.5">[廃棄]</span>}
+                {card.exhaust && <span className="text-gray-400 block font-bold text-[6px] mt-0.5">[{trans("廃棄", languageMode)}]</span>}
                 {card.capture && <span className="text-amber-400 block font-bold text-[6px] mt-0.5">[捕獲]</span>}
             </div>
         </div>

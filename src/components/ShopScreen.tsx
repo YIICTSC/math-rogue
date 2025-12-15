@@ -1,8 +1,9 @@
 
 import React, { useState, useRef } from 'react';
-import { Player, Card as ICard, Relic, Potion } from '../types';
+import { Player, Card as ICard, Relic, Potion, LanguageMode } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
 import { ShoppingBag, Trash2, Coins, Gem, FlaskConical, X } from 'lucide-react';
+import { trans } from '../utils/textUtils';
 
 interface ShopScreenProps {
   player: Player;
@@ -14,11 +15,12 @@ interface ShopScreenProps {
   onBuyPotion: (potion: Potion, replacePotionId?: string) => void; // Update signature
   onRemoveCard: (cardId: string, cost: number) => void;
   onLeave: () => void;
+  languageMode: LanguageMode;
 }
 
 const REMOVE_COST = 75;
 
-const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics = [], shopPotions = [], onBuyCard, onBuyRelic, onBuyPotion, onRemoveCard, onLeave }) => {
+const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics = [], shopPotions = [], onBuyCard, onBuyRelic, onBuyPotion, onRemoveCard, onLeave, languageMode }) => {
   const [purchasedIds, setPurchasedIds] = useState<string[]>([]);
   const [removed, setRemoved] = useState(false);
   const [viewMode, setViewMode] = useState<'BUY' | 'REMOVE'>('BUY');
@@ -112,13 +114,13 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
   };
 
   const getProcessedDescription = (card: ICard) => {
-      let desc = card.description;
-      if (card.damage !== undefined) desc = desc.replace(/(\d+)ダメージ/g, `${card.damage}ダメージ`);
-      if (card.block !== undefined) desc = desc.replace(/ブロック(\d+)/g, `ブロック${card.block}`);
-      if (card.poison !== undefined) desc = desc.replace(/ドクドク(\d+)/g, `ドクドク${card.poison}`);
-      if (card.weak !== undefined) desc = desc.replace(/へろへろ(\d+)/g, `へろへろ${card.weak}`);
-      if (card.vulnerable !== undefined) desc = desc.replace(/びくびく(\d+)/g, `びくびく${card.vulnerable}`);
-      if (card.strength !== undefined) desc = desc.replace(/ムキムキ(\d+)/g, `ムキムキ${card.strength}`);
+      let desc = trans(card.description, languageMode);
+      if (card.damage !== undefined) desc = desc.replace(/(\d+)ダメージ/g, `${card.damage}${trans("ダメージ", languageMode)}`);
+      if (card.block !== undefined) desc = desc.replace(/ブロック(\d+)/g, `${trans("ブロック", languageMode)}${card.block}`);
+      if (card.poison !== undefined) desc = desc.replace(/ドクドク(\d+)/g, `${trans("ドクドク", languageMode)}${card.poison}`);
+      if (card.weak !== undefined) desc = desc.replace(/へろへろ(\d+)/g, `${trans("へろへろ", languageMode)}${card.weak}`);
+      if (card.vulnerable !== undefined) desc = desc.replace(/びくびく(\d+)/g, `${trans("びくびく", languageMode)}${card.vulnerable}`);
+      if (card.strength !== undefined) desc = desc.replace(/ムキムキ(\d+)/g, `${trans("ムキムキ", languageMode)}${card.strength}`);
       return desc;
   };
 
@@ -136,7 +138,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                     <div className="flex flex-col items-center mb-4">
                         {inspectedItem.type === 'CARD' && (
                             <div className="scale-100 mb-4">
-                                <Card card={inspectedItem.data} onClick={() => {}} disabled={false} />
+                                <Card card={inspectedItem.data} onClick={() => {}} disabled={false} languageMode={languageMode}/>
                             </div>
                         )}
                         {inspectedItem.type === 'RELIC' && (
@@ -151,12 +153,12 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                         )}
                         
                         <h3 className="text-2xl font-bold text-yellow-400 mb-2 border-b border-gray-600 pb-2 text-center w-full">
-                            {inspectedItem.data.name}
+                            {trans(inspectedItem.data.name, languageMode)}
                         </h3>
                     </div>
 
                     <div className="text-lg text-white mb-6 leading-relaxed whitespace-pre-wrap font-bold bg-black/30 p-3 rounded text-center">
-                        {inspectedItem.type === 'CARD' ? getProcessedDescription(inspectedItem.data) : inspectedItem.data.description}
+                        {inspectedItem.type === 'CARD' ? getProcessedDescription(inspectedItem.data) : trans(inspectedItem.data.description, languageMode)}
                     </div>
                     
                     {/* Keywords List for Cards */}
@@ -164,8 +166,8 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                         <div className="space-y-2">
                             {getCardKeywords(inspectedItem.data).map((k, idx) => (
                                 <div key={idx} className="flex flex-col text-left text-sm bg-gray-700/50 p-2 rounded">
-                                    <span className="font-bold text-yellow-300 mb-0.5">{k.title}</span>
-                                    <span className="text-gray-300 text-xs">{k.desc}</span>
+                                    <span className="font-bold text-yellow-300 mb-0.5">{trans(k.title, languageMode)}</span>
+                                    <span className="text-gray-300 text-xs">{trans(k.desc, languageMode)}</span>
                                 </div>
                             ))}
                         </div>
@@ -179,7 +181,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
            <div className="flex items-center">
                <ShoppingBag size={24} className="text-yellow-500 mr-2" />
                <div>
-                   <h2 className="text-xl font-bold text-yellow-100">購買部</h2>
+                   <h2 className="text-xl font-bold text-yellow-100">{trans("購買部", languageMode)}</h2>
                    <p className="text-xs text-gray-400">「へいらっしゃい！」</p>
                </div>
            </div>
@@ -190,7 +192,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                     <span className="text-sm font-bold">{player.gold}円</span>
                 </div>
                 <button onClick={onLeave} className="bg-red-600 hover:bg-red-500 px-3 py-1 rounded font-bold border-2 border-white cursor-pointer text-xs">
-                    出る
+                    {trans("出る", languageMode)}
                 </button>
            </div>
        </div>
@@ -202,8 +204,8 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                    <div className="absolute top-2 right-2 cursor-pointer" onClick={() => setPotionToBuy(null)}>
                        <X size={24} className="text-gray-400 hover:text-white" />
                    </div>
-                   <h3 className="text-xl font-bold text-white mb-4">ポーションがいっぱいです</h3>
-                   <p className="text-sm text-gray-300 mb-6">どれを捨てて入れ替えますか？</p>
+                   <h3 className="text-xl font-bold text-white mb-4">{trans("ポーションがいっぱいです", languageMode)}</h3>
+                   <p className="text-sm text-gray-300 mb-6">{trans("どれを捨てて入れ替えますか？", languageMode)}</p>
                    
                    <div className="flex justify-center gap-4 mb-4">
                         {player.potions.map(p => (
@@ -215,13 +217,13 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                 <div className="w-12 h-12 bg-gray-800 border-2 border-white rounded-full flex items-center justify-center mb-1">
                                     <FlaskConical size={24} style={{ color: p.color }} />
                                 </div>
-                                <div className="text-xs text-gray-400 w-16 truncate text-center">{p.name}</div>
+                                <div className="text-xs text-gray-400 w-16 truncate text-center">{trans(p.name, languageMode)}</div>
                             </div>
                         ))}
                    </div>
                    
                    <button onClick={() => setPotionToBuy(null)} className="mt-4 text-sm text-gray-500 hover:text-white underline">
-                       やっぱりやめる
+                       {trans("やっぱりやめる", languageMode)}
                    </button>
                </div>
            </div>
@@ -236,14 +238,14 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                     onClick={() => setViewMode('BUY')}
                     className={`flex-1 py-2 rounded border-2 cursor-pointer text-sm ${viewMode === 'BUY' ? 'bg-yellow-600 border-white' : 'bg-gray-800 border-gray-600 text-gray-400'}`}
                 >
-                    購入
+                    {trans("購入", languageMode)}
                 </button>
                 <button 
                     onClick={() => setViewMode('REMOVE')}
                     disabled={removed || player.gold < getPrice(REMOVE_COST)}
                     className={`flex-1 py-2 rounded border-2 flex items-center justify-center gap-1 cursor-pointer text-sm ${viewMode === 'REMOVE' ? 'bg-red-600 border-white' : 'bg-gray-800 border-gray-600 text-gray-400'} ${removed ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                    <Trash2 size={14}/> カード削除 ({getPrice(REMOVE_COST)} 円)
+                    <Trash2 size={14}/> {trans("カード削除", languageMode)} ({getPrice(REMOVE_COST)} 円)
                 </button>
            </div>
 
@@ -269,8 +271,8 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                         <div className="w-16 h-16 bg-gray-800 border-4 border-yellow-600 rounded-full flex items-center justify-center mb-2 shadow-lg">
                                             <Gem className="text-yellow-400" size={24}/>
                                         </div>
-                                        <div className="text-xs font-bold text-center truncate w-full">{relic.name}</div>
-                                        <div className="text-[9px] text-gray-400 text-center mb-2 h-8 overflow-hidden leading-tight">{relic.description}</div>
+                                        <div className="text-xs font-bold text-center truncate w-full">{trans(relic.name, languageMode)}</div>
+                                        <div className="text-[9px] text-gray-400 text-center mb-2 h-8 overflow-hidden leading-tight">{trans(relic.description, languageMode)}</div>
                                         
                                         {!isSold && (
                                             <button 
@@ -281,7 +283,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                                 {price} 円
                                             </button>
                                         )}
-                                        {isSold && <div className="text-red-500 font-bold rotate-12 text-xs">売切れ</div>}
+                                        {isSold && <div className="text-red-500 font-bold rotate-12 text-xs">{trans("売切れ", languageMode)}</div>}
                                     </div>
                                 )
                             })}
@@ -304,8 +306,8 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                         <div className="w-12 h-12 bg-gray-800 border-2 border-white/50 rounded flex items-center justify-center mb-2 shadow-lg">
                                             <FlaskConical size={24} style={{ color: potion.color }}/>
                                         </div>
-                                        <div className="text-xs font-bold text-center truncate w-full">{potion.name}</div>
-                                        <div className="text-[9px] text-gray-400 text-center mb-2 h-8 overflow-hidden leading-tight">{potion.description}</div>
+                                        <div className="text-xs font-bold text-center truncate w-full">{trans(potion.name, languageMode)}</div>
+                                        <div className="text-[9px] text-gray-400 text-center mb-2 h-8 overflow-hidden leading-tight">{trans(potion.description, languageMode)}</div>
                                         
                                         {!isSold && (
                                             <button 
@@ -313,10 +315,10 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                                 disabled={!canAfford}
                                                 className={`px-2 py-0.5 rounded-full font-bold text-xs shadow-lg border border-white ${canAfford ? 'bg-yellow-600 hover:bg-yellow-500 text-white cursor-pointer' : 'bg-gray-600 text-gray-400 cursor-not-allowed'}`}
                                             >
-                                                {isFull ? `${price} 円 (入替)` : `${price} 円`}
+                                                {isFull ? `${price} 円 (${trans("入替", languageMode)})` : `${price} 円`}
                                             </button>
                                         )}
-                                        {isSold && <div className="text-red-500 font-bold rotate-12 text-xs">売切れ</div>}
+                                        {isSold && <div className="text-red-500 font-bold rotate-12 text-xs">{trans("売切れ", languageMode)}</div>}
                                     </div>
                                 )
                             })}
@@ -337,6 +339,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                         onClick={() => handleBuyCard(card)} 
                                         disabled={isSold}
                                         onInspect={(c) => setInspectedItem({ type: 'CARD', data: c })}
+                                        languageMode={languageMode}
                                     />
                                     {!isSold && (
                                         <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-full text-center z-20">
@@ -369,6 +372,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                     onClick={() => handleRemove(card.id)} 
                                     disabled={false}
                                     onInspect={(c) => setInspectedItem({ type: 'CARD', data: c })}
+                                    languageMode={languageMode}
                                 />
                                 <div className="absolute inset-0 bg-red-500/0 group-hover:bg-red-500/20 transition-colors flex items-center justify-center rounded-lg z-20 pointer-events-none">
                                     <Trash2 className="opacity-0 group-hover:opacity-100 text-red-500 bg-black p-2 rounded-full border border-red-500" size={32} />

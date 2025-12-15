@@ -232,6 +232,8 @@ export enum GameMode {
   MIXED = 'MIXED'
 }
 
+export type LanguageMode = 'JAPANESE' | 'HIRAGANA';
+
 // --- Map Types ---
 export enum NodeType {
   COMBAT = 'COMBAT',

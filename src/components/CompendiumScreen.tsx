@@ -1,19 +1,20 @@
 
-
 import React, { useMemo, useState, useEffect } from 'react';
 import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY, ENEMY_LIBRARY } from '../constants';
-import { Card as ICard, CardType } from '../types';
+import { Card as ICard, LanguageMode } from '../types';
 import Card from './Card';
 import { BookOpen, Lock, ArrowLeft, Swords, Gem, FlaskConical, Skull, X } from 'lucide-react';
 import PixelSprite from './PixelSprite';
 import { storageService } from '../services/storageService';
+import { trans } from '../utils/textUtils';
 
 interface CompendiumScreenProps {
   unlockedCardNames: string[];
   onBack: () => void;
+  languageMode: LanguageMode;
 }
 
-const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, onBack }) => {
+const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, onBack, languageMode }) => {
   const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'ENEMIES'>('CARDS');
   const [unlockedRelics, setUnlockedRelics] = useState<string[]>([]);
   const [unlockedPotions, setUnlockedPotions] = useState<string[]>([]);
@@ -59,24 +60,24 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
             <div className="flex items-center">
                 <BookOpen size={32} className="text-amber-500 mr-3" />
                 <div>
-                    <h2 className="text-2xl font-bold text-amber-100">大図鑑</h2>
-                    {activeTab === 'CARDS' && <p className="text-xs text-gray-400">収集率: {percentage}%</p>}
+                    <h2 className="text-2xl font-bold text-amber-100">{trans("図鑑", languageMode)}</h2>
+                    {activeTab === 'CARDS' && <p className="text-xs text-gray-400">{trans("収集率", languageMode)}: {percentage}%</p>}
                 </div>
             </div>
             
             {/* Tabs */}
             <div className="flex gap-2">
                 <button onClick={() => setActiveTab('CARDS')} className={`px-3 py-1 rounded text-sm font-bold flex items-center ${activeTab==='CARDS' ? 'bg-amber-600 text-white' : 'bg-gray-700 text-gray-300'}`}>
-                    <Swords size={14} className="mr-1"/> カード
+                    <Swords size={14} className="mr-1"/> {trans("カード", languageMode)}
                 </button>
                 <button onClick={() => setActiveTab('RELICS')} className={`px-3 py-1 rounded text-sm font-bold flex items-center ${activeTab==='RELICS' ? 'bg-amber-600 text-white' : 'bg-gray-700 text-gray-300'}`}>
-                    <Gem size={14} className="mr-1"/> レリック
+                    <Gem size={14} className="mr-1"/> {trans("レリック", languageMode)}
                 </button>
                 <button onClick={() => setActiveTab('POTIONS')} className={`px-3 py-1 rounded text-sm font-bold flex items-center ${activeTab==='POTIONS' ? 'bg-amber-600 text-white' : 'bg-gray-700 text-gray-300'}`}>
-                    <FlaskConical size={14} className="mr-1"/> 薬
+                    <FlaskConical size={14} className="mr-1"/> {trans("薬", languageMode)}
                 </button>
                 <button onClick={() => setActiveTab('ENEMIES')} className={`px-3 py-1 rounded text-sm font-bold flex items-center ${activeTab==='ENEMIES' ? 'bg-amber-600 text-white' : 'bg-gray-700 text-gray-300'}`}>
-                    <Skull size={14} className="mr-1"/> 魔物
+                    <Skull size={14} className="mr-1"/> {trans("魔物", languageMode)}
                 </button>
             </div>
 
@@ -84,7 +85,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                 onClick={onBack}
                 className="flex items-center bg-gray-700 hover:bg-gray-600 border border-gray-400 px-4 py-2 rounded text-white transition-colors"
             >
-                <ArrowLeft size={16} className="mr-2" /> 戻る
+                <ArrowLeft size={16} className="mr-2" /> {trans("戻る", languageMode)}
             </button>
         </div>
 
@@ -101,7 +102,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                             <div key={idx} className="relative group cursor-pointer" onClick={() => handleItemClick('CARD', cardInstance, isUnlocked)}>
                                 {isUnlocked ? (
                                     <div className="transform hover:scale-105 transition-transform duration-200 scale-75 origin-top-left w-24 h-36">
-                                        <Card card={cardInstance} onClick={() => handleItemClick('CARD', cardInstance, isUnlocked)} disabled={false} />
+                                        <Card card={cardInstance} onClick={() => handleItemClick('CARD', cardInstance, isUnlocked)} disabled={false} languageMode={languageMode}/>
                                     </div>
                                 ) : (
                                     <div className="w-24 h-36 border-[3px] border-gray-700 bg-gray-800 rounded-lg flex flex-col items-center justify-center p-2 opacity-50 select-none grayscale">
@@ -130,7 +131,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                                 <div className={`w-12 h-12 bg-gray-800 rounded-full border border-yellow-600 flex items-center justify-center mb-2 ${!isUnlocked ? 'grayscale opacity-30' : ''}`}>
                                     <Gem size={24} className="text-yellow-400" />
                                 </div>
-                                <div className={`font-bold text-xs mb-1 truncate w-full ${isUnlocked ? 'text-yellow-200' : 'text-gray-600'}`}>{isUnlocked ? relic.name : '???'}</div>
+                                <div className={`font-bold text-xs mb-1 truncate w-full ${isUnlocked ? 'text-yellow-200' : 'text-gray-600'}`}>{isUnlocked ? trans(relic.name, languageMode) : '???'}</div>
                             </div>
                         );
                     })}
@@ -150,7 +151,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                                 <div className={`w-12 h-12 bg-gray-800 rounded flex items-center justify-center mb-2 border border-white/30 ${!isUnlocked ? 'grayscale opacity-30' : ''}`}>
                                     <FlaskConical size={24} style={{ color: potion.color }} />
                                 </div>
-                                <div className={`font-bold text-xs mb-1 truncate w-full ${isUnlocked ? 'text-white' : 'text-gray-600'}`}>{isUnlocked ? potion.name : '???'}</div>
+                                <div className={`font-bold text-xs mb-1 truncate w-full ${isUnlocked ? 'text-white' : 'text-gray-600'}`}>{isUnlocked ? trans(potion.name, languageMode) : '???'}</div>
                             </div>
                         );
                     })}
@@ -170,7 +171,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                                 <div className={`w-16 h-16 mb-2 bg-gray-900 rounded ${!isUnlocked ? 'brightness-0 opacity-20' : ''}`}>
                                     <PixelSprite seed={enemy.name} name={enemy.name} className="w-full h-full" size={16} />
                                 </div>
-                                <div className={`font-bold text-[10px] truncate w-full ${isUnlocked ? 'text-red-200' : 'text-gray-600'}`}>{isUnlocked ? enemy.name : '???'}</div>
+                                <div className={`font-bold text-[10px] truncate w-full ${isUnlocked ? 'text-red-200' : 'text-gray-600'}`}>{isUnlocked ? trans(enemy.name, languageMode) : '???'}</div>
                                 {!isUnlocked && <Lock size={16} className="absolute top-2 right-2 text-gray-600" />}
                             </div>
                         );
@@ -188,13 +189,13 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                     </button>
 
                     <h3 className={`text-2xl font-bold mb-4 ${selectedItem.unlocked ? 'text-amber-200' : 'text-gray-500'}`}>
-                        {selectedItem.unlocked ? selectedItem.data.name : '未発見'}
+                        {selectedItem.unlocked ? trans(selectedItem.data.name, languageMode) : trans('未発見', languageMode)}
                     </h3>
 
                     <div className="mb-6 flex items-center justify-center min-h-[100px]">
                         {selectedItem.type === 'CARD' && (
                             selectedItem.unlocked ? (
-                                <div className="scale-110"><Card card={selectedItem.data} onClick={() => {}} disabled={false} /></div>
+                                <div className="scale-110"><Card card={selectedItem.data} onClick={() => {}} disabled={false} languageMode={languageMode}/></div>
                             ) : <Lock size={64} className="text-gray-600"/>
                         )}
                         {selectedItem.type === 'RELIC' && (
@@ -216,12 +217,12 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                     <div className="bg-black/40 p-4 rounded border border-gray-600 w-full text-left">
                         {selectedItem.unlocked ? (
                             <>
-                                <p className="text-gray-300 text-sm leading-relaxed mb-2">{selectedItem.data.description}</p>
-                                {selectedItem.type === 'ENEMY' && <p className="text-red-400 text-xs mt-2 font-mono">危険度: Tier {selectedItem.data.tier}</p>}
-                                {selectedItem.type === 'RELIC' && <p className="text-yellow-600 text-xs mt-2 font-mono">レアリティ: {selectedItem.data.rarity}</p>}
+                                <p className="text-gray-300 text-sm leading-relaxed mb-2">{trans(selectedItem.data.description, languageMode)}</p>
+                                {selectedItem.type === 'ENEMY' && <p className="text-red-400 text-xs mt-2 font-mono">{trans("危険度", languageMode)}: Tier {selectedItem.data.tier}</p>}
+                                {selectedItem.type === 'RELIC' && <p className="text-yellow-600 text-xs mt-2 font-mono">{trans("レアリティ", languageMode)}: {selectedItem.data.rarity}</p>}
                             </>
                         ) : (
-                            <p className="text-gray-500 text-sm italic">このアイテムはまだ発見されていません。<br/>冒険を進めて解禁しましょう。</p>
+                            <p className="text-gray-500 text-sm italic">{trans("このアイテムはまだ発見されていません。", languageMode)}<br/>{trans("冒険を進めて解禁しましょう。", languageMode)}</p>
                         )}
                     </div>
                 </div>

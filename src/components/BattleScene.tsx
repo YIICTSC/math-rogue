@@ -1,12 +1,12 @@
 
 
-
 import React, { useEffect, useState, useRef } from 'react';
-import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType } from '../types';
+import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
 import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText } from 'lucide-react';
 import PixelSprite from './PixelSprite';
 import { audioService } from '../services/audioService';
+import { trans } from '../utils/textUtils';
 
 interface BattleSceneProps {
   player: Player;
@@ -24,6 +24,7 @@ interface BattleSceneProps {
   onHandSelection: (card: ICard) => void;
   onUsePotion: (potion: Potion) => void;
   combatLog: string[]; // New Prop
+  languageMode: LanguageMode;
 }
 
 const POWER_DEFINITIONS: Record<string, {name: string, desc: string}> = {
@@ -101,7 +102,7 @@ const FloatingTextOverlay: React.FC<{ data: FloatingText | null }> = ({ data }) 
 
 const BattleScene: React.FC<BattleSceneProps> = ({ 
   player, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
-  selectionState, onHandSelection, onUsePotion, combatLog
+  selectionState, onHandSelection, onUsePotion, combatLog, languageMode
 }) => {
   
   const playerHpPercent = (player.currentHp / player.maxHp) * 100;
@@ -231,9 +232,9 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         {selectionState.active && (
             <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/80 z-40 text-center py-2 px-6 border-b-2 border-yellow-500 animate-pulse rounded shadow-xl pointer-events-none">
                 <span className="text-yellow-400 font-bold text-sm">
-                    {selectionState.type === 'DISCARD' && `捨ててください (${selectionState.amount})`}
-                    {selectionState.type === 'COPY' && `コピーしてください (${selectionState.amount})`}
-                    {selectionState.type === 'EXHAUST' && `廃棄してください (${selectionState.amount})`}
+                    {selectionState.type === 'DISCARD' && `${trans("捨てる", languageMode)} (${selectionState.amount})`}
+                    {selectionState.type === 'COPY' && `コピー (${selectionState.amount})`}
+                    {selectionState.type === 'EXHAUST' && `${trans("廃棄", languageMode)} (${selectionState.amount})`}
                 </span>
             </div>
         )}
@@ -242,7 +243,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         {inspectedCard && (
             <div className="fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setInspectedCard(null)}>
                 <div className="scale-150 mb-8 transform transition-transform" onClick={(e) => e.stopPropagation()}>
-                     <Card card={inspectedCard} onClick={() => {}} disabled={false} />
+                     <Card card={inspectedCard} onClick={() => {}} disabled={false} languageMode={languageMode}/>
                 </div>
                 <div className="bg-gray-800 border-2 border-white p-6 rounded-lg max-w-sm w-full shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
                     <button onClick={() => setInspectedCard(null)} className="absolute top-2 right-2 text-gray-400 hover:text-white p-2">
@@ -251,7 +252,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     <h3 className="text-2xl font-bold text-yellow-400 mb-2 border-b border-gray-600 pb-2">{inspectedCard.name}</h3>
                     <div className="flex gap-2 mb-4 text-xs text-gray-400 font-mono">
                         <span className="bg-blue-900/50 px-2 py-1 rounded border border-blue-500/30">コスト: {inspectedCard.cost}</span>
-                        <span className="bg-purple-900/50 px-2 py-1 rounded border border-purple-500/30">タイプ: {inspectedCard.type}</span>
+                        <span className="bg-purple-900/50 px-2 py-1 rounded border border-purple-500/30">{trans(inspectedCard.type, languageMode)}</span>
                     </div>
                     <p className="text-lg text-white mb-6 leading-relaxed whitespace-pre-wrap font-bold bg-black/30 p-3 rounded">
                         {getProcessedDescription(inspectedCard)}
@@ -261,7 +262,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     <div className="space-y-2">
                         {getCardKeywords(inspectedCard).map((k, idx) => (
                             <div key={idx} className="flex flex-col text-left text-sm bg-gray-700/50 p-2 rounded">
-                                <span className="font-bold text-yellow-300 mb-0.5">{k.title}</span>
+                                <span className="font-bold text-yellow-300 mb-0.5">{trans(k.title, languageMode)}</span>
                                 <span className="text-gray-300 text-xs">{k.desc}</span>
                             </div>
                         ))}
@@ -276,7 +277,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 <div className="bg-black border-2 border-white p-4 rounded max-w-xs shadow-2xl animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
                     <h3 className="text-yellow-400 font-bold mb-2 text-lg border-b border-gray-600 pb-1">{tooltip.title}</h3>
                     <p className="text-white text-sm whitespace-pre-wrap">{tooltip.desc}</p>
-                    <button onClick={() => setTooltip(null)} className="mt-4 w-full bg-gray-700 hover:bg-gray-600 text-white text-xs py-2 rounded">閉じる</button>
+                    <button onClick={() => setTooltip(null)} className="mt-4 w-full bg-gray-700 hover:bg-gray-600 text-white text-xs py-2 rounded">{trans("閉じる", languageMode)}</button>
                 </div>
             </div>
         )}
@@ -297,13 +298,13 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             onClick={() => { onUsePotion(potionConfirmation); setPotionConfirmation(null); }} 
                             className="flex-1 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded font-bold border border-white transition-colors"
                         >
-                            使用する
+                            {trans("決定", languageMode)}
                         </button>
                         <button 
                             onClick={() => setPotionConfirmation(null)} 
                             className="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded border border-gray-500 transition-colors"
                         >
-                            やめる
+                            {trans("やめる", languageMode)}
                         </button>
                     </div>
                 </div>
@@ -326,7 +327,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         {/* Intent Bubble */}
                         <div 
                             className="absolute -top-6 left-1/2 -translate-x-1/2 z-30 bg-white text-black text-xs font-extrabold px-1.5 py-0.5 rounded border-2 border-red-600 animate-bounce whitespace-nowrap shadow-xl flex items-center justify-center min-w-[40px]"
-                            onClick={(e) => { e.stopPropagation(); showInfo("敵の行動", "敵の次の行動です。"); }}
+                            onClick={(e) => { e.stopPropagation(); showInfo(trans("敵", languageMode), "敵の次の行動です。"); }}
                         >
                             {/* Attack Intents */}
                             {(enemy.nextIntent.type === 'ATTACK' || enemy.nextIntent.type === 'ATTACK_DEBUFF' || enemy.nextIntent.type === 'ATTACK_DEFEND') && (
@@ -367,12 +368,12 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             {/* Status Icons */}
                             <div className="flex flex-wrap gap-0.5 justify-center min-h-[14px]">
                                 {enemy.vulnerable > 0 && (
-                                    <div className="flex items-center bg-pink-900/80 rounded px-0.5 border border-pink-500/50 cursor-pointer" onClick={(e)=>{e.stopPropagation(); showInfo("びくびく", "攻撃から受けるダメージが50%増加。");}}>
+                                    <div className="flex items-center bg-pink-900/80 rounded px-0.5 border border-pink-500/50 cursor-pointer" onClick={(e)=>{e.stopPropagation(); showInfo(trans("脆弱", languageMode), "攻撃から受けるダメージが50%増加。");}}>
                                         <AlertCircle size={8} className="text-pink-300"/> <span className="text-[8px] ml-0.5 font-bold">{enemy.vulnerable}</span>
                                     </div>
                                 )}
                                 {enemy.weak > 0 && (
-                                    <div className="flex items-center bg-gray-700/80 rounded px-0.5 border border-gray-500/50 cursor-pointer" onClick={(e)=>{e.stopPropagation(); showInfo("へろへろ", "攻撃で与えるダメージが25%減少。");}}>
+                                    <div className="flex items-center bg-gray-700/80 rounded px-0.5 border border-gray-500/50 cursor-pointer" onClick={(e)=>{e.stopPropagation(); showInfo(trans("弱体", languageMode), "攻撃で与えるダメージが25%減少。");}}>
                                         <TrendingDown size={8} className="text-gray-300"/> <span className="text-[8px] ml-0.5 font-bold">{enemy.weak}</span>
                                     </div>
                                 )}
@@ -398,7 +399,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             <div className="flex items-end relative">
                 
                 {/* Player Sprite */}
-                <div className={`w-20 h-20 md:w-24 md:h-24 relative transition-all duration-150 ease-out mr-2 ${getActionClass()}`} onClick={() => showInfo("勇者", "あなたのキャラクター。\nHPが0になるとゲームオーバー。")}>
+                <div className={`w-20 h-20 md:w-24 md:h-24 relative transition-all duration-150 ease-out mr-2 ${getActionClass()}`} onClick={() => showInfo(trans("自分", languageMode), "あなたのキャラクター。\nHPが0になるとゲームオーバー。")}>
                      <img 
                         src={player.imageData} 
                         alt="Hero" 
@@ -413,7 +414,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 <div className="bg-black/80 border-2 border-white p-1 text-white text-xs w-36 md:w-40 mb-2 shadow-lg rounded z-20">
                     <div className="flex items-center justify-between mb-1">
                         <span className="text-red-400 flex items-center font-bold" onClick={() => showInfo("HP", "ヒットポイント。0になると死亡する。")}><Heart size={12} className="mr-1"/> {player.currentHp}/{player.maxHp}</span>
-                        <span className="text-blue-400 flex items-center font-bold" onClick={() => showInfo("ブロック", "敵の攻撃ダメージを防ぐ。ターン終了時に消滅する。")}><Shield size={12} className="mr-1"/> {player.block}</span>
+                        <span className="text-blue-400 flex items-center font-bold" onClick={() => showInfo(trans("ブロック", languageMode), "敵の攻撃ダメージを防ぐ。ターン終了時に消滅する。")}><Shield size={12} className="mr-1"/> {player.block}</span>
                     </div>
                     <div className="w-full h-1.5 bg-gray-700 rounded-full border border-gray-500 overflow-hidden mb-1">
                         <div className="h-full bg-green-500 transition-all duration-500" style={{width: `${playerHpPercent}%`}}></div>
@@ -454,7 +455,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         {player.strength !== 0 && (
                             <span 
                                 className={`flex items-center ${player.strength > 0 ? 'text-red-400' : 'text-gray-400'} text-[9px] font-bold border border-gray-700 px-1 rounded bg-black cursor-pointer`}
-                                onClick={() => showInfo("ムキムキ", "攻撃カードのダメージを増加させる。")}
+                                onClick={() => showInfo(trans("筋力", languageMode), "攻撃カードのダメージを増加させる。")}
                             >
                                 <Sword size={8} className="mr-0.5"/> {player.strength}
                             </span>
@@ -492,8 +493,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                   <span className="text-lg font-bold">{player.currentEnergy}/{player.maxEnergy}</span>
               </div>
               <div className="text-[9px] text-gray-400 flex flex-col leading-tight">
-                  <span onClick={() => setShowDeck(true)} className="cursor-pointer hover:text-white flex items-center" title="山札 (残り)"><Layers size={10} className="mr-1"/> {player.drawPile.length}</span>
-                  <span className="flex items-center" onClick={() => showInfo("捨て札", "使用済みカード。山札が切れるとリシャッフルされる。")}><X size={10} className="mr-1"/> {player.discardPile.length}</span>
+                  <span onClick={() => setShowDeck(true)} className="cursor-pointer hover:text-white flex items-center" title={trans("山札", languageMode)}><Layers size={10} className="mr-1"/> {player.drawPile.length}</span>
+                  <span className="flex items-center" onClick={() => showInfo(trans("捨て札", languageMode), "使用済みカード。山札が切れるとリシャッフルされる。")}><X size={10} className="mr-1"/> {player.discardPile.length}</span>
               </div>
           </div>
 
@@ -506,7 +507,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 ${!actingEnemyId && !selectionState.active ? 'hover:bg-red-500 active:shadow-none active:translate-x-[2px] active:translate-y-[2px] cursor-pointer' : 'opacity-50 cursor-not-allowed grayscale'}
               `}
           >
-              {selectionState.active ? "選択中" : "ターン終了"}
+              {selectionState.active ? trans("選択", languageMode) : trans("ターン終了", languageMode)}
           </button>
       </div>
 
@@ -545,6 +546,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     ? false 
                                     : (player.currentEnergy < displayCard.cost || !!actingEnemyId || card.unplayable || specialDisabled)
                                 }
+                                languageMode={languageMode}
                             />
                         </div>
                     </div>
@@ -561,7 +563,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             <div className="bg-gray-800 border-4 border-white w-full max-w-md h-[80vh] flex flex-col relative shadow-2xl" onClick={e => e.stopPropagation()}>
                 <div className="bg-black border-b-2 border-gray-600 p-4 flex justify-between items-center">
                     <h2 className="text-white text-xl font-bold flex items-center">
-                        <Layers className="mr-2"/> 山札 (残り{player.drawPile.length}枚)
+                        <Layers className="mr-2"/> {trans("山札", languageMode)} ({trans("残り", languageMode)}{player.drawPile.length}{trans("枚", languageMode)})
                     </h2>
                     <button onClick={() => setShowDeck(false)} className="text-gray-400 hover:text-white p-1">
                         <X size={24} />
@@ -571,7 +573,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     <div className="grid grid-cols-3 gap-2 justify-items-center">
                         {sortedDrawPile.map((card) => (
                             <div key={card.id} className="scale-75 origin-top-left w-24 h-36">
-                                <Card card={card} onClick={() => {}} disabled={false} />
+                                <Card card={card} onClick={() => {}} disabled={false} languageMode={languageMode}/>
                             </div>
                         ))}
                     </div>

@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
-  CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode
+  CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode, LanguageMode
 } from './types';
 import { 
   INITIAL_HP, INITIAL_ENERGY, HAND_SIZE, 
@@ -35,7 +35,8 @@ import { generateFlavorText, generateEnemyName } from './services/geminiService'
 import { generateDungeonMap } from './services/mapGenerator';
 import { storageService } from './services/storageService';
 import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain } from 'lucide-react';
+import { trans } from './utils/textUtils';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages } from 'lucide-react';
 
 const calculateScore = (state: GameState, victory: boolean): number => {
     let score = 0;
@@ -189,6 +190,7 @@ const App: React.FC = () => {
     isEndless: false,
   });
 
+  const [languageMode, setLanguageMode] = useState<LanguageMode>('JAPANESE');
   const [currentNarrative, setCurrentNarrative] = useState<string>("...");
   const [turnLog, setTurnLog] = useState<string>("プレイヤーターン");
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -279,6 +281,11 @@ const App: React.FC = () => {
           setLogClickCount(0);
           audioService.playSound('select');
       }
+  };
+
+  const toggleLanguage = () => {
+      setLanguageMode(prev => prev === 'JAPANESE' ? 'HIRAGANA' : 'JAPANESE');
+      audioService.playSound('select');
   };
 
   const returnToTitle = () => {
@@ -960,7 +967,7 @@ const App: React.FC = () => {
             });
             setCurrentNarrative(flavor);
             audioService.playBGM(bgmType);
-            setTurnLog("あなたのターン");
+            setTurnLog(trans("あなたのターン", languageMode));
 
         } else if (node.type === NodeType.REST) {
             setGameState(prev => {
@@ -1525,7 +1532,7 @@ const App: React.FC = () => {
   };
 
   const startPlayerTurn = () => {
-    setTurnLog("あなたのターン");
+    setTurnLog(trans("あなたのターン", languageMode));
     setGameState(prev => {
       const p = { ...prev.player };
       
@@ -1668,7 +1675,7 @@ const App: React.FC = () => {
 
   const handleEndTurn = async (skipEnemies?: boolean) => {
     audioService.playSound('select');
-    setTurnLog("敵のターン...");
+    setTurnLog(trans("敵のターン", languageMode));
     setLastActionType(null);
     
     setGameState(prev => {
@@ -2115,6 +2122,17 @@ const App: React.FC = () => {
     <div className="w-full h-[100dvh] bg-black overflow-hidden">
         <div className="w-full h-full relative overflow-hidden bg-black crt-scanline">
             
+            {/* Language Toggle Button (Always visible on top right) */}
+            <div className="absolute top-2 right-2 z-[9999]">
+                 <button 
+                     onClick={toggleLanguage} 
+                     className="bg-black/50 hover:bg-black/80 text-white border border-white/50 px-2 py-1 rounded text-xs flex items-center shadow-lg transition-colors font-bold"
+                 >
+                     <Languages size={14} className="mr-1"/>
+                     {languageMode === 'JAPANESE' ? 'にほんご' : '日本語'}
+                 </button>
+            </div>
+
             {gameState.screen === GameScreen.START_MENU && (
                 <div className="w-full h-full bg-gray-900 flex items-center justify-center">
                     <div className="text-center p-8 w-full flex flex-col items-center">
@@ -2122,7 +2140,7 @@ const App: React.FC = () => {
                             className="text-5xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-b from-purple-400 to-blue-600 mb-2 font-bold animate-pulse tracking-widest leading-tight cursor-pointer select-none"
                             onClick={handleTitleClick}
                         >
-                            算数ローグ<br/><span className="text-4xl">伝説の小学生</span>
+                            {trans("算数ローグ", languageMode)}<br/><span className="text-4xl">{trans("伝説の小学生", languageMode)}</span>
                         </h1>
                         {isMathDebugSkipped && (
                             <div className="text-red-500 font-bold mb-1 text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse">
@@ -2140,36 +2158,36 @@ const App: React.FC = () => {
                             {hasSave && (
                                 <button onClick={continueGame} className="w-full bg-blue-900 text-white py-3 px-4 text-lg font-bold border-2 border-blue-400 hover:bg-blue-800 cursor-pointer flex items-center justify-center shadow-lg relative group overflow-hidden">
                                     <div className="absolute inset-0 bg-blue-600 opacity-0 group-hover:opacity-20 transition-opacity"></div>
-                                    <Play className="mr-2 fill-current" /> つづきから
+                                    <Play className="mr-2 fill-current" /> {trans("つづきから", languageMode)}
                                 </button>
                             )}
                             <button onClick={startGame} disabled={isLoading} className="w-full bg-gray-100 text-black py-3 px-4 text-lg font-bold border-b-4 border-r-4 border-gray-500 hover:bg-white hover:border-gray-400 hover:translate-x-[1px] hover:translate-y-[1px] active:border-0 active:translate-y-[4px] active:translate-x-[4px] transition-all cursor-pointer shadow-lg flex items-center justify-center">
-                                {isLoading ? "生成中..." : "冒険を始める"}
+                                {isLoading ? trans("生成中...", languageMode) : trans("冒険を始める", languageMode)}
                             </button>
                             
                             <button onClick={startChallengeGame} disabled={isLoading} className="w-full bg-red-900/80 text-red-100 py-2 px-4 text-sm font-bold border border-red-500 hover:bg-red-800 cursor-pointer flex items-center justify-center shadow-md hover:shadow-red-900/50">
-                                <Swords className="mr-2" size={16}/> 1A1Dモード
+                                <Swords className="mr-2" size={16}/> {trans("1A1Dモード", languageMode)}
                             </button>
 
                             <button onClick={openMiniGameMenu} className="w-full bg-indigo-900/80 text-indigo-100 py-2 px-4 text-sm font-bold border border-indigo-500 hover:bg-indigo-800 cursor-pointer flex items-center justify-center shadow-md hover:shadow-indigo-900/50">
-                                <Gamepad2 className="mr-2" size={16}/> ミニゲーム
+                                <Gamepad2 className="mr-2" size={16}/> {trans("ミニゲーム", languageMode)}
                             </button>
 
                             {isDebugHpOne && (
                                 <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.DEBUG_MENU }))} className="w-full bg-gray-800 text-red-400 py-2 px-4 text-sm font-bold border border-red-500 hover:bg-gray-700 cursor-pointer flex items-center justify-center shadow-md mb-2">
-                                    <Zap className="mr-2" size={16}/> デバッグメニュー
+                                    <Zap className="mr-2" size={16}/> {trans("デバッグメニュー", languageMode)}
                                 </button>
                             )}
 
                             <div className="flex gap-2 w-full justify-between mt-2">
                                 <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.COMPENDIUM }))} className="flex-1 bg-gray-800 text-amber-500 py-2 text-[10px] font-bold border border-gray-600 hover:border-amber-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
-                                    <BookOpen className="mb-1" size={18}/> 図鑑
+                                    <BookOpen className="mb-1" size={18}/> {trans("図鑑", languageMode)}
                                 </button>
                                 <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.RANKING }))} className="flex-1 bg-gray-800 text-green-500 py-2 text-[10px] font-bold border border-gray-600 hover:border-green-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
-                                    <Trophy className="mb-1" size={18}/> 記録
+                                    <Trophy className="mb-1" size={18}/> {trans("記録", languageMode)}
                                 </button>
                                 <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.HELP }))} className="flex-1 bg-gray-800 text-blue-400 py-2 text-[10px] font-bold border border-gray-600 hover:border-blue-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
-                                    <HelpCircle className="mb-1" size={18}/> 遊び方
+                                    <HelpCircle className="mb-1" size={18}/> {trans("遊び方", languageMode)}
                                 </button>
                             </div>
 
@@ -2195,6 +2213,7 @@ const App: React.FC = () => {
                                 <h3 className="text-white font-bold mb-1">■ アップデート (Update)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
                                     <li>新ミニゲーム「紙飛行機バトル」を追加しました。</li>
+                                    <li>日本語・にほんご切り替え機能を追加しました。</li>
                                 </ul>
                             </section>
                         </div>
@@ -2246,27 +2265,27 @@ const App: React.FC = () => {
                 <div className="w-full h-full bg-gray-900 flex flex-col items-center text-white p-4 overflow-y-auto custom-scrollbar">
                     {/* ... (Mode Selection UI) ... */}
                     <div className="w-full max-w-2xl flex flex-col items-center my-auto">
-                        <h2 className="text-3xl font-bold mb-2 text-yellow-400 mt-4">計算モード選択</h2>
+                        <h2 className="text-3xl font-bold mb-2 text-yellow-400 mt-4">{trans("計算モード選択", languageMode)}</h2>
                         {gameState.challengeMode === '1A1D' && <p className="text-red-400 mb-6 font-bold animate-pulse">※1A1Dチャレンジモード適用中</p>}
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
                             <button onClick={() => handleModeSelect(GameMode.ADDITION)} className="bg-red-900 border-2 border-red-500 p-4 md:p-6 rounded-xl hover:bg-red-800 flex flex-col items-center transition-transform hover:scale-105 active:scale-95 shadow-lg">
-                                <Plus size={40} className="mb-2"/> <span className="text-lg md:text-xl font-bold">たし算</span>
+                                <Plus size={40} className="mb-2"/> <span className="text-lg md:text-xl font-bold">{trans("たし算", languageMode)}</span>
                             </button>
                             <button onClick={() => handleModeSelect(GameMode.SUBTRACTION)} className="bg-blue-900 border-2 border-blue-500 p-4 md:p-6 rounded-xl hover:bg-blue-800 flex flex-col items-center transition-transform hover:scale-105 active:scale-95 shadow-lg">
-                                <Minus size={40} className="mb-2"/> <span className="text-lg md:text-xl font-bold">ひき算</span>
+                                <Minus size={40} className="mb-2"/> <span className="text-lg md:text-xl font-bold">{trans("ひき算", languageMode)}</span>
                             </button>
                             <button onClick={() => handleModeSelect(GameMode.MULTIPLICATION)} className="bg-green-900 border-2 border-green-500 p-4 md:p-6 rounded-xl hover:bg-green-800 flex flex-col items-center transition-transform hover:scale-105 active:scale-95 shadow-lg">
-                                <MultiplyIcon size={40} className="mb-2"/> <span className="text-lg md:text-xl font-bold">かけ算</span>
+                                <MultiplyIcon size={40} className="mb-2"/> <span className="text-lg md:text-xl font-bold">{trans("かけ算", languageMode)}</span>
                             </button>
                             <button onClick={() => handleModeSelect(GameMode.DIVISION)} className="bg-yellow-700 border-2 border-yellow-500 p-4 md:p-6 rounded-xl hover:bg-yellow-600 flex flex-col items-center transition-transform hover:scale-105 active:scale-95 shadow-lg">
-                                <Divide size={40} className="mb-2"/> <span className="text-lg md:text-xl font-bold">わり算</span>
+                                <Divide size={40} className="mb-2"/> <span className="text-lg md:text-xl font-bold">{trans("わり算", languageMode)}</span>
                             </button>
                             <button onClick={() => handleModeSelect(GameMode.MIXED)} className="bg-purple-900 border-2 border-purple-500 p-4 md:p-6 rounded-xl hover:bg-purple-800 flex flex-col items-center sm:col-span-2 transition-transform hover:scale-105 active:scale-95 shadow-lg">
-                                <Shuffle size={40} className="mb-2"/> <span className="text-lg md:text-xl font-bold">ミックス</span>
+                                <Shuffle size={40} className="mb-2"/> <span className="text-lg md:text-xl font-bold">{trans("ミックス", languageMode)}</span>
                             </button>
                         </div>
-                        <button onClick={returnToTitle} className="mt-8 text-gray-400 hover:text-white underline mb-8">戻る</button>
+                        <button onClick={returnToTitle} className="mt-8 text-gray-400 hover:text-white underline mb-8">{trans("戻る", languageMode)}</button>
                     </div>
                 </div>
             )}
@@ -2277,15 +2296,16 @@ const App: React.FC = () => {
                     unlockedCount={Math.min(CHARACTERS.length, clearCount + 2)} 
                     onSelect={handleCharacterSelect} 
                     challengeMode={gameState.challengeMode}
+                    languageMode={languageMode}
                 />
             )}
 
             {gameState.screen === GameScreen.RELIC_SELECTION && (
-                <RelicSelectionScreen relics={starterRelics} onSelect={handleRelicSelect} />
+                <RelicSelectionScreen relics={starterRelics} onSelect={handleRelicSelect} languageMode={languageMode} />
             )}
 
             {gameState.screen === GameScreen.COMPENDIUM && (
-                <CompendiumScreen unlockedCardNames={unlockedCardNames} onBack={returnToTitle} />
+                <CompendiumScreen unlockedCardNames={unlockedCardNames} onBack={returnToTitle} languageMode={languageMode} />
             )}
 
             {gameState.screen === GameScreen.RANKING && (
@@ -2297,13 +2317,13 @@ const App: React.FC = () => {
             )}
 
             {gameState.screen === GameScreen.MAP && (
-                <MapScreen nodes={gameState.map} currentNodeId={gameState.currentMapNodeId} onNodeSelect={handleNodeSelect} player={gameState.player} />
+                <MapScreen nodes={gameState.map} currentNodeId={gameState.currentMapNodeId} onNodeSelect={handleNodeSelect} player={gameState.player} languageMode={languageMode} />
             )}
 
             {gameState.screen === GameScreen.BATTLE && (
                 <BattleScene 
                     player={gameState.player} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onEndTurn={handleEndTurn} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={gameState.selectionState} onHandSelection={handleHandSelection}
-                    onUsePotion={handleUsePotion} combatLog={gameState.combatLog}
+                    onUsePotion={handleUsePotion} combatLog={gameState.combatLog} languageMode={languageMode}
                 />
             )}
 
@@ -2316,7 +2336,7 @@ const App: React.FC = () => {
             )}
 
             {gameState.screen === GameScreen.REWARD && (
-                <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading} currentPotions={gameState.player.potions} />
+                <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading} currentPotions={gameState.player.potions} languageMode={languageMode} />
             )}
 
             {gameState.screen === GameScreen.REST && (
@@ -2326,6 +2346,7 @@ const App: React.FC = () => {
                     onUpgrade={handleUpgradeCard} 
                     onSynthesize={handleSynthesizeCard}
                     onLeave={handleNodeComplete} 
+                    languageMode={languageMode}
                 />
             )}
 
@@ -2373,6 +2394,7 @@ const App: React.FC = () => {
                          setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - cost, deck: prev.player.deck.filter(c => c.id !== cardId) } }));
                     }}
                     onLeave={handleNodeComplete}
+                    languageMode={languageMode}
                 />
             )}
 
@@ -2426,7 +2448,7 @@ const App: React.FC = () => {
                  <div className="w-full h-full bg-green-900 flex items-center justify-center text-center text-white p-4">
                     <div className="max-w-xs w-full bg-black/60 p-8 border-4 border-yellow-500 rounded-xl shadow-2xl animate-in zoom-in duration-300">
                         <Trophy size={64} className="text-yellow-400 mx-auto mb-4 animate-bounce" />
-                        <h1 className="text-4xl mb-4 text-yellow-400 font-bold tracking-widest">勝利！</h1>
+                        <h1 className="text-4xl mb-4 text-yellow-400 font-bold tracking-widest">{trans("勝利", languageMode)}！</h1>
                         <p className="text-gray-300 mb-8 font-bold leading-relaxed">放課後の試練を一つ乗り越えた。<br/>次はボーナステストだ！</p>
                         <button 
                             onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.MATH_CHALLENGE }))} 
@@ -2450,7 +2472,7 @@ const App: React.FC = () => {
                                 <div className="flex flex-wrap justify-center gap-2 max-h-60 overflow-y-auto custom-scrollbar p-2 bg-black/30 rounded border border-red-700/50">
                                     {gameState.player.deck.map(card => (
                                         <div key={card.id} className="scale-75 cursor-pointer hover:scale-90 transition-transform" onClick={() => handleLegacyCardSelect(card)}>
-                                            <Card card={card} onClick={() => handleLegacyCardSelect(card)} disabled={false} />
+                                            <Card card={card} onClick={() => handleLegacyCardSelect(card)} disabled={false} languageMode={languageMode}/>
                                         </div>
                                     ))}
                                 </div>
@@ -2463,8 +2485,8 @@ const App: React.FC = () => {
                         )}
 
                         <div className="flex flex-col gap-4 items-center">
-                            <button onClick={handleRetry} className="bg-black border-2 border-white px-8 py-3 cursor-pointer w-64 hover:bg-gray-800 flex items-center justify-center"><RotateCcw className="mr-2" size={20} /> 再挑戦</button>
-                            <button onClick={returnToTitle} className="bg-gray-700 border-2 border-white px-8 py-3 cursor-pointer w-64 hover:bg-gray-600 flex items-center justify-center"><Home className="mr-2" size={20} /> タイトルへ戻る</button>
+                            <button onClick={handleRetry} className="bg-black border-2 border-white px-8 py-3 cursor-pointer w-64 hover:bg-gray-800 flex items-center justify-center"><RotateCcw className="mr-2" size={20} /> {trans("再挑戦", languageMode)}</button>
+                            <button onClick={returnToTitle} className="bg-gray-700 border-2 border-white px-8 py-3 cursor-pointer w-64 hover:bg-gray-600 flex items-center justify-center"><Home className="mr-2" size={20} /> {trans("タイトルへ戻る", languageMode)}</button>
                         </div>
                     </div>
                 </div>
@@ -2483,7 +2505,7 @@ const App: React.FC = () => {
                                 <div className="flex flex-wrap justify-center gap-2 max-h-60 overflow-y-auto custom-scrollbar p-2 bg-black/30 rounded border border-yellow-700/50">
                                     {gameState.player.deck.map(card => (
                                         <div key={card.id} className="scale-75 cursor-pointer hover:scale-90 transition-transform" onClick={() => handleLegacyCardSelect(card)}>
-                                            <Card card={card} onClick={() => handleLegacyCardSelect(card)} disabled={false} />
+                                            <Card card={card} onClick={() => handleLegacyCardSelect(card)} disabled={false} languageMode={languageMode}/>
                                         </div>
                                     ))}
                                 </div>
@@ -2500,7 +2522,7 @@ const App: React.FC = () => {
                                 <Infinity className="mr-2" /> エンドレスモードへ (Act {gameState.act + 1})
                             </button>
                             <button onClick={returnToTitle} className="bg-blue-600 border-2 border-white px-8 py-4 cursor-pointer text-xl hover:bg-blue-500 font-bold w-full max-w-sm shadow-lg transform transition-transform hover:scale-105 active:scale-95">
-                                伝説となる (タイトルへ)
+                                伝説となる ({trans("タイトルへ戻る", languageMode)})
                             </button>
                         </div>
                     </div>

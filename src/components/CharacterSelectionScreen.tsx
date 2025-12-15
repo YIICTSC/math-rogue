@@ -1,32 +1,34 @@
 
 import React from 'react';
-import { Character } from '../types';
+import { Character, LanguageMode } from '../types';
 import { Lock, Heart, Coins, Gem, ArrowRight } from 'lucide-react';
 import { RELIC_LIBRARY, CARDS_LIBRARY } from '../constants';
+import { trans } from '../utils/textUtils';
 
 interface CharacterSelectionScreenProps {
   characters: Character[];
   unlockedCount: number;
   onSelect: (character: Character) => void;
   challengeMode?: string;
+  languageMode: LanguageMode;
 }
 
-const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ characters, unlockedCount, onSelect, challengeMode }) => {
+const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ characters, unlockedCount, onSelect, challengeMode, languageMode }) => {
   return (
     <div className="flex flex-col h-full w-full bg-gray-900 text-white relative overflow-hidden">
       
       <div className="z-10 flex flex-col items-center justify-start h-full p-4 pt-8 overflow-y-auto custom-scrollbar">
         <div className="text-center mb-8 shrink-0">
             <h2 className="text-3xl md:text-4xl text-yellow-400 font-bold mb-2 flex items-center justify-center animate-pulse">
-             主人公選択
+             {trans("主人公選択", languageMode)}
             </h2>
             {challengeMode === '1A1D' ? (
                 <div className="bg-red-900/50 border border-red-500 p-2 rounded inline-block animate-in fade-in zoom-in duration-300">
-                    <p className="text-sm text-red-200 font-bold mb-1">【1A1Dモード】</p>
-                    <p className="text-xs text-red-100">初期レリックのみ所持。デッキはランダムなアタック1枚・スキル1枚でスタート。</p>
+                    <p className="text-sm text-red-200 font-bold mb-1">【1A1D{trans("モード", languageMode)}】</p>
+                    <p className="text-xs text-red-100">{trans("初期レリックのみ所持。デッキはランダムなアタック1枚・スキル1枚でスタート。", languageMode)}</p>
                 </div>
             ) : (
-                <p className="text-sm text-gray-400">冒険に挑むキャラクターを選んでください</p>
+                <p className="text-sm text-gray-400">{trans("冒険に挑むキャラクターを選んでください", languageMode)}</p>
             )}
         </div>
 
@@ -63,7 +65,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 z-20 rounded-lg">
                                 <Lock size={48} className="text-gray-400 mb-2" />
                                 <span className="text-gray-400 font-bold">LOCKED</span>
-                                <span className="text-xs text-gray-500 mt-1">クリア回数: {index}回で解放</span>
+                                <span className="text-xs text-gray-500 mt-1">{trans("クリア回数", languageMode)}: {index}{trans("回で解放", languageMode)}</span>
                             </div>
                         )}
 
@@ -77,7 +79,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                         </div>
 
                         <div className="w-full flex justify-between items-start mb-4 border-b border-white/20 pb-2">
-                            <h3 className="text-xl font-bold text-white truncate mr-2">{char.name}</h3>
+                            <h3 className="text-xl font-bold text-white truncate mr-2">{trans(char.name, languageMode)}</h3>
                             <div className="flex gap-2 text-xs shrink-0">
                                 <span className="flex items-center text-red-300"><Heart size={12} className="mr-1"/> {char.maxHp}</span>
                                 <span className="flex items-center text-yellow-300"><Coins size={12} className="mr-1"/> {char.gold}</span>
@@ -85,7 +87,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                         </div>
 
                         <p className="text-xs text-gray-300 mb-4 text-center h-12 leading-relaxed flex items-center justify-center">
-                            {char.description}
+                            {trans(char.description, languageMode)}
                         </p>
 
                         {/* Starting Relic */}
@@ -94,31 +96,31 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                                 <Gem size={20} className="text-yellow-200" />
                             </div>
                             <div className="text-left overflow-hidden">
-                                <div className="text-[10px] text-gray-400">初期レリック</div>
-                                <div className="font-bold text-sm text-yellow-100 truncate">{relic ? relic.name : '???'}</div>
+                                <div className="text-[10px] text-gray-400">{trans("初期レリック", languageMode)}</div>
+                                <div className="font-bold text-sm text-yellow-100 truncate">{relic ? trans(relic.name, languageMode) : '???'}</div>
                             </div>
                         </div>
 
                         {/* Deck Preview (Compact) */}
                         <div className="w-full bg-black/40 rounded p-2 mb-4">
                             <div className="text-[10px] text-gray-400 mb-1">
-                                {challengeMode === '1A1D' ? '初期デッキ (1A1D)' : '得意なカード'}
+                                {challengeMode === '1A1D' ? trans('初期デッキ (1A1D)', languageMode) : trans('得意なカード', languageMode)}
                             </div>
                             <div className="text-xs text-white leading-relaxed truncate">
                                 {challengeMode === '1A1D' ? (
-                                    <span className="text-red-300 font-bold">ランダムなアタック x1, スキル x1</span>
+                                    <span className="text-red-300 font-bold">{trans("ランダムなアタック x1, スキル x1", languageMode)}</span>
                                 ) : (
                                     Array.from(new Set(char.deckTemplate)).filter((id: string) => !['STRIKE','DEFEND'].includes(id)).map((cardId: string) => {
                                         const card = CARDS_LIBRARY[cardId];
-                                        return card ? card.name : '';
-                                    }).join(', ') || '基本カードのみ'
+                                        return card ? trans(card.name, languageMode) : '';
+                                    }).join(', ') || trans('基本カードのみ', languageMode)
                                 )}
                             </div>
                         </div>
 
                         {isUnlocked && (
                             <div className="mt-auto w-full bg-white/10 hover:bg-white/20 text-center py-2 rounded font-bold text-white flex items-center justify-center">
-                                選択 <ArrowRight size={16} className="ml-2" />
+                                {trans("選択", languageMode)} <ArrowRight size={16} className="ml-2" />
                             </div>
                         )}
                     </div>
