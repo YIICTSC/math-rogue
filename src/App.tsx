@@ -1061,7 +1061,10 @@ const App: React.FC = () => {
               p.hand = p.hand.filter(c => c.id !== card.id);
               if (mode.type === 'DISCARD') {
                  p.discardPile.push(card);
-                 if (p.powers['STRATEGIST']) p.currentEnergy += 2; 
+                 if (card.name === 'カンニングペーパー' || card.name === 'STRATEGIST') {
+                     p.currentEnergy += 2;
+                     p.floatingText = { id: `strat-${Date.now()}-${Math.random()}`, text: '+2 Energy', color: 'text-yellow-400', iconType: 'zap' };
+                 }
               } else if (mode.type === 'EXHAUST') {
                  if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
               }
@@ -1222,6 +1225,38 @@ const App: React.FC = () => {
               }
           }
           currentLogs.push(trans("発見！カードを3枚生成", languageMode));
+      }
+
+      // Calculated Gamble Logic
+      if (card.name === '山勘' || card.name === 'CALCULATED_GAMBLE') {
+          const cardsToDiscard = p.hand.filter(c => c.id !== card.id);
+          const count = cardsToDiscard.length;
+          
+          cardsToDiscard.forEach(c => {
+              p.discardPile.push(c);
+              // Strategist check
+              if (c.name === 'カンニングペーパー' || c.name === 'STRATEGIST') {
+                  p.currentEnergy += 2;
+                  currentLogs.push(`${trans("カンニングペーパー", languageMode)}: +2 Energy`);
+                  p.floatingText = { id: `strat-${Date.now()}-${Math.random()}`, text: '+2 Energy', color: 'text-yellow-400', iconType: 'zap' };
+              }
+          });
+          
+          p.hand = [];
+          
+          for (let i = 0; i < count; i++) {
+              if (p.drawPile.length === 0) {
+                  if (p.discardPile.length === 0) break;
+                  p.drawPile = shuffle(p.discardPile);
+                  p.discardPile = [];
+              }
+              const newCard = p.drawPile.pop();
+              if (newCard) {
+                  if (newCard.name === '虚無' || newCard.name === 'VOID') p.currentEnergy = Math.max(0, p.currentEnergy - 1);
+                  p.hand.push(newCard);
+              }
+          }
+          currentLogs.push(`${trans("手札を交換", languageMode)} (${count})`);
       }
 
       if (p.powers['AFTER_IMAGE']) p.block += p.powers['AFTER_IMAGE'];
