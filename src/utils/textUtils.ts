@@ -361,6 +361,7 @@ const DICTIONARY: Record<string, string> = {
   "腹痛": "ふくつう", "不安": "ふあん", "恥": "はじ", "悩み": "なやみ", "退屈": "たいくつ", 
   "骨折": "こっせつ", "寄生虫": "きせいちゅう", "虫歯": "むしば", "ドジ": "ドジ",
   "やほど": "やけど",
+  "手札のカードを1枚コピーする。": "てふだの カードを 1まい コピーする。",
 
   // Relics
   "給食の余り": "きゅうしょくの あまり",
@@ -464,7 +465,7 @@ const DICTIONARY: Record<string, string> = {
   "断る": "ことわる",
 };
 
-export const trans = (text: string, languageMode: LanguageMode): string => {
+export const trans = (text: string, languageMode: LanguageMode | string): string => {
   if (languageMode === 'JAPANESE') return text;
   if (!text) return text;
 

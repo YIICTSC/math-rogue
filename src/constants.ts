@@ -391,7 +391,7 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
   ACROBATICS: { name: '側転', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '3枚引く。1枚捨てる。', draw: 3, promptsDiscard: 1, rarity: 'COMMON', textureRef: 'SHOE|灰|SKILL' },
   BACKFLIP: { name: 'バック転', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック5。2枚引く。', block: 5, draw: 2, rarity: 'COMMON', textureRef: 'SHOE|灰|SKILL' },
   PREPARED: { name: '準備', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '1枚引く。1枚捨てる。', draw: 1, promptsDiscard: 1, rarity: 'COMMON', textureRef: 'NOTEBOOK|黄|SKILL' },
-  HOLOGRAM: { name: 'カンニング', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック3。手札に捨て札から1枚戻す。', block: 3, rarity: 'COMMON', textureRef: 'NOTEBOOK|青|SKILL' },
+  HOLOGRAM: { name: 'カンニング', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '手札のカードを1枚コピーする。', promptsCopy: 1, rarity: 'UNCOMMON', textureRef: 'NOTEBOOK|青|SKILL' },
   THIRD_EYE: { name: '予習', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック7。2枚ドロー。', block: 7, draw: 2, rarity: 'COMMON', textureRef: 'EYE|青|SKILL' },
   EMPTY_BODY: { name: '瞑想', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック10。', block: 10, rarity: 'COMMON', textureRef: 'HUMANOID|青|SKILL' },
   PROSTRATE: { name: '土下座', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック4。エネルギー1を得る。', block: 4, energy: 1, rarity: 'COMMON', textureRef: 'HUMANOID|黄|SKILL' },
@@ -485,7 +485,7 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
   STATIC_DISCHARGE: { name: '摩擦熱', cost: 1, type: CardType.POWER, target: TargetType.SELF, description: '被ダメ時、ランダムに5ダメ。', applyPower: { id: 'STATIC_DISCHARGE', amount: 1 }, rarity: 'RARE', textureRef: 'LIGHTNING|黄|POWER' },
   BUFFER: { name: '心の壁', cost: 2, type: CardType.POWER, target: TargetType.SELF, description: '次に受けるHPダメを0にする。', applyPower: { id: 'BUFFER', amount: 1 }, rarity: 'RARE', textureRef: 'SHIELD|青|POWER' },
   CREATIVE_AI: { name: '自由研究', cost: 3, type: CardType.POWER, target: TargetType.SELF, description: '毎ターンランダムなパワー生成。', applyPower: { id: 'CREATIVE_AI', amount: 1 }, rarity: 'LEGENDARY', textureRef: 'LIGHTNING|黄|POWER' },
-  DEVA_FORM: { name: '受験勉強', cost: 3, type: CardType.POWER, target: TargetType.SELF, description: 'ターン開始時、エネルギーを得る。毎ターン増加する。', applyPower: { id: 'DEVA_FORM', amount: 1 }, rarity: 'LEGENDARY', textureRef: 'FLAME|黄|POWER' },
+  DEVA_FORM: { name: '受験勉強', cost: 3, type: CardType.POWER, target: TargetType.SELF, description: 'ターン開始時、エネルギーを得る。毎ターン増加。', applyPower: { id: 'DEVA_FORM', amount: 1 }, rarity: 'LEGENDARY', textureRef: 'FLAME|黄|POWER' },
   MASTER_REALITY: { name: '模範解答', cost: 1, type: CardType.POWER, target: TargetType.SELF, description: 'カード生成時アップグレード。', applyPower: { id: 'MASTER_REALITY', amount: 1 }, rarity: 'RARE', textureRef: 'NOTEBOOK|白|POWER' },
   BERSERK: { name: '逆ギレ', cost: 0, type: CardType.POWER, target: TargetType.SELF, description: 'びくびく2を受け、エネルギー1を得る。', energy: 1, vulnerable: 2, rarity: 'RARE', textureRef: 'FLAME|赤|POWER' },
   INFINITE_BLADES: { name: '鉛筆削り', cost: 1, type: CardType.POWER, target: TargetType.SELF, description: '毎ターン手札にナイフを加える。', applyPower: { id: 'INFINITE_BLADES', amount: 1 }, rarity: 'UNCOMMON', textureRef: 'SWORD|灰|POWER' },
@@ -807,3 +807,11 @@ export const VOUCHERS_LIBRARY: PokerVoucher[] = [
     { id: 'V_PAINT_BRUSH', name: 'パレット', description: '手札の上限枚数 +1', price: 10, icon: 'NOTEBOOK|#a855f7' },
     { id: 'V_OVERSTOCK', name: '在庫処分', description: 'ショップの商品枠 +1', price: 10, icon: 'BACKPACK|#64748b' }
 ];
+
+// --- CARD WITH UPDATED EFFECT ---
+export const UPDATED_CARDS: Record<string, Omit<Card, 'id'>> = {
+  HOLOGRAM: { name: 'カンニング', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '手札のカードを1枚コピーする。', promptsCopy: 1, rarity: 'UNCOMMON', textureRef: 'NOTEBOOK|青|SKILL' },
+};
+
+// Merge Update
+Object.assign(CARDS_LIBRARY, UPDATED_CARDS);
