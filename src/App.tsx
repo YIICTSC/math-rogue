@@ -2112,8 +2112,8 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-[100dvh] bg-black flex items-center justify-center p-0 md:p-4 overflow-hidden">
-        <div className="w-full h-full md:max-w-4xl md:h-[600px] border-0 md:border-[10px] lg:border-[20px] border-gray-800 md:rounded-xl relative overflow-hidden shadow-2xl bg-black crt-scanline">
+    <div className="w-full h-[100dvh] bg-black overflow-hidden">
+        <div className="w-full h-full relative overflow-hidden bg-black crt-scanline">
             
             {gameState.screen === GameScreen.START_MENU && (
                 <div className="w-full h-full bg-gray-900 flex items-center justify-center">
