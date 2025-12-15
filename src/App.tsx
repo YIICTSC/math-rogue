@@ -364,7 +364,7 @@ const App: React.FC = () => {
           currentMapNodeId: null, 
           screen: GameScreen.MAP, 
           isEndless: true,
-          narrativeLog: [...prev.narrativeLog, "終わらない冒険が始まる..."]
+          narrativeLog: [...prev.narrativeLog, trans("終わらない冒険が始まる...", languageMode)]
       }));
   };
 
@@ -483,7 +483,7 @@ const App: React.FC = () => {
               cardsPlayedThisTurn: 0,
               echoes: 0,
           },
-          narrativeLog: ["冒険が始まった。"],
+          narrativeLog: [trans("冒険が始まった。", languageMode)],
           combatLog: [],
       }));
       audioService.playBGM('menu');
@@ -513,12 +513,12 @@ const App: React.FC = () => {
                           const pots = Object.values(POTION_LIBRARY);
                           const pot = { ...pots[Math.floor(Math.random() * pots.length)], id: `pot-${Date.now()}` };
                           setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - 20, potions: [...prev.player.potions, pot].slice(0, 3) } }));
-                          setEventResultLog(`怪しい薬(ポーション: ${pot.name})を手に入れた！\n残金: ${player.gold - 20}G`);
+                          setEventResultLog(trans(`怪しい薬(ポーション: ${pot.name})を手に入れた！\n残金: ${player.gold - 20}G`, languageMode));
                       } else {
-                          setEventResultLog("お金が足りなかった... 男は舌打ちをして去っていった。");
+                          setEventResultLog(trans("お金が足りなかった... 男は舌打ちをして去っていった。", languageMode));
                       }
                   }},
-                  { label: "無視", text: "何もせず立ち去る", action: () => { setEventResultLog("怪しい男を無視して先へ進んだ。"); } }
+                  { label: "無視", text: "何もせず立ち去る", action: () => { setEventResultLog(trans("怪しい男を無視して先へ進んだ。", languageMode)); } }
               ]
           },
           {
@@ -530,14 +530,14 @@ const App: React.FC = () => {
                       const target = deck[Math.floor(Math.random() * deck.length)];
                       if (target) {
                           setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...target, id: `copy-${Date.now()}` }] } }));
-                          setEventResultLog(`鏡の中の自分が何かを手渡してきた。\n「${target.name}」の複製を入手。`);
+                          setEventResultLog(trans(`鏡の中の自分が何かを手渡してきた。\n「${target.name}」の複製を入手。`, languageMode));
                       } else {
-                          setEventResultLog("何も起こらなかった。");
+                          setEventResultLog(trans("何も起こらなかった。", languageMode));
                       }
                   }},
                   { label: "割る", text: "鏡を叩き割る！", action: () => {
                       setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.INJURY, id: `evt-${Date.now()}` }] } }));
-                      setEventResultLog("破片が飛び散った！\n呪い「骨折」を入手。");
+                      setEventResultLog(trans("破片が飛び散った！\n呪い「骨折」を入手。", languageMode));
                   }}
               ]
           },
@@ -550,9 +550,9 @@ const App: React.FC = () => {
                       const books = [RELIC_LIBRARY.NECRONOMICON, RELIC_LIBRARY.ENCHIRIDION, RELIC_LIBRARY.NILRYS_CODEX];
                       const book = books[Math.floor(Math.random() * books.length)];
                       setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 10), relics: [...prev.player.relics, book] } }));
-                      setEventResultLog(`ページをめくると激痛が走った！(HP-10)\nレリック「${book.name}」を入手。`);
+                      setEventResultLog(trans(`ページをめくると激痛が走った！(HP-10)\nレリック「${book.name}」を入手。`, languageMode));
                   }},
-                  { label: "立ち去る", text: "危険を避ける", action: () => setEventResultLog("危険を避けて立ち去った。") }
+                  { label: "立ち去る", text: "危険を避ける", action: () => setEventResultLog(trans("危険を避けて立ち去った。", languageMode)) }
               ]
           },
           // 新規イベント 1: 給食の余り (Fried Bread War)
@@ -563,27 +563,27 @@ const App: React.FC = () => {
                   { label: "グー", text: "力強く出す！", action: () => {
                       if (Math.random() < 0.5) {
                           setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 5, currentHp: prev.player.currentHp + 5 } }));
-                          setEventResultLog("勝った！揚げパンをゲット！\n最大HPが5上がった。");
+                          setEventResultLog(trans("勝った！揚げパンをゲット！\n最大HPが5上がった。", languageMode));
                       } else {
-                          setEventResultLog("負けた... \n悲しみに包まれた。");
+                          setEventResultLog(trans("負けた... \n悲しみに包まれた。", languageMode));
                       }
                   }},
                   { label: "パー", text: "大きく広げる！", action: () => {
                       if (Math.random() < 0.5) {
                           setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 50 } }));
-                          setEventResultLog("勝った！譲ってあげたらお礼に50Gもらった。");
+                          setEventResultLog(trans("勝った！譲ってあげたらお礼に50Gもらった。", languageMode));
                       } else {
                           setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 5) } }));
-                          setEventResultLog("負けた上、指を突き指した。(HP-5)");
+                          setEventResultLog(trans("負けた上、指を突き指した。(HP-5)", languageMode));
                       }
                   }},
                   { label: "チョキ", text: "鋭く出す！", action: () => {
                       const potion = POTION_LIBRARY['STRENGTH_POTION'];
                       if (Math.random() < 0.5) {
                           setGameState(prev => ({ ...prev, player: { ...prev.player, potions: [...prev.player.potions, { ...potion, id: `pot-${Date.now()}` }].slice(0, 3) } }));
-                          setEventResultLog("勝った！揚げパンの代わりにプロテインをもらった。");
+                          setEventResultLog(trans("勝った！揚げパンの代わりにプロテインをもらった。", languageMode));
                       } else {
-                          setEventResultLog("負けた... みんな美味しそうに食べている。");
+                          setEventResultLog(trans("負けた... みんな美味しそうに食べている。", languageMode));
                       }
                   }}
               ]
@@ -595,19 +595,19 @@ const App: React.FC = () => {
               options: [
                   { label: "なでる", text: "優しく近づく", action: () => {
                       if (Math.random() < 0.7) {
-                          setEventResultLog("犬は嬉しそうに尻尾を振って去っていった。\n心が癒やされた。(HP全回復)");
+                          setEventResultLog(trans("犬は嬉しそうに尻尾を振って去っていった。\n心が癒やされた。(HP全回復)", languageMode));
                           setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: prev.player.maxHp } }));
                       } else {
-                          setEventResultLog("ガブッ！噛まれた！(HP-10)\n犬は走り去った。");
+                          setEventResultLog(trans("ガブッ！噛まれた！(HP-10)\n犬は走り去った。", languageMode));
                           setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 10) } }));
                       }
                   }},
                   { label: "餌をやる", text: "何かあげる", action: () => {
                       if (player.gold >= 30) {
                           setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - 30, relics: [...prev.player.relics, RELIC_LIBRARY.SPIRIT_POOP] } }));
-                          setEventResultLog("パンを買ってあげた(30G消費)。\nお礼に「犬のフン(レリック)」を置いていった...いらない。");
+                          setEventResultLog(trans("パンを買ってあげた(30G消費)。\nお礼に「犬のフン(レリック)」を置いていった...いらない。", languageMode));
                       } else {
-                          setEventResultLog("あげるものがなかった。\n犬は悲しそうな目で去っていった。");
+                          setEventResultLog(trans("あげるものがなかった。\n犬は悲しそうな目で去っていった。", languageMode));
                       }
                   }}
               ]
@@ -621,17 +621,17 @@ const App: React.FC = () => {
                       if (Math.random() < 0.5) {
                           const card = { ...CARDS_LIBRARY.DASH, id: `evt-dash-${Date.now()}` };
                           setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, card] } }));
-                          setEventResultLog("素晴らしい滑りだ！\n「ダッシュ」のカードを習得した。");
+                          setEventResultLog(trans("素晴らしい滑りだ！\n「ダッシュ」のカードを習得した。", languageMode));
                       } else {
                           setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.INJURY, id: `evt-${Date.now()}` }] } }));
-                          setEventResultLog("派手に転んだ！痛い！\n呪い「骨折」を入手。");
+                          setEventResultLog(trans("派手に転んだ！痛い！\n呪い「骨折」を入手。", languageMode));
                       }
                   }},
                   { label: "磨く", text: "真面目に磨く", action: () => {
                       const removeIndex = Math.floor(Math.random() * player.deck.length);
                       const removedCard = player.deck[removeIndex];
                       setGameState(prev => ({ ...prev, player: { ...prev.player, deck: prev.player.deck.filter((_, i) => i !== removeIndex) } }));
-                      setEventResultLog(`心を込めて磨いたら、心が洗われた。\nデッキから「${removedCard.name}」が取り除かれた。`);
+                      setEventResultLog(trans(`心を込めて磨いたら、心が洗われた。\nデッキから「${removedCard.name}」が取り除かれた。`, languageMode));
                   }}
               ]
           },
@@ -648,18 +648,18 @@ const App: React.FC = () => {
                           if (idx !== -1) {
                               deck[idx] = getUpgradedCard(deck[idx]);
                               setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
-                              setEventResultLog(`100点満点だ！\n「${deck[idx].name}」が強化された！`);
+                              setEventResultLog(trans(`100点満点だ！\n「${deck[idx].name}」が強化された！`, languageMode));
                           } else {
-                              setEventResultLog("100点だったが、これ以上学ぶことはないようだ。");
+                              setEventResultLog(trans("100点だったが、これ以上学ぶことはないようだ。", languageMode));
                           }
                       } else {
-                          setEventResultLog("名前を書き忘れていた！0点だ！\n精神的ダメージを受けた。(HP-5)");
+                          setEventResultLog(trans("名前を書き忘れていた！0点だ！\n精神的ダメージを受けた。(HP-5)", languageMode));
                           setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 5) } }));
                       }
                   }},
                   { label: "隠す", text: "カバンに隠す", action: () => {
                       setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.SHAME, id: `evt-${Date.now()}` }] } }));
-                      setEventResultLog("親に見つからないように隠した。\n呪い「恥」を入手。");
+                      setEventResultLog(trans("親に見つからないように隠した。\n呪い「恥」を入手。", languageMode));
                   }}
               ]
           },
@@ -671,15 +671,15 @@ const App: React.FC = () => {
                   { label: "歌う", text: "大熱唱する", action: () => {
                       if (Math.random() < 0.5) {
                           setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 4 } }));
-                          setEventResultLog("生徒たちに大ウケだ！人気者になった。\n最大HP+4。");
+                          setEventResultLog(trans("生徒たちに大ウケだ！人気者になった。\n最大HP+4。", languageMode));
                       } else {
                           setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.SHAME, id: `evt-${Date.now()}` }] } }));
-                          setEventResultLog("音痴すぎて笑い者になった。\n呪い「恥」を入手。");
+                          setEventResultLog(trans("音痴すぎて笑い者になった。\n呪い「恥」を入手。", languageMode));
                       }
                   }},
                   { label: "告白", text: "好きな人の名前を叫ぶ", action: () => {
                       setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.REGRET, id: `evt-${Date.now()}` }] } }));
-                      setEventResultLog("校長先生の名前を叫んでしまった。\n後悔の念に襲われる。呪い「後悔」を入手。");
+                      setEventResultLog(trans("校長先生の名前を叫んでしまった。\n後悔の念に襲われる。呪い「後悔」を入手。", languageMode));
                   }}
               ]
           },
@@ -691,14 +691,14 @@ const App: React.FC = () => {
                   { label: "あげる", text: "HPを少し分ける", action: () => {
                       const damage = Math.floor(player.maxHp * 0.3);
                       setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - damage), relics: [...prev.player.relics, RELIC_LIBRARY.BLOOD_VIAL] } }));
-                      setEventResultLog(`自分の血を分け与えた(HP-${damage})。\nお礼に「保健室の飴(レリック)」を貰った。`);
+                      setEventResultLog(trans(`自分の血を分け与えた(HP-${damage})。\nお礼に「保健室の飴(レリック)」を貰った。`, languageMode));
                   }},
                   { label: "逃げる", text: "ダッシュで逃げる", action: () => {
                       if (Math.random() < 0.5) {
-                          setEventResultLog("なんとか逃げ切った。怖かった...");
+                          setEventResultLog(trans("なんとか逃げ切った。怖かった...", languageMode));
                       } else {
                           setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.DOUBT, id: `evt-${Date.now()}` }] } }));
-                          setEventResultLog("背後から視線を感じる...\n呪い「不安」を入手。");
+                          setEventResultLog(trans("背後から視線を感じる...\n呪い「不安」を入手。", languageMode));
                       }
                   }}
               ]
@@ -711,12 +711,12 @@ const App: React.FC = () => {
                   { label: "寝る", text: "少し仮眠する", action: () => {
                       const heal = Math.floor(player.maxHp * 0.25);
                       setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + heal) } }));
-                      setEventResultLog(`ぐっすり眠れた。HPが${heal}回復した。\nよだれで本が少し濡れた。`);
+                      setEventResultLog(trans(`ぐっすり眠れた。HPが${heal}回復した。\nよだれで本が少し濡れた。`, languageMode));
                   }},
                   { label: "勉強", text: "必死に勉強する", action: () => {
                       const card = { ...CARDS_LIBRARY.SCRY, id: `evt-scry-${Date.now()}` };
                       setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, card] } }));
-                      setEventResultLog("集中して勉強した。\n「先読み」のカードを習得した。");
+                      setEventResultLog(trans("集中して勉強した。\n「先読み」のカードを習得した。", languageMode));
                   }}
               ]
           },
@@ -727,11 +727,11 @@ const App: React.FC = () => {
               options: [
                   { label: "耐える", text: "歯を食いしばる", action: () => {
                       setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 5, currentHp: Math.max(1, prev.player.currentHp - 5) } }));
-                      setEventResultLog("なんとか耐え抜いた！精神力が鍛えられた。\n最大HP+5, HP-5。");
+                      setEventResultLog(trans("なんとか耐え抜いた！精神力が鍛えられた。\n最大HP+5, HP-5。", languageMode));
                   }},
                   { label: "座る", text: "こっそり座る", action: () => {
                       setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.CLUMSINESS, id: `evt-${Date.now()}` }] } }));
-                      setEventResultLog("先生に見つかって怒られた。\n呪い「ドジ」を入手。");
+                      setEventResultLog(trans("先生に見つかって怒られた。\n呪い「ドジ」を入手。", languageMode));
                   }}
               ]
           },
@@ -745,9 +745,9 @@ const App: React.FC = () => {
                           const removeIndex = Math.floor(Math.random() * player.deck.length);
                           const removedCard = player.deck[removeIndex];
                           setGameState(prev => ({ ...prev, player: { ...prev.player, deck: prev.player.deck.filter((_, i) => i !== removeIndex) } }));
-                          setEventResultLog(`教科書(カード: ${removedCard.name})を机の中に隠した。\n体が軽くなった！`);
+                          setEventResultLog(trans(`教科書(カード: ${removedCard.name})を机の中に隠した。\n体が軽くなった！`, languageMode));
                       } else {
-                          setEventResultLog("置く教科書がなかった。");
+                          setEventResultLog(trans("置く教科書がなかった。", languageMode));
                       }
                   }},
                   { label: "持つ", text: "真面目に持ち帰る", action: () => {
@@ -755,7 +755,7 @@ const App: React.FC = () => {
                       // Let's add a card instead.
                       const card = { ...CARDS_LIBRARY.HEADBUTT, id: `evt-head-${Date.now()}` };
                       setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, card] } }));
-                      setEventResultLog("重いカバンで足腰が鍛えられた。\n「頭突き」を習得した。");
+                      setEventResultLog(trans("重いカバンで足腰が鍛えられた。\n「頭突き」を習得した。", languageMode));
                   }}
               ]
           },
@@ -768,14 +768,14 @@ const App: React.FC = () => {
                       if (Math.random() < 0.5) {
                           const rareCard = Object.values(CARDS_LIBRARY).filter(c => c.rarity === 'RARE')[0]; // Simplify
                           setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...rareCard, id: `love-${Date.now()}` }] } }));
-                          setEventResultLog(`なんと！欲しかったレアカード「${rareCard.name}」をもらえた！\nこれは愛の告白...？`);
+                          setEventResultLog(trans(`なんと！欲しかったレアカード「${rareCard.name}」をもらえた！\nこれは愛の告白...？`, languageMode));
                       } else {
                           setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.PAIN, id: `evt-${Date.now()}` }] } }));
-                          setEventResultLog("誰もいなかった... イタズラだったようだ。\n胸が痛む。呪い「腹痛」を入手。");
+                          setEventResultLog(trans("誰もいなかった... イタズラだったようだ。\n胸が痛む。呪い「腹痛」を入手。", languageMode));
                       }
                   }},
                   { label: "無視", text: "興味ない", action: () => {
-                      setEventResultLog("恋愛より冒険だ。\n通り過ぎた。");
+                      setEventResultLog(trans("恋愛より冒険だ。\n通り過ぎた。", languageMode));
                   }}
               ]
           },
@@ -787,13 +787,13 @@ const App: React.FC = () => {
                   { label: "探る", text: "手を突っ込む", action: () => {
                       if (Math.random() < 0.6) {
                           setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 80 } }));
-                          setEventResultLog("ラッキー！誰かのへそくり80Gを見つけた！");
+                          setEventResultLog(trans("ラッキー！誰かのへそくり80Gを見つけた！", languageMode));
                       } else {
                           setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...STATUS_CARDS.SLIMED, id: `evt-${Date.now()}` }] } }));
-                          setEventResultLog("うわっ！腐ったバナナを掴んでしまった。\n「鼻水(粘液)」カードがデッキに入った。");
+                          setEventResultLog(trans("うわっ！腐ったバナナを掴んでしまった。\n「鼻水(粘液)」カードがデッキに入った。", languageMode));
                       }
                   }},
-                  { label: "放置", text: "見なかったことにする", action: () => setEventResultLog("賢明な判断だ。") }
+                  { label: "放置", text: "見なかったことにする", action: () => setEventResultLog(trans("賢明な判断だ。", languageMode)) }
               ]
           },
           // 新規イベント 12: 謎の転校生 (Mystery Transfer Student)        
@@ -811,9 +811,9 @@ const App: React.FC = () => {
                       newDeck.splice(removeIdx, 1, { ...newCard, id: `trade-${Date.now()}` });
                       
                       setGameState(prev => ({ ...prev, player: { ...prev.player, deck: newDeck } }));
-                      setEventResultLog(`「${removed.name}」を渡して、「${newCard.name}」をもらった！\n転校生はニヤリと笑った。`);
+                      setEventResultLog(trans(`「${removed.name}」を渡して、「${newCard.name}」をもらった！\n転校生はニヤリと笑った。`, languageMode));
                   }},
-                  { label: "断る", text: "自分のカードが大事", action: () => setEventResultLog("断った。転校生はつまらなそうに去った。") }
+                  { label: "断る", text: "自分のカードが大事", action: () => setEventResultLog(trans("断った。転校生はつまらなそうに去った。", languageMode)) }
               ]
           }
       ];
@@ -1085,7 +1085,7 @@ const App: React.FC = () => {
       setGameState(prev => {
           const p = { ...prev.player };
           const enemies = [...prev.enemies];
-          const newLogs = [`ポーション使用: ${trans(potion.name, languageMode)}`];
+          const newLogs = [`${trans("ポーション使用", languageMode)}: ${trans(potion.name, languageMode)}`];
           
           p.potions = p.potions.filter(pt => pt.id !== potion.id);
           const target = enemies.find(e => e.id === prev.selectedEnemyId) || enemies[0];
@@ -1093,36 +1093,36 @@ const App: React.FC = () => {
           if (p.relics.find(r => r.id === 'TAKETOMBO')) {
               p.currentHp = Math.min(p.maxHp, p.currentHp + 5);
               p.floatingText = { id: `heal-taketombo-${Date.now()}`, text: `+5`, color: 'text-green-500', iconType: 'heart' };
-              newLogs.push("竹とんぼでHP5回復");
+              newLogs.push(trans("竹とんぼでHP5回復", languageMode));
           }
 
           if (potion.templateId === 'FIRE_POTION' && target) {
               target.currentHp -= 20;
               target.floatingText = { id: `dmg-${Date.now()}`, text: '20', color: 'text-red-500', iconType: 'sword' };
-              newLogs.push(`${target.name}に20ダメージ`);
+              newLogs.push(`${trans(target.name, languageMode)}に20${trans("ダメージ", languageMode)}`);
           } else if (potion.templateId === 'BLOCK_POTION') {
               p.block += 12;
-              newLogs.push("ブロック12を獲得");
+              newLogs.push(`${trans("ブロック", languageMode)}12を${trans("獲得", languageMode)}`);
           } else if (potion.templateId === 'STRENGTH_POTION') {
               p.strength += 2;
-              newLogs.push("ムキムキ+2");
+              newLogs.push(`${trans("ムキムキ", languageMode)}+2`);
           } else if (potion.templateId === 'ENERGY_POTION') {
               p.currentEnergy += 2;
-              newLogs.push("エネルギー+2");
+              newLogs.push(`${trans("エネルギー", languageMode)}+2`);
           } else if (potion.templateId === 'WEAK_POTION' && target) {
               applyDebuff(target, 'WEAK', 3);
-              newLogs.push(`${target.name}にへろへろ3を付与`);
+              newLogs.push(`${trans(target.name, languageMode)}に${trans("へろへろ", languageMode)}3を${trans("付与", languageMode)}`);
           } else if (potion.templateId === 'POISON_POTION' && target) {
               applyDebuff(target, 'POISON', 6);
-              newLogs.push(`${target.name}にドクドク6を付与`);
+              newLogs.push(`${trans(target.name, languageMode)}に${trans("ドクドク", languageMode)}6を${trans("付与", languageMode)}`);
           } else if (potion.templateId === 'HEALTH_POTION') {
               const heal = 15;
               p.currentHp = Math.min(p.maxHp, p.currentHp + heal);
               p.floatingText = { id: `heal-${Date.now()}`, text: `+${heal}`, color: 'text-green-500', iconType: 'heart' };
-              newLogs.push(`HP${heal}回復`);
+              newLogs.push(`HP${heal}${trans("回復", languageMode)}`);
           } else if (potion.templateId === 'LIQUID_BRONZE') {
               p.powers['THORNS'] = (p.powers['THORNS'] || 0) + 3;
-              newLogs.push("トゲトゲ+3");
+              newLogs.push(`${trans("トゲトゲ", languageMode)}+3`);
           } else if (potion.templateId === 'GAMBLERS_BREW') {
               const discardCount = p.hand.length;
               p.discardPile = [...p.discardPile, ...p.hand];
@@ -1136,7 +1136,7 @@ const App: React.FC = () => {
                   const c = p.drawPile.pop();
                   if (c) p.hand.push(c);
               }
-              newLogs.push("手札を交換");
+              newLogs.push(trans("手札を交換", languageMode));
           } else if (potion.templateId === 'ENTROPIC_BREW') {
               for (let i = 0; i < 3; i++) {
                   if (p.potions.length < 3) {
@@ -1145,7 +1145,7 @@ const App: React.FC = () => {
                       p.potions.push(randomPot);
                   }
               }
-              newLogs.push("闇鍋ジュースでポーション充填");
+              newLogs.push(trans("闇鍋ジュースでポーション充填", languageMode));
           }
 
           const remainingEnemies = enemies.filter(e => e.currentHp > 0);
@@ -1184,7 +1184,7 @@ const App: React.FC = () => {
     setGameState(prev => {
       const p = { ...prev.player, hand: [...prev.player.hand], drawPile: [...prev.player.drawPile], discardPile: [...prev.player.discardPile], deck: [...prev.player.deck], powers: { ...prev.player.powers } };
       let enemies = prev.enemies.map(e => ({ ...e }));
-      const currentLogs: string[] = [`> ${trans(card.name, languageMode)} を使用`];
+      const currentLogs: string[] = [`> ${trans(card.name, languageMode)} ${trans("を使用", languageMode)}`];
       
       p.currentEnergy -= card.cost;
       p.cardsPlayedThisTurn++;
@@ -1200,9 +1200,9 @@ const App: React.FC = () => {
               p.typesPlayedThisTurn.includes(CardType.SKILL) && 
               p.typesPlayedThisTurn.includes(CardType.POWER)) {
               
-              if (p.powers['WEAK'] > 0) { p.powers['WEAK'] = 0; currentLogs.push("へろへろ解除！"); }
-              if (p.powers['VULNERABLE'] > 0) { p.powers['VULNERABLE'] = 0; currentLogs.push("びくびく解除！"); }
-              if (p.powers['FRAIL'] > 0) { p.powers['FRAIL'] = 0; currentLogs.push("もろい解除！"); } 
+              if (p.powers['WEAK'] > 0) { p.powers['WEAK'] = 0; currentLogs.push(trans("へろへろ解除！", languageMode)); }
+              if (p.powers['VULNERABLE'] > 0) { p.powers['VULNERABLE'] = 0; currentLogs.push(trans("びくびく解除！", languageMode)); }
+              if (p.powers['FRAIL'] > 0) { p.powers['FRAIL'] = 0; currentLogs.push(trans("もろい解除！", languageMode)); } 
               
               p.typesPlayedThisTurn = []; 
               p.floatingText = { id: `pellets-${Date.now()}`, text: 'デバフ解除', color: 'text-white', iconType: 'shield' };
@@ -1221,7 +1221,7 @@ const App: React.FC = () => {
                   p.discardPile.push(newCard);
               }
           }
-          currentLogs.push("発見！カードを3枚生成");
+          currentLogs.push(trans("発見！カードを3枚生成", languageMode));
       }
 
       if (p.powers['AFTER_IMAGE']) p.block += p.powers['AFTER_IMAGE'];
@@ -1234,12 +1234,12 @@ const App: React.FC = () => {
 
       // Activations Loop
       let activations = 1;
-      if (p.echoes > 0) { activations++; p.echoes--; currentLogs.push("反響で再発動！"); }
-      if (card.type === CardType.SKILL && p.powers['BURST'] > 0) { activations++; p.powers['BURST']--; currentLogs.push("バーストで再発動！"); }
+      if (p.echoes > 0) { activations++; p.echoes--; currentLogs.push(trans("反響で再発動！", languageMode)); }
+      if (card.type === CardType.SKILL && p.powers['BURST'] > 0) { activations++; p.powers['BURST']--; currentLogs.push(trans("バーストで再発動！", languageMode)); }
       if (card.type === CardType.ATTACK && p.relics.find(r => r.id === 'NECRONOMICON') && card.cost >= 2 && !p.turnFlags['NECRONOMICON_USED']) {
           activations++;
           p.turnFlags['NECRONOMICON_USED'] = true;
-          currentLogs.push("ネクロノミコンで再発動！");
+          currentLogs.push(trans("ネクロノミコンで再発動！", languageMode));
       }
 
       for (let act = 0; act < activations; act++) {
@@ -1276,7 +1276,7 @@ const App: React.FC = () => {
                     if (p.strength !== 0) {
                         const bonus = p.strength * (card.strengthScaling || 1);
                         baseDamage += bonus;
-                        logParts.push(`${bonus >= 0 ? '+' : ''}${bonus}(ムキムキ)`);
+                        logParts.push(`${bonus >= 0 ? '+' : ''}${bonus}(${trans("ムキムキ", languageMode)})`);
                     }
 
                     // Pen Nib Logic
@@ -1295,12 +1295,12 @@ const App: React.FC = () => {
 
                     if (p.powers['WEAK'] > 0) {
                         damage = Math.floor(damage * 0.75);
-                        logParts.push(`x0.75(へろへろ)`);
+                        logParts.push(`x0.75(${trans("へろへろ", languageMode)})`);
                     }
 
                     if (e.vulnerable > 0) {
                         damage = Math.floor(damage * 1.5);
-                        logParts.push(`x1.5(びくびく)`);
+                        logParts.push(`x1.5(${trans("びくびく", languageMode)})`);
                     }
 
                     if (p.powers['ENVENOM']) applyDebuff(e, 'POISON', p.powers['ENVENOM']);
@@ -1312,7 +1312,7 @@ const App: React.FC = () => {
                     if (damage > 0 || logParts.length > 1) {
                         e.floatingText = { id: `dmg-${Date.now()}-${e.id}-${h}`, text: `${damage}`, color: 'text-white', iconType: 'sword' };
                         const formula = logParts.length > 1 ? `(${logParts.join(' ')}) = ` : '';
-                        currentLogs.push(`${e.name}に${formula}${damage}ダメージ`);
+                        currentLogs.push(`${trans(e.name, languageMode)}に${formula}${damage}${trans("ダメージ", languageMode)}`);
                     }
 
                     if (card.lifesteal && damage > 0) {
@@ -1320,7 +1320,7 @@ const App: React.FC = () => {
                     }
                     
                     if (e.currentHp <= 0) {
-                         currentLogs.push(`${e.name}を倒した！`);
+                         currentLogs.push(`${trans(e.name, languageMode)}${trans("を倒した！", languageMode)}`);
                          if (card.fatalEnergy) p.currentEnergy += card.fatalEnergy;
                          if (card.fatalPermanentDamage) {
                              const deckCard = p.deck.find(c => c.id === card.id);
@@ -1332,7 +1332,7 @@ const App: React.FC = () => {
                                  if (other.id !== e.id) {
                                      other.currentHp -= e.maxHp; 
                                      other.floatingText = { id: `expl-${Date.now()}`, text: `${e.maxHp}`, color: 'text-green-400' };
-                                     currentLogs.push(`死体爆破: ${other.name}に${e.maxHp}ダメージ`);
+                                     currentLogs.push(`${trans("死体爆破", languageMode)}: ${trans(other.name, languageMode)}に${e.maxHp}${trans("ダメージ", languageMode)}`);
                                  }
                              });
                          }
@@ -1345,7 +1345,7 @@ const App: React.FC = () => {
                                  target: TargetType.ENEMY,
                                  cost: 1,
                                  damage: damageVal,
-                                 description: `${damageVal}ダメージ。廃棄。`,
+                                 description: `${damageVal}${trans("ダメージ", languageMode)}。${trans("廃棄", languageMode)}。`,
                                  rarity: 'SPECIAL',
                                  textureRef: e.name, 
                                  exhaust: true
@@ -1353,7 +1353,7 @@ const App: React.FC = () => {
                              p.deck.push(captured);
                              p.discardPile.push(captured);
                              e.floatingText = { id: `cap-${Date.now()}`, text: 'GET!', color: 'text-yellow-400' };
-                             currentLogs.push(`${e.name}を捕獲した！`);
+                             currentLogs.push(`${trans(e.name, languageMode)}を${trans("捕獲した！", languageMode)}`);
                          }
                     }
                 });
@@ -1366,28 +1366,28 @@ const App: React.FC = () => {
                   
                   if (p.powers['DEXTERITY']) {
                       blk += p.powers['DEXTERITY'];
-                      logParts.push(`${p.powers['DEXTERITY'] >= 0 ? '+' : ''}${p.powers['DEXTERITY']}(カチカチ)`);
+                      logParts.push(`${p.powers['DEXTERITY'] >= 0 ? '+' : ''}${p.powers['DEXTERITY']}(${trans("カチカチ", languageMode)})`);
                   }
                   if (p.powers['FRAIL'] > 0) { 
                       blk = Math.floor(blk * 0.75);
-                      logParts.push(`x0.75(もろい)`);
+                      logParts.push(`x0.75(${trans("もろい", languageMode)})`);
                   }
                   
                   p.block += blk;
                   const formula = logParts.length > 1 ? `(${logParts.join(' ')}) = ` : '';
-                  currentLogs.push(`ブロック${formula}${blk}を獲得`);
+                  currentLogs.push(`${trans("ブロック", languageMode)}${formula}${blk}を${trans("獲得", languageMode)}`);
               }
               if (card.doubleBlock) p.block *= 2;
               if (card.heal) p.currentHp = Math.min(p.currentHp + card.heal, p.maxHp);
               if (card.energy) p.currentEnergy += card.energy;
               if (card.selfDamage) { 
                   p.currentHp -= card.selfDamage; 
-                  currentLogs.push(`自分に${card.selfDamage}ダメージ`);
+                  currentLogs.push(`${trans("自分に", languageMode)}${card.selfDamage}${trans("ダメージ", languageMode)}`);
                   if (p.powers['RUPTURE']) p.strength += p.powers['RUPTURE']; 
               }
               if (card.strength) {
                   p.strength += card.strength;
-                  currentLogs.push(`ムキムキ+${card.strength}`);
+                  currentLogs.push(`${trans("ムキムキ", languageMode)}+${card.strength}`);
               }
               if (card.vulnerable) targets.forEach(e => applyDebuff(e, 'VULNERABLE', card.vulnerable!));
               if (card.weak) targets.forEach(e => applyDebuff(e, 'WEAK', card.weak!));
@@ -1395,28 +1395,28 @@ const App: React.FC = () => {
                   let amt = card.poison;
                   if (p.relics.find(r => r.id === 'SNAKE_SKULL')) amt += 1; 
                   targets.forEach(e => applyDebuff(e, 'POISON', amt));
-                  currentLogs.push(`ドクドク${amt}を付与`);
+                  currentLogs.push(`${trans("ドクドク", languageMode)}${amt}${trans("を付与", languageMode)}`);
               }
               
               if (card.poisonMultiplier && targets.length > 0) {
                   targets.forEach(e => {
                       if (e.poison > 0) {
                           e.poison *= card.poisonMultiplier!;
-                          currentLogs.push(`${e.name}の毒が${card.poisonMultiplier}倍になった！`);
+                          currentLogs.push(`${trans(e.name, languageMode)}の${trans("毒", languageMode)}が${card.poisonMultiplier}倍になった！`);
                       }
                   });
               }
               
               if (card.upgradeHand) {
                   p.hand = p.hand.map(c => getUpgradedCard(c));
-                  currentLogs.push("手札を強化");
+                  currentLogs.push(trans("手札を強化", languageMode));
               }
               if (card.upgradeDeck) {
                   p.hand = p.hand.map(c => getUpgradedCard(c));
                   p.drawPile = p.drawPile.map(c => getUpgradedCard(c));
                   p.discardPile = p.discardPile.map(c => getUpgradedCard(c));
                   p.deck = p.deck.map(c => getUpgradedCard(c));
-                  currentLogs.push("デッキ全体を強化");
+                  currentLogs.push(trans("デッキ全体を強化", languageMode));
               }
               if (card.doubleStrength) p.strength *= 2;
               if (card.shuffleHandToDraw) { p.drawPile = shuffle([...p.drawPile, ...p.hand]); p.hand = []; }
@@ -1424,7 +1424,7 @@ const App: React.FC = () => {
                   p.powers[card.applyPower.id] = (p.powers[card.applyPower.id] || 0) + card.applyPower.amount;
                   if (card.applyPower.id === 'CORPSE_EXPLOSION' && targets.length > 0) {
                       targets.forEach(e => e.corpseExplosion = true);
-                      currentLogs.push("死体爆破を付与");
+                      currentLogs.push(trans("死体爆破を付与", languageMode));
                   }
               }
               if (card.draw) {
@@ -1473,10 +1473,10 @@ const App: React.FC = () => {
                   targets.forEach(e => {
                       if (e.currentHp <= threshold) {
                           e.currentHp = 0;
-                          currentLogs.push(`${e.name}は退学になった！`);
+                          currentLogs.push(`${trans(e.name, languageMode)}は${trans("退学", languageMode)}になった！`);
                           e.floatingText = { id: `kill-${Date.now()}`, text: '退学!', color: 'text-red-600', iconType: 'skull' };
                       } else {
-                          currentLogs.push(`${e.name}は退学を免れた`);
+                          currentLogs.push(`${trans(e.name, languageMode)}は${trans("退学", languageMode)}を免れた`);
                       }
                   });
               }
@@ -1484,8 +1484,8 @@ const App: React.FC = () => {
               if (card.type === CardType.ATTACK) {
                   p.relicCounters['ATTACK_COUNT'] = (p.relicCounters['ATTACK_COUNT'] || 0) + 1;
                   if (p.relicCounters['ATTACK_COUNT'] % 3 === 0) {
-                      if (p.relics.find(r => r.id === 'KUNAI')) { p.powers['DEXTERITY'] = (p.powers['DEXTERITY'] || 0) + 1; p.floatingText = { id: `kunai-${Date.now()}`, text: 'カチカチ+1', color: 'text-blue-400', iconType: 'shield' }; }
-                      if (p.relics.find(r => r.id === 'SHURIKEN')) { p.strength += 1; p.floatingText = { id: `shuri-${Date.now()}`, text: 'ムキムキ+1', color: 'text-red-400', iconType: 'sword' }; }
+                      if (p.relics.find(r => r.id === 'KUNAI')) { p.powers['DEXTERITY'] = (p.powers['DEXTERITY'] || 0) + 1; p.floatingText = { id: `kunai-${Date.now()}`, text: `${trans("カチカチ", languageMode)}+1`, color: 'text-blue-400', iconType: 'shield' }; }
+                      if (p.relics.find(r => r.id === 'SHURIKEN')) { p.strength += 1; p.floatingText = { id: `shuri-${Date.now()}`, text: `${trans("ムキムキ", languageMode)}+1`, color: 'text-red-400', iconType: 'sword' }; }
                       if (p.relics.find(r => r.id === 'ORNAMENTAL_FAN')) { p.block += 4; p.floatingText = { id: `fan-${Date.now()}`, text: '+4 Block', color: 'text-blue-400', iconType: 'shield' }; }
                   }
               }
@@ -1689,11 +1689,11 @@ const App: React.FC = () => {
 
         if (p.powers['WEAK'] > 0) {
             p.powers['WEAK']--;
-            if (p.powers['WEAK'] === 0) newLogs.push("へろへろから回復した");
+            if (p.powers['WEAK'] === 0) newLogs.push(trans("へろへろから回復した", languageMode));
         }
         if (p.powers['VULNERABLE'] > 0) {
             p.powers['VULNERABLE']--;
-            if (p.powers['VULNERABLE'] === 0) newLogs.push("びくびくから回復した");
+            if (p.powers['VULNERABLE'] === 0) newLogs.push(trans("びくびくから回復した", languageMode));
         }
         
         return { ...prev, player: p, combatLog: [...prev.combatLog, ...newLogs] };
@@ -1712,7 +1712,7 @@ const App: React.FC = () => {
             setGameState(prev => ({ 
                 ...prev, 
                 enemies: prev.enemies.map(e => e.id === enemy.id ? { ...e, currentHp: enemy.currentHp, poison: enemy.poison, floatingText: enemy.floatingText } : e),
-                combatLog: [...prev.combatLog, `${enemy.name}に毒ダメージ${enemy.poison + 1}`]
+                combatLog: [...prev.combatLog, `${trans(enemy.name, languageMode)}に毒ダメージ${enemy.poison + 1}`]
             }));
             if (enemy.currentHp <= 0) continue;
         }
@@ -1742,36 +1742,36 @@ const App: React.FC = () => {
 
                 if (e.strength !== 0) {
                     baseDamage += e.strength;
-                    logParts.push(`${e.strength >= 0 ? '+' : ''}${e.strength}(筋力)`);
+                    logParts.push(`${e.strength >= 0 ? '+' : ''}${e.strength}(${trans("筋力", languageMode)})`);
                 }
 
                 let damage = baseDamage;
 
                 if (e.weak > 0) {
                     damage = Math.floor(damage * 0.75);
-                    logParts.push(`x0.75(へろへろ)`);
+                    logParts.push(`x0.75(${trans("へろへろ", languageMode)})`);
                 }
                 
                 if (p.powers['VULNERABLE'] > 0) {
                     damage = Math.floor(damage * 1.5);
-                    logParts.push(`x1.5(びくびく)`);
+                    logParts.push(`x1.5(${trans("びくびく", languageMode)})`);
                 }
 
                 if (p.powers['INTANGIBLE'] > 0) {
                     damage = 1;
-                    logParts.push(`= 1(スケスケ)`);
+                    logParts.push(`= 1(${trans("スケスケ", languageMode)})`);
                 }
                 
                 if (damage > 0) {
                     if (p.powers['BUFFER'] > 0) { 
                         p.powers['BUFFER']--; 
                         damage = 0; 
-                        newLogs.push("バッファーでダメージ無効化");
+                        newLogs.push(trans("バッファーでダメージ無効化", languageMode));
                     } else {
                         if (p.powers['STATIC_DISCHARGE']) {
                             const target = newEnemies[Math.floor(Math.random() * newEnemies.length)];
                             target.currentHp -= p.powers['STATIC_DISCHARGE'];
-                            newLogs.push("静電放電発動！");
+                            newLogs.push(trans("静電放電発動！", languageMode));
                         }
                     }
                 }
@@ -1780,12 +1780,12 @@ const App: React.FC = () => {
                 if (p.block >= damage) { 
                     p.block -= damage; 
                     const formula = logParts.length > 1 ? `(${logParts.join(' ')}) = ` : '';
-                    newLogs.push(`${e.name}の攻撃 ${formula}${damage} をブロック`);
+                    newLogs.push(`${trans(e.name, languageMode)}の攻撃 ${formula}${damage} を${trans("ブロック", languageMode)}`);
                 } else { 
                     unblockedDamage = damage - p.block; 
                     p.block = 0; 
                     const formula = logParts.length > 1 ? `(${logParts.join(' ')}) = ` : '';
-                    newLogs.push(`${e.name}から ${formula}${damage} ダメージを受けた`);
+                    newLogs.push(`${trans(e.name, languageMode)}から ${formula}${damage} ${trans("ダメージを受けた", languageMode)}`);
                 }
                 
                 p.currentHp -= unblockedDamage;
@@ -1796,25 +1796,25 @@ const App: React.FC = () => {
                 if (p.powers['THORNS'] && damage > 0) { 
                     e.currentHp -= p.powers['THORNS'];
                     e.floatingText = { id: `thorns-${Date.now()}`, text: `${p.powers['THORNS']}`, color: 'text-orange-500', iconType: 'sword' };
-                    newLogs.push(`トゲトゲで${p.powers['THORNS']}反撃ダメージ`);
+                    newLogs.push(`${trans("トゲトゲ", languageMode)}で${p.powers['THORNS']}反撃ダメージ`);
                 }
             }
 
             if (intent.type === EnemyIntentType.DEFEND || intent.type === EnemyIntentType.ATTACK_DEFEND) {
                 e.block += intent.value; 
                 if (intent.type === EnemyIntentType.ATTACK_DEFEND && intent.secondaryValue) e.block = intent.secondaryValue;
-                newLogs.push(`${e.name}は防御を固めた`);
+                newLogs.push(`${trans(e.name, languageMode)}は防御を固めた`);
             }
 
             if (intent.type === EnemyIntentType.BUFF) {
                 e.strength += (intent.secondaryValue || 2);
-                newLogs.push(`${e.name}は力を溜めた`);
+                newLogs.push(`${trans(e.name, languageMode)}は力を溜めた`);
             }
 
             if (intent.type === EnemyIntentType.DEBUFF || intent.type === EnemyIntentType.ATTACK_DEBUFF) {
                 if (p.powers['ARTIFACT'] > 0) {
                     p.powers['ARTIFACT']--;
-                    newLogs.push("アーティファクトでデバフを防いだ");
+                    newLogs.push(trans("アーティファクトでデバフを防いだ", languageMode));
                 } else {
                     const debuffAmt = intent.secondaryValue || 1;
                     const type = intent.debuffType;
@@ -1823,11 +1823,11 @@ const App: React.FC = () => {
                     if (type === 'POISON') {
                         const status = { ...STATUS_CARDS.SLIMED, id: `slime-${Date.now()}` };
                         p.discardPile.push(status);
-                        newLogs.push("粘液を混ぜられた");
+                        newLogs.push(trans("粘液を混ぜられた", languageMode));
                     }
                     if (type) {
                         const jpType = type === 'WEAK' ? 'へろへろ' : type === 'VULNERABLE' ? 'びくびく' : type;
-                        newLogs.push(`${jpType}を${debuffAmt}受けました`);
+                        newLogs.push(`${trans(jpType, languageMode)}を${debuffAmt}受けました`);
                     }
                 }
             }
@@ -1864,7 +1864,7 @@ const App: React.FC = () => {
             } else {
                 p.discardPile.push(c);
             }
-            newLogs.push("コーデックスでカード生成");
+            newLogs.push(trans("コーデックスでカード生成", languageMode));
         }
 
         if (p.powers['INTANGIBLE'] > 0) p.powers['INTANGIBLE']--;
@@ -2094,7 +2094,7 @@ const App: React.FC = () => {
               map: newMap,
               currentMapNodeId: null,
               screen: GameScreen.MAP,
-              narrativeLog: [...prev.narrativeLog, `第${nextAct}章へ進んだ。`]
+              narrativeLog: [...prev.narrativeLog, trans(`第${nextAct}章へ進んだ。`, languageMode)]
           }));
           audioService.playBGM('menu');
       } else {
@@ -2263,10 +2263,9 @@ const App: React.FC = () => {
             
             {gameState.screen === GameScreen.MODE_SELECTION && (
                 <div className="w-full h-full bg-gray-900 flex flex-col items-center text-white p-4 overflow-y-auto custom-scrollbar">
-                    {/* ... (Mode Selection UI) ... */}
                     <div className="w-full max-w-2xl flex flex-col items-center my-auto">
                         <h2 className="text-3xl font-bold mb-2 text-yellow-400 mt-4">{trans("計算モード選択", languageMode)}</h2>
-                        {gameState.challengeMode === '1A1D' && <p className="text-red-400 mb-6 font-bold animate-pulse">※1A1Dチャレンジモード適用中</p>}
+                        {gameState.challengeMode === '1A1D' && <p className="text-red-400 mb-6 font-bold animate-pulse">※1A1D{trans("モード", languageMode)}適用中</p>}
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
                             <button onClick={() => handleModeSelect(GameMode.ADDITION)} className="bg-red-900 border-2 border-red-500 p-4 md:p-6 rounded-xl hover:bg-red-800 flex flex-col items-center transition-transform hover:scale-105 active:scale-95 shadow-lg">
