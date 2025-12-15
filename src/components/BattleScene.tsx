@@ -188,7 +188,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
       
       {/* 1. Top Bar: Narrative (Compact) */}
       <div className="h-8 shrink-0 bg-black border-b-2 border-gray-700 flex items-center px-4 text-xs text-green-400 overflow-hidden whitespace-nowrap justify-between z-30">
-        <span className="truncate mr-4"><span className="animate-pulse mr-2">&gt;&gt;</span> {narrative}</span>
+        <span className="truncate mr-4"><span className="animate-pulse mr-2">&gt;&gt;</span> {trans(narrative, languageMode)}</span>
         <div className="flex gap-2 items-center">
             <span className="text-yellow-400 hidden sm:inline">{trans(turnLog, languageMode)}</span>
             <button 
