@@ -313,6 +313,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 const enemyHpPercent = (enemy.currentHp / enemy.maxHp) * 100;
                 const isSelected = selectedEnemyId === enemy.id;
                 const actionClass = getEnemyActionClass(enemy);
+                const enemyName = trans(enemy.name, languageMode);
+                const enemyNameNeedsScroll = enemyName.length > 8;
                 
                 return (
                     <div 
@@ -348,8 +350,19 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         </div>
 
                         <div className={`w-24 md:w-28 bg-black/90 border-2 px-1 py-0.5 text-white text-[9px] md:text-[10px] transition-colors shadow-md rounded ${isSelected ? 'border-yellow-400 ring-1 ring-yellow-400/50' : 'border-gray-600'}`}>
-                            <div className="flex items-center justify-between mb-0.5">
-                                <span className="text-red-200 font-bold truncate flex-1">{trans(enemy.name, languageMode)}</span>
+                            <div className="flex items-center justify-between mb-0.5 h-4 overflow-hidden">
+                                {enemyNameNeedsScroll ? (
+                                    <div className="w-16 overflow-hidden whitespace-nowrap relative flex text-red-200 font-bold">
+                                        <div className="animate-marquee pr-4">
+                                            {enemyName}
+                                        </div>
+                                        <div className="animate-marquee pr-4 absolute top-0 left-full">
+                                            {enemyName}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <span className="text-red-200 font-bold truncate flex-1">{enemyName}</span>
+                                )}
                                 {enemy.block > 0 && <span className="text-blue-300 flex items-center bg-blue-900/80 px-1 rounded text-[8px] font-bold ml-1" onClick={(e)=>{e.stopPropagation(); showInfo(trans("ブロック", languageMode), trans("次のターン開始時までダメージを防ぐ。", languageMode));}}><Shield size={8} className="mr-0.5"/> {enemy.block}</span>}
                             </div>
                             
@@ -568,7 +581,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 </div>
                 <div className="p-4 overflow-y-auto flex-grow bg-gray-900/90">
                     <div className="grid grid-cols-3 gap-2 justify-items-center">
-                        {sortedDrawPile.map((card) => (
+                        {sortedDeck.map((card) => (
                             <div key={card.id} className="scale-75 origin-top-left w-24 h-36">
                                 <Card card={card} onClick={() => {}} disabled={false} languageMode={languageMode}/>
                             </div>
