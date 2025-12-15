@@ -2122,16 +2122,18 @@ const App: React.FC = () => {
     <div className="w-full h-[100dvh] bg-black overflow-hidden">
         <div className="w-full h-full relative overflow-hidden bg-black crt-scanline">
             
-            {/* Language Toggle Button (Always visible on top right) */}
-            <div className="absolute top-2 right-2 z-[9999]">
-                 <button 
-                     onClick={toggleLanguage} 
-                     className="bg-black/50 hover:bg-black/80 text-white border border-white/50 px-2 py-1 rounded text-xs flex items-center shadow-lg transition-colors font-bold"
-                 >
-                     <Languages size={14} className="mr-1"/>
-                     {languageMode === 'JAPANESE' ? 'にほんご' : '日本語'}
-                 </button>
-            </div>
+            {/* Language Toggle Button (Only visible on START_MENU) */}
+            {gameState.screen === GameScreen.START_MENU && (
+                <div className="absolute top-2 right-2 z-[9999]">
+                    <button 
+                        onClick={toggleLanguage} 
+                        className="bg-black/50 hover:bg-black/80 text-white border border-white/50 px-2 py-1 rounded text-xs flex items-center shadow-lg transition-colors font-bold"
+                    >
+                        <Languages size={14} className="mr-1"/>
+                        {languageMode === 'JAPANESE' ? 'にほんご' : '日本語'}
+                    </button>
+                </div>
+            )}
 
             {gameState.screen === GameScreen.START_MENU && (
                 <div className="w-full h-full bg-gray-900 flex items-center justify-center">
