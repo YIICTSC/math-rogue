@@ -1,4 +1,12 @@
-import { ENEMY_LIBRARY } from '../constants';
+
+// Local data lists to replace AI generation
+const ENEMY_NAMES = [
+  "野良犬", "意地悪なカラス", "消しゴムのカス", "グレムリン", "スズメバチ", 
+  "掃除サボり魔", "迷子の幽霊", "暴走した三輪車", "凶暴なハムスター", "画鋲の妖精", 
+  "埃の塊", "放置された傘", "裏庭のミミズ", "給食の残りカス", "校庭の雑草", 
+  "ちぎれたノート", "さまよう上履き", "水槽の金魚", "リコーダー", "実験失敗スライム",
+  "宿題の悪魔", "給食泥棒", "動く人体模型", "トイレの花子さん", "イジワルな上級生"
+];
 
 const FLAVOR_TEXTS = [
   "チャイムが鳴り響く...", "廊下の奥から視線を感じる...", "給食のいい匂いがする。",
@@ -23,7 +31,5 @@ export const generateFlavorText = async (context: string): Promise<string> => {
 };
 
 export const generateEnemyName = async (floor: number): Promise<string> => {
-  // Get all enemy names but exclude the boss name so it doesn't appear as a standard mob
-  const names = Object.keys(ENEMY_LIBRARY).filter(name => name !== "校長先生");
-  return getRandom(names);
+  return getRandom(ENEMY_NAMES);
 };
