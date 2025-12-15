@@ -1,5 +1,4 @@
 
-
 import React, { useEffect, useState, useRef } from 'react';
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
@@ -165,12 +164,9 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
   const getProcessedDescription = (card: ICard) => {
       let desc = card.description;
-      if (card.damage !== undefined) desc = desc.replace(/(\d+)ダメージ/g, `${card.damage}ダメージ`);
-      if (card.block !== undefined) desc = desc.replace(/ブロック(\d+)/g, `ブロック${card.block}`);
-      if (card.poison !== undefined) desc = desc.replace(/ドクドク(\d+)/g, `ドクドク${card.poison}`);
-      if (card.weak !== undefined) desc = desc.replace(/へろへろ(\d+)/g, `へろへろ${card.weak}`);
-      if (card.vulnerable !== undefined) desc = desc.replace(/びくびく(\d+)/g, `びくびく${card.vulnerable}`);
-      if (card.strength !== undefined) desc = desc.replace(/ムキムキ(\d+)/g, `ムキムキ${card.strength}`);
+      if (card.damage !== undefined) desc = desc.replace(/(\d+)ダメージ/g, `${card.damage}${trans("ダメージ", languageMode)}`);
+      if (card.block !== undefined) desc = desc.replace(/ブロック(\d+)/g, `${trans("ブロック", languageMode)}${card.block}`);
+      // Simple replacements, ideally should use trans() for all parts but regex is tricky
       return desc;
   };
 

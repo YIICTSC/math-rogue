@@ -1085,7 +1085,7 @@ const App: React.FC = () => {
       setGameState(prev => {
           const p = { ...prev.player };
           const enemies = [...prev.enemies];
-          const newLogs = [`ポーション使用: ${potion.name}`];
+          const newLogs = [`ポーション使用: ${trans(potion.name, languageMode)}`];
           
           p.potions = p.potions.filter(pt => pt.id !== potion.id);
           const target = enemies.find(e => e.id === prev.selectedEnemyId) || enemies[0];
@@ -1184,7 +1184,7 @@ const App: React.FC = () => {
     setGameState(prev => {
       const p = { ...prev.player, hand: [...prev.player.hand], drawPile: [...prev.player.drawPile], discardPile: [...prev.player.discardPile], deck: [...prev.player.deck], powers: { ...prev.player.powers } };
       let enemies = prev.enemies.map(e => ({ ...e }));
-      const currentLogs: string[] = [`> ${card.name} を使用`];
+      const currentLogs: string[] = [`> ${trans(card.name, languageMode)} を使用`];
       
       p.currentEnergy -= card.cost;
       p.cardsPlayedThisTurn++;
@@ -2400,10 +2400,10 @@ const App: React.FC = () => {
 
             {gameState.screen === GameScreen.EVENT && eventData && (
                 <EventScreen 
-                    title={eventData.title} 
-                    description={eventData.description} 
-                    options={eventData.options} 
-                    resultLog={eventResultLog}
+                    title={trans(eventData.title, languageMode)} 
+                    description={trans(eventData.description, languageMode)} 
+                    options={eventData.options.map((o: any) => ({ ...o, label: trans(o.label, languageMode), text: trans(o.text, languageMode) }))} 
+                    resultLog={eventResultLog ? trans(eventResultLog, languageMode) : null}
                     onContinue={handleEventContinue}
                 />
             )}
