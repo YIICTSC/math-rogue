@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
   <head>
@@ -60,6 +59,13 @@
       }
       .animate-marquee {
         animation: marquee 6s linear infinite;
+      }
+      @keyframes marquee-half {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+      }
+      .animate-marquee-scroll {
+        animation: marquee-half 6s linear infinite;
       }
     </style>
   <script type="importmap">

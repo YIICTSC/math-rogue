@@ -209,7 +209,6 @@ const DICTIONARY: Record<string, string> = {
   "欲しい報酬を選択してください": "ほしい ほうしゅうを えらんでね",
   "カード獲得": "カード ゲット",
   "レリック獲得": "おたから ゲット",
-  // "獲得": "ゲット", // Removed duplicate
   "ポーション獲得": "くすり ゲット",
 
   // --- Characters ---

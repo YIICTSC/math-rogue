@@ -153,12 +153,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
       }
   };
 
-  const sortedDrawPile = [...player.drawPile].sort((a, b) => {
-    if (a.type !== b.type) return a.type.localeCompare(b.type);
-    if (a.cost !== b.cost) return a.cost - b.cost;
-    return a.name.localeCompare(b.name);
-  });
-
   const showInfo = (title: string, desc: string) => {
       setTooltip({ title, desc });
   };
@@ -182,6 +176,12 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   };
 
   const hasChoker = !!player.relics.find(r => r.id === 'VELVET_CHOKER');
+
+  const sortedDeck = [...player.deck].sort((a, b) => {
+    if (a.type !== b.type) return a.type.localeCompare(b.type);
+    if (a.cost !== b.cost) return a.cost - b.cost;
+    return a.name.localeCompare(b.name);
+  });
 
   return (
     <div className="flex flex-col h-full relative bg-gray-900 overflow-hidden">

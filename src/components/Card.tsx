@@ -192,12 +192,10 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
       {/* Header */}
       <div className="flex justify-between items-center relative z-10 mb-1 h-5 overflow-hidden">
         {needsScroll ? (
-            <div className="w-20 overflow-hidden whitespace-nowrap relative flex text-[11px] font-bold drop-shadow-md">
-                <div className={`animate-marquee pr-4 ${card.upgraded ? 'text-green-400' : 'text-white'}`}>
-                    {displayName}
-                </div>
-                <div className={`animate-marquee pr-4 absolute top-0 left-full ${card.upgraded ? 'text-green-400' : 'text-white'}`}>
-                    {displayName}
+            <div className="w-20 overflow-hidden relative text-[11px] font-bold drop-shadow-md">
+                <div className={`flex w-max animate-marquee-scroll ${card.upgraded ? 'text-green-400' : 'text-white'}`}>
+                    <span className="pr-4">{displayName}</span>
+                    <span className="pr-4">{displayName}</span>
                 </div>
             </div>
         ) : (
