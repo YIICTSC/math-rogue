@@ -190,7 +190,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
       <div className="h-8 shrink-0 bg-black border-b-2 border-gray-700 flex items-center px-4 text-xs text-green-400 overflow-hidden whitespace-nowrap justify-between z-30">
         <span className="truncate mr-4"><span className="animate-pulse mr-2">&gt;&gt;</span> {narrative}</span>
         <div className="flex gap-2 items-center">
-            <span className="text-yellow-400 hidden sm:inline">{turnLog}</span>
+            <span className="text-yellow-400 hidden sm:inline">{trans(turnLog, languageMode)}</span>
             <button 
                 onClick={() => setShowLog(!showLog)}
                 className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border ${showLog ? 'bg-gray-700 border-gray-500 text-white' : 'bg-black border-gray-600 text-gray-400 hover:text-white'}`}
@@ -216,7 +216,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     <div className="flex flex-col gap-1">
                         {combatLog.map((log, i) => (
                             <div key={i} className="border-b border-gray-800 pb-0.5 last:border-0 leading-tight break-words">
-                                {log}
+                                {trans(log, languageMode)}
                             </div>
                         ))}
                     </div>
@@ -271,8 +271,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         {tooltip && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4" onClick={() => setTooltip(null)}>
                 <div className="bg-black border-2 border-white p-4 rounded max-w-xs shadow-2xl animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
-                    <h3 className="text-yellow-400 font-bold mb-2 text-lg border-b border-gray-600 pb-1">{tooltip.title}</h3>
-                    <p className="text-white text-sm whitespace-pre-wrap">{tooltip.desc}</p>
+                    <h3 className="text-yellow-400 font-bold mb-2 text-lg border-b border-gray-600 pb-1">{trans(tooltip.title, languageMode)}</h3>
+                    <p className="text-white text-sm whitespace-pre-wrap">{trans(tooltip.desc, languageMode)}</p>
                     <button onClick={() => setTooltip(null)} className="mt-4 w-full bg-gray-700 hover:bg-gray-600 text-white text-xs py-2 rounded">{trans("閉じる", languageMode)}</button>
                 </div>
             </div>

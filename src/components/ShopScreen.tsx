@@ -182,7 +182,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                <ShoppingBag size={24} className="text-yellow-500 mr-2" />
                <div>
                    <h2 className="text-xl font-bold text-yellow-100">{trans("購買部", languageMode)}</h2>
-                   <p className="text-xs text-gray-400">「へいらっしゃい！」</p>
+                   <p className="text-xs text-gray-400">「{trans("いいもの揃ってるよ...", languageMode)}」</p>
                </div>
            </div>
            
