@@ -2194,7 +2194,7 @@ const App: React.FC = () => {
                             </div>
 
                             <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                <Terminal size={10}/> v2.5.1
+                                <Terminal size={10}/> v2.5.2
                             </button>
                         </div>
                     </div>
@@ -2208,14 +2208,14 @@ const App: React.FC = () => {
                             className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2 select-none active:text-green-200"
                             onClick={handleLogTitleClick}
                         >
-                            System Update Log v2.5.1
+                            System Update Log v2.5.2
                         </h2>
                         <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
                             <section>
                                 <h3 className="text-white font-bold mb-1">■ アップデート (Update)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li>新ミニゲーム「紙飛行機バトル」を追加しました。</li>
-                                    <li>日本語・にほんご切り替え機能を追加しました。</li>
+                                    <li>計算モード選択画面に言語切り替えを適用しました。</li>
+                                    <li>遊び方画面に言語切り替えを適用しました。</li>
                                 </ul>
                             </section>
                         </div>
@@ -2267,7 +2267,7 @@ const App: React.FC = () => {
                 <div className="w-full h-full bg-gray-900 flex flex-col items-center text-white p-4 overflow-y-auto custom-scrollbar">
                     <div className="w-full max-w-2xl flex flex-col items-center my-auto">
                         <h2 className="text-3xl font-bold mb-2 text-yellow-400 mt-4">{trans("計算モード選択", languageMode)}</h2>
-                        {gameState.challengeMode === '1A1D' && <p className="text-red-400 mb-6 font-bold animate-pulse">※1A1D{trans("モード", languageMode)}適用中</p>}
+                        {gameState.challengeMode === '1A1D' && <p className="text-red-400 mb-6 font-bold animate-pulse">※{trans("1A1Dモード", languageMode)}</p>}
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
                             <button onClick={() => handleModeSelect(GameMode.ADDITION)} className="bg-red-900 border-2 border-red-500 p-4 md:p-6 rounded-xl hover:bg-red-800 flex flex-col items-center transition-transform hover:scale-105 active:scale-95 shadow-lg">
@@ -2314,7 +2314,7 @@ const App: React.FC = () => {
             )}
 
             {gameState.screen === GameScreen.HELP && (
-                <HelpScreen onBack={returnToTitle} />
+                <HelpScreen onBack={returnToTitle} languageMode={languageMode} />
             )}
 
             {gameState.screen === GameScreen.MAP && (
