@@ -3,7 +3,7 @@ import React, { useMemo, useState } from 'react';
 import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY } from '../constants';
 import { Card as ICard, Relic, Potion, CardType, TargetType } from '../types';
 import Card from './Card';
-import { ArrowRight, Trash2, Plus, Gem, FlaskConical, Swords, Shield, Zap, Search, Beaker, RotateCcw, FileDown } from 'lucide-react';
+import { ArrowRight, Trash2, Plus, Gem, FlaskConical, Swords, Shield, Zap, Search, Beaker, RotateCcw } from 'lucide-react';
 import { synthesizeCards } from '../utils/cardUtils';
 
 interface DebugMenuScreenProps {
@@ -88,71 +88,14 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
       }
   };
 
-  const downloadTodoList = () => {
-      const content = `
-# 算数ローグ: 伝説の小学生 - 未実装・アイデアリスト
-
-## 未実装のカードギミック (Original STS Mechanics)
-- [ ] バリケード (Barricade): ブロックがターン終了時に消えない (一部実装済みだがRelic依存など調整余地あり)
-- [ ] ジャガーノート (Juggernaut): ブロックを得るたびにダメージ
-- [ ] 塹壕 (Entrench): ブロックを倍にする
-- [ ] 供物 (Offering): HPを失ってエナジーとドローを得る
-- [ ] 死霊化 (Wraith Form): 毎ターン器用さが下がるが、無敵を得る (現在はターン制限無敵として実装)
-- [ ] 毒の拡散 (Catalyst): 毒を2倍/3倍にする
-- [ ] ナイフ特化 (Shivs): 0コストのナイフを生成するカード群 (精度上昇など)
-- [ ] オーブシステム (Defect): ライトニング、フロスト、ダークなどのオーブスロット
-- [ ] スタンス (Watcher): 憤怒、平静、神聖の切り替え
-
-## 未実装のレリックアイデア
-- [ ] 古木の枝 (Dead Branch): カードを廃棄するたび、ランダムなカードを手札に加える
-- [ ] アイスクリーム (Ice Cream): エナジーを持ち越す (実装済みだが動作確認推奨)
-- [ ] インク瓶 (Pen Nib): 10回目の攻撃がダメージ2倍
-- [ ] ギャンブルチップ (Gambling Chip): 戦闘開始時に手札を好きなだけ引き直す
-- [ ] 賢者の石 (Philosopher's Stone): エナジー+1だが敵の筋力+1
-- [ ] ベルベットチョーカー (Velvet Choker): エナジー+1だがカード使用枚数制限
-- [ ] スネッコアイ (Snecko Eye): 混乱状態(コストランダム) + 2ドロー
-- [ ] ピラミッド (Runic Pyramid): 手札をターン終了時に捨てない
-
-## 今後の拡張アイデア (学校テーマ)
-- [ ] 部活動システム: キャラクターごとに異なるパッシブ能力や専用カード
-- [ ] 給食イベント: ランダムなバフを得られる食事イベント
-- [ ] テスト期間イベント: 一定期間、エリート敵が出現しやすくなるが報酬アップ
-- [ ] 席替え: 敵の位置や行動順が変わるギミック
-- [ ] 委員会活動: ショップや休憩所での選択肢が増える
-
-## 既知のバグ・調整項目
-- [ ] 呪い「痛み」の効果処理 (手札にある間のトリガー)
-- [ ] 呪い「凡庸」の効果処理 (カード使用枚数制限)
-- [ ] 呪い「寄生」の削除時HP減少処理
-- [ ] 状態異常「混乱」のコストランダム化の完全実装
-`.trim();
-
-      const blob = new Blob([content], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'sansu_rogue_todo.txt';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-  };
-
   return (
     <div className="flex flex-col h-full w-full bg-gray-900 text-white relative">
         {/* Header */}
         <div className="bg-red-900/90 border-b-2 border-red-500 p-2 md:p-4 flex justify-between items-center shrink-0 z-20">
             <h2 className="text-lg md:text-xl font-bold text-red-100 flex items-center">
-                <Zap size={20} className="mr-2" /> DEBUG MENU
+                <Zap size={20} className="mr-2" /> DEBUG
             </h2>
             <div className="flex gap-2 md:gap-4 text-sm md:text-base">
-                <button 
-                    onClick={downloadTodoList} 
-                    className="flex items-center text-xs md:text-sm bg-gray-800 hover:bg-gray-700 border border-gray-500 px-3 py-1 rounded text-gray-300"
-                    title="未実装リストをダウンロード"
-                >
-                    <FileDown size={14} className="mr-1"/> TODO
-                </button>
                 <button onClick={onBack} className="text-gray-300 hover:text-white underline">戻る</button>
                 <button 
                     onClick={() => onStart(selectedDeck, selectedRelics, selectedPotions)}
