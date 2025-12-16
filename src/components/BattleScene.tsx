@@ -6,7 +6,7 @@ import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown,
 import PixelSprite from './PixelSprite';
 import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
-import { HERO_IMAGE_DATA } from '../constants';
+import { HERO_IMAGE_DATA, CARDS_LIBRARY, STATUS_CARDS, CURSE_CARDS } from '../constants';
 
 interface BattleSceneProps {
   player: Player;
