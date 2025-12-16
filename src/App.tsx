@@ -1213,7 +1213,7 @@ const App: React.FC = () => {
       }
 
       // DISCOVERY
-      if (card.name === '自由研究' || card.name === 'DISCOVERY') {
+      if (card.name === '発見' || card.name === 'DISCOVERY') {
           for (let i = 0; i < 3; i++) {
               const keys = Object.keys(CARDS_LIBRARY).filter(k => !STATUS_CARDS[k] && !CURSE_CARDS[k]);
               const key = keys[Math.floor(Math.random() * keys.length)];
@@ -1224,7 +1224,7 @@ const App: React.FC = () => {
                   p.discardPile.push(newCard);
               }
           }
-          currentLogs.push(trans("自由研究！カードを3枚生成", languageMode));
+          currentLogs.push(trans("発見！カードを3枚生成", languageMode));
       }
 
       // Calculated Gamble Logic
@@ -1450,7 +1450,6 @@ const App: React.FC = () => {
                   p.hand = p.hand.map(c => getUpgradedCard(c));
                   p.drawPile = p.drawPile.map(c => getUpgradedCard(c));
                   p.discardPile = p.discardPile.map(c => getUpgradedCard(c));
-                  p.deck = p.deck.map(c => getUpgradedCard(c));
                   currentLogs.push(trans("デッキ全体を強化", languageMode));
               }
               if (card.doubleStrength) p.strength *= 2;

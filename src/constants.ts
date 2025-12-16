@@ -282,7 +282,7 @@ export const RELIC_LIBRARY: Record<string, Relic> = {
     RED_MASK: { id: 'RED_MASK', name: '戦隊のお面', description: '戦闘開始時、敵全体をへろへろ1にする。', rarity: 'RARE' },
     NECRONOMICON: { id: 'NECRONOMICON', name: '禁断の参考書', description: 'コスト2以上の攻撃を1ターン1回2度発動。', rarity: 'RARE' },
     ENCHIRIDION: { id: 'ENCHIRIDION', name: '分厚い辞書', description: '戦闘開始時、ランダムなパワーカードを手札に加える。', rarity: 'RARE' },
-    NILRYS_CODEX: { id: 'NILRYS_CODEX', name: '秘密の攻略本', description: 'ターン終了時、ランダムなカードを1枚手札に加える。', rarity: 'RARE' },
+    NILRYS_CODEX: { id: 'NILRYS_CODEX', name: '秘密の攻略本', description: 'ターン終了時、ランダムな3枚から1枚を選んで手札に加える。', rarity: 'RARE' },
     SPIRIT_POOP: { id: 'SPIRIT_POOP', name: '犬のフン', description: 'スコア計算時に1点減点される。', rarity: 'COMMON' }
 };
 
@@ -484,7 +484,7 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
   ENVENOM: { name: '悪口', cost: 2, type: CardType.POWER, target: TargetType.SELF, description: '攻撃時ドクドク1付与。', applyPower: { id: 'ENVENOM', amount: 1 }, rarity: 'RARE', textureRef: 'SWORD|緑|POWER' },
   STATIC_DISCHARGE: { name: '摩擦熱', cost: 1, type: CardType.POWER, target: TargetType.SELF, description: '被ダメ時、ランダムに5ダメ。', applyPower: { id: 'STATIC_DISCHARGE', amount: 1 }, rarity: 'RARE', textureRef: 'LIGHTNING|黄|POWER' },
   BUFFER: { name: '心の壁', cost: 2, type: CardType.POWER, target: TargetType.SELF, description: '次に受けるHPダメを0にする。', applyPower: { id: 'BUFFER', amount: 1 }, rarity: 'RARE', textureRef: 'SHIELD|青|POWER' },
-  CREATIVE_AI: { name: '創造的AI', cost: 3, type: CardType.POWER, target: TargetType.SELF, description: '毎ターンランダムなパワー生成。', applyPower: { id: 'CREATIVE_AI', amount: 1 }, rarity: 'LEGENDARY', textureRef: 'LIGHTNING|黄|POWER' },
+  CREATIVE_AI: { name: '自由研究', cost: 3, type: CardType.POWER, target: TargetType.SELF, description: '毎ターンランダムなパワー生成。', applyPower: { id: 'CREATIVE_AI', amount: 1 }, rarity: 'LEGENDARY', textureRef: 'LIGHTNING|黄|POWER' },
   DEVA_FORM: { name: '受験勉強', cost: 3, type: CardType.POWER, target: TargetType.SELF, description: 'ターン開始時、エネルギーを得る。毎ターン増加。', applyPower: { id: 'DEVA_FORM', amount: 1 }, rarity: 'LEGENDARY', textureRef: 'FLAME|黄|POWER' },
   MASTER_REALITY: { name: '模範解答', cost: 1, type: CardType.POWER, target: TargetType.SELF, description: 'カード生成時アップグレード。', applyPower: { id: 'MASTER_REALITY', amount: 1 }, rarity: 'RARE', textureRef: 'NOTEBOOK|白|POWER' },
   BERSERK: { name: '逆ギレ', cost: 0, type: CardType.POWER, target: TargetType.SELF, description: 'びくびく2を受け、エネルギー1を得る。', energy: 1, vulnerable: 2, rarity: 'RARE', textureRef: 'FLAME|赤|POWER' },
