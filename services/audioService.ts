@@ -440,7 +440,8 @@ class AudioService {
 
   // --- Public API ---
   public async playBGM(type: 'battle' | 'menu' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane') {
-      if (this.isPlayingBGM && this.currentBgmType === type && this.bgmMode === 'OSCILLATOR') return;
+      // Don't restart if already playing the same type (regardless of mode)
+      if (this.isPlayingBGM && this.currentBgmType === type) return;
       
       this.init(); 
       
