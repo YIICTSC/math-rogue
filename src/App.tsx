@@ -637,8 +637,17 @@ const App: React.FC = () => {
                   { label: "磨く", text: "真面目に磨く", action: () => {
                       const removeIndex = Math.floor(Math.random() * player.deck.length);
                       const removedCard = player.deck[removeIndex];
-                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: prev.player.deck.filter((_, i) => i !== removeIndex) } }));
-                      setEventResultLog(trans(`心を込めて磨いたら、心が洗われた。\nデッキから「${removedCard.name}」が取り除かれた。`, languageMode));
+                      
+                      // Parasite Check
+                      let newMaxHp = player.maxHp;
+                      let curseMsg = "";
+                      if (removedCard.name === '寄生虫' || removedCard.name === 'PARASITE') {
+                          newMaxHp -= 3;
+                          curseMsg = "\n(寄生虫の効果で最大HP-3)";
+                      }
+                      
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: newMaxHp, currentHp: Math.min(prev.player.currentHp, newMaxHp), deck: prev.player.deck.filter((_, i) => i !== removeIndex) } }));
+                      setEventResultLog(trans(`心を込めて磨いたら、心が洗われた。\nデッキから「${removedCard.name}」が取り除かれた。${curseMsg}`, languageMode));
                   }}
               ]
           },
@@ -751,8 +760,17 @@ const App: React.FC = () => {
                       if (player.deck.length > 0) {
                           const removeIndex = Math.floor(Math.random() * player.deck.length);
                           const removedCard = player.deck[removeIndex];
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: prev.player.deck.filter((_, i) => i !== removeIndex) } }));
-                          setEventResultLog(trans(`教科書(カード: ${removedCard.name})を机の中に隠した。\n体が軽くなった！`, languageMode));
+                          
+                          // Parasite Check
+                          let newMaxHp = player.maxHp;
+                          let curseMsg = "";
+                          if (removedCard.name === '寄生虫' || removedCard.name === 'PARASITE') {
+                              newMaxHp -= 3;
+                              curseMsg = "\n(寄生虫の効果で最大HP-3)";
+                          }
+
+                          setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: newMaxHp, currentHp: Math.min(prev.player.currentHp, newMaxHp), deck: prev.player.deck.filter((_, i) => i !== removeIndex) } }));
+                          setEventResultLog(trans(`教科書(カード: ${removedCard.name})を机の中に隠した。\n体が軽くなった！${curseMsg}`, languageMode));
                       } else {
                           setEventResultLog(trans("置く教科書がなかった。", languageMode));
                       }
@@ -814,17 +832,25 @@ const App: React.FC = () => {
                       const newCardKey = Object.keys(CARDS_LIBRARY).filter(k => CARDS_LIBRARY[k].rarity === 'UNCOMMON' || CARDS_LIBRARY[k].rarity === 'RARE')[Math.floor(Math.random() * 5)];
                       const newCard = CARDS_LIBRARY[newCardKey];
                       
+                      // Parasite Check
+                      let newMaxHp = player.maxHp;
+                      let curseMsg = "";
+                      if (removed.name === '寄生虫' || removed.name === 'PARASITE') {
+                          newMaxHp -= 3;
+                          curseMsg = "\n(寄生虫の効果で最大HP-3)";
+                      }
+
                       const newDeck = [...player.deck];
                       newDeck.splice(removeIdx, 1, { ...newCard, id: `trade-${Date.now()}` });
                       
-                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: newDeck } }));
-                      setEventResultLog(trans(`「${removed.name}」を渡して、「${newCard.name}」をもらった！\n転校生はニヤリと笑った。`, languageMode));
+                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: newDeck, maxHp: newMaxHp, currentHp: Math.min(prev.player.currentHp, newMaxHp) } }));
+                      setEventResultLog(trans(`「${removed.name}」を渡して、「${newCard.name}」をもらった！${curseMsg}\n転校生はニヤリと笑った。`, languageMode));
                   }},
                   { label: "断る", text: "自分のカードが大事", action: () => setEventResultLog(trans("断った。転校生はつまらなそうに去った。", languageMode)) }
               ]
           }
       ];
-      return events[Math.floor(Math.random() * events.length)];
+      return events[Math.floor(random * events.length)];
   };
 
   const handleNodeSelect = async (node: MapNode) => {
@@ -1188,11 +1214,19 @@ const App: React.FC = () => {
   };
 
   const handlePlayCard = (card: ICard) => {
+    // Basic validations
     if (gameState.player.currentEnergy < card.cost) return;
     if (gameState.enemies.length === 0) return;
     if (actingEnemyId) return; 
     if (gameState.selectionState.active) return;
     if (card.unplayable) return; 
+
+    // Normality Check
+    const hasNormality = gameState.player.hand.some(c => c.name === '退屈' || c.name === 'NORMALITY');
+    if (hasNormality && gameState.player.cardsPlayedThisTurn >= 3) {
+         audioService.playSound('wrong'); 
+         return; 
+    }
 
     audioService.playSound(card.type === CardType.ATTACK ? 'attack' : 'block');
     setLastActionType(card.type);
@@ -1220,6 +1254,15 @@ const App: React.FC = () => {
       let enemies = prev.enemies.map(e => ({ ...e }));
       const currentLogs: string[] = [`> ${trans(card.name, languageMode)} ${trans("を使用", languageMode)}`];
       
+      // Pain Logic
+      const painCards = p.hand.filter(c => c.name === '腹痛' || c.name === 'PAIN');
+      if (painCards.length > 0) {
+          const dmg = painCards.length;
+          p.currentHp -= dmg;
+          currentLogs.push(`腹痛ダメージ: -${dmg}`);
+          p.floatingText = { id: `pain-${Date.now()}`, text: `-${dmg}`, color: 'text-purple-500', iconType: 'skull' };
+      }
+
       p.currentEnergy -= card.cost;
       p.cardsPlayedThisTurn++;
       if (card.type === CardType.ATTACK) p.attacksPlayedThisTurn++;
@@ -2484,7 +2527,18 @@ const App: React.FC = () => {
                         }
                     }}
                     onRemoveCard={(cardId, cost) => {
-                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - cost, deck: prev.player.deck.filter(c => c.id !== cardId) } }));
+                         setGameState(prev => {
+                             const p = prev.player;
+                             const card = p.deck.find(c => c.id === cardId);
+                             let newMaxHp = p.maxHp;
+                             if (card && (card.name === '寄生虫' || card.name === 'PARASITE')) {
+                                 newMaxHp -= 3;
+                             }
+                             const newDeck = p.deck.filter(c => c.id !== cardId);
+                             const newHp = Math.min(p.currentHp, newMaxHp); // Clamp HP
+                             
+                             return { ...prev, player: { ...p, gold: p.gold - cost, deck: newDeck, maxHp: newMaxHp, currentHp: newHp } };
+                         });
                     }}
                     onLeave={handleNodeComplete}
                     languageMode={languageMode}

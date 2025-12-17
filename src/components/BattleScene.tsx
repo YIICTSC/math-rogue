@@ -180,6 +180,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   };
 
   const hasChoker = !!player.relics.find(r => r.id === 'VELVET_CHOKER');
+  
+  // Curse Logic: Normality (退屈) - Limit 3 cards per turn
+  const hasNormality = player.hand.some(c => c.name === '退屈' || c.name === 'NORMALITY');
+  const normalityRestricted = hasNormality && player.cardsPlayedThisTurn >= 3;
 
   const sortedDeck = [...player.deck].sort((a, b) => {
     if (a.type !== b.type) return a.type.localeCompare(b.type);
@@ -545,7 +549,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 const isClashDisabled = card.playCondition === 'HAND_ONLY_ATTACKS' && player.hand.some(c => c.type !== CardType.ATTACK && c.id !== card.id);
                 const isGrandFinaleDisabled = card.playCondition === 'DRAW_PILE_EMPTY' && player.drawPile.length > 0;
                 const isChokerDisabled = player.relics.some(r => r.id === 'VELVET_CHOKER') && player.cardsPlayedThisTurn >= 6;
-                const specialDisabled = isClashDisabled || isGrandFinaleDisabled || isChokerDisabled;
+                const isNormalityDisabled = player.hand.some(c => c.name === '退屈' || c.name === 'NORMALITY') && player.cardsPlayedThisTurn >= 3;
+                const specialDisabled = isClashDisabled || isGrandFinaleDisabled || isChokerDisabled || isNormalityDisabled;
                 
                 // Visual Cost Override for Corruption
                 const displayCard = { ...card };
@@ -563,7 +568,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                         onHandSelection(card);
                                     } else {
                                         if (!specialDisabled) onPlayCard(card);
-                                        else if (isChokerDisabled) audioService.playSound('wrong');
+                                        else if (isChokerDisabled || isNormalityDisabled) audioService.playSound('wrong');
                                     }
                                 }} 
                                 disabled={
