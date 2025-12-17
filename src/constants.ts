@@ -487,7 +487,7 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
   CREATIVE_AI: { name: '自由研究', cost: 3, type: CardType.POWER, target: TargetType.SELF, description: '毎ターンランダムなパワー生成。', applyPower: { id: 'CREATIVE_AI', amount: 1 }, rarity: 'LEGENDARY', textureRef: 'LIGHTNING|黄|POWER' },
   DEVA_FORM: { name: '受験勉強', cost: 3, type: CardType.POWER, target: TargetType.SELF, description: 'ターン開始時、エネルギーを得る。毎ターン増加。', applyPower: { id: 'DEVA_FORM', amount: 1 }, rarity: 'LEGENDARY', textureRef: 'FLAME|黄|POWER' },
   MASTER_REALITY: { name: '模範解答', cost: 1, type: CardType.POWER, target: TargetType.SELF, description: 'カード生成時アップグレード。', applyPower: { id: 'MASTER_REALITY', amount: 1 }, rarity: 'RARE', textureRef: 'NOTEBOOK|白|POWER' },
-  BERSERK: { name: '逆ギレ', cost: 0, type: CardType.POWER, target: TargetType.SELF, description: 'びくびく2を受け、エネルギー1を得る。', energy: 1, vulnerable: 2, rarity: 'RARE', textureRef: 'FLAME|赤|POWER' },
+  BERSERK: { name: '逆ギレ', cost: 0, type: CardType.POWER, target: TargetType.SELF, description: '自分にびくびく2を与える。エネルギー1を得る。', energy: 1, vulnerable: 2, rarity: 'RARE', textureRef: 'FLAME|赤|POWER' },
   INFINITE_BLADES: { name: '鉛筆削り', cost: 1, type: CardType.POWER, target: TargetType.SELF, description: '毎ターン手札にナイフを加える。', applyPower: { id: 'INFINITE_BLADES', amount: 1 }, rarity: 'UNCOMMON', textureRef: 'SWORD|灰|POWER' },
   ACCURACY: { name: '集中力', cost: 1, type: CardType.POWER, target: TargetType.SELF, description: 'ナイフのダメージ+4。', applyPower: { id: 'ACCURACY', amount: 4 }, rarity: 'UNCOMMON', textureRef: 'EYE|黄|POWER' },
 };
@@ -811,6 +811,8 @@ export const VOUCHERS_LIBRARY: PokerVoucher[] = [
 // --- CARD WITH UPDATED EFFECT ---
 export const UPDATED_CARDS: Record<string, Omit<Card, 'id'>> = {
   HOLOGRAM: { name: 'カンニング', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '手札のカードを1枚コピーする。', promptsCopy: 1, rarity: 'UNCOMMON', textureRef: 'NOTEBOOK|青|SKILL' },
+  BERSERK: { name: '逆ギレ', cost: 0, type: CardType.POWER, target: TargetType.SELF, description: '自分にびくびく2を与える。エネルギー1を得る。', energy: 1, vulnerable: 2, rarity: 'RARE', textureRef: 'FLAME|赤|POWER' },
+  DISCOVERY: { name: '発見', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ランダムなカードを手札に加える。', exhaust: true, rarity: 'UNCOMMON', textureRef: 'NOTEBOOK|白|SKILL' }, 
 };
 
 // Merge Update
