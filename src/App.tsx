@@ -1986,9 +1986,17 @@ const App: React.FC = () => {
             p.strength -= p.powers['STRENGTH_DOWN']; 
             delete p.powers['STRENGTH_DOWN']; 
         }
+
+        if (p.powers['LOSE_STRENGTH'] > 0) {
+            const loss = p.powers['LOSE_STRENGTH'];
+            p.strength -= loss;
+            p.floatingText = { id: `lose-str-${Date.now()}`, text: `-${loss} STR`, color: 'text-red-400', iconType: 'sword' };
+            newLogs.push("反動で筋力が戻った");
+            delete p.powers['LOSE_STRENGTH'];
+        }
         
         p.hand.forEach(c => {
-            if (c.name === 'やほど' || c.name === 'BURN') { p.currentHp -= 2; newLogs.push("やほどダメージ"); }
+            if (c.name === 'やけど' || c.name === 'BURN') { p.currentHp -= 2; newLogs.push("やけどダメージ"); }
             if (c.name === '虫歯' || c.name === 'DECAY') { p.currentHp -= 2; newLogs.push("虫歯ダメージ"); }
             if (c.name === '不安' || c.name === 'DOUBT') p.powers['WEAK'] = (p.powers['WEAK'] || 0) + 1;
             if (c.name === '恥' || c.name === 'SHAME') p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + 1;
