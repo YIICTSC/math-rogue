@@ -281,6 +281,7 @@ const DICTIONARY: Record<string, string> = {
   "所持": "もってる",
   "アップ": "アップ",
   "ダウン": "ダウン",
+  "反動で筋力が戻った": "はんどうで ムキムキが もどった",
 
   "混乱": "こんらん",
   "混乱した": "こんらん した",
@@ -903,6 +904,7 @@ const DICTIONARY: Record<string, string> = {
   "外す": "はずす",
   "投げる": "なげる",
   "振る": "ふる",
+  "反動で筋力が戻った": "はんどうで ムキムキが もどった",
 };
 
 export const trans = (text: string, languageMode: LanguageMode | string): string => {
