@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
@@ -43,6 +42,7 @@ const POWER_DEFINITIONS: Record<string, {name: string, desc: string}> = {
     REGEN: { name: "じわじわ回復", desc: "ターン終了時、その数値分HPを回復し、数値が1減る。" },
     STRENGTH_DOWN: { name: "ムキムキダウン", desc: "ターン終了時、ムキムキが通常の値に戻る。" },
     CONFUSED: { name: "混乱", desc: "カードのコストがランダムに変化する。" },
+    LOSE_STRENGTH: { name: "反動", desc: "ターン終了時、ムキムキを失う。" },
     
     // Renamed Powers
     DEMON_FORM: { name: "反抗期", desc: "ターン開始時、ムキムキになる。" },
@@ -61,7 +61,6 @@ const POWER_DEFINITIONS: Record<string, {name: string, desc: string}> = {
     MASTER_REALITY: { name: '模範解答', desc: 'カードが生成された時、それをアップグレードする。' },
     BURST: { name: 'バースト', desc: '次にプレイするスキルカードが2回発動する。' },
     DOUBLE_POISON: { name: '化学反応', desc: 'ドクドクの効果を増幅させる。' },
-    LOSE_STRENGTH: { name: 'ムキムキダウン', desc: 'ターン終了時、ムキムキを失う。' },
     CORRUPTION: { name: '学級崩壊', desc: 'スキルカードのコストが0になり、使用時に廃棄される。' },
     FEEL_NO_PAIN: { name: '我慢大会', desc: 'カードが廃棄される度、ブロックを得る。' },
     RUPTURE: { name: '成長痛', desc: 'HPを失った時、ムキムキを得る。' },
