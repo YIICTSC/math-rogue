@@ -51,6 +51,10 @@ const calculateScore = (state: GameState, victory: boolean): number => {
     if (victory) {
         score += Math.floor((state.player.currentHp / state.player.maxHp) * 200);
     }
+    // Spirit Poop penalty
+    if (state.player.relics.find(r => r.id === 'SPIRIT_POOP')) {
+        score -= 1;
+    }
     return score;
 };
 
@@ -1736,7 +1740,7 @@ const App: React.FC = () => {
     });
   };
 
-  const handleEndTurn = async (skipEnemies?: boolean) => {
+  const executeEndTurn = async (cardToAdd?: ICard) => {
     audioService.playSound('select');
     setTurnLog(trans("敵のターン", languageMode));
     setLastActionType(null);
@@ -1744,6 +1748,14 @@ const App: React.FC = () => {
     setGameState(prev => {
         const p = { ...prev.player };
         const newLogs: string[] = [];
+
+        if (cardToAdd) {
+            if (p.hand.length < HAND_SIZE + 5) {
+                p.hand = [...p.hand, cardToAdd];
+            } else {
+                p.discardPile = [...p.discardPile, cardToAdd];
+            }
+        }
         
         if (p.powers['METALLICIZE']) {
             p.block += p.powers['METALLICIZE'];
@@ -1926,18 +1938,6 @@ const App: React.FC = () => {
             newLogs.push(`再生で${heal}回復`);
         }
 
-        if (p.relics.find(r => r.id === 'NILRYS_CODEX')) {
-            const keys = Object.keys(CARDS_LIBRARY).filter(k => !STATUS_CARDS[k] && !CURSE_CARDS[k]);
-            const k = keys[Math.floor(Math.random() * keys.length)];
-            const c = { ...CARDS_LIBRARY[k], id: `nilry-${Date.now()}` };
-            if (p.hand.length < HAND_SIZE + 5) {
-                p.hand.push(c); 
-            } else {
-                p.discardPile.push(c);
-            }
-            newLogs.push(trans("コーデックスでカード生成", languageMode));
-        }
-
         if (p.powers['INTANGIBLE'] > 0) p.powers['INTANGIBLE']--;
         if (p.powers['STRENGTH_DOWN']) { 
             p.strength -= p.powers['STRENGTH_DOWN']; 
@@ -1957,6 +1957,24 @@ const App: React.FC = () => {
     
     startPlayerTurn();
   };
+  
+  const handleEndTurnClick = () => {
+       if (gameState.player.relics.find(r => r.id === 'NILRYS_CODEX')) {
+           const pool = Object.values(CARDS_LIBRARY).filter(c => !STATUS_CARDS[c.name] && !CURSE_CARDS[c.name] && c.rarity !== 'SPECIAL');
+           const options = [];
+           for(let i=0; i<3; i++) {
+                options.push({...pool[Math.floor(Math.random() * pool.length)], id: `codex-${Date.now()}-${i}`});
+           }
+           setGameState(prev => ({ ...prev, codexOptions: options }));
+       } else {
+           executeEndTurn();
+       }
+  }
+  
+  const onCodexSelect = (card: ICard | null) => {
+      setGameState(prev => ({ ...prev, codexOptions: undefined }));
+      executeEndTurn(card || undefined);
+  }
 
   const handleSynthesizeCard = (c1: ICard, c2: ICard) => {
       const newCard = synthesizeCards(c1, c2);
@@ -2396,8 +2414,8 @@ const App: React.FC = () => {
 
             {gameState.screen === GameScreen.BATTLE && (
                 <BattleScene 
-                    player={gameState.player} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onEndTurn={handleEndTurn} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={gameState.selectionState} onHandSelection={handleHandSelection}
-                    onUsePotion={handleUsePotion} combatLog={gameState.combatLog} languageMode={languageMode}
+                    player={gameState.player} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onEndTurn={handleEndTurnClick} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={gameState.selectionState} onHandSelection={handleHandSelection}
+                    onUsePotion={handleUsePotion} combatLog={gameState.combatLog} languageMode={languageMode} codexOptions={gameState.codexOptions} onCodexSelect={onCodexSelect}
                 />
             )}
 

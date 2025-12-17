@@ -449,4 +449,5 @@ export interface GameState {
   selectionState: SelectionState; 
   isEndless?: boolean;
   pokerState?: PokerRunState; // Added: Auto-save state for Poker Mini Game
+  codexOptions?: Card[]; // Added: For Nilry's Codex selection
 }

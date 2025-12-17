@@ -26,6 +26,8 @@ interface BattleSceneProps {
   onUsePotion: (potion: Potion) => void;
   combatLog: string[]; // New Prop
   languageMode: LanguageMode;
+  codexOptions?: ICard[]; // New prop for Nilry's Codex
+  onCodexSelect: (card: ICard | null) => void; // New prop for Nilry's Codex
 }
 
 const POWER_DEFINITIONS: Record<string, {name: string, desc: string}> = {
@@ -104,7 +106,7 @@ const FloatingTextOverlay: React.FC<{ data: FloatingText | null, languageMode: L
 
 const BattleScene: React.FC<BattleSceneProps> = ({ 
   player, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
-  selectionState, onHandSelection, onUsePotion, combatLog, languageMode
+  selectionState, onHandSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect
 }) => {
   
   const playerHpPercent = (player.currentHp / player.maxHp) * 100;
@@ -205,6 +207,27 @@ const BattleScene: React.FC<BattleSceneProps> = ({
       {/* 2. Battle Viewport (Enemies & Player Sprite) - Scrollable to prevent overlap */}
       <div className="flex-1 relative overflow-y-auto custom-scrollbar flex flex-col justify-between p-2 bg-gray-800/50 gap-4">
         
+        {/* Codex Selection Modal */}
+        {codexOptions && (
+            <div className="fixed inset-0 z-[100] bg-black/80 flex flex-col items-center justify-center p-4 animate-in fade-in duration-200">
+                <h3 className="text-2xl font-bold text-yellow-400 mb-4 drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]">秘密の攻略本</h3>
+                <p className="text-gray-300 mb-6 text-sm">手札に加えるカードを1枚選んでください</p>
+                <div className="flex flex-wrap justify-center gap-4 mb-8">
+                    {codexOptions.map((card) => (
+                        <div key={card.id} className="scale-100 hover:scale-105 transition-transform cursor-pointer" onClick={() => onCodexSelect(card)}>
+                            <Card card={card} onClick={() => onCodexSelect(card)} disabled={false} languageMode={languageMode}/>
+                        </div>
+                    ))}
+                </div>
+                <button 
+                    onClick={() => onCodexSelect(null)} 
+                    className="bg-gray-600 hover:bg-gray-500 text-white px-8 py-2 rounded font-bold border border-gray-400"
+                >
+                    スキップ
+                </button>
+            </div>
+        )}
+
         {/* Combat Log Overlay */}
         {showLog && (
             <div 
