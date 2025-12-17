@@ -462,7 +462,14 @@ class AudioService {
       
       // If buffer not cached, try to load
       if (!buffer) {
-          const paths = [`./bgm/${type}.mp3`, `./${type}.mp3`]; // Try subfolder first, then root
+          // Try multiple paths. 
+          // Note: In Vite, files in 'public/bgm/' are served at '/bgm/'.
+          const paths = [
+              `/bgm/${type}.mp3`, 
+              `bgm/${type}.mp3`, 
+              `/${type}.mp3`, 
+              `${type}.mp3`
+          ];
           
           for (const path of paths) {
               try {
@@ -471,10 +478,13 @@ class AudioService {
                       const arrayBuffer = await response.arrayBuffer();
                       buffer = await this.ctx.decodeAudioData(arrayBuffer);
                       this.audioBuffers[type] = buffer;
-                      console.log(`Loaded BGM: ${path}`);
+                      console.log(`[AudioService] Loaded BGM successfully: ${path}`);
                       break; // Success
+                  } else {
+                      console.debug(`[AudioService] Failed to fetch ${path}: ${response.status}`);
                   }
               } catch (e) {
+                  console.debug(`[AudioService] Error fetching ${path}`, e);
                   // Continue to next path
               }
           }
