@@ -1240,10 +1240,13 @@ const App: React.FC = () => {
   };
 
   const handlePlayCard = (card: ICard) => {
-    // ... existing play card logic ...
-    // Note: This function is very long in the original code. 
-    // I will include the full function here to ensure it works correctly with new imports.
-    if (gameState.player.currentEnergy < card.cost) return;
+    // Determine effective cost
+    let effectiveCost = card.cost;
+    if (gameState.player.powers['CORRUPTION'] && card.type === CardType.SKILL) {
+        effectiveCost = 0;
+    }
+
+    if (gameState.player.currentEnergy < effectiveCost) return;
     if (gameState.enemies.length === 0) return;
     if (actingEnemyId) return; 
     if (gameState.selectionState.active) return;
@@ -1291,7 +1294,7 @@ const App: React.FC = () => {
           p.floatingText = { id: `pain-${Date.now()}`, text: `-${dmg}`, color: 'text-purple-500', iconType: 'skull' };
       }
 
-      p.currentEnergy -= card.cost;
+      p.currentEnergy -= effectiveCost;
       p.cardsPlayedThisTurn++;
       if (card.type === CardType.ATTACK) p.attacksPlayedThisTurn++;
       
@@ -1674,10 +1677,17 @@ const App: React.FC = () => {
       
       if (p.powers['DEMON_FORM']) { 
           p.strength += p.powers['DEMON_FORM']; 
-          p.floatingText = { id: `pow-demon-${Date.now()}`, text: '悪魔化', color: 'text-red-500' }; 
+          p.floatingText = { id: `pow-demon-${Date.now()}`, text: '反抗期', color: 'text-red-500' }; 
       }
       if (p.powers['ECHO_FORM']) p.echoes = p.powers['ECHO_FORM'];
-      if (p.powers['DEVA_FORM']) p.maxEnergy += p.powers['DEVA_FORM'];
+      
+      let devaBonus = 0;
+      if (p.powers['DEVA_FORM']) {
+          devaBonus = p.powers['DEVA_FORM'];
+          p.powers['DEVA_FORM']++; 
+          p.floatingText = { id: `pow-deva-${Date.now()}`, text: `受験勉強(+${devaBonus})`, color: 'text-purple-400' };
+      }
+
       if (p.powers['NOXIOUS_FUMES']) {
           const enemies = prev.enemies.map(e => {
               const newPoison = e.poison + p.powers['NOXIOUS_FUMES'];
@@ -1778,7 +1788,7 @@ const App: React.FC = () => {
           }
       }
 
-      let baseEnergy = p.maxEnergy + p.nextTurnEnergy;
+      let baseEnergy = p.maxEnergy + p.nextTurnEnergy + devaBonus;
       if (p.relics.find(r => r.id === 'ICE_CREAM')) {
           baseEnergy += p.currentEnergy;
       }
