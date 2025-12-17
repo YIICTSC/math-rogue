@@ -36,7 +36,7 @@ import { generateDungeonMap } from './services/mapGenerator';
 import { storageService } from './services/storageService';
 import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { trans } from './utils/textUtils';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music } from 'lucide-react';
 
 const calculateScore = (state: GameState, victory: boolean): number => {
     let score = 0;
@@ -208,6 +208,7 @@ const App: React.FC = () => {
   const [selectedCharName, setSelectedCharName] = useState<string>("戦士");
   const [legacyCardSelected, setLegacyCardSelected] = useState<boolean>(false);
   const [showDebugLog, setShowDebugLog] = useState<boolean>(false);
+  const [bgmMode, setBgmMode] = useState<'OSCILLATOR' | 'MP3'>('OSCILLATOR');
   
   // Debug Logic
   const [isMathDebugSkipped, setIsMathDebugSkipped] = useState<boolean>(false);
@@ -263,6 +264,8 @@ const App: React.FC = () => {
     setClearCount(storageService.getClearCount());
     setIsMathDebugSkipped(storageService.getDebugMathSkip());
     setIsDebugHpOne(storageService.getDebugHpOne());
+    // Note: BGM mode is reset to Oscillator on reload for simplicity, 
+    // but could be loaded from storage if implemented.
   }, []);
 
   const handleTitleClick = () => {
@@ -292,6 +295,13 @@ const App: React.FC = () => {
 
   const toggleLanguage = () => {
       setLanguageMode(prev => prev === 'JAPANESE' ? 'HIRAGANA' : 'JAPANESE');
+      audioService.playSound('select');
+  };
+
+  const toggleBgmMode = () => {
+      const newMode = bgmMode === 'OSCILLATOR' ? 'MP3' : 'OSCILLATOR';
+      setBgmMode(newMode);
+      audioService.setBgmMode(newMode);
       audioService.playSound('select');
   };
 
@@ -510,6 +520,8 @@ const App: React.FC = () => {
   };
 
   const generateEvent = (player: Player) => {
+      // ... existing event generation logic ...
+      const random = Math.random();
       const events = [
           {
               title: "怪しい薬売り",
@@ -821,7 +833,7 @@ const App: React.FC = () => {
                   { label: "放置", text: "見なかったことにする", action: () => setEventResultLog(trans("賢明な判断だ。", languageMode)) }
               ]
           },
-          // 新規イベント 12: 謎の転校生 (Mystery Transfer Student)        
+          // 新規イベント 12: 謎の転校生 (Mystery Transfer Student) 
           {
               title: "謎の転校生",
               description: "「ねえ、君のそのカード、僕のと交換しない？」\n見たことのないカードを持っている。",
@@ -832,7 +844,6 @@ const App: React.FC = () => {
                       const newCardKey = Object.keys(CARDS_LIBRARY).filter(k => CARDS_LIBRARY[k].rarity === 'UNCOMMON' || CARDS_LIBRARY[k].rarity === 'RARE')[Math.floor(Math.random() * 5)];
                       const newCard = CARDS_LIBRARY[newCardKey];
                       
-                      // Parasite Check
                       let newMaxHp = player.maxHp;
                       let curseMsg = "";
                       if (removed.name === '寄生虫' || removed.name === 'PARASITE') {
@@ -854,6 +865,7 @@ const App: React.FC = () => {
   };
 
   const handleNodeSelect = async (node: MapNode) => {
+      // ... existing node select logic ...
       setIsLoading(true);
       audioService.playSound('select');
       
@@ -912,6 +924,7 @@ const App: React.FC = () => {
             const flavor = await generateFlavorText(node.type === NodeType.BOSS ? "ボスが現れた！" : "敵と遭遇した。");
             
             const p = { ...nextState.player };
+            // ... (rest of battle setup)
             p.drawPile = shuffle(p.deck.map(c => ({ ...c })));
             p.hand = [];
             p.discardPile = [];
@@ -1214,7 +1227,9 @@ const App: React.FC = () => {
   };
 
   const handlePlayCard = (card: ICard) => {
-    // Basic validations
+    // ... existing play card logic ...
+    // Note: This function is very long in the original code. 
+    // I will include the full function here to ensure it works correctly with new imports.
     if (gameState.player.currentEnergy < card.cost) return;
     if (gameState.enemies.length === 0) return;
     if (actingEnemyId) return; 
@@ -2266,7 +2281,14 @@ const App: React.FC = () => {
             
             {/* Language Toggle Button (Only visible on START_MENU) */}
             {gameState.screen === GameScreen.START_MENU && (
-                <div className="absolute top-2 right-2 z-[9999]">
+                <div className="absolute top-2 right-2 z-[9999] flex gap-2">
+                    <button 
+                        onClick={toggleBgmMode} 
+                        className={`bg-black/50 hover:bg-black/80 text-white border border-white/50 px-2 py-1 rounded text-xs flex items-center shadow-lg transition-colors font-bold ${bgmMode === 'MP3' ? 'border-green-500 text-green-400' : ''}`}
+                    >
+                        <Music size={14} className="mr-1"/>
+                        {bgmMode === 'OSCILLATOR' ? 'BGM: 電子音' : 'BGM: MP3'}
+                    </button>
                     <button 
                         onClick={toggleLanguage} 
                         className="bg-black/50 hover:bg-black/80 text-white border border-white/50 px-2 py-1 rounded text-xs flex items-center shadow-lg transition-colors font-bold"
@@ -2336,7 +2358,7 @@ const App: React.FC = () => {
                             </div>
 
                             <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                <Terminal size={10}/> v2.5.2
+                                <Terminal size={10}/> v2.5.3
                             </button>
                         </div>
                     </div>
@@ -2350,14 +2372,14 @@ const App: React.FC = () => {
                             className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2 select-none active:text-green-200"
                             onClick={handleLogTitleClick}
                         >
-                            System Update Log v2.5.2
+                            System Update Log v2.5.3
                         </h2>
                         <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
                             <section>
                                 <h3 className="text-white font-bold mb-1">■ アップデート (Update)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li>計算モード選択画面に言語切り替えを適用しました。</li>
-                                    <li>遊び方画面に言語切り替えを適用しました。</li>
+                                    <li>BGMモード切り替え機能（MP3対応）を追加しました。</li>
+                                    <li>タイトル画面にBGM切り替えボタンを設置しました。</li>
                                 </ul>
                             </section>
                         </div>

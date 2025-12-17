@@ -9,6 +9,11 @@ class AudioService {
   private isPlayingBGM: boolean = false;
   private currentBgmType: 'battle' | 'menu' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane' | null = null;
   
+  // BGM Mode
+  private bgmMode: 'OSCILLATOR' | 'MP3' = 'OSCILLATOR';
+  private audioBuffers: Record<string, AudioBuffer> = {};
+  private currentSource: AudioBufferSourceNode | null = null;
+
   // Sequencer State
   private nextNoteTime: number = 0;
   private current16thNote: number = 0;
@@ -78,6 +83,22 @@ class AudioService {
     for (let i = 0; i < bufferSize; i++) {
         data[i] = Math.random() * 2 - 1;
     }
+  }
+
+  public setBgmMode(mode: 'OSCILLATOR' | 'MP3') {
+      if (this.bgmMode === mode) return;
+      this.bgmMode = mode;
+      
+      // If currently playing, restart with new mode
+      if (this.isPlayingBGM && this.currentBgmType) {
+          const type = this.currentBgmType;
+          this.stopBGM();
+          this.playBGM(type);
+      }
+  }
+
+  public getBgmMode() {
+      return this.bgmMode;
   }
 
   // --- Scheduler & Sequencer ---
@@ -396,40 +417,90 @@ class AudioService {
   }
 
   // --- Public API ---
-  public playBGM(type: 'battle' | 'menu' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane') {
+  public async playBGM(type: 'battle' | 'menu' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane') {
       if (this.isPlayingBGM && this.currentBgmType === type) return;
       
       this.init(); 
-      if (this.timerID) clearTimeout(this.timerID);
       
+      // Stop old BGM
+      this.stopBGM();
+
       this.currentBgmType = type;
       this.isPlayingBGM = true;
       this.swing = 0; // Reset swing
       
-      if (type === 'battle') { this.tempo = 135; }
-      else if (type === 'math') { this.tempo = 110; }
-      else if (type === 'poker_play') { this.tempo = 120; this.swing = 0.6; }
-      else if (type === 'poker_shop') { this.tempo = 90; }
-      else if (type === 'survivor_metal') { this.tempo = 170; }
-      else if (type === 'school_psyche') { this.tempo = 100; }
-      else if (type === 'dungeon_gym') { this.tempo = 110; }
-      else if (type === 'dungeon_science') { this.tempo = 125; }
-      else if (type === 'dungeon_music') { this.tempo = 90; } // Waltz-ish
-      else if (type === 'dungeon_library') { this.tempo = 60; }
-      else if (type === 'dungeon_roof') { this.tempo = 80; }
-      else if (type === 'dungeon_boss') { this.tempo = 150; }
-      else if (type === 'paper_plane') { this.tempo = 90; } // Slow space western
-      else { this.tempo = 90; }
+      if (this.bgmMode === 'MP3') {
+          await this.playMp3(type);
+      } else {
+          // Oscillator Mode
+          if (type === 'battle') { this.tempo = 135; }
+          else if (type === 'math') { this.tempo = 110; }
+          else if (type === 'poker_play') { this.tempo = 120; this.swing = 0.6; }
+          else if (type === 'poker_shop') { this.tempo = 90; }
+          else if (type === 'survivor_metal') { this.tempo = 170; }
+          else if (type === 'school_psyche') { this.tempo = 100; }
+          else if (type === 'dungeon_gym') { this.tempo = 110; }
+          else if (type === 'dungeon_science') { this.tempo = 125; }
+          else if (type === 'dungeon_music') { this.tempo = 90; } // Waltz-ish
+          else if (type === 'dungeon_library') { this.tempo = 60; }
+          else if (type === 'dungeon_roof') { this.tempo = 80; }
+          else if (type === 'dungeon_boss') { this.tempo = 150; }
+          else if (type === 'paper_plane') { this.tempo = 90; } // Slow space western
+          else { this.tempo = 90; }
+    
+          this.current16thNote = 0;
+          this.total16thNotes = 0;
+          if (this.ctx) this.nextNoteTime = this.ctx.currentTime + 0.1;
+          this.scheduler();
+      }
+  }
 
-      this.current16thNote = 0;
-      this.total16thNotes = 0;
-      if (this.ctx) this.nextNoteTime = this.ctx.currentTime + 0.1;
-      this.scheduler();
+  private async playMp3(type: string) {
+      if (!this.ctx || !this.bgmGain) return;
+
+      const path = `./bgm/${type}.mp3`;
+      
+      try {
+          let buffer = this.audioBuffers[type];
+          if (!buffer) {
+              const response = await fetch(path);
+              if (!response.ok) throw new Error(`Failed to load ${path}`);
+              const arrayBuffer = await response.arrayBuffer();
+              buffer = await this.ctx.decodeAudioData(arrayBuffer);
+              this.audioBuffers[type] = buffer;
+          }
+
+          // Check if stopped or changed while loading
+          if (!this.isPlayingBGM || this.currentBgmType !== type) return;
+
+          const source = this.ctx.createBufferSource();
+          source.buffer = buffer;
+          source.loop = true;
+          source.connect(this.bgmGain);
+          source.start(0);
+          this.currentSource = source;
+          
+      } catch (e) {
+          console.warn(`BGM Load Error (${type}):`, e);
+          // Don't fallback automatically to avoid mixing, just silence or console warning
+      }
   }
 
   public stopBGM() {
-      this.isPlayingBGM = false;
+      // Stop Oscillator
       if (this.timerID) clearTimeout(this.timerID);
+      this.timerID = null;
+
+      // Stop MP3
+      if (this.currentSource) {
+          try {
+              this.currentSource.stop();
+              this.currentSource.disconnect();
+          } catch(e) {}
+          this.currentSource = null;
+      }
+      
+      this.isPlayingBGM = false;
       this.currentBgmType = null;
   }
 
