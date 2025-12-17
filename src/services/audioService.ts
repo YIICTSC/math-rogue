@@ -458,38 +458,55 @@ class AudioService {
   private async playMp3(type: string) {
       if (!this.ctx || !this.bgmGain) return;
 
-      const path = `./bgm/${type}.mp3`;
+      let buffer = this.audioBuffers[type];
       
-      try {
-          let buffer = this.audioBuffers[type];
-          if (!buffer) {
-              const response = await fetch(path);
-              if (!response.ok) throw new Error(`Failed to load ${path}`);
-              const arrayBuffer = await response.arrayBuffer();
-              buffer = await this.ctx.decodeAudioData(arrayBuffer);
-              this.audioBuffers[type] = buffer;
+      // If buffer not cached, try to load
+      if (!buffer) {
+          const paths = [`./bgm/${type}.mp3`, `./${type}.mp3`]; // Try subfolder first, then root
+          
+          for (const path of paths) {
+              try {
+                  const response = await fetch(path);
+                  if (response.ok) {
+                      const arrayBuffer = await response.arrayBuffer();
+                      buffer = await this.ctx.decodeAudioData(arrayBuffer);
+                      this.audioBuffers[type] = buffer;
+                      console.log(`Loaded BGM: ${path}`);
+                      break; // Success
+                  }
+              } catch (e) {
+                  // Continue to next path
+              }
           }
+      }
 
-          // Check if stopped or changed while loading
-          if (!this.isPlayingBGM || this.currentBgmType !== type) return;
-          // Check if mode changed while loading
-          if (this.bgmMode !== 'MP3') return;
+      // If still no buffer, fallback
+      if (!buffer) {
+          console.warn(`BGM Load Error (${type}): File not found.`);
+          console.log("Falling back to OSCILLATOR mode.");
+          
+          // Fallback logic: Switch to Oscillator and restart
+          this.stopBGM(); // Reset state
+          this.bgmMode = 'OSCILLATOR';
+          // Avoid infinite recursion if playBGM calls playMp3 again (it checks bgmMode, so it should be safe after setting to OSCILLATOR)
+          this.playBGM(type as any);
+          return;
+      }
 
+      // Check if stopped or changed while loading
+      if (!this.isPlayingBGM || this.currentBgmType !== type) return;
+      // Check if mode changed while loading
+      if (this.bgmMode !== 'MP3') return;
+
+      try {
           const source = this.ctx.createBufferSource();
           source.buffer = buffer;
           source.loop = true;
           source.connect(this.bgmGain);
           source.start(0);
           this.currentSource = source;
-          
       } catch (e) {
-          console.warn(`BGM Load Error (${type}):`, e);
-          console.log("Falling back to OSCILLATOR mode.");
-          
-          // Fallback logic: Switch to Oscillator and restart
-          this.stopBGM(); // Reset state
-          this.bgmMode = 'OSCILLATOR';
-          this.playBGM(type as any);
+          console.error("Audio playback error:", e);
       }
   }
 
