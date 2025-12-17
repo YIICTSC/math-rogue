@@ -7,7 +7,7 @@ class AudioService {
   
   private isMuted: boolean = false;
   private isPlayingBGM: boolean = false;
-  private currentBgmType: 'battle' | 'menu' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane' | null = null;
+  private currentBgmType: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane' | null = null;
   
   // BGM Mode
   private bgmMode: 'OSCILLATOR' | 'MP3' = 'OSCILLATOR';
@@ -125,7 +125,7 @@ class AudioService {
       const t = this.total16thNotes;
 
       if (this.currentBgmType === 'battle') {
-          // --- BATTLE THEME ---
+          // --- BATTLE THEME (Standard) ---
           if (beatNumber % 2 === 0) { 
              const measure = Math.floor(Date.now() / 2000) % 4; 
              const rootMap = [55, 55, 48, 52]; 
@@ -143,8 +143,57 @@ class AudioService {
               this.playOsc(note * 1.01, actualTime, 0.1, 'square', 0.2, this.bgmGain); 
           }
 
+      } else if (this.currentBgmType === 'mid_boss') {
+          // --- MID BOSS / ELITE ---
+          // Faster, more aggressive bass
+          if (beatNumber % 2 === 0) {
+              this.playOsc(55, actualTime, 0.1, 'sawtooth', 0.6, this.bgmGain);
+              this.playOsc(110, actualTime, 0.1, 'square', 0.3, this.bgmGain);
+          }
+          if (beatNumber % 4 === 0) this.playNoise(actualTime, 0.1, 0.9, 'kick');
+          if (beatNumber % 4 === 2) this.playNoise(actualTime, 0.1, 0.7, 'snare');
+          
+          // Fast Arp
+          const arp = [440, 554, 659, 880, 659, 554, 440, 329];
+          const note = arp[beatNumber % 8];
+          this.playOsc(note, actualTime, 0.1, 'triangle', 0.3, this.bgmGain);
+
+      } else if (this.currentBgmType === 'boss') {
+          // --- BOSS THEME ---
+          // Heavy, slow, imposing
+          if (beatNumber === 0) {
+              const chords = [[110, 164, 196], [98, 146, 174], [87, 130, 155], [110, 164, 196]];
+              const measure = Math.floor(t / 16) % 4;
+              this.playChord(chords[measure], actualTime, 0.8, 'sawtooth', 0.4);
+          }
+          if (beatNumber % 8 === 0) this.playNoise(actualTime, 0.2, 1.0, 'kick');
+          if (beatNumber % 16 === 8) this.playNoise(actualTime, 0.3, 0.8, 'snare');
+
+          // Melodic lead
+          if (beatNumber % 4 === 0) {
+              const melody = [440, 440, 392, 493];
+              const note = melody[Math.floor(t / 16) % 4];
+              this.playOsc(note, actualTime, 0.4, 'square', 0.3, this.bgmGain);
+          }
+
+      } else if (this.currentBgmType === 'final_boss') {
+          // --- FINAL BOSS ---
+          // Fast, dramatic, orchestral simulation
+          if (beatNumber % 2 === 0) this.playOsc(55, actualTime, 0.1, 'sawtooth', 0.7, this.bgmGain); // Driving bass
+          
+          // Drums
+          if (beatNumber % 4 === 0) this.playNoise(actualTime, 0.1, 1.0, 'kick');
+          if (beatNumber % 8 === 4) this.playNoise(actualTime, 0.1, 0.9, 'snare');
+          this.playNoise(actualTime, 0.02, 0.3, 'hat');
+
+          // High tension strings
+          const arp = [880, 659, 554, 440, 554, 659, 880, 1108];
+          const note = arp[beatNumber % 8];
+          this.playOsc(note, actualTime, 0.1, 'sawtooth', 0.2, this.bgmGain);
+          this.playOsc(note * 1.5, actualTime, 0.1, 'square', 0.1, this.bgmGain);
+
       } else if (this.currentBgmType === 'menu') {
-          // --- MENU / MAP THEME ---
+          // --- START MENU (Title) ---
           if (beatNumber === 0) {
               const chords = [
                   [220, 261, 329], [174, 220, 261], 
@@ -157,6 +206,92 @@ class AudioService {
               const scale = [440, 523, 587, 659, 783, 880, 1046]; 
               const note = scale[Math.floor(Math.random() * scale.length)];
               this.playOsc(note * 2, actualTime, 0.3, 'sine', 0.15, this.bgmGain);
+          }
+
+      } else if (this.currentBgmType === 'map') {
+          // --- MAP THEME ---
+          // Walking pace, adventurous but quiet
+          if (beatNumber % 4 === 0) {
+              this.playOsc(110, actualTime, 0.1, 'triangle', 0.3, this.bgmGain); // Bass pulse
+          }
+          if (beatNumber % 16 === 0) {
+              const melody = [329, 392, 440, 523];
+              const note = melody[Math.floor(t / 64) % 4];
+              this.playOsc(note, actualTime, 0.5, 'sine', 0.2, this.bgmGain);
+          }
+
+      } else if (this.currentBgmType === 'shop') {
+          // --- SHOP THEME ---
+          // Jazzy, Swing, Relaxed (similar to poker_shop but lighter)
+          const measure = Math.floor(beatNumber / 16) % 4;
+          if (beatNumber % 4 === 0) {
+               // Walking Bass
+               const bass = [110, 130, 146, 164]; 
+               const note = bass[beatNumber % 4];
+               this.playOsc(note, actualTime, 0.3, 'triangle', 0.4, this.bgmGain);
+          }
+          if (beatNumber % 16 === 0) {
+              const chords = [[261, 329, 392], [220, 261, 329], [293, 349, 440], [196, 246, 293]];
+              this.playChord(chords[measure], actualTime, 1.0, 'sine', 0.2);
+          }
+          // Swing Hat
+          if (beatNumber % 2 === 0) this.playNoise(actualTime, 0.03, 0.1, 'hat');
+
+      } else if (this.currentBgmType === 'event') {
+          // --- EVENT THEME ---
+          // Mysterious, slightly unsettling
+          if (Math.random() < 0.3 && beatNumber % 4 === 0) {
+              const scale = [440, 466, 554, 587, 659]; // Diminished-ish
+              const note = scale[Math.floor(Math.random() * scale.length)];
+              this.playOsc(note, actualTime, 0.5, 'sine', 0.2, this.bgmGain);
+          }
+          if (beatNumber % 32 === 0) {
+               this.playOsc(110, actualTime, 4.0, 'triangle', 0.1, this.bgmGain); // Low drone
+          }
+
+      } else if (this.currentBgmType === 'rest') {
+          // --- REST THEME ---
+          // Healing, Arpeggio, Warm
+          const arp = [261, 329, 392, 523, 392, 329]; // C Major
+          const note = arp[beatNumber % 6];
+          if (note) {
+              this.playOsc(note, actualTime, 0.3, 'sine', 0.15, this.bgmGain);
+          }
+          if (beatNumber % 16 === 0) {
+               this.playChord([130, 196, 261], actualTime, 2.0, 'triangle', 0.1);
+          }
+
+      } else if (this.currentBgmType === 'reward') {
+          // --- REWARD THEME ---
+          // Bright, Major, Uplifting
+          if (beatNumber % 4 === 0) {
+              const bass = [261, 349, 392, 261];
+              const note = bass[Math.floor(t / 16) % 4];
+              this.playOsc(note / 2, actualTime, 0.2, 'square', 0.2, this.bgmGain);
+          }
+          const melody = [523, 523, 587, 659, 587, 523, 493, 392];
+          const note = melody[beatNumber % 8];
+          if (beatNumber % 2 === 0) {
+               this.playOsc(note, actualTime, 0.1, 'triangle', 0.3, this.bgmGain);
+          }
+
+      } else if (this.currentBgmType === 'victory') {
+          // --- VICTORY THEME ---
+          // Fanfare loop
+          const melody = [523, 523, 523, 659, 783, 783, 659, 783, 880];
+          const idx = beatNumber % melody.length;
+          this.playOsc(melody[idx], actualTime, 0.3, 'sawtooth', 0.2, this.bgmGain);
+          if (beatNumber % 4 === 0) this.playNoise(actualTime, 0.1, 0.5, 'snare');
+
+      } else if (this.currentBgmType === 'game_over') {
+          // --- GAME OVER THEME ---
+          // Slow, melancholic
+          if (beatNumber % 16 === 0) {
+              const chord = [220, 261, 311]; // Am
+              this.playChord(chord, actualTime, 3.0, 'sine', 0.2);
+          }
+          if (beatNumber % 8 === 0) {
+              this.playOsc(110, actualTime, 2.0, 'triangle', 0.2, this.bgmGain);
           }
 
       } else if (this.currentBgmType === 'math') {
@@ -349,6 +484,42 @@ class AudioService {
       }
   }
 
+  private playOscillatorBGM(type: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane') {
+      // Main Game
+      if (type === 'battle') { this.tempo = 135; }
+      else if (type === 'mid_boss') { this.tempo = 150; }
+      else if (type === 'boss') { this.tempo = 140; }
+      else if (type === 'final_boss') { this.tempo = 170; }
+      else if (type === 'menu') { this.tempo = 90; }
+      else if (type === 'map') { this.tempo = 100; }
+      else if (type === 'shop') { this.tempo = 90; this.swing = 0.3; }
+      else if (type === 'event') { this.tempo = 80; }
+      else if (type === 'rest') { this.tempo = 70; }
+      else if (type === 'reward') { this.tempo = 110; }
+      else if (type === 'victory') { this.tempo = 120; }
+      else if (type === 'game_over') { this.tempo = 60; }
+      
+      // Mini Games
+      else if (type === 'math') { this.tempo = 110; }
+      else if (type === 'poker_play') { this.tempo = 120; this.swing = 0.6; }
+      else if (type === 'poker_shop') { this.tempo = 90; }
+      else if (type === 'survivor_metal') { this.tempo = 170; }
+      else if (type === 'school_psyche') { this.tempo = 100; }
+      else if (type === 'dungeon_gym') { this.tempo = 110; }
+      else if (type === 'dungeon_science') { this.tempo = 125; }
+      else if (type === 'dungeon_music') { this.tempo = 90; }
+      else if (type === 'dungeon_library') { this.tempo = 60; }
+      else if (type === 'dungeon_roof') { this.tempo = 80; }
+      else if (type === 'dungeon_boss') { this.tempo = 150; }
+      else if (type === 'paper_plane') { this.tempo = 90; }
+      else { this.tempo = 90; }
+
+      this.current16thNote = 0;
+      this.total16thNotes = 0;
+      if (this.ctx) this.nextNoteTime = this.ctx.currentTime + 0.1;
+      this.scheduler();
+  }
+
   private scheduler() {
       if (!this.isPlayingBGM || !this.ctx) return;
       while (this.nextNoteTime < this.ctx.currentTime + this.scheduleAheadTime) {
@@ -417,8 +588,9 @@ class AudioService {
   }
 
   // --- Public API ---
-  public async playBGM(type: 'battle' | 'menu' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane') {
-      if (this.isPlayingBGM && this.currentBgmType === type && this.bgmMode === 'OSCILLATOR') return;
+  public async playBGM(type: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane') {
+      // Don't restart if already playing the same type (regardless of mode)
+      if (this.isPlayingBGM && this.currentBgmType === type) return;
       
       this.init(); 
       
@@ -432,26 +604,7 @@ class AudioService {
       if (this.bgmMode === 'MP3') {
           await this.playMp3(type);
       } else {
-          // Oscillator Mode
-          if (type === 'battle') { this.tempo = 135; }
-          else if (type === 'math') { this.tempo = 110; }
-          else if (type === 'poker_play') { this.tempo = 120; this.swing = 0.6; }
-          else if (type === 'poker_shop') { this.tempo = 90; }
-          else if (type === 'survivor_metal') { this.tempo = 170; }
-          else if (type === 'school_psyche') { this.tempo = 100; }
-          else if (type === 'dungeon_gym') { this.tempo = 110; }
-          else if (type === 'dungeon_science') { this.tempo = 125; }
-          else if (type === 'dungeon_music') { this.tempo = 90; } // Waltz-ish
-          else if (type === 'dungeon_library') { this.tempo = 60; }
-          else if (type === 'dungeon_roof') { this.tempo = 80; }
-          else if (type === 'dungeon_boss') { this.tempo = 150; }
-          else if (type === 'paper_plane') { this.tempo = 90; } // Slow space western
-          else { this.tempo = 90; }
-    
-          this.current16thNote = 0;
-          this.total16thNotes = 0;
-          if (this.ctx) this.nextNoteTime = this.ctx.currentTime + 0.1;
-          this.scheduler();
+          this.playOscillatorBGM(type);
       }
   }
 
@@ -462,9 +615,11 @@ class AudioService {
       
       // If buffer not cached, try to load
       if (!buffer) {
-          // Try multiple paths. 
-          // Note: In Vite, files in 'public/bgm/' are served at '/bgm/'.
+          // Ensure correct base path handling for Vite projects
+          const baseUrl = import.meta.env.BASE_URL; // e.g. './' or '/my-app/'
+          
           const paths = [
+              `${baseUrl}bgm/${type}.mp3`,
               `/bgm/${type}.mp3`, 
               `bgm/${type}.mp3`, 
               `/${type}.mp3`, 
@@ -480,11 +635,8 @@ class AudioService {
                       this.audioBuffers[type] = buffer;
                       console.log(`[AudioService] Loaded BGM successfully: ${path}`);
                       break; // Success
-                  } else {
-                      console.debug(`[AudioService] Failed to fetch ${path}: ${response.status}`);
                   }
               } catch (e) {
-                  console.debug(`[AudioService] Error fetching ${path}`, e);
                   // Continue to next path
               }
           }
@@ -493,13 +645,10 @@ class AudioService {
       // If still no buffer, fallback
       if (!buffer) {
           console.warn(`BGM Load Error (${type}): File not found.`);
-          console.log("Falling back to OSCILLATOR mode.");
+          console.log("Falling back to OSCILLATOR mode temporarily.");
           
-          // Fallback logic: Switch to Oscillator and restart
-          this.stopBGM(); // Reset state
-          this.bgmMode = 'OSCILLATOR';
-          // Avoid infinite recursion if playBGM calls playMp3 again (it checks bgmMode, so it should be safe after setting to OSCILLATOR)
-          this.playBGM(type as any);
+          // Fallback logic: Use Oscillator temporarily without changing bgmMode setting
+          this.playOscillatorBGM(type as any);
           return;
       }
 

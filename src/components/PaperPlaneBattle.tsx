@@ -724,7 +724,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     }, [phase, stage, player.starCoins, player.hp, selectedMissionLevel]);
 
     useEffect(() => {
-        audioService.playBGM('paper_plane');
+        // Initial BGM check based on loaded phase
+        if (phase === 'BATTLE') audioService.playBGM('paper_plane_battle');
+        else if (['VACATION', 'SHOP', 'HANGAR', 'REWARD_SELECT', 'REWARD_EQUIP', 'UPGRADE_EVENT'].includes(phase)) audioService.playBGM('paper_plane_vacation');
+        else audioService.playBGM('paper_plane_setup');
+
         if (phase === 'SETUP') {
              initPilotRoll();
         }
@@ -824,6 +828,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setStage(1);
         setIsEndless(false);
         initBattle(1);
+        audioService.playBGM('paper_plane_battle'); // Switch BGM
     };
 
     // --- GAME LOGIC ---
@@ -925,7 +930,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         generateEnemyIntents(1, eParts, stageNum); 
         setPhase('BATTLE');
         addLog(`バトル開始！ 敵: ${template.name}`);
-        audioService.playBGM('paper_plane');
+        audioService.playBGM('paper_plane_battle'); // Ensure correct BGM
     };
 
     const generateEnemyIntents = (turnNum: number, parts: ShipPart[], currentStage: number) => {
@@ -1333,6 +1338,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }
         setRewardOptions(opts);
         setPhase('REWARD_SELECT');
+        audioService.playBGM('paper_plane_vacation'); // Switch to vacation theme for reward
         audioService.playSound('win');
     };
 
@@ -1417,6 +1423,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setVacationLog("戦闘お疲れ様！休暇を楽しんでください。");
         generateVacationEvents();
         setPhase('VACATION');
+        audioService.playBGM('paper_plane_vacation'); // Already set but good for re-entry
     };
 
     const executeVacationEvent = (event: VacationEvent) => {

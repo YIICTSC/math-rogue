@@ -324,14 +324,14 @@ const App: React.FC = () => {
               screen: GameScreen.MAP
           };
       });
-      audioService.playBGM('menu');
+      audioService.playBGM('map');
   };
 
   const continueGame = () => {
       const saved = storageService.loadGame();
       if (saved) {
           setGameState(saved);
-          audioService.playBGM('menu'); 
+          audioService.playBGM('map'); 
       }
   };
 
@@ -433,7 +433,7 @@ const App: React.FC = () => {
             rewards: [],
             selectionState: { active: false, type: 'DISCARD', amount: 0 }
         }));
-        audioService.playBGM('menu');
+        audioService.playBGM('map');
   };
 
   const handleCharacterSelect = (char: Character) => {
@@ -503,7 +503,7 @@ const App: React.FC = () => {
           narrativeLog: [trans("冒険が始まった。", languageMode)],
           combatLog: [],
       }));
-      audioService.playBGM('menu');
+      audioService.playBGM('map');
   };
 
   const handleRelicSelect = (relic: Relic) => {
@@ -879,9 +879,10 @@ const App: React.FC = () => {
             const floorDifficulty = node.y * (1 + (actMultiplier * 0.5));
             
             let enemies: Enemy[] = [];
-            let bgmType: 'battle' | 'menu' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' = 'battle'; 
+            let bgmType: 'battle' | 'mid_boss' | 'boss' | 'final_boss' = 'battle'; 
 
             if (gameState.act === 4 && node.type === NodeType.BOSS) {
+                // Final Boss
                 enemies.push({
                     id: 'true-boss',
                     enemyType: 'THE_HEART',
@@ -894,7 +895,19 @@ const App: React.FC = () => {
                     vulnerable: 0, weak: 0, poison: 0, artifact: 2, corpseExplosion: false,
                     floatingText: null
                 });
+                bgmType = 'final_boss';
+            } else if (node.type === NodeType.BOSS) {
+                 // Act Boss
+                 bgmType = 'boss';
+            } else if (node.type === NodeType.ELITE) {
+                 // Elite
+                 bgmType = 'mid_boss';
             } else {
+                 // Normal Combat
+                 bgmType = 'battle';
+            }
+
+            if (enemies.length === 0) {
                 const numEnemies = node.type === NodeType.BOSS ? 1 : Math.floor(Math.random() * Math.min(3, 1 + Math.floor(node.y / 3))) + 1;
                 for (let i = 0; i < numEnemies; i++) {
                     const baseHp = (node.type === NodeType.BOSS ? 150 : 20) * actMultiplier + floorDifficulty * 2 + (node.type === NodeType.ELITE ? 40 : 0);
@@ -1041,7 +1054,7 @@ const App: React.FC = () => {
                 }
                 return { ...nextState, player: p, screen: GameScreen.REST };
             });
-            audioService.playBGM('menu');
+            audioService.playBGM('rest');
 
         } else if (node.type === NodeType.SHOP) {
             const shopCandidates = Object.values(CARDS_LIBRARY).filter(c => 
@@ -1074,14 +1087,14 @@ const App: React.FC = () => {
             setShopPotions(potionOptions);
 
             setGameState({ ...nextState, screen: GameScreen.SHOP });
-            audioService.playBGM('poker_shop');
+            audioService.playBGM('shop');
 
         } else if (node.type === NodeType.EVENT) {
             const ev = generateEvent(nextState.player);
             setEventData(ev);
             setEventResultLog(null);
             setGameState({ ...nextState, screen: GameScreen.EVENT });
-            audioService.playBGM('menu');
+            audioService.playBGM('event');
         } else if (node.type === NodeType.TREASURE) {
             const p = nextState.player;
             const matryoshkaCharges = p.relicCounters['MATRYOSHKA'] || 0;
@@ -1101,7 +1114,7 @@ const App: React.FC = () => {
             rewards.push({ type: 'GOLD', value: 50 + Math.floor(Math.random() * 50), id: `tr-gold-${Date.now()}` });
             setTreasureRewards(rewards);
             setGameState({ ...nextState, player: p, screen: GameScreen.TREASURE });
-            audioService.playBGM('menu');
+            audioService.playBGM('reward');
         }
 
       } catch (e) {
@@ -2089,6 +2102,7 @@ const App: React.FC = () => {
 
             if (gameState.act === 4) {
                  setGameState(prev => ({ ...prev, screen: GameScreen.ENDING }));
+                 audioService.playBGM('victory');
             } else {
                  // Skip VICTORY screen, go directly to math challenge
                  setGameState(prev => ({ ...prev, screen: GameScreen.MATH_CHALLENGE }));
@@ -2124,7 +2138,7 @@ const App: React.FC = () => {
             }
 
             audioService.playSound('lose');
-            audioService.stopBGM();
+            audioService.playBGM('game_over');
             
             const score = calculateScore(gameState, false);
             storageService.saveScore({
@@ -2189,7 +2203,7 @@ const App: React.FC = () => {
       }
 
       setGameState(prev => ({ ...prev, screen: GameScreen.REWARD, rewards }));
-      audioService.playBGM('menu');
+      audioService.playBGM('reward');
   };
 
   const handleMathChallengeComplete = (correctCount: number) => {
@@ -2253,7 +2267,7 @@ const App: React.FC = () => {
               screen: GameScreen.MAP,
               narrativeLog: [...prev.narrativeLog, trans(`第${nextAct}章へ進んだ。`, languageMode)]
           }));
-          audioService.playBGM('menu');
+          audioService.playBGM('map');
       } else {
           handleNodeComplete();
       }

@@ -574,6 +574,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 disabled={
                                     selectionState.active 
                                     ? false 
+                                    // Use effectiveCost logic in handlePlayCard, here just visual disabled for logic consistency
+                                    // If cost is 0 due to corruption, player.currentEnergy < 0 is false, so it's enabled.
                                     : (player.currentEnergy < displayCard.cost || !!actingEnemyId || card.unplayable || specialDisabled)
                                 }
                                 languageMode={languageMode}
@@ -601,7 +603,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 </div>
                 <div className="p-4 overflow-y-auto flex-grow bg-gray-900/90">
                     <div className="grid grid-cols-3 gap-2 justify-items-center">
-                        {sortedDeck.map((card) => (
+                        {/* Should sort deck if needed, but props passed raw */}
+                        {player.deck.sort((a, b) => a.type.localeCompare(b.type)).map((card) => (
                             <div key={card.id} className="scale-75 origin-top-left w-24 h-36">
                                 <Card card={card} onClick={() => {}} disabled={false} languageMode={languageMode}/>
                             </div>
