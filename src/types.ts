@@ -99,7 +99,7 @@ export interface EnemyIntent {
   type: EnemyIntentType;
   value: number;
   secondaryValue?: number; // For debuff amount or block amount in mixed moves
-  debuffType?: 'WEAK' | 'VULNERABLE' | 'POISON'; // Added to specify debuff
+  debuffType?: 'WEAK' | 'VULNERABLE' | 'POISON' | 'CONFUSED'; // Added to specify debuff
 }
 
 export interface FloatingText {

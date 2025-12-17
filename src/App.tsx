@@ -93,7 +93,10 @@ const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
             return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 14 : 9 };
 
         case 'TRICKSTER':
-            if (localTurn === 0) return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 2, debuffType: 'POISON' };
+            if (localTurn === 0) {
+                 if (Math.random() < 0.5) return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 2, debuffType: 'CONFUSED' };
+                 return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 2, debuffType: 'POISON' };
+            }
             if (localTurn === 1) return { type: EnemyIntentType.DEFEND, value: 8 };
             return { type: EnemyIntentType.ATTACK, value: 7 };
 
@@ -1654,7 +1657,8 @@ const App: React.FC = () => {
         const card = newDrawPile.pop();
         if (card) {
             if (card.name === '虚無' || card.name === 'VOID') p.currentEnergy = Math.max(0, p.currentEnergy - 1);
-            if (p.relics.find(r => r.id === 'SNECKO_EYE') && card.cost >= 0) {
+            // Snecko Eye OR Confusion
+            if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && card.cost >= 0) {
                 card.cost = Math.floor(Math.random() * 4);
             }
             newHand.push(card);
@@ -1669,7 +1673,8 @@ const App: React.FC = () => {
                     const extraCard = newDrawPile.pop();
                     if (extraCard) {
                         if (extraCard.name === '虚無' || extraCard.name === 'VOID') p.currentEnergy = Math.max(0, p.currentEnergy - 1);
-                        if (p.relics.find(r => r.id === 'SNECKO_EYE') && extraCard.cost >= 0) {
+                        // Snecko Eye OR Confusion for extra drawn cards too
+                        if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && extraCard.cost >= 0) {
                             extraCard.cost = Math.floor(Math.random() * 4);
                         }
                         newHand.push(extraCard);
@@ -1752,6 +1757,10 @@ const App: React.FC = () => {
         if (p.powers['VULNERABLE'] > 0) {
             p.powers['VULNERABLE']--;
             if (p.powers['VULNERABLE'] === 0) newLogs.push(trans("びくびくから回復した", languageMode));
+        }
+        if (p.powers['CONFUSED'] > 0) {
+            p.powers['CONFUSED']--;
+            if (p.powers['CONFUSED'] === 0) newLogs.push(trans("混乱から回復した", languageMode));
         }
         
         return { ...prev, player: p, combatLog: [...prev.combatLog, ...newLogs] };
@@ -1878,13 +1887,17 @@ const App: React.FC = () => {
                     const type = intent.debuffType;
                     if (type === 'WEAK') p.powers['WEAK'] = (p.powers['WEAK'] || 0) + debuffAmt;
                     if (type === 'VULNERABLE') p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + debuffAmt;
+                    if (type === 'CONFUSED') p.powers['CONFUSED'] = (p.powers['CONFUSED'] || 0) + debuffAmt;
                     if (type === 'POISON') {
                         const status = { ...STATUS_CARDS.SLIMED, id: `slime-${Date.now()}` };
                         p.discardPile.push(status);
                         newLogs.push(trans("粘液を混ぜられた", languageMode));
                     }
                     if (type) {
-                        const jpType = type === 'WEAK' ? 'へろへろ' : type === 'VULNERABLE' ? 'びくびく' : type;
+                        let jpType = type;
+                        if (type === 'WEAK') jpType = 'へろへろ';
+                        else if (type === 'VULNERABLE') jpType = 'びくびく';
+                        else if (type === 'CONFUSED') jpType = '混乱';
                         newLogs.push(`${trans(jpType, languageMode)}を${debuffAmt}受けました`);
                     }
                 }

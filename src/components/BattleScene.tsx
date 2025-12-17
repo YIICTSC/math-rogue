@@ -40,6 +40,7 @@ const POWER_DEFINITIONS: Record<string, {name: string, desc: string}> = {
     METALLICIZE: { name: "金属化", desc: "ターン終了時、その数値分のブロックを得る。" },
     REGEN: { name: "じわじわ回復", desc: "ターン終了時、その数値分HPを回復し、数値が1減る。" },
     STRENGTH_DOWN: { name: "ムキムキダウン", desc: "ターン終了時、ムキムキが通常の値に戻る。" },
+    CONFUSED: { name: "混乱", desc: "カードのコストがランダムに変化する。" },
     
     // Renamed Powers
     DEMON_FORM: { name: "反抗期", desc: "ターン開始時、ムキムキになる。" },
