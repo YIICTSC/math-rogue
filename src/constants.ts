@@ -283,7 +283,8 @@ export const RELIC_LIBRARY: Record<string, Relic> = {
     NECRONOMICON: { id: 'NECRONOMICON', name: '禁断の参考書', description: 'コスト2以上の攻撃を1ターン1回2度発動。', rarity: 'RARE' },
     ENCHIRIDION: { id: 'ENCHIRIDION', name: '分厚い辞書', description: '戦闘開始時、ランダムなパワーカードを手札に加える。', rarity: 'RARE' },
     NILRYS_CODEX: { id: 'NILRYS_CODEX', name: '秘密の攻略本', description: 'ターン終了時、ランダムな3枚から1枚を選んで手札に加える。', rarity: 'RARE' },
-    SPIRIT_POOP: { id: 'SPIRIT_POOP', name: '犬のフン', description: 'スコア計算時に1点減点される。', rarity: 'COMMON' }
+    SPIRIT_POOP: { id: 'SPIRIT_POOP', name: '犬のフン', description: 'スコア計算時に1点減点される。', rarity: 'COMMON' },
+    SNAKE_SKULL: { id: 'SNAKE_SKULL', name: '蛇の頭蓋骨', description: '毒を与える時、その数値が+1される。', rarity: 'COMMON', price: 180 },
 };
 
 // --- POTIONS ---

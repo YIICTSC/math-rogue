@@ -908,6 +908,15 @@ const App: React.FC = () => {
                 p.relicCounters['TEA_SERVER_ACTIVE'] = 0; 
                 p.floatingText = { id: `tea-${Date.now()}`, text: 'お茶パワー！', color: 'text-green-400', iconType: 'zap' };
             }
+            if (p.relics.find(r => r.id === 'ANCIENT_TEA_SET') && p.relicCounters['ANCIENT_TEA_SET_ACTIVE']) {
+                p.currentEnergy += 2;
+                p.relicCounters['ANCIENT_TEA_SET_ACTIVE'] = 0;
+                p.floatingText = { id: `tea-ancient-${Date.now()}`, text: 'お茶パワー！', color: 'text-green-400', iconType: 'zap' };
+            }
+            
+            if (p.relics.find(r => r.id === 'PHILOSOPHER_STONE')) {
+                 enemies.forEach(e => e.strength += 1);
+            }
 
             if (p.relics.find(r => r.id === 'MEGAPHONE')) {
                 enemies.forEach(e => {
@@ -981,6 +990,9 @@ const App: React.FC = () => {
                 if (p.relics.find(r => r.id === 'TEA_SERVER')) {
                     p.relicCounters['TEA_SERVER_ACTIVE'] = 1;
                 }
+                if (p.relics.find(r => r.id === 'ANCIENT_TEA_SET')) {
+                    p.relicCounters['ANCIENT_TEA_SET_ACTIVE'] = 1;
+                }
                 return { ...nextState, player: p, screen: GameScreen.REST };
             });
             audioService.playBGM('menu');
@@ -1025,12 +1037,24 @@ const App: React.FC = () => {
             setGameState({ ...nextState, screen: GameScreen.EVENT });
             audioService.playBGM('menu');
         } else if (node.type === NodeType.TREASURE) {
+            const p = nextState.player;
+            const matryoshkaCharges = p.relicCounters['MATRYOSHKA'] || 0;
+            const numRelics = matryoshkaCharges > 0 ? 2 : 1;
+            if (matryoshkaCharges > 0) {
+                 p.relicCounters['MATRYOSHKA'] = matryoshkaCharges - 1;
+            }
+
             const rewards: RewardItem[] = [];
             const allRelics = Object.values(RELIC_LIBRARY).filter(r => ['COMMON', 'UNCOMMON', 'RARE'].includes(r.rarity));
-            rewards.push({ type: 'RELIC', value: shuffle(allRelics)[0], id: `tr-relic-${Date.now()}` });
+            
+            // Generate multiple relics if matryoshka active
+            for(let i=0; i<numRelics; i++) {
+                rewards.push({ type: 'RELIC', value: shuffle([...allRelics])[0], id: `tr-relic-${Date.now()}-${i}` });
+            }
+            
             rewards.push({ type: 'GOLD', value: 50 + Math.floor(Math.random() * 50), id: `tr-gold-${Date.now()}` });
             setTreasureRewards(rewards);
-            setGameState({ ...nextState, screen: GameScreen.TREASURE });
+            setGameState({ ...nextState, player: p, screen: GameScreen.TREASURE });
             audioService.playBGM('menu');
         }
 
@@ -2098,6 +2122,7 @@ const App: React.FC = () => {
               if (item.value.id === 'WAFFLE') { p.maxHp += 7; p.currentHp = p.maxHp; }
               if (item.value.id === 'OLD_COIN') p.gold += 300;
               if (item.value.id === 'VELVET_CHOKER') p.maxEnergy += 1;
+              if (item.value.id === 'MATRYOSHKA') p.relicCounters['MATRYOSHKA'] = 2; // Init Counter
               storageService.saveUnlockedRelic(item.value.id);
           } else if (item.type === 'GOLD') {
               p.gold += item.value;
@@ -2408,6 +2433,7 @@ const App: React.FC = () => {
                              if (relic.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
                              if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
                              if (relic.id === 'OLD_COIN') newP.gold += 300;
+                             if (relic.id === 'MATRYOSHKA') newP.relicCounters['MATRYOSHKA'] = 2; // Init Counter
                              return { ...prev, player: newP };
                          });
                          storageService.saveUnlockedRelic(relic.id);
@@ -2463,6 +2489,7 @@ const App: React.FC = () => {
                                     if (r.value.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
                                     if (r.value.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
                                     if (r.value.id === 'OLD_COIN') newP.gold += 300;
+                                    if (r.value.id === 'MATRYOSHKA') newP.relicCounters['MATRYOSHKA'] = 2; // Init Counter
                                 }
                             });
 
