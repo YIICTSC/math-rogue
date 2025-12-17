@@ -243,6 +243,7 @@ const App: React.FC = () => {
           gameState.screen !== GameScreen.HELP &&
           gameState.screen !== GameScreen.RANKING &&
           gameState.screen !== GameScreen.CHARACTER_SELECTION &&
+          gameState.screen !== GameScreen.RELIC_SELECTION &&
           gameState.screen !== GameScreen.MODE_SELECTION &&
           gameState.screen !== GameScreen.DEBUG_MENU &&
           gameState.screen !== GameScreen.MINI_GAME_SELECT &&
@@ -464,14 +465,17 @@ const App: React.FC = () => {
       const starterRelic = RELIC_LIBRARY[char.startingRelicId];
       const relics = starterRelic ? [starterRelic] : [];
 
-      const map = generateDungeonMap();
+      // Generate Bonus Relic Options
+      const commonRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'COMMON');
+      const bonusOptions = shuffle(commonRelics).slice(0, 3);
+      setStarterRelics(bonusOptions);
 
       setGameState(prev => ({
           ...prev,
-          screen: GameScreen.MAP,
+          screen: GameScreen.RELIC_SELECTION,
           act: 1,
           floor: 0,
-          map,
+          map: [], // Map is generated after relic selection
           currentMapNodeId: null,
           player: {
               ...prev.player,
@@ -500,13 +504,13 @@ const App: React.FC = () => {
               cardsPlayedThisTurn: 0,
               echoes: 0,
           },
-          narrativeLog: [trans("冒険が始まった。", languageMode)],
+          narrativeLog: [trans("旅の支度をしている...", languageMode)],
           combatLog: [],
       }));
-      audioService.playBGM('map');
   };
 
   const handleRelicSelect = (relic: Relic) => {
+        audioService.playSound('buff');
         const map = generateDungeonMap();
         setGameState(prev => ({
             ...prev,
@@ -515,8 +519,10 @@ const App: React.FC = () => {
             player: {
                 ...prev.player,
                 relics: [...prev.player.relics, relic]
-            }
+            },
+            narrativeLog: [...prev.narrativeLog, trans("冒険が始まった。", languageMode)]
         }));
+        audioService.playBGM('map');
   };
 
   const generateEvent = (player: Player) => {
@@ -2404,6 +2410,7 @@ const App: React.FC = () => {
                                 <ul className="list-disc pl-5 space-y-1">
                                     <li>BGMモード切り替え機能（MP3対応）を追加しました。</li>
                                     <li>タイトル画面にBGM切り替えボタンを設置しました。</li>
+                                    <li>冒険開始時、ボーナスレリック選択フェーズを追加しました。</li>
                                 </ul>
                             </section>
                         </div>
