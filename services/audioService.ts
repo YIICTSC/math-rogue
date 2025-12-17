@@ -349,6 +349,28 @@ class AudioService {
       }
   }
 
+  private playOscillatorBGM(type: 'battle' | 'menu' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane') {
+      if (type === 'battle') { this.tempo = 135; }
+      else if (type === 'math') { this.tempo = 110; }
+      else if (type === 'poker_play') { this.tempo = 120; this.swing = 0.6; }
+      else if (type === 'poker_shop') { this.tempo = 90; }
+      else if (type === 'survivor_metal') { this.tempo = 170; }
+      else if (type === 'school_psyche') { this.tempo = 100; }
+      else if (type === 'dungeon_gym') { this.tempo = 110; }
+      else if (type === 'dungeon_science') { this.tempo = 125; }
+      else if (type === 'dungeon_music') { this.tempo = 90; }
+      else if (type === 'dungeon_library') { this.tempo = 60; }
+      else if (type === 'dungeon_roof') { this.tempo = 80; }
+      else if (type === 'dungeon_boss') { this.tempo = 150; }
+      else if (type === 'paper_plane') { this.tempo = 90; }
+      else { this.tempo = 90; }
+
+      this.current16thNote = 0;
+      this.total16thNotes = 0;
+      if (this.ctx) this.nextNoteTime = this.ctx.currentTime + 0.1;
+      this.scheduler();
+  }
+
   private scheduler() {
       if (!this.isPlayingBGM || !this.ctx) return;
       while (this.nextNoteTime < this.ctx.currentTime + this.scheduleAheadTime) {
@@ -432,26 +454,7 @@ class AudioService {
       if (this.bgmMode === 'MP3') {
           await this.playMp3(type);
       } else {
-          // Oscillator Mode
-          if (type === 'battle') { this.tempo = 135; }
-          else if (type === 'math') { this.tempo = 110; }
-          else if (type === 'poker_play') { this.tempo = 120; this.swing = 0.6; }
-          else if (type === 'poker_shop') { this.tempo = 90; }
-          else if (type === 'survivor_metal') { this.tempo = 170; }
-          else if (type === 'school_psyche') { this.tempo = 100; }
-          else if (type === 'dungeon_gym') { this.tempo = 110; }
-          else if (type === 'dungeon_science') { this.tempo = 125; }
-          else if (type === 'dungeon_music') { this.tempo = 90; } // Waltz-ish
-          else if (type === 'dungeon_library') { this.tempo = 60; }
-          else if (type === 'dungeon_roof') { this.tempo = 80; }
-          else if (type === 'dungeon_boss') { this.tempo = 150; }
-          else if (type === 'paper_plane') { this.tempo = 90; } // Slow space western
-          else { this.tempo = 90; }
-    
-          this.current16thNote = 0;
-          this.total16thNotes = 0;
-          if (this.ctx) this.nextNoteTime = this.ctx.currentTime + 0.1;
-          this.scheduler();
+          this.playOscillatorBGM(type);
       }
   }
 
@@ -492,13 +495,10 @@ class AudioService {
       // If still no buffer, fallback
       if (!buffer) {
           console.warn(`BGM Load Error (${type}): File not found.`);
-          console.log("Falling back to OSCILLATOR mode.");
+          console.log("Falling back to OSCILLATOR mode temporarily.");
           
-          // Fallback logic: Switch to Oscillator and restart
-          this.stopBGM(); // Reset state
-          this.bgmMode = 'OSCILLATOR';
-          // Avoid infinite recursion if playBGM calls playMp3 again (it checks bgmMode, so it should be safe after setting to OSCILLATOR)
-          this.playBGM(type as any);
+          // Fallback logic: Use Oscillator temporarily without changing bgmMode setting
+          this.playOscillatorBGM(type as any);
           return;
       }
 
