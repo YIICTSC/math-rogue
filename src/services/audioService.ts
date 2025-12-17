@@ -418,7 +418,7 @@ class AudioService {
 
   // --- Public API ---
   public async playBGM(type: 'battle' | 'menu' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane') {
-      if (this.isPlayingBGM && this.currentBgmType === type) return;
+      if (this.isPlayingBGM && this.currentBgmType === type && this.bgmMode === 'OSCILLATOR') return;
       
       this.init(); 
       
@@ -472,6 +472,8 @@ class AudioService {
 
           // Check if stopped or changed while loading
           if (!this.isPlayingBGM || this.currentBgmType !== type) return;
+          // Check if mode changed while loading
+          if (this.bgmMode !== 'MP3') return;
 
           const source = this.ctx.createBufferSource();
           source.buffer = buffer;
@@ -482,7 +484,12 @@ class AudioService {
           
       } catch (e) {
           console.warn(`BGM Load Error (${type}):`, e);
-          // Don't fallback automatically to avoid mixing, just silence or console warning
+          console.log("Falling back to OSCILLATOR mode.");
+          
+          // Fallback logic: Switch to Oscillator and restart
+          this.stopBGM(); // Reset state
+          this.bgmMode = 'OSCILLATOR';
+          this.playBGM(type as any);
       }
   }
 
