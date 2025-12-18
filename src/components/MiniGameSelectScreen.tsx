@@ -1,20 +1,40 @@
 
+
 import React, { useState, useRef } from 'react';
-import { ArrowLeft, Club, Gamepad2, Skull, Compass, Mountain, AlertTriangle, Trash2, Sword, Send } from 'lucide-react';
+import { ArrowLeft, Club, Gamepad2, Skull, Compass, Mountain, AlertTriangle, Trash2, Sword, Send, Lock } from 'lucide-react';
 import { storageService } from '../services/storageService';
 import { audioService } from '../services/audioService';
 
 interface MiniGameSelectScreenProps {
   onSelect: (gameId: string) => void;
   onBack: () => void;
+  totalMathCorrect: number;
+  isDebug: boolean;
 }
 
-const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, onBack }) => {
+const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, onBack, totalMathCorrect, isDebug }) => {
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const longPressTimer = useRef<any>(null);
   const isLongPress = useRef(false);
 
+  // Unlock Thresholds
+  const UNLOCK_THRESHOLDS = {
+      POKER: 1000,
+      SURVIVOR: 1500,
+      DUNGEON: 2000,
+      DUNGEON_2: 2500,
+      KOCHO: 3000,
+      PAPER_PLANE: 3500
+  };
+
+  const isUnlocked = (gameId: string) => {
+      if (isDebug) return true;
+      const threshold = (UNLOCK_THRESHOLDS as any)[gameId] || 0;
+      return totalMathCorrect >= threshold;
+  };
+
   const handlePressStart = (gameId: string) => {
+      if (!isUnlocked(gameId)) return;
       isLongPress.current = false;
       longPressTimer.current = setTimeout(() => {
           isLongPress.current = true;
@@ -29,6 +49,11 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
           longPressTimer.current = null;
       }
       
+      if (!isUnlocked(gameId)) {
+          audioService.playSound('wrong');
+          return;
+      }
+
       if (isLongPress.current) {
           e.preventDefault();
           return;
@@ -86,6 +111,17 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
       onTouchMove: handleCancelPress
   });
 
+  const LockedOverlay: React.FC<{ threshold: number }> = ({ threshold }) => {
+      const remaining = Math.max(0, threshold - totalMathCorrect);
+      return (
+          <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center rounded-xl z-20 pointer-events-none">
+              <Lock className="text-gray-500 mb-2" size={32} />
+              <div className="text-gray-400 font-bold text-xs">LOCKED</div>
+              <div className="text-yellow-500 font-bold text-[10px] mt-1">あと {remaining} 問</div>
+          </div>
+      );
+  };
+
   return (
     <div className="flex flex-col h-full w-full bg-gray-900 text-white relative">
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-30 pointer-events-none"></div>
@@ -127,45 +163,12 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
             
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 w-full mb-8 shrink-0 px-1 md:px-2">
                 
-                {/* Paper Plane Game Card (NEW) */}
-                <button
-                    {...bindPress('PAPER_PLANE')}
-                    className="group relative bg-sky-900 border-4 border-sky-500 hover:border-white hover:bg-sky-800 p-2 md:p-4 rounded-xl flex flex-col md:flex-row items-center justify-center md:justify-start text-center md:text-left transition-all shadow-xl hover:shadow-[0_0_20px_rgba(14,165,233,0.4)] overflow-hidden h-36 md:h-32"
-                >
-                    <div className="absolute top-0 right-0 bg-sky-600 text-white text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-md flex items-center gap-1 z-10">FLIGHT</div>
-                    <div className="bg-sky-950/50 p-2 md:p-3 rounded-full mb-2 md:mb-0 md:mr-3 group-hover:scale-110 transition-transform duration-300 border-2 border-sky-500/30 shrink-0">
-                        <Send size={24} className="text-sky-300 fill-current md:w-7 md:h-7" />
-                    </div>
-                    <div className="flex flex-col items-center md:items-start w-full">
-                        <span className="text-sm md:text-lg font-bold mb-1 text-sky-100 group-hover:text-white font-mono transition-colors block">紙飛行機バトル</span>
-                        <span className="text-[9px] md:text-[10px] text-sky-200/70 leading-tight block font-mono">
-                            風に乗ってどこまでも。<br className="hidden md:inline"/>障害物を避けるフライトアクション。
-                        </span>
-                    </div>
-                </button>
-
-                {/* Kocho Showdown Game Card */}
-                <button
-                    {...bindPress('KOCHO')}
-                    className="group relative bg-[#1a1a2e] border-4 border-indigo-500 hover:border-pink-500 hover:bg-indigo-900 p-2 md:p-4 rounded-xl flex flex-col md:flex-row items-center justify-center md:justify-start text-center md:text-left transition-all shadow-xl hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] overflow-hidden h-36 md:h-32"
-                >
-                    <div className="absolute top-0 right-0 bg-pink-600 text-white text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-md flex items-center gap-1 z-10">STRATEGY</div>
-                    <div className="bg-indigo-900/50 p-2 md:p-3 rounded-full mb-2 md:mb-0 md:mr-3 group-hover:scale-110 transition-transform duration-300 border-2 border-indigo-500/30 shrink-0">
-                        <Sword size={24} className="text-pink-400 fill-current md:w-7 md:h-7" />
-                    </div>
-                    <div className="flex flex-col items-center md:items-start w-full">
-                        <span className="text-sm md:text-lg font-bold mb-1 text-indigo-200 group-hover:text-white font-mono transition-colors block">校長対決</span>
-                        <span className="text-[9px] md:text-[10px] text-indigo-300 leading-tight block font-mono">
-                            ターン制戦略バトル。<br className="hidden md:inline"/>行動を予約して敵を倒せ！
-                        </span>
-                    </div>
-                </button>
-
-                {/* Poker Game Card */}
+                {/* 1. POKER (1000) */}
                 <button
                     {...bindPress('POKER')}
-                    className="group relative bg-slate-800 border-4 border-slate-600 hover:border-purple-500 hover:bg-slate-700 p-2 md:p-4 rounded-xl flex flex-col md:flex-row items-center justify-center md:justify-start text-center md:text-left transition-all shadow-xl hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] overflow-hidden h-36 md:h-32"
+                    className={`group relative bg-slate-800 border-4 border-slate-600 hover:border-purple-500 hover:bg-slate-700 p-2 md:p-4 rounded-xl flex flex-col md:flex-row items-center justify-center md:justify-start text-center md:text-left transition-all shadow-xl hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] overflow-hidden h-36 md:h-32 ${!isUnlocked('POKER') ? 'grayscale opacity-60' : ''}`}
                 >
+                    {!isUnlocked('POKER') && <LockedOverlay threshold={UNLOCK_THRESHOLDS.POKER} />}
                     <div className="absolute top-0 right-0 bg-purple-600 text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-md z-10">POPULAR</div>
                     <div className="bg-purple-900/50 p-2 md:p-3 rounded-full mb-2 md:mb-0 md:mr-3 group-hover:scale-110 transition-transform duration-300 border-2 border-purple-500/30 shrink-0">
                         <Club size={24} className="text-purple-400 fill-current md:w-7 md:h-7" />
@@ -178,11 +181,12 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
                     </div>
                 </button>
 
-                {/* Survivor Game Card */}
+                {/* 2. SURVIVOR (1500) */}
                 <button
                     {...bindPress('SURVIVOR')}
-                    className="group relative bg-slate-800 border-4 border-slate-600 hover:border-red-500 hover:bg-slate-700 p-2 md:p-4 rounded-xl flex flex-col md:flex-row items-center justify-center md:justify-start text-center md:text-left transition-all shadow-xl hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] overflow-hidden h-36 md:h-32"
+                    className={`group relative bg-slate-800 border-4 border-slate-600 hover:border-red-500 hover:bg-slate-700 p-2 md:p-4 rounded-xl flex flex-col md:flex-row items-center justify-center md:justify-start text-center md:text-left transition-all shadow-xl hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] overflow-hidden h-36 md:h-32 ${!isUnlocked('SURVIVOR') ? 'grayscale opacity-60' : ''}`}
                 >
+                    {!isUnlocked('SURVIVOR') && <LockedOverlay threshold={UNLOCK_THRESHOLDS.SURVIVOR} />}
                     <div className="absolute top-0 right-0 bg-red-600 text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-md z-10">ACTION</div>
                     <div className="bg-red-900/50 p-2 md:p-3 rounded-full mb-2 md:mb-0 md:mr-3 group-hover:scale-110 transition-transform duration-300 border-2 border-red-500/30 shrink-0">
                         <Skull size={24} className="text-red-400 fill-current md:w-7 md:h-7" />
@@ -195,11 +199,12 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
                     </div>
                 </button>
 
-                {/* Dungeon Game Card */}
+                {/* 3. DUNGEON (2000) */}
                 <button
                     {...bindPress('DUNGEON')}
-                    className="group relative bg-[#0f380f] border-4 border-[#306230] hover:border-[#8bac0f] p-2 md:p-4 rounded-xl flex flex-col md:flex-row items-center justify-center md:justify-start text-center md:text-left transition-all shadow-xl hover:shadow-[0_0_20px_rgba(139,172,15,0.4)] overflow-hidden h-36 md:h-32"
+                    className={`group relative bg-[#0f380f] border-4 border-[#306230] hover:border-[#8bac0f] p-2 md:p-4 rounded-xl flex flex-col md:flex-row items-center justify-center md:justify-start text-center md:text-left transition-all shadow-xl hover:shadow-[0_0_20px_rgba(139,172,15,0.4)] overflow-hidden h-36 md:h-32 ${!isUnlocked('DUNGEON') ? 'grayscale opacity-60' : ''}`}
                 >
+                    {!isUnlocked('DUNGEON') && <LockedOverlay threshold={UNLOCK_THRESHOLDS.DUNGEON} />}
                     <div className="absolute top-0 right-0 bg-[#306230] text-[#9bbc0f] text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-md flex items-center gap-1 z-10">RETRO</div>
                     <div className="bg-[#306230] p-2 md:p-3 rounded-full mb-2 md:mb-0 md:mr-3 group-hover:scale-110 transition-transform duration-300 border-2 border-[#8bac0f] shrink-0">
                         <Compass size={24} className="text-[#9bbc0f] fill-current md:w-7 md:h-7" />
@@ -212,11 +217,12 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
                     </div>
                 </button>
 
-                {/* Dungeon 2 Game Card */}
+                {/* 4. DUNGEON 2 (2500) */}
                 <button
                     {...bindPress('DUNGEON_2')}
-                    className="group relative bg-[#202020] border-4 border-cyan-700 hover:border-cyan-400 p-2 md:p-4 rounded-xl flex flex-col md:flex-row items-center justify-center md:justify-start text-center md:text-left transition-all shadow-xl hover:shadow-[0_0_20px_rgba(34,211,238,0.4)] overflow-hidden h-36 md:h-32"
+                    className={`group relative bg-[#202020] border-4 border-cyan-700 hover:border-cyan-400 p-2 md:p-4 rounded-xl flex flex-col md:flex-row items-center justify-center md:justify-start text-center md:text-left transition-all shadow-xl hover:shadow-[0_0_20px_rgba(34,211,238,0.4)] overflow-hidden h-36 md:h-32 ${!isUnlocked('DUNGEON_2') ? 'grayscale opacity-60' : ''}`}
                 >
+                    {!isUnlocked('DUNGEON_2') && <LockedOverlay threshold={UNLOCK_THRESHOLDS.DUNGEON_2} />}
                     <div className="absolute top-0 right-0 bg-cyan-700 text-white text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-md flex items-center gap-1 z-10">SEQUEL</div>
                     <div className="bg-cyan-900 p-2 md:p-3 rounded-full mb-2 md:mb-0 md:mr-3 group-hover:scale-110 transition-transform duration-300 border-2 border-cyan-500 shrink-0">
                         <Mountain size={24} className="text-cyan-400 fill-current md:w-7 md:h-7" />
@@ -228,6 +234,43 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
                         </span>
                     </div>
                 </button>
+
+                {/* 5. KOCHO (3000) */}
+                <button
+                    {...bindPress('KOCHO')}
+                    className={`group relative bg-[#1a1a2e] border-4 border-indigo-500 hover:border-pink-500 hover:bg-indigo-900 p-2 md:p-4 rounded-xl flex flex-col md:flex-row items-center justify-center md:justify-start text-center md:text-left transition-all shadow-xl hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] overflow-hidden h-36 md:h-32 ${!isUnlocked('KOCHO') ? 'grayscale opacity-60' : ''}`}
+                >
+                    {!isUnlocked('KOCHO') && <LockedOverlay threshold={UNLOCK_THRESHOLDS.KOCHO} />}
+                    <div className="absolute top-0 right-0 bg-pink-600 text-white text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-md flex items-center gap-1 z-10">STRATEGY</div>
+                    <div className="bg-indigo-900/50 p-2 md:p-3 rounded-full mb-2 md:mb-0 md:mr-3 group-hover:scale-110 transition-transform duration-300 border-2 border-indigo-500/30 shrink-0">
+                        <Sword size={24} className="text-pink-400 fill-current md:w-7 md:h-7" />
+                    </div>
+                    <div className="flex flex-col items-center md:items-start w-full">
+                        <span className="text-sm md:text-lg font-bold mb-1 text-indigo-200 group-hover:text-white font-mono transition-colors block">校長対決</span>
+                        <span className="text-[9px] md:text-[10px] text-indigo-300 leading-tight block font-mono">
+                            ターン制戦略バトル。<br className="hidden md:inline"/>行動を予約して敵を倒せ！
+                        </span>
+                    </div>
+                </button>
+
+                {/* 6. PAPER_PLANE (3500) */}
+                <button
+                    {...bindPress('PAPER_PLANE')}
+                    className={`group relative bg-sky-900 border-4 border-sky-500 hover:border-white hover:bg-sky-800 p-2 md:p-4 rounded-xl flex flex-col md:flex-row items-center justify-center md:justify-start text-center md:text-left transition-all shadow-xl hover:shadow-[0_0_20px_rgba(14,165,233,0.4)] overflow-hidden h-36 md:h-32 ${!isUnlocked('PAPER_PLANE') ? 'grayscale opacity-60' : ''}`}
+                >
+                    {!isUnlocked('PAPER_PLANE') && <LockedOverlay threshold={UNLOCK_THRESHOLDS.PAPER_PLANE} />}
+                    <div className="absolute top-0 right-0 bg-sky-600 text-white text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-md flex items-center gap-1 z-10">FLIGHT</div>
+                    <div className="bg-sky-950/50 p-2 md:p-3 rounded-full mb-2 md:mb-0 md:mr-3 group-hover:scale-110 transition-transform duration-300 border-2 border-sky-500/30 shrink-0">
+                        <Send size={24} className="text-sky-300 fill-current md:w-7 md:h-7" />
+                    </div>
+                    <div className="flex flex-col items-center md:items-start w-full">
+                        <span className="text-sm md:text-lg font-bold mb-1 text-sky-100 group-hover:text-white font-mono transition-colors block">紙飛行機バトル</span>
+                        <span className="text-[9px] md:text-[10px] text-sky-200/70 leading-tight block font-mono">
+                            風に乗ってどこまでも。<br className="hidden md:inline"/>障害物を避けるフライトアクション。
+                        </span>
+                    </div>
+                </button>
+
             </div>
 
             <button 

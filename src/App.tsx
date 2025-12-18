@@ -210,6 +210,7 @@ const App: React.FC = () => {
   const [legacyCardSelected, setLegacyCardSelected] = useState<boolean>(false);
   const [showDebugLog, setShowDebugLog] = useState<boolean>(false);
   const [bgmMode, setBgmMode] = useState<'OSCILLATOR' | 'MP3'>('MP3');
+  const [totalMathCorrect, setTotalMathCorrect] = useState<number>(0);
   
   // Debug Logic
   const [isMathDebugSkipped, setIsMathDebugSkipped] = useState<boolean>(false);
@@ -232,6 +233,8 @@ const App: React.FC = () => {
   const [clearCount, setClearCount] = useState<number>(0);
 
   const VICTORY_GOLD = 25;
+  
+  const UNLOCK_THRESHOLDS = [1000, 1500, 2000, 2500, 3000, 3500];
 
   // --- Auto Save Logic ---
   useEffect(() => {
@@ -266,6 +269,7 @@ const App: React.FC = () => {
     setClearCount(storageService.getClearCount());
     setIsMathDebugSkipped(storageService.getDebugMathSkip());
     setIsDebugHpOne(storageService.getDebugHpOne());
+    setTotalMathCorrect(storageService.getMathCorrectCount());
     
     // Play Menu BGM on initial load if on title screen
     if (gameState.screen === GameScreen.START_MENU) {
@@ -849,7 +853,7 @@ const App: React.FC = () => {
               title: "謎の転校生",
               description: "「ねえ、君のそのカード、僕のと交換しない？」\n見たことのないカードを持っている。",
               options: [
-                  { label: "交換", text: "ランダムに交換する", action: () => {
+                  { label: "交換", text: "ランダムな交換する", action: () => {
                       const removeIdx = Math.floor(Math.random() * player.deck.length);
                       const removed = player.deck[removeIdx];
                       const newCardKey = Object.keys(CARDS_LIBRARY).filter(k => CARDS_LIBRARY[k].rarity === 'UNCOMMON' || CARDS_LIBRARY[k].rarity === 'RARE')[Math.floor(Math.random() * 5)];
@@ -2233,6 +2237,11 @@ const App: React.FC = () => {
       else if (correctCount === 2) bonusGold = 30;
       else if (correctCount === 3) bonusGold = 50;
       
+      // Update Total Math Count
+      const newTotal = totalMathCorrect + correctCount;
+      setTotalMathCorrect(newTotal);
+      storageService.saveMathCorrectCount(newTotal);
+
       goToRewardPhase(bonusGold);
   };
 
@@ -2310,6 +2319,9 @@ const App: React.FC = () => {
       }));
   };
 
+  // Determine next unlock threshold for display
+  const nextThreshold = UNLOCK_THRESHOLDS.find(t => t > totalMathCorrect);
+
   return (
     <div className="w-full h-[100dvh] bg-black overflow-hidden">
         <div className="w-full h-full relative overflow-hidden bg-black crt-scanline">
@@ -2343,6 +2355,19 @@ const App: React.FC = () => {
                         >
                             {trans("算数ローグ", languageMode)}<br/><span className="text-4xl">{trans("伝説の小学生", languageMode)}</span>
                         </h1>
+                        
+                        {/* UNLOCK STATUS DISPLAY */}
+                        <div className="mb-6 bg-black/40 px-4 py-2 rounded-lg border border-gray-600">
+                             {nextThreshold ? (
+                                <div className="text-yellow-300 text-xs md:text-sm font-bold">
+                                    次のミニゲーム開放まで: <span className="text-xl md:text-2xl text-white mx-1">{Math.max(0, nextThreshold - totalMathCorrect)}</span> 問正解
+                                </div>
+                             ) : (
+                                <div className="text-green-400 text-xs md:text-sm font-bold animate-pulse">全ミニゲーム開放済み！</div>
+                             )}
+                             <div className="text-gray-500 text-[10px] mt-1">累計正解数: {totalMathCorrect}問</div>
+                        </div>
+
                         {isMathDebugSkipped && (
                             <div className="text-red-500 font-bold mb-1 text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse">
                                 (デバッグ: 計算スキップ ON)
@@ -2350,10 +2375,10 @@ const App: React.FC = () => {
                         )}
                         {isDebugHpOne && (
                             <div className="text-red-500 font-bold mb-6 text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse">
-                                (デバッグ: 敵HP1 & Loadout ON)
+                                (デバッグ: 敵HP1 & Loadout & 全開放 ON)
                             </div>
                         )}
-                        {(!isMathDebugSkipped && !isDebugHpOne) && <div className="mb-8 h-6"></div>}
+                        {(!isMathDebugSkipped && !isDebugHpOne) && <div className="mb-2 h-2"></div>}
 
                         <div className="flex flex-col gap-3 items-center w-full max-w-[280px]">
                             {hasSave && (
@@ -2393,7 +2418,7 @@ const App: React.FC = () => {
                             </div>
 
                             <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                <Terminal size={10}/> v2.5.3
+                                <Terminal size={10}/> v2.5.4
                             </button>
                         </div>
                     </div>
@@ -2407,16 +2432,14 @@ const App: React.FC = () => {
                             className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2 select-none active:text-green-200"
                             onClick={handleLogTitleClick}
                         >
-                            System Update Log v2.5.3
+                            System Update Log v2.5.4
                         </h2>
                         <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
                             <section>
                                 <h3 className="text-white font-bold mb-1">■ アップデート (Update)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li>BGMモード切り替え機能（MP3対応）を追加しました。</li>
-                                    <li>タイトル画面にBGM切り替えボタンを設置しました。</li>
-                                    <li>冒険開始時、ボーナスレリック選択フェーズを追加しました。</li>
-                                    <li>タイトル画面でBGMが再生されるように修正しました。</li>
+                                    <li>ミニゲームの開放条件（累計計算正解数）を追加しました。</li>
+                                    <li>タイトル画面に次のミニゲーム開放までの残り問題数を表示しました。</li>
                                 </ul>
                             </section>
                         </div>
@@ -2435,9 +2458,15 @@ const App: React.FC = () => {
             )}
 
             {gameState.screen === GameScreen.MINI_GAME_SELECT && (
-                <MiniGameSelectScreen onSelect={handleMiniGameSelect} onBack={returnToTitle} />
+                <MiniGameSelectScreen 
+                    onSelect={handleMiniGameSelect} 
+                    onBack={returnToTitle} 
+                    totalMathCorrect={totalMathCorrect}
+                    isDebug={isDebugHpOne}
+                />
             )}
-
+            
+            {/* ... other screens ... */}
             {gameState.screen === GameScreen.MINI_GAME_POKER && (
                 <PokerGameScreen 
                     onBack={returnToTitle} 
@@ -2622,6 +2651,7 @@ const App: React.FC = () => {
                 />
             )}
 
+            {/* Treasure, Victory, GameOver, Ending Screens... (Same as before) */}
             {gameState.screen === GameScreen.TREASURE && (
                 <TreasureScreen 
                     rewards={treasureRewards}

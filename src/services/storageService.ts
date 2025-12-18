@@ -1,5 +1,4 @@
 
-
 import { GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState, KochoScoreEntry, PaperPlaneScoreEntry } from '../types';
 
 const STORAGE_KEY_UNLOCKED_CARDS = 'pixel_spire_unlocked_cards_v1';
@@ -16,6 +15,7 @@ const STORAGE_KEY_DUNGEON_RANKING = 'pixel_spire_dungeon_ranking_v1';
 const STORAGE_KEY_LEGACY_CARD = 'pixel_spire_legacy_card_v1';
 const STORAGE_KEY_DEBUG_MATH_SKIP = 'pixel_spire_debug_math_skip_v1';
 const STORAGE_KEY_DEBUG_HP_ONE = 'pixel_spire_debug_hp_one_v1';
+const STORAGE_KEY_MATH_CORRECT_COUNT = 'pixel_spire_math_correct_count_v1';
 
 const STORAGE_KEY_DUNGEON_STATE = 'pixel_spire_dungeon_state_v1';
 const STORAGE_KEY_POKER_STATE = 'pixel_spire_poker_state_v1';
@@ -136,6 +136,24 @@ export const storageService = {
           localStorage.setItem(STORAGE_KEY_CLEAR_COUNT, (current + 1).toString());
       } catch (e) {
           console.warn("Failed to save clear count", e);
+      }
+  },
+
+  // --- Math Correct Count ---
+  getMathCorrectCount: (): number => {
+      try {
+          const stored = localStorage.getItem(STORAGE_KEY_MATH_CORRECT_COUNT);
+          return stored ? parseInt(stored, 10) : 0;
+      } catch (e) {
+          return 0;
+      }
+  },
+
+  saveMathCorrectCount: (count: number) => {
+      try {
+          localStorage.setItem(STORAGE_KEY_MATH_CORRECT_COUNT, count.toString());
+      } catch (e) {
+          console.warn("Failed to save math correct count", e);
       }
   },
 
@@ -484,5 +502,6 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_LEGACY_CARD);
       localStorage.removeItem(STORAGE_KEY_DEBUG_MATH_SKIP);
       localStorage.removeItem(STORAGE_KEY_DEBUG_HP_ONE);
+      localStorage.removeItem(STORAGE_KEY_MATH_CORRECT_COUNT);
   }
 };

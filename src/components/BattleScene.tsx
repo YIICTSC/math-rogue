@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
-import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText } from 'lucide-react';
+import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal } from 'lucide-react';
 import PixelSprite from './PixelSprite';
 import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
@@ -113,6 +113,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   
   const [isActing, setIsActing] = useState(false);
   const [showDeck, setShowDeck] = useState(false);
+  const [showRelicList, setShowRelicList] = useState(false);
   const [tooltip, setTooltip] = useState<{title: string, desc: string} | null>(null);
   const [potionConfirmation, setPotionConfirmation] = useState<Potion | null>(null);
   const [inspectedCard, setInspectedCard] = useState<ICard | null>(null);
@@ -296,6 +297,50 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             </div>
         )}
 
+        {/* Relic List Modal */}
+        {showRelicList && (
+            <div className="fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowRelicList(false)}>
+                <div className="bg-gray-800 border-2 border-white rounded-lg p-4 w-full max-w-lg max-h-[80vh] flex flex-col shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex justify-between items-center mb-4 border-b border-gray-600 pb-2">
+                        <h3 className="text-xl font-bold text-yellow-400 flex items-center">
+                            <Gem className="mr-2"/> {trans("所持レリック一覧", languageMode)} ({player.relics.length})
+                        </h3>
+                        <button onClick={() => setShowRelicList(false)} className="text-gray-400 hover:text-white p-1">
+                            <X size={24} />
+                        </button>
+                    </div>
+                    <div className="overflow-y-auto custom-scrollbar flex-grow space-y-2 pr-1">
+                        {player.relics.length === 0 ? (
+                            <div className="text-center text-gray-500 py-8">レリックを持っていません</div>
+                        ) : (
+                            player.relics.map(r => (
+                                <div key={r.id} className="bg-black/40 p-3 rounded border border-gray-600 flex items-start gap-3">
+                                    <div className="bg-gray-700 p-2 rounded-full border border-yellow-600 shrink-0">
+                                        <Gem size={20} className="text-yellow-400" />
+                                    </div>
+                                    <div>
+                                        <div className="font-bold text-yellow-100 text-sm mb-1">{trans(r.name, languageMode)}</div>
+                                        <div className="text-xs text-gray-400 leading-tight">{trans(r.description, languageMode)}</div>
+                                        {player.relicCounters[r.id] !== undefined && player.relicCounters[r.id] > 0 && (
+                                            <div className="text-[10px] text-blue-300 mt-1">
+                                                Counter: {player.relicCounters[r.id]}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                    <button 
+                        onClick={() => setShowRelicList(false)} 
+                        className="mt-4 bg-gray-700 hover:bg-gray-600 text-white py-2 rounded text-sm font-bold border border-gray-500"
+                    >
+                        {trans("閉じる", languageMode)}
+                    </button>
+                </div>
+            </div>
+        )}
+
         {/* Tooltip Modal Overlay (Existing for other UI elements) */}
         {tooltip && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4" onClick={() => setTooltip(null)}>
@@ -457,11 +502,11 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         <div className="h-full bg-green-500 transition-all duration-500" style={{width: `${playerHpPercent}%`}}></div>
                     </div>
                     
-                    {/* Relics/Potions Compact Row */}
-                    <div className="flex items-center justify-between border-t border-gray-700 pt-1">
-                        <div className="flex -space-x-1 overflow-hidden w-20">
-                            {player.relics.slice(0,5).map(r => (
-                                <div key={r.id} className="w-4 h-4 md:w-5 md:h-5 bg-gray-700 rounded-full border border-yellow-600 flex items-center justify-center shrink-0 cursor-pointer relative group" onClick={() => showInfo(trans(r.name, languageMode), trans(r.description, languageMode))}>
+                    {/* Relics/Potions Compact Row (Click to Expand) */}
+                    <div className="flex items-center justify-between border-t border-gray-700 pt-1" onClick={() => setShowRelicList(true)}>
+                        <div className="flex -space-x-1 overflow-hidden w-20 cursor-pointer hover:bg-white/10 rounded px-1 transition-colors">
+                            {player.relics.slice(0, 5).map(r => (
+                                <div key={r.id} className="w-4 h-4 md:w-5 md:h-5 bg-gray-700 rounded-full border border-yellow-600 flex items-center justify-center shrink-0 relative group">
                                     <Gem size={10} className="text-yellow-400" />
                                     {player.relicCounters[r.id] !== undefined && player.relicCounters[r.id] > 0 && (
                                         <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold border-2 border-gray-900 shadow-md z-10 pointer-events-none">
@@ -470,12 +515,20 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     )}
                                 </div>
                             ))}
+                            {player.relics.length > 5 && (
+                                <div className="w-4 h-4 md:w-5 md:h-5 bg-gray-800 rounded-full border border-gray-500 flex items-center justify-center shrink-0 text-[8px] font-bold text-white z-10">
+                                    +{player.relics.length - 5}
+                                </div>
+                            )}
+                            {player.relics.length === 0 && <span className="text-[9px] text-gray-500">No Relics</span>}
                         </div>
+                        
                         <div className="flex gap-0.5">
                             {player.potions.map(p => (
                                  <div 
                                     key={p.id} 
-                                    onClick={() => {
+                                    onClick={(e) => {
+                                        e.stopPropagation();
                                         if (!actingEnemyId && !selectionState.active) {
                                             setPotionConfirmation(p);
                                         }
@@ -488,6 +541,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             ))}
                         </div>
                     </div>
+
                     {/* Power Icons */}
                     <div className="flex flex-wrap gap-0.5 mt-1">
                         {player.strength !== 0 && (
