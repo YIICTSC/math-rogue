@@ -7,7 +7,7 @@ class AudioService {
   
   private isMuted: boolean = false;
   private isPlayingBGM: boolean = false;
-  private currentBgmType: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane' | null = null;
+  private currentBgmType: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane_setup' | 'paper_plane_battle' | 'paper_plane_vacation' | null = null;
   
   // BGM Mode
   private bgmMode: 'OSCILLATOR' | 'MP3' = 'OSCILLATOR';
@@ -449,8 +449,8 @@ class AudioService {
           if (beatNumber % 2 === 0) this.playNoise(actualTime, 0.1, 0.6, 'kick');
           if (beatNumber % 4 === 0) this.playChord([110, 164, 196], actualTime, 0.2, 'sawtooth', 0.3); // Hit
           if (beatNumber % 2 !== 0) this.playOsc(110, actualTime, 0.1, 'square', 0.2, this.bgmGain); // Bass running
-      } else if (this.currentBgmType === 'paper_plane') {
-        // --- PAPER PLANE BATTLE: Spacey Ambient Western ---
+      } else if (this.currentBgmType === 'paper_plane_battle') {
+        // --- PAPER PLANE BATTLE (Standard) ---
         // Scale: E Minor Pentatonic (E G A B D)
         const scale = [164.81, 196.00, 220.00, 246.94, 293.66]; // E3 G3 A3 B3 D4
         
@@ -481,10 +481,49 @@ class AudioService {
         if (beatNumber === 0 && Math.random() < 0.3) {
             this.playNoise(actualTime, 2.0, 0.03, 'hat'); // Hiss-like noise
         }
+      } else if (this.currentBgmType === 'paper_plane_setup') {
+          // --- PAPER PLANE SETUP (Hangar) ---
+          // Mechanical, preparing
+          if (beatNumber % 8 === 0) {
+              // Low mechanical thrum
+              this.playOsc(55, actualTime, 1.5, 'square', 0.1, this.bgmGain);
+          }
+          if (beatNumber % 4 === 0) {
+              // Tech blip
+              this.playNoise(actualTime, 0.05, 0.05, 'hat');
+          }
+          if (t % 16 === 0) {
+              // Computer sequence
+              const arp = [440, 523, 659, 880];
+              const note = arp[Math.floor(t / 16) % 4];
+              this.playOsc(note, actualTime, 0.1, 'triangle', 0.05, this.bgmGain);
+          }
+      } else if (this.currentBgmType === 'paper_plane_vacation') {
+          // --- PAPER PLANE VACATION (Bossa/Relaxed) ---
+          if (beatNumber % 8 === 0) {
+              // Soft chord: F Major 7
+              this.playChord([349, 440, 523, 659], actualTime, 2.0, 'sine', 0.15);
+          } else if (beatNumber % 8 === 4) {
+              // G7
+              this.playChord([392, 493, 587, 698], actualTime, 2.0, 'sine', 0.15);
+          }
+          
+          // Bossa Clave-ish Rimshot
+          const clave = [0, 3, 6, 10, 12]; // on 16th grid
+          if (clave.includes(t % 16)) {
+              this.playNoise(actualTime, 0.02, 0.05, 'snare');
+          }
+          
+          // Light Melody
+          if (beatNumber % 4 === 0 && Math.random() < 0.5) {
+              const scale = [523, 587, 659, 698, 783];
+              const note = scale[Math.floor(Math.random() * scale.length)];
+              this.playOsc(note, actualTime, 0.4, 'triangle', 0.1, this.bgmGain);
+          }
       }
   }
 
-  private playOscillatorBGM(type: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane') {
+  private playOscillatorBGM(type: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane_setup' | 'paper_plane_battle' | 'paper_plane_vacation') {
       // Main Game
       if (type === 'battle') { this.tempo = 135; }
       else if (type === 'mid_boss') { this.tempo = 150; }
@@ -511,7 +550,9 @@ class AudioService {
       else if (type === 'dungeon_library') { this.tempo = 60; }
       else if (type === 'dungeon_roof') { this.tempo = 80; }
       else if (type === 'dungeon_boss') { this.tempo = 150; }
-      else if (type === 'paper_plane') { this.tempo = 90; }
+      else if (type === 'paper_plane_battle') { this.tempo = 90; }
+      else if (type === 'paper_plane_setup') { this.tempo = 80; }
+      else if (type === 'paper_plane_vacation') { this.tempo = 110; }
       else { this.tempo = 90; }
 
       this.current16thNote = 0;
@@ -588,7 +629,7 @@ class AudioService {
   }
 
   // --- Public API ---
-  public async playBGM(type: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane') {
+  public async playBGM(type: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane_setup' | 'paper_plane_battle' | 'paper_plane_vacation') {
       // Don't restart if already playing the same type (regardless of mode)
       if (this.isPlayingBGM && this.currentBgmType === type) return;
       
