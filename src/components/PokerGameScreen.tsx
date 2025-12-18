@@ -4,10 +4,11 @@ import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, Arro
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { 
-    PokerCard, PokerRunState, PokerBlind, PokerSupporter, PokerConsumable, PokerSuit, PokerRank, PokerScoringContext, PokerPack, PokerVoucher
+    PokerCard, PokerRunState, PokerBlind, PokerSupporter, PokerConsumable, PokerSuit, PokerRank, PokerScoringContext, PokerPack, PokerVoucher, GameMode
 } from '../types';
 import { POKER_HAND_LEVELS, SUPPORTERS_LIBRARY, CONSUMABLES_LIBRARY, PACK_LIBRARY, POKER_ENHANCEMENTS, VOUCHERS_LIBRARY } from '../constants';
 import { storageService } from '../services/storageService';
+import MathChallengeScreen from './MathChallengeScreen';
 
 // --- Constants & Helpers ---
 const SUITS: PokerSuit[] = ['SPADE', 'HEART', 'DIAMOND', 'CLUB'];
@@ -339,7 +340,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   };
 
   // --- Game State ---
-  const [phase, setPhase] = useState<'BLIND_SELECT' | 'PLAY' | 'SHOP' | 'PACK_OPEN' | 'GAME_OVER' | 'VICTORY_WAIT' | 'VICTORY'>('BLIND_SELECT');
+  const [phase, setPhase] = useState<'BLIND_SELECT' | 'PLAY' | 'SHOP' | 'PACK_OPEN' | 'GAME_OVER' | 'VICTORY_WAIT' | 'VICTORY' | 'MATH'>('BLIND_SELECT');
   const [highScore, setHighScore] = useState(0); 
   const saveDebounceRef = useRef<any>(null);
 
@@ -720,10 +721,16 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       if (runState.ante === 8 && runState.blindIndex === 2 && !runState.isEndless) {
           setPhase('VICTORY_WAIT');
       } else {
-          generateShop();
-          setPhase('SHOP');
-          audioService.playBGM('poker_shop');
+          setPhase('MATH');
       }
+  };
+
+  const handleMathComplete = (correctCount: number) => {
+      const bonus = correctCount * 1; // $1 per correct answer
+      setRunState(prev => ({ ...prev, money: prev.money + bonus }));
+      generateShop();
+      setPhase('SHOP');
+      audioService.playBGM('poker_shop');
   };
 
   const proceedToEndless = () => {
@@ -1101,6 +1108,15 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           </div>
       );
   };
+
+  if (phase === 'MATH') {
+      return (
+          <MathChallengeScreen 
+              mode={GameMode.MIXED} 
+              onComplete={handleMathComplete} 
+          />
+      );
+  }
 
   if (phase === 'VICTORY_WAIT') {
       return (
