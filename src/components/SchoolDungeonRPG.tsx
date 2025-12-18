@@ -1501,8 +1501,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       audioService.playSound('attack');
   };
 
-  const [showMathChallenge, setShowMathChallenge] = useState(false); // New state
-
   // ... LONG PRESS LOGIC ...
   const handlePressStart = () => {
       if (menuOpen || shopState.active || gameOver || gameClear) return;
@@ -1649,7 +1647,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   };
 
   const executeStaffEffect = (item: Item, target: Entity | null, x: number, y: number): { hit: boolean, msg?: string } => {
-      // ... (Implementation same as previous version)
       let hit = false;
       let msg = "";
 
@@ -1741,7 +1738,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   };
 
   const handleThrowItem = (index: number) => {
-      // ... (Implementation same as previous version)
       const item = inventory[index];
       if (!item) return;
       
@@ -1810,7 +1806,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   };
 
   const handleItemAction = (index: number) => {
-      // ... (Implementation same as previous version)
       const item = inventory[index];
       if (!item) return;
 
@@ -1891,7 +1886,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           });
           actionDone = true;
       } else if (item.category === 'CONSUMABLE') {
-          // ... (Existing consumable logic) ...
           if (item.type.includes('ONIGIRI') || item.type.includes('MEAT')) { 
               const val = item.value || 50;
               let nextBelly = Math.min(maxBelly, belly + val);
@@ -1944,7 +1938,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               actionDone = true;
           }
           else if (item.type === 'GRASS_POISON') {
-              setPlayer(p => ({ ...p, status: { ...p.status, poison: (p.status.poison || 0) + 10 } }));
+              setPlayer(p => ({ ...p, status: { ...p.status, poison: (p.status.poison||0) + 10 } }));
               setBelly(prev => Math.max(0, prev - 10)); // Belly reduce
               addLog("ぐはっ！毒だ！", "purple");
               actionDone = true;
@@ -2071,7 +2065,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const handleMoveInput = (dx: 0|1|-1, dy: 0|1|-1) => {
       movePlayer(dx, dy);
   };
-  
+
   // --- AUTO SCROLL MENU ---
   useEffect(() => {
       if (lastInputType.current === 'KEY' && menuListRef.current) {
