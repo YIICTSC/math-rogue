@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Relic, LanguageMode } from '../types';
 import { Gem, MousePointer2 } from 'lucide-react';
 import { trans } from '../utils/textUtils';
+import { audioService } from '../services/audioService';
 
 interface RelicSelectionScreenProps {
   relics: Relic[];
@@ -11,6 +12,11 @@ interface RelicSelectionScreenProps {
 }
 
 const RelicSelectionScreen: React.FC<RelicSelectionScreenProps> = ({ relics, onSelect, languageMode }) => {
+  useEffect(() => {
+    // Play "shop" theme for selection phase as it fits the "equipping" mood
+    audioService.playBGM('shop');
+  }, []);
+
   return (
     <div className="flex flex-col h-full w-full bg-gray-900 text-white relative overflow-y-auto custom-scrollbar">
       

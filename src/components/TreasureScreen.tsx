@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Archive, Key, Check } from 'lucide-react';
 import { RewardItem } from '../types';
 import { audioService } from '../services/audioService';
@@ -14,9 +14,15 @@ interface TreasureScreenProps {
 const TreasureScreen: React.FC<TreasureScreenProps> = ({ onOpen, onLeave, rewards, hasCursedKey }) => {
   const [isOpen, setIsOpen] = useState(false);
 
+  useEffect(() => {
+    // Play suspenseful "event" music when chest is discovered
+    audioService.playBGM('event');
+  }, []);
+
   const handleOpen = () => {
       setIsOpen(true);
       audioService.playSound('select'); // Chest open sound
+      audioService.playBGM('reward'); // Switch to uplifting "reward" music
       onOpen();
   };
 
