@@ -2072,29 +2072,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       movePlayer(dx, dy);
   };
   
-  // Math Challenge Completion Handler
-  const handleMathComplete = (correctCount: number) => {
-      setShowMathChallenge(false);
-      
-      const nextFloor = floor + 1;
-      
-      if (correctCount >= 3) {
-          const recovery = 10;
-          setBelly(prev => Math.min(maxBelly, prev + recovery));
-          addLog(`計算全問正解！満腹度が${recovery}回復した！`, "green");
-          audioService.playSound('buff');
-      } else {
-          if (correctCount > 0) addLog(`${correctCount}問正解。`);
-      }
-      
-      setFloor(nextFloor);
-      generateFloor(nextFloor);
-      
-      // BGM
-      const nextTheme = getTheme(nextFloor);
-      audioService.playBGM(nextTheme.bgm);
-  };
-
   // --- AUTO SCROLL MENU ---
   useEffect(() => {
       if (lastInputType.current === 'KEY' && menuListRef.current) {
