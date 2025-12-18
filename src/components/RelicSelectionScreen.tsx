@@ -14,7 +14,7 @@ const RelicSelectionScreen: React.FC<RelicSelectionScreenProps> = ({ relics, onS
   return (
     <div className="flex flex-col h-full w-full bg-gray-900 text-white relative overflow-y-auto custom-scrollbar">
       
-      <div className="z-10 flex flex-col items-center min-h-full justify-center p-4 py-8">
+      <div className="z-10 flex flex-col items-center min-h-full justify-start p-4 py-12">
         <div className="text-center mb-8 shrink-0">
             <h2 className="text-3xl md:text-4xl text-yellow-400 font-bold mb-2 md:mb-4 flex items-center justify-center animate-pulse">
             <Gem className="mr-3" size={32} /> {trans("旅の始まり", languageMode)}
