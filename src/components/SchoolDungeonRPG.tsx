@@ -4,6 +4,8 @@ import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, A
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
 import { storageService } from '../services/storageService';
+import MathChallengeScreen from './MathChallengeScreen';
+import { GameMode } from '../types';
 
 interface SchoolDungeonRPGProps {
   onBack: () => void;
@@ -341,6 +343,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   // Fast Forward State
   const [isFastForwarding, setIsFastForwarding] = useState(false);
   const fastForwardInterval = useRef<any>(null);
+
+  // Math Challenge State
+  const [showMathChallenge, setShowMathChallenge] = useState(false);
 
   // Init
   useEffect(() => {
@@ -1034,6 +1039,30 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       });
   };
 
+  const handleMathComplete = (correctCount: number) => {
+      setShowMathChallenge(false);
+      
+      const nextFloor = floor + 1;
+
+      // 全問正解ボーナス (3問)
+      if (correctCount >= 3) {
+          const recovery = 10; // 10回復
+          setBelly(prev => Math.min(maxBelly, prev + recovery));
+          addLog(`計算全問正解！満腹度が${recovery}回復した！`, "green");
+          audioService.playSound('buff');
+      } else {
+           // 何もしない、またはログ出力
+           if (correctCount > 0) addLog(`${correctCount}問正解。`);
+      }
+      
+      setFloor(nextFloor);
+      generateFloor(nextFloor);
+      
+      // BGM復帰
+      const nextTheme = getTheme(nextFloor);
+      audioService.playBGM(nextTheme.bgm);
+  };
+
   const movePlayer = (dx: 0|1|-1, dy: 0|1|-1) => {
       if(gameOver || gameClear) return;
 
@@ -1181,6 +1210,15 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           else if (inventory.length > 0) handleItemAction(selectedItemIndex);
           return;
       }
+      
+      // 階段処理
+      if (map[player.y][player.x] === 'STAIRS') {
+           addLog("階段を降りる...");
+           audioService.playSound('select');
+           setShowMathChallenge(true); // 計算モードへ
+           return;
+      }
+
       const tx = player.x + player.dir.x;
       const ty = player.y + player.dir.y;
       const target = enemies.find(e => e.x === tx && e.y === ty);
@@ -1196,7 +1234,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           }
           return;
       }
-      if (map[player.y][player.x] === 'STAIRS') { addLog("階段を降りた！"); setFloor(f => f + 1); generateFloor(floor + 1); return; }
+      
       triggerPlayerAttackAnim(player.dir);
       addVisualEffect('SLASH', tx, ty, { dir: player.dir });
       addLog("素振りをした。");
@@ -1463,7 +1501,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       audioService.playSound('attack');
   };
 
-  // --- LONG PRESS LOGIC (FAST FORWARD) ---
+  const [showMathChallenge, setShowMathChallenge] = useState(false); // New state
+
+  // ... LONG PRESS LOGIC ...
   const handlePressStart = () => {
       if (menuOpen || shopState.active || gameOver || gameClear) return;
       fastForwardInterval.current = setTimeout(() => {
@@ -1609,6 +1649,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   };
 
   const executeStaffEffect = (item: Item, target: Entity | null, x: number, y: number): { hit: boolean, msg?: string } => {
+      // ... (Implementation same as previous version)
       let hit = false;
       let msg = "";
 
@@ -1700,6 +1741,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   };
 
   const handleThrowItem = (index: number) => {
+      // ... (Implementation same as previous version)
       const item = inventory[index];
       if (!item) return;
       
@@ -1768,6 +1810,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   };
 
   const handleItemAction = (index: number) => {
+      // ... (Implementation same as previous version)
       const item = inventory[index];
       if (!item) return;
 
@@ -1848,6 +1891,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           });
           actionDone = true;
       } else if (item.category === 'CONSUMABLE') {
+          // ... (Existing consumable logic) ...
           if (item.type.includes('ONIGIRI') || item.type.includes('MEAT')) { 
               const val = item.value || 50;
               let nextBelly = Math.min(maxBelly, belly + val);
@@ -1999,7 +2043,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       const droppedEntity: Entity = {
           id: Date.now() + Math.random(), type: 'ITEM', x: player.x, y: player.y, char: '!', name: item.name,
           hp: 0, maxHp: 0, baseAttack: 0, baseDefense: 0, attack: 0, defense: 0, xp: 0, dir: { x: 0, y: 0 },
-          status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
+          status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 },
           itemData: item
       };
       setFloorItems(prev => [...prev, droppedEntity]);
@@ -2026,6 +2070,29 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
 
   const handleMoveInput = (dx: 0|1|-1, dy: 0|1|-1) => {
       movePlayer(dx, dy);
+  };
+  
+  // Math Challenge Completion Handler
+  const handleMathComplete = (correctCount: number) => {
+      setShowMathChallenge(false);
+      
+      const nextFloor = floor + 1;
+      
+      if (correctCount >= 3) {
+          const recovery = 10;
+          setBelly(prev => Math.min(maxBelly, prev + recovery));
+          addLog(`計算全問正解！満腹度が${recovery}回復した！`, "green");
+          audioService.playSound('buff');
+      } else {
+          if (correctCount > 0) addLog(`${correctCount}問正解。`);
+      }
+      
+      setFloor(nextFloor);
+      generateFloor(nextFloor);
+      
+      // BGM
+      const nextTheme = getTheme(nextFloor);
+      audioService.playBGM(nextTheme.bgm);
   };
 
   // --- AUTO SCROLL MENU ---
@@ -2487,7 +2554,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                             <h3 className="font-bold border-b mb-1" style={{ borderColor: C1 }}>ヒント</h3>
                             <ul className="list-disc pl-5">
                                 <li>お腹が減るとHPが減ります。おにぎりやパンを食べましょう。</li>
-                                <li><strong className="text-red-700">傘(杖)</strong>は振ると魔法が出ますが、回数制限があります。使い切ったら投げましょう。</li>
+                                <li><strong className="text-red-700">傘</strong>は振ると魔法が出ますが、回数制限があります。使い切ったら投げましょう。</li>
                                 <li><strong className="text-blue-700">腕輪</strong>は装備するだけで効果があります。</li>
                                 <li>「工作のり」を使うと、装備を合成して強くできます。</li>
                                 <li>敵に囲まれたら通路に逃げ込みましょう。</li>
@@ -2529,6 +2596,13 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                         <div className="absolute top-16 right-2 animate-pulse flex items-center rounded px-2" style={{ backgroundColor: `${C0}80`, color: C3 }}>
                             <FastForward size={16} className="mr-1"/> 早送り中
                         </div>
+                    )}
+                    
+                    {/* Math Challenge Overlay */}
+                    {showMathChallenge && (
+                         <div className="absolute inset-0 z-[60]">
+                             <MathChallengeScreen mode={GameMode.MIXED} onComplete={handleMathComplete} />
+                         </div>
                     )}
 
                     {/* Map Overlay: Now with Fog of War */}
