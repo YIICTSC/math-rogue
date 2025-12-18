@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -208,7 +209,7 @@ const App: React.FC = () => {
   const [selectedCharName, setSelectedCharName] = useState<string>("戦士");
   const [legacyCardSelected, setLegacyCardSelected] = useState<boolean>(false);
   const [showDebugLog, setShowDebugLog] = useState<boolean>(false);
-  const [bgmMode, setBgmMode] = useState<'OSCILLATOR' | 'MP3'>('OSCILLATOR');
+  const [bgmMode, setBgmMode] = useState<'OSCILLATOR' | 'MP3'>('MP3');
   
   // Debug Logic
   const [isMathDebugSkipped, setIsMathDebugSkipped] = useState<boolean>(false);
