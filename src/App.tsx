@@ -37,7 +37,6 @@ import { storageService } from './services/storageService';
 import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { trans } from './utils/textUtils';
 import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music } from 'lucide-react';
-import SchoolStoryScreen from './components/SchoolStoryScreen';
 
 const calculateScore = (state: GameState, victory: boolean): number => {
     let score = 0;
@@ -2374,10 +2373,6 @@ const App: React.FC = () => {
                                 <Gamepad2 className="mr-2" size={16}/> {trans("ミニゲーム", languageMode)}
                             </button>
                             
-                            <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.STORY_MODE }))} className="w-full bg-emerald-900/80 text-emerald-100 py-2 px-4 text-sm font-bold border border-emerald-500 hover:bg-emerald-800 cursor-pointer flex items-center justify-center shadow-md hover:shadow-emerald-900/50">
-                                <Ghost className="mr-2" size={16}/> AI学校の怪談
-                            </button>
-
                             {isDebugHpOne && (
                                 <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.DEBUG_MENU }))} className="w-full bg-gray-800 text-red-400 py-2 px-4 text-sm font-bold border border-red-500 hover:bg-gray-700 cursor-pointer flex items-center justify-center shadow-md mb-2">
                                     <Zap className="mr-2" size={16}/> {trans("デバッグメニュー", languageMode)}
@@ -2434,11 +2429,6 @@ const App: React.FC = () => {
                 </div>
             )}
             
-            {/* Story Mode Screen (AI School Horror) */}
-            {gameState.screen === (GameScreen.STORY_MODE as any) && (
-                <SchoolStoryScreen onBack={returnToTitle} playerImageData={HERO_IMAGE_DATA} />
-            )}
-
             {gameState.screen === GameScreen.DEBUG_MENU && (
                 <DebugMenuScreen onStart={handleDebugStart} onBack={returnToTitle} />
             )}
