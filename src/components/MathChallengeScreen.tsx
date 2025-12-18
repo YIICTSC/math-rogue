@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, Brain } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { GameMode } from '../types';
+import { storageService } from '../services/storageService';
 
 interface MathChallengeScreenProps {
   onComplete: (correctCount: number) => void;
@@ -107,6 +108,11 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
       setCorrectCount(prev => prev + 1);
       setFeedback('CORRECT');
       audioService.playSound('correct');
+
+      // Save global progress immediately
+      const currentTotal = storageService.getMathCorrectCount();
+      storageService.saveMathCorrectCount(currentTotal + 1);
+
     } else {
       setFeedback('WRONG');
       audioService.playSound('wrong');

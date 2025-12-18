@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -2237,10 +2236,8 @@ const App: React.FC = () => {
       else if (correctCount === 2) bonusGold = 30;
       else if (correctCount === 3) bonusGold = 50;
       
-      // Update Total Math Count
-      const newTotal = totalMathCorrect + correctCount;
-      setTotalMathCorrect(newTotal);
-      storageService.saveMathCorrectCount(newTotal);
+      // Update Total Math Count (UI Only, storage updated inside component)
+      setTotalMathCorrect(prev => prev + correctCount);
 
       goToRewardPhase(bonusGold);
   };
