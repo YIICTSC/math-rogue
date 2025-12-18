@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package, Ghost, Trophy, RotateCcw, Play, DollarSign, Info } from 'lucide-react';
+import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package, Ghost, Trophy, RotateCcw, Play, DollarSign, Info, Coins, Check } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { 
@@ -343,6 +342,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   const [phase, setPhase] = useState<'BLIND_SELECT' | 'PLAY' | 'SHOP' | 'PACK_OPEN' | 'GAME_OVER' | 'VICTORY_WAIT' | 'VICTORY' | 'MATH'>('BLIND_SELECT');
   const [highScore, setHighScore] = useState(0); 
   const saveDebounceRef = useRef<any>(null);
+
+  // Results State
+  const [roundResult, setRoundResult] = useState<{blind: number, interest: number, hands: number, math: number} | null>(null);
+  const [showRoundResult, setShowRoundResult] = useState(false);
 
   const [runState, setRunState] = useState<PokerRunState>(() => {
       const saved = storageService.loadPokerState();
@@ -707,16 +710,25 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       const interestCap = runState.vouchers.includes('V_SEED_MONEY') ? 10 : 5;
       const interest = Math.min(interestCap, Math.floor(runState.money / 5));
       const handBonus = runState.handsRemaining;
-      const totalEarned = runState.currentBlind.rewardMoney + interest + handBonus;
-      const newMoney = runState.money + totalEarned;
+      const blindReward = runState.currentBlind.rewardMoney;
       
+      // Add round earnings before Math phase
+      const roundTotal = blindReward + interest + handBonus;
       setRunState(prev => ({
           ...prev,
-          money: newMoney,
+          money: prev.money + roundTotal,
           deck: [...prev.deck, ...prev.hand, ...prev.discardPile],
           hand: [],
           discardPile: []
       }));
+
+      // Set partial result (Math bonus will be added later)
+      setRoundResult({
+          blind: blindReward,
+          interest: interest,
+          hands: handBonus,
+          math: 0
+      });
 
       if (runState.ante === 8 && runState.blindIndex === 2 && !runState.isEndless) {
           setPhase('VICTORY_WAIT');
@@ -728,8 +740,18 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   const handleMathComplete = (correctCount: number) => {
       const bonus = correctCount * 1; // $1 per correct answer
       setRunState(prev => ({ ...prev, money: prev.money + bonus }));
+      
+      setRoundResult(prev => prev ? ({ ...prev, math: bonus }) : null);
+      
       generateShop();
+      setShowRoundResult(true);
+      // Phase set to SHOP, but modal is shown on top
       setPhase('SHOP');
+  };
+
+  const closeResultModal = () => {
+      setShowRoundResult(false);
+      // Play BGM only after closing the modal to start the Shop phase music
       audioService.playBGM('poker_shop');
   };
 
@@ -1171,6 +1193,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
 
   // Shop & Play Render (reused from previous, ensuring context is passed)
   if (phase === 'SHOP' || phase === 'PACK_OPEN') {
+      
+      // ... (Existing Pack Open Rendering) ...
       if (phase === 'PACK_OPEN' && currentPack) {
           return (
               <div className="flex flex-col h-full w-full bg-slate-900 text-white p-4 items-center justify-center relative font-mono overflow-hidden">
@@ -1222,6 +1246,43 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       return (
           <div className="flex flex-col h-full w-full bg-slate-900 text-white p-4 font-mono relative overflow-hidden">
               {renderInspectionModal()}
+              
+              {/* RESULT MODAL OVERLAY */}
+              {showRoundResult && roundResult && (
+                  <div className="absolute inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={closeResultModal}>
+                      <div className="bg-slate-800 border-4 border-yellow-500 rounded-lg p-6 w-full max-w-sm shadow-2xl relative animate-in zoom-in duration-300" onClick={e => e.stopPropagation()}>
+                          <h2 className="text-3xl font-black text-white text-center mb-6 border-b border-slate-600 pb-2">ROUND CLEAR</h2>
+                          
+                          <div className="space-y-3 font-mono text-sm mb-6">
+                              <div className="flex justify-between items-center text-gray-300">
+                                  <span>Blind Reward</span>
+                                  <span className="font-bold text-yellow-400">${roundResult.blind}</span>
+                              </div>
+                              <div className="flex justify-between items-center text-gray-300">
+                                  <span>Interest</span>
+                                  <span className="font-bold text-yellow-400">${roundResult.interest}</span>
+                              </div>
+                              <div className="flex justify-between items-center text-gray-300">
+                                  <span>Hands Left</span>
+                                  <span className="font-bold text-yellow-400">${roundResult.hands}</span>
+                              </div>
+                              <div className="flex justify-between items-center text-cyan-300 border-t border-slate-600 pt-2">
+                                  <span className="flex items-center"><Calculator className="mr-2" size={14}/> Math Bonus</span>
+                                  <span className="font-bold">+${roundResult.math}</span>
+                              </div>
+                              <div className="flex justify-between items-center text-xl font-black text-white bg-slate-700 p-2 rounded mt-2">
+                                  <span>TOTAL</span>
+                                  <span className="text-yellow-400">${roundResult.blind + roundResult.interest + roundResult.hands + roundResult.math}</span>
+                              </div>
+                          </div>
+                          
+                          <button onClick={closeResultModal} className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg flex items-center justify-center shadow-lg transition-colors">
+                              <Check className="mr-2"/> Go to Shop
+                          </button>
+                      </div>
+                  </div>
+              )}
+
               <div className="flex justify-between items-center mb-4 bg-slate-800 p-4 rounded-lg shadow-lg shrink-0">
                   <h2 className="text-2xl font-bold flex items-center"><ShoppingBag className="mr-2 text-yellow-500"/> School Store</h2>
                   <div className="text-2xl font-bold text-yellow-400">${runState.money}</div>
