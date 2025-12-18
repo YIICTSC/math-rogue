@@ -5,6 +5,8 @@ import { HERO_IMAGE_DATA } from '../constants';
 import PixelSprite, { SPRITE_TEMPLATES } from './PixelSprite';
 import { audioService } from '../services/audioService';
 import { storageService } from '../services/storageService';
+import MathChallengeScreen from './MathChallengeScreen';
+import { GameMode } from '../types';
 
 // --- GAME CONSTANTS ---
 const WORLD_WIDTH = 2000;
@@ -243,7 +245,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     const camera = useRef({ x: WORLD_WIDTH/2, y: WORLD_HEIGHT/2 }); // Start centered
 
     // Game State
-    const gameState = useRef<'PLAYING' | 'PAUSED' | 'GAME_OVER' | 'LEVEL_UP'>('PLAYING');
+    const gameState = useRef<'PLAYING' | 'PAUSED' | 'GAME_OVER' | 'LEVEL_UP' | 'MATH_CHALLENGE'>('PLAYING');
     const player = useRef<Entity>({ id: 0, x: WORLD_WIDTH/2, y: WORLD_HEIGHT/2, type: 'WARRIOR', width: 24, height: 24, hp: 100, maxHp: 100, speed: PLAYER_SPEED, damage: 0, vx: 0, vy: 0, dead: false, flashTime: 0 });
     const enemies = useRef<Entity[]>([]);
     const projectiles = useRef<Projectile[]>([]);
@@ -399,6 +401,21 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             levelReached: level.current,
             weapons: ownedWeapons
         });
+    };
+
+    const handleMathComplete = (correctCount: number) => {
+        if (correctCount >= 3) { // 全問正解でボーナス
+            const healAmount = 10;
+            player.current.hp = Math.min(player.current.maxHp, player.current.hp + healAmount);
+            damageTexts.current.push({ id: Math.random(), x: player.current.x, y: player.current.y - 30, value: `+${healAmount} HP`, color: 'green', life: 60 });
+            audioService.playSound('buff');
+        }
+        
+        generateUpgrades();
+        gameState.current = 'LEVEL_UP';
+        audioService.playBGM('survivor_metal'); // BGM復帰
+        audioService.playSound('win'); // Level up sound
+        setUiState(prev => ({ ...prev })); // Force re-render to show level up screen
     };
 
     // --- GAME LOGIC ---
@@ -676,12 +693,11 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 xp.current += g.value;
                 gems.current.splice(i, 1);
                 if (xp.current >= nextLevelXp.current) {
-                    gameState.current = 'LEVEL_UP';
+                    gameState.current = 'MATH_CHALLENGE'; // Switch to Math mode first
                     xp.current -= nextLevelXp.current;
                     level.current++;
                     nextLevelXp.current = Math.floor(nextLevelXp.current * 1.2);
-                    generateUpgrades();
-                    audioService.playSound('win');
+                    audioService.playSound('select');
                 }
                 setUiState(prev => ({ ...prev, level: level.current, xpPercent: (xp.current/nextLevelXp.current)*100 }));
             }
@@ -1125,6 +1141,16 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             </div>
 
             <canvas ref={canvasRef} width={viewSize.width} height={viewSize.height} className="block w-full h-full bg-[#111827]" style={{ imageRendering: 'pixelated' }} />
+
+            {/* Math Challenge Overlay */}
+            {gameState.current === 'MATH_CHALLENGE' && (
+                 <div className="absolute inset-0 z-30 pointer-events-auto">
+                     <MathChallengeScreen 
+                        mode={GameMode.MIXED} 
+                        onComplete={handleMathComplete}
+                     />
+                 </div>
+            )}
 
             {/* Level Up Overlay */}
             {gameState.current === 'LEVEL_UP' && (
