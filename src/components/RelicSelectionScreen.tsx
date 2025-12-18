@@ -14,7 +14,7 @@ interface RelicSelectionScreenProps {
 const RelicSelectionScreen: React.FC<RelicSelectionScreenProps> = ({ relics, onSelect, languageMode }) => {
   useEffect(() => {
     // Play "shop" theme for selection phase as it fits the "equipping" mood
-    audioService.playBGM('shop');
+    audioService.playBGM('relic_select');
   }, []);
 
   return (

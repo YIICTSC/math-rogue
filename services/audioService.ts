@@ -7,7 +7,7 @@ class AudioService {
   
   private isMuted: boolean = false;
   private isPlayingBGM: boolean = false;
-  private currentBgmType: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane_setup' | 'paper_plane_battle' | 'paper_plane_vacation' | null = null;
+  private currentBgmType: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane_setup' | 'paper_plane_battle' | 'paper_plane_vacation' | 'relic_select' | null = null;
   
   // BGM Mode
   private bgmMode: 'OSCILLATOR' | 'MP3' = 'OSCILLATOR';
@@ -520,10 +520,52 @@ class AudioService {
               const note = scale[Math.floor(Math.random() * scale.length)];
               this.playOsc(note, actualTime, 0.4, 'triangle', 0.1, this.bgmGain);
           }
+      } else if (this.currentBgmType === 'relic_select') {
+          // --- RELIC SELECTION (Mysterious, Choice) ---
+          // Slow, arpeggiated, ambient
+          const measure = Math.floor(t / 16) % 4;
+          
+          // Pad / Bass
+          if (beatNumber % 16 === 0) {
+              const roots = [220.00, 174.61, 196.00, 164.81]; // A3, F3, G3, E3
+              const root = roots[measure];
+              this.playOsc(root / 2, actualTime, 4.0, 'sine', 0.15, this.bgmGain);
+              this.playOsc(root, actualTime, 4.0, 'triangle', 0.05, this.bgmGain);
+          }
+
+          // Glittering Arpeggio
+          if (beatNumber % 2 === 0) {
+              // Am9: A C E G B -> 220, 261, 329, 392, 493
+              // Fmaj7: F A C E -> 174, 220, 261, 329
+              // G6: G B D E -> 196, 246, 293, 329
+              // Em7: E G B D -> 164, 196, 246, 293
+              
+              const chords = [
+                  [440.00, 523.25, 659.25, 783.99, 987.77], // Am9 (up octave)
+                  [349.23, 440.00, 523.25, 659.25, 880.00], // Fmaj7
+                  [392.00, 493.88, 587.33, 659.25, 783.99], // G6
+                  [329.63, 392.00, 493.88, 587.33, 659.25]  // Em7
+              ];
+              
+              const currentChord = chords[measure];
+              // Randomly pick notes from chord for twinkling effect or structured arp
+              const noteIdx = Math.floor(Math.random() * currentChord.length);
+              const note = currentChord[noteIdx];
+              
+              this.playOsc(note, actualTime, 0.4, 'sine', 0.1, this.bgmGain);
+              if (Math.random() < 0.3) {
+                  this.playOsc(note * 2, actualTime + 0.1, 0.3, 'sine', 0.05, this.bgmGain); // Sparkle
+              }
+          }
+          
+          // Gentle Bell
+          if (beatNumber % 8 === 0) {
+              this.playOsc(880, actualTime, 1.5, 'triangle', 0.05, this.bgmGain);
+          }
       }
   }
 
-  private playOscillatorBGM(type: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane_setup' | 'paper_plane_battle' | 'paper_plane_vacation') {
+  private playOscillatorBGM(type: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane_setup' | 'paper_plane_battle' | 'paper_plane_vacation' | 'relic_select') {
       // Main Game
       if (type === 'battle') { this.tempo = 135; }
       else if (type === 'mid_boss') { this.tempo = 150; }
@@ -553,6 +595,7 @@ class AudioService {
       else if (type === 'paper_plane_battle') { this.tempo = 90; }
       else if (type === 'paper_plane_setup') { this.tempo = 80; }
       else if (type === 'paper_plane_vacation') { this.tempo = 110; }
+      else if (type === 'relic_select') { this.tempo = 80; }
       else { this.tempo = 90; }
 
       this.current16thNote = 0;
@@ -629,7 +672,7 @@ class AudioService {
   }
 
   // --- Public API ---
-  public async playBGM(type: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane_setup' | 'paper_plane_battle' | 'paper_plane_vacation') {
+  public async playBGM(type: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane_setup' | 'paper_plane_battle' | 'paper_plane_vacation' | 'relic_select') {
       // Don't restart if already playing the same type (regardless of mode)
       if (this.isPlayingBGM && this.currentBgmType === type) return;
       
