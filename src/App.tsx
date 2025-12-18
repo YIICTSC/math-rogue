@@ -37,6 +37,7 @@ import { storageService } from './services/storageService';
 import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { trans } from './utils/textUtils';
 import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music } from 'lucide-react';
+import SchoolStoryScreen from './components/SchoolStoryScreen';
 
 const calculateScore = (state: GameState, victory: boolean): number => {
     let score = 0;
@@ -265,8 +266,12 @@ const App: React.FC = () => {
     setClearCount(storageService.getClearCount());
     setIsMathDebugSkipped(storageService.getDebugMathSkip());
     setIsDebugHpOne(storageService.getDebugHpOne());
-    // Note: BGM mode is reset to Oscillator on reload for simplicity, 
-    // but could be loaded from storage if implemented.
+    
+    // Play Menu BGM on initial load if on title screen
+    if (gameState.screen === GameScreen.START_MENU) {
+        audioService.init();
+        audioService.playBGM('menu');
+    }
   }, []);
 
   const handleTitleClick = () => {
@@ -307,10 +312,10 @@ const App: React.FC = () => {
   };
 
   const returnToTitle = () => {
-      audioService.stopBGM();
       setShopCards([]);
       setEventData(null);
       setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined }));
+      audioService.playBGM('menu'); // Play Menu BGM
   };
 
   const handleNodeComplete = () => {
@@ -2368,6 +2373,10 @@ const App: React.FC = () => {
                             <button onClick={openMiniGameMenu} className="w-full bg-indigo-900/80 text-indigo-100 py-2 px-4 text-sm font-bold border border-indigo-500 hover:bg-indigo-800 cursor-pointer flex items-center justify-center shadow-md hover:shadow-indigo-900/50">
                                 <Gamepad2 className="mr-2" size={16}/> {trans("ミニゲーム", languageMode)}
                             </button>
+                            
+                            <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.STORY_MODE }))} className="w-full bg-emerald-900/80 text-emerald-100 py-2 px-4 text-sm font-bold border border-emerald-500 hover:bg-emerald-800 cursor-pointer flex items-center justify-center shadow-md hover:shadow-emerald-900/50">
+                                <Ghost className="mr-2" size={16}/> AI学校の怪談
+                            </button>
 
                             {isDebugHpOne && (
                                 <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.DEBUG_MENU }))} className="w-full bg-gray-800 text-red-400 py-2 px-4 text-sm font-bold border border-red-500 hover:bg-gray-700 cursor-pointer flex items-center justify-center shadow-md mb-2">
@@ -2411,6 +2420,7 @@ const App: React.FC = () => {
                                     <li>BGMモード切り替え機能（MP3対応）を追加しました。</li>
                                     <li>タイトル画面にBGM切り替えボタンを設置しました。</li>
                                     <li>冒険開始時、ボーナスレリック選択フェーズを追加しました。</li>
+                                    <li>タイトル画面でBGMが再生されるように修正しました。</li>
                                 </ul>
                             </section>
                         </div>
@@ -2422,6 +2432,11 @@ const App: React.FC = () => {
                         </button>
                     </div>
                 </div>
+            )}
+            
+            {/* Story Mode Screen (AI School Horror) */}
+            {gameState.screen === (GameScreen.STORY_MODE as any) && (
+                <SchoolStoryScreen onBack={returnToTitle} playerImageData={HERO_IMAGE_DATA} />
             )}
 
             {gameState.screen === GameScreen.DEBUG_MENU && (
