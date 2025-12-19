@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation, Droplets, Recycle, Repeat, User, Lock, Users, Target, UserPlus, Gauge, Swords, Dice5, Ghost } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -1675,13 +1674,15 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             }));
             setHand([]);
             
-            // Save Meta Progress
-            const newProgress = { ...progress };
-            newProgress.rank += 1;
+            // Re-load progress to ensure consistency
+            const currentProgress = loadProgress();
+            const newProgress = { ...currentProgress };
+            newProgress.rank = (newProgress.rank || 1) + 1;
             
             // Record Max Level
             const shipId = selectedShipId;
-            const currentMax = newProgress.maxClearedLevel[shipId] || -1;
+            const currentMax = newProgress.maxClearedLevel[shipId] ?? -1; 
+            
             if (selectedMissionLevel > currentMax) {
                 newProgress.maxClearedLevel[shipId] = selectedMissionLevel;
                 // Award Rerolls for high level clear
@@ -1988,7 +1989,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     <div className="text-6xl font-black text-white w-20">{selectedMissionLevel}</div>
                                     <button 
                                         onClick={() => {
-                                            const shipMax = progress.maxClearedLevel[selectedShipId] || -1;
+                                            const shipMax = progress.maxClearedLevel[selectedShipId] ?? -1;
                                             // Can select up to Max Cleared + 1
                                             if (selectedMissionLevel <= shipMax) {
                                                 setSelectedMissionLevel(l => Math.min(9, l + 1));
@@ -1996,16 +1997,16 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                                 audioService.playSound('wrong');
                                             }
                                         }}
-                                        className={`bg-slate-700 p-3 rounded-full hover:bg-slate-600 ${(selectedMissionLevel > (progress.maxClearedLevel[selectedShipId]|| -1)) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        className={`bg-slate-700 p-3 rounded-full hover:bg-slate-600 ${(selectedMissionLevel > (progress.maxClearedLevel[selectedShipId] ?? -1)) ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     >
                                         <ChevronsRight/>
                                     </button>
                                 </div>
                                 <div className="text-sm text-gray-400 mb-4">
-                                    {(progress.maxClearedLevel[selectedShipId] || -1) < selectedMissionLevel ? (
+                                    {(progress.maxClearedLevel[selectedShipId] ?? -1) < selectedMissionLevel ? (
                                         <div className="flex flex-col items-center">
                                             <span className="text-red-500 font-bold mb-1">未クリア (挑戦中)</span>
-                                            {selectedMissionLevel === (progress.maxClearedLevel[selectedShipId] || -1) + 1 && (
+                                            {selectedMissionLevel === (progress.maxClearedLevel[selectedShipId] ?? -1) + 1 && (
                                                 <span className="text-xs text-yellow-400 animate-pulse">
                                                     このランクをクリアすると Lv{selectedMissionLevel + 1} が解放されます！
                                                 </span>
