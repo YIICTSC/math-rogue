@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation, Droplets, Recycle, Repeat, User, Lock, Users, Target, UserPlus, Gauge, Swords, Dice5, Ghost } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -1718,6 +1716,14 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setupRewardPhase();
     };
 
+    if (phase === 'MATH') {
+        return (
+            <div className="w-full h-full bg-slate-900 z-[100] relative">
+                 <MathChallengeScreen mode={GameMode.MIXED} onComplete={handleMathComplete} />
+            </div>
+        );
+    }
+
     // --- RENDER HELPERS ---
 
     const RenderTooltip = () => {
@@ -2356,6 +2362,14 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         </button>
                     </div>
                 </div>
+            </div>
+        );
+    }
+
+    if (phase === 'MATH') {
+        return (
+            <div className="w-full h-full bg-slate-900 z-[100] relative">
+                 <MathChallengeScreen mode={GameMode.MIXED} onComplete={handleMathComplete} />
             </div>
         );
     }
