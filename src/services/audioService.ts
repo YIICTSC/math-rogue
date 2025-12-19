@@ -1,4 +1,5 @@
 
+
 class AudioService {
   private ctx: AudioContext | null = null;
   private masterGain: GainNode | null = null;
@@ -700,7 +701,7 @@ class AudioService {
       // If buffer not cached, try to load
       if (!buffer) {
           // Ensure correct base path handling for Vite projects
-          const baseUrl = import.meta.env.BASE_URL; // e.g. './' or '/my-app/'
+          const baseUrl = (import.meta as any).env.BASE_URL; // e.g. './' or '/my-app/'
           
           const paths = [
               `${baseUrl}bgm/${type}.mp3`,

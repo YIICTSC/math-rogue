@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
@@ -191,6 +190,24 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     if (a.cost !== b.cost) return a.cost - b.cost;
     return a.name.localeCompare(b.name);
   });
+  
+  // Helper to get counter for a relic ID (handling shared counters like ATTACK_COUNT)
+  const getRelicCounter = (relicId: string) => {
+      if (relicId === 'KUNAI' || relicId === 'SHURIKEN' || relicId === 'ORNAMENTAL_FAN') {
+          return player.relicCounters['ATTACK_COUNT'];
+      }
+      return player.relicCounters[relicId];
+  };
+
+  // Sort relics to show ones with active counters first
+  const displayedRelics = [...player.relics].sort((a, b) => {
+      const countA = getRelicCounter(a.id) || 0;
+      const countB = getRelicCounter(b.id) || 0;
+      // Sort descending by counter existence/value
+      if (countA > 0 && countB <= 0) return -1;
+      if (countA <= 0 && countB > 0) return 1;
+      return 0;
+  });
 
   return (
     <div className="flex flex-col h-full relative bg-gray-900 overflow-hidden">
@@ -313,22 +330,30 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         {player.relics.length === 0 ? (
                             <div className="text-center text-gray-500 py-8">レリックを持っていません</div>
                         ) : (
-                            player.relics.map(r => (
-                                <div key={r.id} className="bg-black/40 p-3 rounded border border-gray-600 flex items-start gap-3">
-                                    <div className="bg-gray-700 p-2 rounded-full border border-yellow-600 shrink-0">
-                                        <Gem size={20} className="text-yellow-400" />
+                            player.relics.map(r => {
+                                const counter = getRelicCounter(r.id);
+                                return (
+                                    <div key={r.id} className="bg-black/40 p-3 rounded border border-gray-600 flex items-start gap-3">
+                                        <div className="bg-gray-700 p-2 rounded-full border border-yellow-600 shrink-0 relative">
+                                            <Gem size={20} className="text-yellow-400" />
+                                            {counter !== undefined && counter > 0 && (
+                                                <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold border border-white shadow-md">
+                                                    {counter}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <div className="font-bold text-yellow-100 text-sm mb-1">{trans(r.name, languageMode)}</div>
+                                            <div className="text-xs text-gray-400 leading-tight">{trans(r.description, languageMode)}</div>
+                                            {counter !== undefined && counter > 0 && (
+                                                <div className="text-[10px] text-blue-300 mt-1">
+                                                    Counter: {counter}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div>
-                                        <div className="font-bold text-yellow-100 text-sm mb-1">{trans(r.name, languageMode)}</div>
-                                        <div className="text-xs text-gray-400 leading-tight">{trans(r.description, languageMode)}</div>
-                                        {player.relicCounters[r.id] !== undefined && player.relicCounters[r.id] > 0 && (
-                                            <div className="text-[10px] text-blue-300 mt-1">
-                                                Counter: {player.relicCounters[r.id]}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            ))
+                                );
+                            })
                         )}
                     </div>
                     <button 
@@ -505,16 +530,19 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     {/* Relics/Potions Compact Row (Click to Expand) */}
                     <div className="flex items-center justify-between border-t border-gray-700 pt-1" onClick={() => setShowRelicList(true)}>
                         <div className="flex -space-x-1 overflow-hidden w-20 cursor-pointer hover:bg-white/10 rounded px-1 transition-colors">
-                            {player.relics.slice(0, 5).map(r => (
-                                <div key={r.id} className="w-4 h-4 md:w-5 md:h-5 bg-gray-700 rounded-full border border-yellow-600 flex items-center justify-center shrink-0 relative group">
-                                    <Gem size={10} className="text-yellow-400" />
-                                    {player.relicCounters[r.id] !== undefined && player.relicCounters[r.id] > 0 && (
-                                        <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold border-2 border-gray-900 shadow-md z-10 pointer-events-none">
-                                            {player.relicCounters[r.id]}
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
+                            {displayedRelics.slice(0, 5).map(r => {
+                                const counter = getRelicCounter(r.id);
+                                return (
+                                    <div key={r.id} className="w-4 h-4 md:w-5 md:h-5 bg-gray-700 rounded-full border border-yellow-600 flex items-center justify-center shrink-0 relative group">
+                                        <Gem size={10} className="text-yellow-400" />
+                                        {counter !== undefined && counter > 0 && (
+                                            <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold border border-white shadow-md z-10 pointer-events-none scale-125">
+                                                {counter}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
                             {player.relics.length > 5 && (
                                 <div className="w-4 h-4 md:w-5 md:h-5 bg-gray-800 rounded-full border border-gray-500 flex items-center justify-center shrink-0 text-[8px] font-bold text-white z-10">
                                     +{player.relics.length - 5}

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -960,6 +959,12 @@ const App: React.FC = () => {
             p.strength = 0;
             p.powers = {};
             p.relicCounters = { ...p.relicCounters }; 
+            
+            // RESET HAPPY FLOWER COUNTER AT START OF BATTLE
+            if (p.relics.find(r => r.id === 'HAPPY_FLOWER')) {
+                p.relicCounters['HAPPY_FLOWER'] = 0;
+            }
+
             p.turnFlags = {};
             p.typesPlayedThisTurn = [];
             p.echoes = 0;
@@ -1728,9 +1733,16 @@ const App: React.FC = () => {
           p.floatingText = { id: `relic-horn-${Date.now()}`, text: '+14 Block', color: 'text-blue-400', iconType: 'shield' };
       }
 
-      if (p.relics.find(r => r.id === 'HAPPY_FLOWER') && (prev.turn + 1) % 3 === 0) {
-          p.currentEnergy += 1; 
-          p.floatingText = { id: `relic-flower-${Date.now()}`, text: '+1 Energy', color: 'text-yellow-400', iconType: 'zap' };
+      // --- HAPPY FLOWER Logic ---
+      if (p.relics.find(r => r.id === 'HAPPY_FLOWER')) {
+          const current = (p.relicCounters['HAPPY_FLOWER'] || 0) + 1;
+          if (current === 3) {
+              p.currentEnergy += 1; 
+              p.floatingText = { id: `relic-flower-${Date.now()}`, text: '+1 Energy', color: 'text-yellow-400', iconType: 'zap' };
+              p.relicCounters['HAPPY_FLOWER'] = 0;
+          } else {
+              p.relicCounters['HAPPY_FLOWER'] = current;
+          }
       }
 
       let newDrawPile = [...p.drawPile];
@@ -2261,6 +2273,7 @@ const App: React.FC = () => {
               if (item.value.id === 'OLD_COIN') p.gold += 300;
               if (item.value.id === 'VELVET_CHOKER') p.maxEnergy += 1;
               if (item.value.id === 'MATRYOSHKA') p.relicCounters['MATRYOSHKA'] = 2; // Init Counter
+              if (item.value.id === 'HAPPY_FLOWER') p.relicCounters['HAPPY_FLOWER'] = 0; // Init Counter
               storageService.saveUnlockedRelic(item.value.id);
           } else if (item.type === 'GOLD') {
               p.gold += item.value;
@@ -2415,7 +2428,7 @@ const App: React.FC = () => {
                             </div>
 
                             <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                <Terminal size={10}/> v2.5.4
+                                <Terminal size={10}/> v1.0.0
                             </button>
                         </div>
                     </div>
@@ -2429,14 +2442,14 @@ const App: React.FC = () => {
                             className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2 select-none active:text-green-200"
                             onClick={handleLogTitleClick}
                         >
-                            System Update Log v2.5.4
+                            System Update Log v1.0.0
                         </h2>
                         <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
                             <section>
-                                <h3 className="text-white font-bold mb-1">■ アップデート (Update)</h3>
+                                <h3 className="text-white font-bold mb-1">■ リリース (Release)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li>ミニゲームの開放条件（累計計算正解数）を追加しました。</li>
-                                    <li>タイトル画面に次のミニゲーム開放までの残り問題数を表示しました。</li>
+                                    <li>正式版 v1.0.0 リリース</li>
+                                    <li>全ミニゲーム実装完了</li>
                                 </ul>
                             </section>
                         </div>
@@ -2601,6 +2614,7 @@ const App: React.FC = () => {
                              if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
                              if (relic.id === 'OLD_COIN') newP.gold += 300;
                              if (relic.id === 'MATRYOSHKA') newP.relicCounters['MATRYOSHKA'] = 2; // Init Counter
+                             if (relic.id === 'HAPPY_FLOWER') newP.relicCounters['HAPPY_FLOWER'] = 0; // Init Counter
                              return { ...prev, player: newP };
                          });
                          storageService.saveUnlockedRelic(relic.id);
@@ -2669,6 +2683,7 @@ const App: React.FC = () => {
                                     if (r.value.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
                                     if (r.value.id === 'OLD_COIN') newP.gold += 300;
                                     if (r.value.id === 'MATRYOSHKA') newP.relicCounters['MATRYOSHKA'] = 2; // Init Counter
+                                    if (r.value.id === 'HAPPY_FLOWER') newP.relicCounters['HAPPY_FLOWER'] = 0; // Init Counter
                                 }
                             });
 

@@ -1,6 +1,7 @@
 
+
 import React, { useEffect } from 'react';
-import { Relic, LanguageMode } from '../types';
+import { Relic } from '../types';
 import { Gem, MousePointer2 } from 'lucide-react';
 import { trans } from '../utils/textUtils';
 import { audioService } from '../services/audioService';
@@ -8,12 +9,12 @@ import { audioService } from '../services/audioService';
 interface RelicSelectionScreenProps {
   relics: Relic[];
   onSelect: (relic: Relic) => void;
-  languageMode: LanguageMode;
+  languageMode: 'JAPANESE' | 'HIRAGANA';
 }
 
 const RelicSelectionScreen: React.FC<RelicSelectionScreenProps> = ({ relics, onSelect, languageMode }) => {
   useEffect(() => {
-    // Play "shop" theme for selection phase as it fits the "equipping" mood
+    // Play "relic_select" theme for selection phase
     audioService.playBGM('relic_select');
   }, []);
 
