@@ -2429,6 +2429,13 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                 </div>
             </div>
         )}
+        
+        {/* Math Challenge Overlay (Full Screen) */}
+        {showMathChallenge && (
+             <div className="fixed inset-0 z-[100] w-full h-full pointer-events-auto">
+                 <MathChallengeScreen mode={GameMode.MIXED} onComplete={handleMathComplete} />
+             </div>
+        )}
 
         {/* Status Screen */}
         {showStatus && (
