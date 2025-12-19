@@ -125,6 +125,7 @@ interface KochoGameState {
     shopUpgradeUsed: boolean; // Tracks if upgrade was used in current shop/event
     currentUpgradeOffer: UpgradeOffer | null; // Persist current upgrade offer
     shopInventory: KRelic[]; // New: Store specific relics for the shop
+    nextWaveMessage?: string; // Message to display at start of next wave
 }
 
 // --- DATA ---
@@ -282,6 +283,7 @@ const hydrateState = (state: any): KochoGameState => {
         shopInventory: state.shopInventory || [],
         totalTurns: state.totalTurns || 0, // Restore Total Turns
         pendingPhase: state.pendingPhase || null,
+        nextWaveMessage: state.nextWaveMessage || undefined, // New field
     };
 };
 
@@ -308,7 +310,8 @@ const getInitialState = (): KochoGameState => ({
     relics: [],
     shopUpgradeUsed: false,
     currentUpgradeOffer: null,
-    shopInventory: []
+    shopInventory: [],
+    nextWaveMessage: undefined
 });
 
 // --- COMPONENT ---
@@ -544,6 +547,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const isBattleStart = wave === 1;
         const currentHand = isBattleStart ? stateRef.current.hand.map(c => ({...c, currentCooldown: 0})) : stateRef.current.hand;
 
+        const extraLog = stateRef.current.nextWaveMessage;
+
         setGameState(prev => ({
             ...prev,
             phase: 'BATTLE',
@@ -562,7 +567,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             hand: currentHand,
             queue: [],
             status: 'PLAYING',
-            logs: [logMsg],
+            logs: extraLog ? [logMsg, extraLog] : [logMsg],
+            nextWaveMessage: undefined, // Clear message
             specialActionCooldown: 0,
             shopUpgradeUsed: false,
             fieldItems: prev.fieldItems
@@ -1684,7 +1690,9 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     ...nextState.player, 
                     hp: Math.min(nextState.player.maxHp, nextState.player.hp + 1) 
                 };
-                nextState.logs = [bonusMsg, ...nextState.logs.slice(0, 4)];
+                const msg = "計算ボーナス: HP+1";
+                nextState.logs = [msg, ...nextState.logs.slice(0, 4)];
+                nextState.nextWaveMessage = msg; // Save for next wave log
             }
 
             return nextState;
