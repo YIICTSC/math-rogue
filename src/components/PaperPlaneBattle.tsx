@@ -2360,14 +2360,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         );
     }
 
-    if (phase === 'MATH') {
-        return (
-            <div className="absolute inset-0 z-[100] w-full h-full pointer-events-auto">
-                 <MathChallengeScreen mode={GameMode.MIXED} onComplete={handleMathComplete} />
-            </div>
-        );
-    }
-
     return (
         <div className="w-full h-full bg-[#101018] text-white flex flex-col font-mono relative overflow-hidden">
             <RenderTooltip />
