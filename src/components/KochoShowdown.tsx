@@ -1,14 +1,15 @@
 
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp, Dna, Shuffle, Star, HelpCircle, Book, AlertCircle, Flag, Music, Mic, Milk, Battery, ShieldCheck, Bomb, Utensils, PenTool, Circle, ArrowRight, Target, Package } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { storageService } from '../services/storageService';
+import MathChallengeScreen from './MathChallengeScreen';
+import { GameMode } from '../types';
 
 // --- TYPES ---
 type Facing = 1 | -1; // 1: Right, -1: Left
-type GamePhase = 'BATTLE' | 'REWARD' | 'UPGRADE_EVENT' | 'SHOP' | 'VICTORY' | 'GAME_OVER';
+type GamePhase = 'BATTLE' | 'REWARD' | 'UPGRADE_EVENT' | 'SHOP' | 'VICTORY' | 'GAME_OVER' | 'MATH';
 type CardEffectType = 'NORMAL' | 'COUNTER' | 'PUSH' | 'PULL' | 'RECOIL' | 'DASH_ATTACK' | 'FURTHEST' | 'PIERCE' | 'TELEPORT' | 'STUN' | 'HEAL' | 'DRAIN' | 'PIERCE_DASH';
 
 interface KCard {
@@ -102,6 +103,7 @@ interface UpgradeOffer {
 
 interface KochoGameState {
     phase: GamePhase;
+    pendingPhase: GamePhase | null; // For Math intermission
     battleStage: number; // 1 to 7
     battleSequence: number; // 0: 1st Mob Wave, 1: 2nd Mob Wave, 2: MidBoss (Used for Stage 2+)
     wave: number;
@@ -278,12 +280,14 @@ const hydrateState = (state: any): KochoGameState => {
         player: { ...state.player, barrier: state.player.barrier || 0, strength: state.player.strength || 0 }, // Legacy support
         currentUpgradeOffer: restoredOffer,
         shopInventory: state.shopInventory || [],
-        totalTurns: state.totalTurns || 0 // Restore Total Turns
+        totalTurns: state.totalTurns || 0, // Restore Total Turns
+        pendingPhase: state.pendingPhase || null,
     };
 };
 
 const getInitialState = (): KochoGameState => ({
     phase: 'BATTLE',
+    pendingPhase: null,
     battleStage: 1,
     battleSequence: 0,
     wave: 1,
@@ -543,6 +547,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setGameState(prev => ({
             ...prev,
             phase: 'BATTLE',
+            pendingPhase: null,
             battleStage: stage,
             battleSequence: sequence,
             wave: wave,
@@ -1598,10 +1603,37 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
              }
         }
 
-        // Apply Transition
+        // Check for Intermission
+        const isIntermission = ['REWARD', 'SHOP', 'UPGRADE_EVENT'].includes(nextPhase);
+
+        if (isIntermission) {
+             setGameState(prev => ({
+                 ...prev,
+                 battleStage: nextStageVal,
+                 battleSequence: nextSequence,
+                 wave: nextWave,
+                 phase: 'MATH',
+                 pendingPhase: nextPhase as GamePhase, 
+                 status: 'PLAYING'
+             }));
+             audioService.playBGM('math');
+        } else {
+             // Direct transition
+             if (nextPhase === 'VICTORY') {
+                  setGameState(prev => ({ ...prev, status: 'VICTORY', pendingPhase: null }));
+                  audioService.playSound('win');
+             } else if (nextPhase === 'BATTLE') {
+                  startWave(nextStageVal, nextSequence, nextWave);
+             }
+        }
+    };
+
+    const performPhaseTransition = (nextPhase: GamePhase) => {
+        const current = stateRef.current;
+        
         if (nextPhase === 'REWARD') {
              generateRewards();
-             setGameState(prev => ({ ...prev, phase: 'REWARD', status: 'PLAYING' }));
+             setGameState(prev => ({ ...prev, phase: 'REWARD', status: 'PLAYING', pendingPhase: null }));
              audioService.playSound('win');
         } else if (nextPhase === 'SHOP' || nextPhase === 'UPGRADE_EVENT') {
              // Generate random inventory for shop
@@ -1620,20 +1652,41 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
              
              setGameState(prev => ({ 
                  ...prev, 
-                 phase: nextPhase as GamePhase, 
+                 phase: nextPhase, 
                  status: 'PLAYING', 
                  shopUpgradeUsed: false, 
                  currentUpgradeOffer: getRandomOffer(),
-                 shopInventory: newInventory 
+                 shopInventory: newInventory,
+                 pendingPhase: null
             }));
              audioService.playBGM(nextPhase === 'SHOP' ? 'poker_shop' : 'menu');
         } else if (nextPhase === 'VICTORY') {
-             setGameState(prev => ({ ...prev, status: 'VICTORY' }));
-             // Score saving is handled by useEffect on status change
+             setGameState(prev => ({ ...prev, status: 'VICTORY', pendingPhase: null }));
              audioService.playSound('win');
         } else if (nextPhase === 'BATTLE') {
-             startWave(nextStageVal, nextSequence, nextWave);
+             // Should not be called typically as handlePhaseComplete handles BATTLE direct
+             startWave(current.battleStage, current.battleSequence, current.wave);
         }
+    };
+
+    const handleMathComplete = (correctCount: number) => {
+        const targetPhase = stateRef.current.pendingPhase;
+        if (!targetPhase) return; 
+
+        let bonusMsg = "";
+        // Bonus Logic
+        if (correctCount >= 3) { // Max correct
+             setGameState(prev => ({
+                 ...prev,
+                 player: { ...prev.player, hp: Math.min(prev.player.maxHp, prev.player.hp + 1) }
+             }));
+             bonusMsg = "全問正解！HP+1";
+             addVfx('HEAL', stateRef.current.player.pos);
+             audioService.playSound('buff');
+        }
+        
+        if (bonusMsg) addLog(bonusMsg);
+        performPhaseTransition(targetPhase);
     };
 
     const nextStage = () => {
@@ -1891,6 +1944,13 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     // --- MAIN RENDER ---
     return (
         <div className="flex flex-col h-full w-full bg-[#1a1a2e] text-white font-mono relative overflow-hidden">
+            {/* Math Challenge Overlay */}
+            {gameState.phase === 'MATH' && (
+                 <div className="absolute inset-0 z-[100] w-full h-full pointer-events-auto">
+                     <MathChallengeScreen mode={GameMode.MIXED} onComplete={handleMathComplete} />
+                 </div>
+            )}
+
             {/* Header */}
             <div className="flex justify-between items-center p-2 md:p-4 bg-black/40 border-b border-indigo-500/30 shrink-0">
                 <button onClick={handleQuit} className="flex items-center text-gray-400 hover:text-white"><ArrowLeft className="mr-2"/> <span className="hidden md:inline">Quit</span></button>
