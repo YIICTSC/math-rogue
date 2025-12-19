@@ -4,6 +4,8 @@ import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, A
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
 import { storageService } from '../services/storageService';
+import MathChallengeScreen from './MathChallengeScreen';
+import { GameMode } from '../types';
 
 interface SchoolDungeonRPG2Props {
   onBack: () => void;
@@ -404,6 +406,9 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   // Fast Forward State
   const [isFastForwarding, setIsFastForwarding] = useState(false);
   const fastForwardInterval = useRef<any>(null);
+
+  // Math Challenge State
+  const [showMathChallenge, setShowMathChallenge] = useState(false);
 
   // Init
   useEffect(() => {
@@ -1845,6 +1850,30 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
       });
   };
 
+  const handleMathComplete = (correctCount: number) => {
+      setShowMathChallenge(false);
+      
+      const nextFloor = floor + 1;
+
+      // 全問正解ボーナス (3問)
+      if (correctCount >= 3) {
+          const recovery = 10; // 10回復
+          setBelly(prev => Math.min(maxBelly, prev + recovery));
+          addLog(`計算全問正解！満腹度が${recovery}回復した！`, "green");
+          audioService.playSound('buff');
+      } else {
+           // 何もしない、またはログ出力
+           if (correctCount > 0) addLog(`${correctCount}問正解。`);
+      }
+      
+      setFloor(nextFloor);
+      generateFloor(nextFloor);
+      
+      // BGM復帰
+      const nextTheme = getTheme(nextFloor);
+      audioService.playBGM(nextTheme.bgm);
+  };
+
   const movePlayer = (dx: 0|1|-1, dy: 0|1|-1) => {
       if(gameOver || gameClear) return;
 
@@ -2011,6 +2040,15 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           else if (inventory.length > 0) handleItemAction(selectedItemIndex);
           return;
       }
+      
+      // 階段処理の変更
+      if (map[player.y][player.x] === 'STAIRS') {
+           addLog("階段を降りる...");
+           audioService.playSound('select');
+           setShowMathChallenge(true); // 計算モードへ
+           return;
+      }
+
       const tx = player.x + player.dir.x;
       const ty = player.y + player.dir.y;
       const target = enemies.find(e => e.x === tx && e.y === ty);
@@ -2026,7 +2064,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           }
           return;
       }
-      if (map[player.y][player.x] === 'STAIRS') { addLog("階段を降りた！"); setFloor(f => f + 1); generateFloor(floor + 1); return; }
+
       triggerPlayerAttackAnim(player.dir);
       addVisualEffect('SLASH', tx, ty, { dir: player.dir });
       addLog("素振りをした。");
@@ -3239,6 +3277,13 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                     </div>
                 </div>
             </div>
+        )}
+        
+        {/* Math Challenge Overlay (Full Screen) */}
+        {showMathChallenge && (
+             <div className="fixed inset-0 z-[100] w-full h-full pointer-events-auto">
+                 <MathChallengeScreen mode={GameMode.MIXED} onComplete={handleMathComplete} />
+             </div>
         )}
 
         {/* Deck View Modal */}
