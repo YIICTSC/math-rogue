@@ -1628,65 +1628,67 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }
     };
 
-    const performPhaseTransition = (nextPhase: GamePhase) => {
-        const current = stateRef.current;
-        
-        if (nextPhase === 'REWARD') {
-             generateRewards();
-             setGameState(prev => ({ ...prev, phase: 'REWARD', status: 'PLAYING', pendingPhase: null }));
-             audioService.playSound('win');
-        } else if (nextPhase === 'SHOP' || nextPhase === 'UPGRADE_EVENT') {
-             // Generate random inventory for shop
-             let newInventory: KRelic[] = [];
-             if (nextPhase === 'SHOP') {
-                 // Filter out owned relics
-                 const available = SHOP_RELICS.filter(r => !current.relics.some(owned => owned.id === r.id));
-                 // Pick 2 random
-                 for (let i = 0; i < 2; i++) {
-                     if (available.length === 0) break;
-                     const idx = Math.floor(Math.random() * available.length);
-                     newInventory.push(available[idx]);
-                     available.splice(idx, 1);
-                 }
-             }
-             
-             setGameState(prev => ({ 
-                 ...prev, 
-                 phase: nextPhase, 
-                 status: 'PLAYING', 
-                 shopUpgradeUsed: false, 
-                 currentUpgradeOffer: getRandomOffer(),
-                 shopInventory: newInventory,
-                 pendingPhase: null
-            }));
-             audioService.playBGM(nextPhase === 'SHOP' ? 'poker_shop' : 'menu');
-        } else if (nextPhase === 'VICTORY') {
-             setGameState(prev => ({ ...prev, status: 'VICTORY', pendingPhase: null }));
-             audioService.playSound('win');
-        } else if (nextPhase === 'BATTLE') {
-             // Should not be called typically as handlePhaseComplete handles BATTLE direct
-             startWave(current.battleStage, current.battleSequence, current.wave);
-        }
-    };
-
     const handleMathComplete = (correctCount: number) => {
         const targetPhase = stateRef.current.pendingPhase;
         if (!targetPhase) return; 
 
-        let bonusMsg = "";
-        // Bonus Logic
-        if (correctCount >= 3) { // Max correct
-             setGameState(prev => ({
-                 ...prev,
-                 player: { ...prev.player, hp: Math.min(prev.player.maxHp, prev.player.hp + 1) }
-             }));
-             bonusMsg = "全問正解！HP+1";
+        const isMaxCorrect = correctCount >= 3;
+        const bonusMsg = isMaxCorrect ? "全問正解！HP+1" : "";
+        
+        if (isMaxCorrect) {
              addVfx('HEAL', stateRef.current.player.pos);
              audioService.playSound('buff');
         }
-        
-        if (bonusMsg) addLog(bonusMsg);
-        performPhaseTransition(targetPhase);
+
+        // Side effects for transitions that don't depend on gameState setter
+        if (targetPhase === 'REWARD') {
+             generateRewards();
+             audioService.playSound('win');
+        } else if (targetPhase === 'SHOP' || targetPhase === 'UPGRADE_EVENT') {
+             audioService.playBGM(targetPhase === 'SHOP' ? 'poker_shop' : 'menu');
+        } else if (targetPhase === 'VICTORY') {
+             audioService.playSound('win');
+        }
+
+        setGameState(prev => {
+            let nextState = { ...prev, pendingPhase: null };
+
+            // Apply Phase Transition
+            if (targetPhase === 'REWARD') {
+                nextState.phase = 'REWARD';
+                nextState.status = 'PLAYING';
+            } else if (targetPhase === 'SHOP' || targetPhase === 'UPGRADE_EVENT') {
+                let newInventory: KRelic[] = [];
+                if (targetPhase === 'SHOP') {
+                    const available = SHOP_RELICS.filter(r => !prev.relics.some(owned => owned.id === r.id));
+                    for (let i = 0; i < 2; i++) {
+                        if (available.length === 0) break;
+                        const idx = Math.floor(Math.random() * available.length);
+                        newInventory.push(available[idx]);
+                        available.splice(idx, 1);
+                    }
+                }
+                
+                nextState.phase = targetPhase;
+                nextState.status = 'PLAYING';
+                nextState.shopUpgradeUsed = false;
+                nextState.currentUpgradeOffer = getRandomOffer();
+                nextState.shopInventory = newInventory;
+            } else if (targetPhase === 'VICTORY') {
+                nextState.status = 'VICTORY';
+            }
+
+            // Apply Bonus & Log
+            if (isMaxCorrect) {
+                nextState.player = { 
+                    ...nextState.player, 
+                    hp: Math.min(nextState.player.maxHp, nextState.player.hp + 1) 
+                };
+                nextState.logs = [bonusMsg, ...nextState.logs.slice(0, 4)];
+            }
+
+            return nextState;
+        });
     };
 
     const nextStage = () => {
