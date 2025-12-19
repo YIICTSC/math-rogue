@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation, Droplets, Recycle, Repeat, User, Lock, Users, Target, UserPlus, Gauge, Swords, Dice5, Ghost } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -85,7 +87,7 @@ interface PoolState {
     coolColors: EnergyColor[];
 }
 
-type GamePhase = 'TUTORIAL' | 'SETUP' | 'BATTLE' | 'REWARD_SELECT' | 'REWARD_EQUIP' | 'VACATION' | 'GAME_OVER' | 'VICTORY' | 'HANGAR' | 'MATH';
+type GamePhase = 'TUTORIAL' | 'SETUP' | 'BATTLE' | 'REWARD_SELECT' | 'REWARD_EQUIP' | 'VACATION' | 'GAME_OVER' | 'VICTORY' | 'HANGAR';
 
 type VacationEventType = 'REPAIR' | 'PARTS' | 'ENERGY' | 'COIN' | 'TREASURE' | 'FUEL' | 'ENHANCE' | 'UNKNOWN' | 'SHOP' | 'MODIFY' | 'TRAINING' | 'SACRIFICE' | 'GAMBLE';
 
@@ -679,8 +681,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [rewardOptions, setRewardOptions] = useState<ShipPart[]>(savedData?.rewardOptions || []);
     const [earnedCoins, setEarnedCoins] = useState(savedData?.earnedCoins || 0);
 
-    const [mathBonusLog, setMathBonusLog] = useState<string | null>(savedData?.mathBonusLog || null);
-
     // --- AUTO SAVE ---
     const saveDebounceRef = useRef<any>(null);
 
@@ -692,13 +692,12 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             saveDebounceRef.current = setTimeout(() => {
                 const stateToSave = {
                     phase, stage, turn, pool, hand, player, enemy, enemyIntents, isEndless,
-                    vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins, selectedMissionLevel,
-                    mathBonusLog
+                    vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins, selectedMissionLevel
                 };
                 storageService.savePaperPlaneState(stateToSave);
             }, 1000); 
         }
-    }, [phase, stage, turn, pool, hand, player, enemy, enemyIntents, vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins, isEndless, selectedMissionLevel, mathBonusLog]);
+    }, [phase, stage, turn, pool, hand, player, enemy, enemyIntents, vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins, isEndless, selectedMissionLevel]);
 
     // --- SCORE SAVING ---
     const scoreSavedRef = useRef(false);
@@ -728,7 +727,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         // Initial BGM check based on loaded phase
         if (phase === 'BATTLE') audioService.playBGM('paper_plane_battle');
         else if (['VACATION', 'SHOP', 'HANGAR', 'REWARD_SELECT', 'REWARD_EQUIP', 'UPGRADE_EVENT'].includes(phase)) audioService.playBGM('paper_plane_vacation');
-        else if (phase === 'MATH') audioService.playBGM('math');
         else audioService.playBGM('paper_plane_setup');
 
         if (phase === 'SETUP') {
@@ -1287,8 +1285,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 setPhase('VICTORY');
                 handlePhaseComplete(true); 
             } else {
-                setPhase('MATH');
-                audioService.playBGM('math');
+                setupRewardPhase();
             }
         } else {
             setTurn(prev => prev + 1);
@@ -1299,20 +1296,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             }
             drawEnergy(5);
         }
-    };
-
-    const handleMathComplete = (correctCount: number) => {
-        const isMaxCorrect = correctCount >= 3;
-        
-        if (isMaxCorrect) {
-             setPlayer(p => ({ ...p, hp: Math.min(p.maxHp, p.hp + 5) }));
-             setMathBonusLog("計算全問正解！HP+5回復！"); 
-             audioService.playSound('buff');
-        } else {
-             setMathBonusLog(null);
-        }
-        
-        setupRewardPhase();
     };
 
     const setupRewardPhase = () => {
@@ -1437,14 +1420,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const startVacation = () => {
         const days = 4 + Math.floor(Math.random() * 3); 
         setPlayer(prev => ({ ...prev, vacationDays: days }));
-        
-        let msg = "戦闘お疲れ様！休暇を楽しんでください。";
-        if (mathBonusLog) {
-            msg += `\n(${mathBonusLog})`;
-            setMathBonusLog(null);
-        }
-        setVacationLog(msg);
-        
+        setVacationLog("戦闘お疲れ様！休暇を楽しんでください。");
         generateVacationEvents();
         setPhase('VACATION');
         audioService.playBGM('paper_plane_vacation'); // Already set but good for re-entry
@@ -1715,14 +1691,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setPhase('REWARD_SELECT');
         setupRewardPhase();
     };
-
-    if (phase === 'MATH') {
-        return (
-            <div className="w-full h-full bg-slate-900 z-[100] relative">
-                 <MathChallengeScreen mode={GameMode.MIXED} onComplete={handleMathComplete} />
-            </div>
-        );
-    }
 
     // --- RENDER HELPERS ---
 
@@ -2366,14 +2334,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         );
     }
 
-    if (phase === 'MATH') {
-        return (
-            <div className="w-full h-full bg-slate-900 z-[100] relative">
-                 <MathChallengeScreen mode={GameMode.MIXED} onComplete={handleMathComplete} />
-            </div>
-        );
-    }
-
     return (
         <div className="w-full h-full bg-[#101018] text-white flex flex-col font-mono relative overflow-hidden">
             <RenderTooltip />
@@ -2393,7 +2353,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 <ul className="list-disc pl-5 space-y-1">
                                     <li>機体は<strong>3x3</strong>のグリッドで構成されます。</li>
                                     <li>パーツには<strong>スロット</strong>があり、手札のエネルギーカードをはめることで起動します。</li>
-                                    <li><strong>色相性:</strong> <span className="text-orange-400 font-bold">橙</span> &gt; <span className="text-blue-400 font-bold">青</span> &gt; <span className="text-slate-200 font-bold">白</span>。上位の色は下位のスロットにも使用可能です。</li>
+                                    <li><strong>色相性:</strong> <span className="text-orange-400 font-bold">橙</span> &gt; <span className="text-blue-400 font-bold">青</span> &gt; <span className="text-slate-200 font-bold">白</span>。上位の色は下位のスロットにも使えます。</li>
                                     <li>スロットを全て埋めると<strong>起動ボーナス</strong>が発生します。</li>
                                 </ul>
                             </section>
