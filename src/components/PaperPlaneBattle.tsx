@@ -71,14 +71,6 @@ interface ShipState {
     passivePower: number; // From Treasures & Talents
     partInventory: ShipPart[]; 
     talents: Talent[]; // Active talents
-    relics: KRelic[]; // New: List of owned relics
-}
-
-interface KRelic {
-    id: string;
-    name: string;
-    desc: string;
-    price: number;
 }
 
 interface EnemyIntent {
@@ -152,25 +144,6 @@ const PILOTS: Pilot[] = [
     { id: 'PL_GIRL', name: '委員長', spriteName: 'GIRL|青', intrinsicTalent: { id: 'IT_BUDGET', name: '予算管理', description: 'ショップ割引(20%)', effectType: 'SHOP_DISCOUNT', value: 20 } },
     { id: 'PL_SPORT', name: 'エース', spriteName: 'MUSCLE|橙', intrinsicTalent: { id: 'IT_STAMINA', name: 'スタミナ', description: '最大燃料+2', effectType: 'FUEL', value: 2 } },
     { id: 'PL_SENIOR', name: '謎の上級生', spriteName: 'SENIOR|紫', intrinsicTalent: { id: 'IT_SECRET', name: '裏ルート', description: '開始時エネルギー+2', effectType: 'START_ENERGY', value: 2 } },
-    
-    // Expanded Pilots
-    { id: 'PL_GAMER', name: 'ゲーマー', spriteName: 'ROBOT|黒', intrinsicTalent: { id: 'IT_COMBO', name: 'コンボ', description: 'パッシブ出力+1, MaxHP-5', effectType: 'PASSIVE_POWER', value: 1 } },
-    { id: 'PL_IDOL', name: 'アイドル', spriteName: 'GIRL|桃', intrinsicTalent: { id: 'IT_CHARM', name: '愛嬌', description: 'ショップ割引(15%)', effectType: 'SHOP_DISCOUNT', value: 15 } },
-    { id: 'PL_NINJA', name: '忍者ごっこ', spriteName: 'NINJA|黒', intrinsicTalent: { id: 'IT_AGILITY', name: '変わり身', description: '最大燃料+1, HP-5', effectType: 'FUEL', value: 1 } },
-    { id: 'PL_COOK', name: '給食当番', spriteName: 'CHEF|白', intrinsicTalent: { id: 'IT_FEAST', name: 'つまみ食い', description: '最大HP+15', effectType: 'MAX_HP', value: 15 } },
-    { id: 'PL_ARTIST', name: '美術部員', spriteName: 'GHOST|水', intrinsicTalent: { id: 'IT_PAINT', name: '色彩感覚', description: '開始時エネルギー+3 (白)', effectType: 'START_ENERGY', value: 3 } },
-    { id: 'PL_TEACHER', name: '熱血教師', spriteName: 'TEACHER|赤', intrinsicTalent: { id: 'IT_YELL', name: '激アツ指導', description: 'パッシブ出力+3, MaxHP-10', effectType: 'PASSIVE_POWER', value: 3 } },
-];
-
-const SHOP_RELICS: KRelic[] = [
-    { id: 'R_BOOTS', name: '瞬足の靴', desc: '移動コストの燃料消費がたまに0になる(20%)', price: 60 },
-    { id: 'R_GLOVES', name: 'パワー手袋', desc: '全パーツの出力+1', price: 120 },
-    { id: 'R_SHIELD', name: '安全ピン', desc: '戦闘開始時、シールドパーツの出力+2', price: 100 },
-    { id: 'R_POTION', name: '回復セット', desc: '戦闘終了時、HPを5回復', price: 150 },
-    { id: 'R_FANG', name: '吸血の牙', desc: '敵にダメージを与えた時、10%でHP1回復', price: 150 },
-    { id: 'R_THORN', name: 'トゲトゲ肩パッド', desc: 'シールドで防いだ時、相手に1ダメージ', price: 90 },
-    { id: 'R_DISCOUNT', name: 'クーポン券', desc: 'ショップの商品が30%OFF', price: 150 },
-    { id: 'R_RECYCLE', name: 'リサイクル箱', desc: 'エネルギー使用時20%で消費しない(手札に戻る)', price: 110 },
 ];
 
 // Define Ships
@@ -242,7 +215,7 @@ const VACATION_EVENTS_DB: Omit<VacationEvent, 'id'>[] = [
     { type: 'PARTS', name: '軍需物資', description: '高性能なパーツを獲得する。', cost: 4, tier: 3 },
     { type: 'COIN', name: 'アルバイト', description: 'スターコインを50獲得。', cost: 1, tier: 1 },
     { type: 'COIN', name: '臨時ボーナス', description: 'スターコインを150獲得。', cost: 2, tier: 2 },
-    { type: 'TREASURE', name: '謎の宝箱', description: '古代の遺物(レリック)を獲得する。', cost: 3, tier: 3 },
+    { type: 'TREASURE', name: '謎の宝箱', description: '永続的な攻撃力ボーナスを得る。', cost: 3, tier: 3 },
     { type: 'UNKNOWN', name: '謎のイベント', description: '何が起こるかわからない...', cost: 2, tier: 2 },
     { type: 'SHOP', name: '闇市', description: '高品質なパーツを裏ルートで入手する。', cost: 0, coinCost: 150, tier: 3 },
     { type: 'ENHANCE', name: '特別改造', description: '船体を強化。最大HP+20。', cost: 0, coinCost: 100, tier: 2 },
@@ -677,8 +650,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         vacationDays: 0,
         passivePower: 0,
         partInventory: [],
-        talents: [],
-        relics: [] // Init empty
+        talents: []
     });
 
     const [enemy, setEnemy] = useState<ShipState>(savedData?.enemy || {
@@ -687,8 +659,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         parts: [], 
         starCoins: 0, vacationDays: 0, passivePower: 0,
         partInventory: [],
-        talents: [],
-        relics: []
+        talents: []
     });
 
     const [enemyIntents, setEnemyIntents] = useState<EnemyIntent[]>(savedData?.enemyIntents || []);
@@ -696,8 +667,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [showPool, setShowPool] = useState(false);
     const [showHandHelp, setShowHandHelp] = useState(false);
     const [showGameHelp, setShowGameHelp] = useState(false); // Added Game Help State
-    const [showRelicsModal, setShowRelicsModal] = useState(false); // Relic Modal
-
     const [animating, setAnimating] = useState(false);
     const [tooltipPart, setTooltipPart] = useState<ShipPart | null>(null);
     
@@ -852,8 +821,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             vacationDays: 0,
             passivePower: pPassivePower,
             partInventory: [],
-            talents: allTalents,
-            relics: []
+            talents: allTalents
         });
         
         setStage(1);
@@ -919,25 +887,15 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             parts: eParts,
             starCoins: 0, vacationDays: 0, passivePower: 0,
             partInventory: [],
-            talents: [],
-            relics: []
+            talents: []
         });
 
-        // Player Reset for Battle
-        // Apply "Start Damaged" modifier from ascension here if needed, but easier at setup
-        // But if ascension implies "start damaged each battle", apply here.
-        // Usually it's max HP reduction or start run damaged. Let's stick to start run.
-        
-        // Relic: Shield (Start with Shield parts active? No, Shield relic adds +2 power to shield parts)
-        // Actually R_SHIELD description: "戦闘開始時、シールド+4" -> handled via passive effect or initial HP buff?
-        // Let's implement R_SHIELD as temp HP (shield) mechanic or just a buff. 
-        // Current system doesn't have temp HP. Let's make R_SHIELD buff shield parts.
-        
         setPlayer(prev => ({
             ...prev,
             yOffset: 1,
             parts: prev.parts.map(p => ({ ...p, slots: p.slots.map(s => ({...s, value: null})) })),
-            // Ascension 4: Start damaged (if not full heal) - Simplified: Only start of run
+            // Ascension 4: Start damaged
+            hp: selectedMissionLevel >= 4 ? Math.floor(prev.hp * 0.8) : prev.hp
         }));
 
         setTurn(1);
@@ -1102,14 +1060,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         let currentHandList = [...hand];
 
-        // Relic: Recycle (20% chance to keep card)
-        const hasRecycler = player.relics.some(r => r.id === 'R_RECYCLE');
-        let kept = false;
-        if (hasRecycler && Math.random() < 0.2) {
-             kept = true;
-             addLog("リサイクル発動！カード消費なし");
-        }
-
         if (part.specialEffect === 'RANK_UP') {
             const newValue = card.value + 1;
             const newCard: EnergyCard = {
@@ -1129,46 +1079,21 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         newParts[partIndex] = { ...part, slots: newSlots };
         
         setPlayer(prev => ({ ...prev, parts: newParts }));
-        
-        if (!kept) {
-            currentHandList.splice(cardIndex, 1);
-            recycleCard(card);
-        }
+        currentHandList.splice(cardIndex, 1);
         
         setHand(currentHandList);
+        recycleCard(card);
         setSelectedCardId(null);
         if (part.specialEffect !== 'RANK_UP') audioService.playSound('buff');
     };
 
     const handleMove = (dir: -1 | 1) => {
-        if (player.fuel <= 0) {
-            // Relic: Boots (20% chance for free move)
-            const hasBoots = player.relics.some(r => r.id === 'R_BOOTS');
-            if (hasBoots && Math.random() < 0.2) {
-                addLog("瞬足！燃料消費なし");
-            } else {
-                addLog("燃料切れです！"); 
-                audioService.playSound('wrong'); 
-                return;
-            }
-        }
+        if (player.fuel <= 0) { addLog("燃料切れです！"); audioService.playSound('wrong'); return; }
         
         const nextY = player.yOffset + dir;
         if (nextY < 0 || nextY > MAX_ROWS - SHIP_HEIGHT) { addLog("これ以上移動できません"); return; }
 
-        // Deduct fuel unless boots proc above (handled implicitly by return, if we are here we deduct or it was free)
-        // To do it correctly:
-        const hasBoots = player.relics.some(r => r.id === 'R_BOOTS');
-        let cost = 1;
-        if (player.fuel <= 0 && hasBoots && Math.random() < 0.2) cost = 0;
-        else if (player.fuel <= 0) return; // Should have returned above
-
-        if (player.fuel > 0 && hasBoots && Math.random() < 0.2) {
-             cost = 0;
-             addLog("瞬足！");
-        }
-
-        setPlayer(prev => ({ ...prev, yOffset: nextY, fuel: prev.fuel - cost }));
+        setPlayer(prev => ({ ...prev, yOffset: nextY, fuel: prev.fuel - 1 }));
         audioService.playSound('select');
     };
 
@@ -1183,14 +1108,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         let enemyStunDmg = 0;
 
         const buffGrid = calculateBuffGrid(player.parts);
-        
-        // Relic Bonuses
-        const globalPowerBonus = player.relics.some(r => r.id === 'R_GLOVES') ? 1 : 0;
-        const shieldBonus = player.relics.some(r => r.id === 'R_SHIELD') ? 2 : 0; // Add +2 output to shield parts if owned? No, R_SHIELD says "Start combat with shield". 
-        // Let's interpret R_SHIELD as: Shield parts +2 output.
-        
-        const hasThornRelic = player.relics.some(r => r.id === 'R_THORN');
-        const hasFang = player.relics.some(r => r.id === 'R_FANG');
 
         for (let r = 0; r < MAX_ROWS; r++) {
             const pRelIdx = r - player.yOffset;
@@ -1222,11 +1139,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         
                         output += buffGrid[pRelIdx][colIdx];
                         output += player.passivePower; 
-                        output += globalPowerBonus;
 
                         if (p.type === 'CANNON' || p.type === 'MISSILE') pPower += output;
                         if (p.type === 'SHIELD') {
-                            output += shieldBonus;
                             pShield += output;
                             if (p.specialEffect === 'THORNS') pThorns += Math.ceil(output / 2);
                         }
@@ -1240,9 +1155,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 let fuelRecovered = Math.ceil(pEngine / 2); 
                 tempFuel = Math.min(player.maxFuel, tempFuel + fuelRecovered);
             }
-            
-            // Relic Thorn adds to pThorns if clash happens
-            if (hasThornRelic) pThorns += 1;
 
             const eRelIdx = r - enemy.yOffset;
             const intent = enemyIntents.find(i => (i.row + enemy.yOffset) === r);
@@ -1300,8 +1212,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         
         let playerHit = false;
         let enemyHit = false;
-        let damageDealtToEnemy = 0;
-
         clashData.forEach(c => {
              if (c.result === 'PLAYER_HIT') playerHit = true;
              if (c.result === 'ENEMY_HIT') enemyHit = true;
@@ -1316,7 +1226,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             if (c.result === 'ENEMY_HIT') {
                 tempEnemyHp = Math.max(0, tempEnemyHp - c.damage);
                 enemyStunDmg++;
-                damageDealtToEnemy += c.damage;
             } else if (c.result === 'PLAYER_HIT') {
                 const blocked = Math.min(c.damage, c.pShield);
                 const finalDmg = c.damage - blocked;
@@ -1324,17 +1233,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 
                 if (c.pThorns > 0) {
                     tempEnemyHp = Math.max(0, tempEnemyHp - c.pThorns);
-                    damageDealtToEnemy += c.pThorns;
                     addLog(`【反撃】スパイク装甲！敵に${c.pThorns}ダメージ！`);
                 }
             }
         });
-
-        // Relic: Fang (Heal on damage? No, relic desc says heal on kill or damage. Let's do 10% chance on damage)
-        if (hasFang && damageDealtToEnemy > 0 && Math.random() < 0.1) {
-             tempPlayerHp = Math.min(player.maxHp, tempPlayerHp + 1);
-             addLog("吸血！HP+1");
-        }
 
         setClashState({ active: false, phase: 'DONE', data: [] });
 
@@ -1597,18 +1499,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 audioService.playSound('buff');
                 break;
             case 'TREASURE':
-                // New Treasure Logic: Get Relic
-                const availableRelics = SHOP_RELICS.filter(r => !player.relics.some(owned => owned.id === r.id));
-                if (availableRelics.length > 0) {
-                     const relic = availableRelics[Math.floor(Math.random() * availableRelics.length)];
-                     setPlayer(p => ({ ...p, relics: [...p.relics, relic] }));
-                     resultMsg = `古代の遺物「${relic.name}」を発見！`;
-                     audioService.playSound('win');
-                } else {
-                     setPlayer(p => ({ ...p, passivePower: p.passivePower + 1 }));
-                     resultMsg = "もう目ぼしいお宝がない... 代わりにパッシブ出力を強化！";
-                     audioService.playSound('buff');
-                }
+                setPlayer(p => ({ ...p, passivePower: p.passivePower + 1 }));
+                resultMsg = "謎の宝物により、全パーツの出力が+1されました！";
+                audioService.playSound('win');
                 break;
             case 'PARTS':
             case 'SHOP': 
@@ -2334,41 +2227,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 {/* Pool Overlay */}
                 {showPool && <PoolView pool={pool} onClose={() => setShowPool(false)} />}
                 
-                {/* Relic Modal Overlay */}
-                {showRelicsModal && (
-                    <div className="absolute inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={() => setShowRelicsModal(false)}>
-                        <div className="bg-slate-800 p-6 rounded-lg max-w-lg w-full border border-slate-600 shadow-2xl relative" onClick={e => e.stopPropagation()}>
-                            <button onClick={() => setShowRelicsModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
-                            <h3 className="text-xl font-bold mb-6 flex items-center text-yellow-400"><Gift className="mr-2"/> 所持レリック</h3>
-                            
-                            {player.relics.length === 0 ? (
-                                <div className="text-center text-gray-500 py-8">レリックを持っていません</div>
-                            ) : (
-                                <div className="grid grid-cols-1 gap-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
-                                    {player.relics.map((r, i) => (
-                                        <div key={i} className="bg-black/30 p-3 rounded border border-slate-600 flex items-center gap-3">
-                                            <div className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center shrink-0 border border-yellow-600">
-                                                <Gift size={20} className="text-yellow-400"/>
-                                            </div>
-                                            <div>
-                                                <div className="font-bold text-yellow-200 text-sm">{r.name}</div>
-                                                <div className="text-xs text-gray-400">{r.desc}</div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                            <button onClick={() => setShowRelicsModal(false)} className="mt-6 w-full bg-slate-700 hover:bg-slate-600 py-2 rounded text-white font-bold">閉じる</button>
-                        </div>
-                    </div>
-                )}
-                
                 <div className="flex justify-between items-center mb-2 bg-slate-800 p-3 rounded-lg shadow-lg shrink-0">
                     <h2 className="text-lg md:text-2xl font-bold flex items-center text-cyan-300"><Calendar className="mr-2" size={20}/> <span className="hidden md:inline">休暇モード</span><span className="md:hidden">休暇</span></h2>
                     <div className="flex gap-2 md:gap-4 text-sm">
-                        <button onClick={() => setShowRelicsModal(true)} className="flex items-center gap-1 bg-yellow-900/50 hover:bg-yellow-800/50 px-3 py-1 rounded text-xs border border-yellow-600 transition-colors shadow-sm font-bold text-yellow-200">
-                            <Gift size={14} /> <span className="hidden md:inline">RELIC</span>
-                        </button>
                         <button onClick={() => setShowPool(true)} className="flex items-center gap-1 bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded text-xs border border-indigo-400 transition-colors shadow-sm font-bold">
                             <Layers size={14} /> <span className="hidden md:inline">POOL</span>
                         </button>
@@ -2495,35 +2356,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             {/* Pool Overlay */}
             {showPool && <PoolView pool={pool} onClose={() => setShowPool(false)} />}
             
-            {/* Relic Modal Overlay */}
-            {showRelicsModal && (
-                <div className="absolute inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={() => setShowRelicsModal(false)}>
-                    <div className="bg-slate-800 p-6 rounded-lg max-w-lg w-full border border-slate-600 shadow-2xl relative" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => setShowRelicsModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
-                        <h3 className="text-xl font-bold mb-6 flex items-center text-yellow-400"><Gift className="mr-2"/> 所持レリック</h3>
-                        
-                        {player.relics.length === 0 ? (
-                            <div className="text-center text-gray-500 py-8">レリックを持っていません</div>
-                        ) : (
-                            <div className="grid grid-cols-1 gap-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
-                                {player.relics.map((r, i) => (
-                                    <div key={i} className="bg-black/30 p-3 rounded border border-slate-600 flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center shrink-0 border border-yellow-600">
-                                            <Gift size={20} className="text-yellow-400"/>
-                                        </div>
-                                        <div>
-                                            <div className="font-bold text-yellow-200 text-sm">{r.name}</div>
-                                            <div className="text-xs text-gray-400">{r.desc}</div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                        <button onClick={() => setShowRelicsModal(false)} className="mt-6 w-full bg-slate-700 hover:bg-slate-600 py-2 rounded text-white font-bold">閉じる</button>
-                    </div>
-                </div>
-            )}
-            
             {/* Game Help Modal */}
             {showGameHelp && (
                  <div className="absolute inset-0 bg-black/90 z-[60] flex items-center justify-center p-4" onClick={() => setShowGameHelp(false)}>
@@ -2579,7 +2411,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     {isEndless && <span className="ml-2 text-purple-400 text-xs border border-purple-500 px-1 rounded">ENDLESS</span>}
                 </div>
                 <div className="flex gap-2">
-                    <button onClick={() => setShowRelicsModal(true)} className="bg-yellow-900/50 border border-yellow-600 px-2 py-1 rounded text-xs hover:bg-yellow-800 flex items-center text-yellow-200"><Gift size={14} className="mr-1"/> RELIC</button>
                     <button onClick={() => setShowGameHelp(true)} className="bg-slate-800 border border-slate-600 px-2 py-1 rounded text-xs hover:bg-slate-700 flex items-center"><HelpCircle size={14} className="mr-1"/> HELP</button>
                     <button onClick={() => setShowPool(!showPool)} className="bg-slate-800 border border-slate-600 px-2 py-1 rounded text-xs hover:bg-slate-700">POOL</button>
                 </div>
