@@ -385,37 +385,6 @@ const PoolView: React.FC<{ pool: PoolState, onClose: () => void }> = ({ pool, on
     );
 };
 
-// Common Relic List Modal
-const RelicListModal: React.FC<{ relics: KRelic[], onClose: () => void }> = ({ relics, onClose }) => {
-    return (
-        <div className="absolute inset-0 bg-black/90 z-[70] flex items-center justify-center p-4" onClick={onClose}>
-            <div className="bg-slate-800 p-6 rounded-lg max-w-lg w-full border border-slate-600 shadow-2xl relative" onClick={e => e.stopPropagation()}>
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
-                <h3 className="text-xl font-bold mb-6 flex items-center text-yellow-400"><Gift className="mr-2"/> 所持レリック</h3>
-                
-                {relics.length === 0 ? (
-                    <div className="text-center text-gray-500 py-8">レリックを持っていません</div>
-                ) : (
-                    <div className="grid grid-cols-1 gap-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
-                        {relics.map((r, i) => (
-                            <div key={i} className="bg-black/30 p-3 rounded border border-slate-600 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center shrink-0 border border-yellow-600">
-                                    <Gift size={20} className="text-yellow-400"/>
-                                </div>
-                                <div>
-                                    <div className="font-bold text-yellow-200 text-sm">{r.name}</div>
-                                    <div className="text-xs text-gray-400">{r.desc}</div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-                <button onClick={onClose} className="mt-6 w-full bg-slate-700 hover:bg-slate-600 py-2 rounded text-white font-bold">閉じる</button>
-            </div>
-        </div>
-    );
-};
-
 const EnergyCardView: React.FC<{ card: EnergyCard, onClick?: () => void, selected?: boolean, small?: boolean }> = ({ card, onClick, selected, small }) => {
     const bgColor = card.color === 'ORANGE' ? 'bg-orange-500' : card.color === 'BLUE' ? 'bg-blue-500' : 'bg-slate-200 text-black';
     const borderColor = card.color === 'ORANGE' ? 'border-orange-700' : card.color === 'BLUE' ? 'border-blue-700' : 'border-slate-400';
@@ -955,10 +924,20 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         });
 
         // Player Reset for Battle
+        // Apply "Start Damaged" modifier from ascension here if needed, but easier at setup
+        // But if ascension implies "start damaged each battle", apply here.
+        // Usually it's max HP reduction or start run damaged. Let's stick to start run.
+        
+        // Relic: Shield (Start with Shield parts active? No, Shield relic adds +2 power to shield parts)
+        // Actually R_SHIELD description: "戦闘開始時、シールド+4" -> handled via passive effect or initial HP buff?
+        // Let's implement R_SHIELD as temp HP (shield) mechanic or just a buff. 
+        // Current system doesn't have temp HP. Let's make R_SHIELD buff shield parts.
+        
         setPlayer(prev => ({
             ...prev,
             yOffset: 1,
             parts: prev.parts.map(p => ({ ...p, slots: p.slots.map(s => ({...s, value: null})) })),
+            // Ascension 4: Start damaged (if not full heal) - Simplified: Only start of run
         }));
 
         setTurn(1);
@@ -1207,7 +1186,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         
         // Relic Bonuses
         const globalPowerBonus = player.relics.some(r => r.id === 'R_GLOVES') ? 1 : 0;
-        const shieldBonus = player.relics.some(r => r.id === 'R_SHIELD') ? 2 : 0; 
+        const shieldBonus = player.relics.some(r => r.id === 'R_SHIELD') ? 2 : 0; // Add +2 output to shield parts if owned? No, R_SHIELD says "Start combat with shield". 
+        // Let's interpret R_SHIELD as: Shield parts +2 output.
         
         const hasThornRelic = player.relics.some(r => r.id === 'R_THORN');
         const hasFang = player.relics.some(r => r.id === 'R_FANG');
@@ -1350,7 +1330,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             }
         });
 
-        // Relic: Fang
+        // Relic: Fang (Heal on damage? No, relic desc says heal on kill or damage. Let's do 10% chance on damage)
         if (hasFang && damageDealtToEnemy > 0 && Math.random() < 0.1) {
              tempPlayerHp = Math.min(player.maxHp, tempPlayerHp + 1);
              addLog("吸血！HP+1");
@@ -2355,7 +2335,33 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 {showPool && <PoolView pool={pool} onClose={() => setShowPool(false)} />}
                 
                 {/* Relic Modal Overlay */}
-                {showRelicsModal && <RelicListModal relics={player.relics} onClose={() => setShowRelicsModal(false)} />}
+                {showRelicsModal && (
+                    <div className="absolute inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={() => setShowRelicsModal(false)}>
+                        <div className="bg-slate-800 p-6 rounded-lg max-w-lg w-full border border-slate-600 shadow-2xl relative" onClick={e => e.stopPropagation()}>
+                            <button onClick={() => setShowRelicsModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
+                            <h3 className="text-xl font-bold mb-6 flex items-center text-yellow-400"><Gift className="mr-2"/> 所持レリック</h3>
+                            
+                            {player.relics.length === 0 ? (
+                                <div className="text-center text-gray-500 py-8">レリックを持っていません</div>
+                            ) : (
+                                <div className="grid grid-cols-1 gap-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                                    {player.relics.map((r, i) => (
+                                        <div key={i} className="bg-black/30 p-3 rounded border border-slate-600 flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center shrink-0 border border-yellow-600">
+                                                <Gift size={20} className="text-yellow-400"/>
+                                            </div>
+                                            <div>
+                                                <div className="font-bold text-yellow-200 text-sm">{r.name}</div>
+                                                <div className="text-xs text-gray-400">{r.desc}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            <button onClick={() => setShowRelicsModal(false)} className="mt-6 w-full bg-slate-700 hover:bg-slate-600 py-2 rounded text-white font-bold">閉じる</button>
+                        </div>
+                    </div>
+                )}
                 
                 <div className="flex justify-between items-center mb-2 bg-slate-800 p-3 rounded-lg shadow-lg shrink-0">
                     <h2 className="text-lg md:text-2xl font-bold flex items-center text-cyan-300"><Calendar className="mr-2" size={20}/> <span className="hidden md:inline">休暇モード</span><span className="md:hidden">休暇</span></h2>
@@ -2490,7 +2496,33 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             {showPool && <PoolView pool={pool} onClose={() => setShowPool(false)} />}
             
             {/* Relic Modal Overlay */}
-            {showRelicsModal && <RelicListModal relics={player.relics} onClose={() => setShowRelicsModal(false)} />}
+            {showRelicsModal && (
+                <div className="absolute inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={() => setShowRelicsModal(false)}>
+                    <div className="bg-slate-800 p-6 rounded-lg max-w-lg w-full border border-slate-600 shadow-2xl relative" onClick={e => e.stopPropagation()}>
+                        <button onClick={() => setShowRelicsModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
+                        <h3 className="text-xl font-bold mb-6 flex items-center text-yellow-400"><Gift className="mr-2"/> 所持レリック</h3>
+                        
+                        {player.relics.length === 0 ? (
+                            <div className="text-center text-gray-500 py-8">レリックを持っていません</div>
+                        ) : (
+                            <div className="grid grid-cols-1 gap-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                                {player.relics.map((r, i) => (
+                                    <div key={i} className="bg-black/30 p-3 rounded border border-slate-600 flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center shrink-0 border border-yellow-600">
+                                            <Gift size={20} className="text-yellow-400"/>
+                                        </div>
+                                        <div>
+                                            <div className="font-bold text-yellow-200 text-sm">{r.name}</div>
+                                            <div className="text-xs text-gray-400">{r.desc}</div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        <button onClick={() => setShowRelicsModal(false)} className="mt-6 w-full bg-slate-700 hover:bg-slate-600 py-2 rounded text-white font-bold">閉じる</button>
+                    </div>
+                </div>
+            )}
             
             {/* Game Help Modal */}
             {showGameHelp && (
