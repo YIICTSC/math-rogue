@@ -990,7 +990,16 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             };
         });
 
-        setEnemy({
+        // Initial Player Setup (Correct position)
+        setPlayer(prev => ({
+            ...prev,
+            yOffset: 1,
+            parts: prev.parts.map(p => ({ ...p, slots: p.slots.map(s => ({...s, value: null})) })),
+            // Ascension 4: Start damaged
+            hp: selectedMissionLevel >= 4 ? Math.floor(prev.hp * 0.8) : prev.hp
+        }));
+
+        const initialEnemy = {
             yOffset: 1,
             hp: hp, maxHp: hp,
             durability: dur, maxDurability: dur,
@@ -1004,15 +1013,12 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 colors: template.colors,
                 moveChance: template.moveChance
             }
-        });
+        };
 
-        setPlayer(prev => ({
-            ...prev,
-            yOffset: 1,
-            parts: prev.parts.map(p => ({ ...p, slots: p.slots.map(s => ({...s, value: null})) })),
-            // Ascension 4: Start damaged
-            hp: selectedMissionLevel >= 4 ? Math.floor(prev.hp * 0.8) : prev.hp
-        }));
+        // Important: Pass current player state to AI logic for initial intent generation
+        const { nextEnemy, intents } = updateEnemyState(initialEnemy, stageNum, { ...player, yOffset: 1 });
+        setEnemy(nextEnemy);
+        setEnemyIntents(intents);
 
         setTurn(1);
         
@@ -1051,26 +1057,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         });
         setHand(initialHand);
 
-        // Initial Enemy Setup
-        const initialEnemy = {
-            yOffset: 1,
-            hp: hp, maxHp: hp,
-            durability: dur, maxDurability: dur,
-            fuel: 0, maxFuel: 0, isStunned: false,
-            parts: eParts,
-            starCoins: 0, vacationDays: 0, passivePower: 0,
-            partInventory: [],
-            talents: [],
-            enemyConfig: {
-                energyPerTurn: template.energy,
-                colors: template.colors,
-                moveChance: template.moveChance
-            }
-        };
-        const { nextEnemy, intents } = updateEnemyState(initialEnemy, stageNum);
-        setEnemy(nextEnemy);
-        setEnemyIntents(intents);
-
         setPhase('BATTLE');
         addLog(`バトル開始！ 敵: ${template.name}`);
         audioService.playBGM('paper_plane_battle'); // Ensure correct BGM
@@ -1078,21 +1064,12 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     // --- ENEMY AI LOGIC ---
 
-    const updateEnemyState = (currentEnemy: ShipState, currentStage: number): { nextEnemy: ShipState, intents: EnemyIntent[] } => {
+    const updateEnemyState = (currentEnemy: ShipState, currentStage: number, currentPlayer: ShipState): { nextEnemy: ShipState, intents: EnemyIntent[] } => {
         let nextEnemy = { ...currentEnemy };
         const intents: EnemyIntent[] = [];
         const config = nextEnemy.enemyConfig || { energyPerTurn: 2, colors: ['WHITE'], moveChance: 0.2 };
 
-        // 1. Move
-        if (Math.random() < config.moveChance) {
-             const dir = Math.random() < 0.5 ? -1 : 1;
-             const nextY = nextEnemy.yOffset + dir;
-             if (nextY >= 0 && nextY <= MAX_ROWS - SHIP_HEIGHT) {
-                 nextEnemy.yOffset = nextY;
-             }
-        }
-
-        // 2. Charge Energy
+        // 1. Charge Energy
         let energyBudget = config.energyPerTurn;
         
         for (let i = 0; i < nextEnemy.parts.length; i++) {
@@ -1113,10 +1090,78 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             }
         }
 
-        // 3. Generate Intents based on loaded parts
-        const buffGrid = calculateBuffGrid(nextEnemy.parts);
+        // 2. Determine Movement Capability (Engines)
+        // Count fully powered engines
+        let activeEngines = 0;
+        nextEnemy.parts.forEach(p => {
+             if (p.type === 'ENGINE') {
+                 const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
+                 if (energySum > 0) activeEngines++;
+             }
+        });
 
-        // Aggregate damage per row (FIXED LOGIC)
+        // Logic: Can move if has active engines OR if no engines exist in layout (fallback for weak enemies)
+        const hasEnginesInLayout = nextEnemy.parts.some(p => p.type === 'ENGINE');
+        const canMove = hasEnginesInLayout ? (activeEngines > 0) : (Math.random() < config.moveChance);
+
+        // 3. AI Movement Logic (Smart Positioning)
+        if (canMove) {
+            const currentY = nextEnemy.yOffset;
+            const playerY = currentPlayer.yOffset;
+            const playerBodyRows = [playerY, playerY + 1, playerY + 2]; // Player occupies these rows
+
+            let bestY = currentY;
+            let maxScore = -9999;
+
+            // Try staying, moving up, moving down
+            const candidates = [0, -1, 1];
+
+            candidates.forEach(dir => {
+                const testY = currentY + dir;
+                if (testY < 0 || testY > MAX_ROWS - SHIP_HEIGHT) return;
+
+                let score = 0;
+
+                // Analyze alignment
+                nextEnemy.parts.forEach((p, idx) => {
+                    const row = Math.floor(idx / SHIP_WIDTH);
+                    const absRow = testY + row;
+
+                    const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
+                    if (energySum > 0) {
+                        // Offensive Score: Weapon aimed at Player Body
+                        if (p.type === 'CANNON' || p.type === 'MISSILE') {
+                            if (playerBodyRows.includes(absRow)) {
+                                score += 10 * p.multiplier; // High priority to hit
+                            }
+                        }
+                        // Defensive Score: Shield covering Player Body (Assuming player shoots straight)
+                        // This protects against hypothetical player fire on body rows
+                        if (p.type === 'SHIELD') {
+                             if (playerBodyRows.includes(absRow)) {
+                                 score += 5;
+                             }
+                        }
+                    }
+                });
+
+                // Bias towards center if no good targets found (avoid sticking to edges unnecessarily)
+                if (score === 0) {
+                     // Prefer center alignment: 1 (for 3-height ship in 5-row grid, 1 is center)
+                     score -= Math.abs(testY - 1);
+                }
+
+                if (score > maxScore) {
+                    maxScore = score;
+                    bestY = testY;
+                }
+            });
+            
+            nextEnemy.yOffset = bestY;
+        }
+
+        // 4. Generate Intents based on loaded parts
+        const buffGrid = calculateBuffGrid(nextEnemy.parts);
         const rowDamageMap: Record<number, number> = {};
 
         nextEnemy.parts.forEach((p, idx) => {
@@ -1130,16 +1175,13 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                  if(isFull) output += p.basePower;
                  
                  output += buffGrid[r][c];
-                 // Ascension Scaling
                  if (selectedMissionLevel >= 1) output += 1;
                  if (selectedMissionLevel >= 6) output += 1;
 
-                 // Sum up damage for the row
                  rowDamageMap[r] = (rowDamageMap[r] || 0) + output;
             } 
         });
 
-        // Convert aggregated damages to intents
         Object.entries(rowDamageMap).forEach(([rStr, val]) => {
             const r = parseInt(rStr, 10);
             if (val > 0) {
@@ -1347,12 +1389,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                  const rowParts = enemy.parts.slice(startIdx, startIdx + SHIP_WIDTH);
                  isEnemyHitbox = rowParts.some(p => p.type !== 'EMPTY');
 
-                 // Check if enemy intent is attacking on this row
-                 // (Intents were generated based on loaded parts)
-                 // Re-calculate real power for clash? 
-                 // Yes, for accuracy we should calculate real power, but intents are visual guide.
-                 // Let's use the actual part calculation to match the intent logic.
-                 
                  if (!enemy.isStunned) {
                      rowParts.forEach((p, colIdx) => {
                          if (p.type === 'EMPTY' || p.type === 'AMPLIFIER') return;
@@ -1510,10 +1546,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             setTurn(prev => prev + 1);
             
             // Update Enemy State (Move & Charge & Intent)
-            // Need latest enemy state (with cleared parts)
+            // Pass the current player state so the AI can target intelligently
+            // (tempPlayerHp and tempFuel are just scalars, yOffset is inside player.yOffset)
             setEnemy(prev => {
                 if (!nextIsStunned) {
-                    const { nextEnemy, intents } = updateEnemyState(prev, stage);
+                    const { nextEnemy, intents } = updateEnemyState(prev, stage, { ...player, hp: tempPlayerHp });
                     setEnemyIntents(intents);
                     return nextEnemy;
                 } else {
