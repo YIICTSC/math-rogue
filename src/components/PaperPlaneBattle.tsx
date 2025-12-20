@@ -208,7 +208,7 @@ const SHIPS: ShipTemplate[] = [
     }
 ];
 
-// Enhanced Enemy Data (3x3 Grid + AI params)
+// Enhanced Enemy Data (3x3 Grid + AI params) - SHIELD Removed
 const ENEMY_DATA: EnemyDataTemplate[] = [
     { 
         name: "折り紙偵察機", hp: 40, durability: 4, 
@@ -217,22 +217,22 @@ const ENEMY_DATA: EnemyDataTemplate[] = [
     },
     { 
         name: "ノート爆撃機", hp: 60, durability: 6, 
-        layout: ['CANNON', 'EMPTY', 'EMPTY', 'CANNON', 'SHIELD', 'EMPTY', 'CANNON', 'EMPTY', 'EMPTY'], 
+        layout: ['CANNON', 'EMPTY', 'EMPTY', 'CANNON', 'EMPTY', 'EMPTY', 'CANNON', 'EMPTY', 'EMPTY'], 
         energy: 3, colors: ['WHITE', 'BLUE'], moveChance: 0.2 
     },
     { 
         name: "定規戦艦", hp: 90, durability: 8, 
-        layout: ['CANNON', 'CANNON', 'EMPTY', 'SHIELD', 'CANNON', 'EMPTY', 'CANNON', 'CANNON', 'EMPTY'], 
+        layout: ['CANNON', 'CANNON', 'EMPTY', 'AMPLIFIER', 'CANNON', 'EMPTY', 'CANNON', 'CANNON', 'EMPTY'], 
         energy: 4, colors: ['WHITE'], moveChance: 0.1 
     },
     { 
         name: "コンパス要塞", hp: 120, durability: 12, 
-        layout: ['MISSILE', 'SHIELD', 'EMPTY', 'CANNON', 'SHIELD', 'CANNON', 'MISSILE', 'SHIELD', 'EMPTY'], 
+        layout: ['MISSILE', 'CANNON', 'EMPTY', 'CANNON', 'AMPLIFIER', 'CANNON', 'MISSILE', 'EMPTY', 'EMPTY'], 
         energy: 4, colors: ['WHITE', 'BLUE'], moveChance: 0.1 
     },
     { 
         name: "修正液タンク", hp: 180, durability: 20, 
-        layout: ['SHIELD', 'SHIELD', 'EMPTY', 'CANNON', 'SHIELD', 'SHIELD', 'SHIELD', 'SHIELD', 'EMPTY'], 
+        layout: ['EMPTY', 'EMPTY', 'EMPTY', 'CANNON', 'AMPLIFIER', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'], 
         energy: 3, colors: ['WHITE', 'ORANGE'], moveChance: 0.05 
     },
     { 
@@ -247,12 +247,12 @@ const ENEMY_DATA: EnemyDataTemplate[] = [
     },
     { 
         name: "彫刻刀デストロイヤー", hp: 200, durability: 15, 
-        layout: ['MISSILE', 'CANNON', 'CANNON', 'SHIELD', 'ENGINE', 'SHIELD', 'MISSILE', 'CANNON', 'CANNON'], 
+        layout: ['MISSILE', 'CANNON', 'CANNON', 'AMPLIFIER', 'ENGINE', 'AMPLIFIER', 'MISSILE', 'CANNON', 'CANNON'], 
         energy: 6, colors: ['ORANGE', 'WHITE'], moveChance: 0.1 
     },
     { 
         name: "暗黒文房具王", hp: 350, durability: 30, 
-        layout: ['MISSILE', 'AMPLIFIER', 'MISSILE', 'SHIELD', 'ENGINE', 'SHIELD', 'MISSILE', 'AMPLIFIER', 'MISSILE'], 
+        layout: ['MISSILE', 'AMPLIFIER', 'MISSILE', 'AMPLIFIER', 'ENGINE', 'AMPLIFIER', 'MISSILE', 'AMPLIFIER', 'MISSILE'], 
         energy: 7, colors: ['ORANGE', 'BLUE', 'WHITE'], moveChance: 0.3 
     },
 ];
@@ -371,26 +371,6 @@ const calculateBuffGrid = (parts: ShipPart[]): number[][] => {
         }
     });
     return grid;
-};
-
-const calculateTotalOutput = (parts: ShipPart[], buffGrid: number[][], passivePower: number): number => {
-    let total = 0;
-    parts.forEach((p, idx) => {
-        if (p.type === 'EMPTY' || p.type === 'AMPLIFIER') return;
-        const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
-        if (energySum > 0) {
-            let output = Math.floor(energySum * p.multiplier);
-            const isFull = p.slots.every(s => s.value !== null) && p.slots.length > 0;
-            if (isFull) output += p.basePower;
-            
-            const r = Math.floor(idx / SHIP_WIDTH);
-            const c = idx % SHIP_WIDTH;
-            output += buffGrid[r][c];
-            output += passivePower;
-            total += output;
-        }
-    });
-    return total;
 };
 
 // --- COMPONENTS ---
@@ -971,13 +951,17 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                  slots = [{req:'ANY', value:null}];
                  basePower = 3 + Math.floor(stageNum/2);
                  multiplier = 1.5;
-            } else if (type === 'SHIELD') {
-                 slots = [{req:'ANY', value:null}];
-                 basePower = 3;
             } else if (type === 'ENGINE') {
                  slots = [{req:'ANY', value:null}];
                  basePower = 2;
+            } else if (type === 'AMPLIFIER') { // Added AMPLIFIER support for enemies if not present
+                 // Enemy amplifiers usually passive? Or need slot?
+                 // Let's give them a slot so AI charges them
+                 slots = [{req:'ANY', value:null}];
+                 basePower = 2 + Math.floor(stageNum/4);
+                 multiplier = 0;
             }
+            // Removed SHIELD block
 
             return {
                 id: `ep_${i}`,
@@ -1134,13 +1118,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             if (playerBodyRows.includes(absRow)) {
                                 score += 10 * p.multiplier; // High priority to hit
                             }
-                        }
-                        // Defensive Score: Shield covering Player Body (Assuming player shoots straight)
-                        // This protects against hypothetical player fire on body rows
-                        if (p.type === 'SHIELD') {
-                             if (playerBodyRows.includes(absRow)) {
-                                 score += 5;
-                             }
                         }
                     }
                 });
