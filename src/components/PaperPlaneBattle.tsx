@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation, Droplets, Recycle, Repeat, User, Lock, Users, Target, UserPlus, Gauge, Swords, Dice5, Ghost } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -1088,18 +1089,12 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
              const nextY = nextEnemy.yOffset + dir;
              if (nextY >= 0 && nextY <= MAX_ROWS - SHIP_HEIGHT) {
                  nextEnemy.yOffset = nextY;
-                 // addLog("敵が移動した！"); // Optional log
              }
         }
 
         // 2. Charge Energy
-        // Simple logic: fill slots sequentially
         let energyBudget = config.energyPerTurn;
-        // Ascension Bonus to Enemy Energy? Maybe later.
         
-        // Iterate parts and fill slots
-        // Priority: Fill nearly full slots first? Or random?
-        // Simple: Top-left to bottom-right
         for (let i = 0; i < nextEnemy.parts.length; i++) {
             if (energyBudget <= 0) break;
             const part = nextEnemy.parts[i];
@@ -1109,15 +1104,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             
             for (const slotItem of emptySlots) {
                 if (energyBudget > 0) {
-                    // Fill with average energy value based on stage
                     const val = 3 + Math.floor(currentStage / 3); 
-                    // Color check ignored for simplified enemy AI, or assume they have right color
-                    // We just fill it.
-                    
                     const newSlots = [...part.slots];
                     newSlots[slotItem.idx] = { ...slotItem.s, value: val };
                     nextEnemy.parts[i] = { ...part, slots: newSlots };
-                    
                     energyBudget--;
                 }
             }
@@ -1126,14 +1116,13 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         // 3. Generate Intents based on loaded parts
         const buffGrid = calculateBuffGrid(nextEnemy.parts);
 
+        // Aggregate damage per row (FIXED LOGIC)
+        const rowDamageMap: Record<number, number> = {};
+
         nextEnemy.parts.forEach((p, idx) => {
             const r = Math.floor(idx / SHIP_WIDTH);
             const c = idx % SHIP_WIDTH;
             const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
-            
-            // Enemy attacks if it has any energy loaded (aggressive) or only if full?
-            // Let's say if it has > 0 energy it contributes to power, but "Intent" only shows if significant damage?
-            // Actually, we show intent if it will output power.
             
             if (energySum > 0 && (p.type === 'CANNON' || p.type === 'MISSILE')) {
                  let output = Math.floor(energySum * p.multiplier);
@@ -1145,10 +1134,16 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                  if (selectedMissionLevel >= 1) output += 1;
                  if (selectedMissionLevel >= 6) output += 1;
 
-                 intents.push({ row: idx, type: 'ATTACK', value: output });
-            } else if (p.type === 'SHIELD' && energySum > 0) {
-                // Defensive intent? Maybe visual only
-                // intents.push({ row: idx, type: 'BUFF', value: ... }); 
+                 // Sum up damage for the row
+                 rowDamageMap[r] = (rowDamageMap[r] || 0) + output;
+            } 
+        });
+
+        // Convert aggregated damages to intents
+        Object.entries(rowDamageMap).forEach(([rStr, val]) => {
+            const r = parseInt(rStr, 10);
+            if (val > 0) {
+                intents.push({ row: r, type: 'ATTACK', value: val });
             }
         });
 
@@ -1292,7 +1287,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         let enemyStunDmg = 0;
 
         const buffGrid = calculateBuffGrid(player.parts);
-        const enemyBuffGrid = calculateBuffGrid(enemy.parts); // Enemy buffs
+        const enemyBuffGrid = calculateBuffGrid(enemy.parts); // Calculate enemy buffs
 
         // CLASH LOGIC
         for (let r = 0; r < MAX_ROWS; r++) {
