@@ -794,6 +794,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
              slots.push(PILOTS[Math.floor(Math.random() * PILOTS.length)]);
         }
         setPilotOptions(slots);
+        setSelectedPilotIndex(-1); // Reset selection
         
         // Random Talents for higher ranks
         const talents: Talent[] = [];
@@ -824,6 +825,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             newOpts[i] = PILOTS[Math.floor(Math.random() * PILOTS.length)];
         }
         setPilotOptions(newOpts);
+        setSelectedPilotIndex(-1); // Reset on reroll too? Maybe keep if pinned? No reset is safer.
 
         // Roll Random Talents
         const newTalents: Talent[] = [];
@@ -889,6 +891,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setSetupStep('SHIP');
         setStage(1);
         setIsEndless(false);
+        initPilotRoll(); // Ensure pilots are rerolled/reset
         audioService.playSound('select');
         audioService.playBGM('paper_plane_setup');
     };
@@ -1072,14 +1075,15 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }
 
         // 2. AI Movement Logic (Aiming)
-        // Only move if we have fuel and random check passes
-        if (nextEnemy.fuel > 0 && Math.random() < config.moveChance) {
+        // Only move if we have fuel
+        if (nextEnemy.fuel > 0) {
             const currentY = nextEnemy.yOffset;
             const playerY = currentPlayer.yOffset;
             const playerBodyRows = [playerY, playerY + 1, playerY + 2]; // Player occupies these rows on grid
 
             let bestY = currentY;
             let maxScore = -9999;
+            let bestMoveDir = 0;
 
             // Try moves: -1 (Up), 0 (Stay), +1 (Down)
             // Note: In this grid, -1 yOffset means moving visually UP (index decreases)
@@ -1117,13 +1121,20 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                 if (score > maxScore) {
                     maxScore = score;
+                    bestMoveDir = dir;
                     bestY = testY;
                 }
             });
 
-            if (bestY !== currentY) {
-                nextEnemy.yOffset = bestY;
-                nextEnemy.fuel -= 1; // Consume Fuel
+            if (bestMoveDir !== 0) {
+                // If aggressive move (attacking), commit
+                // If defensive/positioning only, use randomness to be unpredictable
+                const isAggressive = maxScore >= 5; 
+                
+                if (isAggressive || Math.random() < config.moveChance) {
+                    nextEnemy.yOffset = bestY;
+                    nextEnemy.fuel -= 1; // Consume Fuel
+                }
             }
         }
 
@@ -2307,7 +2318,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     <p className="text-green-400 font-bold">・戦闘後は「休暇」で機体を強化しよう！</p>
                     <p className="text-blue-400 font-bold mt-2">※オートセーブ機能搭載！</p>
                 </div>
-                <button onClick={() => setPhase('SETUP')} className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-8 rounded shadow-lg animate-pulse flex items-center">
+                <button onClick={() => { setPhase('SETUP'); initPilotRoll(); }} className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-8 rounded shadow-lg animate-pulse flex items-center">
                     <Play className="mr-2"/> 出撃準備
                 </button>
                 <button onClick={onBack} className="mt-4 text-gray-500 hover:text-white underline text-xs">戻る</button>
@@ -2782,14 +2793,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                         <Repeat className="mr-2" /> エンドレスモードへ
                                     </button>
                                     <button 
-                                        onClick={() => {
-                                            setPhase('SETUP');
-                                            setSetupStep('SHIP');
-                                            setStage(1);
-                                            setIsEndless(false);
-                                            audioService.playSound('select');
-                                            audioService.playBGM('paper_plane_setup');
-                                        }} 
+                                        onClick={returnToSetup} 
                                         className="bg-green-600 px-8 py-3 rounded text-xl font-bold hover:bg-green-500 border-2 border-green-400 flex items-center justify-center"
                                     >
                                         <Settings className="mr-2"/> 機体選択へ
@@ -2802,8 +2806,16 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             <>
                                 <Skull size={64} className="text-red-500 mx-auto mb-4"/>
                                 <h2 className="text-4xl font-bold text-red-500 mb-2">DESTROYED</h2>
-                                <p className="text-gray-400">Stage {stage}</p>
-                                <button onClick={onBack} className="mt-8 bg-gray-600 px-8 py-3 rounded text-xl font-bold">Return</button>
+                                <p className="text-gray-400 mb-6">Stage {stage}</p>
+                                <div className="flex flex-col gap-4">
+                                    <button 
+                                        onClick={returnToSetup}
+                                        className="bg-green-600 px-8 py-3 rounded text-xl font-bold hover:bg-green-500 border-2 border-green-400 flex items-center justify-center"
+                                    >
+                                        <Settings className="mr-2"/> 機体選択へ
+                                    </button>
+                                    <button onClick={onBack} className="mt-2 bg-gray-600 px-8 py-3 rounded text-xl font-bold">タイトルへ戻る</button>
+                                </div>
                             </>
                         )}
                     </div>
