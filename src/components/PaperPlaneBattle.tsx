@@ -208,11 +208,11 @@ const SHIPS: ShipTemplate[] = [
     }
 ];
 
-// Enhanced Enemy Data (3x3 Grid + AI params) - SHIELD Removed
+// Enhanced Enemy Data (3x3 Grid + AI params) - ENGINE Removed, replaced with weapons or empty
 const ENEMY_DATA: EnemyDataTemplate[] = [
     { 
         name: "折り紙偵察機", hp: 40, durability: 4, 
-        layout: ['EMPTY', 'CANNON', 'EMPTY', 'EMPTY', 'ENGINE', 'EMPTY', 'EMPTY', 'CANNON', 'EMPTY'], 
+        layout: ['EMPTY', 'CANNON', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'CANNON', 'EMPTY'], 
         energy: 2, colors: ['WHITE'], moveChance: 0.3 
     },
     { 
@@ -237,22 +237,22 @@ const ENEMY_DATA: EnemyDataTemplate[] = [
     },
     { 
         name: "カッター迎撃機", hp: 70, durability: 5, 
-        layout: ['MISSILE', 'EMPTY', 'MISSILE', 'ENGINE', 'ENGINE', 'EMPTY', 'MISSILE', 'EMPTY', 'MISSILE'], 
+        layout: ['MISSILE', 'EMPTY', 'MISSILE', 'CANNON', 'CANNON', 'EMPTY', 'MISSILE', 'EMPTY', 'MISSILE'], 
         energy: 5, colors: ['BLUE'], moveChance: 0.6 
     },
     { 
         name: "分度器マザー", hp: 150, durability: 10, 
-        layout: ['CANNON', 'AMPLIFIER', 'CANNON', 'EMPTY', 'ENGINE', 'EMPTY', 'CANNON', 'AMPLIFIER', 'CANNON'], 
+        layout: ['CANNON', 'AMPLIFIER', 'CANNON', 'EMPTY', 'EMPTY', 'EMPTY', 'CANNON', 'AMPLIFIER', 'CANNON'], 
         energy: 5, colors: ['WHITE', 'BLUE'], moveChance: 0.2 
     },
     { 
         name: "彫刻刀デストロイヤー", hp: 200, durability: 15, 
-        layout: ['MISSILE', 'CANNON', 'CANNON', 'AMPLIFIER', 'ENGINE', 'AMPLIFIER', 'MISSILE', 'CANNON', 'CANNON'], 
+        layout: ['MISSILE', 'CANNON', 'CANNON', 'AMPLIFIER', 'CANNON', 'AMPLIFIER', 'MISSILE', 'CANNON', 'CANNON'], 
         energy: 6, colors: ['ORANGE', 'WHITE'], moveChance: 0.1 
     },
     { 
         name: "暗黒文房具王", hp: 350, durability: 30, 
-        layout: ['MISSILE', 'AMPLIFIER', 'MISSILE', 'AMPLIFIER', 'ENGINE', 'AMPLIFIER', 'MISSILE', 'AMPLIFIER', 'MISSILE'], 
+        layout: ['MISSILE', 'AMPLIFIER', 'MISSILE', 'AMPLIFIER', 'AMPLIFIER', 'AMPLIFIER', 'MISSILE', 'AMPLIFIER', 'MISSILE'], 
         energy: 7, colors: ['ORANGE', 'BLUE', 'WHITE'], moveChance: 0.3 
     },
 ];
@@ -951,17 +951,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                  slots = [{req:'ANY', value:null}];
                  basePower = 3 + Math.floor(stageNum/2);
                  multiplier = 1.5;
-            } else if (type === 'ENGINE') {
-                 slots = [{req:'ANY', value:null}];
-                 basePower = 2;
-            } else if (type === 'AMPLIFIER') { // Added AMPLIFIER support for enemies if not present
-                 // Enemy amplifiers usually passive? Or need slot?
-                 // Let's give them a slot so AI charges them
+            } else if (type === 'AMPLIFIER') {
                  slots = [{req:'ANY', value:null}];
                  basePower = 2 + Math.floor(stageNum/4);
                  multiplier = 0;
             }
-            // Removed SHIELD block
 
             return {
                 id: `ep_${i}`,
@@ -1074,21 +1068,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             }
         }
 
-        // 2. Determine Movement Capability (Engines)
-        // Count fully powered engines
-        let activeEngines = 0;
-        nextEnemy.parts.forEach(p => {
-             if (p.type === 'ENGINE') {
-                 const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
-                 if (energySum > 0) activeEngines++;
-             }
-        });
+        // 2. AI Movement Logic (Simplified: Probability based)
+        const canMove = Math.random() < config.moveChance;
 
-        // Logic: Can move if has active engines OR if no engines exist in layout (fallback for weak enemies)
-        const hasEnginesInLayout = nextEnemy.parts.some(p => p.type === 'ENGINE');
-        const canMove = hasEnginesInLayout ? (activeEngines > 0) : (Math.random() < config.moveChance);
-
-        // 3. AI Movement Logic (Smart Positioning)
         if (canMove) {
             const currentY = nextEnemy.yOffset;
             const playerY = currentPlayer.yOffset;
@@ -1137,7 +1119,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             nextEnemy.yOffset = bestY;
         }
 
-        // 4. Generate Intents based on loaded parts
+        // 3. Generate Intents based on loaded parts
         const buffGrid = calculateBuffGrid(nextEnemy.parts);
         const rowDamageMap: Record<number, number> = {};
 
