@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation, Droplets, Recycle, Repeat, User, Lock, Users, Target, UserPlus, Gauge, Swords, Dice5, Ghost } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -70,6 +71,13 @@ interface ShipState {
     passivePower: number; // From Treasures & Talents
     partInventory: ShipPart[]; 
     talents: Talent[]; // Active talents
+    
+    // Enemy Specific
+    enemyConfig?: {
+        energyPerTurn: number;
+        colors: EnergyColor[];
+        moveChance: number;
+    };
 }
 
 interface EnemyIntent {
@@ -125,6 +133,16 @@ interface ShipTemplate {
     description: string;
     baseHp: number;
     color: string;
+}
+
+interface EnemyDataTemplate {
+    name: string;
+    hp: number;
+    durability: number;
+    layout: string[]; // 9 slots of part types
+    energy: number;
+    colors: EnergyColor[];
+    moveChance: number;
 }
 
 // --- DATA ---
@@ -190,17 +208,53 @@ const SHIPS: ShipTemplate[] = [
     }
 ];
 
-const ENEMY_DATA = [
-    { name: "折り紙偵察機", hp: 30, durability: 4, parts: ['CANNON', 'EMPTY', 'CANNON'] }, // Stage 1-3
-    { name: "ノート爆撃機", hp: 45, durability: 5, parts: ['CANNON', 'CANNON', 'EMPTY'] }, // Stage 4-6
-    { name: "定規戦艦", hp: 70, durability: 6, parts: ['CANNON', 'CANNON', 'CANNON'] }, // Stage 7-9
-    { name: "コンパス要塞", hp: 100, durability: 10, parts: ['CANNON', 'MISSILE', 'CANNON'] }, // Stage 10-12
-    { name: "修正液タンク", hp: 150, durability: 15, parts: ['SHIELD', 'CANNON', 'SHIELD'] }, 
-    { name: "カッター迎撃機", hp: 50, durability: 3, parts: ['MISSILE', 'MISSILE', 'MISSILE'] }, 
-    { name: "分度器マザー", hp: 120, durability: 8, parts: ['CANNON', 'ENGINE', 'CANNON'] }, 
-    { name: "ホッチキス機動兵", hp: 80, durability: 6, parts: ['CANNON', 'EMPTY', 'MISSILE'] }, 
-    { name: "彫刻刀デストロイヤー", hp: 180, durability: 12, parts: ['MISSILE', 'CANNON', 'MISSILE'] },
-    { name: "暗黒文房具王", hp: 300, durability: 20, parts: ['MISSILE', 'MISSILE', 'MISSILE'] }, // Boss class
+// Enhanced Enemy Data (3x3 Grid + AI params)
+const ENEMY_DATA: EnemyDataTemplate[] = [
+    { 
+        name: "折り紙偵察機", hp: 40, durability: 4, 
+        layout: ['EMPTY', 'CANNON', 'EMPTY', 'EMPTY', 'ENGINE', 'EMPTY', 'EMPTY', 'CANNON', 'EMPTY'], 
+        energy: 2, colors: ['WHITE'], moveChance: 0.3 
+    },
+    { 
+        name: "ノート爆撃機", hp: 60, durability: 6, 
+        layout: ['CANNON', 'EMPTY', 'EMPTY', 'CANNON', 'SHIELD', 'EMPTY', 'CANNON', 'EMPTY', 'EMPTY'], 
+        energy: 3, colors: ['WHITE', 'BLUE'], moveChance: 0.2 
+    },
+    { 
+        name: "定規戦艦", hp: 90, durability: 8, 
+        layout: ['CANNON', 'CANNON', 'EMPTY', 'SHIELD', 'CANNON', 'EMPTY', 'CANNON', 'CANNON', 'EMPTY'], 
+        energy: 4, colors: ['WHITE'], moveChance: 0.1 
+    },
+    { 
+        name: "コンパス要塞", hp: 120, durability: 12, 
+        layout: ['MISSILE', 'SHIELD', 'EMPTY', 'CANNON', 'SHIELD', 'CANNON', 'MISSILE', 'SHIELD', 'EMPTY'], 
+        energy: 4, colors: ['WHITE', 'BLUE'], moveChance: 0.1 
+    },
+    { 
+        name: "修正液タンク", hp: 180, durability: 20, 
+        layout: ['SHIELD', 'SHIELD', 'EMPTY', 'CANNON', 'SHIELD', 'SHIELD', 'SHIELD', 'SHIELD', 'EMPTY'], 
+        energy: 3, colors: ['WHITE', 'ORANGE'], moveChance: 0.05 
+    },
+    { 
+        name: "カッター迎撃機", hp: 70, durability: 5, 
+        layout: ['MISSILE', 'EMPTY', 'MISSILE', 'ENGINE', 'ENGINE', 'EMPTY', 'MISSILE', 'EMPTY', 'MISSILE'], 
+        energy: 5, colors: ['BLUE'], moveChance: 0.6 
+    },
+    { 
+        name: "分度器マザー", hp: 150, durability: 10, 
+        layout: ['CANNON', 'AMPLIFIER', 'CANNON', 'EMPTY', 'ENGINE', 'EMPTY', 'CANNON', 'AMPLIFIER', 'CANNON'], 
+        energy: 5, colors: ['WHITE', 'BLUE'], moveChance: 0.2 
+    },
+    { 
+        name: "彫刻刀デストロイヤー", hp: 200, durability: 15, 
+        layout: ['MISSILE', 'CANNON', 'CANNON', 'SHIELD', 'ENGINE', 'SHIELD', 'MISSILE', 'CANNON', 'CANNON'], 
+        energy: 6, colors: ['ORANGE', 'WHITE'], moveChance: 0.1 
+    },
+    { 
+        name: "暗黒文房具王", hp: 350, durability: 30, 
+        layout: ['MISSILE', 'AMPLIFIER', 'MISSILE', 'SHIELD', 'ENGINE', 'SHIELD', 'MISSILE', 'AMPLIFIER', 'MISSILE'], 
+        energy: 7, colors: ['ORANGE', 'BLUE', 'WHITE'], moveChance: 0.3 
+    },
 ];
 
 const VACATION_EVENTS_DB: Omit<VacationEvent, 'id'>[] = [
@@ -317,6 +371,26 @@ const calculateBuffGrid = (parts: ShipPart[]): number[][] => {
         }
     });
     return grid;
+};
+
+const calculateTotalOutput = (parts: ShipPart[], buffGrid: number[][], passivePower: number): number => {
+    let total = 0;
+    parts.forEach((p, idx) => {
+        if (p.type === 'EMPTY' || p.type === 'AMPLIFIER') return;
+        const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
+        if (energySum > 0) {
+            let output = Math.floor(energySum * p.multiplier);
+            const isFull = p.slots.every(s => s.value !== null) && p.slots.length > 0;
+            if (isFull) output += p.basePower;
+            
+            const r = Math.floor(idx / SHIP_WIDTH);
+            const c = idx % SHIP_WIDTH;
+            output += buffGrid[r][c];
+            output += passivePower;
+            total += output;
+        }
+    });
+    return total;
 };
 
 // --- COMPONENTS ---
@@ -658,7 +732,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         parts: [], 
         starCoins: 0, vacationDays: 0, passivePower: 0,
         partInventory: [],
-        talents: []
+        talents: [],
+        enemyConfig: { energyPerTurn: 2, colors: ['WHITE'], moveChance: 0.2 }
     });
 
     const [enemyIntents, setEnemyIntents] = useState<EnemyIntent[]>(savedData?.enemyIntents || []);
@@ -871,12 +946,49 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
              dur += loop * 2;
         }
 
-        const eParts: ShipPart[] = template.parts.map((t, i) => ({
-            id: `ep_${i}`,
-            type: t as any,
-            name: t === 'CANNON' ? '敵砲台' : t === 'MISSILE' ? 'ミサイル' : t === 'SHIELD' ? 'シールド' : t === 'ENGINE' ? 'エンジン' : '空き',
-            slots: [], multiplier: 1, basePower: 0, hp: 10
-        }));
+        const eParts: ShipPart[] = template.layout.map((t, i) => {
+            const type = t as any;
+            let partTemplate = PART_TEMPLATES.find(pt => pt.type === type);
+            // Default template if specific not found or generic needed
+            if (!partTemplate || type === 'EMPTY') {
+                 partTemplate = { 
+                     type: type, 
+                     name: type==='EMPTY'?'空き':(type==='CANNON'?'敵砲台':'敵パーツ'), 
+                     description:'', slots: [], multiplier: 1, basePower: 0, hp: 10 
+                 };
+            }
+            
+            // Adjust enemy parts based on type
+            let slots: EnergySlot[] = [];
+            let basePower = 0;
+            let multiplier = 1;
+
+            if (type === 'CANNON') {
+                 slots = [{req:'ANY', value:null}]; 
+                 basePower = 2 + Math.floor(stageNum/3);
+                 multiplier = 1.0;
+            } else if (type === 'MISSILE') {
+                 slots = [{req:'ANY', value:null}];
+                 basePower = 3 + Math.floor(stageNum/2);
+                 multiplier = 1.5;
+            } else if (type === 'SHIELD') {
+                 slots = [{req:'ANY', value:null}];
+                 basePower = 3;
+            } else if (type === 'ENGINE') {
+                 slots = [{req:'ANY', value:null}];
+                 basePower = 2;
+            }
+
+            return {
+                id: `ep_${i}`,
+                type: type,
+                name: partTemplate.name,
+                slots: slots,
+                multiplier: multiplier,
+                basePower: basePower,
+                hp: 10
+            };
+        });
 
         setEnemy({
             yOffset: 1,
@@ -886,7 +998,12 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             parts: eParts,
             starCoins: 0, vacationDays: 0, passivePower: 0,
             partInventory: [],
-            talents: []
+            talents: [],
+            enemyConfig: {
+                energyPerTurn: template.energy,
+                colors: template.colors,
+                moveChance: template.moveChance
+            }
         });
 
         setPlayer(prev => ({
@@ -934,40 +1051,109 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         });
         setHand(initialHand);
 
-        generateEnemyIntents(1, eParts, stageNum); 
+        // Initial Enemy Setup
+        const initialEnemy = {
+            yOffset: 1,
+            hp: hp, maxHp: hp,
+            durability: dur, maxDurability: dur,
+            fuel: 0, maxFuel: 0, isStunned: false,
+            parts: eParts,
+            starCoins: 0, vacationDays: 0, passivePower: 0,
+            partInventory: [],
+            talents: [],
+            enemyConfig: {
+                energyPerTurn: template.energy,
+                colors: template.colors,
+                moveChance: template.moveChance
+            }
+        };
+        const { nextEnemy, intents } = updateEnemyState(initialEnemy, stageNum);
+        setEnemy(nextEnemy);
+        setEnemyIntents(intents);
+
         setPhase('BATTLE');
         addLog(`バトル開始！ 敵: ${template.name}`);
         audioService.playBGM('paper_plane_battle'); // Ensure correct BGM
     };
 
-    const generateEnemyIntents = (turnNum: number, parts: ShipPart[], currentStage: number) => {
+    // --- ENEMY AI LOGIC ---
+
+    const updateEnemyState = (currentEnemy: ShipState, currentStage: number): { nextEnemy: ShipState, intents: EnemyIntent[] } => {
+        let nextEnemy = { ...currentEnemy };
         const intents: EnemyIntent[] = [];
-        const intensity = 0.5 + (currentStage * 0.05); 
+        const config = nextEnemy.enemyConfig || { energyPerTurn: 2, colors: ['WHITE'], moveChance: 0.2 };
 
-        parts.forEach((p, idx) => {
-            const roll = Math.random();
-            const baseVal = 3 + Math.floor(turnNum/2) + Math.floor(currentStage/2);
-            let finalVal = baseVal;
-            // Ascension 1: Enemy Dmg +1
-            if (selectedMissionLevel >= 1) finalVal += 1;
-            // Ascension 6: Enemy Dmg +2
-            if (selectedMissionLevel >= 6) finalVal += 1;
+        // 1. Move
+        if (Math.random() < config.moveChance) {
+             const dir = Math.random() < 0.5 ? -1 : 1;
+             const nextY = nextEnemy.yOffset + dir;
+             if (nextY >= 0 && nextY <= MAX_ROWS - SHIP_HEIGHT) {
+                 nextEnemy.yOffset = nextY;
+                 // addLog("敵が移動した！"); // Optional log
+             }
+        }
 
-            if (p.type === 'CANNON') {
-                if (roll < Math.min(0.8, intensity)) {
-                    intents.push({ row: idx, type: 'ATTACK', value: finalVal });
-                }
-            } else if (p.type === 'MISSILE') {
-                if (roll < Math.min(0.5, intensity * 0.7)) {
-                    intents.push({ row: idx, type: 'ATTACK', value: Math.floor(finalVal * 1.5) });
-                }
-            } else if (p.type === 'SHIELD') {
-                if (roll < 0.2) {
-                     intents.push({ row: idx, type: 'ATTACK', value: Math.floor(finalVal * 0.5) });
+        // 2. Charge Energy
+        // Simple logic: fill slots sequentially
+        let energyBudget = config.energyPerTurn;
+        // Ascension Bonus to Enemy Energy? Maybe later.
+        
+        // Iterate parts and fill slots
+        // Priority: Fill nearly full slots first? Or random?
+        // Simple: Top-left to bottom-right
+        for (let i = 0; i < nextEnemy.parts.length; i++) {
+            if (energyBudget <= 0) break;
+            const part = nextEnemy.parts[i];
+            if (part.type === 'EMPTY') continue;
+
+            const emptySlots = part.slots.map((s, idx) => ({s, idx})).filter(item => item.s.value === null);
+            
+            for (const slotItem of emptySlots) {
+                if (energyBudget > 0) {
+                    // Fill with average energy value based on stage
+                    const val = 3 + Math.floor(currentStage / 3); 
+                    // Color check ignored for simplified enemy AI, or assume they have right color
+                    // We just fill it.
+                    
+                    const newSlots = [...part.slots];
+                    newSlots[slotItem.idx] = { ...slotItem.s, value: val };
+                    nextEnemy.parts[i] = { ...part, slots: newSlots };
+                    
+                    energyBudget--;
                 }
             }
+        }
+
+        // 3. Generate Intents based on loaded parts
+        const buffGrid = calculateBuffGrid(nextEnemy.parts);
+
+        nextEnemy.parts.forEach((p, idx) => {
+            const r = Math.floor(idx / SHIP_WIDTH);
+            const c = idx % SHIP_WIDTH;
+            const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
+            
+            // Enemy attacks if it has any energy loaded (aggressive) or only if full?
+            // Let's say if it has > 0 energy it contributes to power, but "Intent" only shows if significant damage?
+            // Actually, we show intent if it will output power.
+            
+            if (energySum > 0 && (p.type === 'CANNON' || p.type === 'MISSILE')) {
+                 let output = Math.floor(energySum * p.multiplier);
+                 const isFull = p.slots.every(s => s.value !== null) && p.slots.length > 0;
+                 if(isFull) output += p.basePower;
+                 
+                 output += buffGrid[r][c];
+                 // Ascension Scaling
+                 if (selectedMissionLevel >= 1) output += 1;
+                 if (selectedMissionLevel >= 6) output += 1;
+
+                 intents.push({ row: idx, type: 'ATTACK', value: output });
+            } else if (p.type === 'SHIELD' && energySum > 0) {
+                // Defensive intent? Maybe visual only
+                // intents.push({ row: idx, type: 'BUFF', value: ... }); 
+            }
         });
-        setEnemyIntents(intents);
+
+        return { nextEnemy, intents };
     };
 
     const drawEnergy = (count: number) => {
@@ -1107,7 +1293,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         let enemyStunDmg = 0;
 
         const buffGrid = calculateBuffGrid(player.parts);
+        const enemyBuffGrid = calculateBuffGrid(enemy.parts); // Enemy buffs
 
+        // CLASH LOGIC
         for (let r = 0; r < MAX_ROWS; r++) {
             const pRelIdx = r - player.yOffset;
             let pPower = 0;
@@ -1120,7 +1308,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             if (pRelIdx >= 0 && pRelIdx < SHIP_HEIGHT) {
                 const startIdx = pRelIdx * SHIP_WIDTH;
                 const rowParts = player.parts.slice(startIdx, startIdx + SHIP_WIDTH);
-                
                 isPlayerHitbox = rowParts.some(p => p.type !== 'EMPTY');
 
                 rowParts.forEach((p, colIdx) => {
@@ -1155,20 +1342,40 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 tempFuel = Math.min(player.maxFuel, tempFuel + fuelRecovered);
             }
 
+            // ENEMY CALCULATION (Updated to use actual parts)
             const eRelIdx = r - enemy.yOffset;
-            const intent = enemyIntents.find(i => (i.row + enemy.yOffset) === r);
             let ePower = 0;
-            
-            if (intent && intent.type === 'ATTACK' && !enemy.isStunned) {
-                ePower = intent.value;
-            }
-
+            let eShield = 0; // Enemy shield logic if needed
             let isEnemyHitbox = false;
-            if (eRelIdx >= 0 && eRelIdx < enemy.parts.length) {
-                const ep = enemy.parts[eRelIdx];
-                if (ep && ep.type !== 'EMPTY') {
-                    isEnemyHitbox = true;
-                }
+
+            if (eRelIdx >= 0 && eRelIdx < SHIP_HEIGHT) {
+                 const startIdx = eRelIdx * SHIP_WIDTH;
+                 const rowParts = enemy.parts.slice(startIdx, startIdx + SHIP_WIDTH);
+                 isEnemyHitbox = rowParts.some(p => p.type !== 'EMPTY');
+
+                 // Check if enemy intent is attacking on this row
+                 // (Intents were generated based on loaded parts)
+                 // Re-calculate real power for clash? 
+                 // Yes, for accuracy we should calculate real power, but intents are visual guide.
+                 // Let's use the actual part calculation to match the intent logic.
+                 
+                 if (!enemy.isStunned) {
+                     rowParts.forEach((p, colIdx) => {
+                         if (p.type === 'EMPTY' || p.type === 'AMPLIFIER') return;
+                         const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
+                         
+                         if (energySum > 0 && (p.type === 'CANNON' || p.type === 'MISSILE')) {
+                             let output = Math.floor(energySum * p.multiplier);
+                             const isFull = p.slots.every(s => s.value !== null) && p.slots.length > 0;
+                             if(isFull) output += p.basePower;
+                             output += enemyBuffGrid[eRelIdx][colIdx];
+                             // Ascension Scaling
+                             if (selectedMissionLevel >= 1) output += 1;
+                             if (selectedMissionLevel >= 6) output += 1;
+                             ePower += output;
+                         }
+                     });
+                 }
             }
 
             let result: ClashRowData['result'] = 'NONE';
@@ -1268,11 +1475,22 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 audioService.playSound('buff');
             }
             
+            // Clear Enemy Energy after Attack
+            const clearedParts = enemy.parts.map(p => {
+                 // Clear slots if it attacked (had energy)
+                 const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
+                 if (energySum > 0 && (p.type === 'CANNON' || p.type === 'MISSILE')) {
+                     return { ...p, slots: p.slots.map(s => ({...s, value: null})) };
+                 }
+                 return p;
+            });
+
             setEnemy(prev => ({
                 ...prev,
                 hp: tempEnemyHp,
                 durability: nextDurability,
-                isStunned: nextIsStunned
+                isStunned: nextIsStunned,
+                parts: clearedParts
             }));
         }
 
@@ -1296,11 +1514,20 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             }
         } else {
             setTurn(prev => prev + 1);
-            if (!nextIsStunned) {
-                generateEnemyIntents(turn + 1, enemy.parts, stage);
-            } else {
-                setEnemyIntents([]);
-            }
+            
+            // Update Enemy State (Move & Charge & Intent)
+            // Need latest enemy state (with cleared parts)
+            setEnemy(prev => {
+                if (!nextIsStunned) {
+                    const { nextEnemy, intents } = updateEnemyState(prev, stage);
+                    setEnemyIntents(intents);
+                    return nextEnemy;
+                } else {
+                    setEnemyIntents([]);
+                    return prev;
+                }
+            });
+
             drawEnergy(5);
         }
     };
@@ -1789,7 +2016,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const inShip = pRelIdx >= 0 && pRelIdx < SHIP_HEIGHT;
         const partsToRender = inShip ? player.parts.slice(pRelIdx * 3, pRelIdx * 3 + 3) : [];
         const eRelIdx = rowIndex - enemy.yOffset;
-        const ePart = (eRelIdx >= 0 && eRelIdx < SHIP_HEIGHT) ? enemy.parts[eRelIdx] : null;
+        
+        // Enemy is also 3x3 now
+        const eInShip = eRelIdx >= 0 && eRelIdx < SHIP_HEIGHT;
+        const ePartsToRender = eInShip ? enemy.parts.slice(eRelIdx * 3, eRelIdx * 3 + 3) : [];
+
         const intent = enemyIntents.find(i => (i.row + enemy.yOffset) === rowIndex);
         
         let prediction = null;
@@ -1845,10 +2076,24 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     )}
                 </div>
                 <div className="w-16 md:w-24 relative flex items-center justify-center shrink-0">
-                    {prediction ? prediction : (enemy.isStunned && ePart ? <div className="text-yellow-500 font-bold text-xs">STUNNED</div> : null)}
+                    {prediction ? prediction : (enemy.isStunned && eInShip ? <div className="text-yellow-500 font-bold text-xs">STUNNED</div> : null)}
                 </div>
-                <div className="w-1/3 pl-2 border-l border-dashed border-white/20">
-                    {ePart && <div className="w-full opacity-80"><ShipPartView part={ePart} isEnemy={true} /></div>}
+                <div className="w-1/2 pl-2 border-l border-dashed border-white/20">
+                    {eInShip ? (
+                        <div className="flex gap-1 w-full justify-start">
+                            {ePartsToRender.map((part, i) => (
+                                <div key={part.id} className="w-1/3 max-w-[80px] opacity-90">
+                                    <ShipPartView 
+                                        part={part} 
+                                        isEnemy={true}
+                                        showPower={true} // Show charged power for enemy
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="w-full h-full opacity-10 bg-grid-pattern"></div>
+                    )}
                 </div>
             </div>
         );
