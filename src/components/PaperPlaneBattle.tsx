@@ -708,7 +708,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     const [enemy, setEnemy] = useState<ShipState>(savedData?.enemy || {
         yOffset: 1,
-        hp: 20, maxHp: 20, fuel: 0, maxFuel: 0, durability: 3, maxDurability: 3, isStunned: false,
+        hp: 20, maxHp: 20, fuel: 3, maxFuel: 3, durability: 3, maxDurability: 3, isStunned: false,
         parts: [], 
         starCoins: 0, vacationDays: 0, passivePower: 0,
         partInventory: [],
@@ -977,11 +977,14 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             hp: selectedMissionLevel >= 4 ? Math.floor(prev.hp * 0.8) : prev.hp
         }));
 
+        // Determine initial enemy fuel based on stage (more fuel later)
+        const initialFuel = 3 + Math.floor(stageNum / 2);
+
         const initialEnemy = {
             yOffset: 1,
             hp: hp, maxHp: hp,
             durability: dur, maxDurability: dur,
-            fuel: 0, maxFuel: 0, isStunned: false,
+            fuel: initialFuel, maxFuel: initialFuel, isStunned: false,
             parts: eParts,
             starCoins: 0, vacationDays: 0, passivePower: 0,
             partInventory: [],
@@ -1068,55 +1071,60 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             }
         }
 
-        // 2. AI Movement Logic (Simplified: Probability based)
-        const canMove = Math.random() < config.moveChance;
-
-        if (canMove) {
+        // 2. AI Movement Logic (Aiming)
+        // Only move if we have fuel and random check passes
+        if (nextEnemy.fuel > 0 && Math.random() < config.moveChance) {
             const currentY = nextEnemy.yOffset;
             const playerY = currentPlayer.yOffset;
-            const playerBodyRows = [playerY, playerY + 1, playerY + 2]; // Player occupies these rows
+            const playerBodyRows = [playerY, playerY + 1, playerY + 2]; // Player occupies these rows on grid
 
             let bestY = currentY;
             let maxScore = -9999;
 
-            // Try staying, moving up, moving down
-            const candidates = [0, -1, 1];
+            // Try moves: -1 (Up), 0 (Stay), +1 (Down)
+            // Note: In this grid, -1 yOffset means moving visually UP (index decreases)
+            const moves = [0, -1, 1];
 
-            candidates.forEach(dir => {
+            moves.forEach(dir => {
                 const testY = currentY + dir;
+                // Check Bounds (Ship height is 3, Grid is 5, so valid offsets are 0, 1, 2)
                 if (testY < 0 || testY > MAX_ROWS - SHIP_HEIGHT) return;
 
                 let score = 0;
 
-                // Analyze alignment
+                // 1. Offensive Score: Align loaded weapons with player body
                 nextEnemy.parts.forEach((p, idx) => {
-                    const row = Math.floor(idx / SHIP_WIDTH);
-                    const absRow = testY + row;
+                    const row = Math.floor(idx / SHIP_WIDTH); // 0, 1, 2 relative to ship
+                    const absRow = testY + row; // Absolute grid row
 
+                    // Check if part is loaded weapon
                     const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
-                    if (energySum > 0) {
-                        // Offensive Score: Weapon aimed at Player Body
-                        if (p.type === 'CANNON' || p.type === 'MISSILE') {
-                            if (playerBodyRows.includes(absRow)) {
-                                score += 10 * p.multiplier; // High priority to hit
-                            }
+                    if (energySum > 0 && (p.type === 'CANNON' || p.type === 'MISSILE')) {
+                        if (playerBodyRows.includes(absRow)) {
+                            score += 10 * p.multiplier; // High priority to hit
                         }
                     }
                 });
 
-                // Bias towards center if no good targets found (avoid sticking to edges unnecessarily)
+                // 2. Center Bias (To avoid getting stuck at edges if no clear target)
                 if (score === 0) {
-                     // Prefer center alignment: 1 (for 3-height ship in 5-row grid, 1 is center)
+                     // 1 is the center for a size 3 ship in a size 5 grid
                      score -= Math.abs(testY - 1);
                 }
+                
+                // Add penalty for moving (cost fuel) to encourage staying put if score is equal
+                if (dir !== 0) score -= 0.1;
 
                 if (score > maxScore) {
                     maxScore = score;
                     bestY = testY;
                 }
             });
-            
-            nextEnemy.yOffset = bestY;
+
+            if (bestY !== currentY) {
+                nextEnemy.yOffset = bestY;
+                nextEnemy.fuel -= 1; // Consume Fuel
+            }
         }
 
         // 3. Generate Intents based on loaded parts
@@ -2691,6 +2699,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     <div className="text-lg font-bold">{enemy.hp} HP</div>
                     <div className="text-xs flex justify-end items-center gap-1 text-blue-300">
                         <Shield size={12}/> Def: {enemy.durability}/{enemy.maxDurability}
+                    </div>
+                    {/* Fuel Display */}
+                    <div className="text-xs flex justify-end items-center gap-1 text-orange-300 mt-1">
+                        <Fuel size={12}/> Fuel: {enemy.fuel}
                     </div>
                 </div>
 
