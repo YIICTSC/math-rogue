@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation, Droplets, Recycle, Repeat, User, Lock, Users, Target, UserPlus, Gauge, Swords, Dice5, Ghost } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -2027,7 +2026,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         let pPower = 0;
         
         const buffGrid = calculateBuffGrid(player.parts);
-        
+        const enemyBuffGrid = calculateBuffGrid(enemy.parts); // Calculate enemy buffs
+
         partsToRender.forEach((p, colIdx) => {
              const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
              if (energySum > 0 && (p.type === 'CANNON' || p.type === 'MISSILE')) {
@@ -2053,6 +2053,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             }
         }
 
+        // Calculate Ascension Bonus
+        let ascensionBonus = 0;
+        if (selectedMissionLevel >= 1) ascensionBonus += 1;
+        if (selectedMissionLevel >= 6) ascensionBonus += 1;
+
         return (
             <div key={rowIndex} className="flex items-center h-20 md:h-24 border-b border-white/10 relative">
                 <div className="w-1/2 flex justify-end pr-2 border-r border-dashed border-white/20 relative">
@@ -2066,7 +2071,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                         onLongPress={(p) => setTooltipPart(p)}
                                         highlight={!!selectedCardId}
                                         pendingReplace={!!pendingPart}
-                                        bonusPower={buffGrid[pRelIdx][i]}
+                                        bonusPower={buffGrid[pRelIdx][i] + player.passivePower} // Include passive power for player too
                                     />
                                 </div>
                             ))}
@@ -2081,15 +2086,22 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 <div className="w-1/2 pl-2 border-l border-dashed border-white/20">
                     {eInShip ? (
                         <div className="flex gap-1 w-full justify-start">
-                            {ePartsToRender.map((part, i) => (
-                                <div key={part.id} className="w-1/3 max-w-[80px] opacity-90">
-                                    <ShipPartView 
-                                        part={part} 
-                                        isEnemy={true}
-                                        showPower={true} // Show charged power for enemy
-                                    />
-                                </div>
-                            ))}
+                            {ePartsToRender.map((part, i) => {
+                                // Only apply ascension bonus to offensive parts
+                                const isOffensive = part.type === 'CANNON' || part.type === 'MISSILE';
+                                const totalBonus = enemyBuffGrid[eRelIdx][i] + (isOffensive ? ascensionBonus : 0);
+                                
+                                return (
+                                    <div key={part.id} className="w-1/3 max-w-[80px] opacity-90">
+                                        <ShipPartView 
+                                            part={part} 
+                                            isEnemy={true}
+                                            showPower={true} 
+                                            bonusPower={totalBonus}
+                                        />
+                                    </div>
+                                );
+                            })}
                         </div>
                     ) : (
                         <div className="w-full h-full opacity-10 bg-grid-pattern"></div>
@@ -2347,6 +2359,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     }
 
     if (phase === 'REWARD_EQUIP') {
+         const buffGrid = calculateBuffGrid(player.parts);
+
          return (
              <div className="w-full h-full bg-slate-900 text-white p-4 font-mono flex flex-col items-center relative overflow-y-auto">
                  <RenderTooltip />
@@ -2370,11 +2384,20 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                  <div className="bg-black/40 p-4 rounded-xl border-2 border-slate-700 mb-8 shrink-0">
                      <div className="grid grid-cols-3 gap-2">
-                         {player.parts.map((p, i) => (
-                             <div key={i} className="w-16 h-16 md:w-20 md:h-20" onClick={() => handlePartEquip(i)}>
-                                 <ShipPartView part={p} pendingReplace={true} onLongPress={(p) => setTooltipPart(p)} />
-                             </div>
-                         ))}
+                         {player.parts.map((p, i) => {
+                             const r = Math.floor(i / SHIP_WIDTH);
+                             const c = i % SHIP_WIDTH;
+                             return (
+                                 <div key={i} className="w-16 h-16 md:w-20 md:h-20" onClick={() => handlePartEquip(i)}>
+                                     <ShipPartView 
+                                         part={p} 
+                                         pendingReplace={true} 
+                                         onLongPress={(p) => setTooltipPart(p)} 
+                                         bonusPower={buffGrid[r][c] + player.passivePower} 
+                                     />
+                                 </div>
+                             );
+                         })}
                      </div>
                  </div>
 
@@ -2416,7 +2439,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                             onClick={() => handleHangarAction('SHIP', i)} 
                                             onLongPress={(p) => setTooltipPart(p)}
                                             highlight={hangarSelection?.loc === 'SHIP' && hangarSelection.idx === i}
-                                            bonusPower={buffGrid[r][c]}
+                                            bonusPower={buffGrid[r][c] + player.passivePower}
                                         />
                                         {hangarSelection?.loc === 'SHIP' && hangarSelection.idx === i && (
                                             <div className="absolute inset-0 border-4 border-yellow-400 animate-pulse pointer-events-none rounded"></div>
@@ -2508,7 +2531,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                         const c = i % SHIP_WIDTH;
                                         return (
                                             <div key={i} className="w-16 h-16 md:w-20 md:h-20" onClick={() => handlePartEquip(i)}>
-                                                <ShipPartView part={p} pendingReplace={true} onLongPress={(p) => setTooltipPart(p)} bonusPower={buffGrid[r][c]}/>
+                                                <ShipPartView part={p} pendingReplace={true} onLongPress={(p) => setTooltipPart(p)} bonusPower={buffGrid[r][c] + player.passivePower}/>
                                             </div>
                                         );
                                     })}
