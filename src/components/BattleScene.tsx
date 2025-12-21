@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
@@ -298,7 +297,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
           await new Promise(r => setTimeout(r, 1000)); // Show combo anim
 
           // Pass IDs of consumed cards to app to handle removal
-          const comboPayload = { ...fused, _consumedIds: [c1.id, c2.id], isTemporaryCombo: true };
+          const comboPayload = { ...fused, _consumedIds: [c1.id, c2.id] };
           onPlaySynthesizedCard(comboPayload);
           
       } else {
@@ -785,6 +784,20 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 const isSelectedDual = isDualMode && selectedCardIds.includes(card.id);
                 const isSelectedActive = selectionState.active;
                 
+                // Calculate Combo Cost for UI Hint
+                let currentDualCost = card.cost;
+                if (isDualMode && selectedCardIds.length === 1 && !isSelectedDual) {
+                    const otherCard = player.hand.find(c => c.id === selectedCardIds[0]);
+                    if (otherCard) {
+                        if (otherCard.type === card.type) {
+                            // Combo: Max of costs (effectively just display this card's cost if higher, or show 0 if lower? No, total logic is complex)
+                            // Let's just show standard cost but maybe highlight.
+                        } else {
+                            // No Combo: Additive
+                        }
+                    }
+                }
+
                 const specialDisabled = isClashDisabled || isGrandFinaleDisabled || isChokerDisabled || isNormalityDisabled;
                 
                 // Visual Cost Override for Corruption

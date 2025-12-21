@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -35,7 +34,7 @@ import { generateFlavorText, generateEnemyName } from './services/geminiService'
 import { generateDungeonMap } from './services/mapGenerator';
 import { storageService } from './services/storageService';
 import { generateEvent } from './services/eventService';
-import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
+import { getUpgradedCard, synthesizeCars } from './utils/cardUtils';
 import { trans } from './utils/textUtils';
 import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music } from 'lucide-react';
 
@@ -240,7 +239,7 @@ const App: React.FC = () => {
   useEffect(() => {
       if (gameState.screen !== GameScreen.START_MENU && 
           gameState.screen !== GameScreen.GAME_OVER && 
-          gameState.screen !== GameScreen.ENDING && 
+          gameState.screen !== GameScreen.ENDING &&
           gameState.screen !== GameScreen.VICTORY &&
           gameState.screen !== GameScreen.MATH_CHALLENGE && 
           gameState.screen !== GameScreen.COMPENDIUM && 
@@ -955,7 +954,9 @@ const App: React.FC = () => {
         effectiveCost = 0;
     }
 
-    // Double Character Mode check
+    // Double Character Mode check - energy cost might be tricky if handled outside
+    // For normal play, check energy. Synthesized card is already energy checked or handles cost differently?
+    // We assume if it's a combo, energy was checked in BattleScene.
     if (!consumedIds && gameState.player.currentEnergy < effectiveCost && !gameState.player.partner) return; 
     if (gameState.enemies.length === 0) return;
     if (actingEnemyId) return; 
@@ -1355,7 +1356,11 @@ const App: React.FC = () => {
           let shouldExhaust = card.exhaust;
           if (card.type === CardType.SKILL && p.powers['CORRUPTION']) shouldExhaust = true;
 
-          // Check if this is a temporary combo card
+          // Temporary Combo cards from synthesis (consumedIds was false but it's a synth result)
+          // actually this block handles the "played" card.
+          // If it was a temporary synthesized card (indicated by consumedIds being passed to handlePlaySynthesizedCard, which calls this)
+          // we need to distinguish. 
+          // The cleanest way is if the card has a flag.
           const isTemporaryCombo = (card as any).isTemporaryCombo;
           
           if (!isTemporaryCombo) {
@@ -2113,13 +2118,12 @@ const App: React.FC = () => {
                         
                         {/* UNLOCK STATUS DISPLAY */}
                         <div className="mb-6 bg-black/40 px-4 py-2 rounded-lg border border-gray-600">
-                             {/* Note: nextThreshold logic should be here, assuming it's available in context or calculated */}
-                             {totalMathCorrect >= Math.max(...UNLOCK_THRESHOLDS) ? (
-                                <div className="text-green-400 text-xs md:text-sm font-bold animate-pulse">全ミニゲーム開放済み！</div>
-                             ) : (
+                             {nextThreshold ? (
                                 <div className="text-yellow-300 text-xs md:text-sm font-bold">
-                                    次のミニゲーム開放まで: <span className="text-xl md:text-2xl text-white mx-1">{Math.max(0, UNLOCK_THRESHOLDS.find(t => t > totalMathCorrect) || 0 - totalMathCorrect)}</span> 問正解
+                                    次のミニゲーム開放まで: <span className="text-xl md:text-2xl text-white mx-1">{Math.max(0, nextThreshold - totalMathCorrect)}</span> 問正解
                                 </div>
+                             ) : (
+                                <div className="text-green-400 text-xs md:text-sm font-bold animate-pulse">全ミニゲーム開放済み！</div>
                              )}
                              <div className="text-gray-500 text-[10px] mt-1">累計正解数: {totalMathCorrect}問</div>
                         </div>
