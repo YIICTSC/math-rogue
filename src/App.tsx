@@ -34,8 +34,8 @@ import { generateFlavorText, generateEnemyName } from './services/geminiService'
 import { generateDungeonMap } from './services/mapGenerator';
 import { storageService } from './services/storageService';
 import { generateEvent } from './services/eventService';
-import { getUpgradedCard, synthesizeCars } from './utils/cardUtils';
-import { trans } from './utils/textUtils';
+import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
+import { trans } from '../utils/textUtils';
 import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music } from 'lucide-react';
 
 const calculateScore = (state: GameState, victory: boolean): number => {
