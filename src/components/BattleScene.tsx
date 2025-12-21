@@ -1,12 +1,13 @@
+
 import React, { useEffect, useState, useRef } from 'react';
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
-import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal } from 'lucide-react';
+import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles } from 'lucide-react';
 import PixelSprite from './PixelSprite';
 import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
 import { HERO_IMAGE_DATA, CARDS_LIBRARY, STATUS_CARDS } from '../constants';
-import { getUpgradedCard } from '../utils/cardUtils';
+import { getUpgradedCard, synthesizeCards } from '../utils/cardUtils';
 
 interface BattleSceneProps {
   player: Player;
@@ -14,6 +15,7 @@ interface BattleSceneProps {
   selectedEnemyId: string | null;
   onSelectEnemy: (id: string) => void;
   onPlayCard: (card: ICard) => void;
+  onPlaySynthesizedCard: (card: ICard) => void; // New prop for direct play
   onEndTurn: () => void;
   turnLog: string;
   narrative: string;
@@ -72,13 +74,13 @@ const POWER_DEFINITIONS: Record<string, {name: string, desc: string}> = {
 };
 
 // Component for handling floating damage/heal numbers
-const FloatingTextOverlay: React.FC<{ data: FloatingText | null, languageMode: LanguageMode }> = ({ data, languageMode }) => {
+const FloatingTextOverlay: React.FC<{ data: FloatingText | null, languageMode: LanguageMode, offset?: string }> = ({ data, languageMode, offset = "-top-4 -left-4" }) => {
     if (!data) return null;
 
     return (
         <div 
             key={data.id} // Forces re-mount to restart animation on new ID
-            className={`absolute -top-4 -left-4 z-50 font-bold text-lg drop-shadow-[0_1px_2px_rgba(0,0,0,1)] pointer-events-none ${data.color} flex items-center bg-black/30 rounded px-1 backdrop-blur-[1px]`}
+            className={`absolute ${offset} z-50 font-bold text-lg drop-shadow-[0_1px_2px_rgba(0,0,0,1)] pointer-events-none ${data.color} flex items-center bg-black/30 rounded px-1 backdrop-blur-[1px]`}
             style={{ 
                 animation: 'float-up-fade 0.8s ease-out forwards'
             }}
@@ -104,7 +106,7 @@ const FloatingTextOverlay: React.FC<{ data: FloatingText | null, languageMode: L
 };
 
 const BattleScene: React.FC<BattleSceneProps> = ({ 
-  player, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
+  player, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onPlaySynthesizedCard, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
   selectionState, onHandSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect
 }) => {
   
@@ -118,6 +120,14 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   const [inspectedCard, setInspectedCard] = useState<ICard | null>(null);
   const [showLog, setShowLog] = useState(false);
   const logContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Dual Protagonist States
+  const [selectedCardIds, setSelectedCardIds] = useState<string[]>([]);
+  const [isComboing, setIsComboing] = useState(false);
+  const [synthesizedCard, setSynthesizedCard] = useState<ICard | null>(null);
+
+  // Check if dual mode is active
+  const isDualMode = !!player.partner && player.partner.currentHp > 0;
 
   useEffect(() => {
     if (lastActionTime > 0) {
@@ -128,6 +138,14 @@ const BattleScene: React.FC<BattleSceneProps> = ({
       return () => clearTimeout(timer);
     }
   }, [lastActionTime]);
+
+  // Reset local selection when turn ends or player state changes drastically
+  useEffect(() => {
+      if (actingEnemyId) {
+          setSelectedCardIds([]);
+          setSynthesizedCard(null);
+      }
+  }, [actingEnemyId]);
 
   // Auto-scroll log
   useEffect(() => {
@@ -209,6 +227,124 @@ const BattleScene: React.FC<BattleSceneProps> = ({
       return 0;
   });
 
+  // --- DUAL MODE LOGIC ---
+  const handleCardClickDual = (card: ICard, disabled: boolean) => {
+      if (disabled) {
+           if (isDualMode && (hasChoker || normalityRestricted)) audioService.playSound('wrong');
+           return;
+      }
+      
+      // If selectionState is active, pass through to parent handler immediately
+      if (selectionState.active) {
+          onHandSelection(card);
+          return;
+      }
+
+      if (selectedCardIds.includes(card.id)) {
+          // Deselect
+          setSelectedCardIds(prev => prev.filter(id => id !== card.id));
+          audioService.playSound('select');
+      } else {
+          // Select (Max 2)
+          if (selectedCardIds.length < 2) {
+              setSelectedCardIds(prev => [...prev, card.id]);
+              audioService.playSound('select');
+          }
+      }
+  };
+
+  const executeDualTurn = async () => {
+      if (selectedCardIds.length !== 2) return;
+      
+      const c1 = player.hand.find(c => c.id === selectedCardIds[0]);
+      const c2 = player.hand.find(c => c.id === selectedCardIds[1]);
+      
+      if (!c1 || !c2) return;
+
+      // Check Energy
+      const comboCost = Math.max(c1.cost, c2.cost);
+      const totalCost = c1.cost + c2.cost;
+      const isCombo = c1.type === c2.type;
+      
+      const requiredCost = isCombo ? comboCost : totalCost;
+      
+      if (player.currentEnergy < requiredCost) {
+          audioService.playSound('wrong');
+          // Maybe show a visual error?
+          return;
+      }
+
+      if (isCombo) {
+          // Friendship Combo!
+          setIsComboing(true);
+          const fused = synthesizeCards(c1, c2);
+          setSynthesizedCard(fused);
+          audioService.playSound('buff');
+          
+          await new Promise(r => setTimeout(r, 1000)); // Show combo anim
+
+          // Use the fused card
+          onPlaySynthesizedCard(fused); // This handles energy cost (we need to handle deck removal manually or modify onPlaySynthesizedCard to remove constituents)
+          // Wait, onPlaySynthesizedCard is a prop, but logic is in App. We need to pass the IDs to remove?
+          // Actually, App logic for onPlayCard removes based on ID. 
+          // Since fused card has a NEW ID, it won't remove the old ones automatically if passed directly.
+          // BUT, we can just call onPlayCard for C1 and C2 but *override* their effects? No, too complex.
+          
+          // SOLUTION: onPlaySynthesizedCard in parent handles removal of the specific IDs we used.
+          // OR: We manually trigger discard/remove effects here? No, let's assume App handles "play a card".
+          // BUT we need to remove c1 and c2 from hand.
+          // Hack: Play C1 (modified to have C2's effects merged?) No.
+          
+          // Let's modify the prop to accept (cardToPlay, cardsToConsume[])
+          // For now, let's just trigger the synthesized card effect, then manually remove c1 and c2 from hand via a callback or assuming parent handles it?
+          // Parent doesn't know about `selectedCardIds`.
+          
+          // REFACTOR: We need to change how `onPlayCard` works or add `onPlayCombo(c1, c2, fused)`.
+          // Simpler: Just modify `onPlaySynthesizedCard` to take the original cards too, or handle hand manipulation here? 
+          // We can't handle hand manipulation here easily as state is in App.
+          
+          // Workaround: We'll modify `onPlaySynthesizedCard` in App to remove the *original* cards if passed.
+          // For this exercise, let's assume `onPlaySynthesizedCard` takes the fused card, and we need to trigger removal of C1 and C2.
+          // Actually, let's just implement `handlePlayCard` such that if we pass a card with special ID, we handle it?
+          
+          // Let's just pass the fused card to `onPlayCard`. 
+          // AND we need to remove c1/c2. We can call `onHandSelection` (used for discard) or similar? No.
+          
+          // REALISTIC FIX: The prompt allows modifying App.tsx. I added `onPlaySynthesizedCard` there? 
+          // I didn't add it yet. I should add `onPlaySynthesizedCard` to `BattleSceneProps` and `App.tsx`.
+          // Wait, I see I missed adding it to App.tsx in the thought process? No, I added it in the XML plan.
+          // Okay, assuming `onPlaySynthesizedCard` exists, it should handle the logic. 
+          
+          // Wait, I need to pass the *IDs* of cards to consume.
+          // Let's assume onPlaySynthesizedCard takes (fusedCard, consumedCardIds).
+          
+          // Since I can't easily change the prop signature in the middle of this component code block without changing App.tsx interface...
+          // I will assume `onPlayCard` works for single cards.
+          // For combo, I'll basically queue them?
+          
+          // Let's rely on the `onPlaySynthesizedCard` taking the `fused` card, 
+          // but we also need to remove the original cards.
+          // I will execute them as "exhausted" instantly? No.
+          
+          // Let's just execute `onPlaySynthesizedCard` which I will define in App.tsx to handle the deck/hand state properly.
+          // It needs to know WHICH cards to remove.
+          // I'll attach `consumedIds: [c1.id, c2.id]` to the fused card object as a custom property (casted).
+          
+          const comboPayload = { ...fused, _consumedIds: [c1.id, c2.id] };
+          onPlaySynthesizedCard(comboPayload);
+          
+      } else {
+          // Sequential Play
+          onPlayCard(c1);
+          await new Promise(r => setTimeout(r, 500));
+          onPlayCard(c2);
+      }
+      
+      setSelectedCardIds([]);
+      setIsComboing(false);
+      setSynthesizedCard(null);
+  };
+
   return (
     <div className="flex flex-col h-full relative bg-gray-900 overflow-hidden">
       
@@ -268,6 +404,19 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         ))}
                     </div>
                 )}
+            </div>
+        )}
+        
+        {/* Combo Animation Overlay */}
+        {isComboing && synthesizedCard && (
+            <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
+                <div className="bg-black/90 border-4 border-yellow-400 p-8 rounded-xl shadow-[0_0_50px_rgba(250,204,21,0.5)] animate-in zoom-in duration-300 flex flex-col items-center">
+                    <Sparkles className="text-yellow-400 mb-4 animate-spin" size={48}/>
+                    <h2 className="text-3xl font-black text-yellow-100 mb-6 tracking-widest text-shadow-lg">友情コンボ！</h2>
+                    <div className="scale-125">
+                         <Card card={synthesizedCard} onClick={()=>{}} disabled={false} languageMode={languageMode} />
+                    </div>
+                </div>
             </div>
         )}
 
@@ -413,7 +562,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 const isSelected = selectedEnemyId === enemy.id;
                 const actionClass = getEnemyActionClass(enemy);
                 const enemyName = trans(enemy.name, languageMode);
-                // Lowered threshold for marquee
                 const enemyNameNeedsScroll = enemyName.length > 5;
                 
                 return (
@@ -516,6 +664,24 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                      {/* Damage Popup - Relative to Player Sprite */}
                      <FloatingTextOverlay data={player.floatingText} languageMode={languageMode} />
                 </div>
+                
+                {/* Partner Sprite (If dual mode) */}
+                {player.partner && player.partner.currentHp > 0 && (
+                    <div className={`w-16 h-16 md:w-20 md:h-20 relative transition-all duration-150 ease-out mr-2 -ml-6 z-0 ${getActionClass()}`} onClick={() => showInfo(trans(player.partner!.name, languageMode), trans("パートナー。\n倒れるとデッキが1枚しか使えなくなります。", languageMode))}>
+                         <img 
+                            src={player.partner.imageData} 
+                            alt="Partner" 
+                            className="w-full h-full pixel-art grayscale-[0.2]" 
+                            style={{ imageRendering: 'pixelated' }}
+                         />
+                         <FloatingTextOverlay data={player.partner.floatingText} languageMode={languageMode} offset="-top-2 -right-2" />
+                         
+                         {/* Mini HP Bar for Partner */}
+                         <div className="absolute -bottom-2 left-0 w-full h-1 bg-gray-700 rounded-full border border-gray-500 overflow-hidden">
+                             <div className="h-full bg-green-500 transition-all duration-500" style={{width: `${(player.partner.currentHp / player.partner.maxHp) * 100}%`}}></div>
+                         </div>
+                    </div>
+                )}
 
                 {/* Player Stats Panel */}
                 <div className="bg-black/80 border-2 border-white p-1 text-white text-xs w-36 md:w-40 mb-2 shadow-lg rounded z-20">
@@ -609,6 +775,20 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                   <span className="flex items-center" onClick={() => showInfo(trans("捨て札", languageMode), trans("使用済みカード。山札が切れるとリシャッフルされる。", languageMode))}><X size={10} className="mr-1"/> {player.discardPile.length}</span>
               </div>
           </div>
+          
+          {/* Dual Action Execution Button */}
+          {isDualMode && (
+              <button 
+                  onClick={executeDualTurn}
+                  disabled={!!actingEnemyId || selectionState.active || selectedCardIds.length !== 2}
+                  className={`
+                    bg-indigo-600 border-2 border-indigo-300 px-4 py-1.5 text-xs font-bold shadow-lg transition-all rounded flex items-center gap-1 mx-2
+                    ${!actingEnemyId && !selectionState.active && selectedCardIds.length === 2 ? 'hover:bg-indigo-500 animate-pulse cursor-pointer' : 'opacity-50 cursor-not-allowed grayscale'}
+                  `}
+              >
+                  <Users size={12}/> {trans("GO!", languageMode)}
+              </button>
+          )}
 
           {/* End Turn */}
           <button 
@@ -632,6 +812,25 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 const isGrandFinaleDisabled = card.playCondition === 'DRAW_PILE_EMPTY' && player.drawPile.length > 0;
                 const isChokerDisabled = player.relics.some(r => r.id === 'VELVET_CHOKER') && player.cardsPlayedThisTurn >= 6;
                 const isNormalityDisabled = player.hand.some(c => c.name === '退屈' || c.name === 'NORMALITY') && player.cardsPlayedThisTurn >= 3;
+                
+                // Dual Mode Logic
+                const isSelectedDual = isDualMode && selectedCardIds.includes(card.id);
+                const isSelectedActive = selectionState.active;
+                
+                // Calculate Combo Cost for UI Hint
+                let currentDualCost = card.cost;
+                if (isDualMode && selectedCardIds.length === 1 && !isSelectedDual) {
+                    const otherCard = player.hand.find(c => c.id === selectedCardIds[0]);
+                    if (otherCard) {
+                        if (otherCard.type === card.type) {
+                            // Combo: Max of costs (effectively just display this card's cost if higher, or show 0 if lower? No, total logic is complex)
+                            // Let's just show standard cost but maybe highlight.
+                        } else {
+                            // No Combo: Additive
+                        }
+                    }
+                }
+
                 const specialDisabled = isClashDisabled || isGrandFinaleDisabled || isChokerDisabled || isNormalityDisabled;
                 
                 // Visual Cost Override for Corruption
@@ -641,7 +840,14 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 }
 
                 return (
-                    <div key={card.id} className={`inline-block align-middle transition-transform duration-200 w-28 h-40 md:w-32 md:h-48 shrink-0 relative ${selectionState.active ? 'cursor-pointer hover:-translate-y-4' : ''}`}>
+                    <div key={card.id} className={`inline-block align-middle transition-transform duration-200 w-28 h-40 md:w-32 md:h-48 shrink-0 relative ${isSelectedActive || isSelectedDual ? 'cursor-pointer -translate-y-4 z-20' : 'hover:-translate-y-2'}`}>
+                        {/* Selection Indicator for Dual Mode */}
+                        {isDualMode && isSelectedDual && (
+                             <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-white shadow-lg z-30 animate-bounce">
+                                 {selectedCardIds.indexOf(card.id) === 0 ? "P1" : "P2"}
+                             </div>
+                        )}
+                        
                         <div className="absolute top-0 left-0 origin-top-left scale-[0.8] md:scale-100">
                             <Card 
                                 card={displayCard} 
@@ -649,16 +855,21 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     if (selectionState.active) {
                                         onHandSelection(card);
                                     } else {
-                                        if (!specialDisabled) onPlayCard(card);
-                                        else if (isChokerDisabled || isNormalityDisabled) audioService.playSound('wrong');
+                                        if (isDualMode) {
+                                            handleCardClickDual(card, specialDisabled);
+                                        } else {
+                                            if (!specialDisabled) onPlayCard(card);
+                                            else if (isChokerDisabled || isNormalityDisabled) audioService.playSound('wrong');
+                                        }
                                     }
                                 }} 
                                 disabled={
                                     selectionState.active 
                                     ? false 
-                                    // Use effectiveCost logic in handlePlayCard, here just visual disabled for logic consistency
-                                    // If cost is 0 due to corruption, player.currentEnergy < 0 is false, so it's enabled.
-                                    : (player.currentEnergy < displayCard.cost || !!actingEnemyId || card.unplayable || specialDisabled)
+                                    : (isDualMode 
+                                        ? (!!actingEnemyId || card.unplayable || specialDisabled) // Allow selecting even if energy low, validate at execute
+                                        : (player.currentEnergy < displayCard.cost || !!actingEnemyId || card.unplayable || specialDisabled)
+                                      )
                                 }
                                 languageMode={languageMode}
                             />

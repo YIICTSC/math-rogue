@@ -66,19 +66,29 @@ export const getUpgradedCard = (card: Card): Card => {
     return newCard;
 };
 
-export const synthesizeCards = (c1: Card, c2: Card): Card => {
+export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
       // 1. Name Synthesis
       const len1 = Math.floor(Math.random() * 3) + 2; 
       const len2 = Math.floor(Math.random() * 3) + 2; 
       const part1 = c1.name.substring(0, Math.min(len1, c1.name.length));
-      const part2 = c2.name.substring(Math.max(0, c2.name.length - len2));
-      const newName = part1 + part2;
       
-      // 2. Cost Logic (Max of both)
-      const newCost = Math.max(c1.cost, c2.cost);
+      let newName = "";
+      if (c3) {
+          const part2 = c2.name.substring(Math.floor(c2.name.length/3), Math.floor(2*c2.name.length/3) + 1);
+          const part3 = c3.name.substring(Math.max(0, c3.name.length - len2));
+          newName = part1 + part2 + part3;
+          // Trim if too long
+          if (newName.length > 10) newName = newName.substring(0, 10);
+      } else {
+          const part2 = c2.name.substring(Math.max(0, c2.name.length - len2));
+          newName = part1 + part2;
+      }
+      
+      // 2. Cost Logic (Max of all)
+      const newCost = Math.max(c1.cost, c2.cost, c3?.cost || 0);
       
       // 3. Helper for Summation
-      const sum = (k: keyof Card) => ((c1[k] as number) || 0) + ((c2[k] as number) || 0);
+      const sum = (k: keyof Card) => ((c1[k] as number) || 0) + ((c2[k] as number) || 0) + ((c3?.[k] as number) || 0);
       
       // Basic Stats
       const newDamage = sum('damage');
@@ -94,11 +104,10 @@ export const synthesizeCards = (c1: Card, c2: Card): Card => {
       const newPoisonMultiplier = sum('poisonMultiplier');
       
       // Advanced Logic Summation/Max
-      // Strength Scaling: If both have scaling, we sum the effectiveness (minus base 1). e.g. 3x + 1x -> 3x. 3x + 3x -> 5x? Let's simply MAX for safety or Additive.
-      // Let's make it additive for fun: (Scale1 - 1) + (Scale2 - 1) + 1. Default scale is 1.
       const s1 = c1.strengthScaling || 1;
       const s2 = c2.strengthScaling || 1;
-      const newStrengthScaling = (s1 - 1) + (s2 - 1) + 1;
+      const s3 = c3?.strengthScaling || 1;
+      const newStrengthScaling = (s1 - 1) + (s2 - 1) + (s3 - 1) + 1;
 
       const newFatalEnergy = sum('fatalEnergy');
       const newFatalPermanentDamage = sum('fatalPermanentDamage');
@@ -117,84 +126,89 @@ export const synthesizeCards = (c1: Card, c2: Card): Card => {
       // Prompts
       const newPromptsDiscard = sum('promptsDiscard');
       const newPromptsCopy = sum('promptsCopy');
-      // promptsExhaust is special (99 = hand). If either is 99, result is 99. Else sum.
-      const newPromptsExhaust = (c1.promptsExhaust === 99 || c2.promptsExhaust === 99) ? 99 : sum('promptsExhaust');
+      // promptsExhaust is special (99 = hand). If any is 99, result is 99. Else sum.
+      const newPromptsExhaust = (c1.promptsExhaust === 99 || c2.promptsExhaust === 99 || c3?.promptsExhaust === 99) ? 99 : sum('promptsExhaust');
 
       // 4. Boolean/Flag Merging (OR)
-      const newExhaust = c1.exhaust || c2.exhaust;
-      const newInnate = c1.innate || c2.innate;
-      const newEthereal = c1.unplayable || c2.unplayable; // 'unplayable' often maps to Ethereal/Curse logic in this app
-      const newLifesteal = c1.lifesteal || c2.lifesteal;
-      const newUpgradeHand = c1.upgradeHand || c2.upgradeHand;
-      const newUpgradeDeck = c1.upgradeDeck || c2.upgradeDeck;
-      const newDoubleBlock = c1.doubleBlock || c2.doubleBlock;
-      const newDoubleStrength = c1.doubleStrength || c2.doubleStrength;
-      const newCapture = c1.capture || c2.capture;
-      const newDamageBasedOnBlock = c1.damageBasedOnBlock || c2.damageBasedOnBlock;
+      const newExhaust = c1.exhaust || c2.exhaust || c3?.exhaust;
+      const newInnate = c1.innate || c2.innate || c3?.innate;
+      const newEthereal = c1.unplayable || c2.unplayable || c3?.unplayable;
+      const newLifesteal = c1.lifesteal || c2.lifesteal || c3?.lifesteal;
+      const newUpgradeHand = c1.upgradeHand || c2.upgradeHand || c3?.upgradeHand;
+      const newUpgradeDeck = c1.upgradeDeck || c2.upgradeDeck || c3?.upgradeDeck;
+      const newDoubleBlock = c1.doubleBlock || c2.doubleBlock || c3?.doubleBlock;
+      const newDoubleStrength = c1.doubleStrength || c2.doubleStrength || c3?.doubleStrength;
+      const newCapture = c1.capture || c2.capture || c3?.capture;
+      const newDamageBasedOnBlock = c1.damageBasedOnBlock || c2.damageBasedOnBlock || c3?.damageBasedOnBlock;
 
       // 5. Multi-hit Logic (Additive)
       const extraHits1 = c1.playCopies || 0;
       const extraHits2 = c2.playCopies || 0;
-      const newExtraHits = extraHits1 + extraHits2;
+      const extraHits3 = c3?.playCopies || 0;
+      const newExtraHits = extraHits1 + extraHits2 + extraHits3;
       const newTotalHits = 1 + newExtraHits;
 
       // 6. Object Merging (Power, Card Gen)
-      // applyPower: If IDs match, sum amounts. If different, prioritize Power types, else C1.
+      // applyPower: Sum amounts if IDs match. If different, try to preserve stronger or combine?
+      // Simplified: Just pick one with priority (Power > Others), or sum if same ID.
       let newApplyPower = undefined;
-      if (c1.applyPower || c2.applyPower) {
-          if (c1.applyPower && c2.applyPower) {
-              if (c1.applyPower.id === c2.applyPower.id) {
-                  newApplyPower = { id: c1.applyPower.id, amount: c1.applyPower.amount + c2.applyPower.amount };
-              } else {
-                  // Conflict: Pick the one from the POWER card, or the one with higher amount, or just C1.
-                  // Strategy: Prioritize the one that isn't just a generic debuff if possible?
-                  // Simple strategy: C1 wins unless C2 is a POWER card and C1 isn't.
-                  if (c2.type === CardType.POWER && c1.type !== CardType.POWER) newApplyPower = c2.applyPower;
-                  else newApplyPower = c1.applyPower;
-              }
+      const powers = [c1.applyPower, c2.applyPower, c3?.applyPower].filter(p => p !== undefined);
+      
+      if (powers.length > 0) {
+          // If all same ID, sum
+          const firstId = powers[0]!.id;
+          if (powers.every(p => p!.id === firstId)) {
+               const totalAmount = powers.reduce((acc, p) => acc + p!.amount, 0);
+               newApplyPower = { id: firstId, amount: totalAmount };
           } else {
-              newApplyPower = c1.applyPower || c2.applyPower;
+               // Conflict. Prioritize POWER card type's power.
+               const powerCard = [c1, c2, c3].find(c => c && c.type === CardType.POWER && c.applyPower);
+               if (powerCard && powerCard.applyPower) {
+                   newApplyPower = powerCard.applyPower;
+               } else {
+                   // Fallback to first
+                   newApplyPower = powers[0];
+               }
           }
       }
 
-      // addCardToHand (Blade Dance etc)
+      // addCardToHand
       let newAddCardToHand = undefined;
-      if (c1.addCardToHand || c2.addCardToHand) {
-          if (c1.addCardToHand && c2.addCardToHand && c1.addCardToHand.cardName === c2.addCardToHand.cardName) {
-              newAddCardToHand = { 
-                  ...c1.addCardToHand, 
-                  count: c1.addCardToHand.count + c2.addCardToHand.count 
-              };
-          } else {
-              // Priority: C1
-              newAddCardToHand = c1.addCardToHand || c2.addCardToHand;
-          }
+      const adds = [c1.addCardToHand, c2.addCardToHand, c3?.addCardToHand].filter(a => a !== undefined);
+      if (adds.length > 0) {
+           const firstCardName = adds[0]!.cardName;
+           if (adds.every(a => a!.cardName === firstCardName)) {
+               const totalCount = adds.reduce((acc, a) => acc + a!.count, 0);
+               newAddCardToHand = { ...adds[0]!, count: totalCount };
+           } else {
+               newAddCardToHand = adds[0];
+           }
       }
 
-      const newAddCardToDraw = c1.addCardToDraw || c2.addCardToDraw; // Simplified: No sum for draw pile adding yet to avoid clutter
-      const newAddCardToDiscard = c1.addCardToDiscard || c2.addCardToDiscard;
+      const newAddCardToDraw = c1.addCardToDraw || c2.addCardToDraw || c3?.addCardToDraw;
+      const newAddCardToDiscard = c1.addCardToDiscard || c2.addCardToDiscard || c3?.addCardToDiscard;
 
-      // Merge Play Condition
-      // If both have one, prioritize DRAW_PILE_EMPTY as it is usually associated with stronger effects (Grand Finale vs Clash)
+      // Play Condition
       let newPlayCondition = undefined;
-      if (c1.playCondition === 'DRAW_PILE_EMPTY' || c2.playCondition === 'DRAW_PILE_EMPTY') {
+      if ([c1, c2, c3].some(c => c?.playCondition === 'DRAW_PILE_EMPTY')) {
           newPlayCondition = 'DRAW_PILE_EMPTY';
       } else {
-          newPlayCondition = c1.playCondition || c2.playCondition;
+          newPlayCondition = c1.playCondition || c2.playCondition || c3?.playCondition;
       }
 
       // 7. Type & Target Logic
       let newType = c1.type;
       // Priority: Attack > Power > Skill > Status > Curse
       if (newDamage > 0) newType = CardType.ATTACK;
-      else if (c1.type === CardType.POWER || c2.type === CardType.POWER) newType = CardType.POWER;
+      else if (c1.type === CardType.POWER || c2.type === CardType.POWER || c3?.type === CardType.POWER) newType = CardType.POWER;
       else newType = CardType.SKILL;
 
       let newTarget = TargetType.ENEMY;
       // Priority: All Enemies > Random > Enemy > Self
-      if (c1.target === TargetType.ALL_ENEMIES || c2.target === TargetType.ALL_ENEMIES) newTarget = TargetType.ALL_ENEMIES;
-      else if (c1.target === TargetType.RANDOM_ENEMY || c2.target === TargetType.RANDOM_ENEMY) newTarget = TargetType.RANDOM_ENEMY;
-      else if (c1.target === TargetType.ENEMY || c2.target === TargetType.ENEMY) newTarget = TargetType.ENEMY;
+      const allTargets = [c1.target, c2.target, c3?.target];
+      if (allTargets.includes(TargetType.ALL_ENEMIES)) newTarget = TargetType.ALL_ENEMIES;
+      else if (allTargets.includes(TargetType.RANDOM_ENEMY)) newTarget = TargetType.RANDOM_ENEMY;
+      else if (allTargets.includes(TargetType.ENEMY)) newTarget = TargetType.ENEMY;
       else newTarget = TargetType.SELF;
       
       // Override target if damage/debuff exists but was originally self-targeting
@@ -209,7 +223,7 @@ export const synthesizeCards = (c1: Card, c2: Card): Card => {
           let text = `${newDamage}ダメージ`;
           if (newTarget === TargetType.ALL_ENEMIES) text = `全体に${text}`;
           else if (newTarget === TargetType.RANDOM_ENEMY) text = `ランダムな敵に${text}`;
-          else if (newTarget === TargetType.SELF) text = `自分に${text}`; // Reflection?
+          else if (newTarget === TargetType.SELF) text = `自分に${text}`; 
           
           if (newTotalHits > 1) {
               text += `を${newTotalHits}回`;
@@ -263,7 +277,6 @@ export const synthesizeCards = (c1: Card, c2: Card): Card => {
 
       // Power
       if (newApplyPower) {
-          // Try to map ID to readable name if possible, or generic
           const powerNameMap: Record<string, string> = {
               'DEMON_FORM': '悪魔化', 'ECHO_FORM': '反響', 'BARRICADE': 'バリケード',
               'CORRUPTION': '堕落', 'FEEL_NO_PAIN': '無痛', 'RUPTURE': '破裂',
@@ -277,7 +290,6 @@ export const synthesizeCards = (c1: Card, c2: Card): Card => {
           parts.push(`${pName}${newApplyPower.amount}を得る`);
       }
 
-      // Add condition description
       if (newPlayCondition === 'DRAW_PILE_EMPTY') parts.push("山札0の時のみ");
       if (newPlayCondition === 'HAND_ONLY_ATTACKS') parts.push("手札が攻撃のみの時");
 
@@ -291,7 +303,10 @@ export const synthesizeCards = (c1: Card, c2: Card): Card => {
       // 9. Visual Synthesis (Texture Ref)
       const shapeSource = c1.textureRef ? c1.textureRef.split('|')[0] : getShapeFromCard(c1);
       const colorSource = c2.textureRef ? (c2.textureRef.split('|')[1] || c2.textureRef.split('|')[0]) : c2.name;
-      const newTextureRef = `${shapeSource}|${colorSource}|${newType}`;
+      // Mix type from c3 if present for color variation, or just newType
+      const typeSource = c3 ? (c3.textureRef ? (c3.textureRef.split('|')[2] || c3.type) : c3.type) : newType;
+
+      const newTextureRef = `${shapeSource}|${colorSource}|${typeSource}`;
 
       return {
           id: `synth-${Date.now()}-${Math.random()}`,

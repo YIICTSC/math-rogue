@@ -160,6 +160,15 @@ export interface Character {
     imageData: string;
 }
 
+export interface Partner {
+    id: string;
+    name: string;
+    maxHp: number;
+    currentHp: number;
+    imageData: string;
+    floatingText: FloatingText | null;
+}
+
 export interface Player {
   maxHp: number;
   currentHp: number;
@@ -192,6 +201,9 @@ export interface Player {
   turnFlags: Record<string, boolean>;    // Resets each turn (e.g. Necronomicon)
 
   floatingText: FloatingText | null;
+  
+  // Dual Protagonist
+  partner?: Partner;
 }
 
 export enum GameScreen {

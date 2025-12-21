@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { Player, Card as ICard, LanguageMode } from '../types';
 import Card from './Card';
@@ -10,7 +11,7 @@ interface RestScreenProps {
   player: Player;
   onRest: () => void;
   onUpgrade: (card: ICard) => void;
-  onSynthesize: (c1: ICard, c2: ICard) => ICard;
+  onSynthesize: (cards: ICard[]) => ICard;
   onLeave: () => void;
   languageMode: LanguageMode;
 }
@@ -26,6 +27,8 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
   const [isScienceRoomOpen] = useState(() => Math.random() < 0.5);
 
   const healAmount = Math.floor(player.maxHp * 0.3);
+  const isMage = player.id === 'MAGE';
+  const requiredCards = isMage ? 3 : 2;
 
   const handleRest = () => {
       onRest();
@@ -46,7 +49,9 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       }
       setMode('SYNTHESIS');
       setSynthCards([]);
-      setMessage("理科室だ。混ぜ合わせたいカードを2枚選んでね。");
+      setMessage(isMage 
+          ? `理科室だ。混ぜ合わせたいカードを3枚選んでね。\n(理科クラブ部長特典：3枚合成！)` 
+          : "理科室だ。混ぜ合わせたいカードを2枚選んでね。");
   };
 
   const handleCardClick = (card: ICard) => {
@@ -60,12 +65,14 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
               // Deselect
               setSynthCards(synthCards.filter(c => c.id !== card.id));
           } else {
-              if (synthCards.length < 2) {
+              // Select Logic
+              if (synthCards.length < requiredCards) {
                   const newSelection = [...synthCards, card];
                   setSynthCards(newSelection);
-                  if (newSelection.length === 2) {
+                  
+                  if (newSelection.length === requiredCards) {
                       setMode('PREVIEW_SYNTHESIS');
-                      setMessage("この2つを実験（合成）しますか？（元のカードは消えます）");
+                      setMessage(`この${requiredCards}つを実験（合成）しますか？（元のカードは消えます）`);
                   }
               }
           }
@@ -73,13 +80,12 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
   };
 
   const handleRandomSynthesis = () => {
-      if (player.deck.length < 2) return;
+      if (player.deck.length < requiredCards) return;
       const shuffled = [...player.deck].sort(() => Math.random() - 0.5);
-      const c1 = shuffled[0];
-      const c2 = shuffled[1];
-      setSynthCards([c1, c2]);
+      const selection = shuffled.slice(0, requiredCards);
+      setSynthCards(selection);
       setMode('PREVIEW_SYNTHESIS');
-      setMessage("ランダムな2つで実験しますか？");
+      setMessage(`ランダムな${requiredCards}つで実験しますか？`);
   };
 
   const confirmUpgrade = () => {
@@ -92,8 +98,8 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
   };
 
   const confirmSynthesize = () => {
-      if (synthCards.length === 2) {
-          const result = onSynthesize(synthCards[0], synthCards[1]);
+      if (synthCards.length === requiredCards) {
+          const result = onSynthesize(synthCards);
           setResultCard(result);
           setMode('RESULT');
           setMessage("実験成功！新たな力が生まれた！");
@@ -109,7 +115,9 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       } else if (mode === 'PREVIEW_SYNTHESIS') {
           setMode('SYNTHESIS');
           setSynthCards([]); 
-          setMessage("混ぜ合わせたいカードを2枚選んでね。");
+          setMessage(isMage 
+              ? `混ぜ合わせたいカードを3枚選んでね。` 
+              : "混ぜ合わせたいカードを2枚選んでね。");
       }
   };
 
@@ -157,7 +165,9 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                         <FlaskConical size={40} className={`text-purple-500 ${isScienceRoomOpen ? 'group-hover:shake' : ''} transition-transform`} />
                         <span className="font-bold text-lg">{trans("理科室", languageMode)}</span>
                         <span className="text-xs text-gray-400">
-                            {isScienceRoomOpen ? trans("カード合成", languageMode) : trans("鍵がかかってる", languageMode)}
+                            {isScienceRoomOpen 
+                                ? (isMage ? trans("3枚合成", languageMode) : trans("カード合成", languageMode)) 
+                                : trans("鍵がかかってる", languageMode)}
                         </span>
                     </button>
                 </div>
@@ -170,7 +180,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                             onClick={handleRandomSynthesis}
                             className="mb-4 flex items-center bg-purple-900/50 hover:bg-purple-800/50 text-purple-200 px-4 py-2 rounded-full border border-purple-500 transition-colors text-sm"
                          >
-                             <Shuffle size={14} className="mr-2" /> {trans("ランダムな2枚を選ぶ", languageMode)}
+                             <Shuffle size={14} className="mr-2" /> {trans(`ランダムな${requiredCards}枚を選ぶ`, languageMode)}
                          </button>
                      )}
                      <div className="flex flex-wrap justify-center gap-4 overflow-y-auto w-full p-4 border-inner bg-gray-900/50 rounded custom-scrollbar">
@@ -217,16 +227,18 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                 </div>
             )}
 
-            {mode === 'PREVIEW_SYNTHESIS' && synthCards.length === 2 && (
+            {mode === 'PREVIEW_SYNTHESIS' && synthCards.length === requiredCards && (
                 <div className="flex flex-col items-center flex-grow overflow-y-auto custom-scrollbar w-full">
                     <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 mb-4 flex-grow content-center">
-                        <div className="scale-[0.65] md:scale-90 origin-center">
-                             <Card card={synthCards[0]} onClick={() => {}} disabled={false} languageMode={languageMode}/>
-                        </div>
-                        <Plus size={20} className="text-gray-500" />
-                        <div className="scale-[0.65] md:scale-90 origin-center">
-                             <Card card={synthCards[1]} onClick={() => {}} disabled={false} languageMode={languageMode}/>
-                        </div>
+                        {synthCards.map((card, idx) => (
+                            <React.Fragment key={card.id}>
+                                <div className="scale-[0.65] md:scale-90 origin-center">
+                                     <Card card={card} onClick={() => {}} disabled={false} languageMode={languageMode}/>
+                                </div>
+                                {idx < synthCards.length - 1 && <Plus size={20} className="text-gray-500" />}
+                            </React.Fragment>
+                        ))}
+                        
                         <ArrowRight size={24} className="text-purple-500 animate-pulse mx-1 md:mx-2" />
                         
                         <div className="w-24 h-36 md:w-32 md:h-48 border-4 border-purple-500 bg-black rounded-lg flex flex-col items-center justify-center animate-bounce shadow-[0_0_20px_rgba(168,85,247,0.6)] shrink-0">

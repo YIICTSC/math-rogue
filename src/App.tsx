@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -33,6 +34,7 @@ import { audioService } from './services/audioService';
 import { generateFlavorText, generateEnemyName } from './services/geminiService';
 import { generateDungeonMap } from './services/mapGenerator';
 import { storageService } from './services/storageService';
+import { generateEvent } from './services/eventService';
 import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { trans } from './utils/textUtils';
 import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music } from 'lucide-react';
@@ -449,6 +451,8 @@ const App: React.FC = () => {
       setSelectedCharName(char.name);
       
       let initialDeck: ICard[] = [];
+      let partner = undefined;
+      let logs = [trans("旅の支度をしている...", languageMode)];
       
       if (gameState.challengeMode === '1A1D') {
           const attacks = Object.values(CARDS_LIBRARY).filter(c => c.type === CardType.ATTACK && c.rarity === 'COMMON');
@@ -461,6 +465,22 @@ const App: React.FC = () => {
           ];
       } else {
           initialDeck = createDeck(char.deckTemplate);
+      }
+
+      // Partner Logic for Assassin (Transfer Student)
+      if (char.id === 'ASSASSIN') {
+          const warrior = CHARACTERS.find(c => c.id === 'WARRIOR');
+          if (warrior) {
+              partner = {
+                  id: 'WARRIOR',
+                  name: warrior.name,
+                  maxHp: warrior.maxHp,
+                  currentHp: warrior.maxHp,
+                  imageData: warrior.imageData,
+                  floatingText: null
+              };
+              logs.push(trans("わんぱく小学生が友達になった！(2人プレイモード)", languageMode));
+          }
       }
 
       const legacyCard = storageService.getLegacyCard();
@@ -510,8 +530,9 @@ const App: React.FC = () => {
               attacksPlayedThisTurn: 0,
               cardsPlayedThisTurn: 0,
               echoes: 0,
+              partner: partner,
           },
-          narrativeLog: [trans("旅の支度をしている...", languageMode)],
+          narrativeLog: logs,
           combatLog: [],
       }));
   };
@@ -532,351 +553,6 @@ const App: React.FC = () => {
         audioService.playBGM('map');
   };
 
-  const generateEvent = (player: Player) => {
-      // ... existing event generation logic ...
-      const random = Math.random();
-      const events = [
-          {
-              title: "怪しい薬売り",
-              description: "路地裏で男が声をかけてきた。「とびきりの薬、あるよ」",
-              options: [
-                  { label: "買う", text: "20G支払って試す", action: () => {
-                      if (player.gold >= 20) {
-                          const pots = Object.values(POTION_LIBRARY);
-                          const pot = { ...pots[Math.floor(Math.random() * pots.length)], id: `pot-${Date.now()}` };
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - 20, potions: [...prev.player.potions, pot].slice(0, 3) } }));
-                          setEventResultLog(trans(`怪しい薬(ポーション: ${pot.name})を手に入れた！\n残金: ${player.gold - 20}G`, languageMode));
-                      } else {
-                          setEventResultLog(trans("お金が足りなかった... 男は舌打ちをして去っていった。", languageMode));
-                      }
-                  }},
-                  { label: "無視", text: "何もせず立ち去る", action: () => { setEventResultLog(trans("怪しい男を無視して先へ進んだ。", languageMode)); } }
-              ]
-          },
-          {
-              title: "踊り場の鏡",
-              description: "大きな鏡がある。映っている自分と目が合った。",
-              options: [
-                  { label: "見つめる", text: "じっと見つめる...", action: () => {
-                      const deck = [...player.deck];
-                      const target = deck[Math.floor(Math.random() * deck.length)];
-                      if (target) {
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...target, id: `copy-${Date.now()}` }] } }));
-                          setEventResultLog(trans(`鏡の中の自分が何かを手渡してきた。\n「${target.name}」の複製を入手。`, languageMode));
-                      } else {
-                          setEventResultLog(trans("何も起こらなかった。", languageMode));
-                      }
-                  }},
-                  { label: "割る", text: "鏡を叩き割る！", action: () => {
-                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.INJURY, id: `evt-${Date.now()}` }] } }));
-                      setEventResultLog(trans("破片が飛び散った！\n呪い「骨折」を入手。", languageMode));
-                  }}
-              ]
-          },
-          // 既存イベント（本）
-          {
-              title: "呪われた書物",
-              description: "古びた祭壇に一冊の本が置かれている。不吉な気配がする。",
-              options: [
-                  { label: "読む", text: "勇気を出して読む", action: () => {
-                      const books = [RELIC_LIBRARY.NECRONOMICON, RELIC_LIBRARY.ENCHIRIDION, RELIC_LIBRARY.NILRYS_CODEX];
-                      const book = books[Math.floor(Math.random() * books.length)];
-                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 10), relics: [...prev.player.relics, book] } }));
-                      setEventResultLog(trans(`ページをめくると激痛が走った！(HP-10)\nレリック「${book.name}」を入手。`, languageMode));
-                  }},
-                  { label: "立ち去る", text: "危険を避ける", action: () => setEventResultLog(trans("危険を避けて立ち去った。", languageMode)) }
-              ]
-          },
-          // 新規イベント 1: 給食の余り (Fried Bread War)
-          {
-              title: "伝説の給食",
-              description: "今日は揚げパンの日だ！しかし、最後に一つだけ余っている。\nクラスメートとジャンケンで勝負だ。",
-              options: [
-                  { label: "グー", text: "力強く出す！", action: () => {
-                      if (Math.random() < 0.5) {
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 5, currentHp: prev.player.currentHp + 5 } }));
-                          setEventResultLog(trans("勝った！揚げパンをゲット！\n最大HPが5上がった。", languageMode));
-                      } else {
-                          setEventResultLog(trans("負けた... \n悲しみに包まれた。", languageMode));
-                      }
-                  }},
-                  { label: "パー", text: "大きく広げる！", action: () => {
-                      if (Math.random() < 0.5) {
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 50 } }));
-                          setEventResultLog(trans("勝った！譲ってあげたらお礼に50Gもらった。", languageMode));
-                      } else {
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 5) } }));
-                          setEventResultLog(trans("負けた上、指を突き指した。(HP-5)", languageMode));
-                      }
-                  }},
-                  { label: "チョキ", text: "鋭く出す！", action: () => {
-                      const potion = POTION_LIBRARY['STRENGTH_POTION'];
-                      if (Math.random() < 0.5) {
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, potions: [...prev.player.potions, { ...potion, id: `pot-${Date.now()}` }].slice(0, 3) } }));
-                          setEventResultLog(trans("勝った！揚げパンの代わりにプロテインをもらった。", languageMode));
-                      } else {
-                          setEventResultLog(trans("負けた... みんな美味しそうに食べている。", languageMode));
-                      }
-                  }}
-              ]
-          },
-          // 新規イベント 2: 校庭の野良犬 (Stray Dog)
-          {
-              title: "校庭の野良犬",
-              description: "授業中、校庭に野良犬が迷い込んできた！\n首輪はなく、お腹を空かせているようだ。",
-              options: [
-                  { label: "なでる", text: "優しく近づく", action: () => {
-                      if (Math.random() < 0.7) {
-                          setEventResultLog(trans("犬は嬉しそうに尻尾を振って去っていった。\n心が癒やされた。(HP全回復)", languageMode));
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: prev.player.maxHp } }));
-                      } else {
-                          setEventResultLog(trans("ガブッ！噛まれた！(HP-10)\n犬は走り去った。", languageMode));
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 10) } }));
-                      }
-                  }},
-                  { label: "餌をやる", text: "何かあげる", action: () => {
-                      if (player.gold >= 30) {
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - 30, relics: [...prev.player.relics, RELIC_LIBRARY.SPIRIT_POOP] } }));
-                          setEventResultLog(trans("パンを買ってあげた(30G消費)。\nお礼に「犬のフン(レリック)」を置いていった...いらない。", languageMode));
-                      } else {
-                          setEventResultLog(trans("あげるものがなかった。\n犬は悲しそうな目で去っていった。", languageMode));
-                      }
-                  }}
-              ]
-          },
-          // 新規イベント 3: 魔の掃除時間 (Cleaning Time)
-          {
-              title: "魔の掃除時間",
-              description: "廊下のワックスがけの時間だ。\nツルツル滑る床は危険だが、滑れば速く移動できるかも？",
-              options: [
-                  { label: "滑る", text: "スライディング！", action: () => {
-                      if (Math.random() < 0.5) {
-                          const card = { ...CARDS_LIBRARY.DASH, id: `evt-dash-${Date.now()}` };
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, card] } }));
-                          setEventResultLog(trans("素晴らしい滑りだ！\n「ダッシュ」のカードを習得した。", languageMode));
-                      } else {
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.INJURY, id: `evt-${Date.now()}` }] } }));
-                          setEventResultLog(trans("派手に転んだ！痛い！\n呪い「骨折」を入手。", languageMode));
-                      }
-                  }},
-                  { label: "磨く", text: "真面目に磨く", action: () => {
-                      const removeIndex = Math.floor(Math.random() * player.deck.length);
-                      const removedCard = player.deck[removeIndex];
-                      
-                      // Parasite Check
-                      let newMaxHp = player.maxHp;
-                      let curseMsg = "";
-                      if (removedCard.name === '寄生虫' || removedCard.name === 'PARASITE') {
-                          newMaxHp -= 3;
-                          curseMsg = "\n(寄生虫の効果で最大HP-3)";
-                      }
-                      
-                      setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: newMaxHp, currentHp: Math.min(prev.player.currentHp, newMaxHp), deck: prev.player.deck.filter((_, i) => i !== removeIndex) } }));
-                      setEventResultLog(trans(`心を込めて磨いたら、心が洗われた。\nデッキから「${removedCard.name}」が取り除かれた。${curseMsg}`, languageMode));
-                  }}
-              ]
-          },
-          // 新規イベント 4: テスト返却 (Test Return)
-          {
-              title: "運命のテスト返却",
-              description: "今日は算数のテストが返却される日だ。\n自信はあるか？",
-              options: [
-                  { label: "自信あり", text: "100点の予感！", action: () => {
-                      if (Math.random() < 0.4) {
-                          // Upgrade random card
-                          const deck = [...player.deck];
-                          const idx = deck.findIndex(c => !c.upgraded);
-                          if (idx !== -1) {
-                              deck[idx] = getUpgradedCard(deck[idx]);
-                              setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
-                              setEventResultLog(trans(`100点満点だ！\n「${deck[idx].name}」が強化された！`, languageMode));
-                          } else {
-                              setEventResultLog(trans("100点だったが、これ以上学ぶことはないようだ。", languageMode));
-                          }
-                      } else {
-                          setEventResultLog(trans("名前を書き忘れていた！0点だ！\n精神的ダメージを受けた。(HP-5)", languageMode));
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 5) } }));
-                      }
-                  }},
-                  { label: "隠す", text: "カバンに隠す", action: () => {
-                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.SHAME, id: `evt-${Date.now()}` }] } }));
-                      setEventResultLog(trans("親に見つからないように隠した。\n呪い「恥」を入手。", languageMode));
-                  }}
-              ]
-          },
-          // 新規イベント 5: 放送室のジャック (Broadcasting Room)
-          {
-              title: "放送室のジャック",
-              description: "放送室に誰もいない。マイクの電源が入っている。\nイタズラするチャンス？",
-              options: [
-                  { label: "歌う", text: "大熱唱する", action: () => {
-                      if (Math.random() < 0.5) {
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 4 } }));
-                          setEventResultLog(trans("生徒たちに大ウケだ！人気者になった。\n最大HP+4。", languageMode));
-                      } else {
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.SHAME, id: `evt-${Date.now()}` }] } }));
-                          setEventResultLog(trans("音痴すぎて笑い者になった。\n呪い「恥」を入手。", languageMode));
-                      }
-                  }},
-                  { label: "告白", text: "好きな人の名前を叫ぶ", action: () => {
-                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.REGRET, id: `evt-${Date.now()}` }] } }));
-                      setEventResultLog(trans("校長先生の名前を叫んでしまった。\n後悔の念に襲われる。呪い「後悔」を入手。", languageMode));
-                  }}
-              ]
-          },
-          // 新規イベント 6: 理科室の人体模型 (Anatomy Model)
-          {
-              title: "理科室の人体模型",
-              description: "夜の理科室。人体模型が動いている気がする。\n「心臓ヲ...クレ...」と聞こえた。",
-              options: [
-                  { label: "あげる", text: "HPを少し分ける", action: () => {
-                      const damage = Math.floor(player.maxHp * 0.3);
-                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - damage), relics: [...prev.player.relics, RELIC_LIBRARY.BLOOD_VIAL] } }));
-                      setEventResultLog(trans(`自分の血を分け与えた(HP-${damage})。\nお礼に「保健室の飴(レリック)」を貰った。`, languageMode));
-                  }},
-                  { label: "逃げる", text: "ダッシュで逃げる", action: () => {
-                      if (Math.random() < 0.5) {
-                          setEventResultLog(trans("なんとか逃げ切った。怖かった...", languageMode));
-                      } else {
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.DOUBT, id: `evt-${Date.now()}` }] } }));
-                          setEventResultLog(trans("背後から視線を感じる...\n呪い「不安」を入手。", languageMode));
-                      }
-                  }}
-              ]
-          },
-          // 新規イベント 7: 図書室の居眠り (Library Nap)
-          {
-              title: "図書室の静寂",
-              description: "放課後の図書室はとても静かだ。\n心地よい眠気が襲ってくる...",
-              options: [
-                  { label: "寝る", text: "少し仮眠する", action: () => {
-                      const heal = Math.floor(player.maxHp * 0.25);
-                      setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + heal) } }));
-                      setEventResultLog(trans(`ぐっすり眠れた。HPが${heal}回復した。\nよだれで本が少し濡れた。`, languageMode));
-                  }},
-                  { label: "勉強", text: "必死に勉強する", action: () => {
-                      const card = { ...CARDS_LIBRARY.SCRY, id: `evt-scry-${Date.now()}` };
-                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, card] } }));
-                      setEventResultLog(trans("集中して勉強した。\n「先読み」のカードを習得した。", languageMode));
-                  }}
-              ]
-          },
-          // 新規イベント 8: 終わらない朝礼 (Endless Assembly)
-          {
-              title: "終わらない朝礼",
-              description: "校長先生の話が長い...もう30分も続いている。\n貧血で倒れそうだ。",
-              options: [
-                  { label: "耐える", text: "歯を食いしばる", action: () => {
-                      setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 5, currentHp: Math.max(1, prev.player.currentHp - 5) } }));
-                      setEventResultLog(trans("なんとか耐え抜いた！精神力が鍛えられた。\n最大HP+5, HP-5。", languageMode));
-                  }},
-                  { label: "座る", text: "こっそり座る", action: () => {
-                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.CLUMSINESS, id: `evt-${Date.now()}` }] } }));
-                      setEventResultLog(trans("先生に見つかって怒られた。\n呪い「ドジ」を入手。", languageMode));
-                  }}
-              ]
-          },
-          // 新規イベント 9: 置き勉 (Leaving Books)
-          {
-              title: "置き勉の誘惑",
-              description: "カバンが重すぎる。教科書を学校に置いて帰ろうか...",
-              options: [
-                  { label: "置く", text: "身軽になる", action: () => {
-                      if (player.deck.length > 0) {
-                          const removeIndex = Math.floor(Math.random() * player.deck.length);
-                          const removedCard = player.deck[removeIndex];
-                          
-                          // Parasite Check
-                          let newMaxHp = player.maxHp;
-                          let curseMsg = "";
-                          if (removedCard.name === '寄生虫' || removedCard.name === 'PARASITE') {
-                              newMaxHp -= 3;
-                              curseMsg = "\n(寄生虫の効果で最大HP-3)";
-                          }
-
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: newMaxHp, currentHp: Math.min(prev.player.currentHp, newMaxHp), deck: prev.player.deck.filter((_, i) => i !== removeIndex) } }));
-                          setEventResultLog(trans(`教科書(カード: ${removedCard.name})を机の中に隠した。\n体が軽くなった！${curseMsg}`, languageMode));
-                      } else {
-                          setEventResultLog(trans("置く教科書がなかった。", languageMode));
-                      }
-                  }},
-                  { label: "持つ", text: "真面目に持ち帰る", action: () => {
-                      setGameState(prev => ({ ...prev, player: { ...prev.player, strength: prev.player.strength + 1 } })); // Note: Strength resets after combat usually, but maybe this is persistent? Actually strictly simplistic here: just add temporary buff for next fight or change deck? 
-                      // Let's add a card instead.
-                      const card = { ...CARDS_LIBRARY.HEADBUTT, id: `evt-head-${Date.now()}` };
-                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, card] } }));
-                      setEventResultLog(trans("重いカバンで足腰が鍛えられた。\n「頭突き」を習得した。", languageMode));
-                  }}
-              ]
-          },
-          // 新規イベント 10: 伝説の木の下 (Legendary Tree)
-          {
-              title: "伝説の木の下",
-              description: "この木の下で告白すると結ばれるという伝説がある。\n誰かが待っているようだ。",
-              options: [
-                  { label: "行く", text: "ドキドキしながら行く", action: () => {
-                      if (Math.random() < 0.5) {
-                          const rareCard = Object.values(CARDS_LIBRARY).filter(c => c.rarity === 'RARE')[0]; // Simplify
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...rareCard, id: `love-${Date.now()}` }] } }));
-                          setEventResultLog(trans(`なんと！欲しかったレアカード「${rareCard.name}」をもらえた！\nこれは愛の告白...？`, languageMode));
-                      } else {
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...CURSE_CARDS.PAIN, id: `evt-${Date.now()}` }] } }));
-                          setEventResultLog(trans("誰もいなかった... イタズラだったようだ。\n胸が痛む。呪い「腹痛」を入手。", languageMode));
-                      }
-                  }},
-                  { label: "無視", text: "興味ない", action: () => {
-                      setEventResultLog(trans("恋愛より冒険だ。\n通り過ぎた。", languageMode));
-                  }}
-              ]
-          },
-          // 新規イベント 11: 体育倉庫のマット (Gym Mats)
-          {
-              title: "体育倉庫のマット",
-              description: "体育倉庫のマットの間に何かが挟まっている。\n腐った匂いもするが...",
-              options: [
-                  { label: "探る", text: "手を突っ込む", action: () => {
-                      if (Math.random() < 0.6) {
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 80 } }));
-                          setEventResultLog(trans("ラッキー！誰かのへそくり80Gを見つけた！", languageMode));
-                      } else {
-                          setGameState(prev => ({ ...prev, player: { ...prev.player, deck: [...prev.player.deck, { ...STATUS_CARDS.SLIMED, id: `evt-${Date.now()}` }] } }));
-                          setEventResultLog(trans("うわっ！腐ったバナナを掴んでしまった。\n「鼻水(粘液)」カードがデッキに入った。", languageMode));
-                      }
-                  }},
-                  { label: "放置", text: "見なかったことにする", action: () => setEventResultLog(trans("賢明な判断だ。", languageMode)) }
-              ]
-          },
-          // 新規イベント 12: 謎の転校生 (Mystery Transfer Student) 
-          {
-              title: "謎の転校生",
-              description: "「ねえ、君のそのカード、僕のと交換しない？」\n見たことのないカードを持っている。",
-              options: [
-                  { label: "交換", text: "ランダムな交換する", action: () => {
-                      const removeIdx = Math.floor(Math.random() * player.deck.length);
-                      const removed = player.deck[removeIdx];
-                      const newCardKey = Object.keys(CARDS_LIBRARY).filter(k => CARDS_LIBRARY[k].rarity === 'UNCOMMON' || CARDS_LIBRARY[k].rarity === 'RARE')[Math.floor(Math.random() * 5)];
-                      const newCard = CARDS_LIBRARY[newCardKey];
-                      
-                      let newMaxHp = player.maxHp;
-                      let curseMsg = "";
-                      if (removed.name === '寄生虫' || removed.name === 'PARASITE') {
-                          newMaxHp -= 3;
-                          curseMsg = "\n(寄生虫の効果で最大HP-3)";
-                      }
-
-                      const newDeck = [...player.deck];
-                      newDeck.splice(removeIdx, 1, { ...newCard, id: `trade-${Date.now()}` });
-                      
-                      setGameState(prev => ({ ...prev, player: { ...prev.player, deck: newDeck, maxHp: newMaxHp, currentHp: Math.min(prev.player.currentHp, newMaxHp) } }));
-                      setEventResultLog(trans(`「${removed.name}」を渡して、「${newCard.name}」をもらった！${curseMsg}\n転校生はニヤリと笑った。`, languageMode));
-                  }},
-                  { label: "断る", text: "自分のカードが大事", action: () => setEventResultLog(trans("断った。転校生はつまらなそうに去った。", languageMode)) }
-              ]
-          }
-      ];
-      return events[Math.floor(random * events.length)];
-  };
-
   const handleNodeSelect = async (node: MapNode) => {
       // ... existing node select logic ...
       setIsLoading(true);
@@ -888,6 +564,7 @@ const App: React.FC = () => {
       try {
         if (node.type === NodeType.COMBAT || node.type === NodeType.ELITE || node.type === NodeType.BOSS || node.type === NodeType.START) {
             
+            // ... (Enemy Generation Logic) ...
             const actMultiplier = gameState.act; 
             const floorDifficulty = node.y * (1 + (actMultiplier * 0.5));
             
@@ -971,6 +648,7 @@ const App: React.FC = () => {
             p.cardsPlayedThisTurn = 0;
             p.attacksPlayedThisTurn = 0;
 
+            // Relic Effects
             if (p.relics.find(r => r.id === 'VAJRA')) p.strength += 1;
             if (p.relics.find(r => r.id === 'HACHIMAKI')) p.powers['DEXTERITY'] = 1;
             if (p.relics.find(r => r.id === 'SEED_PACK')) p.powers['THORNS'] = 3;
@@ -1057,6 +735,7 @@ const App: React.FC = () => {
             setTurnLog(trans("あなたのターン", languageMode));
 
         } else if (node.type === NodeType.REST) {
+            // ... (Rest logic same) ...
             setGameState(prev => {
                 const p = { ...prev.player };
                 if (p.relics.find(r => r.id === 'LUXURY_FUTON')) {
@@ -1076,6 +755,7 @@ const App: React.FC = () => {
             audioService.playBGM('rest');
 
         } else if (node.type === NodeType.SHOP) {
+            // ... (Shop logic same) ...
             const shopCandidates = Object.values(CARDS_LIBRARY).filter(c => 
                 c.type !== CardType.STATUS && 
                 c.type !== CardType.CURSE && 
@@ -1109,12 +789,20 @@ const App: React.FC = () => {
             audioService.playBGM('shop');
 
         } else if (node.type === NodeType.EVENT) {
-            const ev = generateEvent(nextState.player);
+            // イベント生成ロジックを eventService に委譲
+            const ev = generateEvent(
+                nextState.player,
+                setGameState,
+                handleNodeComplete,
+                setEventResultLog,
+                languageMode
+            );
             setEventData(ev);
             setEventResultLog(null);
             setGameState({ ...nextState, screen: GameScreen.EVENT });
             audioService.playBGM('event');
         } else if (node.type === NodeType.TREASURE) {
+            // ... (Treasure logic same) ...
             const p = nextState.player;
             const matryoshkaCharges = p.relicCounters['MATRYOSHKA'] || 0;
             const numRelics = matryoshkaCharges > 0 ? 2 : 1;
@@ -1125,7 +813,6 @@ const App: React.FC = () => {
             const rewards: RewardItem[] = [];
             const allRelics = Object.values(RELIC_LIBRARY).filter(r => ['COMMON', 'UNCOMMON', 'RARE'].includes(r.rarity));
             
-            // Generate multiple relics if matryoshka active
             for(let i=0; i<numRelics; i++) {
                 rewards.push({ type: 'RELIC', value: shuffle([...allRelics])[0], id: `tr-relic-${Date.now()}-${i}` });
             }
@@ -1265,7 +952,9 @@ const App: React.FC = () => {
         effectiveCost = 0;
     }
 
-    if (gameState.player.currentEnergy < effectiveCost) return;
+    // Double Character Mode check - energy cost might be tricky if handled outside
+    // For normal play, check energy
+    if (gameState.player.currentEnergy < effectiveCost && !gameState.player.partner) return; // Allow if partner mode handles energy differently or inside batch? No, adhere to standard.
     if (gameState.enemies.length === 0) return;
     if (actingEnemyId) return; 
     if (gameState.selectionState.active) return;
@@ -1289,7 +978,7 @@ const App: React.FC = () => {
                      const newBlock = (c.block || 0) + 2;
                      return { 
                          ...c, 
-                         block: newBlock,
+                         block: newBlock, 
                          description: c.description.replace(/ブロック(\d+)/, `ブロック${newBlock}`) 
                      };
                  }
@@ -1974,9 +1663,26 @@ const App: React.FC = () => {
                     newLogs.push(`${trans(e.name, languageMode)}から ${formula}${damage} ${trans("ダメージを受けた", languageMode)}`);
                 }
                 
-                p.currentHp -= unblockedDamage;
-                if (unblockedDamage > 0) {
-                    p.floatingText = { id: `dmg-${Date.now()}`, text: `-${unblockedDamage}`, color: 'text-red-500' };
+                // --- Partner Damage Logic ---
+                if (p.partner && p.partner.currentHp > 0) {
+                     // Randomly decide if player or partner takes damage
+                     // 50/50 chance for unblocked damage
+                     if (unblockedDamage > 0 && Math.random() < 0.5) {
+                         p.partner.currentHp -= unblockedDamage;
+                         p.partner.floatingText = { id: `dmg-partner-${Date.now()}`, text: `-${unblockedDamage}`, color: 'text-red-500' };
+                         newLogs.push(`${p.partner.name}がダメージを受けた！`);
+                         if (p.partner.currentHp <= 0) {
+                             newLogs.push(`${p.partner.name}が倒れた...`);
+                             // Partner doesn't revive
+                             p.partner = undefined; 
+                         }
+                     } else {
+                         p.currentHp -= unblockedDamage;
+                         if (unblockedDamage > 0) p.floatingText = { id: `dmg-${Date.now()}`, text: `-${unblockedDamage}`, color: 'text-red-500' };
+                     }
+                } else {
+                     p.currentHp -= unblockedDamage;
+                     if (unblockedDamage > 0) p.floatingText = { id: `dmg-${Date.now()}`, text: `-${unblockedDamage}`, color: 'text-red-500' };
                 }
 
                 if (p.powers['THORNS'] && damage > 0) { 
@@ -2091,18 +1797,25 @@ const App: React.FC = () => {
       executeEndTurn(card || undefined);
   }
 
-  const handleSynthesizeCard = (c1: ICard, c2: ICard) => {
-      const newCard = synthesizeCards(c1, c2);
+  const handleSynthesizeCard = (cards: ICard[]) => {
+      // 3枚まで対応。引数は可変長だが、synthesizeCardsの実装に合わせて展開する。
+      const [c1, c2, c3] = cards;
+      const newCard = synthesizeCards(c1, c2, c3);
       
       setGameState(prev => ({
           ...prev,
           player: {
               ...prev.player,
-              deck: [...prev.player.deck.filter(c => c.id !== c1.id && c.id !== c2.id), newCard]
+              // 元のカードを除外
+              deck: [...prev.player.deck.filter(c => !cards.some(target => target.id === c.id)), newCard]
           }
       }));
       
       return newCard;
+  };
+  
+  const handlePlaySynthesizedCard = async (card: ICard) => {
+      handlePlayCard(card);
   };
 
   const handleEventContinue = () => {
@@ -2134,6 +1847,20 @@ const App: React.FC = () => {
                     ...prev, 
                     player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + hpRegen) }
                 }));
+            }
+            
+            // Partner also regens slightly?
+            if (gameState.player.partner) {
+                setGameState(prev => prev.player.partner ? ({
+                    ...prev,
+                    player: {
+                        ...prev.player,
+                        partner: {
+                            ...prev.player.partner,
+                            currentHp: Math.min(prev.player.partner.maxHp, prev.player.partner.currentHp + 5) // Small regen
+                        }
+                    }
+                }) : prev);
             }
 
             if (gameState.act === 4) {
@@ -2564,7 +2291,7 @@ const App: React.FC = () => {
             {gameState.screen === GameScreen.BATTLE && (
                 <BattleScene 
                     player={gameState.player} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onEndTurn={handleEndTurnClick} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={gameState.selectionState} onHandSelection={handleHandSelection}
-                    onUsePotion={handleUsePotion} combatLog={gameState.combatLog} languageMode={languageMode} codexOptions={gameState.codexOptions} onCodexSelect={onCodexSelect}
+                    onUsePotion={handleUsePotion} combatLog={gameState.combatLog} languageMode={languageMode} codexOptions={gameState.codexOptions} onCodexSelect={onCodexSelect} onPlaySynthesizedCard={handlePlaySynthesizedCard}
                 />
             )}
 
