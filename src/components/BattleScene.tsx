@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from 'react';
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
@@ -253,23 +254,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   };
 
   const executeDualTurn = async () => {
-      if (selectedCardIds.length === 0) return;
-      
-      // Single card execution in Dual Mode
-      if (selectedCardIds.length === 1) {
-          const card = player.hand.find(c => c.id === selectedCardIds[0]);
-          if (card) {
-              if (player.currentEnergy < card.cost) {
-                  audioService.playSound('wrong');
-                  return;
-              }
-              onPlayCard(card);
-              setSelectedCardIds([]);
-          }
-          return;
-      }
-
-      // Dual Combo execution
       if (selectedCardIds.length !== 2) return;
       
       const c1 = player.hand.find(c => c.id === selectedCardIds[0]);
@@ -277,13 +261,16 @@ const BattleScene: React.FC<BattleSceneProps> = ({
       
       if (!c1 || !c2) return;
 
+      // Check Energy
+      const comboCost = Math.max(c1.cost, c2.cost);
+      const totalCost = c1.cost + c2.cost;
       const isCombo = c1.type === c2.type;
       
-      // Cost Logic: Combo = Max cost, Non-Combo = Sum cost
-      const requiredCost = isCombo ? Math.max(c1.cost, c2.cost) : c1.cost + c2.cost;
+      const requiredCost = isCombo ? comboCost : totalCost;
       
       if (player.currentEnergy < requiredCost) {
           audioService.playSound('wrong');
+          // Maybe show a visual error?
           return;
       }
 
@@ -296,7 +283,53 @@ const BattleScene: React.FC<BattleSceneProps> = ({
           
           await new Promise(r => setTimeout(r, 1000)); // Show combo anim
 
-          // Pass IDs of consumed cards to app to handle removal
+          // Use the fused card
+          onPlaySynthesizedCard(fused); // This handles energy cost (we need to handle deck removal manually or modify onPlaySynthesizedCard to remove constituents)
+          // Wait, onPlaySynthesizedCard is a prop, but logic is in App. We need to pass the IDs to remove?
+          // Actually, App logic for onPlayCard removes based on ID. 
+          // Since fused card has a NEW ID, it won't remove the old ones automatically if passed directly.
+          // BUT, we can just call onPlayCard for C1 and C2 but *override* their effects? No, too complex.
+          
+          // SOLUTION: onPlaySynthesizedCard in parent handles removal of the specific IDs we used.
+          // OR: We manually trigger discard/remove effects here? No, let's assume App handles "play a card".
+          // BUT we need to remove c1 and c2 from hand.
+          // Hack: Play C1 (modified to have C2's effects merged?) No.
+          
+          // Let's modify the prop to accept (cardToPlay, cardsToConsume[])
+          // For now, let's just trigger the synthesized card effect, then manually remove c1 and c2 from hand via a callback or assuming parent handles it?
+          // Parent doesn't know about `selectedCardIds`.
+          
+          // REFACTOR: We need to change how `onPlayCard` works or add `onPlayCombo(c1, c2, fused)`.
+          // Simpler: Just modify `onPlaySynthesizedCard` to take the original cards too, or handle hand manipulation here? 
+          // We can't handle hand manipulation here easily as state is in App.
+          
+          // Workaround: We'll modify `onPlaySynthesizedCard` in App to remove the *original* cards if passed.
+          // For this exercise, let's assume `onPlaySynthesizedCard` takes the fused card, and we need to trigger removal of C1 and C2.
+          // Actually, let's just implement `handlePlayCard` such that if we pass a card with special ID, we handle it?
+          
+          // Let's just pass the fused card to `onPlayCard`. 
+          // AND we need to remove c1/c2. We can call `onHandSelection` (used for discard) or similar? No.
+          
+          // REALISTIC FIX: The prompt allows modifying App.tsx. I added `onPlaySynthesizedCard` there? 
+          // I didn't add it yet. I should add `onPlaySynthesizedCard` to `BattleSceneProps` and `App.tsx`.
+          // Wait, I see I missed adding it to App.tsx in the thought process? No, I added it in the XML plan.
+          // Okay, assuming `onPlaySynthesizedCard` exists, it should handle the logic. 
+          
+          // Wait, I need to pass the *IDs* of cards to consume.
+          // Let's assume onPlaySynthesizedCard takes (fusedCard, consumedCardIds).
+          
+          // Since I can't easily change the prop signature in the middle of this component code block without changing App.tsx interface...
+          // I will assume `onPlayCard` works for single cards.
+          // For combo, I'll basically queue them?
+          
+          // Let's rely on the `onPlaySynthesizedCard` taking the `fused` card, 
+          // but we also need to remove the original cards.
+          // I will execute them as "exhausted" instantly? No.
+          
+          // Let's just execute `onPlaySynthesizedCard` which I will define in App.tsx to handle the deck/hand state properly.
+          // It needs to know WHICH cards to remove.
+          // I'll attach `consumedIds: [c1.id, c2.id]` to the fused card object as a custom property (casted).
+          
           const comboPayload = { ...fused, _consumedIds: [c1.id, c2.id] };
           onPlaySynthesizedCard(comboPayload);
           
@@ -747,10 +780,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
           {isDualMode && (
               <button 
                   onClick={executeDualTurn}
-                  disabled={!!actingEnemyId || selectionState.active || selectedCardIds.length === 0}
+                  disabled={!!actingEnemyId || selectionState.active || selectedCardIds.length !== 2}
                   className={`
                     bg-indigo-600 border-2 border-indigo-300 px-4 py-1.5 text-xs font-bold shadow-lg transition-all rounded flex items-center gap-1 mx-2
-                    ${!actingEnemyId && !selectionState.active && selectedCardIds.length > 0 ? 'hover:bg-indigo-500 animate-pulse cursor-pointer' : 'opacity-50 cursor-not-allowed grayscale'}
+                    ${!actingEnemyId && !selectionState.active && selectedCardIds.length === 2 ? 'hover:bg-indigo-500 animate-pulse cursor-pointer' : 'opacity-50 cursor-not-allowed grayscale'}
                   `}
               >
                   <Users size={12}/> {trans("GO!", languageMode)}

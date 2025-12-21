@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -35,7 +36,7 @@ import { generateDungeonMap } from './services/mapGenerator';
 import { storageService } from './services/storageService';
 import { generateEvent } from './services/eventService';
 import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
-import { trans } from '../utils/textUtils';
+import { trans } from './utils/textUtils';
 import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music } from 'lucide-react';
 
 const calculateScore = (state: GameState, victory: boolean): number => {
@@ -479,9 +480,6 @@ const App: React.FC = () => {
                   floatingText: null
               };
               logs.push(trans("わんぱく小学生が友達になった！(2人プレイモード)", languageMode));
-              logs.push(trans("【パートナーコンボ】", languageMode));
-              logs.push(trans("同タイプのカードを2枚選ぶと合体技が発動！", languageMode));
-              logs.push(trans("コストは高い方のみ消費します。", languageMode));
           }
       }
 
@@ -947,7 +945,7 @@ const App: React.FC = () => {
       });
   };
 
-  const handlePlayCard = (card: ICard, consumedIds?: string[]) => {
+  const handlePlayCard = (card: ICard) => {
     // Determine effective cost
     let effectiveCost = card.cost;
     if (gameState.player.powers['CORRUPTION'] && card.type === CardType.SKILL) {
@@ -955,9 +953,8 @@ const App: React.FC = () => {
     }
 
     // Double Character Mode check - energy cost might be tricky if handled outside
-    // For normal play, check energy. Synthesized card is already energy checked or handles cost differently?
-    // We assume if it's a combo, energy was checked in BattleScene.
-    if (!consumedIds && gameState.player.currentEnergy < effectiveCost && !gameState.player.partner) return; 
+    // For normal play, check energy
+    if (gameState.player.currentEnergy < effectiveCost && !gameState.player.partner) return; // Allow if partner mode handles energy differently or inside batch? No, adhere to standard.
     if (gameState.enemies.length === 0) return;
     if (actingEnemyId) return; 
     if (gameState.selectionState.active) return;
@@ -1344,37 +1341,20 @@ const App: React.FC = () => {
           }
       }
 
-      // Consumed Cards Handling (for Partner Combo)
-      if (consumedIds) {
-          const consumedCards = p.hand.filter(c => consumedIds.includes(c.id));
-          p.discardPile = [...p.discardPile, ...consumedCards];
-          p.hand = p.hand.filter(c => !consumedIds.includes(c.id));
-      } else {
-          // Standard Card Play
-          p.hand = p.hand.filter(c => c.id !== card.id);
-          
-          let shouldExhaust = card.exhaust;
-          if (card.type === CardType.SKILL && p.powers['CORRUPTION']) shouldExhaust = true;
+      p.hand = p.hand.filter(c => c.id !== card.id);
+      
+      let shouldExhaust = card.exhaust;
+      if (card.type === CardType.SKILL && p.powers['CORRUPTION']) shouldExhaust = true;
 
-          // Temporary Combo cards from synthesis (consumedIds was false but it's a synth result)
-          // actually this block handles the "played" card.
-          // If it was a temporary synthesized card (indicated by consumedIds being passed to handlePlaySynthesizedCard, which calls this)
-          // we need to distinguish. 
-          // The cleanest way is if the card has a flag.
-          const isTemporaryCombo = (card as any).isTemporaryCombo;
-          
-          if (!isTemporaryCombo) {
-              if (card.name === '八つ当たり' || card.name === 'YATSUATARI') {
-                  card.damage = (card.damage || 0) + 5;
-                  currentLogs.push("八つ当たりの怒りが増した！");
-              }
+      if (card.name === '八つ当たり' || card.name === 'YATSUATARI') {
+          card.damage = (card.damage || 0) + 5;
+          currentLogs.push("八つ当たりの怒りが増した！");
+      }
 
-              if (!shouldExhaust && !(card.type === CardType.POWER) && !(card.promptsExhaust === 99)) {
-                  p.discardPile.push(card);
-              } else if (shouldExhaust || card.promptsExhaust === 99) {
-                  if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
-              }
-          }
+      if (!shouldExhaust && !(card.type === CardType.POWER) && !(card.promptsExhaust === 99)) {
+          p.discardPile.push(card);
+      } else if (shouldExhaust || card.promptsExhaust === 99) {
+          if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
       }
 
       let nextSelectionState = { ...prev.selectionState };
@@ -1834,14 +1814,8 @@ const App: React.FC = () => {
       return newCard;
   };
   
-  const handlePlaySynthesizedCard = (card: ICard) => {
-       // Extract _consumedIds
-       const consumedIds = (card as any)._consumedIds;
-       if (consumedIds) {
-           handlePlayCard(card, consumedIds);
-       } else {
-           handlePlayCard(card);
-       }
+  const handlePlaySynthesizedCard = async (card: ICard) => {
+      handlePlayCard(card);
   };
 
   const handleEventContinue = () => {
@@ -2081,6 +2055,9 @@ const App: React.FC = () => {
           } 
       }));
   };
+
+  // Determine next unlock threshold for display
+  const nextThreshold = UNLOCK_THRESHOLDS.find(t => t > totalMathCorrect);
 
   return (
     <div className="w-full h-[100dvh] bg-black overflow-hidden">
