@@ -1341,40 +1341,63 @@ const App: React.FC = () => {
           }
       }
 
-      p.hand = p.hand.filter(c => c.id !== card.id);
-      
-      let shouldExhaust = card.exhaust;
-      if (card.type === CardType.SKILL && p.powers['CORRUPTION']) shouldExhaust = true;
-
-      if (card.name === '八つ当たり' || card.name === 'YATSUATARI') {
-          card.damage = (card.damage || 0) + 5;
-          currentLogs.push("八つ当たりの怒りが増した！");
-      }
-
-      if (!shouldExhaust && !(card.type === CardType.POWER) && !(card.promptsExhaust === 99)) {
-          p.discardPile.push(card);
-      } else if (shouldExhaust || card.promptsExhaust === 99) {
-          if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
-      }
-
-      let nextSelectionState = { ...prev.selectionState };
-      if (card.promptsDiscard) nextSelectionState = { active: true, type: 'DISCARD', amount: card.promptsDiscard, originCardId: card.id };
-      if (card.promptsCopy) nextSelectionState = { active: true, type: 'COPY', amount: card.promptsCopy, originCardId: card.id };
-      if (card.promptsExhaust === 99) {
-          if (card.name === '断捨離' || card.name === 'SEVER_SOUL') {
-              const cardsToExhaust = p.hand.filter(c => c.type !== CardType.ATTACK);
-              if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'] * cardsToExhaust.length;
-              p.hand = p.hand.filter(c => c.type === CardType.ATTACK);
-          } else if (card.name === '焚き火' || card.name === 'FIEND_FIRE') {
-               if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'] * p.hand.length;
-               p.hand = [];
+      // COMBO CONSUMPTION LOGIC (Modified to support combo consumption)
+      const consumedIds = (card as any)._consumedIds;
+      if (consumedIds && Array.isArray(consumedIds)) {
+          // Identify cards to remove from hand
+          const cardsToRemove = p.hand.filter(c => consumedIds.includes(c.id));
+          p.hand = p.hand.filter(c => !consumedIds.includes(c.id));
+          
+          cardsToRemove.forEach(c => {
+             let shouldExhaust = c.exhaust;
+             if (c.type === CardType.SKILL && p.powers['CORRUPTION']) shouldExhaust = true;
+             
+             if (!shouldExhaust && !(c.type === CardType.POWER) && !(c.promptsExhaust === 99)) {
+                  p.discardPile.push(c);
+             } else if (shouldExhaust || c.promptsExhaust === 99) {
+                  if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
+             }
+             
+             // Trigger discard/exhaust prompts if any? (Usually prompts happen on play, but here they are consumed as material)
+             // For simplicity, assume combo materials don't trigger prompts
+          });
+      } else {
+          // Standard Single Card Logic
+          p.hand = p.hand.filter(c => c.id !== card.id);
+          
+          let shouldExhaust = card.exhaust;
+          if (card.type === CardType.SKILL && p.powers['CORRUPTION']) shouldExhaust = true;
+    
+          if (card.name === '八つ当たり' || card.name === 'YATSUATARI') {
+              card.damage = (card.damage || 0) + 5;
+              currentLogs.push("八つ当たりの怒りが増した！");
+          }
+    
+          if (!shouldExhaust && !(card.type === CardType.POWER) && !(card.promptsExhaust === 99)) {
+              p.discardPile.push(card);
+          } else if (shouldExhaust || card.promptsExhaust === 99) {
+              if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
+          }
+    
+          let nextSelectionState = { ...prev.selectionState };
+          if (card.promptsDiscard) nextSelectionState = { active: true, type: 'DISCARD', amount: card.promptsDiscard, originCardId: card.id };
+          if (card.promptsCopy) nextSelectionState = { active: true, type: 'COPY', amount: card.promptsCopy, originCardId: card.id };
+          if (card.promptsExhaust === 99) {
+              if (card.name === '断捨離' || card.name === 'SEVER_SOUL') {
+                  const cardsToExhaust = p.hand.filter(c => c.type !== CardType.ATTACK);
+                  if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'] * cardsToExhaust.length;
+                  p.hand = p.hand.filter(c => c.type === CardType.ATTACK);
+              } else if (card.name === '焚き火' || card.name === 'FIEND_FIRE') {
+                   if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'] * p.hand.length;
+                   p.hand = [];
+              }
           }
       }
 
       let nextSelectedId = prev.selectedEnemyId;
       if (!enemies.find(e => e.id === nextSelectedId) && enemies.length > 0) nextSelectedId = enemies[0].id;
 
-      return { ...prev, player: p, enemies: enemies, selectedEnemyId: nextSelectedId, selectionState: nextSelectionState, combatLog: [...prev.combatLog, ...currentLogs] };
+      return { ...prev, player: p, enemies: enemies, selectedEnemyId: nextSelectedId, selectionState: prev.selectionState, combatLog: [...prev.combatLog, ...currentLogs] };
     });
   };
 
@@ -2055,9 +2078,6 @@ const App: React.FC = () => {
           } 
       }));
   };
-
-  // Determine next unlock threshold for display
-  const nextThreshold = UNLOCK_THRESHOLDS.find(t => t > totalMathCorrect);
 
   return (
     <div className="w-full h-[100dvh] bg-black overflow-hidden">
