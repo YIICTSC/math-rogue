@@ -211,6 +211,7 @@ const App: React.FC = () => {
   const [showDebugLog, setShowDebugLog] = useState<boolean>(false);
   const [bgmMode, setBgmMode] = useState<'OSCILLATOR' | 'MP3'>('MP3');
   const [totalMathCorrect, setTotalMathCorrect] = useState<number>(0);
+  const [nextThreshold, setNextThreshold] = useState<number | null>(null);
   
   // Debug Logic
   const [isMathDebugSkipped, setIsMathDebugSkipped] = useState<boolean>(false);
@@ -277,6 +278,12 @@ const App: React.FC = () => {
         audioService.playBGM('menu');
     }
   }, []);
+
+  // Update Next Threshold
+  useEffect(() => {
+    const next = UNLOCK_THRESHOLDS.find(t => t > totalMathCorrect);
+    setNextThreshold(next || null);
+  }, [totalMathCorrect]);
 
   const handleTitleClick = () => {
       const next = titleClickCount + 1;
