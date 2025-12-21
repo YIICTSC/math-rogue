@@ -458,7 +458,6 @@ const App: React.FC = () => {
       setSelectedCharName(char.name);
       
       let initialDeck: ICard[] = [];
-      let partner = undefined;
       let logs = [trans("旅の支度をしている...", languageMode)];
       
       if (gameState.challengeMode === '1A1D') {
@@ -472,22 +471,6 @@ const App: React.FC = () => {
           ];
       } else {
           initialDeck = createDeck(char.deckTemplate);
-      }
-
-      // Partner Logic for Assassin (Transfer Student)
-      if (char.id === 'ASSASSIN') {
-          const warrior = CHARACTERS.find(c => c.id === 'WARRIOR');
-          if (warrior) {
-              partner = {
-                  id: 'WARRIOR',
-                  name: warrior.name,
-                  maxHp: warrior.maxHp,
-                  currentHp: warrior.maxHp,
-                  imageData: warrior.imageData,
-                  floatingText: null
-              };
-              logs.push(trans("わんぱく小学生が友達になった！(2人プレイモード)", languageMode));
-          }
       }
 
       const legacyCard = storageService.getLegacyCard();
@@ -504,6 +487,90 @@ const App: React.FC = () => {
       const bonusOptions = shuffle(commonRelics).slice(0, 3);
       setStarterRelics(bonusOptions);
 
+      // 共通プレイヤー初期化
+      const initialPlayerState = {
+          ...gameState.player,
+          maxHp: char.maxHp,
+          currentHp: char.maxHp,
+          gold: char.gold,
+          deck: initialDeck,
+          relics: relics,
+          potions: [],
+          imageData: char.imageData,
+          maxEnergy: INITIAL_ENERGY,
+          currentEnergy: INITIAL_ENERGY,
+          block: 0,
+          strength: 0,
+          hand: [],
+          discardPile: [],
+          drawPile: [],
+          powers: {},
+          relicCounters: {},
+          turnFlags: {},
+          typesPlayedThisTurn: [],
+          floatingText: null,
+          nextTurnEnergy: 0,
+          nextTurnDraw: 0,
+          attacksPlayedThisTurn: 0,
+          cardsPlayedThisTurn: 0,
+          echoes: 0,
+          partner: undefined,
+      };
+
+      // ASSASSIN (転校生) の場合の特別イベントフロー
+      if (char.id === 'ASSASSIN') {
+          const warrior = CHARACTERS.find(c => c.id === 'WARRIOR');
+          
+          const specialEvent = {
+              title: "放課後の勧誘",
+              description: "新しい学校、知らないクラスメート...。\n不安な気持ちで校庭の隅に立っていると、赤い帽子の少年が走ってきた。\n\n「よう！ お前、転校生だろ？\n俺と組んで『伝説の小学生』を目指さないか？」\n\n強引だが、悪い気はしない。彼の目は冒険への期待で輝いている。",
+              options: [
+                  {
+                      label: "手を取る",
+                      text: "わんぱく小学生と友達になる",
+                      action: () => {
+                           const newPartner = warrior ? {
+                              id: 'WARRIOR',
+                              name: warrior.name,
+                              maxHp: warrior.maxHp,
+                              currentHp: warrior.maxHp,
+                              imageData: warrior.imageData,
+                              floatingText: null
+                          } : undefined;
+                          
+                          setGameState(prev => ({
+                              ...prev,
+                              screen: GameScreen.RELIC_SELECTION,
+                              player: { ...prev.player, partner: newPartner },
+                              narrativeLog: [
+                                  trans("わんぱく小学生がパートナーになった！", languageMode),
+                                  trans("【TIPS】種類の違うカードを2枚選ぶと『友情コンボ』が発動します！", languageMode)
+                              ]
+                          }));
+                          audioService.playSound('buff');
+                      }
+                  }
+              ]
+          };
+          
+          setEventData(specialEvent);
+          setEventResultLog(null);
+          
+          setGameState(prev => ({
+              ...prev,
+              screen: GameScreen.EVENT,
+              act: 1,
+              floor: 0,
+              map: [],
+              currentMapNodeId: null,
+              player: initialPlayerState,
+              narrativeLog: logs,
+              combatLog: [],
+          }));
+          audioService.playBGM('event');
+          return;
+      }
+
       setGameState(prev => ({
           ...prev,
           screen: GameScreen.RELIC_SELECTION,
@@ -511,34 +578,7 @@ const App: React.FC = () => {
           floor: 0,
           map: [], // Map is generated after relic selection
           currentMapNodeId: null,
-          player: {
-              ...prev.player,
-              maxHp: char.maxHp,
-              currentHp: char.maxHp,
-              gold: char.gold,
-              deck: initialDeck,
-              relics: relics,
-              potions: [],
-              imageData: char.imageData,
-              maxEnergy: INITIAL_ENERGY,
-              currentEnergy: INITIAL_ENERGY,
-              block: 0,
-              strength: 0,
-              hand: [],
-              discardPile: [],
-              drawPile: [],
-              powers: {},
-              relicCounters: {},
-              turnFlags: {},
-              typesPlayedThisTurn: [],
-              floatingText: null,
-              nextTurnEnergy: 0,
-              nextTurnDraw: 0,
-              attacksPlayedThisTurn: 0,
-              cardsPlayedThisTurn: 0,
-              echoes: 0,
-              partner: partner,
-          },
+          player: initialPlayerState,
           narrativeLog: logs,
           combatLog: [],
       }));
@@ -1413,6 +1453,8 @@ const App: React.FC = () => {
     setGameState(prev => {
       const p = { ...prev.player };
       
+      let extraEnergy = 0; // Added variable
+
       if (p.powers['DEMON_FORM']) { 
           p.strength += p.powers['DEMON_FORM']; 
           p.floatingText = { id: `pow-demon-${Date.now()}`, text: '反抗期', color: 'text-red-500' }; 
@@ -1456,7 +1498,7 @@ const App: React.FC = () => {
       if (p.relics.find(r => r.id === 'HAPPY_FLOWER')) {
           const current = (p.relicCounters['HAPPY_FLOWER'] || 0) + 1;
           if (current === 3) {
-              p.currentEnergy += 1; 
+              extraEnergy += 1; 
               p.floatingText = { id: `relic-flower-${Date.now()}`, text: '+1 Energy', color: 'text-yellow-400', iconType: 'zap' };
               p.relicCounters['HAPPY_FLOWER'] = 0;
           } else {
@@ -1533,7 +1575,7 @@ const App: React.FC = () => {
           }
       }
 
-      let baseEnergy = p.maxEnergy + p.nextTurnEnergy + devaBonus;
+      let baseEnergy = p.maxEnergy + p.nextTurnEnergy + devaBonus + extraEnergy; // Add extraEnergy
       if (p.relics.find(r => r.id === 'ICE_CREAM')) {
           baseEnergy += p.currentEnergy;
       }
