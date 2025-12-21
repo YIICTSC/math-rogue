@@ -544,7 +544,7 @@ const App: React.FC = () => {
                               player: { ...prev.player, partner: newPartner },
                               narrativeLog: [
                                   trans("わんぱく小学生がパートナーになった！", languageMode),
-                                  trans("【TIPS】種類の違うカードを2枚選ぶと『友情コンボ』が発動します！", languageMode)
+                                  trans("【TIPS】種類が同じカードを2枚選ぶと『友情コンボ』が発動します！", languageMode)
                               ]
                           }));
                           audioService.playSound('buff');
@@ -1653,15 +1653,27 @@ const App: React.FC = () => {
         if (gameState.player.currentHp <= 0) break;
         
         if (enemy.poison > 0) {
-            enemy.currentHp -= enemy.poison;
+            const poisonDmg = enemy.poison;
+            enemy.currentHp -= poisonDmg;
             enemy.poison--;
-            enemy.floatingText = { id: `psn-${Date.now()}-${enemy.id}`, text: `${enemy.poison + 1}`, color: 'text-green-500', iconType: 'poison' };
-            setGameState(prev => ({ 
-                ...prev, 
-                enemies: prev.enemies.map(e => e.id === enemy.id ? { ...e, currentHp: enemy.currentHp, poison: enemy.poison, floatingText: enemy.floatingText } : e),
-                combatLog: [...prev.combatLog, `${trans(enemy.name, languageMode)}に毒ダメージ${enemy.poison + 1}`]
-            }));
-            if (enemy.currentHp <= 0) continue;
+            
+            const floatText: FloatingText = { id: `psn-${Date.now()}-${enemy.id}`, text: `${poisonDmg}`, color: 'text-green-500', iconType: 'poison' };
+            const logMsg = `${trans(enemy.name, languageMode)}に毒ダメージ${poisonDmg}`;
+
+            if (enemy.currentHp <= 0) {
+                setGameState(prev => ({ 
+                    ...prev, 
+                    enemies: prev.enemies.filter(e => e.id !== enemy.id),
+                    combatLog: [...prev.combatLog, logMsg, `${trans(enemy.name, languageMode)}は力尽きた！`]
+                }));
+                continue;
+            } else {
+                setGameState(prev => ({ 
+                    ...prev, 
+                    enemies: prev.enemies.map(e => e.id === enemy.id ? { ...e, currentHp: enemy.currentHp, poison: enemy.poison, floatingText: floatText } : e),
+                    combatLog: [...prev.combatLog, logMsg]
+                }));
+            }
         }
 
         setActingEnemyId(enemy.id);
@@ -1717,8 +1729,10 @@ const App: React.FC = () => {
                     } else {
                         if (p.powers['STATIC_DISCHARGE']) {
                             const target = newEnemies[Math.floor(Math.random() * newEnemies.length)];
-                            target.currentHp -= p.powers['STATIC_DISCHARGE'];
-                            newLogs.push(trans("静電放電発動！", languageMode));
+                            if (target) {
+                                target.currentHp -= p.powers['STATIC_DISCHARGE'];
+                                newLogs.push(trans("静電放電発動！", languageMode));
+                            }
                         }
                     }
                 }
@@ -1805,7 +1819,8 @@ const App: React.FC = () => {
 
             e.nextIntent = getNextEnemyIntent(e, gameState.turn + 1);
 
-            return { ...prev, player: p, enemies: newEnemies, combatLog: [...prev.combatLog, ...newLogs] };
+            const aliveEnemies = newEnemies.filter(en => en.currentHp > 0);
+            return { ...prev, player: p, enemies: aliveEnemies, combatLog: [...prev.combatLog, ...newLogs] };
         });
         await wait(600);
     }
@@ -2068,9 +2083,9 @@ const App: React.FC = () => {
               if (item.value.id === 'SOZU') p.maxEnergy += 1;
               if (item.value.id === 'CURSED_KEY') p.maxEnergy += 1;
               if (item.value.id === 'PHILOSOPHER_STONE') p.maxEnergy += 1;
+              if (item.value.id === 'VELVET_CHOKER') p.maxEnergy += 1;
               if (item.value.id === 'WAFFLE') { p.maxHp += 7; p.currentHp = p.maxHp; }
               if (item.value.id === 'OLD_COIN') p.gold += 300;
-              if (item.value.id === 'VELVET_CHOKER') p.maxEnergy += 1;
               if (item.value.id === 'MATRYOSHKA') p.relicCounters['MATRYOSHKA'] = 2; // Init Counter
               if (item.value.id === 'HAPPY_FLOWER') p.relicCounters['HAPPY_FLOWER'] = 0; // Init Counter
               storageService.saveUnlockedRelic(item.value.id);
