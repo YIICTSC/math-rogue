@@ -799,8 +799,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
       </div>
 
       {/* 4. Hand Area (Horizontal Scroll) */}
-      <div className={`h-40 md:h-48 bg-gray-900 border-t border-gray-700 relative z-10 ${selectionState.active ? 'bg-blue-900/20' : ''}`}>
-        <div className="w-full h-full overflow-x-auto overflow-y-hidden whitespace-nowrap px-2 flex items-center gap-2 custom-scrollbar touch-pan-x">
+      <div className={`h-52 md:h-64 bg-gray-900 border-t border-gray-700 relative z-10 ${selectionState.active ? 'bg-blue-900/20' : ''}`}>
+        <div className="w-full h-full overflow-x-auto overflow-y-hidden whitespace-nowrap px-2 flex items-end pb-4 gap-2 custom-scrollbar touch-pan-x">
             {player.hand.map((card) => {
                 // Check for special disabling conditions
                 const isClashDisabled = card.playCondition === 'HAND_ONLY_ATTACKS' && player.hand.some(c => c.type !== CardType.ATTACK && c.id !== card.id);
