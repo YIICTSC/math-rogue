@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
   CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode, LanguageMode
@@ -94,7 +94,7 @@ const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
 
         case 'AGGRESSIVE':
             if (turn === 1) return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 10 : 6 };
-            if (localTurn === 0) return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 5 : 3 };
+            if (localTurn === 0) return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 3 : 3 };
             return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 14 : 9 };
 
         case 'TRICKSTER':
@@ -1950,13 +1950,20 @@ const App: React.FC = () => {
                 }) : prev);
             }
 
-            if (gameState.act === 4) {
-                 setGameState(prev => ({ ...prev, screen: GameScreen.ENDING }));
-                 audioService.playBGM('victory');
-            } else {
-                 // Skip VICTORY screen, go directly to math challenge
-                 setGameState(prev => ({ ...prev, screen: GameScreen.MATH_CHALLENGE }));
-            }
+            // 敵全滅時、少し待ってから画面を切り替える
+            const victoryTimer = setTimeout(() => {
+                setGameState(prev => {
+                    if (prev.act === 4) {
+                        audioService.playBGM('victory');
+                        return { ...prev, screen: GameScreen.ENDING };
+                    } else {
+                        return { ...prev, screen: GameScreen.MATH_CHALLENGE };
+                    }
+                });
+            }, 1200);
+
+            return () => clearTimeout(victoryTimer);
+            
         } else if (gameState.player.currentHp <= 0) {
             if (gameState.player.relics.find(r => r.id === 'LIZARD_TAIL') && !gameState.player.relicCounters['LIZARD_TAIL_USED']) {
                 audioService.playSound('buff');
@@ -2422,10 +2429,11 @@ const App: React.FC = () => {
                              if (relic.id === 'SOZU') newP.maxEnergy += 1;
                              if (relic.id === 'CURSED_KEY') newP.maxEnergy += 1;
                              if (relic.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
+                             if (relic.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
                              if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
                              if (relic.id === 'OLD_COIN') newP.gold += 300;
-                             if (relic.id === 'MATRYOSHKA') newP.relicCounters['MATRYOSHKA'] = 2; // Init Counter
-                             if (relic.id === 'HAPPY_FLOWER') newP.relicCounters['HAPPY_FLOWER'] = 0; // Init Counter
+                             if (relic.id === 'MATRYOSHKA') p.relicCounters['MATRYOSHKA'] = 2; // Init Counter
+                             if (relic.id === 'HAPPY_FLOWER') p.relicCounters['HAPPY_FLOWER'] = 0; // Init Counter
                              return { ...prev, player: newP };
                          });
                          storageService.saveUnlockedRelic(relic.id);
@@ -2493,8 +2501,8 @@ const App: React.FC = () => {
                                     if (r.value.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
                                     if (r.value.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
                                     if (r.value.id === 'OLD_COIN') newP.gold += 300;
-                                    if (r.value.id === 'MATRYOSHKA') newP.relicCounters['MATRYOSHKA'] = 2; // Init Counter
-                                    if (r.value.id === 'HAPPY_FLOWER') newP.relicCounters['HAPPY_FLOWER'] = 0; // Init Counter
+                                    if (r.value.id === 'MATRYOSHKA') p.relicCounters['MATRYOSHKA'] = 2; // Init Counter
+                                    if (r.value.id === 'HAPPY_FLOWER') p.relicCounters['HAPPY_FLOWER'] = 0; // Init Counter
                                 }
                             });
 
