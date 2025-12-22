@@ -156,7 +156,7 @@ const GARDENER_SVG = `
   <path d="M10 7h1v1h-1zM13 7h1v1h-1z" fill="#3e2723"/>
   <path d="M8 10h8v6H8z" fill="#aed581"/> <!-- Shirt -->
   <path d="M10 11h4v4h-4z" fill="#c5e1a5"/>
-  <path d="M6 10h2v4H6zM16 10h2v4h-2z" fill="#ffccbc"/>
+  <path d="M6 10h2v4H6z" fill="#ffccbc"/>
   <path d="M17 12h4v3h-4z" fill="#81c784"/> <!-- Can -->
   <path d="M8 16h8v3H8z" fill="#558b2f"/> <!-- Pants -->
   <path d="M9 19h2v3H9zM13 19h2v3h-2z" fill="#795548"/> <!-- Boots -->
@@ -226,7 +226,7 @@ export const ENEMY_LIBRARY: Record<string, { name: string, description: string, 
     "禁断の参考書": { name: "禁断の参考書", description: "開くと頭がおかしくなる本。", tier: 3 },
     "校舎の古龍": { name: "校舎の古龍", description: "開校以来、地下に眠っていたドラゴン。", tier: 3 },
     "時間を食べる時計": { name: "時間を食べる時計", description: "授業時間を永遠に引き伸ばす。", tier: 3 },
-    "異界からの転校生": { name: "異界からの転校生", description: "教科書には載っていない魔法を使う。", tier: 3 },
+    "异界からの転校生": { name: "異界からの転校生", description: "教科書には載っていない魔法を使う。", tier: 3 },
     "校長先生": { name: "校長先生", description: "この学校の全てを統べるラスボス。話が長い。", tier: 3 },
 };
 
@@ -244,7 +244,7 @@ export const RELIC_LIBRARY: Record<string, Relic> = {
     
     TAKETOMBO: { id: 'TAKETOMBO', name: '竹とんぼ', description: 'ポーションを使用する度、HPを5回復する。', rarity: 'COMMON', price: 150 },
     KINJIRO_STATUE: { id: 'KINJIRO_STATUE', name: '二宮金次郎像', description: '戦闘報酬で必ずポーションが出現する。', rarity: 'UNCOMMON', price: 250 },
-    TEA_SERVER: { id: 'TEA_SERVER', name: '給茶機', description: '休憩所に入ると、次の戦闘開始時にエネルギー+2を得る。', rarity: 'COMMON', price: 150 },
+    CALCULATOR: { id: 'CALCULATOR', name: '計算機', description: '算数チャレンジで1問正解するごとにHPを2回復する。', rarity: 'COMMON', price: 150 },
     LUXURY_FUTON: { id: 'LUXURY_FUTON', name: '高級羽毛布団', description: '休憩所に入った時、デッキ5枚につきHP2回復。', rarity: 'UNCOMMON', price: 200 },
 
     VAJRA: { id: 'VAJRA', name: '金の定規', description: '戦闘開始時、ムキムキ1を得る。', rarity: 'COMMON', price: 150 },
@@ -355,7 +355,7 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
   IRON_WAVE: { name: '上履きキック', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '5ダメージ。ブロック5を得る。', damage: 5, block: 5, rarity: 'COMMON', textureRef: 'SHOE|青|ATTACK' },
   HEADBUTT: { name: '頭突き', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '9ダメージ。自傷2ダメージ。', damage: 9, selfDamage: 2, rarity: 'COMMON', textureRef: 'HUMANOID|赤|ATTACK' },
   CLOTHESLINE: { name: 'ラリアット', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '12ダメージ。対象にへろへろ2を与える。', damage: 12, weak: 2, rarity: 'COMMON', textureRef: 'FIST|灰|ATTACK' },
-  DAGGER_THROW: { name: 'チョーク投げ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '9ダメージ。カードを1枚引く。', damage: 9, draw: 1, rarity: 'COMMON', textureRef: 'SWORD|白|ATTACK' },
+  DAGGER_THROW: { name: 'チョーク投げ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '9ダメージ。カードを1枚引く。', damage: 9, draw: 1, rarity: 'COMMON', textureRef: 'DAGGER|白|ATTACK' },
   THUNDERCLAP: { name: '大声', cost: 1, type: CardType.ATTACK, target: TargetType.ALL_ENEMIES, description: '敵全体に4ダメージとびくびく1。', damage: 4, vulnerable: 1, rarity: 'COMMON', textureRef: 'LIGHTNING|黄|ATTACK' },
   TWIN_STRIKE: { name: '往復ビンタ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '5ダメージを2回与える。', damage: 5, playCopies: 1, rarity: 'COMMON', textureRef: 'FIST|赤|ATTACK' },
   POMMEL_STRIKE: { name: '定規で叩く', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '9ダメージ。カード1枚引く。', damage: 9, draw: 1, rarity: 'COMMON', textureRef: 'SWORD|灰|ATTACK' },

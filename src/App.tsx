@@ -706,11 +706,7 @@ const App: React.FC = () => {
             if (p.relics.find(r => r.id === 'BLOOD_VIAL')) p.currentHp = Math.min(p.maxHp, p.currentHp + 2);
             if (p.relics.find(r => r.id === 'BIG_LADLE')) p.currentHp = Math.min(p.maxHp, p.currentHp + 4);
             if (node.type === NodeType.BOSS && p.relics.find(r => r.id === 'PENTOGRAPH')) p.currentHp = Math.min(p.maxHp, p.currentHp + 25);
-            if (p.relics.find(r => r.id === 'TEA_SERVER') && p.relicCounters['TEA_SERVER_ACTIVE']) {
-                p.currentEnergy += 2;
-                p.relicCounters['TEA_SERVER_ACTIVE'] = 0; 
-                p.floatingText = { id: `tea-${Date.now()}`, text: 'お茶パワー！', color: 'text-green-400', iconType: 'zap' };
-            }
+            
             if (p.relics.find(r => r.id === 'ANCIENT_TEA_SET') && p.relicCounters['ANCIENT_TEA_SET_ACTIVE']) {
                 p.currentEnergy += 2;
                 p.relicCounters['ANCIENT_TEA_SET_ACTIVE'] = 0;
@@ -790,9 +786,6 @@ const App: React.FC = () => {
                     if (heal > 0) {
                         p.currentHp = Math.min(p.maxHp, p.currentHp + heal);
                     }
-                }
-                if (p.relics.find(r => r.id === 'TEA_SERVER')) {
-                    p.relicCounters['TEA_SERVER_ACTIVE'] = 1;
                 }
                 if (p.relics.find(r => r.id === 'ANCIENT_TEA_SET')) {
                     p.relicCounters['ANCIENT_TEA_SET_ACTIVE'] = 1;
@@ -1853,7 +1846,7 @@ const App: React.FC = () => {
         }
         
         p.hand.forEach(c => {
-            if (c.name === 'やけど' || c.name === 'BURN') { p.currentHp -= 2; newLogs.push("やけどダメージ"); }
+            if (c.name === 'やけど' || c.name === 'BURN') { p.currentHp -= 2; newLogs.push("やほどダメージ"); }
             if (c.name === '虫歯' || c.name === 'DECAY') { p.currentHp -= 2; newLogs.push("虫歯ダメージ"); }
             if (c.name === '不安' || c.name === 'DOUBT') p.powers['WEAK'] = (p.powers['WEAK'] || 0) + 1;
             if (c.name === '恥' || c.name === 'SHAME') p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + 1;
@@ -2069,6 +2062,21 @@ const App: React.FC = () => {
       else if (correctCount === 2) bonusGold = 30;
       else if (correctCount === 3) bonusGold = 50;
       
+      // レリック「計算機」の効果: 正解数に応じてHP回復
+      if (gameState.player.relics.find(r => r.id === 'CALCULATOR')) {
+          const healAmount = correctCount * 2;
+          if (healAmount > 0) {
+              setGameState(prev => ({
+                  ...prev,
+                  player: {
+                      ...prev.player,
+                      currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + healAmount),
+                      floatingText: { id: `calc-heal-${Date.now()}`, text: `+${healAmount} HP`, color: 'text-green-500', iconType: 'heart' }
+                  }
+              }));
+          }
+      }
+
       // Update Total Math Count (UI Only, storage updated inside component)
       setTotalMathCorrect(prev => prev + correctCount);
 
@@ -2352,7 +2360,7 @@ const App: React.FC = () => {
             {gameState.screen === GameScreen.CHARACTER_SELECTION && (
                 <CharacterSelectionScreen 
                     characters={CHARACTERS} 
-                    unlockedCount={Math.min(CHARACTERS.length, clearCount + 2)} 
+                    unlockedCount={isDebugHpOne ? CHARACTERS.length : Math.min(CHARACTERS.length, clearCount + 2)} 
                     onSelect={handleCharacterSelect} 
                     challengeMode={gameState.challengeMode}
                     languageMode={languageMode}
