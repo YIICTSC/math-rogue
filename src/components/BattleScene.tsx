@@ -128,6 +128,9 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
   // Check if dual mode is active
   const isDualMode = !!player.partner && player.partner.currentHp > 0;
+  
+  // Get latest 2 logs
+  const latestLogs = [...combatLog].reverse().slice(0, 2);
 
   useEffect(() => {
     if (lastActionTime > 0) {
@@ -315,14 +318,39 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   return (
     <div className="flex flex-col h-full relative bg-gray-900 overflow-hidden">
       
-      {/* 1. Top Bar: Narrative (Compact) */}
-      <div className="h-8 shrink-0 bg-black border-b-2 border-gray-700 flex items-center px-4 text-xs text-green-400 overflow-hidden whitespace-nowrap justify-between z-30">
-        <span className="truncate mr-4"><span className="animate-pulse mr-2">&gt;&gt;</span> {trans(narrative, languageMode)}</span>
-        <div className="flex gap-2 items-center">
-            <span className="text-yellow-400 hidden sm:inline">{trans(turnLog, languageMode)}</span>
+      {/* 1. Top Bar: Narrative & Logs (Expanded) */}
+      <div className="shrink-0 bg-black border-b-2 border-gray-700 p-2 z-30 relative min-h-[4rem] flex flex-col justify-center shadow-md">
+        <div className="flex flex-col w-full pr-24 overflow-hidden">
+            {/* Narrative (Primary Context) */}
+            <div className="text-xs text-green-400 truncate leading-snug mb-0.5 font-bold shadow-black drop-shadow-md">
+                <span className="animate-pulse mr-2">&gt;&gt;</span> {trans(narrative, languageMode)}
+            </div>
+            
+            {/* Recent Logs */}
+            {latestLogs.length > 0 ? (
+                <>
+                    <div className="text-[10px] text-gray-200 truncate leading-snug">
+                        {trans(latestLogs[0], languageMode)}
+                    </div>
+                    {latestLogs.length > 1 && (
+                        <div className="text-[10px] text-gray-500 truncate leading-snug">
+                            {trans(latestLogs[1], languageMode)}
+                        </div>
+                    )}
+                </>
+            ) : (
+                <div className="text-[10px] text-gray-600 italic leading-snug">...</div>
+            )}
+        </div>
+
+        {/* Right Side Controls (Absolute) */}
+        <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
+            <div className="text-yellow-400 text-[10px] font-bold bg-gray-900/80 px-2 py-0.5 rounded border border-yellow-700 shadow-sm">
+                {trans(turnLog, languageMode)}
+            </div>
             <button 
                 onClick={() => setShowLog(!showLog)}
-                className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border ${showLog ? 'bg-gray-700 border-gray-500 text-white' : 'bg-black border-gray-600 text-gray-400 hover:text-white'}`}
+                className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold border transition-colors ${showLog ? 'bg-gray-700 border-gray-500 text-white' : 'bg-black/50 border-gray-600 text-gray-400 hover:text-white hover:border-gray-400'}`}
             >
                 <FileText size={10}/> LOG
             </button>
