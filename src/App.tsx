@@ -1906,43 +1906,32 @@ const App: React.FC = () => {
             audioService.stopBGM();
             audioService.playSound('win');
             
-            let hpRegen = 0;
-            if (gameState.player.relics.find(r => r.id === 'BURNING_BLOOD')) hpRegen = 6;
-            if (gameState.player.relics.find(r => r.id === 'MEAT_ON_THE_BONE') && gameState.player.currentHp <= gameState.player.maxHp / 2) hpRegen += 12;
-            
-            if (hpRegen > 0) {
-                setGameState(prev => ({ 
-                    ...prev, 
-                    player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + hpRegen) }
-                }));
-            }
-            
-            if (gameState.player.partner) {
-                setGameState(prev => prev.player.partner ? ({
-                    ...prev,
-                    player: {
-                        ...prev.player,
-                        partner: {
-                            ...prev.player.partner,
-                            currentHp: Math.min(prev.player.partner.maxHp, prev.player.partner.currentHp + 5) 
-                        }
-                    }
-                }) : prev);
-            }
+            setGameState(prev => {
+                let hpRegen = 0;
+                if (prev.player.relics.find(r => r.id === 'BURNING_BLOOD')) hpRegen = 6;
+                if (prev.player.relics.find(r => r.id === 'MEAT_ON_THE_BONE') && prev.player.currentHp <= prev.player.maxHp / 2) hpRegen += 12;
+                
+                const nextPlayer = { ...prev.player };
+                if (hpRegen > 0) {
+                    nextPlayer.currentHp = Math.min(nextPlayer.maxHp, nextPlayer.currentHp + hpRegen);
+                }
+                
+                if (nextPlayer.partner) {
+                    nextPlayer.partner = {
+                        ...nextPlayer.partner,
+                        currentHp: Math.min(nextPlayer.partner.maxHp, nextPlayer.partner.currentHp + 5) 
+                    };
+                }
 
-            const victoryTimer = setTimeout(() => {
-                setGameState(prev => {
-                    if (prev.act === 4) {
-                        audioService.playBGM('victory');
-                        return { ...prev, screen: GameScreen.ENDING };
-                    } else {
-                        return { ...prev, screen: GameScreen.MATH_CHALLENGE };
-                    }
-                });
-            }, 1200);
-
-            return () => clearTimeout(victoryTimer);
-            
+                // 即座にVICTORY画面へ遷移させることで、このuseEffectが何度も実行されるのを防ぐ
+                if (prev.act === 4) {
+                    audioService.playBGM('victory');
+                    return { ...prev, player: nextPlayer, screen: GameScreen.ENDING };
+                } else {
+                    // 勝利画面をスキップして直接計算チャレンジへ
+                    return { ...prev, player: nextPlayer, screen: GameScreen.MATH_CHALLENGE };
+                }
+            });
         } else if (gameState.player.currentHp <= 0) {
             if (gameState.player.relics.find(r => r.id === 'LIZARD_TAIL') && !gameState.player.relicCounters['LIZARD_TAIL_USED']) {
                 audioService.playSound('buff');
@@ -2505,22 +2494,6 @@ const App: React.FC = () => {
                     onLeave={handleNodeComplete}
                     hasCursedKey={!!gameState.player.relics.find(r => r.id === 'CURSED_KEY')}
                 />
-            )}
-
-            {gameState.screen === GameScreen.VICTORY && (
-                 <div className="w-full h-full bg-green-900 flex items-center justify-center text-center text-white p-4">
-                    <div className="max-w-xs w-full bg-black/60 p-8 border-4 border-yellow-500 rounded-xl shadow-2xl animate-in zoom-in duration-300">
-                        <Trophy size={64} className="text-yellow-400 mx-auto mb-4 animate-bounce" />
-                        <h1 className="text-4xl mb-4 text-yellow-400 font-bold tracking-widest">{trans("勝利", languageMode)}！</h1>
-                        <p className="text-gray-300 mb-8 font-bold leading-relaxed">放課後の試練を一つ乗り越えた。<br/>次はボーナステストだ！</p>
-                        <button 
-                            onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.MATH_CHALLENGE }))} 
-                            className="bg-yellow-600 hover:bg-yellow-500 px-8 py-4 border-2 border-white font-bold animate-pulse cursor-pointer w-full flex items-center justify-center shadow-lg transform transition-transform active:scale-95"
-                        >
-                            <Brain className="mr-2" /> テストを受ける
-                        </button>
-                    </div>
-                 </div>
             )}
 
             {gameState.screen === GameScreen.GAME_OVER && (
