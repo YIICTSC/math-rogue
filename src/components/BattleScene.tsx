@@ -1,3 +1,4 @@
+
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
 import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles } from 'lucide-react';
@@ -50,7 +51,7 @@ const POWER_DEFINITIONS: Record<string, {name: string, desc: string}> = {
     ECHO_FORM: { name: "予習復習", desc: "各ターン、最初にプレイしたカードを2回使用する。" },
     BARRICADE: { name: "秘密基地", desc: "ターン開始時にブロックが消えなくなる。" },
     NOXIOUS_FUMES: { name: "異臭騒ぎ", desc: "ターン開始時、敵全体をドクドクにする。" },
-    INFINITE_BLADES: { name: '鉛筆削り', desc: 'ターン開始時、手札にナイフを加える。' },
+    INFINITE_BLADES: { name: '鉛筆削り', desc: 'ターン開始時、手札にえんぴつの削りかすを加える。' },
     AFTER_IMAGE: { name: '反復横跳び', desc: 'カードを使用する度、ブロック1を得る。' },
     THOUSAND_CUTS: { name: '千本ノック', desc: 'カードを使用する度、敵全体にダメージを与える。' },
     TOOLS_OF_THE_TRADE: { name: '整理整頓', desc: 'ターン開始時、1枚引いて1枚捨てる。' },
@@ -67,7 +68,7 @@ const POWER_DEFINITIONS: Record<string, {name: string, desc: string}> = {
     RUPTURE: { name: '成長痛', desc: 'HPを失った時、ムキムキを得る。' },
     EVOLVE: { name: '進級', desc: '状態異常カードを引いた時、カードを引く。' },
     APOTHEOSIS: { name: '覚醒', desc: 'デッキの全てのカードがアップグレードされる。' },
-    ACCURACY: { name: '集中力', desc: 'ナイフのダメージが増加する。' },
+    ACCURACY: { name: '集中力', desc: 'えんぴつの削りかすのダメージが増加する。' },
     STRATEGIST: { name: 'カンニングペーパー', desc: 'このカードが捨てられた時、エネルギーを得る。' },
     INFLAME: { name: 'やる気スイッチ', desc: 'ムキムキを得る。' },
 };
@@ -114,7 +115,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   const [isActing, setIsActing] = useState(false);
   const [showDeck, setShowDeck] = useState(false);
   const [showRelicList, setShowRelicList] = useState(false);
-  const [tooltip, setTooltip] = useState<{title: string, msg: string} | null>(null); // Fixed type name to match usage
+  const [tooltip, setTooltip] = useState<{title: string, msg: string} | null>(null); 
   const [potionConfirmation, setPotionConfirmation] = useState<Potion | null>(null);
   const [inspectedCard, setInspectedCard] = useState<ICard | null>(null);
   const [showLog, setShowLog] = useState(false);
@@ -178,11 +179,12 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   };
 
   const showInfo = (title: string, desc: string) => {
-      setTooltip({ title, msg: desc }); // Ensure property names match
+      setTooltip({ title, msg: desc });
   };
 
   const getProcessedDescription = (card: ICard) => {
       let desc = trans(card.description, languageMode);
+      desc = desc.replace(/自傷/g, trans("自分にダメージ", languageMode));
       if (card.damage !== undefined) desc = desc.replace(/(\d+)ダメージ/g, `${card.damage}${trans("ダメージ", languageMode)}`);
       if (card.block !== undefined) desc = desc.replace(/ブロック(\d+)/g, `${trans("ブロック", languageMode)}${card.block}`);
       return desc;

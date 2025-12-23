@@ -1,5 +1,4 @@
 
-
 import { Card, CardType, TargetType } from '../types';
 
 // Helper to determine the visual shape of a card for synthesis
@@ -228,7 +227,7 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
           if (newTotalHits > 1) {
               text += `を${newTotalHits}回`;
           }
-          if (newStrengthScaling > 1) text += `(筋力${newStrengthScaling}倍)`;
+          if (newStrengthScaling > 1) text += `(ムキムキ${newStrengthScaling}倍)`;
           parts.push(text);
       }
       
@@ -252,7 +251,7 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
       
       if (newLifesteal) parts.push("HP吸収");
       if (newDoubleBlock) parts.push("ブロック2倍");
-      if (newDoubleStrength) parts.push("筋力2倍");
+      if (newDoubleStrength) parts.push("ムキムキ2倍");
       if (newCapture) parts.push("捕獲");
       if (newUpgradeHand) parts.push("手札全体を強化");
       if (newUpgradeDeck) parts.push("デッキ全体を強化");
@@ -267,9 +266,9 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
       if (newPromptsCopy > 0) parts.push("カードをコピー");
       
       // Fatal Effects
-      if (newFatalEnergy > 0) parts.push(`撃破時E${newFatalEnergy}`);
-      if (newFatalPermanentDamage > 0) parts.push(`撃破時威力+${newFatalPermanentDamage}`);
-      if (newFatalMaxHp > 0) parts.push(`撃破時最大HP+${newFatalMaxHp}`);
+      if (newFatalEnergy > 0) parts.push(`解決時E${newFatalEnergy}`);
+      if (newFatalPermanentDamage > 0) parts.push(`解決時威力+${newFatalPermanentDamage}`);
+      if (newFatalMaxHp > 0) parts.push(`解決時最大HP+${newFatalMaxHp}`);
 
       // Next Turn
       if (newNextTurnEnergy > 0) parts.push(`次ターンE+${newNextTurnEnergy}`);

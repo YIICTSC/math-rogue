@@ -952,7 +952,7 @@ const App: React.FC = () => {
           } else if (potion.templateId === 'LIQUID_BRONZE') {
               p.powers['THORNS'] = (p.powers['THORNS'] || 0) + 3;
               newLogs.push(`${trans("トゲトゲ", languageMode)}+3`);
-          } else if (potion.templateId === 'GAMBLERS_BREW') {
+          } else if (potion.templateId === 'GAMBLE') {
               const discardCount = p.hand.length;
               p.discardPile = [...p.discardPile, ...p.hand];
               p.hand = [];
@@ -1217,7 +1217,7 @@ const App: React.FC = () => {
                                  if (other.id !== e.id) {
                                      other.currentHp -= e.maxHp; 
                                      other.floatingText = { id: `expl-${Date.now()}`, text: `${e.maxHp}`, color: 'text-green-400' };
-                                     currentLogs.push(`${trans("死体爆破", languageMode)}: ${trans(other.name, languageMode)}に${e.maxHp}${trans("ダメージ", languageMode)}`);
+                                     currentLogs.push(`${trans("衝撃のうわさ", languageMode)}: ${trans(other.name, languageMode)}に${e.maxHp}${trans("ダメージ", languageMode)}`);
                                  }
                              });
                          }
@@ -1308,7 +1308,7 @@ const App: React.FC = () => {
                   p.powers[card.applyPower.id] = (p.powers[card.applyPower.id] || 0) + card.applyPower.amount;
                   if (card.applyPower.id === 'CORPSE_EXPLOSION' && targets.length > 0) {
                       targets.forEach(e => e.corpseExplosion = true);
-                      currentLogs.push(trans("死体爆破を付与", languageMode));
+                      currentLogs.push(trans("衝撃のうわさを付与", languageMode));
                   }
               }
               if (card.draw) {
@@ -1352,15 +1352,15 @@ const App: React.FC = () => {
               if (card.nextTurnDraw) p.nextTurnDraw += card.nextTurnDraw;
               if (card.nextTurnEnergy) p.nextTurnEnergy += card.nextTurnEnergy;
 
-              if (card.name === '退学処分' || card.name === 'EXPULSION') {
+              if (card.name === '早退' || card.name === 'EXPULSION') {
                   const threshold = card.upgraded ? 40 : 30;
                   targets.forEach(e => {
                       if (e.currentHp <= threshold) {
                           e.currentHp = 0;
-                          currentLogs.push(`${trans(e.name, languageMode)}は${trans("退学", languageMode)}になった！`);
-                          e.floatingText = { id: `kill-${Date.now()}`, text: '退学!', color: 'text-red-600', iconType: 'skull' };
+                          currentLogs.push(`${trans(e.name, languageMode)}は${trans("早退", languageMode)}になった！`);
+                          e.floatingText = { id: `kill-${Date.now()}`, text: '早退!', color: 'text-red-600', iconType: 'skull' };
                       } else {
-                          currentLogs.push(`${trans(e.name, languageMode)}は${trans("退学", languageMode)}を免れた`);
+                          currentLogs.push(`${trans(e.name, languageMode)}は${trans("早退", languageMode)}を免れた`);
                       }
                   });
               }
@@ -1402,9 +1402,9 @@ const App: React.FC = () => {
           let shouldExhaust = card.exhaust;
           if (card.type === CardType.SKILL && p.powers['CORRUPTION']) shouldExhaust = true;
     
-          if (card.name === '八つ当たり' || card.name === 'YATSUATARI') {
+          if (card.name === 'むしゃくしゃ' || card.name === 'YATSUATARI') {
               card.damage = (card.damage || 0) + 5;
-              currentLogs.push("八つ当たりの怒りが増した！");
+              currentLogs.push("むしゃくしゃの怒りが増した！");
           }
     
           if (!shouldExhaust && !(card.type === CardType.POWER) && !(card.promptsExhaust === 99)) {
@@ -1421,7 +1421,7 @@ const App: React.FC = () => {
                   const cardsToExhaust = p.hand.filter(c => c.type !== CardType.ATTACK);
                   if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'] * cardsToExhaust.length;
                   p.hand = p.hand.filter(c => c.type === CardType.ATTACK);
-              } else if (card.name === '焚き火' || card.name === 'FIEND_FIRE') {
+              } else if (card.name === '大掃除' || card.name === 'FIEND_FIRE') {
                    if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'] * p.hand.length;
                    p.hand = [];
               }

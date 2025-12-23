@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Card as CardType, CardType as EnumCardType, LanguageMode } from '../types';
 import PixelSprite from './PixelSprite';
@@ -140,6 +141,8 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
 
   const renderDescription = () => {
       let desc = trans(card.description, languageMode);
+      // 置換処理の強化
+      desc = desc.replace(/自傷/g, trans("自分にダメージ", languageMode));
       if (card.damage !== undefined) desc = desc.replace(/(\d+)ダメージ/g, `${card.damage}${trans("ダメージ", languageMode)}`);
       if (card.block !== undefined) desc = desc.replace(/ブロック(\d+)/g, `${trans("ブロック", languageMode)}${card.block}`);
       if (card.poison !== undefined) desc = desc.replace(/ドクドク(\d+)/g, `${trans("ドクドク", languageMode)}${card.poison}`);
