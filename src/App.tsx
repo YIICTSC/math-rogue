@@ -398,6 +398,10 @@ const App: React.FC = () => {
           currentMapNodeId: null, 
           screen: GameScreen.MAP, 
           isEndless: true,
+          player: {
+              ...prev.player,
+              currentHp: prev.player.maxHp
+          },
           narrativeLog: [...prev.narrativeLog, trans("終わらない冒険が始まる...", languageMode)]
       }));
   };
@@ -999,7 +1003,7 @@ const App: React.FC = () => {
 
     // Normality Check
     const hasNormality = gameState.player.hand.some(c => c.name === '退屈' || c.name === 'NORMALITY');
-    if (hasNormality && gameState.player.cardsPlayedThisTurn >= 3) {
+    if (hasNormality && gameState.player.attacksPlayedThisTurn + (gameState.player.cardsPlayedThisTurn - gameState.player.attacksPlayedThisTurn) >= 3) {
          audioService.playSound('wrong'); 
          return; 
     }
@@ -1509,7 +1513,7 @@ const App: React.FC = () => {
 
       for (let i = 0; i < drawCount; i++) {
         if (newDrawPile.length === 0) {
-          if (newDiscardPile.length === 0) break;
+          if (newDiscardPile === undefined || newDiscardPile.length === 0) break;
           newDrawPile = shuffle(newDiscardPile);
           newDiscardPile = [];
         }
@@ -2106,7 +2110,11 @@ const App: React.FC = () => {
               map: newMap,
               currentMapNodeId: null,
               screen: GameScreen.MAP,
-              narrativeLog: [...prev.narrativeLog, trans(`第${nextAct}章へ進んだ。`, languageMode)]
+              player: {
+                  ...prev.player,
+                  currentHp: prev.player.maxHp // Act移行時にHP全回復
+              },
+              narrativeLog: [...prev.narrativeLog, trans(`第${nextAct}章へ進んだ。体力が全回復した！`, languageMode)]
           }));
           audioService.playBGM('map');
       } else {
@@ -2557,7 +2565,7 @@ const App: React.FC = () => {
                             <button onClick={startEndlessMode} className="bg-purple-900 border-4 border-purple-500 px-8 py-4 cursor-pointer text-xl hover:bg-purple-800 font-bold w-full max-w-sm shadow-[0_0_20px_rgba(168,85,247,0.5)] transform transition-transform hover:scale-105 active:scale-95 flex items-center justify-center animate-pulse">
                                 <Infinity className="mr-2" /> エンドレスモードへ (Act {gameState.act + 1})
                             </button>
-                            <button onClick={returnToTitle} className="bg-blue-600 border-2 border-white px-8 py-4 cursor-pointer text-xl hover:bg-blue-500 font-bold w-full max-w-sm shadow-lg transform transition-transform hover:scale-105 active:scale-95">
+                            <button onClick={returnToTitle} className="bg-blue-600 border-2 border-white px-8 py-4 cursor-pointer text-xl hover:bg-blue-500 font-bold w-full max-sm shadow-lg transform transition-transform hover:scale-105 active:scale-95">
                                 伝説となる ({trans("タイトルへ戻る", languageMode)})
                             </button>
                         </div>
