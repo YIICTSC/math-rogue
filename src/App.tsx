@@ -1053,7 +1053,7 @@ const App: React.FC = () => {
               p.typesPlayedThisTurn.includes(CardType.SKILL) && 
               p.typesPlayedThisTurn.includes(CardType.POWER)) {
               
-              if (p.powers['WEAK'] > 0) { p.powers['WEAK'] = 0; currentLogs.push(trans("へろへろ解除！", languageMode)); }
+              if (p.powers['WEAK'] > 0) { p.powers['WEAK'] = 0; currentLogs.push(trans("へろろから解除！", languageMode)); }
               if (p.powers['VULNERABLE'] > 0) { p.powers['VULNERABLE'] = 0; currentLogs.push(trans("びくびく解除！", languageMode)); }
               if (p.powers['FRAIL'] > 0) { p.powers['FRAIL'] = 0; currentLogs.push(trans("もろい解除！", languageMode)); } 
               
@@ -1164,9 +1164,9 @@ const App: React.FC = () => {
                         logParts.push(`${bonus >= 0 ? '+' : ''}${bonus}(${trans("ムキムキ", languageMode)})`);
                     }
 
-                    // Pen Nib Logic
+                    // Pen Nib Logic (ONLY if relic exists)
                     let multiplier = 1;
-                    if (card.type === CardType.ATTACK) {
+                    if (card.type === CardType.ATTACK && p.relics.find(r => r.id === 'PEN_NIB')) {
                         p.relicCounters['PEN_NIB'] = (p.relicCounters['PEN_NIB'] || 0) + 1;
                         // Trigger on 10th attack
                         if (p.relicCounters['PEN_NIB'] === 10) {
@@ -1417,11 +1417,11 @@ const App: React.FC = () => {
           if (card.promptsDiscard) nextSelectionState = { active: true, type: 'DISCARD', amount: card.promptsDiscard, originCardId: card.id };
           if (card.promptsCopy) nextSelectionState = { active: true, type: 'COPY', amount: card.promptsCopy, originCardId: card.id };
           if (card.promptsExhaust === 99) {
-              if (card.name === '断捨離' || card.name === 'SEVER_SOUL') {
+              if (card.name === '魂の切断' || card.name === 'SEVER_SOUL') {
                   const cardsToExhaust = p.hand.filter(c => c.type !== CardType.ATTACK);
                   if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'] * cardsToExhaust.length;
                   p.hand = p.hand.filter(c => c.type === CardType.ATTACK);
-              } else if (card.name === '大掃除' || card.name === 'FIEND_FIRE') {
+              } else if (card.name === '鬼火' || card.name === 'FIEND_FIRE') {
                    if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'] * p.hand.length;
                    p.hand = [];
               }
