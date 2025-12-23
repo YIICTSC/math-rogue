@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Card as CardType, CardType as EnumCardType, LanguageMode } from '../types';
 import PixelSprite from './PixelSprite';
@@ -178,11 +177,11 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
     >
       {/* Tooltip */}
       {showTooltip && activeKeywords.length > 0 && !onInspect && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-56 bg-black border-4 border-white p-3 z-[100] shadow-2xl pointer-events-none rounded-lg">
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-6 w-64 bg-black/95 border-4 border-white p-3 z-[200] shadow-[0_0_20px_rgba(0,0,0,0.8)] pointer-events-none rounded-lg backdrop-blur-sm animate-in fade-in zoom-in duration-150">
           {activeKeywords.map((k, idx) => (
             <div key={k.title} className={`text-left ${idx !== activeKeywords.length - 1 ? 'mb-2 border-b border-gray-700 pb-1' : ''}`}>
               <div className="text-yellow-400 font-bold text-sm">{trans(k.title, languageMode)}</div>
-              <div className="text-gray-300 text-xs leading-relaxed">{trans(k.desc, languageMode)}</div>
+              <div className="text-gray-300 text-xs leading-relaxed whitespace-normal break-words">{trans(k.desc, languageMode)}</div>
             </div>
           ))}
           <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-white"></div>

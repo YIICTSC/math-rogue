@@ -1,5 +1,3 @@
-
-import React, { useEffect, useState, useRef } from 'react';
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
 import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles } from 'lucide-react';
@@ -8,6 +6,7 @@ import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
 import { HERO_IMAGE_DATA, CARDS_LIBRARY, STATUS_CARDS } from '../constants';
 import { getUpgradedCard, synthesizeCards } from '../utils/cardUtils';
+import React, { useEffect, useState, useRef } from 'react';
 
 interface BattleSceneProps {
   player: Player;
@@ -115,7 +114,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   const [isActing, setIsActing] = useState(false);
   const [showDeck, setShowDeck] = useState(false);
   const [showRelicList, setShowRelicList] = useState(false);
-  const [tooltip, setTooltip] = useState<{title: string, desc: string} | null>(null);
+  const [tooltip, setTooltip] = useState<{title: string, msg: string} | null>(null); // Fixed type name to match usage
   const [potionConfirmation, setPotionConfirmation] = useState<Potion | null>(null);
   const [inspectedCard, setInspectedCard] = useState<ICard | null>(null);
   const [showLog, setShowLog] = useState(false);
@@ -179,7 +178,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   };
 
   const showInfo = (title: string, desc: string) => {
-      setTooltip({ title, desc });
+      setTooltip({ title, msg: desc }); // Ensure property names match
   };
 
   const getProcessedDescription = (card: ICard) => {
@@ -515,7 +514,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4" onClick={() => setTooltip(null)}>
                 <div className="bg-black border-2 border-white p-4 rounded max-w-xs shadow-2xl animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
                     <h3 className="text-yellow-400 font-bold mb-2 text-lg border-b border-gray-600 pb-1">{trans(tooltip.title, languageMode)}</h3>
-                    <p className="text-white text-sm whitespace-pre-wrap">{trans(tooltip.desc, languageMode)}</p>
+                    <p className="text-white text-sm whitespace-pre-wrap">{trans(tooltip.msg, languageMode)}</p>
                     <button onClick={() => setTooltip(null)} className="mt-4 w-full bg-gray-700 hover:bg-gray-600 text-white text-xs py-2 rounded">{trans("閉じる", languageMode)}</button>
                 </div>
             </div>
@@ -798,10 +797,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
           </button>
       </div>
 
-      {/* 4. Hand Area (Horizontal Scroll) */}
+      {/* 4. Hand Area (Horizontal Scroll + Fan Animation) */}
       <div className={`h-52 md:h-64 bg-gray-900 border-t border-gray-700 relative z-10 ${selectionState.active ? 'bg-blue-900/20' : ''}`}>
-        <div className="w-full h-full overflow-x-auto overflow-y-hidden whitespace-nowrap px-2 flex items-end pb-4 gap-2 custom-scrollbar touch-pan-x">
-            {player.hand.map((card) => {
+        <div className="group/hand w-full h-full overflow-x-auto px-10 flex items-end justify-start md:justify-center pb-8 custom-scrollbar touch-pan-x" style={{ overflowY: 'visible' }}>
+            {player.hand.map((card, i) => {
                 // Check for special disabling conditions
                 const isClashDisabled = card.playCondition === 'HAND_ONLY_ATTACKS' && player.hand.some(c => c.type !== CardType.ATTACK && c.id !== card.id);
                 const isGrandFinaleDisabled = card.playCondition === 'DRAW_PILE_EMPTY' && player.drawPile.length > 0;
@@ -812,11 +811,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 const isSelectedDual = isDualMode && selectedCardIds.includes(card.id);
                 const isSelectedActive = selectionState.active;
                 
-                // Calculate Combo Cost for UI Hint
-                let currentDualCost = card.cost;
-                // In dual mode, if one card is selected, show cost info or combo hint?
-                // For now, keeping standard display.
-
                 const specialDisabled = isClashDisabled || isGrandFinaleDisabled || isChokerDisabled || isNormalityDisabled;
                 
                 // Visual Cost Override for Corruption
@@ -825,8 +819,25 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     displayCard.cost = 0;
                 }
 
+                // Fan Effect Calculation
+                const mid = (player.hand.length - 1) / 2;
+                const dist = i - mid;
+                const rotation = dist * 2.5; // Slight fan angle
+                const translateY = Math.abs(dist) * 4; // Curve down slightly at edges
+
                 return (
-                    <div key={card.id} className={`inline-block align-middle transition-transform duration-200 w-28 h-40 md:w-32 md:h-48 shrink-0 relative ${isSelectedActive || isSelectedDual ? 'cursor-pointer -translate-y-4 z-20' : 'hover:-translate-y-2'}`}>
+                    <div 
+                        key={card.id} 
+                        className={`inline-block align-middle transition-all duration-500 ease-out w-28 h-40 md:w-32 md:h-48 shrink-0 relative 
+                            -ml-20 first:ml-0 md:ml-0 
+                            group-hover/hand:-ml-2 group-active/hand:-ml-2 
+                            ${isSelectedActive || isSelectedDual ? 'cursor-pointer -translate-y-8 z-30 scale-110' : 'hover:-translate-y-4 hover:z-20'}
+                        `}
+                        style={{
+                            transform: isSelectedActive || isSelectedDual ? 'translateY(-32px) scale(1.1)' : `rotate(${rotation}deg) translateY(${translateY}px)`,
+                            zIndex: isSelectedActive || isSelectedDual ? 40 : 10 + i
+                        }}
+                    >
                         {/* Selection Indicator for Dual Mode */}
                         {isDualMode && isSelectedDual && (
                              <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-white shadow-lg z-30 animate-bounce">
@@ -864,7 +875,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 );
             })}
             {/* Spacer for right side of scroll */}
-            <div className="w-4 shrink-0"></div>
+            <div className="w-20 shrink-0"></div>
         </div>
       </div>
 

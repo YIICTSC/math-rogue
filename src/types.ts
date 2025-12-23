@@ -170,6 +170,7 @@ export interface Partner {
 }
 
 export interface Player {
+  id?: string; // Character identifier (e.g. 'MAGE')
   maxHp: number;
   currentHp: number;
   maxEnergy: number;

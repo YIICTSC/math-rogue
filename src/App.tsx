@@ -490,6 +490,7 @@ const App: React.FC = () => {
       // 共通プレイヤー初期化
       const initialPlayerState = {
           ...gameState.player,
+          id: char.id, // Character ID set correctly here
           maxHp: char.maxHp,
           currentHp: char.maxHp,
           gold: char.gold,
@@ -601,7 +602,6 @@ const App: React.FC = () => {
   };
 
   const handleNodeSelect = async (node: MapNode) => {
-      // ... existing node select logic ...
       setIsLoading(true);
       audioService.playSound('select');
       
@@ -736,8 +736,9 @@ const App: React.FC = () => {
             if (p.relics.find(r => r.id === 'SNAKE_RING')) drawCount += 2;
 
             for(let i=0; i<drawCount; i++) {
-                const c = p.drawPile.pop();
-                if(c) p.hand.push(c);
+                const c = p.hand.find(x => false); // DUMMY
+                const drawn = p.drawPile.pop();
+                if(drawn) p.hand.push(drawn);
             }
             
             if (p.relics.find(r => r.id === 'ENCHIRIDION')) {
@@ -778,7 +779,6 @@ const App: React.FC = () => {
             setTurnLog(trans("あなたのターン", languageMode));
 
         } else if (node.type === NodeType.REST) {
-            // ... (Rest logic same) ...
             setGameState(prev => {
                 const p = { ...prev.player };
                 if (p.relics.find(r => r.id === 'LUXURY_FUTON')) {
@@ -795,7 +795,6 @@ const App: React.FC = () => {
             audioService.playBGM('rest');
 
         } else if (node.type === NodeType.SHOP) {
-            // ... (Shop logic same) ...
             const shopCandidates = Object.values(CARDS_LIBRARY).filter(c => 
                 c.type !== CardType.STATUS && 
                 c.type !== CardType.CURSE && 
@@ -829,7 +828,6 @@ const App: React.FC = () => {
             audioService.playBGM('shop');
 
         } else if (node.type === NodeType.EVENT) {
-            // イベント生成ロジックを eventService に委譲
             const ev = generateEvent(
                 nextState.player,
                 setGameState,
@@ -842,7 +840,6 @@ const App: React.FC = () => {
             setGameState({ ...nextState, screen: GameScreen.EVENT });
             audioService.playBGM('event');
         } else if (node.type === NodeType.TREASURE) {
-            // ... (Treasure logic same) ...
             const p = nextState.player;
             const matryoshkaCharges = p.relicCounters['MATRYOSHKA'] || 0;
             const numRelics = matryoshkaCharges > 0 ? 2 : 1;
@@ -1397,9 +1394,6 @@ const App: React.FC = () => {
              } else if (shouldExhaust || c.promptsExhaust === 99) {
                   if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
              }
-             
-             // Trigger discard/exhaust prompts if any? (Usually prompts happen on play, but here they are consumed as material)
-             // For simplicity, assume combo materials don't trigger prompts
           });
       } else {
           // Standard Single Card Logic
@@ -1446,7 +1440,7 @@ const App: React.FC = () => {
     setGameState(prev => {
       const p = { ...prev.player };
       
-      let extraEnergy = 0; // Added variable
+      let extraEnergy = 0; 
 
       if (p.powers['DEMON_FORM']) { 
           p.strength += p.powers['DEMON_FORM']; 
@@ -1538,7 +1532,6 @@ const App: React.FC = () => {
                     const extraCard = newDrawPile.pop();
                     if (extraCard) {
                         if (extraCard.name === '虚無' || extraCard.name === 'VOID') p.currentEnergy = Math.max(0, p.currentEnergy - 1);
-                        // Snecko Eye OR Confusion for extra drawn cards too
                         if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && extraCard.cost >= 0) {
                             extraCard.cost = Math.floor(Math.random() * 4);
                         }
@@ -1568,7 +1561,7 @@ const App: React.FC = () => {
           }
       }
 
-      let baseEnergy = p.maxEnergy + p.nextTurnEnergy + devaBonus + extraEnergy; // Add extraEnergy
+      let baseEnergy = p.maxEnergy + p.nextTurnEnergy + devaBonus + extraEnergy; 
       if (p.relics.find(r => r.id === 'ICE_CREAM')) {
           baseEnergy += p.currentEnergy;
       }
@@ -1744,15 +1737,12 @@ const App: React.FC = () => {
                 
                 // --- Partner Damage Logic ---
                 if (p.partner && p.partner.currentHp > 0) {
-                     // Randomly decide if player or partner takes damage
-                     // 50/50 chance for unblocked damage
                      if (unblockedDamage > 0 && Math.random() < 0.5) {
                          p.partner.currentHp -= unblockedDamage;
                          p.partner.floatingText = { id: `dmg-partner-${Date.now()}`, text: `-${unblockedDamage}`, color: 'text-red-500' };
                          newLogs.push(`${p.partner.name}がダメージを受けた！`);
                          if (p.partner.currentHp <= 0) {
                              newLogs.push(`${p.partner.name}が倒れた...`);
-                             // Partner doesn't revive
                              p.partner = undefined; 
                          }
                      } else {
@@ -1878,7 +1868,6 @@ const App: React.FC = () => {
   }
 
   const handleSynthesizeCard = (cards: ICard[]) => {
-      // 3枚まで対応。引数は可変長だが、synthesizeCardsの実装に合わせて展開する。
       const [c1, c2, c3] = cards;
       const newCard = synthesizeCards(c1, c2, c3);
       
@@ -1886,7 +1875,6 @@ const App: React.FC = () => {
           ...prev,
           player: {
               ...prev.player,
-              // 元のカードを除外
               deck: [...prev.player.deck.filter(c => !cards.some(target => target.id === c.id)), newCard]
           }
       }));
@@ -1929,7 +1917,6 @@ const App: React.FC = () => {
                 }));
             }
             
-            // Partner also regens slightly?
             if (gameState.player.partner) {
                 setGameState(prev => prev.player.partner ? ({
                     ...prev,
@@ -1937,13 +1924,12 @@ const App: React.FC = () => {
                         ...prev.player,
                         partner: {
                             ...prev.player.partner,
-                            currentHp: Math.min(prev.player.partner.maxHp, prev.player.partner.currentHp + 5) // Small regen
+                            currentHp: Math.min(prev.player.partner.maxHp, prev.player.partner.currentHp + 5) 
                         }
                     }
                 }) : prev);
             }
 
-            // 敵全滅時、少し待ってから画面を切り替える
             const victoryTimer = setTimeout(() => {
                 setGameState(prev => {
                     if (prev.act === 4) {
@@ -1976,7 +1962,6 @@ const App: React.FC = () => {
             if (ghostPotIndex !== -1) {
                  audioService.playSound('buff');
                  setGameState(prev => ({
-                     ...prev,
                      player: {
                          ...prev.player,
                          currentHp: Math.floor(prev.player.maxHp * 0.1),
@@ -2062,7 +2047,6 @@ const App: React.FC = () => {
       else if (correctCount === 2) bonusGold = 30;
       else if (correctCount === 3) bonusGold = 50;
       
-      // レリック「計算機」の効果: 正解数に応じてHP回復
       if (gameState.player.relics.find(r => r.id === 'CALCULATOR')) {
           const healAmount = correctCount * 2;
           if (healAmount > 0) {
@@ -2077,7 +2061,6 @@ const App: React.FC = () => {
           }
       }
 
-      // Update Total Math Count (UI Only, storage updated inside component)
       setTotalMathCorrect(prev => prev + correctCount);
 
       goToRewardPhase(bonusGold);
@@ -2101,8 +2084,8 @@ const App: React.FC = () => {
               if (item.value.id === 'VELVET_CHOKER') p.maxEnergy += 1;
               if (item.value.id === 'WAFFLE') { p.maxHp += 7; p.currentHp = p.maxHp; }
               if (item.value.id === 'OLD_COIN') p.gold += 300;
-              if (item.value.id === 'MATRYOSHKA') p.relicCounters['MATRYOSHKA'] = 2; // Init Counter
-              if (item.value.id === 'HAPPY_FLOWER') p.relicCounters['HAPPY_FLOWER'] = 0; // Init Counter
+              if (item.value.id === 'MATRYOSHKA') p.relicCounters['MATRYOSHKA'] = 2; 
+              if (item.value.id === 'HAPPY_FLOWER') p.relicCounters['HAPPY_FLOWER'] = 0; 
               storageService.saveUnlockedRelic(item.value.id);
           } else if (item.type === 'GOLD') {
               p.gold += item.value;
@@ -2170,7 +2153,7 @@ const App: React.FC = () => {
                         className={`bg-black/50 hover:bg-black/80 text-white border border-white/50 px-2 py-1 rounded text-xs flex items-center shadow-lg transition-colors font-bold ${bgmMode === 'MP3' ? 'border-green-500 text-green-400' : ''}`}
                     >
                         <Music size={14} className="mr-1"/>
-                        {bgmMode === 'OSCILLATOR' ? 'BGM: 電子音' : 'BGM: MP3'}
+                        {trans(bgmMode === 'OSCILLATOR' ? 'BGM: 電子音' : 'BGM: MP3', languageMode)}
                     </button>
                     <button 
                         onClick={toggleLanguage} 
@@ -2196,22 +2179,22 @@ const App: React.FC = () => {
                         <div className="mb-6 bg-black/40 px-4 py-2 rounded-lg border border-gray-600">
                              {nextThreshold ? (
                                 <div className="text-yellow-300 text-xs md:text-sm font-bold">
-                                    次のミニゲーム開放まで: <span className="text-xl md:text-2xl text-white mx-1">{Math.max(0, nextThreshold - totalMathCorrect)}</span> 問正解
+                                    {trans("次のミニゲーム開放まで", languageMode)}: <span className="text-xl md:text-2xl text-white mx-1">{Math.max(0, nextThreshold - totalMathCorrect)}</span> {trans("問正解", languageMode)}
                                 </div>
                              ) : (
-                                <div className="text-green-400 text-xs md:text-sm font-bold animate-pulse">全ミニゲーム開放済み！</div>
+                                <div className="text-green-400 text-xs md:text-sm font-bold animate-pulse">{trans("全ミニゲーム開放済み！", languageMode)}</div>
                              )}
-                             <div className="text-gray-500 text-[10px] mt-1">累計正解数: {totalMathCorrect}問</div>
+                             <div className="text-gray-500 text-[10px] mt-1">{trans("累計正解数", languageMode)}: {totalMathCorrect}{trans("問", languageMode)}</div>
                         </div>
 
                         {isMathDebugSkipped && (
                             <div className="text-red-500 font-bold mb-1 text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse">
-                                (デバッグ: 計算スキップ ON)
+                                {trans("(デバッグ: 計算スキップ ON)", languageMode)}
                             </div>
                         )}
                         {isDebugHpOne && (
                             <div className="text-red-500 font-bold mb-6 text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse">
-                                (デバッグ: 敵HP1 & Loadout & 全開放 ON)
+                                {trans("(デバッグ: 敵HP1 & Loadout & 全開放 ON)", languageMode)}
                             </div>
                         )}
                         {(!isMathDebugSkipped && !isDebugHpOne) && <div className="mb-2 h-2"></div>}
@@ -2302,7 +2285,6 @@ const App: React.FC = () => {
                 />
             )}
             
-            {/* ... other screens ... */}
             {gameState.screen === GameScreen.MINI_GAME_POKER && (
                 <PokerGameScreen 
                     onBack={returnToTitle} 
@@ -2384,7 +2366,7 @@ const App: React.FC = () => {
             )}
 
             {gameState.screen === GameScreen.MAP && (
-                <MapScreen nodes={gameState.map} currentNodeId={gameState.currentMapNodeId} onNodeSelect={handleNodeSelect} player={gameState.player} languageMode={languageMode} />
+                <MapScreen nodes={gameState.map} currentNodeId={gameState.currentMapNodeId} onNodeSelect={handleNodeSelect} onReturnToTitle={returnToTitle} player={gameState.player} languageMode={languageMode} />
             )}
 
             {gameState.screen === GameScreen.BATTLE && (
@@ -2440,8 +2422,8 @@ const App: React.FC = () => {
                              if (relic.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
                              if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
                              if (relic.id === 'OLD_COIN') newP.gold += 300;
-                             if (relic.id === 'MATRYOSHKA') p.relicCounters['MATRYOSHKA'] = 2; // Init Counter
-                             if (relic.id === 'HAPPY_FLOWER') p.relicCounters['HAPPY_FLOWER'] = 0; // Init Counter
+                             if (relic.id === 'MATRYOSHKA') p.relicCounters['MATRYOSHKA'] = 2; 
+                             if (relic.id === 'HAPPY_FLOWER') p.relicCounters['HAPPY_FLOWER'] = 0; 
                              return { ...prev, player: newP };
                          });
                          storageService.saveUnlockedRelic(relic.id);
@@ -2469,7 +2451,7 @@ const App: React.FC = () => {
                                  newMaxHp -= 3;
                              }
                              const newDeck = p.deck.filter(c => c.id !== cardId);
-                             const newHp = Math.min(p.currentHp, newMaxHp); // Clamp HP
+                             const newHp = Math.min(p.currentHp, newMaxHp); 
                              
                              return { ...prev, player: { ...p, gold: p.gold - cost, deck: newDeck, maxHp: newMaxHp, currentHp: newHp } };
                          });
@@ -2489,7 +2471,6 @@ const App: React.FC = () => {
                 />
             )}
 
-            {/* Treasure, Victory, GameOver, Ending Screens... (Same as before) */}
             {gameState.screen === GameScreen.TREASURE && (
                 <TreasureScreen 
                     rewards={treasureRewards}
@@ -2498,7 +2479,6 @@ const App: React.FC = () => {
                         setGameState(prev => {
                             const newP = { ...prev.player };
                             
-                            // Grant Rewards
                             treasureRewards.forEach(r => {
                                 if (r.type === 'GOLD') newP.gold += r.value;
                                 if (r.type === 'RELIC') {
@@ -2509,12 +2489,11 @@ const App: React.FC = () => {
                                     if (r.value.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
                                     if (r.value.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
                                     if (r.value.id === 'OLD_COIN') newP.gold += 300;
-                                    if (r.value.id === 'MATRYOSHKA') p.relicCounters['MATRYOSHKA'] = 2; // Init Counter
-                                    if (r.value.id === 'HAPPY_FLOWER') p.relicCounters['HAPPY_FLOWER'] = 0; // Init Counter
+                                    if (r.value.id === 'MATRYOSHKA') p.relicCounters['MATRYOSHKA'] = 2; 
+                                    if (r.value.id === 'HAPPY_FLOWER') p.relicCounters['HAPPY_FLOWER'] = 0; 
                                 }
                             });
 
-                            // Cursed Key Effect
                             if (hasCursedKey) {
                                 const curse = { ...CURSE_CARDS.PAIN, id: `curse-${Date.now()}` }; 
                                 newP.deck = [...newP.deck, curse];

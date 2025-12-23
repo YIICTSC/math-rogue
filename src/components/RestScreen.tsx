@@ -1,5 +1,4 @@
 
-
 import React, { useState } from 'react';
 import { Player, Card as ICard, LanguageMode } from '../types';
 import Card from './Card';
@@ -23,11 +22,14 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
   const [synthCards, setSynthCards] = useState<ICard[]>([]);
   const [resultCard, setResultCard] = useState<ICard | null>(null);
   
-  // 50% chance for Science Room to be open
+  // 50% chance for Science Room to be open normally
   const [isScienceRoomOpen] = useState(() => Math.random() < 0.5);
 
-  const healAmount = Math.floor(player.maxHp * 0.3);
   const isMage = player.id === 'MAGE';
+  // Science Club Kid (MAGE) always has the key to the Science Room
+  const scienceRoomAvailable = isMage || isScienceRoomOpen;
+  
+  const healAmount = Math.floor(player.maxHp * 0.3);
   const requiredCards = isMage ? 3 : 2;
 
   const handleRest = () => {
@@ -42,9 +44,9 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
   };
 
   const handleSynthesizeChoice = () => {
-      if (!isScienceRoomOpen) return;
-      if (player.deck.length < 2) {
-          setMessage("実験材料（カード）が足りない...");
+      if (!scienceRoomAvailable) return;
+      if (player.deck.length < requiredCards) {
+          setMessage(trans(`実験材料（カード）が${requiredCards}枚足りない...`, languageMode));
           return;
       }
       setMode('SYNTHESIS');
@@ -72,7 +74,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                   
                   if (newSelection.length === requiredCards) {
                       setMode('PREVIEW_SYNTHESIS');
-                      setMessage(`この${requiredCards}つを実験（合成）しますか？（元のカードは消えます）`);
+                      setMessage(trans(`この${requiredCards}枚を実験（合成）しますか？（元のカードは消えます）`, languageMode));
                   }
               }
           }
@@ -85,7 +87,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       const selection = shuffled.slice(0, requiredCards);
       setSynthCards(selection);
       setMode('PREVIEW_SYNTHESIS');
-      setMessage(`ランダムな${requiredCards}つで実験しますか？`);
+      setMessage(trans(`ランダムな${requiredCards}枚で実験しますか？`, languageMode));
   };
 
   const confirmUpgrade = () => {
@@ -152,20 +154,20 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                         <span className="text-xs text-gray-400">{trans("カード強化", languageMode)}</span>
                     </button>
 
-                    {/* Science Room (Synthesis) - 50% Chance */}
+                    {/* Science Room (Synthesis) */}
                     <button 
                         onClick={handleSynthesizeChoice}
-                        disabled={!isScienceRoomOpen}
+                        disabled={!scienceRoomAvailable}
                         className={`group flex flex-col items-center gap-2 p-4 border-2 rounded-lg transition-all w-32 md:w-40
-                            ${isScienceRoomOpen 
+                            ${scienceRoomAvailable 
                                 ? 'border-gray-600 hover:border-purple-500 hover:bg-gray-800 cursor-pointer' 
                                 : 'border-gray-800 bg-black/50 opacity-50 cursor-not-allowed grayscale'}
                         `}
                     >
-                        <FlaskConical size={40} className={`text-purple-500 ${isScienceRoomOpen ? 'group-hover:shake' : ''} transition-transform`} />
+                        <FlaskConical size={40} className={`text-purple-500 ${scienceRoomAvailable ? 'group-hover:shake' : ''} transition-transform`} />
                         <span className="font-bold text-lg">{trans("理科室", languageMode)}</span>
                         <span className="text-xs text-gray-400">
-                            {isScienceRoomOpen 
+                            {scienceRoomAvailable 
                                 ? (isMage ? trans("3枚合成", languageMode) : trans("カード合成", languageMode)) 
                                 : trans("鍵がかかってる", languageMode)}
                         </span>
