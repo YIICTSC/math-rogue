@@ -30,6 +30,7 @@ import SchoolDungeonRPG2 from './components/SchoolDungeonRPG2';
 import KochoShowdown from './components/KochoShowdown'; 
 import PaperPlaneBattle from './components/PaperPlaneBattle';
 import MiniGameSelectScreen from './components/MiniGameSelectScreen';
+import DodgeballShooting from './components/DodgeballShooting';
 import Card from './components/Card';
 import { audioService } from './services/audioService';
 import { generateFlavorText, generateEnemyName } from './services/geminiService';
@@ -197,6 +198,7 @@ const App: React.FC = () => {
     rewards: [],
     selectionState: { active: false, type: 'DISCARD', amount: 0 },
     isEndless: false,
+    parryState: { active: false, enemyId: null, success: false }
   });
 
   const [languageMode, setLanguageMode] = useState<LanguageMode>('JAPANESE');
@@ -259,7 +261,8 @@ const App: React.FC = () => {
           gameState.screen !== GameScreen.MINI_GAME_DUNGEON &&
           gameState.screen !== GameScreen.MINI_GAME_DUNGEON_2 &&
           gameState.screen !== GameScreen.MINI_GAME_KOCHO &&
-          gameState.screen !== GameScreen.MINI_GAME_PAPER_PLANE
+          gameState.screen !== GameScreen.MINI_GAME_PAPER_PLANE &&
+          gameState.screen !== GameScreen.DODGEBALL_SHOOTING
       ) {
           storageService.saveGame(gameState);
       }
@@ -742,7 +745,6 @@ const App: React.FC = () => {
             if (p.relics.find(r => r.id === 'SNAKE_RING')) drawCount += 2;
 
             for(let i=0; i<drawCount; i++) {
-                const c = p.hand.find(x => false); // DUMMY
                 const drawn = p.drawPile.pop();
                 if(drawn) p.hand.push(drawn);
             }
@@ -770,19 +772,26 @@ const App: React.FC = () => {
                  p.hand.push(c);
             });
 
-            setGameState({
+            const nextGameState = {
                 ...nextState,
-                screen: GameScreen.BATTLE,
                 player: p,
                 enemies: enemies,
                 selectedEnemyId: enemies[0].id,
                 narrativeLog: [...nextState.narrativeLog, flavor],
                 combatLog: [],
-                turn: 1
-            });
-            setCurrentNarrative(flavor);
-            audioService.playBGM(bgmType);
-            setTurnLog(trans("あなたのターン", languageMode));
+                turn: 1,
+                parryState: { active: false, enemyId: null, success: false }
+            };
+
+            // DODGEBALL ACE SPECIAL MECHANIC - Corrected to exclude ELITE nodes as per user request
+            if (p.id === 'DODGEBALL' && (node.type === NodeType.COMBAT || node.type === NodeType.START)) {
+                setGameState({ ...nextGameState, screen: GameScreen.DODGEBALL_SHOOTING });
+            } else {
+                setGameState({ ...nextGameState, screen: GameScreen.BATTLE });
+                setCurrentNarrative(flavor);
+                audioService.playBGM(bgmType);
+                setTurnLog(trans("あなたのターン", languageMode));
+            }
 
         } else if (node.type === NodeType.REST) {
             setGameState(prev => {
@@ -870,6 +879,23 @@ const App: React.FC = () => {
           console.error(e);
       } finally {
           setIsLoading(false);
+      }
+  };
+
+  const handleDodgeballResult = (hit: boolean) => {
+      if (hit) {
+          audioService.playSound('win');
+          setGameState(prev => ({
+              ...prev,
+              screen: GameScreen.BATTLE,
+              enemies: [],
+              narrativeLog: [...prev.narrativeLog, "ドッジボールで撃破！戦闘をスキップします。"]
+          }));
+          // Directly go to reward phase logic handled in useEffect for combat end
+      } else {
+          setGameState(prev => ({ ...prev, screen: GameScreen.BATTLE }));
+          audioService.playBGM('battle');
+          setTurnLog(trans("あなたのターン", languageMode));
       }
   };
 
@@ -1600,6 +1626,14 @@ const App: React.FC = () => {
     });
   };
 
+  const handleParryClick = () => {
+      setGameState(prev => ({
+          ...prev,
+          parryState: { ...prev.parryState!, success: true }
+      }));
+      audioService.playSound('block');
+  };
+
   const executeEndTurn = async (cardToAdd?: ICard) => {
     audioService.playSound('select');
     setTurnLog(trans("敵のターン", languageMode));
@@ -1669,7 +1703,37 @@ const App: React.FC = () => {
         }
 
         setActingEnemyId(enemy.id);
-        await wait(300); 
+        
+// --- Parry Mechanic for BARD ---
+const isBard = gameState.player.id === 'BARD';
+const isAttackIntent =
+  enemy.nextIntent.type === EnemyIntentType.ATTACK ||
+  enemy.nextIntent.type === EnemyIntentType.ATTACK_DEBUFF ||
+  enemy.nextIntent.type === EnemyIntentType.ATTACK_DEFEND;
+
+let parryWindowOpen = false;
+
+if (isBard && isAttackIntent) {
+  setGameState(prev => ({
+    ...prev,
+    parryState: { active: true, enemyId: enemy.id, success: false }
+  }));
+
+  parryWindowOpen = true;
+
+  await wait(300); // ← ★300ms固定
+} else {
+  await wait(300);
+}
+
+        const currentState = await new Promise<GameState>(resolve => {
+            setGameState(prev => { resolve(prev); return prev; });
+        });
+        const parrySuccess = currentState.parryState?.success || false;
+        
+        if (parryWindowOpen) {
+            setGameState(prev => ({ ...prev, parryState: { active: false, enemyId: null, success: false } }));
+        }
 
         if (enemy.nextIntent.type === EnemyIntentType.ATTACK) audioService.playSound('attack');
         else if (enemy.nextIntent.type === EnemyIntentType.DEFEND) audioService.playSound('block');
@@ -1712,6 +1776,17 @@ const App: React.FC = () => {
                     damage = 1;
                     logParts.push(`= 1(${trans("スケスケ", languageMode)})`);
                 }
+
+                // Parry Resolution
+                if (parrySuccess) {
+                    const reflectedDmg = damage;
+                    damage = 0;
+                    e.currentHp -= reflectedDmg;
+                    e.floatingText = { id: `refl-${Date.now()}`, text: `${reflectedDmg}`, color: 'text-cyan-400', iconType: 'zap' };
+                    newLogs.push(trans("ナイス応答！音波を跳ね返した！", languageMode));
+                    newLogs.push(`${trans(e.name, languageMode)}に${reflectedDmg}の反射ダメージ`);
+                    audioService.playSound('buff');
+                }
                 
                 if (damage > 0) {
                     if (p.powers['BUFFER'] > 0) { 
@@ -1732,8 +1807,10 @@ const App: React.FC = () => {
                 let unblockedDamage = 0;
                 if (p.block >= damage) { 
                     p.block -= damage; 
-                    const formula = logParts.length > 1 ? `(${logParts.join(' ')}) = ` : '';
-                    newLogs.push(`${trans(e.name, languageMode)}の攻撃 ${formula}${damage} を${trans("ブロック", languageMode)}`);
+                    if (damage > 0) {
+                        const formula = logParts.length > 1 ? `(${logParts.join(' ')}) = ` : '';
+                        newLogs.push(`${trans(e.name, languageMode)}の攻撃 ${formula}${damage} を${trans("ブロック", languageMode)}`);
+                    }
                 } else { 
                     unblockedDamage = damage - p.block; 
                     p.block = 0; 
@@ -1962,7 +2039,7 @@ const App: React.FC = () => {
                          ...prev.player,
                          currentHp: Math.floor(prev.player.maxHp * 0.1),
                          potions: prev.player.potions.filter((_, i) => i !== ghostPotIndex),
-                         floatingText: { id: `revive-${Date.now()}`, text: 'お守り！', color: 'text-yellow-500', iconType: 'heart' }
+                         floatingText: { id: `revive-${Date.now()}`, text: 'お守り！', color: 'text-yellow-400', iconType: 'heart' }
                      }
                  }));
                  return;
@@ -2227,7 +2304,7 @@ const App: React.FC = () => {
                                 <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.COMPENDIUM }))} className="flex-1 bg-gray-800 text-amber-500 py-2 text-[10px] font-bold border border-gray-600 hover:border-amber-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
                                     <BookOpen className="mb-1" size={18}/> {trans("図鑑", languageMode)}
                                 </button>
-                                <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.RANKING }))} className="flex-1 bg-gray-800 text-green-500 py-2 text-[10px] font-bold border border-gray-600 hover:border-green-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
+                                <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.RANKING }))} className="flex-1 bg-gray-800 text-green-500 py-2 text-[10px] font-bold border border-gray-600 border-green-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
                                     <Trophy className="mb-1" size={18}/> {trans("記録", languageMode)}
                                 </button>
                                 <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.HELP }))} className="flex-1 bg-gray-800 text-blue-400 py-2 text-[10px] font-bold border border-gray-600 border-blue-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
@@ -2382,6 +2459,15 @@ const App: React.FC = () => {
                 <BattleScene 
                     player={gameState.player} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onEndTurn={handleEndTurnClick} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={gameState.selectionState} onHandSelection={handleHandSelection}
                     onUsePotion={handleUsePotion} combatLog={gameState.combatLog} languageMode={languageMode} codexOptions={gameState.codexOptions} onCodexSelect={onCodexSelect} onPlaySynthesizedCard={handlePlaySynthesizedCard}
+                    parryState={gameState.parryState} onParry={handleParryClick}
+                />
+            )}
+
+            {gameState.screen === GameScreen.DODGEBALL_SHOOTING && (
+                <DodgeballShooting 
+                    enemy={gameState.enemies[0]} 
+                    playerImage={gameState.player.imageData}
+                    onComplete={handleDodgeballResult} 
                 />
             )}
 
@@ -2439,8 +2525,8 @@ const App: React.FC = () => {
                              if (relic.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
                              if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
                              if (relic.id === 'OLD_COIN') newP.gold += 300;
-                             if (relic.id === 'MATRYOSHKA') p.relicCounters['MATRYOSHKA'] = 2; 
-                             if (relic.id === 'HAPPY_FLOWER') p.relicCounters['HAPPY_FLOWER'] = 0; 
+                             if (relic.id === 'MATRYOSHKA') prev.player.relicCounters['MATRYOSHKA'] = 2; 
+                             if (relic.id === 'HAPPY_FLOWER') prev.player.relicCounters['HAPPY_FLOWER'] = 0; 
                              return { ...prev, player: newP };
                          });
                          storageService.saveUnlockedRelic(relic.id);
@@ -2506,8 +2592,8 @@ const App: React.FC = () => {
                                     if (r.value.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
                                     if (r.value.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
                                     if (r.value.id === 'OLD_COIN') newP.gold += 300;
-                                    if (r.value.id === 'MATRYOSHKA') p.relicCounters['MATRYOSHKA'] = 2; 
-                                    if (r.value.id === 'HAPPY_FLOWER') p.relicCounters['HAPPY_FLOWER'] = 0; 
+                                    if (r.value.id === 'MATRYOSHKA') prev.player.relicCounters['MATRYOSHKA'] = 2; 
+                                    if (r.value.id === 'HAPPY_FLOWER') prev.player.relicCounters['HAPPY_FLOWER'] = 0; 
                                 }
                             });
 
@@ -2582,7 +2668,7 @@ const App: React.FC = () => {
                         )}
                         
                         <div className="flex flex-col gap-4 items-center mt-4 pb-8 shrink-0">
-                            <button onClick={startEndlessMode} className="bg-purple-900 border-4 border-purple-500 px-8 py-4 cursor-pointer text-xl hover:bg-purple-800 font-bold w-full max-w-sm shadow-[0_0_20px_rgba(168,85,247,0.5)] transform transition-transform hover:scale-105 active:scale-95 flex items-center justify-center animate-pulse">
+                            <button onClick={startEndlessMode} className="bg-purple-900 border-4 border-purple-500 px-8 py-4 cursor-pointer text-xl hover:bg-purple-800 font-bold w-full max-sm shadow-[0_0_20px_rgba(168,85,247,0.5)] transform transition-transform hover:scale-105 active:scale-95 flex items-center justify-center animate-pulse">
                                 <Infinity className="mr-2" /> エンドレスモードへ (Act {gameState.act + 1})
                             </button>
                             <button onClick={returnToTitle} className="bg-blue-600 border-2 border-white px-8 py-4 cursor-pointer text-xl hover:bg-blue-500 font-bold w-full max-sm shadow-lg transform transition-transform hover:scale-105 active:scale-95">

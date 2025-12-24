@@ -1,3 +1,4 @@
+
 import { LanguageMode } from '../types';
 
 const DICTIONARY: Record<string, string> = {
@@ -274,6 +275,8 @@ const DICTIONARY: Record<string, string> = {
   "発動": "はつどう",
   "状態": "じょうたい",
   "解除": "なおす",
+  "応答せよ！": "おとうと せよ！",
+  "ナイス応答！音波を跳ね返した！": "ナイス おとう！ おんぱを はねかえした！",
 
   // --- Common Terms in Descriptions ---
   "攻撃": "こうげき",

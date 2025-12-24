@@ -42,18 +42,15 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
 
             <div className="flex flex-col gap-4">
                 {!resultLog ? (
-                    // Options Mode
+                    // Options Mode: 選択肢のラベル(label)のみを表示し、詳細な結果(text)は非表示にする
                     options.map((opt, idx) => (
                         <button 
                             key={idx}
                             onClick={opt.action}
-                            className="w-full text-left p-4 bg-black/40 hover:bg-purple-900/40 border border-gray-600 hover:border-purple-400 rounded transition-colors group"
+                            className="w-full text-center p-5 bg-black/40 hover:bg-purple-900/40 border border-gray-600 hover:border-purple-400 rounded transition-colors group"
                         >
-                            <span className="font-bold text-yellow-400 block group-hover:text-yellow-200 text-lg text-center mb-1">
+                            <span className="font-bold text-yellow-400 block group-hover:text-yellow-200 text-xl tracking-widest">
                                 {opt.label}
-                            </span>
-                            <span className="text-xs text-gray-400 block text-center group-hover:text-gray-200">
-                                {opt.text}
                             </span>
                         </button>
                     ))

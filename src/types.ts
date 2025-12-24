@@ -215,6 +215,7 @@ export enum GameScreen {
   RELIC_SELECTION = 'RELIC_SELECTION', 
   MAP = 'MAP',
   BATTLE = 'BATTLE',
+  DODGEBALL_SHOOTING = 'DODGEBALL_SHOOTING',
   MATH_CHALLENGE = 'MATH_CHALLENGE', 
   KANJI_CHALLENGE = 'KANJI_CHALLENGE',
   REWARD = 'REWARD',
@@ -455,6 +456,12 @@ export interface PaperPlaneScoreEntry {
     score: number; // Calculated score
 }
 
+export interface ParryState {
+    active: boolean;
+    enemyId: string | null;
+    success: boolean;
+}
+
 export interface GameState {
   screen: GameScreen;
   mode: GameMode; 
@@ -474,4 +481,5 @@ export interface GameState {
   isEndless?: boolean;
   pokerState?: PokerRunState; // Added: Auto-save state for Poker Mini Game
   codexOptions?: Card[]; // Added: For Nilry's Codex selection
+  parryState?: ParryState; // New: Parry state for Bard
 }

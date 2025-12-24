@@ -1,7 +1,7 @@
 
-import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode } from '../types';
+import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode, ParryState } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
-import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles } from 'lucide-react';
+import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles, MessageCircle, Mic } from 'lucide-react';
 import PixelSprite from './PixelSprite';
 import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
@@ -29,6 +29,8 @@ interface BattleSceneProps {
   languageMode: LanguageMode;
   codexOptions?: ICard[]; // New prop for Nilry's Codex
   onCodexSelect: (card: ICard | null) => void; // New prop for Nilry's Codex
+  parryState?: ParryState; // New prop
+  onParry: () => void; // New prop
 }
 
 const POWER_DEFINITIONS: Record<string, {name: string, desc: string}> = {
@@ -107,7 +109,7 @@ const FloatingTextOverlay: React.FC<{ data: FloatingText | null, languageMode: L
 
 const BattleScene: React.FC<BattleSceneProps> = ({ 
   player, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onPlaySynthesizedCard, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
-  selectionState, onHandSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect
+  selectionState, onHandSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect, parryState, onParry
 }) => {
   
   const playerHpPercent = (player.currentHp / player.maxHp) * 100;
@@ -361,6 +363,36 @@ const BattleScene: React.FC<BattleSceneProps> = ({
       {/* 2. Battle Viewport (Enemies & Player Sprite) - Scrollable to prevent overlap */}
       <div className="flex-1 relative overflow-y-auto custom-scrollbar flex flex-col justify-between p-2 bg-gray-800/50 gap-4">
         
+{/* Parry UI Overlay (Bard Special) */}
+{parryState?.active && !parryState.success && (
+    <div className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none translate-y-32">
+        <button 
+            onClick={(e) => { e.stopPropagation(); onParry(); }}
+            className="bg-black/80 border-4 border-cyan-400 p-6 rounded-full shadow-[0_0_30px_rgba(34,211,238,0.6)] animate-bounce pointer-events-auto group transition-transform active:scale-90"
+        >
+            <div className="flex flex-col items-center">
+                <Mic size={48} className="text-cyan-400 mb-2 group-hover:scale-110" />
+                <span className="text-white font-black text-xl tracking-widest">
+                    {trans("インタビューではねかえせ！", languageMode)}
+                </span>
+                <div className="mt-2 w-16 h-1 bg-cyan-900 rounded-full overflow-hidden">
+                    <div
+                        className="h-full bg-cyan-400 animate-shrink-width"
+                        style={{ animation: 'shrink 300ms linear forwards' }}
+                    />
+                </div>
+            </div>
+        </button>
+        <style>{`
+            @keyframes shrink {
+                from { width: 100%; }
+                to { width: 0%; }
+            }
+        `}</style>
+    </div>
+)}
+
+
         {/* Codex Selection Modal */}
         {codexOptions && (
             <div className="fixed inset-0 z-[100] bg-black/80 flex flex-col items-center justify-center p-4 animate-in fade-in duration-200">
