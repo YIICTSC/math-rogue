@@ -216,6 +216,7 @@ export enum GameScreen {
   MAP = 'MAP',
   BATTLE = 'BATTLE',
   MATH_CHALLENGE = 'MATH_CHALLENGE', 
+  KANJI_CHALLENGE = 'KANJI_CHALLENGE',
   REWARD = 'REWARD',
   GAME_OVER = 'GAME_OVER',
   VICTORY = 'VICTORY',
@@ -241,7 +242,17 @@ export enum GameMode {
   SUBTRACTION = 'SUBTRACTION',
   MULTIPLICATION = 'MULTIPLICATION',
   DIVISION = 'DIVISION',
-  MIXED = 'MIXED'
+  MIXED = 'MIXED',
+  KANJI_1 = 'KANJI_1', // 小1
+  KANJI_2 = 'KANJI_2', // 小2
+  KANJI_3 = 'KANJI_3', // 小3
+  KANJI_4 = 'KANJI_4', // 小4
+  KANJI_5 = 'KANJI_5', // 小5
+  KANJI_6 = 'KANJI_6', // 小6
+  KANJI_7 = 'KANJI_7', // 中1
+  KANJI_8 = 'KANJI_8', // 中2
+  KANJI_9 = 'KANJI_9',  // 中3
+  KANJI_MIXED = 'KANJI_MIXED' // 全学年ミックス
 }
 
 export type LanguageMode = 'JAPANESE' | 'HIRAGANA';

@@ -1,10 +1,8 @@
-
 import { LanguageMode } from '../types';
 
 const DICTIONARY: Record<string, string> = {
   // --- UI / Menu ---
-  "算数ローグ": "さんすうローグ",
-  "伝説の小学生": "でんせつの しょうがくせい",
+  "学習ローグ": "おべんきょうローグ",
   "つづきから": "つづきから", 
   "冒険を始める": "ぼうけんを はじめる",
   "1A1Dモード": "1A1Dモード",

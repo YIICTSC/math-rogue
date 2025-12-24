@@ -21,6 +21,7 @@ import TreasureScreen from './components/TreasureScreen';
 import CharacterSelectionScreen from './components/CharacterSelectionScreen';
 import RankingScreen from './components/RankingScreen';
 import MathChallengeScreen from './components/MathChallengeScreen';
+import KanjiChallengeScreen from './components/KanjiChallengeScreen';
 import DebugMenuScreen from './components/DebugMenuScreen';
 import PokerGameScreen from './components/PokerGameScreen';
 import SchoolyardSurvivorScreen from './components/SchoolyardSurvivorScreen';
@@ -37,7 +38,7 @@ import { storageService } from './services/storageService';
 import { generateEvent } from './services/eventService';
 import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { trans } from './utils/textUtils';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book } from 'lucide-react';
 
 const calculateScore = (state: GameState, victory: boolean): number => {
     let score = 0;
@@ -244,6 +245,7 @@ const App: React.FC = () => {
           gameState.screen !== GameScreen.ENDING &&
           gameState.screen !== GameScreen.VICTORY &&
           gameState.screen !== GameScreen.MATH_CHALLENGE && 
+          gameState.screen !== GameScreen.KANJI_CHALLENGE && 
           gameState.screen !== GameScreen.COMPENDIUM && 
           gameState.screen !== GameScreen.HELP &&
           gameState.screen !== GameScreen.RANKING &&
@@ -1840,7 +1842,7 @@ const App: React.FC = () => {
         }
         
         p.hand.forEach(c => {
-            if (c.name === 'やけど' || c.name === 'BURN') { p.currentHp -= 2; newLogs.push("やほどダメージ"); }
+            if (c.name === 'やけど' || c.name === 'BURN') { p.currentHp -= 2; newLogs.push("やけどダメージ"); }
             if (c.name === '虫歯' || c.name === 'DECAY') { p.currentHp -= 2; newLogs.push("虫歯ダメージ"); }
             if (c.name === '不安' || c.name === 'DOUBT') p.powers['WEAK'] = (p.powers['WEAK'] || 0) + 1;
             if (c.name === '恥' || c.name === 'SHAME') p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + 1;
@@ -1932,8 +1934,9 @@ const App: React.FC = () => {
                     audioService.playBGM('victory');
                     return { ...prev, player: nextPlayer, screen: GameScreen.ENDING };
                 } else {
-                    // 勝利画面をスキップして直接計算チャレンジへ
-                    return { ...prev, player: nextPlayer, screen: GameScreen.MATH_CHALLENGE };
+                    // もし漢字系のモードなら漢字チャレンジ、そうでなければ算数チャレンジ
+                    const isKanji = prev.mode.startsWith('KANJI');
+                    return { ...prev, player: nextPlayer, screen: isKanji ? GameScreen.KANJI_CHALLENGE : GameScreen.MATH_CHALLENGE };
                 }
             });
         } else if (gameState.player.currentHp <= 0) {
@@ -1986,11 +1989,11 @@ const App: React.FC = () => {
     }
   }, [gameState.enemies, gameState.player.currentHp, gameState.screen, gameState.act, selectedCharName, gameState.challengeMode]);
 
-  const goToRewardPhase = (mathGold: number = 0) => {
+  const goToRewardPhase = (bonusGold: number = 0) => {
       const rewards: RewardItem[] = [];
       
-      if (mathGold > 0) {
-          let goldReward = mathGold;
+      if (bonusGold > 0) {
+          let goldReward = bonusGold;
           if (gameState.player.relics.find(r => r.id === 'GOLDEN_IDOL')) goldReward = Math.floor(goldReward * 1.25);
           rewards.push({ type: 'GOLD', value: goldReward, id: `rew-gold-${Date.now()}` });
       }
@@ -2055,7 +2058,6 @@ const App: React.FC = () => {
       }
 
       setTotalMathCorrect(prev => prev + correctCount);
-
       goToRewardPhase(bonusGold);
   };
 
@@ -2166,10 +2168,10 @@ const App: React.FC = () => {
                 <div className="w-full h-full bg-gray-900 flex items-center justify-center">
                     <div className="text-center p-8 w-full flex flex-col items-center">
                         <h1 
-                            className="text-5xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-b from-purple-400 to-blue-600 mb-2 font-bold animate-pulse tracking-widest leading-tight cursor-pointer select-none"
+                            className="text-5xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-b from-purple-400 to-blue-600 mb-8 font-bold animate-pulse tracking-widest leading-tight cursor-pointer select-none"
                             onClick={handleTitleClick}
                         >
-                            {trans("算数ローグ", languageMode)}<br/><span className="text-4xl">{trans("伝説の小学生", languageMode)}</span>
+                            {trans("学習ローグ", languageMode)}
                         </h1>
                         
                         {/* UNLOCK STATUS DISPLAY */}
@@ -2228,7 +2230,7 @@ const App: React.FC = () => {
                                 <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.RANKING }))} className="flex-1 bg-gray-800 text-green-500 py-2 text-[10px] font-bold border border-gray-600 hover:border-green-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
                                     <Trophy className="mb-1" size={18}/> {trans("記録", languageMode)}
                                 </button>
-                                <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.HELP }))} className="flex-1 bg-gray-800 text-blue-400 py-2 text-[10px] font-bold border border-gray-600 hover:border-blue-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
+                                <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.HELP }))} className="flex-1 bg-gray-800 text-blue-400 py-2 text-[10px] font-bold border border-gray-600 border-blue-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
                                     <HelpCircle className="mb-1" size={18}/> {trans("遊び方", languageMode)}
                                 </button>
                             </div>
@@ -2310,28 +2312,38 @@ const App: React.FC = () => {
             
             {gameState.screen === GameScreen.MODE_SELECTION && (
                 <div className="w-full h-full bg-gray-900 flex flex-col items-center text-white p-4 overflow-y-auto custom-scrollbar">
-                    <div className="w-full max-w-2xl flex flex-col items-center my-auto">
-                        <h2 className="text-3xl font-bold mb-2 text-yellow-400 mt-4">{trans("計算モード選択", languageMode)}</h2>
-                        {gameState.challengeMode === '1A1D' && <p className="text-red-400 mb-6 font-bold animate-pulse">※{trans("1A1Dモード", languageMode)}</p>}
+                    <div className="w-full max-w-4xl flex flex-col items-center my-auto">
+                        <h2 className="text-3xl font-bold mb-6 text-yellow-400 mt-4">{trans("モード選択", languageMode)}</h2>
                         
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-                            <button onClick={() => handleModeSelect(GameMode.ADDITION)} className="bg-red-900 border-2 border-red-500 p-4 md:p-6 rounded-xl hover:bg-red-800 flex flex-col items-center transition-transform hover:scale-105 active:scale-95 shadow-lg">
-                                <Plus size={40} className="mb-2"/> <span className="text-lg md:text-xl font-bold">{trans("たし算", languageMode)}</span>
-                            </button>
-                            <button onClick={() => handleModeSelect(GameMode.SUBTRACTION)} className="bg-blue-900 border-2 border-blue-500 p-4 md:p-6 rounded-xl hover:bg-blue-800 flex flex-col items-center transition-transform hover:scale-105 active:scale-95 shadow-lg">
-                                <Minus size={40} className="mb-2"/> <span className="text-lg md:text-xl font-bold">{trans("ひき算", languageMode)}</span>
-                            </button>
-                            <button onClick={() => handleModeSelect(GameMode.MULTIPLICATION)} className="bg-green-900 border-2 border-green-500 p-4 md:p-6 rounded-xl hover:bg-green-800 flex flex-col items-center transition-transform hover:scale-105 active:scale-95 shadow-lg">
-                                <MultiplyIcon size={40} className="mb-2"/> <span className="text-lg md:text-xl font-bold">{trans("かけ算", languageMode)}</span>
-                            </button>
-                            <button onClick={() => handleModeSelect(GameMode.DIVISION)} className="bg-yellow-700 border-2 border-yellow-500 p-4 md:p-6 rounded-xl hover:bg-yellow-600 flex flex-col items-center transition-transform hover:scale-105 active:scale-95 shadow-lg">
-                                <Divide size={40} className="mb-2"/> <span className="text-lg md:text-xl font-bold">{trans("わり算", languageMode)}</span>
-                            </button>
-                            <button onClick={() => handleModeSelect(GameMode.MIXED)} className="bg-purple-900 border-2 border-purple-500 p-4 md:p-6 rounded-xl hover:bg-purple-800 flex flex-col items-center sm:col-span-2 transition-transform hover:scale-105 active:scale-95 shadow-lg">
-                                <Shuffle size={40} className="mb-2"/> <span className="text-lg md:text-xl font-bold">{trans("ミックス", languageMode)}</span>
-                            </button>
+                        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-8">
+                            {/* MATH SECTION */}
+                            <div className="space-y-4">
+                                <h3 className="text-xl font-bold text-blue-400 border-b border-blue-900 pb-2 flex items-center"><Brain className="mr-2" /> さんすう</h3>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <button onClick={() => handleModeSelect(GameMode.ADDITION)} className="bg-red-900/60 border border-red-500 p-3 rounded hover:bg-red-800 transition-colors text-sm font-bold flex items-center justify-center gap-2"><Plus size={14}/> たし算</button>
+                                    <button onClick={() => handleModeSelect(GameMode.SUBTRACTION)} className="bg-blue-900/60 border border-blue-500 p-3 rounded hover:bg-blue-800 transition-colors text-sm font-bold flex items-center justify-center gap-2"><Minus size={14}/> ひき算</button>
+                                    <button onClick={() => handleModeSelect(GameMode.MULTIPLICATION)} className="bg-green-900/60 border border-green-500 p-3 rounded hover:bg-green-800 transition-colors text-sm font-bold flex items-center justify-center gap-2"><MultiplyIcon size={14}/> かけ算</button>
+                                    <button onClick={() => handleModeSelect(GameMode.DIVISION)} className="bg-yellow-700/60 border border-yellow-500 p-3 rounded hover:bg-yellow-600 transition-colors text-sm font-bold flex items-center justify-center gap-2"><Divide size={14}/> わり算</button>
+                                    <button onClick={() => handleModeSelect(GameMode.MIXED)} className="col-span-2 bg-purple-900/60 border border-purple-500 p-3 rounded hover:bg-purple-800 transition-colors text-sm font-bold flex items-center justify-center gap-2"><Shuffle size={14}/> ミックス</button>
+                                </div>
+                            </div>
+
+                            {/* KANJI SECTION */}
+                            <div className="space-y-4">
+                                <h3 className="text-xl font-bold text-cyan-400 border-b border-cyan-900 pb-2 flex items-center"><Book className="mr-2" /> かんじ (読み)</h3>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {[1, 2, 3, 4, 5, 6].map(g => (
+                                        <button key={g} onClick={() => handleModeSelect(`KANJI_${g}` as GameMode)} className="bg-slate-800 border border-slate-600 p-2 rounded hover:border-cyan-400 hover:bg-slate-700 transition-all text-xs font-bold">小{g}</button>
+                                    ))}
+                                    {[7, 8, 9].map(g => (
+                                        <button key={g} onClick={() => handleModeSelect(`KANJI_${g}` as GameMode)} className="bg-slate-800 border border-slate-600 p-2 rounded hover:border-orange-400 hover:bg-slate-700 transition-all text-xs font-bold">中{g-6}</button>
+                                    ))}
+                                    <button onClick={() => handleModeSelect(GameMode.KANJI_MIXED)} className="col-span-3 bg-cyan-900/60 border border-cyan-500 p-3 rounded hover:bg-cyan-800 transition-colors text-sm font-bold flex items-center justify-center gap-2"><Shuffle size={14}/> ミックス</button>
+                                </div>
+                            </div>
                         </div>
-                        <button onClick={returnToTitle} className="mt-8 text-gray-400 hover:text-white underline mb-8">{trans("戻る", languageMode)}</button>
+
+                        <button onClick={returnToTitle} className="mt-12 text-gray-400 hover:text-white underline mb-8">{trans("戻る", languageMode)}</button>
                     </div>
                 </div>
             )}
@@ -2375,6 +2387,14 @@ const App: React.FC = () => {
 
             {gameState.screen === GameScreen.MATH_CHALLENGE && (
                 <MathChallengeScreen 
+                    mode={gameState.mode} 
+                    onComplete={handleMathChallengeComplete} 
+                    debugSkip={isMathDebugSkipped}
+                />
+            )}
+
+            {gameState.screen === GameScreen.KANJI_CHALLENGE && (
+                <KanjiChallengeScreen 
                     mode={gameState.mode} 
                     onComplete={handleMathChallengeComplete} 
                     debugSkip={isMathDebugSkipped}
