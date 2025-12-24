@@ -1,17 +1,17 @@
-
 import React, { useMemo, useState } from 'react';
 import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY } from '../constants';
 import { Card as ICard, Relic, Potion, CardType, TargetType } from '../types';
 import Card from './Card';
-import { ArrowRight, Trash2, Plus, Gem, FlaskConical, Swords, Shield, Zap, Search, Beaker, RotateCcw } from 'lucide-react';
+import { ArrowRight, Trash2, Plus, Gem, FlaskConical, Swords, Shield, Zap, Search, Beaker, RotateCcw, Skull } from 'lucide-react';
 import { synthesizeCards } from '../utils/cardUtils';
 
 interface DebugMenuScreenProps {
   onStart: (deck: ICard[], relics: Relic[], potions: Potion[]) => void;
+  onStartAct3Boss: (deck: ICard[], relics: Relic[], potions: Potion[]) => void;
   onBack: () => void;
 }
 
-const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) => {
+const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3Boss, onBack }) => {
   const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS'>('CARDS');
   const [searchTerm, setSearchTerm] = useState("");
   
@@ -97,6 +97,14 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onBack }) =>
             </h2>
             <div className="flex gap-2 md:gap-4 text-sm md:text-base">
                 <button onClick={onBack} className="text-gray-300 hover:text-white underline">戻る</button>
+                
+                <button 
+                    onClick={() => onStartAct3Boss(selectedDeck, selectedRelics, selectedPotions)}
+                    className="bg-purple-700 hover:bg-purple-600 text-white px-3 py-1 md:px-4 md:py-2 rounded font-bold flex items-center shadow-lg border border-purple-400 text-xs"
+                >
+                    ACT3 BOSS <Skull size={14} className="ml-1"/>
+                </button>
+
                 <button 
                     onClick={() => onStart(selectedDeck, selectedRelics, selectedPotions)}
                     className="bg-green-600 hover:bg-green-500 text-white px-4 py-1 md:px-6 md:py-2 rounded font-bold flex items-center shadow-lg border-2 border-white animate-pulse text-xs md:text-sm"

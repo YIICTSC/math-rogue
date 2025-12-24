@@ -127,6 +127,7 @@ export interface Enemy {
   corpseExplosion: boolean; 
   
   floatingText: FloatingText | null;
+  phase?: number; // ボスの形態管理用（追加）
 }
 
 export interface Relic {
@@ -224,6 +225,7 @@ export enum GameScreen {
   REST = 'REST',
   SHOP = 'SHOP',
   EVENT = 'EVENT',
+  FINAL_BRIDGE = 'FINAL_BRIDGE', // ACT3終了後の決戦前イベント（追加）
   COMPENDIUM = 'COMPENDIUM',
   ENDING = 'ENDING',
   HELP = 'HELP',
@@ -425,6 +427,7 @@ export interface PokerScoreEntry {
 export interface SurvivorScoreEntry {
     id: string;
     date: number;
+    score: number;
     timeSurvived: number; // seconds
     levelReached: number;
     weapons: string[]; // IDs of weapons

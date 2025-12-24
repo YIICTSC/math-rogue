@@ -31,6 +31,7 @@ import KochoShowdown from './components/KochoShowdown';
 import PaperPlaneBattle from './components/PaperPlaneBattle';
 import MiniGameSelectScreen from './components/MiniGameSelectScreen';
 import DodgeballShooting from './components/DodgeballShooting';
+import FinalBridgeScreen from './components/FinalBridgeScreen';
 import Card from './components/Card';
 import { audioService } from './services/audioService';
 import { generateFlavorText, generateEnemyName } from './services/geminiService';
@@ -54,14 +55,12 @@ const calculateScore = (state: GameState, victory: boolean): number => {
     if (victory) {
         score += Math.floor((state.player.currentHp / state.player.maxHp) * 200);
     }
-    // Spirit Poop penalty
     if (state.player.relics.find(r => r.id === 'SPIRIT_POOP')) {
         score -= 1;
     }
     return score;
 };
 
-// --- ENEMY DEFINITIONS & AI ---
 const determineEnemyType = (name: string, isBoss: boolean): string => {
     if (isBoss) return 'GUARDIAN'; 
     if (name.includes('先生') || name.includes('用務員') || name.includes('教頭')) return 'TEACHER';
@@ -119,10 +118,18 @@ const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
             return { type: EnemyIntentType.DEFEND, value: 15 };
 
         case 'THE_HEART':
-             const heartTurn = turn % 3;
-             if (heartTurn === 1) return { type: EnemyIntentType.ATTACK, value: 45 }; 
-             if (heartTurn === 2) return { type: EnemyIntentType.BUFF, value: 0, secondaryValue: 2 }; 
-             return { type: EnemyIntentType.ATTACK_DEBUFF, value: 2, secondaryValue: 12, debuffType: 'VULNERABLE' }; 
+             if (enemy.phase === 1) {
+                 const heartTurn = turn % 3;
+                 if (heartTurn === 1) return { type: EnemyIntentType.ATTACK, value: 45 }; 
+                 if (heartTurn === 2) return { type: EnemyIntentType.BUFF, value: 0, secondaryValue: 2 }; 
+                 return { type: EnemyIntentType.ATTACK_DEBUFF, value: 2, secondaryValue: 12, debuffType: 'VULNERABLE' }; 
+             } else {
+                 const heartTurn = turn % 4;
+                 if (heartTurn === 1) return { type: EnemyIntentType.ATTACK, value: 12, secondaryValue: 15, debuffType: 'CONFUSED' }; 
+                 if (heartTurn === 2) return { type: EnemyIntentType.ATTACK, value: 60 }; 
+                 if (heartTurn === 3) return { type: EnemyIntentType.BUFF, value: 0, secondaryValue: 5 }; 
+                 return { type: EnemyIntentType.ATTACK_DEBUFF, value: 10, secondaryValue: 3, debuffType: 'WEAK' };
+             }
 
         default:
             const r = Math.random();
@@ -156,7 +163,6 @@ const App: React.FC = () => {
 
   const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-  // --- State ---
   const [gameState, setGameState] = useState<GameState>({
     screen: GameScreen.START_MENU,
     mode: GameMode.MULTIPLICATION,
@@ -216,14 +222,12 @@ const App: React.FC = () => {
   const [totalMathCorrect, setTotalMathCorrect] = useState<number>(0);
   const [nextThreshold, setNextThreshold] = useState<number | null>(null);
   
-  // Debug Logic
   const [isMathDebugSkipped, setIsMathDebugSkipped] = useState<boolean>(false);
   const [isDebugHpOne, setIsDebugHpOne] = useState<boolean>(false);
   const [titleClickCount, setTitleClickCount] = useState<number>(0);
   const [logClickCount, setLogClickCount] = useState<number>(0);
   const [debugLoadout, setDebugLoadout] = useState<{deck: ICard[], relics: Relic[], potions: Potion[]} | null>(null);
 
-  // Shop & Event
   const [shopCards, setShopCards] = useState<ICard[]>([]);
   const [shopRelics, setShopRelics] = useState<Relic[]>([]);
   const [shopPotions, setShopPotions] = useState<Potion[]>([]);
@@ -233,14 +237,12 @@ const App: React.FC = () => {
   const [starterRelics, setStarterRelics] = useState<Relic[]>([]);
   const [treasureRewards, setTreasureRewards] = useState<RewardItem[]>([]);
   
-  // Progression
   const [clearCount, setClearCount] = useState<number>(0);
 
   const VICTORY_GOLD = 25;
   
   const UNLOCK_THRESHOLDS = [1000, 1500, 2000, 2500, 3000, 3500];
 
-  // --- Auto Save Logic ---
   useEffect(() => {
       if (gameState.screen !== GameScreen.START_MENU && 
           gameState.screen !== GameScreen.GAME_OVER && 
@@ -262,7 +264,8 @@ const App: React.FC = () => {
           gameState.screen !== GameScreen.MINI_GAME_DUNGEON_2 &&
           gameState.screen !== GameScreen.MINI_GAME_KOCHO &&
           gameState.screen !== GameScreen.MINI_GAME_PAPER_PLANE &&
-          gameState.screen !== GameScreen.DODGEBALL_SHOOTING
+          gameState.screen !== GameScreen.DODGEBALL_SHOOTING &&
+          gameState.screen !== GameScreen.FINAL_BRIDGE
       ) {
           storageService.saveGame(gameState);
       }
@@ -277,14 +280,12 @@ const App: React.FC = () => {
     setIsDebugHpOne(storageService.getDebugHpOne());
     setTotalMathCorrect(storageService.getMathCorrectCount());
     
-    // Play Menu BGM on initial load if on title screen
     if (gameState.screen === GameScreen.START_MENU) {
         audioService.init();
         audioService.playBGM('menu');
     }
   }, []);
 
-  // Update Next Threshold
   useEffect(() => {
     const next = UNLOCK_THRESHOLDS.find(t => t > totalMathCorrect);
     setNextThreshold(next || null);
@@ -331,7 +332,7 @@ const App: React.FC = () => {
       setShopCards([]);
       setEventData(null);
       setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined }));
-      audioService.playBGM('menu'); // Play Menu BGM
+      audioService.playBGM('menu'); 
   };
 
   const handleNodeComplete = () => {
@@ -462,6 +463,84 @@ const App: React.FC = () => {
         audioService.playBGM('map');
   };
 
+  const handleDebugStartAct3Boss = async (deck: ICard[], relics: Relic[], potions: Potion[]) => {
+      const map = generateDungeonMap();
+      setDebugLoadout({ deck, relics, potions });
+
+      const bossNode = map.find(n => n.type === NodeType.BOSS);
+      if (!bossNode) return;
+
+      // 1. 基本的な初期ステートを作成 (Act 3, Floor 15)
+      const playerBase = {
+          ...gameState.player,
+          deck: deck.length > 0 ? deck : createDeck(),
+          relics: relics.length > 0 ? relics : [],
+          potions: potions.length > 0 ? potions : [],
+          maxHp: 999,
+          currentHp: isDebugHpOne ? 1 : 999,
+          maxEnergy: 4,
+          currentEnergy: 4,
+          gold: 999,
+          hand: [],
+          discardPile: [],
+          powers: {},
+          relicCounters: {},
+          turnFlags: {},
+          typesPlayedThisTurn: [],
+          floatingText: null,
+          nextTurnEnergy: 0,
+          nextTurnDraw: 0,
+          echoes: 0,
+          cardsPlayedThisTurn: 0,
+          attacksPlayedThisTurn: 0,
+      };
+
+      // 2. ボスエンティティの生成
+      const bossName = await generateEnemyName(15);
+      const bossEnemy: Enemy = {
+          id: `debug-boss-${Date.now()}`,
+          enemyType: 'GUARDIAN', 
+          name: `ボス: ${bossName}`,
+          maxHp: 300,
+          currentHp: isDebugHpOne ? 1 : 300,
+          block: 0,
+          strength: 0,
+          nextIntent: { type: EnemyIntentType.UNKNOWN, value: 0 }, 
+          vulnerable: 0, weak: 0, poison: 0, artifact: 0, corpseExplosion: false,
+          floatingText: null
+      };
+      bossEnemy.nextIntent = getNextEnemyIntent(bossEnemy, 1);
+
+      // 3. 山札と手札の初期化
+      playerBase.drawPile = shuffle(playerBase.deck.map(c => ({ ...c })));
+      for(let i=0; i<HAND_SIZE; i++) {
+          const drawn = playerBase.drawPile.pop();
+          if(drawn) playerBase.hand.push(drawn);
+      }
+
+      // 4. ステートを一括更新 (直接BATTLE画面へ)
+      const combatState: GameState = {
+          ...gameState,
+          screen: GameScreen.BATTLE,
+          act: 3,
+          floor: 16,
+          turn: 1,
+          map,
+          currentMapNodeId: bossNode.id,
+          player: playerBase,
+          enemies: [bossEnemy],
+          selectedEnemyId: bossEnemy.id,
+          narrativeLog: ["デバッグ: ACT3 BOSS 直通開始"],
+          combatLog: ["> ボスとの決戦開始！"],
+          rewards: [],
+          selectionState: { active: false, type: 'DISCARD', amount: 0 }
+      };
+
+      setGameState(combatState);
+      audioService.playBGM('boss');
+      setTurnLog(trans("あなたのターン", languageMode));
+  };
+
   const handleCharacterSelect = (char: Character) => {
       audioService.playSound('select');
       setSelectedCharName(char.name);
@@ -491,15 +570,13 @@ const App: React.FC = () => {
       const starterRelic = RELIC_LIBRARY[char.startingRelicId];
       const relics = starterRelic ? [starterRelic] : [];
 
-      // Generate Bonus Relic Options
       const commonRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'COMMON');
       const bonusOptions = shuffle(commonRelics).slice(0, 3);
       setStarterRelics(bonusOptions);
 
-      // 共通プレイヤー初期化
       const initialPlayerState = {
           ...gameState.player,
-          id: char.id, // Character ID set correctly here
+          id: char.id, 
           maxHp: char.maxHp,
           currentHp: char.maxHp,
           gold: char.gold,
@@ -527,7 +604,6 @@ const App: React.FC = () => {
           partner: undefined,
       };
 
-      // ASSASSIN (転校生) の場合の特別イベントフロー
       if (char.id === 'ASSASSIN') {
           const warrior = CHARACTERS.find(c => c.id === 'WARRIOR');
           
@@ -586,7 +662,7 @@ const App: React.FC = () => {
           screen: GameScreen.RELIC_SELECTION,
           act: 1,
           floor: 0,
-          map: [], // Map is generated after relic selection
+          map: [], 
           currentMapNodeId: null,
           player: initialPlayerState,
           narrativeLog: logs,
@@ -620,7 +696,6 @@ const App: React.FC = () => {
       try {
         if (node.type === NodeType.COMBAT || node.type === NodeType.ELITE || node.type === NodeType.BOSS || node.type === NodeType.START) {
             
-            // ... (Enemy Generation Logic) ...
             const actMultiplier = gameState.act; 
             const floorDifficulty = node.y * (1 + (actMultiplier * 0.5));
             
@@ -628,7 +703,6 @@ const App: React.FC = () => {
             let bgmType: 'battle' | 'mid_boss' | 'boss' | 'final_boss' = 'battle'; 
 
             if (gameState.act === 4 && node.type === NodeType.BOSS) {
-                // Final Boss
                 enemies.push({
                     id: 'true-boss',
                     enemyType: 'THE_HEART',
@@ -639,17 +713,15 @@ const App: React.FC = () => {
                     strength: 0,
                     nextIntent: { type: EnemyIntentType.BUFF, value: 0 },
                     vulnerable: 0, weak: 0, poison: 0, artifact: 2, corpseExplosion: false,
-                    floatingText: null
+                    floatingText: null,
+                    phase: 1 
                 });
                 bgmType = 'final_boss';
             } else if (node.type === NodeType.BOSS) {
-                 // Act Boss
                  bgmType = 'boss';
             } else if (node.type === NodeType.ELITE) {
-                 // Elite
                  bgmType = 'mid_boss';
             } else {
-                 // Normal Combat
                  bgmType = 'battle';
             }
 
@@ -683,17 +755,15 @@ const App: React.FC = () => {
             const flavor = await generateFlavorText(node.type === NodeType.BOSS ? "ボスが現れた！" : "敵と遭遇した。");
             
             const p = { ...nextState.player };
-            // ... (rest of battle setup)
             p.drawPile = shuffle(p.deck.map(c => ({ ...c })));
             p.hand = [];
             p.discardPile = [];
             p.currentEnergy = p.maxEnergy;
             p.block = 0;
             p.strength = 0;
-            p.powers = {};
+            p.powers = { ...p.powers }; 
             p.relicCounters = { ...p.relicCounters }; 
             
-            // RESET HAPPY FLOWER COUNTER AT START OF BATTLE
             if (p.relics.find(r => r.id === 'HAPPY_FLOWER')) {
                 p.relicCounters['HAPPY_FLOWER'] = 0;
             }
@@ -704,14 +774,13 @@ const App: React.FC = () => {
             p.cardsPlayedThisTurn = 0;
             p.attacksPlayedThisTurn = 0;
 
-            // Relic Effects
             if (p.relics.find(r => r.id === 'VAJRA')) p.strength += 1;
-            if (p.relics.find(r => r.id === 'HACHIMAKI')) p.powers['DEXTERITY'] = 1;
-            if (p.relics.find(r => r.id === 'SEED_PACK')) p.powers['THORNS'] = 3;
+            if (p.relics.find(r => r.id === 'HACHIMAKI')) p.powers['DEXTERITY'] = (p.powers['DEXTERITY'] || 0) + 1;
+            if (p.relics.find(r => r.id === 'SEED_PACK')) p.powers['THORNS'] = (p.powers['THORNS'] || 0) + 3;
             if (p.relics.find(r => r.id === 'HOLY_WATER')) p.currentEnergy += 1; 
             if (p.relics.find(r => r.id === 'ANCHOR')) p.block += 10;
             if (p.relics.find(r => r.id === 'LANTERN')) p.currentEnergy += 1;
-            if (p.relics.find(r => r.id === 'BRONZE_SCALES')) p.powers['THORNS'] = 3;
+            if (p.relics.find(r => r.id === 'BRONZE_SCALES')) p.powers['THORNS'] = (p.powers['THORNS'] || 0) + 3;
             if (p.relics.find(r => r.id === 'BLOOD_VIAL')) p.currentHp = Math.min(p.maxHp, p.currentHp + 2);
             if (p.relics.find(r => r.id === 'BIG_LADLE')) p.currentHp = Math.min(p.maxHp, p.currentHp + 4);
             if (node.type === NodeType.BOSS && p.relics.find(r => r.id === 'PENTOGRAPH')) p.currentHp = Math.min(p.maxHp, p.currentHp + 25);
@@ -783,7 +852,6 @@ const App: React.FC = () => {
                 parryState: { active: false, enemyId: null, success: false }
             };
 
-            // DODGEBALL ACE SPECIAL MECHANIC - Corrected to exclude ELITE nodes as per user request
             if (p.id === 'DODGEBALL' && (node.type === NodeType.COMBAT || node.type === NodeType.START)) {
                 setGameState({ ...nextGameState, screen: GameScreen.DODGEBALL_SHOOTING });
             } else {
@@ -891,7 +959,6 @@ const App: React.FC = () => {
               enemies: [],
               narrativeLog: [...prev.narrativeLog, "ドッジボールで撃破！戦闘をスキップします。"]
           }));
-          // Directly go to reward phase logic handled in useEffect for combat end
       } else {
           setGameState(prev => ({ ...prev, screen: GameScreen.BATTLE }));
           audioService.playBGM('battle');
@@ -1015,21 +1082,17 @@ const App: React.FC = () => {
   };
 
   const handlePlayCard = (card: ICard) => {
-    // Determine effective cost
     let effectiveCost = card.cost;
     if (gameState.player.powers['CORRUPTION'] && card.type === CardType.SKILL) {
         effectiveCost = 0;
     }
 
-    // Double Character Mode check - energy cost might be tricky if handled outside
-    // For normal play, check energy
-    if (gameState.player.currentEnergy < effectiveCost && !gameState.player.partner) return; // Allow if partner mode handles energy differently or inside batch? No, adhere to standard.
+    if (gameState.player.currentEnergy < effectiveCost && !gameState.player.partner) return; 
     if (gameState.enemies.length === 0) return;
     if (actingEnemyId) return; 
     if (gameState.selectionState.active) return;
     if (card.unplayable) return; 
 
-    // Normality Check
     const hasNormality = gameState.player.hand.some(c => c.name === '退屈' || c.name === 'NORMALITY');
     if (hasNormality && gameState.player.attacksPlayedThisTurn + (gameState.player.cardsPlayedThisTurn - gameState.player.attacksPlayedThisTurn) >= 3) {
          audioService.playSound('wrong'); 
@@ -1062,7 +1125,6 @@ const App: React.FC = () => {
       let enemies = prev.enemies.map(e => ({ ...e }));
       const currentLogs: string[] = [`> ${trans(card.name, languageMode)} ${trans("を使用", languageMode)}`];
       
-      // Pain Logic
       const painCards = p.hand.filter(c => c.name === '腹痛' || c.name === 'PAIN');
       if (painCards.length > 0) {
           const dmg = painCards.length;
@@ -1079,7 +1141,6 @@ const App: React.FC = () => {
           p.typesPlayedThisTurn.push(card.type);
       }
 
-      // ORANGE PELLETS
       if (p.relics.find(r => r.id === 'ORANGE_PELLETS')) {
           if (p.typesPlayedThisTurn.includes(CardType.ATTACK) && 
               p.typesPlayedThisTurn.includes(CardType.SKILL) && 
@@ -1094,7 +1155,6 @@ const App: React.FC = () => {
           }
       }
 
-      // DISCOVERY
       if (card.name === '発見' || card.name === 'DISCOVERY') {
           for (let i = 0; i < 3; i++) {
               const keys = Object.keys(CARDS_LIBRARY).filter(k => !STATUS_CARDS[k] && !CURSE_CARDS[k]);
@@ -1109,14 +1169,12 @@ const App: React.FC = () => {
           currentLogs.push(trans("発見！カードを3枚生成", languageMode));
       }
 
-      // Calculated Gamble Logic
       if (card.name === '山勘' || card.name === 'CALCULATED_GAMBLE') {
           const cardsToDiscard = p.hand.filter(c => c.id !== card.id);
           const count = cardsToDiscard.length;
           
           cardsToDiscard.forEach(c => {
               p.discardPile.push(c);
-              // Strategist check
               if (c.name === 'カンニングペーパー' || c.name === 'STRATEGIST') {
                   p.currentEnergy += 2;
                   currentLogs.push(`${trans("カンニングペーパー", languageMode)}: +2 Energy`);
@@ -1149,7 +1207,6 @@ const App: React.FC = () => {
           });
       }
 
-      // Activations Loop
       let activations = 1;
       if (p.echoes > 0) { activations++; p.echoes--; currentLogs.push(trans("反響で再発動！", languageMode)); }
       if (card.type === CardType.SKILL && p.powers['BURST'] > 0) { activations++; p.powers['BURST']--; currentLogs.push(trans("バーストで再発動！", languageMode)); }
@@ -1172,10 +1229,8 @@ const App: React.FC = () => {
                   if (target) targets = [target];
               }
 
-              // Damage Logic
               if (card.damage || card.damageBasedOnBlock || card.damagePerCardInHand || card.damagePerAttackPlayed || card.damagePerStrike || card.damagePerCardInDraw) {
                 targets.forEach(e => {
-                    const strengthBonus = p.strength * (card.strengthScaling || 1);
                     let baseDamage = (card.damage || 0);
                     let logParts: string[] = [`${baseDamage}`];
                     
@@ -1196,11 +1251,9 @@ const App: React.FC = () => {
                         logParts.push(`${bonus >= 0 ? '+' : ''}${bonus}(${trans("ムキムキ", languageMode)})`);
                     }
 
-                    // Pen Nib Logic (ONLY if relic exists)
                     let multiplier = 1;
                     if (card.type === CardType.ATTACK && p.relics.find(r => r.id === 'PEN_NIB')) {
                         p.relicCounters['PEN_NIB'] = (p.relicCounters['PEN_NIB'] || 0) + 1;
-                        // Trigger on 10th attack
                         if (p.relicCounters['PEN_NIB'] === 10) {
                             multiplier = 2;
                             p.relicCounters['PEN_NIB'] = 0;
@@ -1226,6 +1279,16 @@ const App: React.FC = () => {
                     else { damage -= e.block; e.block = 0; }
                     
                     e.currentHp -= damage;
+
+                    if (e.enemyType === 'THE_HEART' && e.currentHp <= 0 && e.phase === 1) {
+                         e.currentHp = e.maxHp; 
+                         e.phase = 2; 
+                         e.name = "真・校長先生"; 
+                         e.vulnerable = 0; e.weak = 0; e.poison = 0; 
+                         e.floatingText = { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' };
+                         currentLogs.push("校長先生が真の姿を現した！");
+                    }
+
                     if (damage > 0 || logParts.length > 1) {
                         e.floatingText = { id: `dmg-${Date.now()}-${e.id}-${h}`, text: `${damage}`, color: 'text-white', iconType: 'sword' };
                         const formula = logParts.length > 1 ? `(${logParts.join(' ')}) = ` : '';
@@ -1276,7 +1339,6 @@ const App: React.FC = () => {
                 });
               }
 
-              // Effects Logic
               if (card.block) {
                   let blk = card.block;
                   let logParts = [`${blk}`];
@@ -1410,10 +1472,8 @@ const App: React.FC = () => {
           }
       }
 
-      // COMBO CONSUMPTION LOGIC (Modified to support combo consumption)
       const consumedIds = (card as any)._consumedIds;
       if (consumedIds && Array.isArray(consumedIds)) {
-          // Identify cards to remove from hand
           const cardsToRemove = p.hand.filter(c => consumedIds.includes(c.id));
           p.hand = p.hand.filter(c => !consumedIds.includes(c.id));
           
@@ -1428,7 +1488,6 @@ const App: React.FC = () => {
              }
           });
       } else {
-          // Standard Single Card Logic
           p.hand = p.hand.filter(c => c.id !== card.id);
           
           let shouldExhaust = card.exhaust;
@@ -1513,7 +1572,6 @@ const App: React.FC = () => {
           p.floatingText = { id: `relic-horn-${Date.now()}`, text: '+14 Block', color: 'text-blue-400', iconType: 'shield' };
       }
 
-      // --- HAPPY FLOWER Logic ---
       if (p.relics.find(r => r.id === 'HAPPY_FLOWER')) {
           const current = (p.relicCounters['HAPPY_FLOWER'] || 0) + 1;
           if (current === 3) {
@@ -1548,7 +1606,6 @@ const App: React.FC = () => {
         const card = newDrawPile.pop();
         if (card) {
             if (card.name === '虚無' || card.name === 'VOID') p.currentEnergy = Math.max(0, p.currentEnergy - 1);
-            // Snecko Eye OR Confusion
             if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && card.cost >= 0) {
                 card.cost = Math.floor(Math.random() * 4);
             }
@@ -1622,7 +1679,7 @@ const App: React.FC = () => {
           nextSelection = { active: true, type: 'DISCARD', amount: 1 };
       }
 
-      return { ...prev, player: p, enemies: prev.enemies, selectionState: nextSelection, turn: prev.turn + 1 };
+      return { ...prev, player: p, selectionState: nextSelection, turn: prev.turn + 1 };
     });
   };
 
@@ -1658,7 +1715,7 @@ const App: React.FC = () => {
 
         if (p.powers['WEAK'] > 0) {
             p.powers['WEAK']--;
-            if (p.powers['WEAK'] === 0) newLogs.push(trans("へろへろから回復した", languageMode));
+            if (p.powers['WEAK'] === 0) newLogs.push(trans("へろろから回復した", languageMode));
         }
         if (p.powers['VULNERABLE'] > 0) {
             p.powers['VULNERABLE']--;
@@ -1686,7 +1743,17 @@ const App: React.FC = () => {
             const floatText: FloatingText = { id: `psn-${Date.now()}-${enemy.id}`, text: `${poisonDmg}`, color: 'text-green-500', iconType: 'poison' };
             const logMsg = `${trans(enemy.name, languageMode)}に毒ダメージ${poisonDmg}`;
 
-            if (enemy.currentHp <= 0) {
+            if (enemy.currentHp <= 0 && enemy.enemyType === 'THE_HEART' && enemy.phase === 1) {
+                enemy.currentHp = enemy.maxHp;
+                enemy.phase = 2;
+                enemy.name = "真・校長先生";
+                enemy.poison = 0; enemy.weak = 0; enemy.vulnerable = 0;
+                setGameState(prev => ({ 
+                    ...prev, 
+                    enemies: prev.enemies.map(e => e.id === enemy.id ? { ...enemy, floatingText: { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' } } : e),
+                    combatLog: [...prev.combatLog, logMsg, "校長先生が真の姿を現した！"]
+                }));
+            } else if (enemy.currentHp <= 0) {
                 setGameState(prev => ({ 
                     ...prev, 
                     enemies: prev.enemies.filter(e => e.id !== enemy.id),
@@ -1704,27 +1771,24 @@ const App: React.FC = () => {
 
         setActingEnemyId(enemy.id);
         
-// --- Parry Mechanic for BARD ---
-const isBard = gameState.player.id === 'BARD';
-const isAttackIntent =
-  enemy.nextIntent.type === EnemyIntentType.ATTACK ||
-  enemy.nextIntent.type === EnemyIntentType.ATTACK_DEBUFF ||
-  enemy.nextIntent.type === EnemyIntentType.ATTACK_DEFEND;
+        const isBard = gameState.player.id === 'BARD';
+        const isAttackIntent =
+          enemy.nextIntent.type === EnemyIntentType.ATTACK ||
+          enemy.nextIntent.type === EnemyIntentType.ATTACK_DEBUFF ||
+          enemy.nextIntent.type === EnemyIntentType.ATTACK_DEFEND;
 
-let parryWindowOpen = false;
+        let parryWindowOpen = false;
 
-if (isBard && isAttackIntent) {
-  setGameState(prev => ({
-    ...prev,
-    parryState: { active: true, enemyId: enemy.id, success: false }
-  }));
-
-  parryWindowOpen = true;
-
-  await wait(300); // ← ★300ms固定
-} else {
-  await wait(300);
-}
+        if (isBard && isAttackIntent) {
+          setGameState(prev => ({
+            ...prev,
+            parryState: { active: true, enemyId: enemy.id, success: false }
+          }));
+          parryWindowOpen = true;
+          await wait(300); 
+        } else {
+          await wait(300);
+        }
 
         const currentState = await new Promise<GameState>(resolve => {
             setGameState(prev => { resolve(prev); return prev; });
@@ -1777,7 +1841,6 @@ if (isBard && isAttackIntent) {
                     logParts.push(`= 1(${trans("スケスケ", languageMode)})`);
                 }
 
-                // Parry Resolution
                 if (parrySuccess) {
                     const reflectedDmg = damage;
                     damage = 0;
@@ -1818,7 +1881,6 @@ if (isBard && isAttackIntent) {
                     newLogs.push(`${trans(e.name, languageMode)}から ${formula}${damage} ${trans("ダメージを受けた", languageMode)}`);
                 }
                 
-                // --- Partner Damage Logic ---
                 if (p.partner && p.partner.currentHp > 0) {
                      if (unblockedDamage > 0 && Math.random() < 0.5) {
                          p.partner.currentHp -= unblockedDamage;
@@ -1841,6 +1903,15 @@ if (isBard && isAttackIntent) {
                     e.currentHp -= p.powers['THORNS'];
                     e.floatingText = { id: `thorns-${Date.now()}`, text: `${p.powers['THORNS']}`, color: 'text-orange-500', iconType: 'sword' };
                     newLogs.push(`${trans("トゲトゲ", languageMode)}で${p.powers['THORNS']}反撃ダメージ`);
+                }
+
+                if (e.currentHp <= 0 && e.enemyType === 'THE_HEART' && e.phase === 1) {
+                     e.currentHp = e.maxHp;
+                     e.phase = 2;
+                     e.name = "真・校長先生";
+                     e.poison = 0; e.weak = 0; e.vulnerable = 0;
+                     e.floatingText = { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' };
+                     newLogs.push("校長先生が真の姿を現した！");
                 }
             }
 
@@ -1870,13 +1941,6 @@ if (isBard && isAttackIntent) {
                         p.discardPile.push(status);
                         newLogs.push(trans("粘液を混ぜられた", languageMode));
                     }
-                    if (type) {
-                        let jpType = type;
-                        if (type === 'WEAK') jpType = 'へろへろ';
-                        else if (type === 'VULNERABLE') jpType = 'びくびく';
-                        else if (type === 'CONFUSED') jpType = '混乱';
-                        newLogs.push(`${trans(jpType, languageMode)}を${debuffAmt}受けました`);
-                    }
                 }
             }
             
@@ -1885,7 +1949,7 @@ if (isBard && isAttackIntent) {
 
             e.nextIntent = getNextEnemyIntent(e, gameState.turn + 1);
 
-            const aliveEnemies = newEnemies.filter(en => en.currentHp > 0);
+            const aliveEnemies = newEnemies.filter(en => en.currentHp > 0 || (en.enemyType === 'THE_HEART' && en.phase === 1));
             return { ...prev, player: p, enemies: aliveEnemies, combatLog: [...prev.combatLog, ...newLogs] };
         });
         await wait(600);
@@ -1969,7 +2033,7 @@ if (isBard && isAttackIntent) {
       handlePlayCard(card);
   };
 
-  const handleEventContinue = () => {
+  const handleEventComplete = () => {
       handleNodeComplete();
   };
 
@@ -1981,6 +2045,46 @@ if (isBard && isAttackIntent) {
   const handleRetry = () => {
       setLegacyCardSelected(false);
       startGame(); 
+  };
+
+  const handleFinalBridgeComplete = (upgradeType: 'HEAL' | 'APOTHEOSIS' | 'STRENGTH') => {
+      setGameState(prev => {
+          const p = { ...prev.player };
+          let newDeck = [...p.deck];
+          let newPowers = { ...p.powers };
+          let newStrength = p.strength;
+          let newMaxHp = p.maxHp;
+          let newCurrentHp = p.currentHp;
+
+          if (upgradeType === 'HEAL') {
+              newMaxHp += 10;
+              newCurrentHp = newMaxHp;
+          } else if (upgradeType === 'APOTHEOSIS') {
+              newDeck = newDeck.map(c => getUpgradedCard(c));
+          } else if (upgradeType === 'STRENGTH') {
+              p.relicCounters['FINAL_BUFF_STRENGTH'] = 3;
+          }
+
+          const bossNode: MapNode = { id: 'true-boss-node', x: 3, y: 0, type: NodeType.BOSS, nextNodes: [], completed: false };
+
+          return {
+              ...prev,
+              act: 4,
+              floor: 1,
+              map: [bossNode],
+              currentMapNodeId: null,
+              screen: GameScreen.MAP,
+              player: {
+                  ...p,
+                  deck: newDeck,
+                  maxHp: newMaxHp,
+                  currentHp: newCurrentHp,
+                  powers: newPowers,
+                  strength: newStrength
+              }
+          };
+      });
+      audioService.playBGM('map');
   };
 
   useEffect(() => {
@@ -2006,12 +2110,10 @@ if (isBard && isAttackIntent) {
                     };
                 }
 
-                // 即座にVICTORY画面へ遷移させることで、このuseEffectが何度も実行されるのを防ぐ
                 if (prev.act === 4) {
                     audioService.playBGM('victory');
                     return { ...prev, player: nextPlayer, screen: GameScreen.ENDING };
                 } else {
-                    // もし漢字系のモードなら漢字チャレンジ、そうでなければ算数チャレンジ
                     const isKanji = prev.mode.startsWith('KANJI');
                     return { ...prev, player: nextPlayer, screen: isKanji ? GameScreen.KANJI_CHALLENGE : GameScreen.MATH_CHALLENGE };
                 }
@@ -2065,6 +2167,47 @@ if (isBard && isAttackIntent) {
         }
     }
   }, [gameState.enemies, gameState.player.currentHp, gameState.screen, gameState.act, selectedCharName, gameState.challengeMode]);
+
+  const finishRewardPhase = () => {
+    setGameState(prev => {
+        const currentNode = prev.map.find(n => n.id === prev.currentMapNodeId);
+        if (currentNode && currentNode.type === NodeType.BOSS) {
+            if (prev.act === 3) {
+                return { ...prev, screen: GameScreen.FINAL_BRIDGE };
+            }
+
+            const nextAct = prev.act + 1;
+            if (nextAct > 4) return prev;
+            
+            const newMap = generateDungeonMap();
+            audioService.playBGM('map');
+            return {
+                ...prev,
+                act: nextAct,
+                floor: 0,
+                map: newMap,
+                currentMapNodeId: null,
+                screen: GameScreen.MAP,
+                player: {
+                    ...prev.player,
+                    currentHp: prev.player.maxHp 
+                },
+                narrativeLog: [...prev.narrativeLog, trans(`第${nextAct}章へ進んだ。体力が全回復した！`, languageMode)]
+            };
+        } else {
+            const newMap = prev.map.map(n => {
+                if (n.id === prev.currentMapNodeId) return { ...n, completed: true };
+                return n;
+            });
+            audioService.playBGM('map');
+            return {
+                ...prev,
+                map: newMap,
+                screen: GameScreen.MAP
+            };
+        }
+    });
+  };
 
   const goToRewardPhase = (bonusGold: number = 0) => {
       const rewards: RewardItem[] = [];
@@ -2175,32 +2318,6 @@ if (isBard && isAttackIntent) {
       });
   };
 
-  const finishRewardPhase = () => {
-      const currentNode = gameState.map.find(n => n.id === gameState.currentMapNodeId);
-      if (currentNode && currentNode.type === NodeType.BOSS) {
-          const nextAct = gameState.act + 1;
-          if (nextAct > 4) return;
-          
-          const newMap = generateDungeonMap();
-          setGameState(prev => ({
-              ...prev,
-              act: nextAct,
-              floor: 0,
-              map: newMap,
-              currentMapNodeId: null,
-              screen: GameScreen.MAP,
-              player: {
-                  ...prev.player,
-                  currentHp: prev.player.maxHp // Act移行時にHP全回復
-              },
-              narrativeLog: [...prev.narrativeLog, trans(`第${nextAct}章へ進んだ。体力が全回復した！`, languageMode)]
-          }));
-          audioService.playBGM('map');
-      } else {
-          handleNodeComplete();
-      }
-  };
-
   const handleRestAction = () => {
       const heal = Math.floor(gameState.player.maxHp * 0.3);
       setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + heal) } }));
@@ -2221,7 +2338,6 @@ if (isBard && isAttackIntent) {
     <div className="w-full h-[100dvh] bg-black overflow-hidden">
         <div className="w-full h-full relative overflow-hidden bg-black crt-scanline">
             
-            {/* Language Toggle Button (Only visible on START_MENU) */}
             {gameState.screen === GameScreen.START_MENU && (
                 <div className="absolute top-2 right-2 z-[9999] flex gap-2">
                     <button 
@@ -2251,7 +2367,6 @@ if (isBard && isAttackIntent) {
                             {trans("学習ローグ", languageMode)}
                         </h1>
                         
-                        {/* UNLOCK STATUS DISPLAY */}
                         <div className="mb-6 bg-black/40 px-4 py-2 rounded-lg border border-gray-600">
                              {nextThreshold ? (
                                 <div className="text-yellow-300 text-xs md:text-sm font-bold">
@@ -2270,7 +2385,7 @@ if (isBard && isAttackIntent) {
                         )}
                         {isDebugHpOne && (
                             <div className="text-red-500 font-bold mb-6 text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse">
-                                {trans("(デバッグ: 敵HP1 & Loadout & 全開放 ON)", languageMode)}
+                                {trans("(デバッグ: てきHP1 & Loadout & 全開放 ON)", languageMode)}
                             </div>
                         )}
                         {(!isMathDebugSkipped && !isDebugHpOne) && <div className="mb-2 h-2"></div>}
@@ -2349,7 +2464,7 @@ if (isBard && isAttackIntent) {
             )}
             
             {gameState.screen === GameScreen.DEBUG_MENU && (
-                <DebugMenuScreen onStart={handleDebugStart} onBack={returnToTitle} />
+                <DebugMenuScreen onStart={handleDebugStart} onStartAct3Boss={handleDebugStartAct3Boss} onBack={returnToTitle} />
             )}
 
             {gameState.screen === GameScreen.MINI_GAME_SELECT && (
@@ -2393,7 +2508,6 @@ if (isBard && isAttackIntent) {
                         <h2 className="text-3xl font-bold mb-6 text-yellow-400 mt-4">{trans("モード選択", languageMode)}</h2>
                         
                         <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-8">
-                            {/* MATH SECTION */}
                             <div className="space-y-4">
                                 <h3 className="text-xl font-bold text-blue-400 border-b border-blue-900 pb-2 flex items-center"><Brain className="mr-2" /> さんすう</h3>
                                 <div className="grid grid-cols-2 gap-2">
@@ -2405,7 +2519,6 @@ if (isBard && isAttackIntent) {
                                 </div>
                             </div>
 
-                            {/* KANJI SECTION */}
                             <div className="space-y-4">
                                 <h3 className="text-xl font-bold text-cyan-400 border-b border-cyan-900 pb-2 flex items-center"><Book className="mr-2" /> かんじ (読み)</h3>
                                 <div className="grid grid-cols-3 gap-2">
@@ -2570,7 +2683,15 @@ if (isBard && isAttackIntent) {
                     description={trans(eventData.description, languageMode)} 
                     options={eventData.options.map((o: any) => ({ ...o, label: trans(o.label, languageMode), text: trans(o.text, languageMode) }))} 
                     resultLog={eventResultLog ? trans(eventResultLog, languageMode) : null}
-                    onContinue={handleEventContinue}
+                    onContinue={handleEventComplete}
+                />
+            )}
+
+            {gameState.screen === GameScreen.FINAL_BRIDGE && (
+                <FinalBridgeScreen 
+                  player={gameState.player}
+                  onComplete={handleFinalBridgeComplete}
+                  languageMode={languageMode}
                 />
             )}
 
@@ -2590,6 +2711,7 @@ if (isBard && isAttackIntent) {
                                     if (r.value.id === 'SOZU') newP.maxEnergy += 1;
                                     if (r.value.id === 'CURSED_KEY') newP.maxEnergy += 1;
                                     if (r.value.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
+                                    if (r.value.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
                                     if (r.value.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
                                     if (r.value.id === 'OLD_COIN') newP.gold += 300;
                                     if (r.value.id === 'MATRYOSHKA') prev.player.relicCounters['MATRYOSHKA'] = 2; 
