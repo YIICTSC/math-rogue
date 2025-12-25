@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, XCircle, Languages, Volume2, MessageCircle } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -117,38 +116,38 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
   const isConv = currentProblem.isDialogue;
 
   return (
-    <div className="flex flex-col h-full w-full bg-indigo-900 text-white relative items-center justify-center p-8 font-mono">
+    <div className="flex flex-col h-full w-full bg-indigo-900 text-white relative items-center justify-center p-4 md:p-8 font-mono">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-20 pointer-events-none"></div>
         
-        <div className="z-10 w-full max-w-md text-center">
-            <div className="mb-6 flex flex-col items-center justify-center">
-                {isConv ? <MessageCircle size={48} className="mb-2 text-cyan-300 animate-pulse" /> : <Languages size={48} className="mb-2 text-cyan-300 animate-pulse" />}
-                <div className="text-3xl font-bold text-white tracking-widest font-mono border-b-4 border-white pb-1">
+        <div className="z-10 w-full max-w-md text-center flex flex-col">
+            <div className="mb-4 flex flex-col items-center justify-center">
+                {isConv ? <MessageCircle size={32} className="mb-1 text-cyan-300 animate-pulse" /> : <Languages size={32} className="mb-1 text-cyan-300 animate-pulse" />}
+                <div className="text-2xl font-bold text-white tracking-widest font-mono border-b-2 border-white pb-1">
                     {isChallenge ? `第 ${streak + 1} 問` : `${currentProblemIndex + 1} / ${problems.length}`}
                 </div>
             </div>
 
-            <div className="bg-black/40 border-4 border-white p-6 rounded-2xl mb-8 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[300px]">
+            <div className="bg-black/40 border-4 border-white p-4 md:p-6 rounded-2xl mb-4 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[200px] md:min-h-[300px]">
                 {currentProblem.hint && (
                     <div className="bg-indigo-800/60 p-2 rounded-lg border border-indigo-400/30 mb-4 w-full animate-in fade-in slide-in-from-top-2">
-                        <div className="text-[10px] text-cyan-300 font-bold mb-1 uppercase tracking-tighter">Hint</div>
-                        <div className="text-xs text-gray-100 leading-relaxed">{currentProblem.hint}</div>
+                        <div className="text-[9px] text-cyan-300 font-bold mb-0.5 uppercase tracking-tighter text-left">Hint</div>
+                        <div className="text-[11px] md:text-xs text-gray-100 leading-relaxed text-left">{currentProblem.hint}</div>
                     </div>
                 )}
                 
-                <div className="text-xs text-gray-400 mb-4 uppercase tracking-widest">
+                <div className="text-[10px] text-gray-400 mb-3 uppercase tracking-widest">
                   {isConv ? "Listen and Reply" : "Translation"}
                 </div>
 
                 {isConv ? (
                   <div 
-                    className="relative bg-white text-black p-5 rounded-3xl rounded-bl-none border-4 border-cyan-400 max-w-[90%] group cursor-pointer transition-transform active:scale-95"
+                    className="relative bg-white text-black p-4 md:p-5 rounded-3xl rounded-bl-none border-4 border-cyan-400 max-w-[95%] group cursor-pointer transition-transform active:scale-95 shadow-xl"
                     onClick={() => speakWord(currentProblem.question)}
                   >
-                     <div className="text-lg md:text-xl font-bold font-sans italic text-left pr-6">
+                     <div className="text-base md:text-xl font-bold font-sans italic text-left pr-6 leading-tight">
                         "{currentProblem.question}"
                      </div>
-                     <Volume2 size={20} className="absolute top-2 right-2 text-cyan-600 opacity-50 group-hover:opacity-100" />
+                     <Volume2 size={18} className="absolute top-2 right-2 text-cyan-600 opacity-50 group-hover:opacity-100" />
                      <div className="absolute -bottom-4 left-0 w-0 h-0 border-l-[20px] border-l-transparent border-t-[20px] border-t-white"></div>
                   </div>
                 ) : (
@@ -156,7 +155,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
                     className="group cursor-pointer relative flex flex-col items-center"
                     onClick={() => speakWord(currentProblem.question)}
                   >
-                    <h3 className="text-5xl md:text-6xl font-bold text-white tracking-widest font-sans italic transition-transform group-active:scale-95">
+                    <h3 className="text-4xl md:text-6xl font-bold text-white tracking-widest font-sans italic transition-transform group-active:scale-95 break-words max-w-full">
                       {currentProblem.question}
                     </h3>
                     <Volume2 size={24} className="text-cyan-400 mt-2 opacity-50 group-hover:opacity-100 transition-opacity" />
@@ -166,24 +165,24 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
                 {feedback && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-20 animate-in zoom-in duration-200">
                         {feedback === 'CORRECT' ? (
-                            <CheckCircle size={120} className="text-green-400 drop-shadow-[0_0_15px_rgba(74,222,128,0.8)]" />
+                            <CheckCircle size={100} className="text-green-400 drop-shadow-[0_0_15px_rgba(74,222,128,0.8)]" />
                         ) : (
-                            <XCircle size={120} className="text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)]" />
+                            <XCircle size={100} className="text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)]" />
                         )}
                     </div>
                 )}
             </div>
 
-            <div className={`grid ${isConv ? 'grid-cols-1' : 'grid-cols-2'} gap-4`}>
+            <div className={`grid ${isConv ? 'grid-cols-1' : 'grid-cols-2'} gap-2 md:gap-4`}>
                 {currentProblem.options.map((opt, idx) => (
                     <button
                         key={idx}
                         onClick={() => handleAnswer(opt)}
                         disabled={isAnswered}
                         className={`
-                            py-3 px-4 font-bold rounded-xl border-b-4 transition-all active:border-b-0 active:translate-y-1
-                            ${isConv ? 'text-left text-sm md:text-base' : 'text-center text-lg'}
-                            ${isAnswered && opt === currentProblem.answer ? 'bg-green-600 border-green-800 scale-105' : ''}
+                            py-2.5 px-4 font-bold rounded-xl border-b-4 transition-all active:border-b-0 active:translate-y-1
+                            ${isConv ? 'text-left text-[13px] md:text-base' : 'text-center text-base md:text-lg'}
+                            ${isAnswered && opt === currentProblem.answer ? 'bg-green-600 border-green-800 scale-102' : ''}
                             ${isAnswered && opt === selectedOption && opt !== currentProblem.answer ? 'bg-red-600 border-red-800' : ''}
                             ${!isAnswered ? 'bg-indigo-700 border-indigo-900 hover:bg-indigo-600 cursor-pointer' : 'opacity-80'}
                             break-words leading-tight shadow-lg

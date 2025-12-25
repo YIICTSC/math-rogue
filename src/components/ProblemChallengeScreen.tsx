@@ -62,7 +62,7 @@ const CATEGORIES: Category[] = [
   { 
     id: 'MATH', 
     name: 'さんすう', 
-    icon: <Brain />, 
+    icon: <Brain size={20} />, 
     color: 'emerald',
     subModes: [
         { id: 'ADDITION', name: 'たし算', mode: GameMode.ADDITION },
@@ -75,7 +75,7 @@ const CATEGORIES: Category[] = [
   { 
     id: 'KANJI', 
     name: 'かんじ', 
-    icon: <Book />, 
+    icon: <Book size={20} />, 
     color: 'cyan',
     subModes: [
         { id: 'K1', name: '小学1年', mode: GameMode.KANJI_1 },
@@ -93,7 +93,7 @@ const CATEGORIES: Category[] = [
   { 
     id: 'ENGLISH', 
     name: 'えいご', 
-    icon: <Languages />, 
+    icon: <Languages size={20} />, 
     color: 'indigo',
     subModes: [
         { id: 'E_ES', name: '小学校', mode: GameMode.ENGLISH_ES },
@@ -230,38 +230,38 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
   }
 
   return (
-    <div className="w-full h-full bg-slate-950 flex flex-col items-center justify-center p-4 relative overflow-y-auto">
+    <div className="w-full h-full bg-slate-950 flex flex-col items-center justify-center p-2 md:p-4 relative overflow-y-auto">
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-30 pointer-events-none"></div>
       
-      <div className="z-10 w-full max-w-4xl bg-gray-900 border-4 border-emerald-600 rounded-2xl shadow-2xl p-4 md:p-8 flex flex-col gap-6">
-        <div className="text-center border-b border-gray-800 pb-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-emerald-400 mb-1 flex items-center justify-center gap-3">
-            <GraduationCap size={36}/> 問題チャレンジ
+      <div className="z-10 w-full max-w-4xl bg-gray-900 border-4 border-emerald-600 rounded-2xl shadow-2xl p-4 md:p-6 flex flex-col gap-4">
+        <div className="text-center border-b border-gray-800 pb-3">
+          <h2 className="text-2xl md:text-4xl font-bold text-emerald-400 mb-0.5 flex items-center justify-center gap-3">
+            <GraduationCap size={32} className="md:size-36"/> 問題チャレンジ
           </h2>
-          <div className="flex items-center justify-center gap-2 text-yellow-500 font-bold text-xs uppercase tracking-widest">
-            <Star size={12} fill="currentColor"/> ミニゲーム解放カウント対象 <Star size={12} fill="currentColor"/>
+          <div className="flex items-center justify-center gap-1.5 text-yellow-500 font-bold text-[10px] uppercase tracking-wider">
+            <Star size={10} fill="currentColor"/> ミニゲーム解放カウント対象 <Star size={10} fill="currentColor"/>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-3 flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <div className="lg:col-span-3 flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-x-visible pb-1.5 lg:pb-0 scrollbar-hide">
             {CATEGORIES.map(cat => (
               <button
                 key={cat.id}
                 onClick={() => handleCategorySelect(cat)}
-                className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all shrink-0 lg:shrink ${selectedCategory.id === cat.id ? `bg-${cat.color}-900/40 border-${cat.color}-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)]` : 'bg-gray-800 border-gray-700 text-gray-500 hover:border-gray-600'}`}
+                className={`flex items-center gap-2 p-2.5 md:p-4 rounded-xl border-2 transition-all shrink-0 lg:shrink ${selectedCategory.id === cat.id ? `bg-${cat.color}-900/40 border-${cat.color}-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)]` : 'bg-gray-800 border-gray-700 text-gray-500 hover:border-gray-600'}`}
               >
                 <span className={selectedCategory.id === cat.id ? `text-${cat.color}-400` : 'text-gray-600'}>{cat.icon}</span>
-                <span className="font-bold whitespace-nowrap">{cat.name}</span>
+                <span className="font-bold whitespace-nowrap text-sm md:text-base">{cat.name}</span>
               </button>
             ))}
           </div>
 
           <div className="lg:col-span-6 flex flex-col">
-            <h3 className="text-sm font-bold text-gray-400 mb-3 flex items-center gap-2">
-              <ChevronRight size={14} className="text-emerald-500"/> 種目を選択
+            <h3 className="text-[10px] md:text-sm font-bold text-gray-400 mb-2 flex items-center gap-2 uppercase tracking-tight">
+              <ChevronRight size={12} className="text-emerald-500"/> 種目を選択
             </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-gray-800/50 p-3 rounded-xl border border-gray-700 max-h-64 overflow-y-auto custom-scrollbar">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 bg-gray-800/50 p-2 rounded-xl border border-gray-700 max-h-32 md:max-h-64 overflow-y-auto custom-scrollbar">
                 {selectedCategory.subModes.map(sub => {
                   const recordKey = `${selectedCategory.id}_${sub.id}`;
                   const isSelected = selectedSubMode.id === sub.id;
@@ -269,10 +269,10 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
                     <button
                       key={sub.id}
                       onClick={() => { setSelectedSubMode(sub); audioService.playSound('select'); }}
-                      className={`flex flex-col p-2 rounded-lg border-2 transition-all ${isSelected ? 'bg-emerald-600 border-white text-white shadow-lg' : 'bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-700'}`}
+                      className={`flex flex-col p-1.5 rounded-lg border-2 transition-all ${isSelected ? 'bg-emerald-600 border-white text-white shadow-lg' : 'bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-700'}`}
                     >
-                      <span className="text-xs font-bold mb-1 truncate w-full">{sub.name}</span>
-                      <div className={`text-[10px] font-mono px-1 rounded ${isSelected ? 'bg-emerald-800 text-emerald-200' : 'bg-black/40 text-yellow-500'}`}>
+                      <span className="text-[10px] md:text-xs font-bold mb-0.5 truncate w-full leading-tight">{sub.name}</span>
+                      <div className={`text-[8px] md:text-[10px] font-mono px-1 rounded ${isSelected ? 'bg-emerald-800 text-emerald-200' : 'bg-black/40 text-yellow-500'}`}>
                         BEST: {records[recordKey] || 0}
                       </div>
                     </button>
@@ -282,19 +282,19 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
           </div>
 
           <div className="lg:col-span-3 flex flex-col">
-            <h3 className="text-sm font-bold text-gray-400 mb-3 flex items-center gap-2">
-              <Music size={14} className="text-emerald-500"/> BGM設定
+            <h3 className="text-[10px] md:text-sm font-bold text-gray-400 mb-2 flex items-center gap-2 uppercase tracking-tight">
+              <Music size={12} className="text-emerald-500"/> BGM
             </h3>
-            <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-2 max-h-64 overflow-y-auto custom-scrollbar">
+            <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-1.5 max-h-32 md:max-h-64 overflow-y-auto custom-scrollbar">
               <div className="flex flex-col gap-1">
                 {BGM_OPTIONS.map(bgm => (
                   <button
                     key={bgm.id}
                     onClick={() => { setSelectedBgmId(bgm.id); audioService.playSound('select'); }}
-                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition-all ${selectedBgmId === bgm.id ? 'bg-indigo-600 text-white' : 'text-gray-500 hover:bg-gray-800'}`}
+                    className={`flex items-center justify-between px-2 py-1.5 rounded-lg text-[10px] md:text-xs font-bold transition-all ${selectedBgmId === bgm.id ? 'bg-indigo-600 text-white' : 'text-gray-500 hover:bg-gray-800'}`}
                   >
                     <span className="truncate">{bgm.name}</span>
-                    {selectedBgmId === bgm.id && <CheckCircle size={12} className="shrink-0 ml-1" />}
+                    {selectedBgmId === bgm.id && <CheckCircle size={10} className="shrink-0 ml-1" />}
                   </button>
                 ))}
               </div>
@@ -302,24 +302,24 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 items-center mt-4 border-t border-gray-800 pt-6">
-          <div className="bg-black/40 px-6 py-2 rounded-full border border-emerald-900/50 flex items-center gap-4">
-              <div className="text-xs text-gray-500">選択中:</div>
-              <div className="text-sm font-bold text-emerald-400">{selectedCategory.name} / {selectedSubMode.name}</div>
+        <div className="flex flex-col gap-3 items-center mt-2 border-t border-gray-800 pt-4 shrink-0">
+          <div className="bg-black/40 px-4 py-1.5 rounded-full border border-emerald-900/50 flex items-center gap-2">
+              <div className="text-[10px] text-gray-500">選択中:</div>
+              <div className="text-xs font-bold text-emerald-400">{selectedCategory.name} / {selectedSubMode.name}</div>
           </div>
 
           <button 
             onClick={handleStart}
-            className="w-full md:w-80 bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-xl font-bold text-xl shadow-[0_4px_0_rgb(5,150,105)] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-3 animate-pulse"
+            className="w-full md:w-80 bg-emerald-600 hover:bg-emerald-500 text-white py-3 md:py-4 rounded-xl font-bold text-lg md:text-xl shadow-[0_4px_0_rgb(5,150,105)] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-3 animate-pulse"
           >
-            <Play fill="currentColor" size={24}/> チャレンジ開始！
+            <Play fill="currentColor" size={20}/> チャレンジ開始！
           </button>
           
           <button 
             onClick={onBack}
-            className="text-gray-600 hover:text-white flex items-center gap-2 transition-colors py-2 text-sm"
+            className="text-gray-600 hover:text-white flex items-center gap-2 transition-colors py-1 text-xs"
           >
-            <ArrowLeft size={16}/> タイトルへ戻る
+            <ArrowLeft size={14}/> タイトルへ戻る
           </button>
         </div>
       </div>

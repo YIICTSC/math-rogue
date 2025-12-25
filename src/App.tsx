@@ -926,7 +926,7 @@ const App: React.FC = () => {
             setShopPotions(potionOptions);
 
             setGameState({ ...nextState, screen: GameScreen.SHOP });
-            audioService.playBGM('menu');
+            audioService.playBGM('shop');
 
         } else if (node.type === NodeType.EVENT) {
             const ev = generateEvent(
@@ -1636,7 +1636,7 @@ const App: React.FC = () => {
             if (p.powers['EVOLVE'] && (card.type === CardType.STATUS || card.type === CardType.CURSE)) {
                 for (let k=0; k<p.powers['EVOLVE']; k++) {
                     if (newDrawPile.length === 0) {
-                        if (newDiscardPile.length === 0) break;
+                        if (newDiscardPile === 0) break;
                         newDrawPile = shuffle(newDiscardPile);
                         newDiscardPile = [];
                     }
@@ -2732,7 +2732,7 @@ const App: React.FC = () => {
                                  if (relic.id === 'CURSED_KEY') newP.maxEnergy += 1;
                                  if (relic.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
                                  if (relic.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
-                                 if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
+                                 if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = p.maxHp; }
                                  if (relic.id === 'OLD_COIN') newP.gold += 300;
                                  if (relic.id === 'MATRYOSHKA') prev.player.relicCounters['MATRYOSHKA'] = 2; 
                                  if (relic.id === 'HAPPY_FLOWER') prev.player.relicCounters['HAPPY_FLOWER'] = 0; 
@@ -2814,7 +2814,7 @@ const App: React.FC = () => {
                                         if (r.value.id === 'CURSED_KEY') newP.maxEnergy += 1;
                                         if (r.value.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
                                         if (r.value.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
-                                        if (r.value.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
+                                        if (r.value.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = p.maxHp; }
                                         if (r.value.id === 'OLD_COIN') newP.gold += 300;
                                         if (r.value.id === 'MATRYOSHKA') prev.player.relicCounters['MATRYOSHKA'] = 2; 
                                         if (r.value.id === 'HAPPY_FLOWER') prev.player.relicCounters['HAPPY_FLOWER'] = 0; 
