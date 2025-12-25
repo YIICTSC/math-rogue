@@ -16,19 +16,28 @@ interface RewardScreenProps {
 
 const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, onSkip, isLoading, currentPotions = [], languageMode }) => {
   const [replaceReward, setReplaceReward] = useState<RewardItem | null>(null);
-  
   const [inspectedItem, setInspectedItem] = useState<{ type: 'CARD' | 'RELIC' | 'POTION', data: any } | null>(null);
   const longPressTimer = useRef<any>(null);
+  const startPos = useRef({ x: 0, y: 0 });
 
-  const handleTouchStart = (itemType: 'RELIC' | 'POTION', data: any) => {
+  const handlePointerDown = (e: React.PointerEvent, itemType: 'RELIC' | 'POTION', data: any) => {
+      startPos.current = { x: e.clientX, y: e.clientY };
+      if (longPressTimer.current) clearTimeout(longPressTimer.current);
       longPressTimer.current = setTimeout(() => {
           setInspectedItem({ type: itemType, data });
-      }, 500);
+      }, 700);
   };
 
-  const handleTouchEnd = () => {
+  const handlePointerUp = () => {
       if (longPressTimer.current) {
           clearTimeout(longPressTimer.current);
+      }
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+      const dist = Math.hypot(e.clientX - startPos.current.x, e.clientY - startPos.current.y);
+      if (dist > 10) {
+          handlePointerUp();
       }
   };
 
@@ -192,8 +201,9 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                     className="w-48 bg-black/60 border-2 border-yellow-500 rounded-xl flex flex-col items-center justify-between p-6 cursor-pointer hover:bg-black/80 shadow-lg h-72" 
                     onClick={() => onSelectReward(reward)}
                     onContextMenu={(e) => { e.preventDefault(); setInspectedItem({ type: 'RELIC', data: reward.value }); }}
-                    onTouchStart={() => handleTouchStart('RELIC', reward.value)}
-                    onTouchEnd={handleTouchEnd}
+                    onPointerDown={(e) => handlePointerDown(e, 'RELIC', reward.value)}
+                    onPointerUp={handlePointerUp}
+                    onPointerMove={handlePointerMove}
                 >
                     <div className="bg-gray-800 p-4 rounded-full border-2 border-yellow-600 mb-4 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
                         <Gem size={40} className="text-yellow-400" />
@@ -224,8 +234,9 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                     className="w-48 bg-black/60 border-2 border-white/50 rounded-xl flex flex-col items-center justify-between p-6 cursor-pointer hover:bg-black/80 shadow-lg h-72" 
                     onClick={() => handlePotionClick(reward)}
                     onContextMenu={(e) => { e.preventDefault(); setInspectedItem({ type: 'POTION', data: reward.value }); }}
-                    onTouchStart={() => handleTouchStart('POTION', reward.value)}
-                    onTouchEnd={handleTouchEnd}
+                    onPointerDown={(e) => handlePointerDown(e, 'POTION', reward.value)}
+                    onPointerUp={handlePointerUp}
+                    onPointerMove={handlePointerMove}
                 >
                     <div className="bg-gray-800 p-4 rounded-full border-2 border-white/50 mb-4 shadow-[0_0_15px_rgba(255,255,255,0.3)]">
                         <FlaskConical size={40} style={{ color: (reward.value as Potion).color }} />

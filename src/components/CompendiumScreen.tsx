@@ -1,5 +1,5 @@
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY, ENEMY_LIBRARY } from '../constants';
 import { Card as ICard, LanguageMode } from '../types';
 import Card from './Card';
@@ -25,6 +25,28 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
       data: any;
       unlocked: boolean;
   } | null>(null);
+
+  const longPressTimer = useRef<any>(null);
+  const startPos = useRef({ x: 0, y: 0 });
+
+  const handlePointerDown = (e: React.PointerEvent, type: 'CARD' | 'RELIC' | 'POTION' | 'ENEMY', data: any, unlocked: boolean) => {
+    startPos.current = { x: e.clientX, y: e.clientY };
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    longPressTimer.current = setTimeout(() => {
+        handleItemClick(type, data, unlocked);
+    }, 700);
+  };
+
+  const handlePointerUp = () => {
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    const dist = Math.hypot(e.clientX - startPos.current.x, e.clientY - startPos.current.y);
+    if (dist > 10) {
+        handlePointerUp();
+    }
+  };
 
   useEffect(() => {
       setUnlockedRelics(storageService.getUnlockedRelics());
@@ -126,6 +148,9 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                             <div 
                                 key={idx} 
                                 onClick={() => handleItemClick('RELIC', relic, isUnlocked)}
+                                onPointerDown={(e) => handlePointerDown(e, 'RELIC', relic, isUnlocked)}
+                                onPointerUp={handlePointerUp}
+                                onPointerMove={handlePointerMove}
                                 className={`bg-black/60 border ${isUnlocked ? 'border-gray-600 hover:border-yellow-500' : 'border-gray-800'} p-4 rounded flex flex-col items-center text-center cursor-pointer transition-colors aspect-square justify-center`}
                             >
                                 <div className={`w-12 h-12 bg-gray-800 rounded-full border border-yellow-600 flex items-center justify-center mb-2 ${!isUnlocked ? 'grayscale opacity-30' : ''}`}>
@@ -146,6 +171,9 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                             <div 
                                 key={idx} 
                                 onClick={() => handleItemClick('POTION', potion, isUnlocked)}
+                                onPointerDown={(e) => handlePointerDown(e, 'POTION', potion, isUnlocked)}
+                                onPointerUp={handlePointerUp}
+                                onPointerMove={handlePointerMove}
                                 className={`bg-black/60 border ${isUnlocked ? 'border-gray-600 hover:border-white' : 'border-gray-800'} p-4 rounded flex flex-col items-center text-center cursor-pointer transition-colors aspect-square justify-center`}
                             >
                                 <div className={`w-12 h-12 bg-gray-800 rounded flex items-center justify-center mb-2 border border-white/30 ${!isUnlocked ? 'grayscale opacity-30' : ''}`}>
@@ -166,6 +194,9 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                             <div 
                                 key={idx} 
                                 onClick={() => handleItemClick('ENEMY', enemy, isUnlocked)}
+                                onPointerDown={(e) => handlePointerDown(e, 'ENEMY', enemy, isUnlocked)}
+                                onPointerUp={handlePointerUp}
+                                onPointerMove={handlePointerMove}
                                 className={`bg-black/60 border ${isUnlocked ? 'border-red-900 hover:border-red-500' : 'border-gray-800'} p-2 rounded flex flex-col items-center text-center cursor-pointer transition-colors aspect-square justify-center relative overflow-hidden`}
                             >
                                 <div className={`w-16 h-16 mb-2 bg-gray-900 rounded ${!isUnlocked ? 'brightness-0 opacity-20' : ''}`}>

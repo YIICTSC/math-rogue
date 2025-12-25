@@ -24,33 +24,48 @@ export const KEYWORD_DEFINITIONS: Record<string, { title: string; desc: string }
 const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languageMode = 'JAPANESE' }) => {
   const longPressTimer = useRef<any>(null);
   const isLongPressActive = useRef(false);
+  const startPos = useRef({ x: 0, y: 0 });
 
-  // --- Long Press Logic (Shared for Mouse and Touch) ---
-  const startLongPress = (e: React.MouseEvent | React.TouchEvent) => {
+  // --- Long Press Logic (Unified Pointer Events) ---
+  const startLongPress = (e: React.PointerEvent) => {
+    // 座標を記録（移動を検知するため）
+    startPos.current = { x: e.clientX, y: e.clientY };
     isLongPressActive.current = false;
+    
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    
     longPressTimer.current = setTimeout(() => {
       isLongPressActive.current = true;
       if (onInspect) {
         onInspect(card);
       }
-    }, 500); // 0.5 seconds for long press
+    }, 700); // 0.7 seconds for long press (スマホの誤操作を防ぐため少し長めに設定)
   };
 
-  const endLongPress = (e: React.MouseEvent | React.TouchEvent) => {
+  const endLongPress = () => {
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
     }
-    // If it was a long press, we prevent the normal onClick from firing
-    if (isLongPressActive.current) {
-      e.stopPropagation();
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    // 指が一定以上動いたら（スクロール等の意図）長押しをキャンセル
+    const dist = Math.hypot(e.clientX - startPos.current.x, e.clientY - startPos.current.y);
+    if (dist > 10) {
+      endLongPress();
     }
   };
 
   const handleContextMenu = (e: React.MouseEvent) => {
-      e.preventDefault();
-      if (onInspect) {
-          onInspect(card);
-      }
+    e.preventDefault(); // コンテキストメニューを抑制
+  };
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // 長押しが成立していない場合のみ、本来のクリック（カード使用）を実行
+    if (!isLongPressActive.current && !disabled) {
+      onClick();
+    }
   };
 
   // --- Style Logic ---
@@ -121,7 +136,6 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
 
   const renderDescription = () => {
       let desc = trans(card.description, languageMode);
-      // 置換処理の強化
       desc = desc.replace(/自傷/g, trans("自分にダメージ", languageMode));
       if (card.damage !== undefined) desc = desc.replace(/(\d+)ダメージ/g, `${card.damage}${trans("ダメージ", languageMode)}`);
       if (card.block !== undefined) desc = desc.replace(/ブロック(\d+)/g, `${trans("ブロック", languageMode)}${card.block}`);
@@ -137,35 +151,16 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
       );
   };
 
-  // --- Scrolling Text Logic ---
   const displayName = trans(card.name, languageMode) + (card.upgraded ? '+' : '');
   const needsScroll = displayName.length > 6;
-
-  const handlePointerDown = (e: React.PointerEvent) => {
-    if (e.button === 0) { // Left click only for long press
-      startLongPress(e);
-    }
-  };
-
-  const handlePointerUp = (e: React.PointerEvent) => {
-    endLongPress(e);
-  };
-
-  const handleCardClick = (e: React.MouseEvent) => {
-    // Only fire click if it wasn't a long press
-    if (!isLongPressActive.current && !disabled) {
-      onClick();
-    }
-  };
 
   return (
     <div 
       onClick={handleCardClick}
-      onPointerDown={handlePointerDown}
-      onPointerUp={handlePointerUp}
-      onPointerLeave={handlePointerUp}
-      onTouchStart={startLongPress}
-      onTouchEnd={endLongPress}
+      onPointerDown={startLongPress}
+      onPointerUp={endLongPress}
+      onPointerLeave={endLongPress}
+      onPointerMove={handlePointerMove}
       onContextMenu={handleContextMenu}
       className={`
         relative w-32 h-48 border-[3px] rounded-lg p-2 flex flex-col justify-between 
@@ -174,8 +169,6 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
         ${disabled ? 'opacity-50 cursor-not-allowed grayscale' : 'cursor-pointer hover:-translate-y-4 hover:shadow-[0_0_15px_rgba(255,255,255,0.4)] hover:z-50'}
       `}
     >
-      {/* Tooltip removed as requested. Detailed info moves to onInspect (Long Press) */}
-
       {/* Header */}
       <div className="flex justify-between items-center relative z-10 mb-1 h-5 overflow-hidden">
         {needsScroll ? (

@@ -1,3 +1,4 @@
+
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode, ParryState } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
 import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles, MessageCircle, Mic, ArrowRight, MousePointer2, ChevronsRight } from 'lucide-react';
@@ -83,6 +84,30 @@ const FloatingTextOverlay: React.FC<{ data: FloatingText | null, languageMode: L
         </div>
     );
 };
+
+interface BattleSceneProps {
+  player: Player;
+  enemies: Enemy[];
+  selectedEnemyId: string | null;
+  onSelectEnemy: (id: string) => void;
+  onPlayCard: (card: ICard) => void;
+  onPlaySynthesizedCard: (card: ICard) => void;
+  onEndTurn: () => void;
+  turnLog: string;
+  narrative: string;
+  lastActionTime: number;
+  lastActionType: CardType | null;
+  actingEnemyId: string | null;
+  selectionState: SelectionState;
+  onHandSelection: (card: ICard) => void;
+  onUsePotion: (potion: Potion) => void;
+  combatLog: string[];
+  languageMode: LanguageMode;
+  codexOptions?: ICard[];
+  onCodexSelect: (card: ICard | null) => void;
+  parryState?: ParryState;
+  onParry: () => void;
+}
 
 const BattleScene: React.FC<BattleSceneProps> = ({ 
   player, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onPlaySynthesizedCard, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
@@ -518,7 +543,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 </div>
                 <button 
                     onClick={() => onCodexSelect(null)} 
-                    className="bg-gray-600 hover:bg-gray-500 text-white px-8 py-2 rounded font-bold border border-gray-400"
+                    className="bg-gray-600 hover:bg-green-500 text-white px-8 py-2 rounded font-bold border border-gray-400"
                 >
                     スキップ
                 </button>
@@ -874,7 +899,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                         }
                                     }}
                                     className="w-4 h-4 md:w-5 md:h-5 bg-gray-800 rounded border border-white flex items-center justify-center cursor-pointer hover:scale-110"
-                                    title={trans(p.description, languageMode)}
                                  >
                                     <FlaskConical size={10} style={{ color: p.color }} />
                                 </div>
@@ -917,7 +941,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                   <span className="text-lg font-bold">{player.currentEnergy}/{player.maxEnergy}</span>
               </div>
               <div className="text-[9px] text-gray-400 flex flex-col leading-tight">
-                  <span onClick={() => setShowDeck(true)} className="cursor-pointer hover:text-white flex items-center" title={trans("山札", languageMode)}><Layers size={10} className="mr-1"/> {player.drawPile.length}</span>
+                  <span onClick={() => setShowDeck(true)} className="cursor-pointer hover:text-white flex items-center"><Layers size={10} className="mr-1"/> {player.drawPile.length}</span>
                   <span className="flex items-center" onClick={() => showInfo(trans("捨て札", languageMode), trans("使用済みカード。山札が切れるとリシャッフルされる。", languageMode))}><X size={10} className="mr-1"/> {player.discardPile.length}</span>
               </div>
           </div>

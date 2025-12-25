@@ -28,16 +28,26 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
   
   const [inspectedItem, setInspectedItem] = useState<{ type: 'CARD' | 'RELIC' | 'POTION', data: any } | null>(null);
   const longPressTimer = useRef<any>(null);
+  const startPos = useRef({ x: 0, y: 0 });
 
-  const handleTouchStart = (itemType: 'RELIC' | 'POTION', data: any) => {
+  const handlePointerDown = (e: React.PointerEvent, itemType: 'RELIC' | 'POTION', data: any) => {
+      startPos.current = { x: e.clientX, y: e.clientY };
+      if (longPressTimer.current) clearTimeout(longPressTimer.current);
       longPressTimer.current = setTimeout(() => {
           setInspectedItem({ type: itemType, data });
-      }, 500);
+      }, 700);
   };
 
-  const handleTouchEnd = () => {
+  const handlePointerUp = () => {
       if (longPressTimer.current) {
           clearTimeout(longPressTimer.current);
+      }
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+      const dist = Math.hypot(e.clientX - startPos.current.x, e.clientY - startPos.current.y);
+      if (dist > 10) {
+          handlePointerUp();
       }
   };
 
@@ -200,7 +210,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
        {/* Potion Replacement Modal */}
        {potionToBuy && (
            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setPotionToBuy(null)}>
-               <div className="bg-gray-900 border-2 border-white p-6 rounded shadow-2xl max-w-sm w-full text-center animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
+               <div className="bg-gray-900 border-2 border-white p-6 rounded shadow-2xl max-sm w-full text-center animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
                    <div className="absolute top-2 right-2 cursor-pointer" onClick={() => setPotionToBuy(null)}>
                        <X size={24} className="text-gray-400 hover:text-white" />
                    </div>
@@ -265,8 +275,9 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                         key={relic.id} 
                                         className={`group relative w-28 flex flex-col items-center ${isSold ? 'opacity-20 grayscale' : ''}`}
                                         onContextMenu={(e) => { e.preventDefault(); setInspectedItem({ type: 'RELIC', data: relic }); }}
-                                        onTouchStart={() => handleTouchStart('RELIC', relic)}
-                                        onTouchEnd={handleTouchEnd}
+                                        onPointerDown={(e) => handlePointerDown(e, 'RELIC', relic)}
+                                        onPointerUp={handlePointerUp}
+                                        onPointerMove={handlePointerMove}
                                     >
                                         <div className="w-16 h-16 bg-gray-800 border-4 border-yellow-600 rounded-full flex items-center justify-center mb-2 shadow-lg">
                                             <Gem className="text-yellow-400" size={24}/>
@@ -300,8 +311,9 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                         key={potion.id} 
                                         className={`group relative w-28 flex flex-col items-center ${isSold ? 'opacity-20 grayscale' : ''}`}
                                         onContextMenu={(e) => { e.preventDefault(); setInspectedItem({ type: 'POTION', data: potion }); }}
-                                        onTouchStart={() => handleTouchStart('POTION', potion)}
-                                        onTouchEnd={handleTouchEnd}
+                                        onPointerDown={(e) => handlePointerDown(e, 'POTION', potion)}
+                                        onPointerUp={handlePointerUp}
+                                        onPointerMove={handlePointerMove}
                                     >
                                         <div className="w-12 h-12 bg-gray-800 border-2 border-white/50 rounded flex items-center justify-center mb-2 shadow-lg">
                                             <FlaskConical size={24} style={{ color: potion.color }}/>
