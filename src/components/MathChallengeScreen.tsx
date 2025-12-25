@@ -9,6 +9,8 @@ interface MathChallengeScreenProps {
   onComplete: (correctCount: number) => void;
   mode: GameMode;
   debugSkip?: boolean;
+  isChallenge?: boolean;
+  streak?: number;
 }
 
 interface MathProblem {
@@ -17,7 +19,7 @@ interface MathProblem {
   answer: number;
 }
 
-const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, mode, debugSkip }) => {
+const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, mode, debugSkip, isChallenge, streak = 0 }) => {
   const [problems, setProblems] = useState<MathProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -27,24 +29,26 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
 
   useEffect(() => {
     if (debugSkip) {
-        onComplete(1); // Auto-complete for 15G reward
+        onComplete(1); 
         return;
     }
 
-    try {
-        audioService.playBGM('math');
-    } catch (e) {
-        console.warn("BGM playback failed", e);
+    // チャレンジモード以外の場合のみ専用BGMを流す
+    if (!isChallenge) {
+        try {
+            audioService.playBGM('math');
+        } catch (e) {
+            console.warn("BGM playback failed", e);
+        }
     }
 
-    // Safeguard: default to multiplication if mode is undefined
     const safeMode = mode || GameMode.MULTIPLICATION;
-
     const generatedProblems: MathProblem[] = [];
-    for (let i = 0; i < 3; i++) {
+    // チャレンジモードなら1問、通常なら3問生成
+    const count = isChallenge ? 1 : 3;
+
+    for (let i = 0; i < count; i++) {
       let a, b, answer, operator;
-      
-      // Determine operation type for this problem
       let type = safeMode;
       if (safeMode === GameMode.MIXED) {
           const types = [GameMode.ADDITION, GameMode.SUBTRACTION, GameMode.MULTIPLICATION, GameMode.DIVISION];
@@ -60,14 +64,14 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
               break;
           case GameMode.SUBTRACTION:
               a = Math.floor(Math.random() * 20) + 5;
-              b = Math.floor(Math.random() * a); // Ensure positive result
+              b = Math.floor(Math.random() * a);
               answer = a - b;
               operator = '-';
               break;
           case GameMode.DIVISION:
-              b = Math.floor(Math.random() * 9) + 2; // Divisor
-              answer = Math.floor(Math.random() * 9) + 1; // Quotient
-              a = b * answer; // Dividend
+              b = Math.floor(Math.random() * 9) + 2;
+              answer = Math.floor(Math.random() * 9) + 1;
+              a = b * answer;
               operator = '÷';
               break;
           case GameMode.MULTIPLICATION:
@@ -81,10 +85,9 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
       
       const options = new Set<number>();
       options.add(answer);
-      
       while (options.size < 4) {
         let wrong = answer + (Math.floor(Math.random() * 10) - 5);
-        if (wrong < 0) wrong = 0; 
+        if (wrong < 0) wrong = Math.floor(Math.random() * 20); 
         if (wrong !== answer) options.add(wrong);
       }
       
@@ -95,7 +98,7 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
       });
     }
     setProblems(generatedProblems);
-  }, [mode, debugSkip]);
+  }, [mode, debugSkip, isChallenge]);
 
   const handleAnswer = (option: number) => {
     if (isAnswered) return;
@@ -108,18 +111,18 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
       setCorrectCount(prev => prev + 1);
       setFeedback('CORRECT');
       audioService.playSound('correct');
-
-      // Save global progress immediately
       const currentTotal = storageService.getMathCorrectCount();
       storageService.saveMathCorrectCount(currentTotal + 1);
-
     } else {
       setFeedback('WRONG');
       audioService.playSound('wrong');
     }
 
     setTimeout(() => {
-      if (currentProblemIndex < problems.length - 1) {
+      if (isChallenge) {
+          // チャレンジモードは1問ごとに結果を返す（不正解なら0、正解なら1）
+          onComplete(isCorrect ? 1 : 0);
+      } else if (currentProblemIndex < problems.length - 1) {
         setCurrentProblemIndex(prev => prev + 1);
         setSelectedOption(null);
         setIsAnswered(false);
@@ -148,7 +151,7 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
             <div className="mb-8 flex flex-col items-center justify-center">
                 <Brain size={64} className="mb-4 text-yellow-300 animate-pulse" />
                 <div className="text-4xl font-bold text-white tracking-widest font-mono border-b-4 border-white pb-2">
-                    {currentProblemIndex + 1} / {problems.length}
+                    {isChallenge ? `第 ${streak + 1} 問` : `${currentProblemIndex + 1} / ${problems.length}`}
                 </div>
             </div>
 

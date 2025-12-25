@@ -1,3 +1,4 @@
+
 import { GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState, KochoScoreEntry, PaperPlaneScoreEntry } from '../types';
 
 const STORAGE_KEY_UNLOCKED_CARDS = 'pixel_spire_unlocked_cards_v1';
@@ -15,6 +16,7 @@ const STORAGE_KEY_LEGACY_CARD = 'pixel_spire_legacy_card_v1';
 const STORAGE_KEY_DEBUG_MATH_SKIP = 'pixel_spire_debug_math_skip_v1';
 const STORAGE_KEY_DEBUG_HP_ONE = 'pixel_spire_debug_hp_one_v1';
 const STORAGE_KEY_MATH_CORRECT_COUNT = 'pixel_spire_math_correct_count_v1';
+const STORAGE_KEY_CHALLENGE_RECORDS = 'pixel_spire_challenge_records_v1';
 
 const STORAGE_KEY_DUNGEON_STATE = 'pixel_spire_dungeon_state_v1';
 const STORAGE_KEY_POKER_STATE = 'pixel_spire_poker_state_v1';
@@ -156,6 +158,28 @@ export const storageService = {
           localStorage.setItem(STORAGE_KEY_MATH_CORRECT_COUNT, count.toString());
       } catch (e) {
           console.warn("Failed to save math correct count", e);
+      }
+  },
+
+  // --- Challenge Records ---
+  getChallengeRecords: (): Record<string, number> => {
+      try {
+          const stored = localStorage.getItem(STORAGE_KEY_CHALLENGE_RECORDS);
+          return stored ? JSON.parse(stored) : {};
+      } catch (e) {
+          return {};
+      }
+  },
+
+  saveChallengeRecord: (category: string, score: number) => {
+      try {
+          const current = storageService.getChallengeRecords();
+          if (!current[category] || score > current[category]) {
+              current[category] = score;
+              localStorage.setItem(STORAGE_KEY_CHALLENGE_RECORDS, JSON.stringify(current));
+          }
+      } catch (e) {
+          console.warn("Failed to save challenge record", e);
       }
   },
 
@@ -388,7 +412,7 @@ export const storageService = {
   savePaperPlaneProgress: (progress: PaperPlaneProgress) => {
       try {
           localStorage.setItem(STORAGE_KEY_PAPER_PLANE_PROGRESS, JSON.stringify(progress));
-      } catch (e) { console.warn("Failed to save paper plane progress", e); }
+      } catch (e) { console.warn(prev => prev); }
   },
 
   loadPaperPlaneProgress: (): PaperPlaneProgress => {
@@ -419,7 +443,8 @@ export const storageService = {
           state.screen === GameScreen.COMPENDIUM || 
           state.screen === GameScreen.HELP ||
           state.screen === GameScreen.CHARACTER_SELECTION ||
-          state.screen === GameScreen.RANKING
+          state.screen === GameScreen.RANKING ||
+          state.screen === GameScreen.PROBLEM_CHALLENGE
       ) { 
           return;
       }
@@ -515,5 +540,6 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_DEBUG_HP_ONE);
       localStorage.removeItem(STORAGE_KEY_MATH_CORRECT_COUNT);
       localStorage.removeItem(STORAGE_KEY_SEEN_BATTLE_TUTORIAL);
+      localStorage.removeItem(STORAGE_KEY_CHALLENGE_RECORDS);
   }
 };

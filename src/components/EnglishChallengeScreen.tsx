@@ -10,9 +10,11 @@ interface EnglishChallengeScreenProps {
   onComplete: (correctCount: number) => void;
   mode: GameMode;
   debugSkip?: boolean;
+  isChallenge?: boolean;
+  streak?: number;
 }
 
-const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onComplete, mode, debugSkip }) => {
+const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onComplete, mode, debugSkip, isChallenge, streak = 0 }) => {
   const [problems, setProblems] = useState<EnglishProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -31,14 +33,16 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
 
   useEffect(() => {
     if (debugSkip) {
-        onComplete(3); 
+        onComplete(1); 
         return;
     }
 
-    try {
-        audioService.playBGM('math');
-    } catch (e) {
-        console.warn("BGM playback failed", e);
+    if (!isChallenge) {
+        try {
+            audioService.playBGM('math');
+        } catch (e) {
+            console.warn("BGM playback failed", e);
+        }
     }
 
     let problemPool: EnglishProblem[];
@@ -49,16 +53,17 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
         problemPool = ENGLISH_DATA[key] || ENGLISH_DATA.ENGLISH_ES;
     }
     
+    const count = isChallenge ? 1 : 3;
     const shuffled = [...problemPool]
         .sort(() => Math.random() - 0.5)
-        .slice(0, 3)
+        .slice(0, count)
         .map(p => ({
             ...p,
             options: [...p.options].sort(() => Math.random() - 0.5)
         }));
         
     setProblems(shuffled);
-  }, [mode, debugSkip, onComplete]);
+  }, [mode, debugSkip, isChallenge]);
 
   useEffect(() => {
     if (problems.length > 0 && !isAnswered) {
@@ -88,7 +93,9 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
     }
 
     setTimeout(() => {
-      if (currentProblemIndex < problems.length - 1) {
+      if (isChallenge) {
+          onComplete(isCorrect ? 1 : 0);
+      } else if (currentProblemIndex < problems.length - 1) {
         setCurrentProblemIndex(prev => prev + 1);
         setSelectedOption(null);
         setIsAnswered(false);
@@ -117,7 +124,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
             <div className="mb-6 flex flex-col items-center justify-center">
                 {isConv ? <MessageCircle size={48} className="mb-2 text-cyan-300 animate-pulse" /> : <Languages size={48} className="mb-2 text-cyan-300 animate-pulse" />}
                 <div className="text-3xl font-bold text-white tracking-widest font-mono border-b-4 border-white pb-1">
-                    {mode.includes('CONV') ? '実例英会話' : '英単語チャレンジ'} {currentProblemIndex + 1} / {problems.length}
+                    {isChallenge ? `第 ${streak + 1} 問` : `${currentProblemIndex + 1} / ${problems.length}`}
                 </div>
             </div>
 
@@ -142,7 +149,6 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
                         "{currentProblem.question}"
                      </div>
                      <Volume2 size={20} className="absolute top-2 right-2 text-cyan-600 opacity-50 group-hover:opacity-100" />
-                     {/* Triangle for bubble */}
                      <div className="absolute -bottom-4 left-0 w-0 h-0 border-l-[20px] border-l-transparent border-t-[20px] border-t-white"></div>
                   </div>
                 ) : (

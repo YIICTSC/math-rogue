@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, BookOpen } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -9,9 +10,11 @@ interface KanjiChallengeScreenProps {
   onComplete: (correctCount: number) => void;
   mode: GameMode;
   debugSkip?: boolean;
+  isChallenge?: boolean;
+  streak?: number;
 }
 
-const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete, mode, debugSkip }) => {
+const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete, mode, debugSkip, isChallenge, streak = 0 }) => {
   const [problems, setProblems] = useState<KanjiProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -21,38 +24,37 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
 
   useEffect(() => {
     if (debugSkip) {
-        onComplete(3); 
+        onComplete(1); 
         return;
     }
 
-    try {
-        audioService.playBGM('math');
-    } catch (e) {
-        console.warn("BGM playback failed", e);
+    if (!isChallenge) {
+        try {
+            audioService.playBGM('math');
+        } catch (e) {
+            console.warn("BGM playback failed", e);
+        }
     }
 
-    // Determine the problem pool
     let problemPool: KanjiProblem[];
     if (mode === GameMode.KANJI_MIXED) {
-        // Flatten all grade data into one large pool
         problemPool = Object.values(KANJI_DATA).flat();
     } else {
-        // Get specific grade data
         const gradeKey = mode as keyof typeof KANJI_DATA;
         problemPool = KANJI_DATA[gradeKey] || KANJI_DATA.KANJI_1;
     }
     
-    // Shuffle and pick 3 unique problems, AND shuffle their options
+    const count = isChallenge ? 1 : 3;
     const shuffled = [...problemPool]
         .sort(() => Math.random() - 0.5)
-        .slice(0, 3)
+        .slice(0, count)
         .map(p => ({
             ...p,
-            options: [...p.options].sort(() => Math.random() - 0.5) // 各問題の選択肢をシャッフル
+            options: [...p.options].sort(() => Math.random() - 0.5)
         }));
         
     setProblems(shuffled);
-  }, [mode, debugSkip]);
+  }, [mode, debugSkip, isChallenge]);
 
   const handleAnswer = (option: string) => {
     if (isAnswered) return;
@@ -65,7 +67,6 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
       setCorrectCount(prev => prev + 1);
       setFeedback('CORRECT');
       audioService.playSound('correct');
-
       const currentTotal = storageService.getMathCorrectCount();
       storageService.saveMathCorrectCount(currentTotal + 1);
     } else {
@@ -74,7 +75,9 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
     }
 
     setTimeout(() => {
-      if (currentProblemIndex < problems.length - 1) {
+      if (isChallenge) {
+          onComplete(isCorrect ? 1 : 0);
+      } else if (currentProblemIndex < problems.length - 1) {
         setCurrentProblemIndex(prev => prev + 1);
         setSelectedOption(null);
         setIsAnswered(false);
@@ -103,7 +106,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
             <div className="mb-8 flex flex-col items-center justify-center">
                 <BookOpen size={64} className="mb-4 text-cyan-300 animate-pulse" />
                 <div className="text-4xl font-bold text-white tracking-widest font-mono border-b-4 border-white pb-2">
-                    {mode === GameMode.KANJI_MIXED ? '漢字ミックス' : '漢字'} {currentProblemIndex + 1} / {problems.length}
+                    {isChallenge ? `第 ${streak + 1} 問` : `${currentProblemIndex + 1} / ${problems.length}`}
                 </div>
             </div>
 

@@ -33,6 +33,7 @@ import PaperPlaneBattle from './components/PaperPlaneBattle';
 import MiniGameSelectScreen from './components/MiniGameSelectScreen';
 import DodgeballShooting from './components/DodgeballShooting';
 import FinalBridgeScreen from './components/FinalBridgeScreen';
+import ProblemChallengeScreen from './components/ProblemChallengeScreen';
 import Card from './components/Card';
 import { audioService } from './services/audioService';
 import { generateFlavorText, generateEnemyName } from './services/geminiService';
@@ -41,7 +42,7 @@ import { storageService } from './services/storageService';
 import { generateEvent } from './services/eventService';
 import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { trans } from './utils/textUtils';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap } from 'lucide-react';
 
 const calculateScore = (state: GameState, victory: boolean): number => {
     let score = 0;
@@ -267,7 +268,8 @@ const App: React.FC = () => {
           gameState.screen !== GameScreen.MINI_GAME_KOCHO &&
           gameState.screen !== GameScreen.MINI_GAME_PAPER_PLANE &&
           gameState.screen !== GameScreen.DODGEBALL_SHOOTING &&
-          gameState.screen !== GameScreen.FINAL_BRIDGE
+          gameState.screen !== GameScreen.FINAL_BRIDGE &&
+          gameState.screen !== GameScreen.PROBLEM_CHALLENGE
       ) {
           storageService.saveGame(gameState);
       }
@@ -376,6 +378,16 @@ const App: React.FC = () => {
   const startChallengeGame = () => {
       audioService.playSound('select');
       setGameState(prev => ({ ...prev, screen: GameScreen.MODE_SELECTION, challengeMode: '1A1D' }));
+  };
+
+  const startProblemChallenge = (e?: React.MouseEvent) => {
+      if (e) e.stopPropagation();
+      audioService.playSound('select');
+      setGameState(prev => ({ 
+          ...prev, 
+          screen: GameScreen.PROBLEM_CHALLENGE,
+          challengeMode: undefined 
+      }));
   };
 
   const openMiniGameMenu = () => {
@@ -1432,7 +1444,11 @@ const App: React.FC = () => {
                           let newC = { ...template, id: `gen-${Date.now()}-${c}-${Math.random()}` };
                           if (card.addCardToHand.cost0) newC.cost = 0;
                           if (p.powers['MASTER_REALITY']) newC = getUpgradedCard(newC);
-                          if (p.hand.length < HAND_SIZE + 5) p.hand.push(newC);
+                          if (p.hand.length < HAND_SIZE + 5) {
+                              p.hand.push(newC);
+                          } else {
+                              p.discardPile.push(newC);
+                          }
                       }
                   }
               }
@@ -2415,6 +2431,10 @@ const App: React.FC = () => {
                                 <Swords className="mr-2" size={16}/> {trans("1A1Dモード", languageMode)}
                             </button>
 
+                            <button onClick={startProblemChallenge} className="w-full bg-emerald-900/80 text-emerald-100 py-2 px-4 text-sm font-bold border border-emerald-500 hover:bg-emerald-800 cursor-pointer flex items-center justify-center shadow-md hover:shadow-emerald-900/50">
+                                <GraduationCap className="mr-2" size={16}/> 問題チャレンジ
+                            </button>
+
                             <button onClick={openMiniGameMenu} className="w-full bg-indigo-900/80 text-indigo-100 py-2 px-4 text-sm font-bold border border-indigo-500 hover:bg-indigo-800 cursor-pointer flex items-center justify-center shadow-md hover:shadow-indigo-900/50">
                                 <Gamepad2 className="mr-2" size={16}/> {trans("ミニゲーム", languageMode)}
                             </button>
@@ -2438,7 +2458,7 @@ const App: React.FC = () => {
                             </div>
 
                             <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                <Terminal size={10}/> v1.0.0
+                                <Terminal size={10}/> v1.0.1
                             </button>
                         </div>
                     </div>
@@ -2452,9 +2472,16 @@ const App: React.FC = () => {
                             className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2 select-none active:text-green-200"
                             onClick={handleLogTitleClick}
                         >
-                            System Update Log v1.0.0
+                            System Update Log v1.0.1
                         </h2>
                         <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                            <section>
+                                <h3 className="text-white font-bold mb-1">■ v1.0.1 アップデート</h3>
+                                <ul className="list-disc pl-5 space-y-1">
+                                    <li>問題チャレンジモード実装</li>
+                                    <li>BGM選択機能の追加</li>
+                                </ul>
+                            </section>
                             <section>
                                 <h3 className="text-white font-bold mb-1">■ リリース (Release)</h3>
                                 <ul className="list-disc pl-5 space-y-1">
@@ -2475,6 +2502,10 @@ const App: React.FC = () => {
             
             {gameState.screen === GameScreen.DEBUG_MENU && (
                 <DebugMenuScreen onStart={handleDebugStart} onStartAct3Boss={handleDebugStartAct3Boss} onBack={returnToTitle} />
+            )}
+
+            {gameState.screen === GameScreen.PROBLEM_CHALLENGE && (
+                <ProblemChallengeScreen onBack={returnToTitle} languageMode={languageMode} />
             )}
 
             {gameState.screen === GameScreen.MINI_GAME_SELECT && (
@@ -2569,205 +2600,239 @@ const App: React.FC = () => {
             )}
 
             {gameState.screen === GameScreen.CHARACTER_SELECTION && (
-                <CharacterSelectionScreen 
-                    characters={CHARACTERS} 
-                    unlockedCount={isDebugHpOne ? CHARACTERS.length : Math.min(CHARACTERS.length, clearCount + 2)} 
-                    onSelect={handleCharacterSelect} 
-                    challengeMode={gameState.challengeMode}
-                    languageMode={languageMode}
-                />
+                <div className="absolute inset-0">
+                    <CharacterSelectionScreen 
+                        characters={CHARACTERS} 
+                        unlockedCount={isDebugHpOne ? CHARACTERS.length : Math.min(CHARACTERS.length, clearCount + 2)} 
+                        onSelect={handleCharacterSelect} 
+                        challengeMode={gameState.challengeMode}
+                        languageMode={languageMode}
+                    />
+                </div>
             )}
 
             {gameState.screen === GameScreen.RELIC_SELECTION && (
-                <RelicSelectionScreen relics={starterRelics} onSelect={handleRelicSelect} languageMode={languageMode} />
+                <div className="absolute inset-0">
+                    <RelicSelectionScreen relics={starterRelics} onSelect={handleRelicSelect} languageMode={languageMode} />
+                </div>
             )}
 
             {gameState.screen === GameScreen.COMPENDIUM && (
-                <CompendiumScreen unlockedCardNames={unlockedCardNames} onBack={returnToTitle} languageMode={languageMode} />
+                <div className="absolute inset-0">
+                    <CompendiumScreen unlockedCardNames={unlockedCardNames} onBack={returnToTitle} languageMode={languageMode} />
+                </div>
             )}
 
             {gameState.screen === GameScreen.RANKING && (
-                <RankingScreen onBack={returnToTitle} />
+                <div className="absolute inset-0">
+                    <RankingScreen onBack={returnToTitle} />
+                </div>
             )}
 
             {gameState.screen === GameScreen.HELP && (
-                <HelpScreen onBack={returnToTitle} languageMode={languageMode} />
+                <div className="absolute inset-0">
+                    <HelpScreen onBack={returnToTitle} languageMode={languageMode} />
+                </div>
             )}
 
             {gameState.screen === GameScreen.MAP && (
-                <MapScreen nodes={gameState.map} currentNodeId={gameState.currentMapNodeId} onNodeSelect={handleNodeSelect} onReturnToTitle={returnToTitle} player={gameState.player} languageMode={languageMode} />
+                <div className="absolute inset-0">
+                    <MapScreen nodes={gameState.map} currentNodeId={gameState.currentMapNodeId} onNodeSelect={handleNodeSelect} onReturnToTitle={returnToTitle} player={gameState.player} languageMode={languageMode} />
+                </div>
             )}
 
             {gameState.screen === GameScreen.BATTLE && (
-                <BattleScene 
-                    player={gameState.player} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onEndTurn={handleEndTurnClick} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={gameState.selectionState} onHandSelection={handleHandSelection}
-                    onUsePotion={handleUsePotion} combatLog={gameState.combatLog} languageMode={languageMode} codexOptions={gameState.codexOptions} onCodexSelect={onCodexSelect} onPlaySynthesizedCard={handlePlaySynthesizedCard}
-                    parryState={gameState.parryState} onParry={handleParryClick}
-                />
+                <div className="absolute inset-0">
+                    <BattleScene 
+                        player={gameState.player} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onEndTurn={handleEndTurnClick} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={gameState.selectionState} onHandSelection={handleHandSelection}
+                        onUsePotion={handleUsePotion} combatLog={gameState.combatLog} languageMode={languageMode} codexOptions={gameState.codexOptions} onCodexSelect={onCodexSelect} onPlaySynthesizedCard={handlePlaySynthesizedCard}
+                        parryState={gameState.parryState} onParry={handleParryClick}
+                    />
+                </div>
             )}
 
             {gameState.screen === GameScreen.DODGEBALL_SHOOTING && (
-                <DodgeballShooting 
-                    enemy={gameState.enemies[0]} 
-                    playerImage={gameState.player.imageData}
-                    onComplete={handleDodgeballResult} 
-                />
+                <div className="absolute inset-0">
+                    <DodgeballShooting 
+                        enemy={gameState.enemies[0]} 
+                        playerImage={gameState.player.imageData}
+                        onComplete={handleDodgeballResult} 
+                    />
+                </div>
             )}
 
             {gameState.screen === GameScreen.MATH_CHALLENGE && (
-                <MathChallengeScreen 
-                    mode={gameState.mode} 
-                    onComplete={handleMathChallengeComplete} 
-                    debugSkip={isMathDebugSkipped}
-                />
+                <div className="absolute inset-0">
+                    <MathChallengeScreen 
+                        mode={gameState.mode} 
+                        onComplete={handleMathChallengeComplete} 
+                        debugSkip={isMathDebugSkipped}
+                    />
+                </div>
             )}
 
             {gameState.screen === GameScreen.KANJI_CHALLENGE && (
-                <KanjiChallengeScreen 
-                    mode={gameState.mode} 
-                    onComplete={handleMathChallengeComplete} 
-                    debugSkip={isMathDebugSkipped}
-                />
+                <div className="absolute inset-0">
+                    <KanjiChallengeScreen 
+                        mode={gameState.mode} 
+                        onComplete={handleMathChallengeComplete} 
+                        debugSkip={isMathDebugSkipped}
+                    />
+                </div>
             )}
 
             {gameState.screen === GameScreen.ENGLISH_CHALLENGE && (
-                <EnglishChallengeScreen 
-                    mode={gameState.mode} 
-                    onComplete={handleMathChallengeComplete} 
-                    debugSkip={isMathDebugSkipped}
-                />
+                <div className="absolute inset-0">
+                    <EnglishChallengeScreen 
+                        mode={gameState.mode} 
+                        onComplete={handleMathChallengeComplete} 
+                        debugSkip={isMathDebugSkipped}
+                    />
+                </div>
             )}
 
             {gameState.screen === GameScreen.REWARD && (
-                <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading} currentPotions={gameState.player.potions} languageMode={languageMode} />
+                <div className="absolute inset-0">
+                    <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading} currentPotions={gameState.player.potions} languageMode={languageMode} />
+                </div>
             )}
 
             {gameState.screen === GameScreen.REST && (
-                <RestScreen 
-                    player={gameState.player} 
-                    onRest={handleRestAction} 
-                    onUpgrade={handleUpgradeCard} 
-                    onSynthesize={handleSynthesizeCard}
-                    onLeave={handleNodeComplete} 
-                    languageMode={languageMode}
-                />
+                <div className="absolute inset-0">
+                    <RestScreen 
+                        player={gameState.player} 
+                        onRest={handleRestAction} 
+                        onUpgrade={handleUpgradeCard} 
+                        onSynthesize={handleSynthesizeCard}
+                        onLeave={handleNodeComplete} 
+                        languageMode={languageMode}
+                    />
+                </div>
             )}
 
             {gameState.screen === GameScreen.SHOP && (
-                <ShopScreen 
-                    player={gameState.player}
-                    shopCards={shopCards}
-                    shopRelics={shopRelics}
-                    shopPotions={shopPotions}
-                    onBuyCard={(card) => {
-                        let price = card.price || 50;
-                        if (gameState.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
-                        setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - price, deck: [...prev.player.deck, { ...card, id: `buy-${Date.now()}` }], discardPile: [...prev.player.discardPile, { ...card, id: `buy-${Date.now()}` }] } }));
-                        storageService.saveUnlockedCard(card.name);
-                    }}
-                    onBuyRelic={(relic) => {
-                         let price = relic.price || 150;
-                         if (gameState.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
-                         setGameState(prev => {
-                             const newP = { ...prev.player, gold: prev.player.gold - price, relics: [...prev.player.relics, relic] };
-                             if (relic.id === 'SOZU') newP.maxEnergy += 1;
-                             if (relic.id === 'CURSED_KEY') newP.maxEnergy += 1;
-                             if (relic.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
-                             if (relic.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
-                             if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
-                             if (relic.id === 'OLD_COIN') newP.gold += 300;
-                             if (relic.id === 'MATRYOSHKA') prev.player.relicCounters['MATRYOSHKA'] = 2; 
-                             if (relic.id === 'HAPPY_FLOWER') prev.player.relicCounters['HAPPY_FLOWER'] = 0; 
-                             return { ...prev, player: newP };
-                         });
-                         storageService.saveUnlockedRelic(relic.id);
-                    }}
-                    onBuyPotion={(potion, replacePotionId) => {
-                        if (gameState.player.potions.length < 3 || replacePotionId) {
-                             let price = potion.price || 50;
+                <div className="absolute inset-0">
+                    <ShopScreen 
+                        player={gameState.player}
+                        shopCards={shopCards}
+                        shopRelics={shopRelics}
+                        shopPotions={shopPotions}
+                        onBuyCard={(card) => {
+                            let price = card.price || 50;
+                            if (gameState.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
+                            setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - price, deck: [...prev.player.deck, { ...card, id: `buy-${Date.now()}` }], discardPile: [...prev.player.discardPile, { ...card, id: `buy-${Date.now()}` }] } }));
+                            storageService.saveUnlockedCard(card.name);
+                        }}
+                        onBuyRelic={(relic) => {
+                             let price = relic.price || 150;
                              if (gameState.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
                              setGameState(prev => {
-                                 let newPotions = [...prev.player.potions];
-                                 if (replacePotionId) {
-                                     newPotions = newPotions.filter(pt => pt.id !== replacePotionId);
-                                 }
-                                 return { ...prev, player: { ...prev.player, gold: prev.player.gold - price, potions: [...newPotions, { ...potion, id: `buy-pot-${Date.now()}` }] } }
+                                 const newP = { ...prev.player, gold: prev.player.gold - price, relics: [...prev.player.relics, relic] };
+                                 if (relic.id === 'SOZU') newP.maxEnergy += 1;
+                                 if (relic.id === 'CURSED_KEY') newP.maxEnergy += 1;
+                                 if (relic.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
+                                 if (relic.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
+                                 if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
+                                 if (relic.id === 'OLD_COIN') newP.gold += 300;
+                                 if (relic.id === 'MATRYOSHKA') prev.player.relicCounters['MATRYOSHKA'] = 2; 
+                                 if (relic.id === 'HAPPY_FLOWER') prev.player.relicCounters['HAPPY_FLOWER'] = 0; 
+                                 return { ...prev, player: newP };
                              });
-                             storageService.saveUnlockedPotion(potion.templateId);
-                        }
-                    }}
-                    onRemoveCard={(cardId, cost) => {
-                         setGameState(prev => {
-                             const p = prev.player;
-                             const card = p.deck.find(c => c.id === cardId);
-                             let newMaxHp = p.maxHp;
-                             if (card && (card.name === '寄生虫' || card.name === 'PARASITE')) {
-                                 newMaxHp -= 3;
-                             }
-                             const newDeck = p.deck.filter(c => c.id !== cardId);
-                             const newHp = Math.min(p.currentHp, newMaxHp); 
-                             
-                             return { ...prev, player: { ...p, gold: p.gold - cost, deck: newDeck, maxHp: newMaxHp, currentHp: newHp } };
-                         });
-                    }}
-                    onLeave={handleNodeComplete}
-                    languageMode={languageMode}
-                />
+                             storageService.saveUnlockedRelic(relic.id);
+                        }}
+                        onBuyPotion={(potion, replacePotionId) => {
+                            if (gameState.player.potions.length < 3 || replacePotionId) {
+                                 let price = potion.price || 50;
+                                 if (gameState.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
+                                 setGameState(prev => {
+                                     let newPotions = [...prev.player.potions];
+                                     if (replacePotionId) {
+                                         newPotions = newPotions.filter(pt => pt.id !== replacePotionId);
+                                     }
+                                     return { ...prev, player: { ...prev.player, gold: prev.player.gold - price, potions: [...newPotions, { ...potion, id: `buy-pot-${Date.now()}` }] } }
+                                 });
+                                 storageService.saveUnlockedPotion(potion.templateId);
+                            }
+                        }}
+                        onRemoveCard={(cardId, cost) => {
+                             setGameState(prev => {
+                                 const p = prev.player;
+                                 const card = p.deck.find(c => c.id === cardId);
+                                 let newMaxHp = p.maxHp;
+                                 if (card && (card.name === '寄生虫' || card.name === 'PARASITE')) {
+                                     newMaxHp -= 3;
+                                 }
+                                 const newDeck = p.deck.filter(c => c.id !== cardId);
+                                 const newHp = Math.min(p.currentHp, newMaxHp); 
+                                 
+                                 return { ...prev, player: { ...p, gold: p.gold - cost, deck: newDeck, maxHp: newMaxHp, currentHp: newHp } };
+                             });
+                        }}
+                        onLeave={handleNodeComplete}
+                        languageMode={languageMode}
+                    />
+                </div>
             )}
 
             {gameState.screen === GameScreen.EVENT && eventData && (
-                <EventScreen 
-                    title={trans(eventData.title, languageMode)} 
-                    description={trans(eventData.description, languageMode)} 
-                    options={eventData.options.map((o: any) => ({ ...o, label: trans(o.label, languageMode), text: trans(o.text, languageMode) }))} 
-                    resultLog={eventResultLog ? trans(eventResultLog, languageMode) : null}
-                    onContinue={handleEventComplete}
-                />
+                <div className="absolute inset-0">
+                    <EventScreen 
+                        title={trans(eventData.title, languageMode)} 
+                        description={trans(eventData.description, languageMode)} 
+                        options={eventData.options.map((o: any) => ({ ...o, label: trans(o.label, languageMode), text: trans(o.text, languageMode) }))} 
+                        resultLog={eventResultLog ? trans(eventResultLog, languageMode) : null}
+                        onContinue={handleEventComplete}
+                    />
+                </div>
             )}
 
             {gameState.screen === GameScreen.FINAL_BRIDGE && (
-                <FinalBridgeScreen 
-                  player={gameState.player}
-                  onComplete={handleFinalBridgeComplete}
-                  languageMode={languageMode}
-                />
+                <div className="absolute inset-0">
+                    <FinalBridgeScreen 
+                      player={gameState.player}
+                      onComplete={handleFinalBridgeComplete}
+                      languageMode={languageMode}
+                    />
+                </div>
             )}
 
             {gameState.screen === GameScreen.TREASURE && (
-                <TreasureScreen 
-                    rewards={treasureRewards}
-                    onOpen={() => {
-                        const hasCursedKey = !!gameState.player.relics.find(r => r.id === 'CURSED_KEY');
-                        setGameState(prev => {
-                            const newP = { ...prev.player };
-                            
-                            treasureRewards.forEach(r => {
-                                if (r.type === 'GOLD') newP.gold += r.value;
-                                if (r.type === 'RELIC') {
-                                    newP.relics = [...newP.relics, r.value];
-                                    storageService.saveUnlockedRelic(r.value.id);
-                                    if (r.value.id === 'SOZU') newP.maxEnergy += 1;
-                                    if (r.value.id === 'CURSED_KEY') newP.maxEnergy += 1;
-                                    if (r.value.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
-                                    if (r.value.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
-                                    if (r.value.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
-                                    if (r.value.id === 'OLD_COIN') newP.gold += 300;
-                                    if (r.value.id === 'MATRYOSHKA') prev.player.relicCounters['MATRYOSHKA'] = 2; 
-                                    if (r.value.id === 'HAPPY_FLOWER') prev.player.relicCounters['HAPPY_FLOWER'] = 0; 
-                                }
-                            });
+                <div className="absolute inset-0">
+                    <TreasureScreen 
+                        rewards={treasureRewards}
+                        onOpen={() => {
+                            const hasCursedKey = !!gameState.player.relics.find(r => r.id === 'CURSED_KEY');
+                            setGameState(prev => {
+                                const newP = { ...prev.player };
+                                
+                                treasureRewards.forEach(r => {
+                                    if (r.type === 'GOLD') newP.gold += r.value;
+                                    if (r.type === 'RELIC') {
+                                        newP.relics = [...newP.relics, r.value];
+                                        storageService.saveUnlockedRelic(r.value.id);
+                                        if (r.value.id === 'SOZU') newP.maxEnergy += 1;
+                                        if (r.value.id === 'CURSED_KEY') newP.maxEnergy += 1;
+                                        if (r.value.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
+                                        if (r.value.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
+                                        if (r.value.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
+                                        if (r.value.id === 'OLD_COIN') newP.gold += 300;
+                                        if (r.value.id === 'MATRYOSHKA') prev.player.relicCounters['MATRYOSHKA'] = 2; 
+                                        if (r.value.id === 'HAPPY_FLOWER') prev.player.relicCounters['HAPPY_FLOWER'] = 0; 
+                                    }
+                                });
 
-                            if (hasCursedKey) {
-                                const curse = { ...CURSE_CARDS.PAIN, id: `curse-${Date.now()}` }; 
-                                newP.deck = [...newP.deck, curse];
-                                newP.discardPile = [...newP.discardPile, curse];
-                            }
-                            return { ...prev, player: newP };
-                        });
-                    }}
-                    onLeave={handleNodeComplete}
-                    hasCursedKey={!!gameState.player.relics.find(r => r.id === 'CURSED_KEY')}
-                />
+                                if (hasCursedKey) {
+                                    const curse = { ...CURSE_CARDS.PAIN, id: `curse-${Date.now()}` }; 
+                                    newP.deck = [...newP.deck, curse];
+                                    newP.discardPile = [...newP.discardPile, curse];
+                                }
+                                return { ...prev, player: newP };
+                            });
+                        }}
+                        onLeave={handleNodeComplete}
+                        hasCursedKey={!!gameState.player.relics.find(r => r.id === 'CURSED_KEY')}
+                    />
+                </div>
             )}
 
             {gameState.screen === GameScreen.GAME_OVER && (
