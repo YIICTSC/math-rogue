@@ -474,7 +474,7 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
   ECHO_FORM: { name: '予習復習', cost: 3, type: CardType.POWER, target: TargetType.SELF, description: '毎ターン、最初のカードを2回使用。', applyPower: { id: 'ECHO_FORM', amount: 1 }, rarity: 'LEGENDARY', textureRef: 'LIGHTNING|紫|POWER' },
   ELECTRODYNAMICS: { name: '理科の実験', cost: 2, type: CardType.POWER, target: TargetType.ALL_ENEMIES, description: '全体8ダメージ。', damage: 8, rarity: 'LEGENDARY', textureRef: 'LIGHTNING|青|POWER' },
   BARRICADE: { name: '秘密基地', cost: 3, type: CardType.POWER, target: TargetType.SELF, description: 'ブロックがターン終了時に消えない。', applyPower: { id: 'BARRICADE', amount: 1 }, rarity: 'LEGENDARY', textureRef: 'SHIELD|青|POWER' },
-  CORRUPTION: { name: '学級崩壊', cost: 3, type: CardType.POWER, target: TargetType.SELF, description: 'スキルコスト0。使用時廃棄。', applyPower: { id: 'CORRUPTION', amount: 1 }, rarity: 'LEGENDARY', textureRef: 'FLAME|灰|POWER' },
+  CORRUPTION: { name: '賞味期限', cost: 3, type: CardType.POWER, target: TargetType.SELF, description: 'スキルコスト0。使用時廃棄。', applyPower: { id: 'CORRUPTION', amount: 1 }, rarity: 'LEGENDARY', textureRef: 'FLAME|灰|POWER' },
   FEEL_NO_PAIN: { name: '我慢大会', cost: 1, type: CardType.POWER, target: TargetType.SELF, description: '廃棄する度ブロック3を得る。', applyPower: { id: 'FEEL_NO_PAIN', amount: 3 }, rarity: 'RARE', textureRef: 'SHIELD|白|POWER' },
   RUPTURE: { name: '成長痛', cost: 1, type: CardType.POWER, target: TargetType.SELF, description: 'HPを失う度、ムキムキ1を得る。', applyPower: { id: 'RUPTURE', amount: 1 }, rarity: 'RARE', textureRef: 'FLAME|赤|POWER' },
   EVOLVE: { name: '進級', cost: 1, type: CardType.POWER, target: TargetType.SELF, description: '状態異常カードを引いた時、カードを引く。', applyPower: { id: 'EVOLVE', amount: 1 }, rarity: 'RARE', textureRef: 'SLIME|緑|POWER' },

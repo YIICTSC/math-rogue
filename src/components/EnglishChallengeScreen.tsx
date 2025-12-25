@@ -1,0 +1,196 @@
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { CheckCircle, XCircle, Languages, Volume2, MessageCircle } from 'lucide-react';
+import { audioService } from '../services/audioService';
+import { GameMode } from '../types';
+import { storageService } from '../services/storageService';
+import { ENGLISH_DATA, EnglishProblem } from '../data/englishData';
+
+interface EnglishChallengeScreenProps {
+  onComplete: (correctCount: number) => void;
+  mode: GameMode;
+  debugSkip?: boolean;
+}
+
+const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onComplete, mode, debugSkip }) => {
+  const [problems, setProblems] = useState<EnglishProblem[]>([]);
+  const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [isAnswered, setIsAnswered] = useState(false);
+  const [feedback, setFeedback] = useState<'CORRECT' | 'WRONG' | null>(null);
+
+  const speakWord = useCallback((word: string) => {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(word);
+    utterance.lang = 'en-US';
+    utterance.rate = 0.85; 
+    window.speechSynthesis.speak(utterance);
+  }, []);
+
+  useEffect(() => {
+    if (debugSkip) {
+        onComplete(3); 
+        return;
+    }
+
+    try {
+        audioService.playBGM('math');
+    } catch (e) {
+        console.warn("BGM playback failed", e);
+    }
+
+    let problemPool: EnglishProblem[];
+    if (mode === GameMode.ENGLISH_MIXED) {
+        problemPool = Object.values(ENGLISH_DATA).flat();
+    } else {
+        const key = mode as keyof typeof ENGLISH_DATA;
+        problemPool = ENGLISH_DATA[key] || ENGLISH_DATA.ENGLISH_ES;
+    }
+    
+    const shuffled = [...problemPool]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 3)
+        .map(p => ({
+            ...p,
+            options: [...p.options].sort(() => Math.random() - 0.5)
+        }));
+        
+    setProblems(shuffled);
+  }, [mode, debugSkip, onComplete]);
+
+  useEffect(() => {
+    if (problems.length > 0 && !isAnswered) {
+      const timer = setTimeout(() => {
+        speakWord(problems[currentProblemIndex].question);
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [currentProblemIndex, problems, speakWord, isAnswered]);
+
+  const handleAnswer = (option: string) => {
+    if (isAnswered) return;
+    
+    setSelectedOption(option);
+    setIsAnswered(true);
+    
+    const isCorrect = option === problems[currentProblemIndex].answer;
+    if (isCorrect) {
+      setCorrectCount(prev => prev + 1);
+      setFeedback('CORRECT');
+      audioService.playSound('correct');
+      const currentTotal = storageService.getMathCorrectCount();
+      storageService.saveMathCorrectCount(currentTotal + 1);
+    } else {
+      setFeedback('WRONG');
+      audioService.playSound('wrong');
+    }
+
+    setTimeout(() => {
+      if (currentProblemIndex < problems.length - 1) {
+        setCurrentProblemIndex(prev => prev + 1);
+        setSelectedOption(null);
+        setIsAnswered(false);
+        setFeedback(null);
+      } else {
+        onComplete(isCorrect ? correctCount + 1 : correctCount);
+      }
+    }, 1200);
+  };
+
+  if (debugSkip) return <div className="w-full h-full bg-black"></div>;
+  if (problems.length === 0) return (
+      <div className="flex flex-col h-full w-full bg-indigo-900 text-white items-center justify-center p-8 font-mono">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-yellow-300"></div>
+      </div>
+  );
+
+  const currentProblem = problems[currentProblemIndex];
+  const isConv = currentProblem.isDialogue;
+
+  return (
+    <div className="flex flex-col h-full w-full bg-indigo-900 text-white relative items-center justify-center p-8 font-mono">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-20 pointer-events-none"></div>
+        
+        <div className="z-10 w-full max-w-md text-center">
+            <div className="mb-6 flex flex-col items-center justify-center">
+                {isConv ? <MessageCircle size={48} className="mb-2 text-cyan-300 animate-pulse" /> : <Languages size={48} className="mb-2 text-cyan-300 animate-pulse" />}
+                <div className="text-3xl font-bold text-white tracking-widest font-mono border-b-4 border-white pb-1">
+                    {mode.includes('CONV') ? '実例英会話' : '英単語チャレンジ'} {currentProblemIndex + 1} / {problems.length}
+                </div>
+            </div>
+
+            <div className="bg-black/40 border-4 border-white p-6 rounded-2xl mb-8 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[300px]">
+                {currentProblem.hint && (
+                    <div className="bg-indigo-800/60 p-2 rounded-lg border border-indigo-400/30 mb-4 w-full animate-in fade-in slide-in-from-top-2">
+                        <div className="text-[10px] text-cyan-300 font-bold mb-1 uppercase tracking-tighter">Hint</div>
+                        <div className="text-xs text-gray-100 leading-relaxed">{currentProblem.hint}</div>
+                    </div>
+                )}
+                
+                <div className="text-xs text-gray-400 mb-4 uppercase tracking-widest">
+                  {isConv ? "Listen and Reply" : "Translation"}
+                </div>
+
+                {isConv ? (
+                  <div 
+                    className="relative bg-white text-black p-5 rounded-3xl rounded-bl-none border-4 border-cyan-400 max-w-[90%] group cursor-pointer transition-transform active:scale-95"
+                    onClick={() => speakWord(currentProblem.question)}
+                  >
+                     <div className="text-lg md:text-xl font-bold font-sans italic text-left pr-6">
+                        "{currentProblem.question}"
+                     </div>
+                     <Volume2 size={20} className="absolute top-2 right-2 text-cyan-600 opacity-50 group-hover:opacity-100" />
+                     {/* Triangle for bubble */}
+                     <div className="absolute -bottom-4 left-0 w-0 h-0 border-l-[20px] border-l-transparent border-t-[20px] border-t-white"></div>
+                  </div>
+                ) : (
+                  <div 
+                    className="group cursor-pointer relative flex flex-col items-center"
+                    onClick={() => speakWord(currentProblem.question)}
+                  >
+                    <h3 className="text-5xl md:text-6xl font-bold text-white tracking-widest font-sans italic transition-transform group-active:scale-95">
+                      {currentProblem.question}
+                    </h3>
+                    <Volume2 size={24} className="text-cyan-400 mt-2 opacity-50 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                )}
+                
+                {feedback && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-20 animate-in zoom-in duration-200">
+                        {feedback === 'CORRECT' ? (
+                            <CheckCircle size={120} className="text-green-400 drop-shadow-[0_0_15px_rgba(74,222,128,0.8)]" />
+                        ) : (
+                            <XCircle size={120} className="text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)]" />
+                        )}
+                    </div>
+                )}
+            </div>
+
+            <div className={`grid ${isConv ? 'grid-cols-1' : 'grid-cols-2'} gap-4`}>
+                {currentProblem.options.map((opt, idx) => (
+                    <button
+                        key={idx}
+                        onClick={() => handleAnswer(opt)}
+                        disabled={isAnswered}
+                        className={`
+                            py-3 px-4 font-bold rounded-xl border-b-4 transition-all active:border-b-0 active:translate-y-1
+                            ${isConv ? 'text-left text-sm md:text-base' : 'text-center text-lg'}
+                            ${isAnswered && opt === currentProblem.answer ? 'bg-green-600 border-green-800 scale-105' : ''}
+                            ${isAnswered && opt === selectedOption && opt !== currentProblem.answer ? 'bg-red-600 border-red-800' : ''}
+                            ${!isAnswered ? 'bg-indigo-700 border-indigo-900 hover:bg-indigo-600 cursor-pointer' : 'opacity-80'}
+                            break-words leading-tight shadow-lg
+                        `}
+                    >
+                        {isConv && <span className="text-cyan-300 mr-2">▶</span>}
+                        {opt}
+                    </button>
+                ))}
+            </div>
+        </div>
+    </div>
+  );
+};
+
+export default EnglishChallengeScreen;

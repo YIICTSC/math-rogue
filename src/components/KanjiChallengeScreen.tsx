@@ -103,7 +103,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
             <div className="mb-8 flex flex-col items-center justify-center">
                 <BookOpen size={64} className="mb-4 text-cyan-300 animate-pulse" />
                 <div className="text-4xl font-bold text-white tracking-widest font-mono border-b-4 border-white pb-2">
-                    {mode === GameMode.KANJI_MIXED ? '漢字ミックス' : '漢字の読み'} {currentProblemIndex + 1} / {problems.length}
+                    {mode === GameMode.KANJI_MIXED ? '漢字ミックス' : '漢字'} {currentProblemIndex + 1} / {problems.length}
                 </div>
             </div>
 

@@ -1,37 +1,13 @@
-
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode, ParryState } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
-import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles, MessageCircle, Mic } from 'lucide-react';
+import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles, MessageCircle, Mic, ArrowRight, MousePointer2, ChevronsRight } from 'lucide-react';
 import PixelSprite from './PixelSprite';
 import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
 import { HERO_IMAGE_DATA, CARDS_LIBRARY, STATUS_CARDS } from '../constants';
 import { getUpgradedCard, synthesizeCards } from '../utils/cardUtils';
 import React, { useEffect, useState, useRef } from 'react';
-
-interface BattleSceneProps {
-  player: Player;
-  enemies: Enemy[];
-  selectedEnemyId: string | null;
-  onSelectEnemy: (id: string) => void;
-  onPlayCard: (card: ICard) => void;
-  onPlaySynthesizedCard: (card: ICard) => void; // New prop for direct play
-  onEndTurn: () => void;
-  turnLog: string;
-  narrative: string;
-  lastActionTime: number;
-  lastActionType: CardType | null;
-  actingEnemyId: string | null;
-  selectionState: SelectionState;
-  onHandSelection: (card: ICard) => void;
-  onUsePotion: (potion: Potion) => void;
-  combatLog: string[]; // New Prop
-  languageMode: LanguageMode;
-  codexOptions?: ICard[]; // New prop for Nilry's Codex
-  onCodexSelect: (card: ICard | null) => void; // New prop for Nilry's Codex
-  parryState?: ParryState; // New prop
-  onParry: () => void; // New prop
-}
+import { storageService } from '../services/storageService';
 
 const POWER_DEFINITIONS: Record<string, {name: string, desc: string}> = {
     WEAK: { name: "へろへろ", desc: "攻撃で与えるダメージが25%減っちゃう。" },
@@ -42,6 +18,7 @@ const POWER_DEFINITIONS: Record<string, {name: string, desc: string}> = {
     ARTIFACT: { name: "キラキラ", desc: "次に受ける悪い効果（デバフ）を無効化する。" },
     INTANGIBLE: { name: "スケスケ", desc: "受けるダメージとHP減少が1になる。" },
     THORNS: { name: "トゲトゲ", desc: "攻撃を受けた時、相手にその数値分のダメージを返す。" },
+    THORNS_DESC: { name: "トゲトゲ", desc: "攻撃を受けた時、相手にその数値分のダメージを返す。" },
     METALLICIZE: { name: "金属化", desc: "ターン終了時、その数値分のブロックを得る。" },
     REGEN: { name: "じわじわ回復", desc: "ターン終了時、その数値分HPを回復し、数値が1減る。" },
     STRENGTH_DOWN: { name: "ムキムキダウン", desc: "ターン終了時、ムキムキが通常の値に戻る。" },
@@ -59,18 +36,18 @@ const POWER_DEFINITIONS: Record<string, {name: string, desc: string}> = {
     TOOLS_OF_THE_TRADE: { name: '整理整頓', desc: 'ターン開始時、1枚引いて1枚捨てる。' },
     ENVENOM: { name: '悪口', desc: '攻撃でダメージを与えた時、ドクドク1を与える。' },
     STATIC_DISCHARGE: { name: '摩擦熱', desc: '攻撃を受けた時、ランダムな敵にダメージを与える。' },
-    BUFFER: { name: '心の壁', desc: '次に受けるHPダメージを0にする。' },
+    BUFFER: { name: '心の壁', desc: '次に受ける HPダメージを0にする。' },
     CREATIVE_AI: { name: '自由研究', desc: 'ターン開始時、ランダムなパワーカードを加える。' },
     DEVA_FORM: { name: '受験勉強', desc: 'ターン開始時、エネルギーを得る。' },
     MASTER_REALITY: { name: '模範解答', desc: 'カードが生成された時、それをアップグレードする。' },
     BURST: { name: 'バースト', desc: '次にプレイするスキルカードが2回発動する。' },
     DOUBLE_POISON: { name: '化学反応', desc: 'ドクドクの効果を増幅させる。' },
-    CORRUPTION: { name: '学級崩壊', desc: 'スキルカードのコストが0になり、使用時に廃棄される。' },
+    CORRUPTION: { name: '賞味期限', desc: 'スキルカードのコストが0になり、使用時に廃棄される。' },
     FEEL_NO_PAIN: { name: '我慢大会', desc: 'カードが廃棄される度、ブロックを得る。' },
     RUPTURE: { name: '成長痛', desc: 'HPを失った時、ムキムキを得る。' },
     EVOLVE: { name: '進級', desc: '状態異常カードを引いた時、カードを引く。' },
     APOTHEOSIS: { name: '覚醒', desc: 'デッキの全てのカードがアップグレードされる。' },
-    ACCURACY: { name: '集中力', desc: 'えんぴつの削りかすのダメージが増加する。' },
+    ACCURACY: { name: '精度上昇', desc: 'えんぴつの削りかすのダメージが増加する。' },
     STRATEGIST: { name: 'カンニングペーパー', desc: 'このカードが捨てられた時、エネルギーを得る。' },
     INFLAME: { name: 'やる気スイッチ', desc: 'ムキムキを得る。' },
 };
@@ -123,6 +100,31 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   const [showLog, setShowLog] = useState(false);
   const logContainerRef = useRef<HTMLDivElement>(null);
   
+  // --- BATTLE TUTORIAL STATE ---
+  const [tutorialStep, setTutorialStep] = useState<number | null>(null);
+
+  useEffect(() => {
+      // Check if first time in battle
+      if (!storageService.getSeenBattleTutorial()) {
+          setTutorialStep(1);
+      }
+  }, []);
+
+  const closeTutorial = () => {
+      setTutorialStep(null);
+      storageService.saveSeenBattleTutorial();
+  };
+
+  const nextTutorialStep = () => {
+      if (tutorialStep === null) return;
+      if (tutorialStep >= 5) {
+          closeTutorial();
+      } else {
+          setTutorialStep(tutorialStep + 1);
+          audioService.playSound('select');
+      }
+  };
+
   // Dual Protagonist States
   const [selectedCardIds, setSelectedCardIds] = useState<string[]>([]);
   const [isComboing, setIsComboing] = useState(false);
@@ -318,9 +320,118 @@ const BattleScene: React.FC<BattleSceneProps> = ({
       setSynthesizedCard(null);
   };
 
+  const onInspect = (card: ICard) => {
+    setInspectedCard(card);
+    audioService.playSound('select');
+  };
+
   return (
-    <div className="flex flex-col h-full relative bg-gray-900 overflow-hidden">
+    <div className="flex flex-col h-full w-full bg-gray-900 text-white relative overflow-hidden">
       
+      {/* --- BATTLE TUTORIAL OVERLAY --- */}
+      {tutorialStep !== null && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-in fade-in duration-300">
+              <div className="relative w-full h-full max-w-4xl max-h-[600px] flex flex-col pointer-events-none">
+                  
+                  {/* Step 1: HP & Block */}
+                  {tutorialStep === 1 && (
+                      <div className="absolute top-[160px] left-1/2 -translate-x-1/2 w-full max-w-xl bg-slate-800 border-2 border-green-500 p-4 rounded-xl shadow-[0_0_20px_rgba(34,197,94,0.5)] animate-in zoom-in-95 pointer-events-auto">
+                          <div className="flex items-center gap-2 text-green-400 font-bold mb-2">
+                              <Heart size={20} className="fill-current"/> じぶんの ステータス
+                          </div>
+                          <p className="text-white text-sm leading-relaxed mb-4 text-center">
+                              <span className="text-red-400 font-bold">HP</span>が 0になると まけてしまいます。<br/>
+                              <span className="text-blue-400 font-bold">ブロック</span>を つかえば、てきの こうげきを ふせげます！<br/>
+                              <span className="text-blue-400 font-bold">ブロック</span>は ターンがおわると 0になります。
+                          </p>
+                          <div className="flex justify-between items-center">
+                              <div className="text-[10px] text-gray-400">Step 1/5</div>
+                              <button onClick={nextTutorialStep} className="bg-green-600 hover:bg-green-500 text-white px-4 py-1 rounded font-bold text-sm flex items-center gap-1">つぎへ <ArrowRight size={14}/></button>
+                          </div>
+                          {/* Arrow pointing down to stats (Bottom-Left) */}
+                          <div className="absolute -bottom-4 left-20 -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[15px] border-t-green-500"></div>
+                      </div>
+                  )}
+
+                  {/* Step 2: Enemy Intent */}
+                  {tutorialStep === 2 && (
+                      <div className="absolute top-[160px] left-1/2 -translate-x-1/2 w-full max-w-xl bg-slate-800 border-2 border-red-500 p-4 rounded-xl shadow-[0_0_20px_rgba(239,68,68,0.5)] animate-in zoom-in-95 pointer-events-auto">
+                          <div className="flex items-center gap-2 text-red-400 font-bold mb-2">
+                              <Skull size={20} className="fill-current"/> てきの こうどう
+                          </div>
+                          <p className="text-white text-sm leading-relaxed mb-4 text-center">
+                              てきの あたまのうえに マークが でます。<br/>
+                              <span className="text-red-400 font-bold">ドクロ</span>は こうげき、<span className="text-blue-400 font-bold">たて</span>は ぼうぎょの しるしです。
+                          </p>
+                          <div className="flex justify-between items-center">
+                              <div className="text-[10px] text-gray-400">Step 2/5</div>
+                              <button onClick={nextTutorialStep} className="bg-red-600 hover:bg-red-500 text-white px-4 py-1 rounded font-bold text-sm flex items-center gap-1">なるほど <ArrowRight size={14}/></button>
+                          </div>
+                          {/* Arrow pointing up to enemies (Top Center) */}
+                          <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[15px] border-b-red-500"></div>
+                      </div>
+                  )}
+
+                  {/* Step 3: Energy & Deck */}
+                  {tutorialStep === 3 && (
+                      <div className="absolute top-[160px] left-1/2 -translate-x-1/2 w-full max-w-xl bg-slate-800 border-2 border-yellow-500 p-4 rounded-xl shadow-[0_0_20px_rgba(234,179,8,0.5)] animate-in zoom-in-95 pointer-events-auto">
+                          <div className="flex items-center gap-2 text-yellow-400 font-bold mb-2">
+                              <Zap size={20} className="fill-current"/> エナジーと カード
+                          </div>
+                          <p className="text-white text-sm leading-relaxed mb-4 text-center">
+                              カードを つかうには <span className="text-yellow-400 font-bold">エナジー</span>が ひつようです。<br/>
+                              やまふだが なくなると、すてふだが シャッフルされて もどってきます。
+                          </p>
+                          <div className="flex justify-between items-center">
+                              <div className="text-[10px] text-gray-400">Step 3/5</div>
+                              <button onClick={nextTutorialStep} className="bg-yellow-600 hover:bg-yellow-500 text-white px-4 py-1 rounded font-bold text-sm flex items-center gap-1">つぎへ <ArrowRight size={14}/></button>
+                          </div>
+                          {/* Arrow pointing down to energy (Bottom Left) */}
+                          <div className="absolute -bottom-4 left-12 -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[15px] border-t-yellow-500"></div>
+                      </div>
+                  )}
+
+                  {/* Step 4: Card Play */}
+                  {tutorialStep === 4 && (
+                      <div className="absolute top-[160px] left-1/2 -translate-x-1/2 w-full max-w-xl bg-slate-800 border-2 border-blue-500 p-4 rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.5)] animate-in zoom-in-95 pointer-events-auto">
+                          <div className="flex items-center gap-2 text-blue-400 font-bold mb-2">
+                              <MousePointer2 size={20} className="fill-current"/> カードを つかおう
+                          </div>
+                          <p className="text-white text-sm leading-relaxed mb-4 text-center">
+                              てふだを タップすると カードを つかえます。<br/>
+                              ながおしで、カードの くわしい せつめいを よめるよ！
+                          </p>
+                          <div className="flex justify-between items-center">
+                              <div className="text-[10px] text-gray-400">Step 4/5</div>
+                              <button onClick={nextTutorialStep} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1 rounded font-bold text-sm flex items-center gap-1">わかった <ArrowRight size={14}/></button>
+                          </div>
+                          {/* Arrow pointing down to hand (Bottom Center) */}
+                          <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[15px] border-t-blue-500"></div>
+                      </div>
+                  )}
+
+                  {/* Step 5: End Turn */}
+                  {tutorialStep === 5 && (
+                      <div className="absolute top-[160px] left-1/2 -translate-x-1/2 w-full max-w-xl bg-slate-800 border-2 border-red-400 p-4 rounded-xl shadow-[0_0_20px_rgba(239,68,68,0.5)] animate-in zoom-in-95 pointer-events-auto">
+                          <div className="flex items-center gap-2 text-red-400 font-bold mb-2">
+                              <ChevronsRight size={20}/> ターンを おわらせる
+                          </div>
+                          <p className="text-white text-sm leading-relaxed mb-4 text-center">
+                              エナジーを つかいきったら、<span className="text-red-400 font-bold">ターンしゅうりょう</span> ボタンを おしましょう。<br/>
+                              さあ、ぼうけんを はじめよう！
+                          </p>
+                          <div className="flex justify-between items-center">
+                              <div className="text-[10px] text-gray-400">Final Step</div>
+                              <button onClick={closeTutorial} className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded font-bold text-sm animate-pulse">ぼうけんを はじめる！</button>
+                          </div>
+                          {/* Arrow pointing down to end turn button (Bottom Right) */}
+                          <div className="absolute -bottom-4 right-8 -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[15px] border-t-red-400"></div>
+                      </div>
+                  )}
+              </div>
+          </div>
+      )}
+
       {/* 1. Top Bar: Narrative & Logs (Expanded) */}
       <div className="shrink-0 bg-black border-b-2 border-gray-700 p-2 z-30 relative min-h-[4rem] flex flex-col justify-center shadow-md">
         <div className="flex flex-col w-full pr-24 overflow-hidden">
@@ -360,37 +471,37 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         </div>
       </div>
 
-      {/* 2. Battle Viewport (Enemies & Player Sprite) - Scrollable to prevent overlap */}
+      {/* 2. Battle Viewport (Enemies & Player Sprite) */}
       <div className="flex-1 relative overflow-y-auto custom-scrollbar flex flex-col justify-between p-2 bg-gray-800/50 gap-4">
         
-{/* Parry UI Overlay (Bard Special) */}
-{parryState?.active && !parryState.success && (
-    <div className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none translate-y-32">
-        <button 
-            onClick={(e) => { e.stopPropagation(); onParry(); }}
-            className="bg-black/80 border-4 border-cyan-400 p-6 rounded-full shadow-[0_0_30px_rgba(34,211,238,0.6)] animate-bounce pointer-events-auto group transition-transform active:scale-90"
-        >
-            <div className="flex flex-col items-center">
-                <Mic size={48} className="text-cyan-400 mb-2 group-hover:scale-110" />
-                <span className="text-white font-black text-xl tracking-widest">
-                    {trans("インタビューではねかえせ！", languageMode)}
-                </span>
-                <div className="mt-2 w-16 h-1 bg-cyan-900 rounded-full overflow-hidden">
-                    <div
-                        className="h-full bg-cyan-400 animate-shrink-width"
-                        style={{ animation: 'shrink 300ms linear forwards' }}
-                    />
-                </div>
+        {/* Parry UI Overlay (Bard Special) */}
+        {parryState?.active && !parryState.success && (
+            <div className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none translate-y-32">
+                <button 
+                    onClick={(e) => { e.stopPropagation(); onParry(); }}
+                    className="bg-black/80 border-4 border-cyan-400 p-6 rounded-full shadow-[0_0_30px_rgba(34,211,238,0.6)] animate-bounce pointer-events-auto group transition-transform active:scale-90"
+                >
+                    <div className="flex flex-col items-center">
+                        <Mic size={48} className="text-cyan-400 mb-2 group-hover:scale-110" />
+                        <span className="text-white font-black text-xl tracking-widest">
+                            {trans("インタビューではねかえせ！", languageMode)}
+                        </span>
+                        <div className="mt-2 w-16 h-1 bg-cyan-900 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-cyan-400 animate-shrink-width"
+                                style={{ animation: 'shrink 300ms linear forwards' }}
+                            />
+                        </div>
+                    </div>
+                </button>
+                <style>{`
+                    @keyframes shrink {
+                        from { width: 100%; }
+                        to { width: 0%; }
+                    }
+                `}</style>
             </div>
-        </button>
-        <style>{`
-            @keyframes shrink {
-                from { width: 100%; }
-                to { width: 0%; }
-            }
-        `}</style>
-    </div>
-)}
+        )}
 
 
         {/* Codex Selection Modal */}
@@ -401,7 +512,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 <div className="flex flex-wrap justify-center gap-4 mb-8">
                     {codexOptions.map((card) => (
                         <div key={card.id} className="scale-100 hover:scale-105 transition-transform cursor-pointer" onClick={() => onCodexSelect(card)}>
-                            <Card card={card} onClick={() => onCodexSelect(card)} disabled={false} languageMode={languageMode}/>
+                            <Card card={card} onClick={() => onCodexSelect(card)} disabled={false} languageMode={languageMode} onInspect={onInspect}/>
                         </div>
                     ))}
                 </div>
@@ -442,7 +553,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     <Sparkles className="text-yellow-400 mb-4 animate-spin" size={48}/>
                     <h2 className="text-3xl font-black text-yellow-100 mb-6 tracking-widest text-shadow-lg">友情コンボ！</h2>
                     <div className="scale-125">
-                         <Card card={synthesizedCard} onClick={()=>{}} disabled={false} languageMode={languageMode} />
+                         <Card card={synthesizedCard} onClick={()=>{}} disabled={false} languageMode={languageMode} onInspect={onInspect}/>
                     </div>
                 </div>
             </div>
@@ -462,10 +573,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         {/* Card Inspection Modal */}
         {inspectedCard && (
             <div className="fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setInspectedCard(null)}>
-                <div className="scale-150 mb-8 transform transition-transform" onClick={(e) => e.stopPropagation()}>
+                <div className="scale-110 md:scale-150 mb-8 transform transition-transform" onClick={(e) => e.stopPropagation()}>
                      <Card card={inspectedCard} onClick={() => {}} disabled={false} languageMode={languageMode}/>
                 </div>
-                <div className="bg-gray-800 border-2 border-white p-6 rounded-lg max-w-sm w-full shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
+                <div className="bg-gray-800 border-2 border-white p-4 md:p-6 rounded-lg max-w-sm w-full shadow-2xl relative max-h-[50vh] overflow-y-auto custom-scrollbar" onClick={(e) => e.stopPropagation()}>
                     <button onClick={() => setInspectedCard(null)} className="absolute top-2 right-2 text-gray-400 hover:text-white p-2">
                         <X size={24} />
                     </button>
@@ -481,7 +592,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     {/* Keywords List */}
                     <div className="space-y-2">
                         {getCardKeywords(inspectedCard).map((k, idx) => (
-                            <div key={idx} className="flex flex-col text-left text-sm bg-gray-700/50 p-2 rounded">
+                            <div key={idx} className="flex flex-col text-left text-sm bg-gray-700/50 p-2 rounded border border-gray-600">
                                 <span className="font-bold text-yellow-300 mb-0.5">{trans(k.title, languageMode)}</span>
                                 <span className="text-gray-300 text-xs">{trans(k.desc, languageMode)}</span>
                             </div>
@@ -543,7 +654,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             </div>
         )}
 
-        {/* Tooltip Modal Overlay (Existing for other UI elements) */}
+        {/* Tooltip Modal Overlay (General Info) */}
         {tooltip && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4" onClick={() => setTooltip(null)}>
                 <div className="bg-black border-2 border-white p-4 rounded max-w-xs shadow-2xl animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
@@ -592,12 +703,19 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 const enemyName = trans(enemy.name, languageMode);
                 const enemyNameNeedsScroll = enemyName.length > 5;
                 
+                const isTrueBossPhase2 = enemy.enemyType === 'THE_HEART' && enemy.phase === 2;
+
                 return (
                     <div 
                         key={enemy.id} 
                         onClick={() => onSelectEnemy(enemy.id)}
-                        className={`flex flex-col items-center z-10 transition-transform duration-200 cursor-pointer relative ${isSelected && !actionClass ? 'scale-105 z-20' : ''} ${!isSelected && !actionClass ? 'hover:scale-105' : ''} ${actionClass}`}
+                        className={`flex flex-col items-center z-10 transition-all duration-200 cursor-pointer relative ${isSelected && !actionClass ? 'scale-105 z-20' : ''} ${!isSelected && !actionClass ? 'hover:scale-105' : ''} ${actionClass} ${isTrueBossPhase2 ? 'sinister-aura' : ''} ${tutorialStep === 2 ? 'ring-4 ring-red-500 ring-offset-4 ring-offset-transparent animate-pulse rounded-lg' : ''}`}
                     >
+                        {/* Sinister Aura Background Element */}
+                        {isTrueBossPhase2 && (
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-900/20 blur-3xl rounded-full void-backglow pointer-events-none z-0"></div>
+                        )}
+
                         {/* Intent Bubble */}
                         <div 
                             className="absolute -top-6 left-1/2 -translate-x-1/2 z-30 bg-white text-black text-xs font-extrabold px-1.5 py-0.5 rounded border-2 border-red-600 animate-bounce whitespace-nowrap shadow-xl flex items-center justify-center min-w-[40px]"
@@ -619,13 +737,13 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             {enemy.nextIntent.type === 'UNKNOWN' && <span className="text-gray-600">?</span>}
                         </div>
 
-                        <div className="w-16 h-16 md:w-20 md:h-20 relative mb-1">
-                            <PixelSprite seed={enemy.id} name={enemy.name} className="w-full h-full drop-shadow-lg" />
+                        <div className={`relative mb-1 transition-all duration-700 ${isTrueBossPhase2 ? 'w-32 h-32 md:w-48 md:h-48' : 'w-16 h-16 md:w-20 md:h-20'}`}>
+                            <PixelSprite seed={enemy.id} name={enemy.name} className="w-full h-full drop-shadow-lg relative z-10" />
                             {/* Damage/Status Popup - Positioned relative to sprite */}
                             <FloatingTextOverlay data={enemy.floatingText} languageMode={languageMode} />
                         </div>
 
-                        <div className={`w-24 md:w-28 bg-black/90 border-2 px-1 py-0.5 text-white text-[9px] md:text-[10px] transition-colors shadow-md rounded ${isSelected ? 'border-yellow-400 ring-1 ring-yellow-400/50' : 'border-gray-600'}`}>
+                        <div className={`${isTrueBossPhase2 ? 'w-32 md:w-40 scale-110' : 'w-24 md:w-28'} bg-black/90 border-2 px-1 py-0.5 text-white text-[9px] md:text-[10px] transition-all shadow-md rounded relative z-10 ${isSelected ? 'border-yellow-400 ring-1 ring-yellow-400/50' : 'border-gray-600'} ${isTrueBossPhase2 ? 'border-purple-500' : ''}`}>
                             <div className="flex items-center justify-between mb-0.5 h-4 w-full overflow-hidden">
                                 <div className="flex-1 min-w-0 overflow-hidden relative h-full">
                                     {enemyNameNeedsScroll ? (
@@ -634,7 +752,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                              <span className="pr-4">{enemyName}</span>
                                          </div>
                                     ) : (
-                                         <div className="text-red-200 font-bold truncate">{enemyName}</div>
+                                         <div className={`${isTrueBossPhase2 ? 'text-purple-400' : 'text-red-200'} font-bold truncate`}>{enemyName}</div>
                                     )}
                                 </div>
                                 {enemy.block > 0 && <span className="text-blue-300 flex items-center bg-blue-900/80 px-1 rounded text-[8px] font-bold ml-1 shrink-0" onClick={(e)=>{e.stopPropagation(); showInfo(trans("ブロック", languageMode), trans("次のターン開始時までダメージを防ぐ。", languageMode));}}><Shield size={8} className="mr-0.5"/> {enemy.block}</span>}
@@ -642,7 +760,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             
                             {/* HP Bar & Text */}
                             <div className="relative w-full h-3 bg-gray-800 rounded-full overflow-hidden border border-gray-600 mb-0.5" onClick={(e) => { e.stopPropagation(); showInfo("HP", `現在: ${enemy.currentHp} / 最大: ${enemy.maxHp}`); }}>
-                                <div className="h-full bg-gradient-to-r from-red-600 to-red-500 transition-all duration-500" style={{width: `${enemyHpPercent}%`}}></div>
+                                <div className={`h-full ${isTrueBossPhase2 ? 'bg-gradient-to-r from-purple-800 to-red-600' : 'bg-gradient-to-r from-red-600 to-red-500'} transition-all duration-500`} style={{width: `${enemyHpPercent}%`}}></div>
                                 <div className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-white shadow-black drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] leading-none">
                                     {enemy.currentHp}/{enemy.maxHp}
                                 </div>
@@ -712,7 +830,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 )}
 
                 {/* Player Stats Panel */}
-                <div className="bg-black/80 border-2 border-white p-1 text-white text-xs w-36 md:w-40 mb-2 shadow-lg rounded z-20">
+                <div className={`bg-black/80 border-2 border-white p-1 text-white text-xs w-36 md:w-40 mb-2 shadow-lg rounded z-20 ${tutorialStep === 1 ? 'ring-4 ring-green-500 ring-offset-4 ring-offset-transparent animate-pulse' : ''}`}>
                     <div className="flex items-center justify-between mb-1">
                         <span className="text-red-400 flex items-center font-bold" onClick={() => showInfo("HP", trans("ヒットポイント。0になると死亡する。", languageMode))}><Heart size={12} className="mr-1"/> {player.currentHp}/{player.maxHp}</span>
                         <span className="text-blue-400 flex items-center font-bold" onClick={() => showInfo(trans("ブロック", languageMode), trans("次のターン開始時までダメージを防ぐ。", languageMode))}><Shield size={12} className="mr-1"/> {player.block}</span>
@@ -794,7 +912,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
           
           {/* Energy */}
           <div className="flex items-center">
-              <div className="bg-black border-2 border-yellow-500 text-yellow-400 px-2 py-0.5 rounded-full flex items-center shadow-lg mr-2" onClick={() => showInfo(trans("エネルギー", languageMode), trans("カードを使用するために必要。ターン毎に回復する。", languageMode))}>
+              <div className={`bg-black border-2 border-yellow-500 text-yellow-400 px-2 py-0.5 rounded-full flex items-center shadow-lg mr-2 ${tutorialStep === 3 ? 'ring-4 ring-yellow-400 ring-offset-2 ring-offset-transparent animate-pulse' : ''}`} onClick={() => showInfo(trans("エネルギー", languageMode), trans("カードを使用するために必要。ターン毎に回復する。", languageMode))}>
                   <Zap size={14} className="mr-1 fill-yellow-400"/>
                   <span className="text-lg font-bold">{player.currentEnergy}/{player.maxEnergy}</span>
               </div>
@@ -825,6 +943,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
               className={`
                 bg-red-600 border-2 border-white px-4 py-1.5 text-xs font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all rounded
                 ${!actingEnemyId && !selectionState.active ? 'hover:bg-red-500 active:shadow-none active:translate-x-[2px] active:translate-y-[2px] cursor-pointer' : 'opacity-50 cursor-not-allowed grayscale'}
+                ${tutorialStep === 5 ? 'ring-4 ring-red-400 ring-offset-2 ring-offset-transparent animate-pulse' : ''}
               `}
           >
               {selectionState.active ? trans("選択", languageMode) : trans("ターン終了", languageMode)}
@@ -866,6 +985,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             -ml-20 first:ml-0 md:ml-0 
                             group-hover/hand:-ml-2 group-active/hand:-ml-2 
                             ${isSelectedActive || isSelectedDual ? 'cursor-pointer -translate-y-8 z-30 scale-110' : 'hover:-translate-y-4 hover:z-20'}
+                            ${tutorialStep === 4 ? 'ring-4 ring-blue-500 ring-offset-2 ring-offset-transparent animate-pulse rounded-lg' : ''}
                         `}
                         style={{
                             transform: isSelectedActive || isSelectedDual ? 'translateY(-32px) scale(1.1)' : `rotate(${rotation}deg) translateY(${translateY}px)`,
@@ -894,6 +1014,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                         }
                                     }
                                 }} 
+                                onInspect={onInspect}
                                 disabled={
                                     selectionState.active 
                                     ? false 
@@ -928,9 +1049,9 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 <div className="p-4 overflow-y-auto flex-grow bg-gray-900/90">
                     <div className="grid grid-cols-3 gap-2 justify-items-center">
                         {/* Should sort deck if needed, but props passed raw */}
-                        {player.deck.sort((a, b) => a.type.localeCompare(b.type)).map((card) => (
+                        {[...player.deck].sort((a, b) => a.type.localeCompare(b.type)).map((card) => (
                             <div key={card.id} className="scale-75 origin-top-left w-24 h-36">
-                                <Card card={card} onClick={() => {}} disabled={false} languageMode={languageMode}/>
+                                <Card card={card} onClick={() => {}} disabled={false} languageMode={languageMode} onInspect={onInspect}/>
                             </div>
                         ))}
                     </div>

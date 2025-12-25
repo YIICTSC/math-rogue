@@ -22,6 +22,7 @@ import CharacterSelectionScreen from './components/CharacterSelectionScreen';
 import RankingScreen from './components/RankingScreen';
 import MathChallengeScreen from './components/MathChallengeScreen';
 import KanjiChallengeScreen from './components/KanjiChallengeScreen';
+import EnglishChallengeScreen from './components/EnglishChallengeScreen';
 import DebugMenuScreen from './components/DebugMenuScreen';
 import PokerGameScreen from './components/PokerGameScreen';
 import SchoolyardSurvivorScreen from './components/SchoolyardSurvivorScreen';
@@ -40,7 +41,7 @@ import { storageService } from './services/storageService';
 import { generateEvent } from './services/eventService';
 import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { trans } from './utils/textUtils';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare } from 'lucide-react';
 
 const calculateScore = (state: GameState, victory: boolean): number => {
     let score = 0;
@@ -218,7 +219,7 @@ const App: React.FC = () => {
   const [selectedCharName, setSelectedCharName] = useState<string>("戦士");
   const [legacyCardSelected, setLegacyCardSelected] = useState<boolean>(false);
   const [showDebugLog, setShowDebugLog] = useState<boolean>(false);
-  const [bgmMode, setBgmMode] = useState<'OSCILLATOR' | 'MP3'>('MP3');
+  const [bgmMode, setBgmMode] = useState<'OSCILLATOR' | 'MP3' | 'STUDY'>('MP3');
   const [totalMathCorrect, setTotalMathCorrect] = useState<number>(0);
   const [nextThreshold, setNextThreshold] = useState<number | null>(null);
   
@@ -250,6 +251,7 @@ const App: React.FC = () => {
           gameState.screen !== GameScreen.VICTORY &&
           gameState.screen !== GameScreen.MATH_CHALLENGE && 
           gameState.screen !== GameScreen.KANJI_CHALLENGE && 
+          gameState.screen !== GameScreen.ENGLISH_CHALLENGE &&
           gameState.screen !== GameScreen.COMPENDIUM && 
           gameState.screen !== GameScreen.HELP &&
           gameState.screen !== GameScreen.RANKING &&
@@ -322,9 +324,13 @@ const App: React.FC = () => {
   };
 
   const toggleBgmMode = () => {
-      const newMode = bgmMode === 'OSCILLATOR' ? 'MP3' : 'OSCILLATOR';
-      setBgmMode(newMode);
-      audioService.setBgmMode(newMode);
+      let nextMode: 'OSCILLATOR' | 'MP3' | 'STUDY';
+      if (bgmMode === 'MP3') nextMode = 'OSCILLATOR';
+      else if (bgmMode === 'OSCILLATOR') nextMode = 'STUDY';
+      else nextMode = 'MP3';
+      
+      setBgmMode(nextMode);
+      audioService.setBgmMode(nextMode);
       audioService.playSound('select');
   };
 
@@ -908,7 +914,7 @@ const App: React.FC = () => {
             setShopPotions(potionOptions);
 
             setGameState({ ...nextState, screen: GameScreen.SHOP });
-            audioService.playBGM('shop');
+            audioService.playBGM('menu');
 
         } else if (node.type === NodeType.EVENT) {
             const ev = generateEvent(
@@ -1034,7 +1040,7 @@ const App: React.FC = () => {
           } else if (potion.templateId === 'STRENGTH_POTION') {
               p.strength += 2;
               newLogs.push(`${trans("ムキムキ", languageMode)}+2`);
-          } else if (potion.templateId === 'ENERGY_POTION') {
+          } else if (potion.templateId === 'ENEMY_POTION') {
               p.currentEnergy += 2;
               newLogs.push(`${trans("エネルギー", languageMode)}+2`);
           } else if (potion.templateId === 'WEAK_POTION' && target) {
@@ -1782,7 +1788,7 @@ const App: React.FC = () => {
         if (isBard && isAttackIntent) {
           setGameState(prev => ({
             ...prev,
-            parryState: { active: true, enemyId: enemy.id, success: false }
+            parryState: { awake: true, enemyId: enemy.id, success: false }
           }));
           parryWindowOpen = true;
           await wait(300); 
@@ -2115,7 +2121,11 @@ const App: React.FC = () => {
                     return { ...prev, player: nextPlayer, screen: GameScreen.ENDING };
                 } else {
                     const isKanji = prev.mode.startsWith('KANJI');
-                    return { ...prev, player: nextPlayer, screen: isKanji ? GameScreen.KANJI_CHALLENGE : GameScreen.MATH_CHALLENGE };
+                    const isEnglish = prev.mode.startsWith('ENGLISH');
+                    let targetScreen = GameScreen.MATH_CHALLENGE;
+                    if (isKanji) targetScreen = GameScreen.KANJI_CHALLENGE;
+                    else if (isEnglish) targetScreen = GameScreen.ENGLISH_CHALLENGE;
+                    return { ...prev, player: nextPlayer, screen: targetScreen };
                 }
             });
         } else if (gameState.player.currentHp <= 0) {
@@ -2234,7 +2244,7 @@ const App: React.FC = () => {
       if (!hasSozu && (hasKinjiro || Math.random() < 0.4)) {
           const allPotions = Object.values(POTION_LIBRARY);
           const potion = allPotions[Math.floor(Math.random() * allPotions.length)];
-          rewards.push({ type: 'POTION', value: { ...potion, id: `rew-pot-${Date.now()}` }, id: `rew-pot` });
+          rewards.push({ type: 'POTION', value: { ...potion, id: `pot-${Date.now()}` }, id: `rew-pot` });
       }
 
       const currentNode = gameState.map.find(n => n.id === gameState.currentMapNodeId);
@@ -2270,7 +2280,7 @@ const App: React.FC = () => {
                   ...prev,
                   player: {
                       ...prev.player,
-                      currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + healAmount),
+                      currentHp: Math.min(prev.player.currentHp, prev.player.currentHp + healAmount),
                       floatingText: { id: `calc-heal-${Date.now()}`, text: `+${healAmount} HP`, color: 'text-green-500', iconType: 'heart' }
                   }
               }));
@@ -2299,8 +2309,8 @@ const App: React.FC = () => {
               if (item.value.id === 'VELVET_CHOKER') p.maxEnergy += 1;
               if (item.value.id === 'WAFFLE') { p.maxHp += 7; p.currentHp = p.maxHp; }
               if (item.value.id === 'OLD_COIN') p.gold += 300;
-              if (item.value.id === 'MATRYOSHKA') p.relicCounters['MATRYOSHKA'] = 2; 
-              if (item.value.id === 'HAPPY_FLOWER') p.relicCounters['HAPPY_FLOWER'] = 0; 
+              if (item.value.id === 'MATRYOSHKA') prev.player.relicCounters['MATRYOSHKA'] = 2; 
+              if (item.value.id === 'HAPPY_FLOWER') prev.player.relicCounters['HAPPY_FLOWER'] = 0; 
               storageService.saveUnlockedRelic(item.value.id);
           } else if (item.type === 'GOLD') {
               p.gold += item.value;
@@ -2342,10 +2352,10 @@ const App: React.FC = () => {
                 <div className="absolute top-2 right-2 z-[9999] flex gap-2">
                     <button 
                         onClick={toggleBgmMode} 
-                        className={`bg-black/50 hover:bg-black/80 text-white border border-white/50 px-2 py-1 rounded text-xs flex items-center shadow-lg transition-colors font-bold ${bgmMode === 'MP3' ? 'border-green-500 text-green-400' : ''}`}
+                        className={`bg-black/50 hover:bg-black/80 text-white border border-white/50 px-2 py-1 rounded text-xs flex items-center shadow-lg transition-colors font-bold ${bgmMode !== 'OSCILLATOR' && bgmMode !== 'MP3' ? 'border-indigo-500 text-indigo-400' : (bgmMode === 'MP3' ? 'border-green-500 text-green-400' : '')}`}
                     >
                         <Music size={14} className="mr-1"/>
-                        {trans(bgmMode === 'OSCILLATOR' ? 'BGM: 電子音' : 'BGM: MP3', languageMode)}
+                        {trans(bgmMode === 'OSCILLATOR' ? 'BGM: 電子音' : (bgmMode === 'MP3' ? 'BGM: MP3' : 'BGM: 学習(SEのみ)'), languageMode)}
                     </button>
                     <button 
                         onClick={toggleLanguage} 
@@ -2531,6 +2541,26 @@ const App: React.FC = () => {
                                     <button onClick={() => handleModeSelect(GameMode.KANJI_MIXED)} className="col-span-3 bg-cyan-900/60 border border-cyan-500 p-3 rounded hover:bg-cyan-800 transition-colors text-sm font-bold flex items-center justify-center gap-2"><Shuffle size={14}/> ミックス</button>
                                 </div>
                             </div>
+
+                            <div className="space-y-4">
+                                <h3 className="text-xl font-bold text-indigo-400 border-b border-indigo-900 pb-2 flex items-center"><Languages className="mr-2" /> えいたんご (単語)</h3>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <button onClick={() => handleModeSelect(GameMode.ENGLISH_ES)} className="bg-slate-800 border border-slate-600 p-2 rounded hover:border-indigo-400 hover:bg-slate-700 transition-all text-xs font-bold">小学校</button>
+                                    <button onClick={() => handleModeSelect(GameMode.ENGLISH_J1)} className="bg-slate-800 border border-slate-600 p-2 rounded hover:border-indigo-400 hover:bg-slate-700 transition-all text-xs font-bold">中学1年</button>
+                                    <button onClick={() => handleModeSelect(GameMode.ENGLISH_J2)} className="bg-slate-800 border border-slate-600 p-2 rounded hover:border-indigo-400 hover:bg-slate-700 transition-all text-xs font-bold">中学2年</button>
+                                    <button onClick={() => handleModeSelect(GameMode.ENGLISH_J3)} className="bg-slate-800 border border-slate-600 p-2 rounded hover:border-indigo-400 hover:bg-slate-700 transition-all text-xs font-bold">中学3年</button>
+                                    <button onClick={() => handleModeSelect(GameMode.ENGLISH_MIXED)} className="col-span-2 bg-indigo-900/60 border border-indigo-500 p-2 rounded hover:bg-indigo-800 transition-all text-xs font-bold flex items-center justify-center gap-1"><Shuffle size={12}/> ミックス</button>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <h3 className="text-xl font-bold text-pink-400 border-b border-pink-900 pb-2 flex items-center"><MessageSquare className="mr-2" /> えいかいわ (会話)</h3>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {[1, 2, 3, 4, 5].map(lv => (
+                                        <button key={lv} onClick={() => handleModeSelect(`ENGLISH_CONV_${lv}` as GameMode)} className="bg-slate-800 border border-slate-600 p-2 rounded hover:border-pink-400 hover:bg-slate-700 transition-all text-xs font-bold">会話 Lv{lv}</button>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
 
                         <button onClick={returnToTitle} className="mt-12 text-gray-400 hover:text-white underline mb-8">{trans("戻る", languageMode)}</button>
@@ -2594,6 +2624,14 @@ const App: React.FC = () => {
 
             {gameState.screen === GameScreen.KANJI_CHALLENGE && (
                 <KanjiChallengeScreen 
+                    mode={gameState.mode} 
+                    onComplete={handleMathChallengeComplete} 
+                    debugSkip={isMathDebugSkipped}
+                />
+            )}
+
+            {gameState.screen === GameScreen.ENGLISH_CHALLENGE && (
+                <EnglishChallengeScreen 
                     mode={gameState.mode} 
                     onComplete={handleMathChallengeComplete} 
                     debugSkip={isMathDebugSkipped}
@@ -2750,7 +2788,7 @@ const App: React.FC = () => {
                                 </div>
                             </div>
                         ) : (
-                            <div className="mb-8 p-4 bg-black/50 border border-gray-500 rounded-lg animate-in zoom-in shrink-0">
+                            <div className="mb-8 p-4 bg-black/50 border border-gray-500 rounded-lg animate-in zoom-in duration-150 shrink-0">
                                 <p className="text-gray-300 font-bold text-xl">遺志は継がれた...</p>
                                 <p className="text-sm text-gray-500 mt-1">次の児童が拾うことになる。</p>
                             </div>
@@ -2783,7 +2821,7 @@ const App: React.FC = () => {
                                 </div>
                             </div>
                         ) : (
-                            <div className="mb-8 p-4 bg-green-900/50 border border-green-500 rounded-lg animate-in zoom-in shrink-0">
+                            <div className="mb-8 p-4 bg-green-900/50 border border-green-500 rounded-lg animate-in zoom-in duration-150 shrink-0">
                                 <p className="text-green-400 font-bold text-xl">カードを継承しました！</p>
                                 <p className="text-sm text-green-200 mt-1">次の冒険の初期デッキに追加されます。</p>
                             </div>

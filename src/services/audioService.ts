@@ -1,5 +1,4 @@
 
-
 class AudioService {
   private ctx: AudioContext | null = null;
   private masterGain: GainNode | null = null;
@@ -11,7 +10,7 @@ class AudioService {
   private currentBgmType: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane_setup' | 'paper_plane_battle' | 'paper_plane_vacation' | 'relic_select' | null = null;
   
   // BGM Mode
-  private bgmMode: 'OSCILLATOR' | 'MP3' = 'MP3';
+  private bgmMode: 'OSCILLATOR' | 'MP3' | 'STUDY' = 'MP3';
   private audioBuffers: Record<string, AudioBuffer> = {};
   private currentSource: AudioBufferSourceNode | null = null;
 
@@ -86,7 +85,7 @@ class AudioService {
     }
   }
 
-  public setBgmMode(mode: 'OSCILLATOR' | 'MP3') {
+  public setBgmMode(mode: 'OSCILLATOR' | 'MP3' | 'STUDY') {
       if (this.bgmMode === mode) return;
       this.bgmMode = mode;
       
@@ -686,6 +685,11 @@ class AudioService {
       this.isPlayingBGM = true;
       this.swing = 0; // Reset swing
       
+      if (this.bgmMode === 'STUDY') {
+          // In study mode, we keep state as isPlayingBGM but don't actually output sound
+          return;
+      }
+
       if (this.bgmMode === 'MP3') {
           await this.playMp3(type);
       } else {

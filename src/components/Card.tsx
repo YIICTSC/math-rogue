@@ -22,37 +22,28 @@ export const KEYWORD_DEFINITIONS: Record<string, { title: string; desc: string }
 };
 
 const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languageMode = 'JAPANESE' }) => {
-  const [showTooltip, setShowTooltip] = useState(false);
   const longPressTimer = useRef<any>(null);
-  const isLongPress = useRef(false);
+  const isLongPressActive = useRef(false);
 
-  // --- Touch / Long Press Logic for Mobile ---
-  const handleTouchStart = () => {
-    isLongPress.current = false;
+  // --- Long Press Logic (Shared for Mouse and Touch) ---
+  const startLongPress = (e: React.MouseEvent | React.TouchEvent) => {
+    isLongPressActive.current = false;
     longPressTimer.current = setTimeout(() => {
-      isLongPress.current = true;
+      isLongPressActive.current = true;
       if (onInspect) {
-          onInspect(card);
-      } else {
-          setShowTooltip(true);
+        onInspect(card);
       }
-    }, 500);
+    }, 500); // 0.5 seconds for long press
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
+  const endLongPress = (e: React.MouseEvent | React.TouchEvent) => {
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current);
     }
-    if (isLongPress.current) {
-      if (e.cancelable) e.preventDefault();
+    // If it was a long press, we prevent the normal onClick from firing
+    if (isLongPressActive.current) {
+      e.stopPropagation();
     }
-  };
-
-  const handleTouchMove = () => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-    }
-    if (showTooltip) setShowTooltip(false);
   };
 
   const handleContextMenu = (e: React.MouseEvent) => {
@@ -80,17 +71,6 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
       default: return trans('その他', languageMode);
     }
   };
-
-  const activeKeywords = (() => {
-    const keywords = [];
-    if (card.exhaust) keywords.push(KEYWORD_DEFINITIONS.EXHAUST);
-    if (card.strength || card.description.includes('ムキムキ')) keywords.push(KEYWORD_DEFINITIONS.STRENGTH);
-    if (card.vulnerable || card.description.includes('びくびく')) keywords.push(KEYWORD_DEFINITIONS.VULNERABLE);
-    if (card.weak || card.description.includes('へろへろ')) keywords.push(KEYWORD_DEFINITIONS.WEAK);
-    if (card.block || card.description.includes('ブロック')) keywords.push(KEYWORD_DEFINITIONS.BLOCK);
-    if (card.draw || card.description.includes('引く')) keywords.push(KEYWORD_DEFINITIONS.DRAW);
-    return keywords;
-  })();
 
   const renderCardArt = (card: CardType) => {
     if (card.textureRef) {
@@ -159,17 +139,33 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
 
   // --- Scrolling Text Logic ---
   const displayName = trans(card.name, languageMode) + (card.upgraded ? '+' : '');
-  // Threshold: Lowered to 6 to fix 2-char hidden issue with wider JP fonts
   const needsScroll = displayName.length > 6;
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (e.button === 0) { // Left click only for long press
+      startLongPress(e);
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    endLongPress(e);
+  };
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Only fire click if it wasn't a long press
+    if (!isLongPressActive.current && !disabled) {
+      onClick();
+    }
+  };
 
   return (
     <div 
-      onClick={!disabled ? onClick : undefined}
-      onMouseEnter={() => setShowTooltip(true)}
-      onMouseLeave={() => setShowTooltip(false)}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onTouchMove={handleTouchMove}
+      onClick={handleCardClick}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={handlePointerUp}
+      onTouchStart={startLongPress}
+      onTouchEnd={endLongPress}
       onContextMenu={handleContextMenu}
       className={`
         relative w-32 h-48 border-[3px] rounded-lg p-2 flex flex-col justify-between 
@@ -178,18 +174,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
         ${disabled ? 'opacity-50 cursor-not-allowed grayscale' : 'cursor-pointer hover:-translate-y-4 hover:shadow-[0_0_15px_rgba(255,255,255,0.4)] hover:z-50'}
       `}
     >
-      {/* Tooltip */}
-      {showTooltip && activeKeywords.length > 0 && !onInspect && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-6 w-64 bg-black/95 border-4 border-white p-3 z-[200] shadow-[0_0_20px_rgba(0,0,0,0.8)] pointer-events-none rounded-lg backdrop-blur-sm animate-in fade-in zoom-in duration-150">
-          {activeKeywords.map((k, idx) => (
-            <div key={k.title} className={`text-left ${idx !== activeKeywords.length - 1 ? 'mb-2 border-b border-gray-700 pb-1' : ''}`}>
-              <div className="text-yellow-400 font-bold text-sm">{trans(k.title, languageMode)}</div>
-              <div className="text-gray-300 text-xs leading-relaxed whitespace-normal break-words">{trans(k.desc, languageMode)}</div>
-            </div>
-          ))}
-          <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-white"></div>
-        </div>
-      )}
+      {/* Tooltip removed as requested. Detailed info moves to onInspect (Long Press) */}
 
       {/* Header */}
       <div className="flex justify-between items-center relative z-10 mb-1 h-5 overflow-hidden">

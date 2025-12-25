@@ -1,4 +1,3 @@
-
 import { GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState, KochoScoreEntry, PaperPlaneScoreEntry } from '../types';
 
 const STORAGE_KEY_UNLOCKED_CARDS = 'pixel_spire_unlocked_cards_v1';
@@ -32,6 +31,9 @@ const STORAGE_KEY_KOCHO_RANKING = 'pixel_spire_kocho_ranking_v1';
 const STORAGE_KEY_PAPER_PLANE_STATE = 'pixel_spire_paper_plane_state_v1';
 const STORAGE_KEY_PAPER_PLANE_PROGRESS = 'pixel_spire_paper_plane_progress_v1';
 const STORAGE_KEY_PAPER_PLANE_RANKING = 'pixel_spire_paper_plane_ranking_v1';
+
+// --- BATTLE TUTORIAL FLAG ---
+const STORAGE_KEY_SEEN_BATTLE_TUTORIAL = 'pixel_spire_seen_battle_tutorial_v1';
 
 export interface PaperPlaneProgress {
     rank: number; // Association Level (Clear Count equivalent)
@@ -201,7 +203,7 @@ export const storageService = {
   savePokerState: (state: PokerRunState) => {
       try {
           localStorage.setItem(STORAGE_KEY_POKER_STATE, JSON.stringify(state));
-      } catch (e) { console.warn("Failed to save poker state", e); }
+      } catch (e) { console.warn(prev => prev); }
   },
 
   loadPokerState: (): PokerRunState | null => {
@@ -397,6 +399,15 @@ export const storageService = {
       return { rank: 1, rerollCount: 3, maxClearedLevel: {} };
   },
 
+  // --- Battle Tutorial Flag ---
+  getSeenBattleTutorial: (): boolean => {
+      return localStorage.getItem(STORAGE_KEY_SEEN_BATTLE_TUTORIAL) === 'true';
+  },
+
+  saveSeenBattleTutorial: () => {
+      localStorage.setItem(STORAGE_KEY_SEEN_BATTLE_TUTORIAL, 'true');
+  },
+
   // --- Game State (Save/Load) ---
   saveGame: (state: GameState) => {
     try {
@@ -503,5 +514,6 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_DEBUG_MATH_SKIP);
       localStorage.removeItem(STORAGE_KEY_DEBUG_HP_ONE);
       localStorage.removeItem(STORAGE_KEY_MATH_CORRECT_COUNT);
+      localStorage.removeItem(STORAGE_KEY_SEEN_BATTLE_TUTORIAL);
   }
 };

@@ -36,7 +36,7 @@ const HelpScreen: React.FC<HelpScreenProps> = ({ onBack, languageMode = 'JAPANES
                         <Map className="mr-2" /> {trans("伝説の小学生を目指せ！", languageMode)}
                     </h3>
                     <p className="text-sm text-gray-300 leading-relaxed">
-                        {trans("このゲームは、算数の力とデッキ構築で放課後の学校（ダンジョン）を攻略するローグライクRPGです。", languageMode)}<br/>
+                        {trans("このゲームは、学習の力とデッキ構築で放課後の学校（ダンジョン）を攻略するローグライクRPGです。", languageMode)}<br/>
                         {trans("ユニークなカードやレリック（宝物）を集め、最強のデッキを作り上げましょう。", languageMode)}<br/>
                         {trans("最深部（Act 4）に潜む校長先生を説得（撃破）することが最終目標です。", languageMode)}
                     </p>
@@ -45,7 +45,7 @@ const HelpScreen: React.FC<HelpScreenProps> = ({ onBack, languageMode = 'JAPANES
                 {/* Combat & Math */}
                 <section className="bg-gray-800 p-5 rounded border border-gray-700">
                     <h3 className="text-lg font-bold text-red-400 mb-4 border-b border-gray-600 pb-2 flex items-center">
-                        <Sword className="mr-2" /> {trans("戦闘と算数", languageMode)}
+                        <Sword className="mr-2" /> {trans("戦闘と問題", languageMode)}
                     </h3>
                     <ul className="list-disc list-inside text-sm text-gray-300 space-y-2 mb-4">
                         <li><span className="font-bold text-white">{trans("エナジー", languageMode)}:</span> {trans("カードを使うためのコスト。毎ターン回復します。", languageMode)}</li>
@@ -56,10 +56,10 @@ const HelpScreen: React.FC<HelpScreenProps> = ({ onBack, languageMode = 'JAPANES
                     <div className="bg-blue-900/30 p-4 rounded border border-blue-500/50 flex items-start">
                         <Brain size={24} className="text-cyan-400 mr-3 shrink-0 mt-1"/>
                         <div>
-                            <h4 className="text-cyan-400 font-bold mb-1">{trans("算数ボーナス", languageMode)}</h4>
+                            <h4 className="text-cyan-400 font-bold mb-1">{trans("問題ボーナス", languageMode)}</h4>
                             <p className="text-xs text-gray-300">
-                                {trans("戦闘に勝利すると算数チャレンジが発生！", languageMode)}<br/>
-                                {trans("計算問題を正解するとボーナスゴールドを獲得でき、冒険が有利になります。", languageMode)}
+                                {trans("戦闘に勝利すると学習チャレンジが発生！", languageMode)}<br/>
+                                {trans("問題を正解するとボーナスゴールドを獲得でき、冒険が有利になります。", languageMode)}
                             </p>
                         </div>
                     </div>
