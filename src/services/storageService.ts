@@ -1,4 +1,3 @@
-
 import { GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState, KochoScoreEntry, PaperPlaneScoreEntry } from '../types';
 
 const STORAGE_KEY_UNLOCKED_CARDS = 'pixel_spire_unlocked_cards_v1';
@@ -36,6 +35,9 @@ const STORAGE_KEY_PAPER_PLANE_RANKING = 'pixel_spire_paper_plane_ranking_v1';
 
 // --- BATTLE TUTORIAL FLAG ---
 const STORAGE_KEY_SEEN_BATTLE_TUTORIAL = 'pixel_spire_seen_battle_tutorial_v1';
+
+// --- ENGLISH VOICE FLAG ---
+const STORAGE_KEY_ENGLISH_VOICE = 'pixel_spire_english_voice_v1';
 
 export interface PaperPlaneProgress {
     rank: number; // Association Level (Clear Count equivalent)
@@ -432,6 +434,16 @@ export const storageService = {
       localStorage.setItem(STORAGE_KEY_SEEN_BATTLE_TUTORIAL, 'true');
   },
 
+  // --- English Voice Flag ---
+  getEnglishVoiceEnabled: (): boolean => {
+    const stored = localStorage.getItem(STORAGE_KEY_ENGLISH_VOICE);
+    return stored === null ? true : stored === 'true';
+  },
+
+  saveEnglishVoiceEnabled: (enabled: boolean) => {
+    localStorage.setItem(STORAGE_KEY_ENGLISH_VOICE, enabled.toString());
+  },
+
   // --- Game State (Save/Load) ---
   saveGame: (state: GameState) => {
     try {
@@ -541,5 +553,6 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_MATH_CORRECT_COUNT);
       localStorage.removeItem(STORAGE_KEY_SEEN_BATTLE_TUTORIAL);
       localStorage.removeItem(STORAGE_KEY_CHALLENGE_RECORDS);
+      localStorage.removeItem(STORAGE_KEY_ENGLISH_VOICE);
   }
 };

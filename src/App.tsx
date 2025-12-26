@@ -779,7 +779,7 @@ const App: React.FC = () => {
             p.currentEnergy = p.maxEnergy;
             p.block = 0;
             p.strength = 0;
-            p.powers = { ...p.powers }; 
+            p.powers = {}; // Fix: Clear battle powers at start of new battle
             p.relicCounters = { ...p.relicCounters }; 
             
             if (p.relics.find(r => r.id === 'HAPPY_FLOWER')) {
@@ -1052,7 +1052,7 @@ const App: React.FC = () => {
           } else if (potion.templateId === 'STRENGTH_POTION') {
               p.strength += 2;
               newLogs.push(`${trans("ムキムキ", languageMode)}+2`);
-          } else if (potion.templateId === 'ENEMY_POTION') {
+          } else if (potion.templateId === 'ENERGY_POTION') {
               p.currentEnergy += 2;
               newLogs.push(`${trans("エネルギー", languageMode)}+2`);
           } else if (potion.templateId === 'WEAK_POTION' && target) {
@@ -1095,7 +1095,7 @@ const App: React.FC = () => {
           }
 
           const remainingEnemies = enemies.filter(e => e.currentHp > 0);
-          return { ...prev, player: p, enemies: remainingEnemies, combatLog: [...prev.combatLog, ...newLogs] };
+          return { ...prev, player: p, enemies: remainingEnemies, combatLog: [...prev.combatLog, ...newLogs].slice(-100) };
       });
   };
 
@@ -1237,6 +1237,8 @@ const App: React.FC = () => {
       for (let act = 0; act < activations; act++) {
           let hits = 1;
           if (card.playCopies) hits += card.playCopies;
+          // Optimization: If hits is too high, cap log entries to prevent UI freeze
+          const hitsToLog = Math.min(hits, 10);
 
           for (let h = 0; h < hits; h++) {
               let targets: Enemy[] = [];
@@ -1310,7 +1312,11 @@ const App: React.FC = () => {
                     if (damage > 0 || logParts.length > 1) {
                         e.floatingText = { id: `dmg-${Date.now()}-${e.id}-${h}`, text: `${damage}`, color: 'text-white', iconType: 'sword' };
                         const formula = logParts.length > 1 ? `(${logParts.join(' ')}) = ` : '';
-                        currentLogs.push(`${trans(e.name, languageMode)}に${formula}${damage}${trans("ダメージ", languageMode)}`);
+                        if (h < hitsToLog) {
+                            currentLogs.push(`${trans(e.name, languageMode)}に${formula}${damage}${trans("ダメージ", languageMode)}`);
+                        } else if (h === hitsToLog) {
+                            currentLogs.push("...さらに多数の攻撃！");
+                        }
                     }
 
                     if (card.lifesteal && damage > 0) {
@@ -1544,7 +1550,7 @@ const App: React.FC = () => {
       let nextSelectedId = prev.selectedEnemyId;
       if (!enemies.find(e => e.id === nextSelectedId) && enemies.length > 0) nextSelectedId = enemies[0].id;
 
-      return { ...prev, player: p, enemies: enemies, selectedEnemyId: nextSelectedId, selectionState: prev.selectionState, combatLog: [...prev.combatLog, ...currentLogs] };
+      return { ...prev, player: p, enemies: enemies, selectedEnemyId: nextSelectedId, selectionState: prev.selectionState, combatLog: [...prev.combatLog, ...currentLogs].slice(-100) };
     });
   };
 
@@ -1748,7 +1754,7 @@ const App: React.FC = () => {
             if (p.powers['CONFUSED'] === 0) newLogs.push(trans("混乱から回復した", languageMode));
         }
         
-        return { ...prev, player: p, combatLog: [...prev.combatLog, ...newLogs] };
+        return { ...prev, player: p, combatLog: [...prev.combatLog, ...newLogs].slice(-100) };
     });
 
     await wait(500);
@@ -1773,20 +1779,20 @@ const App: React.FC = () => {
                 setGameState(prev => ({ 
                     ...prev, 
                     enemies: prev.enemies.map(e => e.id === enemy.id ? { ...enemy, floatingText: { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' } } : e),
-                    combatLog: [...prev.combatLog, logMsg, "校長先生が真の姿を現した！"]
+                    combatLog: [...prev.combatLog, logMsg, "校長先生が真の姿を現した！"].slice(-100)
                 }));
             } else if (enemy.currentHp <= 0) {
                 setGameState(prev => ({ 
                     ...prev, 
                     enemies: prev.enemies.filter(e => e.id !== enemy.id),
-                    combatLog: [...prev.combatLog, logMsg, `${trans(enemy.name, languageMode)}は力尽きた！`]
+                    combatLog: [...prev.combatLog, logMsg, `${trans(enemy.name, languageMode)}は力尽きた！`].slice(-100)
                 }));
                 continue;
             } else {
                 setGameState(prev => ({ 
                     ...prev, 
                     enemies: prev.enemies.map(e => e.id === enemy.id ? { ...e, currentHp: enemy.currentHp, poison: enemy.poison, floatingText: floatText } : e),
-                    combatLog: [...prev.combatLog, logMsg]
+                    combatLog: [...prev.combatLog, logMsg].slice(-100)
                 }));
             }
         }
@@ -1972,7 +1978,7 @@ const App: React.FC = () => {
             e.nextIntent = getNextEnemyIntent(e, gameState.turn + 1);
 
             const aliveEnemies = newEnemies.filter(en => en.currentHp > 0 || (en.enemyType === 'THE_HEART' && en.phase === 1));
-            return { ...prev, player: p, enemies: aliveEnemies, combatLog: [...prev.combatLog, ...newLogs] };
+            return { ...prev, player: p, enemies: aliveEnemies, combatLog: [...prev.combatLog, ...newLogs].slice(-100) };
         });
         await wait(600);
     }
@@ -2012,7 +2018,7 @@ const App: React.FC = () => {
             if (c.name === '後悔' || c.name === 'REGRET') { p.currentHp -= p.hand.length; newLogs.push("後悔ダメージ"); }
         });
 
-        return { ...prev, player: p, combatLog: [...prev.combatLog, ...newLogs] };
+        return { ...prev, player: p, combatLog: [...prev.combatLog, ...newLogs].slice(-100) };
     });
     
     startPlayerTurn();

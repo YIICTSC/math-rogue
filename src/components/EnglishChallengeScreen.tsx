@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { CheckCircle, XCircle, Languages, Volume2, MessageCircle } from 'lucide-react';
+import { CheckCircle, XCircle, Languages, Volume2, VolumeX, MessageCircle } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { GameMode } from '../types';
 import { storageService } from '../services/storageService';
@@ -20,6 +20,9 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [feedback, setFeedback] = useState<'CORRECT' | 'WRONG' | null>(null);
+  
+  // Voice feature control
+  const [voiceEnabled, setVoiceEnabled] = useState(() => storageService.getEnglishVoiceEnabled());
 
   const speakWord = useCallback((word: string) => {
     if (!('speechSynthesis' in window)) return;
@@ -29,6 +32,16 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
     utterance.rate = 0.85; 
     window.speechSynthesis.speak(utterance);
   }, []);
+
+  const toggleVoice = () => {
+    const newVal = !voiceEnabled;
+    setVoiceEnabled(newVal);
+    storageService.saveEnglishVoiceEnabled(newVal);
+    if (!newVal) {
+      window.speechSynthesis.cancel();
+    }
+    audioService.playSound('select');
+  };
 
   useEffect(() => {
     if (debugSkip) {
@@ -65,13 +78,13 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
   }, [mode, debugSkip, isChallenge]);
 
   useEffect(() => {
-    if (problems.length > 0 && !isAnswered) {
+    if (problems.length > 0 && !isAnswered && voiceEnabled) {
       const timer = setTimeout(() => {
         speakWord(problems[currentProblemIndex].question);
       }, 600);
       return () => clearTimeout(timer);
     }
-  }, [currentProblemIndex, problems, speakWord, isAnswered]);
+  }, [currentProblemIndex, problems, speakWord, isAnswered, voiceEnabled]);
 
   const handleAnswer = (option: string) => {
     if (isAnswered) return;
@@ -119,6 +132,17 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
     <div className="flex flex-col h-full w-full bg-indigo-900 text-white relative items-center justify-center p-4 md:p-8 font-mono">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-20 pointer-events-none"></div>
         
+        {/* Header with Voice Toggle */}
+        <div className="absolute top-4 right-4 z-50">
+            <button 
+              onClick={toggleVoice}
+              className={`p-2 rounded-full border transition-all ${voiceEnabled ? 'bg-cyan-600 border-cyan-300 text-white' : 'bg-gray-800 border-gray-600 text-gray-400'}`}
+              title={voiceEnabled ? '音声読み上げをオフにする' : '音声読み上げをオンにする'}
+            >
+              {voiceEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
+            </button>
+        </div>
+
         <div className="z-10 w-full max-w-md text-center flex flex-col">
             <div className="mb-4 flex flex-col items-center justify-center">
                 {isConv ? <MessageCircle size={32} className="mb-1 text-cyan-300 animate-pulse" /> : <Languages size={32} className="mb-1 text-cyan-300 animate-pulse" />}

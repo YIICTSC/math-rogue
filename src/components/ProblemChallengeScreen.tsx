@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { GameMode, LanguageMode } from '../types';
 import { storageService } from '../services/storageService';
@@ -6,7 +5,7 @@ import { audioService } from '../services/audioService';
 import MathChallengeScreen from './MathChallengeScreen';
 import KanjiChallengeScreen from './KanjiChallengeScreen';
 import EnglishChallengeScreen from './EnglishChallengeScreen';
-import { ArrowLeft, Brain, Book, Languages, Music, Play, Trophy, Home, Shuffle, CheckCircle, Target, ChevronRight, LogOut, GraduationCap, Star } from 'lucide-react';
+import { ArrowLeft, Brain, Book, Languages, Music, Play, Trophy, Home, Shuffle, CheckCircle, Target, ChevronRight, LogOut, GraduationCap, Star, Volume2, VolumeX } from 'lucide-react';
 import { trans } from '../utils/textUtils';
 
 interface ProblemChallengeScreenProps {
@@ -118,6 +117,9 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
   const [streak, setStreak] = useState(0);
   const [records, setRecords] = useState<Record<string, number>>({});
   const [isQuitting, setIsQuitting] = useState(false);
+  
+  // Voice feature control
+  const [voiceEnabled, setVoiceEnabled] = useState(() => storageService.getEnglishVoiceEnabled());
 
   useEffect(() => {
     audioService.init();
@@ -163,6 +165,13 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
         setIsQuitting(false);
         audioService.playBGM('menu');
     }, 800);
+  };
+
+  const toggleVoice = () => {
+    const newVal = !voiceEnabled;
+    setVoiceEnabled(newVal);
+    storageService.saveEnglishVoiceEnabled(newVal);
+    audioService.playSound('select');
   };
 
   if (phase === 'CHALLENGE') {
@@ -281,24 +290,46 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
             </div>
           </div>
 
-          <div className="lg:col-span-3 flex flex-col">
-            <h3 className="text-[10px] md:text-sm font-bold text-gray-400 mb-2 flex items-center gap-2 uppercase tracking-tight">
-              <Music size={12} className="text-emerald-500"/> BGM
-            </h3>
-            <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-1.5 max-h-32 md:max-h-64 overflow-y-auto custom-scrollbar">
-              <div className="flex flex-col gap-1">
-                {BGM_OPTIONS.map(bgm => (
-                  <button
-                    key={bgm.id}
-                    onClick={() => { setSelectedBgmId(bgm.id); audioService.playSound('select'); }}
-                    className={`flex items-center justify-between px-2 py-1.5 rounded-lg text-[10px] md:text-xs font-bold transition-all ${selectedBgmId === bgm.id ? 'bg-indigo-600 text-white' : 'text-gray-500 hover:bg-gray-800'}`}
-                  >
-                    <span className="truncate">{bgm.name}</span>
-                    {selectedBgmId === bgm.id && <CheckCircle size={10} className="shrink-0 ml-1" />}
-                  </button>
-                ))}
-              </div>
+          <div className="lg:col-span-3 flex flex-col gap-4">
+            <div className="flex flex-col">
+                <h3 className="text-[10px] md:text-sm font-bold text-gray-400 mb-2 flex items-center gap-2 uppercase tracking-tight">
+                <Music size={12} className="text-emerald-500"/> BGM
+                </h3>
+                <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-1.5 max-h-32 md:max-h-48 overflow-y-auto custom-scrollbar">
+                <div className="flex flex-col gap-1">
+                    {BGM_OPTIONS.map(bgm => (
+                    <button
+                        key={bgm.id}
+                        onClick={() => { setSelectedBgmId(bgm.id); audioService.playSound('select'); }}
+                        className={`flex items-center justify-between px-2 py-1.5 rounded-lg text-[10px] md:text-xs font-bold transition-all ${selectedBgmId === bgm.id ? 'bg-indigo-600 text-white' : 'text-gray-500 hover:bg-gray-800'}`}
+                    >
+                        <span className="truncate">{bgm.name}</span>
+                        {selectedBgmId === bgm.id && <CheckCircle size={10} className="shrink-0 ml-1" />}
+                    </button>
+                    ))}
+                </div>
+                </div>
             </div>
+
+            {selectedCategory.id === 'ENGLISH' && (
+                <div className="flex flex-col">
+                    <h3 className="text-[10px] md:text-sm font-bold text-gray-400 mb-2 flex items-center gap-2 uppercase tracking-tight">
+                    <Volume2 size={12} className="text-emerald-500"/> 読み上げ設定
+                    </h3>
+                    <button 
+                        onClick={toggleVoice}
+                        className={`flex items-center justify-between px-3 py-2.5 rounded-xl border-2 font-bold transition-all ${voiceEnabled ? 'bg-cyan-900/40 border-cyan-500 text-white' : 'bg-gray-800 border-gray-700 text-gray-500'}`}
+                    >
+                        <div className="flex items-center gap-2">
+                            {voiceEnabled ? <Volume2 size={16} className="text-cyan-400"/> : <VolumeX size={16}/>}
+                            <span className="text-xs">{voiceEnabled ? 'オン' : 'オフ'}</span>
+                        </div>
+                        <div className={`w-8 h-4 rounded-full relative transition-colors ${voiceEnabled ? 'bg-cyan-500' : 'bg-gray-600'}`}>
+                            <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${voiceEnabled ? 'left-4.5' : 'left-0.5'}`}></div>
+                        </div>
+                    </button>
+                </div>
+            )}
           </div>
         </div>
 
