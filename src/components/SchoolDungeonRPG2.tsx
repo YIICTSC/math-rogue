@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch, Sparkles, BookOpen, Layers, Move, Minimize2, Maximize2, Volume2, ShieldAlert, ArrowUpCircle, Plus, Magnet, Moon, Snowflake, Activity, Eye, Dna, Dice5 } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -1471,12 +1470,12 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
     for (let i = 0; i < enemyCount; i++) {
         const t = candidates.pop();
         if (t) {
-            // Check safe spot for shopkeeper (has 4 neighbors)
-            const nN = newMap[t.y-1] && newMap[t.y-1][t.x] === 'FLOOR';
-            const nS = newMap[t.y+1] && newMap[t.y+1][t.x] === 'FLOOR';
-            const nW = newMap[t.y][t.x-1] === 'FLOOR';
-            const nE = newMap[t.y][t.x+1] === 'FLOOR';
-            const isSafe = nN && nS && nW && nE;
+            // Check safe spot for shopkeeper (surrounded by floor in all 8 directions to avoid entrances)
+            const neighbors = [
+                {x:t.x, y:t.y-1}, {x:t.x, y:t.y+1}, {x:t.x-1, y:t.y}, {x:t.x+1, y:t.y},
+                {x:t.x-1, y:t.y-1}, {x:t.x+1, y:t.y-1}, {x:t.x-1, y:t.y+1}, {x:t.x+1, y:t.y+1}
+            ];
+            const isSafe = neighbors.every(n => n.x >= 0 && n.x < MAP_W && n.y >= 0 && n.y < MAP_H && newMap[n.y][n.x] === 'FLOOR');
             
             // Avoid Shopkeeper in hidden room (no way to enter easily)
             const isHidden = hiddenRoomRect && t.x >= hiddenRoomRect.x && t.x < hiddenRoomRect.x + hiddenRoomRect.w && t.y >= hiddenRoomRect.y && t.y < hiddenRoomRect.y + hiddenRoomRect.h;
@@ -1700,12 +1699,12 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               if (map[ry][rx] === 'FLOOR' && !enemies.find(e => e.x === rx && e.y === ry) && (rx !== px || ry !== py)) {
                   // Pass inRoom check to spawnEnemy for random spawns too
                   const inRoom = isPointInRoom(rx, ry);
-                  // Random spawns can be shopkeepers if room is safe
-                  const nN = map[ry-1] && map[ry-1][rx] === 'FLOOR';
-                  const nS = map[ry+1] && map[ry+1][rx] === 'FLOOR';
-                  const nW = map[ry][rx-1] === 'FLOOR';
-                  const nE = map[ry][rx+1] === 'FLOOR';
-                  const isSafe = nN && nS && nW && nE;
+                  // Random spawns can be shopkeepers if room is safe (8 directions)
+                  const neighbors = [
+                      {x:rx, y:ry-1}, {x:rx, y:ry+1}, {x:rx-1, y:ry}, {x:rx+1, y:ry},
+                      {x:rx-1, y:ry-1}, {x:rx+1, y:ry-1}, {x:rx-1, y:ry+1}, {x:rx+1, y:ry+1}
+                  ];
+                  const isSafe = neighbors.every(n => n.x >= 0 && n.x < MAP_W && n.y >= 0 && n.y < MAP_H && map[n.y][n.x] === 'FLOOR');
                   
                   setEnemies(prev => [...prev, spawnEnemy(rx, ry, floor, inRoom, isSafe)]);
                   break;
@@ -3203,8 +3202,11 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                   ctx.strokeStyle = fx.color || 'red';
                   ctx.lineWidth = 5;
                   ctx.beginPath();
-                  ctx.moveTo(sx + ts/2, sy + ts/2);
-                  ctx.arc(sx + ts/2, sy + ts/2, 20, 0, Math.PI*2);
+                  const d = fx.dir || {x:1, y:0};
+                  const cx = sx + ts/2;
+                  const cy = sy + ts/2;
+                  ctx.moveTo(cx, cy);
+                  ctx.lineTo(cx + d.x * 100, cy + d.y * 100);
                   ctx.stroke();
               }
           }
@@ -3792,7 +3794,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                     )}
                     
                     <div className="absolute bottom-1 right-1 pointer-events-none opacity-50">
-                        <div className="text-[8px] text-[#666] flex items-center bg-[#1a1a1a] px-1 rounded border border-[#333]">
+                        <div className="text-[8px] text-[#666] flex items-center bg-[#1a1a2a] px-1 rounded border border-[#333]">
                             <Layers size={8} className="mr-1"/> {dungeonDeck ? dungeonDeck.length : 0}
                         </div>
                     </div>

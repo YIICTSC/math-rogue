@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -713,12 +712,12 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     for (let i = 0; i < enemyCount; i++) {
         const t = candidates.pop();
         if (t) {
-            // Check safe spot for shopkeeper (has 4 neighbors)
-            const nN = newMap[t.y-1] && newMap[t.y-1][t.x] === 'FLOOR';
-            const nS = newMap[t.y+1] && newMap[t.y+1][t.x] === 'FLOOR';
-            const nW = newMap[t.y][t.x-1] === 'FLOOR';
-            const nE = newMap[t.y][t.x+1] === 'FLOOR';
-            const isSafe = nN && nS && nW && nE;
+            // Check safe spot for shopkeeper (surrounded by floor in all 8 directions to avoid entrances)
+            const neighbors = [
+                {x:t.x, y:t.y-1}, {x:t.x, y:t.y+1}, {x:t.x-1, y:t.y}, {x:t.x+1, y:t.y},
+                {x:t.x-1, y:t.y-1}, {x:t.x+1, y:t.y-1}, {x:t.x-1, y:t.y+1}, {x:t.x+1, y:t.y+1}
+            ];
+            const isSafe = neighbors.every(n => n.x >= 0 && n.x < MAP_W && n.y >= 0 && n.y < MAP_H && newMap[n.y][n.x] === 'FLOOR');
             
             newEnemies.push(spawnEnemy(t.x, t.y, f, isPointInRoom(t.x, t.y), isSafe));
         }
@@ -2899,7 +2898,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             </div>
         </div>
 
-        <div className="w-full max-w-md md:w-64 md:h-[400px] flex-grow md:flex-grow-0 relative min-h-[220px] rounded-t-xl md:rounded-xl border-t-2 md:border-2 border-[#333] bg-[#1a1a1a]">
+        <div className="w-full max-w-md md:w-64 md:h-[400px] flex-grow md:flex-grow-0 relative min-h-[220px] rounded-t-xl md:rounded-xl border-t-2 md:border-2 border-[#333] bg-[#1a1a2a]">
             <div className="absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32 md:left-1/2 md:-translate-x-1/2 md:top-1/4 flex items-center justify-center">
                 <div className="w-10 h-10 bg-[#333] z-10"></div>
                 <div className="absolute top-0 w-10 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0 touch-none select-none" onClick={() => handleMoveInput(0, -1)}><ArrowUp className="text-[#666]" size={20}/></div>
