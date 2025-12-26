@@ -1153,7 +1153,6 @@ const App: React.FC = () => {
 
       p.currentEnergy -= effectiveCost;
       p.cardsPlayedThisTurn++;
-      if (card.type === CardType.ATTACK) p.attacksPlayedThisTurn++;
       
       if (!p.typesPlayedThisTurn.includes(card.type)) {
           p.typesPlayedThisTurn.push(card.type);
@@ -1235,28 +1234,43 @@ const App: React.FC = () => {
       }
 
       for (let act = 0; act < activations; act++) {
+          // Check if all enemies are defeated before proceeding to next hit/activation
+          if (enemies.every(e => e.currentHp <= 0)) break;
+
           let hits = 1;
           if (card.playCopies) hits += card.playCopies;
-          // Optimization: If hits is too high, cap log entries to prevent UI freeze
+          
+          // CRITICAL OPTIMIZATION: Cap multi-hits to prevent hang/freeze
+          const maxHits = 100;
+          if (hits > maxHits) hits = maxHits;
+
           const hitsToLog = Math.min(hits, 10);
 
           for (let h = 0; h < hits; h++) {
+              // Check again inside hits loop
+              if (enemies.every(e => e.currentHp <= 0)) break;
+
               let targets: Enemy[] = [];
-              if (card.target === TargetType.ALL_ENEMIES) targets = enemies;
-              else if (card.target === TargetType.RANDOM_ENEMY) targets = [enemies[Math.floor(Math.random() * enemies.length)]];
+              if (card.target === TargetType.ALL_ENEMIES) targets = enemies.filter(e => e.currentHp > 0);
+              else if (card.target === TargetType.RANDOM_ENEMY) {
+                  const alive = enemies.filter(e => e.currentHp > 0);
+                  targets = alive.length > 0 ? [alive[Math.floor(Math.random() * alive.length)]] : [];
+              }
               else {
-                  const target = enemies.find(e => e.id === prev.selectedEnemyId) || enemies[0];
+                  const target = enemies.find(e => e.id === prev.selectedEnemyId && e.currentHp > 0) || enemies.find(e => e.currentHp > 0);
                   if (target) targets = [target];
               }
 
               if (card.damage || card.damageBasedOnBlock || card.damagePerCardInHand || card.damagePerAttackPlayed || card.damagePerStrike || card.damagePerCardInDraw) {
                 targets.forEach(e => {
+                    if (e.currentHp <= 0) return;
+
                     let baseDamage = (card.damage || 0);
                     let logParts: string[] = [`${baseDamage}`];
                     
                     if (card.damageBasedOnBlock) { baseDamage += p.block; logParts[0] = `${baseDamage}(Block)`; }
                     if (card.damagePerCardInHand) baseDamage += (p.hand.filter(c => c.id !== card.id).length) * card.damagePerCardInHand!;
-                    if (card.damagePerAttackPlayed) baseDamage += (p.attacksPlayedThisTurn - 1) * card.damagePerAttackPlayed!;
+                    if (card.damagePerAttackPlayed) baseDamage += (p.attacksPlayedThisTurn) * card.damagePerAttackPlayed!;
                     if (card.damagePerStrike) baseDamage += (p.deck.filter(c => c.name.includes('えんぴつ攻撃') || c.name.includes('攻撃')).length) * card.damagePerStrike!;
                     if (card.damagePerCardInDraw) baseDamage += p.drawPile.length * card.damagePerCardInDraw!;
 
@@ -1272,7 +1286,8 @@ const App: React.FC = () => {
                     }
 
                     let multiplier = 1;
-                    if (card.type === CardType.ATTACK && p.relics.find(r => r.id === 'PEN_NIB')) {
+                    // Pen Nib only counts distinct play (first hit of first activation)
+                    if (act === 0 && h === 0 && card.type === CardType.ATTACK && p.relics.find(r => r.id === 'PEN_NIB')) {
                         p.relicCounters['PEN_NIB'] = (p.relicCounters['PEN_NIB'] || 0) + 1;
                         if (p.relicCounters['PEN_NIB'] === 10) {
                             multiplier = 2;
@@ -1310,7 +1325,10 @@ const App: React.FC = () => {
                     }
 
                     if (damage > 0 || logParts.length > 1) {
-                        e.floatingText = { id: `dmg-${Date.now()}-${e.id}-${h}`, text: `${damage}`, color: 'text-white', iconType: 'sword' };
+                        // Aggregate/Only update visual once per enemy if too many hits
+                        if (h % 5 === 0 || h === hits - 1) {
+                             e.floatingText = { id: `dmg-${Date.now()}-${e.id}-${h}`, text: `${damage}`, color: 'text-white', iconType: 'sword' };
+                        }
                         const formula = logParts.length > 1 ? `(${logParts.join(' ')}) = ` : '';
                         if (h < hitsToLog) {
                             currentLogs.push(`${trans(e.name, languageMode)}に${formula}${damage}${trans("ダメージ", languageMode)}`);
@@ -1333,7 +1351,7 @@ const App: React.FC = () => {
                          if (card.fatalMaxHp) { p.maxHp += card.fatalMaxHp!; p.currentHp += card.fatalMaxHp!; }
                          if (e.corpseExplosion) {
                              enemies.forEach(other => { 
-                                 if (other.id !== e.id) {
+                                 if (other.id !== e.id && other.currentHp > 0) {
                                      other.currentHp -= e.maxHp; 
                                      other.floatingText = { id: `expl-${Date.now()}`, text: `${e.maxHp}`, color: 'text-green-400' };
                                      currentLogs.push(`${trans("衝撃のうわさ", languageMode)}: ${trans(other.name, languageMode)}に${e.maxHp}${trans("ダメージ", languageMode)}`);
@@ -1378,7 +1396,9 @@ const App: React.FC = () => {
                   
                   p.block += blk;
                   const formula = logParts.length > 1 ? `(${logParts.join(' ')}) = ` : '';
-                  currentLogs.push(`${trans("ブロック", languageMode)}${formula}${blk}を${trans("獲得", languageMode)}`);
+                  if (h < hitsToLog) {
+                      currentLogs.push(`${trans("ブロック", languageMode)}${formula}${blk}を${trans("獲得", languageMode)}`);
+                  }
               }
               if (card.doubleBlock) p.block *= 2;
               if (card.heal) p.currentHp = Math.min(p.currentHp + card.heal, p.maxHp);
@@ -1398,7 +1418,7 @@ const App: React.FC = () => {
                   let amt = card.poison;
                   if (p.relics.find(r => r.id === 'SNAKE_SKULL')) amt += 1; 
                   targets.forEach(e => applyDebuff(e, 'POISON', amt));
-                  currentLogs.push(`${trans("ドクドク", languageMode)}${amt}${trans("を付与", languageMode)}`);
+                  if (h < hitsToLog) currentLogs.push(`${trans("ドクドク", languageMode)}${amt}${trans("を付与", languageMode)}`);
               }
               
               if (card.poisonMultiplier && targets.length > 0) {
@@ -1487,17 +1507,19 @@ const App: React.FC = () => {
                   });
               }
 
-              if (card.type === CardType.ATTACK) {
-                  p.relicCounters['ATTACK_COUNT'] = (p.relicCounters['ATTACK_COUNT'] || 0) + 1;
-                  if (p.relicCounters['ATTACK_COUNT'] % 3 === 0) {
-                      if (p.relics.find(r => r.id === 'KUNAI')) { p.powers['DEXTERITY'] = (p.powers['DEXTERITY'] || 0) + 1; p.floatingText = { id: `kunai-${Date.now()}`, text: `${trans("カチカチ", languageMode)}+1`, color: 'text-blue-400', iconType: 'shield' }; }
-                      if (p.relics.find(r => r.id === 'SHURIKEN')) { p.strength += 1; p.floatingText = { id: `shuri-${Date.now()}`, text: `${trans("ムキムキ", languageMode)}+1`, color: 'text-red-400', iconType: 'sword' }; }
-                      if (p.relics.find(r => r.id === 'ORNAMENTAL_FAN')) { p.block += 4; p.floatingText = { id: `fan-${Date.now()}`, text: '+4 Block', color: 'text-blue-400', iconType: 'shield' }; }
-                  }
-              }
-
-              enemies = enemies.filter(e => e.currentHp > 0);
+              // End of specific hit logic
           }
+      }
+
+      // Card execution cleanup / per-play relic triggers
+      if (card.type === CardType.ATTACK) {
+          p.relicCounters['ATTACK_COUNT'] = (p.relicCounters['ATTACK_COUNT'] || 0) + 1;
+          if (p.relicCounters['ATTACK_COUNT'] % 3 === 0) {
+              if (p.relics.find(r => r.id === 'KUNAI')) { p.powers['DEXTERITY'] = (p.powers['DEXTERITY'] || 0) + 1; p.floatingText = { id: `kunai-${Date.now()}`, text: `${trans("カチカチ", languageMode)}+1`, color: 'text-blue-400', iconType: 'shield' }; }
+              if (p.relics.find(r => r.id === 'SHURIKEN')) { p.strength += 1; p.floatingText = { id: `shuri-${Date.now()}`, text: `${trans("ムキムキ", languageMode)}+1`, color: 'text-red-400', iconType: 'sword' }; }
+              if (p.relics.find(r => r.id === 'ORNAMENTAL_FAN')) { p.block += 4; p.floatingText = { id: `fan-${Date.now()}`, text: '+4 Block', color: 'text-blue-400', iconType: 'shield' }; }
+          }
+          p.attacksPlayedThisTurn++;
       }
 
       const consumedIds = (card as any)._consumedIds;
@@ -1548,9 +1570,10 @@ const App: React.FC = () => {
       }
 
       let nextSelectedId = prev.selectedEnemyId;
-      if (!enemies.find(e => e.id === nextSelectedId) && enemies.length > 0) nextSelectedId = enemies[0].id;
+      const aliveEnemies = enemies.filter(e => e.currentHp > 0);
+      if (!aliveEnemies.find(e => e.id === nextSelectedId) && aliveEnemies.length > 0) nextSelectedId = aliveEnemies[0].id;
 
-      return { ...prev, player: p, enemies: enemies, selectedEnemyId: nextSelectedId, selectionState: prev.selectionState, combatLog: [...prev.combatLog, ...currentLogs].slice(-100) };
+      return { ...prev, player: p, enemies: aliveEnemies, selectedEnemyId: nextSelectedId, selectionState: prev.selectionState, combatLog: [...prev.combatLog, ...currentLogs].slice(-100) };
     });
   };
 
