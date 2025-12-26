@@ -9,8 +9,8 @@ class AudioService {
   private isPlayingBGM: boolean = false;
   private currentBgmType: string | null = null;
   
-  // BGM Mode
-  private bgmMode: 'OSCILLATOR' | 'MP3' | 'STUDY' = 'MP3';
+  // BGM Mode: Default to STUDY
+  private bgmMode: 'OSCILLATOR' | 'MP3' | 'STUDY' = 'STUDY';
   private audioBuffers: Record<string, AudioBuffer> = {};
   private currentSource: AudioBufferSourceNode | null = null;
 

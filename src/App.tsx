@@ -220,7 +220,7 @@ const App: React.FC = () => {
   const [selectedCharName, setSelectedCharName] = useState<string>("戦士");
   const [legacyCardSelected, setLegacyCardSelected] = useState<boolean>(false);
   const [showDebugLog, setShowDebugLog] = useState<boolean>(false);
-  const [bgmMode, setBgmMode] = useState<'OSCILLATOR' | 'MP3' | 'STUDY'>('MP3');
+  const [bgmMode, setBgmMode] = useState<'OSCILLATOR' | 'MP3' | 'STUDY'>('STUDY');
   const [totalMathCorrect, setTotalMathCorrect] = useState<number>(0);
   const [nextThreshold, setNextThreshold] = useState<number | null>(null);
   
@@ -327,9 +327,9 @@ const App: React.FC = () => {
 
   const toggleBgmMode = () => {
       let nextMode: 'OSCILLATOR' | 'MP3' | 'STUDY';
-      if (bgmMode === 'MP3') nextMode = 'OSCILLATOR';
-      else if (bgmMode === 'OSCILLATOR') nextMode = 'STUDY';
-      else nextMode = 'MP3';
+      if (bgmMode === 'STUDY') nextMode = 'MP3';
+      else if (bgmMode === 'MP3') nextMode = 'OSCILLATOR';
+      else nextMode = 'STUDY';
       
       setBgmMode(nextMode);
       audioService.setBgmMode(nextMode);
@@ -2400,7 +2400,7 @@ const App: React.FC = () => {
                         className={`bg-black/50 hover:bg-black/80 text-white border border-white/50 px-2 py-1 rounded text-xs flex items-center shadow-lg transition-colors font-bold ${bgmMode !== 'OSCILLATOR' && bgmMode !== 'MP3' ? 'border-indigo-500 text-indigo-400' : (bgmMode === 'MP3' ? 'border-green-500 text-green-400' : '')}`}
                     >
                         <Music size={14} className="mr-1"/>
-                        {trans(bgmMode === 'OSCILLATOR' ? 'BGM: 電子音' : (bgmMode === 'MP3' ? 'BGM: MP3' : 'BGM: 学習(SEのみ)'), languageMode)}
+                        {trans(bgmMode === 'STUDY' ? 'BGM: 学習(SEのみ)' : (bgmMode === 'MP3' ? 'BGM: MP3' : 'BGM: 電子音'), languageMode)}
                     </button>
                     <button 
                         onClick={toggleLanguage} 
@@ -2435,12 +2435,12 @@ const App: React.FC = () => {
 
                         {isMathDebugSkipped && (
                             <div className="text-red-500 font-bold mb-1 text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse">
-                                {trans("(デバッグ: 計算スキップ ON)", languageMode)}
+                                {trans("(デバッグ: けいさん スキップ ON)", languageMode)}
                             </div>
                         )}
                         {isDebugHpOne && (
                             <div className="text-red-500 font-bold mb-6 text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse">
-                                {trans("(デバッグ: てきHP1 & Loadout & 全開放 ON)", languageMode)}
+                                {trans("(デバッグ: てきHP1 & ぜんかいほう ON)", languageMode)}
                             </div>
                         )}
                         {(!isMathDebugSkipped && !isDebugHpOne) && <div className="mb-2 h-2"></div>}
@@ -2453,7 +2453,7 @@ const App: React.FC = () => {
                                 </button>
                             )}
                             <button onClick={startGame} disabled={isLoading} className="w-full bg-gray-100 text-black py-3 px-4 text-lg font-bold border-b-4 border-r-4 border-gray-500 hover:bg-white hover:border-gray-400 hover:translate-x-[1px] hover:translate-y-[1px] active:border-0 active:translate-y-[4px] active:translate-x-[4px] transition-all cursor-pointer shadow-lg flex items-center justify-center">
-                                {isLoading ? trans("生成中...", languageMode) : trans("冒険を始める", languageMode)}
+                                {isLoading ? trans("じゅんびちゅう...", languageMode) : trans("ぼうけんを はじめる", languageMode)}
                             </button>
                             
                             <button onClick={startChallengeGame} disabled={isLoading} className="w-full bg-red-900/80 text-red-100 py-2 px-4 text-sm font-bold border border-red-500 hover:bg-red-800 cursor-pointer flex items-center justify-center shadow-md hover:shadow-red-900/50">
@@ -2476,13 +2476,13 @@ const App: React.FC = () => {
 
                             <div className="flex gap-2 w-full justify-between mt-2">
                                 <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.COMPENDIUM }))} className="flex-1 bg-gray-800 text-amber-500 py-2 text-[10px] font-bold border border-gray-600 hover:border-amber-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
-                                    <BookOpen className="mb-1" size={18}/> {trans("図鑑", languageMode)}
+                                    <BookOpen className="mb-1" size={18}/> {trans("ずかん", languageMode)}
                                 </button>
                                 <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.RANKING }))} className="flex-1 bg-gray-800 text-green-500 py-2 text-[10px] font-bold border border-gray-600 border-green-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
-                                    <Trophy className="mb-1" size={18}/> {trans("記録", languageMode)}
+                                    <Trophy className="mb-1" size={18}/> {trans("きろく", languageMode)}
                                 </button>
                                 <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.HELP }))} className="flex-1 bg-gray-800 text-blue-400 py-2 text-[10px] font-bold border border-gray-600 border-blue-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
-                                    <HelpCircle className="mb-1" size={18}/> {trans("遊び方", languageMode)}
+                                    <HelpCircle className="mb-1" size={18}/> {trans("あそびかた", languageMode)}
                                 </button>
                             </div>
 
@@ -2623,7 +2623,7 @@ const App: React.FC = () => {
                             </div>
                         </div>
 
-                        <button onClick={returnToTitle} className="mt-12 text-gray-400 hover:text-white underline mb-8">{trans("戻る", languageMode)}</button>
+                        <button onClick={returnToTitle} className="mt-12 text-gray-400 hover:text-white underline mb-8">{trans("もどる", languageMode)}</button>
                     </div>
                 </div>
             )}
