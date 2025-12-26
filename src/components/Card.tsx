@@ -135,8 +135,10 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
   };
 
   const renderDescription = () => {
+      // 数値置換の前に、まず文章全体をtransにかける
       let desc = trans(card.description, languageMode);
-      desc = desc.replace(/自傷/g, trans("自分にダメージ", languageMode));
+      
+      // 動的数値の再適用（trans内でもある程度処理するが、確実を期す）
       if (card.damage !== undefined) desc = desc.replace(/(\d+)ダメージ/g, `${card.damage}${trans("ダメージ", languageMode)}`);
       if (card.block !== undefined) desc = desc.replace(/ブロック(\d+)/g, `${trans("ブロック", languageMode)}${card.block}`);
       if (card.poison !== undefined) desc = desc.replace(/ドクドク(\d+)/g, `${trans("ドクドク", languageMode)}${card.poison}`);

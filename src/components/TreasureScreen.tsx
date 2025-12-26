@@ -1,17 +1,19 @@
 
 import React, { useState, useEffect } from 'react';
 import { Archive, Key, Check } from 'lucide-react';
-import { RewardItem } from '../types';
+import { RewardItem, LanguageMode } from '../types';
 import { audioService } from '../services/audioService';
+import { trans } from '../utils/textUtils';
 
 interface TreasureScreenProps {
   onOpen: () => void;
   onLeave: () => void;
   rewards: RewardItem[];
   hasCursedKey: boolean;
+  languageMode: LanguageMode;
 }
 
-const TreasureScreen: React.FC<TreasureScreenProps> = ({ onOpen, onLeave, rewards, hasCursedKey }) => {
+const TreasureScreen: React.FC<TreasureScreenProps> = ({ onOpen, onLeave, rewards, hasCursedKey, languageMode }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -32,7 +34,7 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({ onOpen, onLeave, reward
           
           {!isOpen ? (
               <>
-                <h2 className="text-4xl text-yellow-400 font-bold mb-8 animate-pulse">宝箱を発見！</h2>
+                <h2 className="text-4xl text-yellow-400 font-bold mb-8 animate-pulse">{trans("宝箱を発見！", languageMode)}</h2>
                 <div 
                     onClick={handleOpen}
                     className="cursor-pointer transition-transform hover:scale-110 mb-8 relative"
@@ -44,17 +46,17 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({ onOpen, onLeave, reward
                         </div>
                     )}
                 </div>
-                <p className="text-gray-400 mb-8">中には何が入っているだろうか？</p>
+                <p className="text-gray-400 mb-8">{trans("中には何が入っているだろうか？", languageMode)}</p>
                 <button 
                     onClick={handleOpen}
                     className="bg-yellow-600 hover:bg-yellow-500 text-white px-8 py-3 rounded font-bold text-xl border-2 border-yellow-300"
                 >
-                    開ける
+                    {trans("開ける", languageMode)}
                 </button>
               </>
           ) : (
               <>
-                <h2 className="text-4xl text-yellow-400 font-bold mb-8">獲得！</h2>
+                <h2 className="text-4xl text-yellow-400 font-bold mb-8">{trans("獲得！", languageMode)}</h2>
                 <div className="mb-12 flex flex-col gap-4 animate-in fade-in zoom-in duration-500">
                     <Archive size={128} className="text-yellow-400 mb-4 mx-auto opacity-50" />
                     
@@ -66,10 +68,10 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({ onOpen, onLeave, reward
                                 {r.type === 'CARD' && <span className="text-2xl">🃏</span>} 
                                 <div className="text-left">
                                     <div className="font-bold text-yellow-100">
-                                        {r.type === 'GOLD' ? `${r.value} G` : r.value.name}
+                                        {r.type === 'GOLD' ? `${r.value} G` : trans(r.value.name, languageMode)}
                                     </div>
                                     <div className="text-xs text-gray-400">
-                                        {r.type === 'RELIC' ? r.value.description : (r.type === 'CARD' ? '呪い' : 'ゴールド')}
+                                        {r.type === 'RELIC' ? trans(r.value.description, languageMode) : (r.type === 'CARD' ? trans('呪い', languageMode) : trans('ゴールド', languageMode))}
                                     </div>
                                 </div>
                             </div>
@@ -80,7 +82,7 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({ onOpen, onLeave, reward
                     onClick={onLeave}
                     className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded font-bold text-xl border-2 border-white flex items-center"
                 >
-                    <Check className="mr-2" /> 進む
+                    <Check className="mr-2" /> {trans("進む", languageMode)}
                 </button>
               </>
           )}

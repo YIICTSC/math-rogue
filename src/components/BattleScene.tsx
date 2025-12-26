@@ -100,6 +100,7 @@ interface BattleSceneProps {
   actingEnemyId: string | null;
   selectionState: SelectionState;
   onHandSelection: (card: ICard) => void;
+  onHandSelection: (card: ICard) => void;
   onUsePotion: (potion: Potion) => void;
   combatLog: string[];
   languageMode: LanguageMode;
@@ -212,6 +213,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   };
 
   const getProcessedDescription = (card: ICard) => {
+      // transをまずかけることで辞書置換を行う
       let desc = trans(card.description, languageMode);
       desc = desc.replace(/自傷/g, trans("自分にダメージ", languageMode));
       if (card.damage !== undefined) desc = desc.replace(/(\d+)ダメージ/g, `${card.damage}${trans("ダメージ", languageMode)}`);

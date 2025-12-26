@@ -76,6 +76,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
   };
 
   const getProcessedDescription = (card: ICard) => {
+      // transをまずかけることで辞書置換を行う
       let desc = trans(card.description, languageMode);
       if (card.damage !== undefined) desc = desc.replace(/(\d+)ダメージ/g, `${card.damage}${trans("ダメージ", languageMode)}`);
       if (card.block !== undefined) desc = desc.replace(/ブロック(\d+)/g, `${trans("ブロック", languageMode)}${card.block}`);
@@ -141,7 +142,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
       {/* Replacement Modal */}
       {replaceReward && (
            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setReplaceReward(null)}>
-               <div className="bg-gray-900 border-2 border-white p-6 rounded shadow-2xl max-w-sm w-full text-center animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
+               <div className="bg-gray-900 border-2 border-white p-6 rounded shadow-2xl max-sm w-full text-center animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
                    <div className="absolute top-2 right-2 cursor-pointer" onClick={() => setReplaceReward(null)}>
                        <X size={24} className="text-gray-400 hover:text-white" />
                    </div>

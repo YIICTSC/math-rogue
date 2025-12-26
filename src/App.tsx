@@ -1833,7 +1833,7 @@ const App: React.FC = () => {
         if (isBard && isAttackIntent) {
           setGameState(prev => ({
             ...prev,
-            parryState: { awake: true, enemyId: enemy.id, success: false }
+            parryState: { active: true, enemyId: enemy.id, success: false }
           }));
           parryWindowOpen = true;
           await wait(300); 
@@ -2860,6 +2860,7 @@ const App: React.FC = () => {
                         }}
                         onLeave={handleNodeComplete}
                         hasCursedKey={!!gameState.player.relics.find(r => r.id === 'CURSED_KEY')}
+                        languageMode={languageMode}
                     />
                 </div>
             )}

@@ -73,7 +73,7 @@ const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplet
         ) : (
           <div className="text-center animate-in slide-in-from-bottom-10 duration-700">
             <h2 className="text-3xl font-bold text-yellow-400 mb-8 tracking-widest drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]">
-              {trans("最後の覚醒", languageMode)}
+              <span style={{ color: "white" }}>{trans("最後の覚醒", languageMode)}</span>
             </h2>
             <p className="text-gray-300 mb-12 text-sm">決戦に持ち込む『最後の力』を一つだけ選んでください。</p>
             
@@ -84,7 +84,7 @@ const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplet
               >
                 <Heart size={40} className="text-green-400 group-hover:scale-110 transition-transform" />
                 <div>
-                  <div className="font-bold text-lg mb-1">{trans("友情の絆", languageMode)}</div>
+                  <div className="font-bold text-lg mb-1 text-white">{trans("友情の絆", languageMode)}</div>
                   <div className="text-[10px] text-gray-400">{trans("HPを全回復し、最大HP+10", languageMode)}</div>
                 </div>
               </button>
@@ -95,7 +95,7 @@ const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplet
               >
                 <BookOpen size={40} className="text-purple-400 group-hover:scale-110 transition-transform" />
                 <div>
-                  <div className="font-bold text-lg mb-1">{trans("猛勉強の成果", languageMode)}</div>
+                  <div className="font-bold text-lg mb-1 text-white">{trans("猛勉強の成果", languageMode)}</div>
                   <div className="text-[10px] text-gray-400">{trans("デッキの全カードをアップグレード", languageMode)}</div>
                 </div>
               </button>
@@ -106,7 +106,7 @@ const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplet
               >
                 <Sparkles size={40} className="text-red-400 group-hover:scale-110 transition-transform" />
                 <div>
-                  <div className="font-bold text-lg mb-1">{trans("わんぱくの極み", languageMode)}</div>
+                  <div className="font-bold text-lg mb-1 text-white">{trans("わんぱくの極み", languageMode)}</div>
                   <div className="text-[10px] text-gray-400">{trans("戦闘開始時にムキムキ+3を得る", languageMode)}</div>
                 </div>
               </button>
