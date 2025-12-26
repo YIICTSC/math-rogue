@@ -2453,7 +2453,7 @@ const App: React.FC = () => {
                                 </button>
                             )}
                             <button onClick={startGame} disabled={isLoading} className="w-full bg-gray-100 text-black py-3 px-4 text-lg font-bold border-b-4 border-r-4 border-gray-500 hover:bg-white hover:border-gray-400 hover:translate-x-[1px] hover:translate-y-[1px] active:border-0 active:translate-y-[4px] active:translate-x-[4px] transition-all cursor-pointer shadow-lg flex items-center justify-center">
-                                {isLoading ? trans("じゅんびちゅう...", languageMode) : trans("ぼうけんを はじめる", languageMode)}
+                                {isLoading ? trans("じゅんびちゅう...", languageMode) : trans("冒険を始める", languageMode)}
                             </button>
                             
                             <button onClick={startChallengeGame} disabled={isLoading} className="w-full bg-red-900/80 text-red-100 py-2 px-4 text-sm font-bold border border-red-500 hover:bg-red-800 cursor-pointer flex items-center justify-center shadow-md hover:shadow-red-900/50">
@@ -2461,7 +2461,7 @@ const App: React.FC = () => {
                             </button>
 
                             <button onClick={startProblemChallenge} className="w-full bg-emerald-900/80 text-emerald-100 py-2 px-4 text-sm font-bold border border-emerald-500 hover:bg-emerald-800 cursor-pointer flex items-center justify-center shadow-md hover:shadow-emerald-900/50">
-                                <GraduationCap className="mr-2" size={16}/> 問題チャレンジ
+                                <GraduationCap className="mr-2" size={16}/> {trans("問題チャレンジ", languageMode)}
                             </button>
 
                             <button onClick={openMiniGameMenu} className="w-full bg-indigo-900/80 text-indigo-100 py-2 px-4 text-sm font-bold border border-indigo-500 hover:bg-indigo-800 cursor-pointer flex items-center justify-center shadow-md hover:shadow-indigo-900/50">
@@ -2476,13 +2476,13 @@ const App: React.FC = () => {
 
                             <div className="flex gap-2 w-full justify-between mt-2">
                                 <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.COMPENDIUM }))} className="flex-1 bg-gray-800 text-amber-500 py-2 text-[10px] font-bold border border-gray-600 hover:border-amber-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
-                                    <BookOpen className="mb-1" size={18}/> {trans("ずかん", languageMode)}
+                                    <BookOpen className="mb-1" size={18}/> {trans("図鑑", languageMode)}
                                 </button>
                                 <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.RANKING }))} className="flex-1 bg-gray-800 text-green-500 py-2 text-[10px] font-bold border border-gray-600 border-green-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
-                                    <Trophy className="mb-1" size={18}/> {trans("きろく", languageMode)}
+                                    <Trophy className="mb-1" size={18}/> {trans("記録", languageMode)}
                                 </button>
                                 <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.HELP }))} className="flex-1 bg-gray-800 text-blue-400 py-2 text-[10px] font-bold border border-gray-600 border-blue-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
-                                    <HelpCircle className="mb-1" size={18}/> {trans("あそびかた", languageMode)}
+                                    <HelpCircle className="mb-1" size={18}/> {trans("遊び方", languageMode)}
                                 </button>
                             </div>
 
