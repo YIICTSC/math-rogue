@@ -1,5 +1,4 @@
 
-
 import React, { useState, useRef } from 'react';
 import { ArrowLeft, Club, Gamepad2, Skull, Compass, Mountain, AlertTriangle, Trash2, Sword, Send, Lock } from 'lucide-react';
 import { storageService } from '../services/storageService';
@@ -17,10 +16,10 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
   const longPressTimer = useRef<any>(null);
   const isLongPress = useRef(false);
 
-  // Unlock Thresholds
+  // Unlock Thresholds - Updated Survivor to be the first (1000)
   const UNLOCK_THRESHOLDS = {
-      POKER: 1000,
-      SURVIVOR: 1500,
+      SURVIVOR: 1000,
+      POKER: 1500,
       DUNGEON: 2000,
       DUNGEON_2: 2500,
       KOCHO: 3000,
@@ -163,25 +162,7 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
             
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 w-full mb-8 shrink-0 px-1 md:px-2">
                 
-                {/* 1. POKER (1000) */}
-                <button
-                    {...bindPress('POKER')}
-                    className={`group relative bg-slate-800 border-4 border-slate-600 hover:border-purple-500 hover:bg-slate-700 p-2 md:p-4 rounded-xl flex flex-col md:flex-row items-center justify-center md:justify-start text-center md:text-left transition-all shadow-xl hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] overflow-hidden h-36 md:h-32 ${!isUnlocked('POKER') ? 'grayscale opacity-60' : ''}`}
-                >
-                    {!isUnlocked('POKER') && <LockedOverlay threshold={UNLOCK_THRESHOLDS.POKER} />}
-                    <div className="absolute top-0 right-0 bg-purple-600 text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-md z-10">POPULAR</div>
-                    <div className="bg-purple-900/50 p-2 md:p-3 rounded-full mb-2 md:mb-0 md:mr-3 group-hover:scale-110 transition-transform duration-300 border-2 border-purple-500/30 shrink-0">
-                        <Club size={24} className="text-purple-400 fill-current md:w-7 md:h-7" />
-                    </div>
-                    <div className="flex flex-col items-center md:items-start w-full">
-                        <span className="text-sm md:text-lg font-bold mb-1 text-white group-hover:text-purple-300 transition-colors block">放課後ポーカー</span>
-                        <span className="text-[9px] md:text-[10px] text-gray-400 group-hover:text-gray-200 leading-tight block font-mono">
-                            役を作ってスコアを稼げ！<br className="hidden md:inline"/>アイテムを駆使するローグライク。
-                        </span>
-                    </div>
-                </button>
-
-                {/* 2. SURVIVOR (1500) */}
+                {/* 1. SURVIVOR (1000) - Now in first position */}
                 <button
                     {...bindPress('SURVIVOR')}
                     className={`group relative bg-slate-800 border-4 border-slate-600 hover:border-red-500 hover:bg-slate-700 p-2 md:p-4 rounded-xl flex flex-col md:flex-row items-center justify-center md:justify-start text-center md:text-left transition-all shadow-xl hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] overflow-hidden h-36 md:h-32 ${!isUnlocked('SURVIVOR') ? 'grayscale opacity-60' : ''}`}
@@ -195,6 +176,24 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
                         <span className="text-sm md:text-lg font-bold mb-1 text-white group-hover:text-red-300 transition-colors block">校庭サバイバー</span>
                         <span className="text-[9px] md:text-[10px] text-gray-400 group-hover:text-gray-200 leading-tight block">
                             迫りくる敵の大群から生き残れ！<br className="hidden md:inline"/>ヴァンサバ風アクション。
+                        </span>
+                    </div>
+                </button>
+
+                {/* 2. POKER (1500) - Now in second position */}
+                <button
+                    {...bindPress('POKER')}
+                    className={`group relative bg-slate-800 border-4 border-slate-600 hover:border-purple-500 hover:bg-slate-700 p-2 md:p-4 rounded-xl flex flex-col md:flex-row items-center justify-center md:justify-start text-center md:text-left transition-all shadow-xl hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] overflow-hidden h-36 md:h-32 ${!isUnlocked('POKER') ? 'grayscale opacity-60' : ''}`}
+                >
+                    {!isUnlocked('POKER') && <LockedOverlay threshold={UNLOCK_THRESHOLDS.POKER} />}
+                    <div className="absolute top-0 right-0 bg-purple-600 text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-md z-10">POPULAR</div>
+                    <div className="bg-purple-900/50 p-2 md:p-3 rounded-full mb-2 md:mb-0 md:mr-3 group-hover:scale-110 transition-transform duration-300 border-2 border-purple-500/30 shrink-0">
+                        <Club size={24} className="text-purple-400 fill-current md:w-7 md:h-7" />
+                    </div>
+                    <div className="flex flex-col items-center md:items-start w-full">
+                        <span className="text-sm md:text-lg font-bold mb-1 text-white group-hover:text-purple-300 transition-colors block">放課後ポーカー</span>
+                        <span className="text-[9px] md:text-[10px] text-gray-400 group-hover:text-gray-200 leading-tight block font-mono">
+                            役を作ってスコアを稼げ！<br className="hidden md:inline"/>アイテムを駆使するローグライク。
                         </span>
                     </div>
                 </button>

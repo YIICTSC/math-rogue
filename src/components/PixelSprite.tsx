@@ -11,7 +11,6 @@ interface PixelSpriteProps {
 // 16x16 Sprite Templates
 // . = Empty, # = Main Color, % = Secondary/Highlight, @ = Outline/Black
 export const SPRITE_TEMPLATES: Record<string, string[]> = {
-  // --- EXISTING TEMPLATES ---
   SLIME: [
     "................",
     "................",
@@ -48,43 +47,6 @@ export const SPRITE_TEMPLATES: Record<string, string[]> = {
     ".##.......##....",
     "................"
   ],
-  HUMANOID_BACK: [
-    "................",
-    ".....####.......",
-    "....#%%%%#......",
-    "...#%%%%%%#.....",
-    "....#%%%%#......",
-    ".....####.......",
-    "...#######......",
-    "..#%#####%#.....",
-    "..#%#####%#.....",
-    "..#%#####%#.....",
-    "...#######......",
-    "...##...##......",
-    "..##.....##.....",
-    "..##.....##.....",
-    ".##.......##....",
-    "................"
-  ],
-  HUMANOID_SIDE: [
-    "................",
-    "......###.......",
-    ".....#%%%#......",
-    "....#%%%%#......",
-    ".....#%##.......",
-    "......###.......",
-    ".....#####......",
-    "....#%###%#.....",
-    "...#%####%#.....",
-    "...#%####%#.....",
-    "...#######......",
-    "....##..##......",
-    "....##..##......",
-    "....##..##......",
-    "....##..##......",
-    "................"
-  ],
-  // --- NEW HERO TEMPLATES (Kid with Cap) ---
   HERO_FRONT: [
     "................",
     "......####......",
@@ -211,24 +173,6 @@ export const SPRITE_TEMPLATES: Record<string, string[]> = {
     ".##..........##.",
     "................"
   ],
-  CULTIST: [
-    "................",
-    "......##........",
-    ".....#%#........",
-    "....#%@%#.......",
-    "...#%%%%%#......",
-    "..#%%%%%%%#.....",
-    "....#%#%#.......",
-    "....#%#%#.......",
-    "....#####.......",
-    "...#%###%#......",
-    "..#%#...#%#.....",
-    "..#%#...#%#.....",
-    "................",
-    "................",
-    "................",
-    "................"
-  ],
   SKELETON: [
     "................",
     ".....####.......",
@@ -297,6 +241,24 @@ export const SPRITE_TEMPLATES: Record<string, string[]> = {
     "...#%%%%%%#.....",
     "....#%##%#......",
     ".....#..#.......",
+    "................",
+    "................",
+    "................"
+  ],
+  BAT: [
+    "................",
+    "................",
+    "................",
+    "................",
+    "..#..........#..",
+    ".#%#........#%#.",
+    ".#%#...##...#%#.",
+    ".#%#..#%#%..#%#.",
+    "..#%##%%%%##%#..",
+    "...#%%%%%%%%#...",
+    "....#%%%%%%#....",
+    ".....#%##%#.....",
+    "......#..#......",
     "................",
     "................",
     "................"
@@ -409,60 +371,6 @@ export const SPRITE_TEMPLATES: Record<string, string[]> = {
     "..##..##.##..##.",
     "................"
   ],
-  SPIDER: [
-    "................",
-    ".#............#.",
-    ".#............#.",
-    "..#...####...#..",
-    "..#..#%%%%#..#..",
-    "...##%@%%@%##...",
-    ".....#%%%%#.....",
-    "....#%%%%%%#....",
-    "..##%%%%%%%%##..",
-    ".#.#%%%%%%%%#.#.",
-    "#..#%%%%%%%%#..#",
-    "....########....",
-    "....#......#....",
-    "...#........#...",
-    "................",
-    "................"
-  ],
-  SNAKE: [
-    "................",
-    "................",
-    ".......####.....",
-    ".....##@%%@#....",
-    "....#%%%%%#.....",
-    "....#%%%%#......",
-    ".....#%%%%#.....",
-    "......#%%%%#....",
-    ".....#%%%%#.....",
-    "....#%%%%#......",
-    "...#%%%%#.......",
-    "..#%%%%#........",
-    ".#%%%%#.........",
-    ".####...........",
-    "................",
-    "................"
-  ],
-  PLANT: [
-    "................",
-    "......####......",
-    "....##%%%%##....",
-    "...#%%%%%%%%#...",
-    "....#%%%%%%#....",
-    ".....##%%##.....",
-    ".......##.......",
-    ".....######.....",
-    "....#%####%#....",
-    "...#%#....#%#...",
-    ".......##.......",
-    "......####......",
-    ".....######.....",
-    "....########....",
-    "................",
-    "................"
-  ],
   EYE: [
     "................",
     "................",
@@ -480,24 +388,6 @@ export const SPRITE_TEMPLATES: Record<string, string[]> = {
     "......####......",
     ".......##.......",
     ".....##..##....."
-  ],
-  FLAME: [
-    "................",
-    ".......#........",
-    "......#%#.......",
-    ".....#%#%#......",
-    "....#%#%#%#.....",
-    "....#%#%#%#.....",
-    "...#%#%#%#%#....",
-    "...#%%%%%%%#....",
-    "..#%%%%%%%%%#...",
-    "..#%%%%%%%%%#...",
-    "..#%%%%%%%%%#...",
-    "...#%%%%%%%#....",
-    "....#######.....",
-    "................",
-    "................",
-    "................"
   ],
   SWORD: [
     "................",
@@ -553,24 +443,6 @@ export const SPRITE_TEMPLATES: Record<string, string[]> = {
     "................",
     "................"
   ],
-  BAT: [
-    "................",
-    "................",
-    "................",
-    "................",
-    "..#..........#..",
-    ".#%#........#%#.",
-    ".#%#...##...#%#.",
-    ".#%#..#%#%..#%#.",
-    "..#%##%%%%##%#..",
-    "...#%%%%%%%%#...",
-    "....#%%%%%%#....",
-    ".....#%##%#.....",
-    "......#..#......",
-    "................",
-    "................",
-    "................"
-  ],
   FIST: [
     "................",
     "................",
@@ -607,81 +479,99 @@ export const SPRITE_TEMPLATES: Record<string, string[]> = {
     "................",
     "................"
   ],
-  UMBRELLA: [
+  PLANT: [
     "................",
+    "......####......",
+    "....##%%%%##....",
+    "...#%%%%%%%%#...",
+    "....#%%%%%%#....",
+    ".....##%%##.....",
     ".......##.......",
+    ".....######.....",
+    "....#%####%#....",
+    "...#%#....#%#...",
+    ".......##.......",
+    "......####......",
+    ".....######.....",
+    "....########....",
+    "................",
+    "................"
+  ],
+  GEM: [
+    "................",
+    "......####......",
+    "....##%%%%##....",
+    "...#%%%%%%%%#...",
+    "..#%%%%%%%%%%#..",
+    "..#%%%%##%%%%#..",
+    "..#%%%%##%%%%#..",
+    "..#%%%%##%%%%#..",
+    "..#%%%%%%%%%%#..",
+    "...#%%%%%%%%#...",
+    "....##%%%%##....",
+    "......####......",
+    "................",
+    "................",
+    "................",
+    "................"
+  ],
+  HAND_BELL: [
+    "................",
+    ".......#........",
+    "......###.......",
+    ".....#%#%#......",
+    "....#%#%#%#.....",
+    "...#%#%#%#%#....",
+    "...#%%%%%%%#....",
+    "..#%%%%%%%%%#...",
+    "..#%%%%%%%%%#...",
+    "..#%%%%%%%%%#...",
+    "...#%%%%%%%#....",
+    "....#######.....",
+    ".......#........",
+    "......###.......",
+    ".....#####......",
+    "................"
+  ],
+  TRUMPET: [
+    "................",
+    "......####......",
+    "....##%%%%##....",
+    "...#%%%%%%%%#...",
+    "..#%%%%%%%%%%#..",
+    "..#%########%#..",
+    "...#%%%%%%%%#...",
+    "....########....",
+    ".......##.......",
+    ".......##.......",
+    ".......##.......",
+    ".......##.......",
+    "......####......",
+    ".....######.....",
+    "....########....",
+    "................"
+  ],
+  MIC: [
+    "................",
     "......####......",
     ".....#%%%%#.....",
     "....#%%%%%%#....",
-    "...#%%%%%%%%#...",
-    "....#%####%#....",
-    "....#%####%#....",
-    ".......##.......",
-    ".......##.......",
-    ".......##.......",
-    ".......##.......",
-    ".......##.......",
-    ".......##.......",
-    ".....###........",
-    "................"
-  ],
-  GOLD_BAG: [
-    "................",
+    "....#%%%%%%#....",
+    "....#%%%%%%#....",
+    ".....#%%%%#.....",
     "......####......",
-    "....##%%%%##....",
-    "...#%%%%%%%%#...",
-    "..#%%%%%%%%%%#..",
-    "..#%%%%%%%%%%#..",
-    "..#%%%%##%%%%#..",
-    "..#%%%%##%%%%#..",
-    "..#%%%%##%%%%#..",
-    "..#%%%%%%%%%%#..",
-    "...#%%%%%%%%#...",
-    "....##%%%%##....",
+    ".......##.......",
+    ".......##.......",
+    ".......##.......",
+    ".......##.......",
     "......####......",
-    "................",
-    "................",
+    ".....######.....",
+    "....########....",
     "................"
-  ],
-  MAGIC_BULLET: [
-    "................",
-    "......##........",
-    "....##%%##......",
-    "...#%%%%%%#.....",
-    "..#%%%%%%%%#....",
-    "..#%%%%%%%%#....",
-    "..#%%%%%%%%#....",
-    "...#%%%%%%#.....",
-    "....##%%##......",
-    "......##........",
-    "......##........",
-    ".....#..#.......",
-    "....#....#......",
-    "................",
-    "................",
-    "................"
-  ],
-  CROSS: [
-    "#.............#.",
-    ".##.........##..",
-    "..##.......##...",
-    "...##.....##....",
-    "....##...##.....",
-    ".....##.##......",
-    "......###.......",
-    "......###.......",
-    ".....##.##......",
-    "....##...##.....",
-    "...##.....##....",
-    "..##.......##...",
-    ".##.........##..",
-    "#.............#.",
-    "................",
-    "................"
-  ],
+  ]
 };
 
-// Exported Helper for other components to use (e.g. SchoolDungeonRPG)
+// Exported Helper for other components
 export const createPixelSpriteCanvas = (seed: string, name: string = "", size: number = 16): HTMLCanvasElement => {
     const canvas = document.createElement('canvas');
     const pixelScale = 8;
@@ -691,68 +581,13 @@ export const createPixelSpriteCanvas = (seed: string, name: string = "", size: n
     
     const ctx = canvas.getContext('2d');
     if (!ctx) return canvas;
-
     ctx.imageSmoothingEnabled = false;
 
-    // --- LOGIC: Handle Composite Names (Shape|Color|Type) ---
     const nameParts = name.split('|');
     const shapeKeySource = nameParts[0]; 
     const colorKeySource = nameParts.length > 1 ? nameParts[1] : (seed || name); 
-    const typeKey = nameParts.length > 2 ? nameParts[2] : null; 
-
-    let spriteKey = null;
-    const n = shapeKeySource;
     
-    // Direct or Keyword Matching
-    if (SPRITE_TEMPLATES[shapeKeySource]) {
-        spriteKey = shapeKeySource;
-    } else if (n.includes('上級生') || n.includes('不良') || n.includes('不審者') || n.includes('番長')) spriteKey = 'SENIOR';
-    else if (n.includes('花子') || n.includes('少女') || n.includes('マネージャー')) spriteKey = 'GIRL';
-    else if (n.includes('体育') || n.includes('教頭') || n.includes('ボス') || n.includes('ガード')) spriteKey = 'MUSCLE';
-    else if (n.includes('先生') || n.includes('校長') || n.includes('顧問') || n.includes('医者')) spriteKey = 'TEACHER';
-    else if (n.includes('用務員') || n.includes('PTA') || n.includes('大人')) spriteKey = 'HUMANOID'; 
-    else if (n.includes('亡霊') || n.includes('幽霊') || n.includes('魂') || n.includes('影') || n.includes('スケスケ')) spriteKey = 'GHOST';
-    else if (n.includes('人体模型') || n.includes('ゴーレム') || n.includes('像') || n.includes('ロボ')) spriteKey = 'SKELETON';
-    else if (n.includes('ミミック') || n.includes('スライム') || n.includes('塊') || n.includes('カス') || n.includes('ヘドロ')) spriteKey = 'SLIME';
-    else if (n.includes('犬') || n.includes('ハムスター') || n.includes('獣') || n.includes('ウサギ') || n.includes('ネズミ') || n.includes('動物')) spriteKey = 'BEAST';
-    else if (n.includes('カラス') || n.includes('ハチ') || n.includes('鳥')) spriteKey = 'FLIER';
-    else if (n.includes('コウモリ')) spriteKey = 'BAT';
-    else if (n.includes('鎧') || n.includes('三輪車') || n.includes('掃除') || n.includes('マシン')) spriteKey = 'ROBOT';
-    else if (n.includes('王') || n.includes('古龍') || n.includes('支配')) spriteKey = 'BOSS';
-    else if (n.includes('悪魔') || n.includes('狂信者') || n.includes('ピエロ') || n.includes('儀式')) spriteKey = 'CULTIST';
-    else if (n.includes('司祭') || n.includes('妖精') || n.includes('魔道士') || n.includes('マジック')) spriteKey = 'WIZARD';
-    else if (n.includes('蜘蛛') || n.includes('ムカデ') || n.includes('虫') || n.includes('甲虫')) spriteKey = 'SPIDER';
-    else if (n.includes('蛇') || n.includes('ミミズ') || n.includes('ツチノコ')) spriteKey = 'SNAKE';
-    else if (n.includes('花') || n.includes('草') || n.includes('キノコ') || n.includes('樹')) spriteKey = 'PLANT';
-    
-    // Cards & Items
-    else if (n.includes('傘') || n.includes('杖') || n.includes('パラソル')) spriteKey = 'UMBRELLA';
-    else if (n.includes('ノート') || n.includes('宿題') || n.includes('辞書') || n.includes('本') || n.includes('学習') || n.includes('予習') || n.includes('計算') || n.includes('研究') || n.includes('速読') || n.includes('計画') || n.includes('作戦') || n.includes('勉強') || n.includes('書') || n.includes('読') || n.includes('誌') || n.includes('帳')) spriteKey = 'NOTEBOOK';
-    else if (n.includes('ランドセル') || n.includes('バッグ') || n.includes('道具') || n.includes('準備')) spriteKey = 'BACKPACK';
-    else if (n.includes('上履き') || n.includes('靴') || n.includes('足') || n.includes('ダッシュ') || n.includes('ステップ') || n.includes('ジャンプ') || n.includes('側転') || n.includes('バック転') || n.includes('歩') || n.includes('走') || n.includes('跳') || n.includes('逃')) spriteKey = 'SHOE';
-    else if (n.includes('目玉') || n.includes('監視') || n.includes('ドローン') || n.includes('見') || n.includes('予見') || n.includes('カンニング') || n.includes('先読み') || n.includes('目隠し') || n.includes('発見') || n.includes('観察') || n.includes('視') || n.includes('睨')) spriteKey = 'EYE';
-    else if (n.includes('火の玉') || n.includes('エレメント') || n.includes('精霊') || n.includes('炎') || n.includes('焼') || n.includes('熱') || n.includes('エネルギー') || n.includes('発火') || n.includes('ギャグ') || n.includes('キレる') || n.includes('深呼吸') || n.includes('激昂') || n.includes('燃') || n.includes('火')) spriteKey = 'FLAME';
-    else if (n.includes('盾') || n.includes('守り') || n.includes('防御') || n.includes('ブロック') || n.includes('障壁') || n.includes('鉄壁') || n.includes('回避') || n.includes('生き残り') || n.includes('知らんぷり') || n.includes('装備') || n.includes('土下座') || n.includes('隠し')) spriteKey = 'SHIELD';
-    else if (n.includes('剣') || n.includes('刃') || n.includes('ナイフ') || n.includes('包丁') || n.includes('攻撃') || n.includes('切') || n.includes('突') || n.includes('えんぴつ') || n.includes('スライス') || n.includes('画鋲') || n.includes('チョーク') || n.includes('雑巾') || n.includes('定規') || n.includes('早弁') || n.includes('割り込む') || n.includes('タオル') || n.includes('消しゴム') || n.includes('カンチョー') || n.includes('追い打ち') || n.includes('斬') || n.includes('刺') || n.includes('投げ')) spriteKey = 'SWORD';
-    else if (n.includes('薬') || n.includes('瓶') || n.includes('フラスコ') || n.includes('毒') || n.includes('ポーション') || n.includes('インク') || n.includes('絵の具') || n.includes('カフェイン') || n.includes('お茶') || n.includes('液') || n.includes('水')) spriteKey = 'POTION';
-    else if (n.includes('拳') || n.includes('パンチ') || n.includes('打撃') || n.includes('殴') || n.includes('手') || n.includes('つかむ') || n.includes('ビンタ') || n.includes('叩く') || n.includes('ボディスラム') || n.includes('暴れる') || n.includes('膝蹴り') || n.includes('口喧嘩') || n.includes('タックル') || n.includes('打') || n.includes('締め')) spriteKey = 'FIST';
-    else if (n.includes('雷') || n.includes('電気') || n.includes('ビーム') || n.includes('光') || n.includes('サンダー') || n.includes('ショック') || n.includes('大声') || n.includes('レーザー') || n.includes('静電気') || n.includes('雄叫び') || n.includes('泣き叫ぶ') || n.includes('充電') || n.includes('怒号') || n.includes('叫') || n.includes('鳴') || n.includes('電')) spriteKey = 'LIGHTNING';
-    else if (n.includes('筋肉') || n.includes('ムキムキ') || n.includes('頭突き') || n.includes('体')) spriteKey = 'MUSCLE';
-    else if (n.includes('罠') || n.includes('トラップ') || n.includes('TRAP') || n.includes('X') || n.includes('バツ') || n.includes('クロス')) spriteKey = 'CROSS';
-
-    if (!spriteKey) {
-        if (typeKey) {
-            if (typeKey === 'ATTACK') spriteKey = 'SWORD'; 
-            else if (typeKey === 'SKILL') spriteKey = 'SHIELD'; 
-            else if (typeKey === 'POWER') spriteKey = 'FLAME'; 
-            else if (typeKey === 'STATUS') spriteKey = 'SLIME';
-            else if (typeKey === 'CURSE') spriteKey = 'GHOST';
-            else spriteKey = 'NOTEBOOK'; 
-        } else {
-            spriteKey = 'HUMANOID'; 
-        }
-    }
-
+    let spriteKey = SPRITE_TEMPLATES[shapeKeySource] ? shapeKeySource : 'HUMANOID';
     const template = SPRITE_TEMPLATES[spriteKey] || SPRITE_TEMPLATES.HUMANOID;
 
     let hash = 0;
@@ -774,46 +609,21 @@ export const createPixelSpriteCanvas = (seed: string, name: string = "", size: n
     ];
 
     let palette = palettes[Math.abs(hash) % palettes.length];
-    
-    const c = colorKeySource;
-    if (c.includes('先生') || c.includes('悪魔') || c.includes('怒') || c.includes('ランドセル') || c.includes('炎') || c.includes('リンゴ') || c.includes('赤') || c.includes('血') || c.includes('攻撃')) palette = palettes[1]; // Red
-    else if (c.includes('スライム') || c.includes('水') || c.includes('三輪車') || c.includes('氷') || c.includes('青') || c.includes('冷') || c.includes('防御') || c.includes('ブロック')) palette = palettes[2]; // Blue
-    else if (c.includes('カス') || c.includes('骸骨') || c.includes('模型') || c.includes('ゴーレム') || c.includes('石') || c.includes('鉄') || c.includes('灰')) palette = palettes[3]; // Grey
-    else if (c.includes('花子') || c.includes('幽霊') || c.includes('毒') || c.includes('紫') || c.includes('闇') || c.includes('呪')) palette = palettes[4]; // Purple
-    else if (c.includes('犬') || c.includes('ハムスター') || c.includes('机') || c.includes('木') || c.includes('茶') || c.includes('土')) palette = palettes[5]; // Brown
-    else if (c.includes('カラス') || c.includes('墨') || c.includes('影') || c.includes('上級生') || c.includes('不良') || c.includes('黒') || c.includes('暗黒')) palette = ['#212121', '#424242', '#000000']; // Black
-    else if (c.includes('チョーク') || c.includes('ノート') || c.includes('上履き') || c.includes('雪') || c.includes('白') || c.includes('紙')) palette = ['#EEEEEE', '#FFFFFF', '#BDBDBD']; // White
-    else if (c.includes('虫') || c.includes('草') || c.includes('森') || c.includes('緑') || c.includes('酸')) palette = palettes[0]; // Green
-    else if (c.includes('電気') || c.includes('光') || c.includes('金') || c.includes('黄') || c.includes('雷')) palette = palettes[7]; // Yellow
-
-    // Override if hex color is passed directly (for specific styling like in Survivor)
-    if (c.startsWith('#')) {
-        palette = [c, c, c]; 
-    }
+    if (colorKeySource.startsWith('#')) palette = [colorKeySource, colorKeySource, colorKeySource]; 
 
     let mainColor = palette[0];
     let highlightColor = palette[1];
-    const outlineColor = '#000000';
 
-    // Special Human Logic for HERO sprites: Ensure skin tone face
-    if (spriteKey && (spriteKey.startsWith('HERO') || spriteKey.includes('PLAYER'))) {
+    if (spriteKey.startsWith('HERO') || spriteKey.includes('PLAYER')) {
         highlightColor = '#ffccbc'; // Skin tone
-        // Ensure Main color is vibrant red if requested, even if palette logic drifted
-        if (c.includes('RED') || c.includes('赤')) {
-            mainColor = '#d32f2f';
-        }
+        if (colorKeySource.includes('RED') || colorKeySource.includes('赤')) mainColor = '#d32f2f';
     }
 
     for (let y = 0; y < 16; y++) {
       for (let x = 0; x < 16; x++) {
         const char = template[y][x];
         if (char === '.') continue;
-        
-        let color = mainColor;
-        if (char === '%') color = highlightColor;
-        if (char === '@') color = outlineColor;
-        
-        ctx.fillStyle = color;
+        ctx.fillStyle = char === '%' ? highlightColor : (char === '@' ? '#000000' : mainColor);
         ctx.fillRect((x + border) * pixelScale, (y + border) * pixelScale, pixelScale, pixelScale);
       }
     }
@@ -822,20 +632,15 @@ export const createPixelSpriteCanvas = (seed: string, name: string = "", size: n
 
 const PixelSprite: React.FC<PixelSpriteProps> = ({ seed, name = "", className, size = 16 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const generated = createPixelSpriteCanvas(seed, name, size);
-    
-    // Copy content
     canvas.width = generated.width;
     canvas.height = generated.height;
     const ctx = canvas.getContext('2d');
     if (ctx) ctx.drawImage(generated, 0, 0);
-    
   }, [seed, name, size]);
-
   return <canvas ref={canvasRef} className={className} style={{ imageRendering: 'pixelated' }} />;
 };
 
