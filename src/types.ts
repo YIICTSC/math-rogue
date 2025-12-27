@@ -477,6 +477,16 @@ export interface ParryState {
     success: boolean;
 }
 
+export type VFXType = 'SLASH' | 'BLOCK' | 'BUFF' | 'DEBUFF' | 'HEAL' | 'FIRE';
+
+export interface VisualEffectInstance {
+    id: string;
+    type: VFXType;
+    targetId: string; // enemyId or 'player'
+    x?: number; // relative pos if needed
+    y?: number;
+}
+
 export interface GameState {
   screen: GameScreen;
   mode: GameMode; 
@@ -497,4 +507,5 @@ export interface GameState {
   pokerState?: PokerRunState; // Added: Auto-save state for Poker Mini Game
   codexOptions?: Card[]; // Added: For Nilry's Codex selection
   parryState?: ParryState; // New: Parry state for Bard
+  activeEffects: VisualEffectInstance[]; // New: VFX
 }

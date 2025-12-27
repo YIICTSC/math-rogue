@@ -1,7 +1,7 @@
 
-import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode, ParryState } from '../types';
+import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode, ParryState, VisualEffectInstance } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
-import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles, MessageCircle, Mic, ArrowRight, MousePointer2, ChevronsRight } from 'lucide-react';
+import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles, MessageCircle, Mic, ArrowRight, MousePointer2, ChevronsRight, Flame } from 'lucide-react';
 import PixelSprite from './PixelSprite';
 import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
@@ -85,6 +85,83 @@ const FloatingTextOverlay: React.FC<{ data: FloatingText | null, languageMode: L
     );
 };
 
+// Component for handling visual effects like slashes
+const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: string }> = ({ effects, targetId }) => {
+    const activeOnThisTarget = effects.filter(e => e.targetId === targetId);
+    if (activeOnThisTarget.length === 0) return null;
+
+    return (
+        <div className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none overflow-visible">
+            {activeOnThisTarget.map(vfx => (
+                <div key={vfx.id} className="absolute inset-0 flex items-center justify-center">
+                    {vfx.type === 'SLASH' && (
+                        <div className="w-32 h-1 bg-white/80 rotate-45 animate-slash-vfx shadow-[0_0_15px_white]"></div>
+                    )}
+                    {vfx.type === 'BLOCK' && (
+                        <div className="animate-block-vfx p-4 bg-blue-500/20 border-2 border-blue-400 rounded-full">
+                            <Shield size={40} className="text-blue-300 fill-blue-500/50" />
+                        </div>
+                    )}
+                    {vfx.type === 'BUFF' && (
+                        <div className="animate-buff-vfx p-2">
+                            <Sparkles size={48} className="text-yellow-400 animate-spin" />
+                        </div>
+                    )}
+                    {vfx.type === 'DEBUFF' && (
+                         <div className="animate-debuff-vfx p-2">
+                             <Skull size={48} className="text-purple-500" />
+                         </div>
+                    )}
+                    {vfx.type === 'HEAL' && (
+                        <div className="animate-heal-vfx">
+                            <Heart size={48} className="text-green-400 fill-green-500/50" />
+                        </div>
+                    )}
+                    {vfx.type === 'FIRE' && (
+                        <div className="animate-fire-vfx">
+                            <Flame size={48} className="text-orange-500 fill-orange-600/50" />
+                        </div>
+                    )}
+                </div>
+            ))}
+            <style>
+                {`
+                    @keyframes slash-vfx {
+                        0% { transform: rotate(45deg) scaleX(0); opacity: 0; }
+                        20% { transform: rotate(45deg) scaleX(1.5); opacity: 1; }
+                        100% { transform: rotate(45deg) scaleX(2); opacity: 0; }
+                    }
+                    @keyframes block-vfx {
+                        0% { transform: scale(0.5); opacity: 0; }
+                        20% { transform: scale(1.2); opacity: 1; }
+                        100% { transform: scale(1); opacity: 0; }
+                    }
+                    @keyframes buff-vfx {
+                        0% { transform: translateY(20px); opacity: 0; }
+                        50% { transform: translateY(-20px); opacity: 1; }
+                        100% { transform: translateY(-40px); opacity: 0; }
+                    }
+                    @keyframes debuff-vfx {
+                         0% { transform: scale(1.5); filter: brightness(2); opacity: 0; }
+                         20% { transform: scale(1); filter: brightness(1); opacity: 1; }
+                         100% { transform: scale(0.8); opacity: 0; }
+                    }
+                    @keyframes heal-vfx {
+                        0% { transform: scale(0.5); opacity: 0; }
+                        50% { transform: scale(1.2); opacity: 1; }
+                        100% { transform: scale(1.5); opacity: 0; }
+                    }
+                    @keyframes fire-vfx {
+                         0% { transform: scale(0.5) translateY(0); opacity: 0; }
+                         20% { transform: scale(1.2) translateY(-10px); opacity: 1; }
+                         100% { transform: scale(1.5) translateY(-30px); opacity: 0; }
+                    }
+                `}
+            </style>
+        </div>
+    );
+};
+
 interface BattleSceneProps {
   player: Player;
   enemies: Enemy[];
@@ -100,7 +177,6 @@ interface BattleSceneProps {
   actingEnemyId: string | null;
   selectionState: SelectionState;
   onHandSelection: (card: ICard) => void;
-  onHandSelection: (card: ICard) => void;
   onUsePotion: (potion: Potion) => void;
   combatLog: string[];
   languageMode: LanguageMode;
@@ -108,11 +184,12 @@ interface BattleSceneProps {
   onCodexSelect: (card: ICard | null) => void;
   parryState?: ParryState;
   onParry: () => void;
+  activeEffects: VisualEffectInstance[];
 }
 
 const BattleScene: React.FC<BattleSceneProps> = ({ 
   player, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onPlaySynthesizedCard, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
-  selectionState, onHandSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect, parryState, onParry
+  selectionState, onHandSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect, parryState, onParry, activeEffects
 }) => {
   
   const playerHpPercent = (player.currentHp / player.maxHp) * 100;
@@ -130,7 +207,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   const [tutorialStep, setTutorialStep] = useState<number | null>(null);
 
   useEffect(() => {
-      // Check if first time in battle
       if (!storageService.getSeenBattleTutorial()) {
           setTutorialStep(1);
       }
@@ -213,7 +289,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   };
 
   const getProcessedDescription = (card: ICard) => {
-      // transをまずかけることで辞書置換を行う
       let desc = trans(card.description, languageMode);
       desc = desc.replace(/自傷/g, trans("自分にダメージ", languageMode));
       if (card.damage !== undefined) desc = desc.replace(/(\d+)ダメージ/g, `${card.damage}${trans("ダメージ", languageMode)}`);
@@ -234,7 +309,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
   const hasChoker = !!player.relics.find(r => r.id === 'VELVET_CHOKER');
   
-  // Curse Logic: Normality (退屈) - Limit 3 cards per turn
   const hasNormality = player.hand.some(c => c.name === '退屈' || c.name === 'NORMALITY');
   const normalityRestricted = hasNormality && player.cardsPlayedThisTurn >= 3;
 
@@ -244,7 +318,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     return a.name.localeCompare(b.name);
   });
   
-  // Helper to get counter for a relic ID (handling shared counters like ATTACK_COUNT)
   const getRelicCounter = (relicId: string) => {
       if (relicId === 'KUNAI' || relicId === 'SHURIKEN' || relicId === 'ORNAMENTAL_FAN') {
           return player.relicCounters['ATTACK_COUNT'];
@@ -252,35 +325,29 @@ const BattleScene: React.FC<BattleSceneProps> = ({
       return player.relicCounters[relicId];
   };
 
-  // Sort relics to show ones with active counters first
   const displayedRelics = [...player.relics].sort((a, b) => {
       const countA = getRelicCounter(a.id) || 0;
       const countB = getRelicCounter(b.id) || 0;
-      // Sort descending by counter existence/value
       if (countA > 0 && countB <= 0) return -1;
       if (countA <= 0 && countB > 0) return 1;
       return 0;
   });
 
-  // --- DUAL MODE LOGIC ---
   const handleCardClickDual = (card: ICard, disabled: boolean) => {
       if (disabled) {
            if (isDualMode && (hasChoker || normalityRestricted)) audioService.playSound('wrong');
            return;
       }
       
-      // If selectionState is active, pass through to parent handler immediately
       if (selectionState.active) {
           onHandSelection(card);
           return;
       }
 
       if (selectedCardIds.includes(card.id)) {
-          // Deselect
           setSelectedCardIds(prev => prev.filter(id => id !== card.id));
           audioService.playSound('select');
       } else {
-          // Select (Max 2)
           if (selectedCardIds.length < 2) {
               setSelectedCardIds(prev => [...prev, card.id]);
               audioService.playSound('select');
@@ -291,7 +358,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   const executeDualTurn = async () => {
       if (selectedCardIds.length === 0) return;
       
-      // Single Card Play
       if (selectedCardIds.length === 1) {
            const c1 = player.hand.find(c => c.id === selectedCardIds[0]);
            if (c1) {
@@ -305,7 +371,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
            return;
       }
 
-      // Combo Play (2 Cards)
       const c1 = player.hand.find(c => c.id === selectedCardIds[0]);
       const c2 = player.hand.find(c => c.id === selectedCardIds[1]);
       
@@ -314,7 +379,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
       const isCombo = c1.type === c2.type;
       const comboCost = Math.max(c1.cost, c2.cost);
       const totalCost = c1.cost + c2.cost;
-      
       const requiredCost = isCombo ? comboCost : totalCost;
       
       if (player.currentEnergy < requiredCost) {
@@ -323,20 +387,16 @@ const BattleScene: React.FC<BattleSceneProps> = ({
       }
 
       if (isCombo) {
-          // Friendship Combo!
           setIsComboing(true);
           const fused = synthesizeCards(c1, c2);
           setSynthesizedCard(fused);
           audioService.playSound('buff');
           
-          await new Promise(r => setTimeout(r, 1000)); // Show combo anim
-
-          // Attach original IDs to consume them in App logic
+          await new Promise(r => setTimeout(r, 1000)); 
           const comboPayload = { ...fused, _consumedIds: [c1.id, c2.id] };
           onPlaySynthesizedCard(comboPayload);
           
       } else {
-          // Sequential Play
           onPlayCard(c1);
           await new Promise(r => setTimeout(r, 500));
           onPlayCard(c2);
@@ -375,7 +435,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                               <div className="text-[10px] text-gray-400">Step 1/5</div>
                               <button onClick={nextTutorialStep} className="bg-green-600 hover:bg-green-500 text-white px-4 py-1 rounded font-bold text-sm flex items-center gap-1">つぎへ <ArrowRight size={14}/></button>
                           </div>
-                          {/* Arrow pointing down to stats (Bottom-Left) */}
                           <div className="absolute -bottom-4 left-20 -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[15px] border-t-green-500"></div>
                       </div>
                   )}
@@ -394,7 +453,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                               <div className="text-[10px] text-gray-400">Step 2/5</div>
                               <button onClick={nextTutorialStep} className="bg-red-600 hover:bg-red-500 text-white px-4 py-1 rounded font-bold text-sm flex items-center gap-1">なるほど <ArrowRight size={14}/></button>
                           </div>
-                          {/* Arrow pointing up to enemies (Top Center) */}
                           <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[15px] border-b-red-500"></div>
                       </div>
                   )}
@@ -413,7 +471,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                               <div className="text-[10px] text-gray-400">Step 3/5</div>
                               <button onClick={nextTutorialStep} className="bg-yellow-600 hover:bg-yellow-500 text-white px-4 py-1 rounded font-bold text-sm flex items-center gap-1">つぎへ <ArrowRight size={14}/></button>
                           </div>
-                          {/* Arrow pointing down to energy (Bottom Left) */}
                           <div className="absolute -bottom-4 left-12 -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[15px] border-t-yellow-500"></div>
                       </div>
                   )}
@@ -432,7 +489,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                               <div className="text-[10px] text-gray-400">Step 4/5</div>
                               <button onClick={nextTutorialStep} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1 rounded font-bold text-sm flex items-center gap-1">わかった <ArrowRight size={14}/></button>
                           </div>
-                          {/* Arrow pointing down to hand (Bottom Center) */}
                           <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[15px] border-t-blue-500"></div>
                       </div>
                   )}
@@ -451,7 +507,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                               <div className="text-[10px] text-gray-400">Final Step</div>
                               <button onClick={closeTutorial} className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded font-bold text-sm animate-pulse">ぼうけんを はじめる！</button>
                           </div>
-                          {/* Arrow pointing down to end turn button (Bottom Right) */}
                           <div className="absolute -bottom-4 right-8 -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[15px] border-t-red-400"></div>
                       </div>
                   )}
@@ -459,15 +514,12 @@ const BattleScene: React.FC<BattleSceneProps> = ({
           </div>
       )}
 
-      {/* 1. Top Bar: Narrative & Logs (Expanded) */}
+      {/* 1. Top Bar: Narrative & Logs */}
       <div className="shrink-0 bg-black border-b-2 border-gray-700 p-2 z-30 relative min-h-[4rem] flex flex-col justify-center shadow-md">
         <div className="flex flex-col w-full pr-24 overflow-hidden">
-            {/* Narrative (Primary Context) */}
             <div className="text-xs text-green-400 truncate leading-snug mb-0.5 font-bold shadow-black drop-shadow-md">
                 <span className="animate-pulse mr-2">&gt;&gt;</span> {trans(narrative, languageMode)}
             </div>
-            
-            {/* Recent Logs */}
             {latestLogs.length > 0 ? (
                 <>
                     <div className="text-[10px] text-gray-200 truncate leading-snug">
@@ -484,7 +536,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             )}
         </div>
 
-        {/* Right Side Controls (Absolute) */}
         <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
             <div className="text-yellow-400 text-[10px] font-bold bg-gray-900/80 px-2 py-0.5 rounded border border-yellow-700 shadow-sm">
                 {trans(turnLog, languageMode)}
@@ -498,7 +549,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         </div>
       </div>
 
-      {/* 2. Battle Viewport (Enemies & Player Sprite) */}
+      {/* 2. Battle Viewport */}
       <div className="flex-1 relative overflow-y-auto custom-scrollbar flex flex-col justify-between p-2 bg-gray-800/50 gap-4">
         
         {/* Parry UI Overlay (Bard Special) */}
@@ -529,7 +580,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 `}</style>
             </div>
         )}
-
 
         {/* Codex Selection Modal */}
         {codexOptions && (
@@ -616,7 +666,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         {getProcessedDescription(inspectedCard)}
                     </p>
                     
-                    {/* Keywords List */}
                     <div className="space-y-2">
                         {getCardKeywords(inspectedCard).map((k, idx) => (
                             <div key={idx} className="flex flex-col text-left text-sm bg-gray-700/50 p-2 rounded border border-gray-600">
@@ -681,7 +730,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             </div>
         )}
 
-        {/* Tooltip Modal Overlay (General Info) */}
+        {/* Tooltip Modal Overlay */}
         {tooltip && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4" onClick={() => setTooltip(null)}>
                 <div className="bg-black border-2 border-white p-4 rounded max-w-xs shadow-2xl animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
@@ -721,7 +770,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             </div>
         )}
 
-        {/* Enemies Area (Top) */}
+        {/* Enemies Area */}
         <div className="flex justify-center items-start pt-8 md:pt-14 gap-2 min-h-[180px] shrink-0">
             {enemies.map((enemy) => {
                 const enemyHpPercent = (enemy.currentHp / enemy.maxHp) * 100;
@@ -729,7 +778,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 const actionClass = getEnemyActionClass(enemy);
                 const enemyName = trans(enemy.name, languageMode);
                 const enemyNameNeedsScroll = enemyName.length > 5;
-                
                 const isTrueBossPhase2 = enemy.enemyType === 'THE_HEART' && enemy.phase === 2;
 
                 return (
@@ -738,36 +786,30 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         onClick={() => onSelectEnemy(enemy.id)}
                         className={`flex flex-col items-center z-10 transition-all duration-200 cursor-pointer relative ${isSelected && !actionClass ? 'scale-105 z-20' : ''} ${!isSelected && !actionClass ? 'hover:scale-105' : ''} ${actionClass} ${isTrueBossPhase2 ? 'sinister-aura' : ''} ${tutorialStep === 2 ? 'ring-4 ring-red-500 ring-offset-4 ring-offset-transparent animate-pulse rounded-lg' : ''}`}
                     >
-                        {/* Sinister Aura Background Element */}
                         {isTrueBossPhase2 && (
                             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-900/20 blur-3xl rounded-full void-backglow pointer-events-none z-0"></div>
                         )}
 
-                        {/* Intent Bubble */}
                         <div 
                             className="absolute -top-6 left-1/2 -translate-x-1/2 z-30 bg-white text-black text-xs font-extrabold px-1.5 py-0.5 rounded border-2 border-red-600 animate-bounce whitespace-nowrap shadow-xl flex items-center justify-center min-w-[40px]"
                             onClick={(e) => { e.stopPropagation(); showInfo(trans("敵", languageMode), trans("敵の次の行動です。", languageMode)); }}
                         >
-                            {/* Attack Intents */}
                             {(enemy.nextIntent.type === 'ATTACK' || enemy.nextIntent.type === 'ATTACK_DEBUFF' || enemy.nextIntent.type === 'ATTACK_DEFEND') && (
                                 <><Skull size={12} className="mr-1 text-red-600"/> {enemy.nextIntent.value}</>
                             )}
-                            {/* Defend Intents */}
                             {enemy.nextIntent.type === 'DEFEND' && (
                                 <><Shield size={12} className="mr-1 text-blue-600"/> {enemy.nextIntent.value}</>
                             )}
-                            {/* Skill / Buff / Debuff Intents (Zap) */}
                             {(enemy.nextIntent.type === 'BUFF' || enemy.nextIntent.type === 'DEBUFF' || enemy.nextIntent.type === 'SLEEP') && (
                                 <><Zap size={12} className="mr-1 text-yellow-500 fill-yellow-500"/> !</>
                             )}
-                            {/* Unknown */}
                             {enemy.nextIntent.type === 'UNKNOWN' && <span className="text-gray-600">?</span>}
                         </div>
 
                         <div className={`relative mb-1 transition-all duration-700 ${isTrueBossPhase2 ? 'w-32 h-32 md:w-48 md:h-48' : 'w-16 h-16 md:w-20 md:h-20'}`}>
                             <PixelSprite seed={enemy.id} name={enemy.name} className="w-full h-full drop-shadow-lg relative z-10" />
-                            {/* Damage/Status Popup - Positioned relative to sprite */}
                             <FloatingTextOverlay data={enemy.floatingText} languageMode={languageMode} />
+                            <VFXOverlay effects={activeEffects} targetId={enemy.id} />
                         </div>
 
                         <div className={`${isTrueBossPhase2 ? 'w-32 md:w-40 scale-110' : 'w-24 md:w-28'} bg-black/90 border-2 px-1 py-0.5 text-white text-[9px] md:text-[10px] transition-all shadow-md rounded relative z-10 ${isSelected ? 'border-yellow-400 ring-1 ring-yellow-400/50' : 'border-gray-600'} ${isTrueBossPhase2 ? 'border-purple-500' : ''}`}>
@@ -785,7 +827,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 {enemy.block > 0 && <span className="text-blue-300 flex items-center bg-blue-900/80 px-1 rounded text-[8px] font-bold ml-1 shrink-0" onClick={(e)=>{e.stopPropagation(); showInfo(trans("ブロック", languageMode), trans("次のターン開始時までダメージを防ぐ。", languageMode));}}><Shield size={8} className="mr-0.5"/> {enemy.block}</span>}
                             </div>
                             
-                            {/* HP Bar & Text */}
                             <div className="relative w-full h-3 bg-gray-800 rounded-full overflow-hidden border border-gray-600 mb-0.5" onClick={(e) => { e.stopPropagation(); showInfo("HP", `現在: ${enemy.currentHp} / 最大: ${enemy.maxHp}`); }}>
                                 <div className={`h-full ${isTrueBossPhase2 ? 'bg-gradient-to-r from-purple-800 to-red-600' : 'bg-gradient-to-r from-red-600 to-red-500'} transition-all duration-500`} style={{width: `${enemyHpPercent}%`}}></div>
                                 <div className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-white shadow-black drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] leading-none">
@@ -793,7 +834,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 </div>
                             </div>
 
-                            {/* Status Icons */}
                             <div className="flex flex-wrap gap-0.5 justify-center min-h-[14px]">
                                 {enemy.vulnerable > 0 && (
                                     <div className="flex items-center bg-pink-900/80 rounded px-0.5 border border-pink-500/50 cursor-pointer" onClick={(e)=>{e.stopPropagation(); showInfo(trans("脆弱", languageMode), trans("攻撃から受けるダメージが50%増加。", languageMode));}}>
@@ -822,11 +862,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             })}
         </div>
 
-        {/* Player Area (Bottom Left) */}
+        {/* Player Area */}
         <div className="flex items-end pl-2 pb-2 shrink-0 mt-auto">
             <div className="flex items-end relative">
                 
-                {/* Player Sprite */}
                 <div className={`w-20 h-20 md:w-24 md:h-24 relative transition-all duration-150 ease-out mr-2 ${getActionClass()}`} onClick={() => showInfo(trans("自分", languageMode), trans("あなたのキャラクター。\nHPが0になるとゲームオーバー。", languageMode))}>
                      <img 
                         src={player.imageData} 
@@ -834,11 +873,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         className="w-full h-full pixel-art" 
                         style={{ imageRendering: 'pixelated' }}
                      />
-                     {/* Damage Popup - Relative to Player Sprite */}
                      <FloatingTextOverlay data={player.floatingText} languageMode={languageMode} />
+                     <VFXOverlay effects={activeEffects} targetId="player" />
                 </div>
                 
-                {/* Partner Sprite (If dual mode) */}
                 {player.partner && player.partner.currentHp > 0 && (
                     <div className={`w-16 h-16 md:w-20 md:h-20 relative transition-all duration-150 ease-out mr-2 -ml-6 z-0 ${getActionClass()}`} onClick={() => showInfo(trans(player.partner!.name, languageMode), trans("パートナー。\n倒れるとデッキが1枚しか使えなくなります。", languageMode))}>
                          <img 
@@ -849,14 +887,12 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                          />
                          <FloatingTextOverlay data={player.partner.floatingText} languageMode={languageMode} offset="-top-2 -right-2" />
                          
-                         {/* Mini HP Bar for Partner */}
                          <div className="absolute -bottom-2 left-0 w-full h-1 bg-gray-700 rounded-full border border-gray-500 overflow-hidden">
                              <div className="h-full bg-green-500 transition-all duration-500" style={{width: `${(player.partner.currentHp / player.partner.maxHp) * 100}%`}}></div>
                          </div>
                     </div>
                 )}
 
-                {/* Player Stats Panel */}
                 <div className={`bg-black/80 border-2 border-white p-1 text-white text-xs w-36 md:w-40 mb-2 shadow-lg rounded z-20 ${tutorialStep === 1 ? 'ring-4 ring-green-500 ring-offset-4 ring-offset-transparent animate-pulse' : ''}`}>
                     <div className="flex items-center justify-between mb-1">
                         <span className="text-red-400 flex items-center font-bold" onClick={() => showInfo("HP", trans("ヒットポイント。0になると死亡する。", languageMode))}><Heart size={12} className="mr-1"/> {player.currentHp}/{player.maxHp}</span>
@@ -866,7 +902,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         <div className="h-full bg-green-500 transition-all duration-500" style={{width: `${playerHpPercent}%`}}></div>
                     </div>
                     
-                    {/* Relics/Potions Compact Row (Click to Expand) */}
                     <div className="flex items-center justify-between border-t border-gray-700 pt-1" onClick={() => setShowRelicList(true)}>
                         <div className="flex -space-x-1 overflow-hidden w-20 cursor-pointer hover:bg-white/10 rounded px-1 transition-colors">
                             {displayedRelics.slice(0, 5).map(r => {
@@ -908,7 +943,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         </div>
                     </div>
 
-                    {/* Power Icons */}
                     <div className="flex flex-wrap gap-0.5 mt-1">
                         {player.strength !== 0 && (
                             <span 
@@ -933,10 +967,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         </div>
       </div>
 
-      {/* 3. Control Bar (Energy, Deck, End Turn) */}
+      {/* 3. Control Bar */}
       <div className="h-12 bg-gray-800 border-t-2 border-white flex items-center justify-between px-2 shrink-0 z-20 shadow-lg">
-          
-          {/* Energy */}
           <div className="flex items-center">
               <div className={`bg-black border-2 border-yellow-500 text-yellow-400 px-2 py-0.5 rounded-full flex items-center shadow-lg mr-2 ${tutorialStep === 3 ? 'ring-4 ring-yellow-400 ring-offset-2 ring-offset-transparent animate-pulse' : ''}`} onClick={() => showInfo(trans("エネルギー", languageMode), trans("カードを使用するために必要。ターン毎に回復する。", languageMode))}>
                   <Zap size={14} className="mr-1 fill-yellow-400"/>
@@ -948,7 +980,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
               </div>
           </div>
           
-          {/* Dual Action Execution Button */}
           {isDualMode && (
               <button 
                   onClick={executeDualTurn}
@@ -962,7 +993,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
               </button>
           )}
 
-          {/* End Turn */}
           <button 
               onClick={!actingEnemyId && !selectionState.active ? onEndTurn : undefined}
               disabled={!!actingEnemyId || selectionState.active}
@@ -976,33 +1006,29 @@ const BattleScene: React.FC<BattleSceneProps> = ({
           </button>
       </div>
 
-      {/* 4. Hand Area (Horizontal Scroll + Fan Animation) */}
+      {/* 4. Hand Area */}
       <div className={`h-52 md:h-64 bg-gray-900 border-t border-gray-700 relative z-10 ${selectionState.active ? 'bg-blue-900/20' : ''}`}>
         <div className="group/hand w-full h-full overflow-x-auto px-10 flex items-end justify-start md:justify-center pb-8 custom-scrollbar touch-pan-x" style={{ overflowY: 'visible' }}>
             {player.hand.map((card, i) => {
-                // Check for special disabling conditions
                 const isClashDisabled = card.playCondition === 'HAND_ONLY_ATTACKS' && player.hand.some(c => c.type !== CardType.ATTACK && c.id !== card.id);
                 const isGrandFinaleDisabled = card.playCondition === 'DRAW_PILE_EMPTY' && player.drawPile.length > 0;
                 const isChokerDisabled = player.relics.some(r => r.id === 'VELVET_CHOKER') && player.cardsPlayedThisTurn >= 6;
                 const isNormalityDisabled = player.hand.some(c => c.name === '退屈' || c.name === 'NORMALITY') && player.cardsPlayedThisTurn >= 3;
                 
-                // Dual Mode Logic
                 const isSelectedDual = isDualMode && selectedCardIds.includes(card.id);
                 const isSelectedActive = selectionState.active;
                 
                 const specialDisabled = isClashDisabled || isGrandFinaleDisabled || isChokerDisabled || isNormalityDisabled;
                 
-                // Visual Cost Override for Corruption
                 const displayCard = { ...card };
                 if (player.powers['CORRUPTION'] && card.type === CardType.SKILL) {
                     displayCard.cost = 0;
                 }
 
-                // Fan Effect Calculation
                 const mid = (player.hand.length - 1) / 2;
                 const dist = i - mid;
-                const rotation = dist * 2.5; // Slight fan angle
-                const translateY = Math.abs(dist) * 4; // Curve down slightly at edges
+                const rotation = dist * 2.5; 
+                const translateY = Math.abs(dist) * 4; 
 
                 return (
                     <div 
@@ -1018,7 +1044,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             zIndex: isSelectedActive || isSelectedDual ? 40 : 10 + i
                         }}
                     >
-                        {/* Selection Indicator for Dual Mode */}
                         {isDualMode && isSelectedDual && (
                              <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-white shadow-lg z-30 animate-bounce">
                                  {selectedCardIds.indexOf(card.id) === 0 ? "1" : "2"}
@@ -1045,7 +1070,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     selectionState.active 
                                     ? false 
                                     : (isDualMode 
-                                        ? (!!actingEnemyId || card.unplayable || specialDisabled) // Allow selecting even if energy low, validate at execute
+                                        ? (!!actingEnemyId || card.unplayable || specialDisabled) 
                                         : (player.currentEnergy < displayCard.cost || !!actingEnemyId || card.unplayable || specialDisabled)
                                       )
                                 }
@@ -1055,12 +1080,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     </div>
                 );
             })}
-            {/* Spacer for right side of scroll */}
             <div className="w-20 shrink-0"></div>
         </div>
       </div>
 
-      {/* Deck View Modal */}
       {showDeck && (
         <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setShowDeck(false)}>
             <div className="bg-gray-800 border-4 border-white w-full max-w-md h-[80vh] flex flex-col relative shadow-2xl" onClick={e => e.stopPropagation()}>
@@ -1074,7 +1097,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 </div>
                 <div className="p-4 overflow-y-auto flex-grow bg-gray-900/90">
                     <div className="grid grid-cols-3 gap-2 justify-items-center">
-                        {/* Should sort deck if needed, but props passed raw */}
                         {[...player.deck].sort((a, b) => a.type.localeCompare(b.type)).map((card) => (
                             <div key={card.id} className="scale-75 origin-top-left w-24 h-36">
                                 <Card card={card} onClick={() => {}} disabled={false} languageMode={languageMode} onInspect={onInspect}/>
