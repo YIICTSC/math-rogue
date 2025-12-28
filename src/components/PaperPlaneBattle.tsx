@@ -268,7 +268,7 @@ const VACATION_EVENTS_DB: Omit<VacationEvent, 'id'>[] = [
     { type: 'PARTS', name: '軍需物資', description: '高性能なパーツを獲得する。', cost: 4, tier: 3 },
     { type: 'COIN', name: 'アルバイト', description: 'スターコインを50獲得。', cost: 1, tier: 1 },
     { type: 'COIN', name: '臨時ボーナス', description: 'スターコインを150獲得。', cost: 2, tier: 2 },
-    { type: 'TREASURE', name: '謎の宝箱', description: '永続的な攻撃力ボーナスを得る。', cost: 3, tier: 3 },
+    { type: 'TREASURE', name: '謎の宝箱', description: '永続的な攻撃力ボーるを得る。', cost: 3, tier: 3 },
     { type: 'UNKNOWN', name: '謎のイベント', description: '何が起こるかわからない...', cost: 2, tier: 2 },
     { type: 'SHOP', name: '闇市', description: '高品質なパーツを裏ルートで入手する。', cost: 0, coinCost: 150, tier: 3 },
     { type: 'ENHANCE', name: '特別改造', description: '船体を強化。最大HP+20。', cost: 0, coinCost: 100, tier: 2 },
@@ -329,6 +329,96 @@ const PART_TEMPLATES: Omit<ShipPart, 'id'>[] = [
     { type: 'ENGINE', name: '無限の心臓', description: '永久機関。ランクアップ効果付き。', slots: [{req:'ORANGE', value:null}, {req:'BLUE', value:null}], multiplier: 2.0, basePower: 5, hp: 40, specialEffect: 'RANK_UP' },
 ];
 
+// --- WIREFRAME COMPONENT ---
+const WireframePlane: React.FC<{ color: string, facing: 1 | -1, yOffset: number, parts: ShipPart[] }> = ({ color, facing, yOffset, parts }) => {
+    // yOffset 0 -> -96px, 1 -> 0px, 2 -> 96px (assuming 96px row height)
+    const translateY = (yOffset - 1) * 96;
+    const strokeColor = color === 'cyan' ? '#22d3ee' : '#f87171';
+    
+    // Attachment positions for components based on 3x3 slots
+    // Columns: [Tail(0), Mid(1), Nose(2)]
+    // Rows: [Top Wing(0-2), Fuselage(3-5), Bottom Wing(6-8)]
+    // Map indices to SVG coordinates (Facing Right)
+    const attachments = [
+        { x: 30, y: 30 }, { x: 50, y: 35 }, { x: 100, y: 45 },  // Top Wing (Indices 0, 1, 2)
+        { x: 40, y: 60 }, { x: 90, y: 60 }, { x: 160, y: 60 },  // Body (Indices 3, 4, 5)
+        { x: 30, y: 90 }, { x: 50, y: 85 }, { x: 100, y: 75 },  // Bot Wing (Indices 6, 7, 8)
+    ];
+
+    const renderPartVisual = (part: ShipPart, pos: { x: number, y: number }) => {
+        if (part.type === 'EMPTY') return null;
+        
+        const isLoaded = part.slots.some(s => s.value !== null);
+        const pStroke = isLoaded ? '#ffffff' : strokeColor;
+        const pWidth = isLoaded ? 2 : 1;
+
+        switch (part.type) {
+            case 'CANNON':
+                return (
+                    <g transform={`translate(${pos.x}, ${pos.y})`}>
+                        <rect x="0" y="-3" width="20" height="6" fill="none" stroke={pStroke} strokeWidth={pWidth} />
+                        <line x1="20" y1="-2" x2="20" y2="2" stroke={pStroke} />
+                    </g>
+                );
+            case 'MISSILE':
+                return (
+                    <g transform={`translate(${pos.x}, ${pos.y})`}>
+                        <path d="M0 -4 L15 -4 L20 0 L15 4 L0 4 Z" fill="none" stroke={pStroke} strokeWidth={pWidth} />
+                        <line x1="3" y1="-4" x2="0" y2="-7" stroke={pStroke} />
+                        <line x1="3" y1="4" x2="0" y2="7" stroke={pStroke} />
+                    </g>
+                );
+            case 'SHIELD':
+                return (
+                    <g transform={`translate(${pos.x}, ${pos.y})`}>
+                        <path d="M0 -10 Q10 0 0 10" fill="none" stroke={pStroke} strokeWidth={pWidth + 1} />
+                    </g>
+                );
+            case 'ENGINE':
+                return (
+                    <g transform={`translate(${pos.x}, ${pos.y})`}>
+                        <rect x="-10" y="-5" width="10" height="10" fill="none" stroke={pStroke} strokeWidth={pWidth} />
+                        {isLoaded && <path d="M-10 0 L-25 -5 L-20 0 L-25 5 Z" fill="none" stroke="#fbbf24" strokeWidth="1" />}
+                    </g>
+                );
+            case 'AMPLIFIER':
+                return (
+                    <g transform={`translate(${pos.x}, ${pos.y})`}>
+                        <circle cx="0" cy="0" r="6" fill="none" stroke={pStroke} strokeWidth={pWidth} />
+                        <line x1="-8" y1="0" x2="8" y2="0" stroke={pStroke} />
+                        <line x1="0" y1="-8" x2="0" y2="8" stroke={pStroke} />
+                    </g>
+                );
+            default:
+                return null;
+        }
+    };
+
+    return (
+        <div 
+            className="absolute top-1/2 -translate-y-1/2 transition-transform duration-700 ease-in-out opacity-20 pointer-events-none"
+            style={{ 
+                left: facing === 1 ? '10%' : 'auto', 
+                right: facing === -1 ? '10%' : 'auto',
+                transform: `translateY(calc(-50% + ${translateY}px)) scaleX(${facing})`,
+                filter: `drop-shadow(0 0 10px ${strokeColor})`
+            }}
+        >
+            <svg width="240" height="120" viewBox="0 0 240 120">
+                {/* Main Body Wireframe */}
+                <path d="M220 60 L20 10 L60 60 L20 110 Z" fill="none" stroke={strokeColor} strokeWidth="2" />
+                <path d="M220 60 L60 60 L80 80 L220 60 Z" fill="none" stroke={strokeColor} strokeWidth="1" />
+                <path d="M220 60 L80 40 L60 60" fill="none" stroke={strokeColor} strokeWidth="1" />
+                <line x1="20" y1="10" x2="60" y2="60" stroke={strokeColor} strokeWidth="2" />
+                <line x1="20" y1="110" x2="60" y2="60" stroke={strokeColor} strokeWidth="2" />
+                
+                {/* Armaments */}
+                {parts.map((p, idx) => renderPartVisual(p, attachments[idx]))}
+            </svg>
+        </div>
+    );
+};
+
 // --- HELPERS ---
 
 const getColorRank = (color: EnergyColor | 'ANY'): number => {
@@ -382,7 +472,7 @@ const PoolView: React.FC<{ pool: PoolState, onClose: () => void }> = ({ pool, on
     return (
         <div className="absolute inset-0 bg-black/90 z-50 flex items-center justify-center p-8" onClick={onClose}>
             <div className="bg-slate-800 p-6 rounded-lg max-w-lg w-full border border-slate-600 shadow-2xl relative" onClick={e => e.stopPropagation()}>
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
+                <button onClose={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
                 <h3 className="text-xl font-bold mb-6 flex items-center text-white"><Layers className="mr-2"/> Energy Inventory</h3>
                 
                 <div className="mb-6">
@@ -2321,7 +2411,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 <button onClick={() => { setPhase('SETUP'); initPilotRoll(); }} className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-8 rounded shadow-lg animate-pulse flex items-center">
                     <Play className="mr-2"/> 出撃準備
                 </button>
-                <button onClick={onBack} className="mt-4 text-gray-500 hover:text-white underline text-xs">戻る</button>
+                <button onBack={onBack} className="mt-4 text-gray-500 hover:text-white underline text-xs">戻る</button>
             </div>
         );
     }
@@ -2697,6 +2787,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
             {/* Battle Grid */}
             <div className="flex-1 relative bg-[#1a1a24] overflow-y-auto custom-scrollbar">
+                {/* Wireframe Backgrounds */}
+                <WireframePlane color="cyan" facing={1} yOffset={player.yOffset} parts={player.parts} />
+                <WireframePlane color="red" facing={-1} yOffset={enemy.yOffset} parts={enemy.parts} />
+                
                 {/* Clash Overlay */}
                 <ClashOverlay clashState={clashState} />
 
@@ -2798,7 +2892,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     >
                                         <Settings className="mr-2"/> 機体選択へ
                                     </button>
-                                    <button onClick={onBack} className="bg-cyan-600 px-8 py-3 rounded text-xl font-bold border-2 border-cyan-400">タイトルへ戻る</button>
+                                    <button onBack={onBack} className="bg-cyan-600 px-8 py-3 rounded text-xl font-bold border-2 border-cyan-400">タイトルへ戻る</button>
                                 </div>
                             </>
                         )}
@@ -2814,7 +2908,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     >
                                         <Settings className="mr-2"/> 機体選択へ
                                     </button>
-                                    <button onClick={onBack} className="mt-2 bg-gray-600 px-8 py-3 rounded text-xl font-bold">タイトルへ戻る</button>
+                                    <button onBack={onBack} className="mt-2 bg-gray-600 px-8 py-3 rounded text-xl font-bold">タイトルへ戻る</button>
                                 </div>
                             </>
                         )}

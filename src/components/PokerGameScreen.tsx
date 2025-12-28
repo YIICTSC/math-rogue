@@ -44,7 +44,7 @@ const HAND_EXAMPLES: Record<string, { desc: string, cards: {r: string, s: PokerS
         cards: [{r:'Q',s:'SPADE'}, {r:'Q',s:'HEART'}, {r:'Q',s:'CLUB'}, {r:'9',s:'DIAMOND'}, {r:'9',s:'SPADE'}]
     },
     'FOUR_OF_A_KIND': {
-        desc: '同じ数字のカードが4枚ある状態。',
+        desc: '同じ数字のカードが4枚ある状態。デッキ操作が必要。',
         cards: [{r:'3',s:'SPADE'}, {r:'3',s:'HEART'}, {r:'3',s:'CLUB'}, {r:'3',s:'DIAMOND'}, {r:'K',s:'SPADE'}]
     },
     'STRAIGHT_FLUSH': {
@@ -82,14 +82,14 @@ const getBlindConfig = (ante: number, index: number): PokerBlind => {
     let reward = 3 + ante;
     
     if (index === 0) {
-        name = "Pop Quiz (小テスト)";
+        name = "小テスト (Small Blind)";
         goal = Math.floor(goal * 1.0);
     } else if (index === 1) {
-        name = "Midterm (中間テスト)";
+        name = "中間テスト (Big Blind)";
         goal = Math.floor(goal * 1.5);
         reward += 1;
     } else {
-        name = "Final Exam (期末テスト)";
+        name = "期末テスト (Boss Blind)";
         goal = Math.floor(goal * 2.5); // Boss is hard
         reward += 2;
     }
@@ -99,15 +99,15 @@ const getBlindConfig = (ante: number, index: number): PokerBlind => {
     if (index === 2) {
         const abilities = [
             { id: 'THE_WALL', name: 'PTA会長', desc: 'スコア目標が超高い' },
-            { id: 'THE_NEEDLE', name: '一発勝負', desc: '手札を1回しか出せない' },
-            { id: 'THE_HOOK', name: '没収', desc: '手札を出すたびランダムに2枚捨てられる' },
+            { id: 'THE_NEEDLE', name: '一発勝負', desc: '役出しを1回しかできない' },
+            { id: 'THE_HOOK', name: '没収', desc: '役を出すたびランダムに2枚捨てられる' },
             { id: 'THE_EYE', name: '厳しい監視', desc: '同じ役を繰り返せない' },
             { id: 'THE_MANACLE', name: '校則違反', desc: '手札枚数制限 -1' }
         ];
         // Cycle boss abilities
         const ability = abilities[(ante - 1) % abilities.length];
         bossAbility = ability.id;
-        name = `${ability.name} (期末テスト)`;
+        name = `${ability.name}`;
         desc = ability.desc;
         if (ability.id === 'THE_WALL') goal *= 2;
     }
@@ -537,6 +537,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   const handlePointerDown = (e: React.PointerEvent, id: string) => { e.preventDefault(); isDraggingRef.current = true; lastProcessedCardIdRef.current = id; toggleSelect(id); };
   const handlePointerMove = (e: React.PointerEvent) => {
       if (!isDraggingRef.current) return;
+      
+      // If we move, it's a swipe, so cancel any pending long press inspection
+      handleTouchEnd();
+
       e.preventDefault();
       const element = document.elementFromPoint(e.clientX, e.clientY);
       const cardContainer = element?.closest('[data-card-id]');
@@ -1063,7 +1067,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                         <div className="flex flex-col items-center mb-4">
                             <div className="w-24 h-24 mb-4"><PixelSprite seed={(item as PokerPack).icon} name={(item as PokerPack).icon} className="w-full h-full"/></div>
                             <h3 className="text-2xl font-bold text-yellow-400 mb-2">{(item as PokerPack).name}</h3>
-                            <div className="text-sm font-bold text-white bg-orange-700 px-3 py-1 rounded-full">PACK</div>
+                            <div className="text-sm font-bold text-white bg-orange-700 px-3 py-1 rounded-full">パック</div>
                         </div>
                         <p className="text-lg text-gray-300 text-center leading-relaxed">{(item as PokerPack).description}</p>
                         <div className="mt-6 text-center text-yellow-500 font-bold text-xl">${getPrice((item as PokerPack).price)}</div> 
@@ -1082,7 +1086,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                                 </div>
                             )}
 
-                            {isVoucher && <div className="text-sm font-bold text-white bg-slate-700 px-3 py-1 rounded-full">VOUCHER</div>}
+                            {isVoucher && <div className="text-sm font-bold text-white bg-slate-700 px-3 py-1 rounded-full">バウチャー</div>}
                             {!isVoucher && <div className="text-sm font-bold text-white bg-slate-700 px-3 py-1 rounded-full">{'rarity' in item ? (item as PokerSupporter).rarity : (item as PokerConsumable).type}</div>}
                         </div>
                         <p className="text-lg text-gray-300 text-center leading-relaxed mb-4">{(item as any).description}</p>
@@ -1107,13 +1111,13 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                               onClick={() => { useConsumable(consumableItem, index); setInspectedItem(null); }}
                               className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded border-2 border-blue-400 shadow-lg flex items-center justify-center animate-pulse"
                           >
-                              <Sparkles size={16} className="mr-1" /> USE
+                              <Sparkles size={16} className="mr-1" /> 使う
                           </button>
                           <button 
                               onClick={sellItem}
                               className="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded border-2 border-red-400 shadow-lg flex items-center justify-center"
                           >
-                              <DollarSign size={16} className="mr-1" /> SELL (${Math.max(1, Math.floor((item as any).price / 2))})
+                              <DollarSign size={16} className="mr-1" /> 売る (${Math.max(1, Math.floor((item as any).price / 2))})
                           </button>
                       </div>
                   )}
@@ -1123,7 +1127,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                         onClick={sellItem}
                         className="mt-6 w-full bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded border-2 border-red-400 shadow-lg flex items-center justify-center"
                       >
-                          <DollarSign size={16} className="mr-1" /> SELL (${Math.max(1, Math.floor((item as any).price / 2))})
+                          <DollarSign size={16} className="mr-1" /> 売る (${Math.max(1, Math.floor((item as any).price / 2))})
                       </button>
                   )}
               </div>
@@ -1144,21 +1148,21 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       return (
           <div className="flex flex-col h-full w-full bg-slate-900 text-white p-8 items-center justify-center relative font-mono text-center">
               <Trophy size={80} className="text-yellow-400 mb-6 animate-bounce" />
-              <h1 className="text-5xl font-black text-white mb-4">GRADUATION!</h1>
-              <p className="text-xl text-gray-300 mb-12">You have conquered the 8th Grade (Ante 8).</p>
+              <h1 className="text-5xl font-black text-white mb-4">卒業おめでとう！</h1>
+              <p className="text-xl text-gray-300 mb-12">第8学年（Ante 8）を突破しました。</p>
               
               <div className="flex flex-col gap-4 w-full max-w-md">
                   <button 
                     onClick={proceedToEndless}
                     className="bg-purple-600 hover:bg-purple-500 text-white text-xl font-bold py-4 px-8 rounded-lg shadow-lg border-2 border-purple-300 flex items-center justify-center"
                   >
-                      <RotateCcw className="mr-3" /> Endless Mode
+                      <RotateCcw className="mr-3" /> エンドレスモード
                   </button>
                   <button 
                     onClick={finishRunVictory}
                     className="bg-slate-700 hover:bg-slate-600 text-gray-200 text-lg font-bold py-4 px-8 rounded-lg flex items-center justify-center"
                   >
-                      <ArrowLeft className="mr-3" /> Return to Menu
+                      <ArrowLeft className="mr-3" /> メニューへ戻る
                   </button>
               </div>
           </div>
@@ -1170,21 +1174,21 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       return (
           <div className="flex flex-col h-full w-full bg-slate-900 text-white p-8 items-center justify-center relative font-mono">
               <div className="absolute top-4 left-4">
-                  <button onClick={handleQuit} className="text-gray-400 hover:text-white flex items-center"><ArrowLeft className="mr-2"/> Quit</button>
+                  <button onClick={handleQuit} className="text-gray-400 hover:text-white flex items-center"><ArrowLeft className="mr-2"/> やめる</button>
               </div>
               <div className="text-center animate-in zoom-in duration-300">
                   <div className="text-2xl text-yellow-500 mb-2 font-bold">ANTE {runState.ante} / 8</div>
-                  {runState.isEndless && <div className="text-purple-400 text-sm font-bold animate-pulse mb-2">ENDLESS MODE</div>}
+                  {runState.isEndless && <div className="text-purple-400 text-sm font-bold animate-pulse mb-2">エンドレスモード</div>}
                   <div className="text-6xl font-black mb-4 text-white tracking-tighter">{config.name}</div>
                   <div className="bg-slate-800 p-6 rounded-xl border-4 border-slate-600 mb-8 min-w-[300px]">
-                      <div className="text-gray-400 mb-2 text-sm uppercase tracking-widest">Score Goal</div>
+                      <div className="text-gray-400 mb-2 text-sm uppercase tracking-widest">目標スコア</div>
                       <div className="text-5xl font-bold text-red-500 mb-4">{config.scoreGoal.toLocaleString()}</div>
-                      <div className="text-gray-400 mb-2 text-sm uppercase tracking-widest">Reward</div>
+                      <div className="text-gray-400 mb-2 text-sm uppercase tracking-widest">報酬</div>
                       <div className="text-3xl font-bold text-yellow-400 mb-2">${config.rewardMoney}</div>
                       {config.description && <div className="text-purple-300 text-sm mt-4 border-t border-slate-600 pt-2">{config.description}</div>}
                   </div>
                   <button onClick={startBlind} className="bg-red-600 hover:bg-red-500 text-white text-2xl font-bold py-4 px-12 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.5)] animate-pulse flex items-center justify-center mx-auto">
-                      <Play className="mr-2 fill-current"/> START
+                      <Play className="mr-2 fill-current"/> 開始
                   </button>
               </div>
           </div>
@@ -1202,7 +1206,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                   {renderInspectionModal()}
                   
                   <div className="z-10 flex flex-col items-center w-full max-w-4xl">
-                      <h2 className="text-3xl font-bold mb-8 text-yellow-400 animate-pulse">{isPackOpened ? "Choose One!" : "Open Pack!"}</h2>
+                      <h2 className="text-3xl font-bold mb-8 text-yellow-400 animate-pulse">{isPackOpened ? "1つ選んで！" : "パック開封！"}</h2>
                       
                       {!isPackOpened ? (
                           <div className="cursor-pointer hover:scale-110 transition-transform animate-bounce relative" onClick={revealPack}>
@@ -1226,13 +1230,13 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                                       <div key={idx} className={`relative cursor-pointer transition-transform hover:-translate-y-4 duration-300 ${disabled ? 'opacity-50 grayscale cursor-not-allowed' : ''}`} onClick={() => !disabled && selectPackItem(item)} onContextMenu={(e) => handleContextMenu(e, item, type, false)} onTouchStart={() => handleTouchStart(item, type, false)} onTouchEnd={handleTouchEnd}>
                                           {isCard && <div className="w-32 h-48 bg-white text-black rounded-lg border-4 border-slate-300 shadow-xl flex flex-col items-center justify-between p-2"><div className={`text-2xl font-bold w-full text-left ${['HEART', 'DIAMOND'].includes((item as PokerCard).suit) ? 'text-red-600' : 'text-black'}`}>{getRankDisplay((item as PokerCard).rank)}</div><div className="scale-150">{getSuitIcon((item as PokerCard).suit, (item as PokerCard).enhancement === 'WILD')}</div><div className="text-xs text-center font-bold text-gray-500">{(item as PokerCard).enhancement || ''}</div><div className={`text-2xl font-bold w-full text-right rotate-180 ${['HEART', 'DIAMOND'].includes((item as PokerCard).suit) ? 'text-red-600' : 'text-black'}`}>{getRankDisplay((item as PokerCard).rank)}</div></div>}
                                           {!isCard && <div className="w-32 h-48 bg-slate-800 text-white rounded-lg border-4 border-blue-400 shadow-xl flex flex-col items-center justify-center p-2 text-center"><PixelSprite seed={(item as any).icon} name={(item as any).icon} className="w-16 h-16 mb-2"/><div className="font-bold text-sm">{(item as any).name}</div><div className="text-[10px] text-gray-400 mt-2 leading-tight">{(item as any).description}</div></div>}
-                                          <button className={`absolute -bottom-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold shadow-lg ${disabled ? 'bg-gray-600 text-gray-300' : 'bg-blue-600 text-white animate-pulse'}`}>{disabled ? 'FULL' : 'SELECT'}</button>
+                                          <button className={`absolute -bottom-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold shadow-lg ${disabled ? 'bg-gray-600 text-gray-300' : 'bg-blue-600 text-white animate-pulse'}`}>{disabled ? '空きなし' : '選択'}</button>
                                       </div>
                                   );
                               })}
                           </div>
                       )}
-                      <button onClick={() => { setPhase('SHOP'); setCurrentPack(null); }} className="mt-12 text-gray-400 hover:text-white border-b border-transparent hover:border-white transition-colors">Skip</button>
+                      <button onClick={() => { setPhase('SHOP'); setCurrentPack(null); }} className="mt-12 text-gray-400 hover:text-white border-b border-transparent hover:border-white transition-colors">スキップ</button>
                   </div>
               </div>
           );
@@ -1251,42 +1255,42 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
               {showRoundResult && roundResult && (
                   <div className="absolute inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={closeResultModal}>
                       <div className="bg-slate-800 border-4 border-yellow-500 rounded-lg p-6 w-full max-w-sm shadow-2xl relative animate-in zoom-in duration-300" onClick={e => e.stopPropagation()}>
-                          <h2 className="text-3xl font-black text-white text-center mb-6 border-b border-slate-600 pb-2">ROUND CLEAR</h2>
+                          <h2 className="text-3xl font-black text-white text-center mb-6 border-b border-slate-600 pb-2">ラウンドクリア</h2>
                           
                           <div className="space-y-3 font-mono text-sm mb-6">
                               <div className="flex justify-between items-center text-gray-300">
-                                  <span>Blind Reward</span>
+                                  <span>ブラインド報酬</span>
                                   <span className="font-bold text-yellow-400">${roundResult.blind}</span>
                               </div>
                               <div className="flex justify-between items-center text-gray-300">
-                                  <span>Interest</span>
+                                  <span>利子</span>
                                   <span className="font-bold text-yellow-400">${roundResult.interest}</span>
                               </div>
                               <div className="flex justify-between items-center text-gray-300">
-                                  <span>Hands Left</span>
+                                  <span>残りハンド数ボーナス</span>
                                   <span className="font-bold text-yellow-400">${roundResult.hands}</span>
                               </div>
                               <div className="flex justify-between items-center text-cyan-300 border-t border-slate-600 pt-2">
-                                  <span className="flex items-center"><Calculator className="mr-2" size={14}/> Math Bonus</span>
+                                  <span className="flex items-center"><Calculator className="mr-2" size={14}/> 計算ボーナス</span>
                                   <span className="font-bold">+${roundResult.math}</span>
                               </div>
                               <div className="flex justify-between items-center text-xl font-black text-white bg-slate-700 p-2 rounded mt-2">
-                                  <span>TOTAL</span>
+                                  <span>合計獲得</span>
                                   <span className="text-yellow-400">${roundResult.blind + roundResult.interest + roundResult.hands + roundResult.math}</span>
                               </div>
                           </div>
                           
                           <button onClick={closeResultModal} className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg flex items-center justify-center shadow-lg transition-colors">
-                              <Check className="mr-2"/> Go to Shop
+                              <Check className="mr-2"/> 購買部へ
                           </button>
                       </div>
                   </div>
               )}
 
               <div className="flex justify-between items-center mb-4 bg-slate-800 p-4 rounded-lg shadow-lg shrink-0">
-                  <h2 className="text-2xl font-bold flex items-center"><ShoppingBag className="mr-2 text-yellow-500"/> School Store</h2>
+                  <h2 className="text-2xl font-bold flex items-center"><ShoppingBag className="mr-2 text-yellow-500"/> 学校の購買部</h2>
                   <div className="text-2xl font-bold text-yellow-400">${runState.money}</div>
-                  <button onClick={nextBlind} className="bg-green-600 hover:bg-green-500 px-6 py-2 rounded font-bold flex items-center shadow-lg transform transition active:translate-y-1">Next Round <ArrowLeft className="rotate-180 inline ml-1"/></button>
+                  <button onClick={nextBlind} className="bg-green-600 hover:bg-green-500 px-6 py-2 rounded font-bold flex items-center shadow-lg transform transition active:translate-y-1">次へ進む <ArrowLeft className="rotate-180 inline ml-1"/></button>
               </div>
               
               <div className="flex-grow flex flex-col gap-4 overflow-hidden">
@@ -1296,7 +1300,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                       <div className="flex gap-2 h-16 md:h-20 items-stretch">
                           {/* Supporters */}
                           <div className="flex-1 bg-black/20 rounded border border-slate-700 flex flex-col px-2 py-1 min-w-0">
-                              <div className="text-[9px] text-blue-300 font-bold mb-0.5 flex items-center"><span className="w-2 h-2 bg-blue-500 rounded-full mr-1 inline-block"></span>SUPPORTERS ({runState.supporters.length}/5)</div>
+                              <div className="text-[9px] text-blue-300 font-bold mb-0.5 flex items-center"><span className="w-2 h-2 bg-blue-500 rounded-full mr-1 inline-block"></span>サポーター ({runState.supporters.length}/5)</div>
                               <div className="flex-1 flex items-center gap-1 overflow-x-auto custom-scrollbar">
                                   {runState.supporters.map((s, i) => (
                                       <div key={i} className={`bg-slate-800 p-0.5 rounded flex-shrink-0 border cursor-pointer hover:bg-slate-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center relative group ${s.edition === 'POLYCHROME' ? 'border-yellow-400 animate-pulse' : s.edition === 'HOLOGRAPHIC' ? 'border-red-400' : s.edition === 'FOIL' ? 'border-blue-400' : 'border-slate-600'}`} onClick={() => setInspectedItem({ item: s, type: 'SUPPORTER', isOwned: true, index: i })} onContextMenu={(e) => handleContextMenu(e, s, 'SUPPORTER', true, i)} onTouchStart={() => handleTouchStart(s, 'SUPPORTER', true, i)} onTouchEnd={handleTouchEnd}>
@@ -1311,7 +1315,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                           
                           {/* Consumables */}
                           <div className="w-24 md:w-32 bg-black/20 rounded border border-slate-700 flex flex-col px-2 py-1 shrink-0">
-                              <div className="text-[9px] text-purple-300 font-bold mb-0.5 flex items-center"><span className="w-2 h-2 bg-purple-500 rounded-full mr-1 inline-block"></span>CARDS ({runState.consumables.length}/2)</div>
+                              <div className="text-[9px] text-purple-300 font-bold mb-0.5 flex items-center"><span className="w-2 h-2 bg-purple-500 rounded-full mr-1 inline-block"></span>消耗品 ({runState.consumables.length}/2)</div>
                               <div className="flex-1 flex items-center gap-1 justify-center">
                                   {runState.consumables.map((c, i) => (
                                       <div key={i} className="bg-slate-800 p-0.5 rounded flex-shrink-0 border border-slate-600 cursor-pointer hover:bg-slate-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center relative group" onClick={() => setInspectedItem({ item: c, type: 'CONSUMABLE', isOwned: true, index: i })} onContextMenu={(e) => handleContextMenu(e, c, 'CONSUMABLE', true, i)} onTouchStart={() => handleTouchStart(c, 'CONSUMABLE', true, i)} onTouchEnd={handleTouchEnd}>
@@ -1355,7 +1359,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                                     onTouchStart={() => handleTouchStart(voucher, 'VOUCHER', false)}
                                     onTouchEnd={handleTouchEnd}
                                   >
-                                      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest w-full border-b border-gray-700 pb-1">Voucher</div>
+                                      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest w-full border-b border-gray-700 pb-1">バウチャー</div>
                                       <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center border-2 border-slate-700 mt-2">
                                           <PixelSprite seed={voucher.icon} name={voucher.icon} className="w-8 h-8"/>
                                       </div>
@@ -1365,7 +1369,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                                   </div>
                               ) : (
                                   <div className="bg-slate-900/50 border-2 border-slate-700 border-dashed p-4 rounded-lg flex flex-col items-center justify-center h-full text-gray-600 text-xs italic min-h-[160px]">
-                                      Sold Out
+                                      売り切れ
                                   </div>
                               )}
                           </div>
@@ -1373,7 +1377,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                           {/* Packs */}
                           {shopPacks.map((item) => (
                               <div key={item.id} className="bg-slate-700 p-2 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg justify-between min-h-[160px]" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'PACK', false)} onTouchStart={() => handleTouchStart(item, 'PACK', false)} onTouchEnd={handleTouchEnd}>
-                                  <div className="absolute top-1 left-1 text-[8px] font-bold text-orange-300 bg-orange-900/50 px-1.5 py-0.5 rounded">PACK</div>
+                                  <div className="absolute top-1 left-1 text-[8px] font-bold text-orange-300 bg-orange-900/50 px-1.5 py-0.5 rounded">パック</div>
                                   <div className="w-12 h-12 mt-4"><PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/></div>
                                   <div className="font-bold text-xs">{item.name}</div>
                                   <div className="text-[9px] text-gray-400 h-8 overflow-hidden leading-tight">{item.description}</div>
@@ -1384,7 +1388,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                           {/* Supporters */}
                           {shopSupporters.map((item) => (
                               <div key={item.id} className="bg-slate-700 p-2 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg justify-between min-h-[160px]" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'SUPPORTER', false)} onTouchStart={() => handleTouchStart(item, 'SUPPORTER', false)} onTouchEnd={handleTouchEnd}>
-                                  <div className="absolute top-1 left-1 text-[8px] font-bold text-blue-300 bg-blue-900/50 px-1.5 py-0.5 rounded">SUPPORTER</div>
+                                  <div className="absolute top-1 left-1 text-[8px] font-bold text-blue-300 bg-blue-900/50 px-1.5 py-0.5 rounded">サポーター</div>
                                   <div className="w-12 h-12 mt-4"><PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/></div>
                                   <div className="font-bold text-xs">{item.name}</div>
                                   <div className="text-[9px] text-gray-400 h-8 overflow-hidden leading-tight">{item.description}</div>
@@ -1395,7 +1399,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                           {/* Consumables */}
                           {shopConsumables.map((item) => (
                               <div key={item.id} className="bg-slate-700 p-2 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg justify-between min-h-[160px]" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'CONSUMABLE', false)} onTouchStart={() => handleTouchStart(item, 'CONSUMABLE', false)} onTouchEnd={handleTouchEnd}>
-                                  <div className="absolute top-1 left-1 text-[8px] font-bold text-purple-300 bg-purple-900/50 px-1.5 py-0.5 rounded">CARD</div>
+                                  <div className="absolute top-1 left-1 text-[8px] font-bold text-purple-300 bg-purple-900/50 px-1.5 py-0.5 rounded">消耗品</div>
                                   <div className="w-12 h-12 mt-4"><PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/></div>
                                   <div className="font-bold text-xs">{item.name}</div>
                                   <div className="text-[9px] text-gray-400 h-8 overflow-hidden leading-tight">{item.description}</div>
@@ -1412,9 +1416,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   if (phase === 'GAME_OVER' || phase === 'VICTORY') {
       return (
           <div className="flex flex-col h-full w-full bg-black text-white items-center justify-center p-8 font-mono text-center">
-              <div className={`text-6xl font-bold mb-4 ${phase === 'VICTORY' ? 'text-yellow-400' : 'text-red-500'}`}>{phase === 'VICTORY' ? 'GRADUATED!' : 'EXPELLED'}</div>
-              <p className="text-xl text-gray-400 mb-8">Reached Ante {runState.ante}</p>
-              <button onClick={() => { storageService.clearPokerState(); onBack(); }} className="bg-white text-black px-8 py-3 font-bold rounded hover:bg-gray-200">Return to Menu</button>
+              <div className={`text-6xl font-bold mb-4 ${phase === 'VICTORY' ? 'text-yellow-400' : 'text-red-500'}`}>{phase === 'VICTORY' ? '卒業おめでとう！' : '退学処分'}</div>
+              <p className="text-xl text-gray-400 mb-8">到達 Ante: {runState.ante}</p>
+              <button onClick={() => { storageService.clearPokerState(); onBack(); }} className="bg-white text-black px-8 py-3 font-bold rounded hover:bg-gray-200">メニューへ戻る</button>
           </div>
       );
   }
@@ -1428,13 +1432,13 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
             <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowRulesModal(false)}>
                 <div className="bg-slate-800 border-4 border-yellow-500 rounded-lg p-6 w-full max-w-3xl max-h-[85vh] overflow-y-auto relative shadow-2xl custom-scrollbar" onClick={e => e.stopPropagation()}>
                     <button onClick={() => setShowRulesModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
-                    <h2 className="text-2xl font-bold text-yellow-400 mb-4 flex items-center"><BookOpen className="mr-2"/> 遊び方 (How to Play)</h2>
+                    <h2 className="text-2xl font-bold text-yellow-400 mb-4 flex items-center"><BookOpen className="mr-2"/> 遊び方</h2>
                     <div className="bg-slate-900/80 p-4 rounded-lg border border-slate-600 mb-6 text-sm space-y-4">
-                        <div><h3 className="font-bold text-white mb-2 flex items-center"><Flag className="mr-2 text-red-400"/> ゲームの目的</h3><p className="text-gray-300">ポーカーの役を作ってスコアを稼げ！<span className="text-red-400 font-bold">目標スコア(Score Goal)</span>を達成しましょう。<br/>全8ステージ(Ante)をクリアすると卒業(ゲームクリア)です。</p></div>
-                        <div><h3 className="font-bold text-white mb-2 flex items-center"><Calculator className="mr-2 text-blue-400"/> スコア計算</h3><div className="flex items-center gap-2 bg-black/40 p-2 rounded justify-center"><span className="text-blue-400 font-bold text-lg">チップ (Chips)</span><X size={16} className="text-gray-500"/><span className="text-red-500 font-bold text-lg">倍率 (Mult)</span><ArrowRight size={16} className="text-gray-500"/><span className="text-yellow-400 font-bold text-lg">スコア</span></div></div>
-                        <div><h3 className="font-bold text-white mb-2 flex items-center"><ShoppingBag className="mr-2 text-yellow-400"/> 買い物</h3><p className="text-gray-300">ラウンド勝利後に獲得したお金でアイテムを購入できます。</p></div>
+                        <div><h3 className="font-bold text-white mb-2 flex items-center"><Flag className="mr-2 text-red-400"/> ゲームの目的</h3><p className="text-gray-300">ポーカーの役を作ってスコアを稼げ！<span className="text-red-400 font-bold">目標スコア</span>を達成しましょう。<br/>全8ステージ(Ante)をクリアすると卒業です。</p></div>
+                        <div><h3 className="font-bold text-white mb-2 flex items-center"><Calculator className="mr-2 text-blue-400"/> スコア計算</h3><div className="flex items-center gap-2 bg-black/40 p-2 rounded justify-center"><span className="text-blue-400 font-bold text-lg">チップ</span><X size={16} className="text-gray-500"/><span className="text-red-500 font-bold text-lg">倍率</span><ArrowRight size={16} className="text-gray-500"/><span className="text-yellow-400 font-bold text-lg">スコア</span></div></div>
+                        <div><h3 className="font-bold text-white mb-2 flex items-center"><ShoppingBag className="mr-2 text-yellow-400"/> 購買部</h3><p className="text-gray-300">ラウンド勝利後に獲得したお金でアイテムを購入できます。</p></div>
                     </div>
-                    <h2 className="text-2xl font-bold text-yellow-400 mb-4 flex items-center border-t border-slate-600 pt-6"><HelpCircle className="mr-2"/> 役一覧 (Hand Types)</h2>
+                    <h2 className="text-2xl font-bold text-yellow-400 mb-4 flex items-center border-t border-slate-600 pt-6"><HelpCircle className="mr-2"/> 役一覧</h2>
                     <div className="space-y-4 text-sm"><div className="grid grid-cols-1 gap-3">{['FLUSH_FIVE', 'FIVE_OF_A_KIND', 'ROYAL_FLUSH', 'STRAIGHT_FLUSH', 'FOUR_OF_A_KIND', 'FULL_HOUSE', 'FLUSH', 'STRAIGHT', 'THREE_OF_A_KIND', 'TWO_PAIR', 'PAIR', 'HIGH_CARD'].map((key) => { const def = POKER_HAND_LEVELS[key]; const example = HAND_EXAMPLES[key]; return (<div key={key} className="bg-slate-900 p-3 rounded-lg border border-slate-700"><div className="flex justify-between items-center mb-1"><span className="font-bold text-lg text-white">{def.name}</span><span className="text-blue-300 font-mono text-xs">{def.baseChips} <span className="text-gray-500">x</span> <span className="text-red-400">{def.baseMult}</span></span></div><div className="text-xs text-gray-400 mb-2">{example.desc}</div><div className="flex gap-1">{example.cards.map((c, i) => (<div key={i} className="bg-white text-black w-8 h-10 rounded-sm border border-gray-400 flex flex-col items-center justify-center shadow-sm"><div className={`text-[10px] font-bold leading-none ${getSuitColorClass(c.s)}`}>{c.r}</div><div className="scale-75">{getSuitIcon(c.s)}</div></div>))}</div></div>); })}</div></div>
                 </div>
             </div>
@@ -1445,8 +1449,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
             <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowHandList(false)}>
                 <div className="bg-slate-800 border-4 border-slate-600 rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto relative shadow-2xl" onClick={e => e.stopPropagation()}>
                     <button onClick={() => setShowHandList(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
-                    <h2 className="text-2xl font-bold text-white mb-4 flex items-center"><BarChart3 className="mr-2"/> Hand Levels (役のレベル)</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{Object.entries(POKER_HAND_LEVELS).map(([key, def]) => { const level = runState.handLevels[key] || 1; const currentChips = def.baseChips + (level - 1) * 10; const currentMult = def.baseMult + (level - 1) * 1; return (<div key={key} className={`p-3 rounded border flex justify-between items-center ${key === lastHandScore?.name ? 'bg-yellow-900/50 border-yellow-500' : 'bg-slate-900 border-slate-700'}`}><div><div className="font-bold text-white">{def.name}</div><div className="text-xs text-blue-300">Lvl {level}</div></div><div className="text-right"><span className="text-blue-400 font-bold">{currentChips}</span><span className="text-gray-500 mx-1">X</span><span className="text-red-500 font-bold">{currentMult}</span></div></div>) })}</div>
+                    <h2 className="text-2xl font-bold text-white mb-4 flex items-center"><BarChart3 className="mr-2"/> 役レベル (Hand Levels)</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{Object.entries(POKER_HAND_LEVELS).map(([key, def]) => { const level = runState.handLevels[key] || 1; const currentChips = def.baseChips + (level - 1) * 10; const currentMult = def.baseMult + (level - 1) * 1; return (<div key={key} className={`p-3 rounded border flex justify-between items-center ${key === lastHandScore?.name ? 'bg-yellow-900/50 border-yellow-500' : 'bg-slate-900 border-slate-700'}`}><div><div className="font-bold text-white">{def.name}</div><div className="text-xs text-blue-300">Lv {level}</div></div><div className="text-right"><span className="text-blue-400 font-bold">{currentChips}</span><span className="text-gray-500 mx-1">X</span><span className="text-red-500 font-bold">{currentMult}</span></div></div>) })}</div>
                 </div>
             </div>
         )}
@@ -1456,7 +1460,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
             <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowDeckList(false)}>
                 <div className="bg-slate-800 border-4 border-slate-600 rounded-lg p-6 w-full max-w-4xl max-h-[80vh] overflow-y-auto relative shadow-2xl" onClick={e => e.stopPropagation()}>
                     <button onClick={() => setShowDeckList(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
-                    <h2 className="text-2xl font-bold text-white mb-6 flex items-center"><Layers className="mr-2"/> Deck List ({runState.deck.length} remaining)</h2>
+                    <h2 className="text-2xl font-bold text-white mb-6 flex items-center"><Layers className="mr-2"/> 山札一覧 (残り {runState.deck.length} 枚)</h2>
                     <div className="space-y-4">{SUITS.map(suit => (<div key={suit} className="flex items-center bg-slate-900/50 p-2 rounded"><div className="w-10 flex-shrink-0 flex justify-center scale-150">{getSuitIcon(suit)}</div><div className="flex flex-wrap gap-1 flex-1 ml-4">{[...runState.deck, ...runState.hand, ...runState.discardPile].filter(c => c.suit === suit || c.enhancement === 'WILD').sort((a, b) => b.rank - a.rank).map((card) => { const isInDeck = runState.deck.some(c => c.id === card.id); return (<div key={card.id} className={`rounded p-1 flex flex-col items-center justify-center h-14 w-10 text-xs border-2 transition-all relative overflow-hidden cursor-pointer ${isInDeck ? 'bg-gray-100 border-gray-300 text-black shadow-md hover:scale-110' : 'bg-black border-gray-700 text-gray-600 opacity-60 grayscale'}`} onContextMenu={(e) => handleContextMenu(e, card, 'CARD', true)} onTouchStart={() => handleTouchStart(card, 'CARD', true)} onTouchEnd={handleTouchEnd}><div className={`font-bold text-sm ${!isInDeck ? 'text-gray-600' : (['HEART', 'DIAMOND'].includes(card.suit) ? 'text-red-600' : 'text-black')}`}>{getRankDisplay(card.rank)}</div><div className="scale-75 opacity-50">{getSuitIcon(card.suit, card.enhancement === 'WILD')}</div>{card.bonusChips > 0 && <div className="absolute top-0 right-0 text-[8px] bg-blue-500 text-white leading-none px-0.5 rounded-bl">+</div>}{card.multMultiplier > 1 && <div className="absolute top-0 left-0 text-[8px] bg-red-500 text-white leading-none px-0.5 rounded-br">x</div>}</div>); })}</div></div>))}</div>
                 </div>
             </div>
@@ -1465,23 +1469,23 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
         <div className="flex flex-col md:flex-row justify-between items-stretch md:items-start p-2 md:p-4 bg-black/60 z-20 shadow-md shrink-0 gap-2">
             <div className="flex gap-2 w-full md:w-auto">
                 <div className="flex flex-col items-start bg-slate-800 p-2 rounded border border-slate-600 flex-grow md:w-48 shadow-lg justify-center">
-                    <div className="flex justify-between w-full md:block"><div className="text-[10px] text-red-400 font-bold uppercase">Score Goal</div><div className="text-[10px] text-gray-400 md:mt-1 block md:hidden">Curr: {runState.currentScore.toLocaleString()}</div></div>
+                    <div className="flex justify-between w-full md:block"><div className="text-[10px] text-red-400 font-bold uppercase">目標スコア</div><div className="text-[10px] text-gray-400 md:mt-1 block md:hidden">現在: {runState.currentScore.toLocaleString()}</div></div>
                     <div className="text-xl md:text-3xl font-black text-white leading-tight">{runState.currentBlind.scoreGoal.toLocaleString()}</div>
                     <div className="w-full h-1.5 bg-gray-700 rounded-full mt-1 overflow-hidden"><div className="h-full bg-red-500 transition-all duration-500" style={{ width: `${Math.min(100, (runState.currentScore / runState.currentBlind.scoreGoal) * 100)}%` }}></div></div>
-                    <div className="text-xs text-gray-400 mt-1 hidden md:block">Current: {runState.currentScore.toLocaleString()}</div>
+                    <div className="text-xs text-gray-400 mt-1 hidden md:block">現在のスコア: {runState.currentScore.toLocaleString()}</div>
                 </div>
-                <div className="bg-slate-800 p-2 rounded border border-yellow-500 flex flex-col items-center justify-center w-20 md:hidden shrink-0"><div className="text-[10px] text-yellow-400 uppercase">Money</div><div className="text-lg font-bold text-yellow-400">${runState.money}</div></div>
+                <div className="bg-slate-800 p-2 rounded border border-yellow-500 flex flex-col items-center justify-center w-20 md:hidden shrink-0"><div className="text-[10px] text-yellow-400 uppercase">所持金</div><div className="text-lg font-bold text-yellow-400">${runState.money}</div></div>
             </div>
             <div className="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto">
                 <div className="flex gap-2">
-                    <button onClick={() => { setShowRulesModal(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><HelpCircle size={18} className="md:w-5 md:h-5 text-yellow-400"/><span className="text-[9px] md:text-[10px] leading-none mt-1">Rules</span></button>
-                    <button onClick={() => { setShowDeckList(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><Layers size={18} className="md:w-5 md:h-5"/><span className="text-[9px] md:text-[10px] leading-none mt-1">Deck</span></button>
-                    <button onClick={() => { setShowHandList(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><BarChart3 size={18} className="md:w-5 md:h-5"/><span className="text-[9px] md:text-[10px] leading-none mt-1">Levels</span></button>
+                    <button onClick={() => { setShowRulesModal(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><HelpCircle size={18} className="md:w-5 md:h-5 text-yellow-400"/><span className="text-[9px] md:text-[10px] leading-none mt-1">遊び方</span></button>
+                    <button onClick={() => { setShowDeckList(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><Layers size={18} className="md:w-5 md:h-5"/><span className="text-[9px] md:text-[10px] leading-none mt-1">山札</span></button>
+                    <button onClick={() => { setShowHandList(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><BarChart3 size={18} className="md:w-5 md:h-5"/><span className="text-[9px] md:text-[10px] leading-none mt-1">役レベル</span></button>
                 </div>
                 <div className="flex gap-2">
-                    <div className="bg-slate-800 p-1 md:p-2 rounded border border-blue-600 flex flex-col items-center w-14 md:w-20 justify-center"><div className="text-[9px] md:text-[10px] text-blue-400 uppercase">Hands</div><div className="text-base md:text-lg font-bold text-blue-100">{runState.handsRemaining}</div></div>
-                    <div className="bg-slate-800 p-1 md:p-2 rounded border border-red-900 flex flex-col items-center w-14 md:w-20 justify-center"><div className="text-[9px] md:text-[10px] text-red-400 uppercase">Disc</div><div className="text-base md:text-lg font-bold text-red-100">{runState.discardsRemaining}</div></div>
-                    <div className="bg-slate-800 p-2 rounded border border-yellow-500 hidden md:flex flex-col items-center w-20 justify-center"><div className="text-[10px] text-yellow-400 uppercase">Money</div><div className="text-lg font-bold text-yellow-400">${runState.money}</div></div>
+                    <div className="bg-slate-800 p-1 md:p-2 rounded border border-blue-600 flex flex-col items-center w-14 md:w-20 justify-center"><div className="text-[9px] md:text-[10px] text-blue-400 uppercase">ハンド</div><div className="text-base md:text-lg font-bold text-blue-100">{runState.handsRemaining}</div></div>
+                    <div className="bg-slate-800 p-1 md:p-2 rounded border border-red-900 flex flex-col items-center w-14 md:w-20 justify-center"><div className="text-[9px] md:text-[10px] text-red-400 uppercase">捨て札</div><div className="text-base md:text-lg font-bold text-red-100">{runState.discardsRemaining}</div></div>
+                    <div className="bg-slate-800 p-2 rounded border border-yellow-500 hidden md:flex flex-col items-center w-20 justify-center"><div className="text-[10px] text-yellow-400 uppercase">所持金</div><div className="text-lg font-bold text-yellow-400">${runState.money}</div></div>
                 </div>
             </div>
         </div>
@@ -1500,11 +1504,11 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                         <PixelSprite seed={s.icon} name={s.icon} className="w-8 h-8"/>
                     </div>
                 ))}
-                {runState.supporters.length === 0 && <div className="text-xs text-gray-500">No Supporters</div>}
+                {runState.supporters.length === 0 && <div className="text-xs text-gray-500">サポーターなし</div>}
             </div>
             <div className="flex gap-2 items-center border-l border-white/20 pl-2">
                 {runState.consumables.map((c, i) => (<div key={i} className="w-10 h-10 md:w-12 md:h-12 bg-slate-800 border-2 border-purple-500 rounded flex items-center justify-center relative group cursor-pointer hover:scale-110 transition-transform" onClick={() => setInspectedItem({ item: c, type: 'CONSUMABLE', isOwned: true, index: i })} onContextMenu={(e) => handleContextMenu(e, c, 'CONSUMABLE', true, i)} onTouchStart={() => handleTouchStart(c, 'CONSUMABLE', true, i)} onTouchEnd={handleTouchEnd}><PixelSprite seed={c.icon} name={c.icon} className="w-8 h-8"/>{selectedConsumable === c && <div className="absolute inset-0 bg-white/30 rounded animate-pulse"></div>}</div>))}
-                {runState.consumables.length === 0 && <div className="text-xs text-gray-500 w-12 text-center">Empty</div>}
+                {runState.consumables.length === 0 && <div className="text-xs text-gray-500 w-12 text-center">空</div>}
             </div>
         </div>
 
@@ -1525,9 +1529,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
             )}
             {selectedConsumable && (
                 <div className="absolute top-4 bg-purple-900/80 p-2 rounded text-center border border-purple-400 z-40">
-                    <div className="text-sm font-bold text-purple-200">Using: {selectedConsumable.name}</div>
-                    <div className="text-xs mb-2">Select cards then click USE</div>
-                    <div className="flex gap-2 justify-center"><button onClick={applyTarot} className="bg-purple-600 px-3 py-1 rounded text-xs font-bold hover:bg-purple-500">USE</button><button onClick={() => { setSelectedConsumable(null); setSelectedCards([]); }} className="bg-gray-600 px-3 py-1 rounded text-xs hover:bg-gray-500">CANCEL</button></div>
+                    <div className="text-sm font-bold text-purple-200">使用中: {selectedConsumable.name}</div>
+                    <div className="text-xs mb-2">カードを選んで「使う」を押してね</div>
+                    <div className="flex gap-2 justify-center"><button onClick={applyTarot} className="bg-purple-600 px-3 py-1 rounded text-xs font-bold hover:bg-purple-500">使う</button><button onClick={() => { setSelectedConsumable(null); setSelectedCards([]); }} className="bg-gray-600 px-3 py-1 rounded text-xs hover:bg-gray-500">やめる</button></div>
                 </div>
             )}
         </div>
@@ -1552,13 +1556,13 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
         </div>
 
         <div className="flex justify-center gap-4 my-2 z-30 shrink-0">
-            <button onClick={sortHandRank} className="bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-full font-bold text-xs flex items-center shadow-lg border-2 border-orange-800">{sortRankAsc ? <ArrowUpNarrowWide size={16} className="mr-1"/> : <ArrowDownWideNarrow size={16} className="mr-1"/>} Rank</button>
-            <button onClick={sortHandSuit} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-full font-bold text-xs flex items-center shadow-lg border-2 border-blue-800"><LayoutList size={16} className="mr-1"/> Suit</button>
+            <button onClick={sortHandRank} className="bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-full font-bold text-xs flex items-center shadow-lg border-2 border-orange-800">{sortRankAsc ? <ArrowUpNarrowWide size={16} className="mr-1"/> : <ArrowDownWideNarrow size={16} className="mr-1"/>} 数字</button>
+            <button onClick={sortHandSuit} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-full font-bold text-xs flex items-center shadow-lg border-2 border-blue-800"><LayoutList size={16} className="mr-1"/> マーク</button>
         </div>
 
         <div className="bg-slate-800 p-2 md:p-4 flex justify-center gap-4 z-20 shadow-up shrink-0">
-            <button onClick={playHand} disabled={animating || selectedCards.length === 0} className="bg-orange-600 hover:bg-orange-500 disabled:bg-gray-600 text-white font-bold py-2 px-8 rounded-lg text-lg md:text-xl shadow-lg border-b-4 border-orange-800 active:border-0 active:translate-y-1 transition-all">PLAY HAND</button>
-            <button onClick={discardHand} disabled={animating || selectedCards.length === 0 || runState.discardsRemaining <= 0} className="bg-red-700 hover:bg-red-600 disabled:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg text-sm md:text-base shadow-lg border-b-4 border-red-900 active:border-0 active:translate-y-1 transition-all">DISCARD</button>
+            <button onClick={playHand} disabled={animating || selectedCards.length === 0} className="bg-orange-600 hover:bg-orange-500 disabled:bg-gray-600 text-white font-bold py-2 px-8 rounded-lg text-lg md:text-xl shadow-lg border-b-4 border-orange-800 active:border-0 active:translate-y-1 transition-all">役を出す</button>
+            <button onClick={discardHand} disabled={animating || selectedCards.length === 0 || runState.discardsRemaining <= 0} className="bg-red-700 hover:bg-red-600 disabled:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg text-sm md:text-base shadow-lg border-b-4 border-red-900 active:border-0 active:translate-y-1 transition-all">捨てる</button>
         </div>
     </div>
   );
