@@ -60,26 +60,27 @@ const FloatingTextOverlay: React.FC<{ data: FloatingText | null, languageMode: L
     return (
         <div 
             key={data.id} // Forces re-mount to restart animation on new ID
-            className={`absolute ${offset} z-50 font-bold text-lg drop-shadow-[0_1px_2px_rgba(0,0,0,1)] pointer-events-none ${data.color} flex items-center bg-black/30 rounded px-1 backdrop-blur-[1px]`}
+            className={`absolute ${offset} z-50 font-bold text-xl drop-shadow-[0_2px_4px_rgba(0,0,0,1)] pointer-events-none ${data.color} flex items-center bg-black/40 rounded-lg px-2 py-0.5 backdrop-blur-[2px] border border-white/10`}
             style={{ 
-                animation: 'float-up-fade 0.8s ease-out forwards'
+                animation: 'float-pop-fade 0.9s cubic-bezier(0.17, 0.67, 0.83, 0.67) forwards'
             }}
         >
             <style>
                 {`
-                    @keyframes float-up-fade {
-                        0% { transform: translateY(0) scale(0.8); opacity: 0; }
-                        20% { transform: translateY(-10px) scale(1.2); opacity: 1; }
-                        100% { transform: translateY(-25px) scale(1); opacity: 0; }
+                    @keyframes float-pop-fade {
+                        0% { transform: translateY(0) scale(0.5); opacity: 0; }
+                        15% { transform: translateY(-15px) scale(1.4); opacity: 1; }
+                        30% { transform: translateY(-10px) scale(1.1); opacity: 1; }
+                        100% { transform: translateY(-40px) scale(1); opacity: 0; }
                     }
                 `}
             </style>
-            {data.iconType === 'zap' && <Zap size={14} className="mr-0.5 fill-current" />}
-            {data.iconType === 'sword' && <Sword size={14} className="mr-0.5 fill-current" />}
-            {data.iconType === 'shield' && <Shield size={14} className="mr-0.5 fill-current" />}
-            {data.iconType === 'heart' && <Heart size={14} className="mr-0.5 fill-current" />}
-            {data.iconType === 'poison' && <Droplets size={14} className="mr-0.5 fill-current" />}
-            {data.iconType === 'skull' && <Skull size={14} className="mr-0.5 fill-current" />}
+            {data.iconType === 'zap' && <Zap size={16} className="mr-1 fill-current" />}
+            {data.iconType === 'sword' && <Sword size={16} className="mr-1 fill-current" />}
+            {data.iconType === 'shield' && <Shield size={16} className="mr-1 fill-current" />}
+            {data.iconType === 'heart' && <Heart size={16} className="mr-1 fill-current" />}
+            {data.iconType === 'poison' && <Droplets size={16} className="mr-1 fill-current" />}
+            {data.iconType === 'skull' && <Skull size={16} className="mr-1 fill-current" />}
             {trans(data.text, languageMode)}
         </div>
     );
@@ -95,31 +96,37 @@ const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: string }
             {activeOnThisTarget.map(vfx => (
                 <div key={vfx.id} className="absolute inset-0 flex items-center justify-center">
                     {vfx.type === 'SLASH' && (
-                        <div className="w-32 h-1 bg-white/80 rotate-45 animate-slash-vfx shadow-[0_0_15px_white]"></div>
+                        <div className="w-48 h-2 bg-gradient-to-r from-transparent via-white to-transparent rotate-45 animate-slash-vfx shadow-[0_0_20px_rgba(255,255,255,0.8)]"></div>
                     )}
                     {vfx.type === 'BLOCK' && (
-                        <div className="animate-block-vfx p-4 bg-blue-500/20 border-2 border-blue-400 rounded-full">
-                            <Shield size={40} className="text-blue-300 fill-blue-500/50" />
+                        <div className="relative flex items-center justify-center">
+                            <div className="absolute w-32 h-32 border-4 border-blue-400 rounded-full animate-pulse-expand opacity-0"></div>
+                            <div className="animate-block-vfx p-4 bg-blue-500/30 border-2 border-blue-300 rounded-lg shadow-[0_0_20px_rgba(59,130,246,0.6)]">
+                                <Shield size={48} className="text-blue-100 fill-blue-500/50" />
+                            </div>
                         </div>
                     )}
                     {vfx.type === 'BUFF' && (
                         <div className="animate-buff-vfx p-2">
-                            <Sparkles size={48} className="text-yellow-400 animate-spin" />
+                            <Sparkles size={56} className="text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.8)]" />
                         </div>
                     )}
                     {vfx.type === 'DEBUFF' && (
                          <div className="animate-debuff-vfx p-2">
-                             <Skull size={48} className="text-purple-500" />
+                             <Skull size={56} className="text-purple-400 drop-shadow-[0_0_15px_rgba(168,85,247,0.8)]" />
                          </div>
                     )}
                     {vfx.type === 'HEAL' && (
                         <div className="animate-heal-vfx">
-                            <Heart size={48} className="text-green-400 fill-green-500/50" />
+                            <Heart size={56} className="text-green-300 fill-green-500/50 drop-shadow-[0_0_15px_rgba(34,197,94,0.8)]" />
                         </div>
                     )}
                     {vfx.type === 'FIRE' && (
-                        <div className="animate-fire-vfx">
-                            <Flame size={48} className="text-orange-500 fill-orange-600/50" />
+                        <div className="relative flex items-center justify-center">
+                            <div className="absolute w-24 h-24 bg-orange-500/40 blur-xl animate-ping rounded-full"></div>
+                            <div className="animate-fire-vfx">
+                                <Flame size={64} className="text-orange-400 fill-orange-600/50 drop-shadow-[0_0_20px_rgba(249,115,22,0.8)]" />
+                            </div>
                         </div>
                     )}
                 </div>
@@ -127,34 +134,55 @@ const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: string }
             <style>
                 {`
                     @keyframes slash-vfx {
-                        0% { transform: rotate(45deg) scaleX(0); opacity: 0; }
-                        20% { transform: rotate(45deg) scaleX(1.5); opacity: 1; }
-                        100% { transform: rotate(45deg) scaleX(2); opacity: 0; }
+                        0% { transform: rotate(45deg) scaleX(0) translateX(-100%); opacity: 0; }
+                        20% { transform: rotate(45deg) scaleX(1.8) translateX(0); opacity: 1; }
+                        100% { transform: rotate(45deg) scaleX(2.5) translateX(100%); opacity: 0; }
                     }
                     @keyframes block-vfx {
-                        0% { transform: scale(0.5); opacity: 0; }
-                        20% { transform: scale(1.2); opacity: 1; }
-                        100% { transform: scale(1); opacity: 0; }
+                        0% { transform: scale(0.4); opacity: 0; }
+                        20% { transform: scale(1.3); opacity: 1; }
+                        30% { transform: scale(1); opacity: 1; }
+                        100% { transform: scale(0.9); opacity: 0; }
+                    }
+                    @keyframes pulse-expand {
+                        0% { transform: scale(0.5); opacity: 0.8; border-width: 8px; }
+                        100% { transform: scale(1.5); opacity: 0; border-width: 1px; }
                     }
                     @keyframes buff-vfx {
-                        0% { transform: translateY(20px); opacity: 0; }
-                        50% { transform: translateY(-20px); opacity: 1; }
-                        100% { transform: translateY(-40px); opacity: 0; }
+                        0% { transform: translateY(30px) scale(0.5) rotate(0deg); opacity: 0; }
+                        50% { transform: translateY(-10px) scale(1.2) rotate(180deg); opacity: 1; }
+                        100% { transform: translateY(-50px) scale(0.8) rotate(360deg); opacity: 0; }
                     }
                     @keyframes debuff-vfx {
-                         0% { transform: scale(1.5); filter: brightness(2); opacity: 0; }
-                         20% { transform: scale(1); filter: brightness(1); opacity: 1; }
-                         100% { transform: scale(0.8); opacity: 0; }
+                         0% { transform: scale(2); filter: brightness(3) blur(5px); opacity: 0; }
+                         20% { transform: scale(1); filter: brightness(1) blur(0); opacity: 1; }
+                         80% { transform: scale(0.95); opacity: 1; }
+                         100% { transform: scale(0.7); filter: blur(2px); opacity: 0; }
                     }
                     @keyframes heal-vfx {
-                        0% { transform: scale(0.5); opacity: 0; }
-                        50% { transform: scale(1.2); opacity: 1; }
-                        100% { transform: scale(1.5); opacity: 0; }
+                        0% { transform: scale(0.3) translateY(20px); opacity: 0; }
+                        40% { transform: scale(1.4) translateY(-10px); opacity: 1; }
+                        100% { transform: scale(1.8) translateY(-40px); opacity: 0; }
                     }
                     @keyframes fire-vfx {
-                         0% { transform: scale(0.5) translateY(0); opacity: 0; }
-                         20% { transform: scale(1.2) translateY(-10px); opacity: 1; }
-                         100% { transform: scale(1.5) translateY(-30px); opacity: 0; }
+                         0% { transform: scale(0.4) translateY(20px); opacity: 0; }
+                         30% { transform: scale(1.4) translateY(-10px); filter: brightness(1.5); opacity: 1; }
+                         100% { transform: scale(2) translateY(-60px); filter: blur(4px); opacity: 0; }
+                    }
+                    @keyframes screen-shake {
+                        0% { transform: translate(0, 0); }
+                        10% { transform: translate(-4px, -4px); }
+                        20% { transform: translate(4px, 4px); }
+                        30% { transform: translate(-4px, 4px); }
+                        40% { transform: translate(4px, -4px); }
+                        50% { transform: translate(-2px, -2px); }
+                        60% { transform: translate(2px, 2px); }
+                        70% { transform: translate(-2px, 2px); }
+                        80% { transform: translate(2px, -2px); }
+                        100% { transform: translate(0, 0); }
+                    }
+                    .animate-screen-shake {
+                        animation: screen-shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
                     }
                 `}
             </style>
@@ -195,6 +223,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   const playerHpPercent = (player.currentHp / player.maxHp) * 100;
   
   const [isActing, setIsActing] = useState(false);
+  const [isShaking, setIsShaking] = useState(false);
   const [showDeck, setShowDeck] = useState(false);
   const [showRelicList, setShowRelicList] = useState(false);
   const [tooltip, setTooltip] = useState<{title: string, msg: string} | null>(null); 
@@ -226,6 +255,19 @@ const BattleScene: React.FC<BattleSceneProps> = ({
           audioService.playSound('select');
       }
   };
+
+  // Screen shake on action or damage
+  useEffect(() => {
+    if (activeEffects.length > 0) {
+        // Only shake for specific high-impact effects
+        const hasImpact = activeEffects.some(e => e.type === 'SLASH' || e.type === 'FIRE' || e.type === 'BLOCK');
+        if (hasImpact) {
+            setIsShaking(true);
+            const timer = setTimeout(() => setIsShaking(false), 400);
+            return () => clearTimeout(timer);
+        }
+    }
+  }, [activeEffects]);
 
   // Dual Protagonist States
   const [selectedCardIds, setSelectedCardIds] = useState<string[]>([]);
@@ -413,7 +455,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-gray-900 text-white relative overflow-hidden">
+    <div className={`flex flex-col h-full w-full bg-gray-900 text-white relative overflow-hidden ${isShaking ? 'animate-screen-shake' : ''}`}>
       
       {/* --- BATTLE TUTORIAL OVERLAY --- */}
       {tutorialStep !== null && (
@@ -680,7 +722,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
         {/* Relic List Modal */}
         {showRelicList && (
-            <div className="fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowRelicList(false)}>
+            <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowRelicList(false)}>
                 <div className="bg-gray-800 border-2 border-white rounded-lg p-4 w-full max-w-lg max-h-[80vh] flex flex-col shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
                     <div className="flex justify-between items-center mb-4 border-b border-gray-600 pb-2">
                         <h3 className="text-xl font-bold text-yellow-400 flex items-center">
