@@ -139,7 +139,7 @@ const CARETAKER_SVG = `
   <path d="M10 7h1v1h-1zM13 7h1v1h-1z" fill="#3e2723"/>
   <path d="M8 10h8v6H8z" fill="#8d6e63"/> <!-- Overalls -->
   <path d="M10 12h4v2h-4z" fill="#a1887f"/>
-  <path d="M6 10h2v4H6zM16 10h2v4h-2z" fill="#ffccbc"/>
+  <path d="M6 10h2v4H6z" fill="#ffccbc"/>
   <path d="M16 13h3v3h-3z" fill="#ffffff"/> <!-- Rabbit -->
   <path d="M17 12h1v1h-1z" fill="#ffffff"/>
   <path d="M8 16h8v4H8z" fill="#5d4037"/>
@@ -198,7 +198,7 @@ export const ENEMY_LIBRARY: Record<string, { name: string, description: string, 
     "反復横跳びマン": { name: "反復横跳びマン", description: "残像が見えるほどの速さで動く。", tier: 2 },
     "図書室の主": { name: "図書室の主", description: "本を汚す者を許さない厳格な霊。", tier: 2 },
     "音楽室の肖像画": { name: "音楽室の肖像画", description: "目が動く。夜になると歌い出す。", tier: 2 },
-    "理科室の骸骨": { name: "理科室の骸骨", description: "骨格標本。カチャカチャと音を立てる。", tier: 2 },
+    "理科室の骸骨": { name: "理科室の骸骨", description: "骨格標本. カチャカチャと音を立てる。", tier: 2 },
     "家庭科室の包丁": { name: "家庭科室の包丁", description: "錆びついた包丁が宙を舞う。", tier: 2 },
     "プールサイドの影": { name: "プールサイドの影", description: "水辺に潜む黒い影。引きずり込もうとする。", tier: 2 },
     "焼却炉の精霊": { name: "焼却炉の精霊", description: "燃え盛る炎の精霊。熱い。", tier: 2 },
@@ -339,10 +339,65 @@ export const EVENT_CARDS: Record<string, Omit<Card, 'id'>> = {
     MADNESS: { name: 'パニック', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '手札のランダムなカード1枚のコストを0にする。廃棄。', exhaust: true, rarity: 'SPECIAL', textureRef: 'LIGHTNING|黄|SKILL' },
 };
 
+// --- LIBRARIAN EXCLUSIVE CARDS (Ninki no Ohanashi Series) ---
+export const LIBRARIAN_CARDS: Record<string, Omit<Card, 'id'>> = {
+    GON_GITSUNE: { name: 'ごんぎつね', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '6ダメージ。山札の一番上のカードが攻撃ならもう一度発動。', damage: 6, rarity: 'SPECIAL', textureRef: 'BEAST|茶|ATTACK' },
+    GON_KURU: { name: 'ごんの栗', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'カードを1枚引く。それがアタックならムキムキ2を得る。', draw: 1, rarity: 'SPECIAL', textureRef: 'PLANT|茶|SKILL' },
+    HYOJU_RIFLE: { name: '兵十の火縄銃', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '22ダメージ。廃棄。', damage: 22, exhaust: true, rarity: 'SPECIAL', textureRef: 'SWORD|黒|ATTACK' },
+    HASHIRE_MELOS: { name: '走れメロス', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '次ターンE+1。カードを1枚引く。', nextTurnEnergy: 1, draw: 1, rarity: 'SPECIAL', textureRef: 'HUMANOID|赤|SKILL' },
+    JACHI_BOGYAKU: { name: '邪智暴虐', cost: 1, type: CardType.SKILL, target: TargetType.ENEMY, description: 'びくびく2を与える。', vulnerable: 2, rarity: 'SPECIAL', textureRef: 'FIST|赤|SKILL' },
+    MELOS_TRUST: { name: 'メロスの信実', cost: 2, type: CardType.SKILL, target: TargetType.SELF, description: 'この戦闘中の経過ターン数分、ブロックを得る。', block: 0, rarity: 'SPECIAL', textureRef: 'SHIELD|白|SKILL' },
+    KUMO_NO_ITO: { name: '蜘蛛の糸', cost: 1, type: CardType.SKILL, target: TargetType.ENEMY, description: 'へろへろ2。敵の次の攻撃ダメージを半分にする。', weak: 2, rarity: 'SPECIAL', textureRef: 'SLIME|白|SKILL' },
+    GOKURAKU_HASU: { name: '極楽の蓮', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'HPを4回復。廃棄。', heal: 4, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|桃|SKILL' },
+    SANGETSUKI: { name: '山月記', cost: 2, type: CardType.POWER, target: TargetType.SELF, description: '攻撃をプレイする度、ダメージ+2。', strength: 2, rarity: 'SPECIAL', textureRef: 'BEAST|黄|POWER' },
+    TORA_HO: { name: '虎咆', cost: 2, type: CardType.ATTACK, target: TargetType.ALL_ENEMIES, description: '全体12ダメージ。びくびく1。', damage: 12, vulnerable: 1, rarity: 'SPECIAL', textureRef: 'BEAST|黒|ATTACK' },
+    BOKKO_CHAN: { name: 'ボッコちゃん', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'トゲトゲ4(反撃)を得る。', applyPower: { id: 'THORNS', amount: 4 }, rarity: 'SPECIAL', textureRef: 'HUMANOID|桃|SKILL' },
+    OI_DETEKOI: { name: 'おーい、でてこい', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '次ターンの開始時、敵に18ダメージ。', rarity: 'SPECIAL', textureRef: 'SLIME|黒|ATTACK' },
+    KOROSHIYA: { name: '殺し屋ですのよ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '9ダメージ。解決すると30G入手。', damage: 9, rarity: 'SPECIAL', textureRef: 'DAGGER|紫|ATTACK' },
+    HOSHI_PRESENT: { name: '星のプレゼント', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'ランダムなポーションを1つ得る。廃棄。', exhaust: true, rarity: 'SPECIAL', textureRef: 'GEM|黄|SKILL' },
+    KAGAMI_HOSHI: { name: '鏡 (星新一)', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '最後に使ったカードを1枚コピーして手札に加える。', promptsCopy: 1, rarity: 'SPECIAL', textureRef: 'EYE|青|SKILL' },
+    YOSEI_HOSHI: { name: '妖精 (星新一)', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'HPを10回復。手札のランダムなカードを1枚廃棄。', heal: 10, promptsExhaust: 1, rarity: 'SPECIAL', textureRef: 'GHOST|緑|SKILL' },
+    LIFE_MAINTENANCE: { name: '生活維持省', cost: 2, type: CardType.POWER, target: TargetType.SELF, description: 'ターン開始時、ブロック6を得る。', applyPower: { id: 'METALLICIZE', amount: 6 }, rarity: 'SPECIAL', textureRef: 'NOTEBOOK|黒|POWER' },
+    SPACE_GREETING: { name: '宇宙のあいさつ', cost: 0, type: CardType.SKILL, target: TargetType.ALL_ENEMIES, description: '敵全体にびくびく1とへろへろ1。', vulnerable: 1, weak: 1, rarity: 'SPECIAL', textureRef: 'GHOST|白|SKILL' },
+    KAIKETSU_ZORORI: { name: 'かいけつゾロリ', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '3枚引き、1枚捨てる。', draw: 3, promptsDiscard: 1, rarity: 'SPECIAL', textureRef: 'BEAST|橙|SKILL' },
+    ZENITEN_DO: { name: '銭天堂', cost: 2, type: CardType.SKILL, target: TargetType.SELF, description: 'ランダムなパワーカードを1枚生成し、コストを0にする。', rarity: 'SPECIAL', textureRef: 'POTION|緑|SKILL' },
+    HOSHI_NO_OJI: { name: '星の王子さま', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '最大HP+2。HP2回復。廃棄。', fatalMaxHp: 2, heal: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'HUMANOID|黄|SKILL' },
+    MOMO_TIME: { name: 'モモ', cost: 2, type: CardType.POWER, target: TargetType.SELF, description: '余ったエネルギーを次のターンに持ち越す。', applyPower: { id: 'ICE_CREAM', amount: 1 }, rarity: 'SPECIAL', textureRef: 'CLOCK|桃|POWER' },
+    TIME_THIEF: { name: '時間どろぼう', cost: 0, type: CardType.ATTACK, target: TargetType.ENEMY, description: '5ダメージ。敵の次の行動を1ターン遅らせる。', damage: 5, rarity: 'SPECIAL', textureRef: 'GHOST|黒|ATTACK' },
+    NEVERENDING_STORY: { name: 'はてしない物語', cost: 3, type: CardType.POWER, target: TargetType.SELF, description: '全てのカードのコストを1下げる。', rarity: 'SPECIAL', textureRef: 'NOTEBOOK|紫|POWER' },
+    TOTTO_CHAN: { name: '窓ぎわのトットちゃん', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '捨て札を全て山札に戻す。1枚引く。', shuffleHandToDraw: true, draw: 1, rarity: 'SPECIAL', textureRef: 'HUMANOID|白|SKILL' },
+    GALAXY_EXPRESS: { name: '銀河鉄道の夜', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '山札の上から5枚を見る。1枚選び手札に加え、残りを捨てる。', draw: 1, rarity: 'SPECIAL', textureRef: 'LIGHTNING|青|SKILL' },
+    YODAKA_NO_HOSHI: { name: 'よだかの星', cost: 1, type: CardType.ATTACK, target: TargetType.ALL_ENEMIES, description: '自分に4ダメージ。全体に15ダメージ。', selfDamage: 4, damage: 15, rarity: 'SPECIAL', textureRef: 'FLAME|赤|ATTACK' },
+    MANY_ORDERS: { name: '注文の多い料理店', cost: 1, type: CardType.SKILL, target: TargetType.ENEMY, description: 'びくびく2。へろへろ2。', vulnerable: 2, weak: 2, rarity: 'SPECIAL', textureRef: 'POTION|黄|SKILL' },
+    BUY_GLOVES: { name: '手袋を買いに', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'カチカチ2(ブロック強化)を得る。', applyPower: { id: 'DEXTERITY', amount: 2 }, rarity: 'SPECIAL', textureRef: 'SHIELD|白|SKILL' },
+    GAUCHE_CELLO: { name: 'セロ弾きのゴーシュ', cost: 2, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック10。次ターン2枚引く。', block: 10, nextTurnDraw: 2, rarity: 'SPECIAL', textureRef: 'SWORD|茶|SKILL' },
+    MINE_BLAST_G: { name: 'トロッコ (芥川)', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '今ターン使用したカード枚数分、ダメージを与える。', damagePerAttackPlayed: 4, rarity: 'SPECIAL', textureRef: 'SLIME|灰|ATTACK' },
+    RASHOMON: { name: '羅生門', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '10ダメージ。解決すると相手を廃棄。', damage: 10, promptsExhaust: 1, rarity: 'SPECIAL', textureRef: 'HUMANOID|黒|ATTACK' },
+    KUMO_NO_ITO_D: { name: 'カンダタの叫び', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'E2。手札に「悩み」を加える。', energy: 2, addCardToHand: { cardName: 'WRITHE', count: 1 }, rarity: 'SPECIAL', textureRef: 'GHOST|紫|SKILL' },
+    OSAMU_NIGHT: { name: '人間失格', cost: 0, type: CardType.POWER, target: TargetType.SELF, description: '使用不可。手札にある限り、毎ターン自分に3ダメージ。', unplayable: true, rarity: 'SPECIAL', textureRef: 'GHOST|黒|POWER' },
+    GOSHI_REVENGE: { name: '走れメロス・ラストスパート', cost: 0, type: CardType.ATTACK, target: TargetType.ENEMY, description: '15ダメージ。この戦闘で「走れメロス」を使用していないと使用不可。', damage: 15, rarity: 'SPECIAL', textureRef: 'SHOE|赤|ATTACK' },
+    KOKORO_SOSEKI: { name: 'こころ', cost: 1, type: CardType.SKILL, target: TargetType.ENEMY, description: '敵の攻撃力を2下げる。廃棄。', strength: -2, exhaust: true, rarity: 'SPECIAL', textureRef: 'GHOST|白|SKILL' },
+    BOTCHAN: { name: '坊っちゃん', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '8ダメージ。敵を「びくびく」状態に。', damage: 8, vulnerable: 1, rarity: 'SPECIAL', textureRef: 'HUMANOID|赤|ATTACK' },
+    WAGAHAI_NEKO: { name: '吾輩は猫である', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック3。カード1枚引く。', block: 3, draw: 1, rarity: 'SPECIAL', textureRef: 'BEAST|白|SKILL' },
+    DOKKO_CHAN: { name: 'どっこいしょ', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック5。手札のカード1枚を強化する。', block: 5, upgradeHand: true, rarity: 'SPECIAL', textureRef: 'FIST|灰|SKILL' },
+    KITSUNE_NO_MADO: { name: 'きつねの窓', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '山札のカード1枚をコピーする。', promptsCopy: 1, rarity: 'SPECIAL', textureRef: 'EYE|黄|SKILL' },
+    KACHIKACHI_YAMA: { name: 'かちかち山', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '12ダメージ。対象に「やけど」を与える。', damage: 12, addCardToDiscard: { cardName: 'BURN', count: 1 }, rarity: 'SPECIAL', textureRef: 'FLAME|赤|ATTACK' },
+    URASHIMA_TARO: { name: '浦島太郎', cost: 2, type: CardType.SKILL, target: TargetType.ALL_ENEMIES, description: '敵全体を2ターン「へろへろ」にする。廃棄。', weak: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'BEAST|青|SKILL' },
+    MOMOTARO: { name: '桃太郎', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '6ダメージ。手札に「きびだんご(コスト0ブロック5)」を加える。', damage: 6, addCardToHand: { cardName: 'DEFEND', count: 1, cost0: true }, rarity: 'SPECIAL', textureRef: 'BEAST|桃|ATTACK' },
+    KAGUYA_HIME: { name: 'かぐや姫', cost: 3, type: CardType.SKILL, target: TargetType.SELF, description: '3ターン「スケスケ(無敵)」になる。廃棄。', applyPower: { id: 'INTANGIBLE', amount: 3 }, exhaust: true, rarity: 'SPECIAL', textureRef: 'GHOST|白|SKILL' },
+    HANASAKA_JIISAN: { name: '花咲かじいさん', cost: 1, type: CardType.SKILL, target: TargetType.ALL_ENEMIES, description: '敵全体に5ダメージを与え、味方全員のHPを2回復。', damage: 5, heal: 2, rarity: 'SPECIAL', textureRef: 'PLANT|桃|SKILL' },
+    KASA_JIZO: { name: 'かさじぞう', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック4を得る。次ターンカードを1枚引く。', block: 4, nextTurnDraw: 1, rarity: 'SPECIAL', textureRef: 'SHIELD|灰|SKILL' },
+    ISSUN_BOSHI: { name: '一寸法師', cost: 0, type: CardType.ATTACK, target: TargetType.ENEMY, description: '3ダメージを3回与える。', damage: 3, playCopies: 2, rarity: 'SPECIAL', textureRef: 'SWORD|緑|ATTACK' },
+    TSURU_ONGAESHI: { name: '鶴の恩返し', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'HPを6失い、山札から好きなカードを1枚手札に加える。', draw: 1, rarity: 'SPECIAL', textureRef: 'BEAST|白|SKILL' },
+    OMUSUBI_KORORIN: { name: 'おむすびころりん', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'E1を得る。ランダムな敵に5ダメージ。', energy: 1, damage: 5, rarity: 'SPECIAL', textureRef: 'SLIME|白|SKILL' },
+    NEZUMI_NO_YOMEIRI: { name: 'ねずみの嫁入り', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'この戦闘中、被ダメージを1軽減する。', applyPower: { id: 'BUFFER', amount: 1 }, rarity: 'SPECIAL', textureRef: 'BEAST|灰|SKILL' },
+};
+
 export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
   ...STATUS_CARDS,
   ...CURSE_CARDS,
   ...EVENT_CARDS,
+  ...LIBRARIAN_CARDS,
   
   YATSUATARI: { name: 'むしゃくしゃ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '8ダメージ。使用する度、この戦闘中ダメージ+5。', damage: 8, rarity: 'UNCOMMON', textureRef: 'FIST|赤|ATTACK' },
   EXPULSION: { name: '早退', cost: 1, type: CardType.SKILL, target: TargetType.ENEMY, description: '敵のHPが30以下ならすぐに解決させる。', rarity: 'RARE', textureRef: 'BOSS|黒|SKILL' },
@@ -574,7 +629,7 @@ export const CHARACTERS: Character[] = [
         gold: 120,
         startingRelicId: 'BOOKMARK',
         color: 'purple',
-        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'THIRD_EYE', 'SHRUG_IT_OFF'], 
+        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'THIRD_EYE', 'SHRUG_IT_OFF', 'GON_GITSUNE', 'HASHIRE_MELOS'], 
         imageData: `data:image/svg+xml;base64,${btoa(LIBRARIAN_SVG)}`
     },
     {
@@ -714,22 +769,13 @@ export const SUPPORTERS_LIBRARY: PokerSupporter[] = [
   { id: 'SUP_POOR_STUDENT', name: '苦学生', description: '所持金が$5以下なら倍率+15', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(ctx.money <= 5) ctx.mult += 15; }, icon: 'SLIME|#795548' },
   { id: 'SUP_LAST_SPURT', name: 'ラストスパート', description: '最後の手札なら倍率x3', price: 7, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(ctx.handsPlayed === 0) ctx.mult *= 3; }, icon: 'SHIELD|#f44336' },
   { id: 'SUP_START_DASH', name: 'スタートダッシュ', description: '最初の手札なら倍率+15', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { 
-      // Assuming handsPlayed is max at start. Need context to know max. 
-      // Simplified: Check if handsPlayed seems high relative to discards used? 
-      // Better: Just assume > 2 means early? No, let's rely on GameScreen logic for now or skip precise check.
-      // Wait, ctx.handsPlayed is remaining hands.
-      // We can infer max hands if we assume default 4.
       if(ctx.handsPlayed >= 3) ctx.mult += 15; 
   }, icon: 'SWORD|#f44336' },
   
   // Meta / Collection
   { 
       id: 'SUP_SNACKER', name: '買い食い', description: '所持している消費アイテム1つにつき倍率+4', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', 
-      effect: (ctx) => { /* Logic depends on GameScreen state access */ }, 
-      // Since ctx doesn't pass consumables, this is a placeholder or needs types.ts update. 
-      // Workaround: We will handle this logic in the effect callback if we can access state, but here we can't easily.
-      // Let's implement it as a flat bonus for now or remove if too complex without refactor.
-      // Actually, let's replace with something simpler.
+      effect: (ctx) => { }, 
       icon: 'POTION|#ff9800' 
   },
   { 
@@ -744,9 +790,6 @@ export const SUPPORTERS_LIBRARY: PokerSupporter[] = [
   { id: 'SUP_STONE_MANIA', name: '石像マニア', description: '得点カードのストーンカード1枚につきチップ+50', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const count = ctx.cards.filter(c => c.enhancement === 'STONE').length; ctx.chips += count * 50; }, icon: 'SKELETON|#607d8b' },
   { id: 'SUP_GLASS_BLOWER', name: 'ガラス職人', description: '得点カードのガラスカード1枚につき倍率x1.5', price: 7, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const count = ctx.cards.filter(c => c.enhancement === 'GLASS').length; if(count>0) ctx.mult *= Math.pow(1.5, count); }, icon: 'POTION|#a5f3fc' },
   { id: 'SUP_ALCHEMIST', name: '錬金術師', description: '得点カードのゴールドカード1枚につき$2獲得', price: 7, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { 
-      // Money gain handled in GameScreen side effect usually, or modify money here? 
-      // ctx.money is usually readonly for scoring. 
-      // Let's make it add chips instead to be safe.
       const count = ctx.cards.filter(c => c.enhancement === 'GOLD').length; ctx.chips += count * 50; 
   }, icon: 'SWORD|#ffc107' },
   { id: 'SUP_PRESIDENT', name: '生徒会長', description: '役がハイカードなら倍率x3', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if(ctx.handType === 'HIGH_CARD') ctx.mult *= 3; }, icon: 'BOSS|#ffeb3b' },

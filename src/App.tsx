@@ -6,7 +6,7 @@ import {
 } from './types';
 import { 
   INITIAL_HP, INITIAL_ENERGY, HAND_SIZE, 
-  CARDS_LIBRARY, STARTING_DECK_TEMPLATE, STATUS_CARDS, CURSE_CARDS, EVENT_CARDS, RELIC_LIBRARY, TRUE_BOSS, POTION_LIBRARY, CHARACTERS, HERO_IMAGE_DATA, ENEMY_LIBRARY
+  CARDS_LIBRARY, STARTING_DECK_TEMPLATE, STATUS_CARDS, CURSE_CARDS, EVENT_CARDS, RELIC_LIBRARY, TRUE_BOSS, POTION_LIBRARY, CHARACTERS, HERO_IMAGE_DATA, ENEMY_LIBRARY, LIBRARIAN_CARDS
 } from './constants';
 import BattleScene from './components/BattleScene';
 import RewardScreen from './components/RewardScreen';
@@ -902,10 +902,11 @@ const App: React.FC = () => {
             audioService.playBGM('rest');
 
         } else if (node.type === NodeType.SHOP) {
+            const isLibrarian = nextState.player.id === 'LIBRARIAN';
             const shopCandidates = Object.values(CARDS_LIBRARY).filter(c => 
                 c.type !== CardType.STATUS && 
                 c.type !== CardType.CURSE && 
-                c.rarity !== 'SPECIAL'
+                (c.rarity !== 'SPECIAL' || (isLibrarian && Object.values(LIBRARIAN_CARDS).some(lc => lc.name === c.name)))
             );
 
             const cards: ICard[] = [];
@@ -918,6 +919,7 @@ const App: React.FC = () => {
                 if (c.rarity === 'UNCOMMON') price += 25;
                 if (c.rarity === 'RARE') price += 50;
                 if (c.rarity === 'LEGENDARY') price += 100;
+                if (c.rarity === 'SPECIAL') price += 30; // Librarian special cards
                 
                 cards.push({ id: `shop-${i}-${Date.now()}`, ...c, price });
             }
@@ -1067,6 +1069,10 @@ const App: React.FC = () => {
               p.currentEnergy += 2;
               newLogs.push(`${trans("エネルギー", languageMode)}+2`);
               nextActiveEffects.push({ id: `vfx-pot-zap-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+          } else if (potion.templateId === 'WEAK_POTION' && target) {
+              applyDebuff(target, 'WEAK', 3);
+              newLogs.push(`${trans(target.name, languageMode)}に${trans("へろへろ", languageMode)}3を${trans("付与", languageMode)}`);
+              nextActiveEffects.push({ id: `vfx-pot-dbuff-${Date.now()}`, type: 'DEBUFF', targetId: target.id });
           } else if (potion.templateId === 'WEAK_POTION' && target) {
               applyDebuff(target, 'WEAK', 3);
               newLogs.push(`${trans(target.name, languageMode)}に${trans("へろへろ", languageMode)}3を${trans("付与", languageMode)}`);
@@ -2380,6 +2386,7 @@ const App: React.FC = () => {
 
   const goToRewardPhase = (bonusGold: number = 0) => {
       const rewards: RewardItem[] = [];
+      const isLibrarian = gameState.player.id === 'LIBRARIAN';
       
       if (bonusGold > 0) {
           let goldReward = bonusGold;
@@ -2387,13 +2394,26 @@ const App: React.FC = () => {
           rewards.push({ type: 'GOLD', value: goldReward, id: `rew-gold-${Date.now()}` });
       }
 
-      const allCards = Object.values(CARDS_LIBRARY).filter(c => c.type !== CardType.STATUS && c.type !== CardType.CURSE && c.rarity !== 'SPECIAL');
+      // Librarian exclusive pool integration
+      const allCards = Object.values(CARDS_LIBRARY).filter(c => 
+          c.type !== CardType.STATUS && 
+          c.type !== CardType.CURSE && 
+          (c.rarity !== 'SPECIAL' || (isLibrarian && Object.values(LIBRARIAN_CARDS).some(lc => lc.name === c.name)))
+      );
+
       for(let i=0; i<3; i++) {
           const roll = Math.random() * 100;
           let targetRarity = 'COMMON';
           if (roll > 95) targetRarity = 'LEGENDARY'; else if (roll > 80) targetRarity = 'RARE'; else if (roll > 50) targetRarity = 'UNCOMMON';
           
-          const pool = allCards.filter(c => c.rarity === targetRarity);
+          // Special Librarian logic: guarantee or increase chance for an "Ohanashi" card in one slot
+          let pool;
+          if (isLibrarian && i === 0 && Math.random() < 0.7) {
+              pool = Object.values(LIBRARIAN_CARDS);
+          } else {
+              pool = allCards.filter(c => c.rarity === targetRarity);
+          }
+
           const candidate = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : allCards[Math.floor(Math.random() * allCards.length)];
           rewards.push({ type: 'CARD', value: { ...candidate, id: `reward-${Date.now()}-${i}` }, id: `rew-card-${i}` });
       }
@@ -2875,7 +2895,7 @@ const App: React.FC = () => {
                                  if (relic.id === 'CURSED_KEY') newP.maxEnergy += 1;
                                  if (relic.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
                                  if (relic.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
-                                 if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = prev.player.maxHp; }
+                                 if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = p.maxHp; }
                                  if (relic.id === 'OLD_COIN') newP.gold += 300;
                                  if (relic.id === 'MATRYOSHKA') prev.player.relicCounters['MATRYOSHKA'] = 2; 
                                  if (relic.id === 'HAPPY_FLOWER') prev.player.relicCounters['HAPPY_FLOWER'] = 0; 
