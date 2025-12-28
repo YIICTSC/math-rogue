@@ -1,4 +1,3 @@
-
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode, ParryState, VisualEffectInstance } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
 import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles, MessageCircle, Mic, ArrowRight, MousePointer2, ChevronsRight, Flame } from 'lucide-react';
@@ -259,8 +258,22 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   // Screen shake on action or damage
   useEffect(() => {
     if (activeEffects.length > 0) {
+        // Only shake for specific high-impact effects (SLASH and FIRE)
+        // BLOCK is no longer included in impact to prevent unwanted shake
+        const hasImpact = activeEffects.some(e => e.type === 'SLASH' || e.type === 'FIRE');
+        if (hasImpact) {
+            setIsShaking(true);
+            const timer = setTimeout(() => setIsShaking(false), 400);
+            return () => clearTimeout(timer);
+        }
+    }
+  }, [activeEffects]);
+
+  // Screen shake on action or damage
+  useEffect(() => {
+    if (activeEffects.length > 0) {
         // Only shake for specific high-impact effects
-        const hasImpact = activeEffects.some(e => e.type === 'SLASH' || e.type === 'FIRE' || e.type === 'BLOCK');
+        const hasImpact = activeEffects.some(e => e.type === 'SLASH' || e.type === 'FIRE');
         if (hasImpact) {
             setIsShaking(true);
             const timer = setTimeout(() => setIsShaking(false), 400);
@@ -592,7 +605,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
       </div>
 
       {/* 2. Battle Viewport */}
-      <div className="flex-1 relative overflow-y-auto custom-scrollbar flex flex-col justify-between p-2 bg-gray-800/50 gap-4">
+      <div className="flex-11 relative overflow-y-auto custom-scrollbar flex flex-col justify-between p-2 bg-gray-800/50 gap-4">
         
         {/* Parry UI Overlay (Bard Special) */}
         {parryState?.active && !parryState.success && (
