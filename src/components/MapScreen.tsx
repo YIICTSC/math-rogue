@@ -1,7 +1,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { MapNode, NodeType, Player, LanguageMode } from '../types';
-import { Swords, Skull, BedDouble, ShoppingBag, HelpCircle, AlertTriangle, PlayCircle, Coins, Heart, Layers, X, Home } from 'lucide-react';
+import { Swords, Skull, BedDouble, ShoppingBag, HelpCircle, AlertTriangle, PlayCircle, Coins, Heart, Layers, X, Home, MessageSquare } from 'lucide-react';
 import { MAP_WIDTH, MAP_HEIGHT } from '../services/mapGenerator';
 import Card from './Card';
 import { trans } from '../utils/textUtils';
@@ -13,9 +13,10 @@ interface MapScreenProps {
   onReturnToTitle: () => void;
   player: Player;
   languageMode: LanguageMode;
+  narrative?: string; // 追加: 最新のメッセージを表示するため
 }
 
-const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelect, onReturnToTitle, player, languageMode }) => {
+const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelect, onReturnToTitle, player, languageMode, narrative }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showDeck, setShowDeck] = useState(false);
 
@@ -126,6 +127,18 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                  <span className="font-bold text-[10px] md:text-sm uppercase"><span className="hidden sm:inline">DECK </span>({player.deck.length})</span>
              </button>
         </div>
+
+        {/* ナラティブバー (追加) */}
+        {narrative && (
+            <div className="bg-black/60 border-b border-green-500/30 px-4 py-2 z-20 flex items-center justify-center animate-in fade-in slide-in-from-top-1 duration-500">
+                <div className="max-w-2xl w-full flex items-center gap-3">
+                    <MessageSquare size={16} className="text-green-400 shrink-0 animate-pulse" />
+                    <span className="text-xs md:text-sm text-green-300 font-bold italic tracking-wider drop-shadow-[0_0_5px_rgba(34,197,94,0.5)]">
+                        {trans(narrative, languageMode)}
+                    </span>
+                </div>
+            </div>
+        )}
 
         {/* メインマップエリア */}
         <div ref={scrollRef} className="flex-grow overflow-y-auto relative custom-scrollbar z-10" style={{ scrollBehavior: 'smooth' }}>

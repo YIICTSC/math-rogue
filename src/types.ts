@@ -80,6 +80,11 @@ export interface Card {
   
   playCondition?: 'DRAW_PILE_EMPTY' | 'HAND_ONLY_ATTACKS';
 
+  // Gardener System
+  isSeed?: boolean;
+  growthRequired?: number;
+  grownCardId?: string;
+
   rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'LEGENDARY' | 'SPECIAL';
   price?: number;       
 }
@@ -170,6 +175,12 @@ export interface Partner {
     floatingText: FloatingText | null;
 }
 
+export interface GardenSlot {
+  plantedCard: Card | null;
+  growth: number;
+  maxGrowth: number;
+}
+
 export interface Player {
   id?: string; // Character identifier (e.g. 'MAGE')
   maxHp: number;
@@ -206,6 +217,9 @@ export interface Player {
   
   // Dual Protagonist
   partner?: Partner;
+
+  // Gardener System
+  garden?: GardenSlot[]; // 3x3 Grid (length 9)
 }
 
 export enum GameScreen {
@@ -214,6 +228,7 @@ export enum GameScreen {
   MODE_SELECTION = 'MODE_SELECTION', 
   CHARACTER_SELECTION = 'CHARACTER_SELECTION',
   RELIC_SELECTION = 'RELIC_SELECTION', 
+  DECK_CONSTRUCTION = 'DECK_CONSTRUCTION',
   MAP = 'MAP',
   BATTLE = 'BATTLE',
   DODGEBALL_SHOOTING = 'DODGEBALL_SHOOTING',
@@ -239,7 +254,8 @@ export enum GameScreen {
   MINI_GAME_DUNGEON_2 = 'MINI_GAME_DUNGEON_2',
   MINI_GAME_KOCHO = 'MINI_GAME_KOCHO',
   MINI_GAME_PAPER_PLANE = 'MINI_GAME_PAPER_PLANE',
-  PROBLEM_CHALLENGE = 'PROBLEM_CHALLENGE'
+  PROBLEM_CHALLENGE = 'PROBLEM_CHALLENGE',
+  GARDEN = 'GARDEN'
 }
 
 export enum GameMode {

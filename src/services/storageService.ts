@@ -68,6 +68,15 @@ export const storageService = {
       console.warn("Failed to save unlocked card", e);
     }
   },
+  saveUnlockedCards: (cardNames: string[]) => {
+    try {
+      const current = storageService.getUnlockedCards();
+      const next = new Set([...current, ...cardNames]);
+      localStorage.setItem(STORAGE_KEY_UNLOCKED_CARDS, JSON.stringify(Array.from(next)));
+    } catch (e) {
+      console.warn("Failed to save unlocked cards", e);
+    }
+  },
 
   // Relics
   getUnlockedRelics: (): string[] => {

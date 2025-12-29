@@ -2,11 +2,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
-  CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode, LanguageMode, VisualEffectInstance
+  CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode, LanguageMode, VisualEffectInstance, GardenSlot
 } from './types';
 import { 
   INITIAL_HP, INITIAL_ENERGY, HAND_SIZE, 
-  CARDS_LIBRARY, STARTING_DECK_TEMPLATE, STATUS_CARDS, CURSE_CARDS, EVENT_CARDS, RELIC_LIBRARY, TRUE_BOSS, POTION_LIBRARY, CHARACTERS, HERO_IMAGE_DATA, ENEMY_LIBRARY, LIBRARIAN_CARDS
+  CARDS_LIBRARY, STARTING_DECK_TEMPLATE, STATUS_CARDS, CURSE_CARDS, EVENT_CARDS, RELIC_LIBRARY, TRUE_BOSS, POTION_LIBRARY, CHARACTERS, HERO_IMAGE_DATA, ENEMY_LIBRARY, LIBRARIAN_CARDS, GROWN_PLANTS, GARDEN_SEEDS
 } from './constants';
 import BattleScene from './components/BattleScene';
 import RewardScreen from './components/RewardScreen';
@@ -34,6 +34,8 @@ import MiniGameSelectScreen from './components/MiniGameSelectScreen';
 import DodgeballShooting from './components/DodgeballShooting';
 import FinalBridgeScreen from './components/FinalBridgeScreen';
 import ProblemChallengeScreen from './components/ProblemChallengeScreen';
+import ChefDeckSelectionScreen from './components/ChefDeckSelectionScreen';
+import GardenScreen from './components/GardenScreen';
 import Card from './components/Card';
 import { audioService } from './services/audioService';
 import { generateFlavorText, generateEnemyName } from './services/geminiService';
@@ -247,13 +249,11 @@ const App: React.FC = () => {
   const UNLOCK_THRESHOLDS = [1000, 1500, 2000, 2500, 3000, 3500];
 
   useEffect(() => {
+      // 重要な遷移時やプレイ中にオートセーブを実行
       if (gameState.screen !== GameScreen.START_MENU && 
           gameState.screen !== GameScreen.GAME_OVER && 
           gameState.screen !== GameScreen.ENDING &&
           gameState.screen !== GameScreen.VICTORY &&
-          gameState.screen !== GameScreen.MATH_CHALLENGE && 
-          gameState.screen !== GameScreen.KANJI_CHALLENGE && 
-          gameState.screen !== GameScreen.ENGLISH_CHALLENGE &&
           gameState.screen !== GameScreen.COMPENDIUM && 
           gameState.screen !== GameScreen.HELP &&
           gameState.screen !== GameScreen.RANKING &&
@@ -262,17 +262,14 @@ const App: React.FC = () => {
           gameState.screen !== GameScreen.MODE_SELECTION &&
           gameState.screen !== GameScreen.DEBUG_MENU &&
           gameState.screen !== GameScreen.MINI_GAME_SELECT &&
-          gameState.screen !== GameScreen.MINI_GAME_POKER && 
-          gameState.screen !== GameScreen.MINI_GAME_SURVIVOR &&
-          gameState.screen !== GameScreen.MINI_GAME_DUNGEON &&
-          gameState.screen !== GameScreen.MINI_GAME_DUNGEON_2 &&
-          gameState.screen !== GameScreen.MINI_GAME_KOCHO &&
-          gameState.screen !== GameScreen.MINI_GAME_PAPER_PLANE &&
-          gameState.screen !== GameScreen.DODGEBALL_SHOOTING &&
-          gameState.screen !== GameScreen.FINAL_BRIDGE &&
           gameState.screen !== GameScreen.PROBLEM_CHALLENGE
       ) {
           storageService.saveGame(gameState);
+      }
+      
+      // タイトル画面の時、セーブデータの有無を再チェック
+      if (gameState.screen === GameScreen.START_MENU) {
+          setHasSave(storageService.hasSaveFile());
       }
   }, [gameState]);
 
@@ -341,6 +338,7 @@ const App: React.FC = () => {
       setShopCards([]);
       setEventData(null);
       setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined }));
+      setHasSave(storageService.hasSaveFile()); // タイトルに戻る際にセーブ確認
       audioService.playBGM('menu'); 
   };
 
@@ -363,7 +361,17 @@ const App: React.FC = () => {
       const saved = storageService.loadGame();
       if (saved) {
           setGameState(saved);
-          audioService.playBGM('map'); 
+          // 画面に応じたBGMの復帰
+          if (saved.screen === GameScreen.BATTLE) {
+              audioService.playBGM('battle');
+          } else if (saved.screen === GameScreen.MAP) {
+              audioService.playBGM('map');
+          } else if (saved.screen === GameScreen.SHOP) {
+              audioService.playBGM('shop');
+          } else {
+              audioService.playBGM('map');
+          }
+          addLog("冒険を再開した。", "blue");
       }
   };
 
@@ -582,6 +590,10 @@ const App: React.FC = () => {
           initialDeck = createDeck(char.deckTemplate);
       }
 
+      // NEW: Unlock starting deck in compendium
+      const startingCardNames = initialDeck.map(c => c.name);
+      storageService.saveUnlockedCards(startingCardNames);
+
       const legacyCard = storageService.getLegacyCard();
       if (legacyCard) {
           initialDeck.push({ ...legacyCard, id: `legacy-${Date.now()}` });
@@ -594,6 +606,9 @@ const App: React.FC = () => {
       const commonRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'COMMON');
       const bonusOptions = shuffle(commonRelics).slice(0, 3);
       setStarterRelics(bonusOptions);
+
+      // --- Gardener System Init ---
+      const garden = char.id === 'GARDENER' ? Array(9).fill(null).map(() => ({ plantedCard: null, growth: 0, maxGrowth: 0 })) : undefined;
 
       const initialPlayerState = {
           ...gameState.player,
@@ -623,7 +638,19 @@ const App: React.FC = () => {
           cardsPlayedThisTurn: 0,
           echoes: 0,
           partner: undefined,
+          garden: garden // Set garden array
       };
+
+      // 特殊処理: 給食当番リーダー (CHEF) はデッキ構築画面へ
+      if (char.id === 'CHEF' && gameState.challengeMode !== '1A1D') {
+        setGameState(prev => ({
+            ...prev,
+            screen: GameScreen.DECK_CONSTRUCTION,
+            player: { ...initialPlayerState, deck: [] }, // デッキなしで開始
+            narrativeLog: [trans("本日の献立を考えている...", languageMode)]
+        }));
+        return;
+      }
 
       if (char.id === 'ASSASSIN') {
           const warrior = CHARACTERS.find(c => c.id === 'WARRIOR');
@@ -690,6 +717,21 @@ const App: React.FC = () => {
           narrativeLog: logs,
           combatLog: [],
           activeEffects: []
+      }));
+  };
+
+  const handleChefDeckSelection = (selectedCards: ICard[]) => {
+      // NEW: Unlock selected cards in compendium
+      const cardNames = selectedCards.map(c => c.name);
+      storageService.saveUnlockedCards(cardNames);
+
+      setGameState(prev => ({
+          ...prev,
+          screen: GameScreen.RELIC_SELECTION,
+          player: {
+              ...prev.player,
+              deck: selectedCards
+          }
       }));
   };
 
@@ -771,6 +813,8 @@ const App: React.FC = () => {
                 
                 enemies = enemies.map(e => {
                     const type = determineEnemyType(e.name, node.type === NodeType.BOSS);
+                    // 図鑑に登録
+                    storageService.saveDefeatedEnemy(e.name);
                     return { ...e, enemyType: type, nextIntent: getNextEnemyIntent({ ...e, enemyType: type }, 1) };
                 });
             }
@@ -903,16 +947,21 @@ const App: React.FC = () => {
 
         } else if (node.type === NodeType.SHOP) {
             const isLibrarian = nextState.player.id === 'LIBRARIAN';
+            const isGardener = nextState.player.id === 'GARDENER';
             const shopCandidates = Object.values(CARDS_LIBRARY).filter(c => 
                 c.type !== CardType.STATUS && 
                 c.type !== CardType.CURSE && 
-                (c.rarity !== 'SPECIAL' || (isLibrarian && Object.values(LIBRARIAN_CARDS).some(lc => lc.name === c.name)))
+                (c.rarity !== 'SPECIAL' || (isLibrarian && Object.values(LIBRARIAN_CARDS).some(lc => lc.name === c.name)) || (isGardener && c.isSeed))
             );
 
             const cards: ICard[] = [];
             for(let i=0; i<5; i++) {
                 if (shopCandidates.length === 0) break;
-                const cTemplate = shopCandidates[Math.floor(Math.random() * shopCandidates.length)];
+                // Gardener specific: boost seeds in shop
+                let candidatePool = shopCandidates;
+                if (isGardener && i < 2) candidatePool = Object.values(GARDEN_SEEDS);
+                
+                const cTemplate = candidatePool[Math.floor(Math.random() * candidatePool.length)] || shopCandidates[Math.floor(Math.random() * shopCandidates.length)];
                 const c = { ...cTemplate };
                 
                 let price = 40 + Math.floor(Math.random() * 60);
@@ -1069,10 +1118,6 @@ const App: React.FC = () => {
               p.currentEnergy += 2;
               newLogs.push(`${trans("エネルギー", languageMode)}+2`);
               nextActiveEffects.push({ id: `vfx-pot-zap-${Date.now()}`, type: 'BUFF', targetId: 'player' });
-          } else if (potion.templateId === 'WEAK_POTION' && target) {
-              applyDebuff(target, 'WEAK', 3);
-              newLogs.push(`${trans(target.name, languageMode)}に${trans("へろへろ", languageMode)}3を${trans("付与", languageMode)}`);
-              nextActiveEffects.push({ id: `vfx-pot-dbuff-${Date.now()}`, type: 'DEBUFF', targetId: target.id });
           } else if (potion.templateId === 'WEAK_POTION' && target) {
               applyDebuff(target, 'WEAK', 3);
               newLogs.push(`${trans(target.name, languageMode)}に${trans("へろへろ", languageMode)}3を${trans("付与", languageMode)}`);
@@ -1345,7 +1390,7 @@ const App: React.FC = () => {
                     // VFX TRIGGER
                     nextActiveEffects.push({ id: `vfx-${Date.now()}-${Math.random()}`, type: 'SLASH', targetId: e.id });
 
-                    if (e.enemyType === 'THE_HEART' && e.currentHp <= 0 && e.phase === 1) {
+                    if (e.currentHp <= 0 && e.enemyType === 'THE_HEART' && e.phase === 1) {
                          e.currentHp = e.maxHp; 
                          e.phase = 2; 
                          e.name = "真・校長先生"; 
@@ -1410,7 +1455,6 @@ const App: React.FC = () => {
                              currentLogs.push(`${trans(e.name, languageMode)}を${trans("捕獲した！", languageMode)}`);
                              nextActiveEffects.push({ id: `vfx-cap-${Date.now()}`, type: 'BUFF', targetId: 'player' });
                          }
-                    }
                 });
               }
 
@@ -1543,7 +1587,7 @@ const App: React.FC = () => {
               }
               if (card.addCardToDraw) {
                    for (let c=0; c<card.addCardToDraw.count; c++) { 
-                       const template = CARDS_LIBRARY[card.addCardToDraw.cardName];
+                       const template = CARDS_LIBRARY[card.addCardToDraw.count];
                        if (template) p.drawPile.push({ ...template, id: `gen-${Date.now()}-${c}` }); 
                    }
                    p.drawPile = shuffle(p.drawPile);
@@ -2258,6 +2302,39 @@ const App: React.FC = () => {
       audioService.playBGM('map');
   };
 
+  // --- Gardener System Handlers ---
+  const handlePlantSeed = (slotIdx: number, card: ICard) => {
+    setGameState(prev => {
+        const p = { ...prev.player };
+        const garden = [...(p.garden || [])];
+        garden[slotIdx] = {
+            plantedCard: card,
+            growth: 0,
+            maxGrowth: card.growthRequired || 1
+        };
+        const newDeck = p.deck.filter(c => c.id !== card.id);
+        return { ...prev, player: { ...p, garden, deck: newDeck } };
+    });
+  };
+
+  const handleHarvestPlant = (slotIdx: number) => {
+    setGameState(prev => {
+        const p = { ...prev.player };
+        const garden = [...(p.garden || [])];
+        const slot = garden[slotIdx];
+        if (!slot.plantedCard) return prev;
+
+        const grownTemplate = GROWN_PLANTS[slot.plantedCard.grownCardId || 'SUNFLOWER'];
+        const grownCard: ICard = {
+            ...grownTemplate,
+            id: `grown-${Date.now()}-${slotIdx}`
+        };
+        
+        garden[slotIdx] = { plantedCard: null, growth: 0, maxGrowth: 0 };
+        return { ...prev, player: { ...p, garden, deck: [...p.deck, grownCard] } };
+    });
+  };
+
   useEffect(() => {
     if (gameState.screen === GameScreen.BATTLE) {
         if (gameState.enemies.length === 0) {
@@ -2346,9 +2423,18 @@ const App: React.FC = () => {
   const finishRewardPhase = () => {
     setGameState(prev => {
         const currentNode = prev.map.find(n => n.id === prev.currentMapNodeId);
+        
+        // --- Garden Growth Logic ---
+        let nextPlayer = { ...prev.player };
+        if (nextPlayer.id === 'GARDENER' && nextPlayer.garden) {
+            nextPlayer.garden = nextPlayer.garden.map(slot => 
+                slot.plantedCard ? { ...slot, growth: Math.min(slot.maxGrowth, slot.growth + 1) } : slot
+            );
+        }
+
         if (currentNode && currentNode.type === NodeType.BOSS) {
             if (prev.act === 3) {
-                return { ...prev, screen: GameScreen.FINAL_BRIDGE };
+                return { ...prev, player: nextPlayer, screen: GameScreen.FINAL_BRIDGE };
             }
 
             const nextAct = prev.act + 1;
@@ -2356,16 +2442,19 @@ const App: React.FC = () => {
             
             const newMap = generateDungeonMap();
             audioService.playBGM('map');
+            
+            const isGardener = nextPlayer.id === 'GARDENER';
+
             return {
                 ...prev,
                 act: nextAct,
                 floor: 0,
                 map: newMap,
                 currentMapNodeId: null,
-                screen: GameScreen.MAP,
+                screen: isGardener ? GameScreen.GARDEN : GameScreen.MAP,
                 player: {
-                    ...prev.player,
-                    currentHp: prev.player.maxHp 
+                    ...nextPlayer,
+                    currentHp: nextPlayer.maxHp 
                 },
                 narrativeLog: [...prev.narrativeLog, trans(`第${nextAct}章へ進んだ。体力が全回復した！`, languageMode)]
             };
@@ -2375,10 +2464,14 @@ const App: React.FC = () => {
                 return n;
             });
             audioService.playBGM('map');
+            
+            const isGardener = nextPlayer.id === 'GARDENER';
+
             return {
                 ...prev,
+                player: nextPlayer,
                 map: newMap,
-                screen: GameScreen.MAP
+                screen: isGardener ? GameScreen.GARDEN : GameScreen.MAP
             };
         }
     });
@@ -2387,6 +2480,7 @@ const App: React.FC = () => {
   const goToRewardPhase = (bonusGold: number = 0) => {
       const rewards: RewardItem[] = [];
       const isLibrarian = gameState.player.id === 'LIBRARIAN';
+      const isGardener = gameState.player.id === 'GARDENER';
       
       if (bonusGold > 0) {
           let goldReward = bonusGold;
@@ -2394,11 +2488,11 @@ const App: React.FC = () => {
           rewards.push({ type: 'GOLD', value: goldReward, id: `rew-gold-${Date.now()}` });
       }
 
-      // Librarian exclusive pool integration
+      // Pool integration
       const allCards = Object.values(CARDS_LIBRARY).filter(c => 
           c.type !== CardType.STATUS && 
           c.type !== CardType.CURSE && 
-          (c.rarity !== 'SPECIAL' || (isLibrarian && Object.values(LIBRARIAN_CARDS).some(lc => lc.name === c.name)))
+          (c.rarity !== 'SPECIAL' || (isLibrarian && Object.values(LIBRARIAN_CARDS).some(lc => lc.name === c.name)) || (isGardener && c.isSeed))
       );
 
       for(let i=0; i<3; i++) {
@@ -2406,10 +2500,11 @@ const App: React.FC = () => {
           let targetRarity = 'COMMON';
           if (roll > 95) targetRarity = 'LEGENDARY'; else if (roll > 80) targetRarity = 'RARE'; else if (roll > 50) targetRarity = 'UNCOMMON';
           
-          // Special Librarian logic: guarantee or increase chance for an "Ohanashi" card in one slot
           let pool;
           if (isLibrarian && i === 0 && Math.random() < 0.7) {
               pool = Object.values(LIBRARIAN_CARDS);
+          } else if (isGardener && i === 0 && Math.random() < 0.7) {
+              pool = Object.values(GARDEN_SEEDS);
           } else {
               pool = allCards.filter(c => c.rarity === targetRarity);
           }
@@ -2581,7 +2676,7 @@ const App: React.FC = () => {
 
                         <div className="flex flex-col gap-3 items-center w-full max-w-[280px]">
                             {hasSave && (
-                                <button onClick={continueGame} className="w-full bg-blue-900 text-white py-3 px-4 text-lg font-bold border-2 border-blue-400 hover:bg-blue-800 cursor-pointer flex items-center justify-center shadow-lg relative group overflow-hidden">
+                                <button onClick={continueGame} className="w-full bg-blue-900 text-white py-3 px-4 text-lg font-bold border-2 border-blue-400 hover:bg-blue-800 cursor-pointer flex items-center justify-center shadow-lg relative group overflow-hidden animate-in fade-in slide-in-from-top-2">
                                     <div className="absolute inset-0 bg-blue-600 opacity-0 group-hover:opacity-20 transition-opacity"></div>
                                     <Play className="mr-2 fill-current" /> {trans("つづきから", languageMode)}
                                 </button>
@@ -2643,13 +2738,7 @@ const App: React.FC = () => {
                                 <ul className="list-disc pl-5 space-y-1">
                                     <li>問題チャレンジモード実装</li>
                                     <li>BGM選択機能の追加</li>
-                                </ul>
-                            </section>
-                            <section>
-                                <h3 className="text-white font-bold mb-1">■ リリース (Release)</h3>
-                                <ul className="list-disc pl-5 space-y-1">
-                                    <li>正式版 v1.0.0 リリース</li>
-                                    <li>全ミニゲーム実装完了</li>
+                                    <li>セーブ・ロード機能の安定性向上</li>
                                 </ul>
                             </section>
                         </div>
@@ -2774,6 +2863,15 @@ const App: React.FC = () => {
                 </div>
             )}
 
+            {gameState.screen === GameScreen.DECK_CONSTRUCTION && (
+                <div className="absolute inset-0">
+                    <ChefDeckSelectionScreen 
+                        onComplete={handleChefDeckSelection}
+                        languageMode={languageMode}
+                    />
+                </div>
+            )}
+
             {gameState.screen === GameScreen.RELIC_SELECTION && (
                 <div className="absolute inset-0">
                     <RelicSelectionScreen relics={starterRelics} onSelect={handleRelicSelect} languageMode={languageMode} />
@@ -2800,7 +2898,15 @@ const App: React.FC = () => {
 
             {gameState.screen === GameScreen.MAP && (
                 <div className="absolute inset-0">
-                    <MapScreen nodes={gameState.map} currentNodeId={gameState.currentMapNodeId} onNodeSelect={handleNodeSelect} onReturnToTitle={returnToTitle} player={gameState.player} languageMode={languageMode} />
+                    <MapScreen 
+                        nodes={gameState.map} 
+                        currentNodeId={gameState.currentMapNodeId} 
+                        onNodeSelect={handleNodeSelect} 
+                        onReturnToTitle={returnToTitle} 
+                        player={gameState.player} 
+                        languageMode={languageMode} 
+                        narrative={currentNarrative}
+                    />
                 </div>
             )}
 
@@ -2937,6 +3043,42 @@ const App: React.FC = () => {
                 </div>
             )}
 
+            {gameState.screen === GameScreen.GARDEN && (
+                <div className="absolute inset-0">
+                    <GardenScreen 
+                        player={gameState.player}
+                        onPlant={handlePlantSeed}
+                        onHarvest={handleHarvestPlant}
+                        onLeave={() => {
+                            // Leave garden and possibly get a new seed bonus
+                            const seedKeys = Object.keys(GARDEN_SEEDS);
+                            const randomKey = seedKeys[Math.floor(Math.random() * seedKeys.length)];
+                            const seedTemplate = GARDEN_SEEDS[randomKey];
+                            const newSeed: ICard = {
+                                ...seedTemplate,
+                                id: `seed-drop-${Date.now()}`
+                            };
+                            const msg = trans(`新しい種「${newSeed.name}」を手に入れた！`, languageMode);
+                            
+                            setGameState(prev => {
+                                return {
+                                    ...prev,
+                                    screen: GameScreen.MAP,
+                                    player: {
+                                        ...prev.player,
+                                        deck: [...prev.player.deck, newSeed]
+                                    },
+                                    narrativeLog: [...prev.narrativeLog, msg]
+                                };
+                            });
+                            setCurrentNarrative(msg);
+                            audioService.playSound('buff');
+                        }}
+                        languageMode={languageMode}
+                    />
+                </div>
+            )}
+
             {gameState.screen === GameScreen.EVENT && eventData && (
                 <div className="absolute inset-0">
                     <EventScreen 
@@ -3050,9 +3192,9 @@ const App: React.FC = () => {
                                 </div>
                             </div>
                         ) : (
-                            <div className="mb-8 p-4 bg-green-900/50 border border-green-500 rounded-lg animate-in zoom-in duration-150 shrink-0">
+                            <div className="mb-8 p-4 bg-green-900/50 border-green-500 rounded-lg animate-in zoom-in duration-150 shrink-0">
                                 <p className="text-green-400 font-bold text-xl">カードを継承しました！</p>
-                                <p className="text-sm text-green-200 mt-1">次の冒険の初期デッキに追加されます。</p>
+                                <p className="text-sm text-green-200 mt-1">次の冒険의 初期デッキに追加されます。</p>
                             </div>
                         )}
                         
