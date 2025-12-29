@@ -1455,6 +1455,7 @@ const App: React.FC = () => {
                              currentLogs.push(`${trans(e.name, languageMode)}を${trans("捕獲した！", languageMode)}`);
                              nextActiveEffects.push({ id: `vfx-cap-${Date.now()}`, type: 'BUFF', targetId: 'player' });
                          }
+                    }
                 });
               }
 
