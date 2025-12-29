@@ -234,7 +234,6 @@ const WEAPONS: Record<WeaponType, WeaponDef> = {
         sprite: { template: 'FIST', color: '#facc15', highlight: '#ffffff' },
         animType: 'CIRCLE'
     },
-    // --- NEW 10 WEAPONS (Total 40) ---
     PRISM: {
         id: 'PRISM', name: 'プリズム', desc: '虹色の光を放つ', 
         evolvedName: 'オーロラ・カノン', evolvedDesc: '画面を焼き尽くす七色の光', synergy: 'TEXTBOOK',
@@ -259,6 +258,12 @@ const WEAPONS: Record<WeaponType, WeaponDef> = {
         sprite: { template: 'SLIME', color: '#f97316', highlight: '#fdba74' },
         animType: 'BLAST'
     },
+    BASKETBALL_STAY: { // Helper for Basketball mechanics
+        id: 'BASKETBALL', name: 'バスケットボール', desc: '', 
+        evolvedName: '', evolvedDesc: '', synergy: 'SHOES',
+        sprite: { template: 'SLIME', color: '#f97316', highlight: '#fdba74' },
+        animType: 'STAY'
+    } as any,
     DUSTER: {
         id: 'DUSTER', name: '黒板消し', desc: '粉塵を撒き散らす', 
         evolvedName: 'ダスト・ノヴァ', evolvedDesc: '画面中を煙に包み爆破', synergy: 'DRILL',
@@ -379,6 +384,7 @@ interface Particle {
     life: number;
     maxLife: number;
     type: 'SPARK' | 'SMOKE' | 'BUBBLE' | 'SLASH_TRACE' | 'RING' | 'GLOW' | 'RAINBOW';
+    scale?: number;
 }
 
 interface SchoolyardSurvivorScreenProps {
@@ -531,7 +537,11 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
         const loop = () => {
             if (gameState.current === 'PLAYING') update();
-            draw();
+            try {
+                draw();
+            } catch (e) {
+                console.error("Draw loop error", e);
+            }
             requestAnimationFrame(loop);
         };
         const animId = requestAnimationFrame(loop);
@@ -553,14 +563,18 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     useEffect(() => { passivesRef.current = passives; }, [passives]);
 
     const saveRecord = () => {
-        const ownedWeapons = (Object.keys(weaponsRef.current) as WeaponType[]).filter(k => weaponsRef.current[k] !== undefined);
-        storageService.saveSurvivorScore({
-            id: `survivor-${Date.now()}`,
-            date: Date.now(),
-            timeSurvived: time.current,
-            levelReached: level.current,
-            weapons: ownedWeapons
-        });
+        try {
+            const ownedWeapons = (Object.keys(weaponsRef.current) as WeaponType[]).filter(k => weaponsRef.current[k] !== undefined);
+            storageService.saveSurvivorScore({
+                id: `survivor-${Date.now()}`,
+                date: Date.now(),
+                timeSurvived: time.current,
+                levelReached: level.current,
+                weapons: ownedWeapons
+            });
+        } catch (e) {
+            console.error("Failed to save record", e);
+        }
     };
 
     const handleMathComplete = (correctCount: number) => {
@@ -651,7 +665,6 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 const spd = 5 * projSpeed;
                 fireWeapon(wType, wData.level, isEvolved, dmg, sz, spd, duration, amount, luck);
                 let baseCd = 60;
-                // Specific Weapon Cooldown Adjustment
                 if (['ERASER', 'LUNCH_TRAY', 'PRISM'].includes(wType)) baseCd = 100;
                 else if (['RULER', 'COMPASS', 'TROWEL'].includes(wType)) baseCd = 40;
                 else if (['HIGHLIGHTER', 'FOUNTAIN_PEN'].includes(wType)) baseCd = 12; 
@@ -676,7 +689,11 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 player.current.flashTime = 30;
                 damageTexts.current.push({ id: Math.random(), x: player.current.x, y: player.current.y - 20, value: `-${Math.floor(finalDmg)}`, color: 'red', life: 60 });
                 if (player.current.hp <= 0) { 
-                    gameState.current = 'GAME_OVER'; saveRecord(); setUiState(prev => ({ ...prev, gameOver: true })); audioService.playSound('lose');
+                    audioService.stopBGM();
+                    gameState.current = 'GAME_OVER'; 
+                    saveRecord(); 
+                    setUiState(prev => ({ ...prev, gameOver: true })); 
+                    audioService.playSound('lose');
                 }
                 setUiState(prev => ({ ...prev, hp: player.current.hp }));
             }
@@ -687,7 +704,6 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             const p = projectiles.current[i];
             p.duration--;
             
-            // Particle Trails
             if (frameCount.current % 3 === 0) {
                 if (['PENCIL', 'PAPER_PLANE_S', 'TRIANGLE_RULER_S', 'EVOLVED'].includes(p.type)) {
                     addParticle(p.x, p.y, 'SMOKE', 'rgba(255,255,255,0.3)', { size: 2, life: 15 });
@@ -812,7 +828,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                     const coneWidth = p.type === 'TRUMPET' ? Math.PI * 0.4 : 0.2;
                     if (Math.abs(diff) < coneWidth && dist < 1000) inRange = true;
                 } else if (animType === 'RAINBOW') {
-                    inRange = true; // Prism hits everything in its beams (visual only target check)
+                    inRange = true; 
                 } else {
                     const range = (p.type === 'RECORDER' || p.type === 'FLASK' || p.type === 'DICTIONARY') ? 60 : 20;
                     if (dist < range * p.scale) inRange = true;
@@ -1065,7 +1081,6 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 ctx.globalAlpha = lifeRatio;
                 ctx.globalCompositeOperation = 'lighter';
                 
-                // Draw arc stroke
                 ctx.beginPath();
                 ctx.arc(0, 0, range, -arcWidth/2, arcWidth/2);
                 
@@ -1085,29 +1100,33 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                     addParticle(p.x + Math.cos(p.rotation + sparkAngle) * range, p.y + Math.sin(p.rotation + sparkAngle) * range, 'SLASH_TRACE', baseCol, { life: 8, size: 3 });
                 }
                 ctx.globalCompositeOperation = 'source-over';
-            } else if (['HIGHLIGHTER', 'TRUMPET', 'PRISM'].includes(animType as string) || ['HIGHLIGHTER', 'TRUMPET', 'PRISM'].includes(weaponKey)) {
+            } else if (['HIGHLIGHTER', 'TRUMPET', 'PRISM'].includes(animType as string) || ['HIGHLIGHTER', 'TRUMPET', 'PRISM'].includes(weaponKey as string)) {
                 const isEv = p.type === 'EVOLVED';
-                let beamColor = isEv ? '255, 100, 255' : '200, 255, 100';
-                if (weaponKey === 'PRISM') {
-                    const hue = (frameCount.current * 15 + p.id * 50) % 360;
-                    beamColor = `hsla(${hue}, 100%, 70%, 0.8)`;
-                } else if (weaponKey === 'TRUMPET') {
-                    beamColor = '251, 191, 36';
-                }
-
                 const pulse = Math.sin(frameCount.current * 0.4) * 0.3 + 0.7;
+                
                 ctx.globalCompositeOperation = 'lighter';
                 const grad = ctx.createLinearGradient(0, -25, 0, 25);
-                grad.addColorStop(0, `rgba(${beamColor}, 0)`);
-                grad.addColorStop(0.5, `rgba(${beamColor}, ${0.5 * pulse})`);
-                grad.addColorStop(1, `rgba(${beamColor}, 0)`);
+                
+                if (weaponKey === 'PRISM') {
+                    const hue = (frameCount.current * 15 + p.id * 50) % 360;
+                    grad.addColorStop(0, `hsla(${hue}, 100%, 70%, 0)`);
+                    grad.addColorStop(0.5, `hsla(${hue}, 100%, 70%, ${0.5 * pulse})`);
+                    grad.addColorStop(1, `hsla(${hue}, 100%, 70%, 0)`);
+                } else {
+                    let rgb = isEv ? '255, 100, 255' : '200, 255, 100';
+                    if (weaponKey === 'TRUMPET') rgb = '251, 191, 36';
+                    grad.addColorStop(0, `rgba(${rgb}, 0)`);
+                    grad.addColorStop(0.5, `rgba(${rgb}, ${0.5 * pulse})`);
+                    grad.addColorStop(1, `rgba(${rgb}, 0)`);
+                }
+                
                 ctx.fillStyle = grad;
-                const beamLen = weaponKey === 'TRUMPET' ? 300 : 1000;
+                const beamLen = (weaponKey === 'TRUMPET') ? 300 : 1000;
                 ctx.fillRect(0, -25 * p.scale, beamLen, 50 * p.scale);
                 ctx.fillStyle = 'white';
                 ctx.fillRect(0, -3 * p.scale, beamLen, 6 * p.scale);
                 ctx.globalCompositeOperation = 'source-over';
-            } else if (['RECORDER', 'SCHOOL_CHIME', 'BROADCAST_MIC', 'BASKETBALL', 'DUSTER'].includes(weaponKey)) {
+            } else if (['RECORDER', 'SCHOOL_CHIME', 'BROADCAST_MIC', 'BASKETBALL', 'DUSTER'].includes(weaponKey as string)) {
                 const ringCol = weaponKey === 'BASKETBALL' ? 'rgba(249,115,22,0.5)' : (weaponKey === 'DUSTER' ? 'rgba(150,150,150,0.5)' : 'rgba(255,255,255,0.5)');
                 ctx.beginPath(); ctx.arc(0, 0, (1 - p.duration/20) * (weaponKey === 'BROADCAST_MIC' ? 300 : 150), 0, Math.PI*2);
                 ctx.strokeStyle = ringCol; ctx.lineWidth = 5; ctx.stroke();
