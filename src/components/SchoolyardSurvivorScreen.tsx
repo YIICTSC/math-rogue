@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
-import { ArrowLeft, RotateCcw, Heart, Pause, Sparkles, Zap, Flame, Shield, Swords, Target, Radiation, Droplets, Recycle, Volume2, Music, Mic, Activity, Wind, Maximize2, Minimize2, Crosshair, FastForward, Dice5, Star } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Heart, Pause, Sparkles, Zap, Flame, Shield, Swords, Target, Radiation, Droplets, Recycle, Volume2, Music, Mic, Activity, Wind, Maximize2, Minimize2, Crosshair, FastForward, Dice5, Star, Skull } from 'lucide-react';
 import { HERO_IMAGE_DATA } from '../constants';
 import PixelSprite, { SPRITE_TEMPLATES } from './PixelSprite';
 import { audioService } from '../services/audioService';
@@ -258,12 +258,6 @@ const WEAPONS: Record<WeaponType, WeaponDef> = {
         sprite: { template: 'SLIME', color: '#f97316', highlight: '#fdba74' },
         animType: 'BLAST'
     },
-    BASKETBALL_STAY: { // Helper for Basketball mechanics
-        id: 'BASKETBALL', name: 'バスケットボール', desc: '', 
-        evolvedName: '', evolvedDesc: '', synergy: 'SHOES',
-        sprite: { template: 'SLIME', color: '#f97316', highlight: '#fdba74' },
-        animType: 'STAY'
-    } as any,
     DUSTER: {
         id: 'DUSTER', name: '黒板消し', desc: '粉塵を撒き散らす', 
         evolvedName: 'ダスト・ノヴァ', evolvedDesc: '画面中を煙に包み爆破', synergy: 'DRILL',
@@ -536,7 +530,13 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         spriteCache.current['GEM'] = generateFromTemplate('EYE', '#eab308', '#fde047');
 
         const loop = () => {
-            if (gameState.current === 'PLAYING') update();
+            if (gameState.current === 'PLAYING') {
+                try {
+                    update();
+                } catch (e) {
+                    console.error("Update loop error", e);
+                }
+            }
             try {
                 draw();
             } catch (e) {
@@ -609,6 +609,8 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     };
 
     const update = () => {
+        if (gameState.current !== 'PLAYING') return;
+
         frameCount.current++;
         if (frameCount.current % 60 === 0) {
             time.current++;
@@ -688,17 +690,18 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 player.current.hp -= finalDmg;
                 player.current.flashTime = 30;
                 damageTexts.current.push({ id: Math.random(), x: player.current.x, y: player.current.y - 20, value: `-${Math.floor(finalDmg)}`, color: 'red', life: 60 });
-                if (player.current.hp <= 0) { 
+                if (player.current.hp <= 0 && gameState.current === 'PLAYING') { 
                     audioService.stopBGM();
                     gameState.current = 'GAME_OVER'; 
                     saveRecord(); 
-                    setUiState(prev => ({ ...prev, gameOver: true })); 
+                    setUiState(prev => ({ ...prev, gameOver: true, hp: 0 })); 
                     audioService.playSound('lose');
                 }
-                setUiState(prev => ({ ...prev, hp: player.current.hp }));
             }
             if (e.flashTime > 0) e.flashTime--;
         });
+
+        if (gameState.current !== 'PLAYING') return; // Exit if game over during loops
 
         for (let i = projectiles.current.length - 1; i >= 0; i--) {
             const p = projectiles.current[i];
@@ -893,6 +896,11 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         });
         particles.current = particles.current.filter(p => p.life > 0);
         if (shakeAmount.current > 0) shakeAmount.current *= 0.85;
+
+        // Final UI updates (throttled)
+        if (frameCount.current % 10 === 0) {
+            setUiState(prev => ({ ...prev, hp: player.current.hp }));
+        }
     };
 
     const applyDamage = (e: Entity, p: Projectile) => {
@@ -941,7 +949,9 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                     const volleys = evolved ? 4 : 1; 
                     for(let v=0; v<volleys; v++) {
                         setTimeout(() => {
-                            projectiles.current.push({ id: Math.random(), x: p.x, y: p.y, dx: Math.cos(angle + (Math.random()-0.5)*0.2) * speed * (evolved?2.5:1), dy: Math.sin(angle + (Math.random()-0.5)*0.2) * speed * (evolved?2.5:1), damage: dmg, type: evolved ? 'EVOLVED' : 'PENCIL', subType: 'PENCIL', duration: 60, maxDuration: 60, penetration: evolved ? 5 : 1 + Math.floor(level/4), rotation: angle, scale: scale, knockback: 2, hitIds: [] });
+                            if (gameState.current === 'PLAYING') {
+                                projectiles.current.push({ id: Math.random(), x: p.x, y: p.y, dx: Math.cos(angle + (Math.random()-0.5)*0.2) * speed * (evolved?2.5:1), dy: Math.sin(angle + (Math.random()-0.5)*0.2) * speed * (evolved?2.5:1), damage: dmg, type: evolved ? 'EVOLVED' : 'PENCIL', subType: 'PENCIL', duration: 60, maxDuration: 60, penetration: evolved ? 5 : 1 + Math.floor(level/4), rotation: angle, scale: scale, knockback: 2, hitIds: [] });
+                            }
                         }, v * 80);
                     }
                 }
@@ -970,8 +980,10 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 const swingCount = (type === 'SCISSORS' || evolved) ? 2 : 1;
                 for(let s=0; s<swingCount; s++) {
                     setTimeout(() => {
-                        const offset = (s % 2 === 0) ? 0 : Math.PI;
-                        projectiles.current.push({ id: Math.random(), x: p.x, y: p.y, dx: 0, dy: 0, damage: dmg * (type==='CUTTER'?2.5:1), type: evolved ? 'EVOLVED' : type, subType: type, duration: 25, maxDuration: 25, penetration: 999, rotation: angleToMove + offset, scale: scale * 1.5, knockback: 10, hitIds: [] });
+                        if (gameState.current === 'PLAYING') {
+                            const offset = (s % 2 === 0) ? 0 : Math.PI;
+                            projectiles.current.push({ id: Math.random(), x: p.x, y: p.y, dx: 0, dy: 0, damage: dmg * (type==='CUTTER'?2.5:1), type: evolved ? 'EVOLVED' : type, subType: type, duration: 25, maxDuration: 25, penetration: 999, rotation: angleToMove + offset, scale: scale * 1.5, knockback: 10, hitIds: [] });
+                        }
                     }, s * 150);
                 }
                 break;
@@ -982,8 +994,10 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             case 'STAPLER':
                 for(let i=0; i<count+3; i++) {
                     setTimeout(() => {
-                        const spread = evolved ? Math.PI * 2 * Math.random() : angleToMove + (Math.random()-0.5)*0.5;
-                        projectiles.current.push({ id: Math.random(), x: p.x, y: p.y, dx: Math.cos(spread)*speed*2, dy: Math.sin(spread)*speed*2, damage: dmg*0.8, type: evolved ? 'EVOLVED' : 'STAPLER', subType: 'STAPLER', duration: 40, maxDuration: 40, penetration: 1, rotation: spread, scale: scale*0.5, knockback: 1, hitIds: [] });
+                        if (gameState.current === 'PLAYING') {
+                            const spread = evolved ? Math.PI * 2 * Math.random() : angleToMove + (Math.random()-0.5)*0.5;
+                            projectiles.current.push({ id: Math.random(), x: p.x, y: p.y, dx: Math.cos(spread)*speed*2, dy: Math.sin(spread)*speed*2, damage: dmg*0.8, type: evolved ? 'EVOLVED' : 'STAPLER', subType: 'STAPLER', duration: 40, maxDuration: 40, penetration: 1, rotation: spread, scale: scale*0.5, knockback: 1, hitIds: [] });
+                        }
                     }, i * 50);
                 }
                 break;
