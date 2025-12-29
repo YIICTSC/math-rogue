@@ -97,17 +97,17 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                                     <Sparkles size={16} className="text-indigo-400" />
                                 </div>
                                 <div className="text-left">
-                                    <div className="text-[10px] text-indigo-300 font-black uppercase tracking-tighter mb-0.5">固有ギミック</div>
+                                    <div className="text-[10px] text-indigo-300 font-black uppercase tracking-tighter mb-0.5">{trans("固有ギミック", languageMode)}</div>
                                     <div className="text-[11px] text-gray-300 font-bold leading-snug">
-                                        {char.id === 'WARRIOR' && '戦闘後の体力回復による高い生存能力。'}
-                                        {char.id === 'CARETAKER' && '倒した敵を仲間の攻撃カードとして「捕獲」。'}
-                                        {char.id === 'ASSASSIN' && '毒による固定ダメージ。初期相棒との共闘。'}
-                                        {char.id === 'MAGE' && '低コストスキルの連打とエナジー加速。'}
-                                        {char.id === 'DODGEBALL' && 'ドロー＆ディスカード。ミニゲームでの敵撃破。'}
-                                        {char.id === 'BARD' && 'デバフ管理と、敵の攻撃を反射する「応答」。'}
-                                        {char.id === 'LIBRARIAN' && '手札の「保留」と、強力な物語カードの活用。'}
-                                        {char.id === 'CHEF' && '献立（初期デッキ）の自由なカスタマイズ。'}
-                                        {char.id === 'GARDENER' && '菜園での種まきと強力な植物カードへの進化。'}
+                                        {char.id === 'WARRIOR' && trans('戦闘後の体力回復による高い生存能力。', languageMode)}
+                                        {char.id === 'CARETAKER' && trans('倒した敵を仲間の攻撃カードとして「捕獲」。', languageMode)}
+                                        {char.id === 'ASSASSIN' && trans('毒による固定ダメージ。初期相棒との共闘。', languageMode)}
+                                        {char.id === 'MAGE' && trans('理科室での「3枚合成」。3つの効果を併せ持つ最強のキメラを作成可能。', languageMode)}
+                                        {char.id === 'DODGEBALL' && trans('ドロー＆ディスカード。ミニゲームでの敵撃破。', languageMode)}
+                                        {char.id === 'BARD' && trans('デバフ管理と、敵の攻撃を反射する「応答」。', languageMode)}
+                                        {char.id === 'LIBRARIAN' && trans('手札の「保留」と、強力な物語カードの活用。', languageMode)}
+                                        {char.id === 'CHEF' && trans('献立（初期デッキ）の自由にカスタマイズ。', languageMode)}
+                                        {char.id === 'GARDENER' && trans('菜園での種まきと強力な植物カードへの進化。', languageMode)}
                                     </div>
                                 </div>
                             </div>
@@ -118,7 +118,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                                     <Gem size={16} className="text-yellow-400" />
                                 </div>
                                 <div className="text-left">
-                                    <div className="text-[10px] text-yellow-300 font-black uppercase tracking-tighter mb-0.5">初期装備</div>
+                                    <div className="text-[10px] text-yellow-300 font-black uppercase tracking-tighter mb-0.5">{trans("初期装備", languageMode)}</div>
                                     <div className="text-xs text-white font-black truncate">{relic ? trans(relic.name, languageMode) : '???'}</div>
                                     <div className="text-[10px] text-gray-400 font-bold leading-tight mt-0.5">
                                         {relic ? trans(relic.description, languageMode) : ''}

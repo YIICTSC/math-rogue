@@ -948,11 +948,23 @@ const App: React.FC = () => {
         } else if (node.type === NodeType.SHOP) {
             const isLibrarian = nextState.player.id === 'LIBRARIAN';
             const isGardener = nextState.player.id === 'GARDENER';
-            const shopCandidates = Object.values(CARDS_LIBRARY).filter(c => 
-                c.type !== CardType.STATUS && 
-                c.type !== CardType.CURSE && 
-                (c.rarity !== 'SPECIAL' || (isLibrarian && Object.values(LIBRARIAN_CARDS).some(lc => lc.name === c.name)) || (isGardener && c.isSeed))
-            );
+            
+            const shopCandidates = Object.values(CARDS_LIBRARY).filter(c => {
+                if (c.type === CardType.STATUS || c.type === CardType.CURSE) return false;
+                
+                // 種カードは園芸委員のみ
+                if (c.isSeed && !isGardener) return false;
+                
+                // 特定職のSPECIALカード（図書委員用物語、園芸用種）の制限
+                const isLibrarianCard = Object.values(LIBRARIAN_CARDS).some(lc => lc.name === c.name);
+                if (c.rarity === 'SPECIAL') {
+                    if (isLibrarian && isLibrarianCard) return true;
+                    if (isGardener && c.isSeed) return true;
+                    return false;
+                }
+                
+                return true;
+            });
 
             const cards: ICard[] = [];
             for(let i=0; i<5; i++) {
@@ -2490,11 +2502,22 @@ const App: React.FC = () => {
       }
 
       // Pool integration
-      const allCards = Object.values(CARDS_LIBRARY).filter(c => 
-          c.type !== CardType.STATUS && 
-          c.type !== CardType.CURSE && 
-          (c.rarity !== 'SPECIAL' || (isLibrarian && Object.values(LIBRARIAN_CARDS).some(lc => lc.name === c.name)) || (isGardener && c.isSeed))
-      );
+      const allCards = Object.values(CARDS_LIBRARY).filter(c => {
+          if (c.type === CardType.STATUS || c.type === CardType.CURSE) return false;
+          
+          // 種カードは園芸委員のみ
+          if (c.isSeed && !isGardener) return false;
+          
+          // 図書委員用、または園芸委員用のSPECIALカードの出現制御
+          const isLibrarianCard = Object.values(LIBRARIAN_CARDS).some(lc => lc.name === c.name);
+          if (c.rarity === 'SPECIAL') {
+              if (isLibrarian && isLibrarianCard) return true;
+              if (isGardener && c.isSeed) return true;
+              return false;
+          }
+          
+          return true;
+      });
 
       for(let i=0; i<3; i++) {
           const roll = Math.random() * 100;
@@ -3217,4 +3240,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-
