@@ -11,14 +11,14 @@ const CARETAKER_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 2
 const ASSASSIN_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges"><path d="M0 0h24v24H0z" fill="none"/><path d="M8 3h8v3h-1v1h-6v-1H8z" fill="#212121"/><path d="M9 6h6v4H9z" fill="#ffe0b2"/><path d="M10 7h1v1h-1zM13 7h1v1h-1z" fill="#3e2723"/><path d="M9 8h6v1H9z" fill="#4caf50" opacity="0.3"/><path d="M8 10h8v6H8z" fill="#424242"/><path d="M10 11h4v4h-4z" fill="#616161"/><path d="M6 10h2v4H6zM16 10h2v4h-2z" fill="#424242"/><path d="M8 16h8v3H8z" fill="#263238"/><path d="M9 19h2v3H9zM13 19h2v3h-2z" fill="#ffe0b2"/><path d="M8 22h3v2H8zM13 22h3v2h-3z" fill="#212121"/></svg>`;
 const MAGE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges"><path d="M0 0h24v24H0z" fill="none"/><path d="M8 3h8v2H8z" fill="#5d4037"/><path d="M9 5h6v4H9z" fill="#ffccbc"/><path d="M9 6h2v1H9zM13 6h2v1h-2z" fill="#212121"/><path d="M11 6h2v1h-2z" fill="#bdbdbd"/><path d="M7 9h10v9H7z" fill="#ffffff"/><path d="M11 9h2v9h-2z" fill="#e3f2fd"/><path d="M18 12h2v3h-2z" fill="#4caf50"/><path d="M9 18h2v4H9zM13 18h2v4h-2z" fill="#455a64"/><path d="M8 22h3v2H8zM13 22h3v2h-3z" fill="#37474f"/></svg>`;
 const BARD_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges"><path d="M0 0h24v24H0z" fill="none"/><path d="M8 3h8v3H8z" fill="#ec407a"/><path d="M6 4h2v4H6zM16 4h2v4h-2z" fill="#ec407a"/><path d="M9 6h6v4H9z" fill="#ffccbc"/><path d="M10 7h1v1h-1zM13 7h1v1h-1z" fill="#3e2723"/><path d="M13 11h3v3h-3z" fill="#212121"/><path d="M14 14h1v2h-1z" fill="#bdbdbd"/><path d="M8 10h8v6H8z" fill="#fff9c4"/><path d="M10 10h4v2h-4z" fill="#f44336"/><path d="M7 16h10v3H7z" fill="#ad1457"/><path d="M9 19h2v3H9zM13 19h2v3h-2z" fill="#ffccbc"/><path d="M9 21h2v1H9zM13 21h2v1h-2z" fill="#fff"/><path d="M8 22h3v2H8zM13 22h3v2h-3z" fill="#5d4037"/></svg>`;
-const DODGEBALL_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges"><path d="M0 0h24v24H0z" fill="none"/><path d="M7 3h10v3H7z" fill="#ff9800"/><path d="M6 4h1v2H6zM17 4h1v2h-1z" fill="#ff9800"/><path d="M9 6h6v4H9z" fill="#ffccbc"/><path d="M10 7h1v1h-1zM13 7h1v1h-1z" fill="#3e2723"/><path d="M8 5h8v1H8z" fill="#ffffff"/><path d="M20 5h2v4h-2z" fill="#ffffff"/><path d="M8 10h8v6H8z" fill="#ff5722"/><path d="M10 11h4v4h-4z" fill="#e64a19"/><path d="M6 10h2v4H6zM16 10h2v4h-2z" fill="#ffccbc"/><path d="M17 13h4v4h-4z" fill="#eeeeee"/><path d="M18 13h1v4h-1z" fill="#bdbdbd"/><path d="M8 16h8v3H8z" fill="#333333"/><path d="M9 19h2v3H9zM13 19h2v3h-2z" fill="#ffccbc"/><path d="M8 22h3v2H8zM13 22h3v2h-3z" fill="#ff9800"/></svg>`;
+const DODGEBALL_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges"><path d="M0 0h24v24H0z" fill="none"/><path d="M7 3h10v3H7z" fill="#ff9800"/><path d="M6 4h1v2H6zM17 4h1v2h-1z" fill="#ff9800"/><path d="M9 6h6v4H9z" fill="#ffccbc"/><path d="M10 7h1v1h-1zM13 7h1v1h-1z" fill="#3e2723"/><path d="M8 5h8v1H8z" fill="#ffffff"/><path d="M20 5h2v4h-2z" fill="#ffffff"/><path d="M8 10h8v6H8z" fill="#ff5722"/><path d="M10 11h4v4h-4z" fill="#e64a19"/><path d="M6 10h2v4H6zM16 10h2v4h-2z" fill="#ffccbc"/><path d="M17 13h4v4h-4z" fill="#eeeeee"/><path d="M18 13h1v4h-1z" fill="#bdbdbd"/><path d="M8 16h8v3H8z" fill="#333333"/><path d="M9 19h2v3H9zM13 19h2v3h-2z" fill="#ffccbc"/><path d="M8 22h3v2H8z" fill="#ff9800"/></svg>`;
 const LIBRARIAN_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges"><path d="M0 0h24v24H0z" fill="none"/><path d="M7 3h10v4H7z" fill="#3f51b5"/><path d="M6 4h1v5H6z" fill="#3f51b5"/><path d="M17 4h1v5h-1z" fill="#3f51b5"/><path d="M9 7h6v4H9z" fill="#ffccbc"/><path d="M9 8h6v1H9z" fill="#212121"/><path d="M8 11h8v6H8z" fill="#e8eaf6"/><path d="M10 11h1v6h-1zM13 11h1v6h-1z" fill="#9fa8da"/><path d="M6 11h2v4H6z" fill="#ffccbc"/><path d="M16 11h2v4h-2z" fill="#ffccbc"/><path d="M16 13h4v4h-4z" fill="#5d4037"/><path d="M17 14h2v2h-2z" fill="#fff"/><path d="M7 17h10v4H7z" fill="#283593"/><path d="M9 21h2v3H9z" fill="#333"/></svg>`;
 const CHEF_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges"><path d="M0 0h24v24H0z" fill="none"/><path d="M8 1h8v4H8z" fill="#ffffff"/><path d="M9 5h6v4H9z" fill="#ffccbc"/><path d="M10 6h1v1h-1zM13 6h1v1h-1z" fill="#3e2723"/><path d="M9 9h6v1H9z" fill="#ffffff"/><path d="M7 10h10v7H7z" fill="#ffffff"/><path d="M9 11h6v4H9z" fill="#eeeeee"/><path d="M5 10h2v4H5zM17 10h2v4h-2z" fill="#ffccbc"/><path d="M18 9h2v6h-2z" fill="#b0bec5"/><path d="M18 15h3v2h-3z" fill="#b0bec5"/><path d="M8 17h8v3H8z" fill="#37474f"/><path d="M9 20h2v4H9zM13 20h2v4h-2z" fill="#ffffff"/></svg>`;
-const GARDENER_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges"><path d="M0 0h24v24H0z" fill="none"/><path d="M6 3h12v2H6z" fill="#fdd835"/><path d="M5 5h14v1H5z" fill="#fbc02d"/><path d="M9 6h6v4H9z" fill="#ffccbc"/><path d="M10 7h1v1h-1zM13 7h1v1h-1z" fill="#3e2723"/><path d="M8 10h8v6H8z" fill="#aed581"/><path d="M10 11h4v4h-4z" fill="#c5e1a5"/><path d="M6 10h2v4H6z" fill="#ffccbc"/><path d="M17 12h4v3h-4z" fill="#81c784"/><path d="M8 16h8v3H8z" fill="#558b2f"/><path d="M9 19h2v3H9zM13 19h2v3h-2z" fill="#795548"/><path d="M8 22h3v2H8zM13 22h3v2h-3z" fill="#5d4037"/></svg>`;
+const GARDENER_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges"><path d="M0 0h24v24H0z" fill="none"/><path d="M6 3h12v2H6z" fill="#fdd835"/><path d="M5 5h14v1H5z" fill="#fbc02d"/><path d="M9 6h6v4H9z" fill="#ffccbc"/><path d="M10 7h1v1h-1zM13 7h1v1h-1z" fill="#3e2723"/><path d="M8 10h8v6H8z" fill="#aed581"/><path d="M10 11h4v4h-4z" fill="#c5e1a5"/><path d="M6 10h2v4H6z" fill="#ffccbc"/><path d="M17 12h4v3h-4z" fill="#81c784"/><path d="M8 16h8v3H8z" fill="#558b2f"/><path d="M9 19h2v3H9z" fill="#795548"/><path d="M8 22h3v2H8zM13 22h3v2h-3z" fill="#5d4037"/></svg>`;
 
 export const HERO_IMAGE_DATA = `data:image/svg+xml;base64,${btoa(WARRIOR_SVG)}`;
 
-// --- GARDENER SEEDS & PLANTS (EXTENDED) ---
+// --- GARDENER SEEDS & PLANTS ---
 
 export const GARDEN_SEEDS: Record<string, Omit<Card, 'id'>> = {
   SUNFLOWER_SEED: { 
@@ -40,58 +40,6 @@ export const GARDEN_SEEDS: Record<string, Omit<Card, 'id'>> = {
   MANDRAKE_SEED: { 
     name: 'マンドレイクの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「マンドレイク」に成長する。', 
     block: 3, isSeed: true, growthRequired: 4, grownCardId: 'MANDRAKE_ROOT', rarity: 'LEGENDARY', textureRef: 'PLANT|紫|SKILL' 
-  },
-  RICE_SEED: { 
-    name: 'コメの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「黄金の稲」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 1, grownCardId: 'GOLDEN_RICE', rarity: 'COMMON', textureRef: 'PLANT|黄|SKILL' 
-  },
-  BAMBOO_SEED: { 
-    name: 'タケノコ', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「巨大な竹」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 1, grownCardId: 'GIANT_BAMBOO', rarity: 'COMMON', textureRef: 'PLANT|緑|SKILL' 
-  },
-  TOMATO_SEED: { 
-    name: 'トマトの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「完熟トマト」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 2, grownCardId: 'RIPE_TOMATO', rarity: 'UNCOMMON', textureRef: 'PLANT|赤|SKILL' 
-  },
-  CHILI_SEED: { 
-    name: 'トウガラシの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「激辛トウガラシ」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 2, grownCardId: 'HOT_CHILI', rarity: 'UNCOMMON', textureRef: 'PLANT|赤|SKILL' 
-  },
-  CLOVER_SEED: { 
-    name: 'クローバーの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「四つ葉」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 2, grownCardId: 'FOUR_LEAF_CLOVER', rarity: 'UNCOMMON', textureRef: 'PLANT|緑|SKILL' 
-  },
-  PUMPKIN_SEED: { 
-    name: 'カボチャの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「巨大カボチャ」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 3, grownCardId: 'GIANT_PUMPKIN', rarity: 'RARE', textureRef: 'PLANT|橙|SKILL' 
-  },
-  BAOBAB_SEED: { 
-    name: 'バオバブの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「古代のバオバブ」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 4, grownCardId: 'ANCIENT_BAOBAB', rarity: 'RARE', textureRef: 'PLANT|茶|SKILL' 
-  },
-  SAKURA_SEED: { 
-    name: 'サクラの苗木', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「満開の桜」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 4, grownCardId: 'SAKURA_BLOSSOM', rarity: 'LEGENDARY', textureRef: 'PLANT|桃|SKILL' 
-  },
-  FLYTRAP_SEED: { 
-    name: '食虫植物の種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「ヴィーナス」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 3, grownCardId: 'VENUS_FLYTRAP', rarity: 'RARE', textureRef: 'PLANT|緑|SKILL' 
-  },
-  DAIKON_SEED: { 
-    name: 'ダイコンの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「聖なるダイコン」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 2, grownCardId: 'HOLY_DAIKON', rarity: 'COMMON', textureRef: 'PLANT|白|SKILL' 
-  },
-  WISTERIA_SEED: { 
-    name: '藤の種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「幻惑の藤」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 3, grownCardId: 'MYSTIC_WISTERIA', rarity: 'RARE', textureRef: 'PLANT|紫|SKILL' 
-  },
-  MOSS_SEED: { 
-    name: 'コケの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「万年苔」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 1, grownCardId: 'ETERNAL_MOSS', rarity: 'COMMON', textureRef: 'PLANT|緑|SKILL' 
-  },
-  LOTUS_SEED: { 
-    name: 'ハスの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「聖蓮」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 4, grownCardId: 'SACRED_LOTUS', rarity: 'LEGENDARY', textureRef: 'PLANT|白|SKILL' 
   },
 };
 
@@ -115,58 +63,6 @@ export const GROWN_PLANTS: Record<string, Omit<Card, 'id'>> = {
   MANDRAKE_ROOT: { 
     name: 'マンドレイク', cost: 0, type: CardType.SKILL, target: TargetType.ALL_ENEMIES, description: '敵全体をびくびく3にする。敵全体にドクドク10。廃棄。', 
     vulnerable: 3, poison: 10, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|紫|SKILL' 
-  },
-  GOLDEN_RICE: { 
-    name: '黄金の稲', cost: 0, type: CardType.SKILL, description: 'エネルギー1。2枚引く。廃棄。', 
-    energy: 1, draw: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|黄|SKILL' 
-  },
-  GIANT_BAMBOO: { 
-    name: '巨大な竹', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '10ダメージ。ムキムキ1を得る。廃棄。', 
-    damage: 10, strength: 1, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|緑|ATTACK' 
-  },
-  RIPE_TOMATO: { 
-    name: '完熟トマト', cost: 0, type: CardType.SKILL, description: 'HPを8回復する。廃棄。', 
-    heal: 8, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|赤|SKILL' 
-  },
-  HOT_CHILI: { 
-    name: '激辛トウガラシ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '7ダメージ。対象にやほど(2ダメ)を与える。廃棄。', 
-    damage: 7, addCardToDiscard: { cardName: 'BURN', count: 1 }, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|赤|ATTACK' 
-  },
-  FOUR_LEAF_CLOVER: { 
-    name: '四つ葉のクローバー', cost: 0, type: CardType.SKILL, description: '50ゴールドを得る。廃棄。', 
-    energy: 0, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|緑|SKILL' 
-  },
-  GIANT_PUMPKIN: { 
-    name: '巨大カボチャ', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '25ダメージ。廃棄。', 
-    damage: 25, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|橙|ATTACK' 
-  },
-  ANCIENT_BAOBAB: { 
-    name: '古代のバオバブ', cost: 2, type: CardType.SKILL, description: 'ブロック20。最大HP3増加。廃棄。', 
-    block: 20, fatalMaxHp: 3, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|茶|SKILL' 
-  },
-  SAKURA_BLOSSOM: { 
-    name: '満開の桜', cost: 3, type: CardType.POWER, description: 'ターン開始時、ブロック5を得る。', 
-    applyPower: { id: 'METALLICIZE', amount: 5 }, rarity: 'SPECIAL', textureRef: 'PLANT|桃|POWER' 
-  },
-  VENUS_FLYTRAP: { 
-    name: 'ヴィーナス', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '15ダメージ。これで解決すると捕獲。廃棄。', 
-    damage: 15, capture: true, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|緑|ATTACK' 
-  },
-  HOLY_DAIKON: { 
-    name: '聖なるダイコン', cost: 1, type: CardType.SKILL, description: 'ブロック12。デバフを解除する。廃棄。', 
-    block: 12, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|白|SKILL' 
-  },
-  MYSTIC_WISTERIA: { 
-    name: '幻惑の藤', cost: 1, type: CardType.SKILL, target: TargetType.ALL_ENEMIES, description: '敵全体を2ターン「へろへろ」と「びくびく」にする。廃棄。', 
-    weak: 2, vulnerable: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|紫|SKILL' 
-  },
-  ETERNAL_MOSS: { 
-    name: '万年苔', cost: 0, type: CardType.SKILL, description: 'この戦闘中、被ダメージを1軽減する。廃棄。', 
-    applyPower: { id: 'BUFFER', amount: 1 }, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|緑|SKILL' 
-  },
-  SACRED_LOTUS: { 
-    name: '聖蓮', cost: 0, type: CardType.SKILL, description: 'エナジー3を得る。3枚引く。廃棄。', 
-    energy: 3, draw: 3, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|白|SKILL' 
   },
 };
 
@@ -344,7 +240,7 @@ export const EVENT_CARDS: Record<string, Omit<Card, 'id'>> = {
     MADNESS: { name: 'パニック', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '手札のランダムなカード1枚のコストを0にする。廃棄。', exhaust: true, rarity: 'SPECIAL', textureRef: 'LIGHTNING|黄|SKILL' },
 };
 
-// --- LIBRARIAN EXCLUSIVE CARDS (Ninki no Ohanashi Series) ---
+// --- LIBRARIAN EXCLUSIVE CARDS ---
 export const LIBRARIAN_CARDS: Record<string, Omit<Card, 'id'>> = {
     GON_GITSUNE: { name: 'ごんぎつね', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '6ダメージ。山札の一番上のカードが攻撃ならもう一度発動。', damage: 6, rarity: 'SPECIAL', textureRef: 'BEAST|茶|ATTACK' },
     GON_KURU: { name: 'ごんの栗', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'カードを1枚引く。それがアタックならムキムキ2を得る。', draw: 1, rarity: 'SPECIAL', textureRef: 'PLANT|茶|SKILL' },
@@ -565,7 +461,7 @@ export const CHARACTERS: Character[] = [
     {
         id: 'WARRIOR',
         name: 'わんぱく小学生',
-        description: '「ランドセルタックル」と「往復ビンタ」でガンガン攻める攻撃型！',
+        description: '【攻撃タイプ】強力な物理攻撃と自己回復で戦うバランス型。初心者におすすめ。',
         maxHp: 80,
         gold: 100,
         startingRelicId: 'BURNING_BLOOD',
@@ -576,7 +472,7 @@ export const CHARACTERS: Character[] = [
     {
         id: 'CARETAKER',
         name: '飼育委員',
-        description: '「捕獲網」で敵をカード化して仲間にするユニークな戦術。',
+        description: '【捕獲タイプ】「捕獲網」で倒した敵をカードとして仲間にできる。動物たちの力を借りて戦う。',
         maxHp: 72,
         gold: 100,
         startingRelicId: 'WHISTLE',
@@ -587,7 +483,7 @@ export const CHARACTERS: Character[] = [
     {
         id: 'ASSASSIN',
         name: '転校生',
-        description: '「毒舌」で相手を毒状態にしてジワジワ追い詰めるテクニカル型。',
+        description: '【テクニカル】毒による継続ダメージが得意。わんぱく小学生が最初からパートナーとして参戦する。',
         maxHp: 70,
         gold: 100,
         startingRelicId: 'SNAKE_RING',
@@ -598,7 +494,7 @@ export const CHARACTERS: Character[] = [
     {
         id: 'MAGE',
         name: '理科クラブ部長',
-        description: 'コスト0の「レーザー」とエネルギーを溜める「静電気」で手数を稼ぐ。',
+        description: '【コンボタイプ】低コストのカードを連打して戦う。エネルギー生成とカード生成に優れる。',
         maxHp: 65,
         gold: 100,
         startingRelicId: 'HOLY_WATER',
@@ -609,7 +505,7 @@ export const CHARACTERS: Character[] = [
     {
         id: 'DODGEBALL',
         name: 'ドッジボールのエース',
-        description: 'カードを引いて捨てる「チョーク投げ」でデッキを回転させるスピードタイプ。',
+        description: '【スピード】カードを捨てることで効果を発揮する。ドッジボールでの先制攻撃が可能。',
         maxHp: 75,
         gold: 100,
         startingRelicId: 'HACHIMAKI',
@@ -620,7 +516,7 @@ export const CHARACTERS: Character[] = [
     {
         id: 'BARD',
         name: '放送委員',
-        description: '「大声」で敵全体にダメージを与え、さらに弱体化させる。',
+        description: '【デバフ・反射】敵を弱体化させ、タイミングよく答える「応答（パリィ）」で攻撃を跳ね返す。',
         maxHp: 68,
         gold: 100,
         startingRelicId: 'MEGAPHONE', 
@@ -631,7 +527,7 @@ export const CHARACTERS: Character[] = [
     {
         id: 'LIBRARIAN',
         name: '図書委員',
-        description: '「予習（ブロック＆保留）」で次のターンに備える慎重派。',
+        description: '【戦略・保留】カードを手札に残す「保留」が得意。「物語」の力で戦局をコントロールする。',
         maxHp: 60,
         gold: 120,
         startingRelicId: 'BOOKMARK',
@@ -642,7 +538,7 @@ export const CHARACTERS: Character[] = [
     {
         id: 'CHEF',
         name: '給食当番リーダー',
-        description: '「やる気」でムキムキになり、「重いバット」で超火力を叩き出す！',
+        description: '【パワー】筋力を高めて一撃で粉砕する。開始時に「これまでに解放したカード」から献立を自由に組める。',
         maxHp: 85,
         gold: 100,
         startingRelicId: 'BIG_LADLE',
@@ -653,7 +549,7 @@ export const CHARACTERS: Character[] = [
     {
         id: 'GARDENER',
         name: '園芸委員',
-        description: '専用の「種」を菜園で育て、強力な植物へと成長させて戦う大器晩成型。',
+        description: '【育成タイプ】専用の「種」を菜園で育て、超強力な植物へと成長させて戦う大器晩成型。',
         maxHp: 78,
         gold: 100,
         startingRelicId: 'SEED_PACK',
