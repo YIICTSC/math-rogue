@@ -126,169 +126,169 @@ const WEAPONS: Record<WeaponType, WeaponDef> = {
         sprite: { template: 'EYE', color: '#60a5fa', highlight: '#bfdbfe' },
         animType: 'BEAM'
     },
-    STAPLER: {
+    STAPLER: { 
         id: 'STAPLER', name: 'ホッチキス', desc: '正面に針を連射', 
         evolvedName: '全自動製本機', evolvedDesc: '全方位に針を連射', synergy: 'DRILL',
         sprite: { template: 'ROBOT', color: '#4b5563', highlight: '#cbd5e1' },
         animType: 'PROJECTILE'
     },
-    CUTTER: {
+    CUTTER: { 
         id: 'CUTTER', name: 'カッターナイフ', desc: '超近距離の鋭い一撃', 
         evolvedName: '断罪の刃', evolvedDesc: '画面を切り裂く絶技', synergy: 'PROTEIN',
         sprite: { template: 'SWORD', color: '#334155', highlight: '#94a3b8' },
         animType: 'SWING'
     },
-    ART_BRUSH: {
+    ART_BRUSH: { 
         id: 'ART_BRUSH', name: '美術の筆', desc: '色鮮やかな絵の具を撒く', 
         evolvedName: '巨匠のキャンバス', evolvedDesc: '色彩の暴力', synergy: 'ORIGAMI',
         sprite: { template: 'PLANT', color: '#f43f5e', highlight: '#fb7185' },
         animType: 'STAY'
     },
-    GLOBE: {
+    GLOBE: { 
         id: 'GLOBE', name: '地球儀', desc: '公転して敵を弾く', 
         evolvedName: 'ブラックホール', evolvedDesc: '敵を吸い寄せ消滅させる', synergy: 'MAGNET',
         sprite: { template: 'SLIME', color: '#0369a1', highlight: '#38bdf8' },
         animType: 'STAY'
     },
-    PROTRACTOR_SWING: {
+    PROTRACTOR_SWING: { 
         id: 'PROTRACTOR_SWING', name: '分度器', desc: '完璧な角度で薙ぎ払う', 
         evolvedName: '黄金比の円舞', evolvedDesc: '全方位を完璧に防御', synergy: 'PROTRACTOR',
         sprite: { template: 'SHIELD', color: '#d946ef', highlight: '#f5d0fe' },
         animType: 'SWING'
     },
-    CHALK_SMOKE: {
+    CHALK_SMOKE: { 
         id: 'CHALK_SMOKE', name: 'チョークの粉', desc: '敵を混乱させる煙', 
         evolvedName: 'ホワイトアウト', evolvedDesc: '画面上の敵を停止させる', synergy: 'TEXTBOOK',
         sprite: { template: 'SLIME', color: '#f8fafc', highlight: '#ffffff' },
         animType: 'STAY'
     },
-    SCISSORS: {
+    SCISSORS: { 
         id: 'SCISSORS', name: 'ハサミ', desc: '二本の刃で切り裂く', 
         evolvedName: '神の裁断', evolvedDesc: '敵を二分する', synergy: 'PAD',
         sprite: { template: 'SWORD', color: '#475569', highlight: '#f1f5f9' },
         animType: 'SWING'
     },
-    TAPE: {
+    TAPE: { 
         id: 'TAPE', name: 'セロハンテープ', desc: '敵の動きを封じる', 
         evolvedName: '蜘蛛の巣の牢獄', evolvedDesc: '広範囲の敵を完全拘束', synergy: 'LUNCHBOX',
         sprite: { template: 'SLIME', color: '#e2e8f0', highlight: '#f8fafc' },
         animType: 'PROJECTILE'
     },
-    DICTIONARY: {
+    DICTIONARY: { 
         id: 'DICTIONARY', name: '分厚い辞書', desc: '重い辞書を投げつける', 
         evolvedName: '百科事典プレス', evolvedDesc: '巨大な本が敵を圧殺', synergy: 'PAD',
         sprite: { template: 'NOTEBOOK', color: '#7c2d12', highlight: '#9a3412' },
         animType: 'PROJECTILE'
     },
-    PAPER_PLANE_S: {
+    PAPER_PLANE_S: { 
         id: 'PAPER_PLANE_S', name: '紙飛行機', desc: 'ジグザグに飛ぶ貫通攻撃', 
         evolvedName: 'ステルス戦闘機', evolvedDesc: '超高速で敵を貫く', synergy: 'SHOES',
         sprite: { template: 'FLIER', color: '#ffffff', highlight: '#e2e8f0' },
         animType: 'PROJECTILE'
     },
-    GLUE_STICK: {
+    GLUE_STICK: { 
         id: 'GLUE_STICK', name: 'スティックのり', desc: 'ネバネバの足場を作る', 
         evolvedName: '超強力接着剤', evolvedDesc: '敵の動きを完全に止める床', synergy: 'MILK',
         sprite: { template: 'POTION', color: '#3b82f6', highlight: '#60a5fa' },
         animType: 'STAY'
     },
-    HAND_BELL: {
+    HAND_BELL: { 
         id: 'HAND_BELL', name: 'ハンドベル', desc: '一定時間ごとに周囲を攻撃', 
         evolvedName: '大聖堂の鐘', evolvedDesc: '強力な衝撃波を放つ', synergy: 'TEXTBOOK',
         sprite: { template: 'LIGHTNING', color: '#facc15', highlight: '#fef08a' },
         animType: 'BLAST'
     },
-    COMPASS_SPIKE: {
+    COMPASS_SPIKE: { 
         id: 'COMPASS_SPIKE', name: 'コンパスの針', desc: '前方に高速で突きを放つ', 
         evolvedName: '千本針', evolvedDesc: '超範囲の連続突き', synergy: 'PROTEIN',
         sprite: { template: 'SWORD', color: '#cbd5e1', highlight: '#f8fafc' },
         animType: 'STAB'
     },
-    WHISTLE_S: {
+    WHISTLE_S: { 
         id: 'WHISTLE_S', name: '先生の笛', desc: '音圧で敵を弾き飛ばす', 
         evolvedName: '超音波カッター', evolvedDesc: '全方位に殺傷音波', synergy: 'DRILL',
         sprite: { template: 'LIGHTNING', color: '#ef4444', highlight: '#fca5a5' },
         animType: 'BLAST'
     },
-    MAGNET_U: {
+    MAGNET_U: { 
         id: 'MAGNET_U', name: 'U字磁石', desc: '敵を中央に吸い寄せる', 
         evolvedName: '電磁波地獄', evolvedDesc: '強力に敵を集め粉砕する', synergy: 'MAGNET',
         sprite: { template: 'SHIELD', color: '#ef4444', highlight: '#3b82f6' },
         animType: 'CIRCLE'
     },
-    TRIANGLE_RULER_S: {
+    TRIANGLE_RULER_S: { 
         id: 'TRIANGLE_RULER_S', name: '三角定規', desc: '回転しながら飛ぶカッター', 
         evolvedName: 'プラズマカッター', evolvedDesc: '敵を切り裂く光輪', synergy: 'PROTRACTOR',
         sprite: { template: 'SWORD', color: '#4ade80', highlight: '#bbf7d0' },
         animType: 'PROJECTILE'
     },
-    STAPLE_REMOVER: {
+    STAPLE_REMOVER: { 
         id: 'STAPLE_REMOVER', name: '針抜き', desc: '近距離に高威力の噛みつき', 
         evolvedName: 'デストラクター', evolvedDesc: '敵の防御を無視して粉砕', synergy: 'LUNCHBOX',
         sprite: { template: 'FIST', color: '#475569', highlight: '#94a3b8' },
         animType: 'STAB'
     },
-    JUMP_ROPE: {
+    JUMP_ROPE: { 
         id: 'JUMP_ROPE', name: 'なわとび', desc: '周囲を円状になぎ払う', 
         evolvedName: '光の鎖', evolvedDesc: '広い範囲を拘束・攻撃', synergy: 'ORIGAMI',
         sprite: { template: 'FIST', color: '#facc15', highlight: '#ffffff' },
         animType: 'CIRCLE'
     },
-    PRISM: {
+    PRISM: { 
         id: 'PRISM', name: 'プリズム', desc: '虹色の光を放つ', 
         evolvedName: 'オーロラ・カノン', evolvedDesc: '画面を焼き尽くす七色の光', synergy: 'TEXTBOOK',
         sprite: { template: 'GEM', color: '#ffffff', highlight: '#fdf4ff' },
         animType: 'RAINBOW'
     },
-    TROWEL: {
+    TROWEL: { 
         id: 'TROWEL', name: '移植ゴテ', desc: '地面からトゲを出す', 
         evolvedName: '大地の怒り', evolvedDesc: '無数の岩の槍を突き出す', synergy: 'PROTEIN',
         sprite: { template: 'SWORD', color: '#78350f', highlight: '#b45309' },
         animType: 'STAB'
     },
-    LUNCH_TRAY: {
+    LUNCH_TRAY: { 
         id: 'LUNCH_TRAY', name: '給食用トレイ', desc: '回転して敵を弾く', 
         evolvedName: '鋼鉄の円盤', evolvedDesc: '触れた敵を切り刻む', synergy: 'PAD',
         sprite: { template: 'SHIELD', color: '#94a3b8', highlight: '#e2e8f0' },
         animType: 'STAY'
     },
-    BASKETBALL: {
+    BASKETBALL: { 
         id: 'BASKETBALL', name: 'バスケットボール', desc: 'ドリブルで衝撃波', 
         evolvedName: 'ダンク・インパクト', evolvedDesc: '爆発的な衝撃波を連続発生', synergy: 'SHOES',
         sprite: { template: 'SLIME', color: '#f97316', highlight: '#fdba74' },
         animType: 'BLAST'
     },
-    DUSTER: {
+    DUSTER: { 
         id: 'DUSTER', name: '黒板消し', desc: '粉塵を撒き散らす', 
         evolvedName: 'ダスト・ノヴァ', evolvedDesc: '画面中を煙に包み爆破', synergy: 'DRILL',
         sprite: { template: 'NOTEBOOK', color: '#1e40af', highlight: '#60a5fa' },
         animType: 'BLAST'
     },
-    FOUNTAIN_PEN: {
+    FOUNTAIN_PEN: { 
         id: 'FOUNTAIN_PEN', name: '万年筆', desc: 'インクの跡を残す', 
         evolvedName: 'インクの海', evolvedDesc: '敵を溺れさせる巨大インク溜まり', synergy: 'MAGNET',
         sprite: { template: 'SWORD', color: '#000000', highlight: '#424242' },
         animType: 'SPLATTER'
     },
-    SCHOOL_CHIME: {
+    SCHOOL_CHIME: { 
         id: 'SCHOOL_CHIME', name: '学校のチャイム', desc: '音圧リングで攻撃', 
         evolvedName: '終焉の鐘', evolvedDesc: '画面中の敵の魂を削る', synergy: 'TEXTBOOK',
         sprite: { template: 'HAND_BELL', color: '#fbbf24', highlight: '#ffffff' },
         animType: 'CIRCLE'
     },
-    TRUMPET: {
+    TRUMPET: { 
         id: 'TRUMPET', name: 'トランペット', desc: '前方に音の壁', 
         evolvedName: '凱旋のファンファーレ', evolvedDesc: '敵を消し飛ばす黄金の波動', synergy: 'ORIGAMI',
         sprite: { template: 'TRUMPET', color: '#fbbf24', highlight: '#fef3c7' },
         animType: 'BEAM'
     },
-    CLAY: {
+    CLAY: { 
         id: 'CLAY', name: '図工の粘土', desc: '粘着弾を投げる', 
         evolvedName: 'クレイ・ゴーレム', evolvedDesc: '敵を拘束し続ける巨人の手', synergy: 'MILK',
         sprite: { template: 'SLIME', color: '#8d6e63', highlight: '#d7ccc8' },
         animType: 'PROJECTILE'
     },
-    BROADCAST_MIC: {
+    BROADCAST_MIC: { 
         id: 'BROADCAST_MIC', name: '放送用マイク', desc: '広範囲にエコー攻撃', 
         evolvedName: '神の宣告', evolvedDesc: '敵を跪かせる聖なる叫び', synergy: 'ABACUS',
         sprite: { template: 'MIC', color: '#475569', highlight: '#94a3b8' },
@@ -328,6 +328,8 @@ interface Entity {
     flashTime: number;
     frozen?: number;
     knockback?: { x: number, y: number, time: number };
+    knockbackImmune?: boolean; // 新規: 吹き飛ばし無効
+    defense?: number; // 新規: ダメージ軽減
 }
 
 interface Projectile {
@@ -518,6 +520,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             'ENEMY_4': ['GHOST', '#a5f3fc', '#cffafe'],
             'ENEMY_5': ['ROBOT', '#6b7280', '#9ca3af'],
             'ENEMY_6': ['TEACHER', '#ef4444', '#fca5a5'],
+            'ENEMY_7': ['GOLEM', '#94a3b8', '#cbd5e1'], // 新規: チョークゴーレム
         };
         Object.entries(sprites).forEach(([key, [t, c1, c2]]) => {
             const s = generateFromTemplate(t, c1, c2);
@@ -865,12 +868,31 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             const clampY = Math.max(0, Math.min(WORLD_HEIGHT, ey));
             const timeSec = time.current;
             let enemyType = 'ENEMY_1'; let hp = 10; let speed = 1; let width = 24; let height = 24;
+            let knockbackImmune = false;
+            let defense = 0;
+
             if (timeSec < 30) { hp = 10; speed = 1 + Math.random() * 0.5; }
             else if (timeSec < 60) { enemyType = Math.random() < 0.5 ? 'ENEMY_1' : 'ENEMY_2'; hp = 15; speed = enemyType === 'ENEMY_2' ? 2.5 : 1.5; }
             else if (timeSec < 120) { enemyType = Math.random() < 0.4 ? 'ENEMY_2' : 'ENEMY_3'; hp = enemyType === 'ENEMY_3' ? 35 : 20; speed = 1.5; }
-            else if (timeSec < 180) { const r = Math.random(); enemyType = r < 0.3 ? 'ENEMY_3' : (r < 0.6 ? 'ENEMY_4' : 'ENEMY_5'); hp = 50; speed = enemyType === 'ENEMY_5' ? 3.5 : (enemyType === 'ENEMY_4' ? 2 : 1.5); }
-            else { const r = Math.random(); if (r < 0.05) { enemyType = 'ENEMY_6'; hp = 400 + (timeSec - 180) * 5; speed = 0.8; width = 48; height = 48; } else if (r < 0.4) { enemyType = 'ENEMY_5'; hp = 80; speed = 3.5; } else { enemyType = 'ENEMY_4'; hp = 70; speed = 2.5; } }
-            enemies.current.push({ id: Math.random(), x: clampX, y: clampY, type: enemyType, width: width, height: height, hp: hp, maxHp: hp, speed: speed, damage: 5 + Math.floor(timeSec/60), vx: 0, vy: 0, dead: false, flashTime: 0 });
+            else if (timeSec < 180) { 
+                const r = Math.random(); 
+                if (r < 0.2) { enemyType = 'ENEMY_7'; hp = 120; speed = 0.6; knockbackImmune = true; defense = 2; width = 48; height = 48; } // チョークゴーレム
+                else { enemyType = r < 0.5 ? 'ENEMY_3' : (r < 0.7 ? 'ENEMY_4' : 'ENEMY_5'); hp = 50; speed = enemyType === 'ENEMY_5' ? 3.5 : 1.5; }
+            }
+            else { 
+                const r = Math.random(); 
+                if (r < 0.05) { enemyType = 'ENEMY_6'; hp = 400 + (timeSec - 180) * 5; speed = 0.8; width = 48; height = 48; knockbackImmune = true; } 
+                else if (r < 0.2) { enemyType = 'ENEMY_7'; hp = 200; speed = 0.5; knockbackImmune = true; defense = 5; width = 52; height = 52; }
+                else if (r < 0.4) { enemyType = 'ENEMY_5'; hp = 80; speed = 3.5; knockbackImmune = Math.random() < 0.3; } 
+                else { enemyType = 'ENEMY_4'; hp = 70; speed = 2.5; } 
+            }
+            
+            enemies.current.push({ 
+                id: Math.random(), x: clampX, y: clampY, type: enemyType, 
+                width: width, height: height, hp: hp, maxHp: hp, speed: speed, 
+                damage: 5 + Math.floor(timeSec/60), vx: 0, vy: 0, dead: false, 
+                flashTime: 0, knockbackImmune, defense
+            });
         }
 
         enemies.current = enemies.current.filter(e => !e.dead);
@@ -904,7 +926,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     };
 
     const applyDamage = (e: Entity, p: Projectile) => {
-        let dmg = p.damage;
+        let dmg = Math.max(1, p.damage - (e.defense || 0));
         const isCrit = Math.random() < (0.05 * (passivesRef.current.CONSOLE ? 2 : 1));
         if (isCrit) {
             dmg *= 2.5;
@@ -915,10 +937,14 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         }
         
         e.hp -= dmg; e.flashTime = 5; p.hitIds.push(e.id);
-        const kbForce = p.knockback;
-        if (kbForce > 0) {
+        
+        // 吹き飛ばし処理（無効でなければ実行）
+        if (p.knockback > 0 && !e.knockbackImmune) {
             const angle = Math.atan2(e.y - p.y, e.x - p.x);
-            e.knockback = { x: Math.cos(angle)*kbForce, y: Math.sin(angle)*kbForce, time: 5 };
+            e.knockback = { x: Math.cos(angle)*p.knockback, y: Math.sin(angle)*p.knockback, time: 5 };
+        } else if (p.knockback > 0 && e.knockbackImmune) {
+            // 無効な場合は「!」を表示して耐性があることを示す
+            damageTexts.current.push({ id: Math.random(), x: e.x + 10, y: e.y - 5, value: "!", color: '#94a3b8', life: 20 });
         }
 
         const sparkCount = isCrit ? 12 : 5;
@@ -926,7 +952,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
         if (e.hp <= 0 && !e.dead) {
             e.dead = true; score.current += 15;
-            const gemVal = e.type === 'ENEMY_6' ? 10 : 1;
+            const gemVal = e.type === 'ENEMY_6' || e.type === 'ENEMY_7' ? 10 : 1;
             if (Math.random() < 0.75) gems.current.push({ id: Math.random(), x: e.x, y: e.y, value: gemVal, collected: false });
             for(let i=0; i<15; i++) addParticle(e.x, e.y, 'SMOKE', 'rgba(120,120,120,0.6)', { size: Math.random()*8+3, life: 50 });
             shakeAmount.current = 3;
