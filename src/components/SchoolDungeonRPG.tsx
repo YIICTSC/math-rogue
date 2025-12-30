@@ -284,7 +284,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     id: 0, type: 'PLAYER', x: 1, y: 1, char: '@', name: 'わんぱく小学生', 
     hp: 50, maxHp: 50, baseAttack: 3, baseDefense: 0, attack: 3, defense: 0, xp: 0, gold: 0, dir: {x:0, y:1},
     equipment: { weapon: null, armor: null, ranged: null, accessory: null },
-    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, trapSight: 0, poison: 0 },
+    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
     offset: { x: 0, y: 0 }
   });
 
@@ -589,7 +589,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       return roomsRef.current.some(r => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h);
   };
 
-  const spawnEnemy = (x: number, y: number, floorLevel: number, inRoom: boolean = false, isSafeForShop: boolean = false): Entity => {
+  const spawnEnemy = (x: number, y: number, floorLevel: number): Entity => {
       const r = Math.random();
       let t: EnemyType = 'SLIME';
       let name="敵", hp=10, atk=2, xp=5, def=0;
@@ -601,9 +601,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           if (r < 0.6) { t = 'SLIME'; name="スライム"; hp=10; atk=3; xp=5; }
           else { t = 'BAT'; name="コウモリ"; hp=8; atk=4; xp=6; }
       } else {
-          // Shopkeeper ONLY spawns in rooms and safe spots
-          if (r < 0.05 && !isEndless && inRoom && isSafeForShop) { t = 'SHOPKEEPER'; name="購買部員"; hp=1000; atk=50; xp=0; def=20; }
-          else if (r < 0.20) { t = 'SLIME'; name="スライム"; hp=10+hpScale; atk=3+scaling; xp=5+xpScale; }
+          if (r < 0.20) { t = 'SLIME'; name="スライム"; hp=10+hpScale; atk=3+scaling; xp=5+xpScale; }
           else if (r < 0.35) { t = 'BAT'; name="コウモリ"; hp=8+hpScale; atk=5+scaling; xp=7+xpScale; }
           else if (r < 0.45 && floorLevel > 2) { t = 'MANDRAKE'; name="人食い植物"; hp=20+hpScale; atk=5+scaling; xp=12+xpScale; }
           else if (r < 0.60) { t = 'GHOST'; name="浮遊霊"; hp=15+hpScale; atk=4+scaling; xp=10+xpScale; def=2+Math.floor(floorLevel/2); }
@@ -616,26 +614,33 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           else if (floorLevel > 6) { t = 'METAL'; name="メタル生徒"; hp=4+Math.floor(floorLevel/5); atk=1+scaling; xp=100+xpScale*3; def=999; }
       }
 
-      // Generate Shop Items if Shopkeeper
-      let shopItems: Item[] = [];
-      if (t === 'SHOPKEEPER') {
-          for(let i=0; i<5; i++) {
-              const keys = Object.keys(ITEM_DB);
-              const key = keys[Math.floor(Math.random() * keys.length)];
-              const template = ITEM_DB[key];
-              const price = (template.value || 100) * (Math.random() * 0.5 + 0.8);
-              shopItems.push({ 
-                  ...template, 
-                  id: `shop-${Date.now()}-${i}`, 
-                  price: Math.floor(price),
-                  plus: 0, charges: template.maxCharges
-              });
-          }
-      }
-
       return {
           id: Date.now() + Math.random(), type: 'ENEMY', x, y, char: t[0], 
           name, hp, maxHp: hp, baseAttack: Math.floor(atk), baseDefense: Math.floor(def), attack: Math.floor(atk), defense: Math.floor(def), xp: Math.floor(xp), dir: {x:0, y:0}, enemyType: t,
+          status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
+          offset: { x: 0, y: 0 }
+      };
+  };
+
+  // Helper to create a shopkeeper entity
+  const createShopkeeper = (x: number, y: number): Entity => {
+      const shopItems: Item[] = [];
+      for(let i=0; i<5; i++) {
+          const keys = Object.keys(ITEM_DB);
+          const key = keys[Math.floor(Math.random() * keys.length)];
+          const template = ITEM_DB[key];
+          const price = (template.value || 100) * (Math.random() * 0.5 + 0.8);
+          shopItems.push({ 
+              ...template, 
+              id: `shop-${Date.now()}-${i}`, 
+              price: Math.floor(price),
+              plus: 0, charges: template.maxCharges
+          });
+      }
+
+      return {
+          id: Date.now() + Math.random(), type: 'ENEMY', x, y, char: 'S', 
+          name: "購買部員", hp: 1000, maxHp: 1000, baseAttack: 50, baseDefense: 20, attack: 50, defense: 20, xp: 0, dir: {x:0, y:0}, enemyType: 'SHOPKEEPER',
           status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
           offset: { x: 0, y: 0 },
           shopItems
@@ -708,19 +713,48 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     // Shuffle candidates
     candidates.sort(() => Math.random() - 0.5);
 
+    // --- Dedicated Shop Spawning Process ---
+    // 25% chance of a shop appearing on 2F+
+    if (f >= 2 && !isEndless && Math.random() < 0.25) {
+        // Find a room that isn't the start room or the stairs room
+        const shopRoomOptions = rooms.filter(r => 
+            !(px >= r.x && px < r.x + r.w && py >= r.y && py < r.y + r.h) &&
+            !(sx >= r.x && sx < r.x + r.w && sy >= r.y && sy < r.y + r.h)
+        );
+
+        if (shopRoomOptions.length > 0) {
+            const shopRoom = shopRoomOptions[Math.floor(Math.random() * shopRoomOptions.length)];
+            // Look for a safe center spot (not against a wall)
+            let shopX = -1, shopY = -1;
+            for(let ry = shopRoom.y + 1; ry < shopRoom.y + shopRoom.h - 1; ry++) {
+                for(let rx = shopRoom.x + 1; rx < shopRoom.x + shopRoom.w - 1; rx++) {
+                    const neighbors = [
+                        {x:rx, y:ry-1}, {x:rx, y:ry+1}, {x:rx-1, y:ry}, {x:rx+1, y:ry},
+                        {x:rx-1, y:ry-1}, {x:rx+1, y:ry-1}, {x:rx-1, y:ry+1}, {x:rx+1, y:ry+1}
+                    ];
+                    if (neighbors.every(n => newMap[n.y][n.x] === 'FLOOR')) {
+                        shopX = rx; shopY = ry;
+                        break;
+                    }
+                }
+                if (shopX !== -1) break;
+            }
+            
+            if (shopX !== -1) {
+                newEnemies.push(createShopkeeper(shopX, shopY));
+                // Remove this tile from candidates so other things don't spawn on top
+                const cIdx = candidates.findIndex(c => c.x === shopX && c.y === shopY);
+                if (cIdx !== -1) candidates.splice(cIdx, 1);
+            }
+        }
+    }
+
     // 1. Spawn Enemies (~5% of floor tiles)
     const enemyCount = Math.floor(candidates.length * 0.05);
     for (let i = 0; i < enemyCount; i++) {
         const t = candidates.pop();
         if (t) {
-            // Check safe spot for shopkeeper (surrounded by floor in all 8 directions to avoid entrances)
-            const neighbors = [
-                {x:t.x, y:t.y-1}, {x:t.x, y:t.y+1}, {x:t.x-1, y:t.y}, {x:t.x+1, y:t.y},
-                {x:t.x-1, y:t.y-1}, {x:t.x+1, y:t.y-1}, {x:t.x-1, y:t.y+1}, {x:t.x+1, y:t.y+1}
-            ];
-            const isSafe = neighbors.every(n => n.x >= 0 && n.x < MAP_W && n.y >= 0 && n.y < MAP_H && newMap[n.y][n.x] === 'FLOOR');
-            
-            newEnemies.push(spawnEnemy(t.x, t.y, f, isPointInRoom(t.x, t.y), isSafe));
+            newEnemies.push(spawnEnemy(t.x, t.y, f));
         }
     }
 
@@ -907,16 +941,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
               const rx = Math.floor(Math.random() * MAP_W);
               const ry = Math.floor(Math.random() * MAP_H);
               if (map[ry][rx] === 'FLOOR' && !enemies.find(e => e.x === rx && e.y === ry) && (rx !== px || ry !== py)) {
-                  // Pass inRoom check to spawnEnemy for random spawns too
-                  const inRoom = isPointInRoom(rx, ry);
-                  // Random spawns can be shopkeepers if room is safe
-                  const nN = map[ry-1] && map[ry-1][rx] === 'FLOOR';
-                  const nS = map[ry+1] && map[ry+1][rx] === 'FLOOR';
-                  const nW = map[ry][rx-1] === 'FLOOR';
-                  const nE = map[ry][rx+1] === 'FLOOR';
-                  const isSafe = nN && nS && nW && nE;
-                  
-                  setEnemies(prev => [...prev, spawnEnemy(rx, ry, floor, inRoom, isSafe)]);
+                  setEnemies(prev => [...prev, spawnEnemy(rx, ry, floor)]);
                   break;
               }
           }
@@ -1388,6 +1413,12 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   setPlayer(p => ({ ...p, gold: (p.gold || 0) - (item.price || 0) }));
                   setInventory(prev => [...prev, item]);
                   
+                  // Identify staff if bought from shop
+                  if (item.category === 'STAFF' && !identifiedTypes.has(item.type)) {
+                      setIdentifiedTypes(prev => new Set(prev).add(item.type));
+                      addLog(`${idMap[item.type]}は${item.name}だった！`, "yellow");
+                  }
+
                   const newShopItems = shopkeeper.shopItems.filter((_, i) => i !== idx);
                   setEnemies(prev => prev.map(e => e.id === shopkeeper.id ? { ...e, shopItems: newShopItems } : e));
                   
@@ -2804,9 +2835,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                                         backgroundColor: selectedItemIndex === i ? C2 : 'transparent',
                                                         color: selectedItemIndex === i ? C0 : C3
                                                     }}
-                                                    onContextMenu={(e) => { e.preventDefault(); setInspectedItem(item); }}
-                                                    onTouchStart={() => handleTouchStart(item)}
-                                                    onTouchEnd={handleTouchEnd}
+                                                    onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}
                                                 >
                                                     <button 
                                                         className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center"
