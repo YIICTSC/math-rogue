@@ -139,10 +139,10 @@ interface Entity {
       frozen: number;
       blind: number;
       speed: number;
-      defenseBuff?: number; // Temporary Defense Buff from cards
-      attackBuff?: number; // Temporary Attack Buff
-      poison?: number; // Poison DoT duration
-      trapSight?: number; // Trap visibility duration
+      poison: number; 
+      trapSight: number;
+      attackBuff?: number;
+      defenseBuff?: number;
   };
   
   dead?: boolean;
@@ -1038,7 +1038,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                   return { ...e, hp: nhp };
               }
               return e;
-          }).filter(e => !e.dead));
+          }).filter(e => !e.dead);
           
           msg = hits > 0 ? "攻撃命中！" : "空振り。";
           audioService.playSound(hits > 0 ? 'attack' : 'select');
@@ -1316,7 +1316,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
       return {
           id: Date.now() + Math.random(), type: 'ENEMY', x, y, char: t[0], 
           name, hp, maxHp: hp, baseAttack: Math.floor(atk), baseDefense: Math.floor(def), attack: Math.floor(atk), defense: Math.floor(def), xp: Math.floor(xp), dir: {x:0, y:0}, enemyType: t,
-          status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
+          status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 },
           offset: { x: 0, y: 0 },
           shopItems
       };
@@ -1410,7 +1410,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                 newItems.push({
                     id: Date.now() + Math.random(), type: 'GOLD', x: hx, y: hy, char: '$', name: 'お金',
                     hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
-                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
+                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 },
                     gold: Math.floor(Math.random() * 200 + 50 * f)
                 });
             } else {
@@ -1420,7 +1420,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                 newItems.push({
                     id: Date.now() + Math.random(), type: 'ITEM', x: hx, y: hy, char: '!', 
                     name: template.name, hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
-                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
+                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 },
                     itemData: { 
                         ...template, 
                         id: `hidden-item-${Date.now()}-${Math.random()}`, 
@@ -1444,7 +1444,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
             id: Date.now(), type: 'ENEMY', x: sx, y: sy, char: 'B',
             name: "校長先生(真)", hp: 500, maxHp: 500, baseAttack: 30, baseDefense: 10, attack: 30, defense: 10, xp: 5000, 
             dir: {x:0, y:0}, enemyType: 'BOSS',
-            status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
+            status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 },
             offset: { x: 0, y: 0 }
         });
     } else {
@@ -1500,7 +1500,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                 newItems.push({
                     id: Date.now() + Math.random(), type: 'GOLD', x: t.x, y: t.y, char: '$', name: 'お金',
                     hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
-                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
+                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 },
                     gold: Math.floor(Math.random() * 50 + 10 * f)
                 });
             } else if (type === 'CARD') {
@@ -1508,7 +1508,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                 newItems.push({
                     id: Date.now() + Math.random(), type: 'ITEM', x: t.x, y: t.y, char: 'C', name: cardTemplate.name,
                     hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
-                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
+                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 },
                     itemData: { 
                         id: `card-loot-${Date.now()}-${Math.random()}`, 
                         category: 'DECK_CARD',
@@ -1533,7 +1533,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                 newItems.push({
                     id: Date.now() + Math.random(), type: 'ITEM', x: t.x, y: t.y, char: '!', 
                     name: template.name, hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
-                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
+                    status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 },
                     itemData: { 
                         ...template, 
                         id: `item-${Date.now()}-${Math.random()}`, 
@@ -1558,7 +1558,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
             newTraps.push({
                 id: Date.now() + Math.random(), type: 'TRAP', x: t.x, y: t.y, char: 'X', name: '罠',
                 hp: 0, maxHp: 0, baseAttack: 0, baseDefense: 0, attack: 0, defense: 0, xp: 0, dir: {x:0, y:0},
-                status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
+                status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 },
                 trapType: tType, visible: false
             });
         }
@@ -2610,8 +2610,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           if (item.category === 'WEAPON' || item.category === 'RANGED') dmg = 5 + (item.power || 0);
           if (item.category === 'ARMOR') dmg = 3 + (item.power || 0);
           if (item.type === 'POT_GLUE') { hitEntity.status.frozen = 10; addLog(`${hitEntity.name}はのりで固まった！`); }
-          if (item.type.includes('POISON')) { addLog(`${hitEntity.name}に毒を与えた！`); dmg += 10; }
-          if (item.type === 'SCROLL_SLEEP') { hitEntity.status.sleep = 10; addLog(`${hitEntity.name}は眠ってしまった！`); }
+          if (item.type.includes('POISON')) { addLog(`${hitEntity.name}にどくをあたえた！`); dmg += 10; }
+          if (item.type === 'SCROLL_SLEEP') { hitEntity.status.sleep = 10; addLog(`${hitEntity.name}はねむってしまった！`); }
           
           if (item.category === 'STAFF') {
               const res = executeStaffEffect(item, hitEntity, hitEntity.x, hitEntity.y);
@@ -2629,7 +2629,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                   return e;
               });
               const dead = newEnemies.find(e => e.id === hitEntity!.id && e.hp <= 0);
-              if(dead) { gainXp(dead.xp); addLog(`${dead.name}を倒した！`); }
+              if(dead) { gainXp(dead.xp); addLog(`${dead.name}をたおした！`); }
               else { addLog(`${hitEntity.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', hitEntity.x, hitEntity.y, {value:`${dmg}`}); }
               setEnemies(newEnemies.filter(e => e.hp > 0));
           }
@@ -2640,12 +2640,12 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               setFloorItems(prev => [...prev, {
                   id: Date.now() + Math.random(), type: 'ITEM', x: lx, y: ly, char: '!', name: item.name, 
                   hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
-                  status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
+                  status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 },
                   itemData: item
               }]);
-              addLog("飛んでいった。");
+              addLog("とんでいった。");
           } else {
-              addLog("彼方へ消え去った。");
+              addLog("かなたへきえさった。");
           }
       }
       setMenuOpen(false);
@@ -2670,7 +2670,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           if ((item.charges || 0) > 0) {
               const res = executeStaffEffect(item, target, player.x + dx, player.y + dy); 
               if (res.msg) addLog(res.msg);
-              else addLog("しかし何も起こらなかった。"); 
+              else addLog("しかしなにもおこらなかった。"); 
 
               const newCharges = (item.charges || 0) - 1;
               const newItem = { ...item, charges: newCharges };
@@ -2685,31 +2685,31 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               setMenuOpen(false);
               processTurn(player.x, player.y);
           } else {
-              addLog("魔力が尽きている！"); 
+              addLog("まりょくがきれている！"); 
           }
           return;
       }
 
       if (item.type === 'POT_GLUE') {
           setSynthState({ active: true, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null });
-          addLog("合成のベースとなる装備を選んでください");
+          addLog("ごうせいのベースとなるそうびをえらんでください");
           audioService.playSound('select');
           return; 
       }
       if (item.type === 'POT_CHANGE') {
           setSynthState({ active: true, mode: 'CHANGE', step: 'SELECT_BASE', baseIndex: index }); 
           setSynthState(prev => ({...prev, step: 'SELECT_TARGET'}));
-          addLog("変化させるアイテムを選んでください");
+          addLog("へんかさせるアイテムをえらんでください");
           audioService.playSound('select');
           return;
       }
       if (item.type === 'SCROLL_BLANK') {
           if (identifiedTypes.size === 0) {
-              addLog("書き込める内容を知らない...", "red");
+              addLog("かきこめる内容をしらない...", "red");
               return;
           }
           setSynthState({ active: true, mode: 'BLANK', step: 'SELECT_EFFECT', baseIndex: index });
-          addLog("何を書き込みますか？");
+          addLog("なにをかきこみますか？");
           audioService.playSound('select');
           return;
       }
@@ -2728,7 +2728,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               newInv.splice(index, 1); 
               if (currentEquip) newInv.push(currentEquip); 
               setInventory(newInv);
-              addLog(`${getItemName(item)}を装備した。`);
+              addLog(`${getItemName(item)}をそうびした。`);
               return { ...p, equipment: newEquipment };
           });
           actionDone = true;
@@ -2740,9 +2740,9 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               
               if (item.type.includes('MEAT')) {
                   nextHp = Math.min(player.maxHp, player.hp + 50);
-                  addLog(`${item.name}を食べた。元気が出た！`); 
+                  addLog(`${item.name}をたべた。げんきがでた！`); 
               } else {
-                  addLog(`${item.name}を食べた。満腹！`); 
+                  addLog(`${item.name}をたべた。まんぷく！`); 
               }
               
               setInventory(prev => prev.filter((_, i) => i !== index));
@@ -2755,14 +2755,13 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           else if (item.type.includes('HEAL') || item.type === 'GRASS_LIFE') { 
               let healVal = item.value || 30;
               if (item.type === 'GRASS_LIFE') {
-                  // Max HP +5, Heal +5
                   setPlayer(p => ({ ...p, maxHp: p.maxHp + 5 }));
                   healVal = 5;
-                  addLog("最大HPが上がった！", "yellow");
+                  addLog("さいだいHPがあがった！", "yellow");
               }
               
               let nextHp = Math.min(player.maxHp, player.hp + healVal);
-              addLog(`HPが${healVal}回復した！`);
+              addLog(`HPが${healVal}かいふくした！`);
               addVisualEffect('TEXT', player.x, player.y, { value: `+${healVal}`, color: 'green' });
               
               setInventory(prev => prev.filter((_, i) => i !== index));
@@ -2774,23 +2773,23 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           }
           else if (item.type === 'GRASS_SPEED') {
               setPlayer(p => ({ ...p, status: { ...p.status, speed: 20 } }));
-              addLog("動きが素早くなった！", "yellow");
+              addLog("うごきがすばやくなった！", "yellow");
               addVisualEffect('FLASH', 0, 0, { color: 'blue', duration: 5 });
               actionDone = true;
           }
           else if (item.type === 'GRASS_EYE') {
               setPlayer(p => ({ ...p, status: { ...p.status, trapSight: 50, blind: 0 } }));
-              addLog("目が良くなった！", "yellow");
+              addLog("めがよくなった！", "yellow");
               addVisualEffect('FLASH', 0, 0, { color: 'yellow', duration: 5 });
               actionDone = true;
           }
           else if (item.type === 'GRASS_POISON') {
               setPlayer(p => ({ ...p, status: { ...p.status, poison: (p.status.poison||0) + 10 } }));
-              setBelly(prev => Math.max(0, prev - 10)); // Belly reduce
-              addLog("ぐはっ！毒だ！", "purple");
+              setBelly(prev => Math.max(0, prev - 10)); 
+              addLog("ぐはっ！どくだ！", "purple");
               actionDone = true;
           }
-          else if (item.type === 'SCROLL_MAP') { setFloorMapRevealed(true); setShowMap(true); addLog("校内図が頭に入った！"); actionDone = true; addVisualEffect('FLASH', 0, 0); }
+          else if (item.type === 'SCROLL_MAP') { setFloorMapRevealed(true); setShowMap(true); addLog("こうないずがあたまにはいった！"); actionDone = true; addVisualEffect('FLASH', 0, 0); }
           else if (item.type === 'SCROLL_THUNDER' || item.type === 'BOMB') {
               const isBomb = item.type === 'BOMB';
               if (isBomb) { addVisualEffect('EXPLOSION', player.x, player.y); } else { addVisualEffect('THUNDER', 0, 0); triggerShake(10); }
@@ -2802,11 +2801,11 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                   if (nhp <= 0) { gainXp(e.xp); return { ...e, hp: 0, dead: true }; }
                   return { ...e, hp: nhp };
               }).filter(e => !e.dead));
-              addLog(item.type === 'BOMB' ? "爆発した！" : "雷が落ちた！");
+              addLog(item.type === 'BOMB' ? "ばくはつした！" : "かみなりがおちた！");
               actionDone = true;
           } else if (item.type === 'SCROLL_SLEEP') {
               setEnemies(prev => prev.map(e => { addVisualEffect('TEXT', e.x, e.y, {value: 'Zzz', color:'blue'}); return { ...e, status: { ...e.status, sleep: 10 } }; }));
-              addLog("魔物が眠りについた。"); addVisualEffect('FLASH', 0, 0); actionDone = true;
+              addLog("まものがねむりについた。"); addVisualEffect('FLASH', 0, 0); actionDone = true;
           } else if (item.type === 'SCROLL_WARP') {
               let attempts = 0;
               while (attempts < 20) {
@@ -2820,28 +2819,28 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               actionDone = true;
           } else if (item.type === 'SCROLL_CONFUSE') {
               setEnemies(prev => prev.map(e => ({ ...e, status: { ...e.status, confused: 10 } })));
-              addLog("魔物が混乱した！"); addVisualEffect('FLASH', 0, 0); actionDone = true;
+              addLog("まものがこんらんした！"); addVisualEffect('FLASH', 0, 0); actionDone = true;
           } else if (item.type === 'SCROLL_IDENTIFY') {
               setIdentifiedTypes(prev => {
                   const next = new Set(prev);
                   inventory.forEach(i => next.add(i.type));
                   return next;
               });
-              addLog("持ち物が識別された！"); addVisualEffect('FLASH', 0, 0); actionDone = true;
+              addLog("もちものがしきべつされた！"); addVisualEffect('FLASH', 0, 0); actionDone = true;
           } else if (item.type === 'SCROLL_UP_W') {
               if (player.equipment?.weapon) {
                   const w = player.equipment.weapon;
                   const newW = { ...w, plus: (w.plus || 0) + 1, name: w.name.split('+')[0] + '+' + ((w.plus || 0) + 1) };
                   setPlayer(p => ({ ...p, equipment: { ...p.equipment!, weapon: newW } }));
-                  addLog("武器が強化された！"); actionDone = true;
-              } else { addLog("武器を装備していない。"); }
+                  addLog("ぶきがきょうかされた！"); actionDone = true;
+              } else { addLog("ぶきをそうびしていない。"); }
           } else if (item.type === 'SCROLL_UP_A') {
               if (player.equipment?.armor) {
                   const a = player.equipment.armor;
                   const newA = { ...a, plus: (a.plus || 0) + 1, name: a.name.split('+')[0] + '+' + ((a.plus || 0) + 1) };
                   setPlayer(p => ({ ...p, equipment: { ...p.equipment!, armor: newA } }));
-                  addLog("防具が強化された！"); actionDone = true;
-              } else { addLog("防具を装備していない。"); }
+                  addLog("ぼうぐがきょうかされた！"); actionDone = true;
+              } else { addLog("ぼうぐをそうびしていない。"); }
           }
           
           if (actionDone) {
@@ -2856,7 +2855,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               newInv.splice(index, 1); 
               if (currentEquip) newInv.push(currentEquip); 
               setInventory(newInv);
-              addLog(`${item.name}を装備した。`);
+              addLog(`${item.name}をそうびした。`);
               return { ...p, equipment: newEquipment };
           });
           actionDone = true;
@@ -2888,7 +2887,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           itemData: item
       };
       setFloorItems(prev => [...prev, droppedEntity]);
-      addLog(`${getItemName(item)}を足元に置いた。`);
+      addLog(`${getItemName(item)}をあしもとにおいた。`);
       audioService.playSound('select');
       setSelectedItemIndex(prev => Math.min(prev, newInv.length - 1));
       if (newInv.length === 0) setMenuOpen(false);
@@ -2900,9 +2899,9 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           if (inventory.length < MAX_INVENTORY) {
               setPlayer(p => ({ ...p, equipment: { ...p.equipment!, [slot]: null } }));
               setInventory(prev => [...prev, item]);
-              addLog(`${getItemName(item)}を外した。`);
+              addLog(`${getItemName(item)}をはずした。`);
               processTurn(player.x, player.y);
-          } else { addLog("持ち物がいっぱいで外せない！"); }
+          } else { addLog("もちものがいっぱいではずせない！"); }
       }
   };
 
@@ -3248,7 +3247,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
 
   const getInspectedDescription = (item: Item) => {
       if (item.category === 'STAFF' && !identifiedTypes.has(item.type)) {
-          return "振ってみるまで分からない。";
+          return "ふってみるまでわからない。";
       }
       return item.desc;
   };
@@ -3271,11 +3270,11 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                         <div>分類: {inspectedItem.category}</div>
                         {inspectedItem.power && (
                             <div>
-                                {inspectedItem.category === 'ARMOR' ? '防御' : '威力'}: {inspectedItem.power + (inspectedItem.plus || 0)}
+                                {inspectedItem.category === 'ARMOR' ? 'ぼうぎょ' : 'いりょく'}: {inspectedItem.power + (inspectedItem.plus || 0)}
                                 {inspectedItem.plus ? <span className="text-[9px] font-normal ml-1">({inspectedItem.power}+{inspectedItem.plus})</span> : ''}
                             </div>
                         )}
-                        {inspectedItem.value && <div>効果: {inspectedItem.value}</div>}
+                        {inspectedItem.value && <div>こうか: {inspectedItem.value}</div>}
                     </div>
                 </div>
             </div>
@@ -3299,13 +3298,13 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                     
                     {deckViewMode === 'REMOVE' && (
                         <div className="bg-red-900/50 p-2 mb-4 text-center border-2 border-red-500 rounded text-red-200 font-bold">
-                            除外するカードを選択してください
+                            じょがいするカードをえらんでください
                         </div>
                     )}
 
                     <div className="space-y-2">
                         {dungeonDeck.length === 0 ? (
-                            <div className="text-center text-sm py-4 opacity-50">デッキは空です</div>
+                            <div className="text-center text-sm py-4 opacity-50">デッキはからです</div>
                         ) : (
                             dungeonDeck.map((card, idx) => (
                                 <div 
@@ -3320,7 +3319,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                                             <span>{card.name}</span>
                                             <span className="text-xs opacity-70 font-normal">{card.type}</span>
                                         </div>
-                                        <div className="text-xs opacity-80">{card.description} {card.power > 0 && `(Pow:${card.power})`}</div>
+                                        <div className="text-xs opacity-80">{card.description} {card.power > 0 && `(いりょく:${card.power})`}</div>
                                     </div>
                                     {deckViewMode === 'REMOVE' && <Trash2 size={16} />}
                                 </div>
@@ -3329,10 +3328,10 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                     </div>
                     
                     <div className="mt-4 pt-4 border-t-2 text-xs opacity-70" style={{ borderColor: C1 }}>
-                        <p>手札: {dungeonHand.length}枚 / 捨て札: {dungeonDiscard.length}枚</p>
+                        <p>てふだ: {dungeonHand.length}まい / すてふだ: {dungeonDiscard.length}まい</p>
                     </div>
                     
-                    <button onClick={() => setShowDeck(false)} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>閉じる</button>
+                    <button onClick={() => setShowDeck(false)} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>とじる</button>
                 </div>
             </div>
         )}
@@ -3347,21 +3346,21 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                     </div>
                     <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                            <div><span style={{ color: C1 }} className="font-bold">名前:</span> {player.name}</div>
-                            <div><span style={{ color: C1 }} className="font-bold">称号:</span> {level < 5 ? '新入生' : (level < 10 ? '一般生徒' : '番長')}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">なまえ:</span> {player.name}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">しょうごう:</span> {level < 5 ? 'しんにゅうせい' : (level < 10 ? 'いっぱんせいと' : 'ばんちょう')}</div>
                             <div><span style={{ color: C1 }} className="font-bold">Lv:</span> {level}</div>
-                            <div><span style={{ color: C1 }} className="font-bold">経験値:</span> {player.xp}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">けいけんち:</span> {player.xp}</div>
                             <div><span style={{ color: C1 }} className="font-bold">HP:</span> {player.hp}/{player.maxHp}</div>
-                            <div><span style={{ color: C1 }} className="font-bold">満腹度:</span> {belly}/{maxBelly}</div>
-                            <div><span style={{ color: C1 }} className="font-bold">攻撃力:</span> {player.attack}</div>
-                            <div><span style={{ color: C1 }} className="font-bold">防御力:</span> {player.defense}</div>
-                            <div><span style={{ color: C1 }} className="font-bold">所持金:</span> {player.gold} G</div>
+                            <div><span style={{ color: C1 }} className="font-bold">まんぷくど:</span> {belly}/{maxBelly}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">こうげきりょく:</span> {player.attack}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">ぼうぎょりょく:</span> {player.defense}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">おかね:</span> {player.gold} G</div>
                         </div>
                         <div className="border-t-2 pt-2" style={{ borderColor: C1 }}>
-                            <h3 className="font-bold mb-2">装備</h3>
+                            <h3 className="font-bold mb-2">そうび</h3>
                             <div className="grid grid-cols-1 gap-1 text-sm">
                                 <div>
-                                    <span className="font-bold mr-2">[武]</span> 
+                                    <span className="font-bold mr-2">[ぶ]</span> 
                                     {player.equipment?.weapon ? (
                                         <span>
                                             {getItemName(player.equipment.weapon)} 
@@ -3373,7 +3372,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                                     ) : 'なし'}
                                 </div>
                                 <div>
-                                    <span className="font-bold mr-2">[防]</span> 
+                                    <span className="font-bold mr-2">[ぼ]</span> 
                                     {player.equipment?.armor ? (
                                         <span>
                                             {getItemName(player.equipment.armor)} 
@@ -3384,27 +3383,24 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                                         </span>
                                     ) : 'なし'}
                                 </div>
-                                <div><span className="font-bold mr-2">[投]</span> {player.equipment?.ranged ? `${getItemName(player.equipment.ranged)} (${player.equipment.ranged.count})` : 'なし'}</div>
-                                <div><span className="font-bold mr-2">[腕]</span> {player.equipment?.accessory ? `${getItemName(player.equipment.accessory)}` : 'なし'}</div>
+                                <div><span className="font-bold mr-2">[と]</span> {player.equipment?.ranged ? `${getItemName(player.equipment.ranged)} (${player.equipment.ranged.count})` : 'なし'}</div>
+                                <div><span className="font-bold mr-2">[う]</span> {player.equipment?.accessory ? `${getItemName(player.equipment.accessory)}` : 'なし'}</div>
                             </div>
                         </div>
                         <div className="border-t-2 pt-2" style={{ borderColor: C1 }}>
-                            <h3 className="font-bold mb-2">状態</h3>
+                            <h3 className="font-bold mb-2">じょうたい</h3>
                             <div className="flex flex-wrap gap-2 text-xs">
-                                {player.status.sleep > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>睡眠</span>}
-                                {player.status.confused > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>混乱</span>}
-                                {player.status.frozen > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>金縛り</span>}
-                                {player.status.blind > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>目潰し</span>}
-                                {player.status.speed > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>倍速</span>}
-                                {player.status.poison && player.status.poison > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>毒</span>}
-                                {player.status.defenseBuff && player.status.defenseBuff > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>防御UP</span>}
-                                {player.status.attackBuff && player.status.attackBuff > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>攻撃UP</span>}
-                                {player.status.trapSight && player.status.trapSight > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>罠見え</span>}
-                                {Object.values(player.status).every((v: number) => v <= 0) && <span>健康</span>}
+                                {player.status.sleep > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>すいみん</span>}
+                                {player.status.confused > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>こんらん</span>}
+                                {player.status.frozen > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>かなしばり</span>}
+                                {player.status.blind > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>めつぶし</span>}
+                                {player.status.speed > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>ばいそく</span>}
+                                {player.status.poison && player.status.poison > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>どく</span>}
+                                {Object.values(player.status).every((v: number) => (v as any) <= 0) && <span>けんこう</span>}
                             </div>
                         </div>
                     </div>
-                    <button onClick={() => setShowStatus(false)} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>閉じる</button>
+                    <button onClick={() => setShowStatus(false)} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>とじる</button>
                 </div>
             </div>
         )}
@@ -3414,46 +3410,46 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
             <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setShowHelp(false)}>
                 <div className="w-full max-w-md border-4 p-6 shadow-xl overflow-y-auto max-h-[80vh] custom-scrollbar" style={{ backgroundColor: C3, borderColor: C1, color: C0 }} onClick={e => e.stopPropagation()}>
                     <div className="flex justify-between items-center mb-4 border-b-2 pb-2" style={{ borderColor: C1 }}>
-                        <h2 className="font-bold text-xl flex items-center"><HelpCircle className="mr-2"/> 遊び方</h2>
+                        <h2 className="font-bold text-xl flex items-center"><HelpCircle className="mr-2"/> あそびかた</h2>
                         <button onClick={() => setShowHelp(false)}><X size={24}/></button>
                     </div>
                     <div className="space-y-4 text-sm">
                         <section>
-                            <h3 className="font-bold border-b mb-1" style={{ borderColor: C1 }}>目的</h3>
-                            <p>地下20階を目指し、校長先生を説得(撃破)してください。<br/>道中で落ちている武器や道具を駆使して生き残りましょう。</p>
+                            <h3 className="font-bold border-b mb-1" style={{ borderColor: C1 }}>もくてき</h3>
+                            <p>ちか20かいをめざし、こうちょうせんせいをせっとく(げきは)してください。<br/>どうちゅうでおちているぶきやどうぐをくししていきのこりましょう。</p>
                         </section>
                         <section>
-                            <h3 className="font-bold border-b mb-1" style={{ borderColor: C1 }}>操作方法</h3>
+                            <h3 className="font-bold border-b mb-1" style={{ borderColor: C1 }}>そうさほうほう</h3>
                             <ul className="list-disc pl-5">
-                                <li><strong>移動:</strong> 十字キー または 画面パッド</li>
-                                <li><strong>攻撃:</strong> Aボタン または Zキー</li>
+                                <li><strong>いどう:</strong> じゅうじキー または がめんパッド</li>
+                                <li><strong>こうげき:</strong> Aボタン または Zキー</li>
                                 <li><strong>メニュー:</strong> Bボタン または Xキー</li>
-                                <li><strong>飛び道具:</strong> <Crosshair size={12} className="inline"/>ボタン または Rキー</li>
-                                <li><strong>早送り:</strong> Aボタン長押し (敵がいない時)</li>
+                                <li><strong>とびどうぐ:</strong> <Crosshair size={12} className="inline"/>ボタン または Rキー</li>
+                                <li><strong>はやおくり:</strong> Aボタンながおし (てきがいないとき)</li>
                             </ul>
                         </section>
                         <section>
                             <h3 className="font-bold border-b mb-1" style={{ borderColor: C1 }}>カードシステム</h3>
                             <ul className="list-disc pl-5">
-                                <li>コントローラー下のカードをタップして発動します。</li>
-                                <li>使用するとターンを消費し、新たなカードを引きます。</li>
-                                <li>カードはフロアに落ちていることもあります。</li>
-                                <li>ダメージは<strong>(攻撃力 + カード威力) - 敵防御力</strong>で計算されます。</li>
+                                <li>コントローラーしたのカードをタップしてはつどうします。</li>
+                                <li>つかうとターンをしょうひし、あたらしいカードをひきます。</li>
+                                <li>カードはフロアにおちていることもあります。</li>
+                                <li>ダメージは<strong>(こうげきりょく + カードいりょく) - てきぼうぎょりょく</strong>でけいさんされます。</li>
                             </ul>
                         </section>
                         <section>
                             <h3 className="font-bold border-b mb-1" style={{ borderColor: C1 }}>ヒント</h3>
                             <ul className="list-disc pl-5">
-                                <li>お腹が減るとHPが減ります。おにぎりやパンを食べましょう。</li>
-                                <li><strong className="text-red-700">傘(杖)</strong>は振ると魔法が出ますが、回数制限があります。使い切ったら投げましょう。</li>
-                                <li><strong className="text-blue-700">腕輪</strong>は装備するだけで効果があります。</li>
-                                <li>「工作のり」を使うと、装備を合成して強くできます。</li>
-                                <li>敵に囲まれたら通路に逃げ込みましょう。</li>
-                                <li>まれに購買部員(店)が現れます。アイテム売買が可能です。</li>
+                                <li>おなかがへるとHPがへります。おにぎりやパンをたべましょう。</li>
+                                <li><strong className="text-red-700">かさ(つえ)</strong>はふるとまほうが出ますが、かいすうせいげんがあります。つかいきったらなげましょう。</li>
+                                <li><strong className="text-blue-700">うでわ</strong>はそうびするだけでこうかがあります。</li>
+                                <li>「こうさくのり」をつかうと、そうびをごうせいしてつよくできます。</li>
+                                <li>てきにかこまれたらつうろににげこみましょう。</li>
+                                <li>まれにこうばいぶいん(みせ)があらわれます。アイテムばいばいがかのうです。</li>
                             </ul>
                         </section>
                     </div>
-                    <button onClick={() => setShowHelp(false)} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>閉じる</button>
+                    <button onClick={() => setShowHelp(false)} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>とじる</button>
                 </div>
             </div>
         )}
@@ -3509,7 +3505,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                         {/* Fast Forward Indicator */}
                         {isFastForwarding && (
                             <div className="absolute top-16 right-2 animate-pulse flex items-center rounded px-2" style={{ backgroundColor: `${C0}80`, color: C3 }}>
-                                <FastForward size={16} className="mr-1"/> 早送り中
+                                <FastForward size={16} className="mr-1"/> はやおくりちゅう
                             </div>
                         )}
 
@@ -3561,7 +3557,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                         {shopState.active && (
                             <div className="absolute right-0 top-0 bottom-0 w-3/4 border-l-2 z-30 p-2 text-xs flex flex-col" style={{ backgroundColor: C0, borderColor: C3, color: C3 }}>
                                 <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}>
-                                    <h3 className="font-bold flex items-center"><ShoppingBag size={12} className="mr-1"/> 購買部</h3>
+                                    <h3 className="font-bold flex items-center"><ShoppingBag size={12} className="mr-1"/> こうばいぶ</h3>
                                     <button onClick={() => setShopState(prev => ({...prev, active: false}))}><X size={12}/></button>
                                 </div>
                                 
@@ -3571,14 +3567,14 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                                         style={{ borderColor: C3, backgroundColor: shopState.mode === 'BUY' ? C3 : 'transparent', color: shopState.mode === 'BUY' ? C0 : C3 }}
                                         onClick={() => { setShopState(prev => ({ ...prev, mode: 'BUY' })); setSelectedItemIndex(0); }}
                                     >
-                                        買う
+                                        かう
                                     </button>
                                     <button 
                                         className={`flex-1 py-1 text-center border`}
                                         style={{ borderColor: C3, backgroundColor: shopState.mode === 'SELL' ? C3 : 'transparent', color: shopState.mode === 'SELL' ? C0 : C3 }}
                                         onClick={() => { setShopState(prev => ({ ...prev, mode: 'SELL' })); setSelectedItemIndex(0); }}
                                     >
-                                        売る
+                                        うる
                                     </button>
                                 </div>
 
@@ -3593,7 +3589,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                                         style={{ borderColor: C1, color: C3 }}
                                         onClick={() => { setDeckViewMode('REMOVE'); setShowDeck(true); }}
                                     >
-                                        <Trash2 size={12} /> カード除外 (100 G)
+                                        <Trash2 size={12} /> カードじょがい (100 G)
                                     </button>
                                 )}
 
@@ -3607,7 +3603,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                                                 </button>
                                                 <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button>
                                             </div>
-                                        )) || <div className="text-center">売り切れ</div>
+                                        )) || <div className="text-center">うりきれ</div>
                                     ) : (
                                         inventory.map((item, i) => (
                                             <div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}>
@@ -3619,7 +3615,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                                             </div>
                                         ))
                                     )}
-                                    {shopState.mode === 'SELL' && inventory.length === 0 && <div className="text-center">持ち物なし</div>}
+                                    {shopState.mode === 'SELL' && inventory.length === 0 && <div className="text-center">もちものなし</div>}
                                 </div>
                             </div>
                         )}
@@ -3629,7 +3625,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                                 <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}>
                                     <h3 className="font-bold">
                                         {synthState.active 
-                                            ? (synthState.mode === 'BLANK' ? '書き込む内容を選択' : (synthState.step === 'SELECT_BASE' ? (synthState.mode==='CHANGE'?'変化させる物':'ベースを選択') : (synthState.mode==='CHANGE'?'変化':'素材を選択')))
+                                            ? (synthState.mode === 'BLANK' ? 'かきこむ内容をえらぶ' : (synthState.step === 'SELECT_BASE' ? (synthState.mode==='CHANGE'?'へんかさせる物':'ベースをえらぶ') : (synthState.mode==='CHANGE'?'へんか':'そざいをえらぶ')))
                                             : `MOCHIMONO (${inventory.length}/${MAX_INVENTORY})`
                                         }
                                     </h3>
@@ -3643,17 +3639,17 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                                                 <button className="flex-grow text-left px-2 py-1 cursor-pointer" onClick={() => handleSynthesisStep()} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setBlankScrollSelectionIndex(i); }}>{ITEM_DB[type as string].name}</button>
                                             </div>
                                         ))}
-                                        {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).length === 0 && <div className="text-red-500">識別済みのノートがありません</div>}
+                                        {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).length === 0 && <div className="text-red-500">しきべつ済みのノートがありません</div>}
                                     </div>
                                 ) : (
                                     <>
                                         {!synthState.active && (
                                             <div className="mb-2 border-b pb-2" style={{ borderColor: C1 }}>
-                                                <div className="mb-1" style={{ color: C2 }}>装備中:</div>
-                                                {player.equipment?.weapon && <div onClick={()=>handleUnequip('weapon')} className="cursor-pointer hover:text-white">[武] {getItemName(player.equipment.weapon)}</div>}
-                                                {player.equipment?.armor && <div onClick={()=>handleUnequip('armor')} className="cursor-pointer hover:text-white">[防] {getItemName(player.equipment.armor)}</div>}
-                                                {player.equipment?.ranged && <div onClick={()=>handleUnequip('ranged')} className="cursor-pointer hover:text-white">[投] {getItemName(player.equipment.ranged)}</div>}
-                                                {player.equipment?.accessory && <div onClick={()=>handleUnequip('accessory')} className="cursor-pointer hover:text-white">[腕] {getItemName(player.equipment.accessory)}</div>}
+                                                <div className="mb-1" style={{ color: C2 }}>そうび中:</div>
+                                                {player.equipment?.weapon && <div onClick={()=>handleUnequip('weapon')} className="cursor-pointer hover:text-white">[ぶ] {getItemName(player.equipment.weapon)}</div>}
+                                                {player.equipment?.armor && <div onClick={()=>handleUnequip('armor')} className="cursor-pointer hover:text-white">[ぼ] {getItemName(player.equipment.armor)}</div>}
+                                                {player.equipment?.ranged && <div onClick={()=>handleUnequip('ranged')} className="cursor-pointer hover:text-white">[と] {getItemName(player.equipment.ranged)}</div>}
+                                                {player.equipment?.accessory && <div onClick={()=>handleUnequip('accessory')} className="cursor-pointer hover:text-white">[う] {getItemName(player.equipment.accessory)}</div>}
                                             </div>
                                         )}
 
@@ -3668,15 +3664,15 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                                                     <div key={i} className={`flex items-center border ${isSynthTarget ? 'opacity-30' : ''}`} style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onContextMenu={(e) => { e.preventDefault(); setInspectedItem(item); }} onTouchStart={() => handleTouchStart(item)} onTouchEnd={handleTouchEnd}>
                                                         <button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => !isSynthTarget && (synthState.active ? handleSynthesisStep() : handleItemAction(i))} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}>
                                                             <span>{getItemName(item)} {item.plus ? `+${item.plus}` : ''} {item.count ? `(${item.count})` : ''}{item.category === 'STAFF' ? `[${item.charges}]` : ''}</span>
-                                                            <span className="text-[9px]" style={{ color: selectedItemIndex === i ? C0 : C2 }}>{synthState.active ? '選択' : (['WEAPON','ARMOR','RANGED','ACCESSORY'].includes(item.category) ? '装備' : (item.category==='STAFF' ? '振る' : '使う'))}</span>
+                                                            <span className="text-[9px]" style={{ color: selectedItemIndex === i ? C0 : C2 }}>{synthState.active ? 'せんたく' : (['WEAPON','ARMOR','RANGED','ACCESSORY'].includes(item.category) ? 'そうび' : (item.category==='STAFF' ? 'ふる' : 'つかう'))}</span>
                                                         </button>
                                                         {!synthState.active && (
-                                                            <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); handleThrowItem(i); }} title="投げる"><Send size={10} /></button>
+                                                            <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); handleThrowItem(i); }} title="なげる"><Send size={10} /></button>
                                                         )}
                                                         {!synthState.active && (
-                                                            <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); handleDropItem(i); }} title="足元に置く"><ArrowDown size={10} /></button>
+                                                            <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); handleDropItem(i); }} title="あしもとにおく"><ArrowDown size={10} /></button>
                                                         )}
-                                                        <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }} title="詳細"><Info size={10} /></button>
+                                                        <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }} title="しょうさい"><Info size={10} /></button>
                                                     </div>
                                                 );
                                             })}
@@ -3763,9 +3759,10 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
             </button>
         </div>
 
-        {/* --- MOBILE ONLY CONTROLLER --- */}
-        <div className="md:hidden w-full max-w-md h-[220px] relative rounded-t-xl border-t-2 border-[#333] bg-[#1a1a2a] shrink-0">
-            <div className="absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32 flex items-center justify-center">
+        {/* --- BOTTOM: MOBILE ONLY CONTROLLER --- */}
+        <div className="md:hidden w-full max-w-md h-[300px] relative rounded-t-xl border-t-2 border-[#333] bg-[#1a1a2a] shrink-0">
+            {/* D-Pad */}
+            <div className="absolute left-6 top-[80px] -translate-y-1/2 w-32 h-32 flex items-center justify-center">
                 <div className="w-10 h-10 bg-[#333] z-10"></div>
                 <div className="absolute top-0 w-10 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0" onClick={() => handleMoveInput(0, -1)}><ArrowUp className="text-[#666]" size={20}/></div>
                 <div className="absolute bottom-0 w-10 h-16 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-0" onClick={() => handleMoveInput(0, 1)}><ArrowDown className="text-[#666]" size={20}/></div>
@@ -3779,11 +3776,12 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
             </div>
 
             {/* Mobile Shoot Button */}
-            <div className="absolute right-6 top-1/2 -translate-y-[100px] flex flex-col items-center z-10 group">
+            <div className="absolute left-[140px] top-[10px] flex flex-col items-center z-10 group">
                 <button className="w-10 h-10 bg-[#333] rounded-full shadow-[0_2px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555]" onClick={fireRangedWeapon}><Crosshair size={16}/></button>
             </div>
 
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-4 transform -rotate-12">
+            {/* A and B buttons */}
+            <div className="absolute right-2 top-[80px] -translate-y-1/2 flex gap-4 transform -rotate-12">
                 <div className="flex flex-col items-center group">
                     <button className="w-14 h-14 bg-[#8b0000] rounded-full shadow-[0_4px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000]" onClick={toggleMenu}>B</button>
                     <span className="text-[#666] text-xs font-bold mt-1">MENU</span>
@@ -3803,8 +3801,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                 </div>
             </div>
 
-            {/* Mobile Cards Row */}
-            <div className="absolute bottom-1 right-1 left-1 h-20 flex items-end justify-center gap-1 pointer-events-none pr-1">
+            {/* Mobile Cards Row (Placed below AB buttons) */}
+            <div className="absolute bottom-[40px] right-1 left-1 h-20 flex items-end justify-center gap-1 pointer-events-none pr-1">
                  {dungeonHand.length > 0 ? (
                     dungeonHand.map((card, i) => (
                         <button 
@@ -3824,6 +3822,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                 )}
             </div>
 
+            {/* Quit Button */}
             <div className="absolute bottom-2 left-4">
                  <button onClick={handleQuit} className="text-[#555] text-[10px] font-bold border border-[#333] px-3 py-1 rounded bg-[#222] flex items-center gap-1"><LogOut size={10}/> QUIT</button>
             </div>
