@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch, Sparkles, BookOpen, Layers, Move, Minimize2, Maximize2, Volume2, ShieldAlert, ArrowUpCircle, Plus, Magnet, Moon, Snowflake, Activity, Eye, Dna, Dice5 } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -836,7 +837,6 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
       } else if (card.templateId === 'THRUST') {
           // 2-tile piercing Thrust
           const { x: dx, y: dy } = player.dir;
-          let hitCount = 0;
           const targets: Entity[] = [];
           
           // Check 2 tiles
@@ -1510,7 +1510,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                     hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0},
                     status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
                     itemData: { 
-                        id: `card-drop-${Date.now()}-${Math.random()}`, 
+                        id: `card-loot-${Date.now()}-${Math.random()}`, 
                         category: 'DECK_CARD',
                         type: cardTemplate.templateId,
                         name: cardTemplate.name,
@@ -3257,7 +3257,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   const { C0, C1, C2, C3 } = currentTheme.colors;
 
   return (
-    <div className="w-full h-full bg-[#101010] flex flex-col md:flex-row items-center md:items-stretch justify-center font-mono select-none overflow-hidden touch-none relative p-4 gap-4">
+    <div className="w-full h-full bg-[#101010] flex flex-col md:flex-row items-center md:items-stretch justify-center font-mono select-none overflow-hidden touch-none relative p-2 md:p-4 gap-2 md:gap-4">
         
         {inspectedItem && (
             <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setInspectedItem(null)}>
@@ -3458,304 +3458,339 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
             </div>
         )}
 
-        {/* --- LEFT COL (Game Screen + Logs) --- */}
-        <div className="w-full max-w-md md:max-w-full md:flex-1 flex flex-col gap-2 min-h-0">
-            {/* Game Area (Top) */}
-            <div className="w-full aspect-[4/3] md:aspect-auto md:flex-1 relative shrink-0 shadow-lg border-2 max-h-[45vh] md:max-h-full flex flex-col overflow-hidden" style={{ backgroundColor: C3, borderColor: C0 }}>
-                <div className="w-full h-8 flex justify-between items-center px-2 text-[10px] z-10 border-b shrink-0" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
-                    <span className="font-bold tracking-widest">{currentTheme.name}</span>
-                    <div className="flex gap-2">
-                        <button onClick={() => setShowMap(!showMap)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><MapIcon size={10}/> Map</button>
-                        <button onClick={() => setShowStatus(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><User size={10}/> Sts</button>
-                        <button onClick={() => { setDeckViewMode('VIEW'); setShowDeck(true); }} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><Layers size={10}/> Deck</button>
-                        <button onClick={() => setShowHelp(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><HelpCircle size={10}/> Help</button>
-                    </div>
-                </div>
+        {/* --- LEFT: D-PAD --- */}
+        <div className="hidden md:flex w-64 flex-col items-center justify-center p-4 bg-[#1a1a2a] border-2 border-[#333] rounded-xl shadow-2xl relative shrink-0">
+            <div className="w-48 h-48 relative flex items-center justify-center">
+                <div className="w-16 h-16 bg-[#333] z-10 rounded-sm"></div>
+                {/* D-PAD Buttons */}
+                <div className="absolute top-0 w-16 h-20 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0" onClick={() => handleMoveInput(0, -1)}><ArrowUp className="text-[#666]" size={28}/></div>
+                <div className="absolute bottom-0 w-16 h-20 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-0" onClick={() => handleMoveInput(0, 1)}><ArrowDown className="text-[#666]" size={28}/></div>
+                <div className="absolute left-0 w-20 h-16 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-0" onClick={() => handleMoveInput(-1, 0)}><ArrowLeft className="text-[#666]" size={28}/></div>
+                <div className="absolute right-0 w-20 h-16 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-0" onClick={() => handleMoveInput(1, 0)}><ArrowRight className="text-[#666]" size={28}/></div>
+                
+                {/* Diagonals */}
+                <div className="absolute top-2 left-2 w-12 h-12 bg-[#2a2a2a] rounded-tl-xl border-t border-l border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(-1, -1)}></div>
+                <div className="absolute top-2 right-2 w-12 h-12 bg-[#2a2a2a] rounded-tr-xl border-t border-r border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(1, -1)}></div>
+                <div className="absolute bottom-2 left-2 w-12 h-12 bg-[#2a2a2a] rounded-bl-xl border-b border-l border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(-1, 1)}></div>
+                <div className="absolute bottom-2 right-2 w-12 h-12 bg-[#2a2a2a] rounded-br-xl border-b border-r border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(1, 1)}></div>
+                
+                <div className="absolute w-12 h-12 bg-[#2a2a2a] rounded-full z-20 shadow-inner"></div>
+            </div>
+            <div className="mt-12 text-[#444] font-black tracking-widest text-sm italic uppercase">Direction</div>
+        </div>
 
-                <div className="w-full h-5 flex justify-between items-center px-2 text-xs font-bold z-10 shrink-0" style={{ backgroundColor: C1, color: C3 }}>
-                    <span>{floor}F</span>
-                    <span>Lv{level}</span>
-                    <span>HP{player.hp}/{player.maxHp}</span>
-                    <span>A{player.attack}D{player.defense}</span>
-                    <span className="flex items-center"><Coins size={10} className="mr-0.5"/>{player.gold}</span>
-                    <span>🍙{belly}%</span>
-                </div>
-
-                <div className="relative flex-1 min-h-0 w-full bg-[#111827]">
-                    <canvas ref={canvasRef} width={VIEW_W * TILE_SIZE * SCALE} height={VIEW_H * TILE_SIZE * SCALE} className="w-full h-full object-contain pixel-art" style={{ imageRendering: 'pixelated' }} />
-
-                    {/* Fast Forward Indicator */}
-                    {isFastForwarding && (
-                        <div className="absolute top-2 right-2 animate-pulse flex items-center rounded px-2" style={{ backgroundColor: `${C0}80`, color: C3 }}>
-                            <FastForward size={16} className="mr-1"/> 早送り中
+        {/* --- CENTER: MAIN DISPLAY --- */}
+        <div className="flex-1 flex flex-col items-center gap-2 min-h-0">
+            {/* Display Area */}
+            <div className="w-full aspect-[11/9] md:aspect-auto md:flex-1 relative shrink-0">
+                <div className="w-full h-full border-4 relative overflow-hidden shadow-lg rounded-sm" style={{ backgroundColor: C3, borderColor: C0 }}>
+                    <div className="absolute top-0 left-0 w-full h-8 flex justify-between items-center px-2 text-[10px] z-10 border-b" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
+                        <span className="font-bold tracking-widest">{currentTheme.name}</span>
+                        <div className="flex gap-2">
+                            <button onClick={() => setShowMap(!showMap)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><MapIcon size={10}/> Map</button>
+                            <button onClick={() => setShowStatus(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><User size={10}/> Sts</button>
+                            <button onClick={() => { setDeckViewMode('VIEW'); setShowDeck(true); }} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><Layers size={10}/> Deck</button>
+                            <button onClick={() => setShowHelp(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><HelpCircle size={10}/> Help</button>
                         </div>
-                    )}
+                    </div>
 
-                    {/* Map Overlay: Now with Fog of War */}
-                    {showMap && map.length > 0 && (
-                        <div className="absolute inset-0 z-20 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}E6` }}>
-                            <div className="w-full h-full border grid" style={{ borderColor: C3, gridTemplateColumns: `repeat(${MAP_W}, 1fr)` }}>
-                                {map.map((row, y) => row.map((tile, x) => {
-                                    const isRevealed = floorMapRevealed || (visitedMap[y] && visitedMap[y][x]);
-                                    const isPlayer = x === player.x && y === player.y;
-                                    const hasSight = player.equipment?.accessory?.type === 'RING_SIGHT';
-                                    const hasTrapSight = (player.equipment?.accessory?.type === 'RING_TRAP') || (player.status.trapSight && player.status.trapSight > 0);
-                                    const hasItem = floorItems.some(i => i.x===x && i.y===y);
-                                    const hasEnemy = enemies.some(e => e.x===x && e.y===y);
-                                    
-                                    let bgStyle = { backgroundColor: 'transparent' };
-                                    let content = null;
+                    <div className="absolute top-8 left-0 w-full h-5 flex justify-between items-center px-2 text-xs font-bold z-10" style={{ backgroundColor: C1, color: C3 }}>
+                        <span>{floor}F</span>
+                        <span>Lv{level}</span>
+                        <span>HP{player.hp}/{player.maxHp}</span>
+                        <span>A{player.attack}D{player.defense}</span>
+                        <span className="flex items-center"><Coins size={10} className="mr-0.5"/>{player.gold}</span>
+                        <span>🍙{belly}%</span>
+                    </div>
 
-                                    if (isPlayer) {
-                                        content = <div className="w-full h-full bg-white rounded-full animate-pulse"></div>;
-                                    } else if (isRevealed) {
-                                        if (tile === 'STAIRS') bgStyle = { backgroundColor: C3 };
-                                        else if (tile !== 'WALL') bgStyle = { backgroundColor: C1 };
+                    <div className="relative w-full h-full bg-[#111827]">
+                        <canvas ref={canvasRef} width={VIEW_W * TILE_SIZE * SCALE} height={VIEW_H * TILE_SIZE * SCALE} className="w-full h-full object-contain pixel-art mt-6" style={{ imageRendering: 'pixelated' }} />
+
+                        {/* Fast Forward Indicator */}
+                        {isFastForwarding && (
+                            <div className="absolute top-16 right-2 animate-pulse flex items-center rounded px-2" style={{ backgroundColor: `${C0}80`, color: C3 }}>
+                                <FastForward size={16} className="mr-1"/> 早送り中
+                            </div>
+                        )}
+
+                        {/* Map Overlay */}
+                        {showMap && map.length > 0 && (
+                            <div className="absolute inset-0 z-20 flex items-center justify-center p-8 mt-12" style={{ backgroundColor: `${C0}E6` }}>
+                                <div className="w-full h-full border grid" style={{ borderColor: C3, gridTemplateColumns: `repeat(${MAP_W}, 1fr)` }}>
+                                    {map.map((row, y) => row.map((tile, x) => {
+                                        const isRevealed = floorMapRevealed || (visitedMap[y] && visitedMap[y][x]);
+                                        const isPlayer = x === player.x && y === player.y;
+                                        const hasSight = player.equipment?.accessory?.type === 'RING_SIGHT';
+                                        const hasTrapSight = (player.equipment?.accessory?.type === 'RING_TRAP') || (player.status.trapSight && player.status.trapSight > 0);
+                                        const hasItem = floorItems.some(i => i.x===x && i.y===y);
+                                        const hasEnemy = enemies.some(e => e.x===x && e.y===y);
                                         
-                                        if (tile !== 'WALL') {
-                                            if (traps.some(t => t.x===x && t.y===y && (t.visible || hasTrapSight))) {
-                                                content = <div className="w-full h-full flex items-center justify-center text-[4px] text-red-500 font-bold">X</div>;
-                                            } else if (hasEnemy && hasSight) {
+                                        let bgStyle = { backgroundColor: 'transparent' };
+                                        let content = null;
+
+                                        if (isPlayer) {
+                                            content = <div className="w-full h-full bg-white rounded-full animate-pulse"></div>;
+                                        } else if (isRevealed) {
+                                            if (tile === 'STAIRS') bgStyle = { backgroundColor: C3 };
+                                            else if (tile !== 'WALL') bgStyle = { backgroundColor: C1 };
+                                            
+                                            if (tile !== 'WALL') {
+                                                if (traps.some(t => t.x===x && t.y===y && (t.visible || hasTrapSight))) {
+                                                    content = <div className="w-full h-full flex items-center justify-center text-[4px] text-red-500 font-bold">X</div>;
+                                                } else if (hasEnemy && hasSight) {
+                                                    content = <div className="w-full h-full bg-red-500 rounded-full"></div>;
+                                                } else if (hasItem && hasSight) {
+                                                    content = <div className="w-full h-full bg-blue-400 rounded-sm"></div>;
+                                                }
+                                            }
+                                        } else {
+                                            if (hasEnemy && hasSight) {
                                                 content = <div className="w-full h-full bg-red-500 rounded-full"></div>;
                                             } else if (hasItem && hasSight) {
                                                 content = <div className="w-full h-full bg-blue-400 rounded-sm"></div>;
                                             }
                                         }
-                                    } else {
-                                        if (hasEnemy && hasSight) {
-                                            content = <div className="w-full h-full bg-red-500 rounded-full"></div>;
-                                        } else if (hasItem && hasSight) {
-                                            content = <div className="w-full h-full bg-blue-400 rounded-sm"></div>;
-                                        }
-                                    }
-
-                                    return (
-                                        <div key={`${x}-${y}`} style={bgStyle}>
-                                            {content}
-                                        </div>
-                                    );
-                                }))}
+                                        return <div key={`${x}-${y}`} style={bgStyle}>{content}</div>;
+                                    }))}
+                                </div>
+                                <button onClick={() => setShowMap(false)} className="absolute bottom-4 border px-2 rounded hover:opacity-80" style={{ color: C3, borderColor: C3 }}>Close</button>
                             </div>
-                            <button onClick={() => setShowMap(false)} className="absolute bottom-4 border px-2 rounded hover:opacity-80 bg-black/50" style={{ color: C3, borderColor: C3 }}>Close</button>
-                        </div>
-                    )}
-                </div>
-
-                {/* Shop Menu */}
-                {shopState.active && (
-                    <div className="absolute right-0 top-0 bottom-0 w-3/4 border-l-2 z-30 p-2 text-xs flex flex-col" style={{ backgroundColor: C0, borderColor: C3, color: C3 }}>
-                        <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}>
-                            <h3 className="font-bold flex items-center"><ShoppingBag size={12} className="mr-1"/> 購買部</h3>
-                            <button onClick={() => setShopState(prev => ({...prev, active: false}))}><X size={12}/></button>
-                        </div>
-                        
-                        <div className="flex gap-2 mb-2">
-                            <button 
-                                className={`flex-1 py-1 text-center border`}
-                                style={{ borderColor: C3, backgroundColor: shopState.mode === 'BUY' ? C3 : 'transparent', color: shopState.mode === 'BUY' ? C0 : C3 }}
-                                onClick={() => { setShopState(prev => ({ ...prev, mode: 'BUY' })); setSelectedItemIndex(0); }}
-                            >
-                                買う
-                            </button>
-                            <button 
-                                className={`flex-1 py-1 text-center border`}
-                                style={{ borderColor: C3, backgroundColor: shopState.mode === 'SELL' ? C3 : 'transparent', color: shopState.mode === 'SELL' ? C0 : C3 }}
-                                onClick={() => { setShopState(prev => ({ ...prev, mode: 'SELL' })); setSelectedItemIndex(0); }}
-                            >
-                                売る
-                            </button>
-                        </div>
-
-                        <div className="flex justify-end mb-2 border-b pb-1" style={{ borderColor: C1 }}>
-                            <span className="flex items-center"><Coins size={10} className="mr-1"/> {player.gold} G</span>
-                        </div>
-
-                        {/* Card Removal Button (Only if not used) */}
-                        {!shopRemovedThisFloor && (
-                            <button 
-                                className="w-full border mb-2 py-1 flex items-center justify-center gap-2 hover:opacity-80"
-                                style={{ borderColor: C1, color: C3 }}
-                                onClick={() => { setDeckViewMode('REMOVE'); setShowDeck(true); }}
-                            >
-                                <Trash2 size={12} /> カード除外 (100 G)
-                            </button>
                         )}
 
-                        <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
-                            {shopState.mode === 'BUY' ? (
-                                enemies.find(e => e.id === shopState.merchantId)?.shopItems?.map((item, i) => (
-                                    <div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}>
-                                        <button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>
-                                            <span>{getItemName(item)}</span>
-                                            <span className="flex items-center gap-1">{item.price} G</span>
-                                        </button>
-                                        <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button>
-                                    </div>
-                                )) || <div className="text-center">売り切れ</div>
-                            ) : (
-                                inventory.map((item, i) => (
-                                    <div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}>
-                                        <button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>
-                                            <span>{getItemName(item)}</span>
-                                            <span className="flex items-center gap-1">{Math.floor((item.price || (item.value || 100)) / 2)} G</span>
-                                        </button>
-                                        <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button>
-                                    </div>
-                                ))
-                            )}
-                            {shopState.mode === 'SELL' && inventory.length === 0 && <div className="text-center">持ち物なし</div>}
-                        </div>
-                    </div>
-                )}
+                        {/* Shop Menu */}
+                        {shopState.active && (
+                            <div className="absolute right-0 top-0 bottom-0 w-3/4 border-l-2 z-30 p-2 text-xs flex flex-col" style={{ backgroundColor: C0, borderColor: C3, color: C3 }}>
+                                <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}>
+                                    <h3 className="font-bold flex items-center"><ShoppingBag size={12} className="mr-1"/> 購買部</h3>
+                                    <button onClick={() => setShopState(prev => ({...prev, active: false}))}><X size={12}/></button>
+                                </div>
+                                
+                                <div className="flex gap-2 mb-2">
+                                    <button 
+                                        className={`flex-1 py-1 text-center border`}
+                                        style={{ borderColor: C3, backgroundColor: shopState.mode === 'BUY' ? C3 : 'transparent', color: shopState.mode === 'BUY' ? C0 : C3 }}
+                                        onClick={() => { setShopState(prev => ({ ...prev, mode: 'BUY' })); setSelectedItemIndex(0); }}
+                                    >
+                                        買う
+                                    </button>
+                                    <button 
+                                        className={`flex-1 py-1 text-center border`}
+                                        style={{ borderColor: C3, backgroundColor: shopState.mode === 'SELL' ? C3 : 'transparent', color: shopState.mode === 'SELL' ? C0 : C3 }}
+                                        onClick={() => { setShopState(prev => ({ ...prev, mode: 'SELL' })); setSelectedItemIndex(0); }}
+                                    >
+                                        売る
+                                    </button>
+                                </div>
 
-                {menuOpen && (
-                    <div className="absolute right-0 top-0 bottom-0 w-3/4 border-l-2 z-30 p-2 text-xs flex flex-col" style={{ backgroundColor: C0, borderColor: C3, color: C3 }}>
-                        <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}>
-                            <h3 className="font-bold">
-                                {synthState.active 
-                                    ? (synthState.mode === 'BLANK' ? '書き込む内容を選択' : (synthState.step === 'SELECT_BASE' ? (synthState.mode==='CHANGE'?'変化させる物':'ベースを選択') : (synthState.mode==='CHANGE'?'変化':'素材を選択')))
-                                    : `MOCHIMONO (${inventory.length}/${MAX_INVENTORY})`
-                                }
-                            </h3>
-                            <button onClick={toggleMenu}><X size={12}/></button>
-                        </div>
-                        
-                        {synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT' ? (
-                            <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
-                                {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).map((type, i) => (
-                                    <div key={i} className="flex items-center border" style={{ borderColor: blankScrollSelectionIndex === i ? C3 : 'transparent', backgroundColor: blankScrollSelectionIndex === i ? C2 : 'transparent', color: blankScrollSelectionIndex === i ? C0 : C3 }}>
-                                        <button className="flex-grow text-left px-2 py-1 cursor-pointer" onClick={() => handleSynthesisStep()} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setBlankScrollSelectionIndex(i); }}>{ITEM_DB[type as string].name}</button>
-                                    </div>
-                                ))}
-                                {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).length === 0 && <div className="text-red-500">識別済みのノートがありません</div>}
-                            </div>
-                        ) : (
-                            <>
-                                {!synthState.active && (
-                                    <div className="mb-2 border-b pb-2" style={{ borderColor: C1 }}>
-                                        <div className="mb-1" style={{ color: C2 }}>装備中:</div>
-                                        {player.equipment?.weapon && <div onClick={()=>handleUnequip('weapon')} className="cursor-pointer hover:text-white">[武] {getItemName(player.equipment.weapon)}</div>}
-                                        {player.equipment?.armor && <div onClick={()=>handleUnequip('armor')} className="cursor-pointer hover:text-white">[防] {getItemName(player.equipment.armor)}</div>}
-                                        {player.equipment?.ranged && <div onClick={()=>handleUnequip('ranged')} className="cursor-pointer hover:text-white">[投] {getItemName(player.equipment.ranged)}</div>}
-                                        {player.equipment?.accessory && <div onClick={()=>handleUnequip('accessory')} className="cursor-pointer hover:text-white">[腕] {getItemName(player.equipment.accessory)}</div>}
-                                    </div>
+                                <div className="flex justify-end mb-2 border-b pb-1" style={{ borderColor: C1 }}>
+                                    <span className="flex items-center"><Coins size={10} className="mr-1"/> {player.gold} G</span>
+                                </div>
+
+                                {/* Card Removal Button (Only if not used) */}
+                                {!shopRemovedThisFloor && (
+                                    <button 
+                                        className="w-full border mb-2 py-1 flex items-center justify-center gap-2 hover:opacity-80"
+                                        style={{ borderColor: C1, color: C3 }}
+                                        onClick={() => { setDeckViewMode('REMOVE'); setShowDeck(true); }}
+                                    >
+                                        <Trash2 size={12} /> カード除外 (100 G)
+                                    </button>
                                 )}
 
                                 <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
-                                    {inventory.map((item, i) => {
-                                        const isSynthTarget = synthState.active && (
-                                            (synthState.step === 'SELECT_BASE' && synthState.mode === 'SYNTH' && !['WEAPON','ARMOR'].includes(item.category)) ||
-                                            (synthState.step === 'SELECT_MAT' && synthState.baseIndex === i)
-                                        );
-                                        
-                                        return (
-                                            <div key={i} className={`flex items-center border ${isSynthTarget ? 'opacity-30' : ''}`} style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onContextMenu={(e) => { e.preventDefault(); setInspectedItem(item); }} onTouchStart={() => handleTouchStart(item)} onTouchEnd={handleTouchEnd}>
-                                                <button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => !isSynthTarget && (synthState.active ? handleSynthesisStep() : handleItemAction(i))} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}>
-                                                    <span>{getItemName(item)} {item.plus ? `+${item.plus}` : ''} {item.count ? `(${item.count})` : ''}{item.category === 'STAFF' ? `[${item.charges}]` : ''}</span>
-                                                    <span className="text-[9px]" style={{ color: selectedItemIndex === i ? C0 : C2 }}>{synthState.active ? '選択' : (['WEAPON','ARMOR','RANGED','ACCESSORY'].includes(item.category) ? '装備' : (item.category==='STAFF' ? '振る' : '使う'))}</span>
+                                    {shopState.mode === 'BUY' ? (
+                                        enemies.find(e => e.id === shopState.merchantId)?.shopItems?.map((item, i) => (
+                                            <div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}>
+                                                <button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>
+                                                    <span>{getItemName(item)}</span>
+                                                    <span className="flex items-center gap-1">{item.price} G</span>
                                                 </button>
-                                                {!synthState.active && (
-                                                    <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); handleThrowItem(i); }} title="投げる"><Send size={10} /></button>
-                                                )}
-                                                {!synthState.active && (
-                                                    <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); handleDropItem(i); }} title="足元に置く"><ArrowDown size={10} /></button>
-                                                )}
-                                                <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }} title="詳細"><Info size={10} /></button>
+                                                <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button>
                                             </div>
-                                        );
-                                    })}
-                                    {inventory.length === 0 && <span className="text-center" style={{ color: C1 }}>Empty</span>}
+                                        )) || <div className="text-center">売り切れ</div>
+                                    ) : (
+                                        inventory.map((item, i) => (
+                                            <div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}>
+                                                <button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>
+                                                    <span>{getItemName(item)}</span>
+                                                    <span className="flex items-center gap-1">{Math.floor((item.price || (item.value || 100)) / 2)} G</span>
+                                                </button>
+                                                <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button>
+                                            </div>
+                                        ))
+                                    )}
+                                    {shopState.mode === 'SELL' && inventory.length === 0 && <div className="text-center">持ち物なし</div>}
                                 </div>
-                            </>
+                            </div>
+                        )}
+
+                        {menuOpen && (
+                            <div className="absolute right-0 top-0 bottom-0 w-3/4 border-l-2 z-30 p-2 text-xs flex flex-col" style={{ backgroundColor: C0, borderColor: C3, color: C3 }}>
+                                <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}>
+                                    <h3 className="font-bold">
+                                        {synthState.active 
+                                            ? (synthState.mode === 'BLANK' ? '書き込む内容を選択' : (synthState.step === 'SELECT_BASE' ? (synthState.mode==='CHANGE'?'変化させる物':'ベースを選択') : (synthState.mode==='CHANGE'?'変化':'素材を選択')))
+                                            : `MOCHIMONO (${inventory.length}/${MAX_INVENTORY})`
+                                        }
+                                    </h3>
+                                    <button onClick={toggleMenu}><X size={12}/></button>
+                                </div>
+                                
+                                {synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT' ? (
+                                    <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
+                                        {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).map((type, i) => (
+                                            <div key={i} className="flex items-center border" style={{ borderColor: blankScrollSelectionIndex === i ? C3 : 'transparent', backgroundColor: blankScrollSelectionIndex === i ? C2 : 'transparent', color: blankScrollSelectionIndex === i ? C0 : C3 }}>
+                                                <button className="flex-grow text-left px-2 py-1 cursor-pointer" onClick={() => handleSynthesisStep()} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setBlankScrollSelectionIndex(i); }}>{ITEM_DB[type as string].name}</button>
+                                            </div>
+                                        ))}
+                                        {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).length === 0 && <div className="text-red-500">識別済みのノートがありません</div>}
+                                    </div>
+                                ) : (
+                                    <>
+                                        {!synthState.active && (
+                                            <div className="mb-2 border-b pb-2" style={{ borderColor: C1 }}>
+                                                <div className="mb-1" style={{ color: C2 }}>装備中:</div>
+                                                {player.equipment?.weapon && <div onClick={()=>handleUnequip('weapon')} className="cursor-pointer hover:text-white">[武] {getItemName(player.equipment.weapon)}</div>}
+                                                {player.equipment?.armor && <div onClick={()=>handleUnequip('armor')} className="cursor-pointer hover:text-white">[防] {getItemName(player.equipment.armor)}</div>}
+                                                {player.equipment?.ranged && <div onClick={()=>handleUnequip('ranged')} className="cursor-pointer hover:text-white">[投] {getItemName(player.equipment.ranged)}</div>}
+                                                {player.equipment?.accessory && <div onClick={()=>handleUnequip('accessory')} className="cursor-pointer hover:text-white">[腕] {getItemName(player.equipment.accessory)}</div>}
+                                            </div>
+                                        )}
+
+                                        <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
+                                            {inventory.map((item, i) => {
+                                                const isSynthTarget = synthState.active && (
+                                                    (synthState.step === 'SELECT_BASE' && synthState.mode === 'SYNTH' && !['WEAPON','ARMOR'].includes(item.category)) ||
+                                                    (synthState.step === 'SELECT_MAT' && synthState.baseIndex === i)
+                                                );
+                                                
+                                                return (
+                                                    <div key={i} className={`flex items-center border ${isSynthTarget ? 'opacity-30' : ''}`} style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onContextMenu={(e) => { e.preventDefault(); setInspectedItem(item); }} onTouchStart={() => handleTouchStart(item)} onTouchEnd={handleTouchEnd}>
+                                                        <button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => !isSynthTarget && (synthState.active ? handleSynthesisStep() : handleItemAction(i))} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}>
+                                                            <span>{getItemName(item)} {item.plus ? `+${item.plus}` : ''} {item.count ? `(${item.count})` : ''}{item.category === 'STAFF' ? `[${item.charges}]` : ''}</span>
+                                                            <span className="text-[9px]" style={{ color: selectedItemIndex === i ? C0 : C2 }}>{synthState.active ? '選択' : (['WEAPON','ARMOR','RANGED','ACCESSORY'].includes(item.category) ? '装備' : (item.category==='STAFF' ? '振る' : '使う'))}</span>
+                                                        </button>
+                                                        {!synthState.active && (
+                                                            <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); handleThrowItem(i); }} title="投げる"><Send size={10} /></button>
+                                                        )}
+                                                        {!synthState.active && (
+                                                            <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); handleDropItem(i); }} title="足元に置く"><ArrowDown size={10} /></button>
+                                                        )}
+                                                        <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }} title="詳細"><Info size={10} /></button>
+                                                    </div>
+                                                );
+                                            })}
+                                            {inventory.length === 0 && <span className="text-center" style={{ color: C1 }}>Empty</span>}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
                         )}
                     </div>
-                )}
-
-                {gameClear && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center z-40 p-4 text-center" style={{ backgroundColor: `${C0}F2`, color: C3 }}>
-                        <Award size={48} className="mb-4" style={{ color: C2 }}/>
-                        <h2 className="text-2xl font-bold mb-4">GRADUATION!</h2>
-                        <p className="mb-2">ついに校長を説得した！</p>
-                        <p className="mb-8">君は伝説の小学生となった。</p>
-                        <div className="flex flex-col gap-4 w-full">
-                            <button onClick={startEndlessMode} className="border-2 px-4 py-3 animate-pulse font-bold" style={{ borderColor: C3, color: C3, backgroundColor: 'transparent' }}>中学生編へ (エンドレス)</button>
-                            <button onClick={handleQuit} className="border-2 px-4 py-2 text-sm" style={{ borderColor: C1, color: C3 }}>タイトルへ戻る</button>
-                        </div>
-                    </div>
-                )}
-
-                {gameOver && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center z-40" style={{ backgroundColor: `${C0}E6`, color: C3 }}>
-                        <Skull size={48} className="mb-4" style={{ color: C1 }}/>
-                        <h2 className="text-2xl font-bold mb-4">GAME OVER</h2>
-                        <p>Floor: {floor}</p>
-                        <p>Level: {level}</p>
-                        <button onClick={handleRestart} className="mt-6 border-2 px-4 py-2 animate-pulse flex items-center" style={{ borderColor: C3, color: C3 }}><RotateCcw size={16} className="mr-2"/> RETRY</button>
-                        <button onClick={handleQuit} className="mt-4 text-sm hover:underline">EXIT</button>
-                    </div>
-                )}
+                </div>
             </div>
 
-            <div className="w-full h-16 p-1 text-[9px] mb-1 rounded border-2 font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner overflow-hidden" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
-                {logs.slice(-4).map((l) => (
+            {/* Log Area */}
+            <div className="w-full h-24 p-1 text-[10px] md:text-[12px] md:h-32 mb-2 rounded border-2 font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner overflow-hidden" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
+                {logs.slice(-6).map((l) => (
                     <div key={l.id} style={{ color: l.color || C3 }} className="truncate">{l.message}</div>
                 ))}
             </div>
         </div>
 
-        {/* --- RIGHT COL (Controls) --- */}
-        <div className="w-full max-w-md md:w-72 flex-1 md:h-full shrink-0 relative bg-[#1a1a1a] rounded-t-xl md:rounded-xl border-t-2 md:border-2 border-[#333] shadow-2xl flex overflow-hidden">
-            
-            {/* Left: D-Pad */}
-            <div className="w-1/2 h-full relative flex items-center justify-center border-r border-[#333] bg-[#111]">
-                <div className="w-40 h-40 relative">
-                    {/* Diagonal Inputs (Visible) */}
-                    <div className="absolute top-4 left-4 w-10 h-10 bg-[#333] rounded-tl-lg border-t border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer z-0 flex items-center justify-center" onClick={() => handleMoveInput(-1, -1)}>
-                        <ArrowUpLeft size={16} className="text-[#555]" />
-                    </div>
-                    <div className="absolute top-4 right-4 w-10 h-10 bg-[#333] rounded-tr-lg border-t border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer z-0 flex items-center justify-center" onClick={() => handleMoveInput(1, -1)}>
-                        <ArrowUpRight size={16} className="text-[#555]" />
-                    </div>
-                    <div className="absolute bottom-4 left-4 w-10 h-10 bg-[#333] rounded-bl-lg border-b border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer z-0 flex items-center justify-center" onClick={() => handleMoveInput(-1, 1)}>
-                        <ArrowDownLeft size={16} className="text-[#555]" />
-                    </div>
-                    <div className="absolute bottom-4 right-4 w-10 h-10 bg-[#333] rounded-br-lg border-b border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer z-0 flex items-center justify-center" onClick={() => handleMoveInput(1, 1)}>
-                        <ArrowDownRight size={16} className="text-[#555]" />
-                    </div>
+        {/* --- RIGHT: BUTTONS & CARDS --- */}
+        <div className="hidden md:flex w-72 flex-col items-center justify-between p-4 bg-[#1a1a1a] border-2 border-[#333] rounded-xl shadow-2xl relative shrink-0 overflow-hidden">
+             {/* Action Buttons Container */}
+             <div className="flex flex-col items-center gap-8 w-full mt-2">
+                 {/* SHOOT (R-Trigger style) */}
+                 <div className="flex flex-col items-center group">
+                    <button 
+                        className="w-12 h-12 bg-[#333] rounded-full shadow-[0_4px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555]" 
+                        onClick={fireRangedWeapon}
+                    >
+                        <Crosshair size={24}/>
+                    </button>
+                    <span className="text-[#666] text-[10px] font-bold mt-1 uppercase">R-Shoot</span>
+                </div>
 
-                    {/* D-Pad Buttons */}
-                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-[#333] z-10"></div>
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-10 touch-none select-none" onClick={() => handleMoveInput(0, -1)}><ArrowUp className="text-[#666]" size={20}/></div>
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-16 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-10 touch-none select-none" onClick={() => handleMoveInput(0, 1)}><ArrowDown className="text-[#666]" size={20}/></div>
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-16 h-10 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-10 touch-none select-none" onClick={() => handleMoveInput(-1, 0)}><ArrowLeft className="text-[#666]" size={20}/></div>
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-16 h-10 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-10 touch-none select-none" onClick={() => handleMoveInput(1, 0)}><ArrowRight className="text-[#666]" size={20}/></div>
-                    
-                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-[#2a2a2a] rounded-full z-20 shadow-inner"></div>
+                <div className="flex flex-col items-center group">
+                    <button className="w-16 h-16 bg-[#8b0000] rounded-full shadow-[0_6px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000] text-2xl" onClick={toggleMenu}>B</button>
+                    <span className="text-[#666] text-xs font-bold mt-1">MENU</span>
+                </div>
+                
+                <div className="flex flex-col items-center group">
+                    <button 
+                        className="w-16 h-16 bg-[#ff0000] rounded-full shadow-[0_6px_0_#8b0000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#cc0000] text-2xl" 
+                        onMouseDown={() => handlePressStart()} 
+                        onMouseUp={(e) => handlePressEnd(e)} 
+                        onMouseLeave={(e) => handlePressEnd(e)}
+                        onTouchStart={(e) => { e.preventDefault(); handlePressStart(); }}
+                        onTouchEnd={(e) => { e.preventDefault(); handlePressEnd(e); }}
+                    >
+                        A
+                    </button>
+                    <span className="text-[#666] text-xs font-bold mt-1">ACT / FF</span>
                 </div>
             </div>
 
-            {/* Right: Actions */}
-            <div className="w-1/2 h-full relative bg-[#161616]">
-                {/* SHOOT (R) - Top Right */}
-                <div className="absolute top-2 right-2 z-20 flex flex-col items-center">
-                    <button 
-                        className="w-10 h-10 bg-[#333] rounded-full shadow-inner active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555] touch-none select-none" 
-                        onClick={fireRangedWeapon}
-                    >
-                        <Crosshair size={16}/>
-                    </button>
-                    <span className="text-[#666] text-[8px] font-bold mt-0.5">R</span>
+            {/* Hand Cards area */}
+            <div className="w-full flex flex-col gap-1.5 mt-4 p-2 bg-black/40 rounded-lg border border-[#333]">
+                <div className="text-[10px] text-gray-500 font-bold mb-1 flex items-center justify-between">
+                    <span>CARDS HAND</span>
+                    <span className="text-gray-600">Deck:{dungeonDeck.length}</span>
                 </div>
-
-                {/* Quit (Top Left of this panel) */}
-                <div className="absolute top-2 left-2 z-20">
-                     <button onClick={handleQuit} className="text-[#555] text-[10px] font-bold border border-[#333] px-2 py-1 rounded bg-[#222] hover:text-white hover:border-gray-500 flex items-center gap-1"><LogOut size={10}/> QUIT</button>
+                <div className="grid grid-cols-2 gap-1.5 overflow-y-auto max-h-48 custom-scrollbar p-1">
+                    {dungeonHand.map((card, i) => (
+                        <button 
+                            key={card.id} 
+                            className="h-20 bg-[#2a2a2a] border-2 border-[#555] rounded flex flex-col items-center justify-start text-white shadow-lg hover:bg-[#333] hover:border-white transition-all p-1 overflow-hidden"
+                            onClick={() => handleCardUse(i)}
+                        >
+                            <div className={`w-full text-[6px] font-bold px-1 rounded-t mb-0.5 text-center ${card.type === 'ATTACK' ? 'bg-red-900 text-red-200' : card.type === 'DEFENSE' ? 'bg-blue-900 text-blue-200' : card.type === 'BUFF' ? 'bg-green-900 text-green-200' : 'bg-purple-900 text-purple-200'}`}>
+                                {card.type}
+                            </div>
+                            <div className="mb-0.5 scale-75">{card.icon}</div>
+                            <div className="text-[7px] font-bold text-center leading-tight truncate w-full">{card.name}</div>
+                        </button>
+                    ))}
+                    {dungeonHand.length === 0 && <div className="col-span-2 text-center text-xs text-gray-600 py-4 animate-pulse">Reloading...</div>}
                 </div>
+            </div>
 
-                {/* Actions (A / B) */}
-                <div className="absolute bottom-[80px] right-4 z-10 flex flex-col items-center group">
+            {/* Quit Button */}
+            <button onClick={handleQuit} className="w-full text-[#555] hover:text-white hover:border-gray-500 border border-[#333] py-2 rounded bg-[#222] text-xs font-bold transition-all flex items-center justify-center gap-2 mb-2">
+                <LogOut size={14}/> QUIT GAME
+            </button>
+        </div>
+
+        {/* --- MOBILE ONLY CONTROLLER --- */}
+        <div className="md:hidden w-full max-w-md h-[220px] relative rounded-t-xl border-t-2 border-[#333] bg-[#1a1a2a] shrink-0">
+            <div className="absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32 flex items-center justify-center">
+                <div className="w-10 h-10 bg-[#333] z-10"></div>
+                <div className="absolute top-0 w-10 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0" onClick={() => handleMoveInput(0, -1)}><ArrowUp className="text-[#666]" size={20}/></div>
+                <div className="absolute bottom-0 w-10 h-16 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-0" onClick={() => handleMoveInput(0, 1)}><ArrowDown className="text-[#666]" size={20}/></div>
+                <div className="absolute left-0 w-16 h-10 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-0" onClick={() => handleMoveInput(-1, 0)}><ArrowLeft className="text-[#666]" size={20}/></div>
+                <div className="absolute right-0 w-16 h-10 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-0" onClick={() => handleMoveInput(1, 0)}><ArrowRight className="text-[#666]" size={20}/></div>
+                <div className="absolute top-0 left-0 w-10 h-10 bg-[#333] rounded-tl-xl border-t border-l border-[#444] active:bg-[#222] cursor-pointer z-0" onClick={() => handleMoveInput(-1, -1)}></div>
+                <div className="absolute top-0 right-0 w-10 h-10 bg-[#333] rounded-tr-xl border-t border-r border-[#444] active:bg-[#222] cursor-pointer z-0" onClick={() => handleMoveInput(1, -1)}></div>
+                <div className="absolute bottom-0 left-0 w-10 h-10 bg-[#333] rounded-bl-xl border-b border-l border-[#444] active:bg-[#222] cursor-pointer z-0" onClick={() => handleMoveInput(-1, 1)}></div>
+                <div className="absolute bottom-0 right-0 w-10 h-10 bg-[#333] rounded-br-xl border-b border-r border-[#444] active:bg-[#222] cursor-pointer z-0" onClick={() => handleMoveInput(1, 1)}></div>
+                <div className="absolute w-8 h-8 bg-[#2a2a2a] rounded-full z-20 shadow-inner"></div>
+            </div>
+
+            {/* Mobile Shoot Button */}
+            <div className="absolute right-6 top-1/2 -translate-y-[100px] flex flex-col items-center z-10 group">
+                <button className="w-10 h-10 bg-[#333] rounded-full shadow-[0_2px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555]" onClick={fireRangedWeapon}><Crosshair size={16}/></button>
+            </div>
+
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-4 transform -rotate-12">
+                <div className="flex flex-col items-center group">
+                    <button className="w-14 h-14 bg-[#8b0000] rounded-full shadow-[0_4px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000]" onClick={toggleMenu}>B</button>
+                    <span className="text-[#666] text-xs font-bold mt-1">MENU</span>
+                </div>
+                <div className="flex flex-col items-center group">
                     <button 
-                        className="w-14 h-14 bg-[#ff0000] rounded-full shadow-[0_4px_0_#8b0000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#cc0000] touch-none select-none text-xl" 
+                        className="w-14 h-14 bg-[#ff0000] rounded-full shadow-[0_4px_0_#8b0000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#cc0000]" 
                         onMouseDown={() => handlePressStart()} 
                         onMouseUp={(e) => handlePressEnd(e)} 
                         onMouseLeave={(e) => handlePressEnd(e)}
@@ -3766,39 +3801,31 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                     </button>
                     <span className="text-[#666] text-xs font-bold mt-1">ACT</span>
                 </div>
+            </div>
 
-                <div className="absolute bottom-[110px] right-24 z-10 flex flex-col items-center group">
-                    <button className="w-12 h-12 bg-[#8b0000] rounded-full shadow-[0_4px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000] touch-none select-none" onClick={toggleMenu}>B</button>
-                    <span className="text-[#666] text-xs font-bold mt-1">MENU</span>
-                </div>
+            {/* Mobile Cards Row */}
+            <div className="absolute bottom-1 right-1 left-1 h-20 flex items-end justify-center gap-1 pointer-events-none pr-1">
+                 {dungeonHand.length > 0 ? (
+                    dungeonHand.map((card, i) => (
+                        <button 
+                            key={card.id} 
+                            className="w-14 h-20 bg-[#2a2a2a] border-2 border-[#555] rounded-lg flex flex-col items-center justify-start text-white relative shadow-lg active:scale-95 transition-all p-0.5 overflow-hidden pointer-events-auto"
+                            onClick={() => handleCardUse(i)}
+                        >
+                            <div className={`w-full text-[6px] font-bold px-1 rounded-t mb-0.5 text-center ${card.type === 'ATTACK' ? 'bg-red-900 text-red-200' : card.type === 'DEFENSE' ? 'bg-blue-900 text-blue-200' : card.type === 'BUFF' ? 'bg-green-900 text-green-200' : 'bg-purple-900 text-purple-200'}`}>
+                                {card.type}
+                            </div>
+                            <div className="mb-0.5 p-0.5 bg-black/50 rounded-full scale-75">{card.icon}</div>
+                            <div className="text-[7px] font-bold text-center leading-tight w-full break-words px-0.5">{card.name}</div>
+                        </button>
+                    ))
+                ) : (
+                    <div className="text-gray-500 text-[10px] mb-4 animate-pulse w-full text-center">Reloading...</div>
+                )}
+            </div>
 
-                {/* Cards Row (Bottom) */}
-                <div className="absolute bottom-1 right-1 left-1 h-20 flex items-end justify-end gap-1 pointer-events-none pr-1">
-                     {dungeonHand.length > 0 ? (
-                        dungeonHand.map((card, i) => (
-                            <button 
-                                key={card.id} 
-                                className="w-14 h-20 bg-[#2a2a2a] border-2 border-[#555] rounded-lg flex flex-col items-center justify-start text-white relative shadow-lg hover:bg-[#333] hover:border-white hover:-translate-y-2 active:scale-95 transition-all p-0.5 overflow-hidden pointer-events-auto"
-                                onClick={() => handleCardUse(i)}
-                            >
-                                <div className={`w-full text-[6px] font-bold px-1 rounded-t mb-0.5 text-center ${card.type === 'ATTACK' ? 'bg-red-900 text-red-200' : card.type === 'DEFENSE' ? 'bg-blue-900 text-blue-200' : card.type === 'BUFF' ? 'bg-green-900 text-green-200' : 'bg-purple-900 text-purple-200'}`}>
-                                    {card.type}
-                                </div>
-                                <div className="mb-0.5 p-0.5 bg-black/50 rounded-full scale-75">{card.icon}</div>
-                                <div className="text-[7px] font-bold text-center leading-tight w-full break-words px-0.5">{card.name}</div>
-                                <div className="text-[6px] text-gray-400 mt-auto border-t border-[#444] w-full text-center pt-0.5">{card.power > 0 ? `Pow:${card.power}` : 'Effect'}</div>
-                            </button>
-                        ))
-                    ) : (
-                        <div className="text-gray-500 text-xs mb-4 animate-pulse w-full text-center">Reloading...</div>
-                    )}
-                    
-                    <div className="absolute bottom-1 right-1 pointer-events-none opacity-50">
-                        <div className="text-[8px] text-[#666] flex items-center bg-[#1a1a2a] px-1 rounded border border-[#333]">
-                            <Layers size={8} className="mr-1"/> {dungeonDeck ? dungeonDeck.length : 0}
-                        </div>
-                    </div>
-                </div>
+            <div className="absolute bottom-2 left-4">
+                 <button onClick={handleQuit} className="text-[#555] text-[10px] font-bold border border-[#333] px-3 py-1 rounded bg-[#222] flex items-center gap-1"><LogOut size={10}/> QUIT</button>
             </div>
         </div>
     </div>

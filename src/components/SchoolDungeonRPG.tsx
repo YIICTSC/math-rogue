@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -566,7 +567,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         id: 0, type: 'PLAYER', x: 1, y: 1, char: '@', name: 'わんぱく小学生', 
         hp: 50, maxHp: 50, baseAttack: 3, baseDefense: 0, attack: 3, defense: 0, xp: 0, gold: 0, dir: {x:0, y:1},
         equipment: { weapon: null, armor: null, ranged: null, accessory: null },
-        status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, trapSight: 0, poison: 0 },
+        status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
         offset: { x: 0, y: 0 }
     });
     setLogs([]);
@@ -2353,8 +2354,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                   ctx.strokeStyle = fx.color || 'red';
                   ctx.lineWidth = 5;
                   ctx.beginPath();
-                  ctx.moveTo(sx + ts/2, sy + ts/2);
-                  ctx.arc(sx + ts/2, sy + ts/2, 20, 0, Math.PI*2);
+                  const d = fx.dir || {x:1, y:0};
+                  const cx = sx + ts/2;
+                  const cy = sy + ts/2;
+                  ctx.moveTo(cx, cy);
+                  ctx.lineTo(cx + d.x * 100, cy + d.y * 100);
                   ctx.stroke();
               }
           }
@@ -2405,7 +2409,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const { C0, C1, C2, C3 } = currentTheme.colors;
 
   return (
-    <div className="w-full h-full bg-[#101010] flex flex-col md:flex-row items-center justify-center font-mono select-none overflow-hidden touch-none relative p-4 gap-4">
+    <div className="w-full h-full bg-[#101010] flex flex-col md:flex-row items-center md:items-stretch justify-center font-mono select-none overflow-hidden touch-none relative p-2 md:p-4 gap-2 md:gap-4">
         
         {inspectedItem && (
             <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setInspectedItem(null)}>
@@ -2544,8 +2548,30 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             </div>
         )}
 
-        <div className="w-full max-w-md flex flex-col items-center gap-2">
-            <div className="w-full aspect-[11/9] relative shrink-0">
+        {/* --- LEFT: D-PAD (Wide screens) --- */}
+        <div className="hidden md:flex w-64 flex-col items-center justify-center p-4 bg-[#1a1a2a] border-2 border-[#333] rounded-xl shadow-2xl relative shrink-0">
+            <div className="w-48 h-48 relative flex items-center justify-center">
+                <div className="w-16 h-16 bg-[#333] z-10 rounded-sm"></div>
+                {/* D-PAD Buttons */}
+                <div className="absolute top-0 w-16 h-20 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0" onClick={() => handleMoveInput(0, -1)}><ArrowUp className="text-[#666]" size={28}/></div>
+                <div className="absolute bottom-0 w-16 h-20 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-0" onClick={() => handleMoveInput(0, 1)}><ArrowDown className="text-[#666]" size={28}/></div>
+                <div className="absolute left-0 w-20 h-16 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-0" onClick={() => handleMoveInput(-1, 0)}><ArrowLeft className="text-[#666]" size={28}/></div>
+                <div className="absolute right-0 w-20 h-16 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-0" onClick={() => handleMoveInput(1, 0)}><ArrowRight className="text-[#666]" size={28}/></div>
+                
+                {/* Diagonals */}
+                <div className="absolute top-2 left-2 w-12 h-12 bg-[#2a2a2a] rounded-tl-xl border-t border-l border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(-1, -1)}></div>
+                <div className="absolute top-2 right-2 w-12 h-12 bg-[#2a2a2a] rounded-tr-xl border-t border-r border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(1, -1)}></div>
+                <div className="absolute bottom-2 left-2 w-12 h-12 bg-[#2a2a2a] rounded-bl-xl border-b border-l border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(-1, 1)}></div>
+                <div className="absolute bottom-2 right-2 w-12 h-12 bg-[#2a2a2a] rounded-br-xl border-b border-r border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(1, 1)}></div>
+                
+                <div className="absolute w-12 h-12 bg-[#2a2a2a] rounded-full z-20 shadow-inner"></div>
+            </div>
+            <div className="mt-12 text-[#444] font-black tracking-widest text-sm italic">DIRECTION</div>
+        </div>
+
+        {/* --- CENTER: GAME SCREEN & LOGS --- */}
+        <div className="flex-1 flex flex-col items-center gap-2 min-h-0">
+            <div className="w-full aspect-[11/9] md:aspect-auto md:flex-1 relative shrink-0">
                 <div className="w-full h-full border-4 relative overflow-hidden shadow-lg rounded-sm" style={{ backgroundColor: C3, borderColor: C0 }}>
                     
                     <div className="absolute top-0 left-0 w-full h-8 flex justify-between items-center px-2 text-[10px] z-10 border-b" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
@@ -2574,41 +2600,28 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                             <FastForward size={16} className="mr-1"/> 早送り中
                         </div>
                     )}
-                    
-                    {/* Math Challenge Overlay */}
-                    {showMathChallenge && (
-                         <div className="absolute inset-0 z-[60]">
-                             <MathChallengeScreen mode={GameMode.MIXED} onComplete={handleMathComplete} />
-                         </div>
-                    )}
 
-                    {/* Map Overlay: Now with Fog of War */}
+                    {/* Map Overlay */}
                     {showMap && map.length > 0 && (
                         <div className="absolute inset-0 z-20 flex items-center justify-center p-8 mt-12" style={{ backgroundColor: `${C0}E6` }}>
                             <div className="w-full h-full border grid" style={{ borderColor: C3, gridTemplateColumns: `repeat(${MAP_W}, 1fr)` }}>
                                 {map.map((row, y) => row.map((tile, x) => {
-                                    // Check visibility: Visited OR Revealed via scroll
                                     const isRevealed = floorMapRevealed || (visitedMap[y] && visitedMap[y][x]);
-                                    
-                                    // Player and Sight Ring items are exceptions handled by logic below
                                     const isPlayer = x === player.x && y === player.y;
                                     const hasSight = player.equipment?.accessory?.type === 'RING_SIGHT';
                                     const hasTrapSight = (player.equipment?.accessory?.type === 'RING_TRAP') || (player.status.trapSight && player.status.trapSight > 0);
                                     const hasItem = floorItems.some(i => i.x===x && i.y===y);
                                     const hasEnemy = enemies.some(e => e.x===x && e.y===y);
                                     
-                                    // Render logic
                                     let bgStyle = { backgroundColor: 'transparent' };
                                     let content = null;
 
                                     if (isPlayer) {
                                         content = <div className="w-full h-full bg-white rounded-full animate-pulse"></div>;
                                     } else if (isRevealed) {
-                                        // Terrain
                                         if (tile === 'STAIRS') bgStyle = { backgroundColor: C3 };
                                         else if (tile !== 'WALL') bgStyle = { backgroundColor: C1 };
                                         
-                                        // Objects on revealed tiles
                                         if (tile !== 'WALL') {
                                             if (traps.some(t => t.x===x && t.y===y && (t.visible || hasTrapSight))) {
                                                 content = <div className="w-full h-full flex items-center justify-center text-[4px] text-red-500 font-bold">X</div>;
@@ -2619,19 +2632,13 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                                             }
                                         }
                                     } else {
-                                        // Not Revealed: Only show Sight items
                                         if (hasEnemy && hasSight) {
                                             content = <div className="w-full h-full bg-red-500 rounded-full"></div>;
                                         } else if (hasItem && hasSight) {
                                             content = <div className="w-full h-full bg-blue-400 rounded-sm"></div>;
                                         }
                                     }
-
-                                    return (
-                                        <div key={`${x}-${y}`} style={bgStyle}>
-                                            {content}
-                                        </div>
-                                    );
+                                    return <div key={`${x}-${y}`} style={bgStyle}>{content}</div>;
                                 }))}
                             </div>
                             <button onClick={() => setShowMap(false)} className="absolute bottom-4 border px-2 rounded hover:opacity-80" style={{ color: C3, borderColor: C3 }}>Close</button>
@@ -2891,46 +2898,82 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                 </div>
             </div>
 
-            <div className="w-full h-24 p-1 text-[10px] mb-2 rounded border-2 font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner overflow-hidden" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
-                {logs.slice(-6).map((l) => (
+            <div className="w-full h-24 p-1 text-[10px] md:text-[12px] md:h-32 mb-2 rounded border-2 font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner overflow-hidden" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
+                {logs.slice(-8).map((l) => (
                     <div key={l.id} style={{ color: l.color || C3 }} className="truncate">{l.message}</div>
                 ))}
             </div>
         </div>
 
-        <div className="w-full max-w-md md:w-64 md:h-[400px] flex-grow md:flex-grow-0 relative min-h-[220px] rounded-t-xl md:rounded-xl border-t-2 md:border-2 border-[#333] bg-[#1a1a2a]">
-            <div className="absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32 md:left-1/2 md:-translate-x-1/2 md:top-1/4 flex items-center justify-center">
+        {/* --- RIGHT: BUTTONS (Wide screens) --- */}
+        <div className="hidden md:flex w-64 flex-col items-center justify-between p-4 bg-[#1a1a1a] border-2 border-[#333] rounded-xl shadow-2xl relative shrink-0">
+            {/* Action Buttons Container */}
+            <div className="flex flex-col items-center gap-8 w-full mt-4">
+                 {/* SHOOT (R-Trigger style) */}
+                 <div className="flex flex-col items-center group">
+                    <button 
+                        className="w-14 h-14 bg-[#333] rounded-full shadow-[0_4px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555]" 
+                        onClick={fireRangedWeapon}
+                    >
+                        <Crosshair size={28}/>
+                    </button>
+                    <span className="text-[#666] text-xs font-bold mt-1">R-SHOOT</span>
+                </div>
+
+                <div className="flex flex-col items-center group">
+                    <button className="w-20 h-20 bg-[#8b0000] rounded-full shadow-[0_6px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000] text-2xl" onClick={toggleMenu}>B</button>
+                    <span className="text-[#666] text-sm font-bold mt-1">MENU</span>
+                </div>
+                
+                <div className="flex flex-col items-center group">
+                    <button 
+                        className="w-20 h-20 bg-[#ff0000] rounded-full shadow-[0_6px_0_#8b0000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#cc0000] text-2xl" 
+                        onMouseDown={() => handlePressStart()} 
+                        onMouseUp={(e) => handlePressEnd(e)} 
+                        onMouseLeave={(e) => handlePressEnd(e)}
+                        onTouchStart={(e) => { e.preventDefault(); handlePressStart(); }}
+                        onTouchEnd={(e) => { e.preventDefault(); handlePressEnd(e); }}
+                    >
+                        A
+                    </button>
+                    <span className="text-[#666] text-sm font-bold mt-1">ACT / FF</span>
+                </div>
+            </div>
+
+            {/* Quit Button */}
+            <button onClick={handleQuit} className="w-full text-[#555] hover:text-white hover:border-gray-500 border border-[#333] py-2 rounded bg-[#222] text-xs font-bold transition-all flex items-center justify-center gap-2 mb-2">
+                <LogOut size={14}/> QUIT GAME
+            </button>
+        </div>
+
+        {/* --- BOTTOM: MOBILE ONLY CONTROLLER --- */}
+        <div className="md:hidden w-full max-w-md h-[220px] relative rounded-t-xl border-t-2 border-[#333] bg-[#1a1a2a] shrink-0">
+            <div className="absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32 flex items-center justify-center">
                 <div className="w-10 h-10 bg-[#333] z-10"></div>
-                <div className="absolute top-0 w-10 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0 touch-none select-none" onClick={() => handleMoveInput(0, -1)}><ArrowUp className="text-[#666]" size={20}/></div>
-                <div className="absolute bottom-0 w-10 h-16 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-0 touch-none select-none" onClick={() => handleMoveInput(0, 1)}><ArrowDown className="text-[#666]" size={20}/></div>
-                <div className="absolute left-0 w-16 h-10 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-0 touch-none select-none" onClick={() => handleMoveInput(-1, 0)}><ArrowLeft className="text-[#666]" size={20}/></div>
-                <div className="absolute right-0 w-16 h-10 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-0 touch-none select-none" onClick={() => handleMoveInput(1, 0)}><ArrowRight className="text-[#666]" size={20}/></div>
-                <div className="absolute top-0 left-0 w-10 h-10 bg-[#333] rounded-tl-xl border-t border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => handleMoveInput(-1, -1)}><ArrowUpLeft className="text-[#666]" size={20}/></div>
-                <div className="absolute top-0 right-0 w-10 h-10 bg-[#333] rounded-tr-xl border-t border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => handleMoveInput(1, -1)}><ArrowUpRight className="text-[#666]" size={20}/></div>
-                <div className="absolute bottom-0 left-0 w-10 h-10 bg-[#333] rounded-bl-xl border-b border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => handleMoveInput(-1, 1)}><ArrowDownLeft className="text-[#666]" size={20}/></div>
-                <div className="absolute bottom-0 right-0 w-10 h-10 bg-[#333] rounded-br-xl border-b border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-center z-0 touch-none select-none" onClick={() => handleMoveInput(1, 1)}><ArrowDownRight className="text-[#666]" size={20}/></div>
+                <div className="absolute top-0 w-10 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0" onClick={() => handleMoveInput(0, -1)}><ArrowUp className="text-[#666]" size={20}/></div>
+                <div className="absolute bottom-0 w-10 h-16 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-0" onClick={() => handleMoveInput(0, 1)}><ArrowDown className="text-[#666]" size={20}/></div>
+                <div className="absolute left-0 w-16 h-10 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-0" onClick={() => handleMoveInput(-1, 0)}><ArrowLeft className="text-[#666]" size={20}/></div>
+                <div className="absolute right-0 w-16 h-10 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-0" onClick={() => handleMoveInput(1, 0)}><ArrowRight className="text-[#666]" size={20}/></div>
+                <div className="absolute top-0 left-0 w-10 h-10 bg-[#333] rounded-tl-xl border-t border-l border-[#444] active:bg-[#222] cursor-pointer z-0" onClick={() => handleMoveInput(-1, -1)}></div>
+                <div className="absolute top-0 right-0 w-10 h-10 bg-[#333] rounded-tr-xl border-t border-r border-[#444] active:bg-[#222] cursor-pointer z-0" onClick={() => handleMoveInput(1, -1)}></div>
+                <div className="absolute bottom-0 left-0 w-10 h-10 bg-[#333] rounded-bl-xl border-b border-l border-[#444] active:bg-[#222] cursor-pointer z-0" onClick={() => handleMoveInput(-1, 1)}></div>
+                <div className="absolute bottom-0 right-0 w-10 h-10 bg-[#333] rounded-br-xl border-b border-r border-[#444] active:bg-[#222] cursor-pointer z-0" onClick={() => handleMoveInput(1, 1)}></div>
                 <div className="absolute w-8 h-8 bg-[#2a2a2a] rounded-full z-20 shadow-inner"></div>
             </div>
 
-            {/* Shoot Button */}
-            <div className="absolute right-6 top-1/2 -translate-y-[100px] md:right-auto md:left-1/2 md:-translate-x-[20px] md:top-1/2 md:-translate-y-1/2 flex flex-col items-center z-10 group">
-                <button 
-                    className="w-10 h-10 bg-[#333] rounded-full shadow-[0_2px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555] touch-none select-none" 
-                    onClick={fireRangedWeapon}
-                >
-                    <Crosshair size={16}/>
-                </button>
-                <span className="text-[#666] text-[10px] font-bold mt-1">SHOOT</span>
+            {/* Mobile Shoot Button */}
+            <div className="absolute right-6 top-1/2 -translate-y-[100px] flex flex-col items-center z-10 group">
+                <button className="w-10 h-10 bg-[#333] rounded-full shadow-[0_2px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555]" onClick={fireRangedWeapon}><Crosshair size={16}/></button>
             </div>
 
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 md:right-auto md:left-1/2 md:-translate-x-1/2 md:top-3/4 flex gap-4 transform -rotate-12 md:rotate-0">
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-4 transform -rotate-12">
                 <div className="flex flex-col items-center group">
-                    <button className="w-14 h-14 bg-[#8b0000] rounded-full shadow-[0_4px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000] touch-none select-none" onClick={toggleMenu}>B</button>
+                    <button className="w-14 h-14 bg-[#8b0000] rounded-full shadow-[0_4px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000]" onClick={toggleMenu}>B</button>
                     <span className="text-[#666] text-xs font-bold mt-1">MENU</span>
                 </div>
                 <div className="flex flex-col items-center group">
                     <button 
-                        className="w-14 h-14 bg-[#ff0000] rounded-full shadow-[0_4px_0_#8b0000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#cc0000] touch-none select-none" 
+                        className="w-14 h-14 bg-[#ff0000] rounded-full shadow-[0_4px_0_#8b0000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#cc0000]" 
                         onMouseDown={() => handlePressStart()} 
                         onMouseUp={(e) => handlePressEnd(e)} 
                         onMouseLeave={(e) => handlePressEnd(e)}
@@ -2943,8 +2986,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                 </div>
             </div>
 
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 md:bottom-4">
-                 <button onClick={handleQuit} className="text-[#555] text-[10px] font-bold border border-[#333] px-3 py-1 rounded bg-[#222] hover:text-white hover:border-gray-500 flex items-center gap-1"><LogOut size={10}/> QUIT</button>
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2">
+                 <button onClick={handleQuit} className="text-[#555] text-[10px] font-bold border border-[#333] px-3 py-1 rounded bg-[#222] flex items-center gap-1"><LogOut size={10}/> QUIT</button>
             </div>
         </div>
     </div>
