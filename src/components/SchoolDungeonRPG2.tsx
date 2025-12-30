@@ -410,6 +410,16 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   // Math Challenge State
   const [showMathChallenge, setShowMathChallenge] = useState(false);
 
+  // --- GAME OVER DETECTION ---
+  useEffect(() => {
+    if (player.hp <= 0 && !gameOver && !gameClear) {
+        setGameOver(true);
+        audioService.playSound('lose');
+        saveDungeonScore("HP 0");
+        storageService.clearDungeonState2();
+    }
+  }, [player.hp, gameOver, gameClear]);
+
   // Init
   useEffect(() => {
     // Generate Sprites
@@ -1668,10 +1678,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           if (starveDamage > 0) {
               currentHp -= 1;
               if (currentHp <= 0) {
-                  setGameOver(true); 
-                  saveDungeonScore("Starved"); 
+                  // Handled by useEffect, but log and save here
                   addLog("空腹で倒れた...", "red"); 
-                  storageService.clearDungeonState2(); // Clear save on death
               } else {
                   if (turnCounter.current % 5 === 0) addLog("お腹が空いて倒れそうだ...", "red");
               }
@@ -1755,7 +1763,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                   addLog(`${e.name}の炎！`, "red");
                   let dmg = 15;
                   if (player.equipment?.armor?.type === 'FIREFIGHTER') dmg = Math.floor(dmg / 2);
-                  setPlayer(p => { const nhp = p.hp - dmg; if(nhp<=0) { setGameOver(true); saveDungeonScore(`Killed by ${e.name}`); storageService.clearDungeonState2(); } return {...p, hp:nhp}; });
+                  setPlayer(p => { const nhp = p.hp - dmg; return {...p, hp:nhp}; });
                   occupied.add(`${e.x},${e.y}`); nextEnemies.push(e);
                   addVisualEffect('EXPLOSION', px, py); addVisualEffect('TEXT', px, py, { value: `${dmg}`, color: 'red' });
                   continue;
@@ -1827,7 +1835,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
 
                   if (dmg > 0) {
                       addLog(`${e.name}の攻撃！${dmg}ダメージ！`, "red");
-                      setPlayer(p => { const newHp = p.hp - dmg; if (newHp <= 0) { setGameOver(true); saveDungeonScore(`Killed by ${e.name}`); storageService.clearDungeonState2(); } return { ...p, hp: newHp }; });
+                      setPlayer(p => ({ ...p, hp: p.hp - dmg }));
                       nextEnemies.push({ ...e, offset: { x: (tx - e.x) * 6, y: (ty - e.y) * 6 } });
                       attackingEnemyIds.push(e.id);
                       triggerShake(5);
@@ -2081,7 +2089,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           let dmg = 20;
           if (player.equipment?.armor?.type === 'DISASTER_HOOD') dmg = Math.floor(dmg / 2);
           setPlayer(p => ({ ...p, hp: Math.max(0, p.hp - dmg) }));
-          if (player.hp - dmg <= 0) { setGameOver(true); saveDungeonScore("Killed by Bomb Trap"); storageService.clearDungeonState2(); }
+          // Note: Death handled by useEffect
       } else if (t === 'SLEEP') {
           addLog("眠ってしまった...", "blue");
           setPlayer(p => ({ ...p, status: { ...p.status, sleep: 5 } }));
@@ -2570,6 +2578,11 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               msg = `${target.name}と入れ替わった！`; hit = true;
           }
       } else if (item.type === 'UMB_BIND') {
+          if (target) {
+              setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, status: { ...e.status, frozen: 10 } } : e));
+              msg = `${target.name}は金縛りにあった！`; hit = true;
+          }
+      } else if (item.type === 'UMB_BIND_2') {
           if (target) {
               setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, status: { ...e.status, frozen: 10 } } : e));
               msg = `${target.name}は金縛りにあった！`; hit = true;
@@ -3699,7 +3712,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
         </div>
 
         {/* --- RIGHT: BUTTONS & CARDS --- */}
-        <div className="hidden md:flex w-72 flex-col items-center justify-between p-4 bg-[#1a1a1a] border-2 border-[#333] rounded-xl shadow-2xl relative shrink-0 overflow-hidden">
+        <div className="hidden md:flex w-72 flex-col items-center justify-between p-4 bg-[#1a1a2a] border-2 border-[#333] rounded-xl shadow-2xl relative shrink-0 overflow-hidden">
              {/* Action Buttons Container */}
              <div className="flex flex-col items-center gap-8 w-full mt-2">
                  {/* SHOOT (R-Trigger style) */}
@@ -3834,6 +3847,35 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                  <button onClick={handleQuit} className="text-[#555] text-[9px] font-bold border border-[#333] px-2 py-0.5 rounded bg-[#222] flex items-center gap-1"><LogOut size={10}/> QUIT</button>
             </div>
         </div>
+
+        {/* --- GAME OVER SCREEN --- */}
+        {gameOver && (
+            <div className="absolute inset-0 bg-red-950/95 flex flex-col items-center justify-center z-[80] pointer-events-auto animate-in fade-in duration-500">
+                <Skull size={80} className="text-red-500 mb-6 animate-bounce" />
+                <h2 className="text-6xl font-black text-white mb-4 tracking-tighter italic">GAME OVER</h2>
+                <div className="bg-black/40 border-2 border-red-500/50 p-6 rounded-xl text-center mb-8 shadow-2xl backdrop-blur-sm">
+                    <p className="text-2xl text-red-400 font-bold mb-2">帰宅させられました...</p>
+                    <div className="flex gap-4 justify-center text-gray-300 font-mono">
+                        <div>Floor: <span className="text-white">{floor}F</span></div>
+                        <div>Level: <span className="text-white">{level}</span></div>
+                    </div>
+                </div>
+                <div className="flex flex-col gap-4 w-72">
+                    <button 
+                        onClick={handleRestart} 
+                        className="bg-white text-black px-8 py-4 rounded-2xl font-black text-xl hover:bg-gray-200 flex items-center justify-center shadow-[0_4px_0_#ccc] active:translate-y-1 active:shadow-none transition-all"
+                    >
+                        <RotateCcw className="mr-2"/> もう一度
+                    </button>
+                    <button 
+                        onClick={handleQuit} 
+                        className="bg-red-800 text-white px-8 py-4 rounded-2xl font-black text-xl border-4 border-red-600/20 hover:bg-red-700 flex items-center justify-center shadow-2xl transition-all"
+                    >
+                        <LogOut className="mr-2"/> メニューへ
+                    </button>
+                </div>
+            </div>
+        )}
     </div>
   );
 };
