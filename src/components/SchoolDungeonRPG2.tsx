@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch, Sparkles, BookOpen, Layers, Move, Minimize2, Maximize2, Volume2, ShieldAlert, ArrowUpCircle, Plus, Magnet, Moon, Snowflake, Activity, Eye, Dna, Dice5 } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -516,7 +517,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
       if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
       
       saveDebounceRef.current = setTimeout(() => {
-          const state = {
+          const stateToSave = {
               map, visitedMap, floorMapRevealed, 
               rooms: roomsRef.current, // Save rooms
               player, enemies, floorItems, traps, inventory,
@@ -525,7 +526,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               isEndless, turnCounter: turnCounter.current,
               dungeonDeck, dungeonHand, dungeonDiscard // Save Deck
           };
-          storageService.saveDungeonState2(state);
+          storageService.saveDungeonState2(stateToSave);
       }, 500); // 500ms debounce
   }, [map, visitedMap, floorMapRevealed, player, enemies, floorItems, traps, inventory, floor, level, belly, maxBelly, idMap, identifiedTypes, isEndless, gameOver, dungeonDeck, dungeonHand, dungeonDiscard]);
 
@@ -778,8 +779,6 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                   } else break;
               }
               if (ex !== target.x || ey !== target.y) {
-                  setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, pos: ex, y: ey } : e)); // Bug fix: should be x: ex
-                  // Fixed:
                   setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, x: ex, y: ey } : e));
                   addVisualEffect('SLASH', tx, ty, { dir: player.dir });
                   msg = `${target.name}を吹き飛ばした！`;
@@ -930,12 +929,11 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               targets = [{x: player.x+dx, y: player.y+dy}, {x: player.x+dx+dy, y: player.y+dy+dx}, {x: player.x+dx-dy, y: player.y+dy-dx}];
               targets.forEach(t => addVisualEffect('SLASH', t.x, t.y, { dir: player.dir }));
           } else if (card.templateId === 'SNIPE') {
-              let hit = false;
               for(let i=1; i<=6; i++) {
                   const tx = player.x + dx*i; const ty = player.y + dy*i;
                   if (map[ty][tx] === 'WALL') break;
                   targets.push({x:tx, y:ty});
-                  if (enemies.some(e => e.x === tx && e.y === ty)) { hit = true; break; } 
+                  if (enemies.some(e => e.x === tx && e.y === ty)) break; 
               }
               addVisualEffect('PROJECTILE', player.x, player.y, { dir: player.dir, duration: 10 });
           } else if (card.templateId === 'CROSS') {
@@ -1609,41 +1607,114 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
       }
       if (deckViewMode === 'REMOVE' && showDeck) return; 
 
-      if(dx === 0 && dy === 0) { addLog("足踏みした。"); processTurn(player.x, player.y); return; }
-      setPlayer(p => ({ ...p, dir: {x: dx, y: dy} }));
-      let tx = player.x + dx; let ty = player.y + dy;
-      if (player.status.confused > 0) if (Math.random() < 0.5) { const dirs = [[0,1], [0,-1], [1,0], [-1,0]]; const r = dirs[Math.floor(Math.random()*4)]; tx = player.x + r[0]; ty = player.y + r[1]; addLog("混乱してふらついた！", "yellow"); }
-      const rdx = tx - player.x; const rdy = ty - player.y;
-      if (tx < 0 || tx >= MAP_W || ty < 0 || ty >= MAP_H || map[ty][tx] === 'WALL') return;
-      if (rdx !== 0 && rdy !== 0) if (map[player.y][player.x + rdx] === 'WALL' || map[player.y + rdy][player.x] === 'WALL') return;
-      const target = enemies.find(e => e.x === tx && e.y === ty);
-      if (target) {
-          if (target.enemyType === 'SHOPKEEPER') { addLog("「へいらっしゃい！何にする？」", currentTheme.colors.C2); setShopState({ active: true, merchantId: target.id, mode: 'BUY' }); setSelectedItemIndex(0); audioService.playSound('select'); } 
-          else { attackEnemy(target); processTurn(player.x, player.y); }
-          return;
-      }
-      let finalX = tx; let finalY = ty;
-      setPlayer(p => ({ ...p, x: finalX, y: finalY }));
-      setVisitedMap(prev => {
-          const next = prev.map(row => [...row]); let changed = false; const startX = finalX - Math.floor(VIEW_W/2); const startY = finalY - Math.floor(VIEW_H/2);
-          for (let y = 0; y < VIEW_H; y++) for (let x = 0; x < VIEW_W; x++) { const mx = startX + x; const my = startY + y; if (mx >= 0 && mx < MAP_W && my >= 0 && my < MAP_H) if (!next[my][mx]) { next[my][mx] = true; changed = true; } }
-          return changed ? next : prev;
-      });
-      const trap = traps.find(t => t.x === finalX && t.y === finalY);
-      if (trap) { if (trap.visible) { addLog(`${trap.name}を踏んでしまった！`, "red"); activateTrap(trap); } else { addLog("罠だ！", "red"); trap.visible = true; activateTrap(trap); } }
-      const itemIdx = floorItems.findIndex(i => i.x === finalX && i.y === finalY);
-      if (itemIdx !== -1) {
-          const itemEntity = floorItems[itemIdx];
-          if (itemEntity.type === 'GOLD') { const amount = itemEntity.gold || 0; setPlayer(p => ({ ...p, gold: (p.gold || 0) + amount })); addLog(`${amount}円を拾った！`, "yellow"); setFloorItems(prev => prev.filter((_, i) => i !== itemIdx)); audioService.playSound('select'); } 
-          else if (itemEntity.itemData) {
-              const item = itemEntity.itemData;
-              if (item.category === 'DECK_CARD') { const template = DUNGEON_CARD_DB.find(t => t.templateId === item.type); if (template) { setDungeonDeck(prev => [...prev, { ...template, id: `card-loot-${Date.now()}` }]); addLog(`${item.name}のカードを拾った！`, "yellow"); setFloorItems(prev => prev.filter((_, i) => i !== itemIdx)); audioService.playSound('buff'); } } 
-              else if (inventory.length < MAX_INVENTORY) { setInventory(prev => [...prev, item]); addLog(`${getItemName(item)}を拾った！`); setFloorItems(prev => prev.filter((_, i) => i !== itemIdx)); audioService.playSound('select'); } 
-              else addLog("持ち物がいっぱいで拾えない！", "red");
+      setPlayer(p => {
+          if (dx === 0 && dy === 0) { addLog("足踏みした。"); processTurn(p.x, p.y); return p; }
+          
+          let nextDir = { x: dx, y: dy };
+          let tx = p.x + dx;
+          let ty = p.y + dy;
+          
+          if (p.status.confused > 0) {
+              if (Math.random() < 0.5) {
+                  const dirs = [[0,1], [0,-1], [1,0], [-1,0]];
+                  const r = dirs[Math.floor(Math.random()*4)];
+                  tx = p.x + r[0]; ty = p.y + r[1];
+                  nextDir = { x: r[0] as any, y: r[1] as any };
+                  addLog("混乱してふらついた！", "yellow");
+              }
           }
-      }
-      if (map[ty][tx] === 'STAIRS') addLog("階段がある。", currentTheme.colors.C2);
-      processTurn(finalX, finalY);
+
+          if (tx < 0 || tx >= MAP_W || ty < 0 || ty >= MAP_H || map[ty][tx] === 'WALL') return { ...p, dir: nextDir };
+          
+          // Corner Check
+          const rdx = tx - p.x; const rdy = ty - p.y;
+          if (rdx !== 0 && rdy !== 0) if (map[p.y][p.x + rdx] === 'WALL' || map[p.y + rdy][p.x] === 'WALL') return { ...p, dir: nextDir };
+
+          const target = enemies.find(e => e.x === tx && e.y === ty);
+          if (target) {
+              if (target.enemyType === 'SHOPKEEPER') {
+                  addLog("「へいらっしゃい！何にする？」", currentTheme.colors.C2);
+                  setShopState({ active: true, merchantId: target.id, mode: 'BUY' });
+                  setSelectedItemIndex(0);
+                  audioService.playSound('select');
+              } else {
+                  attackEnemy(target);
+                  processTurn(p.x, p.y);
+              }
+              return { ...p, dir: nextDir };
+          }
+
+          // Successful Move
+          const finalX = tx; const finalY = ty;
+          
+          // Update Visited Map
+          setVisitedMap(prev => {
+              const next = prev.map(row => [...row]);
+              let changed = false;
+              const startX = finalX - Math.floor(VIEW_W/2);
+              const startY = finalY - Math.floor(VIEW_H/2);
+              for (let y = 0; y < VIEW_H; y++) {
+                  for (let x = 0; x < VIEW_W; x++) {
+                      const mx = startX + x; const my = startY + y;
+                      if (mx >= 0 && mx < MAP_W && my >= 0 && my < MAP_H) {
+                          if (!next[my][mx]) { next[my][mx] = true; changed = true; }
+                      }
+                  }
+              }
+              return changed ? next : prev;
+          });
+
+          // Check Trap
+          const trap = traps.find(t => t.x === finalX && t.y === finalY);
+          if (trap) {
+              if (trap.visible) { addLog(`${trap.name}を踏んでしまった！`, "red"); activateTrap(trap); } 
+              else { addLog("罠だ！", "red"); trap.visible = true; activateTrap(trap); }
+          }
+
+          // Check Items
+          const itemIdx = floorItems.findIndex(i => i.x === finalX && i.y === finalY);
+          if (itemIdx !== -1) {
+              const itemEntity = floorItems[itemIdx];
+              if (itemEntity.type === 'GOLD') {
+                  const amount = itemEntity.gold || 0;
+                  setPlayer(curr => ({ ...curr, gold: (curr.gold || 0) + amount }));
+                  addLog(`${amount}円を拾った！`, "yellow");
+                  setFloorItems(prev => prev.filter((_, i) => i !== itemIdx));
+                  audioService.playSound('select');
+              } else if (itemEntity.itemData) {
+                  const item = itemEntity.itemData;
+                  if (item.category === 'DECK_CARD') {
+                      const template = DUNGEON_CARD_DB.find(t => t.templateId === item.type);
+                      if (template) {
+                          setDungeonDeck(prev => [...prev, { ...template, id: `card-loot-${Date.now()}` }]);
+                          addLog(`${item.name}のカードを拾った！`, "yellow");
+                          setFloorItems(prev => prev.filter((_, i) => i !== itemIdx));
+                          audioService.playSound('buff');
+                      }
+                  } else if (inventory.length < MAX_INVENTORY) {
+                      setInventory(prev => [...prev, item]);
+                      addLog(`${getItemName(item)}を拾った！`);
+                      setFloorItems(prev => prev.filter((_, i) => i !== itemIdx));
+                      audioService.playSound('select');
+                  } else {
+                      addLog("持ち物がいっぱいで拾えない！", "red");
+                  }
+              }
+          }
+
+          if (map[ty][tx] === 'STAIRS') addLog("階段がある。", currentTheme.colors.C2);
+          processTurn(finalX, finalY);
+
+          return { ...p, x: finalX, y: finalY, dir: nextDir };
+      });
+  };
+
+  const handleMoveInput = (dx: 0|1|-1, dy: 0|1|-1, e?: React.PointerEvent | React.MouseEvent) => {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    movePlayer(dx, dy);
   };
 
   const handleActionBtn = () => {
@@ -1735,7 +1806,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
       else if (item.type === 'UMB_BLOW') { if (target) { let tx = target.x; let ty = target.y; const dx = target.x - player.x; const dy = target.y - player.y; const ndx = Math.sign(dx); const ndy = Math.sign(dy); for (let i=0; i<5; i++) { if (map[ty+ndy][tx+ndx] !== 'WALL' && !enemies.some(e=>e.x===tx+ndx && e.y===ty+ndy)) { tx += ndx; ty += ndy; } else break; } if (tx !== target.x || ty !== target.y) { setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, x: tx, y: ty } : e)); msg = `${target.name}を吹き飛ばした！`; hit = true; } else { msg = "吹き飛ばなかった。"; hit = true; } } } 
       else if (item.type === 'UMB_WARP') { if (target) { let atts = 0; while (atts < 20) { atts++; const rx = Math.floor(Math.random() * MAP_W); const ry = Math.floor(Math.random() * MAP_H); if (map[ry][rx] === 'FLOOR' && !enemies.find(e => e.x === rx && e.y === ry) && (rx !== player.x || ry !== player.y)) { setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, x: rx, y: ry } : e)); msg = `${target.name}はどこかへ消えた。`; hit = true; break; } } } } 
       else if (item.type === 'UMB_CHANGE') { if (target) { const px = player.x; const py = player.y; setPlayer(p => ({...p, x: target.x, y: target.y })); setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, x: px, y: py } : e)); msg = `${target.name}と入れ替わった！`; hit = true; } } 
-      else if (item.type === 'UMB_BIND' || item.type === 'UMB_BIND_2') { if (target) { setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, status: { ...e.status, frozen: 10 } } : e)); msg = `${target.name}は金縛りにあった！`; hit = true; } } 
+      else if (item.type === 'UMB_BIND') { if (target) { setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, status: { ...e.status, frozen: 10 } } : e)); msg = `${target.name}は金縛りにあった！`; hit = true; } } 
       else if (item.type === 'UMB_HEAL') { if (target) { setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: e.maxHp } : e)); msg = `${target.name}が回復してしまった！`; hit = true; } }
       return { hit, msg };
   };
@@ -1822,18 +1893,18 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
         )}
         {showMathChallenge && ( <div className="fixed inset-0 z-[100] w-full h-full pointer-events-auto"> <MathChallengeScreen mode={GameMode.MIXED} onComplete={handleMathComplete} /> </div> )}
         {showDeck && (
-            <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setShowDeck(false)}>
+            <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => { setShowDeck(false); setDeckViewMode('VIEW'); }}>
                 <div className="w-full max-w-md border-4 p-6 shadow-xl overflow-y-auto max-h-[80vh] custom-scrollbar" style={{ backgroundColor: C3, borderColor: C1, color: C0 }} onClick={e => e.stopPropagation()}>
                     <div className="flex justify-between items-center mb-4 border-b-2 pb-2" style={{ borderColor: C1 }}>
                         <h2 className="font-bold text-xl flex items-center"><Layers className="mr-2"/> デッキ一覧 ({dungeonDeck.length})</h2>
-                        <button onClick={() => setShowDeck(false)}><X size={24}/></button>
+                        <button onClick={() => { setShowDeck(false); setDeckViewMode('VIEW'); }}><X size={24}/></button>
                     </div>
                     {deckViewMode === 'REMOVE' && ( <div className="bg-red-900/50 p-2 mb-4 text-center border-2 border-red-500 rounded text-red-200 font-bold"> 除外するカードを選択してください </div> )}
                     <div className="space-y-2">
                         {dungeonDeck.length === 0 ? ( <div className="text-center text-sm py-4 opacity-50">デッキは空です</div> ) : ( dungeonDeck.map((card) => ( <div key={card.id} className={`border p-2 rounded flex items-center gap-3 ${deckViewMode === 'REMOVE' ? 'cursor-pointer hover:bg-red-500 hover:text-white' : ''}`} style={{ borderColor: C1 }} onClick={() => deckViewMode === 'REMOVE' && handleCardRemoval(card.id)} > <div className="bg-black/10 p-2 rounded-full border border-current">{card.icon}</div> <div className="flex-grow"> <div className="font-bold flex justify-between"> <span>{card.name}</span> <span className="text-xs opacity-70 font-normal">{card.type}</span> </div> <div className="text-xs opacity-80">{card.description} {card.power > 0 && `(Pow:${card.power})`}</div> </div> {deckViewMode === 'REMOVE' && <Trash2 size={16} />} </div> )) )}
                     </div>
                     <div className="mt-4 pt-4 border-t-2 text-xs opacity-70" style={{ borderColor: C1 }}> <p>手札: {dungeonHand.length}枚 / 捨て札: {dungeonDiscard.length}枚</p> </div>
-                    <button onClick={() => setShowDeck(false)} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>閉じる</button>
+                    <button onClick={() => { setShowDeck(false); setDeckViewMode('VIEW'); }} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>閉じる</button>
                 </div>
             </div>
         )}
@@ -1905,14 +1976,14 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
         <div className="hidden md:flex w-64 flex-col items-center justify-center p-4 bg-[#1a1a2a] border-2 border-[#333] rounded-xl shadow-2xl relative shrink-0">
             <div className="w-48 h-48 relative flex items-center justify-center">
                 <div className="w-16 h-16 bg-[#333] z-10 rounded-sm"></div>
-                <div className="absolute top-0 w-16 h-20 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0" onClick={() => handleMoveInput(0, -1)}><ArrowUp className="text-[#666]" size={28}/></div>
-                <div className="absolute bottom-0 w-16 h-20 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-0" onClick={() => handleMoveInput(0, 1)}><ArrowDown className="text-[#666]" size={28}/></div>
-                <div className="absolute left-0 w-20 h-16 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-0" onClick={() => handleMoveInput(-1, 0)}><ArrowLeft className="text-[#666]" size={28}/></div>
-                <div className="absolute right-0 w-20 h-16 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-0" onClick={() => handleMoveInput(1, 0)}><ArrowRight className="text-[#666]" size={28}/></div>
-                <div className="absolute top-2 left-2 w-12 h-12 bg-[#2a2a2a] rounded-tl-xl border-t border-l border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(-1, -1)}></div>
-                <div className="absolute top-2 right-2 w-12 h-12 bg-[#2a2a2a] rounded-tr-xl border-t border-r border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(1, -1)}></div>
-                <div className="absolute bottom-2 left-2 w-12 h-12 bg-[#2a2a2a] rounded-bl-xl border-b border-l border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(-1, 1)}></div>
-                <div className="absolute bottom-2 right-2 w-12 h-12 bg-[#2a2a2a] rounded-br-xl border-b border-r border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(1, 1)}></div>
+                <div className="absolute top-0 w-16 h-20 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-30" onPointerDown={(e) => handleMoveInput(0, -1, e)}><ArrowUp className="text-[#666]" size={28}/></div>
+                <div className="absolute bottom-0 w-16 h-20 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-30" onPointerDown={(e) => handleMoveInput(0, 1, e)}><ArrowDown className="text-[#666]" size={28}/></div>
+                <div className="absolute left-0 w-20 h-16 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-30" onPointerDown={(e) => handleMoveInput(-1, 0, e)}><ArrowLeft className="text-[#666]" size={28}/></div>
+                <div className="absolute right-0 w-20 h-16 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-30" onPointerDown={(e) => handleMoveInput(1, 0, e)}><ArrowRight className="text-[#666]" size={28}/></div>
+                <div className="absolute top-2 left-2 w-12 h-12 bg-[#2a2a2a] rounded-tl-xl border-t border-l border-[#333] active:bg-[#111] cursor-pointer z-30" onPointerDown={(e) => handleMoveInput(-1, -1, e)}></div>
+                <div className="absolute top-2 right-2 w-12 h-12 bg-[#2a2a2a] rounded-tr-xl border-t border-r border-[#333] active:bg-[#111] cursor-pointer z-30" onPointerDown={(e) => handleMoveInput(1, -1, e)}></div>
+                <div className="absolute bottom-2 left-2 w-12 h-12 bg-[#2a2a2a] rounded-bl-xl border-b border-l border-[#333] active:bg-[#111] cursor-pointer z-30" onPointerDown={(e) => handleMoveInput(-1, 1, e)}></div>
+                <div className="absolute bottom-2 right-2 w-12 h-12 bg-[#2a2a2a] rounded-br-xl border-b border-r border-[#333] active:bg-[#111] cursor-pointer z-30" onPointerDown={(e) => handleMoveInput(1, 1, e)}></div>
                 <div className="absolute w-12 h-12 bg-[#2a2a2a] rounded-full z-20 shadow-inner"></div>
             </div>
             <div className="mt-12 text-[#444] font-black tracking-widest text-sm italic uppercase">Direction</div>
@@ -2004,14 +2075,14 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
         <div className="md:hidden w-full max-w-md h-[240px] relative rounded-t-xl border-t-2 border-[#333] bg-[#1a1a2a] shrink-0">
             <div className="absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32 flex items-center justify-center">
                 <div className="w-10 h-10 bg-[#333] z-10"></div>
-                <div className="absolute top-0 w-10 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0" onClick={() => handleMoveInput(0, -1)}><ArrowUp className="text-[#666]" size={20}/></div>
-                <div className="absolute bottom-0 w-10 h-16 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-0" onClick={() => handleMoveInput(0, 1)}><ArrowDown className="text-[#666]" size={20}/></div>
-                <div className="absolute left-0 w-16 h-10 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-0" onClick={() => handleMoveInput(-1, 0)}><ArrowLeft className="text-[#666]" size={20}/></div>
-                <div className="absolute right-0 w-16 h-10 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-0" onClick={() => handleMoveInput(1, 0)}><ArrowRight className="text-[#666]" size={20}/></div>
-                <div className="absolute top-0 left-0 w-10 h-10 bg-[#333] rounded-tl-xl border-t border-l border-[#444] active:bg-[#222] cursor-pointer z-0" onClick={() => handleMoveInput(-1, -1)}></div>
-                <div className="absolute top-0 right-0 w-10 h-10 bg-[#333] rounded-tr-xl border-t border-r border-[#444] active:bg-[#222] cursor-pointer z-0" onClick={() => handleMoveInput(1, -1)}></div>
-                <div className="absolute bottom-0 left-0 w-10 h-10 bg-[#333] rounded-bl-xl border-b border-l border-[#444] active:bg-[#222] cursor-pointer z-0" onClick={() => handleMoveInput(-1, 1)}></div>
-                <div className="absolute bottom-0 right-0 w-10 h-10 bg-[#333] rounded-br-xl border-b border-r border-[#444] active:bg-[#222] cursor-pointer z-0" onClick={() => handleMoveInput(1, 1)}></div>
+                <div className="absolute top-0 w-10 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-30" onPointerDown={(e) => handleMoveInput(0, -1, e)}><ArrowUp className="text-[#666]" size={20}/></div>
+                <div className="absolute bottom-0 w-10 h-16 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-30" onPointerDown={(e) => handleMoveInput(0, 1, e)}><ArrowDown className="text-[#666]" size={20}/></div>
+                <div className="absolute left-0 w-16 h-10 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-30" onPointerDown={(e) => handleMoveInput(-1, 0, e)}><ArrowLeft className="text-[#666]" size={20}/></div>
+                <div className="absolute right-0 w-16 h-10 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-30" onPointerDown={(e) => handleMoveInput(1, 0, e)}><ArrowRight className="text-[#666]" size={20}/></div>
+                <div className="absolute top-0 left-0 w-10 h-10 bg-[#333] rounded-tl-xl border-t border-l border-[#444] active:bg-[#222] cursor-pointer z-30" onPointerDown={(e) => handleMoveInput(-1, -1, e)}></div>
+                <div className="absolute top-0 right-0 w-10 h-10 bg-[#333] rounded-tr-xl border-t border-r border-[#444] active:bg-[#222] cursor-pointer z-30" onPointerDown={(e) => handleMoveInput(1, -1, e)}></div>
+                <div className="absolute bottom-0 left-0 w-10 h-10 bg-[#333] rounded-bl-xl border-b border-l border-[#444] active:bg-[#222] cursor-pointer z-30" onPointerDown={(e) => handleMoveInput(-1, 1, e)}></div>
+                <div className="absolute bottom-0 right-0 w-10 h-10 bg-[#333] rounded-br-xl border-b border-r border-[#444] active:bg-[#222] cursor-pointer z-30" onPointerDown={(e) => handleMoveInput(1, 1, e)}></div>
                 <div className="absolute w-8 h-8 bg-[#2a2a2a] rounded-full z-20 shadow-inner"></div>
             </div>
             <div className="absolute right-0 top-0 bottom-0 w-1/2 flex flex-col items-center justify-end pb-3 pr-2 gap-2">
