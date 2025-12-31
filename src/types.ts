@@ -74,6 +74,8 @@ export interface Card {
   damagePerStrike?: number;
   damagePerCardInDraw?: number; // New: Mind Blast
   playCopies?: number;            
+  hitsPerSkillInHand?: number;
+  hitsPerAttackPlayed?: number;
   addCardToHand?: { cardName: string, count: number, cost0?: boolean }; 
   addCardToDraw?: { cardName: string, count: number }; 
   addCardToDiscard?: { cardName: string, count: number };

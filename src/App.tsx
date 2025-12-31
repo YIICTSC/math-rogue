@@ -1239,6 +1239,10 @@ const App: React.FC = () => {
           p.typesPlayedThisTurn.push(card.type);
       }
 
+      if (card.type === CardType.ATTACK) {
+          p.attacksPlayedThisTurn++;
+      }
+
       if (p.relics.find(r => r.id === 'ORANGE_PELLETS')) {
           if (p.typesPlayedThisTurn.includes(CardType.ATTACK) && 
               p.typesPlayedThisTurn.includes(CardType.SKILL) && 
@@ -1326,6 +1330,8 @@ const App: React.FC = () => {
 
           let hits = 1;
           if (card.playCopies) hits += card.playCopies;
+          if (card.hitsPerSkillInHand) hits = p.hand.filter(c => c.type === CardType.SKILL && c.id !== card.id).length;
+          if (card.hitsPerAttackPlayed) hits = p.attacksPlayedThisTurn;
           
           const maxHits = 100;
           if (hits > maxHits) hits = maxHits;
@@ -1637,7 +1643,6 @@ const App: React.FC = () => {
               if (p.relics.find(r => r.id === 'SHURIKEN')) { p.strength += 1; p.floatingText = { id: `shuri-${Date.now()}`, text: `${trans("ムキムキ", languageMode)}+1`, color: 'text-red-400', iconType: 'sword' }; nextActiveEffects.push({ id: `vfx-shuri-${Date.now()}`, type: 'BUFF', targetId: 'player' }); }
               if (p.relics.find(r => r.id === 'ORNAMENTAL_FAN')) { p.block += 4; p.floatingText = { id: `fan-${Date.now()}`, text: '+4 Block', color: 'text-blue-400', iconType: 'shield' }; nextActiveEffects.push({ id: `vfx-fan-${Date.now()}`, type: 'BLOCK', targetId: 'player' }); }
           }
-          p.attacksPlayedThisTurn++;
       }
 
       const consumedIds = (card as any)._consumedIds;
