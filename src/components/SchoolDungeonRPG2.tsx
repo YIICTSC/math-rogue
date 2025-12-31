@@ -503,8 +503,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               };
           });
 
-          setDungeonDeck(hydrateCards(save.dungeonDeck));
           setDungeonHand(hydrateCards(save.dungeonHand));
+          setDungeonDeck(hydrateCards(save.dungeonDeck));
           setDungeonDiscard(hydrateCards(save.dungeonDiscard));
       } else {
           // If loading old save without deck, init deck
@@ -1221,7 +1221,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
 
   const executeStaffEffect = (item: Item, target: Entity | null, x: number, y: number): { hit: boolean, msg?: string } => {
       let hit = false; let msg = ""; addVisualEffect('MAGIC_PROJ', 0, 0, { startX: player.x, startY: player.y, targetX: target ? target.x : x, targetY: target ? target.y : y, duration: 5, maxDuration: 5 });
-      if (item.type === 'UMB_FIRE') { addVisualEffect('BEAM', x, y, { color: 'red' }); if (target) { const dmg = 20; target.hp -= dmg; if (target.hp <= 0) { gainXp(target.xp); msg = `${target.name}を焼却！`; } else msg = `${target.name}に${dmg}ダメ！`; hit = true; } } 
+      if (item.type === 'UMB_FIRE') { addVisualEffect('BEAM', x, y, { color: 'red', dir: player.dir }); if (target) { const dmg = 20; target.hp -= dmg; if (target.hp <= 0) { gainXp(target.xp); msg = `${target.name}を焼却！`; } else msg = `${target.name}に${dmg}ダメ！`; hit = true; } } 
       else if (item.type === 'UMB_THUNDER') { addVisualEffect('THUNDER', x, y); if (target) { const dmg = 25; target.hp -= dmg; if (target.hp <= 0) { gainXp(target.xp); msg = `${target.name}に落雷！`; } else msg = `${target.name}に${dmg}ダメ！`; hit = true; } } 
       else if (item.type === 'UMB_SLEEP') { if (target) { target.status.sleep = 10; msg = `${target.name}は眠った。`; hit = true; } } 
       else if (item.type === 'UMB_WARP') { if (target) { for(let i=0; i<20; i++) { const rx = Math.floor(Math.random()*MAP_W); const ry = Math.floor(Math.random()*MAP_H); if (map[ry][rx] === 'FLOOR' && !enemies.find(e => e.x === rx && e.y === ry)) { target.x = rx; target.y = ry; msg = `${target.name}は消えた。`; hit = true; break; } } } }
@@ -1364,7 +1364,10 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           fx.duration--; const sx = (fx.x - startX) * ts; const sy = (fx.y - startY) * ts;
           if (fx.type === 'FLASH') { ctx.fillStyle = 'white'; ctx.globalAlpha = fx.duration/15; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.globalAlpha=1; }
           else if (fx.type === 'SLASH') { ctx.strokeStyle = 'white'; ctx.lineWidth = 4; ctx.beginPath(); const d = fx.dir || {x:1, y:0}; const cx = sx+ts/2; const cy = sy+ts/2; ctx.moveTo(cx-d.y*10-d.x*10, cy-d.x*10+d.y*10); ctx.lineTo(cx+d.y*10+d.x*10, cy+d.x*10-d.y*10); ctx.stroke(); }
+          else if (fx.type === 'BEAM') { if (sx >= -ts && sx < canvas.width && sy >= -ts && sy < canvas.height) { ctx.strokeStyle = fx.color || 'red'; ctx.lineWidth = 5; ctx.beginPath(); const d = fx.dir || {x:1, y:0}; const cx = sx + ts/2; const cy = sy + ts/2; ctx.moveTo(cx, cy); ctx.lineTo(cx + d.x * 100, cy + d.y * 100); ctx.stroke(); } }
           else if (fx.type === 'TEXT') { ctx.fillStyle = fx.color || 'white'; ctx.font = 'bold 16px monospace'; ctx.strokeText(fx.value||'', sx+ts/2, sy+ts-fx.duration); ctx.fillText(fx.value||'', sx+ts/2, sy+ts-fx.duration); }
+          else if (fx.type === 'PROJECTILE') { if (sx >= -ts && sx < canvas.width && sy >= -ts && sy < canvas.height) { ctx.fillStyle = currentTheme.colors.C3; ctx.beginPath(); ctx.arc(sx + ts/2, sy + ts/2, 4 * SCALE, 0, Math.PI*2); ctx.fill(); } }
+          else if (fx.type === 'MAGIC_PROJ' && fx.startX !== undefined && fx.targetX !== undefined && fx.startY !== undefined && fx.targetY !== undefined) { const progress = 1 - (fx.duration / fx.maxDuration); const curX = fx.startX + (fx.targetX - fx.startX) * progress; const curY = fx.startY + (fx.targetY - fx.startY) * progress; const spr = spriteCache.current['MAGIC_BULLET']; const msx = (curX - startX) * ts; const msy = (curY - startY) * ts; if (spr) { if (msx >= -ts && msx < canvas.width && msy >= -ts && msy < canvas.height) { ctx.drawImage(spr, msx, msy, ts, ts); } } }
       });
       visualEffects.current = visualEffects.current.filter(fx => fx.duration > 0); ctx.restore();
   };
@@ -1427,8 +1430,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                         <div className="border-t-2 pt-2" style={{ borderColor: C1 }}>
                             <h3 className="font-bold mb-2">装備</h3>
                             <div className="grid grid-cols-1 gap-1 text-sm">
-                                <div><span className="font-bold mr-2">[武]</span> {player.equipment?.weapon ? `${getItemName(player.equipment.weapon)} ${player.equipment.weapon.plus?`+${player.equipment.weapon.plus}`:''}` : 'なし'}</div>
-                                <div><span className="font-bold mr-2">[防]</span> {player.equipment?.armor ? `${getItemName(player.equipment.armor)} ${player.equipment.armor.plus?`+${player.equipment.armor.plus}`:''}` : 'なし'}</div>
+                                <div><span className="font-bold mr-2">[武]</span> {player.equipment?.weapon ? `${getItemName(player.equipment.weapon)} ${player.equipment.weapon.plus?`+${player.equipment.weapon.plus}`:''}${player.equipment.weapon.category==='STAFF'?`[${player.equipment.weapon.charges}]`:''}` : 'なし'}</div>
+                                <div><span className="font-bold mr-2">[防]</span> {player.equipment?.armor ? `${getItemName(player.equipment.armor)} ${player.equipment.armor.plus?`+${player.equipment.armor.plus}`:''}${player.equipment.armor.category==='STAFF'?`[${player.equipment.armor.charges}]`:''}` : 'なし'}</div>
                                 <div><span className="font-bold mr-2">[投]</span> {player.equipment?.ranged ? `${getItemName(player.equipment.ranged)} (${player.equipment.ranged.count})` : 'なし'}</div>
                                 <div><span className="font-bold mr-2">[腕]</span> {player.equipment?.accessory ? `${getItemName(player.equipment.accessory)}` : 'なし'}</div>
                             </div>
@@ -1498,9 +1501,9 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                                 }))}
                             </div>
                             <div className="mt-2 text-white text-[10px] bg-black/40 px-2 py-1 border border-white/20 rounded">
-                                <span className="font-bold mr-1">[武]</span>{player.equipment?.weapon ? getItemName(player.equipment.weapon) : 'なし'} 
+                                <span className="font-bold mr-1">[武]</span>{player.equipment?.weapon ? `${getItemName(player.equipment.weapon)} ${player.equipment.weapon.plus?`+${player.equipment.weapon.plus}`:''}${player.equipment.weapon.category==='STAFF'?`[${player.equipment.weapon.charges}]`:''}` : 'なし'} 
                                 <span className="mx-1">/</span>
-                                <span className="font-bold mr-1">[防]</span>{player.equipment?.armor ? getItemName(player.equipment.armor) : 'なし'}
+                                <span className="font-bold mr-1">[防]</span>{player.equipment?.armor ? `${getItemName(player.equipment.armor)} ${player.equipment.armor.plus?`+${player.equipment.armor.plus}`:''}${player.equipment.armor.category==='STAFF'?`[${player.equipment.armor.charges}]`:''}` : 'なし'}
                             </div>
                             <button onClick={() => setShowMap(false)} className="mt-4 border px-4 py-1 rounded hover:opacity-80 font-bold" style={{ color: C3, borderColor: C3, backgroundColor: C1 }}>戻る</button>
                         </div>
@@ -1546,7 +1549,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                                     enemies.find(e => e.id === shopState.merchantId)?.shopItems?.map((item, i) => (
                                         <div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onPointerDown={(e) => { e.stopPropagation(); setSelectedItemIndex(i); }}>
                                             <button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={(e) => { e.stopPropagation(); handleShopAction(i); }}>
-                                                <span>{getItemName(item)}</span> <span>{item.price} G</span>
+                                                <span>{getItemName(item)} {item.plus ? `+${item.plus}` : ''}{item.category==='STAFF'?`[${item.charges}]`:''}</span> <span>{item.price} G</span>
                                             </button>
                                             <button className="px-2 py-1 border-l" style={{ borderColor: C1 }} onPointerDown={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button>
                                         </div>
@@ -1555,7 +1558,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                                     inventory.map((item, i) => (
                                         <div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onPointerDown={(e) => { e.stopPropagation(); setSelectedItemIndex(i); }}>
                                             <button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={(e) => { e.stopPropagation(); handleShopAction(i); }}>
-                                                <span>{getItemName(item)}</span> <span>{Math.floor((item.price || (item.value || 100)) / 2)} G</span>
+                                                <span>{getItemName(item)} {item.plus ? `+${item.plus}` : ''}{item.category==='STAFF'?`[${item.charges}]`:''}</span> <span>{Math.floor((item.price || (item.value || 100)) / 2)} G</span>
                                             </button>
                                             <button className="px-2 py-1 border-l" style={{ borderColor: C1 }} onPointerDown={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button>
                                         </div>
@@ -1581,9 +1584,9 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                                 <div className="mb-2 border-b pb-2" style={{ borderColor: C1 }}>
                                     <div className="mb-1 opacity-60 text-[8px]">装備中:</div>
                                     <div className="flex flex-col gap-1">
-                                        {player.equipment?.weapon && <div onClick={(e)=>{e.stopPropagation(); handleUnequip('weapon')}} className="cursor-pointer hover:text-white flex items-center gap-1 text-[9px]"><span className="text-red-400 font-bold shrink-0">[武]</span> <span className="truncate">{getItemName(player.equipment.weapon)}</span></div>}
-                                        {player.equipment?.armor && <div onClick={(e)=>{e.stopPropagation(); handleUnequip('armor')}} className="cursor-pointer hover:text-white flex items-center gap-1 text-[9px]"><span className="text-blue-400 font-bold shrink-0">[防]</span> <span className="truncate">{getItemName(player.equipment.armor)}</span></div>}
-                                        {player.equipment?.ranged && <div onClick={(e)=>{e.stopPropagation(); handleUnequip('ranged')}} className="cursor-pointer hover:text-white flex items-center gap-1 text-[9px]"><span className="text-green-400 font-bold shrink-0">[投]</span> <span className="truncate">{getItemName(player.equipment.ranged)}</span></div>}
+                                        {player.equipment?.weapon && <div onClick={(e)=>{e.stopPropagation(); handleUnequip('weapon')}} className="cursor-pointer hover:text-white flex items-center gap-1 text-[9px]"><span className="text-red-400 font-bold shrink-0">[武]</span> <span className="truncate">{getItemName(player.equipment.weapon)} {player.equipment.weapon.plus ? `+${player.equipment.weapon.plus}` : ''}{player.equipment.weapon.category==='STAFF'?`[${player.equipment.weapon.charges}]`:''}</span></div>}
+                                        {player.equipment?.armor && <div onClick={(e)=>{e.stopPropagation(); handleUnequip('armor')}} className="cursor-pointer hover:text-white flex items-center gap-1 text-[9px]"><span className="text-blue-400 font-bold shrink-0">[防]</span> <span className="truncate">{getItemName(player.equipment.armor)} {player.equipment.armor.plus ? `+${player.equipment.armor.plus}` : ''}{player.equipment.armor.category==='STAFF'?`[${player.equipment.armor.charges}]`:''}</span></div>}
+                                        {player.equipment?.ranged && <div onClick={(e)=>{e.stopPropagation(); handleUnequip('ranged')}} className="cursor-pointer hover:text-white flex items-center gap-1 text-[9px]"><span className="text-green-400 font-bold shrink-0">[投]</span> <span className="truncate">{getItemName(player.equipment.ranged)} ({player.equipment.ranged.count})</span></div>}
                                         {player.equipment?.accessory && <div onClick={(e)=>{e.stopPropagation(); handleUnequip('accessory')}} className="cursor-pointer hover:text-white flex items-center gap-1 text-[9px]"><span className="text-yellow-400 font-bold shrink-0">[腕]</span> <span className="truncate">{getItemName(player.equipment.accessory)}</span></div>}
                                     </div>
                                 </div>
@@ -1592,7 +1595,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                                 {inventory.map((item, i) => (
                                     <div key={i} className={`flex items-center border`} style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onPointerDown={(e) => { e.stopPropagation(); setSelectedItemIndex(i); }}>
                                         <button className="flex-grow text-left px-2 py-2 cursor-pointer flex justify-between items-center min-h-[32px]" onClick={(e) => { e.stopPropagation(); if(synthState.active) handleSynthesisStep(); else handleItemAction(i); }}>
-                                            <span>{getItemName(item)} {item.plus ? `+${item.plus}` : ''}</span>
+                                            <span>{getItemName(item)} {item.plus ? `+${item.plus}` : ''}{item.category==='STAFF'?`[${item.charges}]`:''}</span>
                                             <span className="text-[9px]" style={{ color: selectedItemIndex === i ? C0 : C2 }}>{synthState.active ? '選択' : '使う'}</span>
                                         </button>
                                         {!synthState.active && (
