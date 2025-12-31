@@ -646,6 +646,12 @@ const App: React.FC = () => {
         setGameState(prev => ({
             ...prev,
             screen: GameScreen.DECK_CONSTRUCTION,
+            act: 1, // BUG FIX: Reset progression state
+            floor: 0,
+            turn: 0,
+            map: [],
+            currentMapNodeId: null,
+            combatLog: [],
             player: { ...initialPlayerState, deck: [] }, // デッキなしで開始
             narrativeLog: [trans("本日の献立を考えている...", languageMode)]
         }));
@@ -693,13 +699,14 @@ const App: React.FC = () => {
           setGameState(prev => ({
               ...prev,
               screen: GameScreen.EVENT,
-              act: 1,
+              act: 1, // Ensure reset
               floor: 0,
+              turn: 0,
               map: [],
               currentMapNodeId: null,
+              combatLog: [],
               player: initialPlayerState,
               narrativeLog: logs,
-              combatLog: [],
               activeEffects: []
           }));
           audioService.playBGM('event');
@@ -711,6 +718,7 @@ const App: React.FC = () => {
           screen: GameScreen.RELIC_SELECTION,
           act: 1,
           floor: 0,
+          turn: 0,
           map: [], 
           currentMapNodeId: null,
           player: initialPlayerState,
@@ -1925,7 +1933,7 @@ const App: React.FC = () => {
         }
         if (p.powers['CONFUSED'] > 0) {
             p.powers['CONFUSED']--;
-            if (p.powers['CONFUSED'] === 0) newLogs.push(trans("混乱から回復した", languageMode));
+            if (p.powers['CONFUSED'] === 0) newLogs.push(trans("こんらんから回復した", languageMode));
         }
         
         return { ...prev, player: p, combatLog: [...prev.combatLog, ...newLogs].slice(-100) };
@@ -2212,7 +2220,7 @@ const App: React.FC = () => {
         }
         
         p.hand.forEach(c => {
-            if (c.name === 'やけど' || c.name === 'BURN') { p.currentHp -= 2; newLogs.push("やけどダメージ"); nextActiveEffects.push({ id: `vfx-burn-${Date.now()}`, type: 'FIRE', targetId: 'player' }); }
+            if (c.name === 'やほど' || c.name === 'BURN') { p.currentHp -= 2; newLogs.push("やほどダメージ"); nextActiveEffects.push({ id: `vfx-burn-${Date.now()}`, type: 'FIRE', targetId: 'player' }); }
             if (c.name === '虫歯' || c.name === 'DECAY') { p.currentHp -= 2; newLogs.push("虫歯ダメージ"); nextActiveEffects.push({ id: `vfx-decay-${Date.now()}`, type: 'DEBUFF', targetId: 'player' }); }
             if (c.name === '不安' || c.name === 'DOUBT') p.powers['WEAK'] = (p.powers['WEAK'] || 0) + 1;
             if (c.name === '恥' || c.name === 'SHAME') p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + 1;
@@ -3223,7 +3231,7 @@ const App: React.FC = () => {
                         ) : (
                             <div className="mb-8 p-4 bg-green-900/50 border-green-500 rounded-lg animate-in zoom-in duration-150 shrink-0">
                                 <p className="text-green-400 font-bold text-xl">カードを継承しました！</p>
-                                <p className="text-sm text-green-200 mt-1">次の冒険의 初期デッキに追加されます。</p>
+                                <p className="text-sm text-green-200 mt-1">次の冒険の初期デッキに追加されます。</p>
                             </div>
                         )}
                         
