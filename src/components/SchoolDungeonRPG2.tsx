@@ -82,7 +82,7 @@ interface VisualEffect {
   y: number; 
   duration: number;
   maxDuration: number;
-  value?: string;
+  value?: string | number; // sometimes used for text or damage
   color?: string;
   dir?: Direction;
   scale?: number;
@@ -90,6 +90,7 @@ interface VisualEffect {
   startY?: number;
   targetX?: number;
   targetY?: number;
+  spriteKey?: string; // Added: For projectile sprites
 }
 
 interface Item {
@@ -601,9 +602,9 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
       shake.current.duration = duration;
   };
 
-  const addLog = (msg: string, color?: string) => {
+  const addLog = (msg: string) => {
     setLogs(prev => {
-        const nextLogs = [...prev, { message: msg, color, id: Date.now() + Math.random() }];
+        const nextLogs = [...prev, { message: msg, id: Date.now() + Math.random() }];
         if (nextLogs.length > 20) return nextLogs.slice(nextLogs.length - 20);
         return nextLogs;
     });
@@ -1140,8 +1141,25 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
       const newRanged = { ...rangedItem, count: (rangedItem.count || 0) - 1 }; setPlayer(p => ({ ...p, equipment: { ...p.equipment!, ranged: newRanged } }));
       const { x: dx, y: dy } = player.dir; let lx = player.x, ly = player.y; let hitEntity: Entity | null = null;
       for (let i=1; i<=8; i++) { const tx = player.x + dx * i; const ty = player.y + dy * i; lx = tx; ly = ty; if (map[ty][tx] === 'WALL') break; const target = enemies.find(e => e.x === tx && e.y === ty); if (target) { hitEntity = target; break; } }
-      addVisualEffect('PROJECTILE', lx, ly, { dir: player.dir, duration: 10 }); triggerPlayerAttackAnim(player.dir);
-      if (hitEntity) { let dmg = 5 + (newRanged.power || 0); const newEnemies = enemies.map(e => { if (e.id === hitEntity!.id) { const nhp = e.hp - dmg; return { ...e, hp: nhp }; } return e; }); const dead = newEnemies.find(e => e.id === hitEntity!.id && e.hp <= 0); if(dead) { gainXp(dead.xp); addLog(`${dead.name}を倒した！`); } else { addLog(`${hitEntity.name}に${dmg}ダメ！`); addVisualEffect('TEXT', hitEntity.x, hitEntity.y, {value:`${dmg}`}); } setEnemies(newEnemies.filter(e => e.hp > 0)); audioService.playSound('attack'); } else addLog("外した！");
+      
+      // Animated Projectile VFX
+      addVisualEffect('MAGIC_PROJ', 0, 0, { 
+        startX: player.x, startY: player.y, 
+        targetX: lx, targetY: ly, 
+        duration: 8, maxDuration: 8, 
+        spriteKey: 'RANGED' 
+      });
+      triggerPlayerAttackAnim(player.dir);
+      
+      if (hitEntity) { 
+          let dmg = 5 + (newRanged.power || 0); const newEnemies = enemies.map(e => { if (e.id === hitEntity!.id) { const nhp = e.hp - dmg; return { ...e, hp: nhp }; } return e; }); const dead = newEnemies.find(e => e.id === hitEntity!.id && e.hp <= 0); 
+          if(dead) { gainXp(dead.xp); addLog(`${dead.name}を倒した！`); } 
+          else { addLog(`${hitEntity.name}に${dmg}ダメ！`); addVisualEffect('TEXT', hitEntity.x, hitEntity.y, {value:`${dmg}`}); } 
+          setEnemies(newEnemies.filter(e => e.hp > 0)); audioService.playSound('attack'); 
+          addVisualEffect('EXPLOSION', lx, ly, { duration: 5, maxDuration: 5, scale: 0.5 }); // Impact flash
+      } else {
+          addLog("外した！");
+      }
       processTurn(player.x, player.y);
   };
 
@@ -1220,7 +1238,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   };
 
   const executeStaffEffect = (item: Item, target: Entity | null, x: number, y: number): { hit: boolean, msg?: string } => {
-      let hit = false; let msg = ""; addVisualEffect('MAGIC_PROJ', 0, 0, { startX: player.x, startY: player.y, targetX: target ? target.x : x, targetY: target ? target.y : y, duration: 5, maxDuration: 5 });
+      let hit = false; let msg = ""; addVisualEffect('MAGIC_PROJ', 0, 0, { startX: player.x, startY: player.y, targetX: target ? target.x : x, targetY: target ? target.y : y, duration: 8, maxDuration: 8, spriteKey: 'STAFF' });
       if (item.type === 'UMB_FIRE') { addVisualEffect('BEAM', x, y, { color: 'red', dir: player.dir }); if (target) { const dmg = 20; target.hp -= dmg; if (target.hp <= 0) { gainXp(target.xp); msg = `${target.name}を焼却！`; } else msg = `${target.name}に${dmg}ダメ！`; hit = true; } } 
       else if (item.type === 'UMB_THUNDER') { addVisualEffect('THUNDER', x, y); if (target) { const dmg = 25; target.hp -= dmg; if (target.hp <= 0) { gainXp(target.xp); msg = `${target.name}に落雷！`; } else msg = `${target.name}に${dmg}ダメ！`; hit = true; } } 
       else if (item.type === 'UMB_SLEEP') { if (target) { target.status.sleep = 10; msg = `${target.name}は眠った。`; hit = true; } } 
@@ -1232,9 +1250,35 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   const handleThrowItem = (index: number) => {
       const item = inventory[index]; if (!item) return; const { x: dx, y: dy } = player.dir; let lx = player.x, ly = player.y; let hitEntity: Entity | null = null;
       for (let i=1; i<=10; i++) { const tx = player.x + dx * i; const ty = player.y + dy * i; lx = tx; ly = ty; if (map[ty][tx] === 'WALL') break; const target = enemies.find(e => e.x === tx && e.y === ty); if (target) { hitEntity = target; break; } }
-      addVisualEffect('PROJECTILE', lx, ly, { dir: player.dir, duration: 10 }); setInventory(prev => prev.filter((_, i) => i !== index));
-      if (hitEntity) { if (item.category === 'STAFF') { const res = executeStaffEffect(item, hitEntity, hitEntity.x, hitEntity.y); if (res.msg) addLog(res.msg); } else { let dmg = 10 + (item.power || 0); hitEntity.hp -= dmg; if(hitEntity.hp <= 0) { gainXp(hitEntity.xp); addLog(`${hitEntity.name}撃破！`); } else addLog(`${hitEntity.name}に${dmg}ダメ！`); } setEnemies(prev => prev.filter(e => e.hp > 0)); audioService.playSound('attack'); } 
-      else if (map[ly][lx] !== 'WALL' && !floorItems.find(i=>i.x===lx && i.y===ly)) setFloorItems(prev => [...prev, { id: Date.now()+Math.random(), type: 'ITEM', x: lx, y: ly, char: '!', name: item.name, hp: 0, maxHp: 0, baseAttack: 0, baseDefense: 0, attack: 0, defense: 0, xp: 0, dir: { x: 0, y: 0 }, status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 }, itemData: item }]);
+      
+      // Determine Sprite Key for thrown item
+      let sk = 'CONSUMABLE';
+      if (item.type === 'GOLD') sk = 'GOLD_BAG';
+      else if (item.category === 'WEAPON') sk = 'WEAPON';
+      else if (item.category === 'ARMOR') sk = 'ARMOR';
+      else if (item.category === 'RANGED') sk = 'RANGED';
+      else if (item.category === 'STAFF') sk = 'STAFF';
+      else if (item.category === 'ACCESSORY') sk = 'ACCESSORY';
+      else if (item.category === 'DECK_CARD') sk = 'DECK_CARD';
+
+      addVisualEffect('MAGIC_PROJ', 0, 0, { 
+          startX: player.x, startY: player.y, 
+          targetX: lx, targetY: ly, 
+          duration: 10, maxDuration: 10, 
+          spriteKey: sk 
+      });
+      setInventory(prev => prev.filter((_, i) => i !== index));
+
+      if (hitEntity) { 
+          if (item.category === 'STAFF') { const res = executeStaffEffect(item, hitEntity, hitEntity.x, hitEntity.y); if (res.msg) addLog(res.msg); } 
+          else { let dmg = 10 + (item.power || 0); hitEntity.hp -= dmg; if(hitEntity.hp <= 0) { gainXp(hitEntity.xp); addLog(`${hitEntity.name}撃破！`); } else addLog(`${hitEntity.name}に${dmg}ダメ！`); } 
+          setEnemies(prev => prev.filter(e => e.hp > 0)); audioService.playSound('attack'); 
+          addVisualEffect('SLASH', lx, ly, { duration: 5, maxDuration: 5 }); // Impact sparkle
+      } 
+      else if (map[ly][lx] !== 'WALL' && !floorItems.find(i=>i.x===lx && i.y===ly)) {
+          setFloorItems(prev => [...prev, { id: Date.now()+Math.random(), type: 'ITEM', x: lx, y: ly, char: '!', name: item.name, hp: 0, maxHp: 0, baseAttack: 0, baseDefense: 0, attack: 0, defense: 0, xp: 0, dir: { x: 0, y: 0 }, status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 }, itemData: item }]);
+          addVisualEffect('EXPLOSION', lx, ly, { duration: 5, maxDuration: 5, scale: 0.3 }); // Small puff on landing
+      }
       setMenuOpen(false); processTurn(player.x, player.y);
   };
 
@@ -1361,13 +1405,51 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           }
       }
       visualEffects.current.forEach(fx => {
-          fx.duration--; const sx = (fx.x - startX) * ts; const sy = (fx.y - startY) * ts;
+          fx.duration--; const ts_val = TILE_SIZE * SCALE;
+          const startX_view = player.x - Math.floor(VIEW_W/2);
+          const startY_view = player.y - Math.floor(VIEW_H/2);
+          
           if (fx.type === 'FLASH') { ctx.fillStyle = 'white'; ctx.globalAlpha = fx.duration/15; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.globalAlpha=1; }
-          else if (fx.type === 'SLASH') { ctx.strokeStyle = 'white'; ctx.lineWidth = 4; ctx.beginPath(); const d = fx.dir || {x:1, y:0}; const cx = sx+ts/2; const cy = sy+ts/2; ctx.moveTo(cx-d.y*10-d.x*10, cy-d.x*10+d.y*10); ctx.lineTo(cx+d.y*10+d.x*10, cy+d.x*10-d.y*10); ctx.stroke(); }
-          else if (fx.type === 'BEAM') { if (sx >= -ts && sx < canvas.width && sy >= -ts && sy < canvas.height) { ctx.strokeStyle = fx.color || 'red'; ctx.lineWidth = 5; ctx.beginPath(); const d = fx.dir || {x:1, y:0}; const cx = sx + ts/2; const cy = sy + ts/2; ctx.moveTo(cx, cy); ctx.lineTo(cx + d.x * 100, cy + d.y * 100); ctx.stroke(); } }
-          else if (fx.type === 'TEXT') { ctx.fillStyle = fx.color || 'white'; ctx.font = 'bold 16px monospace'; ctx.strokeText(fx.value||'', sx+ts/2, sy+ts-fx.duration); ctx.fillText(fx.value||'', sx+ts/2, sy+ts-fx.duration); }
-          else if (fx.type === 'PROJECTILE') { if (sx >= -ts && sx < canvas.width && sy >= -ts && sy < canvas.height) { ctx.fillStyle = currentTheme.colors.C3; ctx.beginPath(); ctx.arc(sx + ts/2, sy + ts/2, 4 * SCALE, 0, Math.PI*2); ctx.fill(); } }
-          else if (fx.type === 'MAGIC_PROJ' && fx.startX !== undefined && fx.targetX !== undefined && fx.startY !== undefined && fx.targetY !== undefined) { const progress = 1 - (fx.duration / fx.maxDuration); const curX = fx.startX + (fx.targetX - fx.startX) * progress; const curY = fx.startY + (fx.targetY - fx.startY) * progress; const spr = spriteCache.current['MAGIC_BULLET']; const msx = (curX - startX) * ts; const msy = (curY - startY) * ts; if (spr) { if (msx >= -ts && msx < canvas.width && msy >= -ts && msy < canvas.height) { ctx.drawImage(spr, msx, msy, ts, ts); } } }
+          else if (fx.type === 'SLASH') { 
+              const sx = (fx.x - startX_view) * ts_val; const sy = (fx.y - startY_view) * ts_val;
+              ctx.strokeStyle = 'white'; ctx.lineWidth = 4; ctx.beginPath(); const d = fx.dir || {x:1, y:0}; const cx = sx+ts_val/2; const cy = sy+ts_val/2; ctx.moveTo(cx-d.y*10-d.x*10, cy-d.x*10+d.y*10); ctx.lineTo(cx+d.y*10+d.x*10, cy+d.x*10-d.y*10); ctx.stroke(); 
+          }
+          else if (fx.type === 'BEAM') { 
+              const sx = (fx.x - startX_view) * ts_val; const sy = (fx.y - startY_view) * ts_val;
+              if (sx >= -ts_val && sx < canvas.width && sy >= -ts_val && sy < canvas.height) { ctx.strokeStyle = fx.color || 'red'; ctx.lineWidth = 5; ctx.beginPath(); const d = fx.dir || {x:1, y:0}; const cx = sx + ts_val/2; const cy = sy + ts_val/2; ctx.moveTo(cx, cy); ctx.lineTo(cx + d.x * 100, cy + d.y * 100); ctx.stroke(); } 
+          }
+          else if (fx.type === 'TEXT') { 
+              const sx = (fx.x - startX_view) * ts_val; const sy = (fx.y - startY_view) * ts_val;
+              ctx.fillStyle = fx.color || 'white'; ctx.font = 'bold 16px monospace'; ctx.strokeText(fx.value||'', sx+ts_val/2, sy+ts_val-fx.duration); ctx.fillText(fx.value||'', sx+ts_val/2, sy+ts_val-fx.duration); 
+          }
+          else if (fx.type === 'PROJECTILE') { 
+              const sx = (fx.x - startX_view) * ts_val; const sy = (fx.y - startY_view) * ts_val;
+              if (sx >= -ts_val && sx < canvas.width && sy >= -ts_val && sy < canvas.height) { ctx.fillStyle = currentTheme.colors.C3; ctx.beginPath(); ctx.arc(sx + ts_val/2, sy + ts_val/2, 4 * SCALE, 0, Math.PI*2); ctx.fill(); } 
+          }
+          else if (fx.type === 'MAGIC_PROJ' && fx.startX !== undefined && fx.targetX !== undefined && fx.startY !== undefined && fx.targetY !== undefined) { 
+              const progress = 1 - (fx.duration / fx.maxDuration); 
+              const curX = fx.startX + (fx.targetX - fx.startX) * progress; 
+              const curY = fx.startY + (fx.targetY - fx.startY) * progress; 
+              const spr = spriteCache.current[fx.spriteKey || 'MAGIC_BULLET']; 
+              const msx = (curX - startX_view) * ts_val; 
+              const msy = (curY - startY_view) * ts_val; 
+              if (spr) { 
+                  if (msx >= -ts_val && msx < canvas.width && msy >= -ts_val && msy < canvas.height) { 
+                      ctx.save();
+                      ctx.translate(msx + ts_val/2, msy + ts_val/2);
+                      ctx.rotate(progress * Math.PI * 6); // Item spins while flying
+                      ctx.drawImage(spr, -ts_val/2, -ts_val/2, ts_val, ts_val); 
+                      ctx.restore();
+                  } 
+              } 
+          }
+          else if (fx.type === 'EXPLOSION') {
+              const sx = (fx.x - startX_view) * ts_val; const sy = (fx.y - startY_view) * ts_val;
+              if (sx >= -ts_val && sx < canvas.width && sy >= -ts_val && sy < canvas.height) {
+                  ctx.fillStyle = 'white'; ctx.globalAlpha = fx.duration / fx.maxDuration;
+                  ctx.beginPath(); ctx.arc(sx + ts_val/2, sy + ts_val/2, ts_val * (fx.scale || 0.5), 0, Math.PI*2); ctx.fill(); ctx.globalAlpha = 1.0;
+              }
+          }
       });
       visualEffects.current = visualEffects.current.filter(fx => fx.duration > 0); ctx.restore();
   };
