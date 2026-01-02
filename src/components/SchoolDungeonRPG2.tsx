@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch, Sparkles, BookOpen, Layers, Move, Minimize2, Maximize2, Volume2, ShieldAlert, ArrowUpCircle, Plus, Magnet, Moon, Snowflake, Activity, Eye, Dna, Dice5, CloudLightning, Wind } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -958,7 +957,18 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   const movePlayer = (dx: 0|1|-1, dy: 0|1|-1) => {
       if(gameOver || gameClear) return;
       if (shopState.active) { if (dy !== 0) { const shopkeeper = enemies.find(e => e.id === shopState.merchantId); const listLength = shopState.mode === 'BUY' ? (shopkeeper?.shopItems?.length || 0) : inventory.length; setSelectedItemIndex(prev => Math.max(0, Math.min(listLength - 1, prev + dy))); audioService.playSound('select'); } return; }
-      if (menuOpen) { if (synthState.active) handleSynthesisStep(); else if (inventory.length > 0) handleItemAction(selectedItemIndex); return; }
+      if (menuOpen) {
+          if (dy !== 0) {
+              if (synthState.active && synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT') {
+                  const knownCount = Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).length;
+                  if (knownCount > 0) setBlankScrollSelectionIndex(prev => Math.max(0, Math.min(knownCount - 1, prev + dy)));
+              } else if (inventory.length > 0) {
+                  setSelectedItemIndex(prev => Math.max(0, Math.min(inventory.length - 1, prev + dy)));
+              }
+              audioService.playSound('select');
+          }
+          return;
+      }
       if (deckViewMode === 'REMOVE' && showDeck) return; 
       if(dx === 0 && dy === 0) { addLog("足踏みした。"); processTurn(player.x, player.y); return; }
       setPlayer(p => ({ ...p, dir: {x: dx, y: dy} }));
