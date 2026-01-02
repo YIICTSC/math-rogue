@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package, Ghost, Trophy, RotateCcw, Play, DollarSign, Info, Coins, Check } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -979,7 +980,15 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       const modifiedHand = runState.hand.map(c => {
           if (!selectedCards.includes(c.id)) return c;
           let mod = { ...c };
-          if (selectedConsumable.id === 'STA_RULER') mod.rank = Math.min(14, mod.rank + 1) as PokerRank; if (selectedConsumable.id === 'STA_STICKER') { mod.bonusChips += 50; mod.enhancement = 'BONUS'; } if (selectedConsumable.id === 'STA_MARKER') { mod.multMultiplier = 1.5; mod.enhancement = 'MULT'; } if (selectedConsumable.id === 'STA_PAINT') { mod.suit = 'HEART'; mod.enhancement = 'WILD'; } if (selectedConsumable.id === 'STA_INK') { mod.suit = 'SPADE'; mod.enhancement = 'WILD'; } if (selectedConsumable.id === 'STA_GOLD_SPRAY') { mod.enhancement = 'GOLD'; } if (selectedConsumable.id === 'STA_GLASS_WORK') { mod.enhancement = 'GLASS'; mod.multMultiplier = 2; } if (selectedConsumable.id === 'STA_STEEL_RULER') { mod.enhancement = 'STEEL'; } if (selectedConsumable.id === 'STA_RAINBOW_PEN') { mod.enhancement = 'WILD'; }
+          if (selectedConsumable.id === 'STA_RULER') mod.rank = Math.min(14, mod.rank + 1) as PokerRank; 
+          if (selectedConsumable.id === 'STA_STICKER') { mod.bonusChips += 50; mod.enhancement = 'BONUS'; } 
+          if (selectedConsumable.id === 'STA_MARKER') { mod.multMultiplier = 1.5; mod.enhancement = 'MULT'; } 
+          if (selectedConsumable.id === 'STA_PAINT') { mod.suit = 'HEART'; } 
+          if (selectedConsumable.id === 'STA_INK') { mod.suit = 'SPADE'; } 
+          if (selectedConsumable.id === 'STA_GOLD_SPRAY') { mod.enhancement = 'GOLD'; } 
+          if (selectedConsumable.id === 'STA_GLASS_WORK') { mod.enhancement = 'GLASS'; mod.multMultiplier = 2; } 
+          if (selectedConsumable.id === 'STA_STEEL_RULER') { mod.enhancement = 'STEEL'; } 
+          if (selectedConsumable.id === 'STA_RAINBOW_PEN') { mod.enhancement = 'WILD'; }
           if (selectedConsumable.id === 'STA_DEATH') { if (selectedCards.length === 2 && selectedCards[0] === c.id) { const targetCard = runState.hand.find(h => h.id === selectedCards[1]); if (targetCard) { mod.rank = targetCard.rank; mod.suit = targetCard.suit; mod.enhancement = targetCard.enhancement; } } }
           return mod;
       });
