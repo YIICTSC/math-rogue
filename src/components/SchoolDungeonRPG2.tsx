@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch, Sparkles, BookOpen, Layers, Move, Minimize2, Maximize2, Volume2, ShieldAlert, ArrowUpCircle, Plus, Magnet, Moon, Snowflake, Activity, Eye, Dna, Dice5 } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch, Sparkles, BookOpen, Layers, Move, Minimize2, Maximize2, Volume2, ShieldAlert, ArrowUpCircle, Plus, Magnet, Moon, Snowflake, Activity, Eye, Dna, Dice5, CloudLightning, Wind } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
 import { storageService } from '../services/storageService';
@@ -58,7 +59,7 @@ type TileType = 'WALL' | 'FLOOR' | 'STAIRS' | 'HALLWAY';
 type Direction = { x: 0 | 1 | -1, y: 0 | 1 | -1 };
 type ItemCategory = 'WEAPON' | 'ARMOR' | 'RANGED' | 'CONSUMABLE' | 'SYNTH' | 'STAFF' | 'ACCESSORY' | 'DECK_CARD';
 type EnemyType = 'SLIME' | 'GHOST' | 'DRAIN' | 'DRAGON' | 'METAL' | 'FLOATING' | 'THIEF' | 'BAT' | 'BOSS' | 'MANDRAKE' | 'GOLEM' | 'NINJA' | 'MAGE' | 'SHOPKEEPER';
-type VisualEffectType = 'SLASH' | 'THUNDER' | 'EXPLOSION' | 'TEXT' | 'FLASH' | 'PROJECTILE' | 'WARP' | 'BEAM' | 'MAGIC_PROJ';
+type VisualEffectType = 'SLASH' | 'THUNDER' | 'EXPLOSION' | 'TEXT' | 'FLASH' | 'PROJECTILE' | 'WARP' | 'BEAM' | 'MAGIC_PROJ' | 'WIND';
 type TrapType = 'BOMB' | 'SLEEP' | 'POISON' | 'WARP' | 'RUST' | 'SUMMON';
 
 // --- DUNGEON CARD TYPES ---
@@ -88,6 +89,8 @@ interface VisualEffect {
   startY?: number;
   targetX?: number;
   targetY?: number;
+  itemSpriteKey?: string; 
+  segments?: {x1: number, y1: number, x2: number, y2: number}[]; // 稲妻などの描画用
 }
 
 interface Item {
@@ -448,13 +451,15 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   useEffect(() => { if (!gameOver && !gameClear) saveData(); }, [player, inventory, floor, level, belly, enemies, floorItems, traps, gameOver, gameClear, saveData]);
 
   useEffect(() => {
-      if (lastInputType.current === 'KEY' && menuListRef.current) {
+      if (menuListRef.current) {
           let activeIndex = selectedItemIndex;
           if (menuOpen && synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT') activeIndex = blankScrollSelectionIndex;
           const items = menuListRef.current.children;
-          if (items && items[activeIndex]) items[activeIndex].scrollIntoView({ block: 'nearest', behavior: 'instant' }); 
+          if (items && items[activeIndex]) {
+              (items[activeIndex] as HTMLElement).scrollIntoView({ block: 'nearest', behavior: 'smooth' }); 
+          }
       }
-  }, [selectedItemIndex, blankScrollSelectionIndex, menuOpen, shopState.active, shopState.mode, synthState.step, inventory, enemies]);
+  }, [selectedItemIndex, blankScrollSelectionIndex, menuOpen, shopState.active, shopState.mode, synthState.step]);
 
   useEffect(() => {
       setPlayer(p => {
@@ -535,7 +540,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
               const destX = player.x + dx; const destY = player.y + dy;
               if (!enemies.some(e => e.x === destX && e.y === destY) && map[destY][destX] !== 'WALL') {
                   setEnemies(prev => prev.map(e => e.id === target.id ? {...e, x: destX, y: destY} : e));
-                  addVisualEffect('PROJECTILE', lx, ly, { dir: {x: -dx as any, y: -dy as any}, duration: 10 }); msg = `${target.name}を引き寄せた！`; used = true;
+                  addVisualEffect('PROJECTILE', lx, ly, { startX: player.x, startY: player.y, targetX: destX, targetY: destY, duration: 15, maxDuration: 15, itemSpriteKey: 'MAGIC_BULLET' }); msg = `${target.name}を引き寄せた！`; used = true;
               } else msg = "引き寄せられない！";
           } else msg = "誰もいない。";
       } else if (card.templateId === 'PUSH') {
@@ -571,7 +576,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                   setEnemies(prev => prev.map(e => {
                       if (e.x >= currentRoom.x && e.x < currentRoom.x + currentRoom.w && e.y >= currentRoom.y && e.y < currentRoom.y + currentRoom.h) {
                           const dmg = card.power; const nhp = e.hp - dmg;
-                          addVisualEffect('THUNDER', e.x, e.y);
+                          addVisualEffect('THUNDER', e.x, e.y, { targetX: e.x, targetY: e.y });
                           if (nhp <= 0) { gainXp(e.xp); return { ...e, hp: 0, dead: true }; }
                           return { ...e, hp: nhp };
                       }
@@ -606,7 +611,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
           const { x: dx, y: dy } = player.dir; const targets: Entity[] = [];
           for (let i=1; i<=8; i++) {
               const tx = player.x + dx * i; const ty = player.y + dy * i;
-              if (map[ty][tx] === 'WALL') break; addVisualEffect('PROJECTILE', tx, ty, { dir: player.dir });
+              if (map[ty][tx] === 'WALL') break; addVisualEffect('PROJECTILE', tx, ty, { startX: player.x, startY: player.y, targetX: tx, targetY: ty, duration: 10, maxDuration: 10, itemSpriteKey: 'MAGIC_BULLET' });
               const target = enemies.find(e => e.x === tx && e.y === ty);
               if (target) targets.push(target);
           }
@@ -653,7 +658,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                   if (map[ty][tx] === 'WALL') break; targets.push({x:tx, y:ty});
                   if (enemies.some(e => e.x === tx && e.y === ty)) { hit = true; break; }
               }
-              if (!hit) targets = []; addVisualEffect('PROJECTILE', player.x, player.y, { dir: player.dir, duration: 10 });
+              if (!hit) targets = []; addVisualEffect('PROJECTILE', player.x, player.y, { startX: player.x, startY: player.y, targetX: targets.length > 0 ? targets[targets.length-1].x : player.x+dx*6, targetY: targets.length > 0 ? targets[targets.length-1].y : player.y+dy*6, duration: 15, maxDuration: 15, itemSpriteKey: 'MAGIC_BULLET' });
           } else if (card.templateId === 'CROSS') {
               targets = [{x: player.x, y: player.y-1}, {x: player.x, y: player.y+1}, {x: player.x-1, y: player.y}, {x: player.x+1, y: player.y}];
               targets.forEach(t => addVisualEffect('SLASH', t.x, t.y, { dir: {x: Math.sign(t.x-player.x) as any, y: Math.sign(t.y-player.y) as any} }));
@@ -696,7 +701,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
       } else if (card.templateId === 'FIRE') {
           const { x: dx, y: dy } = player.dir; let tx = player.x, ty = player.y; let target = null;
           for(let i=1; i<=5; i++) { tx += dx; ty += dy; if (map[ty][tx] === 'WALL') break; const e = enemies.find(en => en.x === tx && en.y === ty); if (e) { target = e; break; } }
-          addVisualEffect('BEAM', player.x + dx*2, player.y + dy*2, { dir: player.dir }); 
+          addVisualEffect('BEAM', target ? target.x : player.x + dx*2, target ? target.y : player.y + dy*2, { dir: player.dir, targetX: target ? target.x : player.x+dx*5, targetY: target ? target.y : player.y+dy*5 }); 
           if (target) { const dmg = baseDmg; const nhp = target.hp - dmg; setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0)); if (nhp <= 0) { gainXp(target.xp); msg = `${target.name}を燃やした！`; } else msg = `${target.name}に${dmg}ダメージ！`; } else msg = "炎を放った！";
           audioService.playSound('attack'); used = true;
       } else if (card.templateId === 'DASH') { setPlayer(p => ({ ...p, status: { ...p.status, speed: 5 } })); msg = "ダッシュ！"; used = true; 
@@ -953,7 +958,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   const movePlayer = (dx: 0|1|-1, dy: 0|1|-1) => {
       if(gameOver || gameClear) return;
       if (shopState.active) { if (dy !== 0) { const shopkeeper = enemies.find(e => e.id === shopState.merchantId); const listLength = shopState.mode === 'BUY' ? (shopkeeper?.shopItems?.length || 0) : inventory.length; setSelectedItemIndex(prev => Math.max(0, Math.min(listLength - 1, prev + dy))); audioService.playSound('select'); } return; }
-      if (menuOpen) { if (synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT') { const known = Array.from(identifiedTypes); if (known.length === 0) return; if (dy !== 0) { setBlankScrollSelectionIndex(prev => Math.max(0, Math.min(known.length - 1, prev + dy))); audioService.playSound('select'); } } else { if (dy !== 0) { setSelectedItemIndex(prev => Math.max(0, Math.min(inventory.length - 1, prev + dy))); audioService.playSound('select'); } } return; }
+      if (menuOpen) { if (synthState.active) handleSynthesisStep(); else if (inventory.length > 0) handleItemAction(selectedItemIndex); return; }
       if (deckViewMode === 'REMOVE' && showDeck) return; 
       if(dx === 0 && dy === 0) { addLog("足踏みした。"); processTurn(player.x, player.y); return; }
       setPlayer(p => ({ ...p, dir: {x: dx, y: dy} }));
@@ -1022,13 +1027,15 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
       const newRanged = { ...rangedItem, count: (rangedItem.count || 0) - 1 }; setPlayer(p => ({ ...p, equipment: { ...p.equipment!, ranged: newRanged } }));
       const { x: dx, y: dy } = player.dir; let lx = player.x, ly = player.y; let hitEntity: Entity | null = null;
       for (let i=1; i<=8; i++) { const tx = player.x + dx * i; const ty = player.y + dy * i; lx = tx; ly = ty; if (map[ty][tx] === 'WALL') { addLog("壁に当たった。"); break; } const target = enemies.find(e => e.x === tx && e.y === ty); if (target) { hitEntity = target; break; } }
-      addVisualEffect('PROJECTILE', lx, ly, { dir: player.dir, duration: 10 }); triggerPlayerAttackAnim(player.dir);
+      
+      const itemSpriteKey = rangedItem.category === 'WEAPON' ? 'WEAPON' : (rangedItem.category === 'ARMOR' ? 'ARMOR' : (rangedItem.category === 'STAFF' ? 'STAFF' : 'RANGED'));
+      addVisualEffect('PROJECTILE', lx, ly, { startX: player.x, startY: player.y, targetX: lx, targetY: ly, duration: 15, maxDuration: 15, itemSpriteKey });
+      triggerPlayerAttackAnim(player.dir);
       if (hitEntity) {
           let dmg = 5 + (newRanged.power || 0); if (newRanged.type === 'SHADOW_PIN') { hitEntity.status.frozen = 5; addLog("影を縫いつけた！"); }
           const newEnemies = enemies.map(e => { if (e.id === hitEntity!.id) { const nhp = e.hp - dmg; return { ...e, hp: nhp }; } return e; });
-          const dead = newEnemies.find(e => e.id === hitEntity!.id && e.hp <= 0); if(dead) { gainXp(dead.xp); addLog(`${dead.name}を倒した！`); } else { addLog(`${hitEntity.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', hitEntity.x, hitEntity.y, {value:`${dmg}`}); }
-          setEnemies(newEnemies.filter(e => e.hp > 0)); audioService.playSound('attack');
-      } else addLog("外した！");
+          const dead = newEnemies.find(e => e.id === hitEntity!.id && e.hp <= 0); if(dead) { gainXp(dead.xp); addLog(`${dead.name}をたおした！`); } else { addLog(`${hitEntity.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', hitEntity.x, hitEntity.y, {value:`${dmg}`}); } setEnemies(newEnemies.filter(e => e.hp > 0)); audioService.playSound('attack');
+      } else addLog("はずした！");
       processTurn(player.x, player.y);
   };
 
@@ -1103,10 +1110,19 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   };
   const executeStaffEffect = (item: Item, target: Entity | null, x: number, y: number): { hit: boolean, msg?: string } => {
       let hit = false; let msg = ""; addVisualEffect('MAGIC_PROJ', 0, 0, { startX: player.x, startY: player.y, targetX: target ? target.x : x, targetY: target ? target.y : y, duration: 5, maxDuration: 5 });
-      if (item.type === 'UMB_FIRE') { addVisualEffect('BEAM', x, y, { color: 'red' }); if (target) { const dmg = 20; const nhp = target.hp - dmg; setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0)); if (nhp <= 0) { gainXp(target.xp); msg = `${target.name}を燃やした！`; } else msg = `${target.name}に${dmg}ダメージ！`; hit = true; } } 
-      else if (item.type === 'UMB_THUNDER') { addVisualEffect('THUNDER', x, y); if (target) { const dmg = 25; const nhp = target.hp - dmg; setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0)); if (nhp <= 0) { gainXp(target.xp); msg = `${target.name}に落雷！`; } else msg = `${target.name}に${dmg}ダメージ！`; hit = true; } } 
+      if (item.type === 'UMB_FIRE') { 
+          addVisualEffect('BEAM', target ? target.x : player.x+(player.dir.x*3), target ? target.y : player.y+(player.dir.y*3), { color: 'orange', targetX: target ? target.x : player.x+(player.dir.x*5), targetY: target ? target.y : player.y+(player.dir.y*5) }); 
+          if (target) { const dmg = 20; const nhp = target.hp - dmg; setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0)); if (nhp <= 0) { gainXp(target.xp); msg = `${target.name}を燃やした！`; } else msg = `${target.name}に${dmg}ダメージ！`; hit = true; } 
+      } 
+      else if (item.type === 'UMB_THUNDER') { 
+          addVisualEffect('THUNDER', target ? target.x : x, target ? target.y : y, { targetX: target ? target.x : x, targetY: target ? target.y : y }); 
+          if (target) { const dmg = 25; const nhp = target.hp - dmg; setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0)); if (nhp <= 0) { gainXp(target.xp); msg = `${target.name}に落雷！`; } else msg = `${target.name}に${dmg}ダメージ！`; hit = true; } 
+      } 
       else if (item.type === 'UMB_SLEEP') { addVisualEffect('TEXT', x, y, {value: 'Zzz', color: 'blue'}); if (target) { setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, status: { ...e.status, sleep: 10 } } : e)); msg = `${target.name}は眠ってしまった。`; hit = true; } } 
-      else if (item.type === 'UMB_BLOW') { if (target) { let tx = target.x; let ty = target.y; const dx = target.x - player.x; const dy = target.y - player.y; const ndx = Math.sign(dx); const ndy = Math.sign(dy); for (let i=0; i<5; i++) { if (map[ty+ndy][tx+ndx] !== 'WALL' && !enemies.some(e=>e.x===tx+ndx && e.y===ty+ndy)) { tx += ndx; ty += ndy; } else break; } if (tx !== target.x || ty !== target.y) { setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, x: tx, y: ty } : e)); msg = `${target.name}を吹き飛ばした！`; hit = true; } else { msg = "吹き飛ばなかった。"; hit = true; } } } 
+      else if (item.type === 'UMB_BLOW') { 
+          addVisualEffect('WIND', x, y, { dir: player.dir });
+          if (target) { let tx = target.x; let ty = target.y; const dx = target.x - player.x; const dy = target.y - player.y; const ndx = Math.sign(dx); const ndy = Math.sign(dy); for (let i=0; i<5; i++) { if (map[ty+ndy][tx+ndx] !== 'WALL' && !enemies.some(e=>e.x===tx+ndx && e.y===ty+ndy)) { tx += ndx; ty += ndy; } else break; } if (tx !== target.x || ty !== target.y) { setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, x: tx, y: ty } : e)); msg = `${target.name}を吹き飛ばした！`; hit = true; } else { msg = "吹き飛ばなかった。"; hit = true; } } 
+      } 
       else if (item.type === 'UMB_WARP') { if (target) { let attempts = 0; while (attempts < 20) { attempts++; const rx = Math.floor(Math.random() * MAP_W); const ry = Math.floor(Math.random() * MAP_H); if (map[ry][rx] === 'FLOOR' && !enemies.find(e => e.x === rx && e.y === ry) && (rx !== player.x || ry !== player.y)) { setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, x: rx, y: ry } : e)); msg = `${target.name}はどこかへ消えた。`; hit = true; break; } } } } 
       else if (item.type === 'UMB_CHANGE') { if (target) { const px = player.x; const py = player.y; setPlayer(p => ({...p, x: target.x, y: target.y })); setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, x: px, y: py } : e)); msg = `${target.name}と入れ替わった！`; hit = true; } } 
       else if (item.type === 'UMB_BIND') { if (target) { setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, status: { ...e.status, frozen: 10 } } : e)); msg = `${target.name}は金縛りにあった！`; hit = true; } } 
@@ -1117,13 +1133,17 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   const handleThrowItem = (index: number) => {
       const item = inventory[index]; if (!item) return; const { x: dx, y: dy } = player.dir; let lx = player.x, ly = player.y; let hitEntity: Entity | null = null;
       for (let i=1; i<=10; i++) { const tx = player.x + dx * i; const ty = player.y + dy * i; lx = tx; ly = ty; if (map[ty][tx] === 'WALL') { addLog("壁に当たった。"); break; } const target = enemies.find(e => e.x === tx && e.y === ty); if (target) { hitEntity = target; break; } }
-      addVisualEffect('PROJECTILE', lx, ly, { dir: player.dir, duration: 10 }); setInventory(prev => prev.filter((_, i) => i !== index));
+      
+      const itemSpriteKey = item.category === 'WEAPON' ? 'WEAPON' : (item.category === 'ARMOR' ? 'ARMOR' : (item.category === 'STAFF' ? 'STAFF' : (item.category === 'DECK_CARD' ? 'DECK_CARD' : 'CONSUMABLE')));
+      addVisualEffect('PROJECTILE', lx, ly, { startX: player.x, startY: player.y, targetX: lx, targetY: ly, duration: 15, maxDuration: 15, itemSpriteKey });
+      
+      setInventory(prev => prev.filter((_, i) => i !== index));
       if (hitEntity) {
           let dmg = 2; if (item.category === 'WEAPON' || item.category === 'RANGED') dmg = 5 + (item.power || 0); if (item.category === 'ARMOR') dmg = 3 + (item.power || 0); if (item.type === 'POT_GLUE') { hitEntity.status.frozen = 10; addLog(`${hitEntity.name}はのりで固まった！`); } if (item.type.includes('POISON')) { addLog(`${hitEntity.name}に毒を与えた！`); dmg += 10; } if (item.type === 'SCROLL_SLEEP') { hitEntity.status.sleep = 10; addLog(`${hitEntity.name}は眠ってしまった！`); }
           if (item.category === 'STAFF') { const res = executeStaffEffect(item, hitEntity, hitEntity.x, hitEntity.y); if (res.msg) addLog(res.msg); if (!identifiedTypes.has(item.type)) { setIdentifiedTypes(prev => new Set(prev).add(item.type)); addLog(`${idMap[item.type]}は${item.name}だった！`, "yellow"); } } 
           else { const newEnemies = enemies.map(e => { if (e.id === hitEntity!.id) { const nhp = e.hp - dmg; return { ...e, hp: nhp }; } return e; }); const dead = newEnemies.find(e => e.id === hitEntity!.id && e.hp <= 0); if(dead) { gainXp(dead.xp); addLog(`${dead.name}を倒した！`); } else { addLog(`${hitEntity.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', hitEntity.x, hitEntity.y, {value:`${dmg}`}); } setEnemies(newEnemies.filter(e => e.hp > 0)); }
           audioService.playSound('attack');
-      } else { if (map[ly][lx] !== 'WALL' && !floorItems.find(i=>i.x===lx && i.y===ly)) { setFloorItems(prev => [...prev, { id: Date.now() + Math.random(), type: 'ITEM', x: lx, y: ly, char: '!', name: item.name, hp:0, maxHp:0, baseAttack:0, baseDefense:0, attack:0, defense:0, xp:0, dir:{x:0,y:0}, status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 }, itemData: item }]); addLog("飛んでいった。"); } else addLog("彼方へ消え去った。"); }
+      } else { if (map[ly][lx] !== 'WALL' && !floorItems.find(i=>i.x===lx && i.y===ly)) { setFloorItems(prev => [...prev, { id: Date.now() + Math.random(), type: 'ITEM', x: lx, y: ly, char: '!', name: item.name, hp: 0, maxHp: 0, baseAttack: 0, baseDefense: 0, attack: 0, defense: 0, xp: 0, dir:{x:0,y:0}, status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 }, itemData: item }]); addLog("飛んでいった。"); } else addLog("彼方へ消え去った。"); }
       setMenuOpen(false); processTurn(player.x, player.y);
   };
 
@@ -1268,18 +1288,114 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
       }
       visualEffects.current.forEach((fx, i) => {
           fx.duration--; let currentX = fx.x; let currentY = fx.y;
-          if (fx.type === 'MAGIC_PROJ' && fx.startX !== undefined && fx.targetX !== undefined && fx.startY !== undefined && fx.targetY !== undefined) {
-              const progress = 1 - (fx.duration / fx.maxDuration); currentX = fx.startX + (fx.targetX - fx.startX) * progress; currentY = fx.startY + (fx.targetY - fx.startY) * progress;
-              const sprite = spriteCache.current['MAGIC_BULLET']; const sx = (currentX - startX) * ts; const sy = (currentY - startY) * ts;
-              if (sprite) { if (sx >= -ts && sx < w && sy >= -ts && sy < h) ctx.drawImage(sprite, sx, sy, ts, ts); } return; 
-          }
           const sx = (fx.x - startX) * ts; const sy = (fx.y - startY) * ts;
-          if (fx.type === 'FLASH' || fx.type === 'THUNDER') { ctx.fillStyle = fx.type === 'THUNDER' ? 'yellow' : 'white'; ctx.globalAlpha = fx.duration / (fx.maxDuration || 20); ctx.fillRect(0, 0, w, h); ctx.globalAlpha = 1.0; }
+          
+          if (fx.type === 'FLASH' || fx.type === 'THUNDER') { 
+              if (fx.type === 'THUNDER') {
+                  const tx = (fx.targetX! - startX) * ts + ts/2;
+                  const ty = (fx.targetY! - startY) * ts + ts/2;
+                  ctx.strokeStyle = 'white';
+                  ctx.lineWidth = 3;
+                  ctx.shadowBlur = 10;
+                  ctx.shadowColor = 'yellow';
+                  ctx.beginPath();
+                  ctx.moveTo(tx, ty - 100);
+                  let curX = tx; let curY = ty - 100;
+                  for(let j=0; j<5; j++) {
+                      curX += (Math.random()-0.5)*40;
+                      curY += 20;
+                      ctx.lineTo(curX, curY);
+                  }
+                  ctx.lineTo(tx, ty);
+                  ctx.stroke();
+                  ctx.shadowBlur = 0;
+              } else {
+                  ctx.fillStyle = 'white'; ctx.globalAlpha = fx.duration / (fx.maxDuration || 20); ctx.fillRect(0, 0, w, h); ctx.globalAlpha = 1.0; 
+              }
+          }
           else if (fx.type === 'SLASH') { if (sx >= -ts && sx < w && sy >= -ts && sy < h) { ctx.strokeStyle = 'white'; ctx.lineWidth = 4; ctx.beginPath(); const d = fx.dir || {x:1, y:0}; const cx = sx + ts/2; const cy = sy + ts/2; ctx.moveTo(cx - d.y*10 - d.x*10, cy - d.x*10 + d.y*10); ctx.lineTo(cx + d.y*10 + d.x*10, cy + d.x*10 - d.y*10); ctx.stroke(); } }
           else if (fx.type === 'EXPLOSION') { if (sx >= -ts && sx < w && sy >= -ts && sy < h) { ctx.fillStyle = ['white', 'orange', 'red'][Math.floor(Math.random()*3)]; const rad = (1 - fx.duration / fx.maxDuration) * ts * (fx.scale || 2); ctx.beginPath(); ctx.arc(sx + ts/2, sy + ts/2, rad, 0, Math.PI*2); ctx.fill(); } }
-          else if (fx.type === 'BEAM') { if (sx >= -ts && sx < w && sy >= -ts && sy < h) { ctx.strokeStyle = fx.color || 'red'; ctx.lineWidth = 5; ctx.beginPath(); const d = fx.dir || {x:1, y:0}; const cx = sx + ts/2; const cy = sy + ts/2; ctx.moveTo(cx, cy); ctx.lineTo(cx + d.x * 100, cy + d.y * 100); ctx.stroke(); } }
-          else if (fx.type === 'PROJECTILE') { if (sx >= -ts && sx < w && sy >= -ts && sy < h) { ctx.fillStyle = currentTheme.colors.C3; ctx.beginPath(); ctx.arc(sx + ts/2, sy + ts/2, 4 * SCALE, 0, Math.PI*2); ctx.fill(); } }
-          else if (fx.type === 'WARP') { if (sx >= -ts && sx < w && sy >= -ts && sy < h) { ctx.fillStyle = 'cyan'; const alpha = fx.duration / (fx.maxDuration || 10); ctx.globalAlpha = alpha; ctx.beginPath(); ctx.arc(sx + ts/2, sy + ts/2, 10 * SCALE, 0, Math.PI*2); ctx.fill(); } }
+          else if (fx.type === 'BEAM') { 
+              if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
+                  const targetSx = (fx.targetX! - startX) * ts + ts/2;
+                  const targetSy = (fx.targetY! - startY) * ts + ts/2;
+                  const startSx = (fx.x - startX) * ts + ts/2;
+                  const startSy = (fx.y - startY) * ts + ts/2;
+                  
+                  const grad = ctx.createLinearGradient(startSx, startSy, targetSx, targetSy);
+                  grad.addColorStop(0, 'rgba(255,100,0,0.8)');
+                  grad.addColorStop(0.5, 'rgba(255,255,200,1)');
+                  grad.addColorStop(1, 'rgba(255,50,0,0.8)');
+                  
+                  ctx.strokeStyle = grad;
+                  ctx.lineWidth = 10 * (fx.duration / fx.maxDuration);
+                  ctx.lineCap = 'round';
+                  ctx.beginPath();
+                  ctx.moveTo(startSx, startSy);
+                  ctx.lineTo(targetSx, targetSy);
+                  ctx.stroke();
+                  
+                  // 火の粉
+                  for(let j=0; j<3; j++) {
+                      ctx.fillStyle = 'orange';
+                      ctx.fillRect(targetSx+(Math.random()-0.5)*20, targetSy+(Math.random()-0.5)*20, 4, 4);
+                  }
+              }
+          }
+          else if (fx.type === 'WIND') {
+              if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
+                  ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+                  ctx.lineWidth = 2;
+                  const d = fx.dir || {x:1, y:0};
+                  const cx = sx + ts/2; const cy = sy + ts/2;
+                  for(let j=0; j<3; j++) {
+                      ctx.beginPath();
+                      const off = j * 10 - 10;
+                      const phase = (fx.duration / fx.maxDuration) * Math.PI * 2;
+                      ctx.arc(cx + d.x*20 + Math.cos(phase)*5, cy + d.y*20 + Math.sin(phase)*5 + off, 15, 0, Math.PI);
+                      ctx.stroke();
+                  }
+              }
+          }
+          else if (fx.type === 'PROJECTILE' || fx.type === 'MAGIC_PROJ') { 
+              if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
+                  const progress = 1 - (fx.duration / fx.maxDuration);
+                  const curX = fx.startX! + (fx.targetX! - fx.startX!) * progress;
+                  const curY = fx.startY! + (fx.targetY! - fx.startY!) * progress;
+                  const curSx = (curX - startX) * ts + ts/2;
+                  const curSy = (curY - startY) * ts + ts/2;
+                  
+                  if (fx.type === 'MAGIC_PROJ') {
+                      // 魔法弾（星形）
+                      ctx.save();
+                      ctx.translate(curSx, curSy);
+                      ctx.rotate(progress * Math.PI * 8);
+                      ctx.fillStyle = 'cyan';
+                      ctx.shadowBlur = 15;
+                      ctx.shadowColor = 'white';
+                      // キラキラ描画
+                      for(let j=0; j<4; j++) {
+                          ctx.rotate(Math.PI/2);
+                          ctx.fillRect(-8, -2, 16, 4);
+                      }
+                      ctx.restore();
+                      // 軌跡
+                      addVisualEffect('TEXT', curX, curY, { value: '･', color: 'white', duration: 5, maxDuration: 5 });
+                  } else {
+                      // 通常の投げ物
+                      const itemSprite = spriteCache.current[fx.itemSpriteKey || 'WEAPON'];
+                      if (itemSprite) {
+                          ctx.save();
+                          ctx.translate(curSx, curSy);
+                          ctx.rotate(progress * Math.PI * 4);
+                          ctx.drawImage(itemSprite, -ts/2, -ts/2, ts, ts);
+                          ctx.restore();
+                      }
+                  }
+                  if (fx.duration === 1) addVisualEffect('SLASH', fx.targetX!, fx.targetY!, { duration: 8, maxDuration: 8 });
+              }
+          }
+          else if (fx.type === 'WARP') { if (sx >= -ts && sx < w && sy >= -ts && sy < h) { ctx.fillStyle = 'cyan'; const alpha = fx.duration / (fx.maxDuration || 10); ctx.globalAlpha = alpha; ctx.beginPath(); ctx.arc(sx + ts/2, sy + ts/2, 10 * SCALE, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha = 1.0; } }
           else if (fx.type === 'TEXT') { if (sx >= -ts && sx < w && sy >= -ts && sy < h) { ctx.fillStyle = fx.color || 'white'; ctx.font = 'bold 16px monospace'; ctx.strokeStyle = 'black'; ctx.lineWidth = 2; const lift = (1 - fx.duration / fx.maxDuration) * 20; ctx.strokeText(fx.value || '', sx + ts/2, sy - lift + ts); ctx.fillText(fx.value || '', sx + ts/2, sy - lift + ts); } }
       });
       visualEffects.current = visualEffects.current.filter(fx => fx.duration > 0); ctx.restore();
@@ -1452,7 +1568,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                         <div className="flex justify-end mb-2 border-b pb-1" style={{ borderColor: C1 }}><span className="flex items-center"><Coins size={10} className="mr-1"/> {player.gold} G</span></div>
                         {!shopRemovedThisFloor && (<button className="w-full border mb-2 py-1 flex items-center justify-center gap-2 hover:opacity-80" style={{ borderColor: C1, color: C3 }} onClick={() => { setDeckViewMode('REMOVE'); setShowDeck(true); }}><Trash2 size={12} /> カード除外 (100 G)</button>)}
                         <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
-                            {shopState.mode === 'BUY' ? (enemies.find(e => e.id === shopState.merchantId)?.shopItems?.map((item, i) => (<div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}><button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}><span>{getItemName(item)}</span><span className="flex items-center gap-1">{item.price} G</span></button><button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button></div>)) || <div className="text-center">売り切れ</div>) : (inventory.map((item, i) => (<div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}><button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}><span>{getItemName(item)}</span><span className="flex items-center gap-1">{Math.floor((item.price || (item.value || 100)) / 2)} G</span></button><button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button></div>)))}
+                            {shopState.mode === 'BUY' ? (enemies.find(e => e.id === shopState.merchantId)?.shopItems?.map((item, i) => (<div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}><button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>{selectedItemIndex === i && <span className="mr-1 animate-pulse">▶</span>}<span>{getItemName(item)}</span><span className="flex items-center gap-1">{item.price} G</span></button><button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button></div>)) || <div className="text-center">売り切れ</div>) : (inventory.map((item, i) => (<div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}><button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>{selectedItemIndex === i && <span className="mr-1 animate-pulse">▶</span>}<span>{getItemName(item)}</span><span className="flex items-center gap-1">{Math.floor((item.price || (item.value || 100)) / 2)} G</span></button><button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button></div>)))}
                             {shopState.mode === 'SELL' && inventory.length === 0 && <div className="text-center">持ち物なし</div>}
                         </div>
                     </div>
@@ -1462,7 +1578,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                         <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}><h3 className="font-bold">{synthState.active ? (synthState.mode === 'BLANK' ? '書き込む内容を選択' : (synthState.step === 'SELECT_BASE' ? (synthState.mode==='CHANGE'?'変化させる物':'ベースを選択') : (synthState.mode==='CHANGE'?'変化':'素材を選択'))) : `MOCHIMONO (${inventory.length}/${MAX_INVENTORY})`}</h3><button onClick={toggleMenu}><X size={12}/></button></div>
                         {synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT' ? (
                             <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
-                                {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).map((type, i) => (<div key={i} className="flex items-center border" style={{ borderColor: blankScrollSelectionIndex === i ? C3 : 'transparent', backgroundColor: blankScrollSelectionIndex === i ? C2 : 'transparent', color: blankScrollSelectionIndex === i ? C0 : C3 }}><button className="flex-grow text-left px-2 py-1 cursor-pointer" onClick={() => handleSynthesisStep()} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setBlankScrollSelectionIndex(i); }}>{ITEM_DB[type as string].name}</button></div>))}
+                                {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).map((type, i) => (<div key={i} className="flex items-center border" style={{ borderColor: blankScrollSelectionIndex === i ? C3 : 'transparent', backgroundColor: blankScrollSelectionIndex === i ? C2 : 'transparent', color: blankScrollSelectionIndex === i ? C0 : C3 }}><button className="flex-grow text-left px-2 py-1 cursor-pointer" onClick={() => handleSynthesisStep()} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setBlankScrollSelectionIndex(i); }}>{blankScrollSelectionIndex === i && <span className="mr-1 animate-pulse">▶</span>}{ITEM_DB[type as string].name}</button></div>))}
                                 {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).length === 0 && <div className="text-red-500">識別済みのノートがありません</div>}
                             </div>
                         ) : (
@@ -1471,7 +1587,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                                 <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
                                     {inventory.map((item, i) => {
                                         const isSynthTarget = synthState.active && ((synthState.step === 'SELECT_BASE' && synthState.mode === 'SYNTH' && !['WEAPON','ARMOR'].includes(item.category)) || (synthState.step === 'SELECT_MAT' && synthState.baseIndex === i));
-                                        return (<div key={i} className={`flex items-center border ${isSynthTarget ? 'opacity-30' : ''}`} style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onContextMenu={(e) => { e.preventDefault(); setInspectedItem(item); }} onTouchStart={() => handleTouchStart(item)} onTouchEnd={handleTouchEnd}><button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => !isSynthTarget && (synthState.active ? handleSynthesisStep() : handleItemAction(i))} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}><span>{getItemName(item)} {item.plus ? `+${item.plus}` : ''} {item.count ? `(${item.count})` : ''}{item.category === 'STAFF' ? `[${item.charges}]` : ''}</span><span className="text-[9px]" style={{ color: selectedItemIndex === i ? C0 : C2 }}>{synthState.active ? '選択' : (['WEAPON','ARMOR','RANGED','ACCESSORY'].includes(item.category) ? '装備' : (item.category==='STAFF' ? '振る' : '使う'))}</span></button>{!synthState.active && (<button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); handleThrowItem(i); }} title="投げる"><Send size={10} /></button>)}{!synthState.active && (<button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); handleDropItem(i); }} title="足元に置く"><ArrowDown size={10} /></button>)}<button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }} title="詳細"><Info size={10} /></button></div>);
+                                        return (<div key={i} className={`flex items-center border ${isSynthTarget ? 'opacity-30' : ''}`} style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onContextMenu={(e) => { e.preventDefault(); setInspectedItem(item); }} onTouchStart={() => handleTouchStart(item)} onTouchEnd={handleTouchEnd}><button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => !isSynthTarget && (synthState.active ? handleSynthesisStep() : handleItemAction(i))} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}><span>{selectedItemIndex === i && <span className="mr-1 animate-pulse">▶</span>}{getItemName(item)} {item.plus ? `+${item.plus}` : ''} {item.count ? `(${item.count})` : ''}{item.category === 'STAFF' ? `[${item.charges}]` : ''}</span><span className="text-[9px]" style={{ color: selectedItemIndex === i ? C0 : C2 }}>{synthState.active ? '選択' : (['WEAPON','ARMOR','RANGED','ACCESSORY'].includes(item.category) ? '装備' : (item.category==='STAFF' ? '振る' : '使う'))}</span></button>{!synthState.active && (<button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); handleThrowItem(i); }} title="投げる"><Send size={10} /></button>)}{!synthState.active && (<button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); handleDropItem(i); }} title="足元に置く"><ArrowDown size={10} /></button>)}<button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }} title="詳細"><Info size={10} /></button></div>);
                                     })}
                                     {inventory.length === 0 && <span className="text-center" style={{ color: C1 }}>Empty</span>}
                                 </div>
@@ -1532,7 +1648,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                 <div className="flex flex-col items-center group"><button className="w-14 h-14 bg-[#ff0000] rounded-full shadow-[0_4px_0_#8b0000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#cc0000]" onMouseDown={() => handlePressStart()} onMouseUp={(e) => handlePressEnd(e)} onMouseLeave={(e) => handlePressEnd(e)} onTouchStart={(e) => { e.preventDefault(); handlePressStart(); }} onTouchEnd={(e) => { e.preventDefault(); handlePressEnd(e); }}>A</button><span className="text-[#666] text-xs font-bold mt-1">ACT</span></div>
             </div>
             <div className="absolute bottom-1 right-1 left-1 h-14 flex items-end justify-end gap-1 pointer-events-none pr-1">
-                {dungeonHand.map((card, i) => (<button key={card.id} className="w-10 h-14 bg-[#2a2a2a] border border-[#555] rounded-md flex flex-col items-center justify-start text-white relative shadow p-0.5 pointer-events-auto" onClick={() => handleCardUse(i)}><div className={`w-full text-[4px] font-bold px-0.5 rounded-t mb-0.5 text-center ${card.type === 'ATTACK' ? 'bg-red-900' : 'bg-blue-900'}`}>{card.type}</div><div className="scale-[0.6]">{card.icon}</div><div className="text-[6px] font-bold text-center leading-none mt-0.5">{card.name}</div></button>))}
+                {dungeonHand.map((card, i) => (<button key={card.id} className="w-10 h-14 bg-[#2a2a2a] border border-[#555] rounded-md flex flex-col items-center justify-start text-white relative shadow p-0.5 pointer-events-auto" onClick={() => handleCardUse(i)}><div className={`w-full text-[4px] font-bold px-0.5 rounded-t mb-0.5 text-center ${card.type === 'ATTACK' ? 'bg-red-900' : card.type === 'DEFENSE' ? 'bg-blue-900' : 'bg-green-900'}`}>{card.type}</div><div className="scale-[0.6]">{card.icon}</div><div className="text-[6px] font-bold text-center leading-none mt-0.5">{card.name}</div></button>))}
             </div>
         </div>
     </div>
