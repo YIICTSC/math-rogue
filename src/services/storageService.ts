@@ -1,3 +1,4 @@
+
 import { GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState, KochoScoreEntry, PaperPlaneScoreEntry } from '../types';
 
 const STORAGE_KEY_UNLOCKED_CARDS = 'pixel_spire_unlocked_cards_v1';
@@ -38,6 +39,9 @@ const STORAGE_KEY_SEEN_BATTLE_TUTORIAL = 'pixel_spire_seen_battle_tutorial_v1';
 
 // --- ENGLISH VOICE FLAG ---
 const STORAGE_KEY_ENGLISH_VOICE = 'pixel_spire_english_voice_v1';
+
+// --- BGM MODE FLAG ---
+const STORAGE_KEY_BGM_MODE = 'pixel_spire_bgm_mode_v1';
 
 export interface PaperPlaneProgress {
     rank: number; // Association Level (Clear Count equivalent)
@@ -369,7 +373,7 @@ export const storageService = {
   saveKochoState: (state: any) => {
       try {
           localStorage.setItem(STORAGE_KEY_KOCHO_STATE, JSON.stringify(state));
-      } catch (e) { console.warn("Failed to save kocho state", e); }
+      } catch (e) { console.warn(prev => prev); }
   },
 
   loadKochoState: (): any => {
@@ -406,7 +410,7 @@ export const storageService = {
   savePaperPlaneState: (state: any) => {
       try {
           localStorage.setItem(STORAGE_KEY_PAPER_PLANE_STATE, JSON.stringify(state));
-      } catch (e) { console.warn("Failed to save paper plane state", e); }
+      } catch (e) { console.warn(prev => prev); }
   },
 
   loadPaperPlaneState: (): any => {
@@ -451,6 +455,15 @@ export const storageService = {
 
   saveEnglishVoiceEnabled: (enabled: boolean) => {
     localStorage.setItem(STORAGE_KEY_ENGLISH_VOICE, enabled.toString());
+  },
+
+  // --- BGM Mode ---
+  getBgmMode: (): string | null => {
+    return localStorage.getItem(STORAGE_KEY_BGM_MODE);
+  },
+
+  saveBgmMode: (mode: string) => {
+    localStorage.setItem(STORAGE_KEY_BGM_MODE, mode);
   },
 
   // --- Game State (Save/Load) ---
@@ -563,5 +576,6 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_SEEN_BATTLE_TUTORIAL);
       localStorage.removeItem(STORAGE_KEY_CHALLENGE_RECORDS);
       localStorage.removeItem(STORAGE_KEY_ENGLISH_VOICE);
+      localStorage.removeItem(STORAGE_KEY_BGM_MODE);
   }
 };
