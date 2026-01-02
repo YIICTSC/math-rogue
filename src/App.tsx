@@ -223,7 +223,10 @@ const App: React.FC = () => {
   const [selectedCharName, setSelectedCharName] = useState<string>("戦士");
   const [legacyCardSelected, setLegacyCardSelected] = useState<boolean>(false);
   const [showDebugLog, setShowDebugLog] = useState<boolean>(false);
-  const [bgmMode, setBgmMode] = useState<'OSCILLATOR' | 'MP3' | 'STUDY'>('STUDY');
+  const [bgmMode, setBgmMode] = useState<'OSCILLATOR' | 'MP3' | 'STUDY'>(() => {
+    const saved = storageService.getBgmMode() as 'OSCILLATOR' | 'MP3' | 'STUDY' | null;
+    return saved || 'STUDY';
+  });
   const [totalMathCorrect, setTotalMathCorrect] = useState<number>(0);
   const [nextThreshold, setNextThreshold] = useState<number | null>(null);
   
@@ -282,6 +285,9 @@ const App: React.FC = () => {
     setIsDebugHpOne(storageService.getDebugHpOne());
     setTotalMathCorrect(storageService.getMathCorrectCount());
     
+    // Sync loaded BGM mode with service
+    audioService.setBgmMode(bgmMode);
+
     if (gameState.screen === GameScreen.START_MENU) {
         audioService.init();
         audioService.playBGM('menu');
@@ -331,6 +337,7 @@ const App: React.FC = () => {
       
       setBgmMode(nextMode);
       audioService.setBgmMode(nextMode);
+      storageService.saveBgmMode(nextMode); // Save to local storage
       audioService.playSound('select');
   };
 
