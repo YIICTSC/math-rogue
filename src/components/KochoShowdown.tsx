@@ -436,7 +436,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const startWave = (stage: number, sequence: number, wave: number) => {
         let newEnemies: KEntity[] = [];
         let logMsg = "";
-        let bgm: any = 'dungeon_gym';
+        let bgmId: any = 'kocho_battle';
         let maxW = 3;
 
         // Keep track of occupied positions (starting with player)
@@ -476,7 +476,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             const boss = ENEMY_TYPES.find(e => e.name === '校長')!;
             newEnemies.push(createEnemySafe(boss, 0, 1)); // Phase 1
             logMsg = "最終決戦！校長室";
-            bgm = 'dungeon_boss';
+            bgmId = 'kocho_boss';
             maxW = 1;
         } else if (stage === 1) {
             // Tutorial Stage: Simple 3 waves -> Reward -> Next
@@ -487,7 +487,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 newEnemies.push(createEnemySafe(ENEMY_TYPES[0], i)); // Senior
             }
             logMsg = `Tutorial - Wave ${wave}/${maxW}`;
-            bgm = 'school_psyche';
+            bgmId = 'kocho_battle';
         } else {
             // Complex Stages (2-6)
             // Sequence 0: First Mobs (3-5 waves)
@@ -516,8 +516,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 }
                 logMsg = `Stage ${stage}-${sequence+1} Wave ${wave}/${maxW}`;
                 
-                if (stage >= 3) bgm = 'dungeon_science';
-                if (stage >= 5) bgm = 'dungeon_roof';
+                bgmId = 'kocho_battle';
 
             } else if (sequence === 2) {
                 // Mid Boss
@@ -539,7 +538,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 newEnemies.push(createEnemySafe(minion, 1));
 
                 logMsg = `強敵 ${mb.name} が現れた！`;
-                bgm = 'dungeon_boss';
+                bgmId = 'kocho_boss';
             }
         }
 
@@ -574,7 +573,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             fieldItems: prev.fieldItems
         }));
 
-        audioService.playBGM(bgm);
+        audioService.playBGM(bgmId);
     };
 
     // Modified createEnemy to accept explicit pos instead of calculating internally based on index 
@@ -858,7 +857,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             let minCost = 999;
 
                             for (const r of validRanges) {
-                                const t1 = player.pos - r;
+                                const t1 = t1 >= 0 && t1 < GRID_SIZE ? player.pos - r : -1;
                                 if (t1 >= 0 && t1 < GRID_SIZE) {
                                     const cost = Math.abs(e.pos - t1);
                                     if (cost < minCost) { minCost = cost; bestTargetPos = t1; }
@@ -1651,7 +1650,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
              generateRewards();
              audioService.playSound('win');
         } else if (targetPhase === 'SHOP' || targetPhase === 'UPGRADE_EVENT') {
-             audioService.playBGM(targetPhase === 'SHOP' ? 'poker_shop' : 'menu');
+             audioService.playBGM('kocho_setup');
         } else if (targetPhase === 'VICTORY') {
              audioService.playSound('win');
         }

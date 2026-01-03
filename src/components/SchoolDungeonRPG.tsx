@@ -1,11 +1,14 @@
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
 import { storageService } from '../services/storageService';
 import MathChallengeScreen from './MathChallengeScreen';
 import { GameMode } from '../types';
+
+// --- セッション内アイテム引き継ぎ用変数 ---
+let inheritedItemTemplate: Item | null = null;
 
 interface SchoolDungeonRPGProps {
   onBack: () => void;
@@ -347,6 +350,20 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   // Math Challenge State
   const [showMathChallenge, setShowMathChallenge] = useState(false);
 
+  // --- 引き継ぎ機能用状態 ---
+  const [inheritItemIdx, setInheritItemIdx] = useState<number | null>(null);
+
+  // 引き継ぎ対象アイテム一覧（装備中を含む全所持品）
+  const allPossessions = useMemo(() => {
+    if (!gameOver) return [];
+    const items = [...inventory];
+    if (player.equipment?.weapon) items.push(player.equipment.weapon);
+    if (player.equipment?.armor) items.push(player.equipment.armor);
+    if (player.equipment?.ranged) items.push(player.equipment.ranged);
+    if (player.equipment?.accessory) items.push(player.equipment.accessory);
+    return items;
+  }, [inventory, player.equipment, gameOver]);
+
   // Init
   useEffect(() => {
     // Generate Sprites
@@ -477,7 +494,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           }
           const items = menuListRef.current.children;
           if (items && items[activeIndex]) {
-              items[activeIndex].scrollIntoView({ block: 'nearest', behavior: 'instant' }); 
+              (items[activeIndex] as HTMLElement).scrollIntoView({ block: 'nearest', behavior: 'instant' }); 
           }
       }
   }, [selectedItemIndex, blankScrollSelectionIndex, menuOpen, shopState.active, shopState.mode, synthState.step, inventory, enemies]);
@@ -559,9 +576,17 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     setIdMap(newIdMap);
     setIdentifiedTypes(new Set());
 
-    const initItem: Item = { ...ITEM_DB['FOOD_ONIGIRI'], id: `start-${Date.now()}` };
-    const initWeapon: Item = { ...ITEM_DB['PENCIL_SWORD'], id: `start-w-${Date.now()}` };
-    setInventory([initItem, initWeapon]);
+    const initInventory: Item[] = [];
+    
+    // 引き継ぎアイテムがある場合はそれを追加
+    if (inheritedItemTemplate) {
+        initInventory.push({ ...inheritedItemTemplate, id: `inherited-${Date.now()}` });
+        inheritedItemTemplate = null; // 使い切り
+    }
+
+    initInventory.push({ ...ITEM_DB['FOOD_ONIGIRI'], id: `start-${Date.now()}` });
+    initInventory.push({ ...ITEM_DB['PENCIL_SWORD'], id: `start-w-${Date.now()}` });
+    setInventory(initInventory);
     
     setPlayer({
         id: 0, type: 'PLAYER', x: 1, y: 1, char: '@', name: 'わんぱく小学生', 
@@ -576,8 +601,19 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   };
 
   const handleRestart = () => {
-      storageService.clearDungeonState();
-      startNewGame();
+    if (gameOver && inheritItemIdx !== null) {
+        // 引き継ぎアイテムを全所持品（装備含む）から取得
+        const selected = allPossessions[inheritItemIdx];
+        if (selected) {
+            inheritedItemTemplate = { ...selected };
+            // IDを新調して装備状態などはリセットされるようにする
+            inheritedItemTemplate.id = `inherited-template-${Date.now()}`;
+        }
+    }
+    
+    storageService.clearDungeonState();
+    startNewGame();
+    setInheritItemIdx(null);
   };
 
   const handleQuit = () => {
@@ -586,7 +622,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   };
 
   const isPointInRoom = (x: number, y: number) => {
-      return roomsRef.current.some(r => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h);
+      return (roomsRef.current || []).some(r => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h);
   };
 
   const spawnEnemy = (x: number, y: number, floorLevel: number): Entity => {
@@ -1102,13 +1138,14 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       }
 
       if (menuOpen) {
-          if (synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT') {
-              const known = Array.from(identifiedTypes);
-              if (known.length === 0) return;
-              if (dy !== 0) {
-                  setBlankScrollSelectionIndex(prev => Math.max(0, Math.min(known.length - 1, prev + dy)));
-                  audioService.playSound('select');
+          if (synthState.active) {
+              if (synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT') {
+                  const knownCount = Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).length;
+                  if (knownCount > 0) setBlankScrollSelectionIndex(prev => Math.max(0, Math.min(knownCount - 1, prev + dy)));
+              } else if (inventory.length > 0) {
+                  setSelectedItemIndex(prev => Math.max(0, Math.min(inventory.length - 1, prev + dy)));
               }
+              audioService.playSound('select');
           } else {
               if (dy !== 0) {
                   setSelectedItemIndex(prev => Math.max(0, Math.min(inventory.length - 1, prev + dy)));
@@ -1776,7 +1813,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       let lx = player.x, ly = player.y;
       let hitEntity: Entity | null = null;
 
-      for (let i=1; i<=10; i++) {
+      for (let i=1; i<=8; i++) {
           const tx = player.x + dx * i;
           const ty = player.y + dy * i;
           lx = tx; ly = ty;
@@ -2068,7 +2105,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       const droppedEntity: Entity = {
           id: Date.now() + Math.random(), type: 'ITEM', x: player.x, y: player.y, char: '!', name: item.name,
           hp: 0, maxHp: 0, baseAttack: 0, baseDefense: 0, attack: 0, defense: 0, xp: 0, dir: { x: 0, y: 0 },
-          status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 },
+          status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
           itemData: item
       };
       setFloorItems(prev => [...prev, droppedEntity]);
@@ -2107,7 +2144,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
           
           const items = menuListRef.current.children;
           if (items && items[activeIndex]) {
-              items[activeIndex].scrollIntoView({ block: 'nearest', behavior: 'instant' }); 
+              (items[activeIndex] as HTMLElement).scrollIntoView({ block: 'nearest', behavior: 'instant' }); 
           }
       }
   }, [selectedItemIndex, blankScrollSelectionIndex, menuOpen, shopState.active, shopState.mode, synthState.step, inventory, enemies]);
@@ -2117,7 +2154,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
     const handleKeyDown = (e: KeyboardEvent) => {
         lastInputType.current = 'KEY';
         if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) { e.preventDefault(); }
-        if (gameOver) { if (['z', 'Enter', ' '].includes(e.key)) handleRestart(); return; }
+        if (gameOver) { 
+            // ゲームオーバー時は選択モード
+            return; 
+        }
         if (gameClear) { if (['z', 'Enter', ' '].includes(e.key)) startEndlessMode(); return; }
         if (['x', 'c', 'Escape'].includes(e.key)) { toggleMenu(); return; }
         if ((menuOpen || shopState.active) && (e.key === 'Backspace' || e.key === 'x')) {
@@ -2911,15 +2951,39 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                     )}
 
                     {gameOver && (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center z-40" style={{ backgroundColor: `${C0}E6`, color: C3 }}>
-                            <Skull size={48} className="mb-4" style={{ color: C1 }}/>
-                            <h2 className="text-2xl font-bold mb-4">GAME OVER</h2>
-                            <p>Floor: {floor}</p>
-                            <p>Level: {level}</p>
-                            <button onClick={handleRestart} className="mt-6 border-2 px-4 py-2 animate-pulse flex items-center" style={{ borderColor: C3, color: C3 }}>
-                                <RotateCcw size={16} className="mr-2"/> RETRY
+                        <div className="absolute inset-0 flex flex-col items-center justify-center z-40 p-4 text-center" style={{ backgroundColor: `${C0}E6`, color: C3 }}>
+                            <Skull size={48} className="mb-2" style={{ color: C1 }}/>
+                            <h2 className="text-xl font-bold mb-1">GAME OVER</h2>
+                            <p className="text-[10px] mb-4 opacity-70">Floor: {floor} / Level: {level}</p>
+                            
+                            <div className="bg-black/60 border-2 border-red-500 rounded p-3 w-full max-w-xs mb-4 flex flex-col">
+                                <h3 className="text-red-400 font-bold text-xs mb-2">引き継ぐアイテムを選択</h3>
+                                <div className="flex-grow overflow-y-auto max-h-48 custom-scrollbar space-y-1 pr-1">
+                                    {allPossessions.map((item, idx) => (
+                                        <div 
+                                            key={idx}
+                                            className={`p-2 border rounded flex items-center justify-between cursor-pointer transition-colors text-xs ${inheritItemIdx === idx ? 'bg-red-900 border-white text-white' : 'bg-gray-800 border-gray-600 text-gray-400 hover:border-red-400'}`}
+                                            onClick={() => setInheritItemIdx(idx)}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                {item.category === 'WEAPON' && <Sword size={14} />}
+                                                {item.category === 'ARMOR' && <Shield size={14} />}
+                                                {item.category === 'STAFF' && <Umbrella size={14} />}
+                                                {item.category === 'RANGED' && <Target size={14} />}
+                                                {item.category === 'ACCESSORY' && <Circle size={14} />}
+                                                <span className="truncate max-w-[120px]">{item.name} {item.plus ? `+${item.plus}` : ''}</span>
+                                            </div>
+                                            {inventory.every(invItem => invItem.id !== item.id) && <span className="text-[8px] bg-blue-900 px-1 rounded">装備中</span>}
+                                        </div>
+                                    ))}
+                                    {allPossessions.length === 0 && <div className="text-[10px] text-gray-600 py-4 italic">所持品なし</div>}
+                                </div>
+                            </div>
+
+                            <button onClick={handleRestart} className="px-6 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded border-2 border-white animate-pulse flex items-center justify-center gap-2 w-full max-w-xs">
+                                <RotateCcw size={16}/> {inheritItemIdx !== null ? "アイテムを持って再挑戦" : "再挑戦"}
                             </button>
-                            <button onClick={handleQuit} className="mt-4 text-sm hover:underline">
+                            <button onClick={handleQuit} className="mt-4 text-xs hover:underline opacity-50">
                                 EXIT
                             </button>
                         </div>
@@ -2996,10 +3060,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             </div>
 
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-4 transform -rotate-12">
-                <div className="flex flex-col items-center group">
-                    <button className="w-14 h-14 bg-[#8b0000] rounded-full shadow-[0_4px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000]" onClick={toggleMenu}>B</button>
-                    <span className="text-[#666] text-xs font-bold mt-1">MENU</span>
-                </div>
+                <div className="flex flex-col items-center group"><button className="w-14 h-14 bg-[#8b0000] rounded-full shadow-[0_4px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000]" onClick={toggleMenu}>B</button><span className="text-[#666] text-xs font-bold mt-1">MENU</span></div>
                 <div className="flex flex-col items-center group">
                     <button 
                         className="w-14 h-14 bg-[#ff0000] rounded-full shadow-[0_4px_0_#8b0000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#cc0000]" 
