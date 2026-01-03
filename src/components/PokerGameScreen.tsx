@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package, Ghost, Trophy, RotateCcw, Play, DollarSign, Info, Coins, Check } from 'lucide-react';
+import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package, Ghost, Trophy, RotateCcw, Play, DollarSign, Info, Coins, Check, AlertTriangle } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { 
@@ -335,7 +335,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           shopVoucher: hydrateVoucher(state.shopVoucher),
           voucherRestockedAnte: state.voucherRestockedAnte ?? 0,
           persistentCounters: state.persistentCounters || {},
-          handSizeModifier: state.handSizeModifier || 0 // New field init
+          handSizeModifier: state.handSizeModifier || 0,
+          lastHandTypePlayed: state.lastHandTypePlayed || undefined
       };
   };
 
@@ -373,7 +374,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           isEndless: false,
           voucherRestockedAnte: 0,
           persistentCounters: {},
-          handSizeModifier: 0
+          handSizeModifier: 0,
+          lastHandTypePlayed: undefined
       };
   });
 
@@ -411,13 +413,15 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       const { type } = getHandResult(playedCards, runState.supporters);
       
       const level = runState.handLevels[type] || 1;
+      const isDisallowed = runState.currentBlind.bossAbility === 'THE_EYE' && type === runState.lastHandTypePlayed;
 
       return {
           name: POKER_HAND_LEVELS[type].name,
           level: level,
-          type: type
+          type: type,
+          isDisallowed
       };
-  }, [selectedCards, runState.hand, runState.handLevels, runState.supporters]);
+  }, [selectedCards, runState.hand, runState.handLevels, runState.supporters, runState.currentBlind.bossAbility, runState.lastHandTypePlayed]);
 
   // --- Initialization & Auto Save ---
   useEffect(() => {
@@ -469,7 +473,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           isEndless: false,
           voucherRestockedAnte: 0,
           persistentCounters: {},
-          handSizeModifier: 0
+          handSizeModifier: 0,
+          lastHandTypePlayed: undefined
       });
       setHighScore(0);
       setPhase('BLIND_SELECT');
@@ -513,7 +518,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           discardPile: [],
           currentScore: 0,
           handsRemaining: baseHands,
-          discardsRemaining: baseDiscards
+          discardsRemaining: baseDiscards,
+          lastHandTypePlayed: undefined // Reset for "The Eye"
       }));
       setPhase('PLAY');
       audioService.playBGM('poker_play');
@@ -570,8 +576,11 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       const level = runState.handLevels[type] || 1;
       const baseStats = POKER_HAND_LEVELS[type];
       
-      let chips = baseStats.baseChips + (level - 1) * 10;
-      let mult = baseStats.baseMult + (level - 1) * 1;
+      // Boss Constraint: THE_EYE (Cannot repeat hand types)
+      const isDisallowed = runState.currentBlind.bossAbility === 'THE_EYE' && type === runState.lastHandTypePlayed;
+
+      let chips = isDisallowed ? 0 : (baseStats.baseChips + (level - 1) * 10);
+      let mult = isDisallowed ? 0 : (baseStats.baseMult + (level - 1) * 1);
 
       let bonusMoney = 0;
       const cardsToDestroy: string[] = [];
@@ -611,10 +620,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       mult = Math.floor(ctx.mult);
       const score = chips * mult;
 
-      setLastHandScore({ chips, mult, total: score, name: baseStats.name });
+      setLastHandScore({ chips, mult, total: score, name: isDisallowed ? "制約により無効" : baseStats.name });
       if (score > highScore) setHighScore(score);
       setAnimating(true);
-      audioService.playSound('attack');
+      audioService.playSound(isDisallowed ? 'wrong' : 'attack');
 
       await new Promise(r => setTimeout(r, 1500));
 
@@ -659,7 +668,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
             discardPile: newDiscardPile,
             handsRemaining: prev.handsRemaining - 1,
             money: prev.money + bonusMoney,
-            persistentCounters: newCounters
+            persistentCounters: newCounters,
+            lastHandTypePlayed: type // Record last hand for "The Eye"
           }
       });
       setSelectedCards([]);
@@ -720,7 +730,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           money: prev.money + roundTotal,
           deck: [...prev.deck, ...prev.hand, ...prev.discardPile],
           hand: [],
-          discardPile: []
+          discardPile: [],
+          lastHandTypePlayed: undefined
       }));
 
       // Set partial result (Math bonus will be added later)
@@ -1200,10 +1211,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       );
   }
 
-  // Shop & Play Render (reused from previous, ensuring context is passed)
   if (phase === 'SHOP' || phase === 'PACK_OPEN') {
       
-      // ... (Existing Pack Open Rendering) ...
       if (phase === 'PACK_OPEN' && currentPack) {
           return (
               <div className="flex flex-col h-full w-full bg-slate-900 text-white p-4 items-center justify-center relative font-mono overflow-hidden">
@@ -1256,7 +1265,6 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           <div className="flex flex-col h-full w-full bg-slate-900 text-white p-4 font-mono relative overflow-hidden">
               {renderInspectionModal()}
               
-              {/* RESULT MODAL OVERLAY */}
               {showRoundResult && roundResult && (
                   <div className="absolute inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={closeResultModal}>
                       <div className="bg-slate-800 border-4 border-yellow-500 rounded-lg p-6 w-full max-w-sm shadow-2xl relative animate-in zoom-in duration-300" onClick={e => e.stopPropagation()}>
@@ -1300,10 +1308,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
               
               <div className="flex-grow flex flex-col gap-4 overflow-hidden">
                   
-                  {/* INVENTORY SECTION (TOP) - COMPACT REDESIGN */}
                   <div className="w-full bg-slate-800/90 p-2 rounded-lg border border-slate-600 shrink-0 shadow-sm">
                       <div className="flex gap-2 h-16 md:h-20 items-stretch">
-                          {/* Supporters */}
                           <div className="flex-1 bg-black/20 rounded border border-slate-700 flex flex-col px-2 py-1 min-w-0">
                               <div className="text-[9px] text-blue-300 font-bold mb-0.5 flex items-center"><span className="w-2 h-2 bg-blue-500 rounded-full mr-1 inline-block"></span>SUPPORTERS ({runState.supporters.length}/5)</div>
                               <div className="flex-1 flex items-center gap-1 overflow-x-auto custom-scrollbar">
@@ -1318,7 +1324,6 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                               </div>
                           </div>
                           
-                          {/* Consumables */}
                           <div className="w-24 md:w-32 bg-black/20 rounded border border-slate-700 flex flex-col px-2 py-1 shrink-0">
                               <div className="text-[9px] text-purple-300 font-bold mb-0.5 flex items-center"><span className="w-2 h-2 bg-purple-500 rounded-full mr-1 inline-block"></span>CARDS ({runState.consumables.length}/2)</div>
                               <div className="flex-1 flex items-center gap-1 justify-center">
@@ -1334,7 +1339,6 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                           </div>
                       </div>
                       
-                      {/* Vouchers Row (Tiny) */}
                       {runState.vouchers.length > 0 && (
                           <div className="flex gap-1 mt-1 overflow-x-auto h-5 items-center px-1">
                               {runState.vouchers.map((vid, i) => {
@@ -1350,11 +1354,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                       )}
                   </div>
 
-                  {/* SHOP ITEMS SECTION (BOTTOM) - MAXIMIZED */}
                   <div className="flex-grow bg-slate-800/30 p-2 md:p-4 rounded-lg border-2 border-slate-700 overflow-y-auto custom-scrollbar">
                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                           
-                          {/* Voucher Slot */}
                           <div className="col-span-2 md:col-span-1 row-span-1">
                               {voucher ? (
                                   <div 
@@ -1379,7 +1381,6 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                               )}
                           </div>
 
-                          {/* Packs */}
                           {shopPacks.map((item) => (
                               <div key={item.id} className="bg-slate-700 p-2 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg justify-between min-h-[160px]" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'PACK', false)} onTouchStart={() => handleTouchStart(item, 'PACK', false)} onTouchEnd={handleTouchEnd}>
                                   <div className="absolute top-1 left-1 text-[8px] font-bold text-orange-300 bg-orange-900/50 px-1.5 py-0.5 rounded">PACK</div>
@@ -1390,7 +1391,6 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                               </div>
                           ))}
                           
-                          {/* Supporters */}
                           {shopSupporters.map((item) => (
                               <div key={item.id} className="bg-slate-700 p-2 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg justify-between min-h-[160px]" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'SUPPORTER', false)} onTouchStart={() => handleTouchStart(item, 'SUPPORTER', false)} onTouchEnd={handleTouchEnd}>
                                   <div className="absolute top-1 left-1 text-[8px] font-bold text-blue-300 bg-blue-900/50 px-1.5 py-0.5 rounded">SUPPORTER</div>
@@ -1401,7 +1401,6 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                               </div>
                           ))}
                           
-                          {/* Consumables */}
                           {shopConsumables.map((item) => (
                               <div key={item.id} className="bg-slate-700 p-2 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg justify-between min-h-[160px]" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'CONSUMABLE', false)} onTouchStart={() => handleTouchStart(item, 'CONSUMABLE', false)} onTouchEnd={handleTouchEnd}>
                                   <div className="absolute top-1 left-1 text-[8px] font-bold text-purple-300 bg-purple-900/50 px-1.5 py-0.5 rounded">CARD</div>
@@ -1428,11 +1427,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       );
   }
 
-  // 3. Play Screen
   return (
     <div className="flex flex-col h-full w-full bg-green-900 text-white font-mono relative overflow-hidden">
         {renderInspectionModal()}
-        {/* Rules Modal */}
         {showRulesModal && (
             <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowRulesModal(false)}>
                 <div className="bg-slate-800 border-4 border-yellow-500 rounded-lg p-6 w-full max-w-3xl max-h-[85vh] overflow-y-auto relative shadow-2xl custom-scrollbar" onClick={e => e.stopPropagation()}>
@@ -1449,7 +1446,6 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
             </div>
         )}
         
-        {/* Hand List Modal */}
         {showHandList && (
             <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowHandList(false)}>
                 <div className="bg-slate-800 border-4 border-slate-600 rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto relative shadow-2xl" onClick={e => e.stopPropagation()}>
@@ -1460,7 +1456,6 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
             </div>
         )}
 
-        {/* Deck List Modal */}
         {showDeckList && (
             <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowDeckList(false)}>
                 <div className="bg-slate-800 border-4 border-slate-600 rounded-lg p-6 w-full max-w-4xl max-h-[80vh] overflow-y-auto relative shadow-2xl" onClick={e => e.stopPropagation()}>
@@ -1526,9 +1521,14 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                 </div>
             )}
             {!animating && currentHandInfo && (
-                <div className="absolute bottom-6 z-40">
-                    <div className="bg-slate-900/90 border border-blue-500/50 px-8 py-2 rounded-full shadow-[0_0_15px_rgba(59,130,246,0.5)] backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 pointer-events-none">
-                        <div className="text-xl font-bold text-white tracking-wider flex items-center gap-3">{currentHandInfo.name}<span className="bg-blue-600 text-white text-[10px] px-1.5 py-0.5 rounded font-mono">Lv.{currentHandInfo.level}</span></div>
+                <div className="absolute bottom-6 z-40 flex flex-col items-center gap-2">
+                    {currentHandInfo.isDisallowed && (
+                        <div className="bg-red-900/90 border-2 border-red-500 px-4 py-1 rounded text-red-100 text-xs font-bold animate-pulse flex items-center gap-2 shadow-lg">
+                            <AlertTriangle size={14}/> 厳しい監視: 同じ役は無効です
+                        </div>
+                    )}
+                    <div className={`bg-slate-900/90 border-2 px-8 py-2 rounded-full shadow-[0_0_15px_rgba(59,130,246,0.5)] backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 pointer-events-none ${currentHandInfo.isDisallowed ? 'border-red-500' : 'border-blue-500/50'}`}>
+                        <div className={`text-xl font-bold tracking-wider flex items-center gap-3 ${currentHandInfo.isDisallowed ? 'text-red-400 line-through opacity-70' : 'text-white'}`}>{currentHandInfo.name}<span className={`${currentHandInfo.isDisallowed ? 'bg-gray-600' : 'bg-blue-600'} text-white text-[10px] px-1.5 py-0.5 rounded font-mono`}>Lv.{currentHandInfo.level}</span></div>
                     </div>
                 </div>
             )}

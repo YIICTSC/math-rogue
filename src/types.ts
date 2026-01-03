@@ -439,6 +439,7 @@ export interface PokerRunState {
     discardsRemaining: number;
     hand: PokerCard[];
     discardPile: PokerCard[]; // Add discardPile to track cards during blind
+    lastHandTypePlayed?: string; // Added: For "The Eye" (厳しい監視)
     
     // Shop state
     shopInventory: (PokerSupporter | PokerConsumable | PokerPack)[];
