@@ -699,10 +699,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             if (hasThornRelic) {
                                 e.hp = Math.max(0, e.hp - 1);
                                 generatedVfx.push({ id: `v_thn_${Date.now()}`, type: 'TEXT', pos: e.pos, text: 1, color: 'text-orange-500' });
-                                if (e.hp <= 0) {
-                                     // Handle enemy death by thorns?
-                                     // Just let standard cleanup handle it later or simple check
-                                }
                             }
 
                             if (player.hp <= 0) {
@@ -825,10 +821,10 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     const template = ENEMY_TYPES.find(t => t.name === e.name) || ENEMY_TYPES[0];
                     const validRanges = template.range;
 
-                    const dist = e.pos - player.pos;
-                    const absDist = Math.abs(dist);
+                    const distToPlayer = e.pos - player.pos;
+                    const absDist = Math.abs(distToPlayer);
                     const inRange = validRanges.includes(absDist);
-                    const neededFacing = dist < 0 ? 1 : -1;
+                    const neededFacing = distToPlayer < 0 ? 1 : -1;
                     const facingCorrect = e.facing === neededFacing;
 
                     // Boss Special Logic Check
@@ -857,15 +853,15 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             let minCost = 999;
 
                             for (const r of validRanges) {
-                                const t1 = t1 >= 0 && t1 < GRID_SIZE ? player.pos - r : -1;
-                                if (t1 >= 0 && t1 < GRID_SIZE) {
-                                    const cost = Math.abs(e.pos - t1);
-                                    if (cost < minCost) { minCost = cost; bestTargetPos = t1; }
+                                const t1_candidate = player.pos - r;
+                                if (t1_candidate >= 0 && t1_candidate < GRID_SIZE) {
+                                    const cost = Math.abs(e.pos - t1_candidate);
+                                    if (cost < minCost) { minCost = cost; bestTargetPos = t1_candidate; }
                                 }
-                                const t2 = player.pos + r;
-                                if (t2 >= 0 && t2 < GRID_SIZE) {
-                                    const cost = Math.abs(e.pos - t2);
-                                    if (cost < minCost) { minCost = cost; bestTargetPos = t2; }
+                                const t2_candidate = player.pos + r;
+                                if (t2_candidate >= 0 && t2_candidate < GRID_SIZE) {
+                                    const cost = Math.abs(e.pos - t2_candidate);
+                                    if (cost < minCost) { minCost = cost; bestTargetPos = t2_candidate; }
                                 }
                             }
 
@@ -875,7 +871,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                             if (moveDir !== 0) {
                                 const nextPos = e.pos + moveDir;
-                                const blocked = enemies.some((other, idx) => idx !== i && other.pos === nextPos) || player.pos === nextPos;
+                                const blocked = enemies.some((other, idx) => idx !== i && other.pos === nextPos && other.hp > 0) || player.pos === nextPos;
                                 if (!blocked) {
                                     e.pos = nextPos;
                                 }
@@ -1308,7 +1304,6 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 } else {
                                     // Can't move past, stop at enemy? No, sliding stops *before* if blocked by wall?
                                     // Or stops at enemy tile (collision)? Let's assume stops before if can't pierce.
-                                    // But logic says "pierce". If wall behind, stay at enemy pos (overlap)? No, grid rules.
                                     // Fallback: stay at checkPos - facing
                                     finalPos = checkPos - p.facing; 
                                 }
