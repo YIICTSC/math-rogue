@@ -34,7 +34,8 @@ class AudioService {
 
   private bgmList = [
     'school_psyche', 'dungeon_gym', 'dungeon_science', 'dungeon_music', 
-    'dungeon_library', 'dungeon_roof', 'battle', 'boss', 'dungeon_boss'
+    'dungeon_library', 'dungeon_roof', 'battle', 'boss', 'dungeon_boss',
+    'kocho_setup', 'kocho_battle', 'kocho_boss'
   ];
 
   constructor() {}
@@ -177,7 +178,9 @@ class AudioService {
 
       } else if (this.currentBgmType === 'final_boss') {
           // --- FINAL BOSS ---
-          if (beatNumber % 2 === 0) this.playOsc(55, actualTime, 0.1, 'sawtooth', 0.7, this.bgmGain); 
+          if (beatNumber % 2 === 0) {
+              this.playOsc(55, actualTime, 0.1, 'sawtooth', 0.7, this.bgmGain); 
+          }
           if (beatNumber % 4 === 0) this.playNoise(actualTime, 0.1, 1.0, 'kick');
           if (beatNumber % 8 === 4) this.playNoise(actualTime, 0.1, 0.9, 'snare');
           this.playNoise(actualTime, 0.02, 0.3, 'hat');
@@ -414,6 +417,47 @@ class AudioService {
           if (beatNumber % 2 === 0) this.playNoise(actualTime, 0.1, 0.6, 'kick');
           if (beatNumber % 4 === 0) this.playChord([110, 164, 196], actualTime, 0.2, 'sawtooth', 0.3); 
           if (beatNumber % 2 !== 0) this.playOsc(110, actualTime, 0.1, 'square', 0.2, this.bgmGain); 
+      } else if (this.currentBgmType === 'kocho_setup') {
+          // --- KOCHO SETUP/SHOP THEME ---
+          const measure = Math.floor(t / 16) % 4;
+          if (beatNumber % 4 === 0) {
+              const roots = [110, 123, 130, 146];
+              this.playOsc(roots[measure], actualTime, 0.3, 'triangle', 0.4, this.bgmGain);
+          }
+          if (beatNumber % 16 === 0) {
+              const chords = [[261, 329, 392], [293, 349, 440], [261, 311, 392], [246, 311, 370]];
+              this.playChord(chords[measure], actualTime, 1.5, 'sine', 0.2);
+          }
+          if (beatNumber % 8 === 2) this.playNoise(actualTime, 0.02, 0.1, 'hat');
+
+      } else if (this.currentBgmType === 'kocho_battle') {
+          // --- KOCHO BATTLE THEME ---
+          if (beatNumber % 4 === 0) this.playNoise(actualTime, 0.1, 0.7, 'kick');
+          if (beatNumber % 4 === 2) this.playNoise(actualTime, 0.08, 0.5, 'snare');
+          if (beatNumber % 2 === 0) {
+              const bass = (Math.floor(t / 16) % 2 === 0) ? 82 : 73;
+              this.playOsc(bass, actualTime, 0.15, 'sawtooth', 0.5, this.bgmGain);
+          }
+          const scale = [329, 349, 392, 440, 493, 523];
+          if (beatNumber % 4 === 0 && Math.random() > 0.5) {
+              const note = scale[Math.floor(Math.random() * scale.length)];
+              this.playOsc(note, actualTime, 0.1, 'square', 0.2, this.bgmGain);
+          }
+
+      } else if (this.currentBgmType === 'kocho_boss') {
+          // --- KOCHO BOSS THEME ---
+          if (beatNumber % 2 === 0) this.playNoise(actualTime, 0.1, 0.8, 'kick');
+          if (beatNumber % 4 === 2) this.playNoise(actualTime, 0.1, 0.6, 'snare');
+          const bass = [55, 55, 61, 65, 55, 55, 61, 48];
+          this.playOsc(bass[beatNumber % 8], actualTime, 0.1, 'sawtooth', 0.6, this.bgmGain);
+          
+          const leadScale = [220, 246, 261, 293, 329, 349, 415];
+          if (beatNumber % 2 !== 0) {
+              const note = leadScale[Math.floor(Math.random() * leadScale.length)];
+              this.playOsc(note, actualTime, 0.1, 'square', 0.3, this.bgmGain);
+          }
+          if (beatNumber === 0) this.playChord([110, 138, 164], actualTime, 0.5, 'sawtooth', 0.4);
+
       } else if (this.currentBgmType === 'paper_plane_battle') {
         const scale = [164.81, 196.00, 220.00, 246.94, 293.66]; 
         if (t % 32 === 0) {
@@ -515,6 +559,9 @@ class AudioService {
       else if (type === 'dungeon_library') { this.tempo = 60; }
       else if (type === 'dungeon_roof') { this.tempo = 80; }
       else if (type === 'dungeon_boss') { this.tempo = 150; }
+      else if (type === 'kocho_setup') { this.tempo = 95; }
+      else if (type === 'kocho_battle') { this.tempo = 145; }
+      else if (type === 'kocho_boss') { this.tempo = 160; }
       else if (type === 'paper_plane_battle') { this.tempo = 90; }
       else if (type === 'paper_plane_setup') { this.tempo = 80; }
       else if (type === 'paper_plane_vacation') { this.tempo = 110; }
@@ -589,7 +636,7 @@ class AudioService {
   }
 
   // --- Public API ---
-  public async playBGM(type: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane_setup' | 'paper_plane_battle' | 'paper_plane_vacation' | 'relic_select' | 'random', loop: boolean = true) {
+  public async playBGM(type: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane_setup' | 'paper_plane_battle' | 'paper_plane_vacation' | 'relic_select' | 'kocho_setup' | 'kocho_battle' | 'kocho_boss' | 'random', loop: boolean = true) {
       if (type === 'random') {
           await this.playRandomBGM();
           return;
