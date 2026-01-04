@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch, Sparkles, BookOpen, Layers, Move, Minimize2, Maximize2, Volume2, ShieldAlert, ArrowUpCircle, Plus, Magnet, Moon, Snowflake, Activity, Eye, Dna, Dice5, CloudLightning, Wind } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -5,6 +6,9 @@ import { createPixelSpriteCanvas } from './PixelSprite';
 import { storageService } from '../services/storageService';
 import MathChallengeScreen from './MathChallengeScreen';
 import { GameMode } from '../types';
+
+// --- セッション内アイテム引き継ぎ用変数 ---
+let inheritedItemTemplate2: Item | null = null;
 
 interface SchoolDungeonRPG2Props {
   onBack: () => void;
@@ -89,7 +93,7 @@ interface VisualEffect {
   targetX?: number;
   targetY?: number;
   itemSpriteKey?: string; 
-  segments?: {x1: number, y1: number, x2: number, y2: number}[]; // 稲妻などの描画用
+  segments?: {x1: number, y1: number, x2: number, y2: number}[]; 
 }
 
 interface Item {
@@ -347,6 +351,20 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   const [isFastForwarding, setIsFastForwarding] = useState(false);
   const fastForwardInterval = useRef<any>(null);
   const [showMathChallenge, setShowMathChallenge] = useState(false);
+
+  // --- 引き継ぎ機能用状態 ---
+  const [inheritItemIdx, setInheritItemIdx] = useState<number | null>(null);
+
+  // 引き継ぎ対象アイテム一覧（装備中を含む全所持品）
+  const allPossessions = useMemo(() => {
+    if (!gameOver) return [];
+    const items = [...inventory];
+    if (player.equipment?.weapon) items.push(player.equipment.weapon);
+    if (player.equipment?.armor) items.push(player.equipment.armor);
+    if (player.equipment?.ranged) items.push(player.equipment.ranged);
+    if (player.equipment?.accessory) items.push(player.equipment.accessory);
+    return items;
+  }, [inventory, player.equipment, gameOver]);
 
   useEffect(() => {
     spriteCache.current['PLAYER_FRONT'] = createPixelSpriteCanvas('P_FRONT', 'HERO_FRONT|赤'); 
@@ -746,14 +764,34 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
     const newIdMap: Record<string, string> = {};
     staffTypes.forEach((t, i) => { newIdMap[t] = shuffledNames[i] || "謎の傘"; });
     setIdMap(newIdMap); setIdentifiedTypes(new Set());
-    const initItem: Item = { ...ITEM_DB['FOOD_ONIGIRI'], id: `start-${Date.now()}` };
-    const initWeapon: Item = { ...ITEM_DB['PENCIL_SWORD'], id: `start-w-${Date.now()}` };
-    setInventory([initItem, initWeapon]);
+    
+    // 引き継ぎアイテムがある場合はそれを追加
+    const initInventory: Item[] = [];
+    if (inheritedItemTemplate2) {
+        initInventory.push({ ...inheritedItemTemplate2, id: `inherited-${Date.now()}` });
+        inheritedItemTemplate2 = null; 
+    }
+    initInventory.push({ ...ITEM_DB['FOOD_ONIGIRI'], id: `start-${Date.now()}` });
+    initInventory.push({ ...ITEM_DB['PENCIL_SWORD'], id: `start-w-${Date.now()}` });
+    setInventory(initInventory);
+
     setPlayer({ id: 0, type: 'PLAYER', x: 1, y: 1, char: '@', name: 'わんぱく小学生', hp: 50, maxHp: 50, baseAttack: 3, baseDefense: 0, attack: 3, defense: 0, xp: 0, gold: 0, dir: {x:0, y:1}, equipment: { weapon: null, armor: null, ranged: null, accessory: null }, status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 }, offset: { x: 0, y: 0 } });
     setLogs([]); initDeck(); generateFloor(1); addLog("風来の旅が始まった！");
   };
 
-  const handleRestart = () => { storageService.clearDungeonState2(); startNewGame(); };
+  const handleRestart = () => { 
+    if (gameOver && inheritItemIdx !== null) {
+        const selected = allPossessions[inheritItemIdx];
+        if (selected) {
+            inheritedItemTemplate2 = { ...selected };
+            inheritedItemTemplate2.id = `inherited-template-${Date.now()}`;
+        }
+    }
+    storageService.clearDungeonState2(); 
+    startNewGame(); 
+    setInheritItemIdx(null);
+  };
+
   const handleQuit = () => { saveData(); onBack(); };
   const isPointInRoom = (x: number, y: number) => (roomsRef.current || []).some(r => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h);
   const createShopkeeper = (x: number, y: number): Entity => {
@@ -1224,7 +1262,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
         lastInputType.current = 'KEY'; if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
-        if (gameOver) { if (['z', 'Enter', ' '].includes(e.key)) handleRestart(); return; }
+        if (gameOver) return; 
         if (gameClear) { if (['z', 'Enter', ' '].includes(e.key)) startEndlessMode(); return; }
         if (['x', 'c', 'Escape'].includes(e.key)) { toggleMenu(); return; }
         if ((menuOpen || shopState.active) && (e.key === 'Backspace' || e.key === 'x')) { if (shopState.active) { setShopState(prev => ({...prev, active: false})); return; } if (synthState.active) setSynthState({ active: false, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null }); else setMenuOpen(false); return; }
@@ -1345,7 +1383,6 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                   ctx.lineTo(targetSx, targetSy);
                   ctx.stroke();
                   
-                  // 火の粉
                   for(let j=0; j<3; j++) {
                       ctx.fillStyle = 'orange';
                       ctx.fillRect(targetSx+(Math.random()-0.5)*20, targetSy+(Math.random()-0.5)*20, 4, 4);
@@ -1376,23 +1413,19 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                   const curSy = (curY - startY) * ts + ts/2;
                   
                   if (fx.type === 'MAGIC_PROJ') {
-                      // 魔法弾（星形）
                       ctx.save();
                       ctx.translate(curSx, curSy);
                       ctx.rotate(progress * Math.PI * 8);
                       ctx.fillStyle = 'cyan';
                       ctx.shadowBlur = 15;
                       ctx.shadowColor = 'white';
-                      // キラキラ描画
                       for(let j=0; j<4; j++) {
                           ctx.rotate(Math.PI/2);
                           ctx.fillRect(-8, -2, 16, 4);
                       }
                       ctx.restore();
-                      // 軌跡
                       addVisualEffect('TEXT', curX, curY, { value: '･', color: 'white', duration: 5, maxDuration: 5 });
                   } else {
-                      // 通常の投げ物
                       const itemSprite = spriteCache.current[fx.itemSpriteKey || 'WEAPON'];
                       if (itemSprite) {
                           ctx.save();
@@ -1520,7 +1553,6 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
             </div>
         )}
 
-        {/* --- LEFT (D-PAD / Flank Left in Landscape) --- */}
         <div className="hidden landscape:flex md:flex order-1 w-48 md:w-64 flex-col items-center justify-center p-4 bg-[#1a1a2a] border-2 border-[#333] rounded-xl shadow-2xl relative shrink-0">
             <div className="w-40 h-40 relative">
                 <div className="absolute top-4 left-4 w-10 h-10 bg-[#333] rounded-tl-lg border-t border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer z-0 flex items-center justify-center" onClick={() => handleMoveInput(-1, -1)}><ArrowUpLeft size={16} className="text-[#555]" /></div>
@@ -1537,7 +1569,6 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
             <div className="mt-8 text-[#444] font-black tracking-widest text-[10px] italic">D-PAD</div>
         </div>
 
-        {/* --- CENTER (Screen + Logs) --- */}
         <div className="w-full max-w-md md:max-w-full md:flex-1 flex flex-col gap-2 min-h-0 order-2">
             <div className="w-full aspect-[4/3] md:aspect-auto md:flex-1 relative shrink-0 shadow-lg border-2 max-h-[45vh] md:max-h-full flex flex-col overflow-hidden" style={{ backgroundColor: C3, borderColor: C0 }}>
                 <div className="w-full h-8 flex justify-between items-center px-2 text-[10px] z-10 border-b shrink-0" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
@@ -1606,28 +1637,56 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
                     </div>
                 )}
                 {gameClear && (<div className="absolute inset-0 flex flex-col items-center justify-center z-40 p-4 text-center" style={{ backgroundColor: `${C0}F2`, color: C3 }}><Award size={48} className="mb-4" style={{ color: C2 }}/><h2 className="text-2xl font-bold mb-4">GRADUATION!</h2><p className="mb-2">ついに校長を説得した！</p><p className="mb-8">君は伝説の小学生となった。</p><div className="flex flex-col gap-4 w-full"><button onClick={startEndlessMode} className="border-2 px-4 py-3 animate-pulse font-bold" style={{ borderColor: C3, color: C3, backgroundColor: 'transparent' }}>中学生編へ (エンドレス)</button><button onClick={handleQuit} className="border-2 px-4 py-2 text-sm" style={{ borderColor: C1, color: C3 }}>タイトルへ戻る</button></div></div>)}
-                {gameOver && (<div className="absolute inset-0 flex flex-col items-center justify-center z-40" style={{ backgroundColor: `${C0}E6`, color: C3 }}><Skull size={48} className="mb-4" style={{ color: C1 }}/><h2 className="text-2xl font-bold mb-4">GAME OVER</h2><p>Floor: {floor}</p><p>Level: {level}</p><button onClick={handleRestart} className="mt-6 border-2 px-4 py-2 animate-pulse flex items-center" style={{ borderColor: C3, color: C3 }}><RotateCcw size={16} className="mr-2"/> RETRY</button><button onClick={handleQuit} className="mt-4 text-sm hover:underline">EXIT</button></div>)}
+                {gameOver && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center z-40 p-4 text-center" style={{ backgroundColor: `${C0}E6`, color: C3 }}>
+                        <Skull size={48} className="mb-2" style={{ color: C1 }}/>
+                        <h2 className="text-xl font-bold mb-1">GAME OVER</h2>
+                        <p className="text-[10px] mb-4 opacity-70">Floor: {floor} / Level: {level}</p>
+                        
+                        <div className="bg-black/60 border-2 border-red-500 rounded p-3 w-full max-w-xs mb-4 flex flex-col">
+                            <h3 className="text-red-400 font-bold text-xs mb-2">引き継ぐアイテムを選択</h3>
+                            <div className="flex-grow overflow-y-auto max-h-48 custom-scrollbar space-y-1 pr-1">
+                                {allPossessions.map((item, idx) => (
+                                    <div 
+                                        key={idx}
+                                        className={`p-2 border rounded flex items-center justify-between cursor-pointer transition-colors text-xs ${inheritItemIdx === idx ? 'bg-red-900 border-white text-white' : 'bg-gray-800 border-gray-600 text-gray-400 hover:border-red-400'}`}
+                                        onClick={() => setInheritItemIdx(idx)}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            {item.category === 'WEAPON' && <Sword size={14} />}
+                                            {item.category === 'ARMOR' && <Shield size={14} />}
+                                            {item.category === 'STAFF' && <Umbrella size={14} />}
+                                            {item.category === 'RANGED' && <Target size={14} />}
+                                            {item.category === 'ACCESSORY' && <Circle size={14} />}
+                                            <span className="truncate max-w-[120px]">{item.name} {item.plus ? `+${item.plus}` : ''}</span>
+                                        </div>
+                                        {inventory.every(invItem => invItem.id !== item.id) && <span className="text-[8px] bg-blue-900 px-1 rounded">装備中</span>}
+                                    </div>
+                                ))}
+                                {allPossessions.length === 0 && <div className="text-[10px] text-gray-600 py-4 italic">所持品なし</div>}
+                            </div>
+                        </div>
+
+                        <button onClick={handleRestart} className="px-6 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded border-2 border-white animate-pulse flex items-center justify-center gap-2 w-full max-w-xs">
+                            <RotateCcw size={16}/> {inheritItemIdx !== null ? "アイテムを持って再挑戦" : "再挑戦"}
+                        </button>
+                        <button onClick={handleQuit} className="mt-4 text-xs hover:underline opacity-50">EXIT</button>
+                    </div>
+                )}
             </div>
             <div className="w-full h-16 p-1 text-[9px] mb-1 rounded border-2 font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner overflow-hidden" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>{logs.slice(-4).map((l) => (<div key={l.id} style={{ color: l.color || C3 }} className="truncate">{l.message}</div>))}</div>
         </div>
 
-        {/* --- RIGHT (Actions / Flank Right in Landscape) --- */}
         <div className="hidden landscape:flex md:flex order-3 w-64 flex-col items-center justify-between p-4 bg-[#161616] border-2 border-[#333] rounded-xl shadow-2xl relative shrink-0">
-            {/* Top Right: SHOOT(R) */}
             <div className="absolute top-4 right-4 flex flex-col items-center">
                 <button className="w-12 h-12 bg-[#333] rounded-full shadow-inner active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555]" onClick={fireRangedWeapon}><Crosshair size={24}/></button>
                 <span className="text-[#666] text-xs font-bold mt-1">R-SHOOT</span>
             </div>
-            {/* Top Left: Quit */}
             <div className="absolute top-4 left-4"><button onClick={handleQuit} className="text-[#555] text-[10px] font-bold border border-[#333] px-3 py-1 rounded bg-[#222] hover:text-white hover:border-gray-500 flex items-center gap-1"><LogOut size={12}/> QUIT</button></div>
-
-            {/* Actions: A / B */}
             <div className="mt-20 flex flex-col gap-8 w-full items-center">
                 <div className="flex flex-col items-center group"><button className="w-20 h-20 bg-[#ff0000] rounded-full shadow-[0_6px_0_#8b0000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#cc0000] text-2xl" onMouseDown={() => handlePressStart()} onMouseUp={(e) => handlePressEnd(e)} onMouseLeave={(e) => handlePressEnd(e)} onTouchStart={(e) => { e.preventDefault(); handlePressStart(); }} onTouchEnd={(e) => { e.preventDefault(); handlePressEnd(e); }}>A</button><span className="text-[#666] text-sm font-bold mt-1 uppercase tracking-widest">Action</span></div>
                 <div className="flex flex-col items-center group"><button className="w-16 h-16 bg-[#8b0000] rounded-full shadow-[0_4px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000] text-xl" onClick={toggleMenu}>B</button><span className="text-[#666] text-sm font-bold mt-1 uppercase tracking-widest">Menu</span></div>
             </div>
-
-            {/* Cards Display (GBA Style Right Flank) */}
             <div className="w-full flex flex-col gap-2 mt-4 max-h-[25vh] overflow-y-auto custom-scrollbar p-1">
                 {dungeonHand.length > 0 ? (dungeonHand.map((card, i) => (
                     <button key={card.id} className="w-full bg-[#2a2a2a] border-2 border-[#555] rounded-lg flex items-center gap-2 text-white p-1 hover:bg-[#333] hover:border-white transition-all shadow" onClick={() => handleCardUse(i)}>
@@ -1638,7 +1697,6 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
             </div>
         </div>
 
-        {/* --- BOTTOM (Mobile Portrait Controller Only) --- */}
         <div className="portrait:flex landscape:hidden md:hidden order-4 w-full max-w-md h-[220px] relative rounded-t-xl border-t-2 border-[#333] bg-[#1a1a2a] shrink-0 overflow-hidden">
             <div className="absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32 flex items-center justify-center">
                 <div className="w-10 h-10 bg-[#333] z-10"></div>
