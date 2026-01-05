@@ -1309,7 +1309,10 @@ const App: React.FC = () => {
               }
               const newCard = p.drawPile.pop();
               if (newCard) {
-                  if (newCard.name === '虚無' || newCard.name === 'VOID') p.currentEnergy = Math.max(0, p.currentEnergy - 1);
+                  if (newCard.name === '虚無' || newCard.name === 'VOID') {
+                      p.currentEnergy = Math.max(0, p.currentEnergy - 1);
+                      p.floatingText = { id: `void-${Date.now()}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
+                  }
                   p.hand.push(newCard);
               }
           }
@@ -1605,7 +1608,10 @@ const App: React.FC = () => {
                   }
                   const newCard = p.drawPile.pop();
                   if (newCard) { 
-                      if (newCard.name === '虚無' || newCard.name === 'VOID') p.currentEnergy = Math.max(0, p.currentEnergy - 1); 
+                      if (newCard.name === '虚無' || newCard.name === 'VOID') {
+                          p.currentEnergy = Math.max(0, p.currentEnergy - 1);
+                          p.floatingText = { id: `void-draw-${Date.now()}-${j}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
+                      }
                       p.hand.push(newCard); 
                   }
                 }
@@ -1627,7 +1633,7 @@ const App: React.FC = () => {
               }
               if (card.addCardToDraw) {
                    for (let c=0; c<card.addCardToDraw.count; c++) { 
-                       const template = CARDS_LIBRARY[card.addCardToDraw.count];
+                       const template = CARDS_LIBRARY[card.addCardToDraw.cardName];
                        if (template) p.drawPile.push({ ...template, id: `gen-${Date.now()}-${c}` }); 
                    }
                    p.drawPile = shuffle(p.drawPile);
@@ -1799,6 +1805,13 @@ const App: React.FC = () => {
           }
       }
 
+      let baseEnergy = p.maxEnergy + p.nextTurnEnergy + devaBonus + extraEnergy; 
+      if (p.relics.find(r => r.id === 'ICE_CREAM')) {
+          baseEnergy += p.currentEnergy;
+      }
+      p.currentEnergy = baseEnergy; // BUG FIX: Set current energy before draw loop to avoid overwriting energy loss from Void
+      p.nextTurnEnergy = 0;
+
       let newDrawPile = [...p.drawPile];
       let newDiscardPile = [...p.discardPile];
       let newHand: ICard[] = [];
@@ -1821,7 +1834,10 @@ const App: React.FC = () => {
         }
         const card = newDrawPile.pop();
         if (card) {
-            if (card.name === '虚無' || card.name === 'VOID') p.currentEnergy = Math.max(0, p.currentEnergy - 1);
+            if (card.name === '虚無' || card.name === 'VOID') {
+                p.currentEnergy = Math.max(0, p.currentEnergy - 1);
+                p.floatingText = { id: `void-turn-${Date.now()}-${i}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
+            }
             if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && card.cost >= 0) {
                 card.cost = Math.floor(Math.random() * 4);
             }
@@ -1830,13 +1846,16 @@ const App: React.FC = () => {
             if (p.powers['EVOLVE'] && (card.type === CardType.STATUS || card.type === CardType.CURSE)) {
                 for (let k=0; k<p.powers['EVOLVE']; k++) {
                     if (newDrawPile.length === 0) {
-                        if (newDiscardPile === 0) break;
+                        if (newDiscardPile.length === 0) break;
                         newDrawPile = shuffle(newDiscardPile);
                         newDiscardPile = [];
                     }
                     const extraCard = newDrawPile.pop();
                     if (extraCard) {
-                        if (extraCard.name === '虚無' || extraCard.name === 'VOID') p.currentEnergy = Math.max(0, p.currentEnergy - 1);
+                        if (extraCard.name === '虚無' || extraCard.name === 'VOID') {
+                            p.currentEnergy = Math.max(0, p.currentEnergy - 1);
+                            p.floatingText = { id: `void-evolve-${Date.now()}-${k}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
+                        }
                         if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && extraCard.cost >= 0) {
                             extraCard.cost = Math.floor(Math.random() * 4);
                         }
@@ -1867,13 +1886,6 @@ const App: React.FC = () => {
               nextActiveEffects.push({ id: `vfx-tongs-${Date.now()}`, type: 'BUFF', targetId: 'player' });
           }
       }
-
-      let baseEnergy = p.maxEnergy + p.nextTurnEnergy + devaBonus + extraEnergy; 
-      if (p.relics.find(r => r.id === 'ICE_CREAM')) {
-          baseEnergy += p.currentEnergy;
-      }
-      p.currentEnergy = baseEnergy;
-      p.nextTurnEnergy = 0;
 
       if (!p.powers['BARRICADE']) {
           if (p.relics.find(r => r.id === 'CALIPERS')) {
