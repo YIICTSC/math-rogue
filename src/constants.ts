@@ -276,7 +276,7 @@ export const LIBRARIAN_CARDS: Record<string, Omit<Card, 'id'>> = {
     RASHOMON: { name: '羅生門', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '10ダメージ。解決すると相手を廃棄。', damage: 10, promptsExhaust: 1, rarity: 'SPECIAL', textureRef: 'HUMANOID|黒|ATTACK' },
     KUMO_NO_ITO_D: { name: 'カンダタの叫び', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'E2。手札に「悩み」を加える。', energy: 2, addCardToHand: { cardName: 'WRITHE', count: 1 }, rarity: 'SPECIAL', textureRef: 'GHOST|紫|SKILL' },
     OSAMU_NIGHT: { name: '人間失格', cost: 0, type: CardType.POWER, target: TargetType.SELF, description: '使用不可。手札にある限り、毎ターン自分に3ダメージ。', unplayable: true, rarity: 'SPECIAL', textureRef: 'GHOST|黒|POWER' },
-    GOSHI_REVENGE: { name: '走れメロス・ラストスパート', cost: 0, type: CardType.ATTACK, target: TargetType.ENEMY, description: '15ダメージ。この戦闘で「走れメロス」を使用していないと使用不可。', damage: 15, rarity: 'SPECIAL', textureRef: 'SHOE|赤|ATTACK' },
+    GOSHI_REVENGE: { name: '走れメロス・ラストスパート', cost: 0, type: CardType.ATTACK, target: TargetType.ENEMY, description: '15ダメージ。', damage: 15, rarity: 'SPECIAL', textureRef: 'SHOE|赤|ATTACK' },
     KOKORO_SOSEKI: { name: 'こころ', cost: 1, type: CardType.SKILL, target: TargetType.ENEMY, description: '敵の攻撃力を2下げる。廃棄。', strength: -2, exhaust: true, rarity: 'SPECIAL', textureRef: 'GHOST|白|SKILL' },
     BOTCHAN: { name: '坊っちゃん', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '8ダメージ。敵を「びくびく」状態に。', damage: 8, vulnerable: 1, rarity: 'SPECIAL', textureRef: 'HUMANOID|赤|ATTACK' },
     WAGAHAI_NEKO: { name: '吾輩は猫である', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック3。カード1枚引く。', block: 3, draw: 1, rarity: 'SPECIAL', textureRef: 'BEAST|白|SKILL' },

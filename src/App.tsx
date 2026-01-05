@@ -259,7 +259,6 @@ const App: React.FC = () => {
           gameState.screen !== GameScreen.VICTORY &&
           gameState.screen !== GameScreen.COMPENDIUM && 
           gameState.screen !== GameScreen.HELP &&
-          gameState.screen !== GameScreen.RANKING &&
           gameState.screen !== GameScreen.CHARACTER_SELECTION &&
           gameState.screen !== GameScreen.RELIC_SELECTION &&
           gameState.screen !== GameScreen.MODE_SELECTION &&
@@ -948,7 +947,7 @@ const App: React.FC = () => {
             setGameState(prev => {
                 const p = { ...prev.player };
                 if (p.relics.find(r => r.id === 'LUXURY_FUTON')) {
-                    const heal = Math.floor(p.deck.length / 5) * 2;
+                    const heal = Math.floor(p.currentHp / 5) * 2; // BUG FIXED: typo from p.deck
                     if (heal > 0) {
                         p.currentHp = Math.min(p.maxHp, p.currentHp + heal);
                     }
@@ -1215,28 +1214,27 @@ const App: React.FC = () => {
     setLastActionType(card.type);
     setLastActionTime(Date.now());
 
-    if (card.name === '学習アルゴリズム' || card.name === 'GENETIC_ALGORITHM') {
-         setGameState(prev => {
-             const newDeck = prev.player.deck.map(c => {
-                 if (c.id === card.id) {
-                     const newBlock = (c.block || 0) + 2;
-                     return { 
-                         ...c, 
-                         block: newBlock, 
-                         description: c.description.replace(/ブロック(\d+)/, `ブロック${newBlock}`) 
-                     };
-                 }
-                 return c;
-             });
-             return { ...prev, player: { ...prev.player, deck: newDeck } };
-         });
-    }
-
     setGameState(prev => {
       const p = { ...prev.player, hand: [...prev.player.hand], drawPile: [...prev.player.drawPile], discardPile: [...prev.player.discardPile], deck: [...prev.player.deck], powers: { ...prev.player.powers } };
       let enemies = prev.enemies.map(e => ({ ...e }));
       const currentLogs: string[] = [`> ${trans(card.name, languageMode)} ${trans("を使用", languageMode)}`];
       const nextActiveEffects: VisualEffectInstance[] = [];
+      let nextSelectionState = { ...prev.selectionState };
+
+      // 学習アルゴリズム処理の統合
+      if (card.name === '学習アルゴリズム' || card.name === 'GENETIC_ALGORITHM') {
+          p.deck = p.deck.map(c => {
+              if (c.id === card.id) {
+                  const newBlock = (c.block || 0) + 2;
+                  return { 
+                      ...c, 
+                      block: newBlock, 
+                      description: c.description.replace(/ブロック(\d+)/, `ブロック${newBlock}`) 
+                  };
+              }
+              return c;
+          });
+      }
 
       const painCards = p.hand.filter(c => c.name === '腹痛' || c.name === 'PAIN');
       if (painCards.length > 0) {
@@ -1489,6 +1487,14 @@ const App: React.FC = () => {
                              nextActiveEffects.push({ id: `vfx-cap-${Date.now()}`, type: 'BUFF', targetId: 'player' });
                          }
                     }
+
+                    // --- 時間どろぼう効果の実装 ---
+                    if (card.name === '時間どろぼう' || card.name === 'TIME_THIEF') {
+                        e.nextIntent = { type: EnemyIntentType.SLEEP, value: 0 };
+                        currentLogs.push(`${trans(e.name, languageMode)}の行動を遅らせた！`);
+                        e.floatingText = { id: `delay-${Date.now()}`, text: '遅延', color: 'text-blue-400' };
+                        nextActiveEffects.push({ id: `vfx-delay-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id });
+                    }
                 });
               }
 
@@ -1693,7 +1699,6 @@ const App: React.FC = () => {
               if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
           }
     
-          let nextSelectionState = { ...prev.selectionState };
           if (card.promptsDiscard) nextSelectionState = { active: true, type: 'DISCARD', amount: card.promptsDiscard, originCardId: card.id };
           if (card.promptsCopy) nextSelectionState = { active: true, type: 'COPY', amount: card.promptsCopy, originCardId: card.id };
           if (card.promptsExhaust === 99) {
@@ -1717,7 +1722,7 @@ const App: React.FC = () => {
         player: p, 
         enemies: aliveEnemies, 
         selectedEnemyId: nextSelectedId, 
-        selectionState: prev.selectionState, 
+        selectionState: nextSelectionState, 
         combatLog: [...prev.combatLog, ...currentLogs].slice(-100),
         activeEffects: [...prev.activeEffects, ...nextActiveEffects]
       };
@@ -2910,8 +2915,8 @@ const App: React.FC = () => {
             {gameState.screen === GameScreen.DECK_CONSTRUCTION && (
                 <div className="absolute inset-0">
                     <ChefDeckSelectionScreen 
-                        onComplete={handleChefDeckSelection}
-                        languageMode={languageMode}
+                        onComplete={handleChefDeckSelection} 
+                        languageMode={languageMode} 
                     />
                 </div>
             )}
