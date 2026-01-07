@@ -1,6 +1,7 @@
+
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode, ParryState, VisualEffectInstance } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
-import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles, MessageCircle, Mic, ArrowRight, MousePointer2, ChevronsRight, Flame } from 'lucide-react';
+import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles, MessageCircle, Mic, ArrowRight, MousePointer2, ChevronsRight, Flame, RotateCcw } from 'lucide-react';
 import PixelSprite from './PixelSprite';
 import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
@@ -204,6 +205,7 @@ interface BattleSceneProps {
   actingEnemyId: string | null;
   selectionState: SelectionState;
   onHandSelection: (card: ICard) => void;
+  onCancelSelection: () => void;
   onUsePotion: (potion: Potion) => void;
   combatLog: string[];
   languageMode: LanguageMode;
@@ -216,7 +218,7 @@ interface BattleSceneProps {
 
 const BattleScene: React.FC<BattleSceneProps> = ({ 
   player, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onPlaySynthesizedCard, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
-  selectionState, onHandSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect, parryState, onParry, activeEffects
+  selectionState, onHandSelection, onCancelSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect, parryState, onParry, activeEffects
 }) => {
   
   const playerHpPercent = (player.currentHp / player.maxHp) * 100;
@@ -281,7 +283,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         }
     }
   }, [activeEffects]);
-
+  
   // Dual Protagonist States
   const [selectedCardIds, setSelectedCardIds] = useState<string[]>([]);
   const [isComboing, setIsComboing] = useState(false);
@@ -693,12 +695,18 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
         {/* Selection Overlay */}
         {selectionState.active && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/80 z-40 text-center py-2 px-6 border-b-2 border-yellow-500 animate-pulse rounded shadow-xl pointer-events-none">
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/80 z-40 text-center py-2 px-6 border-b-2 border-yellow-500 animate-pulse rounded shadow-xl pointer-events-auto flex flex-col items-center gap-2">
                 <span className="text-yellow-400 font-bold text-sm">
                     {selectionState.type === 'DISCARD' && `${trans("捨てる", languageMode)} (${selectionState.amount})`}
                     {selectionState.type === 'COPY' && `コピー (${selectionState.amount})`}
                     {selectionState.type === 'EXHAUST' && `${trans("廃棄", languageMode)} (${selectionState.amount})`}
                 </span>
+                <button 
+                  onClick={onCancelSelection}
+                  className="bg-red-900/80 hover:bg-red-700 text-white text-[10px] px-3 py-1 rounded border border-red-500 flex items-center gap-1 transition-colors"
+                >
+                  <RotateCcw size={10}/> {trans("やめる", languageMode)}
+                </button>
             </div>
         )}
 

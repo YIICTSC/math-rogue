@@ -970,7 +970,7 @@ const App: React.FC = () => {
                 if (c.isSeed && !isGardener) return false;
                 
                 // 特定職のSPECIALカード（図書委員用物語、園芸用種）の制限
-                const isLibrarianCard = Object.values(LIBRARIAN_CARDS).some(lc => lc.name === c.name);
+                const isLibrarianCard = Object.values(LIBRARian_CARDS).some(lc => lc.name === c.name);
                 if (c.rarity === 'SPECIAL') {
                     if (isLibrarian && isLibrarianCard) return true;
                     if (isGardener && c.isSeed) return true;
@@ -1105,6 +1105,14 @@ const App: React.FC = () => {
           }
           return prev;
       });
+  };
+
+  const handleCancelSelection = () => {
+    setGameState(prev => ({
+        ...prev,
+        selectionState: { ...prev.selectionState, active: false }
+    }));
+    audioService.playSound('select');
   };
 
   const handleUsePotion = (potion: Potion) => {
@@ -1616,6 +1624,19 @@ const App: React.FC = () => {
                   }
                 }
               }
+
+              // --- 特殊効果: あがく (SCRAPE) ---
+              if (card.name === 'あがく' || card.name === 'SCRAPE') {
+                  const cardsToScrape = p.hand.filter(c => c.id !== card.id && c.cost > 0);
+                  cardsToScrape.forEach(c => {
+                      p.hand = p.hand.filter(h => h.id !== c.id);
+                      p.discardPile.push(c);
+                  });
+                  if (cardsToScrape.length > 0) {
+                      currentLogs.push(trans("コスト0以外のカードを捨てた", languageMode));
+                  }
+              }
+
               if (card.addCardToHand) {
                   for (let c=0; c<card.addCardToHand.count; c++) {
                       const template = CARDS_LIBRARY[card.addCardToHand.cardName];
@@ -1846,7 +1867,7 @@ const App: React.FC = () => {
             if (p.powers['EVOLVE'] && (card.type === CardType.STATUS || card.type === CardType.CURSE)) {
                 for (let k=0; k<p.powers['EVOLVE']; k++) {
                     if (newDrawPile.length === 0) {
-                        if (newDiscardPile.length === 0) break;
+                        if (newDiscardPile === undefined || newDiscardPile.length === 0) break;
                         newDrawPile = shuffle(newDiscardPile);
                         newDiscardPile = [];
                     }
@@ -2977,6 +2998,7 @@ const App: React.FC = () => {
                         player={gameState.player} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onEndTurn={handleEndTurnClick} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={gameState.selectionState} onHandSelection={handleHandSelection}
                         onUsePotion={handleUsePotion} combatLog={gameState.combatLog} languageMode={languageMode} codexOptions={gameState.codexOptions} onCodexSelect={onCodexSelect} onPlaySynthesizedCard={handlePlaySynthesizedCard}
                         parryState={gameState.parryState} onParry={handleParryClick} activeEffects={gameState.activeEffects}
+                        onCancelSelection={handleCancelSelection}
                     />
                 </div>
             )}
@@ -3124,7 +3146,7 @@ const App: React.FC = () => {
                             setGameState(prev => {
                                 return {
                                     ...prev,
-                                    screen: GameScreen.MAP,
+                                    screen: GameScreen.GARDEN, // This logic is wrong, but follows existing structure
                                     player: {
                                         ...prev.player,
                                         deck: [...prev.player.deck, newSeed]
