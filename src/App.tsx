@@ -250,7 +250,7 @@ const App: React.FC = () => {
   const VICTORY_GOLD = 25;
   
   const UNLOCK_THRESHOLDS = [1000, 1500, 2000, 2500, 3000, 3500];
-
+  
   useEffect(() => {
       // 重要な遷移時やプレイ中にオートセーブを実行
       if (gameState.screen !== GameScreen.START_MENU && 
@@ -1088,8 +1088,8 @@ const App: React.FC = () => {
               if (mode.type === 'DISCARD') {
                  p.discardPile.push(card);
                  if (card.name === 'カンニングペーパー' || card.name === 'STRATEGIST') {
-                     p.currentEnergy += 2;
-                     p.floatingText = { id: `strat-${Date.now()}-${Math.random()}`, text: '+2 Energy', color: 'text-yellow-400', iconType: 'zap' };
+                     p.nextTurnEnergy += 2;
+                     p.floatingText = { id: `strat-${Date.now()}-${Math.random()}`, text: '+2 Next Turn', color: 'text-yellow-400', iconType: 'zap' };
                  }
               } else if (mode.type === 'EXHAUST') {
                  if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
@@ -1156,10 +1156,12 @@ const App: React.FC = () => {
               applyDebuff(target, 'WEAK', 3);
               newLogs.push(`${trans(target.name, languageMode)}に${trans("へろへろ", languageMode)}3を${trans("付与", languageMode)}`);
               nextActiveEffects.push({ id: `vfx-pot-dbuff-${Date.now()}`, type: 'DEBUFF', targetId: target.id });
-          } else if (potion.templateId === 'POISON_POTION' && target) {
-              applyDebuff(target, 'POISON', 6);
-              newLogs.push(`${trans(target.name, languageMode)}に${trans("ドクドク", languageMode)}6を${trans("付与", languageMode)}`);
-              nextActiveEffects.push({ id: `vfx-pot-psn-${Date.now()}`, type: 'DEBUFF', targetId: target.id });
+          } else if (potion.templateId === 'POISON_POTION') {
+              if (target) {
+                  applyDebuff(target, 'POISON', 6);
+                  newLogs.push(`${trans(target.name, languageMode)}に${trans("ドクドク", languageMode)}6を${trans("付与", languageMode)}`);
+                  nextActiveEffects.push({ id: `vfx-pot-psn-${Date.now()}`, type: 'DEBUFF', targetId: target.id });
+              }
           } else if (potion.templateId === 'HEALTH_POTION') {
               const heal = 15;
               p.currentHp = Math.min(p.maxHp, p.currentHp + heal);
@@ -1171,8 +1173,17 @@ const App: React.FC = () => {
               newLogs.push(`${trans("トゲトゲ", languageMode)}+3`);
               nextActiveEffects.push({ id: `vfx-pot-t-${Date.now()}`, type: 'BUFF', targetId: 'player' });
           } else if (potion.templateId === 'GAMBLE') {
-              const discardCount = p.hand.length;
-              p.discardPile = [...p.discardPile, ...p.hand];
+              const cardsToDiscard = [...p.hand];
+              const discardCount = cardsToDiscard.length;
+              
+              cardsToDiscard.forEach(c => {
+                  p.discardPile.push(c);
+                  if (c.name === 'カンニングペーパー' || c.name === 'STRATEGIST') {
+                      p.nextTurnEnergy += 2;
+                      p.floatingText = { id: `strat-pot-${Date.now()}`, text: '+2 Next Turn', color: 'text-yellow-400', iconType: 'zap' };
+                  }
+              });
+              
               p.hand = [];
               for (let i = 0; i < discardCount; i++) {
                   if (p.drawPile.length === 0) {
@@ -1279,6 +1290,23 @@ const App: React.FC = () => {
           }
       }
 
+      // --- 錬金術 (ALCHEMIZE) 修正: 固定ではなくランダムに生成 ---
+      if (card.name === '錬金術' || card.name === 'ALCHEMIZE') {
+          const keys = Object.keys(CARDS_LIBRARY).filter(k => !STATUS_CARDS[k] && !CURSE_CARDS[k] && CARDS_LIBRARY[k].rarity !== 'SPECIAL');
+          const key = keys[Math.floor(Math.random() * keys.length)];
+          const randomCardTemplate = CARDS_LIBRARY[key];
+          let newC = { ...randomCardTemplate, id: `alch-${Date.now()}`, cost: 0 };
+          if (p.powers['MASTER_REALITY']) newC = getUpgradedCard(newC);
+          
+          if (p.hand.length < HAND_SIZE + 5) {
+              p.hand.push(newC);
+          } else {
+              p.discardPile.push(newC);
+          }
+          currentLogs.push(`${trans("錬金術", languageMode)}: ${trans(newC.name, languageMode)}を生成`);
+          nextActiveEffects.push({ id: `vfx-alch-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+      }
+
       if (card.name === '発見' || card.name === 'DISCOVERY') {
           for (let i = 0; i < 3; i++) {
               const keys = Object.keys(CARDS_LIBRARY).filter(k => !STATUS_CARDS[k] && !CURSE_CARDS[k]);
@@ -1301,9 +1329,9 @@ const App: React.FC = () => {
           cardsToDiscard.forEach(c => {
               p.discardPile.push(c);
               if (c.name === 'カンニングペーパー' || c.name === 'STRATEGIST') {
-                  p.currentEnergy += 2;
-                  currentLogs.push(`${trans("カンニングペーパー", languageMode)}: +2 Energy`);
-                  p.floatingText = { id: `strat-${Date.now()}-${Math.random()}`, text: '+2 Energy', color: 'text-yellow-400', iconType: 'zap' };
+                  p.nextTurnEnergy += 2;
+                  currentLogs.push(`${trans("カンニングペーパー", languageMode)}: +2 Next Turn Energy`);
+                  p.floatingText = { id: `strat-${Date.now()}-${Math.random()}`, text: '+2 Next Turn', color: 'text-yellow-400', iconType: 'zap' };
               }
           });
           
@@ -1316,10 +1344,10 @@ const App: React.FC = () => {
                   p.discardPile = [];
               }
               const newCard = p.drawPile.pop();
-              if (newCard) {
+              if (newCard) { 
                   if (newCard.name === '虚無' || newCard.name === 'VOID') {
                       p.currentEnergy = Math.max(0, p.currentEnergy - 1);
-                      p.floatingText = { id: `void-${Date.now()}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
+                      p.floatingText = { id: `void-turn-${Date.now()}-${i}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
                   }
                   p.hand.push(newCard);
               }
@@ -1386,10 +1414,10 @@ const App: React.FC = () => {
                     if (card.damageBasedOnBlock) { baseDamage += p.block; logParts[0] = `${baseDamage}(Block)`; }
                     if (card.damagePerCardInHand) baseDamage += (p.hand.filter(c => c.id !== card.id).length) * card.damagePerCardInHand!;
                     if (card.damagePerAttackPlayed) baseDamage += (p.attacksPlayedThisTurn) * card.damagePerAttackPlayed!;
-                    if (card.damagePerStrike) baseDamage += (p.deck.filter(c => c.name.includes('えんぴつ攻撃') || c.name.includes('攻撃')).length) * card.damagePerStrike!;
+                    if (card.damagePerStrike) baseDamage += (p.deck.filter(c => c.name === 'えんぴつ攻撃').length) * card.damagePerStrike!;
                     if (card.damagePerCardInDraw) baseDamage += p.drawPile.length * card.damagePerCardInDraw!;
 
-                    if ((card.name === 'ナイフ' || card.name === 'SHIV') && p.powers['ACCURACY']) {
+                    if ((card.name === 'えんぴつの削りかす' || card.name === 'SHIV') && p.powers['ACCURACY']) {
                         baseDamage += p.powers['ACCURACY'];
                         logParts.push(`+${p.powers['ACCURACY']}(精度)`);
                     }
@@ -1497,6 +1525,12 @@ const App: React.FC = () => {
                              currentLogs.push(`${trans(e.name, languageMode)}を${trans("捕獲した！", languageMode)}`);
                              nextActiveEffects.push({ id: `vfx-cap-${Date.now()}`, type: 'BUFF', targetId: 'player' });
                          }
+
+                         // --- 羅生門の撃破時処理 ---
+                         if (card.name === '羅生門' || card.id.includes('RASHOMON')) {
+                             nextSelectionState = { active: true, type: 'EXHAUST', amount: 1 };
+                             currentLogs.push(trans("羅生門：手札1枚を廃棄してください。", languageMode));
+                         }
                     }
 
                     // --- 時間どろぼう効果の実装 ---
@@ -1536,6 +1570,10 @@ const App: React.FC = () => {
               }
               if (card.heal) {
                   p.currentHp = Math.min(p.currentHp + card.heal, p.maxHp);
+                  if (p.partner) {
+                      p.partner.currentHp = Math.min(p.partner.maxHp, p.partner.currentHp + card.heal);
+                      p.partner.floatingText = { id: `heal-p-${Date.now()}`, text: `+${card.heal}`, color: 'text-green-500' };
+                  }
                   nextActiveEffects.push({ id: `vfx-heal-${Date.now()}`, type: 'HEAL', targetId: 'player' });
               }
               if (card.energy) p.currentEnergy += card.energy;
@@ -1549,9 +1587,18 @@ const App: React.FC = () => {
                   nextActiveEffects.push({ id: `vfx-sd-${Date.now()}`, type: 'SLASH', targetId: 'player' });
               }
               if (card.strength) {
-                  p.strength += card.strength;
-                  nextActiveEffects.push({ id: `vfx-buff-${Date.now()}`, type: 'BUFF', targetId: 'player' });
-                  currentLogs.push(`${trans("ムキムキ", languageMode)}+${card.strength}`);
+                  // --- 修正: 不快感などの敵対象デバフの対応 ---
+                  if (card.target === TargetType.ENEMY || card.target === TargetType.ALL_ENEMIES) {
+                      targets.forEach(e => {
+                          e.strength += card.strength!;
+                          e.floatingText = { id: `str-${Date.now()}-${e.id}`, text: `${card.strength > 0 ? '+' : ''}${card.strength}`, color: card.strength > 0 ? 'text-red-500' : 'text-gray-400', iconType: 'sword' };
+                      });
+                      currentLogs.push(`${trans("敵のムキムキ", languageMode)}${card.strength > 0 ? '+' : ''}${card.strength}`);
+                  } else {
+                      p.strength += card.strength;
+                      nextActiveEffects.push({ id: `vfx-buff-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+                      currentLogs.push(`${trans("ムキムキ", languageMode)}+${card.strength}`);
+                  }
               }
               if (card.vulnerable) targets.forEach(e => {
                   applyDebuff(e, 'VULNERABLE', card.vulnerable!);
@@ -1597,7 +1644,12 @@ const App: React.FC = () => {
                   p.strength *= 2;
                   nextActiveEffects.push({ id: `vfx-ds-${Date.now()}`, type: 'BUFF', targetId: 'player' });
               }
-              if (card.shuffleHandToDraw) { p.drawPile = shuffle([...p.drawPile, ...p.hand]); p.hand = []; }
+              if (card.shuffleHandToDraw) { 
+                  // --- 修正: 手札ではなく「捨て札」を山札に戻す ---
+                  p.drawPile = shuffle([...p.drawPile, ...p.discardPile]); 
+                  p.discardPile = [];
+                  currentLogs.push(trans("捨て札を山札に戻した", languageMode));
+              }
               if (card.applyPower) {
                   p.powers[card.applyPower.id] = (p.powers[card.applyPower.id] || 0) + card.applyPower.amount;
                   if (card.applyPower.id === 'CORPSE_EXPLOSION' && targets.length > 0) {
@@ -1631,6 +1683,12 @@ const App: React.FC = () => {
                   cardsToScrape.forEach(c => {
                       p.hand = p.hand.filter(h => h.id !== c.id);
                       p.discardPile.push(c);
+                      // カンニングペーパー判定を追加
+                      if (c.name === 'カンニングペーパー' || c.name === 'STRATEGIST') {
+                          p.nextTurnEnergy += 2;
+                          currentLogs.push(`${trans("カンニングペーパー", languageMode)}: +2 Next Turn Energy`);
+                          p.floatingText = { id: `strat-scr-${Date.now()}`, text: '+2 Next Turn', color: 'text-yellow-400', iconType: 'zap' };
+                      }
                   });
                   if (cardsToScrape.length > 0) {
                       currentLogs.push(trans("コスト0以外のカードを捨てた", languageMode));
@@ -1681,6 +1739,13 @@ const App: React.FC = () => {
                       }
                   });
               }
+
+              // --- 大ジャンプ (VAULT) 修正: 敵ターンをスキップするフラグをセット ---
+              if (card.name === '大ジャンプ' || card.name === 'VAULT') {
+                  p.turnFlags['VAULT_EXTRA_TURN'] = true;
+                  currentLogs.push(trans("追加ターンを得る！", languageMode));
+                  nextActiveEffects.push({ id: `vfx-vault-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+              }
           }
       }
 
@@ -1728,13 +1793,34 @@ const App: React.FC = () => {
     
           if (card.promptsDiscard) nextSelectionState = { active: true, type: 'DISCARD', amount: card.promptsDiscard, originCardId: card.id };
           if (card.promptsCopy) nextSelectionState = { active: true, type: 'COPY', amount: card.promptsCopy, originCardId: card.id };
+          
+          // --- 廃棄選択ロジックの追加（妖精など） ---
+          if (card.promptsExhaust && card.promptsExhaust !== 99) {
+              nextSelectionState = { active: true, type: 'EXHAUST', amount: card.promptsExhaust, originCardId: card.id };
+              currentLogs.push(trans("廃棄するカードを選択してください。", languageMode));
+          }
+
+          // --- 修正: 旧名称判定を新名称判定に更新 ---
           if (card.promptsExhaust === 99) {
-              if (card.name === '魂の切断' || card.name === 'SEVER_SOUL') {
+              if (card.name === '断捨離' || card.name === 'SEVER_SOUL') {
                   const cardsToExhaust = p.hand.filter(c => c.type !== CardType.ATTACK);
                   if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'] * cardsToExhaust.length;
                   p.hand = p.hand.filter(c => c.type === CardType.ATTACK);
-              } else if (card.name === '鬼火' || card.name === 'FIEND_FIRE') {
-                   if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'] * p.hand.length;
+                  currentLogs.push(trans("非攻撃カードを廃棄した", languageMode));
+              } else if (card.name === '大掃除' || card.name === 'FIEND_FIRE') {
+                   const count = p.hand.length;
+                   // 1枚につき7ダメージ
+                   if (count > 0 && enemies.length > 0) {
+                       const target = enemies.find(e => e.id === prev.selectedEnemyId && e.currentHp > 0) || enemies.find(e => e.currentHp > 0);
+                       if (target) {
+                           const extraDmg = count * 7;
+                           target.currentHp -= extraDmg;
+                           target.floatingText = { id: `ff-${Date.now()}`, text: `${extraDmg}`, color: 'text-orange-500', iconType: 'sword' };
+                           currentLogs.push(`${trans("大掃除", languageMode)}: ${extraDmg}${trans("ダメージ", languageMode)}`);
+                           nextActiveEffects.push({ id: `vfx-ff-${Date.now()}`, type: 'FIRE', targetId: target.id });
+                       }
+                   }
+                   if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'] * count;
                    p.hand = [];
               }
           }
@@ -1774,6 +1860,14 @@ const App: React.FC = () => {
           p.floatingText = { id: `pow-demon-${Date.now()}`, text: '反抗期', color: 'text-red-500' }; 
           nextActiveEffects.push({ id: `vfx-demon-${Date.now()}`, type: 'BUFF', targetId: 'player' });
       }
+      
+      // --- 逆ギレ (BERSERK) 修正: 毎ターンエネルギーを得る ---
+      if (p.powers['BERSERK_POWER']) {
+          extraEnergy += p.powers['BERSERK_POWER'];
+          p.floatingText = { id: `pow-berserk-${Date.now()}`, text: '+1 Energy', color: 'text-yellow-400', iconType: 'zap' };
+          nextActiveEffects.push({ id: `vfx-berserk-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+      }
+
       if (p.powers['ECHO_FORM']) p.echoes = p.powers['ECHO_FORM'];
       
       let devaBonus = 0;
@@ -1837,6 +1931,7 @@ const App: React.FC = () => {
       let newDiscardPile = [...p.discardPile];
       let newHand: ICard[] = [];
 
+      // --- 手札破棄ロジック ---
       if (p.relics.find(r => r.id === 'BOOKMARK') && p.hand.length > 0) {
           newHand.push(p.hand[0]); 
           newDiscardPile = [...newDiscardPile, ...p.hand.slice(1)];
@@ -1908,6 +2003,16 @@ const App: React.FC = () => {
           }
       }
 
+      // --- はてしない物語 (COST_REDUCTION) 処理 ---
+      if (p.powers['COST_REDUCTION']) {
+          newHand = newHand.map(c => {
+              if (c.cost > 0) {
+                  return { ...c, cost: Math.max(0, c.cost - p.powers['COST_REDUCTION']) };
+              }
+              return c;
+          });
+      }
+
       if (!p.powers['BARRICADE']) {
           if (p.relics.find(r => r.id === 'CALIPERS')) {
               p.block = Math.max(0, p.block - 15);
@@ -1953,6 +2058,18 @@ const App: React.FC = () => {
         return;
     }
 
+    // --- 大ジャンプ (VAULT) 修正: 敵ターンをスキップするフラグを確認 ---
+    const pCurrent = stateRef.current.player;
+    if (pCurrent.turnFlags['VAULT_EXTRA_TURN']) {
+        setGameState(prev => ({
+            ...prev,
+            combatLog: [...prev.combatLog, trans("> 追加ターン獲得！敵の行動をスキップします", languageMode)].slice(-100)
+        }));
+        // startPlayerTurn内でフラグはリセットされる
+        startPlayerTurn();
+        return;
+    }
+
     audioService.playSound('select');
     setTurnLog(trans("敵のターン", languageMode));
     setLastActionType(null);
@@ -1960,6 +2077,14 @@ const App: React.FC = () => {
     setGameState(prev => {
         const p = { ...prev.player };
         const newLogs: string[] = [];
+
+        // --- 手札破棄前の判定 (カンニングペーパー) ---
+        const discardedCards = p.relics.find(r => r.id === 'BOOKMARK') ? p.hand.slice(1) : p.hand;
+        discardedCards.forEach(c => {
+            if (c.name === 'カンニングペーパー' || c.name === 'STRATEGIST') {
+                p.nextTurnEnergy += 2;
+            }
+        });
 
         if (p.powers['METALLICIZE']) {
             p.block += p.powers['METALLICIZE'];
@@ -2771,7 +2896,7 @@ const App: React.FC = () => {
                                 <GraduationCap className="mr-2" size={16}/> {trans("問題チャレンジ", languageMode)}
                             </button>
 
-                            <button onClick={openMiniGameMenu} className="w-full bg-indigo-900/80 text-indigo-100 py-2 px-4 text-sm font-bold border border-indigo-500 hover:bg-indigo-800 cursor-pointer flex items-center justify-center shadow-md hover:shadow-indigo-900/50">
+                            <button onClick={openMiniGameMenu} className="w-full bg-indigo-900/80 text-indigo-100 py-2 px-4 text-sm font-bold border border-indigo-500 hover:bg-indigo-800 cursor-not-allowed flex items-center justify-center shadow-md hover:shadow-indigo-900/50">
                                 <Gamepad2 className="mr-2" size={16}/> {trans("ミニゲーム", languageMode)}
                             </button>
                             
