@@ -947,7 +947,7 @@ const App: React.FC = () => {
             setGameState(prev => {
                 const p = { ...prev.player };
                 if (p.relics.find(r => r.id === 'LUXURY_FUTON')) {
-                    const heal = Math.floor(p.deck.length / 5) * 2;
+                    const heal = Math.floor(p.currentHp / 5) * 2; // BUG FIXED: typo from p.deck
                     if (heal > 0) {
                         p.currentHp = Math.min(p.maxHp, p.currentHp + heal);
                     }
@@ -1227,6 +1227,7 @@ const App: React.FC = () => {
       let enemies = prev.enemies.map(e => ({ ...e }));
       const currentLogs: string[] = [`> ${trans(card.name, languageMode)} ${trans("を使用", languageMode)}`];
       const nextActiveEffects: VisualEffectInstance[] = [];
+      let nextSelectionState = { ...prev.selectionState };
 
       // 学習アルゴリズム処理の統合
       if (card.name === '学習アルゴリズム' || card.name === 'GENETIC_ALGORITHM') {
@@ -3083,7 +3084,7 @@ const App: React.FC = () => {
                                  if (relic.id === 'CURSED_KEY') newP.maxEnergy += 1;
                                  if (relic.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
                                  if (relic.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
-                                 if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
+                                 if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = p.maxHp; }
                                  if (relic.id === 'OLD_COIN') newP.gold += 300;
                                  if (relic.id === 'MATRYOSHKA') prev.player.relicCounters['MATRYOSHKA'] = 2; 
                                  if (relic.id === 'HAPPY_FLOWER') prev.player.relicCounters['HAPPY_FLOWER'] = 0; 
