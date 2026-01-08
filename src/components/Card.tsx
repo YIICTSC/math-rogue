@@ -172,20 +172,20 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
       `}
     >
       {/* Header */}
-      <div className="flex justify-between items-center relative z-10 mb-1 h-5 overflow-hidden">
+      <div className="flex justify-between items-center relative z-10 mb-1 h-6 overflow-hidden">
         {needsScroll ? (
-            <div className="flex-1 overflow-hidden relative text-[11px] font-bold drop-shadow-md min-w-0 mr-1">
+            <div className="flex-1 overflow-hidden relative text-[13px] font-bold drop-shadow-md min-w-0 mr-1">
                 <div className={`flex w-max animate-marquee-scroll ${card.upgraded ? 'text-green-400' : 'text-white'}`}>
                     <span className="pr-4">{displayName}</span>
                     <span className="pr-4">{displayName}</span>
                 </div>
             </div>
         ) : (
-            <span className={`text-[11px] font-bold truncate flex-1 drop-shadow-md mr-1 ${card.upgraded ? 'text-green-400' : 'text-white'}`}>
+            <span className={`text-[13px] font-bold truncate flex-1 drop-shadow-md mr-1 ${card.upgraded ? 'text-green-400' : 'text-white'}`}>
                 {displayName}
             </span>
         )}
-        <div className={`w-5 h-5 flex items-center justify-center rounded text-[10px] border border-white font-bold shrink-0 shadow-sm ${card.upgraded && card.cost < 99 ? 'bg-green-600 text-white' : 'bg-blue-600 text-white'}`}>
+        <div className={`w-6 h-6 flex items-center justify-center rounded text-[11px] border border-white font-bold shrink-0 shadow-sm ${card.upgraded && card.cost < 99 ? 'bg-green-600 text-white' : 'bg-blue-600 text-white'}`}>
           {card.cost}
         </div>
       </div>
@@ -197,14 +197,14 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
 
       {/* Description */}
       <div className="relative z-10 mt-auto flex flex-col items-center w-full">
-        <div className="bg-black/70 p-1 rounded border border-white/10 backdrop-blur-[1px] w-full min-h-[2.5rem] flex items-center justify-center flex-col overflow-hidden">
-            <div className="text-[7px] text-white leading-tight text-center whitespace-pre-wrap break-words w-full">
+        <div className="bg-black/70 p-1.5 rounded border border-white/10 backdrop-blur-[1px] w-full min-h-[3.2rem] flex items-center justify-center flex-col overflow-hidden">
+            <div className="text-[10px] text-white leading-tight text-center whitespace-pre-wrap break-words w-full font-bold">
                 {renderDescription()}
-                {card.exhaust && <span className="text-gray-400 block font-bold text-[6px] mt-0.5">[{trans("廃棄", languageMode)}]</span>}
-                {card.capture && <span className="text-amber-400 block font-bold text-[6px] mt-0.5">[捕獲]</span>}
+                {card.exhaust && <span className="text-gray-400 block font-bold text-[8px] mt-0.5">[{trans("廃棄", languageMode)}]</span>}
+                {card.capture && <span className="text-amber-400 block font-bold text-[8px] mt-0.5">[捕獲]</span>}
             </div>
         </div>
-        <div className="text-[7px] text-center mt-0.5 text-white/60 font-mono tracking-tighter">
+        <div className="text-[9px] text-center mt-0.5 text-white/60 font-mono tracking-tighter">
             {getTypeText(card.type)}
         </div>
       </div>

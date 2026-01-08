@@ -1096,7 +1096,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 return (
                     <div 
                         key={card.id} 
-                        className={`inline-block align-middle transition-all duration-500 ease-out w-28 h-40 md:w-32 md:h-48 shrink-0 relative 
+                        className={`inline-block align-middle transition-all duration-500 ease-out w-28 h-44 md:w-32 md:h-48 shrink-0 relative 
                             -ml-20 first:ml-0 md:ml-0 
                             group-hover/hand:-ml-2 group-active/hand:-ml-2 
                             ${isSelectedActive || isSelectedDual ? 'cursor-pointer -translate-y-8 z-30 scale-110' : 'hover:-translate-y-4 hover:z-20'}
@@ -1113,7 +1113,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                              </div>
                         )}
                         
-                        <div className="absolute top-0 left-0 origin-top-left scale-[0.8] md:scale-100">
+                        <div className="absolute top-0 left-0 origin-top-left scale-[0.95] md:scale-100">
                             <Card 
                                 card={displayCard} 
                                 onClick={() => {
