@@ -266,9 +266,9 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
       if (newPromptsCopy > 0) parts.push("カードをコピー");
       
       // Fatal Effects
-      if (newFatalEnergy > 0) parts.push(`解決時E${newFatalEnergy}`);
-      if (newFatalPermanentDamage > 0) parts.push(`解決時威力+${newFatalPermanentDamage}`);
-      if (newFatalMaxHp > 0) parts.push(`解決時最大HP+${newFatalMaxHp}`);
+      if (newFatalEnergy > 0) parts.push(`たおすとE${newFatalEnergy}`);
+      if (newFatalPermanentDamage > 0) parts.push(`たおすと威力+${newFatalPermanentDamage}`);
+      if (newFatalMaxHp > 0) parts.push(`たおすと最大HP+${newFatalMaxHp}`);
 
       // Next Turn
       if (newNextTurnEnergy > 0) parts.push(`次ターンE+${newNextTurnEnergy}`);
