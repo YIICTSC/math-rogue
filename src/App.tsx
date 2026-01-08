@@ -1946,7 +1946,13 @@ const App: React.FC = () => {
       audioService.playSound('block');
   };
 
-  const executeEndTurn = async (cardToAdd?: ICard) => {
+  const executeEndTurn = async () => {
+    // すでに敵が全滅している場合は何もしない
+    if (gameState.enemies.length === 0) {
+        startPlayerTurn();
+        return;
+    }
+
     audioService.playSound('select');
     setTurnLog(trans("敵のターン", languageMode));
     setLastActionType(null);
@@ -1955,14 +1961,6 @@ const App: React.FC = () => {
         const p = { ...prev.player };
         const newLogs: string[] = [];
 
-        if (cardToAdd) {
-            if (p.hand.length < HAND_SIZE + 5) {
-                p.hand = [...p.hand, cardToAdd];
-            } else {
-                p.discardPile = [...p.discardPile, cardToAdd];
-            }
-        }
-        
         if (p.powers['METALLICIZE']) {
             p.block += p.powers['METALLICIZE'];
             p.floatingText = { id: `pow-metal-${Date.now()}`, text: `+${p.powers['METALLICIZE']}`, color: 'text-blue-400', iconType: 'shield' };
@@ -1984,78 +1982,77 @@ const App: React.FC = () => {
         return { ...prev, player: p, combatLog: [...prev.combatLog, ...newLogs].slice(-100) };
     });
 
-    await wait(500);
+    await wait(400);
 
-    const enemies = [...gameState.enemies];
-    for (const enemy of enemies) {
-        if (gameState.player.currentHp <= 0) break;
+    // 毒ダメージの処理を分離して一括で行う
+    await new Promise<void>(resolve => {
+        setGameState(prev => {
+            let nextEnemies = prev.enemies.map(e => ({ ...e }));
+            const nextActiveEffects: VisualEffectInstance[] = [];
+            const nextLogs: string[] = [];
+
+            nextEnemies = nextEnemies.map(enemy => {
+                if (enemy.poison > 0) {
+                    const poisonDmg = enemy.poison;
+                    enemy.currentHp -= poisonDmg;
+                    enemy.poison--;
+                    enemy.floatingText = { id: `psn-${Date.now()}-${enemy.id}`, text: `${poisonDmg}`, color: 'text-green-500', iconType: 'poison' };
+                    nextLogs.push(`${trans(enemy.name, languageMode)}に毒ダメージ${poisonDmg}`);
+                    nextActiveEffects.push({ id: `vfx-psn-${Date.now()}-${enemy.id}`, type: 'FIRE', targetId: enemy.id });
+                    
+                    // 真・校長先生の形態変化チェック
+                    if (enemy.currentHp <= 0 && enemy.enemyType === 'THE_HEART' && enemy.phase === 1) {
+                        enemy.currentHp = enemy.maxHp;
+                        enemy.phase = 2;
+                        enemy.name = "真・校長先生";
+                        enemy.poison = 0; enemy.weak = 0; enemy.vulnerable = 0;
+                        enemy.floatingText = { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' };
+                        nextLogs.push("校長先生が真の姿を現した！");
+                    }
+                }
+                return enemy;
+            }).filter(e => e.currentHp > 0 || (e.enemyType === 'THE_HEART' && e.phase === 1));
+
+            return { 
+                ...prev, 
+                enemies: nextEnemies, 
+                combatLog: [...prev.combatLog, ...nextLogs].slice(-100),
+                activeEffects: [...prev.activeEffects, ...nextActiveEffects]
+            };
+        });
+        setTimeout(resolve, 600);
+    });
+
+    // 敵の行動処理
+    const enemiesToAct = [...stateRef.current.enemies];
+    for (const enemyTemplate of enemiesToAct) {
+        // すでに倒されているか、ラスボスがフェーズ移行中(HP満タン)ならスキップ判定はしないが
+        // 最新の敵リストに存在するかチェック
+        if (stateRef.current.player.currentHp <= 0) break;
         
-        if (enemy.poison > 0) {
-            const poisonDmg = enemy.poison;
-            enemy.currentHp -= poisonDmg;
-            enemy.poison--;
-            
-            const floatText: FloatingText = { id: `psn-${Date.now()}-${enemy.id}`, text: `${poisonDmg}`, color: 'text-green-500', iconType: 'poison' };
-            const logMsg = `${trans(enemy.name, languageMode)}に毒ダメージ${poisonDmg}`;
-
-            if (enemy.currentHp <= 0 && enemy.enemyType === 'THE_HEART' && enemy.phase === 1) {
-                enemy.currentHp = enemy.maxHp;
-                enemy.phase = 2;
-                enemy.name = "真・校長先生";
-                enemy.poison = 0; enemy.weak = 0; enemy.vulnerable = 0;
-                setGameState(prev => ({ 
-                    ...prev, 
-                    enemies: prev.enemies.map(e => e.id === enemy.id ? { ...enemy, floatingText: { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' } } : e),
-                    combatLog: [...prev.combatLog, logMsg, "校長先生が真の姿を現した！"].slice(-100),
-                    activeEffects: [...prev.activeEffects, { id: `vfx-psn-${Date.now()}`, type: 'FIRE', targetId: enemy.id }]
-                }));
-            } else if (enemy.currentHp <= 0) {
-                setGameState(prev => ({ 
-                    ...prev, 
-                    enemies: prev.enemies.filter(e => e.id !== enemy.id),
-                    combatLog: [...prev.combatLog, logMsg, `${trans(enemy.name, languageMode)}は力尽きた！`].slice(-100),
-                    activeEffects: [...prev.activeEffects, { id: `vfx-psn-${Date.now()}`, type: 'FIRE', targetId: enemy.id }]
-                }));
-                continue;
-            } else {
-                setGameState(prev => ({ 
-                    ...prev, 
-                    enemies: prev.enemies.map(e => e.id === enemy.id ? { ...e, currentHp: enemy.currentHp, poison: enemy.poison, floatingText: floatText } : e),
-                    combatLog: [...prev.combatLog, logMsg].slice(-100),
-                    activeEffects: [...prev.activeEffects, { id: `vfx-psn-${Date.now()}`, type: 'FIRE', targetId: enemy.id }]
-                }));
-            }
-            await wait(300);
-            setGameState(prev => ({ ...prev, activeEffects: [] }));
-        }
+        const enemy = stateRef.current.enemies.find(e => e.id === enemyTemplate.id);
+        if (!enemy || enemy.currentHp <= 0) continue;
 
         setActingEnemyId(enemy.id);
         
-        const isBard = gameState.player.id === 'BARD';
+        const isBard = stateRef.current.player.id === 'BARD';
         const isAttackIntent =
           enemy.nextIntent.type === EnemyIntentType.ATTACK ||
           enemy.nextIntent.type === EnemyIntentType.ATTACK_DEBUFF ||
           enemy.nextIntent.type === EnemyIntentType.ATTACK_DEFEND;
-
-        let parryWindowOpen = false;
 
         if (isBard && isAttackIntent) {
           setGameState(prev => ({
             ...prev,
             parryState: { active: true, enemyId: enemy.id, success: false }
           }));
-          parryWindowOpen = true;
-          await wait(300); 
+          await wait(350); 
         } else {
           await wait(300);
         }
 
-        const currentState = await new Promise<GameState>(resolve => {
-            setGameState(prev => { resolve(prev); return prev; });
-        });
-        const parrySuccess = currentState.parryState?.success || false;
-        
-        if (parryWindowOpen) {
+        const parrySuccess = stateRef.current.parryState?.success || false;
+        if (stateRef.current.parryState?.active) {
             setGameState(prev => ({ ...prev, parryState: { active: false, enemyId: null, success: false } }));
         }
 
@@ -2063,176 +2060,167 @@ const App: React.FC = () => {
         else if (enemy.nextIntent.type === EnemyIntentType.DEFEND) audioService.playSound('block');
         else audioService.playSound('select');
 
-        setGameState(prev => {
-            const currentEnemyIndex = prev.enemies.findIndex(e => e.id === enemy.id);
-            if (currentEnemyIndex === -1) return prev;
-            const p = { ...prev.player };
-            const newEnemies = [...prev.enemies];
-            const e = { ...newEnemies[currentEnemyIndex] };
-            newEnemies[currentEnemyIndex] = e;
-            const newLogs: string[] = [];
-            const nextActiveEffects: VisualEffectInstance[] = [];
-            
-            const intent = e.nextIntent;
-            e.block = 0; 
-
-            if (intent.type === EnemyIntentType.ATTACK || intent.type === EnemyIntentType.ATTACK_DEBUFF || intent.type === EnemyIntentType.ATTACK_DEFEND) {
-                let baseDamage = intent.value;
-                let logParts = [`${baseDamage}`];
-
-                if (e.strength !== 0) {
-                    baseDamage += e.strength;
-                    logParts.push(`${e.strength >= 0 ? '+' : ''}${e.strength}(${trans("筋力", languageMode)})`);
-                }
-
-                let damage = baseDamage;
-
-                if (e.weak > 0) {
-                    damage = Math.floor(damage * 0.75);
-                    logParts.push(`x0.75(${trans("へろへろ", languageMode)})`);
-                }
+        await new Promise<void>(resolve => {
+            setGameState(prev => {
+                const currentEnemyIndex = prev.enemies.findIndex(e => e.id === enemy.id);
+                if (currentEnemyIndex === -1) return prev;
                 
-                if (p.powers['VULNERABLE'] > 0) {
-                    damage = Math.floor(damage * 1.5);
-                    logParts.push(`x1.5(${trans("びくびく", languageMode)})`);
-                }
-
-                if (p.powers['INTANGIBLE'] > 0) {
-                    damage = 1;
-                    logParts.push(`= 1(${trans("スケスケ", languageMode)})`);
-                }
-
-                if (parrySuccess) {
-                    const reflectedDmg = damage;
-                    damage = 0;
-                    e.currentHp -= reflectedDmg;
-                    e.floatingText = { id: `refl-${Date.now()}`, text: `${reflectedDmg}`, color: 'text-cyan-400', iconType: 'zap' };
-                    newLogs.push(trans("ナイス応答！音波を跳ね返した！", languageMode));
-                    newLogs.push(`${trans(e.name, languageMode)}に${reflectedDmg}の反射ダメージ`);
-                    audioService.playSound('buff');
-                    nextActiveEffects.push({ id: `vfx-parry-${Date.now()}`, type: 'FIRE', targetId: e.id });
-                }
+                const p = { ...prev.player };
+                const newEnemies = [...prev.enemies];
+                const e = { ...newEnemies[currentEnemyIndex] };
+                newEnemies[currentEnemyIndex] = e;
+                const newLogs: string[] = [];
+                const nextActiveEffects: VisualEffectInstance[] = [];
                 
-                if (damage > 0) {
-                    if (p.powers['BUFFER'] > 0) { 
-                        p.powers['BUFFER']--; 
-                        damage = 0; 
-                        newLogs.push(trans("バッファーでダメージ無効化", languageMode));
-                        nextActiveEffects.push({ id: `vfx-buffer-${Date.now()}`, type: 'BLOCK', targetId: 'player' });
-                    } else {
-                        if (p.powers['STATIC_DISCHARGE']) {
-                            const target = newEnemies[Math.floor(Math.random() * newEnemies.length)];
-                            if (target) {
-                                target.currentHp -= p.powers['STATIC_DISCHARGE'];
-                                newLogs.push(trans("静電放電発動！", languageMode));
-                                nextActiveEffects.push({ id: `vfx-static-${Date.now()}`, type: 'FIRE', targetId: target.id });
+                const intent = e.nextIntent;
+                e.block = 0; 
+
+                if (intent.type === EnemyIntentType.ATTACK || intent.type === EnemyIntentType.ATTACK_DEBUFF || intent.type === EnemyIntentType.ATTACK_DEFEND) {
+                    let baseDamage = intent.value;
+                    let logParts = [`${baseDamage}`];
+                    if (e.strength !== 0) {
+                        baseDamage += e.strength;
+                        logParts.push(`${e.strength >= 0 ? '+' : ''}${e.strength}(${trans("筋力", languageMode)})`);
+                    }
+                    let damage = baseDamage;
+                    if (e.weak > 0) {
+                        damage = Math.floor(damage * 0.75);
+                        logParts.push(`x0.75(${trans("へろへろ", languageMode)})`);
+                    }
+                    if (p.powers['VULNERABLE'] > 0) {
+                        damage = Math.floor(damage * 1.5);
+                        logParts.push(`x1.5(${trans("びくびく", languageMode)})`);
+                    }
+                    if (p.powers['INTANGIBLE'] > 0) {
+                        damage = 1;
+                        logParts.push(`= 1(${trans("スケスケ", languageMode)})`);
+                    }
+                    if (parrySuccess) {
+                        const reflectedDmg = damage;
+                        damage = 0;
+                        e.currentHp -= reflectedDmg;
+                        e.floatingText = { id: `refl-${Date.now()}`, text: `${reflectedDmg}`, color: 'text-cyan-400', iconType: 'zap' };
+                        newLogs.push(trans("ナイス応答！音波を跳ね返した！", languageMode));
+                        newLogs.push(`${trans(e.name, languageMode)}に${reflectedDmg}の反射ダメージ`);
+                        audioService.playSound('buff');
+                        nextActiveEffects.push({ id: `vfx-parry-${Date.now()}`, type: 'FIRE', targetId: e.id });
+                    }
+                    if (damage > 0) {
+                        if (p.powers['BUFFER'] > 0) { 
+                            p.powers['BUFFER']--; 
+                            damage = 0; 
+                            newLogs.push(trans("バッファーでダメージ無効化", languageMode));
+                            nextActiveEffects.push({ id: `vfx-buffer-${Date.now()}`, type: 'BLOCK', targetId: 'player' });
+                        } else {
+                            if (p.powers['STATIC_DISCHARGE']) {
+                                const livingEnemies = newEnemies.filter(le => le.currentHp > 0);
+                                const target = livingEnemies[Math.floor(Math.random() * livingEnemies.length)];
+                                if (target) {
+                                    target.currentHp -= p.powers['STATIC_DISCHARGE'];
+                                    newLogs.push(trans("静電放電発動！", languageMode));
+                                    nextActiveEffects.push({ id: `vfx-static-${Date.now()}`, type: 'FIRE', targetId: target.id });
+                                }
                             }
                         }
                     }
-                }
-
-                let unblockedDamage = 0;
-                if (p.block >= damage) { 
-                    p.block -= damage; 
-                    if (damage > 0) {
+                    let unblockedDamage = 0;
+                    if (p.block >= damage) { 
+                        p.block -= damage; 
+                        if (damage > 0) {
+                            const formula = logParts.length > 1 ? `(${logParts.join(' ')}) = ` : '';
+                            newLogs.push(`${trans(e.name, languageMode)}の攻撃 ${formula}${damage} を${trans("ブロック", languageMode)}`);
+                            nextActiveEffects.push({ id: `vfx-eblk-${Date.now()}`, type: 'BLOCK', targetId: 'player' });
+                        }
+                    } else { 
+                        unblockedDamage = damage - p.block; 
+                        p.block = 0; 
                         const formula = logParts.length > 1 ? `(${logParts.join(' ')}) = ` : '';
-                        newLogs.push(`${trans(e.name, languageMode)}の攻撃 ${formula}${damage} を${trans("ブロック", languageMode)}`);
-                        nextActiveEffects.push({ id: `vfx-eblk-${Date.now()}`, type: 'BLOCK', targetId: 'player' });
+                        newLogs.push(`${trans(e.name, languageMode)}から ${formula}${damage} ${trans("ダメージを受けた", languageMode)}`);
+                        nextActiveEffects.push({ id: `vfx-eslash-${Date.now()}`, type: 'SLASH', targetId: 'player' });
                     }
-                } else { 
-                    unblockedDamage = damage - p.block; 
-                    p.block = 0; 
-                    const formula = logParts.length > 1 ? `(${logParts.join(' ')}) = ` : '';
-                    newLogs.push(`${trans(e.name, languageMode)}から ${formula}${damage} ${trans("ダメージを受けた", languageMode)}`);
-                    nextActiveEffects.push({ id: `vfx-eslash-${Date.now()}`, type: 'SLASH', targetId: 'player' });
+                    if (p.partner && p.partner.currentHp > 0) {
+                        if (unblockedDamage > 0 && Math.random() < 0.5) {
+                            p.partner.currentHp -= unblockedDamage;
+                            p.partner.floatingText = { id: `dmg-partner-${Date.now()}`, text: `-${unblockedDamage}`, color: 'text-red-500' };
+                            newLogs.push(`${p.partner.name}がダメージを受けた！`);
+                            if (p.partner.currentHp <= 0) {
+                                newLogs.push(`${p.partner.name}が倒れた...`);
+                                p.partner = undefined; 
+                            }
+                        } else {
+                            p.currentHp -= unblockedDamage;
+                            if (unblockedDamage > 0) p.floatingText = { id: `dmg-${Date.now()}`, text: `-${unblockedDamage}`, color: 'text-red-500' };
+                        }
+                    } else {
+                        p.currentHp -= unblockedDamage;
+                        if (unblockedDamage > 0) p.floatingText = { id: `dmg-${Date.now()}`, text: `-${unblockedDamage}`, color: 'text-red-500' };
+                    }
+                    if (p.powers['THORNS'] && damage > 0) { 
+                        e.currentHp -= p.powers['THORNS'];
+                        e.floatingText = { id: `thorns-${Date.now()}`, text: `${p.powers['THORNS']}`, color: 'text-orange-500', iconType: 'sword' };
+                        newLogs.push(`${trans("トゲトゲ", languageMode)}で${p.powers['THORNS']}反撃ダメージ`);
+                        nextActiveEffects.push({ id: `vfx-thn-${Date.now()}`, type: 'SLASH', targetId: e.id });
+                    }
+                    // 真・校長先生の形態変化チェック(反撃時)
+                    if (e.currentHp <= 0 && e.enemyType === 'THE_HEART' && e.phase === 1) {
+                        e.currentHp = e.maxHp;
+                        e.phase = 2;
+                        e.name = "真・校長先生";
+                        e.poison = 0; e.weak = 0; e.vulnerable = 0;
+                        e.floatingText = { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' };
+                        newLogs.push("校長先生が真の姿を現した！");
+                        nextActiveEffects.push({ id: `vfx-evo2-${Date.now()}`, type: 'BUFF', targetId: e.id });
+                    }
                 }
+                if (intent.type === EnemyIntentType.DEFEND || intent.type === EnemyIntentType.ATTACK_DEFEND) {
+                    e.block += intent.value; 
+                    if (intent.type === EnemyIntentType.ATTACK_DEFEND && intent.secondaryValue) e.block = intent.secondaryValue;
+                    newLogs.push(`${trans(e.name, languageMode)}は防御を固めた`);
+                    nextActiveEffects.push({ id: `vfx-eblk-self-${Date.now()}`, type: 'BLOCK', targetId: e.id });
+                }
+                if (intent.type === EnemyIntentType.BUFF) {
+                    e.strength += (intent.secondaryValue || 2);
+                    newLogs.push(`${trans(e.name, languageMode)}は力を溜めた`);
+                    nextActiveEffects.push({ id: `vfx-ebuff-${Date.now()}`, type: 'BUFF', targetId: e.id });
+                }
+                if (intent.type === EnemyIntentType.DEBUFF || intent.type === EnemyIntentType.ATTACK_DEBUFF) {
+                    if (p.powers['ARTIFACT'] > 0) {
+                        p.powers['ARTIFACT']--;
+                        newLogs.push(trans("アーティファクトでデバフを防いだ", languageMode));
+                        nextActiveEffects.push({ id: `vfx-art-f-${Date.now()}`, type: 'BLOCK', targetId: 'player' });
+                    } else {
+                        const debuffAmt = intent.secondaryValue || 1;
+                        const type = intent.debuffType;
+                        if (type === 'WEAK') p.powers['WEAK'] = (p.powers['WEAK'] || 0) + debuffAmt;
+                        if (type === 'VULNERABLE') p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + debuffAmt;
+                        if (type === 'CONFUSED') p.powers['CONFUSED'] = (p.powers['CONFUSED'] || 0) + debuffAmt;
+                        if (type === 'POISON') {
+                            const status = { ...STATUS_CARDS.SLIMED, id: `slime-${Date.now()}` };
+                            p.discardPile.push(status);
+                            newLogs.push(trans("粘液を混ぜられた", languageMode));
+                        }
+                        nextActiveEffects.push({ id: `vfx-edbuff-${Date.now()}`, type: 'DEBUFF', targetId: 'player' });
+                    }
+                }
+                if (e.vulnerable > 0) e.vulnerable--;
+                if (e.weak > 0) e.weak--;
+                e.nextIntent = getNextEnemyIntent(e, prev.turn + 1);
                 
-                if (p.partner && p.partner.currentHp > 0) {
-                     if (unblockedDamage > 0 && Math.random() < 0.5) {
-                         p.partner.currentHp -= unblockedDamage;
-                         p.partner.floatingText = { id: `dmg-partner-${Date.now()}`, text: `-${unblockedDamage}`, color: 'text-red-500' };
-                         newLogs.push(`${p.partner.name}がダメージを受けた！`);
-                         if (p.partner.currentHp <= 0) {
-                             newLogs.push(`${p.partner.name}が倒れた...`);
-                             p.partner = undefined; 
-                         }
-                         nextActiveEffects.push({ id: `vfx-pslash-${Date.now()}`, type: 'SLASH', targetId: 'player' });
-                     } else {
-                         p.currentHp -= unblockedDamage;
-                         if (unblockedDamage > 0) p.floatingText = { id: `dmg-${Date.now()}`, text: `-${unblockedDamage}`, color: 'text-red-500' };
-                     }
-                } else {
-                     p.currentHp -= unblockedDamage;
-                     if (unblockedDamage > 0) p.floatingText = { id: `dmg-${Date.now()}`, text: `-${unblockedDamage}`, color: 'text-red-500' };
-                }
-
-                if (p.powers['THORNS'] && damage > 0) { 
-                    e.currentHp -= p.powers['THORNS'];
-                    e.floatingText = { id: `thorns-${Date.now()}`, text: `${p.powers['THORNS']}`, color: 'text-orange-500', iconType: 'sword' };
-                    newLogs.push(`${trans("トゲトゲ", languageMode)}で${p.powers['THORNS']}反撃ダメージ`);
-                    nextActiveEffects.push({ id: `vfx-thn-${Date.now()}`, type: 'SLASH', targetId: e.id });
-                }
-
-                if (e.currentHp <= 0 && e.enemyType === 'THE_HEART' && e.phase === 1) {
-                     e.currentHp = e.maxHp;
-                     e.phase = 2;
-                     e.name = "真・校長先生";
-                     e.poison = 0; e.weak = 0; e.vulnerable = 0;
-                     e.floatingText = { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' };
-                     newLogs.push("校長先生が真の姿を現した！");
-                     nextActiveEffects.push({ id: `vfx-evo2-${Date.now()}`, type: 'BUFF', targetId: e.id });
-                }
-            }
-
-            if (intent.type === EnemyIntentType.DEFEND || intent.type === EnemyIntentType.ATTACK_DEFEND) {
-                e.block += intent.value; 
-                if (intent.type === EnemyIntentType.ATTACK_DEFEND && intent.secondaryValue) e.block = intent.secondaryValue;
-                newLogs.push(`${trans(e.name, languageMode)}は防御を固めた`);
-                nextActiveEffects.push({ id: `vfx-eblk-self-${Date.now()}`, type: 'BLOCK', targetId: e.id });
-            }
-
-            if (intent.type === EnemyIntentType.BUFF) {
-                e.strength += (intent.secondaryValue || 2);
-                newLogs.push(`${trans(e.name, languageMode)}は力を溜めた`);
-                nextActiveEffects.push({ id: `vfx-ebuff-${Date.now()}`, type: 'BUFF', targetId: e.id });
-            }
-
-            if (intent.type === EnemyIntentType.DEBUFF || intent.type === EnemyIntentType.ATTACK_DEBUFF) {
-                if (p.powers['ARTIFACT'] > 0) {
-                    p.powers['ARTIFACT']--;
-                    newLogs.push(trans("アーティファクトでデバフを防いだ", languageMode));
-                    nextActiveEffects.push({ id: `vfx-art-f-${Date.now()}`, type: 'BLOCK', targetId: 'player' });
-                } else {
-                    const debuffAmt = intent.secondaryValue || 1;
-                    const type = intent.debuffType;
-                    if (type === 'WEAK') p.powers['WEAK'] = (p.powers['WEAK'] || 0) + debuffAmt;
-                    if (type === 'VULNERABLE') p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + debuffAmt;
-                    if (type === 'CONFUSED') p.powers['CONFUSED'] = (p.powers['CONFUSED'] || 0) + debuffAmt;
-                    if (type === 'POISON') {
-                        const status = { ...STATUS_CARDS.SLIMED, id: `slime-${Date.now()}` };
-                        p.discardPile.push(status);
-                        newLogs.push(trans("粘液を混ぜられた", languageMode));
-                    }
-                    nextActiveEffects.push({ id: `vfx-edbuff-${Date.now()}`, type: 'DEBUFF', targetId: 'player' });
-                }
-            }
-            
-            if (e.vulnerable > 0) e.vulnerable--;
-            if (e.weak > 0) e.weak--;
-
-            e.nextIntent = getNextEnemyIntent(e, gameState.turn + 1);
-
-            const aliveEnemies = newEnemies.filter(en => en.currentHp > 0 || (en.enemyType === 'THE_HEART' && en.phase === 1));
-            return { ...prev, player: p, enemies: aliveEnemies, combatLog: [...prev.combatLog, ...newLogs].slice(-100), activeEffects: [...prev.activeEffects, ...nextActiveEffects] };
+                const aliveEnemies = newEnemies.filter(en => en.currentHp > 0 || (en.enemyType === 'THE_HEART' && en.phase === 1));
+                return { 
+                    ...prev, 
+                    player: p, 
+                    enemies: aliveEnemies, 
+                    combatLog: [...prev.combatLog, ...newLogs].slice(-100), 
+                    activeEffects: [...prev.activeEffects, ...nextActiveEffects] 
+                };
+            });
+            setTimeout(resolve, 500);
         });
         
-        // VFX duration logic for enemy turn
-        setTimeout(() => {
-            setGameState(prev => ({ ...prev, activeEffects: [] }));
-        }, 600);
-
-        await wait(600);
+        await wait(100);
     }
+    
     setActingEnemyId(null);
     
     setGameState(prev => {
@@ -2254,7 +2242,6 @@ const App: React.FC = () => {
             p.strength -= p.powers['STRENGTH_DOWN']; 
             delete p.powers['STRENGTH_DOWN']; 
         }
-
         if (p.powers['LOSE_STRENGTH'] > 0) {
             const loss = p.powers['LOSE_STRENGTH'];
             p.strength -= loss;
@@ -2373,7 +2360,6 @@ const App: React.FC = () => {
       audioService.playBGM('map');
   };
 
-  // --- Gardener System Handlers ---
   const handlePlantSeed = (slotIdx: number, card: ICard) => {
     setGameState(prev => {
         const p = { ...prev.player };
@@ -2406,9 +2392,15 @@ const App: React.FC = () => {
     });
   };
 
+  const stateRef = useRef(gameState);
+  useEffect(() => { stateRef.current = gameState; }, [gameState]);
+
   useEffect(() => {
     if (gameState.screen === GameScreen.BATTLE) {
-        if (gameState.enemies.length === 0) {
+        // 真・校長先生のフェーズ移行中は全滅判定をスキップする
+        const isHeartTransforming = gameState.enemies.some(e => e.enemyType === 'THE_HEART' && e.phase === 1 && e.currentHp <= 0);
+        
+        if (gameState.enemies.length === 0 && !isHeartTransforming) {
             audioService.stopBGM();
             audioService.playSound('win');
             
@@ -2421,14 +2413,12 @@ const App: React.FC = () => {
                 if (hpRegen > 0) {
                     nextPlayer.currentHp = Math.min(nextPlayer.maxHp, nextPlayer.currentHp + hpRegen);
                 }
-                
                 if (nextPlayer.partner) {
                     nextPlayer.partner = {
                         ...nextPlayer.partner,
                         currentHp: Math.min(nextPlayer.partner.maxHp, nextPlayer.partner.currentHp + 5) 
                     };
                 }
-
                 if (prev.act === 4) {
                     audioService.playBGM('victory');
                     return { ...prev, player: nextPlayer, screen: GameScreen.ENDING };
@@ -2442,7 +2432,12 @@ const App: React.FC = () => {
                 }
             });
         } else if (gameState.player.currentHp <= 0) {
-            if (gameState.player.relics.find(r => r.id === 'LIZARD_TAIL') && !gameState.player.relicCounters['LIZARD_TAIL_USED']) {
+            // 復活チェック
+            const lizardRelic = gameState.player.relics.find(r => r.id === 'LIZARD_TAIL');
+            const hasLizardReady = lizardRelic && !gameState.player.relicCounters['LIZARD_TAIL_USED'];
+            const ghostPotIndex = gameState.player.potions.findIndex(p => p.templateId === 'GHOST_IN_JAR');
+
+            if (hasLizardReady) {
                 audioService.playSound('buff');
                 setGameState(prev => ({ 
                     ...prev, 
@@ -2456,10 +2451,10 @@ const App: React.FC = () => {
                 return;
             }
             
-            const ghostPotIndex = gameState.player.potions.findIndex(p => p.templateId === 'GHOST_IN_JAR');
             if (ghostPotIndex !== -1) {
                  audioService.playSound('buff');
                  setGameState(prev => ({
+                     ...prev,
                      player: {
                          ...prev.player,
                          currentHp: Math.floor(prev.player.maxHp * 0.1),
@@ -2470,6 +2465,7 @@ const App: React.FC = () => {
                  return;
             }
 
+            // 復活もできない場合はゲームオーバー
             audioService.playSound('lose');
             audioService.playBGM('game_over');
             
@@ -3084,7 +3080,7 @@ const App: React.FC = () => {
                                  if (relic.id === 'CURSED_KEY') newP.maxEnergy += 1;
                                  if (relic.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
                                  if (relic.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
-                                 if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = p.maxHp; }
+                                 if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = prev.player.maxHp; }
                                  if (relic.id === 'OLD_COIN') newP.gold += 300;
                                  if (relic.id === 'MATRYOSHKA') prev.player.relicCounters['MATRYOSHKA'] = 2; 
                                  if (relic.id === 'HAPPY_FLOWER') prev.player.relicCounters['HAPPY_FLOWER'] = 0; 
