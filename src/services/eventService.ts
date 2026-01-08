@@ -81,7 +81,7 @@ export const generateEvent = (
     potentialEvents.push(
         {
             title: "怪しい薬売り",
-            description: "路地裏で男が声をかけてきた。「とびきりの薬、あるよ」",
+            description: "路地裏で男が声をかけてきた。「とびきりの薬, あるよ」",
             options: [
                 { label: "買う", text: "20G支払って試す", action: () => {
                     if (player.gold >= 20) {
@@ -295,7 +295,7 @@ export const generateEvent = (
         },
         {
             title: "魔の掃除時間",
-            description: "廊下のワックスがけの時間だ。\nツルツル滑る床は危険だが、滑れば速く移動できるかも？",
+            description: "廊下のワックスがけの時間だ。\nツルツル滑る床は危険だが, 滑れば速く移動できるかも？",
             options: [
                 { label: "滑る", text: "カード強化。HP-5。", action: () => {
                     damagePlayer(5);
@@ -419,7 +419,7 @@ export const generateEvent = (
                          addRelic(RELIC_LIBRARY.HAPPY_FLOWER);
                          setEventResultLog(trans("なんと！欲しかったレアカード「アサガオ(レリック)」をもらえた！\nこれは愛の告白...？", languageMode));
                     } else if (r < 0.6) {
-                         addCard(CARDS_LIBRARY.LOVE_LETTER || CARDS_LIBRARY.SIMULATED_LOVE || CURSE_CARDS.WRITHE); // Fallback to writhe
+                         addCard(CURSE_CARDS.WRITHE); // Fallback to writhe
                          setEventResultLog(trans("誰もいなかった... イタズラだったようだ。\n胸が痛む。呪い「苦悩」を入手。", languageMode));
                     } else {
                          gainGold(100);
@@ -499,7 +499,7 @@ export const generateEvent = (
         });
         potentialEvents.push({
             title: "飼育小屋の主",
-            description: "飼育小屋の奥に、主と呼ばれる巨大なニワトリがいる。",
+            description: "飼育小屋の奥に, 主と呼ばれる巨大なニワトリがいる。",
             options: [
                 { label: "戦う", text: "HP-10。カード強化。", action: () => {
                     damagePlayer(10);
@@ -525,7 +525,7 @@ export const generateEvent = (
     if (charType === 'ASSASSIN') {
         potentialEvents.push({
             title: "闇の掲示板",
-            description: "校舎裏の掲示板に、ターゲットの情報が書かれている。",
+            description: "校舎裏の掲示板に, ターゲットの情報が書かれている。",
             options: [
                 { label: "情報を売る", text: "カードを1枚削除。50G入手。", action: () => {
                     const removed = removeCard();
@@ -599,7 +599,7 @@ export const generateEvent = (
     if (charType === 'LIBRARIAN') {
         potentialEvents.push({
             title: "延滞図書の督促",
-            description: "「あ、あの...本返してください...」\n不良グループが本を返してくれない。",
+            description: "「あ, あの...本返してください...」\n不良グループが本を返してくれない。",
             options: [
                 { label: "戦う", text: "HP-5。カード強化。", action: () => {
                     damagePlayer(5);
