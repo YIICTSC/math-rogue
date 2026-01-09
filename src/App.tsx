@@ -3205,7 +3205,7 @@ const App: React.FC = () => {
                                  if (relic.id === 'CURSED_KEY') newP.maxEnergy += 1;
                                  if (relic.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
                                  if (relic.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
-                                 if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = prev.player.maxHp; }
+                                 if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = p.maxHp; }
                                  if (relic.id === 'OLD_COIN') newP.gold += 300;
                                  if (relic.id === 'MATRYOSHKA') prev.player.relicCounters['MATRYOSHKA'] = 2; 
                                  if (relic.id === 'HAPPY_FLOWER') prev.player.relicCounters['HAPPY_FLOWER'] = 0; 
@@ -3267,7 +3267,7 @@ const App: React.FC = () => {
                             setGameState(prev => {
                                 return {
                                     ...prev,
-                                    screen: GameScreen.GARDEN, // This logic is wrong, but follows existing structure
+                                    screen: GameScreen.MAP, // FIX: Depart correctly to the map
                                     player: {
                                         ...prev.player,
                                         deck: [...prev.player.deck, newSeed]
