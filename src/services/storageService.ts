@@ -43,6 +43,10 @@ const STORAGE_KEY_ENGLISH_VOICE = 'pixel_spire_english_voice_v1';
 // --- BGM MODE FLAG ---
 const STORAGE_KEY_BGM_MODE = 'pixel_spire_bgm_mode_v1';
 
+// --- PLAY TIME ---
+const STORAGE_KEY_TOTAL_PLAY_TIME = 'pixel_spire_total_play_time_v1';
+const STORAGE_KEY_DAILY_PLAY_TIME = 'pixel_spire_daily_play_time_v1';
+
 export interface PaperPlaneProgress {
     rank: number; // Association Level (Clear Count equivalent)
     rerollCount: number; // Consumable rerolls
@@ -466,6 +470,34 @@ export const storageService = {
     localStorage.setItem(STORAGE_KEY_BGM_MODE, mode);
   },
 
+  // --- Play Time Management ---
+  getTotalPlayTime: (): number => {
+    try {
+        const stored = localStorage.getItem(STORAGE_KEY_TOTAL_PLAY_TIME);
+        return stored ? parseInt(stored, 10) : 0;
+    } catch { return 0; }
+  },
+
+  saveTotalPlayTime: (seconds: number) => {
+    localStorage.setItem(STORAGE_KEY_TOTAL_PLAY_TIME, seconds.toString());
+  },
+
+  getDailyPlayTime: (): number => {
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        const stored = localStorage.getItem(STORAGE_KEY_DAILY_PLAY_TIME);
+        if (!stored) return 0;
+        const data = JSON.parse(stored);
+        if (data.date !== today) return 0;
+        return data.seconds || 0;
+    } catch { return 0; }
+  },
+
+  saveDailyPlayTime: (seconds: number) => {
+    const today = new Date().toISOString().split('T')[0];
+    localStorage.setItem(STORAGE_KEY_DAILY_PLAY_TIME, JSON.stringify({ date: today, seconds }));
+  },
+
   // --- Game State (Save/Load) ---
   saveGame: (state: GameState) => {
     try {
@@ -577,5 +609,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_CHALLENGE_RECORDS);
       localStorage.removeItem(STORAGE_KEY_ENGLISH_VOICE);
       localStorage.removeItem(STORAGE_KEY_BGM_MODE);
+      localStorage.removeItem(STORAGE_KEY_TOTAL_PLAY_TIME);
+      localStorage.removeItem(STORAGE_KEY_DAILY_PLAY_TIME);
   }
 };

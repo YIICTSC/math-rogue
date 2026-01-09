@@ -44,7 +44,7 @@ import { storageService } from './services/storageService';
 import { generateEvent } from './services/eventService';
 import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { trans } from './utils/textUtils';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle } from 'lucide-react';
 
 const calculateScore = (state: GameState, victory: boolean): number => {
     let score = 0;
@@ -247,10 +247,45 @@ const App: React.FC = () => {
   
   const [clearCount, setClearCount] = useState<number>(0);
 
+  // --- PLAY TIME STATES ---
+  const [totalPlaySeconds, setTotalPlaySeconds] = useState(() => storageService.getTotalPlayTime());
+  const [dailyPlaySeconds, setDailyPlaySeconds] = useState(() => storageService.getDailyPlayTime());
+  const PLAY_LIMIT_SECONDS = 3600; // 1 Hour
+
+  const formatTime = (total: number) => {
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const isDailyLimitReached = dailyPlaySeconds >= PLAY_LIMIT_SECONDS;
+
   const VICTORY_GOLD = 25;
   
   const UNLOCK_THRESHOLDS = [1000, 1500, 2000, 2500, 3000, 3500];
-  
+
+  // --- TIME TRACKER EFFECT ---
+  useEffect(() => {
+    const interval = setInterval(() => {
+        setTotalPlaySeconds(prev => {
+            const next = prev + 1;
+            storageService.saveTotalPlayTime(next);
+            return next;
+        });
+
+        // Only count towards daily limit if NOT in Start Menu and NOT in Problem Challenge
+        if (gameState.screen !== GameScreen.START_MENU && gameState.screen !== GameScreen.PROBLEM_CHALLENGE) {
+            setDailyPlaySeconds(prev => {
+                const next = prev + 1;
+                storageService.saveDailyPlayTime(next);
+                return next;
+            });
+        }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [gameState.screen]);
+
   useEffect(() => {
       // 重要な遷移時やプレイ中にオートセーブを実行
       // 学習ローグ以外の画面（ミニゲームなど）では rogue の状態保存を行わない
@@ -371,6 +406,10 @@ const App: React.FC = () => {
   };
 
   const continueGame = () => {
+      if (isDailyLimitReached) {
+          audioService.playSound('wrong');
+          return;
+      }
       const saved = storageService.loadGame();
       if (saved) {
           setGameState(saved);
@@ -389,6 +428,10 @@ const App: React.FC = () => {
   };
 
   const startGame = () => {
+      if (isDailyLimitReached) {
+          audioService.playSound('wrong');
+          return;
+      }
       audioService.playSound('select');
       setGameState(prev => ({ 
           ...prev, 
@@ -398,6 +441,10 @@ const App: React.FC = () => {
   };
 
   const startChallengeGame = () => {
+      if (isDailyLimitReached) {
+          audioService.playSound('wrong');
+          return;
+      }
       audioService.playSound('select');
       setGameState(prev => ({ ...prev, screen: GameScreen.MODE_SELECTION, challengeMode: '1A1D' }));
   };
@@ -413,11 +460,19 @@ const App: React.FC = () => {
   };
 
   const openMiniGameMenu = () => {
+      if (isDailyLimitReached) {
+          audioService.playSound('wrong');
+          return;
+      }
       audioService.playSound('select');
       setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_SELECT }));
   };
 
   const handleMiniGameSelect = (gameId: string) => {
+      if (isDailyLimitReached) {
+          audioService.playSound('wrong');
+          return;
+      }
       audioService.playSound('select');
       if (gameId === 'POKER') {
           setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_POKER }));
@@ -2852,7 +2907,15 @@ const App: React.FC = () => {
             )}
 
             {gameState.screen === GameScreen.START_MENU && (
-                <div className="w-full h-full bg-gray-900 flex items-center justify-center">
+                <div className="w-full h-full bg-gray-900 flex items-center justify-center relative">
+                    {/* Time UI */}
+                    <div className="absolute bottom-2 left-2 z-[9999] text-gray-500 text-[10px] font-mono flex flex-col gap-0.5">
+                        <div>TOTAL TIME: {formatTime(totalPlaySeconds)}</div>
+                        <div className={isDailyLimitReached ? "text-red-500 font-bold" : ""}>
+                            DAILY: {formatTime(dailyPlaySeconds)} / 01:00:00
+                        </div>
+                    </div>
+
                     <div className="text-center p-8 w-full flex flex-col items-center">
                         <h1 
                             className="text-5xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-b from-purple-400 to-blue-600 mb-8 font-bold animate-pulse tracking-widest leading-tight cursor-pointer select-none"
@@ -2862,7 +2925,11 @@ const App: React.FC = () => {
                         </h1>
                         
                         <div className="mb-6 bg-black/40 px-4 py-2 rounded-lg border border-gray-600">
-                             {nextThreshold ? (
+                             {isDailyLimitReached ? (
+                                <div className="text-red-500 text-xs md:text-sm font-bold animate-pulse flex items-center gap-2">
+                                    <AlertTriangle size={16}/> {trans("本日のプレイ制限に達しました。問題チャレンジで勉強しましょう！", languageMode)}
+                                </div>
+                             ) : nextThreshold ? (
                                 <div className="text-yellow-300 text-xs md:text-sm font-bold">
                                     {trans("次のミニゲーム開放まで", languageMode)}: <span className="text-xl md:text-2xl text-white mx-1">{Math.max(0, nextThreshold - totalMathCorrect)}</span> {trans("問正解", languageMode)}
                                 </div>
@@ -2884,44 +2951,60 @@ const App: React.FC = () => {
                         )}
                         {(!isMathDebugSkipped && !isDebugHpOne) && <div className="mb-2 h-2"></div>}
 
-                        <div className="flex flex-col gap-3 items-center w-full max-w-[280px]">
+                        <div className="flex flex-col gap-3 items-center w-full max-w-[320px]">
                             {hasSave && (
-                                <button onClick={continueGame} className="w-full bg-blue-900 text-white py-3 px-4 text-lg font-bold border-2 border-blue-400 hover:bg-blue-800 cursor-pointer flex items-center justify-center shadow-lg relative group overflow-hidden animate-in fade-in slide-in-from-top-2">
-                                    <div className="absolute inset-0 bg-blue-600 opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                                <button 
+                                    onClick={continueGame} 
+                                    disabled={isDailyLimitReached}
+                                    className={`w-full py-3 px-4 text-lg font-bold border-b-4 border-r-4 rounded-none cursor-pointer flex items-center justify-center shadow-lg relative group overflow-hidden animate-in fade-in slide-in-from-top-2 ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 cursor-not-allowed opacity-50 grayscale' : 'bg-blue-900 text-white border-blue-400 hover:bg-blue-800'}`}
+                                >
+                                    {!isDailyLimitReached && <div className="absolute inset-0 bg-blue-600 opacity-0 group-hover:opacity-20 transition-opacity"></div>}
                                     <Play className="mr-2 fill-current" /> {trans("つづきから", languageMode)}
                                 </button>
                             )}
-                            <button onClick={startGame} disabled={isLoading} className="w-full bg-gray-100 text-black py-3 px-4 text-lg font-bold border-b-4 border-r-4 border-gray-500 hover:bg-white hover:border-gray-400 hover:translate-x-[1px] hover:translate-y-[1px] active:border-0 active:translate-y-[4px] active:translate-x-[4px] transition-all cursor-pointer shadow-lg flex items-center justify-center">
+                            <button 
+                                onClick={startGame} 
+                                disabled={isLoading || isDailyLimitReached} 
+                                className={`w-full py-3 px-4 text-lg font-bold border-b-4 border-r-4 rounded-none transition-all shadow-lg flex items-center justify-center ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 cursor-not-allowed opacity-50 grayscale' : 'bg-gray-100 text-black border-gray-500 hover:bg-white hover:border-gray-400 hover:translate-x-[1px] hover:translate-y-[1px] active:border-0 active:translate-y-[4px] active:translate-x-[4px]'}`}
+                            >
                                 {isLoading ? trans("じゅんびちゅう...", languageMode) : trans("冒険を始める", languageMode)}
                             </button>
                             
-                            <button onClick={startChallengeGame} disabled={isLoading} className="w-full bg-red-900/80 text-red-100 py-2 px-4 text-sm font-bold border border-red-500 hover:bg-red-800 cursor-pointer flex items-center justify-center shadow-md hover:shadow-red-900/50">
-                                <Swords className="mr-2" size={16}/> {trans("1A1Dモード", languageMode)}
+                            <button 
+                                onClick={startChallengeGame} 
+                                disabled={isLoading || isDailyLimitReached} 
+                                className={`w-full py-3 px-4 text-base font-bold border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 cursor-not-allowed opacity-50 grayscale' : 'bg-red-900/80 text-red-100 border-red-500 hover:bg-red-800 hover:shadow-red-900/50'}`}
+                            >
+                                <Swords className="mr-2" size={18}/> {trans("1A1Dモード", languageMode)}
                             </button>
 
-                            <button onClick={startProblemChallenge} className="w-full bg-emerald-900/80 text-emerald-100 py-2 px-4 text-sm font-bold border border-emerald-500 hover:bg-emerald-800 cursor-pointer flex items-center justify-center shadow-md hover:shadow-emerald-900/50">
-                                <GraduationCap className="mr-2" size={16}/> {trans("問題チャレンジ", languageMode)}
+                            <button onClick={startProblemChallenge} className="w-full py-3 px-4 text-base font-bold border-b-4 border-r-4 rounded-none bg-emerald-900/80 text-emerald-100 border-emerald-500 hover:bg-emerald-800 cursor-pointer flex items-center justify-center shadow-md hover:shadow-emerald-900/50">
+                                <GraduationCap className="mr-2" size={20}/> {trans("問題チャレンジ", languageMode)}
                             </button>
 
-                            <button onClick={openMiniGameMenu} className="w-full bg-indigo-900/80 text-indigo-100 py-2 px-4 text-sm font-bold border border-indigo-500 hover:bg-indigo-800 cursor-pointer flex items-center justify-center shadow-md hover:shadow-indigo-900/50">
-                                <Gamepad2 className="mr-2" size={16}/> {trans("ミニゲーム", languageMode)}
+                            <button 
+                                onClick={openMiniGameMenu} 
+                                disabled={isDailyLimitReached}
+                                className={`w-full py-3 px-4 text-base font-bold border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 cursor-not-allowed opacity-50 grayscale' : 'bg-indigo-900/80 text-indigo-100 border-indigo-500 hover:bg-indigo-800 hover:shadow-indigo-900/50'}`}
+                            >
+                                <Gamepad2 className="mr-2" size={20}/> {trans("ミニゲーム", languageMode)}
                             </button>
                             
                             {isDebugHpOne && (
-                                <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.DEBUG_MENU }))} className="w-full bg-gray-800 text-red-400 py-2 px-4 text-sm font-bold border border-red-500 hover:bg-gray-700 cursor-pointer flex items-center justify-center shadow-md mb-2">
-                                    <Zap className="mr-2" size={16}/> {trans("デバッグメニュー", languageMode)}
+                                <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.DEBUG_MENU }))} className="w-full py-3 px-4 text-base font-bold border-b-4 border-r-4 rounded-none bg-gray-800 text-red-400 border-red-500 hover:bg-gray-700 cursor-pointer flex items-center justify-center shadow-md mb-2">
+                                    <Zap size={18} className="mr-2"/> {trans("デバッグメニュー", languageMode)}
                                 </button>
                             )}
 
                             <div className="flex gap-2 w-full justify-between mt-2">
-                                <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.COMPENDIUM }))} className="flex-1 bg-gray-800 text-amber-500 py-2 text-[10px] font-bold border border-gray-600 hover:border-amber-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
-                                    <BookOpen className="mb-1" size={18}/> {trans("図鑑", languageMode)}
+                                <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.COMPENDIUM }))} className="flex-1 bg-gray-800 text-amber-500 py-3 text-xs font-bold border-b-4 border-r-4 border-gray-600 hover:border-amber-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-16 rounded">
+                                    <BookOpen className="mb-1" size={20}/> {trans("図鑑", languageMode)}
                                 </button>
-                                <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.RANKING }))} className="flex-1 bg-gray-800 text-green-500 py-2 text-[10px] font-bold border border-gray-600 border-green-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
-                                    <Trophy className="mb-1" size={18}/> {trans("記録", languageMode)}
+                                <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.RANKING }))} className="flex-1 bg-gray-800 text-green-500 py-3 text-xs font-bold border-b-4 border-r-4 border-gray-600 border-green-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-16 rounded">
+                                    <Trophy className="mb-1" size={20}/> {trans("記録", languageMode)}
                                 </button>
-                                <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.HELP }))} className="flex-1 bg-gray-800 text-blue-400 py-2 text-[10px] font-bold border border-gray-600 border-blue-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
-                                    <HelpCircle className="mb-1" size={18}/> {trans("遊び方", languageMode)}
+                                <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.HELP }))} className="flex-1 bg-gray-800 text-blue-400 py-3 text-xs font-bold border-b-4 border-r-4 border-gray-600 border-blue-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-16 rounded">
+                                    <HelpCircle className="mb-1" size={20}/> {trans("遊び方", languageMode)}
                                 </button>
                             </div>
 
@@ -2963,46 +3046,64 @@ const App: React.FC = () => {
             )}
             
             {gameState.screen === GameScreen.DEBUG_MENU && (
-                <DebugMenuScreen onStart={handleDebugStart} onStartAct3Boss={handleDebugStartAct3Boss} onBack={returnToTitle} />
+                <div className="absolute inset-0">
+                    <DebugMenuScreen onStart={handleDebugStart} onStartAct3Boss={handleDebugStartAct3Boss} onBack={returnToTitle} />
+                </div>
             )}
 
             {gameState.screen === GameScreen.PROBLEM_CHALLENGE && (
-                <ProblemChallengeScreen onBack={returnToTitle} languageMode={languageMode} />
+                <div className="absolute inset-0">
+                    <ProblemChallengeScreen onBack={returnToTitle} languageMode={languageMode} />
+                </div>
             )}
 
             {gameState.screen === GameScreen.MINI_GAME_SELECT && (
-                <MiniGameSelectScreen 
-                    onSelect={handleMiniGameSelect} 
-                    onBack={returnToTitle} 
-                    totalMathCorrect={totalMathCorrect}
-                    isDebug={isDebugHpOne}
-                />
+                <div className="absolute inset-0">
+                    <MiniGameSelectScreen 
+                        onSelect={handleMiniGameSelect} 
+                        onBack={returnToTitle} 
+                        totalMathCorrect={totalMathCorrect}
+                        isDebug={isDebugHpOne}
+                    />
+                </div>
             )}
             
             {gameState.screen === GameScreen.MINI_GAME_POKER && (
-                <PokerGameScreen 
-                    onBack={returnToTitle} 
-                />
+                <div className="absolute inset-0">
+                    <PokerGameScreen 
+                        onBack={returnToTitle} 
+                    />
+                </div>
             )}
 
             {gameState.screen === GameScreen.MINI_GAME_SURVIVOR && (
-                <SchoolyardSurvivorScreen onBack={returnToTitle} />
+                <div className="absolute inset-0">
+                    <SchoolyardSurvivorScreen onBack={returnToTitle} />
+                </div>
             )}
 
             {gameState.screen === GameScreen.MINI_GAME_DUNGEON && (
-                <SchoolDungeonRPG onBack={returnToTitle} />
+                <div className="absolute inset-0">
+                    <SchoolDungeonRPG onBack={returnToTitle} />
+                </div>
             )}
 
             {gameState.screen === GameScreen.MINI_GAME_DUNGEON_2 && (
-                <SchoolDungeonRPG2 onBack={returnToTitle} />
+                <div className="absolute inset-0">
+                    <SchoolDungeonRPG2 onBack={returnToTitle} />
+                </div>
             )}
 
             {gameState.screen === GameScreen.MINI_GAME_KOCHO && (
-                <KochoShowdown onBack={returnToTitle} />
+                <div className="absolute inset-0">
+                    <KochoShowdown onBack={returnToTitle} />
+                </div>
             )}
 
             {gameState.screen === GameScreen.MINI_GAME_PAPER_PLANE && (
-                <PaperPlaneBattle onBack={returnToTitle} />
+                <div className="absolute inset-0">
+                    <PaperPlaneBattle onBack={returnToTitle} />
+                </div>
             )}
             
             {gameState.screen === GameScreen.MODE_SELECTION && (
