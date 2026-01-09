@@ -3083,7 +3083,7 @@ const App: React.FC = () => {
 
             {gameState.screen === GameScreen.COMPENDIUM && (
                 <div className="absolute inset-0">
-                    <CompendiumScreen unlockedCardNames={unlockedCardNames} onBack={returnToTitle} languageMode={languageMode} />
+                    <CompendiumScreen unlockedCardNames={unlockedCardNames} onBack={returnToTitle} languageMode={languageMode} isDebug={isDebugHpOne} />
                 </div>
             )}
 
