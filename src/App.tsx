@@ -253,6 +253,7 @@ const App: React.FC = () => {
   
   useEffect(() => {
       // 重要な遷移時やプレイ中にオートセーブを実行
+      // 学習ローグ以外の画面（ミニゲームなど）では rogue の状態保存を行わない
       if (gameState.screen !== GameScreen.START_MENU && 
           gameState.screen !== GameScreen.GAME_OVER && 
           gameState.screen !== GameScreen.ENDING &&
@@ -264,6 +265,12 @@ const App: React.FC = () => {
           gameState.screen !== GameScreen.MODE_SELECTION &&
           gameState.screen !== GameScreen.DEBUG_MENU &&
           gameState.screen !== GameScreen.MINI_GAME_SELECT &&
+          gameState.screen !== GameScreen.MINI_GAME_POKER &&
+          gameState.screen !== GameScreen.MINI_GAME_SURVIVOR &&
+          gameState.screen !== GameScreen.MINI_GAME_DUNGEON &&
+          gameState.screen !== GameScreen.MINI_GAME_DUNGEON_2 &&
+          gameState.screen !== GameScreen.MINI_GAME_KOCHO &&
+          gameState.screen !== GameScreen.MINI_GAME_PAPER_PLANE &&
           gameState.screen !== GameScreen.PROBLEM_CHALLENGE
       ) {
           storageService.saveGame(gameState);
@@ -2896,7 +2903,7 @@ const App: React.FC = () => {
                                 <GraduationCap className="mr-2" size={16}/> {trans("問題チャレンジ", languageMode)}
                             </button>
 
-                            <button onClick={openMiniGameMenu} className="w-full bg-indigo-900/80 text-indigo-100 py-2 px-4 text-sm font-bold border border-indigo-500 hover:bg-indigo-800 cursor-not-allowed flex items-center justify-center shadow-md hover:shadow-indigo-900/50">
+                            <button onClick={openMiniGameMenu} className="w-full bg-indigo-900/80 text-indigo-100 py-2 px-4 text-sm font-bold border border-indigo-500 hover:bg-indigo-800 cursor-pointer flex items-center justify-center shadow-md hover:shadow-indigo-900/50">
                                 <Gamepad2 className="mr-2" size={16}/> {trans("ミニゲーム", languageMode)}
                             </button>
                             

@@ -469,17 +469,17 @@ export const storageService = {
   // --- Game State (Save/Load) ---
   saveGame: (state: GameState) => {
     try {
-      // Don't save if we are on transient screens
-      if (state.screen === GameScreen.START_MENU || 
-          state.screen === GameScreen.GAME_OVER || 
-          state.screen === GameScreen.ENDING ||
-          state.screen === GameScreen.VICTORY ||
-          state.screen === GameScreen.COMPENDIUM || 
-          state.screen === GameScreen.HELP ||
-          state.screen === GameScreen.CHARACTER_SELECTION ||
-          state.screen === GameScreen.RANKING ||
-          state.screen === GameScreen.PROBLEM_CHALLENGE
-      ) { 
+      // Don't save if we are on transient screens OR mini-games
+      // Title screen resume should only work for the main game
+      const transientOrMini = [
+          GameScreen.START_MENU, GameScreen.GAME_OVER, GameScreen.ENDING,
+          GameScreen.VICTORY, GameScreen.COMPENDIUM, GameScreen.HELP,
+          GameScreen.CHARACTER_SELECTION, GameScreen.RANKING, GameScreen.PROBLEM_CHALLENGE,
+          GameScreen.MINI_GAME_SELECT, GameScreen.MINI_GAME_POKER, GameScreen.MINI_GAME_SURVIVOR,
+          GameScreen.MINI_GAME_DUNGEON, GameScreen.MINI_GAME_DUNGEON_2, GameScreen.MINI_GAME_KOCHO,
+          GameScreen.MINI_GAME_PAPER_PLANE
+      ];
+      if (transientOrMini.includes(state.screen)) { 
           return;
       }
       localStorage.setItem(STORAGE_KEY_GAME_STATE, JSON.stringify(state));
