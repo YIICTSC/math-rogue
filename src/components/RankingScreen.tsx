@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ScrollText, Calendar, Skull, Trophy, Club, Swords, Timer, Zap, Compass, Mountain, Send, Crown } from 'lucide-react';
 import { RankingEntry, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, KochoScoreEntry, PaperPlaneScoreEntry } from '../types';
@@ -20,13 +19,17 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
   const [planeData, setPlaneData] = useState<PaperPlaneScoreEntry[]>([]);
 
   useEffect(() => {
-      setAdventureData(storageService.getLocalScores());
-      setPokerData(storageService.getPokerScores());
-      setSurvivorData(storageService.getSurvivorScores());
-      setDungeonData(storageService.getDungeonScores());
-      setDungeon2Data(storageService.getDungeonScores2());
-      setKochoData(storageService.getKochoScores());
-      setPlaneData(storageService.getPaperPlaneScores());
+      // 全データを取得し、それぞれの指標で上位順にソート
+      setAdventureData(storageService.getLocalScores().sort((a, b) => b.score - a.score));
+      setPokerData(storageService.getPokerScores().sort((a, b) => b.bestHandScore - a.bestHandScore));
+      setSurvivorData(storageService.getSurvivorScores().sort((a, b) => b.score - a.score));
+      setDungeonData(storageService.getDungeonScores().sort((a, b) => b.score - a.score));
+      setDungeon2Data(storageService.getDungeonScores2().sort((a, b) => b.score - a.score));
+      setKochoData(storageService.getKochoScores().sort((a, b) => {
+          if (b.stage !== a.stage) return b.stage - a.stage;
+          return a.turns - b.turns; // ステージが同じならターン数が少ない方が上位
+      }));
+      setPlaneData(storageService.getPaperPlaneScores().sort((a, b) => b.score - a.score));
   }, []);
 
   const formatDate = (ts: number) => {
