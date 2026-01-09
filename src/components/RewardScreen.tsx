@@ -178,7 +178,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
         <p className="text-gray-300 text-sm">{trans("欲しい報酬を選択してください", languageMode)}</p>
       </div>
 
-      <div className={`z-10 flex flex-row items-center gap-8 w-full overflow-x-auto custom-scrollbar px-4 pt-20 pb-8 min-h-[420px] snap-x ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
+      <div className={`z-10 flex flex-row items-center gap-8 w-full overflow-x-auto md:justify-center landscape:justify-center custom-scrollbar px-4 pt-20 pb-8 min-h-[420px] snap-x ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
         {rewards.map((reward) => (
           <div key={reward.id} className="snap-center shrink-0 transform hover:scale-105 transition-transform duration-200 flex justify-center">
             
