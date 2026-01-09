@@ -12,9 +12,10 @@ interface CompendiumScreenProps {
   unlockedCardNames: string[];
   onBack: () => void;
   languageMode: LanguageMode;
+  isDebug?: boolean;
 }
 
-const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, onBack, languageMode }) => {
+const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, onBack, languageMode, isDebug = false }) => {
   const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'ENEMIES'>('CARDS');
   const [unlockedRelics, setUnlockedRelics] = useState<string[]>([]);
   const [unlockedPotions, setUnlockedPotions] = useState<string[]>([]);
@@ -67,7 +68,9 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
   const allEnemies = useMemo(() => Object.values(ENEMY_LIBRARY).sort((a, b) => a.tier - b.tier), []);
 
   const totalCards = allCards.length;
-  const currentLibraryUnlockedCount = allCards.filter(c => unlockedCardNames.includes(c.name)).length;
+  const currentLibraryUnlockedCount = isDebug 
+    ? totalCards 
+    : allCards.filter(c => unlockedCardNames.includes(c.name)).length;
   const percentage = Math.floor((currentLibraryUnlockedCount / totalCards) * 100);
 
   const handleItemClick = (type: 'CARD' | 'RELIC' | 'POTION' | 'ENEMY', data: any, unlocked: boolean) => {
@@ -83,7 +86,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                 <BookOpen size={32} className="text-amber-500 mr-3" />
                 <div>
                     <h2 className="text-2xl font-bold text-amber-100">{trans("図鑑", languageMode)}</h2>
-                    {activeTab === 'CARDS' && <p className="text-xs text-gray-400">{trans("収集率", languageMode)}: {percentage}%</p>}
+                    {activeTab === 'CARDS' && <p className="text-xs text-gray-400">{trans("収集率", languageMode)}: {percentage}% {isDebug && "(DEBUG ON)"}</p>}
                 </div>
             </div>
             
@@ -117,7 +120,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
             {activeTab === 'CARDS' && (
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-4 justify-items-center">
                     {allCards.map((template, idx) => {
-                        const isUnlocked = unlockedCardNames.includes(template.name);
+                        const isUnlocked = isDebug || unlockedCardNames.includes(template.name);
                         const cardInstance: ICard = { id: `compendium-${idx}`, ...template };
 
                         return (
@@ -143,7 +146,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
             {activeTab === 'RELICS' && (
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
                     {allRelics.map((relic, idx) => {
-                        const isUnlocked = unlockedRelics.includes(relic.id);
+                        const isUnlocked = isDebug || unlockedRelics.includes(relic.id);
                         return (
                             <div 
                                 key={idx} 
@@ -166,7 +169,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
             {activeTab === 'POTIONS' && (
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
                     {allPotions.map((potion, idx) => {
-                        const isUnlocked = unlockedPotions.includes(potion.templateId);
+                        const isUnlocked = isDebug || unlockedPotions.includes(potion.templateId);
                         return (
                             <div 
                                 key={idx} 
@@ -189,7 +192,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
             {activeTab === 'ENEMIES' && (
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
                     {allEnemies.map((enemy, idx) => {
-                        const isUnlocked = defeatedEnemies.includes(enemy.name);
+                        const isUnlocked = isDebug || defeatedEnemies.includes(enemy.name);
                         return (
                             <div 
                                 key={idx} 
