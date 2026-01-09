@@ -1470,7 +1470,26 @@ export const SPRITE_TEMPLATES: Record<string, string[]> = {
     "....###....###..",
     "...####....####.",
     "................"
-  ]
+  ],
+  // --- MUSHROOM TEMPLATES ---
+  MUSHROOM: [
+    "................",
+    "......####......",
+    "....########....",
+    "...##########...",
+    "..############..",
+    "..############..",
+    "...###%%%%###...",
+    "....###%%###....",
+    "......####......",
+    "......####......",
+    "......####......",
+    "......####......",
+    ".....######.....",
+    "....########....",
+    "................",
+    "................"
+  ],
 };
 
 // Exported Helper for other components
@@ -1490,17 +1509,21 @@ export const createPixelSpriteCanvas = (seed: string, name: string = "", size: n
     let colorKeySource = nameParts.length > 1 ? nameParts[1] : (seed || name); 
 
     // --- Smart Shape Matching Logic ---
-    // If explicitly provided a template name, use it. Otherwise, match by keyword in name.
     if (!SPRITE_TEMPLATES[shapeKeySource]) {
         const lowerName = name.toLowerCase();
         
-        // --- 特殊マッチング: 植物系 ---
+        // --- 特殊マッチング: 植物系 (拡張) ---
         if (lowerName.includes("ヒマワリ") || lowerName.includes("sunflower")) shapeKeySource = "SUNFLOWER";
         else if (lowerName.includes("バラ") || lowerName.includes("rose")) shapeKeySource = "ROSE";
         else if (lowerName.includes("サボテン") || lowerName.includes("cactus")) shapeKeySource = "CACTUS";
+        else if (lowerName.includes("サクラ") || lowerName.includes("sakura")) shapeKeySource = "FLAME"; // 桜はFLAMEの形を流用
+        else if (lowerName.includes("きのこ") || lowerName.includes("キノコ") || lowerName.includes("mushroom")) shapeKeySource = "MUSHROOM";
+        else if (lowerName.includes("マツ") || lowerName.includes("カシ") || lowerName.includes("ヒノキ") || lowerName.includes("pine") || lowerName.includes("oak") || lowerName.includes("cypress")) shapeKeySource = "PLANT";
         else if (lowerName.includes("種") || lowerName.includes("seed")) shapeKeySource = "SPROUT";
-        else if (lowerName.includes("ツル") || lowerName.includes("vine")) shapeKeySource = "PLANT";
+        else if (lowerName.includes("ツル") || lowerName.includes("vine")) shapeKeySource = "SNAKE"; // ツルは蛇の形を流用
         else if (lowerName.includes("マンドレイク") || lowerName.includes("mandrake")) shapeKeySource = "MANDRAKE_ROOT";
+        else if (lowerName.includes("盆栽") || lowerName.includes("bonsai")) shapeKeySource = "PLANT";
+        else if (lowerName.includes("世界樹") || lowerName.includes("yggdrasil")) shapeKeySource = "BOSS_TRUE";
         
         // --- 特殊マッチング: 文房具・学校用品 ---
         else if (lowerName.includes("えんぴつ") || lowerName.includes("シャープ") || lowerName.includes("pencil")) shapeKeySource = "ROCKET_PENCIL";
@@ -1515,7 +1538,7 @@ export const createPixelSpriteCanvas = (seed: string, name: string = "", size: n
         else if (lowerName.includes("卒業") || lowerName.includes("卒園") || lowerName.includes("graduation")) shapeKeySource = "GRAD_CAP";
         else if (lowerName.includes("トロフィー") || lowerName.includes("優勝") || lowerName.includes("trophy")) shapeKeySource = "TROPHY";
         else if (lowerName.includes("メダル") || lowerName.includes("medal") || lowerName.includes("表彰")) shapeKeySource = "MEDAL";
-        else if (lowerName.includes("ホイッスル") || lowerName.includes("笛") || lowerName.includes("whistle")) shapeKeySource = "MIC"; // 既存流用または新規
+        else if (lowerName.includes("ホイッスル") || lowerName.includes("笛") || lowerName.includes("whistle")) shapeKeySource = "MIC";
         else if (lowerName.includes("上履き") || lowerName.includes("靴") || lowerName.includes("shoe")) shapeKeySource = "SHOE";
         else if (lowerName.includes("給食") || lowerName.includes("当番") || lowerName.includes("おたま")) shapeKeySource = "LUNCH_TRAY";
         else if (lowerName.includes("鞄") || lowerName.includes("ランドセル") || lowerName.includes("バッグ") || lowerName.includes("backpack")) shapeKeySource = "BACKPACK";
@@ -1592,8 +1615,10 @@ export const createPixelSpriteCanvas = (seed: string, name: string = "", size: n
     else if (lowerColorSource.includes("緑") || lowerColorSource.includes("草")) palette = palettes[0];
     else if (lowerColorSource.includes("紫") || lowerColorSource.includes("書")) palette = palettes[4];
     else if (lowerColorSource.includes("黄") || lowerColorSource.includes("金") || lowerColorSource.includes("光")) palette = palettes[7];
+    else if (lowerColorSource.includes("桃") || lowerColorSource.includes("桜") || lowerColorSource.includes("花")) palette = palettes[9];
     else if (lowerColorSource.includes("白") || lowerColorSource.includes("雪")) palette = ['#FFFFFF', '#F0F0F0', '#CCCCCC'];
     else if (lowerColorSource.includes("黒") || lowerColorSource.includes("影") || lowerColorSource.includes("闇")) palette = ['#1A1A1A', '#333333', '#000000'];
+    else if (lowerColorSource.includes("虹")) palette = ['#FF0000', '#00FF00', '#0000FF'];
     
     if (colorKeySource.startsWith('#')) palette = [colorKeySource, colorKeySource, colorKeySource]; 
 
