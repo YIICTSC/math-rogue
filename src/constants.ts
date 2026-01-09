@@ -18,132 +18,112 @@ const GARDENER_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24
 
 export const HERO_IMAGE_DATA = `data:image/svg+xml;base64,${btoa(WARRIOR_SVG)}`;
 
-// --- GARDENER SEEDS & PLANTS ---
+// --- GARDENER SEEDS & PLANTS (50 TYPES) ---
 
 export const GARDEN_SEEDS: Record<string, Omit<Card, 'id'>> = {
-  SUNFLOWER_SEED: { 
-    name: 'ヒマワリの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「ヒマワリ」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 1, grownCardId: 'SUNFLOWER', rarity: 'COMMON', textureRef: 'PLANT|黄|SKILL' 
-  },
-  CACTUS_SEED: { 
-    name: 'サボテンの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「サボテン」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 2, grownCardId: 'CACTUS', rarity: 'COMMON', textureRef: 'PLANT|緑|SKILL' 
-  },
-  ROSE_SEED: { 
-    name: 'バラの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「バラ」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 2, grownCardId: 'ROSE', rarity: 'UNCOMMON', textureRef: 'PLANT|赤|SKILL' 
-  },
-  VINE_SEED: { 
-    name: 'ツルの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「巨大なツル」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 3, grownCardId: 'GIANT_VINE', rarity: 'RARE', textureRef: 'PLANT|緑|SKILL' 
-  },
-  MANDRAKE_SEED: { 
-    name: 'マンドレイクの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「マンドレイク」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 4, grownCardId: 'MANDRAKE_ROOT', rarity: 'LEGENDARY', textureRef: 'PLANT|紫|SKILL' 
-  },
-  PEA_SEED: { 
-    name: 'エンドウ豆の種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「豆鉄砲」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 1, grownCardId: 'PEA_SHOOTER', rarity: 'COMMON', textureRef: 'PLANT|緑|SKILL' 
-  },
-  TOMATO_SEED: { 
-    name: 'トマトの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「完熟トマト」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 2, grownCardId: 'RIPE_TOMATO', rarity: 'UNCOMMON', textureRef: 'PLANT|赤|SKILL' 
-  },
-  PUMPKIN_SEED: { 
-    name: 'カボチャの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「鉄壁カボチャ」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 3, grownCardId: 'IRON_PUMPKIN', rarity: 'RARE', textureRef: 'PLANT|橙|SKILL' 
-  },
-  CHILI_SEED: { 
-    name: 'トウガラシの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「激辛トウガラシ」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 2, grownCardId: 'HOT_CHILI', rarity: 'UNCOMMON', textureRef: 'PLANT|赤|SKILL' 
-  },
-  WHEAT_SEED: { 
-    name: '小麦の種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「黄金の小麦」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 3, grownCardId: 'GOLDEN_WHEAT', rarity: 'RARE', textureRef: 'PLANT|黄|SKILL' 
-  },
-  LOTUS_SEED: { 
-    name: 'ハスの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「聖なるハス」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 4, grownCardId: 'SACRED_LOTUS', rarity: 'LEGENDARY', textureRef: 'PLANT|白|SKILL' 
-  },
-  CLOVER_SEED: { 
-    name: 'クローバーの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「四つ葉のクローバー」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 2, grownCardId: 'LUCKY_CLOVER', rarity: 'UNCOMMON', textureRef: 'PLANT|緑|SKILL' 
-  },
-  IVY_SEED: { 
-    name: 'アイビーの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「毒蔦アイビー」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 2, grownCardId: 'POISON_IVY', rarity: 'UNCOMMON', textureRef: 'PLANT|緑|SKILL' 
-  },
-  TULIP_SEED: { 
-    name: 'チューリップの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「魅惑のチューリップ」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 2, grownCardId: 'Tulip_Draw', rarity: 'UNCOMMON', textureRef: 'PLANT|桃|SKILL' 
-  },
-  BAMBOO_SEED: { 
-    name: '竹の種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「剛健な竹」に成長する。', 
-    block: 3, isSeed: true, growthRequired: 1, grownCardId: 'STURDY_BAMBOO', rarity: 'COMMON', textureRef: 'PLANT|緑|SKILL' 
-  },
+  SUNFLOWER_SEED: { name: 'ヒマワリの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「ヒマワリ」に成長する。', block: 3, isSeed: true, growthRequired: 1, grownCardId: 'SUNFLOWER', rarity: 'COMMON', textureRef: 'PLANT|黄|SKILL' },
+  CACTUS_SEED: { name: 'サボテンの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「サボテン」に成長する。', block: 3, isSeed: true, growthRequired: 2, grownCardId: 'CACTUS', rarity: 'COMMON', textureRef: 'PLANT|緑|SKILL' },
+  ROSE_SEED: { name: 'バラの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「バラ」に成長する。', block: 3, isSeed: true, growthRequired: 2, grownCardId: 'ROSE', rarity: 'UNCOMMON', textureRef: 'PLANT|赤|SKILL' },
+  VINE_SEED: { name: 'ツルの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「巨大なツル」に成長する。', block: 3, isSeed: true, growthRequired: 3, grownCardId: 'GIANT_VINE', rarity: 'RARE', textureRef: 'PLANT|緑|SKILL' },
+  MANDRAKE_SEED: { name: 'マンドレイクの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「マンドレイク」に成長する。', block: 3, isSeed: true, growthRequired: 4, grownCardId: 'MANDRAKE_ROOT', rarity: 'LEGENDARY', textureRef: 'PLANT|紫|SKILL' },
+  PEA_SEED: { name: 'エンドウ豆の種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「豆鉄砲」に成長する。', block: 3, isSeed: true, growthRequired: 1, grownCardId: 'PEA_SHOOTER', rarity: 'COMMON', textureRef: 'PLANT|緑|SKILL' },
+  TOMATO_SEED: { name: 'トマトの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「完熟トマト」に成長する。', block: 3, isSeed: true, growthRequired: 2, grownCardId: 'RIPE_TOMATO', rarity: 'UNCOMMON', textureRef: 'PLANT|赤|SKILL' },
+  PUMPKIN_SEED: { name: 'カボチャの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「鉄壁カボチャ」に成長する。', block: 3, isSeed: true, growthRequired: 3, grownCardId: 'IRON_PUMPKIN', rarity: 'RARE', textureRef: 'PLANT|橙|SKILL' },
+  CHILI_SEED: { name: 'トウガラシの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「激辛トウガラシ」に成長する。', block: 3, isSeed: true, growthRequired: 2, grownCardId: 'HOT_CHILI', rarity: 'UNCOMMON', textureRef: 'PLANT|赤|SKILL' },
+  WHEAT_SEED: { name: '小麦の種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「黄金の小麦」に成長する。', block: 3, isSeed: true, growthRequired: 3, grownCardId: 'GOLDEN_WHEAT', rarity: 'RARE', textureRef: 'PLANT|黄|SKILL' },
+  LOTUS_SEED: { name: 'ハスの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「聖なるハス」に成長する。', block: 3, isSeed: true, growthRequired: 4, grownCardId: 'SACRED_LOTUS', rarity: 'LEGENDARY', textureRef: 'PLANT|白|SKILL' },
+  CLOVER_SEED: { name: 'クローバーの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「四つ葉のクローバー」に成長する。', block: 3, isSeed: true, growthRequired: 2, grownCardId: 'LUCKY_CLOVER', rarity: 'UNCOMMON', textureRef: 'PLANT|緑|SKILL' },
+  IVY_SEED: { name: 'アイビーの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「毒蔦アイビー」に成長する。', block: 3, isSeed: true, growthRequired: 2, grownCardId: 'POISON_IVY', rarity: 'UNCOMMON', textureRef: 'PLANT|緑|SKILL' },
+  TULIP_SEED: { name: 'チューリップの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「魅惑のチューリップ」に成長する。', block: 3, isSeed: true, growthRequired: 2, grownCardId: 'TULIP_DRAW', rarity: 'UNCOMMON', textureRef: 'PLANT|桃|SKILL' },
+  BAMBOO_SEED: { name: '竹の種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「剛健な竹」に成長する。', block: 3, isSeed: true, growthRequired: 1, grownCardId: 'STURDY_BAMBOO', rarity: 'COMMON', textureRef: 'PLANT|緑|SKILL' },
+  SAKURA_SEED: { name: 'サくらの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「サくら吹雪」に成長する。', block: 3, isSeed: true, growthRequired: 3, grownCardId: 'SAKURA_STORM', rarity: 'RARE', textureRef: 'PLANT|桃|SKILL' },
+  PINE_SEED: { name: 'マツの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「不老長寿のマツ」に成長する。', block: 3, isSeed: true, growthRequired: 4, grownCardId: 'ETERNAL_PINE', rarity: 'RARE', textureRef: 'PLANT|緑|SKILL' },
+  MAPLE_SEED: { name: 'モミジの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「真紅のモミジ」に成長する。', block: 3, isSeed: true, growthRequired: 2, grownCardId: 'CRIMSON_MAPLE', rarity: 'UNCOMMON', textureRef: 'PLANT|赤|SKILL' },
+  GARLIC_SEED: { name: 'ニンニクの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「魔除けのニンニク」に成長する。', block: 3, isSeed: true, growthRequired: 2, grownCardId: 'HOLY_GARLIC', rarity: 'UNCOMMON', textureRef: 'PLANT|白|SKILL' },
+  GINGER_SEED: { name: 'ショウガの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「癒やしのショウガ」に成長する。', block: 3, isSeed: true, growthRequired: 1, grownCardId: 'HEALING_GINGER', rarity: 'COMMON', textureRef: 'PLANT|茶|SKILL' },
+  LAVENDER_SEED: { name: 'ラベンダーの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「安らぎのラベンダー」に成長する。', block: 3, isSeed: true, growthRequired: 2, grownCardId: 'CALM_LAVENDER', rarity: 'UNCOMMON', textureRef: 'PLANT|紫|SKILL' },
+  OAK_SEED: { name: 'カシの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「大樹のカシ」に成長する。', block: 3, isSeed: true, growthRequired: 5, grownCardId: 'GREAT_OAK', rarity: 'LEGENDARY', textureRef: 'PLANT|茶|SKILL' },
+  M_GLORY_SEED: { name: 'アサガオの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「朝露のアサガオ」に成長する。', block: 3, isSeed: true, growthRequired: 1, grownCardId: 'MORNING_GLORY', rarity: 'COMMON', textureRef: 'PLANT|青|SKILL' },
+  HYDRANGEA_SEED: { name: 'アジサイの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「七変化のアジサイ」に成長する。', block: 3, isSeed: true, growthRequired: 3, grownCardId: 'RAINBOW_HYDRANGEA', rarity: 'RARE', textureRef: 'PLANT|青|SKILL' },
+  BLUEBELL_SEED: { name: 'ブルーベルの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「響き渡る鈴蘭」に成長する。', block: 3, isSeed: true, growthRequired: 2, grownCardId: 'ECHO_BLUEBELL', rarity: 'UNCOMMON', textureRef: 'PLANT|白|SKILL' },
+  APPLE_SEED: { name: 'リンゴの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「禁断のリンゴ」に成長する。', block: 3, isSeed: true, growthRequired: 4, grownCardId: 'FORBIDDEN_APPLE', rarity: 'RARE', textureRef: 'PLANT|赤|SKILL' },
+  ORANGE_SEED: { name: 'オレンジの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「太陽のオレンジ」に成長する。', block: 3, isSeed: true, growthRequired: 3, grownCardId: 'SOLAR_ORANGE', rarity: 'UNCOMMON', textureRef: 'PLANT|橙|SKILL' },
+  GRAPE_SEED: { name: 'ブドウの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「芳醇なブドウ」に成長する。', block: 3, isSeed: true, growthRequired: 3, grownCardId: 'RICH_GRAPE', rarity: 'RARE', textureRef: 'PLANT|紫|SKILL' },
+  CABBAGE_SEED: { name: 'キャベツの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「幾重のキャベツ」に成長する。', block: 3, isSeed: true, growthRequired: 2, grownCardId: 'LAYERED_CABBAGE', rarity: 'COMMON', textureRef: 'PLANT|緑|SKILL' },
+  DAIKON_SEED: { name: 'ダイコンの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「斬鉄ダイコン」に成長する。', block: 3, isSeed: true, growthRequired: 2, grownCardId: 'SWORD_DAIKON', rarity: 'UNCOMMON', textureRef: 'PLANT|白|SKILL' },
+  MUSHROOM_SPORE: { name: 'キノコの胞子', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「幻覚キノコ」に成長する。', block: 3, isSeed: true, growthRequired: 3, grownCardId: 'MYSTIC_MUSHROOM', rarity: 'RARE', textureRef: 'PLANT|紫|SKILL' },
+  LILY_SEED: { name: 'ユリの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「純白のユリ」に成長する。', block: 3, isSeed: true, growthRequired: 4, grownCardId: 'SACRED_LILY', rarity: 'RARE', textureRef: 'PLANT|白|SKILL' },
+  CAMELLIA_SEED: { name: 'ツバキの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「冬枯れのツバキ」に成長する。', block: 3, isSeed: true, growthRequired: 3, grownCardId: 'WINTER_CAMELLIA', rarity: 'UNCOMMON', textureRef: 'PLANT|赤|SKILL' },
+  COSMOS_SEED: { name: 'コスモスの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「秋空のコスモス」に成長する。', block: 3, isSeed: true, growthRequired: 1, grownCardId: 'AUTUMN_COSMOS', rarity: 'COMMON', textureRef: 'PLANT|桃|SKILL' },
+  DANDELION_SEED: { name: 'タンポポの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「綿毛のタンポポ」に成長する。', block: 3, isSeed: true, growthRequired: 1, grownCardId: 'FLUFFY_DANDELION', rarity: 'COMMON', textureRef: 'PLANT|黄|SKILL' },
+  GINKGO_SEED: { name: 'イチョウの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「知恵のイチョウ」に成長する。', block: 3, isSeed: true, growthRequired: 4, grownCardId: 'WISDOM_GINKGO', rarity: 'RARE', textureRef: 'PLANT|黄|SKILL' },
+  WASABI_SEED: { name: 'ワサビの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「劇薬ワサビ」に成長する。', block: 3, isSeed: true, growthRequired: 3, grownCardId: 'CAUSTIC_WASABI', rarity: 'UNCOMMON', textureRef: 'PLANT|緑|SKILL' },
+  SHIITAKE_SPORE: { name: 'シイタケの胞子', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「剛力のシイタケ」に成長する。', block: 3, isSeed: true, growthRequired: 2, grownCardId: 'POWER_SHIITAKE', rarity: 'UNCOMMON', textureRef: 'PLANT|茶|SKILL' },
+  PERSIMMON_SEED: { name: 'カキの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「豊穣のカキ」に成長する。', block: 3, isSeed: true, growthRequired: 2, grownCardId: 'BOUNTY_PERSIMMON', rarity: 'UNCOMMON', textureRef: 'PLANT|橙|SKILL' },
+  PLUM_SEED: { name: 'ウメの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「早咲きのウメ」に成長する。', block: 3, isSeed: true, growthRequired: 2, grownCardId: 'EARLY_PLUM', rarity: 'UNCOMMON', textureRef: 'PLANT|赤|SKILL' },
+  COFFEE_BEAN: { name: 'コーヒーの豆', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「覚醒のコーヒー」に成長する。', block: 3, isSeed: true, growthRequired: 2, grownCardId: 'AWAKE_COFFEE', rarity: 'UNCOMMON', textureRef: 'PLANT|黒|SKILL' },
+  CACAO_BEAN: { name: 'カカオの豆', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「魅惑のカカオ」に成長する。', block: 3, isSeed: true, growthRequired: 3, grownCardId: 'SWEET_CACAO', rarity: 'RARE', textureRef: 'PLANT|茶|SKILL' },
+  PEPPER_SEED: { name: 'コショウの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「爆炎のコショウ」に成長する。', block: 3, isSeed: true, growthRequired: 2, grownCardId: 'EXPLOSIVE_PEPPER', rarity: 'UNCOMMON', textureRef: 'PLANT|灰|SKILL' },
+  WILLOW_SEED: { name: 'ヤナギの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「柳に風」に成長する。', block: 3, isSeed: true, growthRequired: 5, grownCardId: 'WILLOW_WIND', rarity: 'LEGENDARY', textureRef: 'PLANT|緑|SKILL' },
+  CYPRESS_SEED: { name: 'ヒノキの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「鉄壁のヒノキ」に成長する。', block: 3, isSeed: true, growthRequired: 4, grownCardId: 'IRON_CYPRESS', rarity: 'RARE', textureRef: 'PLANT|茶|SKILL' },
+  ALOE_SEED: { name: 'アロエの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「医薬のアロエ」に成長する。', block: 3, isSeed: true, growthRequired: 2, grownCardId: 'MEDICINAL_ALOE', rarity: 'UNCOMMON', textureRef: 'PLANT|緑|SKILL' },
+  MINT_SEED: { name: 'ミントの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「清涼のミント」に成長する。', block: 3, isSeed: true, growthRequired: 1, grownCardId: 'REFRESH_MINT', rarity: 'COMMON', textureRef: 'PLANT|青|SKILL' },
+  JASMINE_SEED: { name: 'ジャスミンの種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「香華のジャスミン」に成長する。', block: 3, isSeed: true, growthRequired: 2, grownCardId: 'FRAGRANT_JASMINE', rarity: 'UNCOMMON', textureRef: 'PLANT|白|SKILL' },
+  BONSAI_SEED: { name: '松の盆栽の種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「至高の盆栽」に成長する。', block: 3, isSeed: true, growthRequired: 4, grownCardId: 'ULTIMATE_BONSAI', rarity: 'RARE', textureRef: 'PLANT|緑|SKILL' },
+  WORLD_TREE_SEED: { name: '世界樹の種', cost: 1, type: CardType.SKILL, description: 'ブロック3。菜園に植えると「ユグドラシル」に成長する。', block: 3, isSeed: true, growthRequired: 6, grownCardId: 'YGGDRASIL', rarity: 'LEGENDARY', textureRef: 'PLANT|虹|SKILL' },
 };
 
 export const GROWN_PLANTS: Record<string, Omit<Card, 'id'>> = {
-  SUNFLOWER: { 
-    name: 'ヒマワリ', cost: 0, type: CardType.SKILL, description: 'エネルギー1。1枚引く。廃棄。', 
-    energy: 1, draw: 1, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|黄|SKILL' 
-  },
-  CACTUS: { 
-    name: 'サボテン', cost: 1, type: CardType.POWER, description: 'トゲトゲ4を得る。', 
-    applyPower: { id: 'THORNS', amount: 4 }, rarity: 'SPECIAL', textureRef: 'PLANT|緑|POWER' 
-  },
-  ROSE: { 
-    name: 'バラ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '12ダメージ。ドクドク4。廃棄。', 
-    damage: 12, poison: 4, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|赤|ATTACK' 
-  },
-  GIANT_VINE: { 
-    name: '巨大なツル', cost: 2, type: CardType.ATTACK, target: TargetType.ALL_ENEMIES, description: '全体15ダメージ。敵全体をへろへろ2にする。廃棄。', 
-    damage: 15, weak: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|緑|ATTACK' 
-  },
-  MANDRAKE_ROOT: { 
-    name: 'マンドレイク', cost: 0, type: CardType.SKILL, target: TargetType.ALL_ENEMIES, description: '敵全体をびくびく3にする。敵全体にドクドク10。廃棄。', 
-    vulnerable: 3, poison: 10, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|紫|SKILL' 
-  },
-  PEA_SHOOTER: { 
-    name: '豆鉄砲', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '4ダメージを3回与える。廃棄。', 
-    damage: 4, playCopies: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|緑|ATTACK' 
-  },
-  RIPE_TOMATO: { 
-    name: '完熟トマト', cost: 0, type: CardType.SKILL, description: 'HPを10回復する。廃棄。', 
-    heal: 10, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|赤|SKILL' 
-  },
-  IRON_PUMPKIN: { 
-    name: '鉄壁カボチャ', cost: 2, type: CardType.SKILL, description: 'ブロック25を得る。廃棄。', 
-    block: 25, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|橙|SKILL' 
-  },
-  HOT_CHILI: { 
-    name: '激辛トウガラシ', cost: 1, type: CardType.POWER, description: 'ムキムキ3を得る。', 
-    strength: 3, rarity: 'SPECIAL', textureRef: 'PLANT|赤|POWER' 
-  },
-  GOLDEN_WHEAT: { 
-    name: '黄金の小麦', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '10ダメージ。これで倒すと最大HP+4。廃棄。', 
-    damage: 10, fatalMaxHp: 4, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|黄|ATTACK' 
-  },
-  SACRED_LOTUS: { 
-    name: '聖なるハス', cost: 0, type: CardType.SKILL, description: 'エネルギー2。2枚引く。廃棄。', 
-    energy: 2, draw: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|白|SKILL' 
-  },
-  LUCKY_CLOVER: { 
-    name: '四つ葉のクローバー', cost: 0, type: CardType.SKILL, description: 'キラキラ2を得る。廃棄。', 
-    applyPower: { id: 'ARTIFACT', amount: 2 }, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|緑|SKILL' 
-  },
-  POISON_IVY: { 
-    name: '毒蔦アイビー', cost: 1, type: CardType.SKILL, target: TargetType.ENEMY, description: 'ドクドク10を与える。廃棄。', 
-    poison: 10, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|緑|SKILL' 
-  },
-  Tulip_Draw: { 
-    name: '魅惑のチューリップ', cost: 1, type: CardType.POWER, description: 'ターン開始時にカードを1枚引く。', 
-    applyPower: { id: 'DRAW_POWER', amount: 1 }, rarity: 'SPECIAL', textureRef: 'PLANT|桃|POWER' 
-  },
-  STURDY_BAMBOO: { 
-    name: '剛健な竹', cost: 1, type: CardType.SKILL, description: '現在のブロック値を倍にする。廃棄。', 
-    doubleBlock: true, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|緑|SKILL' 
-  },
+  SUNFLOWER: { name: 'ヒマワリ', cost: 0, type: CardType.SKILL, description: 'エネルギー1。1枚引く。廃棄。', energy: 1, draw: 1, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|黄|SKILL' },
+  CACTUS: { name: 'サボテン', cost: 1, type: CardType.POWER, description: 'トゲトゲ4を得る。', applyPower: { id: 'THORNS', amount: 4 }, rarity: 'SPECIAL', textureRef: 'PLANT|緑|POWER' },
+  ROSE: { name: 'バラ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '12ダメージ。ドクドク4。廃棄。', damage: 12, poison: 4, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|赤|ATTACK' },
+  GIANT_VINE: { name: '巨大なツル', cost: 2, type: CardType.ATTACK, target: TargetType.ALL_ENEMIES, description: '全体15ダメージ。敵全体をへろへろ2にする。廃棄。', damage: 15, weak: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|緑|ATTACK' },
+  MANDRAKE_ROOT: { name: 'マンドレイク', cost: 0, type: CardType.SKILL, target: TargetType.ALL_ENEMIES, description: '敵全体をびくびく3にする。敵全体にドクドク10。廃棄。', vulnerable: 3, poison: 10, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|紫|SKILL' },
+  PEA_SHOOTER: { name: '豆鉄砲', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '4ダメージを3回与える。廃棄。', damage: 4, playCopies: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|緑|ATTACK' },
+  RIPE_TOMATO: { name: '完熟トマト', cost: 0, type: CardType.SKILL, description: 'HPを10回復する。廃棄。', heal: 10, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|赤|SKILL' },
+  IRON_PUMPKIN: { name: '鉄壁カボチャ', cost: 2, type: CardType.SKILL, description: 'ブロック25を得る。廃棄。', block: 25, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|橙|SKILL' },
+  HOT_CHILI: { name: '激辛トウガラシ', cost: 1, type: CardType.POWER, description: 'ムキムキ3を得る。', strength: 3, rarity: 'SPECIAL', textureRef: 'PLANT|赤|POWER' },
+  GOLDEN_WHEAT: { name: '黄金の小麦', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '10ダメージ。これで倒すと最大HP+4。廃棄。', damage: 10, fatalMaxHp: 4, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|黄|ATTACK' },
+  SACRED_LOTUS: { name: '聖なるハス', cost: 0, type: CardType.SKILL, description: 'エネルギー2。2枚引く。廃棄。', energy: 2, draw: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|白|SKILL' },
+  LUCKY_CLOVER: { name: '四つ葉のクローバー', cost: 0, type: CardType.SKILL, description: 'キラキラ2を得る。廃棄。', applyPower: { id: 'ARTIFACT', amount: 2 }, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|緑|SKILL' },
+  POISON_IVY: { name: '毒蔦アイビー', cost: 1, type: CardType.SKILL, target: TargetType.ENEMY, description: 'ドクドク10を与える。廃棄。', poison: 10, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|緑|SKILL' },
+  TULIP_DRAW: { name: '魅惑のチューリップ', cost: 1, type: CardType.POWER, description: 'ターン開始時にカードを1枚引く。', applyPower: { id: 'DRAW_POWER', amount: 1 }, rarity: 'SPECIAL', textureRef: 'PLANT|桃|POWER' },
+  STURDY_BAMBOO: { name: '剛健な竹', cost: 1, type: CardType.SKILL, description: '現在のブロック値を倍にする。廃棄。', doubleBlock: true, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|緑|SKILL' },
+  SAKURA_STORM: { name: 'サくら吹雪', cost: 1, type: CardType.ATTACK, target: TargetType.ALL_ENEMIES, description: '全体10ダメージ。ムキムキ1を得る。廃棄。', damage: 10, strength: 1, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|桃|ATTACK' },
+  ETERNAL_PINE: { name: '不老長寿のマツ', cost: 2, type: CardType.POWER, description: 'ターン終了時、ブロック6を得る。', applyPower: { id: 'METALLICIZE', amount: 6 }, rarity: 'SPECIAL', textureRef: 'PLANT|緑|POWER' },
+  CRIMSON_MAPLE: { name: '真紅のモミジ', cost: 1, type: CardType.SKILL, description: '手札を全て強化する。廃棄。', upgradeHand: true, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|赤|SKILL' },
+  HOLY_GARLIC: { name: '魔除けのニンニク', cost: 0, type: CardType.SKILL, description: 'キラキラ3を得る。廃棄。', applyPower: { id: 'ARTIFACT', amount: 3 }, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|白|SKILL' },
+  HEALING_GINGER: { name: '癒やしのショウガ', cost: 0, type: CardType.SKILL, description: 'HPを5回復。全デバフを解除。廃棄。', heal: 5, applyPower: { id: 'CLEAR_DEBUFFS', amount: 1 }, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|茶|SKILL' },
+  CALM_LAVENDER: { name: '安らぎのラベンダー', cost: 1, type: CardType.SKILL, description: '次ターン、エネルギー2。廃棄。', nextTurnEnergy: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|紫|SKILL' },
+  GREAT_OAK: { name: '大樹のカシ', cost: 2, type: CardType.SKILL, description: 'ブロック35を得る。廃棄。', block: 35, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|茶|SKILL' },
+  MORNING_GLORY: { name: '朝露のアサガオ', cost: 0, type: CardType.SKILL, target: TargetType.ALL_ENEMIES, description: '敵全体をへろへろ2にする。廃棄。', weak: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|青|SKILL' },
+  RAINBOW_HYDRANGEA: { name: '七変化のアジサイ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '手札の枚数x4ダメージ。廃棄。', damage: 0, damagePerCardInHand: 4, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|青|ATTACK' },
+  ECHO_BLUEBELL: { name: '響き渡る鈴蘭', cost: 1, type: CardType.SKILL, target: TargetType.ALL_ENEMIES, description: '敵全体をびくびく2にする。廃棄。', vulnerable: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|白|SKILL' },
+  FORBIDDEN_APPLE: { name: '禁断のリンゴ', cost: 0, type: CardType.SKILL, description: '最大HP+5。廃棄。', fatalMaxHp: 5, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|赤|SKILL' },
+  SOLAR_ORANGE: { name: '太陽のオレンジ', cost: 2, type: CardType.POWER, description: 'カチカチ3を得る。', applyPower: { id: 'DEXTERITY', amount: 3 }, rarity: 'SPECIAL', textureRef: 'PLANT|橙|POWER' },
+  RICH_GRAPE: { name: '芳醇なブドウ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '10ダメージ。ムキムキの効果が3倍になる。廃棄。', damage: 10, strengthScaling: 3, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|紫|ATTACK' },
+  LAYERED_CABBAGE: { name: '幾重のキャベツ', cost: 1, type: CardType.SKILL, description: 'ブロック10。ドクドク4を与える。廃棄。', block: 10, poison: 4, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|緑|SKILL' },
+  SWORD_DAIKON: { name: '斬鉄ダイコン', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '28ダメージ。廃棄。', damage: 28, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|白|ATTACK' },
+  MYSTIC_MUSHROOM: { name: '幻覚キノコ', cost: 1, type: CardType.SKILL, description: 'ランダムなカード2枚を手札に加える。廃棄。', addCardToHand: { cardName: 'DISCOVERY', count: 1 }, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|紫|SKILL' },
+  SACRED_LILY: { name: '純白のユリ', cost: 1, type: CardType.POWER, description: '次に使うスキルは2回発動する。', applyPower: { id: 'BURST', amount: 1 }, rarity: 'SPECIAL', textureRef: 'PLANT|白|POWER' },
+  WINTER_CAMELLIA: { name: '冬枯れのツバキ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '8ダメージ。HPを全ダメージ分回復。廃棄。', damage: 8, lifesteal: true, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|赤|ATTACK' },
+  AUTUMN_COSMOS: { name: '秋空のコスモス', cost: 0, type: CardType.SKILL, description: 'カードを3枚引く。廃棄。', draw: 3, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|桃|SKILL' },
+  FLUFFY_DANDELION: { name: '綿毛のタンポポ', cost: 0, type: CardType.SKILL, description: '「えんぴつの削りかす」を3枚手札に加える。廃棄。', addCardToHand: { cardName: 'SHIV', count: 3, cost0: true }, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|黄|SKILL' },
+  WISDOM_GINKGO: { name: '知恵のイチョウ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '12ダメージ。これで倒すと永続的に威力+3。廃棄。', damage: 12, fatalPermanentDamage: 3, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|黄|ATTACK' },
+  CAUSTIC_WASABI: { name: '劇薬ワサビ', cost: 1, type: CardType.SKILL, target: TargetType.ENEMY, description: 'ドクドクを3倍にする。廃棄。', poisonMultiplier: 3, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|緑|SKILL' },
+  POWER_SHIITAKE: { name: '剛力のシイタケ', cost: 1, type: CardType.SKILL, description: 'ムキムキ2を得る。廃棄。', strength: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|茶|SKILL' },
+  BOUNTY_PERSIMMON: { name: '豊穣のカキ', cost: 1, type: CardType.SKILL, description: '次のターン、追加で2枚引く。廃棄。', nextTurnDraw: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|橙|SKILL' },
+  EARLY_PLUM: { name: '早咲きのウメ', cost: 0, type: CardType.SKILL, description: '次のターン、エネルギー1を得る。廃棄。', nextTurnEnergy: 1, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|赤|SKILL' },
+  AWAKE_COFFEE: { name: '覚醒のコーヒー', cost: 0, type: CardType.SKILL, description: 'エネルギー2を得る。廃棄。', energy: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|黒|SKILL' },
+  SWEET_CACAO: { name: '魅惑のカカオ', cost: 0, type: CardType.SKILL, description: '手札を全て捨て、同数引く。廃棄。', exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|茶|SKILL' },
+  EXPLOSIVE_PEPPER: { name: '爆炎のコショウ', cost: 2, type: CardType.ATTACK, target: TargetType.ALL_ENEMIES, description: '全体20ダメージ。自分に3ダメージ。廃棄。', damage: 20, selfDamage: 3, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|灰|ATTACK' },
+  WILLOW_WIND: { name: '柳に風', cost: 2, type: CardType.SKILL, description: 'スケスケ1（無敵）を得る。廃棄。', applyPower: { id: 'INTANGIBLE', amount: 1 }, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|緑|SKILL' },
+  IRON_CYPRESS: { name: '鉄壁のヒノキ', cost: 3, type: CardType.POWER, description: 'ブロックがターン終了時に消えない。', applyPower: { id: 'BARRICADE', amount: 1 }, rarity: 'SPECIAL', textureRef: 'PLANT|茶|POWER' },
+  MEDICINAL_ALOE: { name: '医薬のアロエ', cost: 1, type: CardType.SKILL, description: 'HPを20回復。廃棄。', heal: 20, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|緑|SKILL' },
+  REFRESH_MINT: { name: '清涼のミント', cost: 0, type: CardType.SKILL, description: '全デバフを解除。1枚引く。廃棄。', draw: 1, applyPower: { id: 'CLEAR_DEBUFFS', amount: 1 }, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|青|SKILL' },
+  FRAGRANT_JASMINE: { name: '香華のジャスミン', cost: 1, type: CardType.POWER, description: 'ターン開始時に追加で2枚引く。', applyPower: { id: 'DRAW_POWER_2', amount: 2 }, rarity: 'SPECIAL', textureRef: 'PLANT|白|POWER' },
+  ULTIMATE_BONSAI: { name: '至高の盆栽', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '現在のブロック値分ダメージ。廃棄。', damage: 0, damageBasedOnBlock: true, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|緑|ATTACK' },
+  YGGDRASIL: { name: 'ユグドラシル', cost: 3, type: CardType.SKILL, description: 'デッキの全カードを強化。廃棄。', upgradeDeck: true, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|虹|SKILL' },
 };
 
 // --- ENEMIES (Compendium Data) ---
