@@ -1,18 +1,21 @@
+
 import React, { useMemo, useState } from 'react';
 import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY } from '../constants';
 import { Card as ICard, Relic, Potion, CardType, TargetType } from '../types';
 import Card from './Card';
-import { ArrowRight, Trash2, Plus, Gem, FlaskConical, Swords, Shield, Zap, Search, Beaker, RotateCcw, Skull } from 'lucide-react';
+import { ArrowRight, Trash2, Plus, Gem, FlaskConical, Swords, Shield, Zap, Search, Beaker, RotateCcw, Skull, Clock, History } from 'lucide-react';
 import { synthesizeCards } from '../utils/cardUtils';
+import { storageService } from '../services/storageService';
 
 interface DebugMenuScreenProps {
   onStart: (deck: ICard[], relics: Relic[], potions: Potion[]) => void;
   onStartAct3Boss: (deck: ICard[], relics: Relic[], potions: Potion[]) => void;
   onBack: () => void;
+  onTimeUpdate: (newDailySeconds: number) => void;
 }
 
-const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3Boss, onBack }) => {
-  const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS'>('CARDS');
+const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3Boss, onBack, onTimeUpdate }) => {
+  const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'SYSTEM'>('CARDS');
   const [searchTerm, setSearchTerm] = useState("");
   
   // Selection State
@@ -88,6 +91,21 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3B
       }
   };
 
+  // --- Time Debug Logic ---
+  const addDebugTime = () => {
+      const current = storageService.getDailyPlayTime();
+      const next = current + (58 * 60); // Add 58 minutes
+      storageService.saveDailyPlayTime(next);
+      onTimeUpdate(next); // Appコンポーネントのステートを即座に更新
+      alert("今日のプレイ時間を58分追加しました。");
+  };
+
+  const resetDebugTime = () => {
+      storageService.saveDailyPlayTime(0);
+      onTimeUpdate(0); // Appコンポーネントのステートを即座に更新
+      alert("今日のプレイ時間をリセットしました。");
+  };
+
   return (
     <div className="flex flex-col h-full w-full bg-gray-900 text-white relative">
         {/* Header */}
@@ -123,6 +141,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3B
                     <button onClick={() => setActiveTab('RELICS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'RELICS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>RELICS</button>
                     <button onClick={() => setActiveTab('POTIONS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'POTIONS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>POT</button>
                     <button onClick={() => setActiveTab('SYNTHESIS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'SYNTHESIS' ? 'bg-purple-900 text-white' : 'text-purple-400 hover:bg-gray-750'}`}>SYNTH</button>
+                    <button onClick={() => setActiveTab('SYSTEM')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'SYSTEM' ? 'bg-indigo-900 text-white' : 'text-indigo-400 hover:bg-gray-750'}`}>SYSTEM</button>
                 </div>
 
                 {/* Fixed Search Bar Area */}
@@ -144,6 +163,32 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3B
                 {/* Content */}
                 <div className="flex-grow overflow-y-auto p-2 md:p-4 custom-scrollbar min-h-0">
                     
+                    {activeTab === 'SYSTEM' && (
+                        <div className="space-y-6">
+                            <section>
+                                <h3 className="text-indigo-300 font-bold mb-4 flex items-center"><Clock size={18} className="mr-2"/> 時間制限テスト</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <button 
+                                        onClick={addDebugTime}
+                                        className="bg-indigo-700 hover:bg-indigo-600 text-white p-4 rounded-xl border border-indigo-500 shadow-lg flex flex-col items-center gap-2 transition-transform active:scale-95"
+                                    >
+                                        <History size={32} />
+                                        <div className="font-bold">今日のプレイ時間を58分進める</div>
+                                        <div className="text-[10px] opacity-70">制限時間の確認用（1時間で制限）</div>
+                                    </button>
+                                    <button 
+                                        onClick={resetDebugTime}
+                                        className="bg-slate-700 hover:bg-slate-600 text-white p-4 rounded-xl border border-slate-500 shadow-lg flex flex-col items-center gap-2 transition-transform active:scale-95"
+                                    >
+                                        <RotateCcw size={32} />
+                                        <div className="font-bold">今日のプレイ時間をリセット</div>
+                                        <div className="text-[10px] opacity-70">制限を解除して最初から</div>
+                                    </button>
+                                </div>
+                            </section>
+                        </div>
+                    )}
+
                     {activeTab === 'SYNTHESIS' && (
                         <div className="mb-8 border-b-2 border-purple-500 pb-4">
                             <h3 className="text-purple-300 font-bold mb-4 flex items-center text-sm md:text-base"><Beaker className="mr-2"/> SYNTHESIS LAB</h3>

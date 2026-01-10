@@ -44,7 +44,7 @@ import { storageService } from './services/storageService';
 import { generateEvent } from './services/eventService';
 import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { trans } from './utils/textUtils';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check } from 'lucide-react';
 
 const calculateScore = (state: GameState, victory: boolean): number => {
     let score = 0;
@@ -250,6 +250,7 @@ const App: React.FC = () => {
   // --- PLAY TIME STATES ---
   const [totalPlaySeconds, setTotalPlaySeconds] = useState(() => storageService.getTotalPlayTime());
   const [dailyPlaySeconds, setDailyPlaySeconds] = useState(() => storageService.getDailyPlayTime());
+  const [showTimeLimitModal, setShowTimeLimitModal] = useState(false);
   const PLAY_LIMIT_SECONDS = 3600; // 1 Hour
 
   const formatTime = (total: number) => {
@@ -268,17 +269,39 @@ const App: React.FC = () => {
   // --- TIME TRACKER EFFECT ---
   useEffect(() => {
     const interval = setInterval(() => {
+        // 全体の合計プレイ時間は常にカウント
         setTotalPlaySeconds(prev => {
             const next = prev + 1;
             storageService.saveTotalPlayTime(next);
             return next;
         });
 
-        // Only count towards daily limit if NOT in Start Menu and NOT in Problem Challenge
+        // スタートメニューと問題チャレンジ以外でのみ、1日のプレイ制限をカウント
         if (gameState.screen !== GameScreen.START_MENU && gameState.screen !== GameScreen.PROBLEM_CHALLENGE) {
             setDailyPlaySeconds(prev => {
+                // すでに制限に達している場合はカウントもステート更新も行わない（ループ防止）
+                if (prev >= PLAY_LIMIT_SECONDS) return prev;
+
                 const next = prev + 1;
                 storageService.saveDailyPlayTime(next);
+
+                // 制限時間に達した瞬間に一度だけタイトルに戻す処理を実行
+                if (next >= PLAY_LIMIT_SECONDS) {
+                    // 現在の進行状況を保存（ミニゲームなどの状態もここで確実に保存）
+                    // stateRef を使って最新の gameState をキャプチャ
+                    setGameState(curr => {
+                        // 重複遷移防止
+                        if (curr.screen === GameScreen.START_MENU) return curr;
+                        
+                        // 進行中のデータを保存
+                        storageService.saveGame(curr);
+                        
+                        // タイトルへ強制遷移
+                        audioService.playBGM('menu');
+                        setShowTimeLimitModal(true);
+                        return { ...curr, screen: GameScreen.START_MENU };
+                    });
+                }
                 return next;
             });
         }
@@ -288,7 +311,6 @@ const App: React.FC = () => {
 
   useEffect(() => {
       // 重要な遷移時やプレイ中にオートセーブを実行
-      // 学習ローグ以外の画面（ミニゲームなど）では rogue の状態保存を行わない
       if (gameState.screen !== GameScreen.START_MENU && 
           gameState.screen !== GameScreen.GAME_OVER && 
           gameState.screen !== GameScreen.ENDING &&
@@ -408,6 +430,7 @@ const App: React.FC = () => {
   const continueGame = () => {
       if (isDailyLimitReached) {
           audioService.playSound('wrong');
+          setShowTimeLimitModal(true);
           return;
       }
       const saved = storageService.loadGame();
@@ -430,6 +453,7 @@ const App: React.FC = () => {
   const startGame = () => {
       if (isDailyLimitReached) {
           audioService.playSound('wrong');
+          setShowTimeLimitModal(true);
           return;
       }
       audioService.playSound('select');
@@ -443,6 +467,7 @@ const App: React.FC = () => {
   const startChallengeGame = () => {
       if (isDailyLimitReached) {
           audioService.playSound('wrong');
+          setShowTimeLimitModal(true);
           return;
       }
       audioService.playSound('select');
@@ -462,6 +487,7 @@ const App: React.FC = () => {
   const openMiniGameMenu = () => {
       if (isDailyLimitReached) {
           audioService.playSound('wrong');
+          setShowTimeLimitModal(true);
           return;
       }
       audioService.playSound('select');
@@ -471,6 +497,7 @@ const App: React.FC = () => {
   const handleMiniGameSelect = (gameId: string) => {
       if (isDailyLimitReached) {
           audioService.playSound('wrong');
+          setShowTimeLimitModal(true);
           return;
       }
       audioService.playSound('select');
@@ -508,6 +535,11 @@ const App: React.FC = () => {
   };
 
   const handleModeSelect = (mode: GameMode) => {
+      if (isDailyLimitReached) {
+          audioService.playSound('wrong');
+          setShowTimeLimitModal(true);
+          return;
+      }
       audioService.playSound('select');
       setGameState(prev => ({ ...prev, mode, screen: GameScreen.CHARACTER_SELECTION }));
   };
@@ -731,7 +763,7 @@ const App: React.FC = () => {
           
           const specialEvent = {
               title: "放課後の勧誘",
-              description: "新しい学校、知らないクラスメート...。\n不安な気持ちで校庭の隅に立っていると、赤い帽子の少年が走ってきた。\n\n「よう！ お前、転校生だろ？\n俺と組んで『伝説の小学生』を目指さないか？」\n\n強引だが、悪い気はしない。彼の目は冒険への期待で輝いている。",
+              description: "新しい学校、知らないクラスメート...。\n不安な気持ちで校庭の隅に立っていると、赤い帽子の少年が走ってきた。\n\n「よう！ お前、転こう生だろ？\n俺と組んで『伝説の小学生』を目指さないか？」\n\n強引だが、悪い気はしない。彼の目は冒険への期待で輝いている。",
               options: [
                   {
                       label: "手を取る",
@@ -925,7 +957,7 @@ const App: React.FC = () => {
             if (p.relics.find(r => r.id === 'LANTERN')) p.currentEnergy += 1;
             if (p.relics.find(r => r.id === 'BRONZE_SCALES')) p.powers['THORNS'] = (p.powers['THORNS'] || 0) + 3;
             if (p.relics.find(r => r.id === 'BLOOD_VIAL')) p.currentHp = Math.min(p.maxHp, p.currentHp + 2);
-            if (p.relics.find(r => r.id === 'BIG_LADLE')) p.currentHp = Math.min(p.maxHp, p.currentHp + 4);
+            if (p.relics.find(r => r.id === 'BIG_LADLE')) p.currentHp = Math.min(p.maxHp, p.currentHp + 2);
             if (node.type === NodeType.BOSS && p.relics.find(r => r.id === 'PENTOGRAPH')) p.currentHp = Math.min(p.maxHp, p.currentHp + 25);
             
             if (p.relics.find(r => r.id === 'ANCIENT_TEA_SET') && p.relicCounters['ANCIENT_TEA_SET_ACTIVE']) {
@@ -1749,7 +1781,7 @@ const App: React.FC = () => {
                       if (c.name === 'カンニングペーパー' || c.name === 'STRATEGIST') {
                           p.nextTurnEnergy += 2;
                           currentLogs.push(`${trans("カンニングペーパー", languageMode)}: +2 Next Turn Energy`);
-                          p.floatingText = { id: `strat-scr-${Date.now()}`, text: '+2 Next Turn', color: 'text-yellow-400', iconType: 'zap' };
+                          p.floatingText = { id: `strat-${Date.now()}-${Math.random()}`, text: '+2 Next Turn', color: 'text-yellow-400', iconType: 'zap' };
                       }
                   });
                   if (cardsToScrape.length > 0) {
@@ -2103,6 +2135,10 @@ const App: React.FC = () => {
     setTimeout(() => {
         setGameState(prev => ({ ...prev, activeEffects: [] }));
     }, 600);
+  };
+
+  const handleTimeUpdate = (newDailySeconds: number) => {
+      setDailyPlaySeconds(newDailySeconds);
   };
 
   const handleParryClick = () => {
@@ -2887,6 +2923,27 @@ const App: React.FC = () => {
     <div className="w-full h-[100dvh] bg-black overflow-hidden">
         <div className="w-full h-full relative overflow-hidden bg-black crt-scanline">
             
+            {/* Time Limit Modal */}
+            {showTimeLimitModal && (
+                <div className="fixed inset-0 z-[10000] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-300">
+                    <div className="bg-gray-900 border-4 border-red-600 p-8 rounded-2xl max-w-sm w-full shadow-[0_0_50px_rgba(220,38,38,0.5)] text-center transform scale-110">
+                        <TimerOff size={64} className="text-red-500 mx-auto mb-6 animate-pulse" />
+                        <h2 className="text-3xl font-black text-white mb-4 tracking-tighter">時間切れ！</h2>
+                        <p className="text-gray-300 mb-8 leading-relaxed font-bold">
+                            本日の冒険時間は終了しました。<br/>
+                            勉強の時間です！<br/>
+                            <span className="text-emerald-400">「問題チャレンジ」</span>で脳を鍛えましょう。
+                        </p>
+                        <button 
+                            onClick={() => setShowTimeLimitModal(false)}
+                            className="bg-white text-black w-full py-4 rounded-xl font-black text-xl hover:bg-gray-200 transition-all flex items-center justify-center gap-2"
+                        >
+                            <Check size={24}/> わかった！
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {gameState.screen === GameScreen.START_MENU && (
                 <div className="absolute top-2 right-2 z-[9999] flex gap-2">
                     <button 
@@ -2955,8 +3012,7 @@ const App: React.FC = () => {
                             {hasSave && (
                                 <button 
                                     onClick={continueGame} 
-                                    disabled={isDailyLimitReached}
-                                    className={`w-full py-3 px-4 text-lg font-bold border-b-4 border-r-4 rounded-none cursor-pointer flex items-center justify-center shadow-lg relative group overflow-hidden animate-in fade-in slide-in-from-top-2 ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 cursor-not-allowed opacity-50 grayscale' : 'bg-blue-900 text-white border-blue-400 hover:bg-blue-800'}`}
+                                    className={`w-full py-3 px-4 text-lg font-bold border-b-4 border-r-4 rounded-none cursor-pointer flex items-center justify-center shadow-lg relative group overflow-hidden animate-in fade-in slide-in-from-top-2 ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-blue-900 text-white border-blue-400 hover:bg-blue-800'}`}
                                 >
                                     {!isDailyLimitReached && <div className="absolute inset-0 bg-blue-600 opacity-0 group-hover:opacity-20 transition-opacity"></div>}
                                     <Play className="mr-2 fill-current" /> {trans("つづきから", languageMode)}
@@ -2964,16 +3020,15 @@ const App: React.FC = () => {
                             )}
                             <button 
                                 onClick={startGame} 
-                                disabled={isLoading || isDailyLimitReached} 
-                                className={`w-full py-3 px-4 text-lg font-bold border-b-4 border-r-4 rounded-none transition-all shadow-lg flex items-center justify-center ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 cursor-not-allowed opacity-50 grayscale' : 'bg-gray-100 text-black border-gray-500 hover:bg-white hover:border-gray-400 hover:translate-x-[1px] hover:translate-y-[1px] active:border-0 active:translate-y-[4px] active:translate-x-[4px]'}`}
+                                disabled={isLoading} 
+                                className={`w-full py-3 px-4 text-lg font-bold border-b-4 border-r-4 rounded-none transition-all shadow-lg flex items-center justify-center ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-gray-100 text-black border-gray-500 hover:bg-white hover:border-gray-400 hover:translate-x-[1px] hover:translate-y-[1px] active:border-0 active:translate-y-[4px] active:translate-x-[4px]'}`}
                             >
                                 {isLoading ? trans("じゅんびちゅう...", languageMode) : trans("冒険を始める", languageMode)}
                             </button>
                             
                             <button 
                                 onClick={startChallengeGame} 
-                                disabled={isLoading || isDailyLimitReached} 
-                                className={`w-full py-3 px-4 text-base font-bold border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 cursor-not-allowed opacity-50 grayscale' : 'bg-red-900/80 text-red-100 border-red-500 hover:bg-red-800 hover:shadow-red-900/50'}`}
+                                className={`w-full py-3 px-4 text-base font-bold border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-red-900/80 text-red-100 border-red-500 hover:bg-red-800 hover:shadow-red-900/50'}`}
                             >
                                 <Swords className="mr-2" size={18}/> {trans("1A1Dモード", languageMode)}
                             </button>
@@ -2984,8 +3039,7 @@ const App: React.FC = () => {
 
                             <button 
                                 onClick={openMiniGameMenu} 
-                                disabled={isDailyLimitReached}
-                                className={`w-full py-3 px-4 text-base font-bold border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 cursor-not-allowed opacity-50 grayscale' : 'bg-indigo-900/80 text-indigo-100 border-indigo-500 hover:bg-indigo-800 hover:shadow-indigo-900/50'}`}
+                                className={`w-full py-3 px-4 text-base font-bold border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-indigo-900/80 text-indigo-100 border-indigo-500 hover:bg-indigo-800 hover:shadow-indigo-900/50'}`}
                             >
                                 <Gamepad2 className="mr-2" size={20}/> {trans("ミニゲーム", languageMode)}
                             </button>
@@ -3047,7 +3101,12 @@ const App: React.FC = () => {
             
             {gameState.screen === GameScreen.DEBUG_MENU && (
                 <div className="absolute inset-0">
-                    <DebugMenuScreen onStart={handleDebugStart} onStartAct3Boss={handleDebugStartAct3Boss} onBack={returnToTitle} />
+                    <DebugMenuScreen 
+                        onStart={handleDebugStart} 
+                        onStartAct3Boss={handleDebugStartAct3Boss} 
+                        onBack={returnToTitle} 
+                        onTimeUpdate={handleTimeUpdate}
+                    />
                 </div>
             )}
 
@@ -3313,7 +3372,7 @@ const App: React.FC = () => {
                                  if (relic.id === 'CURSED_KEY') newP.maxEnergy += 1;
                                  if (relic.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
                                  if (relic.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
-                                 if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = p.maxHp; }
+                                 if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = prev.player.maxHp; }
                                  if (relic.id === 'OLD_COIN') newP.gold += 300;
                                  if (relic.id === 'MATRYOSHKA') prev.player.relicCounters['MATRYOSHKA'] = 2; 
                                  if (relic.id === 'HAPPY_FLOWER') prev.player.relicCounters['HAPPY_FLOWER'] = 0; 
@@ -3456,7 +3515,7 @@ const App: React.FC = () => {
             {gameState.screen === GameScreen.GAME_OVER && (
                  <div className="w-full h-full bg-red-900 flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar">
                     <div className="my-auto w-full max-w-2xl py-8">
-                        <h1 className="text-6xl mb-4 font-bold">宿題がふえた…</h1>
+                        <h1 className="text-6xl mb-4 font-bold">しゅくだいがふえた…</h1>
                         <p className="mb-8 text-2xl">Act {gameState.act} - Floor {gameState.floor}</p>
                         
                         {!legacyCardSelected ? (

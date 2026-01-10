@@ -330,7 +330,7 @@ export const storageService = {
 
   getDungeonScores2: (): DungeonScoreEntry[] => {
       try {
-          const stored = localStorage.getItem(STORAGE_KEY_DUNGEON_RANKING_2);
+          const stored = localStorage.getItem(STORAGE_KEY_DUNGEING_2);
           return stored ? JSON.parse(stored) : [];
       } catch (e) {
           return [];
