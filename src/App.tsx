@@ -1259,6 +1259,10 @@ const App: React.FC = () => {
               applyDebuff(target, 'WEAK', 3);
               newLogs.push(`${trans(target.name, languageMode)}に${trans("へろへろ", languageMode)}3を${trans("付与", languageMode)}`);
               nextActiveEffects.push({ id: `vfx-pot-dbuff-${Date.now()}`, type: 'DEBUFF', targetId: target.id });
+          } else if (potion.templateId === 'WEAK_POTION' && target) {
+              applyDebuff(target, 'WEAK', 3);
+              newLogs.push(`${trans(target.name, languageMode)}に${trans("へろへろ", languageMode)}3を${trans("付与", languageMode)}`);
+              nextActiveEffects.push({ id: `vfx-pot-dbuff-${Date.now()}`, type: 'DEBUFF', targetId: target.id });
           } else if (potion.templateId === 'POISON_POTION') {
               if (target) {
                   applyDebuff(target, 'POISON', 6);
@@ -1325,6 +1329,12 @@ const App: React.FC = () => {
     if (actingEnemyId) return; 
     if (gameState.selectionState.active) return;
     if (card.unplayable) return; 
+
+    const hasChoker = !!gameState.player.relics.find(r => r.id === 'VELVET_CHOKER');
+    if (hasChoker && gameState.player.cardsPlayedThisTurn >= 6) {
+        audioService.playSound('wrong');
+        return;
+    }
 
     const hasNormality = gameState.player.hand.some(c => c.name === '退屈' || c.name === 'NORMALITY');
     if (hasNormality && gameState.player.attacksPlayedThisTurn + (gameState.player.cardsPlayedThisTurn - gameState.player.attacksPlayedThisTurn) >= 3) {
@@ -1595,7 +1605,7 @@ const App: React.FC = () => {
                          if (card.fatalEnergy) p.currentEnergy += card.fatalEnergy;
                          if (card.fatalPermanentDamage) {
                              const deckCard = p.deck.find(c => c.id === card.id);
-                             if (deckCard) deckCard.damage = (deckCard.damage || 0) + card.fatalPermanentDamage!;
+                             if (deckCard) card.damage = (card.damage || 0) + card.fatalPermanentDamage!;
                          }
                          if (card.fatalMaxHp) { p.maxHp += card.fatalMaxHp!; p.currentHp += card.fatalMaxHp!; }
                          if (e.corpseExplosion) {
@@ -1822,7 +1832,7 @@ const App: React.FC = () => {
               }
               if (card.addCardToDiscard) {
                    for (let c=0; c<card.addCardToDiscard.count; c++) { 
-                       const template = CARDS_LIBRARY[card.addCardToDiscard.cardName];
+                       const template = CARDS_LIBRARY[card.addCardToDiscard.count.cardName];
                        if (template) p.discardPile.push({ ...template, id: `gen-${Date.now()}-${c}` }); 
                    }
               }
@@ -3115,6 +3125,7 @@ const App: React.FC = () => {
                         onStartAct3Boss={handleDebugStartAct3Boss} 
                         onBack={returnToTitle} 
                         onTimeUpdate={handleTimeUpdate}
+                        languageMode={languageMode}
                     />
                 </div>
             )}

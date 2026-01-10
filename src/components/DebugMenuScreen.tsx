@@ -1,20 +1,22 @@
 
 import React, { useMemo, useState } from 'react';
 import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY } from '../constants';
-import { Card as ICard, Relic, Potion, CardType, TargetType } from '../types';
+import { Card as ICard, Relic, Potion, CardType, TargetType, LanguageMode } from '../types';
 import Card from './Card';
 import { ArrowRight, Trash2, Plus, Gem, FlaskConical, Swords, Shield, Zap, Search, Beaker, RotateCcw, Skull, Clock, History } from 'lucide-react';
 import { synthesizeCards } from '../utils/cardUtils';
 import { storageService } from '../services/storageService';
+import { trans } from '../utils/textUtils';
 
 interface DebugMenuScreenProps {
   onStart: (deck: ICard[], relics: Relic[], potions: Potion[]) => void;
   onStartAct3Boss: (deck: ICard[], relics: Relic[], potions: Potion[]) => void;
   onBack: () => void;
   onTimeUpdate: (newDailySeconds: number) => void;
+  languageMode: LanguageMode;
 }
 
-const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3Boss, onBack, onTimeUpdate }) => {
+const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3Boss, onBack, onTimeUpdate, languageMode }) => {
   const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'SYSTEM'>('CARDS');
   const [searchTerm, setSearchTerm] = useState("");
   
@@ -97,13 +99,13 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3B
       const next = current + (58 * 60); // Add 58 minutes
       storageService.saveDailyPlayTime(next);
       onTimeUpdate(next); // Appコンポーネントのステートを即座に更新
-      alert("今日のプレイ時間を58分追加しました。");
+      alert("きょうの ぼうけんじかんを 58ふん プラスしました。");
   };
 
   const resetDebugTime = () => {
       storageService.saveDailyPlayTime(0);
       onTimeUpdate(0); // Appコンポーネントのステートを即座に更新
-      alert("今日のプレイ時間をリセットしました。");
+      alert("きょうの ぼうけんじかんを リセットしました。");
   };
 
   return (
@@ -114,7 +116,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3B
                 <Zap size={20} className="mr-2" /> DEBUG
             </h2>
             <div className="flex gap-2 md:gap-4 text-sm md:text-base">
-                <button onClick={onBack} className="text-gray-300 hover:text-white underline">戻る</button>
+                <button onClick={onBack} className="text-gray-300 hover:text-white underline">{trans("戻る", languageMode)}</button>
                 
                 <button 
                     onClick={() => onStartAct3Boss(selectedDeck, selectedRelics, selectedPotions)}
@@ -127,7 +129,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3B
                     onClick={() => onStart(selectedDeck, selectedRelics, selectedPotions)}
                     className="bg-green-600 hover:bg-green-500 text-white px-4 py-1 md:px-6 md:py-2 rounded font-bold flex items-center shadow-lg border-2 border-white animate-pulse text-xs md:text-sm"
                 >
-                    START <ArrowRight size={14} className="ml-1"/>
+                    {trans("出発する", languageMode)} <ArrowRight size={14} className="ml-1"/>
                 </button>
             </div>
         </div>
@@ -137,11 +139,11 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3B
             <div className="w-full md:w-3/4 h-[60%] md:h-full border-b md:border-b-0 md:border-r border-gray-700 flex flex-col bg-gray-800/50 min-h-0">
                 {/* Tabs */}
                 <div className="flex bg-gray-800 border-b border-gray-700 overflow-x-auto shrink-0">
-                    <button onClick={() => setActiveTab('CARDS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'CARDS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>CARDS</button>
-                    <button onClick={() => setActiveTab('RELICS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'RELICS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>RELICS</button>
-                    <button onClick={() => setActiveTab('POTIONS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'POTIONS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>POT</button>
-                    <button onClick={() => setActiveTab('SYNTHESIS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'SYNTHESIS' ? 'bg-purple-900 text-white' : 'text-purple-400 hover:bg-gray-750'}`}>SYNTH</button>
-                    <button onClick={() => setActiveTab('SYSTEM')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'SYSTEM' ? 'bg-indigo-900 text-white' : 'text-indigo-400 hover:bg-gray-750'}`}>SYSTEM</button>
+                    <button onClick={() => setActiveTab('CARDS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'CARDS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>{trans("カード", languageMode)}</button>
+                    <button onClick={() => setActiveTab('RELICS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'RELICS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>{trans("レリック", languageMode)}</button>
+                    <button onClick={() => setActiveTab('POTIONS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'POTIONS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>{trans("ポーション", languageMode)}</button>
+                    <button onClick={() => setActiveTab('SYNTHESIS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'SYNTHESIS' ? 'bg-purple-900 text-white' : 'text-purple-400 hover:bg-gray-750'}`}>{trans("合成", languageMode)}</button>
+                    <button onClick={() => setActiveTab('SYSTEM')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'SYSTEM' ? 'bg-indigo-900 text-white' : 'text-indigo-400 hover:bg-gray-750'}`}>{trans("システム", languageMode)}</button>
                 </div>
 
                 {/* Fixed Search Bar Area */}
@@ -151,7 +153,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3B
                             <Search className="absolute left-3 top-2 text-gray-400" size={14}/>
                             <input 
                                 type="text" 
-                                placeholder="Search..." 
+                                placeholder={trans("検索...", languageMode)} 
                                 className="w-full bg-black border border-gray-600 rounded pl-9 p-1.5 text-sm text-white focus:border-blue-500 outline-none"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -166,23 +168,23 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3B
                     {activeTab === 'SYSTEM' && (
                         <div className="space-y-6">
                             <section>
-                                <h3 className="text-indigo-300 font-bold mb-4 flex items-center"><Clock size={18} className="mr-2"/> 時間制限テスト</h3>
+                                <h3 className="text-indigo-300 font-bold mb-4 flex items-center"><Clock size={18} className="mr-2"/> {trans("時間制限テスト", languageMode)}</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <button 
                                         onClick={addDebugTime}
                                         className="bg-indigo-700 hover:bg-indigo-600 text-white p-4 rounded-xl border border-indigo-500 shadow-lg flex flex-col items-center gap-2 transition-transform active:scale-95"
                                     >
                                         <History size={32} />
-                                        <div className="font-bold">今日のプレイ時間を58分進める</div>
-                                        <div className="text-[10px] opacity-70">制限時間の確認用（1時間で制限）</div>
+                                        <div className="font-bold">{trans("今日のプレイ時間を58分進める", languageMode)}</div>
+                                        <div className="text-[10px] opacity-70">{trans("制限時間の確認用（1時間で制限）", languageMode)}</div>
                                     </button>
                                     <button 
                                         onClick={resetDebugTime}
                                         className="bg-slate-700 hover:bg-slate-600 text-white p-4 rounded-xl border border-slate-500 shadow-lg flex flex-col items-center gap-2 transition-transform active:scale-95"
                                     >
                                         <RotateCcw size={32} />
-                                        <div className="font-bold">今日のプレイ時間をリセット</div>
-                                        <div className="text-[10px] opacity-70">制限を解除して最初から</div>
+                                        <div className="font-bold">{trans("今日のプレイ時間をリセット", languageMode)}</div>
+                                        <div className="text-[10px] opacity-70">{trans("制限を解除して最初から", languageMode)}</div>
                                     </button>
                                 </div>
                             </section>
@@ -199,7 +201,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3B
                                         onClick={() => setSynthSlot1(null)}
                                     >
                                         {synthSlot1 ? (
-                                            <div className="scale-[0.6] md:scale-75 pointer-events-none"><Card card={synthSlot1} onClick={()=>{}} disabled={false}/></div>
+                                            <div className="scale-[0.6] md:scale-75 pointer-events-none"><Card card={synthSlot1} onClick={()=>{}} disabled={false} languageMode={languageMode}/></div>
                                         ) : (
                                             <span className="text-gray-600 text-xs">Slot 1</span>
                                         )}
@@ -210,7 +212,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3B
                                         onClick={() => setSynthSlot2(null)}
                                     >
                                         {synthSlot2 ? (
-                                            <div className="scale-[0.6] md:scale-75 pointer-events-none"><Card card={synthSlot2} onClick={()=>{}} disabled={false}/></div>
+                                            <div className="scale-[0.6] md:scale-75 pointer-events-none"><Card card={synthSlot2} onClick={()=>{}} disabled={false} languageMode={languageMode}/></div>
                                         ) : (
                                             <span className="text-gray-600 text-xs">Slot 2</span>
                                         )}
@@ -228,7 +230,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3B
                                         onClick={() => { setSynthSlot1(null); setSynthSlot2(null); setSynthResult(null); }}
                                         className="text-gray-500 hover:text-white text-xs flex items-center justify-center"
                                     >
-                                        <RotateCcw size={12} className="mr-1"/> Reset
+                                        <RotateCcw size={12} className="mr-1"/> {trans("やめる", languageMode)}
                                     </button>
                                 </div>
                                 
@@ -236,18 +238,18 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3B
                                     <>
                                         <ArrowRight size={24} className="text-purple-400 rotate-90 md:rotate-0" />
                                         <div className="flex flex-col items-center gap-2">
-                                            <div className="scale-[0.8] md:scale-90"><Card card={synthResult} onClick={()=>{}} disabled={false} /></div>
+                                            <div className="scale-[0.8] md:scale-90"><Card card={synthResult} onClick={()=>{}} disabled={false} languageMode={languageMode}/></div>
                                             <button 
                                                 onClick={addSynthToDeck}
                                                 className="bg-blue-600 hover:bg-blue-500 text-white px-2 py-1 rounded text-xs font-bold w-full"
                                             >
-                                                Add
+                                                {trans("ゲット", languageMode)}
                                             </button>
                                         </div>
                                     </>
                                 )}
                             </div>
-                            <div className="text-center text-xs text-gray-400 mb-2">Select cards below</div>
+                            <div className="text-center text-xs text-gray-400 mb-2">{trans("スロットを選んでください", languageMode)}</div>
                         </div>
                     )}
 
@@ -256,7 +258,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3B
                             {filteredCards.map((c, idx) => (
                                 <div key={idx} className="cursor-pointer hover:scale-105 transition-transform flex justify-center" onClick={() => handleAddCard(c)}>
                                     <div className="scale-90 origin-top pointer-events-none -mb-4">
-                                        <Card card={{...c, id: 'temp'}} onClick={()=>{}} disabled={false} />
+                                        <Card card={{...c, id: 'temp'}} onClick={()=>{}} disabled={false} languageMode={languageMode} />
                                     </div>
                                 </div>
                             ))}
@@ -274,7 +276,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3B
                                         className={`p-2 rounded border cursor-pointer flex flex-col items-center text-center ${isSelected ? 'bg-yellow-900/50 border-yellow-400' : 'bg-black/40 border-gray-700 hover:border-gray-500'}`}
                                     >
                                         <Gem size={20} className={isSelected ? "text-yellow-400" : "text-gray-500"} />
-                                        <span className="text-[10px] mt-1 font-bold leading-tight">{r.name}</span>
+                                        <span className="text-[10px] mt-1 font-bold leading-tight">{trans(r.name, languageMode)}</span>
                                     </div>
                                 );
                             })}
@@ -290,7 +292,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3B
                                     className="p-2 rounded border border-gray-700 hover:border-white bg-black/40 cursor-pointer flex flex-col items-center text-center"
                                 >
                                     <FlaskConical size={20} style={{ color: p.color }} />
-                                    <span className="text-[10px] mt-1 font-bold">{p.name}</span>
+                                    <span className="text-[10px] mt-1 font-bold">{trans(p.name, languageMode)}</span>
                                 </div>
                             ))}
                         </div>
@@ -308,14 +310,14 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3B
                     {/* Deck */}
                     <div>
                         <div className="flex justify-between items-center mb-1">
-                            <h3 className="font-bold text-blue-300 flex items-center text-[10px] md:text-xs"><Swords size={12} className="mr-1"/> Deck ({selectedDeck.length})</h3>
+                            <h3 className="font-bold text-blue-300 flex items-center text-[10px] md:text-xs"><Swords size={12} className="mr-1"/> {trans("デッキ", languageMode)} ({selectedDeck.length})</h3>
                             <button onClick={clearDeck} className="text-[10px] text-red-400 hover:text-red-200">Clear</button>
                         </div>
                         <div className="space-y-1">
                             {selectedDeck.map((c, idx) => (
                                 <div key={idx} className="flex justify-between items-center bg-gray-800 p-1 rounded border border-gray-700 group">
                                     <span className={`truncate text-[10px] ${c.type === CardType.ATTACK ? 'text-red-300' : c.type === CardType.SKILL ? 'text-blue-300' : 'text-yellow-300'}`}>
-                                        {c.name}
+                                        {trans(c.name, languageMode)}
                                     </span>
                                     <button onClick={() => handleRemoveCard(idx)} className="text-gray-500 hover:text-red-500 ml-1 shrink-0">
                                         <Trash2 size={12} />
@@ -328,11 +330,11 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3B
 
                     {/* Relics */}
                     <div>
-                        <h3 className="font-bold text-yellow-300 mb-1 flex items-center text-[10px] md:text-xs"><Gem size={12} className="mr-1"/> Relics ({selectedRelics.length})</h3>
+                        <h3 className="font-bold text-yellow-300 mb-1 flex items-center text-[10px] md:text-xs"><Gem size={12} className="mr-1"/> {trans("レリック", languageMode)} ({selectedRelics.length})</h3>
                         <div className="flex flex-wrap gap-1">
                             {selectedRelics.map(r => (
-                                <div key={r.id} className="bg-gray-800 p-1 rounded border border-yellow-700 flex items-center" title={r.description}>
-                                    <span className="truncate max-w-[60px] text-[9px]">{r.name}</span>
+                                <div key={r.id} className="bg-gray-800 p-1 rounded border border-yellow-700 flex items-center" title={trans(r.description, languageMode)}>
+                                    <span className="truncate max-w-[60px] text-[9px]">{trans(r.name, languageMode)}</span>
                                     <button onClick={() => toggleRelic(r)} className="ml-1 text-gray-500 hover:text-red-500"><X size={10}/></button>
                                 </div>
                             ))}
@@ -341,11 +343,11 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3B
 
                     {/* Potions */}
                     <div>
-                        <h3 className="font-bold text-purple-300 mb-1 flex items-center text-[10px] md:text-xs"><FlaskConical size={12} className="mr-1"/> Potions ({selectedPotions.length})</h3>
+                        <h3 className="font-bold text-purple-300 mb-1 flex items-center text-[10px] md:text-xs"><FlaskConical size={12} className="mr-1"/> {trans("ポーション", languageMode)} ({selectedPotions.length})</h3>
                         <div className="space-y-1">
                             {selectedPotions.map((p, idx) => (
                                 <div key={idx} className="flex justify-between items-center bg-gray-800 p-1 rounded border border-gray-700">
-                                    <span style={{color: p.color}} className="truncate text-[10px]">{p.name}</span>
+                                    <span style={{color: p.color}} className="truncate text-[10px]">{trans(p.name, languageMode)}</span>
                                     <button onClick={() => removePotion(idx)} className="text-gray-500 hover:text-red-500 ml-1 shrink-0">
                                         <Trash2 size={12} />
                                     </button>
