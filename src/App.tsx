@@ -276,10 +276,19 @@ const App: React.FC = () => {
             return next;
         });
 
-        // スタートメニューと問題チャレンジ以外でのみ、1日のプレイ制限をカウント
+        // プレイ制限のカウント
         if (gameState.screen !== GameScreen.START_MENU && gameState.screen !== GameScreen.PROBLEM_CHALLENGE) {
+            
+            // リアルタイムでの日付変更チェック
+            // storageService.getDailyPlayTime() は日付が違えば 0 を返す
+            const currentFromStorage = storageService.getDailyPlayTime();
+            
             setDailyPlaySeconds(prev => {
-                // すでに制限に達している場合はカウントもステート更新も行わない（ループ防止）
+                // 日付が変更されていたら 0 にリセット
+                if (currentFromStorage === 0 && prev > 0) {
+                    return 0;
+                }
+
                 if (prev >= PLAY_LIMIT_SECONDS) return prev;
 
                 const next = prev + 1;
@@ -287,16 +296,9 @@ const App: React.FC = () => {
 
                 // 制限時間に達した瞬間に一度だけタイトルに戻す処理を実行
                 if (next >= PLAY_LIMIT_SECONDS) {
-                    // 現在の進行状況を保存（ミニゲームなどの状態もここで確実に保存）
-                    // stateRef を使って最新の gameState をキャプチャ
                     setGameState(curr => {
-                        // 重複遷移防止
                         if (curr.screen === GameScreen.START_MENU) return curr;
-                        
-                        // 進行中のデータを保存
                         storageService.saveGame(curr);
-                        
-                        // タイトルへ強制遷移
                         audioService.playBGM('menu');
                         setShowTimeLimitModal(true);
                         return { ...curr, screen: GameScreen.START_MENU };
@@ -304,39 +306,46 @@ const App: React.FC = () => {
                 }
                 return next;
             });
+        } else if (gameState.screen === GameScreen.START_MENU) {
+            // スタートメニューでも日付変更を監視してUIを更新
+            const currentFromStorage = storageService.getDailyPlayTime();
+            setDailyPlaySeconds(prev => {
+                if (currentFromStorage === 0 && prev > 0) return 0;
+                return prev;
+            });
         }
     }, 1000);
     return () => clearInterval(interval);
-  }, [gameState.screen]);
+  }, [gameState.screen, dailyPlaySeconds]); // dailyPlaySeconds も依存に追加して最新状態を維持
 
   useEffect(() => {
-      // 重要な遷移時やプレイ中にオートセーブを実行
-      if (gameState.screen !== GameScreen.START_MENU && 
-          gameState.screen !== GameScreen.GAME_OVER && 
-          gameState.screen !== GameScreen.ENDING &&
-          gameState.screen !== GameScreen.VICTORY &&
-          gameState.screen !== GameScreen.COMPENDIUM && 
-          gameState.screen !== GameScreen.HELP &&
-          gameState.screen !== GameScreen.CHARACTER_SELECTION &&
-          gameState.screen !== GameScreen.RELIC_SELECTION &&
-          gameState.screen !== GameScreen.MODE_SELECTION &&
-          gameState.screen !== GameScreen.DEBUG_MENU &&
-          gameState.screen !== GameScreen.MINI_GAME_SELECT &&
-          gameState.screen !== GameScreen.MINI_GAME_POKER &&
-          gameState.screen !== GameScreen.MINI_GAME_SURVIVOR &&
-          gameState.screen !== GameScreen.MINI_GAME_DUNGEON &&
-          gameState.screen !== GameScreen.MINI_GAME_DUNGEON_2 &&
-          gameState.screen !== GameScreen.MINI_GAME_KOCHO &&
-          gameState.screen !== GameScreen.MINI_GAME_PAPER_PLANE &&
-          gameState.screen !== GameScreen.PROBLEM_CHALLENGE
-      ) {
-          storageService.saveGame(gameState);
-      }
-      
-      // タイトル画面の時、セーブデータの有無を再チェック
-      if (gameState.screen === GameScreen.START_MENU) {
-          setHasSave(storageService.hasSaveFile());
-      }
+    // 重要な遷移時やプレイ中にオートセーブを実行
+    if (gameState.screen !== GameScreen.START_MENU && 
+        gameState.screen !== GameScreen.GAME_OVER && 
+        gameState.screen !== GameScreen.ENDING &&
+        gameState.screen !== GameScreen.VICTORY &&
+        gameState.screen !== GameScreen.COMPENDIUM && 
+        gameState.screen !== GameScreen.HELP &&
+        gameState.screen !== GameScreen.CHARACTER_SELECTION &&
+        gameState.screen !== GameScreen.RELIC_SELECTION &&
+        gameState.screen !== GameScreen.MODE_SELECTION &&
+        gameState.screen !== GameScreen.DEBUG_MENU &&
+        gameState.screen !== GameScreen.MINI_GAME_SELECT &&
+        gameState.screen !== GameScreen.MINI_GAME_POKER &&
+        gameState.screen !== GameScreen.MINI_GAME_SURVIVOR &&
+        gameState.screen !== GameScreen.MINI_GAME_DUNGEON &&
+        gameState.screen !== GameScreen.MINI_GAME_DUNGEON_2 &&
+        gameState.screen !== GameScreen.MINI_GAME_KOCHO &&
+        gameState.screen !== GameScreen.MINI_GAME_PAPER_PLANE &&
+        gameState.screen !== GameScreen.PROBLEM_CHALLENGE
+    ) {
+        storageService.saveGame(gameState);
+    }
+    
+    // タイトル画面の時、セーブデータの有無を再チェック
+    if (gameState.screen === GameScreen.START_MENU) {
+        setHasSave(storageService.hasSaveFile());
+    }
   }, [gameState]);
 
   useEffect(() => {
@@ -2848,7 +2857,7 @@ const App: React.FC = () => {
       else if (correctCount === 2) bonusGold = 30;
       else if (correctCount === 3) bonusGold = 50;
       
-      if (gameState.player.relics.find(r => r.id === 'CALCULATOR')) {
+      if (gameState.player.relics.find(r => r.id === 'CALIPERS')) {
           const healAmount = correctCount * 2;
           if (healAmount > 0) {
               setGameState(prev => ({

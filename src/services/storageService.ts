@@ -53,6 +53,18 @@ export interface PaperPlaneProgress {
     maxClearedLevel: Record<string, number>; // Map of Ship ID -> Max Ascension Level cleared
 }
 
+/**
+ * ローカルの現在日付を取得する（YYYY-MM-DD）
+ * toISOString() は UTC になるため使用しない
+ */
+const getLocalDateString = () => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export const storageService = {
   // --- Unlocked Items (Cards, Relics, Potions, Enemies) ---
   
@@ -484,7 +496,7 @@ export const storageService = {
 
   getDailyPlayTime: (): number => {
     try {
-        const today = new Date().toISOString().split('T')[0];
+        const today = getLocalDateString();
         const stored = localStorage.getItem(STORAGE_KEY_DAILY_PLAY_TIME);
         if (!stored) return 0;
         const data = JSON.parse(stored);
@@ -494,7 +506,7 @@ export const storageService = {
   },
 
   saveDailyPlayTime: (seconds: number) => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDateString();
     localStorage.setItem(STORAGE_KEY_DAILY_PLAY_TIME, JSON.stringify({ date: today, seconds }));
   },
 
