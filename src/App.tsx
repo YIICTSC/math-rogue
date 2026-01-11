@@ -3082,7 +3082,7 @@ const App: React.FC = () => {
                             </div>
 
                             <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                <Terminal size={10}/> v1.0.1
+                                <Terminal size={10}/> v1.0.1 🄫YUSUKE ISHIGE
                             </button>
                         </div>
                     </div>
