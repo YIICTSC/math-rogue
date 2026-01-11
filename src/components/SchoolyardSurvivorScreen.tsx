@@ -88,7 +88,7 @@ const WEAPONS: Record<WeaponType, WeaponDef> = {
         id: 'RECORDER', name: 'リコーダー', desc: '音波で押し返す', 
         evolvedName: '校内放送(メタル)', evolvedDesc: '画面全体攻撃＆スタン', synergy: 'DRILL',
         sprite: { template: 'SWORD', color: '#fca5a5', highlight: '#ffe4e6' },
-        animType: 'BEAM'
+        animType: 'BLAST'
     },
     SOCCER: { 
         id: 'SOCCER', name: 'サッカーボール', desc: '跳ね返るボール', 
@@ -674,7 +674,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 else if (['RULER', 'COMPASS', 'TROWEL'].includes(wType)) baseCd = 40;
                 else if (['HIGHLIGHTER', 'FOUNTAIN_PEN'].includes(wType)) baseCd = 12; 
                 else if (['STAPLER', 'BASKETBALL'].includes(wType)) baseCd = 45;
-                else if (['HAND_BELL', 'SCHOOL_CHIME', 'BROADCAST_MIC'].includes(wType)) baseCd = 180;
+                else if (['RECORDER', 'HAND_BELL', 'SCHOOL_CHIME', 'BROADCAST_MIC'].includes(wType)) baseCd = 180;
                 wData.cooldownTimer = Math.max(5, baseCd * Math.pow(0.9, wData.level-1) * cooldownReduc);
             }
         });
@@ -786,7 +786,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 const shift = Math.sin(frameCount.current * 0.8) * 30;
                 p.x = player.current.x + Math.cos(p.rotation) * (40 + shift);
                 p.y = player.current.y + Math.sin(p.rotation) * (40 + shift);
-            } else if (['HAND_BELL', 'WHISTLE_S', 'SCHOOL_CHIME', 'BROADCAST_MIC', 'BASKETBALL', 'DUSTER'].includes(p.type as string)) {
+            } else if (['RECORDER', 'HAND_BELL', 'WHISTLE_S', 'SCHOOL_CHIME', 'BROADCAST_MIC', 'BASKETBALL', 'DUSTER'].includes(p.type as string)) {
                 p.x = player.current.x; p.y = player.current.y;
                 if (frameCount.current % 20 === 0) {
                     const ringCol = (p.type === 'DUSTER') ? 'gray' : (p.type === 'BROADCAST_MIC' ? '#818cf8' : 'white');
@@ -1040,6 +1040,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             case 'TROWEL':
                 projectiles.current.push({ id: Math.random(), x: p.x, y: p.y, dx: 0, dy: 0, damage: dmg*2, type: evolved ? 'EVOLVED' : type, subType: type as WeaponType, duration: 30, maxDuration: 30, penetration: 999, rotation: angleToMove, scale: scale, knockback: 5, hitIds: [] });
                 break;
+            case 'RECORDER':
             case 'HAND_BELL':
             case 'WHISTLE_S':
             case 'SCHOOL_CHIME':
@@ -1168,7 +1169,9 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 ctx.globalCompositeOperation = 'source-over';
             } else if (['RECORDER', 'SCHOOL_CHIME', 'BROADCAST_MIC', 'BASKETBALL', 'DUSTER'].includes(weaponKey as string)) {
                 const ringCol = weaponKey === 'BASKETBALL' ? 'rgba(249,115,22,0.5)' : (weaponKey === 'DUSTER' ? 'rgba(150,150,150,0.5)' : 'rgba(255,255,255,0.5)');
-                ctx.beginPath(); ctx.arc(0, 0, (1 - p.duration/20) * (weaponKey === 'BROADCAST_MIC' ? 300 : 150), 0, Math.PI*2);
+                const progress = Math.max(0, 1 - p.duration / p.maxDuration);
+                const radius = progress * (weaponKey === 'BROADCAST_MIC' ? 300 : 150);
+                ctx.beginPath(); ctx.arc(0, 0, radius, 0, Math.PI*2);
                 ctx.strokeStyle = ringCol; ctx.lineWidth = 5; ctx.stroke();
             } else if (['CURRY', 'ART_BRUSH', 'CHALK_SMOKE', 'GLUE_STICK', 'FOUNTAIN_PEN', 'CLAY'].includes(p.type as string) || ['CURRY', 'ART_BRUSH', 'CHALK_SMOKE', 'GLUE_STICK', 'FOUNTAIN_PEN', 'CLAY'].includes(p.subType as string)) {
                 const color = p.type === 'CURRY' ? 'rgba(255,120,0,0.4)' : (p.type === 'ART_BRUSH' ? 'rgba(244,63,94,0.4)' : (p.type === 'GLUE_STICK' ? 'rgba(96,165,250,0.4)' : (p.type === 'FOUNTAIN_PEN' ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.3)')));
