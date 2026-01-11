@@ -41,8 +41,8 @@ const getTheme = (floor: number): ThemeConfig => {
 };
 
 // --- CONSTANTS ---
-const MAP_W = 40; 
-const MAP_H = 40; 
+const MAP_W = 26; 
+const MAP_H = 26; 
 const VIEW_W = 11; 
 const VIEW_H = 9;
 const TILE_SIZE = 16; 
@@ -2134,21 +2134,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
       movePlayer(dx, dy);
   };
 
-  // --- AUTO SCROLL MENU ---
-  useEffect(() => {
-      if (lastInputType.current === 'KEY' && menuListRef.current) {
-          let activeIndex = selectedItemIndex;
-          if (menuOpen && synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT') {
-              activeIndex = blankScrollSelectionIndex;
-          }
-          
-          const items = menuListRef.current.children;
-          if (items && items[activeIndex]) {
-              (items[activeIndex] as HTMLElement).scrollIntoView({ block: 'nearest', behavior: 'instant' }); 
-          }
-      }
-  }, [selectedItemIndex, blankScrollSelectionIndex, menuOpen, shopState.active, shopState.mode, synthState.step, inventory, enemies]);
-
   // --- KEYBOARD ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -2480,7 +2465,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
   const { C0, C1, C2, C3 } = currentTheme.colors;
 
   return (
-    <div className="w-full h-full bg-[#101010] flex flex-col md:flex-row items-center md:items-stretch justify-center font-mono select-none overflow-hidden touch-none relative p-2 md:p-4 gap-2 md:gap-4">
+    <div className="w-full h-full bg-[#101010] flex flex-col landscape:flex-row md:flex-row items-center landscape:items-stretch md:items-stretch justify-center font-mono select-none overflow-hidden touch-none relative p-4 gap-4">
         
         {inspectedItem && (
             <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setInspectedItem(null)}>
@@ -2619,32 +2604,31 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
             </div>
         )}
 
-        {/* --- LEFT: D-PAD (Wide screens) --- */}
-        <div className="hidden md:flex w-64 flex-col items-center justify-center p-4 bg-[#1a1a2a] border-2 border-[#333] rounded-xl shadow-2xl relative shrink-0">
-            <div className="w-48 h-48 relative flex items-center justify-center">
-                <div className="w-16 h-16 bg-[#333] z-10 rounded-sm"></div>
+        {/* --- LEFT: D-PAD (PC/Tablet Landscape & Desktop) --- */}
+        <div className="hidden landscape:flex md:flex order-1 w-48 md:w-64 flex-col items-center justify-center p-4 bg-[#1a1a2a] border-2 border-[#333] rounded-xl shadow-2xl relative shrink-0">
+            <div className="w-40 h-40 relative flex items-center justify-center">
+                <div className="w-12 h-12 bg-[#333] z-10 rounded-sm"></div>
                 {/* D-PAD Buttons */}
-                <div className="absolute top-0 w-16 h-20 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0" onClick={() => handleMoveInput(0, -1)}><ArrowUp className="text-[#666]" size={28}/></div>
-                <div className="absolute bottom-0 w-16 h-20 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-0" onClick={() => handleMoveInput(0, 1)}><ArrowDown className="text-[#666]" size={28}/></div>
-                <div className="absolute left-0 w-20 h-16 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-0" onClick={() => handleMoveInput(-1, 0)}><ArrowLeft className="text-[#666]" size={28}/></div>
-                <div className="absolute right-0 w-20 h-16 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-0" onClick={() => handleMoveInput(1, 0)}><ArrowRight className="text-[#666]" size={28}/></div>
+                <div className="absolute top-0 w-12 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0" onClick={() => handleMoveInput(0, -1)}><ArrowUp className="text-[#666]" size={24}/></div>
+                <div className="absolute bottom-0 w-12 h-16 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-0" onClick={() => handleMoveInput(0, 1)}><ArrowDown className="text-[#666]" size={24}/></div>
+                <div className="absolute left-0 w-16 h-12 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-0" onClick={() => handleMoveInput(-1, 0)}><ArrowLeft className="text-[#666]" size={24}/></div>
+                <div className="absolute right-0 w-16 h-12 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-0" onClick={() => handleMoveInput(1, 0)}><ArrowRight className="text-[#666]" size={24}/></div>
                 
                 {/* Diagonals */}
-                <div className="absolute top-2 left-2 w-12 h-12 bg-[#2a2a2a] rounded-tl-xl border-t border-l border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(-1, -1)}></div>
-                <div className="absolute top-2 right-2 w-12 h-12 bg-[#2a2a2a] rounded-tr-xl border-t border-r border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(1, -1)}></div>
-                <div className="absolute bottom-2 left-2 w-12 h-12 bg-[#2a2a2a] rounded-bl-xl border-b border-l border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(-1, 1)}></div>
-                <div className="absolute bottom-2 right-2 w-12 h-12 bg-[#2a2a2a] rounded-br-xl border-b border-r border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(1, 1)}></div>
+                <div className="absolute top-2 left-2 w-10 h-10 bg-[#2a2a2a] rounded-tl-xl border-t border-l border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(-1, -1)}></div>
+                <div className="absolute top-2 right-2 w-10 h-10 bg-[#2a2a2a] rounded-tr-xl border-t border-r border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(1, -1)}></div>
+                <div className="absolute bottom-2 left-2 w-10 h-10 bg-[#2a2a2a] rounded-bl-xl border-b border-l border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(-1, 1)}></div>
+                <div className="absolute bottom-2 right-2 w-10 h-10 bg-[#2a2a2a] rounded-br-xl border-b border-r border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(1, 1)}></div>
                 
-                <div className="absolute w-12 h-12 bg-[#2a2a2a] rounded-full z-20 shadow-inner"></div>
+                <div className="absolute w-10 h-10 bg-[#2a2a2a] rounded-full z-20 shadow-inner"></div>
             </div>
-            <div className="mt-12 text-[#444] font-black tracking-widest text-sm italic">DIRECTION</div>
+            <div className="mt-8 text-[#444] font-black tracking-widest text-xs italic">DIRECTION</div>
         </div>
 
         {/* --- CENTER: GAME SCREEN & LOGS --- */}
-        <div className="flex-1 flex flex-col items-center gap-2 min-h-0">
-            <div className="w-full aspect-[11/9] md:aspect-auto md:flex-1 relative shrink-0">
-                <div className="w-full h-full border-4 relative overflow-hidden shadow-lg rounded-sm" style={{ backgroundColor: C3, borderColor: C0 }}>
-                    
+        <div className="w-full max-w-md md:max-w-full md:flex-1 flex flex-col gap-2 min-h-0 order-2">
+            <div className="w-full aspect-[4/3] md:aspect-auto md:flex-1 relative shrink-0 shadow-lg border-2 max-h-[45vh] md:max-h-full flex flex-col overflow-hidden" style={{ backgroundColor: C3, borderColor: C0 }}>
+                <div className="w-full h-full relative overflow-hidden flex flex-col">
                     <div className="absolute top-0 left-0 w-full h-8 flex justify-between items-center px-2 text-[10px] z-10 border-b" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
                         <span className="font-bold tracking-widest">{currentTheme.name}</span>
                         <div className="flex gap-2">
@@ -2991,15 +2975,15 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
                 </div>
             </div>
 
-            <div className="w-full h-24 p-1 text-[10px] md:text-[12px] md:h-32 mb-2 rounded border-2 font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner overflow-hidden" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
-                {logs.slice(-8).map((l) => (
+            <div className="w-full h-16 p-1 text-[9px] mb-1 rounded border-2 font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner overflow-hidden" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
+                {logs.slice(-4).map((l) => (
                     <div key={l.id} style={{ color: l.color || C3 }} className="truncate">{l.message}</div>
                 ))}
             </div>
         </div>
 
-        {/* --- RIGHT: BUTTONS (Wide screens) --- */}
-        <div className="hidden md:flex w-64 flex-col items-center justify-between p-4 bg-[#1a1a1a] border-2 border-[#333] rounded-xl shadow-2xl relative shrink-0">
+        {/* --- RIGHT: BUTTONS (PC/Tablet Landscape & Desktop) --- */}
+        <div className="hidden landscape:flex md:flex order-3 w-48 md:w-64 flex-col items-center justify-between p-4 bg-[#1a1a1a] border-2 border-[#333] rounded-xl shadow-2xl relative shrink-0">
             {/* Action Buttons Container */}
             <div className="flex flex-col items-center gap-8 w-full mt-4">
                  {/* SHOOT (R-Trigger style) */}
@@ -3040,7 +3024,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack }) => {
         </div>
 
         {/* --- BOTTOM: MOBILE ONLY CONTROLLER --- */}
-        <div className="md:hidden w-full max-w-md h-[220px] relative rounded-t-xl border-t-2 border-[#333] bg-[#1a1a2a] shrink-0">
+        <div className="portrait:flex landscape:hidden md:hidden order-4 w-full max-w-md h-[220px] relative rounded-t-xl border-t-2 border-[#333] bg-[#1a1a2a] shrink-0">
             <div className="absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32 flex items-center justify-center">
                 <div className="w-10 h-10 bg-[#333] z-10"></div>
                 <div className="absolute top-0 w-10 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0" onClick={() => handleMoveInput(0, -1)}><ArrowUp className="text-[#666]" size={20}/></div>
