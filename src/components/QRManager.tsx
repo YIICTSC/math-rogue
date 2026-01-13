@@ -24,6 +24,10 @@ const QRManager: React.FC<QRManagerProps> = ({ player, onOpponentLoaded, onClose
     const scanRequestRef = useRef<number | null>(null);
     const [scanError, setScanError] = useState<string | null>(null);
 
+    // Camera selection state
+    const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+    const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
+
     useEffect(() => {
         const encoded = encodePlayerData(player);
         setQrData(encoded);
@@ -35,11 +39,56 @@ const QRManager: React.FC<QRManagerProps> = ({ player, onOpponentLoaded, onClose
     useEffect(() => {
         if (mode === 'SCAN') {
             startCamera();
+            updateDeviceList();
         } else {
             stopCamera();
         }
         return () => stopCamera();
-    }, [mode]);
+    }, [mode, selectedDeviceId]);
+
+    const updateDeviceList = async () => {
+        try {
+            const allDevices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = allDevices.filter(device => device.kind === 'videoinput');
+            setDevices(videoDevices);
+            
+            // 初回、かつデバイスがまだ明示的に選択されていない場合
+            if (videoDevices.length > 0 && !selectedDeviceId) {
+                // 背面カメラと思われるデバイスを検索 (ラベルから推測)
+                const backCamera = videoDevices.find(device => 
+                    /back|rear|背面|後方|environment/i.test(device.label)
+                );
+                
+                if (backCamera) {
+                    setSelectedDeviceId(backCamera.deviceId);
+                } else if (videoRef.current?.srcObject) {
+                    // ラベルが空の場合などは、現在実際に使われているトラックからIDを取得
+                    const stream = videoRef.current.srcObject as MediaStream;
+                    const activeTrack = stream.getVideoTracks()[0];
+                    if (activeTrack) {
+                        const settings = activeTrack.getSettings();
+                        if (settings.deviceId) {
+                            setSelectedDeviceId(settings.deviceId);
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            console.error("Error listing devices:", e);
+        }
+    };
+
+    const switchCamera = () => {
+        if (devices.length < 2) return;
+        
+        const currentIndex = devices.findIndex(d => d.deviceId === selectedDeviceId);
+        const nextIndex = (currentIndex + 1) % devices.length;
+        const nextDevice = devices[nextIndex];
+        
+        stopCamera();
+        setSelectedDeviceId(nextDevice.deviceId);
+        audioService.playSound('select');
+    };
 
     const startCamera = async () => {
         setScanError(null);
@@ -55,9 +104,14 @@ const QRManager: React.FC<QRManagerProps> = ({ player, onOpponentLoaded, onClose
                 });
             }
 
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "environment" } 
-            });
+            // selectedDeviceId がない場合は理想的な向きとして "environment" (背面) を指定
+            const constraints: MediaStreamConstraints = {
+                video: selectedDeviceId 
+                    ? { deviceId: { exact: selectedDeviceId } } 
+                    : { facingMode: { ideal: "environment" } }
+            };
+
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
             
             if (videoRef.current) {
                 videoRef.current.srcObject = stream;
@@ -289,7 +343,18 @@ const QRManager: React.FC<QRManagerProps> = ({ player, onOpponentLoaded, onClose
                                             <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]" style={{ clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 15%, 15% 15%, 15% 85%, 85% 85%, 85% 15%, 0% 15%)' }}></div>
                                         </div>
                                         
-                                        <div className="absolute bottom-4 left-0 right-0 text-center">
+                                        {/* Switch Camera Button */}
+                                        {devices.length > 1 && (
+                                            <button 
+                                                onClick={switchCamera}
+                                                className="absolute bottom-4 right-4 bg-indigo-600/80 hover:bg-indigo-500 text-white p-3 rounded-full shadow-lg border border-white/30 backdrop-blur-md transition-all active:scale-90 z-[220]"
+                                                title="カメラを切り替える"
+                                            >
+                                                <RefreshCw size={24} />
+                                            </button>
+                                        )}
+
+                                        <div className="absolute bottom-4 left-0 right-0 text-center px-4">
                                             <span className="bg-black/60 px-4 py-1 rounded-full text-[10px] font-bold text-white border border-white/20 backdrop-blur-md">
                                                 相手のQRコードを枠内に映してください
                                             </span>
