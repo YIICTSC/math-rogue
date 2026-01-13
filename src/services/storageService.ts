@@ -1,5 +1,5 @@
 
-import { GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState, KochoScoreEntry, PaperPlaneScoreEntry } from '../types';
+import { GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState, KochoScoreEntry, PaperPlaneScoreEntry, VSRecord } from '../types';
 
 const STORAGE_KEY_UNLOCKED_CARDS = 'pixel_spire_unlocked_cards_v1';
 const STORAGE_KEY_UNLOCKED_RELICS = 'pixel_spire_unlocked_relics_v1';
@@ -12,6 +12,7 @@ const STORAGE_KEY_RANKING = 'pixel_spire_ranking_v1';
 const STORAGE_KEY_POKER_RANKING = 'pixel_spire_poker_ranking_v1';
 const STORAGE_KEY_SURVIVOR_RANKING = 'pixel_spire_survivor_ranking_v1';
 const STORAGE_KEY_DUNGEON_RANKING = 'pixel_spire_dungeon_ranking_v1';
+const STORAGE_KEY_VS_RANKING = 'pixel_spire_vs_ranking_v1';
 const STORAGE_KEY_LEGACY_CARD = 'pixel_spire_legacy_card_v1';
 const STORAGE_KEY_DEBUG_MATH_SKIP = 'pixel_spire_debug_math_skip_v1';
 const STORAGE_KEY_DEBUG_HP_ONE = 'pixel_spire_debug_hp_one_v1';
@@ -23,6 +24,7 @@ const STORAGE_KEY_POKER_STATE = 'pixel_spire_poker_state_v1';
 
 // For School Dungeon 2
 const STORAGE_KEY_DUNGEON_STATE_2 = 'pixel_spire_dungeon_state_2_v1';
+const STORAGE_KEY_DUNGEING_2 = 'pixel_spire_dungeon_ranking_2_v1';
 const STORAGE_KEY_DUNGEON_RANKING_2 = 'pixel_spire_dungeon_ranking_2_v1';
 
 // For Kocho Showdown
@@ -235,6 +237,26 @@ export const storageService = {
       }
   },
 
+  // --- VS Battle Records ---
+  saveVSRecord: (record: VSRecord) => {
+      try {
+          const current = storageService.getVSRecords();
+          const updated = [record, ...current].slice(0, 50);
+          localStorage.setItem(STORAGE_KEY_VS_RANKING, JSON.stringify(updated));
+      } catch (e) {
+          console.warn("Failed to save VS record", e);
+      }
+  },
+
+  getVSRecords: (): VSRecord[] => {
+      try {
+          const stored = localStorage.getItem(STORAGE_KEY_VS_RANKING);
+          return stored ? JSON.parse(stored) : [];
+      } catch (e) {
+          return [];
+      }
+  },
+
   // --- Poker Scores ---
   savePokerScore: (entry: PokerScoreEntry) => {
       try {
@@ -342,7 +364,7 @@ export const storageService = {
 
   getDungeonScores2: (): DungeonScoreEntry[] => {
       try {
-          const stored = localStorage.getItem(STORAGE_KEY_DUNGEING_2);
+          const stored = localStorage.getItem(STORAGE_KEY_DUNGEON_RANKING_2);
           return stored ? JSON.parse(stored) : [];
       } catch (e) {
           return [];
@@ -608,6 +630,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_DUNGEON_STATE);
       localStorage.removeItem(STORAGE_KEY_DUNGEON_RANKING_2);
       localStorage.removeItem(STORAGE_KEY_DUNGEON_STATE_2);
+      localStorage.removeItem(STORAGE_KEY_VS_RANKING);
       localStorage.removeItem(STORAGE_KEY_KOCHO_STATE);
       localStorage.removeItem(STORAGE_KEY_KOCHO_RANKING);
       localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_STATE);
