@@ -43,36 +43,32 @@ export interface Card {
   strengthScaling?: number; 
   lifesteal?: boolean;      
   upgradeHand?: boolean;
-  upgradeDeck?: boolean; // New: Apotheosis
+  upgradeDeck?: boolean; 
   fatalEnergy?: number;     
   fatalPermanentDamage?: number; 
   shuffleHandToDraw?: boolean;   
   doubleStrength?: boolean;      
   applyPower?: { id: string, amount: number }; 
-  poisonMultiplier?: number; // New: Catalyst
+  poisonMultiplier?: number; 
   
-  // Even More Advanced Effects
   damageBasedOnBlock?: boolean; 
   doubleBlock?: boolean;        
   fatalMaxHp?: number;
   innate?: boolean;
   
-  // Special Mechanics
-  capture?: boolean; // If fatal, adds enemy as card to deck
-  textureRef?: string; // Seed/Name for generating PixelSprite on card
+  capture?: boolean; 
+  textureRef?: string; 
   
-  // Next Turn Effects
   nextTurnEnergy?: number;
   nextTurnDraw?: number;          
 
-  // Complex Interactions
   promptsDiscard?: number;      
   promptsCopy?: number;         
   promptsExhaust?: number;      
   damagePerAttackPlayed?: number; 
   damagePerCardInHand?: number;   
   damagePerStrike?: number;
-  damagePerCardInDraw?: number; // New: Mind Blast
+  damagePerCardInDraw?: number; 
   playCopies?: number;            
   hitsPerSkillInHand?: number;
   hitsPerAttackPlayed?: number;
@@ -82,7 +78,6 @@ export interface Card {
   
   playCondition?: 'DRAW_PILE_EMPTY' | 'HAND_ONLY_ATTACKS';
 
-  // Gardener System
   isSeed?: boolean;
   growthRequired?: number;
   grownCardId?: string;
@@ -105,36 +100,33 @@ export enum EnemyIntentType {
 export interface EnemyIntent {
   type: EnemyIntentType;
   value: number;
-  secondaryValue?: number; // For debuff amount or block amount in mixed moves
-  debuffType?: 'WEAK' | 'VULNERABLE' | 'POISON' | 'CONFUSED'; // Added to specify debuff
+  secondaryValue?: number;
+  debuffType?: 'WEAK' | 'VULNERABLE' | 'POISON' | 'CONFUSED';
 }
 
 export interface FloatingText {
-    id: string; // Unique ID to trigger animation (e.g. timestamp)
+    id: string;
     text: string;
-    color: string; // Tailwind text color class
+    color: string;
     iconType?: 'sword' | 'shield' | 'heart' | 'poison' | 'zap' | 'skull';
 }
 
 export interface Enemy {
   id: string;
-  enemyType: string; // For AI Logic (eg. 'CULTIST', 'SLIME_ACID')
+  enemyType: string;
   name: string;
   maxHp: number;
   currentHp: number;
   block: number;
   nextIntent: EnemyIntent;
   strength: number;
-  
-  // Status Effects
   vulnerable: number; 
   weak: number;       
   poison: number;     
   artifact: number;   
   corpseExplosion: boolean; 
-  
   floatingText: FloatingText | null;
-  phase?: number; // ボスの形態管理用（追加）
+  phase?: number;
 }
 
 export interface Relic {
@@ -147,13 +139,13 @@ export interface Relic {
 }
 
 export interface Potion {
-    id: string; // Instance ID
+    id: string;
     templateId: string;
     name: string;
     description: string;
     rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'SHOP';
     price?: number;
-    color: string; // Hex color for UI
+    color: string;
 }
 
 export interface Character {
@@ -164,7 +156,7 @@ export interface Character {
     gold: number;
     startingRelicId: string;
     deckTemplate: string[];
-    color: string; // Tailwind color class prefix (e.g. 'red', 'green')
+    color: string;
     imageData: string;
 }
 
@@ -184,7 +176,7 @@ export interface GardenSlot {
 }
 
 export interface Player {
-  id?: string; // Character identifier (e.g. 'MAGE')
+  id?: string;
   maxHp: number;
   currentHp: number;
   maxEnergy: number;
@@ -197,31 +189,20 @@ export interface Player {
   discardPile: Card[];
   drawPile: Card[];
   relics: Relic[];
-  potions: Potion[]; // New: Max 3
+  potions: Potion[];
   imageData: string;
-  
-  // Advanced State
   powers: Record<string, number>; 
   echoes: number; 
   cardsPlayedThisTurn: number; 
   attacksPlayedThisTurn: number;
-  typesPlayedThisTurn: CardType[]; // New: For Orange Pellets etc.
-  
-  // Next Turn State
+  typesPlayedThisTurn: CardType[];
   nextTurnEnergy: number;
   nextTurnDraw: number;
-  
-  // Relic & Turn Counters
-  relicCounters: Record<string, number>; // Persists across battles (e.g. Pen Nib)
-  turnFlags: Record<string, boolean>;    // Resets each turn (e.g. Necronomicon)
-
+  relicCounters: Record<string, number>;
+  turnFlags: Record<string, boolean>;
   floatingText: FloatingText | null;
-  
-  // Dual Protagonist
   partner?: Partner;
-
-  // Gardener System
-  garden?: GardenSlot[]; // 3x3 Grid (length 9)
+  garden?: GardenSlot[];
 }
 
 export enum GameScreen {
@@ -233,6 +214,8 @@ export enum GameScreen {
   DECK_CONSTRUCTION = 'DECK_CONSTRUCTION',
   MAP = 'MAP',
   BATTLE = 'BATTLE',
+  VS_SETUP = 'VS_SETUP',
+  VS_BATTLE = 'VS_BATTLE',
   DODGEBALL_SHOOTING = 'DODGEBALL_SHOOTING',
   MATH_CHALLENGE = 'MATH_CHALLENGE', 
   KANJI_CHALLENGE = 'KANJI_CHALLENGE',
@@ -243,7 +226,7 @@ export enum GameScreen {
   REST = 'REST',
   SHOP = 'SHOP',
   EVENT = 'EVENT',
-  FINAL_BRIDGE = 'FINAL_BRIDGE', // ACT3終了後の決戦前イベント（追加）
+  FINAL_BRIDGE = 'FINAL_BRIDGE',
   COMPENDIUM = 'COMPENDIUM',
   ENDING = 'ENDING',
   HELP = 'HELP',
@@ -266,31 +249,30 @@ export enum GameMode {
   MULTIPLICATION = 'MULTIPLICATION',
   DIVISION = 'DIVISION',
   MIXED = 'MIXED',
-  KANJI_1 = 'KANJI_1', // 小1
-  KANJI_2 = 'KANJI_2', // 小2
-  KANJI_3 = 'KANJI_3', // 小3
-  KANJI_4 = 'KANJI_4', // 小4
-  KANJI_5 = 'KANJI_5', // 小5
-  KANJI_6 = 'KANJI_6', // 小6
-  KANJI_7 = 'KANJI_7', // 中1
-  KANJI_8 = 'KANJI_8', // 中2
-  KANJI_9 = 'KANJI_9',  // 中3
-  KANJI_MIXED = 'KANJI_MIXED', // 全学年ミックス
-  ENGLISH_ES = 'ENGLISH_ES', // 小学校
-  ENGLISH_J1 = 'ENGLISH_J1', // 中1
-  ENGLISH_J2 = 'ENGLISH_J2', // 中2
-  ENGLISH_J3 = 'ENGLISH_J3', // 中3
-  ENGLISH_MIXED = 'ENGLISH_MIXED', // 全ミックス
-  ENGLISH_CONV_1 = 'ENGLISH_CONV_1', // 会話Lv1
-  ENGLISH_CONV_2 = 'ENGLISH_CONV_2', // 会話Lv2
-  ENGLISH_CONV_3 = 'ENGLISH_CONV_3', // 会話Lv3
-  ENGLISH_CONV_4 = 'ENGLISH_CONV_4', // 会話Lv4
-  ENGLISH_CONV_5 = 'ENGLISH_CONV_5'  // 会話Lv5
+  KANJI_1 = 'KANJI_1',
+  KANJI_2 = 'KANJI_2',
+  KANJI_3 = 'KANJI_3',
+  KANJI_4 = 'KANJI_4',
+  KANJI_5 = 'KANJI_5',
+  KANJI_6 = 'KANJI_6',
+  KANJI_7 = 'KANJI_7',
+  KANJI_8 = 'KANJI_8',
+  KANJI_9 = 'KANJI_9',
+  KANJI_MIXED = 'KANJI_MIXED',
+  ENGLISH_ES = 'ENGLISH_ES',
+  ENGLISH_J1 = 'ENGLISH_J1',
+  ENGLISH_J2 = 'ENGLISH_J2',
+  ENGLISH_J3 = 'ENGLISH_J3',
+  ENGLISH_MIXED = 'ENGLISH_MIXED',
+  ENGLISH_CONV_1 = 'ENGLISH_CONV_1',
+  ENGLISH_CONV_2 = 'ENGLISH_CONV_2',
+  ENGLISH_CONV_3 = 'ENGLISH_CONV_3',
+  ENGLISH_CONV_4 = 'ENGLISH_CONV_4',
+  ENGLISH_CONV_5 = 'ENGLISH_CONV_5'
 }
 
 export type LanguageMode = 'JAPANESE' | 'HIRAGANA';
 
-// --- Map Types ---
 export enum NodeType {
   COMBAT = 'COMBAT',
   ELITE = 'ELITE',
@@ -320,7 +302,7 @@ export interface SelectionState {
 
 export interface RewardItem {
     type: 'CARD' | 'RELIC' | 'GOLD' | 'POTION';
-    value?: any; // Card object, Relic object, Potion object, or number
+    value?: any;
     id: string;
 }
 
@@ -332,13 +314,12 @@ export interface RankingEntry {
     act: number;
     floor: number;
     victory: boolean;
-    date: number; // timestamp
+    date: number;
     challengeMode?: string;
 }
 
-// --- Poker Mini Game Types ---
 export type PokerSuit = 'SPADE' | 'HEART' | 'DIAMOND' | 'CLUB';
-export type PokerRank = 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14; // 14 is Ace
+export type PokerRank = 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14;
 
 export interface PokerCard {
   id: string;
@@ -348,7 +329,7 @@ export interface PokerCard {
   bonusChips: number;
   multMultiplier: number;
   enhancement?: 'BONUS' | 'MULT' | 'WILD' | 'STONE' | 'GLASS' | 'GOLD' | 'STEEL';
-  edition?: 'FOIL' | 'HOLOGRAPHIC' | 'POLYCHROME'; // Visual effect & small bonus
+  edition?: 'FOIL' | 'HOLOGRAPHIC' | 'POLYCHROME';
 }
 
 export interface PokerHandResult {
@@ -366,24 +347,24 @@ export interface PokerScoringContext {
   handsPlayed: number;
   discardsUsed: number;
   deckState: PokerCard[];
-  money: number; // Added to calculate interest/jokers based on gold
-  persistentCounters: Record<string, number>; // New: Track actions across runs
+  money: number;
+  persistentCounters: Record<string, number>;
 }
 
-export interface PokerSupporter { // Joker
+export interface PokerSupporter {
   id: string;
   name: string;
   description: string;
   rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'LEGENDARY';
   price: number;
   effect: (ctx: PokerScoringContext) => void;
-  getDynamicDescription?: (state: PokerRunState) => string; // Returns dynamic stats like "(Currently: +200)"
+  getDynamicDescription?: (state: PokerRunState) => string;
   icon: string;
   triggerOn?: 'HAND_PLAYED' | 'DISCARD' | 'HELD_IN_HAND' | 'PASSIVE';
   edition?: 'FOIL' | 'HOLOGRAPHIC' | 'POLYCHROME';
 }
 
-export interface PokerConsumable { // Tarot / Planet / Spectral
+export interface PokerConsumable {
   id: string;
   type: 'TAROT' | 'PLANET' | 'SPECTRAL';
   name: string;
@@ -398,8 +379,8 @@ export interface PokerPack {
     description: string;
     price: number;
     type: 'STANDARD' | 'BUFF' | 'SUPPORTER' | 'SPECTRAL';
-    size: number; // How many cards revealed
-    choose: number; // How many to pick
+    size: number;
+    choose: number;
     icon: string;
 }
 
@@ -412,10 +393,10 @@ export interface PokerVoucher {
 }
 
 export interface PokerBlind {
-    name: string; // e.g. "Small Blind", "Big Blind", "The Wall"
+    name: string;
     scoreGoal: number;
     rewardMoney: number;
-    bossAbility?: string; // Special effect for Boss Blinds
+    bossAbility?: string;
     description?: string;
 }
 
@@ -423,28 +404,24 @@ export interface PokerRunState {
     deck: PokerCard[];
     money: number;
     ante: number;
-    blindIndex: number; // 0=Small, 1=Big, 2=Boss
+    blindIndex: number;
     currentBlind: PokerBlind;
     supporters: PokerSupporter[];
     consumables: PokerConsumable[];
     handLevels: Record<string, number>;
-    vouchers: string[]; // IDs of bought vouchers
-    isEndless?: boolean; // New: Endless Mode flag
-    persistentCounters: Record<string, number>; // New: Track actions like "Cards Sold"
-    handSizeModifier: number; // Track permanent hand size changes (e.g. Spectral)
-    
-    // Play state
+    vouchers: string[];
+    isEndless?: boolean;
+    persistentCounters: Record<string, number>;
+    handSizeModifier: number;
     currentScore: number;
     handsRemaining: number;
     discardsRemaining: number;
     hand: PokerCard[];
-    discardPile: PokerCard[]; // Add discardPile to track cards during blind
-    lastHandTypePlayed?: string; // Added: For "The Eye" (厳しい監視)
-    
-    // Shop state
+    discardPile: PokerCard[];
+    lastHandTypePlayed?: string;
     shopInventory: (PokerSupporter | PokerConsumable | PokerPack)[];
-    shopVoucher: PokerVoucher | null; // The voucher available in the current shop
-    voucherRestockedAnte: number; // Tracks when the voucher was last restocked (per Ante)
+    shopVoucher: PokerVoucher | null;
+    voucherRestockedAnte: number;
 }
 
 export interface PokerScoreEntry {
@@ -459,9 +436,9 @@ export interface SurvivorScoreEntry {
     id: string;
     date: number;
     score: number;
-    timeSurvived: number; // seconds
+    timeSurvived: number;
     levelReached: number;
-    weapons: string[]; // IDs of weapons
+    weapons: string[];
 }
 
 export interface DungeonScoreEntry {
@@ -470,10 +447,9 @@ export interface DungeonScoreEntry {
     floor: number;
     level: number;
     score: number;
-    reason: string; // "Cleared", "Starved", "Killed by X"
+    reason: string;
 }
 
-// New Score Types for additional mini-games
 export interface KochoScoreEntry {
     id: string;
     date: number;
@@ -486,8 +462,8 @@ export interface PaperPlaneScoreEntry {
     id: string;
     date: number;
     stage: number;
-    rank: number; // Ascension/Difficulty level
-    score: number; // Calculated score
+    rank: number;
+    score: number;
 }
 
 export interface ParryState {
@@ -501,15 +477,15 @@ export type VFXType = 'SLASH' | 'BLOCK' | 'BUFF' | 'DEBUFF' | 'HEAL' | 'FIRE';
 export interface VisualEffectInstance {
     id: string;
     type: VFXType;
-    targetId: string; // enemyId or 'player'
-    x?: number; // relative pos if needed
+    targetId: string;
+    x?: number;
     y?: number;
 }
 
 export interface GameState {
   screen: GameScreen;
   mode: GameMode; 
-  challengeMode?: string; // e.g. '1A1D'
+  challengeMode?: string;
   act: number;
   floor: number;
   turn: number;
@@ -519,12 +495,13 @@ export interface GameState {
   enemies: Enemy[];
   selectedEnemyId: string | null;
   narrativeLog: string[];
-  combatLog: string[]; // New: Combat Log
+  combatLog: string[];
   rewards: RewardItem[]; 
   selectionState: SelectionState; 
   isEndless?: boolean;
-  pokerState?: PokerRunState; // Added: Auto-save state for Poker Mini Game
-  codexOptions?: Card[]; // Added: For Nilry's Codex selection
-  parryState?: ParryState; // New: Parry state for Bard
-  activeEffects: VisualEffectInstance[]; // New: VFX
+  pokerState?: PokerRunState;
+  codexOptions?: Card[];
+  parryState?: ParryState;
+  activeEffects: VisualEffectInstance[];
+  vsOpponent?: Player; // 対戦相手のデータ
 }
