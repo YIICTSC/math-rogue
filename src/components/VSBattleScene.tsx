@@ -1,10 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import { Player, Card as ICard, CardType, TargetType, LanguageMode } from '../types';
+import { Player, Card as ICard, CardType, TargetType, LanguageMode, VSRecord } from '../types';
 import Card from './Card';
 import { trans } from '../utils/textUtils';
 import { audioService } from '../services/audioService';
-import { Heart, Shield, Zap, Swords, RotateCcw, Trophy, Skull } from 'lucide-react';
+import { storageService } from '../services/storageService';
+import { CHARACTERS } from '../constants';
+import { Heart, Shield, Zap, Swords, RotateCcw, Trophy, Skull, User, ArrowRight, Home } from 'lucide-react';
 
 interface VSBattleSceneProps {
     player1: Player; // 自分
@@ -14,11 +16,15 @@ interface VSBattleSceneProps {
 }
 
 const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinish, languageMode }) => {
+    const [phase, setPhase] = useState<'NAMING' | 'BATTLE' | 'RESULT'>('NAMING');
+    const [opponentName, setOpponentName] = useState("");
     const [p1State, setP1State] = useState<Player>(() => initPlayer(player1));
     const [p2State, setP2State] = useState<Player>(() => initPlayer(player2));
     const [turnOwner, setTurnOwner] = useState<1 | 2>(1);
     const [isAnimating, setIsAnimating] = useState(false);
     const [logs, setLogs] = useState<string[]>(["対戦開始！"]);
+    const [turnCount, setTurnCount] = useState(1);
+    const [winner, setWinner] = useState<1 | 2 | null>(null);
 
     function initPlayer(p: Player): Player {
         const deck = [...p.deck].sort(() => Math.random() - 0.5);
@@ -38,8 +44,17 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
 
     const addLog = (msg: string) => setLogs(prev => [msg, ...prev.slice(0, 3)]);
 
+    const handleStartBattle = () => {
+        if (!opponentName.trim()) {
+            audioService.playSound('wrong');
+            return;
+        }
+        audioService.playSound('select');
+        setPhase('BATTLE');
+    };
+
     const handlePlayCard = (card: ICard, owner: 1 | 2) => {
-        if (turnOwner !== owner || isAnimating) return;
+        if (turnOwner !== owner || isAnimating || phase !== 'BATTLE') return;
         const current = owner === 1 ? p1State : p2State;
         const target = owner === 1 ? p2State : p1State;
 
@@ -100,15 +115,17 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
 
         // 勝利判定
         if (nextTarget.currentHp <= 0) {
-            onFinish(owner);
+            finishMatch(owner);
         }
     };
 
     const handleEndTurn = (owner: 1 | 2) => {
-        if (turnOwner !== owner || isAnimating) return;
+        if (turnOwner !== owner || isAnimating || phase !== 'BATTLE') return;
         
         const nextOwner = owner === 1 ? 2 : 1;
         const nextToAct = nextOwner === 1 ? p1State : p2State;
+
+        if (nextOwner === 1) setTurnCount(prev => prev + 1);
 
         // 次のプレイヤーのターン開始処理
         const processed = { ...nextToAct };
@@ -134,6 +151,99 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
         audioService.playSound('select');
     };
 
+    const finishMatch = (matchWinner: 1 | 2) => {
+        setWinner(matchWinner);
+        setPhase('RESULT');
+        audioService.playSound('win');
+
+        // 記録の保存
+        const p1Char = CHARACTERS.find(c => c.id === player1.id)?.name || "不明";
+        const p2Char = CHARACTERS.find(c => c.id === player2.id)?.name || "不明";
+
+        const record: VSRecord = {
+            id: `vs-${Date.now()}`,
+            date: Date.now(),
+            opponentName: opponentName,
+            playerCharName: p1Char,
+            opponentCharName: p2Char,
+            victory: matchWinner === 1,
+            turns: turnCount
+        };
+        storageService.saveVSRecord(record);
+    };
+
+    if (phase === 'NAMING') {
+        return (
+            <div className="flex flex-col h-full w-full bg-slate-950 items-center justify-center p-6 text-white font-mono">
+                <div className="bg-slate-900 border-4 border-indigo-600 p-8 rounded-3xl w-full max-w-sm shadow-2xl text-center animate-in zoom-in duration-300">
+                    <User size={64} className="text-indigo-400 mx-auto mb-6" />
+                    <h2 className="text-2xl font-black mb-2 italic tracking-tighter">BATTLE ENTRY</h2>
+                    <p className="text-gray-400 text-xs mb-8">対戦相手の名前を入力してください</p>
+                    
+                    <input 
+                        type="text" 
+                        value={opponentName}
+                        onChange={(e) => setOpponentName(e.target.value)}
+                        placeholder="相手の名前"
+                        className="w-full bg-black border-2 border-indigo-900 rounded-xl px-4 py-3 text-center text-xl font-bold focus:border-indigo-400 outline-none transition-all mb-8 placeholder:text-gray-700"
+                        autoFocus
+                    />
+
+                    <button 
+                        onClick={handleStartBattle}
+                        disabled={!opponentName.trim()}
+                        className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-gray-800 disabled:text-gray-600 text-white font-black py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95"
+                    >
+                        READY <ArrowRight size={20}/>
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    if (phase === 'RESULT') {
+        return (
+            <div className="flex flex-col h-full w-full bg-slate-950 items-center justify-center p-6 text-white font-mono">
+                <div className="bg-slate-900 border-4 border-indigo-500 p-8 rounded-3xl w-full max-w-md shadow-[0_0_60px_rgba(79,70,229,0.4)] text-center animate-in zoom-in duration-300">
+                    {winner === 1 ? (
+                        <>
+                            <Trophy size={80} className="text-yellow-400 mx-auto mb-6 animate-bounce" />
+                            <h2 className="text-5xl font-black text-yellow-400 italic mb-2 tracking-tighter">WINNER!</h2>
+                        </>
+                    ) : (
+                        <>
+                            <Skull size={80} className="text-red-500 mx-auto mb-6 animate-pulse" />
+                            <h2 className="text-5xl font-black text-red-500 italic mb-2 tracking-tighter">DEFEATED</h2>
+                        </>
+                    )}
+                    
+                    <div className="bg-black/40 rounded-2xl p-6 border border-indigo-900/50 mb-8 mt-6">
+                        <div className="flex justify-between items-center mb-4">
+                            <div className="text-left">
+                                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Opponent</p>
+                                <p className="text-xl font-black text-indigo-100">{opponentName}</p>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Turns</p>
+                                <p className="text-xl font-black text-indigo-400">{turnCount}</p>
+                            </div>
+                        </div>
+                        <div className="border-t border-indigo-900/30 pt-4 text-xs text-gray-400 italic">
+                            勝負の記録は図鑑の「記録」に保存されました。
+                        </div>
+                    </div>
+
+                    <button 
+                        onClick={() => onFinish(winner!)}
+                        className="w-full bg-white text-slate-900 font-black py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 hover:bg-gray-200 transition-all"
+                    >
+                        <Home size={20}/> タイトルへ戻る
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-col h-full w-full bg-gray-900 overflow-hidden font-mono">
             {/* Player 2 Area (Top, Rotated) */}
@@ -150,7 +260,7 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
                             </div>
                         </div>
                         <div className="text-right">
-                            <div className="text-xs text-gray-500">PLAYER 2</div>
+                            <div className="text-xs text-red-500 font-bold">{opponentName.toUpperCase() || 'PLAYER 2'}</div>
                             <div className="bg-yellow-900/50 px-3 py-1 rounded-full border border-yellow-500 text-yellow-400 font-bold flex items-center gap-1">
                                 <Zap size={14} fill="currentColor"/> {p2State.currentEnergy}/{p2State.maxEnergy}
                             </div>
@@ -181,11 +291,14 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
                 </div>
             </div>
 
-            {/* Middle Bar: Logs */}
-            <div className="h-12 bg-black flex items-center justify-center border-y-2 border-indigo-600 px-4 shrink-0">
-                <div className="text-[10px] text-indigo-300 font-bold truncate">
+            {/* Middle Bar: Logs & Turn Count */}
+            <div className="h-14 bg-black flex items-center justify-between border-y-2 border-indigo-600 px-6 shrink-0 relative overflow-hidden">
+                <div className="absolute inset-0 bg-indigo-600/5 pointer-events-none"></div>
+                <div className="text-xs text-indigo-300 font-black italic tracking-widest z-10">TURN {turnCount}</div>
+                <div className="text-[10px] text-white font-bold truncate max-w-[60%] text-center z-10 px-4">
                     {logs[0]}
                 </div>
+                <div className="text-xs text-indigo-400 font-black z-10">VS</div>
             </div>
 
             {/* Player 1 Area (Bottom) */}
@@ -201,7 +314,7 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
                             </div>
                         </div>
                         <div className="text-right">
-                            <div className="text-xs text-gray-500">PLAYER 1 (YOU)</div>
+                            <div className="text-xs text-blue-400 font-bold">PLAYER 1 (YOU)</div>
                             <div className="bg-yellow-900/50 px-3 py-1 rounded-full border border-yellow-500 text-yellow-400 font-bold flex items-center gap-1">
                                 <Zap size={14} fill="currentColor"/> {p1State.currentEnergy}/{p1State.maxEnergy}
                             </div>
