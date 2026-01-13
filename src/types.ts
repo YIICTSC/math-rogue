@@ -318,6 +318,16 @@ export interface RankingEntry {
     challengeMode?: string;
 }
 
+export interface VSRecord {
+    id: string;
+    date: number;
+    opponentName: string;
+    playerCharName: string;
+    opponentCharName: string;
+    victory: boolean;
+    turns: number;
+}
+
 export type PokerSuit = 'SPADE' | 'HEART' | 'DIAMOND' | 'CLUB';
 export type PokerRank = 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14;
 
