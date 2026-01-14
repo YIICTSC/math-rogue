@@ -235,7 +235,7 @@ const App: React.FC = () => {
   
   const [isMathDebugSkipped, setIsMathDebugSkipped] = useState<boolean>(false);
   const [isDebugHpOne, setIsDebugHpOne] = useState<boolean>(false);
-  const [titleClickCount, setTitleClickCount] = useState<number>(0);
+  const [titleClickCount, setTitleCount] = useState<number>(0);
   const [logClickCount, setLogClickCount] = useState<number>(0);
   const [debugLoadout, setDebugLoadout] = useState<{deck: ICard[], relics: Relic[], potions: Potion[]} | null>(null);
 
@@ -369,12 +369,12 @@ const App: React.FC = () => {
 
   const handleTitleClick = () => {
       const next = titleClickCount + 1;
-      setTitleClickCount(next);
+      setTitleCount(next);
       if (next >= 10) {
           const newState = !isMathDebugSkipped;
           setIsMathDebugSkipped(newState);
           storageService.saveDebugMathSkip(newState);
-          setTitleClickCount(0);
+          setTitleCount(0);
           audioService.playSound('select');
       }
   };
@@ -1828,7 +1828,7 @@ const App: React.FC = () => {
           if (card.name === 'むしゃくしゃ' || card.name === 'YATSUATARI') {
               card.damage = (card.damage || 0) + 5;
               currentLogs.push("むしゃくしゃの怒りが増した！");
-              nextActiveEffects.push({ id: `vfx-yatsu-${Date.now()}`, type: 'FIRE', targetId: 'player' });
+              nextActiveEffects.push({ id: `vfx-metric-${Date.now()}`, type: 'FIRE', targetId: 'player' });
           }
           if (!shouldExhaust && !(card.type === CardType.POWER) && !(card.promptsExhaust === 99)) {
               p.discardPile.push(card);
@@ -2825,26 +2825,25 @@ const App: React.FC = () => {
             )}
 
             {gameState.screen === GameScreen.START_MENU && (
-                <div className="absolute top-2 right-2 z-9999 flex gap-2">
-                    <button 
-                        onClick={toggleBgmMode} 
-                        className={`bg-black/50 hover:bg-black/80 text-white border border-white/50 px-2 py-1 rounded text-xs flex items-center shadow-lg transition-colors font-bold ${bgmMode !== 'OSCILLATOR' && bgmMode !== 'MP3' ? 'border-indigo-500 text-indigo-400' : (bgmMode === 'MP3' ? 'border-green-500 text-green-400' : '')}`}
-                    >
-                        <Music size={14} className="mr-1"/>
-                        {trans(bgmMode === 'STUDY' ? 'BGM: 学習(SEのみ)' : (bgmMode === 'MP3' ? 'BGM: MP3' : 'BGM: 電子音'), languageMode)}
-                    </button>
-                    <button 
-                        onClick={toggleLanguage} 
-                        className="bg-black/50 hover:bg-black/80 text-white border border-white/50 px-2 py-1 rounded text-xs flex items-center shadow-lg transition-colors font-bold"
-                    >
-                        <Languages size={14} className="mr-1"/>
-                        {languageMode === 'JAPANESE' ? 'にほんご' : '日本語'}
-                    </button>
-                </div>
-            )}
-
-            {gameState.screen === GameScreen.START_MENU && (
                 <div className="w-full h-full bg-gray-900 flex items-center justify-center relative">
+                    {/* restore BGM and Language toggle buttons to title screen */}
+                    <div className="absolute top-2 right-2 z-9999 flex gap-2">
+                        <button 
+                            onClick={toggleBgmMode} 
+                            className={`bg-black/50 hover:bg-black/80 text-white border border-white/50 px-2 py-1 rounded text-xs flex items-center shadow-lg transition-colors font-bold ${bgmMode !== 'OSCILLATOR' && bgmMode !== 'MP3' ? 'border-indigo-500 text-indigo-400' : (bgmMode === 'MP3' ? 'border-green-500 text-green-400' : '')}`}
+                        >
+                            <Music size={14} className="mr-1"/>
+                            {trans(bgmMode === 'STUDY' ? 'BGM: 学習(SEのみ)' : (bgmMode === 'MP3' ? 'BGM: MP3' : 'BGM: 電子音'), languageMode)}
+                        </button>
+                        <button 
+                            onClick={toggleLanguage} 
+                            className="bg-black/50 hover:bg-black/80 text-white border border-white/50 px-2 py-1 rounded text-xs flex items-center shadow-lg transition-colors font-bold"
+                        >
+                            <Languages size={14} className="mr-1"/>
+                            {languageMode === 'JAPANESE' ? 'にほんご' : '日本語'}
+                        </button>
+                    </div>
+
                     <div className="absolute bottom-2 left-2 z-9999 text-gray-500 text-[10px] font-mono flex flex-col gap-0.5">
                         <div>TOTAL TIME: {formatTime(totalPlaySeconds)}</div>
                         <div className={isDailyLimitReached ? "text-red-500 font-bold" : ""}>
