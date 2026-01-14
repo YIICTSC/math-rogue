@@ -2913,8 +2913,15 @@ const App: React.FC = () => {
                                 </button>
 
                                 <button 
-                                    onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.VS_SETUP }))}
-                                    className={`flex-1 py-3 px-2 text-sm font-bold border-b-4 border-r-4 rounded-none bg-indigo-600/80 text-white border-indigo-400 hover:bg-indigo-700 cursor-pointer flex items-center justify-center shadow-md ${isDailyLimitReached ? 'grayscale opacity-70' : ''}`}
+                                    onClick={() => {
+                                        if (isDailyLimitReached) {
+                                            audioService.playSound('wrong');
+                                            setShowTimeLimitModal(true);
+                                            return;
+                                        }
+                                        setGameState(prev => ({ ...prev, screen: GameScreen.VS_SETUP }));
+                                    }}
+                                    className={`flex-1 py-3 px-2 text-sm font-bold border-b-4 border-r-4 rounded-none bg-indigo-600/80 text-white border-indigo-400 hover:bg-indigo-700 cursor-pointer flex items-center justify-center shadow-md ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
                                 >
                                     <QrCode className="mr-1.5" size={16}/> {trans("対戦", languageMode)}
                                 </button>
