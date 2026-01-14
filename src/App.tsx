@@ -201,7 +201,8 @@ const App: React.FC = () => {
       imageData: HERO_IMAGE_DATA,
       floatingText: null,
       nextTurnEnergy: 0,
-      nextTurnDraw: 0
+      nextTurnDraw: 0,
+      codexBuffer: []
     },
     enemies: [],
     selectedEnemyId: null,
@@ -246,8 +247,10 @@ const App: React.FC = () => {
   const [unlockedCardNames, setUnlockedCardNames] = useState<string[]>([]);
   const [starterRelics, setStarterRelics] = useState<Relic[]>([]);
   const [treasureRewards, setTreasureRewards] = useState<RewardItem[]>([]);
-  
   const [clearCount, setClearCount] = useState<number>(0);
+
+  // --- ターン終了処理のロック用 ---
+  const isEndingTurnRef = useRef(false);
 
   // --- PLAY TIME STATES ---
   const [totalPlaySeconds, setTotalPlaySeconds] = useState(() => storageService.getTotalPlayTime());
@@ -580,6 +583,7 @@ const App: React.FC = () => {
                 echoes: 0,
                 cardsPlayedThisTurn: 0,
                 attacksPlayedThisTurn: 0,
+                codexBuffer: []
             },
             narrativeLog: ["デバッグモード開始"],
             combatLog: [],
@@ -621,6 +625,7 @@ const App: React.FC = () => {
           echoes: 0,
           cardsPlayedThisTurn: 0,
           attacksPlayedThisTurn: 0,
+          codexBuffer: []
       };
 
       const bossName = await generateEnemyName(15);
@@ -733,7 +738,8 @@ const App: React.FC = () => {
           cardsPlayedThisTurn: 0,
           echoes: 0,
           partner: undefined,
-          garden: garden 
+          garden: garden,
+          codexBuffer: []
       };
 
       if (char.id === 'CHEF' && gameState.challengeMode !== '1A1D') {
@@ -940,6 +946,7 @@ const App: React.FC = () => {
             p.echoes = 0;
             p.cardsPlayedThisTurn = 0;
             p.attacksPlayedThisTurn = 0;
+            p.codexBuffer = []; // バトル開始時にリセット
 
             if (p.relics.find(r => r.id === 'VAJRA')) p.strength += 1;
             if (p.relics.find(r => r.id === 'HACHIMAKI')) p.powers['DEXTERITY'] = (p.powers['DEXTERITY'] || 0) + 1;
@@ -1714,7 +1721,7 @@ const App: React.FC = () => {
                   if (newCard) { 
                       if (newCard.name === '虚無' || newCard.name === 'VOID') {
                           p.currentEnergy = Math.max(0, p.currentEnergy - 1);
-                          p.floatingText = { id: `void-draw-${Date.now()}-${j}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
+                          p.floatingText = { id: `void-turn-${Date.now()}-${j}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
                       }
                       p.hand.push(newCard); 
                   }
@@ -1882,6 +1889,7 @@ const App: React.FC = () => {
     setTurnLog(trans("あなたのターン", languageMode));
     setGameState(prev => {
       const p = { ...prev.player };
+      const currentLogs: string[] = [];
       const nextActiveEffects: VisualEffectInstance[] = [];
       let extraEnergy = 0; 
       if (p.powers['DEMON_FORM']) { 
@@ -1995,6 +2003,18 @@ const App: React.FC = () => {
             }
         }
       }
+      
+      // --- 秘密の攻略本の効果: 手札に加える ---
+      if (p.codexBuffer && p.codexBuffer.length > 0) {
+          const uniqueCodexCards = [...p.codexBuffer];
+          p.codexBuffer = []; // バッファを確実にクリア
+          uniqueCodexCards.forEach(c => {
+            const newCard = { ...c, id: `codex-hand-${Date.now()}-${Math.random().toString(36).substr(2, 9)}` };
+            newHand.push(newCard);
+            currentLogs.push(`${trans(newCard.name, languageMode)} を手札に加えた！`);
+          });
+      }
+
       if (p.powers['CREATIVE_AI']) {
           const powers = Object.values(CARDS_LIBRARY).filter(c => c.type === CardType.POWER);
           const power = powers[Math.floor(Math.random() * powers.length)];
@@ -2041,7 +2061,18 @@ const App: React.FC = () => {
       if (p.powers['TOOLS_OF_THE_TRADE']) {
           nextSelection = { active: true, type: 'DISCARD', amount: 1 };
       }
-      return { ...prev, player: p, selectionState: nextSelection, turn: prev.turn + 1, activeEffects: [...prev.activeEffects, ...nextActiveEffects] };
+      
+      // ターンの終了フラグを解除
+      isEndingTurnRef.current = false;
+
+      return { 
+        ...prev, 
+        player: p, 
+        selectionState: nextSelection, 
+        turn: prev.turn + 1, 
+        activeEffects: [...prev.activeEffects, ...nextActiveEffects],
+        combatLog: [...prev.combatLog, ...currentLogs].slice(-100)
+      };
     });
     setTimeout(() => {
         setGameState(prev => ({ ...prev, activeEffects: [] }));
@@ -2060,31 +2091,25 @@ const App: React.FC = () => {
       audioService.playSound('block');
   };
 
-  const executeEndTurn = async (codexCard?: ICard) => {
-    if (gameState.enemies.length === 0) {
+  const executeEndTurn = async () => {
+    // すでにターン終了処理中なら重複させない
+    if (isEndingTurnRef.current) return;
+    isEndingTurnRef.current = true;
+
+    const currentState = stateRef.current;
+    if (currentState.enemies.length === 0) {
+        isEndingTurnRef.current = false;
         startPlayerTurn();
         return;
     }
     
-    // Nilry's Codex logic
-    if (codexCard) {
-        setGameState(prev => ({
-            ...prev,
-            player: {
-                ...prev.player,
-                discardPile: [...prev.player.discardPile, codexCard]
-            },
-            combatLog: [...prev.combatLog, `> ${codexCard.name} を獲得した！`].slice(-100)
-        }));
-        await wait(100);
-    }
-
     const pCurrent = stateRef.current.player;
     if (pCurrent.turnFlags['VAULT_EXTRA_TURN']) {
         setGameState(prev => ({
             ...prev,
             combatLog: [...prev.combatLog, trans("> 追加ターン獲得！敵の行動をスキップします", languageMode)].slice(-100)
         }));
+        isEndingTurnRef.current = false;
         startPlayerTurn();
         return;
     }
@@ -2375,11 +2400,16 @@ const App: React.FC = () => {
   };
   
   const handleEndTurnClick = () => {
+       // ターン終了処理中の連打防止
+       if (isEndingTurnRef.current) return;
+
        if (gameState.player.relics.find(r => r.id === 'NILRYS_CODEX')) {
            const pool = Object.values(CARDS_LIBRARY).filter(c => !STATUS_CARDS[c.name] && !CURSE_CARDS[c.name] && c.rarity !== 'SPECIAL');
            const options = [];
+           // Codex用の選択肢を生成
+           const ts = Date.now();
            for(let i=0; i<3; i++) {
-                options.push({...pool[Math.floor(Math.random() * pool.length)], id: `codex-${Date.now()}-${i}`});
+                options.push({...pool[Math.floor(Math.random() * pool.length)], id: `codex-${ts}-${i}`});
            }
            setGameState(prev => ({ ...prev, codexOptions: options }));
        } else {
@@ -2388,8 +2418,23 @@ const App: React.FC = () => {
   }
   
   const onCodexSelect = (card: ICard | null) => {
-      setGameState(prev => ({ ...prev, codexOptions: undefined }));
-      executeEndTurn(card || undefined);
+      setGameState(prev => {
+        const nextPlayer = { ...prev.player };
+        if (card) {
+          // 絶対にユニークなIDを持つカードとしてバッファに格納
+          const bufferedCard = { ...card, id: `codex-buf-${Date.now()}-${Math.random().toString(36).substr(2, 9)}` };
+          nextPlayer.codexBuffer = [bufferedCard]; // 1枚に限定
+        }
+        return { 
+          ...prev, 
+          player: nextPlayer, 
+          codexOptions: undefined 
+        };
+      });
+      // 攻略本選択が終わったら敵のターンへ移行
+      setTimeout(() => {
+        executeEndTurn();
+      }, 50);
   }
 
   const handleSynthesizeCard = (cards: ICard[]) => {
@@ -2760,7 +2805,7 @@ const App: React.FC = () => {
         <div className="w-full h-full relative overflow-hidden bg-black crt-scanline">
             
             {showTimeLimitModal && (
-                <div className="fixed inset-0 z-[10000] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-300">
+                <div className="fixed inset-0 z-10000 bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-300">
                     <div className="bg-gray-900 border-4 border-red-600 p-8 rounded-2xl max-w-sm w-full shadow-[0_0_50px_rgba(220,38,38,0.5)] text-center transform scale-110">
                         <TimerOff size={64} className="text-red-500 mx-auto mb-6 animate-pulse" />
                         <h2 className="text-3xl font-black text-white mb-4 tracking-tighter">時間切れ！</h2>
@@ -2780,7 +2825,7 @@ const App: React.FC = () => {
             )}
 
             {gameState.screen === GameScreen.START_MENU && (
-                <div className="absolute top-2 right-2 z-[9999] flex gap-2">
+                <div className="absolute top-2 right-2 z-9999 flex gap-2">
                     <button 
                         onClick={toggleBgmMode} 
                         className={`bg-black/50 hover:bg-black/80 text-white border border-white/50 px-2 py-1 rounded text-xs flex items-center shadow-lg transition-colors font-bold ${bgmMode !== 'OSCILLATOR' && bgmMode !== 'MP3' ? 'border-indigo-500 text-indigo-400' : (bgmMode === 'MP3' ? 'border-green-500 text-green-400' : '')}`}
@@ -2800,7 +2845,7 @@ const App: React.FC = () => {
 
             {gameState.screen === GameScreen.START_MENU && (
                 <div className="w-full h-full bg-gray-900 flex items-center justify-center relative">
-                    <div className="absolute bottom-2 left-2 z-[9999] text-gray-500 text-[10px] font-mono flex flex-col gap-0.5">
+                    <div className="absolute bottom-2 left-2 z-9999 text-gray-500 text-[10px] font-mono flex flex-col gap-0.5">
                         <div>TOTAL TIME: {formatTime(totalPlaySeconds)}</div>
                         <div className={isDailyLimitReached ? "text-red-500 font-bold" : ""}>
                             DAILY: {formatTime(dailyPlaySeconds)} / 01:00:00
@@ -2916,7 +2961,7 @@ const App: React.FC = () => {
             )}
 
             {showDebugLog && (
-                <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4" onClick={() => setShowDebugLog(false)}>
+                <div className="fixed inset-0 z-100 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowDebugLog(false)}>
                     <div className="bg-gray-900 border-2 border-green-500 p-6 rounded-lg max-w-lg w-full shadow-[0_0_20px_rgba(34,197,94,0.3)]" onClick={e => e.stopPropagation()}>
                         <h2 
                             className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2 select-none active:text-green-200"
@@ -3332,9 +3377,9 @@ const App: React.FC = () => {
             {gameState.screen === GameScreen.FINAL_BRIDGE && (
                 <div className="absolute inset-0">
                     <FinalBridgeScreen 
-                      player={gameState.player}
-                      onComplete={handleFinalBridgeComplete}
-                      languageMode={languageMode}
+                        player={gameState.player}
+                        onComplete={handleFinalBridgeComplete}
+                        languageMode={languageMode}
                     />
                 </div>
             )}

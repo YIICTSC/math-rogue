@@ -203,6 +203,7 @@ export interface Player {
   floatingText: FloatingText | null;
   partner?: Partner;
   garden?: GardenSlot[];
+  codexBuffer?: Card[]; // 秘密の攻略本用
 }
 
 export enum GameScreen {
