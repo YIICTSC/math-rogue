@@ -57,6 +57,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
     if (player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
 
     if (player.gold >= price) {
+        setInspectedItem(null); // 詳細を閉じる
         onBuyCard(card);
         setPurchasedIds([...purchasedIds, card.id]);
     }
@@ -68,6 +69,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
     if (player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
 
     if (player.gold >= price) {
+        setInspectedItem(null); // 詳細を閉じる
         onBuyRelic(relic);
         setPurchasedIds([...purchasedIds, relic.id]);
     }
@@ -80,6 +82,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
       if (player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
 
       if (player.gold >= price) {
+          setInspectedItem(null); // 詳細を閉じる
           if (player.potions.length >= 3) {
               setPotionToBuy(potion);
           } else {
@@ -101,6 +104,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
       if (player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) cost = Math.floor(cost * 0.5);
 
       if (player.gold >= cost && !removed) {
+          setInspectedItem(null); // 詳細を閉じる
           onRemoveCard(cardId, cost);
           setRemoved(true);
           setViewMode('BUY');
