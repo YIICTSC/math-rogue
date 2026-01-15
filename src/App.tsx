@@ -2979,7 +2979,7 @@ const App: React.FC = () => {
                             <section>
                                 <h3 className="text-white font-bold mb-1">■ v1.0.2 アップデート</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li>通信対戦(QR対戦)機能の実装</li>
+                                    <li>対戦(QR対戦)機能の実装</li>
                                     <li>問題チャレンジモードの改善</li>
                                     <li>UIの微調整とバグ修正</li>
                                 </ul>
