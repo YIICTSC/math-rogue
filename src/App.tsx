@@ -169,6 +169,37 @@ const App: React.FC = () => {
 
   const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+  // --- HELPER: CARD POOL FILTERING ---
+  // 特定キャラクター専用のカードや種カードを、他のキャラが引けないようにするための共通フィルター
+  const getFilteredCardPool = (playerId: string | undefined, includeSpecial: boolean = false): ICard[] => {
+    const isLibrarian = playerId === 'LIBRARIAN';
+    const isGardener = playerId === 'GARDENER';
+    
+    return Object.values(CARDS_LIBRARY).filter(c => {
+      // 状態異常と呪いは除外
+      if (c.type === CardType.STATUS || c.type === CardType.CURSE) return false;
+      
+      // 図書委員カードかどうかの判定
+      const isLibCard = Object.values(LIBRARIAN_CARDS).some(lc => lc.name === c.name);
+      
+      // 種カードは園芸委員以外出ない
+      if (c.isSeed && !isGardener) return false;
+      // 図書委員専用カードは図書委員以外出ない
+      if (isLibCard && !isLibrarian) return false;
+      
+      // レアリティSPECIALのカード（植物成長後、敵カードなど）の扱い
+      if (c.rarity === 'SPECIAL') {
+        if (!includeSpecial) return false;
+        // SPECIALを含める場合でも、本来の持ち主以外には出さない
+        if (isGardener && (c.isSeed || Object.values(GROWN_PLANTS).some(gp => gp.name === c.name))) return true;
+        if (isLibrarian && isLibCard) return true;
+        return false;
+      }
+      
+      return true;
+    }).map((c, i) => ({ ...c, id: `pool-${i}-${Math.random()}` } as ICard));
+  };
+
   const [gameState, setGameState] = useState<GameState>({
     screen: GameScreen.START_MENU,
     mode: GameMode.MULTIPLICATION,
@@ -993,8 +1024,8 @@ const App: React.FC = () => {
             }
             
             if (p.relics.find(r => r.id === 'ENCHIRIDION')) {
-                const powers = Object.values(CARDS_LIBRARY).filter(c => c.type === CardType.POWER);
-                const power = powers[Math.floor(Math.random() * powers.length)];
+                const powerPool = getFilteredCardPool(p.id).filter(c => c.type === CardType.POWER);
+                const power = powerPool[Math.floor(Math.random() * powerPool.length)];
                 p.hand.push({ ...power, id: `ench-${Date.now()}`, cost: 0 });
             }
             if (p.relics.find(r => r.id === 'WHISTLE')) {
@@ -1053,27 +1084,19 @@ const App: React.FC = () => {
             audioService.playBGM('rest');
 
         } else if (node.type === NodeType.SHOP) {
-            const isLibrarian = nextState.player.id === 'LIBRARIAN';
             const isGardener = nextState.player.id === 'GARDENER';
-            
-            const shopCandidates = Object.values(CARDS_LIBRARY).filter(c => {
-                if (c.type === CardType.STATUS || c.type === CardType.CURSE) return false;
-                if (c.isSeed && !isGardener) return false;
-                const isLibrarianCard = Object.values(LIBRARIAN_CARDS).some(lc => lc.name === c.name);
-                if (c.rarity === 'SPECIAL') {
-                    if (isLibrarian && isLibrarianCard) return true;
-                    if (isGardener && c.isSeed) return true;
-                    return false;
-                }
-                return true;
-            });
+            const allPossibleCards = getFilteredCardPool(nextState.player.id);
 
             const cards: ICard[] = [];
             for(let i=0; i<5; i++) {
-                if (shopCandidates.length === 0) break;
-                let candidatePool = shopCandidates;
-                if (isGardener && i < 2) candidatePool = Object.values(GARDEN_SEEDS);
-                const cTemplate = candidatePool[Math.floor(Math.random() * candidatePool.length)] || shopCandidates[Math.floor(Math.random() * shopCandidates.length)];
+                if (allPossibleCards.length === 0) break;
+                let candidatePool = allPossibleCards;
+                // 園芸委員の場合は、ショップ枠のいくつかを確定で種にする
+                if (isGardener && i < 2) {
+                  candidatePool = Object.values(GARDEN_SEEDS).map(s => ({...s, id: `shop-seed-${i}-${Date.now()}`}) as ICard);
+                }
+                
+                const cTemplate = candidatePool[Math.floor(Math.random() * candidatePool.length)];
                 const c = { ...cTemplate };
                 let price = 40 + Math.floor(Math.random() * 60);
                 if (c.rarity === 'UNCOMMON') price += 25;
@@ -1378,10 +1401,10 @@ const App: React.FC = () => {
       }
 
       if (card.name === '錬金術' || card.name === 'ALCHEMIZE') {
-          const keys = Object.keys(CARDS_LIBRARY).filter(k => !STATUS_CARDS[k] && !CURSE_CARDS[k] && CARDS_LIBRARY[k].rarity !== 'SPECIAL');
-          const key = keys[Math.floor(Math.random() * keys.length)];
-          const randomCardTemplate = CARDS_LIBRARY[key];
-          let newC = { ...randomCardTemplate, id: `alch-${Date.now()}`, cost: 0 };
+          // キャラクターに応じた適切なプールから抽選
+          const possibleCards = getFilteredCardPool(p.id).filter(c => c.rarity !== 'SPECIAL');
+          const randomCardTemplate = possibleCards[Math.floor(Math.random() * possibleCards.length)];
+          let newC = { ...randomCardTemplate, id: `alch-${Date.now()}`, cost: 0 } as ICard;
           if (p.powers['MASTER_REALITY']) newC = getUpgradedCard(newC);
           
           if (p.hand.length < HAND_SIZE + 5) {
@@ -1394,10 +1417,11 @@ const App: React.FC = () => {
       }
 
       if (card.name === '発見' || card.name === 'DISCOVERY') {
+          // キャラクターに応じた適切なプールから抽選
+          const possibleCards = getFilteredCardPool(p.id);
           for (let i = 0; i < 3; i++) {
-              const keys = Object.keys(CARDS_LIBRARY).filter(k => !STATUS_CARDS[k] && !CURSE_CARDS[k]);
-              const key = keys[Math.floor(Math.random() * keys.length)];
-              const newCard = { ...CARDS_LIBRARY[key], id: `disc-${Date.now()}-${i}`, cost: 0, exhaust: true };
+              const template = possibleCards[Math.floor(Math.random() * possibleCards.length)];
+              const newCard = { ...template, id: `disc-${Date.now()}-${i}`, cost: 0, exhaust: true } as ICard;
               if (p.hand.length < HAND_SIZE + 5) {
                   p.hand.push(newCard);
               } else {
@@ -2016,8 +2040,8 @@ const App: React.FC = () => {
       }
 
       if (p.powers['CREATIVE_AI']) {
-          const powers = Object.values(CARDS_LIBRARY).filter(c => c.type === CardType.POWER);
-          const power = powers[Math.floor(Math.random() * powers.length)];
+          const powerPool = getFilteredCardPool(p.id).filter(c => c.type === CardType.POWER);
+          const power = powerPool[Math.floor(Math.random() * powerPool.length)];
           newHand.push({ ...power, id: `ai-${Date.now()}`, cost: 0 });
           nextActiveEffects.push({ id: `vfx-ai-${Date.now()}`, type: 'BUFF', targetId: 'player' });
       }
@@ -2404,7 +2428,7 @@ const App: React.FC = () => {
        if (isEndingTurnRef.current) return;
 
        if (gameState.player.relics.find(r => r.id === 'NILRYS_CODEX')) {
-           const pool = Object.values(CARDS_LIBRARY).filter(c => !STATUS_CARDS[c.name] && !CURSE_CARDS[c.name] && c.rarity !== 'SPECIAL');
+           const pool = getFilteredCardPool(gameState.player.id);
            const options = [];
            // Codex用の選択肢を生成
            const ts = Date.now();
@@ -2676,32 +2700,28 @@ const App: React.FC = () => {
           if (gameState.player.relics.find(r => r.id === 'GOLDEN_IDOL')) goldReward = Math.floor(goldReward * 1.25);
           rewards.push({ type: 'GOLD', value: goldReward, id: `rew-gold-${Date.now()}` });
       }
-      const allCards = Object.values(CARDS_LIBRARY).filter(c => {
-          if (c.type === CardType.STATUS || c.type === CardType.CURSE) return false;
-          if (c.isSeed && !isGardener) return false;
-          const isLibrarianCard = Object.values(LIBRARIAN_CARDS).some(lc => lc.name === c.name);
-          if (c.rarity === 'SPECIAL') {
-              if (isLibrarian && isLibrarianCard) return true;
-              if (isGardener && c.isSeed) return true;
-              return false;
-          }
-          return true;
-      });
+
+      const allPossibleCards = getFilteredCardPool(gameState.player.id);
+
       for(let i=0; i<3; i++) {
           const roll = Math.random() * 100;
           let targetRarity = 'COMMON';
           if (roll > 95) targetRarity = 'LEGENDARY'; else if (roll > 80) targetRarity = 'RARE'; else if (roll > 50) targetRarity = 'UNCOMMON';
+          
           let pool;
+          // 特定キャラクターの場合、1枠目は確定で専用カードプールから抽選（出現率の担保）
           if (isLibrarian && i === 0 && Math.random() < 0.7) {
               pool = Object.values(LIBRARIAN_CARDS);
           } else if (isGardener && i === 0 && Math.random() < 0.7) {
               pool = Object.values(GARDEN_SEEDS);
           } else {
-              pool = allCards.filter(c => c.rarity === targetRarity);
+              pool = allPossibleCards.filter(c => c.rarity === targetRarity);
           }
-          const candidate = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : allCards[Math.floor(Math.random() * allCards.length)];
+          
+          const candidate = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : allPossibleCards[Math.floor(Math.random() * allPossibleCards.length)];
           rewards.push({ type: 'CARD', value: { ...candidate, id: `reward-${Date.now()}-${i}` }, id: `rew-card-${i}` });
       }
+      
       const hasSozu = gameState.player.relics.find(r => r.id === 'SOZU');
       const hasKinjiro = gameState.player.relics.find(r => r.id === 'KINJIRO_STATUE');
       if (!hasSozu && (hasKinjiro || Math.random() < 0.4)) {
