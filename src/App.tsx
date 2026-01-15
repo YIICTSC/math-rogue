@@ -3279,41 +3279,44 @@ const App: React.FC = () => {
                         shopRelics={shopRelics}
                         shopPotions={shopPotions}
                         onBuyCard={(card) => {
-                            let price = card.price || 50;
-                            if (gameState.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
-                            setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - price, deck: [...prev.player.deck, { ...card, id: `buy-${Date.now()}` }], discardPile: [...prev.player.discardPile, { ...card, id: `buy-${Date.now()}` }] } }));
+                            setGameState(prev => {
+                                let price = card.price || 50;
+                                if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
+                                return { ...prev, player: { ...prev.player, gold: prev.player.gold - price, deck: [...prev.player.deck, { ...card, id: `buy-${Date.now()}` }], discardPile: [...prev.player.discardPile, { ...card, id: `buy-${Date.now()}` }] } };
+                            });
                             storageService.saveUnlockedCard(card.name);
                         }}
                         onBuyRelic={(relic) => {
-                             let price = relic.price || 150;
-                             if (gameState.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
                              setGameState(prev => {
+                                 let price = relic.price || 150;
+                                 if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
                                  const newP = { ...prev.player, gold: prev.player.gold - price, relics: [...prev.player.relics, relic] };
                                  if (relic.id === 'SOZU') newP.maxEnergy += 1;
                                  if (relic.id === 'CURSED_KEY') newP.maxEnergy += 1;
                                  if (relic.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
                                  if (relic.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
-                                 if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = p.maxHp; }
+                                 if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
                                  if (relic.id === 'OLD_COIN') newP.gold += 300;
-                                 if (relic.id === 'MATRYOSHKA') prev.player.relicCounters['MATRYOSHKA'] = 2; 
-                                 if (relic.id === 'HAPPY_FLOWER') prev.player.relicCounters['HAPPY_FLOWER'] = 0; 
+                                 if (relic.id === 'MATRYOSHKA') newP.relicCounters['MATRYOSHKA'] = 2; 
+                                 if (relic.id === 'HAPPY_FLOWER') newP.relicCounters['HAPPY_FLOWER'] = 0; 
                                  return { ...prev, player: newP };
                              });
                              storageService.saveUnlockedRelic(relic.id);
                         }}
                         onBuyPotion={(potion, replacePotionId) => {
-                            if (gameState.player.potions.length < 3 || replacePotionId) {
-                                 let price = potion.price || 50;
-                                 if (gameState.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
-                                 setGameState(prev => {
+                            setGameState(prev => {
+                                if (prev.player.potions.length < 3 || replacePotionId) {
+                                     let price = potion.price || 50;
+                                     if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
                                      let newPotions = [...prev.player.potions];
                                      if (replacePotionId) {
                                          newPotions = newPotions.filter(pt => pt.id !== replacePotionId);
                                      }
                                      return { ...prev, player: { ...prev.player, gold: prev.player.gold - price, potions: [...newPotions, { ...potion, id: `buy-pot-${Date.now()}` }] } }
-                                 });
-                                 storageService.saveUnlockedPotion(potion.templateId);
-                            }
+                                }
+                                return prev;
+                            });
+                            storageService.saveUnlockedPotion(potion.templateId);
                         }}
                         onRemoveCard={(cardId, cost) => {
                              setGameState(prev => {
@@ -3407,10 +3410,10 @@ const App: React.FC = () => {
                                         if (r.value.id === 'CURSED_KEY') newP.maxEnergy += 1;
                                         if (r.value.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
                                         if (r.value.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
-                                        if (r.value.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = p.maxHp; }
+                                        if (r.value.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
                                         if (r.value.id === 'OLD_COIN') newP.gold += 300;
-                                        if (r.value.id === 'MATRYOSHKA') prev.player.relicCounters['MATRYOSHKA'] = 2; 
-                                        if (r.value.id === 'HAPPY_FLOWER') prev.player.relicCounters['HAPPY_FLOWER'] = 0; 
+                                        if (r.value.id === 'MATRYOSHKA') newP.relicCounters['MATRYOSHKA'] = 2; 
+                                        if (r.value.id === 'HAPPY_FLOWER') newP.relicCounters['HAPPY_FLOWER'] = 0; 
                                     }
                                 });
                                 if (hasCursedKey) {
