@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
-  CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode, LanguageMode, VisualEffectInstance, GardenSlot
+  CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode, LanguageMode, VisualEffectInstance, GardenSlot, VFXType
 } from './types';
 import { 
   INITIAL_HP, INITIAL_ENERGY, HAND_SIZE, 
@@ -246,7 +246,7 @@ const App: React.FC = () => {
     activeEffects: []
   });
 
-  const [languageMode, setLanguageMode] = useState<LanguageMode>('JAPANESE');
+  const [languageMode, setLanguageMode] = useState<LanguageMode>(() => storageService.getLanguageMode() || 'JAPANESE');
   const [currentNarrative, setCurrentNarrative] = useState<string>("...");
   const [turnLog, setTurnLog] = useState<string>("プレイヤーターン");
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -424,7 +424,9 @@ const App: React.FC = () => {
   };
 
   const toggleLanguage = () => {
-      setLanguageMode(prev => prev === 'JAPANESE' ? 'HIRAGANA' : 'JAPANESE');
+      const nextMode = languageMode === 'JAPANESE' ? 'HIRAGANA' : 'JAPANESE';
+      setLanguageMode(nextMode);
+      storageService.saveLanguageMode(nextMode);
       audioService.playSound('select');
   };
 
@@ -1401,7 +1403,6 @@ const App: React.FC = () => {
       }
 
       if (card.name === '錬金術' || card.name === 'ALCHEMIZE') {
-          // キャラクターに応じた適切なプールから抽選
           const possibleCards = getFilteredCardPool(p.id).filter(c => c.rarity !== 'SPECIAL');
           const randomCardTemplate = possibleCards[Math.floor(Math.random() * possibleCards.length)];
           let newC = { ...randomCardTemplate, id: `alch-${Date.now()}`, cost: 0 } as ICard;
@@ -1417,7 +1418,6 @@ const App: React.FC = () => {
       }
 
       if (card.name === '発見' || card.name === 'DISCOVERY') {
-          // キャラクターに応じた適切なプールから抽選
           const possibleCards = getFilteredCardPool(p.id);
           for (let i = 0; i < 3; i++) {
               const template = possibleCards[Math.floor(Math.random() * possibleCards.length)];
@@ -1484,6 +1484,14 @@ const App: React.FC = () => {
           currentLogs.push(trans("ネクロノミコンで再発動！", languageMode));
       }
 
+      // --- VFX Type Determination ---
+      let baseVfxType: VFXType = 'SLASH';
+      if (card.type === CardType.ATTACK) {
+          if (card.name.includes('火') || card.name.includes('炎') || card.name === '焼却炉' || card.name === 'IMMOLATE') baseVfxType = 'FIRE';
+          else if (card.name.includes('雷') || card.name === '静電気' || card.name === 'BALL_LIGHTNING') baseVfxType = 'LIGHTNING';
+          else if (card.name === '大掃除' || card.name === 'FIEND_FIRE') baseVfxType = 'EXPLOSION';
+      }
+
       for (let act = 0; act < activations; act++) {
           if (enemies.every(e => e.currentHp <= 0)) break;
           let hits = 1;
@@ -1495,6 +1503,8 @@ const App: React.FC = () => {
           const hitsToLog = Math.min(hits, 10);
 
           for (let h = 0; h < hits; h++) {
+              const hitDelay = (act * hits + h) * 120; // Stagger hits visually
+
               if (enemies.every(e => e.currentHp <= 0)) break;
               let targets: Enemy[] = [];
               if (card.target === TargetType.ALL_ENEMIES) targets = enemies.filter(e => e.currentHp > 0);
@@ -1548,7 +1558,20 @@ const App: React.FC = () => {
                     if (e.block >= damage) { e.block -= damage; damage = 0; }
                     else { damage -= e.block; e.block = 0; }
                     e.currentHp -= damage;
-                    nextActiveEffects.push({ id: `vfx-${Date.now()}-${Math.random()}`, type: 'SLASH', targetId: e.id });
+                    
+                    // Enhanced VFX Logic
+                    let finalVfx = baseVfxType;
+                    if (damage > 15 && finalVfx === 'SLASH') finalVfx = 'CRITICAL';
+                    if (e.currentHp <= 0 && (finalVfx === 'SLASH' || finalVfx === 'CRITICAL')) finalVfx = 'EXPLOSION';
+
+                    nextActiveEffects.push({ 
+                        id: `vfx-${Date.now()}-${Math.random()}`, 
+                        type: finalVfx, 
+                        targetId: e.id,
+                        delay: hitDelay,
+                        rotation: Math.random() * 360 // Random rotation for variety
+                    });
+
                     if (e.currentHp <= 0 && e.enemyType === 'THE_HEART' && e.phase === 1) {
                          e.currentHp = e.maxHp; 
                          e.phase = 2; 
@@ -1556,7 +1579,7 @@ const App: React.FC = () => {
                          e.vulnerable = 0; e.weak = 0; e.poison = 0; 
                          e.floatingText = { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' };
                          currentLogs.push("校長先生が真の姿を現した！");
-                         nextActiveEffects.push({ id: `vfx-evo-${Date.now()}`, type: 'BUFF', targetId: e.id });
+                         nextActiveEffects.push({ id: `vfx-evo-${Date.now()}`, type: 'BUFF', targetId: e.id, delay: hitDelay + 200 });
                     }
                     if (damage > 0 || logParts.length > 1) {
                         if (h % 5 === 0 || h === hits - 1) {
@@ -1571,7 +1594,7 @@ const App: React.FC = () => {
                     }
                     if (card.lifesteal && damage > 0) {
                         p.currentHp = Math.min(p.currentHp + damage, p.maxHp);
-                        nextActiveEffects.push({ id: `vfx-heal-ls-${Date.now()}`, type: 'HEAL', targetId: 'player' });
+                        nextActiveEffects.push({ id: `vfx-heal-ls-${Date.now()}`, type: 'HEAL', targetId: 'player', delay: hitDelay });
                     }
                     if (e.currentHp <= 0) {
                          currentLogs.push(`${trans(e.name, languageMode)}${trans("を倒した！", languageMode)}`);
@@ -1587,7 +1610,7 @@ const App: React.FC = () => {
                                      other.currentHp -= e.maxHp; 
                                      other.floatingText = { id: `expl-${Date.now()}`, text: `${e.maxHp}`, color: 'text-green-400' };
                                      currentLogs.push(`${trans("衝撃のうわさ", languageMode)}: ${trans(other.name, languageMode)}に${e.maxHp}${trans("ダメージ", languageMode)}`);
-                                     nextActiveEffects.push({ id: `vfx-expl-${Date.now()}-${other.id}`, type: 'FIRE', targetId: other.id });
+                                     nextActiveEffects.push({ id: `vfx-expl-${Date.now()}-${other.id}`, type: 'FIRE', targetId: other.id, delay: hitDelay + 100 });
                                  }
                              });
                          }
@@ -1609,7 +1632,7 @@ const App: React.FC = () => {
                              p.discardPile.push(captured);
                              e.floatingText = { id: `cap-${Date.now()}`, text: 'GET!', color: 'text-yellow-400' };
                              currentLogs.push(`${trans(e.name, languageMode)}を${trans("捕獲した！", languageMode)}`);
-                             nextActiveEffects.push({ id: `vfx-cap-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+                             nextActiveEffects.push({ id: `vfx-cap-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
                          }
                          if (card.name === '羅生門' || card.id.includes('RASHOMON')) {
                              nextSelectionState = { active: true, type: 'EXHAUST', amount: 1 };
@@ -1620,7 +1643,7 @@ const App: React.FC = () => {
                         e.nextIntent = { type: EnemyIntentType.SLEEP, value: 0 };
                         currentLogs.push(`${trans(e.name, languageMode)}の行動を遅らせた！`);
                         e.floatingText = { id: `delay-${Date.now()}`, text: '遅延', color: 'text-blue-400' };
-                        nextActiveEffects.push({ id: `vfx-delay-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id });
+                        nextActiveEffects.push({ id: `vfx-delay-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay });
                     }
                 });
               }
@@ -1637,7 +1660,7 @@ const App: React.FC = () => {
                       logParts.push(`x0.75(${trans("もろい", languageMode)})`);
                   }
                   p.block += blk;
-                  nextActiveEffects.push({ id: `vfx-blk-${Date.now()}`, type: 'BLOCK', targetId: 'player' });
+                  nextActiveEffects.push({ id: `vfx-blk-${Date.now()}`, type: 'BLOCK', targetId: 'player', delay: hitDelay });
                   const formula = logParts.length > 1 ? `(${logParts.join(' ')}) = ` : '';
                   if (h < hitsToLog) {
                       currentLogs.push(`${trans("ブロック", languageMode)}${formula}${blk}を${trans("獲得", languageMode)}`);
@@ -1645,7 +1668,7 @@ const App: React.FC = () => {
               }
               if (card.doubleBlock) {
                   p.block *= 2;
-                  nextActiveEffects.push({ id: `vfx-dblblk-${Date.now()}`, type: 'BLOCK', targetId: 'player' });
+                  nextActiveEffects.push({ id: `vfx-dblblk-${Date.now()}`, type: 'BLOCK', targetId: 'player', delay: hitDelay });
               }
               if (card.heal) {
                   p.currentHp = Math.min(p.currentHp + card.heal, p.maxHp);
@@ -1653,7 +1676,7 @@ const App: React.FC = () => {
                       p.partner.currentHp = Math.min(p.partner.maxHp, p.partner.currentHp + card.heal);
                       p.partner.floatingText = { id: `heal-p-${Date.now()}`, text: `+${card.heal}`, color: 'text-green-500' };
                   }
-                  nextActiveEffects.push({ id: `vfx-heal-${Date.now()}`, type: 'HEAL', targetId: 'player' });
+                  nextActiveEffects.push({ id: `vfx-heal-${Date.now()}`, type: 'HEAL', targetId: 'player', delay: hitDelay });
               }
               if (card.energy) p.currentEnergy += card.energy;
               if (card.selfDamage) { 
@@ -1661,9 +1684,9 @@ const App: React.FC = () => {
                   currentLogs.push(`${trans("自分に", languageMode)}${card.selfDamage}${trans("ダメージ", languageMode)}`);
                   if (p.powers['RUPTURE']) {
                       p.strength += p.powers['RUPTURE']; 
-                      nextActiveEffects.push({ id: `vfx-rup-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+                      nextActiveEffects.push({ id: `vfx-rup-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
                   }
-                  nextActiveEffects.push({ id: `vfx-sd-${Date.now()}`, type: 'SLASH', targetId: 'player' });
+                  nextActiveEffects.push({ id: `vfx-sd-${Date.now()}`, type: 'SLASH', targetId: 'player', delay: hitDelay });
               }
               if (card.strength) {
                   if (card.target === TargetType.ENEMY || card.target === TargetType.ALL_ENEMIES) {
@@ -1674,24 +1697,24 @@ const App: React.FC = () => {
                       currentLogs.push(`${trans("敵のムキムキ", languageMode)}${card.strength > 0 ? '+' : ''}${card.strength}`);
                   } else {
                       p.strength += card.strength;
-                      nextActiveEffects.push({ id: `vfx-buff-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+                      nextActiveEffects.push({ id: `vfx-buff-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
                       currentLogs.push(`${trans("ムキムキ", languageMode)}+${card.strength}`);
                   }
               }
               if (card.vulnerable) targets.forEach(e => {
                   applyDebuff(e, 'VULNERABLE', card.vulnerable!);
-                  nextActiveEffects.push({ id: `vfx-dbuff-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id });
+                  nextActiveEffects.push({ id: `vfx-dbuff-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay });
               });
               if (card.weak) targets.forEach(e => {
                   applyDebuff(e, 'WEAK', card.weak!);
-                  nextActiveEffects.push({ id: `vfx-dbuff-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id });
+                  nextActiveEffects.push({ id: `vfx-dbuff-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay });
               });
               if (card.poison) {
                   let amt = card.poison;
                   if (p.relics.find(r => r.id === 'SNAKE_SKULL')) amt += 1; 
                   targets.forEach(e => {
                       applyDebuff(e, 'POISON', amt);
-                      nextActiveEffects.push({ id: `vfx-dbuff-p-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id });
+                      nextActiveEffects.push({ id: `vfx-dbuff-p-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay });
                   });
                   if (h < hitsToLog) currentLogs.push(`${trans("ドクドク", languageMode)}${amt}${trans("を付与", languageMode)}`);
               }
@@ -1700,25 +1723,25 @@ const App: React.FC = () => {
                       if (e.poison > 0) {
                           e.poison *= card.poisonMultiplier!;
                           currentLogs.push(`${trans(e.name, languageMode)}の${trans("毒", languageMode)}が${card.poisonMultiplier}倍になった！`);
-                          nextActiveEffects.push({ id: `vfx-dbuff-pm-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id });
+                          nextActiveEffects.push({ id: `vfx-dbuff-pm-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay });
                       }
                   });
               }
               if (card.upgradeHand) {
                   p.hand = p.hand.map(c => getUpgradedCard(c));
                   currentLogs.push(trans("手札を強化", languageMode));
-                  nextActiveEffects.push({ id: `vfx-uh-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+                  nextActiveEffects.push({ id: `vfx-uh-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
               }
               if (card.upgradeDeck) {
                   p.hand = p.hand.map(c => getUpgradedCard(c));
                   p.drawPile = p.drawPile.map(c => getUpgradedCard(c));
                   p.discardPile = p.discardPile.map(c => getUpgradedCard(c));
                   currentLogs.push(trans("デッキ全体を強化", languageMode));
-                  nextActiveEffects.push({ id: `vfx-ud-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+                  nextActiveEffects.push({ id: `vfx-ud-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
               }
               if (card.doubleStrength) {
                   p.strength *= 2;
-                  nextActiveEffects.push({ id: `vfx-ds-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+                  nextActiveEffects.push({ id: `vfx-ds-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
               }
               if (card.shuffleHandToDraw) { 
                   p.drawPile = shuffle([...p.drawPile, ...p.discardPile]); 
@@ -1730,9 +1753,9 @@ const App: React.FC = () => {
                   if (card.applyPower.id === 'CORPSE_EXPLOSION' && targets.length > 0) {
                       targets.forEach(e => e.corpseExplosion = true);
                       currentLogs.push(trans("衝撃のうわさを付与", languageMode));
-                      nextActiveEffects.push({ id: `vfx-ce-${Date.now()}`, type: 'DEBUFF', targetId: targets[0].id });
+                      nextActiveEffects.push({ id: `vfx-ce-${Date.now()}`, type: 'DEBUFF', targetId: targets[0].id, delay: hitDelay });
                   }
-                  nextActiveEffects.push({ id: `vfx-ap-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+                  nextActiveEffects.push({ id: `vfx-ap-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
               }
               if (card.draw) {
                 for (let j = 0; j < card.draw; j++) {
@@ -1806,7 +1829,7 @@ const App: React.FC = () => {
                           e.currentHp = 0;
                           currentLogs.push(`${trans(e.name, languageMode)}は${trans("早退", languageMode)}になった！`);
                           e.floatingText = { id: `kill-${Date.now()}`, text: '早退!', color: 'text-red-600', iconType: 'skull' };
-                          nextActiveEffects.push({ id: `vfx-exp-${Date.now()}`, type: 'SLASH', targetId: e.id });
+                          nextActiveEffects.push({ id: `vfx-exp-${Date.now()}`, type: 'SLASH', targetId: e.id, delay: hitDelay });
                       } else {
                           currentLogs.push(`${trans(e.name, languageMode)}は${trans("早退", languageMode)}を免れた`);
                       }
@@ -1816,7 +1839,7 @@ const App: React.FC = () => {
               if (card.name === '大ジャンプ' || card.name === 'VAULT') {
                   p.turnFlags['VAULT_EXTRA_TURN'] = true;
                   currentLogs.push(trans("追加ターンを得る！", languageMode));
-                  nextActiveEffects.push({ id: `vfx-vault-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+                  nextActiveEffects.push({ id: `vfx-vault-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
               }
           }
       }
@@ -1904,9 +1927,10 @@ const App: React.FC = () => {
       };
     });
     
+    // Increased duration to allow multi-hit VFX to finish
     setTimeout(() => {
         setGameState(prev => ({ ...prev, activeEffects: [] }));
-    }, 600);
+    }, 2000);
   };
 
   const startPlayerTurn = () => {
@@ -2028,7 +2052,6 @@ const App: React.FC = () => {
         }
       }
       
-      // --- 秘密の攻略本の効果: 手札に加える ---
       if (p.codexBuffer && p.codexBuffer.length > 0) {
           const uniqueCodexCards = [...p.codexBuffer];
           p.codexBuffer = []; // バッファを確実にクリア
@@ -2330,8 +2353,8 @@ const App: React.FC = () => {
                         e.currentHp = e.maxHp;
                         e.phase = 2;
                         e.name = "真・校長先生";
-                        e.poison = 0; e.weak = 0; e.vulnerable = 0;
-                        e.floatingText = { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' };
+                        enemy.poison = 0; enemy.weak = 0; enemy.vulnerable = 0;
+                        enemy.floatingText = { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' };
                         newLogs.push("校長先生が真の姿を現した！");
                         nextActiveEffects.push({ id: `vfx-evo2-${Date.now()}`, type: 'BUFF', targetId: e.id });
                     }
@@ -2424,13 +2447,11 @@ const App: React.FC = () => {
   };
   
   const handleEndTurnClick = () => {
-       // ターン終了処理中の連打防止
        if (isEndingTurnRef.current) return;
 
        if (gameState.player.relics.find(r => r.id === 'NILRYS_CODEX')) {
            const pool = getFilteredCardPool(gameState.player.id);
            const options = [];
-           // Codex用の選択肢を生成
            const ts = Date.now();
            for(let i=0; i<3; i++) {
                 options.push({...pool[Math.floor(Math.random() * pool.length)], id: `codex-${ts}-${i}`});
@@ -2445,9 +2466,8 @@ const App: React.FC = () => {
       setGameState(prev => {
         const nextPlayer = { ...prev.player };
         if (card) {
-          // 絶対にユニークなIDを持つカードとしてバッファに格納
           const bufferedCard = { ...card, id: `codex-buf-${Date.now()}-${Math.random().toString(36).substr(2, 9)}` };
-          nextPlayer.codexBuffer = [bufferedCard]; // 1枚に限定
+          nextPlayer.codexBuffer = [bufferedCard]; 
         }
         return { 
           ...prev, 
@@ -2455,7 +2475,6 @@ const App: React.FC = () => {
           codexOptions: undefined 
         };
       });
-      // 攻略本選択が終わったら敵のターンへ移行
       setTimeout(() => {
         executeEndTurn();
       }, 50);
@@ -2709,7 +2728,6 @@ const App: React.FC = () => {
           if (roll > 95) targetRarity = 'LEGENDARY'; else if (roll > 80) targetRarity = 'RARE'; else if (roll > 50) targetRarity = 'UNCOMMON';
           
           let pool;
-          // 特定キャラクターの場合、1枠目は確定で専用カードプールから抽選（出現率の担保）
           if (isLibrarian && i === 0 && Math.random() < 0.7) {
               pool = Object.values(LIBRARIAN_CARDS);
           } else if (isGardener && i === 0 && Math.random() < 0.7) {
@@ -2846,7 +2864,6 @@ const App: React.FC = () => {
 
             {gameState.screen === GameScreen.START_MENU && (
                 <div className="w-full h-full bg-gray-900 flex items-center justify-center relative">
-                    {/* restore BGM and Language toggle buttons to title screen */}
                     <div className="absolute top-2 right-2 z-9999 flex gap-2">
                         <button 
                             onClick={toggleBgmMode} 

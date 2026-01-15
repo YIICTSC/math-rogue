@@ -1,5 +1,5 @@
 
-import { GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState, KochoScoreEntry, PaperPlaneScoreEntry, VSRecord } from '../types';
+import { GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState, KochoScoreEntry, PaperPlaneScoreEntry, VSRecord, LanguageMode } from '../types';
 
 const STORAGE_KEY_UNLOCKED_CARDS = 'pixel_spire_unlocked_cards_v1';
 const STORAGE_KEY_UNLOCKED_RELICS = 'pixel_spire_unlocked_relics_v1';
@@ -44,6 +44,9 @@ const STORAGE_KEY_ENGLISH_VOICE = 'pixel_spire_english_voice_v1';
 
 // --- BGM MODE FLAG ---
 const STORAGE_KEY_BGM_MODE = 'pixel_spire_bgm_mode_v1';
+
+// --- LANGUAGE MODE FLAG ---
+const STORAGE_KEY_LANGUAGE_MODE = 'pixel_spire_language_mode_v1';
 
 // --- PLAY TIME ---
 const STORAGE_KEY_TOTAL_PLAY_TIME = 'pixel_spire_total_play_time_v1';
@@ -504,6 +507,15 @@ export const storageService = {
     localStorage.setItem(STORAGE_KEY_BGM_MODE, mode);
   },
 
+  // --- Language Mode ---
+  getLanguageMode: (): LanguageMode | null => {
+    return localStorage.getItem(STORAGE_KEY_LANGUAGE_MODE) as LanguageMode | null;
+  },
+
+  saveLanguageMode: (mode: LanguageMode) => {
+    localStorage.setItem(STORAGE_KEY_LANGUAGE_MODE, mode);
+  },
+
   // --- Play Time Management ---
   getTotalPlayTime: (): number => {
     try {
@@ -644,6 +656,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_CHALLENGE_RECORDS);
       localStorage.removeItem(STORAGE_KEY_ENGLISH_VOICE);
       localStorage.removeItem(STORAGE_KEY_BGM_MODE);
+      localStorage.removeItem(STORAGE_KEY_LANGUAGE_MODE);
       localStorage.removeItem(STORAGE_KEY_TOTAL_PLAY_TIME);
       localStorage.removeItem(STORAGE_KEY_DAILY_PLAY_TIME);
   }

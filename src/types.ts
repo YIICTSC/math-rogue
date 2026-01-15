@@ -483,7 +483,7 @@ export interface ParryState {
     success: boolean;
 }
 
-export type VFXType = 'SLASH' | 'BLOCK' | 'BUFF' | 'DEBUFF' | 'HEAL' | 'FIRE';
+export type VFXType = 'SLASH' | 'BLOCK' | 'BUFF' | 'DEBUFF' | 'HEAL' | 'FIRE' | 'EXPLOSION' | 'LIGHTNING' | 'CRITICAL' | 'SHOCKWAVE';
 
 export interface VisualEffectInstance {
     id: string;
@@ -491,6 +491,8 @@ export interface VisualEffectInstance {
     targetId: string;
     x?: number;
     y?: number;
+    delay?: number;
+    rotation?: number;
 }
 
 export interface GameState {

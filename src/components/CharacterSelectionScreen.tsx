@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Character, LanguageMode } from '../types';
-import { Lock, Heart, Coins, Gem, ArrowRight, Swords, Shield, Zap, Sparkles, Brain, GraduationCap } from 'lucide-react';
-import { RELIC_LIBRARY, CARDS_LIBRARY } from '../constants';
+import { Lock, Heart, Coins, Gem, ArrowRight, Swords, Shield, Zap, Sparkles, Brain, GraduationCap, Camera, X, RefreshCw, AlertCircle } from 'lucide-react';
+import { RELIC_LIBRARY, CARDS_LIBRARY, CHARACTER_ACCESSORIES } from '../constants';
 import { trans } from '../utils/textUtils';
+import { audioService } from '../services/audioService';
 
 interface CharacterSelectionScreenProps {
   characters: Character[];
@@ -14,9 +15,172 @@ interface CharacterSelectionScreenProps {
 }
 
 const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ characters, unlockedCount, onSelect, challengeMode, languageMode }) => {
+  const [customImages, setCustomImages] = useState<Record<string, string>>({});
+  const [showCamera, setShowCamera] = useState(false);
+  const [activeCharId, setActiveCharId] = useState<string | null>(null);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // カメラを停止する
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+  };
+
+  // カメラを開始する
+  const startCamera = async (charId: string) => {
+    setActiveCharId(charId);
+    setCameraError(null);
+    setShowCamera(true);
+    audioService.playSound('select');
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'user', width: { ideal: 400 }, height: { ideal: 400 } } 
+      });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (err) {
+      console.error("Camera access error:", err);
+      setCameraError("カメラにアクセスできませんでした");
+    }
+  };
+
+  // 写真を撮影する
+  const capturePhoto = async () => {
+    if (videoRef.current && canvasRef.current && activeCharId) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d');
+
+      if (context) {
+        // スクエアにクロップしてキャプチャ
+        const size = Math.min(video.videoWidth, video.videoHeight);
+        const startX = (video.videoWidth - size) / 2;
+        const startY = (video.videoHeight - size) / 2;
+        
+        canvas.width = 128;
+        canvas.height = 128;
+        
+        // 1. カメラ映像を描画（左右反転対応）
+        context.save();
+        context.translate(128, 0);
+        context.scale(-1, 1);
+        context.drawImage(video, startX, startY, size, size, 0, 0, 128, 128);
+        context.restore();
+
+        // 2. キャラクターアクセサリーを合成
+        const accessoryUrl = CHARACTER_ACCESSORIES[activeCharId];
+        if (accessoryUrl) {
+            const accessoryImg = new Image();
+            accessoryImg.src = accessoryUrl;
+            await new Promise((resolve) => {
+                accessoryImg.onload = resolve;
+            });
+            // アクセサリーを適切な位置（頭のあたり）に描画
+            context.drawImage(accessoryImg, 0, 0, 128, 128);
+        }
+        
+        // フラッシュ音
+        audioService.playSound('attack');
+        
+        const dataUrl = canvas.toDataURL('image/png');
+        setCustomImages(prev => ({ ...prev, [activeCharId]: dataUrl }));
+        handleCloseCamera();
+      }
+    }
+  };
+
+  const handleCloseCamera = () => {
+    stopCamera();
+    setShowCamera(false);
+    setActiveCharId(null);
+  };
+
+  const handleCharSelect = (char: Character) => {
+    // カスタム画像があれば上書きして選択
+    const finalChar = {
+      ...char,
+      imageData: customImages[char.id] || char.imageData
+    };
+    onSelect(finalChar);
+  };
+
   return (
     <div className="flex flex-col h-full w-full bg-gray-900 text-white relative overflow-hidden">
       
+      {/* Camera Modal */}
+      {showCamera && (
+        <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="bg-gray-800 border-4 border-white p-6 rounded-3xl w-full max-w-sm shadow-[0_0_50px_rgba(255,255,255,0.3)] relative flex flex-col items-center">
+            <button onClick={handleCloseCamera} className="absolute -top-4 -right-4 bg-red-600 border-2 border-white p-2 rounded-full hover:bg-red-500 transition-colors">
+              <X size={24} />
+            </button>
+            
+            <h3 className="text-xl font-bold mb-4 text-yellow-400 tracking-widest uppercase flex items-center gap-2">
+              <Camera size={20} /> 写真で作成
+            </h3>
+
+            <div className="relative w-full aspect-square bg-black border-4 border-gray-600 rounded-2xl overflow-hidden mb-6">
+              {cameraError ? (
+                <div className="w-full h-full flex flex-col items-center justify-center text-center p-4">
+                  <AlertCircle size={48} className="text-red-500 mb-2" />
+                  <p className="text-sm font-bold text-red-200">{cameraError}</p>
+                </div>
+              ) : (
+                <>
+                  <video 
+                    ref={videoRef} 
+                    autoPlay 
+                    playsInline 
+                    muted 
+                    className="w-full h-full object-cover scale-x-[-1]"
+                  />
+                  {/* Accessory Overlay - Live Preview */}
+                  {activeCharId && CHARACTER_ACCESSORIES[activeCharId] && (
+                    <img 
+                        src={CHARACTER_ACCESSORIES[activeCharId]} 
+                        className="absolute inset-0 w-full h-full pointer-events-none opacity-80 z-20 animate-pulse"
+                        style={{ imageRendering: 'pixelated' }}
+                    />
+                  )}
+                  {/* Viewfinder overlay */}
+                  <div className="absolute inset-0 pointer-events-none border-2 border-white/20 m-4 flex items-center justify-center">
+                    <div className="w-8 h-8 border-t-2 border-l-2 border-white/50 absolute top-0 left-0"></div>
+                    <div className="w-8 h-8 border-t-2 border-r-2 border-white/50 absolute top-0 right-0"></div>
+                    <div className="w-8 h-8 border-b-2 border-l-2 border-white/50 absolute bottom-0 left-0"></div>
+                    <div className="w-8 h-8 border-b-2 border-r-2 border-white/50 absolute bottom-0 right-0"></div>
+                    <div className="w-1 h-8 bg-red-500/10 absolute"></div>
+                    <div className="h-1 w-8 bg-red-500/10 absolute"></div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <canvas ref={canvasRef} className="hidden" />
+
+            <div className="flex flex-col gap-3 w-full">
+                <p className="text-[10px] text-gray-400 text-center px-4 font-bold">アイテムの位置に合わせて顔を写してね！</p>
+                <button 
+                    onClick={capturePhoto}
+                    disabled={!!cameraError}
+                    className="w-full bg-white text-black py-4 rounded-xl font-black text-xl hover:bg-gray-200 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_0_#ccc] flex items-center justify-center gap-2"
+                >
+                    <Camera size={24} /> 撮影する
+                </button>
+            </div>
+            
+            <p className="text-[10px] text-gray-500 mt-4 font-bold italic tracking-tighter">CHARACTER PHOTO CAPTURE SYSTEM v2.0</p>
+          </div>
+        </div>
+      )}
+
       <div className="z-10 flex flex-col items-center justify-start h-full p-4 pt-8 overflow-y-auto custom-scrollbar">
         <div className="text-center mb-8 shrink-0">
             <h2 className="text-3xl md:text-4xl text-yellow-400 font-bold mb-2 flex items-center justify-center animate-pulse">
@@ -36,6 +200,8 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
             {characters.map((char, index) => {
                 const isUnlocked = index < unlockedCount;
                 const relic = RELIC_LIBRARY[char.startingRelicId];
+                const charImage = customImages[char.id] || char.imageData;
+                const isCustom = !!customImages[char.id];
                 
                 const colorMap: Record<string, string> = {
                     'red': 'border-red-600 bg-red-950/40 hover:bg-red-900/60 shadow-red-900/20',
@@ -58,7 +224,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                     <div 
                         key={char.id} 
                         className={`${baseClass} ${colorClass}`}
-                        onClick={() => isUnlocked && onSelect(char)}
+                        onClick={() => isUnlocked && handleCharSelect(char)}
                     >
                         {!isUnlocked && (
                             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 z-20 rounded-xl">
@@ -70,11 +236,37 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
 
                         <div className="w-24 h-24 mb-4 relative drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
                              <img 
-                                src={char.imageData} 
+                                src={charImage} 
                                 alt={char.name} 
-                                className="w-full h-full pixel-art" 
-                                style={{ imageRendering: 'pixelated' }}
+                                className={`w-full h-full ${isCustom ? 'rounded-xl' : 'pixel-art'}`} 
+                                style={{ imageRendering: isCustom ? 'auto' : 'pixelated' }}
                              />
+                             {isUnlocked && (
+                                <button 
+                                  onClick={(e) => { e.stopPropagation(); startCamera(char.id); }}
+                                  className="absolute -bottom-2 -right-2 bg-indigo-600 p-1.5 rounded-full border-2 border-white shadow-lg hover:bg-indigo-500 transition-colors"
+                                  title="写真を撮る"
+                                >
+                                  <Camera size={14} />
+                                </button>
+                             )}
+                             {isCustom && (
+                                <button 
+                                  onClick={(e) => { 
+                                    e.stopPropagation(); 
+                                    setCustomImages(prev => {
+                                      const next = {...prev};
+                                      delete next[char.id];
+                                      return next;
+                                    });
+                                    audioService.playSound('select');
+                                  }}
+                                  className="absolute -top-2 -left-2 bg-red-600 p-1 rounded-full border-2 border-white shadow-lg hover:bg-red-500 transition-colors"
+                                  title="リセット"
+                                >
+                                  <RefreshCw size={12} />
+                                </button>
+                             )}
                         </div>
 
                         <div className="w-full flex justify-between items-center mb-3 border-b-2 border-white/10 pb-2">

@@ -18,6 +18,19 @@ const GARDENER_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24
 
 export const HERO_IMAGE_DATA = `data:image/svg+xml;base64,${btoa(WARRIOR_SVG)}`;
 
+// --- PHOTO CAPTURE ACCESSORIES ---
+export const CHARACTER_ACCESSORIES: Record<string, string> = {
+    WARRIOR: `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges"><path d="M8 2h8v2H8z" fill="#f44336"/><path d="M7 4h10v2H7z" fill="#d32f2f"/><path d="M7 6h2v1H7z" fill="#f44336"/></svg>`)}`,
+    CARETAKER: `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges"><path d="M7 3h10v3H7z" fill="#795548"/><path d="M6 4h1v3H6zM17 4h1v3h-1z" fill="#795548"/></svg>`)}`,
+    ASSASSIN: `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges"><path d="M8 3h8v3h-1v1h-6v-1H8z" fill="#212121"/></svg>`)}`,
+    MAGE: `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges"><path d="M8 3h8v2H8z" fill="#5d4037"/><path d="M10 7h1v1h-1zM13 7h1v1h-1z" fill="#3e2723"/></svg>`)}`,
+    DODGEBALL: `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges"><path d="M8 5h8v1H8z" fill="#ffffff"/><path d="M20 5h2v4h-2z" fill="#ffffff"/></svg>`)}`,
+    BARD: `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges"><path d="M8 3h8v2H8z" fill="#ec407a"/><path d="M6 4h2v5H6zM16 4h2v5h-2z" fill="#ec407a"/></svg>`)}`,
+    LIBRARIAN: `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges"><path d="M7 3h10v4H7z" fill="#3f51b5"/><path d="M6 4h1v5H6z" fill="#3f51b5"/><path d="M17 4h1v5h-1z" fill="#3f51b5"/></svg>`)}`,
+    CHEF: `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges"><path d="M8 1h8v4H8z" fill="#ffffff"/></svg>`)}`,
+    GARDENER: `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges"><path d="M6 3h12v2H6z" fill="#fdd835"/><path d="M5 5h14v1H5z" fill="#fbc02d"/></svg>`)}`,
+};
+
 // --- GARDENER SEEDS & PLANTS (50 TYPES) ---
 
 export const GARDEN_SEEDS: Record<string, Omit<Card, 'id'>> = {

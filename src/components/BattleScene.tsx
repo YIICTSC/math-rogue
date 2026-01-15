@@ -96,10 +96,20 @@ const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: string }
             {activeOnThisTarget.map(vfx => (
                 <div key={vfx.id} className="absolute inset-0 flex items-center justify-center">
                     {vfx.type === 'SLASH' && (
-                        <div className="w-48 h-2 bg-gradient-to-r from-transparent via-white to-transparent rotate-45 animate-slash-vfx shadow-[0_0_20px_rgba(255,255,255,0.8)]"></div>
+                        <div 
+                            className="w-48 h-2 bg-gradient-to-r from-transparent via-white to-transparent animate-slash-vfx shadow-[0_0_20px_rgba(255,255,255,0.8)]"
+                            style={{ 
+                                transform: `rotate(${vfx.rotation !== undefined ? vfx.rotation : 45}deg)`,
+                                animationDelay: `${vfx.delay || 0}ms`,
+                                animationFillMode: 'both'
+                            }}
+                        ></div>
                     )}
                     {vfx.type === 'BLOCK' && (
-                        <div className="relative flex items-center justify-center">
+                        <div 
+                            className="relative flex items-center justify-center"
+                            style={{ animationDelay: `${vfx.delay || 0}ms`, animationFillMode: 'both' }}
+                        >
                             <div className="absolute w-32 h-32 border-4 border-blue-400 rounded-full animate-pulse-expand opacity-0"></div>
                             <div className="animate-block-vfx p-4 bg-blue-500/30 border-2 border-blue-300 rounded-lg shadow-[0_0_20px_rgba(59,130,246,0.6)]">
                                 <Shield size={48} className="text-blue-100 fill-blue-500/50" />
@@ -107,27 +117,55 @@ const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: string }
                         </div>
                     )}
                     {vfx.type === 'BUFF' && (
-                        <div className="animate-buff-vfx p-2">
+                        <div className="animate-buff-vfx p-2" style={{ animationDelay: `${vfx.delay || 0}ms`, animationFillMode: 'both' }}>
                             <Sparkles size={56} className="text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.8)]" />
                         </div>
                     )}
                     {vfx.type === 'DEBUFF' && (
-                         <div className="animate-debuff-vfx p-2">
+                         <div className="animate-debuff-vfx p-2" style={{ animationDelay: `${vfx.delay || 0}ms`, animationFillMode: 'both' }}>
                              <Skull size={56} className="text-purple-400 drop-shadow-[0_0_15px_rgba(168,85,247,0.8)]" />
                          </div>
                     )}
                     {vfx.type === 'HEAL' && (
-                        <div className="animate-heal-vfx">
+                        <div className="animate-heal-vfx" style={{ animationDelay: `${vfx.delay || 0}ms`, animationFillMode: 'both' }}>
                             <Heart size={56} className="text-green-300 fill-green-500/50 drop-shadow-[0_0_15px_rgba(34,197,94,0.8)]" />
                         </div>
                     )}
                     {vfx.type === 'FIRE' && (
-                        <div className="relative flex items-center justify-center">
+                        <div className="relative flex items-center justify-center" style={{ animationDelay: `${vfx.delay || 0}ms`, animationFillMode: 'both' }}>
                             <div className="absolute w-24 h-24 bg-orange-500/40 blur-xl animate-ping rounded-full"></div>
                             <div className="animate-fire-vfx">
                                 <Flame size={64} className="text-orange-400 fill-orange-600/50 drop-shadow-[0_0_20px_rgba(249,115,22,0.8)]" />
                             </div>
                         </div>
+                    )}
+                    {vfx.type === 'EXPLOSION' && (
+                        <div 
+                            className="w-32 h-32 bg-orange-500 rounded-full animate-explosion-vfx shadow-[0_0_40px_orange]"
+                            style={{ animationDelay: `${vfx.delay || 0}ms`, animationFillMode: 'both' }}
+                        ></div>
+                    )}
+                    {vfx.type === 'LIGHTNING' && (
+                        <div 
+                            className="w-4 h-64 bg-cyan-200 animate-lightning-vfx shadow-[0_0_30px_cyan]"
+                            style={{ 
+                                animationDelay: `${vfx.delay || 0}ms`,
+                                transform: `rotate(${vfx.rotation || 0}deg)`,
+                                animationFillMode: 'both'
+                            }}
+                        ></div>
+                    )}
+                    {vfx.type === 'CRITICAL' && (
+                        <div 
+                            className="w-64 h-64 border-8 border-yellow-400 rounded-full animate-critical-vfx"
+                            style={{ animationDelay: `${vfx.delay || 0}ms`, animationFillMode: 'both' }}
+                        ></div>
+                    )}
+                    {vfx.type === 'SHOCKWAVE' && (
+                        <div 
+                            className="w-16 h-16 border-4 border-white/50 rounded-full animate-shockwave-vfx"
+                            style={{ animationDelay: `${vfx.delay || 0}ms`, animationFillMode: 'both' }}
+                        ></div>
                     )}
                 </div>
             ))}
@@ -168,6 +206,29 @@ const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: string }
                          0% { transform: scale(0.4) translateY(20px); opacity: 0; }
                          30% { transform: scale(1.4) translateY(-10px); filter: brightness(1.5); opacity: 1; }
                          100% { transform: scale(2) translateY(-60px); filter: blur(4px); opacity: 0; }
+                    }
+                    @keyframes explosion-vfx {
+                        0% { transform: scale(0.1); opacity: 1; filter: brightness(2); }
+                        50% { transform: scale(1.5); opacity: 0.8; }
+                        100% { transform: scale(2); opacity: 0; }
+                    }
+                    @keyframes lightning-vfx {
+                        0% { transform: scaleY(0); opacity: 0; }
+                        10% { transform: scaleY(1); opacity: 1; }
+                        20% { opacity: 0; }
+                        30% { opacity: 1; }
+                        40% { opacity: 0; }
+                        50% { opacity: 1; }
+                        100% { opacity: 0; }
+                    }
+                    @keyframes critical-vfx {
+                        0% { transform: scale(0.5); opacity: 0; border-width: 20px; }
+                        20% { transform: scale(1.2); opacity: 1; border-width: 10px; }
+                        100% { transform: scale(1.5); opacity: 0; border-width: 1px; }
+                    }
+                    @keyframes shockwave-vfx {
+                        0% { transform: scale(1); opacity: 1; border-width: 10px; }
+                        100% { transform: scale(4); opacity: 0; border-width: 1px; }
                     }
                     @keyframes screen-shake {
                         0% { transform: translate(0, 0); }
@@ -260,22 +321,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   // Screen shake on action or damage
   useEffect(() => {
     if (activeEffects.length > 0) {
-        // Only shake for specific high-impact effects (SLASH and FIRE)
-        // BLOCK is no longer included in impact to prevent unwanted shake
-        const hasImpact = activeEffects.some(e => e.type === 'SLASH' || e.type === 'FIRE');
-        if (hasImpact) {
-            setIsShaking(true);
-            const timer = setTimeout(() => setIsShaking(false), 400);
-            return () => clearTimeout(timer);
-        }
-    }
-  }, [activeEffects]);
-
-  // Screen shake on action or damage
-  useEffect(() => {
-    if (activeEffects.length > 0) {
-        // Only shake for specific high-impact effects
-        const hasImpact = activeEffects.some(e => e.type === 'SLASH' || e.type === 'FIRE');
+        // Only shake for specific high-impact effects (SLASH, FIRE, EXPLOSION, LIGHTNING, CRITICAL)
+        const hasImpact = activeEffects.some(e => ['SLASH', 'FIRE', 'EXPLOSION', 'LIGHTNING', 'CRITICAL'].includes(e.type));
         if (hasImpact) {
             setIsShaking(true);
             const timer = setTimeout(() => setIsShaking(false), 400);
