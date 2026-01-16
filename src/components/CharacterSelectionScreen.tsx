@@ -5,6 +5,7 @@ import { Lock, Heart, Coins, Gem, ArrowRight, Swords, Shield, Zap, Sparkles, Bra
 import { RELIC_LIBRARY, CARDS_LIBRARY, CHARACTER_ACCESSORIES } from '../constants';
 import { trans } from '../utils/textUtils';
 import { audioService } from '../services/audioService';
+import { storageService } from '../services/storageService';
 
 interface CharacterSelectionScreenProps {
   characters: Character[];
@@ -22,6 +23,12 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // 初回マウント時に保存されている画像を読み込む
+  useEffect(() => {
+    const savedImages = storageService.getCustomImages();
+    setCustomImages(savedImages);
+  }, []);
 
   // カメラを停止する
   const stopCamera = () => {
@@ -91,7 +98,11 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
         audioService.playSound('attack');
         
         const dataUrl = canvas.toDataURL('image/png');
+        
+        // 保存処理
         setCustomImages(prev => ({ ...prev, [activeCharId]: dataUrl }));
+        storageService.saveCustomImage(activeCharId, dataUrl);
+        
         handleCloseCamera();
       }
     }
@@ -112,12 +123,23 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
     onSelect(finalChar);
   };
 
+  const handleResetImage = (e: React.MouseEvent, charId: string) => {
+    e.stopPropagation();
+    setCustomImages(prev => {
+        const next = {...prev};
+        delete next[charId];
+        return next;
+    });
+    storageService.clearCustomImage(charId);
+    audioService.playSound('select');
+  };
+
   return (
     <div className="flex flex-col h-full w-full bg-gray-900 text-white relative overflow-hidden">
       
       {/* Camera Modal */}
       {showCamera && (
-        <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="bg-gray-800 border-4 border-white p-6 rounded-3xl w-full max-w-sm shadow-[0_0_50px_rgba(255,255,255,0.3)] relative flex flex-col items-center">
             <button onClick={handleCloseCamera} className="absolute -top-4 -right-4 bg-red-600 border-2 border-white p-2 rounded-full hover:bg-red-500 transition-colors">
               <X size={24} />
@@ -176,7 +198,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                 </button>
             </div>
             
-            <p className="text-[10px] text-gray-500 mt-4 font-bold italic tracking-tighter">CHARACTER PHOTO CAPTURE SYSTEM v2.0</p>
+            <p className="text-[10px] text-gray-500 mt-4 font-bold italic tracking-tighter">CHARACTER PHOTO CAPTURE SYSTEM v2.1</p>
           </div>
         </div>
       )}
@@ -252,15 +274,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                              )}
                              {isCustom && (
                                 <button 
-                                  onClick={(e) => { 
-                                    e.stopPropagation(); 
-                                    setCustomImages(prev => {
-                                      const next = {...prev};
-                                      delete next[char.id];
-                                      return next;
-                                    });
-                                    audioService.playSound('select');
-                                  }}
+                                  onClick={(e) => handleResetImage(e, char.id)}
                                   className="absolute -top-2 -left-2 bg-red-600 p-1 rounded-full border-2 border-white shadow-lg hover:bg-red-500 transition-colors"
                                   title="リセット"
                                 >
