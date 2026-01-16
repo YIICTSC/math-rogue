@@ -206,6 +206,12 @@ export interface Player {
   codexBuffer?: Card[]; // 秘密の攻略本用
 }
 
+export interface ActStats {
+    enemiesDefeated: number;
+    goldGained: number;
+    mathCorrect: number;
+}
+
 export enum GameScreen {
   START_MENU = 'START_MENU',
   DEBUG_MENU = 'DEBUG_MENU', 
@@ -241,7 +247,8 @@ export enum GameScreen {
   MINI_GAME_KOCHO = 'MINI_GAME_KOCHO',
   MINI_GAME_PAPER_PLANE = 'MINI_GAME_PAPER_PLANE',
   PROBLEM_CHALLENGE = 'PROBLEM_CHALLENGE',
-  GARDEN = 'GARDEN'
+  GARDEN = 'GARDEN',
+  FLOOR_RESULT = 'FLOOR_RESULT'
 }
 
 export enum GameMode {
@@ -517,4 +524,6 @@ export interface GameState {
   parryState?: ParryState;
   activeEffects: VisualEffectInstance[];
   vsOpponent?: Player; // 対戦相手のデータ
+  currentStoryIndex?: number;
+  actStats?: ActStats;
 }

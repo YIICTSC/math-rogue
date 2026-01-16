@@ -2,14 +2,16 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
-  CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode, LanguageMode, VisualEffectInstance, GardenSlot, VFXType
+  CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode, LanguageMode, VisualEffectInstance, GardenSlot, VFXType, ActStats
 } from './types';
 import { 
   INITIAL_HP, INITIAL_ENERGY, HAND_SIZE, 
   CARDS_LIBRARY, STARTING_DECK_TEMPLATE, STATUS_CARDS, CURSE_CARDS, EVENT_CARDS, RELIC_LIBRARY, TRUE_BOSS, POTION_LIBRARY, CHARACTERS, HERO_IMAGE_DATA, ENEMY_LIBRARY, LIBRARIAN_CARDS, GROWN_PLANTS, GARDEN_SEEDS
 } from './constants';
+import { GAME_STORIES } from './data/stories';
 import BattleScene from './components/BattleScene';
 import RewardScreen from './components/RewardScreen';
+import FloorResultScreen from './components/FloorResultScreen';
 import MapScreen from './components/MapScreen';
 import RestScreen from './components/RestScreen';
 import ShopScreen from './components/ShopScreen';
@@ -170,7 +172,6 @@ const App: React.FC = () => {
   const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
   // --- HELPER: CARD POOL FILTERING ---
-  // 特定キャラクター専用のカードや種カードを、他のキャラが引けないようにするための共通フィルター
   const getFilteredCardPool = (playerId: string | undefined, includeSpecial: boolean = false): ICard[] => {
     const isLibrarian = playerId === 'LIBRARIAN';
     const isGardener = playerId === 'GARDENER';
@@ -243,7 +244,9 @@ const App: React.FC = () => {
     selectionState: { active: false, type: 'DISCARD', amount: 0 },
     isEndless: false,
     parryState: { active: false, enemyId: null, success: false },
-    activeEffects: []
+    activeEffects: [],
+    currentStoryIndex: 0,
+    actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
   });
 
   const [languageMode, setLanguageMode] = useState<LanguageMode>(() => storageService.getLanguageMode() || 'JAPANESE');
@@ -366,7 +369,8 @@ const App: React.FC = () => {
         gameState.screen !== GameScreen.MINI_GAME_PAPER_PLANE &&
         gameState.screen !== GameScreen.PROBLEM_CHALLENGE &&
         gameState.screen !== GameScreen.VS_SETUP &&
-        gameState.screen !== GameScreen.VS_BATTLE
+        gameState.screen !== GameScreen.VS_BATTLE &&
+        gameState.screen !== GameScreen.FLOOR_RESULT
     ) {
         storageService.saveGame(gameState);
     }
@@ -497,7 +501,9 @@ const App: React.FC = () => {
       setGameState(prev => ({ 
           ...prev, 
           screen: GameScreen.MODE_SELECTION,
-          challengeMode: undefined 
+          challengeMode: undefined,
+          currentStoryIndex: Math.floor(Math.random() * GAME_STORIES.length),
+          actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
       }));
   };
 
@@ -508,7 +514,7 @@ const App: React.FC = () => {
           return;
       }
       audioService.playSound('select');
-      setGameState(prev => ({ ...prev, screen: GameScreen.MODE_SELECTION, challengeMode: '1A1D' }));
+      setGameState(prev => ({ ...prev, screen: GameScreen.MODE_SELECTION, challengeMode: '1A1D', currentStoryIndex: Math.floor(Math.random() * GAME_STORIES.length), actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 } }));
   };
 
   const startProblemChallenge = (e?: React.MouseEvent) => {
@@ -567,7 +573,8 @@ const App: React.FC = () => {
               ...prev.player,
               currentHp: prev.player.maxHp
           },
-          narrativeLog: [...prev.narrativeLog, trans("終わらない冒険が始まる...", languageMode)]
+          narrativeLog: [...prev.narrativeLog, trans("終わらない冒険が始まる...", languageMode)],
+          actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
       }));
   };
 
@@ -624,7 +631,9 @@ const App: React.FC = () => {
             selectedEnemyId: null,
             rewards: [],
             selectionState: { active: false, type: 'DISCARD', amount: 0 },
-            activeEffects: []
+            activeEffects: [],
+            currentStoryIndex: 0,
+            actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
         }));
         audioService.playBGM('map');
   };
@@ -697,7 +706,8 @@ const App: React.FC = () => {
           combatLog: ["> ボスとの決戦開始！"],
           rewards: [],
           selectionState: { active: false, type: 'DISCARD', amount: 0 },
-          activeEffects: []
+          activeEffects: [],
+          actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
       };
 
       setGameState(combatState);
@@ -1614,6 +1624,9 @@ const App: React.FC = () => {
                     }
                     if (e.currentHp <= 0) {
                          currentLogs.push(`${trans(e.name, languageMode)}${trans("を倒した！", languageMode)}`);
+                         // Stats increment
+                         prev.actStats.enemiesDefeated++;
+
                          if (card.fatalEnergy) p.currentEnergy += card.fatalEnergy;
                          if (card.fatalPermanentDamage) {
                              const deckCard = p.deck.find(c => c.id === card.id);
@@ -2687,30 +2700,13 @@ const App: React.FC = () => {
                 slot.plantedCard ? { ...slot, growth: Math.min(slot.maxGrowth, slot.growth + 1) } : slot
             );
         }
+        
+        // エリアボス撃破後、リザルト画面へ遷移
         if (currentNode && currentNode.type === NodeType.BOSS) {
-            if (prev.act === 3) {
-                return { ...prev, player: nextPlayer, screen: GameScreen.FINAL_BRIDGE };
-            }
-            // 第4章のボス撃破後は直接エンディングへ
-            if (prev.act >= 4) {
-                return { ...prev, player: nextPlayer, screen: GameScreen.ENDING };
-            }
-            const nextAct = prev.act + 1;
-            const newMap = generateDungeonMap();
-            audioService.playBGM('map');
-            const isGardener = nextPlayer.id === 'GARDENER';
             return {
                 ...prev,
-                act: nextAct,
-                floor: 0,
-                map: newMap,
-                currentMapNodeId: null,
-                screen: isGardener ? GameScreen.GARDEN : GameScreen.MAP,
-                player: {
-                    ...nextPlayer,
-                    currentHp: nextPlayer.maxHp 
-                },
-                narrativeLog: [...prev.narrativeLog, trans(`第${nextAct}章へ進んだ。体力が全回復した！`, languageMode)]
+                player: nextPlayer,
+                screen: GameScreen.FLOOR_RESULT
             };
         } else {
             const newMap = prev.map.map(n => {
@@ -2737,6 +2733,7 @@ const App: React.FC = () => {
           let goldReward = bonusGold;
           if (gameState.player.relics.find(r => r.id === 'GOLDEN_IDOL')) goldReward = Math.floor(goldReward * 1.25);
           rewards.push({ type: 'GOLD', value: goldReward, id: `rew-gold-${Date.now()}` });
+          setGameState(prev => ({ ...prev, actStats: { ...prev.actStats!, goldGained: prev.actStats!.goldGained + goldReward } }));
       }
 
       const allPossibleCards = getFilteredCardPool(gameState.player.id);
@@ -2777,7 +2774,9 @@ const App: React.FC = () => {
               rewards.push({ type: 'RELIC', value: relic, id: `rew-relic-${Date.now()}` });
           }
           if (currentNode.type === NodeType.BOSS) {
-               rewards.push({ type: 'GOLD', value: 100, id: `rew-gold-boss-${Date.now()}` });
+               const goldBoss = 100;
+               rewards.push({ type: 'GOLD', value: goldBoss, id: `rew-gold-boss-${Date.now()}` });
+               setGameState(prev => ({ ...prev, actStats: { ...prev.actStats!, goldGained: prev.actStats!.goldGained + goldBoss } }));
           }
       }
       setGameState(prev => ({ ...prev, screen: GameScreen.REWARD, rewards }));
@@ -2803,6 +2802,7 @@ const App: React.FC = () => {
           }
       }
       setTotalMathCorrect(prev => prev + correctCount);
+      setGameState(prev => ({ ...prev, actStats: { ...prev.actStats!, mathCorrect: prev.actStats!.mathCorrect + correctCount } }));
       goToRewardPhase(bonusGold);
   };
 
@@ -2855,6 +2855,32 @@ const App: React.FC = () => {
               deck: prev.player.deck.map(c => c.id === card.id ? upgraded : c) 
           } 
       }));
+  };
+
+  const handleNextActFromStory = () => {
+      setGameState(prev => {
+          if (prev.act === 3) {
+              return { ...prev, screen: GameScreen.FINAL_BRIDGE };
+          }
+          const nextAct = prev.act + 1;
+          const newMap = generateDungeonMap();
+          audioService.playBGM('map');
+          const isGardener = prev.player.id === 'GARDENER';
+          return {
+              ...prev,
+              act: nextAct,
+              floor: 0,
+              map: newMap,
+              currentMapNodeId: null,
+              screen: isGardener ? GameScreen.GARDEN : GameScreen.MAP,
+              player: {
+                  ...prev.player,
+                  currentHp: prev.player.maxHp 
+              },
+              narrativeLog: [...prev.narrativeLog, trans(`第${nextAct}章へ進んだ。体力が全回復した！`, languageMode)],
+              actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
+          };
+      });
   };
 
   return (
@@ -3019,6 +3045,18 @@ const App: React.FC = () => {
                             </button>
                         </div>
                     </div>
+                </div>
+            )}
+
+            {gameState.screen === GameScreen.FLOOR_RESULT && (
+                <div className="absolute inset-0">
+                    <FloorResultScreen 
+                        act={gameState.act}
+                        stats={gameState.actStats!}
+                        storyIndex={gameState.currentStoryIndex || 0}
+                        onNext={handleNextActFromStory}
+                        languageMode={languageMode}
+                    />
                 </div>
             )}
 
