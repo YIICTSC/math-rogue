@@ -1167,7 +1167,7 @@ const App: React.FC = () => {
             }
 
             const rewards: RewardItem[] = [];
-            const allRelics = Object.values(RELIC_LIBRARY).filter(r => ['COMMON', 'UNCOMMON', 'RARE'].includes(r.rarity));
+            const allRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'COMMON' || r.rarity === 'UNCOMMON' || r.rarity === 'RARE');
             
             for(let i=0; i<numRelics; i++) {
                 rewards.push({ type: 'RELIC', value: shuffle([...allRelics])[0], id: `tr-relic-${Date.now()}-${i}` });
@@ -1282,7 +1282,7 @@ const App: React.FC = () => {
           } else if (potion.templateId === 'STRENGTH_POTION') {
               p.strength += 2;
               newLogs.push(`${trans("ムキムキ", languageMode)}+2`);
-              nextActiveEffects.push({ id: `vfx-pot-buff-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+              nextActiveEffects.push({ id: `vfx-pot-zap-${Date.now()}`, type: 'BUFF', targetId: 'player' });
           } else if (potion.templateId === 'ENERGY_POTION') {
               p.currentEnergy += 2;
               newLogs.push(`${trans("エネルギー", languageMode)}+2`);
@@ -2630,7 +2630,8 @@ const App: React.FC = () => {
                         currentHp: Math.min(nextPlayer.partner.maxHp, nextPlayer.partner.currentHp + 5) 
                     };
                 }
-                if (prev.act === 4) {
+                // エンドレスモードでない場合のみエンディングへ遷移
+                if (prev.act === 4 && !prev.isEndless) {
                     audioService.playBGM('victory');
                     return { ...prev, player: nextPlayer, screen: GameScreen.ENDING };
                 } else {
@@ -2703,6 +2704,29 @@ const App: React.FC = () => {
         
         // エリアボス撃破後、リザルト画面へ遷移
         if (currentNode && currentNode.type === NodeType.BOSS) {
+            // エンドレスモード時はストーリーリザルト画面をスキップして直接次のアクトへ
+            if (prev.isEndless) {
+                const nextAct = prev.act + 1;
+                const newMap = generateDungeonMap();
+                audioService.playBGM('map');
+                const isGardener = nextPlayer.id === 'GARDENER';
+                
+                return {
+                    ...prev,
+                    act: nextAct,
+                    floor: 0,
+                    map: newMap,
+                    currentMapNodeId: null,
+                    screen: isGardener ? GameScreen.GARDEN : GameScreen.MAP,
+                    player: {
+                        ...nextPlayer,
+                        currentHp: nextPlayer.maxHp 
+                    },
+                    narrativeLog: [...prev.narrativeLog, trans(`第${nextAct}章へ進んだ。体力が全回復した！`, languageMode)],
+                    actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
+                };
+            }
+
             return {
                 ...prev,
                 player: nextPlayer,
@@ -2727,7 +2751,7 @@ const App: React.FC = () => {
 
   const goToRewardPhase = (bonusGold: number = 0) => {
       const rewards: RewardItem[] = [];
-      const isLibrarian = gameState.player.id === 'LIBRARIAN';
+      const isLibrarian = gameState.player.id === 'LIBRARian';
       const isGardener = gameState.player.id === 'GARDENER';
       if (bonusGold > 0) {
           let goldReward = bonusGold;
@@ -2859,7 +2883,8 @@ const App: React.FC = () => {
 
   const handleNextActFromStory = () => {
       setGameState(prev => {
-          if (prev.act === 3) {
+          // エンドレスモード時は Final Bridge に行かない
+          if (prev.act === 3 && !prev.isEndless) {
               return { ...prev, screen: GameScreen.FINAL_BRIDGE };
           }
           const nextAct = prev.act + 1;
