@@ -907,13 +907,22 @@ const App: React.FC = () => {
             let enemies: Enemy[] = [];
             let bgmType: 'battle' | 'mid_boss' | 'boss' | 'final_boss' = 'battle'; 
 
+            // デッキ内の最大ダメージ値を計算
+            const maxAtkDmg = Math.max(...nextState.player.deck.filter(c => c.type === CardType.ATTACK).map(c => c.damage || 0), 0);
+
             if (gameState.act === 4 && node.type === NodeType.BOSS) {
+                // ラスボス (The Heart)
+                let finalHeartHp = TRUE_BOSS.maxHp;
+                if (maxAtkDmg > finalHeartHp) {
+                    finalHeartHp = Math.ceil(maxAtkDmg * 6);
+                }
+
                 enemies.push({
                     id: 'true-boss',
                     enemyType: 'THE_HEART',
                     name: TRUE_BOSS.name,
-                    maxHp: TRUE_BOSS.maxHp,
-                    currentHp: isDebugHpOne ? 1 : TRUE_BOSS.maxHp,
+                    maxHp: finalHeartHp,
+                    currentHp: isDebugHpOne ? 1 : finalHeartHp,
                     block: 0,
                     strength: 0,
                     nextIntent: { type: EnemyIntentType.BUFF, value: 0 },
@@ -933,7 +942,14 @@ const App: React.FC = () => {
             if (enemies.length === 0) {
                 const numEnemies = node.type === NodeType.BOSS ? 1 : Math.floor(Math.random() * Math.min(3, 1 + Math.floor(node.y / 3))) + 1;
                 for (let i = 0; i < numEnemies; i++) {
-                    const baseHp = (node.type === NodeType.BOSS ? 150 : 20) * actMultiplier + floorDifficulty * 2 + (node.type === NodeType.ELITE ? 40 : 0);
+                    let baseHp = (node.type === NodeType.BOSS ? 150 : 20) * actMultiplier + floorDifficulty * 2 + (node.type === NodeType.ELITE ? 40 : 0);
+                    
+                    // 階層ボス(Actボス)のHP強化ロジック
+                    if (node.type === NodeType.BOSS && maxAtkDmg > baseHp) {
+                        const multiplier = 2 + gameState.act; // Act 1=2x, Act 2=3x, Act 3=4x
+                        baseHp = Math.ceil(maxAtkDmg * multiplier);
+                    }
+
                     const name = await generateEnemyName(node.y);
                     const isBoss = node.type === NodeType.BOSS;
                     
@@ -1503,7 +1519,7 @@ const App: React.FC = () => {
           const hitsToLog = Math.min(hits, 10);
 
           for (let h = 0; h < hits; h++) {
-              const hitDelay = (act * hits + h) * 120; // Stagger hits visually
+              const hitDelay = (act * hits + h) * 80; // Stagger hits visually
 
               if (enemies.every(e => e.currentHp <= 0)) break;
               let targets: Enemy[] = [];
@@ -1930,7 +1946,7 @@ const App: React.FC = () => {
     // Increased duration to allow multi-hit VFX to finish
     setTimeout(() => {
         setGameState(prev => ({ ...prev, activeEffects: [] }));
-    }, 2000);
+    }, 1200);
   };
 
   const startPlayerTurn = () => {
