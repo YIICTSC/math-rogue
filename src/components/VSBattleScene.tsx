@@ -5,8 +5,9 @@ import Card from './Card';
 import { trans } from '../utils/textUtils';
 import { audioService } from '../services/audioService';
 import { storageService } from '../services/storageService';
-import { CHARACTERS } from '../constants';
-import { Heart, Shield, Zap, Swords, RotateCcw, Trophy, Skull, User, ArrowRight, Home, AlertCircle, TrendingDown, Droplets, Sword, Hexagon, Radiation } from 'lucide-react';
+import { CHARACTERS, CARDS_LIBRARY } from '../constants';
+import { getUpgradedCard } from '../utils/cardUtils';
+import { Heart, Shield, Zap, Swords, RotateCcw, Trophy, Skull, User, ArrowRight, Home, AlertCircle, TrendingDown, Droplets, Sword, Hexagon, Radiation, Activity, ShieldPlus, Flame } from 'lucide-react';
 
 interface VSBattleSceneProps {
     player1: Player; // 自分
@@ -38,7 +39,14 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
             hand: hand,
             drawPile: drawPile,
             discardPile: [],
-            powers: { ...p.powers }
+            powers: { ...p.powers },
+            cardsPlayedThisTurn: 0,
+            attacksPlayedThisTurn: 0,
+            typesPlayedThisTurn: [],
+            relicCounters: { ...p.relicCounters },
+            nextTurnEnergy: 0,
+            nextTurnDraw: 0,
+            turnFlags: {}
         };
     }
 
@@ -76,7 +84,6 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
     const handlePlayCard = (card: ICard, owner: 1 | 2) => {
         if (turnOwner !== owner || isAnimating || phase !== 'BATTLE') return;
 
-        // --- 先行1ターン目の制約 (より厳密にチェック) ---
         const isAttack = card.type === CardType.ATTACK || String(card.type) === 'ATTACK';
         if (owner === 1 && turnCount === 1 && isAttack) {
             audioService.playSound('wrong');
@@ -95,51 +102,76 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
         setIsAnimating(true);
         audioService.playSound(isAttack ? 'attack' : 'block');
 
-        let nextCurrent = { ...current, powers: { ...current.powers } };
+        let nextCurrent = { ...current, powers: { ...current.powers }, relicCounters: { ...current.relicCounters } };
         let nextTarget = { ...target, powers: { ...target.powers } };
 
         nextCurrent.currentEnergy -= card.cost;
         nextCurrent.hand = nextCurrent.hand.filter(c => c.id !== card.id);
-        nextCurrent.discardPile.push(card);
+        nextCurrent.cardsPlayedThisTurn++;
+        
+        if (!nextCurrent.typesPlayedThisTurn.includes(card.type)) {
+            nextCurrent.typesPlayedThisTurn.push(card.type);
+        }
+        
+        if (isAttack) {
+            nextCurrent.attacksPlayedThisTurn++;
+        }
 
-        // --- ダメージ計算ロジック ---
-        if (card.damage !== undefined || card.damageBasedOnBlock) {
-            let baseDmg = card.damage || 0;
-            if (card.damageBasedOnBlock) baseDmg += nextCurrent.block;
+        addLog(`${owner === 1 ? 'P1' : 'P2'}が${card.name}を使用`);
 
-            // 筋力（ムキムキ）
-            baseDmg += (nextCurrent.strength || 0);
-            if (nextCurrent.powers['STRENGTH']) baseDmg += nextCurrent.powers['STRENGTH'];
+        // 多段ヒット
+        let hits = 1;
+        if (card.playCopies) hits += card.playCopies;
+        if (card.hitsPerSkillInHand) hits = nextCurrent.hand.filter(c => c.type === CardType.SKILL).length;
+        if (card.hitsPerAttackPlayed) hits = nextCurrent.attacksPlayedThisTurn;
 
-            let finalDmg = baseDmg;
+        for (let h = 0; h < hits; h++) {
+            if (card.damage !== undefined || card.damageBasedOnBlock || card.damagePerCardInHand || card.damagePerAttackPlayed || card.damagePerStrike || card.damagePerCardInDraw) {
+                let baseDmg = card.damage || 0;
+                if (card.damageBasedOnBlock) baseDmg += nextCurrent.block;
+                if (card.damagePerCardInHand) baseDmg += nextCurrent.hand.length * card.damagePerCardInHand;
+                if (card.damagePerAttackPlayed) baseDmg += nextCurrent.attacksPlayedThisTurn * card.damagePerAttackPlayed;
+                if (card.damagePerStrike) baseDmg += nextCurrent.deck.filter(c => c.name.includes("えんぴつ攻撃")).length * card.damagePerStrike;
+                if (card.damagePerCardInDraw) baseDmg += nextCurrent.drawPile.length * card.damagePerCardInDraw;
 
-            // 弱体（へろへろ）: 与ダメージ 25% 減
-            if (nextCurrent.powers['WEAK'] && nextCurrent.powers['WEAK'] > 0) {
-                finalDmg = Math.floor(finalDmg * 0.75);
-            }
+                const strScaling = card.strengthScaling || 1;
+                baseDmg += (nextCurrent.strength + (nextCurrent.powers['STRENGTH'] || 0)) * strScaling;
 
-            // 脆弱（びくびく）: 被ダメージ 50% 増
-            if (nextTarget.powers['VULNERABLE'] && nextTarget.powers['VULNERABLE'] > 0) {
-                finalDmg = Math.floor(finalDmg * 1.5);
-            }
+                let multiplier = 1;
+                if (isAttack && nextCurrent.relics.some(r => r.id === 'PEN_NIB')) {
+                    nextCurrent.relicCounters['PEN_NIB'] = (nextCurrent.relicCounters['PEN_NIB'] || 0) + 1;
+                    if (nextCurrent.relicCounters['PEN_NIB'] >= 10) {
+                        multiplier = 2;
+                        nextCurrent.relicCounters['PEN_NIB'] = 0;
+                        addLog("ペン先の力が発動！ダメージ2倍！");
+                    }
+                }
 
-            // ブロック処理
-            const damageToReflect = finalDmg; // 反射用
-            if (nextTarget.block >= finalDmg) {
-                nextTarget.block -= finalDmg;
-                finalDmg = 0;
-            } else {
-                finalDmg -= nextTarget.block;
-                nextTarget.block = 0;
-                nextTarget.currentHp = Math.max(0, nextTarget.currentHp - finalDmg);
-            }
-            addLog(`${owner === 1 ? 'P1' : 'P2'}が${card.name}で${finalDmg}ダメ！`);
+                let finalDmg = Math.floor(baseDmg * multiplier);
+                if (nextCurrent.powers['WEAK'] > 0) finalDmg = Math.floor(finalDmg * 0.75);
+                if (nextTarget.powers['VULNERABLE'] > 0) finalDmg = Math.floor(finalDmg * 1.5);
+                if (nextTarget.powers['INTANGIBLE'] > 0) finalDmg = 1;
 
-            // トゲトゲ反射
-            if (damageToReflect > 0 && nextTarget.powers['THORNS'] && nextTarget.powers['THORNS'] > 0) {
-                const reflect = nextTarget.powers['THORNS'];
-                nextCurrent.currentHp = Math.max(0, nextCurrent.currentHp - reflect);
-                addLog(`トゲトゲで${reflect}反射ダメージ！`);
+                // ブロック計算
+                const damageBeforeBlock = finalDmg;
+                if (nextTarget.block >= finalDmg) {
+                    nextTarget.block -= finalDmg;
+                    finalDmg = 0;
+                } else {
+                    finalDmg -= nextTarget.block;
+                    nextTarget.block = 0;
+                    nextTarget.currentHp = Math.max(0, nextTarget.currentHp - finalDmg);
+                }
+
+                // 吸収（HP削った分だけ回復）
+                if (card.lifesteal && damageBeforeBlock > 0) {
+                    const actualHeal = Math.min(damageBeforeBlock, target.currentHp);
+                    nextCurrent.currentHp = Math.min(nextCurrent.maxHp, nextCurrent.currentHp + actualHeal);
+                }
+
+                if (damageBeforeBlock > 0 && nextTarget.powers['THORNS'] > 0) {
+                    nextCurrent.currentHp = Math.max(0, nextCurrent.currentHp - nextTarget.powers['THORNS']);
+                }
             }
         }
 
@@ -147,27 +179,27 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
         if (card.block) {
             let blk = card.block;
             if (nextCurrent.powers['DEXTERITY']) blk += nextCurrent.powers['DEXTERITY'];
+            if (nextCurrent.powers['FRAIL'] > 0) blk = Math.floor(blk * 0.75);
             nextCurrent.block += blk;
         }
+        if (card.doubleBlock) nextCurrent.block *= 2;
 
-        // バフ・デバフ付与
-        if (card.strength) nextCurrent.strength += card.strength;
-        if (card.weak) nextTarget = applyDebuff(nextTarget, 'WEAK', card.weak);
-        if (card.vulnerable) nextTarget = applyDebuff(nextTarget, 'VULNERABLE', card.vulnerable);
-        if (card.poison) nextTarget = applyDebuff(nextTarget, 'POISON', card.poison);
+        // 特殊効果
+        if (card.heal) nextCurrent.currentHp = Math.min(nextCurrent.maxHp, nextCurrent.currentHp + card.heal);
+        if (card.energy) nextCurrent.currentEnergy += card.energy;
         
-        if (card.applyPower) {
-            const pid = card.applyPower.id;
-            const amt = card.applyPower.amount;
-            // デバフIDのリスト
-            const debuffs = ['WEAK', 'VULNERABLE', 'POISON', 'FRAIL', 'CONFUSED'];
-            if (debuffs.includes(pid)) {
-                nextTarget = applyDebuff(nextTarget, pid, amt);
-            } else {
-                nextCurrent.powers[pid] = (nextCurrent.powers[pid] || 0) + amt;
+        if (card.selfDamage) {
+            nextCurrent.currentHp = Math.max(0, nextCurrent.currentHp - card.selfDamage);
+            // 成長痛(RUPTURE)との連動
+            if (nextCurrent.powers['RUPTURE'] > 0) {
+                nextCurrent.powers['STRENGTH'] = (nextCurrent.powers['STRENGTH'] || 0) + nextCurrent.powers['RUPTURE'];
+                addLog("成長痛！筋力が上がった！");
             }
         }
 
+        if (card.strength) nextCurrent.strength += card.strength;
+        if (card.doubleStrength) nextCurrent.strength *= 2;
+        
         if (card.draw) {
             for(let i=0; i<card.draw; i++) {
                 if (nextCurrent.drawPile.length === 0) {
@@ -178,17 +210,29 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
                 if (drawn) nextCurrent.hand.push(drawn);
             }
         }
+        
+        if (card.upgradeHand) nextCurrent.hand = nextCurrent.hand.map(c => getUpgradedCard(c));
+        if (card.nextTurnEnergy) nextCurrent.nextTurnEnergy += card.nextTurnEnergy;
+        if (card.nextTurnDraw) nextCurrent.nextTurnDraw += card.nextTurnDraw;
 
-        if (owner === 1) {
-            setP1State(nextCurrent);
-            setP2State(nextTarget);
-        } else {
-            setP2State(nextCurrent);
-            setP1State(nextTarget);
+        if (card.applyPower) {
+            const pid = card.applyPower.id;
+            const amt = card.applyPower.amount;
+            const debuffs = ['WEAK', 'VULNERABLE', 'POISON', 'FRAIL', 'CONFUSED'];
+            if (debuffs.includes(pid)) nextTarget = applyDebuff(nextTarget, pid, amt);
+            else nextCurrent.powers[pid] = (nextCurrent.powers[pid] || 0) + amt;
         }
 
-        setIsAnimating(false);
+        if (card.exhaust) {
+            nextCurrent.discardPile = nextCurrent.discardPile.filter(c => c.id !== card.id);
+        } else if (card.type !== CardType.POWER) {
+            nextCurrent.discardPile.push(card);
+        }
 
+        if (owner === 1) { setP1State(nextCurrent); setP2State(nextTarget); } 
+        else { setP2State(nextCurrent); setP1State(nextTarget); }
+
+        setIsAnimating(false);
         if (nextTarget.currentHp <= 0 || nextCurrent.currentHp <= 0) {
             if (nextTarget.currentHp <= 0) finishMatch(owner);
             else finishMatch(owner === 1 ? 2 : 1);
@@ -204,18 +248,31 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
 
         let updatedCurrent = { ...current, powers: { ...current.powers } };
         
-        // 毒ダメージ処理
-        if (updatedCurrent.powers['POISON'] && updatedCurrent.powers['POISON'] > 0) {
+        // 毒ダメージ
+        if (updatedCurrent.powers['POISON'] > 0) {
             const poisonDmg = updatedCurrent.powers['POISON'];
             updatedCurrent.currentHp = Math.max(0, updatedCurrent.currentHp - poisonDmg);
             updatedCurrent.powers['POISON']--;
-            addLog(`${owner === 1 ? 'P1' : 'P2'}は毒で${poisonDmg}ダメージ！`);
+        }
+
+        // じわじわ回復(REGEN)
+        if (updatedCurrent.powers['REGEN'] > 0) {
+            const healAmt = updatedCurrent.powers['REGEN'];
+            updatedCurrent.currentHp = Math.min(updatedCurrent.maxHp, updatedCurrent.currentHp + healAmt);
+            updatedCurrent.powers['REGEN']--;
+            addLog("再生能力で回復！");
+        }
+
+        // 金属化(METALLICIZE)
+        if (updatedCurrent.powers['METALLICIZE'] > 0) {
+            updatedCurrent.block += updatedCurrent.powers['METALLICIZE'];
+            addLog("金属化によりブロック獲得");
         }
 
         // デバフ減少
-        if (updatedCurrent.powers['WEAK']) updatedCurrent.powers['WEAK']--;
-        if (updatedCurrent.powers['VULNERABLE']) updatedCurrent.powers['VULNERABLE']--;
-        if (updatedCurrent.powers['FRAIL']) updatedCurrent.powers['FRAIL']--;
+        ['WEAK', 'VULNERABLE', 'FRAIL', 'CONFUSED'].forEach(p => {
+            if (updatedCurrent.powers[p]) updatedCurrent.powers[p]--;
+        });
 
         if (owner === 1) setP1State(updatedCurrent); else setP2State(updatedCurrent);
 
@@ -228,9 +285,16 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
 
         const processed = { ...nextToAct };
         processed.block = 0; 
-        processed.currentEnergy = processed.maxEnergy;
+        processed.currentEnergy = processed.maxEnergy + (processed.nextTurnEnergy || 0);
+        processed.nextTurnEnergy = 0;
+        processed.cardsPlayedThisTurn = 0;
+        processed.attacksPlayedThisTurn = 0;
+        processed.typesPlayedThisTurn = [];
+
+        let drawCount = 5 + (processed.nextTurnDraw || 0);
+        processed.nextTurnDraw = 0;
         
-        while(processed.hand.length < 5) {
+        while(processed.hand.length < drawCount) {
             if (processed.drawPile.length === 0) {
                 if (processed.discardPile.length === 0) break;
                 processed.drawPile = [...processed.discardPile].sort(() => Math.random() - 0.5);
@@ -242,9 +306,8 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
         }
 
         if (nextOwner === 1) setP1State(processed); else setP2State(processed);
-        
         setTurnOwner(nextOwner);
-        addLog(`${nextOwner === 1 ? 'P1' : 'P2'}のターン`);
+        addLog(`${nextOwner === 1 ? 'P1' : opponentName}のターン`);
         audioService.playSound('select');
     };
 
@@ -252,10 +315,8 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
         setWinner(matchWinner);
         setPhase('RESULT');
         audioService.playSound('win');
-
         const p1Char = CHARACTERS.find(c => c.id === player1.id)?.name || "不明";
         const p2Char = CHARACTERS.find(c => c.id === player2.id)?.name || "不明";
-
         const record: VSRecord = {
             id: `vs-${Date.now()}`,
             date: Date.now(),
@@ -270,78 +331,87 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
 
     const renderPowers = (powers: Record<string, number>, strength: number) => {
         const badges = [];
-        
-        // 筋力 (ムキムキ)
         const totalStr = strength + (powers['STRENGTH'] || 0);
         if (totalStr !== 0) {
             badges.push(
-                <div key="str" className="flex items-center bg-red-900/60 border border-red-500 rounded px-1 gap-1 text-[10px]" title="ムキムキ: 攻撃ダメージ増加">
+                <div key="str" className="flex items-center bg-red-900/60 border border-red-500 rounded px-1 gap-1 text-[10px]" title="ムキムキ">
                     <Sword size={10} className="text-red-400"/>
                     <span className="font-bold text-red-100">{totalStr}</span>
                 </div>
             );
         }
-        
-        // 敏捷 (カチカチ)
-        if (powers['DEXTERITY'] && powers['DEXTERITY'] !== 0) {
+        if (powers['DEXTERITY']) {
             badges.push(
-                <div key="dex" className="flex items-center bg-blue-900/60 border border-blue-500 rounded px-1 gap-1 text-[10px]" title="カチカチ: ブロック獲得量増加">
+                <div key="dex" className="flex items-center bg-blue-900/60 border border-blue-500 rounded px-1 gap-1 text-[10px]" title="カチカチ">
                     <Shield size={10} className="text-blue-400"/>
                     <span className="font-bold text-blue-100">{powers['DEXTERITY']}</span>
                 </div>
             );
         }
-
-        // 弱体 (へろへろ)
         if (powers['WEAK'] > 0) {
             badges.push(
-                <div key="weak" className="flex items-center bg-slate-700/60 border border-slate-400 rounded px-1 gap-1 text-[10px]" title="へろへろ: 与えるダメージ減少">
+                <div key="weak" className="flex items-center bg-slate-700/60 border border-slate-400 rounded px-1 gap-1 text-[10px]" title="へろへろ">
                     <TrendingDown size={10} className="text-slate-300"/>
                     <span className="font-bold text-slate-100">{powers['WEAK']}</span>
                 </div>
             );
         }
-
-        // 脆弱 (びくびく)
         if (powers['VULNERABLE'] > 0) {
             badges.push(
-                <div key="vul" className="flex items-center bg-pink-900/60 border border-pink-500 rounded px-1 gap-1 text-[10px]" title="びくびく: 受けるダメージ増加">
+                <div key="vul" className="flex items-center bg-pink-900/60 border border-pink-500 rounded px-1 gap-1 text-[10px]" title="びくびく">
                     <AlertCircle size={10} className="text-pink-300"/>
                     <span className="font-bold text-pink-100">{powers['VULNERABLE']}</span>
                 </div>
             );
         }
-
-        // 毒 (ドクドク)
         if (powers['POISON'] > 0) {
             badges.push(
-                <div key="psn" className="flex items-center bg-green-900/60 border border-green-500 rounded px-1 gap-1 text-[10px]" title="ドクドク: ターン終了時にダメージ">
+                <div key="psn" className="flex items-center bg-green-900/60 border border-green-500 rounded px-1 gap-1 text-[10px]" title="ドクドク">
                     <Droplets size={10} className="text-green-300"/>
                     <span className="font-bold text-green-100">{powers['POISON']}</span>
                 </div>
             );
         }
-
-        // アーティファクト (キラキラ)
         if (powers['ARTIFACT'] > 0) {
             badges.push(
-                <div key="art" className="flex items-center bg-yellow-900/60 border border-yellow-500 rounded px-1 gap-1 text-[10px]" title="キラキラ: デバフを無効化">
+                <div key="art" className="flex items-center bg-yellow-900/60 border border-yellow-500 rounded px-1 gap-1 text-[10px]" title="キラキラ">
                     <Hexagon size={10} className="text-yellow-300"/>
                     <span className="font-bold text-yellow-100">{powers['ARTIFACT']}</span>
                 </div>
             );
         }
-
-        // トゲトゲ
         if (powers['THORNS'] > 0) {
             badges.push(
-                <div key="thorns" className="flex items-center bg-orange-900/60 border border-orange-500 rounded px-1 gap-1 text-[10px]" title="トゲトゲ: 攻撃を受けた時に反撃">
+                <div key="thorns" className="flex items-center bg-orange-900/60 border border-orange-500 rounded px-1 gap-1 text-[10px]" title="トゲトゲ">
                     <Radiation size={10} className="text-orange-400"/>
                     <span className="font-bold text-orange-100">{powers['THORNS']}</span>
                 </div>
             );
         }
-
+        if (powers['REGEN'] > 0) {
+            badges.push(
+                <div key="regen" className="flex items-center bg-green-900/60 border border-green-500 rounded px-1 gap-1 text-[10px]" title="リジェネ">
+                    <Activity size={10} className="text-green-400"/>
+                    <span className="font-bold text-green-100">{powers['REGEN']}</span>
+                </div>
+            );
+        }
+        if (powers['METALLICIZE'] > 0) {
+            badges.push(
+                <div key="metal" className="flex items-center bg-blue-900/60 border border-blue-400 rounded px-1 gap-1 text-[10px]" title="金属化">
+                    <ShieldPlus size={10} className="text-blue-200"/>
+                    <span className="font-bold text-blue-100">{powers['METALLICIZE']}</span>
+                </div>
+            );
+        }
+        if (powers['RUPTURE'] > 0) {
+            badges.push(
+                <div key="rupture" className="flex items-center bg-purple-900/60 border border-purple-500 rounded px-1 gap-1 text-[10px]" title="成長痛">
+                    <Flame size={10} className="text-purple-300"/>
+                    <span className="font-bold text-purple-100">{powers['RUPTURE']}</span>
+                </div>
+            );
+        }
         return badges;
     };
 
@@ -434,31 +504,18 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
                             </div>
                         </div>
                     </div>
-
                     <div className="flex justify-center gap-2 h-44 overflow-x-auto pb-4 custom-scrollbar">
                         {p2State.hand.map(card => (
                             <div key={card.id} className="scale-90 origin-bottom transform-gpu">
-                                <Card 
-                                    card={card} 
-                                    onClick={() => handlePlayCard(card, 2)} 
-                                    disabled={turnOwner !== 2 || isAnimating || p2State.currentEnergy < card.cost}
-                                    languageMode={languageMode}
-                                />
+                                <Card card={card} onClick={() => handlePlayCard(card, 2)} disabled={turnOwner !== 2 || isAnimating || p2State.currentEnergy < card.cost} languageMode={languageMode}/>
                             </div>
                         ))}
                     </div>
-
-                    <button 
-                        onClick={() => handleEndTurn(2)}
-                        disabled={turnOwner !== 2 || isAnimating}
-                        className={`w-full py-3 rounded-xl font-bold text-lg border-2 shadow-lg transition-all ${turnOwner === 2 ? 'bg-red-600 border-white text-white animate-pulse' : 'bg-gray-800 border-gray-600 text-gray-500'}`}
-                    >
+                    <button onClick={() => handleEndTurn(2)} disabled={turnOwner !== 2 || isAnimating} className={`w-full py-3 rounded-xl font-bold text-lg border-2 shadow-lg transition-all ${turnOwner === 2 ? 'bg-red-600 border-white text-white animate-pulse' : 'bg-gray-800 border-gray-600 text-gray-500'}`}>
                         TURN END
                     </button>
                 </div>
             </div>
-
-            {/* Middle Bar */}
             <div className="h-16 bg-black flex items-center justify-between border-y-2 border-indigo-600 px-6 shrink-0 relative overflow-hidden">
                 <div className="absolute inset-0 bg-indigo-600/5 pointer-events-none"></div>
                 <div className="text-xs text-indigo-300 font-black italic tracking-widest z-10">TURN {turnCount}</div>
@@ -467,8 +524,6 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
                 </div>
                 <div className="text-xs text-indigo-400 font-black z-10">VS</div>
             </div>
-
-            {/* Player 1 Area (Bottom) */}
             <div className={`flex-1 relative transition-colors duration-300 ${turnOwner === 1 ? 'bg-blue-600/10' : 'bg-black/20'}`}>
                 <div className="absolute inset-0 p-4 flex flex-col justify-between">
                      <div className="flex justify-between items-start">
@@ -490,31 +545,18 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
                             </div>
                         </div>
                     </div>
-
                     <div className="flex justify-center gap-2 h-44 overflow-x-auto pb-4 custom-scrollbar">
                         {p1State.hand.map(card => {
-                            // 先行1ターン目のアタック禁止を視覚的に反映
                             const isAttack = card.type === CardType.ATTACK || String(card.type) === 'ATTACK';
                             const isAttackRestricted = turnCount === 1 && isAttack;
-                            
                             return (
                                 <div key={card.id} className="scale-90 origin-bottom transform-gpu">
-                                    <Card 
-                                        card={card} 
-                                        onClick={() => handlePlayCard(card, 1)} 
-                                        disabled={turnOwner !== 1 || isAnimating || p1State.currentEnergy < card.cost || isAttackRestricted}
-                                        languageMode={languageMode}
-                                    />
+                                    <Card card={card} onClick={() => handlePlayCard(card, 1)} disabled={turnOwner !== 1 || isAnimating || p1State.currentEnergy < card.cost || isAttackRestricted} languageMode={languageMode}/>
                                 </div>
                             );
                         })}
                     </div>
-
-                    <button 
-                        onClick={() => handleEndTurn(1)}
-                        disabled={turnOwner !== 1 || isAnimating}
-                        className={`w-full py-3 rounded-xl font-bold text-lg border-2 shadow-lg transition-all ${turnOwner === 1 ? 'bg-blue-600 border-white text-white animate-pulse' : 'bg-gray-800 border-gray-600 text-gray-500'}`}
-                    >
+                    <button onClick={() => handleEndTurn(1)} disabled={turnOwner !== 1 || isAnimating} className={`w-full py-3 rounded-xl font-bold text-lg border-2 shadow-lg transition-all ${turnOwner === 1 ? 'bg-blue-600 border-white text-white animate-pulse' : 'bg-gray-800 border-gray-600 text-gray-500'}`}>
                         TURN END
                     </button>
                 </div>
