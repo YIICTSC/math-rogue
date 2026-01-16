@@ -52,6 +52,9 @@ const STORAGE_KEY_LANGUAGE_MODE = 'pixel_spire_language_mode_v1';
 const STORAGE_KEY_TOTAL_PLAY_TIME = 'pixel_spire_total_play_time_v1';
 const STORAGE_KEY_DAILY_PLAY_TIME = 'pixel_spire_daily_play_time_v1';
 
+// --- CUSTOM CHARACTER IMAGES ---
+const STORAGE_KEY_CUSTOM_IMAGES = 'pixel_spire_custom_images_v1';
+
 export interface PaperPlaneProgress {
     rank: number; // Association Level (Clear Count equivalent)
     rerollCount: number; // Consumable rerolls
@@ -71,6 +74,36 @@ const getLocalDateString = () => {
 };
 
 export const storageService = {
+  // --- Custom Character Images ---
+  saveCustomImage: (charId: string, dataUrl: string) => {
+    try {
+      const current = storageService.getCustomImages();
+      current[charId] = dataUrl;
+      localStorage.setItem(STORAGE_KEY_CUSTOM_IMAGES, JSON.stringify(current));
+    } catch (e) {
+      console.warn("Failed to save custom image", e);
+    }
+  },
+
+  getCustomImages: (): Record<string, string> => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_CUSTOM_IMAGES);
+      return stored ? JSON.parse(stored) : {};
+    } catch (e) {
+      return {};
+    }
+  },
+
+  clearCustomImage: (charId: string) => {
+    try {
+      const current = storageService.getCustomImages();
+      delete current[charId];
+      localStorage.setItem(STORAGE_KEY_CUSTOM_IMAGES, JSON.stringify(current));
+    } catch (e) {
+      console.warn("Failed to clear custom image", e);
+    }
+  },
+
   // --- Unlocked Items (Cards, Relics, Potions, Enemies) ---
   
   // Cards
@@ -659,5 +692,6 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_LANGUAGE_MODE);
       localStorage.removeItem(STORAGE_KEY_TOTAL_PLAY_TIME);
       localStorage.removeItem(STORAGE_KEY_DAILY_PLAY_TIME);
+      localStorage.removeItem(STORAGE_KEY_CUSTOM_IMAGES);
   }
 };
