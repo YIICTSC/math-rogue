@@ -2691,8 +2691,11 @@ const App: React.FC = () => {
             if (prev.act === 3) {
                 return { ...prev, player: nextPlayer, screen: GameScreen.FINAL_BRIDGE };
             }
+            // 第4章のボス撃破後は直接エンディングへ
+            if (prev.act >= 4) {
+                return { ...prev, player: nextPlayer, screen: GameScreen.ENDING };
+            }
             const nextAct = prev.act + 1;
-            if (nextAct > 4) return prev;
             const newMap = generateDungeonMap();
             audioService.playBGM('map');
             const isGardener = nextPlayer.id === 'GARDENER';
