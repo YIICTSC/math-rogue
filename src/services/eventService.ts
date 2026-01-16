@@ -1,8 +1,8 @@
-
-import { Player, GameState, GameScreen, CardType } from '../types';
+import { Player, GameState, GameScreen, CardType, Card } from '../types';
 import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY, CURSE_CARDS, EVENT_CARDS, STATUS_CARDS } from '../constants';
 import { trans } from '../utils/textUtils';
 import { LanguageMode } from '../types';
+import { storageService } from './storageService';
 
 interface EventOption {
     label: string;
@@ -30,6 +30,42 @@ const getCharacterType = (player: Player): string | null => {
     if (relics.includes('SEED_PACK')) return 'GARDENER';
     return null;
 };
+
+/**
+ * 前回のプレイから引き継いだカードを取得するための特別なイベント
+ */
+export const generateLegacyEvent = (
+    card: Card,
+    setGameState: React.Dispatch<React.SetStateAction<GameState>>,
+    setEventResultLog: (log: string | null) => void,
+    languageMode: LanguageMode
+): GameEvent => ({
+    title: "忘れ物",
+    description: `校庭の隅に、誰かが落としたと思われるカード「${trans(card.name, languageMode)}」が落ちている。\nこれは以前ここを冒険した生徒の持ち物かもしれない...。`,
+    options: [
+        {
+            label: "ひろう",
+            text: "カードをデッキに加える",
+            action: () => {
+                setGameState(prev => ({
+                    ...prev,
+                    player: { ...prev.player, deck: [...prev.player.deck, { ...card, id: `legacy-${Date.now()}` }] }
+                }));
+                // ユーザー要望により、ここでは clearLegacyCard を呼ばない。
+                // 次に別のカードを継承するまで、このデータは保持される。
+                setEventResultLog(trans(`「${card.name}」を拾い、大切にランドセルにしまった。`, languageMode));
+            }
+        },
+        {
+            label: "そのままにする",
+            text: "ひろわずに進む",
+            action: () => {
+                // 拾わなかった場合も、データは消さずに保持する（次の冒険の時にまた出る可能性がある）
+                setEventResultLog(trans("自分には必要ないと判断し、そのまま通り過ぎた。またいつか誰かが拾うだろう。", languageMode));
+            }
+        }
+    ]
+});
 
 export const generateEvent = (
     player: Player,
@@ -297,7 +333,7 @@ export const generateEvent = (
             title: "魔の掃除時間",
             description: "廊下のワックスがけの時間だ。\nツルツル滑る床は危険だが、滑れば速く移動できるかも？",
             options: [
-                { label: "滑る", text: "カード強化。HP-5。", action: () => {
+                { label: "滑る", text: "カード強化. HP-5。", action: () => {
                     damagePlayer(5);
                     const deck = [...player.deck];
                     const upgradeable = deck.filter(c => !c.upgraded);
@@ -388,7 +424,7 @@ export const generateEvent = (
                     setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 5, currentHp: Math.max(1, prev.player.currentHp - 5) } }));
                     setEventResultLog(trans("なんとか耐え抜いた！精神力が鍛えられた。\n最大HP+5, HP-5。", languageMode));
                 }},
-                { label: "座る", text: "HP全回復。呪い「ドジ」入手。", action: () => {
+                { label: "座る", text: "HP全回復. 呪い「ドジ」入手。", action: () => {
                     setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: prev.player.maxHp } }));
                     addCard(CURSE_CARDS.CLUMSINESS);
                     setEventResultLog(trans("こっそり座って休んだ。HP全回復。\n先生に見つかって怒られた。呪い「ドジ」を入手。", languageMode));
@@ -506,7 +542,7 @@ export const generateEvent = (
                     const deck = [...player.deck];
                     const target = deck.find(c => c.type === CardType.ATTACK && !c.upgraded);
                     if (target) {
-                        const newDeck = deck.map(c => c.id === target.id ? { ...c, upgraded: true, damage: c.damage ? Math.floor(c.damage*1.3)+2 : undefined } : c);
+                        const newDeck = deck.map(c => c.id === target.id ? { ...c, upgraded: true, damage: card.damage ? Math.floor(card.damage*1.3)+2 : undefined } : c);
                         setGameState(prev => ({ ...prev, player: { ...prev.player, deck: newDeck } }));
                         setEventResultLog(trans(`つつかれた！(HP-10)\n反撃で「${target.name}」の腕が上がった！`, languageMode));
                     } else {
@@ -563,7 +599,7 @@ export const generateEvent = (
     if (charType === 'DODGEBALL') {
         potentialEvents.push({
             title: "地獄の特訓",
-            description: "タイヤを引いて校庭を10周！\nエースへの道は険しい。",
+            description: "タイヤを引いて校庭を10周！\nエースへの道は圏しい。",
             options: [
                 { label: "やる", text: "HP-10。最大HP+10。", action: () => {
                     damagePlayer(10);

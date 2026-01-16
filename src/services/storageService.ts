@@ -681,7 +681,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_STATE);
       localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_PROGRESS);
       localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_RANKING);
-      localStorage.removeItem(STORAGE_KEY_LEGACY_CARD);
+      // NOTE: STORAGE_KEY_LEGACY_CARD はリセット対象から除外（ユーザー要望）
       localStorage.removeItem(STORAGE_KEY_DEBUG_MATH_SKIP);
       localStorage.removeItem(STORAGE_KEY_DEBUG_HP_ONE);
       localStorage.removeItem(STORAGE_KEY_MATH_CORRECT_COUNT);

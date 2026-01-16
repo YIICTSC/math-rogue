@@ -45,7 +45,7 @@ import { audioService } from './services/audioService';
 import { generateFlavorText, generateEnemyName } from './services/geminiService';
 import { generateDungeonMap } from './services/mapGenerator';
 import { storageService } from './services/storageService';
-import { generateEvent } from './services/eventService';
+import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { trans } from './utils/textUtils';
 import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, QrCode } from 'lucide-react';
@@ -738,12 +738,6 @@ const App: React.FC = () => {
       const startingCardNames = initialDeck.map(c => c.name);
       storageService.saveUnlockedCards(startingCardNames);
 
-      const legacyCard = storageService.getLegacyCard();
-      if (legacyCard) {
-          initialDeck.push({ ...legacyCard, id: `legacy-${Date.now()}` });
-          storageService.clearLegacyCard();
-      }
-
       const starterRelic = RELIC_LIBRARY[char.startingRelicId];
       const relics = starterRelic ? [starterRelic] : [];
 
@@ -888,17 +882,43 @@ const App: React.FC = () => {
   const handleRelicSelect = (relic: Relic) => {
         audioService.playSound('buff');
         const map = generateDungeonMap();
-        setGameState(prev => ({
-            ...prev,
-            screen: GameScreen.MAP,
-            map: map,
-            player: {
-                ...prev.player,
-                relics: [...prev.player.relics, relic]
-            },
-            narrativeLog: [...prev.narrativeLog, trans("冒険が始まった。", languageMode)]
-        }));
-        audioService.playBGM('map');
+
+        // 最初のレリック選択後に引き継ぎカードがあるかチェック
+        const legacyCard = storageService.getLegacyCard();
+        if (legacyCard) {
+            const ev = generateLegacyEvent(
+                legacyCard, 
+                setGameState, 
+                setEventResultLog, 
+                languageMode
+            );
+            setEventData(ev);
+            setEventResultLog(null);
+            
+            setGameState(prev => ({
+                ...prev,
+                screen: GameScreen.EVENT,
+                map: map,
+                player: {
+                    ...prev.player,
+                    relics: [...prev.player.relics, relic]
+                },
+                narrativeLog: [...prev.narrativeLog, trans("冒険が始まった。", languageMode)]
+            }));
+            audioService.playBGM('event');
+        } else {
+            setGameState(prev => ({
+                ...prev,
+                screen: GameScreen.MAP,
+                map: map,
+                player: {
+                    ...prev.player,
+                    relics: [...prev.player.relics, relic]
+                },
+                narrativeLog: [...prev.narrativeLog, trans("冒険が始まった。", languageMode)]
+            }));
+            audioService.playBGM('map');
+        }
   };
 
   const handleNodeSelect = async (node: MapNode) => {
@@ -2632,6 +2652,7 @@ const App: React.FC = () => {
                 }
                 // エンドレスモードでない場合のみエンディングへ遷移
                 if (prev.act === 4 && !prev.isEndless) {
+                    setLegacyCardSelected(false); 
                     audioService.playBGM('victory');
                     return { ...prev, player: nextPlayer, screen: GameScreen.ENDING };
                 } else {
@@ -2673,6 +2694,7 @@ const App: React.FC = () => {
                  }));
                  return;
             }
+            setLegacyCardSelected(false);
             audioService.playSound('lose');
             audioService.playBGM('game_over');
             const score = calculateScore(gameState, false);
