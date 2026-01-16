@@ -19,7 +19,8 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
   const [isTyping, setIsTyping] = useState(true);
   
   const storySet = GAME_STORIES[storyIndex] || GAME_STORIES[0];
-  const currentPart = storySet.parts[act - 1]; // Act 1 end -> Part 0
+  // エンドレスモード対策: アクトが4以上になってもストーリーがループするように修正
+  const currentPart = storySet.parts[(act - 1) % 3]; 
 
   // 音声読み上げ関数
   const speakStory = useCallback((text: string) => {
