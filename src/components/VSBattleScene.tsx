@@ -42,6 +42,15 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
         };
     }
 
+    // --- BGM Control ---
+    useEffect(() => {
+        if (phase === 'BATTLE') {
+            audioService.playBGM('battle');
+        } else if (phase === 'RESULT') {
+            audioService.stopBGM();
+        }
+    }, [phase]);
+
     const addLog = (msg: string) => setLogs(prev => [msg, ...prev.slice(0, 3)]);
 
     const applyDebuff = (target: Player, powerId: string, amount: number): Player => {
@@ -67,8 +76,9 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
     const handlePlayCard = (card: ICard, owner: 1 | 2) => {
         if (turnOwner !== owner || isAnimating || phase !== 'BATTLE') return;
 
-        // --- 先行1ターン目の制約 ---
-        if (owner === 1 && turnCount === 1 && card.type === CardType.ATTACK) {
+        // --- 先行1ターン目の制約 (より厳密にチェック) ---
+        const isAttack = card.type === CardType.ATTACK || String(card.type) === 'ATTACK';
+        if (owner === 1 && turnCount === 1 && isAttack) {
             audioService.playSound('wrong');
             addLog("先行1ターン目はアタック不可！");
             return;
@@ -83,7 +93,7 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
         }
 
         setIsAnimating(true);
-        audioService.playSound(card.type === CardType.ATTACK ? 'attack' : 'block');
+        audioService.playSound(isAttack ? 'attack' : 'block');
 
         let nextCurrent = { ...current, powers: { ...current.powers } };
         let nextTarget = { ...target, powers: { ...target.powers } };
@@ -338,7 +348,7 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
     if (phase === 'NAMING') {
         return (
             <div className="flex flex-col h-full w-full bg-slate-950 items-center justify-center p-6 text-white font-mono">
-                <div className="bg-slate-900 border-4 border-indigo-600 p-8 rounded-3xl w-full max-w-sm shadow-2xl text-center animate-in zoom-in duration-300">
+                <div className="bg-slate-900 border-4 border-indigo-600 p-8 rounded-3xl w-full max-sm shadow-2xl text-center animate-in zoom-in duration-300">
                     <User size={64} className="text-indigo-400 mx-auto mb-6" />
                     <h2 className="text-2xl font-black mb-2 italic tracking-tighter">BATTLE ENTRY</h2>
                     <p className="text-gray-400 text-xs mb-8">対戦相手の名前を入力してください</p>
@@ -484,7 +494,8 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
                     <div className="flex justify-center gap-2 h-44 overflow-x-auto pb-4 custom-scrollbar">
                         {p1State.hand.map(card => {
                             // 先行1ターン目のアタック禁止を視覚的に反映
-                            const isAttackRestricted = turnCount === 1 && card.type === CardType.ATTACK;
+                            const isAttack = card.type === CardType.ATTACK || String(card.type) === 'ATTACK';
+                            const isAttackRestricted = turnCount === 1 && isAttack;
                             
                             return (
                                 <div key={card.id} className="scale-90 origin-bottom transform-gpu">
