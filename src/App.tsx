@@ -2652,6 +2652,21 @@ const App: React.FC = () => {
                 }
                 // エンドレスモードでない場合のみエンディングへ遷移
                 if (prev.act === 4 && !prev.isEndless) {
+                    // --- クリア回数の加算とスコアの保存 ---
+                    storageService.incrementClearCount();
+                    const score = calculateScore(prev, true);
+                    storageService.saveScore({
+                        id: `victory-${Date.now()}`,
+                        playerName: 'Player',
+                        characterName: selectedCharName,
+                        score: score,
+                        act: prev.act,
+                        floor: prev.floor,
+                        victory: true,
+                        date: Date.now(),
+                        challengeMode: prev.challengeMode
+                    });
+                    
                     setLegacyCardSelected(false); 
                     audioService.playBGM('victory');
                     return { ...prev, player: nextPlayer, screen: GameScreen.ENDING };
@@ -3551,7 +3566,7 @@ const App: React.FC = () => {
                                         if (r.value.id === 'CURSED_KEY') newP.maxEnergy += 1;
                                         if (r.value.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
                                         if (r.value.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
-                                        if (r.value.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
+                                        if (r.value.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = p.maxHp; }
                                         if (r.value.id === 'OLD_COIN') newP.gold += 300;
                                         if (r.value.id === 'MATRYOSHKA') newP.relicCounters['MATRYOSHKA'] = 2; 
                                         if (r.value.id === 'HAPPY_FLOWER') newP.relicCounters['HAPPY_FLOWER'] = 0; 
