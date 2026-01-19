@@ -251,13 +251,13 @@ const App: React.FC = () => {
 
   const [languageMode, setLanguageMode] = useState<LanguageMode>(() => storageService.getLanguageMode() || 'JAPANESE');
   const [currentNarrative, setCurrentNarrative] = useState<string>("...");
-  const [turnLog, setTurnLog] = useState<string>("プレイヤーターン");
+  const [turnLog, setTurnLog] = useState<string>("あなたのターン");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [lastActionTime, setLastActionTime] = useState<number>(0);
   const [lastActionType, setLastActionType] = useState<CardType | null>(null);
   const [actingEnemyId, setActingEnemyId] = useState<string | null>(null);
   const [hasSave, setHasSave] = useState<boolean>(false);
-  const [selectedCharName, setSelectedCharName] = useState<string>("戦士");
+  const [selectedCharName, setSelectedCharName] = useState<string>("わんぱく小学生");
   const [legacyCardSelected, setLegacyCardSelected] = useState<boolean>(false);
   const [showDebugLog, setShowDebugLog] = useState<boolean>(false);
   const [bgmMode, setBgmMode] = useState<'OSCILLATOR' | 'MP3' | 'STUDY'>(() => {
@@ -1649,8 +1649,18 @@ const App: React.FC = () => {
 
                          if (card.fatalEnergy) p.currentEnergy += card.fatalEnergy;
                          if (card.fatalPermanentDamage) {
-                             const deckCard = p.deck.find(c => c.id === card.id);
-                             if (deckCard) card.damage = (card.damage || 0) + card.fatalPermanentDamage!;
+                            p.deck = p.deck.map(dc => {
+                                if (dc.id === card.id) {
+                                    const newDmg = (dc.damage || 0) + card.fatalPermanentDamage!;
+                                    return { 
+                                        ...dc, 
+                                        damage: newDmg,
+                                        description: dc.description.replace(/(\d+)(ダメージ)/, `${newDmg}$2`)
+                                    };
+                                }
+                                return dc;
+                            });
+                            currentLogs.push(`${trans(card.name, languageMode)} の威力が上がった！`);
                          }
                          if (card.fatalMaxHp) { p.maxHp += card.fatalMaxHp!; p.currentHp += card.fatalMaxHp!; }
                          if (e.corpseExplosion) {
