@@ -16,22 +16,24 @@ import { trans } from '../utils/textUtils';
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 400;
 const GROUND_Y = 340;
-const GRAVITY = 0.6; // 0.38 -> 0.6 (スピードアップに合わせて重力を強化)
-const JUMP_FORCE = -14.0; // -10.5 -> -14.0 (重力に合わせてジャンプ力を強化)
-const BASE_SPEED = 4.5; // 2.5 -> 4.5 (ベーススピードを大幅に向上)
+const GRAVITY = 0.6; 
+const JUMP_FORCE = -14.0; 
+const BASE_SPEED = 4.5; 
 const PLAYER_DEFAULT_X = 120;
 const MAX_PARTICLES = 60; 
-const MIN_OBSTACLE_GAP = 450; // 280 -> 450 (スピードアップに合わせて間隔を調整)
+const MIN_OBSTACLE_GAP = 500; 
 
 interface Obstacle {
     id: string;
     x: number;
     y: number;
+    vy: number; // 垂直速度（ジャンプ用）
     width: number;
     height: number;
-    type: 'BACKPACK' | 'VAULTING' | 'CHALKBOARD' | 'BIRD' | 'IRON_BARRIER' | 'HOLE' | 'STEPS';
+    type: 'BACKPACK' | 'VAULTING' | 'CHALKBOARD' | 'BIRD' | 'IRON_BARRIER' | 'HOLE' | 'STEPS' | 'HIGH_STEPS' | 'MOUNTAIN_STEPS' | 'JUMPING_SLIME' | 'DRONE' | 'TEACHER_RUNNER';
     speedMult: number;
     isHard?: boolean;
+    shootCooldown?: number;
 }
 
 interface Projectile {
@@ -43,6 +45,7 @@ interface Projectile {
     isHoming?: boolean;
     isLarge?: boolean;
     isPierce?: boolean;
+    isEnemy?: boolean; // 敵の弾かどうか
 }
 
 interface Particle {
@@ -137,6 +140,7 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     const obstaclesRef = useRef<Obstacle[]>([]);
     const projectilesRef = useRef<Projectile[]>([]);
+    const enemyProjectilesRef = useRef<Projectile[]>([]);
     const particlesRef = useRef<Particle[]>([]);
     const bgOffsets = useRef({ far: 0, mid: 0, near: 0 });
     const frameIdRef = useRef<number>(null);
@@ -214,7 +218,7 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             stompAbility: false, airStall: false, reflectShield: false, lifesteal: false, trailFire: false, jumpBoom: false,
             scoreBonus: 1, cleaningDuty: 0, animFrameTimer: 0
         };
-        obstaclesRef.current = []; projectilesRef.current = []; particlesRef.current = [];
+        obstaclesRef.current = []; projectilesRef.current = []; enemyProjectilesRef.current = []; particlesRef.current = [];
         bgOffsets.current = { far: 0, mid: 0, near: 0 };
         setGameState('PLAYING');
         audioService.playBGM('survivor_metal');
@@ -247,6 +251,10 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                  obstaclesRef.current = obstaclesRef.current.filter(obs => {
                      const dx = obs.x - p.x;
                      if (dx > 0 && dx < 150 && Math.abs(obs.y - p.y) < 100) {
+                         if (['HOLE', 'STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS', 'IRON_BARRIER', 'VAULTING', 'CHALKBOARD'].includes(obs.type)) {
+                             addParticle(obs.x, obs.y, '#94a3b8');
+                             return true;
+                         }
                          addParticle(obs.x, obs.y, '#ffeb3b');
                          scoreRef.current += 10;
                          return false;
@@ -259,11 +267,14 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     const handlePointerUp = () => { playerRef.current.isPressing = false; };
 
+    const isDestroyable = (type: string) => !['HOLE', 'STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS', 'IRON_BARRIER', 'VAULTING', 'CHALKBOARD'].includes(type);
+
     const updateLogic = () => {
         if (gameStateRef.current !== 'PLAYING') return;
         const p = playerRef.current;
-        const currentSpeed = (BASE_SPEED + ((levelRef.current - 1) * 0.2)) * p.speedBoost;
+        const currentSpeed = (BASE_SPEED + ((levelRef.current - 1) * 0.4)) * p.speedBoost;
 
+        frameCount.current++;
         bgOffsets.current.far += currentSpeed * 0.1;
         bgOffsets.current.mid += currentSpeed * 0.3;
         bgOffsets.current.near += currentSpeed;
@@ -271,7 +282,6 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         if (p.x < PLAYER_DEFAULT_X) p.x += 0.8;
 
         p.animFrameTimer = (p.animFrameTimer || 0) + 1;
-        // アニメーション速度もゲームスピードに同期させる
         const animThreshold = Math.max(2, 6 - Math.floor(currentSpeed * 0.5));
         if (p.animFrameTimer > animThreshold) {
             p.animFrame = (p.animFrame + 1) % 4; p.animFrameTimer = 0;
@@ -293,18 +303,42 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         if (p.cleaningDuty > 0) {
             addVfxRing(p.x, p.y, '#ffffff');
-            obstaclesRef.current = [];
+            obstaclesRef.current = obstaclesRef.current.filter(obs => !isDestroyable(obs.type));
             p.cleaningDuty = 0;
             audioService.playSound('win');
         }
 
         const obstacles = obstaclesRef.current;
         for (const obs of obstacles) {
-            if (obs.type === 'STEPS') {
-                const objectTop = obs.y - obs.height; const objectLeft = obs.x - obs.width / 2; const objectRight = obs.x + obs.width / 2;
-                if (p.x + 15 > objectLeft && p.x - 15 < objectRight) {
-                    if (p.y <= objectTop + 20 && p.vy >= 0) { currentGroundLevel = Math.min(currentGroundLevel, objectTop); isOnObject = true; } 
-                    else if (p.x < obs.x) p.x -= currentSpeed * obs.speedMult;
+            if (['STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS'].includes(obs.type)) {
+                const stepsCount = obs.type === 'STEPS' ? 1 : (obs.type === 'HIGH_STEPS' ? 2 : 3);
+                const stepH = obs.height / stepsCount;
+                const stepW = obs.width / stepsCount;
+
+                // 各段をチェックして接地可能な面を探す
+                for (let s = 0; s < stepsCount; s++) {
+                    const currentW = obs.width - (s * stepW);
+                    const currentH = stepH * (s + 1);
+                    const stepTop = GROUND_Y - currentH;
+                    const stepLeft = obs.x - currentW / 2;
+                    const stepRight = obs.x + currentW / 2;
+
+                    if (p.x + 10 > stepLeft && p.x - 10 < stepRight) {
+                        // 上面に接地
+                        if (p.y <= stepTop + 20 && p.vy >= 0 && p.x > stepLeft + 5 && p.x < stepRight - 5) {
+                            if (stepTop < currentGroundLevel) {
+                                currentGroundLevel = stepTop;
+                                isOnObject = true;
+                            }
+                        } 
+                        // 前面（左側の壁）に衝突判定
+                        else if (p.x + 15 > stepLeft && p.x < stepLeft + 20 && p.y > stepTop + 5) {
+                            if (p.invulFrame <= 0) {
+                                handlePlayerDamage(false); // 地形なのでiは渡さず、消滅させない
+                            }
+                            p.x = stepLeft - 15; // 強く押し戻す
+                        }
+                    }
                 }
             }
         }
@@ -319,7 +353,7 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     addVfxRing(p.x, currentGroundLevel, '#ffeb3b');
                     audioService.playSound('block');
                     obstaclesRef.current = obstaclesRef.current.filter(obs => {
-                        if (obs.isHard) return true;
+                        if (!isDestroyable(obs.type)) return true;
                         return Math.abs(obs.x - p.x) > 120;
                     });
                 }
@@ -343,7 +377,7 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         if (p.trailFire && frameCount.current % 10 === 0) {
             addParticle(p.x - 20, p.y, '#ff4500');
             obstaclesRef.current = obstaclesRef.current.filter(obs => {
-                if (obs.isHard) return true;
+                if (!isDestroyable(obs.type)) return true;
                 return Math.abs(obs.x - (p.x - 40)) > 40;
             });
         }
@@ -367,11 +401,12 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             }
         }
 
+        // プレイヤーの弾更新
         const projs = projectilesRef.current;
         for (let i = projs.length - 1; i >= 0; i--) {
             const pr = projs[i];
             if (pr.isHoming) {
-                const target = obstaclesRef.current.find(o => o.x > pr.x && !o.isHard);
+                const target = obstaclesRef.current.find(o => o.x > pr.x && isDestroyable(o.type));
                 if (target) {
                     const ang = Math.atan2(target.y - 20 - pr.y, target.x - pr.x);
                     pr.vx += Math.cos(ang) * 0.5; pr.vy += Math.sin(ang) * 0.5;
@@ -379,6 +414,24 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             }
             pr.x += pr.vx; pr.y += pr.vy;
             if (pr.x > CANVAS_WIDTH + 50 || pr.y < -50 || pr.y > CANVAS_HEIGHT + 50) projs.splice(i, 1);
+        }
+
+        // 敵の弾更新
+        const enemyProjs = enemyProjectilesRef.current;
+        for (let i = enemyProjs.length - 1; i >= 0; i--) {
+            const ep = enemyProjs[i];
+            ep.x += ep.vx; ep.y += ep.vy;
+            
+            // プレイヤーとの当たり判定
+            const dx = ep.x - p.x;
+            const dy = ep.y - (p.y - 20);
+            if (Math.sqrt(dx*dx + dy*dy) < 25 && p.invulFrame <= 0) {
+                handlePlayerDamage(false);
+                enemyProjs.splice(i, 1);
+                continue;
+            }
+
+            if (ep.x < -50 || ep.y < -50 || ep.y > CANVAS_HEIGHT + 50) enemyProjs.splice(i, 1);
         }
 
         const parts = particlesRef.current;
@@ -389,18 +442,76 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         const lastObs = obstacles.length > 0 ? obstacles[obstacles.length - 1] : null;
         const spawnX = CANVAS_WIDTH + 150;
-        if ((!lastObs || (spawnX - lastObs.x) > MIN_OBSTACLE_GAP) && Math.random() < 0.02 + (levelRef.current * 0.002) && obstacles.length < 5) {
-            const types: Obstacle['type'][] = ['BACKPACK', 'VAULTING', 'CHALKBOARD', 'BIRD', 'IRON_BARRIER', 'HOLE', 'STEPS'];
+        
+        const spawnProb = 0.02 + (levelRef.current * 0.005) + (scoreRef.current * 0.00001);
+        const dynamicGap = Math.max(160, MIN_OBSTACLE_GAP - (levelRef.current * 20));
+
+        if ((!lastObs || (spawnX - lastObs.x) > dynamicGap) && Math.random() < spawnProb && obstacles.length < 8) {
+            const types: Obstacle['type'][] = ['BACKPACK', 'VAULTING', 'CHALKBOARD', 'BIRD', 'IRON_BARRIER', 'HOLE', 'STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS', 'JUMPING_SLIME', 'DRONE', 'TEACHER_RUNNER'];
             let type = types[Math.floor(Math.random() * types.length)];
             if (lastObs?.type === 'HOLE' && type === 'HOLE') type = 'BACKPACK';
-            const isAir = type === 'BIRD'; const isHard = type === 'IRON_BARRIER' || type === 'STEPS';
-            obstaclesRef.current.push({ id: Math.random().toString(), x: spawnX, y: isAir ? GROUND_Y - 80 - Math.random() * 60 : (type === 'HOLE' ? GROUND_Y : GROUND_Y - 20), width: type === 'STEPS' ? 120 : (type === 'HOLE' ? 60 : 40), height: type === 'STEPS' ? 60 : 40, type, speedMult: isAir ? 1.3 : 1.0, isHard });
+            
+            const isAir = type === 'BIRD' || type === 'DRONE'; 
+            const isHard = !isDestroyable(type);
+            const speedMult = type === 'TEACHER_RUNNER' ? 1.8 : (isAir ? 1.3 : 1.0);
+            
+            let width = 40;
+            let height = 40;
+            if (type === 'STEPS') { width = 200; height = 60; }
+            else if (type === 'HIGH_STEPS') { width = 320; height = 110; }
+            else if (type === 'MOUNTAIN_STEPS') { width = 480; height = 160; }
+            else if (type === 'HOLE') { width = 70; }
+
+            obstaclesRef.current.push({ 
+                id: Math.random().toString(), 
+                x: spawnX, 
+                y: isAir ? GROUND_Y - 100 - Math.random() * 60 : (type === 'HOLE' ? GROUND_Y : GROUND_Y - 20), 
+                vy: 0,
+                width, 
+                height, 
+                type, 
+                speedMult, 
+                isHard,
+                shootCooldown: type === 'DRONE' ? 100 : 0
+            });
         }
 
         for (let i = obstacles.length - 1; i >= 0; i--) {
-            const obs = obstacles[i]; obs.x -= currentSpeed * obs.speedMult;
+            const obs = obstacles[i]; 
+            obs.x -= currentSpeed * obs.speedMult;
+
+            // 特殊挙動: ジャンプ
+            if (obs.type === 'JUMPING_SLIME' && obs.y >= GROUND_Y - 20 && obs.x < 500 && Math.random() < 0.05) {
+                obs.vy = -12;
+            }
+            if (obs.type === 'JUMPING_SLIME' || obs.vy !== 0) {
+                obs.vy += 0.5; // 敵用重力
+                obs.y += obs.vy;
+                if (obs.y > GROUND_Y - 20) {
+                    obs.y = GROUND_Y - 20;
+                    obs.vy = 0;
+                    addParticle(obs.x, GROUND_Y, '#8d6e63');
+                }
+            }
+
+            // 特殊挙動: 射撃
+            if (obs.type === 'DRONE') {
+                obs.shootCooldown = (obs.shootCooldown || 0) - 1;
+                if (obs.shootCooldown <= 0) {
+                    enemyProjectilesRef.current.push({
+                        id: Math.random().toString(),
+                        x: obs.x - 20,
+                        y: obs.y,
+                        vx: -8,
+                        vy: 0,
+                        isEnemy: true
+                    });
+                    obs.shootCooldown = 150 - Math.min(100, levelRef.current * 5);
+                    audioService.playSound('attack');
+                }
+            }
             
-            if (p.stompAbility && p.vy > 0 && !obs.isHard && obs.type !== 'HOLE') {
+            if (p.stompAbility && p.vy > 0 && isDestroyable(obs.type) && obs.type !== 'HOLE') {
                 const dx = p.x - obs.x;
                 const dy = obs.y - p.y;
                 if (Math.abs(dx) < 40 && dy > 0 && dy < 40) {
@@ -413,7 +524,7 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 }
             }
 
-            if (obs.type !== 'HOLE' && obs.type !== 'STEPS') {
+            if (obs.type !== 'HOLE' && !['STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS'].includes(obs.type)) {
                 const pdx = p.x - obs.x; const pdy = (p.y - 20) - (obs.y - 20);
                 if (Math.sqrt(pdx * pdx + pdy * pdy) < 35 && p.invulFrame <= 0) { handlePlayerDamage(false, i); continue; }
             }
@@ -422,7 +533,10 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 const proj = projs[j]; const rdx = proj.x - obs.x; const rdy = proj.y - obs.y;
                 const hitDist = proj.isLarge ? 50 : 35;
                 if (Math.sqrt(rdx * rdx + rdy * rdy) < hitDist) {
-                    if (obs.isHard) { projs.splice(j, 1); addParticle(proj.x, proj.y, '#94a3b8'); } 
+                    if (!isDestroyable(obs.type)) {
+                        projs.splice(j, 1); 
+                        addParticle(proj.x, proj.y, '#94a3b8'); 
+                    } 
                     else if (obs.type !== 'HOLE') {
                         if (!proj.isPierce) projs.splice(j, 1);
                         obstacles.splice(i, 1); audioService.playSound('attack');
@@ -432,7 +546,7 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     break;
                 }
             }
-            if (obs.x < -200) obstacles.splice(i, 1);
+            if (obs.x < -400) obstacles.splice(i, 1);
         }
 
         const addExp = 0.1 * (currentSpeed / BASE_SPEED) * p.expMult;
@@ -545,18 +659,58 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const projs = projectilesRef.current;
         for (const proj of projs) { ctx.fillStyle = '#fbbf24'; const sz = proj.isLarge ? 20 : 10; ctx.fillRect(proj.x, proj.y, sz * 1.4, sz * 0.5); }
         
+        // 敵の弾の描画
+        const enemyProjs = enemyProjectilesRef.current;
+        for (const ep of enemyProjs) {
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(ep.x, ep.y, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = 'white';
+            ctx.stroke();
+        }
+
         for (const obs of obstacles) {
             if (obs.type === 'HOLE') continue;
-            if (obs.type === 'STEPS') {
+            if (obs.type === 'STEPS' || obs.type === 'HIGH_STEPS' || obs.type === 'MOUNTAIN_STEPS') {
                 ctx.fillStyle = '#8d6e63'; ctx.strokeStyle = '#2d1b0e'; ctx.lineWidth = 3;
-                ctx.beginPath(); ctx.moveTo(obs.x - obs.width/2, GROUND_Y); ctx.lineTo(obs.x - obs.width/2 + 20, GROUND_Y - obs.height); ctx.lineTo(obs.x + obs.width/2 - 20, GROUND_Y - obs.height); ctx.lineTo(obs.x + obs.width/2, GROUND_Y); ctx.closePath(); ctx.fill(); ctx.stroke();
+                const steps = obs.type === 'STEPS' ? 1 : (obs.type === 'HIGH_STEPS' ? 2 : 3);
+                const stepH = obs.height / steps;
+                const stepW = obs.width / steps;
+                for(let s=0; s<steps; s++) {
+                    const currentW = obs.width - (s * stepW);
+                    const currentH = stepH * (s + 1);
+                    ctx.fillRect(obs.x - currentW/2, GROUND_Y - currentH, currentW, currentH);
+                    ctx.strokeRect(obs.x - currentW/2, GROUND_Y - currentH, currentW, currentH);
+                }
             } else if (obs.type === 'IRON_BARRIER') {
-                ctx.shadowBlur = 10; ctx.shadowColor = "#00ffff"; ctx.fillStyle = '#e2e8f0'; ctx.fillRect(obs.x - 20, GROUND_Y - 60, 40, 60); ctx.shadowBlur = 0;
+                ctx.shadowBlur = 10; ctx.shadowColor = "#00ffff"; ctx.fillStyle = '#e2e8f0'; 
+                ctx.fillRect(obs.x - obs.width/2, GROUND_Y - obs.height, obs.width, obs.height); 
+                ctx.shadowBlur = 0;
             } else {
-                const spriteMap: any = { BACKPACK: 'BACKPACK', VAULTING: 'VAULTING', CHALKBOARD: 'NOTEBOOK', BIRD: 'BAT' };
+                const spriteMap: any = { 
+                    BACKPACK: 'BACKPACK', 
+                    VAULTING: 'VAULTING', 
+                    CHALKBOARD: 'NOTEBOOK', 
+                    BIRD: 'BAT',
+                    JUMPING_SLIME: 'SLIME',
+                    DRONE: 'ROBOT',
+                    TEACHER_RUNNER: 'TEACHER'
+                };
                 const size = 40; const pixelSize = size / 16;
                 const template = SPRITE_TEMPLATES[spriteMap[obs.type] || 'SLIME'] || SPRITE_TEMPLATES.SLIME;
-                for (let row = 0; row < 16; row++) { for (let col = 0; col < 16; col++) { const char = template[row][col]; if (char === '.') continue; ctx.fillStyle = char === '%' ? "#ffffff" : (char === '@' ? '#000000' : (obs.isHard ? '#cbd5e1' : '#ef4444')); ctx.fillRect(obs.x - 20 + col * pixelSize, obs.y - 20 + row * pixelSize, pixelSize + 0.5, pixelSize + 0.5); } }
+                for (let row = 0; row < 16; row++) { 
+                    for (let col = 0; col < 16; col++) { 
+                        const char = template[row][col]; if (char === '.') continue; 
+                        let color = obs.isHard ? '#cbd5e1' : '#ef4444';
+                        if (obs.type === 'JUMPING_SLIME') color = '#22c55e';
+                        if (obs.type === 'DRONE') color = '#3b82f6';
+                        if (obs.type === 'TEACHER_RUNNER') color = '#dc2626';
+
+                        ctx.fillStyle = char === '%' ? "#ffffff" : (char === '@' ? '#000000' : color); 
+                        ctx.fillRect(obs.x - 20 + col * pixelSize, obs.y - 20 + row * pixelSize, pixelSize + 0.5, pixelSize + 0.5); 
+                    } 
+                }
             }
         }
 
@@ -567,7 +721,7 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             const template = SPRITE_TEMPLATES['HERO_SIDE'];
             const size = 40; const pixelSize = size / 16;
             ctx.shadowBlur = 4; ctx.shadowColor = "white";
-            for (let row = 0; row < 16; row++) { for (let col = 0; col < 16; col++) { const char = template[row][col]; if (char === '.') continue; ctx.fillStyle = char === '%' ? '#ffccbc' : (char === '@' ? '#000000' : '#3b82f6'); ctx.fillRect(-20 + col * pixelSize, -40 + row * pixelSize, pixelSize + 0.5, pixelSize + 0.5); } }
+            for (let row = 0; row < 16; row++) { for (let col = 0; col < 16; col++) { const char = template[row][col]; if (char === '.') continue; ctx.fillStyle = char === '%' ? '#ffccbc' : (char === '@' ? '#000000' : '#dc2626'); ctx.fillRect(-20 + col * pixelSize, -40 + row * pixelSize, pixelSize + 0.5, pixelSize + 0.5); } }
             ctx.shadowBlur = 0;
             if (pl.barrier) { ctx.strokeStyle = '#00ffff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, -20, 30, 0, Math.PI * 2); ctx.stroke(); }
             ctx.restore();
@@ -576,7 +730,7 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     useEffect(() => {
-        const fixedStep = 1000 / 60; // 16.66ms for logic
+        const fixedStep = 1000 / 60; 
         let lastTime = performance.now();
         let accumulator = 0;
 
@@ -584,10 +738,7 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             if (gameStateRef.current === 'PLAYING') {
                 const deltaTime = currentTime - lastTime;
                 lastTime = currentTime;
-                
-                // Cap delta time to avoid spiral of death
                 accumulator += Math.min(deltaTime, 100);
-                
                 while (accumulator >= fixedStep) {
                     updateLogic();
                     accumulator -= fixedStep;
@@ -599,9 +750,7 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
             if (canvasRef.current) {
                 const ctx = canvasRef.current.getContext('2d');
-                if (ctx) {
-                    draw(ctx);
-                }
+                if (ctx) draw(ctx);
             }
             frameIdRef.current = requestAnimationFrame(loop);
         };

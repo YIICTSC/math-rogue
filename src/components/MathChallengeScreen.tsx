@@ -50,26 +50,62 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
     for (let i = 0; i < count; i++) {
       let a, b, answer, operator;
       let type = safeMode;
+      
       if (safeMode === GameMode.MIXED) {
           const types = [GameMode.ADDITION, GameMode.SUBTRACTION, GameMode.MULTIPLICATION, GameMode.DIVISION];
           type = types[Math.floor(Math.random() * types.length)];
       }
 
       switch (type) {
+          case GameMode.ADD_1DIGIT:
+              a = Math.floor(Math.random() * 9) + 1;
+              b = Math.floor(Math.random() * 9) + 1;
+              answer = a + b;
+              operator = '+';
+              break;
+          case GameMode.ADD_1DIGIT_CARRY:
+              // くりあがりあり: a + b >= 10
+              a = Math.floor(Math.random() * 9) + 1;
+              // bは 10-a 以上の数
+              b = Math.floor(Math.random() * (9 - (10 - a) + 1)) + (10 - a);
+              if (b < 1) b = 1; // セーフティ
+              answer = a + b;
+              operator = '+';
+              break;
+          case GameMode.SUB_1DIGIT:
+              // 1ケタ同士の引き算 (a >= b)
+              a = Math.floor(Math.random() * 9) + 1;
+              b = Math.floor(Math.random() * a) + 1;
+              answer = a - b;
+              operator = '-';
+              break;
+          case GameMode.SUB_1DIGIT_BORROW:
+              // くりさがりあり: 11-18 の数から 1-9 を引き、答えが1ケタ
+              answer = Math.floor(Math.random() * 9) + 1; // 答えも1ケタ
+              b = Math.floor(Math.random() * 9) + 1;
+              a = answer + b;
+              // 繰り下がりの定義として a が 10以上である必要がある
+              if (a < 10) {
+                // 再生成の代わりに補正
+                a += 10;
+                answer = a - b;
+              }
+              operator = '-';
+              break;
           case GameMode.ADDITION:
-              a = Math.floor(Math.random() * 20) + 1;
-              b = Math.floor(Math.random() * 20) + 1;
+              a = Math.floor(Math.random() * 40) + 10;
+              b = Math.floor(Math.random() * 40) + 10;
               answer = a + b;
               operator = '+';
               break;
           case GameMode.SUBTRACTION:
-              a = Math.floor(Math.random() * 20) + 5;
-              b = Math.floor(Math.random() * a);
+              a = Math.floor(Math.random() * 50) + 20;
+              b = Math.floor(Math.random() * (a - 10)) + 5;
               answer = a - b;
               operator = '-';
               break;
           case GameMode.DIVISION:
-              b = Math.floor(Math.random() * 9) + 2;
+              b = Math.floor(Math.random() * 8) + 2;
               answer = Math.floor(Math.random() * 9) + 1;
               a = b * answer;
               operator = '÷';

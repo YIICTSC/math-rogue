@@ -29,6 +29,10 @@ const MODE_TO_SCREEN: Record<string, GameScreen> = {
     [GameMode.MULTIPLICATION]: GameScreen.MATH_CHALLENGE,
     [GameMode.DIVISION]: GameScreen.MATH_CHALLENGE,
     [GameMode.MIXED]: GameScreen.MATH_CHALLENGE,
+    [GameMode.ADD_1DIGIT]: GameScreen.MATH_CHALLENGE,
+    [GameMode.ADD_1DIGIT_CARRY]: GameScreen.MATH_CHALLENGE,
+    [GameMode.SUB_1DIGIT]: GameScreen.MATH_CHALLENGE,
+    [GameMode.SUB_1DIGIT_BORROW]: GameScreen.MATH_CHALLENGE,
     
     // 算数・数学系（静的データ）
     [GameMode.MATH_G1_1]: GameScreen.GENERAL_CHALLENGE,
@@ -96,9 +100,13 @@ export const SUBJECT_CATEGORIES: SubjectCategoryConfig[] = [
     color: 'emerald',
     uiType: 'grid',
     subModes: [
-        { id: 'ADDITION', name: 'たし算', mode: GameMode.ADDITION },
-        { id: 'SUBTRACTION', name: 'ひき算', mode: GameMode.SUBTRACTION },
-        { id: 'MULTIPLICATION', name: 'かけ算', mode: GameMode.MULTIPLICATION },
+        { id: 'ADD_1DIGIT', name: '1ケタのたし算', mode: GameMode.ADD_1DIGIT },
+        { id: 'ADD_1DIGIT_CARRY', name: 'たし算（くりあがり）', mode: GameMode.ADD_1DIGIT_CARRY },
+        { id: 'SUB_1DIGIT', name: '1ケタのひき算', mode: GameMode.SUB_1DIGIT },
+        { id: 'SUB_1DIGIT_BORROW', name: 'ひき算（くりさがり）', mode: GameMode.SUB_1DIGIT_BORROW },
+        { id: 'ADDITION', name: '2ケタのたし算', mode: GameMode.ADDITION },
+        { id: 'SUBTRACTION', name: '2ケタのひき算', mode: GameMode.SUBTRACTION },
+        { id: 'MULTIPLICATION', name: 'かけ算九九', mode: GameMode.MULTIPLICATION },
         { id: 'DIVISION', name: 'わり算', mode: GameMode.DIVISION },
         { id: 'MIXED', name: 'ミックス', mode: GameMode.MIXED },
     ]
