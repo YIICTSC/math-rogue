@@ -16,12 +16,12 @@ import { trans } from '../utils/textUtils';
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 400;
 const GROUND_Y = 340;
-const GRAVITY = 0.38; 
-const JUMP_FORCE = -10.5; 
-const BASE_SPEED = 2.5; 
+const GRAVITY = 0.6; // 0.38 -> 0.6 (スピードアップに合わせて重力を強化)
+const JUMP_FORCE = -14.0; // -10.5 -> -14.0 (重力に合わせてジャンプ力を強化)
+const BASE_SPEED = 4.5; // 2.5 -> 4.5 (ベーススピードを大幅に向上)
 const PLAYER_DEFAULT_X = 120;
 const MAX_PARTICLES = 60; 
-const MIN_OBSTACLE_GAP = 280; 
+const MIN_OBSTACLE_GAP = 450; // 280 -> 450 (スピードアップに合わせて間隔を調整)
 
 interface Obstacle {
     id: string;
@@ -271,7 +271,9 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         if (p.x < PLAYER_DEFAULT_X) p.x += 0.8;
 
         p.animFrameTimer = (p.animFrameTimer || 0) + 1;
-        if (p.animFrameTimer > 8 - Math.min(4, currentSpeed * 0.5)) {
+        // アニメーション速度もゲームスピードに同期させる
+        const animThreshold = Math.max(2, 6 - Math.floor(currentSpeed * 0.5));
+        if (p.animFrameTimer > animThreshold) {
             p.animFrame = (p.animFrame + 1) % 4; p.animFrameTimer = 0;
             if (!p.isJumping && !p.isFalling) addParticle(p.x - 10, p.y, '#8d6e63');
         }
@@ -571,11 +573,39 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             ctx.restore();
         }
         ctx.restore();
-        frameCount.current++;
     };
 
     useEffect(() => {
-        const loop = () => { if (canvasRef.current) { const ctx = canvasRef.current.getContext('2d'); if (ctx) { updateLogic(); draw(ctx); } } frameIdRef.current = requestAnimationFrame(loop); };
+        const fixedStep = 1000 / 60; // 16.66ms for logic
+        let lastTime = performance.now();
+        let accumulator = 0;
+
+        const loop = (currentTime: number) => {
+            if (gameStateRef.current === 'PLAYING') {
+                const deltaTime = currentTime - lastTime;
+                lastTime = currentTime;
+                
+                // Cap delta time to avoid spiral of death
+                accumulator += Math.min(deltaTime, 100);
+                
+                while (accumulator >= fixedStep) {
+                    updateLogic();
+                    accumulator -= fixedStep;
+                }
+            } else {
+                lastTime = currentTime;
+                accumulator = 0;
+            }
+
+            if (canvasRef.current) {
+                const ctx = canvasRef.current.getContext('2d');
+                if (ctx) {
+                    draw(ctx);
+                }
+            }
+            frameIdRef.current = requestAnimationFrame(loop);
+        };
+        
         frameIdRef.current = requestAnimationFrame(loop);
         return () => { if (frameIdRef.current) cancelAnimationFrame(frameIdRef.current); };
     }, []);
@@ -803,7 +833,7 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             {gameState === 'LEVEL_UP' && (
                 <div className="absolute inset-0 z-[60] flex flex-col items-center justify-center bg-indigo-950/95 p-4 backdrop-blur-md animate-in fade-in" onPointerDown={e => e.stopPropagation()}>
                     <div className="flex items-center gap-4 mb-10 animate-bounce"><Star size={40} className="text-yellow-400 fill-current" /><h2 className="text-5xl font-black text-white italic tracking-tighter uppercase">Grade Up!</h2><Star size={40} className="text-yellow-400 fill-current" /></div>
-                    <div className="grid grid-cols-1 gap-4 w-full max-w-sm overflow-y-auto max-h-[60vh] p-2 custom-scrollbar">
+                    <div className="grid grid-cols-1 gap-4 w-full max-sm overflow-y-auto max-h-[60vh] p-2 custom-scrollbar">
                         {upgradeOptions.map(card => (
                             <div key={card.id} onClick={(e) => { e.stopPropagation(); selectUpgrade(card); }} className="bg-slate-800 border-2 border-slate-600 rounded-3xl p-4 flex items-center text-left transition-all transform hover:scale-102 hover:border-yellow-400 shadow-xl group">
                                 <div className="p-3 bg-black/40 rounded-2xl mr-4 border border-slate-700 group-hover:border-yellow-500/50">{getSubjectIcon(card.iconType)}</div>
@@ -816,10 +846,10 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             )}
 
             {gameState === 'GAME_OVER' && (
-                <div className="absolute inset-0 z-[70] flex flex-col items-center justify-center bg-red-950/98 animate-in fade-in backdrop-blur-lg" onPointerDown={e => e.stopPropagation()}>
+                <div className="absolute inset-0 z-70 flex flex-col items-center justify-center bg-red-950/98 animate-in fade-in backdrop-blur-lg" onPointerDown={e => e.stopPropagation()}>
                     <Skull size={80} className="text-red-600 mb-6 animate-pulse" /><h2 className="text-7xl font-black text-white mb-2 italic tracking-tighter uppercase">Failed</h2><div className="text-2xl text-yellow-400 mb-12 font-black bg-black/60 px-8 py-3 rounded-full border-2 border-yellow-500/50 italic shadow-xl">DISTANCE: {score.toLocaleString()}m</div>
                     <div className="flex flex-col gap-4 w-64">
-                        <button onClick={(e) => { e.stopPropagation(); setGameState('MODE_SELECT'); audioService.playSound('select'); }} className="w-full bg-white text-black py-4 rounded-2xl font-black text-xl shadow-[0_6px_0_#ccc] hover:bg-slate-200 transition-all active:translate-y-1 active:shadow-none">TRY AGAIN</button>
+                        <button onClick={(e) => { e.stopPropagation(); setGameState('MODE_SELECT'); audioService.playSound('select'); }} className="w-full bg-white text-black py-4 rounded-2xl font-black text-xl shadow-[0_8px_0_#ccc] hover:bg-slate-200 transition-all active:translate-y-1 active:shadow-none">TRY AGAIN</button>
                         <button onClick={(e) => { e.stopPropagation(); onBack(); }} className="w-full bg-slate-800 text-white py-4 rounded-2xl font-black text-xl border-2 border-white/10 hover:bg-slate-700 transition-colors">EXIT</button>
                     </div>
                 </div>
