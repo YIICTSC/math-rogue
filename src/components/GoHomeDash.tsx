@@ -1,0 +1,831 @@
+
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { Heart, Star, Skull, Brain, Book, Flame, Wind, Target, RotateCcw, ArrowLeft, Play, Sparkles, ChevronRight, AlertTriangle, Zap, Crosshair, Shield, Move, FastForward, Repeat, Search, Ghost, Music, Activity, Rocket, FlaskConical, Globe, MapPin, CheckCircle2, ChevronDown, Check, Languages, Home } from 'lucide-react';
+import { audioService } from '../services/audioService';
+import { SPRITE_TEMPLATES } from './PixelSprite';
+import { storageService } from '../services/storageService';
+import MathChallengeScreen from './MathChallengeScreen';
+import KanjiChallengeScreen from './KanjiChallengeScreen';
+import EnglishChallengeScreen from './EnglishChallengeScreen';
+import GeneralChallengeScreen from './GeneralChallengeScreen';
+import { GameMode, GameScreen, LanguageMode } from '../types';
+import { SUBJECT_CATEGORIES, SubjectCategoryConfig, getChallengeScreenForMode, SubjectCategoryType } from '../subjectConfig';
+import { trans } from '../utils/textUtils';
+
+// --- CONSTANTS ---
+const CANVAS_WIDTH = 800;
+const CANVAS_HEIGHT = 400;
+const GROUND_Y = 340;
+const GRAVITY = 0.38; 
+const JUMP_FORCE = -10.5; 
+const BASE_SPEED = 2.5; 
+const PLAYER_DEFAULT_X = 120;
+const MAX_PARTICLES = 60; 
+const MIN_OBSTACLE_GAP = 280; 
+
+interface Obstacle {
+    id: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    type: 'BACKPACK' | 'VAULTING' | 'CHALKBOARD' | 'BIRD' | 'IRON_BARRIER' | 'HOLE' | 'STEPS';
+    speedMult: number;
+    isHard?: boolean;
+}
+
+interface Projectile {
+    id: string;
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    isHoming?: boolean;
+    isLarge?: boolean;
+    isPierce?: boolean;
+}
+
+interface Particle {
+    id: string;
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    life: number;
+    color: string;
+    size: number;
+}
+
+interface DashCardEffect {
+    id: string;
+    name: string;
+    description: string;
+    iconType: 'MATH' | 'SCIENCE' | 'JAPANESE' | 'PE' | 'SOCIAL';
+    isWeaponBase?: boolean; 
+    requiresWeapon?: boolean; 
+    apply: (p: any, setHp: any, setMaxHp: any) => void;
+}
+
+type DashGameState = 'START' | 'MODE_SELECT' | 'PLAYING' | 'CHALLENGE' | 'LEVEL_UP' | 'GAME_OVER';
+
+const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [gameState, setGameState] = useState<DashGameState>('START');
+    const gameStateRef = useRef<DashGameState>('START');
+    
+    useEffect(() => {
+        gameStateRef.current = gameState;
+    }, [gameState]);
+
+    const [selectedMode, setSelectedMode] = useState<GameMode>(GameMode.MULTIPLICATION);
+    const [selectedGrade, setSelectedGrade] = useState<number>(3);
+    const [selectedTerm, setSelectedTerm] = useState<number>(1);
+    const [languageMode] = useState<LanguageMode>(() => storageService.getLanguageMode() || 'JAPANESE');
+    
+    const [score, setScore] = useState(0);
+    const [level, setLevel] = useState(1);
+    const [hp, setHp] = useState(3);
+    const [maxHp, setMaxHp] = useState(3);
+    const [exp, setExp] = useState(0);
+    const [nextLevelExp, setNextLevelExp] = useState(200);
+
+    const scoreRef = useRef(0);
+    const levelRef = useRef(1);
+    const expRef = useRef(0);
+    const nextLevelExpRef = useRef(200);
+    const frameCount = useRef(0);
+    const shakeRef = useRef(0);
+
+    const playerRef = useRef({
+        x: PLAYER_DEFAULT_X,
+        y: GROUND_Y,
+        vy: 0,
+        isJumping: false,
+        isFalling: false,
+        isPressing: false, 
+        jumpCount: 0,
+        maxJumps: 1,
+        invulFrame: 0,
+        speedBoost: 1,
+        shootingRate: 0,
+        shootingTimer: 0,
+        barrier: false,
+        barrierRegen: false,
+        barrierTimer: 0,
+        expMult: 1,
+        animFrame: 0,
+        animTimer: 0,
+        autoHeal: false,
+        autoHealTimer: 0,
+        pierceShot: false,
+        doubleShot: false,
+        tripleShot: false,
+        homingShot: false,
+        largeShot: false,
+        landShockwave: false,
+        stompAbility: false,
+        airStall: false,
+        reflectShield: false,
+        lifesteal: false,
+        trailFire: false,
+        jumpBoom: false,
+        scoreBonus: 1,
+        cleaningDuty: 0,
+        animFrameTimer: 0
+    });
+
+    const obstaclesRef = useRef<Obstacle[]>([]);
+    const projectilesRef = useRef<Projectile[]>([]);
+    const particlesRef = useRef<Particle[]>([]);
+    const bgOffsets = useRef({ far: 0, mid: 0, near: 0 });
+    const frameIdRef = useRef<number>(null);
+
+    // --- UPGRADE POOL ---
+    const UPGRADE_POOL: DashCardEffect[] = useMemo(() => [
+        { id: 'STRIKE_1', name: 'えんぴつミサイル', description: '前方にえんぴつを発射！', iconType: 'MATH', isWeaponBase: true, apply: (p) => { p.shootingRate = p.shootingRate === 0 ? 100 : Math.max(30, p.shootingRate - 20); } },
+        { id: 'STRIKE_2', name: '2連装えんぴつ', description: '弾を2発同時に発射する。', iconType: 'MATH', requiresWeapon: true, apply: (p) => { p.doubleShot = true; } },
+        { id: 'STRIKE_3', name: '3方向ショット', description: '扇状に3発の弾を発射。', iconType: 'MATH', requiresWeapon: true, apply: (p) => { p.tripleShot = true; } },
+        { id: 'STRIKE_4', name: '貫通えんぴつ', description: '弾が敵を貫通するようになる。', iconType: 'MATH', requiresWeapon: true, apply: (p) => { p.pierceShot = true; } },
+        { id: 'STRIKE_5', name: '巨大えんぴつ', description: '弾のサイズと当たり判定がアップ。', iconType: 'MATH', requiresWeapon: true, apply: (p) => { p.largeShot = true; } },
+        { id: 'STRIKE_6', name: '追尾誘導弾', description: '一番近い敵を自動で追いかける。', iconType: 'MATH', requiresWeapon: true, apply: (p) => { p.homingShot = true; } },
+        { id: 'STRIKE_7', name: '連射力UP', description: 'ミサイルの発射速度が大幅に上昇。', iconType: 'MATH', requiresWeapon: true, apply: (p) => { p.shootingRate = Math.max(15, (p.shootingRate || 100) - 30); } },
+        { id: 'STRIKE_8', name: '着地衝撃波', description: '着地時に周囲の敵をなぎ倒す。', iconType: 'PE', apply: (p) => { p.landShockwave = true; } },
+        { id: 'STRIKE_9', name: 'ソニックブーム', description: 'ジャンプ時に前方の敵を攻撃。', iconType: 'PE', apply: (p) => { p.jumpBoom = true; } },
+        { id: 'STRIKE_10', name: '火炎の足跡', description: '走りながら背後に炎を置いていく。', iconType: 'SCIENCE', apply: (p) => { p.trailFire = true; } },
+        { id: 'STRIKE_11', name: '辞書プレッシャー', description: '定期的に巨大な辞書を投げつける。', iconType: 'JAPANESE', requiresWeapon: true, apply: (p) => { p.largeShot = true; p.shootingRate = Math.max(40, (p.shootingRate || 120) - 10); } },
+        { id: 'STRIKE_12', name: '反射バリア', description: 'バリア消失時に敵にダメージ。', iconType: 'SCIENCE', apply: (p) => { p.reflectShield = true; p.barrier = true; } },
+        { id: 'STRIKE_13', name: '吸血攻撃', description: '敵を倒すと稀にHPが1回復する。', iconType: 'SCIENCE', apply: (p) => { p.lifesteal = true; } },
+        { id: 'STRIKE_14', name: 'コンパス針', description: '弾が回転しながら飛び、多段ヒット。', iconType: 'MATH', requiresWeapon: true, apply: (p) => { p.pierceShot = true; p.shootingRate = Math.max(30, (p.shootingRate || 100) - 5); } },
+        { id: 'STRIKE_15', name: 'フルバースト', description: '弾数が一気に増えるが、少し遅くなる。', iconType: 'MATH', requiresWeapon: true, apply: (p) => { p.doubleShot = true; p.tripleShot = true; p.speedBoost *= 0.95; } },
+        { id: 'MOVE_1', name: '上履きブースト', description: '移動速度が常時アップ。', iconType: 'PE', apply: (p) => { p.speedBoost += 0.2; } },
+        { id: 'MOVE_2', name: '空中2段ジャンプ', description: '空中でさらにもう一度飛べる。', iconType: 'PE', apply: (p) => { p.maxJumps = Math.max(p.maxJumps, 2); } },
+        { id: 'MOVE_3', name: '3段ジャンプ', description: '驚異の3段ジャンプが可能に。', iconType: 'PE', apply: (p) => { p.maxJumps = Math.max(p.maxJumps, 3); } },
+        { id: 'MOVE_4', name: 'マ〇オステップ', description: '敵を踏んで倒せるようになる！', iconType: 'PE', apply: (p) => { p.stompAbility = true; } },
+        { id: 'MOVE_5', name: 'ホバリング', description: 'ジャンプ中に長押しで滞空できる。', iconType: 'SCIENCE', apply: (p) => { p.airStall = true; } },
+        { id: 'MOVE_6', name: 'ロケットスタート', description: '初期位置から少し前に進む。', iconType: 'PE', apply: (p) => { p.x = Math.min(p.x + 50, 300); } },
+        { id: 'MOVE_8', name: '瞬足の極意', description: '速度が大幅アップし、無敵時間増加。', iconType: 'PE', apply: (p) => { p.speedBoost += 0.3; } },
+        { id: 'DEF_1', name: 'ノートバリア', description: '衝突を防ぐバリアを展開。', iconType: 'JAPANESE', apply: (p) => { p.barrier = true; } },
+        { id: 'DEF_2', name: '給食おかわり', description: '最大HPが+1され、全回復。', iconType: 'SOCIAL', apply: (p, setHp, setMaxHp) => { setMaxHp((prev:number)=>prev+1); setHp((prev:number)=>prev+1); } },
+        { id: 'DEF_3', name: '自動修復ノート', description: '一定時間ごとにバリアが自動復活。', iconType: 'JAPANESE', apply: (p) => { p.barrierRegen = true; } },
+        { id: 'DEF_4', name: '保健室の飴', description: '一定時間ごとにHPが1回復する。', iconType: 'SOCIAL', apply: (p) => { p.autoHeal = true; } },
+        { id: 'DEF_7', name: 'カルシウム摂取', description: '最大HP+2。', iconType: 'SOCIAL', apply: (p, setHp, setMaxHp) => { setMaxHp((prev:number)=>prev+2); } },
+        { id: 'DEF_10', name: 'ビタミン補給', description: 'HPを2回復し、加速。', iconType: 'SOCIAL', apply: (p, setHp) => { setHp((prev:number)=>Math.min(5, prev+2)); p.speedBoost += 0.1; } },
+        { id: 'UTIL_1', name: '進級パワー', description: '獲得EXPが常時1.5倍に。', iconType: 'SCIENCE', apply: (p) => { p.expMult += 0.5; } },
+        { id: 'UTIL_2', name: 'お年玉ボーナス', description: 'スコアの増加速度がアップ。', iconType: 'SOCIAL', apply: (p) => { p.scoreBonus += 0.5; } },
+        { id: 'UTIL_4', name: '大掃除', description: '画面内の敵をすべて消去する。', iconType: 'SOCIAL', apply: (p) => { p.cleaningDuty = 1; } },
+        { id: 'UTIL_7', name: '委員長の号令', description: 'すべてのクールダウンを短縮。', iconType: 'JAPANESE', apply: (p) => { p.shootingRate = Math.max(20, (p.shootingRate || 100) - 20); } },
+        { id: 'UTIL_10', name: '卒業証明書', description: 'すべてのステータスを少しずつ強化。', iconType: 'SOCIAL', apply: (p) => { p.maxJumps = 2; p.speedBoost += 0.1; p.shootingRate = 60; p.expMult += 0.2; } },
+    ], [setHp, setMaxHp]);
+
+    const [upgradeOptions, setUpgradeOptions] = useState<DashCardEffect[]>([]);
+
+    const addVfxRing = (x: number, y: number, color: string) => {
+        for(let i=0; i<8; i++) {
+            const ang = (i / 8) * Math.PI * 2;
+            particlesRef.current.push({
+                id: Math.random().toString(), x, y,
+                vx: Math.cos(ang) * 5, vy: Math.sin(ang) * 5,
+                life: 15, color, size: 4
+            });
+        }
+    };
+
+    const triggerShake = () => {
+        shakeRef.current = 10;
+    };
+
+    const selectUpgrade = (card: DashCardEffect) => {
+        const p = playerRef.current;
+        card.apply(p, setHp, setMaxHp);
+        setGameState('PLAYING');
+        audioService.playBGM('survivor_metal');
+        audioService.playSound('buff');
+    };
+
+    const initGame = () => {
+        scoreRef.current = 0; levelRef.current = 1; expRef.current = 0; nextLevelExpRef.current = 200;
+        setScore(0); setLevel(1); setExp(0); setHp(3); setMaxHp(3); setNextLevelExp(200);
+        playerRef.current = {
+            x: PLAYER_DEFAULT_X, y: GROUND_Y, vy: 0, isJumping: false, isFalling: false, isPressing: false, jumpCount: 0, maxJumps: 1, invulFrame: 0,
+            speedBoost: 1, shootingRate: 0, shootingTimer: 0, barrier: false, barrierRegen: false, barrierTimer: 0, expMult: 1,
+            animFrame: 0, animTimer: 0, autoHeal: false, autoHealTimer: 0, 
+            pierceShot: false, doubleShot: false, tripleShot: false, homingShot: false, largeShot: false, landShockwave: false, 
+            stompAbility: false, airStall: false, reflectShield: false, lifesteal: false, trailFire: false, jumpBoom: false,
+            scoreBonus: 1, cleaningDuty: 0, animFrameTimer: 0
+        };
+        obstaclesRef.current = []; projectilesRef.current = []; particlesRef.current = [];
+        bgOffsets.current = { far: 0, mid: 0, near: 0 };
+        setGameState('PLAYING');
+        audioService.playBGM('survivor_metal');
+    };
+
+    const addParticle = (x: number, y: number, color: string) => {
+        if (particlesRef.current.length > MAX_PARTICLES) return;
+        const angle = Math.random() * Math.PI * 2;
+        const spd = Math.random() * 2 + 1;
+        particlesRef.current.push({
+            id: Math.random().toString(),
+            x, y,
+            vx: Math.cos(angle) * spd,
+            vy: Math.sin(angle) * spd,
+            life: 20,
+            color,
+            size: Math.random() * 3 + 1
+        });
+    };
+
+    const handlePointerDown = (e: React.PointerEvent) => {
+        if (gameStateRef.current !== 'PLAYING') return;
+        const p = playerRef.current;
+        p.isPressing = true;
+        if (!p.isFalling && p.jumpCount < p.maxJumps) {
+            p.vy = JUMP_FORCE; p.isJumping = true; p.jumpCount++;
+            audioService.playSound('select'); addParticle(p.x, p.y, '#ffffff');
+            if (p.jumpBoom) {
+                 addVfxRing(p.x, p.y, '#ffffff');
+                 obstaclesRef.current = obstaclesRef.current.filter(obs => {
+                     const dx = obs.x - p.x;
+                     if (dx > 0 && dx < 150 && Math.abs(obs.y - p.y) < 100) {
+                         addParticle(obs.x, obs.y, '#ffeb3b');
+                         scoreRef.current += 10;
+                         return false;
+                     }
+                     return true;
+                 });
+            }
+        }
+    };
+
+    const handlePointerUp = () => { playerRef.current.isPressing = false; };
+
+    const updateLogic = () => {
+        if (gameStateRef.current !== 'PLAYING') return;
+        const p = playerRef.current;
+        const currentSpeed = (BASE_SPEED + ((levelRef.current - 1) * 0.2)) * p.speedBoost;
+
+        bgOffsets.current.far += currentSpeed * 0.1;
+        bgOffsets.current.mid += currentSpeed * 0.3;
+        bgOffsets.current.near += currentSpeed;
+
+        if (p.x < PLAYER_DEFAULT_X) p.x += 0.8;
+
+        p.animFrameTimer = (p.animFrameTimer || 0) + 1;
+        if (p.animFrameTimer > 8 - Math.min(4, currentSpeed * 0.5)) {
+            p.animFrame = (p.animFrame + 1) % 4; p.animFrameTimer = 0;
+            if (!p.isJumping && !p.isFalling) addParticle(p.x - 10, p.y, '#8d6e63');
+        }
+
+        if (p.airStall && p.isPressing && p.vy > 0) {
+            p.vy *= 0.8; 
+            addParticle(p.x, p.y + 10, '#00ffff');
+        }
+
+        if (p.isJumping && !p.isPressing && p.vy < -2) p.vy *= 0.85; 
+        p.vy += GRAVITY; p.y += p.vy;
+
+        if (p.isFalling && p.y > CANVAS_HEIGHT + 20) { handlePlayerDamage(true); return; }
+
+        let currentGroundLevel = GROUND_Y;
+        let isOnObject = false;
+
+        if (p.cleaningDuty > 0) {
+            addVfxRing(p.x, p.y, '#ffffff');
+            obstaclesRef.current = [];
+            p.cleaningDuty = 0;
+            audioService.playSound('win');
+        }
+
+        const obstacles = obstaclesRef.current;
+        for (const obs of obstacles) {
+            if (obs.type === 'STEPS') {
+                const objectTop = obs.y - obs.height; const objectLeft = obs.x - obs.width / 2; const objectRight = obs.x + obs.width / 2;
+                if (p.x + 15 > objectLeft && p.x - 15 < objectRight) {
+                    if (p.y <= objectTop + 20 && p.vy >= 0) { currentGroundLevel = Math.min(currentGroundLevel, objectTop); isOnObject = true; } 
+                    else if (p.x < obs.x) p.x -= currentSpeed * obs.speedMult;
+                }
+            }
+        }
+
+        const overHole = !isOnObject && obstacles.some(obs => obs.type === 'HOLE' && Math.abs(obs.x - p.x) < obs.width / 2);
+
+        if (p.y >= currentGroundLevel) {
+            if (overHole || p.isFalling) p.isFalling = true;
+            else {
+                if (p.isFalling) p.isFalling = false;
+                if (p.isJumping && p.landShockwave) {
+                    addVfxRing(p.x, currentGroundLevel, '#ffeb3b');
+                    audioService.playSound('block');
+                    obstaclesRef.current = obstaclesRef.current.filter(obs => {
+                        if (obs.isHard) return true;
+                        return Math.abs(obs.x - p.x) > 120;
+                    });
+                }
+                p.y = currentGroundLevel; p.vy = 0; p.isJumping = false; p.jumpCount = 0;
+            }
+        }
+
+        if (p.x < 20) { setGameOverState(); return; }
+        if (p.invulFrame > 0) p.invulFrame--;
+        
+        if (p.barrierRegen && !p.barrier) {
+            p.barrierTimer++;
+            if (p.barrierTimer > 600) { p.barrier = true; p.barrierTimer = 0; audioService.playSound('buff'); }
+        }
+
+        if (p.autoHeal) {
+            p.autoHealTimer++;
+            if (p.autoHealTimer > 1200) { setHp(h => Math.min(maxHp, h + 1)); p.autoHealTimer = 0; audioService.playSound('buff'); }
+        }
+
+        if (p.trailFire && frameCount.current % 10 === 0) {
+            addParticle(p.x - 20, p.y, '#ff4500');
+            obstaclesRef.current = obstaclesRef.current.filter(obs => {
+                if (obs.isHard) return true;
+                return Math.abs(obs.x - (p.x - 40)) > 40;
+            });
+        }
+
+        if (p.shootingRate > 0) {
+            p.shootingTimer++;
+            if (p.shootingTimer >= p.shootingRate) {
+                const angles = p.tripleShot ? [-0.2, 0, 0.2] : [0];
+                const count = p.doubleShot ? 2 : 1;
+                for (const angle of angles) {
+                    for (let i = 0; i < count; i++) {
+                        projectilesRef.current.push({ 
+                            id: Math.random().toString(), x: p.x + 20, y: p.y - 25 - (i * 12), 
+                            vx: (currentSpeed + 12) * Math.cos(angle), 
+                            vy: (currentSpeed + 12) * Math.sin(angle),
+                            isHoming: p.homingShot, isLarge: p.largeShot, isPierce: p.pierceShot
+                        });
+                    }
+                }
+                p.shootingTimer = 0; audioService.playSound('attack');
+            }
+        }
+
+        const projs = projectilesRef.current;
+        for (let i = projs.length - 1; i >= 0; i--) {
+            const pr = projs[i];
+            if (pr.isHoming) {
+                const target = obstaclesRef.current.find(o => o.x > pr.x && !o.isHard);
+                if (target) {
+                    const ang = Math.atan2(target.y - 20 - pr.y, target.x - pr.x);
+                    pr.vx += Math.cos(ang) * 0.5; pr.vy += Math.sin(ang) * 0.5;
+                }
+            }
+            pr.x += pr.vx; pr.y += pr.vy;
+            if (pr.x > CANVAS_WIDTH + 50 || pr.y < -50 || pr.y > CANVAS_HEIGHT + 50) projs.splice(i, 1);
+        }
+
+        const parts = particlesRef.current;
+        for (let i = parts.length - 1; i >= 0; i--) {
+            const part = parts[i]; part.x += part.vx; part.y += part.vy; part.life--;
+            if (part.life <= 0) parts.splice(i, 1);
+        }
+
+        const lastObs = obstacles.length > 0 ? obstacles[obstacles.length - 1] : null;
+        const spawnX = CANVAS_WIDTH + 150;
+        if ((!lastObs || (spawnX - lastObs.x) > MIN_OBSTACLE_GAP) && Math.random() < 0.02 + (levelRef.current * 0.002) && obstacles.length < 5) {
+            const types: Obstacle['type'][] = ['BACKPACK', 'VAULTING', 'CHALKBOARD', 'BIRD', 'IRON_BARRIER', 'HOLE', 'STEPS'];
+            let type = types[Math.floor(Math.random() * types.length)];
+            if (lastObs?.type === 'HOLE' && type === 'HOLE') type = 'BACKPACK';
+            const isAir = type === 'BIRD'; const isHard = type === 'IRON_BARRIER' || type === 'STEPS';
+            obstaclesRef.current.push({ id: Math.random().toString(), x: spawnX, y: isAir ? GROUND_Y - 80 - Math.random() * 60 : (type === 'HOLE' ? GROUND_Y : GROUND_Y - 20), width: type === 'STEPS' ? 120 : (type === 'HOLE' ? 60 : 40), height: type === 'STEPS' ? 60 : 40, type, speedMult: isAir ? 1.3 : 1.0, isHard });
+        }
+
+        for (let i = obstacles.length - 1; i >= 0; i--) {
+            const obs = obstacles[i]; obs.x -= currentSpeed * obs.speedMult;
+            
+            if (p.stompAbility && p.vy > 0 && !obs.isHard && obs.type !== 'HOLE') {
+                const dx = p.x - obs.x;
+                const dy = obs.y - p.y;
+                if (Math.abs(dx) < 40 && dy > 0 && dy < 40) {
+                    p.vy = JUMP_FORCE * 0.7; 
+                    obstacles.splice(i, 1);
+                    audioService.playSound('attack');
+                    scoreRef.current += 100;
+                    addVfxRing(obs.x, obs.y, '#ffffff');
+                    continue;
+                }
+            }
+
+            if (obs.type !== 'HOLE' && obs.type !== 'STEPS') {
+                const pdx = p.x - obs.x; const pdy = (p.y - 20) - (obs.y - 20);
+                if (Math.sqrt(pdx * pdx + pdy * pdy) < 35 && p.invulFrame <= 0) { handlePlayerDamage(false, i); continue; }
+            }
+
+            for (let j = projs.length - 1; j >= 0; j--) {
+                const proj = projs[j]; const rdx = proj.x - obs.x; const rdy = proj.y - obs.y;
+                const hitDist = proj.isLarge ? 50 : 35;
+                if (Math.sqrt(rdx * rdx + rdy * rdy) < hitDist) {
+                    if (obs.isHard) { projs.splice(j, 1); addParticle(proj.x, proj.y, '#94a3b8'); } 
+                    else if (obs.type !== 'HOLE') {
+                        if (!proj.isPierce) projs.splice(j, 1);
+                        obstacles.splice(i, 1); audioService.playSound('attack');
+                        scoreRef.current += 50; addParticle(obs.x, obs.y, '#ffeb3b');
+                        if (p.lifesteal && Math.random() < 0.1) setHp(h => Math.min(maxHp, h + 1));
+                    }
+                    break;
+                }
+            }
+            if (obs.x < -200) obstacles.splice(i, 1);
+        }
+
+        const addExp = 0.1 * (currentSpeed / BASE_SPEED) * p.expMult;
+        expRef.current += addExp;
+        if (expRef.current >= nextLevelExpRef.current) {
+            levelRef.current++; expRef.current = 0; nextLevelExpRef.current += 100;
+            const hasWeapon = p.shootingRate > 0;
+            const availableUpgrades = UPGRADE_POOL.filter(card => {
+                if (card.requiresWeapon && !hasWeapon) return false;
+                return true;
+            });
+            const shuffled = [...availableUpgrades].sort(() => Math.random() - 0.5);
+            setUpgradeOptions(shuffled.slice(0, 3)); 
+            setGameState('CHALLENGE'); 
+            audioService.playBGM('math');
+        }
+        scoreRef.current += (currentSpeed * 0.1 * p.scoreBonus);
+        if (frameCount.current % 10 === 0) { setScore(Math.floor(scoreRef.current)); setExp(expRef.current); setLevel(levelRef.current); setNextLevelExp(nextLevelExpRef.current); }
+    };
+
+    const setGameOverState = () => {
+        setGameState('GAME_OVER');
+        audioService.playSound('lose');
+        storageService.saveGoHomeScore({
+            id: `gohome-${Date.now()}`,
+            date: Date.now(),
+            score: Math.floor(scoreRef.current),
+            level: levelRef.current,
+            distance: Math.floor(scoreRef.current)
+        });
+    };
+
+    const handleChallengeComplete = (correctCount: number) => {
+        if (correctCount >= 3) {
+            setHp(h => Math.min(maxHp, h + 1));
+            audioService.playSound('buff');
+        }
+        setGameState('LEVEL_UP');
+        audioService.playSound('win');
+    };
+
+    const handlePlayerDamage = (isFall: boolean, obsIdx?: number) => {
+        const p = playerRef.current;
+        if (p.barrier) {
+            p.barrier = false;
+            if (isFall) { p.y = GROUND_Y; p.vy = -10; p.isFalling = false; } 
+            else if (obsIdx !== undefined) obstaclesRef.current.splice(obsIdx, 1);
+            if (p.reflectShield) {
+                addVfxRing(p.x, p.y, '#00ffff');
+                obstaclesRef.current = obstaclesRef.current.filter(o => Math.abs(o.x - p.x) > 200);
+            }
+            audioService.playSound('block'); return;
+        }
+        setHp(prev => {
+            const next = prev - 1;
+            if (next <= 0) { setGameOverState(); }
+            return next;
+        });
+        p.invulFrame = 60; audioService.playSound('damage'); triggerShake();
+        if (isFall) { p.y = GROUND_Y; p.vy = 0; p.isFalling = false; }
+    };
+
+    const draw = (ctx: CanvasRenderingContext2D) => {
+        ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        ctx.save();
+        if (shakeRef.current > 0) {
+            ctx.translate((Math.random() - 0.5) * shakeRef.current, (Math.random() - 0.5) * shakeRef.current);
+            shakeRef.current *= 0.9;
+        }
+
+        ctx.fillStyle = '#1e293b'; 
+        ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+        const farOff = bgOffsets.current.far % 400;
+        ctx.fillStyle = '#334155';
+        for (let x = -farOff; x < CANVAS_WIDTH; x += 400) {
+            ctx.beginPath(); ctx.moveTo(x, 280); ctx.lineTo(x + 200, 80); ctx.lineTo(x + 400, 280); ctx.fill();
+        }
+
+        const midOff = bgOffsets.current.mid % 600;
+        for (let x = -midOff; x < CANVAS_WIDTH; x += 600) {
+            ctx.fillStyle = '#475569'; ctx.fillRect(x, 180, 450, 200); ctx.fillStyle = '#94a3b8';
+            for (let r = 0; r < 3; r++) { for (let c = 0; c < 8; c++) { ctx.fillRect(x + 30 + c * 50, 200 + r * 50, 30, 35); } }
+        }
+
+        const nearOff = bgOffsets.current.near % 60;
+        const obstacles = obstaclesRef.current;
+        const holes = obstacles.filter(o => o.type === 'HOLE');
+
+        ctx.fillStyle = '#3e2723';
+        for (let x = 0; x < CANVAS_WIDTH; x += 5) {
+            const isHole = holes.some(h => x >= h.x - h.width / 2 && x <= h.x + h.width / 2);
+            if (!isHole) { ctx.fillRect(x, GROUND_Y, 6, CANVAS_HEIGHT - GROUND_Y); }
+        }
+
+        holes.forEach(hole => {
+            if (hole.x > 0 && hole.x < CANVAS_WIDTH) { ctx.fillStyle = "#ef4444"; ctx.font = "bold 20px monospace"; ctx.textAlign = "center"; ctx.fillText("!", hole.x, GROUND_Y + 30); }
+        });
+
+        ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2;
+        for (let x = -nearOff; x < CANVAS_WIDTH + 60; x += 60) {
+            const isHole = holes.some(h => x >= h.x - h.width / 2 && x <= h.x + h.width / 2);
+            if (!isHole) { ctx.beginPath(); ctx.moveTo(x, GROUND_Y - 40); ctx.lineTo(x, GROUND_Y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, GROUND_Y - 30); ctx.lineTo(x + 60, GROUND_Y - 30); ctx.stroke(); }
+        }
+
+        const parts = particlesRef.current;
+        for (const p of parts) { ctx.fillStyle = p.color; ctx.globalAlpha = p.life / 30; ctx.fillRect(p.x, p.y, p.size, p.size); }
+        ctx.globalAlpha = 1.0;
+
+        const projs = projectilesRef.current;
+        for (const proj of projs) { ctx.fillStyle = '#fbbf24'; const sz = proj.isLarge ? 20 : 10; ctx.fillRect(proj.x, proj.y, sz * 1.4, sz * 0.5); }
+        
+        for (const obs of obstacles) {
+            if (obs.type === 'HOLE') continue;
+            if (obs.type === 'STEPS') {
+                ctx.fillStyle = '#8d6e63'; ctx.strokeStyle = '#2d1b0e'; ctx.lineWidth = 3;
+                ctx.beginPath(); ctx.moveTo(obs.x - obs.width/2, GROUND_Y); ctx.lineTo(obs.x - obs.width/2 + 20, GROUND_Y - obs.height); ctx.lineTo(obs.x + obs.width/2 - 20, GROUND_Y - obs.height); ctx.lineTo(obs.x + obs.width/2, GROUND_Y); ctx.closePath(); ctx.fill(); ctx.stroke();
+            } else if (obs.type === 'IRON_BARRIER') {
+                ctx.shadowBlur = 10; ctx.shadowColor = "#00ffff"; ctx.fillStyle = '#e2e8f0'; ctx.fillRect(obs.x - 20, GROUND_Y - 60, 40, 60); ctx.shadowBlur = 0;
+            } else {
+                const spriteMap: any = { BACKPACK: 'BACKPACK', VAULTING: 'VAULTING', CHALKBOARD: 'NOTEBOOK', BIRD: 'BAT' };
+                const size = 40; const pixelSize = size / 16;
+                const template = SPRITE_TEMPLATES[spriteMap[obs.type] || 'SLIME'] || SPRITE_TEMPLATES.SLIME;
+                for (let row = 0; row < 16; row++) { for (let col = 0; col < 16; col++) { const char = template[row][col]; if (char === '.') continue; ctx.fillStyle = char === '%' ? "#ffffff" : (char === '@' ? '#000000' : (obs.isHard ? '#cbd5e1' : '#ef4444')); ctx.fillRect(obs.x - 20 + col * pixelSize, obs.y - 20 + row * pixelSize, pixelSize + 0.5, pixelSize + 0.5); } }
+            }
+        }
+
+        const pl = playerRef.current;
+        if (pl.invulFrame % 4 < 2) {
+            const bounce = (!pl.isJumping && !pl.isFalling) ? Math.sin(frameCount.current * 0.2) * 3 : 0;
+            ctx.save(); ctx.translate(pl.x, pl.y + bounce);
+            const template = SPRITE_TEMPLATES['HERO_SIDE'];
+            const size = 40; const pixelSize = size / 16;
+            ctx.shadowBlur = 4; ctx.shadowColor = "white";
+            for (let row = 0; row < 16; row++) { for (let col = 0; col < 16; col++) { const char = template[row][col]; if (char === '.') continue; ctx.fillStyle = char === '%' ? '#ffccbc' : (char === '@' ? '#000000' : '#3b82f6'); ctx.fillRect(-20 + col * pixelSize, -40 + row * pixelSize, pixelSize + 0.5, pixelSize + 0.5); } }
+            ctx.shadowBlur = 0;
+            if (pl.barrier) { ctx.strokeStyle = '#00ffff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, -20, 30, 0, Math.PI * 2); ctx.stroke(); }
+            ctx.restore();
+        }
+        ctx.restore();
+        frameCount.current++;
+    };
+
+    useEffect(() => {
+        const loop = () => { if (canvasRef.current) { const ctx = canvasRef.current.getContext('2d'); if (ctx) { updateLogic(); draw(ctx); } } frameIdRef.current = requestAnimationFrame(loop); };
+        frameIdRef.current = requestAnimationFrame(loop);
+        return () => { if (frameIdRef.current) cancelAnimationFrame(frameIdRef.current); };
+    }, []);
+
+    const getCategoryIcon = (id: SubjectCategoryType) => {
+        switch(id) {
+            case 'MATH': return <Brain size={20} />;
+            case 'KANJI': return <Book size={20} />;
+            case 'ENGLISH': return <Languages size={20} />;
+            case 'SCIENCE': return <FlaskConical size={20} />;
+            case 'SOCIAL': return <Globe size={20} />;
+            case 'MAP_PREF': return <MapPin size={20} />;
+            default: return <Home size={20} />;
+        }
+    };
+
+    const getCategoryClasses = (color: string) => {
+        switch (color) {
+            case 'emerald': return { bg: 'bg-emerald-600', hover: 'hover:bg-emerald-500', text: 'text-emerald-400', border: 'border-emerald-900' };
+            case 'cyan': return { bg: 'bg-cyan-600', hover: 'hover:bg-cyan-500', text: 'text-cyan-400', border: 'border-cyan-900' };
+            case 'indigo': return { bg: 'bg-indigo-600', hover: 'hover:bg-indigo-500', text: 'text-indigo-400', border: 'border-indigo-900' };
+            case 'amber': return { bg: 'bg-amber-600', hover: 'hover:bg-amber-500', text: 'text-amber-400', border: 'border-amber-900' };
+            case 'orange': return { bg: 'bg-orange-600', hover: 'hover:bg-orange-500', text: 'text-orange-400', border: 'border-orange-900' };
+            case 'rose': return { bg: 'bg-rose-600', hover: 'hover:bg-rose-500', text: 'text-rose-400', border: 'border-rose-900' };
+            default: return { bg: 'bg-slate-600', hover: 'hover:bg-slate-500', text: 'text-slate-400', border: 'border-slate-900' };
+        }
+    };
+
+    const renderCategoryContent = (cat: SubjectCategoryConfig) => {
+        const theme = getCategoryClasses(cat.color);
+
+        if (cat.uiType === 'grid') {
+            return (
+                <div className={`grid ${cat.id === 'KANJI' ? 'grid-cols-3' : 'grid-cols-2'} gap-1.5`}>
+                {cat.subModes.map(sub => (
+                    <button 
+                        key={sub.id} 
+                        onClick={() => { setSelectedMode(sub.mode); initGame(); }} 
+                        className="bg-slate-800 border border-slate-600 p-1.5 rounded hover:border-white transition-colors text-[10px] md:text-xs font-bold truncate"
+                    >
+                        {sub.name}
+                    </button>
+                ))}
+                </div>
+            );
+        }
+
+        if (cat.uiType === 'grade_term') {
+            const grades = (cat.id === 'SCIENCE' || cat.id === 'MATH_GRADES') ? [1,2,3,4,5,6,7,8,9] : [3,4,5,6,7,8,9];
+            return (
+                <div className="space-y-3">
+                <div className="flex items-start gap-2">
+                    <span className="text-[10px] text-gray-500 whitespace-nowrap mt-1">学年</span>
+                    <div className="flex-1 grid grid-cols-5 gap-1">
+                    {grades.map(g => (
+                        <button 
+                        key={g} 
+                        onClick={() => setSelectedGrade(g)} 
+                        className={`p-1 rounded text-[9px] md:text-[10px] font-bold border transition-colors ${selectedGrade === g ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-400'}`}
+                        >
+                        {g <= 6 ? `${g}年` : `中${g-6}`}
+                        </button>
+                    ))}
+                    </div>
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-gray-500 whitespace-nowrap">学期</span>
+                    <div className="flex-1 flex gap-1">
+                    {[1, 2, 3].map(t => (
+                        <button 
+                        key={t} 
+                        onClick={() => setSelectedTerm(t)} 
+                        className={`flex-1 p-1 rounded text-[10px] font-bold border transition-colors ${selectedTerm === t ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-400'}`}
+                        >
+                        {t}学期
+                        </button>
+                    ))}
+                    </div>
+                </div>
+                <button 
+                    onClick={() => {
+                        let modeString = "";
+                        if (cat.id === 'MATH_GRADES') {
+                            modeString = `MATH_G${selectedGrade}_${selectedTerm}`;
+                        } else if (cat.id === 'SCIENCE') {
+                            if (selectedGrade <= 2) modeString = `LIFE_${selectedGrade}_${selectedTerm}`;
+                            else modeString = `SCIENCE_${selectedGrade}_${selectedTerm}`;
+                        } else {
+                            modeString = `SOCIAL_${selectedGrade}_${selectedTerm}`;
+                        }
+                        setSelectedMode(modeString as GameMode);
+                        initGame();
+                    }} 
+                    className={`w-full ${theme.bg} ${theme.hover} p-2 rounded font-bold text-xs shadow-lg transition-all text-white`}
+                >
+                    この範囲で開始
+                </button>
+                </div>
+            );
+        }
+
+        if (cat.uiType === 'english_mixed') {
+            const words = cat.subModes.filter(s => s.id.startsWith('E_'));
+            const convs = cat.subModes.filter(s => s.id.startsWith('C'));
+            return (
+                <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-1.5">
+                    {words.map(sub => (
+                    <button key={sub.id} onClick={() => { setSelectedMode(sub.mode); initGame(); }} className="bg-slate-800 border border-slate-600 p-1.5 rounded hover:border-indigo-400 text-[10px] font-bold">
+                        {sub.name}
+                    </button>
+                    ))}
+                </div>
+                <div className="h-px bg-slate-700 my-1"></div>
+                <div className="grid grid-cols-3 gap-1.5">
+                    {convs.map(sub => (
+                    <button key={sub.id} onClick={() => { setSelectedMode(sub.mode); initGame(); }} className="bg-pink-900/40 border border-pink-500/50 p-1 rounded hover:bg-pink-800 text-[10px] font-bold">
+                        {sub.name}
+                    </button>
+                    ))}
+                    <button onClick={() => { setSelectedMode(GameMode.ENGLISH_MIXED); initGame(); }} className="bg-indigo-900/60 border border-indigo-500 p-1 rounded hover:bg-indigo-800 text-[10px] font-bold">ミックス</button>
+                </div>
+                </div>
+            );
+        }
+
+        return null;
+    };
+    
+    const getSubjectIcon = (type: DashCardEffect['iconType']) => {
+        switch(type) {
+            case 'MATH': return <Brain className="text-emerald-400" />;
+            case 'SCIENCE': return <Flame className="text-orange-400" />;
+            case 'JAPANESE': return <Book className="text-blue-400" />;
+            case 'PE': return <Wind className="text-cyan-400" />;
+            case 'SOCIAL': return <Target className="text-yellow-400" />;
+        }
+    };
+
+    return (
+        <div className="w-full h-full bg-slate-950 text-white font-mono flex flex-col items-center p-4 relative overflow-hidden touch-none select-none" 
+            onPointerDown={handlePointerDown} onPointerUp={handlePointerUp} onPointerLeave={handlePointerUp}>
+            
+            <div className="w-full flex justify-between items-start z-10 pointer-events-none mb-2">
+                <div className="flex flex-col gap-2">
+                    <div className="flex gap-1">{[...Array(maxHp)].map((_, i) => (<Heart key={i} size={24} className={`${i < hp ? "text-red-500 fill-current" : "text-slate-800"} drop-shadow-lg`} />))}</div>
+                    <div className="bg-black/60 px-3 py-1.5 rounded-xl border-2 border-indigo-500/50 flex flex-col w-48 backdrop-blur-md">
+                        <div className="flex justify-between text-[10px] font-black text-indigo-300"><span>RANK {level}</span><span>{Math.floor(exp)} / {nextLevelExp}</span></div>
+                        <div className="w-full h-1.5 bg-slate-800 rounded-full mt-1 overflow-hidden"><div className="h-full bg-gradient-to-r from-indigo-600 to-purple-400 transition-all" style={{ width: `${(exp / nextLevelExp) * 100}%` }}></div></div>
+                    </div>
+                </div>
+                <div className="text-right">
+                    <div className="text-3xl font-black text-white italic tracking-tighter">{score.toLocaleString()}</div>
+                    <div className="text-[8px] text-indigo-400 font-bold uppercase tracking-widest bg-black/40 px-2 py-0.5 rounded">Distance</div>
+                </div>
+            </div>
+
+            <div className="flex-grow w-full flex flex-col items-center justify-center min-h-0 relative">
+                <div className="w-full relative group">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-[2rem] blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+                    <div className="relative p-1 bg-slate-800 rounded-[2rem] shadow-2xl border-2 border-slate-700 w-full overflow-hidden">
+                        <canvas ref={canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} className="w-full h-auto bg-black rounded-[1.8rem] pixel-art aspect-[2/1]" style={{ imageRendering: 'pixelated' }} />
+                    </div>
+                </div>
+            </div>
+
+            <div className="mt-4 flex flex-col items-center gap-2 pointer-events-none opacity-50 text-[10px] uppercase font-black tracking-widest">
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1"><Move size={12}/>クリックかタップでジャンプ</div>
+                </div>
+            </div>
+
+            {gameState === 'START' && (
+                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/95 animate-in fade-in backdrop-blur-md">
+                    <h2 className="text-6xl md:text-7xl font-black text-orange-500 tracking-tighter italic mb-4 drop-shadow-[4px_4px_0_#000]">帰宅ダッシュ！</h2>
+                    <div className="w-16 h-1 bg-orange-500 mb-8 rounded-full"></div>
+                    <p className="text-slate-400 mb-10 text-center px-8 text-sm md:text-base leading-relaxed">障害物をよけて帰宅せよ！<br/>ミサイルやスキルを駆使してゴールを目指せ。</p>
+                    <button onClick={(e) => { e.stopPropagation(); setGameState('MODE_SELECT'); audioService.playSound('select'); }} className="bg-white text-black px-12 py-5 rounded-3xl font-black text-2xl hover:bg-orange-400 hover:text-white transition-all transform hover:scale-110 shadow-[0_8px_0_#ccc] flex items-center gap-4 active:translate-y-1 active:shadow-none"><Play fill="currentColor" size={32} /> START DASH</button>
+                    <button onClick={(e) => { e.stopPropagation(); onBack(); }} className="mt-12 text-slate-500 hover:text-white flex items-center gap-2 font-bold transition-colors"><ArrowLeft size={20}/> 職員室に戻る</button>
+                </div>
+            )}
+
+            {gameState === 'MODE_SELECT' && (
+                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/95 p-4 animate-in fade-in backdrop-blur-md">
+                    <h2 className="text-2xl md:text-3xl font-black text-orange-400 mb-4 italic tracking-tighter shrink-0">
+                      {trans("モード選択", languageMode)}
+                    </h2>
+                    
+                    <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto custom-scrollbar p-2">
+                    {SUBJECT_CATEGORIES.map(cat => {
+                        const theme = getCategoryClasses(cat.color);
+                        return (
+                        <div key={cat.id} className="bg-slate-800/40 p-4 rounded-xl border border-slate-700 flex flex-col shadow-xl">
+                            <h3 className={`text-lg font-bold ${theme.text} border-b ${theme.border} pb-2 flex items-center mb-4`}>
+                            {getCategoryIcon(cat.id)}
+                            <span className="ml-2">{cat.name}</span>
+                            </h3>
+                            <div className="flex-grow">
+                                {renderCategoryContent(cat)}
+                            </div>
+                        </div>
+                        );
+                    })}
+                    </div>
+
+                    <button onClick={() => setGameState('START')} className="mt-6 text-gray-400 hover:text-white underline flex items-center gap-2 shrink-0">
+                       <ArrowLeft size={16}/> {trans("もどる", languageMode)}
+                    </button>
+                </div>
+            )}
+
+            {gameState === 'CHALLENGE' && (
+                <div className="absolute inset-0 z-[100] w-full h-full pointer-events-auto">
+                    {(() => {
+                        const ChallengeScreen = getChallengeScreenForMode(selectedMode);
+                        const commonProps = { mode: selectedMode, onComplete: handleChallengeComplete, isChallenge: false, streak: 0 };
+                        if (ChallengeScreen === GameScreen.MATH_CHALLENGE) return <MathChallengeScreen {...commonProps} />;
+                        if (ChallengeScreen === GameScreen.KANJI_CHALLENGE) return <KanjiChallengeScreen {...commonProps} />;
+                        if (ChallengeScreen === GameScreen.ENGLISH_CHALLENGE) return <EnglishChallengeScreen {...commonProps} />;
+                        return <GeneralChallengeScreen {...commonProps} />;
+                    })()}
+                </div>
+            )}
+
+            {gameState === 'LEVEL_UP' && (
+                <div className="absolute inset-0 z-[60] flex flex-col items-center justify-center bg-indigo-950/95 p-4 backdrop-blur-md animate-in fade-in" onPointerDown={e => e.stopPropagation()}>
+                    <div className="flex items-center gap-4 mb-10 animate-bounce"><Star size={40} className="text-yellow-400 fill-current" /><h2 className="text-5xl font-black text-white italic tracking-tighter uppercase">Grade Up!</h2><Star size={40} className="text-yellow-400 fill-current" /></div>
+                    <div className="grid grid-cols-1 gap-4 w-full max-w-sm overflow-y-auto max-h-[60vh] p-2 custom-scrollbar">
+                        {upgradeOptions.map(card => (
+                            <div key={card.id} onClick={(e) => { e.stopPropagation(); selectUpgrade(card); }} className="bg-slate-800 border-2 border-slate-600 rounded-3xl p-4 flex items-center text-left transition-all transform hover:scale-102 hover:border-yellow-400 shadow-xl group">
+                                <div className="p-3 bg-black/40 rounded-2xl mr-4 border border-slate-700 group-hover:border-yellow-500/50">{getSubjectIcon(card.iconType)}</div>
+                                <div className="flex-grow"><h3 className="text-lg font-black text-white leading-tight">{card.name}</h3><p className="text-[10px] text-slate-400 font-bold leading-tight mt-1">{card.description}</p></div>
+                                <ChevronRight size={20} className="text-slate-600 group-hover:text-yellow-400 transition-colors ml-2"/>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {gameState === 'GAME_OVER' && (
+                <div className="absolute inset-0 z-[70] flex flex-col items-center justify-center bg-red-950/98 animate-in fade-in backdrop-blur-lg" onPointerDown={e => e.stopPropagation()}>
+                    <Skull size={80} className="text-red-600 mb-6 animate-pulse" /><h2 className="text-7xl font-black text-white mb-2 italic tracking-tighter uppercase">Failed</h2><div className="text-2xl text-yellow-400 mb-12 font-black bg-black/60 px-8 py-3 rounded-full border-2 border-yellow-500/50 italic shadow-xl">DISTANCE: {score.toLocaleString()}m</div>
+                    <div className="flex flex-col gap-4 w-64">
+                        <button onClick={(e) => { e.stopPropagation(); setGameState('MODE_SELECT'); audioService.playSound('select'); }} className="w-full bg-white text-black py-4 rounded-2xl font-black text-xl shadow-[0_6px_0_#ccc] hover:bg-slate-200 transition-all active:translate-y-1 active:shadow-none">TRY AGAIN</button>
+                        <button onClick={(e) => { e.stopPropagation(); onBack(); }} className="w-full bg-slate-800 text-white py-4 rounded-2xl font-black text-xl border-2 border-white/10 hover:bg-slate-700 transition-colors">EXIT</button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default GoHomeDash;

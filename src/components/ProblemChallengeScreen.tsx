@@ -1,12 +1,15 @@
+
 import React, { useState, useEffect } from 'react';
-import { GameMode, LanguageMode } from '../types';
+import { GameMode, LanguageMode, GameScreen } from '../types';
 import { storageService } from '../services/storageService';
 import { audioService } from '../services/audioService';
 import MathChallengeScreen from './MathChallengeScreen';
 import KanjiChallengeScreen from './KanjiChallengeScreen';
 import EnglishChallengeScreen from './EnglishChallengeScreen';
-import { ArrowLeft, Brain, Book, Languages, Music, Play, Trophy, Home, Shuffle, CheckCircle, Target, ChevronRight, LogOut, GraduationCap, Star, Volume2, VolumeX } from 'lucide-react';
+import GeneralChallengeScreen from './GeneralChallengeScreen';
+import { ArrowLeft, Brain, Book, Languages, Music, Play, Trophy, Home, Shuffle, CheckCircle, Target, ChevronRight, LogOut, GraduationCap, Star, Volume2, VolumeX, FlaskConical, Map as MapIcon, Globe, MapPin } from 'lucide-react';
 import { trans } from '../utils/textUtils';
+import { SUBJECT_CATEGORIES, SubjectCategoryConfig, SubModeConfig, getChallengeScreenForMode } from '../subjectConfig';
 
 interface ProblemChallengeScreenProps {
   onBack: () => void;
@@ -43,76 +46,47 @@ const BGM_OPTIONS = [
   { id: 'game_over', name: 'ゲームオーバー' },
 ];
 
-interface SubMode {
-    id: string;
-    name: string;
-    mode: GameMode;
-}
+const getCategoryIcon = (id: string) => {
+    switch(id) {
+        case 'MATH': return <Brain size={20} />;
+        case 'KANJI': return <Book size={20} />;
+        case 'ENGLISH': return <Languages size={20} />;
+        case 'SCIENCE': return <FlaskConical size={20} />;
+        case 'SOCIAL': return <Globe size={20} />;
+        case 'MAP_PREF': return <MapPin size={20} />;
+        default: return <Home size={20} />;
+    }
+};
 
-interface Category {
-    id: string;
-    name: string;
-    icon: React.ReactNode;
-    color: string;
-    subModes: SubMode[];
-}
+// カテゴリカラーからボタンの背景色（強度別）を取得するヘルパー
+const getTailwindColorClass = (color: string, isSelected: boolean) => {
+    switch(color) {
+        case 'emerald': return isSelected ? 'bg-emerald-600' : 'bg-emerald-900/60';
+        case 'cyan': return isSelected ? 'bg-cyan-600' : 'bg-cyan-900/60';
+        case 'indigo': return isSelected ? 'bg-indigo-600' : 'bg-indigo-900/60';
+        case 'amber': return isSelected ? 'bg-amber-600' : 'bg-amber-900/60';
+        case 'orange': return isSelected ? 'bg-orange-600' : 'bg-orange-900/60';
+        case 'rose': return isSelected ? 'bg-rose-600' : 'bg-rose-900/60';
+        default: return isSelected ? 'bg-slate-600' : 'bg-slate-900/60';
+    }
+};
 
-const CATEGORIES: Category[] = [
-  { 
-    id: 'MATH', 
-    name: 'さんすう', 
-    icon: <Brain size={20} />, 
-    color: 'emerald',
-    subModes: [
-        { id: 'ADDITION', name: 'たし算', mode: GameMode.ADDITION },
-        { id: 'SUBTRACTION', name: 'ひき算', mode: GameMode.SUBTRACTION },
-        { id: 'MULTIPLICATION', name: 'かけ算', mode: GameMode.MULTIPLICATION },
-        { id: 'DIVISION', name: 'わり算', mode: GameMode.DIVISION },
-        { id: 'MIXED', name: 'ミックス', mode: GameMode.MIXED },
-    ]
-  },
-  { 
-    id: 'KANJI', 
-    name: 'かんじ', 
-    icon: <Book size={20} />, 
-    color: 'cyan',
-    subModes: [
-        { id: 'K1', name: '小学1年', mode: GameMode.KANJI_1 },
-        { id: 'K2', name: '小学2年', mode: GameMode.KANJI_2 },
-        { id: 'K3', name: '小学3年', mode: GameMode.KANJI_3 },
-        { id: 'K4', name: '小学4年', mode: GameMode.KANJI_4 },
-        { id: 'K5', name: '小学5年', mode: GameMode.KANJI_5 },
-        { id: 'K6', name: '小学6年', mode: GameMode.KANJI_6 },
-        { id: 'K7', name: '中学1年', mode: GameMode.KANJI_7 },
-        { id: 'K8', name: '中学2年', mode: GameMode.KANJI_8 },
-        { id: 'K9', name: '中学3年', mode: GameMode.KANJI_9 },
-        { id: 'K_MIXED', name: 'ミックス', mode: GameMode.KANJI_MIXED },
-    ]
-  },
-  { 
-    id: 'ENGLISH', 
-    name: 'えいご', 
-    icon: <Languages size={20} />, 
-    color: 'indigo',
-    subModes: [
-        { id: 'E_ES', name: '小学校', mode: GameMode.ENGLISH_ES },
-        { id: 'E_J1', name: '中学1年', mode: GameMode.ENGLISH_J1 },
-        { id: 'E_J2', name: '中学2年', mode: GameMode.ENGLISH_J2 },
-        { id: 'E_J3', name: '中学3年', mode: GameMode.ENGLISH_J3 },
-        { id: 'E_MIXED', name: 'ミックス', mode: GameMode.ENGLISH_MIXED },
-        { id: 'C1', name: '会話 Lv1', mode: GameMode.ENGLISH_CONV_1 },
-        { id: 'C2', name: '会話 Lv2', mode: GameMode.ENGLISH_CONV_2 },
-        { id: 'C3', name: '会話 Lv3', mode: GameMode.ENGLISH_CONV_3 },
-        { id: 'C4', name: '会話 Lv4', mode: GameMode.ENGLISH_CONV_4 },
-        { id: 'C5', name: '会話 Lv5', mode: GameMode.ENGLISH_CONV_5 },
-    ]
-  },
-];
+const getGlowColorClass = (color: string) => {
+    switch(color) {
+        case 'emerald': return 'shadow-[0_0_15px_rgba(16,185,129,0.5)]';
+        case 'cyan': return 'shadow-[0_0_15px_rgba(6,182,212,0.5)]';
+        case 'indigo': return 'shadow-[0_0_15px_rgba(79,70,229,0.5)]';
+        case 'amber': return 'shadow-[0_0_15px_rgba(245,158,11,0.5)]';
+        case 'orange': return 'shadow-[0_0_15px_rgba(249,115,22,0.5)]';
+        case 'rose': return 'shadow-[0_0_15px_rgba(244,63,94,0.5)]';
+        default: return 'shadow-[0_0_15px_rgba(255,255,255,0.3)]';
+    }
+};
 
 const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack, languageMode }) => {
   const [phase, setPhase] = useState<'SELECT' | 'CHALLENGE'>('SELECT');
-  const [selectedCategory, setSelectedCategory] = useState<Category>(CATEGORIES[0]);
-  const [selectedSubMode, setSelectedSubMode] = useState<SubMode>(CATEGORIES[0].subModes[0]);
+  const [selectedCategory, setSelectedCategory] = useState<SubjectCategoryConfig>(SUBJECT_CATEGORIES[0]);
+  const [selectedSubMode, setSelectedSubMode] = useState<SubModeConfig>(SUBJECT_CATEGORIES[0].subModes[0]);
   const [selectedBgmId, setSelectedBgmId] = useState('random');
   const [streak, setStreak] = useState(0);
   const [records, setRecords] = useState<Record<string, number>>({});
@@ -126,9 +100,9 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
     setRecords(storageService.getChallengeRecords());
   }, []);
 
-  const handleCategorySelect = (cat: Category) => {
+  const handleCategorySelect = (cat: SubjectCategoryConfig) => {
       setSelectedCategory(cat);
-      setSelectedSubMode(cat.subModes[cat.subModes.length - 1]); 
+      setSelectedSubMode(cat.subModes[0]); 
       audioService.playSound('select');
   };
 
@@ -175,6 +149,8 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
   };
 
   if (phase === 'CHALLENGE') {
+    const ChallengeScreen = getChallengeScreenForMode(selectedSubMode.mode);
+    
     return (
       <div className="w-full h-full relative bg-black flex flex-col">
         <div className="bg-black/80 border-b-2 border-gray-700 p-2 flex justify-between items-center z-50 shrink-0">
@@ -195,7 +171,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
         </div>
 
         <div className="flex-1 min-h-0 relative">
-          {selectedCategory.id === 'MATH' && (
+          {ChallengeScreen === GameScreen.MATH_CHALLENGE && (
             <MathChallengeScreen 
               key={streak} 
               mode={selectedSubMode.mode} 
@@ -204,7 +180,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
               streak={streak}
             />
           )}
-          {selectedCategory.id === 'KANJI' && (
+          {ChallengeScreen === GameScreen.KANJI_CHALLENGE && (
             <KanjiChallengeScreen 
               key={streak}
               mode={selectedSubMode.mode} 
@@ -213,8 +189,17 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
               streak={streak}
             />
           )}
-          {selectedCategory.id === 'ENGLISH' && (
+          {ChallengeScreen === GameScreen.ENGLISH_CHALLENGE && (
             <EnglishChallengeScreen 
+              key={streak}
+              mode={selectedSubMode.mode} 
+              onComplete={handleCompleteOne} 
+              isChallenge={true}
+              streak={streak}
+            />
+          )}
+          {ChallengeScreen === GameScreen.GENERAL_CHALLENGE && (
+            <GeneralChallengeScreen 
               key={streak}
               mode={selectedSubMode.mode} 
               onComplete={handleCompleteOne} 
@@ -254,13 +239,13 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           <div className="lg:col-span-3 flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-x-visible pb-1.5 lg:pb-0 scrollbar-hide">
-            {CATEGORIES.map(cat => (
+            {SUBJECT_CATEGORIES.map(cat => (
               <button
                 key={cat.id}
                 onClick={() => handleCategorySelect(cat)}
-                className={`flex items-center gap-2 p-2.5 md:p-4 rounded-xl border-2 transition-all shrink-0 lg:shrink ${selectedCategory.id === cat.id ? `bg-${cat.color}-900/40 border-${cat.color}-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)]` : 'bg-gray-800 border-gray-700 text-gray-500 hover:border-gray-600'}`}
+                className={`flex items-center gap-2 p-2.5 md:p-4 rounded-xl border-2 transition-all shrink-0 lg:shrink ${selectedCategory.id === cat.id ? `bg-emerald-900/40 border-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)]` : 'bg-gray-800 border-gray-700 text-gray-500 hover:border-gray-600'}`}
               >
-                <span className={selectedCategory.id === cat.id ? `text-${cat.color}-400` : 'text-gray-600'}>{cat.icon}</span>
+                <span className={selectedCategory.id === cat.id ? `text-emerald-400` : 'text-gray-600'}>{getCategoryIcon(cat.id)}</span>
                 <span className="font-bold whitespace-nowrap text-sm md:text-base">{cat.name}</span>
               </button>
             ))}
@@ -270,19 +255,33 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
             <h3 className="text-[10px] md:text-sm font-bold text-gray-400 mb-2 flex items-center gap-2 uppercase tracking-tight">
               <ChevronRight size={12} className="text-emerald-500"/> 種目を選択
             </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 bg-gray-800/50 p-2 rounded-xl border border-gray-700 max-h-32 md:max-h-64 overflow-y-auto custom-scrollbar">
-                {selectedCategory.subModes.map(sub => {
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-black/40 p-3 rounded-xl border border-gray-800 max-h-40 md:max-h-80 overflow-y-auto custom-scrollbar shadow-inner">
+                {selectedCategory.subModes.map((sub, i) => {
                   const recordKey = `${selectedCategory.id}_${sub.id}`;
                   const isSelected = selectedSubMode.id === sub.id;
+                  const buttonColor = getTailwindColorClass(selectedCategory.color, isSelected);
+                  const glowEffect = isSelected ? getGlowColorClass(selectedCategory.color) : '';
+                  
                   return (
                     <button
                       key={sub.id}
                       onClick={() => { setSelectedSubMode(sub); audioService.playSound('select'); }}
-                      className={`flex flex-col p-1.5 rounded-lg border-2 transition-all ${isSelected ? 'bg-emerald-600 border-white text-white shadow-lg' : 'bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-700'}`}
+                      className={`
+                        flex flex-col p-2 rounded-xl border-2 transition-all transform hover:-translate-y-0.5 active:scale-95
+                        ${isSelected 
+                            ? 'border-white z-10 scale-105 ' + glowEffect 
+                            : 'border-transparent opacity-70 hover:opacity-100'} 
+                        ${buttonColor}
+                      `}
                     >
-                      <span className="text-[10px] md:text-xs font-bold mb-0.5 truncate w-full leading-tight">{sub.name}</span>
-                      <div className={`text-[8px] md:text-[10px] font-mono px-1 rounded ${isSelected ? 'bg-emerald-800 text-emerald-200' : 'bg-black/40 text-yellow-500'}`}>
-                        BEST: {records[recordKey] || 0}
+                      <span className="text-[11px] md:text-xs font-black text-white mb-1 truncate w-full leading-tight text-left drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                        {sub.name}
+                      </span>
+                      <div className="flex items-center justify-between mt-auto">
+                        <div className="bg-black/40 px-1.5 rounded text-[8px] md:text-[9px] font-mono text-white/90 border border-white/10">
+                          BEST: {records[recordKey] || 0}
+                        </div>
+                        {isSelected && <CheckCircle size={12} className="text-white animate-pulse" />}
                       </div>
                     </button>
                   );
@@ -318,7 +317,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
                     </h3>
                     <button 
                         onClick={toggleVoice}
-                        className={`flex items-center justify-between px-3 py-2.5 rounded-xl border-2 font-bold transition-all ${voiceEnabled ? 'bg-cyan-900/40 border-cyan-500 text-white' : 'bg-gray-800 border-gray-700 text-gray-500'}`}
+                        className={`flex items-center justify-between px-3 py-2.5 rounded-xl border-2 font-bold transition-all ${voiceEnabled ? 'bg-cyan-900/40 border-cyan-500 text-white' : 'bg-gray-800 border-gray-600 text-gray-500'}`}
                     >
                         <div className="flex items-center gap-2">
                             {voiceEnabled ? <Volume2 size={16} className="text-cyan-400"/> : <VolumeX size={16}/>}
@@ -357,9 +356,5 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
     </div>
   );
 };
-
-const LogOut = ({size}:{size:number}) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-);
 
 export default ProblemChallengeScreen;

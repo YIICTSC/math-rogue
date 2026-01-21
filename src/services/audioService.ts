@@ -7,6 +7,7 @@ class AudioService {
   
   private isMuted: boolean = false;
   private isPlayingBGM: boolean = false;
+  private isLooping: boolean = true;
   private currentBgmType: string | null = null;
   
   // BGM Mode: Default to STUDY
@@ -32,10 +33,13 @@ class AudioService {
   // School Chime (Westminster Quarters): E4, C4, D4, G3 ... G3, D4, E4, C4
   private chimeMelody = [329.63, 261.63, 293.66, 196.00, 0, 0, 0, 0, 196.00, 293.66, 329.63, 261.63, 0, 0, 0, 0];
 
+  // 全楽曲リスト
   private bgmList = [
     'school_psyche', 'dungeon_gym', 'dungeon_science', 'dungeon_music', 
-    'dungeon_library', 'dungeon_roof', 'battle', 'boss', 'dungeon_boss',
-    'kocho_setup', 'kocho_battle', 'kocho_boss'
+    'dungeon_library', 'dungeon_roof', 'battle', 'boss', 'mid_boss', 'final_boss', 'dungeon_boss',
+    'kocho_setup', 'kocho_battle', 'kocho_boss', 'poker_shop', 'poker_play', 'survivor_metal',
+    'paper_plane_battle', 'paper_plane_setup', 'paper_plane_vacation', 'relic_select',
+    'menu', 'map', 'shop', 'event', 'rest', 'reward', 'math', 'victory', 'game_over'
   ];
 
   constructor() {}
@@ -98,8 +102,9 @@ class AudioService {
       // If currently playing, restart with new mode
       if (this.isPlayingBGM && this.currentBgmType) {
           const type = this.currentBgmType;
+          const loop = this.isLooping;
           this.stopBGM();
-          this.playBGM(type as any);
+          this.playBGM(type as any, loop);
       }
   }
 
@@ -120,6 +125,12 @@ class AudioService {
 
   private scheduleNote(beatNumber: number, time: number) {
       if (!this.bgmGain || this.isMuted) return;
+
+      // ランダム再生（ループなし）の場合、一定小節（例：32小節＝512個の16分音符）で次の曲へ
+      if (!this.isLooping && this.current16thNote === 0 && this.total16thNotes > 0 && this.total16thNotes % 512 === 0) {
+          this.playRandomBGM();
+          return;
+      }
 
       let actualTime = time;
       if (this.swing > 0 && (beatNumber % 4 === 2)) {
@@ -647,6 +658,7 @@ class AudioService {
       this.stopBGM();
       this.currentBgmType = type;
       this.isPlayingBGM = true;
+      this.isLooping = loop;
       this.swing = 0; 
       if (this.bgmMode === 'STUDY') return;
 
@@ -660,6 +672,7 @@ class AudioService {
   public async playRandomBGM() {
       const candidates = this.bgmList.filter(t => t !== this.currentBgmType);
       const next = candidates[Math.floor(Math.random() * candidates.length)];
+      // ランダム再生時は自動で次へ行くように loop=false にする
       await this.playBGM(next as any, false);
   }
 

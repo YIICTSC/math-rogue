@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, ScrollText, Calendar, Skull, Trophy, Club, Swords, Timer, Zap, Compass, Mountain, Send, Crown, Users, User, ArrowRight } from 'lucide-react';
-import { RankingEntry, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, KochoScoreEntry, PaperPlaneScoreEntry, VSRecord } from '../types';
+import { ArrowLeft, ScrollText, Calendar, Skull, Trophy, Club, Swords, Timer, Zap, Compass, Mountain, Send, Crown, Users, User, ArrowRight, Rocket } from 'lucide-react';
+import { RankingEntry, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, KochoScoreEntry, PaperPlaneScoreEntry, VSRecord, GoHomeScoreEntry } from '../types';
 import { storageService } from '../services/storageService';
 
 interface RankingScreenProps {
@@ -9,7 +9,7 @@ interface RankingScreenProps {
 }
 
 const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
-  const [activeTab, setActiveTab] = useState<'ADVENTURE' | 'VS' | 'POKER' | 'SURVIVOR' | 'DUNGEON' | 'DUNGEON_2' | 'KOCHO' | 'PLANE'>('ADVENTURE');
+  const [activeTab, setActiveTab] = useState<'ADVENTURE' | 'VS' | 'POKER' | 'SURVIVOR' | 'DUNGEON' | 'DUNGEON_2' | 'KOCHO' | 'PLANE' | 'GO_HOME'>('ADVENTURE');
   const [adventureData, setAdventureData] = useState<RankingEntry[]>([]);
   const [vsData, setVsData] = useState<VSRecord[]>([]);
   const [pokerData, setPokerData] = useState<PokerScoreEntry[]>([]);
@@ -18,6 +18,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
   const [dungeon2Data, setDungeon2Data] = useState<DungeonScoreEntry[]>([]);
   const [kochoData, setKochoData] = useState<KochoScoreEntry[]>([]);
   const [planeData, setPlaneData] = useState<PaperPlaneScoreEntry[]>([]);
+  const [goHomeData, setGoHomeData] = useState<GoHomeScoreEntry[]>([]);
 
   useEffect(() => {
       // 全データを取得し、それぞれの指標で上位順にソート
@@ -32,6 +33,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
           return a.turns - b.turns; // ステージが同じならターン数が少ない方が上位
       }));
       setPlaneData(storageService.getPaperPlaneScores().sort((a, b) => b.score - a.score));
+      setGoHomeData(storageService.getGoHomeScores().sort((a, b) => b.score - a.score));
   }, []);
 
   const formatDate = (ts: number) => {
@@ -77,6 +79,12 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
                     className={`flex items-center px-3 py-2 rounded text-xs md:text-sm font-bold transition-colors whitespace-nowrap ${activeTab === 'SURVIVOR' ? 'bg-red-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
                 >
                     <Skull className="mr-1 md:mr-2" size={16}/> Surv
+                </button>
+                <button 
+                    onClick={() => setActiveTab('GO_HOME')}
+                    className={`flex items-center px-3 py-2 rounded text-xs md:text-sm font-bold transition-colors whitespace-nowrap ${activeTab === 'GO_HOME' ? 'bg-orange-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
+                >
+                    <Rocket className="mr-1 md:mr-2" size={16}/> Dash
                 </button>
                 <button 
                     onClick={() => setActiveTab('DUNGEON')}
@@ -325,6 +333,55 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
                                 {/* Right: Icon */}
                                 <div className="w-full md:w-32 text-right flex justify-end">
                                     <Zap size={24} className="text-gray-600" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )
+            )}
+
+            {activeTab === 'GO_HOME' && (
+                goHomeData.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+                        <Rocket size={48} className="mb-4 opacity-50 text-orange-500" />
+                        <p>帰宅ダッシュの記録はありません。</p>
+                    </div>
+                ) : (
+                    <div className="max-w-4xl mx-auto space-y-3">
+                        {goHomeData.map((entry, idx) => (
+                            <div 
+                                key={idx} 
+                                className="flex flex-col md:flex-row items-start md:items-center p-4 rounded-lg border-l-4 border-orange-500 bg-gray-800 hover:bg-gray-700 shadow-lg transition-colors font-mono"
+                            >
+                                {/* Left: Distance & Date */}
+                                <div className="flex items-center w-full md:w-48 mb-2 md:mb-0 shrink-0">
+                                    <div className="p-2 rounded-full mr-3 bg-orange-900/50 border border-orange-500 text-orange-300">
+                                        <Rocket size={20} />
+                                    </div>
+                                    <div>
+                                        <div className="font-bold text-orange-300 text-xl">
+                                            {entry.distance.toLocaleString()} m
+                                        </div>
+                                        <div className="flex items-center text-[10px] text-gray-500">
+                                            <Calendar size={10} className="mr-1" />
+                                            {formatDate(entry.date)}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Middle: Level */}
+                                <div className="flex-grow mb-2 md:mb-0 px-0 md:px-4">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs bg-orange-900 border border-orange-500 px-2 py-0.5 rounded text-orange-100 font-bold">RANK {entry.level}</span>
+                                    </div>
+                                </div>
+
+                                {/* Right: Score */}
+                                <div className="w-full md:w-32 text-right">
+                                    <div className="text-xs text-gray-500">SCORE</div>
+                                    <div className="text-xl font-mono font-bold text-yellow-400">
+                                        {entry.score.toLocaleString()}
+                                    </div>
                                 </div>
                             </div>
                         ))}

@@ -1,5 +1,5 @@
 
-import { GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState, KochoScoreEntry, PaperPlaneScoreEntry, VSRecord, LanguageMode } from '../types';
+import { GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState, KochoScoreEntry, PaperPlaneScoreEntry, VSRecord, LanguageMode, GoHomeScoreEntry } from '../types';
 
 const STORAGE_KEY_UNLOCKED_CARDS = 'pixel_spire_unlocked_cards_v1';
 const STORAGE_KEY_UNLOCKED_RELICS = 'pixel_spire_unlocked_relics_v1';
@@ -24,7 +24,6 @@ const STORAGE_KEY_POKER_STATE = 'pixel_spire_poker_state_v1';
 
 // For School Dungeon 2
 const STORAGE_KEY_DUNGEON_STATE_2 = 'pixel_spire_dungeon_state_2_v1';
-const STORAGE_KEY_DUNGEING_2 = 'pixel_spire_dungeon_ranking_2_v1';
 const STORAGE_KEY_DUNGEON_RANKING_2 = 'pixel_spire_dungeon_ranking_2_v1';
 
 // For Kocho Showdown
@@ -35,6 +34,9 @@ const STORAGE_KEY_KOCHO_RANKING = 'pixel_spire_kocho_ranking_v1';
 const STORAGE_KEY_PAPER_PLANE_STATE = 'pixel_spire_paper_plane_state_v1';
 const STORAGE_KEY_PAPER_PLANE_PROGRESS = 'pixel_spire_paper_plane_progress_v1';
 const STORAGE_KEY_PAPER_PLANE_RANKING = 'pixel_spire_paper_plane_ranking_v1';
+
+// For Go Home Dash
+const STORAGE_KEY_GO_HOME_RANKING = 'pixel_spire_go_home_ranking_v1';
 
 // --- BATTLE TUTORIAL FLAG ---
 const STORAGE_KEY_SEEN_BATTLE_TUTORIAL = 'pixel_spire_seen_battle_tutorial_v1';
@@ -316,7 +318,7 @@ export const storageService = {
   savePokerState: (state: PokerRunState) => {
       try {
           localStorage.setItem(STORAGE_KEY_POKER_STATE, JSON.stringify(state));
-      } catch (e) { console.warn(prev => prev); }
+      } catch (e) { console.warn("Failed to save poker state", e); }
   },
 
   loadPokerState: (): PokerRunState | null => {
@@ -447,7 +449,7 @@ export const storageService = {
   saveKochoState: (state: any) => {
       try {
           localStorage.setItem(STORAGE_KEY_KOCHO_STATE, JSON.stringify(state));
-      } catch (e) { console.warn(prev => prev); }
+      } catch (e) { console.warn("Failed to save kocho state", e); }
   },
 
   loadKochoState: (): any => {
@@ -484,7 +486,7 @@ export const storageService = {
   savePaperPlaneState: (state: any) => {
       try {
           localStorage.setItem(STORAGE_KEY_PAPER_PLANE_STATE, JSON.stringify(state));
-      } catch (e) { console.warn(prev => prev); }
+      } catch (e) { console.warn("Failed to save paper plane state", e); }
   },
 
   loadPaperPlaneState: (): any => {
@@ -501,7 +503,7 @@ export const storageService = {
   savePaperPlaneProgress: (progress: PaperPlaneProgress) => {
       try {
           localStorage.setItem(STORAGE_KEY_PAPER_PLANE_PROGRESS, JSON.stringify(progress));
-      } catch (e) { console.warn(prev => prev); }
+      } catch (e) { console.warn("Failed to save paper plane progress", e); }
   },
 
   loadPaperPlaneProgress: (): PaperPlaneProgress => {
@@ -510,6 +512,26 @@ export const storageService = {
           if (stored) return JSON.parse(stored);
       } catch (e) { /* ignore */ }
       return { rank: 1, rerollCount: 3, maxClearedLevel: {} };
+  },
+
+  // --- Go Home Dash Scores ---
+  saveGoHomeScore: (entry: GoHomeScoreEntry) => {
+      try {
+          const current = storageService.getGoHomeScores();
+          const updated = [entry, ...current].slice(0, 50);
+          localStorage.setItem(STORAGE_KEY_GO_HOME_RANKING, JSON.stringify(updated));
+      } catch (e) {
+          console.warn("Failed to save go home score", e);
+      }
+  },
+
+  getGoHomeScores: (): GoHomeScoreEntry[] => {
+      try {
+          const stored = localStorage.getItem(STORAGE_KEY_GO_HOME_RANKING);
+          return stored ? JSON.parse(stored) : [];
+      } catch (e) {
+          return [];
+      }
   },
 
   // --- Battle Tutorial Flag ---
@@ -588,7 +610,7 @@ export const storageService = {
           GameScreen.CHARACTER_SELECTION, GameScreen.RANKING, GameScreen.PROBLEM_CHALLENGE,
           GameScreen.MINI_GAME_SELECT, GameScreen.MINI_GAME_POKER, GameScreen.MINI_GAME_SURVIVOR,
           GameScreen.MINI_GAME_DUNGEON, GameScreen.MINI_GAME_DUNGEON_2, GameScreen.MINI_GAME_KOCHO,
-          GameScreen.MINI_GAME_PAPER_PLANE
+          GameScreen.MINI_GAME_PAPER_PLANE, GameScreen.MINI_GAME_GO_HOME
       ];
       if (transientOrMini.includes(state.screen)) { 
           return;
@@ -681,6 +703,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_STATE);
       localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_PROGRESS);
       localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_RANKING);
+      localStorage.removeItem(STORAGE_KEY_GO_HOME_RANKING);
       // NOTE: STORAGE_KEY_LEGACY_CARD はリセット対象から除外（ユーザー要望）
       localStorage.removeItem(STORAGE_KEY_DEBUG_MATH_SKIP);
       localStorage.removeItem(STORAGE_KEY_DEBUG_HP_ONE);

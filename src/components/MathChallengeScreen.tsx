@@ -136,7 +136,7 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
   if (debugSkip) return <div className="w-full h-full bg-black"></div>;
 
   if (problems.length === 0) return (
-      <div className="flex flex-col h-full w-full bg-green-900 text-white items-center justify-center p-8 font-mono">
+      <div className="flex flex-col h-full w-full bg-emerald-950 text-white items-center justify-center p-8 font-mono">
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-yellow-300"></div>
       </div>
   );
@@ -144,7 +144,7 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
   const currentProblem = problems[currentProblemIndex];
 
   return (
-    <div className="flex flex-col h-full w-full bg-green-900 text-white relative items-center justify-center p-8 font-mono">
+    <div className="flex flex-col h-full w-full bg-emerald-950 text-white relative items-center justify-center p-8 font-mono">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/blackboard.png')] opacity-20 pointer-events-none"></div>
         
         <div className="z-10 w-full max-w-md text-center">

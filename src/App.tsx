@@ -9,6 +9,7 @@ import {
   CARDS_LIBRARY, STARTING_DECK_TEMPLATE, STATUS_CARDS, CURSE_CARDS, EVENT_CARDS, RELIC_LIBRARY, TRUE_BOSS, POTION_LIBRARY, CHARACTERS, HERO_IMAGE_DATA, ENEMY_LIBRARY, LIBRARIAN_CARDS, GROWN_PLANTS, GARDEN_SEEDS
 } from './constants';
 import { GAME_STORIES } from './data/stories';
+import { getChallengeScreenForMode } from './subjectConfig'; // New Utility
 import BattleScene from './components/BattleScene';
 import RewardScreen from './components/RewardScreen';
 import FloorResultScreen from './components/FloorResultScreen';
@@ -25,14 +26,11 @@ import RankingScreen from './components/RankingScreen';
 import MathChallengeScreen from './components/MathChallengeScreen';
 import KanjiChallengeScreen from './components/KanjiChallengeScreen';
 import EnglishChallengeScreen from './components/EnglishChallengeScreen';
+import GeneralChallengeScreen from './components/GeneralChallengeScreen';
 import DebugMenuScreen from './components/DebugMenuScreen';
-import PokerGameScreen from './components/PokerGameScreen';
-import SchoolyardSurvivorScreen from './components/SchoolyardSurvivorScreen';
-import SchoolDungeonRPG from './components/SchoolDungeonRPG'; 
-import SchoolDungeonRPG2 from './components/SchoolDungeonRPG2'; 
-import KochoShowdown from './components/KochoShowdown'; 
-import PaperPlaneBattle from './components/PaperPlaneBattle';
 import MiniGameSelectScreen from './components/MiniGameSelectScreen';
+import MiniGameRouter from './components/MiniGameRouter'; // Added
+import { MINI_GAMES } from './miniGameConfig'; // Added
 import DodgeballShooting from './components/DodgeballShooting';
 import FinalBridgeScreen from './components/FinalBridgeScreen';
 import ProblemChallengeScreen from './components/ProblemChallengeScreen';
@@ -40,6 +38,7 @@ import ChefDeckSelectionScreen from './components/ChefDeckSelectionScreen';
 import GardenScreen from './components/GardenScreen';
 import QRManager from './components/QRManager';
 import VSBattleScene from './components/VSBattleScene';
+import ModeSelectionScreen from './components/ModeSelectionScreen'; 
 import Card from './components/Card';
 import { audioService } from './services/audioService';
 import { generateFlavorText, generateEnemyName } from './services/geminiService';
@@ -48,7 +47,7 @@ import { storageService } from './services/storageService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { trans } from './utils/textUtils';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, QrCode } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, QrCode, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft } from 'lucide-react';
 
 const calculateScore = (state: GameState, victory: boolean): number => {
     let score = 0;
@@ -171,32 +170,21 @@ const App: React.FC = () => {
 
   const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-  // --- HELPER: CARD POOL FILTERING ---
   const getFilteredCardPool = (playerId: string | undefined, includeSpecial: boolean = false): ICard[] => {
     const isLibrarian = playerId === 'LIBRARIAN';
     const isGardener = playerId === 'GARDENER';
     
     return Object.values(CARDS_LIBRARY).filter(c => {
-      // 状態異常と呪いは除外
       if (c.type === CardType.STATUS || c.type === CardType.CURSE) return false;
-      
-      // 図書委員カードかどうかの判定
       const isLibCard = Object.values(LIBRARIAN_CARDS).some(lc => lc.name === c.name);
-      
-      // 種カードは園芸委員以外出ない
       if (c.isSeed && !isGardener) return false;
-      // 図書委員専用カードは図書委員以外出ない
       if (isLibCard && !isLibrarian) return false;
-      
-      // レアリティSPECIALのカード（植物成長後、敵カードなど）の扱い
       if (c.rarity === 'SPECIAL') {
         if (!includeSpecial) return false;
-        // SPECIALを含める場合でも、本来の持ち主以外には出さない
         if (isGardener && (c.isSeed || Object.values(GROWN_PLANTS).some(gp => gp.name === c.name))) return true;
         if (isLibrarian && isLibCard) return true;
         return false;
       }
-      
       return true;
     }).map((c, i) => ({ ...c, id: `pool-${i}-${Math.random()}` } as ICard));
   };
@@ -283,10 +271,8 @@ const App: React.FC = () => {
   const [treasureRewards, setTreasureRewards] = useState<RewardItem[]>([]);
   const [clearCount, setClearCount] = useState<number>(0);
 
-  // --- ターン終了処理のロック用 ---
   const isEndingTurnRef = useRef(false);
 
-  // --- PLAY TIME STATES ---
   const [totalPlaySeconds, setTotalPlaySeconds] = useState(() => storageService.getTotalPlayTime());
   const [dailyPlaySeconds, setDailyPlaySeconds] = useState(() => storageService.getDailyPlayTime());
   const [showTimeLimitModal, setShowTimeLimitModal] = useState(false);
@@ -303,9 +289,8 @@ const App: React.FC = () => {
 
   const VICTORY_GOLD = 25;
   
-  const UNLOCK_THRESHOLDS = [1000, 1500, 2000, 2500, 3000, 3500];
+  const UNLOCK_THRESHOLDS = [500, 1000, 1500, 2000, 2500, 3000, 3500];
 
-  // --- TIME TRACKER EFFECT ---
   useEffect(() => {
     const interval = setInterval(() => {
         setTotalPlaySeconds(prev => {
@@ -498,13 +483,54 @@ const App: React.FC = () => {
           return;
       }
       audioService.playSound('select');
-      setGameState(prev => ({ 
-          ...prev, 
+      setIsLoading(false); // Ensure loading is reset
+      setGameState({ 
           screen: GameScreen.MODE_SELECTION,
-          challengeMode: undefined,
+          mode: GameMode.MULTIPLICATION,
+          act: 1,
+          floor: 0,
+          turn: 0,
+          map: [],
+          currentMapNodeId: null,
+          player: {
+            maxHp: INITIAL_HP,
+            currentHp: INITIAL_HP,
+            maxEnergy: INITIAL_ENERGY,
+            currentEnergy: INITIAL_ENERGY,
+            block: 0,
+            strength: 0,
+            gold: 99,
+            deck: createDeck(),
+            hand: [],
+            discardPile: [],
+            drawPile: [],
+            relics: [],
+            potions: [],
+            powers: {},
+            echoes: 0,
+            cardsPlayedThisTurn: 0,
+            attacksPlayedThisTurn: 0,
+            typesPlayedThisTurn: [],
+            relicCounters: {},
+            turnFlags: {},
+            imageData: HERO_IMAGE_DATA,
+            floatingText: null,
+            nextTurnEnergy: 0,
+            nextTurnDraw: 0,
+            codexBuffer: []
+          },
+          enemies: [],
+          selectedEnemyId: null,
+          narrativeLog: [trans("冒険が始まった。", languageMode)],
+          combatLog: [],
+          rewards: [],
+          selectionState: { active: false, type: 'DISCARD', amount: 0 },
+          isEndless: false,
+          parryState: { active: false, enemyId: null, success: false },
+          activeEffects: [],
           currentStoryIndex: Math.floor(Math.random() * GAME_STORIES.length),
           actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
-      }));
+      });
   };
 
   const startChallengeGame = () => {
@@ -514,7 +540,55 @@ const App: React.FC = () => {
           return;
       }
       audioService.playSound('select');
-      setGameState(prev => ({ ...prev, screen: GameScreen.MODE_SELECTION, challengeMode: '1A1D', currentStoryIndex: Math.floor(Math.random() * GAME_STORIES.length), actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 } }));
+      setIsLoading(false);
+      setGameState({ 
+          screen: GameScreen.MODE_SELECTION,
+          mode: GameMode.MULTIPLICATION,
+          act: 1,
+          floor: 0,
+          turn: 0,
+          map: [],
+          currentMapNodeId: null,
+          player: {
+            maxHp: INITIAL_HP,
+            currentHp: INITIAL_HP,
+            maxEnergy: INITIAL_ENERGY,
+            currentEnergy: INITIAL_ENERGY,
+            block: 0,
+            strength: 0,
+            gold: 99,
+            deck: createDeck(),
+            hand: [],
+            discardPile: [],
+            drawPile: [],
+            relics: [],
+            potions: [],
+            powers: {},
+            echoes: 0,
+            cardsPlayedThisTurn: 0,
+            attacksPlayedThisTurn: 0,
+            typesPlayedThisTurn: [],
+            relicCounters: {},
+            turnFlags: {},
+            imageData: HERO_IMAGE_DATA,
+            floatingText: null,
+            nextTurnEnergy: 0,
+            nextTurnDraw: 0,
+            codexBuffer: []
+          },
+          enemies: [],
+          selectedEnemyId: null,
+          narrativeLog: [trans("1A1Dチャレンジ開始！", languageMode)],
+          combatLog: [],
+          rewards: [],
+          selectionState: { active: false, type: 'DISCARD', amount: 0 },
+          isEndless: false,
+          parryState: { active: false, enemyId: null, success: false },
+          activeEffects: [],
+          challengeMode: '1A1D', 
+          currentStoryIndex: Math.floor(Math.random() * GAME_STORIES.length), 
+          actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 } 
+      });
   };
 
   const startProblemChallenge = (e?: React.MouseEvent) => {
@@ -527,36 +601,14 @@ const App: React.FC = () => {
       }));
   };
 
-  const openMiniGameMenu = () => {
+  const handleMiniGameSelect = (screen: GameScreen) => {
       if (isDailyLimitReached) {
           audioService.playSound('wrong');
           setShowTimeLimitModal(true);
           return;
       }
       audioService.playSound('select');
-      setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_SELECT }));
-  };
-
-  const handleMiniGameSelect = (gameId: string) => {
-      if (isDailyLimitReached) {
-          audioService.playSound('wrong');
-          setShowTimeLimitModal(true);
-          return;
-      }
-      audioService.playSound('select');
-      if (gameId === 'POKER') {
-          setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_POKER }));
-      } else if (gameId === 'SURVIVOR') {
-          setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_SURVIVOR }));
-      } else if (gameId === 'DUNGEON') {
-          setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_DUNGEON }));
-      } else if (gameId === 'DUNGEON_2') {
-          setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_DUNGEON_2 }));
-      } else if (gameId === 'KOCHO') {
-          setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_KOCHO }));
-      } else if (gameId === 'PAPER_PLANE') {
-          setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_PAPER_PLANE }));
-      }
+      setGameState(prev => ({ ...prev, screen }));
   };
 
   const startEndlessMode = () => {
@@ -681,7 +733,8 @@ const App: React.FC = () => {
           strength: 0,
           nextIntent: { type: EnemyIntentType.UNKNOWN, value: 0 }, 
           vulnerable: 0, weak: 0, poison: 0, artifact: 0, corpseExplosion: false,
-          floatingText: null
+          floatingText: null,
+          phase: 1
       };
       bossEnemy.nextIntent = getNextEnemyIntent(bossEnemy, 1);
 
@@ -883,7 +936,6 @@ const App: React.FC = () => {
         audioService.playSound('buff');
         const map = generateDungeonMap();
 
-        // 最初のレリック選択後に引き継ぎカードがあるかチェック
         const legacyCard = storageService.getLegacyCard();
         if (legacyCard) {
             const ev = generateLegacyEvent(
@@ -937,11 +989,9 @@ const App: React.FC = () => {
             let enemies: Enemy[] = [];
             let bgmType: 'battle' | 'mid_boss' | 'boss' | 'final_boss' = 'battle'; 
 
-            // デッキ内の最大ダメージ値を計算
             const maxAtkDmg = Math.max(...nextState.player.deck.filter(c => c.type === CardType.ATTACK).map(c => c.damage || 0), 0);
 
             if (gameState.act === 4 && node.type === NodeType.BOSS) {
-                // ラスボス (The Heart)
                 let finalHeartHp = TRUE_BOSS.maxHp;
                 if (maxAtkDmg > finalHeartHp) {
                     finalHeartHp = Math.ceil(maxAtkDmg * 6);
@@ -974,9 +1024,8 @@ const App: React.FC = () => {
                 for (let i = 0; i < numEnemies; i++) {
                     let baseHp = (node.type === NodeType.BOSS ? 150 : 20) * actMultiplier + floorDifficulty * 2 + (node.type === NodeType.ELITE ? 40 : 0);
                     
-                    // 階層ボス(Actボス)のHP強化ロジック
                     if (node.type === NodeType.BOSS && maxAtkDmg > baseHp) {
-                        const multiplier = 2 + gameState.act; // Act 1=2x, Act 2=3x, Act 3=4x
+                        const multiplier = 2 + gameState.act; 
                         baseHp = Math.ceil(maxAtkDmg * multiplier);
                     }
 
@@ -1025,7 +1074,7 @@ const App: React.FC = () => {
             p.echoes = 0;
             p.cardsPlayedThisTurn = 0;
             p.attacksPlayedThisTurn = 0;
-            p.codexBuffer = []; // バトル開始時にリセット
+            p.codexBuffer = []; 
 
             if (p.relics.find(r => r.id === 'VAJRA')) p.strength += 1;
             if (p.relics.find(r => r.id === 'HACHIMAKI')) p.powers['DEXTERITY'] = (p.powers['DEXTERITY'] || 0) + 1;
@@ -1139,7 +1188,6 @@ const App: React.FC = () => {
             for(let i=0; i<5; i++) {
                 if (allPossibleCards.length === 0) break;
                 let candidatePool = allPossibleCards;
-                // 園芸委員の場合は、ショップ枠のいくつかを確定で種にする
                 if (isGardener && i < 2) {
                   candidatePool = Object.values(GARDEN_SEEDS).map(s => ({...s, id: `shop-seed-${i}-${Date.now()}`}) as ICard);
                 }
@@ -1530,12 +1578,11 @@ const App: React.FC = () => {
           currentLogs.push(trans("ネクロノミコンで再発動！", languageMode));
       }
 
-      // --- VFX Type Determination ---
-      let baseVfxType: VFXType = 'SLASH';
+      let baseVfx = 'SLASH';
       if (card.type === CardType.ATTACK) {
-          if (card.name.includes('火') || card.name.includes('炎') || card.name === '焼却炉' || card.name === 'IMMOLATE') baseVfxType = 'FIRE';
-          else if (card.name.includes('雷') || card.name === '静電気' || card.name === 'BALL_LIGHTNING') baseVfxType = 'LIGHTNING';
-          else if (card.name === '大掃除' || card.name === 'FIEND_FIRE') baseVfxType = 'EXPLOSION';
+          if (card.name.includes('火') || card.name.includes('炎') || card.name === '焼却炉' || card.name === 'IMMOLATE') baseVfx = 'FIRE';
+          else if (card.name.includes('雷') || card.name === '静電気' || card.name === 'BALL_LIGHTNING') baseVfx = 'LIGHTNING';
+          else if (card.name === '大掃除' || card.name === 'FIEND_FIRE') baseVfx = 'EXPLOSION';
       }
 
       for (let act = 0; act < activations; act++) {
@@ -1549,7 +1596,7 @@ const App: React.FC = () => {
           const hitsToLog = Math.min(hits, 10);
 
           for (let h = 0; h < hits; h++) {
-              const hitDelay = (act * hits + h) * 80; // Stagger hits visually
+              const hitDelay = (act * hits + h) * 80; 
 
               if (enemies.every(e => e.currentHp <= 0)) break;
               let targets: Enemy[] = [];
@@ -1584,10 +1631,10 @@ const App: React.FC = () => {
                     }
                     let multiplier = 1;
                     if (act === 0 && h === 0 && card.type === CardType.ATTACK && p.relics.find(r => r.id === 'PEN_NIB')) {
-                        p.relicCounters['PEN_NIB'] = (p.relicCounters['PEN_NIB'] || 0) + 1;
-                        if (p.relicCounters['PEN_NIB'] === 10) {
+                        p.relicCounters['ATTACK_COUNT_NIB'] = (p.relicCounters['ATTACK_COUNT_NIB'] || 0) + 1;
+                        if (p.relicCounters['ATTACK_COUNT_NIB'] === 10) {
                             multiplier = 2;
-                            p.relicCounters['PEN_NIB'] = 0;
+                            p.relicCounters['ATTACK_COUNT_NIB'] = 0;
                             logParts.push(`x2(ペン先)`);
                         }
                     }
@@ -1605,17 +1652,16 @@ const App: React.FC = () => {
                     else { damage -= e.block; e.block = 0; }
                     e.currentHp -= damage;
                     
-                    // Enhanced VFX Logic
-                    let finalVfx = baseVfxType;
+                    let finalVfx = baseVfx;
                     if (damage > 15 && finalVfx === 'SLASH') finalVfx = 'CRITICAL';
                     if (e.currentHp <= 0 && (finalVfx === 'SLASH' || finalVfx === 'CRITICAL')) finalVfx = 'EXPLOSION';
 
                     nextActiveEffects.push({ 
                         id: `vfx-${Date.now()}-${Math.random()}`, 
-                        type: finalVfx, 
+                        type: finalVfx as VFXType, 
                         targetId: e.id,
                         delay: hitDelay,
-                        rotation: Math.random() * 360 // Random rotation for variety
+                        rotation: Math.random() * 360 
                     });
 
                     if (e.currentHp <= 0 && e.enemyType === 'THE_HEART' && e.phase === 1) {
@@ -1644,7 +1690,6 @@ const App: React.FC = () => {
                     }
                     if (e.currentHp <= 0) {
                          currentLogs.push(`${trans(e.name, languageMode)}${trans("を倒した！", languageMode)}`);
-                         // Stats increment
                          prev.actStats.enemiesDefeated++;
 
                          if (card.fatalEnergy) p.currentEnergy += card.fatalEnergy;
@@ -1693,7 +1738,7 @@ const App: React.FC = () => {
                              currentLogs.push(`${trans(e.name, languageMode)}を${trans("捕獲した！", languageMode)}`);
                              nextActiveEffects.push({ id: `vfx-cap-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
                          }
-                         if (card.name === '羅生門' || card.id.includes('RASHOMON')) {
+                         if (card.name === '羅生門' || (card.id && card.id.includes('RASHOMON'))) {
                              nextSelectionState = { active: true, type: 'EXHAUST', amount: 1 };
                              currentLogs.push(trans("羅生門：手札1枚を廃棄してください。", languageMode));
                          }
@@ -1874,7 +1919,7 @@ const App: React.FC = () => {
               }
               if (card.addCardToDiscard) {
                    for (let c=0; c<card.addCardToDiscard.count; c++) { 
-                       const template = CARDS_LIBRARY[card.addCardToDiscard.count.cardName];
+                       const template = CARDS_LIBRARY[card.addCardToDiscard.cardName];
                        if (template) p.discardPile.push({ ...template, id: `gen-${Date.now()}-${c}` }); 
                    }
               }
@@ -1986,7 +2031,6 @@ const App: React.FC = () => {
       };
     });
     
-    // Increased duration to allow multi-hit VFX to finish
     setTimeout(() => {
         setGameState(prev => ({ ...prev, activeEffects: [] }));
     }, 1200);
@@ -2113,9 +2157,9 @@ const App: React.FC = () => {
       
       if (p.codexBuffer && p.codexBuffer.length > 0) {
           const uniqueCodexCards = [...p.codexBuffer];
-          p.codexBuffer = []; // バッファを確実にクリア
+          p.codexBuffer = []; 
           uniqueCodexCards.forEach(c => {
-            const newCard = { ...c, id: `codex-hand-${Date.now()}-${Math.random().toString(36).substr(2, 9)}` };
+            const newCard = { ...c, id: `codex-hand-${Date.now()}-${Math.random()}` };
             newHand.push(newCard);
             currentLogs.push(`${trans(newCard.name, languageMode)} を手札に加えた！`);
           });
@@ -2168,7 +2212,6 @@ const App: React.FC = () => {
           nextSelection = { active: true, type: 'DISCARD', amount: 1 };
       }
       
-      // ターンの終了フラグを解除
       isEndingTurnRef.current = false;
 
       return { 
@@ -2198,7 +2241,6 @@ const App: React.FC = () => {
   };
 
   const executeEndTurn = async () => {
-    // すでにターン終了処理中なら重複させない
     if (isEndingTurnRef.current) return;
     isEndingTurnRef.current = true;
 
@@ -2380,7 +2422,7 @@ const App: React.FC = () => {
                         }
                     } else { 
                         unblockedDamage = damage - p.block; 
-                        p.block = 0; 
+ p.block = 0; 
                         const formula = logParts.length > 1 ? `(${logParts.join(' ')}) = ` : '';
                         newLogs.push(`${trans(e.name, languageMode)}から ${formula}${damage} ${trans("ダメージを受けた", languageMode)}`);
                         nextActiveEffects.push({ id: `vfx-eslash-${Date.now()}`, type: 'SLASH', targetId: 'player' });
@@ -2525,7 +2567,7 @@ const App: React.FC = () => {
       setGameState(prev => {
         const nextPlayer = { ...prev.player };
         if (card) {
-          const bufferedCard = { ...card, id: `codex-buf-${Date.now()}-${Math.random().toString(36).substr(2, 9)}` };
+          const bufferedCard = { ...card, id: `codex-buf-${Date.now()}-${Math.random()}` };
           nextPlayer.codexBuffer = [bufferedCard]; 
         }
         return { 
@@ -2660,9 +2702,7 @@ const App: React.FC = () => {
                         currentHp: Math.min(nextPlayer.partner.maxHp, nextPlayer.partner.currentHp + 5) 
                     };
                 }
-                // エンドレスモードでない場合のみエンディングへ遷移
                 if (prev.act === 4 && !prev.isEndless) {
-                    // --- クリア回数の加算とスコアの保存 ---
                     storageService.incrementClearCount();
                     const score = calculateScore(prev, true);
                     storageService.saveScore({
@@ -2681,12 +2721,8 @@ const App: React.FC = () => {
                     audioService.playBGM('victory');
                     return { ...prev, player: nextPlayer, screen: GameScreen.ENDING };
                 } else {
-                    const isKanji = prev.mode.startsWith('KANJI');
-                    const isEnglish = prev.mode.startsWith('ENGLISH');
-                    let targetScreen = GameScreen.MATH_CHALLENGE;
-                    if (isKanji) targetScreen = GameScreen.KANJI_CHALLENGE;
-                    else if (isEnglish) targetScreen = GameScreen.ENGLISH_CHALLENGE;
-                    return { ...prev, player: nextPlayer, screen: targetScreen };
+                    const challengeScreen = getChallengeScreenForMode(prev.mode);
+                    return { ...prev, player: nextPlayer, screen: challengeScreen };
                 }
             });
         } else if (gameState.player.currentHp <= 0) {
@@ -2749,9 +2785,7 @@ const App: React.FC = () => {
             );
         }
         
-        // エリアボス撃破後、リザルト画面へ遷移
         if (currentNode && currentNode.type === NodeType.BOSS) {
-            // エンドレスモード時はストーリーリザルト画面をスキップして直接次のアクトへ
             if (prev.isEndless) {
                 const nextAct = prev.act + 1;
                 const newMap = generateDungeonMap();
@@ -2930,7 +2964,6 @@ const App: React.FC = () => {
 
   const handleNextActFromStory = () => {
       setGameState(prev => {
-          // エンドレスモード時は Final Bridge に行かない
           if (prev.act === 3 && !prev.isEndless) {
               return { ...prev, screen: GameScreen.FINAL_BRIDGE };
           }
@@ -2954,6 +2987,9 @@ const App: React.FC = () => {
           };
       });
   };
+
+  // --- Render logic for screens ---
+  const miniGame = MINI_GAMES.find(g => g.screen === gameState.screen);
 
   return (
     <div className="w-full h-[100dvh] bg-black overflow-hidden">
@@ -3087,7 +3123,7 @@ const App: React.FC = () => {
                                 </button>
 
                                 <button 
-                                    onClick={openMiniGameMenu} 
+                                    onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_SELECT }))} 
                                     className={`flex-1 py-3 px-2 text-sm font-bold border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-indigo-900/80 text-indigo-100 border-indigo-500 hover:bg-indigo-800 hover:shadow-indigo-900/50'}`}
                                 >
                                     <Gamepad2 className="mr-1.5" size={18}/> {trans("ミニゲーム", languageMode)}
@@ -3214,100 +3250,21 @@ const App: React.FC = () => {
                 </div>
             )}
             
-            {gameState.screen === GameScreen.MINI_GAME_POKER && (
+            {/* Generic Mini-Game Router */}
+            {miniGame && (
                 <div className="absolute inset-0">
-                    <PokerGameScreen 
-                        onBack={returnToTitle} 
-                    />
+                    <MiniGameRouter screen={gameState.screen} onBack={returnToTitle} />
                 </div>
             )}
 
-            {gameState.screen === GameScreen.MINI_GAME_SURVIVOR && (
-                <div className="absolute inset-0">
-                    <SchoolyardSurvivorScreen onBack={returnToTitle} />
-                </div>
-            )}
-
-            {gameState.screen === GameScreen.MINI_GAME_DUNGEON && (
-                <div className="absolute inset-0">
-                    <SchoolDungeonRPG onBack={returnToTitle} />
-                </div>
-            )}
-
-            {gameState.screen === GameScreen.MINI_GAME_DUNGEON_2 && (
-                <div className="absolute inset-0">
-                    <SchoolDungeonRPG2 onBack={returnToTitle} />
-                </div>
-            )}
-
-            {gameState.screen === GameScreen.MINI_GAME_KOCHO && (
-                <div className="absolute inset-0">
-                    <KochoShowdown onBack={returnToTitle} />
-                </div>
-            )}
-
-            {gameState.screen === GameScreen.MINI_GAME_PAPER_PLANE && (
-                <div className="absolute inset-0">
-                    <PaperPlaneBattle onBack={returnToTitle} />
-                </div>
+            {gameState.screen === GameScreen.MODE_SELECTION && (
+                <ModeSelectionScreen 
+                  onSelectMode={handleModeSelect} 
+                  onBack={returnToTitle} 
+                  languageMode={languageMode}
+                />
             )}
             
-            {gameState.screen === GameScreen.MODE_SELECTION && (
-                <div className="w-full h-full bg-gray-900 flex flex-col items-center text-white p-4 overflow-y-auto custom-scrollbar">
-                    <div className="w-full max-w-4xl flex flex-col items-center my-auto">
-                        <h2 className="text-3xl font-bold mb-6 text-yellow-400 mt-4">{trans("モード選択", languageMode)}</h2>
-                        
-                        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="space-y-4">
-                                <h3 className="text-xl font-bold text-blue-400 border-b border-blue-900 pb-2 flex items-center"><Brain className="mr-2" /> さんすう</h3>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <button onClick={() => handleModeSelect(GameMode.ADDITION)} className="bg-red-900/60 border border-red-500 p-3 rounded hover:bg-red-800 transition-colors text-sm font-bold flex items-center justify-center gap-2"><Plus size={14}/> たし算</button>
-                                    <button onClick={() => handleModeSelect(GameMode.SUBTRACTION)} className="bg-blue-900/60 border border-blue-500 p-3 rounded hover:bg-blue-800 transition-colors text-sm font-bold flex items-center justify-center gap-2"><Minus size={14}/> ひき算</button>
-                                    <button onClick={() => handleModeSelect(GameMode.MULTIPLICATION)} className="bg-green-900/60 border border-green-500 p-3 rounded hover:bg-green-800 transition-colors text-sm font-bold flex items-center justify-center gap-2"><MultiplyIcon size={14}/> かけ算</button>
-                                    <button onClick={() => handleModeSelect(GameMode.DIVISION)} className="bg-yellow-700/60 border border-yellow-500 p-3 rounded hover:bg-yellow-600 transition-colors text-sm font-bold flex items-center justify-center gap-2"><Divide size={14}/> わり算</button>
-                                    <button onClick={() => handleModeSelect(GameMode.MIXED)} className="col-span-2 bg-purple-900/60 border border-purple-500 p-3 rounded hover:bg-purple-800 transition-colors text-sm font-bold flex items-center justify-center gap-2"><Shuffle size={14}/> ミックス</button>
-                                </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                <h3 className="text-xl font-bold text-cyan-400 border-b border-cyan-900 pb-2 flex items-center"><Book className="mr-2" /> かんじ (読み)</h3>
-                                <div className="grid grid-cols-3 gap-2">
-                                    {[1, 2, 3, 4, 5, 6].map(g => (
-                                        <button key={g} onClick={() => handleModeSelect(`KANJI_${g}` as GameMode)} className="bg-slate-800 border border-slate-600 p-2 rounded hover:border-cyan-400 hover:bg-slate-700 transition-all text-xs font-bold">小{g}</button>
-                                    ))}
-                                    {[7, 8, 9].map(g => (
-                                        <button key={g} onClick={() => handleModeSelect(`KANJI_${g}` as GameMode)} className="bg-slate-800 border border-slate-600 p-2 rounded hover:border-orange-400 hover:bg-slate-700 transition-all text-xs font-bold">中{g-6}</button>
-                                    ))}
-                                    <button onClick={() => handleModeSelect(GameMode.KANJI_MIXED)} className="col-span-3 bg-cyan-900/60 border border-cyan-500 p-3 rounded hover:bg-cyan-800 transition-colors text-sm font-bold flex items-center justify-center gap-2"><Shuffle size={14}/> ミックス</button>
-                                </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                <h3 className="text-xl font-bold text-indigo-400 border-b border-indigo-900 pb-2 flex items-center"><Languages className="mr-2" /> えいたんご (単語)</h3>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <button onClick={() => handleModeSelect(GameMode.ENGLISH_ES)} className="bg-slate-800 border border-slate-600 p-2 rounded hover:border-indigo-400 hover:bg-slate-700 transition-all text-xs font-bold">小学校</button>
-                                    <button onClick={() => handleModeSelect(GameMode.ENGLISH_J1)} className="bg-slate-800 border border-slate-600 p-2 rounded hover:border-indigo-400 hover:bg-slate-700 transition-all text-xs font-bold">中学1年</button>
-                                    <button onClick={() => handleModeSelect(GameMode.ENGLISH_J2)} className="bg-slate-800 border border-slate-600 p-2 rounded hover:border-indigo-400 hover:bg-slate-700 transition-all text-xs font-bold">中学2年</button>
-                                    <button onClick={() => handleModeSelect(GameMode.ENGLISH_J3)} className="bg-slate-800 border border-slate-600 p-2 rounded hover:border-indigo-400 hover:bg-slate-700 transition-all text-xs font-bold">中学3年</button>
-                                    <button onClick={() => handleModeSelect(GameMode.ENGLISH_MIXED)} className="col-span-2 bg-indigo-900/60 border border-indigo-500 p-2 rounded hover:bg-indigo-800 transition-all text-xs font-bold flex items-center justify-center gap-1"><Shuffle size={12}/> ミックス</button>
-                                </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                <h3 className="text-xl font-bold text-pink-400 border-b border-pink-900 pb-2 flex items-center"><MessageSquare className="mr-2" /> えいかいわ (会話)</h3>
-                                <div className="grid grid-cols-3 gap-2">
-                                    {[1, 2, 3, 4, 5].map(lv => (
-                                        <button key={lv} onClick={() => handleModeSelect(`ENGLISH_CONV_${lv}` as GameMode)} className="bg-slate-800 border border-slate-600 p-2 rounded hover:border-pink-400 hover:bg-slate-700 transition-all text-xs font-bold">会話 Lv{lv}</button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        <button onClick={returnToTitle} className="mt-12 text-gray-400 hover:text-white underline mb-8">{trans("もどる", languageMode)}</button>
-                    </div>
-                </div>
-            )}
-
             {gameState.screen === GameScreen.CHARACTER_SELECTION && (
                 <div className="absolute inset-0">
                     <CharacterSelectionScreen 
@@ -3418,6 +3375,16 @@ const App: React.FC = () => {
                 </div>
             )}
 
+            {gameState.screen === GameScreen.GENERAL_CHALLENGE && (
+                <div className="absolute inset-0">
+                    <GeneralChallengeScreen 
+                        mode={gameState.mode} 
+                        onComplete={handleMathChallengeComplete} 
+                        debugSkip={isMathDebugSkipped}
+                    />
+                </div>
+            )}
+
             {gameState.screen === GameScreen.REWARD && (
                 <div className="absolute inset-0">
                     <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading} currentPotions={gameState.player.potions} languageMode={languageMode} />
@@ -3461,7 +3428,7 @@ const App: React.FC = () => {
                                  if (relic.id === 'CURSED_KEY') newP.maxEnergy += 1;
                                  if (relic.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
                                  if (relic.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
-                                 if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
+                                 if (relic.id === 'WAFFLE') { newP.maxHp += 7; p.currentHp = p.maxHp; }
                                  if (relic.id === 'OLD_COIN') newP.gold += 300;
                                  if (relic.id === 'MATRYOSHKA') newP.relicCounters['MATRYOSHKA'] = 2; 
                                  if (relic.id === 'HAPPY_FLOWER') newP.relicCounters['HAPPY_FLOWER'] = 0; 
@@ -3576,7 +3543,7 @@ const App: React.FC = () => {
                                         if (r.value.id === 'CURSED_KEY') newP.maxEnergy += 1;
                                         if (r.value.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
                                         if (r.value.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
-                                        if (r.value.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = p.maxHp; }
+                                        if (r.value.id === 'WAFFLE') { newP.maxHp += 7; p.currentHp = p.maxHp; }
                                         if (r.value.id === 'OLD_COIN') newP.gold += 300;
                                         if (r.value.id === 'MATRYOSHKA') newP.relicCounters['MATRYOSHKA'] = 2; 
                                         if (r.value.id === 'HAPPY_FLOWER') newP.relicCounters['HAPPY_FLOWER'] = 0; 

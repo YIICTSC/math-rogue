@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, XCircle, Languages, Volume2, VolumeX, MessageCircle } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -13,8 +14,12 @@ interface EnglishChallengeScreenProps {
   streak?: number;
 }
 
+interface ExtendedEnglishProblem extends EnglishProblem {
+  actualCorrectAnswer: string;
+}
+
 const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onComplete, mode, debugSkip, isChallenge, streak = 0 }) => {
-  const [problems, setProblems] = useState<EnglishProblem[]>([]);
+  const [problems, setProblems] = useState<ExtendedEnglishProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -23,6 +28,11 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
   
   // Voice feature control
   const [voiceEnabled, setVoiceEnabled] = useState(() => storageService.getEnglishVoiceEnabled());
+
+  const normalize = (s: string) => {
+    if (!s) return "";
+    return s.replace(/\（.*?\）|\(.*?\)/g, "").replace(/[\s　]+/g, "").toLowerCase().trim();
+  };
 
   const speakWord = useCallback((word: string) => {
     if (!('speechSynthesis' in window)) return;
@@ -69,10 +79,14 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
     const shuffled = [...problemPool]
         .sort(() => Math.random() - 0.5)
         .slice(0, count)
-        .map(p => ({
-            ...p,
-            options: [...p.options].sort(() => Math.random() - 0.5)
-        }));
+        .map(p => {
+            const correctAnswer = p.options[0];
+            return {
+                ...p,
+                actualCorrectAnswer: correctAnswer,
+                options: [...p.options].sort(() => Math.random() - 0.5)
+            };
+        });
         
     setProblems(shuffled);
   }, [mode, debugSkip, isChallenge]);
@@ -92,7 +106,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
     setSelectedOption(option);
     setIsAnswered(true);
     
-    const isCorrect = option === problems[currentProblemIndex].answer;
+    const isCorrect = normalize(option) === normalize(problems[currentProblemIndex].actualCorrectAnswer);
     if (isCorrect) {
       setCorrectCount(prev => prev + 1);
       setFeedback('CORRECT');
@@ -120,7 +134,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
 
   if (debugSkip) return <div className="w-full h-full bg-black"></div>;
   if (problems.length === 0) return (
-      <div className="flex flex-col h-full w-full bg-indigo-900 text-white items-center justify-center p-8 font-mono">
+      <div className="flex flex-col h-full w-full bg-indigo-950 text-white items-center justify-center p-8 font-mono">
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-yellow-300"></div>
       </div>
   );
@@ -129,7 +143,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
   const isConv = currentProblem.isDialogue;
 
   return (
-    <div className="flex flex-col h-full w-full bg-indigo-900 text-white relative items-center justify-center p-4 md:p-8 font-mono">
+    <div className="flex flex-col h-full w-full bg-indigo-950 text-white relative items-center justify-center p-4 md:p-8 font-mono">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-20 pointer-events-none"></div>
         
         {/* Header with Voice Toggle */}
@@ -206,8 +220,8 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
                         className={`
                             py-2.5 px-4 font-bold rounded-xl border-b-4 transition-all active:border-b-0 active:translate-y-1
                             ${isConv ? 'text-left text-[13px] md:text-base' : 'text-center text-base md:text-lg'}
-                            ${isAnswered && opt === currentProblem.answer ? 'bg-green-600 border-green-800 scale-102' : ''}
-                            ${isAnswered && opt === selectedOption && opt !== currentProblem.answer ? 'bg-red-600 border-red-800' : ''}
+                            ${isAnswered && normalize(opt) === normalize(currentProblem.actualCorrectAnswer) ? 'bg-green-600 border-green-800 scale-102' : ''}
+                            ${isAnswered && opt === selectedOption && normalize(opt) !== normalize(currentProblem.actualCorrectAnswer) ? 'bg-red-600 border-red-800' : ''}
                             ${!isAnswered ? 'bg-indigo-700 border-indigo-900 hover:bg-indigo-600 cursor-pointer' : 'opacity-80'}
                             break-words leading-tight shadow-lg
                         `}
