@@ -2132,7 +2132,7 @@ const App: React.FC = () => {
         if (card) {
             if (card.name === '虚無' || card.name === 'VOID') {
                 p.currentEnergy = Math.max(0, p.currentEnergy - 1);
-                p.floatingText = { id: `void-turn-${Date.now()}-${j}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
+                p.floatingText = { id: `void-turn-${Date.now()}-${i}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
             }
             if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && card.cost >= 0) {
                 card.cost = Math.floor(Math.random() * 4);
