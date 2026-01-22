@@ -1681,8 +1681,8 @@ const App: React.FC = () => {
                         e.currentHp = e.maxHp;
                         e.phase = 2;
                         e.name = "真・校長先生";
-                        enemy.poison = 0; enemy.weak = 0; enemy.vulnerable = 0;
-                        enemy.floatingText = { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' };
+                        e.poison = 0; e.weak = 0; e.vulnerable = 0;
+                        e.floatingText = { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' };
                         currentLogs.push("校長先生が真の姿を現した！");
                         nextActiveEffects.push({ id: `vfx-evo-${Date.now()}`, type: 'BUFF', targetId: e.id, delay: hitDelay + 200 });
                     }
