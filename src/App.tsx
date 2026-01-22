@@ -989,7 +989,13 @@ const App: React.FC = () => {
             let enemies: Enemy[] = [];
             let bgmType: 'battle' | 'mid_boss' | 'boss' | 'final_boss' = 'battle'; 
 
-            const maxAtkDmg = Math.max(...nextState.player.deck.filter(c => c.type === CardType.ATTACK).map(c => c.damage || 0), 0);
+            // ボスHP計算ロジック：デッキ内の攻撃期待値（damage * 回数）の最大値を考慮する
+            const maxAtkDmg = Math.max(...nextState.player.deck.filter(c => c.type === CardType.ATTACK).map(c => {
+                const base = c.damage || 0;
+                // 回数攻撃（playCopies）を考慮。playCopies:1 は 2回攻撃なので 1 + playCopies
+                const hits = 1 + (c.playCopies || 0);
+                return base * hits;
+            }), 0);
 
             if (gameState.act === 4 && node.type === NodeType.BOSS) {
                 let finalHeartHp = TRUE_BOSS.maxHp;
@@ -2126,7 +2132,7 @@ const App: React.FC = () => {
         if (card) {
             if (card.name === '虚無' || card.name === 'VOID') {
                 p.currentEnergy = Math.max(0, p.currentEnergy - 1);
-                p.floatingText = { id: `void-turn-${Date.now()}-${i}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
+                p.floatingText = { id: `void-turn-${Date.now()}-${j}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
             }
             if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && card.cost >= 0) {
                 card.cost = Math.floor(Math.random() * 4);
