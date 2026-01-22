@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   GameState, GameScreen, Enemy, Card as ICard, 
@@ -291,6 +290,13 @@ const App: React.FC = () => {
   
   const UNLOCK_THRESHOLDS = [500, 1000, 1500, 2000, 2500, 3000, 3500];
 
+  const addLog = useCallback((msg: string, color: string = 'white') => {
+    setGameState(prev => ({
+      ...prev,
+      combatLog: [...prev.combatLog, msg].slice(-100)
+    }));
+  }, []);
+
   useEffect(() => {
     const interval = setInterval(() => {
         setTotalPlaySeconds(prev => {
@@ -472,7 +478,7 @@ const App: React.FC = () => {
           } else {
               audioService.playBGM('map');
           }
-          addLog("冒険を再開した。", "blue");
+          addLog(trans("冒険を再開した。", languageMode), "blue");
       }
   };
 
@@ -1410,7 +1416,7 @@ const App: React.FC = () => {
                       p.potions.push(randomPot);
                   }
               }
-              newLogs.push(trans("闇鍋ジュースでポーション充填", languageMode));
+              newLogs.push(trans("小箱からポーション充填", languageMode));
           }
 
           const remainingEnemies = enemies.filter(e => e.currentHp > 0);
@@ -1452,6 +1458,7 @@ const App: React.FC = () => {
       const currentLogs: string[] = [`> ${trans(card.name, languageMode)} ${trans("を使用", languageMode)}`];
       const nextActiveEffects: VisualEffectInstance[] = [];
       let nextSelectionState = { ...prev.selectionState };
+      const nextActStats = prev.actStats ? { ...prev.actStats } : { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 };
 
       if (card.name === '学習アルゴリズム' || card.name === 'GENETIC_ALGORITHM') {
           p.deck = p.deck.map(c => {
@@ -1671,13 +1678,13 @@ const App: React.FC = () => {
                     });
 
                     if (e.currentHp <= 0 && e.enemyType === 'THE_HEART' && e.phase === 1) {
-                         e.currentHp = e.maxHp; 
-                         e.phase = 2; 
-                         e.name = "真・校長先生"; 
-                         e.vulnerable = 0; e.weak = 0; e.poison = 0; 
-                         e.floatingText = { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' };
-                         currentLogs.push("校長先生が真の姿を現した！");
-                         nextActiveEffects.push({ id: `vfx-evo-${Date.now()}`, type: 'BUFF', targetId: e.id, delay: hitDelay + 200 });
+                        e.currentHp = e.maxHp;
+                        e.phase = 2;
+                        e.name = "真・校長先生";
+                        enemy.poison = 0; enemy.weak = 0; enemy.vulnerable = 0;
+                        enemy.floatingText = { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' };
+                        currentLogs.push("校長先生が真の姿を現した！");
+                        nextActiveEffects.push({ id: `vfx-evo-${Date.now()}`, type: 'BUFF', targetId: e.id, delay: hitDelay + 200 });
                     }
                     if (damage > 0 || logParts.length > 1) {
                         if (h % 5 === 0 || h === hits - 1) {
@@ -1696,7 +1703,7 @@ const App: React.FC = () => {
                     }
                     if (e.currentHp <= 0) {
                          currentLogs.push(`${trans(e.name, languageMode)}${trans("を倒した！", languageMode)}`);
-                         prev.actStats.enemiesDefeated++;
+                         nextActStats.enemiesDefeated++;
 
                          if (card.fatalEnergy) p.currentEnergy += card.fatalEnergy;
                          if (card.fatalPermanentDamage) {
@@ -2032,6 +2039,7 @@ const App: React.FC = () => {
         enemies: aliveEnemies, 
         selectedEnemyId: nextSelectedId, 
         selectionState: nextSelectionState, 
+        actStats: nextActStats,
         combatLog: [...prev.combatLog, ...currentLogs].slice(-100),
         activeEffects: [...prev.activeEffects, ...nextActiveEffects]
       };
@@ -2129,7 +2137,7 @@ const App: React.FC = () => {
           newDiscardPile = [];
         }
         const card = newDrawPile.pop();
-        if (card) {
+        if (card) { 
             if (card.name === '虚無' || card.name === 'VOID') {
                 p.currentEnergy = Math.max(0, p.currentEnergy - 1);
                 p.floatingText = { id: `void-turn-${Date.now()}-${i}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
@@ -2428,7 +2436,7 @@ const App: React.FC = () => {
                         }
                     } else { 
                         unblockedDamage = damage - p.block; 
- p.block = 0; 
+                        p.block = 0; 
                         const formula = logParts.length > 1 ? `(${logParts.join(' ')}) = ` : '';
                         newLogs.push(`${trans(e.name, languageMode)}から ${formula}${damage} ${trans("ダメージを受けた", languageMode)}`);
                         nextActiveEffects.push({ id: `vfx-eslash-${Date.now()}`, type: 'SLASH', targetId: 'player' });
@@ -2573,7 +2581,7 @@ const App: React.FC = () => {
       setGameState(prev => {
         const nextPlayer = { ...prev.player };
         if (card) {
-          const bufferedCard = { ...card, id: `codex-buf-${Date.now()}-${Math.random()}` };
+          const bufferedCard = { ...card, id: `codex-hand-${Date.now()}-${Math.random()}` };
           nextPlayer.codexBuffer = [bufferedCard]; 
         }
         return { 
@@ -2838,7 +2846,7 @@ const App: React.FC = () => {
 
   const goToRewardPhase = (bonusGold: number = 0) => {
       const rewards: RewardItem[] = [];
-      const isLibrarian = gameState.player.id === 'LIBRARian';
+      const isLibrarian = gameState.player.id === 'LIBRARIAN';
       const isGardener = gameState.player.id === 'GARDENER';
       if (bonusGold > 0) {
           let goldReward = bonusGold;
@@ -3003,7 +3011,7 @@ const App: React.FC = () => {
             
             {showTimeLimitModal && (
                 <div className="fixed inset-0 z-10000 bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-300">
-                    <div className="bg-gray-900 border-4 border-red-600 p-8 rounded-2xl max-w-sm w-full shadow-[0_0_50px_rgba(220,38,38,0.5)] text-center transform scale-110">
+                    <div className="bg-gray-900 border-4 border-red-600 p-8 rounded-2xl max-sm w-full shadow-[0_0_50px_rgba(220,38,38,0.5)] text-center transform scale-110">
                         <TimerOff size={64} className="text-red-500 mx-auto mb-6 animate-pulse" />
                         <h2 className="text-3xl font-black text-white mb-4 tracking-tighter">時間切れ！</h2>
                         <p className="text-gray-300 mb-8 leading-relaxed font-bold">
@@ -3084,13 +3092,18 @@ const App: React.FC = () => {
 
                         <div className="flex flex-col gap-3 items-center w-full max-w-[320px]">
                             {hasSave && (
-                                <button 
-                                    onClick={continueGame} 
-                                    className={`w-full py-3 px-4 text-lg font-bold border-b-4 border-r-4 rounded-none cursor-pointer flex items-center justify-center shadow-lg relative group overflow-hidden animate-in fade-in slide-in-from-top-2 ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-blue-900 text-white border-blue-400 hover:bg-blue-800'}`}
-                                >
-                                    {!isDailyLimitReached && <div className="absolute inset-0 bg-blue-600 opacity-0 group-hover:opacity-20 transition-opacity"></div>}
-                                    <Play className="mr-2 fill-current" /> {trans("つづきから", languageMode)}
-                                </button>
+                                <>
+                                    <div className="text-[10px] text-red-400 font-bold animate-pulse mb-[-8px]">
+                                        ※ゲームがフリーズする場合、冒険を始めるからやり直してください
+                                    </div>
+                                    <button 
+                                        onClick={continueGame} 
+                                        className={`w-full py-3 px-4 text-lg font-bold border-b-4 border-r-4 rounded-none cursor-pointer flex items-center justify-center shadow-lg relative group overflow-hidden animate-in fade-in ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-blue-900 text-white border-blue-400 hover:bg-blue-800'}`}
+                                    >
+                                        {!isDailyLimitReached && <div className="absolute inset-0 bg-blue-600 opacity-0 group-hover:opacity-20 transition-opacity"></div>}
+                                        <Play className="mr-2 fill-current" /> {trans("つづきから", languageMode)}
+                                    </button>
+                                </>
                             )}
                             <button 
                                 onClick={startGame} 
@@ -3363,7 +3376,7 @@ const App: React.FC = () => {
 
             {gameState.screen === GameScreen.KANJI_CHALLENGE && (
                 <div className="absolute inset-0">
-                    <KanjiChallengeScreen 
+                    <InputChallengeScreen 
                         mode={gameState.mode} 
                         onComplete={handleMathChallengeComplete} 
                         debugSkip={isMathDebugSkipped}
@@ -3434,7 +3447,7 @@ const App: React.FC = () => {
                                  if (relic.id === 'CURSED_KEY') newP.maxEnergy += 1;
                                  if (relic.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
                                  if (relic.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
-                                 if (relic.id === 'WAFFLE') { newP.maxHp += 7; p.currentHp = p.maxHp; }
+                                 if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
                                  if (relic.id === 'OLD_COIN') newP.gold += 300;
                                  if (relic.id === 'MATRYOSHKA') newP.relicCounters['MATRYOSHKA'] = 2; 
                                  if (relic.id === 'HAPPY_FLOWER') newP.relicCounters['HAPPY_FLOWER'] = 0; 
@@ -3549,7 +3562,7 @@ const App: React.FC = () => {
                                         if (r.value.id === 'CURSED_KEY') newP.maxEnergy += 1;
                                         if (r.value.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
                                         if (r.value.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
-                                        if (r.value.id === 'WAFFLE') { newP.maxHp += 7; p.currentHp = p.maxHp; }
+                                        if (r.value.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
                                         if (r.value.id === 'OLD_COIN') newP.gold += 300;
                                         if (r.value.id === 'MATRYOSHKA') newP.relicCounters['MATRYOSHKA'] = 2; 
                                         if (r.value.id === 'HAPPY_FLOWER') newP.relicCounters['HAPPY_FLOWER'] = 0; 
