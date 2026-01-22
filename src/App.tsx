@@ -3376,7 +3376,7 @@ const App: React.FC = () => {
 
             {gameState.screen === GameScreen.KANJI_CHALLENGE && (
                 <div className="absolute inset-0">
-                    <InputChallengeScreen 
+                    <KanjiChallengeScreen 
                         mode={gameState.mode} 
                         onComplete={handleMathChallengeComplete} 
                         debugSkip={isMathDebugSkipped}
