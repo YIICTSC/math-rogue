@@ -1,4 +1,3 @@
-
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode, ParryState, VisualEffectInstance } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
 import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles, MessageCircle, Mic, ArrowRight, MousePointer2, ChevronsRight, Flame, RotateCcw } from 'lucide-react';
@@ -411,7 +410,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
       return keywords;
   };
 
-  const hasChoker = !!player.relics.find(r => r.id === 'VELVET_CHOKER');
+  const findRelic = (relicId: string) => player.relics.find(r => r.id === relicId);
+  const hasChoker = !!findRelic('VELVET_CHOKER');
   
   const hasNormality = player.hand.some(c => c.name === '退屈' || c.name === 'NORMALITY');
   const normalityRestricted = hasNormality && player.cardsPlayedThisTurn >= 3;

@@ -1,3 +1,4 @@
+
 import { GeneralProblem, d } from './utils';
 
 export const MATH_G1_DATA: Record<string, GeneralProblem[]> = {
@@ -61,7 +62,7 @@ export const MATH_G1_DATA: Record<string, GeneralProblem[]> = {
         { question: "10が 2つで いくつ？", answer: "20", options: d("20", "10", "2", "12"), hint: "じゅう、にじゅう…。" },
         { question: "「9 ＋ 6 ＝ 」 こたえは？", answer: "15", options: d("15", "14", "16", "13"), hint: "くりあがり が あるよ。" },
         { question: "「15 － 7 ＝ 」 こたえは？", answer: "8", options: d("8", "9", "7", "6"), hint: "くりさがり が あるよ。" },
-        { question: "とけいの ながい はりが 6 のとき、なんぷん？", answer: "30ぷん", options: d("30ぷん", "6ぷん", "12ぷん", "0ぷん"), hint: "はんぶん まわったよ。" },
+        { question: "とけいの ながい はりが 6 のとき、なんという？", answer: "～じはん", options: d("～じはん", "～じ", "30ぷん", "6じ"), hint: "1年生は「半（はん）」という読み方をならうよ。" },
         { question: "「10 ＋ 10 ＝ 」 こたえは？", answer: "20", options: d("20", "10", "0", "100"), hint: "10が 2つ。" },
         { question: "「12 － 4 ＝ 」 こたえは？", answer: "8", options: d("8", "7", "9", "4"), hint: "10から 4を ひいて 2を たそう。" },
         { question: "「7 ＋ 7 ＝ 」 こたえは？", answer: "14", options: d("14", "7", "0", "10"), hint: "おなじ かずを たすよ。" },
@@ -117,7 +118,7 @@ export const MATH_G1_DATA: Record<string, GeneralProblem[]> = {
         { question: "40 は 10が なにこ？", answer: "4こ", options: d("4こ", "40こ", "1こ", "10こ"), hint: "じゅう、にじゅう、さんじゅう…。" },
         { question: "「25 ＋ 4 ＝ 」 こたえは？", answer: "29", options: d("29", "21", "20", "30"), hint: "5 ＋ 4 は？" },
         { question: "「37 － 7 ＝ 」 こたえは？", answer: "30", options: d("30", "37", "7", "44"), hint: "7を ひくと きりがいいね。" },
-        { question: "1じかん は なんぷん？", answer: "60ぷん", options: d("60ぷん", "10ぷん", "100ぷん", "24ぷん"), hint: "ながい はりが いっしゅう するよ。" },
+        { question: "とけいの ながい はりと みじかい はりが 12 の ところで かさなると なんじ？", answer: "12じ", options: d("12じ", "6じ", "0じ", "12じはん"), hint: "お昼のチャイムが鳴る時間だね。" },
         { question: "「6 ＋ 8 ＝ 」 こたえは？", answer: "14", options: d("14", "12", "16", "2"), hint: "くりあがり の れんしゅう。" },
         { question: "「15 － 9 ＝ 」 こたえは？", answer: "6", options: d("6", "5", "4", "7"), hint: "くりさがりの れんしゅう。" },
         { question: "100より 10 ちいさい かずは？", answer: "90", options: d("90", "100", "80", "10"), hint: "じゅう、にじゅう…きゅうじゅう。" },

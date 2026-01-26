@@ -19,16 +19,20 @@ interface ExtendedKanjiProblem extends KanjiProblem {
 }
 
 const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete, mode, debugSkip, isChallenge, streak = 0 }) => {
-  const [problems, setProblems] = useState<ExtendedKanjiProblem[]>([]);
+  const [problems, setProblems] = useState<ExtendedGeneralProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [feedback, setFeedback] = useState<'CORRECT' | 'WRONG' | null>(null);
 
+  // 表記のゆらぎ（スペース、括弧内の補足、全角半角など）を排除して比較する関数
   const normalize = (s: string) => {
     if (!s) return "";
-    return s.replace(/\（.*?\）|\(.*?\)/g, "").replace(/[\s　]+/g, "").trim();
+    return s
+      .replace(/\（.*?\）|\(.*?\)/g, "") // （）や()の中身を削除
+      .replace(/[\s　]+/g, "")           // 全角・半角スペースを削除
+      .trim();
   };
 
   useEffect(() => {
@@ -58,10 +62,12 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
         .sort(() => Math.random() - 0.5)
         .slice(0, count)
         .map(p => {
+            // 指示通り、options[0]を絶対的な正解として保持する
             const correctAnswer = p.options[0];
             return {
                 ...p,
                 actualCorrectAnswer: correctAnswer,
+                // 表示用にはシャッフルした選択肢を渡す
                 options: [...p.options].sort(() => Math.random() - 0.5)
             };
         });
@@ -75,7 +81,9 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
     setSelectedOption(option);
     setIsAnswered(true);
     
+    // 選択された文字列と、保持していた正解文字列を正規化して比較
     const isCorrect = normalize(option) === normalize(problems[currentProblemIndex].actualCorrectAnswer);
+    
     if (isCorrect) {
       setCorrectCount(prev => prev + 1);
       setFeedback('CORRECT');

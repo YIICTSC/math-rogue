@@ -31,7 +31,11 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
 
   const normalize = (s: string) => {
     if (!s) return "";
-    return s.replace(/\（.*?\）|\(.*?\)/g, "").replace(/[\s　]+/g, "").toLowerCase().trim();
+    return s
+      .replace(/\（.*?\）|\(.*?\)/g, "") // 括弧削除
+      .replace(/[\s　]+/g, "")           // 空白削除
+      .toLowerCase()                     // 英語は小文字に統一
+      .trim();
   };
 
   const speakWord = useCallback((word: string) => {
@@ -80,6 +84,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
         .sort(() => Math.random() - 0.5)
         .slice(0, count)
         .map(p => {
+            // インデックス0を正解として保持
             const correctAnswer = p.options[0];
             return {
                 ...p,

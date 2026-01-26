@@ -38,7 +38,10 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
 
   const normalize = (s: string) => {
     if (!s) return "";
-    return s.replace(/\（.*?\）|\(.*?\)/g, "").replace(/[\s　]+/g, "").trim();
+    return s
+      .replace(/\（.*?\）|\(.*?\)/g, "") // 括弧削除
+      .replace(/[\s　]+/g, "")           // 空白削除
+      .trim();
   };
 
   useEffect(() => {
@@ -62,7 +65,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
         .sort(() => Math.random() - 0.5)
         .slice(0, count)
         .map(p => {
-            // データ定義上の最初の選択肢が常に正解
+            // 指示通り、options[0]を絶対的な正解として保持する
             const correctAnswer = p.options[0];
             return {
                 ...p,
@@ -80,7 +83,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     setSelectedOption(option);
     setIsAnswered(true);
     
-    // actualCorrectAnswer（選択肢の中の正解文字列）と比較する
+    // actualCorrectAnswer（インデックス0から抽出した文字列）と比較する
     const isCorrect = normalize(option) === normalize(problems[currentProblemIndex].actualCorrectAnswer);
     
     if (isCorrect) {
