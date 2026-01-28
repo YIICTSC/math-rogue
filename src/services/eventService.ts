@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Player, GameState, GameScreen, CardType, Card, TargetType } from '../types';
 import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY, CURSE_CARDS, EVENT_CARDS, STATUS_CARDS } from '../constants';
@@ -101,12 +102,36 @@ export const generateEvent = (
         const idx = Math.floor(Math.random() * deck.length);
         const removed = deck[idx];
         deck.splice(idx, 1);
-        setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+        
+        // 寄生虫のペナルティ処理を共通化
+        let maxHpPenalty = 0;
+        if (removed.name === '寄生虫' || removed.name === 'PARASITE') {
+            maxHpPenalty = 3;
+        }
+
+        setGameState(prev => {
+            const nextMaxHp = prev.player.maxHp - maxHpPenalty;
+            return { 
+                ...prev, 
+                player: { 
+                    ...prev.player, 
+                    deck, 
+                    maxHp: nextMaxHp,
+                    currentHp: Math.min(prev.player.currentHp, nextMaxHp)
+                } 
+            };
+        });
         return removed;
     };
 
     const addRelic = (relic: any) => {
-        setGameState(prev => ({ ...prev, player: { ...prev.player, relics: [...prev.player.relics, relic] } }));
+        setGameState(prev => {
+            const p = { ...prev.player, relics: [...prev.player.relics, relic] };
+            // 即時効果のあるレリックの処理
+            if (relic.id === 'OLD_COIN') p.gold += 300;
+            if (relic.id === 'WAFFLE') { p.maxHp += 7; p.currentHp = p.maxHp; }
+            return { ...prev, player: p };
+        });
     };
 
     const charType = getCharacterType(player);
@@ -122,7 +147,17 @@ export const generateEvent = (
                     if (player.gold >= 20) {
                         const pots = Object.values(POTION_LIBRARY);
                         const pot = { ...pots[Math.floor(Math.random() * pots.length)], id: `pot-${Date.now()}` };
-                        setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold - 20, potions: [...prev.player.potions, pot].slice(0, 3) } }));
+                        setGameState(prev => {
+                            const newPotions = [...prev.player.potions, pot];
+                            return { 
+                                ...prev, 
+                                player: { 
+                                    ...prev.player, 
+                                    gold: prev.player.gold - 20, 
+                                    potions: newPotions.slice(0, 3) 
+                                } 
+                            };
+                        });
                         setEventResultLog(trans(`怪しい薬(ポーション: ${pot.name})を手に入れた！\n残金: ${player.gold - 20}G`, languageMode));
                     } else {
                         setEventResultLog(trans("お金が足りなかった... 男は舌打ちをして去っていった。", languageMode));
@@ -380,7 +415,14 @@ export const generateEvent = (
             description: "放送室に誰もいない。マイクの電源が入っている。\nイタズラするチャンス？",
             options: [
                 { label: "歌う", text: "最大HP+4。", action: () => {
-                    setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 4 } }));
+                    setGameState(prev => ({ 
+                        ...prev, 
+                        player: { 
+                            ...prev.player, 
+                            maxHp: prev.player.maxHp + 4,
+                            currentHp: prev.player.currentHp + 4 
+                        } 
+                    }));
                     setEventResultLog(trans("生徒たちに大ウケだ！人気者になった。\n最大HP+4。", languageMode));
                 }},
                 { label: "告白", text: "呪い「後悔」を得る。HP回復。", action: () => {
@@ -428,7 +470,17 @@ export const generateEvent = (
             description: "校長先生の話が長い...もう30分も続いている。\n貧血で倒れそうだ。",
             options: [
                 { label: "耐える", text: "最大HP+5, HP-5。", action: () => {
-                    setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 5, currentHp: Math.max(1, prev.player.currentHp - 5) } }));
+                    setGameState(prev => {
+                        const nextMaxHp = prev.player.maxHp + 5;
+                        return { 
+                            ...prev, 
+                            player: { 
+                                ...prev.player, 
+                                maxHp: nextMaxHp, 
+                                currentHp: Math.min(nextMaxHp, Math.max(1, prev.player.currentHp + 5 - 5)) 
+                            } 
+                        };
+                    });
                     setEventResultLog(trans("なんとか耐え抜いた！精神力が鍛えられた。\n最大HP+5, HP-5。", languageMode));
                 }},
                 { label: "座る", text: "HP全回復。呪い「ドジ」入手。", action: () => {
@@ -532,7 +584,8 @@ export const generateEvent = (
             options: [
                 { label: "吹く", text: "カード「歌う」か「めまい」入手。", action: () => {
                     if (Math.random() < 0.5) {
-                        addCard(CARDS_LIBRARY.SING || EVENT_CARDS.MADNESS);
+                        // SINGがないので、代わりに近い効果のカードを使用
+                        addCard(CARDS_LIBRARY.THUNDERCLAP);
                         setEventResultLog(trans("素晴らしい音色だ！新しい表現を覚えた。", languageMode));
                     } else {
                         addCard(STATUS_CARDS.DAZED);
@@ -561,7 +614,7 @@ export const generateEvent = (
                     }
                 }},
                 { label: "壊す", text: "ストレス解消。最大HP+2。", action: () => {
-                    setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 2 } }));
+                    setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 2, currentHp: prev.player.currentHp + 2 } }));
                     setEventResultLog(trans("力いっぱい叩き潰した！スッキリして最大HP+2。", languageMode));
                 }}
             ]
@@ -611,7 +664,7 @@ export const generateEvent = (
             title: "校章の輝き",
             description: "地面に落ちているピカピカの校章。学校への愛着を試されている。",
             options: [
-                { label: "磨く", text: "レリック「純金の校章(金剛杵)」入手。呪い「悩み」入手。", action: () => {
+                { label: "磨く", text: "レリック「純金の校章(金剛杵)」入手. 呪い「悩み」入手。", action: () => {
                     addRelic(RELIC_LIBRARY.VAJRA);
                     addCard(CURSE_CARDS.WRITHE);
                     setEventResultLog(trans("まばゆい輝きだ！レリック「金剛杵」を入手。しかし独り占めして心が痛む...呪い「悩み」入手。", languageMode));
@@ -661,7 +714,17 @@ export const generateEvent = (
             description: "屋上のフェンスが一部壊れている。外の景色がよく見える。",
             options: [
                 { label: "叫ぶ", text: "HP全回復。最大HP-5。", action: () => {
-                    setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: prev.player.maxHp, maxHp: prev.player.maxHp - 5 } }));
+                    setGameState(prev => {
+                        const nextMaxHp = prev.player.maxHp - 5;
+                        return { 
+                            ...prev, 
+                            player: { 
+                                ...prev.player, 
+                                maxHp: nextMaxHp,
+                                currentHp: nextMaxHp 
+                            } 
+                        };
+                    });
                     setEventResultLog(trans("「宿題なんて大嫌いだー！」...スッキリした。HP全回復。喉を傷めて最大HP-5。", languageMode));
                 }},
                 { label: "黄昏れる", text: "レリック「砂時計」入手。呪い「後悔」入手。", action: () => {
@@ -681,7 +744,8 @@ export const generateEvent = (
                     setEventResultLog(trans("もったいない精神！HP20回復。しかし何かが体内に...。呪い「寄生虫」入手。", languageMode));
                 }},
                 { label: "埋める", text: "カード「園芸(発掘)」入手。", action: () => {
-                    addCard(CARDS_LIBRARY.EXHUME || CARDS_LIBRARY.REBOOT); // Fallback
+                    // EXHUMEがないのでREBOOT等を使用
+                    addCard(CARDS_LIBRARY.REBOOT); 
                     setEventResultLog(trans("土に還した。新たな命の循環「再起動」を覚えた。", languageMode));
                 }}
             ]
@@ -706,7 +770,17 @@ export const generateEvent = (
             description: "夜になると動き出すという石像。背負っている薪（まき）が重そうだ。",
             options: [
                 { label: "手伝う", text: "最大HP+10。HP-10。", action: () => {
-                    setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 10 } }));
+                    setGameState(prev => {
+                        const nextMaxHp = prev.player.maxHp + 10;
+                        return {
+                            ...prev,
+                            player: {
+                                ...prev.player,
+                                maxHp: nextMaxHp,
+                                currentHp: Math.min(nextMaxHp, prev.player.currentHp)
+                            }
+                        }
+                    });
                     damagePlayer(10);
                     setEventResultLog(trans("肩代わりした！(HP-10) 筋肉が鍛えられ最大HP+10。", languageMode));
                 }},
@@ -775,7 +849,7 @@ export const generateEvent = (
             options: [
                 { label: "盗み見る", text: "全マップ開示。呪い「恥」入手。", action: () => {
                     addCard(CURSE_CARDS.SHAME);
-                    setGameState(prev => ({ ...prev, map: prev.map.map(n => ({...n, revealed: true})) }));
+                    setGameState(prev => ({ ...prev, floorMapRevealed: true }));
                     setEventResultLog(trans("テストの範囲がわかった！マップが全開。しかし罪悪感が...呪い「恥」入手。", languageMode));
                 }},
                 { label: "届ける", text: "100G入手。", action: () => {
@@ -815,7 +889,7 @@ export const generateEvent = (
                     }
                 }},
                 { label: "遊ぶ", text: "カード「やほど」3枚入手. 最大HP+5。", action: () => {
-                    setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 5 } }));
+                    setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 5, currentHp: prev.player.currentHp + 5 } }));
                     addCard(STATUS_CARDS.BURN); addCard(STATUS_CARDS.BURN); addCard(STATUS_CARDS.BURN);
                     setEventResultLog(trans("火遊びは最高だ！最大HP+5。しかし火傷した...「やほど」3枚入手。", languageMode));
                 }}
@@ -832,7 +906,7 @@ export const generateEvent = (
                 }},
                 { label: "逃げる", text: "カード1枚削除。", action: () => {
                     const removed = removeCard();
-                    setEventResultLog(trans(`全力疾走！恐怖で「${removed?.name || '記憶'}」を忘れた。`, languageMode));
+                    setEventResultLog(trans(`全力疾走！恐怖で「${removed?.name || '記憶'}」が忘れた。`, languageMode));
                 }}
             ]
         },
@@ -842,14 +916,14 @@ export const generateEvent = (
             options: [
                 { label: "跳ぶ", text: "成功で最大HP+5、失敗でHP-10。", action: () => {
                     if (Math.random() < 0.4) {
-                        setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 5 } }));
+                        setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 5, currentHp: prev.player.currentHp + 5 } }));
                         setEventResultLog(trans("見事な着地！英雄として讃えられた。最大HP+5。", languageMode));
                     } else {
                         damagePlayer(10);
                         setEventResultLog(trans("激突！鼻血が出た。(HP-10)", languageMode));
                     }
                 }},
-                { label: "潜る", text: "レリック「お道具箱(マトリョーシカ)」入手。呪い「悩み」入手。", action: () => {
+                { label: "潜る", text: "レリック「お道具箱(マトリョーシカ)」入手. 呪い「悩み」入手。", action: () => {
                     addRelic(RELIC_LIBRARY.MATRYOSHKA);
                     addCard(CURSE_CARDS.WRITHE);
                     setEventResultLog(trans("中に隠れていたお宝を発見！「お道具箱」を入手。しかし秘密にして心が痛む...呪い「悩み」入手。", languageMode));
@@ -864,7 +938,7 @@ export const generateEvent = (
                     healPlayer(10);
                     setEventResultLog(trans("水を大切に。心が洗われてHP10回復。", languageMode));
                 }},
-                { label: "飲む", text: "ポーション入手。HP-5。", action: () => {
+                { label: "飲む", text: "ポーション入手. HP-5。", action: () => {
                     damagePlayer(5);
                     const potion = POTION_LIBRARY['BLOCK_POTION'];
                     setGameState(prev => ({ ...prev, player: { ...prev.player, potions: [...prev.player.potions, { ...potion, id: `water-${Date.now()}` }].slice(0, 3) } }));
@@ -917,7 +991,7 @@ export const generateEvent = (
                     setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 2, currentHp: prev.player.currentHp + 2 } }));
                     setEventResultLog(trans("心まで磨かれた気がする。最大HP+2。", languageMode));
                 }},
-                { label: "落書き", text: "呪い「後悔」入手。ムキムキ+3。", action: () => {
+                { label: "落書き", text: "呪い「後悔」入手. ムキムキ+3。", action: () => {
                     addCard(CURSE_CARDS.REGRET);
                     setGameState(prev => ({ ...prev, player: { ...prev.player, strength: prev.player.strength + 3 } }));
                     setEventResultLog(trans("背徳の力！ムキムキ+3。しかし後でめちゃくちゃ怒られた...呪い「後悔」入手。", languageMode));
@@ -928,7 +1002,7 @@ export const generateEvent = (
             title: "階段の13段目",
             description: "夜になると増えるという伝説の階段。今、足元にあるのは13段目だ。",
             options: [
-                { label: "踏み抜く", text: "カード1枚削除。HP-10。", action: () => {
+                { label: "踏み抜く", text: "カード1枚削除. HP-10。", action: () => {
                     damagePlayer(10);
                     const removed = removeCard();
                     setEventResultLog(trans(`異界に吸い込まれた！(HP-10) 「${removed?.name || '恐怖'}」を異次元に置いてきた。`, languageMode));
@@ -969,7 +1043,7 @@ export const generateEvent = (
                         setEventResultLog(trans("足を滑らせて落ちかけた！危ない！(HP-10)", languageMode));
                     }
                 }},
-                { label: "叩く", text: "響く音。ムキムキ+1。", action: () => {
+                { label: "叩く", text: "響く音. ムキムキ+1。", action: () => {
                     setGameState(prev => ({ ...prev, player: { ...prev.player, strength: prev.player.strength + 1 } }));
                     setEventResultLog(trans("いい音が響いた！腕の筋肉がついてムキムキ+1。", languageMode));
                 }}
@@ -979,7 +1053,7 @@ export const generateEvent = (
             title: "飼育室のウサギ",
             description: "モフモフのウサギがいる。癒やされる...",
             options: [
-                { label: "抱っこ", text: "HP全回復。呪い「寄生虫」入手。", action: () => {
+                { label: "抱っこ", text: "HP全回復. 呪い「寄生虫」入手。", action: () => {
                     setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: prev.player.maxHp } }));
                     addCard(CURSE_CARDS.PARASITE);
                     setEventResultLog(trans("最高の癒やし！HP全回復。しかしノミをもらったようだ...呪い「寄生虫」入手。", languageMode));
@@ -1026,7 +1100,7 @@ export const generateEvent = (
                     addCard(CARDS_LIBRARY.THUNDERCLAP);
                     setEventResultLog(trans("マイクを奪い取った！「大声」のスキルを覚えた。", languageMode));
                 }},
-                { label: "聞き入る", text: "呪い「退屈」入手。HP回復。", action: () => {
+                { label: "聞き入る", text: "呪い「退屈」入手. HP回復。", action: () => {
                     addCard(CURSE_CARDS.NORMALITY);
                     healPlayer(10);
                     setEventResultLog(trans("不思議な歌声だ...HP10回復. しかし思考が鈍った。呪い「退屈」入手。", languageMode));
@@ -1037,7 +1111,7 @@ export const generateEvent = (
             title: "掲示板の100点答案",
             description: "誰かの100点のテストが飾られている。眩しい。",
             options: [
-                { label: "盗む", text: "カード1枚強化。呪い「恥」入手。", action: () => {
+                { label: "盗む", text: "カード1枚強化. 呪い「恥」入手。", action: () => {
                     const deck = [...player.deck];
                     const target = deck[Math.floor(Math.random() * deck.length)];
                     const newDeck = deck.map(c => c.id === target.id ? getUpgradedCard(c) : c);
@@ -1045,7 +1119,7 @@ export const generateEvent = (
                     addCard(CURSE_CARDS.SHAME);
                     setEventResultLog(trans(`答えを丸写しした！「${target.name}」を強化。しかしバレるのが怖い...呪い「恥」入手。`, languageMode));
                 }},
-                { label: "破る", text: "ムキムキ+2。呪い「後悔」入手。", action: () => {
+                { label: "破る", text: "ムキムキ+2. 呪い「後悔」入手。", action: () => {
                     setGameState(prev => ({ ...prev, player: { ...prev.player, strength: prev.player.strength + 2 } }));
                     addCard(CURSE_CARDS.REGRET);
                     setEventResultLog(trans("嫉妬の炎！ムキムキ+2。でも後味が悪い...呪い「後悔」入手。", languageMode));
@@ -1056,12 +1130,12 @@ export const generateEvent = (
             title: "保健室のベッド",
             description: "ふかふかのシーツ。今なら誰もいない。",
             options: [
-                { label: "寝る", text: "HP全回復。次戦闘の1ターン目E-1。", action: () => {
+                { label: "寝る", text: "HP全回復. 次戦闘の1ターン目E-1。", action: () => {
                     setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: prev.player.maxHp, nextTurnEnergy: -1 } }));
                     setEventResultLog(trans("ぐっすり...HP全回復。でも寝ぼけて次の戦闘の開始エナジー-1。", languageMode));
                 }},
                 { label: "飛び跳ねる", text: "最大HP+3。", action: () => {
-                    setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 3 } }));
+                    setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 3, currentHp: prev.player.currentHp + 3 } }));
                     setEventResultLog(trans("ベッドでジャンプ！楽しかった。最大HP+3。", languageMode));
                 }}
             ]
@@ -1070,11 +1144,11 @@ export const generateEvent = (
             title: "給食の余りの牛乳",
             description: "バケツに1本だけ余っている。冷たそうだ。",
             options: [
-                { label: "飲む", text: "最大HP+2。HP2回復。", action: () => {
+                { label: "飲む", text: "最大HP+2. HP2回復。", action: () => {
                     setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 2, currentHp: prev.player.currentHp + 2 } }));
                     setEventResultLog(trans("カルシウム摂取！最大HP+2。", languageMode));
                 }},
-                { label: "かける", text: "全カード強化。自分にダメージ。", action: () => {
+                { label: "かける", text: "全カード強化. 自分にダメージ。", action: () => {
                     damagePlayer(5);
                     setGameState(prev => ({ ...prev, player: { ...prev.player, deck: prev.player.deck.map(c => getUpgradedCard(c)) } }));
                     setEventResultLog(trans("ミルクシャワー！(HP-5) 皮膚が強くなって（？）全カード強化！", languageMode));
@@ -1083,9 +1157,9 @@ export const generateEvent = (
         },
         {
             title: "廊下のワックス",
-            description: "塗りたてピカピカ。滑るぞ。",
+            description: "塗りたてピカピカ. 滑るぞ。",
             options: [
-                { label: "滑る", text: "レリック「上履き」入手。HP-5。", action: () => {
+                { label: "滑る", text: "レリック「上履き」入手. HP-5。", action: () => {
                     addRelic(RELIC_LIBRARY.HORN_CLEAT);
                     damagePlayer(5);
                     setEventResultLog(trans("華麗なスライディング！(HP-5) レリック「上履き」を入手。", languageMode));
@@ -1100,7 +1174,7 @@ export const generateEvent = (
             title: "理科室の毒薬",
             description: "ドクロマークの小瓶。どうする？",
             options: [
-                { label: "飲む", text: "カード「毒」強化。HP-10。", action: () => {
+                { label: "飲む", text: "カード「毒」強化. HP-10。", action: () => {
                     const deck = [...player.deck];
                     const target = deck.find(c => c.name.includes("毒") && !c.upgraded);
                     if (target) {
@@ -1113,7 +1187,7 @@ export const generateEvent = (
                         setEventResultLog(trans("ただの毒だった！(HP-10)", languageMode));
                     }
                 }},
-                { label: "捨てる", text: "全デバフ解除。HP10回復。", action: () => {
+                { label: "捨てる", text: "全デバフ解除. HP10回復。", action: () => {
                     setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: prev.player.currentHp + 10, powers: {} } }));
                     setEventResultLog(trans("平和主義。心が晴れて全デバフ解除＆HP10回復。", languageMode));
                 }}
@@ -1121,13 +1195,13 @@ export const generateEvent = (
         }
     );
 
-    // --- CHARACTER SPECIFIC EVENTS (81-110) ---
+    // --- CHARACTER SPECIFIC EVENTS ---
     if (charType === 'WARRIOR') {
         potentialEvents.push({
             title: "放課後の決闘",
             description: "河川敷で隣の小学校の番長が待ち構えている。「俺と勝負しろ！」",
             options: [
-                { label: "受けて立つ", text: "HP-20。レリック「金剛杵」入手。", action: () => {
+                { label: "受けて立つ", text: "HP-20. レリック「金剛杵」入手。", action: () => {
                     damagePlayer(20);
                     addRelic(RELIC_LIBRARY.VAJRA);
                     setEventResultLog(trans("激闘の末、勝利した！(HP-20) 番長の証「金剛杵」を奪い取った！", languageMode));
@@ -1172,14 +1246,14 @@ export const generateEvent = (
             title: "飼育小屋の主",
             description: "飼育小屋の奥に、主と呼ばれる巨大なニワトリがいる。",
             options: [
-                { label: "戦う", text: "HP-10。カード強化。", action: () => {
+                { label: "戦う", text: "HP-10. カード強化。", action: () => {
                     damagePlayer(10);
                     const deck = [...player.deck];
                     const target = deck.find(c => c.type === CardType.ATTACK && !c.upgraded);
                     if (target) {
                         const newDeck = deck.map(c => c.id === target.id ? getUpgradedCard(c) : c);
                         setGameState(prev => ({ ...prev, player: { ...prev.player, deck: newDeck } }));
-                        setEventResultLog(trans(`つつかれた！(HP-10) 反撃で「${target.name}」の腕が上がった！`, languageMode));
+                        setEventResultLog(trans(`つつかれた！(HP-10) はんげきで「${target.name}」の腕が上がった！`, languageMode));
                     } else {
                         setEventResultLog(trans("つつかれただけで終わった...(HP-10)", languageMode));
                     }
@@ -1196,9 +1270,9 @@ export const generateEvent = (
     if (charType === 'ASSASSIN') {
         potentialEvents.push({
             title: "闇の掲示板",
-            description: "校舎裏の掲示板に、ターゲットの情報が書かれている。",
+            description: "校舎裏の掲示板に, ターゲットの情報が書かれている。",
             options: [
-                { label: "情報を売る", text: "カードを1枚削除。50G入手。", action: () => {
+                { label: "情報を売る", text: "カードを1枚削除. 50G入手。", action: () => {
                     const removed = removeCard();
                     gainGold(50);
                     setEventResultLog(trans(`「${removed?.name || '秘密'}」の情報を売った。50Gを手に入れた。`, languageMode));
@@ -1206,7 +1280,7 @@ export const generateEvent = (
                 { label: "依頼を受ける", text: "HP-15。カード「毒突き」入手。", action: () => {
                     damagePlayer(15);
                     addCard(CARDS_LIBRARY['POISON_STAB']); 
-                    setEventResultLog(trans("裏の仕事をこなした。(HP-15)「毒舌(毒突き)」の技術を習得した。", languageMode));
+                    setEventResultLog(trans("裏の仕事をこなした。(HP-15)「どくぜつ(毒突き)」の技術を習得した。", languageMode));
                 }}
             ]
         });
@@ -1217,7 +1291,7 @@ export const generateEvent = (
             title: "理科室の爆発",
             description: "実験中に薬品を混ぜすぎた！フラスコが光り輝いている。",
             options: [
-                { label: "耐える", text: "HP-15。ポーション2個入手。", action: () => {
+                { label: "耐える", text: "HP-15. ポーション2個入手。", action: () => {
                     damagePlayer(15);
                     const p1 = POTION_LIBRARY['FIRE_POTION'];
                     const p2 = POTION_LIBRARY['ENERGY_POTION'];
@@ -1236,7 +1310,7 @@ export const generateEvent = (
             options: [
                 { label: "やる", text: "HP-10。最大HP+10。", action: () => {
                     damagePlayer(10);
-                    setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 10 } }));
+                    setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 10, currentHp: prev.player.currentHp } }));
                     setEventResultLog(trans("倒れそうになりながら完走した。(HP-10) 体力が大幅に向上した！(MaxHP+10)", languageMode));
                 }},
                 { label: "サボる", text: "HP全回復。", action: () => {
@@ -1252,7 +1326,7 @@ export const generateEvent = (
             title: "校内放送ジャック",
             description: "お昼の放送でリサイタルを開そう！全校生徒が君の歌を待っている（？）",
             options: [
-                { label: "熱唱", text: "最大エナジー+1。HP-10。", action: () => {
+                { label: "熱唱", text: "最大エナジー+1. HP-10。", action: () => {
                     damagePlayer(10);
                     setGameState(prev => ({ ...prev, player: { ...prev.player, maxEnergy: prev.player.maxEnergy + 1 } }));
                     setEventResultLog(trans("魂の叫びが届いた！(エナジー+1) 喉を痛めた...(HP-10)", languageMode));
@@ -1270,7 +1344,7 @@ export const generateEvent = (
             title: "延滞図書の督促",
             description: "「あ、あの...本返してください...」不良グループが本を返してくれない。",
             options: [
-                { label: "戦う", text: "HP-5。カード強化。", action: () => {
+                { label: "戦う", text: "HP-5. カード強化。", action: () => {
                     damagePlayer(5);
                     const deck = [...player.deck];
                     const c = deck[Math.floor(Math.random() * deck.length)];
@@ -1332,7 +1406,7 @@ export const generateEvent = (
                     setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
                     setEventResultLog(trans("新しい献立を思いついた！カードが1枚変化した。", languageMode));
                 }},
-                { label: "試食する", text: "HP15回復。ムキムキ+1。", action: () => {
+                { label: "試食する", text: "HP15回復. ムキムキ+1。", action: () => {
                     healPlayer(15);
                     setGameState(prev => ({ ...prev, player: { ...prev.player, strength: prev.player.strength + 1 } }));
                     setEventResultLog(trans("素晴らしい味だ！HP15回復、さらにムキムキ+1。", languageMode));
