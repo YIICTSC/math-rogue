@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Heart, Star, Skull, Brain, Book, Flame, Wind, Target, RotateCcw, ArrowLeft, Play, Sparkles, ChevronRight, AlertTriangle, Zap, Crosshair, Shield, Move, FastForward, Repeat, Search, Ghost, Music, Activity, Rocket, FlaskConical, Globe, MapPin, CheckCircle2, ChevronDown, Check, Languages, Home } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -202,6 +201,8 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const selectUpgrade = (card: DashCardEffect) => {
         const p = playerRef.current;
         card.apply(p, setHp, setMaxHp);
+        // 報酬獲得後2秒間（120フレーム）無敵にする
+        p.invulFrame = 120;
         setGameState('PLAYING');
         audioService.playBGM('survivor_metal');
         audioService.playSound('buff');
