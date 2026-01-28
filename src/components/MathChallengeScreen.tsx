@@ -5,14 +5,6 @@ import { audioService } from '../services/audioService';
 import { GameMode } from '../types';
 import { storageService } from '../services/storageService';
 
-interface MathChallengeScreenProps {
-  onComplete: (correctCount: number) => void;
-  mode: GameMode;
-  debugSkip?: boolean;
-  isChallenge?: boolean;
-  streak?: number;
-}
-
 interface MathProblem {
   question: string;
   options: number[];
@@ -58,8 +50,9 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
 
       switch (type) {
           case GameMode.ADD_1DIGIT:
-              a = Math.floor(Math.random() * 9) + 1;
-              b = Math.floor(Math.random() * 9) + 1;
+              // 繰り上がりなし: a + b <= 9
+              a = Math.floor(Math.random() * 8) + 1; // 1~8
+              b = Math.floor(Math.random() * (9 - a)) + 1; // 1~(9-a)
               answer = a + b;
               operator = '+';
               break;
@@ -73,9 +66,9 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
               operator = '+';
               break;
           case GameMode.SUB_1DIGIT:
-              // 1ケタ同士の引き算 (a >= b)
-              a = Math.floor(Math.random() * 9) + 1;
-              b = Math.floor(Math.random() * a) + 1;
+              // くりさがりなし: 1ケタ同士で a >= b
+              a = Math.floor(Math.random() * 9) + 1; // 1~9
+              b = Math.floor(Math.random() * a) + 1; // 1~a
               answer = a - b;
               operator = '-';
               break;
@@ -228,3 +221,10 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
 };
 
 export default MathChallengeScreen;
+interface MathChallengeScreenProps {
+  onComplete: (correctCount: number) => void;
+  mode: GameMode;
+  debugSkip?: boolean;
+  isChallenge?: boolean;
+  streak?: number;
+}
