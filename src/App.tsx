@@ -1887,7 +1887,31 @@ const App: React.FC = () => {
                           p.currentEnergy = Math.max(0, p.currentEnergy - 1);
                           p.floatingText = { id: `void-turn-${Date.now()}-${j}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
                       }
+                      if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && newCard.cost >= 0) {
+                          newCard.cost = Math.floor(Math.random() * 4);
+                      }
                       p.hand.push(newCard); 
+                      if (p.powers['EVOLVE'] && (newCard.type === CardType.STATUS || newCard.type === CardType.CURSE)) {
+                          for (let k=0; k<p.powers['EVOLVE']; k++) {
+                              if (p.drawPile.length === 0) {
+                                  if (p.discardPile === undefined || p.discardPile.length === 0) break;
+                                  p.drawPile = shuffle(p.discardPile);
+                                  p.discardPile = [];
+                              }
+                              const extraCardRaw = p.drawPile.pop();
+                              if (extraCardRaw) {
+                                  const extraCard = { ...extraCardRaw };
+                                  if (extraCard.name === '虚無' || extraCard.name === 'VOID') {
+                                      p.currentEnergy = Math.max(0, p.currentEnergy - 1);
+                                      p.floatingText = { id: `void-evolve-${Date.now()}-${k}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
+                                  }
+                                  if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && extraCard.cost >= 0) {
+                                      extraCard.cost = Math.floor(Math.random() * 4);
+                                  }
+                                  p.hand.push(extraCard);
+                              }
+                          }
+                      }
                   }
                 }
               }
@@ -1912,7 +1936,7 @@ const App: React.FC = () => {
                   for (let c=0; c<card.addCardToHand.count; c++) {
                       const template = CARDS_LIBRARY[card.addCardToHand.cardName];
                       if (template) {
-                          let newC = { ...template, id: `gen-${Date.now()}-${c}-${Math.random()}` };
+                          let newC = { ...template, id: `gen-hand-${Date.now()}-${act}-${h}-${c}-${Math.random()}` };
                           if (card.addCardToHand.cost0) newC.cost = 0;
                           if (p.powers['MASTER_REALITY']) newC = getUpgradedCard(newC);
                           if (p.hand.length < HAND_SIZE + 5) {
@@ -1926,14 +1950,14 @@ const App: React.FC = () => {
               if (card.addCardToDraw) {
                    for (let c=0; c<card.addCardToDraw.count; c++) { 
                        const template = CARDS_LIBRARY[card.addCardToDraw.cardName];
-                       if (template) p.drawPile.push({ ...template, id: `gen-${Date.now()}-${c}` }); 
+                       if (template) p.drawPile.push({ ...template, id: `gen-draw-${Date.now()}-${act}-${h}-${c}-${Math.random()}` }); 
                    }
                    p.drawPile = shuffle(p.drawPile);
               }
               if (card.addCardToDiscard) {
                    for (let c=0; c<card.addCardToDiscard.count; c++) { 
                        const template = CARDS_LIBRARY[card.addCardToDiscard.cardName];
-                       if (template) p.discardPile.push({ ...template, id: `gen-${Date.now()}-${c}` }); 
+                       if (template) p.discardPile.push({ ...template, id: `gen-discard-${Date.now()}-${act}-${h}-${c}-${Math.random()}` }); 
                    }
               }
               if (card.nextTurnDraw) p.nextTurnDraw += card.nextTurnDraw;
@@ -1967,6 +1991,21 @@ const App: React.FC = () => {
               if (p.relics.find(r => r.id === 'KUNAI')) { p.powers['DEXTERITY'] = (p.powers['DEXTERITY'] || 0) + 1; p.floatingText = { id: `kunai-${Date.now()}`, text: `${trans("カチカチ", languageMode)}+1`, color: 'text-blue-400', iconType: 'shield' }; nextActiveEffects.push({ id: `vfx-kunai-${Date.now()}`, type: 'BLOCK', targetId: 'player' }); }
               if (p.relics.find(r => r.id === 'SHURIKEN')) { p.strength += 1; p.floatingText = { id: `shuri-${Date.now()}`, text: `${trans("ムキムキ", languageMode)}+1`, color: 'text-red-400', iconType: 'sword' }; nextActiveEffects.push({ id: `vfx-shuri-${Date.now()}`, type: 'BUFF', targetId: 'player' }); }
               if (p.relics.find(r => r.id === 'ORNAMENTAL_FAN')) { p.block += 4; p.floatingText = { id: `fan-${Date.now()}`, text: '+4 Block', color: 'text-blue-400', iconType: 'shield' }; nextActiveEffects.push({ id: `vfx-fan-${Date.now()}`, type: 'BLOCK', targetId: 'player' }); }
+              // Compass (Calipers) Effect: Draw 1 card every 3 attacks
+              if (p.relics.find(r => r.id === 'CALIPERS')) {
+                if (p.drawPile.length === 0) {
+                    if (p.discardPile.length !== 0) {
+                        p.drawPile = shuffle(p.discardPile);
+                        p.discardPile = [];
+                    }
+                }
+                const drawn = p.drawPile.pop();
+                if (drawn) {
+                    p.hand.push(drawn);
+                    currentLogs.push(trans("コンパス：カードを1枚引いた", languageMode));
+                    nextActiveEffects.push({ id: `vfx-calip-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+                }
+              }
           }
       }
 
@@ -2136,8 +2175,9 @@ const App: React.FC = () => {
           newDrawPile = shuffle(newDiscardPile);
           newDiscardPile = [];
         }
-        const card = newDrawPile.pop();
-        if (card) { 
+        const drawnCard = newDrawPile.pop();
+        if (drawnCard) { 
+            const card = { ...drawnCard };
             if (card.name === '虚無' || card.name === 'VOID') {
                 p.currentEnergy = Math.max(0, p.currentEnergy - 1);
                 p.floatingText = { id: `void-turn-${Date.now()}-${i}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
@@ -2153,8 +2193,9 @@ const App: React.FC = () => {
                         newDrawPile = shuffle(newDiscardPile);
                         newDiscardPile = [];
                     }
-                    const extraCard = newDrawPile.pop();
-                    if (extraCard) {
+                    const extraCardRaw = newDrawPile.pop();
+                    if (extraCardRaw) {
+                        const extraCard = { ...extraCardRaw };
                         if (extraCard.name === '虚無' || extraCard.name === 'VOID') {
                             p.currentEnergy = Math.max(0, p.currentEnergy - 1);
                             p.floatingText = { id: `void-evolve-${Date.now()}-${k}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
@@ -2207,11 +2248,7 @@ const App: React.FC = () => {
           });
       }
       if (!p.powers['BARRICADE']) {
-          if (p.relics.find(r => r.id === 'CALIPERS')) {
-              p.block = Math.max(0, p.block - 15);
-          } else {
-              p.block = 0;
-          }
+          p.block = 0;
       }
       p.hand = newHand;
       p.drawPile = newDrawPile;
@@ -2907,7 +2944,7 @@ const App: React.FC = () => {
       if (correctCount === 1) bonusGold = 15;
       else if (correctCount === 2) bonusGold = 30;
       else if (correctCount === 3) bonusGold = 50;
-      if (gameState.player.relics.find(r => r.id === 'CALIPERS')) {
+      if (gameState.player.relics.find(r => r.id === 'CALCULATOR')) {
           const healAmount = correctCount * 2;
           if (healAmount > 0) {
               setGameState(prev => ({
@@ -3356,7 +3393,7 @@ const App: React.FC = () => {
 
             {gameState.screen === GameScreen.DODGEBALL_SHOOTING && (
                 <div className="absolute inset-0">
-                    <DodgeballShooting 
+                    < DodgeballShooting 
                         enemy={gameState.enemies[0]} 
                         playerImage={gameState.player.imageData}
                         onComplete={handleDodgeballResult} 
