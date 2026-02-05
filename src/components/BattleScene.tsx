@@ -167,6 +167,12 @@ const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: string }
                             style={{ animationDelay: `${vfx.delay || 0}ms`, animationFillMode: 'both' }}
                         ></div>
                     )}
+                    {vfx.type === 'FLASH' && (
+                        <div 
+                            className="absolute w-[200vw] h-[200vh] bg-white animate-flash-vfx"
+                            style={{ animationDelay: `${vfx.delay || 0}ms`, animationFillMode: 'both' }}
+                        ></div>
+                    )}
                 </div>
             ))}
             <style>
@@ -229,6 +235,11 @@ const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: string }
                     @keyframes shockwave-vfx {
                         0% { transform: scale(1); opacity: 1; border-width: 10px; }
                         100% { transform: scale(4); opacity: 0; border-width: 1px; }
+                    }
+                    @keyframes flash-vfx {
+                        0% { opacity: 0; }
+                        20% { opacity: 0.8; }
+                        100% { opacity: 0; }
                     }
                     @keyframes screen-shake {
                         0% { transform: translate(0, 0); }
@@ -393,11 +404,22 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   };
 
   const getProcessedDescription = (card: ICard) => {
+      // 数値置換の前に、まず文章全体をtransにかける
       let desc = trans(card.description, languageMode);
-      desc = desc.replace(/自傷/g, trans("自分にダメージ", languageMode));
+      
+      // 動的数値の再適用（trans内でもある程度処理するが、確実を期す）
       if (card.damage !== undefined) desc = desc.replace(/(\d+)ダメージ/g, `${card.damage}${trans("ダメージ", languageMode)}`);
       if (card.block !== undefined) desc = desc.replace(/ブロック(\d+)/g, `${trans("ブロック", languageMode)}${card.block}`);
-      return desc;
+      if (card.poison !== undefined) desc = desc.replace(/ドクドク(\d+)/g, `${trans("ドクドク", languageMode)}${card.poison}`);
+      if (card.weak !== undefined) desc = desc.replace(/へろへろ(\d+)/g, `${trans("へろへろ", languageMode)}${card.weak}`);
+      if (card.vulnerable !== undefined) desc = desc.replace(/びくびく(\d+)/g, `${trans("びくびく", languageMode)}${card.vulnerable}`);
+      if (card.strength !== undefined) desc = desc.replace(/ムキムキ(\d+)/g, `${trans("ムキムキ", languageMode)}${card.strength}`);
+
+      return (
+        <span className={card.upgraded ? "text-green-300 font-bold" : ""}>
+            {desc}
+        </span>
+      );
   };
 
   const getCardKeywords = (card: ICard) => {
@@ -855,7 +877,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         {/* Potion Confirmation Modal */}
         {potionConfirmation && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4" onClick={() => setPotionConfirmation(null)}>
-                <div className="bg-gray-900 border-2 border-white p-6 rounded shadow-2xl max-w-xs w-full text-center animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
+                <div className="bg-gray-900 border-2 border-white p-6 rounded shadow-2xl max-xs w-full text-center animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
                     <div className="mb-4 flex justify-center">
                         <div className="w-16 h-16 bg-gray-800 rounded-full border-2 border-white flex items-center justify-center">
                             <FlaskConical size={32} style={{color: potionConfirmation.color}} />

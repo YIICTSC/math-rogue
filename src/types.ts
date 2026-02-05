@@ -30,6 +30,9 @@ export interface Card {
   energy?: number;
   selfDamage?: number;
   poison?: number;      
+  gold?: number; // 追加: ゴールド獲得量
+  addPotion?: boolean; // 追加: ポーション獲得フラグ
+  blockMultiplier?: number; // 追加: ブロック倍率 (1.5倍など)
   
   // Basic Mechanics
   exhaust?: boolean;    
@@ -545,7 +548,7 @@ export interface ParryState {
     success: boolean;
 }
 
-export type VFXType = 'SLASH' | 'BLOCK' | 'BUFF' | 'DEBUFF' | 'HEAL' | 'FIRE' | 'EXPLOSION' | 'LIGHTNING' | 'CRITICAL' | 'SHOCKWAVE';
+export type VFXType = 'SLASH' | 'BLOCK' | 'BUFF' | 'DEBUFF' | 'HEAL' | 'FIRE' | 'EXPLOSION' | 'LIGHTNING' | 'CRITICAL' | 'SHOCKWAVE' | 'FLASH';
 
 export interface VisualEffectInstance {
     id: string;
@@ -581,4 +584,5 @@ export interface GameState {
   vsOpponent?: Player; // 対戦相手のデータ
   currentStoryIndex?: number;
   actStats?: ActStats;
+  newlyUnlockedCardName?: string; // 追加: このアクトで解放されたカード
 }

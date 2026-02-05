@@ -7,6 +7,7 @@ import {
   INITIAL_HP, INITIAL_ENERGY, HAND_SIZE, 
   CARDS_LIBRARY, STARTING_DECK_TEMPLATE, STATUS_CARDS, CURSE_CARDS, EVENT_CARDS, RELIC_LIBRARY, TRUE_BOSS, POTION_LIBRARY, CHARACTERS, HERO_IMAGE_DATA, ENEMY_LIBRARY, LIBRARIAN_CARDS, GROWN_PLANTS, GARDEN_SEEDS
 } from './constants';
+import { ADDITIONAL_CARDS } from './constants1';
 import { GAME_STORIES } from './data/stories';
 import { getChallengeScreenForMode } from './subjectConfig'; // New Utility
 import BattleScene from './components/BattleScene';
@@ -46,7 +47,8 @@ import { storageService } from './services/storageService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { trans } from './utils/textUtils';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, QrCode, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, QrCode, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles } from 'lucide-react';
+import { applyAdditionalCardLogic } from './services/cardEffectLogic';
 
 const calculateScore = (state: GameState, victory: boolean): number => {
     let score = 0;
@@ -97,7 +99,7 @@ const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
         case 'GHOST':
             if (localTurn === 0) return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 2, debuffType: 'WEAK' };
             if (localTurn === 1) return { type: EnemyIntentType.ATTACK, value: 6 };
-            return { type: EnemyIntentType.ATTACK_DEBUFF, value: 5, secondaryValue: 1, debuffType: 'VULNERABLE' };
+            return { type: EnemyIntentType.ATTACK_DEBUFF, value: 5, secondaryValue: 3, debuffType: 'VULNERABLE' };
 
         case 'AGGRESSIVE':
             if (turn === 1) return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 10 : 6 };
@@ -114,7 +116,7 @@ const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
 
         case 'SWARM':
             if (turn % 2 === 0) return { type: EnemyIntentType.ATTACK, value: 5 };
-            return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 1, debuffType: 'WEAK' };
+            return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 3, debuffType: 'WEAK' };
 
         case 'GUARDIAN':
             const bossTurn = turn % 4;
@@ -131,7 +133,7 @@ const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
                  return { type: EnemyIntentType.ATTACK_DEBUFF, value: 2, secondaryValue: 12, debuffType: 'VULNERABLE' }; 
              } else {
                  const heartTurn = turn % 4;
-                 if (heartTurn === 1) return { type: EnemyIntentType.ATTACK, value: 12, secondaryValue: 15, debuffType: 'CONFUSED' }; 
+                 if (heartTurn === 1) return { type: EnemyIntentType.ATTACK_DEBUFF, value: 12, secondaryValue: 15, debuffType: 'CONFUSED' };
                  if (heartTurn === 2) return { type: EnemyIntentType.ATTACK, value: 60 }; 
                  if (heartTurn === 3) return { type: EnemyIntentType.BUFF, value: 0, secondaryValue: 5 }; 
                  return { type: EnemyIntentType.ATTACK_DEBUFF, value: 10, secondaryValue: 3, debuffType: 'WEAK' };
@@ -173,11 +175,29 @@ const App: React.FC = () => {
     const isLibrarian = playerId === 'LIBRARIAN';
     const isGardener = playerId === 'GARDENER';
     
+    // Get currently unlocked cards from storage
+    const unlockedCards = new Set(storageService.getUnlockedCards().map(name => name.trim()));
+    // Get all additional card names as a Set for fast lookup
+    const additionalNames = new Set(Object.values(ADDITIONAL_CARDS).map(ac => ac.name.trim()));
+
     return Object.values(CARDS_LIBRARY).filter(c => {
+      // Basic type filtering
       if (c.type === CardType.STATUS || c.type === CardType.CURSE) return false;
+      
+      const cleanName = c.name.trim();
+
+      // IMPORTANT: If this card is an additional card, only include it if it's unlocked
+      if (additionalNames.has(cleanName)) {
+        if (!unlockedCards.has(cleanName)) {
+          return false;
+        }
+      }
+
+      // Special character-specific filtering
       const isLibCard = Object.values(LIBRARIAN_CARDS).some(lc => lc.name === c.name);
       if (c.isSeed && !isGardener) return false;
       if (isLibCard && !isLibrarian) return false;
+      
       if (c.rarity === 'SPECIAL') {
         if (!includeSpecial) return false;
         if (isGardener && (c.isSeed || Object.values(GROWN_PLANTS).some(gp => gp.name === c.name))) return true;
@@ -246,6 +266,7 @@ const App: React.FC = () => {
   const [hasSave, setHasSave] = useState<boolean>(false);
   const [selectedCharName, setSelectedCharName] = useState<string>("わんぱく小学生");
   const [legacyCardSelected, setLegacyCardSelected] = useState<boolean>(false);
+  const [newlyUnlockedCard, setNewlyUnlockedCard] = useState<ICard | null>(null); // New State
   const [showDebugLog, setShowDebugLog] = useState<boolean>(false);
   const [bgmMode, setBgmMode] = useState<'OSCILLATOR' | 'MP3' | 'STUDY'>(() => {
     const saved = storageService.getBgmMode() as 'OSCILLATOR' | 'MP3' | 'STUDY' | null;
@@ -295,6 +316,19 @@ const App: React.FC = () => {
       ...prev,
       combatLog: [...prev.combatLog, msg].slice(-100)
     }));
+  }, []);
+
+  const unlockRandomAdditionalCard = useCallback(() => {
+    const unlocked = storageService.getUnlockedCards();
+    const allAdditional = Object.values(ADDITIONAL_CARDS);
+    const lockedAdditional = allAdditional.filter(c => !unlocked.includes(c.name));
+
+    if (lockedAdditional.length > 0) {
+      const randomCardTemplate = lockedAdditional[Math.floor(Math.random() * lockedAdditional.length)];
+      storageService.saveUnlockedCard(randomCardTemplate.name);
+      return { ...randomCardTemplate, id: `unlocked-${Date.now()}` } as ICard;
+    }
+    return null;
   }, []);
 
   useEffect(() => {
@@ -352,12 +386,13 @@ const App: React.FC = () => {
         gameState.screen !== GameScreen.MODE_SELECTION &&
         gameState.screen !== GameScreen.DEBUG_MENU &&
         gameState.screen !== GameScreen.MINI_GAME_SELECT &&
-        gameState.screen !== GameScreen.MINI_GAME_POKER &&
-        gameState.screen !== GameScreen.MINI_GAME_SURVIVOR &&
-        gameState.screen !== GameScreen.MINI_GAME_DUNGEON &&
-        gameState.screen !== GameScreen.MINI_GAME_DUNGEON_2 &&
-        gameState.screen !== GameScreen.MINI_GAME_KOCHO &&
-        gameState.screen !== GameScreen.MINI_GAME_PAPER_PLANE &&
+        gameState.screen === GameScreen.MINI_GAME_POKER ||
+        gameState.screen === GameScreen.MINI_GAME_SURVIVOR ||
+        gameState.screen === GameScreen.MINI_GAME_DUNGEON ||
+        gameState.screen === GameScreen.MINI_GAME_DUNGEON_2 ||
+        gameState.screen === GameScreen.MINI_GAME_KOCHO ||
+        gameState.screen === GameScreen.MINI_GAME_PAPER_PLANE ||
+        gameState.screen === GameScreen.MINI_GAME_GO_HOME ||
         gameState.screen !== GameScreen.PROBLEM_CHALLENGE &&
         gameState.screen !== GameScreen.VS_SETUP &&
         gameState.screen !== GameScreen.VS_BATTLE &&
@@ -405,7 +440,7 @@ const App: React.FC = () => {
       }
   };
 
-  const handleLogTitleClick = (e: React.MouseEvent) => {
+  const handleLogClick = (e: React.MouseEvent) => {
       e.stopPropagation(); 
       const next = logClickCount + 1;
       setLogClickCount(next);
@@ -468,6 +503,12 @@ const App: React.FC = () => {
       }
       const saved = storageService.loadGame();
       if (saved) {
+          // 不正データチェック: HPが0以下の場合はロードさせない
+          if (saved.player.currentHp <= 0) {
+              storageService.clearSave();
+              addLog("不適切なセーブデータを破棄しました。", "red");
+              return;
+          }
           setGameState(saved);
           if (saved.screen === GameScreen.BATTLE) {
               audioService.playBGM('battle');
@@ -874,6 +915,18 @@ const App: React.FC = () => {
                               floatingText: null
                           } : undefined;
                           
+                          const unlockedCards = storageService.getUnlockedCards();
+                          const ev = generateEvent(
+                              initialPlayerState,
+                              setGameState,
+                              handleNodeComplete,
+                              setEventResultLog,
+                              languageMode,
+                              unlockedCards
+                          );
+                          setEventData(ev);
+                          setEventResultLog(null);
+
                           setGameState(prev => ({
                               ...prev,
                               screen: GameScreen.RELIC_SELECTION,
@@ -941,6 +994,7 @@ const App: React.FC = () => {
   const handleRelicSelect = (relic: Relic) => {
         audioService.playSound('buff');
         const map = generateDungeonMap();
+        const unlockedCards = storageService.getUnlockedCards();
 
         const legacyCard = storageService.getLegacyCard();
         if (legacyCard) {
@@ -995,10 +1049,8 @@ const App: React.FC = () => {
             let enemies: Enemy[] = [];
             let bgmType: 'battle' | 'mid_boss' | 'boss' | 'final_boss' = 'battle'; 
 
-            // ボスHP計算ロジック：デッキ内の攻撃期待値（damage * 回数）の最大値を考慮する
             const maxAtkDmg = Math.max(...nextState.player.deck.filter(c => c.type === CardType.ATTACK).map(c => {
                 const base = c.damage || 0;
-                // 回数攻撃（playCopies）を考慮。playCopies:1 は 2回攻撃なので 1 + playCopies
                 const hits = 1 + (c.playCopies || 0);
                 return base * hits;
             }), 0);
@@ -1227,12 +1279,14 @@ const App: React.FC = () => {
             audioService.playBGM('shop');
 
         } else if (node.type === NodeType.EVENT) {
+            const unlockedCards = storageService.getUnlockedCards();
             const ev = generateEvent(
                 nextState.player,
                 setGameState,
                 handleNodeComplete,
                 setEventResultLog,
-                languageMode
+                languageMode,
+                unlockedCards
             );
             setEventData(ev);
             setEventResultLog(null);
@@ -1460,6 +1514,52 @@ const App: React.FC = () => {
       let nextSelectionState = { ...prev.selectionState };
       const nextActStats = prev.actStats ? { ...prev.actStats } : { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 };
 
+      // --- カード固有の拡張ロジック ---
+      // ここに外部サービスからの呼び出しを追加
+      const additionalResult = applyAdditionalCardLogic(card, p, enemies, languageMode, currentLogs, nextActiveEffects);
+      Object.assign(p, additionalResult.player);
+      enemies = additionalResult.enemies;
+
+      if (card.gold) {
+          p.gold += card.gold;
+          currentLogs.push(`${card.gold}ゴールドをゲット！`);
+          audioService.playSound('buff');
+      }
+
+      if (card.addPotion) {
+          const allPotions = Object.values(POTION_LIBRARY);
+          const potion = { ...allPotions[Math.floor(Math.random() * allPotions.length)], id: `event-pot-${Date.now()}` };
+          if (p.potions.length < 3) p.potions.push(potion);
+          currentLogs.push(`${trans(potion.name, languageMode)}をゲット！`);
+      }
+
+      if (card.blockMultiplier) {
+          p.block = Math.floor(p.block * card.blockMultiplier);
+          nextActiveEffects.push({ id: `vfx-blkmul-${Date.now()}`, type: 'BLOCK', targetId: 'player' });
+      }
+
+      if (card.name === '磁石の力' || card.name === 'RIKA_MAGNET' || card.name === '鉄棒の逆上がり' || card.name === 'PE_HORIZONTAL_BAR') {
+          if (p.discardPile.length > 0) {
+              const idx = Math.floor(Math.random() * p.discardPile.length);
+              const retrieved = p.discardPile.splice(idx, 1)[0];
+              p.hand.push(retrieved);
+              currentLogs.push(`${trans(retrieved.name, languageMode)}を捨て札から回収した！`);
+          }
+      }
+
+      if (card.name === '虹のプリズム' || card.name === 'RIKA_RAINBOW') {
+          const handToUpgrade = p.hand.filter(c => c.id !== card.id && !c.upgraded);
+          if (handToUpgrade.length > 0) {
+              const shuffled = shuffle([...handToUpgrade]);
+              const targets = shuffled.slice(0, 2);
+              p.hand = p.hand.map(hc => {
+                  if (targets.some(t => t.id === hc.id)) return getUpgradedCard(hc);
+                  return hc;
+              });
+              currentLogs.push("手札のカードを2枚強化した！");
+          }
+      }
+
       if (card.name === '学習アルゴリズム' || card.name === 'GENETIC_ALGORITHM') {
           p.deck = p.deck.map(c => {
               if (c.id === card.id) {
@@ -1499,8 +1599,8 @@ const App: React.FC = () => {
               p.typesPlayedThisTurn.includes(CardType.SKILL) && 
               p.typesPlayedThisTurn.includes(CardType.POWER)) {
               
-              if (p.powers['WEAK'] > 0) { p.powers['WEAK'] = 0; currentLogs.push(trans("へろろから解除！", languageMode)); }
-              if (p.powers['VULNERABLE'] > 0) { p.powers['VULNERABLE'] = 0; currentLogs.push(trans("びくびく解除！", languageMode)); }
+              if (p.powers['WEAK'] > 0) { p.powers['WEAK'] = 0; currentLogs.push(trans("へろろから回復した", languageMode)); }
+              if (p.powers['VULNERABLE'] > 0) { p.powers['VULNERABLE'] = 0; currentLogs.push(trans("びくびくから回復した", languageMode)); }
               if (p.powers['FRAIL'] > 0) { p.powers['FRAIL'] = 0; currentLogs.push(trans("もろい解除！", languageMode)); } 
               
               p.typesPlayedThisTurn = []; 
@@ -1559,11 +1659,15 @@ const App: React.FC = () => {
               }
               const newCard = p.drawPile.pop();
               if (newCard) { 
-                  if (newCard.name === '虚無' || newCard.name === 'VOID') {
+                  const card = { ...newCard };
+                  if (card.name === '虚無' || card.name === 'VOID') {
                       p.currentEnergy = Math.max(0, p.currentEnergy - 1);
                       p.floatingText = { id: `void-turn-${Date.now()}-${i}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
                   }
-                  p.hand.push(newCard);
+                  if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && card.cost >= 0) {
+                      card.cost = Math.floor(Math.random() * 4);
+                  }
+                  p.hand.push(card);
               }
           }
           currentLogs.push(`${trans("手札を交換", languageMode)} (${count})`);
@@ -1805,6 +1909,15 @@ const App: React.FC = () => {
                   }
                   nextActiveEffects.push({ id: `vfx-sd-${Date.now()}`, type: 'SLASH', targetId: 'player', delay: hitDelay });
               }
+              
+              // --- FIX: fatalMaxHp as instant boost for non-attack Skills (target: SELF) ---
+              if (card.fatalMaxHp && card.type === CardType.SKILL && card.target === TargetType.SELF) {
+                  p.maxHp += card.fatalMaxHp;
+                  p.currentHp += card.fatalMaxHp;
+                  p.floatingText = { id: `maxhp-${Date.now()}`, text: `MaxHP+${card.fatalMaxHp}`, color: 'text-green-400', iconType: 'heart' };
+                  nextActiveEffects.push({ id: `vfx-mhp-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
+              }
+
               if (card.strength) {
                   if (card.target === TargetType.ENEMY || card.target === TargetType.ALL_ENEMIES) {
                       targets.forEach(e => {
@@ -1877,21 +1990,22 @@ const App: React.FC = () => {
               if (card.draw) {
                 for (let j = 0; j < card.draw; j++) {
                   if (p.drawPile.length === 0) {
-                    if (p.discardPile.length === 0) break;
+                    if (p.discardPile === undefined || p.discardPile.length === 0) break;
                     p.drawPile = shuffle(p.discardPile);
                     p.discardPile = [];
                   }
                   const newCard = p.drawPile.pop();
                   if (newCard) { 
-                      if (newCard.name === '虚無' || newCard.name === 'VOID') {
+                      const card = { ...newCard };
+                      if (card.name === '虚無' || card.name === 'VOID') {
                           p.currentEnergy = Math.max(0, p.currentEnergy - 1);
                           p.floatingText = { id: `void-turn-${Date.now()}-${j}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
                       }
-                      if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && newCard.cost >= 0) {
-                          newCard.cost = Math.floor(Math.random() * 4);
+                      if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && card.cost >= 0) {
+                          card.cost = Math.floor(Math.random() * 4);
                       }
-                      p.hand.push(newCard); 
-                      if (p.powers['EVOLVE'] && (newCard.type === CardType.STATUS || newCard.type === CardType.CURSE)) {
+                      p.hand.push(card);
+                      if (p.powers['EVOLVE'] && (card.type === CardType.STATUS || card.type === CardType.CURSE)) {
                           for (let k=0; k<p.powers['EVOLVE']; k++) {
                               if (p.drawPile.length === 0) {
                                   if (p.discardPile === undefined || p.discardPile.length === 0) break;
@@ -2088,7 +2202,7 @@ const App: React.FC = () => {
         setGameState(prev => ({ ...prev, activeEffects: [] }));
     }, 1200);
   };
-
+  
   const startPlayerTurn = () => {
     setTurnLog(trans("あなたのターン", languageMode));
     setGameState(prev => {
@@ -2096,6 +2210,16 @@ const App: React.FC = () => {
       const currentLogs: string[] = [];
       const nextActiveEffects: VisualEffectInstance[] = [];
       let extraEnergy = 0; 
+
+      // --- ターン開始時ドロー強化ロジック ---
+      let drawBonus = 0;
+      if (p.powers['DRAW_POWER']) drawBonus += p.powers['DRAW_POWER'];
+      if (p.powers['DRAW_POWER_2']) drawBonus += p.powers['DRAW_POWER_2'];
+      if (p.powers['ENERGY_DRAW_POWER']) {
+          drawBonus += p.powers['ENERGY_DRAW_POWER'];
+          extraEnergy += p.powers['ENERGY_DRAW_POWER'];
+      }
+
       if (p.powers['DEMON_FORM']) { 
           p.strength += p.powers['DEMON_FORM']; 
           p.floatingText = { id: `pow-demon-${Date.now()}`, text: '反抗期', color: 'text-red-500' }; 
@@ -2167,7 +2291,7 @@ const App: React.FC = () => {
       } else {
           newDiscardPile = [...newDiscardPile, ...p.hand];
       }
-      let drawCount = HAND_SIZE + (p.powers['TOOLS_OF_THE_TRADE'] ? 1 : 0) + p.nextTurnDraw;
+      let drawCount = HAND_SIZE + (p.powers['TOOLS_OF_THE_TRADE'] ? 1 : 0) + p.nextTurnDraw + drawBonus;
       p.nextTurnDraw = 0;
       for (let i = 0; i < drawCount; i++) {
         if (newDrawPile.length === 0) {
@@ -2753,6 +2877,7 @@ const App: React.FC = () => {
                         currentHp: Math.min(nextPlayer.partner.maxHp, nextPlayer.partner.currentHp + 5) 
                     };
                 }
+                
                 if (prev.act === 4 && !prev.isEndless) {
                     storageService.incrementClearCount();
                     const score = calculateScore(prev, true);
@@ -2806,6 +2931,14 @@ const App: React.FC = () => {
                  }));
                  return;
             }
+            
+            // --- FIXED: Immediate save deletion to prevent repeat unlocks ---
+            storageService.clearSave();
+
+            // --- NEW UNLOCK LOGIC ON GAME OVER ---
+            const unlockedCard = unlockRandomAdditionalCard();
+            if (unlockedCard) setNewlyUnlockedCard(unlockedCard);
+
             setLegacyCardSelected(false);
             audioService.playSound('lose');
             audioService.playBGM('game_over');
@@ -2824,7 +2957,7 @@ const App: React.FC = () => {
             setGameState(prev => ({ ...prev, screen: GameScreen.GAME_OVER }));
         }
     }
-  }, [gameState.enemies, gameState.player.currentHp, gameState.screen, gameState.act, selectedCharName, gameState.challengeMode]);
+  }, [gameState.enemies, gameState.player.currentHp, gameState.screen, gameState.act, selectedCharName, gameState.challengeMode, unlockRandomAdditionalCard]);
 
   const finishRewardPhase = () => {
     setGameState(prev => {
@@ -2859,10 +2992,14 @@ const App: React.FC = () => {
                 };
             }
 
+            // --- ACT CLEAR: Unlock additional card ---
+            const unlockedCard = unlockRandomAdditionalCard();
+
             return {
                 ...prev,
                 player: nextPlayer,
-                screen: GameScreen.FLOOR_RESULT
+                screen: GameScreen.FLOOR_RESULT,
+                newlyUnlockedCardName: unlockedCard?.name // Passing unlocked card name to display in result screen
             };
         } else {
             const newMap = prev.map.map(n => {
@@ -2883,7 +3020,7 @@ const App: React.FC = () => {
 
   const goToRewardPhase = (bonusGold: number = 0) => {
       const rewards: RewardItem[] = [];
-      const isLibrarian = gameState.player.id === 'LIBRARIAN';
+      const isLibrarian = gameState.player.id === 'LIBRARian';
       const isGardener = gameState.player.id === 'GARDENER';
       if (bonusGold > 0) {
           let goldReward = bonusGold;
@@ -3014,32 +3151,53 @@ const App: React.FC = () => {
   };
 
   const handleNextActFromStory = () => {
-      setGameState(prev => {
-          if (prev.act === 3 && !prev.isEndless) {
-              return { ...prev, screen: GameScreen.FINAL_BRIDGE };
-          }
-          const nextAct = prev.act + 1;
-          const newMap = generateDungeonMap();
-          audioService.playBGM('map');
-          const isGardener = prev.player.id === 'GARDENER';
-          return {
-              ...prev,
-              act: nextAct,
-              floor: 0,
-              map: newMap,
-              currentMapNodeId: null,
-              screen: isGardener ? GameScreen.GARDEN : GameScreen.MAP,
-              player: {
-                  ...prev.player,
-                  currentHp: prev.player.maxHp 
-              },
-              narrativeLog: [...prev.narrativeLog, trans(`第${nextAct}章へ進んだ。体力が全回復した！`, languageMode)],
-              actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
-          };
-      });
+    setGameState(prev => {
+        if (prev.act === 3 && !prev.isEndless) {
+            return { ...prev, screen: GameScreen.FINAL_BRIDGE };
+        }
+        const nextAct = prev.act + 1;
+        const newMap = generateDungeonMap();
+        audioService.playBGM('map');
+        const isGardener = prev.player.id === 'GARDENER';
+        return {
+            ...prev,
+            act: nextAct,
+            floor: 0,
+            map: newMap,
+            currentMapNodeId: null,
+            screen: isGardener ? GameScreen.GARDEN : GameScreen.MAP,
+            player: {
+                ...prev.player,
+                currentHp: prev.player.maxHp 
+            },
+            narrativeLog: [...prev.narrativeLog, trans(`第${nextAct}章へ進んだ。体力が全回復した！`, languageMode)],
+            actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 },
+            newlyUnlockedCardName: undefined // 次のアクトへ行くときにリセット
+        };
+    });
   };
 
-  // --- Render logic for screens ---
+  const goToFloorResult = () => {
+      // 未解放のカードがあれば1枚解放する
+      const unlockedCard = unlockRandomAdditionalCard();
+      setGameState(prev => ({
+          ...prev,
+          screen: GameScreen.FLOOR_RESULT,
+          newlyUnlockedCardName: unlockedCard?.name
+      }));
+  };
+
+  // 既存の finishRewardPhase を修正して goToFloorResult を呼ぶようにする
+  const handleRewardSelectionAndFinish = (item: RewardItem, replacePotionId?: string) => {
+      handleRewardSelection(item, replacePotionId);
+      // カードを選択し終えたらチェック
+      const nextState = stateRef.current;
+      if (nextState.rewards.every(r => r.type === 'CARD')) {
+           // すべて選択済みなら
+           // ... (App.tsxの他の箇所でfinishRewardPhaseが呼ばれる想定)
+      }
+  };
+
   const miniGame = MINI_GAMES.find(g => g.screen === gameState.screen);
 
   return (
@@ -3205,7 +3363,7 @@ const App: React.FC = () => {
                             </div>
 
                             <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                <Terminal size={10}/> v1.0.2 YUSUKE ISHIGE
+                                <Terminal size={10}/> v1.0.3 YUSUKE ISHIGE
                             </button>
                         </div>
                     </div>
@@ -3220,6 +3378,7 @@ const App: React.FC = () => {
                         storyIndex={gameState.currentStoryIndex || 0}
                         onNext={handleNextActFromStory}
                         languageMode={languageMode}
+                        newlyUnlockedCardName={gameState.newlyUnlockedCardName}
                     />
                 </div>
             )}
@@ -3229,15 +3388,15 @@ const App: React.FC = () => {
                     <div className="bg-gray-900 border-2 border-green-500 p-6 rounded-lg max-w-lg w-full shadow-[0_0_20px_rgba(34,197,94,0.3)]" onClick={e => e.stopPropagation()}>
                         <h2 
                             className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2 select-none active:text-green-200"
-                            onClick={handleLogTitleClick}
+                            onClick={handleLogClick}
                         >
-                            System Update Log v1.0.2
+                            System Update Log v1.0.3
                         </h2>
                         <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
                             <section>
-                                <h3 className="text-white font-bold mb-1">■ v1.0.2 アップデート</h3>
+                                <h3 className="text-white font-bold mb-1">■ v1.0.3 アップデート</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li>対戦(QR対戦)機能の実装</li>
+                                    <li>200を超えるアンロックカードの実装</li>
                                     <li>問題チャレンジモードの改善</li>
                                     <li>UIの微調整とバグ修正</li>
                                 </ul>
@@ -3601,8 +3760,8 @@ const App: React.FC = () => {
                                         if (r.value.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
                                         if (r.value.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
                                         if (r.value.id === 'OLD_COIN') newP.gold += 300;
-                                        if (r.value.id === 'MATRYOSHKA') newP.relicCounters['MATRYOSHKA'] = 2; 
-                                        if (r.value.id === 'HAPPY_FLOWER') newP.relicCounters['HAPPY_FLOWER'] = 0; 
+                                        if (r.value.id === 'MATRYOSHKA') prev.player.relicCounters['MATRYOSHKA'] = 2; 
+                                        if (r.value.id === 'HAPPY_FLOWER') prev.player.relicCounters['HAPPY_FLOWER'] = 0; 
                                     }
                                 });
                                 if (hasCursedKey) {
@@ -3625,6 +3784,22 @@ const App: React.FC = () => {
                     <div className="my-auto w-full max-w-2xl py-8">
                         <h1 className="text-6xl mb-4 font-bold">しゅくだいがふえた…</h1>
                         <p className="mb-8 text-2xl">Act {gameState.act} - Floor {gameState.floor}</p>
+                        
+                        {/* Newly Unlocked Card Section */}
+                        {newlyUnlockedCard && (
+                            <div className="mb-8 p-6 bg-yellow-600/20 border-2 border-yellow-400 rounded-2xl animate-in zoom-in duration-500 shadow-[0_0_20px_rgba(250,204,21,0.3)]">
+                                <div className="flex items-center justify-center gap-2 text-yellow-400 font-black text-xl mb-4 italic tracking-widest">
+                                    <Sparkles size={24}/> NEW CARD UNLOCKED! <Sparkles size={24}/>
+                                </div>
+                                <div className="flex flex-col items-center gap-4">
+                                    <div className="scale-100">
+                                        <Card card={newlyUnlockedCard} onClick={()=>{}} disabled={false} languageMode={languageMode}/>
+                                    </div>
+                                    <p className="text-sm text-yellow-100 font-bold">新しい学習の成果が、次回の冒険から現れるようになります！</p>
+                                </div>
+                            </div>
+                        )}
+
                         {!legacyCardSelected ? (
                             <div className="mb-8 shrink-0">
                                 <p className="mb-4 text-sm text-red-200 font-bold">次回の冒険に持っていくカードを1枚選んでください</p>
@@ -3655,7 +3830,23 @@ const App: React.FC = () => {
                     <div className="my-auto w-full max-w-2xl py-8">
                         <Trophy size={80} className="text-yellow-400 mx-auto mb-6 animate-pulse shrink-0" />
                         <h1 className="text-4xl md:text-6xl mb-4 font-bold text-yellow-200 shrink-0">ゲームクリア！</h1>
-                        <p className="mb-8 text-lg md:text-xl shrink-0">あなたは校長先生を説得し、<br/>伝説の小学生として語り継がれることでしょう。</p>
+                        <p className="mb-8 text-lg md:text-xl shrink-0">あなたは校長先生をせっとくし、<br/>でんせつの しょうがくせいとして かたりつがれることでしょう。</p>
+                        
+                        {/* Newly Unlocked Card Section */}
+                        {newlyUnlockedCard && (
+                            <div className="mb-8 p-6 bg-white/20 border-2 border-white rounded-2xl animate-in zoom-in duration-500 shadow-xl">
+                                <div className="flex items-center justify-center gap-2 text-white font-black text-xl mb-4 italic tracking-widest">
+                                    <Sparkles size={24}/> NEW CARD UNLOCKED! <Sparkles size={24}/>
+                                </div>
+                                <div className="flex flex-col items-center gap-4">
+                                    <div className="scale-100">
+                                        <Card card={newlyUnlockedCard} onClick={()=>{}} disabled={false} languageMode={languageMode}/>
+                                    </div>
+                                    <p className="text-sm text-yellow-100 font-bold">新しい学習の成果が、次回の冒険から現れるようになります！</p>
+                                </div>
+                            </div>
+                        )}
+
                         {!legacyCardSelected ? (
                             <div className="mb-8 shrink-0">
                                 <p className="mb-4 text-sm text-yellow-100 font-bold">次回の冒険に持っていくカードを1枚選んでください</p>

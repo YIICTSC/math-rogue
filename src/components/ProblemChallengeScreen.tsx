@@ -224,107 +224,115 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
   }
 
   return (
-    <div className="w-full h-full bg-slate-950 flex flex-col items-center justify-center p-2 md:p-4 relative overflow-y-auto">
+    <div className="w-full h-full bg-slate-950 flex flex-col items-center justify-center p-2 md:p-4 relative">
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-30 pointer-events-none"></div>
       
-      <div className="z-10 w-full max-w-4xl bg-gray-900 border-4 border-emerald-600 rounded-2xl shadow-2xl p-4 md:p-6 flex flex-col gap-4">
-        <div className="text-center border-b border-gray-800 pb-3">
-          <h2 className="text-2xl md:text-4xl font-bold text-emerald-400 mb-0.5 flex items-center justify-center gap-3">
-            <GraduationCap size={32} className="md:size-36"/> 問題チャレンジ
+      <div className="z-10 w-full max-w-5xl bg-gray-900 border-4 border-emerald-600 rounded-2xl shadow-2xl flex flex-col max-h-[95vh] lg:max-h-[90vh] overflow-hidden">
+        {/* Header - Fixed */}
+        <div className="text-center border-b border-gray-800 p-4 shrink-0">
+          <h2 className="text-2xl md:text-3xl font-bold text-emerald-400 mb-0.5 flex items-center justify-center gap-3">
+            <GraduationCap size={28} className="md:size-32"/> 問題チャレンジ
           </h2>
           <div className="flex items-center justify-center gap-1.5 text-yellow-500 font-bold text-[10px] uppercase tracking-wider">
             <Star size={10} fill="currentColor"/> ミニゲーム解放カウント対象 <Star size={10} fill="currentColor"/>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          <div className="lg:col-span-3 flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-x-visible pb-1.5 lg:pb-0 scrollbar-hide">
+        {/* Main Selection Area - Flexible with Scrollbars */}
+        <div className="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 overflow-hidden min-h-0">
+          
+          {/* Left: Category Selector - Scrollable vertically on PC */}
+          <div className="lg:col-span-3 flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-y-auto lg:overflow-x-visible pb-1.5 lg:pb-0 custom-scrollbar shrink-0">
             {SUBJECT_CATEGORIES.map(cat => (
               <button
                 key={cat.id}
                 onClick={() => handleCategorySelect(cat)}
-                className={`flex items-center gap-2 p-2.5 md:p-4 rounded-xl border-2 transition-all shrink-0 lg:shrink ${selectedCategory.id === cat.id ? `bg-emerald-900/40 border-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)]` : 'bg-gray-800 border-gray-700 text-gray-500 hover:border-gray-600'}`}
+                className={`flex items-center gap-2 p-2 md:p-3 rounded-xl border-2 transition-all shrink-0 lg:shrink-0 ${selectedCategory.id === cat.id ? `bg-emerald-900/40 border-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.2)]` : 'bg-gray-800 border-gray-700 text-gray-500 hover:border-gray-600'}`}
               >
                 <span className={selectedCategory.id === cat.id ? `text-emerald-400` : 'text-gray-600'}>{getCategoryIcon(cat.id)}</span>
-                <span className="font-bold whitespace-nowrap text-sm md:text-base">{cat.name}</span>
+                <span className="font-bold whitespace-nowrap text-xs md:text-sm">{cat.name}</span>
               </button>
             ))}
           </div>
 
-          <div className="lg:col-span-6 flex flex-col">
-            <h3 className="text-[10px] md:text-sm font-bold text-gray-400 mb-2 flex items-center gap-2 uppercase tracking-tight">
-              <ChevronRight size={12} className="text-emerald-500"/> 種目を選択
+          {/* Middle: SubMode Selector - Scrollable vertically */}
+          <div className="lg:col-span-6 flex flex-col min-h-0">
+            <h3 className="text-[10px] md:text-xs font-bold text-gray-400 mb-1.5 flex items-center gap-2 uppercase tracking-tight shrink-0">
+              <ChevronRight size={10} className="text-emerald-500"/> 種目を選択
             </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-black/40 p-3 rounded-xl border border-gray-800 max-h-40 md:max-h-80 overflow-y-auto custom-scrollbar shadow-inner">
-                {selectedCategory.subModes.map((sub, i) => {
-                  const recordKey = `${selectedCategory.id}_${sub.id}`;
-                  const isSelected = selectedSubMode.id === sub.id;
-                  const buttonColor = getTailwindColorClass(selectedCategory.color, isSelected);
-                  const glowEffect = isSelected ? getGlowColorClass(selectedCategory.color) : '';
-                  
-                  return (
-                    <button
-                      key={sub.id}
-                      onClick={() => { setSelectedSubMode(sub); audioService.playSound('select'); }}
-                      className={`
-                        flex flex-col p-2 rounded-xl border-2 transition-all transform hover:-translate-y-0.5 active:scale-95
-                        ${isSelected 
-                            ? 'border-white z-10 scale-105 ' + glowEffect 
-                            : 'border-transparent opacity-70 hover:opacity-100'} 
-                        ${buttonColor}
-                      `}
-                    >
-                      <span className="text-[11px] md:text-xs font-black text-white mb-1 truncate w-full leading-tight text-left drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
-                        {sub.name}
-                      </span>
-                      <div className="flex items-center justify-between mt-auto">
-                        <div className="bg-black/40 px-1.5 rounded text-[8px] md:text-[9px] font-mono text-white/90 border border-white/10">
-                          BEST: {records[recordKey] || 0}
-                        </div>
-                        {isSelected && <CheckCircle size={12} className="text-white animate-pulse" />}
-                      </div>
-                    </button>
-                  );
-                })}
+            <div className="bg-black/40 p-2 rounded-xl border border-gray-800 flex-grow overflow-y-auto custom-scrollbar shadow-inner min-h-[120px]">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 gap-2">
+                    {selectedCategory.subModes.map((sub, i) => {
+                      const recordKey = `${selectedCategory.id}_${sub.id}`;
+                      const isSelected = selectedSubMode.id === sub.id;
+                      const buttonColor = getTailwindColorClass(selectedCategory.color, isSelected);
+                      const glowEffect = isSelected ? getGlowColorClass(selectedCategory.color) : '';
+                      
+                      return (
+                        <button
+                          key={sub.id}
+                          onClick={() => { setSelectedSubMode(sub); audioService.playSound('select'); }}
+                          className={`
+                            flex flex-col p-2 rounded-lg border-2 transition-all transform hover:-translate-y-0.5 active:scale-95
+                            ${isSelected 
+                                ? 'border-white z-10 scale-105 ' + glowEffect 
+                                : 'border-transparent opacity-70 hover:opacity-100'} 
+                            ${buttonColor}
+                          `}
+                        >
+                          <span className="text-[10px] md:text-xs font-black text-white mb-1 truncate w-full leading-tight text-left drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                            {sub.name}
+                          </span>
+                          <div className="flex items-center justify-between mt-auto">
+                            <div className="bg-black/40 px-1.5 rounded text-[8px] md:text-[9px] font-mono text-white/90 border border-white/10">
+                              BEST: {records[recordKey] || 0}
+                            </div>
+                            {isSelected && <CheckCircle size={12} className="text-white animate-pulse" />}
+                          </div>
+                        </button>
+                      );
+                    })}
+                </div>
             </div>
           </div>
 
-          <div className="lg:col-span-3 flex flex-col gap-4">
+          {/* Right: Settings - Scrollable vertically */}
+          <div className="lg:col-span-3 flex flex-col gap-4 overflow-y-auto custom-scrollbar shrink-0">
             <div className="flex flex-col">
-                <h3 className="text-[10px] md:text-sm font-bold text-gray-400 mb-2 flex items-center gap-2 uppercase tracking-tight">
-                <Music size={12} className="text-emerald-500"/> BGM
+                <h3 className="text-[10px] md:text-xs font-bold text-gray-400 mb-1.5 flex items-center gap-2 uppercase tracking-tight shrink-0">
+                <Music size={10} className="text-emerald-500"/> BGM
                 </h3>
-                <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-1.5 max-h-32 md:max-h-48 overflow-y-auto custom-scrollbar">
-                <div className="flex flex-col gap-1">
-                    {BGM_OPTIONS.map(bgm => (
-                    <button
-                        key={bgm.id}
-                        onClick={() => { setSelectedBgmId(bgm.id); audioService.playSound('select'); }}
-                        className={`flex items-center justify-between px-2 py-1.5 rounded-lg text-[10px] md:text-xs font-bold transition-all ${selectedBgmId === bgm.id ? 'bg-indigo-600 text-white' : 'text-gray-500 hover:bg-gray-800'}`}
-                    >
-                        <span className="truncate">{bgm.name}</span>
-                        {selectedBgmId === bgm.id && <CheckCircle size={10} className="shrink-0 ml-1" />}
-                    </button>
-                    ))}
-                </div>
+                <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-1.5 overflow-y-auto max-h-32 lg:max-h-none lg:flex-grow custom-scrollbar">
+                    <div className="flex flex-col gap-1">
+                        {BGM_OPTIONS.map(bgm => (
+                        <button
+                            key={bgm.id}
+                            onClick={() => { setSelectedBgmId(bgm.id); audioService.playSound('select'); }}
+                            className={`flex items-center justify-between px-2 py-1.5 rounded-lg text-[9px] md:text-[10px] font-bold transition-all ${selectedBgmId === bgm.id ? 'bg-indigo-600 text-white' : 'text-gray-500 hover:bg-gray-800'}`}
+                        >
+                            <span className="truncate">{bgm.name}</span>
+                            {selectedBgmId === bgm.id && <CheckCircle size={10} className="shrink-0 ml-1" />}
+                        </button>
+                        ))}
+                    </div>
                 </div>
             </div>
 
             {selectedCategory.id === 'ENGLISH' && (
-                <div className="flex flex-col">
-                    <h3 className="text-[10px] md:text-sm font-bold text-gray-400 mb-2 flex items-center gap-2 uppercase tracking-tight">
-                    <Volume2 size={12} className="text-emerald-500"/> 読み上げ設定
+                <div className="flex flex-col shrink-0">
+                    <h3 className="text-[10px] md:text-xs font-bold text-gray-400 mb-1.5 flex items-center gap-2 uppercase tracking-tight">
+                    <Volume2 size={10} className="text-emerald-500"/> 読み上げ
                     </h3>
                     <button 
                         onClick={toggleVoice}
-                        className={`flex items-center justify-between px-3 py-2.5 rounded-xl border-2 font-bold transition-all ${voiceEnabled ? 'bg-cyan-900/40 border-cyan-500 text-white' : 'bg-gray-800 border-gray-600 text-gray-500'}`}
+                        className={`flex items-center justify-between px-3 py-2 rounded-xl border-2 font-bold transition-all ${voiceEnabled ? 'bg-cyan-900/40 border-cyan-500 text-white' : 'bg-gray-800 border-gray-600 text-gray-500'}`}
                     >
                         <div className="flex items-center gap-2">
-                            {voiceEnabled ? <Volume2 size={16} className="text-cyan-400"/> : <VolumeX size={16}/>}
-                            <span className="text-xs">{voiceEnabled ? 'オン' : 'オフ'}</span>
+                            {voiceEnabled ? <Volume2 size={14} className="text-cyan-400"/> : <VolumeX size={14}/>}
+                            <span className="text-[10px]">{voiceEnabled ? 'オン' : 'オフ'}</span>
                         </div>
-                        <div className={`w-8 h-4 rounded-full relative transition-colors ${voiceEnabled ? 'bg-cyan-500' : 'bg-gray-600'}`}>
-                            <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${voiceEnabled ? 'left-4.5' : 'left-0.5'}`}></div>
+                        <div className={`w-7 h-3.5 rounded-full relative transition-colors ${voiceEnabled ? 'bg-cyan-500' : 'bg-gray-600'}`}>
+                            <div className={`absolute top-0.5 w-2.5 h-2.5 bg-white rounded-full transition-all ${voiceEnabled ? 'left-4' : 'left-0.5'}`}></div>
                         </div>
                     </button>
                 </div>
@@ -332,7 +340,8 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 items-center mt-2 border-t border-gray-800 pt-4 shrink-0">
+        {/* Footer - Fixed */}
+        <div className="flex flex-col gap-3 items-center p-4 border-t border-gray-800 shrink-0 bg-gray-900">
           <div className="bg-black/40 px-4 py-1.5 rounded-full border border-emerald-900/50 flex items-center gap-2">
               <div className="text-[10px] text-gray-500">選択中:</div>
               <div className="text-xs font-bold text-emerald-400">{selectedCategory.name} / {selectedSubMode.name}</div>
@@ -340,7 +349,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
 
           <button 
             onClick={handleStart}
-            className="w-full md:w-80 bg-emerald-600 hover:bg-emerald-500 text-white py-3 md:py-4 rounded-xl font-bold text-lg md:text-xl shadow-[0_4px_0_rgb(5,150,105)] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-3 animate-pulse"
+            className="w-full md:w-80 bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-xl font-bold text-lg shadow-[0_4px_0_rgb(5,150,105)] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-3 animate-pulse"
           >
             <Play fill="currentColor" size={20}/> チャレンジ開始！
           </button>
