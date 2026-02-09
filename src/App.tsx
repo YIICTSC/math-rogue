@@ -3020,7 +3020,7 @@ const App: React.FC = () => {
 
   const goToRewardPhase = (bonusGold: number = 0) => {
       const rewards: RewardItem[] = [];
-      const isLibrarian = gameState.player.id === 'LIBRARian';
+      const isLibrarian = gameState.player.id === 'LIBRARIAN';
       const isGardener = gameState.player.id === 'GARDENER';
       if (bonusGold > 0) {
           let goldReward = bonusGold;
