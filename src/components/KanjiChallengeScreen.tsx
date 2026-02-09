@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, BookOpen } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -19,7 +18,7 @@ interface ExtendedKanjiProblem extends KanjiProblem {
 }
 
 const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete, mode, debugSkip, isChallenge, streak = 0 }) => {
-  const [problems, setProblems] = useState<ExtendedGeneralProblem[]>([]);
+  const [problems, setProblems] = useState<ExtendedKanjiProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);

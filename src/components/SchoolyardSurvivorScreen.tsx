@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
 import { ArrowLeft, RotateCcw, Heart, Pause, Sparkles, Zap, Flame, Shield, Swords, Target, Radiation, Droplets, Recycle, Volume2, Music, Mic, Activity, Wind, Maximize2, Minimize2, Crosshair, FastForward, Dice5, Star, Skull } from 'lucide-react';
 import { HERO_IMAGE_DATA } from '../constants';
-import PixelSprite, { SPRITE_TEMPLATES } from './PixelSprite';
+import PixelSprite, { SPRITE_TEMPLATES, createPixelSpriteCanvas } from './PixelSprite';
 import { audioService } from '../services/audioService';
 import { storageService } from '../services/storageService';
 import MathChallengeScreen from './MathChallengeScreen';
@@ -328,8 +328,8 @@ interface Entity {
     flashTime: number;
     frozen?: number;
     knockback?: { x: number, y: number, time: number };
-    knockbackImmune?: boolean; // 新規: 吹き飛ばし無効
-    defense?: number; // 新規: ダメージ軽減
+    knockbackImmune?: boolean; 
+    defense?: number; 
 }
 
 interface Projectile {
@@ -381,6 +381,14 @@ interface Particle {
     maxLife: number;
     type: 'SPARK' | 'SMOKE' | 'BUBBLE' | 'SLASH_TRACE' | 'RING' | 'GLOW' | 'RAINBOW';
     scale?: number;
+}
+
+interface MathChallengeScreenProps {
+  onComplete: (correctCount: number) => void;
+  mode: GameMode;
+  debugSkip?: boolean;
+  isChallenge?: boolean;
+  streak?: number;
 }
 
 interface SchoolyardSurvivorScreenProps {
@@ -447,7 +455,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     const xp = useRef(0);
     const nextLevelXp = useRef(BASE_XP_REQUIREMENT);
     const shakeAmount = useRef(0);
-    const activeTimeouts = useRef<number[]>([]); // Track pending weapon volleys
+    const activeTimeouts = useRef<number[]>([]); 
 
     const [weapons, setWeapons] = useState<Record<WeaponType, { level: number, cooldownTimer: number } | undefined>>(() => {
         const initial: any = {};
@@ -521,7 +529,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             'ENEMY_4': ['GHOST', '#a5f3fc', '#cffafe'],
             'ENEMY_5': ['ROBOT', '#6b7280', '#9ca3af'],
             'ENEMY_6': ['TEACHER', '#ef4444', '#fca5a5'],
-            'ENEMY_7': ['GOLEM', '#94a3b8', '#cbd5e1'], // 新規: チョークゴーレム
+            'ENEMY_7': ['GOLEM', '#94a3b8', '#cbd5e1'], 
         };
         Object.entries(sprites).forEach(([key, [t, c1, c2]]) => {
             const s = generateFromTemplate(t, c1, c2);
@@ -573,6 +581,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             storageService.saveSurvivorScore({
                 id: `survivor-${Date.now()}`,
                 date: Date.now(),
+                score: Math.floor(scoreRef.current),
                 timeSurvived: time.current,
                 levelReached: level.current,
                 weapons: ownedWeapons
@@ -707,7 +716,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                     saveRecord(); 
                     setUiState(prev => ({ ...prev, gameOver: true, hp: 0 })); 
                     audioService.playSound('lose');
-                    clearAllTimeouts(); // Stop all future sounds/bullets
+                    clearAllTimeouts(); 
                 }
             }
             if (e.flashTime > 0) e.flashTime--;
@@ -1319,7 +1328,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     };
 
     const handleRestart = () => {
-        clearAllTimeouts(); // Ensure no previous game timeouts carry over
+        clearAllTimeouts(); 
         player.current = { ...player.current, x: WORLD_WIDTH/2, y: WORLD_HEIGHT/2, hp: 100, dead: false };
         camera.current = { x: WORLD_WIDTH/2, y: WORLD_HEIGHT/2 };
         enemies.current = []; projectiles.current = []; gems.current = []; damageTexts.current = []; particles.current = [];
@@ -1355,7 +1364,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             {gameState.current === 'LEVEL_UP' && (
                 <div className="absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center z-20 animate-in zoom-in duration-250 pointer-events-auto p-4">
                     <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-orange-500 mb-8 animate-pulse italic">LEVEL UP!</h2>
-                    <div className="grid grid-cols-1 gap-4 w-full max-w-md max-h-[70vh] overflow-y-auto custom-scrollbar pr-2">
+                    <div className="grid grid-cols-1 gap-4 w-full max-md overflow-y-auto max-h-[70vh] p-2 custom-scrollbar">
                         {upgradeOptions.map((opt, idx) => {
                             let itemDef: any = opt.type === 'WEAPON' ? WEAPONS[opt.id as WeaponType] : (opt.type === 'PASSIVE' ? PASSIVES[opt.id as PassiveType] : { name: '特別給食', desc: 'HP 50回復', sprite: { template: 'POTION', color: '#f472b6' } });
                             let isEvo = opt.isEvo;
@@ -1367,7 +1376,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 </div>
             )}
             {joystickUI && joystickUI.active && <div className="absolute z-30 pointer-events-none" style={{ left: joystickUI.startX, top: joystickUI.startY, transform: 'translate(-50%, -50%)' }}><div className="w-24 h-24 rounded-full border-4 border-white/30 bg-white/10 backdrop-blur-sm"></div><div className="absolute w-12 h-12 rounded-full bg-white/40 shadow-2xl" style={{ left: '50%', top: '50%', transform: `translate(calc(-50% + ${joystickUI.curX - joystickUI.startX}px), calc(-50% + ${joystickUI.curY - joystickUI.startY}px))` }}></div></div>}
-            {uiState.gameOver && (<div className="absolute inset-0 bg-red-950/95 flex flex-col items-center justify-center z-20 pointer-events-auto animate-in fade-in duration-500"><Skull size={80} className="text-red-500 mb-4 animate-bounce"/><h2 className="text-7xl font-black text-white mb-4 tracking-tighter italic">GAME OVER</h2><div className="text-2xl text-yellow-400 mb-8 font-black bg-black/40 px-8 py-2 rounded-full border border-yellow-500">SURVIVED: {Math.floor(uiState.time/60)}:{(uiState.time%60).toString().padStart(2,'0')}</div><div className="flex flex-col gap-4 w-72"><button onClick={handleRestart} className="bg-white text-black px-8 py-4 rounded-2xl font-black text-xl hover:bg-gray-200 flex items-center justify-center shadow-[0_4px_0_#ccc] active:translate-y-1 active:shadow-none transition-all"><RotateCcw className="mr-2"/> PLAY AGAIN</button><button onClick={onBack} className="bg-black text-white px-8 py-4 rounded-2xl font-black text-xl border-4 border-white/20 hover:bg-gray-900 flex items-center justify-center shadow-2xl transition-all"><ArrowLeft className="mr-2"/> EXIT TO MENU</button></div></div>)}
+            {uiState.gameOver && (<div className="absolute inset-0 bg-red-950/95 flex flex-col items-center justify-center z-20 pointer-events-auto animate-in fade-in duration-500"><Skull size={80} className="text-red-500 mb-4 animate-bounce"/><h2 className="text-7xl font-black text-white mb-4 tracking-tighter italic">GAME OVER</h2><div className="text-2xl text-yellow-400 mb-8 font-black bg-black/60 px-8 py-2 rounded-full border border-yellow-500">SURVIVED: {Math.floor(uiState.time/60)}:{(uiState.time%60).toString().padStart(2,'0')}</div><div className="flex flex-col gap-4 w-72"><button onClick={handleRestart} className="bg-white text-black px-8 py-4 rounded-2xl font-black text-xl hover:bg-gray-200 flex items-center justify-center shadow-[0_4px_0_#ccc] active:translate-y-1 active:shadow-none transition-all"><RotateCcw className="mr-2"/> PLAY AGAIN</button><button onClick={onBack} className="bg-black text-white px-8 py-4 rounded-2xl font-black text-xl border-4 border-white/20 hover:bg-gray-900 flex items-center justify-center shadow-2xl transition-all"><ArrowLeft className="mr-2"/> EXIT TO MENU</button></div></div>)}
             {gameState.current === 'PLAYING' && (<button onClick={onBack} className="absolute top-4 right-4 bg-gray-800/60 hover:bg-red-500/80 text-white p-3 rounded-2xl border-2 border-white/20 z-50 pointer-events-auto shadow-2xl backdrop-blur-lg transition-all"><Pause size={24} /></button>)}
         </div>
     );
