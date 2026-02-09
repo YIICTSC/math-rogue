@@ -29,6 +29,13 @@ import { MATH_G7_DATA } from './subjects/math_g7';
 import { MATH_G8_DATA } from './subjects/math_g8';
 import { MATH_G9_DATA } from './subjects/math_g9';
 
+// IT・情報のインポート
+import { IT_TABLET_DATA } from './subjects/it_tablet';
+import { IT_INTERNET_DATA } from './subjects/it_internet';
+import { IT_LITERACY_DATA } from './subjects/it_literacy';
+import { IT_PROGRAMMING_DATA } from './subjects/it_programming';
+import { IT_SECURITY_DATA } from './subjects/it_security';
+
 export type { GeneralProblem };
 
 export const SUBJECT_DATA: Record<string, GeneralProblem[]> = {
@@ -58,4 +65,10 @@ export const SUBJECT_DATA: Record<string, GeneralProblem[]> = {
     ...SOCIAL_G8_DATA,
     ...SOCIAL_G9_DATA,
     ...MAP_PREF_DATA,
+    // IT・情報
+    ...IT_TABLET_DATA,
+    IT_INTERNET: IT_INTERNET_DATA,
+    IT_LITERACY: IT_LITERACY_DATA,
+    IT_PROGRAMMING: IT_PROGRAMMING_DATA,
+    IT_SECURITY: IT_SECURITY_DATA,
 };

@@ -25,6 +25,7 @@ const getBackgroundClass = (mode: string) => {
     if (mode.startsWith('SCIENCE') || mode.startsWith('LIFE')) return 'bg-amber-950';
     if (mode.startsWith('SOCIAL') || mode.includes('GEOGRAPHY') || mode.includes('HISTORY') || mode.includes('CIVICS')) return 'bg-orange-950';
     if (mode.startsWith('MAP_') || mode.startsWith('PREF_') || mode.startsWith('PREFECTURES')) return 'bg-rose-950';
+    if (mode.startsWith('IT_')) return 'bg-indigo-950'; // ICT系はインディゴ
     return 'bg-slate-900';
 };
 

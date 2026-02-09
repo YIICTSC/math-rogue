@@ -1,7 +1,7 @@
 
 import { GameMode, GameScreen } from './types';
 
-export type SubjectCategoryType = 'MATH' | 'MATH_GRADES' | 'KANJI' | 'SCIENCE' | 'SOCIAL' | 'ENGLISH' | 'MAP_PREF';
+export type SubjectCategoryType = 'MATH' | 'MATH_GRADES' | 'KANJI' | 'SCIENCE' | 'SOCIAL' | 'ENGLISH' | 'MAP_PREF' | 'IT_INFO';
 
 export interface SubModeConfig {
     id: string;
@@ -255,6 +255,21 @@ export const SUBJECT_CATEGORIES: SubjectCategoryConfig[] = [
         { id: 'MS', name: '地図記号', mode: GameMode.MAP_SYMBOLS },
         { id: 'PF', name: '都道府県', mode: GameMode.PREFECTURES },
         { id: 'PC', name: '県庁所在地', mode: GameMode.PREF_CAPITALS },
+    ]
+  },
+  {
+    id: 'IT_INFO',
+    name: 'ICT・情報',
+    color: 'indigo',
+    uiType: 'grid',
+    subModes: [
+        { id: 'IT_WIN', name: 'Windows', mode: GameMode.IT_WINDOWS },
+        { id: 'IT_IPAD', name: 'iPad', mode: GameMode.IT_IPAD },
+        { id: 'IT_CHROME', name: 'Chromebook', mode: GameMode.IT_CHROMEBOOK },
+        { id: 'IT_NET', name: 'スマホ・ネット', mode: GameMode.IT_INTERNET },
+        { id: 'IT_LIT', name: '情報リテラシー', mode: GameMode.IT_LITERACY },
+        { id: 'IT_PROG', name: 'プログラミング', mode: GameMode.IT_PROGRAMMING },
+        { id: 'IT_SEC', name: 'モラル・セキュリティ', mode: GameMode.IT_SECURITY },
     ]
   }
 ];
