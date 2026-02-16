@@ -21,7 +21,7 @@ export interface Card {
   type: CardType;
   target?: TargetType;
   description: string;
-  
+
   // Values
   damage?: number;
   block?: number;
@@ -29,56 +29,56 @@ export interface Card {
   heal?: number;
   energy?: number;
   selfDamage?: number;
-  poison?: number;      
+  poison?: number;
   gold?: number; // 追加: ゴールド獲得量
   addPotion?: boolean; // 追加: ポーション獲得フラグ
   blockMultiplier?: number; // 追加: ブロック倍率 (1.5倍など)
-  
+
   // Basic Mechanics
-  exhaust?: boolean;    
-  strength?: number;    
-  vulnerable?: number;  
-  weak?: number;        
-  upgraded?: boolean;   
-  unplayable?: boolean; 
+  exhaust?: boolean;
+  strength?: number;
+  vulnerable?: number;
+  weak?: number;
+  upgraded?: boolean;
+  unplayable?: boolean;
 
   // Advanced Effects
-  strengthScaling?: number; 
-  lifesteal?: boolean;      
+  strengthScaling?: number;
+  lifesteal?: boolean;
   upgradeHand?: boolean;
-  upgradeDeck?: boolean; 
-  fatalEnergy?: number;     
-  fatalPermanentDamage?: number; 
-  shuffleHandToDraw?: boolean;   
-  doubleStrength?: boolean;      
-  applyPower?: { id: string, amount: number }; 
-  poisonMultiplier?: number; 
-  
-  damageBasedOnBlock?: boolean; 
-  doubleBlock?: boolean;        
+  upgradeDeck?: boolean;
+  fatalEnergy?: number;
+  fatalPermanentDamage?: number;
+  shuffleHandToDraw?: boolean;
+  doubleStrength?: boolean;
+  applyPower?: { id: string, amount: number };
+  poisonMultiplier?: number;
+
+  damageBasedOnBlock?: boolean;
+  doubleBlock?: boolean;
   fatalMaxHp?: number;
   innate?: boolean;
-  
-  capture?: boolean; 
-  textureRef?: string; 
-  
-  nextTurnEnergy?: number;
-  nextTurnDraw?: number;          
 
-  promptsDiscard?: number;      
-  promptsCopy?: number;         
-  promptsExhaust?: number;      
-  damagePerAttackPlayed?: number; 
-  damagePerCardInHand?: number;   
+  capture?: boolean;
+  textureRef?: string;
+
+  nextTurnEnergy?: number;
+  nextTurnDraw?: number;
+
+  promptsDiscard?: number;
+  promptsCopy?: number;
+  promptsExhaust?: number;
+  damagePerAttackPlayed?: number;
+  damagePerCardInHand?: number;
   damagePerStrike?: number;
-  damagePerCardInDraw?: number; 
-  playCopies?: number;            
+  damagePerCardInDraw?: number;
+  playCopies?: number;
   hitsPerSkillInHand?: number;
   hitsPerAttackPlayed?: number;
-  addCardToHand?: { cardName: string, count: number, cost0?: boolean }; 
-  addCardToDraw?: { cardName: string, count: number }; 
+  addCardToHand?: { cardName: string, count: number, cost0?: boolean };
+  addCardToDraw?: { cardName: string, count: number };
   addCardToDiscard?: { cardName: string, count: number };
-  
+
   playCondition?: 'DRAW_PILE_EMPTY' | 'HAND_ONLY_ATTACKS';
 
   isSeed?: boolean;
@@ -86,7 +86,8 @@ export interface Card {
   grownCardId?: string;
 
   rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'LEGENDARY' | 'SPECIAL';
-  price?: number;       
+  price?: number;
+  originalNames?: string[]; // 合成前のカード名を保持する (特殊効果継承用)
 }
 
 export enum EnemyIntentType {
@@ -97,8 +98,10 @@ export enum EnemyIntentType {
   UNKNOWN = 'UNKNOWN',
   ATTACK_DEBUFF = 'ATTACK_DEBUFF',
   ATTACK_DEFEND = 'ATTACK_DEFEND',
-  SLEEP = 'SLEEP'
+  SLEEP = 'SLEEP',
+  PIERCE_ATTACK = 'PIERCE_ATTACK'
 }
+
 
 export interface EnemyIntent {
   type: EnemyIntentType;
@@ -108,10 +111,10 @@ export interface EnemyIntent {
 }
 
 export interface FloatingText {
-    id: string;
-    text: string;
-    color: string;
-    iconType?: 'sword' | 'shield' | 'heart' | 'poison' | 'zap' | 'skull';
+  id: string;
+  text: string;
+  color: string;
+  iconType?: 'sword' | 'shield' | 'heart' | 'poison' | 'zap' | 'skull';
 }
 
 export interface Enemy {
@@ -123,11 +126,11 @@ export interface Enemy {
   block: number;
   nextIntent: EnemyIntent;
   strength: number;
-  vulnerable: number; 
-  weak: number;       
-  poison: number;     
-  artifact: number;   
-  corpseExplosion: boolean; 
+  vulnerable: number;
+  weak: number;
+  poison: number;
+  artifact: number;
+  corpseExplosion: boolean;
   floatingText: FloatingText | null;
   phase?: number;
 }
@@ -142,34 +145,34 @@ export interface Relic {
 }
 
 export interface Potion {
-    id: string;
-    templateId: string;
-    name: string;
-    description: string;
-    rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'SHOP';
-    price?: number;
-    color: string;
+  id: string;
+  templateId: string;
+  name: string;
+  description: string;
+  rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'SHOP';
+  price?: number;
+  color: string;
 }
 
 export interface Character {
-    id: string;
-    name: string;
-    description: string;
-    maxHp: number;
-    gold: number;
-    startingRelicId: string;
-    deckTemplate: string[];
-    color: string;
-    imageData: string;
+  id: string;
+  name: string;
+  description: string;
+  maxHp: number;
+  gold: number;
+  startingRelicId: string;
+  deckTemplate: string[];
+  color: string;
+  imageData: string;
 }
 
 export interface Partner {
-    id: string;
-    name: string;
-    maxHp: number;
-    currentHp: number;
-    imageData: string;
-    floatingText: FloatingText | null;
+  id: string;
+  name: string;
+  maxHp: number;
+  currentHp: number;
+  imageData: string;
+  floatingText: FloatingText | null;
 }
 
 export interface GardenSlot {
@@ -185,8 +188,8 @@ export interface Player {
   maxEnergy: number;
   currentEnergy: number;
   block: number;
-  strength: number; 
-  gold: number;     
+  strength: number;
+  gold: number;
   deck: Card[];
   hand: Card[];
   discardPile: Card[];
@@ -194,9 +197,9 @@ export interface Player {
   relics: Relic[];
   potions: Potion[];
   imageData: string;
-  powers: Record<string, number>; 
-  echoes: number; 
-  cardsPlayedThisTurn: number; 
+  powers: Record<string, number>;
+  echoes: number;
+  cardsPlayedThisTurn: number;
   attacksPlayedThisTurn: number;
   typesPlayedThisTurn: CardType[];
   nextTurnEnergy: number;
@@ -210,24 +213,24 @@ export interface Player {
 }
 
 export interface ActStats {
-    enemiesDefeated: number;
-    goldGained: number;
-    mathCorrect: number;
+  enemiesDefeated: number;
+  goldGained: number;
+  mathCorrect: number;
 }
 
 export enum GameScreen {
   START_MENU = 'START_MENU',
-  DEBUG_MENU = 'DEBUG_MENU', 
-  MODE_SELECTION = 'MODE_SELECTION', 
+  DEBUG_MENU = 'DEBUG_MENU',
+  MODE_SELECTION = 'MODE_SELECTION',
   CHARACTER_SELECTION = 'CHARACTER_SELECTION',
-  RELIC_SELECTION = 'RELIC_SELECTION', 
+  RELIC_SELECTION = 'RELIC_SELECTION',
   DECK_CONSTRUCTION = 'DECK_CONSTRUCTION',
   MAP = 'MAP',
   BATTLE = 'BATTLE',
   VS_SETUP = 'VS_SETUP',
   VS_BATTLE = 'VS_BATTLE',
   DODGEBALL_SHOOTING = 'DODGEBALL_SHOOTING',
-  MATH_CHALLENGE = 'MATH_CHALLENGE', 
+  MATH_CHALLENGE = 'MATH_CHALLENGE',
   KANJI_CHALLENGE = 'KANJI_CHALLENGE',
   ENGLISH_CHALLENGE = 'ENGLISH_CHALLENGE',
   GENERAL_CHALLENGE = 'GENERAL_CHALLENGE', // 教科汎用クイズ用
@@ -243,7 +246,7 @@ export enum GameScreen {
   HELP = 'HELP',
   TREASURE = 'TREASURE',
   RANKING = 'RANKING',
-  MINI_GAME_SELECT = 'MINI_GAME_SELECT', 
+  MINI_GAME_SELECT = 'MINI_GAME_SELECT',
   MINI_GAME_POKER = 'MINI_GAME_POKER',
   MINI_GAME_SURVIVOR = 'MINI_GAME_SURVIVOR',
   MINI_GAME_DUNGEON = 'MINI_GAME_DUNGEON',
@@ -268,7 +271,7 @@ export enum GameMode {
   ADD_1DIGIT_CARRY = 'ADD_1DIGIT_CARRY',
   SUB_1DIGIT = 'SUB_1DIGIT',
   SUB_1DIGIT_BORROW = 'SUB_1DIGIT_BORROW',
-  
+
   // 算数・数学（静的データ）
   MATH_G1_1 = 'MATH_G1_1', MATH_G1_2 = 'MATH_G1_2', MATH_G1_3 = 'MATH_G1_3',
   MATH_G2_1 = 'MATH_G2_1', MATH_G2_2 = 'MATH_G2_2', MATH_G2_3 = 'MATH_G2_3',
@@ -291,11 +294,11 @@ export enum GameMode {
   ENGLISH_MIXED = 'ENGLISH_MIXED',
   ENGLISH_CONV_1 = 'ENGLISH_CONV_1', ENGLISH_CONV_2 = 'ENGLISH_CONV_2', ENGLISH_CONV_3 = 'ENGLISH_CONV_3',
   ENGLISH_CONV_4 = 'ENGLISH_CONV_4', ENGLISH_CONV_5 = 'ENGLISH_CONV_5',
-  
+
   // 生活 (小1-2)
   LIFE_1_1 = 'LIFE_1_1', LIFE_1_2 = 'LIFE_1_2', LIFE_1_3 = 'LIFE_1_3',
   LIFE_2_1 = 'LIFE_2_1', LIFE_2_2 = 'LIFE_2_2', LIFE_2_3 = 'LIFE_2_3',
-  
+
   // 理科 (小3-6)
   SCIENCE_3_1 = 'SCIENCE_3_1', SCIENCE_3_2 = 'SCIENCE_3_2', SCIENCE_3_3 = 'SCIENCE_3_3',
   SCIENCE_4_1 = 'SCIENCE_4_1', SCIENCE_4_2 = 'SCIENCE_4_2', SCIENCE_4_3 = 'SCIENCE_4_3',
@@ -306,7 +309,7 @@ export enum GameMode {
   SCIENCE_7_1 = 'SCIENCE_7_1', SCIENCE_7_2 = 'SCIENCE_7_2', SCIENCE_7_3 = 'SCIENCE_7_3',
   SCIENCE_8_1 = 'SCIENCE_8_1', SCIENCE_8_2 = 'SCIENCE_8_2', SCIENCE_8_3 = 'SCIENCE_8_3',
   SCIENCE_9_1 = 'SCIENCE_9_1', SCIENCE_9_2 = 'SCIENCE_9_2', SCIENCE_9_3 = 'SCIENCE_9_3',
-  
+
   // 社会 (小3-6)
   SOCIAL_3_1 = 'SOCIAL_3_1', SOCIAL_3_2 = 'SOCIAL_3_2', SOCIAL_3_3 = 'SOCIAL_3_3',
   SOCIAL_4_1 = 'SOCIAL_4_1', SOCIAL_4_2 = 'SOCIAL_4_2', SOCIAL_4_3 = 'SOCIAL_4_3',
@@ -317,12 +320,12 @@ export enum GameMode {
   SOCIAL_7_1 = 'SOCIAL_7_1', SOCIAL_7_2 = 'SOCIAL_7_2', SOCIAL_7_3 = 'SOCIAL_7_3',
   SOCIAL_8_1 = 'SOCIAL_8_1', SOCIAL_8_2 = 'SOCIAL_8_2', SOCIAL_8_3 = 'SOCIAL_8_3',
   SOCIAL_9_1 = 'SOCIAL_9_1', SOCIAL_9_2 = 'SOCIAL_9_2', SOCIAL_9_3 = 'SOCIAL_9_3',
-  
+
   // 地理・歴史・公民 (中1-3) - Legacy/Generic
   GEOGRAPHY_1 = 'GEOGRAPHY_1', GEOGRAPHY_2 = 'GEOGRAPHY_2', GEOGRAPHY_3 = 'GEOGRAPHY_3',
   HISTORY_1 = 'HISTORY_1', HISTORY_2 = 'HISTORY_2', HISTORY_3 = 'HISTORY_3',
   CIVICS_1 = 'CIVICS_1', CIVICS_2 = 'CIVICS_2', CIVICS_3 = 'CIVICS_3',
-  
+
   // 地図・都道府県
   MAP_SYMBOLS = 'MAP_SYMBOLS',
   PREFECTURES = 'PREFECTURES',
@@ -353,10 +356,10 @@ export enum NodeType {
 
 export interface MapNode {
   id: string;
-  x: number; 
-  y: number; 
+  x: number;
+  y: number;
   type: NodeType;
-  nextNodes: string[]; 
+  nextNodes: string[];
   completed: boolean;
 }
 
@@ -364,35 +367,35 @@ export interface SelectionState {
   active: boolean;
   type: 'DISCARD' | 'COPY' | 'EXHAUST';
   amount: number;
-  originCardId?: string; 
+  originCardId?: string;
 }
 
 export interface RewardItem {
-    type: 'CARD' | 'RELIC' | 'GOLD' | 'POTION';
-    value?: any;
-    id: string;
+  type: 'CARD' | 'RELIC' | 'GOLD' | 'POTION';
+  value?: any;
+  id: string;
 }
 
 export interface RankingEntry {
-    id: string;
-    playerName: string;
-    characterName: string;
-    score: number;
-    act: number;
-    floor: number;
-    victory: boolean;
-    date: number;
-    challengeMode?: string;
+  id: string;
+  playerName: string;
+  characterName: string;
+  score: number;
+  act: number;
+  floor: number;
+  victory: boolean;
+  date: number;
+  challengeMode?: string;
 }
 
 export interface VSRecord {
-    id: string;
-    date: number;
-    opponentName: string;
-    playerCharName: string;
-    opponentCharName: string;
-    victory: boolean;
-    turns: number;
+  id: string;
+  date: number;
+  opponentName: string;
+  playerCharName: string;
+  opponentCharName: string;
+  victory: boolean;
+  turns: number;
 }
 
 export type PokerSuit = 'SPADE' | 'HEART' | 'DIAMOND' | 'CLUB';
@@ -451,127 +454,127 @@ export interface PokerConsumable {
 }
 
 export interface PokerPack {
-    id: string;
-    name: string;
-    description: string;
-    price: number;
-    type: 'STANDARD' | 'BUFF' | 'SUPPORTER' | 'SPECTRAL';
-    size: number;
-    choose: number;
-    icon: string;
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  type: 'STANDARD' | 'BUFF' | 'SUPPORTER' | 'SPECTRAL';
+  size: number;
+  choose: number;
+  icon: string;
 }
 
 export interface PokerVoucher {
-    id: string;
-    name: string;
-    description: string;
-    price: number;
-    icon: string;
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  icon: string;
 }
 
 export interface PokerBlind {
-    name: string;
-    scoreGoal: number;
-    rewardMoney: number;
-    bossAbility?: string;
-    description?: string;
+  name: string;
+  scoreGoal: number;
+  rewardMoney: number;
+  bossAbility?: string;
+  description?: string;
 }
 
 export interface PokerRunState {
-    deck: PokerCard[];
-    money: number;
-    ante: number;
-    blindIndex: number;
-    currentBlind: PokerBlind;
-    supporters: PokerSupporter[];
-    consumables: PokerConsumable[];
-    handLevels: Record<string, number>;
-    vouchers: string[];
-    isEndless?: boolean;
-    persistentCounters: Record<string, number>;
-    handSizeModifier: number;
-    currentScore: number;
-    handsRemaining: number;
-    discardsRemaining: number;
-    hand: PokerCard[];
-    discardPile: PokerCard[];
-    lastHandTypePlayed?: string;
-    shopInventory: (PokerSupporter | PokerConsumable | PokerPack)[];
-    shopVoucher: PokerVoucher | null;
-    voucherRestockedAnte: number;
+  deck: PokerCard[];
+  money: number;
+  ante: number;
+  blindIndex: number;
+  currentBlind: PokerBlind;
+  supporters: PokerSupporter[];
+  consumables: PokerConsumable[];
+  handLevels: Record<string, number>;
+  vouchers: string[];
+  isEndless?: boolean;
+  persistentCounters: Record<string, number>;
+  handSizeModifier: number;
+  currentScore: number;
+  handsRemaining: number;
+  discardsRemaining: number;
+  hand: PokerCard[];
+  discardPile: PokerCard[];
+  lastHandTypePlayed?: string;
+  shopInventory: (PokerSupporter | PokerConsumable | PokerPack)[];
+  shopVoucher: PokerVoucher | null;
+  voucherRestockedAnte: number;
 }
 
 export interface PokerScoreEntry {
-    id: string;
-    date: number;
-    ante: number;
-    money: number;
-    bestHandScore: number;
+  id: string;
+  date: number;
+  ante: number;
+  money: number;
+  bestHandScore: number;
 }
 
 export interface SurvivorScoreEntry {
-    id: string;
-    date: number;
-    score: number;
-    timeSurvived: number;
-    levelReached: number;
-    weapons: string[];
+  id: string;
+  date: number;
+  score: number;
+  timeSurvived: number;
+  levelReached: number;
+  weapons: string[];
 }
 
 export interface DungeonScoreEntry {
-    id: string;
-    date: number;
-    floor: number;
-    level: number;
-    score: number;
-    reason: string;
+  id: string;
+  date: number;
+  floor: number;
+  level: number;
+  score: number;
+  reason: string;
 }
 
 export interface KochoScoreEntry {
-    id: string;
-    date: number;
-    stage: number;
-    victory: boolean;
-    turns: number; 
+  id: string;
+  date: number;
+  stage: number;
+  victory: boolean;
+  turns: number;
 }
 
 export interface PaperPlaneScoreEntry {
-    id: string;
-    date: number;
-    stage: number;
-    rank: number;
-    score: number;
+  id: string;
+  date: number;
+  stage: number;
+  rank: number;
+  score: number;
 }
 
 export interface GoHomeScoreEntry {
-    id: string;
-    date: number;
-    score: number;
-    level: number;
-    distance: number;
+  id: string;
+  date: number;
+  score: number;
+  level: number;
+  distance: number;
 }
 
 export interface ParryState {
-    active: boolean;
-    enemyId: string | null;
-    success: boolean;
+  active: boolean;
+  enemyId: string | null;
+  success: boolean;
 }
 
 export type VFXType = 'SLASH' | 'BLOCK' | 'BUFF' | 'DEBUFF' | 'HEAL' | 'FIRE' | 'EXPLOSION' | 'LIGHTNING' | 'CRITICAL' | 'SHOCKWAVE' | 'FLASH';
 
 export interface VisualEffectInstance {
-    id: string;
-    type: VFXType;
-    targetId: string;
-    x?: number;
-    y?: number;
-    delay?: number;
-    rotation?: number;
+  id: string;
+  type: VFXType;
+  targetId: string;
+  x?: number;
+  y?: number;
+  delay?: number;
+  rotation?: number;
 }
 
 export interface GameState {
   screen: GameScreen;
-  mode: GameMode; 
+  mode: GameMode;
   challengeMode?: string;
   act: number;
   floor: number;
@@ -583,8 +586,8 @@ export interface GameState {
   selectedEnemyId: string | null;
   narrativeLog: string[];
   combatLog: string[];
-  rewards: RewardItem[]; 
-  selectionState: SelectionState; 
+  rewards: RewardItem[];
+  selectionState: SelectionState;
   isEndless?: boolean;
   pokerState?: PokerRunState;
   codexOptions?: Card[];
