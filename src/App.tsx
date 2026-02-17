@@ -3546,7 +3546,6 @@ const App: React.FC = () => {
                             player2={gameState.vsOpponent}
                             isHost={gameState.vsIsHost || false}
                             onFinish={(winner) => {
-                                alert(trans(winner === 1 ? "あなたの勝利！" : "対戦相手の勝利！", languageMode));
                                 setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, vsOpponent: undefined, vsIsHost: undefined }));
                             }}
                             languageMode={languageMode}
