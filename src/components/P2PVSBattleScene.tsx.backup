@@ -1,0 +1,668 @@
+import React, { useState, useEffect } from 'react';
+import { Player, Card as ICard, CardType, TargetType, LanguageMode, VSRecord, VisualEffectInstance } from '../types';
+import Card from './Card';
+import { trans } from '../utils/textUtils';
+import { audioService } from '../services/audioService';
+import { storageService } from '../services/storageService';
+import { p2pService, P2PEvent } from '../services/p2pService';
+import { CHARACTERS, CARDS_LIBRARY } from '../constants';
+import { getUpgradedCard } from '../utils/cardUtils';
+import { Heart, Shield, Zap, Swords, RotateCcw, Trophy, Skull, User, ArrowRight, Home, AlertCircle, TrendingDown, Droplets, Sword, Hexagon, Radiation, Activity, ShieldPlus, Flame, Wifi, WifiOff, Layers, X } from 'lucide-react';
+import PixelSprite from './PixelSprite';
+
+interface P2PVSBattleSceneProps {
+    player1: Player; // 自分
+    player2: Player; // 相手
+    isHost: boolean; // ホストかどうか
+    onFinish: (winner: 1 | 2) => void;
+    languageMode: LanguageMode;
+}
+
+type GamePhase = 'NAMING' | 'BATTLE' | 'RESULT' | 'DISCONNECTED';
+
+// Simple VFX Overlay component (placeholder for now)
+const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: string }> = ({ effects, targetId }) => {
+    return null; // Can be enhanced later with actual VFX
+};
+
+const P2PVSBattleScene: React.FC<P2PVSBattleSceneProps> = ({ player1, player2, isHost, onFinish, languageMode }) => {
+    const [phase, setPhase] = useState<GamePhase>('NAMING');
+    const [myName, setMyName] = useState("");
+    const [p1State, setP1State] = useState<Player>(() => initPlayer(player1));
+    const [p2State, setP2State] = useState<Player>(() => initPlayer(player2));
+    const [isMyTurn, setIsMyTurn] = useState<boolean>(isHost); // ホストが先攻
+    const [isAnimating, setIsAnimating] = useState(false);
+    const [logs, setLogs] = useState<string[]>(["対戦開始！"]);
+    const [turnCount, setTurnCount] = useState(1);
+    const [winner, setWinner] = useState<1 | 2 | null>(null);
+    const [connectionStatus, setConnectionStatus] = useState<'CONNECTED' | 'DISCONNECTED'>('CONNECTED');
+    const [activeEffects, setActiveEffects] = useState<VisualEffectInstance[]>([]);
+
+    // 相手のキャラクター名を取得
+    const opponentCharName = CHARACTERS.find(c => c.id === player2.id)?.name || "OPPONENT";
+
+    function initPlayer(p: Player): Player {
+        const deck = [...p.deck].sort(() => Math.random() - 0.5);
+        const drawPile = [...deck];
+        const hand = drawPile.splice(0, 5);
+        return {
+            ...p,
+            currentEnergy: 3,
+            maxEnergy: 3,
+            block: 0,
+            hand: hand,
+            drawPile: drawPile,
+            discardPile: [],
+            powers: { ...p.powers },
+            cardsPlayedThisTurn: 0,
+            attacksPlayedThisTurn: 0,
+            typesPlayedThisTurn: [],
+            relicCounters: { ...p.relicCounters },
+            nextTurnEnergy: 0,
+            nextTurnDraw: 0,
+            turnFlags: {}
+        };
+    }
+
+    // P2P通信のセットアップ
+    useEffect(() => {
+        p2pService.onData = (data: P2PEvent) => {
+            console.log('📨 Received P2P data:', data.type);
+            if (data.type === 'STATE_UPDATE') {
+                // 相手の状態を受信（相手のp1が自分のp2）
+                setP2State(data.myState);
+                setP1State(data.yourState);
+
+                // 相手がターン終了したら自分のターンに
+                if (data.lastAction?.includes('のターン')) {
+                    setIsMyTurn(true);
+                    console.log('✅ My turn now!');
+                }
+
+                if (data.lastAction) {
+                    addLog(data.lastAction);
+                }
+            } else if (data.type === 'GIVE_UP') {
+                addLog("相手が降参しました");
+                finishMatch(1);
+            }
+        };
+
+        p2pService.onClose = () => {
+            setConnectionStatus('DISCONNECTED');
+            setPhase('DISCONNECTED');
+        };
+
+        return () => {
+            p2pService.onData = null;
+            p2pService.onClose = null;
+        };
+    }, []);
+
+    // BGM Control
+    useEffect(() => {
+        if (phase === 'BATTLE') {
+            audioService.playBGM('battle');
+        } else if (phase === 'RESULT' || phase === 'DISCONNECTED') {
+            audioService.stopBGM();
+        }
+    }, [phase]);
+
+    const addLog = (msg: string) => setLogs(prev => [msg, ...prev.slice(0, 3)]);
+
+    const syncState = (action?: string) => {
+        // 自分の状態を相手に送信
+        p2pService.send({
+            type: 'STATE_UPDATE',
+            myState: p1State,
+            yourState: p2State,
+            lastAction: action
+        });
+    };
+
+    const applyDebuff = (target: Player, powerId: string, amount: number): Player => {
+        const nextPowers = { ...target.powers };
+        if (nextPowers['ARTIFACT'] && nextPowers['ARTIFACT'] > 0) {
+            nextPowers['ARTIFACT']--;
+            addLog("キラキラがデバフを防いだ!");
+            return { ...target, powers: nextPowers };
+        }
+        nextPowers[powerId] = (nextPowers[powerId] || 0) + amount;
+        return { ...target, powers: nextPowers };
+    };
+
+    const handleStartBattle = () => {
+        if (!myName.trim()) {
+            audioService.playSound('wrong');
+            return;
+        }
+        audioService.playSound('select');
+        setPhase('BATTLE');
+    };
+
+    const handlePlayCard = (card: ICard) => {
+        if (!isMyTurn || isAnimating || phase !== 'BATTLE') {
+            console.log('Cannot play card:', { isMyTurn, isAnimating, phase });
+            return;
+        }
+
+        const isAttack = card.type === CardType.ATTACK || String(card.type) === 'ATTACK';
+        if (turnCount === 1 && isAttack && isHost) {
+            audioService.playSound('wrong');
+            addLog("先行1ターン目はアタック不可！");
+            return;
+        }
+
+        const current = p1State;
+        const target = p2State;
+
+        if (current.currentEnergy < card.cost) {
+            audioService.playSound('wrong');
+            return;
+        }
+
+        setIsAnimating(true);
+        audioService.playSound(isAttack ? 'attack' : 'block');
+
+        let nextCurrent = { ...current, powers: { ...current.powers }, relicCounters: { ...current.relicCounters } };
+        let nextTarget = { ...target, powers: { ...target.powers } };
+
+        nextCurrent.currentEnergy -= card.cost;
+        nextCurrent.hand = nextCurrent.hand.filter(c => c.id !== card.id);
+        nextCurrent.cardsPlayedThisTurn++;
+
+        if (!nextCurrent.typesPlayedThisTurn.includes(card.type)) {
+            nextCurrent.typesPlayedThisTurn.push(card.type);
+        }
+
+        if (isAttack) {
+            nextCurrent.attacksPlayedThisTurn++;
+        }
+
+        const actionLog = `あなたが${card.name}を使用`;
+        addLog(actionLog);
+
+        // カード効果の処理（簡略版）
+        let hits = 1;
+        if (card.playCopies) hits += card.playCopies;
+
+        for (let h = 0; h < hits; h++) {
+            if (card.damage !== undefined) {
+                let baseDmg = card.damage || 0;
+                baseDmg += (nextCurrent.strength + (nextCurrent.powers['STRENGTH'] || 0));
+
+                let finalDmg = baseDmg;
+                if (nextCurrent.powers['WEAK'] > 0) finalDmg = Math.floor(finalDmg * 0.75);
+                if (nextTarget.powers['VULNERABLE'] > 0) finalDmg = Math.floor(finalDmg * 1.5);
+
+                if (nextTarget.block >= finalDmg) {
+                    nextTarget.block -= finalDmg;
+                } else {
+                    finalDmg -= nextTarget.block;
+                    nextTarget.block = 0;
+                    nextTarget.currentHp = Math.max(0, nextTarget.currentHp - finalDmg);
+                }
+
+                if (card.lifesteal && finalDmg > 0) {
+                    nextCurrent.currentHp = Math.min(nextCurrent.maxHp, nextCurrent.currentHp + finalDmg);
+                }
+            }
+        }
+
+        if (card.block) {
+            let blk = card.block;
+            if (nextCurrent.powers['DEXTERITY']) blk += nextCurrent.powers['DEXTERITY'];
+            if (nextCurrent.powers['FRAIL'] > 0) blk = Math.floor(blk * 0.75);
+            nextCurrent.block += blk;
+        }
+
+        if (card.heal) nextCurrent.currentHp = Math.min(nextCurrent.maxHp, nextCurrent.currentHp + card.heal);
+        if (card.energy) nextCurrent.currentEnergy += card.energy;
+        if (card.draw) {
+            for (let i = 0; i < card.draw; i++) {
+                if (nextCurrent.drawPile.length === 0) {
+                    nextCurrent.drawPile = [...nextCurrent.discardPile].sort(() => Math.random() - 0.5);
+                    nextCurrent.discardPile = [];
+                }
+                const drawn = nextCurrent.drawPile.pop();
+                if (drawn) nextCurrent.hand.push(drawn);
+            }
+        }
+
+        if (card.applyPower) {
+            const pid = card.applyPower.id;
+            const amt = card.applyPower.amount;
+            const debuffs = ['WEAK', 'VULNERABLE', 'POISON', 'FRAIL', 'CONFUSED'];
+            if (debuffs.includes(pid)) nextTarget = applyDebuff(nextTarget, pid, amt);
+            else nextCurrent.powers[pid] = (nextCurrent.powers[pid] || 0) + amt;
+        }
+
+        if (card.type !== CardType.POWER) {
+            nextCurrent.discardPile.push(card);
+        }
+
+        setP1State(nextCurrent);
+        setP2State(nextTarget);
+
+        // P2P同期
+        syncState(actionLog);
+
+        setIsAnimating(false);
+
+        if (nextTarget.currentHp <= 0 || nextCurrent.currentHp <= 0) {
+            if (nextTarget.currentHp <= 0) finishMatch(1);
+            else finishMatch(2);
+        }
+    };
+
+    const handleEndTurn = () => {
+        if (!isMyTurn || isAnimating || phase !== 'BATTLE') return;
+
+        const current = p1State;
+
+        let updatedCurrent = { ...current, powers: { ...current.powers } };
+
+        // 毒ダメージ
+        if (updatedCurrent.powers['POISON'] > 0) {
+            const poisonDmg = updatedCurrent.powers['POISON'];
+            updatedCurrent.currentHp = Math.max(0, updatedCurrent.currentHp - poisonDmg);
+            updatedCurrent.powers['POISON']--;
+        }
+
+        // デバフ減少
+        ['WEAK', 'VULNERABLE', 'FRAIL', 'CONFUSED'].forEach(p => {
+            if (updatedCurrent.powers[p]) updatedCurrent.powers[p]--;
+        });
+
+        setP1State(updatedCurrent);
+
+        if (updatedCurrent.currentHp <= 0) {
+            finishMatch(2);
+            return;
+        }
+
+        // ターンカウント増加（ホストのターン終了時のみ）
+        if (isHost) setTurnCount(prev => prev + 1);
+
+        // 相手のターン開始準備
+        const processed = { ...p2State };
+        processed.block = 0;
+        processed.currentEnergy = processed.maxEnergy;
+        processed.cardsPlayedThisTurn = 0;
+        processed.attacksPlayedThisTurn = 0;
+        processed.typesPlayedThisTurn = [];
+
+        let drawCount = 5;
+        while (processed.hand.length < drawCount) {
+            if (processed.drawPile.length === 0) {
+                if (processed.discardPile.length === 0) break;
+                processed.drawPile = [...processed.discardPile].sort(() => Math.random() - 0.5);
+                processed.discardPile = [];
+            }
+            const drawn = processed.drawPile.pop();
+            if (drawn) processed.hand.push(drawn);
+            else break;
+        }
+
+        setP2State(processed);
+        setIsMyTurn(false); // 相手のターンに
+
+        const turnLog = `相手のターン`;
+        addLog(turnLog);
+
+        // P2P同期
+        syncState(turnLog);
+
+        audioService.playSound('select');
+    };
+
+    const finishMatch = (matchWinner: 1 | 2) => {
+        setWinner(matchWinner);
+        setPhase('RESULT');
+        audioService.playSound('win');
+
+        const p1Char = CHARACTERS.find(c => c.id === player1.id)?.name || "不明";
+        const p2Char = CHARACTERS.find(c => c.id === player2.id)?.name || "不明";
+        const record: VSRecord = {
+            id: `vs-${Date.now()}`,
+            date: Date.now(),
+            opponentName: opponentCharName,
+            playerCharName: p1Char,
+            opponentCharName: p2Char,
+            victory: matchWinner === 1,
+            turns: turnCount
+        };
+        storageService.saveVSRecord(record);
+    };
+
+
+
+    const renderPowers = (powers: Record<string, number>, strength: number) => {
+        const badges = [];
+        const totalStr = strength + (powers['STRENGTH'] || 0);
+        if (totalStr !== 0) {
+            badges.push(
+                <div key="str" className="flex items-center bg-red-900/60 border border-red-500 rounded px-1 gap-1 text-[10px]" title="ムキムキ">
+                    <Sword size={10} className="text-red-400" />
+                    <span className="font-bold text-red-100">{totalStr}</span>
+                </div>
+            );
+        }
+        if (powers['DEXTERITY']) {
+            badges.push(
+                <div key="dex" className="flex items-center bg-blue-900/60 border border-blue-500 rounded px-1 gap-1 text-[10px]" title="カチカチ">
+                    <Shield size={10} className="text-blue-400" />
+                    <span className="font-bold text-blue-100">{powers['DEXTERITY']}</span>
+                </div>
+            );
+        }
+        if (powers['WEAK']) {
+            badges.push(
+                <div key="weak" className="flex items-center bg-purple-900/60 border border-purple-500 rounded px-1 gap-1 text-[10px]" title="へろへろ">
+                    <TrendingDown size={10} className="text-purple-400" />
+                    <span className="font-bold text-purple-100">{powers['WEAK']}</span>
+                </div>
+            );
+        }
+        if (powers['VULNERABLE']) {
+            badges.push(
+                <div key="vuln" className="flex items-center bg-orange-900/60 border border-orange-500 rounded px-1 gap-1 text-[10px]" title="びくびく">
+                    <AlertCircle size={10} className="text-orange-400" />
+                    <span className="font-bold text-orange-100">{powers['VULNERABLE']}</span>
+                </div>
+            );
+        }
+        if (powers['POISON']) {
+            badges.push(
+                <div key="poison" className="flex items-center bg-green-900/60 border border-green-500 rounded px-1 gap-1 text-[10px]" title="ドクドク">
+                    <Droplets size={10} className="text-green-400" />
+                    <span className="font-bold text-green-100">{powers['POISON']}</span>
+                </div>
+            );
+        }
+        return badges;
+    };
+
+    if (phase === 'DISCONNECTED') {
+        return (
+            <div className="flex flex-col h-full w-full bg-slate-950 items-center justify-center p-6 text-white font-mono">
+                <div className="bg-slate-900 border-4 border-red-600 p-8 rounded-3xl w-full max-w-md shadow-2xl text-center">
+                    <WifiOff size={80} className="text-red-500 mx-auto mb-6 animate-pulse" />
+                    <h2 className="text-3xl font-black text-red-500 italic mb-4">接続が切断されました</h2>
+                    <p className="text-gray-400 mb-8">対戦相手との接続が失われました</p>
+                    <button
+                        onClick={() => onFinish(1)}
+                        className="w-full bg-white text-slate-900 font-black py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 hover:bg-gray-200 transition-all"
+                    >
+                        <Home size={20} /> タイトルへ戻る
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    if (phase === 'NAMING') {
+        return (
+            <div className="flex flex-col h-full w-full bg-slate-950 items-center justify-center p-6 text-white font-mono">
+                <div className="bg-slate-900 border-4 border-indigo-600 p-8 rounded-3xl w-full max-w-md shadow-2xl text-center animate-in zoom-in duration-300">
+                    <User size={64} className="text-indigo-400 mx-auto mb-6" />
+                    <h2 className="text-2xl font-black mb-2 italic tracking-tighter">BATTLE ENTRY</h2>
+                    <p className="text-gray-400 text-xs mb-8">あなたの名前を入力してください</p>
+                    <input
+                        type="text"
+                        value={myName}
+                        onChange={(e) => setMyName(e.target.value)}
+                        placeholder="あなたの名前"
+                        className="w-full bg-black border-2 border-indigo-900 rounded-xl px-4 py-3 text-center text-xl font-bold focus:border-indigo-400 outline-none transition-all mb-8 placeholder:text-gray-700"
+                        autoFocus
+                    />
+                    <button
+                        onClick={handleStartBattle}
+                        disabled={!myName.trim()}
+                        className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-gray-800 disabled:text-gray-600 text-white font-black py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95"
+                    >
+                        READY <ArrowRight size={20} />
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    if (phase === 'RESULT') {
+        return (
+            <div className="flex flex-col h-full w-full bg-slate-950 items-center justify-center p-6 text-white font-mono">
+                <div className="bg-slate-900 border-4 border-indigo-500 p-8 rounded-3xl w-full max-w-md shadow-[0_0_60px_rgba(79,70,229,0.4)] text-center animate-in zoom-in duration-300">
+                    {winner === 1 ? (
+                        <>
+                            <Trophy size={80} className="text-yellow-400 mx-auto mb-6 animate-bounce" />
+                            <h2 className="text-5xl font-black text-yellow-400 italic mb-2 tracking-tighter">WINNER!</h2>
+                        </>
+                    ) : (
+                        <>
+                            <Skull size={80} className="text-red-500 mx-auto mb-6 animate-pulse" />
+                            <h2 className="text-5xl font-black text-red-500 italic mb-2 tracking-tighter">DEFEATED</h2>
+                        </>
+                    )}
+                    <div className="bg-black/40 rounded-2xl p-6 border border-indigo-900/50 mb-8 mt-6">
+                        <div className="flex justify-between items-center mb-4">
+                            <div className="text-left">
+                                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">You</p>
+                                <p className="text-xl font-black text-indigo-100">{myName}</p>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Turns</p>
+                                <p className="text-xl font-black text-indigo-400">{turnCount}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => onFinish(winner!)}
+                        className="w-full bg-white text-slate-900 font-black py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 hover:bg-gray-200 transition-all"
+                    >
+                        <Home size={20} /> タイトルへ戻る
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // BATTLE画面
+    return (
+        <div className="flex flex-col h-full w-full bg-gray-900 text-white relative overflow-hidden">
+            {/* Top Bar: Connection Status & Turn Info */}
+            <div className="shrink-0 bg-black border-b-2 border-gray-700 p-2 z-30 relative min-h-[4rem] flex flex-col justify-center shadow-md">
+                <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-2 bg-black/60 px-3 py-1 rounded-full border border-green-500/50">
+                        <Wifi size={16} className="text-green-400 animate-pulse" />
+                        <span className="text-green-400 text-xs font-bold">P2P接続中</span>
+                    </div>
+                    <div className="text-yellow-400 text-sm font-bold bg-gray-900/80 px-3 py-1 rounded border border-yellow-700">
+                        TURN {turnCount}
+                    </div>
+                    <div className="text-xs text-gray-400">
+                        {isMyTurn ? 'あなたのターン' : '相手のターン'}
+                    </div>
+                </div>
+                <div className="text-xs text-green-400 truncate leading-snug mt-1">
+                    <span className="animate-pulse mr-2">&gt;&gt;</span> {logs[0]}
+                </div>
+            </div>
+
+            {/* Battle Viewport */}
+            <div className="flex-1 relative overflow-y-auto custom-scrollbar flex flex-col justify-between p-2 bg-gray-800/50 gap-4">
+
+                {/* Opponent Area (Enemy-style) */}
+                <div className="flex justify-center items-start pt-8 gap-2 min-h-[180px] shrink-0">
+                    <div className="flex flex-col items-center z-10 transition-all duration-200 relative">
+                        {/* Opponent Intent (Turn Indicator) */}
+                        <div className={`absolute -top-6 left-1/2 -translate-x-1/2 z-30 transition-all duration-300 text-xs font-extrabold px-2 py-1 rounded border-2 whitespace-nowrap shadow-xl flex items-center justify-center min-w-[60px] ${!isMyTurn ? 'bg-red-600 text-white border-white animate-pulse' : 'bg-gray-700 text-gray-400 border-gray-600'
+                            }`}>
+                            {!isMyTurn ? (
+                                <>
+                                    <Swords size={12} className="mr-1" />
+                                    行動中
+                                </>
+                            ) : (
+                                <>待機中</>
+                            )}
+                        </div>
+
+                        {/* Opponent Sprite */}
+                        <div className="relative mb-2">
+                            <PixelSprite
+                                imageData={player2.imageData}
+                                width={80}
+                                height={80}
+                                className="drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]"
+                            />
+                            <VFXOverlay effects={activeEffects} targetId="opponent" />
+                        </div>
+
+                        {/* Opponent Name */}
+                        <div className="text-sm font-bold text-red-400 mb-1 max-w-[120px] text-center truncate">
+                            {opponentCharName}
+                        </div>
+
+                        {/* Opponent HP Bar */}
+                        <div className="w-32 bg-gray-800 rounded-full h-3 border border-gray-600 overflow-hidden mb-1 shadow-inner">
+                            <div
+                                className="h-full bg-gradient-to-r from-red-600 to-red-400 transition-all duration-300"
+                                style={{ width: `${(p2State.currentHp / p2State.maxHp) * 100}%` }}
+                            />
+                        </div>
+                        <div className="flex items-center gap-1 text-xs text-red-300 font-bold">
+                            <Heart size={12} fill="currentColor" />
+                            {p2State.currentHp}/{p2State.maxHp}
+                        </div>
+
+                        {/* Opponent Block */}
+                        {p2State.block > 0 && (
+                            <div className="mt-1 flex items-center gap-1 bg-blue-900/60 border border-blue-500 rounded px-2 py-0.5">
+                                <Shield size={14} className="text-blue-400" />
+                                <span className="text-blue-100 font-bold text-sm">{p2State.block}</span>
+                            </div>
+                        )}
+
+                        {/* Opponent Powers */}
+                        <div className="flex flex-wrap gap-1 mt-2 max-w-[150px] justify-center">
+                            {renderPowers(p2State.powers, p2State.strength)}
+                        </div>
+
+                        {/* Opponent Energy */}
+                        <div className="mt-2 bg-yellow-900/50 px-3 py-1 rounded-full border border-yellow-500 text-yellow-400 font-bold flex items-center gap-1">
+                            <Zap size={14} fill="currentColor" />
+                            {p2State.currentEnergy}/{p2State.maxEnergy}
+                        </div>
+
+                        {/* Opponent Hand Count (Hidden) */}
+                        <div className="mt-2 text-xs text-gray-400 flex items-center gap-1">
+                            <Layers size={12} />
+                            手札: {p2State.hand.length}枚
+                        </div>
+                    </div>
+                </div>
+
+                {/* Player Area */}
+                <div className="shrink-0">
+                    {/* Player Stats Bar */}
+                    <div className="bg-black/60 rounded-lg p-2 mb-2 border border-blue-500/30 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            {/* Player HP */}
+                            <div className="flex flex-col">
+                                <div className="flex items-center gap-1 text-xs text-gray-400 mb-0.5">
+                                    <Heart size={12} />
+                                    HP
+                                </div>
+                                <div className="w-32 bg-gray-800 rounded-full h-3 border border-gray-600 overflow-hidden shadow-inner">
+                                    <div
+                                        className="h-full bg-gradient-to-r from-green-600 to-green-400 transition-all duration-300"
+                                        style={{ width: `${(p1State.currentHp / p1State.maxHp) * 100}%` }}
+                                    />
+                                </div>
+                                <div className="text-xs text-green-300 font-bold mt-0.5">
+                                    {p1State.currentHp}/{p1State.maxHp}
+                                </div>
+                            </div>
+
+                            {/* Player Block */}
+                            <div className="flex flex-col items-center">
+                                <div className="flex items-center gap-1 text-xs text-gray-400 mb-0.5">
+                                    <Shield size={12} />
+                                    ブロック
+                                </div>
+                                <div className="text-2xl font-black text-blue-400">
+                                    {p1State.block}
+                                </div>
+                            </div>
+
+                            {/* Player Energy */}
+                            <div className="flex flex-col items-center">
+                                <div className="flex items-center gap-1 text-xs text-gray-400 mb-0.5">
+                                    <Zap size={12} />
+                                    エナジー
+                                </div>
+                                <div className="text-2xl font-black text-yellow-400">
+                                    {p1State.currentEnergy}/{p1State.maxEnergy}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Player Powers */}
+                        <div className="flex flex-wrap gap-1 max-w-[200px]">
+                            {renderPowers(p1State.powers, p1State.strength)}
+                        </div>
+                    </div>
+
+                    {/* Player Hand */}
+                    <div className="flex justify-center gap-1 overflow-x-auto pb-2 custom-scrollbar min-h-[160px]">
+                        {p1State.hand.map(card => {
+                            const isAttack = card.type === CardType.ATTACK || String(card.type) === 'ATTACK';
+                            const isAttackRestricted = turnCount === 1 && isAttack && isHost;
+                            const isDisabled = !isMyTurn || isAnimating || p1State.currentEnergy < card.cost || isAttackRestricted;
+
+                            return (
+                                <div key={card.id} className="scale-90 origin-bottom transform-gpu">
+                                    <Card
+                                        card={card}
+                                        onClick={() => handlePlayCard(card)}
+                                        disabled={isDisabled}
+                                        languageMode={languageMode}
+                                    />
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+            {/* Control Bar */ }
+    <div className="h-12 bg-gray-800 border-t-2 border-white flex items-center justify-between px-2 shrink-0 z-20 shadow-lg">
+        <div className="flex items-center">
+            <div className="bg-black border-2 border-yellow-500 text-yellow-400 px-2 py-0.5 rounded-full flex items-center shadow-lg mr-2">
+                <Zap size={14} className="mr-1 fill-yellow-400" />
+                <span className="text-lg font-bold">{p1State.currentEnergy}/{p1State.maxEnergy}</span>
+            </div>
+            <div className="text-[9px] text-gray-400 flex flex-col leading-tight">
+                <span className="flex items-center"><Layers size={10} className="mr-1" /> {p1State.drawPile.length}</span>
+                <span className="flex items-center"><X size={10} className="mr-1" /> {p1State.discardPile.length}</span>
+            </div>
+        </div>
+
+        <button
+            onClick={!isAnimating ? handleEndTurn : undefined}
+            disabled={!isMyTurn || isAnimating}
+            className={`
+                        bg-red-600 border-2 border-white px-4 py-1.5 text-xs font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all rounded
+                        ${isMyTurn && !isAnimating ? 'hover:bg-red-500 active:shadow-none active:translate-x-[2px] active:translate-y-[2px] cursor-pointer' : 'opacity-50 cursor-not-allowed grayscale'}
+                    `}
+        >
+            ターン終了
+        </button>
+    </div>
+        </div >
+    );
+};
+
+export default P2PVSBattleScene;
