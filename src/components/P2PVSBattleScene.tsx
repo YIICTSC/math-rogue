@@ -1059,8 +1059,8 @@ const P2PVSBattleScene: React.FC<P2PVSBattleSceneProps> = ({ player1, player2, i
                 </div>
             </div>
 
-            <div className="flex-1 relative overflow-y-auto custom-scrollbar flex flex-col justify-between p-2 bg-gray-800/50 gap-3 md:gap-4">
-                <div className="flex justify-center items-start pt-2 md:pt-8 gap-2 min-h-[110px] md:min-h-[180px] shrink-0">
+            <div className="flex-1 relative overflow-y-auto custom-scrollbar flex flex-col justify-between p-2 bg-gray-800/50 gap-2 md:gap-4">
+                <div className="flex justify-center items-start pt-1 md:pt-8 gap-2 min-h-[92px] md:min-h-[180px] shrink-0">
                     <div className="flex flex-col items-center z-10 transition-all duration-200 relative">
                         <div className={`absolute -top-5 md:-top-6 left-1/2 -translate-x-1/2 z-30 transition-all duration-300 text-[10px] md:text-xs font-extrabold px-2 py-0.5 md:py-1 rounded border-2 whitespace-nowrap shadow-xl flex items-center justify-center min-w-[54px] ${!isMyTurn ? 'bg-red-600 text-white border-white animate-pulse' : 'bg-gray-700 text-gray-400 border-gray-600'}`}>
                             {!isMyTurn ? (
@@ -1073,12 +1073,12 @@ const P2PVSBattleScene: React.FC<P2PVSBattleSceneProps> = ({ player1, player2, i
                             )}
                         </div>
 
-                        <div className="relative mb-1.5 md:mb-2">
+                        <div className="relative mb-1 md:mb-2">
                             <img src={player2.imageData} alt={opponentDisplayName} className="w-16 h-16 md:w-20 md:h-20 rounded-md object-cover border border-gray-700 bg-black/40 drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]" style={{ imageRendering: player2.imageData.startsWith('data:image/svg+xml') ? 'pixelated' : 'auto' }} />
                             <VFXOverlay effects={activeEffects} targetId="opponent" />
                         </div>
 
-                        <div className="text-[11px] md:text-sm font-bold text-red-400 mb-0.5 max-w-[120px] text-center truncate">{opponentDisplayName}</div>
+                        <div className="text-[11px] md:text-sm font-bold text-red-400 mb-0 max-w-[120px] text-center truncate">{opponentDisplayName}</div>
                         <div className="text-[9px] text-red-300 mb-0.5 md:mb-1 max-w-[120px] text-center truncate">{opponentCharName}</div>
 
                         <div className="w-28 md:w-32 bg-gray-800 rounded-full h-2.5 md:h-3 border border-gray-600 overflow-hidden mb-0.5 md:mb-1 shadow-inner">
@@ -1099,23 +1099,23 @@ const P2PVSBattleScene: React.FC<P2PVSBattleSceneProps> = ({ player1, player2, i
                             </div>
                         )}
 
-                        <div className="flex flex-wrap gap-1 mt-1.5 md:mt-2 max-w-[140px] justify-center">
+                        <div className="flex flex-wrap gap-1 mt-1 md:mt-2 max-w-[140px] justify-center">
                             {renderPowers(p2State.powers, p2State.strength)}
                         </div>
 
-                        <div className="mt-1.5 md:mt-2 bg-yellow-900/50 px-2 py-0.5 rounded-full border border-yellow-500 text-yellow-400 font-bold flex items-center gap-1 text-xs">
+                        <div className="mt-1 md:mt-2 bg-yellow-900/50 px-2 py-0.5 rounded-full border border-yellow-500 text-yellow-400 font-bold flex items-center gap-1 text-xs">
                             <Zap size={12} fill="currentColor" />
                             {p2State.currentEnergy}/{p2State.maxEnergy}
                         </div>
 
-                        <div className="mt-1.5 md:mt-2 text-[10px] md:text-xs text-gray-400 flex items-center gap-1">
+                        <div className="mt-1 md:mt-2 text-[10px] md:text-xs text-gray-400 flex items-center gap-1">
                             <Layers size={10} />
                             手札: {p2State.hand.length}枚
                         </div>
                     </div>
                 </div>
 
-                <div className="shrink-0">
+                <div className="shrink-0 -mt-1 md:mt-0">
                     <div className="bg-black/60 rounded-lg p-1.5 md:p-2 mb-2 border border-blue-500/30 flex flex-col md:flex-row md:flex-wrap items-stretch md:items-center gap-2 md:gap-3 relative">
                         <VFXOverlay effects={activeEffects} targetId="player" />
                         <div className="flex items-center gap-2 md:gap-3 flex-wrap md:flex-nowrap">
@@ -1203,7 +1203,7 @@ const P2PVSBattleScene: React.FC<P2PVSBattleSceneProps> = ({ player1, player2, i
                         </div>
                     )}
 
-                    <div className="h-40 md:h-52 bg-transparent relative z-10 -mt-2 md:mt-0">
+                    <div className="h-44 md:h-52 bg-transparent relative z-10 -mt-2 md:mt-0">
                         <div className="group/hand w-full h-full overflow-x-auto px-6 flex items-end justify-start md:justify-center pb-3 md:pb-2 custom-scrollbar touch-pan-x" style={{ overflowY: 'visible' }}>
                             {p1State.hand.map((card, i) => {
                                 const isAttack = card.type === CardType.ATTACK || String(card.type) === 'ATTACK';
