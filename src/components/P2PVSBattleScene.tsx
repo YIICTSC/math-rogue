@@ -205,6 +205,7 @@ const P2PVSBattleScene: React.FC<P2PVSBattleSceneProps> = ({ player1, player2, i
     const [winner, setWinner] = useState<1 | 2 | null>(null);
     const [connectionStatus, setConnectionStatus] = useState<'CONNECTED' | 'DISCONNECTED'>('CONNECTED');
     const [activeEffects, setActiveEffects] = useState<VisualEffectInstance[]>([]);
+    const [opponentActionPulse, setOpponentActionPulse] = useState(false);
     const [selectionState, setSelectionState] = useState<SelectionState>({
         active: false,
         type: 'DISCARD',
@@ -212,6 +213,8 @@ const P2PVSBattleScene: React.FC<P2PVSBattleSceneProps> = ({ player1, player2, i
     });
     const [selectedCardIds, setSelectedCardIds] = useState<string[]>([]);
     const phaseRef = useRef<GamePhase>(phase);
+    const p1Ref = useRef<Player>(p1State);
+    const p2Ref = useRef<Player>(p2State);
 
     const opponentCharName = CHARACTERS.find(c => c.id === player2.id)?.name || 'OPPONENT';
     const myDisplayName = myName.trim() || 'あなた';
@@ -274,8 +277,41 @@ const P2PVSBattleScene: React.FC<P2PVSBattleSceneProps> = ({ player1, player2, i
     }, [phase]);
 
     useEffect(() => {
+        p1Ref.current = p1State;
+    }, [p1State]);
+
+    useEffect(() => {
+        p2Ref.current = p2State;
+    }, [p2State]);
+
+    const triggerRemoteActionFeedback = (prevMe: Player, nextMe: Player, lastAction?: string) => {
+        if (!lastAction || !lastAction.includes('を使用')) return;
+
+        setOpponentActionPulse(true);
+        setTimeout(() => setOpponentActionPulse(false), 420);
+
+        const tookDamage = nextMe.currentHp < prevMe.currentHp;
+        const lostBlock = nextMe.block < prevMe.block;
+        const nextEffects: VisualEffectInstance[] = [];
+
+        // Opponent acted: show a cast-like effect on opponent.
+        nextEffects.push({ id: `vfx-remote-cast-${Date.now()}`, type: 'BUFF', targetId: 'opponent' });
+
+        if (tookDamage || lostBlock) {
+            nextEffects.push({ id: `vfx-remote-hit-${Date.now()}`, type: 'SLASH', targetId: 'player', rotation: 45 });
+            audioService.playSound('attack');
+        } else {
+            audioService.playSound('block');
+        }
+
+        setActiveEffects(nextEffects);
+        setTimeout(() => setActiveEffects([]), 750);
+    };
+
+    useEffect(() => {
         p2pService.onData = (data: P2PEvent) => {
             if (data.type === 'STATE_UPDATE') {
+                const prevMe = p1Ref.current;
                 setP2State(data.myState);
                 setP1State(data.yourState);
 
@@ -293,6 +329,7 @@ const P2PVSBattleScene: React.FC<P2PVSBattleSceneProps> = ({ player1, player2, i
 
                 if (data.lastAction) {
                     addLog(data.lastAction);
+                    triggerRemoteActionFeedback(prevMe, data.yourState, data.lastAction);
                 }
 
                 if (phaseRef.current === 'BATTLE') {
@@ -1074,7 +1111,12 @@ const P2PVSBattleScene: React.FC<P2PVSBattleSceneProps> = ({ player1, player2, i
                         </div>
 
                         <div className="relative mb-1 md:mb-2">
-                            <img src={player2.imageData} alt={opponentDisplayName} className="w-16 h-16 md:w-20 md:h-20 rounded-md object-cover border border-gray-700 bg-black/40 drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]" style={{ imageRendering: player2.imageData.startsWith('data:image/svg+xml') ? 'pixelated' : 'auto' }} />
+                            <img
+                                src={player2.imageData}
+                                alt={opponentDisplayName}
+                                className={`w-16 h-16 md:w-20 md:h-20 rounded-md object-cover border border-gray-700 bg-black/40 drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)] transition-transform ${opponentActionPulse ? 'animate-opponent-act' : ''}`}
+                                style={{ imageRendering: player2.imageData.startsWith('data:image/svg+xml') ? 'pixelated' : 'auto' }}
+                            />
                             <VFXOverlay effects={activeEffects} targetId="opponent" />
                         </div>
 
@@ -1274,6 +1316,18 @@ const P2PVSBattleScene: React.FC<P2PVSBattleSceneProps> = ({ player1, player2, i
 
                 </div>
             </div>
+            <style>
+                {`
+                    @keyframes opponent-act {
+                        0% { transform: translateX(0) scale(1); }
+                        35% { transform: translateX(-8px) scale(1.06); }
+                        100% { transform: translateX(0) scale(1); }
+                    }
+                    .animate-opponent-act {
+                        animation: opponent-act 0.42s ease-out;
+                    }
+                `}
+            </style>
         </div>
     );
 };
