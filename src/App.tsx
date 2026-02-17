@@ -36,8 +36,9 @@ import FinalBridgeScreen from './components/FinalBridgeScreen';
 import ProblemChallengeScreen from './components/ProblemChallengeScreen';
 import ChefDeckSelectionScreen from './components/ChefDeckSelectionScreen';
 import GardenScreen from './components/GardenScreen';
-import QRManager from './components/QRManager';
+import P2PBattleSetup from './components/P2PBattleSetup';
 import VSBattleScene from './components/VSBattleScene';
+import P2PVSBattleScene from './components/P2PVSBattleScene';
 import ModeSelectionScreen from './components/ModeSelectionScreen';
 import Card from './components/Card';
 import { audioService } from './services/audioService';
@@ -47,7 +48,7 @@ import { storageService } from './services/storageService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { trans } from './utils/textUtils';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, QrCode, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles } from 'lucide-react';
 import { applyAdditionalCardLogic } from './services/cardEffectLogic';
 
 const calculateScore = (state: GameState, victory: boolean): number => {
@@ -3418,7 +3419,7 @@ const App: React.FC = () => {
                                         }}
                                         className={`flex-1 py-3 px-2 text-sm font-bold border-b-4 border-r-4 rounded-none bg-indigo-600/80 text-white border-indigo-400 hover:bg-indigo-700 cursor-pointer flex items-center justify-center shadow-md ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
                                     >
-                                        <QrCode className="mr-1.5" size={16} /> {trans("対戦", languageMode)}
+                                        <Swords className="mr-1.5" size={16} /> {trans("対戦", languageMode)}
                                     </button>
                                 </div>
 
@@ -3523,9 +3524,16 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.VS_SETUP && (
                     <div className="absolute inset-0">
-                        <QRManager
+                        <P2PBattleSetup
                             player={gameState.player}
-                            onOpponentLoaded={(opp) => setGameState(prev => ({ ...prev, vsOpponent: opp, screen: GameScreen.VS_BATTLE }))}
+                            onBattleStart={(opp, isHost) => {
+                                setGameState(prev => ({
+                                    ...prev,
+                                    vsOpponent: opp,
+                                    screen: GameScreen.VS_BATTLE,
+                                    vsIsHost: isHost
+                                }));
+                            }}
                             onClose={returnToTitle}
                         />
                     </div>
@@ -3533,12 +3541,13 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.VS_BATTLE && gameState.vsOpponent && (
                     <div className="absolute inset-0">
-                        <VSBattleScene
+                        <P2PVSBattleScene
                             player1={gameState.player}
                             player2={gameState.vsOpponent}
+                            isHost={gameState.vsIsHost || false}
                             onFinish={(winner) => {
                                 alert(trans(winner === 1 ? "あなたの勝利！" : "対戦相手の勝利！", languageMode));
-                                setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, vsOpponent: undefined }));
+                                setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, vsOpponent: undefined, vsIsHost: undefined }));
                             }}
                             languageMode={languageMode}
                         />

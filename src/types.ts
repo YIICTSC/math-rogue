@@ -594,6 +594,7 @@ export interface GameState {
   parryState?: ParryState;
   activeEffects: VisualEffectInstance[];
   vsOpponent?: Player; // 対戦相手のデータ
+  vsIsHost?: boolean; // P2P対戦でホストかどうか
   currentStoryIndex?: number;
   actStats?: ActStats;
   newlyUnlockedCardName?: string; // 追加: このアクトで解放されたカード
