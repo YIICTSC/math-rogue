@@ -1074,14 +1074,14 @@ const P2PVSBattleScene: React.FC<P2PVSBattleSceneProps> = ({ player1, player2, i
                         </div>
 
                         <div className="relative mb-1.5 md:mb-2">
-                            <img src={player2.imageData} alt={opponentDisplayName} className="w-12 h-12 md:w-20 md:h-20 rounded-md object-cover border border-gray-700 bg-black/40 drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]" style={{ imageRendering: player2.imageData.startsWith('data:image/svg+xml') ? 'pixelated' : 'auto' }} />
+                            <img src={player2.imageData} alt={opponentDisplayName} className="w-16 h-16 md:w-20 md:h-20 rounded-md object-cover border border-gray-700 bg-black/40 drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]" style={{ imageRendering: player2.imageData.startsWith('data:image/svg+xml') ? 'pixelated' : 'auto' }} />
                             <VFXOverlay effects={activeEffects} targetId="opponent" />
                         </div>
 
                         <div className="text-[11px] md:text-sm font-bold text-red-400 mb-0.5 max-w-[120px] text-center truncate">{opponentDisplayName}</div>
                         <div className="text-[9px] text-red-300 mb-0.5 md:mb-1 max-w-[120px] text-center truncate">{opponentCharName}</div>
 
-                        <div className="w-24 md:w-32 bg-gray-800 rounded-full h-2.5 md:h-3 border border-gray-600 overflow-hidden mb-0.5 md:mb-1 shadow-inner">
+                        <div className="w-28 md:w-32 bg-gray-800 rounded-full h-2.5 md:h-3 border border-gray-600 overflow-hidden mb-0.5 md:mb-1 shadow-inner">
                             <div
                                 className="h-full bg-gradient-to-r from-red-600 to-red-400 transition-all duration-300"
                                 style={{ width: `${(p2State.currentHp / p2State.maxHp) * 100}%` }}
@@ -1203,8 +1203,8 @@ const P2PVSBattleScene: React.FC<P2PVSBattleSceneProps> = ({ player1, player2, i
                         </div>
                     )}
 
-                    <div className="h-40 md:h-52 bg-transparent relative z-10">
-                        <div className="group/hand w-full h-full overflow-x-auto px-6 flex items-end justify-start md:justify-center pb-2 custom-scrollbar touch-pan-x" style={{ overflowY: 'visible' }}>
+                    <div className="h-40 md:h-52 bg-transparent relative z-10 -mt-2 md:mt-0">
+                        <div className="group/hand w-full h-full overflow-x-auto px-6 flex items-end justify-start md:justify-center pb-3 md:pb-2 custom-scrollbar touch-pan-x" style={{ overflowY: 'visible' }}>
                             {p1State.hand.map((card, i) => {
                                 const isAttack = card.type === CardType.ATTACK || String(card.type) === 'ATTACK';
                                 const isAttackRestricted = turnCount === 1 && isAttack && isHost;
@@ -1248,7 +1248,7 @@ const P2PVSBattleScene: React.FC<P2PVSBattleSceneProps> = ({ player1, player2, i
                                             zIndex: isSelected ? 40 : 10 + i
                                         }}
                                     >
-                                        <div className="absolute top-0 left-0 origin-top-left scale-[0.7] sm:scale-90 md:scale-100">
+                                        <div className="absolute -top-2 md:top-0 left-0 origin-top-left scale-[0.7] sm:scale-90 md:scale-100">
                                             <Card
                                                 card={displayCard}
                                                 onClick={() => {
