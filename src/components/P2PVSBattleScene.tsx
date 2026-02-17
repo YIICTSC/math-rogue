@@ -1059,7 +1059,7 @@ const P2PVSBattleScene: React.FC<P2PVSBattleSceneProps> = ({ player1, player2, i
                 </div>
             </div>
 
-            <div className="flex-1 relative overflow-y-auto custom-scrollbar flex flex-col justify-between p-2 bg-gray-800/50 gap-2 md:gap-4">
+            <div className="flex-1 relative overflow-y-auto custom-scrollbar flex flex-col justify-start p-2 bg-gray-800/50 gap-2 md:gap-4">
                 <div className="flex justify-center items-start pt-1 md:pt-8 gap-2 min-h-[92px] md:min-h-[180px] shrink-0">
                     <div className="flex flex-col items-center z-10 transition-all duration-200 relative">
                         <div className={`absolute -top-5 md:-top-6 left-1/2 -translate-x-1/2 z-30 transition-all duration-300 text-[10px] md:text-xs font-extrabold px-2 py-0.5 md:py-1 rounded border-2 whitespace-nowrap shadow-xl flex items-center justify-center min-w-[54px] ${!isMyTurn ? 'bg-red-600 text-white border-white animate-pulse' : 'bg-gray-700 text-gray-400 border-gray-600'}`}>
