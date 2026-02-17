@@ -48,7 +48,7 @@ import { storageService } from './services/storageService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { trans } from './utils/textUtils';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Wifi } from 'lucide-react';
 import { applyAdditionalCardLogic } from './services/cardEffectLogic';
 
 const calculateScore = (state: GameState, victory: boolean): number => {
@@ -3419,7 +3419,7 @@ const App: React.FC = () => {
                                         }}
                                         className={`flex-1 py-3 px-2 text-sm font-bold border-b-4 border-r-4 rounded-none bg-indigo-600/80 text-white border-indigo-400 hover:bg-indigo-700 cursor-pointer flex items-center justify-center shadow-md ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
                                     >
-                                        <Swords className="mr-1.5" size={16} /> {trans("対戦", languageMode)}
+                                        <Wifi className="mr-1.5" size={16} /> {trans("対戦", languageMode)}
                                     </button>
                                 </div>
 
