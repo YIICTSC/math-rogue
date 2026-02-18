@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState } from 'react';
+﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { GameMode, Player } from '../types';
 import { p2pService, P2PEvent } from '../services/p2pService';
 import { X, Wifi, Users, Loader, AlertCircle } from 'lucide-react';
@@ -31,6 +31,7 @@ const P2PRaceSetup: React.FC<P2PRaceSetupProps> = ({ player, onRaceStart, onClos
     const [participants, setParticipants] = useState<Array<{ peerId: string; name: string; imageData?: string }>>([]);
     const [joinSent, setJoinSent] = useState(false);
     const [hostSelectedMode, setHostSelectedMode] = useState<GameMode | undefined>(undefined);
+    const joinInFlightRef = useRef(false);
 
     const canStart = useMemo(() => mode === 'HOST' && status === 'CONNECTED' && participants.length >= 1, [mode, status, participants.length]);
 
@@ -116,7 +117,9 @@ const P2PRaceSetup: React.FC<P2PRaceSetupProps> = ({ player, onRaceStart, onClos
     };
 
     const handleJoinRoom = async () => {
+        if (joinInFlightRef.current || status === 'CONNECTING' || mode === 'JOIN') return;
         if (!myName.trim() || inputCode.length !== 6) return;
+        joinInFlightRef.current = true;
         setStatus('CONNECTING');
         setErrorMsg('');
         try {
@@ -126,6 +129,7 @@ const P2PRaceSetup: React.FC<P2PRaceSetupProps> = ({ player, onRaceStart, onClos
             setJoinSent(false);
             audioService.playSound('select');
         } catch (err: any) {
+            joinInFlightRef.current = false;
             setStatus('ERROR');
             setErrorMsg(err?.message || '接続に失敗');
         }
@@ -146,6 +150,7 @@ const P2PRaceSetup: React.FC<P2PRaceSetupProps> = ({ player, onRaceStart, onClos
     };
 
     const handleBack = () => {
+        joinInFlightRef.current = false;
         p2pService.close();
         onClose();
     };
@@ -155,7 +160,7 @@ const P2PRaceSetup: React.FC<P2PRaceSetupProps> = ({ player, onRaceStart, onClos
             <div className="bg-slate-900 border-2 border-indigo-500 rounded-2xl w-full max-w-lg p-6 relative">
                 <button onClick={handleBack} className="absolute top-3 right-3 text-gray-400 hover:text-white"><X size={22} /></button>
 
-                <h2 className="text-2xl font-black mb-4">RACE MODE</h2>
+                <h2 className="text-2xl font-black mb-4">レースモード</h2>
 
                 <div className="mb-4">
                     <label className="block text-sm text-gray-300 mb-2">名前</label>
@@ -171,14 +176,14 @@ const P2PRaceSetup: React.FC<P2PRaceSetupProps> = ({ player, onRaceStart, onClos
                 {mode === 'SELECT' && (
                     <div className="space-y-3">
                         <button onClick={handleCreateRoom} className="w-full bg-indigo-600 py-3 rounded font-bold flex items-center justify-center gap-2"><Wifi size={18} /> ルーム作成</button>
-                        <div className="flex gap-2">
+                        <div className="flex flex-col sm:flex-row gap-2">
                             <input
                                 value={inputCode}
-                                onChange={(e) => setInputCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                onChange={(e) => setInputCode(e.target.value.normalize('NFKC').replace(/[^0-9]/g, '').slice(0, 6))}
                                 placeholder="6桁コード"
-                                className="flex-1 bg-black/60 border border-gray-600 rounded px-3 py-2"
+                                className="w-full min-w-0 bg-black/60 border border-gray-600 rounded px-3 py-2"
                             />
-                            <button onClick={handleJoinRoom} className="bg-emerald-600 px-4 rounded font-bold">参加</button>
+                            <button onClick={handleJoinRoom} disabled={status === 'CONNECTING' || mode === 'JOIN'} className="w-full sm:w-auto sm:shrink-0 bg-emerald-600 disabled:bg-gray-700 disabled:text-gray-300 px-4 py-2 rounded font-bold">参加</button>
                         </div>
                     </div>
                 )}
