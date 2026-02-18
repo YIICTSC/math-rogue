@@ -49,7 +49,7 @@ import { storageService } from './services/storageService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { trans } from './utils/textUtils';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, QrCode, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Wifi } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Wifi, Flag } from 'lucide-react';
 import { applyAdditionalCardLogic } from './services/cardEffectLogic';
 import { p2pService } from './services/p2pService';
 
@@ -357,6 +357,11 @@ const App: React.FC = () => {
     const VICTORY_GOLD = 25;
 
     const UNLOCK_THRESHOLDS = [500, 1000, 1500, 2000, 2500, 3000, 3500];
+    const getRaceSyncIntervalMs = (participantsCount: number) => {
+        if (participantsCount >= 30) return 10000;
+        if (participantsCount >= 20) return 7000;
+        return 5000;
+    };
     const raceScore = (floor: number, maxDamage: number, gameOverCount: number) => floor * 100 + maxDamage - gameOverCount * 30;
     const raceFloorProgress = (act: number, floor: number) => (Math.max(1, act) - 1) * 17 + Math.max(0, floor);
     const formatRaceRemaining = (sec: number) => {
@@ -502,7 +507,6 @@ const App: React.FC = () => {
                     if (!prev || prev.ended) return prev;
                     const nextEntry: RaceEntry = { peerId: fromPeerId, ...data };
                     const nextEntries = [...prev.entries.filter(e => e.peerId !== fromPeerId), nextEntry].sort((a, b) => b.score - a.score);
-                    p2pService.send({ type: 'RACE_LEADERBOARD', entries: nextEntries });
                     return { ...prev, entries: nextEntries };
                 });
                 return;
@@ -526,6 +530,7 @@ const App: React.FC = () => {
 
     useEffect(() => {
         if (!raceSession || raceSession.ended || gameState.challengeMode !== 'RACE') return;
+        const syncIntervalMs = getRaceSyncIntervalMs(raceSession.participants.length);
 
         const tick = () => {
             const floor = raceFloorProgress(gameState.act, gameState.floor);
@@ -545,7 +550,6 @@ const App: React.FC = () => {
                     if (!prev || prev.ended) return prev;
                     const selfEntry: RaceEntry = { peerId: 'host', ...payload };
                     const nextEntries = [...prev.entries.filter(e => e.peerId !== 'host'), selfEntry].sort((a, b) => b.score - a.score);
-                    p2pService.send({ type: 'RACE_LEADERBOARD', entries: nextEntries });
                     return { ...prev, entries: nextEntries };
                 });
             } else {
@@ -554,9 +558,21 @@ const App: React.FC = () => {
         };
 
         tick();
-        const interval = setInterval(tick, 2000);
+        const interval = setInterval(tick, syncIntervalMs);
         return () => clearInterval(interval);
     }, [raceSession, gameState.challengeMode, gameState.act, gameState.floor, gameState.player.imageData, raceMaxDamage, raceGameOverCount]);
+
+    useEffect(() => {
+        if (!raceSession || raceSession.ended || !raceSession.isHost || gameState.challengeMode !== 'RACE') return;
+        const syncIntervalMs = getRaceSyncIntervalMs(raceSession.participants.length);
+        const broadcast = () => {
+            const entries = [...raceSession.entries].sort((a, b) => b.score - a.score);
+            p2pService.send({ type: 'RACE_LEADERBOARD', entries });
+        };
+        broadcast();
+        const interval = setInterval(broadcast, syncIntervalMs);
+        return () => clearInterval(interval);
+    }, [raceSession, gameState.challengeMode]);
 
     useEffect(() => {
         if (!raceSession || raceSession.ended) return;
@@ -3584,12 +3600,12 @@ const App: React.FC = () => {
                                     {isLoading ? trans("じゅんびちゅう...", languageMode) : trans("冒険を始める", languageMode)}
                                 </button>
 
-                                <div className="flex gap-3 w-full">
+                                <div className="flex gap-2 w-full">
                                     <button
                                         onClick={startChallengeGame}
-                                        className={`flex-1 py-3 px-2 text-sm font-bold border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-red-900/80 text-red-100 border-red-500 hover:bg-red-800 hover:shadow-red-900/50'}`}
+                                        className={`flex-1 py-3 px-1 text-xs font-bold border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-red-900/80 text-red-100 border-red-500 hover:bg-red-800 hover:shadow-red-900/50'}`}
                                     >
-                                        <Swords className="mr-1.5" size={16} /> {trans("1A1D", languageMode)}
+                                        <Swords className="mr-1" size={14} /> {trans("1A1D", languageMode)}
                                     </button>
 
                                     <button
@@ -3601,25 +3617,25 @@ const App: React.FC = () => {
                                             }
                                             setGameState(prev => ({ ...prev, screen: GameScreen.VS_SETUP }));
                                         }}
-                                        className={`flex-1 py-3 px-2 text-sm font-bold border-b-4 border-r-4 rounded-none bg-indigo-600/80 text-white border-indigo-400 hover:bg-indigo-700 cursor-pointer flex items-center justify-center shadow-md ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
+                                        className={`flex-1 py-3 px-1 text-xs font-bold border-b-4 border-r-4 rounded-none bg-indigo-600/80 text-white border-indigo-400 hover:bg-indigo-700 cursor-pointer flex items-center justify-center shadow-md ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
                                     >
-                                        <QrCode className="mr-1.5" size={16} /> {trans("対戦", languageMode)}
+                                        <Wifi className="mr-1" size={14} /> {trans("VS", languageMode)}
+                                    </button>
+
+                                    <button
+                                        onClick={() => {
+                                            if (isDailyLimitReached) {
+                                                audioService.playSound('wrong');
+                                                setShowTimeLimitModal(true);
+                                                return;
+                                            }
+                                            setGameState(prev => ({ ...prev, screen: GameScreen.RACE_SETUP }));
+                                        }}
+                                        className={`flex-1 py-3 px-1 text-xs font-bold border-b-4 border-r-4 rounded-none bg-cyan-700/80 text-cyan-100 border-cyan-400 hover:bg-cyan-700 cursor-pointer flex items-center justify-center shadow-md ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
+                                    >
+                                        <Flag className="mr-1" size={14} /> {trans("レース", languageMode)}
                                     </button>
                                 </div>
-
-                                <button
-                                    onClick={() => {
-                                        if (isDailyLimitReached) {
-                                            audioService.playSound('wrong');
-                                            setShowTimeLimitModal(true);
-                                            return;
-                                        }
-                                        setGameState(prev => ({ ...prev, screen: GameScreen.RACE_SETUP }));
-                                    }}
-                                    className={`w-full py-3 px-2 text-sm font-bold border-b-4 border-r-4 rounded-none bg-cyan-700/80 text-cyan-100 border-cyan-400 hover:bg-cyan-700 cursor-pointer flex items-center justify-center shadow-md ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
-                                >
-                                    <Wifi className="mr-1.5" size={16} /> {trans("レース", languageMode)}
-                                </button>
 
                                 <div className="flex gap-3 w-full">
                                     <button onClick={startProblemChallenge} className="flex-1 py-3 px-2 text-sm font-bold border-b-4 border-r-4 rounded-none bg-emerald-900/80 text-emerald-100 border-emerald-500 hover:bg-emerald-800 cursor-pointer flex items-center justify-center shadow-md hover:shadow-emerald-900/50">
@@ -3831,8 +3847,8 @@ const App: React.FC = () => {
                         {raceSession && !raceSession.ended && !raceSession.isHost && gameState.challengeMode === 'RACE' && (
                             <div className="absolute inset-0 bg-black/65 backdrop-blur-[1px] flex items-center justify-center p-4 z-20">
                                 <div className="bg-slate-900 border-2 border-cyan-500 rounded-xl p-6 text-white text-center max-w-md w-full">
-                                    <div className="text-xl font-black mb-2">RACE MODE PREPARING</div>
-                                    <div className="text-sm text-cyan-200">Waiting for host mode selection...</div>
+                                    <div className="text-xl font-black mb-2">レースモード準備中</div>
+                                    <div className="text-sm text-cyan-200">ホストのモード選択を待っています...</div>
                                 </div>
                             </div>
                         )}
@@ -3901,13 +3917,13 @@ const App: React.FC = () => {
                             <>
                                 <div className="absolute left-3 top-[72px] z-30">
                                     <div className="bg-slate-900/90 border border-cyan-500 rounded-lg px-3 py-2 text-cyan-100 shadow-lg min-w-[136px]">
-                                        <div className="text-[10px] font-bold tracking-wide text-cyan-200">RACE TIME</div>
+                                        <div className="text-[10px] font-bold tracking-wide text-cyan-200">レース残り時間</div>
                                         <div className="text-xl font-black tabular-nums">{formatRaceRemaining(raceRemainingSec)}</div>
                                     </div>
                                 </div>
                                 <div className="absolute right-3 top-[72px] z-30 w-[180px]">
                                     <div className="bg-slate-900/90 border border-cyan-500 rounded-lg p-2 text-cyan-100 shadow-lg">
-                                        <div className="text-[10px] font-bold tracking-wide text-cyan-200 mb-1">RANKING</div>
+                                        <div className="text-[10px] font-bold tracking-wide text-cyan-200 mb-1">ランキング</div>
                                         <div className="space-y-1">
                                             {(raceSession.entries || []).slice().sort((a, b) => b.score - a.score).slice(0, 5).map((entry, idx) => (
                                                 <div key={entry.peerId} className="flex items-center justify-between text-[11px]">
@@ -4166,7 +4182,7 @@ const App: React.FC = () => {
                 {raceSession && raceResultOpen && (
                     <div className="fixed inset-0 z-[220] bg-black/70 flex items-center justify-center p-4">
                         <div className="bg-slate-900 border-2 border-cyan-500 rounded-xl p-5 text-white w-full max-w-lg">
-                            <h2 className="text-2xl font-black mb-3">RACE RESULT</h2>
+                            <h2 className="text-2xl font-black mb-3">レース結果</h2>
                             <div className="space-y-2 max-h-[60vh] overflow-y-auto">
                                 {[...raceSession.entries].sort((a, b) => b.score - a.score).map((entry, index) => (
                                     <div key={entry.peerId} className="flex items-center justify-between bg-slate-800/70 rounded px-3 py-2">
@@ -4182,7 +4198,7 @@ const App: React.FC = () => {
                                 }}
                                 className="mt-4 w-full bg-cyan-700 hover:bg-cyan-600 rounded py-2 font-bold"
                             >
-                                CLOSE
+                                閉じる
                             </button>
                         </div>
                     </div>
