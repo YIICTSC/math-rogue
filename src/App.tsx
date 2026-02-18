@@ -39,6 +39,7 @@ import GardenScreen from './components/GardenScreen';
 import P2PBattleSetup from './components/P2PBattleSetup';
 import VSBattleScene from './components/VSBattleScene';
 import P2PVSBattleScene from './components/P2PVSBattleScene';
+import P2PRaceSetup from './components/P2PRaceSetup';
 import ModeSelectionScreen from './components/ModeSelectionScreen';
 import Card from './components/Card';
 import { audioService } from './services/audioService';
@@ -48,8 +49,9 @@ import { storageService } from './services/storageService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { trans } from './utils/textUtils';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Wifi } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, QrCode, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Wifi } from 'lucide-react';
 import { applyAdditionalCardLogic } from './services/cardEffectLogic';
+import { p2pService } from './services/p2pService';
 
 const calculateScore = (state: GameState, victory: boolean): number => {
     let score = 0;
@@ -68,6 +70,29 @@ const calculateScore = (state: GameState, victory: boolean): number => {
         score -= 1;
     }
     return score;
+};
+
+type RaceEntry = {
+    peerId: string;
+    name: string;
+    imageData?: string;
+    floor: number;
+    maxDamage: number;
+    gameOverCount: number;
+    score: number;
+    updatedAt: number;
+};
+
+type RaceSession = {
+    isHost: boolean;
+    name: string;
+    roomCode?: string;
+    durationSec: number;
+    endAt: number;
+    startedAt: number;
+    participants: Array<{ peerId: string; name: string; imageData?: string }>;
+    entries: RaceEntry[];
+    ended: boolean;
 };
 
 const determineEnemyType = (name: string, isBoss: boolean): string => {
@@ -305,6 +330,13 @@ const App: React.FC = () => {
     const [starterRelics, setStarterRelics] = useState<Relic[]>([]);
     const [treasureRewards, setTreasureRewards] = useState<RewardItem[]>([]);
     const [clearCount, setClearCount] = useState<number>(0);
+    const [raceSession, setRaceSession] = useState<RaceSession | null>(null);
+    const [raceResultOpen, setRaceResultOpen] = useState(false);
+    const [raceMaxDamage, setRaceMaxDamage] = useState(0);
+    const [raceGameOverCount, setRaceGameOverCount] = useState(0);
+    const [raceNow, setRaceNow] = useState(Date.now());
+    const [raceRemainingSec, setRaceRemainingSec] = useState(0);
+    const prevScreenRef = useRef<GameScreen>(GameScreen.START_MENU);
 
     const isEndingTurnRef = useRef(false);
 
@@ -325,6 +357,14 @@ const App: React.FC = () => {
     const VICTORY_GOLD = 25;
 
     const UNLOCK_THRESHOLDS = [500, 1000, 1500, 2000, 2500, 3000, 3500];
+    const raceScore = (floor: number, maxDamage: number, gameOverCount: number) => floor * 100 + maxDamage - gameOverCount * 30;
+    const raceFloorProgress = (act: number, floor: number) => (Math.max(1, act) - 1) * 17 + Math.max(0, floor);
+    const formatRaceRemaining = (sec: number) => {
+        const remain = Math.max(0, sec);
+        const m = Math.floor(remain / 60);
+        const s = remain % 60;
+        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    };
 
     const addLog = useCallback((msg: string, color: string = 'white') => {
         setGameState(prev => ({
@@ -390,6 +430,9 @@ const App: React.FC = () => {
     }, [gameState.screen, dailyPlaySeconds]);
 
     useEffect(() => {
+        if (gameState.challengeMode === 'RACE') {
+            return;
+        }
         if (gameState.screen !== GameScreen.START_MENU &&
             gameState.screen !== GameScreen.GAME_OVER &&
             gameState.screen !== GameScreen.ENDING &&
@@ -411,6 +454,7 @@ const App: React.FC = () => {
             gameState.screen !== GameScreen.PROBLEM_CHALLENGE &&
             gameState.screen !== GameScreen.VS_SETUP &&
             gameState.screen !== GameScreen.VS_BATTLE &&
+            gameState.screen !== GameScreen.RACE_SETUP &&
             gameState.screen !== GameScreen.FLOOR_RESULT
         ) {
             storageService.saveGame(gameState);
@@ -420,6 +464,138 @@ const App: React.FC = () => {
             setHasSave(storageService.hasSaveFile());
         }
     }, [gameState]);
+
+    useEffect(() => {
+        if (!raceSession || gameState.challengeMode !== 'RACE' || gameState.screen === GameScreen.RACE_SETUP) return;
+
+        const previousOnData = p2pService.onData;
+        p2pService.onData = (data, fromPeerId) => {
+            if (data.type === 'RACE_JOIN' && raceSession.isHost && fromPeerId) {
+                setRaceSession(prev => {
+                    if (!prev) return prev;
+                    const nextParticipants = prev.participants.some(p => p.peerId === fromPeerId)
+                        ? prev.participants.map(p => p.peerId === fromPeerId ? { ...p, name: data.name, imageData: data.imageData } : p)
+                        : [...prev.participants, { peerId: fromPeerId, name: data.name, imageData: data.imageData }];
+                    const nextEntries = prev.entries.some(e => e.peerId === fromPeerId)
+                        ? prev.entries
+                        : [...prev.entries, { peerId: fromPeerId, name: data.name, imageData: data.imageData, floor: 0, maxDamage: 0, gameOverCount: 0, score: 0, updatedAt: Date.now() }];
+                    const sortedEntries = [...nextEntries].sort((a, b) => b.score - a.score);
+                    p2pService.sendTo(fromPeerId, { type: 'RACE_PARTICIPANTS', participants: nextParticipants });
+                    p2pService.sendTo(fromPeerId, { type: 'RACE_START', endAt: prev.endAt, durationSec: prev.durationSec, mode: gameState.mode });
+                    p2pService.sendTo(fromPeerId, { type: 'RACE_MODE_SET', mode: gameState.mode });
+                    p2pService.sendTo(fromPeerId, { type: 'RACE_LEADERBOARD', entries: sortedEntries });
+                    if (prev.ended) {
+                        p2pService.sendTo(fromPeerId, { type: 'RACE_END', entries: sortedEntries });
+                    }
+                    return { ...prev, participants: nextParticipants, entries: sortedEntries };
+                });
+                return;
+            }
+
+            if (data.type === 'RACE_MODE_SET' && !raceSession.isHost) {
+                setGameState(prev => ({ ...prev, mode: data.mode, screen: GameScreen.CHARACTER_SELECTION }));
+                return;
+            }
+
+            if (data.type === 'RACE_PROGRESS' && raceSession.isHost && fromPeerId) {
+                setRaceSession(prev => {
+                    if (!prev || prev.ended) return prev;
+                    const nextEntry: RaceEntry = { peerId: fromPeerId, ...data };
+                    const nextEntries = [...prev.entries.filter(e => e.peerId !== fromPeerId), nextEntry].sort((a, b) => b.score - a.score);
+                    p2pService.send({ type: 'RACE_LEADERBOARD', entries: nextEntries });
+                    return { ...prev, entries: nextEntries };
+                });
+                return;
+            }
+
+            if (data.type === 'RACE_LEADERBOARD' && !raceSession.isHost) {
+                setRaceSession(prev => prev ? { ...prev, entries: [...data.entries].sort((a, b) => b.score - a.score) } : prev);
+                return;
+            }
+
+            if (data.type === 'RACE_END') {
+                setRaceSession(prev => prev ? { ...prev, ended: true, entries: [...data.entries].sort((a, b) => b.score - a.score) } : prev);
+                setRaceResultOpen(true);
+            }
+        };
+
+        return () => {
+            p2pService.onData = previousOnData;
+        };
+    }, [raceSession, gameState.challengeMode, gameState.screen, gameState.mode]);
+
+    useEffect(() => {
+        if (!raceSession || raceSession.ended || gameState.challengeMode !== 'RACE') return;
+
+        const tick = () => {
+            const floor = raceFloorProgress(gameState.act, gameState.floor);
+            const score = raceScore(floor, raceMaxDamage, raceGameOverCount);
+            const payload = {
+                name: raceSession.name,
+                imageData: gameState.player.imageData,
+                floor,
+                maxDamage: raceMaxDamage,
+                gameOverCount: raceGameOverCount,
+                score,
+                updatedAt: Date.now()
+            };
+
+            if (raceSession.isHost) {
+                setRaceSession(prev => {
+                    if (!prev || prev.ended) return prev;
+                    const selfEntry: RaceEntry = { peerId: 'host', ...payload };
+                    const nextEntries = [...prev.entries.filter(e => e.peerId !== 'host'), selfEntry].sort((a, b) => b.score - a.score);
+                    p2pService.send({ type: 'RACE_LEADERBOARD', entries: nextEntries });
+                    return { ...prev, entries: nextEntries };
+                });
+            } else {
+                p2pService.send({ type: 'RACE_PROGRESS', ...payload });
+            }
+        };
+
+        tick();
+        const interval = setInterval(tick, 2000);
+        return () => clearInterval(interval);
+    }, [raceSession, gameState.challengeMode, gameState.act, gameState.floor, gameState.player.imageData, raceMaxDamage, raceGameOverCount]);
+
+    useEffect(() => {
+        if (!raceSession || raceSession.ended) return;
+        if (raceNow < raceSession.endAt) return;
+
+        setRaceSession(prev => {
+            if (!prev || prev.ended) return prev;
+            const finalEntries = [...prev.entries].sort((a, b) => b.score - a.score);
+            if (prev.isHost) {
+                p2pService.send({ type: 'RACE_END', entries: finalEntries });
+            }
+            return { ...prev, ended: true, entries: finalEntries };
+        });
+        setRaceResultOpen(true);
+    }, [raceSession, raceNow]);
+
+    useEffect(() => {
+        if (!raceSession || raceSession.ended) return;
+        const updateRemaining = () => {
+            const now = Date.now();
+            setRaceNow(now);
+            const remainSec = Math.max(0, Math.ceil((raceSession.endAt - now) / 1000));
+            setRaceRemainingSec(remainSec);
+        };
+        updateRemaining();
+        const interval = setInterval(updateRemaining, 1000);
+        return () => clearInterval(interval);
+    }, [raceSession]);
+
+    useEffect(() => {
+        if (!raceSession || gameState.challengeMode !== 'RACE') {
+            prevScreenRef.current = gameState.screen;
+            return;
+        }
+        if (gameState.screen === GameScreen.GAME_OVER && prevScreenRef.current !== GameScreen.GAME_OVER) {
+            setRaceGameOverCount(prev => prev + 1);
+        }
+        prevScreenRef.current = gameState.screen;
+    }, [gameState.screen, gameState.challengeMode, raceSession]);
 
     useEffect(() => {
         const unlocked = storageService.getUnlockedCards();
@@ -490,6 +666,8 @@ const App: React.FC = () => {
     const returnToTitle = () => {
         setShopCards([]);
         setEventData(null);
+        setRaceSession(null);
+        setRaceResultOpen(false);
         setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined, vsOpponent: undefined }));
         setHasSave(storageService.hasSaveFile());
         audioService.playBGM('menu');
@@ -698,7 +876,13 @@ const App: React.FC = () => {
             setShowTimeLimitModal(true);
             return;
         }
+        if (gameState.challengeMode === 'RACE' && raceSession && !raceSession.isHost) {
+            return;
+        }
         audioService.playSound('select');
+        if (gameState.challengeMode === 'RACE' && raceSession?.isHost) {
+            p2pService.send({ type: 'RACE_MODE_SET', mode });
+        }
         setGameState(prev => ({ ...prev, mode, screen: GameScreen.CHARACTER_SELECTION }));
     };
 
@@ -3419,9 +3603,23 @@ const App: React.FC = () => {
                                         }}
                                         className={`flex-1 py-3 px-2 text-sm font-bold border-b-4 border-r-4 rounded-none bg-indigo-600/80 text-white border-indigo-400 hover:bg-indigo-700 cursor-pointer flex items-center justify-center shadow-md ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
                                     >
-                                        <Wifi className="mr-1.5" size={16} /> {trans("対戦", languageMode)}
+                                        <QrCode className="mr-1.5" size={16} /> {trans("対戦", languageMode)}
                                     </button>
                                 </div>
+
+                                <button
+                                    onClick={() => {
+                                        if (isDailyLimitReached) {
+                                            audioService.playSound('wrong');
+                                            setShowTimeLimitModal(true);
+                                            return;
+                                        }
+                                        setGameState(prev => ({ ...prev, screen: GameScreen.RACE_SETUP }));
+                                    }}
+                                    className={`w-full py-3 px-2 text-sm font-bold border-b-4 border-r-4 rounded-none bg-cyan-700/80 text-cyan-100 border-cyan-400 hover:bg-cyan-700 cursor-pointer flex items-center justify-center shadow-md ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
+                                >
+                                    <Wifi className="mr-1.5" size={16} /> {trans("レース", languageMode)}
+                                </button>
 
                                 <div className="flex gap-3 w-full">
                                     <button onClick={startProblemChallenge} className="flex-1 py-3 px-2 text-sm font-bold border-b-4 border-r-4 rounded-none bg-emerald-900/80 text-emerald-100 border-emerald-500 hover:bg-emerald-800 cursor-pointer flex items-center justify-center shadow-md hover:shadow-emerald-900/50">
@@ -3539,6 +3737,57 @@ const App: React.FC = () => {
                     </div>
                 )}
 
+                {gameState.screen === GameScreen.RACE_SETUP && (
+                    <div className="absolute inset-0">
+                        <P2PRaceSetup
+                            player={gameState.player}
+                            onRaceStart={(payload) => {
+                                const baseEntries: RaceEntry[] = payload.participants.map(p => ({
+                                    peerId: p.peerId,
+                                    name: p.name,
+                                    imageData: p.imageData,
+                                    floor: 0,
+                                    maxDamage: 0,
+                                    gameOverCount: 0,
+                                    score: 0,
+                                    updatedAt: Date.now()
+                                }));
+                                setRaceSession({
+                                    isHost: payload.isHost,
+                                    name: payload.name,
+                                    roomCode: payload.roomCode,
+                                    durationSec: payload.durationSec,
+                                    endAt: payload.endAt,
+                                    startedAt: payload.endAt - payload.durationSec * 1000,
+                                    participants: payload.participants,
+                                    entries: baseEntries,
+                                    ended: false
+                                });
+                                setRaceRemainingSec(payload.durationSec);
+                                setRaceResultOpen(false);
+                                setRaceMaxDamage(0);
+                                setRaceGameOverCount(0);
+                                setGameState(prev => ({
+                                    ...prev,
+                                    challengeMode: 'RACE',
+                                    mode: payload.mode ?? prev.mode,
+                                    screen: payload.mode ? GameScreen.CHARACTER_SELECTION : GameScreen.MODE_SELECTION
+                                }));
+                            }}
+                            onClose={returnToTitle}
+                        />
+                    </div>
+                )}
+
+                {raceSession && !raceSession.ended && raceSession.isHost && gameState.challengeMode === 'RACE' && gameState.screen !== GameScreen.RACE_SETUP && raceSession.roomCode && (
+                    <div className="absolute right-3 top-3 z-40">
+                        <div className="bg-slate-900/90 border border-cyan-500 rounded-lg px-3 py-2 text-cyan-100 shadow-lg">
+                            <div className="text-[10px] font-bold tracking-wide text-cyan-200">参加コード</div>
+                            <div className="text-lg font-black tracking-widest tabular-nums">{raceSession.roomCode}</div>
+                        </div>
+                    </div>
+                )}
+
                 {gameState.screen === GameScreen.VS_BATTLE && gameState.vsOpponent && (
                     <div className="absolute inset-0">
                         <P2PVSBattleScene
@@ -3546,6 +3795,7 @@ const App: React.FC = () => {
                             player2={gameState.vsOpponent}
                             isHost={gameState.vsIsHost || false}
                             onFinish={(winner) => {
+                                alert(trans(winner === 1 ? "あなたの勝利！" : "対戦相手の勝利！", languageMode));
                                 setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, vsOpponent: undefined, vsIsHost: undefined }));
                             }}
                             languageMode={languageMode}
@@ -3572,11 +3822,21 @@ const App: React.FC = () => {
                 )}
 
                 {gameState.screen === GameScreen.MODE_SELECTION && (
-                    <ModeSelectionScreen
-                        onSelectMode={handleModeSelect}
-                        onBack={returnToTitle}
-                        languageMode={languageMode}
-                    />
+                    <div className="absolute inset-0">
+                        <ModeSelectionScreen
+                            onSelectMode={handleModeSelect}
+                            onBack={returnToTitle}
+                            languageMode={languageMode}
+                        />
+                        {raceSession && !raceSession.ended && !raceSession.isHost && gameState.challengeMode === 'RACE' && (
+                            <div className="absolute inset-0 bg-black/65 backdrop-blur-[1px] flex items-center justify-center p-4 z-20">
+                                <div className="bg-slate-900 border-2 border-cyan-500 rounded-xl p-6 text-white text-center max-w-md w-full">
+                                    <div className="text-xl font-black mb-2">RACE MODE PREPARING</div>
+                                    <div className="text-sm text-cyan-200">Waiting for host mode selection...</div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 )}
 
                 {gameState.screen === GameScreen.CHARACTER_SELECTION && (
@@ -3637,6 +3897,29 @@ const App: React.FC = () => {
                             act={gameState.act}
                             floor={gameState.floor}
                         />
+                        {raceSession && !raceSession.ended && (
+                            <>
+                                <div className="absolute left-3 top-[72px] z-30">
+                                    <div className="bg-slate-900/90 border border-cyan-500 rounded-lg px-3 py-2 text-cyan-100 shadow-lg min-w-[136px]">
+                                        <div className="text-[10px] font-bold tracking-wide text-cyan-200">RACE TIME</div>
+                                        <div className="text-xl font-black tabular-nums">{formatRaceRemaining(raceRemainingSec)}</div>
+                                    </div>
+                                </div>
+                                <div className="absolute right-3 top-[72px] z-30 w-[180px]">
+                                    <div className="bg-slate-900/90 border border-cyan-500 rounded-lg p-2 text-cyan-100 shadow-lg">
+                                        <div className="text-[10px] font-bold tracking-wide text-cyan-200 mb-1">RANKING</div>
+                                        <div className="space-y-1">
+                                            {(raceSession.entries || []).slice().sort((a, b) => b.score - a.score).slice(0, 5).map((entry, idx) => (
+                                                <div key={entry.peerId} className="flex items-center justify-between text-[11px]">
+                                                    <span className="truncate pr-2">{idx + 1}. {entry.name}</span>
+                                                    <span className="tabular-nums">{entry.score}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </div>
                 )}
 
@@ -3877,6 +4160,31 @@ const App: React.FC = () => {
                             hasCursedKey={!!gameState.player.relics.find(r => r.id === 'CURSED_KEY')}
                             languageMode={languageMode}
                         />
+                    </div>
+                )}
+
+                {raceSession && raceResultOpen && (
+                    <div className="fixed inset-0 z-[220] bg-black/70 flex items-center justify-center p-4">
+                        <div className="bg-slate-900 border-2 border-cyan-500 rounded-xl p-5 text-white w-full max-w-lg">
+                            <h2 className="text-2xl font-black mb-3">RACE RESULT</h2>
+                            <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+                                {[...raceSession.entries].sort((a, b) => b.score - a.score).map((entry, index) => (
+                                    <div key={entry.peerId} className="flex items-center justify-between bg-slate-800/70 rounded px-3 py-2">
+                                        <div className="font-bold">{index + 1}. {entry.name}</div>
+                                        <div className="text-cyan-300 tabular-nums">{entry.score}</div>
+                                    </div>
+                                ))}
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setRaceResultOpen(false);
+                                    returnToTitle();
+                                }}
+                                className="mt-4 w-full bg-cyan-700 hover:bg-cyan-600 rounded py-2 font-bold"
+                            >
+                                CLOSE
+                            </button>
+                        </div>
                     </div>
                 )}
 
