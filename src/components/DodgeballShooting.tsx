@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Enemy } from '../types';
-import PixelSprite from './PixelSprite';
+import EnemyIllustration from './EnemyIllustration';
 import { audioService } from '../services/audioService';
+import { ENEMY_ILLUSTRATION_SIZE_CLASS } from '../constants/uiSizing';
 
 interface DodgeballShootingProps {
     enemy: Enemy;
@@ -154,8 +155,8 @@ const DodgeballShooting: React.FC<DodgeballShootingProps> = ({ enemy, playerImag
                     className="absolute -translate-x-1/2 -translate-y-1/2 transition-transform duration-75"
                     style={{ left: `${enemyPos.x}%`, top: `${enemyPos.y}%` }}
                 >
-                    <div className="w-16 h-16 scale-x-[-1] relative">
-                        <PixelSprite seed={enemy.id} name={enemy.name} className="w-full h-full" />
+                    <div className={`${ENEMY_ILLUSTRATION_SIZE_CLASS.miniGameDodgeball} scale-x-[-1] relative`}>
+                        <EnemyIllustration name={enemy.name} seed={enemy.id} className="w-full h-full" />
                         {/* Shadow underneath enemy */}
                         <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-8 h-2 bg-black/40 rounded-full blur-sm"></div>
                     </div>

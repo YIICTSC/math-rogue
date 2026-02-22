@@ -4,9 +4,10 @@ import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY, ENEMY_LIBRARY } from '../
 import { Card as ICard, LanguageMode } from '../types';
 import Card from './Card';
 import { BookOpen, Lock, ArrowLeft, Swords, Gem, FlaskConical, Skull, X } from 'lucide-react';
-import PixelSprite from './PixelSprite';
+import EnemyIllustration from './EnemyIllustration';
 import { storageService } from '../services/storageService';
 import { trans } from '../utils/textUtils';
+import { ENEMY_ILLUSTRATION_SIZE_CLASS } from '../constants/uiSizing';
 
 interface CompendiumScreenProps {
     unlockedCardNames: string[];
@@ -217,8 +218,8 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                                     onPointerMove={handlePointerMove}
                                     className={`bg-black/60 border ${isUnlocked ? 'border-red-900 hover:border-red-500' : 'border-gray-800'} p-2 rounded flex flex-col items-center text-center cursor-pointer transition-colors aspect-square justify-center relative overflow-hidden`}
                                 >
-                                    <div className={`w-16 h-16 mb-2 bg-gray-900 rounded ${!isUnlocked ? 'brightness-0 opacity-20' : ''}`}>
-                                        <PixelSprite seed={enemy.name} name={enemy.name} className="w-full h-full" size={16} />
+                                    <div className={`${ENEMY_ILLUSTRATION_SIZE_CLASS.compendiumGrid} mb-2 bg-gray-900 rounded relative ${!isUnlocked ? 'brightness-0 opacity-20' : ''}`}>
+                                        <EnemyIllustration name={enemy.name} seed={enemy.name} className="w-full h-full" size={16} />
                                     </div>
                                     <div className={`font-bold text-[10px] truncate w-full ${isUnlocked ? 'text-red-200' : 'text-gray-600'}`}>{isUnlocked ? trans(enemy.name, languageMode) : '???'}</div>
                                     {!isUnlocked && <Lock size={16} className="absolute top-2 right-2 text-gray-600" />}
@@ -254,9 +255,9 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                                 selectedItem.unlocked ? <FlaskConical size={80} style={{ color: selectedItem.data.color }} className="drop-shadow-[0_0_10px_currentColor]" /> : <FlaskConical size={80} className="text-gray-700" />
                             )}
                             {selectedItem.type === 'ENEMY' && (
-                                <div className="w-32 h-32 bg-black rounded border border-gray-600">
+                                <div className={`${ENEMY_ILLUSTRATION_SIZE_CLASS.compendiumDetail} bg-black rounded border border-gray-600 relative`}>
                                     {selectedItem.unlocked ?
-                                        <PixelSprite seed={selectedItem.data.name} name={selectedItem.data.name} className="w-full h-full" size={16} />
+                                        <EnemyIllustration name={selectedItem.data.name} seed={selectedItem.data.name} className="w-full h-full" size={16} />
                                         : <div className="w-full h-full flex items-center justify-center text-gray-700 text-4xl">?</div>
                                     }
                                 </div>

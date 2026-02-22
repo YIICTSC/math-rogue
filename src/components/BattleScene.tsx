@@ -3,9 +3,11 @@ import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, Floatin
 import Card, { KEYWORD_DEFINITIONS } from './Card';
 import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles, MessageCircle, Mic, ArrowRight, MousePointer2, ChevronsRight, Flame, RotateCcw, Triangle } from 'lucide-react';
 import PixelSprite from './PixelSprite';
+import EnemyIllustration from './EnemyIllustration';
 import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
 import { HERO_IMAGE_DATA, CARDS_LIBRARY, STATUS_CARDS } from '../constants';
+import { ENEMY_ILLUSTRATION_SIZE_CLASS } from '../constants/uiSizing';
 import { getUpgradedCard, synthesizeCards } from '../utils/cardUtils';
 import React, { useEffect, useState, useRef } from 'react';
 import { storageService } from '../services/storageService';
@@ -294,6 +296,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 }) => {
 
     const playerHpPercent = (player.currentHp / player.maxHp) * 100;
+    const isTrueBossPhase2Active = enemies.some(enemy => enemy.enemyType === 'THE_HEART' && enemy.phase === 2);
 
     const [isActing, setIsActing] = useState(false);
     const [isShaking, setIsShaking] = useState(false);
@@ -903,8 +906,11 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     </div>
                 )}
 
+                {/* Enemies + Player Area */}
+                <div className={isTrueBossPhase2Active ? "relative min-h-[220px] md:min-h-[320px] pt-2 md:pt-4" : "flex flex-col flex-1"}>
+
                 {/* Enemies Area */}
-                <div className="flex justify-center items-start pt-8 md:pt-14 gap-2 min-h-[180px] shrink-0">
+                <div className={isTrueBossPhase2Active ? "absolute left-1/2 -translate-x-1/2 bottom-0 flex justify-center items-end gap-2 min-h-0 shrink-0 z-10" : "flex justify-center items-start pt-8 md:pt-14 gap-2 min-h-[180px] shrink-0"}>
                     {enemies.map((enemy) => {
                         const enemyHpPercent = (enemy.currentHp / enemy.maxHp) * 100;
                         const isSelected = selectedEnemyId === enemy.id;
@@ -912,6 +918,9 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         const enemyName = trans(enemy.name, languageMode);
                         const enemyNameNeedsScroll = enemyName.length > 5;
                         const isTrueBossPhase2 = enemy.enemyType === 'THE_HEART' && enemy.phase === 2;
+                        const enemySvgAliases = isTrueBossPhase2
+                            ? ['THE_HEART_PHASE2', '真ボス2形態目', '真ボス_2', '真ボス第二形態', `${enemy.enemyType}_2`]
+                            : [];
 
                         return (
                             <div
@@ -949,8 +958,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     {enemy.nextIntent.type === 'UNKNOWN' && <span className="text-gray-600">?</span>}
                                 </div>
 
-                                <div className={`relative mb-1 transition-all duration-700 ${isTrueBossPhase2 ? 'w-32 h-32 md:w-48 md:h-48' : 'w-16 h-16 md:w-20 md:h-20'}`}>
-                                    <PixelSprite seed={enemy.id} name={enemy.name} className="w-full h-full drop-shadow-lg relative z-10" />
+                                <div className={`relative mb-1 transition-all duration-700 ${isTrueBossPhase2 ? ENEMY_ILLUSTRATION_SIZE_CLASS.battleTrueBossPhase2 : ENEMY_ILLUSTRATION_SIZE_CLASS.battleNormal}`}>
+                                    <EnemyIllustration name={enemy.name} seed={enemy.id} aliases={enemySvgAliases} className="w-full h-full drop-shadow-lg relative z-10" />
                                     <FloatingTextOverlay data={enemy.floatingText} languageMode={languageMode} />
                                     <VFXOverlay effects={activeEffects} targetId={enemy.id} />
                                 </div>
@@ -1006,10 +1015,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 </div>
 
                 {/* Player Area */}
-                <div className="flex items-end pl-2 pb-2 shrink-0 mt-auto">
-                    <div className="flex items-end relative">
+                <div className={isTrueBossPhase2Active ? "relative z-20 flex items-end pl-2 pb-2 shrink-0" : "flex items-end pl-2 pb-2 shrink-0 mt-auto"}>
+                    <div className={isTrueBossPhase2Active ? "flex flex-col items-start md:flex-row md:items-end relative max-w-[48vw] md:max-w-none" : "flex items-end relative"}>
 
-                        <div className={`w-20 h-20 md:w-24 md:h-24 relative transition-all duration-150 ease-out mr-2 ${getActionClass()}`} onClick={() => showInfo(trans("自分", languageMode), trans("あなたのキャラクター。\nHPが0になるとゲームオーバー。", languageMode))}>
+                        <div className={`w-20 h-20 md:w-24 md:h-24 relative transition-all duration-150 ease-out ${isTrueBossPhase2Active ? 'mr-0 md:mr-2 mb-1 md:mb-0' : 'mr-2'} ${getActionClass()}`} onClick={() => showInfo(trans("自分", languageMode), trans("あなたのキャラクター。\nHPが0になるとゲームオーバー。", languageMode))}>
                             <img
                                 src={player.imageData}
                                 alt="Hero"
@@ -1021,7 +1030,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         </div>
 
                         {player.partner && player.partner.currentHp > 0 && (
-                            <div className={`w-16 h-16 md:w-20 md:h-20 relative transition-all duration-150 ease-out mr-2 -ml-6 z-0 ${getActionClass()}`} onClick={() => showInfo(trans(player.partner!.name, languageMode), trans("パートナー。\n倒れるとデッキが1枚しか使えなくなります。", languageMode))}>
+                            <div className={`w-16 h-16 md:w-20 md:h-20 relative transition-all duration-150 ease-out ${isTrueBossPhase2Active ? 'mr-0 md:mr-2 -ml-3 md:-ml-6 mb-1 md:mb-0' : 'mr-2 -ml-6'} z-0 ${getActionClass()}`} onClick={() => showInfo(trans(player.partner!.name, languageMode), trans("パートナー。\n倒れるとデッキが1枚しか使えなくなります。", languageMode))}>
                                 <img
                                     src={player.partner.imageData}
                                     alt="Partner"
@@ -1036,7 +1045,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             </div>
                         )}
 
-                        <div className={`bg-black/80 border-2 border-white p-1 text-white text-xs w-36 md:w-40 mb-2 shadow-lg rounded z-20 ${tutorialStep === 1 ? 'ring-4 ring-green-500 ring-offset-4 ring-offset-transparent animate-pulse' : ''}`}>
+                        <div className={`bg-black/80 border-2 border-white p-1 text-white text-xs ${isTrueBossPhase2Active ? 'w-28 md:w-40' : 'w-36 md:w-40'} mb-2 shadow-lg rounded z-20 ${tutorialStep === 1 ? 'ring-4 ring-green-500 ring-offset-4 ring-offset-transparent animate-pulse' : ''}`}>
                             <div className="flex items-center justify-between mb-1">
                                 <span className="text-red-400 flex items-center font-bold" onClick={() => showInfo("HP", trans("ヒットポイント。0になると死亡する。", languageMode))}><Heart size={12} className="mr-1" /> {player.currentHp}/{player.maxHp}</span>
                                 <span className="text-blue-400 flex items-center font-bold" onClick={() => showInfo(trans("ブロック", languageMode), trans("次のターン開始時までダメージを防ぐ。", languageMode))}><Shield size={12} className="mr-1" /> {player.block}</span>
@@ -1107,6 +1116,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             </div>
                         </div>
                     </div>
+                </div>
                 </div>
             </div>
 
