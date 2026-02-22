@@ -1,0 +1,32 @@
+<svg width="384" height="256" viewBox="0 0 384 256"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 机 -->
+  <rect x="64" y="160" width="256" height="64" fill="#8b5a2b"/>
+
+  <!-- 紙の山 -->
+  <rect x="128" y="128" width="32" height="16" fill="#ffffff"/>
+  <rect x="144" y="120" width="32" height="16" fill="#ffffff"/>
+  <rect x="160" y="112" width="32" height="16" fill="#ffffff"/>
+  <rect x="176" y="104" width="32" height="16" fill="#ffffff"/>
+  <rect x="192" y="96" width="32" height="16" fill="#ffffff"/>
+
+  <!-- 鉛筆 -->
+  <rect x="200" y="160" width="8" height="32" fill="#ffcc00"/>
+  <rect x="200" y="160" width="8" height="4" fill="#000000"/> <!-- 芯先 -->
+
+  <!-- 生徒の頭（悩む） -->
+  <rect x="144" y="176" width="32" height="32" fill="#3366cc"/>
+  <rect x="152" y="184" width="16" height="16" fill="#ffcc99"/> <!-- 顔 -->
+
+  <!-- 机の影 -->
+  <rect x="64" y="224" width="256" height="16" fill="#1a2240" opacity="0.5"/>
+
+  <!-- 焦燥感のエフェクト -->
+  <rect x="160" y="80" width="4" height="4" fill="#ff0000"/>
+  <rect x="168" y="88" width="4" height="4" fill="#ff0000"/>
+  <rect x="176" y="80" width="4" height="4" fill="#ff0000"/>
+
+</svg>
+

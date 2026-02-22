@@ -1,0 +1,31 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 足（左右に広げる） -->
+  <rect x="38" y="92" width="12" height="20" fill="#2244aa"/>
+  <rect x="78" y="92" width="12" height="20" fill="#2244aa"/>
+
+  <!-- 体（スポーツウェア・青シャツ） -->
+  <rect x="46" y="60" width="36" height="32" fill="#3366ff"/>
+
+  <!-- 腕（左右に大きく開く） -->
+  <rect x="32" y="60" width="12" height="8" fill="#3366ff"/>
+  <rect x="84" y="60" width="12" height="8" fill="#3366ff"/>
+  <rect x="30" y="68" width="12" height="8" fill="#3366ff"/>
+  <rect x="86" y="68" width="12" height="8" fill="#3366ff"/>
+
+  <!-- 頭 -->
+  <rect x="50" y="36" width="28" height="24" fill="#ffd8b0"/>
+
+  <!-- 髪（黒） -->
+  <rect x="50" y="32" width="28" height="8" fill="#111111"/>
+
+  <!-- 目（集中） -->
+  <rect x="56" y="44" width="4" height="2" fill="#111111"/>
+  <rect x="68" y="44" width="4" height="2" fill="#111111"/>
+
+  <!-- 口（真剣な線） -->
+  <rect x="60" y="52" width="8" height="2" fill="#111111"/>
+
+</svg>

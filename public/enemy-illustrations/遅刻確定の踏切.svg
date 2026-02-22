@@ -1,0 +1,25 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- レール -->
+  <rect x="48" y="80" width="32" height="4" fill="#666666"/>
+  <rect x="48" y="88" width="32" height="2" fill="#999999"/>
+
+  <!-- 踏切遮断機（赤白ライン） -->
+  <rect x="44" y="60" width="8" height="28" fill="#ff0000"/>
+  <rect x="52" y="60" width="8" height="28" fill="#ffffff"/>
+  <rect x="60" y="60" width="8" height="28" fill="#ff0000"/>
+  
+  <!-- 踏切警告ライト（赤点滅） -->
+  <rect x="56" y="52" width="16" height="8" fill="#ff2222"/>
+  <rect x="58" y="54" width="12" height="4" fill="#ff5555"/> <!-- 点滅強調 -->
+
+  <!-- 道（踏切手前） -->
+  <rect x="48" y="96" width="32" height="12" fill="#444444"/>
+
+  <!-- 小さい飛び散り光で焦燥感 -->
+  <rect x="50" y="50" width="2" height="2" fill="#ffff00"/>
+  <rect x="64" y="50" width="2" height="2" fill="#ffff00"/>
+
+</svg>

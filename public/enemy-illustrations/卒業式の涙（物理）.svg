@@ -1,0 +1,24 @@
+<svg width="384" height="256" viewBox="0 0 384 256"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 涙の粒（落下中） -->
+  <rect x="184" y="80" width="8" height="12" fill="#66ccff"/>
+  <rect x="192" y="96" width="6" height="10" fill="#66ccff"/>
+  <rect x="200" y="110" width="4" height="8" fill="#99ddff"/>
+
+  <!-- 水はね・飛び散り -->
+  <rect x="178" y="92" width="4" height="4" fill="#99ddff"/>
+  <rect x="204" y="102" width="4" height="4" fill="#99ddff"/>
+  <rect x="190" y="120" width="6" height="2" fill="#cceeff"/>
+
+  <!-- 卒業帽（少し漂わせて涙の上に） -->
+  <rect x="176" y="64" width="32" height="8" fill="#444444"/>
+  <rect x="184" y="56" width="16" height="8" fill="#555555"/>
+
+  <!-- 紙吹雪 -->
+  <rect x="160" y="72" width="6" height="4" fill="#ffffcc"/>
+  <rect x="210" y="68" width="6" height="4" fill="#ffffcc"/>
+  <rect x="192" y="60" width="4" height="4" fill="#ffffcc"/>
+
+</svg>

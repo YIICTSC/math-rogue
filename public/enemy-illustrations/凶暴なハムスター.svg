@@ -1,0 +1,45 @@
+<svg width="256" height="256" viewBox="0 0 256 256"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 影（濃茶） -->
+  <rect x="88" y="196" width="80" height="16" fill="#3a2415" opacity="0.5"/>
+
+  <!-- 体（ベース） -->
+  <rect x="80" y="96" width="96" height="80" fill="#c89b6d"/>
+
+  <!-- ほっぺ丸み -->
+  <rect x="64" y="112" width="32" height="48" fill="#d8ab7d"/>
+  <rect x="160" y="112" width="32" height="48" fill="#d8ab7d"/>
+
+  <!-- 耳 -->
+  <rect x="96" y="72" width="24" height="24" fill="#e0b58a"/>
+  <rect x="136" y="72" width="24" height="24" fill="#e0b58a"/>
+
+  <!-- 耳内側 -->
+  <rect x="104" y="80" width="8" height="8" fill="#f2c9a4"/>
+  <rect x="144" y="80" width="8" height="8" fill="#f2c9a4"/>
+
+  <!-- 目（凶暴） -->
+  <rect x="104" y="120" width="16" height="16" fill="#aa0000"/>
+  <rect x="136" y="120" width="16" height="16" fill="#aa0000"/>
+
+  <!-- 目ハイライト -->
+  <rect x="108" y="124" width="4" height="4" fill="#ffffff"/>
+  <rect x="140" y="124" width="4" height="4" fill="#ffffff"/>
+
+  <!-- 鼻 -->
+  <rect x="120" y="136" width="16" height="8" fill="#5a2e1b"/>
+
+  <!-- 口 -->
+  <rect x="112" y="144" width="32" height="16" fill="#7a3e20"/>
+
+  <!-- 前歯 -->
+  <rect x="120" y="152" width="8" height="12" fill="#fff8e6"/>
+  <rect x="132" y="152" width="8" height="12" fill="#fff8e6"/>
+
+  <!-- 足 -->
+  <rect x="96" y="176" width="16" height="20" fill="#b88458"/>
+  <rect x="144" y="176" width="16" height="20" fill="#b88458"/>
+
+</svg>

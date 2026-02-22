@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 左翼 -->
+  <rect x="28" y="52" width="28" height="12" fill="#1b2230"/>
+  <rect x="20" y="56" width="12" height="8" fill="#1b2230"/>
+
+  <!-- 右翼 -->
+  <rect x="72" y="52" width="28" height="12" fill="#1b2230"/>
+  <rect x="96" y="56" width="12" height="8" fill="#1b2230"/>
+
+  <!-- 胴体 -->
+  <rect x="48" y="48" width="32" height="28" fill="#222a3a"/>
+
+  <!-- 頭 -->
+  <rect x="56" y="36" width="20" height="16" fill="#222a3a"/>
+
+  <!-- 目（吊り目） -->
+  <rect x="60" y="42" width="4" height="4" fill="#e6f2ff"/>
+  <rect x="68" y="42" width="4" height="4" fill="#e6f2ff"/>
+
+  <!-- くちばし -->
+  <rect x="76" y="44" width="8" height="4" fill="#e0b000"/>
+
+  <!-- 足 -->
+  <rect x="56" y="76" width="4" height="8" fill="#e0b000"/>
+  <rect x="68" y="76" width="4" height="8" fill="#e0b000"/>
+
+</svg>
+

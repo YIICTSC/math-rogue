@@ -1,0 +1,24 @@
+<svg width="384" height="256" viewBox="0 0 384 256"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 校庭の地面 -->
+  <rect x="0" y="224" width="384" height="32" fill="#d2b48c"/>
+
+  <!-- 雑草1 -->
+  <rect x="64" y="200" width="16" height="24" fill="#2f7f2f"/>
+  <rect x="64" y="192" width="8" height="8" fill="#4faf4f"/>
+  <rect x="72" y="192" width="8" height="8" fill="#4faf4f"/>
+
+  <!-- 雑草2 -->
+  <rect x="160" y="208" width="16" height="16" fill="#2f7f2f"/>
+  <rect x="160" y="200" width="8" height="8" fill="#4faf4f"/>
+  <rect x="168" y="200" width="8" height="8" fill="#4faf4f"/>
+
+  <!-- 雑草3 -->
+  <rect x="288" y="208" width="16" height="16" fill="#2f7f2f"/>
+  <rect x="288" y="200" width="8" height="8" fill="#4faf4f"/>
+  <rect x="296" y="200" width="8" height="8" fill="#4faf4f"/>
+
+</svg>
+

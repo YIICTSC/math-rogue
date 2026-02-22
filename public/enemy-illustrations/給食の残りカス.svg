@@ -1,0 +1,32 @@
+<svg width="256" height="256" viewBox="0 0 256 256"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 影（濃緑） -->
+  <rect x="88" y="196" width="80" height="16" fill="#1a2b1a" opacity="0.5"/>
+
+  <!-- 不定形ベース -->
+  <rect x="96" y="120" width="64" height="40" fill="#7a8f6a"/>
+  <rect x="80" y="136" width="96" height="24" fill="#6f845f"/>
+  <rect x="104" y="104" width="48" height="24" fill="#859b74"/>
+
+  <!-- ドロっと広がり -->
+  <rect x="88" y="160" width="80" height="16" fill="#5f744f"/>
+  <rect x="104" y="176" width="48" height="16" fill="#546a45"/>
+
+  <!-- 異物（にんじん的な欠片） -->
+  <rect x="116" y="132" width="8" height="8" fill="#d97a2b"/>
+  <rect x="140" y="148" width="8" height="8" fill="#d97a2b"/>
+
+  <!-- 目 -->
+  <rect x="112" y="128" width="12" height="12" fill="#2e1a12"/>
+  <rect x="132" y="128" width="12" height="12" fill="#2e1a12"/>
+
+  <!-- 目ハイライト -->
+  <rect x="116" y="132" width="4" height="4" fill="#e6fff2"/>
+  <rect x="136" y="132" width="4" height="4" fill="#e6fff2"/>
+
+  <!-- 口（ぬめっと） -->
+  <rect x="120" y="148" width="24" height="8" fill="#3e2a20"/>
+
+</svg>

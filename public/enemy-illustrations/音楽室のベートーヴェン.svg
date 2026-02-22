@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 髪（石膏） -->
+  <rect x="44" y="24" width="40" height="20" fill="#d9d9d9"/>
+
+  <!-- 顔 -->
+  <rect x="52" y="36" width="24" height="20" fill="#f0f0f0"/>
+
+  <!-- 目 -->
+  <rect x="56" y="42" width="4" height="4" fill="#9ff0ff"/>
+  <rect x="68" y="42" width="4" height="4" fill="#9ff0ff"/>
+
+  <!-- 眉 -->
+  <rect x="54" y="38" width="8" height="2" fill="#c8c8c8"/>
+  <rect x="66" y="38" width="8" height="2" fill="#c8c8c8"/>
+
+  <!-- 口 -->
+  <rect x="60" y="48" width="8" height="2" fill="#c8c8c8"/>
+
+  <!-- ヒビ -->
+  <rect x="64" y="40" width="2" height="10" fill="#b0b0b0"/>
+
+  <!-- 胸像部分 -->
+  <rect x="48" y="56" width="32" height="20" fill="#e5e5e5"/>
+
+  <!-- 台座 -->
+  <rect x="44" y="76" width="40" height="16" fill="#cccccc"/>
+
+</svg>
+

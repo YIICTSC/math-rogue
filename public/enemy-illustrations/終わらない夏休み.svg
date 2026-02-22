@@ -1,0 +1,32 @@
+<svg width="384" height="256" viewBox="0 0 384 256"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 空 -->
+  <rect x="0" y="0" width="384" height="128" fill="#88ccff"/>
+
+  <!-- 校庭の地面 -->
+  <rect x="0" y="128" width="384" height="128" fill="#d2b48c"/>
+
+  <!-- プール（空想的モチーフ） -->
+  <rect x="64" y="160" width="128" height="48" fill="#3399ff"/>
+  <rect x="64" y="160" width="128" height="8" fill="#66ccff"/> <!-- 水面の光 -->
+
+  <!-- 砂場や遊具 -->
+  <rect x="208" y="176" width="64" height="32" fill="#ffcc66"/>
+  <rect x="216" y="184" width="48" height="16" fill="#ffdd88"/> <!-- 砂の模様 -->
+
+  <!-- セミ（小さなドット） -->
+  <rect x="300" y="40" width="4" height="4" fill="#cc6600"/>
+  <rect x="308" y="44" width="4" height="4" fill="#cc6600"/>
+
+  <!-- 机と椅子（教室の残像） -->
+  <rect x="128" y="96" width="32" height="16" fill="#8b5a2b"/>
+  <rect x="128" y="112" width="32" height="8" fill="#aa7f4b"/>
+
+  <!-- 時間が止まった印象：光の粒 -->
+  <rect x="80" y="48" width="4" height="4" fill="#ffff66"/>
+  <rect x="120" y="64" width="4" height="4" fill="#ffff88"/>
+  <rect x="200" y="32" width="4" height="4" fill="#ffffaa"/>
+
+</svg>

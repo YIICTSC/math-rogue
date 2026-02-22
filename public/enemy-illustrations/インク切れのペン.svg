@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+
+  <!-- ペン本体 -->
+  <rect x="52" y="20" width="24" height="64" fill="#66ccff"/>
+
+  <!-- グリップ -->
+  <rect x="52" y="60" width="24" height="12" fill="#3399cc"/>
+
+  <!-- ペン先 -->
+  <rect x="56" y="84" width="16" height="16" fill="#cccccc"/>
+  <rect x="60" y="100" width="8" height="8" fill="#888888"/>
+
+  <!-- インク垂れ（黒背景対応：濃い紫） -->
+  <rect x="62" y="108" width="4" height="8" fill="#550077"/>
+  <rect x="58" y="112" width="4" height="4" fill="#550077"/>
+  <rect x="66" y="112" width="4" height="4" fill="#550077"/>
+
+  <!-- 顔 -->
+  <rect x="56" y="36" width="4" height="4" fill="#222222"/>
+  <rect x="68" y="36" width="4" height="4" fill="#222222"/>
+
+  <!-- かすれ口 -->
+  <rect x="60" y="46" width="8" height="2" fill="#222222"/>
+
+</svg>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+
+  <!-- 足 -->
+  <rect x="48" y="88" width="12" height="20" fill="#2f4f6f"/>
+  <rect x="68" y="88" width="12" height="20" fill="#2f4f6f"/>
+
+  <!-- 体（明るめネイビー） -->
+  <rect x="40" y="56" width="48" height="40" fill="#3a6ea5"/>
+
+  <!-- ネクタイ -->
+  <rect x="62" y="60" width="4" height="20" fill="#ff4444"/>
+
+  <!-- 腕 -->
+  <rect x="28" y="60" width="12" height="28" fill="#3a6ea5"/>
+  <rect x="88" y="60" width="12" height="28" fill="#3a6ea5"/>
+
+  <!-- 書類バインダー -->
+  <rect x="20" y="64" width="16" height="20" fill="#66ccff" stroke="#ffffff" stroke-width="2"/>
+  <rect x="24" y="68" width="8" height="2" fill="#ffffff"/>
+  <rect x="24" y="72" width="8" height="2" fill="#ffffff"/>
+
+  <!-- 頭 -->
+  <rect x="44" y="24" width="40" height="32" fill="#ffd2a6"/>
+
+  <!-- 髪（黒回避） -->
+  <rect x="44" y="20" width="40" height="8" fill="#444444"/>
+
+  <!-- メガネ -->
+  <rect x="50" y="36" width="10" height="8" fill="none" stroke="#ffffff" stroke-width="2"/>
+  <rect x="68" y="36" width="10" height="8" fill="none" stroke="#ffffff" stroke-width="2"/>
+  <rect x="60" y="38" width="8" height="2" fill="#ffffff"/>
+
+  <!-- 目 -->
+  <rect x="54" y="40" width="2" height="2" fill="#222222"/>
+  <rect x="72" y="40" width="2" height="2" fill="#222222"/>
+
+  <!-- 口 -->
+  <rect x="60" y="48" width="8" height="2" fill="#222222"/>
+
+  <!-- 発光オーラ（シアン） -->
+  <rect x="34" y="52" width="4" height="4" fill="#00ffff"/>
+  <rect x="90" y="52" width="4" height="4" fill="#00ffff"/>
+  <rect x="34" y="96" width="4" height="4" fill="#00ffff"/>
+  <rect x="90" y="96" width="4" height="4" fill="#00ffff"/>
+
+</svg>

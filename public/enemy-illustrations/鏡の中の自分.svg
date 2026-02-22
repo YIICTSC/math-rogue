@@ -1,0 +1,46 @@
+<svg width="256" height="256" viewBox="0 0 256 256"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 影（濃紺） -->
+  <rect x="80" y="208" width="96" height="16" fill="#1a2238" opacity="0.5"/>
+
+  <!-- 鏡フレーム -->
+  <rect x="72" y="40" width="112" height="144" fill="#8aa0b8"/>
+  <rect x="80" y="48" width="96" height="128" fill="#bfcfe8"/>
+
+  <!-- 鏡の中の背景 -->
+  <rect x="88" y="56" width="80" height="112" fill="#2f3a5a"/>
+
+  <!-- 歪んだ自分（頭） -->
+  <rect x="112" y="72" width="32" height="32" fill="#c8a080"/>
+
+  <!-- 髪 -->
+  <rect x="112" y="72" width="32" height="12" fill="#444c66"/>
+
+  <!-- 左目（通常） -->
+  <rect x="120" y="84" width="6" height="6" fill="#ffffff"/>
+  <rect x="122" y="86" width="2" height="2" fill="#222244"/>
+
+  <!-- 右目（赤い異変） -->
+  <rect x="134" y="84" width="6" height="6" fill="#aa0000"/>
+  <rect x="136" y="86" width="2" height="2" fill="#ffffff"/>
+
+  <!-- 口（不自然な笑み） -->
+  <rect x="120" y="96" width="16" height="6" fill="#5a2e2e"/>
+
+  <!-- 体 -->
+  <rect x="104" y="104" width="48" height="48" fill="#3b4668"/>
+
+  <!-- 片腕が少し長い（違和感） -->
+  <rect x="96" y="112" width="8" height="56" fill="#3b4668"/>
+
+  <!-- もう片腕 -->
+  <rect x="152" y="112" width="8" height="40" fill="#3b4668"/>
+
+  <!-- 鏡のひび -->
+  <rect x="100" y="60" width="2" height="100" fill="#d0e4ff"/>
+  <rect x="140" y="80" width="2" height="60" fill="#d0e4ff"/>
+
+</svg>
+

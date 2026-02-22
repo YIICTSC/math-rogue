@@ -1,0 +1,35 @@
+<svg width="256" height="256" viewBox="0 0 256 256"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 影（濃紫） -->
+  <rect x="88" y="208" width="80" height="16" fill="#2a1f3a" opacity="0.5"/>
+
+  <!-- 本の裏表紙 -->
+  <rect x="72" y="72" width="112" height="112" fill="#3b2f6a"/>
+
+  <!-- 本のページ -->
+  <rect x="80" y="80" width="96" height="96" fill="#e8e0c8"/>
+
+  <!-- 開いている中央 -->
+  <rect x="124" y="80" width="8" height="96" fill="#d8d0b8"/>
+
+  <!-- 赤い知識の目 -->
+  <rect x="112" y="112" width="32" height="24" fill="#660000"/>
+  <rect x="120" y="120" width="16" height="8" fill="#cc0000"/>
+  <rect x="124" y="122" width="4" height="4" fill="#ffffff"/>
+
+  <!-- ページの模様（文字っぽい線） -->
+  <rect x="88" y="96" width="24" height="4" fill="#b0a890"/>
+  <rect x="88" y="104" width="32" height="4" fill="#b0a890"/>
+  <rect x="144" y="96" width="24" height="4" fill="#b0a890"/>
+  <rect x="136" y="104" width="32" height="4" fill="#b0a890"/>
+
+  <!-- 不気味な浮遊オーラ -->
+  <rect x="64" y="64" width="8" height="8" fill="#5a4a8a"/>
+  <rect x="184" y="64" width="8" height="8" fill="#5a4a8a"/>
+  <rect x="64" y="184" width="8" height="8" fill="#5a4a8a"/>
+  <rect x="184" y="184" width="8" height="8" fill="#5a4a8a"/>
+
+</svg>
+

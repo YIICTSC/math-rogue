@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 耳 -->
+  <rect x="28" y="36" width="20" height="12" fill="#66cc66"/>
+  <rect x="80" y="36" width="20" height="12" fill="#66cc66"/>
+
+  <!-- 耳内側 -->
+  <rect x="32" y="40" width="12" height="4" fill="#99ff99"/>
+  <rect x="84" y="40" width="12" height="4" fill="#99ff99"/>
+
+  <!-- 頭 -->
+  <rect x="36" y="40" width="56" height="40" fill="#55aa55"/>
+
+  <!-- 体 -->
+  <rect x="44" y="80" width="40" height="28" fill="#449944"/>
+
+  <!-- 足 -->
+  <rect x="48" y="108" width="8" height="12" fill="#338833"/>
+  <rect x="72" y="108" width="8" height="12" fill="#338833"/>
+
+  <!-- 目（黄色で黒背景対応） -->
+  <rect x="52" y="56" width="8" height="8" fill="#ffff66"/>
+  <rect x="68" y="56" width="8" height="8" fill="#ffff66"/>
+
+  <!-- 瞳 -->
+  <rect x="56" y="60" width="4" height="4" fill="#222222"/>
+  <rect x="72" y="60" width="4" height="4" fill="#222222"/>
+
+  <!-- 口 -->
+  <rect x="56" y="72" width="16" height="4" fill="#222222"/>
+
+  <!-- 牙 -->
+  <rect x="60" y="76" width="4" height="4" fill="#ffffff"/>
+  <rect x="68" y="76" width="4" height="4" fill="#ffffff"/>
+
+</svg>

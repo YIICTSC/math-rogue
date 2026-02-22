@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+
+  <!-- 背景（透明） -->
+
+  <!-- 影 -->
+  <rect x="40" y="100" width="48" height="8" fill="#222222"/>
+
+  <!-- 本体（黒い絶望ボディ） -->
+  <rect x="40" y="40" width="48" height="48" fill="#111111"/>
+  <rect x="32" y="48" width="16" height="32" fill="#111111"/>
+  <rect x="80" y="48" width="16" height="32" fill="#111111"/>
+
+  <!-- 顔（青白い） -->
+  <rect x="48" y="48" width="32" height="32" fill="#cccccc"/>
+
+  <!-- 目（絶望の縦線） -->
+  <rect x="56" y="56" width="4" height="12" fill="#000000"/>
+  <rect x="68" y="56" width="4" height="12" fill="#000000"/>
+
+  <!-- 口（下がった絶望口） -->
+  <rect x="56" y="76" width="16" height="4" fill="#000000"/>
+
+  <!-- 涙 -->
+  <rect x="56" y="68" width="4" height="8" fill="#3399ff"/>
+  <rect x="68" y="68" width="4" height="8" fill="#3399ff"/>
+
+  <!-- 0点プレート -->
+  <rect x="44" y="24" width="40" height="16" fill="#ffffff" stroke="#000000" stroke-width="2"/>
+  <text x="64" y="36" font-size="12" text-anchor="middle" fill="#ff0000" font-family="monospace">0</text>
+
+  <!-- オーラ（絶望感） -->
+  <rect x="36" y="36" width="4" height="4" fill="#6600aa"/>
+  <rect x="88" y="36" width="4" height="4" fill="#6600aa"/>
+  <rect x="32" y="88" width="4" height="4" fill="#6600aa"/>
+  <rect x="92" y="88" width="4" height="4" fill="#6600aa"/>
+
+</svg>
+

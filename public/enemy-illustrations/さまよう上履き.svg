@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 上履き本体（白すぎない白） -->
+  <rect x="40" y="64" width="48" height="20" fill="#f2f2f2"/>
+  <rect x="48" y="56" width="32" height="12" fill="#ffffff"/>
+
+  <!-- つま先ライン -->
+  <rect x="40" y="80" width="48" height="4" fill="#cccccc"/>
+
+  <!-- ゴム部分（青） -->
+  <rect x="48" y="68" width="32" height="4" fill="#3399ff"/>
+
+  <!-- かかと -->
+  <rect x="76" y="60" width="12" height="12" fill="#e6e6e6"/>
+
+  <!-- 顔（ちょっと不気味） -->
+  <rect x="56" y="64" width="4" height="4" fill="#222222"/>
+  <rect x="72" y="64" width="4" height="4" fill="#222222"/>
+
+  <!-- 口 -->
+  <rect x="60" y="72" width="12" height="2" fill="#222222"/>
+
+  <!-- 影を避けるため浮遊足なし構造 -->
+
+</svg>

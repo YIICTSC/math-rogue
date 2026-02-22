@@ -1,0 +1,33 @@
+<svg width="384" height="256" viewBox="0 0 384 256"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 影 -->
+  <rect x="160" y="224" width="64" height="16" fill="#1a2240" opacity="0.5"/>
+
+  <!-- 頭 -->
+  <rect x="176" y="64" width="32" height="32" fill="#666666"/>
+  <!-- 目（光る守護目） -->
+  <rect x="184" y="72" width="8" height="8" fill="#ff0000"/>
+  <rect x="192" y="72" width="8" height="8" fill="#ff0000"/>
+  <!-- 兜の角っぽい装飾 -->
+  <rect x="176" y="56" width="8" height="8" fill="#999999"/>
+  <rect x="200" y="56" width="8" height="8" fill="#999999"/>
+
+  <!-- 胴体（鎧） -->
+  <rect x="160" y="96" width="64" height="80" fill="#888888"/>
+  <!-- 胸の紋章 -->
+  <rect x="184" y="112" width="16" height="16" fill="#ffcc00"/>
+
+  <!-- 腕 -->
+  <rect x="144" y="96" width="16" height="64" fill="#666666"/>
+  <rect x="208" y="96" width="16" height="64" fill="#666666"/>
+  <!-- 盾（左腕） -->
+  <rect x="136" y="120" width="16" height="32" fill="#3333cc"/>
+
+  <!-- 足 -->
+  <rect x="168" y="176" width="16" height="32" fill="#333333"/>
+  <rect x="192" y="176" width="16" height="32" fill="#333333"/>
+
+</svg>
+

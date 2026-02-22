@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 体（チョーク色：白すぎない） -->
+  <rect x="48" y="48" width="32" height="32" fill="#f0f0f0"/>
+
+  <!-- ひび模様 -->
+  <rect x="60" y="52" width="4" height="12" fill="#cccccc"/>
+  <rect x="52" y="64" width="8" height="4" fill="#cccccc"/>
+
+  <!-- 目（黒板グリーン） -->
+  <rect x="56" y="56" width="4" height="4" fill="#66ffcc"/>
+  <rect x="68" y="56" width="4" height="4" fill="#66ffcc"/>
+
+  <!-- 口（にやり） -->
+  <rect x="60" y="68" width="8" height="2" fill="#bbbbbb"/>
+
+  <!-- 小さな浮遊下部 -->
+  <rect x="56" y="80" width="16" height="8" fill="#e6e6e6"/>
+
+</svg>

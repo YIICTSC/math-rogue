@@ -1,0 +1,42 @@
+<svg width="256" height="256" viewBox="0 0 256 256"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 影（濃茶） -->
+  <rect x="88" y="208" width="80" height="16" fill="#3a2415" opacity="0.5"/>
+
+  <!-- 頭 -->
+  <rect x="104" y="64" width="48" height="40" fill="#e0b080"/>
+
+  <!-- 帽子 -->
+  <rect x="96" y="56" width="64" height="16" fill="#4a5a3a"/>
+
+  <!-- 目（怒り） -->
+  <rect x="112" y="80" width="8" height="8" fill="#cc0000"/>
+  <rect x="136" y="80" width="8" height="8" fill="#cc0000"/>
+
+  <!-- 眉 -->
+  <rect x="112" y="76" width="8" height="4" fill="#7a4a2a"/>
+  <rect x="136" y="76" width="8" height="4" fill="#7a4a2a"/>
+
+  <!-- 口 -->
+  <rect x="120" y="92" width="16" height="8" fill="#7a2a2a"/>
+
+  <!-- 作業服（上） -->
+  <rect x="96" y="104" width="64" height="56" fill="#5f7a4f"/>
+
+  <!-- 腕 -->
+  <rect x="80" y="112" width="16" height="48" fill="#5f7a4f"/>
+  <rect x="160" y="112" width="16" height="48" fill="#5f7a4f"/>
+
+  <!-- モップの柄 -->
+  <rect x="64" y="96" width="8" height="96" fill="#8b5a2b"/>
+
+  <!-- モップ先 -->
+  <rect x="56" y="184" width="24" height="16" fill="#b0c4d8"/>
+
+  <!-- 作業服（下） -->
+  <rect x="104" y="160" width="16" height="40" fill="#4a6a3a"/>
+  <rect x="136" y="160" width="16" height="40" fill="#4a6a3a"/>
+
+</svg>

@@ -1,0 +1,32 @@
+<svg width="384" height="256" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+
+  <!-- 足 -->
+  <rect x="50" y="94" width="10" height="18" fill="#2e6da4"/>
+  <rect x="68" y="94" width="10" height="18" fill="#2e6da4"/>
+
+  <!-- 体 -->
+  <rect x="42" y="62" width="44" height="32" fill="#4a90e2"/>
+
+  <!-- 腕 -->
+  <rect x="38" y="66" width="52" height="8" fill="#357abd"/>
+  <rect x="34" y="62" width="12" height="20" fill="#4a90e2"/>
+  <rect x="82" y="62" width="12" height="20" fill="#4a90e2"/>
+
+  <!-- 頭 -->
+  <rect x="46" y="30" width="36" height="32" fill="#ffd8b0"/>
+
+  <!-- 髪（濃グレー） -->
+  <rect x="46" y="26" width="36" height="8" fill="#444444"/>
+
+  <!-- 目（監視感） -->
+  <rect x="54" y="40" width="8" height="4" fill="#111111"/>
+  <rect x="66" y="40" width="8" height="4" fill="#111111"/>
+
+  <!-- 口（小さく） -->
+  <rect x="60" y="50" width="8" height="2" fill="#111111"/>
+
+  <!-- 掃除用具（ほうき） -->
+  <rect x="84" y="70" width="4" height="20" fill="#a0522d"/> <!-- 柄 -->
+  <rect x="84" y="90" width="8" height="4" fill="#ffcc33"/> <!-- 毛先 -->
+
+</svg>

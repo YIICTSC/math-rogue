@@ -1,0 +1,25 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 足（跳び箱脚） -->
+  <rect x="50" y="92" width="12" height="12" fill="#774400"/>
+  <rect x="66" y="92" width="12" height="12" fill="#774400"/>
+
+  <!-- 体（跳び箱本体） -->
+  <rect x="44" y="60" width="40" height="32" fill="#aa5522"/>
+  <rect x="44" y="64" width="40" height="4" fill="#cc7733"/> <!-- 上の板ライン -->
+
+  <!-- 口（上板が口） -->
+  <rect x="48" y="64" width="32" height="6" fill="#660000"/> <!-- 口の内部 -->
+  <rect x="48" y="64" width="32" height="2" fill="#ff0000"/> <!-- 歯ライン -->
+
+  <!-- 目（威圧赤目） -->
+  <rect x="50" y="58" width="6" height="4" fill="#ff2222"/>
+  <rect x="72" y="58" width="6" height="4" fill="#ff2222"/>
+
+  <!-- 手（板が飛び出す） -->
+  <rect x="36" y="66" width="8" height="4" fill="#aa5522"/>
+  <rect x="84" y="66" width="8" height="4" fill="#aa5522"/>
+
+</svg>

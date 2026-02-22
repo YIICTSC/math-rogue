@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 鉛筆本体（短い） -->
+  <rect x="52" y="40" width="24" height="48" fill="#ffcc33"/>
+
+  <!-- 木の部分 -->
+  <rect x="56" y="84" width="16" height="12" fill="#d9a066"/>
+
+  <!-- 芯 -->
+  <rect x="60" y="96" width="8" height="8" fill="#444444"/>
+
+  <!-- 消しゴム部分 -->
+  <rect x="52" y="32" width="24" height="8" fill="#ff9999"/>
+
+  <!-- 金具 -->
+  <rect x="52" y="36" width="24" height="4" fill="#cccccc"/>
+
+  <!-- 顔 -->
+  <rect x="56" y="56" width="4" height="4" fill="#222222"/>
+  <rect x="68" y="56" width="4" height="4" fill="#222222"/>
+
+  <!-- ちょっと困った口 -->
+  <rect x="60" y="68" width="12" height="2" fill="#222222"/>
+
+</svg>
+

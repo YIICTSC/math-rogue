@@ -1,0 +1,40 @@
+<svg width="256" height="256" viewBox="0 0 256 256"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 影（濃灰） -->
+  <rect x="88" y="200" width="80" height="16" fill="#2a2a2a" opacity="0.5"/>
+
+  <!-- 頭 -->
+  <rect x="104" y="64" width="48" height="40" fill="#f0c8a0"/>
+
+  <!-- 髪 -->
+  <rect x="104" y="64" width="48" height="16" fill="#555555"/>
+
+  <!-- メガネ -->
+  <rect x="112" y="80" width="16" height="8" fill="#d0e4ff"/>
+  <rect x="128" y="80" width="16" height="8" fill="#d0e4ff"/>
+
+  <!-- 目 -->
+  <rect x="116" y="84" width="4" height="4" fill="#333333"/>
+  <rect x="136" y="84" width="4" height="4" fill="#333333"/>
+
+  <!-- 体（スーツ） -->
+  <rect x="96" y="104" width="64" height="64" fill="#3a3f4a"/>
+
+  <!-- ネクタイ -->
+  <rect x="120" y="104" width="16" height="32" fill="#7a1f1f"/>
+
+  <!-- 腕 -->
+  <rect x="80" y="112" width="16" height="48" fill="#3a3f4a"/>
+  <rect x="160" y="112" width="16" height="48" fill="#3a3f4a"/>
+
+  <!-- バインダー -->
+  <rect x="64" y="120" width="16" height="40" fill="#8aa0b8"/>
+  <rect x="64" y="120" width="16" height="6" fill="#cfe0ff"/>
+
+  <!-- 脚 -->
+  <rect x="104" y="168" width="16" height="32" fill="#2c3038"/>
+  <rect x="136" y="168" width="16" height="32" fill="#2c3038"/>
+
+</svg>

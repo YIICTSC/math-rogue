@@ -1,0 +1,36 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+
+  <!-- 影 -->
+  <rect x="88" y="200" width="80" height="16" fill="#000000" opacity="0.5"/>
+
+  <!-- 時計本体（ドット円風） -->
+  <rect x="80" y="48" width="96" height="16" fill="#444"/>
+  <rect x="64" y="64" width="128" height="96" fill="#2b2b2b"/>
+  <rect x="80" y="160" width="96" height="16" fill="#444"/>
+
+  <!-- 左右丸み表現 -->
+  <rect x="48" y="80" width="16" height="64" fill="#2b2b2b"/>
+  <rect x="192" y="80" width="16" height="64" fill="#2b2b2b"/>
+
+  <!-- 文字盤内側 -->
+  <rect x="88" y="80" width="80" height="80" fill="#1a1a1a"/>
+
+  <!-- 目 -->
+  <rect x="104" y="104" width="16" height="16" fill="#ff0000"/>
+  <rect x="136" y="104" width="16" height="16" fill="#ff0000"/>
+
+  <!-- 目のハイライト -->
+  <rect x="108" y="108" width="4" height="4" fill="#ffffff"/>
+  <rect x="140" y="108" width="4" height="4" fill="#ffffff"/>
+
+  <!-- 口 -->
+  <rect x="112" y="136" width="32" height="8" fill="#660000"/>
+
+  <!-- 時計針 -->
+  <rect x="124" y="88" width="8" height="48" fill="#cccccc"/>
+  <rect x="88" y="124" width="48" height="8" fill="#aaaaaa"/>
+
+  <!-- 中心ドット -->
+  <rect x="120" y="120" width="16" height="16" fill="#880000"/>
+
+</svg>

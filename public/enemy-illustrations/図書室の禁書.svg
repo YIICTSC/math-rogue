@@ -1,0 +1,26 @@
+<svg width="384" height="256" viewBox="0 0 384 256"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 本体 -->
+  <rect x="176" y="96" width="32" height="48" fill="#552288"/>
+  
+  <!-- 開いたページのエッジ -->
+  <rect x="168" y="96" width="8" height="48" fill="#aa77ff"/>
+  <rect x="208" y="96" width="8" height="48" fill="#aa77ff"/>
+  
+  <!-- 魔力のオーラ -->
+  <rect x="160" y="80" width="8" height="8" fill="#cc66ff"/>
+  <rect x="216" y="80" width="8" height="8" fill="#cc66ff"/>
+  <rect x="176" y="72" width="32" height="8" fill="#aa55ff"/>
+  
+  <!-- 光る目（本の中に潜む知識の力） -->
+  <rect x="184" y="104" width="8" height="8" fill="#ff4444"/>
+  <rect x="192" y="104" width="8" height="8" fill="#ff4444"/>
+  
+  <!-- 魔力の粒 -->
+  <rect x="168" y="64" width="4" height="4" fill="#dd88ff"/>
+  <rect x="200" y="64" width="4" height="4" fill="#dd88ff"/>
+  <rect x="184" y="56" width="4" height="4" fill="#dd88ff"/>
+
+</svg>

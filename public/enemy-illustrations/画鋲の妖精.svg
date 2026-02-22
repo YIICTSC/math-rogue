@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 羽（薄い青） -->
+  <rect x="44" y="48" width="16" height="12" fill="#9fd6ff"/>
+  <rect x="68" y="48" width="16" height="12" fill="#9fd6ff"/>
+
+  <!-- 頭（画鋲の丸部分） -->
+  <rect x="52" y="40" width="24" height="16" fill="#d0d8e5"/>
+
+  <!-- 光沢 -->
+  <rect x="56" y="44" width="8" height="4" fill="#f2f7ff"/>
+
+  <!-- 目 -->
+  <rect x="60" y="46" width="4" height="4" fill="#2a3442"/>
+  <rect x="68" y="46" width="4" height="4" fill="#2a3442"/>
+
+  <!-- 針部分 -->
+  <rect x="62" y="56" width="4" height="16" fill="#b8c4d1"/>
+  <rect x="63" y="72" width="2" height="8" fill="#aab5c2"/>
+
+</svg>
+

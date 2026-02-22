@@ -1,0 +1,49 @@
+<svg width="384" height="256" viewBox="0 0 384 256"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 影（濃藍） -->
+  <rect x="64" y="216" width="256" height="16" fill="#1a2240" opacity="0.5"/>
+
+  <!-- 尾 -->
+  <rect x="64" y="152" width="32" height="32" fill="#3a4a7a"/>
+  <rect x="48" y="160" width="16" height="16" fill="#2f3f6a"/>
+
+  <!-- 胴体（校舎） -->
+  <rect x="96" y="128" width="192" height="64" fill="#4f5f8f"/>
+
+  <!-- 屋根背びれ -->
+  <rect x="96" y="112" width="32" height="16" fill="#7a2f2f"/>
+  <rect x="128" y="112" width="32" height="16" fill="#8f3a3a"/>
+  <rect x="160" y="112" width="32" height="16" fill="#7a2f2f"/>
+  <rect x="192" y="112" width="32" height="16" fill="#8f3a3a"/>
+  <rect x="224" y="112" width="32" height="16" fill="#7a2f2f"/>
+  <rect x="256" y="112" width="32" height="16" fill="#8f3a3a"/>
+
+  <!-- 窓（発光） -->
+  <rect x="112" y="144" width="16" height="16" fill="#e8f4ff"/>
+  <rect x="144" y="144" width="16" height="16" fill="#e8f4ff"/>
+  <rect x="176" y="144" width="16" height="16" fill="#e8f4ff"/>
+  <rect x="208" y="144" width="16" height="16" fill="#e8f4ff"/>
+  <rect x="240" y="144" width="16" height="16" fill="#e8f4ff"/>
+
+  <!-- 頭 -->
+  <rect x="288" y="120" width="48" height="48" fill="#3a4a7a"/>
+
+  <!-- 角 -->
+  <rect x="296" y="104" width="8" height="16" fill="#cfc6a8"/>
+  <rect x="320" y="104" width="8" height="16" fill="#cfc6a8"/>
+
+  <!-- 目 -->
+  <rect x="304" y="136" width="8" height="8" fill="#cc0000"/>
+  <rect x="306" y="138" width="2" height="2" fill="#ffffff"/>
+
+  <!-- 口 -->
+  <rect x="320" y="152" width="16" height="8" fill="#7a2a2a"/>
+
+  <!-- 前脚 -->
+  <rect x="128" y="192" width="16" height="24" fill="#2f3f6a"/>
+  <rect x="224" y="192" width="16" height="24" fill="#2f3f6a"/>
+
+</svg>
+

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 歪んだ鉄棒 -->
+  <rect x="20" y="36" width="88" height="4" fill="#6f859d"/>
+  <rect x="28" y="36" width="4" height="60" fill="#5e738a"/>
+  <rect x="96" y="36" width="4" height="60" fill="#5e738a"/>
+
+  <!-- 逆さ影の頭 -->
+  <rect x="56" y="44" width="16" height="12" fill="#1f2a38"/>
+
+  <!-- 逆さ影の体 -->
+  <rect x="60" y="56" width="8" height="20" fill="#1f2a38"/>
+
+  <!-- 絡みつく呪い -->
+  <rect x="48" y="48" width="32" height="4" fill="#2a3a4d"/>
+  <rect x="52" y="60" width="24" height="4" fill="#2a3a4d"/>
+
+  <!-- 呪いの光 -->
+  <rect x="60" y="46" width="4" height="4" fill="#9ff0ff"/>
+  <rect x="64" y="46" width="4" height="4" fill="#9ff0ff"/>
+
+  <!-- 足元の歪み -->
+  <rect x="52" y="80" width="24" height="6" fill="#253140"/>
+
+</svg>
+

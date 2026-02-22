@@ -1,0 +1,25 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- マット本体（緑系） -->
+  <rect x="40" y="60" width="48" height="32" fill="#228844"/>
+  
+  <!-- 破れ目 -->
+  <rect x="50" y="66" width="28" height="4" fill="#66aa66"/>
+  <rect x="44" y="72" width="4" height="16" fill="#66aa66"/>
+  <rect x="80" y="72" width="4" height="16" fill="#66aa66"/>
+  
+  <!-- 目（不気味赤目） -->
+  <rect x="52" y="64" width="6" height="4" fill="#ff2222"/>
+  <rect x="70" y="64" width="6" height="4" fill="#ff2222"/>
+  
+  <!-- 口（裂けた布が口） -->
+  <rect x="50" y="84" width="28" height="4" fill="#112200"/>
+  <rect x="50" y="84" width="4" height="2" fill="#554400"/>
+  <rect x="74" y="84" width="4" height="2" fill="#554400"/>
+  
+  <!-- 浮遊感・影 -->
+  <rect x="44" y="96" width="36" height="2" fill="#111111" opacity="0.5"/>
+  
+</svg>

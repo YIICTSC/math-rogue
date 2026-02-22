@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 影本体（黒回避：濃い青灰色） -->
+  <rect x="52" y="32" width="24" height="40" fill="#1f2a38"/>
+  <rect x="48" y="40" width="8" height="24" fill="#1f2a38"/>
+  <rect x="76" y="40" width="8" height="24" fill="#1f2a38"/>
+
+  <!-- 頭 -->
+  <rect x="56" y="24" width="16" height="12" fill="#1f2a38"/>
+
+  <!-- 目（白く発光風） -->
+  <rect x="58" y="30" width="4" height="4" fill="#e6f2ff"/>
+  <rect x="66" y="30" width="4" height="4" fill="#e6f2ff"/>
+
+  <!-- 下半身ぼやけ表現 -->
+  <rect x="56" y="72" width="16" height="8" fill="#2a3a4d"/>
+  <rect x="60" y="80" width="8" height="8" fill="#3b4f66"/>
+
+</svg>
+

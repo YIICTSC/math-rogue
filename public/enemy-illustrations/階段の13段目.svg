@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 通常階段 -->
+  <rect x="24" y="80" width="80" height="8" fill="#444f5e"/>
+  <rect x="32" y="72" width="72" height="8" fill="#4c5868"/>
+  <rect x="40" y="64" width="64" height="8" fill="#444f5e"/>
+  <rect x="48" y="56" width="56" height="8" fill="#4c5868"/>
+
+  <!-- 13段目（異変） -->
+  <rect x="56" y="48" width="48" height="8" fill="#2a3a4d"/>
+
+  <!-- 不気味な光 -->
+  <rect x="60" y="50" width="40" height="4" fill="#9ff0ff"/>
+
+  <!-- 影の歪み -->
+  <rect x="52" y="44" width="56" height="4" fill="#1f2a38"/>
+
+</svg>
+

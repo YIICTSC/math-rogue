@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 髪（黒回避濃紺） -->
+  <rect x="48" y="24" width="32" height="24" fill="#1f2a38"/>
+
+  <!-- 顔 -->
+  <rect x="56" y="32" width="16" height="16" fill="#e6f2ff"/>
+
+  <!-- 目（右だけ異界発光） -->
+  <rect x="58" y="38" width="4" height="4" fill="#222222"/>
+  <rect x="66" y="38" width="4" height="4" fill="#9ff0ff"/>
+
+  <!-- 口 -->
+  <rect x="60" y="44" width="8" height="2" fill="#222222"/>
+
+  <!-- 制服上（濃いグレー） -->
+  <rect x="48" y="48" width="32" height="28" fill="#2b3444"/>
+
+  <!-- ネクタイ（赤） -->
+  <rect x="62" y="52" width="4" height="10" fill="#cc0000"/>
+
+  <!-- 腕 -->
+  <rect x="40" y="52" width="8" height="20" fill="#2b3444"/>
+  <rect x="80" y="52" width="8" height="20" fill="#2b3444"/>
+
+  <!-- 足 -->
+  <rect x="52" y="76" width="8" height="20" fill="#2b3444"/>
+  <rect x="68" y="76" width="8" height="20" fill="#2b3444"/>
+
+  <!-- ズレた影（少し横に） -->
+  <rect x="58" y="100" width="20" height="6" fill="#1a2230"/>
+
+</svg>

@@ -1,0 +1,29 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 紙本体（幽霊化した通知表） -->
+  <rect x="46" y="40" width="36" height="56" fill="#eeeeee"/>
+  
+  <!-- 破れ角 -->
+  <rect x="78" y="40" width="4" height="8" fill="#cccccc"/>
+  <rect x="46" y="88" width="6" height="8" fill="#cccccc"/>
+  
+  <!-- 赤紫の目 -->
+  <rect x="52" y="50" width="6" height="4" fill="#ff2244"/>
+  <rect x="70" y="50" width="6" height="4" fill="#aa00ff"/>
+  
+  <!-- 口（不気味なニヤリ口） -->
+  <rect x="54" y="70" width="20" height="4" fill="#660000"/>
+  <rect x="54" y="70" width="4" height="2" fill="#990000"/>
+  <rect x="70" y="70" width="4" height="2" fill="#990000"/>
+  
+  <!-- 浮遊感・影 -->
+  <rect x="48" y="100" width="32" height="2" fill="#111111" opacity="0.5"/>
+  <rect x="56" y="102" width="16" height="2" fill="#111111" opacity="0.5"/>
+  
+  <!-- 紙の裂け目（幽霊らしさ） -->
+  <rect x="60" y="60" width="2" height="16" fill="#888888"/>
+  <rect x="66" y="60" width="2" height="16" fill="#888888"/>
+
+</svg>

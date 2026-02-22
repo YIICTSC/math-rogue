@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 鉄棒 -->
+  <rect x="20" y="36" width="88" height="4" fill="#8aa0b8"/>
+  <rect x="28" y="36" width="4" height="60" fill="#6f859d"/>
+  <rect x="96" y="36" width="4" height="60" fill="#6f859d"/>
+
+  <!-- 影の頭 -->
+  <rect x="56" y="40" width="16" height="12" fill="#1f2a38"/>
+
+  <!-- 影の体 -->
+  <rect x="60" y="52" width="8" height="20" fill="#1f2a38"/>
+
+  <!-- 腕（鉄棒を握っている） -->
+  <rect x="52" y="40" width="8" height="8" fill="#1f2a38"/>
+  <rect x="68" y="40" width="8" height="8" fill="#1f2a38"/>
+
+  <!-- 足（浮きかけ） -->
+  <rect x="56" y="72" width="6" height="12" fill="#253140"/>
+  <rect x="66" y="72" width="6" height="12" fill="#253140"/>
+
+  <!-- 小さな目 -->
+  <rect x="60" y="44" width="3" height="3" fill="#9ff0ff"/>
+  <rect x="65" y="44" width="3" height="3" fill="#9ff0ff"/>
+
+</svg>

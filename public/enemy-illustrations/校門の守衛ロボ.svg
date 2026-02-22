@@ -1,0 +1,32 @@
+<svg width="384" height="256" viewBox="0 0 384 256"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 影 -->
+  <rect x="160" y="224" width="64" height="16" fill="#1a2240" opacity="0.5"/>
+
+  <!-- 頭 -->
+  <rect x="168" y="64" width="48" height="48" fill="#666666"/>
+  <!-- 目（赤く光る） -->
+  <rect x="176" y="80" width="8" height="8" fill="#cc0000"/>
+  <rect x="184" y="80" width="8" height="8" fill="#cc0000"/>
+  <!-- アンテナ -->
+  <rect x="192" y="56" width="8" height="8" fill="#ffcc00"/>
+
+  <!-- 胴体 -->
+  <rect x="160" y="112" width="64" height="80" fill="#999999"/>
+  <!-- 胸のバッジ -->
+  <rect x="184" y="128" width="16" height="16" fill="#ffcc00"/>
+
+  <!-- 腕 -->
+  <rect x="144" y="112" width="16" height="64" fill="#666666"/>
+  <rect x="208" y="112" width="16" height="64" fill="#666666"/>
+  <!-- 警棒っぽい装飾 -->
+  <rect x="208" y="160" width="16" height="8" fill="#333333"/>
+
+  <!-- 足 -->
+  <rect x="168" y="192" width="16" height="32" fill="#333333"/>
+  <rect x="192" y="192" width="16" height="32" fill="#333333"/>
+
+</svg>
+

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 本体（幽霊色） -->
+  <rect x="60" y="24" width="8" height="64" fill="#7f95a8"/>
+
+  <!-- 吹き口 -->
+  <rect x="56" y="20" width="16" height="8" fill="#8fa9bf"/>
+
+  <!-- 穴（発光風） -->
+  <rect x="62" y="36" width="4" height="4" fill="#e6f2ff"/>
+  <rect x="62" y="46" width="4" height="4" fill="#e6f2ff"/>
+  <rect x="62" y="56" width="4" height="4" fill="#e6f2ff"/>
+  <rect x="62" y="66" width="4" height="4" fill="#e6f2ff"/>
+
+  <!-- 目のような影 -->
+  <rect x="60" y="32" width="8" height="2" fill="#2a3a4d"/>
+
+  <!-- 霧状下部 -->
+  <rect x="56" y="88" width="16" height="8" fill="#9fb4c8"/>
+  <rect x="60" y="96" width="8" height="8" fill="#b8cad9"/>
+
+</svg>

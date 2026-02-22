@@ -1,0 +1,25 @@
+<svg width="384" height="256" viewBox="0 0 384 256"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 影 -->
+  <rect x="160" y="224" width="64" height="16" fill="#1a2240" opacity="0.5"/>
+
+  <!-- スライム本体 -->
+  <rect x="160" y="160" width="64" height="48" fill="#33cc33"/>
+  <rect x="168" y="152" width="48" height="16" fill="#66ff66"/> <!-- ぷるんとした頭部分 -->
+
+  <!-- 目 -->
+  <rect x="176" y="168" width="8" height="8" fill="#ffffff"/>
+  <rect x="200" y="168" width="8" height="8" fill="#ffffff"/>
+  <rect x="178" y="170" width="4" height="4" fill="#000000"/>
+  <rect x="202" y="170" width="4" height="4" fill="#000000"/>
+
+  <!-- 口（驚き顔） -->
+  <rect x="184" y="184" width="16" height="8" fill="#ff3333"/>
+
+  <!-- ドロップのしずく（失敗感） -->
+  <rect x="152" y="200" width="16" height="8" fill="#33cc33"/>
+  <rect x="208" y="200" width="16" height="8" fill="#33cc33"/>
+
+</svg>

@@ -1,0 +1,35 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 足（作業靴） -->
+  <rect x="48" y="92" width="12" height="20" fill="#444444"/>
+  <rect x="68" y="92" width="12" height="20" fill="#444444"/>
+
+  <!-- 体（作業着） -->
+  <rect x="40" y="60" width="48" height="36" fill="#223366"/>
+  <rect x="40" y="64" width="48" height="4" fill="#4455aa"/> <!-- 腕まくりライン -->
+
+  <!-- 腕（ほうきやモップを持つイメージ） -->
+  <rect x="36" y="64" width="14" height="8" fill="#223366"/>
+  <rect x="84" y="64" width="14" height="20" fill="#223366"/>
+  <rect x="84" y="64" width="8" height="8" fill="#aa7733"/> <!-- ほうきの端 -->
+
+  <!-- 頭 -->
+  <rect x="44" y="28" width="40" height="32" fill="#ffd8b0"/>
+
+  <!-- 髪（落ち着いたダークブラウン） -->
+  <rect x="44" y="24" width="40" height="8" fill="#554433"/>
+
+  <!-- 目（鋭め） -->
+  <rect x="54" y="36" width="8" height="2" fill="#111111"/>
+  <rect x="66" y="36" width="8" height="2" fill="#111111"/>
+
+  <!-- 口（ニヤリ口） -->
+  <rect x="60" y="50" width="12" height="2" fill="#111111"/>
+  <rect x="70" y="48" width="2" height="2" fill="#111111"/>
+
+  <!-- 工具ベルト（アクセント） -->
+  <rect x="50" y="80" width="28" height="4" fill="#aa5522"/>
+
+</svg>

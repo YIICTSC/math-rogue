@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 髪（黒回避ダークグレー） -->
+  <rect x="42" y="26" width="44" height="28" fill="#444444"/>
+
+  <!-- 顔（青白） -->
+  <rect x="52" y="34" width="24" height="24" fill="#e6f2ff"/>
+
+  <!-- 目（少し吊り目） -->
+  <rect x="56" y="42" width="4" height="4" fill="#222222"/>
+  <rect x="68" y="42" width="4" height="4" fill="#222222"/>
+
+  <!-- 口（ニヤリ） -->
+  <rect x="60" y="52" width="8" height="2" fill="#222222"/>
+
+  <!-- 学ラン上半身（黒に近いが埋もれない） -->
+  <rect x="48" y="58" width="32" height="28" fill="#222833"/>
+
+  <!-- ボタン -->
+  <rect x="62" y="62" width="4" height="4" fill="#cccccc"/>
+  <rect x="62" y="70" width="4" height="4" fill="#cccccc"/>
+
+  <!-- 幽霊下部 -->
+  <rect x="56" y="86" width="16" height="14" fill="#d9d9d9"/>
+
+</svg>

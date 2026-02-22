@@ -1,0 +1,26 @@
+<svg width="384" height="256" viewBox="0 0 384 256"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 給食トレイ -->
+  <rect x="96" y="160" width="192" height="32" fill="#b5651d"/>
+
+  <!-- 空の皿 -->
+  <rect x="120" y="164" width="32" height="16" fill="#ffffff"/>
+  <rect x="168" y="164" width="32" height="16" fill="#ffffff"/>
+  <rect x="216" y="164" width="32" height="16" fill="#ffffff"/>
+
+  <!-- 消えたデザートの残像（飛んだ跡） -->
+  <rect x="200" y="128" width="16" height="16" fill="#ffcc33"/> <!-- プリン -->
+  <rect x="216" y="112" width="16" height="16" fill="#ff9999"/> <!-- ケーキの欠片 -->
+  <rect x="232" y="96" width="16" height="16" fill="#ff6666"/> <!-- 飛んだ残像 -->
+
+  <!-- 飛んだ軌跡の光ブロック -->
+  <rect x="208" y="144" width="4" height="4" fill="#ffff66"/>
+  <rect x="224" y="136" width="4" height="4" fill="#ffff66"/>
+  <rect x="240" y="128" width="4" height="4" fill="#ffff66"/>
+
+  <!-- 机の影 -->
+  <rect x="96" y="192" width="192" height="16" fill="#1a2240" opacity="0.5"/>
+
+</svg>

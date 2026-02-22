@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 羽（明るめグレー） -->
+  <rect x="36" y="36" width="24" height="16" fill="#dddddd"/>
+  <rect x="68" y="36" width="24" height="16" fill="#dddddd"/>
+
+  <!-- 羽内側 -->
+  <rect x="40" y="40" width="16" height="8" fill="#ffffff"/>
+  <rect x="72" y="40" width="16" height="8" fill="#ffffff"/>
+
+  <!-- 胴体（黄色） -->
+  <rect x="48" y="52" width="32" height="32" fill="#ffcc00"/>
+
+  <!-- 黒縞（黒回避：ダークブラウン） -->
+  <rect x="48" y="60" width="32" height="4" fill="#4a2a00"/>
+  <rect x="48" y="72" width="32" height="4" fill="#4a2a00"/>
+
+  <!-- 頭 -->
+  <rect x="52" y="44" width="24" height="12" fill="#ffcc00"/>
+
+  <!-- 目（赤） -->
+  <rect x="56" y="48" width="6" height="4" fill="#ff4444"/>
+  <rect x="66" y="48" width="6" height="4" fill="#ff4444"/>
+
+  <!-- 触角 -->
+  <rect x="56" y="40" width="4" height="4" fill="#4a2a00"/>
+  <rect x="68" y="40" width="4" height="4" fill="#4a2a00"/>
+
+  <!-- 針 -->
+  <rect x="60" y="84" width="8" height="12" fill="#888888"/>
+
+</svg>

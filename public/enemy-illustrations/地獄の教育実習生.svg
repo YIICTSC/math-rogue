@@ -1,0 +1,38 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 足（少し浮かせて不安定感） -->
+  <rect x="48" y="94" width="12" height="18" fill="#222222"/>
+  <rect x="68" y="94" width="12" height="18" fill="#222222"/>
+
+  <!-- 体（破れたスーツ、赤紫のアクセント） -->
+  <rect x="42" y="62" width="44" height="32" fill="#551144"/>
+  <rect x="42" y="68" width="44" height="4" fill="#aa4444"/> <!-- スーツライン破れ表現 -->
+
+  <!-- 腕（教科書を持つ） -->
+  <rect x="36" y="66" width="14" height="8" fill="#551144"/>
+  <rect x="84" y="64" width="14" height="20" fill="#551144"/>
+  <rect x="84" y="64" width="8" height="8" fill="#ffcc88"/> <!-- 教科書の端 -->
+
+  <!-- 頭 -->
+  <rect x="44" y="28" width="40" height="34" fill="#ffd8b0"/>
+
+  <!-- 髪（ダークグレー、少し乱れた幽霊感） -->
+  <rect x="44" y="24" width="40" height="8" fill="#444444"/>
+  <rect x="48" y="20" width="32" height="4" fill="#555555"/>
+
+  <!-- 目（細めで焦った表情） -->
+  <rect x="54" y="38" width="8" height="2" fill="#111111"/>
+  <rect x="66" y="38" width="8" height="2" fill="#111111"/>
+  <rect x="58" y="42" width="2" height="2" fill="#ff2222"/> <!-- 焦りのアクセント -->
+
+  <!-- 口（小さく焦った口） -->
+  <rect x="60" y="48" width="8" height="2" fill="#660000"/>
+  <rect x="64" y="48" width="2" height="2" fill="#990000"/>
+
+  <!-- 影・浮遊感 -->
+  <rect x="50" y="110" width="12" height="2" fill="#111111" opacity="0.5"/>
+  <rect x="66" y="110" width="12" height="2" fill="#111111" opacity="0.5"/>
+
+</svg>

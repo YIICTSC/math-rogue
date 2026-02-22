@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+
+  <!-- 足 -->
+  <rect x="48" y="92" width="12" height="20" fill="#2e6da4"/>
+  <rect x="68" y="92" width="12" height="20" fill="#2e6da4"/>
+
+  <!-- 体（明るめ制服ブルー） -->
+  <rect x="40" y="60" width="48" height="36" fill="#4a90e2"/>
+
+  <!-- 腕組みポーズ -->
+  <rect x="36" y="64" width="56" height="8" fill="#357abd"/>
+  <rect x="32" y="60" width="12" height="20" fill="#4a90e2"/>
+  <rect x="84" y="60" width="12" height="20" fill="#4a90e2"/>
+
+  <!-- 頭 -->
+  <rect x="44" y="28" width="40" height="32" fill="#ffd8b0"/>
+
+  <!-- 髪（黒回避ダークグレー） -->
+  <rect x="44" y="24" width="40" height="8" fill="#444444"/>
+
+  <!-- 目（細め） -->
+  <rect x="54" y="40" width="8" height="2" fill="#111111"/>
+  <rect x="66" y="40" width="8" height="2" fill="#111111"/>
+
+  <!-- ニヤリ口 -->
+  <rect x="60" y="50" width="12" height="2" fill="#111111"/>
+  <rect x="70" y="48" width="2" height="2" fill="#111111"/>
+
+  <!-- 威圧オーラ（紫） -->
+  <rect x="36" y="36" width="4" height="4" fill="#cc00ff"/>
+  <rect x="88" y="36" width="4" height="4" fill="#cc00ff"/>
+  <rect x="36" y="100" width="4" height="4" fill="#cc00ff"/>
+  <rect x="88" y="100" width="4" height="4" fill="#cc00ff"/>
+
+</svg>

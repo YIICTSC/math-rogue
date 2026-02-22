@@ -1,0 +1,27 @@
+<svg width="384" height="256" viewBox="0 0 384 256"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 影 -->
+  <rect x="160" y="224" width="64" height="16" fill="#1a2240" opacity="0.5"/>
+
+  <!-- 時計の本体（丸型ブロック） -->
+  <rect x="160" y="64" width="64" height="64" fill="#888888"/>
+  <!-- 文字盤の顔 -->
+  <rect x="176" y="80" width="16" height="16" fill="#ffcc99"/> <!-- 左目 -->
+  <rect x="192" y="80" width="16" height="16" fill="#ffcc99"/> <!-- 右目 -->
+  <rect x="184" y="96" width="16" height="8" fill="#cc0000"/>  <!-- 口 -->
+
+  <!-- 時計の針（腕） -->
+  <rect x="192" y="64" width="8" height="32" fill="#333333"/> <!-- 上向き針 -->
+  <rect x="224" y="96" width="32" height="8" fill="#333333"/> <!-- 横針 -->
+
+  <!-- 時間を食べる表現：針の先の小光 -->
+  <rect x="224" y="96" width="8" height="8" fill="#ff0000"/>
+  <rect x="192" y="64" width="4" height="4" fill="#ff0000"/>
+
+  <!-- 足 -->
+  <rect x="176" y="128" width="16" height="32" fill="#666666"/>
+  <rect x="192" y="128" width="16" height="32" fill="#666666"/>
+
+</svg>

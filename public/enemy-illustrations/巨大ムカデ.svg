@@ -1,0 +1,44 @@
+<svg width="320" height="256" viewBox="0 0 320 256"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 影 -->
+  <rect x="40" y="200" width="240" height="16" fill="#2b1a12" opacity="0.5"/>
+
+  <!-- 体セグメント（後ろ） -->
+  <rect x="48" y="136" width="24" height="24" fill="#7a1f1f"/>
+  <rect x="72" y="136" width="24" height="24" fill="#8f2626"/>
+  <rect x="96" y="136" width="24" height="24" fill="#7a1f1f"/>
+  <rect x="120" y="136" width="24" height="24" fill="#8f2626"/>
+  <rect x="144" y="136" width="24" height="24" fill="#7a1f1f"/>
+  <rect x="168" y="136" width="24" height="24" fill="#8f2626"/>
+  <rect x="192" y="136" width="24" height="24" fill="#7a1f1f"/>
+  <rect x="216" y="136" width="24" height="24" fill="#8f2626"/>
+
+  <!-- 頭 -->
+  <rect x="240" y="128" width="40" height="32" fill="#a12e2e"/>
+
+  <!-- 目 -->
+  <rect x="260" y="136" width="8" height="8" fill="#ff3333"/>
+  <rect x="260" y="148" width="8" height="8" fill="#ff3333"/>
+
+  <!-- 目ハイライト -->
+  <rect x="262" y="138" width="2" height="2" fill="#ffffff"/>
+  <rect x="262" y="150" width="2" height="2" fill="#ffffff"/>
+
+  <!-- 牙 -->
+  <rect x="272" y="144" width="8" height="8" fill="#f2e6d9"/>
+
+  <!-- 足（左右交互） -->
+  <rect x="52" y="160" width="8" height="16" fill="#5a140f"/>
+  <rect x="76" y="120" width="8" height="16" fill="#5a140f"/>
+  <rect x="100" y="160" width="8" height="16" fill="#5a140f"/>
+  <rect x="124" y="120" width="8" height="16" fill="#5a140f"/>
+  <rect x="148" y="160" width="8" height="16" fill="#5a140f"/>
+  <rect x="172" y="120" width="8" height="16" fill="#5a140f"/>
+  <rect x="196" y="160" width="8" height="16" fill="#5a140f"/>
+  <rect x="220" y="120" width="8" height="16" fill="#5a140f"/>
+  <rect x="244" y="160" width="8" height="16" fill="#5a140f"/>
+
+</svg>
+

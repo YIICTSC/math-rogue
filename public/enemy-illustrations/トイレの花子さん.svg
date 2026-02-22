@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 髪（黒回避ダークグレー） -->
+  <rect x="44" y="28" width="40" height="32" fill="#444444"/>
+
+  <!-- 顔（青白い） -->
+  <rect x="52" y="36" width="24" height="24" fill="#e6f2ff"/>
+
+  <!-- 目 -->
+  <rect x="56" y="44" width="4" height="4" fill="#222222"/>
+  <rect x="68" y="44" width="4" height="4" fill="#222222"/>
+
+  <!-- 口 -->
+  <rect x="60" y="54" width="8" height="2" fill="#222222"/>
+
+  <!-- 上半身（白制服） -->
+  <rect x="52" y="60" width="24" height="20" fill="#f0f0f0"/>
+
+  <!-- スカート（赤） -->
+  <rect x="48" y="80" width="32" height="16" fill="#cc0000"/>
+
+  <!-- 浮遊下部（半透明風カラー） -->
+  <rect x="56" y="96" width="16" height="12" fill="#dddddd"/>
+
+</svg>
+

@@ -1,0 +1,24 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- ボール本体 -->
+  <rect x="56" y="56" width="16" height="16" fill="#aa5500"/>
+
+  <!-- ボールライン（不規則で不気味感） -->
+  <rect x="63" y="56" width="2" height="16" fill="#883300"/>
+  <rect x="56" y="63" width="16" height="2" fill="#883300"/>
+
+  <!-- 目（赤く光る） -->
+  <rect x="58" y="60" width="4" height="4" fill="#ff2222"/>
+  <rect x="66" y="60" width="4" height="4" fill="#ff2222"/>
+
+  <!-- 口（ニヤリ口、少し歪めて不気味さ） -->
+  <rect x="60" y="68" width="8" height="2" fill="#660000"/>
+  <rect x="60" y="68" width="2" height="2" fill="#aa0000"/>
+  <rect x="66" y="68" width="2" height="2" fill="#aa0000"/>
+
+  <!-- 浮遊感のための小さい影 -->
+  <rect x="58" y="72" width="12" height="2" fill="#111111" opacity="0.5"/>
+
+</svg>
