@@ -1,0 +1,32 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 足（黒系スーツ） -->
+  <rect x="50" y="88" width="12" height="24" fill="#222222"/>
+  <rect x="66" y="88" width="12" height="24" fill="#222222"/>
+
+  <!-- 体（ダークスーツ） -->
+  <rect x="48" y="56" width="32" height="32" fill="#444466"/>
+
+  <!-- 腕（スーツ袖） -->
+  <rect x="44" y="56" width="8" height="24" fill="#444466"/>
+  <rect x="76" y="56" width="8" height="24" fill="#444466"/>
+
+  <!-- ネクタイ -->
+  <rect x="60" y="68" width="8" height="16" fill="#aa0000"/>
+
+  <!-- 頭 -->
+  <rect x="52" y="28" width="24" height="28" fill="#ffd8b0"/>
+
+  <!-- 髪（黒回避ダークグレー） -->
+  <rect x="52" y="24" width="24" height="8" fill="#444444"/>
+
+  <!-- 目（冷徹・細め） -->
+  <rect x="56" y="36" width="4" height="2" fill="#111111"/>
+  <rect x="66" y="36" width="4" height="2" fill="#111111"/>
+
+  <!-- 口（無表情・冷徹） -->
+  <rect x="60" y="44" width="8" height="2" fill="#111111"/>
+
+</svg>

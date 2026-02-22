@@ -1,0 +1,37 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 足 -->
+  <rect x="50" y="92" width="8" height="20" fill="#eeeeee"/>
+  <rect x="70" y="92" width="8" height="20" fill="#eeeeee"/>
+  <!-- 膝関節 -->
+  <rect x="50" y="88" width="8" height="4" fill="#cccccc"/>
+  <rect x="70" y="88" width="8" height="4" fill="#cccccc"/>
+
+  <!-- 体（胴体） -->
+  <rect x="46" y="60" width="36" height="28" fill="#dddddd"/>
+  <!-- 肩関節 -->
+  <rect x="44" y="60" width="4" height="8" fill="#cccccc"/>
+  <rect x="78" y="60" width="4" height="8" fill="#cccccc"/>
+
+  <!-- 腕 -->
+  <rect x="36" y="62" width="8" height="16" fill="#eeeeee"/>
+  <rect x="84" y="62" width="8" height="16" fill="#eeeeee"/>
+  <!-- 肘関節 -->
+  <rect x="36" y="72" width="8" height="4" fill="#cccccc"/>
+  <rect x="84" y="72" width="8" height="4" fill="#cccccc"/>
+
+  <!-- 頭 -->
+  <rect x="50" y="36" width="28" height="24" fill="#eeeeee"/>
+  <!-- 顎関節 -->
+  <rect x="50" y="56" width="28" height="4" fill="#cccccc"/>
+
+  <!-- 目窩（黒で不気味さ） -->
+  <rect x="56" y="44" width="4" height="4" fill="#111111"/>
+  <rect x="68" y="44" width="4" height="4" fill="#111111"/>
+
+  <!-- 鼻孔 -->
+  <rect x="62" y="50" width="4" height="2" fill="#111111"/>
+
+</svg>

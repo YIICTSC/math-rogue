@@ -1,0 +1,27 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 机の天板 -->
+  <rect x="44" y="48" width="40" height="24" fill="#886644"/>
+  
+  <!-- 落書き（赤・青・紫） -->
+  <rect x="48" y="52" width="4" height="4" fill="#ff0000"/>
+  <rect x="56" y="52" width="4" height="4" fill="#0000ff"/>
+  <rect x="64" y="52" width="4" height="4" fill="#aa00ff"/>
+  <rect x="72" y="52" width="4" height="4" fill="#ff6600"/>
+  <rect x="48" y="60" width="4" height="4" fill="#ff00ff"/>
+  <rect x="56" y="60" width="4" height="4" fill="#00ff00"/>
+  <rect x="64" y="60" width="4" height="4" fill="#ffff00"/>
+  <rect x="72" y="60" width="4" height="4" fill="#ff4444"/>
+
+  <!-- 机の脚 -->
+  <rect x="44" y="72" width="8" height="20" fill="#553311"/>
+  <rect x="76" y="72" width="8" height="20" fill="#553311"/>
+
+  <!-- 顔的表現（天板中央に不気味な目） -->
+  <rect x="60" y="54" width="4" height="4" fill="#ff0000"/>
+  <rect x="64" y="54" width="4" height="4" fill="#aa00ff"/>
+  <rect x="62" y="60" width="4" height="2" fill="#660000"/>
+
+</svg>

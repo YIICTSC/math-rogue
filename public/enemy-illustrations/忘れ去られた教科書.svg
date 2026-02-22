@@ -1,0 +1,32 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 本体（教科書の厚み） -->
+  <rect x="48" y="40" width="32" height="48" fill="#bbbbbb"/>
+
+  <!-- 表紙の色（くたびれ感） -->
+  <rect x="48" y="40" width="32" height="8" fill="#7777cc"/>
+  <rect x="48" y="48" width="32" height="4" fill="#5555aa"/>
+  <rect x="48" y="52" width="32" height="4" fill="#6666bb"/>
+
+  <!-- ページの裂け目 -->
+  <rect x="48" y="56" width="32" height="4" fill="#dddddd"/>
+  <rect x="48" y="60" width="32" height="4" fill="#eeeeee"/>
+  <rect x="48" y="64" width="32" height="4" fill="#dddddd"/>
+
+  <!-- 目（赤く不気味） -->
+  <rect x="56" y="50" width="4" height="4" fill="#ff2222"/>
+  <rect x="68" y="50" width="4" height="4" fill="#aa00ff"/>
+
+  <!-- 口（ギザギザ） -->
+  <rect x="56" y="72" width="16" height="2" fill="#660000"/>
+  <rect x="56" y="72" width="2" height="2" fill="#ff5555"/>
+  <rect x="62" y="72" width="2" height="2" fill="#ff5555"/>
+  <rect x="68" y="72" width="2" height="2" fill="#ff5555"/>
+  <rect x="74" y="72" width="2" height="2" fill="#ff5555"/>
+
+  <!-- 下の影で浮遊感 -->
+  <rect x="50" y="92" width="28" height="2" fill="#111111" opacity="0.3"/>
+
+</svg>

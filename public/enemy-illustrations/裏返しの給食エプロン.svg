@@ -1,0 +1,26 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- エプロン本体 -->
+  <rect x="50" y="44" width="28" height="40" fill="#ffffcc"/>
+
+  <!-- ポケット（不気味アクセント） -->
+  <rect x="54" y="60" width="6" height="8" fill="#ffcc66"/>
+  <rect x="68" y="60" width="6" height="8" fill="#ffcc66"/>
+
+  <!-- 目（幽霊感・赤） -->
+  <rect x="56" y="50" width="4" height="4" fill="#ff0000"/>
+  <rect x="68" y="50" width="4" height="4" fill="#aa00ff"/>
+
+  <!-- 口（ギザギザで不気味） -->
+  <rect x="58" y="68" width="12" height="2" fill="#660000"/>
+  <rect x="58" y="68" width="2" height="2" fill="#ff5555"/>
+  <rect x="64" y="68" width="2" height="2" fill="#ff5555"/>
+  <rect x="70" y="68" width="2" height="2" fill="#ff5555"/>
+
+  <!-- 肩紐 -->
+  <rect x="50" y="44" width="4" height="12" fill="#ffffcc"/>
+  <rect x="74" y="44" width="4" height="12" fill="#ffffcc"/>
+
+</svg>

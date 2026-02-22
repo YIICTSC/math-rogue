@@ -1,0 +1,21 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 体（曲線をブロックで表現） -->
+  <rect x="48" y="60" width="32" height="8" fill="#884422"/>
+  <rect x="46" y="68" width="28" height="8" fill="#996633"/>
+  <rect x="44" y="76" width="24" height="8" fill="#aa7744"/>
+  <rect x="42" y="84" width="20" height="6" fill="#bb8855"/>
+
+  <!-- 頭 -->
+  <rect x="50" y="58" width="12" height="4" fill="#cc9966"/>
+
+  <!-- 目 -->
+  <rect x="52" y="59" width="4" height="2" fill="#ff0000"/>
+  <rect x="56" y="59" width="4" height="2" fill="#aa00ff"/>
+
+  <!-- 口（小さく怪しい） -->
+  <rect x="54" y="62" width="4" height="2" fill="#660000"/>
+
+</svg>

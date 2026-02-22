@@ -1,0 +1,32 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 本体（名札の形） -->
+  <rect x="50" y="44" width="28" height="32" fill="#eeeeee"/>
+  
+  <!-- 名札の文字の影風 -->
+  <rect x="52" y="48" width="24" height="4" fill="#cccccc"/>
+  <rect x="52" y="54" width="24" height="4" fill="#dddddd"/>
+  
+  <!-- 目（幽霊感・赤） -->
+  <rect x="56" y="50" width="4" height="4" fill="#ff0000"/>
+  <rect x="66" y="50" width="4" height="4" fill="#aa00ff"/>
+  
+  <!-- 口（小さく不気味に） -->
+  <rect x="60" y="60" width="8" height="2" fill="#660000"/>
+  
+  <!-- 浮遊感・下端フリンジ -->
+  <rect x="50" y="76" width="4" height="4" fill="#dddddd"/>
+  <rect x="54" y="76" width="4" height="4" fill="#dddddd"/>
+  <rect x="58" y="76" width="4" height="4" fill="#dddddd"/>
+  <rect x="62" y="76" width="4" height="4" fill="#dddddd"/>
+  <rect x="66" y="76" width="4" height="4" fill="#dddddd"/>
+  <rect x="70" y="76" width="4" height="4" fill="#dddddd"/>
+  <rect x="74" y="76" width="4" height="4" fill="#dddddd"/>
+
+  <!-- 下の影 -->
+  <rect x="50" y="84" width="28" height="2" fill="#111111" opacity="0.3"/>
+
+</svg>
+

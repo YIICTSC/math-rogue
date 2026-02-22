@@ -1,0 +1,24 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 本体（埃の塊） -->
+  <rect x="52" y="56" width="24" height="24" fill="#aa8866"/>
+  <rect x="50" y="52" width="28" height="8" fill="#997755"/>
+  <rect x="54" y="48" width="20" height="4" fill="#886644"/>
+
+  <!-- 目 -->
+  <rect x="58" y="60" width="4" height="4" fill="#ff0000"/>
+  <rect x="66" y="60" width="4" height="4" fill="#aa00ff"/>
+
+  <!-- 口（小さく不気味） -->
+  <rect x="60" y="68" width="8" height="2" fill="#660000"/>
+
+  <!-- 浮遊感フリンジ -->
+  <rect x="52" y="80" width="4" height="4" fill="#777777"/>
+  <rect x="56" y="80" width="4" height="4" fill="#777777"/>
+  <rect x="60" y="80" width="4" height="4" fill="#777777"/>
+  <rect x="64" y="80" width="4" height="4" fill="#777777"/>
+  <rect x="68" y="80" width="4" height="4" fill="#777777"/>
+
+</svg>

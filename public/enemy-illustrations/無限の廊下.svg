@@ -1,0 +1,27 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 廊下の床（遠近感） -->
+  <rect x="32" y="100" width="64" height="8" fill="#333366"/>
+  <rect x="36" y="92" width="56" height="6" fill="#444477"/>
+  <rect x="40" y="84" width="48" height="6" fill="#555588"/>
+  <rect x="44" y="76" width="40" height="6" fill="#666699"/>
+  <rect x="48" y="68" width="32" height="6" fill="#7777aa"/>
+
+  <!-- 壁のブロック -->
+  <rect x="28" y="68" width="4" height="32" fill="#222244"/>
+  <rect x="96" y="68" width="4" height="32" fill="#222244"/>
+  <rect x="28" y="36" width="4" height="32" fill="#222244"/>
+  <rect x="96" y="36" width="4" height="32" fill="#222244"/>
+
+  <!-- ドア・窓のシルエット -->
+  <rect x="48" y="60" width="32" height="8" fill="#111111"/>
+  <rect x="48" y="52" width="32" height="4" fill="#333333"/>
+  <rect x="48" y="44" width="32" height="4" fill="#111111"/>
+
+  <!-- 不気味アクセント -->
+  <rect x="60" y="64" width="8" height="4" fill="#aa00ff"/>
+  <rect x="60" y="56" width="8" height="4" fill="#ff3333"/>
+
+</svg>

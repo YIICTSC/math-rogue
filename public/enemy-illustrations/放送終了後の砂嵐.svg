@@ -1,0 +1,26 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 中心渦（砂嵐本体） -->
+  <rect x="56" y="48" width="16" height="32" fill="#ccaa33"/>
+  
+  <!-- 砂の飛び散り -->
+  <rect x="52" y="44" width="4" height="4" fill="#ffaa33"/>
+  <rect x="72" y="44" width="4" height="4" fill="#ffaa33"/>
+  <rect x="50" y="52" width="4" height="4" fill="#ddbb55"/>
+  <rect x="74" y="52" width="4" height="4" fill="#ddbb55"/>
+  <rect x="48" y="60" width="4" height="4" fill="#ccaa33"/>
+  <rect x="76" y="60" width="4" height="4" fill="#ccaa33"/>
+  <rect x="46" y="68" width="4" height="4" fill="#bb9933"/>
+  <rect x="78" y="68" width="4" height="4" fill="#bb9933"/>
+
+  <!-- 上空の舞い上がる砂 -->
+  <rect x="54" y="36" width="4" height="4" fill="#ffdd66"/>
+  <rect x="70" y="36" width="4" height="4" fill="#ffdd66"/>
+  <rect x="60" y="32" width="8" height="2" fill="#ffcc44"/>
+
+  <!-- 浮遊感・下の砂の影 -->
+  <rect x="56" y="80" width="16" height="2" fill="#111111" opacity="0.3"/>
+
+</svg>

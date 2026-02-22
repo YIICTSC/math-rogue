@@ -1,0 +1,25 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 本体（小さめ幽霊） -->
+  <rect x="54" y="40" width="20" height="28" fill="#eeeeee"/>
+
+  <!-- 目（不安げ） -->
+  <rect x="58" y="46" width="4" height="4" fill="#ff4444"/>
+  <rect x="64" y="46" width="4" height="4" fill="#aa00ff"/>
+
+  <!-- 口（小さく困った感じ） -->
+  <rect x="60" y="54" width="8" height="2" fill="#660000"/>
+
+  <!-- 下端フリンジ（浮遊感） -->
+  <rect x="54" y="68" width="4" height="4" fill="#dddddd"/>
+  <rect x="58" y="68" width="4" height="4" fill="#dddddd"/>
+  <rect x="62" y="68" width="4" height="4" fill="#dddddd"/>
+  <rect x="66" y="68" width="4" height="4" fill="#dddddd"/>
+  <rect x="70" y="68" width="4" height="4" fill="#dddddd"/>
+
+  <!-- 下の影 -->
+  <rect x="54" y="76" width="20" height="2" fill="#111111" opacity="0.3"/>
+
+</svg>

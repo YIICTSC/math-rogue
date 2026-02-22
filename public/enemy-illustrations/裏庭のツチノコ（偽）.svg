@@ -1,0 +1,24 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 体 -->
+  <rect x="48" y="56" width="32" height="16" fill="#558844"/>
+
+  <!-- 頭（少し丸め） -->
+  <rect x="52" y="52" width="24" height="8" fill="#66aa66"/>
+
+  <!-- 目 -->
+  <rect x="56" y="54" width="4" height="4" fill="#ff0000"/>
+  <rect x="64" y="54" width="4" height="4" fill="#aa00ff"/>
+
+  <!-- 口（小さくギザギザ） -->
+  <rect x="58" y="60" width="12" height="2" fill="#440000"/>
+  <rect x="58" y="60" width="2" height="2" fill="#ff5555"/>
+  <rect x="64" y="60" width="2" height="2" fill="#ff5555"/>
+  <rect x="70" y="60" width="2" height="2" fill="#ff5555"/>
+
+  <!-- 尾（小さめ） -->
+  <rect x="76" y="60" width="4" height="4" fill="#336633"/>
+
+</svg>

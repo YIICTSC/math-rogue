@@ -1,0 +1,30 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 頭 -->
+  <rect x="58" y="32" width="12" height="12" fill="#eeeeee"/>
+  
+  <!-- 目 -->
+  <rect x="60" y="36" width="4" height="4" fill="#ff0000"/>
+  <rect x="66" y="36" width="4" height="4" fill="#aa00ff"/>
+  
+  <!-- 口 -->
+  <rect x="62" y="42" width="4" height="2" fill="#660000"/>
+  
+  <!-- 胴体 -->
+  <rect x="56" y="44" width="16" height="28" fill="#dddddd"/>
+  
+  <!-- 腕 -->
+  <rect x="50" y="44" width="6" height="20" fill="#cccccc"/>
+  <rect x="72" y="44" width="6" height="20" fill="#cccccc"/>
+  
+  <!-- 脚 -->
+  <rect x="56" y="72" width="6" height="20" fill="#bbbbbb"/>
+  <rect x="66" y="72" width="6" height="20" fill="#bbbbbb"/>
+
+  <!-- 胴体のアクセント（骨感） -->
+  <rect x="60" y="50" width="4" height="4" fill="#aaaaaa"/>
+  <rect x="60" y="58" width="4" height="4" fill="#aaaaaa"/>
+
+</svg>

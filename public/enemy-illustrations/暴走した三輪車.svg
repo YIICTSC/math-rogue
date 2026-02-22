@@ -1,0 +1,33 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 前輪 -->
+  <rect x="48" y="84" width="16" height="16" fill="#cc0000"/>
+  <!-- 後輪 -->
+  <rect x="36" y="92" width="12" height="12" fill="#cc0000"/>
+  <rect x="80" y="92" width="12" height="12" fill="#cc0000"/>
+
+  <!-- 車体（本体） -->
+  <rect x="48" y="60" width="32" height="24" fill="#ffaa00"/>
+
+  <!-- ハンドル -->
+  <rect x="58" y="52" width="12" height="8" fill="#ffcc33"/>
+  <rect x="56" y="48" width="4" height="8" fill="#ffcc33"/>
+  <rect x="68" y="48" width="4" height="8" fill="#ffcc33"/>
+
+  <!-- 目（フロントライト風に赤） -->
+  <rect x="54" y="64" width="4" height="4" fill="#ff0000"/>
+  <rect x="70" y="64" width="4" height="4" fill="#ff0000"/>
+
+  <!-- 口（暴走感あるギザギザ） -->
+  <rect x="56" y="74" width="16" height="2" fill="#660000"/>
+  <rect x="56" y="74" width="2" height="2" fill="#ff5555"/>
+  <rect x="62" y="74" width="2" height="2" fill="#ff5555"/>
+  <rect x="68" y="74" width="2" height="2" fill="#ff5555"/>
+  <rect x="74" y="74" width="2" height="2" fill="#ff5555"/>
+
+  <!-- 浮遊感・影 -->
+  <rect x="48" y="100" width="32" height="2" fill="#111111" opacity="0.3"/>
+
+</svg>

@@ -1,0 +1,23 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 本体（波状の幽霊電波） -->
+  <rect x="52" y="40" width="24" height="48" fill="#aa00ff"/>
+  <rect x="50" y="44" width="4" height="4" fill="#ff00ff"/>
+  <rect x="74" y="44" width="4" height="4" fill="#ff00ff"/>
+
+  <!-- 顔的表現（目） -->
+  <rect x="56" y="50" width="4" height="4" fill="#ff2222"/>
+  <rect x="66" y="50" width="4" height="4" fill="#ff2222"/>
+  <rect x="61" y="60" width="6" height="2" fill="#660000"/> <!-- 口的表現 -->
+
+  <!-- 触手・電波アンテナ -->
+  <rect x="48" y="44" width="4" height="12" fill="#aa33ff"/>
+  <rect x="76" y="44" width="4" height="12" fill="#aa33ff"/>
+  <rect x="50" y="84" width="28" height="4" fill="#cc00ff"/> <!-- 下に波打つ電波 -->
+
+  <!-- 浮遊感・影 -->
+  <rect x="52" y="92" width="24" height="2" fill="#111111" opacity="0.3"/>
+
+</svg>

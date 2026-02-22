@@ -1,0 +1,35 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 足（ズボン・靴） -->
+  <rect x="48" y="92" width="12" height="20" fill="#222222"/>
+  <rect x="68" y="92" width="12" height="20" fill="#222222"/>
+
+  <!-- 体（白衣） -->
+  <rect x="40" y="60" width="48" height="36" fill="#ffffff"/>
+  <rect x="36" y="64" width="56" height="8" fill="#dddddd"/> <!-- 腕組みや白衣の影 -->
+
+  <!-- 襟部分 -->
+  <rect x="36" y="60" width="12" height="16" fill="#ffffff"/>
+  <rect x="80" y="60" width="12" height="16" fill="#ffffff"/>
+
+  <!-- 頭 -->
+  <rect x="44" y="28" width="40" height="32" fill="#ffd8b0"/>
+
+  <!-- 髪（暗めブラウン） -->
+  <rect x="44" y="24" width="40" height="8" fill="#553311"/>
+
+  <!-- 目（鋭くニヤリ目） -->
+  <rect x="54" y="36" width="8" height="2" fill="#111111"/>
+  <rect x="66" y="36" width="8" height="2" fill="#111111"/>
+
+  <!-- 口（ニヤリ口） -->
+  <rect x="60" y="50" width="12" height="2" fill="#111111"/>
+  <rect x="70" y="48" width="2" height="2" fill="#111111"/>
+
+  <!-- 小道具：注射器（右手に持たせる） -->
+  <rect x="84" y="64" width="4" height="12" fill="#888888"/> <!-- 注射器本体 -->
+  <rect x="86" y="64" width="2" height="2" fill="#ff0000"/> <!-- 針先赤 -->
+
+</svg>

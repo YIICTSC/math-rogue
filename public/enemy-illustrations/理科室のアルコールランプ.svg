@@ -1,0 +1,21 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- ランプ本体（ガラス瓶） -->
+  <rect x="56" y="60" width="16" height="24" fill="#dddddd"/>
+  
+  <!-- 液体（アルコール） -->
+  <rect x="58" y="72" width="12" height="12" fill="#00aaff"/>
+
+  <!-- 炎 -->
+  <rect x="60" y="52" width="8" height="8" fill="#ff6600"/>
+  <rect x="62" y="48" width="4" height="4" fill="#ffcc33"/>
+  <rect x="60" y="44" width="8" height="4" fill="#ff3300"/>
+
+  <!-- 顔的表現（ランプが生きてる感じ） -->
+  <rect x="60" y="64" width="4" height="4" fill="#ff0000"/>
+  <rect x="68" y="64" width="4" height="4" fill="#aa00ff"/>
+  <rect x="62" y="72" width="4" height="2" fill="#660000"/> <!-- 口的表現 -->
+
+</svg>

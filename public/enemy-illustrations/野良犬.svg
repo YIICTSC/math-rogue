@@ -1,0 +1,30 @@
+<svg width="384" height="256" viewBox="0 0 128 128"
+     xmlns="http://www.w3.org/2000/svg"
+     shape-rendering="crispEdges">
+
+  <!-- 前脚 -->
+  <rect x="46" y="72" width="8" height="20" fill="#664422"/>
+  <rect x="62" y="72" width="8" height="20" fill="#664422"/>
+
+  <!-- 後脚 -->
+  <rect x="80" y="72" width="8" height="20" fill="#553311"/>
+  <rect x="96" y="72" width="8" height="20" fill="#553311"/>
+
+  <!-- 体 -->
+  <rect x="54" y="52" width="40" height="20" fill="#886633"/>
+
+  <!-- 頭 -->
+  <rect x="92" y="44" width="24" height="20" fill="#886633"/>
+
+  <!-- 耳（立ち耳風） -->
+  <rect x="92" y="40" width="8" height="4" fill="#553311"/>
+  <rect x="108" y="40" width="8" height="4" fill="#553311"/>
+
+  <!-- 目（赤く野性感） -->
+  <rect x="96" y="50" width="4" height="4" fill="#ff0000"/>
+  <rect x="108" y="50" width="4" height="4" fill="#ff0000"/>
+
+  <!-- 口（鋭く） -->
+  <rect x="100" y="60" width="8" height="2" fill="#440000"/>
+
+</svg>
