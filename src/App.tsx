@@ -1300,6 +1300,10 @@ const App: React.FC = () => {
 
                 if (enemies.length === 0) {
                     const numEnemies = node.type === NodeType.BOSS ? 1 : Math.floor(Math.random() * Math.min(3, 1 + Math.floor(node.y / 3))) + 1;
+                    const hpOffsets = numEnemies > 1
+                        ? Array.from({ length: numEnemies }, (_, idx) => idx - (numEnemies - 1) / 2)
+                            .sort(() => Math.random() - 0.5)
+                        : [0];
                     for (let i = 0; i < numEnemies; i++) {
                         let baseHp = (node.type === NodeType.BOSS ? 150 : 20) * actMultiplier + floorDifficulty * 2 + (node.type === NodeType.ELITE ? 40 : 0);
 
@@ -1307,6 +1311,9 @@ const App: React.FC = () => {
                             const multiplier = 2 + gameState.act;
                             baseHp = Math.ceil(maxAtkDmg * multiplier);
                         }
+                        // 複数体出現時は個体ごとにHP差を付ける
+                        const hpStep = Math.max(2, Math.floor(baseHp * 0.08));
+                        const hpAdjusted = Math.max(1, Math.floor(baseHp + hpOffsets[i] * hpStep));
 
                         const name = await generateEnemyName(node.y, gameState.act);
                         const isBoss = node.type === NodeType.BOSS;
@@ -1315,8 +1322,8 @@ const App: React.FC = () => {
                             id: `enemy-${node.y}-${i}-${Date.now()}`,
                             enemyType: 'GENERIC',
                             name: isBoss ? `ボス: ${name}` : name,
-                            maxHp: Math.floor(baseHp),
-                            currentHp: isDebugHpOne ? 1 : Math.floor(baseHp),
+                            maxHp: hpAdjusted,
+                            currentHp: isDebugHpOne ? 1 : hpAdjusted,
                             block: 0,
                             strength: 0,
                             nextIntent: { type: EnemyIntentType.UNKNOWN, value: 0 },
@@ -1343,6 +1350,8 @@ const App: React.FC = () => {
                 p.strength = 0;
                 p.powers = {};
                 p.relicCounters = { ...p.relicCounters };
+                const eventStrengthBonus = p.relicCounters['EVENT_STRENGTH_BONUS'] || 0;
+                if (eventStrengthBonus > 0) p.strength += eventStrengthBonus;
 
                 if (p.relics.find(r => r.id === 'HAPPY_FLOWER')) {
                     p.relicCounters['HAPPY_FLOWER'] = 0;
@@ -2257,6 +2266,27 @@ const App: React.FC = () => {
                     if (card.doubleStrength) {
                         p.strength *= 2;
                         nextActiveEffects.push({ id: `vfx-ds-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
+                    }
+                    if (card.name === '天気予報' || card.originalNames?.includes('天気予報')) {
+                        const peekCards: ICard[] = [];
+                        for (let j = 0; j < 3; j++) {
+                            if (p.drawPile.length === 0) {
+                                if (p.discardPile === undefined || p.discardPile.length === 0) break;
+                                p.drawPile = shuffle(p.discardPile);
+                                p.discardPile = [];
+                            }
+                            const top = p.drawPile.pop();
+                            if (top) peekCards.push(top);
+                        }
+                        const scoreCard = (c: ICard) => {
+                            const costScore = c.cost >= 0 ? c.cost : 99;
+                            return (c.unplayable ? 100 : 0) + costScore;
+                        };
+                        // 次に引くカードが先頭になるように、逆順で戻す
+                        const reordered = [...peekCards].sort((a, b) => scoreCard(a) - scoreCard(b));
+                        reordered.slice().reverse().forEach(c => p.drawPile.push(c));
+                        currentLogs.push(trans("天気予報：山札トップ3枚を並べ替えた", languageMode));
+                        nextActiveEffects.push({ id: `vfx-weather-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
                     }
                     if (card.shuffleHandToDraw) {
                         p.drawPile = shuffle([...p.drawPile, ...p.discardPile]);
@@ -4125,6 +4155,7 @@ const App: React.FC = () => {
                             title={trans(eventData.title, languageMode)}
                             description={trans(eventData.description, languageMode)}
                             options={eventData.options.map((o: any) => ({ ...o, label: trans(o.label, languageMode), text: trans(o.text, languageMode) }))}
+                            image={gameState.player.imageData}
                             resultLog={eventResultLog ? trans(eventResultLog, languageMode) : null}
                             onContinue={handleEventComplete}
                         />
