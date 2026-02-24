@@ -5,4 +5,3 @@ export const ENEMY_ILLUSTRATION_SIZE_CLASS = {
   compendiumDetail: 'w-32 h-32',
   miniGameDodgeball: 'w-16 h-16',
 } as const;
-

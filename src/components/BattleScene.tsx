@@ -910,7 +910,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 <div className={isTrueBossPhase2Active ? "relative min-h-[220px] md:min-h-[320px] pt-2 md:pt-4" : "flex flex-col flex-1"}>
 
                 {/* Enemies Area */}
-                <div className={isTrueBossPhase2Active ? "absolute left-1/2 -translate-x-1/2 bottom-0 flex justify-center items-end gap-2 min-h-0 shrink-0 z-10" : "flex justify-center items-start pt-8 md:pt-14 gap-2 min-h-[180px] shrink-0"}>
+                <div className={isTrueBossPhase2Active ? "absolute right-2 md:left-1/2 md:-translate-x-1/2 bottom-0 flex justify-end md:justify-center items-end gap-2 min-h-0 shrink-0 z-10" : "flex justify-center items-start pt-8 md:pt-14 gap-2 min-h-[180px] shrink-0"}>
                     {enemies.map((enemy) => {
                         const enemyHpPercent = (enemy.currentHp / enemy.maxHp) * 100;
                         const isSelected = selectedEnemyId === enemy.id;

@@ -19,6 +19,14 @@ interface GameEvent {
     options: EventOption[];
 }
 
+const addPermanentStrengthBonus = (player: Player, amount: number): Player => ({
+    ...player,
+    relicCounters: {
+        ...player.relicCounters,
+        EVENT_STRENGTH_BONUS: (player.relicCounters['EVENT_STRENGTH_BONUS'] || 0) + amount
+    }
+});
+
 // Helper to check if a card is available based on unlock status
 const isCardAvailable = (card: Card, unlockedNames: string[]) => {
     const additionalCardNames = Object.values(ADDITIONAL_CARDS).map(ac => ac.name);
@@ -1102,11 +1110,13 @@ export const generateEvent = (
                 { label: "読む", text: "ムキムキ+2。HP-5。", action: () => {
                     setGameState(prev => ({ 
                         ...prev, 
-                        player: { 
-                            ...prev.player, 
-                            strength: prev.player.strength + 2,
-                            currentHp: Math.max(1, prev.player.currentHp - 5)
-                        } 
+                        player: (() => {
+                            const boosted = addPermanentStrengthBonus(prev.player, 2);
+                            return {
+                                ...boosted,
+                                currentHp: Math.max(1, boosted.currentHp - 5)
+                            };
+                        })()
                     }));
                     setEventResultLog(trans("ゆうじょう・どりょく・しょうり！(HPが 5 ヘル) ゆうきが わいて ムキムキ+2。", languageMode));
                 }},
@@ -1368,7 +1378,7 @@ export const generateEvent = (
                     else setEventResultLog(trans("すべって おちそうになった！ あぶない！(HPが 10 ヘル)", languageMode));
                 }},
                 { label: "叩く", text: "響く音. ムキムキ+1。", action: () => {
-                    setGameState(prev => ({ ...prev, player: { ...prev.player, strength: prev.player.strength + 1 } }));
+                    setGameState(prev => ({ ...prev, player: addPermanentStrengthBonus(prev.player, 1) }));
                     setEventResultLog(trans("いいおとが した！ うでの ちからが ついて ムキムキ+1。", languageMode));
                 }}
             ]
@@ -1483,11 +1493,13 @@ export const generateEvent = (
                 { label: "破る", text: "ムキムキ+2. 呪い「後悔」入手。", action: () => {
                     setGameState(prev => ({
                         ...prev,
-                        player: {
-                            ...prev.player,
-                            strength: prev.player.strength + 2,
-                            deck: [...prev.player.deck, { ...CURSE_CARDS.REGRET, id: `regret-tear-${Date.now()}` }]
-                        }
+                        player: (() => {
+                            const boosted = addPermanentStrengthBonus(prev.player, 2);
+                            return {
+                                ...boosted,
+                                deck: [...boosted.deck, { ...CURSE_CARDS.REGRET, id: `regret-tear-${Date.now()}` }]
+                            };
+                        })()
                     }));
                     setEventResultLog(trans("しっとの ほのお！ ムキムキ+2. でも こころが いたむ...のろい「こうかい」を ゲット。", languageMode));
                 }}
@@ -1855,11 +1867,13 @@ export const generateEvent = (
                 { label: "試食する", text: "HP15回復. ムキムキ+1。", action: () => {
                     setGameState(prev => ({ 
                         ...prev, 
-                        player: { 
-                            ...prev.player, 
-                            currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 15),
-                            strength: prev.player.strength + 1
-                        } 
+                        player: (() => {
+                            const boosted = addPermanentStrengthBonus(prev.player, 1);
+                            return {
+                                ...boosted,
+                                currentHp: Math.min(boosted.maxHp, boosted.currentHp + 15)
+                            };
+                        })()
                     }));
                     setEventResultLog(trans("とっても おいしい！ HPを 15 かいふく. さらに ムキムキ+1。", languageMode));
                 }}

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { HelpCircle, ArrowRight } from 'lucide-react';
 
 interface EventOption {
@@ -18,6 +18,23 @@ interface EventScreenProps {
 }
 
 const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, image, resultLog, onContinue }) => {
+  const imageCandidates = useMemo(() => {
+    const encodedTitle = encodeURIComponent(title);
+    return [
+      `/event-illustrations/${encodedTitle}.webp`,
+      `/event-illustrations/${encodedTitle}.png`,
+      `/event-illustrations/${encodedTitle}.jpg`,
+      `/event-illustrations/${encodedTitle}.jpeg`,
+      `/event-illustrations/${encodedTitle}.svg`,
+      '/event-illustrations/default.svg'
+    ];
+  }, [title]);
+  const [imageIndex, setImageIndex] = useState(0);
+
+  useEffect(() => {
+    setImageIndex(0);
+  }, [title]);
+
   return (
     <div className="flex flex-col h-full w-full bg-gray-900 text-white relative items-center justify-center p-8">
         
@@ -27,6 +44,23 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                     <HelpCircle size={32} className="text-purple-300" />
                 </div>
                 <h2 className="text-3xl font-bold text-purple-100">{title}</h2>
+            </div>
+
+            <div className="relative mb-6 h-44 sm:h-56 rounded-xl overflow-hidden border border-purple-400/40 bg-slate-900">
+                <img
+                    src={imageCandidates[imageIndex]}
+                    alt={`${title} thumbnail`}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    onError={() => setImageIndex(prev => Math.min(prev + 1, imageCandidates.length - 1))}
+                />
+                {image && (
+                    <img
+                        src={image}
+                        alt="主人公"
+                        className="absolute left-1 bottom-0 h-[50%] sm:h-[58%] md:h-[64%] object-contain drop-shadow-[0_6px_12px_rgba(0,0,0,0.8)]"
+                    />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
             </div>
             
             <div className="text-lg text-gray-300 mb-8 leading-relaxed whitespace-pre-wrap min-h-[6rem]">
