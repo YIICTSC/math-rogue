@@ -12,14 +12,15 @@ interface EventScreenProps {
     title: string;
     description: string;
     options: EventOption[];
+    imageKey?: string;
     image?: string;
     resultLog: string | null;
     onContinue: () => void;
 }
 
-const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, image, resultLog, onContinue }) => {
+const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, imageKey, image, resultLog, onContinue }) => {
   const imageCandidates = useMemo(() => {
-    const encodedTitle = encodeURIComponent(title);
+    const encodedTitle = encodeURIComponent(imageKey ?? title);
     return [
       `/event-illustrations/${encodedTitle}.webp`,
       `/event-illustrations/${encodedTitle}.png`,
@@ -33,7 +34,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
 
   useEffect(() => {
     setImageIndex(0);
-  }, [title]);
+  }, [imageKey, title]);
 
   return (
     <div className="flex flex-col h-full w-full bg-gray-900 text-white relative items-center justify-center p-8">

@@ -115,7 +115,8 @@ export const generateEvent = (
     handleNodeComplete: () => void,
     setEventResultLog: (log: string | null) => void,
     languageMode: LanguageMode,
-    unlockedCardNames: string[]
+    unlockedCardNames: string[],
+    preferredEventTitle?: string
 ): GameEvent => {
     
     const charType = getCharacterType(player);
@@ -5798,6 +5799,11 @@ export const generateEvent = (
             ]
         }
     );
+
+    if (preferredEventTitle) {
+        const matched = potentialEvents.find(e => e.title === preferredEventTitle);
+        if (matched) return matched;
+    }
 
     // Pick random event from the massive pool
     return potentialEvents[Math.floor(Math.random() * potentialEvents.length)];
