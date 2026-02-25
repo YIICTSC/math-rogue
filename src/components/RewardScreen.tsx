@@ -11,10 +11,11 @@ interface RewardScreenProps {
   onSkip: () => void;
   isLoading: boolean;
   currentPotions?: Potion[];
+  potionCapacity?: number;
   languageMode: LanguageMode;
 }
 
-const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, onSkip, isLoading, currentPotions = [], languageMode }) => {
+const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, onSkip, isLoading, currentPotions = [], potionCapacity = 3, languageMode }) => {
   const [replaceReward, setReplaceReward] = useState<RewardItem | null>(null);
   const [inspectedItem, setInspectedItem] = useState<{ type: 'CARD' | 'RELIC' | 'POTION', data: any } | null>(null);
   const longPressTimer = useRef<any>(null);
@@ -51,7 +52,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
   }, [rewards, isLoading, onSkip]);
 
   const handlePotionClick = (reward: RewardItem) => {
-      if (currentPotions.length >= 3) {
+      if (currentPotions.length >= potionCapacity) {
           setReplaceReward(reward);
       } else {
           onSelectReward(reward);

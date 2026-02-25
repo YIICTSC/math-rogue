@@ -16,11 +16,12 @@ interface ShopScreenProps {
   onRemoveCard: (cardId: string, cost: number) => void;
   onLeave: () => void;
   languageMode: LanguageMode;
+  potionCapacity?: number;
 }
 
 const REMOVE_COST = 75;
 
-const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics = [], shopPotions = [], onBuyCard, onBuyRelic, onBuyPotion, onRemoveCard, onLeave, languageMode }) => {
+const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics = [], shopPotions = [], onBuyCard, onBuyRelic, onBuyPotion, onRemoveCard, onLeave, languageMode, potionCapacity = 3 }) => {
   const [purchasedIds, setPurchasedIds] = useState<string[]>([]);
   const [removed, setRemoved] = useState(false);
   const [viewMode, setViewMode] = useState<'BUY' | 'REMOVE'>('BUY');
@@ -83,7 +84,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
 
       if (player.gold >= price) {
           setInspectedItem(null); // 詳細を閉じる
-          if (player.potions.length >= 3) {
+          if (player.potions.length >= potionCapacity) {
               setPotionToBuy(potion);
           } else {
               onBuyPotion(potion);
@@ -100,7 +101,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
   };
 
   const handleRemove = (cardId: string) => {
-      let cost = REMOVE_COST;
+      let cost = player.relics.find(r => r.id === 'SMILING_MASK') ? 50 : REMOVE_COST;
       if (player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) cost = Math.floor(cost * 0.5);
 
       if (player.gold >= cost && !removed) {
@@ -256,10 +257,10 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                 </button>
                 <button 
                     onClick={() => setViewMode('REMOVE')}
-                    disabled={removed || player.gold < getPrice(REMOVE_COST)}
+                    disabled={removed || player.gold < getPrice(player.relics.find(r => r.id === 'SMILING_MASK') ? 50 : REMOVE_COST)}
                     className={`flex-1 py-2 rounded border-2 flex items-center justify-center gap-1 cursor-pointer text-sm ${viewMode === 'REMOVE' ? 'bg-red-600 border-white' : 'bg-gray-800 border-gray-600 text-gray-400'} ${removed ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                    <Trash2 size={14}/> {trans("カード削除", languageMode)} ({getPrice(REMOVE_COST)} 円)
+                    <Trash2 size={14}/> {trans("カード削除", languageMode)} ({getPrice(player.relics.find(r => r.id === 'SMILING_MASK') ? 50 : REMOVE_COST)} 円)
                 </button>
            </div>
 
@@ -308,7 +309,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                 const isSold = purchasedIds.includes(potion.id);
                                 const price = getPrice(potion.price || 50);
                                 const canAfford = player.gold >= price;
-                                const isFull = player.potions.length >= 3;
+                                const isFull = player.potions.length >= potionCapacity;
 
                                 return (
                                     <div 
