@@ -343,8 +343,13 @@ const App: React.FC = () => {
 
     const [totalPlaySeconds, setTotalPlaySeconds] = useState(() => storageService.getTotalPlayTime());
     const [dailyPlaySeconds, setDailyPlaySeconds] = useState(() => storageService.getDailyPlayTime());
+    const [modeCorrectCounts, setModeCorrectCounts] = useState<Record<string, number>>(() => storageService.getModeCorrectCounts());
+    const [masteredModes, setMasteredModes] = useState<string[]>(() => storageService.getMasteredModes());
+    const [masteryRewardModal, setMasteryRewardModal] = useState<{ mode: GameMode } | null>(null);
     const [showTimeLimitModal, setShowTimeLimitModal] = useState(false);
-    const PLAY_LIMIT_SECONDS = 3600; // 1 Hour
+    const BASE_PLAY_LIMIT_SECONDS = 3600; // 1 Hour
+    const masteryBonusSeconds = masteredModes.length * 300;
+    const PLAY_LIMIT_SECONDS = BASE_PLAY_LIMIT_SECONDS + masteryBonusSeconds;
 
     const formatTime = (total: number) => {
         const h = Math.floor(total / 3600);
@@ -433,7 +438,7 @@ const App: React.FC = () => {
             }
         }, 1000);
         return () => clearInterval(interval);
-    }, [gameState.screen, dailyPlaySeconds]);
+    }, [gameState.screen, PLAY_LIMIT_SECONDS]);
 
     useEffect(() => {
         if (gameState.challengeMode === 'RACE') {
@@ -3765,9 +3770,32 @@ const App: React.FC = () => {
                 }));
             }
         }
+        handleModeCorrectProgress(gameState.mode, correctCount);
         setTotalMathCorrect(prev => prev + correctCount);
         setGameState(prev => ({ ...prev, actStats: { ...prev.actStats!, mathCorrect: prev.actStats!.mathCorrect + correctCount } }));
         goToRewardPhase(bonusGold);
+    };
+
+    const handleModeCorrectProgress = (mode: GameMode, correctCount: number) => {
+        if (correctCount <= 0) return;
+        const modeKey = mode as string;
+        const prevModeCount = modeCorrectCounts[modeKey] || 0;
+        const nextModeCount = prevModeCount + correctCount;
+        const alreadyMastered = masteredModes.includes(modeKey);
+        setModeCorrectCounts(prev => {
+            const next = { ...prev, [modeKey]: (prev[modeKey] || 0) + correctCount };
+            storageService.saveModeCorrectCounts(next);
+            return next;
+        });
+        if (!alreadyMastered && prevModeCount < 100 && nextModeCount >= 100) {
+            setMasteredModes(prev => {
+                if (prev.includes(modeKey)) return prev;
+                const next = [...prev, modeKey];
+                storageService.saveMasteredModes(next);
+                return next;
+            });
+            setMasteryRewardModal({ mode });
+        }
     };
 
     const handleRewardSelection = (item: RewardItem, replacePotionId?: string) => {
@@ -3918,7 +3946,7 @@ const App: React.FC = () => {
                         <div className="absolute bottom-2 left-2 z-9999 text-gray-500 text-[10px] font-mono flex flex-col gap-0.5">
                             <div>TOTAL TIME: {formatTime(totalPlaySeconds)}</div>
                             <div className={isDailyLimitReached ? "text-red-500 font-bold" : ""}>
-                                DAILY: {formatTime(dailyPlaySeconds)} / 01:00:00
+                                DAILY: {formatTime(dailyPlaySeconds)} / {formatTime(PLAY_LIMIT_SECONDS)}
                             </div>
                         </div>
 
@@ -4112,7 +4140,11 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.PROBLEM_CHALLENGE && (
                     <div className="absolute inset-0">
-                        <ProblemChallengeScreen onBack={returnToTitle} languageMode={languageMode} />
+                        <ProblemChallengeScreen
+                            onBack={returnToTitle}
+                            languageMode={languageMode}
+                            onCorrectAnswers={handleModeCorrectProgress}
+                        />
                     </div>
                 )}
 
@@ -4223,6 +4255,7 @@ const App: React.FC = () => {
                             onSelectMode={handleModeSelect}
                             onBack={returnToTitle}
                             languageMode={languageMode}
+                            modeMasteryMap={Object.fromEntries(Object.entries(modeCorrectCounts).map(([mode, count]) => [mode, count >= 100]))}
                         />
                         {raceSession && !raceSession.ended && !raceSession.isHost && gameState.challengeMode === 'RACE' && (
                             <div className="absolute inset-0 bg-black/65 backdrop-blur-[1px] flex items-center justify-center p-4 z-20">
@@ -4562,6 +4595,24 @@ const App: React.FC = () => {
                             hasCursedKey={!!gameState.player.relics.find(r => r.id === 'CURSED_KEY')}
                             languageMode={languageMode}
                         />
+                    </div>
+                )}
+
+                {masteryRewardModal && (
+                    <div className="fixed inset-0 z-[2147483647] bg-black/80 flex items-center justify-center p-4 pointer-events-auto">
+                        <div className="w-full max-w-md bg-slate-900 border-2 border-yellow-400 rounded-xl p-6 text-center">
+                            <div className="text-2xl font-black text-yellow-300 mb-3">◎ マスター達成</div>
+                            <div className="text-white font-bold leading-relaxed mb-5">
+                                この種類の問題のマスターおめでとう！<br />
+                                ゲームの制限時間が5分延長されました！
+                            </div>
+                            <button
+                                onClick={() => setMasteryRewardModal(null)}
+                                className="w-full bg-yellow-400 text-black font-black py-3 rounded-lg hover:bg-yellow-300 transition-colors"
+                            >
+                                OK
+                            </button>
+                        </div>
                     </div>
                 )}
 
