@@ -337,7 +337,22 @@ export const RELIC_LIBRARY: Record<string, Relic> = {
     NILRYS_CODEX: { id: 'NILRYS_CODEX', name: '秘密の攻略本', description: 'ターン終了時、ランダムな3枚から1枚を選んで手札に加える。', rarity: 'RARE' },
     SPIRIT_POOP: { id: 'SPIRIT_POOP', name: '犬のフン', description: 'スコア計算時に1点減点される。', rarity: 'COMMON' },
     SNAKE_SKULL: { id: 'SNAKE_SKULL', name: '蛇の頭蓋骨', description: '毒を与える時、その数値が+1される。', rarity: 'COMMON', price: 180 },
-};
+    BAG_OF_PREPARATION: { id: 'BAG_OF_PREPARATION', name: '予習かばん', description: '戦闘開始時、追加で2枚カードを引く。', rarity: 'COMMON', price: 170 },
+    BIRD_FACED_URN: { id: 'BIRD_FACED_URN', name: '鳥の壺', description: '戦闘中、敵を倒した時にHPを2回復する。', rarity: 'UNCOMMON', price: 220 },
+    CAULDRON: { id: 'CAULDRON', name: '大鍋', description: 'ポーション枠を2つ増やす。', rarity: 'RARE', price: 240 },
+    CERAMIC_FISH: { id: 'CERAMIC_FISH', name: '焼き物の魚', description: 'カードをデッキに追加するたびに9G得る。', rarity: 'UNCOMMON', price: 210 },
+    DOLLYS_MIRROR: { id: 'DOLLYS_MIRROR', name: '合わせ鏡', description: '次に手に入れたカードを1枚複製する。', rarity: 'RARE', price: 250 },
+    FROZEN_EYE: { id: 'FROZEN_EYE', name: '冷たい目玉', description: '敵の次の行動が見えやすくなる。', rarity: 'SHOP', price: 180 },
+    INK_BOTTLE: { id: 'INK_BOTTLE', name: 'インク瓶', description: 'カードを10枚使うごとに1枚引く。', rarity: 'UNCOMMON', price: 220 },
+    ORICHALCUM: { id: 'ORICHALCUM', name: 'オリハルコン', description: 'ターン終了時、ブロックが0ならブロック6を得る。', rarity: 'RARE', price: 220 },
+    ORRERY: { id: 'ORRERY', name: '天球儀', description: '獲得時、カード候補を5枚表示して選べる。', rarity: 'SHOP', price: 260 },
+    PEACE_PIPE: { id: 'PEACE_PIPE', name: '和解のパイプ', description: '休憩所でカードを1枚削除できる。', rarity: 'SHOP', price: 220 },
+    POCKETWATCH: { id: 'POCKETWATCH', name: '懐中時計', description: '1ターンに3枚以下しかカードを使わなかった時、次ターン3枚引く。', rarity: 'RARE', price: 260 },
+    RED_SKULL: { id: 'RED_SKULL', name: '赤い髑髏', description: 'HPが半分以下の時、ムキムキ+3。', rarity: 'RARE', price: 230 },
+    SMILING_MASK: { id: 'SMILING_MASK', name: '笑う仮面', description: 'ショップでカード削除の価格が固定になる。', rarity: 'SHOP', price: 150 },
+    TINY_CHEST: { id: 'TINY_CHEST', name: '小さな宝箱', description: '？マスを4回通るごとに宝箱イベントが発生する。', rarity: 'COMMON', price: 170 },
+    TINY_HOUSE: { id: 'TINY_HOUSE', name: '小さな家', description: '獲得時、最大HP+5・50G・ポーション1つ・カード1枚強化。', rarity: 'BOSS' },
+  };
 
 // --- POTIONS ---
 export const POTION_LIBRARY: Record<string, Omit<Potion, 'id'>> = {

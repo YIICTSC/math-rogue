@@ -689,6 +689,102 @@ const App: React.FC = () => {
         audioService.playBGM('menu');
     };
 
+    const hasRelic = (player: Player, relicId: string) => player.relics.some(r => r.id === relicId);
+    const getPotionCapacity = (player: Player) => hasRelic(player, 'CAULDRON') ? 5 : 3;
+
+    const drawOneCard = (player: Player): ICard | null => {
+        if (player.drawPile.length === 0) {
+            if (player.discardPile.length === 0) return null;
+            player.drawPile = shuffle(player.discardPile);
+            player.discardPile = [];
+        }
+        const card = player.drawPile.pop();
+        return card ? { ...card } : null;
+    };
+
+    const syncRedSkullState = (player: Player) => {
+        if (!hasRelic(player, 'RED_SKULL')) return;
+        const isActive = (player.relicCounters['RED_SKULL_ACTIVE'] || 0) === 1;
+        const shouldBeActive = player.currentHp <= Math.floor(player.maxHp / 2);
+        if (shouldBeActive && !isActive) {
+            player.strength += 3;
+            player.relicCounters['RED_SKULL_ACTIVE'] = 1;
+        } else if (!shouldBeActive && isActive) {
+            player.strength = Math.max(0, player.strength - 3);
+            player.relicCounters['RED_SKULL_ACTIVE'] = 0;
+        }
+    };
+
+    const addCardToDeckWithRelics = (player: Player, card: ICard, options?: { addToDiscard?: boolean }) => {
+        const addToDiscard = options?.addToDiscard ?? false;
+        const base = { ...card, id: card.id || `gain-${Date.now()}-${Math.random()}` };
+        player.deck = [...player.deck, base];
+        if (addToDiscard) player.discardPile = [...player.discardPile, { ...base, id: `discard-${Date.now()}-${Math.random()}` }];
+
+        if (hasRelic(player, 'CERAMIC_FISH')) {
+            player.gold += 9;
+        }
+
+        const mirrorCharges = player.relicCounters['DOLLYS_MIRROR_CHARGES'] || 0;
+        if (mirrorCharges > 0) {
+            const copy = { ...base, id: `mirror-copy-${Date.now()}-${Math.random()}` };
+            player.deck = [...player.deck, copy];
+            if (addToDiscard) player.discardPile = [...player.discardPile, { ...copy, id: `mirror-discard-${Date.now()}-${Math.random()}` }];
+            player.relicCounters['DOLLYS_MIRROR_CHARGES'] = mirrorCharges - 1;
+        }
+    };
+
+    const applyExtendedRelicAcquireEffects = (player: Player, relic: Relic) => {
+        if (relic.id === 'DOLLYS_MIRROR') {
+            player.relicCounters['DOLLYS_MIRROR_CHARGES'] = 1;
+        }
+        if (relic.id === 'TINY_HOUSE') {
+            player.maxHp += 5;
+            player.currentHp = Math.min(player.maxHp, player.currentHp + 5);
+            player.gold += 50;
+            if (player.potions.length < getPotionCapacity(player)) {
+                const allPotions = Object.values(POTION_LIBRARY);
+                const potion = { ...allPotions[Math.floor(Math.random() * allPotions.length)], id: `tiny-house-pot-${Date.now()}` };
+                player.potions = [...player.potions, potion];
+            }
+            const upgradeable = player.deck.filter(c => !c.upgraded);
+            if (upgradeable.length > 0) {
+                const target = upgradeable[Math.floor(Math.random() * upgradeable.length)];
+                player.deck = player.deck.map(c => c.id === target.id ? getUpgradedCard(c) : c);
+            }
+        }
+        if (relic.id === 'ORRERY') {
+            const pool = getFilteredCardPool(player.id);
+            for (let i = 0; i < 5; i++) {
+                const pick = pool[Math.floor(Math.random() * pool.length)];
+                addCardToDeckWithRelics(player, { ...pick, id: `orrery-${Date.now()}-${i}-${Math.random()}` });
+            }
+        }
+    };
+
+    useEffect(() => {
+        setGameState(prev => {
+            const p = { ...prev.player, relicCounters: { ...prev.player.relicCounters }, deck: [...prev.player.deck], potions: [...prev.player.potions], discardPile: [...prev.player.discardPile] };
+            let changed = false;
+            if (hasRelic(p, 'DOLLYS_MIRROR') && !p.relicCounters['DOLLYS_MIRROR_INIT']) {
+                p.relicCounters['DOLLYS_MIRROR_CHARGES'] = Math.max(1, p.relicCounters['DOLLYS_MIRROR_CHARGES'] || 0);
+                p.relicCounters['DOLLYS_MIRROR_INIT'] = 1;
+                changed = true;
+            }
+            if (hasRelic(p, 'TINY_HOUSE') && !p.relicCounters['TINY_HOUSE_APPLIED']) {
+                applyExtendedRelicAcquireEffects(p, RELIC_LIBRARY.TINY_HOUSE);
+                p.relicCounters['TINY_HOUSE_APPLIED'] = 1;
+                changed = true;
+            }
+            if (hasRelic(p, 'ORRERY') && !p.relicCounters['ORRERY_APPLIED']) {
+                applyExtendedRelicAcquireEffects(p, RELIC_LIBRARY.ORRERY);
+                p.relicCounters['ORRERY_APPLIED'] = 1;
+                changed = true;
+            }
+            return changed ? { ...prev, player: p } : prev;
+        });
+    }, [gameState.player.relics]);
+
     const handleNodeComplete = () => {
         setGameState(prev => {
             const newMap = prev.map.map(n => {
@@ -1398,10 +1494,12 @@ const App: React.FC = () => {
                     });
                 }
                 if (p.relics.find(r => r.id === 'MUTAGENIC_STRENGTH')) p.strength += 3;
+                syncRedSkullState(p);
 
                 let drawCount = HAND_SIZE;
-                if (p.relics.find(r => r.id === 'BAG_OF_PREP')) drawCount += 2;
+                if (p.relics.find(r => r.id === 'BAG_OF_PREP') || p.relics.find(r => r.id === 'BAG_OF_PREPARATION')) drawCount += 2;
                 if (p.relics.find(r => r.id === 'SNAKE_RING')) drawCount += 2;
+                if (p.relics.find(r => r.id === 'FROZEN_EYE')) drawCount += 1;
 
                 for (let i = 0; i < drawCount; i++) {
                     const drawn = p.drawPile.pop();
@@ -1455,6 +1553,7 @@ const App: React.FC = () => {
             } else if (node.type === NodeType.REST) {
                 setGameState(prev => {
                     const p = { ...prev.player };
+                    let restLog = [...nextState.narrativeLog];
                     if (p.relics.find(r => r.id === 'LUXURY_FUTON')) {
                         const heal = Math.floor(p.currentHp / 5) * 2;
                         if (heal > 0) {
@@ -1464,7 +1563,13 @@ const App: React.FC = () => {
                     if (p.relics.find(r => r.id === 'ANCIENT_TEA_SET')) {
                         p.relicCounters['ANCIENT_TEA_SET_ACTIVE'] = 1;
                     }
-                    return { ...nextState, player: p, screen: GameScreen.REST };
+                    if (p.relics.find(r => r.id === 'PEACE_PIPE') && p.deck.length > 0) {
+                        const idx = Math.floor(Math.random() * p.deck.length);
+                        const removed = p.deck[idx];
+                        p.deck = p.deck.filter((_, i) => i !== idx);
+                        restLog = [...restLog, `和解のパイプで「${removed.name}」を取り除いた。`];
+                    }
+                    return { ...nextState, player: p, narrativeLog: restLog, screen: GameScreen.REST };
                 });
                 audioService.playBGM('rest');
 
@@ -1503,6 +1608,22 @@ const App: React.FC = () => {
                 audioService.playBGM('shop');
 
             } else if (node.type === NodeType.EVENT) {
+                const p = nextState.player;
+                if (hasRelic(p, 'TINY_CHEST')) {
+                    const tinyChestProgress = (p.relicCounters['TINY_CHEST_PROGRESS'] || 0) + 1;
+                    if (tinyChestProgress >= 4) {
+                        p.relicCounters['TINY_CHEST_PROGRESS'] = 0;
+                        const rewards: RewardItem[] = [];
+                        const allRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'COMMON' || r.rarity === 'UNCOMMON' || r.rarity === 'RARE');
+                        rewards.push({ type: 'RELIC', value: shuffle([...allRelics])[0], id: `tiny-chest-relic-${Date.now()}` });
+                        rewards.push({ type: 'GOLD', value: 50 + Math.floor(Math.random() * 50), id: `tiny-chest-gold-${Date.now()}` });
+                        setTreasureRewards(rewards);
+                        setGameState({ ...nextState, player: p, screen: GameScreen.TREASURE });
+                        audioService.playBGM('reward');
+                        return;
+                    }
+                    p.relicCounters['TINY_CHEST_PROGRESS'] = tinyChestProgress;
+                }
                 const unlockedCards = storageService.getUnlockedCards();
                 const ev = generateEvent(
                     nextState.player,
@@ -1688,7 +1809,7 @@ const App: React.FC = () => {
                 newLogs.push(trans("手札を交換", languageMode));
             } else if (potion.templateId === 'ENTROPIC_BREW') {
                 for (let i = 0; i < 3; i++) {
-                    if (p.potions.length < 3) {
+                    if (p.potions.length < getPotionCapacity(p)) {
                         const allPotions = Object.values(POTION_LIBRARY);
                         const randomPot = { ...allPotions[Math.floor(Math.random() * allPotions.length)], id: `entropy-${Date.now()}-${i}` };
                         p.potions.push(randomPot);
@@ -1753,7 +1874,7 @@ const App: React.FC = () => {
             if (card.addPotion) {
                 const allPotions = Object.values(POTION_LIBRARY);
                 const potion = { ...allPotions[Math.floor(Math.random() * allPotions.length)], id: `event-pot-${Date.now()}` };
-                if (p.potions.length < 3) p.potions.push(potion);
+                if (p.potions.length < getPotionCapacity(p)) p.potions.push(potion);
                 currentLogs.push(`${trans(potion.name, languageMode)}をゲット！`);
             }
 
@@ -1809,6 +1930,19 @@ const App: React.FC = () => {
 
             p.currentEnergy -= effectiveCost;
             p.cardsPlayedThisTurn++;
+            if (hasRelic(p, 'INK_BOTTLE')) {
+                const inkCount = (p.relicCounters['INK_BOTTLE_COUNT'] || 0) + 1;
+                if (inkCount >= 10) {
+                    p.relicCounters['INK_BOTTLE_COUNT'] = 0;
+                    const drawn = drawOneCard(p);
+                    if (drawn) {
+                        p.hand.push(drawn);
+                        currentLogs.push(trans("インク瓶：カードを1枚引いた", languageMode));
+                    }
+                } else {
+                    p.relicCounters['INK_BOTTLE_COUNT'] = inkCount;
+                }
+            }
 
             if (!p.typesPlayedThisTurn.includes(card.type)) {
                 p.typesPlayedThisTurn.push(card.type);
@@ -2499,6 +2633,13 @@ const App: React.FC = () => {
 
             let nextSelectedId = prev.selectedEnemyId;
             const aliveEnemies = enemies.filter(e => e.currentHp > 0);
+            const defeatedCount = enemies.length - aliveEnemies.length;
+            if (defeatedCount > 0 && hasRelic(p, 'BIRD_FACED_URN')) {
+                const healAmount = defeatedCount * 2;
+                p.currentHp = Math.min(p.maxHp, p.currentHp + healAmount);
+                currentLogs.push(`鳥の壺: HPを${healAmount}回復`);
+            }
+            syncRedSkullState(p);
             if (!aliveEnemies.find(e => e.id === nextSelectedId) && aliveEnemies.length > 0) nextSelectedId = aliveEnemies[0].id;
 
             return {
@@ -2533,6 +2674,10 @@ const App: React.FC = () => {
             if (p.powers['ENERGY_DRAW_POWER']) {
                 drawBonus += p.powers['ENERGY_DRAW_POWER'];
                 extraEnergy += p.powers['ENERGY_DRAW_POWER'];
+            }
+            if (hasRelic(p, 'POCKETWATCH') && (p.relicCounters['POCKETWATCH_PENDING'] || 0) > 0) {
+                drawBonus += 3;
+                p.relicCounters['POCKETWATCH_PENDING'] = 0;
             }
 
             if (p.powers['DEMON_FORM']) {
@@ -2697,6 +2842,7 @@ const App: React.FC = () => {
             p.turnFlags = {};
             p.typesPlayedThisTurn = [];
             p.relicCounters['ATTACK_COUNT'] = 0;
+            syncRedSkullState(p);
             let nextSelection = { ...prev.selectionState };
             if (p.powers['TOOLS_OF_THE_TRADE']) {
                 nextSelection = { active: true, type: 'DISCARD', amount: 1 };
@@ -2757,12 +2903,19 @@ const App: React.FC = () => {
         setGameState(prev => {
             const p = { ...prev.player };
             const newLogs: string[] = [];
+            if (hasRelic(p, 'POCKETWATCH')) {
+                p.relicCounters['POCKETWATCH_PENDING'] = p.cardsPlayedThisTurn <= 3 ? 1 : 0;
+            }
             const discardedCards = p.relics.find(r => r.id === 'BOOKMARK') ? p.hand.slice(1) : p.hand;
             discardedCards.forEach(c => {
                 if (c.name === 'カンニングペーパー' || c.name === 'STRATEGIST') {
                     p.nextTurnEnergy += 2;
                 }
             });
+            if (hasRelic(p, 'ORICHALCUM') && p.block <= 0) {
+                p.block = 6;
+                newLogs.push("オリハルコン: ブロック+6");
+            }
             if (p.powers['METALLICIZE']) {
                 p.block += p.powers['METALLICIZE'];
                 p.floatingText = { id: `pow-metal-${Date.now()}`, text: `+${p.powers['METALLICIZE']}`, color: 'text-blue-400', iconType: 'shield' };
@@ -2783,10 +2936,11 @@ const App: React.FC = () => {
         });
         await wait(400);
         await new Promise<void>(resolve => {
-            setGameState(prev => {
-                let nextEnemies = prev.enemies.map(e => ({ ...e }));
-                const nextActiveEffects: VisualEffectInstance[] = [];
-                const nextLogs: string[] = [];
+                setGameState(prev => {
+                    let nextEnemies = prev.enemies.map(e => ({ ...e }));
+                    const p = { ...prev.player };
+                    const nextActiveEffects: VisualEffectInstance[] = [];
+                    const nextLogs: string[] = [];
                 nextEnemies = nextEnemies.map(enemy => {
                     if (enemy.poison > 0) {
                         const poisonDmg = enemy.poison;
@@ -2806,8 +2960,16 @@ const App: React.FC = () => {
                     }
                     return enemy;
                 }).filter(e => e.currentHp > 0 || (e.enemyType === 'THE_HEART' && e.phase === 1));
+                if (hasRelic(p, 'BIRD_FACED_URN')) {
+                    const defeatedByPoison = prev.enemies.length - nextEnemies.length;
+                    if (defeatedByPoison > 0) {
+                        p.currentHp = Math.min(p.maxHp, p.currentHp + defeatedByPoison * 2);
+                        nextLogs.push(`鳥の壺: HPを${defeatedByPoison * 2}回復`);
+                    }
+                }
                 return {
                     ...prev,
+                    player: p,
                     enemies: nextEnemies,
                     combatLog: [...prev.combatLog, ...nextLogs].slice(-100),
                     activeEffects: [...prev.activeEffects, ...nextActiveEffects]
@@ -2991,6 +3153,14 @@ const App: React.FC = () => {
                     if (e.weak > 0) e.weak--;
                     e.nextIntent = getNextEnemyIntent(e, prev.turn + 1);
                     const aliveEnemies = newEnemies.filter(en => en.currentHp > 0 || (en.enemyType === 'THE_HEART' && en.phase === 1));
+                    if (hasRelic(p, 'BIRD_FACED_URN')) {
+                        const defeatedNow = newEnemies.length - aliveEnemies.length;
+                        if (defeatedNow > 0) {
+                            p.currentHp = Math.min(p.maxHp, p.currentHp + defeatedNow * 2);
+                            newLogs.push(`鳥の壺: HPを${defeatedNow * 2}回復`);
+                        }
+                    }
+                    syncRedSkullState(p);
                     return {
                         ...prev,
                         player: p,
@@ -3036,6 +3206,7 @@ const App: React.FC = () => {
                 if (c.name === '恥' || c.name === 'SHAME') p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + 1;
                 if (c.name === '後悔' || c.name === 'REGRET') { p.currentHp -= p.hand.length; newLogs.push("後悔ダメージ"); nextActiveEffects.push({ id: `vfx-reg-${Date.now()}`, type: 'SLASH', targetId: 'player' }); }
             });
+            syncRedSkullState(p);
             return { ...prev, player: p, combatLog: [...prev.combatLog, ...newLogs].slice(-100), activeEffects: [...prev.activeEffects, ...nextActiveEffects] };
         });
         setTimeout(() => {
@@ -3426,7 +3597,7 @@ const App: React.FC = () => {
             let p = { ...prev.player };
             let nextRewards = [...prev.rewards];
             if (item.type === 'CARD') {
-                p.deck = [...p.deck, item.value];
+                addCardToDeckWithRelics(p, item.value);
                 nextRewards = nextRewards.filter(r => r.type !== 'CARD');
                 storageService.saveUnlockedCard(item.value.name);
             } else if (item.type === 'RELIC') {
@@ -3438,14 +3609,15 @@ const App: React.FC = () => {
                 if (item.value.id === 'VELVET_CHOKER') p.maxEnergy += 1;
                 if (item.value.id === 'WAFFLE') { p.maxHp += 7; p.currentHp = p.maxHp; }
                 if (item.value.id === 'OLD_COIN') p.gold += 300;
-                if (item.value.id === 'MATRYOSHKA') prev.player.relicCounters['MATRYOSHKA'] = 2;
-                if (item.value.id === 'HAPPY_FLOWER') prev.player.relicCounters['HAPPY_FLOWER'] = 0;
+                if (item.value.id === 'MATRYOSHKA') p.relicCounters['MATRYOSHKA'] = 2;
+                if (item.value.id === 'HAPPY_FLOWER') p.relicCounters['HAPPY_FLOWER'] = 0;
+                applyExtendedRelicAcquireEffects(p, item.value);
                 storageService.saveUnlockedRelic(item.value.id);
             } else if (item.type === 'GOLD') {
                 p.gold += item.value;
                 nextRewards = nextRewards.filter(r => r.id !== item.id);
             } else if (item.type === 'POTION') {
-                if (p.potions.length < 3 || replacePotionId) {
+                if (p.potions.length < getPotionCapacity(p) || replacePotionId) {
                     if (replacePotionId) p.potions = p.potions.filter(pt => pt.id !== replacePotionId);
                     p.potions = [...p.potions, item.value];
                     nextRewards = nextRewards.filter(r => r.id !== item.id);
@@ -4032,7 +4204,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.REWARD && (
                     <div className="absolute inset-0">
-                        <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading} currentPotions={gameState.player.potions} languageMode={languageMode} />
+                        <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading} currentPotions={gameState.player.potions} potionCapacity={getPotionCapacity(gameState.player)} languageMode={languageMode} />
                     </div>
                 )}
 
@@ -4060,7 +4232,9 @@ const App: React.FC = () => {
                                 setGameState(prev => {
                                     let price = card.price || 50;
                                     if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
-                                    return { ...prev, player: { ...prev.player, gold: prev.player.gold - price, deck: [...prev.player.deck, { ...card, id: `buy-${Date.now()}` }], discardPile: [...prev.player.discardPile, { ...card, id: `buy-${Date.now()}` }] } };
+                                    const newP = { ...prev.player, gold: prev.player.gold - price };
+                                    addCardToDeckWithRelics(newP, { ...card, id: `buy-${Date.now()}` }, { addToDiscard: true });
+                                    return { ...prev, player: newP };
                                 });
                                 storageService.saveUnlockedCard(card.name);
                             }}
@@ -4077,13 +4251,14 @@ const App: React.FC = () => {
                                     if (relic.id === 'OLD_COIN') newP.gold += 300;
                                     if (relic.id === 'MATRYOSHKA') newP.relicCounters['MATRYOSHKA'] = 2;
                                     if (relic.id === 'HAPPY_FLOWER') newP.relicCounters['HAPPY_FLOWER'] = 0;
+                                    applyExtendedRelicAcquireEffects(newP, relic);
                                     return { ...prev, player: newP };
                                 });
                                 storageService.saveUnlockedRelic(relic.id);
                             }}
                             onBuyPotion={(potion, replacePotionId) => {
                                 setGameState(prev => {
-                                    if (prev.player.potions.length < 3 || replacePotionId) {
+                                    if (prev.player.potions.length < getPotionCapacity(prev.player) || replacePotionId) {
                                         let price = potion.price || 50;
                                         if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
                                         let newPotions = [...prev.player.potions];
@@ -4110,6 +4285,7 @@ const App: React.FC = () => {
                                 });
                             }}
                             onLeave={handleNodeComplete}
+                            potionCapacity={getPotionCapacity(gameState.player)}
                             languageMode={languageMode}
                         />
                     </div>
@@ -4191,14 +4367,14 @@ const App: React.FC = () => {
                                             if (r.value.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
                                             if (r.value.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
                                             if (r.value.id === 'OLD_COIN') newP.gold += 300;
-                                            if (r.value.id === 'MATRYOSHKA') prev.player.relicCounters['MATRYOSHKA'] = 2;
-                                            if (r.value.id === 'HAPPY_FLOWER') prev.player.relicCounters['HAPPY_FLOWER'] = 0;
+                                            if (r.value.id === 'MATRYOSHKA') newP.relicCounters['MATRYOSHKA'] = 2;
+                                            if (r.value.id === 'HAPPY_FLOWER') newP.relicCounters['HAPPY_FLOWER'] = 0;
+                                            applyExtendedRelicAcquireEffects(newP, r.value);
                                         }
                                     });
                                     if (hasCursedKey) {
                                         const curse = { ...CURSE_CARDS.PAIN, id: `curse-${Date.now()}` };
-                                        newP.deck = [...newP.deck, curse];
-                                        newP.discardPile = [...newP.discardPile, curse];
+                                        addCardToDeckWithRelics(newP, curse, { addToDiscard: true });
                                     }
                                     return { ...prev, player: newP };
                                 });
