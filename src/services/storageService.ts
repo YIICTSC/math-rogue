@@ -53,6 +53,8 @@ const STORAGE_KEY_LANGUAGE_MODE = 'pixel_spire_language_mode_v1';
 // --- PLAY TIME ---
 const STORAGE_KEY_TOTAL_PLAY_TIME = 'pixel_spire_total_play_time_v1';
 const STORAGE_KEY_DAILY_PLAY_TIME = 'pixel_spire_daily_play_time_v1';
+const STORAGE_KEY_MODE_CORRECT_COUNTS = 'pixel_spire_mode_correct_counts_v1';
+const STORAGE_KEY_MASTERED_MODES = 'pixel_spire_mastered_modes_v1';
 
 // --- CUSTOM CHARACTER IMAGES ---
 const STORAGE_KEY_CUSTOM_IMAGES = 'pixel_spire_custom_images_v1';
@@ -599,6 +601,32 @@ export const storageService = {
     localStorage.setItem(STORAGE_KEY_DAILY_PLAY_TIME, JSON.stringify({ date: today, seconds }));
   },
 
+  getModeCorrectCounts: (): Record<string, number> => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_MODE_CORRECT_COUNTS);
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  },
+
+  saveModeCorrectCounts: (counts: Record<string, number>) => {
+    localStorage.setItem(STORAGE_KEY_MODE_CORRECT_COUNTS, JSON.stringify(counts));
+  },
+
+  getMasteredModes: (): string[] => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_MASTERED_MODES);
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  },
+
+  saveMasteredModes: (modes: string[]) => {
+    localStorage.setItem(STORAGE_KEY_MASTERED_MODES, JSON.stringify(modes));
+  },
+
   // --- Game State (Save/Load) ---
   saveGame: (state: GameState) => {
     try {
@@ -715,6 +743,8 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_LANGUAGE_MODE);
       localStorage.removeItem(STORAGE_KEY_TOTAL_PLAY_TIME);
       localStorage.removeItem(STORAGE_KEY_DAILY_PLAY_TIME);
+      localStorage.removeItem(STORAGE_KEY_MODE_CORRECT_COUNTS);
+      localStorage.removeItem(STORAGE_KEY_MASTERED_MODES);
       localStorage.removeItem(STORAGE_KEY_CUSTOM_IMAGES);
   }
 };

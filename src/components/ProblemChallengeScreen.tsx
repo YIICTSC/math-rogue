@@ -14,6 +14,7 @@ import { SUBJECT_CATEGORIES, SubjectCategoryConfig, SubModeConfig, getChallengeS
 interface ProblemChallengeScreenProps {
   onBack: () => void;
   languageMode: LanguageMode;
+  onCorrectAnswers?: (mode: GameMode, correctCount: number) => void;
 }
 
 const BGM_OPTIONS = [
@@ -83,7 +84,7 @@ const getGlowColorClass = (color: string) => {
     }
 };
 
-const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack, languageMode }) => {
+const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack, languageMode, onCorrectAnswers }) => {
   const [phase, setPhase] = useState<'SELECT' | 'CHALLENGE'>('SELECT');
   const [selectedCategory, setSelectedCategory] = useState<SubjectCategoryConfig>(SUBJECT_CATEGORIES[0]);
   const [selectedSubMode, setSelectedSubMode] = useState<SubModeConfig>(SUBJECT_CATEGORIES[0].subModes[0]);
@@ -119,6 +120,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
 
   const handleCompleteOne = (correctCount: number) => {
     if (correctCount > 0) {
+      onCorrectAnswers?.(selectedSubMode.mode, correctCount);
       const newStreak = streak + correctCount;
       setStreak(newStreak);
       
