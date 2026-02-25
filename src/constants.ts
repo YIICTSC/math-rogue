@@ -367,6 +367,17 @@ export const POTION_LIBRARY: Record<string, Omit<Potion, 'id'>> = {
     GHOST_IN_JAR: { templateId: 'GHOST_IN_JAR', name: 'お守り', description: '敗北時、HP10%で復活。', rarity: 'RARE', color: '#fcd34d', price: 200 },
     ENTROPIC_BREW: { templateId: 'ENTROPIC_BREW', name: '闇鍋ジュース', description: 'ポーションスロットを全て埋める。', rarity: 'RARE', color: '#a855f7', price: 120 },
     GAMBLERS_BREW: { templateId: 'GAMBLERS_BREW', name: 'サイダー', description: '手札を全て捨て、同じ枚数引く。', rarity: 'UNCOMMON', color: '#f59e0b', price: 60 },
+    STUDY_SESSION_DRINK: { templateId: 'STUDY_SESSION_DRINK', name: '放課後勉強ドリンク', description: 'エナジー1獲得。カードを2枚引く。', rarity: 'UNCOMMON', color: '#38bdf8', price: 80 },
+    MORNING_DRILL_JUICE: { templateId: 'MORNING_DRILL_JUICE', name: '朝練ジュース', description: 'このターン、次に使うカードを追加でもう1回発動する。', rarity: 'RARE', color: '#fb923c', price: 120 },
+    NURSE_ROOM_GEL: { templateId: 'NURSE_ROOM_GEL', name: '保健室ジェル', description: 'ブロック15獲得。次ターン開始時にさらにブロック8獲得。', rarity: 'UNCOMMON', color: '#60a5fa', price: 90 },
+    PROTEIN_MILK: { templateId: 'PROTEIN_MILK', name: '部活プロテイン', description: 'HPを10回復し、ムキムキ1獲得。', rarity: 'UNCOMMON', color: '#ef4444', price: 95 },
+    GARGLE_SYRUP: { templateId: 'GARGLE_SYRUP', name: 'うがいシロップ', description: '自分のデバフを全解除し、カードを1枚引く。', rarity: 'COMMON', color: '#22c55e', price: 65 },
+    CHALK_DUST_VIAL: { templateId: 'CHALK_DUST_VIAL', name: 'チョークダスト', description: '敵全体をびくびく2にする。', rarity: 'COMMON', color: '#cbd5e1', price: 70 },
+    TIMETABLE_ELIXIR: { templateId: 'TIMETABLE_ELIXIR', name: '時間割エリクサー', description: '次ターン、エナジー+1、ドロー+2。', rarity: 'UNCOMMON', color: '#a78bfa', price: 95 },
+    LAB_FLASK: { templateId: 'LAB_FLASK', name: '理科室フラスコ', description: '手札のランダムな1枚を強化する。', rarity: 'UNCOMMON', color: '#10b981', price: 85 },
+    COPY_PAPER_FLUID: { templateId: 'COPY_PAPER_FLUID', name: 'コピー用紙インク', description: '手札のカードを1枚選び、コピーを1枚手札に加える。', rarity: 'UNCOMMON', color: '#6366f1', price: 90 },
+    DETENTION_ENERGY_DRINK: { templateId: 'DETENTION_ENERGY_DRINK', name: '居残りエナドリ', description: 'HPを8失う。ムキムキ+3、エナジー+1。', rarity: 'RARE', color: '#f43f5e', price: 110 },
+
 };
 
 export const TRUE_BOSS = {

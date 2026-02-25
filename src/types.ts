@@ -598,5 +598,6 @@ export interface GameState {
   vsIsHost?: boolean; // P2P対戦でホストかどうか
   currentStoryIndex?: number;
   actStats?: ActStats;
+  currentEventTitle?: string;
   newlyUnlockedCardName?: string; // 追加: このアクトで解放されたカード
 }

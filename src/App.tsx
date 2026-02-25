@@ -324,6 +324,7 @@ const App: React.FC = () => {
     const [shopCards, setShopCards] = useState<ICard[]>([]);
     const [shopRelics, setShopRelics] = useState<Relic[]>([]);
     const [shopPotions, setShopPotions] = useState<Potion[]>([]);
+    const [weatherScryModal, setWeatherScryModal] = useState<{ cards: ICard[]; keepMap: Record<string, boolean> } | null>(null);
     const [eventData, setEventData] = useState<any>(null);
     const [eventResultLog, setEventResultLog] = useState<string | null>(null);
     const [unlockedCardNames, setUnlockedCardNames] = useState<string[]>([]);
@@ -794,7 +795,8 @@ const App: React.FC = () => {
             return {
                 ...prev,
                 map: newMap,
-                screen: GameScreen.MAP
+                screen: GameScreen.MAP,
+                currentEventTitle: undefined
             };
         });
         audioService.playBGM('map');
@@ -808,12 +810,43 @@ const App: React.FC = () => {
         }
         const saved = storageService.loadGame();
         if (saved) {
-            // 不正データチェック: HPが0以下の場合はロードさせない
+            // ???????: HP?0?????????????
             if (saved.player.currentHp <= 0) {
                 storageService.clearSave();
-                addLog("不適切なセーブデータを破棄しました。", "red");
+                addLog("???????????????????", "red");
                 return;
             }
+
+            if (saved.screen === GameScreen.EVENT) {
+                const currentNode = saved.map.find(n => n.id === saved.currentMapNodeId);
+                const canRestoreEvent = !!currentNode && currentNode.type === NodeType.EVENT;
+
+                if (canRestoreEvent) {
+                    const unlockedCards = storageService.getUnlockedCards();
+                    const restoredEvent = generateEvent(
+                        saved.player,
+                        setGameState,
+                        handleNodeComplete,
+                        setEventResultLog,
+                        languageMode,
+                        unlockedCards,
+                        saved.currentEventTitle
+                    );
+                    setEventData(restoredEvent);
+                    setEventResultLog(null);
+                } else {
+                    // ?????????????????????????????????
+                    saved.screen = saved.map.length > 0 ? GameScreen.MAP : GameScreen.RELIC_SELECTION;
+                    setEventData(null);
+                    setEventResultLog(null);
+                    addLog(trans("??????????????????????????????", languageMode), "yellow");
+                }
+            } else {
+                setEventData(null);
+                setEventResultLog(null);
+                saved.currentEventTitle = undefined;
+            }
+
             setGameState(saved);
             if (saved.screen === GameScreen.BATTLE) {
                 audioService.playBGM('battle');
@@ -824,7 +857,7 @@ const App: React.FC = () => {
             } else {
                 audioService.playBGM('map');
             }
-            addLog(trans("冒険を再開した。", languageMode), "blue");
+            addLog(trans("???????????", languageMode), "blue");
         }
     };
 
@@ -1259,6 +1292,7 @@ const App: React.FC = () => {
             setGameState(prev => ({
                 ...prev,
                 screen: GameScreen.EVENT,
+                currentEventTitle: specialEvent.title,
                 act: 1,
                 floor: 0,
                 turn: 0,
@@ -1321,6 +1355,7 @@ const App: React.FC = () => {
             setGameState(prev => ({
                 ...prev,
                 screen: GameScreen.EVENT,
+                currentEventTitle: ev.title,
                 map: map,
                 player: {
                     ...prev.player,
@@ -1635,7 +1670,7 @@ const App: React.FC = () => {
                 );
                 setEventData(ev);
                 setEventResultLog(null);
-                setGameState({ ...nextState, screen: GameScreen.EVENT });
+                setGameState({ ...nextState, screen: GameScreen.EVENT, currentEventTitle: ev.title });
                 audioService.playBGM('event');
             } else if (node.type === NodeType.TREASURE) {
                 const p = nextState.player;
@@ -1729,8 +1764,40 @@ const App: React.FC = () => {
         audioService.playSound('select');
     };
 
+    const toggleWeatherScryCard = (cardId: string, keep: boolean) => {
+        setWeatherScryModal(prev => {
+            if (!prev) return prev;
+            return { ...prev, keepMap: { ...prev.keepMap, [cardId]: keep } };
+        });
+    };
+
+    const applyWeatherScrySelection = () => {
+        if (!weatherScryModal) return;
+        const modal = weatherScryModal;
+        setGameState(prev => {
+            const p = { ...prev.player, drawPile: [...prev.player.drawPile], discardPile: [...prev.player.discardPile] };
+            const targetIds = new Set(modal.cards.map(c => c.id));
+            const keepCards = modal.cards.filter(c => modal.keepMap[c.id] !== false);
+            const discardCards = modal.cards.filter(c => modal.keepMap[c.id] === false);
+
+            // モーダル対象カードを山札から除外してから、選択結果を反映する
+            p.drawPile = p.drawPile.filter(c => !targetIds.has(c.id));
+            p.discardPile.push(...discardCards);
+            keepCards.slice().reverse().forEach(c => p.drawPile.push(c));
+
+            const combatLog = [
+                ...prev.combatLog,
+                trans(`天気予報：${keepCards.length}枚を山札に戻し、${discardCards.length}枚を捨て札に送った`, languageMode)
+            ].slice(-100);
+
+            return { ...prev, player: p, combatLog };
+        });
+        setWeatherScryModal(null);
+    };
+
     const handleUsePotion = (potion: Potion) => {
         if (gameState.screen !== GameScreen.BATTLE) return;
+        if (weatherScryModal) return;
         audioService.playSound('select');
 
         setGameState(prev => {
@@ -1741,6 +1808,17 @@ const App: React.FC = () => {
 
             p.potions = p.potions.filter(pt => pt.id !== potion.id);
             const target = enemies.find(e => e.id === prev.selectedEnemyId) || enemies[0];
+            const drawCards = (count: number) => {
+                for (let i = 0; i < count; i++) {
+                    if (p.drawPile.length === 0) {
+                        if (p.discardPile.length === 0) break;
+                        p.drawPile = shuffle(p.discardPile);
+                        p.discardPile = [];
+                    }
+                    const c = p.drawPile.pop();
+                    if (c) p.hand.push(c);
+                }
+            };
 
             if (p.relics.find(r => r.id === 'TAKETOMBO')) {
                 p.currentHp = Math.min(p.maxHp, p.currentHp + 5);
@@ -1786,7 +1864,7 @@ const App: React.FC = () => {
                 p.powers['THORNS'] = (p.powers['THORNS'] || 0) + 3;
                 newLogs.push(`${trans("トゲトゲ", languageMode)}+3`);
                 nextActiveEffects.push({ id: `vfx-pot-t-${Date.now()}`, type: 'BUFF', targetId: 'player' });
-            } else if (potion.templateId === 'GAMBLE') {
+            } else if (potion.templateId === 'GAMBLE' || potion.templateId === 'GAMBLERS_BREW') {
                 const cardsToDiscard = [...p.hand];
                 const discardCount = cardsToDiscard.length;
                 cardsToDiscard.forEach(c => {
@@ -1816,7 +1894,76 @@ const App: React.FC = () => {
                     }
                 }
                 newLogs.push(trans("小箱からポーション充填", languageMode));
+            } else if (potion.templateId === 'STUDY_SESSION_DRINK') {
+                p.currentEnergy += 1;
+                drawCards(2);
+                newLogs.push('Energy +1, Draw +2');
+                nextActiveEffects.push({ id: `vfx-pot-study-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+            } else if (potion.templateId === 'MORNING_DRILL_JUICE') {
+                p.echoes = Math.max(p.echoes, 1);
+                newLogs.push('Echo +1 for next card');
+                nextActiveEffects.push({ id: `vfx-pot-drill-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+            } else if (potion.templateId === 'NURSE_ROOM_GEL') {
+                p.block += 15;
+                p.turnFlags = { ...p.turnFlags, NURSE_ROOM_GEL_NEXT_BLOCK: true };
+                newLogs.push('Block +15, next turn Block +8');
+                nextActiveEffects.push({ id: `vfx-pot-nurse-${Date.now()}`, type: 'BLOCK', targetId: 'player' });
+            } else if (potion.templateId === 'PROTEIN_MILK') {
+                p.currentHp = Math.min(p.maxHp, p.currentHp + 10);
+                p.strength += 1;
+                p.floatingText = { id: `pot-protein-${Date.now()}`, text: '+10 / +1', color: 'text-green-500', iconType: 'heart' };
+                newLogs.push('HP +10, Strength +1');
+                nextActiveEffects.push({ id: `vfx-pot-protein-${Date.now()}`, type: 'HEAL', targetId: 'player' });
+            } else if (potion.templateId === 'GARGLE_SYRUP') {
+                p.powers['WEAK'] = 0;
+                p.powers['VULNERABLE'] = 0;
+                p.powers['FRAIL'] = 0;
+                p.powers['CONFUSED'] = 0;
+                drawCards(1);
+                newLogs.push('Cleanse debuffs, Draw +1');
+                nextActiveEffects.push({ id: `vfx-pot-gargle-${Date.now()}`, type: 'HEAL', targetId: 'player' });
+            } else if (potion.templateId === 'CHALK_DUST_VIAL') {
+                enemies.forEach(e => applyDebuff(e, 'VULNERABLE', 2));
+                newLogs.push('All enemies Vulnerable +2');
+                nextActiveEffects.push({ id: `vfx-pot-chalk-${Date.now()}`, type: 'DEBUFF', targetId: target ? target.id : 'player' });
+            } else if (potion.templateId === 'TIMETABLE_ELIXIR') {
+                p.nextTurnEnergy += 1;
+                p.nextTurnDraw += 2;
+                newLogs.push('Next turn: Energy +1, Draw +2');
+                nextActiveEffects.push({ id: `vfx-pot-time-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+            } else if (potion.templateId === 'LAB_FLASK') {
+                const upgradable = p.hand.filter(c => !c.upgraded);
+                if (upgradable.length > 0) {
+                    const selected = upgradable[Math.floor(Math.random() * upgradable.length)];
+                    p.hand = p.hand.map(c => c.id === selected.id ? getUpgradedCard(c) : c);
+                    newLogs.push(`Upgraded: ${trans(selected.name, languageMode)}`);
+                } else {
+                    newLogs.push('No upgradable card in hand');
+                }
+                nextActiveEffects.push({ id: `vfx-pot-lab-${Date.now()}`, type: 'LIGHTNING', targetId: 'player' });
+            } else if (potion.templateId === 'COPY_PAPER_FLUID') {
+                if (p.hand.length === 0) {
+                    newLogs.push('No card to copy');
+                } else {
+                    newLogs.push('Select 1 card to copy');
+                    return {
+                        ...prev,
+                        player: p,
+                        enemies,
+                        selectionState: { active: true, type: 'COPY', amount: 1 },
+                        combatLog: [...prev.combatLog, ...newLogs].slice(-100),
+                        activeEffects: [...prev.activeEffects, ...nextActiveEffects]
+                    };
+                }
+            } else if (potion.templateId === 'DETENTION_ENERGY_DRINK') {
+                p.currentHp = Math.max(1, p.currentHp - 8);
+                p.strength += 3;
+                p.currentEnergy += 1;
+                p.floatingText = { id: `pot-risk-${Date.now()}`, text: '-8 / +3 / +1', color: 'text-red-500', iconType: 'zap' };
+                newLogs.push('HP -8, Strength +3, Energy +1');
+                nextActiveEffects.push({ id: `vfx-pot-risk-${Date.now()}`, type: 'CRITICAL', targetId: 'player' });
             }
+
 
             const remainingEnemies = enemies.filter(e => e.currentHp > 0);
             return { ...prev, player: p, enemies: remainingEnemies, combatLog: [...prev.combatLog, ...newLogs].slice(-100), activeEffects: [...prev.activeEffects, ...nextActiveEffects] };
@@ -1824,6 +1971,7 @@ const App: React.FC = () => {
     };
 
     const handlePlayCard = (card: ICard) => {
+        if (weatherScryModal) return;
         let effectiveCost = card.cost;
         if (gameState.player.powers['CORRUPTION'] && card.type === CardType.SKILL) {
             effectiveCost = 0;
@@ -2401,7 +2549,11 @@ const App: React.FC = () => {
                         p.strength *= 2;
                         nextActiveEffects.push({ id: `vfx-ds-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
                     }
-                    if (card.name === '天気予報' || card.originalNames?.includes('天気予報')) {
+                    const isWeatherForecastCard =
+                        card.name === '天気予報' ||
+                        card.originalNames?.includes('天気予報') ||
+                        card.description.includes('山札のトップ3枚');
+                    if (isWeatherForecastCard) {
                         const peekCards: ICard[] = [];
                         for (let j = 0; j < 3; j++) {
                             if (p.drawPile.length === 0) {
@@ -2412,14 +2564,14 @@ const App: React.FC = () => {
                             const top = p.drawPile.pop();
                             if (top) peekCards.push(top);
                         }
-                        const scoreCard = (c: ICard) => {
-                            const costScore = c.cost >= 0 ? c.cost : 99;
-                            return (c.unplayable ? 100 : 0) + costScore;
-                        };
-                        // 次に引くカードが先頭になるように、逆順で戻す
-                        const reordered = [...peekCards].sort((a, b) => scoreCard(a) - scoreCard(b));
-                        reordered.slice().reverse().forEach(c => p.drawPile.push(c));
-                        currentLogs.push(trans("天気予報：山札トップ3枚を並べ替えた", languageMode));
+                        // 一旦そのまま山札へ戻し、次の描画で専用モーダルを開く
+                        peekCards.slice().reverse().forEach(c => p.drawPile.push(c));
+                        p.turnFlags = { ...p.turnFlags, WEATHER_PENDING_MODAL: true };
+                        if (peekCards.length > 0) {
+                            currentLogs.push(trans("天気予報：カード選択を開始", languageMode));
+                        } else {
+                            currentLogs.push(trans("天気予報：並べ替えるカードがなかった", languageMode));
+                        }
                         nextActiveEffects.push({ id: `vfx-weather-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
                     }
                     if (card.shuffleHandToDraw) {
@@ -2678,6 +2830,12 @@ const App: React.FC = () => {
             if (hasRelic(p, 'POCKETWATCH') && (p.relicCounters['POCKETWATCH_PENDING'] || 0) > 0) {
                 drawBonus += 3;
                 p.relicCounters['POCKETWATCH_PENDING'] = 0;
+            }
+
+            if (p.turnFlags['NURSE_ROOM_GEL_NEXT_BLOCK']) {
+                p.block += 8;
+                p.floatingText = { id: `nurse-gel-${Date.now()}`, text: '+8', color: 'text-blue-400', iconType: 'shield' };
+                delete p.turnFlags['NURSE_ROOM_GEL_NEXT_BLOCK'];
             }
 
             if (p.powers['DEMON_FORM']) {
@@ -3217,6 +3375,7 @@ const App: React.FC = () => {
 
     const handleEndTurnClick = () => {
         if (isEndingTurnRef.current) return;
+        if (weatherScryModal) return;
 
         if (gameState.player.relics.find(r => r.id === 'NILRYS_CODEX')) {
             const pool = getFilteredCardPool(gameState.player.id);
@@ -3230,6 +3389,25 @@ const App: React.FC = () => {
             executeEndTurn();
         }
     }
+
+    useEffect(() => {
+        if (gameState.screen !== GameScreen.BATTLE) return;
+        if (weatherScryModal) return;
+        if (!gameState.player.turnFlags['WEATHER_PENDING_MODAL']) return;
+
+        const cards = [...gameState.player.drawPile].slice(-3).reverse();
+        const keepMap: Record<string, boolean> = {};
+        cards.forEach(c => { keepMap[c.id] = true; });
+        setWeatherScryModal({ cards, keepMap });
+
+        setGameState(prev => ({
+            ...prev,
+            player: {
+                ...prev.player,
+                turnFlags: { ...prev.player.turnFlags, WEATHER_PENDING_MODAL: false }
+            }
+        }));
+    }, [gameState.screen, gameState.player.drawPile, gameState.player.turnFlags, weatherScryModal]);
 
     const onCodexSelect = (card: ICard | null) => {
         setGameState(prev => {
@@ -4331,6 +4509,7 @@ const App: React.FC = () => {
                             title={trans(eventData.title, languageMode)}
                             description={trans(eventData.description, languageMode)}
                             options={eventData.options.map((o: any) => ({ ...o, label: trans(o.label, languageMode), text: trans(o.text, languageMode) }))}
+                            imageKey={eventData.title}
                             image={gameState.player.imageData}
                             resultLog={eventResultLog ? trans(eventResultLog, languageMode) : null}
                             onContinue={handleEventComplete}
@@ -4383,6 +4562,45 @@ const App: React.FC = () => {
                             hasCursedKey={!!gameState.player.relics.find(r => r.id === 'CURSED_KEY')}
                             languageMode={languageMode}
                         />
+                    </div>
+                )}
+
+                {weatherScryModal && (
+                    <div className="fixed inset-0 z-[230] bg-black/70 flex items-center justify-center p-4">
+                        <div className="w-full max-w-lg rounded-xl border-2 border-cyan-400 bg-slate-900 text-white p-4">
+                            <h3 className="text-xl font-bold mb-2">{trans("天気予報", languageMode)}</h3>
+                            <p className="text-sm text-slate-300 mb-3">山札に戻すか、捨て札に送るかを選択してください</p>
+                            <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
+                                {weatherScryModal.cards.map((card, idx) => {
+                                    const keep = weatherScryModal.keepMap[card.id] !== false;
+                                    return (
+                                        <div key={card.id} className="rounded border border-slate-600 bg-slate-800/80 p-2">
+                                            <div className="text-sm font-bold mb-2">{idx + 1}. {trans(card.name, languageMode)}</div>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => toggleWeatherScryCard(card.id, true)}
+                                                    className={`flex-1 rounded px-2 py-1 text-sm ${keep ? 'bg-emerald-600' : 'bg-slate-700 hover:bg-slate-600'}`}
+                                                >
+                                                    山札に戻す
+                                                </button>
+                                                <button
+                                                    onClick={() => toggleWeatherScryCard(card.id, false)}
+                                                    className={`flex-1 rounded px-2 py-1 text-sm ${!keep ? 'bg-rose-600' : 'bg-slate-700 hover:bg-slate-600'}`}
+                                                >
+                                                    捨て札へ送る
+                                                </button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <button
+                                onClick={applyWeatherScrySelection}
+                                className="mt-4 w-full rounded bg-cyan-700 hover:bg-cyan-600 py-2 font-bold"
+                            >
+                                決定
+                            </button>
+                        </div>
                     </div>
                 )}
 

@@ -63,7 +63,7 @@ export const ADDITIONAL_CARDS: Record<string, Omit<Card, 'id'>> = {
   RIKA_FOSSIL: { name: 'アンモナイト', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック12。廃棄。', block: 12, exhaust: true, rarity: 'COMMON', textureRef: 'SNAKE|灰|SKILL' },
   RIKA_ANATOMY: { name: '人体模型', cost: 2, type: CardType.SKILL, target: TargetType.SELF, description: 'スケスケ1（ダメージ1化）を得る。', applyPower: { id: 'INTANGIBLE', amount: 1 }, rarity: 'RARE', textureRef: 'HUMANOID|白|SKILL' },
   RIKA_SPRING: { name: 'バネの弾力', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック5。次に使う攻撃のダメージ2倍。', block: 5, rarity: 'UNCOMMON', textureRef: 'SHIELD|灰|SKILL' },
-  RIKA_WEATHER: { name: '天気予報', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '山札のトップ3枚を確認して並べ替える。', rarity: 'COMMON', textureRef: 'EYE|青|SKILL' },
+  RIKA_WEATHER: { name: '天気予報', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '山札のトップ3枚を確認して戻すか捨てる。', rarity: 'COMMON', textureRef: 'EYE|青|SKILL' },
   RIKA_ALCOHOL: { name: 'アルコールランプ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '7ダメージ。対象にドクドク3。', damage: 7, poison: 3, rarity: 'COMMON', textureRef: 'FLAME|青|ATTACK' },
   RIKA_CONSTELLATION: { name: '冬の大三角形', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '6ダメージを3回与える。', damage: 6, playCopies: 2, rarity: 'UNCOMMON', textureRef: 'GEM|白|ATTACK' },
   RIKA_ROBOT: { name: '二足歩行ロボット', cost: 2, type: CardType.POWER, target: TargetType.SELF, description: 'ターン終了時、ブロック5を得る。', applyPower: { id: 'METALLICIZE', amount: 5 }, rarity: 'UNCOMMON', textureRef: 'ROBOT|灰|POWER' },
