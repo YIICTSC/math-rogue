@@ -14,12 +14,12 @@ interface CardProps {
 }
 
 export const KEYWORD_DEFINITIONS: Record<string, { title: string; desc: string }> = {
-  EXHAUST: { title: 'Exhaust', desc: 'Use once this battle.' },
-  STRENGTH: { title: 'Strength', desc: 'Increases attack damage.' },
-  VULNERABLE: { title: 'Vulnerable', desc: 'Take increased damage.' },
-  WEAK: { title: 'Weak', desc: 'Deal reduced attack damage.' },
-  BLOCK: { title: 'Block', desc: 'Prevents incoming damage.' },
-  DRAW: { title: 'Draw', desc: 'Draw cards from draw pile.' },
+  EXHAUST: { title: '廃棄', desc: '使用後、この戦闘中はデッキから除外される。' },
+  STRENGTH: { title: 'ムキムキ', desc: '攻撃ダメージがその数値分アップ！' },
+  VULNERABLE: { title: 'びくびく', desc: '攻撃から受けるダメージが50%増えちゃう！' },
+  WEAK: { title: 'へろへろ', desc: '攻撃で与えるダメージが25%減っちゃう...' },
+  BLOCK: { title: 'ブロック', desc: '次のターンまで、敵からのダメージを防ぐ。' },
+  DRAW: { title: 'ドロー', desc: '山札からカードを引く。' },
 };
 
 const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languageMode = 'JAPANESE' }) => {
