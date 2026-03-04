@@ -5,8 +5,24 @@ export const sanitizeCardIllustrationName = (name: string): string => {
   return cleaned.length > 0 ? cleaned : 'unknown-card';
 };
 
+const deriveNameAliases = (name: string): string[] => {
+  const trimmed = (name || '').trim();
+  if (!trimmed) return [];
+
+  const aliases = new Set<string>();
+  const suffixes = ['の種', 'の胞子', 'の豆'];
+  suffixes.forEach((suffix) => {
+    if (trimmed.endsWith(suffix)) {
+      aliases.add(trimmed.slice(0, -suffix.length));
+    }
+  });
+  return Array.from(aliases);
+};
+
 export const getCardIllustrationPaths = (id: string, name: string, aliases: string[] = []): string[] => {
-  const rawCandidates = [id, name, ...aliases].filter(Boolean).map((value) => value.trim());
+  const rawCandidates = [name, ...deriveNameAliases(name), ...aliases, id, 'SEED_SHARED', 'unknown-card']
+    .filter(Boolean)
+    .map((value) => value.trim());
   const candidates = Array.from(
     new Set(
       rawCandidates.flatMap((value) => [
@@ -15,7 +31,7 @@ export const getCardIllustrationPaths = (id: string, name: string, aliases: stri
       ])
     )
   );
-  const extensions = ['png', 'webp', 'jpg', 'jpeg', 'svg'];
+  const extensions = ['webp', 'png', 'jpg', 'jpeg', 'svg'];
   return candidates.flatMap((fileName) =>
     extensions.map((ext) => `/card-illustrations/${encodeURIComponent(`${fileName}.${ext}`)}`)
   );
