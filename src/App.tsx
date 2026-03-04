@@ -1737,305 +1737,1092 @@ const App: React.FC = () => {
         setGameState(prev => {
             const p = { ...prev.player };
             const mode = prev.selectionState;
-            if (!mode.active) return prev;
-
             if (mode.type === 'DISCARD' || mode.type === 'EXHAUST') {
                 p.hand = p.hand.filter(c => c.id !== card.id);
                 if (mode.type === 'DISCARD') {
                     p.discardPile.push(card);
-                    if (card.name === '??????' || card.name === 'YATSUATARI' || card.originalNames?.includes('??????') || card.originalNames?.includes('YATSUATARI')) {
-                        card.damage = (card.damage || 0) + 5;
+                    if (card.name === 'カンニングペーパー' || card.name === 'STRATEGIST') {
+                        p.nextTurnEnergy += 2;
+                        p.floatingText = { id: `strat-${Date.now()}-${Math.random()}`, text: '+2 Next Turn', color: 'text-yellow-400', iconType: 'zap' };
                     }
-                } else if (p.powers['FEEL_NO_PAIN']) {
-                    p.block += p.powers['FEEL_NO_PAIN'];
+                } else if (mode.type === 'EXHAUST') {
+                    if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
                 }
                 const newAmount = mode.amount - 1;
                 return { ...prev, player: p, selectionState: { ...mode, active: newAmount > 0, amount: newAmount } };
             }
-
             if (mode.type === 'COPY') {
-                p.hand = [...p.hand, { ...card, id: `copy-${Date.now()}-${Math.random()}` }];
+                const copy = { ...card, id: `copy-${Date.now()}` };
+                if (p.hand.length < HAND_SIZE + 5) p.hand.push(copy);
                 const newAmount = mode.amount - 1;
                 return { ...prev, player: p, selectionState: { ...mode, active: newAmount > 0, amount: newAmount } };
             }
-
             return prev;
         });
     };
 
-
-
     const handleCancelSelection = () => {
         setGameState(prev => ({
             ...prev,
-            selectionState: { active: false, type: 'DISCARD', amount: 0 }
+            selectionState: { ...prev.selectionState, active: false }
         }));
-    };
-
-    const handleUsePotion = (potion: Potion) => {
-        setGameState(prev => {
-            const p = { ...prev.player, powers: { ...prev.player.powers } };
-            const enemies = [...prev.enemies];
-            const logs = [...prev.combatLog];
-            const effects = [...prev.activeEffects];
-            const targetEnemyId = prev.selectedEnemyId ?? enemies[0]?.id;
-            const targetEnemy = enemies.find(e => e.id === targetEnemyId);
-
-            switch (potion.templateId) {
-                case 'HEALTH_POTION':
-                    p.currentHp = Math.min(p.maxHp, p.currentHp + 20);
-                    break;
-                case 'ENERGY_POTION':
-                    p.currentEnergy += 2;
-                    break;
-                case 'BLOCK_POTION':
-                    p.block += 12;
-                    break;
-                case 'STRENGTH_POTION':
-                    p.strength += 2;
-                    break;
-                case 'DEXTERITY_POTION':
-                    p.dexterity += 2;
-                    break;
-                case 'FIRE_POTION':
-                    if (targetEnemy) {
-                        targetEnemy.currentHp -= 20;
-                        effects.push({ id: `vfx-pot-fire-${Date.now()}`, type: 'FIRE', targetId: targetEnemy.id });
-                    }
-                    break;
-                case 'WEAK_POTION':
-                    enemies.forEach(enemy => applyDebuff(enemy, 'WEAK', 2));
-                    break;
-                case 'GHOST_IN_JAR':
-                    p.powers['INTANGIBLE'] = Math.max(p.powers['INTANGIBLE'] || 0, 1);
-                    break;
-                default:
-                    break;
-            }
-
-            p.potions = p.potions.filter(pt => pt.id !== potion.id);
-            syncRedSkullState(p);
-            logs.push(`${trans(potion.name, languageMode)} ?????`);
-
-            return {
-                ...prev,
-                player: p,
-                enemies: enemies.filter(e => e.currentHp > 0),
-                combatLog: logs.slice(-100),
-                activeEffects: effects
-            };
-        });
-        audioService.playSound('select');
-    };
-
-    const handlePlayCard = (card: ICard) => {
-        if (gameState.screen !== GameScreen.BATTLE) return;
-        if (weatherScryModal) return;
-
-        setGameState(prev => {
-            const p = {
-                ...prev.player,
-                hand: [...prev.player.hand],
-                drawPile: [...prev.player.drawPile],
-                discardPile: [...prev.player.discardPile],
-                powers: { ...prev.player.powers },
-                turnFlags: { ...prev.player.turnFlags },
-                relicCounters: { ...prev.player.relicCounters },
-                typesPlayedThisTurn: [...prev.player.typesPlayedThisTurn]
-            };
-            let enemies = prev.enemies.map(e => ({ ...e }));
-
-            const handIndex = p.hand.findIndex(c => c.id === card.id);
-            if (handIndex < 0) return prev;
-            if (card.unplayable) return prev;
-            if (card.cost > p.currentEnergy) return prev;
-
-            const playedCard = p.hand[handIndex];
-            p.hand.splice(handIndex, 1);
-            if (playedCard.cost > 0) p.currentEnergy -= playedCard.cost;
-            p.cardsPlayedThisTurn += 1;
-            if (playedCard.type === CardType.ATTACK) p.attacksPlayedThisTurn += 1;
-            p.typesPlayedThisTurn.push(playedCard.type);
-
-            const logs = [...prev.combatLog];
-            const effects: VisualEffectInstance[] = [...prev.activeEffects];
-            const targetEnemyId = prev.selectedEnemyId ?? enemies[0]?.id;
-            const targetEnemy = enemies.find(e => e.id === targetEnemyId);
-
-            const drawCards = (count: number) => {
-                for (let i = 0; i < count; i++) {
-                    if (p.drawPile.length === 0) {
-                        if (p.discardPile.length === 0) break;
-                        p.drawPile = shuffle([...p.discardPile]);
-                        p.discardPile = [];
-                    }
-                    const drawn = p.drawPile.pop();
-                    if (drawn) p.hand.push({ ...drawn });
-                }
-            };
-
-            const applyDamageToEnemy = (enemy: Enemy, baseDamage: number) => {
-                if (!enemy || baseDamage <= 0) return;
-                let dmg = baseDamage + p.strength;
-                if (p.powers['WEAK'] > 0) dmg = Math.floor(dmg * 0.75);
-                if (enemy.vulnerable > 0) dmg = Math.floor(dmg * 1.5);
-                dmg = Math.max(0, dmg);
-                const blocked = Math.min(enemy.block, dmg);
-                enemy.block -= blocked;
-                enemy.currentHp -= (dmg - blocked);
-                effects.push({ id: `vfx-card-hit-${Date.now()}-${enemy.id}`, type: 'SLASH', targetId: enemy.id });
-            };
-
-            const shouldUseTopDeckModal =
-                playedCard.name === '????'
-                || playedCard.originalNames?.includes('????')
-                || playedCard.description.includes('??????3?');
-
-            if (playedCard.damage) {
-                if (playedCard.target === TargetType.ALL_ENEMIES) {
-                    enemies.forEach(enemy => applyDamageToEnemy(enemy, playedCard.damage || 0));
-                } else if (playedCard.target === TargetType.RANDOM_ENEMY) {
-                    if (enemies.length > 0) {
-                        const random = enemies[Math.floor(Math.random() * enemies.length)];
-                        applyDamageToEnemy(random, playedCard.damage || 0);
-                    }
-                } else if (targetEnemy) {
-                    applyDamageToEnemy(targetEnemy, playedCard.damage || 0);
-                }
-            }
-
-            if (playedCard.block) p.block += playedCard.block + p.dexterity;
-            if (playedCard.draw) drawCards(playedCard.draw);
-            if (playedCard.heal) p.currentHp = Math.min(p.maxHp, p.currentHp + playedCard.heal);
-            if (playedCard.energy) p.currentEnergy += playedCard.energy;
-            if (playedCard.selfDamage) p.currentHp -= playedCard.selfDamage;
-            if (playedCard.nextTurnEnergy) p.nextTurnEnergy += playedCard.nextTurnEnergy;
-            if (playedCard.nextTurnDraw) p.nextTurnDraw += playedCard.nextTurnDraw;
-            if (playedCard.strength) p.strength += playedCard.strength;
-            if (playedCard.poison && targetEnemy) applyDebuff(targetEnemy, 'POISON', playedCard.poison);
-            if (playedCard.weak && targetEnemy) applyDebuff(targetEnemy, 'WEAK', playedCard.weak);
-            if (playedCard.vulnerable && targetEnemy) applyDebuff(targetEnemy, 'VULNERABLE', playedCard.vulnerable);
-            if (playedCard.applyPower) {
-                const { id, amount } = playedCard.applyPower;
-                p.powers[id] = (p.powers[id] || 0) + amount;
-            }
-
-            const logicResult = applyAdditionalCardLogic(playedCard, p, enemies, languageMode, logs, effects);
-            const nextPlayer = logicResult.player;
-            let nextEnemies = logicResult.enemies;
-            if (shouldUseTopDeckModal) {
-                nextPlayer.turnFlags['WEATHER_PENDING_MODAL'] = true;
-            }
-
-            if (playedCard.promptsDiscard && playedCard.promptsDiscard > 0) {
-                return {
-                    ...prev,
-                    player: nextPlayer,
-                    enemies: nextEnemies,
-                    selectionState: {
-                        active: true,
-                        type: 'DISCARD',
-                        amount: playedCard.promptsDiscard,
-                        originCardId: playedCard.id
-                    },
-                    combatLog: logs.slice(-100),
-                    activeEffects: effects
-                };
-            }
-            if (playedCard.promptsCopy && playedCard.promptsCopy > 0) {
-                return {
-                    ...prev,
-                    player: nextPlayer,
-                    enemies: nextEnemies,
-                    selectionState: {
-                        active: true,
-                        type: 'COPY',
-                        amount: playedCard.promptsCopy,
-                        originCardId: playedCard.id
-                    },
-                    combatLog: logs.slice(-100),
-                    activeEffects: effects
-                };
-            }
-            if (playedCard.promptsExhaust && playedCard.promptsExhaust > 0) {
-                return {
-                    ...prev,
-                    player: nextPlayer,
-                    enemies: nextEnemies,
-                    selectionState: {
-                        active: true,
-                        type: 'EXHAUST',
-                        amount: playedCard.promptsExhaust,
-                        originCardId: playedCard.id
-                    },
-                    combatLog: logs.slice(-100),
-                    activeEffects: effects
-                };
-            }
-
-            if (!playedCard.exhaust) nextPlayer.discardPile.push(playedCard);
-
-            syncRedSkullState(nextPlayer);
-            logs.push(`${trans(playedCard.name, languageMode)} ?????`);
-            nextEnemies = nextEnemies.filter(e => e.currentHp > 0);
-
-            return {
-                ...prev,
-                player: nextPlayer,
-                enemies: nextEnemies,
-                selectedEnemyId: nextEnemies.some(e => e.id === prev.selectedEnemyId) ? prev.selectedEnemyId : (nextEnemies[0]?.id ?? null),
-                combatLog: logs.slice(-100),
-                activeEffects: effects
-            };
-        });
-
-        setLastActionType(card.type);
-        setLastActionTime(Date.now());
         audioService.playSound('select');
     };
 
     const toggleWeatherScryCard = (cardId: string, keep: boolean) => {
         setWeatherScryModal(prev => {
             if (!prev) return prev;
-            return {
-                ...prev,
-                keepMap: { ...prev.keepMap, [cardId]: keep }
-            };
+            return { ...prev, keepMap: { ...prev.keepMap, [cardId]: keep } };
         });
     };
 
     const applyWeatherScrySelection = () => {
         if (!weatherScryModal) return;
-        const modalSnapshot = weatherScryModal;
-        setWeatherScryModal(null);
-
+        const modal = weatherScryModal;
         setGameState(prev => {
             const p = { ...prev.player, drawPile: [...prev.player.drawPile], discardPile: [...prev.player.discardPile] };
-            if (p.drawPile.length === 0) return prev;
+            const targetIds = new Set(modal.cards.map(c => c.id));
+            const keepCards = modal.cards.filter(c => modal.keepMap[c.id] !== false);
+            const discardCards = modal.cards.filter(c => modal.keepMap[c.id] === false);
 
-            const topCount = Math.min(3, p.drawPile.length);
-            const topCards = p.drawPile.slice(-topCount).reverse();
-            p.drawPile = p.drawPile.slice(0, -topCount);
+            // モーダル対象カードを山札から除外してから、選択結果を反映する
+            p.drawPile = p.drawPile.filter(c => !targetIds.has(c.id));
+            p.discardPile.push(...discardCards);
+            keepCards.slice().reverse().forEach(c => p.drawPile.push(c));
 
-            const keepCards: ICard[] = [];
-            const discardCards: ICard[] = [];
-            topCards.forEach(card => {
-                const keep = modalSnapshot.keepMap[card.id] !== false;
-                if (keep) keepCards.push(card);
-                else discardCards.push(card);
-            });
+            const combatLog = [
+                ...prev.combatLog,
+                trans(`天気予報：${keepCards.length}枚を山札に戻し、${discardCards.length}枚を捨て札に送った`, languageMode)
+            ].slice(-100);
 
-            p.discardPile = [...p.discardPile, ...discardCards];
-            for (let i = keepCards.length - 1; i >= 0; i--) {
-                p.drawPile.push(keepCards[i]);
+            return { ...prev, player: p, combatLog };
+        });
+        setWeatherScryModal(null);
+    };
+
+    const handleUsePotion = (potion: Potion) => {
+        if (gameState.screen !== GameScreen.BATTLE) return;
+        if (weatherScryModal) return;
+        audioService.playSound('select');
+
+        setGameState(prev => {
+            const p = { ...prev.player };
+            const enemies = [...prev.enemies];
+            const newLogs = [`${trans("ポーション使用", languageMode)}: ${trans(potion.name, languageMode)}`];
+            const nextActiveEffects: VisualEffectInstance[] = [];
+
+            p.potions = p.potions.filter(pt => pt.id !== potion.id);
+            const target = enemies.find(e => e.id === prev.selectedEnemyId) || enemies[0];
+            const drawCards = (count: number) => {
+                for (let i = 0; i < count; i++) {
+                    if (p.drawPile.length === 0) {
+                        if (p.discardPile.length === 0) break;
+                        p.drawPile = shuffle(p.discardPile);
+                        p.discardPile = [];
+                    }
+                    const c = p.drawPile.pop();
+                    if (c) p.hand.push(c);
+                }
+            };
+
+            if (p.relics.find(r => r.id === 'TAKETOMBO')) {
+                p.currentHp = Math.min(p.maxHp, p.currentHp + 5);
+                p.floatingText = { id: `heal-taketombo-${Date.now()}`, text: `+5`, color: 'text-green-500', iconType: 'heart' };
+                newLogs.push(trans("竹とんぼでHP5回復", languageMode));
+                nextActiveEffects.push({ id: `vfx-pot-heal-${Date.now()}`, type: 'HEAL', targetId: 'player' });
             }
+
+            if (potion.templateId === 'FIRE_POTION' && target) {
+                target.currentHp -= 20;
+                target.floatingText = { id: `dmg-${Date.now()}`, text: '20', color: 'text-red-500', iconType: 'sword' };
+                newLogs.push(`${trans(target.name, languageMode)}に20${trans("ダメージ", languageMode)}`);
+                nextActiveEffects.push({ id: `vfx-pot-fire-${Date.now()}`, type: 'FIRE', targetId: target.id });
+            } else if (potion.templateId === 'BLOCK_POTION') {
+                p.block += 12;
+                newLogs.push(`${trans("ブロック", languageMode)}12を${trans("獲得", languageMode)}`);
+                nextActiveEffects.push({ id: `vfx-pot-blk-${Date.now()}`, type: 'BLOCK', targetId: 'player' });
+            } else if (potion.templateId === 'STRENGTH_POTION') {
+                p.strength += 2;
+                newLogs.push(`${trans("ムキムキ", languageMode)}+2`);
+                nextActiveEffects.push({ id: `vfx-pot-zap-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+            } else if (potion.templateId === 'ENERGY_POTION') {
+                p.currentEnergy += 2;
+                newLogs.push(`${trans("エネルギー", languageMode)}+2`);
+                nextActiveEffects.push({ id: `vfx-pot-zap-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+            } else if (potion.templateId === 'WEAK_POTION' && target) {
+                applyDebuff(target, 'WEAK', 3);
+                newLogs.push(`${trans(target.name, languageMode)}に${trans("へろへろ", languageMode)}3を${trans("付与", languageMode)}`);
+                nextActiveEffects.push({ id: `vfx-pot-dbuff-${Date.now()}`, type: 'DEBUFF', targetId: target.id });
+            } else if (potion.templateId === 'POISON_POTION') {
+                if (target) {
+                    applyDebuff(target, 'POISON', 6);
+                    newLogs.push(`${trans(target.name, languageMode)}に${trans("ドクドク", languageMode)}6を${trans("付与", languageMode)}`);
+                    nextActiveEffects.push({ id: `vfx-pot-psn-${Date.now()}`, type: 'DEBUFF', targetId: target.id });
+                }
+            } else if (potion.templateId === 'HEALTH_POTION') {
+                const heal = 15;
+                p.currentHp = Math.min(p.maxHp, p.currentHp + heal);
+                p.floatingText = { id: `heal-${Date.now()}`, text: `+${heal}`, color: 'text-green-500', iconType: 'heart' };
+                newLogs.push(`HP${heal}${trans("回復", languageMode)}`);
+                nextActiveEffects.push({ id: `vfx-pot-h-${Date.now()}`, type: 'HEAL', targetId: 'player' });
+            } else if (potion.templateId === 'LIQUID_BRONZE') {
+                p.powers['THORNS'] = (p.powers['THORNS'] || 0) + 3;
+                newLogs.push(`${trans("トゲトゲ", languageMode)}+3`);
+                nextActiveEffects.push({ id: `vfx-pot-t-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+            } else if (potion.templateId === 'GAMBLE' || potion.templateId === 'GAMBLERS_BREW') {
+                const cardsToDiscard = [...p.hand];
+                const discardCount = cardsToDiscard.length;
+                cardsToDiscard.forEach(c => {
+                    p.discardPile.push(c);
+                    if (c.name === 'カンニングペーパー' || c.name === 'STRATEGIST') {
+                        p.nextTurnEnergy += 2;
+                        p.floatingText = { id: `strat-pot-${Date.now()}`, text: '+2 Next Turn', color: 'text-yellow-400', iconType: 'zap' };
+                    }
+                });
+                p.hand = [];
+                for (let i = 0; i < discardCount; i++) {
+                    if (p.drawPile.length === 0) {
+                        if (p.discardPile.length === 0) break;
+                        p.drawPile = shuffle(p.discardPile);
+                        p.discardPile = [];
+                    }
+                    const c = p.drawPile.pop();
+                    if (c) p.hand.push(c);
+                }
+                newLogs.push(trans("手札を交換", languageMode));
+            } else if (potion.templateId === 'ENTROPIC_BREW') {
+                for (let i = 0; i < 3; i++) {
+                    if (p.potions.length < getPotionCapacity(p)) {
+                        const allPotions = Object.values(POTION_LIBRARY);
+                        const randomPot = { ...allPotions[Math.floor(Math.random() * allPotions.length)], id: `entropy-${Date.now()}-${i}` };
+                        p.potions.push(randomPot);
+                    }
+                }
+                newLogs.push(trans("小箱からポーション充填", languageMode));
+            } else if (potion.templateId === 'STUDY_SESSION_DRINK') {
+                p.currentEnergy += 1;
+                drawCards(2);
+                newLogs.push('Energy +1, Draw +2');
+                nextActiveEffects.push({ id: `vfx-pot-study-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+            } else if (potion.templateId === 'MORNING_DRILL_JUICE') {
+                p.echoes = Math.max(p.echoes, 1);
+                newLogs.push('Echo +1 for next card');
+                nextActiveEffects.push({ id: `vfx-pot-drill-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+            } else if (potion.templateId === 'NURSE_ROOM_GEL') {
+                p.block += 15;
+                p.turnFlags = { ...p.turnFlags, NURSE_ROOM_GEL_NEXT_BLOCK: true };
+                newLogs.push('Block +15, next turn Block +8');
+                nextActiveEffects.push({ id: `vfx-pot-nurse-${Date.now()}`, type: 'BLOCK', targetId: 'player' });
+            } else if (potion.templateId === 'PROTEIN_MILK') {
+                p.currentHp = Math.min(p.maxHp, p.currentHp + 10);
+                p.strength += 1;
+                p.floatingText = { id: `pot-protein-${Date.now()}`, text: '+10 / +1', color: 'text-green-500', iconType: 'heart' };
+                newLogs.push('HP +10, Strength +1');
+                nextActiveEffects.push({ id: `vfx-pot-protein-${Date.now()}`, type: 'HEAL', targetId: 'player' });
+            } else if (potion.templateId === 'GARGLE_SYRUP') {
+                p.powers['WEAK'] = 0;
+                p.powers['VULNERABLE'] = 0;
+                p.powers['FRAIL'] = 0;
+                p.powers['CONFUSED'] = 0;
+                drawCards(1);
+                newLogs.push('Cleanse debuffs, Draw +1');
+                nextActiveEffects.push({ id: `vfx-pot-gargle-${Date.now()}`, type: 'HEAL', targetId: 'player' });
+            } else if (potion.templateId === 'CHALK_DUST_VIAL') {
+                enemies.forEach(e => applyDebuff(e, 'VULNERABLE', 2));
+                newLogs.push('All enemies Vulnerable +2');
+                nextActiveEffects.push({ id: `vfx-pot-chalk-${Date.now()}`, type: 'DEBUFF', targetId: target ? target.id : 'player' });
+            } else if (potion.templateId === 'TIMETABLE_ELIXIR') {
+                p.nextTurnEnergy += 1;
+                p.nextTurnDraw += 2;
+                newLogs.push('Next turn: Energy +1, Draw +2');
+                nextActiveEffects.push({ id: `vfx-pot-time-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+            } else if (potion.templateId === 'LAB_FLASK') {
+                const upgradable = p.hand.filter(c => !c.upgraded);
+                if (upgradable.length > 0) {
+                    const selected = upgradable[Math.floor(Math.random() * upgradable.length)];
+                    p.hand = p.hand.map(c => c.id === selected.id ? getUpgradedCard(c) : c);
+                    newLogs.push(`Upgraded: ${trans(selected.name, languageMode)}`);
+                } else {
+                    newLogs.push('No upgradable card in hand');
+                }
+                nextActiveEffects.push({ id: `vfx-pot-lab-${Date.now()}`, type: 'LIGHTNING', targetId: 'player' });
+            } else if (potion.templateId === 'COPY_PAPER_FLUID') {
+                if (p.hand.length === 0) {
+                    newLogs.push('No card to copy');
+                } else {
+                    newLogs.push('Select 1 card to copy');
+                    return {
+                        ...prev,
+                        player: p,
+                        enemies,
+                        selectionState: { active: true, type: 'COPY', amount: 1 },
+                        combatLog: [...prev.combatLog, ...newLogs].slice(-100),
+                        activeEffects: [...prev.activeEffects, ...nextActiveEffects]
+                    };
+                }
+            } else if (potion.templateId === 'DETENTION_ENERGY_DRINK') {
+                p.currentHp = Math.max(1, p.currentHp - 8);
+                p.strength += 3;
+                p.currentEnergy += 1;
+                p.floatingText = { id: `pot-risk-${Date.now()}`, text: '-8 / +3 / +1', color: 'text-red-500', iconType: 'zap' };
+                newLogs.push('HP -8, Strength +3, Energy +1');
+                nextActiveEffects.push({ id: `vfx-pot-risk-${Date.now()}`, type: 'CRITICAL', targetId: 'player' });
+            }
+
+
+            const remainingEnemies = enemies.filter(e => e.currentHp > 0);
+            return { ...prev, player: p, enemies: remainingEnemies, combatLog: [...prev.combatLog, ...newLogs].slice(-100), activeEffects: [...prev.activeEffects, ...nextActiveEffects] };
+        });
+    };
+
+    const handlePlayCard = (card: ICard) => {
+        if (weatherScryModal) return;
+        let effectiveCost = card.cost;
+        if (gameState.player.powers['CORRUPTION'] && card.type === CardType.SKILL) {
+            effectiveCost = 0;
+        }
+
+        if (gameState.player.currentEnergy < effectiveCost && !gameState.player.partner) return;
+        if (gameState.enemies.length === 0) return;
+        if (actingEnemyId) return;
+        if (gameState.selectionState.active) return;
+        if (card.unplayable) return;
+
+        const hasChoker = !!gameState.player.relics.find(r => r.id === 'VELVET_CHOKER');
+        if (hasChoker && gameState.player.cardsPlayedThisTurn >= 6) {
+            audioService.playSound('wrong');
+            return;
+        }
+
+        const hasNormality = gameState.player.hand.some(c => c.name === '退屈' || c.name === 'NORMALITY');
+        if (hasNormality && gameState.player.attacksPlayedThisTurn + (gameState.player.cardsPlayedThisTurn - gameState.player.attacksPlayedThisTurn) >= 3) {
+            audioService.playSound('wrong');
+            return;
+        }
+
+        audioService.playSound(card.type === CardType.ATTACK ? 'attack' : 'block');
+        setLastActionType(card.type);
+        setLastActionTime(Date.now());
+
+        setGameState(prev => {
+            const p = { ...prev.player, hand: [...prev.player.hand], drawPile: [...prev.player.drawPile], discardPile: [...prev.player.discardPile], deck: [...prev.player.deck], powers: { ...prev.player.powers } };
+            let enemies = prev.enemies.map(e => ({ ...e }));
+            const currentLogs: string[] = [`> ${trans(card.name, languageMode)} ${trans("を使用", languageMode)}`];
+            const nextActiveEffects: VisualEffectInstance[] = [];
+            let nextSelectionState = { ...prev.selectionState };
+            const nextActStats = prev.actStats ? { ...prev.actStats } : { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 };
+
+            // --- カード固有の拡張ロジック ---
+            // ここに外部サービスからの呼び出しを追加
+            const additionalResult = applyAdditionalCardLogic(card, p, enemies, languageMode, currentLogs, nextActiveEffects);
+            Object.assign(p, additionalResult.player);
+            enemies = additionalResult.enemies;
+
+            if (card.gold) {
+                p.gold += card.gold;
+                currentLogs.push(`${card.gold}ゴールドをゲット！`);
+                audioService.playSound('buff');
+            }
+
+            if (card.addPotion) {
+                const allPotions = Object.values(POTION_LIBRARY);
+                const potion = { ...allPotions[Math.floor(Math.random() * allPotions.length)], id: `event-pot-${Date.now()}` };
+                if (p.potions.length < getPotionCapacity(p)) p.potions.push(potion);
+                currentLogs.push(`${trans(potion.name, languageMode)}をゲット！`);
+            }
+
+            if (card.blockMultiplier) {
+                p.block = Math.floor(p.block * card.blockMultiplier);
+                nextActiveEffects.push({ id: `vfx-blkmul-${Date.now()}`, type: 'BLOCK', targetId: 'player' });
+            }
+
+            if (card.name === '磁石の力' || card.name === 'RIKA_MAGNET' || card.name === '鉄棒の逆上がり' || card.name === 'PE_HORIZONTAL_BAR' || card.originalNames?.some(n => ['磁石の力', 'RIKA_MAGNET', '鉄棒の逆上がり', 'PE_HORIZONTAL_BAR'].includes(n))) {
+                if (p.discardPile.length > 0) {
+                    const idx = Math.floor(Math.random() * p.discardPile.length);
+                    const retrieved = p.discardPile.splice(idx, 1)[0];
+                    p.hand.push(retrieved);
+                    currentLogs.push(`${trans(retrieved.name, languageMode)}を捨て札から回収した！`);
+                }
+            }
+
+            if (card.name === '虹のプリズム' || card.name === 'RIKA_RAINBOW' || card.originalNames?.includes('虹のプリズム') || card.originalNames?.includes('RIKA_RAINBOW')) {
+                const handToUpgrade = p.hand.filter(c => c.id !== card.id && !c.upgraded);
+                if (handToUpgrade.length > 0) {
+                    const shuffled = shuffle([...handToUpgrade]);
+                    const targets = shuffled.slice(0, 2);
+                    p.hand = p.hand.map(hc => {
+                        if (targets.some(t => t.id === hc.id)) return getUpgradedCard(hc);
+                        return hc;
+                    });
+                    currentLogs.push("手札のカードを2枚強化した！");
+                }
+            }
+
+            if (card.name === '学習アルゴリズム' || card.name === 'GENETIC_ALGORITHM' || card.originalNames?.includes('学習アルゴリズム') || card.originalNames?.includes('GENETIC_ALGORITHM')) {
+                p.deck = p.deck.map(c => {
+                    if (c.id === card.id) {
+                        const newBlock = (c.block || 0) + 2;
+                        return {
+                            ...c,
+                            block: newBlock,
+                            description: c.description.replace(/ブロック(\d+)/, `ブロック${newBlock}`)
+                        };
+                    }
+                    return c;
+                });
+            }
+
+            const painCards = p.hand.filter(c => c.name === '腹痛' || c.name === 'PAIN');
+            if (painCards.length > 0) {
+                const dmg = painCards.length;
+                p.currentHp -= dmg;
+                currentLogs.push(`腹痛ダメージ: -${dmg}`);
+                p.floatingText = { id: `pain-${Date.now()}`, text: `-${dmg}`, color: 'text-purple-500', iconType: 'skull' };
+                nextActiveEffects.push({ id: `vfx-pain-${Date.now()}`, type: 'SLASH', targetId: 'player' });
+            }
+
+            p.currentEnergy -= effectiveCost;
+            p.cardsPlayedThisTurn++;
+            if (hasRelic(p, 'INK_BOTTLE')) {
+                const inkCount = (p.relicCounters['INK_BOTTLE_COUNT'] || 0) + 1;
+                if (inkCount >= 10) {
+                    p.relicCounters['INK_BOTTLE_COUNT'] = 0;
+                    const drawn = drawOneCard(p);
+                    if (drawn) {
+                        p.hand.push(drawn);
+                        currentLogs.push(trans("インク瓶：カードを1枚引いた", languageMode));
+                    }
+                } else {
+                    p.relicCounters['INK_BOTTLE_COUNT'] = inkCount;
+                }
+            }
+
+            if (!p.typesPlayedThisTurn.includes(card.type)) {
+                p.typesPlayedThisTurn.push(card.type);
+            }
+
+            if (card.type === CardType.ATTACK) {
+                p.attacksPlayedThisTurn++;
+            }
+
+            if (p.relics.find(r => r.id === 'ORANGE_PELLETS')) {
+                if (p.typesPlayedThisTurn.includes(CardType.ATTACK) &&
+                    p.typesPlayedThisTurn.includes(CardType.SKILL) &&
+                    p.typesPlayedThisTurn.includes(CardType.POWER)) {
+
+                    if (p.powers['WEAK'] > 0) { p.powers['WEAK'] = 0; currentLogs.push(trans("へろろから回復した", languageMode)); }
+                    if (p.powers['VULNERABLE'] > 0) { p.powers['VULNERABLE'] = 0; currentLogs.push(trans("びくびくから回復した", languageMode)); }
+                    if (p.powers['FRAIL'] > 0) { p.powers['FRAIL'] = 0; currentLogs.push(trans("もろい解除！", languageMode)); }
+
+                    p.typesPlayedThisTurn = [];
+                    p.floatingText = { id: `pellets-${Date.now()}`, text: 'デバフ解除', color: 'text-white', iconType: 'shield' };
+                    nextActiveEffects.push({ id: `vfx-pellets-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+                }
+            }
+
+            if (card.name === '錬金術' || card.name === 'ALCHEMIZE' || card.originalNames?.includes('錬金術') || card.originalNames?.includes('ALCHEMIZE')) {
+                const possibleCards = getFilteredCardPool(p.id).filter(c => c.rarity !== 'SPECIAL');
+                const randomCardTemplate = possibleCards[Math.floor(Math.random() * possibleCards.length)];
+                let newC = { ...randomCardTemplate, id: `alch-${Date.now()}`, cost: 0 } as ICard;
+                if (p.powers['MASTER_REALITY']) newC = getUpgradedCard(newC);
+
+                if (p.hand.length < HAND_SIZE + 5) {
+                    p.hand.push(newC);
+                } else {
+                    p.discardPile.push(newC);
+                }
+                currentLogs.push(`${trans("錬金術", languageMode)}: ${trans(newC.name, languageMode)}を生成`);
+                nextActiveEffects.push({ id: `vfx-alch-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+            }
+
+            if (card.name === '発見' || card.name === 'DISCOVERY' || card.originalNames?.includes('発見') || card.originalNames?.includes('DISCOVERY')) {
+                const possibleCards = getFilteredCardPool(p.id);
+                for (let i = 0; i < 3; i++) {
+                    const template = possibleCards[Math.floor(Math.random() * possibleCards.length)];
+                    const newCard = { ...template, id: `disc-${Date.now()}-${i}`, cost: 0, exhaust: true } as ICard;
+                    if (p.hand.length < HAND_SIZE + 5) {
+                        p.hand.push(newCard);
+                    } else {
+                        p.discardPile.push(newCard);
+                    }
+                }
+                currentLogs.push(trans("発見！カードを3枚生成", languageMode));
+                nextActiveEffects.push({ id: `vfx-disc-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+            }
+
+            if (card.name === '山勘' || card.name === 'CALCULATED_GAMBLE' || card.originalNames?.includes('山勘') || card.originalNames?.includes('CALCULATED_GAMBLE')) {
+                const cardsToDiscard = p.hand.filter(c => c.id !== card.id);
+                const count = cardsToDiscard.length;
+                cardsToDiscard.forEach(c => {
+                    p.discardPile.push(c);
+                    if (c.name === 'カンニングペーパー' || c.name === 'STRATEGIST') {
+                        p.nextTurnEnergy += 2;
+                        currentLogs.push(`${trans("カンニングペーパー", languageMode)}: +2 Next Turn Energy`);
+                        p.floatingText = { id: `strat-${Date.now()}-${Math.random()}`, text: '+2 Next Turn', color: 'text-yellow-400', iconType: 'zap' };
+                    }
+                });
+                p.hand = [];
+                for (let i = 0; i < count; i++) {
+                    if (p.drawPile.length === 0) {
+                        if (p.discardPile.length === 0) break;
+                        p.drawPile = shuffle(p.discardPile);
+                        p.discardPile = [];
+                    }
+                    const newCard = p.drawPile.pop();
+                    if (newCard) {
+                        const card = { ...newCard };
+                        if (card.name === '虚無' || card.name === 'VOID') {
+                            p.currentEnergy = Math.max(0, p.currentEnergy - 1);
+                            p.floatingText = { id: `void-turn-${Date.now()}-${i}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
+                        }
+                        if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && card.cost >= 0) {
+                            card.cost = Math.floor(Math.random() * 4);
+                        }
+                        p.hand.push(card);
+                    }
+                }
+                currentLogs.push(`${trans("手札を交換", languageMode)} (${count})`);
+                nextActiveEffects.push({ id: `vfx-gamble-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+            }
+
+            if (p.powers['AFTER_IMAGE']) {
+                p.block += p.powers['AFTER_IMAGE'];
+                nextActiveEffects.push({ id: `vfx-after-${Date.now()}`, type: 'BLOCK', targetId: 'player' });
+            }
+            if (p.powers['THOUSAND_CUTS']) {
+                enemies.forEach(e => {
+                    e.currentHp -= p.powers['THOUSAND_CUTS'];
+                    e.floatingText = { id: `cut-${Date.now()}-${e.id}`, text: `${p.powers['THOUSAND_CUTS']}`, color: 'text-purple-400' };
+                    nextActiveEffects.push({ id: `vfx-cut-${Date.now()}-${e.id}`, type: 'FIRE', targetId: e.id });
+                });
+            }
+
+            let activations = 1;
+            if (p.echoes > 0) { activations++; p.echoes--; currentLogs.push(trans("反響で再発動！", languageMode)); }
+            if (card.type === CardType.SKILL && p.powers['BURST'] > 0) { activations++; p.powers['BURST']--; currentLogs.push(trans("バーストで再発動！", languageMode)); }
+            if (card.type === CardType.ATTACK && p.relics.find(r => r.id === 'NECRONOMICON') && card.cost >= 2 && !p.turnFlags['NECRONOMICON_USED']) {
+                activations++;
+                p.turnFlags['NECRONOMICON_USED'] = true;
+                currentLogs.push(trans("ネクロノミコンで再発動！", languageMode));
+            }
+
+            let baseVfx = 'SLASH';
+            if (card.type === CardType.ATTACK) {
+                if (card.name.includes('火') || card.name.includes('炎') || card.name === '焼却炉' || card.name === 'IMMOLATE') baseVfx = 'FIRE';
+                else if (card.name.includes('雷') || card.name === '静電気' || card.name === 'BALL_LIGHTNING') baseVfx = 'LIGHTNING';
+                else if (card.name === '大掃除' || card.name === 'FIEND_FIRE') baseVfx = 'EXPLOSION';
+            }
+
+            for (let act = 0; act < activations; act++) {
+                if (enemies.every(e => e.currentHp <= 0)) break;
+                let hits = 1;
+                if (card.playCopies) hits += card.playCopies;
+                if (card.hitsPerSkillInHand) hits = p.hand.filter(c => c.type === CardType.SKILL && c.id !== card.id).length;
+                if (card.hitsPerAttackPlayed) hits = p.attacksPlayedThisTurn;
+                const maxHits = 100;
+                if (hits > maxHits) hits = maxHits;
+                const hitsToLog = Math.min(hits, 10);
+
+                for (let h = 0; h < hits; h++) {
+                    const hitDelay = (act * hits + h) * 80;
+
+                    if (enemies.every(e => e.currentHp <= 0)) break;
+                    let targets: Enemy[] = [];
+                    if (card.target === TargetType.ALL_ENEMIES) targets = enemies.filter(e => e.currentHp > 0);
+                    else if (card.target === TargetType.RANDOM_ENEMY) {
+                        const alive = enemies.filter(e => e.currentHp > 0);
+                        targets = alive.length > 0 ? [alive[Math.floor(Math.random() * alive.length)]] : [];
+                    }
+                    else {
+                        const target = enemies.find(e => e.id === prev.selectedEnemyId && e.currentHp > 0) || enemies.find(e => e.currentHp > 0);
+                        if (target) targets = [target];
+                    }
+
+                    if (card.damage || card.damageBasedOnBlock || card.damagePerCardInHand || card.damagePerAttackPlayed || card.damagePerStrike || card.damagePerCardInDraw) {
+                        targets.forEach(e => {
+                            if (e.currentHp <= 0) return;
+                            let baseDamage = (card.damage || 0);
+                            let logParts: string[] = [`${baseDamage}`];
+                            if (card.damageBasedOnBlock) { baseDamage += p.block; logParts[0] = `${baseDamage}(Block)`; }
+                            if (card.damagePerCardInHand) baseDamage += (p.hand.filter(c => c.id !== card.id).length) * card.damagePerCardInHand!;
+                            if (card.damagePerAttackPlayed) baseDamage += (p.attacksPlayedThisTurn) * card.damagePerAttackPlayed!;
+                            if (card.damagePerStrike) baseDamage += (p.deck.filter(c => c.name === 'えんぴつ攻撃' || c.originalNames?.includes('えんぴつ攻撃')).length) * card.damagePerStrike!;
+                            if (card.damagePerCardInDraw) baseDamage += p.drawPile.length * card.damagePerCardInDraw!;
+                            if ((card.name === 'えんぴつの削りかす' || card.name === 'SHIV') && p.powers['ACCURACY']) {
+                                baseDamage += p.powers['ACCURACY'];
+                                logParts.push(`+${p.powers['ACCURACY']}(精度)`);
+                            }
+                            if (p.strength !== 0) {
+                                const bonus = p.strength * (card.strengthScaling || 1);
+                                baseDamage += bonus;
+                                logParts.push(`${bonus >= 0 ? '+' : ''}${bonus}(${trans("ムキムキ", languageMode)})`);
+                            }
+                            let multiplier = 1;
+                            if (act === 0 && h === 0 && card.type === CardType.ATTACK && p.relics.find(r => r.id === 'PEN_NIB')) {
+                                p.relicCounters['ATTACK_COUNT_NIB'] = (p.relicCounters['ATTACK_COUNT_NIB'] || 0) + 1;
+                                if (p.relicCounters['ATTACK_COUNT_NIB'] === 10) {
+                                    multiplier = 2;
+                                    p.relicCounters['ATTACK_COUNT_NIB'] = 0;
+                                    logParts.push(`x2(ペン先)`);
+                                }
+                            }
+                            let damage = Math.floor(baseDamage * multiplier);
+                            if (p.powers['WEAK'] > 0) {
+                                damage = Math.floor(damage * 0.75);
+                                logParts.push(`x0.75(${trans("へろへろ", languageMode)})`);
+                            }
+                            if (e.vulnerable > 0) {
+                                damage = Math.floor(damage * 1.5);
+                                logParts.push(`x1.5(${trans("びくびく", languageMode)})`);
+                            }
+                            if (p.powers['ENVENOM']) applyDebuff(e, 'POISON', p.powers['ENVENOM']);
+                            if (e.block >= damage) { e.block -= damage; damage = 0; }
+                            else { damage -= e.block; e.block = 0; }
+                            e.currentHp -= damage;
+
+                            let finalVfx = baseVfx;
+                            if (damage > 15 && finalVfx === 'SLASH') finalVfx = 'CRITICAL';
+                            if (e.currentHp <= 0 && (finalVfx === 'SLASH' || finalVfx === 'CRITICAL')) finalVfx = 'EXPLOSION';
+
+                            nextActiveEffects.push({
+                                id: `vfx-${Date.now()}-${Math.random()}`,
+                                type: finalVfx as VFXType,
+                                targetId: e.id,
+                                delay: hitDelay,
+                                rotation: Math.random() * 360
+                            });
+
+                            if (e.currentHp <= 0 && e.enemyType === 'THE_HEART' && e.phase === 1) {
+                                e.currentHp = e.maxHp;
+                                e.phase = 2;
+                                e.name = "真・校長先生";
+                                e.poison = 0; e.weak = 0; e.vulnerable = 0;
+                                e.floatingText = { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' };
+                                currentLogs.push("校長先生が真の姿を現した！");
+                                nextActiveEffects.push({ id: `vfx-evo-${Date.now()}`, type: 'BUFF', targetId: e.id, delay: hitDelay + 200 });
+                            }
+                            if (damage > 0 || logParts.length > 1) {
+                                if (h % 5 === 0 || h === hits - 1) {
+                                    e.floatingText = { id: `dmg-${Date.now()}-${e.id}-${h}`, text: `${damage}`, color: 'text-white', iconType: 'sword' };
+                                }
+                                const formula = logParts.length > 1 ? `(${logParts.join(' ')}) = ` : '';
+                                if (h < hitsToLog) {
+                                    currentLogs.push(`${trans(e.name, languageMode)}に${formula}${damage}${trans("ダメージ", languageMode)}`);
+                                } else if (h === hitsToLog) {
+                                    currentLogs.push("...さらに多数の攻撃！");
+                                }
+                            }
+                            if (card.lifesteal && damage > 0) {
+                                p.currentHp = Math.min(p.currentHp + damage, p.maxHp);
+                                nextActiveEffects.push({ id: `vfx-heal-ls-${Date.now()}`, type: 'HEAL', targetId: 'player', delay: hitDelay });
+                            }
+                            if (e.currentHp <= 0) {
+                                currentLogs.push(`${trans(e.name, languageMode)}${trans("を倒した！", languageMode)}`);
+                                nextActStats.enemiesDefeated++;
+
+                                if (card.fatalEnergy) p.currentEnergy += card.fatalEnergy;
+                                if (card.fatalPermanentDamage) {
+                                    p.deck = p.deck.map(dc => {
+                                        if (dc.id === card.id) {
+                                            const newDmg = (dc.damage || 0) + card.fatalPermanentDamage!;
+                                            return {
+                                                ...dc,
+                                                damage: newDmg,
+                                                description: dc.description.replace(/(\d+)(ダメージ)/, `${newDmg}$2`)
+                                            };
+                                        }
+                                        return dc;
+                                    });
+                                    currentLogs.push(`${trans(card.name, languageMode)} の威力が上がった！`);
+                                }
+                                if (card.fatalMaxHp) { p.maxHp += card.fatalMaxHp!; p.currentHp += card.fatalMaxHp!; }
+                                if (e.corpseExplosion) {
+                                    enemies.forEach(other => {
+                                        if (other.id !== e.id && other.currentHp > 0) {
+                                            other.currentHp -= e.maxHp;
+                                            other.floatingText = { id: `expl-${Date.now()}`, text: `${e.maxHp}`, color: 'text-green-400' };
+                                            currentLogs.push(`${trans("衝撃のうわさ", languageMode)}: ${trans(other.name, languageMode)}に${e.maxHp}${trans("ダメージ", languageMode)}`);
+                                            nextActiveEffects.push({ id: `vfx-expl-${Date.now()}-${other.id}`, type: 'FIRE', targetId: other.id, delay: hitDelay + 100 });
+                                        }
+                                    });
+                                }
+                                if (card.capture) {
+                                    // 1. ダメージ計算 (最大HPの1/4)
+                                    const damageVal = Math.max(5, Math.floor(e.maxHp * 0.25));
+
+                                    // 2. ランダムなカード効果の抽選 (コスト3以下、アンロック済み、特定キャラ専用除外)
+                                    const unlockedCardNames = storageService.getUnlockedCards();
+                                    const forbiddenNames = new Set([
+                                        ...Object.values(LIBRARIAN_CARDS).map(c => c.name),
+                                        ...Object.values(GARDEN_SEEDS).map(c => c.name),
+                                        ...Object.values(GROWN_PLANTS).map(c => c.name)
+                                    ]);
+
+                                    const allPossibleCards = Object.values(CARDS_LIBRARY).filter(c => {
+                                        // 基本フィルタ
+                                        if (c.type === CardType.CURSE || c.type === CardType.STATUS || c.rarity === 'SPECIAL') return false;
+                                        if (c.cost > 3) return false;
+
+                                        // 除外カードフィルタ
+                                        if (forbiddenNames.has(c.name)) return false;
+
+                                        // アンロックフィルタ (リストがある場合のみ適用)
+                                        if (unlockedCardNames.length > 0 && !unlockedCardNames.includes(c.name)) {
+                                            // ただし、BASIC/COMMONなカードがアンロックリストに含まれていない場合の救済が必要な場合は調整
+                                            // ここではユーザー要望通り「アンロックされていないカードを除外」とする
+                                            return false;
+                                        }
+
+                                        return true;
+                                    });
+
+                                    // 候補がない場合のフォールバック (基本カード)
+                                    const fallbackPool = Object.values(CARDS_LIBRARY).filter(c => c.name === 'えんぴつ攻撃' || c.name === 'ノートで防御');
+                                    const pool = allPossibleCards.length > 0 ? allPossibleCards : fallbackPool;
+
+                                    const randomCardTemplate = pool[Math.floor(Math.random() * pool.length)];
+
+                                    // 3. ハイブリッドカードの作成
+                                    const totalDamage = (randomCardTemplate.damage || 0) + damageVal;
+
+                                    const captured: ICard = {
+                                        ...randomCardTemplate, // ランダムカードのプロパティをベースにする
+                                        id: `captured-${e.id}-${Date.now()}`,
+                                        name: e.name,
+                                        textureRef: randomCardTemplate.textureRef,
+                                        enemyIllustrationName: e.name,
+                                        enemyIllustrationNames: Array.from(new Set([
+                                            e.name,
+                                            e.enemyType,
+                                            e.phase === 2 ? `${e.enemyType}_2` : undefined,
+                                            e.enemyType === 'THE_HEART' && e.phase === 2 ? 'THE_HEART_PHASE2' : undefined,
+                                        ].filter(Boolean) as string[])),
+                                        rarity: 'SPECIAL',
+                                        exhaust: true,
+
+                                        // ダメージを追加 (元々攻撃カードなら加算、そうでなければ新規設定)
+                                        damage: totalDamage,
+                                        target: randomCardTemplate.target === TargetType.SELF ? TargetType.ENEMY : randomCardTemplate.target, // 自分のみ対象なら敵単体に変更
+                                        type: totalDamage > 0 ? CardType.ATTACK : randomCardTemplate.type // ダメージがあるなら攻撃タイプ優先
+                                    };
+
+                                    // 説明文の合成
+                                    const exhaustText = trans("廃棄", languageMode);
+                                    const damageLabel = trans("ダメージ", languageMode);
+                                    let baseDesc = randomCardTemplate.description;
+                                    let descriptionUpdated = false;
+
+                                    // 元が攻撃カードで、かつ固定ダメージ記述がある場合、数値を合算値に置換して重複を防ぐ
+                                    if ((randomCardTemplate.damage || 0) > 0) {
+                                        // "Xダメージ" のパターンを探す
+                                        const regex = new RegExp(`(\\d+)${damageLabel}`);
+                                        const match = baseDesc.match(regex);
+                                        if (match) {
+                                            const numInDesc = parseInt(match[1]);
+                                            // 記述されている数値がデータ上のダメージと一致する場合のみ置換 (「2回」などの回数や他数値を誤爆しないため)
+                                            if (numInDesc === randomCardTemplate.damage) {
+                                                captured.description = baseDesc.replace(regex, `${totalDamage}${damageLabel}`);
+                                                descriptionUpdated = true;
+                                            }
+                                        }
+                                    }
+
+                                    // 置換できなかった場合（スキルカードや特殊な記述）は、先頭にダメージ文言を追加
+                                    if (!descriptionUpdated) {
+                                        const damageDesc = `${damageVal}${damageLabel}。`;
+                                        captured.description = `${damageDesc} ${baseDesc}`;
+                                    }
+
+                                    if (!captured.description.includes(exhaustText) && !captured.description.includes('Exhaust')) {
+                                        captured.description += ` ${exhaustText}。`;
+                                    }
+
+                                    p.deck.push(captured);
+                                    p.discardPile.push(captured);
+                                    e.floatingText = { id: `cap-${Date.now()}`, text: 'GET!', color: 'text-yellow-400' };
+                                    currentLogs.push(`${trans(e.name, languageMode)}を${trans("捕獲した！", languageMode)} (${trans(randomCardTemplate.name, languageMode)}の効果付与)`);
+                                    nextActiveEffects.push({ id: `vfx-cap-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
+                                }
+                                if (card.name === '羅生門' || (card.id && card.id.includes('RASHOMON'))) {
+                                    nextSelectionState = { active: true, type: 'EXHAUST', amount: 1 };
+                                    currentLogs.push(trans("羅生門：手札1枚を廃棄してください。", languageMode));
+                                }
+                            }
+                            if (card.name === '時間どろぼう' || card.name === 'TIME_THIEF') {
+                                e.nextIntent = { type: EnemyIntentType.SLEEP, value: 0 };
+                                currentLogs.push(`${trans(e.name, languageMode)}の行動を遅らせた！`);
+                                e.floatingText = { id: `delay-${Date.now()}`, text: '遅延', color: 'text-blue-400' };
+                                nextActiveEffects.push({ id: `vfx-delay-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay });
+                            }
+                        });
+                    }
+
+                    if (card.block) {
+                        let blk = card.block;
+                        let logParts = [`${blk}`];
+                        if (p.powers['DEXTERITY']) {
+                            blk += p.powers['DEXTERITY'];
+                            logParts.push(`${p.powers['DEXTERITY'] >= 0 ? '+' : ''}${p.powers['DEXTERITY']}(${trans("カチカチ", languageMode)})`);
+                        }
+                        if (p.powers['FRAIL'] > 0) {
+                            blk = Math.floor(blk * 0.75);
+                            logParts.push(`x0.75(${trans("もろい", languageMode)})`);
+                        }
+                        p.block += blk;
+                        nextActiveEffects.push({ id: `vfx-blk-${Date.now()}`, type: 'BLOCK', targetId: 'player', delay: hitDelay });
+                        const formula = logParts.length > 1 ? `(${logParts.join(' ')}) = ` : '';
+                        if (h < hitsToLog) {
+                            currentLogs.push(`${trans("ブロック", languageMode)}${formula}${blk}を${trans("獲得", languageMode)}`);
+                        }
+                    }
+                    if (card.doubleBlock) {
+                        p.block *= 2;
+                        nextActiveEffects.push({ id: `vfx-dblblk-${Date.now()}`, type: 'BLOCK', targetId: 'player', delay: hitDelay });
+                    }
+                    if (card.heal) {
+                        p.currentHp = Math.min(p.currentHp + card.heal, p.maxHp);
+                        if (p.partner) {
+                            p.partner.currentHp = Math.min(p.partner.maxHp, p.partner.currentHp + card.heal);
+                            p.partner.floatingText = { id: `heal-p-${Date.now()}`, text: `+${card.heal}`, color: 'text-green-500' };
+                        }
+                        nextActiveEffects.push({ id: `vfx-heal-${Date.now()}`, type: 'HEAL', targetId: 'player', delay: hitDelay });
+                    }
+                    if (card.energy) p.currentEnergy += card.energy;
+                    if (card.selfDamage) {
+                        p.currentHp -= card.selfDamage;
+                        currentLogs.push(`${trans("自分に", languageMode)}${card.selfDamage}${trans("ダメージ", languageMode)}`);
+                        if (p.powers['RUPTURE']) {
+                            p.strength += p.powers['RUPTURE'];
+                            nextActiveEffects.push({ id: `vfx-rup-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
+                        }
+                        nextActiveEffects.push({ id: `vfx-sd-${Date.now()}`, type: 'SLASH', targetId: 'player', delay: hitDelay });
+                    }
+
+                    // --- FIX: fatalMaxHp as instant boost for non-attack Skills (target: SELF) ---
+                    if (card.fatalMaxHp && card.type === CardType.SKILL && card.target === TargetType.SELF) {
+                        p.maxHp += card.fatalMaxHp;
+                        p.currentHp += card.fatalMaxHp;
+                        p.floatingText = { id: `maxhp-${Date.now()}`, text: `MaxHP+${card.fatalMaxHp}`, color: 'text-green-400', iconType: 'heart' };
+                        nextActiveEffects.push({ id: `vfx-mhp-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
+                    }
+
+                    if (card.strength) {
+                        if (card.target === TargetType.ENEMY || card.target === TargetType.ALL_ENEMIES) {
+                            targets.forEach(e => {
+                                e.strength += card.strength!;
+                                e.floatingText = { id: `str-${Date.now()}-${e.id}`, text: `${card.strength > 0 ? '+' : ''}${card.strength}`, color: card.strength > 0 ? 'text-red-500' : 'text-gray-400', iconType: 'sword' };
+                            });
+                            currentLogs.push(`${trans("敵のムキムキ", languageMode)}${card.strength > 0 ? '+' : ''}${card.strength}`);
+                        } else {
+                            p.strength += card.strength;
+                            nextActiveEffects.push({ id: `vfx-buff-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
+                            currentLogs.push(`${trans("ムキムキ", languageMode)}+${card.strength}`);
+                        }
+                    }
+                    if (card.vulnerable) targets.forEach(e => {
+                        applyDebuff(e, 'VULNERABLE', card.vulnerable!);
+                        nextActiveEffects.push({ id: `vfx-dbuff-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay });
+                    });
+                    if (card.weak) targets.forEach(e => {
+                        applyDebuff(e, 'WEAK', card.weak!);
+                        nextActiveEffects.push({ id: `vfx-dbuff-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay });
+                    });
+                    if (card.poison) {
+                        let amt = card.poison;
+                        if (p.relics.find(r => r.id === 'SNAKE_SKULL')) amt += 1;
+                        targets.forEach(e => {
+                            applyDebuff(e, 'POISON', amt);
+                            nextActiveEffects.push({ id: `vfx-dbuff-p-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay });
+                        });
+                        if (h < hitsToLog) currentLogs.push(`${trans("ドクドク", languageMode)}${amt}${trans("を付与", languageMode)}`);
+                    }
+                    if (card.poisonMultiplier && targets.length > 0) {
+                        targets.forEach(e => {
+                            if (e.poison > 0) {
+                                e.poison *= card.poisonMultiplier!;
+                                currentLogs.push(`${trans(e.name, languageMode)}の${trans("毒", languageMode)}が${card.poisonMultiplier}倍になった！`);
+                                nextActiveEffects.push({ id: `vfx-dbuff-pm-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay });
+                            }
+                        });
+                    }
+                    if (card.upgradeHand) {
+                        p.hand = p.hand.map(c => getUpgradedCard(c));
+                        currentLogs.push(trans("手札を強化", languageMode));
+                        nextActiveEffects.push({ id: `vfx-uh-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
+                    }
+                    if (card.upgradeDeck) {
+                        p.hand = p.hand.map(c => getUpgradedCard(c));
+                        p.drawPile = p.drawPile.map(c => getUpgradedCard(c));
+                        p.discardPile = p.discardPile.map(c => getUpgradedCard(c));
+                        currentLogs.push(trans("デッキ全体を強化", languageMode));
+                        nextActiveEffects.push({ id: `vfx-ud-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
+                    }
+                    if (card.doubleStrength) {
+                        p.strength *= 2;
+                        nextActiveEffects.push({ id: `vfx-ds-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
+                    }
+                    const isWeatherForecastCard =
+                        card.name === '天気予報' ||
+                        card.originalNames?.includes('天気予報') ||
+                        card.description.includes('山札のトップ3枚');
+                    if (isWeatherForecastCard) {
+                        const peekCards: ICard[] = [];
+                        for (let j = 0; j < 3; j++) {
+                            if (p.drawPile.length === 0) {
+                                if (p.discardPile === undefined || p.discardPile.length === 0) break;
+                                p.drawPile = shuffle(p.discardPile);
+                                p.discardPile = [];
+                            }
+                            const top = p.drawPile.pop();
+                            if (top) peekCards.push(top);
+                        }
+                        // 一旦そのまま山札へ戻し、次の描画で専用モーダルを開く
+                        peekCards.slice().reverse().forEach(c => p.drawPile.push(c));
+                        p.turnFlags = { ...p.turnFlags, WEATHER_PENDING_MODAL: true };
+                        if (peekCards.length > 0) {
+                            currentLogs.push(trans("天気予報：カード選択を開始", languageMode));
+                        } else {
+                            currentLogs.push(trans("天気予報：並べ替えるカードがなかった", languageMode));
+                        }
+                        nextActiveEffects.push({ id: `vfx-weather-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
+                    }
+                    if (card.shuffleHandToDraw) {
+                        p.drawPile = shuffle([...p.drawPile, ...p.discardPile]);
+                        p.discardPile = [];
+                        currentLogs.push(trans("捨て札を山札に戻した", languageMode));
+                    }
+                    if (card.applyPower) {
+                        p.powers[card.applyPower.id] = (p.powers[card.applyPower.id] || 0) + card.applyPower.amount;
+                        if (card.applyPower.id === 'CORPSE_EXPLOSION' && targets.length > 0) {
+                            targets.forEach(e => e.corpseExplosion = true);
+                            currentLogs.push(trans("衝撃のうわさを付与", languageMode));
+                            nextActiveEffects.push({ id: `vfx-ce-${Date.now()}`, type: 'DEBUFF', targetId: targets[0].id, delay: hitDelay });
+                        }
+                        nextActiveEffects.push({ id: `vfx-ap-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
+                    }
+                    if (card.draw) {
+                        for (let j = 0; j < card.draw; j++) {
+                            if (p.drawPile.length === 0) {
+                                if (p.discardPile === undefined || p.discardPile.length === 0) break;
+                                p.drawPile = shuffle(p.discardPile);
+                                p.discardPile = [];
+                            }
+                            const newCard = p.drawPile.pop();
+                            if (newCard) {
+                                const card = { ...newCard };
+                                if (card.name === '虚無' || card.name === 'VOID') {
+                                    p.currentEnergy = Math.max(0, p.currentEnergy - 1);
+                                    p.floatingText = { id: `void-turn-${Date.now()}-${j}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
+                                }
+                                if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && card.cost >= 0) {
+                                    card.cost = Math.floor(Math.random() * 4);
+                                }
+                                p.hand.push(card);
+                                if (p.powers['EVOLVE'] && (card.type === CardType.STATUS || card.type === CardType.CURSE)) {
+                                    for (let k = 0; k < p.powers['EVOLVE']; k++) {
+                                        if (p.drawPile.length === 0) {
+                                            if (p.discardPile === undefined || p.discardPile.length === 0) break;
+                                            p.drawPile = shuffle(p.discardPile);
+                                            p.discardPile = [];
+                                        }
+                                        const extraCardRaw = p.drawPile.pop();
+                                        if (extraCardRaw) {
+                                            const extraCard = { ...extraCardRaw };
+                                            if (extraCard.name === '虚無' || extraCard.name === 'VOID') {
+                                                p.currentEnergy = Math.max(0, p.currentEnergy - 1);
+                                                p.floatingText = { id: `void-evolve-${Date.now()}-${k}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
+                                            }
+                                            if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && extraCard.cost >= 0) {
+                                                extraCard.cost = Math.floor(Math.random() * 4);
+                                            }
+                                            p.hand.push(extraCard);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (card.name === 'あがく' || card.name === 'SCRAPE' || card.originalNames?.includes('あがく') || card.originalNames?.includes('SCRAPE')) {
+                        const cardsToScrape = p.hand.filter(c => c.id !== card.id && c.cost > 0);
+                        cardsToScrape.forEach(c => {
+                            p.hand = p.hand.filter(h => h.id !== c.id);
+                            p.discardPile.push(c);
+                            if (c.name === 'カンニングペーパー' || c.name === 'STRATEGIST') {
+                                p.nextTurnEnergy += 2;
+                                currentLogs.push(`${trans("カンニングペーパー", languageMode)}: +2 Next Turn Energy`);
+                                p.floatingText = { id: `strat-${Date.now()}-${Math.random()}`, text: '+2 Next Turn', color: 'text-yellow-400', iconType: 'zap' };
+                            }
+                        });
+                        if (cardsToScrape.length > 0) {
+                            currentLogs.push(trans("コスト0以外のカードを捨てた", languageMode));
+                        }
+                    }
+
+                    if (card.addCardToHand) {
+                        for (let c = 0; c < card.addCardToHand.count; c++) {
+                            const template = CARDS_LIBRARY[card.addCardToHand.cardName];
+                            if (template) {
+                                let newC = { ...template, id: `gen-hand-${Date.now()}-${act}-${h}-${c}-${Math.random()}` };
+                                if (card.addCardToHand.cost0) newC.cost = 0;
+                                if (p.powers['MASTER_REALITY']) newC = getUpgradedCard(newC);
+                                if (p.hand.length < HAND_SIZE + 5) {
+                                    p.hand.push(newC);
+                                } else {
+                                    p.discardPile.push(newC);
+                                }
+                            }
+                        }
+                    }
+                    if (card.addCardToDraw) {
+                        for (let c = 0; c < card.addCardToDraw.count; c++) {
+                            const template = CARDS_LIBRARY[card.addCardToDraw.cardName];
+                            if (template) p.drawPile.push({ ...template, id: `gen-draw-${Date.now()}-${act}-${h}-${c}-${Math.random()}` });
+                        }
+                        p.drawPile = shuffle(p.drawPile);
+                    }
+                    if (card.addCardToDiscard) {
+                        for (let c = 0; c < card.addCardToDiscard.count; c++) {
+                            const template = CARDS_LIBRARY[card.addCardToDiscard.cardName];
+                            if (template) p.discardPile.push({ ...template, id: `gen-discard-${Date.now()}-${act}-${h}-${c}-${Math.random()}` });
+                        }
+                    }
+                    if (card.nextTurnDraw) p.nextTurnDraw += card.nextTurnDraw;
+                    if (card.nextTurnEnergy) p.nextTurnEnergy += card.nextTurnEnergy;
+
+                    if (card.name === '早退' || card.name === 'EXPULSION' || card.originalNames?.includes('早退') || card.originalNames?.includes('EXPULSION')) {
+                        const threshold = card.upgraded ? 40 : 30;
+                        targets.forEach(e => {
+                            if (e.currentHp <= threshold) {
+                                e.currentHp = 0;
+                                currentLogs.push(`${trans(e.name, languageMode)}は${trans("早退", languageMode)}になった！`);
+                                e.floatingText = { id: `kill-${Date.now()}`, text: '早退!', color: 'text-red-600', iconType: 'skull' };
+                                nextActiveEffects.push({ id: `vfx-exp-${Date.now()}`, type: 'SLASH', targetId: e.id, delay: hitDelay });
+                            } else {
+                                currentLogs.push(`${trans(e.name, languageMode)}は${trans("早退", languageMode)}を免れた`);
+                            }
+                        });
+                    }
+
+                    if (card.name === '大ジャンプ' || card.name === 'VAULT' || card.originalNames?.includes('大ジャンプ') || card.originalNames?.includes('VAULT')) {
+                        p.turnFlags['VAULT_EXTRA_TURN'] = true;
+                        currentLogs.push(trans("追加ターンを得る！", languageMode));
+                        nextActiveEffects.push({ id: `vfx-vault-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
+                    }
+                }
+            }
+
+            if (card.type === CardType.ATTACK) {
+                p.relicCounters['ATTACK_COUNT'] = (p.relicCounters['ATTACK_COUNT'] || 0) + 1;
+                if (p.relicCounters['ATTACK_COUNT'] % 3 === 0) {
+                    if (p.relics.find(r => r.id === 'KUNAI')) { p.powers['DEXTERITY'] = (p.powers['DEXTERITY'] || 0) + 1; p.floatingText = { id: `kunai-${Date.now()}`, text: `${trans("カチカチ", languageMode)}+1`, color: 'text-blue-400', iconType: 'shield' }; nextActiveEffects.push({ id: `vfx-kunai-${Date.now()}`, type: 'BLOCK', targetId: 'player' }); }
+                    if (p.relics.find(r => r.id === 'SHURIKEN')) { p.strength += 1; p.floatingText = { id: `shuri-${Date.now()}`, text: `${trans("ムキムキ", languageMode)}+1`, color: 'text-red-400', iconType: 'sword' }; nextActiveEffects.push({ id: `vfx-shuri-${Date.now()}`, type: 'BUFF', targetId: 'player' }); }
+                    if (p.relics.find(r => r.id === 'ORNAMENTAL_FAN')) { p.block += 4; p.floatingText = { id: `fan-${Date.now()}`, text: '+4 Block', color: 'text-blue-400', iconType: 'shield' }; nextActiveEffects.push({ id: `vfx-fan-${Date.now()}`, type: 'BLOCK', targetId: 'player' }); }
+                    // Compass (Calipers) Effect: Draw 1 card every 3 attacks
+                    if (p.relics.find(r => r.id === 'CALIPERS')) {
+                        if (p.drawPile.length === 0) {
+                            if (p.discardPile.length !== 0) {
+                                p.drawPile = shuffle(p.discardPile);
+                                p.discardPile = [];
+                            }
+                        }
+                        const drawn = p.drawPile.pop();
+                        if (drawn) {
+                            p.hand.push(drawn);
+                            currentLogs.push(trans("コンパス：カードを1枚引いた", languageMode));
+                            nextActiveEffects.push({ id: `vfx-calip-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+                        }
+                    }
+                }
+            }
+
+            const consumedIds = (card as any)._consumedIds;
+            if (consumedIds && Array.isArray(consumedIds)) {
+                const cardsToRemove = p.hand.filter(c => consumedIds.includes(c.id));
+                p.hand = p.hand.filter(c => !consumedIds.includes(c.id));
+
+                cardsToRemove.forEach(c => {
+                    let shouldExhaust = c.exhaust;
+                    if (c.type === CardType.SKILL && p.powers['CORRUPTION']) shouldExhaust = true;
+
+                    if (!shouldExhaust && !(c.type === CardType.POWER) && !(c.promptsExhaust === 99)) {
+                        p.discardPile.push(c);
+                    } else if (shouldExhaust || c.promptsExhaust === 99) {
+                        if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
+                    }
+                });
+            } else {
+                p.hand = p.hand.filter(c => c.id !== card.id);
+                let shouldExhaust = card.exhaust;
+                if (card.type === CardType.SKILL && p.powers['CORRUPTION']) shouldExhaust = true;
+                if (card.name === 'むしゃくしゃ' || card.name === 'YATSUATARI' || card.originalNames?.includes('むしゃくしゃ') || card.originalNames?.includes('YATSUATARI')) {
+                    card.damage = (card.damage || 0) + 5;
+                    currentLogs.push("むしゃくしゃの怒りが増した！");
+                    nextActiveEffects.push({ id: `vfx-metric-${Date.now()}`, type: 'FIRE', targetId: 'player' });
+                }
+                if (!shouldExhaust && !(card.type === CardType.POWER) && !(card.promptsExhaust === 99)) {
+                    p.discardPile.push(card);
+                } else if (shouldExhaust || card.promptsExhaust === 99) {
+                    if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
+                }
+                if (card.promptsDiscard) nextSelectionState = { active: true, type: 'DISCARD', amount: card.promptsDiscard, originCardId: card.id };
+                if (card.promptsCopy) nextSelectionState = { active: true, type: 'COPY', amount: card.promptsCopy, originCardId: card.id };
+                if (card.promptsExhaust && card.promptsExhaust !== 99) {
+                    nextSelectionState = { active: true, type: 'EXHAUST', amount: card.promptsExhaust, originCardId: card.id };
+                    currentLogs.push(trans("廃棄するカードを選択してください。", languageMode));
+                }
+                if (card.promptsExhaust === 99) {
+                    if (card.name === '断捨離' || card.name === 'SEVER_SOUL' || card.originalNames?.includes('断捨離') || card.originalNames?.includes('SEVER_SOUL')) {
+                        const cardsToExhaust = p.hand.filter(c => c.type !== CardType.ATTACK);
+                        if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'] * cardsToExhaust.length;
+                        p.hand = p.hand.filter(c => c.type === CardType.ATTACK);
+                        currentLogs.push(trans("非攻撃カードを廃棄した", languageMode));
+                    } else if (card.name === '大掃除' || card.name === 'FIEND_FIRE' || card.originalNames?.includes('大掃除') || card.originalNames?.includes('FIEND_FIRE')) {
+                        const count = p.hand.length;
+                        if (count > 0 && enemies.length > 0) {
+                            const target = enemies.find(e => e.id === prev.selectedEnemyId && e.currentHp > 0) || enemies.find(e => e.currentHp > 0);
+                            if (target) {
+                                const extraDmg = count * 7;
+                                target.currentHp -= extraDmg;
+                                target.floatingText = { id: `ff-${Date.now()}`, text: `${extraDmg}`, color: 'text-orange-500', iconType: 'sword' };
+                                currentLogs.push(`${trans("大掃除", languageMode)}: ${extraDmg}${trans("ダメージ", languageMode)}`);
+                                nextActiveEffects.push({ id: `vfx-ff-${Date.now()}-${target.id}`, type: 'FIRE', targetId: target.id });
+                            }
+                        }
+                        if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'] * count;
+                        p.hand = [];
+                    }
+                }
+            }
+
+            let nextSelectedId = prev.selectedEnemyId;
+            const aliveEnemies = enemies.filter(e => e.currentHp > 0);
+            const defeatedCount = enemies.length - aliveEnemies.length;
+            if (defeatedCount > 0 && hasRelic(p, 'BIRD_FACED_URN')) {
+                const healAmount = defeatedCount * 2;
+                p.currentHp = Math.min(p.maxHp, p.currentHp + healAmount);
+                currentLogs.push(`鳥の壺: HPを${healAmount}回復`);
+            }
+            syncRedSkullState(p);
+            if (!aliveEnemies.find(e => e.id === nextSelectedId) && aliveEnemies.length > 0) nextSelectedId = aliveEnemies[0].id;
 
             return {
                 ...prev,
-                player: p
+                player: p,
+                enemies: aliveEnemies,
+                selectedEnemyId: nextSelectedId,
+                selectionState: nextSelectionState,
+                actStats: nextActStats,
+                combatLog: [...prev.combatLog, ...currentLogs].slice(-100),
+                activeEffects: [...prev.activeEffects, ...nextActiveEffects]
             };
         });
+
+        setTimeout(() => {
+            setGameState(prev => ({ ...prev, activeEffects: [] }));
+        }, 1200);
     };
+
     const startPlayerTurn = () => {
         setTurnLog(trans("あなたのターン", languageMode));
         setGameState(prev => {
@@ -3475,7 +4262,7 @@ const App: React.FC = () => {
                             onSelectMode={handleModeSelect}
                             onBack={returnToTitle}
                             languageMode={languageMode}
-                            modeMasteryMap={Object.fromEntries((Object.entries(modeCorrectCounts) as Array<[string, number]>).map(([mode, count]) => [mode, count >= 100]))}
+                            modeMasteryMap={Object.fromEntries(Object.entries(modeCorrectCounts).map(([mode, count]) => [mode, count >= 100]))}
                         />
                         {raceSession && !raceSession.ended && !raceSession.isHost && gameState.challengeMode === 'RACE' && (
                             <div className="absolute inset-0 bg-black/65 backdrop-blur-[1px] flex items-center justify-center p-4 z-20">

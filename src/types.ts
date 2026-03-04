@@ -61,6 +61,8 @@ export interface Card {
 
   capture?: boolean;
   textureRef?: string;
+  enemyIllustrationName?: string;
+  enemyIllustrationNames?: string[];
 
   nextTurnEnergy?: number;
   nextTurnDraw?: number;
