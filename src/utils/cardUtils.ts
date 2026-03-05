@@ -115,6 +115,42 @@ export const getUpgradedCard = (card: Card): Card => {
     if (card.name === '限界突破' || card.name === 'LIMIT_BREAK') newCard.exhaust = false;
     if (card.name === '触媒' || card.name === 'CATALYST') newCard.poisonMultiplier = 3;
 
+    // Keep description values in sync with upgraded stats.
+    let syncedDesc = newCard.description;
+    const replaceOnce = (pattern: RegExp, formatter: (...args: any[]) => string) => {
+        syncedDesc = syncedDesc.replace(pattern, (...args) => formatter(...args));
+    };
+
+    if (card.damage !== undefined && newCard.damage !== undefined && card.damage !== newCard.damage) {
+        replaceOnce(/(\d+)(ダメージ)/, (_m, _n, label) => `${newCard.damage}${label}`);
+    }
+    if (card.block !== undefined && newCard.block !== undefined && card.block !== newCard.block) {
+        replaceOnce(/(ブロック)(\d+)/, (_m, label) => `${label}${newCard.block}`);
+    }
+    if (card.draw !== undefined && newCard.draw !== undefined && card.draw !== newCard.draw) {
+        replaceOnce(/(\d+)(枚引く)/, (_m, _n, label) => `${newCard.draw}${label}`);
+    }
+    if (card.energy !== undefined && newCard.energy !== undefined && card.energy !== newCard.energy) {
+        replaceOnce(/(E)(\d+)(を得る)/, (_m, prefix, _n, suffix) => `${prefix}${newCard.energy}${suffix}`);
+    }
+    if (card.poison !== undefined && newCard.poison !== undefined && card.poison !== newCard.poison) {
+        replaceOnce(/(ドクドク)(\d+)/, (_m, label) => `${label}${newCard.poison}`);
+    }
+    if (card.weak !== undefined && newCard.weak !== undefined && card.weak !== newCard.weak) {
+        replaceOnce(/(へろへろ)(\d+)/, (_m, label) => `${label}${newCard.weak}`);
+    }
+    if (card.vulnerable !== undefined && newCard.vulnerable !== undefined && card.vulnerable !== newCard.vulnerable) {
+        replaceOnce(/(びくびく)(\d+)/, (_m, label) => `${label}${newCard.vulnerable}`);
+    }
+    if (card.strength !== undefined && newCard.strength !== undefined && card.strength !== newCard.strength) {
+        replaceOnce(/(ムキムキ)(\d+)/, (_m, label) => `${label}${newCard.strength}`);
+    }
+    if (card.poisonMultiplier !== undefined && newCard.poisonMultiplier !== undefined && card.poisonMultiplier !== newCard.poisonMultiplier) {
+        replaceOnce(/(毒を)(\d+)(倍)/, (_m, prefix, _n, suffix) => `${prefix}${newCard.poisonMultiplier}${suffix}`);
+    }
+
+    newCard.description = syncedDesc;
+
     return newCard;
 };
 
