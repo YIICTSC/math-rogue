@@ -3,8 +3,123 @@
 > vite --host 0.0.0.0 --port 5173
 
 
-  [32m[1mVITE[22m v6.4.1[39m  [2mready in [0m[1m708[22m[2m[0m ms[22m
+  [32m[1mVITE[22m v6.4.1[39m  [2mready in [0m[1m301[22m[2m[0m ms[22m
 
   [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5173[22m/[39m
   [32m➜[39m  [1mNetwork[22m: [36mhttp://172.16.1.223:[1m5173[22m/[39m
 [2m[32m  ➜[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
+[2m8:15:55[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m9:07:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m9:09:00[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/CompendiumScreen.tsx[22m
+[2m9:11:11[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/CompendiumScreen.tsx[22m
+[2m9:13:00[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/CompendiumScreen.tsx[22m
+[2m9:13:00[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/CompendiumScreen.tsx[22m
+[2m10:04:29[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m10:10:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m10:10:25[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m10:10:39[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m10:10:43[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m10:10:47[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m10:10:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m10:10:59[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m10:11:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m10:11:33[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m10:17:15[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/components/ModeSelectionScreen.tsx, /src/components/ProblemChallengeScreen.tsx, /src/components/GoHomeDash.tsx, /src/components/MiniGameSelectScreen.tsx, /src/components/MiniGameRouter.tsx, /src/components/ChefDeckSelectionScreen.tsx, /src/components/MathChallengeScreen.tsx, /src/components/MapScreen.tsx, /src/components/GeneralChallengeScreen.tsx, /src/components/CompendiumScreen.tsx, /src/components/KanjiChallengeScreen.tsx, /src/components/P2PVSBattleScene.tsx, /src/components/DebugMenuScreen.tsx, /src/components/CharacterSelectionScreen.tsx, /src/components/EnglishChallengeScreen.tsx, /src/components/RankingScreen.tsx, /src/components/BattleScene.tsx, /src/components/SchoolyardSurvivorScreen.tsx, /src/components/PokerGameScreen.tsx, /src/components/KochoShowdown.tsx, /src/components/PaperPlaneBattle.tsx, /src/components/SchoolDungeonRPG.tsx, /src/components/SchoolDungeonRPG2.tsx, /src/components/Card.tsx, /src/components/FloorResultScreen.tsx, /src/components/RestScreen.tsx[22m
+[2m10:17:16[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/components/Card.tsx[22m Could not Fast Refresh ("KEYWORD_DEFINITIONS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m10:17:16[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/components/FloorResultScreen.tsx, /src/components/ChefDeckSelectionScreen.tsx, /src/components/RewardScreen.tsx, /src/components/CompendiumScreen.tsx, /src/components/MapScreen.tsx, /src/components/P2PVSBattleScene.tsx, /src/components/ShopScreen.tsx, /src/components/DebugMenuScreen.tsx, /src/components/RestScreen.tsx, /src/components/BattleScene.tsx[22m
+[2m10:17:26[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/components/P2PVSBattleScene.tsx, /src/components/DebugMenuScreen.tsx, /src/components/RestScreen.tsx, /src/components/BattleScene.tsx[22m
+[2m10:17:44[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/Card.tsx[22m
+[2m10:17:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/components/Card.tsx[22m Could not Fast Refresh ("KEYWORD_DEFINITIONS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m10:17:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/components/FloorResultScreen.tsx, /src/components/ChefDeckSelectionScreen.tsx, /src/components/RewardScreen.tsx, /src/components/CompendiumScreen.tsx, /src/components/MapScreen.tsx, /src/components/P2PVSBattleScene.tsx, /src/components/ShopScreen.tsx, /src/components/DebugMenuScreen.tsx, /src/components/RestScreen.tsx, /src/components/BattleScene.tsx[22m
+[2m11:07:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/components/ModeSelectionScreen.tsx, /src/components/ProblemChallengeScreen.tsx, /src/components/GoHomeDash.tsx, /src/components/MiniGameSelectScreen.tsx, /src/components/MiniGameRouter.tsx, /src/components/ChefDeckSelectionScreen.tsx, /src/components/MathChallengeScreen.tsx, /src/components/MapScreen.tsx, /src/components/GeneralChallengeScreen.tsx, /src/components/CompendiumScreen.tsx, /src/components/KanjiChallengeScreen.tsx, /src/components/P2PVSBattleScene.tsx, /src/components/DebugMenuScreen.tsx, /src/components/CharacterSelectionScreen.tsx, /src/components/EnglishChallengeScreen.tsx, /src/components/RankingScreen.tsx, /src/components/BattleScene.tsx, /src/components/SchoolyardSurvivorScreen.tsx, /src/components/PokerGameScreen.tsx, /src/components/KochoShowdown.tsx, /src/components/PaperPlaneBattle.tsx, /src/components/SchoolDungeonRPG.tsx, /src/components/SchoolDungeonRPG2.tsx, /src/components/Card.tsx, /src/components/FloorResultScreen.tsx, /src/components/RestScreen.tsx[22m
+[2m11:07:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/components/Card.tsx[22m Could not Fast Refresh ("KEYWORD_DEFINITIONS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m11:07:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/components/FloorResultScreen.tsx, /src/components/ChefDeckSelectionScreen.tsx, /src/components/RewardScreen.tsx, /src/components/CompendiumScreen.tsx, /src/components/MapScreen.tsx, /src/components/P2PVSBattleScene.tsx, /src/components/ShopScreen.tsx, /src/components/DebugMenuScreen.tsx, /src/components/RestScreen.tsx, /src/components/BattleScene.tsx[22m
+[2m11:07:14[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/components/P2PVSBattleScene.tsx, /src/components/DebugMenuScreen.tsx, /src/components/RestScreen.tsx, /src/components/BattleScene.tsx[22m
+[2m11:12:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m11:13:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m12:08:25[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m12:11:55[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m12:11:55[22m [31m[1m[vite][22m[39m [31mInternal server error: C:\Users\myfav\Documents\VScode\学習ローグ\src\components\BattleScene.tsx: Unexpected token, expected "," (1400:21)
+
+[0m [90m 1398 |[31m                             )[33m;[31m
+ [90m 1399 |[31m                         })()
+[31m[1m>[22m[31m[90m 1400 |[31m                     )}
+ [90m      |[31m                      [31m[1m^[22m[31m
+ [90m 1401 |[31m                 [33m<[31m[33m/[31m[33mdiv[31m[33m>[31m
+ [90m 1402 |[31m             ) [33m:[31m (
+ [90m 1403 |[31m                 [33m<[31m[33mdiv[31m className[33m=[31m[32m"absolute inset-0 flex items-center"[31m[33m>[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mC:/Users/myfav/Documents/VScode/学習ローグ/src/components/BattleScene.tsx[39m:1400:21
+[33m  1398|                              );
+  1399|                          })()
+  1400|                      )}
+     |                       ^
+  1401|                  </div>
+  1402|              ) : ([39m
+      at constructor (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:365:19)
+      at TypeScriptParserMixin.raise (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:6599:19)
+      at TypeScriptParserMixin.unexpected (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:6619:16)
+      at TypeScriptParserMixin.expect (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:6899:12)
+      at TypeScriptParserMixin.parseCallExpressionArguments (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:11243:14)
+      at TypeScriptParserMixin.parseCoverCallAndAsyncArrowHead (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:11186:29)
+      at TypeScriptParserMixin.parseSubscript (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:11120:19)
+      at TypeScriptParserMixin.parseSubscript (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:9272:18)
+      at TypeScriptParserMixin.parseSubscripts (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:11094:19)
+      at TypeScriptParserMixin.parseExprSubscripts (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:11085:17)
+      at TypeScriptParserMixin.parseUpdate (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:11066:21)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:11046:23)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:9837:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:10899:61)
+      at TypeScriptParserMixin.parseExprOps (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:10904:23)
+      at TypeScriptParserMixin.parseMaybeConditional (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:10881:23)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:10831:21)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:9786:20)
+      at TypeScriptParserMixin.parseExpressionBase (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:10784:23)
+      at C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:10780:39
+      at TypeScriptParserMixin.allowInAnd (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:12426:12)
+      at TypeScriptParserMixin.parseExpression (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:10780:17)
+      at TypeScriptParserMixin.jsxParseExpressionContainer (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:4632:31)
+      at TypeScriptParserMixin.jsxParseElementAt (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:4711:36)
+      at TypeScriptParserMixin.jsxParseElement (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:4749:17)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:4759:19)
+      at TypeScriptParserMixin.parseExprSubscripts (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:11081:23)
+      at TypeScriptParserMixin.parseUpdate (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:11066:21)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:11046:23)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:9837:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:10899:61)
+      at TypeScriptParserMixin.parseExprOps (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:10904:23)
+      at TypeScriptParserMixin.parseMaybeConditional (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:10881:23)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:10831:21)
+      at C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:9775:39
+      at TypeScriptParserMixin.tryParse (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:6907:20)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:9775:18)
+      at C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:10800:39
+      at TypeScriptParserMixin.allowInAnd (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:12426:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:10800:17)
+      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:12493:17)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:11675:28)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:11331:23)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:4764:20)
+      at TypeScriptParserMixin.parseExprSubscripts (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:11081:23)
+      at TypeScriptParserMixin.parseUpdate (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:11066:21)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:11046:23)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:9837:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:10899:61)
+      at TypeScriptParserMixin.parseExprOps (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\@babel\parser\lib\index.js:10904:23)
+[2m12:12:41[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m12:16:35[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m12:39:04[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/components/GeneralChallengeScreen.tsx, /src/components/ModeSelectionScreen.tsx, /src/components/TreasureScreen.tsx, /src/components/MiniGameSelectScreen.tsx, /src/components/RelicSelectionScreen.tsx, /src/components/FloorResultScreen.tsx, /src/components/ChefDeckSelectionScreen.tsx, /src/components/MathChallengeScreen.tsx, /src/components/P2PRaceSetup.tsx, /src/components/GardenScreen.tsx, /src/components/FinalBridgeScreen.tsx, /src/components/P2PBattleSetup.tsx, /src/components/ProblemChallengeScreen.tsx, /src/components/KanjiChallengeScreen.tsx, /src/components/DodgeballShooting.tsx, /src/components/P2PVSBattleScene.tsx, /src/components/CharacterSelectionScreen.tsx, /src/components/EnglishChallengeScreen.tsx, /src/components/BattleScene.tsx, /src/components/SchoolyardSurvivorScreen.tsx, /src/components/GoHomeDash.tsx, /src/components/PokerGameScreen.tsx, /src/components/KochoShowdown.tsx, /src/components/PaperPlaneBattle.tsx, /src/components/SchoolDungeonRPG.tsx, /src/components/SchoolDungeonRPG2.tsx[22m
+[2m12:39:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m12:47:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/components/GeneralChallengeScreen.tsx, /src/components/ModeSelectionScreen.tsx, /src/components/TreasureScreen.tsx, /src/components/MiniGameSelectScreen.tsx, /src/components/RelicSelectionScreen.tsx, /src/components/FloorResultScreen.tsx, /src/components/ChefDeckSelectionScreen.tsx, /src/components/MathChallengeScreen.tsx, /src/components/P2PRaceSetup.tsx, /src/components/GardenScreen.tsx, /src/components/FinalBridgeScreen.tsx, /src/components/P2PBattleSetup.tsx, /src/components/ProblemChallengeScreen.tsx, /src/components/KanjiChallengeScreen.tsx, /src/components/DodgeballShooting.tsx, /src/components/P2PVSBattleScene.tsx, /src/components/CharacterSelectionScreen.tsx, /src/components/EnglishChallengeScreen.tsx, /src/components/BattleScene.tsx, /src/components/SchoolyardSurvivorScreen.tsx, /src/components/GoHomeDash.tsx, /src/components/PokerGameScreen.tsx, /src/components/KochoShowdown.tsx, /src/components/PaperPlaneBattle.tsx, /src/components/SchoolDungeonRPG.tsx, /src/components/SchoolDungeonRPG2.tsx[22m
+[2m12:47:25[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m12:50:55[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m12:53:52[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m12:55:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m12:59:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m13:02:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m13:03:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m13:03:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m13:05:54[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m13:07:01[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m13:11:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m13:14:27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
