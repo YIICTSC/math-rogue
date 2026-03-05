@@ -5,8 +5,10 @@ import { Card as ICard, LanguageMode } from '../types';
 import Card from './Card';
 import { BookOpen, Lock, ArrowLeft, Swords, Gem, FlaskConical, Skull, X } from 'lucide-react';
 import EnemyIllustration from './EnemyIllustration';
+import PixelSprite from './PixelSprite';
 import { storageService } from '../services/storageService';
 import { trans } from '../utils/textUtils';
+import { getCardIllustrationPaths } from '../utils/cardIllustration';
 import { ENEMY_ILLUSTRATION_SIZE_CLASS } from '../constants/uiSizing';
 
 interface CompendiumScreenProps {
@@ -27,6 +29,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
         data: any;
         unlocked: boolean;
     } | null>(null);
+    const [fullscreenArtCard, setFullscreenArtCard] = useState<ICard | null>(null);
 
     const longPressTimer = useRef<any>(null);
     const startPos = useRef({ x: 0, y: 0 });
@@ -242,10 +245,25 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                             {selectedItem.unlocked ? trans(selectedItem.data.name, languageMode) : trans('未発見', languageMode)}
                         </h3>
 
-                        <div className="mb-6 flex items-center justify-center min-h-[100px]">
+                        <div
+                            className={`flex items-center justify-center ${
+                                selectedItem.type === 'CARD'
+                                    ? 'mb-8 min-h-[260px] md:min-h-[360px]'
+                                    : 'mb-6 min-h-[100px]'
+                            }`}
+                        >
                             {selectedItem.type === 'CARD' && (
                                 selectedItem.unlocked ? (
-                                    <div className="scale-110"><Card card={selectedItem.data} onClick={() => { }} disabled={false} languageMode={languageMode} /></div>
+                                    <div
+                                        className="scale-125 md:scale-[1.7] cursor-zoom-in"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setFullscreenArtCard(selectedItem.data as ICard);
+                                        }}
+                                        title={trans("タッチでイラスト拡大", languageMode)}
+                                    >
+                                        <Card card={selectedItem.data} onClick={() => { }} disabled={false} languageMode={languageMode} />
+                                    </div>
                                 ) : <Lock size={64} className="text-gray-600" />
                             )}
                             {selectedItem.type === 'RELIC' && (
@@ -278,6 +296,58 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                     </div>
                 </div>
             )}
+
+            {fullscreenArtCard && (
+                <FullscreenCardArtModal
+                    card={fullscreenArtCard}
+                    languageMode={languageMode}
+                    onClose={() => setFullscreenArtCard(null)}
+                />
+            )}
+        </div>
+    );
+};
+
+const FullscreenCardArtModal: React.FC<{ card: ICard; languageMode: LanguageMode; onClose: () => void }> = ({ card, languageMode, onClose }) => {
+    const translated = trans(card.name, languageMode);
+    const imageCandidates = useMemo(
+        () => getCardIllustrationPaths(card.id, translated, [card.name]),
+        [card.id, card.name, translated]
+    );
+    const [imageIndex, setImageIndex] = useState(0);
+
+    useEffect(() => {
+        setImageIndex(0);
+    }, [card.id, card.name, translated]);
+
+    return (
+        <div className="fixed inset-0 z-[70] bg-black/95 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
+            <button
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onClose();
+                }}
+                className="absolute top-3 right-3 text-white/80 hover:text-white p-2"
+            >
+                <X size={28} />
+            </button>
+
+            <div className="w-full h-full max-w-[96vw] max-h-[96vh] flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+                {imageIndex < imageCandidates.length ? (
+                    <img
+                        src={imageCandidates[imageIndex]}
+                        alt={translated}
+                        className="max-w-full max-h-full object-contain rounded"
+                        onError={() => setImageIndex((prev) => prev + 1)}
+                    />
+                ) : card.textureRef ? (
+                    <div className="w-[70vmin] h-[70vmin] max-w-[90vw] max-h-[90vh]">
+                        <PixelSprite seed={card.id} name={card.textureRef} className="w-full h-full" size={32} />
+                    </div>
+                ) : (
+                    <div className="text-gray-400">{trans("イラストがありません", languageMode)}</div>
+                )}
+            </div>
         </div>
     );
 };

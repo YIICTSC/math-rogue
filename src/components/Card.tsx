@@ -22,6 +22,67 @@ export const KEYWORD_DEFINITIONS: Record<string, { title: string; desc: string }
   DRAW: { title: 'ドロー', desc: '山札からカードを引く。' },
 };
 
+const MAX_ILLUSTRATION_REFS = 8;
+
+const extractCompositeIllustrationRefs = (card: CardType): string[] => {
+  if (card.illustrationRefs && card.illustrationRefs.length > 0) {
+    return card.illustrationRefs.filter(Boolean).slice(0, MAX_ILLUSTRATION_REFS);
+  }
+
+  const enemyNames = [
+    ...(card.enemyIllustrationNames || []),
+    ...(card.enemyIllustrationName ? [card.enemyIllustrationName] : []),
+  ].filter(Boolean) as string[];
+  if (enemyNames.length > 0) return [`enemy:${enemyNames[0]}`];
+
+  if (card.capture && card.textureRef && !card.textureRef.includes('|')) {
+    return [`enemy:${card.textureRef}`];
+  }
+
+  if (card.name) return [`card:${card.name}`];
+  if (card.textureRef) return [`pixel:${card.textureRef}`];
+  return [];
+};
+
+const CompositeArtPiece: React.FC<{ refToken: string; seed: string; languageMode: LanguageMode }> = ({ refToken, seed, languageMode }) => {
+  const [failed, setFailed] = useState(false);
+  const [imageIndex, setImageIndex] = useState(0);
+
+  useEffect(() => {
+    setFailed(false);
+    setImageIndex(0);
+  }, [refToken]);
+
+  if (refToken.startsWith('enemy:')) {
+    const name = refToken.substring('enemy:'.length);
+    return <EnemyIllustration name={name} seed={seed} className="w-full h-full" size={16} />;
+  }
+
+  if (refToken.startsWith('pixel:')) {
+    const spriteName = refToken.substring('pixel:'.length);
+    return <PixelSprite seed={seed} name={spriteName} className="w-full h-full opacity-90" size={16} />;
+  }
+
+  const cardName = refToken.startsWith('card:') ? refToken.substring('card:'.length) : refToken;
+  const candidates = getCardIllustrationPaths(seed, trans(cardName, languageMode), [cardName]);
+  if (!failed && imageIndex < candidates.length) {
+    return (
+      <img
+        src={candidates[imageIndex]}
+        alt={cardName}
+        className="w-full h-full object-cover opacity-95"
+        onError={() => {
+          const next = imageIndex + 1;
+          if (next < candidates.length) setImageIndex(next);
+          else setFailed(true);
+        }}
+      />
+    );
+  }
+
+  return <div className="w-full h-full bg-black/20" />;
+};
+
 const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languageMode = 'JAPANESE' }) => {
   const longPressTimer = useRef<any>(null);
   const isLongPressActive = useRef(false);
@@ -49,6 +110,10 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
   }, [card.capture, card.textureRef, card.enemyIllustrationName, card.enemyIllustrationNames]);
 
   const [imageIndex, setImageIndex] = useState(0);
+  const compositeIllustrationRefs = useMemo(
+    () => extractCompositeIllustrationRefs(card),
+    [card]
+  );
 
   useEffect(() => {
     setImageIndex(0);
@@ -113,6 +178,19 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
   };
 
   const renderCardArt = () => {
+    if (compositeIllustrationRefs.length > 1) {
+      const sliceWidth = `${100 / compositeIllustrationRefs.length}%`;
+      return (
+        <div className="w-full h-full flex overflow-hidden">
+          {compositeIllustrationRefs.map((token, idx) => (
+            <div key={`${token}-${idx}`} className="h-full border-r border-white/20 last:border-r-0" style={{ width: sliceWidth }}>
+              <CompositeArtPiece refToken={token} seed={`${card.id}-mix-${idx}`} languageMode={languageMode} />
+            </div>
+          ))}
+        </div>
+      );
+    }
+
     if (enemyIllustrationNames.length > 0) {
       return (
         <EnemyIllustration

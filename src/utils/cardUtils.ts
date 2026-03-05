@@ -1,6 +1,59 @@
 
 import { Card, CardType, TargetType } from '../types';
 
+const MAX_ILLUSTRATION_REFS = 8;
+
+const toIllustrationRefs = (card: Card): string[] => {
+    if (card.illustrationRefs && card.illustrationRefs.length > 0) {
+        return card.illustrationRefs.filter(Boolean).slice(0, MAX_ILLUSTRATION_REFS);
+    }
+
+    const enemyNames = [
+        ...(card.enemyIllustrationNames || []),
+        ...(card.enemyIllustrationName ? [card.enemyIllustrationName] : [])
+    ].filter(Boolean) as string[];
+    if (enemyNames.length > 0) {
+        return [`enemy:${enemyNames[0]}`];
+    }
+
+    if (card.capture && card.textureRef && !card.textureRef.includes('|')) {
+        return [`enemy:${card.textureRef}`];
+    }
+
+    if (card.name) {
+        return [`card:${card.name}`];
+    }
+
+    if (card.textureRef) {
+        return [`pixel:${card.textureRef}`];
+    }
+
+    return [];
+};
+
+const mergeIllustrationRefsCircular = (c1: Card, c2: Card, c3?: Card): { refs: string[]; writeIndex: number } => {
+    const refs = [...toIllustrationRefs(c1)];
+    let writeIndex = c1.illustrationRefWriteIndex || 0;
+    if (refs.length < MAX_ILLUSTRATION_REFS) {
+        writeIndex = refs.length % MAX_ILLUSTRATION_REFS;
+    }
+
+    const append = (token: string) => {
+        if (refs.length < MAX_ILLUSTRATION_REFS) {
+            refs.push(token);
+            writeIndex = refs.length % MAX_ILLUSTRATION_REFS;
+            return;
+        }
+        refs[writeIndex] = token;
+        writeIndex = (writeIndex + 1) % MAX_ILLUSTRATION_REFS;
+    };
+
+    toIllustrationRefs(c2).forEach(append);
+    if (c3) toIllustrationRefs(c3).forEach(append);
+
+    return { refs, writeIndex };
+};
+
 // Helper to determine the visual shape of a card for synthesis
 export const getShapeFromCard = (card: Card): string => {
     if (card.textureRef) return card.textureRef.split('|')[0];
@@ -340,6 +393,8 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
 
     const newTextureRef = `${shapeSource}|${colorSource}|${typeSource}`;
 
+    const { refs: mergedIllustrationRefs, writeIndex: illustrationRefWriteIndex } = mergeIllustrationRefsCircular(c1, c2, c3);
+
     // 10. Inherit Original Names for Special Logic
     const originalNames: string[] = [];
     const addOriginals = (c: Card) => {
@@ -418,6 +473,8 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
         nextTurnEnergy: newNextTurnEnergy || undefined,
         nextTurnDraw: newNextTurnDraw || undefined,
 
-        textureRef: newTextureRef
+        textureRef: newTextureRef,
+        illustrationRefs: mergedIllustrationRefs,
+        illustrationRefWriteIndex
     };
 };

@@ -13,6 +13,7 @@ class AudioService {
   // BGM Mode: Default to STUDY
   private bgmMode: 'OSCILLATOR' | 'MP3' | 'STUDY' = 'STUDY';
   private audioBuffers: Record<string, AudioBuffer> = {};
+  private sfxBuffers: Record<string, AudioBuffer> = {};
   private currentSource: AudioBufferSourceNode | null = null;
 
   // Sequencer State
@@ -740,7 +741,72 @@ class AudioService {
       }
   }
 
-  public playSound(effect: 'select' | 'attack' | 'block' | 'win' | 'lose' | 'correct' | 'wrong' | 'buff' | 'debuff' | 'damage') {
+  private playAttackSynth(t: number) {
+      if (!this.ctx || !this.sfxGain) return;
+      const osc = this.ctx.createOscillator();
+      osc.frequency.setValueAtTime(400, t);
+      osc.frequency.exponentialRampToValueAtTime(50, t + 0.15);
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(0.6, t);
+      g.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+      osc.connect(g);
+      g.connect(this.sfxGain);
+      osc.start(t);
+      osc.stop(t + 0.15);
+      this.playNoise(t, 0.15, 0.5, 'snare');
+  }
+
+  private playExplosionSynth(t: number) {
+      if (!this.sfxGain) return;
+      this.playOsc(90, t, 0.25, 'sawtooth', 0.45, this.sfxGain);
+      this.playOsc(55, t, 0.35, 'triangle', 0.35, this.sfxGain);
+      this.playNoise(t, 0.24, 0.9, 'kick');
+      this.playNoise(t + 0.03, 0.2, 0.7, 'snare');
+  }
+
+  private playSfxMp3(name: string, fallback: () => void) {
+      if (!this.ctx || !this.sfxGain) {
+          fallback();
+          return;
+      }
+
+      const cached = this.sfxBuffers[name];
+      if (cached) {
+          try {
+              const source = this.ctx.createBufferSource();
+              source.buffer = cached;
+              source.connect(this.sfxGain);
+              source.start(0);
+              return;
+          } catch {
+              fallback();
+              return;
+          }
+      }
+
+      const baseUrl = (import.meta as any).env.BASE_URL;
+      const paths = [`${baseUrl}sfx/${name}.mp3`, `/sfx/${name}.mp3`, `sfx/${name}.mp3`];
+
+      (async () => {
+          for (const path of paths) {
+              try {
+                  const response = await fetch(path);
+                  if (!response.ok) continue;
+                  const arrayBuffer = await response.arrayBuffer();
+                  const buffer = await this.ctx!.decodeAudioData(arrayBuffer);
+                  this.sfxBuffers[name] = buffer;
+                  const source = this.ctx!.createBufferSource();
+                  source.buffer = buffer;
+                  source.connect(this.sfxGain!);
+                  source.start(0);
+                  return;
+              } catch {}
+          }
+          fallback();
+      })();
+  }
+
+  public playSound(effect: 'select' | 'attack' | 'block' | 'win' | 'lose' | 'correct' | 'wrong' | 'buff' | 'debuff' | 'damage' | 'explosion' | 'finisher_slash' | 'finisher_explosion') {
       this.init();
       if (!this.ctx || !this.sfxGain || this.isMuted) return;
       const t = this.ctx.currentTime;
@@ -749,17 +815,7 @@ class AudioService {
               this.playOsc(1100, t, 0.05, 'triangle', 0.2, this.sfxGain);
               break;
           case 'attack':
-              const osc = this.ctx.createOscillator();
-              osc.frequency.setValueAtTime(400, t);
-              osc.frequency.exponentialRampToValueAtTime(50, t + 0.15);
-              const g = this.ctx.createGain();
-              g.gain.setValueAtTime(0.6, t);
-              g.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
-              osc.connect(g);
-              g.connect(this.sfxGain);
-              osc.start(t);
-              osc.stop(t+0.15);
-              this.playNoise(t, 0.15, 0.5, 'snare');
+              this.playAttackSynth(t);
               break;
           case 'block':
               this.playOsc(600, t, 0.1, 'square', 0.2, this.sfxGain);
@@ -816,6 +872,15 @@ class AudioService {
               this.playOsc(150, t, 0.1, 'square', 0.3, this.sfxGain);
               this.playOsc(100, t, 0.15, 'sawtooth', 0.3, this.sfxGain);
               this.playNoise(t, 0.1, 0.5, 'kick');
+              break;
+          case 'explosion':
+              this.playExplosionSynth(t);
+              break;
+          case 'finisher_slash':
+              this.playSfxMp3('finisher-slash', () => this.playAttackSynth(this.ctx!.currentTime));
+              break;
+          case 'finisher_explosion':
+              this.playSfxMp3('finisher-explosion', () => this.playExplosionSynth(this.ctx!.currentTime));
               break;
       }
   }

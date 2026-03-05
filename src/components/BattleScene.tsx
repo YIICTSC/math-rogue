@@ -9,7 +9,8 @@ import { trans } from '../utils/textUtils';
 import { HERO_IMAGE_DATA, CARDS_LIBRARY, STATUS_CARDS } from '../constants';
 import { ENEMY_ILLUSTRATION_SIZE_CLASS } from '../constants/uiSizing';
 import { getUpgradedCard, synthesizeCards } from '../utils/cardUtils';
-import React, { useEffect, useState, useRef } from 'react';
+import { getCardIllustrationPaths } from '../utils/cardIllustration';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { storageService } from '../services/storageService';
 
 const POWER_DEFINITIONS: Record<string, { name: string, desc: string }> = {
@@ -288,15 +289,25 @@ interface BattleSceneProps {
     parryState?: ParryState;
     onParry: () => void;
     activeEffects: VisualEffectInstance[];
+    finisherCutinCard?: ICard | null;
 }
 
 const BattleScene: React.FC<BattleSceneProps> = ({
     player, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onPlaySynthesizedCard, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
-    selectionState, onHandSelection, onCancelSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect, parryState, onParry, activeEffects
+    selectionState, onHandSelection, onCancelSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect, parryState, onParry, activeEffects, finisherCutinCard
 }) => {
 
+    const [lastVisibleEnemies, setLastVisibleEnemies] = useState<Enemy[]>([]);
+    const isFinisherActive = !!finisherCutinCard;
+    const visualEnemies = isFinisherActive && enemies.length === 0 ? lastVisibleEnemies : enemies;
     const playerHpPercent = (player.currentHp / player.maxHp) * 100;
-    const isTrueBossPhase2Active = enemies.some(enemy => enemy.enemyType === 'THE_HEART' && enemy.phase === 2);
+    const isTrueBossPhase2Active = visualEnemies.some(enemy => enemy.enemyType === 'THE_HEART' && enemy.phase === 2);
+
+    useEffect(() => {
+        if (enemies.length > 0) {
+            setLastVisibleEnemies(enemies.map((e) => ({ ...e })));
+        }
+    }, [enemies]);
 
     const [isActing, setIsActing] = useState(false);
     const [isShaking, setIsShaking] = useState(false);
@@ -305,7 +316,9 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const [tooltip, setTooltip] = useState<{ title: string, msg: string } | null>(null);
     const [potionConfirmation, setPotionConfirmation] = useState<Potion | null>(null);
     const [inspectedCard, setInspectedCard] = useState<ICard | null>(null);
+    const [fullscreenArtCard, setFullscreenArtCard] = useState<ICard | null>(null);
     const [showLog, setShowLog] = useState(false);
+    const [finisherBurst, setFinisherBurst] = useState(false);
     const logContainerRef = useRef<HTMLDivElement>(null);
 
     // --- BATTLE TUTORIAL STATE ---
@@ -344,6 +357,15 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             }
         }
     }, [activeEffects]);
+
+    useEffect(() => {
+        if (!isFinisherActive) {
+            setFinisherBurst(false);
+            return;
+        }
+        const timer = setTimeout(() => setFinisherBurst(true), 760);
+        return () => clearTimeout(timer);
+    }, [isFinisherActive, finisherCutinCard?.id]);
 
     // Dual Protagonist States
     const [selectedCardIds, setSelectedCardIds] = useState<string[]>([]);
@@ -544,6 +566,9 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
     return (
         <div className={`flex flex-col h-full w-full bg-gray-900 text-white relative overflow-hidden ${isShaking ? 'animate-screen-shake' : ''}`}>
+            {finisherCutinCard && (
+                <BattleFinisherCutinOverlay card={finisherCutinCard} languageMode={languageMode} />
+            )}
 
             {/* --- BATTLE TUTORIAL OVERLAY --- */}
             {tutorialStep !== null && (
@@ -785,8 +810,15 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
                 {/* Card Inspection Modal */}
                 {inspectedCard && (
-                    <div className="fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setInspectedCard(null)}>
-                        <div className="scale-110 md:scale-150 mb-8 transform transition-transform" onClick={(e) => e.stopPropagation()}>
+                    <div className="fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => { setInspectedCard(null); setFullscreenArtCard(null); }}>
+                        <div
+                            className="scale-125 md:scale-[1.85] mb-10 transform transition-transform cursor-zoom-in"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setFullscreenArtCard(inspectedCard);
+                            }}
+                            title={trans("タッチでイラスト拡大", languageMode)}
+                        >
                             <Card card={inspectedCard} onClick={() => { }} disabled={false} languageMode={languageMode} />
                         </div>
                         <div className="bg-gray-800 border-2 border-white p-4 md:p-6 rounded-lg max-w-sm w-full shadow-2xl relative max-h-[50vh] overflow-y-auto custom-scrollbar" onClick={(e) => e.stopPropagation()}>
@@ -812,6 +844,13 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             </div>
                         </div>
                     </div>
+                )}
+                {fullscreenArtCard && (
+                    <FullscreenCardArtModal
+                        card={fullscreenArtCard}
+                        languageMode={languageMode}
+                        onClose={() => setFullscreenArtCard(null)}
+                    />
                 )}
 
                 {/* Relic List Modal */}
@@ -910,10 +949,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 <div className={isTrueBossPhase2Active ? "relative min-h-[220px] md:min-h-[320px] pt-2 md:pt-4" : "flex flex-col flex-1"}>
 
                 {/* Enemies Area */}
-                <div className={isTrueBossPhase2Active ? "absolute right-2 md:left-1/2 md:-translate-x-1/2 bottom-0 flex justify-end md:justify-center items-end gap-2 min-h-0 shrink-0 z-10" : "flex justify-center items-start pt-8 md:pt-14 gap-2 min-h-[180px] shrink-0"}>
-                    {enemies.map((enemy) => {
+                <div className={isTrueBossPhase2Active ? `absolute right-2 md:left-1/2 md:-translate-x-1/2 bottom-0 flex justify-end md:justify-center items-end gap-2 min-h-0 shrink-0 ${isFinisherActive ? 'z-[280]' : 'z-10'}` : `flex justify-center items-start pt-8 md:pt-14 gap-2 min-h-[180px] shrink-0 ${isFinisherActive ? 'z-[280]' : ''}`}>
+                    {visualEnemies.map((enemy) => {
                         const enemyHpPercent = (enemy.currentHp / enemy.maxHp) * 100;
-                        const isSelected = selectedEnemyId === enemy.id;
+                        const isSelected = !isFinisherActive && selectedEnemyId === enemy.id;
                         const actionClass = getEnemyActionClass(enemy);
                         const enemyName = trans(enemy.name, languageMode);
                         const enemyNameNeedsScroll = enemyName.length > 5;
@@ -925,46 +964,102 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         return (
                             <div
                                 key={enemy.id}
-                                onClick={() => onSelectEnemy(enemy.id)}
-                                className={`flex flex-col items-center z-10 transition-all duration-200 cursor-pointer relative ${isSelected && !actionClass ? 'scale-105 z-20' : ''} ${!isSelected && !actionClass ? 'hover:scale-105' : ''} ${actionClass} ${isTrueBossPhase2 ? 'sinister-aura' : ''} ${tutorialStep === 2 ? 'ring-4 ring-red-500 ring-offset-4 ring-offset-transparent animate-pulse rounded-lg' : ''}`}
+                                onClick={() => {
+                                    if (!isFinisherActive) onSelectEnemy(enemy.id);
+                                }}
+                                className={`flex flex-col items-center z-10 transition-all duration-200 cursor-pointer relative ${isSelected && !actionClass ? 'scale-105 z-20' : ''} ${!isSelected && !actionClass ? 'hover:scale-105' : ''} ${actionClass} ${isTrueBossPhase2 ? 'sinister-aura' : ''} ${tutorialStep === 2 ? 'ring-4 ring-red-500 ring-offset-4 ring-offset-transparent animate-pulse rounded-lg' : ''} ${isFinisherActive ? '!z-[300]' : ''}`}
                             >
                                 {isTrueBossPhase2 && (
                                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-900/20 blur-3xl rounded-full void-backglow pointer-events-none z-0"></div>
                                 )}
 
-                                <div
-                                    className={`absolute ${isTrueBossPhase2 ? '-top-1 md:-top-6' : '-top-6'} left-1/2 -translate-x-1/2 z-30 transition-all duration-300 text-xs font-extrabold px-1.5 py-0.5 rounded border-2 animate-bounce whitespace-nowrap shadow-xl flex items-center justify-center min-w-[40px] ${enemy.nextIntent.type === 'PIERCE_ATTACK' ? 'bg-red-800 text-white border-yellow-400 scale-125 ring-2 ring-red-400 shadow-red-900/50' : 'bg-white text-black border-red-600'}`}
-                                    onClick={(e) => { e.stopPropagation(); showInfo(trans("敵", languageMode), trans("敵の次の行動です。", languageMode)); }}
-                                >
-                                    {(enemy.nextIntent.type === 'ATTACK' || enemy.nextIntent.type === 'ATTACK_DEBUFF' || enemy.nextIntent.type === 'ATTACK_DEFEND' || enemy.nextIntent.type === 'PIERCE_ATTACK') && (
-                                        <>
-                                            {enemy.nextIntent.type === 'PIERCE_ATTACK' ? (
-                                                <div className="relative flex items-center justify-center mr-1.5">
-                                                    <Triangle size={18} className="text-yellow-400 fill-yellow-400" />
-                                                    <span className="absolute text-[10px] font-black text-red-900 top-[3px]">!</span>
-                                                </div>
-                                            ) : (
-                                                <Skull size={12} className="mr-1 text-red-600" />
-                                            )}
-                                            {enemy.nextIntent.value}
-                                        </>
-                                    )}
-                                    {enemy.nextIntent.type === 'DEFEND' && (
-                                        <><Shield size={12} className="mr-1 text-blue-600" /> {enemy.nextIntent.value}</>
-                                    )}
-                                    {(enemy.nextIntent.type === 'BUFF' || enemy.nextIntent.type === 'DEBUFF' || enemy.nextIntent.type === 'SLEEP') && (
-                                        <><Zap size={12} className="mr-1 text-yellow-500 fill-yellow-500" /> !</>
-                                    )}
-                                    {enemy.nextIntent.type === 'UNKNOWN' && <span className="text-gray-600">?</span>}
-                                </div>
+                                {!isFinisherActive && (
+                                    <div
+                                        className={`absolute ${isTrueBossPhase2 ? '-top-1 md:-top-6' : '-top-6'} left-1/2 -translate-x-1/2 z-30 transition-all duration-300 text-xs font-extrabold px-1.5 py-0.5 rounded border-2 animate-bounce whitespace-nowrap shadow-xl flex items-center justify-center min-w-[40px] ${enemy.nextIntent.type === 'PIERCE_ATTACK' ? 'bg-red-800 text-white border-yellow-400 scale-125 ring-2 ring-red-400 shadow-red-900/50' : 'bg-white text-black border-red-600'}`}
+                                        onClick={(e) => { e.stopPropagation(); showInfo(trans("敵", languageMode), trans("敵の次の行動です。", languageMode)); }}
+                                    >
+                                        {(enemy.nextIntent.type === 'ATTACK' || enemy.nextIntent.type === 'ATTACK_DEBUFF' || enemy.nextIntent.type === 'ATTACK_DEFEND' || enemy.nextIntent.type === 'PIERCE_ATTACK') && (
+                                            <>
+                                                {enemy.nextIntent.type === 'PIERCE_ATTACK' ? (
+                                                    <div className="relative flex items-center justify-center mr-1.5">
+                                                        <Triangle size={18} className="text-yellow-400 fill-yellow-400" />
+                                                        <span className="absolute text-[10px] font-black text-red-900 top-[3px]">!</span>
+                                                    </div>
+                                                ) : (
+                                                    <Skull size={12} className="mr-1 text-red-600" />
+                                                )}
+                                                {enemy.nextIntent.value}
+                                            </>
+                                        )}
+                                        {enemy.nextIntent.type === 'DEFEND' && (
+                                            <><Shield size={12} className="mr-1 text-blue-600" /> {enemy.nextIntent.value}</>
+                                        )}
+                                        {(enemy.nextIntent.type === 'BUFF' || enemy.nextIntent.type === 'DEBUFF' || enemy.nextIntent.type === 'SLEEP') && (
+                                            <><Zap size={12} className="mr-1 text-yellow-500 fill-yellow-500" /> !</>
+                                        )}
+                                        {enemy.nextIntent.type === 'UNKNOWN' && <span className="text-gray-600">?</span>}
+                                    </div>
+                                )}
 
                                 <div className={`relative mb-1 transition-all duration-700 ${isTrueBossPhase2 ? ENEMY_ILLUSTRATION_SIZE_CLASS.battleTrueBossPhase2 : ENEMY_ILLUSTRATION_SIZE_CLASS.battleNormal}`}>
-                                    <EnemyIllustration name={enemy.name} seed={enemy.id} aliases={enemySvgAliases} className="w-full h-full drop-shadow-lg relative z-10" />
-                                    <FloatingTextOverlay data={enemy.floatingText} languageMode={languageMode} />
-                                    <VFXOverlay effects={activeEffects} targetId={enemy.id} />
+                                    {isFinisherActive ? (
+                                        <div className="relative w-full h-full flex items-center justify-center">
+                                            {!finisherBurst && (
+                                                <div className="w-full h-full animate-finisher-enemy-focus">
+                                                    <EnemyIllustration
+                                                        name={enemy.name}
+                                                        seed={`${enemy.id}-finisher-main`}
+                                                        aliases={enemySvgAliases}
+                                                        className="w-full h-full drop-shadow-[0_0_20px_rgba(255,255,255,0.5)] rotate-[6deg] scale-110"
+                                                        size={24}
+                                                    />
+                                                </div>
+                                            )}
+                                            {finisherBurst && (
+                                                <>
+                                                    {[
+                                                        { tx: '-110px', ty: '-85px', rot: -42 },
+                                                        { tx: '110px', ty: '-85px', rot: 42 },
+                                                        { tx: '-130px', ty: '5px', rot: -28 },
+                                                        { tx: '130px', ty: '5px', rot: 28 },
+                                                        { tx: '-80px', ty: '105px', rot: -33 },
+                                                        { tx: '80px', ty: '105px', rot: 33 },
+                                                    ].map((v, idx) => (
+                                                        <div
+                                                            key={`enemy-shatter-${enemy.id}-${idx}`}
+                                                            className="absolute w-[42%] h-[42%] animate-finisher-enemy-shatter"
+                                                            style={
+                                                                {
+                                                                    '--tx': v.tx,
+                                                                    '--ty': v.ty,
+                                                                    '--rot': `${v.rot}deg`,
+                                                                    animationDelay: `${idx * 22}ms`
+                                                                } as React.CSSProperties
+                                                            }
+                                                        >
+                                                            <EnemyIllustration
+                                                                name={enemy.name}
+                                                                seed={`${enemy.id}-finisher-piece-${idx}`}
+                                                                aliases={enemySvgAliases}
+                                                                className="w-full h-full"
+                                                                size={16}
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                    <div className="absolute w-16 h-16 md:w-24 md:h-24 rounded-full bg-orange-500/90 shadow-[0_0_60px_rgba(249,115,22,0.95)] animate-finisher-enemy-explosion"></div>
+                                                    <div className="absolute w-24 h-24 md:w-36 md:h-36 rounded-full border-4 border-yellow-200/90 animate-finisher-enemy-shockwave"></div>
+                                                </>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <EnemyIllustration name={enemy.name} seed={enemy.id} aliases={enemySvgAliases} className="w-full h-full drop-shadow-lg relative z-10" />
+                                    )}
+                                    {!isFinisherActive && <FloatingTextOverlay data={enemy.floatingText} languageMode={languageMode} />}
+                                    {!isFinisherActive && <VFXOverlay effects={activeEffects} targetId={enemy.id} />}
                                 </div>
 
-                                <div className={`${isTrueBossPhase2 ? 'w-32 md:w-40 scale-110' : 'w-24 md:w-28'} bg-black/90 border-2 px-1 py-0.5 text-white text-[9px] md:text-[10px] transition-all shadow-md rounded relative z-10 ${isSelected ? 'border-yellow-400 ring-1 ring-yellow-400/50' : 'border-gray-600'} ${isTrueBossPhase2 ? 'border-purple-500' : ''}`}>
+                                {!isFinisherActive && (
+                                    <div className={`${isTrueBossPhase2 ? 'w-32 md:w-40 scale-110' : 'w-24 md:w-28'} bg-black/90 border-2 px-1 py-0.5 text-white text-[9px] md:text-[10px] transition-all shadow-md rounded relative z-10 ${isSelected ? 'border-yellow-400 ring-1 ring-yellow-400/50' : 'border-gray-600'} ${isTrueBossPhase2 ? 'border-purple-500' : ''}`}>
                                     <div className="flex items-center justify-between mb-0.5 h-4 w-full overflow-hidden">
                                         <div className="flex-1 min-w-0 overflow-hidden relative h-full">
                                             {enemyNameNeedsScroll ? (
@@ -1008,7 +1103,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                             </div>
                                         )}
                                     </div>
-                                </div>
+                                    </div>
+                                )}
                             </div>
                         );
                     })}
@@ -1119,6 +1215,32 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 </div>
                 </div>
             </div>
+            <style>
+                {`
+                    @keyframes finisher-enemy-focus {
+                        0% { transform: scale(0.7) rotate(-4deg); opacity: 0.2; }
+                        35% { transform: scale(1.12) rotate(7deg); opacity: 1; }
+                        100% { transform: scale(1.08) rotate(6deg); opacity: 1; }
+                    }
+                    @keyframes finisher-enemy-shatter {
+                        0% { transform: translate(0,0) rotate(0deg) scale(1); opacity: 1; }
+                        100% { transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(0.2); opacity: 0; }
+                    }
+                    @keyframes finisher-enemy-explosion {
+                        0% { transform: scale(0.2); opacity: 1; }
+                        70% { transform: scale(2.8); opacity: 0.9; }
+                        100% { transform: scale(4.2); opacity: 0; }
+                    }
+                    @keyframes finisher-enemy-shockwave {
+                        0% { transform: scale(0.15); opacity: 1; border-width: 8px; }
+                        100% { transform: scale(3.8); opacity: 0; border-width: 1px; }
+                    }
+                    .animate-finisher-enemy-focus { animation: finisher-enemy-focus 0.62s cubic-bezier(.2,.8,.2,1) forwards; }
+                    .animate-finisher-enemy-shatter { animation: finisher-enemy-shatter 0.58s cubic-bezier(.12,.84,.25,1) forwards; }
+                    .animate-finisher-enemy-explosion { animation: finisher-enemy-explosion 0.85s ease-out forwards; }
+                    .animate-finisher-enemy-shockwave { animation: finisher-enemy-shockwave 0.85s ease-out forwards; }
+                `}
+            </style>
 
             {/* 3. Control Bar */}
             <div className="h-12 bg-gray-800 border-t-2 border-white flex items-center justify-between px-2 shrink-0 z-20 shadow-lg">
@@ -1261,6 +1383,293 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 </div>
             )}
 
+        </div>
+    );
+};
+
+const MAX_ILLUSTRATION_REFS = 8;
+
+const extractIllustrationTokens = (card: ICard): string[] => {
+    if (card.illustrationRefs && card.illustrationRefs.length > 0) {
+        return card.illustrationRefs.filter(Boolean).slice(0, MAX_ILLUSTRATION_REFS);
+    }
+
+    const enemyNames = [
+        ...(card.enemyIllustrationNames || []),
+        ...(card.enemyIllustrationName ? [card.enemyIllustrationName] : []),
+    ].filter(Boolean) as string[];
+    if (enemyNames.length > 0) return [`enemy:${enemyNames[0]}`];
+
+    if (card.capture && card.textureRef && !card.textureRef.includes('|')) {
+        return [`enemy:${card.textureRef}`];
+    }
+
+    if (card.name) return [`card:${card.name}`];
+    if (card.textureRef) return [`pixel:${card.textureRef}`];
+    return [];
+};
+
+const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: LanguageMode }> = ({ token, seed, languageMode }) => {
+    const [imageIndex, setImageIndex] = useState(0);
+    const [failed, setFailed] = useState(false);
+    const normalized = token.startsWith('enemy:') || token.startsWith('card:') || token.startsWith('pixel:') ? token : `card:${token}`;
+
+    useEffect(() => {
+        setImageIndex(0);
+        setFailed(false);
+    }, [normalized]);
+
+    if (normalized.startsWith('enemy:')) {
+        const name = normalized.substring('enemy:'.length);
+        return <EnemyIllustration name={name} seed={seed} className="w-full h-full" size={32} />;
+    }
+
+    if (normalized.startsWith('pixel:')) {
+        const sprite = normalized.substring('pixel:'.length);
+        return <PixelSprite seed={seed} name={sprite} className="w-full h-full" size={32} />;
+    }
+
+    const cardName = normalized.substring('card:'.length);
+    const candidates = getCardIllustrationPaths(seed, trans(cardName, languageMode), [cardName]);
+    if (!failed && imageIndex < candidates.length) {
+        return (
+            <img
+                src={candidates[imageIndex]}
+                alt={cardName}
+                className="w-full h-full object-cover"
+                onError={() => {
+                    const next = imageIndex + 1;
+                    if (next < candidates.length) setImageIndex(next);
+                    else setFailed(true);
+                }}
+            />
+        );
+    }
+
+    return <div className="w-full h-full bg-black/30" />;
+};
+
+const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: LanguageMode }> = ({ card, languageMode }) => {
+    const translated = trans(card.name, languageMode);
+    const illustrationTokens = useMemo(
+        () => Array.from(new Set(extractIllustrationTokens(card))),
+        [card]
+    );
+    const isComposite = illustrationTokens.length > 1;
+    const anglePattern = [-16, -8, -2, 7, 14, -12, 9, 4];
+    const laneTopPattern = [6, 30, 54];
+    const directionPattern = ['left', 'right', 'up', 'down'] as const;
+    const delayStepMs = 140;
+    const cutinCount = Math.max(illustrationTokens.length, 1);
+
+    useEffect(() => {
+        const timers: ReturnType<typeof setTimeout>[] = [];
+
+        for (let i = 0; i < cutinCount; i++) {
+            timers.push(
+                setTimeout(() => {
+                    audioService.playSound('finisher_slash');
+                }, i * delayStepMs)
+            );
+        }
+
+        const explosionDelay = Math.max(680, (cutinCount - 1) * delayStepMs + 220);
+        timers.push(
+            setTimeout(() => {
+                audioService.playSound('finisher_explosion');
+            }, explosionDelay)
+        );
+
+        return () => {
+            timers.forEach((timer) => clearTimeout(timer));
+        };
+    }, [card.id, cutinCount, delayStepMs]);
+
+    return (
+        <div className="absolute inset-0 z-[160] pointer-events-none overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent animate-finish-dim"></div>
+
+            {isComposite ? (
+                <div className="absolute inset-0">
+                    {illustrationTokens.map((token, idx) => {
+                        const lane = idx % laneTopPattern.length;
+                        const direction = directionPattern[idx % directionPattern.length];
+                        const fromLeft = direction === 'left' || direction === 'up';
+                        const horizontalShift = Math.min(Math.floor(idx / laneTopPattern.length) * 5 + lane * 2, 22);
+
+                        return (
+                            <div
+                                key={`${token}-${idx}`}
+                                className="absolute w-[62vw] max-w-[760px] h-[28vh] max-h-[250px]"
+                                style={{
+                                    top: `${laneTopPattern[lane]}%`,
+                                    [fromLeft ? 'left' : 'right']: `${horizontalShift}%`,
+                                    transform: `rotate(${anglePattern[idx % anglePattern.length]}deg)`,
+                                    zIndex: 10 + idx
+                                }}
+                            >
+                                <div
+                                    className={`w-full h-full rounded-2xl overflow-hidden border-4 border-orange-300/70 shadow-[0_0_45px_rgba(251,146,60,0.45)] bg-black/35 ${
+                                        direction === 'left'
+                                            ? 'animate-finish-cutin-multi-left'
+                                            : direction === 'right'
+                                                ? 'animate-finish-cutin-multi-right'
+                                                : direction === 'up'
+                                                    ? 'animate-finish-cutin-multi-up'
+                                                    : 'animate-finish-cutin-multi-down'
+                                    }`}
+                                    style={{ animationDelay: `${idx * delayStepMs}ms` }}
+                                >
+                                    <FinisherArtPiece token={token} seed={`${card.id}-finisher-${idx}`} languageMode={languageMode} />
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            ) : (
+                <div className="absolute inset-0 flex items-center">
+                    <div className="w-[78vw] max-w-[920px] h-[42vh] max-h-[360px] animate-finish-cutin rounded-r-2xl overflow-hidden border-y-4 border-r-4 border-orange-300/70 shadow-[0_0_50px_rgba(251,146,60,0.45)] bg-black/30">
+                        <FinisherArtPiece token={illustrationTokens[0] || `card:${card.name}`} seed={`${card.id}-finisher`} languageMode={languageMode} />
+                    </div>
+                </div>
+            )}
+
+            <div className="absolute left-6 bottom-8 md:bottom-12 animate-finish-title">
+                <div className="text-orange-200 text-xs md:text-sm font-bold tracking-[0.18em] mb-1">{trans("フィニッシュ", languageMode)}</div>
+                <div className="text-white text-2xl md:text-4xl font-black drop-shadow-[0_0_18px_rgba(0,0,0,1)]">{translated}</div>
+            </div>
+
+            <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-20 h-20 md:w-32 md:h-32 rounded-full bg-orange-500/90 shadow-[0_0_80px_rgba(249,115,22,0.95)] animate-finish-explosion"></div>
+                <div className="absolute w-32 h-32 md:w-52 md:h-52 rounded-full border-4 border-yellow-200/90 animate-finish-shockwave"></div>
+            </div>
+
+            <style>
+                {`
+                    @keyframes finish-cutin {
+                        0% { transform: translateX(-110%) skewX(-10deg); opacity: 0; }
+                        20% { transform: translateX(-6%) skewX(-6deg); opacity: 1; }
+                        100% { transform: translateX(0) skewX(0deg); opacity: 1; }
+                    }
+                    @keyframes finish-cutin-multi-left {
+                        0% { transform: translateX(-120%) scale(1.05); }
+                        35% { transform: translateX(-8%) scale(1.02); }
+                        100% { transform: translateX(0) scale(1); }
+                    }
+                    @keyframes finish-cutin-multi-right {
+                        0% { transform: translateX(120%) scale(1.05); }
+                        35% { transform: translateX(8%) scale(1.02); }
+                        100% { transform: translateX(0) scale(1); }
+                    }
+                    @keyframes finish-cutin-multi-up {
+                        0% { transform: translateY(-110%) scale(1.06); }
+                        35% { transform: translateY(-8%) scale(1.02); }
+                        100% { transform: translateY(0) scale(1); }
+                    }
+                    @keyframes finish-cutin-multi-down {
+                        0% { transform: translateY(110%) scale(1.06); }
+                        35% { transform: translateY(8%) scale(1.02); }
+                        100% { transform: translateY(0) scale(1); }
+                    }
+                    @keyframes finish-dim {
+                        0% { opacity: 0; }
+                        25% { opacity: 1; }
+                        100% { opacity: 1; }
+                    }
+                    @keyframes finish-title {
+                        0% { transform: translateY(20px); opacity: 0; }
+                        35% { transform: translateY(0); opacity: 1; }
+                        100% { transform: translateY(0); opacity: 1; }
+                    }
+                    @keyframes finish-explosion {
+                        0%, 54% { transform: scale(0.15); opacity: 0; }
+                        58% { transform: scale(0.35); opacity: 0.9; }
+                        75% { transform: scale(2.8); opacity: 0.95; }
+                        100% { transform: scale(4.8); opacity: 0; }
+                    }
+                    @keyframes finish-shockwave {
+                        0%, 56% { transform: scale(0.2); opacity: 0; border-width: 10px; }
+                        60% { opacity: 1; }
+                        100% { transform: scale(4.5); opacity: 0; border-width: 1px; }
+                    }
+                    .animate-finish-cutin { animation: finish-cutin 0.55s cubic-bezier(.2,.8,.2,1) forwards; }
+                    .animate-finish-cutin-multi-left { animation: finish-cutin-multi-left 0.62s cubic-bezier(.2,.8,.2,1) forwards; }
+                    .animate-finish-cutin-multi-right { animation: finish-cutin-multi-right 0.62s cubic-bezier(.2,.8,.2,1) forwards; }
+                    .animate-finish-cutin-multi-up { animation: finish-cutin-multi-up 0.62s cubic-bezier(.2,.8,.2,1) forwards; }
+                    .animate-finish-cutin-multi-down { animation: finish-cutin-multi-down 0.62s cubic-bezier(.2,.8,.2,1) forwards; }
+                    .animate-finish-dim { animation: finish-dim 0.3s ease-out forwards; }
+                    .animate-finish-title { animation: finish-title 0.45s ease-out forwards; }
+                    .animate-finish-explosion { animation: finish-explosion 1.2s ease-out forwards; }
+                    .animate-finish-shockwave { animation: finish-shockwave 1.2s ease-out forwards; }
+                `}
+            </style>
+        </div>
+    );
+};
+
+const FullscreenCardArtModal: React.FC<{ card: ICard; languageMode: LanguageMode; onClose: () => void }> = ({ card, languageMode, onClose }) => {
+    const translated = trans(card.name, languageMode);
+    const imageCandidates = useMemo(
+        () => getCardIllustrationPaths(card.id, translated, [card.name]),
+        [card.id, card.name, translated]
+    );
+    const enemyIllustrationNames = useMemo(() => {
+        const explicit = [
+            ...(card.enemyIllustrationNames || []),
+            ...(card.enemyIllustrationName ? [card.enemyIllustrationName] : []),
+        ].filter(Boolean) as string[];
+        if (explicit.length > 0) return Array.from(new Set(explicit));
+
+        if (card.capture && card.textureRef && !card.textureRef.includes('|')) {
+            return [card.textureRef];
+        }
+
+        return [];
+    }, [card.capture, card.textureRef, card.enemyIllustrationName, card.enemyIllustrationNames]);
+    const [imageIndex, setImageIndex] = useState(0);
+
+    useEffect(() => {
+        setImageIndex(0);
+    }, [card.id, card.name, translated]);
+
+    return (
+        <div className="fixed inset-0 z-[120] bg-black/95 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
+            <button
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onClose();
+                }}
+                className="absolute top-3 right-3 text-white/80 hover:text-white p-2"
+            >
+                <X size={28} />
+            </button>
+
+            <div className="w-full h-full max-w-[96vw] max-h-[96vh] flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+                {enemyIllustrationNames.length > 0 ? (
+                    <div className="w-[70vmin] h-[70vmin] max-w-[90vw] max-h-[90vh]">
+                        <EnemyIllustration
+                            name={enemyIllustrationNames[0]}
+                            seed={`${card.id}-enemy-fullscreen`}
+                            aliases={enemyIllustrationNames.slice(1)}
+                            className="w-full h-full"
+                            size={32}
+                        />
+                    </div>
+                ) : imageIndex < imageCandidates.length ? (
+                    <img
+                        src={imageCandidates[imageIndex]}
+                        alt={translated}
+                        className="max-w-full max-h-full object-contain rounded"
+                        onError={() => setImageIndex((prev) => prev + 1)}
+                    />
+                ) : card.textureRef ? (
+                    <div className="w-[70vmin] h-[70vmin] max-w-[90vw] max-h-[90vh]">
+                        <PixelSprite seed={card.id} name={card.textureRef} className="w-full h-full" size={32} />
+                    </div>
+                ) : (
+                    <div className="text-gray-400">{trans("イラストがありません", languageMode)}</div>
+                )}
+            </div>
         </div>
     );
 };
