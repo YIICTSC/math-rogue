@@ -1,0 +1,3 @@
+finisher-slash.wav : フィニッシュ演出の斬撃音（ダミー）
+finisher-explosion.wav : フィニッシュ演出の爆発音（ダミー）
+Replace these files with real SFX keeping the same names.
