@@ -61,6 +61,8 @@ export interface Card {
 
   capture?: boolean;
   textureRef?: string;
+  illustrationRefs?: string[];
+  illustrationRefWriteIndex?: number;
   enemyIllustrationName?: string;
   enemyIllustrationNames?: string[];
 

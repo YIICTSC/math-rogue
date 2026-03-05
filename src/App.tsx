@@ -314,6 +314,7 @@ const App: React.FC = () => {
     });
     const [totalMathCorrect, setTotalMathCorrect] = useState<number>(0);
     const [nextThreshold, setNextThreshold] = useState<number | null>(null);
+    const [battleFinisherCutinCard, setBattleFinisherCutinCard] = useState<ICard | null>(null);
 
     const [isMathDebugSkipped, setIsMathDebugSkipped] = useState<boolean>(false);
     const [isDebugHpOne, setIsDebugHpOne] = useState<boolean>(false);
@@ -815,10 +816,10 @@ const App: React.FC = () => {
         }
         const saved = storageService.loadGame();
         if (saved) {
-            // ???????: HP?0?????????????
+            // セーブ破損対策: HPが0以下ならセーブを無効化
             if (saved.player.currentHp <= 0) {
                 storageService.clearSave();
-                addLog("???????????????????", "red");
+                addLog("セーブデータが無効だったため削除しました。", "red");
                 return;
             }
 
@@ -840,11 +841,11 @@ const App: React.FC = () => {
                     setEventData(restoredEvent);
                     setEventResultLog(null);
                 } else {
-                    // ?????????????????????????????????
+                    // イベントを復元できない場合は安全にマップへ戻す
                     saved.screen = saved.map.length > 0 ? GameScreen.MAP : GameScreen.RELIC_SELECTION;
                     setEventData(null);
                     setEventResultLog(null);
-                    addLog(trans("??????????????????????????????", languageMode), "yellow");
+                    addLog(trans("イベントを復元できなかったためマップに戻りました。", languageMode), "yellow");
                 }
             } else {
                 setEventData(null);
@@ -862,7 +863,7 @@ const App: React.FC = () => {
             } else {
                 audioService.playBGM('map');
             }
-            addLog(trans("???????????", languageMode), "blue");
+            addLog(trans("続きから再開しました。", languageMode), "blue");
         }
     };
 
@@ -2003,6 +2004,7 @@ const App: React.FC = () => {
         audioService.playSound(card.type === CardType.ATTACK ? 'attack' : 'block');
         setLastActionType(card.type);
         setLastActionTime(Date.now());
+        lastPlayedCardRef.current = card;
 
         setGameState(prev => {
             const p = { ...prev.player, hand: [...prev.player.hand], drawPile: [...prev.player.drawPile], discardPile: [...prev.player.discardPile], deck: [...prev.player.deck], powers: { ...prev.player.powers } };
@@ -3388,6 +3390,7 @@ const App: React.FC = () => {
     const handleEndTurnClick = () => {
         if (isEndingTurnRef.current) return;
         if (weatherScryModal) return;
+        lastPlayedCardRef.current = null;
 
         if (gameState.player.relics.find(r => r.id === 'NILRYS_CODEX')) {
             const pool = getFilteredCardPool(gameState.player.id);
@@ -3538,52 +3541,75 @@ const App: React.FC = () => {
     };
 
     const stateRef = useRef(gameState);
+    const lastPlayedCardRef = useRef<ICard | null>(null);
+    const victorySequenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     useEffect(() => { stateRef.current = gameState; }, [gameState]);
+
+    const resolveBattleVictory = useCallback(() => {
+        audioService.stopBGM();
+        audioService.playSound('win');
+        setGameState(prev => {
+            let hpRegen = 0;
+            if (prev.player.relics.find(r => r.id === 'BURNING_BLOOD')) hpRegen = 6;
+            if (prev.player.relics.find(r => r.id === 'MEAT_ON_THE_BONE') && prev.player.currentHp <= prev.player.maxHp / 2) hpRegen += 12;
+            const nextPlayer = { ...prev.player };
+            if (hpRegen > 0) {
+                nextPlayer.currentHp = Math.min(nextPlayer.maxHp, nextPlayer.currentHp + hpRegen);
+            }
+            if (nextPlayer.partner) {
+                nextPlayer.partner = {
+                    ...nextPlayer.partner,
+                    currentHp: Math.min(nextPlayer.partner.maxHp, nextPlayer.partner.currentHp + 5)
+                };
+            }
+
+            if (prev.act === 4 && !prev.isEndless) {
+                storageService.incrementClearCount();
+                const score = calculateScore(prev, true);
+                storageService.saveScore({
+                    id: `victory-${Date.now()}`,
+                    playerName: 'Player',
+                    characterName: selectedCharName,
+                    score: score,
+                    act: prev.act,
+                    floor: prev.floor,
+                    victory: true,
+                    date: Date.now(),
+                    challengeMode: prev.challengeMode
+                });
+
+                setLegacyCardSelected(false);
+                audioService.playBGM('victory');
+                return { ...prev, player: nextPlayer, screen: GameScreen.ENDING };
+            } else {
+                const challengeScreen = getChallengeScreenForMode(prev.mode);
+                return { ...prev, player: nextPlayer, screen: challengeScreen };
+            }
+        });
+    }, [selectedCharName]);
 
     useEffect(() => {
         if (gameState.screen === GameScreen.BATTLE) {
             const isHeartTransforming = gameState.enemies.some(e => e.enemyType === 'THE_HEART' && e.phase === 1 && e.currentHp <= 0);
             if (gameState.enemies.length === 0 && !isHeartTransforming) {
-                audioService.stopBGM();
-                audioService.playSound('win');
-                setGameState(prev => {
-                    let hpRegen = 0;
-                    if (prev.player.relics.find(r => r.id === 'BURNING_BLOOD')) hpRegen = 6;
-                    if (prev.player.relics.find(r => r.id === 'MEAT_ON_THE_BONE') && prev.player.currentHp <= prev.player.maxHp / 2) hpRegen += 12;
-                    const nextPlayer = { ...prev.player };
-                    if (hpRegen > 0) {
-                        nextPlayer.currentHp = Math.min(nextPlayer.maxHp, nextPlayer.currentHp + hpRegen);
-                    }
-                    if (nextPlayer.partner) {
-                        nextPlayer.partner = {
-                            ...nextPlayer.partner,
-                            currentHp: Math.min(nextPlayer.partner.maxHp, nextPlayer.partner.currentHp + 5)
-                        };
-                    }
+                if (battleFinisherCutinCard) return;
 
-                    if (prev.act === 4 && !prev.isEndless) {
-                        storageService.incrementClearCount();
-                        const score = calculateScore(prev, true);
-                        storageService.saveScore({
-                            id: `victory-${Date.now()}`,
-                            playerName: 'Player',
-                            characterName: selectedCharName,
-                            score: score,
-                            act: prev.act,
-                            floor: prev.floor,
-                            victory: true,
-                            date: Date.now(),
-                            challengeMode: prev.challengeMode
-                        });
+                if (lastPlayedCardRef.current) {
+                    const finisherCard = { ...lastPlayedCardRef.current };
+                    lastPlayedCardRef.current = null;
+                    setBattleFinisherCutinCard(finisherCard);
 
-                        setLegacyCardSelected(false);
-                        audioService.playBGM('victory');
-                        return { ...prev, player: nextPlayer, screen: GameScreen.ENDING };
-                    } else {
-                        const challengeScreen = getChallengeScreenForMode(prev.mode);
-                        return { ...prev, player: nextPlayer, screen: challengeScreen };
+                    if (victorySequenceTimerRef.current) {
+                        clearTimeout(victorySequenceTimerRef.current);
                     }
-                });
+                    victorySequenceTimerRef.current = setTimeout(() => {
+                        setBattleFinisherCutinCard(null);
+                        resolveBattleVictory();
+                        victorySequenceTimerRef.current = null;
+                    }, 1200);
+                } else {
+                    resolveBattleVictory();
+                }
             } else if (gameState.player.currentHp <= 0) {
                 const lizardRelic = gameState.player.relics.find(r => r.id === 'LIZARD_TAIL');
                 const hasLizardReady = lizardRelic && !gameState.player.relicCounters['LIZARD_TAIL_USED'];
@@ -3640,7 +3666,15 @@ const App: React.FC = () => {
                 setGameState(prev => ({ ...prev, screen: GameScreen.GAME_OVER }));
             }
         }
-    }, [gameState.enemies, gameState.player.currentHp, gameState.screen, gameState.act, selectedCharName, gameState.challengeMode, unlockRandomAdditionalCard]);
+    }, [gameState.enemies, gameState.player.currentHp, gameState.screen, gameState.act, gameState.challengeMode, unlockRandomAdditionalCard, battleFinisherCutinCard, resolveBattleVictory]);
+
+    useEffect(() => {
+        return () => {
+            if (victorySequenceTimerRef.current) {
+                clearTimeout(victorySequenceTimerRef.current);
+            }
+        };
+    }, []);
 
     const finishRewardPhase = () => {
         setGameState(prev => {
@@ -4366,6 +4400,7 @@ const App: React.FC = () => {
                             onUsePotion={handleUsePotion} combatLog={gameState.combatLog} languageMode={languageMode} codexOptions={gameState.codexOptions} onCodexSelect={onCodexSelect} onPlaySynthesizedCard={handlePlaySynthesizedCard}
                             parryState={gameState.parryState} onParry={handleParryClick} activeEffects={gameState.activeEffects}
                             onCancelSelection={handleCancelSelection}
+                            finisherCutinCard={battleFinisherCutinCard}
                         />
                     </div>
                 )}
