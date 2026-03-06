@@ -4,12 +4,7 @@ import { audioService } from '../services/audioService';
 import { SPRITE_TEMPLATES } from './PixelSprite';
 import { storageService } from '../services/storageService';
 import MathChallengeScreen from './MathChallengeScreen';
-import KanjiChallengeScreen from './KanjiChallengeScreen';
-import EnglishChallengeScreen from './EnglishChallengeScreen';
-import GeneralChallengeScreen from './GeneralChallengeScreen';
-import { GameMode, GameScreen, LanguageMode } from '../types';
-import { SUBJECT_CATEGORIES, SubjectCategoryConfig, getChallengeScreenForMode, SubjectCategoryType } from '../subjectConfig';
-import { trans } from '../utils/textUtils';
+import { GameMode, LanguageMode } from '../types';
 
 // --- CONSTANTS ---
 const CANVAS_WIDTH = 800;
@@ -68,7 +63,7 @@ interface DashCardEffect {
     apply: (p: any, setHp: any, setMaxHp: any) => void;
 }
 
-type DashGameState = 'START' | 'MODE_SELECT' | 'PLAYING' | 'CHALLENGE' | 'LEVEL_UP' | 'GAME_OVER';
+type DashGameState = 'START' | 'PLAYING' | 'CHALLENGE' | 'LEVEL_UP' | 'GAME_OVER';
 
 const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -80,9 +75,6 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         gameStateRef.current = gameState;
     }, [gameState]);
 
-    const [selectedMode, setSelectedMode] = useState<GameMode>(GameMode.MULTIPLICATION);
-    const [selectedGrade, setSelectedGrade] = useState<number>(3);
-    const [selectedTerm, setSelectedTerm] = useState<number>(1);
     const [languageMode] = useState<LanguageMode>(() => storageService.getLanguageMode() || 'JAPANESE');
     
     const [score, setScore] = useState(0);
@@ -760,131 +752,6 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         return () => { if (frameIdRef.current) cancelAnimationFrame(frameIdRef.current); };
     }, []);
 
-    const getCategoryIcon = (id: SubjectCategoryType) => {
-        switch(id) {
-            case 'MATH': return <Brain size={20} />;
-            case 'KANJI': return <Book size={20} />;
-            case 'ENGLISH': return <Languages size={20} />;
-            case 'SCIENCE': return <FlaskConical size={20} />;
-            case 'SOCIAL': return <Globe size={20} />;
-            case 'MAP_PREF': return <MapPin size={20} />;
-            default: return <Home size={20} />;
-        }
-    };
-
-    const getCategoryClasses = (color: string) => {
-        switch (color) {
-            case 'emerald': return { bg: 'bg-emerald-600', hover: 'hover:bg-emerald-500', text: 'text-emerald-400', border: 'border-emerald-900' };
-            case 'cyan': return { bg: 'bg-cyan-600', hover: 'hover:bg-cyan-500', text: 'text-cyan-400', border: 'border-cyan-900' };
-            case 'indigo': return { bg: 'bg-indigo-600', hover: 'hover:bg-indigo-500', text: 'text-indigo-400', border: 'border-indigo-900' };
-            case 'amber': return { bg: 'bg-amber-600', hover: 'hover:bg-amber-500', text: 'text-amber-400', border: 'border-amber-900' };
-            case 'orange': return { bg: 'bg-orange-600', hover: 'hover:bg-orange-500', text: 'text-orange-400', border: 'border-orange-900' };
-            case 'rose': return { bg: 'bg-rose-600', hover: 'hover:bg-rose-500', text: 'text-rose-400', border: 'border-rose-900' };
-            default: return { bg: 'bg-slate-600', hover: 'hover:bg-slate-500', text: 'text-slate-400', border: 'border-slate-900' };
-        }
-    };
-
-    const renderCategoryContent = (cat: SubjectCategoryConfig) => {
-        const theme = getCategoryClasses(cat.color);
-
-        if (cat.uiType === 'grid') {
-            return (
-                <div className={`grid ${cat.id === 'KANJI' ? 'grid-cols-3' : 'grid-cols-2'} gap-1.5`}>
-                {cat.subModes.map(sub => (
-                    <button 
-                        key={sub.id} 
-                        onClick={() => { setSelectedMode(sub.mode); initGame(); }} 
-                        className="bg-slate-800 border border-slate-600 p-1.5 rounded hover:border-white transition-colors text-[10px] md:text-xs font-bold truncate"
-                    >
-                        {sub.name}
-                    </button>
-                ))}
-                </div>
-            );
-        }
-
-        if (cat.uiType === 'grade_term') {
-            const grades = (cat.id === 'SCIENCE' || cat.id === 'MATH_GRADES') ? [1,2,3,4,5,6,7,8,9] : [3,4,5,6,7,8,9];
-            return (
-                <div className="space-y-3">
-                <div className="flex items-start gap-2">
-                    <span className="text-[10px] text-gray-500 whitespace-nowrap mt-1">学年</span>
-                    <div className="flex-1 grid grid-cols-5 gap-1">
-                    {grades.map(g => (
-                        <button 
-                        key={g} 
-                        onClick={() => setSelectedGrade(g)} 
-                        className={`p-1 rounded text-[9px] md:text-[10px] font-bold border transition-colors ${selectedGrade === g ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-400'}`}
-                        >
-                        {g <= 6 ? `${g}年` : `中${g-6}`}
-                        </button>
-                    ))}
-                    </div>
-                </div>
-                <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-gray-500 whitespace-nowrap">学期</span>
-                    <div className="flex-1 flex gap-1">
-                    {[1, 2, 3].map(t => (
-                        <button 
-                        key={t} 
-                        onClick={() => setSelectedTerm(t)} 
-                        className={`flex-1 p-1 rounded text-[10px] font-bold border transition-colors ${selectedTerm === t ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-400'}`}
-                        >
-                        {t}学期
-                        </button>
-                    ))}
-                    </div>
-                </div>
-                <button 
-                    onClick={() => {
-                        let modeString = "";
-                        if (cat.id === 'MATH_GRADES') {
-                            modeString = `MATH_G${selectedGrade}_${selectedTerm}`;
-                        } else if (cat.id === 'SCIENCE') {
-                            if (selectedGrade <= 2) modeString = `LIFE_${selectedGrade}_${selectedTerm}`;
-                            else modeString = `SCIENCE_${selectedGrade}_${selectedTerm}`;
-                        } else {
-                            modeString = `SOCIAL_${selectedGrade}_${selectedTerm}`;
-                        }
-                        setSelectedMode(modeString as GameMode);
-                        initGame();
-                    }} 
-                    className={`w-full ${theme.bg} ${theme.hover} p-2 rounded font-bold text-xs shadow-lg transition-all text-white`}
-                >
-                    この範囲で開始
-                </button>
-                </div>
-            );
-        }
-
-        if (cat.uiType === 'english_mixed') {
-            const words = cat.subModes.filter(s => s.id.startsWith('E_'));
-            const convs = cat.subModes.filter(s => s.id.startsWith('C'));
-            return (
-                <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-1.5">
-                    {words.map(sub => (
-                    <button key={sub.id} onClick={() => { setSelectedMode(sub.mode); initGame(); }} className="bg-slate-800 border border-slate-600 p-1.5 rounded hover:border-indigo-400 text-[10px] font-bold">
-                        {sub.name}
-                    </button>
-                    ))}
-                </div>
-                <div className="h-px bg-slate-700 my-1"></div>
-                <div className="grid grid-cols-3 gap-1.5">
-                    {convs.map(sub => (
-                    <button key={sub.id} onClick={() => { setSelectedMode(sub.mode); initGame(); }} className="bg-pink-900/40 border border-pink-500/50 p-1 rounded hover:bg-pink-800 text-[10px] font-bold">
-                        {sub.name}
-                    </button>
-                    ))}
-                    <button onClick={() => { setSelectedMode(GameMode.ENGLISH_MIXED); initGame(); }} className="bg-indigo-900/60 border border-indigo-500 p-1 rounded hover:bg-indigo-800 text-[10px] font-bold">ミックス</button>
-                </div>
-                </div>
-            );
-        }
-
-        return null;
-    };
-    
     const getSubjectIcon = (type: DashCardEffect['iconType']) => {
         switch(type) {
             case 'MATH': return <Brain className="text-emerald-400" />;
@@ -933,50 +800,14 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     <h2 className="text-6xl md:text-7xl font-black text-orange-500 tracking-tighter italic mb-4 drop-shadow-[4px_4px_0_#000]">帰宅ダッシュ！</h2>
                     <div className="w-16 h-1 bg-orange-500 mb-8 rounded-full"></div>
                     <p className="text-slate-400 mb-10 text-center px-8 text-sm md:text-base leading-relaxed">障害物をよけて帰宅せよ！<br/>ミサイルやスキルを駆使してゴールを目指せ。</p>
-                    <button onClick={(e) => { e.stopPropagation(); setGameState('MODE_SELECT'); audioService.playSound('select'); }} className="bg-white text-black px-12 py-5 rounded-3xl font-black text-2xl hover:bg-orange-400 hover:text-white transition-all transform hover:scale-110 shadow-[0_8px_0_#ccc] flex items-center gap-4 active:translate-y-1 active:shadow-none"><Play fill="currentColor" size={32} /> START DASH</button>
+                    <button onClick={(e) => { e.stopPropagation(); initGame(); audioService.playSound('select'); }} className="bg-white text-black px-12 py-5 rounded-3xl font-black text-2xl hover:bg-orange-400 hover:text-white transition-all transform hover:scale-110 shadow-[0_8px_0_#ccc] flex items-center gap-4 active:translate-y-1 active:shadow-none"><Play fill="currentColor" size={32} /> START DASH</button>
                     <button onClick={(e) => { e.stopPropagation(); onBack(); }} className="mt-12 text-slate-500 hover:text-white flex items-center gap-2 font-bold transition-colors"><ArrowLeft size={20}/> 職員室に戻る</button>
-                </div>
-            )}
-
-            {gameState === 'MODE_SELECT' && (
-                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/95 p-4 animate-in fade-in backdrop-blur-md">
-                    <h2 className="text-2xl md:text-3xl font-black text-orange-400 mb-4 italic tracking-tighter shrink-0">
-                      {trans("モード選択", languageMode)}
-                    </h2>
-                    
-                    <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto custom-scrollbar p-2">
-                    {SUBJECT_CATEGORIES.map(cat => {
-                        const theme = getCategoryClasses(cat.color);
-                        return (
-                        <div key={cat.id} className="bg-slate-800/40 p-4 rounded-xl border border-slate-700 flex flex-col shadow-xl">
-                            <h3 className={`text-lg font-bold ${theme.text} border-b ${theme.border} pb-2 flex items-center mb-4`}>
-                            {getCategoryIcon(cat.id)}
-                            <span className="ml-2">{cat.name}</span>
-                            </h3>
-                            <div className="flex-grow">
-                                {renderCategoryContent(cat)}
-                            </div>
-                        </div>
-                        );
-                    })}
-                    </div>
-
-                    <button onClick={() => setGameState('START')} className="mt-6 text-gray-400 hover:text-white underline flex items-center gap-2 shrink-0">
-                       <ArrowLeft size={16}/> {trans("もどる", languageMode)}
-                    </button>
                 </div>
             )}
 
             {gameState === 'CHALLENGE' && (
                 <div className="absolute inset-0 z-[100] w-full h-full pointer-events-auto">
-                    {(() => {
-                        const ChallengeScreen = getChallengeScreenForMode(selectedMode);
-                        const commonProps = { mode: selectedMode, onComplete: handleChallengeComplete, isChallenge: false, streak: 0 };
-                        if (ChallengeScreen === GameScreen.MATH_CHALLENGE) return <MathChallengeScreen {...commonProps} />;
-                        if (ChallengeScreen === GameScreen.KANJI_CHALLENGE) return <KanjiChallengeScreen {...commonProps} />;
-                        if (ChallengeScreen === GameScreen.ENGLISH_CHALLENGE) return <EnglishChallengeScreen {...commonProps} />;
-                        return <GeneralChallengeScreen {...commonProps} />;
-                    })()}
+                    <MathChallengeScreen mode={GameMode.MIXED} onComplete={handleChallengeComplete} isChallenge={false} streak={0} />
                 </div>
             )}
 
@@ -999,7 +830,7 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 <div className="absolute inset-0 z-70 flex flex-col items-center justify-center bg-red-950/98 animate-in fade-in backdrop-blur-lg" onPointerDown={e => e.stopPropagation()}>
                     <Skull size={80} className="text-red-600 mb-6 animate-pulse" /><h2 className="text-7xl font-black text-white mb-2 italic tracking-tighter uppercase">Failed</h2><div className="text-2xl text-yellow-400 mb-12 font-black bg-black/60 px-8 py-3 rounded-full border-2 border-yellow-500/50 italic shadow-xl">DISTANCE: {score.toLocaleString()}m</div>
                     <div className="flex flex-col gap-4 w-64">
-                        <button onClick={(e) => { e.stopPropagation(); setGameState('MODE_SELECT'); audioService.playSound('select'); }} className="w-full bg-white text-black py-4 rounded-2xl font-black text-xl shadow-[0_8px_0_#ccc] hover:bg-slate-200 transition-all active:translate-y-1 active:shadow-none">TRY AGAIN</button>
+                        <button onClick={(e) => { e.stopPropagation(); initGame(); audioService.playSound('select'); }} className="w-full bg-white text-black py-4 rounded-2xl font-black text-xl shadow-[0_8px_0_#ccc] hover:bg-slate-200 transition-all active:translate-y-1 active:shadow-none">TRY AGAIN</button>
                         <button onClick={(e) => { e.stopPropagation(); onBack(); }} className="w-full bg-slate-800 text-white py-4 rounded-2xl font-black text-xl border-2 border-white/10 hover:bg-slate-700 transition-colors">EXIT</button>
                     </div>
                 </div>
