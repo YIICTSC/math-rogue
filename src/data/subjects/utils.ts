@@ -22,6 +22,16 @@ export interface GeneralProblem {
         lang?: string;
         autoPlay?: boolean;
     };
+    speechPrompt?: {
+        expected: string;
+        alternates?: string[];
+        keywords?: string[];
+        minKeywordHits?: number;
+        lang?: string;
+        buttonLabel?: string;
+        freeResponse?: boolean;
+        examples?: string[];
+    };
 }
 
 /**

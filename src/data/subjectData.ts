@@ -37,6 +37,13 @@ import { KOKUGO_G6_DATA } from './subjects/kokugo_g6';
 import { KOKUGO_G7_DATA } from './subjects/kokugo_g7';
 import { KOKUGO_G8_DATA } from './subjects/kokugo_g8';
 import { KOKUGO_G9_DATA } from './subjects/kokugo_g9';
+import { ENGLISH_G3_DATA } from './subjects/english_g3';
+import { ENGLISH_G4_DATA } from './subjects/english_g4';
+import { ENGLISH_G5_DATA } from './subjects/english_g5';
+import { ENGLISH_G6_DATA } from './subjects/english_g6';
+import { ENGLISH_G7_DATA } from './subjects/english_g7';
+import { ENGLISH_G8_DATA } from './subjects/english_g8';
+import { ENGLISH_G9_DATA } from './subjects/english_g9';
 
 // IT・情報のインポート
 import { IT_TABLET_DATA } from './subjects/it_tablet';
@@ -66,6 +73,13 @@ export const SUBJECT_DATA: Record<string, GeneralProblem[]> = {
     ...KOKUGO_G7_DATA,
     ...KOKUGO_G8_DATA,
     ...KOKUGO_G9_DATA,
+    ...ENGLISH_G3_DATA,
+    ...ENGLISH_G4_DATA,
+    ...ENGLISH_G5_DATA,
+    ...ENGLISH_G6_DATA,
+    ...ENGLISH_G7_DATA,
+    ...ENGLISH_G8_DATA,
+    ...ENGLISH_G9_DATA,
     ...LIFE_G1_DATA,
     ...LIFE_G2_DATA,
     ...SCIENCE_G3_DATA,
