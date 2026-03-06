@@ -1452,15 +1452,128 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
 const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: LanguageMode }> = ({ card, languageMode }) => {
     const translated = trans(card.name, languageMode);
     const illustrationTokens = useMemo(
-        () => Array.from(new Set(extractIllustrationTokens(card))),
+        () => extractIllustrationTokens(card),
         [card]
     );
     const isComposite = illustrationTokens.length > 1;
-    const anglePattern = [-16, -8, -2, 7, 14, -12, 9, 4];
-    const laneTopPattern = [6, 30, 54];
-    const directionPattern = ['left', 'right', 'up', 'down'] as const;
-    const delayStepMs = 140;
+    const randomDirectionPool = ['left', 'right', 'up', 'down'] as const;
+    const shuffledDirections = useMemo(() => {
+        const dirs = [...randomDirectionPool];
+        for (let i = dirs.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [dirs[i], dirs[j]] = [dirs[j], dirs[i]];
+        }
+        return dirs;
+    }, [card.id, isComposite]);
+
+    const delayStepMs = useMemo(() => 90 + Math.floor(Math.random() * 70), [card.id, isComposite]);
     const cutinCount = Math.max(illustrationTokens.length, 1);
+    const compositeStyleMode = useMemo(() => {
+        const modes = ['collage', 'stack', 'stripSlash', 'radialFan', 'neonGrid', 'diagonalTiles', 'centerBurst', 'venetianWave'] as const;
+        return modes[Math.floor(Math.random() * modes.length)];
+    }, [card.id, isComposite]);
+    const tokenRenderOrder = useMemo(() => {
+        const ordered = illustrationTokens.map((token, idx) => ({ token, originalIndex: idx }));
+        for (let i = ordered.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [ordered[i], ordered[j]] = [ordered[j], ordered[i]];
+        }
+        return ordered;
+    }, [illustrationTokens, card.id, isComposite]);
+    const panelDelays = useMemo(() => {
+        const delays: number[] = [];
+        let current = 0;
+        for (let i = 0; i < cutinCount; i++) {
+            current += delayStepMs + Math.floor(Math.random() * 50);
+            delays.push(current);
+        }
+        return delays;
+    }, [cutinCount, delayStepMs, card.id, isComposite]);
+    const radialAngles = useMemo(() => {
+        const list: number[] = [];
+        for (let i = 0; i < cutinCount; i++) {
+            const base = -42 + (84 / Math.max(1, cutinCount - 1)) * i;
+            list.push(base + (Math.random() * 8 - 4));
+        }
+        return list;
+    }, [cutinCount, card.id, isComposite]);
+    const burstPositions = useMemo(() => {
+        const positions: Array<{ x: number; y: number; scale: number; rot: number }> = [];
+        for (let i = 0; i < cutinCount; i++) {
+            const ring = i % 2 === 0 ? 18 : 30;
+            const theta = ((i / Math.max(1, cutinCount)) * 360 + Math.random() * 28 - 14) * (Math.PI / 180);
+            positions.push({
+                x: Math.cos(theta) * ring,
+                y: Math.sin(theta) * ring,
+                scale: 0.88 + Math.random() * 0.28,
+                rot: Math.random() * 20 - 10,
+            });
+        }
+        return positions;
+    }, [cutinCount, card.id, isComposite]);
+    const collagePanels = useMemo(() => {
+        if (!isComposite || tokenRenderOrder.length === 0) return [];
+
+        const layouts: Record<number, Array<{ clip: string; tx: string; ty: string; scale: number; rot: number }>> = {
+            2: [
+                { clip: 'polygon(0% 0%, 64% 0%, 44% 100%, 0% 100%)', tx: '-6%', ty: '-3%', scale: 1.24, rot: -2.5 },
+                { clip: 'polygon(64% 0%, 100% 0%, 100% 100%, 44% 100%)', tx: '8%', ty: '4%', scale: 1.24, rot: 2.5 },
+            ],
+            3: [
+                { clip: 'polygon(0% 0%, 55% 0%, 34% 58%, 0% 48%)', tx: '-7%', ty: '-5%', scale: 1.22, rot: -3 },
+                { clip: 'polygon(55% 0%, 100% 0%, 100% 52%, 58% 58%)', tx: '7%', ty: '-4%', scale: 1.2, rot: 2.2 },
+                { clip: 'polygon(0% 48%, 34% 58%, 58% 58%, 100% 52%, 100% 100%, 0% 100%)', tx: '2%', ty: '6%', scale: 1.16, rot: 1.4 },
+            ],
+            4: [
+                { clip: 'polygon(0% 0%, 50% 0%, 36% 52%, 0% 44%)', tx: '-7%', ty: '-6%', scale: 1.2, rot: -3.2 },
+                { clip: 'polygon(50% 0%, 100% 0%, 100% 44%, 64% 52%)', tx: '8%', ty: '-6%', scale: 1.2, rot: 2.8 },
+                { clip: 'polygon(0% 44%, 36% 52%, 44% 100%, 0% 100%)', tx: '-5%', ty: '8%', scale: 1.18, rot: -1.8 },
+                { clip: 'polygon(64% 52%, 100% 44%, 100% 100%, 44% 100%)', tx: '8%', ty: '8%', scale: 1.18, rot: 2.1 },
+            ],
+            5: [
+                { clip: 'polygon(0% 0%, 46% 0%, 30% 36%, 0% 32%)', tx: '-8%', ty: '-7%', scale: 1.22, rot: -3.4 },
+                { clip: 'polygon(46% 0%, 100% 0%, 100% 32%, 70% 36%)', tx: '9%', ty: '-7%', scale: 1.2, rot: 2.8 },
+                { clip: 'polygon(0% 32%, 30% 36%, 26% 68%, 0% 62%)', tx: '-7%', ty: '1%', scale: 1.2, rot: -2.2 },
+                { clip: 'polygon(30% 36%, 70% 36%, 74% 68%, 26% 68%)', tx: '1%', ty: '1%', scale: 1.16, rot: 1.1 },
+                { clip: 'polygon(70% 36%, 100% 32%, 100% 62%, 74% 68%)', tx: '8%', ty: '1%', scale: 1.2, rot: 2.1 },
+            ],
+            6: [
+                { clip: 'polygon(0% 0%, 44% 0%, 30% 34%, 0% 30%)', tx: '-8%', ty: '-7%', scale: 1.22, rot: -3.5 },
+                { clip: 'polygon(44% 0%, 100% 0%, 100% 30%, 70% 34%)', tx: '9%', ty: '-7%', scale: 1.2, rot: 3.2 },
+                { clip: 'polygon(0% 30%, 30% 34%, 24% 64%, 0% 60%)', tx: '-8%', ty: '-1%', scale: 1.2, rot: -2.5 },
+                { clip: 'polygon(30% 34%, 70% 34%, 76% 64%, 24% 64%)', tx: '2%', ty: '0%', scale: 1.15, rot: 1.2 },
+                { clip: 'polygon(70% 34%, 100% 30%, 100% 60%, 76% 64%)', tx: '9%', ty: '-1%', scale: 1.2, rot: 2.2 },
+                { clip: 'polygon(0% 60%, 24% 64%, 100% 60%, 100% 100%, 0% 100%)', tx: '2%', ty: '9%', scale: 1.14, rot: 1.7 },
+            ],
+            7: [
+                { clip: 'polygon(0% 0%, 40% 0%, 28% 28%, 0% 24%)', tx: '-8%', ty: '-8%', scale: 1.23, rot: -3.8 },
+                { clip: 'polygon(40% 0%, 72% 0%, 66% 28%, 28% 28%)', tx: '1%', ty: '-8%', scale: 1.18, rot: 1.1 },
+                { clip: 'polygon(72% 0%, 100% 0%, 100% 24%, 66% 28%)', tx: '9%', ty: '-8%', scale: 1.23, rot: 3.2 },
+                { clip: 'polygon(0% 24%, 28% 28%, 22% 58%, 0% 54%)', tx: '-8%', ty: '-2%', scale: 1.2, rot: -2.7 },
+                { clip: 'polygon(28% 28%, 66% 28%, 72% 58%, 22% 58%)', tx: '2%', ty: '-1%', scale: 1.14, rot: 1.3 },
+                { clip: 'polygon(66% 28%, 100% 24%, 100% 54%, 72% 58%)', tx: '9%', ty: '-2%', scale: 1.2, rot: 2.3 },
+                { clip: 'polygon(0% 54%, 22% 58%, 100% 54%, 100% 100%, 0% 100%)', tx: '3%', ty: '9%', scale: 1.12, rot: 1.8 },
+            ],
+            8: [
+                { clip: 'polygon(0% 0%, 38% 0%, 26% 24%, 0% 22%)', tx: '-8%', ty: '-8%', scale: 1.23, rot: -3.8 },
+                { clip: 'polygon(38% 0%, 68% 0%, 62% 24%, 26% 24%)', tx: '0%', ty: '-8%', scale: 1.18, rot: 1.1 },
+                { clip: 'polygon(68% 0%, 100% 0%, 100% 22%, 62% 24%)', tx: '9%', ty: '-8%', scale: 1.23, rot: 3.2 },
+                { clip: 'polygon(0% 22%, 26% 24%, 22% 50%, 0% 48%)', tx: '-8%', ty: '-3%', scale: 1.2, rot: -2.8 },
+                { clip: 'polygon(26% 24%, 62% 24%, 66% 50%, 22% 50%)', tx: '2%', ty: '-2%', scale: 1.14, rot: 1.2 },
+                { clip: 'polygon(62% 24%, 100% 22%, 100% 48%, 66% 50%)', tx: '9%', ty: '-3%', scale: 1.2, rot: 2.3 },
+                { clip: 'polygon(0% 48%, 22% 50%, 54% 100%, 0% 100%)', tx: '-5%', ty: '9%', scale: 1.16, rot: -1.7 },
+                { clip: 'polygon(22% 50%, 66% 50%, 100% 48%, 100% 100%, 54% 100%)', tx: '7%', ty: '8%', scale: 1.14, rot: 1.9 },
+            ],
+        };
+
+        const count = Math.max(2, Math.min(8, illustrationTokens.length));
+        const panelDefs = layouts[count];
+        return panelDefs.map((def, idx) => ({
+            ...def,
+            token: tokenRenderOrder[idx % tokenRenderOrder.length].token,
+            index: idx,
+        }));
+    }, [illustrationTokens, tokenRenderOrder, isComposite]);
 
     useEffect(() => {
         const timers: ReturnType<typeof setTimeout>[] = [];
@@ -1469,11 +1582,11 @@ const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: Language
             timers.push(
                 setTimeout(() => {
                     audioService.playSound('finisher_slash');
-                }, i * delayStepMs)
+                }, panelDelays[i] ?? i * delayStepMs)
             );
         }
 
-        const explosionDelay = Math.max(680, (cutinCount - 1) * delayStepMs + 220);
+        const explosionDelay = Math.max(680, (panelDelays[panelDelays.length - 1] || ((cutinCount - 1) * delayStepMs)) + 220);
         timers.push(
             setTimeout(() => {
                 audioService.playSound('finisher_explosion');
@@ -1483,33 +1596,92 @@ const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: Language
         return () => {
             timers.forEach((timer) => clearTimeout(timer));
         };
-    }, [card.id, cutinCount, delayStepMs]);
+    }, [card.id, cutinCount, delayStepMs, panelDelays]);
 
     return (
         <div className="absolute inset-0 z-[160] pointer-events-none overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent animate-finish-dim"></div>
 
-            {isComposite ? (
-                <div className="absolute inset-0">
-                    {illustrationTokens.map((token, idx) => {
-                        const lane = idx % laneTopPattern.length;
-                        const direction = directionPattern[idx % directionPattern.length];
-                        const fromLeft = direction === 'left' || direction === 'up';
-                        const horizontalShift = Math.min(Math.floor(idx / laneTopPattern.length) * 5 + lane * 2, 22);
-
-                        return (
+            {isComposite && compositeStyleMode === 'collage' ? (
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="relative w-[112vw] h-[112vh] border-4 border-white/90 bg-black/25 overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.75)]">
+                        {collagePanels.map((panel) => (
                             <div
-                                key={`${token}-${idx}`}
-                                className="absolute w-[62vw] max-w-[760px] h-[28vh] max-h-[250px]"
+                                key={`collage-${panel.index}`}
+                                className={`absolute inset-0 opacity-0 ${
+                                    shuffledDirections[panel.index % shuffledDirections.length] === 'left'
+                                        ? 'animate-finish-cutin-stack-left'
+                                        : shuffledDirections[panel.index % shuffledDirections.length] === 'right'
+                                            ? 'animate-finish-cutin-stack-right'
+                                            : shuffledDirections[panel.index % shuffledDirections.length] === 'up'
+                                                ? 'animate-finish-cutin-stack-up'
+                                                : 'animate-finish-cutin-stack-down'
+                                }`}
                                 style={{
-                                    top: `${laneTopPattern[lane]}%`,
-                                    [fromLeft ? 'left' : 'right']: `${horizontalShift}%`,
-                                    transform: `rotate(${anglePattern[idx % anglePattern.length]}deg)`,
-                                    zIndex: 10 + idx
+                                    clipPath: panel.clip,
+                                    WebkitClipPath: panel.clip,
+                                    animationDelay: `${panelDelays[panel.index] ?? panel.index * delayStepMs}ms`,
+                                    zIndex: 20 + panel.index
                                 }}
                             >
                                 <div
-                                    className={`w-full h-full rounded-2xl overflow-hidden border-4 border-orange-300/70 shadow-[0_0_45px_rgba(251,146,60,0.45)] bg-black/35 ${
+                                    className="absolute inset-0 border-[2px] border-white/95 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.2)] bg-black"
+                                    style={{ transform: `translate(0%, 0%) scale(${panel.scale}) rotate(${panel.rot}deg)` }}
+                                >
+                                    <FinisherArtPiece token={panel.token} seed={`${card.id}-collage-${panel.index}`} languageMode={languageMode} />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            ) : isComposite && compositeStyleMode === 'stack' ? (
+                <div className="absolute inset-0 flex items-center justify-center">
+                    {tokenRenderOrder.map((entry, idx) => {
+                        const frontScale = Math.min(0.78 + idx * 0.045, 1.08);
+                        const offsetX = Math.min(idx * 10, 72);
+                        const offsetY = Math.min(idx * 5, 36);
+                        const angle = [-14, -7, -2, 5, 11, -10, 8, 3][idx % 8];
+                        const direction = shuffledDirections[idx % shuffledDirections.length];
+
+                        return (
+                            <div
+                                key={`stack-${entry.token}-${idx}-${entry.originalIndex}`}
+                                className="absolute w-[62vw] max-w-[760px] h-[28vh] max-h-[250px]"
+                                style={{
+                                    left: `calc(50% - 31vw + ${offsetX}px)`,
+                                    top: `calc(34% + ${offsetY}px)`,
+                                    transform: `rotate(${angle}deg) scale(${frontScale})`,
+                                    zIndex: 20 + idx
+                                }}
+                            >
+                                <div
+                                    className={`w-full h-full rounded-2xl overflow-hidden border-4 border-orange-300/70 shadow-[0_0_45px_rgba(251,146,60,0.45)] bg-black/35 opacity-0 ${
+                                        direction === 'left'
+                                            ? 'animate-finish-cutin-stack-left'
+                                            : direction === 'right'
+                                                ? 'animate-finish-cutin-stack-right'
+                                                : direction === 'up'
+                                                    ? 'animate-finish-cutin-stack-up'
+                                                    : 'animate-finish-cutin-stack-down'
+                                    }`}
+                                    style={{ animationDelay: `${panelDelays[idx] ?? idx * delayStepMs}ms` }}
+                                >
+                                    <FinisherArtPiece token={entry.token} seed={`${card.id}-stack-${idx}`} languageMode={languageMode} />
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            ) : isComposite && compositeStyleMode === 'stripSlash' ? (
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="relative w-[108vw] h-[108vh] overflow-hidden bg-black/30 border-y-2 border-white/70 shadow-[0_0_60px_rgba(255,255,255,0.18)]">
+                        {tokenRenderOrder.map((entry, idx) => {
+                            const stripWidth = 100 / cutinCount;
+                            const direction = shuffledDirections[idx % shuffledDirections.length];
+                            return (
+                                <div
+                                    key={`strip-${entry.token}-${idx}`}
+                                    className={`absolute top-[-8%] h-[116%] opacity-0 ${
                                         direction === 'left'
                                             ? 'animate-finish-cutin-multi-left'
                                             : direction === 'right'
@@ -1518,13 +1690,205 @@ const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: Language
                                                     ? 'animate-finish-cutin-multi-up'
                                                     : 'animate-finish-cutin-multi-down'
                                     }`}
-                                    style={{ animationDelay: `${idx * delayStepMs}ms` }}
+                                    style={{
+                                        left: `${idx * stripWidth}%`,
+                                        width: `${stripWidth + 1.4}%`,
+                                        clipPath: 'polygon(8% 0%, 100% 0%, 92% 100%, 0% 100%)',
+                                        WebkitClipPath: 'polygon(8% 0%, 100% 0%, 92% 100%, 0% 100%)',
+                                        animationDelay: `${panelDelays[idx] ?? idx * delayStepMs}ms`,
+                                        zIndex: 20 + idx
+                                    }}
                                 >
-                                    <FinisherArtPiece token={token} seed={`${card.id}-finisher-${idx}`} languageMode={languageMode} />
+                                    <div className="absolute inset-0 border-l border-r border-white/90 bg-black/60 shadow-[inset_0_0_16px_rgba(255,255,255,0.35)]" />
+                                    <FinisherArtPiece token={entry.token} seed={`${card.id}-strip-${idx}`} languageMode={languageMode} />
                                 </div>
-                            </div>
-                        );
-                    })}
+                            );
+                        })}
+                    </div>
+                </div>
+            ) : isComposite && compositeStyleMode === 'radialFan' ? (
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="relative w-full h-full">
+                        {tokenRenderOrder.map((entry, idx) => {
+                            const angle = radialAngles[idx] ?? 0;
+                            const direction = shuffledDirections[idx % shuffledDirections.length];
+                            return (
+                                <div
+                                    key={`radial-${entry.token}-${idx}`}
+                                    className={`absolute left-1/2 top-1/2 w-[68vw] max-w-[920px] h-[27vh] max-h-[250px] -translate-x-1/2 -translate-y-1/2 opacity-0 ${
+                                        direction === 'left'
+                                            ? 'animate-finish-cutin-stack-left'
+                                            : direction === 'right'
+                                                ? 'animate-finish-cutin-stack-right'
+                                                : direction === 'up'
+                                                    ? 'animate-finish-cutin-stack-up'
+                                                    : 'animate-finish-cutin-stack-down'
+                                    }`}
+                                    style={{
+                                        transform: `translate(-50%, -50%) rotate(${angle}deg) scale(${0.9 + idx * 0.03})`,
+                                        transformOrigin: '14% 50%',
+                                        animationDelay: `${panelDelays[idx] ?? idx * delayStepMs}ms`,
+                                        zIndex: 16 + idx
+                                    }}
+                                >
+                                    <div className="w-full h-full rounded-2xl overflow-hidden border-4 border-cyan-200/80 bg-black/35 shadow-[0_0_42px_rgba(34,211,238,0.35)]">
+                                        <FinisherArtPiece token={entry.token} seed={`${card.id}-radial-${idx}`} languageMode={languageMode} />
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            ) : isComposite && compositeStyleMode === 'neonGrid' ? (
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="relative w-[110vw] h-[110vh] overflow-hidden bg-black/30 border-2 border-cyan-200/70">
+                        {tokenRenderOrder.map((entry, idx) => {
+                            const cols = Math.min(4, Math.ceil(Math.sqrt(cutinCount)));
+                            const rows = Math.ceil(cutinCount / cols);
+                            const col = idx % cols;
+                            const row = Math.floor(idx / cols);
+                            const cellW = 100 / cols;
+                            const cellH = 100 / rows;
+                            const direction = shuffledDirections[idx % shuffledDirections.length];
+                            return (
+                                <div
+                                    key={`grid-${entry.token}-${idx}`}
+                                    className={`absolute opacity-0 ${
+                                        direction === 'left'
+                                            ? 'animate-finish-cutin-stack-left'
+                                            : direction === 'right'
+                                                ? 'animate-finish-cutin-stack-right'
+                                                : direction === 'up'
+                                                    ? 'animate-finish-cutin-stack-up'
+                                                    : 'animate-finish-cutin-stack-down'
+                                    }`}
+                                    style={{
+                                        left: `${col * cellW}%`,
+                                        top: `${row * cellH}%`,
+                                        width: `${cellW + 0.8}%`,
+                                        height: `${cellH + 0.8}%`,
+                                        clipPath: 'polygon(0% 8%, 8% 0%, 100% 0%, 100% 92%, 92% 100%, 0% 100%)',
+                                        WebkitClipPath: 'polygon(0% 8%, 8% 0%, 100% 0%, 100% 92%, 92% 100%, 0% 100%)',
+                                        animationDelay: `${panelDelays[idx] ?? idx * delayStepMs}ms`,
+                                        zIndex: 18 + idx
+                                    }}
+                                >
+                                    <div className="absolute inset-0 border-[2px] border-cyan-200/90 bg-black/45 shadow-[inset_0_0_20px_rgba(34,211,238,0.35)]" />
+                                    <FinisherArtPiece token={entry.token} seed={`${card.id}-grid-${idx}`} languageMode={languageMode} />
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            ) : isComposite && compositeStyleMode === 'diagonalTiles' ? (
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="relative w-[110vw] h-[110vh] overflow-hidden bg-black/25">
+                        {tokenRenderOrder.map((entry, idx) => {
+                            const tiles = Math.max(2, Math.ceil(Math.sqrt(cutinCount)));
+                            const col = idx % tiles;
+                            const row = Math.floor(idx / tiles);
+                            const w = 100 / tiles;
+                            const h = 100 / Math.ceil(cutinCount / tiles);
+                            const direction = shuffledDirections[idx % shuffledDirections.length];
+                            return (
+                                <div
+                                    key={`diag-${entry.token}-${idx}`}
+                                    className={`absolute opacity-0 ${
+                                        direction === 'left'
+                                            ? 'animate-finish-cutin-multi-left'
+                                            : direction === 'right'
+                                                ? 'animate-finish-cutin-multi-right'
+                                                : direction === 'up'
+                                                    ? 'animate-finish-cutin-multi-up'
+                                                    : 'animate-finish-cutin-multi-down'
+                                    }`}
+                                    style={{
+                                        left: `${col * w}%`,
+                                        top: `${row * h}%`,
+                                        width: `${w + 0.6}%`,
+                                        height: `${h + 0.6}%`,
+                                        clipPath: 'polygon(0% 12%, 12% 0%, 100% 0%, 100% 88%, 88% 100%, 0% 100%)',
+                                        WebkitClipPath: 'polygon(0% 12%, 12% 0%, 100% 0%, 100% 88%, 88% 100%, 0% 100%)',
+                                        transform: `skewX(-6deg) rotate(${(idx % 2 === 0 ? -2 : 2)}deg)`,
+                                        animationDelay: `${panelDelays[idx] ?? idx * delayStepMs}ms`,
+                                        zIndex: 22 + idx
+                                    }}
+                                >
+                                    <div className="absolute inset-0 border-[2px] border-fuchsia-200/80 bg-black/35 shadow-[0_0_24px_rgba(232,121,249,0.38)]" />
+                                    <FinisherArtPiece token={entry.token} seed={`${card.id}-diagonal-${idx}`} languageMode={languageMode} />
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            ) : isComposite && compositeStyleMode === 'centerBurst' ? (
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="relative w-full h-full">
+                        {tokenRenderOrder.map((entry, idx) => {
+                            const pos = burstPositions[idx] || { x: 0, y: 0, scale: 1, rot: 0 };
+                            const direction = shuffledDirections[idx % shuffledDirections.length];
+                            return (
+                                <div
+                                    key={`burst-${entry.token}-${idx}`}
+                                    className={`absolute left-1/2 top-1/2 w-[54vw] max-w-[760px] h-[24vh] max-h-[220px] -translate-x-1/2 -translate-y-1/2 opacity-0 ${
+                                        direction === 'left'
+                                            ? 'animate-finish-cutin-stack-left'
+                                            : direction === 'right'
+                                                ? 'animate-finish-cutin-stack-right'
+                                                : direction === 'up'
+                                                    ? 'animate-finish-cutin-stack-up'
+                                                    : 'animate-finish-cutin-stack-down'
+                                    }`}
+                                    style={{
+                                        transform: `translate(calc(-50% + ${pos.x}vw), calc(-50% + ${pos.y}vh)) rotate(${pos.rot}deg) scale(${pos.scale})`,
+                                        animationDelay: `${panelDelays[idx] ?? idx * delayStepMs}ms`,
+                                        zIndex: 24 + idx
+                                    }}
+                                >
+                                    <div className="w-full h-full rounded-2xl overflow-hidden border-4 border-amber-200/80 bg-black/35 shadow-[0_0_35px_rgba(251,191,36,0.42)]">
+                                        <FinisherArtPiece token={entry.token} seed={`${card.id}-burst-${idx}`} languageMode={languageMode} />
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            ) : isComposite && compositeStyleMode === 'venetianWave' ? (
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="relative w-[112vw] h-[108vh] overflow-hidden bg-black/30 border-y-2 border-sky-200/70">
+                        {tokenRenderOrder.map((entry, idx) => {
+                            const barCount = Math.max(3, Math.min(8, cutinCount));
+                            const barW = 100 / barCount;
+                            const waveShift = (idx % 2 === 0 ? -8 : 8);
+                            const direction = shuffledDirections[idx % shuffledDirections.length];
+                            return (
+                                <div
+                                    key={`wave-${entry.token}-${idx}`}
+                                    className={`absolute top-0 h-full opacity-0 ${
+                                        direction === 'left'
+                                            ? 'animate-finish-cutin-stack-left'
+                                            : direction === 'right'
+                                                ? 'animate-finish-cutin-stack-right'
+                                                : direction === 'up'
+                                                    ? 'animate-finish-cutin-stack-up'
+                                                    : 'animate-finish-cutin-stack-down'
+                                    }`}
+                                    style={{
+                                        left: `${idx * barW}%`,
+                                        width: `${barW + 1.2}%`,
+                                        transform: `translateY(${waveShift}px)`,
+                                        clipPath: 'polygon(0% 0%, 100% 0%, 92% 100%, 8% 100%)',
+                                        WebkitClipPath: 'polygon(0% 0%, 100% 0%, 92% 100%, 8% 100%)',
+                                        animationDelay: `${panelDelays[idx] ?? idx * delayStepMs}ms`,
+                                        zIndex: 26 + idx
+                                    }}
+                                >
+                                    <div className="absolute inset-0 border-l border-r border-sky-100/90 bg-black/45 shadow-[inset_0_0_18px_rgba(125,211,252,0.35)]" />
+                                    <FinisherArtPiece token={entry.token} seed={`${card.id}-wave-${idx}`} languageMode={languageMode} />
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
             ) : (
                 <div className="absolute inset-0 flex items-center">
@@ -1550,6 +1914,26 @@ const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: Language
                         0% { transform: translateX(-110%) skewX(-10deg); opacity: 0; }
                         20% { transform: translateX(-6%) skewX(-6deg); opacity: 1; }
                         100% { transform: translateX(0) skewX(0deg); opacity: 1; }
+                    }
+                    @keyframes finish-cutin-stack-left {
+                        0% { transform: translate(-90px, -24px) scale(0.84); opacity: 0; filter: blur(2px); }
+                        55% { transform: translate(8px, 3px) scale(1.04); opacity: 1; filter: blur(0); }
+                        100% { transform: translate(0, 0) scale(1); opacity: 1; }
+                    }
+                    @keyframes finish-cutin-stack-right {
+                        0% { transform: translate(90px, -24px) scale(0.84); opacity: 0; filter: blur(2px); }
+                        55% { transform: translate(-8px, 3px) scale(1.04); opacity: 1; filter: blur(0); }
+                        100% { transform: translate(0, 0) scale(1); opacity: 1; }
+                    }
+                    @keyframes finish-cutin-stack-up {
+                        0% { transform: translate(0, -78px) scale(0.84); opacity: 0; filter: blur(2px); }
+                        55% { transform: translate(0, 4px) scale(1.04); opacity: 1; filter: blur(0); }
+                        100% { transform: translate(0, 0) scale(1); opacity: 1; }
+                    }
+                    @keyframes finish-cutin-stack-down {
+                        0% { transform: translateY(-42px) scale(0.84); opacity: 0; filter: blur(2px); }
+                        55% { transform: translateY(4px) scale(1.04); opacity: 1; filter: blur(0); }
+                        100% { transform: translateY(0) scale(1); opacity: 1; }
                     }
                     @keyframes finish-cutin-multi-left {
                         0% { transform: translateX(-120%) scale(1.05); }
@@ -1593,6 +1977,10 @@ const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: Language
                         100% { transform: scale(4.5); opacity: 0; border-width: 1px; }
                     }
                     .animate-finish-cutin { animation: finish-cutin 0.55s cubic-bezier(.2,.8,.2,1) forwards; }
+                    .animate-finish-cutin-stack-left { animation: finish-cutin-stack-left 0.62s cubic-bezier(.2,.8,.2,1) forwards; }
+                    .animate-finish-cutin-stack-right { animation: finish-cutin-stack-right 0.62s cubic-bezier(.2,.8,.2,1) forwards; }
+                    .animate-finish-cutin-stack-up { animation: finish-cutin-stack-up 0.62s cubic-bezier(.2,.8,.2,1) forwards; }
+                    .animate-finish-cutin-stack-down { animation: finish-cutin-stack-down 0.62s cubic-bezier(.2,.8,.2,1) forwards; }
                     .animate-finish-cutin-multi-left { animation: finish-cutin-multi-left 0.62s cubic-bezier(.2,.8,.2,1) forwards; }
                     .animate-finish-cutin-multi-right { animation: finish-cutin-multi-right 0.62s cubic-bezier(.2,.8,.2,1) forwards; }
                     .animate-finish-cutin-multi-up { animation: finish-cutin-multi-up 0.62s cubic-bezier(.2,.8,.2,1) forwards; }
