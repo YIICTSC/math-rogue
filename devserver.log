@@ -123,3 +123,330 @@
 [2m13:07:01[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
 [2m13:11:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
 [2m13:14:27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m13:28:43[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/components/P2PVSBattleScene.tsx, /src/components/DebugMenuScreen.tsx, /src/components/RestScreen.tsx, /src/components/BattleScene.tsx[22m
+[2m16:24:47[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m16:28:02[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m16:31:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m16:34:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m16:37:37[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m16:41:23[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m16:41:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m16:46:19[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m16:49:58[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m8:15:26[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m8:17:23[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m8:36:40[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m8:39:04[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m8:46:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m8:49:55[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m8:50:19[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m8:54:52[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m8:57:47[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/BattleScene.tsx[22m
+[2m9:36:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m9:36:41[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ProblemChallengeScreen.tsx[22m
+[2m9:37:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ProblemChallengeScreen.tsx[22m
+[2m9:37:51[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ProblemChallengeScreen.tsx[22m
+[2m9:42:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ProblemChallengeScreen.tsx[22m
+[2m9:44:24[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m9:44:24[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: Transform failed with 1 error:
+C:/Users/myfav/Documents/VScode/学習ローグ/src/data/subjects/math_g1.ts:159:0: ERROR: Unexpected "}"
+  Plugin: [35mvite:esbuild[39m
+  File: [36mC:/Users/myfav/Documents/VScode/学習ローグ/src/data/subjects/math_g1.ts[39m:159:0
+[33m  
+  [33mUnexpected "}"[33m
+  157|          { question: "「1 ＋ 99 ＝ 」 こたえは？", answer: "100", options: d("100", "99", "1", "0"), hint: "100。" },
+  158|      ]
+  159|  };
+     |  ^
+  160|  
+  161|  
+  [39m
+[2m9:44:24[22m [31m[1m[vite][22m[39m [31mInternal server error: Transform failed with 1 error:
+C:/Users/myfav/Documents/VScode/学習ローグ/src/data/subjects/math_g1.ts:159:0: ERROR: Unexpected "}"[39m
+  Plugin: [35mvite:esbuild[39m
+  File: [36mC:/Users/myfav/Documents/VScode/学習ローグ/src/data/subjects/math_g1.ts[39m:159:0
+[33m  
+  [33mUnexpected "}"[33m
+  157|          { question: "「1 ＋ 99 ＝ 」 こたえは？", answer: "100", options: d("100", "99", "1", "0"), hint: "100。" },
+  158|      ]
+  159|  };
+     |  ^
+  160|  
+  161|  
+  [39m
+      at failureErrorWithLog (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\esbuild\lib\main.js:1467:15)
+      at C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\esbuild\lib\main.js:736:50
+      at responseCallbacks.<computed> (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\esbuild\lib\main.js:603:9)
+      at handleIncomingPacket (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\esbuild\lib\main.js:658:12)
+      at Socket.readFromStdout (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\esbuild\lib\main.js:581:7)
+      at Socket.emit (node:events:508:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+[2m9:44:44[22m [31m[1m[vite][22m[39m [31mInternal server error: Transform failed with 1 error:
+C:/Users/myfav/Documents/VScode/学習ローグ/src/data/subjects/math_g1.ts:159:0: ERROR: Unexpected "}"[39m
+  Plugin: [35mvite:esbuild[39m
+  File: [36mC:/Users/myfav/Documents/VScode/学習ローグ/src/data/subjects/math_g1.ts[39m:159:0
+[33m  
+  [33mUnexpected "}"[33m
+  157|          { question: "「1 ＋ 99 ＝ 」 こたえは？", answer: "100", options: d("100", "99", "1", "0"), hint: "100。" },
+  158|      ]
+  159|  };
+     |  ^
+  160|  
+  161|  
+  [39m
+      at failureErrorWithLog (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\esbuild\lib\main.js:1467:15)
+      at C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\esbuild\lib\main.js:736:50
+      at responseCallbacks.<computed> (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\esbuild\lib\main.js:603:9)
+      at handleIncomingPacket (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\esbuild\lib\main.js:658:12)
+      at Socket.readFromStdout (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\esbuild\lib\main.js:581:7)
+      at Socket.emit (node:events:508:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+[2m9:44:45[22m [31m[1m[vite][22m[39m [31mInternal server error: Transform failed with 1 error:
+C:/Users/myfav/Documents/VScode/学習ローグ/src/data/subjects/math_g1.ts:159:0: ERROR: Unexpected "}"[39m
+  Plugin: [35mvite:esbuild[39m
+  File: [36mC:/Users/myfav/Documents/VScode/学習ローグ/src/data/subjects/math_g1.ts[39m:159:0
+[33m  
+  [33mUnexpected "}"[33m
+  157|          { question: "「1 ＋ 99 ＝ 」 こたえは？", answer: "100", options: d("100", "99", "1", "0"), hint: "100。" },
+  158|      ]
+  159|  };
+     |  ^
+  160|  
+  161|  
+  [39m
+      at failureErrorWithLog (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\esbuild\lib\main.js:1467:15)
+      at C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\esbuild\lib\main.js:736:50
+      at responseCallbacks.<computed> (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\esbuild\lib\main.js:603:9)
+      at handleIncomingPacket (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\esbuild\lib\main.js:658:12)
+      at Socket.readFromStdout (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\esbuild\lib\main.js:581:7)
+      at Socket.emit (node:events:508:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+[2m9:44:55[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m9:45:04[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m9:45:33[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ProblemChallengeScreen.tsx[22m
+[2m9:50:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m9:54:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m9:55:16[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m9:55:29[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ProblemChallengeScreen.tsx[22m
+[2m9:57:09[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m9:58:11[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m9:58:25[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ProblemChallengeScreen.tsx[22m
+[2m9:59:44[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m10:00:39[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m10:00:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ProblemChallengeScreen.tsx[22m
+[2m10:02:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m10:03:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m10:03:25[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ProblemChallengeScreen.tsx[22m
+[2m10:04:37[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m10:05:30[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m10:05:52[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ProblemChallengeScreen.tsx[22m
+[2m10:07:48[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m10:08:30[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m10:08:44[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ProblemChallengeScreen.tsx[22m
+[2m10:09:59[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m10:10:48[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m10:11:01[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ProblemChallengeScreen.tsx[22m
+[2m10:13:34[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ProblemChallengeScreen.tsx[22m
+[2m10:14:09[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m10:19:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ProblemChallengeScreen.tsx[22m
+[2m10:22:35[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m10:22:50[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m10:22:59[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m11:20:05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ModeSelectionScreen.tsx[22m
+[2m11:25:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GoHomeDash.tsx[22m
+[2m11:25:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GoHomeDash.tsx[22m
+[2m11:32:06[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m11:32:06[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m11:32:06[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m11:32:06[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m11:32:06[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m11:32:06[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m11:32:06[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m11:32:06[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m11:32:06[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m11:45:02[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/components/ModeSelectionScreen.tsx, /src/components/ProblemChallengeScreen.tsx, /src/components/MiniGameSelectScreen.tsx, /src/components/MiniGameRouter.tsx, /src/components/ChefDeckSelectionScreen.tsx, /src/components/MathChallengeScreen.tsx, /src/components/MapScreen.tsx, /src/components/GeneralChallengeScreen.tsx, /src/components/CompendiumScreen.tsx, /src/components/KanjiChallengeScreen.tsx, /src/components/P2PVSBattleScene.tsx, /src/components/DebugMenuScreen.tsx, /src/components/CharacterSelectionScreen.tsx, /src/components/EnglishChallengeScreen.tsx, /src/components/RankingScreen.tsx, /src/components/BattleScene.tsx, /src/components/SchoolyardSurvivorScreen.tsx, /src/components/GoHomeDash.tsx, /src/components/PokerGameScreen.tsx, /src/components/KochoShowdown.tsx, /src/components/PaperPlaneBattle.tsx, /src/components/SchoolDungeonRPG.tsx, /src/components/SchoolDungeonRPG2.tsx, /src/components/Card.tsx, /src/components/FloorResultScreen.tsx, /src/components/RestScreen.tsx[22m
+[2m11:45:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/components/Card.tsx[22m Could not Fast Refresh ("KEYWORD_DEFINITIONS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m11:45:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/components/FloorResultScreen.tsx, /src/components/ChefDeckSelectionScreen.tsx, /src/components/RewardScreen.tsx, /src/components/CompendiumScreen.tsx, /src/components/MapScreen.tsx, /src/components/P2PVSBattleScene.tsx, /src/components/ShopScreen.tsx, /src/components/DebugMenuScreen.tsx, /src/components/RestScreen.tsx, /src/components/BattleScene.tsx[22m
+[2m11:45:08[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m11:45:35[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ModeSelectionScreen.tsx[22m
+[2m11:50:20[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m11:50:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m11:50:41[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ProblemChallengeScreen.tsx[22m
+[2m11:55:41[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m11:56:04[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m11:56:25[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m11:59:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m12:02:49[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m12:07:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m12:09:08[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m12:17:29[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m12:19:35[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m12:23:02[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m12:23:25[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m12:23:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m12:23:55[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m12:24:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m12:24:25[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m12:24:51[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m12:25:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m12:25:22[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m12:25:36[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m12:31:17[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m12:33:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m12:33:26[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m12:33:42[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m12:33:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:21:52[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:22:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:22:24[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:22:40[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:22:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:23:15[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:23:26[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:23:43[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:23:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:24:08[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:26:59[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:27:25[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:28:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:28:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:28:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:28:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:28:47[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:32:06[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:32:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:32:43[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:32:55[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:33:11[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:33:20[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:33:30[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:33:36[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:33:46[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:39:01[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:40:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:41:25[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:41:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:45:46[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:46:58[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:47:09[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:53:05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:53:05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:53:05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:53:05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:57:50[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:57:50[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m13:57:50[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m14:01:47[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ModeSelectionScreen.tsx[22m
+[2m14:01:47[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ProblemChallengeScreen.tsx[22m
+[2m14:06:49[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m14:07:41[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m14:10:25[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m14:10:25[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m14:10:25[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m14:10:34[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m14:13:02[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m14:13:02[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m14:13:02[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m14:18:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m14:18:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/components/ModeSelectionScreen.tsx, /src/components/ProblemChallengeScreen.tsx, /src/components/MiniGameSelectScreen.tsx, /src/components/MiniGameRouter.tsx, /src/components/ChefDeckSelectionScreen.tsx, /src/components/MathChallengeScreen.tsx, /src/components/MapScreen.tsx, /src/components/GeneralChallengeScreen.tsx, /src/components/CompendiumScreen.tsx, /src/components/KanjiChallengeScreen.tsx, /src/components/P2PVSBattleScene.tsx, /src/components/DebugMenuScreen.tsx, /src/components/CharacterSelectionScreen.tsx, /src/components/EnglishChallengeScreen.tsx, /src/components/RankingScreen.tsx, /src/components/BattleScene.tsx, /src/components/SchoolyardSurvivorScreen.tsx, /src/components/GoHomeDash.tsx, /src/components/PokerGameScreen.tsx, /src/components/KochoShowdown.tsx, /src/components/PaperPlaneBattle.tsx, /src/components/SchoolDungeonRPG.tsx, /src/components/SchoolDungeonRPG2.tsx, /src/components/Card.tsx, /src/components/FloorResultScreen.tsx, /src/components/RestScreen.tsx[22m
+[2m14:18:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/components/ModeSelectionScreen.tsx, /src/components/ProblemChallengeScreen.tsx[22m
+[2m14:18:46[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/components/Card.tsx[22m Could not Fast Refresh ("KEYWORD_DEFINITIONS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m14:18:46[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/components/FloorResultScreen.tsx, /src/components/ChefDeckSelectionScreen.tsx, /src/components/RewardScreen.tsx, /src/components/CompendiumScreen.tsx, /src/components/MapScreen.tsx, /src/components/P2PVSBattleScene.tsx, /src/components/ShopScreen.tsx, /src/components/DebugMenuScreen.tsx, /src/components/RestScreen.tsx, /src/components/BattleScene.tsx[22m
+[2m14:19:46[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ModeSelectionScreen.tsx[22m
+[2m14:19:46[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ProblemChallengeScreen.tsx[22m
+[2m14:19:54[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ProblemChallengeScreen.tsx[22m
+[2m14:26:20[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m14:26:20[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ModeSelectionScreen.tsx[22m
+[2m14:26:20[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ProblemChallengeScreen.tsx[22m
+[2m14:32:08[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m14:33:42[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ModeSelectionScreen.tsx[22m
+[2m14:33:42[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ProblemChallengeScreen.tsx[22m
+[2m14:39:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m14:42:40[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m14:42:54[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m14:43:18[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m14:43:29[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m14:46:39[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m14:49:24[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m14:52:26[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m14:55:24[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m14:59:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:03:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:05:28[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:08:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:16:04[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:16:35[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:16:52[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:17:15[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:17:39[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:17:58[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:18:16[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:18:34[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:20:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:21:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:21:29[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:21:30[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: Transform failed with 1 error:
+C:/Users/myfav/Documents/VScode/学習ローグ/src/data/subjects/kokugo_g3.ts:97:12: ERROR: The symbol "passage" has already been declared
+  Plugin: [35mvite:esbuild[39m
+  File: [36mC:/Users/myfav/Documents/VScode/学習ローグ/src/data/subjects/kokugo_g3.ts[39m:97:12
+[33m  
+  [33mThe symbol "passage" has already been declared[33m
+  95 |        return { question: '物語文で 場面が かわるとき ちゅうもくするのは？', answer: '時間や 場所', options: d('時間や 場所', '数字だけ', '記号だけ', 'ページ数'), hint: 'いつ・どこで。' };
+  96 |      case 'KOKUGO_G3_U05':
+  97 |        const passage = explanatoryPassages[n % explanatoryPassages.length];
+     |              ^
+  98 |        if (n % 4 === 0) {
+  99 |          return { question: '説明文で 大切なのは？', answer: '事実とわけ', options: d('事実とわけ', 'せりふ', '気もちだけ', '会話の数'), hint: '何が どうして そうなのか。' };
+  [39m
+[2m15:21:30[22m [31m[1m[vite][22m[39m [31mInternal server error: Transform failed with 1 error:
+C:/Users/myfav/Documents/VScode/学習ローグ/src/data/subjects/kokugo_g3.ts:97:12: ERROR: The symbol "passage" has already been declared[39m
+  Plugin: [35mvite:esbuild[39m
+  File: [36mC:/Users/myfav/Documents/VScode/学習ローグ/src/data/subjects/kokugo_g3.ts[39m:97:12
+[33m  
+  [33mThe symbol "passage" has already been declared[33m
+  95 |        return { question: '物語文で 場面が かわるとき ちゅうもくするのは？', answer: '時間や 場所', options: d('時間や 場所', '数字だけ', '記号だけ', 'ページ数'), hint: 'いつ・どこで。' };
+  96 |      case 'KOKUGO_G3_U05':
+  97 |        const passage = explanatoryPassages[n % explanatoryPassages.length];
+     |              ^
+  98 |        if (n % 4 === 0) {
+  99 |          return { question: '説明文で 大切なのは？', answer: '事実とわけ', options: d('事実とわけ', 'せりふ', '気もちだけ', '会話の数'), hint: '何が どうして そうなのか。' };
+  [39m
+      at failureErrorWithLog (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\esbuild\lib\main.js:1467:15)
+      at C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\esbuild\lib\main.js:736:50
+      at responseCallbacks.<computed> (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\esbuild\lib\main.js:603:9)
+      at handleIncomingPacket (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\esbuild\lib\main.js:658:12)
+      at Socket.readFromStdout (C:\Users\myfav\Documents\VScode\学習ローグ\node_modules\esbuild\lib\main.js:581:7)
+      at Socket.emit (node:events:508:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+[2m15:21:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:23:44[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:24:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:24:35[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:25:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:26:22[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:26:47[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:27:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:27:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:30:30[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:30:36[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:31:02[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:31:19[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:31:34[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:31:47[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:32:05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:32:27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:32:34[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:34:01[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
+[2m15:38:44[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/GeneralChallengeScreen.tsx[22m
