@@ -95,6 +95,13 @@ const MODE_TO_SCREEN: Record<string, GameScreen> = {
     [GameMode.ENGLISH_CONV_3]: GameScreen.ENGLISH_CHALLENGE,
     [GameMode.ENGLISH_CONV_4]: GameScreen.ENGLISH_CHALLENGE,
     [GameMode.ENGLISH_CONV_5]: GameScreen.ENGLISH_CHALLENGE,
+    [GameMode.ENGLISH_G3_1]: GameScreen.GENERAL_CHALLENGE,
+    [GameMode.ENGLISH_G4_1]: GameScreen.GENERAL_CHALLENGE,
+    [GameMode.ENGLISH_G5_1]: GameScreen.GENERAL_CHALLENGE,
+    [GameMode.ENGLISH_G6_1]: GameScreen.GENERAL_CHALLENGE,
+    [GameMode.ENGLISH_G7_1]: GameScreen.GENERAL_CHALLENGE,
+    [GameMode.ENGLISH_G8_1]: GameScreen.GENERAL_CHALLENGE,
+    [GameMode.ENGLISH_G9_1]: GameScreen.GENERAL_CHALLENGE,
 };
 
 // 指定されたモードに対応するチャレンジ画面を取得する（デフォルトは汎用チャレンジ）
@@ -194,18 +201,15 @@ export const SUBJECT_CATEGORIES: SubjectCategoryConfig[] = [
     id: 'ENGLISH', 
     name: 'えいご', 
     color: 'indigo',
-    uiType: 'english_mixed',
+    uiType: 'grade_term',
     subModes: [
-        { id: 'E_ES', name: '小学校単語', mode: GameMode.ENGLISH_ES },
-        { id: 'E_J1', name: '中1単語', mode: GameMode.ENGLISH_J1 },
-        { id: 'E_J2', name: '中2単語', mode: GameMode.ENGLISH_J2 },
-        { id: 'E_J3', name: '中3単語', mode: GameMode.ENGLISH_J3 },
-        { id: 'C1', name: '会話 Lv1', mode: GameMode.ENGLISH_CONV_1 },
-        { id: 'C2', name: '会話 Lv2', mode: GameMode.ENGLISH_CONV_2 },
-        { id: 'C3', name: '会話 Lv3', mode: GameMode.ENGLISH_CONV_3 },
-        { id: 'C4', name: '会話 Lv4', mode: GameMode.ENGLISH_CONV_4 },
-        { id: 'C5', name: '会話 Lv5', mode: GameMode.ENGLISH_CONV_5 },
-        { id: 'E_MIXED', name: 'ミックス', mode: GameMode.ENGLISH_MIXED },
+        { id: 'E3_1', name: '英 小3', mode: GameMode.ENGLISH_G3_1 },
+        { id: 'E4_1', name: '英 小4', mode: GameMode.ENGLISH_G4_1 },
+        { id: 'E5_1', name: '英 小5', mode: GameMode.ENGLISH_G5_1 },
+        { id: 'E6_1', name: '英 小6', mode: GameMode.ENGLISH_G6_1 },
+        { id: 'E7_1', name: '英 中1', mode: GameMode.ENGLISH_G7_1 },
+        { id: 'E8_1', name: '英 中2', mode: GameMode.ENGLISH_G8_1 },
+        { id: 'E9_1', name: '英 中3', mode: GameMode.ENGLISH_G9_1 },
     ]
   },
   { 
