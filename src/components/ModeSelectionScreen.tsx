@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { SUBJECT_CATEGORIES, SubjectCategoryConfig, SubjectCategoryType } from '../subjectConfig';
+import { ENGLISH_GRADE_UNITS } from '../englishUnitConfig';
 
 interface ModeSelectionScreenProps {
   onSelectMode: (mode: GameMode, modePool?: string[]) => void;
@@ -397,19 +398,35 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({ onSelectMode,
     }
 
     if (cat.uiType === 'grade_term') {
-      if (cat.id === 'MATH_GRADES' || cat.id === 'KOKUGO_GRADES') {
+      if (cat.id === 'MATH_GRADES' || cat.id === 'KOKUGO_GRADES' || cat.id === 'ENGLISH') {
         const isKokugo = cat.id === 'KOKUGO_GRADES';
-        const mathUnits = isKokugo ? (KOKUGO_GRADE_UNITS[selectedMathGrade] || []) : (MATH_GRADE_UNITS[selectedMathGrade] || []);
-        const selectedMathUnits = mathUnits.filter((u) => selectedMathUnitIds.includes(u.id));
-        const selectedMathMode = (selectedMathUnits[0]?.mode || (isKokugo ? GameMode.KOKUGO_G1_1 : GameMode.MATH_G1_1)) as string;
-        const modePool = selectedMathUnits.map((u) => u.mode);
-        const canStartMath = selectedMathUnits.length > 0;
+        const isEnglish = cat.id === 'ENGLISH';
+        const gradeUnits = isEnglish
+          ? (ENGLISH_GRADE_UNITS[selectedMathGrade] || [])
+          : isKokugo
+          ? (KOKUGO_GRADE_UNITS[selectedMathGrade] || [])
+          : (MATH_GRADE_UNITS[selectedMathGrade] || []);
+        const selectedUnits = gradeUnits.filter((u) => selectedMathUnitIds.includes(u.id));
+        const defaultMode = isEnglish
+          ? (selectedMathGrade === 3 ? GameMode.ENGLISH_G3_1
+            : selectedMathGrade === 4 ? GameMode.ENGLISH_G4_1
+            : selectedMathGrade === 5 ? GameMode.ENGLISH_G5_1
+            : selectedMathGrade === 6 ? GameMode.ENGLISH_G6_1
+            : selectedMathGrade === 7 ? GameMode.ENGLISH_G7_1
+            : selectedMathGrade === 8 ? GameMode.ENGLISH_G8_1
+            : GameMode.ENGLISH_G9_1)
+          : isKokugo
+          ? GameMode.KOKUGO_G1_1
+          : GameMode.MATH_G1_1;
+        const selectedMode = (selectedUnits[0]?.mode || defaultMode) as string;
+        const modePool = selectedUnits.map((u) => u.mode);
+        const canStartUnits = selectedUnits.length > 0;
         return (
           <div className="space-y-3">
             <div className="flex items-start gap-2">
               <span className="text-[10px] text-gray-500 whitespace-nowrap mt-1">学年</span>
               <div className="flex-1 grid grid-cols-5 gap-1">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(g => (
+                {[(isEnglish ? 3 : 1), ...(isEnglish ? [4, 5, 6, 7, 8, 9] : [2, 3, 4, 5, 6, 7, 8, 9])].map(g => (
                   <button
                     key={g}
                     onClick={() => {
@@ -424,7 +441,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({ onSelectMode,
               </div>
             </div>
             <div className="space-y-1.5 max-h-44 overflow-y-auto custom-scrollbar pr-1">
-              {mathUnits.map(unit => (
+              {gradeUnits.map(unit => (
                 <button
                   key={unit.id}
                   onClick={() => {
@@ -443,18 +460,18 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({ onSelectMode,
             </div>
             <button
               onClick={() => {
-                if (!canStartMath) return;
-                handleSelect(selectedMathMode, modePool);
+                if (!canStartUnits) return;
+                handleSelect(selectedMode, modePool);
               }}
-              disabled={!canStartMath}
-              className={`w-full p-2 rounded font-bold text-xs shadow-lg transition-all text-white ${canStartMath ? `${theme.bg} ${theme.hover}` : 'bg-slate-700 cursor-not-allowed opacity-50'}`}
+              disabled={!canStartUnits}
+              className={`w-full p-2 rounded font-bold text-xs shadow-lg transition-all text-white ${canStartUnits ? `${theme.bg} ${theme.hover}` : 'bg-slate-700 cursor-not-allowed opacity-50'}`}
             >
-              {renderMasteryPrefix(selectedMathMode)}
+              {renderMasteryPrefix(selectedMode)}
               この単元ミックスで開始
             </button>
-            {!canStartMath && (
+            {!canStartUnits && (
               <div className="text-[10px] text-amber-300">
-                {mathUnits.length > 0 ? '単元を1つ以上選ぶと開始できます' : 'この学年の国語単元はまだ未実装です'}
+                {gradeUnits.length > 0 ? '単元を1つ以上選ぶと開始できます' : 'この学年の単元はまだ未実装です'}
               </div>
             )}
           </div>

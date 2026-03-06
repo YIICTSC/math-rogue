@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { CheckCircle, XCircle, Lightbulb, Volume2 } from 'lucide-react';
+import { CheckCircle, XCircle, Lightbulb, Volume2, Mic } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { GameMode } from '../types';
 import { storageService } from '../services/storageService';
@@ -22,15 +22,38 @@ interface ExtendedGeneralProblem extends GeneralProblem {
   sourceMode: string;
 }
 
+type BrowserSpeechRecognition = {
+  lang: string;
+  interimResults: boolean;
+  maxAlternatives: number;
+  onresult: ((event: any) => void) | null;
+  onerror: ((event: any) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+};
+
+declare global {
+  interface Window {
+    SpeechRecognition?: new () => BrowserSpeechRecognition;
+    webkitSpeechRecognition?: new () => BrowserSpeechRecognition;
+  }
+}
+
 // 教科に応じた背景色の取得
 const getBackgroundClass = (mode: string) => {
     if (mode.startsWith('MATH')) return 'bg-emerald-950';
+    if (mode.startsWith('ENGLISH')) return 'bg-indigo-950';
     if (mode.startsWith('SCIENCE') || mode.startsWith('LIFE')) return 'bg-amber-950';
     if (mode.startsWith('SOCIAL') || mode.includes('GEOGRAPHY') || mode.includes('HISTORY') || mode.includes('CIVICS')) return 'bg-orange-950';
     if (mode.startsWith('MAP_') || mode.startsWith('PREF_') || mode.startsWith('PREFECTURES')) return 'bg-rose-950';
     if (mode.startsWith('IT_')) return 'bg-indigo-950'; // ICT系はインディゴ
     return 'bg-slate-900';
 };
+
+const isEnglishReviewMode = (mode: string) => /^ENGLISH_G[3-9]_U(11|12|13|14)$/.test(mode);
+const isEnglishSpeakingReviewMode = (mode: string) =>
+  /^ENGLISH_G[3-6]_U12$/.test(mode) || mode === 'ENGLISH_G7_U14' || mode === 'ENGLISH_G8_U11' || mode === 'ENGLISH_G9_U12';
 
 const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onComplete, mode, modePool, onModeCorrect, debugSkip, isChallenge, streak = 0 }) => {
   const [problems, setProblems] = useState<ExtendedGeneralProblem[]>([]);
@@ -39,16 +62,60 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [feedback, setFeedback] = useState<'CORRECT' | 'WRONG' | null>(null);
+  const [isListening, setIsListening] = useState(false);
+  const [speechTranscript, setSpeechTranscript] = useState('');
+  const [speechError, setSpeechError] = useState('');
   const visualCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
   const currentProblem = problems[currentProblemIndex];
 
   const normalize = (s: string) => {
     if (!s) return "";
     return s
+      .replace(/’/g, "'")
+      .replace(/\bI'm\b/gi, 'I am')
+      .replace(/\byou're\b/gi, 'you are')
+      .replace(/\bhe's\b/gi, 'he is')
+      .replace(/\bshe's\b/gi, 'she is')
+      .replace(/\bit's\b/gi, 'it is')
+      .replace(/\bwe're\b/gi, 'we are')
+      .replace(/\bthey're\b/gi, 'they are')
+      .replace(/\bI've\b/gi, 'I have')
+      .replace(/\bwe've\b/gi, 'we have')
+      .replace(/\bthey've\b/gi, 'they have')
+      .replace(/\bdon't\b/gi, 'do not')
+      .replace(/\bdoesn't\b/gi, 'does not')
+      .replace(/\bdidn't\b/gi, 'did not')
+      .replace(/\bcan't\b/gi, 'cannot')
+      .replace(/\bwon't\b/gi, 'will not')
+      .replace(/\bwouldn't\b/gi, 'would not')
       .replace(/\（.*?\）|\(.*?\)/g, "") // 括弧削除
       .replace(/[\s　]+/g, "")           // 空白削除
+      .replace(/[.,!?'"`:-]/g, '')
+      .toLowerCase()
       .trim();
   };
+
+  const matchesSpeechPrompt = useCallback((transcript: string, speechPrompt: NonNullable<GeneralProblem['speechPrompt']>) => {
+    const normalizedTranscript = normalize(transcript);
+    const answers = [
+      speechPrompt.expected,
+      ...(speechPrompt.alternates || []),
+    ];
+    const exactMatch = answers.some((answer) => {
+      const normalizedAnswer = normalize(answer);
+      return normalizedTranscript.includes(normalizedAnswer) || normalizedAnswer.includes(normalizedTranscript);
+    });
+    if (exactMatch) return true;
+
+    if (speechPrompt.keywords && speechPrompt.keywords.length > 0) {
+      const hits = speechPrompt.keywords.filter((keyword) => normalizedTranscript.includes(normalize(keyword))).length;
+      const requiredHits = speechPrompt.minKeywordHits || speechPrompt.keywords.length;
+      if (hits >= requiredHits) return true;
+    }
+
+    return false;
+  }, []);
 
   const speakPrompt = useCallback((text: string, lang = 'ja-JP') => {
     if (!('speechSynthesis' in window) || !text) return;
@@ -85,7 +152,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       problemPool = SUBJECT_DATA.MAP_SYMBOLS.map((p) => ({ ...p, sourceMode: 'MAP_SYMBOLS' }));
     }
     
-    const count = isChallenge ? 1 : 3;
+    const count = isChallenge ? 1 : (isEnglishReviewMode(mode) ? problemPool.length : 3);
     const shuffled = [...problemPool]
         .sort(() => Math.random() - 0.5)
         .slice(0, count)
@@ -102,6 +169,9 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     setProblems(shuffled);
   }, [mode, modePool, debugSkip, isChallenge]);
 
+  const attemptedCount = currentProblemIndex + (isAnswered ? 1 : 0);
+  const accuracy = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0;
+
   useEffect(() => {
     if (!currentProblem?.audioPrompt || isAnswered) return;
     if (currentProblem.audioPrompt.autoPlay === false) return;
@@ -113,21 +183,27 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
 
   useEffect(() => {
     return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
       }
     };
   }, []);
 
-  const handleAnswer = (option: string) => {
+  useEffect(() => {
+    setSpeechTranscript('');
+    setSpeechError('');
+    setIsListening(false);
+  }, [currentProblemIndex]);
+
+  const submitAnswerResult = useCallback((isCorrect: boolean, selected: string) => {
     if (isAnswered) return;
-    
-    setSelectedOption(option);
+
+    setSelectedOption(selected);
     setIsAnswered(true);
-    
-    // actualCorrectAnswer（インデックス0から抽出した文字列）と比較する
-    const isCorrect = normalize(option) === normalize(problems[currentProblemIndex].actualCorrectAnswer);
-    
+
     if (isCorrect) {
       setCorrectCount(prev => prev + 1);
       setFeedback('CORRECT');
@@ -152,7 +228,45 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
         onComplete(isCorrect ? correctCount + 1 : correctCount);
       }
     }, 1200);
+  }, [correctCount, currentProblemIndex, isAnswered, isChallenge, onComplete, onModeCorrect, problems]);
+
+  const handleAnswer = (option: string) => {
+    const isCorrect = normalize(option) === normalize(problems[currentProblemIndex].actualCorrectAnswer);
+    submitAnswerResult(isCorrect, option);
   };
+
+  const startSpeechRecognition = useCallback(() => {
+    if (!currentProblem?.speechPrompt || isAnswered || isListening) return;
+    const RecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!RecognitionCtor) {
+      setSpeechError('このブラウザでは はつわ判定が つかえません');
+      return;
+    }
+
+    setSpeechError('');
+    setSpeechTranscript('');
+
+    const recognition = new RecognitionCtor();
+    recognition.lang = currentProblem.speechPrompt.lang || 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 3;
+    recognition.onresult = (event) => {
+      const transcript = String(event.results?.[0]?.[0]?.transcript || '').trim();
+      setSpeechTranscript(transcript);
+      const isCorrect = matchesSpeechPrompt(transcript, currentProblem.speechPrompt!);
+      submitAnswerResult(isCorrect, transcript || currentProblem.speechPrompt!.expected);
+    };
+    recognition.onerror = () => {
+      setSpeechError('うまく ききとれませんでした');
+      setIsListening(false);
+    };
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+    recognitionRef.current = recognition;
+    setIsListening(true);
+    recognition.start();
+  }, [currentProblem, isAnswered, isListening, submitAnswerResult]);
 
   useEffect(() => {
     const canvas = visualCanvasRef.current;
@@ -722,6 +836,13 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                 <div className="text-2xl font-bold text-white tracking-widest font-mono border-b-2 border-white pb-1">
                     {isChallenge ? `第 ${streak + 1} 問` : `${currentProblemIndex + 1} / ${problems.length}`}
                 </div>
+                {isEnglishSpeakingReviewMode(mode) && !isChallenge && (
+                    <div className="mt-2 flex gap-3 text-xs md:text-sm text-cyan-100">
+                        <span>Score: {correctCount}</span>
+                        <span>Attempted: {attemptedCount}</span>
+                        <span>Accuracy: {accuracy}%</span>
+                    </div>
+                )}
             </div>
 
             <div className="bg-black/40 border-4 border-white p-4 md:p-6 rounded-2xl mb-4 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[210px] md:min-h-[260px]">
@@ -747,6 +868,31 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                     </button>
                 )}
 
+                {currentProblem.speechPrompt && (
+                    <div className="mb-4 flex w-full flex-col items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={startSpeechRecognition}
+                            disabled={isAnswered || isListening}
+                            className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold ${isListening ? 'border-emerald-300/60 bg-emerald-500/20 text-emerald-100' : 'border-pink-300/50 bg-pink-500/15 text-pink-100 hover:bg-pink-500/25'} disabled:opacity-60`}
+                        >
+                            <Mic size={18} />
+                            {isListening ? 'ききとり中...' : (currentProblem.speechPrompt.buttonLabel || 'はなして こたえる')}
+                        </button>
+                        {speechTranscript && (
+                            <div className="text-xs text-emerald-200">ききとり: {speechTranscript}</div>
+                        )}
+                        {speechError && (
+                            <div className="text-xs text-amber-300">{speechError}</div>
+                        )}
+                        {currentProblem.speechPrompt.freeResponse && currentProblem.speechPrompt.examples && currentProblem.speechPrompt.examples.length > 0 && (
+                            <div className="w-full rounded-lg border border-pink-300/20 bg-pink-500/10 px-3 py-2 text-left text-[11px] text-pink-100">
+                                例: {currentProblem.speechPrompt.examples.join(' / ')}
+                            </div>
+                        )}
+                    </div>
+                )}
+
                 {currentProblem.visual && (
                     <div className="w-full mb-4 flex justify-center">
                         <canvas
@@ -769,6 +915,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                 )}
             </div>
 
+            {!currentProblem.speechPrompt?.freeResponse && (
             <div className="grid grid-cols-2 gap-2 md:gap-3">
                 {currentProblem.options.map((opt, idx) => (
                     <button
@@ -787,6 +934,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                     </button>
                 ))}
             </div>
+            )}
         </div>
     </div>
   );

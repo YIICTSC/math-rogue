@@ -10,6 +10,7 @@ import GeneralChallengeScreen from './GeneralChallengeScreen';
 import { ArrowLeft, Brain, Book, Languages, Music, Play, Trophy, Home, Shuffle, CheckCircle, Target, ChevronRight, LogOut, GraduationCap, Star, Volume2, VolumeX, FlaskConical, Map as MapIcon, Globe, MapPin } from 'lucide-react';
 import { trans } from '../utils/textUtils';
 import { SUBJECT_CATEGORIES, SubjectCategoryConfig, SubModeConfig, getChallengeScreenForMode } from '../subjectConfig';
+import { ENGLISH_GRADE_UNITS } from '../englishUnitConfig';
 
 interface ProblemChallengeScreenProps {
   onBack: () => void;
@@ -207,6 +208,19 @@ const getKokugoGradeMode = (grade: number): GameMode => {
     case 8: return GameMode.KOKUGO_G8_1;
     case 9: return GameMode.KOKUGO_G9_1;
     default: return GameMode.KOKUGO_G1_1;
+  }
+};
+
+const getEnglishGradeMode = (grade: number): GameMode => {
+  switch (grade) {
+    case 3: return GameMode.ENGLISH_G3_1;
+    case 4: return GameMode.ENGLISH_G4_1;
+    case 5: return GameMode.ENGLISH_G5_1;
+    case 6: return GameMode.ENGLISH_G6_1;
+    case 7: return GameMode.ENGLISH_G7_1;
+    case 8: return GameMode.ENGLISH_G8_1;
+    case 9: return GameMode.ENGLISH_G9_1;
+    default: return GameMode.ENGLISH_G3_1;
   }
 };
 
@@ -438,6 +452,20 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
     };
   };
 
+  const getEnglishSelection = (): ActiveChallengeConfig => {
+    const units = ENGLISH_GRADE_UNITS[selectedMathGrade] || [];
+    const selectedUnits = units.filter((u) => selectedMathUnitIds.includes(u.id));
+    const modePool = selectedUnits.map((u) => u.mode);
+    const label = selectedUnits.length > 0
+      ? `${getGradeLabel(selectedMathGrade)} 英語 / ${selectedUnits.map((u) => u.name).join(' + ')} ミックス`
+      : `${getGradeLabel(selectedMathGrade)} 英語 / 単元未選択`;
+    const subModeId = `ENGLISH_G${selectedMathGrade}_MIX_${selectedUnits.map((u) => u.id).sort().join('_') || 'NONE'}`;
+    return {
+      subMode: { id: subModeId, name: label, mode: getEnglishGradeMode(selectedMathGrade) },
+      modePool,
+    };
+  };
+
   const handleMathGradeSelect = (grade: number) => {
     setSelectedMathGrade(grade);
     setSelectedMathUnitIds([]);
@@ -458,17 +486,23 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
       setSelectedCategory(cat);
       setSelectedSubMode(cat.subModes[0]); 
       setActiveChallenge(null);
+      if (cat.id === 'ENGLISH' && selectedMathGrade < 3) {
+        setSelectedMathGrade(3);
+        setSelectedMathUnitIds([]);
+      }
       audioService.playSound('select');
   };
 
   const handleStart = () => {
-    if (selectedCategory.id === 'MATH_GRADES' && selectedMathUnitIds.length === 0) {
+    if ((selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH') && selectedMathUnitIds.length === 0) {
       return;
     }
     const challengeConfig = selectedCategory.id === 'MATH_GRADES'
       ? getMathSelection()
       : selectedCategory.id === 'KOKUGO_GRADES'
       ? getKokugoSelection()
+      : selectedCategory.id === 'ENGLISH'
+      ? getEnglishSelection()
       : { subMode: selectedSubMode };
 
     setActiveChallenge(challengeConfig);
@@ -603,11 +637,15 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
     ? getMathSelection()
     : selectedCategory.id === 'KOKUGO_GRADES'
     ? getKokugoSelection()
+    : selectedCategory.id === 'ENGLISH'
+    ? getEnglishSelection()
     : null;
-  const currentUnits = selectedCategory.id === 'KOKUGO_GRADES'
+  const currentUnits = selectedCategory.id === 'ENGLISH'
+    ? (ENGLISH_GRADE_UNITS[selectedMathGrade] || [])
+    : selectedCategory.id === 'KOKUGO_GRADES'
     ? (KOKUGO_GRADE_UNITS[selectedMathGrade] || [])
     : (MATH_GRADE_UNITS[selectedMathGrade] || []);
-  const canStart = (selectedCategory.id !== 'MATH_GRADES' && selectedCategory.id !== 'KOKUGO_GRADES') || selectedMathUnitIds.length > 0;
+  const canStart = (selectedCategory.id !== 'MATH_GRADES' && selectedCategory.id !== 'KOKUGO_GRADES' && selectedCategory.id !== 'ENGLISH') || selectedMathUnitIds.length > 0;
   const footerSelectionLabel = previewSelection
     ? previewSelection.subMode.name
     : selectedSubMode.name;
@@ -650,12 +688,12 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
               <ChevronRight size={10} className="text-emerald-500"/> 種目を選択
             </h3>
             <div className="bg-black/40 p-2 rounded-xl border border-gray-800 flex-grow overflow-y-auto custom-scrollbar shadow-inner min-h-[120px]">
-                {selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' ? (
+                {selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' ? (
                   <div className="space-y-3">
                     <div>
                       <div className="text-[10px] text-gray-400 mb-1">学年を選択</div>
                       <div className="grid grid-cols-5 gap-1.5">
-                        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((grade) => {
+                        {[(selectedCategory.id === 'ENGLISH' ? 3 : 1), ...((selectedCategory.id === 'ENGLISH' ? [4, 5, 6, 7, 8, 9] : [2, 3, 4, 5, 6, 7, 8, 9]))].map((grade) => {
                           const isSelected = selectedMathGrade === grade;
                           return (
                             <button
@@ -694,7 +732,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
                     </div>
                     {selectedMathUnitIds.length === 0 && (
                       <div className="text-[10px] text-amber-300">
-                        {currentUnits.length > 0 ? '単元を1つ以上選ぶと開始できます' : 'この学年の国語単元はまだ未実装です'}
+                        {currentUnits.length > 0 ? '単元を1つ以上選ぶと開始できます' : 'この学年の単元はまだ未実装です'}
                       </div>
                     )}
                   </div>
