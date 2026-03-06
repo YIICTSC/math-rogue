@@ -1,8 +1,7 @@
 
 import { GeneralProblem, d } from './utils';
 
-export const MATH_G1_DATA: Record<string, GeneralProblem[]> = {
-    MATH_G1_1: [
+const MATH_G1_1: GeneralProblem[] = [
         { question: "1、2、3、の つぎの かずは なに？", answer: "4", options: d("4", "0", "5", "6"), hint: "ひとつ ずつ ふえていくよ。" },
         { question: "5 と 3、 どっちが おおきい？", answer: "5", options: d("5", "3", "おなじ", "わからない"), hint: "ゆびを つかって かぞえてみよう。" },
         { question: "10 は 7 と なに？", answer: "3", options: d("3", "2", "4", "5"), hint: "10に なる 組み合わせだよ。" },
@@ -52,8 +51,9 @@ export const MATH_G1_DATA: Record<string, GeneralProblem[]> = {
         { question: "10は 8と なに？", answer: "2", options: d("2", "1", "3", "8"), hint: "あと すこし。" },
         { question: "「9 ＋ 1 ＝ 」 こたえは？", answer: "10", options: d("10", "9", "11", "0"), hint: "キリが いいね。" },
         { question: "「10 － 10 ＝ 」 こたえは？", answer: "0", options: d("0", "10", "1", "20"), hint: "なにも なくなる。" },
-    ],
-    MATH_G1_2: [
+    ];
+
+const MATH_G1_2: GeneralProblem[] = [
         { question: "10 よりも 1 おおきい かずは？", answer: "11", options: d("11", "9", "10", "12"), hint: "10の つぎの かず。" },
         { question: "「10 ＋ 5 ＝ 」 こたえは？", answer: "15", options: d("15", "10", "5", "20"), hint: "10と 5で いくつ？" },
         { question: "とけいの ながい はりが 12、みじかい はりが 3 のとき、なんじ？", answer: "3じ", options: d("3じ", "12じ", "6じ", "9じ"), hint: "みじかい はりを みてね。" },
@@ -103,8 +103,9 @@ export const MATH_G1_DATA: Record<string, GeneralProblem[]> = {
         { question: "「10 ＋ 4 ＋ 1 ＝ 」 こたえは？", answer: "15", options: d("15", "14", "16", "10"), hint: "じゅんに たそう。" },
         { question: "「18 － 8 － 2 ＝ 」 こたえは？", answer: "8", options: d("8", "10", "18", "6"), hint: "じゅんに ひこう。" },
         { question: "「6 ＋ 4 ＋ 5 ＝ 」 こたえは？", answer: "15", options: d("15", "10", "14", "16"), hint: "10をつくろう。" },
-    ],
-    MATH_G1_3: [
+    ];
+
+const MATH_G1_3: GeneralProblem[] = [
         { question: "10が 10こで いくつ？", answer: "100", options: d("100", "10", "1000", "20"), hint: "とっても おおきな かず。" },
         { question: "「30 ＋ 20 ＝ 」 こたえは？", answer: "50", options: d("50", "32", "10", "100"), hint: "10の かたまりで 考えよう。" },
         { question: "「80 － 30 ＝ 」 こたえは？", answer: "50", options: d("50", "83", "30", "110"), hint: "8から 3を ひくるのと にてるよ。" },
@@ -154,5 +155,175 @@ export const MATH_G1_DATA: Record<string, GeneralProblem[]> = {
         { question: "「42 ＋ 7 ＝ 」 こたえは？", answer: "49", options: d("49", "42", "40", "50"), hint: "49。" },
         { question: "「100 － 0 ＝ 」 こたえは？", answer: "100", options: d("100", "0", "99", "10"), hint: "かわらないよ。" },
         { question: "「1 ＋ 99 ＝ 」 こたえは？", answer: "100", options: d("100", "99", "1", "0"), hint: "100。" },
-    ]
+    ];
+
+const splitIntoUnits = (problems: GeneralProblem[], unitCount: number): GeneralProblem[][] => {
+    const chunkSize = Math.ceil(problems.length / unitCount);
+    return Array.from({ length: unitCount }, (_, i) => problems.slice(i * chunkSize, (i + 1) * chunkSize));
 };
+
+const g1Term1Units = splitIntoUnits(MATH_G1_1, 6);
+const g1Term2Units = splitIntoUnits(MATH_G1_2, 6);
+const g1Term3Units = splitIntoUnits(MATH_G1_3, 6);
+
+export const MATH_G1_UNIT_DATA: Record<string, GeneralProblem[]> = {
+    MATH_G1_U01: [], // かずとすうじ（10までのかず）
+    MATH_G1_U02: [], // いくつといくつ
+    MATH_G1_U03: [], // かたちあそび
+    MATH_G1_U04: [], // なんばんめ
+    MATH_G1_U05: [], // あわせていくつ（たしざん）
+    MATH_G1_U06: [], // ふえるといくつ（たしざん）
+    MATH_G1_U07: [], // のこりはいくつ（ひきざん）
+    MATH_G1_U08: [], // ちがいはいくつ（ひきざん）
+    MATH_G1_U09: [], // 20までのかず
+    MATH_G1_U10: [], // なんじ（とけい）
+    MATH_G1_U11: [], // ながさくらべ
+    MATH_G1_U12: [], // かさくらべ
+    MATH_G1_U13: [], // えぐらふ
+    MATH_G1_U14: [], // ひょう
+    MATH_G1_U15: [], // さんかくとしかく
+    MATH_G1_U16: [], // かたちづくり
+    MATH_G1_U17: [], // 3つのかずのけいさん
+    MATH_G1_U18: [], // ぶんしょうだい
+};
+
+const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
+    switch (unitId) {
+        case 'MATH_G1_U01': {
+            const a = (n % 9) + 1;
+            return { question: `${a}の つぎの かずは？`, answer: `${a + 1}`, options: d(`${a + 1}`, `${a}`, `${a + 2}`, `${a - 1}`), hint: "1つ おおきい かずだよ。", visual: { kind: 'dots', counts: [a], labels: ["かず"] } };
+        }
+        case 'MATH_G1_U02': {
+            const a = (n % 9) + 1;
+            const b = 10 - a;
+            return { question: `10は ${a} と なに？`, answer: `${b}`, options: d(`${b}`, `${b + 1}`, `${a}`, `${Math.max(0, b - 1)}`), hint: "10に なる くみあわせを かんがえよう。", visual: { kind: 'dots', counts: [a, b], labels: ["その1", "その2"] } };
+        }
+        case 'MATH_G1_U03': {
+            const p = n % 3;
+            if (p === 0) return { question: "まるい かたちは どれ？", answer: "ボール", options: d("ボール", "ノート", "つくえ", "ほん"), hint: "ころころ ころがるよ。" };
+            if (p === 1) return { question: "しかくい かたちは どれ？", answer: "ノート", options: d("ノート", "ボール", "みかん", "ビー玉"), hint: "かどが 4つ あるよ。" };
+            return { question: "さんかくに にている ものは？", answer: "さんかく じょうぎ", options: d("さんかく じょうぎ", "ボール", "ノート", "コップ"), hint: "3つの かどが あるよ。" };
+        }
+        case 'MATH_G1_U04': {
+            const pos = (n % 5) + 1;
+            return { question: `1、2、3、4、5。 ${pos}ばんめの かずは？`, answer: `${pos}`, options: d(`${pos}`, `${Math.max(1, pos - 1)}`, `${Math.min(5, pos + 1)}`, "5"), hint: "じゅんばんに よんでみよう。", visual: { kind: 'number_sequence', values: [1, 2, 3, 4, 5] } };
+        }
+        case 'MATH_G1_U05': {
+            const a = (n % 6) + 1;
+            const b = (n % (10 - a)) + 1;
+            const sum = a + b;
+            if (n % 2 === 0) return { question: `${a} + ${b} = ?`, answer: `${sum}`, options: d(`${sum}`, `${sum + 1}`, `${sum - 1}`, `${a}`), hint: "あわせて いくつか かぞえよう。" };
+            return { question: `${a} と ${b} を あわせると？`, answer: `${sum}`, options: d(`${sum}`, `${sum + 1}`, `${sum - 1}`, `${b}`), hint: "たしざんの もんだい。" };
+        }
+        case 'MATH_G1_U06': {
+            const a = (n % 7) + 2;
+            const b = (n % 3) + 1;
+            if (n % 2 === 0) return { question: `${a}こ ありました。 ${b}こ ふえると なんこ？`, answer: `${a + b}こ`, options: d(`${a + b}こ`, `${a}こ`, `${b}こ`, `${a + b + 1}こ`), hint: "ふえると たしざんだよ。" };
+            return { question: `${a}こ に ${b}こ たすと？`, answer: `${a + b}こ`, options: d(`${a + b}こ`, `${a - b}こ`, `${b}こ`, `${a}こ`), hint: "ふえる は たす。" };
+        }
+        case 'MATH_G1_U07': {
+            const a = (n % 7) + 4;
+            const b = (n % 3) + 1;
+            if (n % 2 === 0) return { question: `${a}こ あります。 ${b}こ つかうと のこりは？`, answer: `${a - b}こ`, options: d(`${a - b}こ`, `${a + b}こ`, `${b}こ`, `${a}こ`), hint: "のこりは ひきざん。" };
+            return { question: `${a}こ から ${b}こ へると？`, answer: `${a - b}こ`, options: d(`${a - b}こ`, `${a}こ`, `${b}こ`, `${a + b}こ`), hint: "へる は ひく。" };
+        }
+        case 'MATH_G1_U08': {
+            const small = (n % 6) + 1;
+            const diff = (n % 3) + 1;
+            const big = small + diff;
+            if (n % 2 === 0) return { question: `${big}こと ${small}こ。 ちがいは なんこ？`, answer: `${diff}こ`, options: d(`${diff}こ`, `${big}こ`, `${small}こ`, `${diff + 1}こ`), hint: "おおい ほう から すくない ほうを ひくよ。" };
+            return { question: `${small}こ より ${big}こ は なんこ おおい？`, answer: `${diff}こ`, options: d(`${diff}こ`, `${big}こ`, `${small}こ`, `${diff + 1}こ`), hint: "ちがいを しらべる。" };
+        }
+        case 'MATH_G1_U09': {
+            const a = (n % 10) + 10;
+            return { question: `${a}の つぎの かずは？`, answer: `${a + 1}`, options: d(`${a + 1}`, `${a - 1}`, `${a}`, `${a + 2}`), hint: "20までの かずを よんでみよう。", visual: { kind: 'number_sequence', values: [Math.max(1, a - 1), a, a + 1, a + 2] } };
+        }
+        case 'MATH_G1_U10': {
+            const hour = (n % 12) + 1;
+            if (n % 2 === 0) {
+                return {
+                    question: `この とけいは なんじ？`,
+                    answer: `${hour}じ`,
+                    options: d(`${hour}じ`, `${(hour % 12) + 1}じ`, `${hour}じはん`, "12じ"),
+                    hint: "ながい はりが12は ちょうど。",
+                    visual: { kind: 'clock', hour, minute: 0 }
+                };
+            }
+            return {
+                question: `この とけいは なんじ？`,
+                answer: `${hour}じはん`,
+                options: d(`${hour}じはん`, `${hour}じ`, `${(hour % 12) + 1}じ`, "12じ"),
+                hint: "ながい はりが6は はん。",
+                visual: { kind: 'clock', hour, minute: 30 }
+            };
+        }
+        case 'MATH_G1_U11': {
+            const a = (n % 8) + 2;
+            const b = (n % 5) + 1;
+            const answer = a === b ? "おなじ" : `${Math.max(a, b)}cm`;
+            return { question: `${a}cm と ${b}cm。 ながいのは どっち？`, answer, options: d(answer, a === b ? `${a + 1}cm` : `${Math.min(a, b)}cm`, a === b ? `${Math.max(1, a - 1)}cm` : "おなじ", "わからない"), hint: "おおきい かずが ながいよ。", visual: { kind: 'bar_chart', values: [a, b], labels: ["A", "B"] } };
+        }
+        case 'MATH_G1_U12': {
+            const a = (n % 5) + 1;
+            const b = (n % 4) + 1;
+            return { question: `コップAは ${a}はい、コップBは ${a + b}はい。 たくさん はいるのは？`, answer: "コップB", options: d("コップB", "コップA", "おなじ", "どちらでもない"), hint: "かずが おおきい ほうが たくさん。", visual: { kind: 'bar_chart', values: [a, a + b], labels: ["A", "B"] } };
+        }
+        case 'MATH_G1_U13': {
+            const r = (n % 5) + 1;
+            const b = (n % 4) + 1;
+            const answer = r === b ? "おなじ" : (r > b ? "あか" : "あお");
+            const wrongs = ["あか", "あお", "おなじ", "わからない"].filter((label) => label !== answer).slice(0, 3);
+            return { question: `えグラフ。 あか ${r}こ、あお ${b}こ。 おおいのは？`, answer, options: d(answer, ...wrongs), hint: "かずを くらべよう。", visual: { kind: 'bar_chart', values: [r, b], labels: ["あか", "あお"] } };
+        }
+        case 'MATH_G1_U14': {
+            const cat = (n % 4) + 1;
+            return { question: `ひょう。 ねこ:${cat} いぬ:${cat + 1} うさぎ:${cat - 1}。 いちばん おおいのは？`, answer: "いぬ", options: d("いぬ", "ねこ", "うさぎ", "おなじ"), hint: "ひょうの かずを くらべるよ。", visual: { kind: 'bar_chart', values: [cat, cat + 1, cat - 1], labels: ["ねこ", "いぬ", "うさぎ"] } };
+        }
+        case 'MATH_G1_U15': {
+            if (n % 2 === 0) {
+                return { question: "この ずけいの かどは いくつ？", answer: "3つ", options: d("3つ", "4つ", "2つ", "0つ"), hint: "さんかくは 3つだよ。", visual: { kind: 'polygon', sides: 3 } };
+            }
+            return { question: "この ずけいの へんは いくつ？", answer: "4つ", options: d("4つ", "3つ", "5つ", "2つ"), hint: "しかくは 4つだよ。", visual: { kind: 'polygon', sides: 4 } };
+        }
+        case 'MATH_G1_U16': {
+            const sticks = (n % 3) + 3;
+            const ans = sticks === 3 ? "さんかく" : (sticks === 4 ? "しかく" : "ごかくけい");
+            return { question: "この ずけいの なまえは？", answer: ans, options: d(ans, "まる", "わからない", "かたちに ならない"), hint: "へんの かずと おなじだよ。", visual: { kind: 'polygon', sides: sticks } };
+        }
+        case 'MATH_G1_U17': {
+            const a = (n % 4) + 1;
+            const b = (n % 3) + 1;
+            const c = (n % 2) + 1;
+            const sum = a + b + c;
+            if (n % 2 === 0) return { question: `${a} + ${b} + ${c} = ?`, answer: `${sum}`, options: d(`${sum}`, `${sum + 1}`, `${sum - 1}`, `${a + b}`), hint: "2つずつ たしていこう。" };
+            return { question: `${a}こと ${b}こと ${c}こ。 あわせて いくつ？`, answer: `${sum}`, options: d(`${sum}`, `${a + b}`, `${b + c}`, `${sum + 1}`), hint: "じゅんに たそう。" };
+        }
+        case 'MATH_G1_U18': {
+            const a = (n % 6) + 4;
+            const b = (n % 3) + 1;
+            if (n % 3 === 0) {
+                return { question: `りんごが ${a}こ。 ${b}こ もらいました。 ぜんぶで？`, answer: `${a + b}こ`, options: d(`${a + b}こ`, `${a - b}こ`, `${b}こ`, `${a}こ`), hint: "もらうは たしざん。" };
+            }
+            if (n % 3 === 1) return { question: `あめが ${a}こ。 ${b}こ たべました。 のこりは？`, answer: `${a - b}こ`, options: d(`${a - b}こ`, `${a + b}こ`, `${a}こ`, `${b}こ`), hint: "たべると へるから ひきざん。" };
+            return { question: `えんぴつが ${a}ほん。 ${b}ほん ふえると なんぼん？`, answer: `${a + b}ほん`, options: d(`${a + b}ほん`, `${a - b}ほん`, `${a}ほん`, `${b}ほん`), hint: "ぶんしょうを しきにしよう。" };
+        }
+        default:
+            return { question: "1 + 1 = ?", answer: "2", options: d("2", "1", "3", "0"), hint: "たしざんだよ。" };
+    }
+};
+
+Object.keys(MATH_G1_UNIT_DATA).forEach((unitId) => {
+    const problems = MATH_G1_UNIT_DATA[unitId];
+    while (problems.length < 20) {
+        problems.push(makeUnitProblem(unitId, problems.length));
+    }
+});
+
+export const MATH_G1_DATA: Record<string, GeneralProblem[]> = {
+    MATH_G1_1,
+    MATH_G1_2,
+    MATH_G1_3,
+    ...MATH_G1_UNIT_DATA,
+};
+
+

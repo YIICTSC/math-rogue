@@ -164,3 +164,119 @@ export const MATH_G9_DATA: Record<string, GeneralProblem[]> = {
         { question: "2x² = 32 を解け。", answer: "x = ±4", options: d("x = ±4", "x = 4", "x = 16", "x = ±16"), hint: "x² = 16。" }
     ]
 };
+
+const splitIntoUnits = (problems: GeneralProblem[], unitCount: number): GeneralProblem[][] => {
+    const chunkSize = Math.ceil(problems.length / unitCount);
+    return Array.from({ length: unitCount }, (_, i) => problems.slice(i * chunkSize, (i + 1) * chunkSize));
+};
+
+const g9Term1Units = splitIntoUnits(MATH_G9_DATA.MATH_G9_1 ?? [], 4);
+const g9Term2Units = splitIntoUnits(MATH_G9_DATA.MATH_G9_2 ?? [], 2);
+const g9Term3Units = splitIntoUnits(MATH_G9_DATA.MATH_G9_3 ?? [], 3);
+
+export const MATH_G9_UNIT_DATA: Record<string, GeneralProblem[]> = {
+    MATH_G9_U01: [], // 式の 展開 と 因数分解
+    MATH_G9_U02: [], // 平方根
+    MATH_G9_U03: [], // 二次方程式
+    MATH_G9_U04: [], // 二次方程式の 利用
+    MATH_G9_U05: [], // 関数 y=ax^2
+    MATH_G9_U06: [], // 相似な 図形
+    MATH_G9_U07: [], // 三平方の 定理
+    MATH_G9_U08: [], // 円の 性質
+    MATH_G9_U09: [], // 標本調査
+};
+
+const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
+    switch (unitId) {
+        case 'MATH_G9_U01': {
+            const a = (n % 6) + 1;
+            const b = (n % 5) + 2;
+            if (n % 2 === 0) {
+                return { question: `(x+${a})(x+${b}) を展開せよ。`, answer: `x² + ${(a + b)}x + ${a * b}`, options: d(`x² + ${(a + b)}x + ${a * b}`, `x² + ${(a - b)}x + ${a * b}`, `x² + ${a + b}`, `x² + ${(a + b)}x - ${a * b}`), hint: "分配法則で展開。" };
+            }
+            return { question: `x² + ${(a + b)}x + ${a * b} を因数分解せよ。`, answer: `(x+${a})(x+${b})`, options: d(`(x+${a})(x+${b})`, `(x-${a})(x-${b})`, `(x+${a * b})(x+1)`, `(x+${a + b})(x+1)`), hint: "足して ${a + b}、かけて ${a * b}。" };
+        }
+        case 'MATH_G9_U02': {
+            const k = (n % 8) + 2;
+            if (n % 2 === 0) {
+                return { question: `√${k * k * 2} を簡単にせよ。`, answer: `${k}√2`, options: d(`${k}√2`, `${k * 2}`, `√${k * 2}`, `${k}√${k}`), hint: "平方数を外に出す。" };
+            }
+            return { question: `${k}√2 を 1つの根号で表すと？`, answer: `√${k * k * 2}`, options: d(`√${k * k * 2}`, `√${k * 2}`, `${k * 2}`, `√${k * k}`), hint: "係数を2乗して中に入れる。" };
+        }
+        case 'MATH_G9_U03': {
+            const p = (n % 6) + 2;
+            const q = (n % 5) + 1;
+            if (n % 2 === 0) {
+                return { question: `x² - ${(p + q)}x + ${p * q} = 0 の解は？`, answer: `x=${p}, ${q}`, options: d(`x=${p}, ${q}`, `x=-${p}, -${q}`, `x=${p + q}`, `x=${p * q}`), hint: "因数分解で解く。" };
+            }
+            return { question: `x=${p}, ${q} を解にもつ二次方程式は？`, answer: `x² - ${(p + q)}x + ${p * q} = 0`, options: d(`x² - ${(p + q)}x + ${p * q} = 0`, `x² + ${(p + q)}x + ${p * q} = 0`, `x² - ${p * q}x + ${p + q} = 0`, `x² - ${(p + q)}x - ${p * q} = 0`), hint: "(x-p)(x-q)=0 の形。" };
+        }
+        case 'MATH_G9_U04': {
+            const x = (n % 8) + 3;
+            if (n % 2 === 0) {
+                return { question: `連続する2整数の積が ${x * (x + 1)}。小さい方は？`, answer: `${x}`, options: d(`${x}`, `${x + 1}`, `${x - 1}`, `${x + 2}`), hint: "x(x+1) の形。" };
+            }
+            return { question: `連続する2整数の積が ${x * (x + 1)}。大きい方は？`, answer: `${x + 1}`, options: d(`${x + 1}`, `${x}`, `${x + 2}`, `${x - 1}`), hint: "小さい方が ${x} なら次は ${x + 1}。" };
+        }
+        case 'MATH_G9_U05': {
+            const a = (n % 5) + 1;
+            const x = (n % 4) + 1;
+            if (n % 2 === 0) {
+                return { question: `y=${a}x² で x=${x} のとき y は？`, answer: `${a * x * x}`, options: d(`${a * x * x}`, `${a * x}`, `${x * x}`, `${a + x}`), hint: "xを代入。", visual: { kind: 'parabola', a, markX: x } };
+            }
+            return { question: `y=${a}x² のグラフで x が 1 から 2 へ増えるとき、y の増加量は？`, answer: `${a * 4 - a}`, options: d(`${a * 4 - a}`, `${a * 4}`, `${a}`, `${a * 2}`), hint: "y(2)-y(1) を求める。", visual: { kind: 'parabola', a, markX: 2 } };
+        }
+        case 'MATH_G9_U06': {
+            const p = (n % 4) + 1;
+            const q = p + 1;
+            if (n % 2 === 0) {
+                return { question: `相似比 ${p}:${q} のとき面積比は？`, answer: `${p * p}:${q * q}`, options: d(`${p * p}:${q * q}`, `${p}:${q}`, `${p * 2}:${q * 2}`, `${p * p * p}:${q * q * q}`), hint: "面積比は相似比の2乗。", visual: { kind: 'polygon', sides: 3, labels: ['A', 'B', 'C'] } };
+            }
+            return { question: `相似比 ${p}:${q} のとき体積比は？`, answer: `${p * p * p}:${q * q * q}`, options: d(`${p * p * p}:${q * q * q}`, `${p * p}:${q * q}`, `${p}:${q}`, `${p + q}:${q}`), hint: "体積比は相似比の3乗。", visual: { kind: 'polygon', sides: 3, labels: ['P', 'Q', 'R'] } };
+        }
+        case 'MATH_G9_U07': {
+            const a = (n % 5) + 3;
+            const b = (n % 4) + 4;
+            const c2 = a * a + b * b;
+            if (n % 2 === 0) {
+                return { question: `直角三角形の2辺が ${a}, ${b}。斜辺の2乗は？`, answer: `${c2}`, options: d(`${c2}`, `${a + b}`, `${a * b}`, `${c2 + 1}`), hint: "a²+b²。", visual: { kind: 'angle', degrees: 90, rightAngleMark: true, labels: ['a', 'b'] } };
+            }
+            return { question: `直角三角形の斜辺の2乗が ${c2}、1辺が ${a}。もう1辺の2乗は？`, answer: `${b * b}`, options: d(`${b * b}`, `${c2}`, `${a * a}`, `${a + b}`), hint: "c²-a² を求める。", visual: { kind: 'angle', degrees: 90, rightAngleMark: true, labels: ['a', 'c'] } };
+        }
+        case 'MATH_G9_U08': {
+            const angle = ((n % 8) + 1) * 15;
+            if (n % 2 === 0) {
+                return { question: `同じ弧に対する中心角が ${angle * 2}度。円周角は？`, answer: `${angle}度`, options: d(`${angle}度`, `${angle * 2}度`, `${Math.floor(angle / 2)}度`, `90度`), hint: "円周角は中心角の半分。", visual: { kind: 'circle', showChord: true, centralAngle: angle * 2, inscribedAngle: angle, labels: ['A', 'B', 'P'] } };
+            }
+            return { question: `同じ弧に対する円周角が ${angle}度。中心角は？`, answer: `${angle * 2}度`, options: d(`${angle * 2}度`, `${angle}度`, `${Math.floor(angle / 2)}度`, `180度`), hint: "中心角は円周角の2倍。", visual: { kind: 'circle', showChord: true, centralAngle: angle * 2, inscribedAngle: angle, labels: ['A', 'B', 'P'] } };
+        }
+        case 'MATH_G9_U09': {
+            const sample = (n % 5) + 10;
+            const hit = (n % 4) + 2;
+            const p = n % 4;
+            if (p === 0) {
+                return { question: `標本 ${sample}個中 ${hit}個が該当。割合は？`, answer: `${hit}/${sample}`, options: d(`${hit}/${sample}`, `${sample}/${hit}`, `${hit + sample}`, `${sample - hit}`), hint: "該当数/標本数。" };
+            }
+            if (p === 1) {
+                return { question: `標本 ${sample}個中 ${hit}個が該当。百分率は？`, answer: `${Math.round((hit / sample) * 100)}%`, options: d(`${Math.round((hit / sample) * 100)}%`, `${hit * sample}%`, `${sample - hit}%`, `${hit}%`), hint: "割合×100。" };
+            }
+            if (p === 2) {
+                const miss = sample - hit;
+                return { question: `標本 ${sample}個中 ${hit}個が該当。該当しない個数は？`, answer: `${miss}個`, options: d(`${miss}個`, `${sample + hit}個`, `${hit}個`, `${sample}個`), hint: "全体-該当数。" };
+            }
+            return { question: `標本調査で 母集団を推定するとき大切なのは？`, answer: "かたよりのない標本", options: d("かたよりのない標本", "できるだけ少ない標本", "同じ人だけの標本", "結果が高い標本"), hint: "代表性が重要。" };
+        }
+        default:
+            return { question: "2 + 3 = ?", answer: "5", options: d("5", "4", "6", "7"), hint: "基本。" };
+    }
+};
+
+Object.keys(MATH_G9_UNIT_DATA).forEach((unitId) => {
+    const problems = MATH_G9_UNIT_DATA[unitId];
+    while (problems.length < 20) {
+        problems.push(makeUnitProblem(unitId, problems.length));
+    }
+});
+
+Object.assign(MATH_G9_DATA, MATH_G9_UNIT_DATA);
+

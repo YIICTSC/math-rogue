@@ -1,9 +1,8 @@
 
 import { GeneralProblem, d } from './utils';
 
-export const MATH_G6_DATA: Record<string, GeneralProblem[]> = {
-    // --- 6年生 1学期: 対称・文字と式・分数の掛け算割り算 (50問) ---
-    MATH_G6_1: [
+// --- 6年生 1学期: 対称・文字と式・分数の掛け算割り算 (50問) ---
+const MATH_G6_1: GeneralProblem[] = [
         { question: "1つの直線を折り目にして重ねた時、ぴったり重なる図形を？", answer: "線対称（せんたいしょう）な図形", options: d("線対称", "点対称", "非対称", "正多角形"), hint: "鏡（かがみ）あわせのような形だよ。" },
         { question: "線対称な図形で、折り目にした直線を何という？", answer: "対称の軸（じく）", options: d("対称の軸", "対称の中心", "対角線", "底辺"), hint: "図形を半分に分ける線だね。" },
         { question: "ある点を中心に180度回すと重なる図形を？", answer: "点対称（てんたいしょう）な図形", options: d("点対称", "線対称", "拡大図", "縮図"), hint: "逆さまにしても同じ形に見えるよ。" },
@@ -52,10 +51,10 @@ export const MATH_G6_DATA: Record<string, GeneralProblem[]> = {
         { question: "点対称な図形で、中心を通る直線で分けると、2つの図形は？", answer: "合同（ごうどう）になる", options: d("合同になる", "面積が違う", "形が違う", "重ならない"), hint: "ぴったり重なるよ。" },
         { question: "「x ＋ x ＋ x」 を文字と式で表すと？", answer: "3x", options: d("3x", "x³", "xxx", "x＋3"), hint: "x が 3つ あるね。" },
         { question: "「x × x × x」 を文字と式で表すと？", answer: "x³（xの3乗）", options: d("x³", "3x", "xxx", "3＋x"), hint: "同じ数を3回かけるよ。" },
-    ],
+    ];
 
-    // --- 6年生 2学期: 比・拡大縮小・円の面積・比例反比例 (50問) ---
-    MATH_G6_2: [
+// --- 6年生 2学期: 比・拡大縮小・円の面積・比例反比例 (50問) ---
+const MATH_G6_2: GeneralProblem[] = [
         { question: "「比（ひ）」の問題。 2：3 と同じ比はどれ？", answer: "4：6", options: d("4：6", "1：2", "3：2", "5：6"), hint: "両方に同じ数をかけても比は変わらない。" },
         { question: "比を簡単にすること。 15：10 を簡単にすると？", answer: "3：2", options: d("3：2", "5：2", "1.5：1", "30：20"), hint: "最大公約数の 5 で割ろう。" },
         { question: "比の値（あたい）。 2：5 の比の値は？", answer: "2/5 (0.4)", options: d("2/5", "5/2", "7", "10"), hint: "前 ÷ 後 で求められるよ。" },
@@ -104,10 +103,10 @@ export const MATH_G6_DATA: Record<string, GeneralProblem[]> = {
         { question: "拡大図を描くとき、対応する「辺の長さ」の比は？", answer: "すべて等しい", options: d("すべて等しい", "バラバラ", "足して同じ", "角度と同じ"), hint: "これがズレると形が歪（ゆが）んじゃう。" },
         { question: "「円周」を求める公式は？", answer: "直径 × 円周率", options: d("直径 × 円周率", "半径 × 円周率", "半径 × 半径 × 円周率", "底辺 × 高さ"), hint: "長さのことだよ。" },
         { question: "10km の 道のりを 時速 x km で走ったときにかかる時間 y。 これは？", answer: "反比例", options: d("反比例", "比例", "どちらでもない", "引き算"), hint: "y ＝ 10 ÷ x。" },
-    ],
+    ];
 
-    // --- 6年生 3学期: 資料の調べ方・並べ方組み合わせ・まとめ (50問) ---
-    MATH_G6_3: [
+// --- 6年生 3学期: 資料の調べ方・並べ方組み合わせ・まとめ (50問) ---
+const MATH_G6_3: GeneralProblem[] = [
         { question: "「資料の調べ方」。 柱状のグラフを何という？", answer: "ヒストグラム", options: d("ヒストグラム", "折れ線グラフ", "円グラフ", "散布図"), hint: "データの散らばり（分布）を見るのに便利。" },
         { question: "資料を整理するための、数値をドット（点）で表した図は？", answer: "ドットプロット", options: d("ドットプロット", "棒グラフ", "数直線", "絵グラフ"), hint: "一つ一つのデータをポチポチ打つよ。" },
         { question: "平均値（へいきんち）の求め方は？", answer: "合計 ÷ 個数", options: d("合計 ÷ 個数", "最大 － 最小", "真ん中の値", "一番多い値"), hint: "小学校で何度もやったね。" },
@@ -156,5 +155,240 @@ export const MATH_G6_DATA: Record<string, GeneralProblem[]> = {
         { question: "算数で一番大切だと思うことは？", answer: "きみの 答え", options: d("計算力", "考える力", "粘り強さ", "全部！"), hint: "算数はすべての科学の基礎（きそ）だよ。" },
         { question: "「x ＝ 2, y ＝ 3」 のとき、 「x ＋ 2y」 の値は？", answer: "8", options: d("8", "7", "5", "10"), hint: "2 ＋ 2×3 ＝ ?" },
         { question: "「a ＝ 5」 のとき、 「a² 」 の値は？", answer: "25", options: d("25", "10", "55", "5"), hint: "5 × 5 ＝ ?" },
-    ]
+    ];
+
+const splitIntoUnitsByCounts = (problems: GeneralProblem[], counts: number[]): GeneralProblem[][] => {
+    const totalWeight = counts.reduce((s, c) => s + c, 0);
+    const totalProblems = problems.length;
+    const sizes = counts.map((c) => Math.floor((totalProblems * c) / totalWeight));
+    let rest = totalProblems - sizes.reduce((s, n) => s + n, 0);
+    let i = 0;
+    while (rest > 0) {
+        sizes[i % sizes.length] += 1;
+        rest -= 1;
+        i += 1;
+    }
+
+    const out: GeneralProblem[][] = [];
+    let start = 0;
+    sizes.forEach((size) => {
+        out.push(problems.slice(start, start + size));
+        start += size;
+    });
+    return out;
 };
+
+const g6Term1Units = splitIntoUnitsByCounts(MATH_G6_1, [1, 1, 1, 1]);
+const g6Term2Units = splitIntoUnitsByCounts(MATH_G6_2, [1, 1, 1, 1]);
+const g6Term3Units = splitIntoUnitsByCounts(MATH_G6_3, [1, 1, 1, 1, 1]);
+
+export const MATH_G6_UNIT_DATA: Record<string, GeneralProblem[]> = {
+    MATH_G6_U01: [], // 対称な 図形
+    MATH_G6_U02: [], // 文字 と 式
+    MATH_G6_U03: [], // 分数の かけ算
+    MATH_G6_U04: [], // 分数の わり算
+    MATH_G6_U05: [], // 比 と その 利用
+    MATH_G6_U06: [], // 比例 と 反比例
+    MATH_G6_U07: [], // 拡大図 と 縮図
+    MATH_G6_U08: [], // 円の 面積
+    MATH_G6_U09: [], // 角柱 と 円柱の 体積
+    MATH_G6_U10: [], // およその 面積 と 体積
+    MATH_G6_U11: [], // 場合の 数
+    MATH_G6_U12: [], // 資料の 調べ方
+    MATH_G6_U13: [], // 算数の まとめ
+};
+
+const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
+    switch (unitId) {
+        case 'MATH_G6_U01':
+            return n % 2 === 0
+                ? { question: "このような図形で、折り目になる線は？", answer: "対称の軸", options: d("対称の軸", "対称の中心", "対角線", "底辺"), hint: "鏡写しになる線。", visual: { kind: 'polygon', sides: 4 } }
+                : { question: "点対称の図形は何度回すと重なる？", answer: "180度", options: d("180度", "90度", "360度", "45度"), hint: "半回転で重なる。", visual: { kind: 'polygon', sides: 4 } };
+        case 'MATH_G6_U02': {
+            const x = (n % 8) + 2;
+            const y = x + (n % 5) + 1;
+            if (n % 2 === 0) {
+                return { question: `□ + ${x} = ${x + y}。□ は？`, answer: `${y}`, options: d(`${y}`, `${x}`, `${x + y}`, `${y + 1}`), hint: "逆算しよう。" };
+            }
+            return { question: `${x} × □ = ${x * y}。□ は？`, answer: `${y}`, options: d(`${y}`, `${x}`, `${x + y}`, `${y + 1}`), hint: "かけ算の 逆算をする。" };
+        }
+        case 'MATH_G6_U03': {
+            const a = (n % 6) + 1;
+            const b = (n % 7) + 2;
+            const c = (n % 5) + 1;
+            const dnm = (n % 8) + 3;
+            const p = n % 4;
+            if (p === 0) {
+                return {
+                    question: `${a}/${b} × ${c}/${dnm} = ?`,
+                    answer: `${a * c}/${b * dnm}`,
+                    options: d(`${a * c}/${b * dnm}`, `${a + c}/${b + dnm}`, `${a * dnm}/${b * c}`, `${a}/${b}`),
+                    hint: "分子どうし、分母どうし。",
+                    visual: { kind: 'fraction_operation', left: { n: a, d: b }, right: { n: c, d: dnm }, op: '×' }
+                };
+            }
+            if (p === 1) {
+                return {
+                    question: `${a}/${b} の 分子は？`,
+                    answer: `${a}`,
+                    options: d(`${a}`, `${b}`, `${a + b}`, `${a * b}`),
+                    hint: "上が分子、下が分母。",
+                    visual: { kind: 'fraction', numerator: a, denominator: b }
+                };
+            }
+            if (p === 2) {
+                return {
+                    question: `${a}/${b} の 分母は？`,
+                    answer: `${b}`,
+                    options: d(`${b}`, `${a}`, `${a + b}`, `${b - 1}`),
+                    hint: "下が分母。",
+                    visual: { kind: 'fraction', numerator: a, denominator: b }
+                };
+            }
+            return {
+                question: `${a}/${b} × 1 = ?`,
+                answer: `${a}/${b}`,
+                options: d(`${a}/${b}`, `${a}/${b + 1}`, `${a + 1}/${b}`, `1/${b}`),
+                hint: "1をかけても変わらない。",
+                visual: { kind: 'fraction_operation', left: { n: a, d: b }, right: { n: 1, d: 1 }, op: '×' }
+            };
+        }
+        case 'MATH_G6_U04': {
+            const a = (n % 6) + 2;
+            const b = (n % 7) + 3;
+            const c = (n % 5) + 1;
+            const dnm = (n % 4) + 2;
+            const p = n % 4;
+            if (p === 0) {
+                return {
+                    question: `${a}/${b} ÷ ${c}/${dnm} = ?`,
+                    answer: `${a * dnm}/${b * c}`,
+                    options: d(`${a * dnm}/${b * c}`, `${a * c}/${b * dnm}`, `${a + dnm}/${b + c}`, `${a}/${b}`),
+                    hint: "後ろをひっくり返してかける。",
+                    visual: { kind: 'fraction_operation', left: { n: a, d: b }, right: { n: c, d: dnm }, op: '÷' }
+                };
+            }
+            if (p === 1) {
+                return {
+                    question: `${c}/${dnm} を ひっくり返すと？`,
+                    answer: `${dnm}/${c}`,
+                    options: d(`${dnm}/${c}`, `${c}/${dnm}`, `${c + dnm}/${dnm}`, `${dnm - c}/${c}`),
+                    hint: "逆数にする。",
+                    visual: { kind: 'fraction', numerator: c, denominator: dnm }
+                };
+            }
+            if (p === 2) {
+                return {
+                    question: `${a}/${b} ÷ 1 = ?`,
+                    answer: `${a}/${b}`,
+                    options: d(`${a}/${b}`, `${b}/${a}`, `1/${b}`, `${a * b}/1`),
+                    hint: "1で割っても変わらない。",
+                    visual: { kind: 'fraction_operation', left: { n: a, d: b }, right: { n: 1, d: 1 }, op: '÷' }
+                };
+            }
+            return {
+                question: `分数のわり算で 先にすることは？`,
+                answer: "わる数をひっくり返す",
+                options: d("わる数をひっくり返す", "たす", "分母をたす", "分子をひく"),
+                hint: "逆数にしてかけ算。",
+                visual: { kind: 'fraction_operation', left: { n: a, d: b }, right: { n: c, d: dnm }, op: '÷' }
+            };
+        }
+        case 'MATH_G6_U05': {
+            const left = (n % 5) + 1;
+            const right = (n % 4) + 2;
+            const mul = (n % 4) + 2;
+            if (n % 2 === 0) {
+                return { question: `${left}:${right} と同じ比は？`, answer: `${left * mul}:${right * mul}`, options: d(`${left * mul}:${right * mul}`, `${left + mul}:${right + mul}`, `${left}:${right * mul}`, `${left * mul}:${right}`), hint: "両方に同じ数をかける。" };
+            }
+            return { question: `${left * mul}:${right * mul} を いちばん かんたんな比にすると？`, answer: `${left}:${right}`, options: d(`${left}:${right}`, `${left * mul}:${right * mul}`, `${left + right}:${right}`, `${left}:${right + mul}`), hint: "両方を 同じ数で わる。" };
+        }
+        case 'MATH_G6_U06': {
+            const x = (n % 6) + 1;
+            if (n % 2 === 0) {
+                return { question: `比例で y=4x。x=${x} のとき y=?`, answer: `${4 * x}`, options: d(`${4 * x}`, `${x + 4}`, `${x * x}`, `${x}`), hint: "比例は y=ax。" };
+            }
+            return { question: `反比例で x×y=12。x=${x} のとき y=?`, answer: `${12 / x}`, options: d(`${12 / x}`, `${4 * x}`, `${x + 12}`, `${x}`), hint: "反比例は x×y が いつも同じ。" };
+        }
+        case 'MATH_G6_U07': {
+            const scale = (n % 4) + 2;
+            const len = (n % 6) + 3;
+            if (n % 2 === 0) {
+                return { question: `拡大率${scale}倍。元の長さ${len}cm の対応辺は？`, answer: `${len * scale}cm`, options: d(`${len * scale}cm`, `${len / scale}cm`, `${len + scale}cm`, `${scale}cm`), hint: "長さは倍率でかける。", visual: { kind: 'polygon', sides: 3 } };
+            }
+            return { question: `縮尺 1:${scale}。実際の長さが ${len * scale}cm のとき、図の長さは？`, answer: `${len}cm`, options: d(`${len}cm`, `${len * scale}cm`, `${scale}cm`, `${len + scale}cm`), hint: "縮図は 実際の長さを わる。", visual: { kind: 'polygon', sides: 3 } };
+        }
+        case 'MATH_G6_U08': {
+            const r = (n % 9) + 1;
+            if (n % 2 === 0) {
+                return { question: `この円の半径が${r}cm。面積（π=3.14）は？`, answer: `${(r * r * 3.14).toFixed(2)}cm2`, options: d(`${(r * r * 3.14).toFixed(2)}cm2`, `${(2 * r * 3.14).toFixed(2)}cm2`, `${(r * 3.14).toFixed(2)}cm2`, `${(r * r).toFixed(2)}cm2`), hint: "半径×半径×3.14。", visual: { kind: 'circle', showRadius: true } };
+            }
+            return { question: `この円の直径が${r * 2}cm。面積（π=3.14）は？`, answer: `${(r * r * 3.14).toFixed(2)}cm2`, options: d(`${(r * r * 3.14).toFixed(2)}cm2`, `${(r * 2 * 3.14).toFixed(2)}cm2`, `${(r * 2 * r * 2 * 3.14).toFixed(2)}cm2`, `${(r * r).toFixed(2)}cm2`), hint: "まず 半径に なおす。", visual: { kind: 'circle', showRadius: true } };
+        }
+        case 'MATH_G6_U09': {
+            const base = (n % 8) + 5;
+            const h = (n % 6) + 2;
+            if (n % 2 === 0) {
+                return { question: `底面積${base}cm2、高さ${h}cm の角柱/円柱の体積は？`, answer: `${base * h}cm3`, options: d(`${base * h}cm3`, `${base + h}cm3`, `${base * 2 + h}cm3`, `${h}cm3`), hint: "底面積×高さ。", visual: { kind: n % 2 === 0 ? 'cube' : 'circle' } };
+            }
+            return { question: `体積が ${base * h}cm3、高さが ${h}cm の角柱/円柱。底面積は？`, answer: `${base}cm2`, options: d(`${base}cm2`, `${base * h}cm2`, `${h}cm2`, `${base + h}cm2`), hint: "体積÷高さ。", visual: { kind: n % 2 === 0 ? 'cube' : 'circle' } };
+        }
+        case 'MATH_G6_U10': {
+            const x = 100 + n * 13;
+            const rounded = Math.round(x / 10) * 10;
+            if (n % 2 === 0) {
+                return { question: `${x} を十の位までのおよその数にすると？`, answer: `${rounded}`, options: d(`${rounded}`, `${Math.floor(x / 10) * 10}`, `${Math.ceil(x / 10) * 10}`, `${x}`), hint: "一の位で四捨五入。" };
+            }
+            return { question: `${x} は およそ ${rounded} と いえる？`, answer: "はい", options: d("はい", "いいえ", "同じ", "わからない"), hint: "十の位までの がい数に した数を 見よう。" };
+        }
+        case 'MATH_G6_U11': {
+            const nItems = (n % 4) + 3;
+            let ways = 1;
+            for (let k = 2; k <= nItems; k++) ways *= k;
+            if (n % 2 === 0) {
+                return { question: `${nItems}人 を1列に並べると何通り？`, answer: `${ways}通り`, options: d(`${ways}通り`, `${nItems * nItems}通り`, `${nItems + 1}通り`, `${ways / 2}通り`), hint: "順列の基本 n×(n-1)×..." };
+            }
+            return { question: `赤と青の2しゅるいのき を ${nItems}回 えらぶ。全部で何通り？`, answer: `${2 ** nItems}通り`, options: d(`${2 ** nItems}通り`, `${ways}通り`, `${nItems * 2}通り`, `${nItems}通り`), hint: "毎回 2通り ずつ。" };
+        }
+        case 'MATH_G6_U12': {
+            const a = (n % 5) * 10 + 50;
+            const b = (n % 4) * 10 + 40;
+            const c = (n % 3) * 10 + 30;
+            const avg = Math.floor((a + b + c) / 3);
+            const p = n % 4;
+            if (p === 0) {
+                return { question: `${a}, ${b}, ${c} の平均は？`, answer: `${avg}`, options: d(`${avg}`, `${a + b + c}`, `${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`), hint: "合計÷個数。" };
+            }
+            if (p === 1) {
+                return { question: `${a}, ${b}, ${c} の最大値は？`, answer: `${Math.max(a, b, c)}`, options: d(`${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`, `${avg}`, `${a + b + c}`), hint: "いちばん大きい値。" };
+            }
+            if (p === 2) {
+                return { question: `${a}, ${b}, ${c} の最小値は？`, answer: `${Math.min(a, b, c)}`, options: d(`${Math.min(a, b, c)}`, `${Math.max(a, b, c)}`, `${avg}`, `${a + b + c}`), hint: "いちばん小さい値。" };
+            }
+            return { question: `${a}, ${b}, ${c} の範囲（最大-最小）は？`, answer: `${Math.max(a, b, c) - Math.min(a, b, c)}`, options: d(`${Math.max(a, b, c) - Math.min(a, b, c)}`, `${a + b + c}`, `${avg}`, `${Math.max(a, b, c)}`), hint: "ばらつきをみる指標。" };
+        }
+        case 'MATH_G6_U13': {
+            const a = (n % 8) + 2;
+            const b = (n % 5) + 3;
+            const c = (n % 4) + 2;
+            return { question: `まとめ：${a} + ${b} × ${c} = ?`, answer: `${a + b * c}`, options: d(`${a + b * c}`, `${(a + b) * c}`, `${a * b + c}`, `${a + b + c}`), hint: "計算順序の確認。" };
+        }
+        default:
+            return { question: "6 + 4 = ?", answer: "10", options: d("10", "9", "11", "8"), hint: "たし算。" };
+    }
+};
+
+Object.keys(MATH_G6_UNIT_DATA).forEach((unitId) => {
+    const problems = MATH_G6_UNIT_DATA[unitId];
+    while (problems.length < 20) {
+        problems.push(makeUnitProblem(unitId, problems.length));
+    }
+});
+
+export const MATH_G6_DATA: Record<string, GeneralProblem[]> = {
+    MATH_G6_1,
+    MATH_G6_2,
+    MATH_G6_3,
+    ...MATH_G6_UNIT_DATA,
+};
+

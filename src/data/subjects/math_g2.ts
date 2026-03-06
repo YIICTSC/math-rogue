@@ -1,8 +1,7 @@
 
 import { GeneralProblem, d } from './utils';
 
-export const MATH_G2_DATA: Record<string, GeneralProblem[]> = {
-    MATH_G2_1: [
+const MATH_G2_1: GeneralProblem[] = [
         { question: "「25 ＋ 38」のひっ算。一のくらいの 計算は？", answer: "5 ＋ 8 ＝ 13", options: d("5 ＋ 8 ＝ 13", "2 ＋ 3 ＝ 5", "5 － 8", "1 ＋ 2 ＋ 3"), hint: "まずは 右のはし（一のくらい）から 計算するよ。" },
         { question: "長さの たんい。10mm（ミリメートル）は 何cm？", answer: "1cm", options: d("1cm", "10cm", "100cm", "0.1cm"), hint: "ものさしの 小さい 1めもりが 1mmだよ。" },
         { question: "1メートル(m)は 何センチメートル(cm)？", answer: "100cm", options: d("100cm", "10cm", "1000cm", "1cm"), hint: "大きな ものさし 1本分くらいだね。" },
@@ -23,8 +22,9 @@ export const MATH_G2_DATA: Record<string, GeneralProblem[]> = {
         { question: "「67 － 24 ＝ 」 答えは？", answer: "43", options: d("43", "41", "33", "53"), hint: "一のくらいから ひこう。" },
         { question: "「48 ＋ 16 ＝ 」 くりあがりは ある？", answer: "ある", options: d("ある", "ない", "わからない", "半分だけ"), hint: "8 ＋ 6 は 10より 大きいかな？" },
         { question: "「50 － 18 ＝ 」 答えは？", answer: "32", options: d("32", "42", "38", "48"), hint: "十のくらいから 1かりてくるよ。" },
-    ],
-    MATH_G2_2: [
+    ];
+
+const MATH_G2_2: GeneralProblem[] = [
         { question: "九九。 3 × 6 ＝ ？", answer: "18", options: d("18", "15", "21", "12"), hint: "さぶろく...？" },
         { question: "九九。 4 × 8 ＝ ？", answer: "32", options: d("32", "36", "28", "40"), hint: "しは...？" },
         { question: "九九。 6 × 7 ＝ ？", answer: "42", options: d("42", "36", "48", "49"), hint: "ろくしち...？" },
@@ -45,8 +45,9 @@ export const MATH_G2_DATA: Record<string, GeneralProblem[]> = {
         { question: "1000は 10が なにこ？", answer: "100こ", options: d("100こ", "10こ", "1000こ", "1こ"), hint: "とっても たくさん！" },
         { question: "「705」の 読み方は？", answer: "ななひゃくご", options: d("ななひゃくご", "ななじゅうご", "ななひゃくじゅうご", "ななご"), hint: "十のくらいは 「れい」だね。" },
         { question: "九九。 2 × 7 ＝ ？", answer: "14", options: d("14", "16", "12", "18"), hint: "にし...？" },
-    ],
-    MATH_G2_3: [
+    ];
+
+const MATH_G2_3: GeneralProblem[] = [
         { question: "「1000 － 400 ＝ 」 答えは？", answer: "600", options: d("600", "1400", "400", "0"), hint: "100が 10こ から 4こ ひく。" },
         { question: "5000 と 300 と 20 と 7 で？", answer: "5327", options: d("5327", "5000327", "532", "50327"), hint: "くらいの じゅんばんに ならべよう。" },
         { question: "「150 ＋ 70 ＝ 」 答えは？", answer: "220", options: d("220", "210", "120", "1570"), hint: "15 ＋ 7 は？" },
@@ -67,5 +68,165 @@ export const MATH_G2_DATA: Record<string, GeneralProblem[]> = {
         { question: "直角三角形（ちょっかくさんかくけい）には、直角が いくつある？", answer: "1つ", options: d("1つ", "2つ", "3つ", "ない"), hint: "「直角」が あるから その なまえだよ。" },
         { question: "長方形（ちょうほうけい）には、直角が いくつある？", answer: "4つ", options: d("4つ", "2つ", "0つ", "3つ"), hint: "ぜんぶの かどが 直角だよ。" },
         { question: "10円玉が 100こ あると、ぜんぶで いくら？", answer: "1000円", options: d("1000円", "100円", "10000円", "10円"), hint: "10 × 100 ＝ ?" },
-    ]
+    ];
+
+const splitIntoUnits = (problems: GeneralProblem[], unitCount: number): GeneralProblem[][] => {
+    const chunkSize = Math.ceil(problems.length / unitCount);
+    return Array.from({ length: unitCount }, (_, i) => problems.slice(i * chunkSize, (i + 1) * chunkSize));
+};
+
+const g2Term1Units = splitIntoUnits(MATH_G2_1, 4);
+const g2Term2Units = splitIntoUnits(MATH_G2_2, 4);
+const g2Term3Units = splitIntoUnits(MATH_G2_3, 4);
+
+export const MATH_G2_UNIT_DATA: Record<string, GeneralProblem[]> = {
+    MATH_G2_U01: [], // 表 と グラフ
+    MATH_G2_U02: [], // たし算（2けた＋2けた）
+    MATH_G2_U03: [], // ひき算（2けた−2けた）
+    MATH_G2_U04: [], // 長さ（ものさし）
+    MATH_G2_U05: [], // 100までの 数
+    MATH_G2_U06: [], // かさ（リットル・デシリットル）
+    MATH_G2_U07: [], // 時こく と 時かん
+    MATH_G2_U08: [], // 3けたの 数
+    MATH_G2_U09: [], // かけ算（かけ算のいみ）
+    MATH_G2_U10: [], // かけ算（九九）
+    MATH_G2_U11: [], // はこの 形
+    MATH_G2_U12: [], // ぶんしょうだい
+};
+
+const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
+    switch (unitId) {
+        case 'MATH_G2_U01': {
+            const a = (n % 6) + 2;
+            const b = (n % 5) + 1;
+            const c = (n % 4) + 1;
+            const p = n % 4;
+            if (p === 0) {
+                const answer = a === b ? "おなじ" : (a > b ? "あか" : "あお");
+                const wrongs = ["あか", "あお", "おなじ", "わからない"].filter((label) => label !== answer).slice(0, 3);
+                return { question: `ぼうグラフで いちばん おおいのは？`, answer, options: d(answer, ...wrongs), hint: "たかい ぼうを みよう。", visual: { kind: 'bar_chart', values: [a, b], labels: ["あか", "あお"] } };
+            }
+            if (p === 1) {
+                return { question: `あか と あおを あわせると いくつ？`, answer: `${a + b}`, options: d(`${a + b}`, `${a - b}`, `${a + b + 1}`, `${a}`), hint: "たしざんで もとめる。", visual: { kind: 'bar_chart', values: [a, b], labels: ["あか", "あお"] } };
+            }
+            if (p === 2) {
+                const min = Math.min(a, b, c);
+                const winners = [["あか", a], ["あお", b], ["みどり", c]].filter(([, v]) => v === min).map(([label]) => label);
+                const answer = winners.length === 1 ? winners[0] : "おなじ";
+                const wrongs = ["あか", "あお", "みどり", "おなじ"].filter((label) => label !== answer).slice(0, 3);
+                return { question: `みどりは ${c}こ。 いちばん すくない いろは？`, answer, options: d(answer, ...wrongs), hint: "ひくい ぼうを さがそう。", visual: { kind: 'bar_chart', values: [a, b, c], labels: ["あか", "あお", "みどり"] } };
+            }
+            return { question: `あおは あかより いくつ ちがう？`, answer: `${Math.abs(a - b)}`, options: d(`${Math.abs(a - b)}`, `${a + b}`, `${Math.max(a, b)}`, `${Math.min(a, b)}`), hint: "おおいほう と すくないほう の さ。", visual: { kind: 'bar_chart', values: [a, b], labels: ["あか", "あお"] } };
+        }
+        case 'MATH_G2_U02': {
+            const a = 20 + (n % 60);
+            const b = 10 + (n % 30);
+            const s = a + b;
+            if (n % 3 === 0) return { question: `${a} + ${b} = ?`, answer: `${s}`, options: d(`${s}`, `${s + 1}`, `${s - 1}`, `${a}`), hint: "2けたどうしの たし算だよ。" };
+            if (n % 3 === 1) return { question: `${a} に ${b} を たすと？`, answer: `${s}`, options: d(`${s}`, `${s + 10}`, `${s - 10}`, `${b}`), hint: "くりあがりにも 気をつけよう。" };
+            return { question: `こたえが ${s} に なる しきは？`, answer: `${a} + ${b}`, options: d(`${a} + ${b}`, `${a} + ${b + 1}`, `${a - 1} + ${b}`, `${a} - ${b}`), hint: "しきを えらぼう。" };
+        }
+        case 'MATH_G2_U03': {
+            const b = 10 + (n % 30);
+            const a = b + 20 + (n % 20);
+            const dff = a - b;
+            if (n % 3 === 0) return { question: `${a} - ${b} = ?`, answer: `${dff}`, options: d(`${dff}`, `${dff + 1}`, `${dff - 1}`, `${a}`), hint: "2けたどうしの ひき算だよ。" };
+            if (n % 3 === 1) return { question: `${a} から ${b} を ひくと？`, answer: `${dff}`, options: d(`${dff}`, `${a + b}`, `${b}`, `${dff + 10}`), hint: "くりさがりにも 気をつけよう。" };
+            return { question: `こたえが ${dff} に なる しきは？`, answer: `${a} - ${b}`, options: d(`${a} - ${b}`, `${a} + ${b}`, `${b} - ${a}`, `${a} - ${b + 1}`), hint: "しきを えらぼう。" };
+        }
+        case 'MATH_G2_U04': {
+            const a = (n % 9) + 1;
+            const b = (n % 8) + 2;
+            const answer = a === b ? "おなじ" : `${Math.max(a, b)}cm`;
+            return { question: `${a}cm と ${b}cm。 ながいのは？`, answer, options: d(answer, a === b ? `${a + 1}cm` : `${Math.min(a, b)}cm`, a === b ? `${Math.max(1, a - 1)}cm` : "おなじ", "わからない"), hint: "ものさしで くらべる イメージ。" };
+        }
+        case 'MATH_G2_U05': {
+            const a = 10 + (n % 90);
+            if (n % 2 === 0) return { question: `${a}の つぎの かずは？`, answer: `${a + 1}`, options: d(`${a + 1}`, `${a}`, `${a - 1}`, `${a + 2}`), hint: "100までの かずを ならべよう。" };
+            return { question: `${a}の まえの かずは？`, answer: `${a - 1}`, options: d(`${a - 1}`, `${a}`, `${a + 1}`, `${a - 2}`), hint: "ひとつ まえを かんがえよう。" };
+        }
+        case 'MATH_G2_U06': {
+            const dl = (n % 9) + 1;
+            if (n % 2 === 0) return { question: `${dl}dL は なんmL？`, answer: `${dl * 100}mL`, options: d(`${dl * 100}mL`, `${dl * 10}mL`, `${dl}mL`, `${dl * 1000}mL`), hint: "1dL = 100mL。" };
+            return { question: `${dl * 100}mL は なんdL？`, answer: `${dl}dL`, options: d(`${dl}dL`, `${dl * 10}dL`, `1dL`, `${dl + 1}dL`), hint: "100mLで 1dL。" };
+        }
+        case 'MATH_G2_U07': {
+            const h = (n % 10) + 1;
+            const add = (n % 4) + 1;
+            const ans = ((h + add - 1) % 12) + 1;
+            const wrong1 = (ans % 12) + 1;
+            return {
+                question: `この とけいの ${add}じかんご は？`,
+                answer: `${ans}じ`,
+                options: d(`${ans}じ`, `${wrong1}じ`, `${h}じ`, `${add}じ`),
+                hint: "じかんを たそう。",
+                visual: { kind: 'clock', hour: h, minute: 0 }
+            };
+        }
+        case 'MATH_G2_U08': {
+            const h = (n % 9) + 1;
+            const t = n % 10;
+            const o = (n * 3) % 10;
+            const value = `${h}${t}${o}`;
+            if (n % 2 === 0) return { question: `${h}ひゃく ${t}じゅう ${o} を 数字で かくと？`, answer: value, options: d(value, `${h}${o}${t}`, `${t}${h}${o}`, `${h}${t}`), hint: "100の くらいから ならべよう。" };
+            return { question: `${value} を ことばで いうと？`, answer: `${h}ひゃく ${t}じゅう ${o}`, options: d(`${h}ひゃく ${t}じゅう ${o}`, `${h}ひゃく ${o}じゅう ${t}`, `${t}ひゃく ${h}じゅう ${o}`, `${h}じゅう ${t}`), hint: "百、十、一のくらい。" };
+        }
+        case 'MATH_G2_U09': {
+            const a = (n % 4) + 2;
+            const b = (n % 5) + 2;
+            if (n % 2 === 0) return { question: `${a} が ${b}こ。 かけ算の 式は？`, answer: `${a} × ${b}`, options: d(`${a} × ${b}`, `${a} + ${b}`, `${b} - ${a}`, `${b} × ${a} + 1`), hint: "おなじ数の くりかえしは かけ算。" };
+            const repeatedAdd = Array.from({ length: b }, () => `${a}`).join(' + ');
+            return { question: `${repeatedAdd} を かけ算の 式にすると？`, answer: `${a} × ${b}`, options: d(`${a} × ${b}`, `${b} × ${a}`, `${a} + ${b}`, `${a} × ${b - 1}`), hint: "たしざんを かけざんに。" };
+        }
+        case 'MATH_G2_U10': {
+            const a = (n % 8) + 2;
+            const b = (n % 8) + 2;
+            const p = a * b;
+            if (n % 3 === 0) return { question: `九九。 ${a} × ${b} = ?`, answer: `${p}`, options: d(`${p}`, `${p + 1}`, `${p - 1}`, `${a + b}`), hint: "九九を おもいだそう。" };
+            if (n % 3 === 1) return { question: `${p} に なる かけ算は？`, answer: `${a} × ${b}`, options: d(`${a} × ${b}`, `${a} + ${b}`, `${p} × 1`, `${a} × ${b + 1}`), hint: "しきを えらぼう。" };
+            return { question: `${a} × □ = ${p}。 □ は？`, answer: `${b}`, options: d(`${b}`, `${a}`, `${p}`, `${b + 1}`), hint: "九九を つかって さがそう。" };
+        }
+        case 'MATH_G2_U11': {
+            const p = n % 6;
+            if (p === 0) {
+                return { question: "この はこの 形で、たいらな 面は いくつ？", answer: "6つ", options: d("6つ", "4つ", "8つ", "12つ"), hint: "サイコロを おもいだそう。", visual: { kind: 'cube' } };
+            }
+            if (p === 1) {
+                return { question: "この はこの 形で、かど（頂点）は いくつ？", answer: "8つ", options: d("8つ", "6つ", "4つ", "12つ"), hint: "かどの 数を かぞえよう。", visual: { kind: 'cube' } };
+            }
+            if (p === 2) {
+                return { question: "この はこの 形で、へんは なん本？", answer: "12本", options: d("12本", "8本", "6本", "10本"), hint: "ほねぐみ を かぞえよう。", visual: { kind: 'cube' } };
+            }
+            if (p === 3) {
+                return { question: "1つの かどに あつまる へんは 何本？", answer: "3本", options: d("3本", "2本", "4本", "6本"), hint: "たて・よこ・高さ。", visual: { kind: 'cube' } };
+            }
+            if (p === 4) {
+                return { question: "この はこの 形を ひらくと 面は いくつ？", answer: "6つ", options: d("6つ", "5つ", "7つ", "8つ"), hint: "組み立てても 面の数は同じ。", visual: { kind: 'cube' } };
+            }
+            return { question: "サイコロの 形と おなじ 立体は？", answer: "立方体", options: d("立方体", "球", "円柱", "三角柱"), hint: "ぜんぶ 正方形の面。", visual: { kind: 'cube' } };
+        }
+        case 'MATH_G2_U12': {
+            const a = 20 + (n % 30);
+            const b = (n % 9) + 1;
+            if (n % 3 === 0) return { question: `えんぴつが ${a}本。 ${b}本 もらうと なん本？`, answer: `${a + b}本`, options: d(`${a + b}本`, `${a - b}本`, `${a}本`, `${b}本`), hint: "もらうは たし算。" };
+            if (n % 3 === 1) return { question: `クッキーが ${a}こ。 ${b}こ たべると のこりは？`, answer: `${a - b}こ`, options: d(`${a - b}こ`, `${a + b}こ`, `${a}こ`, `${b}こ`), hint: "たべると ひき算。" };
+            return { question: `はこに ${a}こ あります。 ${b}こ ふやすと ぜんぶで？`, answer: `${a + b}こ`, options: d(`${a + b}こ`, `${a - b}こ`, `${b}こ`, `${a}こ`), hint: "ぶんしょうを しきにしよう。" };
+        }
+        default:
+            return { question: "2 + 2 = ?", answer: "4", options: d("4", "3", "5", "2"), hint: "たし算だよ。" };
+    }
+};
+
+Object.keys(MATH_G2_UNIT_DATA).forEach((unitId) => {
+    const problems = MATH_G2_UNIT_DATA[unitId];
+    while (problems.length < 20) {
+        problems.push(makeUnitProblem(unitId, problems.length));
+    }
+});
+
+export const MATH_G2_DATA: Record<string, GeneralProblem[]> = {
+    MATH_G2_1,
+    MATH_G2_2,
+    MATH_G2_3,
+    ...MATH_G2_UNIT_DATA,
 };

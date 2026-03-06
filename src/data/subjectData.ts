@@ -28,6 +28,15 @@ import { MATH_G6_DATA } from './subjects/math_g6';
 import { MATH_G7_DATA } from './subjects/math_g7';
 import { MATH_G8_DATA } from './subjects/math_g8';
 import { MATH_G9_DATA } from './subjects/math_g9';
+import { KOKUGO_G1_DATA } from './subjects/kokugo_g1';
+import { KOKUGO_G2_DATA } from './subjects/kokugo_g2';
+import { KOKUGO_G3_DATA } from './subjects/kokugo_g3';
+import { KOKUGO_G4_DATA } from './subjects/kokugo_g4';
+import { KOKUGO_G5_DATA } from './subjects/kokugo_g5';
+import { KOKUGO_G6_DATA } from './subjects/kokugo_g6';
+import { KOKUGO_G7_DATA } from './subjects/kokugo_g7';
+import { KOKUGO_G8_DATA } from './subjects/kokugo_g8';
+import { KOKUGO_G9_DATA } from './subjects/kokugo_g9';
 
 // IT・情報のインポート
 import { IT_TABLET_DATA } from './subjects/it_tablet';
@@ -48,6 +57,15 @@ export const SUBJECT_DATA: Record<string, GeneralProblem[]> = {
     ...MATH_G7_DATA,
     ...MATH_G8_DATA,
     ...MATH_G9_DATA,
+    ...KOKUGO_G1_DATA,
+    ...KOKUGO_G2_DATA,
+    ...KOKUGO_G3_DATA,
+    ...KOKUGO_G4_DATA,
+    ...KOKUGO_G5_DATA,
+    ...KOKUGO_G6_DATA,
+    ...KOKUGO_G7_DATA,
+    ...KOKUGO_G8_DATA,
+    ...KOKUGO_G9_DATA,
     ...LIFE_G1_DATA,
     ...LIFE_G2_DATA,
     ...SCIENCE_G3_DATA,

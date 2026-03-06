@@ -1,9 +1,8 @@
 
 import { GeneralProblem, d } from './utils';
 
-export const MATH_G8_DATA: Record<string, GeneralProblem[]> = {
-    // --- 中2 1学期: 式の計算・連立方程式・一次関数 (50問) ---
-    MATH_G8_1: [
+// --- 中2 1学期: 式の計算・連立方程式・一次関数 (50問) ---
+const MATH_G8_1: GeneralProblem[] = [
         { question: "「2a ＋ 3b － a ＋ 2b」を計算せよ。", answer: "a ＋ 5b", options: d("a ＋ 5b", "3a ＋ 5b", "a ＋ b", "ab"), hint: "同じ文字どうし（同類項）をまとめよう。" },
         { question: "「(2x)² 」の計算結果は？", answer: "4x²", options: d("4x²", "2x²", "4x", "2x"), hint: "2もxも2乗するよ。" },
         { question: "「6ab ÷ 2a」を計算せよ。", answer: "3b", options: d("3b", "3ab", "12ab²", "3"), hint: "aが約分されて消えるよ。" },
@@ -54,10 +53,10 @@ export const MATH_G8_DATA: Record<string, GeneralProblem[]> = {
         { question: "二元一次方程式 2x ＋ y ＝ 5 の解はいくつある？", answer: "無限にある", options: d("無限にある", "1つだけ", "2つ", "ない"), hint: "直線上のすべての点が解になるよ。" },
         { question: "比例 y ＝ 3x を y 方向に 2 ずらした直線の式は？", answer: "y ＝ 3x ＋ 2", options: d("y ＝ 3x ＋ 2", "y ＝ 5x", "y ＝ 3x － 2", "y ＝ 2x ＋ 3"), hint: "切片が 2 になる。" },
         { question: "x軸に垂直で、点 (3, 5) を通る直線の式は？", answer: "x ＝ 3", options: d("x ＝ 3", "y ＝ 5", "y ＝ x ＋ 2", "x ＝ 5"), hint: "xの値がずっと変わらない。" }
-    ],
+    ];
 
-    // --- 中2 2学期: 図形の調べ方・合同・三角形と四角形 (50問) ---
-    MATH_G8_2: [
+// --- 中2 2学期: 図形の調べ方・合同・三角形と四角形 (50問) ---
+const MATH_G8_2: GeneralProblem[] = [
         { question: "三角形の内角の和は何度？", answer: "180度", options: d("180度", "360度", "540度", "90度"), hint: "基本中の基本だね。" },
         { question: "n角形の内角の和を求める公式は？", answer: "180 × (n － 2)", options: d("180 × (n － 2)", "180 × n", "360 × n", "180 × (n ＋ 2)"), hint: "三角形がいくつ作れるか。" },
         { question: "五角形の内角の和は何度？", answer: "540度", options: d("540度", "360度", "720度", "180度"), hint: "180 × 3 ＝ ?" },
@@ -108,10 +107,10 @@ export const MATH_G8_DATA: Record<string, GeneralProblem[]> = {
         { question: "四角形の対角線の数が2本のとき、五角形は何本？", answer: "5本", options: d("5本", "3本", "10本", "4本"), hint: "星形を描いて数えてみて。" },
         { question: "「証明（しょうめい）」で、根拠（こんきょ）として使っていいのは？", answer: "定義、定理、仮定", options: d("定義・定理・仮定", "自分の予想", "見た目の感じ", "友達の意見"), hint: "客観的な事実だけを使おう。" },
         { question: "「すべての正方形はひし形である」は正しい？", answer: "正しい", options: d("正しい", "間違い", "逆なら正しい", "わからない"), hint: "正方形はひし形の定義（4辺が等しい）を満たしている。" }
-    ],
+    ];
 
-    // --- 中2 3学期: 確率・データの活用 (50問) ---
-    MATH_G8_3: [
+// --- 中2 3学期: 確率・データの活用 (50問) ---
+const MATH_G8_3: GeneralProblem[] = [
         { question: "「確率（かくりつ）」の値の範囲は？", answer: "0 から 1 まで", options: d("0 から 1 まで", "0 から 100 まで", "1 から 10 まで", "マイナスもある"), hint: "絶対に起こらない(0)から必ず起こる(1)まで。" },
         { question: "必ず起こる事象の確率は？", answer: "1", options: d("1", "100", "0", "0.5"), hint: "100%は 1 だよ。" },
         { question: "決して起こらない事象の確率は？", answer: "0", options: d("0", "1", "－1", "なし"), hint: "可能性ゼロ。" },
@@ -160,5 +159,120 @@ export const MATH_G8_DATA: Record<string, GeneralProblem[]> = {
         { question: "2つのサイコロの「目が同じ（ゾロ目）」になる確率は？", answer: "1/6 (6/36)", options: d("1/6", "1/36", "1/12", "1/2"), hint: "(1,1)から(6,6)までの6通り。" },
         { question: "ジャンケン。4人でして「全員同じ手」になる確率は？（発展）", answer: "3/81 (1/27)", options: d("1/27", "1/81", "1/3", "4/81"), hint: "出し方は 3⁴＝81通り。当たりは3通り。" },
         { question: "確率の問題を解くとき、ミスを防ぐために大切なのは？", answer: "もれなく、重なりなく数え上げる（書き出す）", options: d("もれなく重なりなく", "勘で当てる", "難しい公式を暗記する", "適当に割る"), hint: "「数え上げ」が確率の基本だよ。" },
-    ]
+    ];
+
+const splitIntoUnits = (problems: GeneralProblem[], unitCount: number): GeneralProblem[][] => {
+    const chunkSize = Math.ceil(problems.length / unitCount);
+    return Array.from({ length: unitCount }, (_, i) => problems.slice(i * chunkSize, (i + 1) * chunkSize));
 };
+
+const g8Term1Units = splitIntoUnits(MATH_G8_1, 4);
+const g8Term2Units = splitIntoUnits(MATH_G8_2, 3);
+const g8Term3Units = splitIntoUnits(MATH_G8_3, 2);
+
+export const MATH_G8_UNIT_DATA: Record<string, GeneralProblem[]> = {
+    MATH_G8_U01: [], // 式の計算
+    MATH_G8_U02: [], // 連立方程式
+    MATH_G8_U03: [], // 連立方程式の 利用
+    MATH_G8_U04: [], // 一次関数
+    MATH_G8_U05: [], // 図形の 性質
+    MATH_G8_U06: [], // 図形の 合同
+    MATH_G8_U07: [], // 三角形 と 四角形
+    MATH_G8_U08: [], // 確率
+    MATH_G8_U09: [], // データの 分析
+};
+
+const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
+    switch (unitId) {
+        case 'MATH_G8_U01': {
+            const a = (n % 5) + 2;
+            const b = (n % 4) + 1;
+            if (n % 2 === 0) {
+                return { question: `${a}x + ${b}x = ?`, answer: `${a + b}x`, options: d(`${a + b}x`, `${a * b}x`, `${a + b}`, `${a - b}x`), hint: "同類項をまとめる。" };
+            }
+            return { question: `${a + b}x - ${b}x = ?`, answer: `${a}x`, options: d(`${a}x`, `${b}x`, `${a + b}x`, `${a - b}x`), hint: "同類項を整理する。" };
+        }
+        case 'MATH_G8_U02': {
+            const x = (n % 6) + 1;
+            const y = (n % 5) + 2;
+            if (n % 2 === 0) {
+                return { question: `連立方程式。x+y=${x + y}, x-y=${x - y} のとき x は？`, answer: `${x}`, options: d(`${x}`, `${y}`, `${x + y}`, `${x - y}`), hint: "2式を足すと2x。" };
+            }
+            return { question: `連立方程式。x+y=${x + y}, x-y=${x - y} のとき y は？`, answer: `${y}`, options: d(`${y}`, `${x}`, `${x + y}`, `${x - y}`), hint: "2式を引くと2y。" };
+        }
+        case 'MATH_G8_U03': {
+            const p = (n % 4) + 3;
+            const q = (n % 5) + 2;
+            const total = p * q;
+            if (n % 2 === 0) {
+                return { question: `連立利用。1個${p}円の商品をx個で${total}円。xは？`, answer: `${q}`, options: d(`${q}`, `${p}`, `${total}`, `${q + 1}`), hint: "px=total。" };
+            }
+            return { question: `商品を${q}個買って${total}円。1個あたりの値段は？`, answer: `${p}`, options: d(`${p}`, `${q}`, `${total}`, `${p + 1}`), hint: "合計 ÷ 個数。" };
+        }
+        case 'MATH_G8_U04': {
+            const a = (n % 5) + 1;
+            const b = (n % 7) - 3;
+            const x = (n % 4) + 1;
+            if (n % 2 === 0) {
+                return { question: `一次関数 y=${a}x${b >= 0 ? `+${b}` : b}。x=${x} のとき y=?`, answer: `${a * x + b}`, options: d(`${a * x + b}`, `${a + x + b}`, `${a * x}`, `${x + b}`), hint: "代入計算。" };
+            }
+            return { question: `一次関数 y=${a}x${b >= 0 ? `+${b}` : b} の切片は？`, answer: `${b}`, options: d(`${b}`, `${a}`, `${a * x + b}`, `${x}`), hint: "x=0 のときの y の値。" };
+        }
+        case 'MATH_G8_U05':
+            return n % 2 === 0
+                ? { question: "平行線の同位角は？", answer: "等しい", options: d("等しい", "和が180度", "90度", "不定"), hint: "平行線の角の性質。", visual: { kind: 'angle', degrees: 45, parallelLines: true, labels: ['a', 'a'] } }
+                : { question: "対頂角は？", answer: "等しい", options: d("等しい", "和が180度", "90度", "不定"), hint: "向かい合う角。", visual: { kind: 'angle', degrees: 120, labels: ['x', 'x'] } };
+        case 'MATH_G8_U06':
+            return n % 2 === 0
+                ? { question: "合同な図形とは？", answer: "形と大きさが同じ", options: d("形と大きさが同じ", "形だけ同じ", "面積だけ同じ", "向きだけ同じ"), hint: "重ねて一致。", visual: { kind: 'polygon', sides: 4, labels: ['A', 'B', 'C', 'D'], showDiagonals: true } }
+                : { question: "三角形の合同条件の1つは？", answer: "3組の辺がそれぞれ等しい", options: d("3組の辺が等しい", "3組の角が等しい", "面積が等しい", "周が等しい"), hint: "SSS条件。", visual: { kind: 'polygon', sides: 3, labels: ['A', 'B', 'C'] } };
+        case 'MATH_G8_U07':
+            return n % 3 === 0
+                ? { question: "n角形の内角和の公式は？", answer: "180(n-2)", options: d("180(n-2)", "180n", "360n", "90n"), hint: "三角形分割。", visual: { kind: 'polygon', sides: 5, labels: ['A', 'B', 'C', 'D', 'E'], showDiagonals: true } }
+                : n % 3 === 1
+                ? { question: "四角形の内角和は？", answer: "360度", options: d("360度", "180度", "540度", "720度"), hint: "三角形2つ分。", visual: { kind: 'polygon', sides: 4, labels: ['A', 'B', 'C', 'D'], showDiagonals: true } }
+                : { question: "正六角形の1つの内角は？", answer: "120度", options: d("120度", "60度", "90度", "108度"), hint: "720÷6。", visual: { kind: 'polygon', sides: 6, labels: ['A', 'B', 'C', 'D', 'E', 'F'] } };
+        case 'MATH_G8_U08': {
+            const faces = (n % 6) + 1;
+            if (n % 2 === 0) {
+                return { question: `サイコロ1回。${faces}の目が出る確率は？`, answer: `1/6`, options: d(`1/6`, `1/3`, `1/2`, `1/12`), hint: "同様に確からしい6通り。" };
+            }
+            return { question: `サイコロ1回。${faces}以外の目が出る確率は？`, answer: `5/6`, options: d(`5/6`, `1/6`, `1/2`, `1`), hint: "余事象で考える。" };
+        }
+        case 'MATH_G8_U09': {
+            const a = (n % 20) + 60;
+            const b = (n % 15) + 70;
+            const c = (n % 10) + 80;
+            const avg = Math.floor((a + b + c) / 3);
+            const sorted = [a, b, c].sort((x, y) => x - y);
+            const p = n % 4;
+            if (p === 0) {
+                return { question: `データ分析。${a}, ${b}, ${c} の平均は？`, answer: `${avg}`, options: d(`${avg}`, `${a + b + c}`, `${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`), hint: "合計÷個数。" };
+            }
+            if (p === 1) {
+                return { question: `データ分析。中央値は？`, answer: `${sorted[1]}`, options: d(`${sorted[1]}`, `${sorted[0]}`, `${sorted[2]}`, `${avg}`), hint: "小さい順で真ん中。" };
+            }
+            if (p === 2) {
+                return { question: `データ分析。範囲（最大-最小）は？`, answer: `${sorted[2] - sorted[0]}`, options: d(`${sorted[2] - sorted[0]}`, `${avg}`, `${a + b + c}`, `${sorted[2]}`), hint: "散らばりを見る。" };
+            }
+            return { question: `データ分析。最小値は？`, answer: `${sorted[0]}`, options: d(`${sorted[0]}`, `${sorted[2]}`, `${sorted[1]}`, `${avg}`), hint: "最も小さい値。" };
+        }
+        default:
+            return { question: "2 + 3 = ?", answer: "5", options: d("5", "4", "6", "7"), hint: "基本。" };
+    }
+};
+
+Object.keys(MATH_G8_UNIT_DATA).forEach((unitId) => {
+    const problems = MATH_G8_UNIT_DATA[unitId];
+    while (problems.length < 20) {
+        problems.push(makeUnitProblem(unitId, problems.length));
+    }
+});
+
+export const MATH_G8_DATA: Record<string, GeneralProblem[]> = {
+    MATH_G8_1,
+    MATH_G8_2,
+    MATH_G8_3,
+    ...MATH_G8_UNIT_DATA,
+};
+

@@ -1,8 +1,7 @@
 
 import { GeneralProblem, d } from './utils';
 
-export const MATH_G4_DATA: Record<string, GeneralProblem[]> = {
-    MATH_G4_1: [
+const MATH_G4_1: GeneralProblem[] = [
         { question: "「億」の10倍のたんいは何？", answer: "十億", options: d("十億", "百億", "一兆", "千万"), hint: "位（くらい）は十、百、千と上がっていくよ。" },
         { question: "「兆（ちょう）」は、億を何こ集めた数？", answer: "10000こ", options: d("10000こ", "1000こ", "100こ", "10こ"), hint: "万が万こで億、億が万こで兆になる。" },
         { question: "「一兆」の1つ下の位は何？", answer: "千億", options: d("千億", "一億", "百億", "十億"), hint: "大きな数の位を順番に思い出して。" },
@@ -52,8 +51,9 @@ export const MATH_G4_DATA: Record<string, GeneralProblem[]> = {
         { question: "すいちょくな直線をかくとき、何を使うと正確？", answer: "三角定規", options: d("三角定規", "分度器だけ", "コンパスだけ", "はさみ"), hint: "直角の部分を使うよ。" },
         { question: "大きな数. 千万の10倍は？", answer: "一億", options: d("一億", "百万", "一兆", "二千万"), hint: "位が上がるポイント。" },
         { question: "「角」の2つの辺が、1つの直線になっているとき、角度は何度？", answer: "180度", options: d("180度", "90度", "0度", "360度"), hint: "平らな角、平角というよ。" },
-    ],
-    MATH_G4_2: [
+    ];
+
+const MATH_G4_2: GeneralProblem[] = [
         { question: "小数. 0.1 をさらに 10等分した数は？", answer: "0.01", options: d("0.01", "0.001", "0.11", "0.2"), hint: "1の 1/100 の大きさ。" },
         { question: "「3.24」の「2」の位（くらい）の名前は？", answer: "1/10の位（小数第一位）", options: d("1/10の位", "1/100の位", "一の位", "十の位"), hint: "小数点のすぐ右だよ。" },
         { question: "「0.56 ＋ 0.23 ＝ 」 答えは？", answer: "0.79", options: d("0.79", "0.33", "7.9", "0.079"), hint: "位をそろえて足そう。" },
@@ -103,8 +103,9 @@ export const MATH_G4_DATA: Record<string, GeneralProblem[]> = {
         { question: "「切り上げ（きりあげ）」で、101 を百の位までで表すと？", answer: "200", options: d("200", "100", "110", "1000"), hint: "少しでもあれば上に上げるよ。" },
         { question: "L字型の図面のめんせき. どうやって求める？", answer: "2つの長方形に分けて足す", options: d("分けて足す", "大きな長方形から引く", "両方のやり方がある", "求められない"), hint: "工夫して長方形を作ろう。" },
         { question: "めんせき 1a の正方形. 一辺は何m？", answer: "10m", options: d("10m", "100m", "1m", "1000m"), hint: "10 × 10 ＝ 100 (a)。" },
-    ],
-    MATH_G4_3: [
+    ];
+
+const MATH_G4_3: GeneralProblem[] = [
         { question: "「2.4 ÷ 4 ＝ 」 答えは？", answer: "0.6", options: d("0.6", "6", "0.06", "24"), hint: "24 ÷ 4 は 6. 位を考えよう。" },
         { question: "「6.3 ÷ 3 ＝ 」 答えは？", answer: "2.1", options: d("2.1", "21", "0.21", "6.3"), hint: "小数のわり算のひっ算。" },
         { question: "「真分数（しんぶんすう）」とは？", answer: "分子が分母より小さい分数", options: d("分子が小さい", "分子が大きい", "整数と同じ", "分母が1"), hint: "1より小さい分数のことだよ。" },
@@ -153,5 +154,235 @@ export const MATH_G4_DATA: Record<string, GeneralProblem[]> = {
         { question: "立方体を真上から見ると、どんな形？", answer: "正方形", options: d("正方形", "長方形", "円", "点"), hint: "どの面も正方形だからね。" },
         { question: "「8.1 ÷ 9 ＝ 」 答えは？", answer: "0.9", options: d("0.9", "9", "0.09", "1.1"), hint: "81 ÷ 9 ＝ 9。" },
         { question: "「0.05 × 2 ＝ 」 答えは？", answer: "0.1", options: d("0.1", "0.01", "1", "0.52"), hint: "5 × 2 ＝ 10。" },
-    ]
+    ];
+
+const splitIntoUnits = (problems: GeneralProblem[], unitCount: number): GeneralProblem[][] => {
+    const chunkSize = Math.ceil(problems.length / unitCount);
+    return Array.from({ length: unitCount }, (_, i) => problems.slice(i * chunkSize, (i + 1) * chunkSize));
 };
+
+const g4Term1Units = splitIntoUnits(MATH_G4_1, 5);
+const g4Term2Units = splitIntoUnits(MATH_G4_2, 5);
+const g4Term3Units = splitIntoUnits(MATH_G4_3, 5);
+
+export const MATH_G4_UNIT_DATA: Record<string, GeneralProblem[]> = {
+    MATH_G4_U01: [], // 大きい 数（1おくまでの数）
+    MATH_G4_U02: [], // わり算（2けたでわる計算）
+    MATH_G4_U03: [], // 折れ線グラフ
+    MATH_G4_U04: [], // 角
+    MATH_G4_U05: [], // そろばん
+    MATH_G4_U06: [], // 小数
+    MATH_G4_U07: [], // 小数の たし算 と ひき算
+    MATH_G4_U08: [], // 面せき
+    MATH_G4_U09: [], // がい数
+    MATH_G4_U10: [], // 式 と 計算の じゅんじょ
+    MATH_G4_U11: [], // 分数
+    MATH_G4_U12: [], // 分数の たし算 と ひき算
+    MATH_G4_U13: [], // 直方体 と 立方体
+    MATH_G4_U14: [], // 変わり方
+    MATH_G4_U15: [], // 調べたことを 表 や グラフ にまとめる
+};
+
+const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
+    switch (unitId) {
+        case 'MATH_G4_U01': {
+            const oku = (n % 9) + 1;
+            const man = (n % 8) + 1;
+            if (n % 2 === 0) {
+                return { question: `${oku}億${man}万 は 何万？`, answer: `${oku * 10000 + man}万`, options: d(`${oku * 10000 + man}万`, `${oku * 1000 + man}万`, `${oku * 10000}万`, `${man}万`), hint: "1億 = 10000万。" };
+            }
+            return { question: `${oku * 10000 + man}万 は 何億何万？`, answer: `${oku}億${man}万`, options: d(`${oku}億${man}万`, `${oku}億`, `${man}万`, `${oku + 1}億${man}万`), hint: "10000万 を 1億 として まとめる。" };
+        }
+        case 'MATH_G4_U02': {
+            const divisor = (n % 80) + 20;
+            const q = (n % 7) + 2;
+            const nmr = divisor * q;
+            if (n % 2 === 0) {
+                return { question: `${nmr} ÷ ${divisor} = ?`, answer: `${q}`, options: d(`${q}`, `${q + 1}`, `${q - 1}`, `${divisor}`), hint: "2けたでわる計算。" };
+            }
+            return { question: `□ × ${divisor} = ${nmr}。 □ は？`, answer: `${q}`, options: d(`${q}`, `${q + 1}`, `${Math.max(1, q - 1)}`, `${divisor}`), hint: "わり算を かけ算で たしかめる。" };
+        }
+        case 'MATH_G4_U03': {
+            const a = (n % 7) + 2;
+            const b = (n % 6) + 1;
+            const c = (n % 8) + 1;
+            const p = n % 4;
+            if (p === 0) {
+                const answer = a === b ? "同じ" : (a < b ? "ふえた" : "へった");
+                const wrongs = ["ふえた", "へった", "同じ", "わからない"].filter((label) => label !== answer).slice(0, 3);
+                return { question: `1日目→2日目で ふえた？へった？`, answer, options: d(answer, ...wrongs), hint: "前の日と比べる。", visual: { kind: 'bar_chart', values: [a, b], labels: ["1日目", "2日目"] } };
+            }
+            if (p === 1) {
+                const max = Math.max(a, b, c);
+                const winners = [["1日目", a], ["2日目", b], ["3日目", c]].filter(([, v]) => v === max).map(([label]) => label);
+                const answer = winners.length === 1 ? winners[0] : "同じ";
+                const wrongs = ["1日目", "2日目", "3日目", "同じ"].filter((label) => label !== answer).slice(0, 3);
+                return { question: `3日間で いちばん 多い日は？`, answer, options: d(answer, ...wrongs), hint: "いちばん高いぼう。", visual: { kind: 'bar_chart', values: [a, b, c], labels: ["1日目", "2日目", "3日目"] } };
+            }
+            if (p === 2) {
+                return { question: `1日目 と 2日目 の ちがいは？`, answer: `${Math.abs(a - b)}人`, options: d(`${Math.abs(a - b)}人`, `${a + b}人`, `${Math.max(a, b)}人`, `${Math.min(a, b)}人`), hint: "2本の高さの差。", visual: { kind: 'bar_chart', values: [a, b], labels: ["1日目", "2日目"] } };
+            }
+            return { question: `3日間の 合計は？`, answer: `${a + b + c}人`, options: d(`${a + b + c}人`, `${a + b}人`, `${b + c}人`, `${a + c}人`), hint: "3本ともたす。", visual: { kind: 'bar_chart', values: [a, b, c], labels: ["1日目", "2日目", "3日目"] } };
+        }
+        case 'MATH_G4_U04': {
+            const a = (n % 9 + 1) * 10;
+            return {
+                question: `この角は 直角(90度)より 大きい？小さい？`,
+                answer: a > 90 ? "大きい" : (a < 90 ? "小さい" : "同じ"),
+                options: d(a > 90 ? "大きい" : (a < 90 ? "小さい" : "同じ"), "大きい", "小さい", "同じ"),
+                hint: "90度と比べよう。",
+                visual: { kind: 'angle', degrees: a }
+            };
+        }
+        case 'MATH_G4_U05': {
+            const a = (n % 6) + 2;
+            const b = (n % 5) + 2;
+            return { question: `そろばんのように くらをそろえて計算。 ${a * 100} + ${b * 10} = ?`, answer: `${a * 100 + b * 10}`, options: d(`${a * 100 + b * 10}`, `${a * 10 + b * 100}`, `${a + b}`, `${a * 100 + b}`), hint: "百のくら、十のくらを分ける。" };
+        }
+        case 'MATH_G4_U06': {
+            const a = (n % 9) + 1;
+            if (n % 2 === 0) {
+                return { question: `0.${a} は 1/10 が いくつ分？`, answer: `${a}つ`, options: d(`${a}つ`, `${a * 10}つ`, "1つ", `${a + 1}つ`), hint: "小数第一位を見よう。" };
+            }
+            return { question: `1/10 が ${a}つ ある数を 小数で書くと？`, answer: `0.${a}`, options: d(`0.${a}`, `${a}.0`, `0.0${a}`, `${a}/10`), hint: "10分のいくつかを 小数で 表す。" };
+        }
+        case 'MATH_G4_U07': {
+            const a = (n % 8) + 1;
+            const b = (n % 8) + 1;
+            const sum = (a + a / 10 + b + b / 10).toFixed(1);
+            const diffBig = (Math.max(a, b) + Math.max(a, b) / 10 - (Math.min(a, b) + Math.min(a, b) / 10)).toFixed(1);
+            if (n % 2 === 0) {
+                return { question: `${a}.${a} + ${b}.${b} = ?`, answer: sum, options: d(sum, `${a + b}`, `${a}.${b}`, `${b}.${a}`), hint: "同じ位どうしを足す。" };
+            }
+            return { question: `${Math.max(a, b)}.${Math.max(a, b)} - ${Math.min(a, b)}.${Math.min(a, b)} = ?`, answer: diffBig, options: d(diffBig, `${Math.max(a, b) - Math.min(a, b)}`, `${sum}`, `${(Math.max(a, b) - Math.min(a, b)).toFixed(1)}`), hint: "同じ位どうしをひく。" };
+        }
+        case 'MATH_G4_U08': {
+            const h = (n % 8) + 2;
+            const w = (n % 7) + 3;
+            if (n % 2 === 0) {
+                return { question: `たて${h}cm よこ${w}cm の長方形の面せきは？`, answer: `${h * w}cm2`, options: d(`${h * w}cm2`, `${h + w}cm2`, `${h * 2 + w * 2}cm`, `${h * w * 2}cm2`), hint: "面せき = たて×よこ。" };
+            }
+            return { question: `面せきが ${h * w}cm2、たてが ${h}cm の長方形。 よこは？`, answer: `${w}cm`, options: d(`${w}cm`, `${h}cm`, `${h * w}cm`, `${h + w}cm`), hint: "面せき ÷ たて = よこ。" };
+        }
+        case 'MATH_G4_U09': {
+            const value = 1000 + n * 37;
+            const rounded = Math.round(value / 100) * 100;
+            if (n % 2 === 0) {
+                return { question: `${value} を百の位までの がい数にすると？`, answer: `${rounded}`, options: d(`${rounded}`, `${Math.floor(value / 100) * 100}`, `${Math.ceil(value / 100) * 100}`, `${value}`), hint: "十の位を見て四捨五入。" };
+            }
+            return { question: `${value} の 十の位を四捨五入すると？`, answer: `${rounded}`, options: d(`${rounded}`, `${Math.floor(value / 100) * 100}`, `${Math.ceil(value / 100) * 100}`, `${value}`), hint: "百の位までの がい数と 同じ意味。" };
+        }
+        case 'MATH_G4_U10': {
+            const a = (n % 8) + 2;
+            const b = (n % 7) + 2;
+            const c = (n % 6) + 2;
+            if (n % 2 === 0) {
+                return { question: `${a} + ${b} × ${c} = ?`, answer: `${a + b * c}`, options: d(`${a + b * c}`, `${(a + b) * c}`, `${a * b + c}`, `${a + b + c}`), hint: "かけ算を先に計算。" };
+            }
+            return { question: `(${a} + ${b}) × ${c} = ?`, answer: `${(a + b) * c}`, options: d(`${(a + b) * c}`, `${a + b * c}`, `${a * b + c}`, `${a + b + c}`), hint: "かっこの中を 先に計算。" };
+        }
+        case 'MATH_G4_U11': {
+            const denominator = (n % 7) + 3;
+            const num = (n % (denominator - 1)) + 1;
+            const improper = denominator + (n % 3);
+            const p = n % 4;
+            if (p === 0) {
+                return { question: `${num}/${denominator} は 真分数？仮分数？`, answer: "真分数", options: d("真分数", "仮分数", "帯分数", "整数"), hint: "分子が分母より小さい。", visual: { kind: 'fraction', numerator: num, denominator } };
+            }
+            if (p === 1) {
+                return { question: `${improper}/${denominator} は 真分数？仮分数？`, answer: "仮分数", options: d("仮分数", "真分数", "帯分数", "整数"), hint: "分子が分母以上。", visual: { kind: 'fraction', numerator: improper, denominator } };
+            }
+            if (p === 2) {
+                return { question: `${num}/${denominator} と ${num}/${denominator} は 同じ？`, answer: "同じ", options: d("同じ", "ちがう", "くらべられない", "わからない"), hint: "まったく同じ分数。", visual: { kind: 'fraction_operation', left: { n: num, d: denominator }, right: { n: num, d: denominator }, op: '>' } };
+            }
+            return { question: `${num}/${denominator} は 1より 小さい？大きい？`, answer: "小さい", options: d("小さい", "大きい", "同じ", "わからない"), hint: "真分数は1より小さい。", visual: { kind: 'fraction', numerator: num, denominator } };
+        }
+        case 'MATH_G4_U12': {
+            const denominator = (n % 7) + 3;
+            const a = (n % (denominator - 1)) + 1;
+            const b = Math.min(denominator - 1, a + 1);
+            const p = n % 4;
+            if (p === 0) {
+                return {
+                    question: `${a}/${denominator} + ${b}/${denominator} = ?`,
+                    answer: `${a + b}/${denominator}`,
+                    options: d(`${a + b}/${denominator}`, `${a + b}/${denominator * 2}`, `${a}/${denominator}`, `${b}/${denominator}`),
+                    hint: "分母が同じなら分子を足す。",
+                    visual: { kind: 'fraction_operation', left: { n: a, d: denominator }, right: { n: b, d: denominator }, op: '+' }
+                };
+            }
+            if (p === 1) {
+                const big = Math.max(a, b);
+                const small = Math.min(a, b);
+                return {
+                    question: `${big}/${denominator} - ${small}/${denominator} = ?`,
+                    answer: `${big - small}/${denominator}`,
+                    options: d(`${big - small}/${denominator}`, `${big + small}/${denominator}`, `${big - small}/${denominator * 2}`, `${small}/${denominator}`),
+                    hint: "分母が同じなら分子を引く。",
+                    visual: { kind: 'fraction_operation', left: { n: big, d: denominator }, right: { n: small, d: denominator }, op: '-' }
+                };
+            }
+            if (p === 2) {
+                return {
+                    question: `${a}/${denominator} と ${b}/${denominator}。 大きいのは？`,
+                    answer: `${b}/${denominator}`,
+                    options: d(`${b}/${denominator}`, `${a}/${denominator}`, "同じ", "くらべられない"),
+                    hint: "分母が同じなら分子を比べる。",
+                    visual: { kind: 'fraction_operation', left: { n: a, d: denominator }, right: { n: b, d: denominator }, op: '>' }
+                };
+            }
+            return {
+                question: `${a}/${denominator} と ${b}/${denominator}。 小さいのは？`,
+                answer: `${a}/${denominator}`,
+                options: d(`${a}/${denominator}`, `${b}/${denominator}`, "同じ", "くらべられない"),
+                hint: "分母が同じなら分子が小さいほう。",
+                visual: { kind: 'fraction_operation', left: { n: a, d: denominator }, right: { n: b, d: denominator }, op: '<' }
+            };
+        }
+        case 'MATH_G4_U13': {
+            const p = n % 6;
+            if (p === 0) {
+                return { question: "この立体の面の数は？", answer: "6つ", options: d("6つ", "8つ", "12つ", "4つ"), hint: "サイコロと同じ。", visual: { kind: 'cube' } };
+            }
+            if (p === 1) {
+                return { question: "この立体の辺の数は？", answer: "12本", options: d("12本", "6本", "8本", "4本"), hint: "骨組みを数える。", visual: { kind: 'cube' } };
+            }
+            if (p === 2) {
+                return { question: "この立体の頂点の数は？", answer: "8こ", options: d("8こ", "6こ", "12こ", "4こ"), hint: "かどの数。", visual: { kind: 'cube' } };
+            }
+            if (p === 3) {
+                return { question: "1つの頂点から出る辺の数は？", answer: "3本", options: d("3本", "2本", "4本", "6本"), hint: "たて・よこ・高さ。", visual: { kind: 'cube' } };
+            }
+            if (p === 4) {
+                return { question: "直方体の向かい合う面どうしの関係は？", answer: "へいこう", options: d("へいこう", "すいちょく", "交わる", "重なる"), hint: "どこまでのばしても交わらない。", visual: { kind: 'cube' } };
+            }
+            return { question: "直方体のとなりあう面どうしの関係は？", answer: "すいちょく", options: d("すいちょく", "へいこう", "重なる", "同じ面"), hint: "かどで直角に交わる。", visual: { kind: 'cube' } };
+        }
+        case 'MATH_G4_U14': {
+            const x = (n % 6) + 1;
+            return { question: `正方形の1辺が ${x}cm のとき、まわりの長さは？`, answer: `${x * 4}cm`, options: d(`${x * 4}cm`, `${x * x}cm2`, `${x + 4}cm`, `${x * 2}cm`), hint: "同じ長さが4本。" };
+        }
+        case 'MATH_G4_U15': {
+            const a = (n % 8) + 2;
+            const b = (n % 5) + 1;
+            return { question: `調べ学習。Aは${a}人、Bは${b}人。 表やグラフで伝えるならまず何をそろえる？`, answer: "項目と人数", options: d("項目と人数", "色だけ", "線の太さだけ", "順番は不要"), hint: "比べるために同じ項目をそろえる。" };
+        }
+        default:
+            return { question: "4 + 5 = ?", answer: "9", options: d("9", "8", "10", "7"), hint: "たし算。" };
+    }
+};
+
+Object.keys(MATH_G4_UNIT_DATA).forEach((unitId) => {
+    const problems = MATH_G4_UNIT_DATA[unitId];
+    while (problems.length < 20) {
+        problems.push(makeUnitProblem(unitId, problems.length));
+    }
+});
+
+export const MATH_G4_DATA: Record<string, GeneralProblem[]> = {
+    MATH_G4_1,
+    MATH_G4_2,
+    MATH_G4_3,
+    ...MATH_G4_UNIT_DATA,
+};
+

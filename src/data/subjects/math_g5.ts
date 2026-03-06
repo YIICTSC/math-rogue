@@ -1,9 +1,8 @@
 
 import { GeneralProblem, d } from './utils';
 
-export const MATH_G5_DATA: Record<string, GeneralProblem[]> = {
-    // --- 5年生 1学期: 整数・倍数・約数・体積・合同・角度 (50問) ---
-    MATH_G5_1: [
+// --- 5年生 1学期: 整数・倍数・約数・体積・合同・角度 (50問) ---
+const MATH_G5_1: GeneralProblem[] = [
         { question: "「整数」の中で、2で割り切れる数を何という？", answer: "偶数（ぐうすう）", options: d("偶数（ぐうすう）", "奇数（きすう）", "小数", "素数"), hint: "0, 2, 4, 6... だよ。" },
         { question: "「整数」の中で、2で割り切れない数を何という？", answer: "奇数（きすう）", options: d("奇数（きすう）", "偶数（ぐうすう）", "整数", "自然数"), hint: "1, 3, 5, 7... だよ。" },
         { question: "0 は 偶数・奇数のどちらに含まれる？", answer: "偶数", options: d("偶数", "奇数", "どちらでもない", "小数"), hint: "算数では0も偶数としてあつかうよ。" },
@@ -53,10 +52,10 @@ export const MATH_G5_DATA: Record<string, GeneralProblem[]> = {
         { question: "台形の面積を求めるのに、補助線を引いて何に分けるといい？", answer: "2つの三角形", options: d("2つの三角形", "2つの円", "3つの四角形", "曲線"), hint: "三角形の面積公式が使えるようになる。" },
         { question: "小数の筆算。小数点の位置はどうする？", answer: "かけた数と足した数だけ右から数えて打つ", options: d("右から数えて打つ", "一番左に打つ", "打たなくていい", "一の位に打つ"), hint: "小数以下の桁数を合計するんだよ。" },
         { question: "0.01 が 100個集まると？", answer: "1", options: d("1", "0.1", "10", "100"), hint: "1/100 の 100倍。" },
-    ],
+    ];
 
-    // --- 5年生 2学期: 小数の割り算・分数・割合・図形 (50問) ---
-    MATH_G5_2: [
+// --- 5年生 2学期: 小数の割り算・分数・割合・図形 (50問) ---
+const MATH_G5_2: GeneralProblem[] = [
         { question: "「小数の割り算」。 「6 ÷ 0.5 ＝ 」 答えは？", answer: "12", options: d("12", "3", "0.3", "6.5"), hint: "0.5(半分)でわると、数は2倍になるよ。" },
         { question: "「4.8 ÷ 1.2 ＝ 」 答えは？", answer: "4", options: d("4", "40", "0.4", "6"), hint: "両方を10倍して 48÷12 として考えよう。" },
         { question: "小数の割り算で、わる数が1より小さいとき、商はどうなる？", answer: "わられる数より大きくなる", options: d("大きくなる", "小さくなる", "変わらない", "0になる"), hint: "0.1でわると10倍になるイメージ。" },
@@ -106,10 +105,10 @@ export const MATH_G5_DATA: Record<string, GeneralProblem[]> = {
         { question: "小数の筆算。 「1.2 ÷ 0.5 ＝ 」", answer: "2.4", options: d("2.4", "2", "0.6", "1.7"), hint: "12 ÷ 5 ＝ ?" },
         { question: "面積 1a（アール） は 何m²？", answer: "100m²", options: d("100m²", "10m²", "1000m²", "1m²"), hint: "10m × 10m の広さ。" },
         { question: "面積 1ha（ヘクタール） は 何m²？", answer: "10000m²", options: d("10000m²", "100m²", "1000m²", "100000m²"), hint: "100m × 100m の広さ。" },
-    ],
+    ];
 
-    // --- 5年生 3学期: 角柱・円柱・速さ・分数の掛け算割り算・グラフ・比例 (50問) ---
-    MATH_G5_3: [
+// --- 5年生 3学期: 角柱・円柱・速さ・分数の掛け算割り算・グラフ・比例 (50問) ---
+const MATH_G5_3: GeneralProblem[] = [
         { question: "「角柱（かくちゅう）」の体積を求める公式は？", answer: "底面積 × 高さ", options: d("底面積 × 高さ", "底面のまわり × 高さ", "たて×よこ×高さ", "底面積 ÷ 高さ"), hint: "積み重ねるイメージだよ。" },
         { question: "「円柱（えんちゅう）」の底面の形は？", answer: "円", options: d("円", "正方形", "三角形", "ドーナツ形"), hint: "缶詰（かんづめ）のような形。" },
         { question: "三角柱の底面が 10cm²、高さが 5cm。体積は？", answer: "50cm³", options: d("50cm³", "15cm³", "25cm³", "30cm³"), hint: "10 × 5 ＝ ?" },
@@ -158,5 +157,233 @@ export const MATH_G5_DATA: Record<string, GeneralProblem[]> = {
         { question: "「5分（ぶ）」 を小数で？", answer: "0.05", options: d("0.05", "0.5", "5", "0.005"), hint: "100分の1。" },
         { question: "「40 ÷ 0.8」 の答えは？", answer: "50", options: d("50", "32", "4", "400"), hint: "400 ÷ 8 ＝ ?" },
         { question: "「0.6 × 0.7」 の答えは？", answer: "0.42", options: d("0.42", "4.2", "42", "0.042"), hint: "6 × 7 ＝ 42。" },
-    ]
+    ];
+
+const splitIntoUnits = (problems: GeneralProblem[], unitCount: number): GeneralProblem[][] => {
+    const chunkSize = Math.ceil(problems.length / unitCount);
+    return Array.from({ length: unitCount }, (_, i) => problems.slice(i * chunkSize, (i + 1) * chunkSize));
 };
+
+const g5Term1Units = splitIntoUnits(MATH_G5_1, 5);
+const g5Term2Units = splitIntoUnits(MATH_G5_2, 5);
+const g5Term3Units = splitIntoUnits(MATH_G5_3, 5);
+
+export const MATH_G5_UNIT_DATA: Record<string, GeneralProblem[]> = {
+    MATH_G5_U01: [], // 整数 と 小数
+    MATH_G5_U02: [], // 体積
+    MATH_G5_U03: [], // 小数の かけ算
+    MATH_G5_U04: [], // 小数の わり算
+    MATH_G5_U05: [], // 合同な 図形
+    MATH_G5_U06: [], // 分数 と 小数・整数
+    MATH_G5_U07: [], // 分数の たし算 と ひき算
+    MATH_G5_U08: [], // 平均
+    MATH_G5_U09: [], // 単位量あたりの 大きさ
+    MATH_G5_U10: [], // 速さ
+    MATH_G5_U11: [], // 比例
+    MATH_G5_U12: [], // 円 と 正多角形
+    MATH_G5_U13: [], // 角柱 と 円柱
+    MATH_G5_U14: [], // 割合
+    MATH_G5_U15: [], // 帯グラフ と 円グラフ
+};
+
+const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
+    switch (unitId) {
+        case 'MATH_G5_U01': {
+            const a = (n % 900) + 100;
+            if (n % 2 === 0) {
+                return { question: `${a} を 10でわると？`, answer: `${a / 10}`, options: d(`${a / 10}`, `${a * 10}`, `${a}`, `${a / 100}`), hint: "小数点を左へ1つ。" };
+            }
+            return { question: `${a / 10} を 10倍すると？`, answer: `${a}`, options: d(`${a}`, `${a / 10}`, `${a * 10}`, `${a / 100}`), hint: "10倍は 小数点を右へ1つ。" };
+        }
+        case 'MATH_G5_U02': {
+            const a = (n % 6) + 2;
+            const b = (n % 5) + 3;
+            const c = (n % 4) + 2;
+            if (n % 2 === 0) {
+                return { question: `たて${a}cm よこ${b}cm 高さ${c}cm の体積は？`, answer: `${a * b * c}cm3`, options: d(`${a * b * c}cm3`, `${a + b + c}cm3`, `${a * b}cm2`, `${a * b * c * 2}cm3`), hint: "たて×よこ×高さ。" };
+            }
+            return { question: `底面積が ${a * b}cm2、高さが ${c}cm の体積は？`, answer: `${a * b * c}cm3`, options: d(`${a * b * c}cm3`, `${a * b + c}cm3`, `${a * b}cm3`, `${c}cm3`), hint: "底面積×高さ。" };
+        }
+        case 'MATH_G5_U03': {
+            const a = (n % 9) + 1;
+            const b = (n % 8) + 1;
+            const product = (a * b) / 100;
+            if (n % 2 === 0) {
+                return { question: `0.${a} × 0.${b} = ?`, answer: `${product}`, options: d(`${product}`, `0.${a * b}`, `${a * b}`, `0.00${a * b}`), hint: "小数第1位×小数第1位。" };
+            }
+            return { question: `0.${a} を ${b}倍すると？`, answer: `${(a * b) / 10}`, options: d(`${(a * b) / 10}`, `${product}`, `${a * b}`, `0.${a + b}`), hint: "小数×整数 でも考えられる。" };
+        }
+        case 'MATH_G5_U04': {
+            const b = (n % 8) + 2;
+            const q = (n % 6) + 1;
+            const a = b * q;
+            if (n % 2 === 0) {
+                return { question: `${a}.${a % 10} ÷ ${b} = ?`, answer: `${q}.${Math.floor((a % 10) / b)}`, options: d(`${q}.${Math.floor((a % 10) / b)}`, `${q}`, `${a / b}`, `${q + 1}`), hint: "整数部分と小数部分を順に考える。" };
+            }
+            return { question: `${a}.${a % 10} を ${b} でわると、商は ${q} より 大きい？小さい？`, answer: "大きい", options: d("大きい", "小さい", "同じ", "わからない"), hint: "小数部分があるので ${q} より少し大きい。" };
+        }
+        case 'MATH_G5_U05': {
+            return n % 2 === 0
+                ? { question: "このような図形で合同とは？", answer: "形と大きさが同じ", options: d("形と大きさが同じ", "形だけ同じ", "面積だけ同じ", "色だけ同じ"), hint: "重ねてぴったり重なる。", visual: { kind: 'polygon', sides: 4 } }
+                : { question: "三角形の合同条件の1つは？", answer: "3辺がそれぞれ等しい", options: d("3辺がそれぞれ等しい", "3角が等しい", "面積が等しい", "周が等しい"), hint: "辺と角の条件を使う。", visual: { kind: 'polygon', sides: 3 } };
+        }
+        case 'MATH_G5_U06': {
+            const num = (n % 9) + 1;
+            const p = n % 4;
+            if (p === 0) {
+                return { question: `${num}/10 を小数で書くと？`, answer: `0.${num}`, options: d(`0.${num}`, `${num}.0`, `${num}/100`, `1.${num}`), hint: "10分のいくつかを考える。", visual: { kind: 'fraction', numerator: num, denominator: 10 } };
+            }
+            if (p === 1) {
+                return { question: `0.${num} を分数で書くと？`, answer: `${num}/10`, options: d(`${num}/10`, `${num}/100`, `${10}/${num}`, `${num}`), hint: "小数第一位は10分のいくつ。", visual: { kind: 'fraction', numerator: num, denominator: 10 } };
+            }
+            if (p === 2) {
+                return { question: `${num}/10 は 1より 小さい？大きい？`, answer: "小さい", options: d("小さい", "大きい", "同じ", "わからない"), hint: "10分の1から9/10までは1より小さい。", visual: { kind: 'fraction', numerator: num, denominator: 10 } };
+            }
+            return { question: `${num}/10 と 0.${num} は 同じ？`, answer: "同じ", options: d("同じ", "ちがう", "くらべられない", "わからない"), hint: "分数と小数の対応。", visual: { kind: 'fraction', numerator: num, denominator: 10 } };
+        }
+        case 'MATH_G5_U07': {
+            const denominator = (n % 8) + 2;
+            const a = (n % (denominator - 1)) + 1;
+            const b = Math.min(denominator - 1, a + 1);
+            const p = n % 4;
+            if (p === 0) {
+                return {
+                    question: `${a}/${denominator} + ${b}/${denominator} = ?`,
+                    answer: `${a + b}/${denominator}`,
+                    options: d(`${a + b}/${denominator}`, `${a + b}/${denominator * 2}`, `${a}/${denominator}`, `${b}/${denominator}`),
+                    hint: "分母が同じなら分子を足す。",
+                    visual: { kind: 'fraction_operation', left: { n: a, d: denominator }, right: { n: b, d: denominator }, op: '+' }
+                };
+            }
+            if (p === 1) {
+                const big = Math.max(a, b);
+                const small = Math.min(a, b);
+                return {
+                    question: `${big}/${denominator} - ${small}/${denominator} = ?`,
+                    answer: `${big - small}/${denominator}`,
+                    options: d(`${big - small}/${denominator}`, `${big + small}/${denominator}`, `${small}/${denominator}`, `${big}/${denominator}`),
+                    hint: "分母が同じなら分子を引く。",
+                    visual: { kind: 'fraction_operation', left: { n: big, d: denominator }, right: { n: small, d: denominator }, op: '-' }
+                };
+            }
+            if (p === 2) {
+                return {
+                    question: `${a}/${denominator} と ${b}/${denominator}。 大きいのは？`,
+                    answer: `${b}/${denominator}`,
+                    options: d(`${b}/${denominator}`, `${a}/${denominator}`, "同じ", "くらべられない"),
+                    hint: "分母が同じなら分子が大きいほう。",
+                    visual: { kind: 'fraction_operation', left: { n: a, d: denominator }, right: { n: b, d: denominator }, op: '>' }
+                };
+            }
+            return {
+                question: `${a}/${denominator} と ${a}/${denominator} は 同じ？`,
+                answer: "同じ",
+                options: d("同じ", "ちがう", `${a}/${denominator}`, `${b}/${denominator}`),
+                hint: "同じ分数どうし。",
+                visual: { kind: 'fraction_operation', left: { n: a, d: denominator }, right: { n: a, d: denominator }, op: '>' }
+            };
+        }
+        case 'MATH_G5_U08': {
+            const a = (n % 30) + 60;
+            const b = (n % 20) + 70;
+            const c = (n % 10) + 80;
+            const avg = Math.floor((a + b + c) / 3);
+            if (n % 2 === 0) {
+                return { question: `${a}, ${b}, ${c} の平均は？`, answer: `${avg}`, options: d(`${avg}`, `${a + b + c}`, `${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`), hint: "合計÷個数。" };
+            }
+            return { question: `3この数の平均が ${avg}。 合計は？`, answer: `${avg * 3}`, options: d(`${avg * 3}`, `${avg}`, `${avg + 3}`, `${a + b + c}`), hint: "平均×個数。" };
+        }
+        case 'MATH_G5_U09': {
+            const people = (n % 8 + 2) * 3;
+            const area = (n % 4) + 2;
+            if (n % 2 === 0) {
+                return { question: `${area}m2 に ${people}人。1m2あたりは？`, answer: `${people / area}人`, options: d(`${people / area}人`, `${people * area}人`, `${people - area}人`, `${area / people}人`), hint: "人数÷面積。" };
+            }
+            return { question: `1m2あたり ${people / area}人 の部屋が ${area}m2。 全部で何人？`, answer: `${people}人`, options: d(`${people}人`, `${people / area}人`, `${area}人`, `${people + area}人`), hint: "単位量あたりの大きさ×広さ。" };
+        }
+        case 'MATH_G5_U10': {
+            const speed = (n % 6 + 3) * 10;
+            const h = (n % 4) + 1;
+            if (n % 2 === 0) {
+                return { question: `時速${speed}km で ${h}時間。道のりは？`, answer: `${speed * h}km`, options: d(`${speed * h}km`, `${speed / h}km`, `${speed + h}km`, `${h}km`), hint: "速さ×時間。" };
+            }
+            return { question: `${speed * h}km を ${h}時間で 進むと 時速は？`, answer: `${speed}km`, options: d(`${speed}km`, `${h}km`, `${speed * h}km`, `${speed / h}km`), hint: "道のり÷時間。" };
+        }
+        case 'MATH_G5_U11': {
+            const x = (n % 6) + 1;
+            if (n % 2 === 0) {
+                return { question: `比例で y=3x。 x=${x} のとき y=?`, answer: `${3 * x}`, options: d(`${3 * x}`, `${x + 3}`, `${x}`, `${x * x}`), hint: "一定の割合で増える。" };
+            }
+            return { question: `比例で y=3x。 y=${3 * x} のとき x=?`, answer: `${x}`, options: d(`${x}`, `${3 * x}`, `${x + 3}`, `${x * x}`), hint: "比例定数 3 で わる。" };
+        }
+        case 'MATH_G5_U12': {
+            const nSides = (n % 5) + 3;
+            return { question: `この正${nSides}角形の中心角は？`, answer: `${360 / nSides}度`, options: d(`${360 / nSides}度`, `${180 / nSides}度`, `${nSides * 10}度`, "90度"), hint: "360÷辺の数。", visual: { kind: 'polygon', sides: nSides } };
+        }
+        case 'MATH_G5_U13': {
+            const p = n % 6;
+            if (p === 0) {
+                return { question: "この立体（円柱）の底面の形は？", answer: "円", options: d("円", "三角形", "長方形", "正方形"), hint: "上下の面を考える。", visual: { kind: 'circle' } };
+            }
+            if (p === 1) {
+                return { question: "角柱の体積公式は？", answer: "底面積×高さ", options: d("底面積×高さ", "底面周×高さ", "たて×よこ", "半径×高さ"), hint: "柱の体積は同じ形。", visual: { kind: 'cube' } };
+            }
+            if (p === 2) {
+                return { question: "円柱の体積公式として正しいのは？", answer: "底面積×高さ", options: d("底面積×高さ", "円周×高さ", "半径×高さ", "直径×高さ"), hint: "角柱と同じ。", visual: { kind: 'circle' } };
+            }
+            if (p === 3) {
+                return { question: "円柱の展開図で、側面は何の形？", answer: "長方形", options: d("長方形", "三角形", "円", "台形"), hint: "まきついた面をひらく。", visual: { kind: 'circle' } };
+            }
+            if (p === 4) {
+                return { question: "三角柱の頂点の数は？", answer: "6こ", options: d("6こ", "3こ", "8こ", "9こ"), hint: "上に3こ、下に3こ。", visual: { kind: 'cube' } };
+            }
+            return { question: "三角柱の辺の数は？", answer: "9本", options: d("9本", "6本", "12本", "15本"), hint: "上3本、下3本、横3本。", visual: { kind: 'cube' } };
+        }
+        case 'MATH_G5_U14': {
+            const base = (n % 9 + 1) * 100;
+            const pct = ((n % 5) + 1) * 10;
+            if (n % 2 === 0) {
+                return { question: `${base}円 の ${pct}% は？`, answer: `${(base * pct) / 100}円`, options: d(`${(base * pct) / 100}円`, `${base - (base * pct) / 100}円`, `${pct}円`, `${base * pct}円`), hint: "もとにする量×割合。" };
+            }
+            return { question: `${base}円 の ${pct}%引き の ねだんは？`, answer: `${base - (base * pct) / 100}円`, options: d(`${base - (base * pct) / 100}円`, `${(base * pct) / 100}円`, `${base}円`, `${base + (base * pct) / 100}円`), hint: "割引は 元のねだん から ひく。" };
+        }
+        case 'MATH_G5_U15': {
+            const a = (n % 6) + 2;
+            const b = (n % 5) + 1;
+            const c = (n % 4) + 1;
+            const total = a + b + c;
+            const p = n % 4;
+            if (p === 0) {
+                return { question: `A,B,C の合計は？`, answer: `${total}`, options: d(`${total}`, `${a * b * c}`, `${a + b}`, `${a + c}`), hint: "まず全体を出す。", visual: { kind: 'bar_chart', values: [a, b, c], labels: ["A", "B", "C"] } };
+            }
+            if (p === 1) {
+                const max = Math.max(a, b, c);
+                const winners = [["A", a], ["B", b], ["C", c]].filter(([, v]) => v === max).map(([label]) => label);
+                const answer = winners.length === 1 ? winners[0] : "同じ";
+                const wrongs = ["A", "B", "C", "同じ"].filter((label) => label !== answer).slice(0, 3);
+                return { question: `いちばん大きい割合の項目は？`, answer, options: d(answer, ...wrongs), hint: "最大値の項目。", visual: { kind: 'bar_chart', values: [a, b, c], labels: ["A", "B", "C"] } };
+            }
+            if (p === 2) {
+                return { question: `A の割合は 全体の 何分のいくつ？`, answer: `${a}/${total}`, options: d(`${a}/${total}`, `${total}/${a}`, `${a + total}/${total}`, `${a}/${b + c}`), hint: "項目÷全体。", visual: { kind: 'bar_chart', values: [a, b, c], labels: ["A", "B", "C"] } };
+            }
+            return { question: `A と B の差は？`, answer: `${Math.abs(a - b)}`, options: d(`${Math.abs(a - b)}`, `${a + b}`, `${Math.max(a, b)}`, `${Math.min(a, b)}`), hint: "2つの差をみる。", visual: { kind: 'bar_chart', values: [a, b], labels: ["A", "B"] } };
+        }
+        default:
+            return { question: "5 + 5 = ?", answer: "10", options: d("10", "9", "11", "8"), hint: "たし算。" };
+    }
+};
+
+Object.keys(MATH_G5_UNIT_DATA).forEach((unitId) => {
+    const problems = MATH_G5_UNIT_DATA[unitId];
+    while (problems.length < 20) {
+        problems.push(makeUnitProblem(unitId, problems.length));
+    }
+});
+
+export const MATH_G5_DATA: Record<string, GeneralProblem[]> = {
+    MATH_G5_1,
+    MATH_G5_2,
+    MATH_G5_3,
+    ...MATH_G5_UNIT_DATA,
+};
+

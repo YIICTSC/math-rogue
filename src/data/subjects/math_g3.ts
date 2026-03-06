@@ -1,8 +1,7 @@
 
 import { GeneralProblem, d } from './utils';
 
-export const MATH_G3_DATA: Record<string, GeneralProblem[]> = {
-    MATH_G3_1: [
+const MATH_G3_1: GeneralProblem[] = [
         { question: "「12 ÷ 3 ＝ 」 答えは なに？", answer: "4", options: d("4", "3", "5", "6"), hint: "3 × □ ＝ 12 を かんがえよう。" },
         { question: "12この リンゴを 3人に 同じ数ずつ 分けると、1人分は 何こ？", answer: "4個", options: d("4個", "3個", "5個", "15個"), hint: "わり算の もんだいだよ。" },
         { question: "「0 ÷ 5 ＝ 」 答えは なに？", answer: "0", options: d("0", "5", "1", "なし"), hint: "0を 何人で 分けても 0だね。" },
@@ -53,8 +52,9 @@ export const MATH_G3_DATA: Record<string, GeneralProblem[]> = {
         { question: "「3km - 500m = 」 答えは？", answer: "2km 500m", options: d("2km 500m", "2km", "3km 500m", "2500m"), hint: "3000m - 500m。" },
         { question: "「130 × 3 = 」 答えは？", answer: "390", options: d("390", "360", "133", "300"), hint: "あんざんで できるかな？" },
         { question: "「210 ÷ 7 = 」 答えは？", answer: "30", options: d("30", "3", "300", "21"), hint: "21 ÷ 7 を かんがえて。" }
-    ],
-    MATH_G3_2: [
+    ];
+
+const MATH_G3_2: GeneralProblem[] = [
         { question: "「24 × 30」 の 答えは？", answer: "720", options: d("720", "72", "240", "600"), hint: "24 × 3 の あとに 0 を つけよう。" },
         { question: "小数（しょうすう）の問題。 0.1 を 10こ あつめると？", answer: "1", options: d("1", "0.10", "10", "0"), hint: "1を 10等分（とうぶん）したのが 0.1だよ。" },
         { question: "「0.3 ＋ 0.5 ＝ 」 答えは？", answer: "0.8", options: d("0.8", "8", "0.08", "3.5"), hint: "小数の たし算。" },
@@ -105,8 +105,9 @@ export const MATH_G3_DATA: Record<string, GeneralProblem[]> = {
         { question: "「12 × 5 = 」 答えは？", answer: "60", options: d("60", "50", "17", "70"), hint: "とけいの 数字を おもいだして。" },
         { question: "「25 × 4 = 」 答えは？", answer: "100", options: d("100", "80", "29", "125"), hint: "よく出る 組み合わせ。" },
         { question: "「100 ÷ 4 = 」 答えは？", answer: "25", options: d("25", "20", "50", "30"), hint: "100の 半分、の 半分。" }
-    ],
-    MATH_G3_3: [
+    ];
+
+const MATH_G3_3: GeneralProblem[] = [
         { question: "「48 ÷ 4 ＝ 」 あんざんで 答えは？", answer: "12", options: d("12", "10", "11", "14"), hint: "40÷4 と 8÷4 に 分けよう。" },
         { question: "「630 ÷ 3 ＝ 」 答えは？", answer: "210", options: d("210", "21", "230", "310"), hint: "63 ÷ 3 は？" },
         { question: "一億（いちおく）は、一万（いちまん）を 何こ あつめた 数？", answer: "10000こ", options: d("10000こ", "100こ", "1000こ", "10こ"), hint: "万が 万こで 億に なるよ。" },
@@ -158,5 +159,231 @@ export const MATH_G3_DATA: Record<string, GeneralProblem[]> = {
         { question: "「66 ÷ 6 = 」 答えは？", answer: "11", options: d("11", "6", "60", "10"), hint: "10倍と 1倍。" },
         { question: "「□ ＋ 5 ＝ 12」 □ は いくつ？", answer: "7", options: d("7", "17", "5", "60"), hint: "12 － 5 ＝ ?" },
         { question: "「□ × 4 ＝ 32」 □ は いくつ？", answer: "8", options: d("8", "36", "28", "128"), hint: "32 ÷ 4 ＝ ?" },
-    ]
+    ];
+
+const splitIntoUnitsByCounts = (problems: GeneralProblem[], counts: number[]): GeneralProblem[][] => {
+    const totalWeight = counts.reduce((sum, c) => sum + c, 0);
+    const totalProblems = problems.length;
+    const targetSizes = counts.map((count) => Math.floor((totalProblems * count) / totalWeight));
+    let rest = totalProblems - targetSizes.reduce((sum, n) => sum + n, 0);
+    let idx = 0;
+    while (rest > 0) {
+        targetSizes[idx % targetSizes.length] += 1;
+        rest -= 1;
+        idx += 1;
+    }
+
+    const units: GeneralProblem[][] = [];
+    let start = 0;
+    targetSizes.forEach((size) => {
+        units.push(problems.slice(start, start + size));
+        start += size;
+    });
+    return units;
 };
+
+const g3Term1Units = splitIntoUnitsByCounts(MATH_G3_1, [1, 1, 1, 1, 1]);
+const g3Term2Units = splitIntoUnitsByCounts(MATH_G3_2, [1, 1, 1, 1, 1]);
+const g3Term3Units = splitIntoUnitsByCounts(MATH_G3_3, [1, 1, 1, 1]);
+
+export const MATH_G3_UNIT_DATA: Record<string, GeneralProblem[]> = {
+    MATH_G3_U01: [], // 表 と グラフ
+    MATH_G3_U02: [], // 大きい 数（1000より大きい数）
+    MATH_G3_U03: [], // たし算（3けた・4けた）
+    MATH_G3_U04: [], // ひき算（3けた・4けた）
+    MATH_G3_U05: [], // 時こく と 時かん
+    MATH_G3_U06: [], // 長さ（km と m）
+    MATH_G3_U07: [], // かけ算（2けた×1けた など）
+    MATH_G3_U08: [], // 円 と きゅう
+    MATH_G3_U09: [], // わり算（わり算のいみ）
+    MATH_G3_U10: [], // わり算（あまりのある計算）
+    MATH_G3_U11: [], // 重さ（g と kg）
+    MATH_G3_U12: [], // 小数
+    MATH_G3_U13: [], // 分数
+    MATH_G3_U14: [], // □をつかった 式
+};
+
+const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
+    switch (unitId) {
+        case 'MATH_G3_U01': {
+            const a = (n % 9) + 1;
+            const b = (n % 6) + 1;
+            const c = (n % 7) + 1;
+            const p = n % 4;
+            if (p === 0) {
+                const max = Math.max(a, b, c);
+                const winners = [["ねこ", a], ["いぬ", b], ["うさぎ", c]].filter(([, v]) => v === max).map(([label]) => label);
+                const answer = winners.length === 1 ? winners[0] : "おなじ";
+                const wrongs = ["ねこ", "いぬ", "うさぎ", "おなじ"].filter((label) => label !== answer).slice(0, 3);
+                return { question: `ぼうグラフ。 いちばん おおいの どうぶつは？`, answer, options: d(answer, ...wrongs), hint: "いちばん高いぼう。", visual: { kind: 'bar_chart', values: [a, b, c], labels: ["ねこ", "いぬ", "うさぎ"] } };
+            }
+            if (p === 1) {
+                return { question: `ねこ と いぬ の 合計は？`, answer: `${a + b}ひき`, options: d(`${a + b}ひき`, `${a + b + 1}ひき`, `${a - b}ひき`, `${a}ひき`), hint: "2つのぼうを たす。", visual: { kind: 'bar_chart', values: [a, b], labels: ["ねこ", "いぬ"] } };
+            }
+            if (p === 2) {
+                return { question: `ねこは いぬより 何ひき多い？`, answer: `${Math.abs(a - b)}ひき`, options: d(`${Math.abs(a - b)}ひき`, `${a + b}ひき`, `${Math.max(a, b)}ひき`, `${Math.min(a, b)}ひき`), hint: "2本の差をみる。", visual: { kind: 'bar_chart', values: [a, b], labels: ["ねこ", "いぬ"] } };
+            }
+            return { question: `3しゅるい ぜんぶで 何ひき？`, answer: `${a + b + c}ひき`, options: d(`${a + b + c}ひき`, `${a + b}ひき`, `${b + c}ひき`, `${a + c}ひき`), hint: "3本ともたす。", visual: { kind: 'bar_chart', values: [a, b, c], labels: ["ねこ", "いぬ", "うさぎ"] } };
+        }
+        case 'MATH_G3_U02': {
+            const value = 1000 + n * 37;
+            if (n % 2 === 0) {
+                return { question: `${value} は 1000より おおきい？`, answer: "はい", options: d("はい", "いいえ", "おなじ", "わからない"), hint: "1000を こえているか 見よう。" };
+            }
+            return { question: `1000 と ${value}。 大きいのは？`, answer: `${value}`, options: d(`${value}`, "1000", "同じ", "わからない"), hint: "1000を こえているか 比べよう。" };
+        }
+        case 'MATH_G3_U03': {
+            const a = 200 + (n % 700);
+            const b = 100 + (n % 500);
+            const s = a + b;
+            if (n % 2 === 0) {
+                return { question: `${a} + ${b} = ?`, answer: `${s}`, options: d(`${s}`, `${s + 10}`, `${s - 10}`, `${a}`), hint: "3けた・4けたの たし算。" };
+            }
+            return { question: `${s} に なる 式は どれ？`, answer: `${a} + ${b}`, options: d(`${a} + ${b}`, `${a} + ${b + 10}`, `${a - 10} + ${b}`, `${s} + ${b}`), hint: "和が ${s} に なる式を えらぼう。" };
+        }
+        case 'MATH_G3_U04': {
+            const b = 100 + (n % 500);
+            const a = b + 200 + (n % 400);
+            const dff = a - b;
+            if (n % 2 === 0) {
+                return { question: `${a} - ${b} = ?`, answer: `${dff}`, options: d(`${dff}`, `${dff + 10}`, `${dff - 10}`, `${a}`), hint: "3けた・4けたの ひき算。" };
+            }
+            return { question: `${dff} に なる 式は どれ？`, answer: `${a} - ${b}`, options: d(`${a} - ${b}`, `${a} - ${b - 10}`, `${a + 10} - ${b}`, `${dff} - ${b}`), hint: "差が ${dff} に なる式を えらぼう。" };
+        }
+        case 'MATH_G3_U05': {
+            const h = (n % 10) + 1;
+            const m = (n % 6) * 10;
+            const ansH = h + Math.floor((m + 20) / 60);
+            const ansM = (m + 20) % 60;
+            return {
+                question: `この とけいの 20分後は？`,
+                answer: `${ansH}時${ansM}分`,
+                options: d(`${ansH}時${ansM}分`, `${h}時${m}分`, `${h}時${(m + 40) % 60}分`, `${h + 1}時${m}分`),
+                hint: "60分で 1時間 くりあがる。",
+                visual: { kind: 'clock', hour: h, minute: m }
+            };
+        }
+        case 'MATH_G3_U06': {
+            const km = (n % 5) + 1;
+            const m = (n % 9) * 100;
+            if (n % 2 === 0) {
+                return { question: `${km}km${m}m は 何m？`, answer: `${km * 1000 + m}m`, options: d(`${km * 1000 + m}m`, `${km * 100 + m}m`, `${km * 1000}m`, `${m}m`), hint: "1km=1000m。" };
+            }
+            return { question: `${km * 1000 + m}m は 何km何m？`, answer: `${km}km${m}m`, options: d(`${km}km${m}m`, `${km}km`, `${m}m`, `${km + 1}km${m}m`), hint: "1000m ごとに km に なおす。" };
+        }
+        case 'MATH_G3_U07': {
+            const a = (n % 8) + 12;
+            const b = (n % 7) + 2;
+            const p = a * b;
+            if (n % 2 === 0) {
+                return { question: `${a} × ${b} = ?`, answer: `${p}`, options: d(`${p}`, `${p + b}`, `${p - b}`, `${a + b}`), hint: "2けた×1けた の かけ算。" };
+            }
+            return { question: `${a} × □ = ${p}。 □ は？`, answer: `${b}`, options: d(`${b}`, `${a}`, `${b + 1}`, `${Math.max(1, b - 1)}`), hint: "かけ算を ぎゃくに見よう。" };
+        }
+        case 'MATH_G3_U08': {
+            if (n % 2 === 0) {
+                const r = (n % 9) + 1;
+                return { question: `この 円の 半径が ${r}cm。 直径は？`, answer: `${r * 2}cm`, options: d(`${r * 2}cm`, `${r}cm`, `${r * 3}cm`, `${Math.max(1, r - 1)}cm`), hint: "直径は 半径の2倍。", visual: { kind: 'circle', showRadius: true } };
+            }
+            return { question: "きゅうを どこで 切っても、切り口は 何の形？", answer: "円", options: d("円", "正方形", "長方形", "三角形"), hint: "ボールを 思い出して。", visual: { kind: 'circle' } };
+        }
+        case 'MATH_G3_U09': {
+            const divisor = (n % 8) + 2;
+            const q = (n % 6) + 3;
+            const nmr = divisor * q;
+            if (n % 2 === 0) {
+                return { question: `${nmr} ÷ ${divisor} = ?`, answer: `${q}`, options: d(`${q}`, `${divisor}`, `${q + 1}`, `${q - 1}`), hint: "かけ算で たしかめよう。" };
+            }
+            return { question: `□ × ${divisor} = ${nmr}。 □ は？`, answer: `${q}`, options: d(`${q}`, `${divisor}`, `${q + 1}`, `${Math.max(1, q - 1)}`), hint: "わり算を かけ算に なおそう。" };
+        }
+        case 'MATH_G3_U10': {
+            const divisor = (n % 7) + 3;
+            const q = (n % 5) + 2;
+            const r = (n % (divisor - 1)) + 1;
+            const nmr = divisor * q + r;
+            return { question: `${nmr} ÷ ${divisor} = ?`, answer: `${q} あまり ${r}`, options: d(`${q} あまり ${r}`, `${q + 1} あまり ${r}`, `${q} あまり ${Math.max(0, r - 1)}`, `${q - 1} あまり ${r}`), hint: "あまりは わる数より 小さい。" };
+        }
+        case 'MATH_G3_U11': {
+            const kg = (n % 4) + 1;
+            const g = (n % 9) * 100;
+            if (n % 2 === 0) {
+                return { question: `${kg}kg${g}g は 何g？`, answer: `${kg * 1000 + g}g`, options: d(`${kg * 1000 + g}g`, `${kg * 100 + g}g`, `${kg * 1000}g`, `${g}g`), hint: "1kg=1000g。" };
+            }
+            return { question: `${kg * 1000 + g}g は 何kg何g？`, answer: `${kg}kg${g}g`, options: d(`${kg}kg${g}g`, `${kg}kg`, `${g}g`, `${kg + 1}kg${g}g`), hint: "1000g ごとに kg に なおす。" };
+        }
+        case 'MATH_G3_U12': {
+            const a = (n % 9) + 1;
+            const b = (n % 9) + 1;
+            const sum = (a + b) / 10;
+            if (n % 2 === 0) {
+                return { question: `0.${a} + 0.${b} = ?`, answer: `${sum}`, options: d(`${sum}`, `0.${a}`, `0.${b}`, `${a + b}`), hint: "小数第1位どうしを たそう。" };
+            }
+            return { question: `0.1 が ${a}こ と 0.1 が ${b}こ。 あわせて いくつ？`, answer: `${sum}`, options: d(`${sum}`, `${a + b}`, `0.${a}`, `1.${Math.max(0, a + b - 10)}`), hint: "0.1 を 何こ 集めたかで 考える。" };
+        }
+        case 'MATH_G3_U13': {
+            const den = (n % 6) + 3;
+            const num1 = (n % (den - 1)) + 1;
+            const num2 = Math.min(den - 1, num1 + 1);
+            const p = n % 4;
+            if (p === 0) {
+                return {
+                    question: `${num1}/${den} と ${num2}/${den}。 大きいのは？`,
+                    answer: `${num2}/${den}`,
+                    options: d(`${num2}/${den}`, `${num1}/${den}`, "おなじ", "くらべられない"),
+                    hint: "分母が 同じなら 分子で くらべる。",
+                    visual: { kind: 'fraction_operation', left: { n: num1, d: den }, right: { n: num2, d: den }, op: '>' }
+                };
+            }
+            if (p === 1) {
+                return {
+                    question: `${num1}/${den} と ${num2}/${den}。 小さいのは？`,
+                    answer: `${num1}/${den}`,
+                    options: d(`${num1}/${den}`, `${num2}/${den}`, "おなじ", "くらべられない"),
+                    hint: "分母が 同じなら 分子が 小さいほうが 小さい。",
+                    visual: { kind: 'fraction_operation', left: { n: num1, d: den }, right: { n: num2, d: den }, op: '<' }
+                };
+            }
+            if (p === 2) {
+                return {
+                    question: `${num1}/${den} と ${num1}/${den}。 同じものは？`,
+                    answer: "おなじ",
+                    options: d("おなじ", `${num1}/${den}`, `${num2}/${den}`, "ちがう"),
+                    hint: "まったく 同じ分数なら おなじ。",
+                    visual: { kind: 'fraction_operation', left: { n: num1, d: den }, right: { n: num1, d: den }, op: '>' }
+                };
+            }
+            return {
+                question: `${num1}/${den} と ${num2}/${den}。 分子が 大きいのは？`,
+                answer: `${num2}/${den}`,
+                options: d(`${num2}/${den}`, `${num1}/${den}`, "おなじ", "わからない"),
+                hint: "分母が 同じなら 分子に 注目。",
+                visual: { kind: 'fraction_operation', left: { n: num1, d: den }, right: { n: num2, d: den }, op: '>' }
+            };
+        }
+        case 'MATH_G3_U14': {
+            const x = (n % 8) + 2;
+            const y = x + (n % 5) + 1;
+            if (n % 2 === 0) {
+                return { question: `□ + ${x} = ${x + y}。 □ は？`, answer: `${y}`, options: d(`${y}`, `${x}`, `${x + y}`, `${y + 1}`), hint: "逆の計算を しよう。" };
+            }
+            return { question: `${x} + □ = ${x + y}。 □ は？`, answer: `${y}`, options: d(`${y}`, `${x}`, `${x + y}`, `${y + 1}`), hint: "たされる数が どこにあるかを 見よう。" };
+        }
+        default:
+            return { question: "3 + 4 = ?", answer: "7", options: d("7", "6", "8", "5"), hint: "たし算。" };
+    }
+};
+
+Object.keys(MATH_G3_UNIT_DATA).forEach((unitId) => {
+    const problems = MATH_G3_UNIT_DATA[unitId];
+    while (problems.length < 20) {
+        problems.push(makeUnitProblem(unitId, problems.length));
+    }
+});
+
+export const MATH_G3_DATA: Record<string, GeneralProblem[]> = {
+    MATH_G3_1,
+    MATH_G3_2,
+    MATH_G3_3,
+    ...MATH_G3_UNIT_DATA,
+};
+

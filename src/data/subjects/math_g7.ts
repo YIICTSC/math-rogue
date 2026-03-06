@@ -1,9 +1,8 @@
 
 import { GeneralProblem, d } from './utils';
 
-export const MATH_G7_DATA: Record<string, GeneralProblem[]> = {
-    // --- 中1 1学期: 正負の数・文字式・一次方程式 (50問) ---
-    MATH_G7_1: [
+// --- 中1 1学期: 正負の数・文字式・一次方程式 (50問) ---
+const MATH_G7_1: GeneralProblem[] = [
         { question: "「－5 ＋ 3」を計算せよ。", answer: "－2", options: d("－2", "2", "－8", "8"), hint: "0から左に5行って、右に3戻る。" },
         { question: "「(－4) × (－2)」を計算せよ。", answer: "8", options: d("8", "－8", "－6", "6"), hint: "負の数 × 負の数 は 正の数になるよ。" },
         { question: "「10 ÷ (－2)」を計算せよ。", answer: "－5", options: d("－5", "5", "－20", "8"), hint: "異符号の割り算の符号はマイナス。" },
@@ -54,10 +53,10 @@ export const MATH_G7_DATA: Record<string, GeneralProblem[]> = {
         { question: "「4x ＋ 7 ＝ 15」 x の値は？", answer: "2", options: d("2", "8", "22", "5.5"), hint: "4x ＝ 8。" },
         { question: "「3(x － 4) ＝ 6」 x の値は？", answer: "6", options: d("6", "2", "10", "3"), hint: "x － 4 ＝ 2。" },
         { question: "不等式「x ＋ 3 ＞ 10」を解け。", answer: "x ＞ 7", options: d("x ＞ 7", "x ＜ 7", "x ≧ 7", "x ＝ 7"), hint: "不等号の向きに注意。" }
-    ],
+    ];
 
-    // --- 中1 2学期: 比例・反比例・平面図形 (50問) ---
-    SOCIAL_7_2: [
+// --- 中1 2学期: 比例・反比例・平面図形 (50問) ---
+const MATH_G7_2: GeneralProblem[] = [
         { question: "「比例（ひれい）」の基本の式は？", answer: "y ＝ ax", options: d("y ＝ ax", "y ＝ a/x", "y ＝ x ＋ a", "y ＝ ax²"), hint: "xが2倍になるとyも2倍になる関係。" },
         { question: "「反比例（はんぴれい）」の基本の式は？", answer: "y ＝ a/x", options: d("y ＝ a/x", "y ＝ ax", "xy ＝ a", "y ＝ x/a"), hint: "xが2倍になるとyは 1/2 倍になる。" },
         { question: "比例定数（ひれいていすう） a を求める式は？", answer: "a ＝ y/x", options: d("a ＝ y/x", "a ＝ x/y", "a ＝ xy", "a ＝ x ＋ y"), hint: "y ＝ ax を変形させよう。" },
@@ -107,10 +106,10 @@ export const MATH_G7_DATA: Record<string, GeneralProblem[]> = {
         { question: "比例のグラフが (0, 0) 以外を通ることはある？", answer: "いいえ", options: d("いいえ", "はい", "切片があれば", "わからない"), hint: "y＝ax は必ず原点を通る。" },
         { question: "比例定数が分数のとき（y ＝ 1/2 xなど）、グラフはどうなる？", answer: "傾きがゆるやかな直線", options: d("ゆるやかな直線", "急な直線", "曲線", "階段状"), hint: "xが2進んでyが1上がる。" },
         { question: "平面上の点の位置を確定させるのに必要な数字はいくつ？", answer: "2つ", options: d("2つ", "1つ", "3つ", "なし"), hint: "x座標とy座標だね。" },
-    ],
+    ];
 
-    // --- 中1 3学期: 空間図形・データの活用 (50問) ---
-    SOCIAL_7_3: [
+// --- 中1 3学期: 空間図形・データの活用 (50問) ---
+const MATH_G7_3: GeneralProblem[] = [
         { question: "すべての面が合同な正多角形で、頂点に集まる面の数も等しい立体を？", answer: "正多面体", options: d("正多面体", "半多面体", "角柱", "球"), hint: "世界に5種類しかない特別な形。" },
         { question: "正多面体は全部で何種類？", answer: "5種類", options: d("5種類", "4種類", "6種類", "無限"), hint: "4, 6, 8, 12, 20面体があるよ。" },
         { question: "「角柱」の体積を求める公式は？", answer: "底面積 × 高さ", options: d("底面積 × 高さ", "底面積 × 高さ ÷ 3", "底面積 ＋ 高さ", "辺の合計"), hint: "積み重ねるイメージだね。" },
@@ -160,5 +159,171 @@ export const MATH_G7_DATA: Record<string, GeneralProblem[]> = {
         { question: "円柱の展開図。側面（長方形）の縦の長さは何？", answer: "円柱の高さ", options: d("高さ", "直径", "半径", "円周"), hint: "そのままの高さだね。" },
         { question: "多角柱の辺の数。底面が n 角形なら？", answer: "3n 本", options: d("3n", "2n", "n+2", "4n"), hint: "上n、下n、横n。" },
         { question: "正六角柱の面の数は？", answer: "8個", options: d("8個", "6個", "12個", "18個"), hint: "側面6枚 ＋ 底面2枚。" },
-    ]
+    ];
+
+const splitIntoUnitsByCounts = (problems: GeneralProblem[], counts: number[]): GeneralProblem[][] => {
+    const totalWeight = counts.reduce((s, c) => s + c, 0);
+    const totalProblems = problems.length;
+    const sizes = counts.map((c) => Math.floor((totalProblems * c) / totalWeight));
+    let rest = totalProblems - sizes.reduce((s, n) => s + n, 0);
+    let i = 0;
+    while (rest > 0) {
+        sizes[i % sizes.length] += 1;
+        rest -= 1;
+        i += 1;
+    }
+
+    const out: GeneralProblem[][] = [];
+    let start = 0;
+    sizes.forEach((size) => {
+        out.push(problems.slice(start, start + size));
+        start += size;
+    });
+    return out;
 };
+
+const g7Term1Units = splitIntoUnitsByCounts(MATH_G7_1, [1, 1, 1, 1]);
+const g7Term2Units = splitIntoUnitsByCounts(MATH_G7_2, [1, 1, 1, 1]);
+const g7Term3Units = splitIntoUnitsByCounts(MATH_G7_3, [1, 1, 1]);
+
+export const MATH_G7_UNIT_DATA: Record<string, GeneralProblem[]> = {
+    MATH_G7_U01: [], // 正の数 と 負の数
+    MATH_G7_U02: [], // 正負の数の 加法 と 減法
+    MATH_G7_U03: [], // 正負の数の 乗法 と 除法
+    MATH_G7_U04: [], // 文字式
+    MATH_G7_U05: [], // 文字式の 計算
+    MATH_G7_U06: [], // 一次方程式
+    MATH_G7_U07: [], // 一次方程式の 利用
+    MATH_G7_U08: [], // 比例 と 反比例
+    MATH_G7_U09: [], // 平面図形
+    MATH_G7_U10: [], // 空間図形
+    MATH_G7_U11: [], // 資料の 整理 と 活用
+};
+
+const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
+    switch (unitId) {
+        case 'MATH_G7_U01': {
+            const a = (n % 9) + 1;
+            if (n % 2 === 0) {
+                return { question: `正の数と負の数。 ${a} の反対の数は？`, answer: `${-a}`, options: d(`${-a}`, `${a}`, "0", `${a + 1}`), hint: "符号を反転。" };
+            }
+            return { question: `数直線で 0 から ${a} はなれた負の数は？`, answer: `${-a}`, options: d(`${-a}`, `${a}`, "0", `${-(a + 1)}`), hint: "負の向きに ${a} 進む。" };
+        }
+        case 'MATH_G7_U02': {
+            const a = (n % 7) + 2;
+            const b = (n % 6) + 1;
+            if (n % 2 === 0) {
+                return { question: `${a} + (${ -b }) = ?`, answer: `${a - b}`, options: d(`${a - b}`, `${a + b}`, `${b - a}`, `${a}`), hint: "符号に注意して加減。" };
+            }
+            return { question: `${a} - ${b} = ?`, answer: `${a - b}`, options: d(`${a - b}`, `${a + b}`, `${b - a}`, `${-a - b}`), hint: "減法を加法に直してもよい。" };
+        }
+        case 'MATH_G7_U03': {
+            const a = (n % 8) + 2;
+            const b = (n % 7) + 2;
+            if (n % 2 === 0) {
+                return { question: `(${ -a }) × (${ b }) = ?`, answer: `${-(a * b)}`, options: d(`${-(a * b)}`, `${a * b}`, `${-a + b}`, `${a - b}`), hint: "異符号の積は負。" };
+            }
+            return { question: `(${-(a * b)}) ÷ (${b}) = ?`, answer: `${-a}`, options: d(`${-a}`, `${a}`, `${-b}`, `${a * b}`), hint: "積と商の関係で考える。" };
+        }
+        case 'MATH_G7_U04': {
+            const x = (n % 9) + 2;
+            if (n % 2 === 0) {
+                return { question: `文字式。 x=${x} のとき 2x+3 の値は？`, answer: `${2 * x + 3}`, options: d(`${2 * x + 3}`, `${x + 3}`, `${2 * x}`, `${x * x}`), hint: "代入して計算。" };
+            }
+            return { question: `文字式。 x を使って「${x}円のノートを2冊と3円」を表す式は？`, answer: `2x+3`, options: d(`2x+3`, `${x}+3`, `2+3x`, `x²+3`), hint: "個数はかけ算で表す。" };
+        }
+        case 'MATH_G7_U05': {
+            const a = (n % 6) + 2;
+            const b = (n % 5) + 1;
+            if (n % 2 === 0) {
+                return { question: `${a}x + ${b}x = ?`, answer: `${a + b}x`, options: d(`${a + b}x`, `${a * b}x`, `${a + b}`, `${a - b}x`), hint: "同類項をまとめる。" };
+            }
+            return { question: `${a + b}x を 2つの同類項の和で表すと？`, answer: `${a}x + ${b}x`, options: d(`${a}x + ${b}x`, `${a * b}x`, `${a + b}`, `${a} + ${b}x`), hint: "係数を分けて考える。" };
+        }
+        case 'MATH_G7_U06': {
+            const x = (n % 7) + 2;
+            const a = (n % 4) + 2;
+            const b = a * x + 3;
+            if (n % 2 === 0) {
+                return { question: `${a}x + 3 = ${b}。xは？`, answer: `${x}`, options: d(`${x}`, `${x + 1}`, `${x - 1}`, `${a}`), hint: "移項して解く。" };
+            }
+            return { question: `${a}x = ${a * x}。xは？`, answer: `${x}`, options: d(`${x}`, `${a}`, `${a * x}`, `${x + 1}`), hint: "両辺を ${a} で割る。" };
+        }
+        case 'MATH_G7_U07': {
+            const p = (n % 5) + 2;
+            const q = (n % 6) + 4;
+            const total = p * q;
+            if (n % 2 === 0) {
+                return { question: `一次方程式の利用。1個${p}円の品をx個買って${total}円。xは？`, answer: `${q}`, options: d(`${q}`, `${p}`, `${total}`, `${q + 1}`), hint: "px=total の形。" };
+            }
+            return { question: `x個で${total}円。1個${p}円のとき x を表す式は？`, answer: `${total}/${p}`, options: d(`${total}/${p}`, `${p}/${total}`, `${p}x=${total}`, `${total}-${p}`), hint: "合計 ÷ 単価。" };
+        }
+        case 'MATH_G7_U08': {
+            const x = (n % 6) + 1;
+            if (n % 2 === 0) {
+                return { question: `比例 y=5x。x=${x} のとき y=?`, answer: `${5 * x}`, options: d(`${5 * x}`, `${x + 5}`, `${x * x}`, `${x}`), hint: "y=ax。" };
+            }
+            return { question: `反比例 y=20/x。x=${x} のとき y=?`, answer: `${20 / x}`, options: d(`${20 / x}`, `${5 * x}`, `${x + 20}`, `${x}`), hint: "xとyの積が一定。" };
+        }
+        case 'MATH_G7_U09': {
+            return n % 3 === 0
+                ? { question: "この三角形の内角の和は？", answer: "180度", options: d("180度", "360度", "90度", "270度"), hint: "基本。", visual: { kind: 'polygon', sides: 3, labels: ['A', 'B', 'C'] } }
+                : n % 3 === 1
+                ? { question: "平行線と同位角の関係は？", answer: "等しい", options: d("等しい", "和が180度", "直角", "不定"), hint: "平行線の角の性質。", visual: { kind: 'angle', degrees: 60, parallelLines: true, labels: ['a', 'a'] } }
+                : { question: "平行線と錯角の関係は？", answer: "等しい", options: d("等しい", "和が180度", "直角", "不定"), hint: "Zの形の角。", visual: { kind: 'angle', degrees: 60, parallelLines: true, labels: ['x', 'x'] } };
+        }
+        case 'MATH_G7_U10': {
+            const p = n % 6;
+            if (p === 0) {
+                return { question: "この立体の頂点の数は？", answer: "8個", options: d("8個", "6個", "12個", "4個"), hint: "基本の立体。", visual: { kind: 'cube', showHiddenEdges: true, labels: ['A', 'B', 'C', 'D'] } };
+            }
+            if (p === 1) {
+                return { question: "この立体の辺の数は？", answer: "12本", options: d("12本", "8本", "6本", "16本"), hint: "骨組みを数える。", visual: { kind: 'cube', showHiddenEdges: true, labels: ['A', 'B', 'C', 'D'] } };
+            }
+            if (p === 2) {
+                return { question: "この立体の面の数は？", answer: "6個", options: d("6個", "8個", "12個", "4個"), hint: "上下左右前後。", visual: { kind: 'cube', showHiddenEdges: true, labels: ['A', 'B', 'C', 'D'] } };
+            }
+            if (p === 3) {
+                return { question: "角柱の体積公式は？", answer: "底面積×高さ", options: d("底面積×高さ", "底面周×高さ", "たて×よこ", "辺の和"), hint: "柱の体積。", visual: { kind: 'cube' } };
+            }
+            if (p === 4) {
+                return { question: "円柱の体積公式は？", answer: "底面積×高さ", options: d("底面積×高さ", "円周×高さ", "半径×高さ", "直径×高さ"), hint: "円柱も柱。", visual: { kind: 'circle' } };
+            }
+            return { question: "円柱の展開図で、側面は何の形？", answer: "長方形", options: d("長方形", "円", "三角形", "台形"), hint: "まいた面を広げる。", visual: { kind: 'circle' } };
+        }
+        case 'MATH_G7_U11': {
+            const a = (n % 30) + 40;
+            const b = (n % 20) + 50;
+            const c = (n % 10) + 60;
+            const avg = Math.floor((a + b + c) / 3);
+            const p = n % 4;
+            if (p === 0) {
+                return { question: `資料の整理。${a}, ${b}, ${c} の平均は？`, answer: `${avg}`, options: d(`${avg}`, `${a + b + c}`, `${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`), hint: "合計÷個数。" };
+            }
+            if (p === 1) {
+                return { question: `資料の整理。中央値（小さい順の真ん中）は？`, answer: `${[a, b, c].sort((x, y) => x - y)[1]}`, options: d(`${[a, b, c].sort((x, y) => x - y)[1]}`, `${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`, `${avg}`), hint: "並べ替えて中央を見る。" };
+            }
+            if (p === 2) {
+                return { question: `資料の整理。範囲（最大-最小）は？`, answer: `${Math.max(a, b, c) - Math.min(a, b, c)}`, options: d(`${Math.max(a, b, c) - Math.min(a, b, c)}`, `${a + b + c}`, `${avg}`, `${Math.max(a, b, c)}`), hint: "散らばりの大きさ。" };
+            }
+            return { question: `資料の整理。最大値は？`, answer: `${Math.max(a, b, c)}`, options: d(`${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`, `${avg}`, `${a + b + c}`), hint: "最も大きいデータ。" };
+        }
+        default:
+            return { question: "1 + 1 = ?", answer: "2", options: d("2", "1", "3", "0"), hint: "基本。" };
+    }
+};
+
+Object.keys(MATH_G7_UNIT_DATA).forEach((unitId) => {
+    const problems = MATH_G7_UNIT_DATA[unitId];
+    while (problems.length < 20) {
+        problems.push(makeUnitProblem(unitId, problems.length));
+    }
+});
+
+export const MATH_G7_DATA: Record<string, GeneralProblem[]> = {
+    MATH_G7_1,
+    MATH_G7_2,
+    MATH_G7_3,
+    ...MATH_G7_UNIT_DATA,
+};
+
