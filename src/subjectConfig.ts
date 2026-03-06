@@ -1,7 +1,7 @@
 
 import { GameMode, GameScreen } from './types';
 
-export type SubjectCategoryType = 'MATH' | 'MATH_GRADES' | 'KANJI' | 'SCIENCE' | 'SOCIAL' | 'ENGLISH' | 'MAP_PREF' | 'IT_INFO';
+export type SubjectCategoryType = 'MATH' | 'MATH_GRADES' | 'KOKUGO_GRADES' | 'KANJI' | 'SCIENCE' | 'SOCIAL' | 'ENGLISH' | 'MAP_PREF' | 'IT_INFO';
 
 export interface SubModeConfig {
     id: string;
@@ -62,6 +62,15 @@ const MODE_TO_SCREEN: Record<string, GameScreen> = {
     [GameMode.MATH_G9_1]: GameScreen.GENERAL_CHALLENGE,
     [GameMode.MATH_G9_2]: GameScreen.GENERAL_CHALLENGE,
     [GameMode.MATH_G9_3]: GameScreen.GENERAL_CHALLENGE,
+    [GameMode.KOKUGO_G1_1]: GameScreen.GENERAL_CHALLENGE,
+    [GameMode.KOKUGO_G2_1]: GameScreen.GENERAL_CHALLENGE,
+    [GameMode.KOKUGO_G3_1]: GameScreen.GENERAL_CHALLENGE,
+    [GameMode.KOKUGO_G4_1]: GameScreen.GENERAL_CHALLENGE,
+    [GameMode.KOKUGO_G5_1]: GameScreen.GENERAL_CHALLENGE,
+    [GameMode.KOKUGO_G6_1]: GameScreen.GENERAL_CHALLENGE,
+    [GameMode.KOKUGO_G7_1]: GameScreen.GENERAL_CHALLENGE,
+    [GameMode.KOKUGO_G8_1]: GameScreen.GENERAL_CHALLENGE,
+    [GameMode.KOKUGO_G9_1]: GameScreen.GENERAL_CHALLENGE,
 
     // 漢字系
     [GameMode.KANJI_1]: GameScreen.KANJI_CHALLENGE,
@@ -144,6 +153,23 @@ export const SUBJECT_CATEGORIES: SubjectCategoryConfig[] = [
         { id: 'M9_1', name: '数 中3 1学期', mode: GameMode.MATH_G9_1 },
         { id: 'M9_2', name: '数 中3 2学期', mode: GameMode.MATH_G9_2 },
         { id: 'M9_3', name: '数 中3 3学期', mode: GameMode.MATH_G9_3 },
+    ]
+  },
+  { 
+    id: 'KOKUGO_GRADES',
+    name: 'こくご',
+    color: 'cyan',
+    uiType: 'grade_term',
+    subModes: [
+        { id: 'J1_1', name: '国 小1', mode: GameMode.KOKUGO_G1_1 },
+        { id: 'J2_1', name: '国 小2', mode: GameMode.KOKUGO_G2_1 },
+        { id: 'J3_1', name: '国 小3', mode: GameMode.KOKUGO_G3_1 },
+        { id: 'J4_1', name: '国 小4', mode: GameMode.KOKUGO_G4_1 },
+        { id: 'J5_1', name: '国 小5', mode: GameMode.KOKUGO_G5_1 },
+        { id: 'J6_1', name: '国 小6', mode: GameMode.KOKUGO_G6_1 },
+        { id: 'J7_1', name: '国 中1', mode: GameMode.KOKUGO_G7_1 },
+        { id: 'J8_1', name: '国 中2', mode: GameMode.KOKUGO_G8_1 },
+        { id: 'J9_1', name: '国 中3', mode: GameMode.KOKUGO_G9_1 },
     ]
   },
   { 

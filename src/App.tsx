@@ -346,7 +346,7 @@ const App: React.FC = () => {
     const [dailyPlaySeconds, setDailyPlaySeconds] = useState(() => storageService.getDailyPlayTime());
     const [modeCorrectCounts, setModeCorrectCounts] = useState<Record<string, number>>(() => storageService.getModeCorrectCounts());
     const [masteredModes, setMasteredModes] = useState<string[]>(() => storageService.getMasteredModes());
-    const [masteryRewardModal, setMasteryRewardModal] = useState<{ mode: GameMode } | null>(null);
+    const [masteryRewardModal, setMasteryRewardModal] = useState<{ mode: string } | null>(null);
     const [showTimeLimitModal, setShowTimeLimitModal] = useState(false);
     const BASE_PLAY_LIMIT_SECONDS = 3600; // 1 Hour
     const masteryBonusSeconds = masteredModes.length * 300;
@@ -1021,7 +1021,7 @@ const App: React.FC = () => {
         }));
     };
 
-    const handleModeSelect = (mode: GameMode) => {
+    const handleModeSelect = (mode: GameMode, modePool?: string[]) => {
         if (isDailyLimitReached) {
             audioService.playSound('wrong');
             setShowTimeLimitModal(true);
@@ -1034,7 +1034,7 @@ const App: React.FC = () => {
         if (gameState.challengeMode === 'RACE' && raceSession?.isHost) {
             p2pService.send({ type: 'RACE_MODE_SET', mode });
         }
-        setGameState(prev => ({ ...prev, mode, screen: GameScreen.CHARACTER_SELECTION }));
+        setGameState(prev => ({ ...prev, mode, modePool, screen: GameScreen.CHARACTER_SELECTION }));
     };
 
     const handleDebugStart = (deck: ICard[], relics: Relic[], potions: Potion[]) => {
@@ -3811,15 +3811,17 @@ const App: React.FC = () => {
                 }));
             }
         }
-        handleModeCorrectProgress(gameState.mode, correctCount);
+        if (!gameState.modePool || gameState.modePool.length === 0) {
+            handleModeCorrectProgress(gameState.mode, correctCount);
+        }
         setTotalMathCorrect(prev => prev + correctCount);
         setGameState(prev => ({ ...prev, actStats: { ...prev.actStats!, mathCorrect: prev.actStats!.mathCorrect + correctCount } }));
         goToRewardPhase(bonusGold);
     };
 
-    const handleModeCorrectProgress = (mode: GameMode, correctCount: number) => {
+    const handleModeCorrectProgress = (mode: string, correctCount: number) => {
         if (correctCount <= 0) return;
-        const modeKey = mode as string;
+        const modeKey = mode;
         const prevModeCount = modeCorrectCounts[modeKey] || 0;
         const nextModeCount = prevModeCount + correctCount;
         const alreadyMastered = masteredModes.includes(modeKey);
@@ -3835,7 +3837,7 @@ const App: React.FC = () => {
                 storageService.saveMasteredModes(next);
                 return next;
             });
-            setMasteryRewardModal({ mode });
+            setMasteryRewardModal({ mode: modeKey });
         }
     };
 
@@ -4449,6 +4451,8 @@ const App: React.FC = () => {
                     <div className="absolute inset-0">
                         <GeneralChallengeScreen
                             mode={gameState.mode}
+                            modePool={gameState.modePool}
+                            onModeCorrect={handleModeCorrectProgress}
                             onComplete={handleMathChallengeComplete}
                             debugSkip={isMathDebugSkipped}
                         />

@@ -288,6 +288,11 @@ export enum GameMode {
   MATH_G8_1 = 'MATH_G8_1', MATH_G8_2 = 'MATH_G8_2', MATH_G8_3 = 'MATH_G8_3',
   MATH_G9_1 = 'MATH_G9_1', MATH_G9_2 = 'MATH_G9_2', MATH_G9_3 = 'MATH_G9_3',
 
+  // 国語
+  KOKUGO_G1_1 = 'KOKUGO_G1_1', KOKUGO_G2_1 = 'KOKUGO_G2_1', KOKUGO_G3_1 = 'KOKUGO_G3_1',
+  KOKUGO_G4_1 = 'KOKUGO_G4_1', KOKUGO_G5_1 = 'KOKUGO_G5_1', KOKUGO_G6_1 = 'KOKUGO_G6_1',
+  KOKUGO_G7_1 = 'KOKUGO_G7_1', KOKUGO_G8_1 = 'KOKUGO_G8_1', KOKUGO_G9_1 = 'KOKUGO_G9_1',
+
   // 漢字
   KANJI_1 = 'KANJI_1', KANJI_2 = 'KANJI_2', KANJI_3 = 'KANJI_3',
   KANJI_4 = 'KANJI_4', KANJI_5 = 'KANJI_5', KANJI_6 = 'KANJI_6',
@@ -580,6 +585,7 @@ export interface VisualEffectInstance {
 export interface GameState {
   screen: GameScreen;
   mode: GameMode;
+  modePool?: string[];
   challengeMode?: string;
   act: number;
   floor: number;
