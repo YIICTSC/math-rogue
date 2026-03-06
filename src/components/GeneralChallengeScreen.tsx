@@ -610,6 +610,194 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
         }
       }
 
+      if (visual.kind === 'prism') {
+        const sides = Math.max(3, visual.baseSides);
+        const r = Math.min(w, h) * (sides >= 6 ? 0.15 : sides === 5 ? 0.165 : 0.18);
+        const frontCx = w * (sides >= 5 ? 0.35 : 0.38);
+        const frontCy = h * 0.58;
+        const dx = w * (sides >= 5 ? 0.26 : 0.22);
+        const dy = -h * (sides >= 5 ? 0.12 : 0.16);
+        const front: Array<{ x: number; y: number }> = [];
+        const back: Array<{ x: number; y: number }> = [];
+
+        for (let i = 0; i < sides; i++) {
+          const a = (i / sides) * Math.PI * 2 - Math.PI / 2;
+          const x = frontCx + Math.cos(a) * r;
+          const y = frontCy + Math.sin(a) * r;
+          front.push({ x, y });
+          back.push({ x: x + dx, y: y + dy });
+        }
+
+        ctx.strokeStyle = '#a5b4fc';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        front.forEach((pt, i) => {
+          if (i === 0) ctx.moveTo(pt.x, pt.y);
+          else ctx.lineTo(pt.x, pt.y);
+        });
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.beginPath();
+        back.forEach((pt, i) => {
+          if (i === 0) ctx.moveTo(pt.x, pt.y);
+          else ctx.lineTo(pt.x, pt.y);
+        });
+        ctx.closePath();
+        ctx.stroke();
+
+        front.forEach((pt, i) => {
+          ctx.beginPath();
+          ctx.moveTo(pt.x, pt.y);
+          ctx.lineTo(back[i].x, back[i].y);
+          ctx.stroke();
+        });
+      }
+
+      if (visual.kind === 'cylinder') {
+        const cx = w * 0.5;
+        const topY = h * 0.28;
+        const bottomY = h * 0.72;
+        const rx = w * 0.2;
+        const ry = h * 0.08;
+
+        if (visual.showNet) {
+          ctx.strokeStyle = '#f8fafc';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(w * 0.28, h * 0.5, 26, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.strokeRect(w * 0.4, h * 0.36, w * 0.28, h * 0.28);
+          ctx.beginPath();
+          ctx.arc(w * 0.8, h * 0.5, 26, 0, Math.PI * 2);
+          ctx.stroke();
+        } else {
+          ctx.strokeStyle = '#22d3ee';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.ellipse(cx, topY, rx, ry, 0, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(cx - rx, topY);
+          ctx.lineTo(cx - rx, bottomY);
+          ctx.moveTo(cx + rx, topY);
+          ctx.lineTo(cx + rx, bottomY);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.ellipse(cx, bottomY, rx, ry, 0, 0, Math.PI);
+          ctx.stroke();
+          ctx.save();
+          ctx.setLineDash([6, 4]);
+          ctx.beginPath();
+          ctx.ellipse(cx, bottomY, rx, ry, 0, Math.PI, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+
+          if (visual.showHeight) {
+            ctx.strokeStyle = '#fde68a';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(cx, topY);
+            ctx.lineTo(cx, bottomY);
+            ctx.stroke();
+          }
+          if (visual.showRadius) {
+            ctx.strokeStyle = '#f8fafc';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(cx, topY);
+            ctx.lineTo(cx + rx, topY);
+            ctx.stroke();
+          }
+        }
+      }
+
+      if (visual.kind === 'pyramid') {
+        const sides = Math.max(3, visual.baseSides);
+        const cx = w * 0.5;
+        const cy = h * 0.7;
+        const r = Math.min(w, h) * (sides >= 5 ? 0.16 : 0.18);
+        const apex = { x: w * 0.5, y: h * 0.18 };
+        const base: Array<{ x: number; y: number }> = [];
+        for (let i = 0; i < sides; i++) {
+          const a = (i / sides) * Math.PI * 2 - Math.PI / 2 + Math.PI / sides;
+          base.push({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r * 0.55 });
+        }
+
+        ctx.strokeStyle = '#fca5a5';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        base.forEach((pt, i) => {
+          if (i === 0) ctx.moveTo(pt.x, pt.y);
+          else ctx.lineTo(pt.x, pt.y);
+        });
+        ctx.closePath();
+        ctx.stroke();
+
+        base.forEach((pt) => {
+          ctx.beginPath();
+          ctx.moveTo(apex.x, apex.y);
+          ctx.lineTo(pt.x, pt.y);
+          ctx.stroke();
+        });
+      }
+
+      if (visual.kind === 'cone') {
+        const cx = w * 0.5;
+        const topY = h * 0.18;
+        const baseY = h * 0.72;
+        const rx = w * 0.22;
+        const ry = h * 0.08;
+
+        if (visual.showNet) {
+          ctx.strokeStyle = '#f8fafc';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(w * 0.28, h * 0.52, 28, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(w * 0.62, h * 0.3);
+          ctx.arc(w * 0.62, h * 0.52, 70, -Math.PI / 3, Math.PI / 3, false);
+          ctx.closePath();
+          ctx.stroke();
+        } else {
+          ctx.strokeStyle = '#f97316';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(cx, topY);
+          ctx.lineTo(cx - rx, baseY);
+          ctx.moveTo(cx, topY);
+          ctx.lineTo(cx + rx, baseY);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.ellipse(cx, baseY, rx, ry, 0, 0, Math.PI);
+          ctx.stroke();
+          ctx.save();
+          ctx.setLineDash([6, 4]);
+          ctx.beginPath();
+          ctx.ellipse(cx, baseY, rx, ry, 0, Math.PI, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+
+          if (visual.showHeight) {
+            ctx.strokeStyle = '#fde68a';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(cx, topY);
+            ctx.lineTo(cx, baseY);
+            ctx.stroke();
+          }
+          if (visual.showRadius) {
+            ctx.strokeStyle = '#f8fafc';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(cx, baseY);
+            ctx.lineTo(cx + rx, baseY);
+            ctx.stroke();
+          }
+        }
+      }
+
       if (visual.kind === 'parabola') {
         const originX = w * 0.5;
         const originY = h * 0.78;
