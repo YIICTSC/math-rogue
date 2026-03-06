@@ -4,6 +4,10 @@ export type ProblemVisual =
     | { kind: 'angle'; degrees: number; rightAngleMark?: boolean; parallelLines?: boolean; labels?: string[] }
     | { kind: 'circle'; showRadius?: boolean; showDiameter?: boolean; showChord?: boolean; centralAngle?: number; inscribedAngle?: number; labels?: string[] }
     | { kind: 'cube'; showHiddenEdges?: boolean; labels?: string[] }
+    | { kind: 'prism'; baseSides: number; labels?: string[] }
+    | { kind: 'cylinder'; showNet?: boolean; showRadius?: boolean; showHeight?: boolean }
+    | { kind: 'pyramid'; baseSides: number }
+    | { kind: 'cone'; showRadius?: boolean; showHeight?: boolean; showNet?: boolean }
     | { kind: 'parabola'; a: number; markX?: number }
     | { kind: 'bar_chart'; values: number[]; labels?: string[] }
     | { kind: 'dots'; counts: number[]; labels?: string[] }

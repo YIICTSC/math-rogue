@@ -323,21 +323,22 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
         case 'MATH_G5_U13': {
             const p = n % 6;
             if (p === 0) {
-                return { question: "この立体（円柱）の底面の形は？", answer: "円", options: d("円", "三角形", "長方形", "正方形"), hint: "上下の面を考える。", visual: { kind: 'circle' } };
+                return { question: "この立体（円柱）の底面の形は？", answer: "円", options: d("円", "三角形", "長方形", "正方形"), hint: "上下の面を考える。", visual: { kind: 'cylinder', showRadius: true, showHeight: true } };
             }
             if (p === 1) {
-                return { question: "角柱の体積公式は？", answer: "底面積×高さ", options: d("底面積×高さ", "底面周×高さ", "たて×よこ", "半径×高さ"), hint: "柱の体積は同じ形。", visual: { kind: 'cube' } };
+                const baseSides = (n % 2 === 0) ? 5 : 6;
+                return { question: "角柱の体積公式は？", answer: "底面積×高さ", options: d("底面積×高さ", "底面周×高さ", "たて×よこ", "半径×高さ"), hint: "柱の体積は同じ形。", visual: { kind: 'prism', baseSides } };
             }
             if (p === 2) {
-                return { question: "円柱の体積公式として正しいのは？", answer: "底面積×高さ", options: d("底面積×高さ", "円周×高さ", "半径×高さ", "直径×高さ"), hint: "角柱と同じ。", visual: { kind: 'circle' } };
+                return { question: "円柱の体積公式として正しいのは？", answer: "底面積×高さ", options: d("底面積×高さ", "円周×高さ", "半径×高さ", "直径×高さ"), hint: "角柱と同じ。", visual: { kind: 'cylinder', showRadius: true, showHeight: true } };
             }
             if (p === 3) {
-                return { question: "円柱の展開図で、側面は何の形？", answer: "長方形", options: d("長方形", "三角形", "円", "台形"), hint: "まきついた面をひらく。", visual: { kind: 'circle' } };
+                return { question: "円柱の展開図で、側面は何の形？", answer: "長方形", options: d("長方形", "三角形", "円", "台形"), hint: "まきついた面をひらく。", visual: { kind: 'cylinder', showNet: true } };
             }
             if (p === 4) {
-                return { question: "三角柱の頂点の数は？", answer: "6こ", options: d("6こ", "3こ", "8こ", "9こ"), hint: "上に3こ、下に3こ。", visual: { kind: 'cube' } };
+                return { question: "三角柱の頂点の数は？", answer: "6こ", options: d("6こ", "3こ", "8こ", "9こ"), hint: "上に3こ、下に3こ。", visual: { kind: 'prism', baseSides: 3 } };
             }
-            return { question: "三角柱の辺の数は？", answer: "9本", options: d("9本", "6本", "12本", "15本"), hint: "上3本、下3本、横3本。", visual: { kind: 'cube' } };
+            return { question: "三角柱の辺の数は？", answer: "9本", options: d("9本", "6本", "12本", "15本"), hint: "上3本、下3本、横3本。", visual: { kind: 'prism', baseSides: 3 } };
         }
         case 'MATH_G5_U14': {
             const base = (n % 9 + 1) * 100;

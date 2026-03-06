@@ -119,7 +119,7 @@ const MATH_G6_3: GeneralProblem[] = [
         { question: "1円、5円、10円が1枚ずつある。合計金額は何通り作れる？", answer: "7通り", options: d("7通り", "3通り", "8通り", "6通り"), hint: "1, 5, 10, 6, 11, 15, 16円。" },
         { question: "メートル法の単位。 1ha（ヘクタール）は何a？", answer: "100a", options: d("100a", "10a", "1000a", "1a"), hint: "100倍の関係だよ。" },
         { question: "「体積」の問題。底面が 10cm²、高さが 6cm の角柱の体積は？", answer: "60cm³", options: d("60cm³", "20cm³", "30cm³", "16cm³"), hint: "底面積 × 高さ。" },
-        { question: "底面が 10cm²、高さが 6cm の角すいの体積は？", answer: "20cm³", options: d("20cm³", "60cm³", "30cm³", "10cm³"), hint: "柱の体積の 1/3 になるんだ。" },
+        { question: "底面が 10cm²、高さが 6cm の角すいの体積は？", answer: "20cm³", options: d("20cm³", "60cm³", "30cm³", "10cm³"), hint: "柱の体積の 1/3 になるんだ。", visual: { kind: 'pyramid', baseSides: 4 } },
         { question: "「速さ」の単位変換。 分速 100m は 時速何km？", answer: "時速 6km", options: d("時速 6km", "時速 60km", "時速 1km", "時速 100km"), hint: "100m × 60分 ＝ 6000m。" },
         { question: "データの散らばりを表す。最大値 － 最小値 を何という？", answer: "はんい（レンジ）", options: d("はんい", "階級", "度数", "誤差"), hint: "一番大きいところから一番小さいところまでの幅。" },
         { question: "樹形図（じゅけいず）は何を調べるために書く？", answer: "すべての場合の数", options: d("すべての場合", "平均値", "グラフの傾き", "合計"), hint: "枝分かれさせて数える図だよ。" },
@@ -329,9 +329,9 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             const base = (n % 8) + 5;
             const h = (n % 6) + 2;
             if (n % 2 === 0) {
-                return { question: `底面積${base}cm2、高さ${h}cm の角柱/円柱の体積は？`, answer: `${base * h}cm3`, options: d(`${base * h}cm3`, `${base + h}cm3`, `${base * 2 + h}cm3`, `${h}cm3`), hint: "底面積×高さ。", visual: { kind: n % 2 === 0 ? 'cube' : 'circle' } };
+                return { question: `底面積${base}cm2、高さ${h}cm の角柱/円柱の体積は？`, answer: `${base * h}cm3`, options: d(`${base * h}cm3`, `${base + h}cm3`, `${base * 2 + h}cm3`, `${h}cm3`), hint: "底面積×高さ。", visual: { kind: 'prism', baseSides: (n % 4) + 3 } };
             }
-            return { question: `体積が ${base * h}cm3、高さが ${h}cm の角柱/円柱。底面積は？`, answer: `${base}cm2`, options: d(`${base}cm2`, `${base * h}cm2`, `${h}cm2`, `${base + h}cm2`), hint: "体積÷高さ。", visual: { kind: n % 2 === 0 ? 'cube' : 'circle' } };
+            return { question: `体積が ${base * h}cm3、高さが ${h}cm の角柱/円柱。底面積は？`, answer: `${base}cm2`, options: d(`${base}cm2`, `${base * h}cm2`, `${h}cm2`, `${base + h}cm2`), hint: "体積÷高さ。", visual: { kind: 'cylinder', showRadius: true, showHeight: true } };
         }
         case 'MATH_G6_U10': {
             const x = 100 + n * 13;
