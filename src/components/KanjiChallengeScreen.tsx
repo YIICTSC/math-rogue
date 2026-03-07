@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, BookOpen } from 'lucide-react';
+import { CheckCircle, XCircle } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { GameMode } from '../types';
 import { storageService } from '../services/storageService';
@@ -123,13 +123,6 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-20 pointer-events-none"></div>
         
         <div className="z-10 w-full max-w-md text-center">
-            <div className="mb-8 flex flex-col items-center justify-center">
-                <BookOpen size={64} className="mb-4 text-cyan-300 animate-pulse" />
-                <div className="text-4xl font-bold text-white tracking-widest font-mono border-b-4 border-white pb-2">
-                    {isChallenge ? `第 ${streak + 1} 問` : `${currentProblemIndex + 1} / ${problems.length}`}
-                </div>
-            </div>
-
             <div className="bg-black/40 border-4 border-white p-8 rounded-lg mb-8 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[260px]">
                 {currentProblem.hint && (
                     <div className="bg-blue-900/40 p-2 rounded border border-blue-500/30 mb-4 w-full animate-in fade-in slide-in-from-top-2">

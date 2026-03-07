@@ -13,6 +13,7 @@ interface ModeSelectionScreenProps {
   onBack: () => void;
   languageMode: LanguageMode;
   modeMasteryMap?: Record<string, boolean>;
+  modeCorrectCounts?: Record<string, number>;
 }
 
 interface MathUnitOption {
@@ -357,7 +358,12 @@ const getCategoryClasses = (color: string) => {
   }
 };
 
-const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({ onSelectMode, onBack, modeMasteryMap = {} }) => {
+const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
+  onSelectMode,
+  onBack,
+  modeMasteryMap = {},
+  modeCorrectCounts = {},
+}) => {
   const [selectedGrade, setSelectedGrade] = useState<number>(3);
   const [selectedTerm, setSelectedTerm] = useState<number>(1);
   const [selectedMathGrade, setSelectedMathGrade] = useState<number>(1);
@@ -371,6 +377,10 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({ onSelectMode,
   const isMastered = (mode: string) => !!modeMasteryMap[mode];
   const getCategoryLabel = (id: SubjectCategoryType) => CATEGORY_LABELS[id] || id;
   const getSubLabel = (id: string, fallback: string) => SUBMODE_LABELS[id] || fallback;
+  const getUnitCorrectCount = (unit: { mode?: string; modes?: string[] }) => {
+    if (unit.mode) return modeCorrectCounts[unit.mode] || 0;
+    return (unit.modes || []).reduce((total, mode) => total + (modeCorrectCounts[mode] || 0), 0);
+  };
 
   const renderMasteryPrefix = (mode: string) => {
     if (!isMastered(mode)) return null;
@@ -452,9 +462,12 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({ onSelectMode,
                       return [...prev, unit.id];
                     });
                   }}
-                  className={`w-full p-1.5 rounded text-[10px] md:text-xs font-bold border text-left transition-colors ${selectedMathUnitIds.includes(unit.id) ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:border-slate-400'}`}
+                  className={`relative w-full p-1.5 pr-14 rounded text-[10px] md:text-xs font-bold border text-left transition-colors ${selectedMathUnitIds.includes(unit.id) ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:border-slate-400'}`}
                 >
-                  {unit.name}
+                  <span className="block">{unit.name}</span>
+                  <span className="absolute right-1.5 top-1.5 rounded-full bg-black/45 border border-white/15 px-1.5 py-0.5 text-[8px] md:text-[9px] font-mono leading-none text-white/90">
+                    {getUnitCorrectCount(unit)}問
+                  </span>
                 </button>
               ))}
             </div>

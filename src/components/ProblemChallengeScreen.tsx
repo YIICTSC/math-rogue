@@ -7,6 +7,7 @@ import MathChallengeScreen from './MathChallengeScreen';
 import KanjiChallengeScreen from './KanjiChallengeScreen';
 import EnglishChallengeScreen from './EnglishChallengeScreen';
 import GeneralChallengeScreen from './GeneralChallengeScreen';
+import MiniBattleBanner from './MiniBattleBanner';
 import { ArrowLeft, Brain, Book, Languages, Music, Play, Trophy, Home, Shuffle, CheckCircle, Target, ChevronRight, LogOut, GraduationCap, Star, Volume2, VolumeX, FlaskConical, Map as MapIcon, Globe, MapPin } from 'lucide-react';
 import { trans } from '../utils/textUtils';
 import { SUBJECT_CATEGORIES, SubjectCategoryConfig, SubModeConfig, getChallengeScreenForMode } from '../subjectConfig';
@@ -16,6 +17,7 @@ interface ProblemChallengeScreenProps {
   onBack: () => void;
   languageMode: LanguageMode;
   onCorrectAnswers?: (mode: string, correctCount: number) => void;
+  modeCorrectCounts?: Record<string, number>;
 }
 
 const BGM_OPTIONS = [
@@ -399,7 +401,12 @@ const getGlowColorClass = (color: string) => {
     }
 };
 
-const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack, languageMode, onCorrectAnswers }) => {
+const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
+  onBack,
+  languageMode,
+  onCorrectAnswers,
+  modeCorrectCounts = {},
+}) => {
   const [phase, setPhase] = useState<'SELECT' | 'CHALLENGE'>('SELECT');
   const [selectedCategory, setSelectedCategory] = useState<SubjectCategoryConfig>(SUBJECT_CATEGORIES[0]);
   const [selectedSubMode, setSelectedSubMode] = useState<SubModeConfig>(SUBJECT_CATEGORIES[0].subModes[0]);
@@ -554,6 +561,11 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
     audioService.playSound('select');
   };
 
+  const getUnitCorrectCount = (unit: { mode?: string; modes?: string[] }) => {
+    if (unit.mode) return modeCorrectCounts[unit.mode] || 0;
+    return (unit.modes || []).reduce((total, mode) => total + (modeCorrectCounts[mode] || 0), 0);
+  };
+
   if (phase === 'CHALLENGE') {
     const challengeSubMode = activeChallenge?.subMode ?? selectedSubMode;
     const challengeModePool = activeChallenge?.modePool;
@@ -577,6 +589,8 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
             <LogOut size={14}/> 終了
           </button>
         </div>
+
+        <MiniBattleBanner key={challengeSubMode.id} streak={streak} />
 
         <div className="flex-1 min-h-0 relative">
           {ChallengeScreen === GameScreen.MATH_CHALLENGE && (
@@ -717,9 +731,12 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({ onBack,
                             <button
                               key={unit.id}
                               onClick={() => toggleMathUnit(unit.id)}
-                              className={`flex items-center justify-between p-2 rounded-lg border-2 transition-all ${isSelected ? 'bg-emerald-700 border-emerald-300 text-white' : 'bg-gray-800 border-gray-700 text-gray-300 hover:border-gray-500'}`}
+                              className={`relative flex items-center justify-between p-2 pr-16 rounded-lg border-2 transition-all ${isSelected ? 'bg-emerald-700 border-emerald-300 text-white' : 'bg-gray-800 border-gray-700 text-gray-300 hover:border-gray-500'}`}
                             >
                               <span className="text-xs font-bold">{unit.name}</span>
+                              <span className="absolute right-7 top-2 rounded-full bg-black/45 border border-white/15 px-1.5 py-0.5 text-[8px] font-mono leading-none text-white/90">
+                                {getUnitCorrectCount(unit)}問
+                              </span>
                               {isSelected && <CheckCircle size={14} className="text-emerald-200" />}
                             </button>
                           );

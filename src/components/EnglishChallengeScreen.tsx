@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { CheckCircle, XCircle, Languages, Volume2, VolumeX, MessageCircle } from 'lucide-react';
+import { CheckCircle, XCircle, Volume2, VolumeX } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { GameMode } from '../types';
 import { storageService } from '../services/storageService';
@@ -163,13 +163,6 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
         </div>
 
         <div className="z-10 w-full max-w-md text-center flex flex-col">
-            <div className="mb-4 flex flex-col items-center justify-center">
-                {isConv ? <MessageCircle size={32} className="mb-1 text-cyan-300 animate-pulse" /> : <Languages size={32} className="mb-1 text-cyan-300 animate-pulse" />}
-                <div className="text-2xl font-bold text-white tracking-widest font-mono border-b-2 border-white pb-1">
-                    {isChallenge ? `第 ${streak + 1} 問` : `${currentProblemIndex + 1} / ${problems.length}`}
-                </div>
-            </div>
-
             <div className="bg-black/40 border-4 border-white p-4 md:p-6 rounded-2xl mb-4 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[200px] md:min-h-[300px]">
                 {currentProblem.hint && (
                     <div className="bg-indigo-800/60 p-2 rounded-lg border border-indigo-400/30 mb-4 w-full animate-in fade-in slide-in-from-top-2">

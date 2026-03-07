@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { CheckCircle, XCircle, Lightbulb, Volume2, Mic } from 'lucide-react';
+import { CheckCircle, XCircle, Volume2, Mic } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { GameMode } from '../types';
 import { storageService } from '../services/storageService';
@@ -1015,25 +1015,19 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
   );
 
   return (
-    <div className={`flex flex-col h-full w-full ${bgClass} text-white relative items-center justify-start md:justify-center p-3 md:p-8 font-mono overflow-y-auto`}>
+    <div className={`flex flex-col h-full w-full ${bgClass} text-white relative items-center justify-start md:justify-center p-2 sm:p-3 md:p-8 font-mono overflow-y-auto overflow-x-hidden`}>
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-20 pointer-events-none"></div>
         
-        <div className="z-10 w-full max-w-md text-center flex flex-col py-2 md:py-0">
-            <div className="mb-4 flex flex-col items-center justify-center">
-                <Lightbulb size={32} className="mb-1 text-yellow-300 animate-pulse" />
-                <div className="text-2xl font-bold text-white tracking-widest font-mono border-b-2 border-white pb-1">
-                    {isChallenge ? `第 ${streak + 1} 問` : `${currentProblemIndex + 1} / ${problems.length}`}
+        <div className="z-10 w-full max-w-md text-center flex flex-col py-2 md:py-0 min-w-0">
+            {isEnglishSpeakingReviewMode(mode) && !isChallenge && (
+                <div className="mb-4 flex justify-center gap-3 text-xs md:text-sm text-cyan-100">
+                    <span>Score: {correctCount}</span>
+                    <span>Attempted: {attemptedCount}</span>
+                    <span>Accuracy: {accuracy}%</span>
                 </div>
-                {isEnglishSpeakingReviewMode(mode) && !isChallenge && (
-                    <div className="mt-2 flex gap-3 text-xs md:text-sm text-cyan-100">
-                        <span>Score: {correctCount}</span>
-                        <span>Attempted: {attemptedCount}</span>
-                        <span>Accuracy: {accuracy}%</span>
-                    </div>
-                )}
-            </div>
+            )}
 
-            <div className="bg-black/40 border-4 border-white p-4 md:p-6 rounded-2xl mb-4 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[210px] md:min-h-[260px]">
+            <div className="w-full bg-black/40 border-4 border-white p-3 sm:p-4 md:p-6 rounded-2xl mb-4 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[210px] md:min-h-[260px] min-w-0">
                 {currentProblem.hint && (
                     <div className="bg-white/10 p-2 rounded-lg border border-white/20 mb-4 w-full animate-in fade-in slide-in-from-top-2">
                         <div className="text-[10px] text-yellow-300 font-bold mb-0.5 uppercase tracking-tighter text-left">Hint</div>
@@ -1041,7 +1035,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                     </div>
                 )}
                 
-                <h3 className="text-2xl md:text-3xl font-bold text-white leading-tight mb-4 break-words w-full">
+                <h3 className="text-[clamp(1.25rem,4vw,1.875rem)] font-bold text-white leading-tight mb-4 break-words w-full min-w-0">
                     {currentProblem.question}
                 </h3>
 
@@ -1087,7 +1081,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                             ref={visualCanvasRef}
                             width={260}
                             height={180}
-                            className="rounded-lg border border-white/30 bg-slate-900"
+                            className="w-full max-w-[260px] h-auto aspect-[13/9] rounded-lg border border-white/30 bg-slate-900"
                         />
                     </div>
                 )}
@@ -1104,18 +1098,18 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
             </div>
 
             {!currentProblem.speechPrompt?.freeResponse && (
-            <div className="grid grid-cols-2 gap-2 md:gap-3">
+            <div className="w-full grid grid-cols-2 gap-2 md:gap-3 min-w-0">
                 {currentProblem.options.map((opt, idx) => (
                     <button
                         key={idx}
                         onClick={() => handleAnswer(opt)}
                         disabled={isAnswered}
                         className={`
-                            py-2.5 md:py-3 px-2 md:px-3 font-bold rounded-xl border-b-4 transition-all active:border-b-0 active:translate-y-1 text-sm md:text-base
+                            py-2.5 md:py-3 px-2 md:px-3 font-bold rounded-xl border-b-4 transition-all active:border-b-0 active:translate-y-1 text-[clamp(0.8rem,2.8vw,1rem)]
                             ${isAnswered && normalize(opt) === normalize(currentProblem.actualCorrectAnswer) ? 'bg-green-600 border-green-800 scale-102' : ''}
                             ${isAnswered && opt === selectedOption && normalize(opt) !== normalize(currentProblem.actualCorrectAnswer) ? 'bg-red-600 border-red-800' : ''}
                             ${!isAnswered ? 'bg-white/10 border-white/30 hover:bg-white/20 cursor-pointer' : 'opacity-80'}
-                            break-words shadow-lg
+                            break-words shadow-lg min-w-0
                         `}
                     >
                         {opt}
