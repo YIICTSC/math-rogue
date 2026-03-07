@@ -4187,6 +4187,7 @@ const App: React.FC = () => {
                             onBack={returnToTitle}
                             languageMode={languageMode}
                             onCorrectAnswers={handleModeCorrectProgress}
+                            modeCorrectCounts={modeCorrectCounts}
                         />
                     </div>
                 )}
@@ -4299,6 +4300,7 @@ const App: React.FC = () => {
                             onBack={returnToTitle}
                             languageMode={languageMode}
                             modeMasteryMap={Object.fromEntries(Object.entries(modeCorrectCounts).map(([mode, count]) => [mode, count >= 100]))}
+                            modeCorrectCounts={modeCorrectCounts}
                         />
                         {raceSession && !raceSession.ended && !raceSession.isHost && gameState.challengeMode === 'RACE' && (
                             <div className="absolute inset-0 bg-black/65 backdrop-blur-[1px] flex items-center justify-center p-4 z-20">
