@@ -368,7 +368,8 @@ const App: React.FC = () => {
     const [masteryRewardModal, setMasteryRewardModal] = useState<{ mode: string } | null>(null);
     const [showTimeLimitModal, setShowTimeLimitModal] = useState(false);
     const BASE_PLAY_LIMIT_SECONDS = 3600; // 1 Hour
-    const masteryBonusSeconds = masteredModes.length * 300;
+    const isTypingMasteryMode = (modeKey: string) => modeKey.startsWith('TYPING_') || modeKey.startsWith('typing:');
+    const masteryBonusSeconds = masteredModes.filter(modeKey => !isTypingMasteryMode(modeKey)).length * 300;
     const PLAY_LIMIT_SECONDS = BASE_PLAY_LIMIT_SECONDS + masteryBonusSeconds;
 
     const formatTime = (total: number) => {
@@ -425,6 +426,10 @@ const App: React.FC = () => {
                 return next;
             });
 
+            if (gameState.challengeMode === 'TYPING') {
+                return;
+            }
+
             if (gameState.screen !== GameScreen.START_MENU && gameState.screen !== GameScreen.PROBLEM_CHALLENGE) {
                 const currentFromStorage = storageService.getDailyPlayTime();
 
@@ -458,7 +463,7 @@ const App: React.FC = () => {
             }
         }, 1000);
         return () => clearInterval(interval);
-    }, [gameState.screen, PLAY_LIMIT_SECONDS]);
+    }, [gameState.screen, PLAY_LIMIT_SECONDS, gameState.challengeMode]);
 
     useEffect(() => {
         if (gameState.challengeMode === 'RACE') {
@@ -1002,11 +1007,6 @@ const App: React.FC = () => {
     };
 
     const startTypingGame = () => {
-        if (isDailyLimitReached) {
-            audioService.playSound('wrong');
-            setShowTimeLimitModal(true);
-            return;
-        }
         audioService.playSound('select');
         setIsLoading(false);
         setGameState({
@@ -3941,12 +3941,13 @@ const App: React.FC = () => {
         const prevModeCount = modeCorrectCounts[modeKey] || 0;
         const nextModeCount = prevModeCount + correctCount;
         const alreadyMastered = masteredModes.includes(modeKey);
+        const canGrantMasteryBonus = gameState.challengeMode !== 'TYPING' && !isTypingMasteryMode(modeKey);
         setModeCorrectCounts(prev => {
             const next = { ...prev, [modeKey]: (prev[modeKey] || 0) + correctCount };
             storageService.saveModeCorrectCounts(next);
             return next;
         });
-        if (!alreadyMastered && prevModeCount < 100 && nextModeCount >= 100) {
+        if (canGrantMasteryBonus && !alreadyMastered && prevModeCount < 100 && nextModeCount >= 100) {
             setMasteredModes(prev => {
                 if (prev.includes(modeKey)) return prev;
                 const next = [...prev, modeKey];
@@ -4207,7 +4208,7 @@ const App: React.FC = () => {
                                 {!isMobilePortrait && (
                                     <button
                                         onClick={startTypingGame}
-                                        className={`w-full py-3 px-4 text-sm font-bold border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-amber-900/80 text-amber-100 border-amber-500 hover:bg-amber-800 hover:shadow-amber-900/50'}`}
+                                        className="w-full py-3 px-4 text-sm font-bold border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center bg-amber-900/80 text-amber-100 border-amber-500 hover:bg-amber-800 hover:shadow-amber-900/50"
                                     >
                                         <Keyboard className="mr-2" size={18} /> {trans("タイピングモード", languageMode)}
                                     </button>
