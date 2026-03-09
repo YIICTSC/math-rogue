@@ -260,6 +260,7 @@ export enum GameScreen {
   MINI_GAME_PAPER_PLANE = 'MINI_GAME_PAPER_PLANE',
   MINI_GAME_GO_HOME = 'MINI_GAME_GO_HOME',
   PROBLEM_CHALLENGE = 'PROBLEM_CHALLENGE',
+  TYPING_MODE_SELECTION = 'TYPING_MODE_SELECTION',
   GARDEN = 'GARDEN',
   FLOOR_RESULT = 'FLOOR_RESULT'
 }
@@ -594,6 +595,7 @@ export interface GameState {
   mode: GameMode;
   modePool?: string[];
   challengeMode?: string;
+  typingLessonId?: string;
   act: number;
   floor: number;
   turn: number;

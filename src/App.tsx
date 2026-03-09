@@ -11,6 +11,7 @@ import { ADDITIONAL_CARDS } from './constants1';
 import { GAME_STORIES } from './data/stories';
 import { getChallengeScreenForMode } from './subjectConfig'; // New Utility
 import BattleScene from './components/BattleScene';
+import TypingBattleScene from './components/TypingBattleScene';
 import RewardScreen from './components/RewardScreen';
 import FloorResultScreen from './components/FloorResultScreen';
 import MapScreen from './components/MapScreen';
@@ -22,6 +23,7 @@ import RelicSelectionScreen from './components/RelicSelectionScreen';
 import HelpScreen from './components/HelpScreen';
 import TreasureScreen from './components/TreasureScreen';
 import CharacterSelectionScreen from './components/CharacterSelectionScreen';
+import TypingModeSelectionScreen from './components/TypingModeSelectionScreen';
 import RankingScreen from './components/RankingScreen';
 import MathChallengeScreen from './components/MathChallengeScreen';
 import KanjiChallengeScreen from './components/KanjiChallengeScreen';
@@ -49,9 +51,10 @@ import { storageService } from './services/storageService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { trans } from './utils/textUtils';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Wifi, Flag } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Wifi, Flag, Keyboard } from 'lucide-react';
 import { applyAdditionalCardLogic } from './services/cardEffectLogic';
 import { p2pService } from './services/p2pService';
+import { TypingLessonId } from './data/typingLessonConfig';
 
 const calculateScore = (state: GameState, victory: boolean): number => {
     let score = 0;
@@ -188,6 +191,13 @@ const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
 };
 
 const App: React.FC = () => {
+    const detectMobilePortrait = () => {
+        if (typeof window === 'undefined') return false;
+        const isTouchLike = ('ontouchstart' in window) || navigator.maxTouchPoints > 0 || window.matchMedia('(pointer: coarse)').matches;
+        const isPortrait = window.matchMedia('(orientation: portrait)').matches || window.innerHeight > window.innerWidth;
+        return isTouchLike && isPortrait;
+    };
+
     const createDeck = (template: string[] = STARTING_DECK_TEMPLATE): ICard[] => {
         return template.map((key, index) => {
             const cardTemplate = CARDS_LIBRARY[key];
@@ -295,6 +305,15 @@ const App: React.FC = () => {
         currentStoryIndex: 0,
         actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
     });
+    const [isMobilePortrait, setIsMobilePortrait] = useState(false);
+    const previousScreenRef = useRef<GameScreen>(GameScreen.START_MENU);
+
+    useEffect(() => {
+        const syncMobilePortrait = () => setIsMobilePortrait(detectMobilePortrait());
+        syncMobilePortrait();
+        window.addEventListener('resize', syncMobilePortrait);
+        return () => window.removeEventListener('resize', syncMobilePortrait);
+    }, []);
 
     const [languageMode, setLanguageMode] = useState<LanguageMode>(() => storageService.getLanguageMode() || 'JAPANESE');
     const [currentNarrative, setCurrentNarrative] = useState<string>("...");
@@ -691,7 +710,7 @@ const App: React.FC = () => {
         setEventData(null);
         setRaceSession(null);
         setRaceResultOpen(false);
-        setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined, vsOpponent: undefined }));
+        setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined, typingLessonId: undefined, vsOpponent: undefined }));
         setHasSave(storageService.hasSaveFile());
         audioService.playBGM('menu');
     };
@@ -980,6 +999,74 @@ const App: React.FC = () => {
             currentStoryIndex: Math.floor(Math.random() * GAME_STORIES.length),
             actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
         });
+    };
+
+    const startTypingGame = () => {
+        if (isDailyLimitReached) {
+            audioService.playSound('wrong');
+            setShowTimeLimitModal(true);
+            return;
+        }
+        audioService.playSound('select');
+        setIsLoading(false);
+        setGameState({
+            screen: GameScreen.TYPING_MODE_SELECTION,
+            mode: GameMode.MULTIPLICATION,
+            act: 1,
+            floor: 0,
+            turn: 0,
+            map: [],
+            currentMapNodeId: null,
+            player: {
+                maxHp: INITIAL_HP,
+                currentHp: INITIAL_HP,
+                maxEnergy: INITIAL_ENERGY,
+                currentEnergy: INITIAL_ENERGY,
+                block: 0,
+                strength: 0,
+                gold: 99,
+                deck: createDeck(),
+                hand: [],
+                discardPile: [],
+                drawPile: [],
+                relics: [],
+                potions: [],
+                powers: {},
+                echoes: 0,
+                cardsPlayedThisTurn: 0,
+                attacksPlayedThisTurn: 0,
+                typesPlayedThisTurn: [],
+                relicCounters: {},
+                turnFlags: {},
+                imageData: HERO_IMAGE_DATA,
+                floatingText: null,
+                nextTurnEnergy: 0,
+                nextTurnDraw: 0,
+                codexBuffer: []
+            },
+            enemies: [],
+            selectedEnemyId: null,
+            narrativeLog: [trans("タイピングモード開始！", languageMode)],
+            combatLog: [],
+            rewards: [],
+            selectionState: { active: false, type: 'DISCARD', amount: 0 },
+            isEndless: false,
+            parryState: { active: false, enemyId: null, success: false },
+            activeEffects: [],
+            challengeMode: 'TYPING',
+            typingLessonId: undefined,
+            currentStoryIndex: Math.floor(Math.random() * GAME_STORIES.length),
+            actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
+        });
+    };
+
+    const handleTypingLessonSelect = (lessonId: TypingLessonId) => {
+        audioService.playSound('select');
+        setGameState(prev => ({
+            ...prev,
+            typingLessonId: lessonId,
+            screen: GameScreen.CHARACTER_SELECTION
+        }));
     };
 
     const startProblemChallenge = (e?: React.MouseEvent) => {
@@ -2978,12 +3065,13 @@ const App: React.FC = () => {
 
             if (p.powers['CREATIVE_AI']) {
                 const powerPool = getFilteredCardPool(p.id).filter(c => c.type === CardType.POWER);
-                const power = powerPool[Math.floor(Math.random() * powerPool.length)];
-                newHand.push({ ...power, id: `ai-${Date.now()}`, cost: 0 });
+                const power = { ...powerPool[Math.floor(Math.random() * powerPool.length)], id: `ai-${Date.now()}`, cost: 0 };
+                newHand.push(power);
                 nextActiveEffects.push({ id: `vfx-ai-${Date.now()}`, type: 'BUFF', targetId: 'player' });
             }
             if (p.powers['INFINITE_BLADES']) {
-                newHand.push({ ...CARDS_LIBRARY['SHIV'], id: `inf-${Date.now()}` });
+                const shiv = { ...CARDS_LIBRARY['SHIV'], id: `inf-${Date.now()}` };
+                newHand.push(shiv);
             }
             if (p.relics.find(r => r.id === 'WARPED_TONGS') && newHand.length > 0) {
                 const upgradeable = newHand.filter(c => !c.upgraded);
@@ -3290,6 +3378,9 @@ const App: React.FC = () => {
                             newLogs.push("校長先生が真の姿を現した！");
                             nextActiveEffects.push({ id: `vfx-evo2-${Date.now()}`, type: 'BUFF', targetId: e.id });
                         }
+                        if (prev.challengeMode === 'TYPING') {
+                            p.block = 0;
+                        }
                     }
                     if (intent.type === EnemyIntentType.DEFEND || intent.type === EnemyIntentType.ATTACK_DEFEND) {
                         e.block += intent.value;
@@ -3459,6 +3550,10 @@ const App: React.FC = () => {
         handlePlayCard(card);
     };
 
+    const handleTypingAutoPlayCard = (card: ICard) => {
+        handlePlayCard({ ...card, cost: 0, unplayable: false });
+    };
+
     const handleEventComplete = () => {
         handleNodeComplete();
     };
@@ -3470,6 +3565,10 @@ const App: React.FC = () => {
 
     const handleRetry = () => {
         setLegacyCardSelected(false);
+        if (gameState.challengeMode === 'TYPING') {
+            startTypingGame();
+            return;
+        }
         startGame();
     };
 
@@ -3582,6 +3681,9 @@ const App: React.FC = () => {
                 audioService.playBGM('victory');
                 return { ...prev, player: nextPlayer, screen: GameScreen.ENDING };
             } else {
+                if (prev.challengeMode === 'TYPING') {
+                    return { ...prev, player: nextPlayer, screen: GameScreen.REWARD, rewards: [] };
+                }
                 const challengeScreen = getChallengeScreenForMode(prev.mode);
                 return { ...prev, player: nextPlayer, screen: challengeScreen };
             }
@@ -3792,6 +3894,20 @@ const App: React.FC = () => {
         setGameState(prev => ({ ...prev, screen: GameScreen.REWARD, rewards }));
         audioService.playBGM('reward');
     };
+
+    useEffect(() => {
+        const previousScreen = previousScreenRef.current;
+        if (
+            gameState.challengeMode === 'TYPING' &&
+            gameState.screen === GameScreen.REWARD &&
+            previousScreen !== GameScreen.REWARD &&
+            gameState.rewards.length === 0 &&
+            gameState.enemies.length === 0
+        ) {
+            goToRewardPhase(0);
+        }
+        previousScreenRef.current = gameState.screen;
+    }, [gameState.challengeMode, gameState.screen, gameState.rewards.length, gameState.enemies.length]);
 
     const handleMathChallengeComplete = (correctCount: number) => {
         let bonusGold = 0;
@@ -4088,6 +4204,15 @@ const App: React.FC = () => {
                                     </button>
                                 </div>
 
+                                {!isMobilePortrait && (
+                                    <button
+                                        onClick={startTypingGame}
+                                        className={`w-full py-3 px-4 text-sm font-bold border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-amber-900/80 text-amber-100 border-amber-500 hover:bg-amber-800 hover:shadow-amber-900/50'}`}
+                                    >
+                                        <Keyboard className="mr-2" size={18} /> {trans("タイピングモード", languageMode)}
+                                    </button>
+                                )}
+
                                 <div className="flex gap-3 w-full">
                                     <button onClick={startProblemChallenge} className="flex-1 py-3 px-2 text-sm font-bold border-b-4 border-r-4 rounded-none bg-emerald-900/80 text-emerald-100 border-emerald-500 hover:bg-emerald-800 cursor-pointer flex items-center justify-center shadow-md hover:shadow-emerald-900/50">
                                         <GraduationCap className="mr-1.5" size={18} /> {trans("問題", languageMode)}
@@ -4136,6 +4261,7 @@ const App: React.FC = () => {
                             onNext={handleNextActFromStory}
                             languageMode={languageMode}
                             newlyUnlockedCardName={gameState.newlyUnlockedCardName}
+                            typingMode={gameState.challengeMode === 'TYPING'}
                         />
                     </div>
                 )}
@@ -4336,7 +4462,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.RELIC_SELECTION && (
                     <div className="absolute inset-0">
-                        <RelicSelectionScreen relics={starterRelics} onSelect={handleRelicSelect} languageMode={languageMode} />
+                        <RelicSelectionScreen relics={starterRelics} onSelect={handleRelicSelect} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} />
                     </div>
                 )}
 
@@ -4370,6 +4496,7 @@ const App: React.FC = () => {
                             narrative={currentNarrative}
                             act={gameState.act}
                             floor={gameState.floor}
+                            typingMode={gameState.challengeMode === 'TYPING'}
                         />
                         {raceSession && !raceSession.ended && (
                             <>
@@ -4399,13 +4526,38 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.BATTLE && (
                     <div className="absolute inset-0">
-                        <BattleScene
-                            player={gameState.player} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onEndTurn={handleEndTurnClick} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={gameState.selectionState} onHandSelection={handleHandSelection}
-                            onUsePotion={handleUsePotion} combatLog={gameState.combatLog} languageMode={languageMode} codexOptions={gameState.codexOptions} onCodexSelect={onCodexSelect} onPlaySynthesizedCard={handlePlaySynthesizedCard}
-                            parryState={gameState.parryState} onParry={handleParryClick} activeEffects={gameState.activeEffects}
-                            onCancelSelection={handleCancelSelection}
-                            finisherCutinCard={battleFinisherCutinCard}
-                        />
+                        {gameState.challengeMode === 'TYPING' ? (
+                            <TypingBattleScene
+                                player={gameState.player}
+                                enemies={gameState.enemies}
+                                selectedEnemyId={gameState.selectedEnemyId}
+                                onSelectEnemy={handleSelectEnemy}
+                                onPlayTypingCard={handleTypingAutoPlayCard}
+                                onEndTurn={handleEndTurnClick}
+                                turnLog={turnLog}
+                                narrative={currentNarrative}
+                                actingEnemyId={actingEnemyId}
+                                selectionState={gameState.selectionState}
+                                onHandSelection={handleHandSelection}
+                                onCancelSelection={handleCancelSelection}
+                                onUsePotion={handleUsePotion}
+                                combatLog={gameState.combatLog}
+                                languageMode={languageMode}
+                                activeEffects={gameState.activeEffects}
+                                finisherCutinCard={battleFinisherCutinCard}
+                                act={gameState.act}
+                                floor={gameState.floor}
+                                lessonId={gameState.typingLessonId}
+                            />
+                        ) : (
+                            <BattleScene
+                                player={gameState.player} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onEndTurn={handleEndTurnClick} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={gameState.selectionState} onHandSelection={handleHandSelection}
+                                onUsePotion={handleUsePotion} combatLog={gameState.combatLog} languageMode={languageMode} codexOptions={gameState.codexOptions} onCodexSelect={onCodexSelect} onPlaySynthesizedCard={handlePlaySynthesizedCard}
+                                parryState={gameState.parryState} onParry={handleParryClick} activeEffects={gameState.activeEffects}
+                                onCancelSelection={handleCancelSelection}
+                                finisherCutinCard={battleFinisherCutinCard}
+                            />
+                        )}
                     </div>
                 )}
 
@@ -4461,9 +4613,20 @@ const App: React.FC = () => {
                     </div>
                 )}
 
+                {gameState.screen === GameScreen.TYPING_MODE_SELECTION && (
+                    <div className="absolute inset-0">
+                        <TypingModeSelectionScreen
+                            selectedLessonId={gameState.typingLessonId}
+                            onSelect={handleTypingLessonSelect}
+                            onBack={returnToTitle}
+                            languageMode={languageMode}
+                        />
+                    </div>
+                )}
+
                 {gameState.screen === GameScreen.REWARD && (
                     <div className="absolute inset-0">
-                        <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading} currentPotions={gameState.player.potions} potionCapacity={getPotionCapacity(gameState.player)} languageMode={languageMode} />
+                        <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading} currentPotions={gameState.player.potions} potionCapacity={getPotionCapacity(gameState.player)} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} />
                     </div>
                 )}
 
@@ -4476,6 +4639,7 @@ const App: React.FC = () => {
                             onSynthesize={handleSynthesizeCard}
                             onLeave={handleNodeComplete}
                             languageMode={languageMode}
+                            typingMode={gameState.challengeMode === 'TYPING'}
                         />
                     </div>
                 )}
@@ -4546,6 +4710,7 @@ const App: React.FC = () => {
                             onLeave={handleNodeComplete}
                             potionCapacity={getPotionCapacity(gameState.player)}
                             languageMode={languageMode}
+                            typingMode={gameState.challengeMode === 'TYPING'}
                         />
                     </div>
                 )}
@@ -4594,6 +4759,7 @@ const App: React.FC = () => {
                             image={gameState.player.imageData}
                             resultLog={eventResultLog ? trans(eventResultLog, languageMode) : null}
                             onContinue={handleEventComplete}
+                            typingMode={gameState.challengeMode === 'TYPING'}
                         />
                     </div>
                 )}
@@ -4642,6 +4808,7 @@ const App: React.FC = () => {
                             onLeave={handleNodeComplete}
                             hasCursedKey={!!gameState.player.relics.find(r => r.id === 'CURSED_KEY')}
                             languageMode={languageMode}
+                            typingMode={gameState.challengeMode === 'TYPING'}
                         />
                     </div>
                 )}
