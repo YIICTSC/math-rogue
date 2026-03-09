@@ -16,9 +16,10 @@ interface EventScreenProps {
     image?: string;
     resultLog: string | null;
     onContinue: () => void;
+    typingMode?: boolean;
 }
 
-const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, imageKey, image, resultLog, onContinue }) => {
+const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, imageKey, image, resultLog, onContinue, typingMode = false }) => {
   const imageCandidates = useMemo(() => {
     const encodedTitle = encodeURIComponent(imageKey ?? title);
     return [
@@ -35,6 +36,30 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
   useEffect(() => {
     setImageIndex(0);
   }, [imageKey, title]);
+
+  useEffect(() => {
+    if (!typingMode) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (resultLog) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          onContinue();
+        }
+        return;
+      }
+      if (e.key >= '1' && e.key <= '9') {
+        const option = options[Number(e.key) - 1];
+        if (!option) return;
+        e.preventDefault();
+        option.action();
+      } else if (e.key === 'Enter' && options[0]) {
+        e.preventDefault();
+        options[0].action();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [typingMode, resultLog, options, onContinue]);
 
   return (
     <div className="flex flex-col h-full w-full bg-gray-900 text-white relative items-center justify-center p-8">
@@ -82,8 +107,9 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                             <button 
                                 key={idx}
                                 onClick={opt.action}
-                                className="w-full text-center p-3 sm:p-4 bg-black/40 hover:bg-purple-900/40 border border-gray-600 hover:border-purple-400 rounded transition-colors group min-h-[72px] sm:min-h-[88px]"
+                                className="relative w-full text-center p-3 sm:p-4 bg-black/40 hover:bg-purple-900/40 border border-gray-600 hover:border-purple-400 rounded transition-colors group min-h-[72px] sm:min-h-[88px]"
                             >
+                                {typingMode && <span className="absolute right-2 top-2 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">{idx + 1}</span>}
                                 <span className="font-bold text-yellow-400 block group-hover:text-yellow-200 text-base sm:text-lg tracking-wide break-words">
                                     {opt.label}
                                 </span>
@@ -97,6 +123,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                         className="w-full text-center p-4 bg-blue-900/40 hover:bg-blue-800/60 border border-blue-500 hover:border-blue-300 rounded transition-colors flex items-center justify-center font-bold text-xl animate-bounce"
                     >
                         進む <ArrowRight className="ml-2" />
+                        {typingMode && <span className="ml-3 rounded-full border border-cyan-300 bg-cyan-950/95 px-2 py-0.5 text-[10px] font-black text-cyan-200">Enter</span>}
                     </button>
                 )}
             </div>

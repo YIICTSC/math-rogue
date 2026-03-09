@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { Player, Card as ICard, Relic, Potion, LanguageMode } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
 import { ShoppingBag, Trash2, Coins, Gem, FlaskConical, X } from 'lucide-react';
@@ -17,11 +17,13 @@ interface ShopScreenProps {
   onLeave: () => void;
   languageMode: LanguageMode;
   potionCapacity?: number;
+  typingMode?: boolean;
 }
 
 const REMOVE_COST = 75;
+const SHOP_SHORTCUT_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'];
 
-const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics = [], shopPotions = [], onBuyCard, onBuyRelic, onBuyPotion, onRemoveCard, onLeave, languageMode, potionCapacity = 3 }) => {
+const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics = [], shopPotions = [], onBuyCard, onBuyRelic, onBuyPotion, onRemoveCard, onLeave, languageMode, potionCapacity = 3, typingMode = false }) => {
   const [purchasedIds, setPurchasedIds] = useState<string[]>([]);
   const [removed, setRemoved] = useState(false);
   const [viewMode, setViewMode] = useState<'BUY' | 'REMOVE'>('BUY');
@@ -116,6 +118,68 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
       if (player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) return Math.floor(base * 0.5);
       return base;
   };
+
+  const buyShortcutItems = useMemo(() => {
+      const relicItems = shopRelics.filter(relic => !purchasedIds.includes(relic.id)).map(relic => ({ kind: 'RELIC' as const, id: relic.id, data: relic }));
+      const potionItems = shopPotions.filter(potion => !purchasedIds.includes(potion.id)).map(potion => ({ kind: 'POTION' as const, id: potion.id, data: potion }));
+      const cardItems = shopCards.filter(card => !purchasedIds.includes(card.id)).map(card => ({ kind: 'CARD' as const, id: card.id, data: card }));
+      return [...relicItems, ...potionItems, ...cardItems].slice(0, SHOP_SHORTCUT_KEYS.length);
+  }, [shopRelics, shopPotions, shopCards, purchasedIds]);
+
+  const removeShortcutItems = useMemo(() => player.deck.slice(0, SHOP_SHORTCUT_KEYS.length), [player.deck]);
+
+  useEffect(() => {
+      if (!typingMode) return;
+      const handleKeyDown = (e: KeyboardEvent) => {
+          if (inspectedItem) {
+              if (e.key === 'Escape' || e.key === '0' || e.key === 'Enter') {
+                  e.preventDefault();
+                  setInspectedItem(null);
+              }
+              return;
+          }
+          if (potionToBuy) {
+              if (e.key >= '1' && e.key <= '9') {
+                  const potion = player.potions[Number(e.key) - 1];
+                  if (potion) {
+                      e.preventDefault();
+                      confirmPotionReplace(potion.id);
+                  }
+              } else if (e.key === '0' || e.key === 'Escape' || e.key === 'Enter') {
+                  e.preventDefault();
+                  setPotionToBuy(null);
+              }
+              return;
+          }
+          if (e.key === 'Enter') {
+              e.preventDefault();
+              onLeave();
+              return;
+          }
+          if (e.key === '0') {
+              e.preventDefault();
+              setViewMode(prev => prev === 'BUY' ? 'REMOVE' : 'BUY');
+              return;
+          }
+          const index = SHOP_SHORTCUT_KEYS.indexOf(e.key.toLowerCase());
+          if (index === -1) return;
+          e.preventDefault();
+
+          if (viewMode === 'BUY') {
+              const item = buyShortcutItems[index];
+              if (!item) return;
+              if (item.kind === 'CARD') handleBuyCard(item.data);
+              if (item.kind === 'RELIC') handleBuyRelic(item.data);
+              if (item.kind === 'POTION') handleBuyPotionClick(item.data);
+              return;
+          }
+
+          const card = removeShortcutItems[index];
+          if (card) handleRemove(card.id);
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [typingMode, inspectedItem, potionToBuy, player.potions, viewMode, buyShortcutItems, removeShortcutItems, onLeave, purchasedIds, player.gold, removed]);
 
   const getCardKeywords = (card: ICard) => {
       const keywords = [];
@@ -223,12 +287,13 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                    <p className="text-sm text-gray-300 mb-6">{trans("どれを捨てて入れ替えますか？", languageMode)}</p>
                    
                    <div className="flex justify-center gap-4 mb-4">
-                        {player.potions.map(p => (
+                        {player.potions.map((p, index) => (
                             <div 
                                 key={p.id} 
-                                className="flex flex-col items-center cursor-pointer hover:scale-110 transition-transform"
+                                className="relative flex flex-col items-center cursor-pointer hover:scale-110 transition-transform"
                                 onClick={() => confirmPotionReplace(p.id)}
                             >
+                                {typingMode && <div className="absolute -right-1 -top-1 z-10 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">{index + 1}</div>}
                                 <div className="w-12 h-12 bg-gray-800 border-2 border-white rounded-full flex items-center justify-center mb-1">
                                     <FlaskConical size={24} style={{ color: p.color }} />
                                 </div>
@@ -263,6 +328,11 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                     <Trash2 size={14}/> {trans("カード削除", languageMode)} ({getPrice(player.relics.find(r => r.id === 'SMILING_MASK') ? 50 : REMOVE_COST)} 円)
                 </button>
            </div>
+           {typingMode && (
+                <div className="mb-3 text-center text-[10px] font-bold text-cyan-300">
+                    1-9, QWERTY...: 選択 / 0: 購入・削除切替 / Enter: 店を出る
+                </div>
+           )}
 
            {viewMode === 'BUY' && (
                 <div className="flex-grow w-full overflow-y-auto custom-scrollbar pb-20">
@@ -284,6 +354,11 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                         onPointerUp={handlePointerUp}
                                         onPointerMove={handlePointerMove}
                                     >
+                                        {typingMode && !isSold && buyShortcutItems.findIndex(item => item.id === relic.id) !== -1 && (
+                                            <div className="absolute -right-1 -top-1 z-20 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">
+                                                {SHOP_SHORTCUT_KEYS[buyShortcutItems.findIndex(item => item.id === relic.id)]}
+                                            </div>
+                                        )}
                                         <div className="w-16 h-16 bg-gray-800 border-4 border-yellow-600 rounded-full flex items-center justify-center mb-2 shadow-lg">
                                             <Gem className="text-yellow-400" size={24}/>
                                         </div>
@@ -320,6 +395,11 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                         onPointerUp={handlePointerUp}
                                         onPointerMove={handlePointerMove}
                                     >
+                                        {typingMode && !isSold && buyShortcutItems.findIndex(item => item.id === potion.id) !== -1 && (
+                                            <div className="absolute -right-1 -top-1 z-20 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">
+                                                {SHOP_SHORTCUT_KEYS[buyShortcutItems.findIndex(item => item.id === potion.id)]}
+                                            </div>
+                                        )}
                                         <div className="w-12 h-12 bg-gray-800 border-2 border-white/50 rounded flex items-center justify-center mb-2 shadow-lg">
                                             <FlaskConical size={24} style={{ color: potion.color }}/>
                                         </div>
@@ -351,6 +431,11 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
 
                             return (
                                 <div key={card.id} className={`relative group transition-all scale-90 ${isSold ? 'opacity-20 grayscale' : ''}`}>
+                                    {typingMode && !isSold && buyShortcutItems.findIndex(item => item.id === card.id) !== -1 && (
+                                        <div className="absolute right-0 top-0 z-30 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">
+                                            {SHOP_SHORTCUT_KEYS[buyShortcutItems.findIndex(item => item.id === card.id)]}
+                                        </div>
+                                    )}
                                     <Card 
                                         card={card} 
                                         onClick={() => handleBuyCard(card)} 
@@ -384,6 +469,11 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                    <div className="grid grid-cols-3 gap-2 pt-4">
                        {player.deck.map(card => (
                            <div key={card.id} className="scale-75 origin-top-left w-24 h-36 cursor-pointer relative group" onClick={() => handleRemove(card.id)}>
+                                {typingMode && removeShortcutItems.findIndex(deckCard => deckCard.id === card.id) !== -1 && (
+                                    <div className="absolute right-1 top-1 z-30 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200 scale-125">
+                                        {SHOP_SHORTCUT_KEYS[removeShortcutItems.findIndex(deckCard => deckCard.id === card.id)]}
+                                    </div>
+                                )}
                                 <Card 
                                     card={card} 
                                     onClick={() => handleRemove(card.id)} 

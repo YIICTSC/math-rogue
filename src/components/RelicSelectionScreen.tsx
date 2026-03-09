@@ -10,13 +10,32 @@ interface RelicSelectionScreenProps {
   relics: Relic[];
   onSelect: (relic: Relic) => void;
   languageMode: 'JAPANESE' | 'HIRAGANA';
+  typingMode?: boolean;
 }
 
-const RelicSelectionScreen: React.FC<RelicSelectionScreenProps> = ({ relics, onSelect, languageMode }) => {
+const RelicSelectionScreen: React.FC<RelicSelectionScreenProps> = ({ relics, onSelect, languageMode, typingMode = false }) => {
   useEffect(() => {
     // Play "relic_select" theme for selection phase
     audioService.playBGM('relic_select');
   }, []);
+
+  useEffect(() => {
+    if (!typingMode) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key >= '1' && e.key <= '9') {
+        const relic = relics[Number(e.key) - 1];
+        if (relic) {
+          e.preventDefault();
+          onSelect(relic);
+        }
+      } else if (e.key === 'Enter' && relics[0]) {
+        e.preventDefault();
+        onSelect(relics[0]);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [typingMode, relics, onSelect]);
 
   return (
     <div className="flex flex-col h-full w-full bg-gray-900 text-white relative overflow-y-auto custom-scrollbar">
@@ -33,9 +52,10 @@ const RelicSelectionScreen: React.FC<RelicSelectionScreenProps> = ({ relics, onS
             {relics.map((relic) => (
             <div 
                 key={relic.id} 
-                className="group w-full max-w-[280px] md:w-64 bg-black/60 border-2 border-gray-500 hover:border-yellow-400 p-4 md:p-6 rounded-lg flex flex-col items-center cursor-pointer transition-all hover:bg-black/80 hover:-translate-y-1 shadow-lg shrink-0"
+                className="group relative w-full max-w-[280px] md:w-64 bg-black/60 border-2 border-gray-500 hover:border-yellow-400 p-4 md:p-6 rounded-lg flex flex-col items-center cursor-pointer transition-all hover:bg-black/80 hover:-translate-y-1 shadow-lg shrink-0"
                 onClick={() => onSelect(relic)}
             >
+                {typingMode && <div className="absolute right-3 top-3 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">{relics.findIndex(r => r.id === relic.id) + 1}</div>}
                 <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-800 rounded-full border-4 border-gray-600 flex items-center justify-center mb-4 group-hover:border-yellow-500 transition-colors">
                     <Gem size={32} className="text-yellow-200" />
                 </div>

@@ -683,7 +683,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
         <div className="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 overflow-hidden min-h-0">
           
           {/* Left: Category Selector - Scrollable vertically on PC */}
-          <div className="lg:col-span-3 flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-y-auto lg:overflow-x-visible pb-1.5 lg:pb-0 custom-scrollbar shrink-0">
+          <div className="lg:col-span-2 flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-y-auto lg:overflow-x-visible pb-1.5 lg:pb-0 custom-scrollbar shrink-0">
             {SUBJECT_CATEGORIES.map(cat => (
               <button
                 key={cat.id}
@@ -697,7 +697,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
           </div>
 
           {/* Middle: SubMode Selector - Scrollable vertically */}
-          <div className="lg:col-span-6 flex flex-col min-h-0">
+          <div className="lg:col-span-7 flex flex-col min-h-0">
             <h3 className="text-[10px] md:text-xs font-bold text-gray-400 mb-1.5 flex items-center gap-2 uppercase tracking-tight shrink-0">
               <ChevronRight size={10} className="text-emerald-500"/> 種目を選択
             </h3>

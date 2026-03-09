@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Character, LanguageMode } from '../types';
-import { Lock, Heart, Coins, Gem, ArrowRight, Swords, Shield, Zap, Sparkles, Brain, GraduationCap, Camera, X, RefreshCw, AlertCircle } from 'lucide-react';
+import { Lock, Heart, Coins, Gem, ArrowRight, Swords, Shield, Zap, Sparkles, Brain, GraduationCap, Camera, X, RefreshCw, AlertCircle, Keyboard } from 'lucide-react';
 import { RELIC_LIBRARY, CARDS_LIBRARY, CHARACTER_ACCESSORIES } from '../constants';
 import { trans } from '../utils/textUtils';
 import { audioService } from '../services/audioService';
@@ -29,6 +29,25 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
     const savedImages = storageService.getCustomImages();
     setCustomImages(savedImages);
   }, []);
+
+  useEffect(() => {
+    if (challengeMode !== 'TYPING' || showCamera) return;
+    const unlockedCharacters = characters.filter((_, index) => index < unlockedCount);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key >= '1' && e.key <= '9') {
+        const char = unlockedCharacters[Number(e.key) - 1];
+        if (char) {
+          e.preventDefault();
+          handleCharSelect(char);
+        }
+      } else if (e.key === 'Enter' && unlockedCharacters[0]) {
+        e.preventDefault();
+        handleCharSelect(unlockedCharacters[0]);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [challengeMode, showCamera, characters, unlockedCount, customImages]);
 
   // カメラを停止する
   const stopCamera = () => {
@@ -213,6 +232,13 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                     <p className="text-sm text-red-200 font-bold mb-1">【{trans("1A1Dモード", languageMode)}】</p>
                     <p className="text-xs text-red-100">{trans("初期レリックのみ所持。デッキはランダムなアタック1枚・スキル1枚でスタート。", languageMode)}</p>
                 </div>
+            ) : challengeMode === 'TYPING' ? (
+                <div className="bg-amber-900/50 border border-amber-500 p-2 rounded inline-block animate-in fade-in zoom-in duration-300">
+                    <p className="text-sm text-amber-200 font-bold mb-1 flex items-center justify-center gap-1">
+                      <Keyboard size={14} /> {trans("タイピングモード", languageMode)}
+                    </p>
+                    <p className="text-xs text-amber-100">{trans("戦闘ではカードを選ばず、タイピング成功ごとに開いているカードを自動で使います。", languageMode)}</p>
+                </div>
             ) : (
                 <p className="text-sm text-gray-400">{trans("冒険に挑むキャラクターを選んでください", languageMode)}</p>
             )}
@@ -248,6 +274,11 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                         className={`${baseClass} ${colorClass}`}
                         onClick={() => isUnlocked && handleCharSelect(char)}
                     >
+                        {challengeMode === 'TYPING' && isUnlocked && index < 9 && (
+                            <div className="absolute right-3 top-3 z-30 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">
+                                {index + 1}
+                            </div>
+                        )}
                         {!isUnlocked && (
                             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 z-20 rounded-xl">
                                 <Lock size={48} className="text-gray-500 mb-3" />

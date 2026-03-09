@@ -16,9 +16,10 @@ interface MapScreenProps {
     narrative?: string;
     act: number;
     floor: number;
+    typingMode?: boolean;
 }
 
-const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelect, onReturnToTitle, player, languageMode, narrative, act, floor }) => {
+const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelect, onReturnToTitle, player, languageMode, narrative, act, floor, typingMode = false }) => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [showDeck, setShowDeck] = useState(false);
 
@@ -72,6 +73,24 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
             availableNodeIds = currentNode.nextNodes;
         }
     }
+    const availableNodes = nodes.filter(n => availableNodeIds.includes(n.id));
+
+    useEffect(() => {
+        if (!typingMode || showDeck) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key >= '1' && e.key <= '9') {
+                const node = availableNodes[Number(e.key) - 1];
+                if (!node) return;
+                e.preventDefault();
+                onNodeSelect(node);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (availableNodes[0]) onNodeSelect(availableNodes[0]);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [typingMode, showDeck, availableNodes, onNodeSelect]);
 
     // 経路データの作成
     const connections = [];
@@ -227,6 +246,11 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                                 style={{ left, bottom }}
                                 onClick={() => isAvailable ? onNodeSelect(node) : null}
                             >
+                                {typingMode && isAvailable && (
+                                    <div className="absolute -right-2 -top-2 z-30 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">
+                                        {availableNodes.findIndex(n => n.id === node.id) + 1}
+                                    </div>
+                                )}
                                 {/* プレイヤーアバター表示 */}
                                 {isCurrent && (
                                     <div className="absolute -top-14 left-1/2 -translate-x-1/2 w-14 h-14 z-20 animate-bounce">
@@ -261,6 +285,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
             {/* フッターガイド */}
             <div className="p-2 bg-black/90 border-t border-slate-800 text-[10px] text-center text-slate-500 z-30 font-bold tracking-widest uppercase">
                 {trans("次の目的地を選択してください", languageMode)}
+                {typingMode && <span className="ml-2 text-cyan-300">1-9 / Enter</span>}
             </div>
 
             {/* デッキ確認用モーダル */}

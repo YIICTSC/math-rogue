@@ -57,7 +57,7 @@ const POWER_DEFINITIONS: Record<string, { name: string, desc: string }> = {
 };
 
 // Component for handling floating damage/heal numbers
-const FloatingTextOverlay: React.FC<{ data: FloatingText | null, languageMode: LanguageMode, offset?: string }> = ({ data, languageMode, offset = "-top-4 -left-4" }) => {
+export const FloatingTextOverlay: React.FC<{ data: FloatingText | null, languageMode: LanguageMode, offset?: string }> = ({ data, languageMode, offset = "-top-4 -left-4" }) => {
     if (!data) return null;
 
     return (
@@ -90,7 +90,7 @@ const FloatingTextOverlay: React.FC<{ data: FloatingText | null, languageMode: L
 };
 
 // Component for handling visual effects like slashes
-const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: string }> = ({ effects, targetId }) => {
+export const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: string }> = ({ effects, targetId }) => {
     const activeOnThisTarget = effects.filter(e => e.targetId === targetId);
     if (activeOnThisTarget.length === 0) return null;
 
@@ -1449,7 +1449,7 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
     return <div className="w-full h-full bg-black/30" />;
 };
 
-const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: LanguageMode }> = ({ card, languageMode }) => {
+export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: LanguageMode }> = ({ card, languageMode }) => {
     const translated = trans(card.name, languageMode);
     const illustrationTokens = useMemo(
         () => extractIllustrationTokens(card),

@@ -11,15 +11,31 @@ interface TreasureScreenProps {
   rewards: RewardItem[];
   hasCursedKey: boolean;
   languageMode: LanguageMode;
+  typingMode?: boolean;
 }
 
-const TreasureScreen: React.FC<TreasureScreenProps> = ({ onOpen, onLeave, rewards, hasCursedKey, languageMode }) => {
+const TreasureScreen: React.FC<TreasureScreenProps> = ({ onOpen, onLeave, rewards, hasCursedKey, languageMode, typingMode = false }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     // Play suspenseful "event" music when chest is discovered
     audioService.playBGM('event');
   }, []);
+
+  useEffect(() => {
+    if (!typingMode) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isOpen && (e.key === '1' || e.key === 'Enter')) {
+        e.preventDefault();
+        handleOpen();
+      } else if (isOpen && (e.key === '1' || e.key === 'Enter')) {
+        e.preventDefault();
+        onLeave();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [typingMode, isOpen, rewards]);
 
   const handleOpen = () => {
       setIsOpen(true);
@@ -51,7 +67,7 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({ onOpen, onLeave, reward
                     onClick={handleOpen}
                     className="bg-yellow-600 hover:bg-yellow-500 text-white px-8 py-3 rounded font-bold text-xl border-2 border-yellow-300"
                 >
-                    {trans("開ける", languageMode)}
+                    {trans("開ける", languageMode)}{typingMode && ' [1/Enter]'}
                 </button>
               </>
           ) : (
@@ -82,7 +98,7 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({ onOpen, onLeave, reward
                     onClick={onLeave}
                     className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded font-bold text-xl border-2 border-white flex items-center"
                 >
-                    <Check className="mr-2" /> {trans("進む", languageMode)}
+                    <Check className="mr-2" /> {trans("進む", languageMode)}{typingMode && ' [1/Enter]'}
                 </button>
               </>
           )}

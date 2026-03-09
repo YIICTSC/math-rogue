@@ -55,6 +55,7 @@ const STORAGE_KEY_TOTAL_PLAY_TIME = 'pixel_spire_total_play_time_v1';
 const STORAGE_KEY_DAILY_PLAY_TIME = 'pixel_spire_daily_play_time_v1';
 const STORAGE_KEY_MODE_CORRECT_COUNTS = 'pixel_spire_mode_correct_counts_v1';
 const STORAGE_KEY_MASTERED_MODES = 'pixel_spire_mastered_modes_v1';
+const STORAGE_KEY_TYPING_WEAK_KEYS = 'pixel_spire_typing_weak_keys_v1';
 
 // --- CUSTOM CHARACTER IMAGES ---
 const STORAGE_KEY_CUSTOM_IMAGES = 'pixel_spire_custom_images_v1';
@@ -625,6 +626,43 @@ export const storageService = {
 
   saveMasteredModes: (modes: string[]) => {
     localStorage.setItem(STORAGE_KEY_MASTERED_MODES, JSON.stringify(modes));
+  },
+
+  getTypingWeakKeys: (): Record<string, Record<string, number>> => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_TYPING_WEAK_KEYS);
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  },
+
+  recordTypingWeakKey: (lessonId: string, key: string) => {
+    try {
+      if (!lessonId || !key) return;
+      const current = storageService.getTypingWeakKeys();
+      const lesson = { ...(current[lessonId] || {}) };
+      lesson[key] = (lesson[key] || 0) + 1;
+      current[lessonId] = lesson;
+      localStorage.setItem(STORAGE_KEY_TYPING_WEAK_KEYS, JSON.stringify(current));
+    } catch (e) {
+      console.warn("Failed to save typing weak key", e);
+    }
+  },
+
+  decayTypingWeakKey: (lessonId: string, key: string, amount: number = 1) => {
+    try {
+      if (!lessonId || !key) return;
+      const current = storageService.getTypingWeakKeys();
+      const lesson = { ...(current[lessonId] || {}) };
+      if (!lesson[key]) return;
+      lesson[key] = Math.max(0, lesson[key] - amount);
+      if (lesson[key] === 0) delete lesson[key];
+      current[lessonId] = lesson;
+      localStorage.setItem(STORAGE_KEY_TYPING_WEAK_KEYS, JSON.stringify(current));
+    } catch (e) {
+      console.warn("Failed to decay typing weak key", e);
+    }
   },
 
   // --- Game State (Save/Load) ---

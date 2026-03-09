@@ -15,9 +15,10 @@ interface FloorResultScreenProps {
   onNext: () => void;
   languageMode: LanguageMode;
   newlyUnlockedCardName?: string; // 追加
+  typingMode?: boolean;
 }
 
-const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, storyIndex, onNext, languageMode, newlyUnlockedCardName }) => {
+const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, storyIndex, onNext, languageMode, newlyUnlockedCardName, typingMode = false }) => {
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
   
@@ -84,6 +85,18 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
       audioService.playSound('select');
     }
   };
+
+  useEffect(() => {
+    if (!typingMode) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === '1') {
+        e.preventDefault();
+        handleNext();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [typingMode, isTyping, currentPart, languageMode]);
 
   return (
     <div className="w-full h-full bg-[#0a0a0a] flex flex-col items-center justify-center p-3 sm:p-6 md:p-8 lg:p-10 relative overflow-hidden font-mono">
@@ -166,7 +179,7 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
                 onClick={handleNext}
                 className={`w-full py-3 sm:py-4 md:py-3 rounded-lg font-black text-lg sm:text-xl flex items-center justify-center gap-2 sm:gap-3 transition-all transform active:scale-95 shadow-xl border-b-4 ${isTyping ? 'bg-gray-700 border-gray-900 text-gray-400' : 'bg-white text-black border-gray-300 hover:bg-gray-200'}`}
             >
-                {isTyping ? trans("スキップ", languageMode) : trans("次へ進む", languageMode)} <ArrowRight size={20} className="sm:size-6" />
+                {isTyping ? trans("スキップ", languageMode) : trans("次へ進む", languageMode)} <ArrowRight size={20} className="sm:size-6" />{typingMode && ' [Enter]'}
             </button>
         </div>
       </div>

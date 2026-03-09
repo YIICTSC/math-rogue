@@ -13,9 +13,10 @@ interface RewardScreenProps {
   currentPotions?: Potion[];
   potionCapacity?: number;
   languageMode: LanguageMode;
+  typingMode?: boolean;
 }
 
-const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, onSkip, isLoading, currentPotions = [], potionCapacity = 3, languageMode }) => {
+const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, onSkip, isLoading, currentPotions = [], potionCapacity = 3, languageMode, typingMode = false }) => {
   const [replaceReward, setReplaceReward] = useState<RewardItem | null>(null);
   const [inspectedItem, setInspectedItem] = useState<{ type: 'CARD' | 'RELIC' | 'POTION', data: any } | null>(null);
   const longPressTimer = useRef<any>(null);
@@ -50,6 +51,43 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
       return () => clearTimeout(timer);
     }
   }, [rewards, isLoading, onSkip]);
+
+  useEffect(() => {
+    if (!typingMode) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isLoading) return;
+      if (replaceReward) {
+        if (e.key >= '1' && e.key <= '9') {
+          const index = Number(e.key) - 1;
+          const potion = currentPotions[index];
+          if (potion) {
+            e.preventDefault();
+            confirmReplace(potion.id);
+          }
+        } else if (e.key === '0' || e.key === 'Escape' || e.key === 'Enter') {
+          e.preventDefault();
+          setReplaceReward(null);
+        }
+        return;
+      }
+      if (e.key >= '1' && e.key <= '9') {
+        const index = Number(e.key) - 1;
+        const reward = rewards[index];
+        if (!reward) return;
+        e.preventDefault();
+        if (reward.type === 'POTION') {
+          handlePotionClick(reward);
+        } else {
+          onSelectReward(reward);
+        }
+      } else if (e.key === '0' || e.key === 'Enter') {
+        e.preventDefault();
+        onSkip();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [typingMode, isLoading, replaceReward, currentPotions, rewards, onSkip]);
 
   const handlePotionClick = (reward: RewardItem) => {
       if (currentPotions.length >= potionCapacity) {
@@ -154,9 +192,10 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                         {currentPotions.map(p => (
                             <div 
                                 key={p.id} 
-                                className="flex flex-col items-center cursor-pointer hover:scale-110 transition-transform"
+                                className="relative flex flex-col items-center cursor-pointer hover:scale-110 transition-transform"
                                 onClick={() => confirmReplace(p.id)}
                             >
+                                {typingMode && <div className="absolute -right-1 -top-1 z-10 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">{currentPotions.findIndex(cp => cp.id === p.id) + 1}</div>}
                                 <div className="w-12 h-12 bg-gray-800 border-2 border-white rounded-full flex items-center justify-center mb-1">
                                     <FlaskConical size={24} style={{ color: p.color }} />
                                 </div>
@@ -184,7 +223,8 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
           <div key={reward.id} className="snap-center shrink-0 transform hover:scale-105 transition-transform duration-200 flex justify-center">
             
             {reward.type === 'CARD' && (
-                <div className="flex flex-col items-center w-48"> 
+                <div className="relative flex flex-col items-center w-48"> 
+                    {typingMode && <div className="absolute right-0 top-0 z-20 rounded-full border border-cyan-300 bg-cyan-950/95 px-2 py-0.5 text-[10px] font-black text-cyan-200">{rewards.findIndex(r => r.id === reward.id) + 1}</div>}
                     <div className="scale-110 mb-8 mt-6">
                         <Card 
                             card={reward.value as ICard} 
@@ -200,13 +240,14 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
             
             {reward.type === 'RELIC' && (
                 <div 
-                    className="w-48 bg-black/60 border-2 border-yellow-500 rounded-xl flex flex-col items-center justify-between p-6 cursor-pointer hover:bg-black/80 shadow-lg h-72" 
+                    className="relative w-48 bg-black/60 border-2 border-yellow-500 rounded-xl flex flex-col items-center justify-between p-6 cursor-pointer hover:bg-black/80 shadow-lg h-72" 
                     onClick={() => onSelectReward(reward)}
                     onContextMenu={(e) => { e.preventDefault(); setInspectedItem({ type: 'RELIC', data: reward.value }); }}
                     onPointerDown={(e) => handlePointerDown(e, 'RELIC', reward.value)}
                     onPointerUp={handlePointerUp}
                     onPointerMove={handlePointerMove}
                 >
+                    {typingMode && <div className="absolute right-2 top-2 z-20 rounded-full border border-cyan-300 bg-cyan-950/95 px-2 py-0.5 text-[10px] font-black text-cyan-200">{rewards.findIndex(r => r.id === reward.id) + 1}</div>}
                     <div className="bg-gray-800 p-4 rounded-full border-2 border-yellow-600 mb-4 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
                         <Gem size={40} className="text-yellow-400" />
                     </div>
@@ -219,7 +260,8 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
             )}
 
             {reward.type === 'GOLD' && (
-                <div className="w-48 bg-black/60 border-2 border-yellow-500 rounded-xl flex flex-col items-center justify-between p-6 cursor-pointer hover:bg-black/80 shadow-lg h-72" onClick={() => onSelectReward(reward)}>
+                <div className="relative w-48 bg-black/60 border-2 border-yellow-500 rounded-xl flex flex-col items-center justify-between p-6 cursor-pointer hover:bg-black/80 shadow-lg h-72" onClick={() => onSelectReward(reward)}>
+                    {typingMode && <div className="absolute right-2 top-2 z-20 rounded-full border border-cyan-300 bg-cyan-950/95 px-2 py-0.5 text-[10px] font-black text-cyan-200">{rewards.findIndex(r => r.id === reward.id) + 1}</div>}
                     <div className="bg-gray-800 p-4 rounded-full border-2 border-yellow-600 mb-4 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
                         <Coins size={40} className="text-yellow-400" />
                     </div>
@@ -233,13 +275,14 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
 
             {reward.type === 'POTION' && (
                 <div 
-                    className="w-48 bg-black/60 border-2 border-white/50 rounded-xl flex flex-col items-center justify-between p-6 cursor-pointer hover:bg-black/80 shadow-lg h-72" 
+                    className="relative w-48 bg-black/60 border-2 border-white/50 rounded-xl flex flex-col items-center justify-between p-6 cursor-pointer hover:bg-black/80 shadow-lg h-72" 
                     onClick={() => handlePotionClick(reward)}
                     onContextMenu={(e) => { e.preventDefault(); setInspectedItem({ type: 'POTION', data: reward.value }); }}
                     onPointerDown={(e) => handlePointerDown(e, 'POTION', reward.value)}
                     onPointerUp={handlePointerUp}
                     onPointerMove={handlePointerMove}
                 >
+                    {typingMode && <div className="absolute right-2 top-2 z-20 rounded-full border border-cyan-300 bg-cyan-950/95 px-2 py-0.5 text-[10px] font-black text-cyan-200">{rewards.findIndex(r => r.id === reward.id) + 1}</div>}
                     <div className="bg-gray-800 p-4 rounded-full border-2 border-white/50 mb-4 shadow-[0_0_15px_rgba(255,255,255,0.3)]">
                         <FlaskConical size={40} style={{ color: (reward.value as Potion).color }} />
                     </div>
@@ -262,6 +305,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
         >
           {isLoading ? trans("読み込み中...", languageMode) : `${trans("これ以上受け取らずに進む", languageMode)} >>`}
         </button>
+        {typingMode && <div className="mt-2 text-center text-[10px] font-bold text-cyan-300">1-9: 選択 / 0 or Enter: 進む</div>}
       </div>
     </div>
   );
