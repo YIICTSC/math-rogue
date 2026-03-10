@@ -1,5 +1,5 @@
 import { GeneralProblem } from './utils';
-import { buildListeningReviewUnit, buildSpeakingReviewUnit, cycleProblems, EnglishWordItem, prompt, uniqueEnglishWordItems } from './english_utils';
+import { buildListeningReviewUnit, buildRepeatReviewUnit, buildResponseReviewUnit, buildSpeakingReviewUnit, cycleProblems, EnglishResponseItem, EnglishWordItem, prompt, uniqueEnglishWordItems } from './english_utils';
 
 const readingPassagesG8: GeneralProblem[] = [
   prompt(
@@ -42,6 +42,14 @@ const g8ReviewItems: EnglishWordItem[] = uniqueEnglishWordItems([
   { en: 'The window was broken.', jp: '窓は こわされました。', speech: 'The window was broken' },
   { en: 'The room was cleaned by the students.', jp: 'その部屋は 生徒たちによって そうじされました。', speech: 'The room was cleaned by the students' },
 ]);
+const g8ResponseItems: EnglishResponseItem[] = [
+  { promptEn: 'What did you do yesterday?', promptJp: 'きのう 何を しましたか。', answerEn: 'I went to the park yesterday.', answerJp: 'わたしは きのう公園へ行きました。', answerSpeech: 'I went to the park yesterday' },
+  { promptEn: 'What were you doing then?', promptJp: 'そのとき 何を していましたか。', answerEn: 'We were eating lunch.', answerJp: 'わたしたちは 昼食を食べていました。', answerSpeech: 'We were eating lunch' },
+  { promptEn: 'What will you do tomorrow?', promptJp: 'あした 何を しますか。', answerEn: 'I will help you.', answerJp: 'わたしは あなたを助けます。', answerSpeech: 'I will help you', answerSpeechAlternates: ["I'll help you"] },
+  { promptEn: 'What do you have to do?', promptJp: '何を しなければなりませんか。', answerEn: 'I have to wash my hands.', answerJp: '手を洗わなければなりません。', answerSpeech: 'I have to wash my hands' },
+  { promptEn: 'What do you want to be?', promptJp: '何に なりたいですか。', answerEn: 'I want to be a teacher.', answerJp: 'わたしは 先生になりたいです。', answerSpeech: 'I want to be a teacher' },
+  { promptEn: 'Which is taller, Ken or Tom?', promptJp: 'けんとトムでは どちらが 背が高いですか。', answerEn: 'Ken is taller than Tom.', answerJp: 'けんは トムより背が高いです。', answerSpeech: 'Ken is taller than Tom' },
+];
 
 export const ENGLISH_G8_UNIT_DATA: Record<string, GeneralProblem[]> = {
   ENGLISH_G8_U01: cycleProblems([
@@ -118,6 +126,8 @@ export const ENGLISH_G8_UNIT_DATA: Record<string, GeneralProblem[]> = {
   ]),
   ENGLISH_G8_U10: buildListeningReviewUnit(g8ReviewItems, '中2の 重要表現を きいて、あてはまる 英語を えらぼう。'),
   ENGLISH_G8_U11: buildSpeakingReviewUnit(g8ReviewItems, '中2の 重要表現を 英語で いってみよう。'),
+  ENGLISH_G8_U12: buildRepeatReviewUnit(g8ReviewItems, '中2の 重要表現を きいて、英語を くりかえそう。'),
+  ENGLISH_G8_U13: buildResponseReviewUnit(g8ResponseItems, '中2の 会話に 英語で こたえよう。'),
 };
 
 export const ENGLISH_G8_DATA: Record<string, GeneralProblem[]> = {

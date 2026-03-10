@@ -1,5 +1,5 @@
 import { GeneralProblem } from './utils';
-import { buildListeningReviewUnit, buildSpeakingReviewUnit, cycleProblems, EnglishWordItem, prompt, uniqueEnglishWordItems } from './english_utils';
+import { buildListeningReviewUnit, buildRepeatReviewUnit, buildResponseReviewUnit, buildSpeakingReviewUnit, cycleProblems, EnglishResponseItem, EnglishWordItem, prompt, uniqueEnglishWordItems } from './english_utils';
 
 const readingPassages = [
   {
@@ -63,6 +63,14 @@ const g9ReviewItems: EnglishWordItem[] = uniqueEnglishWordItems([
   { en: 'Today, I want to talk about my hobby.', jp: '今日は わたしのしゅみについて話したいです。', speech: 'Today I want to talk about my hobby' },
   { en: 'Thank you for listening.', jp: '聞いてくれてありがとうございます。', speech: 'Thank you for listening', speechAlternates: ['Thanks for listening'] },
 ]);
+const g9ResponseItems: EnglishResponseItem[] = [
+  { promptEn: 'Have you seen that movie?', promptJp: 'その映画を見たことがありますか。', answerEn: 'Yes, I have.', answerJp: 'はい、あります。', answerSpeech: 'Yes I have', answerSpeechAlternates: ['Yes, I have.'] },
+  { promptEn: 'What have you been doing?', promptJp: 'ずっと 何を していましたか。', answerEn: 'We have been waiting here.', answerJp: 'わたしたちは ここでずっと待っています。', answerSpeech: 'We have been waiting here' },
+  { promptEn: 'Which cake is it?', promptJp: 'どの ケーキですか。', answerEn: 'This is the cake that my mother made.', answerJp: 'これは 母が作ったケーキです。', answerSpeech: 'This is the cake that my mother made' },
+  { promptEn: 'If you were me, what would you do?', promptJp: 'もし わたしだったら、どうしますか。', answerEn: 'I would study harder.', answerJp: 'もっと 勉強します。', answerSpeech: 'I would study harder' },
+  { promptEn: 'What language is spoken here?', promptJp: 'ここで 話されている言語は 何ですか。', answerEn: 'English is spoken here.', answerJp: 'ここでは 英語が話されています。', answerSpeech: 'English is spoken here' },
+  { promptEn: 'Please start your speech.', promptJp: 'スピーチを はじめてください。', answerEn: 'Today, I want to talk about my hobby.', answerJp: '今日は わたしのしゅみについて話したいです。', answerSpeech: 'Today I want to talk about my hobby' },
+];
 
 export const ENGLISH_G9_UNIT_DATA: Record<string, GeneralProblem[]> = {
   ENGLISH_G9_U01: cycleProblems([
@@ -198,6 +206,8 @@ export const ENGLISH_G9_UNIT_DATA: Record<string, GeneralProblem[]> = {
   ]),
   ENGLISH_G9_U11: buildListeningReviewUnit(g9ReviewItems, '中3の 重要表現を きいて、あてはまる 英語を えらぼう。'),
   ENGLISH_G9_U12: buildSpeakingReviewUnit(g9ReviewItems, '中3の 重要表現を 英語で いってみよう。'),
+  ENGLISH_G9_U13: buildRepeatReviewUnit(g9ReviewItems, '中3の 重要表現を きいて、英語を くりかえそう。'),
+  ENGLISH_G9_U14: buildResponseReviewUnit(g9ResponseItems, '中3の 会話に 英語で こたえよう。'),
 };
 
 export const ENGLISH_G9_DATA: Record<string, GeneralProblem[]> = {

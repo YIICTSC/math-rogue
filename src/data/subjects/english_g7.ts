@@ -1,5 +1,5 @@
 import { GeneralProblem } from './utils';
-import { buildListeningReviewUnit, buildSpeakingReviewUnit, cycleProblems, EnglishWordItem, prompt, uniqueEnglishWordItems } from './english_utils';
+import { buildListeningReviewUnit, buildRepeatReviewUnit, buildResponseReviewUnit, buildSpeakingReviewUnit, cycleProblems, EnglishResponseItem, EnglishWordItem, prompt, uniqueEnglishWordItems } from './english_utils';
 
 const readingPassagesG7: GeneralProblem[] = [
   prompt(
@@ -44,6 +44,14 @@ const g7ReviewItems: EnglishWordItem[] = uniqueEnglishWordItems([
   { en: 'These are books.', jp: 'これらは 本です。', speech: 'These are books' },
   { en: 'She is my friend.', jp: '彼女は わたしの友だちです。', speech: 'She is my friend' },
 ]);
+const g7ResponseItems: EnglishResponseItem[] = [
+  { promptEn: 'Are you a student?', promptJp: 'あなたは 生徒ですか。', answerEn: 'Yes, I am.', answerJp: 'はい、そうです。', answerSpeech: 'Yes I am', answerSpeechAlternates: ['Yes, I am.'] },
+  { promptEn: 'Do you play soccer?', promptJp: 'あなたは サッカーをしますか。', answerEn: 'Yes, I do.', answerJp: 'はい、します。', answerSpeech: 'Yes I do', answerSpeechAlternates: ['Yes, I do.'] },
+  { promptEn: 'Can you cook?', promptJp: 'あなたは 料理できますか。', answerEn: 'Yes, I can.', answerJp: 'はい、できます。', answerSpeech: 'Yes I can', answerSpeechAlternates: ['Yes, I can.'] },
+  { promptEn: 'What is she doing?', promptJp: '彼女は 何を していますか。', answerEn: 'She is reading a book.', answerJp: '彼女は 本を 読んでいます。', answerSpeech: 'She is reading a book' },
+  { promptEn: 'Where is the cat?', promptJp: 'ねこは どこですか。', answerEn: 'It is in the box.', answerJp: 'それは 箱の中にいます。', answerSpeech: 'It is in the box' },
+  { promptEn: 'Who is she?', promptJp: '彼女は だれですか。', answerEn: 'She is my friend.', answerJp: '彼女は わたしの友だちです。', answerSpeech: 'She is my friend' },
+];
 
 export const ENGLISH_G7_UNIT_DATA: Record<string, GeneralProblem[]> = {
   ENGLISH_G7_U01: cycleProblems([
@@ -144,6 +152,8 @@ export const ENGLISH_G7_UNIT_DATA: Record<string, GeneralProblem[]> = {
   ]),
   ENGLISH_G7_U13: buildListeningReviewUnit(g7ReviewItems, '中1の 重要表現を きいて、あてはまる 英語を えらぼう。'),
   ENGLISH_G7_U14: buildSpeakingReviewUnit(g7ReviewItems, '中1の 重要表現を 英語で いってみよう。'),
+  ENGLISH_G7_U15: buildRepeatReviewUnit(g7ReviewItems, '中1の 重要表現を きいて、英語を くりかえそう。'),
+  ENGLISH_G7_U16: buildResponseReviewUnit(g7ResponseItems, '中1の 会話に 英語で こたえよう。'),
 };
 
 export const ENGLISH_G7_DATA: Record<string, GeneralProblem[]> = {

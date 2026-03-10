@@ -10,6 +10,16 @@ export interface EnglishWordItem {
   exampleJp?: string;
 }
 
+export interface EnglishResponseItem {
+  promptEn: string;
+  promptJp: string;
+  answerEn: string;
+  answerJp: string;
+  promptSpeech?: string;
+  answerSpeech?: string;
+  answerSpeechAlternates?: string[];
+}
+
 export const cycleProblems = (problems: GeneralProblem[]) => {
   const result = [...problems];
   while (result.length < 20) {
@@ -189,6 +199,101 @@ export const buildSpeakingReviewUnit = (items: EnglishWordItem[], promptText = '
     },
     audioPrompt: { text: item.speech || item.en, lang: 'en-US', autoPlay: false },
   }));
+};
+
+export const buildRepeatReviewUnit = (items: EnglishWordItem[], promptText = 'おとを きいて、そのまま 英語で くりかえそう。'): GeneralProblem[] => {
+  const enPool = items.map((item) => item.en);
+  const makeSpeechAlternates = (item: EnglishWordItem) => {
+    const base = item.speech || item.en;
+    const normalized = base.replace(/[.!?]/g, '');
+    return Array.from(new Set([
+      normalized,
+      normalized.toLowerCase(),
+      base,
+      ...(item.speechAlternates || []),
+    ]));
+  };
+
+  return items.flatMap((item, index) => ([
+    {
+      question: `${promptText}\n「${item.jp}」`,
+      answer: item.en,
+      options: d(item.en, ...pickDistinct(enPool, item.en, index + 1, 3)),
+      hint: '聞いた 英語を そのまま くりかえす。',
+      audioPrompt: { text: item.speech || item.en, lang: 'en-US', autoPlay: true },
+      speechPrompt: {
+        expected: item.speech || item.en,
+        alternates: makeSpeechAlternates(item),
+        lang: 'en-US',
+        buttonLabel: 'くりかえす',
+      },
+    },
+    {
+      question: 'おとを きいて、同じ 英語を えらぼう。',
+      answer: item.en,
+      options: d(item.en, ...pickDistinct(enPool, item.en, index + 2, 3)),
+      hint: '聞こえた 英語の ならびを たしかめる。',
+      audioPrompt: { text: item.speech || item.en, lang: 'en-US', autoPlay: true },
+    },
+    {
+      question: `つぎの 日本語を 英語で くりかえそう。\n「${item.jp}」`,
+      answer: item.en,
+      options: d(item.en, ...pickDistinct(enPool, item.en, index + 3, 3)),
+      hint: '例の音を まねして はっきり言う。',
+      audioPrompt: { text: item.speech || item.en, lang: 'en-US', autoPlay: false },
+      speechPrompt: {
+        expected: item.speech || item.en,
+        alternates: makeSpeechAlternates(item),
+        lang: 'en-US',
+        buttonLabel: '英語を くりかえす',
+      },
+    },
+  ]));
+};
+
+export const buildResponseReviewUnit = (items: EnglishResponseItem[], promptText = '聞かれたことに 英語で こたえよう。'): GeneralProblem[] => {
+  const enPool = items.map((item) => item.answerEn);
+  const jpPool = items.map((item) => item.answerJp);
+  const makeSpeechAlternates = (item: EnglishResponseItem) => {
+    const base = item.answerSpeech || item.answerEn;
+    const normalized = base.replace(/[.!?]/g, '');
+    return Array.from(new Set([
+      normalized,
+      normalized.toLowerCase(),
+      item.answerEn,
+      ...(item.answerSpeechAlternates || []),
+    ]));
+  };
+
+  return items.flatMap((item, index) => ([
+    {
+      question: `${promptText}\n${item.promptEn}`,
+      answer: item.answerEn,
+      options: d(item.answerEn, ...pickDistinct(enPool, item.answerEn, index + 1, 3)),
+      hint: '質問や 呼びかけに 合う 返事を えらぶ。',
+      audioPrompt: { text: item.promptSpeech || item.promptEn, lang: 'en-US', autoPlay: true },
+    },
+    {
+      question: `「${item.promptJp}」への へんじとして 合う 日本語は？`,
+      answer: item.answerJp,
+      options: d(item.answerJp, ...pickDistinct(jpPool, item.answerJp, index + 2, 3)),
+      hint: '返事の いみも あわせて おぼえる。',
+      audioPrompt: { text: item.promptSpeech || item.promptEn, lang: 'en-US', autoPlay: false },
+    },
+    {
+      question: `${item.promptEn}\nえいごで こたえよう。`,
+      answer: item.answerEn,
+      options: d(item.answerEn, ...pickDistinct(enPool, item.answerEn, index + 3, 3)),
+      hint: 'みじかく はっきり へんじする。',
+      audioPrompt: { text: item.promptSpeech || item.promptEn, lang: 'en-US', autoPlay: false },
+      speechPrompt: {
+        expected: item.answerSpeech || item.answerEn,
+        alternates: makeSpeechAlternates(item),
+        lang: 'en-US',
+        buttonLabel: 'へんじを はなす',
+      },
+    },
+  ]));
 };
 
 export const prompt = (

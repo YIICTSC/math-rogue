@@ -1,5 +1,5 @@
 import { GeneralProblem } from './utils';
-import { buildListeningReviewUnit, buildSpeakingReviewUnit, buildWordUnit, cycleProblems, EnglishWordItem, uniqueEnglishWordItems } from './english_utils';
+import { buildListeningReviewUnit, buildRepeatReviewUnit, buildResponseReviewUnit, buildSpeakingReviewUnit, buildWordUnit, cycleProblems, EnglishResponseItem, EnglishWordItem, uniqueEnglishWordItems } from './english_utils';
 
 const alphabet: EnglishWordItem[] = [
   { en: 'A', jp: 'エー', speech: 'A' },
@@ -130,6 +130,14 @@ const g5ReviewItems: EnglishWordItem[] = uniqueEnglishWordItems([
   ...canDo,
   ...places,
 ]);
+const g5ResponseItems: EnglishResponseItem[] = [
+  { promptEn: 'What is your name?', promptJp: 'おなまえは なんですか。', answerEn: 'My name is Yui.', answerJp: 'わたしの なまえは ユイです。', answerSpeech: 'My name is Yui' },
+  { promptEn: 'When is your birthday?', promptJp: 'たん生日は いつですか。', answerEn: 'It is in May.', answerJp: '5月です。', answerSpeech: 'It is in May' },
+  { promptEn: 'What day is it today?', promptJp: 'きょうは なんよう日ですか。', answerEn: 'It is Monday.', answerJp: '月よう日です。', answerSpeech: 'It is Monday' },
+  { promptEn: 'What can you do?', promptJp: 'なにが できますか。', answerEn: 'I can swim.', answerJp: 'わたしは およげます。', answerSpeech: 'I can swim' },
+  { promptEn: 'Where do you want to go?', promptJp: 'どこへ 行きたいですか。', answerEn: 'I want to go to Kyoto.', answerJp: 'わたしは 京都へ 行きたいです。', answerSpeech: 'I want to go to Kyoto' },
+  { promptEn: 'What do you like?', promptJp: 'なにが すきですか。', answerEn: 'I like cats.', answerJp: 'わたしは ねこが 好きです。', answerSpeech: 'I like cats' },
+];
 
 export const ENGLISH_G5_UNIT_DATA: Record<string, GeneralProblem[]> = {
   ENGLISH_G5_U01: cycleProblems(buildWordUnit(alphabet, { enableListening: true, enableSpeaking: true })),
@@ -144,6 +152,8 @@ export const ENGLISH_G5_UNIT_DATA: Record<string, GeneralProblem[]> = {
   ENGLISH_G5_U10: cycleProblems(buildWordUnit(places, { enableListening: true, enableSpeaking: true })),
   ENGLISH_G5_U11: buildListeningReviewUnit(g5ReviewItems, '5年生の ことばを きいて、あてはまる 英語を えらぼう。'),
   ENGLISH_G5_U12: buildSpeakingReviewUnit(g5ReviewItems, '5年生の ことばを 英語で いってみよう。'),
+  ENGLISH_G5_U13: buildRepeatReviewUnit(g5ReviewItems, '5年生の ことばを きいて、英語を くりかえそう。'),
+  ENGLISH_G5_U14: buildResponseReviewUnit(g5ResponseItems, '5年生の きほん会話に 英語で こたえよう。'),
 };
 
 export const ENGLISH_G5_DATA: Record<string, GeneralProblem[]> = {

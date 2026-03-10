@@ -1,5 +1,5 @@
 import { GeneralProblem } from './utils';
-import { buildListeningReviewUnit, buildSpeakingReviewUnit, buildWordUnit, cycleProblems, EnglishWordItem, uniqueEnglishWordItems } from './english_utils';
+import { buildListeningReviewUnit, buildRepeatReviewUnit, buildResponseReviewUnit, buildSpeakingReviewUnit, buildWordUnit, cycleProblems, EnglishResponseItem, EnglishWordItem, uniqueEnglishWordItems } from './english_utils';
 
 const selfIntro: EnglishWordItem[] = [
   { en: 'I am in sixth grade.', jp: 'わたしは 6年生です。', speech: 'I am in sixth grade' },
@@ -116,6 +116,14 @@ const g6ReviewItems: EnglishWordItem[] = uniqueEnglishWordItems([
   ...worldCulture,
   ...futurePlans,
 ]);
+const g6ResponseItems: EnglishResponseItem[] = [
+  { promptEn: 'What do you want to be?', promptJp: 'しょうらい 何に なりたいですか。', answerEn: 'I want to be a doctor.', answerJp: 'わたしは 医者に なりたいです。', answerSpeech: 'I want to be a doctor' },
+  { promptEn: 'What do you do every day?', promptJp: '毎日 何を しますか。', answerEn: 'I practice every day.', answerJp: 'わたしは 毎日れんしゅうします。', answerSpeech: 'I practice every day' },
+  { promptEn: 'Where do you want to go?', promptJp: 'どこへ 行きたいですか。', answerEn: 'I want to go to Canada.', answerJp: 'わたしは カナダへ 行きたいです。', answerSpeech: 'I want to go to Canada' },
+  { promptEn: 'What did you do last Sunday?', promptJp: 'この前の日よう日に 何を しましたか。', answerEn: 'I visited Kyoto.', answerJp: 'わたしは 京都を おとずれました。', answerSpeech: 'I visited Kyoto' },
+  { promptEn: 'What is your favorite sport?', promptJp: 'すきな スポーツは 何ですか。', answerEn: 'My favorite sport is baseball.', answerJp: 'わたしの 好きなスポーツは 野球です。', answerSpeech: 'My favorite sport is baseball' },
+  { promptEn: 'What will you do next year?', promptJp: '来年 何を しますか。', answerEn: 'I will study English hard.', answerJp: 'わたしは 英語を しっかり勉強します。', answerSpeech: 'I will study English hard' },
+];
 
 export const ENGLISH_G6_UNIT_DATA: Record<string, GeneralProblem[]> = {
   ENGLISH_G6_U01: cycleProblems(buildWordUnit(selfIntro, { enableListening: true, enableSpeaking: true })),
@@ -130,6 +138,8 @@ export const ENGLISH_G6_UNIT_DATA: Record<string, GeneralProblem[]> = {
   ENGLISH_G6_U10: cycleProblems(buildWordUnit(futurePlans, { enableListening: true, enableSpeaking: true })),
   ENGLISH_G6_U11: buildListeningReviewUnit(g6ReviewItems, '6年生の ことばを きいて、あてはまる 英語を えらぼう。'),
   ENGLISH_G6_U12: buildSpeakingReviewUnit(g6ReviewItems, '6年生の ことばを 英語で いってみよう。'),
+  ENGLISH_G6_U13: buildRepeatReviewUnit(g6ReviewItems, '6年生の ことばを きいて、英語を くりかえそう。'),
+  ENGLISH_G6_U14: buildResponseReviewUnit(g6ResponseItems, '6年生の 会話に 英語で こたえよう。'),
 };
 
 export const ENGLISH_G6_DATA: Record<string, GeneralProblem[]> = {

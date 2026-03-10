@@ -1,5 +1,5 @@
 import { GeneralProblem } from './utils';
-import { buildListeningReviewUnit, buildSpeakingReviewUnit, buildWordUnit, cycleProblems, EnglishWordItem, uniqueEnglishWordItems } from './english_utils';
+import { buildListeningReviewUnit, buildRepeatReviewUnit, buildResponseReviewUnit, buildSpeakingReviewUnit, buildWordUnit, cycleProblems, EnglishResponseItem, EnglishWordItem, uniqueEnglishWordItems } from './english_utils';
 
 const greetingsTalk: EnglishWordItem[] = [
   { en: 'How are you?', jp: 'げんきですか。', speech: 'How are you' },
@@ -120,6 +120,14 @@ const g4ReviewItems: EnglishWordItem[] = uniqueEnglishWordItems([
   ...foods,
   ...japaneseCulture,
 ]);
+const g4ResponseItems: EnglishResponseItem[] = [
+  { promptEn: 'How are you?', promptJp: 'げんきですか。', answerEn: 'I am great.', answerJp: 'とても げんきです。', answerSpeech: 'I am great', answerSpeechAlternates: ["I'm great"] },
+  { promptEn: 'What subject do you like?', promptJp: 'どの 教科が すきですか。', answerEn: 'I like music.', answerJp: 'わたしは 音楽が すきです。', answerSpeech: 'I like music' },
+  { promptEn: 'How is the weather?', promptJp: 'てんきは どうですか。', answerEn: 'It is sunny.', answerJp: 'はれです。', answerSpeech: 'It is sunny' },
+  { promptEn: 'What time is it?', promptJp: 'なんじですか。', answerEn: "It is seven o'clock.", answerJp: '7じです。', answerSpeech: 'It is seven o clock' },
+  { promptEn: 'What do you have?', promptJp: 'なにを もっていますか。', answerEn: 'I have a pencil.', answerJp: 'わたしは えんぴつを もっています。', answerSpeech: 'I have a pencil' },
+  { promptEn: 'What food do you like?', promptJp: 'どんな 食べものが すきですか。', answerEn: 'I like sushi.', answerJp: 'わたしは すしが すきです。', answerSpeech: 'I like sushi' },
+];
 
 export const ENGLISH_G4_UNIT_DATA: Record<string, GeneralProblem[]> = {
   ENGLISH_G4_U01: cycleProblems(buildWordUnit(greetingsTalk, { enableListening: true, enableSpeaking: true })),
@@ -134,6 +142,8 @@ export const ENGLISH_G4_UNIT_DATA: Record<string, GeneralProblem[]> = {
   ENGLISH_G4_U10: cycleProblems(buildWordUnit(japaneseCulture, { enableListening: true })),
   ENGLISH_G4_U11: buildListeningReviewUnit(g4ReviewItems, '4年生の ことばを きいて、あてはまる 英語を えらぼう。'),
   ENGLISH_G4_U12: buildSpeakingReviewUnit(g4ReviewItems, '4年生の ことばを 英語で いってみよう。'),
+  ENGLISH_G4_U13: buildRepeatReviewUnit(g4ReviewItems, '4年生の ことばを きいて、英語を くりかえそう。'),
+  ENGLISH_G4_U14: buildResponseReviewUnit(g4ResponseItems, '4年生の きほん会話に 英語で こたえよう。'),
 };
 
 export const ENGLISH_G4_DATA: Record<string, GeneralProblem[]> = {
