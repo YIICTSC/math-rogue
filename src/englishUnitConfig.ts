@@ -18,6 +18,8 @@ export const ENGLISH_GRADE_UNITS: Record<number, EnglishUnitOption[]> = {
     { id: 'E3_U10', name: 'からだのぶぶん', mode: 'ENGLISH_G3_U10' },
     { id: 'E3_U11', name: 'リスニング総仕上げ', mode: 'ENGLISH_G3_U11' },
     { id: 'E3_U12', name: '発声総仕上げ', mode: 'ENGLISH_G3_U12' },
+    { id: 'E3_U13', name: '復唱問題総仕上げ', mode: 'ENGLISH_G3_U13' },
+    { id: 'E3_U14', name: '応答問題総仕上げ', mode: 'ENGLISH_G3_U14' },
   ],
   4: [
     { id: 'E4_U01', name: 'あいさつと会話', mode: 'ENGLISH_G4_U01' },
@@ -32,6 +34,8 @@ export const ENGLISH_GRADE_UNITS: Record<number, EnglishUnitOption[]> = {
     { id: 'E4_U10', name: '日本の文化しょうかい', mode: 'ENGLISH_G4_U10' },
     { id: 'E4_U11', name: 'リスニング総仕上げ', mode: 'ENGLISH_G4_U11' },
     { id: 'E4_U12', name: '発声総仕上げ', mode: 'ENGLISH_G4_U12' },
+    { id: 'E4_U13', name: '復唱問題総仕上げ', mode: 'ENGLISH_G4_U13' },
+    { id: 'E4_U14', name: '応答問題総仕上げ', mode: 'ENGLISH_G4_U14' },
   ],
   5: [
     { id: 'E5_U01', name: 'アルファベット', mode: 'ENGLISH_G5_U01' },
@@ -46,6 +50,8 @@ export const ENGLISH_GRADE_UNITS: Record<number, EnglishUnitOption[]> = {
     { id: 'E5_U10', name: '行きたい場所', mode: 'ENGLISH_G5_U10' },
     { id: 'E5_U11', name: 'リスニング総仕上げ', mode: 'ENGLISH_G5_U11' },
     { id: 'E5_U12', name: '発声総仕上げ', mode: 'ENGLISH_G5_U12' },
+    { id: 'E5_U13', name: '復唱問題総仕上げ', mode: 'ENGLISH_G5_U13' },
+    { id: 'E5_U14', name: '応答問題総仕上げ', mode: 'ENGLISH_G5_U14' },
   ],
   6: [
     { id: 'E6_U01', name: '自己紹介', mode: 'ENGLISH_G6_U01' },
@@ -60,6 +66,8 @@ export const ENGLISH_GRADE_UNITS: Record<number, EnglishUnitOption[]> = {
     { id: 'E6_U10', name: '将来の計画', mode: 'ENGLISH_G6_U10' },
     { id: 'E6_U11', name: 'リスニング総仕上げ', mode: 'ENGLISH_G6_U11' },
     { id: 'E6_U12', name: '発声総仕上げ', mode: 'ENGLISH_G6_U12' },
+    { id: 'E6_U13', name: '復唱問題総仕上げ', mode: 'ENGLISH_G6_U13' },
+    { id: 'E6_U14', name: '応答問題総仕上げ', mode: 'ENGLISH_G6_U14' },
   ],
   7: [
     { id: 'E7_U01', name: 'アルファベット', mode: 'ENGLISH_G7_U01' },
@@ -76,6 +84,8 @@ export const ENGLISH_GRADE_UNITS: Record<number, EnglishUnitOption[]> = {
     { id: 'E7_U12', name: '代名詞', mode: 'ENGLISH_G7_U12' },
     { id: 'E7_U13', name: 'リスニング総仕上げ', mode: 'ENGLISH_G7_U13' },
     { id: 'E7_U14', name: '発声総仕上げ', mode: 'ENGLISH_G7_U14' },
+    { id: 'E7_U15', name: '復唱問題総仕上げ', mode: 'ENGLISH_G7_U15' },
+    { id: 'E7_U16', name: '応答問題総仕上げ', mode: 'ENGLISH_G7_U16' },
   ],
   8: [
     { id: 'E8_U01', name: '過去形', mode: 'ENGLISH_G8_U01' },
@@ -89,6 +99,8 @@ export const ENGLISH_GRADE_UNITS: Record<number, EnglishUnitOption[]> = {
     { id: 'E8_U09', name: '受動態', mode: 'ENGLISH_G8_U09' },
     { id: 'E8_U10', name: 'リスニング総仕上げ', mode: 'ENGLISH_G8_U10' },
     { id: 'E8_U11', name: '発声総仕上げ', mode: 'ENGLISH_G8_U11' },
+    { id: 'E8_U12', name: '復唱問題総仕上げ', mode: 'ENGLISH_G8_U12' },
+    { id: 'E8_U13', name: '応答問題総仕上げ', mode: 'ENGLISH_G8_U13' },
   ],
   9: [
     { id: 'E9_U01', name: '現在完了', mode: 'ENGLISH_G9_U01' },
@@ -103,5 +115,7 @@ export const ENGLISH_GRADE_UNITS: Record<number, EnglishUnitOption[]> = {
     { id: 'E9_U10', name: 'スピーチ', mode: 'ENGLISH_G9_U10' },
     { id: 'E9_U11', name: 'リスニング総仕上げ', mode: 'ENGLISH_G9_U11' },
     { id: 'E9_U12', name: '発声総仕上げ', mode: 'ENGLISH_G9_U12' },
+    { id: 'E9_U13', name: '復唱問題総仕上げ', mode: 'ENGLISH_G9_U13' },
+    { id: 'E9_U14', name: '応答問題総仕上げ', mode: 'ENGLISH_G9_U14' },
   ],
 };

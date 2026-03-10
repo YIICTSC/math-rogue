@@ -3378,9 +3378,6 @@ const App: React.FC = () => {
                             newLogs.push("校長先生が真の姿を現した！");
                             nextActiveEffects.push({ id: `vfx-evo2-${Date.now()}`, type: 'BUFF', targetId: e.id });
                         }
-                        if (prev.challengeMode === 'TYPING') {
-                            p.block = 0;
-                        }
                     }
                     if (intent.type === EnemyIntentType.DEFEND || intent.type === EnemyIntentType.ATTACK_DEFEND) {
                         e.block += intent.value;
@@ -3553,6 +3550,49 @@ const App: React.FC = () => {
     const handleTypingAutoPlayCard = (card: ICard) => {
         handlePlayCard({ ...card, cost: 0, unplayable: false });
     };
+
+    useEffect(() => {
+        if (gameState.screen !== GameScreen.BATTLE) return;
+        if (gameState.challengeMode !== 'TYPING') return;
+        if (!gameState.selectionState.active) return;
+        if (actingEnemyId) return;
+
+        const timer = window.setTimeout(() => {
+            const current = stateRef.current;
+            if (current.screen !== GameScreen.BATTLE || current.challengeMode !== 'TYPING') return;
+            if (!current.selectionState.active) return;
+
+            const nextCard = current.player.hand[0];
+            const { selectionState } = current;
+
+            if (selectionState.type === 'DISCARD') {
+                if (!selectionState.originCardId || !nextCard) {
+                    handleCancelSelection();
+                    return;
+                }
+                handleHandSelection(nextCard);
+                return;
+            }
+
+            if ((selectionState.type === 'COPY' || selectionState.type === 'EXHAUST') && nextCard) {
+                handleHandSelection(nextCard);
+                return;
+            }
+
+            handleCancelSelection();
+        }, 180);
+
+        return () => window.clearTimeout(timer);
+    }, [
+        actingEnemyId,
+        gameState.challengeMode,
+        gameState.player.hand.length,
+        gameState.screen,
+        gameState.selectionState.active,
+        gameState.selectionState.amount,
+        gameState.selectionState.originCardId,
+        gameState.selectionState.type,
+    ]);
 
     const handleEventComplete = () => {
         handleNodeComplete();
@@ -4549,6 +4589,7 @@ const App: React.FC = () => {
                                 act={gameState.act}
                                 floor={gameState.floor}
                                 lessonId={gameState.typingLessonId}
+                                onAbort={returnToTitle}
                             />
                         ) : (
                             <BattleScene
