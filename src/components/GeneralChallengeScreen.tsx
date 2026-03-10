@@ -51,9 +51,17 @@ const getBackgroundClass = (mode: string) => {
     return 'bg-slate-900';
 };
 
-const isEnglishReviewMode = (mode: string) => /^ENGLISH_G[3-9]_U(11|12|13|14)$/.test(mode);
+const isEnglishReviewMode = (mode: string) =>
+  /^ENGLISH_G[3-6]_U(11|12|13|14)$/.test(mode) ||
+  /^ENGLISH_G7_U(13|14|15|16)$/.test(mode) ||
+  /^ENGLISH_G8_U(10|11|12|13)$/.test(mode) ||
+  /^ENGLISH_G9_U(11|12|13|14)$/.test(mode);
+
 const isEnglishSpeakingReviewMode = (mode: string) =>
-  /^ENGLISH_G[3-6]_U12$/.test(mode) || mode === 'ENGLISH_G7_U14' || mode === 'ENGLISH_G8_U11' || mode === 'ENGLISH_G9_U12';
+  /^ENGLISH_G[3-6]_U(12|13|14)$/.test(mode) ||
+  /^ENGLISH_G7_U(14|15|16)$/.test(mode) ||
+  /^ENGLISH_G8_U(11|12|13)$/.test(mode) ||
+  /^ENGLISH_G9_U(12|13|14)$/.test(mode);
 
 const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onComplete, mode, modePool, onModeCorrect, debugSkip, isChallenge, streak = 0 }) => {
   const [problems, setProblems] = useState<ExtendedGeneralProblem[]>([]);
@@ -1015,7 +1023,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
   );
 
   return (
-    <div className={`flex flex-col h-full w-full ${bgClass} text-white relative items-center justify-start md:justify-center p-2 sm:p-3 md:p-8 font-mono overflow-y-auto overflow-x-hidden`}>
+    <div className={`flex flex-col h-full w-full ${bgClass} text-white relative items-center justify-center p-2 sm:p-3 md:p-8 font-mono overflow-y-auto overflow-x-hidden`}>
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-20 pointer-events-none"></div>
         
         <div className="z-10 w-full max-w-md text-center flex flex-col py-2 md:py-0 min-w-0">

@@ -30,6 +30,7 @@ interface TypingBattleSceneProps {
     act: number;
     floor: number;
     lessonId?: string;
+    onAbort: () => void;
 }
 
 type FingerId =
@@ -524,7 +525,8 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
     finisherCutinCard,
     act,
     floor,
-    lessonId
+    lessonId,
+    onAbort
 }) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const autoEndTimerRef = useRef<number | null>(null);
@@ -538,6 +540,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
     const [rtbNow, setRtbNow] = useState(Date.now());
     const [isShaking, setIsShaking] = useState(false);
     const [lastVisibleEnemies, setLastVisibleEnemies] = useState<Enemy[]>([]);
+    const [wrongInputStreak, setWrongInputStreak] = useState(0);
 
     const currentCard = useMemo(() => {
         if (player.hand.length === 0) return null;
@@ -651,6 +654,16 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
     }, [prompt?.id, selectionState.active, actingEnemyId]);
 
     useEffect(() => {
+        if (wrongInputStreak < 20) return;
+        audioService.playSound('wrong');
+        setStatusMessage('ミスタイプが続いたため タイトルへ もどります');
+        const timer = window.setTimeout(() => {
+            onAbort();
+        }, 700);
+        return () => window.clearTimeout(timer);
+    }, [onAbort, wrongInputStreak]);
+
+    useEffect(() => {
         if (autoEndTimerRef.current) {
             window.clearTimeout(autoEndTimerRef.current);
             autoEndTimerRef.current = null;
@@ -667,6 +680,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
         if (!prompt || !currentCard) return;
         audioService.playSound('attack');
         setStatusMessage(`${trans(currentCard.name, languageMode)} を自動使用`);
+        setWrongInputStreak(0);
         if (lessonId && nextExpectedKey) {
             storageService.decayTypingWeakKey(lessonId, nextExpectedKey, 1);
         }
@@ -683,11 +697,13 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
         }
         if (!normalizedAnswers.some(answer => answer.startsWith(normalized))) {
             audioService.playSound('wrong');
+            setWrongInputStreak(prev => prev + 1);
             if (lessonId && nextExpectedKey) {
                 storageService.recordTypingWeakKey(lessonId, nextExpectedKey);
             }
             return;
         }
+        setWrongInputStreak(0);
         setInput(value);
         if (normalizedAnswers.includes(normalized)) {
             handleSuccess();

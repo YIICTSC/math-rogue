@@ -1282,8 +1282,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             </div>
 
             {/* 4. Hand Area */}
-            <div className={`h-52 md:h-64 bg-gray-900 border-t border-gray-700 relative z-10 ${selectionState.active ? 'bg-blue-900/20' : ''}`}>
-                <div className="group/hand w-full h-full overflow-x-auto px-10 flex items-end justify-start md:justify-center pb-8 custom-scrollbar touch-pan-x" style={{ overflowY: 'visible' }}>
+            <div className={`h-60 md:h-64 bg-gray-900 border-t border-gray-700 relative z-10 ${selectionState.active ? 'bg-blue-900/20' : ''}`}>
+                <div className="group/hand w-full h-full overflow-x-auto px-8 md:px-10 flex items-end justify-start md:justify-center pt-5 pb-10 md:pb-8 custom-scrollbar touch-pan-x" style={{ overflowY: 'visible' }}>
                     {player.hand.map((card, i) => {
                         const isClashDisabled = card.playCondition === 'HAND_ONLY_ATTACKS' && player.hand.some(c => c.type !== CardType.ATTACK && c.id !== card.id);
                         const isGrandFinaleDisabled = card.playCondition === 'DRAW_PILE_EMPTY' && player.drawPile.length > 0;
@@ -1315,7 +1315,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             ${tutorialStep === 4 ? 'ring-4 ring-blue-500 ring-offset-2 ring-offset-transparent animate-pulse rounded-lg' : ''}
                         `}
                                 style={{
-                                    transform: isSelectedActive || isSelectedDual ? 'translateY(-32px) scale(1.1)' : `rotate(${rotation}deg) translateY(${translateY}px)`,
+                                    transform: isSelectedActive || isSelectedDual ? 'translateY(-24px) scale(1.1)' : `rotate(${rotation}deg) translateY(${translateY}px)`,
                                     zIndex: isSelectedActive || isSelectedDual ? 40 : 10 + i
                                 }}
                             >
