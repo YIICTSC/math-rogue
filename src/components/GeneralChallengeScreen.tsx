@@ -5,6 +5,7 @@ import { audioService } from '../services/audioService';
 import { GameMode } from '../types';
 import { storageService } from '../services/storageService';
 import { SUBJECT_DATA, GeneralProblem } from '../data/subjectData';
+import { MAP_SYMBOL_ASSET_MAP } from './mapSymbolImageMap';
 
 interface GeneralChallengeScreenProps {
   onComplete: (correctCount: number) => void;
@@ -76,6 +77,10 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
   const visualCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
   const currentProblem = problems[currentProblemIndex];
+  const mapSymbolAsset =
+    currentProblem?.visual?.kind === 'map_symbol'
+      ? MAP_SYMBOL_ASSET_MAP[currentProblem.visual.symbol]
+      : undefined;
 
   const normalize = (s: string) => {
     if (!s) return "";
@@ -219,9 +224,13 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       onModeCorrect?.(problems[currentProblemIndex].sourceMode, 1);
       const currentTotal = storageService.getMathCorrectCount();
       storageService.saveMathCorrectCount(currentTotal + 1);
+      
+      const currentStreak = storageService.getHintStreaks()[problems[currentProblemIndex].sourceMode] || 0;
+      storageService.saveHintStreak(problems[currentProblemIndex].sourceMode, currentStreak + 1);
     } else {
       setFeedback('WRONG');
       audioService.playSound('wrong');
+      storageService.saveHintStreak(problems[currentProblemIndex].sourceMode, 0);
     }
 
     setTimeout(() => {
@@ -290,6 +299,340 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       ctx.fillRect(0, 0, w, h);
       ctx.strokeStyle = '#e2e8f0';
       ctx.lineWidth = 2;
+
+      if (visual.kind === 'map_symbol') {
+        const cx = w / 2;
+        const cy = h / 2;
+        const stroke = '#111827';
+        const fill = '#111827';
+        const line = (x1: number, y1: number, x2: number, y2: number, width = 5) => {
+          ctx.strokeStyle = stroke;
+          ctx.lineWidth = width;
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.stroke();
+        };
+        const circle = (r: number, width = 5, filled = false) => {
+          ctx.beginPath();
+          ctx.arc(cx, cy, r, 0, Math.PI * 2);
+          if (filled) {
+            ctx.fillStyle = fill;
+            ctx.fill();
+          } else {
+            ctx.strokeStyle = stroke;
+            ctx.lineWidth = width;
+            ctx.stroke();
+          }
+        };
+        const text = (value: string, size = 52, y = cy + 18) => {
+          ctx.fillStyle = fill;
+          ctx.font = `bold ${size}px sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(value, cx, y);
+        };
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(0, 0, w, h);
+        ctx.strokeStyle = stroke;
+        ctx.fillStyle = fill;
+
+        switch (visual.symbol) {
+          case 'city_office':
+            circle(42, 5);
+            circle(22, 5);
+            break;
+          case 'town_office':
+            circle(36, 5);
+            break;
+          case 'school':
+            text('文', 64, cy + 8);
+            break;
+          case 'post_office':
+          case 'post_office_round':
+            if (visual.symbol === 'post_office_round') {
+              circle(40, 5);
+            }
+            text('〒', 58, cy + 8);
+            break;
+          case 'temple':
+            text('卍', 58, cy + 8);
+            break;
+          case 'shrine':
+            line(cx - 34, cy - 22, cx + 34, cy - 22, 6);
+            line(cx - 28, cy - 4, cx + 28, cy - 4, 6);
+            line(cx - 18, cy - 22, cx - 18, cy + 34, 6);
+            line(cx + 18, cy - 22, cx + 18, cy + 34, 6);
+            break;
+          case 'police_box':
+            line(cx - 24, cy - 24, cx + 24, cy + 24, 6);
+            line(cx + 24, cy - 24, cx - 24, cy + 24, 6);
+            break;
+          case 'police_station':
+            circle(38, 5);
+            line(cx - 22, cy - 22, cx + 22, cy + 22, 5);
+            line(cx + 22, cy - 22, cx - 22, cy + 22, 5);
+            break;
+          case 'fire_station':
+            line(cx, cy - 40, cx, cy + 34, 6);
+            line(cx, cy - 8, cx - 28, cy - 34, 6);
+            line(cx, cy - 8, cx + 28, cy - 34, 6);
+            break;
+          case 'factory':
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 34, 0, Math.PI * 2);
+            for (let i = 0; i < 8; i++) {
+              const a = (i / 8) * Math.PI * 2;
+              const inner = 34;
+              const outer = 48;
+              ctx.moveTo(cx + Math.cos(a) * inner, cy + Math.sin(a) * inner);
+              ctx.lineTo(cx + Math.cos(a) * outer, cy + Math.sin(a) * outer);
+            }
+            ctx.stroke();
+            break;
+          case 'health_center':
+            circle(38, 5);
+            line(cx - 18, cy, cx + 18, cy, 6);
+            line(cx, cy - 18, cx, cy + 18, 6);
+            break;
+          case 'hospital':
+            ctx.strokeRect(cx - 34, cy - 28, 68, 56);
+            line(cx - 16, cy, cx + 16, cy, 6);
+            line(cx, cy - 16, cx, cy + 16, 6);
+            break;
+          case 'rice_field':
+            ctx.strokeRect(cx - 34, cy - 34, 68, 68);
+            line(cx, cy - 34, cx, cy + 34, 5);
+            line(cx - 34, cy, cx + 34, cy, 5);
+            break;
+          case 'farm':
+            line(cx - 34, cy + 26, cx - 8, cy - 12, 5);
+            line(cx - 10, cy + 26, cx + 16, cy - 12, 5);
+            line(cx + 14, cy + 26, cx + 40, cy - 12, 5);
+            break;
+          case 'orchard':
+            circle(24, 5);
+            line(cx, cy - 6, cx, cy - 34, 5);
+            line(cx, cy - 34, cx + 16, cy - 44, 5);
+            break;
+          case 'tea_field':
+            circle(6, 1, true);
+            ctx.beginPath();
+            ctx.arc(cx - 18, cy + 10, 6, 0, Math.PI * 2);
+            ctx.arc(cx + 18, cy + 10, 6, 0, Math.PI * 2);
+            ctx.fill();
+            break;
+          case 'broadleaf_forest':
+            ctx.beginPath();
+            ctx.arc(cx, cy - 6, 26, 0, Math.PI * 2);
+            ctx.stroke();
+            line(cx, cy + 18, cx, cy + 44, 5);
+            break;
+          case 'conifer_forest':
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - 42);
+            ctx.lineTo(cx - 28, cy + 12);
+            ctx.lineTo(cx + 28, cy + 12);
+            ctx.closePath();
+            ctx.stroke();
+            line(cx, cy + 12, cx, cy + 40, 5);
+            break;
+          case 'cemetery':
+            line(cx, cy - 28, cx, cy + 28, 6);
+            line(cx - 20, cy - 8, cx + 20, cy - 8, 6);
+            circle(4, 1, true);
+            break;
+          case 'castle_ruins':
+            ctx.strokeRect(cx - 34, cy - 8, 68, 28);
+            line(cx - 34, cy - 8, cx - 34, cy - 26, 5);
+            line(cx - 10, cy - 8, cx - 10, cy - 26, 5);
+            line(cx + 14, cy - 8, cx + 14, cy - 26, 5);
+            line(cx + 34, cy - 8, cx + 34, cy - 26, 5);
+            break;
+          case 'fire_brigade':
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+              const a = (i / 6) * Math.PI * 2 - Math.PI / 6;
+              const x = cx + Math.cos(a) * 34;
+              const y = cy + Math.sin(a) * 34;
+              if (i === 0) ctx.moveTo(x, y);
+              else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.stroke();
+            circle(4, 1, true);
+            break;
+          case 'self_defense_force':
+            line(cx, cy - 34, cx, cy + 22, 6);
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - 34);
+            ctx.lineTo(cx + 28, cy - 20);
+            ctx.lineTo(cx, cy - 6);
+            ctx.closePath();
+            ctx.fill();
+            break;
+          case 'lighthouse':
+            ctx.strokeRect(cx - 14, cy - 30, 28, 54);
+            line(cx - 24, cy + 24, cx + 24, cy + 24, 5);
+            line(cx + 14, cy - 18, cx + 34, cy - 30, 4);
+            line(cx + 16, cy - 6, cx + 42, cy - 6, 4);
+            break;
+          case 'court':
+            ctx.strokeRect(cx - 34, cy - 34, 68, 68);
+            line(cx - 20, cy - 20, cx + 20, cy + 20, 5);
+            line(cx + 20, cy - 20, cx - 20, cy + 20, 5);
+            break;
+          case 'wasteland':
+            line(cx - 28, cy + 26, cx - 12, cy - 22, 5);
+            line(cx - 4, cy + 26, cx + 12, cy - 22, 5);
+            line(cx + 20, cy + 26, cx + 36, cy - 22, 5);
+            line(cx - 20, cy + 6, cx + 28, cy + 6, 5);
+            break;
+          case 'sandy_area':
+            for (const [dx, dy] of [[-26, -14], [0, -22], [24, -8], [-14, 14], [14, 20], [34, 18]]) {
+              ctx.beginPath();
+              ctx.arc(cx + dx, cy + dy, 4, 0, Math.PI * 2);
+              ctx.fill();
+            }
+            break;
+          case 'government_office':
+            ctx.strokeRect(cx - 38, cy - 38, 76, 76);
+            ctx.strokeRect(cx - 24, cy - 24, 48, 48);
+            break;
+          case 'power_station':
+            circle(40, 5);
+            line(cx, cy - 28, cx, cy + 28, 6);
+            break;
+          case 'weather_station':
+            circle(40, 5);
+            line(cx - 20, cy - 18, cx + 20, cy - 18, 4);
+            line(cx - 24, cy, cx + 24, cy, 4);
+            line(cx - 20, cy + 18, cx + 20, cy + 18, 4);
+            break;
+          case 'hot_spring':
+            text('♨', 58, cy + 8);
+            break;
+          case 'museum':
+            ctx.beginPath();
+            for (let i = 0; i < 5; i++) {
+              const a = (i / 5) * Math.PI * 2 - Math.PI / 2;
+              const x = cx + Math.cos(a) * 36;
+              const y = cy + Math.sin(a) * 36;
+              if (i === 0) ctx.moveTo(x, y);
+              else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.stroke();
+            ctx.strokeRect(cx - 16, cy - 14, 32, 28);
+            break;
+          case 'library':
+            circle(40, 5);
+            ctx.strokeRect(cx - 18, cy - 22, 36, 44);
+            line(cx, cy - 22, cx, cy + 22, 3);
+            break;
+          case 'monument':
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - 38);
+            ctx.lineTo(cx - 20, cy + 30);
+            ctx.lineTo(cx + 20, cy + 30);
+            ctx.closePath();
+            ctx.stroke();
+            break;
+          case 'electronic_control_point':
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+              const a = (i / 6) * Math.PI * 2;
+              const x = cx + Math.cos(a) * 34;
+              const y = cy + Math.sin(a) * 34;
+              if (i === 0) ctx.moveTo(x, y);
+              else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.stroke();
+            circle(4, 1, true);
+            break;
+          case 'triangulation_point':
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - 34);
+            ctx.lineTo(cx - 30, cy + 24);
+            ctx.lineTo(cx + 30, cy + 24);
+            ctx.closePath();
+            ctx.stroke();
+            break;
+          case 'benchmark':
+            ctx.strokeRect(cx - 18, cy - 18, 36, 36);
+            break;
+          case 'mulberry_field':
+            circle(36, 5);
+            line(cx - 18, cy - 18, cx + 18, cy + 18, 5);
+            line(cx + 18, cy - 18, cx - 18, cy + 18, 5);
+            line(cx - 6, cy - 28, cx + 26, cy + 4, 5);
+            break;
+          case 'bamboo_grove':
+            line(cx - 20, cy - 30, cx - 20, cy + 30, 5);
+            line(cx, cy - 30, cx, cy + 30, 5);
+            line(cx + 20, cy - 30, cx + 20, cy + 30, 5);
+            line(cx - 28, cy - 10, cx - 12, cy - 22, 4);
+            line(cx + 8, cy + 4, cx + 28, cy - 10, 4);
+            break;
+          case 'smokestack':
+            line(cx, cy - 34, cx, cy + 28, 8);
+            line(cx - 18, cy + 28, cx + 18, cy + 28, 5);
+            break;
+          case 'crater':
+            for (let i = 0; i < 8; i++) {
+              const a = (i / 8) * Math.PI * 2;
+              line(cx, cy, cx + Math.cos(a) * 32, cy + Math.sin(a) * 32, 3);
+            }
+            break;
+          case 'quarry':
+            circle(36, 3);
+            ctx.setLineDash([6, 5]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            break;
+          case 'oil_gas_well':
+            line(cx - 22, cy + 26, cx, cy - 34, 5);
+            line(cx + 22, cy + 26, cx, cy - 34, 5);
+            line(cx - 30, cy + 6, cx + 30, cy + 6, 5);
+            break;
+          case 'observatory':
+            circle(28, 5);
+            line(cx - 14, cy + 20, cx + 20, cy - 14, 5);
+            break;
+          case 'wetland':
+            line(cx - 42, cy + 16, cx + 42, cy + 16, 4);
+            line(cx - 38, cy + 30, cx + 38, cy + 30, 4);
+            circle(4, 1, true);
+            ctx.beginPath();
+            ctx.arc(cx - 20, cy, 4, 0, Math.PI * 2);
+            ctx.arc(cx + 8, cy - 8, 4, 0, Math.PI * 2);
+            ctx.arc(cx + 26, cy + 2, 4, 0, Math.PI * 2);
+            ctx.fill();
+            break;
+          case 'historic_site':
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - 30);
+            ctx.bezierCurveTo(cx + 18, cy - 44, cx + 34, cy - 12, cx, cy + 18);
+            ctx.bezierCurveTo(cx - 34, cy - 12, cx - 18, cy - 44, cx, cy - 30);
+            ctx.stroke();
+            line(cx, cy + 18, cx, cy + 34, 4);
+            break;
+          case 'hydro_power':
+            ctx.strokeRect(cx - 28, cy - 24, 56, 48);
+            ctx.beginPath();
+            ctx.moveTo(cx - 14, cy + 30);
+            ctx.quadraticCurveTo(cx - 6, cy + 12, cx + 2, cy + 30);
+            ctx.quadraticCurveTo(cx + 10, cy + 48, cx + 18, cy + 30);
+            ctx.stroke();
+            break;
+          default:
+            text('?', 62, cy + 10);
+            break;
+        }
+      }
 
       if (visual.kind === 'clock') {
         const cx = w / 2;
@@ -1010,6 +1353,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     currentProblem?.visual?.kind === 'number_sequence' ? currentProblem.visual.values.join(',') : undefined,
     currentProblem?.visual?.kind === 'fraction' ? `${currentProblem.visual.whole || 0},${currentProblem.visual.numerator},${currentProblem.visual.denominator}` : undefined,
     currentProblem?.visual?.kind === 'fraction_operation' ? `${currentProblem.visual.left.n}/${currentProblem.visual.left.d}${currentProblem.visual.op}${currentProblem.visual.right.n}/${currentProblem.visual.right.d}` : undefined,
+    currentProblem?.visual?.kind === 'map_symbol' ? currentProblem.visual.symbol : undefined,
   ]);
 
   if (debugSkip) return <div className="w-full h-full bg-black"></div>;
@@ -1036,7 +1380,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
             )}
 
             <div className="w-full bg-black/40 border-4 border-white p-3 sm:p-4 md:p-6 rounded-2xl mb-4 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[210px] md:min-h-[260px] min-w-0">
-                {currentProblem.hint && (
+                {currentProblem.hint && (storageService.getHintStreaks()[currentProblem.sourceMode] || 0) < 3 && (
                     <div className="bg-white/10 p-2 rounded-lg border border-white/20 mb-4 w-full animate-in fade-in slide-in-from-top-2">
                         <div className="text-[10px] text-yellow-300 font-bold mb-0.5 uppercase tracking-tighter text-left">Hint</div>
                         <div className="text-[11px] md:text-xs text-gray-100 leading-relaxed text-left">{currentProblem.hint}</div>
@@ -1083,7 +1427,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                     </div>
                 )}
 
-                {currentProblem.visual && (
+                {currentProblem.visual && currentProblem.visual.kind !== 'map_symbol' && (
                     <div className="w-full mb-4 flex justify-center">
                         <canvas
                             ref={visualCanvasRef}
@@ -1091,6 +1435,20 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                             height={180}
                             className="w-full max-w-[260px] h-auto aspect-[13/9] rounded-lg border border-white/30 bg-slate-900"
                         />
+                    </div>
+                )}
+                {currentProblem.visual?.kind === 'map_symbol' && mapSymbolAsset && (
+                    <div className="w-full mb-4 flex justify-center">
+                        <div className="flex w-full max-w-[240px] flex-col items-center gap-2">
+                            <div className="flex w-full min-h-[165px] items-center justify-center rounded-lg border border-white/30 bg-white p-3">
+                                <img
+                                    src={mapSymbolAsset.src}
+                                    alt={mapSymbolAsset.title}
+                                    className="block h-auto max-h-[140px] w-full object-contain"
+                                />
+                            </div>
+
+                        </div>
                     </div>
                 )}
                 

@@ -532,6 +532,8 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
     const autoEndTimerRef = useRef<number | null>(null);
     const rtbIntervalRef = useRef<number | null>(null);
     const prevActingRef = useRef<string | null>(null);
+    const mistypeFlashTimerRef = useRef<number | null>(null);
+    const mistypeShakeTimerRef = useRef<number | null>(null);
 
     const [input, setInput] = useState('');
     const [prompt, setPrompt] = useState<TypingPrompt | null>(null);
@@ -541,6 +543,8 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
     const [isShaking, setIsShaking] = useState(false);
     const [lastVisibleEnemies, setLastVisibleEnemies] = useState<Enemy[]>([]);
     const [wrongInputStreak, setWrongInputStreak] = useState(0);
+    const [mistypeFlashActive, setMistypeFlashActive] = useState(false);
+    const [mistypeShakeActive, setMistypeShakeActive] = useState(false);
 
     const currentCard = useMemo(() => {
         if (player.hand.length === 0) return null;
@@ -676,6 +680,13 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
         };
     }, [currentCard, selectionState.active, actingEnemyId, enemies.length, onEndTurn]);
 
+    useEffect(() => {
+        return () => {
+            if (mistypeFlashTimerRef.current) window.clearTimeout(mistypeFlashTimerRef.current);
+            if (mistypeShakeTimerRef.current) window.clearTimeout(mistypeShakeTimerRef.current);
+        };
+    }, []);
+
     const handleSuccess = () => {
         if (!prompt || !currentCard) return;
         audioService.playSound('attack');
@@ -688,6 +699,18 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
         onPlayTypingCard(currentCard);
     };
 
+    const triggerMistypeFeedback = () => {
+        audioService.playSound('wrong');
+        setMistypeFlashActive(true);
+        setMistypeShakeActive(true);
+
+        if (mistypeFlashTimerRef.current) window.clearTimeout(mistypeFlashTimerRef.current);
+        if (mistypeShakeTimerRef.current) window.clearTimeout(mistypeShakeTimerRef.current);
+
+        mistypeFlashTimerRef.current = window.setTimeout(() => setMistypeFlashActive(false), 180);
+        mistypeShakeTimerRef.current = window.setTimeout(() => setMistypeShakeActive(false), 220);
+    };
+
     const handleInputChange = (value: string) => {
         if (!prompt) return;
         const normalized = normalizeAnswer(value);
@@ -696,7 +719,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
             return;
         }
         if (!normalizedAnswers.some(answer => answer.startsWith(normalized))) {
-            audioService.playSound('wrong');
+            triggerMistypeFeedback();
             setWrongInputStreak(prev => prev + 1);
             if (lessonId && nextExpectedKey) {
                 storageService.recordTypingWeakKey(lessonId, nextExpectedKey);
@@ -726,7 +749,8 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                 spellCheck={false}
             />
 
-            <div className="relative shrink-0 border-b-2 border-gray-700 bg-black p-2 shadow-md">
+            <div className={`relative shrink-0 border-b-2 border-gray-700 bg-black p-2 shadow-md ${mistypeShakeActive ? 'animate-mistype-jolt' : ''}`}>
+                <div className={`pointer-events-none absolute inset-0 bg-red-500/20 transition-opacity duration-150 ${mistypeFlashActive ? 'opacity-100' : 'opacity-0'}`} />
                 <div className="flex w-full flex-col overflow-hidden pr-24">
                     <div className="mb-0.5 truncate text-xs font-bold leading-snug text-green-400 drop-shadow-md">
                         <span className="mr-2 animate-pulse">&gt;&gt;</span> {trans(narrative, languageMode)}
@@ -928,7 +952,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                 </div>
 
                 <div className="absolute left-1/2 top-1/2 flex w-[min(52vw,560px)] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 px-2">
-                    <div className="w-full overflow-hidden rounded-2xl border border-cyan-400/40 bg-slate-950/90 px-3 py-1.5 text-center text-lg font-black tracking-[0.2em] text-white md:text-xl">
+                    <div className={`w-full overflow-hidden rounded-2xl border px-3 py-1.5 text-center text-lg font-black tracking-[0.2em] text-white md:text-xl transition-[transform,border-color,box-shadow,background-color] duration-150 ${mistypeFlashActive ? 'border-red-400/80 bg-red-950/60 shadow-[0_0_22px_rgba(248,113,113,0.28)]' : 'border-cyan-400/40 bg-slate-950/90'} ${mistypeShakeActive ? 'animate-mistype-jolt' : ''}`}>
                         <div className="mb-1.5 flex items-center gap-2">
                             <span className="shrink-0 text-[9px] font-black tracking-[0.22em] text-cyan-300 md:text-[10px]">RTB</span>
                             <div className="h-1.5 w-full overflow-hidden rounded-full border border-slate-700 bg-slate-900/90">
@@ -946,8 +970,8 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                         )) : '...'}
                     </div>
                     <div className="flex items-center gap-2 text-[10px] text-slate-300">
-                        <span className="rounded border border-slate-600 px-2 py-0.5">次キー: {nextExpectedKey || '-'}</span>
-                        <span className="rounded border border-slate-600 px-2 py-0.5">担当指: {currentFinger ? FINGER_LABELS[currentFinger] : 'IME入力'}</span>
+                        <span className={`rounded border px-2 py-0.5 transition-colors duration-150 ${mistypeFlashActive ? 'border-red-400/70 text-red-100' : 'border-slate-600'}`}>次キー: {nextExpectedKey || '-'}</span>
+                        <span className={`rounded border px-2 py-0.5 transition-colors duration-150 ${mistypeFlashActive ? 'border-red-400/70 text-red-100' : 'border-slate-600'}`}>担当指: {currentFinger ? FINGER_LABELS[currentFinger] : 'IME入力'}</span>
                     </div>
                     <div className="flex flex-wrap items-center gap-1.5 text-[10px] text-slate-300">
                         <span className="rounded border border-amber-500/40 bg-amber-950/30 px-2 py-0.5 font-bold text-amber-200">今の重点練習</span>
@@ -972,10 +996,10 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                 </button>
             </div>
 
-            <div className={`relative z-10 h-52 border-t border-gray-700 bg-gray-900 sm:h-56 md:h-60 lg:h-64 ${selectionState.active ? 'bg-blue-900/20' : ''}`} onClick={focusInput}>
+            <div className={`relative z-10 h-52 border-t border-gray-700 bg-gray-900 transition-colors duration-150 sm:h-56 md:h-60 lg:h-64 ${selectionState.active ? 'bg-blue-900/20' : ''} ${mistypeFlashActive ? 'bg-red-950/35' : ''}`} onClick={focusInput}>
                 <div className="group/keyboard flex h-full w-full items-end justify-center gap-3 overflow-x-auto px-3 pb-3 pt-3 custom-scrollbar sm:px-4 sm:pb-4">
                     <TypingHandGuide side="left" activeFinger={currentFinger} />
-                    <div className="w-full max-w-5xl rounded-xl border border-slate-700 bg-slate-950/70 p-2 sm:p-3">
+                    <div className={`w-full max-w-5xl rounded-xl border bg-slate-950/70 p-2 transition-[transform,border-color,box-shadow] duration-150 sm:p-3 ${mistypeFlashActive ? 'border-red-400/70 shadow-[0_0_18px_rgba(248,113,113,0.18)]' : 'border-slate-700'} ${mistypeShakeActive ? 'animate-mistype-jolt' : ''}`}>
                         <div className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-wider text-yellow-300">
                             <Keyboard size={14} /> JIS Keyboard Guide
                         </div>
@@ -989,11 +1013,11 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                                         return (
                                             <div
                                                 key={key}
-                                                className={`flex h-8 min-w-8 items-center justify-center rounded border px-2 text-[11px] font-black uppercase sm:h-9 sm:min-w-9 sm:text-xs ${
-                                                    isActive ? 'border-amber-300 bg-amber-500/40 text-white shadow-[0_0_18px_rgba(251,191,36,0.35)]' :
+                                                className={`flex h-8 min-w-8 items-center justify-center rounded border px-2 text-[11px] font-black uppercase transition-[transform,border-color,background-color,box-shadow] duration-150 sm:h-9 sm:min-w-9 sm:text-xs ${
+                                                    isActive ? (mistypeFlashActive ? 'border-red-300 bg-red-500/35 text-white shadow-[0_0_18px_rgba(248,113,113,0.35)]' : 'border-amber-300 bg-amber-500/40 text-white shadow-[0_0_18px_rgba(251,191,36,0.35)]') :
                                                     finger ? `${FINGER_COLORS[finger]} border` :
                                                     'border-slate-700 bg-slate-950/70 text-slate-300'
-                                                } ${key === 'space' ? 'min-w-28 sm:min-w-40' : ''}`}
+                                                } ${mistypeShakeActive && isActive ? 'animate-mistype-jolt' : ''} ${key === 'space' ? 'min-w-28 sm:min-w-40' : ''}`}
                                             >
                                                 {key}
                                                 {isHome && <span className="ml-1 text-[9px] text-amber-200">•</span>}
@@ -1014,6 +1038,17 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                     0% { transform: scale(0.85); filter: brightness(1.6); }
                     70% { transform: scale(1.12); filter: brightness(1.15); }
                     100% { transform: scale(1.05); filter: brightness(1); }
+                }
+                @keyframes mistype-jolt {
+                    0% { transform: translate3d(0, 0, 0); }
+                    20% { transform: translate3d(-3px, 0, 0); }
+                    40% { transform: translate3d(3px, -1px, 0); }
+                    60% { transform: translate3d(-2px, 1px, 0); }
+                    80% { transform: translate3d(2px, 0, 0); }
+                    100% { transform: translate3d(0, 0, 0); }
+                }
+                .animate-mistype-jolt {
+                    animation: mistype-jolt 180ms ease-out;
                 }
             `}</style>
         </div>

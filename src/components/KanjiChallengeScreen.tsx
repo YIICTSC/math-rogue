@@ -89,9 +89,13 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
       audioService.playSound('correct');
       const currentTotal = storageService.getMathCorrectCount();
       storageService.saveMathCorrectCount(currentTotal + 1);
+      
+      const currentStreak = storageService.getHintStreaks()[mode] || 0;
+      storageService.saveHintStreak(mode, currentStreak + 1);
     } else {
       setFeedback('WRONG');
       audioService.playSound('wrong');
+      storageService.saveHintStreak(mode, 0);
     }
 
     setTimeout(() => {
@@ -124,7 +128,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
         
         <div className="z-10 w-full max-w-md text-center">
             <div className="bg-black/40 border-4 border-white p-8 rounded-lg mb-8 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[260px]">
-                {currentProblem.hint && (
+                {currentProblem.hint && (storageService.getHintStreaks()[mode] || 0) < 3 && (
                     <div className="bg-blue-900/40 p-2 rounded border border-blue-500/30 mb-4 w-full animate-in fade-in slide-in-from-top-2">
                         <div className="text-[10px] text-blue-300 font-bold mb-1">ヒント</div>
                         <div className="text-xs text-gray-200 leading-relaxed">{currentProblem.hint}</div>

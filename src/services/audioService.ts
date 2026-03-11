@@ -34,7 +34,6 @@ class AudioService {
   // School Chime (Westminster Quarters): E4, C4, D4, G3 ... G3, D4, E4, C4
   private chimeMelody = [329.63, 261.63, 293.66, 196.00, 0, 0, 0, 0, 196.00, 293.66, 329.63, 261.63, 0, 0, 0, 0];
 
-  // 全楽曲リスト
   private bgmList = [
     'school_psyche', 'dungeon_gym', 'dungeon_science', 'dungeon_music', 
     'dungeon_library', 'dungeon_roof', 'battle', 'boss', 'mid_boss', 'final_boss', 'dungeon_boss',
@@ -42,6 +41,7 @@ class AudioService {
     'paper_plane_battle', 'paper_plane_setup', 'paper_plane_vacation', 'relic_select',
     'menu', 'map', 'shop', 'event', 'rest', 'reward', 'math', 'victory', 'game_over'
   ];
+  private unplayedBgmList: string[] = [...this.bgmList];
 
   constructor() {}
 
@@ -671,8 +671,23 @@ class AudioService {
   }
 
   public async playRandomBGM() {
-      const candidates = this.bgmList.filter(t => t !== this.currentBgmType);
-      const next = candidates[Math.floor(Math.random() * candidates.length)];
+      // Refresh the pool if empty
+      if (this.unplayedBgmList.length === 0) {
+          this.unplayedBgmList = [...this.bgmList];
+      }
+
+      // Filter out current BGM if possible to prevent immediate repeats on pool refresh
+      let candidates = this.unplayedBgmList;
+      if (candidates.length > 1 && this.currentBgmType) {
+          candidates = candidates.filter(t => t !== this.currentBgmType);
+      }
+
+      const nextIndex = Math.floor(Math.random() * candidates.length);
+      const next = candidates[nextIndex];
+      
+      // Remove from unplayed list
+      this.unplayedBgmList = this.unplayedBgmList.filter(t => t !== next);
+
       // ランダム再生時は自動で次へ行くように loop=false にする
       await this.playBGM(next as any, false);
   }

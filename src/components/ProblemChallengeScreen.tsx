@@ -12,6 +12,8 @@ import { ArrowLeft, Brain, Book, Languages, Music, Play, Trophy, Home, Shuffle, 
 import { trans } from '../utils/textUtils';
 import { SUBJECT_CATEGORIES, SubjectCategoryConfig, SubModeConfig, getChallengeScreenForMode } from '../subjectConfig';
 import { ENGLISH_GRADE_UNITS } from '../englishUnitConfig';
+import { SCIENCE_GRADE_UNITS, getScienceGradeMode } from '../scienceUnitConfig';
+import { SOCIAL_GRADE_UNITS, getSocialGradeMode } from '../socialUnitConfig';
 
 interface ProblemChallengeScreenProps {
   onBack: () => void;
@@ -22,6 +24,7 @@ interface ProblemChallengeScreenProps {
 
 const BGM_OPTIONS = [
   { id: 'random', name: 'ランダム (自動切替)' },
+  { id: 'none', name: 'BGMなし' },
   { id: 'school_psyche', name: '一般教室 (風来1)' },
   { id: 'dungeon_gym', name: '体育館 (風来2)' },
   { id: 'dungeon_science', name: '理科室 (風来3)' },
@@ -401,6 +404,18 @@ const getGlowColorClass = (color: string) => {
     }
 };
 
+const getCategoryClasses = (color: string) => {
+  switch (color) {
+    case 'emerald': return { bg: 'bg-emerald-600', hover: 'hover:bg-emerald-500', text: 'text-emerald-400', border: 'border-emerald-900' };
+    case 'cyan': return { bg: 'bg-cyan-600', hover: 'hover:bg-cyan-500', text: 'text-cyan-400', border: 'border-cyan-900' };
+    case 'indigo': return { bg: 'bg-indigo-600', hover: 'hover:bg-indigo-500', text: 'text-indigo-400', border: 'border-indigo-900' };
+    case 'amber': return { bg: 'bg-amber-600', hover: 'hover:bg-amber-500', text: 'text-amber-400', border: 'border-amber-900' };
+    case 'orange': return { bg: 'bg-orange-600', hover: 'hover:bg-orange-500', text: 'text-orange-400', border: 'border-orange-900' };
+    case 'rose': return { bg: 'bg-rose-600', hover: 'hover:bg-rose-500', text: 'text-rose-400', border: 'border-rose-900' };
+    default: return { bg: 'bg-slate-600', hover: 'hover:bg-slate-500', text: 'text-slate-400', border: 'border-slate-900' };
+  }
+};
+
 const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   onBack,
   languageMode,
@@ -417,6 +432,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   const [streak, setStreak] = useState(0);
   const [records, setRecords] = useState<Record<string, number>>({});
   const [isQuitting, setIsQuitting] = useState(false);
+  const isUnitCategory = selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL';
   
   // Voice feature control
   const [voiceEnabled, setVoiceEnabled] = useState(() => storageService.getEnglishVoiceEnabled());
@@ -426,56 +442,41 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     setRecords(storageService.getChallengeRecords());
   }, []);
 
-  const getMathSelection = (): ActiveChallengeConfig => {
-    const units = MATH_GRADE_UNITS[selectedMathGrade] || [];
-    const selectedUnits = units.filter((u) => selectedMathUnitIds.includes(u.id));
-    const modePool = selectedUnits.flatMap((u) => u.modes);
+  const getCombinedSelection = (): ActiveChallengeConfig => {
+    const allUnits = [
+      ...Object.values(MATH_GRADE_UNITS).flat(),
+      ...Object.values(KOKUGO_GRADE_UNITS).flat(),
+      ...Object.values(ENGLISH_GRADE_UNITS).flat(),
+      ...Object.values(SCIENCE_GRADE_UNITS).flat(),
+      ...Object.values(SOCIAL_GRADE_UNITS).flat(),
+    ];
+    
+    const selectedUnits = allUnits.filter((u) => selectedMathUnitIds.includes(u.id));
+    const modePool = selectedUnits.flatMap((u: any) => {
+      const modes: string[] = [];
+      if ('mode' in u && u.mode) modes.push(u.mode as string);
+      if ('modes' in u && u.modes && Array.isArray(u.modes)) modes.push(...u.modes);
+      return modes;
+    });
+
     const label = selectedUnits.length > 0
-      ? `${getGradeLabel(selectedMathGrade)} 算数・数学 / ${selectedUnits.map((u) => u.name).join(' + ')} ミックス`
-      : `${getGradeLabel(selectedMathGrade)} 算数・数学 / 単元未選択`;
-    const subModeId = `MATH_G${selectedMathGrade}_MIX_${selectedUnits.map((u) => u.id).sort().join('_') || 'NONE'}`;
+      ? `ミックス選択 (${selectedUnits.length}単元)`
+      : `単元未選択`;
+      
+    const subModeId = `COMBINED_MIX_${selectedUnits.map((u) => u.id).sort().join('_') || 'NONE'}`;
 
     return {
-      subMode: {
-        id: subModeId,
-        name: label,
-        mode: getMathGradeMode(selectedMathGrade),
+      subMode: { 
+        id: subModeId, 
+        name: label, 
+        mode: selectedUnits.length > 0 && (selectedUnits[0] as any).mode ? (selectedUnits[0] as any).mode as GameMode : GameMode.MATH_G1_1 
       },
-      modePool,
-    };
-  };
-
-  const getKokugoSelection = (): ActiveChallengeConfig => {
-    const units = KOKUGO_GRADE_UNITS[selectedMathGrade] || [];
-    const selectedUnits = units.filter((u) => selectedMathUnitIds.includes(u.id));
-    const modePool = selectedUnits.flatMap((u) => u.modes);
-    const label = selectedUnits.length > 0
-      ? `${getGradeLabel(selectedMathGrade)} 国語 / ${selectedUnits.map((u) => u.name).join(' + ')} ミックス`
-      : `${getGradeLabel(selectedMathGrade)} 国語 / 単元未選択`;
-    const subModeId = `KOKUGO_G${selectedMathGrade}_MIX_${selectedUnits.map((u) => u.id).sort().join('_') || 'NONE'}`;
-    return {
-      subMode: { id: subModeId, name: label, mode: getKokugoGradeMode(selectedMathGrade) },
-      modePool,
-    };
-  };
-
-  const getEnglishSelection = (): ActiveChallengeConfig => {
-    const units = ENGLISH_GRADE_UNITS[selectedMathGrade] || [];
-    const selectedUnits = units.filter((u) => selectedMathUnitIds.includes(u.id));
-    const modePool = selectedUnits.map((u) => u.mode);
-    const label = selectedUnits.length > 0
-      ? `${getGradeLabel(selectedMathGrade)} 英語 / ${selectedUnits.map((u) => u.name).join(' + ')} ミックス`
-      : `${getGradeLabel(selectedMathGrade)} 英語 / 単元未選択`;
-    const subModeId = `ENGLISH_G${selectedMathGrade}_MIX_${selectedUnits.map((u) => u.id).sort().join('_') || 'NONE'}`;
-    return {
-      subMode: { id: subModeId, name: label, mode: getEnglishGradeMode(selectedMathGrade) },
       modePool,
     };
   };
 
   const handleMathGradeSelect = (grade: number) => {
     setSelectedMathGrade(grade);
-    setSelectedMathUnitIds([]);
     audioService.playSound('select');
   };
 
@@ -489,27 +490,27 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     audioService.playSound('select');
   };
 
+  const clearSelectedUnits = () => {
+    setSelectedMathUnitIds([]);
+    audioService.playSound('select');
+  };
+
   const handleCategorySelect = (cat: SubjectCategoryConfig) => {
       setSelectedCategory(cat);
       setSelectedSubMode(cat.subModes[0]); 
       setActiveChallenge(null);
       if (cat.id === 'ENGLISH' && selectedMathGrade < 3) {
         setSelectedMathGrade(3);
-        setSelectedMathUnitIds([]);
       }
       audioService.playSound('select');
   };
 
   const handleStart = () => {
-    if ((selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH') && selectedMathUnitIds.length === 0) {
+    if (isUnitCategory && selectedMathUnitIds.length === 0) {
       return;
     }
-    const challengeConfig = selectedCategory.id === 'MATH_GRADES'
-      ? getMathSelection()
-      : selectedCategory.id === 'KOKUGO_GRADES'
-      ? getKokugoSelection()
-      : selectedCategory.id === 'ENGLISH'
-      ? getEnglishSelection()
+    const challengeConfig = isUnitCategory 
+      ? getCombinedSelection()
       : { subMode: selectedSubMode };
 
     setActiveChallenge(challengeConfig);
@@ -518,6 +519,8 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     
     if (selectedBgmId === 'random') {
       audioService.playRandomBGM();
+    } else if (selectedBgmId === 'none') {
+      audioService.stopBGM();
     } else {
       audioService.playBGM(selectedBgmId as any, true);
     }
@@ -647,73 +650,77 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     );
   }
 
-  const previewSelection = selectedCategory.id === 'MATH_GRADES'
-    ? getMathSelection()
-    : selectedCategory.id === 'KOKUGO_GRADES'
-    ? getKokugoSelection()
-    : selectedCategory.id === 'ENGLISH'
-    ? getEnglishSelection()
-    : null;
+  const previewSelection = isUnitCategory ? getCombinedSelection() : null;
+
   const currentUnits = selectedCategory.id === 'ENGLISH'
     ? (ENGLISH_GRADE_UNITS[selectedMathGrade] || [])
+    : selectedCategory.id === 'SCIENCE'
+    ? (SCIENCE_GRADE_UNITS[selectedMathGrade] || []).map((unit) => ({ ...unit, modes: [unit.mode] }))
+    : selectedCategory.id === 'SOCIAL'
+    ? (SOCIAL_GRADE_UNITS[selectedMathGrade] || []).map((unit) => ({ ...unit, modes: [unit.mode] }))
     : selectedCategory.id === 'KOKUGO_GRADES'
     ? (KOKUGO_GRADE_UNITS[selectedMathGrade] || [])
     : (MATH_GRADE_UNITS[selectedMathGrade] || []);
-  const canStart = (selectedCategory.id !== 'MATH_GRADES' && selectedCategory.id !== 'KOKUGO_GRADES' && selectedCategory.id !== 'ENGLISH') || selectedMathUnitIds.length > 0;
+  const canStart = !isUnitCategory || selectedMathUnitIds.length > 0;
   const footerSelectionLabel = previewSelection
     ? previewSelection.subMode.name
     : selectedSubMode.name;
 
   return (
-    <div className="w-full h-full bg-slate-950 flex flex-col items-center justify-center p-2 md:p-4 relative">
+    <div className="w-full h-full bg-slate-950 flex flex-col relative overflow-hidden">
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-30 pointer-events-none"></div>
       
-      <div className="z-10 w-full max-w-5xl bg-gray-900 border-4 border-emerald-600 rounded-2xl shadow-2xl flex flex-col max-h-[95vh] lg:max-h-[90vh] overflow-hidden">
+      <div className="z-10 w-full max-w-6xl mx-auto flex flex-col flex-1 min-h-0 overflow-hidden">
         {/* Header - Fixed */}
-        <div className="text-center border-b border-gray-800 p-4 shrink-0">
-          <h2 className="text-2xl md:text-3xl font-bold text-emerald-400 mb-0.5 flex items-center justify-center gap-3">
-            <GraduationCap size={28} className="md:size-32"/> 問題チャレンジ
+        <div className="text-center border-b border-slate-800 p-3 shrink-0">
+          <h2 className="text-xl md:text-2xl font-bold text-emerald-400 tracking-widest mb-1">
+            問題チャレンジ
           </h2>
-          <div className="flex items-center justify-center gap-1.5 text-yellow-500 font-bold text-[10px] uppercase tracking-wider">
-            <Star size={10} fill="currentColor"/> ミニゲーム解放カウント対象 <Star size={10} fill="currentColor"/>
+          <div className="flex items-center justify-center gap-1 text-yellow-500 font-bold text-[9px] uppercase tracking-wider">
+            <Star size={8} fill="currentColor"/> ミニゲーム解放カウント対象 <Star size={8} fill="currentColor"/>
           </div>
         </div>
 
         {/* Main Selection Area - Flexible with Scrollbars */}
         <div className="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 overflow-hidden min-h-0">
           
-          {/* Left: Category Selector - Scrollable vertically on PC */}
-          <div className="lg:col-span-2 flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-y-auto lg:overflow-x-visible pb-1.5 lg:pb-0 custom-scrollbar shrink-0">
+          {/* Left: Category Selector - Grid on mobile, vertically flex on PC */}
+          <div className="lg:col-span-2 grid grid-cols-3 sm:grid-cols-5 lg:flex lg:flex-col gap-1 lg:gap-1.5 pb-1 lg:pb-0 overflow-y-auto lg:overflow-x-visible custom-scrollbar shrink-0">
             {SUBJECT_CATEGORIES.map(cat => (
               <button
                 key={cat.id}
                 onClick={() => handleCategorySelect(cat)}
-                className={`flex items-center gap-2 p-2 md:p-3 rounded-xl border-2 transition-all shrink-0 lg:shrink-0 ${selectedCategory.id === cat.id ? `bg-emerald-900/40 border-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.2)]` : 'bg-gray-800 border-gray-700 text-gray-500 hover:border-gray-600'}`}
+                className={`flex items-center justify-center lg:justify-start gap-2 px-2 py-1.5 sm:p-2.5 lg:p-3 rounded-lg lg:rounded-xl border-2 transition-all shrink-0 lg:shrink-0 min-h-[2.5rem] sm:min-h-[3rem] lg:min-h-0 ${selectedCategory.id === cat.id ? `bg-emerald-900/40 border-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.2)]` : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500'}`}
               >
-                <span className={selectedCategory.id === cat.id ? `text-emerald-400` : 'text-gray-600'}>{getCategoryIcon(cat.id)}</span>
-                <span className="font-bold whitespace-nowrap text-xs md:text-sm">{cat.name}</span>
+                <div className={`${selectedCategory.id === cat.id ? `text-emerald-400` : 'text-slate-500'} scale-75 lg:scale-100 hidden lg:flex items-center justify-center h-4 lg:h-auto`}>
+                  {getCategoryIcon(cat.id)}
+                </div>
+                <span className="font-bold text-sm sm:text-base lg:text-sm text-center lg:text-left leading-tight w-full whitespace-normal break-words">
+                  {cat.name}
+                </span>
               </button>
             ))}
           </div>
 
           {/* Middle: SubMode Selector - Scrollable vertically */}
           <div className="lg:col-span-7 flex flex-col min-h-0">
-            <h3 className="text-[10px] md:text-xs font-bold text-gray-400 mb-1.5 flex items-center gap-2 uppercase tracking-tight shrink-0">
+            <h3 className="text-[10px] md:text-xs font-bold text-slate-400 mb-1.5 flex items-center gap-2 uppercase tracking-tight shrink-0">
               <ChevronRight size={10} className="text-emerald-500"/> 種目を選択
             </h3>
-            <div className="bg-black/40 p-2 rounded-xl border border-gray-800 flex-grow overflow-y-auto custom-scrollbar shadow-inner min-h-[120px]">
-                {selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' ? (
+            <div className="bg-black/40 p-3 rounded-xl border border-slate-800 flex-grow overflow-y-auto custom-scrollbar shadow-inner min-h-[160px]">
+                {isUnitCategory ? (
                   <div className="space-y-3">
                     <div>
-                      <div className="text-[10px] text-gray-400 mb-1">学年を選択</div>
-                      <div className="grid grid-cols-5 gap-1.5">
-                        {[(selectedCategory.id === 'ENGLISH' ? 3 : 1), ...((selectedCategory.id === 'ENGLISH' ? [4, 5, 6, 7, 8, 9] : [2, 3, 4, 5, 6, 7, 8, 9]))].map((grade) => {
+                      <div className="text-[10px] text-gray-400 mb-1">学年</div>
+                      <div className="grid grid-cols-9 sm:grid-cols-5 gap-1">
+                        {[(selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SOCIAL' ? 3 : 1), ...((selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SOCIAL' ? [4, 5, 6, 7, 8, 9] : [2, 3, 4, 5, 6, 7, 8, 9]))].map((grade) => {
                           const isSelected = selectedMathGrade === grade;
+                          const theme = getCategoryClasses(selectedCategory.color);
                           return (
                             <button
                               key={grade}
                               onClick={() => handleMathGradeSelect(grade)}
-                              className={`p-1.5 rounded border text-[10px] font-bold transition-colors ${isSelected ? 'bg-emerald-600 border-white text-white' : 'bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700'}`}
+                              className={`px-0.5 py-1 rounded border text-[9px] sm:text-[10px] font-bold leading-none transition-colors ${isSelected ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'}`}
                             >
                               {getGradeLabel(grade)}
                             </button>
@@ -723,28 +730,38 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                     </div>
 
                     <div>
-                      <div className="text-[10px] text-gray-400 mb-1">単元を複数選択（ミックス出題）</div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div className="mb-1 flex items-center justify-between gap-2">
+                        <div className="text-[10px] text-gray-400">単元</div>
+                        <button
+                          type="button"
+                          onClick={clearSelectedUnits}
+                          disabled={selectedMathUnitIds.length === 0}
+                          className={`rounded border px-2 py-0.5 text-[9px] font-bold transition-colors ${selectedMathUnitIds.length > 0 ? 'border-slate-500 text-slate-200 hover:bg-slate-700' : 'border-slate-700 text-slate-500 cursor-not-allowed opacity-60'}`}
+                        >
+                          選択解除
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
                         {currentUnits.map((unit) => {
                           const isSelected = selectedMathUnitIds.includes(unit.id);
+                          const theme = getCategoryClasses(selectedCategory.color);
                           return (
                             <button
                               key={unit.id}
                               onClick={() => toggleMathUnit(unit.id)}
-                              className={`relative flex items-center justify-between p-2 pr-16 rounded-lg border-2 transition-all ${isSelected ? 'bg-emerald-700 border-emerald-300 text-white' : 'bg-gray-800 border-gray-700 text-gray-300 hover:border-gray-500'}`}
+                              className={`relative w-full p-1.5 pr-12 sm:p-2 sm:pr-14 rounded-lg border text-left text-[10px] sm:text-xs font-bold leading-snug transition-colors ${isSelected ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-200 hover:border-slate-400'}`}
                             >
-                              <span className="text-xs font-bold">{unit.name}</span>
-                              <span className="absolute right-7 top-2 rounded-full bg-black/45 border border-white/15 px-1.5 py-0.5 text-[8px] font-mono leading-none text-white/90">
+                              <span className="block">{unit.name}</span>
+                              <span className="absolute right-1 top-1 rounded-full bg-black/45 border border-white/15 px-1 py-0.5 text-[7px] sm:right-1.5 sm:top-1.5 sm:px-1.5 sm:text-[8px] font-mono leading-none text-white/90">
                                 {getUnitCorrectCount(unit)}問
                               </span>
-                              {isSelected && <CheckCircle size={14} className="text-emerald-200" />}
                             </button>
                           );
                         })}
                       </div>
                     </div>
 
-                    <div className="bg-black/40 px-2 py-1 rounded border border-emerald-900/50 text-[10px] text-emerald-300">
+                    <div className="bg-black/40 px-2 py-1 rounded border border-slate-700 text-[10px] text-slate-300">
                       出題範囲: {previewSelection?.subMode.name}
                     </div>
                     {selectedMathUnitIds.length === 0 && (
@@ -754,33 +771,24 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                     )}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 gap-2">
+                  <div className={`grid ${selectedCategory.id === 'KANJI' ? 'grid-cols-3' : 'grid-cols-2'} gap-2`}>
                       {selectedCategory.subModes.map((sub) => {
                         const recordKey = `${selectedCategory.id}_${sub.id}`;
                         const isSelected = selectedSubMode.id === sub.id;
-                        const buttonColor = getTailwindColorClass(selectedCategory.color, isSelected);
-                        const glowEffect = isSelected ? getGlowColorClass(selectedCategory.color) : '';
+                        const theme = getCategoryClasses(selectedCategory.color);
                         
                         return (
                           <button
                             key={sub.id}
                             onClick={() => { setSelectedSubMode(sub); audioService.playSound('select'); }}
-                            className={`
-                              flex flex-col p-2 rounded-lg border-2 transition-all transform hover:-translate-y-0.5 active:scale-95
-                              ${isSelected 
-                                  ? 'border-white z-10 scale-105 ' + glowEffect 
-                                  : 'border-transparent opacity-70 hover:opacity-100'} 
-                              ${buttonColor}
-                            `}
+                            className={`p-2 rounded-lg border text-left text-[10px] md:text-xs font-bold transition-colors ${isSelected ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'}`}
                           >
-                            <span className="text-[10px] md:text-xs font-black text-white mb-1 truncate w-full leading-tight text-left drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
-                              {sub.name}
-                            </span>
-                            <div className="flex items-center justify-between mt-auto">
-                              <div className="bg-black/40 px-1.5 rounded text-[8px] md:text-[9px] font-mono text-white/90 border border-white/10">
-                                BEST: {records[recordKey] || 0}
-                              </div>
-                              {isSelected && <CheckCircle size={12} className="text-white animate-pulse" />}
+                            <div className="flex justify-between items-center mb-1 w-full truncate gap-2">
+                                <span className={isSelected ? 'text-white' : ''}>{sub.name}</span>
+                                {isSelected && <CheckCircle size={12} className="text-white animate-pulse shrink-0" />}
+                            </div>
+                            <div className="bg-black/40 px-1.5 rounded text-[8px] md:text-[9px] font-mono text-white/90 border border-white/10 w-fit">
+                              BEST: {records[recordKey] || 0}
                             </div>
                           </button>
                         );
@@ -791,25 +799,45 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
           </div>
 
           {/* Right: Settings - Scrollable vertically */}
-          <div className="lg:col-span-3 flex flex-col gap-4 overflow-y-auto custom-scrollbar shrink-0">
-            <div className="flex flex-col">
+          <div className="lg:col-span-3 flex flex-col gap-3 overflow-y-auto custom-scrollbar shrink-0">
+             <div className="bg-black/40 rounded-xl border border-slate-800 p-3">
+              <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mb-2">選択中</div>
+              <div className="text-xs font-bold text-emerald-400">{selectedCategory.name} / {footerSelectionLabel}</div>
+            </div>
+            
+            <button 
+              onClick={handleStart}
+              disabled={!canStart}
+              className={`w-full py-3 rounded-xl font-bold text-base transition-all flex items-center justify-center gap-3 ${canStart ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_4px_0_rgb(5,150,105)] active:translate-y-1 active:shadow-none animate-pulse' : 'bg-slate-700 text-slate-400 opacity-60 cursor-not-allowed'}`}
+            >
+              <Play fill="currentColor" size={20}/> チャレンジ開始！
+            </button>
+             {!canStart && (
+              <div className="text-[10px] text-amber-300">
+                {isUnitCategory
+                  ? '単元を1つ以上選ぶと開始できます'
+                  : '開始条件を確認してください'}
+              </div>
+            )}
+
+            <div className="flex flex-col mt-2">
                 <h3 className="text-[10px] md:text-xs font-bold text-gray-400 mb-1.5 flex items-center gap-2 uppercase tracking-tight shrink-0">
                 <Music size={10} className="text-emerald-500"/> BGM
                 </h3>
-                <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-1.5 overflow-y-auto max-h-32 lg:max-h-none lg:flex-grow custom-scrollbar">
-                    <div className="flex flex-col gap-1">
-                        {BGM_OPTIONS.map(bgm => (
-                        <button
-                            key={bgm.id}
-                            onClick={() => { setSelectedBgmId(bgm.id); audioService.playSound('select'); }}
-                            className={`flex items-center justify-between px-2 py-1.5 rounded-lg text-[9px] md:text-[10px] font-bold transition-all ${selectedBgmId === bgm.id ? 'bg-indigo-600 text-white' : 'text-gray-500 hover:bg-gray-800'}`}
-                        >
-                            <span className="truncate">{bgm.name}</span>
-                            {selectedBgmId === bgm.id && <CheckCircle size={10} className="shrink-0 ml-1" />}
-                        </button>
-                        ))}
-                    </div>
-                </div>
+                <select
+                  value={selectedBgmId}
+                  onChange={(e) => {
+                    setSelectedBgmId(e.target.value);
+                    audioService.playSound('select');
+                  }}
+                  className="w-full bg-slate-800 border-2 border-slate-700 text-slate-300 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:border-indigo-500 cursor-pointer"
+                >
+                  {BGM_OPTIONS.map(bgm => (
+                    <option key={bgm.id} value={bgm.id}>
+                      {bgm.name}
+                    </option>
+                  ))}
+                </select>
             </div>
 
             {selectedCategory.id === 'ENGLISH' && (
@@ -831,30 +859,11 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                     </button>
                 </div>
             )}
+            
+            <button onClick={onBack} className="mt-auto text-slate-400 hover:text-white flex items-center gap-2 transition-colors py-1 text-xs">
+              <ArrowLeft size={14} /> もどる
+            </button>
           </div>
-        </div>
-
-        {/* Footer - Fixed */}
-        <div className="flex flex-col gap-3 items-center p-4 border-t border-gray-800 shrink-0 bg-gray-900">
-          <div className="bg-black/40 px-4 py-1.5 rounded-full border border-emerald-900/50 flex items-center gap-2">
-              <div className="text-[10px] text-gray-500">選択中:</div>
-              <div className="text-xs font-bold text-emerald-400">{selectedCategory.name} / {footerSelectionLabel}</div>
-          </div>
-
-          <button 
-            onClick={handleStart}
-            disabled={!canStart}
-            className={`w-full md:w-80 text-white py-3 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-3 ${canStart ? 'bg-emerald-600 hover:bg-emerald-500 shadow-[0_4px_0_rgb(5,150,105)] active:translate-y-1 active:shadow-none animate-pulse' : 'bg-slate-700 opacity-50 cursor-not-allowed'}`}
-          >
-            <Play fill="currentColor" size={20}/> チャレンジ開始！
-          </button>
-          
-          <button 
-            onClick={onBack}
-            className="text-gray-600 hover:text-white flex items-center gap-2 transition-colors py-1 text-xs"
-          >
-            <ArrowLeft size={14}/> タイトルへ戻る
-          </button>
         </div>
       </div>
     </div>

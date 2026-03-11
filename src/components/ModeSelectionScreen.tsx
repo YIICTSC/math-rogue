@@ -7,6 +7,8 @@ import {
 import { audioService } from '../services/audioService';
 import { SUBJECT_CATEGORIES, SubjectCategoryConfig, SubjectCategoryType } from '../subjectConfig';
 import { ENGLISH_GRADE_UNITS } from '../englishUnitConfig';
+import { SCIENCE_GRADE_UNITS, getScienceGradeMode } from '../scienceUnitConfig';
+import { SOCIAL_GRADE_UNITS, getSocialGradeMode } from '../socialUnitConfig';
 
 interface ModeSelectionScreenProps {
   onSelectMode: (mode: GameMode, modePool?: string[]) => void;
@@ -19,7 +21,8 @@ interface ModeSelectionScreenProps {
 interface MathUnitOption {
   id: string;
   name: string;
-  mode: string;
+  mode?: string;
+  modes?: string[];
 }
 
 const KOKUGO_GRADE_UNITS: Record<number, MathUnitOption[]> = {
@@ -280,13 +283,13 @@ const MATH_GRADE_UNITS: Record<number, MathUnitOption[]> = {
 };
 
 const CATEGORY_LABELS: Record<SubjectCategoryType, string> = {
-  MATH: 'けいさん',
-  MATH_GRADES: 'さんすう・数学',
-  KOKUGO_GRADES: 'こくご',
-  KANJI: 'かんじ',
-  SCIENCE: 'せいかつ・理科',
-  SOCIAL: 'しゃかい',
-  ENGLISH: 'えいご',
+  MATH: '計算',
+  MATH_GRADES: '算数・数学',
+  KOKUGO_GRADES: '国語',
+  KANJI: '漢字',
+  SCIENCE: '生活・理科',
+  SOCIAL: '社会',
+  ENGLISH: '英語',
   MAP_PREF: '地図・日本',
   IT_INFO: 'ICT・情報',
 };
@@ -370,6 +373,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   const [selectedTerm, setSelectedTerm] = useState<number>(1);
   const [selectedMathGrade, setSelectedMathGrade] = useState<number>(1);
   const [selectedMathUnitIds, setSelectedMathUnitIds] = useState<string[]>([]);
+  const isUnitCategory = selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SCIENCE';
 
   const handleSelect = (mode: string, modePool?: string[]) => {
     audioService.playSound('select');
@@ -384,6 +388,11 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
     return (unit.modes || []).reduce((total, mode) => total + (modeCorrectCounts[mode] || 0), 0);
   };
 
+  const clearSelectedUnits = () => {
+    setSelectedMathUnitIds([]);
+    audioService.playSound('select');
+  };
+
   const renderMasteryPrefix = (mode: string) => {
     if (!isMastered(mode)) return null;
     return <span className="text-red-500 font-black font-sans mr-1">◎</span>;
@@ -395,42 +404,36 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
     if (cat.id === 'ENGLISH' && selectedMathGrade < 3) {
       setSelectedMathGrade(3);
     }
-    if (cat.id === 'MATH_GRADES' || cat.id === 'KOKUGO_GRADES' || cat.id === 'ENGLISH') {
-      setSelectedMathUnitIds([]);
-    }
     audioService.playSound('select');
   };
 
   const selectedSubMode = selectedCategory.subModes.find((sub) => sub.id === selectedSubModeId) || selectedCategory.subModes[0];
 
   const getModeSelectionPreview = () => {
-    if (selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH') {
-      const isKokugo = selectedCategory.id === 'KOKUGO_GRADES';
-      const isEnglish = selectedCategory.id === 'ENGLISH';
-      const gradeUnits = isEnglish
-        ? (ENGLISH_GRADE_UNITS[selectedMathGrade] || [])
-        : isKokugo
-        ? (KOKUGO_GRADE_UNITS[selectedMathGrade] || [])
-        : (MATH_GRADE_UNITS[selectedMathGrade] || []);
-      const selectedUnits = gradeUnits.filter((u) => selectedMathUnitIds.includes(u.id));
-      const defaultMode = isEnglish
-        ? (selectedMathGrade === 3 ? GameMode.ENGLISH_G3_1
-          : selectedMathGrade === 4 ? GameMode.ENGLISH_G4_1
-          : selectedMathGrade === 5 ? GameMode.ENGLISH_G5_1
-          : selectedMathGrade === 6 ? GameMode.ENGLISH_G6_1
-          : selectedMathGrade === 7 ? GameMode.ENGLISH_G7_1
-          : selectedMathGrade === 8 ? GameMode.ENGLISH_G8_1
-          : GameMode.ENGLISH_G9_1)
-        : isKokugo
-        ? GameMode.KOKUGO_G1_1
-        : GameMode.MATH_G1_1;
+    if (selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL') {
+      const allUnitsAcrossAllCategories = [
+        ...Object.values(ENGLISH_GRADE_UNITS).flat(),
+        ...Object.values(SCIENCE_GRADE_UNITS).flat(),
+        ...Object.values(SOCIAL_GRADE_UNITS).flat(),
+        ...Object.values(KOKUGO_GRADE_UNITS).flat(),
+        ...Object.values(MATH_GRADE_UNITS).flat()
+      ];
+      const selectedUnits = allUnitsAcrossAllCategories.filter((u) => selectedMathUnitIds.includes(u.id));
+      
+      const modePool = selectedUnits.flatMap((u: any) => {
+        const modes: string[] = [];
+        if ('mode' in u && u.mode) modes.push(u.mode as string);
+        if ('modes' in u && u.modes && Array.isArray(u.modes)) modes.push(...u.modes);
+        return modes;
+      });
+
       return {
-        mode: (selectedUnits[0]?.mode || defaultMode) as string,
-        modePool: selectedUnits.map((u) => u.mode),
+        mode: selectedUnits.length > 0 && (selectedUnits[0] as any).mode ? (selectedUnits[0] as any).mode as string : GameMode.MATH_G1_1,
+        modePool,
         canStart: selectedUnits.length > 0,
         label: selectedUnits.length > 0
-          ? `${selectedCategory.name} / ${selectedUnits.map((u) => u.name).join(' + ')}`
-          : `${selectedCategory.name} / 単元未選択`,
+          ? `ミックス選択 (${selectedUnits.length}単元)`
+          : `単元未選択`,
       };
     }
 
@@ -478,30 +481,40 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   const renderModeSelectionPanel = () => {
     const theme = getCategoryClasses(selectedCategory.color);
 
-    if (selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH') {
+    if (selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL') {
       const isKokugo = selectedCategory.id === 'KOKUGO_GRADES';
       const isEnglish = selectedCategory.id === 'ENGLISH';
+      const isScience = selectedCategory.id === 'SCIENCE';
+      const isSocial = selectedCategory.id === 'SOCIAL';
       const gradeUnits = isEnglish
         ? (ENGLISH_GRADE_UNITS[selectedMathGrade] || [])
+        : isScience
+        ? (SCIENCE_GRADE_UNITS[selectedMathGrade] || [])
+        : isSocial
+        ? (SOCIAL_GRADE_UNITS[selectedMathGrade] || [])
         : isKokugo
         ? (KOKUGO_GRADE_UNITS[selectedMathGrade] || [])
         : (MATH_GRADE_UNITS[selectedMathGrade] || []);
-      const grades = [(isEnglish ? 3 : 1), ...((isEnglish ? [4, 5, 6, 7, 8, 9] : [2, 3, 4, 5, 6, 7, 8, 9]))];
+      const grades = isEnglish
+        ? [3, 4, 5, 6, 7, 8, 9]
+        : isSocial
+        ? [3, 4, 5, 6, 7, 8, 9]
+        : [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
       return (
         <div className="space-y-3">
           <div>
             <div className="text-[10px] text-gray-400 mb-1">学年</div>
-            <div className="grid grid-cols-5 gap-1.5">
+            <div className="grid grid-cols-9 sm:grid-cols-5 gap-1">
               {grades.map((grade) => (
                 <button
                   key={grade}
                   onClick={() => {
                     setSelectedMathGrade(grade);
-                    setSelectedMathUnitIds([]);
+                    // Do not clear selected units when switching grades to allow cross-grade mix
                     audioService.playSound('select');
                   }}
-                  className={`p-1.5 rounded border text-[10px] font-bold transition-colors ${selectedMathGrade === grade ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'}`}
+                  className={`px-0.5 py-1 rounded border text-[9px] sm:text-[10px] font-bold leading-none transition-colors ${selectedMathGrade === grade ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'}`}
                 >
                   {grade <= 6 ? `${grade}年` : `中${grade - 6}`}
                 </button>
@@ -510,8 +523,18 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
           </div>
 
           <div>
-            <div className="text-[10px] text-gray-400 mb-1">単元</div>
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-2 max-h-[48vh] overflow-y-auto custom-scrollbar pr-1">
+            <div className="mb-1 flex items-center justify-between gap-2">
+              <div className="text-[10px] text-gray-400">単元</div>
+              <button
+                type="button"
+                onClick={clearSelectedUnits}
+                disabled={selectedMathUnitIds.length === 0}
+                className={`rounded border px-2 py-0.5 text-[9px] font-bold transition-colors ${selectedMathUnitIds.length > 0 ? 'border-slate-500 text-slate-200 hover:bg-slate-700' : 'border-slate-700 text-slate-500 cursor-not-allowed opacity-60'}`}
+              >
+                選択解除
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-1.5 sm:gap-2 max-h-[48vh] overflow-y-auto custom-scrollbar pr-1">
               {gradeUnits.map((unit) => {
                 const isSelected = selectedMathUnitIds.includes(unit.id);
                 return (
@@ -523,10 +546,10 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
                         : [...prev, unit.id]);
                       audioService.playSound('select');
                     }}
-                    className={`relative w-full p-2 pr-14 rounded-lg border text-left text-xs font-bold transition-colors ${isSelected ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-200 hover:border-slate-400'}`}
+                    className={`relative w-full p-1.5 pr-12 sm:p-2 sm:pr-14 rounded-lg border text-left text-[10px] sm:text-xs font-bold leading-snug transition-colors ${isSelected ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-200 hover:border-slate-400'}`}
                   >
                     <span className="block">{unit.name}</span>
-                    <span className="absolute right-1.5 top-1.5 rounded-full bg-black/45 border border-white/15 px-1.5 py-0.5 text-[8px] font-mono leading-none text-white/90">
+                    <span className="absolute right-1 top-1 rounded-full bg-black/45 border border-white/15 px-1 py-0.5 text-[7px] sm:right-1.5 sm:top-1.5 sm:px-1.5 sm:text-[8px] font-mono leading-none text-white/90">
                       {getUnitCorrectCount(unit)}問
                     </span>
                   </button>
@@ -677,73 +700,95 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
     }
 
     if (cat.uiType === 'grade_term') {
-      if (cat.id === 'MATH_GRADES' || cat.id === 'KOKUGO_GRADES' || cat.id === 'ENGLISH') {
+      if (cat.id === 'MATH_GRADES' || cat.id === 'KOKUGO_GRADES' || cat.id === 'ENGLISH' || cat.id === 'SCIENCE' || cat.id === 'SOCIAL') {
         const isKokugo = cat.id === 'KOKUGO_GRADES';
         const isEnglish = cat.id === 'ENGLISH';
+        const isScience = cat.id === 'SCIENCE';
+        const isSocial = cat.id === 'SOCIAL';
         const gradeUnits = isEnglish
           ? (ENGLISH_GRADE_UNITS[selectedMathGrade] || [])
+          : isScience
+          ? (SCIENCE_GRADE_UNITS[selectedMathGrade] || [])
+          : isSocial
+          ? (SOCIAL_GRADE_UNITS[selectedMathGrade] || [])
           : isKokugo
           ? (KOKUGO_GRADE_UNITS[selectedMathGrade] || [])
           : (MATH_GRADE_UNITS[selectedMathGrade] || []);
-        const selectedUnits = gradeUnits.filter((u) => selectedMathUnitIds.includes(u.id));
-        const defaultMode = isEnglish
-          ? (selectedMathGrade === 3 ? GameMode.ENGLISH_G3_1
-            : selectedMathGrade === 4 ? GameMode.ENGLISH_G4_1
-            : selectedMathGrade === 5 ? GameMode.ENGLISH_G5_1
-            : selectedMathGrade === 6 ? GameMode.ENGLISH_G6_1
-            : selectedMathGrade === 7 ? GameMode.ENGLISH_G7_1
-            : selectedMathGrade === 8 ? GameMode.ENGLISH_G8_1
-            : GameMode.ENGLISH_G9_1)
-          : isKokugo
-          ? GameMode.KOKUGO_G1_1
-          : GameMode.MATH_G1_1;
-        const selectedMode = (selectedUnits[0]?.mode || defaultMode) as string;
-        const modePool = selectedUnits.map((u) => u.mode);
+        const allUnitsAcrossGrades = [
+          ...Object.values(ENGLISH_GRADE_UNITS).flat(),
+          ...Object.values(SCIENCE_GRADE_UNITS).flat(),
+          ...Object.values(SOCIAL_GRADE_UNITS).flat(),
+          ...Object.values(KOKUGO_GRADE_UNITS).flat(),
+          ...Object.values(MATH_GRADE_UNITS).flat()
+        ];
+
+        const selectedUnits = allUnitsAcrossGrades.filter((u) => selectedMathUnitIds.includes(u.id));
+        const defaultMode = GameMode.MATH_G1_1;
+        const selectedMode = (selectedUnits[0] && ('mode' in selectedUnits[0] ? selectedUnits[0].mode : ('modes' in selectedUnits[0] && selectedUnits[0].modes ? selectedUnits[0].modes[0] : defaultMode))) as string;
+        const modePool = [...new Set(selectedUnits.flatMap((u) => {
+          const modes: string[] = [];
+          if ('mode' in u && u.mode) modes.push(u.mode as string);
+          if ('modes' in u && u.modes && Array.isArray(u.modes)) modes.push(...u.modes);
+          return modes;
+        }))];
         const canStartUnits = selectedUnits.length > 0;
         return (
           <div className="space-y-3">
             <div className="flex items-start gap-2">
               <span className="text-[10px] text-gray-500 whitespace-nowrap mt-1">学年</span>
-              <div className="flex-1 grid grid-cols-5 gap-1">
-                {[(isEnglish ? 3 : 1), ...(isEnglish ? [4, 5, 6, 7, 8, 9] : [2, 3, 4, 5, 6, 7, 8, 9])].map(g => (
+              <div className="flex-1 grid grid-cols-9 sm:grid-cols-5 gap-1">
+                {(isEnglish ? [3, 4, 5, 6, 7, 8, 9] : isSocial ? [3, 4, 5, 6, 7, 8, 9] : [1, 2, 3, 4, 5, 6, 7, 8, 9]).map(g => (
                   <button
                     key={g}
                     onClick={() => {
                       setSelectedMathGrade(g);
-                      setSelectedMathUnitIds([]);
+                      // Do not clear.
                     }}
-                    className={`p-1 rounded text-[9px] md:text-[10px] font-bold border transition-colors ${selectedMathGrade === g ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-400'}`}
+                    className={`px-0.5 py-1 rounded text-[9px] md:text-[10px] font-bold leading-none border transition-colors ${selectedMathGrade === g ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-400'}`}
                   >
                     {g <= 6 ? `${g}年` : `中${g - 6}`}
                   </button>
                 ))}
               </div>
             </div>
-            <div className="space-y-1.5 max-h-44 overflow-y-auto custom-scrollbar pr-1">
-              {gradeUnits.map(unit => (
+            <div>
+              <div className="mb-1 flex items-center justify-between gap-2">
+                <div className="text-[10px] text-gray-500 whitespace-nowrap">単元</div>
                 <button
-                  key={unit.id}
-                  onClick={() => {
-                    setSelectedMathUnitIds((prev) => {
-                      if (prev.includes(unit.id)) {
-                        return prev.filter((id) => id !== unit.id);
-                      }
-                      return [...prev, unit.id];
-                    });
-                  }}
-                  className={`relative w-full p-1.5 pr-14 rounded text-[10px] md:text-xs font-bold border text-left transition-colors ${selectedMathUnitIds.includes(unit.id) ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:border-slate-400'}`}
+                  type="button"
+                  onClick={clearSelectedUnits}
+                  disabled={selectedMathUnitIds.length === 0}
+                  className={`rounded border px-2 py-0.5 text-[9px] font-bold transition-colors ${selectedMathUnitIds.length > 0 ? 'border-slate-500 text-slate-200 hover:bg-slate-700' : 'border-slate-700 text-slate-500 cursor-not-allowed opacity-60'}`}
                 >
-                  <span className="block">{unit.name}</span>
-                  <span className="absolute right-1.5 top-1.5 rounded-full bg-black/45 border border-white/15 px-1.5 py-0.5 text-[8px] md:text-[9px] font-mono leading-none text-white/90">
-                    {getUnitCorrectCount(unit)}問
-                  </span>
+                  選択解除
                 </button>
-              ))}
+              </div>
+              <div className="grid grid-cols-2 gap-1.5 max-h-44 overflow-y-auto custom-scrollbar pr-1">
+                {gradeUnits.map(unit => (
+                  <button
+                    key={unit.id}
+                    onClick={() => {
+                      setSelectedMathUnitIds((prev) => {
+                        if (prev.includes(unit.id)) {
+                          return prev.filter((id) => id !== unit.id);
+                        }
+                        return [...prev, unit.id];
+                      });
+                    }}
+                    className={`relative w-full p-1.5 pr-12 sm:pr-14 rounded text-[10px] md:text-xs font-bold leading-snug border text-left transition-colors ${selectedMathUnitIds.includes(unit.id) ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:border-slate-400'}`}
+                  >
+                    <span className="block">{unit.name}</span>
+                    <span className="absolute right-1 top-1 rounded-full bg-black/45 border border-white/15 px-1 py-0.5 text-[7px] sm:right-1.5 sm:top-1.5 sm:px-1.5 sm:text-[8px] md:text-[9px] font-mono leading-none text-white/90">
+                      {getUnitCorrectCount(unit)}問
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
             <button
               onClick={() => {
                 if (!canStartUnits) return;
-                handleSelect(selectedMode, modePool);
+                handleSelect(selectedMode, modePool.length > 0 ? modePool : undefined);
               }}
               disabled={!canStartUnits}
               className={`w-full p-2 rounded font-bold text-xs shadow-lg transition-all text-white ${canStartUnits ? `${theme.bg} ${theme.hover}` : 'bg-slate-700 cursor-not-allowed opacity-50'}`}
@@ -759,64 +804,6 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
           </div>
         );
       }
-
-      const grades = (cat.id === 'SCIENCE' || cat.id === 'MATH_GRADES') ? [1, 2, 3, 4, 5, 6, 7, 8, 9] : [3, 4, 5, 6, 7, 8, 9];
-      const selectedMode = (() => {
-        if (cat.id === 'MATH_GRADES') return `MATH_G${selectedGrade}_${selectedTerm}`;
-        if (cat.id === 'SCIENCE') return selectedGrade <= 2 ? `LIFE_${selectedGrade}_${selectedTerm}` : `SCIENCE_${selectedGrade}_${selectedTerm}`;
-        return `SOCIAL_${selectedGrade}_${selectedTerm}`;
-      })() as GameMode;
-
-      return (
-        <div className="space-y-3">
-          <div className="flex items-start gap-2">
-            <span className="text-[10px] text-gray-500 whitespace-nowrap mt-1">学年</span>
-            <div className="flex-1 grid grid-cols-5 gap-1">
-              {grades.map(g => (
-                <button
-                  key={g}
-                  onClick={() => setSelectedGrade(g)}
-                  className={`p-1 rounded text-[9px] md:text-[10px] font-bold border transition-colors ${selectedGrade === g ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-400'}`}
-                >
-                  {g <= 6 ? `${g}年` : `中${g - 6}`}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] text-gray-500 whitespace-nowrap">学期</span>
-            <div className="flex-1 flex gap-1">
-              {[1, 2, 3].map(t => (
-                <button
-                  key={t}
-                  onClick={() => setSelectedTerm(t)}
-                  className={`flex-1 p-1 rounded text-[10px] font-bold border transition-colors ${selectedTerm === t ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-400'}`}
-                >
-                  {t}学期
-                </button>
-              ))}
-            </div>
-          </div>
-          <button
-            onClick={() => handleSelect(selectedMode)}
-            className={`w-full ${theme.bg} ${theme.hover} p-2 rounded font-bold text-xs shadow-lg transition-all text-white`}
-          >
-            {renderMasteryPrefix(selectedMode)}
-            この条件で開始
-          </button>
-
-          {cat.id === 'SOCIAL' && (
-            <div className="grid grid-cols-3 gap-1 mt-2">
-              {cat.subModes.filter(s => !s.id.includes('SO')).map(s => (
-                <button key={s.id} onClick={() => handleSelect(s.mode)} className="bg-indigo-900/40 border border-indigo-500 p-1 rounded text-[9px] font-bold hover:bg-indigo-800 text-indigo-200">
-                  {renderMasteryPrefix(s.mode)}
-                  {getSubLabel(s.id, s.name)}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      );
     }
 
     if (cat.uiType === 'english_mixed') {
@@ -853,22 +840,26 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   };
 
   return (
-    <div className="w-full h-full bg-gray-900 flex flex-col items-center text-white p-2 md:p-4 overflow-hidden">
-      <div className="w-full max-w-6xl my-auto bg-slate-950 border-4 border-yellow-700/80 rounded-2xl shadow-2xl flex flex-col max-h-[95vh] overflow-hidden">
+    <div className="w-full h-full bg-slate-950 flex flex-col text-white overflow-hidden">
+      <div className="w-full max-w-6xl mx-auto flex flex-col flex-1 min-h-0 overflow-hidden">
         <div className="text-center border-b border-slate-800 p-4 shrink-0">
           <h2 className="text-2xl md:text-3xl font-bold text-yellow-400 tracking-widest">モード選択</h2>
         </div>
 
         <div className="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 overflow-hidden min-h-0">
-          <div className="lg:col-span-2 flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-y-auto lg:overflow-x-visible pb-1.5 lg:pb-0 custom-scrollbar shrink-0">
+          <div className="lg:col-span-2 grid grid-cols-3 sm:grid-cols-5 lg:flex lg:flex-col gap-1 lg:gap-1.5 pb-1 lg:pb-0 overflow-y-auto lg:overflow-x-visible custom-scrollbar shrink-0">
             {SUBJECT_CATEGORIES.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => handleCategorySelect(cat)}
-                className={`flex items-center gap-2 p-2 md:p-3 rounded-xl border-2 transition-all shrink-0 ${selectedCategory.id === cat.id ? 'bg-yellow-900/35 border-yellow-400 text-white shadow-[0_0_10px_rgba(250,204,21,0.18)]' : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500'}`}
+                className={`flex items-center justify-center lg:justify-start gap-2 px-2 py-1.5 sm:p-2.5 lg:p-3 rounded-lg lg:rounded-xl border-2 transition-all shrink-0 min-h-[2.5rem] sm:min-h-[3rem] lg:min-h-0 ${selectedCategory.id === cat.id ? 'bg-yellow-900/35 border-yellow-400 text-white shadow-[0_0_10px_rgba(250,204,21,0.18)]' : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500'}`}
               >
-                <span className={selectedCategory.id === cat.id ? 'text-yellow-300' : 'text-slate-500'}>{getCategoryIcon(cat.id)}</span>
-                <span className="font-bold whitespace-nowrap text-xs md:text-sm">{getCategoryLabel(cat.id)}</span>
+                <div className={`${selectedCategory.id === cat.id ? 'text-yellow-300' : 'text-slate-500'} scale-75 lg:scale-100 hidden lg:flex items-center justify-center h-4 lg:h-auto`}>
+                  {getCategoryIcon(cat.id)}
+                </div>
+                <span className="font-bold text-sm sm:text-base lg:text-sm text-center lg:text-left leading-tight w-full whitespace-normal break-words">
+                  {getCategoryLabel(cat.id)}
+                </span>
               </button>
             ))}
           </div>
@@ -887,14 +878,14 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
               <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mb-2">選択中</div>
               <div className="text-sm font-bold text-yellow-300">{selectionPreview.label}</div>
             </div>
-            {(selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH') && (
+            {isUnitCategory && (
               <div className="bg-black/40 rounded-xl border border-slate-800 p-3 text-xs text-slate-300">
                 学年: {selectedMathGrade <= 6 ? `${selectedMathGrade}年` : `中${selectedMathGrade - 6}`}
                 <br />
                 選択単元数: {selectedMathUnitIds.length}
               </div>
             )}
-            {selectedCategory.uiType === 'grade_term' && selectedCategory.id !== 'MATH_GRADES' && selectedCategory.id !== 'KOKUGO_GRADES' && selectedCategory.id !== 'ENGLISH' && (
+            {selectedCategory.uiType === 'grade_term' && !isUnitCategory && (
               <div className="bg-black/40 rounded-xl border border-slate-800 p-3 text-xs text-slate-300">
                 学年: {selectedGrade <= 6 ? `${selectedGrade}年` : `中${selectedGrade - 6}`}
                 <br />
@@ -913,7 +904,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
             </button>
             {!selectionPreview.canStart && (
               <div className="text-[10px] text-amber-300">
-                {selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH'
+                {isUnitCategory
                   ? '単元を1つ以上選ぶと開始できます'
                   : '開始条件を確認してください'}
               </div>

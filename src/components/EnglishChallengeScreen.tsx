@@ -118,9 +118,13 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
       audioService.playSound('correct');
       const currentTotal = storageService.getMathCorrectCount();
       storageService.saveMathCorrectCount(currentTotal + 1);
+
+      const currentStreak = storageService.getHintStreaks()[mode] || 0;
+      storageService.saveHintStreak(mode, currentStreak + 1);
     } else {
       setFeedback('WRONG');
       audioService.playSound('wrong');
+      storageService.saveHintStreak(mode, 0);
     }
 
     setTimeout(() => {
@@ -164,7 +168,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
 
         <div className="z-10 w-full max-w-md text-center flex flex-col">
             <div className="bg-black/40 border-4 border-white p-4 md:p-6 rounded-2xl mb-4 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[200px] md:min-h-[300px]">
-                {currentProblem.hint && (
+                {currentProblem.hint && (storageService.getHintStreaks()[mode] || 0) < 3 && (
                     <div className="bg-indigo-800/60 p-2 rounded-lg border border-indigo-400/30 mb-4 w-full animate-in fade-in slide-in-from-top-2">
                         <div className="text-[9px] text-cyan-300 font-bold mb-0.5 uppercase tracking-tighter text-left">Hint</div>
                         <div className="text-[11px] md:text-xs text-gray-100 leading-relaxed text-left">{currentProblem.hint}</div>

@@ -602,6 +602,25 @@ export const storageService = {
     localStorage.setItem(STORAGE_KEY_DAILY_PLAY_TIME, JSON.stringify({ date: today, seconds }));
   },
 
+  getHintStreaks: (): Record<string, number> => {
+    try {
+      const stored = localStorage.getItem('pixel_spire_hint_streaks_v1');
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  },
+
+  saveHintStreak: (mode: string, count: number) => {
+    try {
+      const current = storageService.getHintStreaks();
+      current[mode] = count;
+      localStorage.setItem('pixel_spire_hint_streaks_v1', JSON.stringify(current));
+    } catch (e) {
+      console.warn("Failed to save hint streak", e);
+    }
+  },
+
   getModeCorrectCounts: (): Record<string, number> => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY_MODE_CORRECT_COUNTS);
@@ -784,5 +803,6 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_MODE_CORRECT_COUNTS);
       localStorage.removeItem(STORAGE_KEY_MASTERED_MODES);
       localStorage.removeItem(STORAGE_KEY_CUSTOM_IMAGES);
+      localStorage.removeItem('pixel_spire_hint_streaks_v1');
   }
 };
