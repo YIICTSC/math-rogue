@@ -1,0 +1,7 @@
+{
+  "name": "学習ローグ",
+  "description": "計算と漢字の力で運命を変えろ！小学校生活を舞台にしたデッキ構築型ローグライクRPG。",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

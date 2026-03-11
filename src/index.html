@@ -1,0 +1,110 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>学習ローグ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'DotGothic16', sans-serif;
+        background-color: #202020;
+        /* Prevent selection and tap highlights for app-like feel */
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      /* Re-enable selection for inputs */
+      input, textarea {
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
+      }
+      .pixel-art {
+        image-rendering: pixelated;
+      }
+      .crt-scanline {
+        background: linear-gradient(
+          to bottom,
+          rgba(255,255,255,0),
+          rgba(255,255,255,0) 50%,
+          rgba(0,0,0,0.2) 50%,
+          rgba(0,0,0,0.2)
+        );
+        background-size: 100% 4px;
+      }
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 10px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #000; 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #4b5563; 
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #9ca3af; 
+      }
+
+      /* Marquee Animation for Scrolling Text */
+      @keyframes marquee {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-100%); }
+      }
+      .animate-marquee {
+        animation: marquee 6s linear infinite;
+      }
+      @keyframes marquee-half {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+      }
+      .animate-marquee-scroll {
+        animation: marquee-half 6s linear infinite;
+      }
+
+      /* Sinister Aura for True Boss */
+      @keyframes sinister-pulse {
+        0% { filter: drop-shadow(0 0 10px #7e22ce) drop-shadow(0 0 20px #9d174d); transform: scale(1) translateY(0); }
+        50% { filter: drop-shadow(0 0 30px #a855f7) drop-shadow(0 0 50px #db2777); transform: scale(1.05) translateY(-5px); }
+        100% { filter: drop-shadow(0 0 10px #7e22ce) drop-shadow(0 0 20px #9d174d); transform: scale(1) translateY(0); }
+      }
+      .sinister-aura {
+        animation: sinister-pulse 3s infinite ease-in-out;
+      }
+      @keyframes void-spin {
+        from { transform: rotate(0deg) scale(2); opacity: 0.3; }
+        to { transform: rotate(360deg) scale(2.2); opacity: 0.5; }
+      }
+      .void-backglow {
+        animation: void-spin 10s linear infinite;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "vite": "https://aistudiocdn.com/vite@^7.2.4",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+    <!-- Pointing to src/index.tsx. Please ensure index.tsx is inside the 'src' folder -->
+    <script type="module" src="./src/index.tsx"></script>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
