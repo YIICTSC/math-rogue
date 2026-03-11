@@ -13,7 +13,8 @@ export type ProblemVisual =
     | { kind: 'dots'; counts: number[]; labels?: string[] }
     | { kind: 'number_sequence'; values: number[] }
     | { kind: 'fraction'; numerator: number; denominator: number; whole?: number }
-    | { kind: 'fraction_operation'; left: { n: number; d: number }; right: { n: number; d: number }; op: '+' | '-' | '×' | '÷' | '>' | '<' };
+    | { kind: 'fraction_operation'; left: { n: number; d: number }; right: { n: number; d: number }; op: '+' | '-' | '×' | '÷' | '>' | '<' }
+    | { kind: 'map_symbol'; symbol: string };
 
 export interface GeneralProblem {
     question: string;

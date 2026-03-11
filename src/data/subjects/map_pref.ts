@@ -1,8 +1,74 @@
 import { GeneralProblem, d } from './utils';
+import { MAP_SYMBOL_ASSET_MAP } from '../../components/mapSymbolImageMap';
+
+const resolveMapSymbol = (question: string, answer: string): string | undefined => {
+    const text = `${question} ${answer}`;
+    if (text.includes('市役所')) return 'city_office';
+    if (text.includes('町村役場')) return 'town_office';
+    if (text.includes('小中学校')) return 'school';
+    if (text.includes('郵便局')) return text.includes('○の中にテ') ? 'post_office_round' : 'post_office';
+    if (text.includes('寺')) return 'temple';
+    if (text.includes('神社')) return 'shrine';
+    if (text.includes('交番')) return 'police_box';
+    if (text.includes('警察署')) return 'police_station';
+    if (text.includes('消防署')) return 'fire_station';
+    if (text.includes('消防団の詰所')) return 'fire_brigade';
+    if (text.includes('工場')) return 'factory';
+    if (text.includes('保健所')) return 'health_center';
+    if (text.includes('病院')) return 'hospital';
+    if (text.includes('田んぼ')) return 'rice_field';
+    if (text.includes('畑') && !text.includes('茶畑') && !text.includes('桑')) return 'farm';
+    if (text.includes('果樹園')) return 'orchard';
+    if (text.includes('茶畑')) return 'tea_field';
+    if (text.includes('広葉樹林')) return 'broadleaf_forest';
+    if (text.includes('針葉樹林')) return 'conifer_forest';
+    if (text.includes('墓地')) return 'cemetery';
+    if (text.includes('城跡')) return 'castle_ruins';
+    if (text.includes('自衛隊')) return 'self_defense_force';
+    if (text.includes('灯台')) return 'lighthouse';
+    if (text.includes('裁判所')) return 'court';
+    if (text.includes('荒地')) return 'wasteland';
+    if (text.includes('砂浜') || text.includes('砂地')) return 'sandy_area';
+    if (text.includes('官公庁')) return 'government_office';
+    if (text.includes('発電所・変電所')) return 'power_station';
+    if (text.includes('水力発電所')) return 'hydro_power';
+    if (text.includes('気象台')) return 'weather_station';
+    if (text.includes('温泉')) return 'hot_spring';
+    if (text.includes('博物館・美術館')) return 'museum';
+    if (text.includes('図書館')) return 'library';
+    if (text.includes('記念碑')) return 'monument';
+    if (text.includes('電子基準点')) return 'electronic_control_point';
+    if (text.includes('三角点')) return 'triangulation_point';
+    if (text.includes('水準点')) return 'benchmark';
+    if (text.includes('桑畑')) return 'mulberry_field';
+    if (text.includes('竹林')) return 'bamboo_grove';
+    if (text.includes('煙突')) return 'smokestack';
+    if (text.includes('噴火口') || text.includes('噴気口')) return 'crater';
+    if (text.includes('採石場')) return 'quarry';
+    if (text.includes('油井') || text.includes('ガス井')) return 'oil_gas_well';
+    if (text.includes('展望台')) return 'observatory';
+    if (text.includes('湿地')) return 'wetland';
+    if (text.includes('史跡') || text.includes('名勝') || text.includes('天然記念物')) return 'historic_site';
+    return undefined;
+};
+
+const withMapSymbolVisuals = (problems: GeneralProblem[]): GeneralProblem[] =>
+    problems.map((problem) => {
+        const symbol = resolveMapSymbol(problem.question, problem.answer);
+        if (symbol) {
+            const hasImage = symbol in MAP_SYMBOL_ASSET_MAP;
+            return {
+                ...problem,
+                question: hasImage ? 'この地図記号は何？' : problem.question,
+                visual: { kind: 'map_symbol', symbol }
+            };
+        }
+        return problem;
+    });
 
 export const MAP_PREF_DATA: Record<string, GeneralProblem[]> = {
     // --- 地図記号特訓 (50問) ---
-    MAP_SYMBOLS: [
+    MAP_SYMBOLS: withMapSymbolVisuals([
         { question: "地図記号「◎」は何を表している？", answer: "市役所", options: d("市役所", "警察署", "消防署", "町村役場"), hint: "二重の丸は、その地域の中心的な役所だよ。" },
         { question: "地図記号「文」は何を表している？", answer: "小中学校", options: d("小中学校", "図書館", "博物館", "交番"), hint: "「文（ぶん）」は勉強するところを意味するよ。" },
         { question: "地図記号「〒」は何を表している？", answer: "郵便局", options: d("郵便局", "銀行", "寺", "神社"), hint: "カタカナの「テ」のような形だね。" },
@@ -53,7 +119,7 @@ export const MAP_PREF_DATA: Record<string, GeneralProblem[]> = {
         { question: "地図記号「点々に囲まれたエリア」は？", answer: "湿地", options: d("湿地", "砂浜", "畑", "荒地"), hint: "水がたまりやすい、じめじめした場所。"},
         { question: "地図記号「双葉の形」は何を表す？", answer: "史跡・名勝・天然記念物", options: d("史跡・名勝", "公園", "森林", "畑"), hint: "歴史的に価値のある場所だよ。"},
         { question: "地図記号「建物に波のような線」は？", answer: "水力発電所", options: d("水力発電所", "工場", "灯台", "浄水場"), hint: "水の力で電気を作る場所。"}
-    ],
+    ]),
 
     // --- 都道府県特訓 (50問) ---
     PREFECTURES: [

@@ -44,6 +44,10 @@ import { ENGLISH_G6_DATA } from './subjects/english_g6';
 import { ENGLISH_G7_DATA } from './subjects/english_g7';
 import { ENGLISH_G8_DATA } from './subjects/english_g8';
 import { ENGLISH_G9_DATA } from './subjects/english_g9';
+import { SCIENCE_GRADE_UNITS } from '../scienceUnitConfig';
+import { SCIENCE_UNIT_DATA as DEDICATED_SCIENCE_UNIT_DATA } from './subjects/science_units';
+import { SOCIAL_GRADE_UNITS } from '../socialUnitConfig';
+import { SOCIAL_UNIT_DATA as DEDICATED_SOCIAL_UNIT_DATA } from './subjects/social_units';
 
 // IT・情報のインポート
 import { IT_TABLET_DATA } from './subjects/it_tablet';
@@ -54,7 +58,7 @@ import { IT_SECURITY_DATA } from './subjects/it_security';
 
 export type { GeneralProblem };
 
-export const SUBJECT_DATA: Record<string, GeneralProblem[]> = {
+const BASE_SUBJECT_DATA: Record<string, GeneralProblem[]> = {
     ...MATH_G1_DATA,
     ...MATH_G2_DATA,
     ...MATH_G3_DATA,
@@ -103,4 +107,24 @@ export const SUBJECT_DATA: Record<string, GeneralProblem[]> = {
     IT_LITERACY: IT_LITERACY_DATA,
     IT_PROGRAMMING: IT_PROGRAMMING_DATA,
     IT_SECURITY: IT_SECURITY_DATA,
+};
+
+const SCIENCE_UNIT_ALIAS_DATA: Record<string, GeneralProblem[]> = Object.fromEntries(
+    Object.values(SCIENCE_GRADE_UNITS)
+        .flat()
+        .map((unit) => [unit.mode, BASE_SUBJECT_DATA[unit.sourceMode] || []])
+);
+
+const SOCIAL_UNIT_ALIAS_DATA: Record<string, GeneralProblem[]> = Object.fromEntries(
+    Object.values(SOCIAL_GRADE_UNITS)
+        .flat()
+        .map((unit) => [unit.mode, BASE_SUBJECT_DATA[unit.sourceMode] || []])
+);
+
+export const SUBJECT_DATA: Record<string, GeneralProblem[]> = {
+    ...BASE_SUBJECT_DATA,
+    ...SCIENCE_UNIT_ALIAS_DATA,
+    ...SOCIAL_UNIT_ALIAS_DATA,
+    ...DEDICATED_SCIENCE_UNIT_DATA,
+    ...DEDICATED_SOCIAL_UNIT_DATA,
 };
