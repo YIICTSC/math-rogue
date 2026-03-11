@@ -112,7 +112,7 @@ export const getChallengeScreenForMode = (mode: GameMode): GameScreen => {
 export const SUBJECT_CATEGORIES: SubjectCategoryConfig[] = [
   { 
     id: 'MATH', 
-    name: 'けいさん', 
+    name: '計算', 
     color: 'emerald',
     uiType: 'grid',
     subModes: [
@@ -129,7 +129,7 @@ export const SUBJECT_CATEGORIES: SubjectCategoryConfig[] = [
   },
   { 
     id: 'MATH_GRADES', 
-    name: 'さんすう・数学', 
+    name: '算数・数学', 
     color: 'emerald',
     uiType: 'grade_term',
     subModes: [
@@ -164,7 +164,7 @@ export const SUBJECT_CATEGORIES: SubjectCategoryConfig[] = [
   },
   { 
     id: 'KOKUGO_GRADES',
-    name: 'こくご',
+    name: '国語',
     color: 'cyan',
     uiType: 'grade_term',
     subModes: [
@@ -181,7 +181,7 @@ export const SUBJECT_CATEGORIES: SubjectCategoryConfig[] = [
   },
   { 
     id: 'KANJI', 
-    name: 'かんじ', 
+    name: '漢字', 
     color: 'cyan',
     uiType: 'grid',
     subModes: [
@@ -199,7 +199,7 @@ export const SUBJECT_CATEGORIES: SubjectCategoryConfig[] = [
   },
   { 
     id: 'ENGLISH', 
-    name: 'えいご', 
+    name: '英語', 
     color: 'indigo',
     uiType: 'grade_term',
     subModes: [
@@ -214,7 +214,7 @@ export const SUBJECT_CATEGORIES: SubjectCategoryConfig[] = [
   },
   { 
     id: 'SCIENCE', 
-    name: 'せいかつ・理科', 
+    name: '生活・理科', 
     color: 'amber',
     uiType: 'grade_term',
     subModes: [
@@ -249,7 +249,7 @@ export const SUBJECT_CATEGORIES: SubjectCategoryConfig[] = [
   },
   { 
     id: 'SOCIAL', 
-    name: 'しゃかい', 
+    name: '社会', 
     color: 'orange',
     uiType: 'grade_term',
     subModes: [
