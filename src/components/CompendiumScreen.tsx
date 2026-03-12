@@ -3,10 +3,11 @@ import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY, ENEMY_LIBRARY } from '../constants';
 import { Card as ICard, LanguageMode } from '../types';
 import Card from './Card';
-import { BookOpen, Lock, ArrowLeft, Swords, Gem, FlaskConical, Skull, X } from 'lucide-react';
+import { BookOpen, Lock, ArrowLeft, Swords, Gem, FlaskConical, Skull, X, Music, StepBack, StepForward, Pause, Play, Square, Repeat } from 'lucide-react';
 import EnemyIllustration from './EnemyIllustration';
 import PixelSprite from './PixelSprite';
 import { storageService } from '../services/storageService';
+import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
 import { getCardIllustrationPaths } from '../utils/cardIllustration';
 import { ENEMY_ILLUSTRATION_SIZE_CLASS } from '../constants/uiSizing';
@@ -17,6 +18,15 @@ interface CompendiumScreenProps {
     languageMode: LanguageMode;
     isDebug?: boolean;
 }
+
+const shuffleList = <T,>(items: T[]) => {
+    const next = [...items];
+    for (let i = next.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [next[i], next[j]] = [next[j], next[i]];
+    }
+    return next;
+};
 
 const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, onBack, languageMode, isDebug = false }) => {
     const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'ENEMIES'>('CARDS');
@@ -30,6 +40,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
         unlocked: boolean;
     } | null>(null);
     const [fullscreenArtCard, setFullscreenArtCard] = useState<ICard | null>(null);
+    const [showBgmMode, setShowBgmMode] = useState(false);
 
     const longPressTimer = useRef<any>(null);
     const startPos = useRef({ x: 0, y: 0 });
@@ -70,6 +81,22 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
     const allRelics = useMemo(() => Object.values(RELIC_LIBRARY), []);
     const allPotions = useMemo(() => Object.values(POTION_LIBRARY), []);
     const allEnemies = useMemo(() => Object.values(ENEMY_LIBRARY).sort((a, b) => a.tier - b.tier), []);
+    const unlockedCardsForShowcase = useMemo(() => {
+        const visibleNames = isDebug ? allCards.map(card => card.name) : unlockedCardNames;
+        const uniqueNames = Array.from(new Set(visibleNames));
+        return uniqueNames
+            .map(name => Object.values(CARDS_LIBRARY).find(card => card.name === name))
+            .filter((card): card is typeof allCards[number] => Boolean(card))
+            .filter(card => !card.isSeed)
+            .map((card, index) => ({ ...card, id: `compendium-showcase-${index}` }));
+    }, [allCards, isDebug, unlockedCardNames]);
+    const defeatedEnemySet = useMemo(() => {
+        if (isDebug) {
+            return new Set(allEnemies.map(enemy => enemy.name));
+        }
+        const knownNames = new Set(allEnemies.map(enemy => enemy.name));
+        return new Set(defeatedEnemies.filter(name => knownNames.has(name)));
+    }, [allEnemies, defeatedEnemies, isDebug]);
 
     const totalCards = allCards.length;
     const currentLibraryUnlockedCount = isDebug
@@ -86,11 +113,26 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
     const potionsPercentage = Math.floor((unlockedPotionsCount / totalPotions) * 100);
 
     const totalEnemies = allEnemies.length;
-    const defeatedEnemiesCount = isDebug ? totalEnemies : defeatedEnemies.length;
+    const defeatedEnemiesCount = defeatedEnemySet.size;
     const enemiesPercentage = Math.floor((defeatedEnemiesCount / totalEnemies) * 100);
 
     const handleItemClick = (type: 'CARD' | 'RELIC' | 'POTION' | 'ENEMY', data: any, unlocked: boolean) => {
         setSelectedItem({ type, data, unlocked });
+    };
+
+    const openBgmMode = () => {
+        if (unlockedCardsForShowcase.length === 0) {
+            audioService.playSound('wrong');
+            return;
+        }
+        audioService.playSound('select');
+        setShowBgmMode(true);
+        audioService.playBGM('random', false);
+    };
+
+    const closeBgmMode = () => {
+        setShowBgmMode(false);
+        audioService.playBGM('menu');
     };
 
     return (
@@ -122,6 +164,13 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                     </button>
                     <button onClick={() => setActiveTab('ENEMIES')} className={`px-3 py-1 rounded text-sm font-bold flex items-center ${activeTab === 'ENEMIES' ? 'bg-amber-600 text-white' : 'bg-gray-700 text-gray-300'}`}>
                         <Skull size={14} className="mr-1" /> {trans("魔物", languageMode)}
+                    </button>
+                    <button
+                        onClick={openBgmMode}
+                        disabled={unlockedCardsForShowcase.length === 0}
+                        className={`px-3 py-1 rounded text-sm font-bold flex items-center ${unlockedCardsForShowcase.length === 0 ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-cyan-700 text-white hover:bg-cyan-600'}`}
+                    >
+                        <Music size={14} className="mr-1" /> BGMモード
                     </button>
                 </div>
 
@@ -211,7 +260,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                 {activeTab === 'ENEMIES' && (
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
                         {allEnemies.map((enemy, idx) => {
-                            const isUnlocked = isDebug || defeatedEnemies.includes(enemy.name);
+                            const isUnlocked = defeatedEnemySet.has(enemy.name);
                             return (
                                 <div
                                     key={idx}
@@ -304,6 +353,13 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                     onClose={() => setFullscreenArtCard(null)}
                 />
             )}
+            {showBgmMode && (
+                <CompendiumBgmModeModal
+                    cards={unlockedCardsForShowcase}
+                    languageMode={languageMode}
+                    onClose={closeBgmMode}
+                />
+            )}
         </div>
     );
 };
@@ -347,6 +403,262 @@ const FullscreenCardArtModal: React.FC<{ card: ICard; languageMode: LanguageMode
                 ) : (
                     <div className="text-gray-400">{trans("イラストがありません", languageMode)}</div>
                 )}
+            </div>
+        </div>
+    );
+};
+
+const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageMode; onClose: () => void }> = ({ cards, languageMode, onClose }) => {
+    const defaultTracks = useMemo(() => [...audioService.getBgmTrackList()], []);
+    const transitionVariants = useMemo(() => ([
+        'animate-in fade-in duration-700',
+        'animate-in fade-in zoom-in-95 duration-700',
+        'animate-in slide-in-from-right-12 fade-in duration-700',
+        'animate-in slide-in-from-left-12 fade-in duration-700',
+        'animate-in slide-in-from-bottom-12 fade-in duration-700',
+        'animate-in slide-in-from-top-12 fade-in duration-700',
+    ]), []);
+    const [playOrder, setPlayOrder] = useState<'sorted' | 'random'>(() => audioService.getBgmAdvanceMode());
+    const [randomTrackOrder, setRandomTrackOrder] = useState<string[]>(() => shuffleList(defaultTracks));
+    const bgmTracks = useMemo(() => {
+        if (playOrder === 'sorted') {
+            return [...defaultTracks].sort((a, b) => a.localeCompare(b));
+        }
+        return randomTrackOrder;
+    }, [defaultTracks, playOrder, randomTrackOrder]);
+    const [cardIndex, setCardIndex] = useState(() => Math.floor(Math.random() * cards.length));
+    const [trackIndex, setTrackIndex] = useState(() => {
+        const current = audioService.getCurrentBgmType();
+        const found = current ? bgmTracks.findIndex(track => track === current) : -1;
+        return found >= 0 ? found : 0;
+    });
+    const [isPlaying, setIsPlaying] = useState(true);
+    const [isPaused, setIsPaused] = useState(false);
+    const [isRepeat, setIsRepeat] = useState(false);
+    const [transitionClass, setTransitionClass] = useState(transitionVariants[0]);
+    const [transitionKey, setTransitionKey] = useState(0);
+    const activeCard = cards[cardIndex] || cards[0];
+    const activeTrack = bgmTracks[trackIndex] || bgmTracks[0];
+    const translated = trans(activeCard.name, languageMode);
+    const imageCandidates = useMemo(
+        () => getCardIllustrationPaths(activeCard.id, translated, [activeCard.name]),
+        [activeCard.id, activeCard.name, translated]
+    );
+    const [imageIndex, setImageIndex] = useState(0);
+
+    useEffect(() => {
+        setImageIndex(0);
+        setTransitionClass(transitionVariants[Math.floor(Math.random() * transitionVariants.length)]);
+        setTransitionKey(prev => prev + 1);
+    }, [activeCard.id, transitionVariants]);
+
+    useEffect(() => {
+        audioService.setBgmAdvanceMode(playOrder, bgmTracks);
+        audioService.playBGM(activeTrack as any, isRepeat);
+        setIsPlaying(true);
+        setIsPaused(false);
+    }, []);
+
+    useEffect(() => {
+        if (cards.length <= 1 || !isPlaying) return;
+        const interval = window.setInterval(() => {
+            setCardIndex(prev => {
+                if (cards.length <= 1) return prev;
+                let next = prev;
+                while (next === prev) {
+                    next = Math.floor(Math.random() * cards.length);
+                }
+                return next;
+            });
+        }, 7000);
+        return () => window.clearInterval(interval);
+    }, [cards, isPlaying]);
+
+    useEffect(() => {
+        audioService.setBgmAdvanceMode(playOrder, bgmTracks);
+        if (!isPlaying) {
+            audioService.stopBGM();
+            return;
+        }
+        audioService.playBGM(activeTrack as any, isRepeat);
+        setIsPaused(false);
+    }, [activeTrack, bgmTracks, isPlaying, isRepeat, playOrder]);
+
+    useEffect(() => {
+        const syncTrackLabel = () => {
+            const current = audioService.getCurrentBgmType();
+            if (!current) return;
+            const currentIndex = bgmTracks.findIndex(track => track === current);
+            if (currentIndex >= 0) {
+                setTrackIndex(prev => (prev === currentIndex ? prev : currentIndex));
+            }
+        };
+
+        syncTrackLabel();
+        const interval = window.setInterval(syncTrackLabel, 300);
+        return () => window.clearInterval(interval);
+    }, [bgmTracks]);
+
+    useEffect(() => {
+        const current = audioService.getCurrentBgmType();
+        if (!current) return;
+        const currentIndex = bgmTracks.findIndex(track => track === current);
+        if (currentIndex >= 0) {
+            setTrackIndex(currentIndex);
+        }
+    }, [bgmTracks]);
+
+    const handleClose = () => {
+        audioService.setBgmAdvanceMode('random');
+        audioService.playBGM('menu');
+        onClose();
+    };
+
+    const handlePrevTrack = () => {
+        setTrackIndex(prev => (prev - 1 + bgmTracks.length) % bgmTracks.length);
+        setIsPlaying(true);
+    };
+
+    const handleNextTrack = () => {
+        setTrackIndex(prev => (prev + 1) % bgmTracks.length);
+        setIsPlaying(true);
+    };
+
+    const handlePlayPause = () => {
+        if (!isPlaying) {
+            setIsPlaying(true);
+            audioService.playBGM(activeTrack as any, isRepeat);
+            setIsPaused(false);
+            return;
+        }
+        if (isPaused) {
+            audioService.resumeBGM();
+            setIsPaused(false);
+        } else {
+            audioService.pauseBGM();
+            setIsPaused(true);
+        }
+    };
+
+    const handleStop = () => {
+        audioService.stopBGM();
+        setIsPlaying(false);
+        setIsPaused(false);
+    };
+
+    const handleToggleRepeat = () => {
+        const next = !isRepeat;
+        setIsRepeat(next);
+        if (isPlaying) {
+            audioService.playBGM(activeTrack as any, next);
+        }
+    };
+
+    const handleTogglePlayOrder = () => {
+        const currentTrack = audioService.getCurrentBgmType() || activeTrack;
+        setPlayOrder(prev => {
+            const nextMode = prev === 'sorted' ? 'random' : 'sorted';
+            if (nextMode === 'random') {
+                const shuffled = shuffleList(defaultTracks.filter(track => track !== currentTrack));
+                setRandomTrackOrder([currentTrack, ...shuffled]);
+            }
+            return nextMode;
+        });
+    };
+
+    const handleNextCard = () => {
+        if (cards.length <= 1) return;
+        setCardIndex(prev => (prev + 1) % cards.length);
+    };
+
+    return (
+        <div className="fixed inset-0 z-[80] bg-black flex flex-col">
+            <div className="absolute inset-0 overflow-hidden">
+                <div key={transitionKey} className={`${transitionClass} flex h-full w-full items-center justify-center`}>
+                    {imageIndex < imageCandidates.length ? (
+                        <img
+                            src={imageCandidates[imageIndex]}
+                            alt={translated}
+                            className="h-full w-full object-contain"
+                            onError={() => setImageIndex(prev => prev + 1)}
+                        />
+                    ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.2),_rgba(2,6,23,0.95)_60%)]">
+                            <div className="h-[70vmin] w-[70vmin] max-h-[86vh] max-w-[86vw] opacity-90">
+                                <PixelSprite seed={activeCard.id} name={activeCard.textureRef || 'SWORD'} className="w-full h-full" size={32} />
+                            </div>
+                        </div>
+                    )}
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/10 to-black/85" />
+            </div>
+
+            <button
+                onClick={(e) => {
+                    e.stopPropagation();
+                    handleClose();
+                }}
+                className="absolute right-3 top-3 z-20 rounded-full border border-white/15 bg-black/70 p-2.5 text-white/90 hover:text-white sm:right-4 sm:top-4 sm:p-3"
+            >
+                <X size={22} className="sm:w-[26px] sm:h-[26px]" />
+            </button>
+
+            <div className="relative z-10 flex flex-1 flex-col justify-between p-3 sm:p-6">
+                <div className="flex items-start justify-between gap-4">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                        <div className="rounded-full border border-cyan-300/30 bg-cyan-500/10 px-3 py-1 text-[10px] font-black tracking-[0.24em] text-cyan-200 sm:px-4 sm:text-xs sm:tracking-[0.3em]">
+                            BGM MODE
+                        </div>
+                        <div className="rounded-full border border-white/10 bg-black/50 px-3 py-1.5 text-[11px] font-bold text-white/85 backdrop-blur-md sm:px-4 sm:py-2 sm:text-sm">
+                            {'\u266B'} {activeTrack}
+                        </div>
+                        <button
+                            onClick={handleTogglePlayOrder}
+                            className="rounded-full border border-white/10 bg-black/50 px-3 py-1.5 text-[11px] font-bold text-white/85 backdrop-blur-md hover:bg-white/10 sm:px-4 sm:py-2 sm:text-sm"
+                        >
+                            {playOrder === 'sorted' ? '曲順: 名前順' : '曲順: シャッフル'}
+                        </button>
+                    </div>
+                </div>
+
+                <div className="flex-1" />
+
+                <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 rounded-[22px] border border-white/10 bg-black/55 p-3 backdrop-blur-xl sm:gap-4 sm:rounded-[28px] sm:p-6">
+                    <div className="flex flex-col gap-1.5 text-center sm:gap-2 sm:text-left">
+                        <div className="text-lg font-black leading-tight text-white sm:text-3xl">{translated}</div>
+                        <div className="line-clamp-2 text-xs leading-relaxed text-slate-300 sm:line-clamp-none sm:text-sm">
+                            {trans(activeCard.description, languageMode)}
+                        </div>
+                    </div>
+                    <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3">
+                        <div className="text-[11px] text-slate-300 sm:text-sm">
+                            {cardIndex + 1} / {cards.length} ・ スライドショー
+                        </div>
+                        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+                            <button onClick={handlePrevTrack} className="rounded-full bg-white/10 p-2 text-white hover:bg-white/20 sm:p-3">
+                                <StepBack size={16} className="sm:w-[18px] sm:h-[18px]" />
+                            </button>
+                            <button onClick={handlePlayPause} className="rounded-full bg-cyan-500/80 p-2 text-white hover:bg-cyan-400 sm:p-3">
+                                {isPlaying && !isPaused ? <Pause size={16} className="sm:w-[18px] sm:h-[18px]" /> : <Play size={16} className="sm:w-[18px] sm:h-[18px]" />}
+                            </button>
+                            <button onClick={handleStop} className="rounded-full bg-white/10 p-2 text-white hover:bg-white/20 sm:p-3">
+                                <Square size={16} className="sm:w-[18px] sm:h-[18px]" />
+                            </button>
+                            <button onClick={handleNextTrack} className="rounded-full bg-white/10 p-2 text-white hover:bg-white/20 sm:p-3">
+                                <StepForward size={16} className="sm:w-[18px] sm:h-[18px]" />
+                            </button>
+                            <button
+                                onClick={handleToggleRepeat}
+                                className={`rounded-full p-2 text-white sm:p-3 ${isRepeat ? 'bg-amber-500/80 hover:bg-amber-400' : 'bg-white/10 hover:bg-white/20'}`}
+                            >
+                                <Repeat size={16} className="sm:w-[18px] sm:h-[18px]" />
+                            </button>
+                            <button onClick={handleNextCard} className="rounded-full bg-white/10 p-2 text-white hover:bg-white/20 sm:p-3" title="次のカード">
+                                <ArrowLeft className="rotate-180 sm:w-[18px] sm:h-[18px]" size={16} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );

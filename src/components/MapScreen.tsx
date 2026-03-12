@@ -17,11 +17,13 @@ interface MapScreenProps {
     act: number;
     floor: number;
     typingMode?: boolean;
+    selectionHoldMs?: number;
 }
 
-const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelect, onReturnToTitle, player, languageMode, narrative, act, floor, typingMode = false }) => {
+const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelect, onReturnToTitle, player, languageMode, narrative, act, floor, typingMode = false, selectionHoldMs = 0 }) => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [showDeck, setShowDeck] = useState(false);
+    const holdTimerRef = useRef<number | null>(null);
 
     // 現在地へのオートスクロール
     useEffect(() => {
@@ -91,6 +93,10 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [typingMode, showDeck, availableNodes, onNodeSelect]);
+
+    useEffect(() => () => {
+        if (holdTimerRef.current) window.clearTimeout(holdTimerRef.current);
+    }, []);
 
     // 経路データの作成
     const connections = [];
@@ -244,7 +250,24 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                                 key={node.id}
                                 className={`absolute w-12 h-12 -ml-6 flex items-center justify-center rounded-2xl ${nodeBaseStyle} ${bgClass}`}
                                 style={{ left, bottom }}
-                                onClick={() => isAvailable ? onNodeSelect(node) : null}
+                                onClick={() => isAvailable && selectionHoldMs <= 0 ? onNodeSelect(node) : null}
+                                onPointerDown={() => {
+                                    if (!isAvailable || selectionHoldMs <= 0) return;
+                                    if (holdTimerRef.current) window.clearTimeout(holdTimerRef.current);
+                                    holdTimerRef.current = window.setTimeout(() => onNodeSelect(node), selectionHoldMs);
+                                }}
+                                onPointerUp={() => {
+                                    if (holdTimerRef.current) {
+                                        window.clearTimeout(holdTimerRef.current);
+                                        holdTimerRef.current = null;
+                                    }
+                                }}
+                                onPointerLeave={() => {
+                                    if (holdTimerRef.current) {
+                                        window.clearTimeout(holdTimerRef.current);
+                                        holdTimerRef.current = null;
+                                    }
+                                }}
                             >
                                 {typingMode && isAvailable && (
                                     <div className="absolute -right-2 -top-2 z-30 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">

@@ -117,7 +117,7 @@ const P2PRaceSetup: React.FC<P2PRaceSetupProps> = ({ player, onRaceStart, onClos
     };
 
     const handleJoinRoom = async () => {
-        if (joinInFlightRef.current || status === 'CONNECTING' || mode === 'JOIN') return;
+        if (joinInFlightRef.current || status === 'CONNECTING' || battleCode) return;
         if (!myName.trim() || inputCode.length !== 6) return;
         joinInFlightRef.current = true;
         setStatus('CONNECTING');
@@ -155,6 +155,9 @@ const P2PRaceSetup: React.FC<P2PRaceSetupProps> = ({ player, onRaceStart, onClos
         onClose();
     };
 
+    const recommendedPlayerText = '推奨同時接続数: 2〜8人';
+    const cautionPlayerText = '10〜12人は回線次第、20人以上は非推奨';
+
     return (
         <div className="fixed inset-0 z-[200] bg-slate-950/95 flex items-center justify-center p-4 text-white">
             <div className="bg-slate-900 border-2 border-indigo-500 rounded-2xl w-full max-w-lg p-6 relative">
@@ -173,63 +176,116 @@ const P2PRaceSetup: React.FC<P2PRaceSetupProps> = ({ player, onRaceStart, onClos
                     />
                 </div>
 
+                <div className="mb-4 rounded-lg border border-indigo-500/40 bg-indigo-950/30 px-3 py-2 text-xs">
+                    <div className="font-bold text-indigo-200">{recommendedPlayerText}</div>
+                    <div className="mt-1 text-indigo-100/80">{cautionPlayerText}</div>
+                </div>
+
                 {mode === 'SELECT' && (
-                    <div className="space-y-3">
-                        <button onClick={handleCreateRoom} className="w-full bg-indigo-600 py-3 rounded font-bold flex items-center justify-center gap-2"><Wifi size={18} /> ルーム作成</button>
-                        <div className="flex flex-col sm:flex-row gap-2">
-                            <input
-                                value={inputCode}
-                                onChange={(e) => setInputCode(e.target.value.normalize('NFKC').replace(/[^0-9]/g, '').slice(0, 6))}
-                                placeholder="6桁コード"
-                                className="w-full min-w-0 bg-black/60 border border-gray-600 rounded px-3 py-2"
-                            />
-                            <button onClick={handleJoinRoom} disabled={status === 'CONNECTING' || mode === 'JOIN'} className="w-full sm:w-auto sm:shrink-0 bg-emerald-600 disabled:bg-gray-700 disabled:text-gray-300 px-4 py-2 rounded font-bold">参加</button>
-                        </div>
+                    <div className="space-y-4">
+                        <button
+                            onClick={() => {
+                                setMode('HOST');
+                                setStatus('IDLE');
+                                setErrorMsg('');
+                            }}
+                            className="w-full bg-indigo-600 py-4 rounded-xl font-bold flex items-center justify-center gap-2 text-lg"
+                        >
+                            <Wifi size={20} /> ルームを作成
+                        </button>
+                        <button
+                            onClick={() => {
+                                setMode('JOIN');
+                                setStatus('IDLE');
+                                setErrorMsg('');
+                            }}
+                            className="w-full bg-emerald-600 py-4 rounded-xl font-bold flex items-center justify-center gap-2 text-lg"
+                        >
+                            <Users size={20} /> ルームに参加
+                        </button>
                     </div>
                 )}
 
                 {mode === 'HOST' && (
                     <div className="space-y-3">
-                        <div className="bg-black/60 border border-gray-700 rounded p-3">
-                            <div className="text-xs text-gray-400">ルームコード</div>
-                            <div className="text-4xl font-black tracking-widest">{battleCode}</div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-300">制限時間</span>
-                            <select value={durationSec} onChange={(e) => setDurationSec(Number(e.target.value))} className="bg-black/60 border border-gray-600 rounded px-2 py-1">
-                                <option value={60}>1分</option>
-                                <option value={300}>5分</option>
-                                <option value={600}>10分</option>
-                                <option value={900}>15分</option>
-                                <option value={1200}>20分</option>
-                                <option value={1500}>25分</option>
-                                <option value={1800}>30分</option>
-                                <option value={2100}>35分</option>
-                                <option value={2400}>40分</option>
-                                <option value={2700}>45分</option>
-                                <option value={3000}>50分</option>
-                            </select>
-                        </div>
-                        <div className="bg-black/40 border border-gray-700 rounded p-3 max-h-44 overflow-auto">
-                            <div className="text-sm font-bold mb-2 flex items-center gap-1"><Users size={14} /> 参加者 {participants.length}</div>
-                            {participants.map(p => (
-                                <div key={p.peerId} className="text-sm text-gray-200">- {p.name}</div>
-                            ))}
-                        </div>
-                        <button onClick={handleStart} disabled={!canStart} className="w-full bg-emerald-600 disabled:bg-gray-700 py-3 rounded font-bold">レース開始</button>
+                        {!battleCode ? (
+                            <>
+                                <div className="text-sm text-gray-300">作成者名を入力してルームを作成します。</div>
+                                <button
+                                    onClick={handleCreateRoom}
+                                    disabled={!myName.trim() || status === 'CONNECTING'}
+                                    className="w-full bg-indigo-600 disabled:bg-gray-700 disabled:text-gray-300 py-3 rounded font-bold flex items-center justify-center gap-2"
+                                >
+                                    {status === 'CONNECTING' ? <Loader size={18} className="animate-spin" /> : <Wifi size={18} />}
+                                    {status === 'CONNECTING' ? '作成中...' : 'ルームを作成'}
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <div className="bg-black/60 border border-gray-700 rounded p-3">
+                                    <div className="text-xs text-gray-400">ルームコード</div>
+                                    <div className="text-4xl font-black tracking-widest">{battleCode}</div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm text-gray-300">制限時間</span>
+                                    <select value={durationSec} onChange={(e) => setDurationSec(Number(e.target.value))} className="bg-black/60 border border-gray-600 rounded px-2 py-1">
+                                        <option value={60}>1分</option>
+                                        <option value={300}>5分</option>
+                                        <option value={600}>10分</option>
+                                        <option value={900}>15分</option>
+                                        <option value={1200}>20分</option>
+                                        <option value={1500}>25分</option>
+                                        <option value={1800}>30分</option>
+                                        <option value={2100}>35分</option>
+                                        <option value={2400}>40分</option>
+                                        <option value={2700}>45分</option>
+                                        <option value={3000}>50分</option>
+                                    </select>
+                                </div>
+                                <div className="bg-black/40 border border-gray-700 rounded p-3 max-h-44 overflow-auto">
+                                    <div className="text-sm font-bold mb-2 flex items-center gap-1"><Users size={14} /> 参加者 {participants.length}</div>
+                                    {participants.map(p => (
+                                        <div key={p.peerId} className="text-sm text-gray-200">- {p.name}</div>
+                                    ))}
+                                </div>
+                                <button onClick={handleStart} disabled={!canStart} className="w-full bg-emerald-600 disabled:bg-gray-700 py-3 rounded font-bold">レース開始</button>
+                            </>
+                        )}
                     </div>
                 )}
 
                 {mode === 'JOIN' && (
                     <div className="space-y-3">
-                        <div className="bg-black/40 border border-gray-700 rounded p-3 text-sm text-gray-200">コード: {battleCode}</div>
-                        <div className="bg-black/40 border border-gray-700 rounded p-3 max-h-44 overflow-auto">
-                            <div className="text-sm font-bold mb-2 flex items-center gap-1"><Users size={14} /> 参加者</div>
-                            {participants.length === 0 ? <div className="text-sm text-gray-400">待機中...</div> : participants.map(p => (
-                                <div key={p.peerId} className="text-sm text-gray-200">- {p.name}</div>
-                            ))}
-                        </div>
-                        <div className="text-sm text-gray-400 flex items-center gap-2"><Loader size={14} className="animate-spin" /> ホストの開始待ち</div>
+                        {!battleCode ? (
+                            <>
+                                <div className="text-sm text-gray-300">参加コードを入力してルームへ接続します。</div>
+                                <input
+                                    value={inputCode}
+                                    onChange={(e) => setInputCode(e.target.value.normalize('NFKC').replace(/[^0-9]/g, '').slice(0, 6))}
+                                    placeholder="6桁コード"
+                                    className="w-full min-w-0 bg-black/60 border border-gray-600 rounded px-3 py-3 text-center text-2xl font-black tracking-[0.35em]"
+                                />
+                                <button
+                                    onClick={handleJoinRoom}
+                                    disabled={!myName.trim() || inputCode.length !== 6 || status === 'CONNECTING'}
+                                    className="w-full bg-emerald-600 disabled:bg-gray-700 disabled:text-gray-300 px-4 py-3 rounded font-bold flex items-center justify-center gap-2"
+                                >
+                                    {status === 'CONNECTING' ? <Loader size={18} className="animate-spin" /> : <Users size={18} />}
+                                    {status === 'CONNECTING' ? '接続中...' : '参加する'}
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <div className="bg-black/40 border border-gray-700 rounded p-3 text-sm text-gray-200">コード: {battleCode}</div>
+                                <div className="bg-black/40 border border-gray-700 rounded p-3 max-h-44 overflow-auto">
+                                    <div className="text-sm font-bold mb-2 flex items-center gap-1"><Users size={14} /> 参加者</div>
+                                    {participants.length === 0 ? <div className="text-sm text-gray-400">待機中...</div> : participants.map(p => (
+                                        <div key={p.peerId} className="text-sm text-gray-200">- {p.name}</div>
+                                    ))}
+                                </div>
+                                <div className="text-sm text-gray-400 flex items-center gap-2"><Loader size={14} className="animate-spin" /> ホストの開始待ち</div>
+                            </>
+                        )}
                     </div>
                 )}
 

@@ -31,6 +31,7 @@ interface TypingBattleSceneProps {
     floor: number;
     lessonId?: string;
     onAbort: () => void;
+    hideEnemyIntents?: boolean;
 }
 
 type FingerId =
@@ -424,7 +425,10 @@ const buildPromptFromLesson = (lessonId: string | undefined, act: number, floor:
     }
 };
 
-const renderIntent = (enemy: Enemy) => {
+const renderIntent = (enemy: Enemy, hideEnemyIntents: boolean) => {
+    if (hideEnemyIntents) {
+        return <span className="tracking-[0.25em] text-slate-200">???</span>;
+    }
     const intent = enemy.nextIntent;
     if (
         intent.type === EnemyIntentType.ATTACK ||
@@ -526,7 +530,8 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
     act,
     floor,
     lessonId,
-    onAbort
+    onAbort,
+    hideEnemyIntents = false
 }) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const autoEndTimerRef = useRef<number | null>(null);
@@ -779,7 +784,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                             >
                                 {!isFinisherActive && (
                                     <div className="absolute -top-5 left-1/2 z-30 flex min-w-[36px] -translate-x-1/2 items-center justify-center rounded border-2 border-red-600 bg-white px-1 py-0.5 text-[10px] font-extrabold text-black shadow-xl">
-                                        {renderIntent(enemy)}
+                                        {renderIntent(enemy, hideEnemyIntents)}
                                     </div>
                                 )}
 

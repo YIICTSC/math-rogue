@@ -21,6 +21,7 @@ const STORAGE_KEY_CHALLENGE_RECORDS = 'pixel_spire_challenge_records_v1';
 
 const STORAGE_KEY_DUNGEON_STATE = 'pixel_spire_dungeon_state_v1';
 const STORAGE_KEY_POKER_STATE = 'pixel_spire_poker_state_v1';
+const STORAGE_KEY_POKER_EXPANDED_SUPPORTERS_UNLOCKED = 'pixel_spire_poker_expanded_supporters_unlocked_v1';
 
 // For School Dungeon 2
 const STORAGE_KEY_DUNGEON_STATE_2 = 'pixel_spire_dungeon_state_2_v1';
@@ -315,6 +316,27 @@ export const storageService = {
           return stored ? JSON.parse(stored) : [];
       } catch (e) {
           return [];
+      }
+  },
+
+  getPokerExpandedSupporterUnlockCount: (): number => {
+      try {
+          const stored = localStorage.getItem(STORAGE_KEY_POKER_EXPANDED_SUPPORTERS_UNLOCKED);
+          if (stored === 'true') return Number.MAX_SAFE_INTEGER;
+          const parsed = stored ? parseInt(stored, 10) : 0;
+          return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+      } catch (e) {
+          return 0;
+      }
+  },
+
+  unlockPokerExpandedSupporters: (maxCount?: number) => {
+      try {
+          const current = storageService.getPokerExpandedSupporterUnlockCount();
+          const next = maxCount !== undefined ? Math.min(current + 1, maxCount) : current + 1;
+          localStorage.setItem(STORAGE_KEY_POKER_EXPANDED_SUPPORTERS_UNLOCKED, next.toString());
+      } catch (e) {
+          console.warn("Failed to unlock poker expanded supporters", e);
       }
   },
 

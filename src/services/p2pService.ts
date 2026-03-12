@@ -1,4 +1,5 @@
-﻿import Peer, { DataConnection } from 'peerjs';
+import Peer, { DataConnection } from 'peerjs';
+import { RaceTrickEffectId } from '../types';
 
 export type P2PEvent =
     | { type: 'HANDSHAKE', player: any }
@@ -11,14 +12,16 @@ export type P2PEvent =
     | { type: 'RACE_MODE_SET', mode: any }
     | { type: 'RACE_PROGRESS', name: string, imageData?: string, floor: number, maxDamage: number, gameOverCount: number, score: number, updatedAt: number }
     | { type: 'RACE_LEADERBOARD', entries: Array<{ peerId: string, name: string, imageData?: string, floor: number, maxDamage: number, gameOverCount: number, score: number, updatedAt: number }> }
-    | { type: 'RACE_END', entries: Array<{ peerId: string, name: string, imageData?: string, floor: number, maxDamage: number, gameOverCount: number, score: number, updatedAt: number }> };
+    | { type: 'RACE_END', entries: Array<{ peerId: string, name: string, imageData?: string, floor: number, maxDamage: number, gameOverCount: number, score: number, updatedAt: number }> }
+    | { type: 'RACE_TRICK_PLAY', cardId: string, effectId: RaceTrickEffectId, targetPeerId: string, sourceName: string, sourceGold: number }
+    | { type: 'RACE_TRICK_APPLY', cardId: string, effectId: RaceTrickEffectId, sourcePeerId: string, sourceName: string, sourceGold: number }
+    | { type: 'RACE_TRICK_RESULT', effectId: RaceTrickEffectId, sourcePeerId: string, targetPeerId: string, sourceGoldAfter?: number, goldDelta?: number };
 
 class P2PService {
     private peer: Peer | null = null;
     private connections: Map<string, DataConnection> = new Map();
     private myId: string | null = null;
 
-    // Callbacks
     public onConnect: ((conn: DataConnection) => void) | null = null;
     public onData: ((data: P2PEvent, fromPeerId?: string) => void) | null = null;
     public onClose: (() => void) | null = null;
@@ -61,7 +64,8 @@ class P2PService {
                 const peerId = `lr-battle-${code}`;
                 this.peer = new Peer();
 
-                this.peer.on('open', () => {
+                this.peer.on('open', (id) => {
+                    this.myId = id;
                     const conn = this.peer!.connect(peerId);
                     conn.on('open', () => {
                         this.handleConnection(conn);
@@ -122,6 +126,10 @@ class P2PService {
         return Array.from(this.connections.keys());
     }
 
+    public getMyId() {
+        return this.myId;
+    }
+
     public close() {
         this.connections.forEach(conn => conn.close());
         this.connections.clear();
@@ -129,6 +137,7 @@ class P2PService {
             this.peer.destroy();
             this.peer = null;
         }
+        this.myId = null;
     }
 
     public isConnected() {

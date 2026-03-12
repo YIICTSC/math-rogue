@@ -1,8 +1,8 @@
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Card as ICard, RewardItem, Potion, LanguageMode } from '../types';
+import { Card as ICard, RewardItem, Potion, LanguageMode, RaceTrickCard } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
-import { Gift, Gem, Coins, FlaskConical, X } from 'lucide-react';
+import { Gift, Gem, Coins, FlaskConical, X, Flag, Sparkles } from 'lucide-react';
 import { trans } from '../utils/textUtils';
 
 interface RewardScreenProps {
@@ -14,9 +14,10 @@ interface RewardScreenProps {
   potionCapacity?: number;
   languageMode: LanguageMode;
   typingMode?: boolean;
+  dummyRewards?: number;
 }
 
-const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, onSkip, isLoading, currentPotions = [], potionCapacity = 3, languageMode, typingMode = false }) => {
+const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, onSkip, isLoading, currentPotions = [], potionCapacity = 3, languageMode, typingMode = false, dummyRewards = 0 }) => {
   const [replaceReward, setReplaceReward] = useState<RewardItem | null>(null);
   const [inspectedItem, setInspectedItem] = useState<{ type: 'CARD' | 'RELIC' | 'POTION', data: any } | null>(null);
   const longPressTimer = useRef<any>(null);
@@ -293,6 +294,38 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                     <button className="bg-gray-600 px-6 py-2 text-sm font-bold rounded border hover:bg-gray-500 w-full mt-2">{trans("獲得", languageMode)}</button>
                 </div>
             )}
+
+            {reward.type === 'RACE_TRICK' && (
+                <div className="relative w-48 bg-gradient-to-b from-fuchsia-950/90 to-slate-950 border-2 border-fuchsia-400 rounded-xl flex flex-col items-center justify-between p-6 cursor-pointer hover:bg-black/80 shadow-lg h-72" onClick={() => onSelectReward(reward)}>
+                    {typingMode && <div className="absolute right-2 top-2 z-20 rounded-full border border-cyan-300 bg-cyan-950/95 px-2 py-0.5 text-[10px] font-black text-cyan-200">{rewards.findIndex(r => r.id === reward.id) + 1}</div>}
+                    <div className="bg-fuchsia-950/70 p-4 rounded-full border-2 border-fuchsia-300 mb-4 shadow-[0_0_15px_rgba(217,70,239,0.5)]">
+                        <Flag size={40} className="text-fuchsia-200" />
+                    </div>
+                    <div className="text-center mb-auto w-full">
+                        <div className="flex items-center justify-center gap-1 text-[10px] uppercase tracking-[0.2em] text-fuchsia-200 mb-1">
+                            <Sparkles size={12} />
+                            Race Trick
+                        </div>
+                        <div className="text-fuchsia-50 font-bold text-lg mb-2">{trans((reward.value as RaceTrickCard).name, languageMode)}</div>
+                        <div className="text-xs text-fuchsia-100/80 leading-tight h-16 overflow-hidden">{trans((reward.value as RaceTrickCard).description, languageMode)}</div>
+                    </div>
+                    <button className="bg-fuchsia-600 px-6 py-2 text-sm font-bold rounded border hover:bg-fuchsia-500 w-full mt-2">{trans("獲得", languageMode)}</button>
+                </div>
+            )}
+          </div>
+        ))}
+        {Array.from({ length: dummyRewards }).map((_, index) => (
+          <div key={`dummy-${index}`} className="snap-center shrink-0 flex justify-center opacity-80">
+            <div className="relative w-48 bg-black/40 border-2 border-dashed border-slate-500 rounded-xl flex flex-col items-center justify-between p-6 shadow-lg h-72 pointer-events-none">
+              <div className="bg-slate-800 p-4 rounded-full border-2 border-slate-500 mb-4">
+                <X size={40} className="text-slate-400" />
+              </div>
+              <div className="text-center mb-auto w-full">
+                <div className="text-slate-100 font-bold text-lg mb-2">ダミー報酬</div>
+                <div className="text-xs text-slate-400 leading-tight h-16 overflow-hidden">プリントが混ざっていて選べません。</div>
+              </div>
+              <button className="bg-slate-700 px-6 py-2 text-sm font-bold rounded border w-full mt-2">選択不可</button>
+            </div>
           </div>
         ))}
       </div>

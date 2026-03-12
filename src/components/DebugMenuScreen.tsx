@@ -15,6 +15,11 @@ interface DebugMenuScreenProps {
     onStartAct3Boss: (deck: ICard[], relics: Relic[], potions: Potion[]) => void;
     onBack: () => void;
     onTimeUpdate: (newDailySeconds: number) => void;
+    onAddClearCount: () => void;
+    onBoostMathCorrect: () => void;
+    clearCount: number;
+    totalMathCorrect: number;
+    nextMiniGameThreshold: number | null;
     languageMode: LanguageMode;
 }
 
@@ -58,7 +63,18 @@ const TranslationRow = React.memo(({ original, context, debugLanguageMode, isInl
     );
 });
 
-const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3Boss, onBack, onTimeUpdate, languageMode: initialLanguageMode }) => {
+const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
+    onStart,
+    onStartAct3Boss,
+    onBack,
+    onTimeUpdate,
+    onAddClearCount,
+    onBoostMathCorrect,
+    clearCount,
+    totalMathCorrect,
+    nextMiniGameThreshold,
+    languageMode: initialLanguageMode
+}) => {
     const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'SYSTEM' | 'TRANSLATION'>('CARDS');
     const [searchTerm, setSearchTerm] = useState("");
     const [debugLanguageMode, setDebugLanguageMode] = useState<LanguageMode>(initialLanguageMode);
@@ -348,6 +364,35 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({ onStart, onStartAct3B
 
                         {activeTab === 'SYSTEM' && (
                             <div className="space-y-6">
+                                <section>
+                                    <h3 className="text-amber-300 font-bold mb-4 flex items-center"><Plus size={18} className="mr-2" /> 解禁モーダル確認</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <button
+                                            onClick={onAddClearCount}
+                                            className="bg-amber-700 hover:bg-amber-600 text-white p-4 rounded-xl border border-amber-500 shadow-lg flex flex-col items-center gap-2 transition-transform active:scale-95"
+                                        >
+                                            <Plus size={32} />
+                                            <div className="font-bold">主人公解禁用にクリア回数を+1</div>
+                                            <div className="text-xs text-amber-100/80">現在: {clearCount} クリア</div>
+                                        </button>
+                                        <button
+                                            onClick={onBoostMathCorrect}
+                                            className="bg-cyan-700 hover:bg-cyan-600 text-white p-4 rounded-xl border border-cyan-500 shadow-lg flex flex-col items-center gap-2 transition-transform active:scale-95"
+                                        >
+                                            <BookOpen size={32} />
+                                            <div className="font-bold">次のミニゲーム解禁まで正解数を加算</div>
+                                            <div className="text-xs text-cyan-100/80">
+                                                {nextMiniGameThreshold
+                                                    ? `現在: ${totalMathCorrect} 問 / 次: ${nextMiniGameThreshold} 問`
+                                                    : `現在: ${totalMathCorrect} 問 / 全解禁済み`}
+                                            </div>
+                                        </button>
+                                    </div>
+                                    <p className="text-xs text-gray-400 mt-3">
+                                        ここで増やした分は、デバッグメニューから戻った時に既存の解禁モーダルで確認できます。
+                                    </p>
+                                </section>
+
                                 <section>
                                     <h3 className="text-indigo-300 font-bold mb-4 flex items-center"><Clock size={18} className="mr-2" /> 時間制限テスト</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

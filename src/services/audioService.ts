@@ -7,8 +7,11 @@ class AudioService {
   
   private isMuted: boolean = false;
   private isPlayingBGM: boolean = false;
+  private isBgmPaused: boolean = false;
   private isLooping: boolean = true;
   private currentBgmType: string | null = null;
+  private bgmAdvanceMode: 'random' | 'sorted' = 'random';
+  private bgmSequence: string[] = [];
   
   // BGM Mode: Default to STUDY
   private bgmMode: 'OSCILLATOR' | 'MP3' | 'STUDY' = 'STUDY';
@@ -113,6 +116,27 @@ class AudioService {
       return this.bgmMode;
   }
 
+  public getBgmTrackList() {
+      return [...this.bgmList] as const;
+  }
+
+  public setBgmAdvanceMode(mode: 'random' | 'sorted', sequence?: string[]) {
+      this.bgmAdvanceMode = mode;
+      this.bgmSequence = sequence && sequence.length > 0 ? [...sequence] : [...this.bgmList];
+  }
+
+  public getBgmAdvanceMode() {
+      return this.bgmAdvanceMode;
+  }
+
+  public getCurrentBgmType() {
+      return this.currentBgmType;
+  }
+
+  public getIsBgmPaused() {
+      return this.isBgmPaused;
+  }
+
   // --- Scheduler & Sequencer ---
   private nextNote() {
       const secondsPerBeat = 60.0 / this.tempo;
@@ -129,7 +153,11 @@ class AudioService {
 
       // ランダム再生（ループなし）の場合、一定小節（例：32小節＝512個の16分音符）で次の曲へ
       if (!this.isLooping && this.current16thNote === 0 && this.total16thNotes > 0 && this.total16thNotes % 512 === 0) {
-          this.playRandomBGM();
+          if (this.bgmAdvanceMode === 'sorted') {
+              this.playNextSequentialBGM();
+          } else {
+              this.playRandomBGM();
+          }
           return;
       }
 
@@ -659,6 +687,7 @@ class AudioService {
       this.stopBGM();
       this.currentBgmType = type;
       this.isPlayingBGM = true;
+      this.isBgmPaused = false;
       this.isLooping = loop;
       this.swing = 0; 
       if (this.bgmMode === 'STUDY') return;
@@ -690,6 +719,14 @@ class AudioService {
 
       // ランダム再生時は自動で次へ行くように loop=false にする
       await this.playBGM(next as any, false);
+  }
+
+  public async playNextSequentialBGM() {
+      const sequence = this.bgmSequence.length > 0 ? this.bgmSequence : [...this.bgmList];
+      if (sequence.length === 0) return;
+      const currentIndex = this.currentBgmType ? sequence.findIndex(track => track === this.currentBgmType) : -1;
+      const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % sequence.length : 0;
+      await this.playBGM(sequence[nextIndex] as any, false);
   }
 
   private async playMp3(type: string, loop: boolean) {
@@ -724,7 +761,11 @@ class AudioService {
           source.connect(this.bgmGain);
           source.onended = () => {
               if (this.isPlayingBGM && !loop) {
-                  this.playRandomBGM();
+                  if (this.bgmAdvanceMode === 'sorted') {
+                      this.playNextSequentialBGM();
+                  } else {
+                      this.playRandomBGM();
+                  }
               }
           };
           source.start(0);
@@ -746,7 +787,33 @@ class AudioService {
           this.currentSource = null;
       }
       this.isPlayingBGM = false;
+      this.isBgmPaused = false;
       this.currentBgmType = null;
+  }
+
+  public pauseBGM() {
+      if (!this.ctx || !this.isPlayingBGM || this.isBgmPaused) return;
+      this.ctx.suspend().catch(() => {});
+      this.isBgmPaused = true;
+  }
+
+  public resumeBGM() {
+      if (!this.ctx || !this.isPlayingBGM || !this.isBgmPaused) return;
+      this.ctx.resume().catch(() => {});
+      this.isBgmPaused = false;
+  }
+
+  public stopAllAudio() {
+      this.stopBGM();
+      if (!this.ctx || !this.masterGain) return;
+      if (this.sfxGain) {
+          try {
+              this.sfxGain.disconnect();
+          } catch {}
+      }
+      this.sfxGain = this.ctx.createGain();
+      this.sfxGain.gain.value = 0.6;
+      this.sfxGain.connect(this.masterGain);
   }
 
   public toggleMute() {

@@ -14,6 +14,7 @@ const WORLD_HEIGHT = 2000;
 const PLAYER_SPEED = 4;
 const BASE_XP_REQUIREMENT = 10;
 const ZOOM_SCALE = 1.25;
+const FIXED_STEP_MS = 1000 / 60;
 
 // --- TYPES ---
 type WeaponType = 
@@ -455,6 +456,10 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     const xp = useRef(0);
     const nextLevelXp = useRef(BASE_XP_REQUIREMENT);
     const shakeAmount = useRef(0);
+    const frameRequestRef = useRef<number | null>(null);
+    const lastLoopTimeRef = useRef<number | null>(null);
+    const accumulatorRef = useRef(0);
+    const isLoopActiveRef = useRef(false);
     const activeTimeouts = useRef<number[]>([]); 
 
     const [weapons, setWeapons] = useState<Record<WeaponType, { level: number, cooldownTimer: number } | undefined>>(() => {
@@ -511,6 +516,16 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         return c;
     };
 
+    const stopSurvivorAudio = () => {
+        audioService.stopAllAudio();
+    };
+
+    const handleExit = () => {
+        stopSurvivorAudio();
+        clearAllTimeouts();
+        onBack();
+    };
+
     useEffect(() => {
         audioService.playBGM('survivor_metal');
         bgCanvasRef.current = createSchoolyardBackground();
@@ -541,31 +556,50 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         });
         spriteCache.current['GEM'] = generateFromTemplate('EYE', '#eab308', '#fde047');
 
-        const loop = () => {
-            if (gameState.current === 'PLAYING') {
-                try {
-                    update();
-                } catch (e) {
-                    console.error("Update loop error", e);
-                }
+        isLoopActiveRef.current = true;
+        const loop = (now: number) => {
+            if (!isLoopActiveRef.current) return;
+            if (lastLoopTimeRef.current === null) {
+                lastLoopTimeRef.current = now;
             }
+            const delta = Math.min(100, now - lastLoopTimeRef.current);
+            lastLoopTimeRef.current = now;
+            accumulatorRef.current += delta;
+
+            while (accumulatorRef.current >= FIXED_STEP_MS) {
+                if (gameState.current === 'PLAYING') {
+                    try {
+                        update();
+                    } catch (e) {
+                        console.error("Update loop error", e);
+                    }
+                }
+                accumulatorRef.current -= FIXED_STEP_MS;
+            }
+
             try {
                 draw();
             } catch (e) {
                 console.error("Draw loop error", e);
             }
-            requestAnimationFrame(loop);
+            frameRequestRef.current = requestAnimationFrame(loop);
         };
-        const animId = requestAnimationFrame(loop);
+        frameRequestRef.current = requestAnimationFrame(loop);
         const handleKeyDown = (e: KeyboardEvent) => keys.current[e.code] = true;
         const handleKeyUp = (e: KeyboardEvent) => keys.current[e.code] = false;
         window.addEventListener('keydown', handleKeyDown);
         window.addEventListener('keyup', handleKeyUp);
         return () => {
-            cancelAnimationFrame(animId);
+            isLoopActiveRef.current = false;
+            if (frameRequestRef.current !== null) {
+                cancelAnimationFrame(frameRequestRef.current);
+                frameRequestRef.current = null;
+            }
+            lastLoopTimeRef.current = null;
+            accumulatorRef.current = 0;
             window.removeEventListener('keydown', handleKeyDown);
             window.removeEventListener('keyup', handleKeyUp);
-            audioService.stopBGM();
+            stopSurvivorAudio();
             clearAllTimeouts();
         };
     }, []); 
@@ -711,7 +745,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 player.current.flashTime = 30;
                 damageTexts.current.push({ id: Math.random(), x: player.current.x, y: player.current.y - 20, value: `-${Math.floor(finalDmg)}`, color: 'red', life: 60 });
                 if (player.current.hp <= 0 && gameState.current === 'PLAYING') { 
-                    audioService.stopBGM();
+                    stopSurvivorAudio();
                     gameState.current = 'GAME_OVER'; 
                     saveRecord(); 
                     setUiState(prev => ({ ...prev, gameOver: true, hp: 0 })); 
@@ -1376,8 +1410,8 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 </div>
             )}
             {joystickUI && joystickUI.active && <div className="absolute z-30 pointer-events-none" style={{ left: joystickUI.startX, top: joystickUI.startY, transform: 'translate(-50%, -50%)' }}><div className="w-24 h-24 rounded-full border-4 border-white/30 bg-white/10 backdrop-blur-sm"></div><div className="absolute w-12 h-12 rounded-full bg-white/40 shadow-2xl" style={{ left: '50%', top: '50%', transform: `translate(calc(-50% + ${joystickUI.curX - joystickUI.startX}px), calc(-50% + ${joystickUI.curY - joystickUI.startY}px))` }}></div></div>}
-            {uiState.gameOver && (<div className="absolute inset-0 bg-red-950/95 flex flex-col items-center justify-center z-20 pointer-events-auto animate-in fade-in duration-500"><Skull size={80} className="text-red-500 mb-4 animate-bounce"/><h2 className="text-7xl font-black text-white mb-4 tracking-tighter italic">GAME OVER</h2><div className="text-2xl text-yellow-400 mb-8 font-black bg-black/60 px-8 py-2 rounded-full border border-yellow-500">SURVIVED: {Math.floor(uiState.time/60)}:{(uiState.time%60).toString().padStart(2,'0')}</div><div className="flex flex-col gap-4 w-72"><button onClick={handleRestart} className="bg-white text-black px-8 py-4 rounded-2xl font-black text-xl hover:bg-gray-200 flex items-center justify-center shadow-[0_4px_0_#ccc] active:translate-y-1 active:shadow-none transition-all"><RotateCcw className="mr-2"/> PLAY AGAIN</button><button onClick={onBack} className="bg-black text-white px-8 py-4 rounded-2xl font-black text-xl border-4 border-white/20 hover:bg-gray-900 flex items-center justify-center shadow-2xl transition-all"><ArrowLeft className="mr-2"/> EXIT TO MENU</button></div></div>)}
-            {gameState.current === 'PLAYING' && (<button onClick={onBack} className="absolute top-4 right-4 bg-gray-800/60 hover:bg-red-500/80 text-white p-3 rounded-2xl border-2 border-white/20 z-50 pointer-events-auto shadow-2xl backdrop-blur-lg transition-all"><Pause size={24} /></button>)}
+            {uiState.gameOver && (<div className="absolute inset-0 bg-red-950/95 flex flex-col items-center justify-center z-20 pointer-events-auto animate-in fade-in duration-500"><Skull size={80} className="text-red-500 mb-4 animate-bounce"/><h2 className="text-7xl font-black text-white mb-4 tracking-tighter italic">GAME OVER</h2><div className="text-2xl text-yellow-400 mb-8 font-black bg-black/60 px-8 py-2 rounded-full border border-yellow-500">SURVIVED: {Math.floor(uiState.time/60)}:{(uiState.time%60).toString().padStart(2,'0')}</div><div className="flex flex-col gap-4 w-72"><button onClick={handleRestart} className="bg-white text-black px-8 py-4 rounded-2xl font-black text-xl hover:bg-gray-200 flex items-center justify-center shadow-[0_4px_0_#ccc] active:translate-y-1 active:shadow-none transition-all"><RotateCcw className="mr-2"/> PLAY AGAIN</button><button onClick={handleExit} className="bg-black text-white px-8 py-4 rounded-2xl font-black text-xl border-4 border-white/20 hover:bg-gray-900 flex items-center justify-center shadow-2xl transition-all"><ArrowLeft className="mr-2"/> EXIT TO MENU</button></div></div>)}
+            {gameState.current === 'PLAYING' && (<button onClick={handleExit} className="absolute top-4 right-4 bg-gray-800/60 hover:bg-red-500/80 text-white p-3 rounded-2xl border-2 border-white/20 z-50 pointer-events-auto shadow-2xl backdrop-blur-lg transition-all"><Pause size={24} /></button>)}
         </div>
     );
 };

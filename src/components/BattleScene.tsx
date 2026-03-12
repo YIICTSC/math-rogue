@@ -290,11 +290,12 @@ interface BattleSceneProps {
     onParry: () => void;
     activeEffects: VisualEffectInstance[];
     finisherCutinCard?: ICard | null;
+    hideEnemyIntents?: boolean;
 }
 
 const BattleScene: React.FC<BattleSceneProps> = ({
     player, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onPlaySynthesizedCard, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
-    selectionState, onHandSelection, onCancelSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect, parryState, onParry, activeEffects, finisherCutinCard
+    selectionState, onHandSelection, onCancelSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect, parryState, onParry, activeEffects, finisherCutinCard, hideEnemyIntents = false
 }) => {
 
     const [lastVisibleEnemies, setLastVisibleEnemies] = useState<Enemy[]>([]);
@@ -975,29 +976,35 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
                                 {!isFinisherActive && (
                                     <div
-                                        className={`absolute ${isTrueBossPhase2 ? '-top-1 md:-top-6' : '-top-6'} left-1/2 -translate-x-1/2 z-30 transition-all duration-300 text-xs font-extrabold px-1.5 py-0.5 rounded border-2 animate-bounce whitespace-nowrap shadow-xl flex items-center justify-center min-w-[40px] ${enemy.nextIntent.type === 'PIERCE_ATTACK' ? 'bg-red-800 text-white border-yellow-400 scale-125 ring-2 ring-red-400 shadow-red-900/50' : 'bg-white text-black border-red-600'}`}
+                                        className={`absolute ${isTrueBossPhase2 ? '-top-1 md:-top-6' : '-top-6'} left-1/2 -translate-x-1/2 z-30 transition-all duration-300 text-xs font-extrabold px-1.5 py-0.5 rounded border-2 animate-bounce whitespace-nowrap shadow-xl flex items-center justify-center min-w-[40px] ${hideEnemyIntents ? 'bg-slate-900 text-slate-100 border-slate-500' : enemy.nextIntent.type === 'PIERCE_ATTACK' ? 'bg-red-800 text-white border-yellow-400 scale-125 ring-2 ring-red-400 shadow-red-900/50' : 'bg-white text-black border-red-600'}`}
                                         onClick={(e) => { e.stopPropagation(); showInfo(trans("敵", languageMode), trans("敵の次の行動です。", languageMode)); }}
                                     >
-                                        {(enemy.nextIntent.type === 'ATTACK' || enemy.nextIntent.type === 'ATTACK_DEBUFF' || enemy.nextIntent.type === 'ATTACK_DEFEND' || enemy.nextIntent.type === 'PIERCE_ATTACK') && (
+                                        {hideEnemyIntents ? (
+                                            <span className="tracking-[0.25em]">???</span>
+                                        ) : (
                                             <>
-                                                {enemy.nextIntent.type === 'PIERCE_ATTACK' ? (
-                                                    <div className="relative flex items-center justify-center mr-1.5">
-                                                        <Triangle size={18} className="text-yellow-400 fill-yellow-400" />
-                                                        <span className="absolute text-[10px] font-black text-red-900 top-[3px]">!</span>
-                                                    </div>
-                                                ) : (
-                                                    <Skull size={12} className="mr-1 text-red-600" />
+                                                {(enemy.nextIntent.type === 'ATTACK' || enemy.nextIntent.type === 'ATTACK_DEBUFF' || enemy.nextIntent.type === 'ATTACK_DEFEND' || enemy.nextIntent.type === 'PIERCE_ATTACK') && (
+                                                    <>
+                                                        {enemy.nextIntent.type === 'PIERCE_ATTACK' ? (
+                                                            <div className="relative flex items-center justify-center mr-1.5">
+                                                                <Triangle size={18} className="text-yellow-400 fill-yellow-400" />
+                                                                <span className="absolute text-[10px] font-black text-red-900 top-[3px]">!</span>
+                                                            </div>
+                                                        ) : (
+                                                            <Skull size={12} className="mr-1 text-red-600" />
+                                                        )}
+                                                        {enemy.nextIntent.value}
+                                                    </>
                                                 )}
-                                                {enemy.nextIntent.value}
+                                                {enemy.nextIntent.type === 'DEFEND' && (
+                                                    <><Shield size={12} className="mr-1 text-blue-600" /> {enemy.nextIntent.value}</>
+                                                )}
+                                                {(enemy.nextIntent.type === 'BUFF' || enemy.nextIntent.type === 'DEBUFF' || enemy.nextIntent.type === 'SLEEP') && (
+                                                    <><Zap size={12} className="mr-1 text-yellow-500 fill-yellow-500" /> !</>
+                                                )}
+                                                {enemy.nextIntent.type === 'UNKNOWN' && <span className="text-gray-600">?</span>}
                                             </>
                                         )}
-                                        {enemy.nextIntent.type === 'DEFEND' && (
-                                            <><Shield size={12} className="mr-1 text-blue-600" /> {enemy.nextIntent.value}</>
-                                        )}
-                                        {(enemy.nextIntent.type === 'BUFF' || enemy.nextIntent.type === 'DEBUFF' || enemy.nextIntent.type === 'SLEEP') && (
-                                            <><Zap size={12} className="mr-1 text-yellow-500 fill-yellow-500" /> !</>
-                                        )}
-                                        {enemy.nextIntent.type === 'UNKNOWN' && <span className="text-gray-600">?</span>}
                                     </div>
                                 )}
 

@@ -6,7 +6,7 @@ import PixelSprite from './PixelSprite';
 import { 
     PokerCard, PokerRunState, PokerBlind, PokerSupporter, PokerConsumable, PokerSuit, PokerRank, PokerScoringContext, PokerPack, PokerVoucher, GameMode
 } from '../types';
-import { POKER_HAND_LEVELS, SUPPORTERS_LIBRARY, CONSUMABLES_LIBRARY, PACK_LIBRARY, POKER_ENHANCEMENTS, VOUCHERS_LIBRARY } from '../constants';
+import { POKER_HAND_LEVELS, SUPPORTERS_LIBRARY, CONSUMABLES_LIBRARY, PACK_LIBRARY, POKER_ENHANCEMENTS, VOUCHERS_LIBRARY, EXPANDED_SUPPORTER_IDS } from '../constants';
 import { storageService } from '../services/storageService';
 import MathChallengeScreen from './MathChallengeScreen';
 
@@ -43,6 +43,10 @@ const HAND_EXAMPLES: Record<string, { desc: string, cards: {r: string, s: PokerS
     'FULL_HOUSE': {
         desc: 'スリーカードとワンペアの組み合わせ。',
         cards: [{r:'Q',s:'SPADE'}, {r:'Q',s:'HEART'}, {r:'Q',s:'CLUB'}, {r:'9',s:'DIAMOND'}, {r:'9',s:'SPADE'}]
+    },
+    'FLUSH_HOUSE': {
+        desc: 'フルハウスで、かつ全て同じマークの状態。',
+        cards: [{r:'Q',s:'HEART'}, {r:'Q',s:'HEART'}, {r:'Q',s:'HEART'}, {r:'9',s:'HEART'}, {r:'9',s:'HEART'}]
     },
     'FOUR_OF_A_KIND': {
         desc: '同じ数字のカードが4枚ある状態。',
@@ -249,7 +253,10 @@ const getHandResult = (cards: PokerCard[], supporters: PokerSupporter[] = []): {
         return { type: 'FOUR_OF_A_KIND', cards: sorted.filter(c => c.rank === Number(rank)) };
     }
     
-    if (countsValues[0] === 3 && countsValues[1] >= 2) return { type: 'FULL_HOUSE', cards: sorted };
+    if (countsValues[0] === 3 && countsValues[1] >= 2) {
+        if (isFlush) return { type: 'FLUSH_HOUSE', cards: sorted };
+        return { type: 'FULL_HOUSE', cards: sorted };
+    }
     
     if (isFlush) return { type: 'FLUSH', cards: sorted };
     
@@ -300,11 +307,69 @@ const getSuitColorClass = (suit: PokerSuit) => {
     }
 }
 
+const PLANET_TARGETS: Record<string, { hand: string; levels?: number }> = {
+    TXT_MATH: { hand: 'HIGH_CARD' },
+    TXT_JPN: { hand: 'PAIR' },
+    TXT_SCI: { hand: 'TWO_PAIR' },
+    TXT_SOC: { hand: 'THREE_OF_A_KIND' },
+    TXT_ENG: { hand: 'STRAIGHT' },
+    TXT_ART: { hand: 'FLUSH' },
+    TXT_PE: { hand: 'FULL_HOUSE' },
+    TXT_MUS: { hand: 'FOUR_OF_A_KIND' },
+    TXT_GEO: { hand: 'STRAIGHT_FLUSH' },
+    TXT_AST: { hand: 'FIVE_OF_A_KIND' },
+    TXT_MYTH: { hand: 'FLUSH_FIVE' },
+    TXT_HIS: { hand: 'ROYAL_FLUSH' },
+    TXT_PAIR_PLUS: { hand: 'PAIR', levels: 2 },
+    TXT_STRAIGHT_PLUS: { hand: 'STRAIGHT', levels: 2 },
+    TXT_FLUSH_PLUS: { hand: 'FLUSH', levels: 2 },
+    TXT_FULLHOUSE_PLUS: { hand: 'FULL_HOUSE', levels: 2 },
+    TXT_ROYAL_PLUS: { hand: 'ROYAL_FLUSH', levels: 2 }
+};
+
 interface PokerGameScreenProps {
   onBack: () => void;
 }
 
+type ScoreAnimationState = {
+  handName: string;
+  chips: number;
+  mult: number;
+  total: number;
+  displayChips: number;
+  displayMult: number;
+  displayTotal: number;
+  phase: 'hand' | 'chips' | 'mult' | 'total';
+  isDisallowed: boolean;
+};
+
+type ScoreBreakdownEntry = {
+  id: string;
+  label: string;
+  chipsDelta?: number;
+  multDelta?: number;
+  multFactor?: number;
+  accent?: 'chips' | 'mult' | 'special';
+};
+
 const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
+  const expandedSupporterUnlockCount = Math.min(
+      storageService.getPokerExpandedSupporterUnlockCount(),
+      EXPANDED_SUPPORTER_IDS.length
+  );
+  const unlockedExpandedSupporterIds = useMemo(
+      () => new Set(EXPANDED_SUPPORTER_IDS.slice(0, expandedSupporterUnlockCount)),
+      [expandedSupporterUnlockCount]
+  );
+  const availableSupporters = useMemo(
+      () => SUPPORTERS_LIBRARY.filter(s => !EXPANDED_SUPPORTER_IDS.includes(s.id) || unlockedExpandedSupporterIds.has(s.id)),
+      [unlockedExpandedSupporterIds]
+  );
+  const nextUnlockSupporterId = EXPANDED_SUPPORTER_IDS[expandedSupporterUnlockCount] ?? null;
+  const nextUnlockSupporter = nextUnlockSupporterId
+      ? SUPPORTERS_LIBRARY.find(s => s.id === nextUnlockSupporterId) ?? null
+      : null;
+  const willUnlockExpandedSupporters = nextUnlockSupporter !== null;
   
   const hydrateState = (state: PokerRunState): PokerRunState => {
       const hydrateSupporters = (list: PokerSupporter[]) => list.map(item => {
@@ -316,7 +381,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       
       const hydrateShop = (list: (PokerSupporter | PokerConsumable | PokerPack)[]) => {
           return list.map(item => {
-              if ('rarity' in item) return SUPPORTERS_LIBRARY.find(lib => lib.id === item.id) || item;
+              if ('rarity' in item) return availableSupporters.find(lib => lib.id === item.id) || SUPPORTERS_LIBRARY.find(lib => lib.id === item.id) || item;
               if ('size' in item) return PACK_LIBRARY.find(lib => lib.id === item.id) || item;
               return CONSUMABLES_LIBRARY.find(lib => lib.id === item.id) || item;
           }) as (PokerSupporter | PokerConsumable | PokerPack)[];
@@ -387,6 +452,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   // Play Animation State
   const [lastHandScore, setLastHandScore] = useState<{chips: number, mult: number, total: number, name: string} | null>(null);
   const [animating, setAnimating] = useState(false);
+  const [scoreAnimation, setScoreAnimation] = useState<ScoreAnimationState | null>(null);
+  const [scoreBreakdown, setScoreBreakdown] = useState<ScoreBreakdownEntry[]>([]);
+  const [revealedBreakdownCount, setRevealedBreakdownCount] = useState(0);
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
   const [showHandList, setShowHandList] = useState(false);
   const [showDeckList, setShowDeckList] = useState(false);
@@ -405,6 +473,40 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   // Drag/Swipe Select
   const isDraggingRef = useRef(false);
   const lastProcessedCardIdRef = useRef<string | null>(null);
+  const scoreAnimationFrameRef = useRef<number | null>(null);
+
+  const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+  const formatPokerCardLabel = (card: PokerCard) => `${getRankDisplay(card.rank)}${card.suit === 'SPADE' ? '♠' : card.suit === 'HEART' ? '♥' : card.suit === 'DIAMOND' ? '♦' : '♣'}`;
+  const animateScoreValue = useCallback((from: number, to: number, duration: number, onUpdate: (value: number) => void) => {
+      if (scoreAnimationFrameRef.current) cancelAnimationFrame(scoreAnimationFrameRef.current);
+      if (duration <= 0 || from === to) {
+          onUpdate(to);
+          return Promise.resolve();
+      }
+
+      return new Promise<void>((resolve) => {
+          const start = performance.now();
+          const tick = (now: number) => {
+              const progress = Math.min(1, (now - start) / duration);
+              const eased = 1 - Math.pow(1 - progress, 3);
+              const value = Math.round(from + (to - from) * eased);
+              onUpdate(value);
+              if (progress < 1) {
+                  scoreAnimationFrameRef.current = requestAnimationFrame(tick);
+              } else {
+                  scoreAnimationFrameRef.current = null;
+                  resolve();
+              }
+          };
+          scoreAnimationFrameRef.current = requestAnimationFrame(tick);
+      });
+  }, []);
+
+  useEffect(() => {
+      return () => {
+          if (scoreAnimationFrameRef.current) cancelAnimationFrame(scoreAnimationFrameRef.current);
+      };
+  }, []);
 
   const currentHandInfo = useMemo(() => {
       if (selectedCards.length === 0) return null;
@@ -526,6 +628,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   };
 
   const handleTouchStart = (item: any, type: 'CARD'|'SUPPORTER'|'CONSUMABLE'|'PACK'|'VOUCHER', isOwned: boolean, index?: number) => {
+      if (type === 'CARD' && selectedCards.length > 1) {
+          if (longPressTimer.current) clearTimeout(longPressTimer.current);
+          return;
+      }
       longPressTimer.current = setTimeout(() => {
           setInspectedItem({ item, type, isOwned, index });
       }, 500);
@@ -533,13 +639,20 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   const handleTouchEnd = () => { if (longPressTimer.current) clearTimeout(longPressTimer.current); };
   const handleContextMenu = (e: React.MouseEvent, item: any, type: 'CARD'|'SUPPORTER'|'CONSUMABLE'|'PACK'|'VOUCHER', isOwned: boolean, index?: number) => { 
       e.preventDefault(); 
+      if (type === 'CARD' && selectedCards.length > 1) return;
       setInspectedItem({ item, type, isOwned, index }); 
   };
 
   const toggleSelect = (id: string) => {
       if (animating) return;
-      if (selectedCards.includes(id)) { setSelectedCards(prev => prev.filter(c => c !== id)); } 
-      else { if (selectedCards.length < 5) { setSelectedCards(prev => [...prev, id]); audioService.playSound('select'); } }
+      if (selectedCards.includes(id)) {
+          setSelectedCards(prev => prev.filter(c => c !== id));
+          return;
+      }
+      if (selectedCards.length >= 5) return;
+      if (longPressTimer.current) clearTimeout(longPressTimer.current);
+      setSelectedCards(prev => [...prev, id]);
+      audioService.playSound('select');
   };
   const handlePointerDown = (e: React.PointerEvent, id: string) => { e.preventDefault(); isDraggingRef.current = true; lastProcessedCardIdRef.current = id; toggleSelect(id); };
   const handlePointerMove = (e: React.PointerEvent) => {
@@ -572,6 +685,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       const playedCards = runState.hand.filter(c => selectedCards.includes(c.id));
       const heldCards = runState.hand.filter(c => !selectedCards.includes(c.id));
       const { type, cards: scoringCards } = getHandResult(playedCards, runState.supporters);
+      const breakdown: ScoreBreakdownEntry[] = [];
       
       const level = runState.handLevels[type] || 1;
       const baseStats = POKER_HAND_LEVELS[type];
@@ -582,6 +696,16 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       let chips = isDisallowed ? 0 : (baseStats.baseChips + (level - 1) * 10);
       let mult = isDisallowed ? 0 : (baseStats.baseMult + (level - 1) * 1);
 
+      if (!isDisallowed) {
+          breakdown.push({
+              id: `base-${Date.now()}`,
+              label: `${baseStats.name} Lv.${level}`,
+              chipsDelta: baseStats.baseChips + (level - 1) * 10,
+              multDelta: baseStats.baseMult + (level - 1) * 1,
+              accent: 'special'
+          });
+      }
+
       let bonusMoney = 0;
       const cardsToDestroy: string[] = [];
 
@@ -589,43 +713,168 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           let val = c.rank;
           if (val > 10 && val < 14) val = 10;
           if (val === 14) val = 11;
-          chips += val + c.bonusChips;
-          mult += (c.multMultiplier - 1); 
+          const cardChipGain = val + c.bonusChips;
+          const cardMultGain = c.multMultiplier - 1;
+          chips += cardChipGain;
+          mult += cardMultGain;
+          breakdown.push({
+              id: `card-${c.id}`,
+              label: `${formatPokerCardLabel(c)} を得点化`,
+              chipsDelta: cardChipGain !== 0 ? cardChipGain : undefined,
+              multDelta: cardMultGain !== 0 ? cardMultGain : undefined,
+              accent: cardMultGain > 0 ? 'mult' : 'chips'
+          });
           
-          if (c.enhancement === 'GLASS') { mult *= 2; if (Math.random() < 0.25) cardsToDestroy.push(c.id); }
-          if (c.enhancement === 'GOLD') { bonusMoney += 3; }
+          if (c.enhancement === 'GLASS') {
+              mult *= 2;
+              breakdown.push({
+                  id: `glass-${c.id}`,
+                  label: `${formatPokerCardLabel(c)} ガラス補正`,
+                  multFactor: 2,
+                  accent: 'mult'
+              });
+              if (Math.random() < 0.25) cardsToDestroy.push(c.id);
+          }
+          if (c.enhancement === 'GOLD') {
+              bonusMoney += 3;
+              breakdown.push({
+                  id: `gold-${c.id}`,
+                  label: `${formatPokerCardLabel(c)} ゴールド収入 +$3`,
+                  accent: 'special'
+              });
+          }
       });
 
-      heldCards.forEach(c => { if (c.enhancement === 'STEEL') { mult *= 1.5; } });
+      heldCards.forEach(c => {
+          if (c.enhancement === 'STEEL') {
+              mult *= 1.5;
+              breakdown.push({
+                  id: `steel-${c.id}`,
+                  label: `${formatPokerCardLabel(c)} スチール保持`,
+                  multFactor: 1.5,
+                  accent: 'mult'
+              });
+          }
+      });
 
       const ctx: PokerScoringContext = {
           chips, mult, handType: type, cards: scoringCards,
           handsPlayed: (4 - runState.handsRemaining) + 1,
           discardsUsed: (3 - runState.discardsRemaining),
+          discardsRemaining: runState.discardsRemaining,
           deckState: runState.deck,
           money: runState.money,
           persistentCounters: runState.persistentCounters
       };
       
-      runState.supporters.forEach(s => { if (s.triggerOn === 'HAND_PLAYED' || !s.triggerOn) s.effect(ctx); });
+      runState.supporters.forEach(s => {
+          if (s.triggerOn !== 'HAND_PLAYED' && s.triggerOn) return;
+          const beforeChips = ctx.chips;
+          const beforeMult = ctx.mult;
+          s.effect(ctx);
+          const chipDelta = Math.floor(ctx.chips - beforeChips);
+          const multDelta = Math.floor(ctx.mult - beforeMult);
+          const multFactor = beforeMult !== 0 && ctx.mult !== beforeMult && Math.abs(multDelta) === 0
+              ? Number((ctx.mult / beforeMult).toFixed(2))
+              : undefined;
+          if (chipDelta !== 0 || multDelta !== 0 || (multFactor !== undefined && multFactor !== 1)) {
+              breakdown.push({
+                  id: `supporter-${s.id}-${breakdown.length}`,
+                  label: s.name,
+                  chipsDelta: chipDelta !== 0 ? chipDelta : undefined,
+                  multDelta: multDelta !== 0 ? multDelta : undefined,
+                  multFactor: multFactor !== undefined && multFactor !== 1 ? multFactor : undefined,
+                  accent: multDelta !== 0 || multFactor ? 'mult' : 'chips'
+              });
+          }
+      });
 
       // Apply Supporter Edition Bonuses
       runState.supporters.forEach(s => {
-          if (s.edition === 'FOIL') ctx.chips += 50;
-          if (s.edition === 'HOLOGRAPHIC') ctx.mult += 10;
-          if (s.edition === 'POLYCHROME') ctx.mult *= 1.5;
+          if (s.edition === 'FOIL') {
+              ctx.chips += 50;
+              breakdown.push({
+                  id: `edition-${s.id}-foil`,
+                  label: `${s.name} FOIL`,
+                  chipsDelta: 50,
+                  accent: 'chips'
+              });
+          }
+          if (s.edition === 'HOLOGRAPHIC') {
+              ctx.mult += 10;
+              breakdown.push({
+                  id: `edition-${s.id}-holo`,
+                  label: `${s.name} HOLOGRAPHIC`,
+                  multDelta: 10,
+                  accent: 'mult'
+              });
+          }
+          if (s.edition === 'POLYCHROME') {
+              ctx.mult *= 1.5;
+              breakdown.push({
+                  id: `edition-${s.id}-poly`,
+                  label: `${s.name} POLYCHROME`,
+                  multFactor: 1.5,
+                  accent: 'mult'
+              });
+          }
       });
 
       chips = Math.floor(ctx.chips);
       mult = Math.floor(ctx.mult);
       const score = chips * mult;
+      const handName = isDisallowed ? "制約により無効" : baseStats.name;
 
-      setLastHandScore({ chips, mult, total: score, name: isDisallowed ? "制約により無効" : baseStats.name });
+      setLastHandScore({ chips, mult, total: score, name: handName });
       if (score > highScore) setHighScore(score);
       setAnimating(true);
+      setScoreBreakdown(isDisallowed ? [] : breakdown);
+      setRevealedBreakdownCount(0);
+      setScoreAnimation({
+          handName,
+          chips,
+          mult,
+          total: score,
+          displayChips: 0,
+          displayMult: isDisallowed ? 0 : 1,
+          displayTotal: 0,
+          phase: 'hand',
+          isDisallowed
+      });
       audioService.playSound(isDisallowed ? 'wrong' : 'attack');
 
-      await new Promise(r => setTimeout(r, 1500));
+      if (isDisallowed) {
+          await sleep(1100);
+      } else {
+          await sleep(280);
+          for (let i = 0; i < breakdown.length; i++) {
+              setRevealedBreakdownCount(i + 1);
+              audioService.playSound(breakdown[i].accent === 'mult' ? 'buff' : breakdown[i].accent === 'chips' ? 'select' : 'correct');
+              await sleep(120);
+          }
+          await sleep(100);
+          setScoreAnimation(prev => prev ? { ...prev, phase: 'chips' } : prev);
+          audioService.playSound('select');
+          await animateScoreValue(0, chips, 420, (value) => {
+              setScoreAnimation(prev => prev ? { ...prev, displayChips: value } : prev);
+          });
+
+          await sleep(120);
+          setScoreAnimation(prev => prev ? { ...prev, phase: 'mult' } : prev);
+          audioService.playSound('buff');
+          await animateScoreValue(1, mult, 360, (value) => {
+              setScoreAnimation(prev => prev ? { ...prev, displayMult: value } : prev);
+          });
+
+          await sleep(140);
+          setScoreAnimation(prev => prev ? { ...prev, phase: 'total' } : prev);
+          audioService.playSound('correct');
+          await animateScoreValue(0, score, 520, (value) => {
+              setScoreAnimation(prev => prev ? { ...prev, displayTotal: value } : prev);
+          });
+
+          await sleep(520);
+      }
 
       const newScore = runState.currentScore + score;
       const remainingPlayedCards = playedCards.filter(c => !cardsToDestroy.includes(c.id));
@@ -673,6 +922,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           }
       });
       setSelectedCards([]);
+      setScoreAnimation(null);
+      setScoreBreakdown([]);
+      setRevealedBreakdownCount(0);
       setAnimating(false);
 
       if (newScore >= runState.currentBlind.scoreGoal) {
@@ -775,6 +1027,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
   };
 
   const finishRunVictory = () => {
+      storageService.unlockPokerExpandedSupporters(EXPANDED_SUPPORTER_IDS.length);
       saveRecord();
       storageService.clearPokerState();
       onBack();
@@ -792,7 +1045,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
 
   const generateShop = () => {
       const items: (PokerSupporter | PokerConsumable | PokerPack)[] = [];
-      const supporters = [...SUPPORTERS_LIBRARY].sort(() => Math.random() - 0.5);
+      const supporters = [...availableSupporters].sort(() => Math.random() - 0.5);
       items.push(supporters[0]);
       items.push(supporters[1]);
       const consumables = [...CONSUMABLES_LIBRARY].sort(() => Math.random() - 0.5);
@@ -889,7 +1142,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           if (currentPack.type === 'BUFF') {
               pool = [...CONSUMABLES_LIBRARY.filter(c => c.type === 'PLANET' || c.type === 'TAROT')];
           } else if (currentPack.type === 'SUPPORTER') {
-              pool = [...SUPPORTERS_LIBRARY];
+              pool = [...availableSupporters];
           } else if (currentPack.type === 'SPECTRAL') {
               pool = [...CONSUMABLES_LIBRARY.filter(c => c.type === 'SPECTRAL')];
           }
@@ -919,27 +1172,35 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
 
   const useConsumable = (consumable: PokerConsumable, index: number) => {
       if (consumable.type === 'PLANET') {
-          let targetHand = 'HIGH_CARD';
-          if (consumable.id === 'TXT_MATH') targetHand = 'HIGH_CARD'; 
-          else if (consumable.id === 'TXT_JPN') targetHand = 'PAIR'; 
-          else if (consumable.id === 'TXT_SCI') targetHand = 'TWO_PAIR'; 
-          else if (consumable.id === 'TXT_SOC') targetHand = 'THREE_OF_A_KIND'; 
-          else if (consumable.id === 'TXT_ENG') targetHand = 'STRAIGHT'; 
-          else if (consumable.id === 'TXT_ART') targetHand = 'FLUSH'; 
-          else if (consumable.id === 'TXT_PE') targetHand = 'FULL_HOUSE'; 
-          else if (consumable.id === 'TXT_MUS') targetHand = 'FOUR_OF_A_KIND';
-          else if (consumable.id === 'TXT_GEO') targetHand = 'STRAIGHT_FLUSH';
-          else if (consumable.id === 'TXT_AST') targetHand = 'FIVE_OF_A_KIND';
-          else if (consumable.id === 'TXT_MYTH') targetHand = 'FLUSH_FIVE';
-          else if (consumable.id === 'TXT_HIS') targetHand = 'ROYAL_FLUSH';
-          
-          setRunState(prev => ({ ...prev, handLevels: { ...prev.handLevels, [targetHand]: prev.handLevels[targetHand] + 1 }, consumables: prev.consumables.filter((_, i) => i !== index) }));
+          const currentHand = getHandResult(runState.hand, runState.supporters).type;
+          const basicPool = ['HIGH_CARD', 'PAIR', 'TWO_PAIR', 'THREE_OF_A_KIND', 'STRAIGHT', 'FLUSH'];
+          const advancedPool = ['FULL_HOUSE', 'FOUR_OF_A_KIND', 'STRAIGHT_FLUSH', 'ROYAL_FLUSH', 'FIVE_OF_A_KIND', 'FLUSH_FIVE'];
+          const mapped = PLANET_TARGETS[consumable.id];
+          const targetHand = consumable.id === 'TXT_RANDOM_BASIC'
+              ? basicPool[Math.floor(Math.random() * basicPool.length)]
+              : consumable.id === 'TXT_RANDOM_ADV'
+                ? advancedPool[Math.floor(Math.random() * advancedPool.length)]
+                : consumable.id === 'TXT_BLACK_HANDBOOK'
+                  ? currentHand
+                  : mapped?.hand || 'HIGH_CARD';
+          const levelGain = mapped?.levels || (consumable.id === 'TXT_BLACK_HANDBOOK' ? 1 : 1);
+          setRunState(prev => ({ ...prev, handLevels: { ...prev.handLevels, [targetHand]: prev.handLevels[targetHand] + levelGain }, consumables: prev.consumables.filter((_, i) => i !== index) }));
           audioService.playSound('win');
       } else if (consumable.type === 'TAROT') { setSelectedConsumable(consumable); } else if (consumable.type === 'SPECTRAL') { handleSpectral(consumable, index); }
   };
   
   const handleSpectral = (consumable: PokerConsumable, index: number) => {
       let newState = { ...runState };
+      const requiresSupporter = ['SPC_ANKH', 'SPC_HEX', 'SPC_PHANTOM_BELL', 'SPC_CURSE_BOX', 'SPC_AURA'].includes(consumable.id);
+      const requiresHand = ['SPC_IMMOLATE', 'SPC_OUIJA', 'SPC_METEOR', 'SPC_MIRROR', 'SPC_VOID_NOTE', 'SPC_GHOST_WRITER'].includes(consumable.id);
+      if (requiresSupporter && newState.supporters.length === 0) {
+          audioService.playSound('wrong');
+          return;
+      }
+      if (requiresHand && newState.hand.length === 0) {
+          audioService.playSound('wrong');
+          return;
+      }
       
       if (consumable.id === 'SPC_BLACKHOLE') { 
           Object.keys(newState.handLevels).forEach(k => newState.handLevels[k] += 1); 
@@ -981,6 +1242,57 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
               audioService.playSound('win'); 
           } 
       }
+      else if (consumable.id === 'SPC_METEOR') {
+          const ids = [...newState.hand].sort(() => Math.random() - 0.5).slice(0, 3).map(c => c.id);
+          newState.hand = newState.hand.map(c => ids.includes(c.id) ? { ...c, bonusChips: c.bonusChips + 50, enhancement: c.enhancement === 'STONE' ? c.enhancement : 'BONUS' } : c);
+          audioService.playSound('win');
+      }
+      else if (consumable.id === 'SPC_PHANTOM_BELL') {
+          if (newState.supporters.length > 0) {
+              const targetIndex = Math.floor(Math.random() * newState.supporters.length);
+              newState.supporters = newState.supporters.map((s, i) => i === targetIndex ? { ...s, edition: 'HOLOGRAPHIC' } : s);
+              audioService.playSound('win');
+          }
+      }
+      else if (consumable.id === 'SPC_MIRROR') {
+          if (newState.hand.length > 0) {
+              const target = newState.hand[Math.floor(Math.random() * newState.hand.length)];
+              const copyA = { ...target, id: `mirror-a-${Date.now()}-${Math.random()}` };
+              const copyB = { ...target, id: `mirror-b-${Date.now()}-${Math.random()}` };
+              newState.deck = [...newState.deck, copyA, copyB];
+              audioService.playSound('win');
+          }
+      }
+      else if (consumable.id === 'SPC_VOID_NOTE') {
+          const ids = [...newState.hand].sort(() => Math.random() - 0.5).slice(0, 2).map(c => c.id);
+          newState.hand = newState.hand.map(c => ids.includes(c.id) ? { ...c, enhancement: 'WILD' } : c);
+          audioService.playSound('win');
+      }
+      else if (consumable.id === 'SPC_CURSE_BOX') {
+          if (newState.supporters.length > 0) {
+              const removeIndex = Math.floor(Math.random() * newState.supporters.length);
+              newState.supporters = newState.supporters.filter((_, i) => i !== removeIndex);
+              newState.money += 30;
+              audioService.playSound('attack');
+          }
+      }
+      else if (consumable.id === 'SPC_AURA') {
+          if (newState.supporters.length > 0) {
+              const targetIndex = Math.floor(Math.random() * newState.supporters.length);
+              newState.supporters = newState.supporters.map((s, i) => i === targetIndex ? { ...s, edition: 'FOIL' } : s);
+              audioService.playSound('win');
+          }
+      }
+      else if (consumable.id === 'SPC_TIME_SKIP') {
+          newState.handsRemaining += 1;
+          newState.discardsRemaining += 1;
+          audioService.playSound('win');
+      }
+      else if (consumable.id === 'SPC_GHOST_WRITER') {
+          const currentHand = getHandResult(newState.hand, newState.supporters).type;
+          newState.handLevels = { ...newState.handLevels, [currentHand]: newState.handLevels[currentHand] + 2 };
+          audioService.playSound('win');
+      }
       
       newState.consumables = newState.consumables.filter((_, i) => i !== index); 
       setRunState(newState);
@@ -988,6 +1300,31 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
 
   const applyTarot = () => {
       if (!selectedConsumable || selectedCards.length === 0) return;
+      const requiredSelectionCount: Record<string, number> = {
+          STA_RULER: 2,
+          STA_ERASER: 2,
+          STA_DEATH: 2,
+          STA_NOTE_SWAP: 2,
+          STA_COPY_SHEET: 1,
+          STA_GOLD_SPRAY: 1,
+          STA_GLASS_WORK: 1,
+          STA_STEEL_RULER: 1,
+          STA_RAINBOW_PEN: 1,
+          STA_BLUE_MARKER: 1,
+          STA_GREEN_MARKER: 1,
+          STA_CHALK_WHITE: 1,
+          STA_HOLOGRAM: 1,
+          STA_LUNCH_PASS: 1,
+          STA_CLUB_STAMP: 3,
+          STA_DIAMOND_DUST: 3,
+          STA_PAINT: 3,
+          STA_INK: 3
+      };
+      const requiredCount = requiredSelectionCount[selectedConsumable.id];
+      if (requiredCount !== undefined && selectedCards.length !== requiredCount) {
+          audioService.playSound('wrong');
+          return;
+      }
       const modifiedHand = runState.hand.map(c => {
           if (!selectedCards.includes(c.id)) return c;
           let mod = { ...c };
@@ -1000,11 +1337,37 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           if (selectedConsumable.id === 'STA_GLASS_WORK') { mod.enhancement = 'GLASS'; mod.multMultiplier = 2; } 
           if (selectedConsumable.id === 'STA_STEEL_RULER') { mod.enhancement = 'STEEL'; } 
           if (selectedConsumable.id === 'STA_RAINBOW_PEN') { mod.enhancement = 'WILD'; }
+          if (selectedConsumable.id === 'STA_BLUE_MARKER') { mod.bonusChips += 80; mod.enhancement = 'BONUS'; }
+          if (selectedConsumable.id === 'STA_GREEN_MARKER') { mod.multMultiplier = Math.max(mod.multMultiplier, 2); mod.enhancement = 'MULT'; }
+          if (selectedConsumable.id === 'STA_CHALK_WHITE') { mod.enhancement = 'STONE'; mod.bonusChips = 50; mod.multMultiplier = 1; }
+          if (selectedConsumable.id === 'STA_CLUB_STAMP') { mod.suit = 'CLUB'; }
+          if (selectedConsumable.id === 'STA_DIAMOND_DUST') { mod.suit = 'DIAMOND'; }
+          if (selectedConsumable.id === 'STA_SHARPENER') { mod.rank = Math.max(2, mod.rank - 1) as PokerRank; }
+          if (selectedConsumable.id === 'STA_HOLOGRAM') { mod.bonusChips += 40; mod.multMultiplier = Math.max(mod.multMultiplier, 1.5); mod.enhancement = 'MULT'; }
+          if (selectedConsumable.id === 'STA_LUNCH_PASS') { mod.enhancement = 'GOLD'; mod.bonusChips += 30; }
           if (selectedConsumable.id === 'STA_DEATH') { if (selectedCards.length === 2 && selectedCards[0] === c.id) { const targetCard = runState.hand.find(h => h.id === selectedCards[1]); if (targetCard) { mod.rank = targetCard.rank; mod.suit = targetCard.suit; mod.enhancement = targetCard.enhancement; } } }
+          if (selectedConsumable.id === 'STA_NOTE_SWAP' && selectedCards.length === 2) {
+              const first = runState.hand.find(h => h.id === selectedCards[0]);
+              const second = runState.hand.find(h => h.id === selectedCards[1]);
+              if (first && second) {
+                  if (c.id === first.id) mod.rank = second.rank;
+                  if (c.id === second.id) mod.rank = first.rank;
+              }
+          }
           return mod;
       });
-      if (selectedConsumable.id === 'STA_ERASER') { setRunState(prev => ({ ...prev, hand: prev.hand.filter(c => !selectedCards.includes(c.id)), deck: prev.deck, consumables: prev.consumables.filter(c => c !== selectedConsumable) })); } 
-      else { setRunState(prev => ({ ...prev, hand: modifiedHand, consumables: prev.consumables.filter(c => c !== selectedConsumable) })); }
+      if (selectedConsumable.id === 'STA_ERASER') {
+          setRunState(prev => ({ ...prev, hand: prev.hand.filter(c => !selectedCards.includes(c.id)), deck: prev.deck, consumables: prev.consumables.filter(c => c !== selectedConsumable) }));
+      } else if (selectedConsumable.id === 'STA_COPY_SHEET') {
+          const target = runState.hand.find(c => c.id === selectedCards[0]);
+          setRunState(prev => ({
+              ...prev,
+              deck: target ? [...prev.deck, { ...target, id: `copy-sheet-${Date.now()}-${Math.random()}` }] : prev.deck,
+              consumables: prev.consumables.filter(c => c !== selectedConsumable)
+          }));
+      } else {
+          setRunState(prev => ({ ...prev, hand: modifiedHand, consumables: prev.consumables.filter(c => c !== selectedConsumable) }));
+      }
       setSelectedConsumable(null); setSelectedCards([]); audioService.playSound('win');
   };
 
@@ -1166,6 +1529,18 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
               <Trophy size={80} className="text-yellow-400 mb-6 animate-bounce" />
               <h1 className="text-5xl font-black text-white mb-4">GRADUATION!</h1>
               <p className="text-xl text-gray-300 mb-12">You have conquered the 8th Grade (Ante 8).</p>
+              {willUnlockExpandedSupporters && (
+                  <div className="w-full max-w-2xl mb-10 rounded-2xl border-2 border-yellow-300 bg-yellow-500/10 px-6 py-5 shadow-[0_0_30px_rgba(250,204,21,0.15)]">
+                      <div className="text-sm font-bold tracking-[0.2em] text-yellow-300 mb-2">NEXT RUN UNLOCK</div>
+                      <div className="text-2xl font-black text-white mb-2">追加サポーター 1種 解禁</div>
+                      {nextUnlockSupporter && (
+                          <div className="text-xl font-bold text-yellow-100 mb-2">{nextUnlockSupporter.name}</div>
+                      )}
+                      <div className="text-sm text-yellow-100/90 leading-relaxed">
+                          次のランから、上のサポーターがショップと「部員勧誘」パックに出現します。
+                      </div>
+                  </div>
+              )}
               
               <div className="flex flex-col gap-4 w-full max-w-md">
                   <button 
@@ -1427,6 +1802,65 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
       );
   }
 
+  const scoreDisplayPanel = animating && scoreAnimation ? (
+      <div className={`w-full max-w-none sm:max-w-[520px] rounded-2xl border-2 px-3 py-2 text-center shadow-xl backdrop-blur-md transition-all duration-300 ${scoreAnimation.isDisallowed ? 'border-red-500 bg-red-950/85' : scoreAnimation.phase === 'total' ? 'border-yellow-400 bg-slate-900/90 shadow-[0_0_30px_rgba(250,204,21,0.22)]' : 'border-yellow-500/70 bg-slate-900/85'}`}>
+          <div className="mb-1 text-[9px] font-black uppercase tracking-[0.35em] text-slate-400">After School Poker</div>
+          <div className={`mb-2 text-lg md:text-xl font-black tracking-wide break-words leading-tight ${scoreAnimation.isDisallowed ? 'text-red-200' : 'text-white'} ${scoreAnimation.phase === 'hand' ? 'animate-pulse' : ''}`}>
+              {scoreAnimation.handName}
+          </div>
+          {!scoreAnimation.isDisallowed && scoreBreakdown.length > 0 && (
+              <div className="mb-2 max-h-28 overflow-y-auto rounded-xl border border-slate-700 bg-black/25 px-2 py-1.5 text-left custom-scrollbar">
+                  <div className="mb-1 text-[9px] font-black uppercase tracking-[0.25em] text-slate-500">Breakdown</div>
+                  <div className="space-y-1">
+                      {scoreBreakdown.slice(0, revealedBreakdownCount).map((entry) => (
+                          <div key={entry.id} className="flex items-start justify-between gap-2 rounded-lg border border-slate-800 bg-slate-950/70 px-2 py-1 text-[10px] animate-in fade-in slide-in-from-bottom-1">
+                              <div className="min-w-0 flex-1 whitespace-normal break-words font-bold text-slate-100 leading-tight">{entry.label}</div>
+                              <div className="flex shrink-0 items-center gap-1.5 font-black text-right">
+                                  {entry.chipsDelta !== undefined && <span className="text-cyan-300">+{entry.chipsDelta}</span>}
+                                  {entry.multDelta !== undefined && <span className="text-rose-300">+{entry.multDelta}M</span>}
+                                  {entry.multFactor !== undefined && <span className="text-yellow-300">x{entry.multFactor}</span>}
+                              </div>
+                          </div>
+                      ))}
+                  </div>
+              </div>
+          )}
+          <div className="flex items-center justify-center gap-2 md:gap-3">
+              <div className={`min-w-[96px] rounded-xl border px-3 py-2 transition-all duration-200 ${scoreAnimation.phase === 'chips' ? 'border-cyan-300 bg-cyan-500/15 scale-105' : 'border-slate-700 bg-black/25'}`}>
+                  <div className="text-[9px] font-black uppercase tracking-[0.25em] text-cyan-300">Chips</div>
+                  <div className="text-xl md:text-2xl font-black text-cyan-300">{scoreAnimation.displayChips.toLocaleString()}</div>
+              </div>
+              <div className={`text-lg md:text-2xl font-black ${scoreAnimation.phase === 'mult' ? 'scale-125 text-white transition-transform duration-150' : 'text-slate-500'}`}>×</div>
+              <div className={`min-w-[96px] rounded-xl border px-3 py-2 transition-all duration-200 ${scoreAnimation.phase === 'mult' ? 'border-rose-300 bg-rose-500/15 scale-105' : 'border-slate-700 bg-black/25'}`}>
+                  <div className="text-[9px] font-black uppercase tracking-[0.25em] text-rose-300">Mult</div>
+                  <div className="text-xl md:text-2xl font-black text-rose-300">{scoreAnimation.displayMult.toLocaleString()}</div>
+              </div>
+              <div className="min-w-[112px]">
+                  <div className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500">Score</div>
+                  <div className={`text-2xl md:text-3xl font-black transition-all duration-200 ${scoreAnimation.phase === 'total' ? 'scale-110 text-yellow-300 drop-shadow-[0_0_16px_rgba(250,204,21,0.5)]' : 'text-yellow-500'}`}>
+                      {scoreAnimation.displayTotal.toLocaleString()}
+                  </div>
+              </div>
+          </div>
+      </div>
+  ) : (
+      null
+  );
+
+  const handPreviewPanel = !animating && currentHandInfo ? (
+      <div className={`w-[min(92vw,420px)] rounded-2xl border px-4 py-2 shadow-[0_0_15px_rgba(59,130,246,0.22)] backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 pointer-events-none ${currentHandInfo.isDisallowed ? 'border-red-500 bg-red-950/85' : 'border-blue-500/50 bg-slate-900/85'}`}>
+          {currentHandInfo.isDisallowed && (
+              <div className="mb-2 flex items-center justify-center gap-2 rounded-lg border border-red-500/60 bg-red-900/60 px-3 py-1 text-[10px] font-bold text-red-100">
+                  <AlertTriangle size={12}/> 厳しい監視: 同じ役は無効です
+              </div>
+          )}
+          <div className={`text-sm md:text-base font-bold tracking-wider flex items-center justify-center gap-2 ${currentHandInfo.isDisallowed ? 'text-red-300 line-through opacity-80' : 'text-white'}`}>
+              {currentHandInfo.name}
+              <span className={`${currentHandInfo.isDisallowed ? 'bg-gray-600' : 'bg-blue-600'} text-white text-[10px] px-1.5 py-0.5 rounded font-mono`}>Lv.{currentHandInfo.level}</span>
+          </div>
+      </div>
+  ) : null;
+
   return (
     <div className="flex flex-col h-full w-full bg-green-900 text-white font-mono relative overflow-hidden">
         {renderInspectionModal()}
@@ -1441,7 +1875,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                         <div><h3 className="font-bold text-white mb-2 flex items-center"><ShoppingBag className="mr-2 text-yellow-400"/> 買い物</h3><p className="text-gray-300">ラウンド勝利後に獲得したお金でアイテムを購入できます。</p></div>
                     </div>
                     <h2 className="text-2xl font-bold text-yellow-400 mb-4 flex items-center border-t border-slate-600 pt-6"><HelpCircle className="mr-2"/> 役一覧 (Hand Types)</h2>
-                    <div className="space-y-4 text-sm"><div className="grid grid-cols-1 gap-3">{['FLUSH_FIVE', 'FIVE_OF_A_KIND', 'ROYAL_FLUSH', 'STRAIGHT_FLUSH', 'FOUR_OF_A_KIND', 'FULL_HOUSE', 'FLUSH', 'STRAIGHT', 'THREE_OF_A_KIND', 'TWO_PAIR', 'PAIR', 'HIGH_CARD'].map((key) => { const def = POKER_HAND_LEVELS[key]; const example = HAND_EXAMPLES[key]; return (<div key={key} className="bg-slate-900 p-3 rounded-lg border border-slate-700"><div className="flex justify-between items-center mb-1"><span className="font-bold text-lg text-white">{def.name}</span><span className="text-blue-300 font-mono text-xs">{def.baseChips} <span className="text-gray-500">x</span> <span className="text-red-400">{def.baseMult}</span></span></div><div className="text-xs text-gray-400 mb-2">{example.desc}</div><div className="flex gap-1">{example.cards.map((c, i) => (<div key={i} className="bg-white text-black w-8 h-10 rounded-sm border border-gray-400 flex flex-col items-center justify-center shadow-sm"><div className={`text-[10px] font-bold leading-none ${getSuitColorClass(c.s)}`}>{c.r}</div><div className="scale-75">{getSuitIcon(c.s)}</div></div>))}</div></div>); })}</div></div>
+                    <div className="space-y-4 text-sm"><div className="grid grid-cols-1 gap-3">{['FLUSH_FIVE', 'FLUSH_HOUSE', 'FIVE_OF_A_KIND', 'ROYAL_FLUSH', 'STRAIGHT_FLUSH', 'FOUR_OF_A_KIND', 'FULL_HOUSE', 'FLUSH', 'STRAIGHT', 'THREE_OF_A_KIND', 'TWO_PAIR', 'PAIR', 'HIGH_CARD'].map((key) => { const def = POKER_HAND_LEVELS[key]; const example = HAND_EXAMPLES[key]; return (<div key={key} className="bg-slate-900 p-3 rounded-lg border border-slate-700"><div className="flex justify-between items-center mb-1"><span className="font-bold text-lg text-white">{def.name}</span><span className="text-blue-300 font-mono text-xs">{def.baseChips} <span className="text-gray-500">x</span> <span className="text-red-400">{def.baseMult}</span></span></div><div className="text-xs text-gray-400 mb-2">{example.desc}</div><div className="flex gap-1">{example.cards.map((c, i) => (<div key={i} className="bg-white text-black w-8 h-10 rounded-sm border border-gray-400 flex flex-col items-center justify-center shadow-sm"><div className={`text-[10px] font-bold leading-none ${getSuitColorClass(c.s)}`}>{c.r}</div><div className="scale-75">{getSuitIcon(c.s)}</div></div>))}</div></div>); })}</div></div>
                 </div>
             </div>
         )}
@@ -1504,32 +1938,29 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
                         <PixelSprite seed={s.icon} name={s.icon} className="w-8 h-8"/>
                     </div>
                 ))}
-                {runState.supporters.length === 0 && <div className="text-xs text-gray-500">No Supporters</div>}
+                {[...Array(Math.max(0, 5 - runState.supporters.length))].map((_, i) => (
+                    <div key={`supporter-empty-${i}`} className="w-10 h-10 md:w-12 md:h-12 rounded border border-dashed border-slate-700/70 bg-slate-900/20" />
+                ))}
             </div>
             <div className="flex gap-2 items-center border-l border-white/20 pl-2">
                 {runState.consumables.map((c, i) => (<div key={i} className="w-10 h-10 md:w-12 md:h-12 bg-slate-800 border-2 border-purple-500 rounded flex items-center justify-center relative group cursor-pointer hover:scale-110 transition-transform" onClick={() => setInspectedItem({ item: c, type: 'CONSUMABLE', isOwned: true, index: i })} onContextMenu={(e) => handleContextMenu(e, c, 'CONSUMABLE', true, i)} onTouchStart={() => handleTouchStart(c, 'CONSUMABLE', true, i)} onTouchEnd={handleTouchEnd}><PixelSprite seed={c.icon} name={c.icon} className="w-8 h-8"/>{selectedConsumable === c && <div className="absolute inset-0 bg-white/30 rounded animate-pulse"></div>}</div>))}
-                {runState.consumables.length === 0 && <div className="text-xs text-gray-500 w-12 text-center">Empty</div>}
+                {[...Array(Math.max(0, 2 - runState.consumables.length))].map((_, i) => (
+                    <div key={`consumable-empty-${i}`} className="w-10 h-10 md:w-12 md:h-12 rounded border border-dashed border-slate-700/70 bg-slate-900/20" />
+                ))}
             </div>
         </div>
 
         <div className="flex-grow flex flex-col items-center justify-center relative">
-            {animating && lastHandScore && (
-                <div className="bg-slate-900/90 border-4 border-yellow-500 p-6 rounded-xl shadow-2xl animate-bounce z-50 text-center">
-                    <div className="text-2xl text-white font-bold mb-2">{lastHandScore.name}</div>
-                    <div className="flex items-center gap-2 text-3xl font-black"><span className="text-blue-400">{lastHandScore.chips}</span><span className="text-gray-500">x</span><span className="text-red-500">{lastHandScore.mult}</span></div>
-                    <div className="text-4xl text-yellow-400 mt-2 font-black">{lastHandScore.total.toLocaleString()}</div>
+            {scoreDisplayPanel && (
+                <div className="fixed inset-x-0 top-20 md:top-24 z-[90] flex justify-center px-3 pointer-events-none">
+                    <div className="w-full max-w-[min(96vw,560px)]">
+                        {scoreDisplayPanel}
+                    </div>
                 </div>
             )}
-            {!animating && currentHandInfo && (
-                <div className="absolute bottom-6 z-40 flex flex-col items-center gap-2">
-                    {currentHandInfo.isDisallowed && (
-                        <div className="bg-red-900/90 border-2 border-red-500 px-4 py-1 rounded text-red-100 text-xs font-bold animate-pulse flex items-center gap-2 shadow-lg">
-                            <AlertTriangle size={14}/> 厳しい監視: 同じ役は無効です
-                        </div>
-                    )}
-                    <div className={`bg-slate-900/90 border-2 px-8 py-2 rounded-full shadow-[0_0_15px_rgba(59,130,246,0.5)] backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 pointer-events-none ${currentHandInfo.isDisallowed ? 'border-red-500' : 'border-blue-500/50'}`}>
-                        <div className={`text-xl font-bold tracking-wider flex items-center gap-3 ${currentHandInfo.isDisallowed ? 'text-red-400 line-through opacity-70' : 'text-white'}`}>{currentHandInfo.name}<span className={`${currentHandInfo.isDisallowed ? 'bg-gray-600' : 'bg-blue-600'} text-white text-[10px] px-1.5 py-0.5 rounded font-mono`}>Lv.{currentHandInfo.level}</span></div>
-                    </div>
+            {handPreviewPanel && (
+                <div className="absolute bottom-5 md:bottom-8 z-40 flex justify-center w-full px-4">
+                    {handPreviewPanel}
                 </div>
             )}
             {selectedConsumable && (

@@ -18,12 +18,13 @@ interface ShopScreenProps {
   languageMode: LanguageMode;
   potionCapacity?: number;
   typingMode?: boolean;
+  priceMultiplier?: number;
 }
 
 const REMOVE_COST = 75;
 const SHOP_SHORTCUT_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'];
 
-const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics = [], shopPotions = [], onBuyCard, onBuyRelic, onBuyPotion, onRemoveCard, onLeave, languageMode, potionCapacity = 3, typingMode = false }) => {
+const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics = [], shopPotions = [], onBuyCard, onBuyRelic, onBuyPotion, onRemoveCard, onLeave, languageMode, potionCapacity = 3, typingMode = false, priceMultiplier = 1 }) => {
   const [purchasedIds, setPurchasedIds] = useState<string[]>([]);
   const [removed, setRemoved] = useState(false);
   const [viewMode, setViewMode] = useState<'BUY' | 'REMOVE'>('BUY');
@@ -58,6 +59,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
     if (purchasedIds.includes(card.id)) return;
     let price = card.price || 50;
     if (player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
+    price = Math.floor(price * priceMultiplier);
 
     if (player.gold >= price) {
         setInspectedItem(null); // 詳細を閉じる
@@ -70,6 +72,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
     if (purchasedIds.includes(relic.id)) return;
     let price = relic.price || 150;
     if (player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
+    price = Math.floor(price * priceMultiplier);
 
     if (player.gold >= price) {
         setInspectedItem(null); // 詳細を閉じる
@@ -83,6 +86,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
       
       let price = potion.price || 50;
       if (player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
+      price = Math.floor(price * priceMultiplier);
 
       if (player.gold >= price) {
           setInspectedItem(null); // 詳細を閉じる
@@ -105,6 +109,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
   const handleRemove = (cardId: string) => {
       let cost = player.relics.find(r => r.id === 'SMILING_MASK') ? 50 : REMOVE_COST;
       if (player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) cost = Math.floor(cost * 0.5);
+      cost = Math.floor(cost * priceMultiplier);
 
       if (player.gold >= cost && !removed) {
           setInspectedItem(null); // 詳細を閉じる
@@ -115,8 +120,8 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
   };
 
   const getPrice = (base: number) => {
-      if (player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) return Math.floor(base * 0.5);
-      return base;
+      const discounted = player.relics.find(r => r.id === 'MEMBERSHIP_CARD') ? Math.floor(base * 0.5) : base;
+      return Math.floor(discounted * priceMultiplier);
   };
 
   const buyShortcutItems = useMemo(() => {
