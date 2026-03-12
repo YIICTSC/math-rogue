@@ -92,6 +92,14 @@ export interface Card {
   rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'LEGENDARY' | 'SPECIAL';
   price?: number;
   originalNames?: string[]; // 合成前のカード名を保持する (特殊効果継承用)
+
+  battleBaseCost?: number;
+  battleBaseDamage?: number;
+  battleBaseBlock?: number;
+  battleBaseDescription?: string;
+  battleBaseExhaust?: boolean;
+  battleBonusDrawOnPlay?: number;
+  battleRestore?: Partial<Card>;
 }
 
 export enum EnemyIntentType {
@@ -136,6 +144,7 @@ export interface Enemy {
   artifact: number;
   corpseExplosion: boolean;
   floatingText: FloatingText | null;
+  sleepTurns?: number;
   phase?: number;
 }
 
@@ -211,6 +220,7 @@ export interface Player {
   relicCounters: Record<string, number>;
   turnFlags: Record<string, boolean>;
   floatingText: FloatingText | null;
+  hpLostThisTurn?: number;
   partner?: Partner;
   garden?: GardenSlot[];
   codexBuffer?: Card[]; // 秘密の攻略本用
@@ -388,8 +398,38 @@ export interface SelectionState {
   originCardId?: string;
 }
 
+export type RaceTrickEffectId =
+  | 'LATE_DAMAGE'
+  | 'RETEST_DAMAGE'
+  | 'WALLET_SWAP'
+  | 'GOLD_SIPHON'
+  | 'SHOP_MARKUP'
+  | 'PAPER_STORM'
+  | 'CHALK_DUST'
+  | 'DESK_SHAKE'
+  | 'UPSIDE_DOWN_NOTES'
+  | 'SLEEPY_VIGNETTE'
+  | 'SLOW_BELL'
+  | 'SCORE_MIST'
+  | 'FAKE_SIGNBOARD'
+  | 'DETENTION_TAX'
+  | 'SLEEP_GLASSES'
+  | 'BLACKBOARD_SMOKE'
+  | 'POP_QUIZ_HURRY'
+  | 'PRINT_AVALANCHE'
+  | 'SHOE_LACE'
+  | 'FORGOTTEN_HOMEWORK';
+
+export interface RaceTrickCard {
+  id: string;
+  effectId: RaceTrickEffectId;
+  name: string;
+  description: string;
+  rarity: 'COMMON' | 'UNCOMMON' | 'RARE';
+}
+
 export interface RewardItem {
-  type: 'CARD' | 'RELIC' | 'GOLD' | 'POTION';
+  type: 'CARD' | 'RELIC' | 'GOLD' | 'POTION' | 'RACE_TRICK';
   value?: any;
   id: string;
 }
@@ -444,6 +484,7 @@ export interface PokerScoringContext {
   cards: PokerCard[];
   handsPlayed: number;
   discardsUsed: number;
+  discardsRemaining: number;
   deckState: PokerCard[];
   money: number;
   persistentCounters: Record<string, number>;

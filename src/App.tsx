@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
     GameState, GameScreen, Enemy, Card as ICard,
-    CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode, LanguageMode, VisualEffectInstance, GardenSlot, VFXType, ActStats
+    CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode, LanguageMode, VisualEffectInstance, GardenSlot, VFXType, ActStats, RaceTrickCard, RaceTrickEffectId
 } from './types';
 import {
     INITIAL_HP, INITIAL_ENERGY, HAND_SIZE,
@@ -55,6 +55,7 @@ import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, S
 import { applyAdditionalCardLogic } from './services/cardEffectLogic';
 import { p2pService } from './services/p2pService';
 import { TypingLessonId } from './data/typingLessonConfig';
+import { getRandomRaceTrickCard, getRaceTrickCard } from './raceTricks';
 
 const calculateScore = (state: GameState, victory: boolean): number => {
     let score = 0;
@@ -98,6 +99,81 @@ type RaceSession = {
     ended: boolean;
 };
 
+type GalaxyExpressModalState = {
+    cards: ICard[];
+};
+
+type SingleCardPickModalState = {
+    title: string;
+    description: string;
+    cards: ICard[];
+};
+
+type RelicCardChoiceModalState = {
+    title: string;
+    description: string;
+    cards: ICard[];
+    allowSkip?: boolean;
+};
+
+const compareRaceEntries = (a: RaceEntry, b: RaceEntry) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return a.name.localeCompare(b.name, 'ja');
+};
+
+type RaceEffectState = {
+    paperStormUntil: number;
+    chalkDustUntil: number;
+    deskShakeUntil: number;
+    upsideDownUntil: number;
+    sleepyVignetteUntil: number;
+    slowBellUntil: number;
+    scoreMistUntil: number;
+    fakeSignboardUntil: number;
+    detentionTaxUntil: number;
+    shopMarkupUntil: number;
+    shoeLaceUntil: number;
+    nextBattleDamage: number;
+    nextBattleHandPenalty: number;
+    nextQuestionDelayCount: number;
+    rewardDummyCount: number;
+    forgottenHomeworkCount: number;
+    hideEnemyIntentsOnce: boolean;
+};
+
+const EMPTY_RACE_EFFECTS: RaceEffectState = {
+    paperStormUntil: 0,
+    chalkDustUntil: 0,
+    deskShakeUntil: 0,
+    upsideDownUntil: 0,
+    sleepyVignetteUntil: 0,
+    slowBellUntil: 0,
+    scoreMistUntil: 0,
+    fakeSignboardUntil: 0,
+    detentionTaxUntil: 0,
+    shopMarkupUntil: 0,
+    shoeLaceUntil: 0,
+    nextBattleDamage: 0,
+    nextBattleHandPenalty: 0,
+    nextQuestionDelayCount: 0,
+    rewardDummyCount: 0,
+    forgottenHomeworkCount: 0,
+    hideEnemyIntentsOnce: false
+};
+
+const RACE_TRICK_SCREEN_SET = new Set<GameScreen>([
+    GameScreen.MAP,
+    GameScreen.BATTLE,
+    GameScreen.MATH_CHALLENGE,
+    GameScreen.KANJI_CHALLENGE,
+    GameScreen.ENGLISH_CHALLENGE,
+    GameScreen.GENERAL_CHALLENGE,
+    GameScreen.REWARD,
+    GameScreen.REST,
+    GameScreen.SHOP,
+    GameScreen.EVENT
+]);
+
 const determineEnemyType = (name: string, isBoss: boolean): string => {
     if (isBoss) return 'GUARDIAN';
     if (name.includes('先生') || name.includes('用務員') || name.includes('教頭') || name.includes('実習生')) return 'TEACHER';
@@ -110,10 +186,71 @@ const determineEnemyType = (name: string, isBoss: boolean): string => {
     return 'GENERIC';
 };
 
+const getNamedEnemyIntent = (enemy: Enemy, turn: number, isAct2Plus: boolean): EnemyIntent | null => {
+    const name = enemy.name;
+    const cycle = turn % 3;
+
+    if (name.includes('傘')) {
+        if (cycle === 1) return { type: EnemyIntentType.ATTACK_DEFEND, value: isAct2Plus ? 7 : 4, secondaryValue: isAct2Plus ? 12 : 8 };
+        if (cycle === 2) return isAct2Plus
+            ? { type: EnemyIntentType.DEFEND, value: 16 }
+            : { type: EnemyIntentType.ATTACK_DEFEND, value: 5, secondaryValue: 10 };
+        return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 12 : 8 };
+    }
+    if (name.includes('リコーダー')) {
+        if (cycle === 1) return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 2, debuffType: 'CONFUSED' };
+        if (cycle === 2) return { type: EnemyIntentType.ATTACK_DEBUFF, value: isAct2Plus ? 9 : 6, secondaryValue: 1, debuffType: 'WEAK' };
+        return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 14 : 9 };
+    }
+    if (name.includes('三輪車')) {
+        if (cycle === 1) return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 16 : 10 };
+        if (cycle === 2) return { type: EnemyIntentType.ATTACK_DEFEND, value: isAct2Plus ? 8 : 5, secondaryValue: isAct2Plus ? 8 : 5 };
+        return { type: EnemyIntentType.PIERCE_ATTACK, value: isAct2Plus ? 12 : 7 };
+    }
+    if (name.includes('幽霊') || name.includes('亡霊')) {
+        if (cycle === 1) return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 2, debuffType: 'WEAK' };
+        if (cycle === 2) return { type: EnemyIntentType.ATTACK_DEBUFF, value: isAct2Plus ? 8 : 5, secondaryValue: 2, debuffType: 'VULNERABLE' };
+        return { type: EnemyIntentType.ATTACK_DEFEND, value: isAct2Plus ? 5 : 3, secondaryValue: isAct2Plus ? 10 : 6 };
+    }
+    if (name.includes('カラス')) {
+        if (cycle === 1) return { type: EnemyIntentType.ATTACK_DEBUFF, value: isAct2Plus ? 10 : 6, secondaryValue: 1, debuffType: 'CONFUSED' };
+        if (cycle === 2) return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 13 : 8 };
+        return { type: EnemyIntentType.ATTACK_DEFEND, value: isAct2Plus ? 6 : 4, secondaryValue: isAct2Plus ? 7 : 4 };
+    }
+    if (name.includes('ハチ') || name.includes('スズメバチ')) {
+        if (cycle === 1) return { type: EnemyIntentType.ATTACK_DEBUFF, value: isAct2Plus ? 7 : 4, secondaryValue: 2, debuffType: 'POISON' };
+        if (cycle === 2) return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 11 : 7 };
+        return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 9 : 5 };
+    }
+    if (name.includes('画鋲')) {
+        if (cycle === 1) return { type: EnemyIntentType.PIERCE_ATTACK, value: isAct2Plus ? 11 : 6 };
+        if (cycle === 2) return { type: EnemyIntentType.ATTACK_DEBUFF, value: isAct2Plus ? 7 : 4, secondaryValue: 1, debuffType: 'VULNERABLE' };
+        return { type: EnemyIntentType.ATTACK_DEFEND, value: isAct2Plus ? 4 : 3, secondaryValue: isAct2Plus ? 8 : 5 };
+    }
+    if (name.includes('ミミズ') || name.includes('雑草') || name.includes('埃')) {
+        if (cycle === 1) return { type: EnemyIntentType.ATTACK_DEFEND, value: isAct2Plus ? 7 : 4, secondaryValue: isAct2Plus ? 14 : 8 };
+        if (cycle === 2) return { type: EnemyIntentType.ATTACK_DEFEND, value: isAct2Plus ? 6 : 4, secondaryValue: isAct2Plus ? 9 : 6 };
+        return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 10 : 6 };
+    }
+    if (name.includes('先生') || name.includes('教頭')) {
+        if (cycle === 1) return { type: EnemyIntentType.BUFF, value: 0, secondaryValue: isAct2Plus ? 4 : 2 };
+        if (cycle === 2) return { type: EnemyIntentType.ATTACK_DEFEND, value: isAct2Plus ? 10 : 6, secondaryValue: isAct2Plus ? 12 : 8 };
+        return { type: EnemyIntentType.ATTACK_DEBUFF, value: isAct2Plus ? 11 : 7, secondaryValue: 2, debuffType: 'VULNERABLE' };
+    }
+    if (name.includes('ノート')) {
+        if (cycle === 1) return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 2, debuffType: 'CONFUSED' };
+        if (cycle === 2) return { type: EnemyIntentType.ATTACK_DEFEND, value: isAct2Plus ? 7 : 4, secondaryValue: isAct2Plus ? 10 : 6 };
+        return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 12 : 7 };
+    }
+    return null;
+};
+
 const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
     const type = enemy.enemyType;
     const localTurn = turn % 3;
     const isAct2Plus = (enemy.maxHp > 60);
+    const namedIntent = getNamedEnemyIntent(enemy, turn, isAct2Plus);
+    if (namedIntent) return namedIntent;
 
     switch (type) {
         case 'TEACHER':
@@ -122,8 +259,10 @@ const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
             return { type: EnemyIntentType.ATTACK_DEBUFF, value: 8, secondaryValue: 2, debuffType: 'VULNERABLE' };
 
         case 'TANK':
-            if (localTurn === 0) return { type: EnemyIntentType.DEFEND, value: isAct2Plus ? 20 : 12 };
-            if (localTurn === 1) return { type: EnemyIntentType.ATTACK_DEFEND, value: 10, secondaryValue: 10 };
+            if (localTurn === 0) return isAct2Plus
+                ? { type: EnemyIntentType.DEFEND, value: 20 }
+                : { type: EnemyIntentType.ATTACK_DEFEND, value: 6, secondaryValue: 12 };
+            if (localTurn === 1) return { type: EnemyIntentType.ATTACK_DEFEND, value: isAct2Plus ? 9 : 6, secondaryValue: isAct2Plus ? 14 : 10 };
             return { type: EnemyIntentType.ATTACK, value: 15 };
 
         case 'GHOST':
@@ -141,7 +280,7 @@ const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
                 if (Math.random() < 0.5) return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 2, debuffType: 'CONFUSED' };
                 return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 2, debuffType: 'POISON' };
             }
-            if (localTurn === 1) return { type: EnemyIntentType.DEFEND, value: 8 };
+            if (localTurn === 1) return { type: EnemyIntentType.ATTACK_DEFEND, value: isAct2Plus ? 6 : 4, secondaryValue: isAct2Plus ? 10 : 8 };
             return { type: EnemyIntentType.ATTACK, value: 7 };
 
         case 'ELITE_FORCE':
@@ -185,7 +324,8 @@ const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
         default:
             const r = Math.random();
             if (r < 0.6) return { type: EnemyIntentType.ATTACK, value: 9 + Math.floor(turn / 2) };
-            if (r < 0.9) return { type: EnemyIntentType.DEFEND, value: 8 };
+            if (r < 0.8) return { type: EnemyIntentType.ATTACK_DEFEND, value: 4, secondaryValue: 8 };
+            if (r < 0.95) return { type: EnemyIntentType.ATTACK_DEFEND, value: 5 + Math.floor(turn / 3), secondaryValue: 7 + Math.floor(turn / 3) };
             return { type: EnemyIntentType.BUFF, value: 0, secondaryValue: 2 };
     }
 };
@@ -323,9 +463,15 @@ const App: React.FC = () => {
     const [lastActionType, setLastActionType] = useState<CardType | null>(null);
     const [actingEnemyId, setActingEnemyId] = useState<string | null>(null);
     const [hasSave, setHasSave] = useState<boolean>(false);
+    const [showStartOverConfirm, setShowStartOverConfirm] = useState<boolean>(false);
     const [selectedCharName, setSelectedCharName] = useState<string>("わんぱく小学生");
     const [legacyCardSelected, setLegacyCardSelected] = useState<boolean>(false);
     const [newlyUnlockedCard, setNewlyUnlockedCard] = useState<ICard | null>(null); // New State
+    const [newlyUnlockedCharacters, setNewlyUnlockedCharacters] = useState<Character[]>([]);
+    const [newlyUnlockedMiniGames, setNewlyUnlockedMiniGames] = useState<(typeof MINI_GAMES)[number][]>([]);
+    const [unlockCheckStartMathCorrect, setUnlockCheckStartMathCorrect] = useState<number>(0);
+    const [debugMenuStartClearCount, setDebugMenuStartClearCount] = useState<number>(0);
+    const [debugMenuStartMathCorrect, setDebugMenuStartMathCorrect] = useState<number>(0);
     const [showDebugLog, setShowDebugLog] = useState<boolean>(false);
     const [bgmMode, setBgmMode] = useState<'OSCILLATOR' | 'MP3' | 'STUDY'>(() => {
         const saved = storageService.getBgmMode() as 'OSCILLATOR' | 'MP3' | 'STUDY' | null;
@@ -345,6 +491,11 @@ const App: React.FC = () => {
     const [shopRelics, setShopRelics] = useState<Relic[]>([]);
     const [shopPotions, setShopPotions] = useState<Potion[]>([]);
     const [weatherScryModal, setWeatherScryModal] = useState<{ cards: ICard[]; keepMap: Record<string, boolean> } | null>(null);
+    const [galaxyExpressModal, setGalaxyExpressModal] = useState<GalaxyExpressModalState | null>(null);
+    const [goldFishModal, setGoldFishModal] = useState<SingleCardPickModalState | null>(null);
+    const [dreamCatcherModal, setDreamCatcherModal] = useState<SingleCardPickModalState | null>(null);
+    const [orreryModal, setOrreryModal] = useState<RelicCardChoiceModalState | null>(null);
+    const [peacePipeModal, setPeacePipeModal] = useState<RelicCardChoiceModalState | null>(null);
     const [eventData, setEventData] = useState<any>(null);
     const [eventResultLog, setEventResultLog] = useState<string | null>(null);
     const [unlockedCardNames, setUnlockedCardNames] = useState<string[]>([]);
@@ -357,7 +508,160 @@ const App: React.FC = () => {
     const [raceGameOverCount, setRaceGameOverCount] = useState(0);
     const [raceNow, setRaceNow] = useState(Date.now());
     const [raceRemainingSec, setRaceRemainingSec] = useState(0);
+    const [raceSelfPeerId, setRaceSelfPeerId] = useState<string>('host');
+    const [raceTrickCards, setRaceTrickCards] = useState<RaceTrickCard[]>([]);
+    const [raceEffects, setRaceEffects] = useState<RaceEffectState>(EMPTY_RACE_EFFECTS);
+    const [raceHudOpen, setRaceHudOpen] = useState(false);
+    const [raceToast, setRaceToast] = useState<string | null>(null);
+    const [raceEffectNow, setRaceEffectNow] = useState(Date.now());
+    const [raceRewardDummyDisplay, setRaceRewardDummyDisplay] = useState(0);
     const prevScreenRef = useRef<GameScreen>(GameScreen.START_MENU);
+    const raceToastTimerRef = useRef<number | null>(null);
+
+    const showRaceToast = useCallback((message: string) => {
+        setRaceToast(message);
+        if (raceToastTimerRef.current) {
+            window.clearTimeout(raceToastTimerRef.current);
+        }
+        raceToastTimerRef.current = window.setTimeout(() => setRaceToast(null), 2200);
+    }, []);
+
+    const getRaceTargetEntries = useCallback(() => {
+        if (!raceSession) return [];
+        return [...raceSession.entries]
+            .filter(entry => entry.peerId !== raceSelfPeerId)
+            .sort(compareRaceEntries);
+    }, [raceSession, raceSelfPeerId]);
+
+    const getDefaultRaceTarget = useCallback(() => {
+        const targets = getRaceTargetEntries();
+        return targets[0] || null;
+    }, [getRaceTargetEntries]);
+
+    const applyRaceDamageToLocalPlayer = useCallback((amount: number, label: string) => {
+        if (amount <= 0) return;
+        setGameState(prev => {
+            const nextHp = Math.max(0, prev.player.currentHp - amount);
+            const nextState: GameState = {
+                ...prev,
+                player: {
+                    ...prev.player,
+                    currentHp: nextHp,
+                    floatingText: { id: `race-hit-${Date.now()}`, text: `-${amount} HP`, color: 'text-red-400', iconType: 'skull' }
+                }
+            };
+            if (nextHp <= 0 && prev.screen !== GameScreen.GAME_OVER) {
+                audioService.playBGM('game_over');
+                return { ...nextState, screen: GameScreen.GAME_OVER };
+            }
+            return nextState;
+        });
+        showRaceToast(label);
+    }, [showRaceToast]);
+
+    const applyRaceGoldDelta = useCallback((delta: number, label: string) => {
+        if (delta === 0) return;
+        setGameState(prev => ({
+            ...prev,
+            player: {
+                ...prev.player,
+                gold: Math.max(0, prev.player.gold + delta),
+                floatingText: { id: `race-gold-${Date.now()}`, text: `${delta > 0 ? '+' : ''}${delta}G`, color: delta > 0 ? 'text-yellow-300' : 'text-amber-400', iconType: 'zap' }
+            }
+        }));
+        showRaceToast(label);
+    }, [showRaceToast]);
+
+    const applyRaceTrickEffectLocal = useCallback((effectId: RaceTrickEffectId, sourceName: string, sourceGold: number) => {
+        const now = Date.now();
+        switch (effectId) {
+            case 'LATE_DAMAGE':
+                applyRaceDamageToLocalPlayer(5, `${sourceName} の遅刻ダメージ`);
+                break;
+            case 'RETEST_DAMAGE':
+                setRaceEffects(prev => ({ ...prev, nextBattleDamage: prev.nextBattleDamage + 8 }));
+                showRaceToast(`${sourceName} の追試ダメージ`);
+                break;
+            case 'WALLET_SWAP': {
+                const targetGoldBefore = stateRef.current.player.gold;
+                setGameState(prev => ({ ...prev, player: { ...prev.player, gold: sourceGold, floatingText: { id: `wallet-swap-${Date.now()}`, text: `${sourceGold}G`, color: 'text-yellow-300', iconType: 'zap' } } }));
+                showRaceToast(`${sourceName} とお財布交換`);
+                return targetGoldBefore;
+            }
+            case 'GOLD_SIPHON': {
+                const targetGoldBefore = stateRef.current.player.gold;
+                const stolen = Math.max(1, Math.floor(targetGoldBefore * 0.15));
+                setGameState(prev => ({ ...prev, player: { ...prev.player, gold: Math.max(0, prev.player.gold - stolen), floatingText: { id: `gold-siphon-${Date.now()}`, text: `-${stolen}G`, color: 'text-amber-300', iconType: 'zap' } } }));
+                showRaceToast(`${sourceName} に ${stolen}G 奪われた`);
+                return stolen;
+            }
+            case 'SHOP_MARKUP':
+                setRaceEffects(prev => ({ ...prev, shopMarkupUntil: Math.max(prev.shopMarkupUntil, now + 12000) }));
+                showRaceToast(`${sourceName} の購買部値上げ`);
+                break;
+            case 'PAPER_STORM':
+                setRaceEffects(prev => ({ ...prev, paperStormUntil: Math.max(prev.paperStormUntil, now + 8000) }));
+                showRaceToast(`${sourceName} のプリント散乱`);
+                break;
+            case 'CHALK_DUST':
+                setRaceEffects(prev => ({ ...prev, chalkDustUntil: Math.max(prev.chalkDustUntil, now + 8000) }));
+                showRaceToast(`${sourceName} のチョークの粉`);
+                break;
+            case 'DESK_SHAKE':
+                setRaceEffects(prev => ({ ...prev, deskShakeUntil: Math.max(prev.deskShakeUntil, now + 5000) }));
+                showRaceToast(`${sourceName} のぐらぐら机`);
+                break;
+            case 'UPSIDE_DOWN_NOTES':
+                setRaceEffects(prev => ({ ...prev, upsideDownUntil: Math.max(prev.upsideDownUntil, now + 6000) }));
+                showRaceToast(`${sourceName} のさかさノート`);
+                break;
+            case 'SLEEPY_VIGNETTE':
+                setRaceEffects(prev => ({ ...prev, sleepyVignetteUntil: Math.max(prev.sleepyVignetteUntil, now + 10000) }));
+                showRaceToast(`${sourceName} の居眠りフィルタ`);
+                break;
+            case 'SLOW_BELL':
+                setRaceEffects(prev => ({ ...prev, slowBellUntil: Math.max(prev.slowBellUntil, now + 2500) }));
+                showRaceToast(`${sourceName} のろのろチャイム`);
+                break;
+            case 'SCORE_MIST':
+                setRaceEffects(prev => ({ ...prev, scoreMistUntil: Math.max(prev.scoreMistUntil, now + 12000) }));
+                showRaceToast(`${sourceName} のスコア減衰ミスト`);
+                break;
+            case 'FAKE_SIGNBOARD':
+                setRaceEffects(prev => ({ ...prev, fakeSignboardUntil: Math.max(prev.fakeSignboardUntil, now + 8000) }));
+                showRaceToast(`${sourceName} のにせ案内板`);
+                break;
+            case 'DETENTION_TAX':
+                setRaceEffects(prev => ({ ...prev, detentionTaxUntil: Math.max(prev.detentionTaxUntil, now + 12000) }));
+                showRaceToast(`${sourceName} の居残りペナルティ`);
+                break;
+            case 'SLEEP_GLASSES':
+                setRaceEffects(prev => ({ ...prev, nextBattleHandPenalty: Math.max(prev.nextBattleHandPenalty, 1) }));
+                showRaceToast(`${sourceName} のねむけメガネ`);
+                break;
+            case 'BLACKBOARD_SMOKE':
+                setRaceEffects(prev => ({ ...prev, hideEnemyIntentsOnce: true }));
+                showRaceToast(`${sourceName} の黒板けむり`);
+                break;
+            case 'POP_QUIZ_HURRY':
+                setRaceEffects(prev => ({ ...prev, nextQuestionDelayCount: prev.nextQuestionDelayCount + 1 }));
+                showRaceToast(`${sourceName} の抜き打ち小テスト`);
+                break;
+            case 'PRINT_AVALANCHE':
+                setRaceEffects(prev => ({ ...prev, rewardDummyCount: Math.max(prev.rewardDummyCount, 2) }));
+                showRaceToast(`${sourceName} のプリント雪崩`);
+                break;
+            case 'SHOE_LACE':
+                setRaceEffects(prev => ({ ...prev, shoeLaceUntil: Math.max(prev.shoeLaceUntil, now + 12000) }));
+                showRaceToast(`${sourceName} のくつひもトラップ`);
+                break;
+            case 'FORGOTTEN_HOMEWORK':
+                setRaceEffects(prev => ({ ...prev, forgottenHomeworkCount: prev.forgottenHomeworkCount + 1 }));
+                showRaceToast(`${sourceName} の忘れもの通知`);
+                break;
+        }
+        return undefined;
+    }, [applyRaceDamageToLocalPlayer, showRaceToast]);
 
     const isEndingTurnRef = useRef(false);
 
@@ -389,7 +693,10 @@ const App: React.FC = () => {
         if (participantsCount >= 20) return 7000;
         return 5000;
     };
-    const raceScore = (floor: number, maxDamage: number, gameOverCount: number) => floor * 100 + maxDamage - gameOverCount * 30;
+    const raceScore = (floor: number, maxDamage: number, gameOverCount: number) => {
+        const base = floor * 100 + maxDamage - gameOverCount * 30;
+        return raceEffects.scoreMistUntil > raceEffectNow ? Math.floor(base * 0.8) : base;
+    };
     const raceFloorProgress = (act: number, floor: number) => (Math.max(1, act) - 1) * 17 + Math.max(0, floor);
     const formatRaceRemaining = (sec: number) => {
         const remain = Math.max(0, sec);
@@ -515,7 +822,7 @@ const App: React.FC = () => {
                     const nextEntries = prev.entries.some(e => e.peerId === fromPeerId)
                         ? prev.entries
                         : [...prev.entries, { peerId: fromPeerId, name: data.name, imageData: data.imageData, floor: 0, maxDamage: 0, gameOverCount: 0, score: 0, updatedAt: Date.now() }];
-                    const sortedEntries = [...nextEntries].sort((a, b) => b.score - a.score);
+                    const sortedEntries = [...nextEntries].sort(compareRaceEntries);
                     p2pService.sendTo(fromPeerId, { type: 'RACE_PARTICIPANTS', participants: nextParticipants });
                     p2pService.sendTo(fromPeerId, { type: 'RACE_START', endAt: prev.endAt, durationSec: prev.durationSec, mode: gameState.mode });
                     p2pService.sendTo(fromPeerId, { type: 'RACE_MODE_SET', mode: gameState.mode });
@@ -537,19 +844,79 @@ const App: React.FC = () => {
                 setRaceSession(prev => {
                     if (!prev || prev.ended) return prev;
                     const nextEntry: RaceEntry = { peerId: fromPeerId, ...data };
-                    const nextEntries = [...prev.entries.filter(e => e.peerId !== fromPeerId), nextEntry].sort((a, b) => b.score - a.score);
+                    const nextEntries = [...prev.entries.filter(e => e.peerId !== fromPeerId), nextEntry].sort(compareRaceEntries);
                     return { ...prev, entries: nextEntries };
                 });
                 return;
             }
 
             if (data.type === 'RACE_LEADERBOARD' && !raceSession.isHost) {
-                setRaceSession(prev => prev ? { ...prev, entries: [...data.entries].sort((a, b) => b.score - a.score) } : prev);
+                setRaceSession(prev => prev ? { ...prev, entries: [...data.entries].sort(compareRaceEntries) } : prev);
+                return;
+            }
+
+            if (data.type === 'RACE_TRICK_PLAY' && raceSession.isHost && fromPeerId) {
+                if (data.effectId !== 'WALLET_SWAP') {
+                    applyRaceTrickEffectLocal(data.effectId, data.sourceName, data.sourceGold);
+                    p2pService.getConnectedPeerIds()
+                        .filter(peerId => peerId !== fromPeerId)
+                        .forEach(peerId => {
+                            p2pService.sendTo(peerId, { type: 'RACE_TRICK_APPLY', cardId: data.cardId, effectId: data.effectId, sourcePeerId: fromPeerId, sourceName: data.sourceName, sourceGold: data.sourceGold });
+                        });
+                } else if (data.targetPeerId === 'host') {
+                    const localResult = applyRaceTrickEffectLocal(data.effectId, data.sourceName, data.sourceGold);
+                    if (data.effectId === 'WALLET_SWAP') {
+                        p2pService.sendTo(fromPeerId, { type: 'RACE_TRICK_RESULT', effectId: data.effectId, sourcePeerId: fromPeerId, targetPeerId: 'host', sourceGoldAfter: Number(localResult || 0) });
+                    } else if (data.effectId === 'GOLD_SIPHON') {
+                        p2pService.sendTo(fromPeerId, { type: 'RACE_TRICK_RESULT', effectId: data.effectId, sourcePeerId: fromPeerId, targetPeerId: 'host', goldDelta: Number(localResult || 0) });
+                    }
+                } else {
+                    p2pService.sendTo(data.targetPeerId, { type: 'RACE_TRICK_APPLY', cardId: data.cardId, effectId: data.effectId, sourcePeerId: fromPeerId, sourceName: data.sourceName, sourceGold: data.sourceGold });
+                }
+                return;
+            }
+
+            if (data.type === 'RACE_TRICK_APPLY') {
+                const localResult = applyRaceTrickEffectLocal(data.effectId, data.sourceName, data.sourceGold);
+                if (data.effectId === 'WALLET_SWAP' || data.effectId === 'GOLD_SIPHON') {
+                    if (raceSession.isHost) {
+                        if (data.effectId === 'WALLET_SWAP') {
+                            if (data.sourcePeerId === 'host') {
+                                setGameState(prev => ({ ...prev, player: { ...prev.player, gold: Number(localResult || 0) } }));
+                            } else {
+                                p2pService.sendTo(data.sourcePeerId, { type: 'RACE_TRICK_RESULT', effectId: data.effectId, sourcePeerId: data.sourcePeerId, targetPeerId: 'host', sourceGoldAfter: Number(localResult || 0) });
+                            }
+                        } else {
+                            if (data.sourcePeerId === 'host') {
+                                applyRaceGoldDelta(Number(localResult || 0), 'おつりミスでゴールド獲得');
+                            } else {
+                                p2pService.sendTo(data.sourcePeerId, { type: 'RACE_TRICK_RESULT', effectId: data.effectId, sourcePeerId: data.sourcePeerId, targetPeerId: raceSelfPeerId, goldDelta: Number(localResult || 0) });
+                            }
+                        }
+                    } else {
+                        p2pService.send({ type: 'RACE_TRICK_RESULT', effectId: data.effectId, sourcePeerId: data.sourcePeerId, targetPeerId: raceSelfPeerId, sourceGoldAfter: data.effectId === 'WALLET_SWAP' ? Number(localResult || 0) : undefined, goldDelta: data.effectId === 'GOLD_SIPHON' ? Number(localResult || 0) : undefined });
+                    }
+                }
+                return;
+            }
+
+            if (data.type === 'RACE_TRICK_RESULT') {
+                if (raceSession.isHost && data.sourcePeerId !== 'host') {
+                    p2pService.sendTo(data.sourcePeerId, data);
+                    return;
+                }
+                if (data.effectId === 'WALLET_SWAP' && data.sourceGoldAfter !== undefined) {
+                    setGameState(prev => ({ ...prev, player: { ...prev.player, gold: data.sourceGoldAfter!, floatingText: { id: `wallet-back-${Date.now()}`, text: `${data.sourceGoldAfter}G`, color: 'text-yellow-300', iconType: 'zap' } } }));
+                    showRaceToast('お財布交換が成立');
+                }
+                if (data.effectId === 'GOLD_SIPHON' && data.goldDelta) {
+                    applyRaceGoldDelta(data.goldDelta, 'おつりミスでゴールド獲得');
+                }
                 return;
             }
 
             if (data.type === 'RACE_END') {
-                setRaceSession(prev => prev ? { ...prev, ended: true, entries: [...data.entries].sort((a, b) => b.score - a.score) } : prev);
+                setRaceSession(prev => prev ? { ...prev, ended: true, entries: [...data.entries].sort(compareRaceEntries) } : prev);
                 setRaceResultOpen(true);
             }
         };
@@ -557,7 +924,7 @@ const App: React.FC = () => {
         return () => {
             p2pService.onData = previousOnData;
         };
-    }, [raceSession, gameState.challengeMode, gameState.screen, gameState.mode]);
+    }, [raceSession, gameState.challengeMode, gameState.screen, gameState.mode, applyRaceTrickEffectLocal, applyRaceGoldDelta, showRaceToast, raceSelfPeerId]);
 
     useEffect(() => {
         if (!raceSession || raceSession.ended || gameState.challengeMode !== 'RACE') return;
@@ -580,7 +947,7 @@ const App: React.FC = () => {
                 setRaceSession(prev => {
                     if (!prev || prev.ended) return prev;
                     const selfEntry: RaceEntry = { peerId: 'host', ...payload };
-                    const nextEntries = [...prev.entries.filter(e => e.peerId !== 'host'), selfEntry].sort((a, b) => b.score - a.score);
+                    const nextEntries = [...prev.entries.filter(e => e.peerId !== 'host'), selfEntry].sort(compareRaceEntries);
                     return { ...prev, entries: nextEntries };
                 });
             } else {
@@ -597,7 +964,7 @@ const App: React.FC = () => {
         if (!raceSession || raceSession.ended || !raceSession.isHost || gameState.challengeMode !== 'RACE') return;
         const syncIntervalMs = getRaceSyncIntervalMs(raceSession.participants.length);
         const broadcast = () => {
-            const entries = [...raceSession.entries].sort((a, b) => b.score - a.score);
+            const entries = [...raceSession.entries].sort(compareRaceEntries);
             p2pService.send({ type: 'RACE_LEADERBOARD', entries });
         };
         broadcast();
@@ -611,7 +978,7 @@ const App: React.FC = () => {
 
         setRaceSession(prev => {
             if (!prev || prev.ended) return prev;
-            const finalEntries = [...prev.entries].sort((a, b) => b.score - a.score);
+            const finalEntries = [...prev.entries].sort(compareRaceEntries);
             if (prev.isHost) {
                 p2pService.send({ type: 'RACE_END', entries: finalEntries });
             }
@@ -632,6 +999,95 @@ const App: React.FC = () => {
         const interval = setInterval(updateRemaining, 1000);
         return () => clearInterval(interval);
     }, [raceSession]);
+
+    useEffect(() => {
+        if (gameState.challengeMode !== 'RACE') return;
+        const tick = () => setRaceEffectNow(Date.now());
+        tick();
+        const interval = window.setInterval(tick, 200);
+        return () => window.clearInterval(interval);
+    }, [gameState.challengeMode]);
+
+    useEffect(() => {
+        if (gameState.challengeMode !== 'RACE') return;
+        const isChallengeScreen =
+            gameState.screen === GameScreen.MATH_CHALLENGE ||
+            gameState.screen === GameScreen.KANJI_CHALLENGE ||
+            gameState.screen === GameScreen.ENGLISH_CHALLENGE ||
+            gameState.screen === GameScreen.GENERAL_CHALLENGE;
+        if (!isChallengeScreen) return;
+        setRaceEffects(prev => {
+            if (prev.nextQuestionDelayCount <= 0) return prev;
+            return {
+                ...prev,
+                nextQuestionDelayCount: prev.nextQuestionDelayCount - 1,
+                slowBellUntil: Math.max(prev.slowBellUntil, Date.now() + 2500)
+            };
+        });
+    }, [gameState.challengeMode, gameState.screen]);
+
+    useEffect(() => {
+        if (gameState.challengeMode !== 'RACE') return;
+        if (gameState.screen !== GameScreen.BATTLE || prevScreenRef.current === GameScreen.BATTLE) return;
+        const now = Date.now();
+        if (raceEffects.nextBattleDamage > 0) {
+            applyRaceDamageToLocalPlayer(raceEffects.nextBattleDamage, '追試ダメージが発動');
+            setRaceEffects(prev => ({ ...prev, nextBattleDamage: 0 }));
+        }
+        if (raceEffects.nextBattleHandPenalty > 0 || raceEffects.forgottenHomeworkCount > 0) {
+            setGameState(prev => {
+                const p = {
+                    ...prev.player,
+                    hand: [...prev.player.hand],
+                    discardPile: [...prev.player.discardPile]
+                };
+                for (let i = 0; i < raceEffects.nextBattleHandPenalty; i++) {
+                    const removed = p.hand.pop();
+                    if (removed) p.discardPile.unshift(removed);
+                }
+                for (let i = 0; i < raceEffects.forgottenHomeworkCount; i++) {
+                    const status = STATUS_CARDS['DAZED'] || STATUS_CARDS['SLIME'] || CURSE_CARDS['CLUMSY'];
+                    if (status) {
+                        p.discardPile.unshift({ ...status, id: `race-status-${now}-${i}` });
+                    }
+                }
+                return { ...prev, player: p };
+            });
+            setRaceEffects(prev => ({ ...prev, nextBattleHandPenalty: 0, forgottenHomeworkCount: 0 }));
+        }
+    }, [gameState.challengeMode, gameState.screen, raceEffects.nextBattleDamage, raceEffects.nextBattleHandPenalty, raceEffects.forgottenHomeworkCount, applyRaceDamageToLocalPlayer]);
+
+    useEffect(() => {
+        if (gameState.challengeMode !== 'RACE') return;
+        if (gameState.screen !== GameScreen.REWARD) return;
+        if (raceEffects.detentionTaxUntil <= Date.now()) return;
+        const interval = window.setInterval(() => {
+            if (stateRef.current.screen !== GameScreen.REWARD) return;
+            if (Date.now() > raceEffects.detentionTaxUntil) return;
+            applyRaceDamageToLocalPlayer(1, '居残りペナルティ');
+        }, 1000);
+        return () => window.clearInterval(interval);
+    }, [gameState.challengeMode, gameState.screen, raceEffects.detentionTaxUntil, applyRaceDamageToLocalPlayer]);
+
+    useEffect(() => {
+        if (gameState.challengeMode !== 'RACE') return;
+        if (gameState.screen === GameScreen.REWARD && prevScreenRef.current !== GameScreen.REWARD) {
+            setRaceRewardDummyDisplay(raceEffects.rewardDummyCount);
+            if (raceEffects.rewardDummyCount > 0) {
+                setRaceEffects(prev => ({ ...prev, rewardDummyCount: 0 }));
+            }
+        } else if (gameState.screen !== GameScreen.REWARD && prevScreenRef.current === GameScreen.REWARD) {
+            setRaceRewardDummyDisplay(0);
+        }
+        if (prevScreenRef.current === GameScreen.BATTLE && gameState.screen !== GameScreen.BATTLE && raceEffects.hideEnemyIntentsOnce) {
+            setRaceEffects(prev => ({ ...prev, hideEnemyIntentsOnce: false }));
+        }
+    }, [gameState.challengeMode, gameState.screen, raceEffects.rewardDummyCount, raceEffects.hideEnemyIntentsOnce]);
+
+    useEffect(() => {
+        if (!raceSession || !raceResultOpen) return;
+        audioService.playBGM('victory');
+    }, [raceSession, raceResultOpen]);
 
     useEffect(() => {
         if (!raceSession || gameState.challengeMode !== 'RACE') {
@@ -710,15 +1166,105 @@ const App: React.FC = () => {
         audioService.playSound('select');
     };
 
+    const handleUseRaceTrickCard = (card: RaceTrickCard, targetPeerId: string) => {
+        if (!raceSession || raceSession.ended || gameState.challengeMode !== 'RACE') return;
+        setRaceTrickCards(prev => prev.filter(c => c.id !== card.id));
+        audioService.playSound('select');
+        if (raceSession.isHost) {
+            if (card.effectId !== 'WALLET_SWAP') {
+                p2pService.getConnectedPeerIds().forEach(peerId => {
+                    p2pService.sendTo(peerId, { type: 'RACE_TRICK_APPLY', cardId: card.id, effectId: card.effectId, sourcePeerId: 'host', sourceName: raceSession.name, sourceGold: gameState.player.gold });
+                });
+            } else if (targetPeerId === 'host') {
+                const localResult = applyRaceTrickEffectLocal(card.effectId, raceSession.name, gameState.player.gold);
+                if (card.effectId === 'WALLET_SWAP' && localResult !== undefined) {
+                    setGameState(prev => ({ ...prev, player: { ...prev.player, gold: Number(localResult) } }));
+                }
+                if (card.effectId === 'GOLD_SIPHON' && localResult !== undefined) {
+                    applyRaceGoldDelta(Number(localResult), 'おつりミスでゴールド獲得');
+                }
+            } else {
+                p2pService.sendTo(targetPeerId, { type: 'RACE_TRICK_APPLY', cardId: card.id, effectId: card.effectId, sourcePeerId: 'host', sourceName: raceSession.name, sourceGold: gameState.player.gold });
+            }
+        } else {
+            p2pService.send({ type: 'RACE_TRICK_PLAY', cardId: card.id, effectId: card.effectId, targetPeerId: card.effectId === 'WALLET_SWAP' ? targetPeerId : 'ALL', sourceName: raceSession.name, sourceGold: gameState.player.gold });
+        }
+        showRaceToast(`${card.name} を使用`);
+    };
+
     const returnToTitle = () => {
+        const isEndingReturn = stateRef.current.screen === GameScreen.ENDING;
+        const isDebugReturn = stateRef.current.screen === GameScreen.DEBUG_MENU;
+        const shouldCheckMiniGameUnlocks =
+            stateRef.current.screen === GameScreen.ENDING ||
+            stateRef.current.screen === GameScreen.GAME_OVER ||
+            stateRef.current.screen === GameScreen.PROBLEM_CHALLENGE ||
+            stateRef.current.screen === GameScreen.DEBUG_MENU;
+
+        if (isEndingReturn) {
+            const previousClearCount = storageService.getClearCount();
+            storageService.incrementClearCount();
+            const nextClearCount = previousClearCount + 1;
+            const previousUnlockedCount = Math.min(CHARACTERS.length, previousClearCount + 2);
+            const nextUnlockedCount = Math.min(CHARACTERS.length, nextClearCount + 2);
+            setClearCount(nextClearCount);
+            setNewlyUnlockedCharacters(CHARACTERS.slice(previousUnlockedCount, nextUnlockedCount));
+        } else if (isDebugReturn) {
+            const nextClearCount = storageService.getClearCount();
+            const previousUnlockedCount = Math.min(CHARACTERS.length, debugMenuStartClearCount + 2);
+            const nextUnlockedCount = Math.min(CHARACTERS.length, nextClearCount + 2);
+            setClearCount(nextClearCount);
+            setNewlyUnlockedCharacters(CHARACTERS.slice(previousUnlockedCount, nextUnlockedCount));
+        } else {
+            setNewlyUnlockedCharacters([]);
+        }
+
+        if (shouldCheckMiniGameUnlocks) {
+            const currentMathCorrect = isDebugReturn ? storageService.getMathCorrectCount() : totalMathCorrect;
+            const previousMathCorrect = isDebugReturn ? debugMenuStartMathCorrect : unlockCheckStartMathCorrect;
+            const previousUnlockedMiniGames = MINI_GAMES.filter(game => previousMathCorrect >= game.threshold);
+            const nextUnlockedMiniGames = MINI_GAMES.filter(game => currentMathCorrect >= game.threshold);
+            if (isDebugReturn) {
+                setTotalMathCorrect(currentMathCorrect);
+            }
+            setNewlyUnlockedMiniGames(nextUnlockedMiniGames.filter(game => !previousUnlockedMiniGames.some(prev => prev.id === game.id)));
+        } else {
+            setNewlyUnlockedMiniGames([]);
+        }
+
         setShopCards([]);
         setEventData(null);
         setRaceSession(null);
         setRaceResultOpen(false);
+        setRaceSelfPeerId('host');
+        setRaceTrickCards([]);
+        setRaceEffects(EMPTY_RACE_EFFECTS);
+        setRaceHudOpen(false);
+        setRaceToast(null);
+        setRaceRewardDummyDisplay(0);
         setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined, typingLessonId: undefined, vsOpponent: undefined }));
         setHasSave(storageService.hasSaveFile());
         audioService.playBGM('menu');
     };
+
+    const openDebugMenu = useCallback(() => {
+        setDebugMenuStartClearCount(storageService.getClearCount());
+        setDebugMenuStartMathCorrect(storageService.getMathCorrectCount());
+        setGameState(prev => ({ ...prev, screen: GameScreen.DEBUG_MENU }));
+    }, []);
+
+    const handleDebugAddClearCount = useCallback(() => {
+        storageService.incrementClearCount();
+        setClearCount(storageService.getClearCount());
+    }, []);
+
+    const handleDebugBoostMathCorrect = useCallback(() => {
+        const current = storageService.getMathCorrectCount();
+        const nextUnlock = MINI_GAMES.find(game => game.threshold > current);
+        const nextCount = nextUnlock ? nextUnlock.threshold : current + 100;
+        storageService.saveMathCorrectCount(nextCount);
+        setTotalMathCorrect(nextCount);
+    }, []);
 
     const hasRelic = (player: Player, relicId: string) => player.relics.some(r => r.id === relicId);
     const getPotionCapacity = (player: Player) => hasRelic(player, 'CAULDRON') ? 5 : 3;
@@ -785,13 +1331,97 @@ const App: React.FC = () => {
             }
         }
         if (relic.id === 'ORRERY') {
-            const pool = getFilteredCardPool(player.id);
-            for (let i = 0; i < 5; i++) {
-                const pick = pool[Math.floor(Math.random() * pool.length)];
-                addCardToDeckWithRelics(player, { ...pick, id: `orrery-${Date.now()}-${i}-${Math.random()}` });
-            }
+            player.relicCounters['ORRERY_PENDING'] = 1;
         }
     };
+
+    const clearBigLadleTemp = (player: Player): Player => {
+        const counters = { ...player.relicCounters };
+        if (!counters['BIG_LADLE_ACTIVE']) return player;
+        delete counters['BIG_LADLE_ACTIVE'];
+        const nextMaxHp = Math.max(1, player.maxHp - 4);
+        return {
+            ...player,
+            maxHp: nextMaxHp,
+            currentHp: Math.min(player.currentHp, nextMaxHp),
+            relicCounters: counters
+        };
+    };
+
+    const restoreBattleOnlyCard = (card: ICard): ICard => {
+        let nextCard = { ...card };
+        if (nextCard.battleRestore) {
+            nextCard = { ...nextCard, ...nextCard.battleRestore };
+            delete nextCard.battleRestore;
+        }
+        if (nextCard.battleBaseCost !== undefined) {
+            nextCard.cost = nextCard.battleBaseCost;
+            delete nextCard.battleBaseCost;
+        }
+        if (nextCard.battleBaseDamage !== undefined) {
+            nextCard.damage = nextCard.battleBaseDamage;
+            delete nextCard.battleBaseDamage;
+        }
+        if (nextCard.battleBaseBlock !== undefined) {
+            nextCard.block = nextCard.battleBaseBlock;
+            delete nextCard.battleBaseBlock;
+        }
+        if (nextCard.battleBaseDescription !== undefined) {
+            nextCard.description = nextCard.battleBaseDescription;
+            delete nextCard.battleBaseDescription;
+        }
+        if (nextCard.battleBaseExhaust !== undefined) {
+            nextCard.exhaust = nextCard.battleBaseExhaust;
+            delete nextCard.battleBaseExhaust;
+        }
+        delete nextCard.battleBonusDrawOnPlay;
+        return nextCard;
+    };
+
+    const clearBattleOnlyCardState = (player: Player): Player => ({
+        ...player,
+        relicCounters: Object.fromEntries(
+            Object.entries(player.relicCounters).filter(([key]) =>
+                key !== 'OUT_SUPER_HERO_POSE_ACTIVE' && key !== 'OUT_STAMP_QUEST_REMAINING'
+            )
+        ),
+        deck: player.deck.map(restoreBattleOnlyCard),
+        hand: player.hand.map(restoreBattleOnlyCard),
+        drawPile: player.drawPile.map(restoreBattleOnlyCard),
+        discardPile: player.discardPile.map(restoreBattleOnlyCard)
+    });
+
+    const appendBattleOnlyText = (card: ICard, text: string): ICard => {
+        if (card.description.includes(text)) return card;
+        return {
+            ...card,
+            battleBaseDescription: card.battleBaseDescription ?? card.description,
+            description: `${card.description} ${text}`
+        };
+    };
+
+    const makeBattleCostZero = (card: ICard, extraText: string): ICard =>
+        appendBattleOnlyText({
+            ...card,
+            battleRestore: card.battleRestore ?? {
+                cost: card.cost,
+                damage: card.damage,
+                block: card.block,
+                description: card.description,
+                exhaust: card.exhaust,
+                upgraded: card.upgraded,
+                draw: card.draw,
+                energy: card.energy,
+                weak: card.weak,
+                vulnerable: card.vulnerable,
+                strength: card.strength,
+                poison: card.poison,
+                applyPower: card.applyPower ? { ...card.applyPower } : undefined,
+                addCardToHand: card.addCardToHand ? { ...card.addCardToHand } : undefined
+            },
+            battleBaseCost: card.battleBaseCost ?? card.cost,
+            cost: 0
+        }, extraText);
 
     useEffect(() => {
         setGameState(prev => {
@@ -816,6 +1446,33 @@ const App: React.FC = () => {
         });
     }, [gameState.player.relics]);
 
+    useEffect(() => {
+        if (orreryModal || gameState.player.relicCounters['ORRERY_PENDING'] !== 1) return;
+        const pool = getFilteredCardPool(gameState.player.id);
+        const cards: ICard[] = [];
+        for (let i = 0; i < 5; i++) {
+            const pick = pool[Math.floor(Math.random() * pool.length)];
+            cards.push({ ...pick, id: `orrery-choice-${Date.now()}-${i}-${Math.random()}` });
+        }
+        setOrreryModal({
+            title: '天球儀',
+            description: '候補から1枚選んでデッキに追加してください',
+            cards
+        });
+    }, [gameState.player.id, gameState.player.relicCounters, orreryModal]);
+
+    useEffect(() => {
+        if (gameState.screen !== GameScreen.REST) return;
+        if (peacePipeModal || !hasRelic(gameState.player, 'PEACE_PIPE')) return;
+        if (gameState.player.relicCounters['PEACE_PIPE_READY'] !== 1) return;
+        setPeacePipeModal({
+            title: '和解のパイプ',
+            description: '削除するカードを1枚選ぶか、使わずに休憩を続けてください',
+            cards: [...gameState.player.deck],
+            allowSkip: true
+        });
+    }, [gameState.player, gameState.screen, peacePipeModal]);
+
     const handleNodeComplete = () => {
         setGameState(prev => {
             const newMap = prev.map.map(n => {
@@ -838,6 +1495,7 @@ const App: React.FC = () => {
             setShowTimeLimitModal(true);
             return;
         }
+        setShowStartOverConfirm(false);
         const saved = storageService.loadGame();
         if (saved) {
             // セーブ破損対策: HPが0以下ならセーブを無効化
@@ -891,7 +1549,7 @@ const App: React.FC = () => {
         }
     };
 
-    const startGame = () => {
+    const launchNewAdventure = () => {
         if (isDailyLimitReached) {
             audioService.playSound('wrong');
             setShowTimeLimitModal(true);
@@ -1006,6 +1664,22 @@ const App: React.FC = () => {
         });
     };
 
+    const startGame = () => {
+        if (hasSave) {
+            audioService.playSound('wrong');
+            setShowStartOverConfirm(true);
+            return;
+        }
+        launchNewAdventure();
+    };
+
+    const confirmStartOver = () => {
+        storageService.clearSave();
+        setHasSave(false);
+        setShowStartOverConfirm(false);
+        launchNewAdventure();
+    };
+
     const startTypingGame = () => {
         audioService.playSound('select');
         setIsLoading(false);
@@ -1072,6 +1746,7 @@ const App: React.FC = () => {
     const startProblemChallenge = (e?: React.MouseEvent) => {
         if (e) e.stopPropagation();
         audioService.playSound('select');
+        setUnlockCheckStartMathCorrect(totalMathCorrect);
         setGameState(prev => ({
             ...prev,
             screen: GameScreen.PROBLEM_CHALLENGE,
@@ -1255,6 +1930,7 @@ const App: React.FC = () => {
     const handleCharacterSelect = (char: Character) => {
         audioService.playSound('select');
         setSelectedCharName(char.name);
+        setUnlockCheckStartMathCorrect(totalMathCorrect);
 
         let initialDeck: ICard[] = [];
         let logs = [trans("旅の支度をしている...", languageMode)];
@@ -1596,7 +2272,11 @@ const App: React.FC = () => {
                 if (p.relics.find(r => r.id === 'LANTERN')) p.currentEnergy += 1;
                 if (p.relics.find(r => r.id === 'BRONZE_SCALES')) p.powers['THORNS'] = (p.powers['THORNS'] || 0) + 3;
                 if (p.relics.find(r => r.id === 'BLOOD_VIAL')) p.currentHp = Math.min(p.maxHp, p.currentHp + 2);
-                if (p.relics.find(r => r.id === 'BIG_LADLE')) p.currentHp = Math.min(p.maxHp, p.currentHp + 2);
+                if (p.relics.find(r => r.id === 'BIG_LADLE')) {
+                    p.maxHp += 4;
+                    p.currentHp += 4;
+                    p.relicCounters['BIG_LADLE_ACTIVE'] = 1;
+                }
                 if (node.type === NodeType.BOSS && p.relics.find(r => r.id === 'PENTOGRAPH')) p.currentHp = Math.min(p.maxHp, p.currentHp + 25);
 
                 if (p.relics.find(r => r.id === 'ANCIENT_TEA_SET') && p.relicCounters['ANCIENT_TEA_SET_ACTIVE']) {
@@ -1621,13 +2301,17 @@ const App: React.FC = () => {
                         e.floatingText = { id: `rel-mask-${Date.now()}-${e.id}`, text: 'へろへろ', color: 'text-gray-400' };
                     });
                 }
+                p.hpLostThisTurn = 0;
+                if (p.turnFlags['STREET_DOG_NEXT_BATTLE']) {
+                    p.nextTurnEnergy += 3;
+                    delete p.turnFlags['STREET_DOG_NEXT_BATTLE'];
+                }
                 if (p.relics.find(r => r.id === 'MUTAGENIC_STRENGTH')) p.strength += 3;
                 syncRedSkullState(p);
 
                 let drawCount = HAND_SIZE;
                 if (p.relics.find(r => r.id === 'BAG_OF_PREP') || p.relics.find(r => r.id === 'BAG_OF_PREPARATION')) drawCount += 2;
                 if (p.relics.find(r => r.id === 'SNAKE_RING')) drawCount += 2;
-                if (p.relics.find(r => r.id === 'FROZEN_EYE')) drawCount += 1;
 
                 for (let i = 0; i < drawCount; i++) {
                     const drawn = p.drawPile.pop();
@@ -1692,10 +2376,7 @@ const App: React.FC = () => {
                         p.relicCounters['ANCIENT_TEA_SET_ACTIVE'] = 1;
                     }
                     if (p.relics.find(r => r.id === 'PEACE_PIPE') && p.deck.length > 0) {
-                        const idx = Math.floor(Math.random() * p.deck.length);
-                        const removed = p.deck[idx];
-                        p.deck = p.deck.filter((_, i) => i !== idx);
-                        restLog = [...restLog, `和解のパイプで「${removed.name}」を取り除いた。`];
+                        p.relicCounters['PEACE_PIPE_READY'] = 1;
                     }
                     return { ...nextState, player: p, narrativeLog: restLog, screen: GameScreen.REST };
                 });
@@ -1888,9 +2569,152 @@ const App: React.FC = () => {
         setWeatherScryModal(null);
     };
 
+    const applyGalaxyExpressSelection = (selectedCardId: string) => {
+        if (!galaxyExpressModal) return;
+        const modal = galaxyExpressModal;
+        setGameState(prev => {
+            const p = { ...prev.player, hand: [...prev.player.hand], drawPile: [...prev.player.drawPile], discardPile: [...prev.player.discardPile] };
+            const targetIds = new Set(modal.cards.map(c => c.id));
+            const selectedCard = modal.cards.find(c => c.id === selectedCardId);
+            const discardCards = modal.cards.filter(c => c.id !== selectedCardId);
+
+            p.drawPile = p.drawPile.filter(c => !targetIds.has(c.id));
+            if (selectedCard) {
+                const picked = { ...selectedCard };
+                if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && picked.cost >= 0) {
+                    picked.cost = Math.floor(Math.random() * 4);
+                }
+                if (p.hand.length < HAND_SIZE + 5) p.hand.push(picked);
+                else p.discardPile.push(picked);
+            }
+            p.discardPile.push(...discardCards);
+
+            const combatLog = [
+                ...prev.combatLog,
+                selectedCard
+                    ? trans(`銀河鉄道の夜：${selectedCard.name}を手札に加え、残り${discardCards.length}枚を捨て札に送った`, languageMode)
+                    : trans("銀河鉄道の夜：選択できるカードがなかった", languageMode)
+            ].slice(-100);
+
+            return { ...prev, player: p, combatLog };
+        });
+        setGalaxyExpressModal(null);
+    };
+
+    const applyGoldFishSelection = (selectedCardId: string) => {
+        if (!goldFishModal) return;
+        setGameState(prev => {
+            const applyEnchant = (zoneCard: ICard) => {
+                if (zoneCard.id !== selectedCardId) return zoneCard;
+                const originalCard = { ...zoneCard };
+                const upgraded = getUpgradedCard(zoneCard);
+                const battleText = 'この戦闘中: +6ダメージ。廃棄。';
+                return appendBattleOnlyText({
+                    ...upgraded,
+                    battleRestore: {
+                        cost: originalCard.cost,
+                        damage: originalCard.damage,
+                        block: originalCard.block,
+                        description: originalCard.description,
+                        exhaust: originalCard.exhaust,
+                        upgraded: originalCard.upgraded,
+                        draw: originalCard.draw,
+                        energy: originalCard.energy,
+                        weak: originalCard.weak,
+                        vulnerable: originalCard.vulnerable,
+                        strength: originalCard.strength,
+                        poison: originalCard.poison,
+                        applyPower: originalCard.applyPower ? { ...originalCard.applyPower } : undefined,
+                        addCardToHand: originalCard.addCardToHand ? { ...originalCard.addCardToHand } : undefined
+                    },
+                    battleBaseCost: upgraded.battleBaseCost ?? upgraded.cost,
+                    battleBaseDamage: upgraded.battleBaseDamage ?? upgraded.damage,
+                    battleBaseExhaust: upgraded.battleBaseExhaust ?? upgraded.exhaust,
+                    cost: 0,
+                    damage: (upgraded.damage || 0) + 6,
+                    exhaust: true
+                }, battleText);
+            };
+            return {
+                ...prev,
+                player: {
+                    ...prev.player,
+                    deck: prev.player.deck.map(applyEnchant),
+                    hand: prev.player.hand.map(applyEnchant),
+                    drawPile: prev.player.drawPile.map(applyEnchant),
+                    discardPile: prev.player.discardPile.map(applyEnchant)
+                },
+                combatLog: [...prev.combatLog, trans("金魚すくい：選んだアタックを戦闘中強化した", languageMode)].slice(-100)
+            };
+        });
+        setGoldFishModal(null);
+    };
+
+    const applyDreamCatcherSelection = (selectedCardId: string) => {
+        if (!dreamCatcherModal) return;
+        setGameState(prev => {
+            const p = { ...prev.player, hand: [...prev.player.hand], drawPile: [...prev.player.drawPile], discardPile: [...prev.player.discardPile] };
+            const index = p.drawPile.findIndex(c => c.id === selectedCardId);
+            if (index >= 0) {
+                const [picked] = p.drawPile.splice(index, 1);
+                const chosen = { ...picked };
+                if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && chosen.cost >= 0) {
+                    chosen.cost = Math.floor(Math.random() * 4);
+                }
+                if (p.hand.length < HAND_SIZE + 5) p.hand.push(chosen);
+                else p.discardPile = [...p.discardPile, chosen];
+                return {
+                    ...prev,
+                    player: p,
+                    combatLog: [...prev.combatLog, trans(`ドリーム・キャッチャー：${picked.name}を手札に加えた`, languageMode)].slice(-100)
+                };
+            }
+            return prev;
+        });
+        setDreamCatcherModal(null);
+    };
+
+    const applyOrrerySelection = (selectedCardId: string) => {
+        if (!orreryModal) return;
+        setGameState(prev => {
+            const p = { ...prev.player, deck: [...prev.player.deck], discardPile: [...prev.player.discardPile], relicCounters: { ...prev.player.relicCounters } };
+            const picked = orreryModal.cards.find(card => card.id === selectedCardId);
+            if (picked) {
+                addCardToDeckWithRelics(p, { ...picked, id: `orrery-picked-${Date.now()}` });
+            }
+            p.relicCounters['ORRERY_PENDING'] = 0;
+            return {
+                ...prev,
+                player: p,
+                narrativeLog: picked ? [...prev.narrativeLog, `${trans("天球儀", languageMode)}: ${trans(picked.name, languageMode)} を選んだ。`] : prev.narrativeLog
+            };
+        });
+        setOrreryModal(null);
+    };
+
+    const applyPeacePipeSelection = (selectedCardId: string | null) => {
+        if (!peacePipeModal) return;
+        setGameState(prev => {
+            const p = { ...prev.player, deck: [...prev.player.deck], relicCounters: { ...prev.player.relicCounters } };
+            let narrativeLog = [...prev.narrativeLog];
+            if (selectedCardId) {
+                const removed = p.deck.find(card => card.id === selectedCardId);
+                p.deck = p.deck.filter(card => card.id !== selectedCardId);
+                if (removed) {
+                    narrativeLog.push(`和解のパイプで「${trans(removed.name, languageMode)}」を取り除いた。`);
+                }
+            } else {
+                narrativeLog.push(`和解のパイプは使わなかった。`);
+            }
+            p.relicCounters['PEACE_PIPE_READY'] = 0;
+            return { ...prev, player: p, narrativeLog };
+        });
+        setPeacePipeModal(null);
+    };
+
     const handleUsePotion = (potion: Potion) => {
         if (gameState.screen !== GameScreen.BATTLE) return;
-        if (weatherScryModal) return;
+        if (weatherScryModal || galaxyExpressModal || goldFishModal || dreamCatcherModal) return;
         audioService.playSound('select');
 
         setGameState(prev => {
@@ -1979,12 +2803,11 @@ const App: React.FC = () => {
                 }
                 newLogs.push(trans("手札を交換", languageMode));
             } else if (potion.templateId === 'ENTROPIC_BREW') {
-                for (let i = 0; i < 3; i++) {
-                    if (p.potions.length < getPotionCapacity(p)) {
-                        const allPotions = Object.values(POTION_LIBRARY);
-                        const randomPot = { ...allPotions[Math.floor(Math.random() * allPotions.length)], id: `entropy-${Date.now()}-${i}` };
-                        p.potions.push(randomPot);
-                    }
+                const capacity = getPotionCapacity(p);
+                for (let i = p.potions.length; i < capacity; i++) {
+                    const allPotions = Object.values(POTION_LIBRARY);
+                    const randomPot = { ...allPotions[Math.floor(Math.random() * allPotions.length)], id: `entropy-${Date.now()}-${i}` };
+                    p.potions.push(randomPot);
                 }
                 newLogs.push(trans("小箱からポーション充填", languageMode));
             } else if (potion.templateId === 'STUDY_SESSION_DRINK') {
@@ -2064,10 +2887,13 @@ const App: React.FC = () => {
     };
 
     const handlePlayCard = (card: ICard) => {
-        if (weatherScryModal) return;
+        if (weatherScryModal || galaxyExpressModal || goldFishModal || dreamCatcherModal) return;
         let effectiveCost = card.cost;
         if (gameState.player.powers['CORRUPTION'] && card.type === CardType.SKILL) {
             effectiveCost = 0;
+        }
+        if (card.type === CardType.ATTACK && gameState.player.turnFlags['NEXT_ATTACK_COST_DOWN']) {
+            effectiveCost = Math.max(0, effectiveCost - 1);
         }
 
         if (gameState.player.currentEnergy < effectiveCost && !gameState.player.partner) return;
@@ -2107,13 +2933,23 @@ const App: React.FC = () => {
             Object.assign(p, additionalResult.player);
             enemies = additionalResult.enemies;
 
+            const isGalaxyExpressCard =
+                card.name === '銀河鉄道の夜' ||
+                card.originalNames?.includes('銀河鉄道の夜') ||
+                card.id?.includes('GALAXY_EXPRESS') ||
+                card.description.includes('山札の上から5枚を見る');
+            const isGiftBoxCard =
+                card.name === '秘密のプレゼント' ||
+                card.originalNames?.includes('秘密のプレゼント') ||
+                card.id?.includes('GIRLS_GIFT_BOX');
+
             if (card.gold) {
                 p.gold += card.gold;
                 currentLogs.push(`${card.gold}ゴールドをゲット！`);
                 audioService.playSound('buff');
             }
 
-            if (card.addPotion) {
+            if (card.addPotion && !isGiftBoxCard) {
                 const allPotions = Object.values(POTION_LIBRARY);
                 const potion = { ...allPotions[Math.floor(Math.random() * allPotions.length)], id: `event-pot-${Date.now()}` };
                 if (p.potions.length < getPotionCapacity(p)) p.potions.push(potion);
@@ -2123,6 +2959,28 @@ const App: React.FC = () => {
             if (card.blockMultiplier) {
                 p.block = Math.floor(p.block * card.blockMultiplier);
                 nextActiveEffects.push({ id: `vfx-blkmul-${Date.now()}`, type: 'BLOCK', targetId: 'player' });
+            }
+
+            if (card.name === 'スタンプラリー' || card.originalNames?.includes('スタンプラリー') || card.id?.includes('OUT_STAMP_COLLECT')) {
+                p.relicCounters['OUT_STAMP_QUEST_REMAINING'] = 5;
+                currentLogs.push('クエスト開始: あと5枚カードを使う');
+            }
+
+            if (card.name === '戦隊ヒーローのポーズ' || card.originalNames?.includes('戦隊ヒーローのポーズ') || card.id?.includes('OUT_SUPER_HERO_POSE')) {
+                const battleText = 'この戦闘中: 使用後に1枚引く。';
+                p.relicCounters['OUT_SUPER_HERO_POSE_ACTIVE'] = 1;
+                const applyAttackText = (zoneCard: ICard) => {
+                    if (zoneCard.type !== CardType.ATTACK) return zoneCard;
+                    return appendBattleOnlyText({
+                        ...zoneCard,
+                        battleBonusDrawOnPlay: Math.max(zoneCard.battleBonusDrawOnPlay || 0, 1)
+                    }, battleText);
+                };
+                p.deck = p.deck.map(applyAttackText);
+                p.hand = p.hand.map(applyAttackText);
+                p.drawPile = p.drawPile.map(applyAttackText);
+                p.discardPile = p.discardPile.map(applyAttackText);
+                currentLogs.push('この戦闘中、アタックに追加テキストが付与された');
             }
 
             if (card.name === '磁石の力' || card.name === 'RIKA_MAGNET' || card.name === '鉄棒の逆上がり' || card.name === 'PE_HORIZONTAL_BAR' || card.originalNames?.some(n => ['磁石の力', 'RIKA_MAGNET', '鉄棒の逆上がり', 'PE_HORIZONTAL_BAR'].includes(n))) {
@@ -2144,6 +3002,16 @@ const App: React.FC = () => {
                         return hc;
                     });
                     currentLogs.push("手札のカードを2枚強化した！");
+                }
+            }
+
+            if (isGiftBoxCard) {
+                const allPotions = Object.values(POTION_LIBRARY);
+                for (let i = 0; i < 2; i++) {
+                    if (p.potions.length >= getPotionCapacity(p)) break;
+                    const potion = { ...allPotions[Math.floor(Math.random() * allPotions.length)], id: `gift-pot-${Date.now()}-${i}` };
+                    p.potions.push(potion);
+                    currentLogs.push(`${trans(potion.name, languageMode)}をゲット！`);
                 }
             }
 
@@ -2171,6 +3039,9 @@ const App: React.FC = () => {
             }
 
             p.currentEnergy -= effectiveCost;
+            if (card.type === CardType.ATTACK && p.turnFlags['NEXT_ATTACK_COST_DOWN']) {
+                delete p.turnFlags['NEXT_ATTACK_COST_DOWN'];
+            }
             p.cardsPlayedThisTurn++;
             if (hasRelic(p, 'INK_BOTTLE')) {
                 const inkCount = (p.relicCounters['INK_BOTTLE_COUNT'] || 0) + 1;
@@ -2294,6 +3165,22 @@ const App: React.FC = () => {
                 p.turnFlags['NECRONOMICON_USED'] = true;
                 currentLogs.push(trans("ネクロノミコンで再発動！", languageMode));
             }
+            let attackDamageMultiplier = 1;
+            if (card.type === CardType.ATTACK && p.turnFlags['NEXT_ATTACK_DOUBLE_DAMAGE']) {
+                attackDamageMultiplier *= 2;
+                delete p.turnFlags['NEXT_ATTACK_DOUBLE_DAMAGE'];
+                currentLogs.push(trans("次のアタック強化が発動！", languageMode));
+            }
+            if (card.type === CardType.ATTACK && p.turnFlags['NEXT_ATTACK_EXTRA_ACTIVATION']) {
+                activations += 1;
+                delete p.turnFlags['NEXT_ATTACK_EXTRA_ACTIVATION'];
+                currentLogs.push(trans("次のアタックが追加発動！", languageMode));
+            }
+            if (card.type === CardType.ATTACK && p.turnFlags['NEXT_ATTACK_TRIPLE']) {
+                activations += 2;
+                delete p.turnFlags['NEXT_ATTACK_TRIPLE'];
+                currentLogs.push(trans("次のアタックが3連発動！", languageMode));
+            }
 
             let baseVfx = 'SLASH';
             if (card.type === CardType.ATTACK) {
@@ -2355,7 +3242,7 @@ const App: React.FC = () => {
                                     logParts.push(`x2(ペン先)`);
                                 }
                             }
-                            let damage = Math.floor(baseDamage * multiplier);
+                            let damage = Math.floor(baseDamage * multiplier * attackDamageMultiplier);
                             if (p.powers['WEAK'] > 0) {
                                 damage = Math.floor(damage * 0.75);
                                 logParts.push(`x0.75(${trans("へろへろ", languageMode)})`);
@@ -2579,6 +3466,7 @@ const App: React.FC = () => {
                     if (card.energy) p.currentEnergy += card.energy;
                     if (card.selfDamage) {
                         p.currentHp -= card.selfDamage;
+                        p.hpLostThisTurn = (p.hpLostThisTurn || 0) + card.selfDamage;
                         currentLogs.push(`${trans("自分に", languageMode)}${card.selfDamage}${trans("ダメージ", languageMode)}`);
                         if (p.powers['RUPTURE']) {
                             p.strength += p.powers['RUPTURE'];
@@ -2675,6 +3563,246 @@ const App: React.FC = () => {
                         }
                         nextActiveEffects.push({ id: `vfx-weather-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
                     }
+                    if (isGalaxyExpressCard) {
+                        const peekCards: ICard[] = [];
+                        for (let j = 0; j < 5; j++) {
+                            if (p.drawPile.length === 0) {
+                                if (p.discardPile === undefined || p.discardPile.length === 0) break;
+                                p.drawPile = shuffle(p.discardPile);
+                                p.discardPile = [];
+                            }
+                            const top = p.drawPile.pop();
+                            if (top) peekCards.push(top);
+                        }
+                        peekCards.slice().reverse().forEach(c => p.drawPile.push(c));
+                        p.turnFlags = { ...p.turnFlags, GALAXY_PENDING_MODAL: true };
+                        currentLogs.push(
+                            peekCards.length > 0
+                                ? trans("銀河鉄道の夜：カード選択を開始", languageMode)
+                                : trans("銀河鉄道の夜：見られるカードがなかった", languageMode)
+                        );
+                        nextActiveEffects.push({ id: `vfx-galaxy-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
+                    }
+                    if (card.name === '金魚すくい' || card.originalNames?.includes('金魚すくい') || card.id?.includes('OUT_GOLD_FISH')) {
+                        p.turnFlags = { ...p.turnFlags, GOLD_FISH_PENDING_MODAL: true };
+                        currentLogs.push(trans("金魚すくい：強化する手札を選んでください", languageMode));
+                    }
+                    if (card.name === '夢のおもちゃ屋' || card.originalNames?.includes('夢のおもちゃ屋') || card.id?.includes('OUT_TOY_STORE')) {
+                        const legendaryPool = getFilteredCardPool(p.id).filter(c => c.rarity === 'LEGENDARY');
+                        if (legendaryPool.length > 0) {
+                            let newCard = { ...legendaryPool[Math.floor(Math.random() * legendaryPool.length)], id: `toy-store-${Date.now()}` };
+                            if (p.powers['MASTER_REALITY']) newCard = getUpgradedCard(newCard);
+                            if (p.hand.length < HAND_SIZE + 5) p.hand.push(newCard);
+                            else p.discardPile.push(newCard);
+                            currentLogs.push(`${trans(newCard.name, languageMode)}を生成した！`);
+                        }
+                    }
+                    if (card.name === '幻覚キノコ' || card.originalNames?.includes('幻覚キノコ') || card.id?.includes('MYSTIC_MUSHROOM')) {
+                        const pool = getFilteredCardPool(p.id).filter(c => c.type !== CardType.CURSE && c.type !== CardType.STATUS);
+                        for (let j = 0; j < 2; j++) {
+                            if (pool.length === 0) break;
+                            let newCard = { ...pool[Math.floor(Math.random() * pool.length)], id: `mystic-mushroom-${Date.now()}-${j}` };
+                            if (p.powers['MASTER_REALITY']) newCard = getUpgradedCard(newCard);
+                            if (p.hand.length < HAND_SIZE + 5) p.hand.push(newCard);
+                            else p.discardPile.push(newCard);
+                        }
+                        currentLogs.push(trans("ランダムなカード2枚を手札に加えた！", languageMode));
+                    }
+                    if (card.name === 'お年玉の誘惑' || card.originalNames?.includes('お年玉の誘惑') || card.id?.includes('OUT_NEW_YEAR_GOLD')) {
+                        const candidates = p.hand.filter(c => c.id !== card.id);
+                        if (candidates.length > 0) {
+                            const target = candidates[Math.floor(Math.random() * candidates.length)];
+                            p.hand = p.hand.map(hc => hc.id === target.id ? makeBattleCostZero(hc, 'この戦闘中: 0コスト。') : hc);
+                            currentLogs.push(`${trans(target.name, languageMode)}のコストを0にした！`);
+                        }
+                    }
+                    if (card.name === 'ガチャの神引き' || card.originalNames?.includes('ガチャの神引き') || card.id?.includes('OUT_GACHA_LUCK')) {
+                        const deckLegendaries = p.deck.filter(c => c.rarity === 'LEGENDARY');
+                        if (deckLegendaries.length > 0) {
+                            const target = deckLegendaries[Math.floor(Math.random() * deckLegendaries.length)];
+                            const copy = { ...target, id: `gacha-luck-${Date.now()}` };
+                            if (p.hand.length < HAND_SIZE + 5) p.hand.push(copy);
+                            else p.discardPile.push(copy);
+                            currentLogs.push(`${trans(copy.name, languageMode)}を手札に加えた！`);
+                        }
+                    }
+                    if (card.name === '図書室での昼寝' || card.originalNames?.includes('図書室での昼寝') || card.id?.includes('OUT_LIBRARY_SLEEP')) {
+                        p.currentHp = p.maxHp;
+                        if (p.powers['WEAK'] > 0) p.powers['WEAK'] = 0;
+                        if (p.powers['VULNERABLE'] > 0) p.powers['VULNERABLE'] = 0;
+                        if (p.powers['FRAIL'] > 0) p.powers['FRAIL'] = 0;
+                        if (p.powers['CONFUSED'] > 0) p.powers['CONFUSED'] = 0;
+                        currentLogs.push(trans("全デバフを解除し、HPを全回復した！", languageMode));
+                    }
+                    if (card.name === '手作りの宝地図' || card.originalNames?.includes('手作りの宝地図') || card.id?.includes('OUT_TREASURE_MAP')) {
+                        const relicPool = Object.values(RELIC_LIBRARY).filter(r => ['COMMON', 'UNCOMMON', 'RARE', 'SHOP'].includes(r.rarity));
+                        const relic = relicPool[Math.floor(Math.random() * relicPool.length)];
+                        if (relic) {
+                            p.relics = [...p.relics, relic];
+                            applyExtendedRelicAcquireEffects(p, relic);
+                            currentLogs.push(`${trans(relic.name, languageMode)}を入手した！`);
+                        }
+                    }
+                    if (card.name === '初詣の願い事' || card.originalNames?.includes('初詣の願い事') || card.id?.includes('OUT_SHRINE_PRAY')) {
+                        p.hand = p.hand.map(hc => hc.id === card.id ? hc : { ...hc, cost: 0 });
+                        currentLogs.push(trans("手札の全カードのコストを0にした！", languageMode));
+                    }
+                    if (card.name === 'ローラーシューズ' || card.originalNames?.includes('ローラーシューズ') || card.id?.includes('OUT_ROLLER_BLADE')) {
+                        p.hand = p.hand.map(hc => hc.id === card.id ? hc : makeBattleCostZero(hc, 'この戦闘中: 0コスト。'));
+                        currentLogs.push(trans("このターン、全手札のコストを0にした！", languageMode));
+                    }
+                    if (card.name === '虫かごの秘密' || card.originalNames?.includes('虫かごの秘密') || card.id?.includes('OUT_BUG_BOX')) {
+                        const capturedCards = p.deck.filter(c => c.id.startsWith('captured-') || c.rarity === 'SPECIAL' && !!c.enemyIllustrationName);
+                        if (capturedCards.length > 0) {
+                            const target = capturedCards[Math.floor(Math.random() * capturedCards.length)];
+                            const copy = { ...target, id: `bug-box-${Date.now()}` };
+                            if (p.hand.length < HAND_SIZE + 5) p.hand.push(copy);
+                            else p.discardPile.push(copy);
+                            currentLogs.push(`${trans(copy.name, languageMode)}を手札に加えた！`);
+                        }
+                    }
+                    if (card.name === '出前ピザパーティー' || card.originalNames?.includes('出前ピザパーティー') || card.id?.includes('OUT_PIZZA_PARTY')) {
+                        p.currentHp = p.maxHp;
+                        if (p.partner) {
+                            p.partner.currentHp = p.partner.maxHp;
+                            p.partner.floatingText = { id: `partner-pizza-heal-${Date.now()}`, text: 'FULL', color: 'text-pink-400', iconType: 'heart' };
+                        }
+                        currentLogs.push(trans("自分とパートナーのHPを全回復した！", languageMode));
+                    }
+                    if (card.name === '虹を追いかけて' || card.originalNames?.includes('虹を追いかけて') || card.id?.includes('OUT_RAINBOW_CHASE')) {
+                        const upgradeTargets = shuffle([...p.deck]).slice(0, 5);
+                        const targetIds = new Set(upgradeTargets.map(c => c.id));
+                        p.deck = p.deck.map(dc => targetIds.has(dc.id) ? getUpgradedCard(dc) : dc);
+                        currentLogs.push(trans("デッキのランダムなカード5枚を強化した！", languageMode));
+                    }
+                    if (card.name === '迷い犬の恩返し' || card.originalNames?.includes('迷い犬の恩返し') || card.id?.includes('OUT_STREET_DOG')) {
+                        p.turnFlags = { ...p.turnFlags, STREET_DOG_NEXT_BATTLE: true };
+                        currentLogs.push(trans("次の戦闘開始時、エネルギー+3", languageMode));
+                    }
+                    if (card.name === '究極の10連ガチャ' || card.originalNames?.includes('究極の10連ガチャ') || card.id?.includes('OUT_SUPER_GACHA')) {
+                        const pool = getFilteredCardPool(p.id).filter(c => c.type !== CardType.CURSE && c.type !== CardType.STATUS);
+                        for (let j = 0; j < 10; j++) {
+                            if (pool.length === 0) break;
+                            let newCard = { ...pool[Math.floor(Math.random() * pool.length)], id: `super-gacha-${Date.now()}-${j}` };
+                            if (p.powers['MASTER_REALITY']) newCard = getUpgradedCard(newCard);
+                            if (p.hand.length < HAND_SIZE + 5) p.hand.push(newCard);
+                            else p.discardPile.push(newCard);
+                        }
+                        currentLogs.push(trans("ランダムなカード10枚を加えた！", languageMode));
+                    }
+                    if (card.name === 'いつかの卒業式' || card.originalNames?.includes('いつかの卒業式') || card.id?.includes('OUT_GRADUATION_DAY')) {
+                        p.strength += 20;
+                        p.powers['DEXTERITY'] = (p.powers['DEXTERITY'] || 0) + 20;
+                        p.powers['ARTIFACT'] = (p.powers['ARTIFACT'] || 0) + 5;
+                        currentLogs.push(trans("ムキムキ20、カチカチ20、キラキラ5を得た！", languageMode));
+                    }
+                    if (
+                        card.name === '田んぼのかかし' ||
+                        card.originalNames?.includes('田んぼのかかし') ||
+                        card.id?.includes('OUT_SCARE_CROW') ||
+                        card.name === 'おやすみスウィート' ||
+                        card.originalNames?.includes('おやすみスウィート') ||
+                        card.id?.includes('GIRLS_SWEET_DREAM')
+                    ) {
+                        targets.forEach(e => {
+                            e.sleepTurns = Math.max(e.sleepTurns || 0, 2);
+                            e.nextIntent = { type: EnemyIntentType.SLEEP, value: 0 };
+                        });
+                        currentLogs.push(trans("敵全体を2ターン眠らせた！", languageMode));
+                    }
+                    if (card.name === 'ドリーム・キャッチャー' || card.originalNames?.includes('ドリーム・キャッチャー') || card.id?.includes('GIRLS_DREAM_CATCHER')) {
+                        p.turnFlags = { ...p.turnFlags, DREAM_CATCHER_PENDING_MODAL: true };
+                        currentLogs.push(trans("ドリーム・キャッチャー：山札からカードを選んでください", languageMode));
+                    }
+                    if (card.name === 'なないろマジック' || card.originalNames?.includes('なないろマジック') || card.id?.includes('GIRLS_RAINBOW_MAGIC')) {
+                        const candidates = p.hand.filter(c => c.id !== card.id && c.cost > 0);
+                        if (candidates.length > 0) {
+                            const target = candidates[Math.floor(Math.random() * candidates.length)];
+                            p.hand = p.hand.map(hc => hc.id === target.id ? { ...hc, cost: 0 } : hc);
+                            currentLogs.push(`${trans(target.name, languageMode)}のコストを0にした！`);
+                        }
+                    }
+                    if (card.name === 'お姫様の呼び声' || card.originalNames?.includes('お姫様の呼び声') || card.id?.includes('GIRLS_PRINCESS_CALL')) {
+                        const skills = p.drawPile.filter(c => c.type === CardType.SKILL);
+                        if (skills.length > 0) {
+                            const target = skills[Math.floor(Math.random() * skills.length)];
+                            p.drawPile = p.drawPile.filter(c => c.id !== target.id);
+                            p.hand.push(target);
+                            currentLogs.push(`${trans(target.name, languageMode)}を山札から手札に加えた！`);
+                        }
+                    }
+                    if (card.name === 'おとぎ話の扉' || card.originalNames?.includes('おとぎ話の扉') || card.id?.includes('GIRLS_FAIRY_TALE')) {
+                        const specialPool = getFilteredCardPool(p.id).filter(c => c.rarity === 'SPECIAL');
+                        for (let j = 0; j < 3; j++) {
+                            if (specialPool.length === 0) break;
+                            let newCard = { ...specialPool[Math.floor(Math.random() * specialPool.length)], id: `fairy-tale-${Date.now()}-${j}` };
+                            if (p.powers['MASTER_REALITY']) newCard = getUpgradedCard(newCard);
+                            if (p.hand.length < HAND_SIZE + 5) p.hand.push(newCard);
+                            else p.discardPile.push(newCard);
+                        }
+                        currentLogs.push(trans("ランダムなスペシャルカードを3枚加えた！", languageMode));
+                    }
+                    if (card.name === '親友との約束' || card.originalNames?.includes('親友との約束') || card.id?.includes('OUT_FRIEND_FOREVER')) {
+                        if (p.partner) {
+                            p.partner.maxHp += 20;
+                            p.partner.currentHp = p.partner.maxHp;
+                            p.partner.floatingText = { id: `partner-fullheal-${Date.now()}`, text: 'FULL', color: 'text-pink-400', iconType: 'heart' };
+                            currentLogs.push(trans("パートナーの最大HP+20、全回復！", languageMode));
+                        }
+                    }
+                    if (card.name === 'ずっと友達だよ' || card.originalNames?.includes('ずっと友達だよ') || card.id?.includes('GIRLS_FRIENDSHIP')) {
+                        if (p.partner) {
+                            p.partner.currentHp = p.partner.maxHp;
+                            p.partner.floatingText = { id: `partner-heal-${Date.now()}`, text: 'FULL', color: 'text-pink-400', iconType: 'heart' };
+                            currentLogs.push(trans("パートナーのHPを全回復した！", languageMode));
+                        }
+                    }
+                    if (card.name === '雷神の鉄拳' || card.originalNames?.includes('雷神の鉄拳') || card.id?.includes('BOYS_THUNDER_FIST')) {
+                        p.turnFlags = { ...p.turnFlags, NEXT_ATTACK_COST_DOWN: true };
+                        currentLogs.push(trans("次のアタックのコストが1下がる", languageMode));
+                    }
+                    if (card.name === 'リベンジ・バースト' || card.originalNames?.includes('リベンジ・バースト') || card.id?.includes('BOYS_REVENGE')) {
+                        card.damage = Math.max(0, (p.hpLostThisTurn || 0) * 2);
+                        currentLogs.push(trans(`今ターン失ったHPを力に変えた！ (${card.damage}ダメージ)`, languageMode));
+                    }
+                    if (card.name === '修羅の構え' || card.originalNames?.includes('修羅の構え') || card.id?.includes('BOYS_BATTLE_STANCE')) {
+                        p.turnFlags = { ...p.turnFlags, NEXT_ATTACK_EXTRA_ACTIVATION: true };
+                        currentLogs.push(trans("次のアタックが2回発動する", languageMode));
+                    }
+                    if (card.name === '路地裏の野良猫' || card.originalNames?.includes('路地裏の野良猫') || card.id?.includes('OUT_STRAY_CAT')) {
+                        p.turnFlags = { ...p.turnFlags, NEXT_ATTACK_TRIPLE: true };
+                        currentLogs.push(trans("次のアタックが3回発動する", languageMode));
+                    }
+                    if (card.name === 'バネの弾力' || card.originalNames?.includes('バネの弾力') || card.id?.includes('RIKA_SPRING')) {
+                        p.turnFlags = { ...p.turnFlags, NEXT_ATTACK_DOUBLE_DAMAGE: true };
+                        currentLogs.push(trans("次の攻撃ダメージが2倍になる", languageMode));
+                    }
+                    if (card.name === '華麗な舞' || card.originalNames?.includes('華麗な舞') || card.id?.includes('GIRLS_BALLERINA')) {
+                        p.turnFlags = { ...p.turnFlags, NEXT_ATTACK_DOUBLE_DAMAGE: true };
+                        currentLogs.push(trans("次のアタックが強化された", languageMode));
+                    }
+                    if (card.name === '本命チョコ' || card.originalNames?.includes('本命チョコ') || card.id?.includes('GIRLS_CHOCO_VALENTINE')) {
+                        targets.forEach(e => {
+                            e.sleepTurns = Math.max(e.sleepTurns || 0, 1);
+                            e.nextIntent = { type: EnemyIntentType.SLEEP, value: 0 };
+                        });
+                        currentLogs.push(trans("相手を1ターン行動不能にした！", languageMode));
+                    }
+                    if (card.name === 'カラフル・レインボー' || card.originalNames?.includes('カラフル・レインボー') || card.id?.includes('GIRLS_COLORFUL_RAIN')) {
+                        enemies.forEach(e => {
+                            if (e.currentHp > 0) e.block = 0;
+                        });
+                        currentLogs.push(trans("敵全体のブロックを解除した！", languageMode));
+                    }
+                    if (card.name === '川での魚つかみ' || card.originalNames?.includes('川での魚つかみ') || card.id?.includes('OUT_FISH_CATCH')) {
+                        const allPotions = Object.values(POTION_LIBRARY);
+                        for (let i = 0; i < 2; i++) {
+                            if (p.potions.length >= getPotionCapacity(p)) break;
+                            const potion = { ...allPotions[Math.floor(Math.random() * allPotions.length)], id: `fish-catch-${Date.now()}-${i}` };
+                            p.potions.push(potion);
+                            currentLogs.push(`${trans(potion.name, languageMode)}をゲット！`);
+                        }
+                    }
                     if (card.shuffleHandToDraw) {
                         p.drawPile = shuffle([...p.drawPile, ...p.discardPile]);
                         p.discardPile = [];
@@ -2689,7 +3817,17 @@ const App: React.FC = () => {
                         }
                         nextActiveEffects.push({ id: `vfx-ap-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
                     }
-                    if (card.draw) {
+                    if (
+                        (card.name === '奇跡のリボン' || card.originalNames?.includes('奇跡のリボン') || card.id?.includes('GIRLS_MIRACLE_RIBBON'))
+                    ) {
+                        p.currentEnergy = p.maxEnergy;
+                        currentLogs.push(trans("エネルギーを全回復した！", languageMode));
+                    }
+                    if (card.name === 'おじいちゃんの古民家' || card.originalNames?.includes('おじいちゃんの古民家') || card.id?.includes('OUT_OLD_HOUSE')) {
+                        p.currentHp = p.maxHp;
+                        currentLogs.push(trans("HPを全回復した！", languageMode));
+                    }
+                    if (card.draw && !isGalaxyExpressCard) {
                         for (let j = 0; j < card.draw; j++) {
                             if (p.drawPile.length === 0) {
                                 if (p.discardPile === undefined || p.discardPile.length === 0) break;
@@ -2748,7 +3886,7 @@ const App: React.FC = () => {
                         }
                     }
 
-                    if (card.addCardToHand) {
+                    if (card.addCardToHand && !(card.name === '幻覚キノコ' || card.originalNames?.includes('幻覚キノコ') || card.id?.includes('MYSTIC_MUSHROOM'))) {
                         for (let c = 0; c < card.addCardToHand.count; c++) {
                             const template = CARDS_LIBRARY[card.addCardToHand.cardName];
                             if (template) {
@@ -2884,6 +4022,42 @@ const App: React.FC = () => {
                 }
             }
 
+            if ((card.battleBonusDrawOnPlay || 0) > 0) {
+                for (let i = 0; i < (card.battleBonusDrawOnPlay || 0); i++) {
+                    if (p.drawPile.length === 0 && p.discardPile.length > 0) {
+                        p.drawPile = shuffle(p.discardPile);
+                        p.discardPile = [];
+                    }
+                    const drawn = p.drawPile.pop();
+                    if (!drawn) break;
+                    p.hand.push(drawn);
+                }
+                currentLogs.push('追加テキスト: カードを1枚引いた');
+            }
+
+            if ((p.relicCounters['OUT_STAMP_QUEST_REMAINING'] || 0) > 0 &&
+                !(card.name === 'スタンプラリー' || card.originalNames?.includes('スタンプラリー') || card.id?.includes('OUT_STAMP_COLLECT'))) {
+                p.relicCounters['OUT_STAMP_QUEST_REMAINING'] -= 1;
+                const remaining = p.relicCounters['OUT_STAMP_QUEST_REMAINING'];
+                if (remaining <= 0) {
+                    p.currentEnergy += 1;
+                    for (let i = 0; i < 2; i++) {
+                        if (p.drawPile.length === 0 && p.discardPile.length > 0) {
+                            p.drawPile = shuffle(p.discardPile);
+                            p.discardPile = [];
+                        }
+                        const drawn = p.drawPile.pop();
+                        if (!drawn) break;
+                        p.hand.push(drawn);
+                    }
+                    currentLogs.push('クエスト達成: エネルギー1、2ドロー');
+                    delete p.relicCounters['OUT_STAMP_QUEST_REMAINING'];
+                    nextActiveEffects.push({ id: `vfx-quest-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+                } else {
+                    currentLogs.push(`クエスト進行: あと${remaining}枚`);
+                }
+            }
+
             let nextSelectedId = prev.selectedEnemyId;
             const aliveEnemies = enemies.filter(e => e.currentHp > 0);
             const defeatedCount = enemies.length - aliveEnemies.length;
@@ -3000,6 +4174,7 @@ const App: React.FC = () => {
             }
             p.currentEnergy = baseEnergy;
             p.nextTurnEnergy = 0;
+            p.hpLostThisTurn = 0;
 
             let newDrawPile = [...p.drawPile];
             let newDiscardPile = [...p.discardPile];
@@ -3276,6 +4451,23 @@ const App: React.FC = () => {
                     const nextActiveEffects: VisualEffectInstance[] = [];
                     const intent = e.nextIntent;
                     e.block = 0;
+                    if (e.sleepTurns && e.sleepTurns > 0) {
+                        const remainingSleep = e.sleepTurns - 1;
+                        newLogs.push(`${trans(e.name, languageMode)}は眠っている...`);
+                        e.sleepTurns = remainingSleep;
+                        e.nextIntent = remainingSleep > 0
+                            ? { type: EnemyIntentType.SLEEP, value: 0 }
+                            : getNextEnemyIntent(e, prev.turn + 1);
+                        if (e.vulnerable > 0) e.vulnerable--;
+                        if (e.weak > 0) e.weak--;
+                        return {
+                            ...prev,
+                            player: p,
+                            enemies: newEnemies,
+                            combatLog: [...prev.combatLog, ...newLogs].slice(-100),
+                            activeEffects: [...prev.activeEffects, ...nextActiveEffects]
+                        };
+                    }
                     if (intent.type === EnemyIntentType.ATTACK || intent.type === EnemyIntentType.ATTACK_DEBUFF || intent.type === EnemyIntentType.ATTACK_DEFEND || intent.type === EnemyIntentType.PIERCE_ATTACK) {
                         let baseDamage = intent.value;
                         let logParts = [`${baseDamage}`];
@@ -3357,10 +4549,12 @@ const App: React.FC = () => {
                                 }
                             } else {
                                 p.currentHp -= unblockedDamage;
+                                p.hpLostThisTurn = (p.hpLostThisTurn || 0) + unblockedDamage;
                                 if (unblockedDamage > 0) p.floatingText = { id: `dmg-${Date.now()}`, text: `-${unblockedDamage}`, color: 'text-red-500' };
                             }
                         } else {
                             p.currentHp -= unblockedDamage;
+                            p.hpLostThisTurn = (p.hpLostThisTurn || 0) + unblockedDamage;
                             if (unblockedDamage > 0) p.floatingText = { id: `dmg-${Date.now()}`, text: `-${unblockedDamage}`, color: 'text-red-500' };
                         }
                         if (p.powers['THORNS'] && damage > 0) {
@@ -3477,7 +4671,7 @@ const App: React.FC = () => {
 
     const handleEndTurnClick = () => {
         if (isEndingTurnRef.current) return;
-        if (weatherScryModal) return;
+        if (weatherScryModal || galaxyExpressModal || goldFishModal || dreamCatcherModal) return;
         lastPlayedCardRef.current = null;
 
         if (gameState.player.relics.find(r => r.id === 'NILRYS_CODEX')) {
@@ -3495,7 +4689,7 @@ const App: React.FC = () => {
 
     useEffect(() => {
         if (gameState.screen !== GameScreen.BATTLE) return;
-        if (weatherScryModal) return;
+        if (weatherScryModal || galaxyExpressModal || goldFishModal || dreamCatcherModal) return;
         if (!gameState.player.turnFlags['WEATHER_PENDING_MODAL']) return;
 
         const cards = [...gameState.player.drawPile].slice(-3).reverse();
@@ -3510,7 +4704,98 @@ const App: React.FC = () => {
                 turnFlags: { ...prev.player.turnFlags, WEATHER_PENDING_MODAL: false }
             }
         }));
-    }, [gameState.screen, gameState.player.drawPile, gameState.player.turnFlags, weatherScryModal]);
+    }, [dreamCatcherModal, galaxyExpressModal, gameState.player.drawPile, gameState.player.turnFlags, gameState.screen, goldFishModal, weatherScryModal]);
+
+    useEffect(() => {
+        if (gameState.screen !== GameScreen.BATTLE) return;
+        if (weatherScryModal || galaxyExpressModal || goldFishModal || dreamCatcherModal) return;
+        if (!gameState.player.turnFlags['GALAXY_PENDING_MODAL']) return;
+
+        const cards = [...gameState.player.drawPile].slice(-5).reverse();
+        if (cards.length > 0) {
+            setGalaxyExpressModal({ cards });
+        }
+        setGameState(prev => ({
+            ...prev,
+            player: {
+                ...prev.player,
+                turnFlags: { ...prev.player.turnFlags, GALAXY_PENDING_MODAL: false }
+            }
+        }));
+    }, [dreamCatcherModal, galaxyExpressModal, gameState.player.drawPile, gameState.player.turnFlags, gameState.screen, goldFishModal, weatherScryModal]);
+
+    useEffect(() => {
+        if (gameState.screen !== GameScreen.BATTLE) return;
+        if (weatherScryModal || galaxyExpressModal || goldFishModal || dreamCatcherModal) return;
+        if (!gameState.player.turnFlags['GOLD_FISH_PENDING_MODAL']) return;
+
+        const cards = [...gameState.player.hand].filter(c => c.type === CardType.ATTACK && c.type !== CardType.STATUS && c.type !== CardType.CURSE);
+        if (cards.length > 0) {
+            setGoldFishModal({
+                title: '金魚すくい',
+                description: '戦闘中強化するアタックを1枚選んでください',
+                cards
+            });
+        }
+        setGameState(prev => ({
+            ...prev,
+            player: {
+                ...prev.player,
+                turnFlags: { ...prev.player.turnFlags, GOLD_FISH_PENDING_MODAL: false }
+            }
+        }));
+    }, [dreamCatcherModal, galaxyExpressModal, gameState.player.hand, gameState.player.turnFlags, gameState.screen, goldFishModal, weatherScryModal]);
+
+    useEffect(() => {
+        if (gameState.screen !== GameScreen.BATTLE) return;
+        if (!gameState.player.relicCounters['OUT_SUPER_HERO_POSE_ACTIVE']) return;
+
+        const battleText = 'この戦闘中: 使用後に1枚引く。';
+        const applyAttackText = (zoneCard: ICard) => {
+            if (zoneCard.type !== CardType.ATTACK) return zoneCard;
+            return appendBattleOnlyText({
+                ...zoneCard,
+                battleBonusDrawOnPlay: Math.max(zoneCard.battleBonusDrawOnPlay || 0, 1)
+            }, battleText);
+        };
+
+        const hasMissingText = [...gameState.player.hand, ...gameState.player.drawPile, ...gameState.player.discardPile]
+            .some(c => c.type === CardType.ATTACK && (!c.battleBonusDrawOnPlay || !c.description.includes(battleText)));
+        if (!hasMissingText) return;
+
+        setGameState(prev => ({
+            ...prev,
+            player: {
+                ...prev.player,
+                deck: prev.player.deck.map(applyAttackText),
+                hand: prev.player.hand.map(applyAttackText),
+                drawPile: prev.player.drawPile.map(applyAttackText),
+                discardPile: prev.player.discardPile.map(applyAttackText)
+            }
+        }));
+    }, [gameState.player.deck, gameState.player.discardPile, gameState.player.drawPile, gameState.player.hand, gameState.player.relicCounters, gameState.screen]);
+
+    useEffect(() => {
+        if (gameState.screen !== GameScreen.BATTLE) return;
+        if (weatherScryModal || galaxyExpressModal || goldFishModal || dreamCatcherModal) return;
+        if (!gameState.player.turnFlags['DREAM_CATCHER_PENDING_MODAL']) return;
+
+        const cards = [...gameState.player.drawPile].slice().reverse();
+        if (cards.length > 0) {
+            setDreamCatcherModal({
+                title: 'ドリーム・キャッチャー',
+                description: '山札から手札に加えるカードを1枚選んでください',
+                cards
+            });
+        }
+        setGameState(prev => ({
+            ...prev,
+            player: {
+                ...prev.player,
+                turnFlags: { ...prev.player.turnFlags, DREAM_CATCHER_PENDING_MODAL: false }
+            }
+        }));
+    }, [dreamCatcherModal, galaxyExpressModal, gameState.player.drawPile, gameState.player.turnFlags, gameState.screen, goldFishModal, weatherScryModal]);
 
     const onCodexSelect = (card: ICard | null) => {
         setGameState(prev => {
@@ -3609,6 +4894,62 @@ const App: React.FC = () => {
             startTypingGame();
             return;
         }
+        if (gameState.challengeMode === 'RACE') {
+            audioService.playSound('select');
+            setIsLoading(false);
+            setRaceEffects(EMPTY_RACE_EFFECTS);
+            setRaceRewardDummyDisplay(0);
+            setGameState(prev => ({
+                screen: GameScreen.CHARACTER_SELECTION,
+                mode: prev.mode,
+                modePool: prev.modePool,
+                challengeMode: prev.challengeMode,
+                act: 1,
+                floor: 0,
+                turn: 0,
+                map: [],
+                currentMapNodeId: null,
+                player: {
+                    maxHp: INITIAL_HP,
+                    currentHp: INITIAL_HP,
+                    maxEnergy: INITIAL_ENERGY,
+                    currentEnergy: INITIAL_ENERGY,
+                    block: 0,
+                    strength: 0,
+                    gold: 99,
+                    deck: createDeck(),
+                    hand: [],
+                    discardPile: [],
+                    drawPile: [],
+                    relics: [],
+                    potions: [],
+                    powers: {},
+                    echoes: 0,
+                    cardsPlayedThisTurn: 0,
+                    attacksPlayedThisTurn: 0,
+                    typesPlayedThisTurn: [],
+                    relicCounters: {},
+                    turnFlags: {},
+                    imageData: HERO_IMAGE_DATA,
+                    floatingText: null,
+                    nextTurnEnergy: 0,
+                    nextTurnDraw: 0,
+                    codexBuffer: []
+                },
+                enemies: [],
+                selectedEnemyId: null,
+                narrativeLog: [trans("レース再挑戦！", languageMode)],
+                combatLog: [],
+                rewards: [],
+                selectionState: { active: false, type: 'DISCARD', amount: 0 },
+                isEndless: false,
+                parryState: { active: false, enemyId: null, success: false },
+                activeEffects: [],
+                currentStoryIndex: Math.floor(Math.random() * GAME_STORIES.length),
+                actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
+            }));
+            return;
+        }
         startGame();
     };
 
@@ -3691,7 +5032,7 @@ const App: React.FC = () => {
             let hpRegen = 0;
             if (prev.player.relics.find(r => r.id === 'BURNING_BLOOD')) hpRegen = 6;
             if (prev.player.relics.find(r => r.id === 'MEAT_ON_THE_BONE') && prev.player.currentHp <= prev.player.maxHp / 2) hpRegen += 12;
-            const nextPlayer = { ...prev.player };
+            const nextPlayer = clearBattleOnlyCardState(clearBigLadleTemp({ ...prev.player }));
             if (hpRegen > 0) {
                 nextPlayer.currentHp = Math.min(nextPlayer.maxHp, nextPlayer.currentHp + hpRegen);
             }
@@ -3703,7 +5044,6 @@ const App: React.FC = () => {
             }
 
             if (prev.act === 4 && !prev.isEndless) {
-                storageService.incrementClearCount();
                 const score = calculateScore(prev, true);
                 storageService.saveScore({
                     id: `victory-${Date.now()}`,
@@ -3805,7 +5145,7 @@ const App: React.FC = () => {
                     date: Date.now(),
                     challengeMode: gameState.challengeMode
                 });
-                setGameState(prev => ({ ...prev, screen: GameScreen.GAME_OVER }));
+                setGameState(prev => ({ ...prev, player: clearBattleOnlyCardState(clearBigLadleTemp(prev.player)), screen: GameScreen.GAME_OVER }));
             }
         }
     }, [gameState.enemies, gameState.player.currentHp, gameState.screen, gameState.act, gameState.challengeMode, unlockRandomAdditionalCard, battleFinisherCutinCard, resolveBattleVictory]);
@@ -3908,6 +5248,10 @@ const App: React.FC = () => {
             rewards.push({ type: 'CARD', value: { ...candidate, id: `reward-${Date.now()}-${i}` }, id: `rew-card-${i}` });
         }
 
+        if (gameState.challengeMode === 'RACE' && Math.random() < 0.3) {
+            rewards.push({ type: 'RACE_TRICK', value: { ...getRandomRaceTrickCard(), id: `race-trick-${Date.now()}` }, id: `rew-race-trick-${Date.now()}` });
+        }
+
         const hasSozu = gameState.player.relics.find(r => r.id === 'SOZU');
         const hasKinjiro = gameState.player.relics.find(r => r.id === 'KINJIRO_STATUE');
         if (!hasSozu && (hasKinjiro || Math.random() < 0.4)) {
@@ -3999,6 +5343,9 @@ const App: React.FC = () => {
     };
 
     const handleRewardSelection = (item: RewardItem, replacePotionId?: string) => {
+        if (item.type === 'RACE_TRICK') {
+            setRaceTrickCards(prevCards => [...prevCards, item.value as RaceTrickCard]);
+        }
         setGameState(prev => {
             let p = { ...prev.player };
             let nextRewards = [...prev.rewards];
@@ -4029,6 +5376,8 @@ const App: React.FC = () => {
                     nextRewards = nextRewards.filter(r => r.id !== item.id);
                     storageService.saveUnlockedPotion(item.value.templateId);
                 }
+            } else if (item.type === 'RACE_TRICK') {
+                nextRewards = nextRewards.filter(r => r.id !== item.id);
             }
             return { ...prev, player: p, rewards: nextRewards };
         });
@@ -4102,10 +5451,20 @@ const App: React.FC = () => {
 
     return (
         <div className="w-full h-[100dvh] bg-black overflow-hidden">
-            <div className="w-full h-full relative overflow-hidden bg-black crt-scanline">
+            <div className={`w-full h-full relative overflow-hidden bg-black crt-scanline ${raceEffects.upsideDownUntil > raceEffectNow ? 'scale-x-[-1]' : ''} ${raceEffects.deskShakeUntil > raceEffectNow ? 'animate-[race-desk-shake_0.18s_linear_infinite]' : ''}`}>
+                <style>{`
+                    @keyframes race-desk-shake {
+                        0% { transform: translate(0, 0); }
+                        20% { transform: translate(-3px, 1px); }
+                        40% { transform: translate(2px, -1px); }
+                        60% { transform: translate(-2px, 2px); }
+                        80% { transform: translate(3px, -1px); }
+                        100% { transform: translate(0, 0); }
+                    }
+                `}</style>
 
                 {showTimeLimitModal && (
-                    <div className="fixed inset-0 z-10000 bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-300">
+                    <div className="fixed inset-0 z-[10000] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-300">
                         <div className="bg-gray-900 border-4 border-red-600 p-8 rounded-2xl max-sm w-full shadow-[0_0_50px_rgba(220,38,38,0.5)] text-center transform scale-110">
                             <TimerOff size={64} className="text-red-500 mx-auto mb-6 animate-pulse" />
                             <h2 className="text-3xl font-black text-white mb-4 tracking-tighter">時間切れ！</h2>
@@ -4120,6 +5479,40 @@ const App: React.FC = () => {
                             >
                                 <Check size={24} /> わかった！
                             </button>
+                        </div>
+                    </div>
+                )}
+
+                {showStartOverConfirm && (
+                    <div className="fixed inset-0 z-[10000] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-300">
+                        <div className="bg-gray-900 border-4 border-yellow-500 p-8 rounded-2xl max-sm w-full max-w-md shadow-[0_0_50px_rgba(234,179,8,0.35)] text-center">
+                            <AlertTriangle size={64} className="text-yellow-400 mx-auto mb-6 animate-pulse" />
+                            <h2 className="text-3xl font-black text-white mb-4 tracking-tighter">続きデータがあります</h2>
+                            <p className="text-gray-300 mb-8 leading-relaxed font-bold">
+                                冒険を最初から始めると、<br />
+                                今の続きデータは上書きされます。<br />
+                                本当に新しく始めますか？
+                            </p>
+                            <div className="flex flex-col gap-3">
+                                <button
+                                    onClick={continueGame}
+                                    className="bg-blue-600 text-white w-full py-4 rounded-xl font-black text-lg hover:bg-blue-500 transition-all"
+                                >
+                                    続きから遊ぶ
+                                </button>
+                                <button
+                                    onClick={confirmStartOver}
+                                    className="bg-yellow-400 text-black w-full py-4 rounded-xl font-black text-lg hover:bg-yellow-300 transition-all"
+                                >
+                                    最初から始める
+                                </button>
+                                <button
+                                    onClick={() => setShowStartOverConfirm(false)}
+                                    className="bg-gray-700 text-white w-full py-3 rounded-xl font-bold hover:bg-gray-600 transition-all"
+                                >
+                                    キャンセル
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -4268,7 +5661,7 @@ const App: React.FC = () => {
                                 </div>
 
                                 {isDebugHpOne && (
-                                    <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.DEBUG_MENU }))} className="w-full py-3 px-4 text-base font-bold border-b-4 border-r-4 rounded-none bg-gray-800 text-red-400 border-red-500 hover:bg-gray-700 cursor-pointer flex items-center justify-center shadow-md mb-2">
+                                    <button onClick={openDebugMenu} className="w-full py-3 px-4 text-base font-bold border-b-4 border-r-4 rounded-none bg-gray-800 text-red-400 border-red-500 hover:bg-gray-700 cursor-pointer flex items-center justify-center shadow-md mb-2">
                                         <Zap size={18} className="mr-2" /> {trans("デバッグメニュー", languageMode)}
                                     </button>
                                 )}
@@ -4343,6 +5736,11 @@ const App: React.FC = () => {
                             onStartAct3Boss={handleDebugStartAct3Boss}
                             onBack={returnToTitle}
                             onTimeUpdate={handleTimeUpdate}
+                            onAddClearCount={handleDebugAddClearCount}
+                            onBoostMathCorrect={handleDebugBoostMathCorrect}
+                            clearCount={clearCount}
+                            totalMathCorrect={totalMathCorrect}
+                            nextMiniGameThreshold={nextThreshold}
                             languageMode={languageMode}
                         />
                     </div>
@@ -4406,6 +5804,11 @@ const App: React.FC = () => {
                                 setRaceResultOpen(false);
                                 setRaceMaxDamage(0);
                                 setRaceGameOverCount(0);
+                                setRaceSelfPeerId(payload.isHost ? 'host' : (p2pService.getMyId() || 'guest'));
+                                setRaceTrickCards([]);
+                                setRaceEffects(EMPTY_RACE_EFFECTS);
+                                setRaceHudOpen(false);
+                                setRaceRewardDummyDisplay(0);
                                 setGameState(prev => ({
                                     ...prev,
                                     challengeMode: 'RACE',
@@ -4419,12 +5822,117 @@ const App: React.FC = () => {
                 )}
 
                 {raceSession && !raceSession.ended && raceSession.isHost && gameState.challengeMode === 'RACE' && gameState.screen !== GameScreen.RACE_SETUP && raceSession.roomCode && (
-                    <div className="absolute right-3 top-3 z-40">
+                    <div className="absolute left-1/2 top-3 z-40 -translate-x-1/2">
                         <div className="bg-slate-900/90 border border-cyan-500 rounded-lg px-3 py-2 text-cyan-100 shadow-lg">
-                            <div className="text-[10px] font-bold tracking-wide text-cyan-200">参加コード</div>
-                            <div className="text-lg font-black tracking-widest tabular-nums">{raceSession.roomCode}</div>
+                            <div className="text-center text-[10px] font-bold tracking-wide text-cyan-200">参加コード</div>
+                            <div className="text-center text-lg font-black tracking-widest tabular-nums">{raceSession.roomCode}</div>
                         </div>
                     </div>
+                )}
+
+                {raceSession && !raceSession.ended && gameState.challengeMode === 'RACE' && RACE_TRICK_SCREEN_SET.has(gameState.screen) && (
+                    <>
+                        <div className="absolute left-3 bottom-3 z-40 w-[min(360px,calc(100vw-24px))]">
+                            <div className="bg-slate-950/88 border border-fuchsia-500/70 rounded-xl shadow-2xl backdrop-blur px-3 py-2 text-white">
+                                <button
+                                    onClick={() => setRaceHudOpen(prev => !prev)}
+                                    className="w-full flex items-center justify-between text-left"
+                                >
+                                    <div>
+                                        <div className="text-[10px] uppercase tracking-[0.25em] text-fuchsia-200">Race Trick</div>
+                                        <div className="text-sm font-black">妨害カード {raceTrickCards.length} 枚</div>
+                                    </div>
+                                    <ChevronDown className={`transition-transform ${raceHudOpen ? 'rotate-180' : ''}`} size={16} />
+                                </button>
+                                {raceHudOpen && (
+                                    <div className="mt-3 space-y-2 max-h-[40vh] overflow-y-auto custom-scrollbar pr-1">
+                                        {raceTrickCards.length === 0 && (
+                                            <div className="rounded border border-slate-700 bg-slate-900/80 px-3 py-2 text-xs text-slate-300">
+                                                戦闘報酬でたまに手に入るレース専用カードです。
+                                            </div>
+                                        )}
+                                        {raceTrickCards.map((card, index) => {
+                                            const targets = getRaceTargetEntries().slice(0, 3);
+                                            return (
+                                                <div key={`${card.id}-${index}`} className="rounded-lg border border-fuchsia-500/30 bg-fuchsia-950/25 p-3">
+                                                    <div className="flex items-start justify-between gap-2">
+                                                        <div>
+                                                            <div className="font-black text-fuchsia-100">{card.name}</div>
+                                                            <div className="text-[11px] text-fuchsia-100/80 leading-relaxed">{card.description}</div>
+                                                        </div>
+                                                        <div className="text-[10px] font-bold text-fuchsia-200">{card.rarity}</div>
+                                                    </div>
+                                                    <div className="mt-2 flex flex-wrap gap-2">
+                                                        {card.effectId === 'WALLET_SWAP' ? (
+                                                            <>
+                                                                {targets.length === 0 && <div className="text-[11px] text-slate-400">対象なし</div>}
+                                                                {targets.map(target => (
+                                                                    <button
+                                                                        key={`${card.id}-${target.peerId}`}
+                                                                        onClick={() => handleUseRaceTrickCard(card, target.peerId)}
+                                                                        className="rounded border border-fuchsia-300/50 bg-fuchsia-700/40 px-2 py-1 text-[11px] font-bold hover:bg-fuchsia-600/60"
+                                                                    >
+                                                                        {target.name} に使う
+                                                                    </button>
+                                                                ))}
+                                                            </>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() => handleUseRaceTrickCard(card, 'ALL')}
+                                                                className="rounded border border-fuchsia-300/50 bg-fuchsia-700/40 px-2 py-1 text-[11px] font-bold hover:bg-fuchsia-600/60"
+                                                            >
+                                                                全員に使う
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        {raceToast && (
+                            <div className="absolute left-1/2 top-16 z-50 -translate-x-1/2 rounded-full border border-fuchsia-300/60 bg-slate-950/90 px-4 py-2 text-sm font-black text-fuchsia-100 shadow-xl">
+                                {raceToast}
+                            </div>
+                        )}
+                        {raceEffects.fakeSignboardUntil > raceEffectNow && (
+                            <div className="pointer-events-none absolute inset-0 z-30 overflow-hidden">
+                                {Array.from({ length: 12 }).map((_, index) => (
+                                    <div
+                                        key={`fake-sign-${index}`}
+                                        className="absolute text-cyan-200/80 font-black text-xs"
+                                        style={{
+                                            left: `${(index * 17) % 90}%`,
+                                            top: `${(index * 23) % 86}%`,
+                                            transform: `rotate(${(index % 2 === 0 ? 1 : -1) * (10 + index * 3)}deg)`
+                                        }}
+                                    >
+                                        ← こっち
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        {raceEffects.paperStormUntil > raceEffectNow && (
+                            <div className="pointer-events-none absolute inset-0 z-40 overflow-hidden">
+                                {Array.from({ length: 18 }).map((_, index) => (
+                                    <div
+                                        key={`paper-${index}`}
+                                        className="absolute h-8 w-6 rounded bg-white/80 shadow-md animate-bounce"
+                                        style={{ left: `${(index * 11) % 100}%`, top: `${(index * 19) % 100}%`, transform: `rotate(${index * 17}deg)` }}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                        {raceEffects.chalkDustUntil > raceEffectNow && <div className="pointer-events-none absolute inset-0 z-40 bg-white/18 backdrop-blur-[1px]" />}
+                        {raceEffects.sleepyVignetteUntil > raceEffectNow && <div className="pointer-events-none absolute inset-0 z-40 shadow-[inset_0_0_120px_rgba(0,0,0,0.92)]" />}
+                        {raceEffects.slowBellUntil > raceEffectNow && (
+                            <div className="absolute inset-0 z-50 bg-black/45 backdrop-blur-[2px] flex items-center justify-center text-white font-black text-xl">
+                                しばらく操作できません
+                            </div>
+                        )}
+                    </>
                 )}
 
                 {gameState.screen === GameScreen.VS_BATTLE && gameState.vsOpponent && (
@@ -4538,6 +6046,7 @@ const App: React.FC = () => {
                             act={gameState.act}
                             floor={gameState.floor}
                             typingMode={gameState.challengeMode === 'TYPING'}
+                            selectionHoldMs={raceEffects.shoeLaceUntil > raceEffectNow ? 400 : 0}
                         />
                         {raceSession && !raceSession.ended && (
                             <>
@@ -4551,7 +6060,7 @@ const App: React.FC = () => {
                                     <div className="bg-slate-900/90 border border-cyan-500 rounded-lg p-2 text-cyan-100 shadow-lg">
                                         <div className="text-[10px] font-bold tracking-wide text-cyan-200 mb-1">ランキング</div>
                                         <div className="space-y-1">
-                                            {(raceSession.entries || []).slice().sort((a, b) => b.score - a.score).slice(0, 5).map((entry, idx) => (
+                                            {(raceSession.entries || []).slice().sort(compareRaceEntries).slice(0, 5).map((entry, idx) => (
                                                 <div key={entry.peerId} className="flex items-center justify-between text-[11px]">
                                                     <span className="truncate pr-2">{idx + 1}. {entry.name}</span>
                                                     <span className="tabular-nums">{entry.score}</span>
@@ -4590,6 +6099,7 @@ const App: React.FC = () => {
                                 floor={gameState.floor}
                                 lessonId={gameState.typingLessonId}
                                 onAbort={returnToTitle}
+                                hideEnemyIntents={raceEffects.hideEnemyIntentsOnce}
                             />
                         ) : (
                             <BattleScene
@@ -4598,6 +6108,7 @@ const App: React.FC = () => {
                                 parryState={gameState.parryState} onParry={handleParryClick} activeEffects={gameState.activeEffects}
                                 onCancelSelection={handleCancelSelection}
                                 finisherCutinCard={battleFinisherCutinCard}
+                                hideEnemyIntents={raceEffects.hideEnemyIntentsOnce}
                             />
                         )}
                     </div>
@@ -4668,7 +6179,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.REWARD && (
                     <div className="absolute inset-0">
-                        <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading} currentPotions={gameState.player.potions} potionCapacity={getPotionCapacity(gameState.player)} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} />
+                        <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading} currentPotions={gameState.player.potions} potionCapacity={getPotionCapacity(gameState.player)} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} dummyRewards={raceRewardDummyDisplay} />
                     </div>
                 )}
 
@@ -4697,6 +6208,7 @@ const App: React.FC = () => {
                                 setGameState(prev => {
                                     let price = card.price || 50;
                                     if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
+                                    if (raceEffects.shopMarkupUntil > raceEffectNow) price = Math.floor(price * 1.25);
                                     const newP = { ...prev.player, gold: prev.player.gold - price };
                                     addCardToDeckWithRelics(newP, { ...card, id: `buy-${Date.now()}` }, { addToDiscard: true });
                                     return { ...prev, player: newP };
@@ -4707,6 +6219,7 @@ const App: React.FC = () => {
                                 setGameState(prev => {
                                     let price = relic.price || 150;
                                     if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
+                                    if (raceEffects.shopMarkupUntil > raceEffectNow) price = Math.floor(price * 1.25);
                                     const newP = { ...prev.player, gold: prev.player.gold - price, relics: [...prev.player.relics, relic] };
                                     if (relic.id === 'SOZU') newP.maxEnergy += 1;
                                     if (relic.id === 'CURSED_KEY') newP.maxEnergy += 1;
@@ -4726,6 +6239,7 @@ const App: React.FC = () => {
                                     if (prev.player.potions.length < getPotionCapacity(prev.player) || replacePotionId) {
                                         let price = potion.price || 50;
                                         if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
+                                        if (raceEffects.shopMarkupUntil > raceEffectNow) price = Math.floor(price * 1.25);
                                         let newPotions = [...prev.player.potions];
                                         if (replacePotionId) {
                                             newPotions = newPotions.filter(pt => pt.id !== replacePotionId);
@@ -4753,6 +6267,7 @@ const App: React.FC = () => {
                             potionCapacity={getPotionCapacity(gameState.player)}
                             languageMode={languageMode}
                             typingMode={gameState.challengeMode === 'TYPING'}
+                            priceMultiplier={raceEffects.shopMarkupUntil > raceEffectNow ? 1.25 : 1}
                         />
                     </div>
                 )}
@@ -4873,6 +6388,59 @@ const App: React.FC = () => {
                     </div>
                 )}
 
+                {(newlyUnlockedCharacters.length > 0 || newlyUnlockedMiniGames.length > 0) && (
+                    <div className="fixed inset-0 z-[2147483646] bg-black/80 flex items-center justify-center p-4">
+                        <div className="flex max-h-[min(88vh,960px)] w-full max-w-4xl flex-col rounded-2xl border-2 border-yellow-400 bg-slate-900 p-4 sm:p-6 text-center shadow-[0_0_40px_rgba(250,204,21,0.25)]">
+                            <div className="mb-4 flex items-center justify-center gap-2 text-yellow-300 font-black text-2xl shrink-0">
+                                <Sparkles size={24} />
+                                NEW UNLOCKS
+                                <Sparkles size={24} />
+                            </div>
+                            <div className="flex-1 overflow-y-auto pr-1 space-y-6">
+                                {newlyUnlockedCharacters.length > 0 && (
+                                    <section className="flex flex-col">
+                                        <p className="text-white font-bold mb-4 shrink-0">新しい主人公が使えるようになりました</p>
+                                        <div className="flex flex-wrap items-stretch justify-center gap-4 sm:gap-6">
+                                            {newlyUnlockedCharacters.map((character) => (
+                                                <div key={character.id} className="flex w-full max-w-[16rem] flex-col rounded-xl border border-yellow-300/40 bg-slate-800/80 p-4">
+                                                    <img src={character.imageData} alt={character.name} className="mx-auto mb-3 h-28 w-28 object-contain pixelated" />
+                                                    <div className="text-xl font-black text-yellow-100">{character.name}</div>
+                                                    <div className="mt-2 text-sm text-slate-300 leading-relaxed">{character.description}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
+                                {newlyUnlockedMiniGames.length > 0 && (
+                                    <section className="flex flex-col">
+                                        <p className="text-white font-bold mb-4 shrink-0">新しいミニゲームが解禁されました</p>
+                                        <div className="flex flex-wrap items-stretch justify-center gap-4">
+                                            {newlyUnlockedMiniGames.map((game) => (
+                                                <div key={game.id} className="flex w-full max-w-[16rem] flex-col rounded-xl border border-cyan-300/40 bg-slate-800/80 p-4">
+                                                    <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full border border-white/10 bg-black/20">
+                                                        <game.icon size={28} className="text-cyan-200" />
+                                                    </div>
+                                                    <div className="text-xl font-black text-cyan-100">{game.name}</div>
+                                                    <div className="mt-2 text-sm text-slate-300 leading-relaxed">{game.description}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setNewlyUnlockedCharacters([]);
+                                    setNewlyUnlockedMiniGames([]);
+                                }}
+                                className="mt-4 w-full shrink-0 rounded-lg bg-yellow-400 py-3 font-black text-black hover:bg-yellow-300 transition-colors"
+                            >
+                                OK
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 {weatherScryModal && (
                     <div className="fixed inset-0 z-[230] bg-black/70 flex items-center justify-center p-4">
                         <div className="w-full max-w-lg rounded-xl border-2 border-cyan-400 bg-slate-900 text-white p-4">
@@ -4912,27 +6480,230 @@ const App: React.FC = () => {
                     </div>
                 )}
 
-                {raceSession && raceResultOpen && (
-                    <div className="fixed inset-0 z-[220] bg-black/70 flex items-center justify-center p-4">
-                        <div className="bg-slate-900 border-2 border-cyan-500 rounded-xl p-5 text-white w-full max-w-lg">
-                            <h2 className="text-2xl font-black mb-3">レース結果</h2>
-                            <div className="space-y-2 max-h-[60vh] overflow-y-auto">
-                                {[...raceSession.entries].sort((a, b) => b.score - a.score).map((entry, index) => (
-                                    <div key={entry.peerId} className="flex items-center justify-between bg-slate-800/70 rounded px-3 py-2">
-                                        <div className="font-bold">{index + 1}. {entry.name}</div>
-                                        <div className="text-cyan-300 tabular-nums">{entry.score}</div>
-                                    </div>
+                {galaxyExpressModal && (
+                    <div className="fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
+                        <div className="w-full max-w-2xl rounded-xl border-2 border-sky-400 bg-slate-950 text-white p-4">
+                            <h3 className="text-xl font-bold mb-2">{trans("銀河鉄道の夜", languageMode)}</h3>
+                            <p className="text-sm text-slate-300 mb-3">1枚選んで手札に加え、残りは捨て札に送ります</p>
+                            <div className="grid gap-2 sm:grid-cols-2 max-h-[60vh] overflow-y-auto pr-1">
+                                {galaxyExpressModal.cards.map((card, idx) => (
+                                    <button
+                                        key={card.id}
+                                        onClick={() => applyGalaxyExpressSelection(card.id)}
+                                        className="rounded border border-slate-600 bg-slate-800/80 p-3 text-left hover:border-sky-400 hover:bg-slate-700/80 transition-colors"
+                                    >
+                                        <div className="text-xs text-slate-400 mb-1">{idx + 1}</div>
+                                        <div className="font-bold">{trans(card.name, languageMode)}</div>
+                                        <div className="text-xs text-slate-300 mt-1 line-clamp-2">{trans(card.description, languageMode)}</div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {goldFishModal && (
+                    <div className="fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
+                        <div className="w-full max-w-xl rounded-xl border-2 border-rose-400 bg-slate-950 text-white p-4">
+                            <h3 className="text-xl font-bold mb-2">{trans(goldFishModal.title, languageMode)}</h3>
+                            <p className="text-sm text-slate-300 mb-3">{goldFishModal.description}</p>
+                            <div className="space-y-2 max-h-[55vh] overflow-y-auto pr-1">
+                                {goldFishModal.cards.map(card => (
+                                    <button
+                                        key={card.id}
+                                        onClick={() => applyGoldFishSelection(card.id)}
+                                        className="w-full rounded border border-slate-600 bg-slate-800/80 p-3 text-left hover:border-rose-400 hover:bg-slate-700/80 transition-colors"
+                                    >
+                                        <div className="font-bold">{trans(card.name, languageMode)}</div>
+                                        <div className="text-xs text-slate-300 mt-1">{trans(card.description, languageMode)}</div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {dreamCatcherModal && (
+                    <div className="fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
+                        <div className="w-full max-w-2xl rounded-xl border-2 border-violet-400 bg-slate-950 text-white p-4">
+                            <h3 className="text-xl font-bold mb-2">{trans(dreamCatcherModal.title, languageMode)}</h3>
+                            <p className="text-sm text-slate-300 mb-3">{dreamCatcherModal.description}</p>
+                            <div className="grid gap-2 sm:grid-cols-2 max-h-[60vh] overflow-y-auto pr-1">
+                                {dreamCatcherModal.cards.map(card => (
+                                    <button
+                                        key={card.id}
+                                        onClick={() => applyDreamCatcherSelection(card.id)}
+                                        className="rounded border border-slate-600 bg-slate-800/80 p-3 text-left hover:border-violet-400 hover:bg-slate-700/80 transition-colors"
+                                    >
+                                        <div className="font-bold">{trans(card.name, languageMode)}</div>
+                                        <div className="text-xs text-slate-300 mt-1 line-clamp-2">{trans(card.description, languageMode)}</div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {orreryModal && (
+                    <div className="fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
+                        <div className="w-full max-w-2xl rounded-xl border-2 border-amber-400 bg-slate-950 text-white p-4">
+                            <h3 className="text-xl font-bold mb-2">{trans(orreryModal.title, languageMode)}</h3>
+                            <p className="text-sm text-slate-300 mb-3">{orreryModal.description}</p>
+                            <div className="grid gap-2 sm:grid-cols-2 max-h-[60vh] overflow-y-auto pr-1">
+                                {orreryModal.cards.map(card => (
+                                    <button
+                                        key={card.id}
+                                        onClick={() => applyOrrerySelection(card.id)}
+                                        className="rounded border border-slate-600 bg-slate-800/80 p-3 text-left hover:border-amber-400 hover:bg-slate-700/80 transition-colors"
+                                    >
+                                        <div className="font-bold">{trans(card.name, languageMode)}</div>
+                                        <div className="text-xs text-slate-300 mt-1 line-clamp-2">{trans(card.description, languageMode)}</div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {peacePipeModal && (
+                    <div className="fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
+                        <div className="w-full max-w-2xl rounded-xl border-2 border-emerald-400 bg-slate-950 text-white p-4">
+                            <h3 className="text-xl font-bold mb-2">{trans(peacePipeModal.title, languageMode)}</h3>
+                            <p className="text-sm text-slate-300 mb-3">{peacePipeModal.description}</p>
+                            <div className="grid gap-2 sm:grid-cols-2 max-h-[60vh] overflow-y-auto pr-1">
+                                {peacePipeModal.cards.map(card => (
+                                    <button
+                                        key={card.id}
+                                        onClick={() => applyPeacePipeSelection(card.id)}
+                                        className="rounded border border-slate-600 bg-slate-800/80 p-3 text-left hover:border-emerald-400 hover:bg-slate-700/80 transition-colors"
+                                    >
+                                        <div className="font-bold">{trans(card.name, languageMode)}</div>
+                                        <div className="text-xs text-slate-300 mt-1 line-clamp-2">{trans(card.description, languageMode)}</div>
+                                    </button>
                                 ))}
                             </div>
                             <button
-                                onClick={() => {
-                                    setRaceResultOpen(false);
-                                    returnToTitle();
-                                }}
-                                className="mt-4 w-full bg-cyan-700 hover:bg-cyan-600 rounded py-2 font-bold"
+                                onClick={() => applyPeacePipeSelection(null)}
+                                className="mt-4 w-full rounded bg-slate-700 hover:bg-slate-600 py-2 font-bold"
                             >
-                                閉じる
+                                使わない
                             </button>
+                        </div>
+                    </div>
+                )}
+
+                {raceSession && raceResultOpen && (
+                    <div className="fixed inset-0 z-[220] bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.18),_rgba(2,6,23,0.96)_55%)] flex items-center justify-center p-3 sm:p-4 overflow-hidden">
+                        <div className="absolute inset-0 pointer-events-none">
+                            {Array.from({ length: 18 }).map((_, index) => (
+                                <div
+                                    key={`race-result-spark-${index}`}
+                                    className="absolute rounded-full bg-cyan-300/40 blur-sm animate-pulse"
+                                    style={{
+                                        width: `${10 + (index % 4) * 8}px`,
+                                        height: `${10 + (index % 4) * 8}px`,
+                                        left: `${(index * 13) % 100}%`,
+                                        top: `${(index * 19) % 100}%`,
+                                        animationDelay: `${index * 120}ms`
+                                    }}
+                                />
+                            ))}
+                        </div>
+                        <div className="relative w-full max-w-5xl rounded-[28px] border border-cyan-400/40 bg-slate-950/90 p-4 sm:p-6 text-white shadow-[0_0_60px_rgba(6,182,212,0.28)] backdrop-blur-xl">
+                            <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300 to-transparent" />
+                            <div className="absolute inset-0 rounded-[28px] bg-[linear-gradient(135deg,rgba(34,211,238,0.08),transparent_30%,transparent_70%,rgba(250,204,21,0.08))] pointer-events-none" />
+                            {(() => {
+                                const sortedEntries = [...raceSession.entries].sort(compareRaceEntries);
+                                const winner = sortedEntries[0];
+                                const podium = [sortedEntries[1], winner, sortedEntries[2]];
+                                const podiumStyles = [
+                                    'sm:pt-10 sm:pb-4 sm:order-1 border-slate-500/40 bg-slate-900/70',
+                                    'sm:pt-4 sm:pb-8 sm:order-2 border-yellow-400/60 bg-gradient-to-b from-yellow-500/20 to-cyan-500/10 shadow-[0_0_30px_rgba(250,204,21,0.2)]',
+                                    'sm:pt-14 sm:pb-2 sm:order-3 border-amber-700/50 bg-slate-900/70'
+                                ];
+                                const podiumRanks = [2, 1, 3];
+                                const podiumHeights = ['sm:h-[220px]', 'sm:h-[260px]', 'sm:h-[200px]'];
+                                return (
+                                    <>
+                                        <div className="text-center mb-6">
+                                            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-500/10 px-4 py-1 text-xs font-black tracking-[0.35em] text-cyan-200 uppercase">
+                                                <Trophy size={14} />
+                                                Race Result
+                                            </div>
+                                            <h2 className="mt-3 text-3xl sm:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 via-white to-yellow-200">
+                                                結果発表
+                                            </h2>
+                                            {winner && (
+                                                <p className="mt-2 text-sm sm:text-base text-cyan-100/85">
+                                                    優勝は <span className="font-black text-yellow-300">{winner.name}</span> ・ {winner.score} pt
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4 mb-6">
+                                            {podium.map((entry, index) => (
+                                                <div
+                                                    key={entry?.peerId || `podium-empty-${index}`}
+                                                    className={`relative rounded-3xl border p-4 ${podiumStyles[index]} ${podiumHeights[index]} flex-1 flex flex-col justify-end overflow-hidden`}
+                                                >
+                                                    {entry ? (
+                                                        <>
+                                                            {podiumRanks[index] === 1 && (
+                                                                <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-yellow-400/15 px-2 py-1 text-[10px] font-black text-yellow-200">
+                                                                    <Sparkles size={12} />
+                                                                    WINNER
+                                                                </div>
+                                                            )}
+                                                            <div className={`mb-3 text-center ${podiumRanks[index] === 1 ? 'text-yellow-300' : podiumRanks[index] === 2 ? 'text-slate-200' : 'text-amber-500'}`}>
+                                                                <div className="text-4xl sm:text-5xl font-black">{podiumRanks[index]}</div>
+                                                                <div className="text-[11px] tracking-[0.25em] uppercase">Place</div>
+                                                            </div>
+                                                            <div className="text-center">
+                                                                <div className="text-lg sm:text-xl font-black truncate">{entry.name}</div>
+                                                                <div className="mt-1 text-2xl sm:text-3xl font-black tabular-nums text-cyan-200">{entry.score}</div>
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <div className="h-full flex items-center justify-center text-slate-500 font-bold">-</div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <div className="rounded-3xl border border-cyan-500/20 bg-slate-900/70 p-3 sm:p-4">
+                                            <div className="mb-3 flex items-center justify-between">
+                                                <div className="text-sm font-black tracking-[0.25em] uppercase text-cyan-200">Leaderboard</div>
+                                                <div className="text-xs text-slate-400">参加者 {sortedEntries.length} 人</div>
+                                            </div>
+                                            <div className="flex flex-col gap-2 max-h-[34vh] overflow-y-auto custom-scrollbar pr-1">
+                                                {sortedEntries.map((entry, index) => (
+                                                    <div
+                                                        key={entry.peerId}
+                                                        className={`flex items-center gap-2 rounded-2xl px-3 py-3 ${index === 0 ? 'bg-yellow-400/10 border border-yellow-400/30' : 'bg-slate-800/70 border border-white/5'}`}
+                                                    >
+                                                        <div className={`w-14 shrink-0 text-center text-lg font-black ${index === 0 ? 'text-yellow-300' : 'text-slate-300'}`}>#{index + 1}</div>
+                                                        <div className="min-w-0 flex-1">
+                                                            <div className="truncate font-black text-white">{entry.name}</div>
+                                                            <div className="text-[11px] text-slate-400">更新: {new Date(entry.updatedAt).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}</div>
+                                                        </div>
+                                                        <div className="w-24 shrink-0 text-right text-cyan-200 font-black tabular-nums">{entry.score}</div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                    </div>
+
+                                        <button
+                                            onClick={() => {
+                                                setRaceResultOpen(false);
+                                                returnToTitle();
+                                            }}
+                                            className="mt-5 w-full rounded-2xl border border-cyan-400/40 bg-gradient-to-r from-cyan-700 to-sky-600 py-3 font-black tracking-wide hover:from-cyan-600 hover:to-sky-500 shadow-lg shadow-cyan-900/30"
+                                        >
+                                            タイトルへ戻る
+                                        </button>
+                                    </>
+                                );
+                            })()}
                         </div>
                     </div>
                 )}
@@ -4977,7 +6748,16 @@ const App: React.FC = () => {
                             )}
                             <div className="flex flex-col gap-4 items-center">
                                 <button onClick={handleRetry} className="bg-black border-2 border-white px-8 py-3 cursor-pointer w-64 hover:bg-gray-800 flex items-center justify-center"><RotateCcw className="mr-2" size={20} /> {trans("再挑戦", languageMode)}</button>
-                                <button onClick={returnToTitle} className="bg-gray-700 border-2 border-white px-8 py-3 cursor-pointer w-64 hover:bg-gray-600 flex items-center justify-center"><Home className="mr-2" size={20} /> {trans("タイトルへ戻る", languageMode)}</button>
+                                <button
+                                    onClick={returnToTitle}
+                                    disabled={gameState.challengeMode === 'RACE'}
+                                    className={`border-2 border-white px-8 py-3 w-64 flex items-center justify-center ${gameState.challengeMode === 'RACE'
+                                        ? 'bg-gray-500 text-gray-300 cursor-not-allowed opacity-70'
+                                        : 'bg-gray-700 cursor-pointer hover:bg-gray-600'
+                                        }`}
+                                >
+                                    <Home className="mr-2" size={20} /> {trans("タイトルへ戻る", languageMode)}
+                                </button>
                             </div>
                         </div>
                     </div>
