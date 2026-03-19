@@ -9,7 +9,6 @@ import EnglishChallengeScreen from './EnglishChallengeScreen';
 import GeneralChallengeScreen from './GeneralChallengeScreen';
 import MiniBattleBanner from './MiniBattleBanner';
 import { ArrowLeft, Brain, Book, Languages, Music, Play, Trophy, Home, Shuffle, CheckCircle, Target, ChevronRight, LogOut, GraduationCap, Star, Volume2, VolumeX, FlaskConical, Map as MapIcon, Globe, MapPin } from 'lucide-react';
-import { trans } from '../utils/textUtils';
 import { SUBJECT_CATEGORIES, SubjectCategoryConfig, SubModeConfig, getChallengeScreenForMode } from '../subjectConfig';
 import { ENGLISH_GRADE_UNITS } from '../englishUnitConfig';
 import { SCIENCE_GRADE_UNITS, getScienceGradeMode } from '../scienceUnitConfig';
@@ -418,12 +417,9 @@ const getCategoryClasses = (color: string) => {
 
 const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   onBack,
-  languageMode,
   onCorrectAnswers,
   modeCorrectCounts = {},
 }) => {
-  const t = (text: string) => trans(text, languageMode);
-  const getLocalizedGradeLabel = (grade: number) => grade <= 6 ? t(`${grade}年`) : t(`中${grade - 6}`);
   const [phase, setPhase] = useState<'SELECT' | 'CHALLENGE'>('SELECT');
   const [selectedCategory, setSelectedCategory] = useState<SubjectCategoryConfig>(SUBJECT_CATEGORIES[0]);
   const [selectedSubMode, setSelectedSubMode] = useState<SubModeConfig>(SUBJECT_CATEGORIES[0].subModes[0]);
@@ -462,8 +458,8 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     });
 
     const label = selectedUnits.length > 0
-      ? `${t('ミックス選択')} (${selectedUnits.length}${t('単元')})`
-      : t('単元未選択');
+      ? `ミックス選択 (${selectedUnits.length}単元)`
+      : `単元未選択`;
       
     const subModeId = `COMBINED_MIX_${selectedUnits.map((u) => u.id).sort().join('_') || 'NONE'}`;
 
@@ -581,17 +577,17 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
         <div className="bg-black/80 border-b-2 border-gray-700 p-2 flex justify-between items-center z-50 shrink-0">
           <div className="flex gap-4 items-center">
             <div className="text-yellow-400 font-bold flex items-center gap-2">
-              <Target size={20}/> {t('正解数')}: <span className="text-2xl font-mono">{streak}</span>
+              <Target size={20}/> 正解数: <span className="text-2xl font-mono">{streak}</span>
             </div>
             <div className="text-gray-500 text-xs font-bold border-l border-gray-700 pl-4 hidden sm:block">
-              {t(challengeSubMode.name)} {t('ベスト')}: <span className="text-white font-mono">{records[`${selectedCategory.id}_${challengeSubMode.id}`] || 0}</span> {t('問')}
+              {challengeSubMode.name} ベスト: <span className="text-white font-mono">{records[`${selectedCategory.id}_${challengeSubMode.id}`] || 0}</span> 問
             </div>
           </div>
           <button 
             onClick={handleFinish}
             className="bg-red-900/60 hover:bg-red-800 border border-red-500 px-4 py-1 rounded text-xs font-bold transition-colors flex items-center gap-1"
           >
-            <LogOut size={14}/> {t('終了')}
+            <LogOut size={14}/> 終了
           </button>
         </div>
 
@@ -642,9 +638,9 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
             <div className="absolute inset-0 bg-black/90 z-[100] flex items-center justify-center animate-in fade-in duration-300">
                 <div className="text-center">
                     <Trophy size={64} className="text-yellow-400 mx-auto mb-4 animate-bounce" />
-                    <h3 className="text-2xl font-bold text-white mb-2">{t('チャレンジ終了！')}</h3>
-                    <p className="text-gray-400">{t('今回の記録')}: <span className="text-yellow-400 text-xl font-bold">{streak}</span> {t('問')}</p>
-                    <p className="text-green-400 text-xs mt-4 animate-pulse">※{t('累計正解数に加算されました')}</p>
+                    <h3 className="text-2xl font-bold text-white mb-2">チャレンジ終了！</h3>
+                    <p className="text-gray-400">今回の記録: <span className="text-yellow-400 text-xl font-bold">{streak}</span> 問</p>
+                    <p className="text-green-400 text-xs mt-4 animate-pulse">※累計正解数に加算されました</p>
                 </div>
             </div>
         )}
@@ -676,10 +672,10 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
         {/* Header - Fixed */}
         <div className="text-center border-b border-slate-800 p-3 shrink-0">
           <h2 className="text-xl md:text-2xl font-bold text-emerald-400 tracking-widest mb-1">
-            {t('問題チャレンジ')}
+            問題チャレンジ
           </h2>
           <div className="flex items-center justify-center gap-1 text-yellow-500 font-bold text-[9px] uppercase tracking-wider">
-            <Star size={8} fill="currentColor"/> {t('ミニゲーム解放カウント対象')} <Star size={8} fill="currentColor"/>
+            <Star size={8} fill="currentColor"/> ミニゲーム解放カウント対象 <Star size={8} fill="currentColor"/>
           </div>
         </div>
 
@@ -698,7 +694,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                   {getCategoryIcon(cat.id)}
                 </div>
                 <span className="font-bold text-sm sm:text-base lg:text-sm text-center lg:text-left leading-tight w-full whitespace-normal break-words">
-                  {t(cat.name)}
+                  {cat.name}
                 </span>
               </button>
             ))}
@@ -707,13 +703,13 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
           {/* Middle: SubMode Selector - Scrollable vertically */}
           <div className="lg:col-span-7 flex flex-col min-h-0">
             <h3 className="text-[10px] md:text-xs font-bold text-slate-400 mb-1.5 flex items-center gap-2 uppercase tracking-tight shrink-0">
-              <ChevronRight size={10} className="text-emerald-500"/> {t('種目を選択')}
+              <ChevronRight size={10} className="text-emerald-500"/> 種目を選択
             </h3>
             <div className="bg-black/40 p-3 rounded-xl border border-slate-800 flex-grow overflow-y-auto custom-scrollbar shadow-inner min-h-[160px]">
                 {isUnitCategory ? (
                   <div className="space-y-3">
                     <div>
-                      <div className="text-[10px] text-gray-400 mb-1">{t('学年')}</div>
+                      <div className="text-[10px] text-gray-400 mb-1">学年</div>
                       <div className="grid grid-cols-9 sm:grid-cols-5 gap-1">
                         {[(selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SOCIAL' ? 3 : 1), ...((selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SOCIAL' ? [4, 5, 6, 7, 8, 9] : [2, 3, 4, 5, 6, 7, 8, 9]))].map((grade) => {
                           const isSelected = selectedMathGrade === grade;
@@ -724,7 +720,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                               onClick={() => handleMathGradeSelect(grade)}
                               className={`px-0.5 py-1 rounded border text-[9px] sm:text-[10px] font-bold leading-none transition-colors ${isSelected ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'}`}
                             >
-                              {getLocalizedGradeLabel(grade)}
+                              {getGradeLabel(grade)}
                             </button>
                           );
                         })}
@@ -733,14 +729,14 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
 
                     <div>
                       <div className="mb-1 flex items-center justify-between gap-2">
-                        <div className="text-[10px] text-gray-400">{t('単元')}</div>
+                        <div className="text-[10px] text-gray-400">単元</div>
                         <button
                           type="button"
                           onClick={clearSelectedUnits}
                           disabled={selectedMathUnitIds.length === 0}
                           className={`rounded border px-2 py-0.5 text-[9px] font-bold transition-colors ${selectedMathUnitIds.length > 0 ? 'border-slate-500 text-slate-200 hover:bg-slate-700' : 'border-slate-700 text-slate-500 cursor-not-allowed opacity-60'}`}
                         >
-                          {t('選択解除')}
+                          選択解除
                         </button>
                       </div>
                       <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
@@ -753,9 +749,9 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                               onClick={() => toggleMathUnit(unit.id)}
                               className={`relative w-full p-1.5 pr-12 sm:p-2 sm:pr-14 rounded-lg border text-left text-[10px] sm:text-xs font-bold leading-snug transition-colors ${isSelected ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-200 hover:border-slate-400'}`}
                             >
-                              <span className="block">{t(unit.name)}</span>
+                              <span className="block">{unit.name}</span>
                               <span className="absolute right-1 top-1 rounded-full bg-black/45 border border-white/15 px-1 py-0.5 text-[7px] sm:right-1.5 sm:top-1.5 sm:px-1.5 sm:text-[8px] font-mono leading-none text-white/90">
-                                {getUnitCorrectCount(unit)}{t('問')}
+                                {getUnitCorrectCount(unit)}問
                               </span>
                             </button>
                           );
@@ -764,11 +760,11 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                     </div>
 
                     <div className="bg-black/40 px-2 py-1 rounded border border-slate-700 text-[10px] text-slate-300">
-                      {t('出題範囲')}: {previewSelection ? t(previewSelection.subMode.name) : ''}
+                      出題範囲: {previewSelection?.subMode.name}
                     </div>
                     {selectedMathUnitIds.length === 0 && (
                       <div className="text-[10px] text-amber-300">
-                        {currentUnits.length > 0 ? t('単元を1つ以上選ぶと開始できます') : t('この学年の単元はまだ未実装です')}
+                        {currentUnits.length > 0 ? '単元を1つ以上選ぶと開始できます' : 'この学年の単元はまだ未実装です'}
                       </div>
                     )}
                   </div>
@@ -786,11 +782,11 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                             className={`p-2 rounded-lg border text-left text-[10px] md:text-xs font-bold transition-colors ${isSelected ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'}`}
                           >
                             <div className="flex justify-between items-center mb-1 w-full truncate gap-2">
-                                <span className={isSelected ? 'text-white' : ''}>{t(sub.name)}</span>
+                                <span className={isSelected ? 'text-white' : ''}>{sub.name}</span>
                                 {isSelected && <CheckCircle size={12} className="text-white animate-pulse shrink-0" />}
                             </div>
                             <div className="bg-black/40 px-1.5 rounded text-[8px] md:text-[9px] font-mono text-white/90 border border-white/10 w-fit">
-                              {t('ベスト')}: {records[recordKey] || 0}
+                              BEST: {records[recordKey] || 0}
                             </div>
                           </button>
                         );
@@ -803,8 +799,8 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
           {/* Right: Settings - Scrollable vertically */}
           <div className="lg:col-span-3 flex flex-col gap-3 overflow-y-auto custom-scrollbar shrink-0">
              <div className="bg-black/40 rounded-xl border border-slate-800 p-3">
-              <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mb-2">{t('選択中')}</div>
-              <div className="text-xs font-bold text-emerald-400">{t(selectedCategory.name)} / {t(footerSelectionLabel)}</div>
+              <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mb-2">選択中</div>
+              <div className="text-xs font-bold text-emerald-400">{selectedCategory.name} / {footerSelectionLabel}</div>
             </div>
             
             <button 
@@ -812,13 +808,13 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
               disabled={!canStart}
               className={`w-full py-3 rounded-xl font-bold text-base transition-all flex items-center justify-center gap-3 ${canStart ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_4px_0_rgb(5,150,105)] active:translate-y-1 active:shadow-none animate-pulse' : 'bg-slate-700 text-slate-400 opacity-60 cursor-not-allowed'}`}
             >
-              <Play fill="currentColor" size={20}/> {t('チャレンジ開始！')}
+              <Play fill="currentColor" size={20}/> チャレンジ開始！
             </button>
              {!canStart && (
               <div className="text-[10px] text-amber-300">
                 {isUnitCategory
-                  ? t('単元を1つ以上選ぶと開始できます')
-                  : t('開始条件を確認してください')}
+                  ? '単元を1つ以上選ぶと開始できます'
+                  : '開始条件を確認してください'}
               </div>
             )}
 
@@ -836,7 +832,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                 >
                   {BGM_OPTIONS.map(bgm => (
                     <option key={bgm.id} value={bgm.id}>
-                      {t(bgm.name)}
+                      {bgm.name}
                     </option>
                   ))}
                 </select>
@@ -845,7 +841,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
             {selectedCategory.id === 'ENGLISH' && (
                 <div className="flex flex-col shrink-0">
                     <h3 className="text-[10px] md:text-xs font-bold text-gray-400 mb-1.5 flex items-center gap-2 uppercase tracking-tight">
-                    <Volume2 size={10} className="text-emerald-500"/> {t('読み上げ')}
+                    <Volume2 size={10} className="text-emerald-500"/> 読み上げ
                     </h3>
                     <button 
                         onClick={toggleVoice}
@@ -853,7 +849,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                     >
                         <div className="flex items-center gap-2">
                             {voiceEnabled ? <Volume2 size={14} className="text-cyan-400"/> : <VolumeX size={14}/>}
-                            <span className="text-[10px]">{voiceEnabled ? t('オン') : t('オフ')}</span>
+                            <span className="text-[10px]">{voiceEnabled ? 'オン' : 'オフ'}</span>
                         </div>
                         <div className={`w-7 h-3.5 rounded-full relative transition-colors ${voiceEnabled ? 'bg-cyan-500' : 'bg-gray-600'}`}>
                             <div className={`absolute top-0.5 w-2.5 h-2.5 bg-white rounded-full transition-all ${voiceEnabled ? 'left-4' : 'left-0.5'}`}></div>
@@ -863,7 +859,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
             )}
             
             <button onClick={onBack} className="mt-auto text-slate-400 hover:text-white flex items-center gap-2 transition-colors py-1 text-xs">
-              <ArrowLeft size={14} /> {t('もどる')}
+              <ArrowLeft size={14} /> もどる
             </button>
           </div>
         </div>
