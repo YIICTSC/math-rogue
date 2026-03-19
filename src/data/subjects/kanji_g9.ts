@@ -69,7 +69,7 @@ export const KANJI_G9_DATA: KanjiProblem[] = [
     { question: "抽出", answer: "ちゅうしゅつ", options: ["ちゅうしゅつ", "ぬきだし", "じゅうしゅつ", "しゅつ"], hint: "抜き出すこと。「データを ～ する。」" },
     { question: "定義", answer: "ていぎ", options: ["ていぎ", "さだめ", "じょうぎ", "だいぎ"], hint: "言葉の意味をはっきり決めること。" },
     { question: "適合", answer: "てきごう", options: ["てきごう", "あてあわせ", "できごう", "ちゃくごう"], hint: "条件によく合うこと。" },
-    { question: "排除", answer: "はいょ", options: ["はいじょ", "のぞき", "ばいじょ", "ぱいじょ"], hint: "取り除いて、なくすこと。" },
+    { question: "排除", answer: "はいじょ", options: ["はいじょ", "のぞき", "ばいじょ", "ぱいじょ"], hint: "取り除いて、なくすこと。" },
     { question: "理論", answer: "りろん", options: ["りろん", "わけとき", "じろん", "ねろん"], hint: "筋道を立てた考えの体系。" },
     { question: "顕在", answer: "けんざい", options: ["けんざい", "あらわれ", "げんざい", "こんざい"], hint: "目に見える形で現れていること。" },
     { question: "暫定", answer: "ざんてい", options: ["ざんてい", "しばらさだめ", "ぜんてい", "さんてい"], hint: "正式に決まるまで、仮に決めること。" },

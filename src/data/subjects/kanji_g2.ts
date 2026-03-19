@@ -51,7 +51,7 @@ export const KANJI_G2_DATA: KanjiProblem[] = [
     { question: "馬車", answer: "ばしゃ", options: ["ばしゃ", "うまくるま", "ばくるま", "ましゃ"], hint: "うまが ひく のりもの。" },
     { question: "小魚", answer: "こざかな", options: ["こざかな", "しょうぎょ", "ちいさかな", "こぎょ"], hint: "ちいさな さかな。" },
     { question: "牛肉", answer: "ぎゅうにく", options: ["ぎゅうにく", "うしにく", "ごうにく", "ぎゅうしし"], hint: "うしの おにく。" },
-    { question: "金魚", answer: "kんぎょ", options: ["きんぎょ", "かなうお", "きんうお", "かねうお"], hint: "あかくて ちいさな さかな。" },
+    { question: "金魚", answer: "きんぎょ", options: ["きんぎょ", "かなうお", "きんうお", "かねうお"], hint: "あかくて ちいさな さかな。" },
     { question: "麦茶", answer: "むぎちゃ", options: ["むぎちゃ", "ばくちゃ", "むぎさ", "ばくさ"], hint: "むぎから つくった のみもの。" },
     { question: "茶畑", answer: "ちゃばたけ", options: ["ちゃばたけ", "さばたけ", "ちゃはた", "さでん"], hint: "おちゃを そだてている ところ。" },
     { question: "小鳥", answer: "ことり", options: ["ことり", "しょうちょう", "おどり", "ちいとり"], hint: "ちいさな とり。" },
