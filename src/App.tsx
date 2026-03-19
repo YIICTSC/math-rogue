@@ -8243,106 +8243,106 @@ const App: React.FC = () => {
                 )}
 
                 {coopSession && gameState.challengeMode === 'COOP' && gameState.screen !== GameScreen.COOP_SETUP && coopSession.roomCode && (
-                    <div className="absolute left-1/2 top-3 z-40 -translate-x-1/2">
-                        <div className="bg-slate-900/90 border border-emerald-500 rounded-lg px-3 py-2 text-emerald-100 shadow-lg">
-                            <div className="text-center text-[10px] font-bold tracking-wide text-emerald-200">
+                    <div className="absolute left-1/2 top-2 sm:top-3 z-40 -translate-x-1/2">
+                        <div className="bg-slate-900/90 border border-emerald-500 rounded-lg px-2 py-1.5 sm:px-3 sm:py-2 text-emerald-100 shadow-lg">
+                            <div className="text-center text-[9px] sm:text-[10px] font-bold tracking-wide text-emerald-200">
                                 {coopSession.isHost ? '協力コード' : '参加中コード'}
                             </div>
-                            <div className="text-center text-lg font-black tracking-widest tabular-nums">{coopSession.roomCode}</div>
+                            <div className="text-center text-base sm:text-lg font-black tracking-[0.18em] sm:tracking-widest tabular-nums">{coopSession.roomCode}</div>
                         </div>
                     </div>
                 )}
 
                 {gameState.challengeMode === 'COOP' && gameState.screen !== GameScreen.COOP_SETUP && coopSupportCards.length > 0 && (
-                    <div className="absolute right-3 top-[72px] z-30">
-                        <div className="bg-slate-900/90 border border-emerald-500 rounded-lg px-3 py-2 text-emerald-100 shadow-lg min-w-[132px]">
-                            <div className="text-[10px] font-bold tracking-wide text-emerald-200">支援カード</div>
-                            <div className="text-xl font-black tabular-nums">{coopSupportCards.length}</div>
+                    <div className="absolute right-2 sm:right-3 top-[60px] sm:top-[72px] z-30">
+                        <div className="bg-slate-900/90 border border-emerald-500 rounded-lg px-2 py-1.5 sm:px-3 sm:py-2 text-emerald-100 shadow-lg min-w-[88px] sm:min-w-[132px]">
+                            <div className="text-[9px] sm:text-[10px] font-bold tracking-wide text-emerald-200">支援</div>
+                            <div className="text-base sm:text-xl font-black tabular-nums">{coopSupportCards.length}</div>
                         </div>
                     </div>
                 )}
 
                 {gameState.challengeMode === 'COOP' && coopSession && COOP_DECISION_HUD_SCREEN_SET.has(gameState.screen) && coopDecisionOwner && (
-                    <div className={`absolute right-3 z-30 ${coopSupportCards.length > 0 ? 'top-[144px]' : 'top-[72px]'}`}>
-                        <div className="bg-slate-900/90 border border-cyan-500 rounded-lg px-3 py-2 text-cyan-100 shadow-lg min-w-[168px]">
-                            <div className="text-[10px] font-bold tracking-wide text-cyan-200">決定役</div>
-                            <div className="text-sm font-black">{coopDecisionOwner.name}</div>
-                            <div className="text-[11px] text-cyan-100/80">{coopCanDecide ? 'あなたの番です' : '進行を待っています'}</div>
+                    <div className={`absolute right-2 sm:right-3 z-30 ${coopSupportCards.length > 0 ? 'top-[116px] sm:top-[144px]' : 'top-[60px] sm:top-[72px]'}`}>
+                        <div className="bg-slate-900/90 border border-cyan-500 rounded-lg px-2 py-1.5 sm:px-3 sm:py-2 text-cyan-100 shadow-lg min-w-[116px] sm:min-w-[168px] max-w-[42vw] sm:max-w-none">
+                            <div className="text-[9px] sm:text-[10px] font-bold tracking-wide text-cyan-200">決定役</div>
+                            <div className="truncate text-[11px] sm:text-sm font-black">{coopDecisionOwner.name}</div>
+                            <div className="text-[9px] sm:text-[11px] text-cyan-100/80">{coopCanDecide ? 'あなたの番です' : '進行待ち'}</div>
                         </div>
                     </div>
                 )}
 
                 {gameState.challengeMode === 'COOP' && coopSession && COOP_PARTY_HUD_SCREEN_SET.has(gameState.screen) && (
-                    <div className="absolute left-3 top-[72px] z-30 w-[min(320px,calc(100vw-24px))]">
-                        <div className="bg-slate-950/88 border border-emerald-500/60 rounded-xl shadow-2xl backdrop-blur px-3 py-2 text-white">
-                            <div className="mb-2 flex items-center justify-between">
+                    <div className="absolute left-2 sm:left-3 top-[60px] sm:top-[72px] z-30 w-[min(240px,calc(100vw-16px))] sm:w-[min(320px,calc(100vw-24px))]">
+                        <div className="bg-slate-950/88 border border-emerald-500/60 rounded-xl shadow-2xl backdrop-blur px-2 py-1.5 sm:px-3 sm:py-2 text-white">
+                            <div className="mb-1.5 sm:mb-2 flex items-center justify-between gap-2">
                                 <div>
-                                    <div className="text-[10px] uppercase tracking-[0.25em] text-emerald-200">Coop Party</div>
-                                    <div className="text-[10px] text-emerald-100/80">{coopSession.participants.length}人</div>
+                                    <div className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-emerald-200">Coop Party</div>
+                                    <div className="text-[9px] sm:text-[10px] text-emerald-100/80">{coopSession.participants.length}人</div>
                                 </div>
                                 <button
                                     onClick={() => setCoopPartyHudOpen(prev => !prev)}
-                                    className="rounded border border-emerald-400/40 bg-emerald-950/30 px-2 py-1 text-[10px] font-bold text-emerald-100 hover:bg-emerald-900/40"
+                                    className="rounded border border-emerald-400/40 bg-emerald-950/30 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[9px] sm:text-[10px] font-bold text-emerald-100 hover:bg-emerald-900/40"
                                 >
                                     {coopPartyHudOpen ? '非表示' : '表示'}
                                 </button>
                             </div>
                             {coopPartyHudOpen && (
-                            <div className="space-y-2">
+                            <div className="space-y-1.5 sm:space-y-2">
                                 {coopSession.participants.map(participant => {
                                     const isSelf = participant.peerId === coopSelfPeerId;
                                     const isDecisionOwner = participant.peerId === coopDecisionOwner?.peerId;
                                     const hpValue = participant.currentHp ?? participant.maxHp ?? 0;
                                     const maxHpValue = participant.maxHp ?? hpValue;
                                     return (
-                                        <div key={participant.peerId} className={`rounded-lg border px-2 py-2 ${isDecisionOwner ? 'border-cyan-400/70 bg-cyan-950/20' : 'border-white/10 bg-black/20'}`}>
+                                        <div key={participant.peerId} className={`rounded-lg border px-2 py-1.5 sm:px-2 sm:py-2 ${isDecisionOwner ? 'border-cyan-400/70 bg-cyan-950/20' : 'border-white/10 bg-black/20'}`}>
                                             <div className="mb-1 flex items-center justify-between gap-2">
                                                 <div className="min-w-0">
-                                                    <div className="truncate text-xs font-black text-white">
+                                                    <div className="truncate text-[11px] sm:text-xs font-black text-white">
                                                         {participant.name}{isSelf ? ' (あなた)' : ''}
                                                     </div>
-                                                    <div className="text-[10px] text-slate-300">
+                                                    <div className="hidden sm:block text-[10px] text-slate-300">
                                                         {isDecisionOwner ? '決定役' : '同行中'}
                                                     </div>
                                                 </div>
-                                                <div className={`text-[10px] font-bold ${hpValue > 0 ? 'text-emerald-300' : 'text-red-300'}`}>
+                                                <div className={`text-[9px] sm:text-[10px] font-bold ${hpValue > 0 ? 'text-emerald-300' : 'text-red-300'}`}>
                                                     {hpValue > 0 ? '生存' : 'ダウン'}
                                                 </div>
                                             </div>
-                                            <div className="mb-1 h-1.5 overflow-hidden rounded-full bg-slate-800">
+                                            <div className="mb-1 h-1 sm:h-1.5 overflow-hidden rounded-full bg-slate-800">
                                                 <div
                                                     className={`h-full rounded-full ${hpValue > 0 ? 'bg-emerald-400' : 'bg-red-500'}`}
                                                     style={{ width: `${maxHpValue > 0 ? Math.max(0, Math.min(100, (hpValue / maxHpValue) * 100)) : 0}%` }}
                                                 />
                                             </div>
-                                            <div className="flex items-center justify-between text-[10px] text-slate-300">
-                                                <span>HP {hpValue}/{maxHpValue}</span>
+                                            <div className="flex items-center justify-between gap-2 text-[9px] sm:text-[10px] text-slate-300">
+                                                <span className="shrink-0">HP {hpValue}/{maxHpValue}</span>
                                                 {gameState.screen === GameScreen.REWARD ? (
-                                                    <span className={participant.rewardResolved ? 'text-yellow-300' : 'text-slate-300'}>
+                                                    <span className={`truncate text-right ${participant.rewardResolved ? 'text-yellow-300' : 'text-slate-300'}`}>
                                                         {participant.rewardResolved ? '報酬完了' : '報酬中'}
                                                     </span>
                                                 ) : gameState.screen === GameScreen.SHOP ? (
-                                                    <span className={participant.shopResolved ? 'text-yellow-300' : 'text-slate-300'}>
+                                                    <span className={`truncate text-right ${participant.shopResolved ? 'text-yellow-300' : 'text-slate-300'}`}>
                                                         {participant.shopResolved ? '買い物完了' : '買い物中'}
                                                     </span>
                                                 ) : gameState.screen === GameScreen.REST ? (
-                                                    <span className={participant.restResolved ? 'text-yellow-300' : 'text-slate-300'}>
+                                                    <span className={`truncate text-right ${participant.restResolved ? 'text-yellow-300' : 'text-slate-300'}`}>
                                                         {participant.restResolved ? '休憩完了' : '休憩中'}
                                                     </span>
                                                 ) : gameState.screen === GameScreen.EVENT ? (
-                                                    <span className={participant.eventResolved ? 'text-yellow-300' : 'text-slate-300'}>
+                                                    <span className={`truncate text-right ${participant.eventResolved ? 'text-yellow-300' : 'text-slate-300'}`}>
                                                         {participant.eventResolved ? 'イベント完了' : 'イベント中'}
                                                     </span>
                                                 ) : gameState.screen === GameScreen.TREASURE ? (
-                                                    <span className={participant.treasureResolved ? 'text-yellow-300' : 'text-slate-300'}>
+                                                    <span className={`truncate text-right ${participant.treasureResolved ? 'text-yellow-300' : 'text-slate-300'}`}>
                                                         {participant.treasureResolved ? '宝確認完了' : '宝確認中'}
                                                     </span>
                                                 ) : CHALLENGE_SCREEN_SET.has(gameState.screen) ? (
-                                                    <span className={participant.quizResolved ? 'text-yellow-300' : 'text-slate-300'}>
+                                                    <span className={`truncate text-right ${participant.quizResolved ? 'text-yellow-300' : 'text-slate-300'}`}>
                                                         {participant.quizResolved ? `クイズ ${participant.quizCorrectCount ?? 0}` : 'クイズ中'}
                                                     </span>
                                                 ) : (
-                                                    <span className={isDecisionOwner ? 'text-cyan-300' : 'text-slate-400'}>
+                                                    <span className={`truncate text-right ${isDecisionOwner ? 'text-cyan-300' : 'text-slate-400'}`}>
                                                         {isDecisionOwner ? '進行中' : '待機'}
                                                     </span>
                                                 )}
