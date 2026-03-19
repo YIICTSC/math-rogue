@@ -719,13 +719,13 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         </div>
                     )}
                     {coopTurnQueue.length > 0 && (
-                        <div className="max-w-[52vw] rounded border border-emerald-500/40 bg-gray-950/85 px-2 py-1 shadow-sm">
-                            <div className="mb-1 text-[9px] font-bold uppercase tracking-[0.2em] text-emerald-200">Coop Order</div>
-                            <div className="flex flex-wrap justify-end gap-1">
+                        <div className="max-w-[46vw] sm:max-w-[52vw] rounded border border-emerald-500/40 bg-gray-950/85 px-1.5 py-1 sm:px-2 sm:py-1 shadow-sm">
+                            <div className="mb-1 text-[8px] sm:text-[9px] font-bold uppercase tracking-[0.12em] sm:tracking-[0.2em] text-emerald-200">Coop Order</div>
+                            <div className="flex flex-wrap justify-end gap-0.5 sm:gap-1">
                                 {coopTurnQueue.map((slot) => (
                                     <div
                                         key={slot.id}
-                                        className={`flex items-center gap-1 rounded border px-1.5 py-0.5 text-[9px] font-bold ${
+                                        className={`flex items-center gap-0.5 sm:gap-1 rounded border px-1 py-0.5 sm:px-1.5 text-[8px] sm:text-[9px] font-bold ${
                                             slot.type === 'SELF'
                                                 ? 'border-yellow-400 bg-yellow-900/50 text-yellow-100'
                                                 : slot.type === 'ALLY'
@@ -733,8 +733,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                     : 'border-red-400 bg-red-950/40 text-red-100'
                                         }`}
                                     >
-                                        {slot.type === 'SELF' ? <Zap size={10} /> : slot.type === 'ALLY' ? <Users size={10} /> : <Skull size={10} />}
-                                        <span>{slot.label}</span>
+                                        {slot.type === 'SELF' ? <Zap size={9} /> : slot.type === 'ALLY' ? <Users size={9} /> : <Skull size={9} />}
+                                        <span className="max-w-[56px] sm:max-w-[96px] truncate">{slot.label}</span>
                                     </div>
                                 ))}
                             </div>

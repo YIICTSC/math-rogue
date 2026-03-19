@@ -9,6 +9,7 @@ import { SUBJECT_CATEGORIES, SubjectCategoryConfig, SubjectCategoryType } from '
 import { ENGLISH_GRADE_UNITS } from '../englishUnitConfig';
 import { SCIENCE_GRADE_UNITS, getScienceGradeMode } from '../scienceUnitConfig';
 import { SOCIAL_GRADE_UNITS, getSocialGradeMode } from '../socialUnitConfig';
+import { trans } from '../utils/textUtils';
 
 interface ModeSelectionScreenProps {
   onSelectMode: (mode: GameMode, modePool?: string[]) => void;
@@ -364,6 +365,7 @@ const getCategoryClasses = (color: string) => {
 const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   onSelectMode,
   onBack,
+  languageMode,
   modeMasteryMap = {},
   modeCorrectCounts = {},
 }) => {
@@ -381,8 +383,10 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   };
 
   const isMastered = (mode: string) => !!modeMasteryMap[mode];
-  const getCategoryLabel = (id: SubjectCategoryType) => CATEGORY_LABELS[id] || id;
-  const getSubLabel = (id: string, fallback: string) => SUBMODE_LABELS[id] || fallback;
+  const t = (text: string) => trans(text, languageMode);
+  const getGradeLabel = (grade: number) => grade <= 6 ? t(`${grade}年`) : t(`中${grade - 6}`);
+  const getCategoryLabel = (id: SubjectCategoryType) => t(CATEGORY_LABELS[id] || id);
+  const getSubLabel = (id: string, fallback: string) => t(SUBMODE_LABELS[id] || fallback);
   const getUnitCorrectCount = (unit: { mode?: string; modes?: string[] }) => {
     if (unit.mode) return modeCorrectCounts[unit.mode] || 0;
     return (unit.modes || []).reduce((total, mode) => total + (modeCorrectCounts[mode] || 0), 0);
@@ -432,8 +436,8 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
         modePool,
         canStart: selectedUnits.length > 0,
         label: selectedUnits.length > 0
-          ? `ミックス選択 (${selectedUnits.length}単元)`
-          : `単元未選択`,
+          ? `${t('ミックス選択')} (${selectedUnits.length}${t('単元')})`
+          : t('単元未選択'),
       };
     }
 
@@ -442,7 +446,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
         return {
           mode: GameMode.ENGLISH_MIXED as string,
           canStart: true,
-          label: `${selectedCategory.name} / ミックス`,
+          label: `${t(selectedCategory.name)} / ${t('ミックス')}`,
         };
       }
     }
@@ -457,7 +461,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
       return {
         mode,
         canStart: !!mode,
-        label: `${selectedCategory.name} / ${selectedGrade <= 6 ? `${selectedGrade}年` : `中${selectedGrade - 6}`} / ${selectedTerm}学期`,
+        label: `${t(selectedCategory.name)} / ${getGradeLabel(selectedGrade)} / ${selectedTerm}${t('学期')}`,
       };
     }
 
@@ -465,14 +469,14 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
       return {
         mode: selectedSubMode.mode as string,
         canStart: true,
-        label: `${selectedCategory.name} / ${selectedSubMode.name}`,
+        label: `${t(selectedCategory.name)} / ${t(selectedSubMode.name)}`,
       };
     }
 
     return {
       mode: '',
       canStart: false,
-      label: `${selectedCategory.name} / 未選択`,
+      label: `${t(selectedCategory.name)} / ${t('未選択')}`,
     };
   };
 
@@ -504,7 +508,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
       return (
         <div className="space-y-3">
           <div>
-            <div className="text-[10px] text-gray-400 mb-1">学年</div>
+            <div className="text-[10px] text-gray-400 mb-1">{t('学年')}</div>
             <div className="grid grid-cols-9 sm:grid-cols-5 gap-1">
               {grades.map((grade) => (
                 <button
@@ -516,7 +520,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
                   }}
                   className={`px-0.5 py-1 rounded border text-[9px] sm:text-[10px] font-bold leading-none transition-colors ${selectedMathGrade === grade ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'}`}
                 >
-                  {grade <= 6 ? `${grade}年` : `中${grade - 6}`}
+                  {getGradeLabel(grade)}
                 </button>
               ))}
             </div>
@@ -524,14 +528,14 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
 
           <div>
             <div className="mb-1 flex items-center justify-between gap-2">
-              <div className="text-[10px] text-gray-400">単元</div>
+              <div className="text-[10px] text-gray-400">{t('単元')}</div>
               <button
                 type="button"
                 onClick={clearSelectedUnits}
                 disabled={selectedMathUnitIds.length === 0}
                 className={`rounded border px-2 py-0.5 text-[9px] font-bold transition-colors ${selectedMathUnitIds.length > 0 ? 'border-slate-500 text-slate-200 hover:bg-slate-700' : 'border-slate-700 text-slate-500 cursor-not-allowed opacity-60'}`}
               >
-                選択解除
+                {t('選択解除')}
               </button>
             </div>
             <div className="grid grid-cols-2 gap-1.5 sm:gap-2 max-h-[48vh] overflow-y-auto custom-scrollbar pr-1">
@@ -548,9 +552,9 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
                     }}
                     className={`relative w-full p-1.5 pr-12 sm:p-2 sm:pr-14 rounded-lg border text-left text-[10px] sm:text-xs font-bold leading-snug transition-colors ${isSelected ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-200 hover:border-slate-400'}`}
                   >
-                    <span className="block">{unit.name}</span>
+                    <span className="block">{t(unit.name)}</span>
                     <span className="absolute right-1 top-1 rounded-full bg-black/45 border border-white/15 px-1 py-0.5 text-[7px] sm:right-1.5 sm:top-1.5 sm:px-1.5 sm:text-[8px] font-mono leading-none text-white/90">
-                      {getUnitCorrectCount(unit)}問
+                      {getUnitCorrectCount(unit)}{t('問')}
                     </span>
                   </button>
                 );
@@ -567,7 +571,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
       return (
         <div className="space-y-3">
           <div>
-            <div className="text-[10px] text-gray-400 mb-1">学年</div>
+            <div className="text-[10px] text-gray-400 mb-1">{t('学年')}</div>
             <div className="grid grid-cols-5 gap-1.5">
               {grades.map((grade) => (
                 <button
@@ -575,13 +579,13 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
                   onClick={() => { setSelectedGrade(grade); audioService.playSound('select'); }}
                   className={`p-1.5 rounded border text-[10px] font-bold transition-colors ${selectedGrade === grade ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'}`}
                 >
-                  {grade <= 6 ? `${grade}年` : `中${grade - 6}`}
+                  {getGradeLabel(grade)}
                 </button>
               ))}
             </div>
           </div>
           <div>
-            <div className="text-[10px] text-gray-400 mb-1">学期</div>
+            <div className="text-[10px] text-gray-400 mb-1">{t('学期')}</div>
             <div className="grid grid-cols-3 gap-1.5">
               {[1, 2, 3].map((term) => (
                 <button
@@ -589,14 +593,14 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
                   onClick={() => { setSelectedTerm(term); audioService.playSound('select'); }}
                   className={`p-1.5 rounded border text-[10px] font-bold transition-colors ${selectedTerm === term ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'}`}
                 >
-                  {term}学期
+                  {term}{t('学期')}
                 </button>
               ))}
             </div>
           </div>
           {selectedCategory.id === 'SOCIAL' && (
             <div>
-              <div className="text-[10px] text-gray-400 mb-1">単独モード</div>
+              <div className="text-[10px] text-gray-400 mb-1">{t('単独モード')}</div>
               <div className="grid grid-cols-3 gap-1.5">
                 {selectedCategory.subModes.filter((sub) => !sub.id.includes('SO')).map((sub) => (
                   <button
@@ -623,7 +627,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
       return (
         <div className="space-y-3">
           <div>
-            <div className="text-[10px] text-gray-400 mb-1">単語</div>
+            <div className="text-[10px] text-gray-400 mb-1">{t('単語')}</div>
             <div className="grid grid-cols-2 gap-1.5">
               {words.map((sub) => (
                 <button
@@ -637,7 +641,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
             </div>
           </div>
           <div>
-            <div className="text-[10px] text-gray-400 mb-1">会話</div>
+            <div className="text-[10px] text-gray-400 mb-1">{t('会話')}</div>
             <div className="grid grid-cols-3 gap-1.5">
               {convs.map((sub) => (
                 <button
@@ -652,7 +656,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
                 onClick={() => { setSelectedSubModeId('ENGLISH_MIXED'); audioService.playSound('select'); }}
                 className={`p-2 rounded-lg border text-[10px] font-bold transition-colors ${selectedSubModeId === 'ENGLISH_MIXED' ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'}`}
               >
-                ミックス
+                {t('ミックス')}
               </button>
             </div>
           </div>
@@ -794,11 +798,11 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
               className={`w-full p-2 rounded font-bold text-xs shadow-lg transition-all text-white ${canStartUnits ? `${theme.bg} ${theme.hover}` : 'bg-slate-700 cursor-not-allowed opacity-50'}`}
             >
               {renderMasteryPrefix(selectedMode)}
-              この単元ミックスで開始
+              {t('この単元ミックスで開始')}
             </button>
             {!canStartUnits && (
               <div className="text-[10px] text-amber-300">
-                {gradeUnits.length > 0 ? '単元を1つ以上選ぶと開始できます' : 'この学年の単元はまだ未実装です'}
+                {gradeUnits.length > 0 ? t('単元を1つ以上選ぶと開始できます') : t('この学年の単元はまだ未実装です')}
               </div>
             )}
           </div>
@@ -843,7 +847,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
     <div className="w-full h-full bg-slate-950 flex flex-col text-white overflow-hidden">
       <div className="w-full max-w-6xl mx-auto flex flex-col flex-1 min-h-0 overflow-hidden">
         <div className="text-center border-b border-slate-800 p-4 shrink-0">
-          <h2 className="text-2xl md:text-3xl font-bold text-yellow-400 tracking-widest">モード選択</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-yellow-400 tracking-widest">{t('モード選択')}</h2>
         </div>
 
         <div className="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 overflow-hidden min-h-0">
@@ -866,7 +870,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
 
           <div className="lg:col-span-7 flex flex-col min-h-0">
             <h3 className="text-[10px] md:text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-tight shrink-0">
-              単元 / 種目
+              {t('単元 / 種目')}
             </h3>
             <div className="bg-black/40 p-3 rounded-xl border border-slate-800 flex-grow overflow-y-auto custom-scrollbar shadow-inner min-h-[160px]">
               {renderModeSelectionPanel()}
@@ -875,21 +879,21 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
 
           <div className="lg:col-span-3 flex flex-col gap-3 overflow-y-auto custom-scrollbar shrink-0">
             <div className="bg-black/40 rounded-xl border border-slate-800 p-3">
-              <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mb-2">選択中</div>
+              <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mb-2">{t('選択中')}</div>
               <div className="text-sm font-bold text-yellow-300">{selectionPreview.label}</div>
             </div>
             {isUnitCategory && (
               <div className="bg-black/40 rounded-xl border border-slate-800 p-3 text-xs text-slate-300">
-                学年: {selectedMathGrade <= 6 ? `${selectedMathGrade}年` : `中${selectedMathGrade - 6}`}
+                {t('学年')}: {getGradeLabel(selectedMathGrade)}
                 <br />
-                選択単元数: {selectedMathUnitIds.length}
+                {t('選択単元数')}: {selectedMathUnitIds.length}
               </div>
             )}
             {selectedCategory.uiType === 'grade_term' && !isUnitCategory && (
               <div className="bg-black/40 rounded-xl border border-slate-800 p-3 text-xs text-slate-300">
-                学年: {selectedGrade <= 6 ? `${selectedGrade}年` : `中${selectedGrade - 6}`}
+                {t('学年')}: {getGradeLabel(selectedGrade)}
                 <br />
-                学期: {selectedTerm}学期
+                {t('学期')}: {selectedTerm}{t('学期')}
               </div>
             )}
             <button
@@ -900,17 +904,17 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
               disabled={!selectionPreview.canStart}
               className={`w-full py-3 rounded-xl font-bold text-base transition-all ${selectionPreview.canStart ? 'bg-yellow-500 hover:bg-yellow-400 text-slate-950 shadow-[0_4px_0_rgb(161,98,7)] active:translate-y-1 active:shadow-none' : 'bg-slate-700 text-slate-400 opacity-60 cursor-not-allowed'}`}
             >
-              {selectionPreview.canStart ? 'この条件で開始' : '単元を選択してください'}
+              {selectionPreview.canStart ? t('この条件で開始') : t('単元を選択してください')}
             </button>
             {!selectionPreview.canStart && (
               <div className="text-[10px] text-amber-300">
                 {isUnitCategory
-                  ? '単元を1つ以上選ぶと開始できます'
-                  : '開始条件を確認してください'}
+                  ? t('単元を1つ以上選ぶと開始できます')
+                  : t('開始条件を確認してください')}
               </div>
             )}
             <button onClick={onBack} className="mt-auto text-slate-400 hover:text-white flex items-center gap-2 transition-colors py-1 text-xs">
-              <ArrowLeft size={14} /> もどる
+              <ArrowLeft size={14} /> {t('もどる')}
             </button>
           </div>
         </div>
