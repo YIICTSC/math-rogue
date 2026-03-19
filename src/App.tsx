@@ -8091,7 +8091,7 @@ const App: React.FC = () => {
                                 </div>
 
                                 <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                    <Terminal size={10} /> v1.0.3 YUSUKE ISHIGE
+                                    <Terminal size={10} /> v1.0.4 YUSUKE ISHIGE
                                 </button>
                             </div>
                         </div>
@@ -8119,15 +8119,15 @@ const App: React.FC = () => {
                                 className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2 select-none active:text-green-200"
                                 onClick={handleLogClick}
                             >
-                                System Update Log v1.0.3
+                                System Update Log v1.0.4
                             </h2>
                             <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
                                 <section>
-                                    <h3 className="text-white font-bold mb-1">■ v1.0.3 アップデート</h3>
+                                    <h3 className="text-white font-bold mb-1">■ v1.0.4 アップデート</h3>
                                     <ul className="list-disc pl-5 space-y-1">
-                                        <li>200を超えるアンロックカードの実装</li>
-                                        <li>問題チャレンジモードの改善</li>
-                                        <li>UIの微調整とバグ修正</li>
+                                        <li>協力モードの進行、報酬、イベント同期を改善</li>
+                                        <li>協力専用UIに参加者名表示を追加</li>
+                                        <li>細かなバグ修正と安定性向上</li>
                                     </ul>
                                 </section>
                             </div>
