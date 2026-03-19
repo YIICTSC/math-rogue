@@ -18,9 +18,11 @@ interface MapScreenProps {
     floor: number;
     typingMode?: boolean;
     selectionHoldMs?: number;
+    selectionDisabled?: boolean;
+    selectionDisabledMessage?: string;
 }
 
-const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelect, onReturnToTitle, player, languageMode, narrative, act, floor, typingMode = false, selectionHoldMs = 0 }) => {
+const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelect, onReturnToTitle, player, languageMode, narrative, act, floor, typingMode = false, selectionHoldMs = 0, selectionDisabled = false, selectionDisabledMessage }) => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [showDeck, setShowDeck] = useState(false);
     const holdTimerRef = useRef<number | null>(null);
@@ -71,14 +73,14 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
         availableNodeIds = nodes.filter(n => n.y === 0).map(n => n.id);
     } else {
         const currentNode = nodes.find(n => n.id === currentNodeId);
-        if (currentNode && currentNode.completed) {
+        if (currentNode) {
             availableNodeIds = currentNode.nextNodes;
         }
     }
     const availableNodes = nodes.filter(n => availableNodeIds.includes(n.id));
 
     useEffect(() => {
-        if (!typingMode || showDeck) return;
+        if (!typingMode || showDeck || selectionDisabled) return;
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key >= '1' && e.key <= '9') {
                 const node = availableNodes[Number(e.key) - 1];
@@ -92,7 +94,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [typingMode, showDeck, availableNodes, onNodeSelect]);
+    }, [typingMode, showDeck, availableNodes, onNodeSelect, selectionDisabled]);
 
     useEffect(() => () => {
         if (holdTimerRef.current) window.clearTimeout(holdTimerRef.current);
@@ -241,8 +243,10 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                         if (isCurrent) {
                             bgClass = "bg-slate-900 border-yellow-500 text-yellow-400 shadow-[0_0_25px_rgba(234,179,8,0.4)]";
                         }
-                        if (isAvailable) {
+                        if (isAvailable && !selectionDisabled) {
                             bgClass = "bg-white border-blue-400 text-slate-900 cursor-pointer hover:scale-110 hover:shadow-[0_0_20px_rgba(96,165,250,0.6)]";
+                        } else if (isAvailable && selectionDisabled) {
+                            bgClass = "bg-slate-100/70 border-slate-400 text-slate-700 opacity-70";
                         }
 
                         return (
@@ -250,9 +254,9 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                                 key={node.id}
                                 className={`absolute w-12 h-12 -ml-6 flex items-center justify-center rounded-2xl ${nodeBaseStyle} ${bgClass}`}
                                 style={{ left, bottom }}
-                                onClick={() => isAvailable && selectionHoldMs <= 0 ? onNodeSelect(node) : null}
+                                onClick={() => isAvailable && !selectionDisabled && selectionHoldMs <= 0 ? onNodeSelect(node) : null}
                                 onPointerDown={() => {
-                                    if (!isAvailable || selectionHoldMs <= 0) return;
+                                    if (!isAvailable || selectionDisabled || selectionHoldMs <= 0) return;
                                     if (holdTimerRef.current) window.clearTimeout(holdTimerRef.current);
                                     holdTimerRef.current = window.setTimeout(() => onNodeSelect(node), selectionHoldMs);
                                 }}
@@ -292,7 +296,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                                 {getNodeIcon(node.type)}
 
                                 {/* 選択可能時のアニメーションリング */}
-                                {isAvailable && (
+                                {isAvailable && !selectionDisabled && (
                                     <div className="absolute inset-[-8px] border-2 border-blue-400/50 rounded-2xl animate-ping opacity-30"></div>
                                 )}
 
@@ -307,9 +311,18 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
 
             {/* フッターガイド */}
             <div className="p-2 bg-black/90 border-t border-slate-800 text-[10px] text-center text-slate-500 z-30 font-bold tracking-widest uppercase">
-                {trans("次の目的地を選択してください", languageMode)}
+                {selectionDisabled ? (selectionDisabledMessage || trans("ホストの選択を待っています", languageMode)) : trans("次の目的地を選択してください", languageMode)}
                 {typingMode && <span className="ml-2 text-cyan-300">1-9 / Enter</span>}
             </div>
+
+            {selectionDisabled && (
+                <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center px-4">
+                    <div className="rounded-2xl border border-emerald-400/50 bg-slate-950/85 px-5 py-4 text-center text-white shadow-2xl backdrop-blur">
+                        <div className="text-lg font-black text-emerald-200 mb-1">協力モード待機中</div>
+                        <div className="text-sm text-emerald-100">{selectionDisabledMessage || trans("ホストの選択を待っています", languageMode)}</div>
+                    </div>
+                </div>
+            )}
 
             {/* デッキ確認用モーダル */}
             {showDeck && (

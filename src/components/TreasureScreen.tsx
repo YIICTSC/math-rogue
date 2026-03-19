@@ -1,21 +1,40 @@
 
 import React, { useState, useEffect } from 'react';
 import { Archive, Key, Check } from 'lucide-react';
-import { RewardItem, LanguageMode } from '../types';
+import { RewardItem, LanguageMode, CoopTreasurePool } from '../types';
 import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
 
 interface TreasureScreenProps {
-  onOpen: () => void;
+  onOpen?: () => void;
   onLeave: () => void;
   rewards: RewardItem[];
   hasCursedKey: boolean;
   languageMode: LanguageMode;
   typingMode?: boolean;
+  opened?: boolean;
+  pools?: CoopTreasurePool[];
+  onClaimPool?: (poolId: string) => void;
+  resolved?: boolean;
+  waitingForOthers?: boolean;
 }
 
-const TreasureScreen: React.FC<TreasureScreenProps> = ({ onOpen, onLeave, rewards, hasCursedKey, languageMode, typingMode = false }) => {
+const TreasureScreen: React.FC<TreasureScreenProps> = ({
+  onOpen,
+  onLeave,
+  rewards,
+  hasCursedKey,
+  languageMode,
+  typingMode = false,
+  opened,
+  pools = [],
+  onClaimPool,
+  resolved = false,
+  waitingForOthers = false
+}) => {
   const [isOpen, setIsOpen] = useState(false);
+  const isPoolMode = pools.length > 0;
+  const displayOpen = opened ?? isOpen;
 
   useEffect(() => {
     // Play suspenseful "event" music when chest is discovered
@@ -23,21 +42,42 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({ onOpen, onLeave, reward
   }, []);
 
   useEffect(() => {
+    if (opened === undefined) return;
+    setIsOpen(opened);
+  }, [opened]);
+
+  useEffect(() => {
     if (!typingMode) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isOpen && (e.key === '1' || e.key === 'Enter')) {
+      if (isPoolMode) {
+        if (e.key === '1' || e.key === 'Enter') {
+          e.preventDefault();
+          if (!resolved) {
+            const firstUnclaimed = pools.find(pool => !pool.claimedByPeerId);
+            if (firstUnclaimed && onClaimPool) {
+              onClaimPool(firstUnclaimed.id);
+              return;
+            }
+          }
+          onLeave();
+        }
+        return;
+      }
+      if (!displayOpen && (e.key === '1' || e.key === 'Enter')) {
         e.preventDefault();
         handleOpen();
-      } else if (isOpen && (e.key === '1' || e.key === 'Enter')) {
+      } else if (displayOpen && (e.key === '1' || e.key === 'Enter')) {
         e.preventDefault();
         onLeave();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [typingMode, isOpen, rewards]);
+  }, [typingMode, displayOpen, rewards, isPoolMode, pools, resolved, onClaimPool, onLeave]);
 
   const handleOpen = () => {
+      if (!onOpen) return;
+      if (displayOpen) return;
       setIsOpen(true);
       audioService.playSound('select'); // Chest open sound
       audioService.playBGM('reward'); // Switch to uplifting "reward" music
@@ -47,8 +87,70 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({ onOpen, onLeave, reward
   return (
     <div className="flex flex-col h-full w-full bg-gray-900 text-white relative items-center justify-center p-8">
       <div className="z-10 flex flex-col items-center text-center">
-          
-          {!isOpen ? (
+
+          {isPoolMode ? (
+              <>
+                <h2 className="text-4xl text-yellow-400 font-bold mb-6">{trans("宝を発見！", languageMode)}</h2>
+                <p className="text-gray-300 mb-6">{trans("人数分の宝があります。誰でも先に取った宝を獲得できます。", languageMode)}</p>
+                {hasCursedKey && (
+                  <div className="mb-4 rounded-full border border-purple-500 bg-purple-950/70 px-4 py-2 text-sm text-purple-200">
+                    <Key className="inline-block mr-2" size={16} />
+                    {trans("あなたが宝を取ると呪いが入ります", languageMode)}
+                  </div>
+                )}
+                {resolved && (
+                  <div className="mb-4 rounded-lg border border-cyan-500/50 bg-cyan-950/30 px-4 py-3 text-sm font-bold text-cyan-100">
+                    {waitingForOthers ? trans("他のプレイヤーが宝を確認するのを待っています", languageMode) : trans("宝の確認を終えました", languageMode)}
+                  </div>
+                )}
+                <div className="mb-8 grid w-full max-w-5xl grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {pools.map(pool => {
+                    const claimed = !!pool.claimedByPeerId;
+                    return (
+                      <div key={pool.id} className={`rounded-xl border-2 p-5 ${claimed ? 'border-yellow-500 bg-black/60' : 'border-slate-600 bg-slate-900/80'}`}>
+                        <div className="mb-4 flex items-center justify-center">
+                          <Archive size={72} className={claimed ? 'text-yellow-400' : 'text-yellow-700 fill-yellow-900'} />
+                        </div>
+                        <div className="mb-4 text-sm text-slate-300">
+                          {claimed
+                            ? trans(`取得者: ${pool.claimedByName || 'Unknown'}`, languageMode)
+                            : trans('未取得', languageMode)}
+                        </div>
+                        <div className="mb-4 flex flex-col gap-2 text-left">
+                          {pool.rewards.map((reward, idx) => (
+                            <div key={`${pool.id}-${idx}`} className="rounded border border-slate-700 bg-black/40 px-3 py-2 text-sm">
+                              <div className="font-bold text-yellow-100">
+                                {reward.type === 'GOLD' ? `${reward.value} G` : trans(reward.value.name, languageMode)}
+                              </div>
+                              <div className="text-xs text-slate-400">
+                                {reward.type === 'RELIC'
+                                  ? trans(reward.value.description, languageMode)
+                                  : reward.type === 'GOLD'
+                                    ? trans('ゴールド', languageMode)
+                                    : trans('報酬', languageMode)}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <button
+                          onClick={!claimed && !resolved ? () => onClaimPool?.(pool.id) : undefined}
+                          disabled={claimed || resolved}
+                          className="w-full rounded border-2 border-yellow-300 bg-yellow-600 px-4 py-2 font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {claimed ? trans('取得済み', languageMode) : trans('この宝を取る', languageMode)}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+                <button
+                  onClick={onLeave}
+                  className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded font-bold text-xl border-2 border-white flex items-center"
+                >
+                  <Check className="mr-2" /> {resolved ? trans("待機", languageMode) : trans("確認完了", languageMode)}{typingMode && ' [1/Enter]'}
+                </button>
+              </>
+          ) : !displayOpen ? (
               <>
                 <h2 className="text-4xl text-yellow-400 font-bold mb-8 animate-pulse">{trans("宝箱を発見！", languageMode)}</h2>
                 <div 

@@ -16,9 +16,11 @@ interface RestScreenProps {
   onLeave: () => void;
   languageMode: LanguageMode;
   typingMode?: boolean;
+  interactionDisabled?: boolean;
+  interactionDisabledMessage?: string;
 }
 
-const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSynthesize, onLeave, languageMode, typingMode = false }) => {
+const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSynthesize, onLeave, languageMode, typingMode = false, interactionDisabled = false, interactionDisabledMessage }) => {
   const [mode, setMode] = useState<'CHOICE' | 'UPGRADE' | 'SYNTHESIS' | 'PREVIEW_UPGRADE' | 'PREVIEW_SYNTHESIS' | 'RESULT' | 'DONE'>('CHOICE');
   const [message, setMessage] = useState("放課後の校舎だ。どこへ行こう？");
   const [selectedCard, setSelectedCard] = useState<ICard | null>(null);
@@ -39,7 +41,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
     : player.deck;
 
   useEffect(() => {
-      if (!typingMode) return;
+      if (!typingMode || interactionDisabled) return;
       const handleKeyDown = (e: KeyboardEvent) => {
           if (mode === 'CHOICE') {
               if (e.key === '1') { e.preventDefault(); handleRest(); }
@@ -92,20 +94,23 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       };
       window.addEventListener('keydown', handleKeyDown);
       return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [typingMode, mode, selectableCards, synthCards, selectedCard, requiredCards]);
+  }, [typingMode, mode, selectableCards, synthCards, selectedCard, requiredCards, interactionDisabled]);
 
   const handleRest = () => {
+      if (interactionDisabled) return;
       onRest();
       setMode('DONE');
       setMessage(`保健室のベッドで仮眠をとった。HPが ${healAmount} 回復した！`);
   };
 
   const handleSmithChoice = () => {
+      if (interactionDisabled) return;
       setMode('UPGRADE');
       setMessage("図工室だ。どの道具（カード）を改良する？");
   };
 
   const handleSynthesizeChoice = () => {
+      if (interactionDisabled) return;
       if (!scienceRoomAvailable) return;
       if (player.deck.length < requiredCards) {
           setMessage(trans(`実験材料（カード）が${requiredCards}枚足りない...`, languageMode));
@@ -119,6 +124,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
   };
 
   const handleCardClick = (card: ICard) => {
+      if (interactionDisabled) return;
       if (mode === 'UPGRADE') {
           if (card.upgraded) return;
           setSelectedCard(card);
@@ -144,6 +150,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
   };
 
   const handleRandomSynthesis = () => {
+      if (interactionDisabled) return;
       if (player.deck.length < requiredCards) return;
       const shuffled = [...player.deck].sort(() => Math.random() - 0.5);
       const selection = shuffled.slice(0, requiredCards);
@@ -153,6 +160,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
   };
 
   const confirmUpgrade = () => {
+      if (interactionDisabled) return;
       if (selectedCard) {
           onUpgrade(selectedCard);
           setMode('DONE');
@@ -162,6 +170,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
   };
 
   const confirmSynthesize = () => {
+      if (interactionDisabled) return;
       if (synthCards.length === requiredCards) {
           const result = onSynthesize(synthCards);
           setResultCard(result);
@@ -172,6 +181,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
   };
 
   const cancelPreview = () => {
+      if (interactionDisabled) return;
       if (mode === 'PREVIEW_UPGRADE') {
           setMode('UPGRADE');
           setSelectedCard(null);
@@ -189,6 +199,11 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
     <div className="flex flex-col h-full w-full bg-gray-900 text-white relative items-center justify-center p-4 md:p-8">
         
         <div className="z-10 bg-black p-6 md:p-8 border-4 border-orange-800 rounded-lg max-w-4xl w-full text-center shadow-2xl flex flex-col max-h-[90vh]">
+            {interactionDisabled && (
+                <div className="mb-4 rounded-lg border border-cyan-500/50 bg-cyan-950/30 px-4 py-3 text-center text-sm font-bold text-cyan-100">
+                    {interactionDisabledMessage ?? '他のプレイヤーの選択を待っています'}
+                </div>
+            )}
             <h2 className="text-3xl md:text-4xl text-orange-500 font-bold mb-4 flex items-center justify-center shrink-0">
                 <DoorOpen className="mr-3" /> {trans("放課後の探索", languageMode)}
             </h2>

@@ -1,5 +1,5 @@
 
-import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode, ParryState, VisualEffectInstance } from '../types';
+import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode, ParryState, VisualEffectInstance, CoopSupportCard } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
 import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles, MessageCircle, Mic, ArrowRight, MousePointer2, ChevronsRight, Flame, RotateCcw, Triangle } from 'lucide-react';
 import PixelSprite from './PixelSprite';
@@ -267,6 +267,13 @@ export const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: s
 
 interface BattleSceneProps {
     player: Player;
+    companions?: Array<{ id: string; name: string; maxHp: number; currentHp: number; imageData: string; floatingText: FloatingText | null; }>;
+    coopTurnQueue?: Array<{ id: string; type: 'SELF' | 'ALLY' | 'ENEMY'; label: string }>;
+    coopCanAct?: boolean;
+    coopTurnOwnerLabel?: string;
+    coopSupportCards?: CoopSupportCard[];
+    onUseCoopSupport?: (card: CoopSupportCard, targetPeerId?: string) => void;
+    selfDown?: boolean;
     enemies: Enemy[];
     selectedEnemyId: string | null;
     onSelectEnemy: (id: string) => void;
@@ -294,14 +301,24 @@ interface BattleSceneProps {
 }
 
 const BattleScene: React.FC<BattleSceneProps> = ({
-    player, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onPlaySynthesizedCard, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
+    player, companions = [], coopTurnQueue = [], coopCanAct = true, coopTurnOwnerLabel, coopSupportCards = [], onUseCoopSupport, selfDown = false, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onPlaySynthesizedCard, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
     selectionState, onHandSelection, onCancelSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect, parryState, onParry, activeEffects, finisherCutinCard, hideEnemyIntents = false
 }) => {
 
     const [lastVisibleEnemies, setLastVisibleEnemies] = useState<Enemy[]>([]);
+    const [selectedSupportCard, setSelectedSupportCard] = useState<CoopSupportCard | null>(null);
     const isFinisherActive = !!finisherCutinCard;
     const visualEnemies = isFinisherActive && enemies.length === 0 ? lastVisibleEnemies : enemies;
     const playerHpPercent = (player.currentHp / player.maxHp) * 100;
+    const supportNeedsTarget = (card: CoopSupportCard) => (
+        card.effectId === 'ALLY_HEAL' ||
+        card.effectId === 'ALLY_BLOCK' ||
+        card.effectId === 'ALLY_NEXT_ENERGY' ||
+        card.effectId === 'ALLY_ATTACK_BOOST' ||
+        card.effectId === 'ALLY_BUFFER' ||
+        card.effectId === 'REVIVE_BANDAGE' ||
+        card.effectId === 'REVIVE_NURSE'
+    );
     const isTrueBossPhase2Active = visualEnemies.some(enemy => enemy.enemyType === 'THE_HEART' && enemy.phase === 2);
 
     useEffect(() => {
@@ -696,6 +713,33 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     <div className="text-yellow-400 text-[10px] font-bold bg-gray-900/80 px-2 py-0.5 rounded border border-yellow-700 shadow-sm">
                         {trans(turnLog, languageMode)}
                     </div>
+                    {selectedSupportCard && (
+                        <div className="max-w-[52vw] rounded border border-emerald-400/50 bg-emerald-950/85 px-2 py-1 text-[10px] font-bold text-emerald-100 shadow-sm">
+                            {trans(selectedSupportCard.name, languageMode)}: {trans("対象を選択", languageMode)}
+                        </div>
+                    )}
+                    {coopTurnQueue.length > 0 && (
+                        <div className="max-w-[52vw] rounded border border-emerald-500/40 bg-gray-950/85 px-2 py-1 shadow-sm">
+                            <div className="mb-1 text-[9px] font-bold uppercase tracking-[0.2em] text-emerald-200">Coop Order</div>
+                            <div className="flex flex-wrap justify-end gap-1">
+                                {coopTurnQueue.map((slot) => (
+                                    <div
+                                        key={slot.id}
+                                        className={`flex items-center gap-1 rounded border px-1.5 py-0.5 text-[9px] font-bold ${
+                                            slot.type === 'SELF'
+                                                ? 'border-yellow-400 bg-yellow-900/50 text-yellow-100'
+                                                : slot.type === 'ALLY'
+                                                    ? 'border-emerald-400 bg-emerald-900/40 text-emerald-100'
+                                                    : 'border-red-400 bg-red-950/40 text-red-100'
+                                        }`}
+                                    >
+                                        {slot.type === 'SELF' ? <Zap size={10} /> : slot.type === 'ALLY' ? <Users size={10} /> : <Skull size={10} />}
+                                        <span>{slot.label}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                     <button
                         onClick={() => setShowLog(!showLog)}
                         className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold border transition-colors ${showLog ? 'bg-gray-700 border-gray-500 text-white' : 'bg-black/50 border-gray-600 text-gray-400 hover:text-white hover:border-gray-400'}`}
@@ -966,7 +1010,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             <div
                                 key={enemy.id}
                                 onClick={() => {
-                                    if (!isFinisherActive) onSelectEnemy(enemy.id);
+                                    if (!isFinisherActive && coopCanAct) onSelectEnemy(enemy.id);
                                 }}
                                 className={`flex flex-col items-center z-10 transition-all duration-200 cursor-pointer relative ${isSelected && !actionClass ? 'scale-105 z-20' : ''} ${!isSelected && !actionClass ? 'hover:scale-105' : ''} ${actionClass} ${isTrueBossPhase2 ? 'sinister-aura' : ''} ${tutorialStep === 2 ? 'ring-4 ring-red-500 ring-offset-4 ring-offset-transparent animate-pulse rounded-lg' : ''} ${isFinisherActive ? '!z-[300]' : ''}`}
                             >
@@ -1121,7 +1165,14 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 <div className={isTrueBossPhase2Active ? "relative z-20 flex items-end pl-2 pb-2 shrink-0" : "flex items-end pl-2 pb-2 shrink-0 mt-auto"}>
                     <div className={isTrueBossPhase2Active ? "flex flex-col items-start md:flex-row md:items-end relative max-w-[48vw] md:max-w-none" : "flex items-end relative"}>
 
-                        <div className={`w-20 h-20 md:w-24 md:h-24 relative transition-all duration-150 ease-out ${isTrueBossPhase2Active ? 'mr-0 md:mr-2 mb-1 md:mb-0' : 'mr-2'} ${getActionClass()}`} onClick={() => showInfo(trans("自分", languageMode), trans("あなたのキャラクター。\nHPが0になるとゲームオーバー。", languageMode))}>
+                        <div className={`w-20 h-20 md:w-24 md:h-24 relative transition-all duration-150 ease-out ${isTrueBossPhase2Active ? 'mr-0 md:mr-2 mb-1 md:mb-0' : 'mr-2'} ${getActionClass()} ${selectedSupportCard ? 'ring-2 ring-emerald-300 rounded-lg cursor-pointer' : ''}`} onClick={() => {
+                            if (selectedSupportCard && onUseCoopSupport) {
+                                onUseCoopSupport(selectedSupportCard);
+                                setSelectedSupportCard(null);
+                                return;
+                            }
+                            showInfo(trans("自分", languageMode), trans("あなたのキャラクター。\nHPが0になるとゲームオーバー。", languageMode));
+                        }}>
                             <img
                                 src={player.imageData}
                                 alt="Hero"
@@ -1145,6 +1196,42 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 <div className="absolute -bottom-2 left-0 w-full h-1 bg-gray-700 rounded-full border border-gray-500 overflow-hidden">
                                     <div className="h-full bg-green-500 transition-all duration-500" style={{ width: `${(player.partner.currentHp / player.partner.maxHp) * 100}%` }}></div>
                                 </div>
+                            </div>
+                        )}
+
+                        {companions.length > 0 && (
+                            <div className={`flex items-end gap-1 md:gap-2 ${player.partner && player.partner.currentHp > 0 ? 'ml-0' : 'ml-1'} mb-2`}>
+                                {companions.map((companion) => {
+                                    const hpPercent = Math.max(0, Math.min(100, (companion.currentHp / Math.max(1, companion.maxHp)) * 100));
+                                    const isDown = companion.currentHp <= 0;
+                                    return (
+                                        <div
+                                            key={companion.id}
+                                            className={`w-14 md:w-16 shrink-0 ${selectedSupportCard ? 'cursor-pointer' : ''}`}
+                                            onClick={() => {
+                                                if (selectedSupportCard && onUseCoopSupport) {
+                                                    onUseCoopSupport(selectedSupportCard, companion.id);
+                                                    setSelectedSupportCard(null);
+                                                    return;
+                                                }
+                                                showInfo(companion.name, trans("協力モードの同行プレイヤー。HPのみを表示します。", languageMode));
+                                            }}
+                                        >
+                                            <div className={`w-14 h-14 md:w-16 md:h-16 relative rounded-lg border border-white/10 bg-black/35 overflow-hidden ${isDown ? 'grayscale opacity-55' : ''} ${selectedSupportCard ? 'ring-2 ring-emerald-300/80' : ''}`}>
+                                                <img
+                                                    src={companion.imageData}
+                                                    alt={companion.name}
+                                                    className="w-full h-full pixel-art"
+                                                    style={{ imageRendering: 'pixelated' }}
+                                                />
+                                                <FloatingTextOverlay data={companion.floatingText} languageMode={languageMode} offset="-top-2 -right-1" />
+                                            </div>
+                                            <div className="mt-1 h-1.5 bg-gray-700 rounded-full border border-gray-500 overflow-hidden">
+                                                <div className={`h-full transition-all duration-500 ${isDown ? 'bg-gray-500' : 'bg-green-500'}`} style={{ width: `${hpPercent}%` }}></div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         )}
 
@@ -1186,7 +1273,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                             key={p.id}
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                if (!actingEnemyId && !selectionState.active) {
+                                                if (!actingEnemyId && !selectionState.active && coopCanAct) {
                                                     setPotionConfirmation(p);
                                                 }
                                             }}
@@ -1252,7 +1339,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             {/* 3. Control Bar */}
             <div className="h-12 bg-gray-800 border-t-2 border-white flex items-center justify-between px-2 shrink-0 z-20 shadow-lg">
                 <div className="flex items-center">
-                    <div className={`bg-black border-2 border-yellow-500 text-yellow-400 px-2 py-0.5 rounded-full flex items-center shadow-lg mr-2 ${tutorialStep === 3 ? 'ring-4 ring-yellow-400 ring-offset-2 ring-offset-transparent animate-pulse' : ''}`} onClick={() => showInfo(trans("エネルギー", languageMode), trans("カードを使用するために必要。ターン毎に回復する。", languageMode))}>
+                    <div className={`bg-black border-2 border-yellow-500 text-yellow-400 px-2 py-0.5 rounded-full flex items-center shadow-lg mr-2 ${tutorialStep === 3 ? 'ring-4 ring-yellow-400 ring-offset-2 ring-offset-transparent animate-pulse' : ''} ${selfDown ? 'opacity-60' : ''}`} onClick={() => showInfo(trans("エネルギー", languageMode), trans("カードを使用するために必要。ターン毎に回復する。", languageMode))}>
                         <Zap size={14} className="mr-1 fill-yellow-400" />
                         <span className="text-lg font-bold">{player.currentEnergy}/{player.maxEnergy}</span>
                     </div>
@@ -1261,6 +1348,37 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         <span className="flex items-center" onClick={() => showInfo(trans("捨て札", languageMode), trans("使用済みカード。山札が切れるとリシャッフルされる。", languageMode))}><X size={10} className="mr-1" /> {player.discardPile.length}</span>
                     </div>
                 </div>
+
+                {coopSupportCards.length > 0 && onUseCoopSupport && (
+                    <div className="mx-2 flex items-center gap-1 overflow-x-auto max-w-[34vw] custom-scrollbar">
+                        {coopSupportCards.slice(0, 3).map((supportCard) => (
+                            <button
+                                key={supportCard.id}
+                                onClick={() => {
+                                    if (actingEnemyId || selectionState.active || !coopCanAct) return;
+                                    if (supportNeedsTarget(supportCard)) {
+                                        setSelectedSupportCard(current => current?.id === supportCard.id ? null : supportCard);
+                                        return;
+                                    }
+                                    onUseCoopSupport(supportCard);
+                                }}
+                                disabled={!!actingEnemyId || selectionState.active || !coopCanAct}
+                                className={`shrink-0 rounded border px-2 py-1 text-[10px] font-bold ${!actingEnemyId && !selectionState.active && coopCanAct ? 'border-emerald-300 bg-emerald-700/80 text-emerald-50 hover:bg-emerald-600' : 'border-gray-600 bg-gray-700 text-gray-400 cursor-not-allowed'}`}
+                                title={supportCard.description}
+                            >
+                                {trans(supportCard.name, languageMode)}
+                            </button>
+                        ))}
+                        {selectedSupportCard && (
+                            <button
+                                onClick={() => setSelectedSupportCard(null)}
+                                className="shrink-0 rounded border border-gray-500 bg-gray-800 px-2 py-1 text-[10px] font-bold text-gray-200 hover:bg-gray-700"
+                            >
+                                {trans("取消", languageMode)}
+                            </button>
+                        )}
+                    </div>
+                )}
 
                 {isDualMode && (
                     <button
@@ -1275,12 +1393,17 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     </button>
                 )}
 
+                {!coopCanAct && coopTurnOwnerLabel && (
+                    <div className="absolute left-1/2 top-2 -translate-x-1/2 z-30 rounded border border-cyan-400/70 bg-cyan-950/85 px-3 py-1 text-xs font-bold text-cyan-100 shadow-lg">
+                        {`${trans("進行中", languageMode)}: ${coopTurnOwnerLabel}`}
+                    </div>
+                )}
                 <button
-                    onClick={!actingEnemyId && !selectionState.active ? onEndTurn : undefined}
-                    disabled={!!actingEnemyId || selectionState.active}
+                    onClick={!actingEnemyId && !selectionState.active && coopCanAct ? onEndTurn : undefined}
+                    disabled={!!actingEnemyId || selectionState.active || !coopCanAct}
                     className={`
                 bg-red-600 border-2 border-white px-4 py-1.5 text-xs font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all rounded
-                ${!actingEnemyId && !selectionState.active ? 'hover:bg-red-500 active:shadow-none active:translate-x-[2px] active:translate-y-[2px] cursor-pointer' : 'opacity-50 cursor-not-allowed grayscale'}
+                ${!actingEnemyId && !selectionState.active && coopCanAct ? 'hover:bg-red-500 active:shadow-none active:translate-x-[2px] active:translate-y-[2px] cursor-pointer' : 'opacity-50 cursor-not-allowed grayscale'}
                 ${tutorialStep === 5 ? 'ring-4 ring-red-400 ring-offset-2 ring-offset-transparent animate-pulse' : ''}
               `}
                 >
@@ -1289,7 +1412,17 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             </div>
 
             {/* 4. Hand Area */}
-            <div className={`h-60 md:h-64 bg-gray-900 border-t border-gray-700 relative z-10 ${selectionState.active ? 'bg-blue-900/20' : ''}`}>
+            <div className={`h-60 md:h-64 bg-gray-900 border-t border-gray-700 relative z-10 ${selectionState.active ? 'bg-blue-900/20' : ''} ${selfDown ? 'bg-red-950/20' : ''}`}>
+                {(selfDown || !coopCanAct) && (
+                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/45 backdrop-blur-[1px]">
+                        <div className={`rounded-lg px-4 py-3 text-center text-sm font-bold shadow-lg ${selfDown ? 'border border-red-500/70 bg-red-950/85 text-red-100' : 'border border-cyan-500/70 bg-cyan-950/85 text-cyan-100'}`}>
+                            {selfDown ? trans("戦闘不能", languageMode) : trans("待機中", languageMode)}<br />
+                            <span className={`text-xs ${selfDown ? 'text-red-200/90' : 'text-cyan-200/90'}`}>
+                                {selfDown ? trans("仲間の支援か蘇生を待っています", languageMode) : `${coopTurnOwnerLabel || trans("他のプレイヤー", languageMode)} ${trans("の行動を待っています", languageMode)}`}
+                            </span>
+                        </div>
+                    </div>
+                )}
                 <div className="group/hand w-full h-full overflow-x-auto px-8 md:px-10 flex items-end justify-start md:justify-center pt-5 pb-10 md:pb-8 custom-scrollbar touch-pan-x" style={{ overflowY: 'visible' }}>
                     {player.hand.map((card, i) => {
                         const isClashDisabled = card.playCondition === 'HAND_ONLY_ATTACKS' && player.hand.some(c => c.type !== CardType.ATTACK && c.id !== card.id);
@@ -1336,6 +1469,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     <Card
                                         card={displayCard}
                                         onClick={() => {
+                                            if (selfDown || !coopCanAct) return;
                                             if (selectionState.active) {
                                                 onHandSelection(card);
                                             } else {
@@ -1352,8 +1486,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                             selectionState.active
                                                 ? false
                                                 : (isDualMode
-                                                    ? (!!actingEnemyId || card.unplayable || specialDisabled)
-                                                    : (player.currentEnergy < displayCard.cost || !!actingEnemyId || card.unplayable || specialDisabled)
+                                                    ? (!!actingEnemyId || card.unplayable || specialDisabled || selfDown || !coopCanAct)
+                                                    : (player.currentEnergy < displayCard.cost || !!actingEnemyId || card.unplayable || specialDisabled || selfDown || !coopCanAct)
                                                 )
                                         }
                                         languageMode={languageMode}

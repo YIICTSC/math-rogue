@@ -1,8 +1,8 @@
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Card as ICard, RewardItem, Potion, LanguageMode, RaceTrickCard } from '../types';
+import { Card as ICard, RewardItem, Potion, LanguageMode, RaceTrickCard, CoopSupportCard } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
-import { Gift, Gem, Coins, FlaskConical, X, Flag, Sparkles } from 'lucide-react';
+import { Gift, Gem, Coins, FlaskConical, X, Flag, Sparkles, Users } from 'lucide-react';
 import { trans } from '../utils/textUtils';
 
 interface RewardScreenProps {
@@ -15,9 +15,14 @@ interface RewardScreenProps {
   languageMode: LanguageMode;
   typingMode?: boolean;
   dummyRewards?: number;
+  autoSkipWhenEmpty?: boolean;
+  skipDisabled?: boolean;
+  skipDisabledMessage?: string;
+  interactionDisabled?: boolean;
+  interactionDisabledMessage?: string;
 }
 
-const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, onSkip, isLoading, currentPotions = [], potionCapacity = 3, languageMode, typingMode = false, dummyRewards = 0 }) => {
+const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, onSkip, isLoading, currentPotions = [], potionCapacity = 3, languageMode, typingMode = false, dummyRewards = 0, autoSkipWhenEmpty = true, skipDisabled = false, skipDisabledMessage, interactionDisabled = false, interactionDisabledMessage }) => {
   const [replaceReward, setReplaceReward] = useState<RewardItem | null>(null);
   const [inspectedItem, setInspectedItem] = useState<{ type: 'CARD' | 'RELIC' | 'POTION', data: any } | null>(null);
   const longPressTimer = useRef<any>(null);
@@ -45,16 +50,16 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
   };
 
   useEffect(() => {
-    if (!isLoading && rewards.length === 0) {
+    if (autoSkipWhenEmpty && !isLoading && !interactionDisabled && rewards.length === 0) {
       const timer = setTimeout(() => {
         onSkip();
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [rewards, isLoading, onSkip]);
+  }, [autoSkipWhenEmpty, rewards, isLoading, interactionDisabled, onSkip]);
 
   useEffect(() => {
-    if (!typingMode) return;
+    if (!typingMode || interactionDisabled) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isLoading) return;
       if (replaceReward) {
@@ -81,16 +86,17 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
         } else {
           onSelectReward(reward);
         }
-      } else if (e.key === '0' || e.key === 'Enter') {
+      } else if ((e.key === '0' || e.key === 'Enter') && !skipDisabled) {
         e.preventDefault();
         onSkip();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [typingMode, isLoading, replaceReward, currentPotions, rewards, onSkip]);
+  }, [typingMode, isLoading, replaceReward, currentPotions, rewards, onSkip, interactionDisabled, skipDisabled]);
 
   const handlePotionClick = (reward: RewardItem) => {
+      if (interactionDisabled) return;
       if (currentPotions.length >= potionCapacity) {
           setReplaceReward(reward);
       } else {
@@ -99,6 +105,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
   };
 
   const confirmReplace = (replaceId: string) => {
+      if (interactionDisabled) return;
       if (!replaceReward) return;
       onSelectReward(replaceReward, replaceId);
       setReplaceReward(null);
@@ -213,6 +220,11 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
        )}
 
       <div className="z-10 text-center mb-4 shrink-0 pt-4">
+        {interactionDisabled && (
+          <div className="mx-auto mb-4 max-w-xl rounded-lg border border-cyan-500/50 bg-cyan-950/30 px-4 py-3 text-center text-sm font-bold text-cyan-100">
+            {interactionDisabledMessage ?? '他のプレイヤーの選択を待っています'}
+          </div>
+        )}
         <h2 className="text-3xl md:text-4xl text-yellow-400 font-bold mb-2 flex items-center justify-center animate-pulse">
           <Gift className="mr-3" size={32} /> {trans("勝利", languageMode)}
         </h2>
@@ -229,20 +241,20 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                     <div className="scale-110 mb-8 mt-6">
                         <Card 
                             card={reward.value as ICard} 
-                            onClick={() => !isLoading && onSelectReward(reward)} 
-                            disabled={isLoading} 
+                            onClick={() => !isLoading && !interactionDisabled && onSelectReward(reward)} 
+                            disabled={isLoading || interactionDisabled} 
                             onInspect={(c) => setInspectedItem({ type: 'CARD', data: c })}
                             languageMode={languageMode}
                         />
                     </div>
-                    <button onClick={() => onSelectReward(reward)} className="mt-4 bg-blue-600 px-6 py-2 text-sm font-bold rounded border hover:bg-blue-500 shadow-lg w-full">{trans("獲得", languageMode)}</button>
+                    <button onClick={() => !interactionDisabled && onSelectReward(reward)} disabled={interactionDisabled} className="mt-4 bg-blue-600 px-6 py-2 text-sm font-bold rounded border hover:bg-blue-500 shadow-lg w-full disabled:cursor-not-allowed disabled:opacity-50">{trans("獲得", languageMode)}</button>
                 </div>
             )}
             
             {reward.type === 'RELIC' && (
                 <div 
                     className="relative w-48 bg-black/60 border-2 border-yellow-500 rounded-xl flex flex-col items-center justify-between p-6 cursor-pointer hover:bg-black/80 shadow-lg h-72" 
-                    onClick={() => onSelectReward(reward)}
+                    onClick={() => !interactionDisabled && onSelectReward(reward)}
                     onContextMenu={(e) => { e.preventDefault(); setInspectedItem({ type: 'RELIC', data: reward.value }); }}
                     onPointerDown={(e) => handlePointerDown(e, 'RELIC', reward.value)}
                     onPointerUp={handlePointerUp}
@@ -256,12 +268,12 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                         <div className="text-yellow-100 font-bold text-lg mb-2 truncate">{trans(reward.value.name, languageMode)}</div>
                         <div className="text-xs text-gray-400 leading-tight h-16 overflow-hidden">{trans(reward.value.description, languageMode)}</div>
                     </div>
-                    <button className="bg-yellow-600 px-6 py-2 text-sm font-bold rounded border hover:bg-yellow-500 w-full mt-2">{trans("獲得", languageMode)}</button>
+                    <button disabled={interactionDisabled} className="bg-yellow-600 px-6 py-2 text-sm font-bold rounded border hover:bg-yellow-500 w-full mt-2 disabled:cursor-not-allowed disabled:opacity-50">{trans("獲得", languageMode)}</button>
                 </div>
             )}
 
             {reward.type === 'GOLD' && (
-                <div className="relative w-48 bg-black/60 border-2 border-yellow-500 rounded-xl flex flex-col items-center justify-between p-6 cursor-pointer hover:bg-black/80 shadow-lg h-72" onClick={() => onSelectReward(reward)}>
+                <div className="relative w-48 bg-black/60 border-2 border-yellow-500 rounded-xl flex flex-col items-center justify-between p-6 cursor-pointer hover:bg-black/80 shadow-lg h-72" onClick={() => !interactionDisabled && onSelectReward(reward)}>
                     {typingMode && <div className="absolute right-2 top-2 z-20 rounded-full border border-cyan-300 bg-cyan-950/95 px-2 py-0.5 text-[10px] font-black text-cyan-200">{rewards.findIndex(r => r.id === reward.id) + 1}</div>}
                     <div className="bg-gray-800 p-4 rounded-full border-2 border-yellow-600 mb-4 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
                         <Coins size={40} className="text-yellow-400" />
@@ -270,14 +282,14 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                         <div className="text-yellow-100 font-bold text-2xl mb-2">{reward.value} G</div>
                         <div className="text-xs text-gray-400">ゴールドを{trans("獲得", languageMode)}</div>
                     </div>
-                    <button className="bg-yellow-600 px-6 py-2 text-sm font-bold rounded border hover:bg-yellow-500 w-full mt-2">{trans("獲得", languageMode)}</button>
+                    <button disabled={interactionDisabled} className="bg-yellow-600 px-6 py-2 text-sm font-bold rounded border hover:bg-yellow-500 w-full mt-2 disabled:cursor-not-allowed disabled:opacity-50">{trans("獲得", languageMode)}</button>
                 </div>
             )}
 
             {reward.type === 'POTION' && (
                 <div 
                     className="relative w-48 bg-black/60 border-2 border-white/50 rounded-xl flex flex-col items-center justify-between p-6 cursor-pointer hover:bg-black/80 shadow-lg h-72" 
-                    onClick={() => handlePotionClick(reward)}
+                    onClick={() => !interactionDisabled && handlePotionClick(reward)}
                     onContextMenu={(e) => { e.preventDefault(); setInspectedItem({ type: 'POTION', data: reward.value }); }}
                     onPointerDown={(e) => handlePointerDown(e, 'POTION', reward.value)}
                     onPointerUp={handlePointerUp}
@@ -291,12 +303,12 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                         <div className="text-white font-bold text-lg mb-2 truncate">{trans(reward.value.name, languageMode)}</div>
                         <div className="text-xs text-gray-400 leading-tight h-16 overflow-hidden">{trans(reward.value.description, languageMode)}</div>
                     </div>
-                    <button className="bg-gray-600 px-6 py-2 text-sm font-bold rounded border hover:bg-gray-500 w-full mt-2">{trans("獲得", languageMode)}</button>
+                    <button disabled={interactionDisabled} className="bg-gray-600 px-6 py-2 text-sm font-bold rounded border hover:bg-gray-500 w-full mt-2 disabled:cursor-not-allowed disabled:opacity-50">{trans("獲得", languageMode)}</button>
                 </div>
             )}
 
             {reward.type === 'RACE_TRICK' && (
-                <div className="relative w-48 bg-gradient-to-b from-fuchsia-950/90 to-slate-950 border-2 border-fuchsia-400 rounded-xl flex flex-col items-center justify-between p-6 cursor-pointer hover:bg-black/80 shadow-lg h-72" onClick={() => onSelectReward(reward)}>
+                <div className="relative w-48 bg-gradient-to-b from-fuchsia-950/90 to-slate-950 border-2 border-fuchsia-400 rounded-xl flex flex-col items-center justify-between p-6 cursor-pointer hover:bg-black/80 shadow-lg h-72" onClick={() => !interactionDisabled && onSelectReward(reward)}>
                     {typingMode && <div className="absolute right-2 top-2 z-20 rounded-full border border-cyan-300 bg-cyan-950/95 px-2 py-0.5 text-[10px] font-black text-cyan-200">{rewards.findIndex(r => r.id === reward.id) + 1}</div>}
                     <div className="bg-fuchsia-950/70 p-4 rounded-full border-2 border-fuchsia-300 mb-4 shadow-[0_0_15px_rgba(217,70,239,0.5)]">
                         <Flag size={40} className="text-fuchsia-200" />
@@ -309,7 +321,25 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                         <div className="text-fuchsia-50 font-bold text-lg mb-2">{trans((reward.value as RaceTrickCard).name, languageMode)}</div>
                         <div className="text-xs text-fuchsia-100/80 leading-tight h-16 overflow-hidden">{trans((reward.value as RaceTrickCard).description, languageMode)}</div>
                     </div>
-                    <button className="bg-fuchsia-600 px-6 py-2 text-sm font-bold rounded border hover:bg-fuchsia-500 w-full mt-2">{trans("獲得", languageMode)}</button>
+                    <button disabled={interactionDisabled} className="bg-fuchsia-600 px-6 py-2 text-sm font-bold rounded border hover:bg-fuchsia-500 w-full mt-2 disabled:cursor-not-allowed disabled:opacity-50">{trans("獲得", languageMode)}</button>
+                </div>
+            )}
+
+            {reward.type === 'COOP_SUPPORT' && (
+                <div className="relative w-48 bg-gradient-to-b from-emerald-950/90 to-slate-950 border-2 border-emerald-400 rounded-xl flex flex-col items-center justify-between p-6 cursor-pointer hover:bg-black/80 shadow-lg h-72" onClick={() => !interactionDisabled && onSelectReward(reward)}>
+                    {typingMode && <div className="absolute right-2 top-2 z-20 rounded-full border border-cyan-300 bg-cyan-950/95 px-2 py-0.5 text-[10px] font-black text-cyan-200">{rewards.findIndex(r => r.id === reward.id) + 1}</div>}
+                    <div className="bg-emerald-950/70 p-4 rounded-full border-2 border-emerald-300 mb-4 shadow-[0_0_15px_rgba(16,185,129,0.5)]">
+                        <Users size={40} className="text-emerald-200" />
+                    </div>
+                    <div className="text-center mb-auto w-full">
+                        <div className="flex items-center justify-center gap-1 text-[10px] uppercase tracking-[0.2em] text-emerald-200 mb-1">
+                            <Sparkles size={12} />
+                            Coop Support
+                        </div>
+                        <div className="text-emerald-50 font-bold text-lg mb-2">{trans((reward.value as CoopSupportCard).name, languageMode)}</div>
+                        <div className="text-xs text-emerald-100/80 leading-tight h-16 overflow-hidden">{trans((reward.value as CoopSupportCard).description, languageMode)}</div>
+                    </div>
+                    <button disabled={interactionDisabled} className="bg-emerald-600 px-6 py-2 text-sm font-bold rounded border hover:bg-emerald-500 w-full mt-2 disabled:cursor-not-allowed disabled:opacity-50">{trans("獲得", languageMode)}</button>
                 </div>
             )}
           </div>
@@ -330,10 +360,19 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
         ))}
       </div>
 
+      {skipDisabled && rewards.length === 0 && (
+        <div className="z-10 mb-4 rounded-lg border border-yellow-500/40 bg-yellow-950/20 px-4 py-3 text-center text-sm font-bold text-yellow-100">
+          {skipDisabledMessage ?? '他のプレイヤーの報酬完了を待っています'}
+        </div>
+      )}
+
       <div className="z-10">
+        {skipDisabled && skipDisabledMessage && (
+          <div className="mb-2 text-center text-xs font-bold text-yellow-300">{skipDisabledMessage}</div>
+        )}
         <button 
-          onClick={onSkip}
-          disabled={isLoading}
+          onClick={interactionDisabled || skipDisabled ? undefined : onSkip}
+          disabled={isLoading || interactionDisabled || skipDisabled}
           className="text-gray-400 hover:text-white border-b border-transparent hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs md:text-sm"
         >
           {isLoading ? trans("読み込み中...", languageMode) : `${trans("これ以上受け取らずに進む", languageMode)} >>`}

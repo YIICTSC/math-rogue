@@ -1,5 +1,5 @@
 import Peer, { DataConnection } from 'peerjs';
-import { RaceTrickEffectId } from '../types';
+import { CoopSharedState, CoopSupportEffectId, CoopTreasurePool, RaceTrickEffectId } from '../types';
 
 export type P2PEvent =
     | { type: 'HANDSHAKE', player: any }
@@ -15,7 +15,234 @@ export type P2PEvent =
     | { type: 'RACE_END', entries: Array<{ peerId: string, name: string, imageData?: string, floor: number, maxDamage: number, gameOverCount: number, score: number, updatedAt: number }> }
     | { type: 'RACE_TRICK_PLAY', cardId: string, effectId: RaceTrickEffectId, targetPeerId: string, sourceName: string, sourceGold: number }
     | { type: 'RACE_TRICK_APPLY', cardId: string, effectId: RaceTrickEffectId, sourcePeerId: string, sourceName: string, sourceGold: number }
-    | { type: 'RACE_TRICK_RESULT', effectId: RaceTrickEffectId, sourcePeerId: string, targetPeerId: string, sourceGoldAfter?: number, goldDelta?: number };
+    | { type: 'RACE_TRICK_RESULT', effectId: RaceTrickEffectId, sourcePeerId: string, targetPeerId: string, sourceGoldAfter?: number, goldDelta?: number }
+    | { type: 'COOP_JOIN', name: string, imageData?: string }
+    | {
+        type: 'COOP_PARTICIPANTS',
+        participants: Array<{
+            peerId: string,
+            name: string,
+            imageData?: string,
+            selectedCharacterId?: string,
+            maxHp?: number,
+            currentHp?: number,
+            block?: number,
+            nextTurnEnergy?: number,
+            strength?: number,
+            buffer?: number,
+            revivedThisBattle?: boolean,
+            quizResolved?: boolean,
+            quizCorrectCount?: number,
+            eventResolved?: boolean,
+            restResolved?: boolean,
+            shopResolved?: boolean,
+            rewardResolved?: boolean,
+            treasureResolved?: boolean,
+            floatingText?: any
+        }>,
+        decisionOwnerIndex?: number
+    }
+    | { type: 'COOP_START' }
+    | { type: 'COOP_MODE_SET', mode: any }
+    | { type: 'COOP_CHARACTER_SELECT', characterId: string, name: string, imageData: string, maxHp: number, currentHp: number }
+    | { type: 'COOP_QUIZ_RESULT', correctCount: number }
+    | { type: 'COOP_PLAYER_SNAPSHOT', player: any }
+    | {
+        type: 'COOP_SELF_STATE',
+        name?: string,
+        imageData?: string,
+        selectedCharacterId?: string,
+        maxHp?: number,
+        currentHp?: number,
+        block?: number,
+        nextTurnEnergy?: number,
+        strength?: number,
+        buffer?: number,
+        revivedThisBattle?: boolean,
+        quizResolved?: boolean,
+        quizCorrectCount?: number,
+        eventResolved?: boolean,
+        restResolved?: boolean,
+        shopResolved?: boolean,
+        rewardResolved?: boolean,
+        treasureResolved?: boolean
+    }
+    | {
+        type: 'COOP_STATE_SYNC',
+        state: CoopSharedState,
+        aux?: {
+            shopCards?: any[],
+            shopRelics?: any[],
+            shopPotions?: any[],
+            treasureRewards?: any[],
+            treasureOpened?: boolean,
+            treasurePools?: CoopTreasurePool[],
+            eventData?: {
+                title: string,
+                description: string,
+                image?: string,
+                imageKey?: string,
+                options: Array<{ label: string, text: string }>
+            } | null,
+            eventResultLog?: string | null
+        }
+    }
+    | {
+        type: 'COOP_BATTLE_SYNC',
+        battleState: {
+            battleKey: string,
+            players: Array<{
+                peerId: string,
+                name: string,
+                player: any,
+                selectedEnemyId?: string | null,
+                isDown?: boolean
+            }>,
+            turnQueue: Array<{
+                id: string,
+                type: 'SELF' | 'ALLY' | 'ENEMY',
+                label: string,
+                peerId?: string
+            }>,
+            turnCursor: number,
+            enemyTurnCursor: number
+        } | null,
+        enemies?: any[],
+        selectedEnemyId?: string | null,
+        combatLog?: string[],
+        turnLog?: string,
+        actingEnemyId?: string | null,
+        finisherCutinCard?: any | null
+    }
+    | {
+        type: 'COOP_BATTLE_FINISH',
+        screen: any,
+        enemies?: any[],
+        selectedEnemyId?: string | null,
+        combatLog?: string[]
+    }
+    | { type: 'COOP_BATTLE_SELECT_ENEMY', enemyId: string }
+    | {
+        type: 'COOP_BATTLE_PLAY_CARD',
+        cardId: string,
+        player: any,
+        enemies: any[],
+        selectedEnemyId?: string | null,
+        combatLog?: string[],
+        turnLog?: string,
+        actingEnemyId?: string | null,
+        battleState?: {
+            battleKey: string,
+            players: Array<{
+                peerId: string,
+                name: string,
+                player: any,
+                selectedEnemyId?: string | null,
+                isDown?: boolean
+            }>,
+            turnQueue: Array<{
+                id: string,
+                type: 'SELF' | 'ALLY' | 'ENEMY',
+                label: string,
+                peerId?: string
+            }>,
+            turnCursor: number,
+            enemyTurnCursor: number
+        } | null
+    }
+    | {
+        type: 'COOP_BATTLE_USE_POTION',
+        potionId: string,
+        player: any,
+        enemies: any[],
+        selectedEnemyId?: string | null,
+        combatLog?: string[],
+        turnLog?: string,
+        actingEnemyId?: string | null,
+        battleState?: {
+            battleKey: string,
+            players: Array<{
+                peerId: string,
+                name: string,
+                player: any,
+                selectedEnemyId?: string | null,
+                isDown?: boolean
+            }>,
+            turnQueue: Array<{
+                id: string,
+                type: 'SELF' | 'ALLY' | 'ENEMY',
+                label: string,
+                peerId?: string
+            }>,
+            turnCursor: number,
+            enemyTurnCursor: number
+        } | null
+    }
+    | {
+        type: 'COOP_BATTLE_TURN_START' | 'COOP_BATTLE_SELECTION_STATE' | 'COOP_BATTLE_MODAL_RESOLVE' | 'COOP_BATTLE_CODEX_SELECT',
+        player: any,
+        enemies: any[],
+        selectedEnemyId?: string | null,
+        combatLog?: string[],
+        turnLog?: string,
+        actingEnemyId?: string | null,
+        battleState?: {
+            battleKey: string,
+            players: Array<{
+                peerId: string,
+                name: string,
+                player: any,
+                selectedEnemyId?: string | null,
+                isDown?: boolean
+            }>,
+            turnQueue: Array<{
+                id: string,
+                type: 'SELF' | 'ALLY' | 'ENEMY',
+                label: string,
+                peerId?: string
+            }>,
+            turnCursor: number,
+            enemyTurnCursor: number
+        } | null
+    }
+    | {
+        type: 'COOP_END_TURN',
+        player: any,
+        selectedEnemyId?: string | null,
+        battleState?: {
+            battleKey: string,
+            players: Array<{
+                peerId: string,
+                name: string,
+                player: any,
+                selectedEnemyId?: string | null,
+                isDown?: boolean
+            }>,
+            turnQueue: Array<{
+                id: string,
+                type: 'SELF' | 'ALLY' | 'ENEMY',
+                label: string,
+                peerId?: string
+            }>,
+            turnCursor: number,
+            enemyTurnCursor: number
+        } | null
+    }
+    | { type: 'COOP_NODE_SELECT', nodeId: string }
+    | { type: 'COOP_REWARD_SYNC', rewards: any[] }
+    | { type: 'COOP_REWARD_SELECT', rewardId: string, item?: any, replacePotionId?: string }
+    | { type: 'COOP_REWARD_SKIP' }
+    | { type: 'COOP_SUPPORT_GRANT', rewardId: string, card: { id: string, effectId: CoopSupportEffectId, name: string, description: string, rarity: 'COMMON' | 'UNCOMMON' | 'RARE' }, rewards?: any[], rewardResolved?: boolean }
+    | { type: 'COOP_REWARD_GRANT', item: any, replacePotionId?: string, rewards?: any[], rewardResolved?: boolean }
+    | { type: 'COOP_TREASURE_OPEN' }
+    | { type: 'COOP_TREASURE_CLAIM', poolId: string }
+    | { type: 'COOP_TREASURE_GRANT', rewards: any[], player?: any, addCurse?: boolean, poolId?: string }
+    | { type: 'COOP_EVENT_OPTION', optionIndex: number }
+    | { type: 'COOP_EVENT_RESULT', player: any, resultLog: string | null }
+    | { type: 'COOP_EVENT_CONTINUE' }
+    | { type: 'COOP_REST_ACTION', action: 'REST' | 'UPGRADE' | 'SYNTHESIZE' | 'LEAVE', cardId?: string, cardIds?: string[] }
+    | { type: 'COOP_SHOP_ACTION', action: 'BUY_CARD' | 'BUY_RELIC' | 'BUY_POTION' | 'REMOVE_CARD' | 'LEAVE', itemId?: string, replacePotionId?: string, cardId?: string, cost?: number }
+    | { type: 'COOP_SUPPORT_USE', cardId: string, effectId: CoopSupportEffectId, name: string, description: string, rarity: string, targetPeerId?: string };
 
 class P2PService {
     private peer: Peer | null = null;

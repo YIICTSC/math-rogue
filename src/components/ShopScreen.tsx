@@ -19,12 +19,14 @@ interface ShopScreenProps {
   potionCapacity?: number;
   typingMode?: boolean;
   priceMultiplier?: number;
+  interactionDisabled?: boolean;
+  interactionDisabledMessage?: string;
 }
 
 const REMOVE_COST = 75;
 const SHOP_SHORTCUT_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'];
 
-const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics = [], shopPotions = [], onBuyCard, onBuyRelic, onBuyPotion, onRemoveCard, onLeave, languageMode, potionCapacity = 3, typingMode = false, priceMultiplier = 1 }) => {
+const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics = [], shopPotions = [], onBuyCard, onBuyRelic, onBuyPotion, onRemoveCard, onLeave, languageMode, potionCapacity = 3, typingMode = false, priceMultiplier = 1, interactionDisabled = false, interactionDisabledMessage }) => {
   const [purchasedIds, setPurchasedIds] = useState<string[]>([]);
   const [removed, setRemoved] = useState(false);
   const [viewMode, setViewMode] = useState<'BUY' | 'REMOVE'>('BUY');
@@ -56,6 +58,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
   };
 
   const handleBuyCard = (card: ICard) => {
+    if (interactionDisabled) return;
     if (purchasedIds.includes(card.id)) return;
     let price = card.price || 50;
     if (player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
@@ -69,6 +72,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
   };
 
   const handleBuyRelic = (relic: Relic) => {
+    if (interactionDisabled) return;
     if (purchasedIds.includes(relic.id)) return;
     let price = relic.price || 150;
     if (player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
@@ -82,6 +86,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
   };
 
   const handleBuyPotionClick = (potion: Potion) => {
+      if (interactionDisabled) return;
       if (purchasedIds.includes(potion.id)) return;
       
       let price = potion.price || 50;
@@ -100,6 +105,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
   };
 
   const confirmPotionReplace = (replaceId: string) => {
+      if (interactionDisabled) return;
       if (!potionToBuy) return;
       onBuyPotion(potionToBuy, replaceId);
       setPurchasedIds([...purchasedIds, potionToBuy.id]);
@@ -107,6 +113,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
   };
 
   const handleRemove = (cardId: string) => {
+      if (interactionDisabled) return;
       let cost = player.relics.find(r => r.id === 'SMILING_MASK') ? 50 : REMOVE_COST;
       if (player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) cost = Math.floor(cost * 0.5);
       cost = Math.floor(cost * priceMultiplier);
@@ -134,7 +141,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
   const removeShortcutItems = useMemo(() => player.deck.slice(0, SHOP_SHORTCUT_KEYS.length), [player.deck]);
 
   useEffect(() => {
-      if (!typingMode) return;
+      if (!typingMode || interactionDisabled) return;
       const handleKeyDown = (e: KeyboardEvent) => {
           if (inspectedItem) {
               if (e.key === 'Escape' || e.key === '0' || e.key === 'Enter') {
@@ -184,7 +191,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
       };
       window.addEventListener('keydown', handleKeyDown);
       return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [typingMode, inspectedItem, potionToBuy, player.potions, viewMode, buyShortcutItems, removeShortcutItems, onLeave, purchasedIds, player.gold, removed]);
+  }, [typingMode, inspectedItem, potionToBuy, player.potions, viewMode, buyShortcutItems, removeShortcutItems, onLeave, purchasedIds, player.gold, removed, interactionDisabled]);
 
   const getCardKeywords = (card: ICard) => {
       const keywords = [];
@@ -275,7 +282,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                     <Coins className="text-yellow-400 mr-1" size={16}/>
                     <span className="text-sm font-bold">{player.gold}円</span>
                 </div>
-                <button onClick={onLeave} className="bg-red-600 hover:bg-red-500 px-3 py-1 rounded font-bold border-2 border-white cursor-pointer text-xs">
+                <button onClick={interactionDisabled ? undefined : onLeave} disabled={interactionDisabled} className="bg-red-600 hover:bg-red-500 px-3 py-1 rounded font-bold border-2 border-white cursor-pointer text-xs disabled:cursor-not-allowed disabled:opacity-50">
                     {trans("出る", languageMode)}
                 </button>
            </div>
@@ -316,6 +323,11 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
 
        {/* Content */}
        <div className="z-10 flex-grow flex flex-col items-center overflow-hidden relative">
+           {interactionDisabled && (
+                <div className="mx-4 mt-4 w-[calc(100%-2rem)] rounded-lg border border-cyan-500/50 bg-cyan-950/30 px-4 py-3 text-center text-sm font-bold text-cyan-100">
+                    {interactionDisabledMessage ?? '他のプレイヤーの選択を待っています'}
+                </div>
+           )}
            
            {/* Actions Toggle */}
            <div className="flex gap-2 my-4 shrink-0 z-30 w-full justify-center px-4">

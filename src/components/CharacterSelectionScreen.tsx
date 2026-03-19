@@ -13,9 +13,17 @@ interface CharacterSelectionScreenProps {
   onSelect: (character: Character) => void;
   challengeMode?: string;
   languageMode: LanguageMode;
+  coopParticipants?: Array<{
+    peerId: string;
+    name: string;
+    imageData?: string;
+    selectedCharacterId?: string;
+  }>;
+  coopSelfPeerId?: string;
+  coopDecisionOwnerPeerId?: string;
 }
 
-const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ characters, unlockedCount, onSelect, challengeMode, languageMode }) => {
+const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ characters, unlockedCount, onSelect, challengeMode, languageMode, coopParticipants = [], coopSelfPeerId, coopDecisionOwnerPeerId }) => {
   const [customImages, setCustomImages] = useState<Record<string, string>>({});
   const [showCamera, setShowCamera] = useState(false);
   const [activeCharId, setActiveCharId] = useState<string | null>(null);
@@ -243,6 +251,49 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                 <p className="text-sm text-gray-400">{trans("冒険に挑むキャラクターを選んでください", languageMode)}</p>
             )}
         </div>
+
+        {challengeMode === 'COOP' && coopParticipants.length > 0 && (
+          <div className="w-full max-w-6xl mb-6 rounded-2xl border border-emerald-500/40 bg-emerald-950/20 px-4 py-3">
+            <div className="text-xs font-black tracking-[0.25em] text-emerald-200 uppercase mb-3">Coop Party</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {coopParticipants.map((participant) => {
+                const selectedChar = participant.selectedCharacterId
+                  ? characters.find((char) => char.id === participant.selectedCharacterId)
+                  : null;
+                const isSelf = participant.peerId === coopSelfPeerId;
+                const isDecisionOwner = participant.peerId === coopDecisionOwnerPeerId;
+                return (
+                  <div
+                    key={participant.peerId}
+                    className={`rounded-xl border px-3 py-2 text-left ${isSelf ? 'border-emerald-300 bg-emerald-900/35' : 'border-white/10 bg-black/20'}`}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-10 h-10 rounded-lg overflow-hidden bg-black/30 border border-white/10 shrink-0">
+                        {participant.imageData ? (
+                          <img
+                            src={participant.imageData}
+                            alt={participant.name}
+                            className="w-full h-full object-cover"
+                            style={{ imageRendering: 'pixelated' }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-[10px] font-black text-gray-500">?</div>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-black text-white">{participant.name}</div>
+                        <div className="text-[10px] text-emerald-200">{isSelf ? 'あなた' : '同行プレイヤー'}{isDecisionOwner ? ' / 決定役' : ''}</div>
+                      </div>
+                    </div>
+                    <div className="text-[11px] font-bold text-gray-300">
+                      {selectedChar ? `選択済み: ${trans(selectedChar.name, languageMode)}` : 'キャラ選択待ち'}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl pb-20">
             {characters.map((char, index) => {

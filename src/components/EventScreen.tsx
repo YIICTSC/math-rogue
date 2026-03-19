@@ -17,9 +17,11 @@ interface EventScreenProps {
     resultLog: string | null;
     onContinue: () => void;
     typingMode?: boolean;
+    interactionDisabled?: boolean;
+    interactionDisabledMessage?: string;
 }
 
-const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, imageKey, image, resultLog, onContinue, typingMode = false }) => {
+const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, imageKey, image, resultLog, onContinue, typingMode = false, interactionDisabled = false, interactionDisabledMessage }) => {
   const imageCandidates = useMemo(() => {
     const encodedTitle = encodeURIComponent(imageKey ?? title);
     return [
@@ -38,7 +40,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
   }, [imageKey, title]);
 
   useEffect(() => {
-    if (!typingMode) return;
+    if (!typingMode || interactionDisabled) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (resultLog) {
         if (e.key === 'Enter') {
@@ -59,12 +61,17 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [typingMode, resultLog, options, onContinue]);
+  }, [typingMode, resultLog, options, onContinue, interactionDisabled]);
 
   return (
     <div className="flex flex-col h-full w-full bg-gray-900 text-white relative items-center justify-center p-8">
         
         <div className="z-10 max-w-2xl w-full bg-gray-800 border-2 border-gray-600 p-8 rounded-lg shadow-2xl">
+            {interactionDisabled && (
+                <div className="mb-4 rounded-lg border border-cyan-500/50 bg-cyan-950/30 px-4 py-3 text-center text-sm font-bold text-cyan-100">
+                    {interactionDisabledMessage ?? '他のプレイヤーの選択を待っています'}
+                </div>
+            )}
             <div className="flex items-center mb-6 border-b border-gray-700 pb-4">
                 <div className="bg-purple-900 p-3 rounded-full mr-4 border border-purple-500">
                     <HelpCircle size={32} className="text-purple-300" />
@@ -106,8 +113,9 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                         {options.map((opt, idx) => (
                             <button 
                                 key={idx}
-                                onClick={opt.action}
-                                className="relative w-full text-center p-3 sm:p-4 bg-black/40 hover:bg-purple-900/40 border border-gray-600 hover:border-purple-400 rounded transition-colors group min-h-[72px] sm:min-h-[88px]"
+                                onClick={interactionDisabled ? undefined : opt.action}
+                                disabled={interactionDisabled}
+                                className="relative w-full text-center p-3 sm:p-4 bg-black/40 hover:bg-purple-900/40 border border-gray-600 hover:border-purple-400 rounded transition-colors group min-h-[72px] sm:min-h-[88px] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-black/40 disabled:hover:border-gray-600"
                             >
                                 {typingMode && <span className="absolute right-2 top-2 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">{idx + 1}</span>}
                                 <span className="font-bold text-yellow-400 block group-hover:text-yellow-200 text-base sm:text-lg tracking-wide break-words">
@@ -119,8 +127,9 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                 ) : (
                     // Result Mode
                     <button 
-                        onClick={onContinue}
-                        className="w-full text-center p-4 bg-blue-900/40 hover:bg-blue-800/60 border border-blue-500 hover:border-blue-300 rounded transition-colors flex items-center justify-center font-bold text-xl animate-bounce"
+                        onClick={interactionDisabled ? undefined : onContinue}
+                        disabled={interactionDisabled}
+                        className="w-full text-center p-4 bg-blue-900/40 hover:bg-blue-800/60 border border-blue-500 hover:border-blue-300 rounded transition-colors flex items-center justify-center font-bold text-xl animate-bounce disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-blue-900/40 disabled:hover:border-blue-500"
                     >
                         進む <ArrowRight className="ml-2" />
                         {typingMode && <span className="ml-3 rounded-full border border-cyan-300 bg-cyan-950/95 px-2 py-0.5 text-[10px] font-black text-cyan-200">Enter</span>}
