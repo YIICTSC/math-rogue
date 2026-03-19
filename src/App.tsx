@@ -799,6 +799,40 @@ const App: React.FC = () => {
         newlyUnlockedCardName: state.newlyUnlockedCardName,
         coopBattleState: state.coopBattleState ?? null
     }), []);
+    const getBgmForCoopScreen = useCallback((state: Pick<GameState, 'screen' | 'map' | 'currentMapNodeId' | 'enemies'>) => {
+        switch (state.screen) {
+            case GameScreen.MAP:
+            case GameScreen.GARDEN:
+                return 'map' as const;
+            case GameScreen.BATTLE: {
+                if (state.enemies.some(enemy => enemy.enemyType === 'THE_HEART')) {
+                    return 'final_boss' as const;
+                }
+                const currentNode = state.currentMapNodeId
+                    ? state.map.find(node => node.id === state.currentMapNodeId)
+                    : null;
+                if (currentNode?.type === NodeType.BOSS) return 'boss' as const;
+                if (currentNode?.type === NodeType.ELITE) return 'mid_boss' as const;
+                return 'battle' as const;
+            }
+            case GameScreen.SHOP:
+                return 'shop' as const;
+            case GameScreen.REST:
+                return 'rest' as const;
+            case GameScreen.EVENT:
+                return 'event' as const;
+            case GameScreen.REWARD:
+            case GameScreen.TREASURE:
+                return 'reward' as const;
+            case GameScreen.FLOOR_RESULT:
+            case GameScreen.ENDING:
+                return 'victory' as const;
+            case GameScreen.GAME_OVER:
+                return 'game_over' as const;
+            default:
+                return null;
+        }
+    }, []);
     const preparePlayerForBattle = useCallback((sourcePlayer: Player, nodeType: NodeType) => {
         const p: Player = {
             ...sourcePlayer,
@@ -1023,6 +1057,12 @@ const App: React.FC = () => {
             };
         });
     }, [coopSelfPeerId, gameState.challengeMode, gameState.player, gameState.selectedEnemyId, gameState.coopBattleState]);
+    useEffect(() => {
+        if (gameState.challengeMode !== 'COOP' || !coopSession || coopSession.isHost) return;
+        const bgmType = getBgmForCoopScreen(gameState);
+        if (!bgmType) return;
+        void audioService.playBGM(bgmType);
+    }, [coopSession, gameState, getBgmForCoopScreen]);
 
     useEffect(() => {
         if (gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.BATTLE || !coopSession || !coopSession.isHost) return;
@@ -6905,7 +6945,165 @@ const App: React.FC = () => {
         applyRewardToLocalPlayer(item, replacePotionId);
     };
 
-    const applyCoopSupportEffect = useCallback((card: CoopSupportCard, targetPeerId?: string) => {
+    const applyCoopSupportEffect = useCallback((card: CoopSupportCard, targetPeerId?: string, sourcePeerId?: string) => {
+        if (gameState.challengeMode === 'COOP' && gameState.screen === GameScreen.BATTLE && gameState.coopBattleState && sourcePeerId) {
+            const revivedPeerIds = new Set(
+                (coopSession?.participants || [])
+                    .filter(participant => participant.revivedThisBattle)
+                    .map(participant => participant.peerId)
+            );
+            const revivedThisEffect = new Set<string>();
+            const nextBattleState: CoopBattleState = {
+                ...gameState.coopBattleState,
+                players: gameState.coopBattleState.players.map(entry => ({
+                    ...entry,
+                    player: {
+                        ...entry.player,
+                        powers: { ...entry.player.powers },
+                        turnFlags: { ...entry.player.turnFlags },
+                        hand: [...entry.player.hand],
+                        drawPile: [...entry.player.drawPile],
+                        discardPile: [...entry.player.discardPile]
+                    }
+                }))
+            };
+            const sourceEntry = nextBattleState.players.find(entry => entry.peerId === sourcePeerId);
+            if (!sourceEntry) return;
+            const singleTargetPeerId = targetPeerId || sourcePeerId;
+            const singleTargetEntry = nextBattleState.players.find(entry => entry.peerId === singleTargetPeerId) || sourceEntry;
+            const sourcePlayer = sourceEntry.player;
+            const targetPlayer = singleTargetEntry.player;
+            const otherEntries = nextBattleState.players.filter(entry => entry.peerId !== sourcePeerId);
+            const lowestHpCompanion = otherEntries
+                .filter(entry => entry.player.currentHp > 0)
+                .slice()
+                .sort((a, b) => a.player.currentHp - b.player.currentHp)[0];
+            const downedTargetEntry = (
+                singleTargetEntry.player.currentHp <= 0 &&
+                !revivedPeerIds.has(singleTargetEntry.peerId)
+            )
+                ? singleTargetEntry
+                : nextBattleState.players.find(entry => entry.player.currentHp <= 0 && !revivedPeerIds.has(entry.peerId));
+
+            switch (card.effectId) {
+                case 'ALLY_HEAL': {
+                    const healEntry = targetPeerId ? singleTargetEntry : (lowestHpCompanion || sourceEntry);
+                    healEntry.player.currentHp = Math.min(healEntry.player.maxHp, healEntry.player.currentHp + 10);
+                    healEntry.player.floatingText = { id: `coop-heal-${Date.now()}-${healEntry.peerId}`, text: '+10', color: 'text-green-400', iconType: 'heart' };
+                    if (healEntry.peerId !== sourcePeerId) {
+                        sourcePlayer.floatingText = { id: `coop-heal-source-${Date.now()}-${sourcePeerId}`, text: healEntry.name, color: 'text-emerald-300', iconType: 'heart' };
+                    }
+                    break;
+                }
+                case 'ALLY_BLOCK':
+                    targetPlayer.block += 20;
+                    targetPlayer.floatingText = { id: `coop-block-${Date.now()}-${singleTargetEntry.peerId}`, text: '+20', color: 'text-blue-300', iconType: 'shield' };
+                    if (singleTargetEntry.peerId !== sourcePeerId) {
+                        sourcePlayer.floatingText = { id: `coop-block-source-${Date.now()}-${sourcePeerId}`, text: singleTargetEntry.name, color: 'text-emerald-300', iconType: 'shield' };
+                    }
+                    break;
+                case 'ALLY_NEXT_ENERGY':
+                    targetPlayer.nextTurnEnergy += 1;
+                    targetPlayer.floatingText = { id: `coop-energy-${Date.now()}-${singleTargetEntry.peerId}`, text: 'NEXT+1', color: 'text-yellow-300', iconType: 'zap' };
+                    if (singleTargetEntry.peerId !== sourcePeerId) {
+                        sourcePlayer.floatingText = { id: `coop-energy-source-${Date.now()}-${sourcePeerId}`, text: singleTargetEntry.name, color: 'text-emerald-300', iconType: 'zap' };
+                    }
+                    break;
+                case 'ALLY_DRAW': {
+                    const drawAmount = Math.min(2, sourcePlayer.drawPile.length);
+                    for (let i = 0; i < drawAmount; i++) {
+                        const drawn = sourcePlayer.drawPile.shift();
+                        if (drawn) sourcePlayer.hand.push(drawn);
+                    }
+                    sourcePlayer.floatingText = { id: `coop-draw-${Date.now()}-${sourcePeerId}`, text: `+${drawAmount}枚`, color: 'text-cyan-300' };
+                    break;
+                }
+                case 'ALLY_ATTACK_BOOST':
+                    targetPlayer.strength += 3;
+                    targetPlayer.floatingText = { id: `coop-boost-${Date.now()}-${singleTargetEntry.peerId}`, text: 'ATK+', color: 'text-red-300', iconType: 'sword' };
+                    if (singleTargetEntry.peerId !== sourcePeerId) {
+                        sourcePlayer.floatingText = { id: `coop-boost-source-${Date.now()}-${sourcePeerId}`, text: singleTargetEntry.name, color: 'text-emerald-300', iconType: 'sword' };
+                    }
+                    break;
+                case 'ALLY_BUFFER':
+                    targetPlayer.powers['BUFFER'] = (targetPlayer.powers['BUFFER'] || 0) + 1;
+                    targetPlayer.floatingText = { id: `coop-buffer-${Date.now()}-${singleTargetEntry.peerId}`, text: '0 DMG', color: 'text-yellow-200', iconType: 'shield' };
+                    if (singleTargetEntry.peerId !== sourcePeerId) {
+                        sourcePlayer.floatingText = { id: `coop-buffer-source-${Date.now()}-${sourcePeerId}`, text: singleTargetEntry.name, color: 'text-emerald-300', iconType: 'shield' };
+                    }
+                    break;
+                case 'TEAM_CLEANSE':
+                    nextBattleState.players.forEach(entry => {
+                        entry.player.block += 8;
+                        entry.player.floatingText = { id: `coop-team-cleanse-${Date.now()}-${entry.peerId}`, text: '+8', color: 'text-emerald-300', iconType: 'shield' };
+                    });
+                    break;
+                case 'TEAM_HEAL':
+                    nextBattleState.players.forEach(entry => {
+                        entry.player.currentHp = Math.min(entry.player.maxHp, entry.player.currentHp + 5);
+                        entry.player.floatingText = { id: `coop-team-heal-${Date.now()}-${entry.peerId}`, text: '+5', color: 'text-green-400', iconType: 'heart' };
+                    });
+                    break;
+                case 'REVIVE_BANDAGE':
+                    if (downedTargetEntry) {
+                        downedTargetEntry.player.currentHp = 15;
+                        downedTargetEntry.player.floatingText = { id: `coop-revive-bandage-${Date.now()}-${downedTargetEntry.peerId}`, text: '復活', color: 'text-green-300', iconType: 'heart' };
+                        revivedThisEffect.add(downedTargetEntry.peerId);
+                    }
+                    break;
+                case 'REVIVE_NURSE':
+                    if (downedTargetEntry) {
+                        downedTargetEntry.player.currentHp = Math.max(1, Math.floor(downedTargetEntry.player.maxHp * 0.25));
+                        downedTargetEntry.player.block += 10;
+                        downedTargetEntry.player.floatingText = { id: `coop-revive-nurse-${Date.now()}-${downedTargetEntry.peerId}`, text: '奇跡', color: 'text-pink-300', iconType: 'heart' };
+                        revivedThisEffect.add(downedTargetEntry.peerId);
+                    }
+                    break;
+            }
+
+            const finalizedBattleState: CoopBattleState = {
+                ...nextBattleState,
+                players: nextBattleState.players.map(entry => ({
+                    ...entry,
+                    isDown: entry.player.currentHp <= 0
+                }))
+            };
+            const selfBattlePlayer = finalizedBattleState.players.find(entry => entry.peerId === coopSelfPeerId);
+            setGameState(prev => ({
+                ...prev,
+                player: selfBattlePlayer?.player || prev.player,
+                coopBattleState: finalizedBattleState
+            }));
+            setCoopBattleState(finalizedBattleState);
+            finalizedBattleState.players.forEach(entry => {
+                upsertCoopPlayerSnapshot(entry.peerId, entry.player);
+            });
+            setCoopSession(prev => {
+                if (!prev) return prev;
+                const nextParticipants = prev.participants.map(participant => {
+                    const battleEntry = finalizedBattleState.players.find(entry => entry.peerId === participant.peerId);
+                    if (!battleEntry) return participant;
+                    return {
+                        ...participant,
+                        maxHp: battleEntry.player.maxHp,
+                        currentHp: battleEntry.player.currentHp,
+                        block: battleEntry.player.block,
+                        nextTurnEnergy: battleEntry.player.nextTurnEnergy,
+                        strength: battleEntry.player.strength,
+                        buffer: battleEntry.player.powers['BUFFER'] || 0,
+                        revivedThisBattle: revivedPeerIds.has(participant.peerId) || revivedThisEffect.has(participant.peerId)
+                    };
+                });
+                if (prev.isHost) {
+                    p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                }
+                return { ...prev, participants: nextParticipants };
+            });
+            if (coopSession?.isHost) {
+                broadcastCoopBattleState(finalizedBattleState);
+            }
+            return;
+        }
         const targetedCompanion = targetPeerId
             ? coopSession?.participants.find(participant => participant.peerId === targetPeerId)
             : undefined;
@@ -7077,7 +7275,7 @@ const App: React.FC = () => {
                     });
             }, 900);
         }
-    }, [coopSession, coopSelfPeerId, updateCoopParticipantState]);
+    }, [broadcastCoopBattleState, coopSelfPeerId, coopSession, gameState.challengeMode, gameState.coopBattleState, gameState.screen, setCoopBattleState, updateCoopParticipantState, upsertCoopPlayerSnapshot]);
 
     const handleUseCoopSupport = useCallback((card: CoopSupportCard, targetPeerId?: string) => {
         setCoopSupportCards(prevCards => prevCards.filter(entry => entry.id !== card.id));
@@ -7093,8 +7291,8 @@ const App: React.FC = () => {
             });
             return;
         }
-        applyCoopSupportEffect(card, targetPeerId);
-    }, [applyCoopSupportEffect, coopSession]);
+        applyCoopSupportEffect(card, targetPeerId, coopSelfPeerId || undefined);
+    }, [applyCoopSupportEffect, coopSelfPeerId, coopSession]);
     const applyRestAction = () => {
         const heal = Math.floor(gameState.player.maxHp * 0.3);
         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + heal) } }));
@@ -7816,14 +8014,14 @@ const App: React.FC = () => {
                 return;
             }
 
-            if (data.type === 'COOP_SUPPORT_USE' && coopSession.isHost && gameState.screen === GameScreen.BATTLE) {
+            if (data.type === 'COOP_SUPPORT_USE' && coopSession.isHost && fromPeerId && gameState.screen === GameScreen.BATTLE) {
                 applyCoopSupportEffect({
                     id: data.cardId,
                     effectId: data.effectId,
                     name: data.name,
                     description: data.description,
                     rarity: data.rarity as CoopSupportCard['rarity']
-                }, data.targetPeerId);
+                }, data.targetPeerId, fromPeerId);
             }
         };
 
