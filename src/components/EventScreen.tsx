@@ -23,14 +23,15 @@ interface EventScreenProps {
 
 const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, imageKey, image, resultLog, onContinue, typingMode = false, interactionDisabled = false, interactionDisabledMessage }) => {
   const imageCandidates = useMemo(() => {
+    const baseUrl = (import.meta as any).env.BASE_URL || '/';
     const encodedTitle = encodeURIComponent(imageKey ?? title);
     return [
-      `/event-illustrations/${encodedTitle}.webp`,
-      `/event-illustrations/${encodedTitle}.png`,
-      `/event-illustrations/${encodedTitle}.jpg`,
-      `/event-illustrations/${encodedTitle}.jpeg`,
-      `/event-illustrations/${encodedTitle}.svg`,
-      '/event-illustrations/default.svg'
+      `${baseUrl}event-illustrations/${encodedTitle}.webp`,
+      `${baseUrl}event-illustrations/${encodedTitle}.png`,
+      `${baseUrl}event-illustrations/${encodedTitle}.jpg`,
+      `${baseUrl}event-illustrations/${encodedTitle}.jpeg`,
+      `${baseUrl}event-illustrations/${encodedTitle}.svg`,
+      `${baseUrl}event-illustrations/default.svg`
     ];
   }, [title]);
   const [imageIndex, setImageIndex] = useState(0);

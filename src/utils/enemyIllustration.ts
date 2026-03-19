@@ -7,6 +7,7 @@ export const sanitizeEnemyIllustrationName = (name: string): string => {
 };
 
 export const getEnemyIllustrationPaths = (name: string, aliases: string[] = []): string[] => {
+  const baseUrl = (import.meta as any).env.BASE_URL || '/';
   const allNames = [name, ...aliases].filter(Boolean).map((v) => v.trim());
   const candidates = Array.from(new Set(
     allNames.flatMap((base) => {
@@ -23,6 +24,6 @@ export const getEnemyIllustrationPaths = (name: string, aliases: string[] = []):
   ));
   const extensions = ['svg', 'jpg', 'jpeg', 'png', 'webp'];
   return candidates.flatMap((fileName) =>
-    extensions.map((ext) => `/enemy-illustrations/${encodeURIComponent(`${fileName}.${ext}`)}`)
+    extensions.map((ext) => `${baseUrl}enemy-illustrations/${encodeURIComponent(`${fileName}.${ext}`)}`)
   );
 };

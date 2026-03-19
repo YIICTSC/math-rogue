@@ -20,6 +20,7 @@ const deriveNameAliases = (name: string): string[] => {
 };
 
 export const getCardIllustrationPaths = (id: string, name: string, aliases: string[] = []): string[] => {
+  const baseUrl = (import.meta as any).env.BASE_URL || '/';
   const rawCandidates = [name, ...deriveNameAliases(name), ...aliases, id, 'SEED_SHARED', 'unknown-card']
     .filter(Boolean)
     .map((value) => value.trim());
@@ -33,6 +34,6 @@ export const getCardIllustrationPaths = (id: string, name: string, aliases: stri
   );
   const extensions = ['webp', 'png', 'jpg', 'jpeg', 'svg'];
   return candidates.flatMap((fileName) =>
-    extensions.map((ext) => `/card-illustrations/${encodeURIComponent(`${fileName}.${ext}`)}`)
+    extensions.map((ext) => `${baseUrl}card-illustrations/${encodeURIComponent(`${fileName}.${ext}`)}`)
   );
 };
