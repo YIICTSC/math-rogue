@@ -1,7 +1,7 @@
 
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode, ParryState, VisualEffectInstance, CoopSupportCard } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
-import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles, MessageCircle, Mic, ArrowRight, MousePointer2, ChevronsRight, Flame, RotateCcw, Triangle } from 'lucide-react';
+import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles, MessageCircle, Mic, ArrowRight, MousePointer2, ChevronsRight, ChevronDown, Flame, RotateCcw, Triangle } from 'lucide-react';
 import PixelSprite from './PixelSprite';
 import EnemyIllustration from './EnemyIllustration';
 import { audioService } from '../services/audioService';
@@ -307,6 +307,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
     const [lastVisibleEnemies, setLastVisibleEnemies] = useState<Enemy[]>([]);
     const [selectedSupportCard, setSelectedSupportCard] = useState<CoopSupportCard | null>(null);
+    const [coopSupportHudOpen, setCoopSupportHudOpen] = useState(false);
     const isFinisherActive = !!finisherCutinCard;
     const visualEnemies = isFinisherActive && enemies.length === 0 ? lastVisibleEnemies : enemies;
     const playerHpPercent = (player.currentHp / player.maxHp) * 100;
@@ -326,6 +327,13 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             setLastVisibleEnemies(enemies.map((e) => ({ ...e })));
         }
     }, [enemies]);
+
+    useEffect(() => {
+        if (coopSupportCards.length === 0) {
+            setCoopSupportHudOpen(false);
+            setSelectedSupportCard(null);
+        }
+    }, [coopSupportCards.length]);
 
     const [isActing, setIsActing] = useState(false);
     const [isShaking, setIsShaking] = useState(false);
@@ -713,11 +721,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     <div className="text-yellow-400 text-[10px] font-bold bg-gray-900/80 px-2 py-0.5 rounded border border-yellow-700 shadow-sm">
                         {trans(turnLog, languageMode)}
                     </div>
-                    {selectedSupportCard && (
-                        <div className="max-w-[52vw] rounded border border-emerald-400/50 bg-emerald-950/85 px-2 py-1 text-[10px] font-bold text-emerald-100 shadow-sm">
-                            {trans(selectedSupportCard.name, languageMode)}: {trans("対象を選択", languageMode)}
-                        </div>
-                    )}
                     {coopTurnQueue.length > 0 && (
                         <div className="max-w-[46vw] sm:max-w-[52vw] rounded border border-emerald-500/40 bg-gray-950/85 px-1.5 py-1 sm:px-2 sm:py-1 shadow-sm">
                             <div className="mb-1 text-[8px] sm:text-[9px] font-bold uppercase tracking-[0.12em] sm:tracking-[0.2em] text-emerald-200">Coop Order</div>
@@ -1336,6 +1339,86 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 `}
             </style>
 
+            {coopSupportCards.length > 0 && onUseCoopSupport && (
+                <div className="absolute left-2 bottom-14 md:bottom-16 z-40 w-[min(320px,calc(100vw-16px))] md:w-[min(360px,calc(100vw-24px))]">
+                    <div className="bg-slate-950/88 border border-emerald-500/70 rounded-xl shadow-2xl backdrop-blur px-3 py-2 text-white">
+                        <button
+                            onClick={() => setCoopSupportHudOpen(prev => !prev)}
+                            className="w-full flex items-center justify-between text-left"
+                        >
+                            <div>
+                                <div className="text-[10px] uppercase tracking-[0.25em] text-emerald-200">Coop Support</div>
+                                <div className="text-sm font-black">支援カード {coopSupportCards.length} 枚</div>
+                            </div>
+                            <ChevronDown className={`transition-transform ${coopSupportHudOpen ? 'rotate-180' : ''}`} size={16} />
+                        </button>
+                        {coopSupportHudOpen && (
+                            <div className="mt-3 space-y-2 max-h-[36vh] overflow-y-auto custom-scrollbar pr-1">
+                                {coopSupportCards.map((supportCard, index) => {
+                                    const needsTarget = supportNeedsTarget(supportCard);
+                                    const isSelected = selectedSupportCard?.id === supportCard.id;
+                                    const canUse = !actingEnemyId && !selectionState.active && coopCanAct;
+                                    return (
+                                        <div key={`${supportCard.id}-${index}`} className={`rounded-lg border p-3 ${isSelected ? 'border-emerald-300/80 bg-emerald-950/35' : 'border-emerald-500/30 bg-emerald-950/20'}`}>
+                                            <div className="flex items-start justify-between gap-2">
+                                                <div>
+                                                    <div className="font-black text-emerald-100">{trans(supportCard.name, languageMode)}</div>
+                                                    <div className="text-[11px] text-emerald-100/80 leading-relaxed">{trans(supportCard.description, languageMode)}</div>
+                                                </div>
+                                                <div className="text-[10px] font-bold text-emerald-200">{supportCard.rarity}</div>
+                                            </div>
+                                            <div className="mt-2 flex flex-wrap gap-2">
+                                                {needsTarget ? (
+                                                    <button
+                                                        onClick={() => {
+                                                            if (!canUse) return;
+                                                            setSelectedSupportCard(current => current?.id === supportCard.id ? null : supportCard);
+                                                        }}
+                                                        disabled={!canUse}
+                                                        className={`rounded border px-2 py-1 text-[11px] font-bold ${
+                                                            canUse
+                                                                ? isSelected
+                                                                    ? 'border-emerald-200 bg-emerald-600/70 text-white hover:bg-emerald-500/80'
+                                                                    : 'border-emerald-300/50 bg-emerald-700/40 text-emerald-50 hover:bg-emerald-600/60'
+                                                                : 'border-gray-600 bg-gray-700 text-gray-400 cursor-not-allowed'
+                                                        }`}
+                                                    >
+                                                        {isSelected ? '対象を選択中' : '対象を選ぶ'}
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => {
+                                                            if (!canUse) return;
+                                                            onUseCoopSupport(supportCard);
+                                                        }}
+                                                        disabled={!canUse}
+                                                        className={`rounded border px-2 py-1 text-[11px] font-bold ${
+                                                            canUse
+                                                                ? 'border-emerald-300/50 bg-emerald-700/40 text-emerald-50 hover:bg-emerald-600/60'
+                                                                : 'border-gray-600 bg-gray-700 text-gray-400 cursor-not-allowed'
+                                                        }`}
+                                                    >
+                                                        使う
+                                                    </button>
+                                                )}
+                                                {isSelected && (
+                                                    <button
+                                                        onClick={() => setSelectedSupportCard(null)}
+                                                        className="rounded border border-gray-500 bg-gray-800 px-2 py-1 text-[11px] font-bold text-gray-200 hover:bg-gray-700"
+                                                    >
+                                                        取消
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
             {/* 3. Control Bar */}
             <div className="h-12 bg-gray-800 border-t-2 border-white flex items-center justify-between px-2 shrink-0 z-20 shadow-lg">
                 <div className="flex items-center">
@@ -1348,37 +1431,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         <span className="flex items-center" onClick={() => showInfo(trans("捨て札", languageMode), trans("使用済みカード。山札が切れるとリシャッフルされる。", languageMode))}><X size={10} className="mr-1" /> {player.discardPile.length}</span>
                     </div>
                 </div>
-
-                {coopSupportCards.length > 0 && onUseCoopSupport && (
-                    <div className="mx-2 flex items-center gap-1 overflow-x-auto max-w-[34vw] custom-scrollbar">
-                        {coopSupportCards.slice(0, 3).map((supportCard) => (
-                            <button
-                                key={supportCard.id}
-                                onClick={() => {
-                                    if (actingEnemyId || selectionState.active || !coopCanAct) return;
-                                    if (supportNeedsTarget(supportCard)) {
-                                        setSelectedSupportCard(current => current?.id === supportCard.id ? null : supportCard);
-                                        return;
-                                    }
-                                    onUseCoopSupport(supportCard);
-                                }}
-                                disabled={!!actingEnemyId || selectionState.active || !coopCanAct}
-                                className={`shrink-0 rounded border px-2 py-1 text-[10px] font-bold ${!actingEnemyId && !selectionState.active && coopCanAct ? 'border-emerald-300 bg-emerald-700/80 text-emerald-50 hover:bg-emerald-600' : 'border-gray-600 bg-gray-700 text-gray-400 cursor-not-allowed'}`}
-                                title={supportCard.description}
-                            >
-                                {trans(supportCard.name, languageMode)}
-                            </button>
-                        ))}
-                        {selectedSupportCard && (
-                            <button
-                                onClick={() => setSelectedSupportCard(null)}
-                                className="shrink-0 rounded border border-gray-500 bg-gray-800 px-2 py-1 text-[10px] font-bold text-gray-200 hover:bg-gray-700"
-                            >
-                                {trans("取消", languageMode)}
-                            </button>
-                        )}
-                    </div>
-                )}
 
                 {isDualMode && (
                     <button

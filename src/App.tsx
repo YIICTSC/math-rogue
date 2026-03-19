@@ -677,6 +677,11 @@ const App: React.FC = () => {
         if (!coopDecisionOwner) return false;
         return coopDecisionOwner.peerId === coopSelfPeerId;
     }, [coopDecisionOwner, coopSelfPeerId]);
+    const coopEnemyHpMultiplier = useMemo(() => {
+        if (gameState.challengeMode !== 'COOP') return 1;
+        const participantCount = coopSession?.participants.length || 1;
+        return Math.max(1, Math.min(4, participantCount));
+    }, [coopSession, gameState.challengeMode]);
     const coopInteractionDisabled = gameState.challengeMode === 'COOP' && !coopCanDecide;
     const coopInteractionDisabledMessage = coopDecisionOwner
         ? `${coopDecisionOwner.name} が選択しています`
@@ -3001,12 +3006,14 @@ const App: React.FC = () => {
                     const hits = 1 + (c.playCopies || 0);
                     return base * hits;
                 }), 0);
+                const enemyHpMultiplier = coopEnemyHpMultiplier;
 
                 if (gameState.act === 4 && node.type === NodeType.BOSS) {
                     let finalHeartHp = TRUE_BOSS.maxHp;
                     if (maxAtkDmg > finalHeartHp) {
                         finalHeartHp = Math.ceil(maxAtkDmg * 6);
                     }
+                    finalHeartHp = Math.ceil(finalHeartHp * enemyHpMultiplier);
 
                     enemies.push({
                         id: 'true-boss',
@@ -3043,6 +3050,7 @@ const App: React.FC = () => {
                             const multiplier = 2 + gameState.act;
                             baseHp = Math.ceil(maxAtkDmg * multiplier);
                         }
+                        baseHp *= enemyHpMultiplier;
                         // 複数体出現時は個体ごとにHP差を付ける
                         const hpStep = Math.max(2, Math.floor(baseHp * 0.08));
                         const hpAdjusted = Math.max(1, Math.floor(baseHp + hpOffsets[i] * hpStep));
@@ -8253,17 +8261,8 @@ const App: React.FC = () => {
                     </div>
                 )}
 
-                {gameState.challengeMode === 'COOP' && gameState.screen !== GameScreen.COOP_SETUP && coopSupportCards.length > 0 && (
-                    <div className="absolute right-2 sm:right-3 top-[60px] sm:top-[72px] z-30">
-                        <div className="bg-slate-900/90 border border-emerald-500 rounded-lg px-2 py-1.5 sm:px-3 sm:py-2 text-emerald-100 shadow-lg min-w-[88px] sm:min-w-[132px]">
-                            <div className="text-[9px] sm:text-[10px] font-bold tracking-wide text-emerald-200">支援</div>
-                            <div className="text-base sm:text-xl font-black tabular-nums">{coopSupportCards.length}</div>
-                        </div>
-                    </div>
-                )}
-
                 {gameState.challengeMode === 'COOP' && coopSession && COOP_DECISION_HUD_SCREEN_SET.has(gameState.screen) && coopDecisionOwner && (
-                    <div className={`absolute right-2 sm:right-3 z-30 ${coopSupportCards.length > 0 ? 'top-[116px] sm:top-[144px]' : 'top-[60px] sm:top-[72px]'}`}>
+                    <div className="absolute right-2 sm:right-3 top-[60px] sm:top-[72px] z-30">
                         <div className="bg-slate-900/90 border border-cyan-500 rounded-lg px-2 py-1.5 sm:px-3 sm:py-2 text-cyan-100 shadow-lg min-w-[116px] sm:min-w-[168px] max-w-[42vw] sm:max-w-none">
                             <div className="text-[9px] sm:text-[10px] font-bold tracking-wide text-cyan-200">決定役</div>
                             <div className="truncate text-[11px] sm:text-sm font-black">{coopDecisionOwner.name}</div>
