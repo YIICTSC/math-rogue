@@ -226,6 +226,29 @@ export interface Player {
   codexBuffer?: Card[]; // 秘密の攻略本用
 }
 
+export interface CoopBattlePlayerState {
+  peerId: string;
+  name: string;
+  player: Player;
+  selectedEnemyId?: string | null;
+  isDown?: boolean;
+}
+
+export interface CoopBattleTurnSlot {
+  id: string;
+  type: 'SELF' | 'ALLY' | 'ENEMY';
+  label: string;
+  peerId?: string;
+}
+
+export interface CoopBattleState {
+  battleKey: string;
+  players: CoopBattlePlayerState[];
+  turnQueue: CoopBattleTurnSlot[];
+  turnCursor: number;
+  enemyTurnCursor: number;
+}
+
 export interface ActStats {
   enemiesDefeated: number;
   goldGained: number;
@@ -244,6 +267,7 @@ export enum GameScreen {
   VS_SETUP = 'VS_SETUP',
   VS_BATTLE = 'VS_BATTLE',
   RACE_SETUP = 'RACE_SETUP',
+  COOP_SETUP = 'COOP_SETUP',
   DODGEBALL_SHOOTING = 'DODGEBALL_SHOOTING',
   MATH_CHALLENGE = 'MATH_CHALLENGE',
   KANJI_CHALLENGE = 'KANJI_CHALLENGE',
@@ -420,6 +444,18 @@ export type RaceTrickEffectId =
   | 'SHOE_LACE'
   | 'FORGOTTEN_HOMEWORK';
 
+export type CoopSupportEffectId =
+  | 'ALLY_HEAL'
+  | 'ALLY_BLOCK'
+  | 'ALLY_NEXT_ENERGY'
+  | 'ALLY_DRAW'
+  | 'ALLY_ATTACK_BOOST'
+  | 'ALLY_BUFFER'
+  | 'TEAM_CLEANSE'
+  | 'TEAM_HEAL'
+  | 'REVIVE_BANDAGE'
+  | 'REVIVE_NURSE';
+
 export interface RaceTrickCard {
   id: string;
   effectId: RaceTrickEffectId;
@@ -428,10 +464,25 @@ export interface RaceTrickCard {
   rarity: 'COMMON' | 'UNCOMMON' | 'RARE';
 }
 
+export interface CoopSupportCard {
+  id: string;
+  effectId: CoopSupportEffectId;
+  name: string;
+  description: string;
+  rarity: 'COMMON' | 'UNCOMMON' | 'RARE';
+}
+
 export interface RewardItem {
-  type: 'CARD' | 'RELIC' | 'GOLD' | 'POTION' | 'RACE_TRICK';
+  type: 'CARD' | 'RELIC' | 'GOLD' | 'POTION' | 'RACE_TRICK' | 'COOP_SUPPORT';
   value?: any;
   id: string;
+}
+
+export interface CoopTreasurePool {
+  id: string;
+  rewards: RewardItem[];
+  claimedByPeerId?: string | null;
+  claimedByName?: string | null;
 }
 
 export interface RankingEntry {
@@ -660,4 +711,31 @@ export interface GameState {
   actStats?: ActStats;
   currentEventTitle?: string;
   newlyUnlockedCardName?: string; // 追加: このアクトで解放されたカード
+  coopBattleState?: CoopBattleState | null;
+}
+
+export interface CoopSharedState {
+  screen: GameScreen;
+  mode: GameMode;
+  modePool?: string[];
+  challengeMode?: string;
+  typingLessonId?: string;
+  act: number;
+  floor: number;
+  turn: number;
+  map: MapNode[];
+  currentMapNodeId: string | null;
+  enemies: Enemy[];
+  selectedEnemyId: string | null;
+  narrativeLog: string[];
+  combatLog: string[];
+  selectionState: SelectionState;
+  isEndless?: boolean;
+  parryState?: ParryState;
+  activeEffects: VisualEffectInstance[];
+  currentStoryIndex?: number;
+  actStats?: ActStats;
+  currentEventTitle?: string;
+  newlyUnlockedCardName?: string;
+  coopBattleState?: CoopBattleState | null;
 }

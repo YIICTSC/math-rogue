@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
     GameState, GameScreen, Enemy, Card as ICard,
-    CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode, LanguageMode, VisualEffectInstance, GardenSlot, VFXType, ActStats, RaceTrickCard, RaceTrickEffectId
+    CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode, LanguageMode, VisualEffectInstance, GardenSlot, VFXType, ActStats, RaceTrickCard, RaceTrickEffectId, CoopSupportCard, CoopBattleState, CoopBattleTurnSlot, CoopBattlePlayerState, CoopSharedState, CoopTreasurePool
 } from './types';
 import {
     INITIAL_HP, INITIAL_ENERGY, HAND_SIZE,
@@ -42,6 +42,7 @@ import P2PBattleSetup from './components/P2PBattleSetup';
 import VSBattleScene from './components/VSBattleScene';
 import P2PVSBattleScene from './components/P2PVSBattleScene';
 import P2PRaceSetup from './components/P2PRaceSetup';
+import CoopSetupScreen, { CoopParticipantPayload, CoopStartPayload } from './components/CoopSetupScreen';
 import ModeSelectionScreen from './components/ModeSelectionScreen';
 import Card from './components/Card';
 import { audioService } from './services/audioService';
@@ -51,11 +52,12 @@ import { storageService } from './services/storageService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { trans } from './utils/textUtils';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Wifi, Flag, Keyboard } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Wifi, Flag, Keyboard, Users } from 'lucide-react';
 import { applyAdditionalCardLogic } from './services/cardEffectLogic';
 import { p2pService } from './services/p2pService';
 import { TypingLessonId } from './data/typingLessonConfig';
 import { getRandomRaceTrickCard, getRaceTrickCard } from './raceTricks';
+import { getRandomCoopSupportCard } from './coopSupportCards';
 
 const calculateScore = (state: GameState, victory: boolean): number => {
     let score = 0;
@@ -98,6 +100,24 @@ type RaceSession = {
     entries: RaceEntry[];
     ended: boolean;
 };
+
+type CoopParticipant = CoopParticipantPayload;
+
+type CoopSession = {
+    isHost: boolean;
+    name: string;
+    roomCode?: string;
+    startedAt: number;
+    participants: CoopParticipant[];
+    decisionOwnerIndex: number;
+};
+
+const createCoopSupportInstance = (card: CoopSupportCard): CoopSupportCard => ({
+    ...card,
+    id: `${card.id}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+});
+
+const shouldClearAllCardRewards = (item: RewardItem) => item.type === 'CARD';
 
 type GalaxyExpressModalState = {
     cards: ICard[];
@@ -173,6 +193,53 @@ const RACE_TRICK_SCREEN_SET = new Set<GameScreen>([
     GameScreen.SHOP,
     GameScreen.EVENT
 ]);
+
+const CHALLENGE_SCREEN_SET = new Set<GameScreen>([
+    GameScreen.MATH_CHALLENGE,
+    GameScreen.KANJI_CHALLENGE,
+    GameScreen.ENGLISH_CHALLENGE,
+    GameScreen.GENERAL_CHALLENGE
+]);
+
+const COOP_DECISION_HUD_SCREEN_SET = new Set<GameScreen>([
+    GameScreen.CHARACTER_SELECTION,
+    GameScreen.MAP,
+    GameScreen.EVENT,
+    GameScreen.REST,
+    GameScreen.SHOP,
+    GameScreen.REWARD
+]);
+
+const COOP_PARTY_HUD_SCREEN_SET = new Set<GameScreen>([
+    GameScreen.MATH_CHALLENGE,
+    GameScreen.KANJI_CHALLENGE,
+    GameScreen.ENGLISH_CHALLENGE,
+    GameScreen.GENERAL_CHALLENGE,
+    GameScreen.MAP,
+    GameScreen.EVENT,
+    GameScreen.REST,
+    GameScreen.SHOP,
+    GameScreen.REWARD
+]);
+
+const COOP_LOCAL_SETUP_SCREEN_SET = new Set<GameScreen>([
+    GameScreen.CHARACTER_SELECTION,
+    GameScreen.DECK_CONSTRUCTION,
+    GameScreen.RELIC_SELECTION
+]);
+
+const shouldPreserveLocalCoopScreen = (localScreen: GameScreen, incomingScreen: GameScreen) => {
+    if (COOP_LOCAL_SETUP_SCREEN_SET.has(localScreen) && localScreen !== incomingScreen) {
+        return true;
+    }
+    if (CHALLENGE_SCREEN_SET.has(localScreen) && !CHALLENGE_SCREEN_SET.has(incomingScreen)) {
+        return true;
+    }
+    if (localScreen === GameScreen.REWARD && CHALLENGE_SCREEN_SET.has(incomingScreen)) {
+        return true;
+    }
+    return false;
+};
 
 const determineEnemyType = (name: string, isBoss: boolean): string => {
     if (isBoss) return 'GUARDIAN';
@@ -358,6 +425,20 @@ const App: React.FC = () => {
     const shuffle = (array: any[]) => {
         return array.sort(() => Math.random() - 0.5);
     };
+    const hashString = (value: string) => {
+        let hash = 0;
+        for (let i = 0; i < value.length; i++) {
+            hash = ((hash << 5) - hash + value.charCodeAt(i)) | 0;
+        }
+        return Math.abs(hash);
+    };
+    const deterministicOrder = <T extends { id: string }>(items: T[], seed: string) =>
+        [...items].sort((a, b) => {
+            const aHash = hashString(`${seed}:${a.id}`);
+            const bHash = hashString(`${seed}:${b.id}`);
+            if (aHash !== bHash) return aHash - bHash;
+            return a.id.localeCompare(b.id);
+        });
 
     const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -442,6 +523,7 @@ const App: React.FC = () => {
         isEndless: false,
         parryState: { active: false, enemyId: null, success: false },
         activeEffects: [],
+        coopBattleState: null,
         currentStoryIndex: 0,
         actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
     });
@@ -501,8 +583,11 @@ const App: React.FC = () => {
     const [unlockedCardNames, setUnlockedCardNames] = useState<string[]>([]);
     const [starterRelics, setStarterRelics] = useState<Relic[]>([]);
     const [treasureRewards, setTreasureRewards] = useState<RewardItem[]>([]);
+    const [treasureOpened, setTreasureOpened] = useState(false);
+    const [treasurePools, setTreasurePools] = useState<CoopTreasurePool[]>([]);
     const [clearCount, setClearCount] = useState<number>(0);
     const [raceSession, setRaceSession] = useState<RaceSession | null>(null);
+    const [coopSession, setCoopSession] = useState<CoopSession | null>(null);
     const [raceResultOpen, setRaceResultOpen] = useState(false);
     const [raceMaxDamage, setRaceMaxDamage] = useState(0);
     const [raceGameOverCount, setRaceGameOverCount] = useState(0);
@@ -515,8 +600,24 @@ const App: React.FC = () => {
     const [raceToast, setRaceToast] = useState<string | null>(null);
     const [raceEffectNow, setRaceEffectNow] = useState(Date.now());
     const [raceRewardDummyDisplay, setRaceRewardDummyDisplay] = useState(0);
+    const [coopSupportCards, setCoopSupportCards] = useState<CoopSupportCard[]>([]);
+    const [coopPartyHudOpen, setCoopPartyHudOpen] = useState(true);
+    const [coopPlayerSnapshots, setCoopPlayerSnapshots] = useState<Record<string, Player>>({});
+    const [coopRewardSets, setCoopRewardSets] = useState<Record<string, RewardItem[]>>({});
+    const [coopAwaitingRewardSync, setCoopAwaitingRewardSync] = useState(false);
+    const [coopAwaitingMapSync, setCoopAwaitingMapSync] = useState(false);
+    const [coopBattleQueue, setCoopBattleQueue] = useState<CoopBattleTurnSlot[]>([]);
+    const [coopBattleKey, setCoopBattleKey] = useState<string | null>(null);
+    const [coopEnemyTurnCursor, setCoopEnemyTurnCursor] = useState(0);
     const prevScreenRef = useRef<GameScreen>(GameScreen.START_MENU);
+    const coopRewardScreenRef = useRef<GameScreen>(GameScreen.START_MENU);
     const raceToastTimerRef = useRef<number | null>(null);
+    const coopEnemyTurnCursorRef = useRef(0);
+    const coopStartedTurnSlotRef = useRef<string | null>(null);
+    const coopApplyingRemoteBattleSyncRef = useRef(false);
+    const coopLastBattleActionSignatureRef = useRef<string | null>(null);
+    const queuedCoopBattleEventRef = useRef<{ type: 'COOP_BATTLE_PLAY_CARD' | 'COOP_BATTLE_USE_POTION' | 'COOP_BATTLE_TURN_START' | 'COOP_BATTLE_SELECTION_STATE' | 'COOP_BATTLE_MODAL_RESOLVE' | 'COOP_BATTLE_CODEX_SELECT', cardId?: string, potionId?: string } | null>(null);
+    const [queuedCoopBattleEventTick, setQueuedCoopBattleEventTick] = useState(0);
 
     const showRaceToast = useCallback((message: string) => {
         setRaceToast(message);
@@ -532,7 +633,451 @@ const App: React.FC = () => {
             .filter(entry => entry.peerId !== raceSelfPeerId)
             .sort(compareRaceEntries);
     }, [raceSession, raceSelfPeerId]);
+    const coopSelfPeerId = useMemo(() => {
+        const directPeerId = p2pService.getMyId();
+        if (directPeerId) return directPeerId;
+        if (!coopSession) return 'host';
 
+        const selfByCharacter = coopSession.participants.find(participant =>
+            participant.selectedCharacterId &&
+            participant.selectedCharacterId === gameState.player.id &&
+            (!!participant.imageData ? participant.imageData === gameState.player.imageData : true)
+        );
+        if (selfByCharacter) return selfByCharacter.peerId;
+
+        const selfByImage = coopSession.participants.find(participant =>
+            participant.imageData &&
+            participant.imageData === gameState.player.imageData
+        );
+        if (selfByImage) return selfByImage.peerId;
+
+        return coopSession.isHost
+            ? (coopSession.participants[0]?.peerId || 'host')
+            : 'self';
+    }, [coopSession, gameState.player.id, gameState.player.imageData]);
+    const coopCompanions = useMemo(() => {
+        if (!coopSession) return [];
+        return coopSession.participants
+            .filter(participant => participant.peerId !== coopSelfPeerId)
+            .slice(0, 3)
+            .map(participant => ({
+                id: participant.peerId,
+                name: participant.name,
+                maxHp: participant.maxHp || 100,
+                currentHp: participant.currentHp ?? participant.maxHp ?? 100,
+                imageData: participant.imageData || HERO_IMAGE_DATA,
+                floatingText: null
+            }));
+    }, [coopSession, coopSelfPeerId]);
+    const coopDecisionOwner = useMemo(() => {
+        if (!coopSession || coopSession.participants.length === 0) return null;
+        return coopSession.participants[coopSession.decisionOwnerIndex] || coopSession.participants[0] || null;
+    }, [coopSession]);
+    const coopCanDecide = useMemo(() => {
+        if (!coopDecisionOwner) return false;
+        return coopDecisionOwner.peerId === coopSelfPeerId;
+    }, [coopDecisionOwner, coopSelfPeerId]);
+    const coopInteractionDisabled = gameState.challengeMode === 'COOP' && !coopCanDecide;
+    const coopInteractionDisabledMessage = coopDecisionOwner
+        ? `${coopDecisionOwner.name} が選択しています`
+        : '他のプレイヤーの選択を待っています';
+    const coopSelfDisplayName = useMemo(() => {
+        if (!coopSession) return selectedCharName || 'あなた';
+        return coopSession.participants.find(participant => participant.peerId === coopSelfPeerId)?.name
+            || coopSession.name
+            || selectedCharName
+            || 'あなた';
+    }, [coopSelfPeerId, coopSession, selectedCharName]);
+    const getSelfTurnLogLabel = useCallback(() => {
+        if (gameState.challengeMode === 'COOP') {
+            return `${coopSelfDisplayName}: ${trans("あなたのターン", languageMode)}`;
+        }
+        return trans("あなたのターン", languageMode);
+    }, [coopSelfDisplayName, gameState.challengeMode, languageMode]);
+    const coopAllRewardsResolved = useMemo(() => {
+        if (!coopSession || gameState.screen !== GameScreen.REWARD) return false;
+        return coopSession.participants.length > 0 && coopSession.participants.every(participant => participant.rewardResolved);
+    }, [coopSession, gameState.screen]);
+    const coopAllRestResolved = useMemo(() => {
+        if (!coopSession || gameState.screen !== GameScreen.REST) return false;
+        return coopSession.participants.length > 0 && coopSession.participants.every(participant => participant.restResolved);
+    }, [coopSession, gameState.screen]);
+    const coopRewardSkipDisabled = gameState.challengeMode === 'COOP' && gameState.screen === GameScreen.REWARD && gameState.rewards.length === 0 && !coopAllRewardsResolved;
+    const coopBattleState = gameState.coopBattleState || null;
+    const coopBattleQueueView = useMemo(() => {
+        const sourceQueue = coopBattleState?.turnQueue || coopBattleQueue;
+        return sourceQueue.map(slot => {
+            if (slot.type === 'ENEMY') return slot;
+            return {
+                ...slot,
+                type: slot.peerId === coopSelfPeerId ? 'SELF' : 'ALLY'
+            } as CoopBattleTurnSlot;
+        });
+    }, [coopBattleQueue, coopBattleState, coopSelfPeerId]);
+    const activeCoopTurnSlot = useMemo(() => {
+        if (!coopBattleState || coopBattleState.turnQueue.length === 0) return null;
+        return coopBattleState.turnQueue[coopBattleState.turnCursor] || null;
+    }, [coopBattleState]);
+    const coopBattleCanAct = useMemo(() => {
+        if (gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.BATTLE) return true;
+        if (!activeCoopTurnSlot) return true;
+        return activeCoopTurnSlot.type !== 'ENEMY' && activeCoopTurnSlot.peerId === coopSelfPeerId;
+    }, [activeCoopTurnSlot, coopSelfPeerId, gameState.challengeMode, gameState.screen]);
+    const coopBattleTurnOwnerLabel = activeCoopTurnSlot?.type === 'ENEMY'
+        ? '敵の行動'
+        : activeCoopTurnSlot?.label || '';
+    const coopBattlePlan = useMemo(() => {
+        if (!coopBattleState || coopBattleState.turnQueue.length === 0) {
+            return { enemyActions: 0, nextCursor: 0 };
+        }
+        const queue = coopBattleState.turnQueue;
+        const currentCursor = coopBattleState.turnCursor;
+        let enemyActions = queue[currentCursor]?.type === 'ENEMY' ? 1 : 0;
+        let nextCursor = currentCursor;
+        for (let offset = 1; offset <= queue.length; offset++) {
+            const index = (currentCursor + offset) % queue.length;
+            const slot = queue[index];
+            if (slot.type === 'ENEMY') {
+                enemyActions++;
+                continue;
+            }
+            nextCursor = index;
+            break;
+        }
+        return { enemyActions, nextCursor };
+    }, [coopBattleState]);
+    const getAliveCoopCompanions = useCallback(() => {
+        if (!coopSession) return [];
+        return coopSession.participants.filter(participant => participant.peerId !== coopSelfPeerId && (participant.currentHp ?? participant.maxHp ?? 0) > 0);
+    }, [coopSession, coopSelfPeerId]);
+    useEffect(() => {
+        coopEnemyTurnCursorRef.current = coopEnemyTurnCursor;
+    }, [coopEnemyTurnCursor]);
+    const updateCoopParticipantState = useCallback((peerId: string, updater: (participant: CoopParticipant) => CoopParticipant) => {
+        setCoopSession(prev => {
+            if (!prev) return prev;
+            const nextParticipants = prev.participants.map(participant => participant.peerId === peerId ? updater(participant) : participant);
+            if (prev.isHost) {
+                p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+            }
+            return { ...prev, participants: nextParticipants };
+        });
+    }, []);
+    const setCoopBattleState = useCallback((battleState: CoopBattleState | null) => {
+        setGameState(prev => ({ ...prev, coopBattleState: battleState }));
+        setCoopBattleQueue(battleState?.turnQueue || []);
+        setCoopBattleKey(battleState?.battleKey || null);
+        setCoopEnemyTurnCursor(battleState?.enemyTurnCursor || 0);
+    }, []);
+    const buildCoopSharedState = useCallback((state: GameState): CoopSharedState => ({
+        screen: state.screen,
+        mode: state.mode,
+        modePool: state.modePool,
+        challengeMode: state.challengeMode,
+        typingLessonId: state.typingLessonId,
+        act: state.act,
+        floor: state.floor,
+        turn: state.turn,
+        map: state.map,
+        currentMapNodeId: state.currentMapNodeId,
+        enemies: state.enemies,
+        selectedEnemyId: state.selectedEnemyId,
+        narrativeLog: state.narrativeLog,
+        combatLog: state.combatLog,
+        selectionState: state.selectionState,
+        isEndless: state.isEndless,
+        parryState: state.parryState,
+        activeEffects: state.activeEffects,
+        currentStoryIndex: state.currentStoryIndex,
+        actStats: state.actStats,
+        currentEventTitle: state.currentEventTitle,
+        newlyUnlockedCardName: state.newlyUnlockedCardName,
+        coopBattleState: state.coopBattleState ?? null
+    }), []);
+    const preparePlayerForBattle = useCallback((sourcePlayer: Player, nodeType: NodeType) => {
+        const p: Player = {
+            ...sourcePlayer,
+            hand: [],
+            discardPile: [],
+            drawPile: shuffle(sourcePlayer.deck.map(c => ({ ...c }))),
+            currentEnergy: sourcePlayer.maxEnergy,
+            block: 0,
+            strength: 0,
+            powers: {},
+            relicCounters: { ...sourcePlayer.relicCounters },
+            turnFlags: {},
+            typesPlayedThisTurn: [],
+            echoes: 0,
+            cardsPlayedThisTurn: 0,
+            attacksPlayedThisTurn: 0,
+            codexBuffer: [],
+            floatingText: null
+        };
+
+        const eventStrengthBonus = p.relicCounters['EVENT_STRENGTH_BONUS'] || 0;
+        if (eventStrengthBonus > 0) p.strength += eventStrengthBonus;
+        if (p.relics.find(r => r.id === 'HAPPY_FLOWER')) p.relicCounters['HAPPY_FLOWER'] = 0;
+        if (p.relics.find(r => r.id === 'VAJRA')) p.strength += 1;
+        if (p.relics.find(r => r.id === 'HACHIMAKI')) p.powers['DEXTERITY'] = (p.powers['DEXTERITY'] || 0) + 1;
+        if (p.relics.find(r => r.id === 'SEED_PACK')) p.powers['THORNS'] = (p.powers['THORNS'] || 0) + 3;
+        if (p.relics.find(r => r.id === 'HOLY_WATER')) p.currentEnergy += 1;
+        if (p.relics.find(r => r.id === 'ANCHOR')) p.block += 10;
+        if (p.relics.find(r => r.id === 'LANTERN')) p.currentEnergy += 1;
+        if (p.relics.find(r => r.id === 'BRONZE_SCALES')) p.powers['THORNS'] = (p.powers['THORNS'] || 0) + 3;
+        if (p.relics.find(r => r.id === 'BLOOD_VIAL')) p.currentHp = Math.min(p.maxHp, p.currentHp + 2);
+        if (p.relics.find(r => r.id === 'BIG_LADLE')) {
+            p.maxHp += 4;
+            p.currentHp += 4;
+            p.relicCounters['BIG_LADLE_ACTIVE'] = 1;
+        }
+        if (nodeType === NodeType.BOSS && p.relics.find(r => r.id === 'PENTOGRAPH')) {
+            p.currentHp = Math.min(p.maxHp, p.currentHp + 25);
+        }
+        if (p.turnFlags['STREET_DOG_NEXT_BATTLE']) {
+            p.nextTurnEnergy += 3;
+            delete p.turnFlags['STREET_DOG_NEXT_BATTLE'];
+        }
+        if (p.relics.find(r => r.id === 'MUTAGENIC_STRENGTH')) p.strength += 3;
+
+        syncRedSkullState(p);
+
+        let drawCount = HAND_SIZE;
+        if (p.relics.find(r => r.id === 'BAG_OF_PREP') || p.relics.find(r => r.id === 'BAG_OF_PREPARATION')) drawCount += 2;
+        if (p.relics.find(r => r.id === 'SNAKE_RING')) drawCount += 2;
+
+        for (let i = 0; i < drawCount; i++) {
+            const drawn = p.drawPile.pop();
+            if (drawn) p.hand.push(drawn);
+        }
+
+        if (p.relics.find(r => r.id === 'ENCHIRIDION')) {
+            const powerPool = getFilteredCardPool(p.id).filter(c => c.type === CardType.POWER);
+            if (powerPool.length > 0) {
+                const power = powerPool[Math.floor(Math.random() * powerPool.length)];
+                p.hand.push({ ...power, id: `ench-${Date.now()}`, cost: 0 });
+            }
+        }
+
+        if (p.relics.find(r => r.id === 'WHISTLE')) {
+            const attacks = p.drawPile.filter(c => c.type === CardType.ATTACK);
+            if (attacks.length > 0) {
+                const randomAttack = attacks[Math.floor(Math.random() * attacks.length)];
+                p.hand.push({ ...randomAttack, cost: 0, id: `whistle-${Date.now()}` });
+            } else {
+                p.hand.push({ ...CARDS_LIBRARY['STRIKE'], cost: 0, id: `whistle-fallback-${Date.now()}` });
+            }
+        }
+
+        const innateCards = p.drawPile.filter(c => c.innate);
+        innateCards.forEach(c => {
+            p.drawPile = p.drawPile.filter(dc => dc.id !== c.id);
+            p.hand.push(c);
+        });
+
+        p.hpLostThisTurn = 0;
+        return p;
+    }, []);
+    const applyCoopSharedState = useCallback((prev: GameState, sharedState: CoopSharedState): GameState => ({
+        ...prev,
+        screen: sharedState.screen,
+        mode: sharedState.mode,
+        modePool: sharedState.modePool,
+        challengeMode: 'COOP',
+        typingLessonId: sharedState.typingLessonId,
+        act: sharedState.act,
+        floor: sharedState.floor,
+        turn: sharedState.turn,
+        map: sharedState.map,
+        currentMapNodeId: sharedState.currentMapNodeId,
+        enemies: sharedState.enemies,
+        selectedEnemyId: sharedState.selectedEnemyId,
+        narrativeLog: sharedState.narrativeLog,
+        combatLog: sharedState.combatLog,
+        selectionState: sharedState.selectionState,
+        isEndless: sharedState.isEndless,
+        parryState: sharedState.parryState,
+        activeEffects: sharedState.activeEffects,
+        currentStoryIndex: sharedState.currentStoryIndex,
+        actStats: sharedState.actStats,
+        currentEventTitle: sharedState.currentEventTitle,
+        newlyUnlockedCardName: sharedState.newlyUnlockedCardName,
+        coopBattleState: sharedState.coopBattleState ?? null,
+        vsOpponent: undefined,
+        vsIsHost: undefined
+    }), []);
+    const broadcastCoopBattleState = useCallback((battleState: CoopBattleState | null) => {
+        if (!coopSession?.isHost) return;
+        p2pService.send({
+            type: 'COOP_BATTLE_SYNC',
+            battleState,
+            enemies: gameState.enemies,
+            selectedEnemyId: gameState.selectedEnemyId,
+            combatLog: gameState.combatLog,
+            turnLog,
+            actingEnemyId,
+            finisherCutinCard: battleFinisherCutinCard
+        });
+    }, [actingEnemyId, battleFinisherCutinCard, coopSession, gameState.combatLog, gameState.enemies, gameState.selectedEnemyId, turnLog]);
+    const upsertCoopPlayerSnapshot = useCallback((peerId: string, player: Player) => {
+        setCoopPlayerSnapshots(prev => ({ ...prev, [peerId]: player }));
+    }, []);
+    const applyCoopPlayerStateToPeer = useCallback((peerId: string, player: Player) => {
+        upsertCoopPlayerSnapshot(peerId, player);
+        updateCoopParticipantState(peerId, participant => ({
+            ...participant,
+            selectedCharacterId: player.id,
+            imageData: player.imageData,
+            maxHp: player.maxHp,
+            currentHp: player.currentHp
+        }));
+        if (peerId === coopSelfPeerId) {
+            setGameState(prev => ({ ...prev, player }));
+        }
+    }, [coopSelfPeerId, updateCoopParticipantState, upsertCoopPlayerSnapshot]);
+    const queueCoopBattleEvent = useCallback((event: { type: 'COOP_BATTLE_PLAY_CARD' | 'COOP_BATTLE_USE_POTION' | 'COOP_BATTLE_TURN_START' | 'COOP_BATTLE_SELECTION_STATE' | 'COOP_BATTLE_MODAL_RESOLVE' | 'COOP_BATTLE_CODEX_SELECT', cardId?: string, potionId?: string }) => {
+        queuedCoopBattleEventRef.current = event;
+        setQueuedCoopBattleEventTick(prev => prev + 1);
+    }, []);
+
+    useEffect(() => {
+        if (gameState.challengeMode !== 'COOP' || !coopSession || !coopSelfPeerId || !gameState.player.id) return;
+        const selfParticipantName = coopSession.participants.find(participant => participant.peerId === coopSelfPeerId)?.name;
+        const selfState: CoopParticipant = {
+            peerId: coopSelfPeerId,
+            name: selfParticipantName || coopSession.name || selectedCharName,
+            imageData: gameState.player.imageData,
+            selectedCharacterId: gameState.player.id,
+            maxHp: gameState.player.maxHp,
+            currentHp: gameState.player.currentHp,
+            block: gameState.player.block,
+            nextTurnEnergy: gameState.player.nextTurnEnergy,
+            strength: gameState.player.strength,
+            buffer: gameState.player.powers['BUFFER'] || 0,
+            revivedThisBattle: false
+        };
+
+        if (coopSession.isHost) {
+            setCoopSession(prev => {
+                if (!prev) return prev;
+                const exists = prev.participants.some(participant => participant.peerId === coopSelfPeerId);
+                let changed = !exists;
+                const nextParticipants = exists
+                    ? prev.participants.map(participant => {
+                        if (participant.peerId !== coopSelfPeerId) return participant;
+                        const merged = { ...participant, ...selfState };
+                        changed = changed || JSON.stringify(merged) !== JSON.stringify(participant);
+                        return merged;
+                    })
+                    : [...prev.participants, selfState];
+                if (!changed) return prev;
+                p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                return { ...prev, participants: nextParticipants };
+            });
+            return;
+        }
+
+        p2pService.send({
+            type: 'COOP_SELF_STATE',
+            name: selfState.name,
+            imageData: selfState.imageData,
+            selectedCharacterId: selfState.selectedCharacterId,
+            maxHp: selfState.maxHp,
+            currentHp: selfState.currentHp,
+            block: selfState.block,
+            nextTurnEnergy: selfState.nextTurnEnergy,
+            strength: selfState.strength,
+            buffer: selfState.buffer,
+            revivedThisBattle: selfState.revivedThisBattle
+        });
+    }, [coopSelfPeerId, coopSession, gameState.challengeMode, gameState.player.block, gameState.player.currentHp, gameState.player.id, gameState.player.imageData, gameState.player.maxHp, gameState.player.nextTurnEnergy, gameState.player.powers, gameState.player.strength, selectedCharName]);
+    useEffect(() => {
+        if (gameState.challengeMode !== 'COOP' || !coopSession || !coopSelfPeerId || !gameState.player.id) return;
+        upsertCoopPlayerSnapshot(coopSelfPeerId, gameState.player);
+        if (!coopSession.isHost) {
+            p2pService.send({ type: 'COOP_PLAYER_SNAPSHOT', player: gameState.player });
+        }
+    }, [coopSelfPeerId, coopSession, gameState.challengeMode, gameState.player, upsertCoopPlayerSnapshot]);
+    useEffect(() => {
+        if (gameState.challengeMode !== 'COOP' || !coopSelfPeerId || !gameState.coopBattleState) return;
+        setGameState(prev => {
+            if (!prev.coopBattleState) return prev;
+            const currentEntry = prev.coopBattleState.players.find(entry => entry.peerId === coopSelfPeerId);
+            if (currentEntry && currentEntry.player === prev.player && currentEntry.selectedEnemyId === prev.selectedEnemyId && currentEntry.isDown === (prev.player.currentHp <= 0)) {
+                return prev;
+            }
+            return {
+                ...prev,
+                coopBattleState: {
+                    ...prev.coopBattleState,
+                    players: prev.coopBattleState.players.map(entry =>
+                        entry.peerId === coopSelfPeerId
+                            ? { ...entry, player: prev.player, selectedEnemyId: prev.selectedEnemyId, isDown: prev.player.currentHp <= 0 }
+                            : entry
+                    )
+                }
+            };
+        });
+    }, [coopSelfPeerId, gameState.challengeMode, gameState.player, gameState.selectedEnemyId, gameState.coopBattleState]);
+
+    useEffect(() => {
+        if (gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.BATTLE || !coopSession || !coopSession.isHost) return;
+        const battleKey = `${gameState.currentMapNodeId ?? 'debug'}:${gameState.enemies.map(enemy => enemy.id).join('|')}`;
+        if (coopBattleState?.battleKey === battleKey) return;
+
+        const playerSlots: CoopBattleTurnSlot[] = coopSession.participants.map(participant => ({
+            id: `coop-turn-player-${battleKey}-${participant.peerId}`,
+            type: 'ALLY',
+            label: participant.name,
+            peerId: participant.peerId
+        }));
+        const enemySlots: CoopBattleTurnSlot[] = Array.from({ length: Math.max(1, coopSession.participants.length) }, (_, index) => ({
+            id: `coop-turn-enemy-${battleKey}-${index}`,
+            type: 'ENEMY',
+            label: `敵${index + 1}`
+        }));
+        const queue = deterministicOrder([...playerSlots, ...enemySlots], battleKey);
+        const battlePlayers: CoopBattlePlayerState[] = coopSession.participants.map(participant => {
+            const snapshot = coopPlayerSnapshots[participant.peerId] || (participant.peerId === coopSelfPeerId ? gameState.player : null);
+            const basePlayer = snapshot ? { ...snapshot } : {
+                ...gameState.player,
+                id: participant.selectedCharacterId || gameState.player.id,
+                imageData: participant.imageData || gameState.player.imageData,
+                maxHp: participant.maxHp || gameState.player.maxHp,
+                currentHp: participant.currentHp ?? participant.maxHp ?? gameState.player.currentHp,
+                block: participant.block || 0,
+                hand: [],
+                discardPile: [],
+                drawPile: [],
+                codexBuffer: []
+            };
+            const player = participant.peerId === coopSelfPeerId && gameState.player.hand.length > 0
+                ? { ...gameState.player }
+                : preparePlayerForBattle(basePlayer, (gameState.map.find(node => node.id === gameState.currentMapNodeId)?.type || NodeType.COMBAT));
+            return {
+                peerId: participant.peerId,
+                name: participant.name,
+                player,
+                selectedEnemyId: gameState.selectedEnemyId,
+                isDown: player.currentHp <= 0
+            };
+        });
+        const nextBattleState: CoopBattleState = {
+            battleKey,
+            players: battlePlayers,
+            turnQueue: queue,
+            turnCursor: 0,
+            enemyTurnCursor: 0
+        };
+        setCoopBattleState(nextBattleState);
+        broadcastCoopBattleState(nextBattleState);
+    }, [broadcastCoopBattleState, coopBattleState, coopPlayerSnapshots, coopSelfPeerId, coopSession, gameState.challengeMode, gameState.currentMapNodeId, gameState.enemies, gameState.map, gameState.player, gameState.screen, gameState.selectedEnemyId, preparePlayerForBattle, setCoopBattleState]);
+
+    useEffect(() => {
+        if (gameState.screen === GameScreen.BATTLE) return;
+        if (coopBattleQueue.length === 0 && coopBattleKey === null && coopEnemyTurnCursor === 0 && !gameState.coopBattleState) return;
+        coopStartedTurnSlotRef.current = null;
+        setCoopBattleState(null);
+    }, [coopBattleKey, coopBattleQueue.length, coopEnemyTurnCursor, gameState.coopBattleState, gameState.screen, setCoopBattleState]);
     const getDefaultRaceTarget = useCallback(() => {
         const targets = getRaceTargetEntries();
         return targets[0] || null;
@@ -773,7 +1318,7 @@ const App: React.FC = () => {
     }, [gameState.screen, PLAY_LIMIT_SECONDS, gameState.challengeMode]);
 
     useEffect(() => {
-        if (gameState.challengeMode === 'RACE') {
+        if (gameState.challengeMode === 'RACE' || gameState.challengeMode === 'COOP') {
             return;
         }
         if (gameState.screen !== GameScreen.START_MENU &&
@@ -925,6 +1470,155 @@ const App: React.FC = () => {
             p2pService.onData = previousOnData;
         };
     }, [raceSession, gameState.challengeMode, gameState.screen, gameState.mode, applyRaceTrickEffectLocal, applyRaceGoldDelta, showRaceToast, raceSelfPeerId]);
+
+    useEffect(() => {
+        if (!coopSession || !coopSession.isHost || gameState.challengeMode !== 'COOP') return;
+        if (gameState.screen === GameScreen.COOP_SETUP || gameState.screen === GameScreen.START_MENU) return;
+
+        const syncableScreens = new Set<GameScreen>([
+            GameScreen.MODE_SELECTION,
+            GameScreen.CHARACTER_SELECTION,
+            GameScreen.RELIC_SELECTION,
+            GameScreen.MAP,
+            GameScreen.BATTLE,
+            GameScreen.REWARD,
+            GameScreen.REST,
+            GameScreen.SHOP,
+            GameScreen.TREASURE,
+            GameScreen.FLOOR_RESULT,
+            GameScreen.EVENT,
+            GameScreen.GAME_OVER,
+            GameScreen.ENDING
+        ]);
+
+        if (!syncableScreens.has(gameState.screen)) return;
+
+        const timeout = window.setTimeout(() => {
+            p2pService.send({
+                type: 'COOP_STATE_SYNC',
+                state: buildCoopSharedState(gameState),
+                aux: {
+                    shopCards,
+                    shopRelics,
+                    shopPotions,
+                    treasureRewards,
+                    treasureOpened,
+                    treasurePools,
+                    eventData: eventData ? {
+                        title: eventData.title,
+                        description: eventData.description,
+                        image: eventData.image,
+                        imageKey: eventData.imageKey,
+                        options: (eventData.options || []).map((option: any) => ({
+                            label: option.label,
+                            text: option.text
+                        }))
+                    } : null,
+                    eventResultLog
+                }
+            });
+        }, 80);
+
+        return () => window.clearTimeout(timeout);
+    }, [buildCoopSharedState, coopSession, eventData, eventResultLog, gameState, shopCards, shopPotions, shopRelics, treasureOpened, treasurePools, treasureRewards]);
+    useEffect(() => {
+        if (!coopSession?.isHost || gameState.challengeMode !== 'COOP') return;
+        if (prevScreenRef.current !== GameScreen.BATTLE || gameState.screen === GameScreen.BATTLE) return;
+        p2pService.send({
+            type: 'COOP_BATTLE_FINISH',
+            screen: gameState.screen,
+            enemies: gameState.enemies,
+            selectedEnemyId: gameState.selectedEnemyId,
+            combatLog: gameState.combatLog
+        });
+        p2pService.send({
+            type: 'COOP_STATE_SYNC',
+            state: buildCoopSharedState(gameState),
+            aux: {
+                shopCards,
+                shopRelics,
+                shopPotions,
+                treasureRewards,
+                treasureOpened,
+                treasurePools,
+                eventData: eventData ? {
+                    title: eventData.title,
+                    description: eventData.description,
+                    image: eventData.image,
+                    imageKey: eventData.imageKey,
+                    options: (eventData.options || []).map((option: any) => ({
+                        label: option.label,
+                        text: option.text
+                    }))
+                } : null,
+                eventResultLog
+            }
+        });
+        broadcastCoopBattleState(null);
+    }, [broadcastCoopBattleState, buildCoopSharedState, coopSession, eventData, eventResultLog, gameState, shopCards, shopPotions, shopRelics, treasureOpened, treasurePools, treasureRewards]);
+    useEffect(() => {
+        if (!coopSession?.isHost || gameState.challengeMode !== 'COOP' || !gameState.coopBattleState) return;
+        const timeout = window.setTimeout(() => {
+            broadcastCoopBattleState(gameState.coopBattleState || null);
+        }, 50);
+        return () => window.clearTimeout(timeout);
+    }, [broadcastCoopBattleState, coopSession, gameState.challengeMode, gameState.coopBattleState]);
+    useEffect(() => {
+        if (
+            queuedCoopBattleEventTick === 0 ||
+            gameState.challengeMode !== 'COOP' ||
+            gameState.screen !== GameScreen.BATTLE ||
+            !coopSession ||
+            coopSession.isHost ||
+            coopApplyingRemoteBattleSyncRef.current
+        ) {
+            return;
+        }
+        const queuedEvent = queuedCoopBattleEventRef.current;
+        if (!queuedEvent) {
+            return;
+        }
+        const actionSignature = JSON.stringify({
+            eventType: queuedEvent.type,
+            cardId: queuedEvent.cardId ?? null,
+            potionId: queuedEvent.potionId ?? null,
+            battleKey: gameState.coopBattleState?.battleKey ?? null,
+            turnCursor: gameState.coopBattleState?.turnCursor ?? 0,
+            enemyTurnCursor: gameState.coopBattleState?.enemyTurnCursor ?? 0,
+            selectedEnemyId: gameState.selectedEnemyId,
+            player: gameState.player,
+            enemies: gameState.enemies,
+            combatLog: gameState.combatLog,
+            turnLog,
+            actingEnemyId
+        });
+        if (coopLastBattleActionSignatureRef.current === actionSignature) {
+            queuedCoopBattleEventRef.current = null;
+            return;
+        }
+        const timeout = window.setTimeout(() => {
+            coopLastBattleActionSignatureRef.current = actionSignature;
+            p2pService.send({
+                type: queuedEvent.type,
+                ...(queuedEvent.cardId ? { cardId: queuedEvent.cardId } : {}),
+                ...(queuedEvent.potionId ? { potionId: queuedEvent.potionId } : {}),
+                player: gameState.player,
+                enemies: gameState.enemies,
+                selectedEnemyId: gameState.selectedEnemyId,
+                combatLog: gameState.combatLog,
+                turnLog,
+                actingEnemyId,
+                battleState: gameState.coopBattleState || null
+            } as any);
+            queuedCoopBattleEventRef.current = null;
+        }, 40);
+        return () => window.clearTimeout(timeout);
+    }, [actingEnemyId, coopSession, gameState.challengeMode, gameState.coopBattleState, gameState.combatLog, gameState.enemies, gameState.player, gameState.screen, gameState.selectedEnemyId, queuedCoopBattleEventTick, turnLog]);
+    useEffect(() => {
+        if (gameState.screen !== GameScreen.BATTLE) {
+            coopLastBattleActionSignatureRef.current = null;
+        }
+    }, [gameState.screen]);
 
     useEffect(() => {
         if (!raceSession || raceSession.ended || gameState.challengeMode !== 'RACE') return;
@@ -1235,6 +1929,7 @@ const App: React.FC = () => {
         setShopCards([]);
         setEventData(null);
         setRaceSession(null);
+        setCoopSession(null);
         setRaceResultOpen(false);
         setRaceSelfPeerId('host');
         setRaceTrickCards([]);
@@ -1242,6 +1937,12 @@ const App: React.FC = () => {
         setRaceHudOpen(false);
         setRaceToast(null);
         setRaceRewardDummyDisplay(0);
+        setCoopSupportCards([]);
+        setCoopPartyHudOpen(true);
+        setCoopBattleQueue([]);
+        setCoopBattleKey(null);
+        setCoopEnemyTurnCursor(0);
+        p2pService.close();
         setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined, typingLessonId: undefined, vsOpponent: undefined }));
         setHasSave(storageService.hasSaveFile());
         audioService.playBGM('menu');
@@ -1380,16 +2081,47 @@ const App: React.FC = () => {
 
     const clearBattleOnlyCardState = (player: Player): Player => ({
         ...player,
+        currentEnergy: player.maxEnergy,
+        block: 0,
+        strength: 0,
+        hand: [],
+        drawPile: [],
+        discardPile: [],
+        powers: {},
+        echoes: 0,
+        cardsPlayedThisTurn: 0,
+        attacksPlayedThisTurn: 0,
+        typesPlayedThisTurn: [],
+        turnFlags: {},
+        nextTurnEnergy: 0,
+        nextTurnDraw: 0,
+        codexBuffer: [],
+        floatingText: null,
         relicCounters: Object.fromEntries(
             Object.entries(player.relicCounters).filter(([key]) =>
                 key !== 'OUT_SUPER_HERO_POSE_ACTIVE' && key !== 'OUT_STAMP_QUEST_REMAINING'
             )
         ),
-        deck: player.deck.map(restoreBattleOnlyCard),
-        hand: player.hand.map(restoreBattleOnlyCard),
-        drawPile: player.drawPile.map(restoreBattleOnlyCard),
-        discardPile: player.discardPile.map(restoreBattleOnlyCard)
+        deck: player.deck.map(restoreBattleOnlyCard)
     });
+    const buildPostBattlePlayer = (player: Player, withVictoryRecovery: boolean): Player => {
+        let hpRegen = 0;
+        if (withVictoryRecovery) {
+            if (player.relics.find(r => r.id === 'BURNING_BLOOD')) hpRegen = 6;
+            if (player.relics.find(r => r.id === 'MEAT_ON_THE_BONE') && player.currentHp <= player.maxHp / 2) hpRegen += 12;
+        }
+        const nextPlayer = clearBattleOnlyCardState(clearBigLadleTemp({ ...player }));
+        if (withVictoryRecovery && hpRegen > 0) {
+            nextPlayer.currentHp = Math.min(nextPlayer.maxHp, nextPlayer.currentHp + hpRegen);
+        }
+        if (withVictoryRecovery && nextPlayer.partner) {
+            nextPlayer.partner = {
+                ...nextPlayer.partner,
+                currentHp: Math.min(nextPlayer.partner.maxHp, nextPlayer.partner.currentHp + 5)
+            };
+        }
+        return nextPlayer;
+    };
 
     const appendBattleOnlyText = (card: ICard, text: string): ICard => {
         if (card.description.includes(text)) return card;
@@ -1486,6 +2218,19 @@ const App: React.FC = () => {
                 currentEventTitle: undefined
             };
         });
+        if (gameState.challengeMode === 'COOP') {
+            setCoopSession(prev => {
+                if (!prev || prev.participants.length === 0) return prev;
+                const next = {
+                    ...prev,
+                    decisionOwnerIndex: (prev.decisionOwnerIndex + 1) % prev.participants.length
+                };
+                if (prev.isHost) {
+                p2pService.send({ type: 'COOP_PARTICIPANTS', participants: next.participants, decisionOwnerIndex: next.decisionOwnerIndex });
+                }
+                return next;
+            });
+        }
         audioService.playBGM('map');
     };
 
@@ -1796,6 +2541,14 @@ const App: React.FC = () => {
         if (gameState.challengeMode === 'RACE' && raceSession?.isHost) {
             p2pService.send({ type: 'RACE_MODE_SET', mode });
         }
+        if (gameState.challengeMode === 'COOP') {
+            if (coopSession && !coopSession.isHost) {
+                return;
+            }
+            if (coopSession?.isHost) {
+                p2pService.send({ type: 'COOP_MODE_SET', mode });
+            }
+        }
         setGameState(prev => ({ ...prev, mode, modePool, screen: GameScreen.CHARACTER_SELECTION }));
     };
 
@@ -1924,7 +2677,7 @@ const App: React.FC = () => {
 
         setGameState(combatState);
         audioService.playBGM('boss');
-        setTurnLog(trans("あなたのターン", languageMode));
+        setTurnLog(getSelfTurnLogLabel());
     };
 
     const handleCharacterSelect = (char: Character) => {
@@ -1992,6 +2745,46 @@ const App: React.FC = () => {
             codexBuffer: []
         };
 
+        if (gameState.challengeMode === 'COOP' && coopSession) {
+            const participantDisplayName =
+                coopSession.participants.find(participant => participant.peerId === coopSelfPeerId)?.name ||
+                coopSession.name ||
+                char.name;
+            const nextSelfParticipant: CoopParticipant = {
+                peerId: coopSelfPeerId,
+                name: participantDisplayName,
+                imageData: char.imageData,
+                selectedCharacterId: char.id,
+                maxHp: char.maxHp,
+                currentHp: char.maxHp
+            };
+
+            setCoopSession(prev => {
+                if (!prev) return prev;
+                const exists = prev.participants.some(participant => participant.peerId === coopSelfPeerId);
+                const nextParticipants = exists
+                    ? prev.participants.map(participant => participant.peerId === coopSelfPeerId ? { ...participant, ...nextSelfParticipant } : participant)
+                    : [...prev.participants, nextSelfParticipant];
+                return { ...prev, participants: nextParticipants };
+            });
+
+            if (coopSession.isHost) {
+                const nextParticipants = coopSession.participants.some(participant => participant.peerId === coopSelfPeerId)
+                    ? coopSession.participants.map(participant => participant.peerId === coopSelfPeerId ? { ...participant, ...nextSelfParticipant } : participant)
+                    : [...coopSession.participants, nextSelfParticipant];
+                p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: coopSession.decisionOwnerIndex });
+            } else {
+                p2pService.send({
+                    type: 'COOP_CHARACTER_SELECT',
+                    characterId: char.id,
+                    name: participantDisplayName,
+                    imageData: char.imageData,
+                    maxHp: char.maxHp,
+                    currentHp: char.maxHp
+                });
+            }
+        }
+
         if (char.id === 'CHEF' && gameState.challengeMode !== '1A1D') {
             setGameState(prev => ({
                 ...prev,
@@ -2057,6 +2850,16 @@ const App: React.FC = () => {
 
             setEventData(specialEvent);
             setEventResultLog(null);
+            if (gameState.challengeMode === 'COOP') {
+                setCoopSession(prev => {
+                    if (!prev) return prev;
+                    const nextParticipants = prev.participants.map(participant => ({ ...participant, eventResolved: false }));
+                    if (prev.isHost) {
+                        p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                    }
+                    return { ...prev, participants: nextParticipants };
+                });
+            }
 
             setGameState(prev => ({
                 ...prev,
@@ -2107,6 +2910,17 @@ const App: React.FC = () => {
 
     const handleRelicSelect = (relic: Relic) => {
         audioService.playSound('buff');
+        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
+            setCoopAwaitingMapSync(true);
+            setGameState(prev => ({
+                ...prev,
+                player: {
+                    ...prev.player,
+                    relics: [...prev.player.relics, relic]
+                }
+            }));
+            return;
+        }
         const map = generateDungeonMap();
         const unlockedCards = storageService.getUnlockedCards();
 
@@ -2120,6 +2934,16 @@ const App: React.FC = () => {
             );
             setEventData(ev);
             setEventResultLog(null);
+            if (gameState.challengeMode === 'COOP') {
+                setCoopSession(prev => {
+                    if (!prev) return prev;
+                    const nextParticipants = prev.participants.map(participant => ({ ...participant, eventResolved: false }));
+                    if (prev.isHost) {
+                        p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                    }
+                    return { ...prev, participants: nextParticipants };
+                });
+            }
 
             setGameState(prev => ({
                 ...prev,
@@ -2148,7 +2972,15 @@ const App: React.FC = () => {
         }
     };
 
-    const handleNodeSelect = async (node: MapNode) => {
+    const handleNodeSelect = async (node: MapNode, allowRemoteCoopSelection = false) => {
+        if (gameState.challengeMode === 'COOP' && coopSession) {
+            if (!coopSession.isHost) {
+                p2pService.send({ type: 'COOP_NODE_SELECT', nodeId: node.id });
+                audioService.playSound('select');
+                return;
+            }
+            if (!coopCanDecide && !allowRemoteCoopSelection) return;
+        }
         setIsLoading(true);
         audioService.playSound('select');
 
@@ -2241,48 +3073,27 @@ const App: React.FC = () => {
 
                 const flavor = await generateFlavorText(node.type === NodeType.BOSS ? "ボスが現れた！" : "敵と遭遇した。");
 
-                const p = { ...nextState.player };
-                p.drawPile = shuffle(p.deck.map(c => ({ ...c })));
-                p.hand = [];
-                p.discardPile = [];
-                p.currentEnergy = p.maxEnergy;
-                p.block = 0;
-                p.strength = 0;
-                p.powers = {};
-                p.relicCounters = { ...p.relicCounters };
-                const eventStrengthBonus = p.relicCounters['EVENT_STRENGTH_BONUS'] || 0;
-                if (eventStrengthBonus > 0) p.strength += eventStrengthBonus;
+                const p = preparePlayerForBattle(nextState.player, node.type);
 
-                if (p.relics.find(r => r.id === 'HAPPY_FLOWER')) {
-                    p.relicCounters['HAPPY_FLOWER'] = 0;
-                }
-
-                p.turnFlags = {};
-                p.typesPlayedThisTurn = [];
-                p.echoes = 0;
-                p.cardsPlayedThisTurn = 0;
-                p.attacksPlayedThisTurn = 0;
-                p.codexBuffer = [];
-
-                if (p.relics.find(r => r.id === 'VAJRA')) p.strength += 1;
-                if (p.relics.find(r => r.id === 'HACHIMAKI')) p.powers['DEXTERITY'] = (p.powers['DEXTERITY'] || 0) + 1;
-                if (p.relics.find(r => r.id === 'SEED_PACK')) p.powers['THORNS'] = (p.powers['THORNS'] || 0) + 3;
-                if (p.relics.find(r => r.id === 'HOLY_WATER')) p.currentEnergy += 1;
-                if (p.relics.find(r => r.id === 'ANCHOR')) p.block += 10;
-                if (p.relics.find(r => r.id === 'LANTERN')) p.currentEnergy += 1;
-                if (p.relics.find(r => r.id === 'BRONZE_SCALES')) p.powers['THORNS'] = (p.powers['THORNS'] || 0) + 3;
-                if (p.relics.find(r => r.id === 'BLOOD_VIAL')) p.currentHp = Math.min(p.maxHp, p.currentHp + 2);
-                if (p.relics.find(r => r.id === 'BIG_LADLE')) {
-                    p.maxHp += 4;
-                    p.currentHp += 4;
-                    p.relicCounters['BIG_LADLE_ACTIVE'] = 1;
-                }
-                if (node.type === NodeType.BOSS && p.relics.find(r => r.id === 'PENTOGRAPH')) p.currentHp = Math.min(p.maxHp, p.currentHp + 25);
-
-                if (p.relics.find(r => r.id === 'ANCIENT_TEA_SET') && p.relicCounters['ANCIENT_TEA_SET_ACTIVE']) {
-                    p.currentEnergy += 2;
-                    p.relicCounters['ANCIENT_TEA_SET_ACTIVE'] = 0;
-                    p.floatingText = { id: `tea-ancient-${Date.now()}`, text: 'お茶パワー！', color: 'text-green-400', iconType: 'zap' };
+                if (gameState.challengeMode === 'COOP') {
+                    setCoopSession(prev => {
+                        if (!prev) return prev;
+                        const nextParticipants = prev.participants.map(participant => ({
+                            ...participant,
+                            block: 0,
+                            nextTurnEnergy: 0,
+                            strength: 0,
+                            buffer: 0,
+                            revivedThisBattle: false,
+                            quizResolved: false,
+                            quizCorrectCount: 0,
+                            floatingText: null
+                        }));
+                        if (prev.isHost) {
+                            p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                        }
+                        return { ...prev, participants: nextParticipants };
+                    });
                 }
 
                 if (p.relics.find(r => r.id === 'PHILOSOPHER_STONE')) {
@@ -2301,45 +3112,6 @@ const App: React.FC = () => {
                         e.floatingText = { id: `rel-mask-${Date.now()}-${e.id}`, text: 'へろへろ', color: 'text-gray-400' };
                     });
                 }
-                p.hpLostThisTurn = 0;
-                if (p.turnFlags['STREET_DOG_NEXT_BATTLE']) {
-                    p.nextTurnEnergy += 3;
-                    delete p.turnFlags['STREET_DOG_NEXT_BATTLE'];
-                }
-                if (p.relics.find(r => r.id === 'MUTAGENIC_STRENGTH')) p.strength += 3;
-                syncRedSkullState(p);
-
-                let drawCount = HAND_SIZE;
-                if (p.relics.find(r => r.id === 'BAG_OF_PREP') || p.relics.find(r => r.id === 'BAG_OF_PREPARATION')) drawCount += 2;
-                if (p.relics.find(r => r.id === 'SNAKE_RING')) drawCount += 2;
-
-                for (let i = 0; i < drawCount; i++) {
-                    const drawn = p.drawPile.pop();
-                    if (drawn) p.hand.push(drawn);
-                }
-
-                if (p.relics.find(r => r.id === 'ENCHIRIDION')) {
-                    const powerPool = getFilteredCardPool(p.id).filter(c => c.type === CardType.POWER);
-                    const power = powerPool[Math.floor(Math.random() * powerPool.length)];
-                    p.hand.push({ ...power, id: `ench-${Date.now()}`, cost: 0 });
-                }
-                if (p.relics.find(r => r.id === 'WHISTLE')) {
-                    const attacks = p.drawPile.filter(c => c.type === CardType.ATTACK);
-                    if (attacks.length > 0) {
-                        const randomAttack = attacks[Math.floor(Math.random() * attacks.length)];
-                        const freeAttack = { ...randomAttack, cost: 0, id: `whistle-${Date.now()}` };
-                        p.hand.push(freeAttack);
-                    } else {
-                        const strike = { ...CARDS_LIBRARY['STRIKE'], cost: 0, id: `whistle-fallback-${Date.now()}` };
-                        p.hand.push(strike);
-                    }
-                }
-
-                const innateCards = p.drawPile.filter(c => c.innate);
-                innateCards.forEach(c => {
-                    p.drawPile = p.drawPile.filter(dc => dc.id !== c.id);
-                    p.hand.push(c);
-                });
 
                 const nextGameState = {
                     ...nextState,
@@ -2359,10 +3131,23 @@ const App: React.FC = () => {
                     setGameState({ ...nextGameState, screen: GameScreen.BATTLE });
                     setCurrentNarrative(flavor);
                     audioService.playBGM(bgmType);
-                    setTurnLog(trans("あなたのターン", languageMode));
+                    setTurnLog(getSelfTurnLogLabel());
                 }
 
             } else if (node.type === NodeType.REST) {
+                if (gameState.challengeMode === 'COOP') {
+                    setCoopSession(prev => {
+                        if (!prev) return prev;
+                        const nextParticipants = prev.participants.map(participant => ({
+                            ...participant,
+                            restResolved: false
+                        }));
+                        if (prev.isHost) {
+                            p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                        }
+                        return { ...prev, participants: nextParticipants };
+                    });
+                }
                 setGameState(prev => {
                     const p = { ...prev.player };
                     let restLog = [...nextState.narrativeLog];
@@ -2383,6 +3168,19 @@ const App: React.FC = () => {
                 audioService.playBGM('rest');
 
             } else if (node.type === NodeType.SHOP) {
+                if (gameState.challengeMode === 'COOP') {
+                    setCoopSession(prev => {
+                        if (!prev) return prev;
+                        const nextParticipants = prev.participants.map(participant => ({
+                            ...participant,
+                            shopResolved: false
+                        }));
+                        if (prev.isHost) {
+                            p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                        }
+                        return { ...prev, participants: nextParticipants };
+                    });
+                }
                 const isGardener = nextState.player.id === 'GARDENER';
                 const allPossibleCards = getFilteredCardPool(nextState.player.id);
 
@@ -2422,11 +3220,24 @@ const App: React.FC = () => {
                     const tinyChestProgress = (p.relicCounters['TINY_CHEST_PROGRESS'] || 0) + 1;
                     if (tinyChestProgress >= 4) {
                         p.relicCounters['TINY_CHEST_PROGRESS'] = 0;
-                        const rewards: RewardItem[] = [];
-                        const allRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'COMMON' || r.rarity === 'UNCOMMON' || r.rarity === 'RARE');
-                        rewards.push({ type: 'RELIC', value: shuffle([...allRelics])[0], id: `tiny-chest-relic-${Date.now()}` });
-                        rewards.push({ type: 'GOLD', value: 50 + Math.floor(Math.random() * 50), id: `tiny-chest-gold-${Date.now()}` });
-                        setTreasureRewards(rewards);
+                        if (gameState.challengeMode === 'COOP' && coopSession) {
+                            setTreasurePools(buildCoopTreasurePools(coopSession.participants.length));
+                            setCoopSession(prev => {
+                                if (!prev) return prev;
+                                const nextParticipants = prev.participants.map(participant => ({ ...participant, treasureResolved: false }));
+                                if (prev.isHost) {
+                                    p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                                }
+                                return { ...prev, participants: nextParticipants };
+                            });
+                        } else {
+                            const rewards: RewardItem[] = [];
+                            const allRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'COMMON' || r.rarity === 'UNCOMMON' || r.rarity === 'RARE');
+                            rewards.push({ type: 'RELIC', value: shuffle([...allRelics])[0], id: `tiny-chest-relic-${Date.now()}` });
+                            rewards.push({ type: 'GOLD', value: 50 + Math.floor(Math.random() * 50), id: `tiny-chest-gold-${Date.now()}` });
+                            setTreasureRewards(rewards);
+                        }
+                        setTreasureOpened(false);
                         setGameState({ ...nextState, player: p, screen: GameScreen.TREASURE });
                         audioService.playBGM('reward');
                         return;
@@ -2444,25 +3255,48 @@ const App: React.FC = () => {
                 );
                 setEventData(ev);
                 setEventResultLog(null);
+                if (gameState.challengeMode === 'COOP') {
+                    setCoopSession(prev => {
+                        if (!prev) return prev;
+                        const nextParticipants = prev.participants.map(participant => ({ ...participant, eventResolved: false }));
+                        if (prev.isHost) {
+                            p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                        }
+                        return { ...prev, participants: nextParticipants };
+                    });
+                }
                 setGameState({ ...nextState, screen: GameScreen.EVENT, currentEventTitle: ev.title });
                 audioService.playBGM('event');
             } else if (node.type === NodeType.TREASURE) {
                 const p = nextState.player;
-                const matryoshkaCharges = p.relicCounters['MATRYOSHKA'] || 0;
-                const numRelics = matryoshkaCharges > 0 ? 2 : 1;
-                if (matryoshkaCharges > 0) {
-                    p.relicCounters['MATRYOSHKA'] = matryoshkaCharges - 1;
+                if (gameState.challengeMode === 'COOP' && coopSession) {
+                    setTreasurePools(buildCoopTreasurePools(coopSession.participants.length));
+                    setCoopSession(prev => {
+                        if (!prev) return prev;
+                        const nextParticipants = prev.participants.map(participant => ({ ...participant, treasureResolved: false }));
+                        if (prev.isHost) {
+                            p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                        }
+                        return { ...prev, participants: nextParticipants };
+                    });
+                } else {
+                    const matryoshkaCharges = p.relicCounters['MATRYOSHKA'] || 0;
+                    const numRelics = matryoshkaCharges > 0 ? 2 : 1;
+                    if (matryoshkaCharges > 0) {
+                        p.relicCounters['MATRYOSHKA'] = matryoshkaCharges - 1;
+                    }
+
+                    const rewards: RewardItem[] = [];
+                    const allRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'COMMON' || r.rarity === 'UNCOMMON' || r.rarity === 'RARE');
+
+                    for (let i = 0; i < numRelics; i++) {
+                        rewards.push({ type: 'RELIC', value: shuffle([...allRelics])[0], id: `tr-relic-${Date.now()}-${i}` });
+                    }
+
+                    rewards.push({ type: 'GOLD', value: 50 + Math.floor(Math.random() * 50), id: `tr-gold-${Date.now()}` });
+                    setTreasureRewards(rewards);
                 }
-
-                const rewards: RewardItem[] = [];
-                const allRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'COMMON' || r.rarity === 'UNCOMMON' || r.rarity === 'RARE');
-
-                for (let i = 0; i < numRelics; i++) {
-                    rewards.push({ type: 'RELIC', value: shuffle([...allRelics])[0], id: `tr-relic-${Date.now()}-${i}` });
-                }
-
-                rewards.push({ type: 'GOLD', value: 50 + Math.floor(Math.random() * 50), id: `tr-gold-${Date.now()}` });
-                setTreasureRewards(rewards);
+                setTreasureOpened(false);
                 setGameState({ ...nextState, player: p, screen: GameScreen.TREASURE });
                 audioService.playBGM('reward');
             }
@@ -2486,11 +3320,25 @@ const App: React.FC = () => {
         } else {
             setGameState(prev => ({ ...prev, screen: GameScreen.BATTLE }));
             audioService.playBGM('battle');
-            setTurnLog(trans("あなたのターン", languageMode));
+            setTurnLog(getSelfTurnLogLabel());
         }
     };
 
-    const handleSelectEnemy = (id: string) => setGameState(prev => ({ ...prev, selectedEnemyId: id }));
+    const handleSelectEnemy = (id: string) => {
+        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
+            p2pService.send({ type: 'COOP_BATTLE_SELECT_ENEMY', enemyId: id });
+        }
+        setGameState(prev => ({
+            ...prev,
+            selectedEnemyId: id,
+            coopBattleState: prev.coopBattleState ? {
+                ...prev.coopBattleState,
+                players: prev.coopBattleState.players.map(entry =>
+                    entry.peerId === coopSelfPeerId ? { ...entry, selectedEnemyId: id } : entry
+                )
+            } : prev.coopBattleState
+        }));
+    };
 
     const applyDebuff = (enemy: Enemy, type: 'WEAK' | 'VULNERABLE' | 'POISON', amount: number) => {
         if (enemy.artifact > 0 && type !== 'POISON') {
@@ -2503,6 +3351,9 @@ const App: React.FC = () => {
     };
 
     const handleHandSelection = (card: ICard) => {
+        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost && gameState.screen === GameScreen.BATTLE) {
+            queueCoopBattleEvent({ type: 'COOP_BATTLE_SELECTION_STATE' });
+        }
         setGameState(prev => {
             const p = { ...prev.player };
             const mode = prev.selectionState;
@@ -2531,6 +3382,9 @@ const App: React.FC = () => {
     };
 
     const handleCancelSelection = () => {
+        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost && gameState.screen === GameScreen.BATTLE) {
+            queueCoopBattleEvent({ type: 'COOP_BATTLE_SELECTION_STATE' });
+        }
         setGameState(prev => ({
             ...prev,
             selectionState: { ...prev.selectionState, active: false }
@@ -2547,6 +3401,9 @@ const App: React.FC = () => {
 
     const applyWeatherScrySelection = () => {
         if (!weatherScryModal) return;
+        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost && gameState.screen === GameScreen.BATTLE) {
+            queueCoopBattleEvent({ type: 'COOP_BATTLE_MODAL_RESOLVE' });
+        }
         const modal = weatherScryModal;
         setGameState(prev => {
             const p = { ...prev.player, drawPile: [...prev.player.drawPile], discardPile: [...prev.player.discardPile] };
@@ -2571,6 +3428,9 @@ const App: React.FC = () => {
 
     const applyGalaxyExpressSelection = (selectedCardId: string) => {
         if (!galaxyExpressModal) return;
+        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost && gameState.screen === GameScreen.BATTLE) {
+            queueCoopBattleEvent({ type: 'COOP_BATTLE_MODAL_RESOLVE' });
+        }
         const modal = galaxyExpressModal;
         setGameState(prev => {
             const p = { ...prev.player, hand: [...prev.player.hand], drawPile: [...prev.player.drawPile], discardPile: [...prev.player.discardPile] };
@@ -2603,6 +3463,9 @@ const App: React.FC = () => {
 
     const applyGoldFishSelection = (selectedCardId: string) => {
         if (!goldFishModal) return;
+        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost && gameState.screen === GameScreen.BATTLE) {
+            queueCoopBattleEvent({ type: 'COOP_BATTLE_MODAL_RESOLVE' });
+        }
         setGameState(prev => {
             const applyEnchant = (zoneCard: ICard) => {
                 if (zoneCard.id !== selectedCardId) return zoneCard;
@@ -2652,6 +3515,9 @@ const App: React.FC = () => {
 
     const applyDreamCatcherSelection = (selectedCardId: string) => {
         if (!dreamCatcherModal) return;
+        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost && gameState.screen === GameScreen.BATTLE) {
+            queueCoopBattleEvent({ type: 'COOP_BATTLE_MODAL_RESOLVE' });
+        }
         setGameState(prev => {
             const p = { ...prev.player, hand: [...prev.player.hand], drawPile: [...prev.player.drawPile], discardPile: [...prev.player.discardPile] };
             const index = p.drawPile.findIndex(c => c.id === selectedCardId);
@@ -2716,6 +3582,9 @@ const App: React.FC = () => {
         if (gameState.screen !== GameScreen.BATTLE) return;
         if (weatherScryModal || galaxyExpressModal || goldFishModal || dreamCatcherModal) return;
         audioService.playSound('select');
+        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
+            queueCoopBattleEvent({ type: 'COOP_BATTLE_USE_POTION', potionId: potion.id });
+        }
 
         setGameState(prev => {
             const p = { ...prev.player };
@@ -2888,6 +3757,7 @@ const App: React.FC = () => {
 
     const handlePlayCard = (card: ICard) => {
         if (weatherScryModal || galaxyExpressModal || goldFishModal || dreamCatcherModal) return;
+        if (gameState.challengeMode === 'COOP' && gameState.player.currentHp <= 0) return;
         let effectiveCost = card.cost;
         if (gameState.player.powers['CORRUPTION'] && card.type === CardType.SKILL) {
             effectiveCost = 0;
@@ -2918,6 +3788,9 @@ const App: React.FC = () => {
         setLastActionType(card.type);
         setLastActionTime(Date.now());
         lastPlayedCardRef.current = card;
+        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
+            queueCoopBattleEvent({ type: 'COOP_BATTLE_PLAY_CARD', cardId: card.id });
+        }
 
         setGameState(prev => {
             const p = { ...prev.player, hand: [...prev.player.hand], drawPile: [...prev.player.drawPile], discardPile: [...prev.player.discardPile], deck: [...prev.player.deck], powers: { ...prev.player.powers } };
@@ -4087,7 +4960,10 @@ const App: React.FC = () => {
     };
 
     const startPlayerTurn = () => {
-        setTurnLog(trans("あなたのターン", languageMode));
+        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost && gameState.screen === GameScreen.BATTLE) {
+            queueCoopBattleEvent({ type: 'COOP_BATTLE_CODEX_SELECT' });
+        }
+        setTurnLog(getSelfTurnLogLabel());
         setGameState(prev => {
             const p = { ...prev.player };
             const currentLogs: string[] = [];
@@ -4311,14 +5187,16 @@ const App: React.FC = () => {
         audioService.playSound('block');
     };
 
-    const executeEndTurn = async () => {
+    const executeEndTurn = async (enemyActionCountOverride?: number) => {
         if (isEndingTurnRef.current) return;
         isEndingTurnRef.current = true;
 
         const currentState = stateRef.current;
         if (currentState.enemies.length === 0) {
             isEndingTurnRef.current = false;
-            startPlayerTurn();
+            if (currentState.challengeMode !== 'COOP') {
+                startPlayerTurn();
+            }
             return;
         }
 
@@ -4329,7 +5207,9 @@ const App: React.FC = () => {
                 combatLog: [...prev.combatLog, trans("> 追加ターン獲得！敵の行動をスキップします", languageMode)].slice(-100)
             }));
             isEndingTurnRef.current = false;
-            startPlayerTurn();
+            if (currentState.challengeMode !== 'COOP') {
+                startPlayerTurn();
+            }
             return;
         }
         audioService.playSound('select');
@@ -4412,7 +5292,18 @@ const App: React.FC = () => {
             });
             setTimeout(resolve, 600);
         });
-        const enemiesToAct = [...stateRef.current.enemies];
+        const livingEnemiesAtStart = stateRef.current.enemies.filter(enemy => enemy.currentHp > 0);
+        let enemiesToAct = [...stateRef.current.enemies];
+        if (enemyActionCountOverride !== undefined) {
+            enemiesToAct = [];
+            if (livingEnemiesAtStart.length > 0) {
+                const startCursor = coopEnemyTurnCursorRef.current % livingEnemiesAtStart.length;
+                for (let i = 0; i < enemyActionCountOverride; i++) {
+                    enemiesToAct.push(livingEnemiesAtStart[(startCursor + i) % livingEnemiesAtStart.length]);
+                }
+                setCoopEnemyTurnCursor((startCursor + enemyActionCountOverride) % livingEnemiesAtStart.length);
+            }
+        }
         for (const enemyTemplate of enemiesToAct) {
             if (stateRef.current.player.currentHp <= 0) break;
             const enemy = stateRef.current.enemies.find(e => e.id === enemyTemplate.id);
@@ -4538,7 +5429,44 @@ const App: React.FC = () => {
                             nextActiveEffects.push({ id: `vfx-eslash-${Date.now()}`, type: 'SLASH', targetId: 'player' });
                         }
 
-                        if (p.partner && p.partner.currentHp > 0) {
+                        if (prev.challengeMode === 'COOP' && coopSession?.isHost) {
+                            const aliveCompanions = coopSession.participants.filter(participant => participant.peerId !== coopSelfPeerId && (participant.currentHp ?? 0) > 0);
+                            if (unblockedDamage > 0 && aliveCompanions.length > 0 && Math.random() < 0.45) {
+                                const targetCompanion = aliveCompanions[Math.floor(Math.random() * aliveCompanions.length)];
+                                const currentBlock = targetCompanion.block ?? 0;
+                                const currentBuffer = targetCompanion.buffer ?? 0;
+                                let remainingDamage = unblockedDamage;
+                                let nextBlock = currentBlock;
+                                let nextBuffer = currentBuffer;
+                                if (nextBuffer > 0) {
+                                    nextBuffer -= 1;
+                                    remainingDamage = 0;
+                                } else if (nextBlock > 0) {
+                                    if (nextBlock >= remainingDamage) {
+                                        nextBlock -= remainingDamage;
+                                        remainingDamage = 0;
+                                    } else {
+                                        remainingDamage -= nextBlock;
+                                        nextBlock = 0;
+                                    }
+                                }
+                                const nextHp = Math.max(0, (targetCompanion.currentHp ?? targetCompanion.maxHp ?? 0) - remainingDamage);
+                                updateCoopParticipantState(targetCompanion.peerId, current => ({
+                                    ...current,
+                                    currentHp: nextHp,
+                                    block: nextBlock,
+                                    buffer: nextBuffer
+                                }));
+                                newLogs.push(`${targetCompanion.name}がダメージを受けた！`);
+                                if (nextHp <= 0) {
+                                    newLogs.push(`${targetCompanion.name}が倒れた...`);
+                                }
+                            } else {
+                                p.currentHp -= unblockedDamage;
+                                p.hpLostThisTurn = (p.hpLostThisTurn || 0) + unblockedDamage;
+                                if (unblockedDamage > 0) p.floatingText = { id: `dmg-${Date.now()}`, text: `-${unblockedDamage}`, color: 'text-red-500' };
+                            }
+                        } else if (p.partner && p.partner.currentHp > 0) {
                             if (unblockedDamage > 0 && Math.random() < 0.5) {
                                 p.partner.currentHp -= unblockedDamage;
                                 p.partner.floatingText = { id: `dmg-partner-${Date.now()}`, text: `-${unblockedDamage}`, color: 'text-red-500' };
@@ -4666,13 +5594,123 @@ const App: React.FC = () => {
         setTimeout(() => {
             setGameState(prev => ({ ...prev, activeEffects: [] }));
         }, 600);
-        startPlayerTurn();
+        if (stateRef.current.challengeMode !== 'COOP') {
+            startPlayerTurn();
+        } else {
+            isEndingTurnRef.current = false;
+        }
     };
+
+    const resolveCoopAllySupport = useCallback(async (slot: CoopBattleTurnSlot) => {
+        if (slot.type !== 'ALLY') return;
+        const participant = slot.peerId ? coopSession?.participants.find(entry => entry.peerId === slot.peerId) : undefined;
+        if (!participant || (participant.currentHp ?? participant.maxHp ?? 0) <= 0) return;
+        setTurnLog(`${slot.label} の支援`);
+        audioService.playSound('buff');
+        setGameState(prev => {
+            const p = { ...prev.player };
+            const nextEnemies = prev.enemies.map(enemy => ({ ...enemy }));
+            const nextActiveEffects: VisualEffectInstance[] = [];
+            const nextLogs = [...prev.combatLog];
+            const playerNeedsHeal = p.currentHp < p.maxHp * 0.7;
+            const roll = Math.random();
+            const supportBoost = Math.max(0, participant.nextTurnEnergy ?? 0);
+            const strengthBonus = Math.max(0, participant.strength ?? 0);
+
+            if (playerNeedsHeal && roll < 0.45) {
+                const heal = 6 + supportBoost * 3;
+                p.currentHp = Math.min(p.maxHp, p.currentHp + heal);
+                p.floatingText = { id: `coop-heal-${Date.now()}-${slot.id}`, text: `+${heal}`, color: 'text-green-400', iconType: 'heart' };
+                nextActiveEffects.push({ id: `coop-vfx-heal-${Date.now()}-${slot.id}`, type: 'HEAL', targetId: 'player' });
+                nextLogs.push(`${slot.label} が回復で支援した`);
+            } else if (roll < 0.8) {
+                const block = 8 + supportBoost * 4;
+                p.block += block;
+                p.floatingText = { id: `coop-block-${Date.now()}-${slot.id}`, text: `+${block}`, color: 'text-blue-300', iconType: 'shield' };
+                nextActiveEffects.push({ id: `coop-vfx-block-${Date.now()}-${slot.id}`, type: 'BLOCK', targetId: 'player' });
+                nextLogs.push(`${slot.label} が防御で支援した`);
+            } else if (nextEnemies.length > 0) {
+                const targetIndex = Math.floor(Math.random() * nextEnemies.length);
+                const target = nextEnemies[targetIndex];
+                const damage = 5 + supportBoost * 2 + strengthBonus;
+                target.currentHp -= damage;
+                target.floatingText = { id: `coop-dmg-${Date.now()}-${slot.id}`, text: `${damage}`, color: 'text-emerald-300', iconType: 'sword' };
+                nextActiveEffects.push({ id: `coop-vfx-dmg-${Date.now()}-${slot.id}`, type: 'SLASH', targetId: target.id });
+                nextLogs.push(`${slot.label} が ${trans(target.name, languageMode)} を援護攻撃した`);
+            }
+
+            return {
+                ...prev,
+                player: p,
+                enemies: nextEnemies.filter(enemy => enemy.currentHp > 0 || (enemy.enemyType === 'THE_HEART' && enemy.phase === 1)),
+                combatLog: nextLogs.slice(-100),
+                activeEffects: [...prev.activeEffects, ...nextActiveEffects]
+            };
+        });
+
+        if (slot.peerId) {
+            updateCoopParticipantState(slot.peerId, participant => ({
+                ...participant,
+                nextTurnEnergy: 0,
+                floatingText: { id: `coop-support-${Date.now()}-${slot.peerId}`, text: '援護', color: 'text-emerald-300' }
+            }));
+            window.setTimeout(() => {
+                updateCoopParticipantState(slot.peerId!, participant => ({ ...participant, floatingText: null }));
+            }, 650);
+        }
+        await wait(350);
+    }, [coopSession, languageMode, updateCoopParticipantState]);
+
+    const executeQueuedTurnTransition = useCallback(async () => {
+        if (gameState.challengeMode === 'COOP' && coopBattleState) {
+            await executeEndTurn(coopBattlePlan.enemyActions);
+            if (coopSession?.isHost) {
+                const nextBattleState: CoopBattleState = {
+                    ...coopBattleState,
+                    turnCursor: coopBattlePlan.nextCursor,
+                    enemyTurnCursor: coopBattleState.enemyTurnCursor + coopBattlePlan.enemyActions
+                };
+                setCoopBattleState(nextBattleState);
+                broadcastCoopBattleState(nextBattleState);
+            }
+            return;
+        }
+        await executeEndTurn();
+    }, [broadcastCoopBattleState, coopBattlePlan.enemyActions, coopBattlePlan.nextCursor, coopBattleState, coopSession, gameState.challengeMode, setCoopBattleState]);
+    useEffect(() => {
+        if (gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.BATTLE || !coopBattleState || !activeCoopTurnSlot) return;
+        const turnKey = `${coopBattleState.battleKey}:${coopBattleState.turnCursor}:${coopBattleState.enemyTurnCursor}:${activeCoopTurnSlot.id}`;
+        if (activeCoopTurnSlot.type === 'ENEMY') {
+            if (!coopSession?.isHost || coopStartedTurnSlotRef.current === turnKey) return;
+            coopStartedTurnSlotRef.current = turnKey;
+            window.setTimeout(() => {
+                void executeQueuedTurnTransition();
+            }, 0);
+            return;
+        }
+        if (activeCoopTurnSlot.peerId !== coopSelfPeerId) return;
+        if (coopStartedTurnSlotRef.current === turnKey) return;
+        if (gameState.turn === 1 && gameState.player.hand.length > 0 && coopStartedTurnSlotRef.current === null) {
+            coopStartedTurnSlotRef.current = turnKey;
+            return;
+        }
+        coopStartedTurnSlotRef.current = turnKey;
+        startPlayerTurn();
+    }, [activeCoopTurnSlot, coopBattleState, coopSelfPeerId, coopSession, executeQueuedTurnTransition, gameState.challengeMode, gameState.player.hand.length, gameState.screen, gameState.turn]);
 
     const handleEndTurnClick = () => {
         if (isEndingTurnRef.current) return;
         if (weatherScryModal || galaxyExpressModal || goldFishModal || dreamCatcherModal) return;
         lastPlayedCardRef.current = null;
+        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
+            p2pService.send({
+                type: 'COOP_END_TURN',
+                player: gameState.player,
+                selectedEnemyId: gameState.selectedEnemyId,
+                battleState: gameState.coopBattleState || null
+            });
+            return;
+        }
 
         if (gameState.player.relics.find(r => r.id === 'NILRYS_CODEX')) {
             const pool = getFilteredCardPool(gameState.player.id);
@@ -4683,7 +5721,7 @@ const App: React.FC = () => {
             }
             setGameState(prev => ({ ...prev, codexOptions: options }));
         } else {
-            executeEndTurn();
+            executeQueuedTurnTransition();
         }
     }
 
@@ -4798,6 +5836,9 @@ const App: React.FC = () => {
     }, [dreamCatcherModal, galaxyExpressModal, gameState.player.drawPile, gameState.player.turnFlags, gameState.screen, goldFishModal, weatherScryModal]);
 
     const onCodexSelect = (card: ICard | null) => {
+        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost && gameState.screen === GameScreen.BATTLE) {
+            queueCoopBattleEvent({ type: 'COOP_BATTLE_TURN_START' });
+        }
         setGameState(prev => {
             const nextPlayer = { ...prev.player };
             if (card) {
@@ -4811,11 +5852,11 @@ const App: React.FC = () => {
             };
         });
         setTimeout(() => {
-            executeEndTurn();
+            executeQueuedTurnTransition();
         }, 50);
     }
 
-    const handleSynthesizeCard = (cards: ICard[]) => {
+    const applySynthesizeCard = (cards: ICard[]) => {
         const [c1, c2, c3] = cards;
         const newCard = synthesizeCards(c1, c2, c3);
         setGameState(prev => ({
@@ -4826,6 +5867,14 @@ const App: React.FC = () => {
             }
         }));
         return newCard;
+    };
+
+    const handleSynthesizeCard = (cards: ICard[]) => {
+        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
+            p2pService.send({ type: 'COOP_REST_ACTION', action: 'SYNTHESIZE', cardIds: cards.map(card => card.id) });
+            return applySynthesizeCard(cards);
+        }
+        return applySynthesizeCard(cards);
     };
 
     const handlePlaySynthesizedCard = async (card: ICard) => {
@@ -4879,9 +5928,90 @@ const App: React.FC = () => {
         gameState.selectionState.type,
     ]);
 
-    const handleEventComplete = () => {
+    const resolveCoopEventOptionForPlayer = useCallback((basePlayer: Player, optionIndex: number, onResolved: (player: Player, resultLog: string | null) => void) => {
+        if (!eventData) return;
+
+        let simulatedState: GameState = { ...gameState, player: { ...basePlayer } };
+        let nextPlayer: Player = simulatedState.player;
+        let nextResultLog: string | null = null;
+
+        const fakeSetGameState: React.Dispatch<React.SetStateAction<GameState>> = (updater) => {
+            const updatedState = typeof updater === 'function' ? updater(simulatedState) : updater;
+            simulatedState = {
+                ...simulatedState,
+                ...updatedState,
+                player: updatedState.player ?? simulatedState.player
+            };
+            nextPlayer = simulatedState.player;
+        };
+
+        const fakeSetEventResultLog = (log: string | null) => {
+            nextResultLog = log;
+        };
+
+        let regeneratedEvent = null as ReturnType<typeof generateEvent> | ReturnType<typeof generateLegacyEvent> | null;
+        if (eventData.title === '忘れ物') {
+            const legacyCard = storageService.getLegacyCard();
+            if (legacyCard) {
+                regeneratedEvent = generateLegacyEvent(
+                    legacyCard,
+                    fakeSetGameState,
+                    fakeSetEventResultLog,
+                    languageMode
+                );
+            }
+        }
+        if (!regeneratedEvent) {
+            regeneratedEvent = generateEvent(
+                basePlayer,
+                fakeSetGameState,
+                () => { },
+                fakeSetEventResultLog,
+                languageMode,
+                unlockedCardNames,
+                eventData.title
+            );
+        }
+
+        const option = regeneratedEvent.options[optionIndex];
+        if (!option) return;
+        option.action();
+        window.setTimeout(() => onResolved(nextPlayer, nextResultLog), 90);
+    }, [eventData, gameState, languageMode, unlockedCardNames]);
+
+    const handleEventComplete = useCallback(() => {
+        if (gameState.challengeMode === 'COOP' && coopSession && coopSelfPeerId) {
+            setCoopSession(prev => {
+                if (!prev) return prev;
+                const nextParticipants = prev.participants.map(participant =>
+                    participant.peerId === coopSelfPeerId ? { ...participant, eventResolved: true } : participant
+                );
+                if (prev.isHost) {
+                    p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                } else {
+                    p2pService.send({ type: 'COOP_SELF_STATE', eventResolved: true });
+                }
+                return { ...prev, participants: nextParticipants };
+            });
+            return;
+        }
         handleNodeComplete();
-    };
+    }, [coopSelfPeerId, coopSession, gameState.challengeMode, handleNodeComplete]);
+
+    const handleCoopEventOptionSelect = useCallback((optionIndex: number) => {
+        if (gameState.challengeMode === 'COOP' && coopSession && coopSelfPeerId) {
+            if (!coopSession.isHost) {
+                p2pService.send({ type: 'COOP_EVENT_OPTION', optionIndex });
+                return;
+            }
+            resolveCoopEventOptionForPlayer(gameState.player, optionIndex, (nextPlayer, resultLog) => {
+                applyCoopPlayerStateToPeer(coopSelfPeerId, nextPlayer);
+                setEventResultLog(resultLog);
+            });
+            return;
+        }
+        eventData?.options?.[optionIndex]?.action?.();
+    }, [applyCoopPlayerStateToPeer, coopSelfPeerId, coopSession, eventData, gameState.challengeMode, gameState.player, resolveCoopEventOptionForPlayer]);
 
     const handleLegacyCardSelect = (card: ICard) => {
         storageService.saveLegacyCard(card);
@@ -5029,19 +6159,7 @@ const App: React.FC = () => {
         audioService.stopBGM();
         audioService.playSound('win');
         setGameState(prev => {
-            let hpRegen = 0;
-            if (prev.player.relics.find(r => r.id === 'BURNING_BLOOD')) hpRegen = 6;
-            if (prev.player.relics.find(r => r.id === 'MEAT_ON_THE_BONE') && prev.player.currentHp <= prev.player.maxHp / 2) hpRegen += 12;
-            const nextPlayer = clearBattleOnlyCardState(clearBigLadleTemp({ ...prev.player }));
-            if (hpRegen > 0) {
-                nextPlayer.currentHp = Math.min(nextPlayer.maxHp, nextPlayer.currentHp + hpRegen);
-            }
-            if (nextPlayer.partner) {
-                nextPlayer.partner = {
-                    ...nextPlayer.partner,
-                    currentHp: Math.min(nextPlayer.partner.maxHp, nextPlayer.partner.currentHp + 5)
-                };
-            }
+            const nextPlayer = buildPostBattlePlayer(prev.player, true);
 
             if (prev.act === 4 && !prev.isEndless) {
                 const score = calculateScore(prev, true);
@@ -5068,10 +6186,13 @@ const App: React.FC = () => {
                 return { ...prev, player: nextPlayer, screen: challengeScreen };
             }
         });
-    }, [selectedCharName]);
+    }, [coopSelfPeerId, coopSession, selectedCharName]);
 
     useEffect(() => {
         if (gameState.screen === GameScreen.BATTLE) {
+            if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
+                return;
+            }
             const isHeartTransforming = gameState.enemies.some(e => e.enemyType === 'THE_HEART' && e.phase === 1 && e.currentHp <= 0);
             if (gameState.enemies.length === 0 && !isHeartTransforming) {
                 if (battleFinisherCutinCard) return;
@@ -5123,6 +6244,15 @@ const App: React.FC = () => {
                     return;
                 }
 
+                if (gameState.challengeMode === 'COOP' && coopSession) {
+                    const aliveCompanions = coopSession.participants.filter(
+                        participant => participant.peerId !== coopSelfPeerId && (participant.currentHp ?? participant.maxHp ?? 0) > 0
+                    );
+                    if (aliveCompanions.length > 0) {
+                        return;
+                    }
+                }
+
                 // --- FIXED: Immediate save deletion to prevent repeat unlocks ---
                 storageService.clearSave();
 
@@ -5148,7 +6278,7 @@ const App: React.FC = () => {
                 setGameState(prev => ({ ...prev, player: clearBattleOnlyCardState(clearBigLadleTemp(prev.player)), screen: GameScreen.GAME_OVER }));
             }
         }
-    }, [gameState.enemies, gameState.player.currentHp, gameState.screen, gameState.act, gameState.challengeMode, unlockRandomAdditionalCard, battleFinisherCutinCard, resolveBattleVictory]);
+    }, [gameState.enemies, gameState.player.currentHp, gameState.screen, gameState.act, gameState.challengeMode, coopSession, unlockRandomAdditionalCard, battleFinisherCutinCard, resolveBattleVictory]);
 
     useEffect(() => {
         return () => {
@@ -5159,6 +6289,44 @@ const App: React.FC = () => {
     }, []);
 
     const finishRewardPhase = () => {
+        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
+            if (coopSelfPeerId) {
+                setCoopSession(prev => prev ? {
+                    ...prev,
+                    participants: prev.participants.map(participant =>
+                        participant.peerId === coopSelfPeerId ? { ...participant, rewardResolved: true } : participant
+                    )
+                } : prev);
+                p2pService.send({ type: 'COOP_SELF_STATE', rewardResolved: true });
+            }
+            setGameState(prev => ({ ...prev, rewards: [] }));
+            return;
+        }
+        if (gameState.challengeMode === 'COOP' && coopSession && coopSession.isHost) {
+            const selfResolved = coopSession.participants.find(participant => participant.peerId === coopSelfPeerId)?.rewardResolved;
+            if (!selfResolved && coopSelfPeerId) {
+                setCoopSession(prev => {
+                    if (!prev) return prev;
+                    const nextParticipants = prev.participants.map(participant =>
+                        participant.peerId === coopSelfPeerId ? { ...participant, rewardResolved: true } : participant
+                    );
+                    p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                    return { ...prev, participants: nextParticipants };
+                });
+                setCoopRewardSets(prev => ({
+                    ...prev,
+                    [coopSelfPeerId]: []
+                }));
+                setGameState(prev => ({ ...prev, rewards: [] }));
+                return;
+            }
+            if (!coopSession.participants.every(participant => participant.rewardResolved)) {
+                return;
+            }
+        }
+        if (gameState.challengeMode === 'COOP') {
+            setCoopRewardSets({});
+        }
         setGameState(prev => {
             const currentNode = prev.map.find(n => n.id === prev.currentMapNodeId);
             let nextPlayer = { ...prev.player };
@@ -5215,67 +6383,90 @@ const App: React.FC = () => {
                 };
             }
         });
+        if (gameState.challengeMode === 'COOP') {
+            setCoopSession(prev => {
+                if (!prev || prev.participants.length === 0) return prev;
+                const nextParticipants = prev.participants.map(participant => ({
+                    ...participant,
+                    quizResolved: false,
+                    quizCorrectCount: 0,
+                    rewardResolved: false
+                }));
+                const next = {
+                    ...prev,
+                    participants: nextParticipants,
+                    decisionOwnerIndex: (prev.decisionOwnerIndex + 1) % prev.participants.length
+                };
+                if (prev.isHost) {
+                    p2pService.send({ type: 'COOP_PARTICIPANTS', participants: next.participants, decisionOwnerIndex: next.decisionOwnerIndex });
+                }
+                return next;
+            });
+        }
     };
 
     const goToRewardPhase = (bonusGold: number = 0) => {
-        const rewards: RewardItem[] = [];
-        const isLibrarian = gameState.player.id === 'LIBRARIAN';
-        const isGardener = gameState.player.id === 'GARDENER';
-        if (bonusGold > 0) {
-            let goldReward = bonusGold;
-            if (gameState.player.relics.find(r => r.id === 'GOLDEN_IDOL')) goldReward = Math.floor(goldReward * 1.25);
-            rewards.push({ type: 'GOLD', value: goldReward, id: `rew-gold-${Date.now()}` });
-            setGameState(prev => ({ ...prev, actStats: { ...prev.actStats!, goldGained: prev.actStats!.goldGained + goldReward } }));
-        }
-
-        const allPossibleCards = getFilteredCardPool(gameState.player.id);
-
-        for (let i = 0; i < 3; i++) {
-            const roll = Math.random() * 100;
-            let targetRarity = 'COMMON';
-            if (roll > 95) targetRarity = 'LEGENDARY'; else if (roll > 80) targetRarity = 'RARE'; else if (roll > 50) targetRarity = 'UNCOMMON';
-
-            let pool;
-            if (isLibrarian && i === 0 && Math.random() < 0.7) {
-                pool = Object.values(LIBRARIAN_CARDS);
-            } else if (isGardener && i === 0 && Math.random() < 0.7) {
-                pool = Object.values(GARDEN_SEEDS);
-            } else {
-                pool = allPossibleCards.filter(c => c.rarity === targetRarity);
-            }
-
-            const candidate = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : allPossibleCards[Math.floor(Math.random() * allPossibleCards.length)];
-            rewards.push({ type: 'CARD', value: { ...candidate, id: `reward-${Date.now()}-${i}` }, id: `rew-card-${i}` });
-        }
-
-        if (gameState.challengeMode === 'RACE' && Math.random() < 0.3) {
-            rewards.push({ type: 'RACE_TRICK', value: { ...getRandomRaceTrickCard(), id: `race-trick-${Date.now()}` }, id: `rew-race-trick-${Date.now()}` });
-        }
-
-        const hasSozu = gameState.player.relics.find(r => r.id === 'SOZU');
-        const hasKinjiro = gameState.player.relics.find(r => r.id === 'KINJIRO_STATUE');
-        if (!hasSozu && (hasKinjiro || Math.random() < 0.4)) {
-            const allPotions = Object.values(POTION_LIBRARY);
-            const potion = allPotions[Math.floor(Math.random() * allPotions.length)];
-            rewards.push({ type: 'POTION', value: { ...potion, id: `pot-${Date.now()}` }, id: `rew-pot` });
+        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
+            const hasBufferedRewards = gameState.rewards.length > 0;
+            setCoopAwaitingRewardSync(!hasBufferedRewards);
+            setGameState(prev => ({
+                ...prev,
+                screen: GameScreen.REWARD,
+                rewards: hasBufferedRewards ? prev.rewards : []
+            }));
+            audioService.playBGM('reward');
+            return;
         }
         const currentNode = gameState.map.find(n => n.id === gameState.currentMapNodeId);
-        if (currentNode && (currentNode.type === NodeType.ELITE || currentNode.type === NodeType.BOSS)) {
-            const rarity = currentNode.type === NodeType.BOSS ? 'RARE' : 'UNCOMMON';
-            const allRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === rarity || r.rarity === 'COMMON' || r.rarity === 'RARE');
-            const owned = gameState.player.relics.map(r => r.id);
-            const available = allRelics.filter(r => !owned.includes(r.id));
-            if (available.length > 0) {
-                const relic = available[Math.floor(Math.random() * available.length)];
-                rewards.push({ type: 'RELIC', value: relic, id: `rew-relic-${Date.now()}` });
+        const nodeType = currentNode?.type;
+        const selfRewardBundle = buildRewardBundleForPlayer(gameState.player, nodeType, gameState.challengeMode, bonusGold, `self-${coopSelfPeerId || 'host'}`);
+
+        if (gameState.challengeMode === 'COOP') {
+            const nextRewardSets: Record<string, RewardItem[]> = {};
+            setCoopSession(prev => {
+                if (!prev) return prev;
+                const nextParticipants = prev.participants.map(participant => ({
+                    ...participant,
+                    currentHp: (participant.currentHp ?? participant.maxHp ?? 0) > 0
+                        ? participant.currentHp
+                        : Math.max(1, Math.floor((participant.maxHp ?? 1) * 0.3)),
+                    block: 0,
+                    nextTurnEnergy: 0,
+                    strength: 0,
+                    buffer: 0,
+                    revivedThisBattle: false,
+                    rewardResolved: false,
+                    floatingText: null
+                }));
+                if (prev.isHost) {
+                    p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                }
+                return { ...prev, participants: nextParticipants };
+            });
+            if (coopSession) {
+                coopSession.participants.forEach(participant => {
+                    const rewardPlayer = participant.peerId === coopSelfPeerId ? gameState.player : getCoopRewardSourcePlayer(participant);
+                    const bundle = participant.peerId === coopSelfPeerId
+                        ? selfRewardBundle
+                        : buildRewardBundleForPlayer(rewardPlayer, nodeType, gameState.challengeMode, bonusGold, `peer-${participant.peerId}`);
+                    nextRewardSets[participant.peerId] = bundle.rewards;
+                    if (participant.peerId !== coopSelfPeerId) {
+                        p2pService.sendTo(participant.peerId, { type: 'COOP_REWARD_SYNC', rewards: bundle.rewards });
+                    }
+                });
             }
-            if (currentNode.type === NodeType.BOSS) {
-                const goldBoss = 100;
-                rewards.push({ type: 'GOLD', value: goldBoss, id: `rew-gold-boss-${Date.now()}` });
-                setGameState(prev => ({ ...prev, actStats: { ...prev.actStats!, goldGained: prev.actStats!.goldGained + goldBoss } }));
-            }
+            setCoopRewardSets(nextRewardSets);
         }
-        setGameState(prev => ({ ...prev, screen: GameScreen.REWARD, rewards }));
+        setGameState(prev => ({
+            ...prev,
+            screen: GameScreen.REWARD,
+            rewards: gameState.challengeMode === 'COOP'
+                ? (coopSelfPeerId ? (selfRewardBundle.rewards || []) : prev.rewards)
+                : selfRewardBundle.rewards,
+            actStats: selfRewardBundle.goldGained > 0
+                ? { ...prev.actStats!, goldGained: prev.actStats!.goldGained + selfRewardBundle.goldGained }
+                : prev.actStats
+        }));
         audioService.playBGM('reward');
     };
 
@@ -5294,6 +6485,23 @@ const App: React.FC = () => {
     }, [gameState.challengeMode, gameState.screen, gameState.rewards.length, gameState.enemies.length]);
 
     const handleMathChallengeComplete = (correctCount: number) => {
+        if (gameState.challengeMode === 'COOP' && coopSession && coopSelfPeerId) {
+            setCoopSession(prev => {
+                if (!prev) return prev;
+                const nextParticipants = prev.participants.map(participant =>
+                    participant.peerId === coopSelfPeerId
+                        ? { ...participant, quizResolved: true, quizCorrectCount: correctCount }
+                        : participant
+                );
+                if (prev.isHost) {
+                    p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                }
+                return { ...prev, participants: nextParticipants };
+            });
+            if (!coopSession.isHost) {
+                p2pService.send({ type: 'COOP_QUIZ_RESULT', correctCount });
+            }
+        }
         let bonusGold = 0;
         if (correctCount === 1) bonusGold = 15;
         else if (correctCount === 2) bonusGold = 30;
@@ -5305,7 +6513,7 @@ const App: React.FC = () => {
                     ...prev,
                     player: {
                         ...prev.player,
-                        currentHp: Math.min(prev.player.currentHp, prev.player.currentHp + healAmount),
+                        currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + healAmount),
                         floatingText: { id: `calc-heal-${Date.now()}`, text: `+${healAmount} HP`, color: 'text-green-500', iconType: 'heart' }
                     }
                 }));
@@ -5318,6 +6526,165 @@ const App: React.FC = () => {
         setGameState(prev => ({ ...prev, actStats: { ...prev.actStats!, mathCorrect: prev.actStats!.mathCorrect + correctCount } }));
         goToRewardPhase(bonusGold);
     };
+
+    useEffect(() => {
+        const previousScreen = coopRewardScreenRef.current;
+        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
+            if (gameState.screen === GameScreen.REWARD && previousScreen !== GameScreen.REWARD && gameState.rewards.length === 0) {
+                setCoopAwaitingRewardSync(true);
+            } else if (gameState.screen === GameScreen.REWARD && gameState.rewards.length > 0 && coopAwaitingRewardSync) {
+                setCoopAwaitingRewardSync(false);
+            } else if (gameState.screen !== GameScreen.REWARD && previousScreen === GameScreen.REWARD) {
+                setCoopAwaitingRewardSync(false);
+            }
+        } else if (gameState.screen !== GameScreen.REWARD && coopAwaitingRewardSync) {
+            setCoopAwaitingRewardSync(false);
+        }
+        coopRewardScreenRef.current = gameState.screen;
+    }, [coopAwaitingRewardSync, coopSession, gameState.challengeMode, gameState.rewards.length, gameState.screen]);
+    useEffect(() => {
+        if (gameState.challengeMode !== 'COOP' || !coopSession || coopSession.isHost) {
+            if (coopAwaitingMapSync) setCoopAwaitingMapSync(false);
+            return;
+        }
+        if (gameState.screen !== GameScreen.RELIC_SELECTION) {
+            if (coopAwaitingMapSync) setCoopAwaitingMapSync(false);
+        }
+    }, [coopAwaitingMapSync, coopSession, gameState.challengeMode, gameState.screen]);
+
+    useEffect(() => {
+        if (gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.REWARD || !coopSession || !coopSelfPeerId) return;
+        if (coopAwaitingRewardSync) return;
+        if (gameState.rewards.length > 0) return;
+        const selfParticipant = coopSession.participants.find(participant => participant.peerId === coopSelfPeerId);
+        if (selfParticipant?.rewardResolved) return;
+
+        setCoopSession(prev => {
+            if (!prev) return prev;
+            const nextParticipants = prev.participants.map(participant =>
+                participant.peerId === coopSelfPeerId ? { ...participant, rewardResolved: true } : participant
+            );
+            if (prev.isHost) {
+                p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+            } else {
+                p2pService.send({ type: 'COOP_SELF_STATE', rewardResolved: true });
+            }
+            return { ...prev, participants: nextParticipants };
+        });
+    }, [coopAwaitingRewardSync, coopSelfPeerId, coopSession, gameState.challengeMode, gameState.rewards.length, gameState.screen]);
+
+    useEffect(() => {
+        if (gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.REWARD || !coopSession?.isHost) return;
+        if (gameState.rewards.length > 0) return;
+        if (!coopSession.participants.length || !coopSession.participants.every(participant => participant.rewardResolved)) return;
+        finishRewardPhase();
+    }, [coopSession, gameState.challengeMode, gameState.rewards.length, gameState.screen]);
+
+    useEffect(() => {
+        if (gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.REST || !coopSession?.isHost) return;
+        if (!coopSession.participants.length || !coopSession.participants.every(participant => participant.restResolved)) return;
+        handleNodeComplete();
+    }, [coopSession, gameState.challengeMode, gameState.screen]);
+
+    useEffect(() => {
+        if (gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.SHOP || !coopSession?.isHost) return;
+        if (!coopSession.participants.length || !coopSession.participants.every(participant => participant.shopResolved)) return;
+        handleNodeComplete();
+    }, [coopSession, gameState.challengeMode, gameState.screen]);
+
+    useEffect(() => {
+        if (gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.EVENT || !coopSession?.isHost) return;
+        if (!coopSession.participants.length || !coopSession.participants.every(participant => participant.eventResolved)) return;
+        handleNodeComplete();
+    }, [coopSession, gameState.challengeMode, gameState.screen]);
+
+    useEffect(() => {
+        if (gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.TREASURE || !coopSession?.isHost) return;
+        if (!coopSession.participants.length || !coopSession.participants.every(participant => participant.treasureResolved)) return;
+        handleNodeComplete();
+    }, [coopSession, gameState.challengeMode, gameState.screen]);
+
+    const buildRewardBundleForPlayer = useCallback((player: Player, nodeType?: NodeType, challengeMode?: string, bonusGold: number = 0, rewardScope: string = 'reward') => {
+        const rewards: RewardItem[] = [];
+        let goldGained = 0;
+        const isLibrarian = player.id === 'LIBRARIAN';
+        const isGardener = player.id === 'GARDENER';
+        const rewardPrefix = `${rewardScope}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+        if (bonusGold > 0) {
+            let goldReward = bonusGold;
+            if (player.relics.find(r => r.id === 'GOLDEN_IDOL')) goldReward = Math.floor(goldReward * 1.25);
+            rewards.push({ type: 'GOLD', value: goldReward, id: `${rewardPrefix}-gold` });
+            goldGained += goldReward;
+        }
+
+        const allPossibleCards = getFilteredCardPool(player.id);
+
+        for (let i = 0; i < 3; i++) {
+            const roll = Math.random() * 100;
+            let targetRarity = 'COMMON';
+            if (roll > 95) targetRarity = 'LEGENDARY'; else if (roll > 80) targetRarity = 'RARE'; else if (roll > 50) targetRarity = 'UNCOMMON';
+
+            let pool;
+            if (isLibrarian && i === 0 && Math.random() < 0.7) {
+                pool = Object.values(LIBRARIAN_CARDS);
+            } else if (isGardener && i === 0 && Math.random() < 0.7) {
+                pool = Object.values(GARDEN_SEEDS);
+            } else {
+                pool = allPossibleCards.filter(c => c.rarity === targetRarity);
+            }
+
+            const candidate = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : allPossibleCards[Math.floor(Math.random() * allPossibleCards.length)];
+            rewards.push({ type: 'CARD', value: { ...candidate, id: `${rewardPrefix}-card-value-${i}` }, id: `${rewardPrefix}-card-${i}` });
+        }
+
+        if (challengeMode === 'RACE' && Math.random() < 0.3) {
+            rewards.push({ type: 'RACE_TRICK', value: { ...getRandomRaceTrickCard(), id: `${rewardPrefix}-race-trick-value` }, id: `${rewardPrefix}-race-trick` });
+        }
+        if (challengeMode === 'COOP' && Math.random() < 0.35) {
+            rewards.push({ type: 'COOP_SUPPORT', value: { ...getRandomCoopSupportCard(), id: `${rewardPrefix}-coop-support-value` }, id: `${rewardPrefix}-coop-support` });
+        }
+
+        const hasSozu = player.relics.find(r => r.id === 'SOZU');
+        const hasKinjiro = player.relics.find(r => r.id === 'KINJIRO_STATUE');
+        if (!hasSozu && (hasKinjiro || Math.random() < 0.4)) {
+            const allPotions = Object.values(POTION_LIBRARY);
+            const potion = allPotions[Math.floor(Math.random() * allPotions.length)];
+            rewards.push({ type: 'POTION', value: { ...potion, id: `${rewardPrefix}-potion-value` }, id: `${rewardPrefix}-potion` });
+        }
+
+        if (nodeType === NodeType.ELITE || nodeType === NodeType.BOSS) {
+            const rarity = nodeType === NodeType.BOSS ? 'RARE' : 'UNCOMMON';
+            const allRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === rarity || r.rarity === 'COMMON' || r.rarity === 'RARE');
+            const owned = player.relics.map(r => r.id);
+            const available = allRelics.filter(r => !owned.includes(r.id));
+            if (available.length > 0) {
+                const relic = available[Math.floor(Math.random() * available.length)];
+                rewards.push({ type: 'RELIC', value: relic, id: `${rewardPrefix}-relic` });
+            }
+            if (nodeType === NodeType.BOSS) {
+                const goldBoss = 100;
+                rewards.push({ type: 'GOLD', value: goldBoss, id: `${rewardPrefix}-gold-boss` });
+                goldGained += goldBoss;
+            }
+        }
+
+        return { rewards, goldGained };
+    }, []);
+
+    const getCoopRewardSourcePlayer = useCallback((participant: CoopParticipant) => {
+        const snapshot = coopPlayerSnapshots[participant.peerId];
+        if (snapshot) return { ...snapshot };
+        if (participant.peerId === coopSelfPeerId) return { ...gameState.player };
+        return {
+            ...gameState.player,
+            id: participant.selectedCharacterId || gameState.player.id,
+            imageData: participant.imageData || gameState.player.imageData,
+            maxHp: participant.maxHp || gameState.player.maxHp,
+            currentHp: participant.currentHp ?? participant.maxHp ?? gameState.player.currentHp,
+            block: participant.block ?? 0
+        };
+    }, [coopPlayerSnapshots, coopSelfPeerId, gameState.player]);
 
     const handleModeCorrectProgress = (mode: string, correctCount: number) => {
         if (correctCount <= 0) return;
@@ -5342,20 +6709,28 @@ const App: React.FC = () => {
         }
     };
 
-    const handleRewardSelection = (item: RewardItem, replacePotionId?: string) => {
+    const removeRewardFromList = useCallback((rewards: RewardItem[], item: RewardItem) => {
+        if (shouldClearAllCardRewards(item)) {
+            return rewards.filter(reward => reward.type !== 'CARD');
+        }
+        return rewards.filter(reward => reward.id !== item.id);
+    }, []);
+
+    const applyRewardToLocalPlayer = useCallback((item: RewardItem, replacePotionId?: string, nextRewardsOverride?: RewardItem[]) => {
         if (item.type === 'RACE_TRICK') {
             setRaceTrickCards(prevCards => [...prevCards, item.value as RaceTrickCard]);
         }
+        if (item.type === 'COOP_SUPPORT') {
+            setCoopSupportCards(prevCards => [...prevCards, createCoopSupportInstance(item.value as CoopSupportCard)]);
+        }
         setGameState(prev => {
             let p = { ...prev.player };
-            let nextRewards = [...prev.rewards];
+            const nextRewards = nextRewardsOverride ?? removeRewardFromList(prev.rewards, item);
             if (item.type === 'CARD') {
                 addCardToDeckWithRelics(p, item.value);
-                nextRewards = nextRewards.filter(r => r.type !== 'CARD');
                 storageService.saveUnlockedCard(item.value.name);
             } else if (item.type === 'RELIC') {
                 p.relics = [...p.relics, item.value];
-                nextRewards = nextRewards.filter(r => r.id !== item.id);
                 if (item.value.id === 'SOZU') p.maxEnergy += 1;
                 if (item.value.id === 'CURSED_KEY') p.maxEnergy += 1;
                 if (item.value.id === 'PHILOSOPHER_STONE') p.maxEnergy += 1;
@@ -5368,27 +6743,365 @@ const App: React.FC = () => {
                 storageService.saveUnlockedRelic(item.value.id);
             } else if (item.type === 'GOLD') {
                 p.gold += item.value;
-                nextRewards = nextRewards.filter(r => r.id !== item.id);
             } else if (item.type === 'POTION') {
                 if (p.potions.length < getPotionCapacity(p) || replacePotionId) {
                     if (replacePotionId) p.potions = p.potions.filter(pt => pt.id !== replacePotionId);
                     p.potions = [...p.potions, item.value];
-                    nextRewards = nextRewards.filter(r => r.id !== item.id);
                     storageService.saveUnlockedPotion(item.value.templateId);
+                } else {
+                    return prev;
                 }
-            } else if (item.type === 'RACE_TRICK') {
-                nextRewards = nextRewards.filter(r => r.id !== item.id);
             }
             return { ...prev, player: p, rewards: nextRewards };
         });
+    }, [removeRewardFromList]);
+    const applyTreasureRewardsToPlayer = useCallback((player: Player, rewards: RewardItem[], addCurse: boolean): Player => {
+        const nextPlayer = { ...player, relicCounters: { ...player.relicCounters } };
+        rewards.forEach(item => {
+            if (item.type === 'GOLD') {
+                nextPlayer.gold += item.value;
+                return;
+            }
+            if (item.type === 'RELIC') {
+                nextPlayer.relics = [...nextPlayer.relics, item.value];
+                storageService.saveUnlockedRelic(item.value.id);
+                if (item.value.id === 'SOZU') nextPlayer.maxEnergy += 1;
+                if (item.value.id === 'CURSED_KEY') nextPlayer.maxEnergy += 1;
+                if (item.value.id === 'PHILOSOPHER_STONE') nextPlayer.maxEnergy += 1;
+                if (item.value.id === 'VELVET_CHOKER') nextPlayer.maxEnergy += 1;
+                if (item.value.id === 'WAFFLE') {
+                    nextPlayer.maxHp += 7;
+                    nextPlayer.currentHp = nextPlayer.maxHp;
+                }
+                if (item.value.id === 'OLD_COIN') nextPlayer.gold += 300;
+                if (item.value.id === 'MATRYOSHKA') nextPlayer.relicCounters['MATRYOSHKA'] = 2;
+                if (item.value.id === 'HAPPY_FLOWER') nextPlayer.relicCounters['HAPPY_FLOWER'] = 0;
+                applyExtendedRelicAcquireEffects(nextPlayer, item.value);
+            }
+        });
+        if (addCurse) {
+            const curse = { ...CURSE_CARDS.PAIN, id: `curse-${Date.now()}` };
+            addCardToDeckWithRelics(nextPlayer, curse, { addToDiscard: true });
+        }
+        return nextPlayer;
+    }, []);
+    const buildTreasureRewardBundle = useCallback((): RewardItem[] => {
+        const rewards: RewardItem[] = [];
+        const allRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'COMMON' || r.rarity === 'UNCOMMON' || r.rarity === 'RARE');
+        rewards.push({ type: 'RELIC', value: shuffle([...allRelics])[0], id: `tr-relic-${Date.now()}-${Math.random().toString(36).slice(2, 8)}` });
+        rewards.push({ type: 'GOLD', value: 50 + Math.floor(Math.random() * 50), id: `tr-gold-${Date.now()}-${Math.random().toString(36).slice(2, 8)}` });
+        return rewards;
+    }, []);
+    const buildCoopTreasurePools = useCallback((count: number): CoopTreasurePool[] => (
+        Array.from({ length: count }, (_, index) => ({
+            id: `coop-treasure-${Date.now()}-${index}-${Math.random().toString(36).slice(2, 8)}`,
+            rewards: buildTreasureRewardBundle(),
+            claimedByPeerId: null,
+            claimedByName: null
+        }))
+    ), [buildTreasureRewardBundle]);
+    const claimCoopTreasurePoolForPeer = useCallback((targetPeerId: string, poolId: string) => {
+        if (!coopSession?.isHost) return;
+        const pool = treasurePools.find(entry => entry.id === poolId);
+        if (!pool || pool.claimedByPeerId) return;
+
+        const sourcePlayer = targetPeerId === coopSelfPeerId
+            ? gameState.player
+            : coopPlayerSnapshots[targetPeerId];
+        if (!sourcePlayer) return;
+
+        const workingPlayer: Player = {
+            ...sourcePlayer,
+            relicCounters: { ...sourcePlayer.relicCounters }
+        };
+        const allRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'COMMON' || r.rarity === 'UNCOMMON' || r.rarity === 'RARE');
+        const claimRewards = [...pool.rewards];
+        const matryoshkaCharges = workingPlayer.relicCounters['MATRYOSHKA'] || 0;
+        if (matryoshkaCharges > 0) {
+            workingPlayer.relicCounters['MATRYOSHKA'] = matryoshkaCharges - 1;
+            claimRewards.push({
+                type: 'RELIC',
+                value: shuffle([...allRelics])[0],
+                id: `coop-tr-matryoshka-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+            });
+        }
+        const addCurse = !!workingPlayer.relics.find(relic => relic.id === 'CURSED_KEY');
+        const nextPlayer = applyTreasureRewardsToPlayer(workingPlayer, claimRewards, addCurse);
+
+        setTreasurePools(prev => prev.map(entry => entry.id === poolId ? {
+            ...entry,
+            claimedByPeerId: targetPeerId,
+            claimedByName: coopSession.participants.find(participant => participant.peerId === targetPeerId)?.name || null,
+            rewards: claimRewards
+        } : entry));
+        applyCoopPlayerStateToPeer(targetPeerId, nextPlayer);
+
+        if (targetPeerId !== coopSelfPeerId) {
+            p2pService.sendTo(targetPeerId, {
+                type: 'COOP_TREASURE_GRANT',
+                poolId,
+                rewards: claimRewards,
+                player: nextPlayer,
+                addCurse
+            });
+        }
+    }, [applyCoopPlayerStateToPeer, applyTreasureRewardsToPlayer, coopPlayerSnapshots, coopSelfPeerId, coopSession, gameState.player, treasurePools]);
+    const handleTreasureOpen = useCallback(() => {
+        if (gameState.challengeMode === 'COOP') return;
+        if (treasureOpened) return;
+        const hasCursedKey = !!gameState.player.relics.find(r => r.id === 'CURSED_KEY');
+        setTreasureOpened(true);
+        setGameState(prev => ({
+            ...prev,
+            player: applyTreasureRewardsToPlayer(prev.player, treasureRewards, hasCursedKey)
+        }));
+    }, [applyTreasureRewardsToPlayer, gameState.challengeMode, gameState.player.relics, treasureOpened, treasureRewards]);
+    const handleTreasureClaim = useCallback((poolId: string) => {
+        if (gameState.challengeMode !== 'COOP' || !coopSession) return;
+        if (!coopSession.isHost) {
+            p2pService.send({ type: 'COOP_TREASURE_CLAIM', poolId });
+            return;
+        }
+        claimCoopTreasurePoolForPeer(coopSelfPeerId, poolId);
+    }, [claimCoopTreasurePoolForPeer, coopSelfPeerId, coopSession, gameState.challengeMode]);
+    const handleTreasureLeave = useCallback(() => {
+        if (gameState.challengeMode === 'COOP' && coopSession && coopSelfPeerId) {
+            setCoopSession(prev => {
+                if (!prev) return prev;
+                const nextParticipants = prev.participants.map(participant =>
+                    participant.peerId === coopSelfPeerId ? { ...participant, treasureResolved: true } : participant
+                );
+                if (prev.isHost) {
+                    p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                } else {
+                    p2pService.send({ type: 'COOP_SELF_STATE', treasureResolved: true });
+                }
+                return { ...prev, participants: nextParticipants };
+            });
+            return;
+        }
+        handleNodeComplete();
+    }, [coopSelfPeerId, coopSession, gameState.challengeMode, handleNodeComplete]);
+
+    const handleRewardSelection = (item: RewardItem, replacePotionId?: string) => {
+        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
+            p2pService.send({ type: 'COOP_REWARD_SELECT', rewardId: item.id, item, replacePotionId });
+            return;
+        }
+        if (gameState.challengeMode === 'COOP' && coopSession?.isHost && coopSelfPeerId) {
+            setCoopRewardSets(prev => ({
+                ...prev,
+                [coopSelfPeerId]: removeRewardFromList(prev[coopSelfPeerId] || [], item)
+            }));
+        }
+        applyRewardToLocalPlayer(item, replacePotionId);
     };
 
-    const handleRestAction = () => {
+    const applyCoopSupportEffect = useCallback((card: CoopSupportCard, targetPeerId?: string) => {
+        const targetedCompanion = targetPeerId
+            ? coopSession?.participants.find(participant => participant.peerId === targetPeerId)
+            : undefined;
+        const downedCompanion = targetedCompanion && (targetedCompanion.currentHp ?? 0) <= 0 && !targetedCompanion.revivedThisBattle
+            ? targetedCompanion
+            : coopSession?.participants.find(participant => participant.peerId !== coopSelfPeerId && (participant.currentHp ?? 0) <= 0 && !participant.revivedThisBattle);
+        const healCompanion = targetedCompanion && targetedCompanion.peerId !== coopSelfPeerId
+            ? targetedCompanion
+            : coopSession?.participants
+                .filter(participant => participant.peerId !== coopSelfPeerId)
+                .slice()
+                .sort((a, b) => (a.currentHp ?? a.maxHp ?? 0) - (b.currentHp ?? b.maxHp ?? 0))[0];
+        setGameState(prev => {
+            const p = {
+                ...prev.player,
+                powers: { ...prev.player.powers },
+                turnFlags: { ...prev.player.turnFlags },
+                hand: [...prev.player.hand],
+                drawPile: [...prev.player.drawPile],
+                discardPile: [...prev.player.discardPile]
+            };
+
+            switch (card.effectId) {
+                case 'ALLY_HEAL':
+                    if (healCompanion && healCompanion.peerId !== coopSelfPeerId) {
+                        updateCoopParticipantState(healCompanion.peerId, current => ({
+                            ...current,
+                            currentHp: Math.min(current.maxHp ?? 0, (current.currentHp ?? 0) + 10),
+                            floatingText: { id: `coop-heal-target-${Date.now()}-${healCompanion.peerId}`, text: '+10', color: 'text-green-400', iconType: 'heart' }
+                        }));
+                        p.floatingText = { id: `coop-heal-ally-${Date.now()}`, text: healCompanion.name, color: 'text-emerald-300', iconType: 'heart' };
+                        break;
+                    }
+                    p.currentHp = Math.min(p.maxHp, p.currentHp + 10);
+                    p.floatingText = { id: `coop-heal-${Date.now()}`, text: '+10', color: 'text-green-400', iconType: 'heart' };
+                    break;
+                case 'ALLY_BLOCK':
+                    if (targetedCompanion && targetedCompanion.peerId !== coopSelfPeerId) {
+                        updateCoopParticipantState(targetedCompanion.peerId, current => ({
+                            ...current,
+                            block: (current.block ?? 0) + 20,
+                            floatingText: { id: `coop-block-target-${Date.now()}-${targetedCompanion.peerId}`, text: '+20', color: 'text-blue-300', iconType: 'shield' }
+                        }));
+                        p.floatingText = { id: `coop-block-self-${Date.now()}`, text: targetedCompanion.name, color: 'text-emerald-300', iconType: 'shield' };
+                    } else {
+                        p.block += 20;
+                        p.floatingText = { id: `coop-block-${Date.now()}`, text: '+20', color: 'text-blue-300', iconType: 'shield' };
+                    }
+                    break;
+                case 'ALLY_NEXT_ENERGY':
+                    if (targetedCompanion && targetedCompanion.peerId !== coopSelfPeerId) {
+                        updateCoopParticipantState(targetedCompanion.peerId, current => ({
+                            ...current,
+                            nextTurnEnergy: (current.nextTurnEnergy ?? 0) + 1,
+                            floatingText: { id: `coop-energy-target-${Date.now()}-${targetedCompanion.peerId}`, text: 'NEXT+1', color: 'text-yellow-300', iconType: 'zap' }
+                        }));
+                        p.floatingText = { id: `coop-energy-self-${Date.now()}`, text: targetedCompanion.name, color: 'text-emerald-300', iconType: 'zap' };
+                    } else {
+                        p.nextTurnEnergy += 1;
+                        p.floatingText = { id: `coop-energy-${Date.now()}`, text: 'NEXT+1', color: 'text-yellow-300', iconType: 'zap' };
+                    }
+                    break;
+                case 'ALLY_DRAW': {
+                    const drawAmount = Math.min(2, p.drawPile.length);
+                    for (let i = 0; i < drawAmount; i++) {
+                        const drawn = p.drawPile.shift();
+                        if (drawn) p.hand.push(drawn);
+                    }
+                    p.floatingText = { id: `coop-draw-${Date.now()}`, text: `+${drawAmount}枚`, color: 'text-cyan-300' };
+                    break;
+                }
+                case 'ALLY_ATTACK_BOOST':
+                    if (targetedCompanion && targetedCompanion.peerId !== coopSelfPeerId) {
+                        updateCoopParticipantState(targetedCompanion.peerId, current => ({
+                            ...current,
+                            strength: (current.strength ?? 0) + 3,
+                            floatingText: { id: `coop-boost-target-${Date.now()}-${targetedCompanion.peerId}`, text: 'ATK+', color: 'text-red-300', iconType: 'sword' }
+                        }));
+                        p.floatingText = { id: `coop-boost-self-${Date.now()}`, text: targetedCompanion.name, color: 'text-emerald-300', iconType: 'sword' };
+                    } else {
+                        p.strength += 3;
+                        p.floatingText = { id: `coop-boost-${Date.now()}`, text: 'ATK+', color: 'text-red-300', iconType: 'sword' };
+                    }
+                    break;
+                case 'ALLY_BUFFER':
+                    if (targetedCompanion && targetedCompanion.peerId !== coopSelfPeerId) {
+                        updateCoopParticipantState(targetedCompanion.peerId, current => ({
+                            ...current,
+                            buffer: (current.buffer ?? 0) + 1,
+                            floatingText: { id: `coop-buffer-target-${Date.now()}-${targetedCompanion.peerId}`, text: '0 DMG', color: 'text-yellow-200', iconType: 'shield' }
+                        }));
+                        p.floatingText = { id: `coop-buffer-self-${Date.now()}`, text: targetedCompanion.name, color: 'text-emerald-300', iconType: 'shield' };
+                    } else {
+                        p.powers['BUFFER'] = (p.powers['BUFFER'] || 0) + 1;
+                        p.floatingText = { id: `coop-buffer-${Date.now()}`, text: '0 DMG', color: 'text-yellow-200', iconType: 'shield' };
+                    }
+                    break;
+                case 'TEAM_CLEANSE':
+                    p.block += 8;
+                    p.floatingText = { id: `coop-cleanse-${Date.now()}`, text: 'RESET', color: 'text-emerald-300', iconType: 'shield' };
+                    if (coopSession) {
+                        coopSession.participants
+                            .filter(participant => participant.peerId !== coopSelfPeerId)
+                            .forEach(participant => {
+                                updateCoopParticipantState(participant.peerId, current => ({
+                                    ...current,
+                                    buffer: Math.max(0, (current.buffer ?? 0) - 1)
+                                }));
+                            });
+                    }
+                    break;
+                case 'TEAM_HEAL':
+                    p.currentHp = Math.min(p.maxHp, p.currentHp + 5);
+                    p.floatingText = { id: `coop-team-heal-${Date.now()}`, text: '+5', color: 'text-green-400', iconType: 'heart' };
+                    if (coopSession) {
+                        coopSession.participants
+                            .filter(participant => participant.peerId !== coopSelfPeerId)
+                            .forEach(participant => {
+                                updateCoopParticipantState(participant.peerId, current => ({
+                                    ...current,
+                                    currentHp: Math.min(current.maxHp ?? 0, (current.currentHp ?? 0) + 5),
+                                    floatingText: { id: `coop-team-heal-target-${Date.now()}-${participant.peerId}`, text: '+5', color: 'text-green-400', iconType: 'heart' }
+                                }));
+                            });
+                    }
+                    break;
+                case 'REVIVE_BANDAGE':
+                    if (p.currentHp <= 0) {
+                        p.currentHp = 15;
+                        p.floatingText = { id: `coop-revive-bandage-${Date.now()}`, text: '復活', color: 'text-green-300', iconType: 'heart' };
+                    } else if (downedCompanion) {
+                        updateCoopParticipantState(downedCompanion.peerId, current => ({
+                            ...current,
+                            currentHp: 15,
+                            revivedThisBattle: true,
+                            floatingText: { id: `coop-revive-bandage-target-${Date.now()}-${downedCompanion.peerId}`, text: '復活', color: 'text-green-300', iconType: 'heart' }
+                        }));
+                    }
+                    break;
+                case 'REVIVE_NURSE':
+                    if (p.currentHp <= 0) {
+                        p.currentHp = Math.max(1, Math.floor(p.maxHp * 0.25));
+                        p.block += 10;
+                        p.floatingText = { id: `coop-revive-nurse-${Date.now()}`, text: '奇跡', color: 'text-pink-300', iconType: 'heart' };
+                    } else if (downedCompanion) {
+                        updateCoopParticipantState(downedCompanion.peerId, current => ({
+                            ...current,
+                            currentHp: Math.max(1, Math.floor((current.maxHp ?? 1) * 0.25)),
+                            revivedThisBattle: true,
+                            floatingText: { id: `coop-revive-nurse-target-${Date.now()}-${downedCompanion.peerId}`, text: '奇跡', color: 'text-pink-300', iconType: 'heart' }
+                        }));
+                    }
+                    break;
+            }
+
+            return { ...prev, player: p };
+        });
+        if (targetedCompanion?.peerId) {
+            window.setTimeout(() => {
+                updateCoopParticipantState(targetedCompanion.peerId, current => ({ ...current, floatingText: null }));
+            }, 900);
+        }
+        if (card.effectId === 'TEAM_HEAL' && coopSession) {
+            window.setTimeout(() => {
+                coopSession.participants
+                    .filter(participant => participant.peerId !== coopSelfPeerId)
+                    .forEach(participant => {
+                        updateCoopParticipantState(participant.peerId, current => ({ ...current, floatingText: null }));
+                    });
+            }, 900);
+        }
+    }, [coopSession, coopSelfPeerId, updateCoopParticipantState]);
+
+    const handleUseCoopSupport = useCallback((card: CoopSupportCard, targetPeerId?: string) => {
+        setCoopSupportCards(prevCards => prevCards.filter(entry => entry.id !== card.id));
+        if (coopSession && !coopSession.isHost) {
+            p2pService.send({
+                type: 'COOP_SUPPORT_USE',
+                cardId: card.id,
+                effectId: card.effectId,
+                name: card.name,
+                description: card.description,
+                rarity: card.rarity,
+                targetPeerId
+            });
+            return;
+        }
+        applyCoopSupportEffect(card, targetPeerId);
+    }, [applyCoopSupportEffect, coopSession]);
+    const applyRestAction = () => {
         const heal = Math.floor(gameState.player.maxHp * 0.3);
         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + heal) } }));
     };
 
-    const handleUpgradeCard = (card: ICard) => {
+    const handleRestAction = () => {
+        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
+            p2pService.send({ type: 'COOP_REST_ACTION', action: 'REST' });
+            applyRestAction();
+            return;
+        }
+        applyRestAction();
+    };
+
+    const applyUpgradeCard = (card: ICard) => {
         const upgraded = getUpgradedCard(card);
         setGameState(prev => ({
             ...prev,
@@ -5397,6 +7110,34 @@ const App: React.FC = () => {
                 deck: prev.player.deck.map(c => c.id === card.id ? upgraded : c)
             }
         }));
+    };
+
+    const handleUpgradeCard = (card: ICard) => {
+        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
+            p2pService.send({ type: 'COOP_REST_ACTION', action: 'UPGRADE', cardId: card.id });
+            applyUpgradeCard(card);
+            return;
+        }
+        applyUpgradeCard(card);
+    };
+
+    const handleRestLeave = () => {
+        if (gameState.challengeMode === 'COOP' && coopSession && coopSelfPeerId) {
+            setCoopSession(prev => {
+                if (!prev) return prev;
+                const nextParticipants = prev.participants.map(participant =>
+                    participant.peerId === coopSelfPeerId ? { ...participant, restResolved: true } : participant
+                );
+                if (prev.isHost) {
+                    p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                } else {
+                    p2pService.send({ type: 'COOP_SELF_STATE', restResolved: true });
+                }
+                return { ...prev, participants: nextParticipants };
+            });
+            return;
+        }
+        handleNodeComplete();
     };
 
     const handleNextActFromStory = () => {
@@ -5425,6 +7166,663 @@ const App: React.FC = () => {
             };
         });
     };
+
+    const handleShopBuyCard = (card: ICard) => {
+        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
+            p2pService.send({ type: 'COOP_SHOP_ACTION', action: 'BUY_CARD', itemId: card.id });
+            setGameState(prev => {
+                let price = card.price || 50;
+                if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
+                if (raceEffects.shopMarkupUntil > raceEffectNow) price = Math.floor(price * 1.25);
+                const newP = { ...prev.player, gold: prev.player.gold - price };
+                addCardToDeckWithRelics(newP, { ...card, id: `buy-${Date.now()}` }, { addToDiscard: true });
+                return { ...prev, player: newP };
+            });
+            setShopCards(prev => prev.filter(entry => entry.id !== card.id));
+            storageService.saveUnlockedCard(card.name);
+            return;
+        }
+        setGameState(prev => {
+            let price = card.price || 50;
+            if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
+            if (raceEffects.shopMarkupUntil > raceEffectNow) price = Math.floor(price * 1.25);
+            const newP = { ...prev.player, gold: prev.player.gold - price };
+            addCardToDeckWithRelics(newP, { ...card, id: `buy-${Date.now()}` }, { addToDiscard: true });
+            return { ...prev, player: newP };
+        });
+        if (gameState.challengeMode === 'COOP') {
+            setShopCards(prev => prev.filter(entry => entry.id !== card.id));
+        }
+        storageService.saveUnlockedCard(card.name);
+    };
+
+    const handleShopBuyRelic = (relic: Relic) => {
+        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
+            p2pService.send({ type: 'COOP_SHOP_ACTION', action: 'BUY_RELIC', itemId: relic.id });
+            setGameState(prev => {
+                let price = relic.price || 150;
+                if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
+                if (raceEffects.shopMarkupUntil > raceEffectNow) price = Math.floor(price * 1.25);
+                const newP = { ...prev.player, gold: prev.player.gold - price, relics: [...prev.player.relics, relic] };
+                if (relic.id === 'SOZU') newP.maxEnergy += 1;
+                if (relic.id === 'CURSED_KEY') newP.maxEnergy += 1;
+                if (relic.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
+                if (relic.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
+                if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
+                if (relic.id === 'OLD_COIN') newP.gold += 300;
+                if (relic.id === 'MATRYOSHKA') newP.relicCounters['MATRYOSHKA'] = 2;
+                if (relic.id === 'HAPPY_FLOWER') newP.relicCounters['HAPPY_FLOWER'] = 0;
+                applyExtendedRelicAcquireEffects(newP, relic);
+                return { ...prev, player: newP };
+            });
+            setShopRelics(prev => prev.filter(entry => entry.id !== relic.id));
+            storageService.saveUnlockedRelic(relic.id);
+            return;
+        }
+        setGameState(prev => {
+            let price = relic.price || 150;
+            if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
+            if (raceEffects.shopMarkupUntil > raceEffectNow) price = Math.floor(price * 1.25);
+            const newP = { ...prev.player, gold: prev.player.gold - price, relics: [...prev.player.relics, relic] };
+            if (relic.id === 'SOZU') newP.maxEnergy += 1;
+            if (relic.id === 'CURSED_KEY') newP.maxEnergy += 1;
+            if (relic.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
+            if (relic.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
+            if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
+            if (relic.id === 'OLD_COIN') newP.gold += 300;
+            if (relic.id === 'MATRYOSHKA') newP.relicCounters['MATRYOSHKA'] = 2;
+            if (relic.id === 'HAPPY_FLOWER') newP.relicCounters['HAPPY_FLOWER'] = 0;
+            applyExtendedRelicAcquireEffects(newP, relic);
+            return { ...prev, player: newP };
+        });
+        if (gameState.challengeMode === 'COOP') {
+            setShopRelics(prev => prev.filter(entry => entry.id !== relic.id));
+        }
+        storageService.saveUnlockedRelic(relic.id);
+    };
+
+    const handleShopBuyPotion = (potion: Potion, replacePotionId?: string) => {
+        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
+            p2pService.send({ type: 'COOP_SHOP_ACTION', action: 'BUY_POTION', itemId: potion.id, replacePotionId });
+            setGameState(prev => {
+                if (prev.player.potions.length < getPotionCapacity(prev.player) || replacePotionId) {
+                    let price = potion.price || 50;
+                    if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
+                    if (raceEffects.shopMarkupUntil > raceEffectNow) price = Math.floor(price * 1.25);
+                    let newPotions = [...prev.player.potions];
+                    if (replacePotionId) {
+                        newPotions = newPotions.filter(pt => pt.id !== replacePotionId);
+                    }
+                    return { ...prev, player: { ...prev.player, gold: prev.player.gold - price, potions: [...newPotions, { ...potion, id: `buy-pot-${Date.now()}` }] } };
+                }
+                return prev;
+            });
+            setShopPotions(prev => prev.filter(entry => entry.id !== potion.id));
+            storageService.saveUnlockedPotion(potion.templateId);
+            return;
+        }
+        setGameState(prev => {
+            if (prev.player.potions.length < getPotionCapacity(prev.player) || replacePotionId) {
+                let price = potion.price || 50;
+                if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
+                if (raceEffects.shopMarkupUntil > raceEffectNow) price = Math.floor(price * 1.25);
+                let newPotions = [...prev.player.potions];
+                if (replacePotionId) {
+                    newPotions = newPotions.filter(pt => pt.id !== replacePotionId);
+                }
+                return { ...prev, player: { ...prev.player, gold: prev.player.gold - price, potions: [...newPotions, { ...potion, id: `buy-pot-${Date.now()}` }] } };
+            }
+            return prev;
+        });
+        if (gameState.challengeMode === 'COOP') {
+            setShopPotions(prev => prev.filter(entry => entry.id !== potion.id));
+        }
+        storageService.saveUnlockedPotion(potion.templateId);
+    };
+
+    const handleShopRemoveCard = (cardId: string, cost: number) => {
+        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
+            p2pService.send({ type: 'COOP_SHOP_ACTION', action: 'REMOVE_CARD', cardId, cost });
+            setGameState(prev => {
+                const p = prev.player;
+                const card = p.deck.find(c => c.id === cardId);
+                let newMaxHp = p.maxHp;
+                if (card && (card.name === '寄生虫' || card.name === 'PARASITE')) {
+                    newMaxHp -= 3;
+                }
+                const newDeck = p.deck.filter(c => c.id !== cardId);
+                const newHp = Math.min(p.currentHp, newMaxHp);
+                return { ...prev, player: { ...p, gold: p.gold - cost, deck: newDeck, maxHp: newMaxHp, currentHp: newHp } };
+            });
+            return;
+        }
+        setGameState(prev => {
+            const p = prev.player;
+            const card = p.deck.find(c => c.id === cardId);
+            let newMaxHp = p.maxHp;
+            if (card && (card.name === '寄生虫' || card.name === 'PARASITE')) {
+                newMaxHp -= 3;
+            }
+            const newDeck = p.deck.filter(c => c.id !== cardId);
+            const newHp = Math.min(p.currentHp, newMaxHp);
+            return { ...prev, player: { ...p, gold: p.gold - cost, deck: newDeck, maxHp: newMaxHp, currentHp: newHp } };
+        });
+    };
+
+    const handleShopLeave = () => {
+        if (gameState.challengeMode === 'COOP' && coopSession && coopSelfPeerId) {
+            setCoopSession(prev => {
+                if (!prev) return prev;
+                const nextParticipants = prev.participants.map(participant =>
+                    participant.peerId === coopSelfPeerId ? { ...participant, shopResolved: true } : participant
+                );
+                if (prev.isHost) {
+                    p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                } else {
+                    p2pService.send({ type: 'COOP_SELF_STATE', shopResolved: true });
+                }
+                return { ...prev, participants: nextParticipants };
+            });
+            return;
+        }
+        handleNodeComplete();
+    };
+    const applyHostCoopBattleSnapshot = useCallback((fromPeerId: string, payload: {
+        player: Player,
+        enemies?: Enemy[],
+        selectedEnemyId?: string | null,
+        combatLog?: string[],
+        turnLog?: string,
+        actingEnemyId?: string | null,
+        battleState?: CoopBattleState | null
+    }, options?: { advanceTurn?: boolean }) => {
+        const activeTurn = gameState.coopBattleState?.turnQueue[gameState.coopBattleState.turnCursor];
+        if (!activeTurn || activeTurn.type === 'ENEMY' || activeTurn.peerId !== fromPeerId) {
+            return;
+        }
+        upsertCoopPlayerSnapshot(fromPeerId, payload.player);
+        const nextBattleState = payload.battleState
+            ? {
+                ...payload.battleState,
+                players: payload.battleState.players.map(entry =>
+                    entry.peerId === fromPeerId
+                        ? { ...entry, player: payload.player, selectedEnemyId: payload.selectedEnemyId ?? entry.selectedEnemyId, isDown: payload.player.currentHp <= 0 }
+                        : entry
+                )
+            }
+            : gameState.coopBattleState
+                ? {
+                    ...gameState.coopBattleState,
+                    players: gameState.coopBattleState.players.map(entry =>
+                        entry.peerId === fromPeerId
+                            ? { ...entry, player: payload.player, selectedEnemyId: payload.selectedEnemyId ?? entry.selectedEnemyId, isDown: payload.player.currentHp <= 0 }
+                            : entry
+                    )
+                }
+                : null;
+        setGameState(prev => ({
+            ...prev,
+            enemies: payload.enemies ?? prev.enemies,
+            selectedEnemyId: payload.selectedEnemyId ?? prev.selectedEnemyId,
+            combatLog: payload.combatLog ?? prev.combatLog,
+            coopBattleState: nextBattleState ?? prev.coopBattleState
+        }));
+        if (payload.turnLog !== undefined) setTurnLog(payload.turnLog);
+        if (payload.actingEnemyId !== undefined) setActingEnemyId(payload.actingEnemyId ?? null);
+        setCoopBattleState(nextBattleState);
+
+        if (payload.enemies) {
+            const isHeartTransforming = payload.enemies.some(enemy => enemy.enemyType === 'THE_HEART' && enemy.phase === 1 && enemy.currentHp <= 0);
+            if (payload.enemies.length === 0 && !isHeartTransforming) {
+                window.setTimeout(() => {
+                    resolveBattleVictory();
+                }, 0);
+                return;
+            }
+        }
+
+        if (options?.advanceTurn) {
+            window.setTimeout(() => {
+                void executeQueuedTurnTransition();
+            }, 0);
+        } else if (nextBattleState) {
+            broadcastCoopBattleState(nextBattleState);
+        }
+    }, [broadcastCoopBattleState, executeQueuedTurnTransition, gameState.coopBattleState, resolveBattleVictory, setCoopBattleState, upsertCoopPlayerSnapshot]);
+    useEffect(() => {
+        if (!coopSession || gameState.challengeMode !== 'COOP' || gameState.screen === GameScreen.COOP_SETUP) return;
+
+        const previousOnData = p2pService.onData;
+        p2pService.onData = (data, fromPeerId) => {
+            if (data.type === 'COOP_STATE_SYNC' && !coopSession.isHost) {
+                if (data.aux) {
+                    setShopCards(data.aux.shopCards || []);
+                    setShopRelics(data.aux.shopRelics || []);
+                    setShopPotions(data.aux.shopPotions || []);
+                    setTreasureRewards(data.aux.treasureRewards || []);
+                    setTreasureOpened(data.aux.treasureOpened || false);
+                    setTreasurePools(data.aux.treasurePools || []);
+                    if (data.aux.eventData) {
+                        setEventData({
+                            ...data.aux.eventData,
+                            options: (data.aux.eventData.options || []).map(option => ({
+                                ...option,
+                                action: () => { }
+                            }))
+                        });
+                    } else {
+                        setEventData(null);
+                    }
+                    if (gameState.screen !== GameScreen.EVENT || data.state.screen !== GameScreen.EVENT) {
+                        setEventResultLog(data.aux.eventResultLog ?? null);
+                    }
+                }
+                setGameState(prev => {
+                    const shouldReleaseInitialMapWait =
+                        coopAwaitingMapSync &&
+                        COOP_LOCAL_SETUP_SCREEN_SET.has(prev.screen) &&
+                        !COOP_LOCAL_SETUP_SCREEN_SET.has(data.state.screen);
+                    const preserveLocalScreen =
+                        (!shouldReleaseInitialMapWait && shouldPreserveLocalCoopScreen(prev.screen, data.state.screen)) ||
+                        (prev.screen === GameScreen.REWARD && prev.rewards.length > 0 && data.state.screen !== GameScreen.REWARD);
+                    const preserveLocalRewards =
+                        prev.screen === GameScreen.REWARD &&
+                        data.state.screen === GameScreen.REWARD &&
+                        prev.rewards.length > 0;
+                    if (shouldReleaseInitialMapWait) {
+                        setCoopAwaitingMapSync(false);
+                    }
+                    const nextSharedState = applyCoopSharedState(prev, data.state);
+                    return {
+                        ...nextSharedState,
+                        player: prev.player,
+                        screen: preserveLocalScreen ? prev.screen : data.state.screen,
+                        rewards: (preserveLocalScreen || preserveLocalRewards)
+                            ? prev.rewards
+                            : (data.state.screen === GameScreen.REWARD ? prev.rewards : [])
+                    };
+                });
+                return;
+            }
+
+            if (data.type === 'COOP_PARTICIPANTS') {
+                setCoopSession(prev => prev ? { ...prev, participants: data.participants, decisionOwnerIndex: data.decisionOwnerIndex ?? prev.decisionOwnerIndex } : prev);
+                return;
+            }
+
+            if (data.type === 'COOP_MODE_SET' && !coopSession.isHost) {
+                setGameState(prev => ({ ...prev, mode: data.mode, screen: GameScreen.CHARACTER_SELECTION }));
+                return;
+            }
+
+            if (data.type === 'COOP_CHARACTER_SELECT' && coopSession.isHost && fromPeerId) {
+                setCoopSession(prev => {
+                    if (!prev) return prev;
+                    const nextParticipants = prev.participants.map(participant =>
+                        participant.peerId === fromPeerId
+                            ? {
+                                ...participant,
+                                selectedCharacterId: data.characterId,
+                                name: data.name,
+                                imageData: data.imageData,
+                                maxHp: data.maxHp,
+                                currentHp: data.currentHp
+                            }
+                            : participant
+                    );
+                    p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                    return { ...prev, participants: nextParticipants };
+                });
+                return;
+            }
+
+            if (data.type === 'COOP_SELF_STATE' && coopSession.isHost && fromPeerId) {
+                setCoopSession(prev => {
+                    if (!prev) return prev;
+                    let changed = false;
+                    const nextParticipants = prev.participants.map(participant => {
+                        if (participant.peerId !== fromPeerId) return participant;
+                        const nextParticipant = {
+                            ...participant,
+                            name: data.name ?? participant.name,
+                            imageData: data.imageData ?? participant.imageData,
+                            selectedCharacterId: data.selectedCharacterId ?? participant.selectedCharacterId,
+                            maxHp: data.maxHp ?? participant.maxHp,
+                            currentHp: data.currentHp ?? participant.currentHp,
+                            block: data.block ?? participant.block,
+                            nextTurnEnergy: data.nextTurnEnergy ?? participant.nextTurnEnergy,
+                            strength: data.strength ?? participant.strength,
+                            buffer: data.buffer ?? participant.buffer,
+                            revivedThisBattle: data.revivedThisBattle ?? participant.revivedThisBattle,
+                            quizResolved: data.quizResolved ?? participant.quizResolved,
+                            quizCorrectCount: data.quizCorrectCount ?? participant.quizCorrectCount,
+                            eventResolved: data.eventResolved ?? participant.eventResolved,
+                            restResolved: data.restResolved ?? participant.restResolved,
+                            shopResolved: data.shopResolved ?? participant.shopResolved,
+                            rewardResolved: data.rewardResolved ?? participant.rewardResolved,
+                            treasureResolved: data.treasureResolved ?? participant.treasureResolved
+                        };
+                        changed = changed || JSON.stringify(nextParticipant) !== JSON.stringify(participant);
+                        return nextParticipant;
+                    });
+                    if (!changed) return prev;
+                    p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                    return { ...prev, participants: nextParticipants };
+                });
+                return;
+            }
+
+            if (data.type === 'COOP_QUIZ_RESULT' && coopSession.isHost && fromPeerId) {
+                setCoopSession(prev => {
+                    if (!prev) return prev;
+                    const nextParticipants = prev.participants.map(participant =>
+                        participant.peerId === fromPeerId
+                            ? { ...participant, quizResolved: true, quizCorrectCount: data.correctCount }
+                            : participant
+                    );
+                    p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                    return { ...prev, participants: nextParticipants };
+                });
+                return;
+            }
+
+            if (data.type === 'COOP_PLAYER_SNAPSHOT' && coopSession.isHost && fromPeerId) {
+                upsertCoopPlayerSnapshot(fromPeerId, data.player);
+                return;
+            }
+
+            if (data.type === 'COOP_BATTLE_FINISH' && !coopSession.isHost) {
+                coopApplyingRemoteBattleSyncRef.current = true;
+                queuedCoopBattleEventRef.current = null;
+                setCoopBattleState(null);
+                setBattleFinisherCutinCard(null);
+                setGameState(prev => ({
+                    ...prev,
+                    player: buildPostBattlePlayer(prev.player, data.screen !== GameScreen.GAME_OVER),
+                    screen: shouldPreserveLocalCoopScreen(prev.screen, data.screen) ? prev.screen : data.screen,
+                    enemies: data.enemies ?? prev.enemies,
+                    selectedEnemyId: data.selectedEnemyId ?? prev.selectedEnemyId,
+                    combatLog: data.combatLog ?? prev.combatLog,
+                    coopBattleState: null
+                }));
+                window.setTimeout(() => {
+                    coopApplyingRemoteBattleSyncRef.current = false;
+                    coopLastBattleActionSignatureRef.current = null;
+                }, 80);
+                return;
+            }
+
+            if (data.type === 'COOP_BATTLE_SYNC') {
+                coopApplyingRemoteBattleSyncRef.current = true;
+                queuedCoopBattleEventRef.current = null;
+                setCoopBattleState(data.battleState);
+                setBattleFinisherCutinCard(data.finisherCutinCard ?? null);
+                if (data.battleState && coopSelfPeerId) {
+                    const selfBattlePlayer = data.battleState.players.find(entry => entry.peerId === coopSelfPeerId);
+                    if (selfBattlePlayer) {
+                        setGameState(prev => ({
+                            ...prev,
+                            player: selfBattlePlayer.player,
+                            enemies: data.enemies ?? prev.enemies,
+                            selectedEnemyId: selfBattlePlayer.selectedEnemyId ?? prev.selectedEnemyId,
+                            combatLog: data.combatLog ?? prev.combatLog,
+                            coopBattleState: data.battleState
+                        }));
+                    }
+                }
+                if (data.turnLog !== undefined) setTurnLog(data.turnLog);
+                if (data.actingEnemyId !== undefined) setActingEnemyId(data.actingEnemyId);
+                window.setTimeout(() => {
+                    coopApplyingRemoteBattleSyncRef.current = false;
+                    coopLastBattleActionSignatureRef.current = null;
+                }, 80);
+                return;
+            }
+
+            if (data.type === 'COOP_BATTLE_SELECT_ENEMY' && coopSession.isHost && fromPeerId && gameState.screen === GameScreen.BATTLE) {
+                const activeTurn = gameState.coopBattleState?.turnQueue[gameState.coopBattleState.turnCursor];
+                if (!activeTurn || activeTurn.type === 'ENEMY' || activeTurn.peerId !== fromPeerId) {
+                    return;
+                }
+                const nextBattleState = gameState.coopBattleState
+                    ? {
+                        ...gameState.coopBattleState,
+                        players: gameState.coopBattleState.players.map(entry =>
+                            entry.peerId === fromPeerId
+                                ? { ...entry, selectedEnemyId: data.enemyId }
+                                : entry
+                        )
+                    }
+                    : null;
+                setGameState(prev => ({
+                    ...prev,
+                    selectedEnemyId: data.enemyId,
+                    coopBattleState: nextBattleState ?? prev.coopBattleState
+                }));
+                if (nextBattleState) {
+                    setCoopBattleState(nextBattleState);
+                    broadcastCoopBattleState(nextBattleState);
+                }
+                return;
+            }
+
+            if (data.type === 'COOP_BATTLE_PLAY_CARD' && coopSession.isHost && fromPeerId && gameState.screen === GameScreen.BATTLE) {
+                applyHostCoopBattleSnapshot(fromPeerId, data);
+                return;
+            }
+
+            if (data.type === 'COOP_BATTLE_USE_POTION' && coopSession.isHost && fromPeerId && gameState.screen === GameScreen.BATTLE) {
+                applyHostCoopBattleSnapshot(fromPeerId, data);
+                return;
+            }
+
+            if ((data.type === 'COOP_BATTLE_TURN_START' || data.type === 'COOP_BATTLE_SELECTION_STATE' || data.type === 'COOP_BATTLE_MODAL_RESOLVE' || data.type === 'COOP_BATTLE_CODEX_SELECT') && coopSession.isHost && fromPeerId && gameState.screen === GameScreen.BATTLE) {
+                applyHostCoopBattleSnapshot(fromPeerId, data);
+                return;
+            }
+
+            if (data.type === 'COOP_END_TURN' && coopSession.isHost && fromPeerId && gameState.screen === GameScreen.BATTLE) {
+                applyHostCoopBattleSnapshot(fromPeerId, data, { advanceTurn: true });
+                return;
+            }
+
+            if (data.type === 'COOP_NODE_SELECT' && coopSession.isHost && fromPeerId && gameState.screen === GameScreen.MAP) {
+                const sender = coopSession.participants.find(participant => participant.peerId === fromPeerId);
+                const requestedNode = gameState.map.find(node => node.id === data.nodeId);
+                const currentNode = gameState.currentMapNodeId
+                    ? gameState.map.find(node => node.id === gameState.currentMapNodeId)
+                    : null;
+                const allowedNodeIds = currentNode
+                    ? currentNode.nextNodes
+                    : gameState.map.filter(node => node.y === 0).map(node => node.id);
+
+                if (sender && requestedNode && allowedNodeIds.includes(requestedNode.id)) {
+                    void handleNodeSelect(requestedNode, true);
+                }
+                return;
+            }
+
+            if (data.type === 'COOP_REWARD_SELECT' && coopSession.isHost && gameState.screen === GameScreen.REWARD) {
+                const rewardSet = fromPeerId ? coopRewardSets[fromPeerId] || [] : gameState.rewards;
+                const targetReward = rewardSet.find(reward => reward.id === data.rewardId) ?? data.item;
+                if (targetReward) {
+                    if (fromPeerId) {
+                        const nextRewardSet = removeRewardFromList(rewardSet, targetReward);
+                        setCoopRewardSets(prev => ({
+                            ...prev,
+                            [fromPeerId]: nextRewardSet
+                        }));
+                        const rewardResolved = nextRewardSet.length === 0;
+                        if (rewardResolved) {
+                            setCoopSession(prev => {
+                                if (!prev) return prev;
+                                const nextParticipants = prev.participants.map(participant =>
+                                    participant.peerId === fromPeerId
+                                        ? { ...participant, rewardResolved: true }
+                                        : participant
+                                );
+                                p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                                return { ...prev, participants: nextParticipants };
+                            });
+                        }
+                        const grantedItem = targetReward.type === 'COOP_SUPPORT'
+                            ? { ...targetReward, value: createCoopSupportInstance(targetReward.value as CoopSupportCard) }
+                            : targetReward;
+                        if (targetReward.type === 'COOP_SUPPORT') {
+                            p2pService.sendTo(fromPeerId, {
+                                type: 'COOP_SUPPORT_GRANT',
+                                rewardId: targetReward.id,
+                                card: grantedItem.value as CoopSupportCard,
+                                rewards: nextRewardSet,
+                                rewardResolved
+                            });
+                        } else {
+                            p2pService.sendTo(fromPeerId, {
+                                type: 'COOP_REWARD_GRANT',
+                                item: grantedItem,
+                                replacePotionId: data.replacePotionId,
+                                rewards: nextRewardSet,
+                                rewardResolved
+                            });
+                        }
+                        return;
+                    }
+                    handleRewardSelection(targetReward, data.replacePotionId);
+                }
+                return;
+            }
+
+            if (data.type === 'COOP_REWARD_SYNC') {
+                setCoopAwaitingRewardSync(false);
+                if (coopSelfPeerId) {
+                    setCoopSession(prev => prev ? {
+                        ...prev,
+                        participants: prev.participants.map(participant =>
+                            participant.peerId === coopSelfPeerId
+                                ? { ...participant, rewardResolved: false }
+                                : participant
+                        )
+                    } : prev);
+                }
+                setGameState(prev => ({
+                    ...prev,
+                    rewards: data.rewards
+                }));
+                return;
+            }
+
+            if (data.type === 'COOP_REWARD_SKIP' && coopSession.isHost && gameState.screen === GameScreen.REWARD) {
+                finishRewardPhase();
+                return;
+            }
+
+            if (data.type === 'COOP_SUPPORT_GRANT') {
+                setCoopSupportCards(prevCards => [...prevCards, data.card]);
+                setGameState(prev => ({
+                    ...prev,
+                    rewards: data.rewards ?? prev.rewards.filter(reward => reward.id !== data.rewardId)
+                }));
+                if (typeof data.rewardResolved === 'boolean' && coopSelfPeerId) {
+                    setCoopSession(prev => prev ? {
+                        ...prev,
+                        participants: prev.participants.map(participant =>
+                            participant.peerId === coopSelfPeerId
+                                ? { ...participant, rewardResolved: data.rewardResolved }
+                                : participant
+                        )
+                    } : prev);
+                }
+                return;
+            }
+
+            if (data.type === 'COOP_REWARD_GRANT') {
+                applyRewardToLocalPlayer(data.item, data.replacePotionId, data.rewards);
+                if (typeof data.rewardResolved === 'boolean' && coopSelfPeerId) {
+                    setCoopSession(prev => prev ? {
+                        ...prev,
+                        participants: prev.participants.map(participant =>
+                            participant.peerId === coopSelfPeerId
+                                ? { ...participant, rewardResolved: data.rewardResolved }
+                                : participant
+                        )
+                    } : prev);
+                }
+                return;
+            }
+
+            if (data.type === 'COOP_TREASURE_GRANT') {
+                if (data.player) {
+                    applyCoopPlayerStateToPeer(coopSelfPeerId, data.player);
+                } else {
+                    setGameState(prev => ({
+                        ...prev,
+                        player: applyTreasureRewardsToPlayer(prev.player, data.rewards, !!data.addCurse)
+                    }));
+                }
+                return;
+            }
+
+            if (data.type === 'COOP_TREASURE_CLAIM' && coopSession.isHost && gameState.screen === GameScreen.TREASURE && fromPeerId) {
+                claimCoopTreasurePoolForPeer(fromPeerId, data.poolId);
+                return;
+            }
+
+            if (data.type === 'COOP_EVENT_OPTION' && coopSession.isHost && gameState.screen === GameScreen.EVENT && eventData) {
+                if (!fromPeerId) return;
+                const sourcePlayer = fromPeerId === coopSelfPeerId
+                    ? gameState.player
+                    : coopPlayerSnapshots[fromPeerId];
+                if (!sourcePlayer) return;
+                resolveCoopEventOptionForPlayer(sourcePlayer, data.optionIndex, (nextPlayer, resultLog) => {
+                    if (fromPeerId === coopSelfPeerId) {
+                        applyCoopPlayerStateToPeer(coopSelfPeerId, nextPlayer);
+                        setEventResultLog(resultLog);
+                        return;
+                    }
+                    applyCoopPlayerStateToPeer(fromPeerId, nextPlayer);
+                    p2pService.sendTo(fromPeerId, { type: 'COOP_EVENT_RESULT', player: nextPlayer, resultLog });
+                });
+                return;
+            }
+
+            if (data.type === 'COOP_EVENT_RESULT' && !coopSession.isHost) {
+                applyCoopPlayerStateToPeer(coopSelfPeerId, data.player);
+                setEventResultLog(data.resultLog);
+                return;
+            }
+
+            if (data.type === 'COOP_REST_ACTION' && coopSession.isHost && gameState.screen === GameScreen.REST) {
+                return;
+            }
+
+            if (data.type === 'COOP_SHOP_ACTION' && coopSession.isHost && gameState.screen === GameScreen.SHOP) {
+                if (data.action === 'BUY_CARD' && data.itemId) {
+                    setShopCards(prev => prev.filter(entry => entry.id !== data.itemId));
+                }
+                if (data.action === 'BUY_RELIC' && data.itemId) {
+                    setShopRelics(prev => prev.filter(entry => entry.id !== data.itemId));
+                }
+                if (data.action === 'BUY_POTION' && data.itemId) {
+                    setShopPotions(prev => prev.filter(entry => entry.id !== data.itemId));
+                }
+                return;
+            }
+
+            if (data.type === 'COOP_SUPPORT_USE' && coopSession.isHost && gameState.screen === GameScreen.BATTLE) {
+                applyCoopSupportEffect({
+                    id: data.cardId,
+                    effectId: data.effectId,
+                    name: data.name,
+                    description: data.description,
+                    rarity: data.rarity as CoopSupportCard['rarity']
+                }, data.targetPeerId);
+            }
+        };
+
+        return () => {
+            p2pService.onData = previousOnData;
+        };
+    }, [applyCoopPlayerStateToPeer, applyCoopSharedState, applyCoopSupportEffect, applyHostCoopBattleSnapshot, applyRestAction, applyRewardToLocalPlayer, applySynthesizeCard, applyTreasureRewardsToPlayer, applyUpgradeCard, broadcastCoopBattleState, claimCoopTreasurePoolForPeer, coopPlayerSnapshots, coopRewardSets, coopSelfPeerId, coopSession, eventData, executeQueuedTurnTransition, gameState.challengeMode, gameState.coopBattleState, gameState.map, gameState.player, gameState.rewards, gameState.screen, handleNodeComplete, handleNodeSelect, handleShopBuyCard, handleShopBuyPotion, handleShopBuyRelic, handleShopLeave, handleShopRemoveCard, handleTreasureOpen, removeRewardFromList, resolveBattleVictory, resolveCoopEventOptionForPlayer, setCoopBattleState, shopCards, shopPotions, shopRelics, treasurePools, turnLog, upsertCoopPlayerSnapshot]);
 
     const goToFloorResult = () => {
         // 未解放のカードがあれば1枚解放する
@@ -5601,7 +7999,7 @@ const App: React.FC = () => {
                                     {isLoading ? trans("じゅんびちゅう...", languageMode) : trans("冒険を始める", languageMode)}
                                 </button>
 
-                                <div className="flex gap-2 w-full">
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full">
                                     <button
                                         onClick={startChallengeGame}
                                         className={`flex-1 py-3 px-1 text-xs font-bold border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-red-900/80 text-red-100 border-red-500 hover:bg-red-800 hover:shadow-red-900/50'}`}
@@ -5621,6 +8019,20 @@ const App: React.FC = () => {
                                         className={`flex-1 py-3 px-1 text-xs font-bold border-b-4 border-r-4 rounded-none bg-indigo-600/80 text-white border-indigo-400 hover:bg-indigo-700 cursor-pointer flex items-center justify-center shadow-md ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
                                     >
                                         <Wifi className="mr-1" size={14} /> {trans("VS", languageMode)}
+                                    </button>
+
+                                    <button
+                                        onClick={() => {
+                                            if (isDailyLimitReached) {
+                                                audioService.playSound('wrong');
+                                                setShowTimeLimitModal(true);
+                                                return;
+                                            }
+                                            setGameState(prev => ({ ...prev, screen: GameScreen.COOP_SETUP }));
+                                        }}
+                                        className={`flex-1 py-3 px-1 text-xs font-bold border-b-4 border-r-4 rounded-none bg-emerald-700/80 text-emerald-100 border-emerald-400 hover:bg-emerald-700 cursor-pointer flex items-center justify-center shadow-md ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
+                                    >
+                                        <Users className="mr-1" size={14} /> {trans("協力", languageMode)}
                                     </button>
 
                                     <button
@@ -5830,6 +8242,120 @@ const App: React.FC = () => {
                     </div>
                 )}
 
+                {coopSession && gameState.challengeMode === 'COOP' && gameState.screen !== GameScreen.COOP_SETUP && coopSession.roomCode && (
+                    <div className="absolute left-1/2 top-3 z-40 -translate-x-1/2">
+                        <div className="bg-slate-900/90 border border-emerald-500 rounded-lg px-3 py-2 text-emerald-100 shadow-lg">
+                            <div className="text-center text-[10px] font-bold tracking-wide text-emerald-200">
+                                {coopSession.isHost ? '協力コード' : '参加中コード'}
+                            </div>
+                            <div className="text-center text-lg font-black tracking-widest tabular-nums">{coopSession.roomCode}</div>
+                        </div>
+                    </div>
+                )}
+
+                {gameState.challengeMode === 'COOP' && gameState.screen !== GameScreen.COOP_SETUP && coopSupportCards.length > 0 && (
+                    <div className="absolute right-3 top-[72px] z-30">
+                        <div className="bg-slate-900/90 border border-emerald-500 rounded-lg px-3 py-2 text-emerald-100 shadow-lg min-w-[132px]">
+                            <div className="text-[10px] font-bold tracking-wide text-emerald-200">支援カード</div>
+                            <div className="text-xl font-black tabular-nums">{coopSupportCards.length}</div>
+                        </div>
+                    </div>
+                )}
+
+                {gameState.challengeMode === 'COOP' && coopSession && COOP_DECISION_HUD_SCREEN_SET.has(gameState.screen) && coopDecisionOwner && (
+                    <div className={`absolute right-3 z-30 ${coopSupportCards.length > 0 ? 'top-[144px]' : 'top-[72px]'}`}>
+                        <div className="bg-slate-900/90 border border-cyan-500 rounded-lg px-3 py-2 text-cyan-100 shadow-lg min-w-[168px]">
+                            <div className="text-[10px] font-bold tracking-wide text-cyan-200">決定役</div>
+                            <div className="text-sm font-black">{coopDecisionOwner.name}</div>
+                            <div className="text-[11px] text-cyan-100/80">{coopCanDecide ? 'あなたの番です' : '進行を待っています'}</div>
+                        </div>
+                    </div>
+                )}
+
+                {gameState.challengeMode === 'COOP' && coopSession && COOP_PARTY_HUD_SCREEN_SET.has(gameState.screen) && (
+                    <div className="absolute left-3 top-[72px] z-30 w-[min(320px,calc(100vw-24px))]">
+                        <div className="bg-slate-950/88 border border-emerald-500/60 rounded-xl shadow-2xl backdrop-blur px-3 py-2 text-white">
+                            <div className="mb-2 flex items-center justify-between">
+                                <div>
+                                    <div className="text-[10px] uppercase tracking-[0.25em] text-emerald-200">Coop Party</div>
+                                    <div className="text-[10px] text-emerald-100/80">{coopSession.participants.length}人</div>
+                                </div>
+                                <button
+                                    onClick={() => setCoopPartyHudOpen(prev => !prev)}
+                                    className="rounded border border-emerald-400/40 bg-emerald-950/30 px-2 py-1 text-[10px] font-bold text-emerald-100 hover:bg-emerald-900/40"
+                                >
+                                    {coopPartyHudOpen ? '非表示' : '表示'}
+                                </button>
+                            </div>
+                            {coopPartyHudOpen && (
+                            <div className="space-y-2">
+                                {coopSession.participants.map(participant => {
+                                    const isSelf = participant.peerId === coopSelfPeerId;
+                                    const isDecisionOwner = participant.peerId === coopDecisionOwner?.peerId;
+                                    const hpValue = participant.currentHp ?? participant.maxHp ?? 0;
+                                    const maxHpValue = participant.maxHp ?? hpValue;
+                                    return (
+                                        <div key={participant.peerId} className={`rounded-lg border px-2 py-2 ${isDecisionOwner ? 'border-cyan-400/70 bg-cyan-950/20' : 'border-white/10 bg-black/20'}`}>
+                                            <div className="mb-1 flex items-center justify-between gap-2">
+                                                <div className="min-w-0">
+                                                    <div className="truncate text-xs font-black text-white">
+                                                        {participant.name}{isSelf ? ' (あなた)' : ''}
+                                                    </div>
+                                                    <div className="text-[10px] text-slate-300">
+                                                        {isDecisionOwner ? '決定役' : '同行中'}
+                                                    </div>
+                                                </div>
+                                                <div className={`text-[10px] font-bold ${hpValue > 0 ? 'text-emerald-300' : 'text-red-300'}`}>
+                                                    {hpValue > 0 ? '生存' : 'ダウン'}
+                                                </div>
+                                            </div>
+                                            <div className="mb-1 h-1.5 overflow-hidden rounded-full bg-slate-800">
+                                                <div
+                                                    className={`h-full rounded-full ${hpValue > 0 ? 'bg-emerald-400' : 'bg-red-500'}`}
+                                                    style={{ width: `${maxHpValue > 0 ? Math.max(0, Math.min(100, (hpValue / maxHpValue) * 100)) : 0}%` }}
+                                                />
+                                            </div>
+                                            <div className="flex items-center justify-between text-[10px] text-slate-300">
+                                                <span>HP {hpValue}/{maxHpValue}</span>
+                                                {gameState.screen === GameScreen.REWARD ? (
+                                                    <span className={participant.rewardResolved ? 'text-yellow-300' : 'text-slate-300'}>
+                                                        {participant.rewardResolved ? '報酬完了' : '報酬中'}
+                                                    </span>
+                                                ) : gameState.screen === GameScreen.SHOP ? (
+                                                    <span className={participant.shopResolved ? 'text-yellow-300' : 'text-slate-300'}>
+                                                        {participant.shopResolved ? '買い物完了' : '買い物中'}
+                                                    </span>
+                                                ) : gameState.screen === GameScreen.REST ? (
+                                                    <span className={participant.restResolved ? 'text-yellow-300' : 'text-slate-300'}>
+                                                        {participant.restResolved ? '休憩完了' : '休憩中'}
+                                                    </span>
+                                                ) : gameState.screen === GameScreen.EVENT ? (
+                                                    <span className={participant.eventResolved ? 'text-yellow-300' : 'text-slate-300'}>
+                                                        {participant.eventResolved ? 'イベント完了' : 'イベント中'}
+                                                    </span>
+                                                ) : gameState.screen === GameScreen.TREASURE ? (
+                                                    <span className={participant.treasureResolved ? 'text-yellow-300' : 'text-slate-300'}>
+                                                        {participant.treasureResolved ? '宝確認完了' : '宝確認中'}
+                                                    </span>
+                                                ) : CHALLENGE_SCREEN_SET.has(gameState.screen) ? (
+                                                    <span className={participant.quizResolved ? 'text-yellow-300' : 'text-slate-300'}>
+                                                        {participant.quizResolved ? `クイズ ${participant.quizCorrectCount ?? 0}` : 'クイズ中'}
+                                                    </span>
+                                                ) : (
+                                                    <span className={isDecisionOwner ? 'text-cyan-300' : 'text-slate-400'}>
+                                                        {isDecisionOwner ? '進行中' : '待機'}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
                 {raceSession && !raceSession.ended && gameState.challengeMode === 'RACE' && RACE_TRICK_SCREEN_SET.has(gameState.screen) && (
                     <>
                         <div className="absolute left-3 bottom-3 z-40 w-[min(360px,calc(100vw-24px))]">
@@ -5985,6 +8511,14 @@ const App: React.FC = () => {
                                 </div>
                             </div>
                         )}
+                        {coopSession && !coopSession.isHost && gameState.challengeMode === 'COOP' && (
+                            <div className="absolute inset-0 bg-black/65 backdrop-blur-[1px] flex items-center justify-center p-4 z-20">
+                                <div className="bg-slate-900 border-2 border-emerald-500 rounded-xl p-6 text-white text-center max-w-md w-full">
+                                    <div className="text-xl font-black mb-2">協力モード準備中</div>
+                                    <div className="text-sm text-emerald-200">ホストのモード選択を待っています...</div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -5996,6 +8530,9 @@ const App: React.FC = () => {
                             onSelect={handleCharacterSelect}
                             challengeMode={gameState.challengeMode}
                             languageMode={languageMode}
+                            coopParticipants={gameState.challengeMode === 'COOP' ? coopSession?.participants : undefined}
+                            coopSelfPeerId={gameState.challengeMode === 'COOP' ? coopSelfPeerId : undefined}
+                            coopDecisionOwnerPeerId={gameState.challengeMode === 'COOP' ? coopDecisionOwner?.peerId : undefined}
                         />
                     </div>
                 )}
@@ -6012,6 +8549,14 @@ const App: React.FC = () => {
                 {gameState.screen === GameScreen.RELIC_SELECTION && (
                     <div className="absolute inset-0">
                         <RelicSelectionScreen relics={starterRelics} onSelect={handleRelicSelect} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} />
+                        {gameState.challengeMode === 'COOP' && coopAwaitingMapSync && coopSession && !coopSession.isHost && (
+                            <div className="absolute inset-0 bg-black/65 backdrop-blur-[1px] flex items-center justify-center p-4 z-20">
+                                <div className="bg-slate-900 border-2 border-emerald-500 rounded-xl p-6 text-white text-center max-w-md w-full">
+                                    <div className="text-xl font-black mb-2">協力モード準備中</div>
+                                    <div className="text-sm text-emerald-200">ホストが初回マップを確定するまで待っています...</div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -6047,6 +8592,8 @@ const App: React.FC = () => {
                             floor={gameState.floor}
                             typingMode={gameState.challengeMode === 'TYPING'}
                             selectionHoldMs={raceEffects.shoeLaceUntil > raceEffectNow ? 400 : 0}
+                            selectionDisabled={gameState.challengeMode === 'COOP' && !!coopSession?.isHost && !coopCanDecide}
+                            selectionDisabledMessage={gameState.challengeMode === 'COOP' ? `${coopDecisionOwner?.name || '他のプレイヤー'} が進行先を選択しています` : undefined}
                         />
                         {raceSession && !raceSession.ended && (
                             <>
@@ -6103,7 +8650,7 @@ const App: React.FC = () => {
                             />
                         ) : (
                             <BattleScene
-                                player={gameState.player} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onEndTurn={handleEndTurnClick} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={gameState.selectionState} onHandSelection={handleHandSelection}
+                                player={gameState.player} companions={gameState.challengeMode === 'COOP' ? coopCompanions : undefined} coopTurnQueue={gameState.challengeMode === 'COOP' ? coopBattleQueueView : undefined} coopCanAct={gameState.challengeMode === 'COOP' ? coopBattleCanAct : true} coopTurnOwnerLabel={gameState.challengeMode === 'COOP' ? coopBattleTurnOwnerLabel : undefined} coopSupportCards={gameState.challengeMode === 'COOP' ? coopSupportCards : undefined} onUseCoopSupport={gameState.challengeMode === 'COOP' ? handleUseCoopSupport : undefined} selfDown={gameState.challengeMode === 'COOP' && gameState.player.currentHp <= 0} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onEndTurn={handleEndTurnClick} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={gameState.selectionState} onHandSelection={handleHandSelection}
                                 onUsePotion={handleUsePotion} combatLog={gameState.combatLog} languageMode={languageMode} codexOptions={gameState.codexOptions} onCodexSelect={onCodexSelect} onPlaySynthesizedCard={handlePlaySynthesizedCard}
                                 parryState={gameState.parryState} onParry={handleParryClick} activeEffects={gameState.activeEffects}
                                 onCancelSelection={handleCancelSelection}
@@ -6130,6 +8677,7 @@ const App: React.FC = () => {
                             mode={gameState.mode}
                             onComplete={handleMathChallengeComplete}
                             debugSkip={isMathDebugSkipped}
+                            isChallenge={false}
                         />
                     </div>
                 )}
@@ -6140,6 +8688,7 @@ const App: React.FC = () => {
                             mode={gameState.mode}
                             onComplete={handleMathChallengeComplete}
                             debugSkip={isMathDebugSkipped}
+                            isChallenge={false}
                         />
                     </div>
                 )}
@@ -6150,6 +8699,7 @@ const App: React.FC = () => {
                             mode={gameState.mode}
                             onComplete={handleMathChallengeComplete}
                             debugSkip={isMathDebugSkipped}
+                            isChallenge={false}
                         />
                     </div>
                 )}
@@ -6162,6 +8712,31 @@ const App: React.FC = () => {
                             onModeCorrect={handleModeCorrectProgress}
                             onComplete={handleMathChallengeComplete}
                             debugSkip={isMathDebugSkipped}
+                            isChallenge={false}
+                        />
+                    </div>
+                )}
+
+                {gameState.screen === GameScreen.COOP_SETUP && (
+                    <div className="absolute inset-0">
+                        <CoopSetupScreen
+                            player={gameState.player}
+                            onStart={(payload: CoopStartPayload) => {
+                                setCoopSession({
+                                    isHost: payload.isHost,
+                                    name: payload.name,
+                                    roomCode: payload.roomCode,
+                                    startedAt: Date.now(),
+                                    participants: payload.participants,
+                                    decisionOwnerIndex: 0
+                                });
+                                setGameState(prev => ({
+                                    ...prev,
+                                    challengeMode: 'COOP',
+                                    screen: GameScreen.MODE_SELECTION
+                                }));
+                            }}
+                            onClose={returnToTitle}
                         />
                     </div>
                 )}
@@ -6179,7 +8754,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.REWARD && (
                     <div className="absolute inset-0">
-                        <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading} currentPotions={gameState.player.potions} potionCapacity={getPotionCapacity(gameState.player)} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} dummyRewards={raceRewardDummyDisplay} />
+                        <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading || coopAwaitingRewardSync} currentPotions={gameState.player.potions} potionCapacity={getPotionCapacity(gameState.player)} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} dummyRewards={raceRewardDummyDisplay} autoSkipWhenEmpty={gameState.challengeMode !== 'COOP'} skipDisabled={coopRewardSkipDisabled} skipDisabledMessage={coopAwaitingRewardSync ? 'ホストが報酬を確定するまで待っています' : (coopRewardSkipDisabled ? '他のプレイヤーの報酬完了を待っています' : undefined)} interactionDisabled={gameState.challengeMode === 'COOP' ? false : coopInteractionDisabled} interactionDisabledMessage={coopInteractionDisabledMessage} />
                     </div>
                 )}
 
@@ -6190,9 +8765,11 @@ const App: React.FC = () => {
                             onRest={handleRestAction}
                             onUpgrade={handleUpgradeCard}
                             onSynthesize={handleSynthesizeCard}
-                            onLeave={handleNodeComplete}
+                            onLeave={handleRestLeave}
                             languageMode={languageMode}
                             typingMode={gameState.challengeMode === 'TYPING'}
+                            interactionDisabled={gameState.challengeMode === 'COOP' ? false : coopInteractionDisabled}
+                            interactionDisabledMessage={coopInteractionDisabledMessage}
                         />
                     </div>
                 )}
@@ -6204,70 +8781,17 @@ const App: React.FC = () => {
                             shopCards={shopCards}
                             shopRelics={shopRelics}
                             shopPotions={shopPotions}
-                            onBuyCard={(card) => {
-                                setGameState(prev => {
-                                    let price = card.price || 50;
-                                    if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
-                                    if (raceEffects.shopMarkupUntil > raceEffectNow) price = Math.floor(price * 1.25);
-                                    const newP = { ...prev.player, gold: prev.player.gold - price };
-                                    addCardToDeckWithRelics(newP, { ...card, id: `buy-${Date.now()}` }, { addToDiscard: true });
-                                    return { ...prev, player: newP };
-                                });
-                                storageService.saveUnlockedCard(card.name);
-                            }}
-                            onBuyRelic={(relic) => {
-                                setGameState(prev => {
-                                    let price = relic.price || 150;
-                                    if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
-                                    if (raceEffects.shopMarkupUntil > raceEffectNow) price = Math.floor(price * 1.25);
-                                    const newP = { ...prev.player, gold: prev.player.gold - price, relics: [...prev.player.relics, relic] };
-                                    if (relic.id === 'SOZU') newP.maxEnergy += 1;
-                                    if (relic.id === 'CURSED_KEY') newP.maxEnergy += 1;
-                                    if (relic.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
-                                    if (relic.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
-                                    if (relic.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
-                                    if (relic.id === 'OLD_COIN') newP.gold += 300;
-                                    if (relic.id === 'MATRYOSHKA') newP.relicCounters['MATRYOSHKA'] = 2;
-                                    if (relic.id === 'HAPPY_FLOWER') newP.relicCounters['HAPPY_FLOWER'] = 0;
-                                    applyExtendedRelicAcquireEffects(newP, relic);
-                                    return { ...prev, player: newP };
-                                });
-                                storageService.saveUnlockedRelic(relic.id);
-                            }}
-                            onBuyPotion={(potion, replacePotionId) => {
-                                setGameState(prev => {
-                                    if (prev.player.potions.length < getPotionCapacity(prev.player) || replacePotionId) {
-                                        let price = potion.price || 50;
-                                        if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
-                                        if (raceEffects.shopMarkupUntil > raceEffectNow) price = Math.floor(price * 1.25);
-                                        let newPotions = [...prev.player.potions];
-                                        if (replacePotionId) {
-                                            newPotions = newPotions.filter(pt => pt.id !== replacePotionId);
-                                        }
-                                        return { ...prev, player: { ...prev.player, gold: prev.player.gold - price, potions: [...newPotions, { ...potion, id: `buy-pot-${Date.now()}` }] } }
-                                    }
-                                    return prev;
-                                });
-                                storageService.saveUnlockedPotion(potion.templateId);
-                            }}
-                            onRemoveCard={(cardId, cost) => {
-                                setGameState(prev => {
-                                    const p = prev.player;
-                                    const card = p.deck.find(c => c.id === cardId);
-                                    let newMaxHp = p.maxHp;
-                                    if (card && (card.name === '寄生虫' || card.name === 'PARASITE')) {
-                                        newMaxHp -= 3;
-                                    }
-                                    const newDeck = p.deck.filter(c => c.id !== cardId);
-                                    const newHp = Math.min(p.currentHp, newMaxHp);
-                                    return { ...prev, player: { ...p, gold: p.gold - cost, deck: newDeck, maxHp: newMaxHp, currentHp: newHp } };
-                                });
-                            }}
-                            onLeave={handleNodeComplete}
+                            onBuyCard={handleShopBuyCard}
+                            onBuyRelic={handleShopBuyRelic}
+                            onBuyPotion={handleShopBuyPotion}
+                            onRemoveCard={handleShopRemoveCard}
+                            onLeave={handleShopLeave}
                             potionCapacity={getPotionCapacity(gameState.player)}
                             languageMode={languageMode}
                             typingMode={gameState.challengeMode === 'TYPING'}
                             priceMultiplier={raceEffects.shopMarkupUntil > raceEffectNow ? 1.25 : 1}
+                            interactionDisabled={gameState.challengeMode === 'COOP' ? false : coopInteractionDisabled}
+                            interactionDisabledMessage={coopInteractionDisabledMessage}
                         />
                     </div>
                 )}
@@ -6311,12 +8835,18 @@ const App: React.FC = () => {
                         <EventScreen
                             title={trans(eventData.title, languageMode)}
                             description={trans(eventData.description, languageMode)}
-                            options={eventData.options.map((o: any) => ({ ...o, label: trans(o.label, languageMode), text: trans(o.text, languageMode) }))}
+                            options={eventData.options.map((o: any, idx: number) => ({ ...o, action: () => handleCoopEventOptionSelect(idx), label: trans(o.label, languageMode), text: trans(o.text, languageMode) }))}
                             imageKey={eventData.title}
                             image={gameState.player.imageData}
                             resultLog={eventResultLog ? trans(eventResultLog, languageMode) : null}
                             onContinue={handleEventComplete}
                             typingMode={gameState.challengeMode === 'TYPING'}
+                            interactionDisabled={gameState.challengeMode === 'COOP'
+                                ? !!coopSession?.participants.find(participant => participant.peerId === coopSelfPeerId)?.eventResolved
+                                : coopInteractionDisabled}
+                            interactionDisabledMessage={gameState.challengeMode === 'COOP'
+                                ? '他のプレイヤーの結果を待っています'
+                                : coopInteractionDisabledMessage}
                         />
                     </div>
                 )}
@@ -6335,37 +8865,16 @@ const App: React.FC = () => {
                     <div className="absolute inset-0">
                         <TreasureScreen
                             rewards={treasureRewards}
-                            onOpen={() => {
-                                const hasCursedKey = !!gameState.player.relics.find(r => r.id === 'CURSED_KEY');
-                                setGameState(prev => {
-                                    const newP = { ...prev.player };
-                                    treasureRewards.forEach(r => {
-                                        if (r.type === 'GOLD') newP.gold += r.value;
-                                        if (r.type === 'RELIC') {
-                                            newP.relics = [...newP.relics, r.value];
-                                            storageService.saveUnlockedRelic(r.value.id);
-                                            if (r.value.id === 'SOZU') newP.maxEnergy += 1;
-                                            if (r.value.id === 'CURSED_KEY') newP.maxEnergy += 1;
-                                            if (r.value.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
-                                            if (r.value.id === 'VELVET_CHOKER') newP.maxEnergy += 1;
-                                            if (r.value.id === 'WAFFLE') { newP.maxHp += 7; newP.currentHp = newP.maxHp; }
-                                            if (r.value.id === 'OLD_COIN') newP.gold += 300;
-                                            if (r.value.id === 'MATRYOSHKA') newP.relicCounters['MATRYOSHKA'] = 2;
-                                            if (r.value.id === 'HAPPY_FLOWER') newP.relicCounters['HAPPY_FLOWER'] = 0;
-                                            applyExtendedRelicAcquireEffects(newP, r.value);
-                                        }
-                                    });
-                                    if (hasCursedKey) {
-                                        const curse = { ...CURSE_CARDS.PAIN, id: `curse-${Date.now()}` };
-                                        addCardToDeckWithRelics(newP, curse, { addToDiscard: true });
-                                    }
-                                    return { ...prev, player: newP };
-                                });
-                            }}
-                            onLeave={handleNodeComplete}
+                            onOpen={handleTreasureOpen}
+                            onLeave={gameState.challengeMode === 'COOP' ? handleTreasureLeave : handleNodeComplete}
                             hasCursedKey={!!gameState.player.relics.find(r => r.id === 'CURSED_KEY')}
                             languageMode={languageMode}
                             typingMode={gameState.challengeMode === 'TYPING'}
+                            opened={gameState.challengeMode === 'COOP' ? treasureOpened : undefined}
+                            pools={gameState.challengeMode === 'COOP' ? treasurePools : undefined}
+                            onClaimPool={gameState.challengeMode === 'COOP' ? handleTreasureClaim : undefined}
+                            resolved={gameState.challengeMode === 'COOP' ? !!coopSession?.participants.find(participant => participant.peerId === coopSelfPeerId)?.treasureResolved : false}
+                            waitingForOthers={gameState.challengeMode === 'COOP' ? !!coopSession?.participants.some(participant => !participant.treasureResolved) : false}
                         />
                     </div>
                 )}
