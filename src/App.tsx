@@ -5009,7 +5009,7 @@ const App: React.FC = () => {
 
     const startPlayerTurn = () => {
         if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost && gameState.screen === GameScreen.BATTLE) {
-            queueCoopBattleEvent({ type: 'COOP_BATTLE_CODEX_SELECT' });
+            queueCoopBattleEvent({ type: 'COOP_BATTLE_TURN_START' });
         }
         setTurnLog(getSelfTurnLogLabel());
         setGameState(prev => {
@@ -7754,13 +7754,16 @@ const App: React.FC = () => {
                 window.setTimeout(() => {
                     coopApplyingRemoteBattleSyncRef.current = false;
                     coopLastBattleActionSignatureRef.current = null;
+                    if (queuedCoopBattleEventRef.current) {
+                        setQueuedCoopBattleEventTick(prev => prev + 1);
+                    }
                 }, 80);
                 return;
             }
 
             if (data.type === 'COOP_BATTLE_SYNC') {
                 coopApplyingRemoteBattleSyncRef.current = true;
-                queuedCoopBattleEventRef.current = null;
+                const pendingQueuedBattleEvent = queuedCoopBattleEventRef.current;
                 setCoopBattleState(data.battleState);
                 setBattleFinisherCutinCard(data.finisherCutinCard ?? null);
                 if (data.battleState && coopSelfPeerId) {
@@ -7768,7 +7771,13 @@ const App: React.FC = () => {
                     if (selfBattlePlayer) {
                         setGameState(prev => ({
                             ...prev,
-                            player: selfBattlePlayer.player,
+                            player: (
+                                pendingQueuedBattleEvent &&
+                                data.battleState?.turnQueue[data.battleState.turnCursor]?.type !== 'ENEMY' &&
+                                data.battleState?.turnQueue[data.battleState.turnCursor]?.peerId === coopSelfPeerId
+                            )
+                                ? prev.player
+                                : selfBattlePlayer.player,
                             enemies: data.enemies ?? prev.enemies,
                             selectedEnemyId: selfBattlePlayer.selectedEnemyId ?? prev.selectedEnemyId,
                             combatLog: data.combatLog ?? prev.combatLog,
@@ -7781,6 +7790,9 @@ const App: React.FC = () => {
                 window.setTimeout(() => {
                     coopApplyingRemoteBattleSyncRef.current = false;
                     coopLastBattleActionSignatureRef.current = null;
+                    if (queuedCoopBattleEventRef.current) {
+                        setQueuedCoopBattleEventTick(prev => prev + 1);
+                    }
                 }, 80);
                 return;
             }
