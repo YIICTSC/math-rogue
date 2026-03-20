@@ -484,8 +484,8 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
            {viewMode === 'REMOVE' && (
                <div className="w-full h-full overflow-y-auto p-4 bg-black/40 rounded custom-scrollbar mb-4">
                    <div className="grid grid-cols-3 gap-2 pt-4">
-                       {player.deck.map(card => (
-                           <div key={card.id} className="scale-75 origin-top-left w-24 h-36 cursor-pointer relative group" onClick={() => handleRemove(card.id)}>
+                      {player.deck.map(card => (
+                           <div key={card.id} className="scale-75 origin-top-left w-24 h-36 cursor-pointer relative group">
                                 {typingMode && removeShortcutItems.findIndex(deckCard => deckCard.id === card.id) !== -1 && (
                                     <div className="absolute right-1 top-1 z-30 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200 scale-125">
                                         {SHOP_SHORTCUT_KEYS[removeShortcutItems.findIndex(deckCard => deckCard.id === card.id)]}
