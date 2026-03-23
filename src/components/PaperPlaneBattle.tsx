@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation, Droplets, Recycle, Repeat, User, Lock, Users, Target, UserPlus, Gauge, Swords, Dice5, Ghost } from 'lucide-react';
+import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation, Droplets, Recycle, Repeat, User, Lock, Users, Target, UserPlus, Gauge, Swords, Dice5, Ghost, Rocket, Fan, Cpu } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { storageService, PaperPlaneProgress } from '../services/storageService';
@@ -25,6 +25,7 @@ interface EnergyCard {
 interface EnergySlot {
     req: EnergyColor | 'ANY';
     value: number | null;
+    loadedColor?: EnergyColor | null;
 }
 
 interface ShipPart {
@@ -36,7 +37,15 @@ interface ShipPart {
     multiplier: number; // Effect multiplier per energy
     basePower: number; // Flat bonus when activated (Full slots)
     hp: number; // Part HP (Visual mainly)
-    specialEffect?: 'RANK_UP' | 'HEAL' | 'RECYCLE' | 'THORNS'; 
+    specialEffect?: 'RANK_UP' | 'HEAL' | 'RECYCLE' | 'THORNS' | 'WHITE_BONUS' | 'MATCH_BONUS' | 'LOW_SCORE_BOOST' | 'RAINBOW_BONUS' | 'SOLO_DOUBLE' | 'BLUE_BONUS' | 'ORANGE_BONUS' | 'HIGH_SCORE_BOOST' | 'EVEN_BONUS' | 'ODD_BONUS' | 'SEQUENCE_BONUS' | 'MONO_COLOR_BONUS' | 'OVERCHARGE_HEAL' | 'OVERCHARGE_RECYCLE' | 'PRIME_BONUS' | 'SQUARE_BONUS' | 'GCD_BONUS' | 'LCM_BONUS' | 'FIBONACCI_BONUS' | 'MEAN_BONUS' | 'MEDIAN_BONUS' | 'SAME_TYPE_LINK' | 'ROW_UNITY' | 'CENTER_COMMAND' | 'DIAGONAL_LINK' | 'MIRROR_BONUS' | 'TURN_SCALE' | 'DAMAGE_MEMORY' | 'EFFORT_STACK' | 'UNIQUE_VALUE_RECORD' | 'RANDOM_SPIKE' | 'FORECAST_COLOR' | 'NO_CONSUME_CHANCE' | 'PALINDROME_BONUS' | 'SUM_FIFTEEN_BONUS' | 'MULTIPLE_OF_THREE_BONUS' | 'HAND_SIZE_BONUS' | 'TEMP_CARD_BONUS' | 'EDGE_BONUS' | 'CORNER_BONUS' | 'ISOLATION_BONUS' | 'ALT_COLOR_BONUS' | 'LAST_STREAK_BONUS' | 'DIVISOR_BONUS' | 'PRIME_FACTOR_BONUS' | 'SUM_TARGET_BONUS' | 'MOD_MATCH_BONUS' | 'RATIO_BONUS' | 'PRODUCT_SUPPORT_BONUS' | 'MEAN_DOUBLE_BONUS' | 'MODE_BONUS' | 'LOW_SPREAD_BONUS' | 'GCD_FUEL_BONUS' | 'ARITHMETIC_BONUS' | 'CENTER_ADJ_BONUS' | 'ROW_TYPE_LINK' | 'ADJACENT_DIVERSITY_BONUS' | 'ISOLATION_FUEL_BONUS' | 'CENTER_COLUMN_BONUS' | 'RANDOM_SWING' | 'OVERCHARGE_SUPPORT' | 'RAINBOW_HEAL_BONUS' | 'FUEL_RESERVE_BONUS' | 'BLUE_THORNS_BONUS' | 'ECHO_MATCH_BONUS' | 'ALL_UNIQUE_RAINBOW_BONUS' | 'CENTER_FULL_BONUS' | 'UNIQUE_RAINBOW_BONUS'; 
+}
+
+interface BattleStats {
+    damageTaken: number;
+    seenValues: number[];
+    partLoadCounts: Record<string, number>;
+    lastLoadedPartId: string | null;
+    lastLoadedStreak: number;
 }
 
 interface Talent {
@@ -149,10 +158,28 @@ interface EnemyDataTemplate {
 
 const GENERIC_TALENTS: Talent[] = [
     { id: 'T_HEALTH', name: '体力自慢', description: '最大HP+5', effectType: 'MAX_HP', value: 5 },
+    { id: 'T_HEALTH_PLUS', name: '皆勤賞', description: '最大HP+8', effectType: 'MAX_HP', value: 8 },
+    { id: 'T_HEALTH_BIG', name: '保健委員', description: '最大HP+10', effectType: 'MAX_HP', value: 10 },
     { id: 'T_FUEL', name: '省エネ', description: '最大燃料+1', effectType: 'FUEL', value: 1 },
+    { id: 'T_FUEL_PLUS', name: '帰宅部ダッシュ', description: '最大燃料+2', effectType: 'FUEL', value: 2 },
+    { id: 'T_FUEL_BIG', name: '校庭ランナー', description: '最大燃料+3', effectType: 'FUEL', value: 3 },
     { id: 'T_BARGAIN', name: '交渉術', description: 'ショップ割引(10%)', effectType: 'SHOP_DISCOUNT', value: 10 },
+    { id: 'T_BARGAIN_PLUS', name: '学級会計', description: 'ショップ割引(15%)', effectType: 'SHOP_DISCOUNT', value: 15 },
+    { id: 'T_BARGAIN_BIG', name: '文化祭バイヤー', description: 'ショップ割引(20%)', effectType: 'SHOP_DISCOUNT', value: 20 },
     { id: 'T_POWER', name: '筋トレ', description: 'パッシブ出力+1', effectType: 'PASSIVE_POWER', value: 1 },
+    { id: 'T_POWER_PLUS', name: '放課後特訓', description: 'パッシブ出力+2', effectType: 'PASSIVE_POWER', value: 2 },
+    { id: 'T_POWER_BIG', name: '学年代表', description: 'パッシブ出力+3', effectType: 'PASSIVE_POWER', value: 3 },
     { id: 'T_ENERGY', name: '準備', description: '開始時エネルギーカード+1', effectType: 'START_ENERGY', value: 1 },
+    { id: 'T_ENERGY_PLUS', name: '早起き', description: '開始時エネルギーカード+2', effectType: 'START_ENERGY', value: 2 },
+    { id: 'T_ENERGY_BIG', name: '朝練習慣', description: '開始時エネルギーカード+3', effectType: 'START_ENERGY', value: 3 },
+    { id: 'T_HEALTH_FUEL', name: 'サバイバル遠足', description: '最大燃料+1', effectType: 'FUEL', value: 1 },
+    { id: 'T_POWER_FUEL', name: 'ラジコン研究', description: 'パッシブ出力+1', effectType: 'PASSIVE_POWER', value: 1 },
+    { id: 'T_POWER_SHOP', name: '商店街の人気者', description: 'ショップ割引(12%)', effectType: 'SHOP_DISCOUNT', value: 12 },
+    { id: 'T_HEALTH_START', name: '寝だめ上手', description: '最大HP+6', effectType: 'MAX_HP', value: 6 },
+    { id: 'T_FUEL_START', name: '通学快速', description: '最大燃料+2', effectType: 'FUEL', value: 2 },
+    { id: 'T_POWER_START', name: '黒板係', description: 'パッシブ出力+2', effectType: 'PASSIVE_POWER', value: 2 },
+    { id: 'T_SHOP_START', name: 'フリマ名人', description: 'ショップ割引(18%)', effectType: 'SHOP_DISCOUNT', value: 18 },
+    { id: 'T_ENERGY_SHOP', name: '朝市の常連', description: '開始時エネルギーカード+1', effectType: 'START_ENERGY', value: 1 },
 ];
 
 const PILOTS: Pilot[] = [
@@ -161,6 +188,27 @@ const PILOTS: Pilot[] = [
     { id: 'PL_GIRL', name: '委員長', spriteName: 'GIRL|青', intrinsicTalent: { id: 'IT_BUDGET', name: '予算管理', description: 'ショップ割引(20%)', effectType: 'SHOP_DISCOUNT', value: 20 } },
     { id: 'PL_SPORT', name: 'エース', spriteName: 'MUSCLE|橙', intrinsicTalent: { id: 'IT_STAMINA', name: 'スタミナ', description: '最大燃料+2', effectType: 'FUEL', value: 2 } },
     { id: 'PL_SENIOR', name: '謎の上級生', spriteName: 'SENIOR|紫', intrinsicTalent: { id: 'IT_SECRET', name: '裏ルート', description: '開始時エネルギー+2', effectType: 'START_ENERGY', value: 2 } },
+    { id: 'PL_LIBRARY', name: '図書委員', spriteName: 'HUMANOID|#5e35b1', intrinsicTalent: { id: 'IT_BOOK', name: '静かな集中', description: '開始時エネルギーカード+1', effectType: 'START_ENERGY', value: 1 } },
+    { id: 'PL_BROADCAST', name: '放送委員', spriteName: 'HUMANOID|#26a69a', intrinsicTalent: { id: 'IT_VOICE', name: '声量アップ', description: 'パッシブ出力+2', effectType: 'PASSIVE_POWER', value: 2 } },
+    { id: 'PL_HEALTH', name: '保健委員', spriteName: 'GIRL|#66bb6a', intrinsicTalent: { id: 'IT_CARE', name: '健康管理', description: '最大HP+12', effectType: 'MAX_HP', value: 12 } },
+    { id: 'PL_TREASURER', name: '会計係', spriteName: 'HUMANOID|#ffa726', intrinsicTalent: { id: 'IT_ACCOUNT', name: '節約上手', description: 'ショップ割引(18%)', effectType: 'SHOP_DISCOUNT', value: 18 } },
+    { id: 'PL_TRACK', name: '陸上部', spriteName: 'MUSCLE|#29b6f6', intrinsicTalent: { id: 'IT_RUN', name: '全力疾走', description: '最大燃料+3', effectType: 'FUEL', value: 3 } },
+    { id: 'PL_ART', name: '美術部', spriteName: 'GIRL|#ec407a', intrinsicTalent: { id: 'IT_COLOR', name: '配色感覚', description: '開始時エネルギーカード+1', effectType: 'START_ENERGY', value: 1 } },
+    { id: 'PL_SCIENCE', name: '理科研究会', spriteName: 'HUMANOID|#42a5f5', intrinsicTalent: { id: 'IT_LAB', name: '実験出力', description: 'パッシブ出力+3', effectType: 'PASSIVE_POWER', value: 3 } },
+    { id: 'PL_GARDEN', name: '園芸委員', spriteName: 'GIRL|#8bc34a', intrinsicTalent: { id: 'IT_GREEN', name: '土いじり体質', description: '最大HP+8', effectType: 'MAX_HP', value: 8 } },
+    { id: 'PL_FESTIVAL', name: '文化祭実行委員', spriteName: 'HERO_SIDE|#ff7043', intrinsicTalent: { id: 'IT_FEST', name: '出店交渉', description: 'ショップ割引(25%)', effectType: 'SHOP_DISCOUNT', value: 25 } },
+    { id: 'PL_SOCCER', name: 'サッカー部主将', spriteName: 'MUSCLE|#43a047', intrinsicTalent: { id: 'IT_CAPTAIN', name: 'グラウンド走破', description: '最大燃料+2', effectType: 'FUEL', value: 2 } },
+    { id: 'PL_MUSIC', name: '吹奏楽部', spriteName: 'GIRL|#ab47bc', intrinsicTalent: { id: 'IT_RHYTHM', name: 'リズム感', description: '開始時エネルギーカード+2', effectType: 'START_ENERGY', value: 2 } },
+    { id: 'PL_CHEM', name: '薬品庫の番人', spriteName: 'SENIOR|#26c6da', intrinsicTalent: { id: 'IT_FORMULA', name: '危険調合', description: 'パッシブ出力+2', effectType: 'PASSIVE_POWER', value: 2 } },
+    { id: 'PL_DISCIPLINE', name: '風紀委員', spriteName: 'SENIOR|#8d6e63', intrinsicTalent: { id: 'IT_RULE', name: '規律徹底', description: '最大HP+10', effectType: 'MAX_HP', value: 10 } },
+    { id: 'PL_SWEETS', name: '購買部の常連', spriteName: 'HUMANOID|#ffca28', intrinsicTalent: { id: 'IT_BREAD', name: 'パン争奪戦', description: '最大燃料+1', effectType: 'FUEL', value: 1 } },
+    { id: 'PL_MAP', name: '地図マニア', spriteName: 'HERO_SIDE|#5c6bc0', intrinsicTalent: { id: 'IT_ROUTE', name: '最短ルート', description: '開始時エネルギーカード+2', effectType: 'START_ENERGY', value: 2 } },
+    { id: 'PL_CRAFT', name: '工作名人', spriteName: 'HUMANOID|#8d6e63', intrinsicTalent: { id: 'IT_TOOL', name: '手先の器用さ', description: 'パッシブ出力+2', effectType: 'PASSIVE_POWER', value: 2 } },
+    { id: 'PL_STUDENT_PRES', name: '生徒会長', spriteName: 'SENIOR|#ef5350', intrinsicTalent: { id: 'IT_PRESTIGE', name: '影響力', description: 'ショップ割引(22%)', effectType: 'SHOP_DISCOUNT', value: 22 } },
+    { id: 'PL_TRANSFER2', name: '旅好き転校生', spriteName: 'HERO_SIDE|#26a69a', intrinsicTalent: { id: 'IT_TRIP', name: '遠征慣れ', description: '最大燃料+2', effectType: 'FUEL', value: 2 } },
+    { id: 'PL_CAFE', name: '喫茶部の看板娘', spriteName: 'GIRL|#ff8a65', intrinsicTalent: { id: 'IT_MENU', name: '店番スキル', description: 'ショップ割引(15%)', effectType: 'SHOP_DISCOUNT', value: 15 } },
+    { id: 'PL_BOXER', name: 'ボクシング部', spriteName: 'MUSCLE|#ef5350', intrinsicTalent: { id: 'IT_PUNCH', name: '拳圧', description: 'パッシブ出力+3', effectType: 'PASSIVE_POWER', value: 3 } },
+    { id: 'PL_OLD_PRO', name: '伝説の卒業生', spriteName: 'SENIOR|#ffd54f', intrinsicTalent: { id: 'IT_LEGEND', name: '置き土産', description: '最大HP+15', effectType: 'MAX_HP', value: 15 } },
 ];
 
 // Define Ships
@@ -211,12 +259,12 @@ const SHIPS: ShipTemplate[] = [
 // Enhanced Enemy Data (3x3 Grid + AI params) - ENGINE Removed, replaced with weapons or empty
 const ENEMY_DATA: EnemyDataTemplate[] = [
     { 
-        name: "折り紙偵察機", hp: 40, durability: 4, 
+        name: "折り紙偵察機", hp: 40, durability: 3, 
         layout: ['EMPTY', 'CANNON', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'CANNON', 'EMPTY'], 
         energy: 2, colors: ['WHITE'], moveChance: 0.3 
     },
     { 
-        name: "ノート爆撃機", hp: 60, durability: 6, 
+        name: "ノート爆撃機", hp: 60, durability: 4, 
         layout: ['CANNON', 'EMPTY', 'EMPTY', 'CANNON', 'EMPTY', 'EMPTY', 'CANNON', 'EMPTY', 'EMPTY'], 
         energy: 3, colors: ['WHITE', 'BLUE'], moveChance: 0.2 
     },
@@ -226,7 +274,7 @@ const ENEMY_DATA: EnemyDataTemplate[] = [
         energy: 4, colors: ['WHITE'], moveChance: 0.1 
     },
     { 
-        name: "コンパス要塞", hp: 120, durability: 12, 
+        name: "コンパス要塞", hp: 120, durability: 8, 
         layout: ['MISSILE', 'CANNON', 'EMPTY', 'CANNON', 'AMPLIFIER', 'CANNON', 'MISSILE', 'EMPTY', 'EMPTY'], 
         energy: 4, colors: ['WHITE', 'BLUE'], moveChance: 0.1 
     },
@@ -236,46 +284,241 @@ const ENEMY_DATA: EnemyDataTemplate[] = [
         energy: 3, colors: ['WHITE', 'ORANGE'], moveChance: 0.05 
     },
     { 
-        name: "カッター迎撃機", hp: 70, durability: 5, 
+        name: "カッター迎撃機", hp: 70, durability: 4, 
         layout: ['MISSILE', 'EMPTY', 'MISSILE', 'CANNON', 'CANNON', 'EMPTY', 'MISSILE', 'EMPTY', 'MISSILE'], 
         energy: 5, colors: ['BLUE'], moveChance: 0.6 
     },
     { 
-        name: "分度器マザー", hp: 150, durability: 10, 
+        name: "分度器マザー", hp: 150, durability: 7, 
         layout: ['CANNON', 'AMPLIFIER', 'CANNON', 'EMPTY', 'EMPTY', 'EMPTY', 'CANNON', 'AMPLIFIER', 'CANNON'], 
         energy: 5, colors: ['WHITE', 'BLUE'], moveChance: 0.2 
     },
     { 
-        name: "彫刻刀デストロイヤー", hp: 200, durability: 15, 
+        name: "彫刻刀デストロイヤー", hp: 200, durability: 11, 
         layout: ['MISSILE', 'CANNON', 'CANNON', 'AMPLIFIER', 'CANNON', 'AMPLIFIER', 'MISSILE', 'CANNON', 'CANNON'], 
         energy: 6, colors: ['ORANGE', 'WHITE'], moveChance: 0.1 
     },
     { 
-        name: "暗黒文房具王", hp: 350, durability: 30, 
+        name: "暗黒文房具王", hp: 350, durability: 22, 
         layout: ['MISSILE', 'AMPLIFIER', 'MISSILE', 'AMPLIFIER', 'AMPLIFIER', 'AMPLIFIER', 'MISSILE', 'AMPLIFIER', 'MISSILE'], 
         energy: 7, colors: ['ORANGE', 'BLUE', 'WHITE'], moveChance: 0.3 
+    },
+    {
+        name: "プリント追試機",
+        hp: 48, durability: 3,
+        layout: ['EMPTY', 'CANNON', 'EMPTY', 'EMPTY', 'CANNON', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+        energy: 2, colors: ['WHITE'], moveChance: 0.25
+    },
+    {
+        name: "赤ペン査定機",
+        hp: 55, durability: 3,
+        layout: ['CANNON', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'CANNON'],
+        energy: 3, colors: ['WHITE', 'BLUE'], moveChance: 0.35
+    },
+    {
+        name: "上履きホバー",
+        hp: 52, durability: 2,
+        layout: ['EMPTY', 'MISSILE', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'MISSILE', 'EMPTY'],
+        energy: 3, colors: ['BLUE'], moveChance: 0.65
+    },
+    {
+        name: "黒板けし艇",
+        hp: 68, durability: 4,
+        layout: ['CANNON', 'EMPTY', 'CANNON', 'EMPTY', 'AMPLIFIER', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+        energy: 3, colors: ['WHITE'], moveChance: 0.15
+    },
+    {
+        name: "チョーク散布機",
+        hp: 72, durability: 4,
+        layout: ['MISSILE', 'EMPTY', 'MISSILE', 'EMPTY', 'CANNON', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+        energy: 4, colors: ['WHITE', 'BLUE'], moveChance: 0.4
+    },
+    {
+        name: "図書室しおり艇",
+        hp: 66, durability: 3,
+        layout: ['EMPTY', 'MISSILE', 'EMPTY', 'EMPTY', 'AMPLIFIER', 'EMPTY', 'EMPTY', 'MISSILE', 'EMPTY'],
+        energy: 4, colors: ['BLUE'], moveChance: 0.45
+    },
+    {
+        name: "給食ワゴン戦車",
+        hp: 88, durability: 6,
+        layout: ['EMPTY', 'CANNON', 'EMPTY', 'CANNON', 'EMPTY', 'EMPTY', 'EMPTY', 'CANNON', 'EMPTY'],
+        energy: 4, colors: ['WHITE', 'ORANGE'], moveChance: 0.15
+    },
+    {
+        name: "モップローラー",
+        hp: 82, durability: 5,
+        layout: ['CANNON', 'EMPTY', 'EMPTY', 'AMPLIFIER', 'EMPTY', 'EMPTY', 'CANNON', 'EMPTY', 'EMPTY'],
+        energy: 4, colors: ['ORANGE', 'WHITE'], moveChance: 0.2
+    },
+    {
+        name: "理科実験ドローン",
+        hp: 90, durability: 5,
+        layout: ['MISSILE', 'EMPTY', 'EMPTY', 'EMPTY', 'AMPLIFIER', 'EMPTY', 'EMPTY', 'EMPTY', 'MISSILE'],
+        energy: 4, colors: ['BLUE', 'ORANGE'], moveChance: 0.5
+    },
+    {
+        name: "放送室ジャマー",
+        hp: 96, durability: 6,
+        layout: ['EMPTY', 'CANNON', 'EMPTY', 'AMPLIFIER', 'AMPLIFIER', 'EMPTY', 'EMPTY', 'CANNON', 'EMPTY'],
+        energy: 4, colors: ['WHITE', 'BLUE'], moveChance: 0.2
+    },
+    {
+        name: "三角定規ランサー",
+        hp: 104, durability: 5,
+        layout: ['MISSILE', 'CANNON', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'MISSILE', 'CANNON', 'EMPTY'],
+        energy: 5, colors: ['BLUE', 'WHITE'], moveChance: 0.45
+    },
+    {
+        name: "彫刻刀追撃機",
+        hp: 112, durability: 6,
+        layout: ['CANNON', 'MISSILE', 'EMPTY', 'EMPTY', 'CANNON', 'EMPTY', 'EMPTY', 'MISSILE', 'CANNON'],
+        energy: 5, colors: ['ORANGE', 'BLUE'], moveChance: 0.35
+    },
+    {
+        name: "答案シュレッダー",
+        hp: 118, durability: 6,
+        layout: ['CANNON', 'EMPTY', 'CANNON', 'EMPTY', 'CANNON', 'EMPTY', 'CANNON', 'EMPTY', 'CANNON'],
+        energy: 5, colors: ['WHITE', 'ORANGE'], moveChance: 0.1
+    },
+    {
+        name: "校内放送要塞",
+        hp: 128, durability: 7,
+        layout: ['EMPTY', 'AMPLIFIER', 'EMPTY', 'CANNON', 'CANNON', 'CANNON', 'EMPTY', 'AMPLIFIER', 'EMPTY'],
+        energy: 5, colors: ['WHITE', 'BLUE'], moveChance: 0.12
+    },
+    {
+        name: "美術室フレーム砲台",
+        hp: 134, durability: 8,
+        layout: ['CANNON', 'EMPTY', 'CANNON', 'AMPLIFIER', 'EMPTY', 'AMPLIFIER', 'CANNON', 'EMPTY', 'CANNON'],
+        energy: 5, colors: ['WHITE', 'ORANGE'], moveChance: 0.18
+    },
+    {
+        name: "焼却炉ブレイザー",
+        hp: 144, durability: 8,
+        layout: ['EMPTY', 'MISSILE', 'EMPTY', 'CANNON', 'AMPLIFIER', 'CANNON', 'EMPTY', 'MISSILE', 'EMPTY'],
+        energy: 6, colors: ['ORANGE', 'WHITE'], moveChance: 0.28
+    },
+    {
+        name: "体育倉庫ブルドーザー",
+        hp: 156, durability: 14,
+        layout: ['CANNON', 'CANNON', 'EMPTY', 'EMPTY', 'AMPLIFIER', 'EMPTY', 'CANNON', 'CANNON', 'EMPTY'],
+        energy: 6, colors: ['ORANGE', 'WHITE'], moveChance: 0.16
+    },
+    {
+        name: "文化祭ステージ艦",
+        hp: 168, durability: 10,
+        layout: ['MISSILE', 'EMPTY', 'MISSILE', 'AMPLIFIER', 'CANNON', 'AMPLIFIER', 'MISSILE', 'EMPTY', 'MISSILE'],
+        energy: 6, colors: ['BLUE', 'WHITE', 'ORANGE'], moveChance: 0.34
+    },
+    {
+        name: "校庭サーチライト艦",
+        hp: 176, durability: 9,
+        layout: ['EMPTY', 'MISSILE', 'EMPTY', 'MISSILE', 'AMPLIFIER', 'MISSILE', 'EMPTY', 'MISSILE', 'EMPTY'],
+        energy: 6, colors: ['BLUE', 'BLUE', 'WHITE'], moveChance: 0.55
+    },
+    {
+        name: "昼休みパン争奪機",
+        hp: 170, durability: 8,
+        layout: ['CANNON', 'EMPTY', 'MISSILE', 'EMPTY', 'CANNON', 'EMPTY', 'MISSILE', 'EMPTY', 'CANNON'],
+        energy: 6, colors: ['WHITE', 'ORANGE', 'BLUE'], moveChance: 0.42
+    },
+    {
+        name: "理科室プラズマ塔",
+        hp: 188, durability: 10,
+        layout: ['MISSILE', 'AMPLIFIER', 'MISSILE', 'EMPTY', 'AMPLIFIER', 'EMPTY', 'MISSILE', 'AMPLIFIER', 'MISSILE'],
+        energy: 6, colors: ['BLUE', 'ORANGE'], moveChance: 0.22
+    },
+    {
+        name: "卒業アルバム号",
+        hp: 196, durability: 11,
+        layout: ['CANNON', 'EMPTY', 'CANNON', 'EMPTY', 'AMPLIFIER', 'EMPTY', 'MISSILE', 'EMPTY', 'MISSILE'],
+        energy: 6, colors: ['WHITE', 'BLUE'], moveChance: 0.24
+    },
+    {
+        name: "応援団総攻撃艇",
+        hp: 210, durability: 12,
+        layout: ['CANNON', 'AMPLIFIER', 'CANNON', 'CANNON', 'EMPTY', 'CANNON', 'MISSILE', 'AMPLIFIER', 'MISSILE'],
+        energy: 7, colors: ['ORANGE', 'WHITE'], moveChance: 0.22
+    },
+    {
+        name: "裏生徒会旗艦",
+        hp: 228, durability: 13,
+        layout: ['MISSILE', 'EMPTY', 'MISSILE', 'AMPLIFIER', 'CANNON', 'AMPLIFIER', 'MISSILE', 'EMPTY', 'MISSILE'],
+        energy: 7, colors: ['WHITE', 'BLUE', 'ORANGE'], moveChance: 0.3
+    },
+    {
+        name: "校則執行ドレッド",
+        hp: 244, durability: 22,
+        layout: ['CANNON', 'CANNON', 'MISSILE', 'AMPLIFIER', 'AMPLIFIER', 'EMPTY', 'CANNON', 'CANNON', 'MISSILE'],
+        energy: 7, colors: ['ORANGE', 'WHITE', 'BLUE'], moveChance: 0.2
+    },
+    {
+        name: "終業チャイム・オメガ",
+        hp: 268, durability: 15,
+        layout: ['MISSILE', 'AMPLIFIER', 'MISSILE', 'CANNON', 'AMPLIFIER', 'CANNON', 'MISSILE', 'AMPLIFIER', 'MISSILE'],
+        energy: 7, colors: ['BLUE', 'WHITE', 'ORANGE'], moveChance: 0.38
+    },
+    {
+        name: "職員室ペーパードラゴン",
+        hp: 290, durability: 18,
+        layout: ['CANNON', 'MISSILE', 'CANNON', 'AMPLIFIER', 'CANNON', 'AMPLIFIER', 'CANNON', 'MISSILE', 'CANNON'],
+        energy: 8, colors: ['ORANGE', 'WHITE', 'BLUE'], moveChance: 0.18
     },
 ];
 
 const VACATION_EVENTS_DB: Omit<VacationEvent, 'id'>[] = [
     { type: 'REPAIR', name: '応急修理', description: 'HPを10回復する。', cost: 1, tier: 1 },
+    { type: 'REPAIR', name: 'ばんそうこう補修', description: 'HPを6回復する。', cost: 1, tier: 1 },
+    { type: 'REPAIR', name: '工具箱メンテ', description: 'HPを15回復する。', cost: 2, tier: 2 },
+    { type: 'REPAIR', name: '放課後メンテ会', description: 'HPを20回復する。', cost: 2, tier: 2 },
     { type: 'REPAIR', name: 'ドック入り', description: 'HPを全回復し、最大HPを+5する。', cost: 3, tier: 3 },
+    { type: 'REPAIR', name: '特製フレーム交換', description: 'HPを全回復し、最大HPを+8する。', cost: 4, tier: 3 },
     { type: 'FUEL', name: '燃料補給', description: '燃料を最大まで回復。', cost: 1, tier: 1 },
+    { type: 'FUEL', name: '理科室アルコール補給', description: '燃料を最大まで回復。', cost: 1, tier: 1 },
+    { type: 'FUEL', name: 'ガソリン代カンパ', description: '燃料を全回復し、最大燃料+1。', cost: 2, tier: 2, value: 1 },
     { type: 'FUEL', name: 'タンク増設', description: '最大燃料+1、燃料全回復。', cost: 3, tier: 3, value: 1 },
+    { type: 'FUEL', name: '予備タンク配備', description: '最大燃料+1、燃料全回復。', cost: 2, tier: 2, value: 1 },
     { type: 'ENERGY', name: 'エネルギー採掘', description: 'エネルギー生成プールに「6」を追加。', cost: 2, tier: 2 },
+    { type: 'ENERGY', name: '算数ドリル強化', description: 'エネルギー生成プールに「5」を追加。', cost: 1, tier: 1 },
+    { type: 'ENERGY', name: '色鉛筆ブレンド', description: '生成プールに「青」を追加。', cost: 2, tier: 2 },
     { type: 'ENERGY', name: 'リアクター調整', description: '生成プールに「オレンジ」を追加。', cost: 2, tier: 2 },
+    { type: 'ENERGY', name: '朝練集中メニュー', description: 'エネルギー生成プールに「7」を追加。', cost: 3, tier: 3 },
+    { type: 'ENERGY', name: '白紙ノート増刷', description: '生成プールに「白」を追加。', cost: 1, tier: 1 },
     { type: 'PARTS', name: 'パーツ回収', description: 'ランダムなパーツを1つ獲得する。', cost: 2, tier: 2 },
+    { type: 'PARTS', name: '倉庫の掘り出し物', description: 'ランダムなパーツを1つ獲得する。', cost: 2, tier: 2 },
+    { type: 'PARTS', name: '先輩のおさがり', description: 'ランダムなパーツを1つ獲得する。', cost: 1, tier: 1 },
     { type: 'PARTS', name: '軍需物資', description: '高性能なパーツを獲得する。', cost: 4, tier: 3 },
+    { type: 'PARTS', name: '文化祭特注パーツ', description: '高性能なパーツを獲得する。', cost: 3, tier: 3 },
     { type: 'COIN', name: 'アルバイト', description: 'スターコインを50獲得。', cost: 1, tier: 1 },
+    { type: 'COIN', name: '落とし物係', description: 'スターコインを40獲得。', cost: 1, tier: 1 },
+    { type: 'COIN', name: '新聞配達', description: 'スターコインを70獲得。', cost: 1, tier: 1 },
     { type: 'COIN', name: '臨時ボーナス', description: 'スターコインを150獲得。', cost: 2, tier: 2 },
+    { type: 'COIN', name: '文化祭の売上', description: 'スターコインを120獲得。', cost: 2, tier: 2 },
+    { type: 'COIN', name: 'スポンサー契約', description: 'スターコインを220獲得。', cost: 3, tier: 3 },
     { type: 'TREASURE', name: '謎の宝箱', description: '永続的な攻撃力ボーナスを得る。', cost: 3, tier: 3 },
+    { type: 'TREASURE', name: '卒業生の遺産', description: '永続的な攻撃力ボーナスを得る。', cost: 3, tier: 3 },
+    { type: 'TREASURE', name: '校庭の埋蔵品', description: '永続的な攻撃力ボーナスを得る。', cost: 2, tier: 2 },
     { type: 'UNKNOWN', name: '謎のイベント', description: '何が起こるかわからない...', cost: 2, tier: 2 },
+    { type: 'UNKNOWN', name: '夜の旧校舎', description: '入るたびに結果が変わる...', cost: 2, tier: 2 },
+    { type: 'UNKNOWN', name: 'うわさの物置', description: '何かが起きるらしい。', cost: 1, tier: 1 },
     { type: 'SHOP', name: '闇市', description: '高品質なパーツを裏ルートで入手する。', cost: 0, coinCost: 150, tier: 3 },
+    { type: 'SHOP', name: '部室バザー', description: 'スターコインで品物を買える。', cost: 0, coinCost: 80, tier: 2 },
+    { type: 'SHOP', name: '購買部の特売', description: 'スターコインで品物を買える。', cost: 0, coinCost: 60, tier: 1 },
     { type: 'ENHANCE', name: '特別改造', description: '船体を強化。最大HP+20。', cost: 0, coinCost: 100, tier: 2 },
+    { type: 'ENHANCE', name: '溶接ブース強化', description: '船体を強化。最大HP+12。', cost: 0, coinCost: 70, tier: 2 },
+    { type: 'ENHANCE', name: 'フレーム補強', description: '船体を強化。最大HP+8。', cost: 0, coinCost: 50, tier: 1 },
     { type: 'TRAINING', name: '極秘訓練', description: 'パッシブパワー(全出力)+1。', cost: 0, coinCost: 200, tier: 3 },
+    { type: 'TRAINING', name: '朝練メニュー', description: 'パッシブパワー(全出力)+1。', cost: 0, coinCost: 120, tier: 2 },
+    { type: 'TRAINING', name: '筋トレ合宿', description: 'パッシブパワー(全出力)+2。', cost: 0, coinCost: 260, tier: 3, value: 2 },
     { type: 'FUEL', name: 'プレミアム燃料', description: '最大燃料+2、全回復。', cost: 0, coinCost: 80, tier: 2, value: 2 },
+    { type: 'FUEL', name: '高濃度ブースト剤', description: '最大燃料+2、全回復。', cost: 0, coinCost: 120, tier: 3, value: 2 },
     { type: 'SACRIFICE', name: '悪魔の契約', description: '最大燃料を1犠牲にし、全出力を+2する。', cost: 0, tier: 3, value: 2 },
+    { type: 'SACRIFICE', name: '徹夜の代償', description: '最大燃料を1犠牲にし、全出力を+2する。', cost: 0, tier: 3, value: 2 },
+    { type: 'SACRIFICE', name: '課題の先食い', description: '最大燃料を1犠牲にし、全出力を+1する。', cost: 0, tier: 2, value: 1 },
     { type: 'GAMBLE', name: '裏カジノ', description: 'コインを賭ける(100G)。勝てば3倍。', cost: 1, coinCost: 100, tier: 2, value: 300 },
+    { type: 'GAMBLE', name: 'くじ引き屋台', description: 'コインを賭ける(50G)。勝てば2倍。', cost: 1, coinCost: 50, tier: 1, value: 100 },
+    { type: 'GAMBLE', name: '放課後ポーカー勝負', description: 'コインを賭ける(150G)。勝てば3倍。', cost: 1, coinCost: 150, tier: 3, value: 450 },
 ];
 
 const PART_TEMPLATES: Omit<ShipPart, 'id'>[] = [
@@ -327,7 +570,210 @@ const PART_TEMPLATES: Omit<ShipPart, 'id'>[] = [
     { type: 'CANNON', name: '伝説のソード', description: '勇者が使っていた剣の切っ先。', slots: [{req:'ORANGE', value:null}, {req:'ORANGE', value:null}, {req:'ORANGE', value:null}], multiplier: 3.0, basePower: 20, hp: 30 },
     { type: 'MISSILE', name: 'ドラゴン花火', description: '龍の形をした花火ミサイル。', slots: [{req:'ORANGE', value:null}, {req:'WHITE', value:null}, {req:'BLUE', value:null}], multiplier: 2.5, basePower: 15, hp: 15 },
     { type: 'ENGINE', name: '無限の心臓', description: '永久機関。ランクアップ効果付き。', slots: [{req:'ORANGE', value:null}, {req:'BLUE', value:null}], multiplier: 2.0, basePower: 5, hp: 40, specialEffect: 'RANK_UP' },
+    { type: 'CANNON', name: '白チョーク連射砲', description: '白エネルギーを使うほど黒板粉が舞い、出力が伸びる。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.3, basePower: 3, hp: 10, specialEffect: 'WHITE_BONUS' },
+    { type: 'CANNON', name: 'おそろいノート砲', description: '同じ数字をそろえると一斉提出の勢いで火力が増す。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.1, basePower: 4, hp: 10, specialEffect: 'MATCH_BONUS' },
+    { type: 'MISSILE', name: '補習プリントランチャー', description: '低い数字ほど枚数で押し込む。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 4, hp: 10, specialEffect: 'LOW_SCORE_BOOST' },
+    { type: 'CANNON', name: '一発勝負えんぴつ', description: 'たった1枚にすべてを賭ける小テスト特化砲。', slots: [{req:'ANY', value:null}], multiplier: 2.0, basePower: 2, hp: 6, specialEffect: 'SOLO_DOUBLE' },
+    { type: 'CANNON', name: '虹色時間割レーザー', description: '3色の授業をそろえると時間割共鳴で威力が跳ね上がる。', slots: [{req:'WHITE', value:null}, {req:'BLUE', value:null}, {req:'ORANGE', value:null}], multiplier: 1.5, basePower: 8, hp: 12, specialEffect: 'RAINBOW_BONUS' },
+    { type: 'SHIELD', name: '図工パレットシールド', description: '3色がそろうとカラフルな防壁が完成する。', slots: [{req:'WHITE', value:null}, {req:'BLUE', value:null}, {req:'ORANGE', value:null}], multiplier: 1.1, basePower: 6, hp: 14, specialEffect: 'RAINBOW_BONUS' },
+    { type: 'SHIELD', name: '保健室の白衣', description: '白エネルギーで守りが厚くなる。', slots: [{req:'WHITE', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 4, hp: 12, specialEffect: 'WHITE_BONUS' },
+    { type: 'ENGINE', name: '連絡網コピー機', description: '増幅炉の量産型。連絡事項を次々と複製する。', slots: [{req:'BLUE', value:null}], multiplier: 0, basePower: 0, hp: 10, specialEffect: 'RANK_UP' },
+    { type: 'ENGINE', name: '給食ワゴンエンジン', description: '配膳の勢いで燃料を回収する。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.4, basePower: 2, hp: 12, specialEffect: 'RECYCLE' },
+    { type: 'SHIELD', name: '画用紙トゲバリア', description: '厚紙の反発で被弾を押し返す。', slots: [{req:'ORANGE', value:null}, {req:'ANY', value:null}], multiplier: 1.3, basePower: 5, hp: 18, specialEffect: 'THORNS' },
+    { type: 'AMPLIFIER', name: '朝礼マイク', description: '朝礼の声量で隣接パーツを底上げする。', slots: [{req:'WHITE', value:null}], multiplier: 0, basePower: 3, hp: 8 },
+    { type: 'AMPLIFIER', name: '応援メガホン', description: '体育祭ばりの声援で隣接出力を引き上げる。', slots: [{req:'ORANGE', value:null}], multiplier: 0, basePower: 4, hp: 8 },
+    { type: 'MISSILE', name: '図書室しおりスナイパー', description: '静かな狙撃。青と白を丁寧にそろえる高精度型。', slots: [{req:'BLUE', value:null}, {req:'WHITE', value:null}], multiplier: 2.2, basePower: 5, hp: 9 },
+    { type: 'CANNON', name: '掃除当番モップブレード', description: '勢いよく振り抜く近距離切断。', slots: [{req:'WHITE', value:null}, {req:'ORANGE', value:null}], multiplier: 1.6, basePower: 5, hp: 10 },
+    { type: 'MISSILE', name: '黒板けしストーム', description: '白エネルギーが多いほど粉塵爆発が強まる。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}, {req:'BLUE', value:null}], multiplier: 1.2, basePower: 6, hp: 12, specialEffect: 'WHITE_BONUS' },
+    { type: 'ENGINE', name: '理科準備室コイル', description: '理科室の配線を流用した高効率推進器。', slots: [{req:'BLUE', value:null}, {req:'ORANGE', value:null}], multiplier: 2.4, basePower: 3, hp: 10 },
+    { type: 'CANNON', name: '学級新聞キャノン', description: '同じ数字がそろうと号外の勢いで一斉発射。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 0.9, basePower: 6, hp: 12, specialEffect: 'MATCH_BONUS' },
+    { type: 'CANNON', name: '居残り反省文シュレッダー', description: '低い数字の束を勢いに変える裁断砲。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'WHITE', value:null}], multiplier: 1.0, basePower: 5, hp: 11, specialEffect: 'LOW_SCORE_BOOST' },
+    { type: 'SHIELD', name: '放課後見回りライト', description: '単独起動時だけ強く光る防護ライト。', slots: [{req:'BLUE', value:null}], multiplier: 1.4, basePower: 3, hp: 8, specialEffect: 'SOLO_DOUBLE' },
+    { type: 'CANNON', name: '青インク速射砲', description: '青エネルギーの本数だけ追撃火力が伸びる。', slots: [{req:'BLUE', value:null}, {req:'BLUE', value:null}], multiplier: 1.2, basePower: 3, hp: 10, specialEffect: 'BLUE_BONUS' },
+    { type: 'CANNON', name: '夕焼け校舎ブラスター', description: 'オレンジの熱量で一気に押し切る。', slots: [{req:'ORANGE', value:null}, {req:'ANY', value:null}], multiplier: 1.4, basePower: 4, hp: 10, specialEffect: 'ORANGE_BONUS' },
+    { type: 'CANNON', name: '成績表ジャッジメント', description: '高得点カードほど厳しく評価して威力化する。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.1, basePower: 4, hp: 11, specialEffect: 'HIGH_SCORE_BOOST' },
+    { type: 'CANNON', name: '偶数小テスト砲', description: '偶数で揃うと模範解答の火力を放つ。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.1, basePower: 3, hp: 9, specialEffect: 'EVEN_BONUS' },
+    { type: 'MISSILE', name: '奇数暗記ミサイル', description: '奇数だけでそろえる変則弾幕。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 4, hp: 9, specialEffect: 'ODD_BONUS' },
+    { type: 'CANNON', name: '時間割シーケンス砲', description: '並び順の美しさで威力が跳ね上がる。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 5, hp: 11, specialEffect: 'SEQUENCE_BONUS' },
+    { type: 'MISSILE', name: '単色クレヨンポッド', description: '同じ色で染めるほどまとまりが出る。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 0.9, basePower: 5, hp: 10, specialEffect: 'MONO_COLOR_BONUS' },
+    { type: 'SHIELD', name: '追い込み補習バリア', description: '過充填した時だけ回復もこなす守り。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 6, hp: 13, specialEffect: 'OVERCHARGE_HEAL' },
+    { type: 'ENGINE', name: '早弁エンジン', description: '大きな数字をまとめて食べると燃料を吐き出す。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.1, basePower: 2, hp: 10, specialEffect: 'OVERCHARGE_RECYCLE' },
+    { type: 'AMPLIFIER', name: '文化祭ライトアップ', description: '3色そろうと舞台照明ばりの増幅を行う。', slots: [{req:'WHITE', value:null}, {req:'BLUE', value:null}, {req:'ORANGE', value:null}], multiplier: 0, basePower: 4, hp: 8, specialEffect: 'RAINBOW_BONUS' },
+    { type: 'AMPLIFIER', name: '生徒会拡声器', description: '高得点エネルギーほど校内中に響き渡る。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 0, basePower: 3, hp: 8, specialEffect: 'HIGH_SCORE_BOOST' },
+    { type: 'SHIELD', name: '保護者会パーテーション', description: '同色統一で場を完全に仕切る。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 5, hp: 12, specialEffect: 'MONO_COLOR_BONUS' },
+    { type: 'MISSILE', name: 'ノート端切れシュート', description: '小さい数字を束ねるほど鋭く飛ぶ。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'WHITE', value:null}], multiplier: 1.0, basePower: 4, hp: 9, specialEffect: 'LOW_SCORE_BOOST' },
+    { type: 'CANNON', name: '目覚まし当番砲', description: '朝イチの一発だけに全力を込める。', slots: [{req:'WHITE', value:null}], multiplier: 2.2, basePower: 2, hp: 7, specialEffect: 'SOLO_DOUBLE' },
+    { type: 'SHIELD', name: '理科室フラスコ盾', description: '青い試薬を注ぐほど防壁が安定する。', slots: [{req:'BLUE', value:null}, {req:'ANY', value:null}], multiplier: 1.1, basePower: 4, hp: 11, specialEffect: 'BLUE_BONUS' },
+    { type: 'ENGINE', name: '習字半紙ブースター', description: '白エネルギーに反応して静かに加速する。', slots: [{req:'WHITE', value:null}, {req:'WHITE', value:null}], multiplier: 1.4, basePower: 2, hp: 9, specialEffect: 'WHITE_BONUS' },
+    { type: 'AMPLIFIER', name: '絵の具パレット増幅器', description: '色がそろうほど図工室の魔法が強まる。', slots: [{req:'WHITE', value:null}, {req:'BLUE', value:null}, {req:'ORANGE', value:null}], multiplier: 0, basePower: 3, hp: 8, specialEffect: 'RAINBOW_BONUS' },
+    { type: 'ENGINE', name: '昼休み鬼ごっこエンジン', description: '偶数の歩調で加速が安定する。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.3, basePower: 2, hp: 10, specialEffect: 'EVEN_BONUS' },
+    { type: 'AMPLIFIER', name: '机寄せプッシャー', description: '同じ数字をそろえて列全体を押し出す。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 0, basePower: 3, hp: 7, specialEffect: 'MATCH_BONUS' },
+    { type: 'ENGINE', name: '校門ダッシュジェット', description: '奇数テンポのスタートダッシュに特化。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.3, basePower: 2, hp: 10, specialEffect: 'ODD_BONUS' },
+    { type: 'CANNON', name: '連続チャイム砲', description: '順番通りに鳴るほど破壊音が増す。', slots: [{req:'WHITE', value:null}, {req:'BLUE', value:null}, {req:'ORANGE', value:null}], multiplier: 1.0, basePower: 6, hp: 12, specialEffect: 'SEQUENCE_BONUS' },
+    { type: 'MISSILE', name: '反省文ミサイルポッド', description: '低評価の束を容赦なく撃ち込む。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 0.9, basePower: 5, hp: 10, specialEffect: 'LOW_SCORE_BOOST' },
+    { type: 'SHIELD', name: '午後の眠気クッション', description: '過充填で眠気が飛ぶと同時に回復する。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 5, hp: 13, specialEffect: 'OVERCHARGE_HEAL' },
+    { type: 'CANNON', name: '放送原稿キャノン', description: '同じ色の原稿束で火力を安定化する。', slots: [{req:'WHITE', value:null}, {req:'BLUE', value:null}], multiplier: 1.2, basePower: 4, hp: 10, specialEffect: 'MONO_COLOR_BONUS' },
+    { type: 'MISSILE', name: '掲示板ホチキスランチャー', description: '同じ数字で留めるほど発射が鋭い。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'WHITE', value:null}], multiplier: 1.0, basePower: 5, hp: 10, specialEffect: 'MATCH_BONUS' },
+    { type: 'ENGINE', name: '修学旅行エンジン', description: '色とりどりの思い出を燃料に変える。', slots: [{req:'WHITE', value:null}, {req:'BLUE', value:null}, {req:'ORANGE', value:null}], multiplier: 1.5, basePower: 3, hp: 11, specialEffect: 'RAINBOW_BONUS' },
+    { type: 'SHIELD', name: '風紀チェックライト', description: '高得点カードほど強く取り締まる防壁。', slots: [{req:'BLUE', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 5, hp: 12, specialEffect: 'HIGH_SCORE_BOOST' },
+    { type: 'CANNON', name: '掃除ロッカーラム', description: 'オレンジエネルギーで雑に押し切る衝角。', slots: [{req:'ORANGE', value:null}, {req:'ORANGE', value:null}], multiplier: 1.4, basePower: 4, hp: 11, specialEffect: 'ORANGE_BONUS' },
+    { type: 'AMPLIFIER', name: 'クラス旗ブースター', description: '同色で染まるほど応援がまとまる。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 0, basePower: 3, hp: 8, specialEffect: 'MONO_COLOR_BONUS' },
+    { type: 'CANNON', name: '係決めじゃんけん砲', description: '偶数でまとまると話が早い。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 0.9, basePower: 5, hp: 10, specialEffect: 'EVEN_BONUS' },
+    { type: 'MISSILE', name: '帰りの会スパイラル', description: '奇数で揃えると締めの一撃が強い。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 0.9, basePower: 5, hp: 10, specialEffect: 'ODD_BONUS' },
+    { type: 'SHIELD', name: '体育館マット壁', description: '同じ数字を重ねるほど防壁が分厚くなる。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 4, hp: 14, specialEffect: 'MATCH_BONUS' },
+    { type: 'ENGINE', name: '予鈴スタート装置', description: '単独入力で一気に走り出す。', slots: [{req:'BLUE', value:null}], multiplier: 1.8, basePower: 2, hp: 7, specialEffect: 'SOLO_DOUBLE' },
+    { type: 'AMPLIFIER', name: '班長メモ増幅器', description: '高得点の指示ほど周囲に伝わる。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 0, basePower: 2, hp: 8, specialEffect: 'HIGH_SCORE_BOOST' },
+    { type: 'CANNON', name: '宿題チェックアーム', description: '高得点カードを見逃さず出力へ変える。', slots: [{req:'ANY', value:null}, {req:'BLUE', value:null}], multiplier: 1.2, basePower: 4, hp: 10, specialEffect: 'HIGH_SCORE_BOOST' },
+    { type: 'MISSILE', name: '色紙メッセージ弾', description: '同じ色でまとめると気持ちが乗る。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.1, basePower: 4, hp: 9, specialEffect: 'MONO_COLOR_BONUS' },
+    { type: 'SHIELD', name: '保冷剤ベスト', description: '青い冷気が多いほど守りが硬い。', slots: [{req:'BLUE', value:null}, {req:'BLUE', value:null}], multiplier: 1.2, basePower: 4, hp: 12, specialEffect: 'BLUE_BONUS' },
+    { type: 'ENGINE', name: '夕方寄り道タービン', description: 'オレンジの勢いで燃料を押し戻す。', slots: [{req:'ORANGE', value:null}, {req:'ANY', value:null}], multiplier: 1.3, basePower: 2, hp: 10, specialEffect: 'ORANGE_BONUS' },
+    { type: 'CANNON', name: '表彰状フラッシュ', description: '高得点時だけまぶしい一撃になる。', slots: [{req:'WHITE', value:null}, {req:'ANY', value:null}], multiplier: 1.1, basePower: 5, hp: 10, specialEffect: 'HIGH_SCORE_BOOST' },
+    { type: 'AMPLIFIER', name: '時間割ボード', description: '数字の流れが整うほど強く支援する。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 0, basePower: 3, hp: 8, specialEffect: 'SEQUENCE_BONUS' },
+    { type: 'SHIELD', name: '折りたたみ座布団', description: '低い数字でも枚数で守りを作る。', slots: [{req:'WHITE', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 0.9, basePower: 5, hp: 13, specialEffect: 'LOW_SCORE_BOOST' },
+    { type: 'MISSILE', name: '校外学習スタンプ弾', description: '順番通りの記録で破壊力が増す。', slots: [{req:'WHITE', value:null}, {req:'BLUE', value:null}, {req:'ORANGE', value:null}], multiplier: 1.0, basePower: 6, hp: 10, specialEffect: 'SEQUENCE_BONUS' },
+    { type: 'ENGINE', name: '購買ダッシュ装置', description: '過充填に成功すると燃料が返ってくる。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 2, hp: 10, specialEffect: 'OVERCHARGE_RECYCLE' },
+    { type: 'CANNON', name: '教科書積み上げ砲', description: '同じ数字を積み上げるほど厚みで押し潰す。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 5, hp: 12, specialEffect: 'MATCH_BONUS' },
+    { type: 'SHIELD', name: 'ホームルーム結界', description: '3色がそろうと一体感で防壁が完成する。', slots: [{req:'WHITE', value:null}, {req:'BLUE', value:null}, {req:'ORANGE', value:null}], multiplier: 1.0, basePower: 5, hp: 12, specialEffect: 'RAINBOW_BONUS' },
+    { type: 'AMPLIFIER', name: '点呼ホイッスル', description: '奇数テンポの合図が味方を鼓舞する。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 0, basePower: 3, hp: 8, specialEffect: 'ODD_BONUS' },
+    { type: 'CANNON', name: '卒業式フラワーシャワー', description: '3色の祝福がそろうと華やかに炸裂する。', slots: [{req:'WHITE', value:null}, {req:'BLUE', value:null}, {req:'ORANGE', value:null}], multiplier: 1.2, basePower: 7, hp: 11, specialEffect: 'RAINBOW_BONUS' },
+    { type: 'MISSILE', name: '先生の赤チョーク弾', description: 'オレンジの勢いで小テストを返却する。', slots: [{req:'ORANGE', value:null}, {req:'ANY', value:null}], multiplier: 1.3, basePower: 4, hp: 10, specialEffect: 'ORANGE_BONUS' },
+    { type: 'ENGINE', name: '放課後居残りブースト', description: '高負荷の過充填でさらに燃料が戻る。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.1, basePower: 3, hp: 11, specialEffect: 'OVERCHARGE_RECYCLE' },
+    { type: 'SHIELD', name: '連絡板ガード', description: '単色でそろえるほど一枚岩の守りになる。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 0.9, basePower: 5, hp: 13, specialEffect: 'MONO_COLOR_BONUS' },
+    { type: 'CANNON', name: '素数判定レーザー', description: '素数だけを見抜いて高火力へ変える。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.1, basePower: 4, hp: 10, specialEffect: 'PRIME_BONUS' },
+    { type: 'SHIELD', name: '平方数プロテクタ', description: '平方数の整った力場で守りを固める。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 4, hp: 12, specialEffect: 'SQUARE_BONUS' },
+    { type: 'ENGINE', name: '最大公約エンジン', description: '数字の共通因子を効率へ変換する。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.1, basePower: 3, hp: 10, specialEffect: 'GCD_BONUS' },
+    { type: 'CANNON', name: '最小公倍キャノン', description: '数字を重ねて巨大な一撃を放つ。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 0.9, basePower: 5, hp: 11, specialEffect: 'LCM_BONUS' },
+    { type: 'ENGINE', name: 'フィボナッチ翼', description: '成長する数列に共鳴して加速する。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 3, hp: 9, specialEffect: 'FIBONACCI_BONUS' },
+    { type: 'CANNON', name: '平均点ブラスター', description: '平均点が高いほど安定して強い。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 4, hp: 10, specialEffect: 'MEAN_BONUS' },
+    { type: 'SHIELD', name: '中央値シールド', description: '極端な値に左右されない堅実な防壁。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 0.9, basePower: 5, hp: 13, specialEffect: 'MEDIAN_BONUS' },
+    { type: 'AMPLIFIER', name: '同型共鳴器', description: '同じタイプが隣にあるほど共鳴する。', slots: [{req:'WHITE', value:null}], multiplier: 0, basePower: 2, hp: 8, specialEffect: 'SAME_TYPE_LINK' },
+    { type: 'AMPLIFIER', name: '整列委員アレイ', description: '同じ列が整うと一斉強化を行う。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 0, basePower: 3, hp: 8, specialEffect: 'ROW_UNITY' },
+    { type: 'AMPLIFIER', name: '中央司令塔', description: '中央で全体を見渡して指揮を執る。', slots: [{req:'BLUE', value:null}], multiplier: 0, basePower: 3, hp: 9, specialEffect: 'CENTER_COMMAND' },
+    { type: 'MISSILE', name: '対角線レーザー', description: '斜めの仲間を数えて収束する。', slots: [{req:'BLUE', value:null}, {req:'WHITE', value:null}], multiplier: 1.3, basePower: 4, hp: 9, specialEffect: 'DIAGONAL_LINK' },
+    { type: 'MISSILE', name: '左右対称ノズル', description: '対称配置で照準が安定する。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 4, hp: 9, specialEffect: 'MIRROR_BONUS' },
+    { type: 'ENGINE', name: '学期末ブースター', description: '長期戦になるほど本気を出す。', slots: [{req:'ORANGE', value:null}, {req:'BLUE', value:null}], multiplier: 1.0, basePower: 3, hp: 10, specialEffect: 'TURN_SCALE' },
+    { type: 'SHIELD', name: '反省ログ装甲', description: '痛みを記録し、次の守りへ変える。', slots: [{req:'WHITE', value:null}, {req:'BLUE', value:null}], multiplier: 1.0, basePower: 5, hp: 14, specialEffect: 'DAMAGE_MEMORY' },
+    { type: 'CANNON', name: '努力ノート砲', description: '同じパーツに装填するほど努力が実る。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.1, basePower: 4, hp: 10, specialEffect: 'EFFORT_STACK' },
+    { type: 'AMPLIFIER', name: '自由研究アーカイブ', description: '戦闘中に見た数字の種類を研究成果に変える。', slots: [{req:'ANY', value:null}], multiplier: 0, basePower: 2, hp: 8, specialEffect: 'UNIQUE_VALUE_RECORD' },
+    { type: 'MISSILE', name: 'くじ引きクラッカー', description: '大当たりが出れば一気に爆ぜる。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 4, hp: 9, specialEffect: 'RANDOM_SPIKE' },
+    { type: 'AMPLIFIER', name: '天気予報アンテナ', description: '日直の予報色に合わせて増幅する。', slots: [{req:'WHITE', value:null}, {req:'BLUE', value:null}], multiplier: 0, basePower: 3, hp: 8, specialEffect: 'FORECAST_COLOR' },
+    { type: 'ENGINE', name: 'ラッキー鉛筆', description: '運が良ければカードを使い回せる。', slots: [{req:'WHITE', value:null}], multiplier: 1.4, basePower: 2, hp: 8, specialEffect: 'NO_CONSUME_CHANCE' },
+    { type: 'CANNON', name: '微分ドリルバースト', description: '素数と高平均の両立を目指す理系砲。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'BLUE', value:null}], multiplier: 1.0, basePower: 5, hp: 11, specialEffect: 'PRIME_BONUS' },
+    { type: 'SHIELD', name: '市松模様ガード', description: '対称と整列の両方を意識した守り。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 5, hp: 12, specialEffect: 'MIRROR_BONUS' },
+    { type: 'CANNON', name: '回文読みレーザー', description: '前から読んでも後ろから読んでも強い。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 4, hp: 10, specialEffect: 'PALINDROME_BONUS' },
+    { type: 'MISSILE', name: '15点満点ミサイル', description: '合計点ぴったりの美しさを威力に変える。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 4, hp: 10, specialEffect: 'SUM_FIFTEEN_BONUS' },
+    { type: 'CANNON', name: '三の倍数ジョーク砲', description: '3の倍数だけ妙に強い。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.1, basePower: 4, hp: 10, specialEffect: 'MULTIPLE_OF_THREE_BONUS' },
+    { type: 'AMPLIFIER', name: '手札分析ボード', description: '選択肢が多いほど作戦は冴える。', slots: [{req:'WHITE', value:null}], multiplier: 0, basePower: 2, hp: 8, specialEffect: 'HAND_SIZE_BONUS' },
+    { type: 'MISSILE', name: '居残りテンポ弾', description: '一時カードの勢いで飛び出す連続弾。', slots: [{req:'BLUE', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 4, hp: 9, specialEffect: 'TEMP_CARD_BONUS' },
+    { type: 'SHIELD', name: '壁ぎわロッカー盾', description: '端に置くと安定する壁役。', slots: [{req:'ANY', value:null}, {req:'WHITE', value:null}], multiplier: 1.0, basePower: 5, hp: 12, specialEffect: 'EDGE_BONUS' },
+    { type: 'CANNON', name: '角席スナイパー', description: '教室の角から狙うと強い。', slots: [{req:'BLUE', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 4, hp: 9, specialEffect: 'CORNER_BONUS' },
+    { type: 'ENGINE', name: 'ぼっち研究エンジン', description: '周りに誰もいない時ほど集中する。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 2, hp: 9, specialEffect: 'ISOLATION_BONUS' },
+    { type: 'CANNON', name: '交互色マーカー砲', description: '色が交互だとリズムよく発射する。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 5, hp: 10, specialEffect: 'ALT_COLOR_BONUS' },
+    { type: 'CANNON', name: '連投演習キャノン', description: '同じ砲に入れ続けるほど鍛えられる。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.1, basePower: 4, hp: 10, specialEffect: 'LAST_STREAK_BONUS' },
+    { type: 'AMPLIFIER', name: '教卓の端ブースター', description: '端配置かつ手札豊富で真価を発揮。', slots: [{req:'BLUE', value:null}], multiplier: 0, basePower: 3, hp: 8, specialEffect: 'EDGE_BONUS' },
+    { type: 'SHIELD', name: '回文座布団', description: '対称の数字で座り心地が増す。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 0.9, basePower: 5, hp: 13, specialEffect: 'PALINDROME_BONUS' },
+    { type: 'MISSILE', name: '予習済みノート弾', description: '手札が多いと撃ち筋も増える。', slots: [{req:'WHITE', value:null}, {req:'BLUE', value:null}], multiplier: 1.2, basePower: 4, hp: 9, specialEffect: 'HAND_SIZE_BONUS' },
+    { type: 'ENGINE', name: '補習残業タービン', description: '一時カードを燃料計画に変換する。', slots: [{req:'ANY', value:null}, {req:'ORANGE', value:null}], multiplier: 1.2, basePower: 2, hp: 10, specialEffect: 'TEMP_CARD_BONUS' },
+    { type: 'CANNON', name: '端数切り上げ砲', description: '端に置くと成績補正が入る。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.1, basePower: 4, hp: 10, specialEffect: 'EDGE_BONUS' },
+    { type: 'MISSILE', name: '角コーナーシュート', description: '角に置いた時だけ見える射線。', slots: [{req:'ORANGE', value:null}, {req:'BLUE', value:null}], multiplier: 1.2, basePower: 4, hp: 9, specialEffect: 'CORNER_BONUS' },
+    { type: 'AMPLIFIER', name: '独習シグナル', description: '周囲が空いているほど信号がよく通る。', slots: [{req:'WHITE', value:null}], multiplier: 0, basePower: 3, hp: 8, specialEffect: 'ISOLATION_BONUS' },
+    { type: 'SHIELD', name: 'しましま防護服', description: '交互色で縫い込むと耐久が増す。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 0.9, basePower: 5, hp: 12, specialEffect: 'ALT_COLOR_BONUS' },
+    { type: 'ENGINE', name: '居残り連続記録計', description: '連続装填の粘りを燃料効率へ変える。', slots: [{req:'ANY', value:null}], multiplier: 1.3, basePower: 2, hp: 8, specialEffect: 'LAST_STREAK_BONUS' },
 ];
+
+const UNLOCKABLE_PART_TEMPLATES: Omit<ShipPart, 'id'>[] = [
+    { type: 'CANNON', name: '約数しらべ砲', description: '約数の多い数字ほど丁寧に分解して火力へ変える。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 4, hp: 10, specialEffect: 'DIVISOR_BONUS' },
+    { type: 'MISSILE', name: '素因数ノートミサイル', description: '素因数の種類が多いほど、散らばるメモのように弾が増える。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 4, hp: 10, specialEffect: 'PRIME_FACTOR_BONUS' },
+    { type: 'CANNON', name: '合計12ブラスター', description: '合計12や18ぴったりで会心の一撃。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 4, hp: 10, specialEffect: 'SUM_TARGET_BONUS' },
+    { type: 'SHIELD', name: '余り3シールド', description: '3で割った余りが揃うと守りが整う。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 0.9, basePower: 5, hp: 12, specialEffect: 'MOD_MATCH_BONUS' },
+    { type: 'AMPLIFIER', name: '比例グラフアンプ', description: '比が揃うとグラフの線がまっすぐ伸びる。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 0, basePower: 3, hp: 8, specialEffect: 'RATIO_BONUS' },
+    { type: 'ENGINE', name: '反比例ノズル', description: '積が12になる絶妙な釣り合いで燃料を生む。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.1, basePower: 2, hp: 10, specialEffect: 'PRODUCT_SUPPORT_BONUS' },
+    { type: 'CANNON', name: '平均点レーザー', description: '平均点そのものを集束光に変える。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 4, hp: 10, specialEffect: 'MEAN_DOUBLE_BONUS' },
+    { type: 'SHIELD', name: '最頻値バリア', description: 'よく出る数字ほど防壁が厚くなる。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 4, hp: 12, specialEffect: 'MODE_BONUS' },
+    { type: 'ENGINE', name: '分散スタビライザー', description: '数字のばらつきが小さいほど安定した推力を出す。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 2, hp: 10, specialEffect: 'LOW_SPREAD_BONUS' },
+    { type: 'MISSILE', name: '平方数ポッド', description: '平方数を揃えるときれいに弾道がまとまる。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 4, hp: 10, specialEffect: 'SQUARE_BONUS' },
+    { type: 'ENGINE', name: '約分エンジン', description: '最大公約数が高いほど、約分の気持ちよさで燃費が伸びる。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.1, basePower: 2, hp: 10, specialEffect: 'GCD_FUEL_BONUS' },
+    { type: 'CANNON', name: '回文読みキャノン', description: '前後対称の並びを一瞬で見抜いて撃ち抜く。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 5, hp: 10, specialEffect: 'PALINDROME_BONUS' },
+    { type: 'MISSILE', name: '15点満点ロケット', description: '合計15に届いた瞬間、満点気分で加速する。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 4, hp: 10, specialEffect: 'SUM_FIFTEEN_BONUS' },
+    { type: 'AMPLIFIER', name: '三の倍数ブースター', description: '3の倍数だけテンポよく増幅する。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 0, basePower: 2, hp: 8, specialEffect: 'MULTIPLE_OF_THREE_BONUS' },
+    { type: 'ENGINE', name: '等差数列ノズル', description: '等差数列が完成すると理路整然と燃料を吐き出す。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 2, hp: 10, specialEffect: 'ARITHMETIC_BONUS' },
+
+    { type: 'CANNON', name: '窓際スナイパー', description: '端や角に置くと視界が開けて狙撃精度が上がる。', slots: [{req:'BLUE', value:null}, {req:'ANY', value:null}], multiplier: 1.1, basePower: 4, hp: 9, specialEffect: 'EDGE_BONUS' },
+    { type: 'AMPLIFIER', name: '教卓タワー', description: '中央で周囲を見渡すほど指揮力が増す。', slots: [{req:'WHITE', value:null}, {req:'ANY', value:null}], multiplier: 0, basePower: 3, hp: 8, specialEffect: 'CENTER_ADJ_BONUS' },
+    { type: 'SHIELD', name: 'ロッカー横シールド', description: '壁際に寄せるほど守備が固まる。', slots: [{req:'ANY', value:null}, {req:'WHITE', value:null}], multiplier: 0.9, basePower: 5, hp: 12, specialEffect: 'EDGE_BONUS' },
+    { type: 'CANNON', name: '掲示板ライン砲', description: '同じ列の仲間が同タイプだと掲示がつながって強い。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.1, basePower: 4, hp: 10, specialEffect: 'ROW_TYPE_LINK' },
+    { type: 'ENGINE', name: '出入口ダッシュエンジン', description: '角からの飛び出しで一気に加速する。', slots: [{req:'ORANGE', value:null}, {req:'ANY', value:null}], multiplier: 1.2, basePower: 2, hp: 9, specialEffect: 'CORNER_BONUS' },
+    { type: 'MISSILE', name: '班行動ミサイル', description: '隣に違う役割が多いほど連携が決まる。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.1, basePower: 4, hp: 9, specialEffect: 'ADJACENT_DIVERSITY_BONUS' },
+    { type: 'AMPLIFIER', name: '黒板前フォーメーション', description: '同じ列を同タイプで埋めると教室全体を押し上げる。', slots: [{req:'ANY', value:null}], multiplier: 0, basePower: 3, hp: 8, specialEffect: 'ROW_UNITY' },
+    { type: 'ENGINE', name: 'すみっこ研究ノズル', description: '孤立しているほど静かに燃料が戻る。', slots: [{req:'ANY', value:null}], multiplier: 1.3, basePower: 2, hp: 8, specialEffect: 'ISOLATION_FUEL_BONUS' },
+    { type: 'SHIELD', name: '中央通路バリア', description: '中央列に置き、上下が埋まるほど守りが伸びる。', slots: [{req:'ANY', value:null}, {req:'BLUE', value:null}], multiplier: 1.0, basePower: 5, hp: 12, specialEffect: 'CENTER_COLUMN_BONUS' },
+    { type: 'CANNON', name: '左右確認レーザー', description: '左右対称の位置に同タイプがあると一斉照射する。', slots: [{req:'ANY', value:null}, {req:'BLUE', value:null}], multiplier: 1.1, basePower: 4, hp: 10, specialEffect: 'MIRROR_BONUS' },
+
+    { type: 'CANNON', name: 'くじ当てキャノン', description: '当たりなら超火力、外れても少しは頑張る。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 4, hp: 10, specialEffect: 'RANDOM_SWING' },
+    { type: 'SHIELD', name: '占いシールド', description: '今日のラッキーカラーに合わせると守りが伸びる。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 4, hp: 12, specialEffect: 'FORECAST_COLOR' },
+    { type: 'ENGINE', name: '席替えエンジン', description: 'うまくハマるとエネルギーを消費しない。', slots: [{req:'ANY', value:null}, {req:'BLUE', value:null}], multiplier: 1.1, basePower: 2, hp: 9, specialEffect: 'NO_CONSUME_CHANCE' },
+    { type: 'MISSILE', name: '福引ミサイル', description: '大吉なら大爆発、外れでも最低限は飛ぶ。', slots: [{req:'ANY', value:null}, {req:'ORANGE', value:null}], multiplier: 1.0, basePower: 4, hp: 9, specialEffect: 'RANDOM_SWING' },
+    { type: 'AMPLIFIER', name: '山勘アンプ', description: 'その場の勘で増幅値が上下する。', slots: [{req:'ANY', value:null}], multiplier: 0, basePower: 3, hp: 8, specialEffect: 'RANDOM_SWING' },
+    { type: 'ENGINE', name: '忘れ物リサイクラ', description: 'たまにカードを使わずに済ませるちゃっかり者。', slots: [{req:'WHITE', value:null}], multiplier: 1.2, basePower: 2, hp: 8, specialEffect: 'NO_CONSUME_CHANCE' },
+    { type: 'CANNON', name: 'ラッキーカラー砲', description: 'そのターンの予報色を当てるとよく伸びる。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.1, basePower: 4, hp: 9, specialEffect: 'FORECAST_COLOR' },
+    { type: 'SHIELD', name: 'おみくじバリア', description: '守りの強さが毎回変わる博打防壁。', slots: [{req:'ANY', value:null}], multiplier: 1.0, basePower: 4, hp: 11, specialEffect: 'RANDOM_SWING' },
+
+    { type: 'CANNON', name: '努力記録レーザー', description: 'この戦闘での装填回数がそのまま威力になる。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 4, hp: 10, specialEffect: 'EFFORT_STACK' },
+    { type: 'SHIELD', name: '継続観察シールド', description: 'ターン経過ごとに観察力が増して守りが厚くなる。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 4, hp: 12, specialEffect: 'TURN_SCALE' },
+    { type: 'ENGINE', name: '部活ランエンジン', description: '連続装填の勢いで推進力が伸びる。', slots: [{req:'ANY', value:null}], multiplier: 1.2, basePower: 2, hp: 8, specialEffect: 'LAST_STREAK_BONUS' },
+    { type: 'AMPLIFIER', name: '宿題ログアンプ', description: '見た数字の種類が多いほど分析が進む。', slots: [{req:'ANY', value:null}], multiplier: 0, basePower: 3, hp: 8, specialEffect: 'UNIQUE_VALUE_RECORD' },
+    { type: 'MISSILE', name: '学期末ミサイル', description: '終盤になるほど締切の圧で強くなる。', slots: [{req:'ANY', value:null}, {req:'ORANGE', value:null}], multiplier: 1.0, basePower: 4, hp: 9, specialEffect: 'TURN_SCALE' },
+    { type: 'CANNON', name: '研究発表キャノン', description: '手札が多いほど選択肢を火力へ変える。', slots: [{req:'ANY', value:null}, {req:'BLUE', value:null}], multiplier: 1.0, basePower: 5, hp: 10, specialEffect: 'HAND_SIZE_BONUS' },
+    { type: 'SHIELD', name: '反省ノートバリア', description: '受けた痛みを忘れず、次の守りに変える。', slots: [{req:'ANY', value:null}], multiplier: 1.0, basePower: 5, hp: 12, specialEffect: 'DAMAGE_MEMORY' },
+    { type: 'ENGINE', name: '居残りターボ', description: '一時カードの勢いで放課後に加速する。', slots: [{req:'ANY', value:null}, {req:'BLUE', value:null}], multiplier: 1.2, basePower: 2, hp: 9, specialEffect: 'TEMP_CARD_BONUS' },
+
+    { type: 'ENGINE', name: '保健室補給ポッド', description: '過充填に成功すると回復も燃料補給もこなす。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 2, hp: 10, specialEffect: 'OVERCHARGE_SUPPORT' },
+    { type: 'CANNON', name: '給食当番キャノン', description: '3色が揃うと配膳の勢いで火力も体力も伸びる。', slots: [{req:'WHITE', value:null}, {req:'BLUE', value:null}, {req:'ORANGE', value:null}], multiplier: 1.1, basePower: 5, hp: 11, specialEffect: 'RAINBOW_HEAL_BONUS' },
+    { type: 'AMPLIFIER', name: '学級費アンプ', description: '余っている燃料をぜいたくに増幅へ回す。', slots: [{req:'ANY', value:null}], multiplier: 0, basePower: 3, hp: 8, specialEffect: 'FUEL_RESERVE_BONUS' },
+    { type: 'SHIELD', name: '清掃時間シールド', description: '青い雑巾が多いほど守りと反撃が増す。', slots: [{req:'BLUE', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 5, hp: 12, specialEffect: 'BLUE_THORNS_BONUS' },
+    { type: 'CANNON', name: '放送室エコー砲', description: '同じ数字が2枚でも3枚でも響き方が変わる。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 4, hp: 10, specialEffect: 'ECHO_MATCH_BONUS' },
+    { type: 'MISSILE', name: '図書整理ミサイル', description: '数字が全部違うと整理され、3色ならさらに整う。', slots: [{req:'ANY', value:null}, {req:'ANY', value:null}, {req:'ANY', value:null}], multiplier: 1.0, basePower: 4, hp: 10, specialEffect: 'ALL_UNIQUE_RAINBOW_BONUS' },
+    { type: 'AMPLIFIER', name: '文化祭カウントダウン', description: '終盤になるほど会場の熱気で増幅が強まる。', slots: [{req:'ANY', value:null}], multiplier: 0, basePower: 3, hp: 8, specialEffect: 'TURN_SCALE' },
+    { type: 'ENGINE', name: '進路相談コア', description: '中央に据えてフル装填すると安定して燃料が戻る。', slots: [{req:'ANY', value:null}, {req:'WHITE', value:null}], multiplier: 1.1, basePower: 2, hp: 10, specialEffect: 'CENTER_FULL_BONUS' },
+    { type: 'CANNON', name: '卒業アルバム砲', description: '見てきた数字の多様さと3色の思い出を火力に変える。', slots: [{req:'WHITE', value:null}, {req:'BLUE', value:null}, {req:'ORANGE', value:null}], multiplier: 1.0, basePower: 5, hp: 11, specialEffect: 'UNIQUE_RAINBOW_BONUS' },
+];
+
+const PAPER_PLANE_UNLOCK_TARGET = 50;
+const getAvailablePartTemplates = (progress: PaperPlaneProgress) => {
+    const unlockedNames = new Set(progress.unlockedPartNames || []);
+    return [
+        ...PART_TEMPLATES,
+        ...UNLOCKABLE_PART_TEMPLATES.filter(template => unlockedNames.has(template.name)),
+    ];
+};
+const getLockedUnlockablePartTemplates = (progress: PaperPlaneProgress) => {
+    const unlockedNames = new Set(progress.unlockedPartNames || []);
+    return UNLOCKABLE_PART_TEMPLATES.filter(template => !unlockedNames.has(template.name));
+};
+const createPartFromTemplate = (template: Omit<ShipPart, 'id'>, idPrefix: string, quality = 1.0): ShipPart => ({
+    id: `${idPrefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    type: template.type,
+    name: template.name + (quality > 1 ? '+' : ''),
+    description: template.description,
+    slots: cloneSlots(template.slots),
+    multiplier: template.multiplier * quality,
+    basePower: Math.floor(template.basePower * quality),
+    hp: 10,
+    specialEffect: template.specialEffect,
+});
+const rollRewardParts = (templates: Omit<ShipPart, 'id'>[], count: number, idPrefix: string) => {
+    const opts: ShipPart[] = [];
+    const pool = [...templates];
+    for (let i = 0; i < count; i++) {
+        if (pool.length === 0) break;
+        const idx = Math.floor(Math.random() * pool.length);
+        const template = pool[idx];
+        pool.splice(idx, 1);
+        const quality = Math.random() < 0.2 ? 1.5 : 1.0;
+        opts.push(createPartFromTemplate(template, `${idPrefix}_${i}`, quality));
+    }
+    return opts;
+};
 
 // --- HELPERS ---
 
@@ -345,21 +791,462 @@ const isColorCompatible = (cardColor: EnergyColor, slotReq: EnergyColor | 'ANY')
     return getColorRank(cardColor) >= getColorRank(slotReq);
 };
 
-const calculateBuffGrid = (parts: ShipPart[]): number[][] => {
+const cloneSlots = (slots: EnergySlot[]): EnergySlot[] => slots.map(slot => ({
+    ...slot,
+    value: slot.value ?? null,
+    loadedColor: slot.loadedColor ?? null,
+}));
+
+interface PartEvalContext {
+    row?: number;
+    col?: number;
+    parts?: ShipPart[];
+    hand?: EnergyCard[];
+    turn?: number;
+    battleStats?: BattleStats;
+    fuel?: number;
+}
+
+const DEFAULT_BATTLE_STATS: BattleStats = {
+    damageTaken: 0,
+    seenValues: [],
+    partLoadCounts: {},
+    lastLoadedPartId: null,
+    lastLoadedStreak: 0,
+};
+
+const createBattleStats = (): BattleStats => ({
+    ...DEFAULT_BATTLE_STATS,
+    seenValues: [],
+    partLoadCounts: {},
+});
+
+const getLoadedSlots = (part: ShipPart) => part.slots.filter(slot => slot.value !== null);
+
+const getLoadedValues = (part: ShipPart) => getLoadedSlots(part).map(slot => slot.value || 0);
+
+const getLoadedColors = (part: ShipPart): EnergyColor[] => (
+    getLoadedSlots(part)
+        .map(slot => slot.loadedColor)
+        .filter((color): color is EnergyColor => color === 'WHITE' || color === 'BLUE' || color === 'ORANGE')
+);
+
+const getPartIndex = (row: number, col: number) => (row * SHIP_WIDTH) + col;
+const clampBonus = (value: number, max = 12) => Math.max(0, Math.min(max, value));
+const uniqueCount = <T,>(arr: T[]) => new Set(arr).size;
+const isPrimeNumber = (n: number) => {
+    if (n < 2) return false;
+    for (let i = 2; i * i <= n; i++) {
+        if (n % i === 0) return false;
+    }
+    return true;
+};
+const isSquareNumber = (n: number) => Number.isInteger(Math.sqrt(n));
+const gcd = (a: number, b: number): number => (b === 0 ? Math.abs(a) : gcd(b, a % b));
+const gcdArray = (values: number[]) => values.reduce((acc, value) => gcd(acc, value));
+const lcm = (a: number, b: number): number => Math.abs(a * b) / gcd(a, b || 1 || a);
+const lcmArray = (values: number[]) => values.reduce((acc, value) => lcm(acc, value), 1);
+const median = (values: number[]) => {
+    const sorted = [...values].sort((a, b) => a - b);
+    if (sorted.length === 0) return 0;
+    const mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 === 0 ? Math.floor((sorted[mid - 1] + sorted[mid]) / 2) : sorted[mid];
+};
+const mean = (values: number[]) => values.length === 0 ? 0 : (values.reduce((sum, value) => sum + value, 0) / values.length);
+const divisorCount = (n: number) => {
+    if (n <= 0) return 0;
+    let count = 0;
+    for (let i = 1; i * i <= n; i++) {
+        if (n % i === 0) count += (i * i === n) ? 1 : 2;
+    }
+    return count;
+};
+const primeFactorTypeCount = (n: number) => {
+    let value = Math.abs(n);
+    const factors = new Set<number>();
+    for (let i = 2; i * i <= value; i++) {
+        while (value % i === 0) {
+            factors.add(i);
+            value = Math.floor(value / i);
+        }
+    }
+    if (value > 1) factors.add(value);
+    return factors.size;
+};
+const modeFrequency = (values: number[]) => {
+    const counts: Record<number, number> = {};
+    values.forEach(value => {
+        counts[value] = (counts[value] || 0) + 1;
+    });
+    return Object.values(counts).reduce((best, count) => Math.max(best, count), 0);
+};
+const product = (values: number[]) => values.reduce((acc, value) => acc * value, 1);
+const hasConstantRatio = (values: number[]) => {
+    if (values.length < 2 || values.some(value => value === 0)) return false;
+    const ratio = values[1] / values[0];
+    return values.every((value, idx) => idx === 0 || Math.abs((value / values[idx - 1]) - ratio) < 0.001);
+};
+const hasConstantDifference = (values: number[]) => {
+    if (values.length < 2) return false;
+    const diff = values[1] - values[0];
+    return values.every((value, idx) => idx === 0 || (value - values[idx - 1]) === diff);
+};
+const spread = (values: number[]) => values.length === 0 ? 0 : Math.max(...values) - Math.min(...values);
+const verticalNeighbors = (context?: PartEvalContext) => {
+    if (!context?.parts || context.row === undefined || context.col === undefined) return [] as ShipPart[];
+    const neighbors = [
+        { row: context.row - 1, col: context.col },
+        { row: context.row + 1, col: context.col },
+    ];
+    return neighbors
+        .filter(n => n.row >= 0 && n.row < SHIP_HEIGHT && n.col >= 0 && n.col < SHIP_WIDTH)
+        .map(n => context.parts![getPartIndex(n.row, n.col)]);
+};
+const allUnique = (values: number[]) => new Set(values).size === values.length;
+const isFibonacciNumber = (n: number) => {
+    const testA = (5 * n * n) + 4;
+    const testB = (5 * n * n) - 4;
+    return isSquareNumber(testA) || isSquareNumber(testB);
+};
+const deterministicRoll = (seed: string) => {
+    let hash = 2166136261;
+    for (let i = 0; i < seed.length; i++) {
+        hash ^= seed.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+    }
+    return ((hash >>> 0) % 1000) / 1000;
+};
+const getForecastColor = (turn: number = 1): EnergyColor => {
+    const colors: EnergyColor[] = ['WHITE', 'BLUE', 'ORANGE'];
+    return colors[Math.max(0, (turn - 1) % colors.length)];
+};
+const getAdjacentParts = (context?: PartEvalContext) => {
+    if (!context?.parts || context.row === undefined || context.col === undefined) return [] as ShipPart[];
+    const neighbors = [
+        { row: context.row - 1, col: context.col },
+        { row: context.row + 1, col: context.col },
+        { row: context.row, col: context.col - 1 },
+        { row: context.row, col: context.col + 1 },
+    ];
+    return neighbors
+        .filter(n => n.row >= 0 && n.row < SHIP_HEIGHT && n.col >= 0 && n.col < SHIP_WIDTH)
+        .map(n => context.parts![getPartIndex(n.row, n.col)]);
+};
+const getDiagonalParts = (context?: PartEvalContext) => {
+    if (!context?.parts || context.row === undefined || context.col === undefined) return [] as ShipPart[];
+    const neighbors = [
+        { row: context.row - 1, col: context.col - 1 },
+        { row: context.row - 1, col: context.col + 1 },
+        { row: context.row + 1, col: context.col - 1 },
+        { row: context.row + 1, col: context.col + 1 },
+    ];
+    return neighbors
+        .filter(n => n.row >= 0 && n.row < SHIP_HEIGHT && n.col >= 0 && n.col < SHIP_WIDTH)
+        .map(n => context.parts![getPartIndex(n.row, n.col)]);
+};
+const getRowParts = (context?: PartEvalContext) => {
+    if (!context?.parts || context.row === undefined) return [] as ShipPart[];
+    return context.parts.slice(context.row * SHIP_WIDTH, (context.row * SHIP_WIDTH) + SHIP_WIDTH);
+};
+const getMirrorPart = (context?: PartEvalContext) => {
+    if (!context?.parts || context.row === undefined || context.col === undefined) return null as ShipPart | null;
+    const mirrorCol = (SHIP_WIDTH - 1) - context.col;
+    if (mirrorCol === context.col) return null;
+    return context.parts[getPartIndex(context.row, mirrorCol)] || null;
+};
+const isEdgePosition = (context?: PartEvalContext) =>
+    context?.row !== undefined && context?.col !== undefined &&
+    (context.row === 0 || context.row === SHIP_HEIGHT - 1 || context.col === 0 || context.col === SHIP_WIDTH - 1);
+const isCornerPosition = (context?: PartEvalContext) =>
+    context?.row !== undefined && context?.col !== undefined &&
+    ((context.row === 0 || context.row === SHIP_HEIGHT - 1) && (context.col === 0 || context.col === SHIP_WIDTH - 1));
+
+const calculatePartOutput = (part: ShipPart, context?: PartEvalContext) => {
+    const loadedSlots = getLoadedSlots(part);
+    const loadedValues = getLoadedValues(part);
+    const energySum = loadedSlots.reduce((sum, slot) => sum + (slot.value || 0), 0);
+    const isFull = part.slots.length > 0 && loadedSlots.length === part.slots.length;
+
+    if (energySum <= 0 && part.slots.length > 0) {
+        return { energySum, isFull, output: 0, specialBonus: 0 };
+    }
+
+    let output = Math.floor(energySum * part.multiplier);
+    if (isFull) output += part.basePower;
+
+    const loadedColors = getLoadedColors(part);
+    let specialBonus = 0;
+
+    switch (part.specialEffect) {
+        case 'WHITE_BONUS':
+            specialBonus = loadedColors.filter(color => color === 'WHITE').length * 2;
+            break;
+        case 'MATCH_BONUS':
+            if (isFull && loadedSlots.length >= 2) {
+                const firstValue = loadedSlots[0]?.value;
+                if (loadedSlots.every(slot => slot.value === firstValue)) {
+                    specialBonus = 4;
+                }
+            }
+            break;
+        case 'LOW_SCORE_BOOST':
+            specialBonus = loadedSlots.reduce((sum, slot) => sum + (((slot.value || 0) <= 3) ? (slot.value || 0) : 0), 0);
+            break;
+        case 'RAINBOW_BONUS':
+            if (isFull && new Set(loadedColors).size >= 3) {
+                specialBonus = 6;
+            }
+            break;
+        case 'SOLO_DOUBLE':
+            if (loadedSlots.length === 1 && loadedSlots[0].value !== null) {
+                specialBonus = output;
+            }
+            break;
+        case 'BLUE_BONUS':
+            specialBonus = loadedColors.filter(color => color === 'BLUE').length * 2;
+            break;
+        case 'ORANGE_BONUS':
+            specialBonus = loadedColors.filter(color => color === 'ORANGE').length * 3;
+            break;
+        case 'HIGH_SCORE_BOOST':
+            specialBonus = loadedSlots.filter(slot => (slot.value || 0) >= 6).length * 3;
+            break;
+        case 'EVEN_BONUS':
+            if (isFull && loadedSlots.length > 0 && loadedSlots.every(slot => ((slot.value || 0) % 2) === 0)) {
+                specialBonus = 5;
+            }
+            break;
+        case 'ODD_BONUS':
+            if (isFull && loadedSlots.length > 0 && loadedSlots.every(slot => ((slot.value || 0) % 2) === 1)) {
+                specialBonus = 5;
+            }
+            break;
+        case 'SEQUENCE_BONUS':
+            if (isFull && loadedSlots.length >= 2) {
+                const values = loadedSlots.map(slot => slot.value || 0);
+                const ascending = values.every((value, idx) => idx === 0 || value > values[idx - 1]);
+                const descending = values.every((value, idx) => idx === 0 || value < values[idx - 1]);
+                if (ascending || descending) specialBonus = 6;
+            }
+            break;
+        case 'MONO_COLOR_BONUS':
+            if (isFull && loadedColors.length > 0 && new Set(loadedColors).size === 1) {
+                specialBonus = 6;
+            }
+            break;
+        case 'OVERCHARGE_HEAL':
+        case 'OVERCHARGE_RECYCLE':
+            if (isFull && energySum >= 12) {
+                specialBonus = 4;
+            }
+            break;
+        case 'PRIME_BONUS':
+            specialBonus = loadedValues.filter(isPrimeNumber).length * 2;
+            if (isFull && loadedValues.length > 0 && loadedValues.every(isPrimeNumber)) specialBonus += 3;
+            break;
+        case 'DIVISOR_BONUS':
+            specialBonus = clampBonus(Math.floor(loadedValues.reduce((sum, value) => sum + divisorCount(value), 0) / 2), 8);
+            break;
+        case 'PRIME_FACTOR_BONUS':
+            specialBonus = clampBonus(loadedValues.reduce((sum, value) => sum + (primeFactorTypeCount(value) * 2), 0), 10);
+            break;
+        case 'SUM_TARGET_BONUS':
+            if (energySum === 18) specialBonus = 10;
+            else if (energySum === 12) specialBonus = 7;
+            break;
+        case 'MOD_MATCH_BONUS':
+            if (isFull && loadedValues.length > 0) {
+                const mod = loadedValues[0] % 3;
+                if (loadedValues.every(value => value % 3 === mod)) specialBonus = 8;
+            }
+            break;
+        case 'RATIO_BONUS':
+            if (isFull && hasConstantRatio(loadedValues)) specialBonus = 6;
+            break;
+        case 'PRODUCT_SUPPORT_BONUS':
+            if (isFull && product(loadedValues) === 12) specialBonus = 4;
+            break;
+        case 'MEAN_DOUBLE_BONUS':
+            specialBonus = clampBonus(Math.floor(mean(loadedValues) * 2), 10);
+            break;
+        case 'MODE_BONUS':
+            specialBonus = clampBonus(modeFrequency(loadedValues) * 3, 9);
+            break;
+        case 'LOW_SPREAD_BONUS':
+            if (isFull && spread(loadedValues) <= 2) specialBonus = 5;
+            break;
+        case 'SQUARE_BONUS':
+            specialBonus = loadedValues.filter(isSquareNumber).length * 3;
+            if (isFull && loadedValues.length > 0 && loadedValues.every(isSquareNumber)) specialBonus += 4;
+            break;
+        case 'GCD_BONUS':
+            if (loadedValues.length >= 2) specialBonus = clampBonus(gcdArray(loadedValues) * 2);
+            break;
+        case 'GCD_FUEL_BONUS':
+            if (loadedValues.length >= 2) specialBonus = clampBonus(gcdArray(loadedValues), 8);
+            break;
+        case 'LCM_BONUS':
+            if (loadedValues.length >= 2) specialBonus = clampBonus(Math.floor(lcmArray(loadedValues) / 3));
+            break;
+        case 'FIBONACCI_BONUS':
+            specialBonus = loadedValues.filter(isFibonacciNumber).length * 2;
+            if (isFull && loadedValues.length > 0 && loadedValues.every(isFibonacciNumber)) specialBonus += 4;
+            break;
+        case 'MEAN_BONUS':
+            specialBonus = clampBonus(Math.floor(mean(loadedValues)));
+            break;
+        case 'MEDIAN_BONUS':
+            specialBonus = clampBonus(median(loadedValues));
+            break;
+        case 'SAME_TYPE_LINK':
+            specialBonus = getAdjacentParts(context).filter(other => other.type === part.type).length * 2;
+            break;
+        case 'ROW_TYPE_LINK':
+            specialBonus = getRowParts(context).filter(other => other.type === part.type).length * 2;
+            break;
+        case 'ROW_UNITY': {
+            const rowParts = getRowParts(context).filter(other => other.type !== 'EMPTY');
+            if (rowParts.length === SHIP_WIDTH && rowParts.every(other => other.type === part.type)) specialBonus = 6;
+            break;
+        }
+        case 'CENTER_COMMAND':
+            if (context?.row === 1 && context?.col === 1) specialBonus = 4;
+            break;
+        case 'CENTER_ADJ_BONUS':
+            if (context?.row === 1 && context?.col === 1) specialBonus = 4 + getAdjacentParts(context).filter(other => other.type !== 'EMPTY').length;
+            break;
+        case 'DIAGONAL_LINK':
+            specialBonus = getDiagonalParts(context).filter(other => other.type !== 'EMPTY').length * 2;
+            break;
+        case 'MIRROR_BONUS': {
+            const mirror = getMirrorPart(context);
+            if (mirror && mirror.type === part.type) specialBonus = 5;
+            break;
+        }
+        case 'TURN_SCALE':
+            specialBonus = clampBonus(context?.turn || 0, 10);
+            break;
+        case 'DAMAGE_MEMORY':
+            specialBonus = clampBonus(context?.battleStats?.damageTaken || 0, 10);
+            break;
+        case 'EFFORT_STACK':
+            specialBonus = clampBonus(context?.battleStats?.partLoadCounts?.[part.id] || 0, 10);
+            break;
+        case 'UNIQUE_VALUE_RECORD':
+            specialBonus = clampBonus(uniqueCount(context?.battleStats?.seenValues || []), 9);
+            break;
+        case 'RANDOM_SPIKE': {
+            const roll = deterministicRoll(`${part.id}:${context?.turn || 0}:${loadedValues.join(',')}:${loadedColors.join(',')}`);
+            specialBonus = roll < 0.2 ? 10 : roll < 0.5 ? 4 : 0;
+            break;
+        }
+        case 'FORECAST_COLOR': {
+            const forecast = getForecastColor(context?.turn || 1);
+            specialBonus = loadedColors.filter(color => color === forecast).length * 3;
+            break;
+        }
+        case 'PALINDROME_BONUS': {
+            if (isFull && loadedValues.length >= 2) {
+                const mirrored = loadedValues.every((value, idx) => value === loadedValues[loadedValues.length - 1 - idx]);
+                if (mirrored) specialBonus = 7;
+            }
+            break;
+        }
+        case 'SUM_FIFTEEN_BONUS':
+            if (energySum === 15) specialBonus = 8;
+            else if (energySum === 10) specialBonus = 4;
+            break;
+        case 'MULTIPLE_OF_THREE_BONUS':
+            specialBonus = loadedValues.filter(value => value % 3 === 0).length * 3;
+            break;
+        case 'HAND_SIZE_BONUS':
+            specialBonus = clampBonus(context?.hand?.length || 0, 8);
+            break;
+        case 'TEMP_CARD_BONUS':
+            specialBonus = (context?.hand?.filter(card => card.isTemporary).length || 0) * 3;
+            break;
+        case 'ARITHMETIC_BONUS':
+            if (isFull && hasConstantDifference(loadedValues)) specialBonus = 6;
+            break;
+        case 'ADJACENT_DIVERSITY_BONUS':
+            specialBonus = uniqueCount(getAdjacentParts(context).filter(other => other.type !== 'EMPTY').map(other => other.type)) * 2;
+            break;
+        case 'EDGE_BONUS':
+            if (isEdgePosition(context)) specialBonus = 4;
+            break;
+        case 'CORNER_BONUS':
+            if (isCornerPosition(context)) specialBonus = 6;
+            break;
+        case 'ISOLATION_BONUS':
+            if (getAdjacentParts(context).filter(other => other.type !== 'EMPTY').length === 0) specialBonus = 5;
+            break;
+        case 'ISOLATION_FUEL_BONUS':
+            if (getAdjacentParts(context).filter(other => other.type !== 'EMPTY').length === 0) specialBonus = 5;
+            break;
+        case 'CENTER_COLUMN_BONUS':
+            if (context?.col === 1) specialBonus = 4 + (verticalNeighbors(context).filter(other => other.type !== 'EMPTY').length * 2);
+            break;
+        case 'ALT_COLOR_BONUS':
+            if (isFull && loadedColors.length >= 2 && loadedColors.every((color, idx) => idx === 0 || color !== loadedColors[idx - 1])) specialBonus = 6;
+            break;
+        case 'LAST_STREAK_BONUS':
+            specialBonus = clampBonus(context?.battleStats?.lastLoadedPartId === part.id ? context?.battleStats?.lastLoadedStreak || 0 : 0, 8);
+            break;
+        case 'RANDOM_SWING': {
+            const roll = deterministicRoll(`swing:${part.id}:${context?.turn || 0}:${loadedValues.join(',')}:${loadedColors.join(',')}`);
+            specialBonus = roll < 0.2 ? 10 : roll < 0.7 ? 4 : 2;
+            break;
+        }
+        case 'OVERCHARGE_SUPPORT':
+            if (isFull && energySum >= 12) specialBonus = 4;
+            break;
+        case 'RAINBOW_HEAL_BONUS':
+            if (isFull && new Set(loadedColors).size >= 3) specialBonus = 6;
+            break;
+        case 'FUEL_RESERVE_BONUS':
+            specialBonus = clampBonus(context?.fuel || 0, 6);
+            break;
+        case 'BLUE_THORNS_BONUS':
+            specialBonus = loadedColors.filter(color => color === 'BLUE').length * 2;
+            break;
+        case 'ECHO_MATCH_BONUS': {
+            const modeCount = modeFrequency(loadedValues);
+            if (modeCount >= 3) specialBonus = 8;
+            else if (modeCount >= 2) specialBonus = 4;
+            break;
+        }
+        case 'ALL_UNIQUE_RAINBOW_BONUS':
+            if (isFull && allUnique(loadedValues)) {
+                specialBonus = 8;
+                if (new Set(loadedColors).size >= 3) specialBonus += 4;
+            }
+            break;
+        case 'CENTER_FULL_BONUS':
+            if (context?.row === 1 && context?.col === 1 && isFull) specialBonus = 6;
+            break;
+        case 'UNIQUE_RAINBOW_BONUS':
+            specialBonus = clampBonus(Math.floor(uniqueCount(context?.battleStats?.seenValues || []) / 2), 6);
+            if (isFull && new Set(loadedColors).size >= 3) specialBonus += 6;
+            break;
+        default:
+            break;
+    }
+
+    return { energySum, isFull, output: output + specialBonus, specialBonus };
+};
+
+const calculateBuffGrid = (parts: ShipPart[], context?: Omit<PartEvalContext, 'row' | 'col' | 'parts'>): number[][] => {
     const grid = Array(SHIP_HEIGHT).fill(0).map(() => Array(SHIP_WIDTH).fill(0));
     parts.forEach((part, idx) => {
         if (part.type === 'AMPLIFIER') {
-            const energySum = part.slots.reduce((s, slot) => s + (slot.value || 0), 0);
-            const isFull = part.slots.every(s => s.value !== null) && part.slots.length > 0;
+            const r = Math.floor(idx / SHIP_WIDTH);
+            const c = idx % SHIP_WIDTH;
+            const { energySum, output } = calculatePartOutput(part, { ...context, row: r, col: c, parts });
             
             // Only provide bonus if active (has energy) or no slots required
             if (energySum > 0 || (part.slots.length === 0)) { 
-                let power = Math.floor(energySum * part.multiplier);
-                if (isFull) power += part.basePower;
-                
-                const r = Math.floor(idx / SHIP_WIDTH);
-                const c = idx % SHIP_WIDTH;
-                
+                const power = output;
+
                 // Apply to adjacent
                 const neighbors = [{r:r-1,c}, {r:r+1,c}, {r,c:c-1}, {r,c:c+1}];
                 neighbors.forEach(n => {
@@ -452,8 +1339,9 @@ const ShipPartView: React.FC<{
     highlight?: boolean,
     pendingReplace?: boolean,
     showPower?: boolean,
-    bonusPower?: number
-}> = ({ part, onClick, onLongPress, isEnemy, highlight, pendingReplace, showPower = true, bonusPower = 0 }) => {
+    bonusPower?: number,
+    evalContext?: PartEvalContext
+}> = ({ part, onClick, onLongPress, isEnemy, highlight, pendingReplace, showPower = true, bonusPower = 0, evalContext }) => {
     
     const longPressTimer = useRef<any>(null);
 
@@ -486,6 +1374,49 @@ const ShipPartView: React.FC<{
     if (part.specialEffect === 'HEAL') { colorClass = 'bg-green-900/60 border-green-500/50'; textColor='text-green-200'; icon = <Droplets size={14}/>; }
     if (part.specialEffect === 'RECYCLE') { colorClass = 'bg-teal-900/60 border-teal-500/50'; textColor='text-teal-200'; icon = <Recycle size={14}/>; }
     if (part.specialEffect === 'THORNS') { colorClass = 'bg-slate-700 border-red-500'; textColor='text-red-300'; icon = <Radiation size={14}/>; }
+    if (part.specialEffect === 'WHITE_BONUS') { colorClass = 'bg-slate-200/20 border-slate-200'; textColor='text-slate-100'; icon = <Palette size={14}/>; }
+    if (part.specialEffect === 'MATCH_BONUS') { colorClass = 'bg-amber-900/60 border-amber-500/50'; textColor='text-amber-200'; icon = <Dice5 size={14}/>; }
+    if (part.specialEffect === 'LOW_SCORE_BOOST') { colorClass = 'bg-cyan-900/60 border-cyan-500/50'; textColor='text-cyan-200'; icon = <Target size={14}/>; }
+    if (part.specialEffect === 'RAINBOW_BONUS') { colorClass = 'bg-fuchsia-900/60 border-fuchsia-500/50'; textColor='text-fuchsia-200'; icon = <Palette size={14}/>; }
+    if (part.specialEffect === 'SOLO_DOUBLE') { colorClass = 'bg-yellow-900/60 border-yellow-500/50'; textColor='text-yellow-200'; icon = <Star size={14}/>; }
+    if (part.specialEffect === 'BLUE_BONUS') { colorClass = 'bg-blue-900/60 border-blue-400/60'; textColor='text-blue-200'; icon = <Wind size={14}/>; }
+    if (part.specialEffect === 'ORANGE_BONUS') { colorClass = 'bg-orange-900/60 border-orange-400/60'; textColor='text-orange-200'; icon = <Zap size={14}/>; }
+    if (part.specialEffect === 'HIGH_SCORE_BOOST') { colorClass = 'bg-rose-900/60 border-rose-400/60'; textColor='text-rose-200'; icon = <Gauge size={14}/>; }
+    if (part.specialEffect === 'EVEN_BONUS') { colorClass = 'bg-indigo-900/60 border-indigo-400/60'; textColor='text-indigo-200'; icon = <Dice5 size={14}/>; }
+    if (part.specialEffect === 'ODD_BONUS') { colorClass = 'bg-pink-900/60 border-pink-400/60'; textColor='text-pink-200'; icon = <Dice5 size={14}/>; }
+    if (part.specialEffect === 'SEQUENCE_BONUS') { colorClass = 'bg-lime-900/60 border-lime-400/60'; textColor='text-lime-200'; icon = <Repeat size={14}/>; }
+    if (part.specialEffect === 'MONO_COLOR_BONUS') { colorClass = 'bg-violet-900/60 border-violet-400/60'; textColor='text-violet-200'; icon = <Ghost size={14}/>; }
+    if (part.specialEffect === 'OVERCHARGE_HEAL') { colorClass = 'bg-green-900/60 border-green-400/60'; textColor='text-green-200'; icon = <Heart size={14}/>; }
+    if (part.specialEffect === 'OVERCHARGE_RECYCLE') { colorClass = 'bg-teal-900/60 border-teal-400/60'; textColor='text-teal-200'; icon = <RefreshCw size={14}/>; }
+    if (part.specialEffect === 'PRIME_BONUS') { colorClass = 'bg-sky-900/60 border-sky-400/60'; textColor='text-sky-200'; icon = <Star size={14}/>; }
+    if (part.specialEffect === 'SQUARE_BONUS') { colorClass = 'bg-emerald-900/60 border-emerald-400/60'; textColor='text-emerald-200'; icon = <Box size={14}/>; }
+    if (part.specialEffect === 'GCD_BONUS') { colorClass = 'bg-cyan-900/60 border-cyan-400/60'; textColor='text-cyan-200'; icon = <Gauge size={14}/>; }
+    if (part.specialEffect === 'LCM_BONUS') { colorClass = 'bg-red-900/60 border-red-400/60'; textColor='text-red-200'; icon = <Swords size={14}/>; }
+    if (part.specialEffect === 'FIBONACCI_BONUS') { colorClass = 'bg-amber-900/60 border-amber-400/60'; textColor='text-amber-200'; icon = <Repeat size={14}/>; }
+    if (part.specialEffect === 'MEAN_BONUS') { colorClass = 'bg-blue-900/60 border-blue-300/60'; textColor='text-blue-100'; icon = <Activity size={14}/>; }
+    if (part.specialEffect === 'MEDIAN_BONUS') { colorClass = 'bg-indigo-900/60 border-indigo-300/60'; textColor='text-indigo-100'; icon = <Target size={14}/>; }
+    if (part.specialEffect === 'SAME_TYPE_LINK') { colorClass = 'bg-violet-900/60 border-violet-300/60'; textColor='text-violet-100'; icon = <Users size={14}/>; }
+    if (part.specialEffect === 'ROW_UNITY') { colorClass = 'bg-fuchsia-900/60 border-fuchsia-300/60'; textColor='text-fuchsia-100'; icon = <Layers size={14}/>; }
+    if (part.specialEffect === 'CENTER_COMMAND') { colorClass = 'bg-yellow-900/60 border-yellow-300/60'; textColor='text-yellow-100'; icon = <Crosshair size={14}/>; }
+    if (part.specialEffect === 'DIAGONAL_LINK') { colorClass = 'bg-rose-900/60 border-rose-300/60'; textColor='text-rose-100'; icon = <ArrowRight size={14}/>; }
+    if (part.specialEffect === 'MIRROR_BONUS') { colorClass = 'bg-slate-700 border-slate-300'; textColor='text-slate-100'; icon = <ChevronsLeft size={14}/>; }
+    if (part.specialEffect === 'TURN_SCALE') { colorClass = 'bg-orange-900/60 border-orange-300/60'; textColor='text-orange-100'; icon = <Calendar size={14}/>; }
+    if (part.specialEffect === 'DAMAGE_MEMORY') { colorClass = 'bg-red-950/80 border-red-300/60'; textColor='text-red-100'; icon = <Shield size={14}/>; }
+    if (part.specialEffect === 'EFFORT_STACK') { colorClass = 'bg-green-950/80 border-green-300/60'; textColor='text-green-100'; icon = <Hammer size={14}/>; }
+    if (part.specialEffect === 'UNIQUE_VALUE_RECORD') { colorClass = 'bg-teal-950/80 border-teal-300/60'; textColor='text-teal-100'; icon = <Archive size={14}/>; }
+    if (part.specialEffect === 'RANDOM_SPIKE') { colorClass = 'bg-pink-950/80 border-pink-300/60'; textColor='text-pink-100'; icon = <Dice5 size={14}/>; }
+    if (part.specialEffect === 'FORECAST_COLOR') { colorClass = 'bg-cyan-950/80 border-cyan-300/60'; textColor='text-cyan-100'; icon = <Palette size={14}/>; }
+    if (part.specialEffect === 'NO_CONSUME_CHANCE') { colorClass = 'bg-lime-950/80 border-lime-300/60'; textColor='text-lime-100'; icon = <RefreshCw size={14}/>; }
+    if (part.specialEffect === 'PALINDROME_BONUS') { colorClass = 'bg-purple-950/80 border-purple-300/60'; textColor='text-purple-100'; icon = <Repeat size={14}/>; }
+    if (part.specialEffect === 'SUM_FIFTEEN_BONUS') { colorClass = 'bg-amber-950/80 border-amber-300/60'; textColor='text-amber-100'; icon = <Gauge size={14}/>; }
+    if (part.specialEffect === 'MULTIPLE_OF_THREE_BONUS') { colorClass = 'bg-orange-950/80 border-orange-300/60'; textColor='text-orange-100'; icon = <Layers size={14}/>; }
+    if (part.specialEffect === 'HAND_SIZE_BONUS') { colorClass = 'bg-blue-950/80 border-blue-300/60'; textColor='text-blue-100'; icon = <Box size={14}/>; }
+    if (part.specialEffect === 'TEMP_CARD_BONUS') { colorClass = 'bg-fuchsia-950/80 border-fuchsia-300/60'; textColor='text-fuchsia-100'; icon = <Ghost size={14}/>; }
+    if (part.specialEffect === 'EDGE_BONUS') { colorClass = 'bg-slate-950/80 border-slate-300/60'; textColor='text-slate-100'; icon = <ChevronsRight size={14}/>; }
+    if (part.specialEffect === 'CORNER_BONUS') { colorClass = 'bg-yellow-950/80 border-yellow-300/60'; textColor='text-yellow-100'; icon = <Target size={14}/>; }
+    if (part.specialEffect === 'ISOLATION_BONUS') { colorClass = 'bg-emerald-950/80 border-emerald-300/60'; textColor='text-emerald-100'; icon = <User size={14}/>; }
+    if (part.specialEffect === 'ALT_COLOR_BONUS') { colorClass = 'bg-cyan-950/80 border-cyan-300/60'; textColor='text-cyan-100'; icon = <Palette size={14}/>; }
+    if (part.specialEffect === 'LAST_STREAK_BONUS') { colorClass = 'bg-red-950/80 border-red-300/60'; textColor='text-red-100'; icon = <Hammer size={14}/>; }
 
     if (part.type === 'EMPTY') {
         return (
@@ -499,16 +1430,7 @@ const ShipPartView: React.FC<{
         );
     }
 
-    const loadedCount = part.slots.filter(s => s.value !== null).length;
-    const isFull = loadedCount === part.slots.length && part.slots.length > 0;
-    
-    let totalPower = 0;
-    const energySum = part.slots.reduce((sum, s) => sum + (s.value || 0), 0);
-    
-    if (energySum > 0 || (part.slots.length === 0)) { 
-        totalPower = Math.floor(energySum * part.multiplier);
-        if (isFull) totalPower += part.basePower;
-    }
+    const { isFull, output: totalPower, specialBonus } = calculatePartOutput(part, evalContext);
     
     const displayPower = totalPower + bonusPower;
 
@@ -538,13 +1460,18 @@ const ShipPartView: React.FC<{
                 )}
                 {part.type === 'AMPLIFIER' && isFull && <div className="text-[8px] font-bold text-yellow-300">UP!</div>}
                 {part.specialEffect === 'HEAL' && isFull && <div className="text-[8px] font-bold text-green-300">HEAL</div>}
+                {specialBonus > 0 && part.specialEffect !== 'HEAL' && part.specialEffect !== 'RANK_UP' && (
+                    <div className="text-[8px] font-bold text-yellow-300">+{specialBonus}</div>
+                )}
             </div>
 
             <div className="flex gap-0.5 justify-center mt-1">
                 {part.slots.map((slot, i) => {
                     let slotColor = 'bg-slate-900 border-slate-600';
                     if (slot.value !== null) {
-                        slotColor = 'bg-white border-white animate-pulse'; 
+                        if (slot.loadedColor === 'ORANGE') slotColor = 'bg-orange-400 border-orange-200 animate-pulse';
+                        else if (slot.loadedColor === 'BLUE') slotColor = 'bg-blue-400 border-blue-200 animate-pulse';
+                        else slotColor = 'bg-white border-white animate-pulse';
                     } else if (slot.req === 'ORANGE') {
                         slotColor = 'bg-orange-900 border-orange-600';
                     } else if (slot.req === 'BLUE') {
@@ -670,6 +1597,7 @@ const loadProgress = () => {
 const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const savedData = loadInitialState();
     const [progress, setProgress] = useState<PaperPlaneProgress>(loadProgress());
+    const [newlyUnlockedPart, setNewlyUnlockedPart] = useState<ShipPart | null>(null);
 
     const [phase, setPhase] = useState<GamePhase>(savedData?.phase || 'SETUP');
     const [stage, setStage] = useState(savedData?.stage || 1); 
@@ -733,6 +1661,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     const [rewardOptions, setRewardOptions] = useState<ShipPart[]>(savedData?.rewardOptions || []);
     const [earnedCoins, setEarnedCoins] = useState(savedData?.earnedCoins || 0);
+    const [battleStats, setBattleStats] = useState<BattleStats>(savedData?.battleStats || createBattleStats());
 
     // --- AUTO SAVE ---
     const saveDebounceRef = useRef<any>(null);
@@ -745,12 +1674,12 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             saveDebounceRef.current = setTimeout(() => {
                 const stateToSave = {
                     phase, stage, turn, pool, hand, player, enemy, enemyIntents, isEndless,
-                    vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins, selectedMissionLevel
+                    vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins, selectedMissionLevel, battleStats
                 };
                 storageService.savePaperPlaneState(stateToSave);
             }, 1000); 
         }
-    }, [phase, stage, turn, pool, hand, player, enemy, enemyIntents, vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins, isEndless, selectedMissionLevel]);
+    }, [phase, stage, turn, pool, hand, player, enemy, enemyIntents, vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins, isEndless, selectedMissionLevel, battleStats]);
 
     // --- SCORE SAVING ---
     const scoreSavedRef = useRef(false);
@@ -891,6 +1820,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setSetupStep('SHIP');
         setStage(1);
         setIsEndless(false);
+        setNewlyUnlockedPart(null);
         initPilotRoll(); // Ensure pilots are rerolled/reset
         audioService.playSound('select');
         audioService.playBGM('paper_plane_setup');
@@ -937,7 +1867,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                  partTemplate = { 
                      type: type, 
                      name: type==='EMPTY'?'空き':(type==='CANNON'?'敵砲台':'敵パーツ'), 
-                     description:'', slots: [], multiplier: 1, basePower: 0, hp: 10 
+                    description:'', slots: [], multiplier: 1, basePower: 0, hp: 10 
                  };
             }
             
@@ -975,7 +1905,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setPlayer(prev => ({
             ...prev,
             yOffset: 1,
-            parts: prev.parts.map(p => ({ ...p, slots: p.slots.map(s => ({...s, value: null})) })),
+            parts: prev.parts.map(p => ({ ...p, slots: p.slots.map(s => ({...s, value: null, loadedColor: null})) })),
             // Ascension 4: Start damaged
             hp: selectedMissionLevel >= 4 ? Math.floor(prev.hp * 0.8) : prev.hp
         }));
@@ -1005,6 +1935,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setEnemyIntents(intents);
 
         setTurn(1);
+        setBattleStats(createBattleStats());
         
         let allNumbers = [...pool.genNumbers, ...pool.coolNumbers, ...hand.map(c => c.value)];
         let allColors = [...pool.genColors, ...pool.coolColors, ...hand.map(c => c.color)];
@@ -1139,7 +2070,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }
 
         // 3. Generate Intents based on loaded parts
-        const buffGrid = calculateBuffGrid(nextEnemy.parts);
+        const buffGrid = calculateBuffGrid(nextEnemy.parts, { turn: currentStage, fuel: nextEnemy.fuel });
         const rowDamageMap: Record<number, number> = {};
 
         nextEnemy.parts.forEach((p, idx) => {
@@ -1171,37 +2102,38 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     const drawEnergy = (count: number) => {
-        setPool(current => {
-            let nextGenNums = [...current.genNumbers];
-            let nextGenCols = [...current.genColors];
-            let nextCoolNums = [...current.coolNumbers];
-            let nextCoolCols = [...current.coolColors];
-            
-            const newCards: EnergyCard[] = [];
+        let nextGenNums = [...pool.genNumbers];
+        let nextGenCols = [...pool.genColors];
+        let nextCoolNums = [...pool.coolNumbers];
+        let nextCoolCols = [...pool.coolColors];
+        
+        const newCards: EnergyCard[] = [];
 
-            for(let i=0; i<count; i++) {
-                if (nextGenNums.length === 0) { nextGenNums = [...nextCoolNums]; nextCoolNums = []; }
-                if (nextGenCols.length === 0) { nextGenCols = [...nextCoolCols]; nextCoolCols = []; }
-                
-                if (current.genNumbers.length === 0) nextGenNums.sort(() => Math.random() - 0.5);
-                if (current.genColors.length === 0) nextGenCols.sort(() => Math.random() - 0.5);
-
-                if (nextGenNums.length > 0 && nextGenCols.length > 0) {
-                    const valIdx = Math.floor(Math.random() * nextGenNums.length);
-                    const val = nextGenNums[valIdx];
-                    nextGenNums.splice(valIdx, 1);
-                    
-                    const colIdx = Math.floor(Math.random() * nextGenCols.length);
-                    const col = nextGenCols[colIdx];
-                    nextGenCols.splice(colIdx, 1);
-
-                    newCards.push({ id: `e_${Date.now()}_${i}`, value: val, color: col });
-                }
+        for(let i=0; i<count; i++) {
+            if (nextGenNums.length === 0) { 
+                nextGenNums = [...nextCoolNums].sort(() => Math.random() - 0.5); 
+                nextCoolNums = []; 
             }
-            
-            setHand(prev => [...prev, ...newCards]);
-            return { genNumbers: nextGenNums, genColors: nextGenCols, coolNumbers: nextCoolNums, coolColors: nextCoolCols };
-        });
+            if (nextGenCols.length === 0) { 
+                nextGenCols = [...nextCoolCols].sort(() => Math.random() - 0.5); 
+                nextCoolCols = []; 
+            }
+
+            if (nextGenNums.length > 0 && nextGenCols.length > 0) {
+                const valIdx = Math.floor(Math.random() * nextGenNums.length);
+                const val = nextGenNums[valIdx];
+                nextGenNums.splice(valIdx, 1);
+                
+                const colIdx = Math.floor(Math.random() * nextGenCols.length);
+                const col = nextGenCols[colIdx];
+                nextGenCols.splice(colIdx, 1);
+
+                newCards.push({ id: `e_${Date.now()}_${i}_${Math.random().toString(36).substring(2,8)}`, value: val, color: col });
+            }
+        }
+        
+        setHand(prev => [...prev, ...newCards]);
+        setPool({ genNumbers: nextGenNums, genColors: nextGenCols, coolNumbers: nextCoolNums, coolColors: nextCoolCols });
         audioService.playSound('select');
     };
 
@@ -1274,14 +2206,34 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         const newParts = [...player.parts];
         const newSlots = [...part.slots];
-        newSlots[slotIdx] = { ...newSlots[slotIdx], value: card.value };
+        newSlots[slotIdx] = { ...newSlots[slotIdx], value: card.value, loadedColor: card.color };
         newParts[partIndex] = { ...part, slots: newSlots };
+        const nextBattleStats: BattleStats = {
+            damageTaken: battleStats.damageTaken,
+            seenValues: [...battleStats.seenValues, card.value],
+            partLoadCounts: {
+                ...battleStats.partLoadCounts,
+                [part.id]: (battleStats.partLoadCounts[part.id] || 0) + 1,
+            },
+            lastLoadedPartId: part.id,
+            lastLoadedStreak: battleStats.lastLoadedPartId === part.id ? battleStats.lastLoadedStreak + 1 : 1,
+        };
         
         setPlayer(prev => ({ ...prev, parts: newParts }));
-        currentHandList.splice(cardIndex, 1);
-        
+        setBattleStats(nextBattleStats);
+
+        const noConsumeTriggered = part.specialEffect === 'NO_CONSUME_CHANCE' &&
+            deterministicRoll(`${part.id}:${card.id}:${turn}:${hand.length}:${card.value}:${card.color}`) < 0.35;
+
+        if (noConsumeTriggered) {
+            addLog('ラッキー！カードが手札に残った！');
+            audioService.playSound('win');
+        } else {
+            currentHandList.splice(cardIndex, 1);
+            recycleCard(card);
+        }
+
         setHand(currentHandList);
-        recycleCard(card);
         setSelectedCardId(null);
         if (part.specialEffect !== 'RANK_UP') audioService.playSound('buff');
     };
@@ -1305,9 +2257,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         let tempPlayerHp = player.hp;
         let tempFuel = player.fuel;
         let enemyStunDmg = 0;
+        let damageTakenThisRound = 0;
 
-        const buffGrid = calculateBuffGrid(player.parts);
-        const enemyBuffGrid = calculateBuffGrid(enemy.parts); // Calculate enemy buffs
+        const buffGrid = calculateBuffGrid(player.parts, { hand, turn, battleStats, fuel: player.fuel });
+        const enemyBuffGrid = calculateBuffGrid(enemy.parts, { turn, fuel: enemy.fuel }); // Calculate enemy buffs
 
         // CLASH LOGIC
         for (let r = 0; r < MAX_ROWS; r++) {
@@ -1327,14 +2280,31 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 rowParts.forEach((p, colIdx) => {
                     if (p.type === 'EMPTY' || p.type === 'AMPLIFIER') return;
 
-                    const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
+                    const { energySum, isFull, output: baseOutput } = calculatePartOutput(p, {
+                        row: pRelIdx,
+                        col: colIdx,
+                        parts: player.parts,
+                        hand,
+                        turn,
+                        battleStats,
+                        fuel: player.fuel,
+                    });
                     if (energySum > 0) {
-                        let output = Math.floor(energySum * p.multiplier);
-                        const isFull = p.slots.every(s => s.value !== null) && p.slots.length > 0;
+                        let output = baseOutput;
                         if (isFull) {
-                            output += p.basePower;
                             if (p.specialEffect === 'HEAL') tempPlayerHp = Math.min(player.maxHp, tempPlayerHp + 5);
                             if (p.specialEffect === 'RECYCLE') tempFuel = Math.min(player.maxFuel, tempFuel + 1);
+                            if (p.specialEffect === 'OVERCHARGE_HEAL' && energySum >= 12) tempPlayerHp = Math.min(player.maxHp, tempPlayerHp + 3);
+                            if (p.specialEffect === 'OVERCHARGE_RECYCLE' && energySum >= 12) tempFuel = Math.min(player.maxFuel, tempFuel + 1);
+                            if (p.specialEffect === 'PRODUCT_SUPPORT_BONUS' && product(getLoadedValues(p)) === 12) tempFuel = Math.min(player.maxFuel, tempFuel + 1);
+                            if (p.specialEffect === 'GCD_FUEL_BONUS' && getLoadedValues(p).length >= 2 && gcdArray(getLoadedValues(p)) >= 2) tempFuel = Math.min(player.maxFuel, tempFuel + 1);
+                            if (p.specialEffect === 'ISOLATION_FUEL_BONUS' && getAdjacentParts({ row: pRelIdx, col: colIdx, parts: player.parts }).filter(other => other.type !== 'EMPTY').length === 0) tempFuel = Math.min(player.maxFuel, tempFuel + 1);
+                            if (p.specialEffect === 'OVERCHARGE_SUPPORT' && energySum >= 12) {
+                                tempPlayerHp = Math.min(player.maxHp, tempPlayerHp + 3);
+                                tempFuel = Math.min(player.maxFuel, tempFuel + 1);
+                            }
+                            if (p.specialEffect === 'RAINBOW_HEAL_BONUS' && new Set(getLoadedColors(p)).size >= 3) tempPlayerHp = Math.min(player.maxHp, tempPlayerHp + 2);
+                            if (p.specialEffect === 'CENTER_FULL_BONUS' && pRelIdx === 1 && colIdx === 1) tempFuel = Math.min(player.maxFuel, tempFuel + 1);
                         }
                         
                         output += buffGrid[pRelIdx][colIdx];
@@ -1344,6 +2314,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         if (p.type === 'SHIELD') {
                             pShield += output;
                             if (p.specialEffect === 'THORNS') pThorns += Math.ceil(output / 2);
+                            if (p.specialEffect === 'BLUE_THORNS_BONUS') pThorns += Math.max(2, getLoadedColors(p).filter(color => color === 'BLUE').length * 2);
                         }
                         if (p.type === 'ENGINE') pEngine += output;
                     }
@@ -1370,12 +2341,16 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                  if (!enemy.isStunned) {
                      rowParts.forEach((p, colIdx) => {
                          if (p.type === 'EMPTY' || p.type === 'AMPLIFIER') return;
-                         const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
+                         const { energySum, output: baseOutput } = calculatePartOutput(p, {
+                             row: eRelIdx,
+                             col: colIdx,
+                             parts: enemy.parts,
+                             turn,
+                             fuel: enemy.fuel,
+                         });
                          
                          if (energySum > 0 && (p.type === 'CANNON' || p.type === 'MISSILE')) {
-                             let output = Math.floor(energySum * p.multiplier);
-                             const isFull = p.slots.every(s => s.value !== null) && p.slots.length > 0;
-                             if(isFull) output += p.basePower;
+                             let output = baseOutput;
                              output += enemyBuffGrid[eRelIdx][colIdx];
                              // Ascension Scaling
                              if (selectedMissionLevel >= 1) output += 1;
@@ -1443,7 +2418,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             } else if (c.result === 'PLAYER_HIT') {
                 const blocked = Math.min(c.damage, c.pShield);
                 const finalDmg = c.damage - blocked;
-                if (finalDmg > 0) tempPlayerHp = Math.max(0, tempPlayerHp - finalDmg);
+                if (finalDmg > 0) {
+                    tempPlayerHp = Math.max(0, tempPlayerHp - finalDmg);
+                    damageTakenThisRound += finalDmg;
+                }
                 
                 if (c.pThorns > 0) {
                     tempEnemyHp = Math.max(0, tempEnemyHp - c.pThorns);
@@ -1453,6 +2431,12 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         });
 
         setClashState({ active: false, phase: 'DONE', data: [] });
+        if (damageTakenThisRound > 0) {
+            setBattleStats(prev => ({
+                ...prev,
+                damageTaken: prev.damageTaken + damageTakenThisRound,
+            }));
+        }
 
         setEnemy(prev => ({...prev, hp: tempEnemyHp}));
         setPlayer(prev => ({...prev, hp: tempPlayerHp, fuel: tempFuel}));
@@ -1488,7 +2472,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                  // Clear slots if it attacked (had energy)
                  const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
                  if (energySum > 0 && (p.type === 'CANNON' || p.type === 'MISSILE')) {
-                     return { ...p, slots: p.slots.map(s => ({...s, value: null})) };
+                     return { ...p, slots: p.slots.map(s => ({...s, value: null, loadedColor: null})) };
                  }
                  return p;
             });
@@ -1504,7 +2488,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         setPlayer(prev => ({ 
             ...prev, 
-            parts: prev.parts.map(p => ({...p, slots: p.slots.map(s => ({...s, value: null})) })) 
+            parts: prev.parts.map(p => ({...p, slots: p.slots.map(s => ({...s, value: null, loadedColor: null})) })) 
         }));
         
         setAnimating(false);
@@ -1555,31 +2539,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }));
         setHand([]);
 
-        const opts: ShipPart[] = [];
-        const pool = [...PART_TEMPLATES]; 
-
-        for(let i=0; i<2; i++){
-            if (pool.length === 0) break;
-            const idx = Math.floor(Math.random() * pool.length);
-            const template = pool[idx];
-            
-            pool.splice(idx, 1);
-            
-            let quality = Math.random() < 0.2 ? 1.5 : 1.0;
-            const newPart: ShipPart = {
-                id: `rew_p_${Date.now()}_${i}`,
-                type: template.type,
-                name: template.name + (quality > 1 ? '+' : ''),
-                description: template.description,
-                slots: template.slots,
-                multiplier: template.multiplier * quality,
-                basePower: Math.floor(template.basePower * quality),
-                hp: 10,
-                specialEffect: template.specialEffect
-            };
-            opts.push(newPart);
-        }
-        setRewardOptions(opts);
+        setRewardOptions(rollRewardParts(getAvailablePartTemplates(progress), 2, 'rew_p'));
         setPhase('REWARD_SELECT');
         audioService.playBGM('paper_plane_vacation'); // Switch to vacation theme for reward
         audioService.playSound('win');
@@ -1604,29 +2564,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }
         setPlayer(p => ({...p, starCoins: p.starCoins - 50}));
         
-        const opts: ShipPart[] = [];
-        const pool = [...PART_TEMPLATES];
-
-        for(let i=0; i<2; i++){
-            if (pool.length === 0) break;
-            const idx = Math.floor(Math.random() * pool.length);
-            const template = pool[idx];
-            pool.splice(idx, 1);
-            let quality = Math.random() < 0.2 ? 1.5 : 1.0;
-            const newPart: ShipPart = {
-                id: `rew_p_${Date.now()}_reroll_${i}`,
-                type: template.type,
-                name: template.name + (quality > 1 ? '+' : ''),
-                description: template.description,
-                slots: template.slots,
-                multiplier: template.multiplier * quality,
-                basePower: Math.floor(template.basePower * quality),
-                hp: 10,
-                specialEffect: template.specialEffect
-            };
-            opts.push(newPart);
-        }
-        setRewardOptions(opts);
+        setRewardOptions(rollRewardParts(getAvailablePartTemplates(progress), 2, 'rew_reroll'));
         audioService.playSound('select');
     };
 
@@ -1740,20 +2678,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 break;
             case 'PARTS':
             case 'SHOP': 
-                const template = PART_TEMPLATES[Math.floor(Math.random() * PART_TEMPLATES.length)];
+                const availableTemplates = getAvailablePartTemplates(progress);
+                const template = availableTemplates[Math.floor(Math.random() * availableTemplates.length)];
                 let quality = event.tier === 3 ? 1.5 : 1.0;
                 if (event.type === 'SHOP') quality = 1.3; 
-                const newPart: ShipPart = {
-                    id: `new_p_${Date.now()}`,
-                    type: template.type,
-                    name: template.name + (quality > 1 ? '+' : ''),
-                    description: template.description,
-                    slots: template.slots,
-                    multiplier: template.multiplier * quality,
-                    basePower: Math.floor(template.basePower * quality),
-                    hp: 10,
-                    specialEffect: template.specialEffect
-                };
+                const newPart = createPartFromTemplate(template, 'new_p', quality);
                 setPendingPart(newPart);
                 resultMsg = `「${newPart.name}」を入手！交換するスロットを選んでください。`;
                 audioService.playSound('select');
@@ -1925,6 +2854,15 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 if (selectedMissionLevel >= 1) newProgress.rerollCount += 1;
                 if (selectedMissionLevel >= 5) newProgress.rerollCount += 2;
             }
+
+            const lockedTemplates = getLockedUnlockablePartTemplates(newProgress);
+            if (lockedTemplates.length > 0) {
+                const unlockedTemplate = lockedTemplates[Math.floor(Math.random() * lockedTemplates.length)];
+                newProgress.unlockedPartNames = Array.from(new Set([...(newProgress.unlockedPartNames || []), unlockedTemplate.name]));
+                setNewlyUnlockedPart(createPartFromTemplate(unlockedTemplate, 'unlock_preview'));
+            } else {
+                setNewlyUnlockedPart(null);
+            }
             
             setProgress(newProgress);
             storageService.savePaperPlaneProgress(newProgress);
@@ -1948,6 +2886,135 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             }
             if (part.specialEffect === 'HEAL') {
                 return '出力は「シールド」になります。\nさらに、スロットが埋まると船体のHPを回復します。';
+            }
+            if (part.specialEffect === 'WHITE_BONUS') {
+                return '白エネルギーを装填したスロット1つごとに、追加で出力が上昇します。';
+            }
+            if (part.specialEffect === 'MATCH_BONUS') {
+                return 'すべてのスロットに同じ数字をそろえると、追加出力を得ます。';
+            }
+            if (part.specialEffect === 'LOW_SCORE_BOOST') {
+                return '3以下の低い数字を装填するほど、追加で出力が伸びます。';
+            }
+            if (part.specialEffect === 'RAINBOW_BONUS') {
+                return '白・青・橙の3色がそろうと、虹色ボーナスで出力が上昇します。';
+            }
+            if (part.specialEffect === 'SOLO_DOUBLE') {
+                return '1スロットに全力集中するパーツです。単独装填時、出力がさらに倍化します。';
+            }
+            if (part.specialEffect === 'BLUE_BONUS') {
+                return '青エネルギーを装填した数だけ、追加で出力が上昇します。';
+            }
+            if (part.specialEffect === 'ORANGE_BONUS') {
+                return 'オレンジエネルギーを装填した数だけ、大きく出力が上昇します。';
+            }
+            if (part.specialEffect === 'HIGH_SCORE_BOOST') {
+                return '6以上の高い数字を装填するほど、追加で出力が上昇します。';
+            }
+            if (part.specialEffect === 'EVEN_BONUS') {
+                return 'すべてのスロットが偶数で埋まると、追加出力を得ます。';
+            }
+            if (part.specialEffect === 'ODD_BONUS') {
+                return 'すべてのスロットが奇数で埋まると、追加出力を得ます。';
+            }
+            if (part.specialEffect === 'SEQUENCE_BONUS') {
+                return '数字が昇順または降順に並ぶと、追加出力を得ます。';
+            }
+            if (part.specialEffect === 'MONO_COLOR_BONUS') {
+                return 'すべて同じ色のエネルギーで埋まると、追加出力を得ます。';
+            }
+            if (part.specialEffect === 'OVERCHARGE_HEAL') {
+                return 'フル装填かつ合計値が12以上なら、追加出力と回復効果が発生します。';
+            }
+            if (part.specialEffect === 'OVERCHARGE_RECYCLE') {
+                return 'フル装填かつ合計値が12以上なら、追加出力と燃料回復が発生します。';
+            }
+            if (part.specialEffect === 'PRIME_BONUS') {
+                return '素数の数字を装填するほど追加出力を得ます。すべて素数ならさらに強化されます。';
+            }
+            if (part.specialEffect === 'SQUARE_BONUS') {
+                return '平方数の数字を装填するたびに追加出力を得ます。';
+            }
+            if (part.specialEffect === 'GCD_BONUS') {
+                return '装填した数字の最大公約数が高いほど出力が増加します。';
+            }
+            if (part.specialEffect === 'LCM_BONUS') {
+                return '装填した数字の最小公倍数をもとに高出力へ変換します。';
+            }
+            if (part.specialEffect === 'FIBONACCI_BONUS') {
+                return 'フィボナッチ数を装填するほど追加出力を得ます。全スロットがそうならさらに強化されます。';
+            }
+            if (part.specialEffect === 'MEAN_BONUS') {
+                return '装填した数字の平均値をそのまま追加出力へ変換します。';
+            }
+            if (part.specialEffect === 'MEDIAN_BONUS') {
+                return '装填した数字の中央値ぶん、安定した追加出力を得ます。';
+            }
+            if (part.specialEffect === 'SAME_TYPE_LINK') {
+                return '上下左右の同じタイプのパーツ数だけ追加出力を得ます。';
+            }
+            if (part.specialEffect === 'ROW_UNITY') {
+                return '同じ列の3マスが同タイプでそろうと大きな追加出力を得ます。';
+            }
+            if (part.specialEffect === 'CENTER_COMMAND') {
+                return '中央マスに置くと常に指揮ボーナスを得ます。';
+            }
+            if (part.specialEffect === 'DIAGONAL_LINK') {
+                return '斜め方向のパーツ数に応じて追加出力を得ます。';
+            }
+            if (part.specialEffect === 'MIRROR_BONUS') {
+                return '左右対称の位置に同タイプのパーツがあると追加出力を得ます。';
+            }
+            if (part.specialEffect === 'TURN_SCALE') {
+                return 'ターンが進むほど追加出力が増えていきます。';
+            }
+            if (part.specialEffect === 'DAMAGE_MEMORY') {
+                return 'この戦闘で受けたダメージ量を記憶し、怒りの出力へ変えます。';
+            }
+            if (part.specialEffect === 'EFFORT_STACK') {
+                return 'この戦闘でこのパーツに装填した回数だけ追加出力を得ます。';
+            }
+            if (part.specialEffect === 'UNIQUE_VALUE_RECORD') {
+                return 'この戦闘で見た数字の種類数に応じて追加出力を得ます。';
+            }
+            if (part.specialEffect === 'RANDOM_SPIKE') {
+                return 'ランダムで大当たりや小当たりの追加出力が発生します。';
+            }
+            if (part.specialEffect === 'FORECAST_COLOR') {
+                return 'ターンごとの予報色と一致する装填色に追加出力を与えます。';
+            }
+            if (part.specialEffect === 'NO_CONSUME_CHANCE') {
+                return '装填時、一定確率でカードを消費せず手札に残します。';
+            }
+            if (part.specialEffect === 'PALINDROME_BONUS') {
+                return '左右対称の数字並びで装填すると大きな追加出力を得ます。';
+            }
+            if (part.specialEffect === 'SUM_FIFTEEN_BONUS') {
+                return '装填した数字の合計が10や15ちょうどだと追加出力を得ます。';
+            }
+            if (part.specialEffect === 'MULTIPLE_OF_THREE_BONUS') {
+                return '3の倍数の数字を装填するほど追加出力を得ます。';
+            }
+            if (part.specialEffect === 'HAND_SIZE_BONUS') {
+                return '手札が多いほど追加出力を得ます。';
+            }
+            if (part.specialEffect === 'TEMP_CARD_BONUS') {
+                return '一時カードを多く持つほど追加出力を得ます。';
+            }
+            if (part.specialEffect === 'EDGE_BONUS') {
+                return '盤面の端に配置されていると追加出力を得ます。';
+            }
+            if (part.specialEffect === 'CORNER_BONUS') {
+                return '盤面の角に置くと強力な追加出力を得ます。';
+            }
+            if (part.specialEffect === 'ISOLATION_BONUS') {
+                return '隣接するパーツがない孤立状態だと追加出力を得ます。';
+            }
+            if (part.specialEffect === 'ALT_COLOR_BONUS') {
+                return '装填した色が交互に並ぶと追加出力を得ます。';
+            }
+            if (part.specialEffect === 'LAST_STREAK_BONUS') {
+                return 'このパーツへの連続装填回数に応じて追加出力を得ます。';
             }
 
             switch(part.type) {
@@ -2014,6 +3081,49 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         {tooltipPart.specialEffect === 'HEAL' && <div className="text-green-400 mt-2 font-bold">HP自動回復機能付き</div>}
                         {tooltipPart.specialEffect === 'RECYCLE' && <div className="text-teal-400 mt-2 font-bold">エネルギー回収機能付き</div>}
                         {tooltipPart.specialEffect === 'THORNS' && <div className="text-red-400 mt-2 font-bold">反撃ダメージ (被弾時、防御出力の半分を敵に返す)</div>}
+                        {tooltipPart.specialEffect === 'WHITE_BONUS' && <div className="text-slate-200 mt-2 font-bold">白エネルギー1個ごとに出力+2</div>}
+                        {tooltipPart.specialEffect === 'MATCH_BONUS' && <div className="text-amber-300 mt-2 font-bold">同じ数字で全スロットを埋めると出力+4</div>}
+                        {tooltipPart.specialEffect === 'LOW_SCORE_BOOST' && <div className="text-cyan-300 mt-2 font-bold">3以下の数字は、その値ぶん追加出力</div>}
+                        {tooltipPart.specialEffect === 'RAINBOW_BONUS' && <div className="text-fuchsia-300 mt-2 font-bold">3色そろうと出力+6</div>}
+                        {tooltipPart.specialEffect === 'SOLO_DOUBLE' && <div className="text-yellow-300 mt-2 font-bold">単独装填時、出力をもう一度加算</div>}
+                        {tooltipPart.specialEffect === 'BLUE_BONUS' && <div className="text-blue-300 mt-2 font-bold">青エネルギー1個ごとに出力+2</div>}
+                        {tooltipPart.specialEffect === 'ORANGE_BONUS' && <div className="text-orange-300 mt-2 font-bold">オレンジエネルギー1個ごとに出力+3</div>}
+                        {tooltipPart.specialEffect === 'HIGH_SCORE_BOOST' && <div className="text-rose-300 mt-2 font-bold">6以上の数字1枚ごとに出力+3</div>}
+                        {tooltipPart.specialEffect === 'EVEN_BONUS' && <div className="text-indigo-300 mt-2 font-bold">偶数で全埋めすると出力+5</div>}
+                        {tooltipPart.specialEffect === 'ODD_BONUS' && <div className="text-pink-300 mt-2 font-bold">奇数で全埋めすると出力+5</div>}
+                        {tooltipPart.specialEffect === 'SEQUENCE_BONUS' && <div className="text-lime-300 mt-2 font-bold">昇順/降順で全埋めすると出力+6</div>}
+                        {tooltipPart.specialEffect === 'MONO_COLOR_BONUS' && <div className="text-violet-300 mt-2 font-bold">同色で全埋めすると出力+6</div>}
+                        {tooltipPart.specialEffect === 'OVERCHARGE_HEAL' && <div className="text-green-300 mt-2 font-bold">合計12以上で出力+4、HP+3</div>}
+                        {tooltipPart.specialEffect === 'OVERCHARGE_RECYCLE' && <div className="text-teal-300 mt-2 font-bold">合計12以上で出力+4、燃料+1</div>}
+                        {tooltipPart.specialEffect === 'PRIME_BONUS' && <div className="text-sky-300 mt-2 font-bold">素数1つごとに出力+2、全素数でさらに+3</div>}
+                        {tooltipPart.specialEffect === 'SQUARE_BONUS' && <div className="text-emerald-300 mt-2 font-bold">平方数1つごとに出力+3</div>}
+                        {tooltipPart.specialEffect === 'GCD_BONUS' && <div className="text-cyan-300 mt-2 font-bold">最大公約数×2を追加出力</div>}
+                        {tooltipPart.specialEffect === 'LCM_BONUS' && <div className="text-red-300 mt-2 font-bold">最小公倍数÷3を追加出力</div>}
+                        {tooltipPart.specialEffect === 'FIBONACCI_BONUS' && <div className="text-amber-300 mt-2 font-bold">フィボナッチ数1つごとに出力+2、全一致でさらに+4</div>}
+                        {tooltipPart.specialEffect === 'MEAN_BONUS' && <div className="text-blue-300 mt-2 font-bold">平均値ぶん追加出力</div>}
+                        {tooltipPart.specialEffect === 'MEDIAN_BONUS' && <div className="text-indigo-300 mt-2 font-bold">中央値ぶん追加出力</div>}
+                        {tooltipPart.specialEffect === 'SAME_TYPE_LINK' && <div className="text-violet-300 mt-2 font-bold">隣接する同タイプ1つごとに出力+2</div>}
+                        {tooltipPart.specialEffect === 'ROW_UNITY' && <div className="text-fuchsia-300 mt-2 font-bold">同列3マス同タイプで出力+6</div>}
+                        {tooltipPart.specialEffect === 'CENTER_COMMAND' && <div className="text-yellow-300 mt-2 font-bold">中央配置で常時出力+4</div>}
+                        {tooltipPart.specialEffect === 'DIAGONAL_LINK' && <div className="text-rose-300 mt-2 font-bold">斜めのパーツ1つごとに出力+2</div>}
+                        {tooltipPart.specialEffect === 'MIRROR_BONUS' && <div className="text-slate-200 mt-2 font-bold">左右対称に同タイプがあると出力+5</div>}
+                        {tooltipPart.specialEffect === 'TURN_SCALE' && <div className="text-orange-300 mt-2 font-bold">現在ターン数ぶん追加出力（最大+10）</div>}
+                        {tooltipPart.specialEffect === 'DAMAGE_MEMORY' && <div className="text-red-300 mt-2 font-bold">この戦闘で受けたダメージ量を追加出力化（最大+10）</div>}
+                        {tooltipPart.specialEffect === 'EFFORT_STACK' && <div className="text-green-300 mt-2 font-bold">この戦闘での装填回数ぶん追加出力（最大+10）</div>}
+                        {tooltipPart.specialEffect === 'UNIQUE_VALUE_RECORD' && <div className="text-teal-300 mt-2 font-bold">見た数字の種類数ぶん追加出力（最大+9）</div>}
+                        {tooltipPart.specialEffect === 'RANDOM_SPIKE' && <div className="text-pink-300 mt-2 font-bold">ランダムで出力+4 か +10</div>}
+                        {tooltipPart.specialEffect === 'FORECAST_COLOR' && <div className="text-cyan-300 mt-2 font-bold">予報色1つごとに出力+3</div>}
+                        {tooltipPart.specialEffect === 'NO_CONSUME_CHANCE' && <div className="text-lime-300 mt-2 font-bold">約35%でカードを消費しない</div>}
+                        {tooltipPart.specialEffect === 'PALINDROME_BONUS' && <div className="text-purple-300 mt-2 font-bold">左右対称の数字並びで出力+7</div>}
+                        {tooltipPart.specialEffect === 'SUM_FIFTEEN_BONUS' && <div className="text-amber-300 mt-2 font-bold">合計15で出力+8、合計10で出力+4</div>}
+                        {tooltipPart.specialEffect === 'MULTIPLE_OF_THREE_BONUS' && <div className="text-orange-300 mt-2 font-bold">3の倍数1つごとに出力+3</div>}
+                        {tooltipPart.specialEffect === 'HAND_SIZE_BONUS' && <div className="text-blue-300 mt-2 font-bold">手札枚数ぶん追加出力（最大+8）</div>}
+                        {tooltipPart.specialEffect === 'TEMP_CARD_BONUS' && <div className="text-fuchsia-300 mt-2 font-bold">一時カード1枚ごとに出力+3</div>}
+                        {tooltipPart.specialEffect === 'EDGE_BONUS' && <div className="text-slate-200 mt-2 font-bold">端配置で出力+4</div>}
+                        {tooltipPart.specialEffect === 'CORNER_BONUS' && <div className="text-yellow-300 mt-2 font-bold">角配置で出力+6</div>}
+                        {tooltipPart.specialEffect === 'ISOLATION_BONUS' && <div className="text-emerald-300 mt-2 font-bold">孤立配置で出力+5</div>}
+                        {tooltipPart.specialEffect === 'ALT_COLOR_BONUS' && <div className="text-cyan-300 mt-2 font-bold">色が交互に並ぶと出力+6</div>}
+                        {tooltipPart.specialEffect === 'LAST_STREAK_BONUS' && <div className="text-red-300 mt-2 font-bold">連続装填回数ぶん追加出力（最大+8）</div>}
                     </div>
                 </div>
             </div>
@@ -2035,15 +3145,21 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         let prediction = null;
         let pPower = 0;
         
-        const buffGrid = calculateBuffGrid(player.parts);
-        const enemyBuffGrid = calculateBuffGrid(enemy.parts); // Calculate enemy buffs
+        const buffGrid = calculateBuffGrid(player.parts, { hand, turn, battleStats, fuel: player.fuel });
+        const enemyBuffGrid = calculateBuffGrid(enemy.parts, { turn, fuel: enemy.fuel }); // Calculate enemy buffs
 
         partsToRender.forEach((p, colIdx) => {
-             const energySum = p.slots.reduce((sum, s) => sum + (s.value || 0), 0);
+             const { energySum, output: baseOutput } = calculatePartOutput(p, {
+                 row: pRelIdx,
+                 col: colIdx,
+                 parts: player.parts,
+                 hand,
+                 turn,
+                 battleStats,
+                 fuel: player.fuel,
+             });
              if (energySum > 0 && (p.type === 'CANNON' || p.type === 'MISSILE')) {
-                 let output = Math.floor(energySum * p.multiplier);
-                 const isFull = p.slots.every(s => s.value !== null) && p.slots.length > 0;
-                 if(isFull) output += p.basePower;
+                 let output = baseOutput;
                  output += player.passivePower; 
                  output += buffGrid[pRelIdx][colIdx];
                  pPower += output;
@@ -2081,6 +3197,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                         onLongPress={(p) => setTooltipPart(p)}
                                         highlight={!!selectedCardId}
                                         pendingReplace={!!pendingPart}
+                                        evalContext={{ row: pRelIdx, col: i, parts: player.parts, hand, turn, battleStats, fuel: player.fuel }}
                                         bonusPower={buffGrid[pRelIdx][i] + player.passivePower} // Include passive power for player too
                                     />
                                 </div>
@@ -2107,6 +3224,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                             part={part} 
                                             isEnemy={true}
                                             showPower={true} 
+                                            evalContext={{ row: eRelIdx, col: i, parts: enemy.parts, turn, fuel: enemy.fuel }}
                                             bonusPower={totalBonus}
                                         />
                                     </div>
@@ -2696,7 +3814,32 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             </div>
 
             {/* Battle Grid */}
-            <div className="flex-1 relative bg-[#1a1a24] overflow-y-auto custom-scrollbar">
+            <div className="flex-1 relative bg-[#1a1a24] overflow-y-auto custom-scrollbar overflow-hidden">
+                <div className="absolute inset-0 flex pointer-events-none overflow-hidden mix-blend-screen z-0 opacity-40">
+                    <div 
+                        className="absolute w-1/2 left-0 h-full flex items-center justify-center transition-transform duration-500 ease-out animate-pulse"
+                        style={{ transform: `translateY(${(player.yOffset - 1) * 20}%)`, animationDuration: '3s' }}
+                    >
+                         <div className="relative w-[80%] max-w-[350px] aspect-square flex items-center justify-center -translate-x-4 md:-translate-x-8">
+                             <Send 
+                                 strokeWidth={0.2} 
+                                 className="w-full h-full text-cyan-400 rotate-45 drop-shadow-[0_0_8px_rgba(34,211,238,1)] absolute" 
+                             />
+                         </div>
+                    </div>
+                    <div 
+                        className="absolute w-1/2 right-0 h-full flex items-center justify-center transition-transform duration-500 ease-out animate-pulse"
+                        style={{ transform: `translateY(${(enemy.yOffset - 1) * 20}%)`, animationDuration: '3.5s', animationDelay: '1s' }}
+                    >
+                         <div className="relative w-[80%] max-w-[350px] aspect-square flex items-center justify-center translate-x-4 md:translate-x-8">
+                             <Send 
+                                 strokeWidth={0.2} 
+                                 className="w-full h-full text-red-500 rotate-[225deg] drop-shadow-[0_0_8px_rgba(239,68,68,1)] absolute" 
+                             />
+                         </div>
+                    </div>
+                </div>
+
                 {/* Clash Overlay */}
                 <ClashOverlay clashState={clashState} />
 
@@ -2788,6 +3931,23 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 <Trophy size={64} className="text-yellow-400 mx-auto mb-4 animate-bounce"/>
                                 <h2 className="text-4xl font-bold text-white mb-2">MISSION COMPLETE</h2>
                                 <p className="text-gray-400 mb-6">全ステージクリアおめでとう！</p>
+                                <div className="mb-6 rounded-xl border border-cyan-500/50 bg-slate-900/80 p-4">
+                                    <div className="text-cyan-300 font-bold mb-2">
+                                        アンロック済みパーツ: {(progress.unlockedPartNames?.length || 0)} / {PAPER_PLANE_UNLOCK_TARGET}
+                                    </div>
+                                    {newlyUnlockedPart ? (
+                                        <div className="flex flex-col items-center gap-2">
+                                            <div className="text-yellow-300 font-bold">NEW PART UNLOCKED</div>
+                                            <div className="w-24">
+                                                <ShipPartView part={newlyUnlockedPart} onLongPress={(p) => setTooltipPart(p)} />
+                                            </div>
+                                            <div className="text-white font-bold">{newlyUnlockedPart.name}</div>
+                                            <div className="text-xs text-slate-300 max-w-sm">{newlyUnlockedPart.description}</div>
+                                        </div>
+                                    ) : (
+                                        <div className="text-sm text-slate-400">今回新規解放できるパーツはありません。</div>
+                                    )}
+                                </div>
                                 <div className="flex flex-col gap-4">
                                     <button onClick={activateEndlessMode} className="bg-purple-600 px-8 py-3 rounded text-xl font-bold hover:bg-purple-500 border-2 border-purple-400 flex items-center justify-center animate-pulse">
                                         <Repeat className="mr-2" /> エンドレスモードへ

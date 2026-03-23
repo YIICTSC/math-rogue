@@ -66,6 +66,7 @@ export interface PaperPlaneProgress {
     rank: number; // Association Level (Clear Count equivalent)
     rerollCount: number; // Consumable rerolls
     maxClearedLevel: Record<string, number>; // Map of Ship ID -> Max Ascension Level cleared
+    unlockedPartNames: string[];
 }
 
 /**
@@ -555,9 +556,17 @@ export const storageService = {
   loadPaperPlaneProgress: (): PaperPlaneProgress => {
       try {
           const stored = localStorage.getItem(STORAGE_KEY_PAPER_PLANE_PROGRESS);
-          if (stored) return JSON.parse(stored);
+          if (stored) {
+              const parsed = JSON.parse(stored);
+              return {
+                  rank: parsed.rank ?? 1,
+                  rerollCount: parsed.rerollCount ?? 3,
+                  maxClearedLevel: parsed.maxClearedLevel ?? {},
+                  unlockedPartNames: parsed.unlockedPartNames ?? [],
+              };
+          }
       } catch (e) { /* ignore */ }
-      return { rank: 1, rerollCount: 3, maxClearedLevel: {} };
+      return { rank: 1, rerollCount: 3, maxClearedLevel: {}, unlockedPartNames: [] };
   },
 
   // --- Go Home Dash Scores ---
