@@ -30,6 +30,7 @@ const STORAGE_KEY_DUNGEON_RANKING_2 = 'pixel_spire_dungeon_ranking_2_v1';
 // For Kocho Showdown
 const STORAGE_KEY_KOCHO_STATE = 'pixel_spire_kocho_state_v1';
 const STORAGE_KEY_KOCHO_RANKING = 'pixel_spire_kocho_ranking_v1';
+const STORAGE_KEY_KOCHO_UNLOCKED_CARDS = 'pixel_spire_kocho_unlocked_cards_v1';
 
 // For Paper Plane Battle
 const STORAGE_KEY_PAPER_PLANE_STATE = 'pixel_spire_paper_plane_state_v1';
@@ -488,6 +489,26 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_KOCHO_STATE);
   },
 
+  getUnlockedKochoCards: (): string[] => {
+      try {
+          const stored = localStorage.getItem(STORAGE_KEY_KOCHO_UNLOCKED_CARDS);
+          return stored ? JSON.parse(stored) : [];
+      } catch (e) {
+          return [];
+      }
+  },
+
+  saveUnlockedKochoCard: (cardName: string) => {
+      try {
+          const current = storageService.getUnlockedKochoCards();
+          if (!current.includes(cardName)) {
+              localStorage.setItem(STORAGE_KEY_KOCHO_UNLOCKED_CARDS, JSON.stringify([...current, cardName]));
+          }
+      } catch (e) {
+          console.warn("Failed to save kocho unlocked card", e);
+      }
+  },
+
   // --- Paper Plane Battle State & Progress & Scores ---
   savePaperPlaneScore: (entry: PaperPlaneScoreEntry) => {
       try {
@@ -807,6 +828,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_VS_RANKING);
       localStorage.removeItem(STORAGE_KEY_KOCHO_STATE);
       localStorage.removeItem(STORAGE_KEY_KOCHO_RANKING);
+      localStorage.removeItem(STORAGE_KEY_KOCHO_UNLOCKED_CARDS);
       localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_STATE);
       localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_PROGRESS);
       localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_RANKING);

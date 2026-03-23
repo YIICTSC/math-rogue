@@ -6,6 +6,7 @@ import { createPixelSpriteCanvas } from './PixelSprite';
 import { storageService } from '../services/storageService';
 import MathChallengeScreen from './MathChallengeScreen';
 import { GameMode } from '../types';
+import { EXTRA_SCHOOL_DUNGEON_ITEMS } from '../data/schoolDungeonExtraItems';
 
 // --- セッション内アイテム引き継ぎ用変数 ---
 let inheritedItemTemplate: Item | null = null;
@@ -230,6 +231,7 @@ const ITEM_DB: Record<string, Omit<Item, 'id'>> = {
     'POT_GLUE': { category: 'SYNTH', type: 'POT_GLUE', name: '工作のり', desc: '装備を合成する。', value: 500 },
     'POT_CHANGE': { category: 'CONSUMABLE', type: 'POT_CHANGE', name: 'びっくり箱', desc: '中身を別のアイテムに変化させる。', value: 400 },
     'BOMB': { category: 'CONSUMABLE', type: 'BOMB', name: '爆弾', desc: '周囲を爆破する。', value: 200 },
+    ...EXTRA_SCHOOL_DUNGEON_ITEMS,
 };
 
 // --- DIJKSTRA PATHFINDING HELPER ---

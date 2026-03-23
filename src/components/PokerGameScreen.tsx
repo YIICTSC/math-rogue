@@ -708,6 +708,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
 
       let bonusMoney = 0;
       const cardsToDestroy: string[] = [];
+      const scoringCardAdjustmentEntries: ScoreBreakdownEntry[] = [];
+      let totalScoringCardChipGain = 0;
+      let totalScoringCardMultGain = 0;
 
       scoringCards.forEach(c => {
           let val = c.rank;
@@ -717,17 +720,12 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           const cardMultGain = c.multMultiplier - 1;
           chips += cardChipGain;
           mult += cardMultGain;
-          breakdown.push({
-              id: `card-${c.id}`,
-              label: `${formatPokerCardLabel(c)} を得点化`,
-              chipsDelta: cardChipGain !== 0 ? cardChipGain : undefined,
-              multDelta: cardMultGain !== 0 ? cardMultGain : undefined,
-              accent: cardMultGain > 0 ? 'mult' : 'chips'
-          });
+          totalScoringCardChipGain += cardChipGain;
+          totalScoringCardMultGain += cardMultGain;
           
           if (c.enhancement === 'GLASS') {
               mult *= 2;
-              breakdown.push({
+              scoringCardAdjustmentEntries.push({
                   id: `glass-${c.id}`,
                   label: `${formatPokerCardLabel(c)} ガラス補正`,
                   multFactor: 2,
@@ -737,13 +735,24 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
           }
           if (c.enhancement === 'GOLD') {
               bonusMoney += 3;
-              breakdown.push({
+              scoringCardAdjustmentEntries.push({
                   id: `gold-${c.id}`,
                   label: `${formatPokerCardLabel(c)} ゴールド収入 +$3`,
                   accent: 'special'
               });
           }
       });
+
+      if (scoringCards.length > 0) {
+          breakdown.push({
+              id: `cards-total-${Date.now()}`,
+              label: `得点カード合計 (${scoringCards.length}枚)`,
+              chipsDelta: totalScoringCardChipGain !== 0 ? totalScoringCardChipGain : undefined,
+              multDelta: totalScoringCardMultGain !== 0 ? totalScoringCardMultGain : undefined,
+              accent: totalScoringCardMultGain > 0 ? 'mult' : 'chips'
+          });
+      }
+      breakdown.push(...scoringCardAdjustmentEntries);
 
       heldCards.forEach(c => {
           if (c.enhancement === 'STEEL') {

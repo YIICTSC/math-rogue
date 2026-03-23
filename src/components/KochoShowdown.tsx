@@ -86,10 +86,19 @@ interface KRelic {
 
 interface KochoVFX {
     id: string;
-    type: 'SLASH' | 'BLAST' | 'TEXT' | 'BLOCK' | 'HEAL' | 'BUFF' | 'COUNTER' | 'IMPACT' | 'WARP' | 'EVOLVE' | 'SUMMON' | 'BARRIER' | 'STUN';
+    type: 'SLASH' | 'BLAST' | 'TEXT' | 'BLOCK' | 'HEAL' | 'BUFF' | 'COUNTER' | 'IMPACT' | 'WARP' | 'EVOLVE' | 'SUMMON' | 'BARRIER' | 'STUN' | 'PUSH' | 'PULL' | 'AFTERIMAGE';
     pos: number;
     text?: string | number;
     color?: string;
+    direction?: Facing;
+    durationMs?: number;
+}
+
+interface KochoAnnouncement {
+    id: string;
+    title: string;
+    subtitle?: string;
+    tone: 'battle' | 'danger' | 'phase' | 'special';
 }
 
 type UpgradeType = 'DMG_1' | 'DMG_1_CD_1' | 'DMG_2_CD_3' | 'CD_MINUS_1' | 'CD_MINUS_2' | 'CD_MINUS_4_DMG_MINUS_1' | 'SLOT_1' | 'SLOT_1_CD_MINUS_1' | 'SACRIFICE' | 'GAMBLE';
@@ -129,7 +138,7 @@ interface KochoGameState {
 }
 
 // --- DATA ---
-const CARD_DB: Omit<KCard, 'id' | 'currentCooldown' | 'usedSlots'>[] = [
+const BASE_CARD_DB: Omit<KCard, 'id' | 'currentCooldown' | 'usedSlots'>[] = [
     // Standard Set
     { name: '定規スラッシュ', type: 'ATTACK', range: [1], damage: 3, cooldown: 2, color: 'bg-red-600', icon: <Swords size={16}/>, description: '目の前の敵を斬る', energyCost: 1, maxSlots: 3, effectType: 'NORMAL' },
     { name: 'コンパス突き', type: 'ATTACK', range: [2], damage: 2, cooldown: 2, color: 'bg-orange-600', icon: <Zap size={16}/>, description: '2マス先を攻撃(間を無視)', energyCost: 1, maxSlots: 3, effectType: 'NORMAL' },
@@ -163,6 +172,73 @@ const CARD_DB: Omit<KCard, 'id' | 'currentCooldown' | 'usedSlots'>[] = [
     { name: '吸血', type: 'ATTACK', range: [1], damage: 2, cooldown: 4, color: 'bg-red-900', icon: <Dna size={16}/>, description: 'ダメージ分HP回復', energyCost: 1, effectType: 'DRAIN', maxSlots: 2 },
     { name: '雑巾がけ', type: 'ATTACK', range: [1, 2, 3], damage: 2, cooldown: 3, color: 'bg-gray-400 text-black', icon: <ChevronsRight size={16}/>, description: 'ダッシュ攻撃', energyCost: 1, effectType: 'DASH_ATTACK', maxSlots: 2 },
 ];
+
+const KOCHO_UNLOCKABLE_CARD_DB: Omit<KCard, 'id' | 'currentCooldown' | 'usedSlots'>[] = [
+    { name: '赤ペン連打', type: 'ATTACK', range: [1], damage: 2, cooldown: 1, color: 'bg-red-700', icon: <PenTool size={16}/>, description: '隙の少ない速打', energyCost: 1, maxSlots: 3, effectType: 'NORMAL' },
+    { name: '連絡帳スマッシュ', type: 'ATTACK', range: [1], damage: 4, cooldown: 3, color: 'bg-slate-700', icon: <Book size={16}/>, description: '分厚い一撃', energyCost: 1, maxSlots: 3, effectType: 'NORMAL' },
+    { name: 'メガホン指導', type: 'ATTACK', range: [1, 2, 3], damage: 2, cooldown: 4, color: 'bg-yellow-500 text-black', icon: <Mic size={16}/>, description: '前方3マスを貫通攻撃', energyCost: 1, maxSlots: 3, effectType: 'PIERCE' },
+    { name: '保健室の包帯', type: 'UTILITY', range: [0], damage: 0, cooldown: 3, color: 'bg-green-500', icon: <Heart size={16}/>, description: 'HPを回復する', energyCost: 1, maxSlots: 2, effectType: 'HEAL' },
+    { name: '跳び箱ダッシュ', type: 'MOVE', range: [1, 2, 3], damage: 0, cooldown: 2, color: 'bg-blue-500', icon: <ChevronsRight size={16}/>, description: '3マスまで前進', energyCost: 1, maxSlots: 2 },
+    { name: '黒板消し投げ', type: 'ATTACK', range: [2, 3, 4], damage: 3, cooldown: 3, color: 'bg-stone-500', icon: <Package size={16}/>, description: '中距離の一撃', energyCost: 1, maxSlots: 3, effectType: 'NORMAL' },
+    { name: '竹ぼうきスイープ', type: 'ATTACK', range: [1, 2], damage: 2, cooldown: 3, color: 'bg-amber-600', icon: <Move size={16}/>, description: '前方2マスを払う', energyCost: 1, maxSlots: 3, effectType: 'PIERCE' },
+    { name: '笛の合図', type: 'ATTACK', range: [1, 2], damage: 1, cooldown: 4, color: 'bg-pink-500', icon: <Music size={16}/>, description: '敵をスタンさせる', energyCost: 1, maxSlots: 2, effectType: 'STUN' },
+    { name: '鉄パイプ', type: 'ATTACK', range: [1], damage: 6, cooldown: 5, color: 'bg-zinc-700', icon: <Hammer size={16}/>, description: '超重量の一撃', energyCost: 1, maxSlots: 2, effectType: 'NORMAL' },
+    { name: '防犯シールド', type: 'UTILITY', range: [0], damage: 0, shield: 5, cooldown: 4, color: 'bg-sky-700', icon: <ShieldCheck size={16}/>, description: 'シールド+5', energyCost: 1, maxSlots: 2 },
+
+    { name: '号令ラッシュ', type: 'ATTACK', range: [1, 2, 3], damage: 2, cooldown: 3, color: 'bg-red-500', icon: <Flag size={16}/>, description: '突進して敵を叩く', energyCost: 1, maxSlots: 3, effectType: 'DASH_ATTACK' },
+    { name: '釣り針フック', type: 'ATTACK', range: [2, 3, 4], damage: 2, cooldown: 4, color: 'bg-cyan-500', icon: <Anchor size={16}/>, description: '敵を手前に引き寄せる', energyCost: 1, maxSlots: 3, effectType: 'PULL' },
+    { name: '教鞭ビンタ', type: 'ATTACK', range: [1], damage: 2, cooldown: 2, color: 'bg-orange-700', icon: <PenTool size={16}/>, description: '敵を押し込む', energyCost: 1, maxSlots: 3, effectType: 'PUSH' },
+    { name: '教鞭ショック', type: 'ATTACK', range: [1], damage: 1, cooldown: 3, color: 'bg-yellow-400 text-black', icon: <AlertTriangle size={16}/>, description: '近距離スタン', energyCost: 1, maxSlots: 2, effectType: 'STUN' },
+    { name: '体育倉庫前進', type: 'MOVE', range: [1, 2, 3, 4], damage: 0, cooldown: 3, color: 'bg-indigo-500', icon: <Move size={16}/>, description: '4マスまで前進', energyCost: 1, maxSlots: 2 },
+    { name: 'タイヤ引き', type: 'ATTACK', range: [1, 2, 3], damage: 3, cooldown: 4, color: 'bg-amber-700', icon: <Activity size={16}/>, description: '重い体当たり', energyCost: 1, maxSlots: 3, effectType: 'DASH_ATTACK' },
+    { name: '救急箱', type: 'UTILITY', range: [0], damage: 0, cooldown: 4, color: 'bg-green-600', icon: <Heart size={16}/>, description: 'HPを回復する', energyCost: 1, maxSlots: 2, effectType: 'HEAL' },
+    { name: '防災頭巾', type: 'UTILITY', range: [0], damage: 0, shield: 7, cooldown: 5, color: 'bg-slate-700', icon: <Shield size={16}/>, description: 'シールド+7', energyCost: 1, maxSlots: 1 },
+    { name: 'チョーク連射', type: 'ATTACK', range: [1, 2, 3, 4], damage: 1, cooldown: 1, color: 'bg-cyan-500', icon: <Zap size={16}/>, description: 'CDの短い牽制射撃', energyCost: 1, maxSlots: 2, effectType: 'NORMAL' },
+    { name: 'バケツ返し', type: 'ATTACK', range: [1, 2], damage: 4, cooldown: 5, color: 'bg-blue-700', icon: <Package size={16}/>, description: '反動付きの重打', energyCost: 1, maxSlots: 2, effectType: 'RECOIL' },
+
+    { name: '花壇ジャンプ', type: 'MOVE', range: [1, 2], damage: 0, cooldown: 1, color: 'bg-green-700', icon: <ArrowUp size={16}/>, description: '2マスまで軽快に移動', energyCost: 1, maxSlots: 2 },
+    { name: '朝礼アタック', type: 'ATTACK', range: [1], damage: 3, cooldown: 0, color: 'bg-red-800', icon: <Swords size={16}/>, description: '即応性の高い一撃', energyCost: 0, maxSlots: 1, effectType: 'NORMAL' },
+    { name: 'ランドセル投げ', type: 'ATTACK', range: [2, 3], damage: 4, cooldown: 4, color: 'bg-indigo-700', icon: <Package size={16}/>, description: '重たい遠投', energyCost: 1, maxSlots: 2, effectType: 'NORMAL' },
+    { name: '校旗突き', type: 'ATTACK', range: [2], damage: 3, cooldown: 2, color: 'bg-rose-700', icon: <Flag size={16}/>, description: '2マス先を正確に突く', energyCost: 1, maxSlots: 3, effectType: 'NORMAL' },
+    { name: 'ラジカセ爆音', type: 'ATTACK', range: [1, 2, 3, 4], damage: 2, cooldown: 5, color: 'bg-purple-600', icon: <Music size={16}/>, description: '前方を轟音で貫く', energyCost: 1, maxSlots: 2, effectType: 'PIERCE' },
+    { name: '授業参観ガード', type: 'UTILITY', range: [0], damage: 0, shield: 3, cooldown: 2, color: 'bg-teal-700', icon: <Shield size={16}/>, description: '軽めの防御姿勢', energyCost: 1, maxSlots: 3 },
+    { name: '雑誌投げ', type: 'ATTACK', range: [1, 2, 3], damage: 2, cooldown: 2, color: 'bg-gray-600', icon: <Book size={16}/>, description: '扱いやすい中距離攻撃', energyCost: 1, maxSlots: 3, effectType: 'NORMAL' },
+    { name: '水筒チャージ', type: 'UTILITY', range: [0], damage: 0, shield: 2, cooldown: 1, color: 'bg-blue-400 text-black', icon: <Battery size={16}/>, description: 'すぐ使える小盾', energyCost: 1, maxSlots: 3 },
+    { name: 'スポドリ補給', type: 'UTILITY', range: [0], damage: 0, cooldown: 5, color: 'bg-lime-500 text-black', icon: <Battery size={16}/>, description: 'HPを回復する', energyCost: 1, maxSlots: 1, effectType: 'HEAL' },
+    { name: '非常階段ダッシュ', type: 'MOVE', range: [1, 2, 3, 4, 5], damage: 0, cooldown: 4, color: 'bg-gray-700', icon: <ChevronsRight size={16}/>, description: '5マスまで一気に進む', energyCost: 1, maxSlots: 2 },
+
+    { name: '竹馬ストライド', type: 'MOVE', range: [1, 2, 3], damage: 0, cooldown: 2, color: 'bg-violet-600', icon: <Move size={16}/>, description: '安定した3マス移動', energyCost: 1, maxSlots: 2 },
+    { name: 'ホイッスルバースト', type: 'ATTACK', range: [1, 2, 3, 4, 5], damage: 3, cooldown: 4, color: 'bg-white text-black', icon: <Mic size={16}/>, description: '最も遠い敵を狙う', energyCost: 1, maxSlots: 2, effectType: 'FURTHEST' },
+    { name: '校内放送', type: 'ATTACK', range: [1, 2, 3, 4, 5, 6], damage: 2, cooldown: 5, color: 'bg-yellow-600', icon: <Mic size={16}/>, description: '前方すべてに届く音圧', energyCost: 1, maxSlots: 2, effectType: 'PIERCE' },
+    { name: '裏門回り込み', type: 'ATTACK', range: [1, 2, 3], damage: 2, cooldown: 4, color: 'bg-indigo-600', icon: <ChevronsRight size={16}/>, description: 'すり抜けて背後を取る', energyCost: 1, maxSlots: 2, effectType: 'PIERCE_DASH' },
+    { name: '旋風脚', type: 'ATTACK', range: [-1, 1], damage: 3, cooldown: 3, color: 'bg-purple-700', icon: <RefreshCw size={16}/>, description: '前後を薙ぐ蹴り', energyCost: 1, maxSlots: 3, effectType: 'PIERCE' },
+    { name: 'たすき掛け', type: 'ATTACK', range: [1], damage: 2, cooldown: 3, color: 'bg-rose-600', icon: <ArrowRightLeft size={16}/>, description: '反撃特化の一打', energyCost: 1, maxSlots: 3, effectType: 'COUNTER' },
+    { name: '箱馬タックル', type: 'ATTACK', range: [1, 2, 3], damage: 3, cooldown: 4, color: 'bg-orange-500', icon: <Activity size={16}/>, description: '勢いを乗せてぶつかる', energyCost: 1, maxSlots: 2, effectType: 'DASH_ATTACK' },
+    { name: 'フロアモップ', type: 'ATTACK', range: [1, 2, 3], damage: 2, cooldown: 4, color: 'bg-cyan-800', icon: <Wind size={16}/>, description: '反動つきの掃討', energyCost: 1, maxSlots: 2, effectType: 'RECOIL' },
+    { name: '金管アラーム', type: 'ATTACK', range: [1, 2, 3], damage: 2, cooldown: 4, color: 'bg-orange-500', icon: <AlertCircle size={16}/>, description: '3マスを一斉攻撃', energyCost: 1, maxSlots: 2, effectType: 'PIERCE' },
+    { name: '絆創膏ケア', type: 'UTILITY', range: [0], damage: 0, cooldown: 2, color: 'bg-green-400 text-black', icon: <Heart size={16}/>, description: '小回りの利く回復', energyCost: 1, maxSlots: 3, effectType: 'HEAL' },
+
+    { name: '校章ブーメラン', type: 'ATTACK', range: [1, 2, 3], damage: 3, cooldown: 3, color: 'bg-yellow-500 text-black', icon: <Shuffle size={16}/>, description: '前方をまとめて薙ぐ', energyCost: 1, maxSlots: 3, effectType: 'PIERCE' },
+    { name: '清掃ワゴン', type: 'ATTACK', range: [1, 2], damage: 2, cooldown: 3, color: 'bg-slate-500', icon: <Package size={16}/>, description: '押し込みながら攻撃', energyCost: 1, maxSlots: 3, effectType: 'PUSH' },
+    { name: '鉄扇', type: 'ATTACK', range: [1], damage: 4, cooldown: 2, color: 'bg-sky-800', icon: <Wind size={16}/>, description: '切れ味の鋭い一閃', energyCost: 1, maxSlots: 3, effectType: 'NORMAL' },
+    { name: 'ドア反撃', type: 'ATTACK', range: [1], damage: 2, cooldown: 3, color: 'bg-gray-800', icon: <Shield size={16}/>, description: '敵の攻撃に合わせて強い', energyCost: 1, maxSlots: 3, effectType: 'COUNTER' },
+    { name: '生徒会バッジ', type: 'UTILITY', range: [0], damage: 0, shield: 4, cooldown: 3, color: 'bg-yellow-700', icon: <Star size={16}/>, description: 'シールド+4', energyCost: 1, maxSlots: 2 },
+    { name: '非常口スライド', type: 'ATTACK', range: [1, 2, 3, 4], damage: 2, cooldown: 3, color: 'bg-emerald-600', icon: <ChevronsRight size={16}/>, description: '長距離すり抜け攻撃', energyCost: 1, maxSlots: 2, effectType: 'PIERCE_DASH' },
+    { name: 'ロープウェイ', type: 'MOVE', range: [1, 2, 3, 4], damage: 0, cooldown: 2, color: 'bg-sky-600', icon: <Minimize2 size={16}/>, description: '4マスまで一気に移動', energyCost: 1, maxSlots: 2 },
+    { name: '校歌斉唱', type: 'ATTACK', range: [1, 2, 3, 4, 5], damage: 2, cooldown: 4, color: 'bg-pink-600', icon: <Music size={16}/>, description: '遠くまで届く歌声', energyCost: 1, maxSlots: 3, effectType: 'PIERCE' },
+    { name: '救護スプレー', type: 'UTILITY', range: [0], damage: 0, cooldown: 4, color: 'bg-emerald-500', icon: <Heart size={16}/>, description: 'HPを回復する', energyCost: 1, maxSlots: 2, effectType: 'HEAL' },
+    { name: '金庫破り', type: 'ATTACK', range: [1], damage: 5, cooldown: 4, color: 'bg-stone-800', icon: <Coins size={16}/>, description: '強打しつつ回復する', energyCost: 1, maxSlots: 2, effectType: 'DRAIN' },
+];
+
+const ALL_KOCHO_CARD_DB = [...BASE_CARD_DB, ...KOCHO_UNLOCKABLE_CARD_DB];
+const KOCHO_UNLOCKABLE_CARD_TOTAL = KOCHO_UNLOCKABLE_CARD_DB.length;
+
+const getUnlockedKochoCardTemplates = () => {
+    const unlocked = new Set(storageService.getUnlockedKochoCards());
+    return [...BASE_CARD_DB, ...KOCHO_UNLOCKABLE_CARD_DB.filter(card => unlocked.has(card.name))];
+};
+
+const getKochoCardTemplateByName = (cardName: string) => ALL_KOCHO_CARD_DB.find(card => card.name === cardName);
 
 const CONSUMABLE_DB: KConsumable[] = [
     { id: 'C_MILK', type: 'HEAL', name: '給食の牛乳', desc: 'HPを5回復', value: 5, icon: <Milk size={16}/>, color: 'text-white' },
@@ -198,9 +274,9 @@ const UPGRADE_POOLS: UpgradeOffer[] = [
 
 const getInitialDeck = (): KCard[] => {
     // Initial Deck: Roundhouse Kick & Chalk Throw ONLY
-    const roundhouse = CARD_DB.find(c => c.name === '回し蹴り')!;
-    const chalk = CARD_DB.find(c => c.name === 'チョーク投げ')!;
-    const ruler = CARD_DB.find(c => c.name === '定規スラッシュ')!;
+    const roundhouse = BASE_CARD_DB.find(c => c.name === '回し蹴り')!;
+    const chalk = BASE_CARD_DB.find(c => c.name === 'チョーク投げ')!;
+    const ruler = BASE_CARD_DB.find(c => c.name === '定規スラッシュ')!;
 
     return [
         { ...roundhouse, id: 'c1', currentCooldown: 0, usedSlots: 0 },
@@ -247,7 +323,7 @@ const MAX_CONSUMABLES = 3;
 const hydrateState = (state: any): KochoGameState => {
     // Restore React Nodes for Cards (Icons)
     const restoreCards = (cards: any[]) => cards.map(c => {
-        const template = CARD_DB.find(t => t.name === c.name);
+        const template = getKochoCardTemplateByName(c.name);
         return { 
             ...c, 
             icon: template ? template.icon : <HelpCircle size={16}/> 
@@ -324,6 +400,8 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     });
 
     const [vfxList, setVfxList] = useState<KochoVFX[]>([]);
+    const [hitStopActive, setHitStopActive] = useState(false);
+    const [announcement, setAnnouncement] = useState<KochoAnnouncement | null>(null);
     
     // Ref to hold current state for async loops (avoiding stale closures)
     const stateRef = useRef(gameState);
@@ -333,14 +411,25 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     const [animating, setAnimating] = useState(false);
     const [rewardCards, setRewardCards] = useState<KCard[]>([]);
+    const [newlyUnlockedCard, setNewlyUnlockedCard] = useState<(typeof KOCHO_UNLOCKABLE_CARD_DB)[number] | null>(null);
+    const [kochoUnlockedCount, setKochoUnlockedCount] = useState(() => storageService.getUnlockedKochoCards().length);
     
     // UI State
     const [showRelicModal, setShowRelicModal] = useState(false);
     const [showHelpModal, setShowHelpModal] = useState(false); // Help Modal
     const [showItemModal, setShowItemModal] = useState(false); // Item Modal
+    const hitStopTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const announcementTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Auto-Save Effect
     const saveDebounceRef = useRef<any>(null);
+    useEffect(() => {
+        return () => {
+            if (hitStopTimeoutRef.current) clearTimeout(hitStopTimeoutRef.current);
+            if (announcementTimeoutRef.current) clearTimeout(announcementTimeoutRef.current);
+        };
+    }, []);
+
     useEffect(() => {
         if (gameState.status !== 'GAME_OVER' && gameState.status !== 'VICTORY') {
             if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
@@ -362,6 +451,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const initialState = getInitialState();
         setGameState(initialState);
         stateRef.current = initialState;
+        setNewlyUnlockedCard(null);
         storageService.saveKochoState(initialState);
         startWave(1, 0, 1);
     };
@@ -371,6 +461,17 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         onBack();
     };
     
+    const unlockRandomKochoCard = useCallback(() => {
+        const unlocked = new Set(storageService.getUnlockedKochoCards());
+        const lockedCards = KOCHO_UNLOCKABLE_CARD_DB.filter(card => !unlocked.has(card.name));
+        if (lockedCards.length === 0) {
+            return null;
+        }
+        const unlockedCard = lockedCards[Math.floor(Math.random() * lockedCards.length)];
+        storageService.saveUnlockedKochoCard(unlockedCard.name);
+        return unlockedCard;
+    }, []);
+
     // --- Save Score on End Game ---
     useEffect(() => {
         if (gameState.status === 'VICTORY' || gameState.status === 'GAME_OVER') {
@@ -381,9 +482,14 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 victory: gameState.status === 'VICTORY',
                 turns: gameState.totalTurns
             });
+            if (gameState.status === 'VICTORY') {
+                const unlockedCard = unlockRandomKochoCard();
+                setNewlyUnlockedCard(unlockedCard);
+                setKochoUnlockedCount(storageService.getUnlockedKochoCards().length);
+            }
             storageService.clearKochoState();
         }
-    }, [gameState.status]);
+    }, [gameState.status, gameState.battleStage, gameState.totalTurns, unlockRandomKochoCard]);
 
     const addLog = (msg: string) => {
         setGameState(prev => ({ ...prev, logs: [msg, ...prev.logs.slice(0, 4)] }));
@@ -394,8 +500,23 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setVfxList(prev => [...prev, { ...options, id, type, pos }]);
         setTimeout(() => {
             setVfxList(prev => prev.filter(v => v.id !== id));
-        }, 800); // Effect duration
+        }, options.durationMs ?? 800); // Effect duration
     };
+
+    const triggerHitStop = useCallback((duration = 110) => {
+        setHitStopActive(true);
+        if (hitStopTimeoutRef.current) clearTimeout(hitStopTimeoutRef.current);
+        hitStopTimeoutRef.current = setTimeout(() => setHitStopActive(false), duration);
+    }, []);
+
+    const showAnnouncement = useCallback((title: string, subtitle = '', tone: KochoAnnouncement['tone'] = 'battle', duration = 1300) => {
+        const id = `ann_${Date.now()}_${Math.random()}`;
+        setAnnouncement({ id, title, subtitle, tone });
+        if (announcementTimeoutRef.current) clearTimeout(announcementTimeoutRef.current);
+        announcementTimeoutRef.current = setTimeout(() => {
+            setAnnouncement(current => current?.id === id ? null : current);
+        }, duration);
+    }, []);
 
     const getRandomOffer = () => UPGRADE_POOLS[Math.floor(Math.random() * UPGRADE_POOLS.length)];
 
@@ -574,6 +695,15 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }));
 
         audioService.playBGM(bgmId);
+        if (stage === FINAL_STAGE) {
+            showAnnouncement('最終決戦', '校長室', 'danger', 1700);
+        } else if (sequence === 2) {
+            const eliteName = newEnemies[0]?.name || '強敵';
+            showAnnouncement('強敵出現', eliteName, 'danger', 1500);
+        } else {
+            const stageLabel = stage === 1 ? 'Tutorial' : `Stage ${stage}-${sequence + 1}`;
+            showAnnouncement(`WAVE ${wave}/${maxW}`, stageLabel, 'battle', 1100);
+        }
     };
 
     // Modified createEnemy to accept explicit pos instead of calculating internally based on index 
@@ -681,6 +811,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             player.barrier--;
                             logs = [`${e.name}の攻撃を無効化！(バリア)`, ...logs];
                             generatedVfx.push({ id: `v_bar_${Date.now()}`, type: 'BARRIER', pos: player.pos });
+                            triggerHitStop(90);
                             hitSomething = true;
                         } else {
                             const blocked = Math.min(dmg, player.shield);
@@ -694,6 +825,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             generatedVfx.push({ id: `v_atk_p_${Date.now()}_${Math.random()}`, type: 'SLASH', pos: player.pos });
                             if (blocked > 0) generatedVfx.push({ id: `v_blk_p_${Date.now()}_${Math.random()}`, type: 'BLOCK', pos: player.pos });
                             if (finalDmg > 0) generatedVfx.push({ id: `v_dmg_p_${Date.now()}_${Math.random()}`, type: 'TEXT', pos: player.pos, text: finalDmg, color: 'text-red-500' });
+                            triggerHitStop(finalDmg > 0 ? 120 : 90);
 
                             // Thorn Relic Effect
                             if (hasThornRelic) {
@@ -729,6 +861,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             
                             generatedVfx.push({ id: `v_atk_e_${Date.now()}_${Math.random()}`, type: 'SLASH', pos: target.pos });
                             if (finalDmg > 0) generatedVfx.push({ id: `v_dmg_e_${Date.now()}_${Math.random()}`, type: 'TEXT', pos: target.pos, text: finalDmg, color: 'text-yellow-400' });
+                            triggerHitStop(90);
 
                             hitSomething = true;
                             enemies[j] = target;
@@ -737,6 +870,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                     if (!hitSomething) {
                         logs = [`${e.name}の攻撃は空を切った。`, ...logs];
+                        generatedVfx.push({ id: `v_miss_${Date.now()}_${Math.random()}`, type: 'TEXT', pos: player.pos, text: '回避', color: 'text-slate-200' });
                     }
                     
                     // Trigger Cooldown
@@ -751,6 +885,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         logs = [`${e.name}の長話！(CD+1)`, ...logs];
                         hand = hand.map(c => ({ ...c, currentCooldown: c.currentCooldown + 1 }));
                         generatedVfx.push({ id: `v_spec_${Date.now()}`, type: 'TEXT', pos: e.pos, text: 'Lecture!', color: 'text-purple-400' });
+                        generatedVfx.push({ id: `v_spec_cd_${Date.now()}`, type: 'TEXT', pos: player.pos, text: 'CD+1', color: 'text-purple-300' });
                         audioService.playSound('wrong');
                     } else if (sName === 'EXPLOSION') { // Science Teacher
                         logs = [`${e.name}の実験失敗！大爆発！`, ...logs];
@@ -779,6 +914,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         logs = [`${e.name}の子守唄... (Action CD+2)`, ...logs];
                         nextState.specialActionCooldown += 2;
                         generatedVfx.push({ id: `v_spec_${Date.now()}`, type: 'TEXT', pos: player.pos, text: 'Zzz...', color: 'text-blue-400' });
+                        generatedVfx.push({ id: `v_spec_cd2_${Date.now()}`, type: 'TEXT', pos: player.pos, text: 'CD+2', color: 'text-blue-300' });
                     } else if (sName === 'CONFISCATE') { // Guidance Counselor
                         logs = [`${e.name}に10G没収された！`, ...logs];
                         nextState.money = Math.max(0, nextState.money - 10);
@@ -912,6 +1048,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                      generatedVfx.push({ id: `v_evo_${Date.now()}`, type: 'EVOLVE', pos: e.pos });
                      generatedVfx.push({ id: `v_txt_evo_${Date.now()}`, type: 'TEXT', pos: e.pos, text: 'EVOLUTION!', color: 'text-purple-400' });
                      logs = [`${e.name}が真の姿を現した！`, ...logs];
+                     showAnnouncement(`PHASE ${nextPhase}`, template.name, 'phase', 1500);
                      audioService.playSound('buff');
                  }
              }
@@ -952,6 +1089,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             const reduceVal = item.value === 99 ? 99 : item.value;
             hand = hand.map(c => ({ ...c, currentCooldown: Math.max(0, c.currentCooldown - reduceVal) }));
             addVfx('BUFF', p.pos);
+            addVfx('TEXT', p.pos, { text: item.value === 99 ? 'CD全快' : `CD-${item.value}`, color: 'text-cyan-300', durationMs: 900 });
             logs.unshift(`手札のCDを${item.value === 99 ? '全' : item.value}短縮！`);
             used = true;
         } else if (item.type === 'BOMB') {
@@ -1253,6 +1391,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         
                         // Visual effect for movement
                         addVfx('WARP', checkPos, { color: 'text-cyan-500' });
+                        addVfx('AFTERIMAGE', checkPos, { color: 'text-cyan-300', direction: p.facing, durationMs: 340 });
 
                         const hitEnemy = nextEnemies.find(e => e.pos === checkPos && e.hp > 0);
                         if (hitEnemy) { 
@@ -1282,6 +1421,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         if (checkPos < 0 || checkPos >= GRID_SIZE) break;
                         
                         addVfx('WARP', checkPos, { color: 'text-indigo-400' }); // Trail
+                        addVfx('AFTERIMAGE', checkPos, { color: 'text-indigo-300', direction: p.facing, durationMs: 360 });
 
                         const hitEnemy = nextEnemies.find(e => e.pos === checkPos && e.hp > 0);
                         
@@ -1320,11 +1460,12 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         // Try push same direction
                         let pushPos = finalPos + p.facing;
                         let pushed = false;
-                        if (pushPos >= 0 && pushPos < GRID_SIZE && !nextEnemies.some(e => e.pos === pushPos && e.hp > 0) && pushPos !== pPos) {
-                             overlappingEnemy.pos = pushPos;
-                             addLog(`${overlappingEnemy.name}を押し出した！`);
-                             addVfx('IMPACT', pushPos);
-                             pushed = true;
+                            if (pushPos >= 0 && pushPos < GRID_SIZE && !nextEnemies.some(e => e.pos === pushPos && e.hp > 0) && pushPos !== pPos) {
+                                 overlappingEnemy.pos = pushPos;
+                                 addLog(`${overlappingEnemy.name}を押し出した！`);
+                                 addVfx('IMPACT', pushPos);
+                                 addVfx('PUSH', pushPos, { direction: p.facing, durationMs: 520 });
+                                 pushed = true;
                         } 
                         
                         if (!pushed) {
@@ -1334,6 +1475,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 overlappingEnemy.pos = pushPos;
                                 addLog(`${overlappingEnemy.name}を背後に押し出した！`);
                                 addVfx('IMPACT', pushPos);
+                                addVfx('PUSH', pushPos, { direction: (-p.facing) as Facing, durationMs: 520 });
                                 pushed = true;
                             }
                         }
@@ -1386,6 +1528,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         addLog(`${e.name} に ${finalDmg} ダメージ！`);
                         addVfx(isRanged ? 'BLAST' : 'SLASH', e.pos);
                         addVfx('TEXT', e.pos, { text: finalDmg, color: 'text-yellow-400' });
+                        triggerHitStop(isRanged ? 95 : 120);
 
                         // DRAIN Effect
                         if (card.effectType === 'DRAIN') {
@@ -1398,6 +1541,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             if (e.intent) {
                                 e.intent.timer += 1;
                                 addVfx('STUN', e.pos);
+                                addVfx('TEXT', e.pos, { text: 'スタン', color: 'text-yellow-300', durationMs: 900 });
                                 addLog(`${e.name}をスタンさせた！`);
                             }
                         }
@@ -1419,13 +1563,23 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 const isBlocked = nextEnemies.some(o => o.pos === next && o.hp > 0) || nextPlayer.pos === next || next < 0 || next >= GRID_SIZE;
                                 if (!isBlocked) targetPos = next; else break;
                             }
-                            if (targetPos !== e.pos) { e.pos = targetPos; addLog(`${e.name}を吹き飛ばした！`); addVfx('IMPACT', e.pos); }
+                            if (targetPos !== e.pos) {
+                                e.pos = targetPos;
+                                addLog(`${e.name}を吹き飛ばした！`);
+                                addVfx('IMPACT', e.pos);
+                                addVfx('PUSH', e.pos, { direction: pushDir as Facing, durationMs: 520 });
+                            }
                         }
 
                         if (card.effectType === 'PULL') {
                             const dest = p.pos + p.facing; 
                             const isBlocked = nextEnemies.some(o => o.pos === dest && o.id !== e.id && o.hp > 0) || nextPlayer.pos === dest;
-                            if (!isBlocked && dest >= 0 && dest < GRID_SIZE) { e.pos = dest; addLog(`${e.name}を引き寄せた！`); addVfx('IMPACT', e.pos); }
+                            if (!isBlocked && dest >= 0 && dest < GRID_SIZE) {
+                                e.pos = dest;
+                                addLog(`${e.name}を引き寄せた！`);
+                                addVfx('IMPACT', e.pos);
+                                addVfx('PULL', e.pos, { direction: p.facing, durationMs: 520 });
+                            }
                         }
                     });
                     
@@ -1435,6 +1589,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         if (!isBlocked) { 
                             nextPlayer.pos = recoilPos; 
                             addLog("反動で後退！"); 
+                            addVfx('AFTERIMAGE', recoilPos, { color: 'text-orange-300', direction: p.facing, durationMs: 320 });
                         }
                     }
 
@@ -1498,6 +1653,9 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             setGameState(prev => {
                  return { ...prev, player: nextPlayer, enemies: nextEnemies };
             });
+            if (hit) {
+                await new Promise(r => setTimeout(r, 90));
+            }
             await new Promise(r => setTimeout(r, 400));
             
             // Check pickup after move
@@ -1699,10 +1857,14 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     const generateRewards = () => {
-        const pool = CARD_DB.filter(c => !stateRef.current.hand.some(h => h.name === c.name)); 
+        const unlockedPool = getUnlockedKochoCardTemplates();
+        const uniquePool = unlockedPool.filter(c => !stateRef.current.hand.some(h => h.name === c.name));
+        const pool = uniquePool.length > 0 ? [...uniquePool] : [...unlockedPool];
         const options: KCard[] = [];
         for (let i = 0; i < 2; i++) {
-            const template = pool[Math.floor(Math.random() * pool.length)] || pool[0];
+            if (pool.length === 0) break;
+            const idx = Math.floor(Math.random() * pool.length);
+            const template = pool.splice(idx, 1)[0];
             options.push({ ...template, id: `rew_${Date.now()}_${i}`, currentCooldown: 0, usedSlots: 0 });
         }
         setRewardCards(options);
@@ -1798,7 +1960,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             case 'SLOT_1_CD_MINUS_1': card.maxSlots += 1; card.cooldown = Math.max(0, card.cooldown - 1); msg = "スロット拡張＆CD短縮！"; break;
             case 'SACRIFICE': newHand.splice(cardIndex, 1); setGameState(prev => ({ ...prev, money: prev.money + 40 })); msg = "カードを犠牲にした..."; break;
             case 'GAMBLE':
-                const pool = CARD_DB.filter(c => c.name !== card.name);
+                const pool = getUnlockedKochoCardTemplates().filter(c => c.name !== card.name);
                 const randomCard = pool[Math.floor(Math.random() * pool.length)];
                 // Reset slots for new card
                 newHand[cardIndex] = { ...randomCard, id: card.id, currentCooldown: 0, usedSlots: 0 };
@@ -1846,7 +2008,29 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         {v.type === 'BARRIER' && <div className="absolute w-full h-full border-4 border-yellow-400 animate-ping rounded-full opacity-50"></div>}
                         {v.type === 'HEAL' && <div className="text-green-500 animate-bounce"><Heart size={32}/></div>}
                         {v.type === 'BUFF' && <div className="text-cyan-500 animate-pulse"><RefreshCw size={32}/></div>}
-                        {v.type === 'STUN' && <div className="text-yellow-500 animate-pulse"><Star size={32}/></div>}
+                        {v.type === 'STUN' && (
+                            <div className="relative flex items-center justify-center">
+                                <div className="absolute w-12 h-12 rounded-full border-2 border-yellow-300/70 animate-ping" />
+                                <div className="absolute -top-2 left-1 text-yellow-300 animate-bounce"><Star size={16}/></div>
+                                <div className="absolute -top-1 right-0 text-yellow-400 animate-bounce delay-75"><Star size={14}/></div>
+                                <div className="text-yellow-500 animate-pulse"><Star size={32}/></div>
+                            </div>
+                        )}
+                        {v.type === 'PUSH' && (
+                            <div className={`text-orange-400 drop-shadow-[0_0_12px_rgba(251,146,60,0.8)] animate-pulse ${v.direction === -1 ? 'rotate-180' : ''}`}>
+                                <ArrowRight size={30}/>
+                            </div>
+                        )}
+                        {v.type === 'PULL' && (
+                            <div className={`text-sky-300 drop-shadow-[0_0_12px_rgba(125,211,252,0.8)] animate-pulse ${v.direction === -1 ? 'scale-x-[-1]' : ''}`}>
+                                <Anchor size={30}/>
+                            </div>
+                        )}
+                        {v.type === 'AFTERIMAGE' && (
+                            <div className={`opacity-25 blur-[1px] ${v.direction === -1 ? 'scale-x-[-1]' : ''}`}>
+                                <PixelSprite seed={`after-${v.id}`} name={p.spriteName} className={`w-16 h-16 md:w-32 md:h-32 ${v.color || 'text-white'}`} />
+                            </div>
+                        )}
                     </div>
                 ))}
 
@@ -2187,6 +2371,29 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     <Trophy size={64} className="text-yellow-400 mb-4 animate-bounce mx-auto"/>
                                     <h2 className="text-4xl font-bold text-white mb-4">GRADUATION!</h2>
                                     <p className="text-gray-300 mb-8">You defeated the Principal.</p>
+                                    <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-yellow-500/50 bg-yellow-950/40 px-4 py-2 text-sm font-bold text-yellow-200">
+                                        <Gift size={16}/>
+                                        追加カード解放 {kochoUnlockedCount}/{KOCHO_UNLOCKABLE_CARD_TOTAL}
+                                    </div>
+                                    {newlyUnlockedCard ? (
+                                        <div className="mx-auto mb-8 w-64 rounded-2xl border-4 border-yellow-500 bg-slate-900 p-5 shadow-xl">
+                                            <div className="mb-2 text-xs font-black tracking-[0.2em] text-yellow-300">NEW CARD</div>
+                                            <div className={`mb-3 inline-flex rounded-full p-3 ${newlyUnlockedCard.color}`}>
+                                                {newlyUnlockedCard.icon}
+                                            </div>
+                                            <div className="text-lg font-bold text-white">{newlyUnlockedCard.name}</div>
+                                            <div className="mt-2 flex justify-center gap-2 text-[11px]">
+                                                {newlyUnlockedCard.damage > 0 && <span className="rounded bg-red-900/40 px-2 py-1 font-bold text-red-300">ATK {newlyUnlockedCard.damage}</span>}
+                                                <span className="rounded bg-blue-900/40 px-2 py-1 font-bold text-blue-300">CD {newlyUnlockedCard.cooldown}</span>
+                                            </div>
+                                            <div className="mt-3 text-xs leading-relaxed text-gray-300">{newlyUnlockedCard.description}</div>
+                                            <div className="mt-4 text-[11px] font-bold text-emerald-300">以降の校長対決の報酬に登場します</div>
+                                        </div>
+                                    ) : (
+                                        <div className="mb-8 rounded-xl border border-emerald-500/40 bg-emerald-950/30 px-5 py-4 text-sm font-bold text-emerald-200">
+                                            追加カードはすべて解放済みです
+                                        </div>
+                                    )}
                                     <button onClick={onBack} className="bg-indigo-600 px-8 py-3 rounded text-xl font-bold hover:bg-indigo-500">Return</button>
                                 </div>
                             )}
@@ -2243,13 +2450,30 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     {/* Standard Gameplay View */}
                     {gameState.phase === 'BATTLE' && (
                         <>
+                            {announcement && (
+                                <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
+                                    <div className={`min-w-[220px] rounded-2xl border px-5 py-3 text-center shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-200 ${
+                                        announcement.tone === 'danger'
+                                            ? 'border-red-400/80 bg-red-950/80'
+                                            : announcement.tone === 'phase'
+                                                ? 'border-yellow-400/80 bg-yellow-950/80'
+                                                : announcement.tone === 'special'
+                                                    ? 'border-purple-400/80 bg-purple-950/80'
+                                                    : 'border-cyan-400/70 bg-slate-950/80'
+                                    }`}>
+                                        <div className="text-[10px] font-black tracking-[0.35em] uppercase text-slate-300">Kocho Showdown</div>
+                                        <div className="mt-1 text-xl md:text-2xl font-black text-white">{announcement.title}</div>
+                                        {announcement.subtitle && <div className="mt-1 text-xs md:text-sm font-bold text-slate-200">{announcement.subtitle}</div>}
+                                    </div>
+                                </div>
+                            )}
                             <div className="absolute top-4 left-1/2 -translate-x-1/2 w-full max-w-lg text-center pointer-events-none z-10">
                                 {gameState.logs.map((log, i) => (
                                     <div key={i} className={`text-sm ${i===0 ? 'text-white font-bold text-shadow-md' : 'text-gray-500'} transition-opacity duration-500`}>{log}</div>
                                 ))}
                             </div>
 
-                            <div className="grid grid-cols-7 gap-1 md:gap-2 w-full max-w-full md:max-w-5xl px-2 mb-4 shrink-0 max-h-full aspect-[7/2] md:aspect-auto">
+                            <div className={`grid grid-cols-7 gap-1 md:gap-2 w-full max-w-full md:max-w-5xl px-2 mb-4 shrink-0 max-h-full aspect-[7/2] md:aspect-auto transition-transform duration-100 ${hitStopActive ? 'scale-[0.982]' : 'scale-100'}`}>
                                 {[...Array(GRID_SIZE)].map((_, i) => (
                                     <div key={i} className={`aspect-[1/2] md:aspect-[3/4] border-2 ${isDangerZone(i) ? 'border-red-500 bg-red-900/20' : 'border-indigo-800 bg-black/30'} rounded-lg flex items-end justify-center relative`}>
                                         {getGridContent(i)}
