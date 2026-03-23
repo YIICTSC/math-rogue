@@ -13,6 +13,7 @@ import { SUBJECT_CATEGORIES, SubjectCategoryConfig, SubModeConfig, getChallengeS
 import { ENGLISH_GRADE_UNITS } from '../englishUnitConfig';
 import { SCIENCE_GRADE_UNITS, getScienceGradeMode } from '../scienceUnitConfig';
 import { SOCIAL_GRADE_UNITS, getSocialGradeMode } from '../socialUnitConfig';
+import { trans, transProblemSubjectName } from '../utils/textUtils';
 
 interface ProblemChallengeScreenProps {
   onBack: () => void;
@@ -183,7 +184,10 @@ interface ActiveChallengeConfig {
   modePool?: string[];
 }
 
-const getGradeLabel = (grade: number) => grade <= 6 ? `小${grade}` : `中${grade - 6}`;
+const getGradeLabel = (grade: number, languageMode: LanguageMode) =>
+  languageMode === 'JAPANESE'
+    ? (grade <= 6 ? `小${grade}` : `中${grade - 6}`)
+    : (grade <= 6 ? `しょう${grade}` : `ちゅう${grade - 6}`);
 
 const getMathGradeMode = (grade: number): GameMode => {
   switch (grade) {
@@ -417,6 +421,7 @@ const getCategoryClasses = (color: string) => {
 
 const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   onBack,
+  languageMode,
   onCorrectAnswers,
   modeCorrectCounts = {},
 }) => {
@@ -434,6 +439,8 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   
   // Voice feature control
   const [voiceEnabled, setVoiceEnabled] = useState(() => storageService.getEnglishVoiceEnabled());
+  const getCategoryLabel = (name: string) => transProblemSubjectName(name, languageMode);
+  const getSubLabel = (sub: SubModeConfig) => trans(sub.name, languageMode);
 
   useEffect(() => {
     audioService.init();
@@ -458,8 +465,8 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     });
 
     const label = selectedUnits.length > 0
-      ? `ミックス選択 (${selectedUnits.length}単元)`
-      : `単元未選択`;
+      ? `${trans('ミックス選択', languageMode)} (${selectedUnits.length}${trans('単元', languageMode)})`
+      : trans('単元未選択', languageMode);
       
     const subModeId = `COMBINED_MIX_${selectedUnits.map((u) => u.id).sort().join('_') || 'NONE'}`;
 
@@ -662,7 +669,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   const canStart = !isUnitCategory || selectedMathUnitIds.length > 0;
   const footerSelectionLabel = previewSelection
     ? previewSelection.subMode.name
-    : selectedSubMode.name;
+    : getSubLabel(selectedSubMode);
 
   return (
     <div className="w-full h-full bg-slate-950 flex flex-col relative overflow-hidden">
@@ -672,10 +679,10 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
         {/* Header - Fixed */}
         <div className="text-center border-b border-slate-800 p-3 shrink-0">
           <h2 className="text-xl md:text-2xl font-bold text-emerald-400 tracking-widest mb-1">
-            問題チャレンジ
+            {trans('問題チャレンジ', languageMode)}
           </h2>
           <div className="flex items-center justify-center gap-1 text-yellow-500 font-bold text-[9px] uppercase tracking-wider">
-            <Star size={8} fill="currentColor"/> ミニゲーム解放カウント対象 <Star size={8} fill="currentColor"/>
+            <Star size={8} fill="currentColor"/> {trans('ミニゲーム解放カウント対象', languageMode)} <Star size={8} fill="currentColor"/>
           </div>
         </div>
 
@@ -694,7 +701,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                   {getCategoryIcon(cat.id)}
                 </div>
                 <span className="font-bold text-sm sm:text-base lg:text-sm text-center lg:text-left leading-tight w-full whitespace-normal break-words">
-                  {cat.name}
+                  {getCategoryLabel(cat.name)}
                 </span>
               </button>
             ))}
@@ -703,13 +710,13 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
           {/* Middle: SubMode Selector - Scrollable vertically */}
           <div className="lg:col-span-7 flex flex-col min-h-0">
             <h3 className="text-[10px] md:text-xs font-bold text-slate-400 mb-1.5 flex items-center gap-2 uppercase tracking-tight shrink-0">
-              <ChevronRight size={10} className="text-emerald-500"/> 種目を選択
+              <ChevronRight size={10} className="text-emerald-500"/> {trans('種目を選択', languageMode)}
             </h3>
             <div className="bg-black/40 p-3 rounded-xl border border-slate-800 flex-grow overflow-y-auto custom-scrollbar shadow-inner min-h-[160px]">
                 {isUnitCategory ? (
                   <div className="space-y-3">
                     <div>
-                      <div className="text-[10px] text-gray-400 mb-1">学年</div>
+                      <div className="text-[10px] text-gray-400 mb-1">{trans('学年', languageMode)}</div>
                       <div className="grid grid-cols-9 sm:grid-cols-5 gap-1">
                         {[(selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SOCIAL' ? 3 : 1), ...((selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SOCIAL' ? [4, 5, 6, 7, 8, 9] : [2, 3, 4, 5, 6, 7, 8, 9]))].map((grade) => {
                           const isSelected = selectedMathGrade === grade;
@@ -720,7 +727,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                               onClick={() => handleMathGradeSelect(grade)}
                               className={`px-0.5 py-1 rounded border text-[9px] sm:text-[10px] font-bold leading-none transition-colors ${isSelected ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'}`}
                             >
-                              {getGradeLabel(grade)}
+                              {getGradeLabel(grade, languageMode)}
                             </button>
                           );
                         })}
@@ -729,14 +736,14 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
 
                     <div>
                       <div className="mb-1 flex items-center justify-between gap-2">
-                        <div className="text-[10px] text-gray-400">単元</div>
+                        <div className="text-[10px] text-gray-400">{trans('単元', languageMode)}</div>
                         <button
                           type="button"
                           onClick={clearSelectedUnits}
                           disabled={selectedMathUnitIds.length === 0}
                           className={`rounded border px-2 py-0.5 text-[9px] font-bold transition-colors ${selectedMathUnitIds.length > 0 ? 'border-slate-500 text-slate-200 hover:bg-slate-700' : 'border-slate-700 text-slate-500 cursor-not-allowed opacity-60'}`}
                         >
-                          選択解除
+                          {trans('選択解除', languageMode)}
                         </button>
                       </div>
                       <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
@@ -760,11 +767,11 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                     </div>
 
                     <div className="bg-black/40 px-2 py-1 rounded border border-slate-700 text-[10px] text-slate-300">
-                      出題範囲: {previewSelection?.subMode.name}
+                      {trans('出題範囲', languageMode)}: {previewSelection?.subMode.name}
                     </div>
                     {selectedMathUnitIds.length === 0 && (
                       <div className="text-[10px] text-amber-300">
-                        {currentUnits.length > 0 ? '単元を1つ以上選ぶと開始できます' : 'この学年の単元はまだ未実装です'}
+                        {currentUnits.length > 0 ? trans('単元を1つ以上選ぶと開始できます', languageMode) : trans('この学年の単元はまだ未実装です', languageMode)}
                       </div>
                     )}
                   </div>
@@ -782,7 +789,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                             className={`p-2 rounded-lg border text-left text-[10px] md:text-xs font-bold transition-colors ${isSelected ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'}`}
                           >
                             <div className="flex justify-between items-center mb-1 w-full truncate gap-2">
-                                <span className={isSelected ? 'text-white' : ''}>{sub.name}</span>
+                                <span className={isSelected ? 'text-white' : ''}>{getSubLabel(sub)}</span>
                                 {isSelected && <CheckCircle size={12} className="text-white animate-pulse shrink-0" />}
                             </div>
                             <div className="bg-black/40 px-1.5 rounded text-[8px] md:text-[9px] font-mono text-white/90 border border-white/10 w-fit">
@@ -799,8 +806,8 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
           {/* Right: Settings - Scrollable vertically */}
           <div className="lg:col-span-3 flex flex-col gap-3 overflow-y-auto custom-scrollbar shrink-0">
              <div className="bg-black/40 rounded-xl border border-slate-800 p-3">
-              <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mb-2">選択中</div>
-              <div className="text-xs font-bold text-emerald-400">{selectedCategory.name} / {footerSelectionLabel}</div>
+              <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mb-2">{trans('選択中', languageMode)}</div>
+              <div className="text-xs font-bold text-emerald-400">{getCategoryLabel(selectedCategory.name)} / {footerSelectionLabel}</div>
             </div>
             
             <button 
@@ -808,13 +815,13 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
               disabled={!canStart}
               className={`w-full py-3 rounded-xl font-bold text-base transition-all flex items-center justify-center gap-3 ${canStart ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_4px_0_rgb(5,150,105)] active:translate-y-1 active:shadow-none animate-pulse' : 'bg-slate-700 text-slate-400 opacity-60 cursor-not-allowed'}`}
             >
-              <Play fill="currentColor" size={20}/> チャレンジ開始！
+              <Play fill="currentColor" size={20}/> {trans('チャレンジ開始！', languageMode)}
             </button>
              {!canStart && (
               <div className="text-[10px] text-amber-300">
                 {isUnitCategory
-                  ? '単元を1つ以上選ぶと開始できます'
-                  : '開始条件を確認してください'}
+                  ? trans('単元を1つ以上選ぶと開始できます', languageMode)
+                  : trans('開始条件を確認してください', languageMode)}
               </div>
             )}
 

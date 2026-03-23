@@ -9,7 +9,9 @@ const BASE_DICTIONARY: Record<string, string> = {
     "冒険を始める": "ぼうけんを はじめる",
     "問題": "もんだい",
     "モード選択": "もんだいをえらぼう",
+    "問題チャレンジ": "もんだい チャレンジ",
     "学期": "がっき",
+    "学年": "がくねん",
     "年": "ねん",
     "対戦": "たいせん",
     "1A1Dモード": "1A1Dモード",
@@ -21,6 +23,9 @@ const BASE_DICTIONARY: Record<string, string> = {
     "戻る": "もどる",
     "進む": "すすむ",
     "選択": "えらぶ",
+    "選択解除": "せんたく かいじょ",
+    "選択中": "せんたくちゅう",
+    "未選択": "みせんたく",
     "獲得": "ゲット",
     "決定": "けってい",
     "閉じる": "とじる",
@@ -30,6 +35,9 @@ const BASE_DICTIONARY: Record<string, string> = {
     "再挑戦": "もういちど",
     "タイトルへ戻る": "タイトルへ もどる",
     "計算モード選択": "けいさんモード せんたく",
+    "単元": "たんげん",
+    "種目": "しゅもく",
+    "出題範囲": "しゅつだい はんい",
     "たし算": "たしざん",
     "ひき算": "ひきざん",
     "かけ算": "かけざん",
@@ -73,6 +81,15 @@ const BASE_DICTIONARY: Record<string, string> = {
     "生成中...": "じゅんびちゅう...",
     "読み込み中...": "よみこみちゅう...",
     "これ以上受け取らずに進む": "なにも もらわずに すすむ",
+    "この条件で開始": "この じょうけんで はじめる",
+    "この単元ミックスで開始": "この たんげん ミックスで はじめる",
+    "単元を選択してください": "たんげんを えらんでください",
+    "単元を1つ以上選ぶと開始できます": "たんげんを 1つ いじょう えらぶと はじめられます",
+    "この学年の単元はまだ未実装です": "この がくねんの たんげんは まだ みじっそうです",
+    "開始条件を確認してください": "かいし じょうけんを かくにん してください",
+    "ミックス選択": "ミックス せんたく",
+    "単元未選択": "たんげん みせんたく",
+    "選択単元数": "せんたく たんげんすう",
     "勝利": "かち",
     "死亡": "まけ",
     "逃げる": "にげる",
@@ -101,6 +118,9 @@ const BASE_DICTIONARY: Record<string, string> = {
     "第": "だい",
     "章": "しょう",
     "本日のプレイ制限に達しました。問題チャレンジで勉強しましょう！": "きょうの ぼうけんは おわりだよ。 もんだいチャレンジで おべんきょう しよう！",
+    "ミニゲーム解放カウント対象": "ミニゲーム かいほう カウント たいしょう",
+    "種目を選択": "しゅもくを えらぶ",
+    "チャレンジ開始！": "チャレンジ かいし！",
 
     // --- ICT・情報系 ---
     "ICT・情報": "ICT・じょうほう",
@@ -2352,6 +2372,17 @@ const DICTIONARY: Record<string, string> = {
 // 置換用キーワードのリスト（長い順にソートして置換ミスを防ぐ）
 const KEYWORDS = Object.keys(DICTIONARY).sort((a, b) => b.length - a.length);
 
+const PROBLEM_SUBJECT_HIRAGANA_MAP: Record<string, string> = {
+    "計算": "けいさん",
+    "算数・数学": "さんすう・すうがく",
+    "国語": "こくご",
+    "漢字": "かんじ",
+    "英語": "えいご",
+    "生活・理科": "せいかつ・りか",
+    "社会": "しゃかい",
+    "ICT・情報": "ICT・じょうほう",
+};
+
 export const trans = (text: string, mode: LanguageMode): string => {
     if (!text) return "";
     if (mode === 'JAPANESE') return text;
@@ -2382,4 +2413,10 @@ export const trans = (text: string, mode: LanguageMode): string => {
     result = result.replace(/,/g, "、");
 
     return result;
+};
+
+export const transProblemSubjectName = (text: string, mode: LanguageMode): string => {
+    if (!text) return "";
+    if (mode === 'JAPANESE') return text;
+    return PROBLEM_SUBJECT_HIRAGANA_MAP[text] || trans(text, mode);
 };
