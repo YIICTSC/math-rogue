@@ -52,7 +52,7 @@ interface Talent {
     id: string;
     name: string;
     description: string;
-    effectType: 'PASSIVE_POWER' | 'MAX_HP' | 'FUEL' | 'SHOP_DISCOUNT' | 'START_ENERGY';
+    effectType: string;
     value: number;
 }
 
@@ -61,6 +61,7 @@ interface Pilot {
     name: string;
     spriteName: string;
     intrinsicTalent: Talent;
+    randomTalents?: Talent[];
 }
 
 interface ShipState {
@@ -157,29 +158,18 @@ interface EnemyDataTemplate {
 // --- DATA ---
 
 const GENERIC_TALENTS: Talent[] = [
-    { id: 'T_HEALTH', name: '体力自慢', description: '最大HP+5', effectType: 'MAX_HP', value: 5 },
-    { id: 'T_HEALTH_PLUS', name: '皆勤賞', description: '最大HP+8', effectType: 'MAX_HP', value: 8 },
-    { id: 'T_HEALTH_BIG', name: '保健委員', description: '最大HP+10', effectType: 'MAX_HP', value: 10 },
-    { id: 'T_FUEL', name: '省エネ', description: '最大燃料+1', effectType: 'FUEL', value: 1 },
-    { id: 'T_FUEL_PLUS', name: '帰宅部ダッシュ', description: '最大燃料+2', effectType: 'FUEL', value: 2 },
-    { id: 'T_FUEL_BIG', name: '校庭ランナー', description: '最大燃料+3', effectType: 'FUEL', value: 3 },
-    { id: 'T_BARGAIN', name: '交渉術', description: 'ショップ割引(10%)', effectType: 'SHOP_DISCOUNT', value: 10 },
-    { id: 'T_BARGAIN_PLUS', name: '学級会計', description: 'ショップ割引(15%)', effectType: 'SHOP_DISCOUNT', value: 15 },
-    { id: 'T_BARGAIN_BIG', name: '文化祭バイヤー', description: 'ショップ割引(20%)', effectType: 'SHOP_DISCOUNT', value: 20 },
-    { id: 'T_POWER', name: '筋トレ', description: 'パッシブ出力+1', effectType: 'PASSIVE_POWER', value: 1 },
-    { id: 'T_POWER_PLUS', name: '放課後特訓', description: 'パッシブ出力+2', effectType: 'PASSIVE_POWER', value: 2 },
-    { id: 'T_POWER_BIG', name: '学年代表', description: 'パッシブ出力+3', effectType: 'PASSIVE_POWER', value: 3 },
-    { id: 'T_ENERGY', name: '準備', description: '開始時エネルギーカード+1', effectType: 'START_ENERGY', value: 1 },
-    { id: 'T_ENERGY_PLUS', name: '早起き', description: '開始時エネルギーカード+2', effectType: 'START_ENERGY', value: 2 },
-    { id: 'T_ENERGY_BIG', name: '朝練習慣', description: '開始時エネルギーカード+3', effectType: 'START_ENERGY', value: 3 },
-    { id: 'T_HEALTH_FUEL', name: 'サバイバル遠足', description: '最大燃料+1', effectType: 'FUEL', value: 1 },
-    { id: 'T_POWER_FUEL', name: 'ラジコン研究', description: 'パッシブ出力+1', effectType: 'PASSIVE_POWER', value: 1 },
-    { id: 'T_POWER_SHOP', name: '商店街の人気者', description: 'ショップ割引(12%)', effectType: 'SHOP_DISCOUNT', value: 12 },
-    { id: 'T_HEALTH_START', name: '寝だめ上手', description: '最大HP+6', effectType: 'MAX_HP', value: 6 },
-    { id: 'T_FUEL_START', name: '通学快速', description: '最大燃料+2', effectType: 'FUEL', value: 2 },
-    { id: 'T_POWER_START', name: '黒板係', description: 'パッシブ出力+2', effectType: 'PASSIVE_POWER', value: 2 },
-    { id: 'T_SHOP_START', name: 'フリマ名人', description: 'ショップ割引(18%)', effectType: 'SHOP_DISCOUNT', value: 18 },
-    { id: 'T_ENERGY_SHOP', name: '朝市の常連', description: '開始時エネルギーカード+1', effectType: 'START_ENERGY', value: 1 },
+    { id: 'T_HEAL_WIN', name: '勝利の余韻', description: '戦闘勝利時、HPを5回復', effectType: 'HEAL_AFTER_BATTLE', value: 5 },
+    { id: 'T_MONEY_WIN', name: 'おこづかい', description: '戦闘勝利時の獲得コイン+15%', effectType: 'EXTRA_COINS', value: 15 },
+    { id: 'T_BOMB', name: '先制花火', description: 'バトル開始時に敵に15ダメージ', effectType: 'INITIAL_BOMB', value: 15 },
+    { id: 'T_POOL_W', name: '白紙の束', description: '初期プールに「白」のカードを3枚追加', effectType: 'EXTRA_POOL_WHITE', value: 3 },
+    { id: 'T_POOL_B', name: '青インクの瓶', description: '初期プールに「青」のカードを2枚追加', effectType: 'EXTRA_POOL_BLUE', value: 2 },
+    { id: 'T_POOL_O', name: '夕焼けスケッチ', description: '初期プールに「橙」のカードを1枚追加', effectType: 'EXTRA_POOL_ORANGE', value: 1 },
+    { id: 'T_REROLL_DISC', name: '情報網', description: '戦利品リロールのコイン消費を半額(25枚)にする', effectType: 'DISCOUNT_REROLL_REWARD', value: 25 },
+    { id: 'T_DRAW_FT', name: '初動重視', description: '一番最初のターンに手札を2枚多く引く', effectType: 'DRAW_CARD_FIRST_TURN', value: 2 },
+    { id: 'T_DOUBLE_LOAD', name: '二重装填(初手)', description: '最初のターンに装填するカードの効果値が倍になる', effectType: 'DOUBLE_FIRST_TURN_LOAD', value: 2 },
+    { id: 'T_FREE_VACATION', name: '優待券', description: '「休暇」の最初のイベントコストを1日軽減', effectType: 'FREE_FIRST_VACATION', value: 1 },
+    { id: 'T_FUEL_ON_CRISIS', name: '火事場の馬鹿力', description: 'ターン開始時、HPが半分以下なら燃料+1', effectType: 'CRISIS_FUEL', value: 1 },
+    { id: 'T_OVERCHARGE', name: 'ハイテンション', description: '「6」以上のカードを装填した時、即座に燃料を1回復', effectType: 'OVERCHARGE_FUEL', value: 1 },
 ];
 
 const PILOTS: Pilot[] = [
@@ -1303,11 +1293,11 @@ const EnergyCardView: React.FC<{ card: EnergyCard, onClick?: () => void, selecte
     const borderColor = card.color === 'ORANGE' ? 'border-orange-700' : card.color === 'BLUE' ? 'border-blue-700' : 'border-slate-400';
     
     const sizeClasses = small 
-        ? "w-8 h-10 md:w-10 md:h-12 rounded border-b-2 border-r-1 text-xs" 
-        : "w-14 h-20 md:w-16 md:h-24 rounded-lg border-b-4 border-r-2 text-xl";
+        ? "w-12 h-16 md:w-14 md:h-20 rounded-md border-b-[3px] border-r-2 text-sm" 
+        : "w-16 h-24 md:w-20 md:h-28 rounded-xl border-b-[5px] border-r-[3px] text-2xl";
 
-    const textSize = small ? "text-base font-bold" : "text-xl md:text-3xl font-black";
-    const iconSize = small ? 8 : 10;
+    const textSize = small ? "text-xl font-bold md:text-2xl" : "text-3xl md:text-4xl font-black";
+    const iconSize = small ? 12 : 16;
     
     return (
         <div 
@@ -1610,7 +1600,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [pilotOptions, setPilotOptions] = useState<Pilot[]>([]);
     const [selectedPilotIndex, setSelectedPilotIndex] = useState<number>(-1);
     const [pinnedPilotIndex, setPinnedPilotIndex] = useState<number | null>(null);
-    const [randomTalents, setRandomTalents] = useState<Talent[]>([]);
     const [selectedMissionLevel, setSelectedMissionLevel] = useState<number>(savedData?.selectedMissionLevel || 0);
 
     const [pool, setPool] = useState<PoolState>(savedData?.pool || {
@@ -1720,20 +1709,21 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const initPilotRoll = () => {
         const slots: Pilot[] = [];
         for (let i=0; i<3; i++) {
-             slots.push(PILOTS[Math.floor(Math.random() * PILOTS.length)]);
+             const pBase = PILOTS[Math.floor(Math.random() * PILOTS.length)];
+             const p: Pilot = { ...pBase, randomTalents: [] };
+             
+             // Always grant 1 generic talent
+             p.randomTalents!.push(GENERIC_TALENTS[Math.floor(Math.random() * GENERIC_TALENTS.length)]);
+             
+             // Grant a 2nd generic talent at Rank 5+
+             if (progress.rank >= 5) {
+                  const available = GENERIC_TALENTS.filter(t => !p.randomTalents!.find(pt => pt.id === t.id));
+                  if (available.length > 0) p.randomTalents!.push(available[Math.floor(Math.random() * available.length)]);
+             }
+             slots.push(p);
         }
         setPilotOptions(slots);
         setSelectedPilotIndex(-1); // Reset selection
-        
-        // Random Talents for higher ranks
-        const talents: Talent[] = [];
-        if (progress.rank >= 5) {
-            talents.push(GENERIC_TALENTS[Math.floor(Math.random() * GENERIC_TALENTS.length)]);
-        }
-        if (progress.rank >= 10) {
-             talents.push(GENERIC_TALENTS[Math.floor(Math.random() * GENERIC_TALENTS.length)]);
-        }
-        setRandomTalents(talents);
     };
 
     const handleRerollPilots = () => {
@@ -1751,17 +1741,22 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const newOpts = [...pilotOptions];
         for (let i=0; i<3; i++) {
             if (pinnedPilotIndex === i) continue;
-            newOpts[i] = PILOTS[Math.floor(Math.random() * PILOTS.length)];
+            const pBase = PILOTS[Math.floor(Math.random() * PILOTS.length)];
+            const p: Pilot = { ...pBase, randomTalents: [] };
+            
+            // Always grant 1 generic talent
+            p.randomTalents!.push(GENERIC_TALENTS[Math.floor(Math.random() * GENERIC_TALENTS.length)]);
+            
+            // Grant a 2nd generic talent at Rank 5+
+            if (progress.rank >= 5) {
+                 const available = GENERIC_TALENTS.filter(t => !p.randomTalents!.find(pt => pt.id === t.id));
+                 if (available.length > 0) p.randomTalents!.push(available[Math.floor(Math.random() * available.length)]);
+            }
+            newOpts[i] = p;
         }
         setPilotOptions(newOpts);
         setSelectedPilotIndex(-1); // Reset on reroll too? Maybe keep if pinned? No reset is safer.
 
-        // Roll Random Talents
-        const newTalents: Talent[] = [];
-        if (progress.rank >= 5) newTalents.push(GENERIC_TALENTS[Math.floor(Math.random() * GENERIC_TALENTS.length)]);
-        if (progress.rank >= 10) newTalents.push(GENERIC_TALENTS[Math.floor(Math.random() * GENERIC_TALENTS.length)]);
-        setRandomTalents(newTalents);
-        
         audioService.playSound('select');
     };
     
@@ -1784,7 +1779,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         let pStartMoney = 0;
         
         // Apply Talents
-        const allTalents = [pilot.intrinsicTalent, ...randomTalents];
+        const allTalents = [pilot.intrinsicTalent, ...(pilot.randomTalents || [])];
         allTalents.forEach(t => {
             if (t.effectType === 'MAX_HP') pMaxHp += t.value;
             if (t.effectType === 'PASSIVE_POWER') pPassivePower += t.value;
@@ -1811,7 +1806,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         
         setStage(1);
         setIsEndless(false);
-        initBattle(1);
+        initBattle(1, allTalents);
         audioService.playBGM('paper_plane_battle'); // Switch BGM
     };
     
@@ -1830,7 +1825,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     const addLog = (msg: string) => setLogs(prev => [msg, ...prev.slice(0, 4)]);
 
-    const initBattle = (stageNum: number) => {
+    const initBattle = (stageNum: number, resolvedTalents?: Talent[]) => {
         let enemyIdx;
         let template;
 
@@ -1929,6 +1924,15 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             }
         };
 
+        const activeTalents = resolvedTalents || player.talents;
+
+        let bombDmg = 0;
+        activeTalents.forEach(t => { if (t.effectType === 'INITIAL_BOMB') bombDmg += t.value; });
+        if (bombDmg > 0) {
+            initialEnemy.hp = Math.max(1, initialEnemy.hp - bombDmg);
+            addLog(`先制攻撃！敵に${bombDmg}ダメージ！`);
+        }
+
         // Important: Pass current player state to AI logic for initial intent generation
         const { nextEnemy, intents } = updateEnemyState(initialEnemy, stageNum, { ...player, yOffset: 1 });
         setEnemy(nextEnemy);
@@ -1940,8 +1944,19 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         let allNumbers = [...pool.genNumbers, ...pool.coolNumbers, ...hand.map(c => c.value)];
         let allColors = [...pool.genColors, ...pool.coolColors, ...hand.map(c => c.color)];
 
+        if (stageNum === 1) {
+            allNumbers = [1,2,3,4,5,6,3,4,5];
+            allColors = ['WHITE','WHITE','WHITE','BLUE','BLUE','ORANGE','ORANGE'];
+            activeTalents.forEach(t => {
+                if (t.effectType === 'EXTRA_POOL_WHITE') { for(let i=0; i<t.value; i++) { allNumbers.push(3); allColors.push('WHITE'); } }
+                if (t.effectType === 'EXTRA_POOL_BLUE') { for(let i=0; i<t.value; i++) { allNumbers.push(4); allColors.push('BLUE'); } }
+                if (t.effectType === 'EXTRA_POOL_ORANGE') { for(let i=0; i<t.value; i++) { allNumbers.push(5); allColors.push('ORANGE'); } }
+            });
+        }
+
         const initialHand: EnergyCard[] = [];
-        const drawCount = 5;
+        let drawCount = 5;
+        activeTalents.forEach(t => { if (t.effectType === 'DRAW_CARD_FIRST_TURN') drawCount += t.value; });
 
         allNumbers.sort(() => Math.random() - 0.5);
         allColors.sort(() => Math.random() - 0.5);
@@ -1955,7 +1970,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }
         
         // Talent: Start Energy
-        player.talents.forEach(t => {
+        activeTalents.forEach(t => {
              if (t.effectType === 'START_ENERGY') {
                  for(let k=0; k<t.value; k++) {
                      // Add extra white energy
@@ -2206,7 +2221,14 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         const newParts = [...player.parts];
         const newSlots = [...part.slots];
-        newSlots[slotIdx] = { ...newSlots[slotIdx], value: card.value, loadedColor: card.color };
+        
+        // NEW LOGIC For DOUBLE_FIRST_TURN_LOAD
+        let loadValue = card.value;
+        if (turn === 1 && player.talents.some(t => t.effectType === 'DOUBLE_FIRST_TURN_LOAD')) {
+            loadValue *= 2;
+        }
+
+        newSlots[slotIdx] = { ...newSlots[slotIdx], value: loadValue, loadedColor: card.color };
         newParts[partIndex] = { ...part, slots: newSlots };
         const nextBattleStats: BattleStats = {
             damageTaken: battleStats.damageTaken,
@@ -2219,7 +2241,19 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             lastLoadedStreak: battleStats.lastLoadedPartId === part.id ? battleStats.lastLoadedStreak + 1 : 1,
         };
         
-        setPlayer(prev => ({ ...prev, parts: newParts }));
+        // NEW LOGIC For OVERCHARGE_FUEL
+        let willHealFuel = false;
+        if (card.value >= 6 && player.talents.some(t => t.effectType === 'OVERCHARGE_FUEL')) {
+            willHealFuel = true;
+            addLog(`ハイテンション！燃料+1`);
+            audioService.playSound('buff');
+        }
+
+        setPlayer(prev => ({ 
+            ...prev, 
+            parts: newParts,
+            fuel: willHealFuel ? Math.min(prev.maxFuel, prev.fuel + 1) : prev.fuel
+        }));
         setBattleStats(nextBattleStats);
 
         const noConsumeTriggered = part.specialEffect === 'NO_CONSUME_CHANCE' &&
@@ -2438,6 +2472,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             }));
         }
 
+        if (tempPlayerHp > 0 && tempPlayerHp <= player.maxHp / 2 && player.talents.some(t => t.effectType === 'CRISIS_FUEL')) {
+            tempFuel = Math.min(player.maxFuel, tempFuel + 1);
+            addLog("火事場の馬鹿力！燃料回復");
+        }
+
         setEnemy(prev => ({...prev, hp: tempEnemyHp}));
         setPlayer(prev => ({...prev, hp: tempPlayerHp, fuel: tempFuel}));
 
@@ -2526,9 +2565,19 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     const setupRewardPhase = () => {
-        const coins = 50 + (stage * 10) + Math.floor(Math.random() * 20);
+        let baseCoins = 50 + (stage * 10) + Math.floor(Math.random() * 20);
+        let coinBonusPct = 0;
+        player.talents.forEach(t => { if (t.effectType === 'EXTRA_COINS') coinBonusPct += t.value; });
+        const coins = Math.floor(baseCoins * (1 + coinBonusPct / 100));
+
+        let healAmt = 0;
+        player.talents.forEach(t => { if (t.effectType === 'HEAL_AFTER_BATTLE') healAmt += t.value; });
+        
         setEarnedCoins(coins);
-        setPlayer(p => ({...p, starCoins: p.starCoins + coins}));
+        setPlayer(p => ({...p, hp: Math.min(p.maxHp, p.hp + healAmt), starCoins: p.starCoins + coins}));
+        
+        if (healAmt > 0) addLog(`勝利の余韻！HPを${healAmt}回復`);
+        if (coinBonusPct > 0) addLog(`おこづかい！コインボーナス+${coinBonusPct}%`);
         
         const persistentHand = hand.filter(c => !c.isTemporary);
 
@@ -2558,11 +2607,15 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
     
     const handleRerollRewards = () => {
-        if (player.starCoins < 50) {
+        let rerollCost = 50;
+        player.talents.forEach(t => { if (t.effectType === 'DISCOUNT_REROLL_REWARD') rerollCost -= t.value; });
+        rerollCost = Math.max(0, rerollCost);
+
+        if (player.starCoins < rerollCost) {
             audioService.playSound('wrong');
             return;
         }
-        setPlayer(p => ({...p, starCoins: p.starCoins - 50}));
+        setPlayer(p => ({...p, starCoins: p.starCoins - rerollCost}));
         
         setRewardOptions(rollRewardParts(getAvailablePartTemplates(progress), 2, 'rew_reroll'));
         audioService.playSound('select');
@@ -2599,7 +2652,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     const startVacation = () => {
-        const days = 4 + Math.floor(Math.random() * 3); 
+        let days = 4 + Math.floor(Math.random() * 3); 
+        player.talents.forEach(t => { if (t.effectType === 'FREE_FIRST_VACATION') days += t.value; });
         setPlayer(prev => ({ ...prev, vacationDays: days }));
         setVacationLog("戦闘お疲れ様！休暇を楽しんでください。");
         generateVacationEvents();
@@ -2608,12 +2662,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     const executeVacationEvent = (event: VacationEvent) => {
-        if (event.coinCost && event.coinCost > 0) {
-            if (player.starCoins < event.coinCost) {
-                setVacationLog(`スターコインが足りません！ (${event.coinCost}必要)`);
-                audioService.playSound('wrong');
-                return;
-            }
+        if (event.coinCost && event.coinCost > 0 && player.starCoins < event.coinCost) {
+            setVacationLog(`スターコインが足りません！ (${event.coinCost}必要)`);
+            audioService.playSound('wrong');
+            return;
         }
         
         if (player.vacationDays < event.cost) {
@@ -2636,103 +2688,213 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         let resultMsg = "";
         
         switch (event.type) {
-            case 'REPAIR':
+            case 'REPAIR': {
+                let healAmt = 0;
+                let maxHpGain = 0;
+                if (event.name === 'ドック入り') { healAmt = 999; maxHpGain = 5; }
+                else if (event.name === '特製フレーム交換') { healAmt = 999; maxHpGain = 8; }
+                else if (event.name === '放課後メンテ会') healAmt = 20;
+                else if (event.name === '工具箱メンテ') healAmt = 15;
+                else if (event.name === '応急修理') healAmt = 10;
+                else if (event.name === 'ばんそうこう補修') healAmt = 6;
+                else healAmt = 10;
+
                 setPlayer(prev => {
-                    let newMax = prev.maxHp;
-                    const heal = event.tier === 1 ? 10 : 999;
-                    if (event.tier === 3) newMax += 5;
-                    return { ...prev, maxHp: newMax, hp: Math.min(newMax, prev.hp + heal) };
+                    let newMax = prev.maxHp + maxHpGain;
+                    return { ...prev, maxHp: newMax, hp: Math.min(newMax, prev.hp + healAmt) };
                 });
-                resultMsg = "機体を修理しました。リフレッシュ！";
+                
+                const repMsgs: Record<string, string[]> = {
+                    '応急修理': ["ガムテープでペタペタ。まあ、落ちなきゃいいんだ。","外装をプラ板で覆った。風の抵抗が減った気がする。","少し叩いたら直った。昭和の家電かよ！"],
+                    'ばんそうこう補修': ["穴の空いた箇所にオシャレなシールを貼った。少しマシだ。","絆創膏を貼って「痛いの飛んでけー」。自己暗示は大事だ。","落書きで傷を隠した。芸術的だ！"],
+                    '工具箱メンテ': ["ホコリまみれの工具箱が火を吹いた！ネジは余ったがヨシ。","ドライバー片手に奮闘。油まみれの顔で空を見上げる。","「ここはこう、だっけな…」適当な整備だが動いている。"],
+                    '放課後メンテ会': ["みんなでワイワイ機体を磨く。温かい記憶が傷を癒やす。","差し入れの肉まんを食べながらの作業。チームワークの勝利だ。","「そこ貸して！」仲間との他愛ない会話が、明日への力になる。"],
+                    'ドック入り': ["おやっさんの神業メンテ！見違えるように生まれ変わった。","まるで新品！だが、かつての傷痕が少しだけ恋しい気もする。","プロの設備は違う。自分のポンコツぶりが恥ずかしくなるほどだ。"],
+                    '特製フレーム交換': ["禁断の技術で骨組みごと刷新。これはもう別のヒコーキだ！","痛みに耐え、新たな鋼の肉体を繋ぐ。俺はまだ折れない。","輝く新型フレーム。「もう二度と負けない」誓いが胸に宿る。"]
+                };
+                const rMsgs = repMsgs[event.name] || ["修理完了！"];
+                resultMsg = rMsgs[Math.floor(Math.random() * rMsgs.length)] + ` (HP+${healAmt===999?'全回復':healAmt}${maxHpGain>0?`, 上限+${maxHpGain}`:''})`;
                 audioService.playSound('buff');
                 break;
-            case 'FUEL':
+            }
+            case 'FUEL': {
+                const fVal = event.value || 0;
                 setPlayer(prev => {
-                    let newMax = prev.maxFuel;
-                    const fuel = MAX_FUEL; 
-                    if (event.value) newMax += event.value;
-                    return { ...prev, maxFuel: newMax, fuel: Math.min(newMax, prev.fuel + fuel) };
+                    let newMax = prev.maxFuel + fVal;
+                    return { ...prev, maxFuel: newMax, fuel: newMax };
                 });
-                resultMsg = "燃料タンクを満タンにしました！" + (event.value ? ` (上限+${event.value})` : "");
+                const fMsgs: Record<string, string[]> = {
+                    '燃料補給': ["標準的な燃料を給油。これでまた飛べるぞ。", "タンクのギリギリまでねじ込んだ。","スタンドの兄ちゃんが窓を拭いてくれた。"],
+                    '理科室アルコール補給': ["怪しいアルコール燃料。少し焦げ臭いのが不安だ。", "先生の目を盗んでコッソリ補充。背徳の味がする。","蒸留の過程で何かが間違っている気がするが、燃えればヨシ！"],
+                    'ガソリン代カンパ': ["貧乏を見かねた誰かがカンパしてくれた！", "カンパ箱にお札が入っていた。涙で前が見えない。","「これでうまい棒でも買いな」…いや、燃料を買います。"],
+                    'タンク増設': ["大胆にも外付けタンクを無理やり接着！", "でっかいポリタンクを背負った。ロマンの塊だ。","見栄えは悪いが背に腹は代えられない。"],
+                    '予備タンク配備': ["スマートな予備タンクを取り付けた。", "安全第一。これで長旅も安心だ。","まるで純正パーツような美しい仕上がりだ。"],
+                    'プレミアム燃料': ["ハイオク給油！エンジンが嬉しそうに唸る！", "青い輝きを放つ超燃料を入れた。","高価な燃料の匂いは甘くて、どこか官能的だ。"],
+                    '高濃度ブースト剤': ["ヤバい色の液体を注入。火力が湧き上がる！", "取り扱い注意の劇薬。機体が微かに震えている。","これを入れたら後戻りはできない。覚悟を決めろ。"]
+                };
+                const selectedFMsgs = fMsgs[event.name] || ["燃料フルチャージ！"];
+                resultMsg = selectedFMsgs[Math.floor(Math.random() * selectedFMsgs.length)] + (fVal ? ` (上限+${fVal})` : "");
                 audioService.playSound('buff');
                 break;
-            case 'COIN':
-                const coin = event.tier * 50;
+            }
+            case 'COIN': {
+                const coin = event.name === 'スポンサー契約' ? 220 : event.name === '臨時ボーナス' ? 150 : event.name === '文化祭の売上' ? 120 : event.name === '新聞配達' ? 70 : event.name === 'アルバイト' ? 50 : event.name === '落とし物係' ? 40 : 50;
                 setPlayer(p => ({ ...p, starCoins: p.starCoins + coin }));
-                resultMsg = `スターコインを ${coin} 獲得！`;
+                const cMsgs: Record<string, string[]> = {
+                    'アルバイト': ["汗水流して働いた。小銭の重みが嬉しい。","ファストフード店でひたすらポテトを揚げた。","皿洗いで指がふやけたが、心は満たされている。"],
+                    '落とし物係': ["財布を届けたらお礼をもらった。一日一善！","「えらいねぇ」と撫でられ、お小遣いをゲット。","持ち主の笑顔プライスレス。もちろんお小遣いも大事だが。"],
+                    '新聞配達': ["朝もやの中、自転車を漕ぐ。青春の味がする。","犬に吠えられながら配りきった！達成感。","雨の日の配達は地獄だが、給料袋の厚みが全てを癒やす。"],
+                    '臨時ボーナス': ["臨時収入だ！この金で何を買おうか。","ボスのポケットからこぼれ落ちた札束…いや、貰った。","「よくやった」ポンと渡されたご褒美。粋な計らいだ。"],
+                    '文化祭の売上': ["焼きそばが大ヒット。みんなの笑顔が輝いている。","出し物の売上をピンハネ…いや、正当な分配だ！","完売御礼！祭りの終わりの静寂と、金庫の重み。"],
+                    'スポンサー契約': ["怪しげな企業がスポンサーに。機体にダサいロゴが入った。","「君の才能に投資しよう」パトロンが現れた！","条件は厳しいが、背に腹は代えられない。大型契約成立！"]
+                };
+                resultMsg = (cMsgs[event.name] || ["コイン獲得！"])[Math.floor(Math.random() * (cMsgs[event.name]?.length || 1))] + ` (+${coin} Coin)`;
                 audioService.playSound('select');
                 break;
-            case 'ENERGY':
-                setPool(prev => ({
-                    ...prev,
-                    genNumbers: [...prev.genNumbers, event.tier === 2 ? 6 : 5],
-                    genColors: [...prev.genColors, event.tier === 2 ? 'ORANGE' : 'BLUE']
-                }));
-                resultMsg = "エネルギー生成プールを強化しました！";
+            }
+            case 'ENERGY': {
+                setPool(prev => {
+                    const newNums = [...prev.genNumbers];
+                    const newCols = [...prev.genColors];
+                    if (event.name === 'エネルギー採掘') newNums.push(6);
+                    else if (event.name === '算数ドリル強化') newNums.push(5);
+                    else if (event.name === '朝練集中メニュー') newNums.push(7);
+                    else if (event.name === '色鉛筆ブレンド') newCols.push('BLUE');
+                    else if (event.name === 'リアクター調整') newCols.push('ORANGE');
+                    else if (event.name === '白紙ノート増刷') newCols.push('WHITE');
+                    return { ...prev, genNumbers: newNums, genColors: newCols };
+                });
+                const eMsgs: Record<string, string[]> = {
+                    'エネルギー採掘': ["廃鉱山で「6」の輝きを放つ結晶を発掘！","泥臭く地面を掘り返し、「6」を手に入れた。","つるはしが折れたとき、そこに「6」があった。"],
+                    '算数ドリル強化': ["頭が痛くなる特訓の末、「5」という数字の美しさを知った。","ドリルを破り捨てたい衝動を抑え、「5」を習得！","計算の果てに宇宙の真理「5」に到達した。"],
+                    '朝練集中メニュー': ["吐きそうなほどのダッシュから生み出された奇跡の「7」。","限界のその先で、最強の数字「7」に手を伸ばした。","泥だらけのジャージ。だが俺は「7」を手に入れた。"],
+                    '色鉛筆ブレンド': ["青色の芯を砕いて装甲にすり込む。これで「青」が使える！","深海のような静かな「青」を抽出した。","空の「青」を切り取ったかのような純粋なエネルギー。"],
+                    'リアクター調整': ["燃え盛る情熱をジェネレータへ。熱き「オレンジ」の炎だ！","コアが軋む音とともに「オレンジ」が解放された。","爆発ギリギリの出力を制御し「オレンジ」へと変換する。"],
+                    '白紙ノート増刷': ["雑念を捨て白紙に向き合う。「白」の可能性を拡張した。","何も描かれていない紙を見つめ、心を無にした。","無限の可能性を秘めた「白」のキャンバスが広がった。"]
+                };
+                resultMsg = (eMsgs[event.name] || ["プール強化！"])[Math.floor(Math.random() * 3)];
                 audioService.playSound('buff');
                 break;
-            case 'TREASURE':
+            }
+            case 'TREASURE': {
                 setPlayer(p => ({ ...p, passivePower: p.passivePower + 1 }));
-                resultMsg = "謎の宝物により、全パーツの出力が+1されました！";
+                const tMsgs: Record<string, string[]> = {
+                    '謎の宝箱': ["宝箱を開けると光が溢れ、機体が不思議な力で強化された！","ホコリまみれの箱の中身は、誰かが隠した最新パーツだった。","ミミックじゃなくて良かった。静かに力を吸収する。"],
+                    '卒業生の遺産': ["かつての英雄が残した設計図。想いが機体を強くする。","ロッカーの奥に刻まれた先輩のポエムを読み、勇気が湧いた。","錆びたペンダント。持ち主の加護が宿っているのを感じる。"],
+                    '校庭の埋蔵品': ["タイムカプセルを掘り起こしたら、謎の超技術コアが出てきた。","10年前に埋めたおもちゃが、時を経て神具に変貌していた。","誰かの隠した「へそくり権力」を横領。力がみなぎる！"]
+                };
+                resultMsg = (tMsgs[event.name] || ["お宝発見！"])[Math.floor(Math.random() * 3)] + " (出力+1)";
                 audioService.playSound('win');
                 break;
+            }
             case 'PARTS':
-            case 'SHOP': 
+            case 'SHOP': {
                 const availableTemplates = getAvailablePartTemplates(progress);
                 const template = availableTemplates[Math.floor(Math.random() * availableTemplates.length)];
                 let quality = event.tier === 3 ? 1.5 : 1.0;
                 if (event.type === 'SHOP') quality = 1.3; 
                 const newPart = createPartFromTemplate(template, 'new_p', quality);
                 setPendingPart(newPart);
-                resultMsg = `「${newPart.name}」を入手！交換するスロットを選んでください。`;
+                const pMsgs: Record<string, string[]> = {
+                    '闇市': [`怪しい商人がコートを広げ、「${newPart.name}」を渡してきた。`,`「絶対内緒だぜ？」と念押しされ、「${newPart.name}」を買い取った。`,`裏路地の取引。紙袋に入った「${newPart.name}」を受け取る。`],
+                    '部室バザー': [`段ボール箱の底から「${newPart.name}」を発見。お宝だ！`,`先輩がガラクタとして投売りしていた「${newPart.name}」をゲット。`,`値切り交渉の末、「${newPart.name}」を手に入れた！`],
+                    '購買部の特売': [`争奪戦を制し、特売品の「${newPart.name}」を勝ち取った！`,`昼休みのチャイムと同時に駆け込み「${newPart.name}」を購入。`,`ラスイチの「${newPart.name}」を、スライディングでお買い上げ。`],
+                    'パーツ回収': [`スクラップの山から「${newPart.name}」を拾い上げた。`,`落ちていた「${newPart.name}」を懐におさめる。ラッキー。`,`野良犬がくわえていた「${newPart.name}」を、骨と交換で手に入れた。`],
+                    '倉庫の掘り出し物': [`ホコリを払うと「${newPart.name}」の文字が見えた。名機だ。`,`カビ臭い倉庫の中で「${newPart.name}」と目が合った。`,`お札が貼られた木箱を開けると、「${newPart.name}」が眠っていた。`],
+                    '先輩のおさがり': [`「これ、お前にやるよ」先輩から「${newPart.name}」を譲り受けた。`,`古ぼけた「${newPart.name}」。先輩の汗と涙が染み込んでいる。`,`「俺の屍を越えてゆけ」と託された「${newPart.name}」。重いよ。`],
+                    '軍需物資': [`違法流通のコンテナから「${newPart.name}」を密輸。ヤバいぜ。`,`国から横流しされた「${newPart.name}」。圧倒的オーラだ。`,`夜の港で「${newPart.name}」を受け取る。スリル満点だ。`],
+                    '文化祭特注パーツ': [`徹夜で作った完全ワンオフの「${newPart.name}」が完成！`,`美術部の協力を得て、ド派手な「${newPart.name}」が組み上がった。`,`「俺の考えた最強のパーツ」がついに具現化！「${newPart.name}」！`]
+                };
+                resultMsg = (pMsgs[event.name] || [`「${newPart.name}」を入手！`])[Math.floor(Math.random() * 3)] + " (装備枠を選択)";
                 audioService.playSound('select');
                 break;
-            case 'ENHANCE':
-                setPlayer(prev => ({ ...prev, maxHp: prev.maxHp + 20 })); 
-                resultMsg = "特別改造完了！HP上限+20";
+            }
+            case 'ENHANCE': {
+                const maxHpGainE = event.name === '特別改造' ? 20 : event.name === '溶接ブース強化' ? 12 : 8;
+                setPlayer(prev => ({ ...prev, maxHp: prev.maxHp + maxHpGainE })); 
+                const enhMsgs: Record<string, string[]> = {
+                    '特別改造': ["装甲の裏にあの日の写真を貼った。死ねない理由ができた。","規格外の装甲板をムリヤリ溶接。無敵艦隊の誕生だ。","「男のロマン」を具現化したら、とんでもなく頑丈になった。"],
+                    '溶接ブース強化': ["火花を散らして鉄板を貼り付けた！無骨でカッコいい。","専門設備で耐久力アップ。手触りが違うぜ。","熱い漢達の汗と涙が、機体に新たな装甲を産み出した。"],
+                    'フレーム補強': ["ボンドでペタペタ。意外とこれが一番頑丈だ。","骨組みにテープをぐるぐる巻きに。努力の結晶だ。","余った割り箸を挟み込んで補強。エコで丈夫！"]
+                };
+                resultMsg = (enhMsgs[event.name] || ["強化完了！"])[Math.floor(Math.random() * 3)] + ` (HP上限+${maxHpGainE})`;
                 audioService.playSound('buff');
                 break;
-            case 'TRAINING':
-                setPlayer(prev => ({ ...prev, passivePower: prev.passivePower + 1 }));
-                resultMsg = "厳しい訓練の成果！全出力+1";
+            }
+            case 'TRAINING': {
+                const pwrGain = event.name === '筋トレ合宿' ? 2 : 1;
+                setPlayer(prev => ({ ...prev, passivePower: prev.passivePower + pwrGain }));
+                const trnMsgs: Record<string, string[]> = {
+                    '極秘訓練': ["地下施設での地獄のシミュレーター。生死の境を越えた。","目隠しして機体を操る特訓。心の目で敵が見える！","謎の組織の訓練プログラムを踏破。俺は機械になった。"],
+                    '朝練メニュー': ["だれもいないグラウンドをひたすら走る。心が澄み渡る。","冷たい朝の空気が肺を焼き、闘志を呼び覚ました。","校長先生と一緒にラジオ体操。精神力が鍛えられた。"],
+                    '筋トレ合宿': ["マッスル！マッスル！筋肉は全てを解決する！！","プロテインをガブ飲みし、物理的に機体を押し出す力を得た。","大胸筋が歩いてる！圧倒的パワーで機体をねじ伏せる！"]
+                };
+                resultMsg = (trnMsgs[event.name] || ["特訓完了！"])[Math.floor(Math.random() * 3)] + ` (出力+${pwrGain})`;
                 audioService.playSound('buff');
                 break;
-            case 'SACRIFICE':
+            }
+            case 'SACRIFICE': {
                 if (player.maxFuel <= 1) {
                      setVacationLog("これ以上燃料を減らせません！");
                      audioService.playSound('wrong');
-                     return; // Don't consume event
+                     return;
                 }
+                const sacGain = event.name === '課題の先食い' ? 1 : 2;
                 setPlayer(prev => ({
-                    ...prev,
-                    maxFuel: prev.maxFuel - 1,
-                    fuel: Math.min(prev.maxFuel - 1, prev.fuel),
-                    passivePower: prev.passivePower + (event.value || 1)
+                    ...prev, maxFuel: prev.maxFuel - 1, fuel: Math.min(prev.maxFuel - 1, prev.fuel), passivePower: prev.passivePower + sacGain
                 }));
-                resultMsg = "燃料タンクを代償に、禁断の力を得た...";
-                audioService.playSound('debuff'); // Use debuff sound for sacrifice feel
+                const sacMsgs: Record<string, string[]> = {
+                    '悪魔の契約': ["燃料タンクを削り落とし、空いたスペースに大砲を積んだ。狂気の沙汰だ。","悪魔の囁きに応じ、機体の寿命と引き換えに破壊力を手に入れた...","契約の烙印が刻まれた。後悔はしていない。"],
+                    '徹夜の代償': ["己の体を削って改造。もう引き返せない、前へ進むだけだ。","血を吐きながら出力コアを調整。後戻りはできない。","睡眠時間を燃料に変換。目を開けたまま意識が飛んでいる。"],
+                    '課題の先食い': ["宿題のプリントを燃料にして火格子に突っ込んだ。来週の俺、頼んだぞ。","未来の自分を生贄に捧げ、今の力を得た。","テストの点数を犠牲に、いまを生き抜く。母さんごめん。"]
+                };
+                resultMsg = (sacMsgs[event.name] || ["代償を払った..."])[Math.floor(Math.random() * 3)] + ` (出力+${sacGain}, 燃料上限-1)`;
+                audioService.playSound('debuff');
                 break;
-            case 'GAMBLE':
+            }
+            case 'GAMBLE': {
                 if (Math.random() < 0.5) {
-                     const reward = event.value || 100;
+                     const reward = event.name === '裏カジノ' ? 300 : event.name === '放課後ポーカー勝負' ? 450 : 100;
                      setPlayer(p => ({ ...p, starCoins: p.starCoins + reward }));
-                     resultMsg = `大勝利！コインを${reward}獲得！`;
+                     const gWinMsgs: Record<string, string[]> = {
+                         '裏カジノ': ["スロットで777！コインが滝のように溢れ出した！","ディーラーが青ざめ、後ろの扉が開く前に荒稼ぎして逃げた。","ルーレットの一点賭けが的中！人生チョロいぜ。"],
+                         'くじ引き屋台': ["「おおっ、1等じゃねえか！」おっちゃんの悔しそうな顔がたまらない。","たまたま買ったくじが大当たり！運を使い切ってないか心配だ。","子供から巻き上げたとは言わせない。俺の実力だ。"],
+                         '放課後ポーカー勝負': ["ロイヤルストレートフラッシュ。俺の勝ちだ。","相手のブラフを見抜き、全掛けでかっさらった。","イカサマだと騒ぐ連中を尻目に、スマートに勝ち逃げした。"]
+                     };
+                     resultMsg = (gWinMsgs[event.name] || ["大勝利！"])[Math.floor(Math.random() * 3)] + ` (+${reward})`;
                      audioService.playSound('win');
                 } else {
-                     resultMsg = "賭けに負けた... 何も得られなかった。";
+                     const gLoseMsgs: Record<string, string[]> = {
+                         '裏カジノ': ["俺の幸運の女神は、今日は機嫌が悪かったらしい。何もない。","「これが大人の世界ってやつさ」ため息とともにカジノを後にする。","身ぐるみ剥がされた。この恨みは戦闘で晴らしてやる。"],
+                         'くじ引き屋台': ["「参加賞のポケットティッシュだ」...ちくしょう。","ハズレくじの山を見て虚無感に襲われる。","おっちゃんの「また来な坊主！」という言葉が胸をえぐる。"],
+                         '放課後ポーカー勝負': ["持ち金を綺麗にハギ取られた。あいつらプロか？","相手のブラフに完全にビビって降りちまった...無様だ。","ツーペアで勝負に出た俺が馬鹿だった。"]
+                     };
+                     resultMsg = (gLoseMsgs[event.name] || ["負けた..."])[Math.floor(Math.random() * 3)];
                      audioService.playSound('lose');
                 }
                 break;
-            case 'UNKNOWN':
+            }
+            case 'UNKNOWN': {
                 if (Math.random() < 0.5) {
                     setPlayer(p => ({...p, hp: Math.min(p.maxHp, p.hp + 20)}));
-                    resultMsg = "温泉を見つけた！HP回復。";
+                    const uHpMsgs: Record<string, string[]> = {
+                        '謎のイベント': ["草むらで寝転がったら気分がリフレッシュした。(HP回復)","謎の宇宙人からリンゴをもらい、食べたら元気になった。(HP回復)","おばあちゃんから謎のせんべいを貰って食べた。謎に元気に。(HP回復)"],
+                        '夜の旧校舎': ["開かずの扉の奥で安全な毛布を見つけ、眠りに落ちた。(HP回復)","誰もいないはずの音楽室から癒しのメロディが流れてきた。(HP回復)","二宮金次郎像が、不思議と肩を揉んでくれた気がした。(HP回復)"],
+                        'うわさの物置': ["カビ臭いが、なぜか実家のような安心感でぐっすり休めた。(HP回復)","ホコリまみれのソファが意外とふかふかだった。(HP回復)","古い雑誌を読んで有意義な時間を過ごした。(HP回復)"]
+                    };
+                    resultMsg = (uHpMsgs[event.name] || ["なんか回復した"])[Math.floor(Math.random() * 3)];
                 } else {
                     setPlayer(p => ({...p, starCoins: p.starCoins + 100}));
-                    resultMsg = "埋蔵金を発掘！100コイン。";
+                    const uCoinMsgs: Record<string, string[]> = {
+                        '謎のイベント': ["偶然見つけた盗賊の隠し穴から、ごっそり金貨を拝借した！(+100)","歩いていたら空からコインが降ってきた！(+100)","謎のボタンを押したらコインが出てきた。ラッキー！(+100)"],
+                        '夜の旧校舎': ["理科室の骨格標本がコインを握りしめていた。拝借するぜ。(+100)","開かないロッカーをこじ開けたら裏金が！(+100)","トイレの三番目の個室に落ちていた金。呪われていないといいが。(+100)"],
+                        'うわさの物置': ["ツボを割ったらコインが飛び出した。RPGあるあるだ。(+100)","昔の先輩のへそくり袋を発見。ありがたく使わせてもらう。(+100)","跳び箱の中からコインが！誰かが隠していたのだろう。(+100)"]
+                    };
+                    resultMsg = (uCoinMsgs[event.name] || ["コインゲット"])[Math.floor(Math.random() * 3)];
                 }
                 audioService.playSound('select');
                 break;
+            }
             default:
                 resultMsg = "リフレッシュしました。";
                 break;
@@ -3292,23 +3454,25 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     )}
 
                     {setupStep === 'PILOT' && (
-                        <div className="flex flex-col items-center">
+                        <div className="flex flex-col items-center w-full max-w-4xl mx-auto">
                             <div className="flex justify-between w-full mb-4 px-4 bg-slate-800 p-2 rounded">
                                 <span className="text-sm text-gray-400">現在のリロール回数</span>
                                 <span className="font-bold text-yellow-400 flex items-center"><RefreshCw size={14} className="mr-1"/> {progress.rerollCount}</span>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mb-8">
+
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mb-6">
                                 {pilotOptions.map((pilot, i) => (
                                     <div 
                                         key={i}
-                                        className={`relative border-2 p-4 rounded-xl cursor-pointer transition-all ${selectedPilotIndex === i ? 'border-yellow-400 bg-slate-800 shadow-lg scale-105' : 'border-slate-600 bg-slate-900 hover:border-slate-400'}`}
+                                        className={`relative border-2 p-4 rounded-xl cursor-pointer transition-all flex flex-col h-full ${selectedPilotIndex === i ? 'border-yellow-400 bg-slate-800 shadow-[0_0_15px_rgba(250,204,21,0.3)] scale-105' : 'border-slate-600 bg-slate-900 hover:border-slate-400'}`}
                                         onClick={() => setSelectedPilotIndex(i)}
                                     >
                                         <div className="absolute top-2 right-2">
                                             <button 
                                                 onClick={(e) => { e.stopPropagation(); setPinnedPilotIndex(pinnedPilotIndex === i ? null : i); }}
-                                                className={`p-1.5 rounded-full ${pinnedPilotIndex === i ? 'bg-yellow-500 text-black' : 'bg-slate-700 text-gray-400 hover:text-white'}`}
+                                                className={`p-1.5 rounded-full ${pinnedPilotIndex === i ? 'bg-yellow-500 text-black shadow-lg' : 'bg-slate-700 text-gray-400 hover:text-white hover:bg-slate-600'}`}
                                                 title="固定する"
                                             >
                                                 <User size={14}/>
@@ -3319,26 +3483,53 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                             <div className="w-16 h-16 mb-2">
                                                  <PixelSprite seed={pilot.id} name={pilot.spriteName} className="w-full h-full"/>
                                             </div>
-                                            <div className="font-bold">{pilot.name}</div>
+                                            <div className="font-bold text-lg">{pilot.name}</div>
                                         </div>
                                         
-                                        <div className="text-xs bg-black/40 p-2 rounded mb-2">
-                                            <div className="font-bold text-yellow-300 mb-1">得意科目: {pilot.intrinsicTalent.name}</div>
-                                            <div className="text-gray-400">{pilot.intrinsicTalent.description}</div>
+                                        <div className="text-sm bg-slate-800 border border-yellow-500/30 p-3 rounded mt-auto w-full">
+                                            <div className="font-bold text-yellow-400 mb-1 flex items-center"><Zap size={14} className="mr-1"/> {pilot.intrinsicTalent.name}</div>
+                                            <div className="text-gray-300 leading-relaxed font-bold">{pilot.intrinsicTalent.description}</div>
                                         </div>
                                         
-                                        {randomTalents.length > 0 && (
-                                            <div className="text-xs bg-indigo-900/40 p-2 rounded">
-                                                <div className="font-bold text-indigo-300 mb-1">委員会スキル</div>
-                                                {randomTalents.map((t, idx) => (
+                                        {pilot.randomTalents && pilot.randomTalents.length > 0 && (
+                                            <div className="text-xs bg-indigo-900/40 p-2 rounded mt-2 w-full">
+                                                <div className="font-bold text-indigo-300 mb-1 flex items-center"><Star size={12} className="mr-1"/> ランダム特性</div>
+                                                {pilot.randomTalents.map((t, idx) => (
                                                     <div key={idx} className="mb-1 last:mb-0">
-                                                        <span className="text-white">{t.name}</span>: <span className="text-gray-400">{t.description}</span>
+                                                        <span className="text-white font-bold">{t.name}</span>: <span className="text-gray-400">{t.description}</span>
                                                     </div>
                                                 ))}
                                             </div>
                                         )}
                                     </div>
                                 ))}
+                            </div>
+                            
+                            {/* Stat Preview */}
+                            <div className="w-full bg-slate-800/80 border border-cyan-500/30 p-4 rounded-xl mb-6">
+                                <div className="text-cyan-400 font-bold mb-2 flex items-center justify-center"><Activity size={16} className="mr-2"/> 機体スペック予想 ({SHIPS.find(s => s.id === selectedShipId)?.name || '未選択'})</div>
+                                <div className="flex justify-center gap-8">
+                                    <div className="text-center">
+                                        <div className="text-xs text-gray-400 mb-1">最大HP</div>
+                                        <div className="text-xl font-bold text-green-400">
+                                            {(SHIPS.find(s => s.id === selectedShipId)?.baseHp || 0) + 
+                                             (selectedPilotIndex !== -1 ? [pilotOptions[selectedPilotIndex].intrinsicTalent, ...(pilotOptions[selectedPilotIndex].randomTalents || [])].filter(t => t.effectType === 'MAX_HP').reduce((a, b) => a + (b.value || 0), 0) : 0)}
+                                        </div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="text-xs text-gray-400 mb-1">最大燃料</div>
+                                        <div className="text-xl font-bold text-orange-400">
+                                            {MAX_FUEL + 
+                                             (selectedPilotIndex !== -1 ? [pilotOptions[selectedPilotIndex].intrinsicTalent, ...(pilotOptions[selectedPilotIndex].randomTalents || [])].filter(t => t.effectType === 'FUEL').reduce((a, b) => a + (b.value || 0), 0) : 0)}
+                                        </div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="text-xs text-gray-400 mb-1">パッシブ出力</div>
+                                        <div className="text-xl font-bold text-yellow-400">
+                                            +{(selectedPilotIndex !== -1 ? [pilotOptions[selectedPilotIndex].intrinsicTalent, ...(pilotOptions[selectedPilotIndex].randomTalents || [])].filter(t => t.effectType === 'PASSIVE_POWER').reduce((a, b) => a + (b.value || 0), 0) : 0)}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="flex gap-4">
@@ -3445,6 +3636,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     }
 
     if (phase === 'REWARD_SELECT') {
+         const rerollCost = Math.max(0, 50 - player.talents.filter(t => t.effectType === 'DISCOUNT_REROLL_REWARD').reduce((a,b)=>a+b.value, 0));
          return (
              <div className="w-full h-full bg-black/90 text-white p-4 flex flex-col items-center justify-start md:justify-center font-mono z-50 relative overflow-y-auto py-8">
                  <RenderTooltip />
@@ -3457,10 +3649,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                  <div className="flex gap-4 mb-8">
                      <button 
                         onClick={handleRerollRewards} 
-                        disabled={player.starCoins < 50} 
-                        className={`bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded font-bold flex items-center transition-colors border border-indigo-400 ${player.starCoins < 50 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        disabled={player.starCoins < rerollCost} 
+                        className={`bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded font-bold flex items-center transition-colors border border-indigo-400 ${player.starCoins < rerollCost ? 'opacity-50 cursor-not-allowed' : ''}`}
                      >
-                         <RefreshCw className="mr-2" size={16}/> リロール (50 Coin)
+                         <RefreshCw className="mr-2" size={16}/> リロール ({rerollCost} Coin)
                      </button>
                  </div>
                  
