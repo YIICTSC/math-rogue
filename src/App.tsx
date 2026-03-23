@@ -253,6 +253,47 @@ const determineEnemyType = (name: string, isBoss: boolean): string => {
     return 'GENERIC';
 };
 
+const estimateBossScalingSingleCardDamage = (deck: ICard[]): number => {
+    const strikeCount = deck.filter(c => c.name === 'えんぴつ攻撃' || c.originalNames?.includes('えんぴつ攻撃')).length;
+    const attackCount = deck.filter(c => c.type === CardType.ATTACK).length;
+    const skillCount = deck.filter(c => c.type === CardType.SKILL).length;
+    const deckSize = deck.length;
+
+    const assumedHand = Math.min(5, Math.max(1, deckSize));
+    const assumedDrawPile = Math.max(0, deckSize - assumedHand);
+    const assumedBlock = 12;
+    const assumedPriorAttacks = Math.max(0, Math.min(2, attackCount - 1));
+    const assumedSkillsInHand = Math.max(0, Math.min(4, skillCount));
+
+    const damageCards = deck.filter(card =>
+        card.target !== TargetType.SELF &&
+        (
+            card.damage !== undefined ||
+            card.damageBasedOnBlock ||
+            card.damagePerCardInHand ||
+            card.damagePerAttackPlayed ||
+            card.damagePerStrike ||
+            card.damagePerCardInDraw
+        )
+    );
+
+    return Math.max(0, ...damageCards.map(card => {
+        let perHit = card.damage || 0;
+
+        if (card.damageBasedOnBlock) perHit += assumedBlock;
+        if (card.damagePerCardInHand) perHit += Math.max(0, assumedHand - 1) * card.damagePerCardInHand;
+        if (card.damagePerAttackPlayed) perHit += assumedPriorAttacks * card.damagePerAttackPlayed;
+        if (card.damagePerStrike) perHit += strikeCount * card.damagePerStrike;
+        if (card.damagePerCardInDraw) perHit += assumedDrawPile * card.damagePerCardInDraw;
+
+        let hits = 1 + (card.playCopies || 0);
+        if (card.hitsPerSkillInHand) hits = Math.max(1, assumedSkillsInHand);
+        if (card.hitsPerAttackPlayed) hits = Math.max(1, assumedPriorAttacks);
+
+        return Math.max(0, perHit * Math.min(hits, 100));
+    }));
+};
+
 const getNamedEnemyIntent = (enemy: Enemy, turn: number, isAct2Plus: boolean): EnemyIntent | null => {
     const name = enemy.name;
     const cycle = turn % 3;
@@ -3041,11 +3082,7 @@ const App: React.FC = () => {
                 let enemies: Enemy[] = [];
                 let bgmType: 'battle' | 'mid_boss' | 'boss' | 'final_boss' = 'battle';
 
-                const maxAtkDmg = Math.max(...nextState.player.deck.filter(c => c.type === CardType.ATTACK).map(c => {
-                    const base = c.damage || 0;
-                    const hits = 1 + (c.playCopies || 0);
-                    return base * hits;
-                }), 0);
+                const maxAtkDmg = estimateBossScalingSingleCardDamage(nextState.player.deck);
                 const enemyHpMultiplier = coopEnemyHpMultiplier;
 
                 if (gameState.act === 4 && node.type === NodeType.BOSS) {
@@ -8103,30 +8140,30 @@ const App: React.FC = () => {
                     <div className="fixed inset-0 z-[10000] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-300">
                         <div className="bg-gray-900 border-4 border-yellow-500 p-8 rounded-2xl max-sm w-full max-w-md shadow-[0_0_50px_rgba(234,179,8,0.35)] text-center">
                             <AlertTriangle size={64} className="text-yellow-400 mx-auto mb-6 animate-pulse" />
-                            <h2 className="text-3xl font-black text-white mb-4 tracking-tighter">続きデータがあります</h2>
+                            <h2 className="text-3xl font-black text-white mb-4 tracking-tighter">{trans("続きデータがあります", languageMode)}</h2>
                             <p className="text-gray-300 mb-8 leading-relaxed font-bold">
-                                冒険を最初から始めると、<br />
-                                今の続きデータは上書きされます。<br />
-                                本当に新しく始めますか？
+                                {trans("冒険を最初から始めると、", languageMode)}<br />
+                                {trans("今の続きデータは上書きされます。", languageMode)}<br />
+                                {trans("本当に新しく始めますか？", languageMode)}
                             </p>
                             <div className="flex flex-col gap-3">
                                 <button
                                     onClick={continueGame}
                                     className="bg-blue-600 text-white w-full py-4 rounded-xl font-black text-lg hover:bg-blue-500 transition-all"
                                 >
-                                    続きから遊ぶ
+                                    {trans("続きから遊ぶ", languageMode)}
                                 </button>
                                 <button
                                     onClick={confirmStartOver}
                                     className="bg-yellow-400 text-black w-full py-4 rounded-xl font-black text-lg hover:bg-yellow-300 transition-all"
                                 >
-                                    最初から始める
+                                    {trans("最初から始める", languageMode)}
                                 </button>
                                 <button
                                     onClick={() => setShowStartOverConfirm(false)}
                                     className="bg-gray-700 text-white w-full py-3 rounded-xl font-bold hover:bg-gray-600 transition-all"
                                 >
-                                    キャンセル
+                                    {trans("やめる", languageMode)}
                                 </button>
                             </div>
                         </div>
