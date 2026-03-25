@@ -1974,12 +1974,19 @@ const App: React.FC = () => {
 
     const returnToTitle = () => {
         const isEndingReturn = stateRef.current.screen === GameScreen.ENDING;
+        const isGameOverReturn = stateRef.current.screen === GameScreen.GAME_OVER;
+        const isVictoryReturn = stateRef.current.screen === GameScreen.VICTORY;
         const isDebugReturn = stateRef.current.screen === GameScreen.DEBUG_MENU;
         const shouldCheckMiniGameUnlocks =
             stateRef.current.screen === GameScreen.ENDING ||
             stateRef.current.screen === GameScreen.GAME_OVER ||
+            stateRef.current.screen === GameScreen.VICTORY ||
             stateRef.current.screen === GameScreen.PROBLEM_CHALLENGE ||
             stateRef.current.screen === GameScreen.DEBUG_MENU;
+
+        if (isEndingReturn || isGameOverReturn || isVictoryReturn) {
+            storageService.clearSave();
+        }
 
         if (isEndingReturn) {
             const previousClearCount = storageService.getClearCount();
