@@ -127,11 +127,7 @@ export const generateLegacyEvent = (
             label: "そのままにする",
             text: "ひろわずに進む",
             action: () => {
-                setGameState(prev => ({
-                    ...prev,
-                    player: healPlayer(prev.player, EVENT_NOOP_RECOVERY)
-                }));
-                setEventResultLog(trans(`自分には必要ないと判断し、そのまま通り過ぎた。またいつか誰かが拾うだろう。\n${EVENT_NOOP_RECOVERY_LOG}`, languageMode));
+                setEventResultLog(trans("自分には必要ないと判断し、そのまま通り過ぎた。またいつか誰かが拾うだろう。", languageMode));
             }
         }
     ]
