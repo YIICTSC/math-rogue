@@ -8269,8 +8269,12 @@ const App: React.FC = () => {
                     <div className="w-full h-full bg-gray-900 flex items-center justify-center relative">
                         {isLegacyVercelHost && showMigrationNotice && (
                             <div className="fixed inset-0 z-[10001] bg-black/80 flex items-center justify-center p-3 sm:p-4">
-                                <div className="w-full max-w-lg max-h-[92dvh] overflow-hidden rounded-2xl border-4 border-cyan-400 bg-slate-950 text-center shadow-[0_0_60px_rgba(34,211,238,0.3)]" onClick={e => e.stopPropagation()}>
-                                    <div className="overflow-y-auto px-4 py-5 sm:px-6 sm:py-7">
+                                <div
+                                    className="w-full max-w-lg max-h-[92dvh] overflow-y-auto rounded-2xl border-4 border-cyan-400 bg-slate-950 text-center shadow-[0_0_60px_rgba(34,211,238,0.3)] overscroll-contain"
+                                    style={{ WebkitOverflowScrolling: 'touch' }}
+                                    onClick={e => e.stopPropagation()}
+                                >
+                                    <div className="px-4 py-5 sm:px-6 sm:py-7">
                                         <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full border-2 border-cyan-300 bg-cyan-500/10 sm:mb-4 sm:h-16 sm:w-16">
                                             <Globe size={isMobilePortrait ? 28 : 34} className="text-cyan-300" />
                                         </div>
@@ -8298,30 +8302,30 @@ const App: React.FC = () => {
                                         <div className="rounded-xl border border-cyan-500/40 bg-black/40 px-3 py-3 text-left text-[11px] font-mono text-cyan-200 break-all sm:px-4 sm:text-xs">
                                             {PRIMARY_SITE_URL}
                                         </div>
-                                    </div>
-                                    <div className="border-t border-slate-800 bg-slate-950/95 px-4 py-4 sm:px-6 sm:py-5">
-                                        <div className="flex flex-col gap-2 sm:gap-3">
-                                            <button
-                                                onClick={() => {
-                                                    setShowMigrationNotice(false);
-                                                    openDataTransferModal();
-                                                }}
-                                                className="w-full rounded-xl border border-amber-400 bg-amber-500/10 px-4 py-3 text-sm font-black text-amber-100 transition-colors hover:bg-amber-500/20"
-                                            >
-                                                {trans("データ移行を開く", languageMode)}
-                                            </button>
-                                            <button
-                                                onClick={handleMoveToPrimarySite}
-                                                className="w-full rounded-xl border-b-4 border-r-4 border-cyan-300 bg-cyan-500 px-4 py-3 text-sm font-black text-slate-950 transition-colors hover:bg-cyan-400 sm:py-4 sm:text-base"
-                                            >
-                                                {trans("新しいサイトへ移動する", languageMode)}
-                                            </button>
-                                            <button
-                                                onClick={() => setShowMigrationNotice(false)}
-                                                className="w-full rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 text-sm font-bold text-slate-200 transition-colors hover:bg-slate-700"
-                                            >
-                                                {trans("このまま続ける", languageMode)}
-                                            </button>
+                                        <div className="mt-4 border-t border-slate-800 pt-4 sm:mt-5 sm:pt-5">
+                                            <div className="flex flex-col gap-2 sm:gap-3">
+                                                <button
+                                                    onClick={() => {
+                                                        setShowMigrationNotice(false);
+                                                        openDataTransferModal();
+                                                    }}
+                                                    className="w-full rounded-xl border border-amber-400 bg-amber-500/10 px-4 py-3 text-sm font-black text-amber-100 transition-colors hover:bg-amber-500/20"
+                                                >
+                                                    {trans("データ移行を開く", languageMode)}
+                                                </button>
+                                                <button
+                                                    onClick={handleMoveToPrimarySite}
+                                                    className="w-full rounded-xl border-b-4 border-r-4 border-cyan-300 bg-cyan-500 px-4 py-3 text-sm font-black text-slate-950 transition-colors hover:bg-cyan-400 sm:py-4 sm:text-base"
+                                                >
+                                                    {trans("新しいサイトへ移動する", languageMode)}
+                                                </button>
+                                                <button
+                                                    onClick={() => setShowMigrationNotice(false)}
+                                                    className="w-full rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 text-sm font-bold text-slate-200 transition-colors hover:bg-slate-700"
+                                                >
+                                                    {trans("このまま続ける", languageMode)}
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -8410,12 +8414,12 @@ const App: React.FC = () => {
                                     {isLoading ? trans("じゅんびちゅう...", languageMode) : trans("冒険を始める", languageMode)}
                                 </button>
 
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full">
+                                <div className={`grid w-full ${isMobilePortrait ? 'grid-cols-4 gap-1' : 'grid-cols-2 sm:grid-cols-4 gap-2'}`}>
                                     <button
                                         onClick={startChallengeGame}
-                                        className={`flex-1 py-3 px-1 text-xs font-bold border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-red-900/80 text-red-100 border-red-500 hover:bg-red-800 hover:shadow-red-900/50'}`}
+                                        className={`min-w-0 border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isMobilePortrait ? 'py-2 px-0.5 text-[10px]' : 'py-3 px-1 text-xs'} font-bold ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-red-900/80 text-red-100 border-red-500 hover:bg-red-800 hover:shadow-red-900/50'}`}
                                     >
-                                        <Swords className="mr-1" size={14} /> {trans("1A1D", languageMode)}
+                                        <Swords className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("1A1D", languageMode)}
                                     </button>
 
                                     <button
@@ -8427,9 +8431,9 @@ const App: React.FC = () => {
                                             }
                                             setGameState(prev => ({ ...prev, screen: GameScreen.VS_SETUP }));
                                         }}
-                                        className={`flex-1 py-3 px-1 text-xs font-bold border-b-4 border-r-4 rounded-none bg-indigo-600/80 text-white border-indigo-400 hover:bg-indigo-700 cursor-pointer flex items-center justify-center shadow-md ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
+                                        className={`min-w-0 border-b-4 border-r-4 rounded-none bg-indigo-600/80 text-white border-indigo-400 hover:bg-indigo-700 cursor-pointer flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-2 px-0.5 text-[10px]' : 'py-3 px-1 text-xs'} font-bold ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
                                     >
-                                        <Wifi className="mr-1" size={14} /> {trans("VS", languageMode)}
+                                        <Wifi className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("VS", languageMode)}
                                     </button>
 
                                     <button
@@ -8441,9 +8445,9 @@ const App: React.FC = () => {
                                             }
                                             setGameState(prev => ({ ...prev, screen: GameScreen.COOP_SETUP }));
                                         }}
-                                        className={`flex-1 py-3 px-1 text-xs font-bold border-b-4 border-r-4 rounded-none bg-emerald-700/80 text-emerald-100 border-emerald-400 hover:bg-emerald-700 cursor-pointer flex items-center justify-center shadow-md ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
+                                        className={`min-w-0 border-b-4 border-r-4 rounded-none bg-emerald-700/80 text-emerald-100 border-emerald-400 hover:bg-emerald-700 cursor-pointer flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-2 px-0.5 text-[10px]' : 'py-3 px-1 text-xs'} font-bold ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
                                     >
-                                        <Users className="mr-1" size={14} /> {trans("協力", languageMode)}
+                                        <Users className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("協力", languageMode)}
                                     </button>
 
                                     <button
@@ -8455,9 +8459,9 @@ const App: React.FC = () => {
                                             }
                                             setGameState(prev => ({ ...prev, screen: GameScreen.RACE_SETUP }));
                                         }}
-                                        className={`flex-1 py-3 px-1 text-xs font-bold border-b-4 border-r-4 rounded-none bg-cyan-700/80 text-cyan-100 border-cyan-400 hover:bg-cyan-700 cursor-pointer flex items-center justify-center shadow-md ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
+                                        className={`min-w-0 border-b-4 border-r-4 rounded-none bg-cyan-700/80 text-cyan-100 border-cyan-400 hover:bg-cyan-700 cursor-pointer flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-2 px-0.5 text-[10px]' : 'py-3 px-1 text-xs'} font-bold ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
                                     >
-                                        <Flag className="mr-1" size={14} /> {trans("レース", languageMode)}
+                                        <Flag className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("レース", languageMode)}
                                     </button>
                                 </div>
 
