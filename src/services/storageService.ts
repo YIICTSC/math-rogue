@@ -58,15 +58,25 @@ const STORAGE_KEY_DAILY_PLAY_TIME = 'pixel_spire_daily_play_time_v1';
 const STORAGE_KEY_MODE_CORRECT_COUNTS = 'pixel_spire_mode_correct_counts_v1';
 const STORAGE_KEY_MASTERED_MODES = 'pixel_spire_mastered_modes_v1';
 const STORAGE_KEY_TYPING_WEAK_KEYS = 'pixel_spire_typing_weak_keys_v1';
+const STORAGE_KEY_HINT_STREAKS = 'pixel_spire_hint_streaks_v1';
 
 // --- CUSTOM CHARACTER IMAGES ---
 const STORAGE_KEY_CUSTOM_IMAGES = 'pixel_spire_custom_images_v1';
+const STORAGE_TRANSFER_PREFIX = 'pixel_spire_';
 
 export interface PaperPlaneProgress {
     rank: number; // Association Level (Clear Count equivalent)
     rerollCount: number; // Consumable rerolls
     maxClearedLevel: Record<string, number>; // Map of Ship ID -> Max Ascension Level cleared
     unlockedPartNames: string[];
+}
+
+export interface StorageTransferPayload {
+    version: number;
+    appName: string;
+    exportedAt: string;
+    origin: string;
+    entries: Record<string, string>;
 }
 
 /**
@@ -79,6 +89,48 @@ const getLocalDateString = () => {
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+};
+
+const collectTransferEntries = (): Record<string, string> => {
+  const entries: Record<string, string> = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key || !key.startsWith(STORAGE_TRANSFER_PREFIX)) continue;
+    const value = localStorage.getItem(key);
+    if (value != null) {
+      entries[key] = value;
+    }
+  }
+  return entries;
+};
+
+const normalizeTransferEntries = (payload: unknown): Record<string, string> => {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    throw new Error('データ形式が正しくありません。');
+  }
+
+  const base = payload as Record<string, unknown>;
+  const rawEntries =
+    base.entries && typeof base.entries === 'object' && !Array.isArray(base.entries)
+      ? (base.entries as Record<string, unknown>)
+      : base;
+
+  const entries = Object.entries(rawEntries)
+    .filter(([key]) => key.startsWith(STORAGE_TRANSFER_PREFIX));
+
+  if (entries.length === 0) {
+    throw new Error('引き継ぎ可能な保存データが見つかりませんでした。');
+  }
+
+  const normalized: Record<string, string> = {};
+  for (const [key, value] of entries) {
+    if (typeof value !== 'string') {
+      throw new Error(`保存データ ${key} の形式が不正です。`);
+    }
+    normalized[key] = value;
+  }
+
+  return normalized;
 };
 
 export const storageService = {
@@ -656,7 +708,7 @@ export const storageService = {
 
   getHintStreaks: (): Record<string, number> => {
     try {
-      const stored = localStorage.getItem('pixel_spire_hint_streaks_v1');
+      const stored = localStorage.getItem(STORAGE_KEY_HINT_STREAKS);
       return stored ? JSON.parse(stored) : {};
     } catch {
       return {};
@@ -667,7 +719,7 @@ export const storageService = {
     try {
       const current = storageService.getHintStreaks();
       current[mode] = count;
-      localStorage.setItem('pixel_spire_hint_streaks_v1', JSON.stringify(current));
+      localStorage.setItem(STORAGE_KEY_HINT_STREAKS, JSON.stringify(current));
     } catch (e) {
       console.warn("Failed to save hint streak", e);
     }
@@ -819,6 +871,35 @@ export const storageService = {
       } catch { return false; }
   },
 
+  exportTransferData: (): StorageTransferPayload => {
+      const entries = collectTransferEntries();
+      return {
+          version: 1,
+          appName: '学習ローグ',
+          exportedAt: new Date().toISOString(),
+          origin: typeof window !== 'undefined' ? window.location.origin : '',
+          entries
+      };
+  },
+
+  importTransferData: (payload: string | StorageTransferPayload) => {
+      const parsed = typeof payload === 'string' ? JSON.parse(payload) : payload;
+      const entries = normalizeTransferEntries(parsed);
+
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith(STORAGE_TRANSFER_PREFIX)) {
+              keysToRemove.push(key);
+          }
+      }
+
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      Object.entries(entries).forEach(([key, value]) => localStorage.setItem(key, value));
+
+      return { importedKeys: Object.keys(entries).length };
+  },
+
   resetProgress: () => {
       localStorage.removeItem(STORAGE_KEY_UNLOCKED_CARDS);
       localStorage.removeItem(STORAGE_KEY_UNLOCKED_RELICS);
@@ -856,6 +937,6 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_MODE_CORRECT_COUNTS);
       localStorage.removeItem(STORAGE_KEY_MASTERED_MODES);
       localStorage.removeItem(STORAGE_KEY_CUSTOM_IMAGES);
-      localStorage.removeItem('pixel_spire_hint_streaks_v1');
+      localStorage.removeItem(STORAGE_KEY_HINT_STREAKS);
   }
 };

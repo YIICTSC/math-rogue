@@ -138,6 +138,11 @@ type RelicCardChoiceModalState = {
     allowSkip?: boolean;
 };
 
+type DataTransferStatus = {
+    type: 'success' | 'error' | 'info';
+    message: string;
+};
+
 const compareRaceEntries = (a: RaceEntry, b: RaceEntry) => {
     if (b.score !== a.score) return b.score - a.score;
     return a.name.localeCompare(b.name, 'ja');
@@ -600,6 +605,11 @@ const App: React.FC = () => {
     const [debugMenuStartClearCount, setDebugMenuStartClearCount] = useState<number>(0);
     const [debugMenuStartMathCorrect, setDebugMenuStartMathCorrect] = useState<number>(0);
     const [showDebugLog, setShowDebugLog] = useState<boolean>(false);
+    const [showDataTransferModal, setShowDataTransferModal] = useState<boolean>(false);
+    const [transferExportText, setTransferExportText] = useState<string>('');
+    const [transferExportCount, setTransferExportCount] = useState<number>(0);
+    const [transferImportText, setTransferImportText] = useState<string>('');
+    const [transferStatus, setTransferStatus] = useState<DataTransferStatus | null>(null);
     const [bgmMode, setBgmMode] = useState<'OSCILLATOR' | 'MP3' | 'STUDY'>(() => {
         const saved = storageService.getBgmMode() as 'OSCILLATOR' | 'MP3' | 'STUDY' | null;
         return saved || 'STUDY';
@@ -663,6 +673,7 @@ const App: React.FC = () => {
     const coopLastBattleActionSignatureRef = useRef<string | null>(null);
     const queuedCoopBattleEventRef = useRef<{ type: 'COOP_BATTLE_PLAY_CARD' | 'COOP_BATTLE_USE_POTION' | 'COOP_BATTLE_TURN_START' | 'COOP_BATTLE_SELECTION_STATE' | 'COOP_BATTLE_MODAL_RESOLVE' | 'COOP_BATTLE_CODEX_SELECT', cardId?: string, potionId?: string } | null>(null);
     const [queuedCoopBattleEventTick, setQueuedCoopBattleEventTick] = useState(0);
+    const transferFileInputRef = useRef<HTMLInputElement | null>(null);
 
     const showRaceToast = useCallback((message: string) => {
         setRaceToast(message);
@@ -675,6 +686,75 @@ const App: React.FC = () => {
         if (typeof window === 'undefined') return;
         window.location.replace(PRIMARY_SITE_URL);
     }, []);
+    const refreshTransferExport = useCallback(() => {
+        const payload = storageService.exportTransferData();
+        setTransferExportText(JSON.stringify(payload, null, 2));
+        setTransferExportCount(Object.keys(payload.entries).length);
+    }, []);
+    const openDataTransferModal = useCallback(() => {
+        refreshTransferExport();
+        setTransferImportText('');
+        setTransferStatus(null);
+        setShowDataTransferModal(true);
+    }, [refreshTransferExport]);
+    const handleCopyTransferData = useCallback(async () => {
+        const text = transferExportText || JSON.stringify(storageService.exportTransferData(), null, 2);
+        try {
+            await navigator.clipboard.writeText(text);
+            setTransferStatus({ type: 'success', message: trans("エクスポートデータをコピーしました。", languageMode) });
+        } catch {
+            setTransferStatus({ type: 'error', message: trans("コピーに失敗しました。下の欄から手動でコピーしてください。", languageMode) });
+        }
+    }, [languageMode, transferExportText]);
+    const handleDownloadTransferData = useCallback(() => {
+        const text = transferExportText || JSON.stringify(storageService.exportTransferData(), null, 2);
+        const blob = new Blob([text], { type: 'application/json' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+        link.href = url;
+        link.download = `math-rogue-save-${stamp}.json`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+        setTransferStatus({ type: 'success', message: trans("エクスポート用ファイルをダウンロードしました。", languageMode) });
+    }, [languageMode, transferExportText]);
+    const handleTransferFileChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        try {
+            const text = await file.text();
+            setTransferImportText(text);
+            setTransferStatus({ type: 'info', message: trans("ファイルを読み込みました。内容を確認してインポートを実行してください。", languageMode) });
+        } catch {
+            setTransferStatus({ type: 'error', message: trans("ファイルの読み込みに失敗しました。", languageMode) });
+        } finally {
+            event.target.value = '';
+        }
+    }, [languageMode]);
+    const handleImportTransferData = useCallback(() => {
+        if (!transferImportText.trim()) {
+            setTransferStatus({ type: 'error', message: trans("インポートするデータを貼り付けるか、ファイルを読み込んでください。", languageMode) });
+            return;
+        }
+        if (!window.confirm(trans("現在の保存データを上書きしてインポートします。よろしいですか？", languageMode))) {
+            return;
+        }
+        try {
+            const result = storageService.importTransferData(transferImportText);
+            setTransferStatus({
+                type: 'success',
+                message: `${trans("保存データを取り込みました。", languageMode)} (${result.importedKeys}${trans("件", languageMode)}) ${trans("ページを再読み込みします。", languageMode)}`
+            });
+            window.setTimeout(() => window.location.reload(), 500);
+        } catch (error) {
+            setTransferStatus({
+                type: 'error',
+                message: error instanceof Error ? error.message : trans("インポートに失敗しました。", languageMode)
+            });
+        }
+    }, [languageMode, transferImportText]);
 
     const getRaceTargetEntries = useCallback(() => {
         if (!raceSession) return [];
@@ -8202,10 +8282,31 @@ const App: React.FC = () => {
                                     <p className="mb-5 text-sm leading-7 text-slate-300">
                                         {trans("今後は下記URLが最新の公開先です。ブックマークの更新をお願いします。", languageMode)}
                                     </p>
+                                    <div className="mb-5 rounded-xl border border-amber-500/40 bg-amber-950/30 px-4 py-4 text-left">
+                                        <div className="mb-2 text-sm font-black text-amber-200">
+                                            {trans("データを引き継ぐ場合は、次の手順で移行してください。", languageMode)}
+                                        </div>
+                                        <div className="text-sm leading-7 text-amber-50">
+                                            <div>{trans("1. このサイトで「データ移行」を開き、エクスポートします。", languageMode)}</div>
+                                            <div>{trans("2. 新しいサイトへ移動して、「データ移行」でインポートします。", languageMode)}</div>
+                                        </div>
+                                        <div className="mt-2 text-xs font-bold text-amber-300">
+                                            {trans("旧サイトのデータは新サイトへ自動では引き継がれません。", languageMode)}
+                                        </div>
+                                    </div>
                                     <div className="mb-5 rounded-xl border border-cyan-500/40 bg-black/40 px-4 py-3 text-left text-xs font-mono text-cyan-200 break-all">
                                         {PRIMARY_SITE_URL}
                                     </div>
                                     <div className="flex flex-col gap-3">
+                                        <button
+                                            onClick={() => {
+                                                setShowMigrationNotice(false);
+                                                openDataTransferModal();
+                                            }}
+                                            className="w-full rounded-xl border border-amber-400 bg-amber-500/10 px-4 py-3 text-sm font-black text-amber-100 transition-colors hover:bg-amber-500/20"
+                                        >
+                                            {trans("データ移行を開く", languageMode)}
+                                        </button>
                                         <button
                                             onClick={handleMoveToPrimarySite}
                                             className="w-full rounded-xl border-b-4 border-r-4 border-cyan-300 bg-cyan-500 px-4 py-4 text-base font-black text-slate-950 transition-colors hover:bg-cyan-400"
@@ -8396,9 +8497,112 @@ const App: React.FC = () => {
                                     </button>
                                 </div>
 
+                                <button onClick={openDataTransferModal} className="w-full bg-gray-800 text-cyan-300 py-3 text-sm font-bold border-b-4 border-r-4 border-gray-600 border-cyan-500 hover:bg-gray-700 cursor-pointer flex items-center justify-center rounded mt-2">
+                                    <Globe className="mr-2" size={18} /> {trans("データ移行", languageMode)}
+                                </button>
+
                                 <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
                                     <Terminal size={10} /> v1.0.4 YUSUKE ISHIGE
                                 </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {showDataTransferModal && (
+                    <div className="fixed inset-0 z-[10001] bg-black/90 flex items-center justify-center p-4" onClick={() => setShowDataTransferModal(false)}>
+                        <div className="w-full max-w-5xl rounded-2xl border-2 border-cyan-500 bg-slate-950 p-5 shadow-[0_0_30px_rgba(34,211,238,0.25)] max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                            <div className="flex items-start justify-between gap-4 mb-5">
+                                <div>
+                                    <h2 className="text-2xl font-black text-white">{trans("データ移行", languageMode)}</h2>
+                                    <p className="text-sm text-slate-300 mt-1">{trans("Vercel版とGitHub版のあいだで保存データを移せます。", languageMode)}</p>
+                                </div>
+                                <button
+                                    onClick={() => setShowDataTransferModal(false)}
+                                    className="rounded-full border border-slate-600 p-2 text-slate-300 hover:bg-slate-800 hover:text-white"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            {transferStatus && (
+                                <div className={`mb-4 rounded-xl border px-4 py-3 text-sm font-bold ${
+                                    transferStatus.type === 'success'
+                                        ? 'border-emerald-500/50 bg-emerald-900/30 text-emerald-200'
+                                        : transferStatus.type === 'error'
+                                            ? 'border-red-500/50 bg-red-900/30 text-red-200'
+                                            : 'border-cyan-500/50 bg-cyan-900/30 text-cyan-200'
+                                }`}>
+                                    {transferStatus.message}
+                                </div>
+                            )}
+
+                            <div className="grid gap-5 md:grid-cols-2">
+                                <section className="rounded-2xl border border-slate-700 bg-black/30 p-4">
+                                    <h3 className="text-lg font-black text-white mb-2">{trans("エクスポート", languageMode)}</h3>
+                                    <p className="text-sm text-slate-300 mb-3">
+                                        {trans("この端末の保存データをJSONとして出力します。", languageMode)}
+                                    </p>
+                                    <div className="mb-3 text-xs font-mono text-cyan-200">
+                                        {trans("保存キー数", languageMode)}: {transferExportCount}
+                                    </div>
+                                    <textarea
+                                        value={transferExportText}
+                                        readOnly
+                                        className="w-full h-64 rounded-xl border border-slate-700 bg-slate-900 px-3 py-3 text-xs text-slate-200 font-mono"
+                                    />
+                                    <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                                        <button
+                                            onClick={handleCopyTransferData}
+                                            className="flex-1 rounded-xl bg-cyan-500 px-4 py-3 text-sm font-black text-slate-950 hover:bg-cyan-400"
+                                        >
+                                            {trans("コピー", languageMode)}
+                                        </button>
+                                        <button
+                                            onClick={handleDownloadTransferData}
+                                            className="flex-1 rounded-xl border border-cyan-500 bg-slate-900 px-4 py-3 text-sm font-black text-cyan-200 hover:bg-slate-800"
+                                        >
+                                            {trans("ダウンロード", languageMode)}
+                                        </button>
+                                    </div>
+                                </section>
+
+                                <section className="rounded-2xl border border-slate-700 bg-black/30 p-4">
+                                    <h3 className="text-lg font-black text-white mb-2">{trans("インポート", languageMode)}</h3>
+                                    <p className="text-sm text-slate-300 mb-3">
+                                        {trans("別の端末で出力したJSONを貼り付けるか、保存ファイルを読み込んでください。", languageMode)}
+                                    </p>
+                                    <textarea
+                                        value={transferImportText}
+                                        onChange={e => setTransferImportText(e.target.value)}
+                                        placeholder={trans("ここにエクスポートしたJSONを貼り付けます。", languageMode)}
+                                        className="w-full h-64 rounded-xl border border-slate-700 bg-slate-900 px-3 py-3 text-xs text-slate-200 font-mono placeholder:text-slate-500"
+                                    />
+                                    <input
+                                        ref={transferFileInputRef}
+                                        type="file"
+                                        accept=".json,application/json"
+                                        className="hidden"
+                                        onChange={handleTransferFileChange}
+                                    />
+                                    <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                                        <button
+                                            onClick={() => transferFileInputRef.current?.click()}
+                                            className="flex-1 rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 text-sm font-black text-slate-200 hover:bg-slate-700"
+                                        >
+                                            {trans("ファイルを読み込む", languageMode)}
+                                        </button>
+                                        <button
+                                            onClick={handleImportTransferData}
+                                            className="flex-1 rounded-xl bg-emerald-500 px-4 py-3 text-sm font-black text-slate-950 hover:bg-emerald-400"
+                                        >
+                                            {trans("インポートを実行", languageMode)}
+                                        </button>
+                                    </div>
+                                    <p className="mt-3 text-xs text-amber-200">
+                                        {trans("インポートを実行すると、この端末の既存データは取り込んだ内容で上書きされます。", languageMode)}
+                                    </p>
+                                </section>
                             </div>
                         </div>
                     </div>
