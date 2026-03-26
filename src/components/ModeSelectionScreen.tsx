@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { GameMode, LanguageMode } from '../types';
 import {
   Brain, Book, Languages, FlaskConical, Globe, MapPin,
-  Home, ArrowLeft
+  Home, ArrowLeft, GraduationCap
 } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { SUBJECT_CATEGORIES, SubjectCategoryConfig, SubjectCategoryType } from '../subjectConfig';
@@ -20,6 +20,13 @@ interface ModeSelectionScreenProps {
 }
 
 interface MathUnitOption {
+  id: string;
+  name: string;
+  mode?: string;
+  modes?: string[];
+}
+
+interface SelectableUnitOption {
   id: string;
   name: string;
   mode?: string;
@@ -291,6 +298,7 @@ const CATEGORY_LABELS: Record<SubjectCategoryType, string> = {
   SCIENCE: '生活・理科',
   SOCIAL: '社会',
   ENGLISH: '英語',
+  SUMMARY: 'まとめ',
   MAP_PREF: '地図・日本',
   IT_INFO: 'ICT・情報',
 };
@@ -345,6 +353,7 @@ const getCategoryIcon = (id: SubjectCategoryType) => {
     case 'ENGLISH': return <Languages size={20} />;
     case 'SCIENCE': return <FlaskConical size={20} />;
     case 'SOCIAL': return <Globe size={20} />;
+    case 'SUMMARY': return <GraduationCap size={20} />;
     case 'MAP_PREF': return <MapPin size={20} />;
     default: return <Home size={20} />;
   }
@@ -370,6 +379,54 @@ const getDisplayGradeLabel = (grade: number, languageMode: LanguageMode) =>
 const getDisplayTermLabel = (term: number, languageMode: LanguageMode) =>
   languageMode === 'JAPANESE' ? `${term}学期` : `${term}がっき`;
 
+const getKanjiGradeMode = (grade: number): string => `KANJI_${grade}`;
+
+const getGradeSummaryModes = (grade: number): string[] => {
+  const modes = [
+    ...(MATH_GRADE_UNITS[grade] || []).flatMap((unit) => unit.modes || (unit.mode ? [unit.mode] : [])),
+    ...(KOKUGO_GRADE_UNITS[grade] || []).flatMap((unit) => unit.modes || (unit.mode ? [unit.mode] : [])),
+    getKanjiGradeMode(grade),
+    ...(ENGLISH_GRADE_UNITS[grade] || []).map((unit) => unit.mode),
+    ...(SCIENCE_GRADE_UNITS[grade] || []).map((unit) => unit.mode),
+    ...(SOCIAL_GRADE_UNITS[grade] || []).map((unit) => unit.mode),
+  ];
+
+  return Array.from(new Set(modes.filter(Boolean)));
+};
+
+const getGradeSummaryUnit = (grade: number): SelectableUnitOption => ({
+  id: `GRADE_SUMMARY_${grade}`,
+  name: '総まとめ（全教科+漢字）',
+  modes: getGradeSummaryModes(grade),
+});
+
+const getCurrentUnitsForCategory = (categoryId: SubjectCategoryType, grade: number): SelectableUnitOption[] => {
+  if (categoryId === 'SUMMARY') {
+    const summaryUnit = getGradeSummaryUnit(grade);
+    return summaryUnit.modes && summaryUnit.modes.length > 0 ? [summaryUnit] : [];
+  }
+  if (categoryId === 'ENGLISH') return (ENGLISH_GRADE_UNITS[grade] || []).map((unit) => ({ ...unit, modes: [unit.mode] }));
+  if (categoryId === 'SCIENCE') return (SCIENCE_GRADE_UNITS[grade] || []).map((unit) => ({ ...unit, modes: [unit.mode] }));
+  if (categoryId === 'SOCIAL') return (SOCIAL_GRADE_UNITS[grade] || []).map((unit) => ({ ...unit, modes: [unit.mode] }));
+  if (categoryId === 'KOKUGO_GRADES') return (KOKUGO_GRADE_UNITS[grade] || []).map((unit) => ({ ...unit, modes: unit.modes || (unit.mode ? [unit.mode] : []) }));
+  if (categoryId === 'MATH_GRADES') return (MATH_GRADE_UNITS[grade] || []).map((unit) => ({ ...unit, modes: unit.modes || (unit.mode ? [unit.mode] : []) }));
+  return [];
+};
+
+const getAllSelectableUnits = (): SelectableUnitOption[] => [
+  ...Array.from({ length: 9 }, (_, index) => getGradeSummaryUnit(index + 1)),
+  ...Object.values(ENGLISH_GRADE_UNITS).flat().map((unit) => ({ ...unit, modes: [unit.mode] })),
+  ...Object.values(SCIENCE_GRADE_UNITS).flat().map((unit) => ({ ...unit, modes: [unit.mode] })),
+  ...Object.values(SOCIAL_GRADE_UNITS).flat().map((unit) => ({ ...unit, modes: [unit.mode] })),
+  ...Object.values(KOKUGO_GRADE_UNITS).flat().map((unit) => ({ ...unit, modes: unit.modes || (unit.mode ? [unit.mode] : []) })),
+  ...Object.values(MATH_GRADE_UNITS).flat().map((unit) => ({ ...unit, modes: unit.modes || (unit.mode ? [unit.mode] : []) })),
+];
+
+const getSelectableGrades = (categoryId: SubjectCategoryType): number[] => {
+  if (categoryId === 'ENGLISH' || categoryId === 'SOCIAL') return [3, 4, 5, 6, 7, 8, 9];
+  return [1, 2, 3, 4, 5, 6, 7, 8, 9];
+};
+
 const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   onSelectMode,
   onBack,
@@ -383,7 +440,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   const [selectedTerm, setSelectedTerm] = useState<number>(1);
   const [selectedMathGrade, setSelectedMathGrade] = useState<number>(1);
   const [selectedMathUnitIds, setSelectedMathUnitIds] = useState<string[]>([]);
-  const isUnitCategory = selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SCIENCE';
+  const isUnitCategory = selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL' || selectedCategory.id === 'SUMMARY';
 
   const handleSelect = (mode: string, modePool?: string[]) => {
     audioService.playSound('select');
@@ -394,8 +451,11 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   const getCategoryLabel = (id: SubjectCategoryType) => transProblemSubjectName(CATEGORY_LABELS[id] || id, languageMode);
   const getSubLabel = (id: string, fallback: string) => trans(SUBMODE_LABELS[id] || fallback, languageMode);
   const getUnitCorrectCount = (unit: { mode?: string; modes?: string[] }) => {
+    if (unit.modes && unit.modes.length > 0) {
+      return unit.modes.reduce((total, mode) => total + (modeCorrectCounts[mode] || 0), 0);
+    }
     if (unit.mode) return modeCorrectCounts[unit.mode] || 0;
-    return (unit.modes || []).reduce((total, mode) => total + (modeCorrectCounts[mode] || 0), 0);
+    return 0;
   };
 
   const clearSelectedUnits = () => {
@@ -420,30 +480,23 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   const selectedSubMode = selectedCategory.subModes.find((sub) => sub.id === selectedSubModeId) || selectedCategory.subModes[0];
 
   const getModeSelectionPreview = () => {
-    if (selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL') {
-      const allUnitsAcrossAllCategories = [
-        ...Object.values(ENGLISH_GRADE_UNITS).flat(),
-        ...Object.values(SCIENCE_GRADE_UNITS).flat(),
-        ...Object.values(SOCIAL_GRADE_UNITS).flat(),
-        ...Object.values(KOKUGO_GRADE_UNITS).flat(),
-        ...Object.values(MATH_GRADE_UNITS).flat()
-      ];
+    if (isUnitCategory) {
+      const allUnitsAcrossAllCategories = getAllSelectableUnits();
       const selectedUnits = allUnitsAcrossAllCategories.filter((u) => selectedMathUnitIds.includes(u.id));
-      
-      const modePool = selectedUnits.flatMap((u: any) => {
-        const modes: string[] = [];
-        if ('mode' in u && u.mode) modes.push(u.mode as string);
-        if ('modes' in u && u.modes && Array.isArray(u.modes)) modes.push(...u.modes);
-        return modes;
-      });
+
+      const modePool = Array.from(new Set(selectedUnits.flatMap((u) => u.modes || (u.mode ? [u.mode] : []))));
+      const representativeMode = (selectedUnits[0]?.modes?.[0] || selectedUnits[0]?.mode || GameMode.MATH_G1_1) as string;
+      const detailLabel = selectedUnits.length === 1
+        ? selectedUnits[0].name
+        : selectedUnits.length > 0
+        ? `${trans('ミックス選択', languageMode)} (${selectedUnits.length}${trans('単元', languageMode)})`
+        : trans('単元未選択', languageMode);
 
       return {
-        mode: selectedUnits.length > 0 && (selectedUnits[0] as any).mode ? (selectedUnits[0] as any).mode as string : GameMode.MATH_G1_1,
+        mode: representativeMode,
         modePool,
         canStart: selectedUnits.length > 0,
-        label: selectedUnits.length > 0
-          ? `${trans('ミックス選択', languageMode)} (${selectedUnits.length}${trans('単元', languageMode)})`
-          : trans('単元未選択', languageMode),
+        label: `${getCategoryLabel(selectedCategory.id)} / ${detailLabel}`,
       };
     }
 
@@ -491,25 +544,9 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   const renderModeSelectionPanel = () => {
     const theme = getCategoryClasses(selectedCategory.color);
 
-    if (selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL') {
-      const isKokugo = selectedCategory.id === 'KOKUGO_GRADES';
-      const isEnglish = selectedCategory.id === 'ENGLISH';
-      const isScience = selectedCategory.id === 'SCIENCE';
-      const isSocial = selectedCategory.id === 'SOCIAL';
-      const gradeUnits = isEnglish
-        ? (ENGLISH_GRADE_UNITS[selectedMathGrade] || [])
-        : isScience
-        ? (SCIENCE_GRADE_UNITS[selectedMathGrade] || [])
-        : isSocial
-        ? (SOCIAL_GRADE_UNITS[selectedMathGrade] || [])
-        : isKokugo
-        ? (KOKUGO_GRADE_UNITS[selectedMathGrade] || [])
-        : (MATH_GRADE_UNITS[selectedMathGrade] || []);
-      const grades = isEnglish
-        ? [3, 4, 5, 6, 7, 8, 9]
-        : isSocial
-        ? [3, 4, 5, 6, 7, 8, 9]
-        : [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    if (isUnitCategory) {
+      const gradeUnits = getCurrentUnitsForCategory(selectedCategory.id, selectedMathGrade);
+      const grades = getSelectableGrades(selectedCategory.id);
 
       return (
         <div className="space-y-3">

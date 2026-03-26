@@ -261,6 +261,11 @@ const getGradeSummaryUnit = (grade: number): SelectableUnitOption => ({
 });
 
 const getCurrentUnitsForCategory = (categoryId: SubjectCategoryConfig['id'], grade: number): SelectableUnitOption[] => {
+  if (categoryId === 'SUMMARY') {
+    const summaryUnit = getGradeSummaryUnit(grade);
+    return summaryUnit.modes && summaryUnit.modes.length > 0 ? [summaryUnit] : [];
+  }
+
   const baseUnits: SelectableUnitOption[] = categoryId === 'ENGLISH'
     ? (ENGLISH_GRADE_UNITS[grade] || []).map((unit) => ({ ...unit, modes: [unit.mode] }))
     : categoryId === 'SCIENCE'
@@ -271,10 +276,6 @@ const getCurrentUnitsForCategory = (categoryId: SubjectCategoryConfig['id'], gra
     ? (KOKUGO_GRADE_UNITS[grade] || []).map((unit) => ({ ...unit }))
     : (MATH_GRADE_UNITS[grade] || []).map((unit) => ({ ...unit }));
 
-  const summaryUnit = getGradeSummaryUnit(grade);
-  if (summaryUnit.modes && summaryUnit.modes.length > 0) {
-    return [summaryUnit, ...baseUnits];
-  }
   return baseUnits;
 };
 
@@ -435,6 +436,7 @@ const getCategoryIcon = (id: string) => {
         case 'ENGLISH': return <Languages size={20} />;
         case 'SCIENCE': return <FlaskConical size={20} />;
         case 'SOCIAL': return <Globe size={20} />;
+        case 'SUMMARY': return <GraduationCap size={20} />;
         case 'MAP_PREF': return <MapPin size={20} />;
         default: return <Home size={20} />;
     }
@@ -493,7 +495,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   const [streak, setStreak] = useState(0);
   const [records, setRecords] = useState<Record<string, number>>({});
   const [isQuitting, setIsQuitting] = useState(false);
-  const isUnitCategory = selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL';
+  const isUnitCategory = selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL' || selectedCategory.id === 'SUMMARY';
   
   // Voice feature control
   const [voiceEnabled, setVoiceEnabled] = useState(() => storageService.getEnglishVoiceEnabled());
@@ -529,6 +531,11 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
       },
       modePool,
     };
+  };
+
+  const getSelectableGrades = (categoryId: SubjectCategoryConfig['id']): number[] => {
+    if (categoryId === 'ENGLISH' || categoryId === 'SOCIAL') return [3, 4, 5, 6, 7, 8, 9];
+    return [1, 2, 3, 4, 5, 6, 7, 8, 9];
   };
 
   const handleMathGradeSelect = (grade: number) => {
@@ -764,7 +771,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                     <div>
                       <div className="text-[10px] text-gray-400 mb-1">{trans('学年', languageMode)}</div>
                       <div className="grid grid-cols-9 sm:grid-cols-5 gap-1">
-                        {[(selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SOCIAL' ? 3 : 1), ...((selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SOCIAL' ? [4, 5, 6, 7, 8, 9] : [2, 3, 4, 5, 6, 7, 8, 9]))].map((grade) => {
+                        {getSelectableGrades(selectedCategory.id).map((grade) => {
                           const isSelected = selectedMathGrade === grade;
                           const theme = getCategoryClasses(selectedCategory.color);
                           return (
