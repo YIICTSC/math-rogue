@@ -19,6 +19,30 @@ interface GameEvent {
     options: EventOption[];
 }
 
+interface EventResolutionContext {
+    mutated: boolean;
+    allowFallback: boolean;
+    resolved: boolean;
+}
+
+const EVENT_NOOP_RECOVERY = 5;
+const EVENT_NOOP_RECOVERY_LOG = `気持ちを整え直し、HPが${EVENT_NOOP_RECOVERY}回復した。`;
+const NO_EFFECT_RESULT_PATTERN = /(何も|なにも|変化なし|へんかなし|変化はない|へんかはない|変わらなかった|かわらなかった|強化対象はなかった|きょうかたいしょうはなかった|強化できるカードはなかった|きょうかできるカードはなかった|取り除くカードはなかった|とりのぞくカードはなかった|成長はなかった|せいちょうはなかった|効果はなかった|こうかはなかった|見つからなかった|みつからなかった|映らなかった|うつらなかった|普通。|ふつう。)/;
+const NO_EFFECT_SKIP_PATTERN = /(お金が足りない|おかねが たりない|所持金が足りない|しょじきんが たりない|これ以上受け取れない|これいじょう うけとれない|満杯|まんぱい)/;
+
+const healPlayer = (player: Player, amount: number): Player => ({
+    ...player,
+    currentHp: Math.min(player.maxHp, player.currentHp + amount)
+});
+
+const shouldGrantNoopRecovery = (log: string | null, context: EventResolutionContext | null): boolean => {
+    if (!log || !context || context.mutated || context.resolved) return false;
+    if (NO_EFFECT_SKIP_PATTERN.test(log)) return false;
+    return context.allowFallback || NO_EFFECT_RESULT_PATTERN.test(log);
+};
+
+const normalizeEventOptionText = (text: string): string => text.replace(/変化なし/g, `HP+${EVENT_NOOP_RECOVERY}`);
+
 const addPermanentStrengthBonus = (player: Player, amount: number): Player => ({
     ...player,
     relicCounters: {
@@ -103,7 +127,11 @@ export const generateLegacyEvent = (
             label: "そのままにする",
             text: "ひろわずに進む",
             action: () => {
-                setEventResultLog(trans("自分には必要ないと判断し、そのまま通り過ぎた。またいつか誰かが拾うだろう。", languageMode));
+                setGameState(prev => ({
+                    ...prev,
+                    player: healPlayer(prev.player, EVENT_NOOP_RECOVERY)
+                }));
+                setEventResultLog(trans(`自分には必要ないと判断し、そのまま通り過ぎた。またいつか誰かが拾うだろう。\n${EVENT_NOOP_RECOVERY_LOG}`, languageMode));
             }
         }
     ]
@@ -118,7 +146,61 @@ export const generateEvent = (
     unlockedCardNames: string[],
     preferredEventTitle?: string
 ): GameEvent => {
-    
+    const rawSetGameState = setGameState;
+    const rawSetEventResultLog = setEventResultLog;
+    let activeResolutionContext: EventResolutionContext | null = null;
+
+    setGameState = update => {
+        if (activeResolutionContext && !activeResolutionContext.resolved) {
+            activeResolutionContext.mutated = true;
+        }
+        rawSetGameState(update);
+    };
+
+    setEventResultLog = log => {
+        const context = activeResolutionContext;
+        if (shouldGrantNoopRecovery(log, context)) {
+            rawSetGameState(prev => ({
+                ...prev,
+                player: healPlayer(prev.player, EVENT_NOOP_RECOVERY)
+            }));
+            rawSetEventResultLog(`${log}\n${trans(EVENT_NOOP_RECOVERY_LOG, languageMode)}`);
+        } else {
+            rawSetEventResultLog(log);
+        }
+
+        if (context) {
+            context.resolved = true;
+            if (activeResolutionContext === context) {
+                activeResolutionContext = null;
+            }
+        }
+    };
+
+    const finalizeEvent = (event: GameEvent): GameEvent => ({
+        ...event,
+        options: event.options.map(option => ({
+            ...option,
+            text: normalizeEventOptionText(option.text),
+            action: () => {
+                const context: EventResolutionContext = {
+                    mutated: false,
+                    allowFallback: option.text.includes('変化なし'),
+                    resolved: false
+                };
+                activeResolutionContext = context;
+                try {
+                    option.action();
+                } catch (error) {
+                    if (activeResolutionContext === context) {
+                        activeResolutionContext = null;
+                    }
+                    throw error;
+                }
+            }
+        }))
+    });
+
     const charType = getCharacterType(player);
     let potentialEvents: GameEvent[] = [];
 
@@ -5802,9 +5884,9 @@ export const generateEvent = (
 
     if (preferredEventTitle) {
         const matched = potentialEvents.find(e => e.title === preferredEventTitle);
-        if (matched) return matched;
+        if (matched) return finalizeEvent(matched);
     }
 
     // Pick random event from the massive pool
-    return potentialEvents[Math.floor(Math.random() * potentialEvents.length)];
+    return finalizeEvent(potentialEvents[Math.floor(Math.random() * potentialEvents.length)]);
 };
