@@ -197,6 +197,15 @@ export const SUBJECT_CATEGORIES: SubjectCategoryConfig[] = [
         { id: 'K_MIXED', name: 'ミックス', mode: GameMode.KANJI_MIXED },
     ]
   },
+  {
+    id: 'SUMMARY',
+    name: 'まとめ',
+    color: 'amber',
+    uiType: 'grade_term',
+    subModes: [
+        { id: 'SUMMARY_GRADE', name: '学年別総まとめ', mode: GameMode.MATH_G1_1 },
+    ]
+  },
   { 
     id: 'ENGLISH', 
     name: '英語', 
@@ -274,15 +283,6 @@ export const SUBJECT_CATEGORIES: SubjectCategoryConfig[] = [
         { id: 'SO9_1', name: '社 中3 1学期', mode: GameMode.SOCIAL_9_1 },
         { id: 'SO9_2', name: '社 中3 2学期', mode: GameMode.SOCIAL_9_2 },
         { id: 'SO9_3', name: '社 中3 3学期', mode: GameMode.SOCIAL_9_3 },
-    ]
-  },
-  {
-    id: 'SUMMARY',
-    name: 'まとめ',
-    color: 'amber',
-    uiType: 'grade_term',
-    subModes: [
-        { id: 'SUMMARY_GRADE', name: '学年別総まとめ', mode: GameMode.MATH_G1_1 },
     ]
   },
   { 
