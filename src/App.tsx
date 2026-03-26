@@ -118,6 +118,8 @@ const createCoopSupportInstance = (card: CoopSupportCard): CoopSupportCard => ({
 });
 
 const shouldClearAllCardRewards = (item: RewardItem) => item.type === 'CARD';
+const LEGACY_VERCEL_HOST = 'math-rogue.vercel.app';
+const PRIMARY_SITE_URL = 'https://yiictsc.github.io/math-rogue/';
 
 type GalaxyExpressModalState = {
     cards: ICard[];
@@ -570,6 +572,8 @@ const App: React.FC = () => {
     });
     const [isMobilePortrait, setIsMobilePortrait] = useState(false);
     const previousScreenRef = useRef<GameScreen>(GameScreen.START_MENU);
+    const isLegacyVercelHost = typeof window !== 'undefined' && window.location.hostname === LEGACY_VERCEL_HOST;
+    const [showMigrationNotice, setShowMigrationNotice] = useState<boolean>(() => isLegacyVercelHost);
 
     useEffect(() => {
         const syncMobilePortrait = () => setIsMobilePortrait(detectMobilePortrait());
@@ -666,6 +670,10 @@ const App: React.FC = () => {
             window.clearTimeout(raceToastTimerRef.current);
         }
         raceToastTimerRef.current = window.setTimeout(() => setRaceToast(null), 2200);
+    }, []);
+    const handleMoveToPrimarySite = useCallback(() => {
+        if (typeof window === 'undefined') return;
+        window.location.replace(PRIMARY_SITE_URL);
     }, []);
 
     const getRaceTargetEntries = useCallback(() => {
@@ -8179,6 +8187,42 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.START_MENU && (
                     <div className="w-full h-full bg-gray-900 flex items-center justify-center relative">
+                        {isLegacyVercelHost && showMigrationNotice && (
+                            <div className="fixed inset-0 z-[10001] bg-black/80 flex items-center justify-center p-4">
+                                <div className="w-full max-w-lg rounded-2xl border-4 border-cyan-400 bg-slate-950 px-6 py-7 text-center shadow-[0_0_60px_rgba(34,211,238,0.3)]" onClick={e => e.stopPropagation()}>
+                                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-cyan-300 bg-cyan-500/10">
+                                        <Globe size={34} className="text-cyan-300" />
+                                    </div>
+                                    <h2 className="mb-3 text-2xl font-black tracking-tight text-white">
+                                        {trans("サイト移転のお知らせ", languageMode)}
+                                    </h2>
+                                    <p className="mb-3 text-sm font-bold leading-7 text-slate-200">
+                                        {trans("現在のVercel版ではなく、新しい公開先からアクセスしてください。", languageMode)}
+                                    </p>
+                                    <p className="mb-5 text-sm leading-7 text-slate-300">
+                                        {trans("今後は下記URLが最新の公開先です。ブックマークの更新をお願いします。", languageMode)}
+                                    </p>
+                                    <div className="mb-5 rounded-xl border border-cyan-500/40 bg-black/40 px-4 py-3 text-left text-xs font-mono text-cyan-200 break-all">
+                                        {PRIMARY_SITE_URL}
+                                    </div>
+                                    <div className="flex flex-col gap-3">
+                                        <button
+                                            onClick={handleMoveToPrimarySite}
+                                            className="w-full rounded-xl border-b-4 border-r-4 border-cyan-300 bg-cyan-500 px-4 py-4 text-base font-black text-slate-950 transition-colors hover:bg-cyan-400"
+                                        >
+                                            {trans("新しいサイトへ移動する", languageMode)}
+                                        </button>
+                                        <button
+                                            onClick={() => setShowMigrationNotice(false)}
+                                            className="w-full rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 text-sm font-bold text-slate-200 transition-colors hover:bg-slate-700"
+                                        >
+                                            {trans("このまま続ける", languageMode)}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="absolute top-2 right-2 z-9999 flex gap-2">
                             <button
                                 onClick={toggleBgmMode}
