@@ -59,6 +59,13 @@ interface MathUnitOption {
   modes: string[];
 }
 
+interface SelectableUnitOption {
+  id: string;
+  name: string;
+  mode?: string;
+  modes?: string[];
+}
+
 const KOKUGO_GRADE_UNITS: Record<number, MathUnitOption[]> = {
   1: [
     { id: 'J1_U01', name: 'ひらがな', modes: ['KOKUGO_G1_U01'] },
@@ -230,6 +237,57 @@ const getEnglishGradeMode = (grade: number): GameMode => {
     case 9: return GameMode.ENGLISH_G9_1;
     default: return GameMode.ENGLISH_G3_1;
   }
+};
+
+const getKanjiGradeMode = (grade: number): string => `KANJI_${grade}`;
+
+const getGradeSummaryModes = (grade: number): string[] => {
+  const modes = [
+    ...(MATH_GRADE_UNITS[grade] || []).flatMap((unit) => unit.modes),
+    ...(KOKUGO_GRADE_UNITS[grade] || []).flatMap((unit) => unit.modes),
+    getKanjiGradeMode(grade),
+    ...(ENGLISH_GRADE_UNITS[grade] || []).map((unit) => unit.mode),
+    ...(SCIENCE_GRADE_UNITS[grade] || []).map((unit) => unit.mode),
+    ...(SOCIAL_GRADE_UNITS[grade] || []).map((unit) => unit.mode),
+  ];
+
+  return Array.from(new Set(modes.filter(Boolean)));
+};
+
+const getGradeSummaryUnit = (grade: number): SelectableUnitOption => ({
+  id: `GRADE_SUMMARY_${grade}`,
+  name: '総まとめ（全教科+漢字）',
+  modes: getGradeSummaryModes(grade),
+});
+
+const getCurrentUnitsForCategory = (categoryId: SubjectCategoryConfig['id'], grade: number): SelectableUnitOption[] => {
+  const baseUnits: SelectableUnitOption[] = categoryId === 'ENGLISH'
+    ? (ENGLISH_GRADE_UNITS[grade] || []).map((unit) => ({ ...unit, modes: [unit.mode] }))
+    : categoryId === 'SCIENCE'
+    ? (SCIENCE_GRADE_UNITS[grade] || []).map((unit) => ({ ...unit, modes: [unit.mode] }))
+    : categoryId === 'SOCIAL'
+    ? (SOCIAL_GRADE_UNITS[grade] || []).map((unit) => ({ ...unit, modes: [unit.mode] }))
+    : categoryId === 'KOKUGO_GRADES'
+    ? (KOKUGO_GRADE_UNITS[grade] || []).map((unit) => ({ ...unit }))
+    : (MATH_GRADE_UNITS[grade] || []).map((unit) => ({ ...unit }));
+
+  const summaryUnit = getGradeSummaryUnit(grade);
+  if (summaryUnit.modes && summaryUnit.modes.length > 0) {
+    return [summaryUnit, ...baseUnits];
+  }
+  return baseUnits;
+};
+
+const getAllSelectableUnits = (): SelectableUnitOption[] => {
+  const summaryUnits = Array.from({ length: 9 }, (_, index) => getGradeSummaryUnit(index + 1));
+  return [
+    ...summaryUnits,
+    ...Object.values(MATH_GRADE_UNITS).flat().map((unit) => ({ ...unit })),
+    ...Object.values(KOKUGO_GRADE_UNITS).flat().map((unit) => ({ ...unit })),
+    ...Object.values(ENGLISH_GRADE_UNITS).flat().map((unit) => ({ ...unit, modes: [unit.mode] })),
+    ...Object.values(SCIENCE_GRADE_UNITS).flat().map((unit) => ({ ...unit, modes: [unit.mode] })),
+    ...Object.values(SOCIAL_GRADE_UNITS).flat().map((unit) => ({ ...unit, modes: [unit.mode] })),
+  ];
 };
 
 const MATH_GRADE_UNITS: Record<number, MathUnitOption[]> = {
@@ -448,23 +506,16 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   }, []);
 
   const getCombinedSelection = (): ActiveChallengeConfig => {
-    const allUnits = [
-      ...Object.values(MATH_GRADE_UNITS).flat(),
-      ...Object.values(KOKUGO_GRADE_UNITS).flat(),
-      ...Object.values(ENGLISH_GRADE_UNITS).flat(),
-      ...Object.values(SCIENCE_GRADE_UNITS).flat(),
-      ...Object.values(SOCIAL_GRADE_UNITS).flat(),
-    ];
+    const allUnits = getAllSelectableUnits();
     
     const selectedUnits = allUnits.filter((u) => selectedMathUnitIds.includes(u.id));
-    const modePool = selectedUnits.flatMap((u: any) => {
-      const modes: string[] = [];
-      if ('mode' in u && u.mode) modes.push(u.mode as string);
-      if ('modes' in u && u.modes && Array.isArray(u.modes)) modes.push(...u.modes);
-      return modes;
-    });
+    const modePool = Array.from(new Set(selectedUnits.flatMap((u) => u.modes || (u.mode ? [u.mode] : []))));
 
-    const label = selectedUnits.length > 0
+    const representativeMode = (selectedUnits[0]?.modes?.[0] || selectedUnits[0]?.mode || GameMode.MATH_G1_1) as GameMode;
+
+    const label = selectedUnits.length === 1
+      ? selectedUnits[0].name
+      : selectedUnits.length > 0
       ? `${trans('ミックス選択', languageMode)} (${selectedUnits.length}${trans('単元', languageMode)})`
       : trans('単元未選択', languageMode);
       
@@ -474,7 +525,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
       subMode: { 
         id: subModeId, 
         name: label, 
-        mode: selectedUnits.length > 0 && (selectedUnits[0] as any).mode ? (selectedUnits[0] as any).mode as GameMode : GameMode.MATH_G1_1 
+        mode: representativeMode
       },
       modePool,
     };
@@ -570,8 +621,11 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   };
 
   const getUnitCorrectCount = (unit: { mode?: string; modes?: string[] }) => {
+    if (unit.modes && unit.modes.length > 0) {
+      return unit.modes.reduce((total, mode) => total + (modeCorrectCounts[mode] || 0), 0);
+    }
     if (unit.mode) return modeCorrectCounts[unit.mode] || 0;
-    return (unit.modes || []).reduce((total, mode) => total + (modeCorrectCounts[mode] || 0), 0);
+    return 0;
   };
 
   if (phase === 'CHALLENGE') {
@@ -657,15 +711,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
 
   const previewSelection = isUnitCategory ? getCombinedSelection() : null;
 
-  const currentUnits = selectedCategory.id === 'ENGLISH'
-    ? (ENGLISH_GRADE_UNITS[selectedMathGrade] || [])
-    : selectedCategory.id === 'SCIENCE'
-    ? (SCIENCE_GRADE_UNITS[selectedMathGrade] || []).map((unit) => ({ ...unit, modes: [unit.mode] }))
-    : selectedCategory.id === 'SOCIAL'
-    ? (SOCIAL_GRADE_UNITS[selectedMathGrade] || []).map((unit) => ({ ...unit, modes: [unit.mode] }))
-    : selectedCategory.id === 'KOKUGO_GRADES'
-    ? (KOKUGO_GRADE_UNITS[selectedMathGrade] || [])
-    : (MATH_GRADE_UNITS[selectedMathGrade] || []);
+  const currentUnits = getCurrentUnitsForCategory(selectedCategory.id, selectedMathGrade);
   const canStart = !isUnitCategory || selectedMathUnitIds.length > 0;
   const footerSelectionLabel = previewSelection
     ? previewSelection.subMode.name
