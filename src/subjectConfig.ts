@@ -1,7 +1,7 @@
 
 import { GameMode, GameScreen } from './types';
 
-export type SubjectCategoryType = 'MATH' | 'MATH_GRADES' | 'KOKUGO_GRADES' | 'KANJI' | 'SCIENCE' | 'SOCIAL' | 'ENGLISH' | 'MAP_PREF' | 'IT_INFO';
+export type SubjectCategoryType = 'MATH' | 'MATH_GRADES' | 'KOKUGO_GRADES' | 'KANJI' | 'SCIENCE' | 'SOCIAL' | 'ENGLISH' | 'SUMMARY' | 'MAP_PREF' | 'IT_INFO';
 
 export interface SubModeConfig {
     id: string;
@@ -274,6 +274,15 @@ export const SUBJECT_CATEGORIES: SubjectCategoryConfig[] = [
         { id: 'SO9_1', name: '社 中3 1学期', mode: GameMode.SOCIAL_9_1 },
         { id: 'SO9_2', name: '社 中3 2学期', mode: GameMode.SOCIAL_9_2 },
         { id: 'SO9_3', name: '社 中3 3学期', mode: GameMode.SOCIAL_9_3 },
+    ]
+  },
+  {
+    id: 'SUMMARY',
+    name: 'まとめ',
+    color: 'amber',
+    uiType: 'grade_term',
+    subModes: [
+        { id: 'SUMMARY_GRADE', name: '学年別総まとめ', mode: GameMode.MATH_G1_1 },
     ]
   },
   { 
