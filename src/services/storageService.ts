@@ -63,6 +63,8 @@ const STORAGE_KEY_HINT_STREAKS = 'pixel_spire_hint_streaks_v1';
 // --- CUSTOM CHARACTER IMAGES ---
 const STORAGE_KEY_CUSTOM_IMAGES = 'pixel_spire_custom_images_v1';
 const STORAGE_TRANSFER_PREFIX = 'pixel_spire_';
+const LEGACY_BURN_NAME = 'やほど';
+const BURN_NAME = 'やけど';
 
 export interface PaperPlaneProgress {
     rank: number; // Association Level (Clear Count equivalent)
@@ -132,6 +134,58 @@ const normalizeTransferEntries = (payload: unknown): Record<string, string> => {
 
   return normalized;
 };
+
+const normalizeBurnText = (text: string | undefined): string | undefined =>
+  typeof text === 'string' ? text.replaceAll(LEGACY_BURN_NAME, BURN_NAME) : text;
+
+const normalizeBurnCard = (card: Card): Card => {
+  const nextName = card.name === LEGACY_BURN_NAME ? BURN_NAME : card.name;
+  const nextDescription = normalizeBurnText(card.description) || card.description;
+  if (nextName === card.name && nextDescription === card.description) return card;
+  return { ...card, name: nextName, description: nextDescription };
+};
+
+const normalizeBurnCards = (cards: Card[] | undefined): Card[] | undefined =>
+  cards ? cards.map(normalizeBurnCard) : cards;
+
+const normalizeBurnPlayer = (player: GameState['player']): GameState['player'] => ({
+  ...player,
+  deck: normalizeBurnCards(player.deck) || [],
+  hand: normalizeBurnCards(player.hand) || [],
+  discardPile: normalizeBurnCards(player.discardPile) || [],
+  drawPile: normalizeBurnCards(player.drawPile) || [],
+  codexBuffer: normalizeBurnCards(player.codexBuffer),
+  floatingText: player.floatingText
+    ? { ...player.floatingText, text: normalizeBurnText(player.floatingText.text) || player.floatingText.text }
+    : player.floatingText,
+});
+
+const normalizeBurnRewards = (rewards: GameState['rewards']): GameState['rewards'] =>
+  rewards.map((reward) =>
+    reward.type === 'CARD' && reward.value && typeof reward.value === 'object'
+      ? { ...reward, value: normalizeBurnCard(reward.value as Card) }
+      : reward
+  );
+
+const normalizeBurnGameState = (state: GameState): GameState => ({
+  ...state,
+  player: normalizeBurnPlayer(state.player),
+  vsOpponent: state.vsOpponent ? normalizeBurnPlayer(state.vsOpponent) : state.vsOpponent,
+  rewards: normalizeBurnRewards(state.rewards),
+  codexOptions: normalizeBurnCards(state.codexOptions),
+  narrativeLog: state.narrativeLog.map((entry) => normalizeBurnText(entry) || entry),
+  combatLog: state.combatLog.map((entry) => normalizeBurnText(entry) || entry),
+  newlyUnlockedCardName: normalizeBurnText(state.newlyUnlockedCardName),
+  coopBattleState: state.coopBattleState
+    ? {
+        ...state.coopBattleState,
+        players: state.coopBattleState.players.map((entry) => ({
+          ...entry,
+          player: normalizeBurnPlayer(entry.player),
+        })),
+      }
+    : state.coopBattleState,
+});
 
 export const storageService = {
   // --- Custom Character Images ---
@@ -813,7 +867,8 @@ export const storageService = {
   loadGame: (): GameState | null => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY_GAME_STATE);
-      return stored ? JSON.parse(stored) : null;
+      if (!stored) return null;
+      return normalizeBurnGameState(JSON.parse(stored));
     } catch (e) {
       console.warn("Failed to load game state", e);
       return null;
