@@ -527,6 +527,36 @@ const App: React.FC = () => {
         }).map((c, i) => ({ ...c, id: `pool-${i}-${Math.random()}` } as ICard));
     };
 
+    const clearCombatDebuffs = (player: Player): Player => {
+        const nextPowers = { ...player.powers };
+        ['WEAK', 'VULNERABLE', 'FRAIL', 'CONFUSED'].forEach(powerId => {
+            if (nextPowers[powerId] > 0) nextPowers[powerId] = 0;
+        });
+        return { ...player, powers: nextPowers };
+    };
+
+    const reviveWithTailEffect = (player: Player): Player | null => {
+        const hasTailRelic = player.relics.some(r => r.id === 'LIZARD_TAIL') && !player.relicCounters['LIZARD_TAIL_USED'];
+        const hasTailPower = (player.powers['LIZARD_TAIL'] || 0) > 0;
+        if (!hasTailRelic && !hasTailPower) return null;
+
+        const nextPlayer: Player = {
+            ...player,
+            powers: { ...player.powers },
+            relicCounters: { ...player.relicCounters },
+            currentHp: Math.max(1, Math.floor(player.maxHp * 0.5)),
+            floatingText: { id: `revive-${Date.now()}`, text: '復活！', color: 'text-green-500', iconType: 'heart' }
+        };
+
+        if (hasTailRelic) {
+            nextPlayer.relicCounters['LIZARD_TAIL_USED'] = 1;
+        } else {
+            nextPlayer.powers['LIZARD_TAIL'] = Math.max(0, (nextPlayer.powers['LIZARD_TAIL'] || 0) - 1);
+        }
+
+        return nextPlayer;
+    };
+
     const [gameState, setGameState] = useState<GameState>({
         screen: GameScreen.START_MENU,
         mode: GameMode.MULTIPLICATION,
@@ -3973,7 +4003,7 @@ const App: React.FC = () => {
         }
 
         setGameState(prev => {
-            const p = { ...prev.player, hand: [...prev.player.hand], drawPile: [...prev.player.drawPile], discardPile: [...prev.player.discardPile], deck: [...prev.player.deck], powers: { ...prev.player.powers } };
+            let p = { ...prev.player, hand: [...prev.player.hand], drawPile: [...prev.player.drawPile], discardPile: [...prev.player.discardPile], deck: [...prev.player.deck], powers: { ...prev.player.powers } };
             let enemies = prev.enemies.map(e => ({ ...e }));
             const currentLogs: string[] = [`> ${trans(card.name, languageMode)} ${trans("を使用", languageMode)}`];
             const nextActiveEffects: VisualEffectInstance[] = [];
@@ -4148,22 +4178,40 @@ const App: React.FC = () => {
                 nextActiveEffects.push({ id: `vfx-alch-${Date.now()}`, type: 'BUFF', targetId: 'player' });
             }
 
-            if (card.name === '発見' || card.name === 'DISCOVERY' || card.originalNames?.includes('発見') || card.originalNames?.includes('DISCOVERY')) {
+            if (
+                card.name === '発見' ||
+                card.name === 'DISCOVERY' ||
+                card.name === 'ゼロの発見' ||
+                card.name === 'SANSU_ZERO' ||
+                card.originalNames?.includes('発見') ||
+                card.originalNames?.includes('DISCOVERY') ||
+                card.originalNames?.includes('ゼロの発見') ||
+                card.originalNames?.includes('SANSU_ZERO')
+            ) {
                 const possibleCards = getFilteredCardPool(p.id);
-                for (let i = 0; i < 3; i++) {
-                    const template = possibleCards[Math.floor(Math.random() * possibleCards.length)];
-                    const newCard = { ...template, id: `disc-${Date.now()}-${i}`, cost: 0, exhaust: true } as ICard;
+                if (possibleCards.length > 0) {
+                    let newCard = { ...possibleCards[Math.floor(Math.random() * possibleCards.length)], id: `disc-${Date.now()}` } as ICard;
+                    if (p.powers['MASTER_REALITY']) newCard = getUpgradedCard(newCard);
                     if (p.hand.length < HAND_SIZE + 5) {
                         p.hand.push(newCard);
                     } else {
                         p.discardPile.push(newCard);
                     }
+                    currentLogs.push(`${trans(newCard.name, languageMode)}を手札に加えた！`);
                 }
-                currentLogs.push(trans("発見！カードを3枚生成", languageMode));
                 nextActiveEffects.push({ id: `vfx-disc-${Date.now()}`, type: 'BUFF', targetId: 'player' });
             }
 
-            if (card.name === '山勘' || card.name === 'CALCULATED_GAMBLE' || card.originalNames?.includes('山勘') || card.originalNames?.includes('CALCULATED_GAMBLE')) {
+            if (
+                card.name === '山勘' ||
+                card.name === 'CALCULATED_GAMBLE' ||
+                card.name === '単位変換' ||
+                card.name === 'SANSU_UNIT' ||
+                card.originalNames?.includes('山勘') ||
+                card.originalNames?.includes('CALCULATED_GAMBLE') ||
+                card.originalNames?.includes('単位変換') ||
+                card.originalNames?.includes('SANSU_UNIT')
+            ) {
                 const cardsToDiscard = p.hand.filter(c => c.id !== card.id);
                 const count = cardsToDiscard.length;
                 cardsToDiscard.forEach(c => {
@@ -4201,6 +4249,19 @@ const App: React.FC = () => {
             if (p.powers['AFTER_IMAGE']) {
                 p.block += p.powers['AFTER_IMAGE'];
                 nextActiveEffects.push({ id: `vfx-after-${Date.now()}`, type: 'BLOCK', targetId: 'player' });
+            }
+            if (p.powers['HEAL_ON_PLAY']) {
+                const healAmount = p.powers['HEAL_ON_PLAY'];
+                const beforeHp = p.currentHp;
+                p.currentHp = Math.min(p.maxHp, p.currentHp + healAmount);
+                if (p.currentHp > beforeHp) {
+                    p.floatingText = { id: `heal-on-play-${Date.now()}`, text: `+${p.currentHp - beforeHp}`, color: 'text-green-500', iconType: 'heart' };
+                    nextActiveEffects.push({ id: `vfx-heal-play-${Date.now()}`, type: 'HEAL', targetId: 'player' });
+                }
+            }
+            if (card.type === CardType.SKILL && p.powers['SKILL_BLOCK']) {
+                p.block += p.powers['SKILL_BLOCK'];
+                nextActiveEffects.push({ id: `vfx-skill-block-${Date.now()}`, type: 'BLOCK', targetId: 'player' });
             }
             if (p.powers['THOUSAND_CUTS']) {
                 enemies.forEach(e => {
@@ -4549,10 +4610,18 @@ const App: React.FC = () => {
                             currentLogs.push(`${trans("ムキムキ", languageMode)}+${card.strength}`);
                         }
                     }
-                    if (card.vulnerable) targets.forEach(e => {
-                        applyDebuff(e, 'VULNERABLE', card.vulnerable!);
-                        nextActiveEffects.push({ id: `vfx-dbuff-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay });
-                    });
+                    if (card.vulnerable) {
+                        if (card.target === TargetType.SELF) {
+                            p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + card.vulnerable;
+                            p.floatingText = { id: `self-vuln-${Date.now()}`, text: `${trans("びくびく", languageMode)}+${card.vulnerable}`, color: 'text-pink-400' };
+                            nextActiveEffects.push({ id: `vfx-self-dbuff-${Date.now()}`, type: 'DEBUFF', targetId: 'player', delay: hitDelay });
+                        } else {
+                            targets.forEach(e => {
+                                applyDebuff(e, 'VULNERABLE', card.vulnerable!);
+                                nextActiveEffects.push({ id: `vfx-dbuff-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay });
+                            });
+                        }
+                    }
                     if (card.weak) targets.forEach(e => {
                         applyDebuff(e, 'WEAK', card.weak!);
                         nextActiveEffects.push({ id: `vfx-dbuff-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay });
@@ -4862,7 +4931,11 @@ const App: React.FC = () => {
                         currentLogs.push(trans("捨て札を山札に戻した", languageMode));
                     }
                     if (card.applyPower) {
-                        p.powers[card.applyPower.id] = (p.powers[card.applyPower.id] || 0) + card.applyPower.amount;
+                        if (card.applyPower.id === 'CLEAR_DEBUFFS') {
+                            p = clearCombatDebuffs(p);
+                        } else {
+                            p.powers[card.applyPower.id] = (p.powers[card.applyPower.id] || 0) + card.applyPower.amount;
+                        }
                         if (card.applyPower.id === 'CORPSE_EXPLOSION' && targets.length > 0) {
                             targets.forEach(e => e.corpseExplosion = true);
                             currentLogs.push(trans("衝撃のうわさを付与", languageMode));
@@ -5052,23 +5125,22 @@ const App: React.FC = () => {
                     currentLogs.push(trans("廃棄するカードを選択してください。", languageMode));
                 }
                 if (card.promptsExhaust === 99) {
-                    if (card.name === '断捨離' || card.name === 'SEVER_SOUL' || card.originalNames?.includes('断捨離') || card.originalNames?.includes('SEVER_SOUL')) {
+                    if (
+                        card.name === '断捨離' ||
+                        card.name === 'SEVER_SOUL' ||
+                        card.name === '読書感想文' ||
+                        card.name === 'KOKUGO_BOOK_REPORT' ||
+                        card.originalNames?.includes('断捨離') ||
+                        card.originalNames?.includes('SEVER_SOUL') ||
+                        card.originalNames?.includes('読書感想文') ||
+                        card.originalNames?.includes('KOKUGO_BOOK_REPORT')
+                    ) {
                         const cardsToExhaust = p.hand.filter(c => c.type !== CardType.ATTACK);
                         if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'] * cardsToExhaust.length;
                         p.hand = p.hand.filter(c => c.type === CardType.ATTACK);
                         currentLogs.push(trans("非攻撃カードを廃棄した", languageMode));
                     } else if (card.name === '大掃除' || card.name === 'FIEND_FIRE' || card.originalNames?.includes('大掃除') || card.originalNames?.includes('FIEND_FIRE')) {
                         const count = p.hand.length;
-                        if (count > 0 && enemies.length > 0) {
-                            const target = enemies.find(e => e.id === prev.selectedEnemyId && e.currentHp > 0) || enemies.find(e => e.currentHp > 0);
-                            if (target) {
-                                const extraDmg = count * 7;
-                                target.currentHp -= extraDmg;
-                                target.floatingText = { id: `ff-${Date.now()}`, text: `${extraDmg}`, color: 'text-orange-500', iconType: 'sword' };
-                                currentLogs.push(`${trans("大掃除", languageMode)}: ${extraDmg}${trans("ダメージ", languageMode)}`);
-                                nextActiveEffects.push({ id: `vfx-ff-${Date.now()}-${target.id}`, type: 'FIRE', targetId: target.id });
-                            }
-                        }
                         if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'] * count;
                         p.hand = [];
                     }
@@ -5762,7 +5834,7 @@ const App: React.FC = () => {
                 nextActiveEffects.push({ id: `vfx-lose-str-${Date.now()}`, type: 'DEBUFF', targetId: 'player' });
             }
             p.hand.forEach(c => {
-                if (c.name === 'やほど' || c.name === 'BURN') { p.currentHp -= 2; newLogs.push("やほどダメージ"); nextActiveEffects.push({ id: `vfx-burn-${Date.now()}`, type: 'FIRE', targetId: 'player' }); }
+                if (c.name === 'やけど' || c.name === 'やほど' || c.name === 'BURN') { p.currentHp -= 2; newLogs.push("やけどダメージ"); nextActiveEffects.push({ id: `vfx-burn-${Date.now()}`, type: 'FIRE', targetId: 'player' }); }
                 if (c.name === '虫歯' || c.name === 'DECAY') { p.currentHp -= 2; newLogs.push("虫歯ダメージ"); nextActiveEffects.push({ id: `vfx-decay-${Date.now()}`, type: 'DEBUFF', targetId: 'player' }); }
                 if (c.name === '不安' || c.name === 'DOUBT') p.powers['WEAK'] = (p.powers['WEAK'] || 0) + 1;
                 if (c.name === '恥' || c.name === 'SHAME') p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + 1;
@@ -6394,19 +6466,13 @@ const App: React.FC = () => {
                     resolveBattleVictory();
                 }
             } else if (gameState.player.currentHp <= 0) {
-                const lizardRelic = gameState.player.relics.find(r => r.id === 'LIZARD_TAIL');
-                const hasLizardReady = lizardRelic && !gameState.player.relicCounters['LIZARD_TAIL_USED'];
                 const ghostPotIndex = gameState.player.potions.findIndex(p => p.templateId === 'GHOST_IN_JAR');
-                if (hasLizardReady) {
+                const revivedPlayer = reviveWithTailEffect(gameState.player);
+                if (revivedPlayer) {
                     audioService.playSound('buff');
                     setGameState(prev => ({
                         ...prev,
-                        player: {
-                            ...prev.player,
-                            currentHp: Math.floor(prev.player.maxHp * 0.5),
-                            relicCounters: { ...prev.player.relicCounters, 'LIZARD_TAIL_USED': 1 },
-                            floatingText: { id: `revive-${Date.now()}`, text: '復活！', color: 'text-green-500', iconType: 'heart' }
-                        }
+                        player: reviveWithTailEffect(prev.player) || prev.player
                     }));
                     return;
                 }

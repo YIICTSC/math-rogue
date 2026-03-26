@@ -72,6 +72,53 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
         return { ...target, powers: nextPowers };
     };
 
+    const drawCards = (state: Player, count: number) => {
+        for (let i = 0; i < count; i++) {
+            if (state.drawPile.length === 0) {
+                if (state.discardPile.length === 0) break;
+                state.drawPile = [...state.discardPile].sort(() => Math.random() - 0.5);
+                state.discardPile = [];
+            }
+            const drawn = state.drawPile.pop();
+            if (drawn) state.hand.push(drawn);
+        }
+    };
+
+    const getFilteredCardPool = (): ICard[] => {
+        return Object.values(CARDS_LIBRARY)
+            .filter(c => c.type !== CardType.STATUS && c.type !== CardType.CURSE && c.rarity !== 'SPECIAL')
+            .map((c, i) => ({ ...c, id: `vs-pool-${i}-${Math.random()}` }));
+    };
+
+    const clearCombatDebuffs = (player: Player): Player => {
+        const nextPowers = { ...player.powers };
+        ['WEAK', 'VULNERABLE', 'FRAIL', 'CONFUSED'].forEach(powerId => {
+            if (nextPowers[powerId] > 0) nextPowers[powerId] = 0;
+        });
+        return { ...player, powers: nextPowers };
+    };
+
+    const reviveWithTailEffect = (player: Player): Player | null => {
+        const hasTailRelic = player.relics.some(r => r.id === 'LIZARD_TAIL') && !player.relicCounters['LIZARD_TAIL_USED'];
+        const hasTailPower = (player.powers['LIZARD_TAIL'] || 0) > 0;
+        if (!hasTailRelic && !hasTailPower) return null;
+
+        const nextPlayer: Player = {
+            ...player,
+            powers: { ...player.powers },
+            relicCounters: { ...player.relicCounters },
+            currentHp: Math.max(1, Math.floor(player.maxHp * 0.5))
+        };
+
+        if (hasTailRelic) {
+            nextPlayer.relicCounters['LIZARD_TAIL_USED'] = 1;
+        } else {
+            nextPlayer.powers['LIZARD_TAIL'] = Math.max(0, (nextPlayer.powers['LIZARD_TAIL'] || 0) - 1);
+        }
+
+        return nextPlayer;
+    };
+
     const handleStartBattle = () => {
         if (!opponentName.trim()) {
             audioService.playSound('wrong');
@@ -199,35 +246,111 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
 
         if (card.strength) nextCurrent.strength += card.strength;
         if (card.doubleStrength) nextCurrent.strength *= 2;
+
+        if (
+            card.name === '発見' ||
+            card.name === 'DISCOVERY' ||
+            card.name === 'ゼロの発見' ||
+            card.name === 'SANSU_ZERO' ||
+            card.originalNames?.includes('発見') ||
+            card.originalNames?.includes('DISCOVERY') ||
+            card.originalNames?.includes('ゼロの発見') ||
+            card.originalNames?.includes('SANSU_ZERO')
+        ) {
+            const pool = getFilteredCardPool();
+            const template = pool[Math.floor(Math.random() * pool.length)];
+            if (template) {
+                let newCard = { ...template, id: `discovery-${Date.now()}-${Math.random()}` };
+                if (nextCurrent.powers['MASTER_REALITY']) newCard = getUpgradedCard(newCard);
+                nextCurrent.hand.push(newCard);
+                addLog(`${newCard.name}を手札に加えた！`);
+            }
+        }
+
+        if (
+            card.name === '山勘' ||
+            card.name === 'GAMBLE' ||
+            card.name === '単位変換' ||
+            card.name === 'SANSU_UNIT' ||
+            card.originalNames?.includes('山勘') ||
+            card.originalNames?.includes('GAMBLE') ||
+            card.originalNames?.includes('単位変換') ||
+            card.originalNames?.includes('SANSU_UNIT')
+        ) {
+            const handToReplace = [...nextCurrent.hand];
+            nextCurrent.hand = [];
+            handToReplace.forEach(c => nextCurrent.discardPile.push(c));
+            drawCards(nextCurrent, handToReplace.length);
+            addLog(`${handToReplace.length}枚入れ替えた`);
+        }
         
         if (card.draw) {
-            for(let i=0; i<card.draw; i++) {
-                if (nextCurrent.drawPile.length === 0) {
-                    nextCurrent.drawPile = [...nextCurrent.discardPile].sort(() => Math.random() - 0.5);
-                    nextCurrent.discardPile = [];
-                }
-                const drawn = nextCurrent.drawPile.pop();
-                if (drawn) nextCurrent.hand.push(drawn);
-            }
+            drawCards(nextCurrent, card.draw);
         }
         
         if (card.upgradeHand) nextCurrent.hand = nextCurrent.hand.map(c => getUpgradedCard(c));
         if (card.nextTurnEnergy) nextCurrent.nextTurnEnergy += card.nextTurnEnergy;
         if (card.nextTurnDraw) nextCurrent.nextTurnDraw += card.nextTurnDraw;
+        if (nextCurrent.powers['HEAL_ON_PLAY']) {
+            nextCurrent.currentHp = Math.min(nextCurrent.maxHp, nextCurrent.currentHp + nextCurrent.powers['HEAL_ON_PLAY']);
+        }
+        if (card.type === CardType.SKILL && nextCurrent.powers['SKILL_BLOCK']) {
+            nextCurrent.block += nextCurrent.powers['SKILL_BLOCK'];
+        }
+
+        if (card.poison) {
+            nextTarget = applyDebuff(nextTarget, 'POISON', card.poison);
+        }
+        if (card.weak) {
+            nextTarget = applyDebuff(nextTarget, 'WEAK', card.weak);
+        }
+        if (card.vulnerable) {
+            if (card.target === TargetType.SELF) nextCurrent = applyDebuff(nextCurrent, 'VULNERABLE', card.vulnerable);
+            else nextTarget = applyDebuff(nextTarget, 'VULNERABLE', card.vulnerable);
+        }
 
         if (card.applyPower) {
             const pid = card.applyPower.id;
             const amt = card.applyPower.amount;
             const debuffs = ['WEAK', 'VULNERABLE', 'POISON', 'FRAIL', 'CONFUSED'];
             if (debuffs.includes(pid)) nextTarget = applyDebuff(nextTarget, pid, amt);
+            else if (pid === 'CLEAR_DEBUFFS') nextCurrent = clearCombatDebuffs(nextCurrent);
             else nextCurrent.powers[pid] = (nextCurrent.powers[pid] || 0) + amt;
         }
 
-        if (card.exhaust) {
+        const shouldExhaust = card.exhaust || (card.type === CardType.SKILL && nextCurrent.powers['CORRUPTION']);
+        if (shouldExhaust || card.promptsExhaust === 99) {
             nextCurrent.discardPile = nextCurrent.discardPile.filter(c => c.id !== card.id);
+            if (nextCurrent.powers['FEEL_NO_PAIN']) nextCurrent.block += nextCurrent.powers['FEEL_NO_PAIN'];
         } else if (card.type !== CardType.POWER) {
             nextCurrent.discardPile.push(card);
         }
+
+        if (card.promptsExhaust === 99) {
+            if (
+                card.name === '断捨離' ||
+                card.name === 'SEVER_SOUL' ||
+                card.name === '読書感想文' ||
+                card.name === 'KOKUGO_BOOK_REPORT' ||
+                card.originalNames?.includes('断捨離') ||
+                card.originalNames?.includes('SEVER_SOUL') ||
+                card.originalNames?.includes('読書感想文') ||
+                card.originalNames?.includes('KOKUGO_BOOK_REPORT')
+            ) {
+                const cardsToExhaust = nextCurrent.hand.filter(c => c.type !== CardType.ATTACK);
+                if (nextCurrent.powers['FEEL_NO_PAIN']) nextCurrent.block += nextCurrent.powers['FEEL_NO_PAIN'] * cardsToExhaust.length;
+                nextCurrent.hand = nextCurrent.hand.filter(c => c.type === CardType.ATTACK);
+            } else if (card.name === '大掃除' || card.name === 'FIEND_FIRE' || card.originalNames?.includes('大掃除') || card.originalNames?.includes('FIEND_FIRE')) {
+                const cardsToExhaust = nextCurrent.hand.length;
+                if (nextCurrent.powers['FEEL_NO_PAIN']) nextCurrent.block += nextCurrent.powers['FEEL_NO_PAIN'] * cardsToExhaust;
+                nextCurrent.hand = [];
+            }
+        }
+
+        const revivedTarget = nextTarget.currentHp <= 0 ? reviveWithTailEffect(nextTarget) : null;
+        if (revivedTarget) nextTarget = revivedTarget;
+        const revivedCurrent = nextCurrent.currentHp <= 0 ? reviveWithTailEffect(nextCurrent) : null;
+        if (revivedCurrent) nextCurrent = revivedCurrent;
 
         if (owner === 1) { setP1State(nextCurrent); setP2State(nextTarget); } 
         else { setP2State(nextCurrent); setP1State(nextTarget); }
@@ -273,6 +396,11 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
         ['WEAK', 'VULNERABLE', 'FRAIL', 'CONFUSED'].forEach(p => {
             if (updatedCurrent.powers[p]) updatedCurrent.powers[p]--;
         });
+
+        const revivedCurrent = updatedCurrent.currentHp <= 0 ? reviveWithTailEffect(updatedCurrent) : null;
+        if (revivedCurrent) {
+            updatedCurrent = revivedCurrent;
+        }
 
         if (owner === 1) setP1State(updatedCurrent); else setP2State(updatedCurrent);
 

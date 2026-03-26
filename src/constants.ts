@@ -468,7 +468,7 @@ export const LIBRARIAN_CARDS: Record<string, Omit<Card, 'id'>> = {
     KASA_JIZO: { name: 'かさじぞう', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック4を得る。次ターンカードを1枚引く。', block: 4, nextTurnDraw: 1, rarity: 'SPECIAL', textureRef: 'SHIELD|灰|SKILL' },
     ISSUN_BOSHI: { name: '一寸法師', cost: 0, type: CardType.ATTACK, target: TargetType.ENEMY, description: '3ダメージを3回与える。', damage: 3, playCopies: 2, rarity: 'SPECIAL', textureRef: 'SWORD|緑|ATTACK' },
     TSURU_ONGAESHI: { name: '鶴の恩返し', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'HPを6失い、2枚引く。', draw: 2, selfDamage: 6, rarity: 'SPECIAL', textureRef: 'BEAST|白|SKILL' },
-    OMUSUBI_KORORIN: { name: 'おむすびころりん', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'E1を得る。ランダムな敵に5ダメージ。', energy: 1, damage: 5, rarity: 'SPECIAL', textureRef: 'SLIME|白|SKILL' },
+    OMUSUBI_KORORIN: { name: 'おむすびころりん', cost: 0, type: CardType.SKILL, target: TargetType.RANDOM_ENEMY, description: 'E1を得る。ランダムな敵に5ダメージ。', energy: 1, damage: 5, rarity: 'SPECIAL', textureRef: 'SLIME|白|SKILL' },
     NEZUMI_NO_YOMEIRI: { name: 'ねずみの嫁入り', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'この戦闘中、被ダメージを1軽減する。', applyPower: { id: 'BUFFER', amount: 1 }, rarity: 'SPECIAL', textureRef: 'BEAST|灰|SKILL' },
 };
 
@@ -560,7 +560,7 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
     BLOOD_FOR_BLOOD: { name: 'やられたらやり返す', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '18ダメージ。自分に3ダメージ。', damage: 18, selfDamage: 3, rarity: 'RARE', textureRef: 'FLAME|赤|ATTACK' },
     SEVER_SOUL: { name: '断捨離', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '16ダメージ。手札の非攻撃カードを全廃棄。', damage: 16, promptsExhaust: 99, rarity: 'RARE', textureRef: 'SWORD|白|ATTACK' },
     WHIRLWIND: { name: 'グルグルバット', cost: 2, type: CardType.ATTACK, target: TargetType.ALL_ENEMIES, description: '全体8ダメージを2回。', damage: 8, playCopies: 1, rarity: 'RARE', textureRef: 'SWORD|灰|ATTACK' },
-    FIEND_FIRE: { name: '大掃除', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '手札を全て廃棄。1枚につき7ダメージ。', damage: 0, damagePerCardInHand: 7, rarity: 'RARE', textureRef: 'FLAME|赤|ATTACK' },
+    FIEND_FIRE: { name: '大掃除', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '手札を全て廃棄。1枚につき7ダメージ。', damage: 0, damagePerCardInHand: 7, promptsExhaust: 99, rarity: 'RARE', textureRef: 'FLAME|赤|ATTACK' },
     CHOKE: { name: 'ヘッドロック', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '12ダメージ。ドクドク5を与える。', damage: 12, poison: 5, rarity: 'RARE', textureRef: 'FIST|灰|ATTACK' },
     ALL_OUT_STRIKE: { name: 'フルスイング', cost: 1, type: CardType.ATTACK, target: TargetType.ALL_ENEMIES, description: '敵全体に10ダメージ。手札1枚捨てる。', damage: 10, promptsDiscard: 1, rarity: 'RARE', textureRef: 'SWORD|灰|ATTACK' },
     HEEL_HOOK: { name: 'かかと落とし', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '5ダメージ。E1回復。カードを1枚引く。', damage: 5, energy: 1, draw: 1, rarity: 'RARE', textureRef: 'SHOE|赤|ATTACK' },
