@@ -48,6 +48,7 @@ import { SCIENCE_GRADE_UNITS } from '../scienceUnitConfig';
 import { SCIENCE_UNIT_DATA as DEDICATED_SCIENCE_UNIT_DATA } from './subjects/science_units';
 import { SOCIAL_GRADE_UNITS } from '../socialUnitConfig';
 import { SOCIAL_UNIT_DATA as DEDICATED_SOCIAL_UNIT_DATA } from './subjects/social_units';
+import { KANJI_DATA } from './kanjiData';
 
 // IT・情報のインポート
 import { IT_TABLET_DATA } from './subjects/it_tablet';
@@ -121,10 +122,25 @@ const SOCIAL_UNIT_ALIAS_DATA: Record<string, GeneralProblem[]> = Object.fromEntr
         .map((unit) => [unit.mode, BASE_SUBJECT_DATA[unit.sourceMode] || []])
 );
 
+const GENERALIZED_KANJI_DATA: Record<string, GeneralProblem[]> = Object.fromEntries(
+    Object.entries(KANJI_DATA).map(([mode, problems]) => [
+        mode,
+        problems.map((problem) => ({
+            question: `「${problem.question}」の読みは？`,
+            answer: problem.answer,
+            options: [...problem.options],
+            hint: problem.hint,
+        })),
+    ])
+);
+
+GENERALIZED_KANJI_DATA.KANJI_MIXED = Object.values(GENERALIZED_KANJI_DATA).flat();
+
 export const SUBJECT_DATA: Record<string, GeneralProblem[]> = {
     ...BASE_SUBJECT_DATA,
     ...SCIENCE_UNIT_ALIAS_DATA,
     ...SOCIAL_UNIT_ALIAS_DATA,
+    ...GENERALIZED_KANJI_DATA,
     ...DEDICATED_SCIENCE_UNIT_DATA,
     ...DEDICATED_SOCIAL_UNIT_DATA,
 };
