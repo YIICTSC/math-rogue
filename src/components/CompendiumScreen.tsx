@@ -609,12 +609,12 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
                         <div className="rounded-full border border-cyan-300/30 bg-cyan-500/10 px-3 py-1 text-[10px] font-black tracking-[0.24em] text-cyan-200 sm:px-4 sm:text-xs sm:tracking-[0.3em]">
                             BGM MODE
                         </div>
-                        <div className="rounded-full border border-white/10 bg-black/50 px-3 py-1.5 text-[11px] font-bold text-white/85 backdrop-blur-md sm:px-4 sm:py-2 sm:text-sm">
+                        <div className="rounded-full border border-white/15 bg-slate-950/30 px-3 py-1.5 text-[11px] font-bold text-white/85 backdrop-blur-sm sm:px-4 sm:py-2 sm:text-sm">
                             {'\u266B'} {activeTrack}
                         </div>
                         <button
                             onClick={handleTogglePlayOrder}
-                            className="rounded-full border border-white/10 bg-black/50 px-3 py-1.5 text-[11px] font-bold text-white/85 backdrop-blur-md hover:bg-white/10 sm:px-4 sm:py-2 sm:text-sm"
+                            className="rounded-full border border-white/15 bg-slate-950/30 px-3 py-1.5 text-[11px] font-bold text-white/85 backdrop-blur-sm hover:bg-white/10 sm:px-4 sm:py-2 sm:text-sm"
                         >
                             {playOrder === 'sorted' ? '曲順: 名前順' : '曲順: シャッフル'}
                         </button>
@@ -623,7 +623,7 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
 
                 <div className="flex-1" />
 
-                <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 rounded-[22px] border border-white/10 bg-black/55 p-3 backdrop-blur-xl sm:gap-4 sm:rounded-[28px] sm:p-6">
+                <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 rounded-[22px] border border-white/15 bg-slate-950/30 p-3 backdrop-blur-md sm:gap-4 sm:rounded-[28px] sm:p-6">
                     <div className="flex flex-col gap-1.5 text-center sm:gap-2 sm:text-left">
                         <div className="text-lg font-black leading-tight text-white sm:text-3xl">{translated}</div>
                         <div className="line-clamp-2 text-xs leading-relaxed text-slate-300 sm:line-clamp-none sm:text-sm">
