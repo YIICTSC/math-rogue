@@ -387,8 +387,8 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
 
     // Special Logic Descriptions (Manual map for effects not covered by stats)
     const specialDescMap: Record<string, string> = {
-        '発見': 'カードを3枚生成', 'DISCOVERY': 'カードを3枚生成',
-        '錬金術': 'カードを1枚生成', 'ALCHEMIZE': 'カードを1枚生成',
+        '発見': 'ランダムなカードを3枚生成', 'DISCOVERY': 'ランダムなカードを3枚生成',
+        '錬金術': '0コストのカードを1枚生成', 'ALCHEMIZE': '0コストのカードを1枚生成',
         '山勘': '手札を全捨て＆ドロー', 'CALCULATED_GAMBLE': '手札を全捨て＆ドロー',
         'あがく': '0コスト以外を捨てる', 'SCRAPE': '0コスト以外を捨てる',
         '早退': 'HP30以下を消滅', 'EXPULSION': 'HP30以下を消滅',

@@ -33,7 +33,7 @@ export const ADDITIONAL_CARDS: Record<string, Omit<Card, 'id'>> = {
   SANSU_SOROBAN: { name: 'そろばん', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'エネルギー1を得る。手札を1枚捨てる。', energy: 1, promptsDiscard: 1, rarity: 'UNCOMMON', textureRef: 'NOTEBOOK|茶|SKILL' },
   SANSU_DIVISION: { name: '割り算', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '7ダメージ。対象をびくびく1にする。', damage: 7, vulnerable: 1, rarity: 'UNCOMMON', textureRef: 'DIVIDE|白|ATTACK' },
   SANSU_MULTIPLICATION: { name: '倍々ゲーム', cost: 2, type: CardType.SKILL, target: TargetType.SELF, description: 'ムキムキを倍にする。廃棄。', doubleStrength: true, exhaust: true, rarity: 'RARE', textureRef: 'FLAME|赤|SKILL' },
-  SANSU_ZERO: { name: 'ゼロの発見', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '「発見」の効果を得る。廃棄。', exhaust: true, rarity: 'RARE', textureRef: 'GEM|青|SKILL' },
+  SANSU_ZERO: { name: 'ゼロの発見', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '「発見」と同じくランダムなカード3枚を手札に加える。廃棄。', exhaust: true, rarity: 'RARE', textureRef: 'GEM|青|SKILL' },
   SANSU_INFINITY: { name: '無限大', cost: 3, type: CardType.POWER, target: TargetType.SELF, description: 'ターン開始時にエネルギー1を得る。', applyPower: { id: 'BERSERK_POWER', amount: 1 }, rarity: 'LEGENDARY', textureRef: 'LIGHTNING|紫|POWER' },
   SANSU_PERCENT: { name: 'パーセント増量', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '現在のブロック値を1.5倍にする。', blockMultiplier: 1.5, rarity: 'UNCOMMON', textureRef: 'SHIELD|白|SKILL' },
   SANSU_GEOMETRY: { name: '幾何学模様', cost: 2, type: CardType.POWER, target: TargetType.SELF, description: '被ダメージ時、ランダムな敵に5ダメージ。', applyPower: { id: 'STATIC_DISCHARGE', amount: 1 }, rarity: 'RARE', textureRef: 'GEM|青|POWER' },

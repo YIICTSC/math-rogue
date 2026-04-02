@@ -595,14 +595,14 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
     CORPSE_EXPLOSION: { name: '衝撃のうわさ', cost: 3, type: CardType.SKILL, target: TargetType.ENEMY, description: 'ドクドク6。たおすと全体に最大HPダメージ。', poison: 6, applyPower: { id: 'CORPSE_EXPLOSION', amount: 1 }, rarity: 'LEGENDARY', textureRef: 'GHOST|緑|SKILL' },
     MALAISE: { name: '不快感', cost: 2, type: CardType.SKILL, target: TargetType.ENEMY, description: 'ムキムキ低下2とへろへろ2。廃棄。', weak: 2, applyPower: { id: 'STRENGTH_DOWN', amount: 2 }, exhaust: true, rarity: 'RARE', textureRef: 'FIST|灰|SKILL' },
     BURST: { name: 'バースト', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '次のスキルを2回発動。', applyPower: { id: 'BURST', amount: 1 }, rarity: 'RARE', textureRef: 'FLAME|黄|SKILL' },
-    ALCHEMIZE: { name: '錬金術', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '手札にランダムなカードを加える。', rarity: 'RARE', textureRef: 'POTION|黄|SKILL' },
+    ALCHEMIZE: { name: '錬金術', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ランダムなカード1枚を0コストで手札に加える。', rarity: 'RARE', textureRef: 'POTION|黄|SKILL' },
     VAULT: { name: '大ジャンプ', cost: 3, type: CardType.SKILL, target: TargetType.SELF, description: '追加ターンを得る。廃棄。', exhaust: true, rarity: 'LEGENDARY', textureRef: 'SHOE|青|SKILL' },
     OFFERING_BLOOD: { name: '指切りげんまん', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '自分に4ダメージ、E2とドロー2。', selfDamage: 4, energy: 2, draw: 2, rarity: 'RARE', textureRef: 'NOTEBOOK|赤|SKILL' },
     BLADE_DANCE: { name: '工作の時間', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '手札にえんぴつの削りかす(0コス4ダメ)を3枚加える。', addCardToHand: { cardName: 'SHIV', count: 3, cost0: true }, rarity: 'COMMON', textureRef: 'SWORD|灰|SKILL' },
     CLOAK_AND_DAGGER: { name: '隠し芸', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック6。えんぴつの削りかす1枚得る。', block: 6, addCardToHand: { cardName: 'SHIV', count: 1, cost0: true }, rarity: 'COMMON', textureRef: 'SHIELD|灰|SKILL' },
     CALCULATED_GAMBLE: { name: '山勘', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '手札を全て捨て、同じ枚数引く。', rarity: 'UNCOMMON', textureRef: 'NOTEBOOK|黄|SKILL' },
     CATALYST: { name: '化学反応', cost: 1, type: CardType.SKILL, target: TargetType.ENEMY, description: 'ドクドクを2倍にする。廃棄。', poisonMultiplier: 2, exhaust: true, rarity: 'UNCOMMON', textureRef: 'POTION|緑|SKILL' },
-    DISCOVERY: { name: '発見', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ランダムなカードを手札に加える。', exhaust: true, rarity: 'UNCOMMON', textureRef: 'NOTEBOOK|白|SKILL' },
+    DISCOVERY: { name: '発見', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ランダムなカード3枚を手札に加える。', exhaust: true, rarity: 'UNCOMMON', textureRef: 'NOTEBOOK|白|SKILL' },
     STRATEGIST: { name: 'カンニングペーパー', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '使用不可。捨てられた時、次のターンにE2を得る。', unplayable: true, rarity: 'UNCOMMON', textureRef: 'NOTEBOOK|青|SKILL' },
     APOTHEOSIS: { name: '覚醒', cost: 2, type: CardType.SKILL, target: TargetType.SELF, description: 'この戦闘中、全カードを強化。廃棄。', upgradeDeck: true, exhaust: true, rarity: 'RARE', textureRef: 'FLAME|白|SKILL' },
     INFLAME: { name: 'やる気スイッチ', cost: 1, type: CardType.POWER, target: TargetType.SELF, description: 'ムキムキを2得る。', strength: 2, rarity: 'RARE', textureRef: 'FLAME|赤|POWER' },
@@ -1099,7 +1099,7 @@ export const VOUCHERS_LIBRARY: PokerVoucher[] = [
 export const UPDATED_CARDS: Record<string, Omit<Card, 'id'>> = {
     HOLOGRAM: { name: 'カンニング', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '手札のカードを1枚コピーする。', promptsCopy: 1, rarity: 'UNCOMMON', textureRef: 'NOTEBOOK|青|SKILL' },
     BERSERK: { name: '逆ギレ', cost: 0, type: CardType.POWER, target: TargetType.SELF, description: '自分にびくびく2を与える。毎ターンエネルギー1を得る。', applyPower: { id: 'BERSERK_POWER', amount: 1 }, vulnerable: 2, rarity: 'RARE', textureRef: 'FLAME|赤|POWER' },
-    DISCOVERY: { name: '発見', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ランダムなカードを手札に加える。', exhaust: true, rarity: 'UNCOMMON', textureRef: 'NOTEBOOK|白|SKILL' },
+    DISCOVERY: { name: '発見', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ランダムなカード3枚を手札に加える。', exhaust: true, rarity: 'UNCOMMON', textureRef: 'NOTEBOOK|白|SKILL' },
 };
 
 // Merge Update
