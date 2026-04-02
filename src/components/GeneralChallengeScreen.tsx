@@ -82,9 +82,106 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       ? MAP_SYMBOL_ASSET_MAP[currentProblem.visual.symbol]
       : undefined;
 
+  const canonicalizeEnglishNumbers = (value: string) => {
+    const smallNumberWords: Record<string, number> = {
+      zero: 0,
+      one: 1,
+      two: 2,
+      three: 3,
+      four: 4,
+      five: 5,
+      six: 6,
+      seven: 7,
+      eight: 8,
+      nine: 9,
+      ten: 10,
+      eleven: 11,
+      twelve: 12,
+      thirteen: 13,
+      fourteen: 14,
+      fifteen: 15,
+      sixteen: 16,
+      seventeen: 17,
+      eighteen: 18,
+      nineteen: 19,
+    };
+    const tensNumberWords: Record<string, number> = {
+      twenty: 20,
+      thirty: 30,
+      forty: 40,
+      fifty: 50,
+      sixty: 60,
+      seventy: 70,
+      eighty: 80,
+      ninety: 90,
+    };
+    const tokens = String(value || '')
+      .replace(/-/g, ' ')
+      .match(/\d+|[a-zA-Z]+|[^\s]/g);
+
+    if (!tokens) return String(value || '');
+
+    const normalizedTokens: string[] = [];
+
+    for (let i = 0; i < tokens.length; i += 1) {
+      const token = tokens[i];
+      const lower = token.toLowerCase();
+
+      if (/^\d+$/.test(token)) {
+        normalizedTokens.push(token);
+        continue;
+      }
+
+      if (!(lower in smallNumberWords) && !(lower in tensNumberWords) && lower !== 'hundred' && lower !== 'thousand') {
+        normalizedTokens.push(token);
+        continue;
+      }
+
+      let total = 0;
+      let current = 0;
+      let consumed = 0;
+
+      for (let j = i; j < tokens.length; j += 1) {
+        const part = tokens[j].toLowerCase();
+        if (part in smallNumberWords) {
+          current += smallNumberWords[part];
+          consumed += 1;
+          continue;
+        }
+        if (part in tensNumberWords) {
+          current += tensNumberWords[part];
+          consumed += 1;
+          continue;
+        }
+        if (part === 'hundred') {
+          current = Math.max(1, current) * 100;
+          consumed += 1;
+          continue;
+        }
+        if (part === 'thousand') {
+          total += Math.max(1, current) * 1000;
+          current = 0;
+          consumed += 1;
+          continue;
+        }
+        break;
+      }
+
+      if (consumed > 0) {
+        normalizedTokens.push(String(total + current));
+        i += consumed - 1;
+        continue;
+      }
+
+      normalizedTokens.push(token);
+    }
+
+    return normalizedTokens.join(' ');
+  };
+
   const normalize = (s: string) => {
     if (!s) return "";
-    return s
+    return canonicalizeEnglishNumbers(s)
       .replace(/’/g, "'")
       .replace(/\bI'm\b/gi, 'I am')
       .replace(/\byou're\b/gi, 'you are')
