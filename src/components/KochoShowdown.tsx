@@ -418,6 +418,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [showRelicModal, setShowRelicModal] = useState(false);
     const [showHelpModal, setShowHelpModal] = useState(false); // Help Modal
     const [showItemModal, setShowItemModal] = useState(false); // Item Modal
+    const [activeIntentTooltipEnemyId, setActiveIntentTooltipEnemyId] = useState<string | null>(null);
     const hitStopTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const announcementTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -1984,6 +1985,37 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         handlePhaseComplete();
     };
 
+    const getIntentTooltip = (enemy: KEntity): { title: string; detail: string } | null => {
+        if (!enemy.intent) return null;
+
+        if (enemy.intent.type === 'ATTACK') {
+            const hitIn = Math.max(0, enemy.intent.timer - 1);
+            return {
+                title: '攻撃予告',
+                detail: `あと${hitIn}ターンで攻撃`,
+            };
+        }
+        if (enemy.intent.type === 'WAIT') {
+            return {
+                title: '待機',
+                detail: `行動まで残り${enemy.intent.timer}ターン`,
+            };
+        }
+        if (enemy.intent.type === 'SUMMON') {
+            return {
+                title: '召喚予告',
+                detail: enemy.intent.summonTarget ? `${enemy.intent.summonTarget}を呼び出す` : '仲間を呼び出す',
+            };
+        }
+        if (enemy.intent.type === 'SPECIAL') {
+            return {
+                title: '特殊行動予告',
+                detail: enemy.intent.specialName ? enemy.intent.specialName : 'ボススキル',
+            };
+        }
+        return null;
+    };
+
     // --- RENDER HELPERS ---
     const getGridContent = (idx: number) => {
         const p = gameState.player;
@@ -2058,32 +2090,44 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         <div className={`transition-transform duration-200 ${e.facing === -1 ? 'scale-x-[-1]' : ''}`}>
                             <PixelSprite seed={e.id} name={e.spriteName} className="w-16 h-16 md:w-32 md:h-32"/>
                         </div>
-                        {e.intent && e.intent.type === 'ATTACK' && e.intent.timer === 1 && (
-                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce z-20">
-                                <div className="bg-red-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center">
-                                    <Swords size={12} className="mr-1"/> !
-                                </div>
-                            </div>
-                        )}
-                        {e.intent && e.intent.type === 'WAIT' && (
-                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center z-20">
-                                <div className="bg-gray-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center">
-                                    <Hourglass size={12} className="mr-1"/> {e.intent.timer}
-                                </div>
-                            </div>
-                        )}
-                        {e.intent && e.intent.type === 'SUMMON' && (
-                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center z-20">
-                                <div className="bg-purple-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center">
-                                    <Ghost size={12} className="mr-1"/> !
-                                </div>
-                            </div>
-                        )}
-                        {e.intent && e.intent.type === 'SPECIAL' && (
-                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center z-20 animate-pulse">
-                                <div className="bg-orange-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center">
-                                    <AlertTriangle size={12} className="mr-1"/> SP!
-                                </div>
+                        {e.intent && (
+                            <div
+                                className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center z-20 group"
+                                onMouseEnter={() => setActiveIntentTooltipEnemyId(e.id)}
+                                onMouseLeave={() => setActiveIntentTooltipEnemyId(prev => (prev === e.id ? null : prev))}
+                                onTouchStart={(event) => {
+                                    event.preventDefault();
+                                    setActiveIntentTooltipEnemyId(prev => (prev === e.id ? null : e.id));
+                                }}
+                            >
+                                {e.intent.type === 'ATTACK' && e.intent.timer === 1 && (
+                                    <div className="bg-red-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center animate-bounce">
+                                        <Swords size={12} className="mr-1"/> !
+                                    </div>
+                                )}
+                                {e.intent.type === 'WAIT' && (
+                                    <div className="bg-gray-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center">
+                                        <Hourglass size={12} className="mr-1"/> {e.intent.timer}
+                                    </div>
+                                )}
+                                {e.intent.type === 'SUMMON' && (
+                                    <div className="bg-purple-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center">
+                                        <Ghost size={12} className="mr-1"/> !
+                                    </div>
+                                )}
+                                {e.intent.type === 'SPECIAL' && (
+                                    <div className="bg-orange-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center animate-pulse">
+                                        <AlertTriangle size={12} className="mr-1"/> SP!
+                                    </div>
+                                )}
+                                {getIntentTooltip(e) && (
+                                    <div
+                                        className={`pointer-events-none absolute left-1/2 top-[-56px] w-max -translate-x-1/2 rounded border border-cyan-300/60 bg-slate-900/95 px-2 py-1 text-[10px] text-cyan-100 shadow-lg transition-opacity duration-150 ${activeIntentTooltipEnemyId === e.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                                    >
+                                        <div className="font-bold leading-tight">{getIntentTooltip(e)?.title}</div>
+                                        <div className="leading-tight text-cyan-200/90">{getIntentTooltip(e)?.detail}</div>
+                                    </div>
+                                )}
                             </div>
                         )}
                         <div className="absolute -bottom-6 w-16 text-center bg-black/50 text-white text-xs rounded border border-red-500">{e.hp}/{e.maxHp}</div>
