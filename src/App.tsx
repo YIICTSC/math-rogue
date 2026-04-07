@@ -5756,12 +5756,12 @@ const App: React.FC = () => {
                     if (intent.type === EnemyIntentType.DEFEND || intent.type === EnemyIntentType.ATTACK_DEFEND) {
                         e.block += intent.value;
                         if (intent.type === EnemyIntentType.ATTACK_DEFEND && intent.secondaryValue) e.block = intent.secondaryValue;
-                        newLogs.push(`${trans(e.name, languageMode)}は防御を固めた`);
+                        newLogs.push(`${trans(e.name, languageMode)}は防御を固めた (ブロック${e.block})`);
                         nextActiveEffects.push({ id: `vfx-eblk-self-${Date.now()}`, type: 'BLOCK', targetId: e.id });
                     }
                     if (intent.type === EnemyIntentType.BUFF) {
                         e.strength += (intent.secondaryValue || 2);
-                        newLogs.push(`${trans(e.name, languageMode)}は力を溜めた`);
+                        newLogs.push(`${trans(e.name, languageMode)}は力を溜めた (ムキムキ+${intent.secondaryValue || 2})`);
                         nextActiveEffects.push({ id: `vfx-ebuff-${Date.now()}`, type: 'BUFF', targetId: e.id });
                     }
                     if (intent.type === EnemyIntentType.DEBUFF || intent.type === EnemyIntentType.ATTACK_DEBUFF) {
@@ -5772,13 +5772,22 @@ const App: React.FC = () => {
                         } else {
                             const debuffAmt = intent.secondaryValue || 1;
                             const type = intent.debuffType;
-                            if (type === 'WEAK') p.powers['WEAK'] = (p.powers['WEAK'] || 0) + debuffAmt;
-                            if (type === 'VULNERABLE') p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + debuffAmt;
-                            if (type === 'CONFUSED') p.powers['CONFUSED'] = (p.powers['CONFUSED'] || 0) + debuffAmt;
+                            if (type === 'WEAK') {
+                                p.powers['WEAK'] = (p.powers['WEAK'] || 0) + debuffAmt;
+                                newLogs.push(`${trans(e.name, languageMode)}の妨害でへろへろ${debuffAmt}`);
+                            }
+                            if (type === 'VULNERABLE') {
+                                p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + debuffAmt;
+                                newLogs.push(`${trans(e.name, languageMode)}の妨害でびくびく${debuffAmt}`);
+                            }
+                            if (type === 'CONFUSED') {
+                                p.powers['CONFUSED'] = (p.powers['CONFUSED'] || 0) + debuffAmt;
+                                newLogs.push(`${trans(e.name, languageMode)}の妨害で混乱${debuffAmt}`);
+                            }
                             if (type === 'POISON') {
                                 const status = { ...STATUS_CARDS.SLIMED, id: `slime-${Date.now()}` };
                                 p.discardPile.push(status);
-                                newLogs.push(trans("粘液を混ぜられた", languageMode));
+                                newLogs.push(`${trans(e.name, languageMode)}に${trans("粘液を混ぜられた", languageMode)}`);
                             }
                             nextActiveEffects.push({ id: `vfx-edbuff-${Date.now()}`, type: 'DEBUFF', targetId: 'player' });
                         }

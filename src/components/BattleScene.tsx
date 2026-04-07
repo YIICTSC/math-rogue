@@ -454,6 +454,38 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         setTooltip({ title, msg: desc });
     };
 
+    const getIntentHoverText = (enemy: Enemy): string => {
+        const intent = enemy.nextIntent;
+        switch (intent.type) {
+            case EnemyIntentType.ATTACK:
+                return `通常攻撃: ${intent.value}ダメージ`;
+            case EnemyIntentType.DEFEND:
+                return `防御: ブロック${intent.value}`;
+            case EnemyIntentType.ATTACK_DEFEND:
+                return `攻撃しつつ防御: ${intent.value}ダメージ / ブロック${intent.secondaryValue ?? intent.value}`;
+            case EnemyIntentType.ATTACK_DEBUFF: {
+                const debuffLabelMap: Record<string, string> = {
+                    WEAK: 'へろへろ',
+                    VULNERABLE: 'びくびく',
+                    POISON: '粘液(状態異常カード)',
+                    CONFUSED: '混乱'
+                };
+                const debuffLabel = intent.debuffType ? (debuffLabelMap[intent.debuffType] ?? intent.debuffType) : 'デバフ';
+                return `特殊攻撃: ${intent.value}ダメージ + ${debuffLabel}${intent.secondaryValue ? ` ${intent.secondaryValue}` : ''}`;
+            }
+            case EnemyIntentType.PIERCE_ATTACK:
+                return `特殊攻撃: 防御貫通で${intent.value}ダメージ`;
+            case EnemyIntentType.BUFF:
+                return `強化行動: ムキムキ+${intent.secondaryValue || 2}`;
+            case EnemyIntentType.DEBUFF:
+                return `妨害行動: ${intent.debuffType || 'デバフ'}${intent.secondaryValue ? ` ${intent.secondaryValue}` : ''}`;
+            case EnemyIntentType.SLEEP:
+                return '睡眠中: 何もしない';
+            default:
+                return '次の行動は不明';
+        }
+    };
+
     const getProcessedDescription = (card: ICard) => {
         // 数値置換の前に、まず文章全体をtransにかける
         let desc = trans(card.description, languageMode);
@@ -1025,6 +1057,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     <div
                                         className={`absolute ${isTrueBossPhase2 ? '-top-1 md:-top-6' : '-top-6'} left-1/2 -translate-x-1/2 z-30 transition-all duration-300 text-xs font-extrabold px-1.5 py-0.5 rounded border-2 animate-bounce whitespace-nowrap shadow-xl flex items-center justify-center min-w-[40px] ${hideEnemyIntents ? 'bg-slate-900 text-slate-100 border-slate-500' : enemy.nextIntent.type === 'PIERCE_ATTACK' ? 'bg-red-800 text-white border-yellow-400 scale-125 ring-2 ring-red-400 shadow-red-900/50' : 'bg-white text-black border-red-600'}`}
                                         onClick={(e) => { e.stopPropagation(); showInfo(trans("敵", languageMode), trans("敵の次の行動です。", languageMode)); }}
+                                        title={hideEnemyIntents ? "???" : trans(getIntentHoverText(enemy), languageMode)}
                                     >
                                         {hideEnemyIntents ? (
                                             <span className="tracking-[0.25em]">???</span>
@@ -1040,7 +1073,15 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                         ) : (
                                                             <Skull size={12} className="mr-1 text-red-600" />
                                                         )}
-                                                        {enemy.nextIntent.value}
+                                                        <span className="inline-flex items-center">
+                                                            {enemy.nextIntent.value}
+                                                        </span>
+                                                        {enemy.nextIntent.type === 'ATTACK_DEFEND' && (
+                                                            <span className="inline-flex items-center ml-1.5 text-blue-600">
+                                                                <Shield size={11} className="mr-0.5" />
+                                                                {enemy.nextIntent.secondaryValue ?? enemy.nextIntent.value}
+                                                            </span>
+                                                        )}
                                                     </>
                                                 )}
                                                 {enemy.nextIntent.type === 'DEFEND' && (
