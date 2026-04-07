@@ -1,5 +1,5 @@
 import { GeneralProblem } from './utils';
-import { buildListeningReviewUnit, buildRepeatReviewUnit, buildResponseReviewUnit, buildSpeakingReviewUnit, buildWordUnit, cycleProblems, EnglishResponseItem, EnglishWordItem, uniqueEnglishWordItems } from './english_utils';
+import { buildListeningReviewUnit, buildRepeatReviewUnit, buildResponseReviewUnit, buildSpeakingReviewUnit, buildWordUnit, buildFixedChoiceUnit, cycleProblems, EnglishResponseItem, EnglishWordItem, uniqueEnglishWordItems } from './english_utils';
 
 const selfIntro: EnglishWordItem[] = [
   { en: 'I am in sixth grade.', jp: 'わたしは 6年生です。', speech: 'I am in sixth grade' },
@@ -126,16 +126,16 @@ const g6ResponseItems: EnglishResponseItem[] = [
 ];
 
 export const ENGLISH_G6_UNIT_DATA: Record<string, GeneralProblem[]> = {
-  ENGLISH_G6_U01: cycleProblems(buildWordUnit(selfIntro, { enableListening: true, enableSpeaking: true })),
-  ENGLISH_G6_U02: cycleProblems(buildWordUnit(dreams, { enableListening: true, enableSpeaking: true })),
-  ENGLISH_G6_U03: cycleProblems(buildWordUnit(dailyLife, { enableListening: true, enableSpeaking: true })),
-  ENGLISH_G6_U04: cycleProblems(buildWordUnit(japaneseCulture, { enableListening: true, enableSpeaking: true })),
-  ENGLISH_G6_U05: cycleProblems(buildWordUnit(countries, { enableListening: true, enableSpeaking: true })),
-  ENGLISH_G6_U06: cycleProblems(buildWordUnit(memories, { enableListening: true, enableSpeaking: true })),
-  ENGLISH_G6_U07: cycleProblems(buildWordUnit(pastEvents, { enableListening: true })),
-  ENGLISH_G6_U08: cycleProblems(buildWordUnit(favorites, { enableListening: true, enableSpeaking: true })),
-  ENGLISH_G6_U09: cycleProblems(buildWordUnit(worldCulture, { enableListening: true })),
-  ENGLISH_G6_U10: cycleProblems(buildWordUnit(futurePlans, { enableListening: true, enableSpeaking: true })),
+  ENGLISH_G6_U01: [...buildFixedChoiceUnit(selfIntro, '自己紹介'), ...cycleProblems(buildWordUnit(selfIntro, { enableListening: true, enableSpeaking: true }))],
+  ENGLISH_G6_U02: [...buildFixedChoiceUnit(dreams, '将来の夢'), ...cycleProblems(buildWordUnit(dreams, { enableListening: true, enableSpeaking: true }))],
+  ENGLISH_G6_U03: [...buildFixedChoiceUnit(dailyLife, '日常生活'), ...cycleProblems(buildWordUnit(dailyLife, { enableListening: true, enableSpeaking: true }))],
+  ENGLISH_G6_U04: [...buildFixedChoiceUnit(japaneseCulture, '日本文化紹介'), ...cycleProblems(buildWordUnit(japaneseCulture, { enableListening: true, enableSpeaking: true }))],
+  ENGLISH_G6_U05: [...buildFixedChoiceUnit(countries, '行きたい国'), ...cycleProblems(buildWordUnit(countries, { enableListening: true, enableSpeaking: true }))],
+  ENGLISH_G6_U06: [...buildFixedChoiceUnit(memories, '思い出'), ...cycleProblems(buildWordUnit(memories, { enableListening: true, enableSpeaking: true }))],
+  ENGLISH_G6_U07: [...buildFixedChoiceUnit(pastEvents, '過去の出来事'), ...cycleProblems(buildWordUnit(pastEvents, { enableListening: true }))],
+  ENGLISH_G6_U08: [...buildFixedChoiceUnit(favorites, '好きなもの'), ...cycleProblems(buildWordUnit(favorites, { enableListening: true, enableSpeaking: true }))],
+  ENGLISH_G6_U09: [...buildFixedChoiceUnit(worldCulture, '世界の文化'), ...cycleProblems(buildWordUnit(worldCulture, { enableListening: true }))],
+  ENGLISH_G6_U10: [...buildFixedChoiceUnit(futurePlans, '将来の計画'), ...cycleProblems(buildWordUnit(futurePlans, { enableListening: true, enableSpeaking: true }))],
   ENGLISH_G6_U11: buildListeningReviewUnit(g6ReviewItems, '6年生の ことばを きいて、あてはまる 英語を えらぼう。'),
   ENGLISH_G6_U12: buildSpeakingReviewUnit(g6ReviewItems, '6年生の ことばを 英語で いってみよう。'),
   ENGLISH_G6_U13: buildRepeatReviewUnit(g6ReviewItems, '6年生の ことばを きいて、英語を くりかえそう。'),

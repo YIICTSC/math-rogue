@@ -152,6 +152,43 @@ export const buildWordUnit = (
   return problems;
 };
 
+export const buildFixedChoiceUnit = (
+  items: EnglishWordItem[],
+  unitTitle: string,
+): GeneralProblem[] => {
+  if (items.length === 0) return [];
+  const enPool = items.map((item) => item.en);
+  const jpPool = items.map((item) => item.jp);
+  const fixed: GeneralProblem[] = [];
+
+  items.forEach((item, index) => {
+    fixed.push({
+      question: `【${unitTitle}】「${item.en}」の意味として正しいものを1つ選ぼう。`,
+      answer: item.jp,
+      options: d(item.jp, ...pickDistinct(jpPool, item.jp, index + 1, 3)),
+      hint: '単語の意味を確認しよう。',
+    });
+    fixed.push({
+      question: `【${unitTitle}】「${item.jp}」を英語で表すとどれ？`,
+      answer: item.en,
+      options: d(item.en, ...pickDistinct(enPool, item.en, index + 2, 3)),
+      hint: '英語表現を選ぼう。',
+    });
+  });
+
+  while (fixed.length < 20) {
+    const item = items[fixed.length % items.length];
+    fixed.push({
+      question: `【${unitTitle}】復習：${item.jp} に当てはまる英語は？`,
+      answer: item.en,
+      options: d(item.en, ...pickDistinct(enPool, item.en, fixed.length + 1, 3)),
+      hint: '4つの選択肢から選ぼう。',
+    });
+  }
+
+  return fixed;
+};
+
 export const buildListeningReviewUnit = (items: EnglishWordItem[], promptText = '学年の ことばを きいて、あてはまる 英語を えらぼう。'): GeneralProblem[] => {
   const enPool = items.map((item) => item.en);
   const jpPool = items.map((item) => item.jp);

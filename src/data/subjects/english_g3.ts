@@ -1,5 +1,5 @@
 import { GeneralProblem } from './utils';
-import { buildListeningReviewUnit, buildRepeatReviewUnit, buildResponseReviewUnit, buildSpeakingReviewUnit, buildWordUnit, cycleProblems, EnglishResponseItem, EnglishWordItem, uniqueEnglishWordItems } from './english_utils';
+import { buildListeningReviewUnit, buildRepeatReviewUnit, buildResponseReviewUnit, buildSpeakingReviewUnit, buildWordUnit, buildFixedChoiceUnit, cycleProblems, EnglishResponseItem, EnglishWordItem, uniqueEnglishWordItems } from './english_utils';
 
 const greetings: EnglishWordItem[] = [
   { en: 'Hello', jp: 'こんにちは', speechAlternates: ['hello there'] },
@@ -148,16 +148,16 @@ const g3ResponseItems: EnglishResponseItem[] = [
 ];
 
 export const ENGLISH_G3_UNIT_DATA: Record<string, GeneralProblem[]> = {
-  ENGLISH_G3_U01: cycleProblems(buildWordUnit(greetings, { enableListening: true, enableSpeaking: true })),
-  ENGLISH_G3_U02: cycleProblems(buildWordUnit(selfIntro, { enableListening: true, enableSpeaking: true })),
-  ENGLISH_G3_U03: cycleProblems(buildWordUnit(favorites, { enableListening: true, enableSpeaking: true })),
-  ENGLISH_G3_U04: cycleProblems(buildWordUnit(family, { enableListening: true })),
-  ENGLISH_G3_U05: cycleProblems(buildWordUnit(colors, { enableListening: true })),
-  ENGLISH_G3_U06: cycleProblems(buildWordUnit(numbers, { enableListening: true, listeningPrompt: 'おとを きいて、あてはまる 数を えらぼう。' })),
-  ENGLISH_G3_U07: cycleProblems(buildWordUnit(animals, { enableListening: true })),
-  ENGLISH_G3_U08: cycleProblems(buildWordUnit(foods, { enableListening: true })),
-  ENGLISH_G3_U09: cycleProblems(buildWordUnit(feelings, { enableListening: true, enableSpeaking: true })),
-  ENGLISH_G3_U10: cycleProblems(buildWordUnit(body, { enableListening: true })),
+  ENGLISH_G3_U01: [...buildFixedChoiceUnit(greetings, 'あいさつ'), ...cycleProblems(buildWordUnit(greetings, { enableListening: true, enableSpeaking: true }))],
+  ENGLISH_G3_U02: [...buildFixedChoiceUnit(selfIntro, 'じこしょうかい'), ...cycleProblems(buildWordUnit(selfIntro, { enableListening: true, enableSpeaking: true }))],
+  ENGLISH_G3_U03: [...buildFixedChoiceUnit(favorites, 'すきなもの'), ...cycleProblems(buildWordUnit(favorites, { enableListening: true, enableSpeaking: true }))],
+  ENGLISH_G3_U04: [...buildFixedChoiceUnit(family, 'かぞく'), ...cycleProblems(buildWordUnit(family, { enableListening: true }))],
+  ENGLISH_G3_U05: [...buildFixedChoiceUnit(colors, 'いろ'), ...cycleProblems(buildWordUnit(colors, { enableListening: true }))],
+  ENGLISH_G3_U06: [...buildFixedChoiceUnit(numbers, 'かず（1〜20）'), ...cycleProblems(buildWordUnit(numbers, { enableListening: true, listeningPrompt: 'おとを きいて、あてはまる 数を えらぼう。' }))],
+  ENGLISH_G3_U07: [...buildFixedChoiceUnit(animals, 'どうぶつ'), ...cycleProblems(buildWordUnit(animals, { enableListening: true }))],
+  ENGLISH_G3_U08: [...buildFixedChoiceUnit(foods, 'くだもの・たべもの'), ...cycleProblems(buildWordUnit(foods, { enableListening: true }))],
+  ENGLISH_G3_U09: [...buildFixedChoiceUnit(feelings, 'きぶん'), ...cycleProblems(buildWordUnit(feelings, { enableListening: true, enableSpeaking: true }))],
+  ENGLISH_G3_U10: [...buildFixedChoiceUnit(body, 'からだのぶぶん'), ...cycleProblems(buildWordUnit(body, { enableListening: true }))],
   ENGLISH_G3_U11: buildListeningReviewUnit(g3ReviewItems, '3年生の ことばを きいて、あてはまる 英語を えらぼう。'),
   ENGLISH_G3_U12: buildSpeakingReviewUnit(g3ReviewItems, '3年生の ことばを 英語で いってみよう。'),
   ENGLISH_G3_U13: buildRepeatReviewUnit(g3ReviewItems, '3年生の ことばを きいて、英語を くりかえそう。'),
