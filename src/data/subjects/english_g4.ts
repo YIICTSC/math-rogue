@@ -1,5 +1,5 @@
 import { GeneralProblem } from './utils';
-import { buildListeningReviewUnit, buildRepeatReviewUnit, buildResponseReviewUnit, buildSpeakingReviewUnit, buildWordUnit, cycleProblems, EnglishResponseItem, EnglishWordItem, uniqueEnglishWordItems } from './english_utils';
+import { buildListeningReviewUnit, buildRepeatReviewUnit, buildResponseReviewUnit, buildSpeakingReviewUnit, buildWordUnit, buildFixedChoiceUnit, cycleProblems, EnglishResponseItem, EnglishWordItem, uniqueEnglishWordItems } from './english_utils';
 
 const greetingsTalk: EnglishWordItem[] = [
   { en: 'How are you?', jp: 'げんきですか。', speech: 'How are you' },
@@ -130,16 +130,16 @@ const g4ResponseItems: EnglishResponseItem[] = [
 ];
 
 export const ENGLISH_G4_UNIT_DATA: Record<string, GeneralProblem[]> = {
-  ENGLISH_G4_U01: cycleProblems(buildWordUnit(greetingsTalk, { enableListening: true, enableSpeaking: true })),
-  ENGLISH_G4_U02: cycleProblems(buildWordUnit(subjects, { enableListening: true })),
-  ENGLISH_G4_U03: cycleProblems(buildWordUnit(dailyLife, { enableListening: true, enableSpeaking: true })),
-  ENGLISH_G4_U04: cycleProblems(buildWordUnit(weather, { enableListening: true })),
-  ENGLISH_G4_U05: cycleProblems(buildWordUnit(times, { enableListening: true, enableSpeaking: true })),
-  ENGLISH_G4_U06: cycleProblems(buildWordUnit(stationery, { enableListening: true })),
-  ENGLISH_G4_U07: cycleProblems(buildWordUnit(places, { enableListening: true })),
-  ENGLISH_G4_U08: cycleProblems(buildWordUnit(schoolPlaces, { enableListening: true })),
-  ENGLISH_G4_U09: cycleProblems(buildWordUnit(foods, { enableListening: true, enableSpeaking: true })),
-  ENGLISH_G4_U10: cycleProblems(buildWordUnit(japaneseCulture, { enableListening: true })),
+  ENGLISH_G4_U01: [...buildFixedChoiceUnit(greetingsTalk, 'あいさつと会話'), ...cycleProblems(buildWordUnit(greetingsTalk, { enableListening: true, enableSpeaking: true }))],
+  ENGLISH_G4_U02: [...buildFixedChoiceUnit(subjects, 'すきな教科'), ...cycleProblems(buildWordUnit(subjects, { enableListening: true }))],
+  ENGLISH_G4_U03: [...buildFixedChoiceUnit(dailyLife, '一日の生活'), ...cycleProblems(buildWordUnit(dailyLife, { enableListening: true, enableSpeaking: true }))],
+  ENGLISH_G4_U04: [...buildFixedChoiceUnit(weather, '天気'), ...cycleProblems(buildWordUnit(weather, { enableListening: true }))],
+  ENGLISH_G4_U05: [...buildFixedChoiceUnit(times, '時こく'), ...cycleProblems(buildWordUnit(times, { enableListening: true, enableSpeaking: true }))],
+  ENGLISH_G4_U06: [...buildFixedChoiceUnit(stationery, '文ぼうぐ'), ...cycleProblems(buildWordUnit(stationery, { enableListening: true }))],
+  ENGLISH_G4_U07: [...buildFixedChoiceUnit(places, '場所'), ...cycleProblems(buildWordUnit(places, { enableListening: true }))],
+  ENGLISH_G4_U08: [...buildFixedChoiceUnit(schoolPlaces, '学校の中'), ...cycleProblems(buildWordUnit(schoolPlaces, { enableListening: true }))],
+  ENGLISH_G4_U09: [...buildFixedChoiceUnit(foods, 'すきな食べ物'), ...cycleProblems(buildWordUnit(foods, { enableListening: true, enableSpeaking: true }))],
+  ENGLISH_G4_U10: [...buildFixedChoiceUnit(japaneseCulture, '日本の文化しょうかい'), ...cycleProblems(buildWordUnit(japaneseCulture, { enableListening: true }))],
   ENGLISH_G4_U11: buildListeningReviewUnit(g4ReviewItems, '4年生の ことばを きいて、あてはまる 英語を えらぼう。'),
   ENGLISH_G4_U12: buildSpeakingReviewUnit(g4ReviewItems, '4年生の ことばを 英語で いってみよう。'),
   ENGLISH_G4_U13: buildRepeatReviewUnit(g4ReviewItems, '4年生の ことばを きいて、英語を くりかえそう。'),

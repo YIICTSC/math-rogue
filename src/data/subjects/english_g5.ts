@@ -1,5 +1,5 @@
 import { GeneralProblem } from './utils';
-import { buildListeningReviewUnit, buildRepeatReviewUnit, buildResponseReviewUnit, buildSpeakingReviewUnit, buildWordUnit, cycleProblems, EnglishResponseItem, EnglishWordItem, uniqueEnglishWordItems } from './english_utils';
+import { buildListeningReviewUnit, buildRepeatReviewUnit, buildResponseReviewUnit, buildSpeakingReviewUnit, buildWordUnit, buildFixedChoiceUnit, cycleProblems, EnglishResponseItem, EnglishWordItem, uniqueEnglishWordItems } from './english_utils';
 
 const alphabet: EnglishWordItem[] = [
   { en: 'A', jp: 'エー', speech: 'A' },
@@ -140,16 +140,16 @@ const g5ResponseItems: EnglishResponseItem[] = [
 ];
 
 export const ENGLISH_G5_UNIT_DATA: Record<string, GeneralProblem[]> = {
-  ENGLISH_G5_U01: cycleProblems(buildWordUnit(alphabet, { enableListening: true, enableSpeaking: true })),
-  ENGLISH_G5_U02: cycleProblems(buildWordUnit(selfIntro, { enableListening: true, enableSpeaking: true })),
-  ENGLISH_G5_U03: cycleProblems(buildWordUnit(family, { enableListening: true, enableSpeaking: true })),
-  ENGLISH_G5_U04: cycleProblems(buildWordUnit(birthdays, { enableListening: true })),
-  ENGLISH_G5_U05: cycleProblems(buildWordUnit(favorites, { enableListening: true, enableSpeaking: true })),
-  ENGLISH_G5_U06: cycleProblems(buildWordUnit(schoolLife, { enableListening: true, enableSpeaking: true })),
-  ENGLISH_G5_U07: cycleProblems(buildWordUnit(weekdays, { enableListening: true })),
-  ENGLISH_G5_U08: cycleProblems(buildWordUnit(times, { enableListening: true, enableSpeaking: true })),
-  ENGLISH_G5_U09: cycleProblems(buildWordUnit(canDo, { enableListening: true, enableSpeaking: true })),
-  ENGLISH_G5_U10: cycleProblems(buildWordUnit(places, { enableListening: true, enableSpeaking: true })),
+  ENGLISH_G5_U01: [...buildFixedChoiceUnit(alphabet, 'アルファベット'), ...cycleProblems(buildWordUnit(alphabet, { enableListening: true, enableSpeaking: true }))],
+  ENGLISH_G5_U02: [...buildFixedChoiceUnit(selfIntro, '自己紹介'), ...cycleProblems(buildWordUnit(selfIntro, { enableListening: true, enableSpeaking: true }))],
+  ENGLISH_G5_U03: [...buildFixedChoiceUnit(family, '家族'), ...cycleProblems(buildWordUnit(family, { enableListening: true, enableSpeaking: true }))],
+  ENGLISH_G5_U04: [...buildFixedChoiceUnit(birthdays, '誕生日'), ...cycleProblems(buildWordUnit(birthdays, { enableListening: true }))],
+  ENGLISH_G5_U05: [...buildFixedChoiceUnit(favorites, '好きなもの'), ...cycleProblems(buildWordUnit(favorites, { enableListening: true, enableSpeaking: true }))],
+  ENGLISH_G5_U06: [...buildFixedChoiceUnit(schoolLife, '学校生活'), ...cycleProblems(buildWordUnit(schoolLife, { enableListening: true, enableSpeaking: true }))],
+  ENGLISH_G5_U07: [...buildFixedChoiceUnit(weekdays, '曜日'), ...cycleProblems(buildWordUnit(weekdays, { enableListening: true }))],
+  ENGLISH_G5_U08: [...buildFixedChoiceUnit(times, '時こく'), ...cycleProblems(buildWordUnit(times, { enableListening: true, enableSpeaking: true }))],
+  ENGLISH_G5_U09: [...buildFixedChoiceUnit(canDo, 'できること（can）'), ...cycleProblems(buildWordUnit(canDo, { enableListening: true, enableSpeaking: true }))],
+  ENGLISH_G5_U10: [...buildFixedChoiceUnit(places, '行きたい場所'), ...cycleProblems(buildWordUnit(places, { enableListening: true, enableSpeaking: true }))],
   ENGLISH_G5_U11: buildListeningReviewUnit(g5ReviewItems, '5年生の ことばを きいて、あてはまる 英語を えらぼう。'),
   ENGLISH_G5_U12: buildSpeakingReviewUnit(g5ReviewItems, '5年生の ことばを 英語で いってみよう。'),
   ENGLISH_G5_U13: buildRepeatReviewUnit(g5ReviewItems, '5年生の ことばを きいて、英語を くりかえそう。'),
