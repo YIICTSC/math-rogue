@@ -8044,6 +8044,26 @@ const App: React.FC = () => {
 
             if (data.type === 'COOP_PLAYER_SNAPSHOT' && coopSession.isHost && fromPeerId) {
                 upsertCoopPlayerSnapshot(fromPeerId, data.player);
+                setGameState(prev => {
+                    if (!prev.coopBattleState) return prev;
+                    const hasTargetEntry = prev.coopBattleState.players.some(entry => entry.peerId === fromPeerId);
+                    if (!hasTargetEntry) return prev;
+                    return {
+                        ...prev,
+                        coopBattleState: {
+                            ...prev.coopBattleState,
+                            players: prev.coopBattleState.players.map(entry =>
+                                entry.peerId === fromPeerId
+                                    ? {
+                                        ...entry,
+                                        player: data.player,
+                                        isDown: data.player.currentHp <= 0
+                                    }
+                                    : entry
+                            )
+                        }
+                    };
+                });
                 return;
             }
 
