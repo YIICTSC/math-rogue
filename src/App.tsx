@@ -602,6 +602,27 @@ const App: React.FC = () => {
         return () => window.removeEventListener('resize', syncMobilePortrait);
     }, []);
 
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const params = new URLSearchParams(window.location.search);
+        const hasVsPin = ((params.get('vsPin') || '').normalize('NFKC').replace(/[^0-9]/g, '').slice(0, 6)).length === 6;
+        const hasCoopPin = ((params.get('coopPin') || '').normalize('NFKC').replace(/[^0-9]/g, '').slice(0, 6)).length === 6;
+        const hasRacePin = ((params.get('racePin') || '').normalize('NFKC').replace(/[^0-9]/g, '').slice(0, 6)).length === 6;
+        const targetScreen = hasVsPin
+            ? GameScreen.VS_SETUP
+            : hasCoopPin
+                ? GameScreen.COOP_SETUP
+                : hasRacePin
+                    ? GameScreen.RACE_SETUP
+                    : null;
+        if (!targetScreen) return;
+        setGameState(prev => (
+            prev.screen === GameScreen.START_MENU
+                ? { ...prev, screen: targetScreen }
+                : prev
+        ));
+    }, []);
+
     const [languageMode, setLanguageMode] = useState<LanguageMode>(() => storageService.getLanguageMode() || 'JAPANESE');
     const [currentNarrative, setCurrentNarrative] = useState<string>("...");
     const [turnLog, setTurnLog] = useState<string>("あなたのターン");
