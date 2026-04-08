@@ -62,6 +62,13 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
     if (!typingMode || interactionDisabled) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isLoading) return;
+      if (inspectedItem) {
+        if (e.key === 'Escape' || e.key === '0' || e.key === 'Enter') {
+          e.preventDefault();
+          setInspectedItem(null);
+        }
+        return;
+      }
       if (replaceReward) {
         if (e.key >= '1' && e.key <= '9') {
           const index = Number(e.key) - 1;
@@ -93,7 +100,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [typingMode, isLoading, replaceReward, currentPotions, rewards, onSkip, interactionDisabled, skipDisabled]);
+  }, [typingMode, isLoading, inspectedItem, replaceReward, currentPotions, rewards, onSkip, interactionDisabled, skipDisabled]);
 
   const handlePotionClick = (reward: RewardItem) => {
       if (interactionDisabled) return;
@@ -213,7 +220,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                    </div>
                    
                    <button onClick={() => setReplaceReward(null)} className="mt-4 text-sm text-gray-500 hover:text-white underline">
-                       {trans("やめる", languageMode)}
+                       {trans("やめる", languageMode)}{typingMode && ' [0]'}
                    </button>
                </div>
            </div>
