@@ -7,7 +7,7 @@ import { storageService } from '../services/storageService';
 import { p2pService, P2PEvent } from '../services/p2pService';
 import { CHARACTERS, CARDS_LIBRARY } from '../constants';
 import { getUpgradedCard } from '../utils/cardUtils';
-import { Heart, Shield, Zap, Swords, Trophy, Skull, User, ArrowRight, Home, AlertCircle, TrendingDown, Droplets, Sword, Hexagon, Radiation, Activity, ShieldPlus, Flame, Wifi, WifiOff, Layers, X, Sparkles } from 'lucide-react';
+import { Heart, Shield, Zap, Swords, Trophy, Skull, Home, AlertCircle, TrendingDown, Droplets, Sword, Hexagon, Radiation, Activity, ShieldPlus, Flame, Wifi, WifiOff, Layers, X, Sparkles } from 'lucide-react';
 
 interface P2PVSBattleSceneProps {
     player1: Player;
@@ -17,7 +17,7 @@ interface P2PVSBattleSceneProps {
     languageMode: LanguageMode;
 }
 
-type GamePhase = 'NAMING' | 'BATTLE' | 'RESULT' | 'DISCONNECTED';
+type GamePhase = 'BATTLE' | 'RESULT' | 'DISCONNECTED';
 type SelectionType = 'DISCARD' | 'COPY' | 'EXHAUST';
 
 interface SelectionState {
@@ -193,9 +193,9 @@ const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: string }
 };
 
 const P2PVSBattleScene: React.FC<P2PVSBattleSceneProps> = ({ player1, player2, isHost, onFinish, languageMode }) => {
-    const [phase, setPhase] = useState<GamePhase>('NAMING');
-    const [myName, setMyName] = useState('');
-    const [opponentName, setOpponentName] = useState('');
+    const [phase, setPhase] = useState<GamePhase>('BATTLE');
+    const [myName] = useState(player1.name || '');
+    const [opponentName, setOpponentName] = useState(player2.name || '');
     const [p1State, setP1State] = useState<Player>(() => initPlayer(player1));
     const [p2State, setP2State] = useState<Player>(() => initPlayer(player2));
     const [isMyTurn, setIsMyTurn] = useState<boolean>(isHost);
@@ -493,15 +493,6 @@ const P2PVSBattleScene: React.FC<P2PVSBattleSceneProps> = ({ player1, player2, i
         }
 
         return nextPlayer;
-    };
-
-    const handleStartBattle = () => {
-        if (!myName.trim()) {
-            audioService.playSound('wrong');
-            return;
-        }
-        audioService.playSound('select');
-        setPhase('BATTLE');
     };
 
     const handlePlayCard = (card: ICard) => {
@@ -1139,33 +1130,6 @@ const P2PVSBattleScene: React.FC<P2PVSBattleSceneProps> = ({ player1, player2, i
                         className="w-full bg-white text-slate-900 font-black py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 hover:bg-gray-200 transition-all"
                     >
                         <Home size={20} /> タイトルへ戻る
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
-    if (phase === 'NAMING') {
-        return (
-            <div className="flex flex-col h-full w-full bg-slate-950 items-center justify-center p-6 text-white font-mono">
-                <div className="bg-slate-900 border-4 border-indigo-600 p-8 rounded-3xl w-full max-w-md shadow-2xl text-center animate-in zoom-in duration-300">
-                    <User size={64} className="text-indigo-400 mx-auto mb-6" />
-                    <h2 className="text-2xl font-black mb-2 italic tracking-tighter">BATTLE ENTRY</h2>
-                    <p className="text-gray-400 text-xs mb-8">あなたの名前を入力してください</p>
-                    <input
-                        type="text"
-                        value={myName}
-                        onChange={(e) => setMyName(e.target.value)}
-                        placeholder="あなたの名前"
-                        className="w-full bg-black border-2 border-indigo-900 rounded-xl px-4 py-3 text-center text-xl font-bold focus:border-indigo-400 outline-none transition-all mb-8 placeholder:text-gray-700"
-                        autoFocus
-                    />
-                    <button
-                        onClick={handleStartBattle}
-                        disabled={!myName.trim()}
-                        className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-gray-800 disabled:text-gray-600 text-white font-black py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95"
-                    >
-                        READY <ArrowRight size={20} />
                     </button>
                 </div>
             </div>
