@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Player } from '../types';
 import { p2pService, P2PEvent } from '../services/p2pService';
-import { X, Wifi, Users, Loader, AlertCircle, Swords } from 'lucide-react';
+import { X, Wifi, Users, Loader, AlertCircle, Swords, Copy, Check } from 'lucide-react';
 import { audioService } from '../services/audioService';
 
 export interface CoopParticipantPayload {
@@ -49,12 +49,23 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
   const [errorMsg, setErrorMsg] = useState('');
   const [participants, setParticipants] = useState<CoopParticipantPayload[]>([]);
   const [joinSent, setJoinSent] = useState(false);
+  const [inviteUrlCopied, setInviteUrlCopied] = useState(false);
   const joinInFlightRef = useRef(false);
 
   const canStart = useMemo(
     () => mode === 'HOST' && status === 'CONNECTED' && participants.length >= 1 && participants.length <= MAX_COOP_PLAYERS,
     [mode, status, participants.length]
   );
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const presetCode = (params.get('coopPin') || '').normalize('NFKC').replace(/[^0-9]/g, '').slice(0, 6);
+    if (presetCode.length === 6) {
+      setMode('JOIN');
+      setInputCode(presetCode);
+    }
+  }, []);
 
   useEffect(() => {
     p2pService.onConnect = () => {
@@ -174,6 +185,16 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
     onClose();
   };
 
+  const handleCopyInviteUrl = () => {
+    if (typeof window === 'undefined' || !roomCode) return;
+    const inviteUrl = new URL(window.location.href);
+    inviteUrl.searchParams.set('coopPin', roomCode);
+    navigator.clipboard.writeText(inviteUrl.toString());
+    setInviteUrlCopied(true);
+    audioService.playSound('select');
+    setTimeout(() => setInviteUrlCopied(false), 2000);
+  };
+
   return (
     <div className="fixed inset-0 z-[200] bg-slate-950/95 flex items-center justify-center p-4 text-white">
       <div className="bg-slate-900 border-2 border-emerald-500 rounded-2xl w-full max-w-lg p-6 relative">
@@ -246,6 +267,13 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
                   <div className="text-xs text-gray-400">ルームコード</div>
                   <div className="text-4xl font-black tracking-widest">{roomCode}</div>
                 </div>
+                <button
+                  onClick={handleCopyInviteUrl}
+                  className={`w-full py-2.5 rounded font-bold flex items-center justify-center gap-2 transition-colors ${inviteUrlCopied ? 'bg-emerald-600 text-white' : 'bg-emerald-900/60 hover:bg-emerald-800/70 text-emerald-100'}`}
+                >
+                  {inviteUrlCopied ? <Check size={16} /> : <Copy size={16} />}
+                  {inviteUrlCopied ? 'URLをコピーしました！' : 'PIN入力済みURLをコピー'}
+                </button>
                 <div className="bg-black/40 border border-gray-700 rounded p-3 max-h-44 overflow-auto">
                   <div className="text-sm font-bold mb-2 flex items-center gap-1">
                     <Users size={14} /> 参加者 {participants.length} / {MAX_COOP_PLAYERS}
