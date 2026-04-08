@@ -17,7 +17,18 @@ const P2PBattleSetup: React.FC<P2PBattleSetupProps> = ({ player, onBattleStart, 
     const [status, setStatus] = useState<'IDLE' | 'CONNECTING' | 'CONNECTED' | 'ERROR'>('IDLE');
     const [errorMsg, setErrorMsg] = useState<string>('');
     const [copied, setCopied] = useState(false);
+    const [urlCopied, setUrlCopied] = useState(false);
     const [opponentPlayer, setOpponentPlayer] = useState<Player | null>(null);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const params = new URLSearchParams(window.location.search);
+        const presetCode = (params.get('vsPin') || '').normalize('NFKC').replace(/[^0-9]/g, '').slice(0, 6);
+        if (presetCode.length === 6) {
+            setMode('JOIN');
+            setInputCode(presetCode);
+        }
+    }, []);
 
     useEffect(() => {
         console.log('🔧 Setting up P2P event handlers');
@@ -129,6 +140,16 @@ const P2PBattleSetup: React.FC<P2PBattleSetupProps> = ({ player, onBattleStart, 
         setTimeout(() => setCopied(false), 2000);
     };
 
+    const handleCopyJoinUrl = () => {
+        if (typeof window === 'undefined' || !battleCode) return;
+        const inviteUrl = new URL(window.location.href);
+        inviteUrl.searchParams.set('vsPin', battleCode);
+        navigator.clipboard.writeText(inviteUrl.toString());
+        setUrlCopied(true);
+        audioService.playSound('select');
+        setTimeout(() => setUrlCopied(false), 2000);
+    };
+
     const handleBack = () => {
         p2pService.close();
         onClose();
@@ -214,6 +235,13 @@ const P2PBattleSetup: React.FC<P2PBattleSetupProps> = ({ player, onBattleStart, 
                         >
                             {copied ? <Check size={20} /> : <Copy size={20} />}
                             {copied ? 'コピーしました！' : 'コードをコピー'}
+                        </button>
+                        <button
+                            onClick={handleCopyJoinUrl}
+                            className={`mt-2 w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold transition-all ${urlCopied ? 'bg-emerald-600 text-white' : 'bg-slate-700/80 text-slate-100 hover:bg-slate-600'}`}
+                        >
+                            {urlCopied ? <Check size={20} /> : <Copy size={20} />}
+                            {urlCopied ? 'URLをコピーしました！' : 'PIN入力済みURLをコピー'}
                         </button>
                     </div>
 

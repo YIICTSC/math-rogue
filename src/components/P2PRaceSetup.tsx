@@ -1,7 +1,7 @@
 ﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { GameMode, Player } from '../types';
 import { p2pService, P2PEvent } from '../services/p2pService';
-import { X, Wifi, Users, Loader, AlertCircle } from 'lucide-react';
+import { X, Wifi, Users, Loader, AlertCircle, Copy, Check } from 'lucide-react';
 import { audioService } from '../services/audioService';
 
 interface RaceStartPayload {
@@ -30,10 +30,21 @@ const P2PRaceSetup: React.FC<P2PRaceSetupProps> = ({ player, onRaceStart, onClos
     const [durationSec, setDurationSec] = useState(600);
     const [participants, setParticipants] = useState<Array<{ peerId: string; name: string; imageData?: string }>>([]);
     const [joinSent, setJoinSent] = useState(false);
+    const [inviteUrlCopied, setInviteUrlCopied] = useState(false);
     const [hostSelectedMode, setHostSelectedMode] = useState<GameMode | undefined>(undefined);
     const joinInFlightRef = useRef(false);
 
     const canStart = useMemo(() => mode === 'HOST' && status === 'CONNECTED' && participants.length >= 1, [mode, status, participants.length]);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const params = new URLSearchParams(window.location.search);
+        const presetCode = (params.get('racePin') || '').normalize('NFKC').replace(/[^0-9]/g, '').slice(0, 6);
+        if (presetCode.length === 6) {
+            setMode('JOIN');
+            setInputCode(presetCode);
+        }
+    }, []);
 
     useEffect(() => {
         p2pService.onConnect = () => {
@@ -155,6 +166,16 @@ const P2PRaceSetup: React.FC<P2PRaceSetupProps> = ({ player, onRaceStart, onClos
         onClose();
     };
 
+    const handleCopyInviteUrl = () => {
+        if (typeof window === 'undefined' || !battleCode) return;
+        const inviteUrl = new URL(window.location.href);
+        inviteUrl.searchParams.set('racePin', battleCode);
+        navigator.clipboard.writeText(inviteUrl.toString());
+        setInviteUrlCopied(true);
+        audioService.playSound('select');
+        setTimeout(() => setInviteUrlCopied(false), 2000);
+    };
+
     const recommendedPlayerText = '推奨同時接続数: 2〜8人';
     const cautionPlayerText = '10〜12人は回線次第、20人以上は非推奨';
 
@@ -226,6 +247,13 @@ const P2PRaceSetup: React.FC<P2PRaceSetupProps> = ({ player, onRaceStart, onClos
                                     <div className="text-xs text-gray-400">ルームコード</div>
                                     <div className="text-4xl font-black tracking-widest">{battleCode}</div>
                                 </div>
+                                <button
+                                    onClick={handleCopyInviteUrl}
+                                    className={`w-full py-2.5 rounded font-bold flex items-center justify-center gap-2 transition-colors ${inviteUrlCopied ? 'bg-emerald-600 text-white' : 'bg-indigo-900/60 hover:bg-indigo-800/70 text-indigo-100'}`}
+                                >
+                                    {inviteUrlCopied ? <Check size={16} /> : <Copy size={16} />}
+                                    {inviteUrlCopied ? 'URLをコピーしました！' : 'PIN入力済みURLをコピー'}
+                                </button>
                                 <div className="flex items-center gap-2">
                                     <span className="text-sm text-gray-300">制限時間</span>
                                     <select value={durationSec} onChange={(e) => setDurationSec(Number(e.target.value))} className="bg-black/60 border border-gray-600 rounded px-2 py-1">
