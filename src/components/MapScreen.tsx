@@ -82,6 +82,16 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
     useEffect(() => {
         if (!typingMode || showDeck || selectionDisabled) return;
         const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key.toLowerCase() === 'd') {
+                e.preventDefault();
+                setShowDeck(true);
+                return;
+            }
+            if (e.key === '0' || e.key === 'Escape') {
+                e.preventDefault();
+                onReturnToTitle();
+                return;
+            }
             if (e.key >= '1' && e.key <= '9') {
                 const node = availableNodes[Number(e.key) - 1];
                 if (!node) return;
@@ -99,6 +109,18 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
     useEffect(() => () => {
         if (holdTimerRef.current) window.clearTimeout(holdTimerRef.current);
     }, []);
+
+    useEffect(() => {
+        if (!typingMode || !showDeck) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape' || e.key === '0' || e.key === 'Enter' || e.key.toLowerCase() === 'd') {
+                e.preventDefault();
+                setShowDeck(false);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [typingMode, showDeck]);
 
     // 経路データの作成
     const connections = [];
@@ -132,6 +154,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                     >
                         <Home size={12} className="md:size-3.5" />
                         <span className="text-[9px] md:text-[10px] font-bold uppercase hidden sm:inline">{trans("タイトルへ戻る", languageMode)}</span>
+                        {typingMode && <span className="rounded border border-cyan-300 bg-cyan-950/95 px-1 py-0.5 text-[8px] font-black text-cyan-200">0</span>}
                     </button>
                     <div className="flex items-center text-red-400 bg-red-950/40 border border-red-500/30 px-1.5 py-0.5 md:px-3 md:py-1 rounded shadow-inner gap-1">
                         <Heart size={14} className="md:size-4 fill-red-500/20" />
@@ -156,6 +179,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                 >
                     <Layers size={14} className="md:size-4 group-hover:scale-110 transition-transform" />
                     <span className="font-bold text-[10px] md:text-sm uppercase"><span className="hidden sm:inline">DECK </span>({player.deck.length})</span>
+                    {typingMode && <span className="rounded border border-cyan-300 bg-cyan-950/95 px-1 py-0.5 text-[8px] font-black text-cyan-200">D</span>}
                 </button>
             </div>
 
@@ -312,7 +336,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
             {/* フッターガイド */}
             <div className="p-2 bg-black/90 border-t border-slate-800 text-[10px] text-center text-slate-500 z-30 font-bold tracking-widest uppercase">
                 {selectionDisabled ? (selectionDisabledMessage || trans("ホストの選択を待っています", languageMode)) : trans("次の目的地を選択してください", languageMode)}
-                {typingMode && <span className="ml-2 text-cyan-300">1-9 / Enter</span>}
+                {typingMode && <span className="ml-2 text-cyan-300">1-9 / Enter / D / 0</span>}
             </div>
 
             {selectionDisabled && (
@@ -337,6 +361,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                             </div>
                             <button onClick={() => setShowDeck(false)} className="text-slate-400 hover:text-white p-2 border-2 border-slate-700 hover:border-white rounded-lg transition-all cursor-pointer">
                                 <X size={24} />
+                                {typingMode && <span className="ml-2 rounded border border-cyan-300 bg-cyan-950/95 px-1 py-0.5 text-[8px] font-black text-cyan-200">Esc</span>}
                             </button>
                         </div>
 
@@ -357,7 +382,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
 
                         <div className="p-4 bg-black/50 border-t-2 border-slate-800 text-center">
                             <button onClick={() => setShowDeck(false)} className="bg-slate-800 hover:bg-slate-700 text-white px-8 py-2 rounded-lg font-bold border border-slate-600 transition-colors">
-                                {trans("閉じる", languageMode)}
+                                {trans("閉じる", languageMode)}{typingMode && ' [Enter]'}
                             </button>
                         </div>
                     </div>

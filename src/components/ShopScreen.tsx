@@ -283,7 +283,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                     <span className="text-sm font-bold">{player.gold}円</span>
                 </div>
                 <button onClick={interactionDisabled ? undefined : onLeave} disabled={interactionDisabled} className="bg-red-600 hover:bg-red-500 px-3 py-1 rounded font-bold border-2 border-white cursor-pointer text-xs disabled:cursor-not-allowed disabled:opacity-50">
-                    {trans("出る", languageMode)}
+                    {trans("出る", languageMode)}{typingMode && ' [Enter]'}
                 </button>
            </div>
        </div>
@@ -342,7 +342,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                     disabled={removed || player.gold < getPrice(player.relics.find(r => r.id === 'SMILING_MASK') ? 50 : REMOVE_COST)}
                     className={`flex-1 py-2 rounded border-2 flex items-center justify-center gap-1 cursor-pointer text-sm ${viewMode === 'REMOVE' ? 'bg-red-600 border-white' : 'bg-gray-800 border-gray-600 text-gray-400'} ${removed ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                    <Trash2 size={14}/> {trans("カード削除", languageMode)} ({getPrice(player.relics.find(r => r.id === 'SMILING_MASK') ? 50 : REMOVE_COST)} 円)
+                    <Trash2 size={14}/> {trans("カード削除", languageMode)} ({getPrice(player.relics.find(r => r.id === 'SMILING_MASK') ? 50 : REMOVE_COST)} 円){typingMode && ' [0]'}
                 </button>
            </div>
            {typingMode && (
