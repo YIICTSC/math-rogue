@@ -6029,10 +6029,11 @@ const App: React.FC = () => {
         if (gameState.challengeMode === 'COOP' && coopBattleState) {
             await executeEndTurn(coopBattlePlan.enemyActions);
             if (coopSession?.isHost) {
+                const latestBattleState = stateRef.current.coopBattleState || coopBattleState;
                 const nextBattleState: CoopBattleState = {
-                    ...coopBattleState,
+                    ...latestBattleState,
                     turnCursor: coopBattlePlan.nextCursor,
-                    enemyTurnCursor: coopBattleState.enemyTurnCursor + coopBattlePlan.enemyActions
+                    enemyTurnCursor: latestBattleState.enemyTurnCursor + coopBattlePlan.enemyActions
                 };
                 setCoopBattleState(nextBattleState);
                 broadcastCoopBattleState(nextBattleState);
