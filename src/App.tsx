@@ -834,6 +834,13 @@ const App: React.FC = () => {
                 floatingText: null
             }));
     }, [coopSession, coopSelfPeerId]);
+    const coopEffectOwnerPeerId = useMemo(() => {
+        if (gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.BATTLE || !gameState.coopBattleState) return null;
+        const activeTurn = gameState.coopBattleState.turnQueue[gameState.coopBattleState.turnCursor];
+        if (!activeTurn) return null;
+        if ((activeTurn.type === 'PLAYER' || activeTurn.type === 'ALLY') && activeTurn.peerId) return activeTurn.peerId;
+        return null;
+    }, [gameState.challengeMode, gameState.coopBattleState, gameState.screen]);
     const coopDecisionOwner = useMemo(() => {
         if (!coopSession || coopSession.participants.length === 0) return null;
         return coopSession.participants[coopSession.decisionOwnerIndex] || coopSession.participants[0] || null;
@@ -9375,7 +9382,7 @@ const App: React.FC = () => {
                             />
                         ) : (
                             <BattleScene
-                                player={gameState.player} companions={gameState.challengeMode === 'COOP' ? coopCompanions : undefined} coopTurnQueue={gameState.challengeMode === 'COOP' ? coopBattleQueueView : undefined} coopCanAct={gameState.challengeMode === 'COOP' ? coopBattleCanAct : true} coopTurnOwnerLabel={gameState.challengeMode === 'COOP' ? coopBattleTurnOwnerLabel : undefined} coopSupportCards={gameState.challengeMode === 'COOP' ? coopSupportCards : undefined} onUseCoopSupport={gameState.challengeMode === 'COOP' ? handleUseCoopSupport : undefined} selfDown={gameState.challengeMode === 'COOP' && gameState.player.currentHp <= 0} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onEndTurn={handleEndTurnClick} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={gameState.selectionState} onHandSelection={handleHandSelection}
+                                player={gameState.player} companions={gameState.challengeMode === 'COOP' ? coopCompanions : undefined} coopSelfPeerId={gameState.challengeMode === 'COOP' ? coopSelfPeerId : undefined} coopEffectOwnerPeerId={gameState.challengeMode === 'COOP' ? coopEffectOwnerPeerId : undefined} coopTurnQueue={gameState.challengeMode === 'COOP' ? coopBattleQueueView : undefined} coopCanAct={gameState.challengeMode === 'COOP' ? coopBattleCanAct : true} coopTurnOwnerLabel={gameState.challengeMode === 'COOP' ? coopBattleTurnOwnerLabel : undefined} coopSupportCards={gameState.challengeMode === 'COOP' ? coopSupportCards : undefined} onUseCoopSupport={gameState.challengeMode === 'COOP' ? handleUseCoopSupport : undefined} selfDown={gameState.challengeMode === 'COOP' && gameState.player.currentHp <= 0} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onEndTurn={handleEndTurnClick} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={gameState.selectionState} onHandSelection={handleHandSelection}
                                 onUsePotion={handleUsePotion} combatLog={gameState.combatLog} languageMode={languageMode} codexOptions={gameState.codexOptions} onCodexSelect={onCodexSelect} onPlaySynthesizedCard={handlePlaySynthesizedCard}
                                 parryState={gameState.parryState} onParry={handleParryClick} activeEffects={gameState.activeEffects}
                                 onCancelSelection={handleCancelSelection}
