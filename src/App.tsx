@@ -5873,12 +5873,6 @@ const App: React.FC = () => {
                                     const targetName = entry.name || coopSelfDisplayName;
                                     const targetPlayer = isSelfTarget ? p : entry.player;
                                     applyDebuff(targetPlayer, targetName);
-                                    if (!isSelfTarget) {
-                                        updateCoopParticipantState(entry.peerId, current => ({
-                                            ...current,
-                                            currentHp: targetPlayer.currentHp
-                                        }));
-                                    }
                                     entry.isDown = targetPlayer.currentHp <= 0;
                                 });
                         } else {
@@ -8047,6 +8041,7 @@ const App: React.FC = () => {
                 upsertCoopPlayerSnapshot(fromPeerId, data.player);
                 setGameState(prev => {
                     if (!prev.coopBattleState) return prev;
+                    if (prev.screen === GameScreen.BATTLE) return prev;
                     const hasTargetEntry = prev.coopBattleState.players.some(entry => entry.peerId === fromPeerId);
                     if (!hasTargetEntry) return prev;
                     return {
