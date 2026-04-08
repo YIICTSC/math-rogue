@@ -1209,7 +1209,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 <div className={isTrueBossPhase2Active ? "relative z-20 flex items-end pl-2 pb-2 shrink-0" : "flex items-end pl-2 pb-2 shrink-0 mt-auto"}>
                     <div className={isTrueBossPhase2Active ? "flex flex-col items-start md:flex-row md:items-end relative max-w-[48vw] md:max-w-none" : "flex items-end relative"}>
 
-                        <div className={`w-20 h-20 md:w-24 md:h-24 relative transition-all duration-150 ease-out ${isTrueBossPhase2Active ? 'mr-0 md:mr-2 mb-1 md:mb-0' : 'mr-2'} ${getActionClass()} ${selectedSupportCard ? 'ring-2 ring-emerald-300 rounded-lg cursor-pointer' : ''}`} onClick={() => {
+                        <div className={`order-1 w-20 h-20 md:w-24 md:h-24 relative transition-all duration-150 ease-out ${isTrueBossPhase2Active ? 'mr-0 md:mr-2 mb-1 md:mb-0' : 'mr-2'} ${getActionClass()} ${selectedSupportCard ? 'ring-2 ring-emerald-300 rounded-lg cursor-pointer' : ''}`} onClick={() => {
                             if (selectedSupportCard && onUseCoopSupport) {
                                 onUseCoopSupport(selectedSupportCard);
                                 setSelectedSupportCard(null);
@@ -1228,7 +1228,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         </div>
 
                         {player.partner && player.partner.currentHp > 0 && (
-                            <div className={`w-16 h-16 md:w-20 md:h-20 relative transition-all duration-150 ease-out ${isTrueBossPhase2Active ? 'mr-0 md:mr-2 -ml-3 md:-ml-6 mb-1 md:mb-0' : 'mr-2 -ml-6'} z-0 ${getActionClass()}`} onClick={() => showInfo(trans(player.partner!.name, languageMode), trans("パートナー。\n倒れるとデッキが1枚しか使えなくなります。", languageMode))}>
+                            <div className={`order-3 w-16 h-16 md:w-20 md:h-20 relative transition-all duration-150 ease-out ${isTrueBossPhase2Active ? 'mr-0 md:mr-2 -ml-3 md:-ml-6 mb-1 md:mb-0' : 'mr-2 -ml-6'} z-0 ${getActionClass()}`} onClick={() => showInfo(trans(player.partner!.name, languageMode), trans("パートナー。\n倒れるとデッキが1枚しか使えなくなります。", languageMode))}>
                                 <img
                                     src={player.partner.imageData}
                                     alt="Partner"
@@ -1244,7 +1244,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         )}
 
                         {companions.length > 0 && (
-                            <div className={`flex items-end gap-1 md:gap-2 ${player.partner && player.partner.currentHp > 0 ? 'ml-0' : 'ml-1'} mb-2`}>
+                            <div className={`order-3 flex items-end gap-1 md:gap-2 ${player.partner && player.partner.currentHp > 0 ? 'ml-0' : 'ml-1'} mb-2`}>
                                 {companions.map((companion) => {
                                     const hpPercent = Math.max(0, Math.min(100, (companion.currentHp / Math.max(1, companion.maxHp)) * 100));
                                     const isDown = companion.currentHp <= 0;
@@ -1279,7 +1279,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             </div>
                         )}
 
-                        <div className={`bg-black/80 border-2 border-white p-1 text-white text-xs ${isTrueBossPhase2Active ? 'w-28 md:w-40' : 'w-36 md:w-40'} mb-2 shadow-lg rounded z-20 ${tutorialStep === 1 ? 'ring-4 ring-green-500 ring-offset-4 ring-offset-transparent animate-pulse' : ''}`}>
+                        <div className={`order-2 bg-black/80 border-2 border-white p-1 text-white text-xs ${isTrueBossPhase2Active ? 'w-28 md:w-40' : 'w-36 md:w-40'} mb-2 shadow-lg rounded z-20 ${tutorialStep === 1 ? 'ring-4 ring-green-500 ring-offset-4 ring-offset-transparent animate-pulse' : ''}`}>
                             <div className="flex items-center justify-between mb-1">
                                 <span className="text-red-400 flex items-center font-bold" onClick={() => showInfo("HP", trans("ヒットポイント。0になると死亡する。", languageMode))}><Heart size={12} className="mr-1" /> {player.currentHp}/{player.maxHp}</span>
                                 <span className="text-blue-400 flex items-center font-bold" onClick={() => showInfo(trans("ブロック", languageMode), trans("次のターン開始時までダメージを防ぐ。", languageMode))}><Shield size={12} className="mr-1" /> {player.block}</span>
