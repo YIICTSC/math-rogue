@@ -268,6 +268,8 @@ export const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: s
 interface BattleSceneProps {
     player: Player;
     companions?: Array<{ id: string; name: string; maxHp: number; currentHp: number; imageData: string; floatingText: FloatingText | null; }>;
+    coopSelfPeerId?: string;
+    coopEffectOwnerPeerId?: string | null;
     coopTurnQueue?: Array<{ id: string; type: 'SELF' | 'ALLY' | 'ENEMY'; label: string }>;
     coopCanAct?: boolean;
     coopTurnOwnerLabel?: string;
@@ -301,9 +303,10 @@ interface BattleSceneProps {
 }
 
 const BattleScene: React.FC<BattleSceneProps> = ({
-    player, companions = [], coopTurnQueue = [], coopCanAct = true, coopTurnOwnerLabel, coopSupportCards = [], onUseCoopSupport, selfDown = false, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onPlaySynthesizedCard, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
+    player, companions = [], coopSelfPeerId, coopEffectOwnerPeerId, coopTurnQueue = [], coopCanAct = true, coopTurnOwnerLabel, coopSupportCards = [], onUseCoopSupport, selfDown = false, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onPlaySynthesizedCard, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
     selectionState, onHandSelection, onCancelSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect, parryState, onParry, activeEffects, finisherCutinCard, hideEnemyIntents = false
 }) => {
+    const shouldRenderPlayerScopedVfxOnSelf = !coopEffectOwnerPeerId || !coopSelfPeerId || coopEffectOwnerPeerId === coopSelfPeerId;
 
     const [lastVisibleEnemies, setLastVisibleEnemies] = useState<Enemy[]>([]);
     const [selectedSupportCard, setSelectedSupportCard] = useState<CoopSupportCard | null>(null);
@@ -1224,7 +1227,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 style={{ imageRendering: 'pixelated' }}
                             />
                             <FloatingTextOverlay data={player.floatingText} languageMode={languageMode} />
-                            <VFXOverlay effects={activeEffects} targetId="player" />
+                            {shouldRenderPlayerScopedVfxOnSelf && <VFXOverlay effects={activeEffects} targetId="player" />}
                         </div>
 
                         {player.partner && player.partner.currentHp > 0 && (
@@ -1269,6 +1272,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                     style={{ imageRendering: 'pixelated' }}
                                                 />
                                                 <FloatingTextOverlay data={companion.floatingText} languageMode={languageMode} offset="-top-2 -right-1" />
+                                                {coopEffectOwnerPeerId === companion.id && <VFXOverlay effects={activeEffects} targetId="player" />}
                                             </div>
                                             <div className="mt-1 h-1.5 bg-gray-700 rounded-full border border-gray-500 overflow-hidden">
                                                 <div className={`h-full transition-all duration-500 ${isDown ? 'bg-gray-500' : 'bg-green-500'}`} style={{ width: `${hpPercent}%` }}></div>
