@@ -1240,27 +1240,13 @@ const App: React.FC = () => {
             label: participant.name,
             peerId: participant.peerId
         }));
-        const enemySlotCount = Math.max(1, gameState.enemies.filter(enemy => enemy.currentHp > 0).length);
-        const enemySlots: CoopBattleTurnSlot[] = Array.from({ length: enemySlotCount }, (_, index) => ({
-            id: `coop-turn-enemy-${battleKey}-${index}`,
+        const randomizedPlayerSlots = shuffle([...playerSlots]) as CoopBattleTurnSlot[];
+        const enemySlot: CoopBattleTurnSlot = {
+            id: `coop-turn-enemy-${battleKey}`,
             type: 'ENEMY',
-            label: `敵${index + 1}`
-        }));
-        const queue: CoopBattleTurnSlot[] = [];
-        const baseEnemiesPerPlayer = Math.floor(enemySlots.length / playerSlots.length);
-        const extraEnemySlots = enemySlots.length % playerSlots.length;
-        let enemyInsertCursor = 0;
-        playerSlots.forEach((playerSlot, playerIndex) => {
-            queue.push(playerSlot);
-            const slotsForThisPlayer = baseEnemiesPerPlayer + (playerIndex < extraEnemySlots ? 1 : 0);
-            for (let i = 0; i < slotsForThisPlayer; i++) {
-                const enemySlot = enemySlots[enemyInsertCursor];
-                if (enemySlot) {
-                    queue.push(enemySlot);
-                    enemyInsertCursor++;
-                }
-            }
-        });
+            label: '敵'
+        };
+        const queue: CoopBattleTurnSlot[] = [...randomizedPlayerSlots, enemySlot];
         const battlePlayers: CoopBattlePlayerState[] = coopSession.participants.map(participant => {
             const snapshot = coopPlayerSnapshots[participant.peerId] || (participant.peerId === coopSelfPeerId ? gameState.player : null);
             const basePlayer = snapshot ? { ...snapshot } : {
