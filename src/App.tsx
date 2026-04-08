@@ -8543,7 +8543,7 @@ const App: React.FC = () => {
                                         </div>
                                         <button
                                             onClick={continueGame}
-                                            className={`w-full py-3 px-4 text-lg font-bold border-b-4 border-r-4 rounded-none cursor-pointer flex items-center justify-center shadow-lg relative group overflow-hidden animate-in fade-in ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-blue-900 text-white border-blue-400 hover:bg-blue-800'}`}
+                                            className={`w-full py-2 px-4 text-lg font-bold border-b-4 border-r-4 rounded-none cursor-pointer flex items-center justify-center shadow-lg relative group overflow-hidden animate-in fade-in ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-blue-900 text-white border-blue-400 hover:bg-blue-800'}`}
                                         >
                                             {!isDailyLimitReached && <div className="absolute inset-0 bg-blue-600 opacity-0 group-hover:opacity-20 transition-opacity"></div>}
                                             <Play className="mr-2 fill-current" /> {trans("つづきから", languageMode)}
@@ -8553,7 +8553,7 @@ const App: React.FC = () => {
                                 <button
                                     onClick={startGame}
                                     disabled={isLoading}
-                                    className={`w-full py-3 px-4 text-lg font-bold border-b-4 border-r-4 rounded-none transition-all shadow-lg flex items-center justify-center ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-gray-100 text-black border-gray-500 hover:bg-white hover:border-gray-400 hover:translate-x-[1px] hover:translate-y-[1px] active:border-0 active:translate-y-[4px] active:translate-x-[4px]'}`}
+                                    className={`w-full py-2 px-4 text-lg font-bold border-b-4 border-r-4 rounded-none transition-all shadow-lg flex items-center justify-center ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-gray-100 text-black border-gray-500 hover:bg-white hover:border-gray-400 hover:translate-x-[1px] hover:translate-y-[1px] active:border-0 active:translate-y-[4px] active:translate-x-[4px]'}`}
                                 >
                                     {isLoading ? trans("じゅんびちゅう...", languageMode) : trans("冒険を始める", languageMode)}
                                 </button>
@@ -8561,7 +8561,7 @@ const App: React.FC = () => {
                                 <div className={`grid w-full ${isMobilePortrait ? 'grid-cols-4 gap-1' : 'grid-cols-2 sm:grid-cols-4 gap-2'}`}>
                                     <button
                                         onClick={startChallengeGame}
-                                        className={`min-w-0 border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isMobilePortrait ? 'py-2 px-0.5 text-[10px]' : 'py-3 px-1 text-xs'} font-bold ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-red-900/80 text-red-100 border-red-500 hover:bg-red-800 hover:shadow-red-900/50'}`}
+                                        className={`min-w-0 border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-red-900/80 text-red-100 border-red-500 hover:bg-red-800 hover:shadow-red-900/50'}`}
                                     >
                                         <Swords className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("1A1D", languageMode)}
                                     </button>
@@ -8575,7 +8575,7 @@ const App: React.FC = () => {
                                             }
                                             setGameState(prev => ({ ...prev, screen: GameScreen.VS_SETUP }));
                                         }}
-                                        className={`min-w-0 border-b-4 border-r-4 rounded-none bg-indigo-600/80 text-white border-indigo-400 hover:bg-indigo-700 cursor-pointer flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-2 px-0.5 text-[10px]' : 'py-3 px-1 text-xs'} font-bold ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
+                                        className={`min-w-0 border-b-4 border-r-4 rounded-none bg-indigo-600/80 text-white border-indigo-400 hover:bg-indigo-700 cursor-pointer flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
                                     >
                                         <Wifi className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("VS", languageMode)}
                                     </button>
@@ -8589,7 +8589,7 @@ const App: React.FC = () => {
                                             }
                                             setGameState(prev => ({ ...prev, screen: GameScreen.COOP_SETUP }));
                                         }}
-                                        className={`min-w-0 border-b-4 border-r-4 rounded-none bg-emerald-700/80 text-emerald-100 border-emerald-400 hover:bg-emerald-700 cursor-pointer flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-2 px-0.5 text-[10px]' : 'py-3 px-1 text-xs'} font-bold ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
+                                        className={`min-w-0 border-b-4 border-r-4 rounded-none bg-emerald-700/80 text-emerald-100 border-emerald-400 hover:bg-emerald-700 cursor-pointer flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
                                     >
                                         <Users className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("協力", languageMode)}
                                     </button>
@@ -8603,7 +8603,7 @@ const App: React.FC = () => {
                                             }
                                             setGameState(prev => ({ ...prev, screen: GameScreen.RACE_SETUP }));
                                         }}
-                                        className={`min-w-0 border-b-4 border-r-4 rounded-none bg-cyan-700/80 text-cyan-100 border-cyan-400 hover:bg-cyan-700 cursor-pointer flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-2 px-0.5 text-[10px]' : 'py-3 px-1 text-xs'} font-bold ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
+                                        className={`min-w-0 border-b-4 border-r-4 rounded-none bg-cyan-700/80 text-cyan-100 border-cyan-400 hover:bg-cyan-700 cursor-pointer flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
                                     >
                                         <Flag className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("レース", languageMode)}
                                     </button>
@@ -8612,44 +8612,44 @@ const App: React.FC = () => {
                                 {!isMobilePortrait && (
                                     <button
                                         onClick={startTypingGame}
-                                        className="w-full py-3 px-4 text-sm font-bold border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center bg-amber-900/80 text-amber-100 border-amber-500 hover:bg-amber-800 hover:shadow-amber-900/50"
+                                        className="w-full py-2 px-4 text-sm font-bold border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center bg-amber-900/80 text-amber-100 border-amber-500 hover:bg-amber-800 hover:shadow-amber-900/50"
                                     >
                                         <Keyboard className="mr-2" size={18} /> {trans("タイピングモード", languageMode)}
                                     </button>
                                 )}
 
                                 <div className="flex gap-3 w-full">
-                                    <button onClick={startProblemChallenge} className="flex-1 py-3 px-2 text-sm font-bold border-b-4 border-r-4 rounded-none bg-emerald-900/80 text-emerald-100 border-emerald-500 hover:bg-emerald-800 cursor-pointer flex items-center justify-center shadow-md hover:shadow-emerald-900/50">
+                                    <button onClick={startProblemChallenge} className="flex-1 py-2 px-2 text-sm font-bold border-b-4 border-r-4 rounded-none bg-emerald-900/80 text-emerald-100 border-emerald-500 hover:bg-emerald-800 cursor-pointer flex items-center justify-center shadow-md hover:shadow-emerald-900/50">
                                         <GraduationCap className="mr-1.5" size={18} /> {trans("問題", languageMode)}
                                     </button>
 
                                     <button
                                         onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_SELECT }))}
-                                        className={`flex-1 py-3 px-2 text-sm font-bold border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-indigo-900/80 text-indigo-100 border-indigo-500 hover:bg-indigo-800 hover:shadow-indigo-900/50'}`}
+                                        className={`flex-1 py-2 px-2 text-sm font-bold border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-indigo-900/80 text-indigo-100 border-indigo-500 hover:bg-indigo-800 hover:shadow-indigo-900/50'}`}
                                     >
                                         <Gamepad2 className="mr-1.5" size={18} /> {trans("ミニゲーム", languageMode)}
                                     </button>
                                 </div>
 
                                 {isDebugHpOne && (
-                                    <button onClick={openDebugMenu} className="w-full py-3 px-4 text-base font-bold border-b-4 border-r-4 rounded-none bg-gray-800 text-red-400 border-red-500 hover:bg-gray-700 cursor-pointer flex items-center justify-center shadow-md mb-2">
+                                    <button onClick={openDebugMenu} className="w-full py-2 px-4 text-base font-bold border-b-4 border-r-4 rounded-none bg-gray-800 text-red-400 border-red-500 hover:bg-gray-700 cursor-pointer flex items-center justify-center shadow-md mb-2">
                                         <Zap size={18} className="mr-2" /> {trans("デバッグメニュー", languageMode)}
                                     </button>
                                 )}
 
                                 <div className="flex gap-2 w-full justify-between mt-2">
-                                    <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.COMPENDIUM }))} className="flex-1 bg-gray-800 text-amber-500 py-3 text-xs font-bold border-b-4 border-r-4 border-gray-600 hover:border-amber-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-16 rounded">
+                                    <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.COMPENDIUM }))} className="flex-1 bg-gray-800 text-amber-500 text-xs font-bold border-b-4 border-r-4 border-gray-600 hover:border-amber-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
                                         <BookOpen className="mb-1" size={20} /> {trans("図鑑", languageMode)}
                                     </button>
-                                    <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.RANKING }))} className="flex-1 bg-gray-800 text-green-500 py-3 text-xs font-bold border-b-4 border-r-4 border-gray-600 border-green-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-16 rounded">
+                                    <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.RANKING }))} className="flex-1 bg-gray-800 text-green-500 text-xs font-bold border-b-4 border-r-4 border-gray-600 border-green-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
                                         <Trophy className="mb-1" size={20} /> {trans("記録", languageMode)}
                                     </button>
-                                    <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.HELP }))} className="flex-1 bg-gray-800 text-blue-400 py-3 text-xs font-bold border-b-4 border-r-4 border-gray-600 border-blue-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-16 rounded">
+                                    <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.HELP }))} className="flex-1 bg-gray-800 text-blue-400 text-xs font-bold border-b-4 border-r-4 border-gray-600 border-blue-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
                                         <HelpCircle className="mb-1" size={20} /> {trans("遊び方", languageMode)}
                                     </button>
                                 </div>
 
-                                <button onClick={openDataTransferModal} className="w-full bg-gray-800 text-cyan-300 py-3 text-sm font-bold border-b-4 border-r-4 border-gray-600 border-cyan-500 hover:bg-gray-700 cursor-pointer flex items-center justify-center rounded mt-2">
+                                <button onClick={openDataTransferModal} className="w-full bg-gray-800 text-cyan-300 py-2 text-sm font-bold border-b-4 border-r-4 border-gray-600 border-cyan-500 hover:bg-gray-700 cursor-pointer flex items-center justify-center rounded mt-2">
                                     <Globe className="mr-2" size={18} /> {trans("データ移行", languageMode)}
                                 </button>
 
