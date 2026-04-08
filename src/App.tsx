@@ -697,6 +697,7 @@ const App: React.FC = () => {
     const [coopRewardSets, setCoopRewardSets] = useState<Record<string, RewardItem[]>>({});
     const [coopAwaitingRewardSync, setCoopAwaitingRewardSync] = useState(false);
     const [coopAwaitingMapSync, setCoopAwaitingMapSync] = useState(false);
+    const [coopMapPendingNodeId, setCoopMapPendingNodeId] = useState<string | null>(null);
     const [coopBattleQueue, setCoopBattleQueue] = useState<CoopBattleTurnSlot[]>([]);
     const [coopBattleKey, setCoopBattleKey] = useState<string | null>(null);
     const [coopEnemyTurnCursor, setCoopEnemyTurnCursor] = useState(0);
@@ -709,6 +710,7 @@ const App: React.FC = () => {
     const coopLastBattleActionSignatureRef = useRef<string | null>(null);
     const queuedCoopBattleEventRef = useRef<{ type: 'COOP_BATTLE_PLAY_CARD' | 'COOP_BATTLE_USE_POTION' | 'COOP_BATTLE_TURN_START' | 'COOP_BATTLE_SELECTION_STATE' | 'COOP_BATTLE_MODAL_RESOLVE' | 'COOP_BATTLE_CODEX_SELECT', cardId?: string, potionId?: string } | null>(null);
     const [queuedCoopBattleEventTick, setQueuedCoopBattleEventTick] = useState(0);
+    const coopMapPendingTimerRef = useRef<number | null>(null);
     const transferFileInputRef = useRef<HTMLInputElement | null>(null);
 
     const showRaceToast = useCallback((message: string) => {
@@ -717,6 +719,13 @@ const App: React.FC = () => {
             window.clearTimeout(raceToastTimerRef.current);
         }
         raceToastTimerRef.current = window.setTimeout(() => setRaceToast(null), 2200);
+    }, []);
+    const clearCoopMapPending = useCallback(() => {
+        setCoopMapPendingNodeId(null);
+        if (coopMapPendingTimerRef.current) {
+            window.clearTimeout(coopMapPendingTimerRef.current);
+            coopMapPendingTimerRef.current = null;
+        }
     }, []);
     const handleMoveToPrimarySite = useCallback(() => {
         if (typeof window === 'undefined') return;
@@ -858,6 +867,14 @@ const App: React.FC = () => {
     const coopInteractionDisabledMessage = coopDecisionOwner
         ? `${coopDecisionOwner.name} が選択しています`
         : '他のプレイヤーの選択を待っています';
+    const coopMapSelectionPending = gameState.challengeMode === 'COOP'
+        && gameState.screen === GameScreen.MAP
+        && !!coopSession
+        && !coopSession.isHost
+        && !!coopMapPendingNodeId;
+    const coopMapPendingMessage = coopMapSelectionPending
+        ? 'ホスト承認待ち...'
+        : `${coopDecisionOwner?.name || '他のプレイヤー'} が進行先を選択しています`;
     const coopSelfDisplayName = useMemo(() => {
         if (!coopSession) return selectedCharName || 'あなた';
         return coopSession.participants.find(participant => participant.peerId === coopSelfPeerId)?.name
@@ -3202,6 +3219,14 @@ const App: React.FC = () => {
     const handleNodeSelect = async (node: MapNode, allowRemoteCoopSelection = false) => {
         if (gameState.challengeMode === 'COOP' && coopSession) {
             if (!coopSession.isHost) {
+                setCoopMapPendingNodeId(node.id);
+                if (coopMapPendingTimerRef.current) {
+                    window.clearTimeout(coopMapPendingTimerRef.current);
+                }
+                coopMapPendingTimerRef.current = window.setTimeout(() => {
+                    setCoopMapPendingNodeId(null);
+                    coopMapPendingTimerRef.current = null;
+                }, 2500);
                 p2pService.send({ type: 'COOP_NODE_SELECT', nodeId: node.id });
                 audioService.playSound('select');
                 return;
@@ -6911,6 +6936,21 @@ const App: React.FC = () => {
             if (coopAwaitingMapSync) setCoopAwaitingMapSync(false);
         }
     }, [coopAwaitingMapSync, coopSession, gameState.challengeMode, gameState.screen]);
+    useEffect(() => {
+        if (gameState.screen !== GameScreen.MAP) {
+            clearCoopMapPending();
+            return;
+        }
+        if (coopMapPendingNodeId && gameState.currentMapNodeId === coopMapPendingNodeId) {
+            clearCoopMapPending();
+        }
+    }, [clearCoopMapPending, coopMapPendingNodeId, gameState.currentMapNodeId, gameState.screen]);
+    useEffect(() => () => {
+        if (coopMapPendingTimerRef.current) {
+            window.clearTimeout(coopMapPendingTimerRef.current);
+            coopMapPendingTimerRef.current = null;
+        }
+    }, []);
 
     useEffect(() => {
         if (gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.REWARD || !coopSession || !coopSelfPeerId) return;
@@ -8364,6 +8404,9 @@ const App: React.FC = () => {
             }
 
             if (data.type === 'COOP_REST_ACTION' && coopSession.isHost && gameState.screen === GameScreen.REST) {
+                // Intentional no-op:
+                // REST choices are local to each player and only completion state (restResolved) is synchronized.
+                // If future requirements need cross-player visualization of selected rest actions, implement handling here.
                 return;
             }
 
@@ -9324,8 +9367,8 @@ const App: React.FC = () => {
                             floor={gameState.floor}
                             typingMode={gameState.challengeMode === 'TYPING'}
                             selectionHoldMs={raceEffects.shoeLaceUntil > raceEffectNow ? 400 : 0}
-                            selectionDisabled={gameState.challengeMode === 'COOP' && !!coopSession?.isHost && !coopCanDecide}
-                            selectionDisabledMessage={gameState.challengeMode === 'COOP' ? `${coopDecisionOwner?.name || '他のプレイヤー'} が進行先を選択しています` : undefined}
+                            selectionDisabled={(gameState.challengeMode === 'COOP' && !!coopSession?.isHost && !coopCanDecide) || coopMapSelectionPending}
+                            selectionDisabledMessage={gameState.challengeMode === 'COOP' ? coopMapPendingMessage : undefined}
                         />
                         {raceSession && !raceSession.ended && (
                             <>
