@@ -3135,7 +3135,9 @@ const App: React.FC = () => {
         const map = generateDungeonMap();
         const unlockedCards = storageService.getUnlockedCards();
 
-        const legacyCard = storageService.getLegacyCard();
+        const legacyCard = (gameState.challengeMode === 'RACE' || gameState.challengeMode === 'COOP')
+            ? null
+            : storageService.getLegacyCard();
         if (legacyCard) {
             const ev = generateLegacyEvent(
                 legacyCard,
