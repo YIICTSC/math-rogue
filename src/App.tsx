@@ -5662,67 +5662,82 @@ const App: React.FC = () => {
                             }
                         }
                         const isPierce = intent.type === EnemyIntentType.PIERCE_ATTACK;
-                        let unblockedDamage = 0;
-                        if (isPierce) {
-                            unblockedDamage = damage;
-                            const formula = logParts.length > 1 ? `(${logParts.join(' ')}) = ` : '';
-                            newLogs.push(`${trans(e.name, languageMode)}の防御貫通攻撃！ ${formula}${damage} ${trans("ダメージを受けた", languageMode)}`);
-                            nextActiveEffects.push({ id: `vfx-pierce-${Date.now()}`, type: 'CRITICAL', targetId: 'player' });
-                        } else if (p.block >= damage) {
-                            p.block -= damage;
-                            if (damage > 0) {
-                                const formula = logParts.length > 1 ? `(${logParts.join(' ')}) = ` : '';
-                                newLogs.push(`${trans(e.name, languageMode)}の攻撃 ${formula}${damage} を${trans("ブロック", languageMode)}`);
-                                nextActiveEffects.push({ id: `vfx-eblk-${Date.now()}`, type: 'BLOCK', targetId: 'player' });
-                            }
-                        } else {
-                            unblockedDamage = damage - p.block;
-                            p.block = 0;
-                            const formula = logParts.length > 1 ? `(${logParts.join(' ')}) = ` : '';
-                            newLogs.push(`${trans(e.name, languageMode)}から ${formula}${damage} ${trans("ダメージを受けた", languageMode)}`);
-                            nextActiveEffects.push({ id: `vfx-eslash-${Date.now()}`, type: 'SLASH', targetId: 'player' });
-                        }
+                        const formula = logParts.length > 1 ? `(${logParts.join(' ')}) = ` : '';
+                        const resolveDamageAgainstDefense = (
+                            incomingDamage: number,
+                            currentBlock: number,
+                            currentBuffer: number
+                        ): { unblockedDamage: number; nextBlock: number; nextBuffer: number; blocked: boolean } => {
+                            if (incomingDamage <= 0) return { unblockedDamage: 0, nextBlock: currentBlock, nextBuffer: currentBuffer, blocked: false };
+                            if (currentBuffer > 0) return { unblockedDamage: 0, nextBlock: currentBlock, nextBuffer: currentBuffer - 1, blocked: true };
+                            if (isPierce) return { unblockedDamage: incomingDamage, nextBlock: currentBlock, nextBuffer: currentBuffer, blocked: false };
+                            if (currentBlock >= incomingDamage) return { unblockedDamage: 0, nextBlock: currentBlock - incomingDamage, nextBuffer: currentBuffer, blocked: true };
+                            return { unblockedDamage: incomingDamage - currentBlock, nextBlock: 0, nextBuffer: currentBuffer, blocked: currentBlock > 0 };
+                        };
 
-                        if (prev.challengeMode === 'COOP' && coopSession?.isHost) {
-                            const aliveCompanions = coopSession.participants.filter(participant => participant.peerId !== coopSelfPeerId && (participant.currentHp ?? 0) > 0);
-                            if (unblockedDamage > 0 && aliveCompanions.length > 0 && Math.random() < 0.45) {
-                                const targetCompanion = aliveCompanions[Math.floor(Math.random() * aliveCompanions.length)];
-                                const currentBlock = targetCompanion.block ?? 0;
-                                const currentBuffer = targetCompanion.buffer ?? 0;
-                                let remainingDamage = unblockedDamage;
-                                let nextBlock = currentBlock;
-                                let nextBuffer = currentBuffer;
-                                if (nextBuffer > 0) {
-                                    nextBuffer -= 1;
-                                    remainingDamage = 0;
-                                } else if (nextBlock > 0) {
-                                    if (nextBlock >= remainingDamage) {
-                                        nextBlock -= remainingDamage;
-                                        remainingDamage = 0;
-                                    } else {
-                                        remainingDamage -= nextBlock;
-                                        nextBlock = 0;
-                                    }
+                        if (prev.challengeMode === 'COOP' && coopSession?.isHost && prev.coopBattleState) {
+                            const aliveTargets = prev.coopBattleState.players.filter(entry => entry.player.currentHp > 0);
+                            const selectedTarget = aliveTargets[Math.floor(Math.random() * aliveTargets.length)];
+                            const isSelfTarget = !selectedTarget || selectedTarget.peerId === coopSelfPeerId;
+                            const targetName = selectedTarget?.name || coopSelfDisplayName;
+
+                            if (isSelfTarget) {
+                                const resolved = resolveDamageAgainstDefense(damage, p.block, p.powers['BUFFER'] || 0);
+                                p.block = resolved.nextBlock;
+                                p.powers['BUFFER'] = resolved.nextBuffer;
+                                const unblockedDamage = resolved.unblockedDamage;
+                                if (isPierce) {
+                                    newLogs.push(`${trans(e.name, languageMode)}の防御貫通攻撃！ ${formula}${damage} ${trans("ダメージを受けた", languageMode)}`);
+                                    nextActiveEffects.push({ id: `vfx-pierce-${Date.now()}`, type: 'CRITICAL', targetId: 'player' });
+                                } else if (unblockedDamage <= 0 && damage > 0) {
+                                    newLogs.push(`${trans(e.name, languageMode)}の攻撃 ${formula}${damage} を${trans("ブロック", languageMode)}`);
+                                    nextActiveEffects.push({ id: `vfx-eblk-${Date.now()}`, type: 'BLOCK', targetId: 'player' });
+                                } else if (unblockedDamage > 0) {
+                                    newLogs.push(`${trans(e.name, languageMode)}から ${formula}${damage} ${trans("ダメージを受けた", languageMode)}`);
+                                    nextActiveEffects.push({ id: `vfx-eslash-${Date.now()}`, type: 'SLASH', targetId: 'player' });
                                 }
-                                const nextHp = Math.max(0, (targetCompanion.currentHp ?? targetCompanion.maxHp ?? 0) - remainingDamage);
-                                updateCoopParticipantState(targetCompanion.peerId, current => ({
-                                    ...current,
-                                    currentHp: nextHp,
-                                    block: nextBlock,
-                                    buffer: nextBuffer
-                                }));
-                                newLogs.push(`${targetCompanion.name}がダメージを受けた！`);
-                                if (nextHp <= 0) {
-                                    newLogs.push(`${targetCompanion.name}が倒れた...`);
-                                }
-                            } else {
-                                p.currentHp -= unblockedDamage;
+                                p.currentHp = Math.max(0, p.currentHp - unblockedDamage);
                                 p.hpLostThisTurn = (p.hpLostThisTurn || 0) + unblockedDamage;
                                 if (unblockedDamage > 0) p.floatingText = { id: `dmg-${Date.now()}`, text: `-${unblockedDamage}`, color: 'text-red-500' };
+                            } else {
+                                const targetPlayer = selectedTarget.player;
+                                const resolved = resolveDamageAgainstDefense(damage, targetPlayer.block, targetPlayer.powers['BUFFER'] || 0);
+                                const unblockedDamage = resolved.unblockedDamage;
+                                const nextHp = Math.max(0, targetPlayer.currentHp - unblockedDamage);
+                                updateCoopParticipantState(selectedTarget.peerId, current => ({
+                                    ...current,
+                                    currentHp: nextHp,
+                                    block: resolved.nextBlock,
+                                    buffer: resolved.nextBuffer
+                                }));
+                                if (isPierce) {
+                                    newLogs.push(`${trans(e.name, languageMode)}の防御貫通攻撃！ ${targetName}に ${formula}${damage} ダメージ！`);
+                                } else if (unblockedDamage <= 0 && damage > 0) {
+                                    newLogs.push(`${trans(e.name, languageMode)}の攻撃を${targetName}が防いだ！`);
+                                } else if (unblockedDamage > 0) {
+                                    newLogs.push(`${targetName}が${unblockedDamage}ダメージを受けた！`);
+                                }
+                                if (nextHp <= 0) {
+                                    newLogs.push(`${targetName}が倒れた...`);
+                                }
                             }
                         } else if (p.partner && p.partner.currentHp > 0) {
+                            const resolved = resolveDamageAgainstDefense(damage, p.block, p.powers['BUFFER'] || 0);
+                            p.block = resolved.nextBlock;
+                            p.powers['BUFFER'] = resolved.nextBuffer;
+                            const unblockedDamage = resolved.unblockedDamage;
+                            if (isPierce) {
+                                newLogs.push(`${trans(e.name, languageMode)}の防御貫通攻撃！ ${formula}${damage} ${trans("ダメージを受けた", languageMode)}`);
+                                nextActiveEffects.push({ id: `vfx-pierce-${Date.now()}`, type: 'CRITICAL', targetId: 'player' });
+                            } else if (unblockedDamage <= 0 && damage > 0) {
+                                newLogs.push(`${trans(e.name, languageMode)}の攻撃 ${formula}${damage} を${trans("ブロック", languageMode)}`);
+                                nextActiveEffects.push({ id: `vfx-eblk-${Date.now()}`, type: 'BLOCK', targetId: 'player' });
+                            } else if (unblockedDamage > 0) {
+                                newLogs.push(`${trans(e.name, languageMode)}から ${formula}${damage} ${trans("ダメージを受けた", languageMode)}`);
+                                nextActiveEffects.push({ id: `vfx-eslash-${Date.now()}`, type: 'SLASH', targetId: 'player' });
+                            }
                             if (unblockedDamage > 0 && Math.random() < 0.5) {
-                                p.partner.currentHp -= unblockedDamage;
+                                p.partner.currentHp = Math.max(0, p.partner.currentHp - unblockedDamage);
                                 p.partner.floatingText = { id: `dmg-partner-${Date.now()}`, text: `-${unblockedDamage}`, color: 'text-red-500' };
                                 newLogs.push(`${p.partner.name}がダメージを受けた！`);
                                 if (p.partner.currentHp <= 0) {
@@ -5730,12 +5745,26 @@ const App: React.FC = () => {
                                     p.partner = undefined;
                                 }
                             } else {
-                                p.currentHp -= unblockedDamage;
+                                p.currentHp = Math.max(0, p.currentHp - unblockedDamage);
                                 p.hpLostThisTurn = (p.hpLostThisTurn || 0) + unblockedDamage;
                                 if (unblockedDamage > 0) p.floatingText = { id: `dmg-${Date.now()}`, text: `-${unblockedDamage}`, color: 'text-red-500' };
                             }
                         } else {
-                            p.currentHp -= unblockedDamage;
+                            const resolved = resolveDamageAgainstDefense(damage, p.block, p.powers['BUFFER'] || 0);
+                            p.block = resolved.nextBlock;
+                            p.powers['BUFFER'] = resolved.nextBuffer;
+                            const unblockedDamage = resolved.unblockedDamage;
+                            if (isPierce) {
+                                newLogs.push(`${trans(e.name, languageMode)}の防御貫通攻撃！ ${formula}${damage} ${trans("ダメージを受けた", languageMode)}`);
+                                nextActiveEffects.push({ id: `vfx-pierce-${Date.now()}`, type: 'CRITICAL', targetId: 'player' });
+                            } else if (unblockedDamage <= 0 && damage > 0) {
+                                newLogs.push(`${trans(e.name, languageMode)}の攻撃 ${formula}${damage} を${trans("ブロック", languageMode)}`);
+                                nextActiveEffects.push({ id: `vfx-eblk-${Date.now()}`, type: 'BLOCK', targetId: 'player' });
+                            } else if (unblockedDamage > 0) {
+                                newLogs.push(`${trans(e.name, languageMode)}から ${formula}${damage} ${trans("ダメージを受けた", languageMode)}`);
+                                nextActiveEffects.push({ id: `vfx-eslash-${Date.now()}`, type: 'SLASH', targetId: 'player' });
+                            }
+                            p.currentHp = Math.max(0, p.currentHp - unblockedDamage);
                             p.hpLostThisTurn = (p.hpLostThisTurn || 0) + unblockedDamage;
                             if (unblockedDamage > 0) p.floatingText = { id: `dmg-${Date.now()}`, text: `-${unblockedDamage}`, color: 'text-red-500' };
                         }
