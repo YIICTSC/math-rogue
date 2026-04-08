@@ -8095,6 +8095,27 @@ const App: React.FC = () => {
                 coopApplyingRemoteBattleSyncRef.current = true;
                 const pendingQueuedBattleEvent = queuedCoopBattleEventRef.current;
                 setCoopBattleState(data.battleState);
+                if (data.battleState) {
+                    setCoopSession(prev => {
+                        if (!prev) return prev;
+                        const nextParticipants = prev.participants.map(participant => {
+                            const battleEntry = data.battleState?.players.find(entry => entry.peerId === participant.peerId);
+                            if (!battleEntry) return participant;
+                            return {
+                                ...participant,
+                                selectedCharacterId: battleEntry.player.id,
+                                imageData: battleEntry.player.imageData,
+                                maxHp: battleEntry.player.maxHp,
+                                currentHp: battleEntry.player.currentHp,
+                                block: battleEntry.player.block,
+                                nextTurnEnergy: battleEntry.player.nextTurnEnergy,
+                                strength: battleEntry.player.strength,
+                                buffer: battleEntry.player.powers['BUFFER'] || 0
+                            };
+                        });
+                        return { ...prev, participants: nextParticipants };
+                    });
+                }
                 setBattleFinisherCutinCard(data.finisherCutinCard ?? null);
                 if (data.battleState && coopSelfPeerId) {
                     const selfBattlePlayer = data.battleState.players.find(entry => entry.peerId === coopSelfPeerId);
