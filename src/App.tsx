@@ -473,21 +473,6 @@ const App: React.FC = () => {
     const shuffle = (array: any[]) => {
         return array.sort(() => Math.random() - 0.5);
     };
-    const hashString = (value: string) => {
-        let hash = 0;
-        for (let i = 0; i < value.length; i++) {
-            hash = ((hash << 5) - hash + value.charCodeAt(i)) | 0;
-        }
-        return Math.abs(hash);
-    };
-    const deterministicOrder = <T extends { id: string }>(items: T[], seed: string) =>
-        [...items].sort((a, b) => {
-            const aHash = hashString(`${seed}:${a.id}`);
-            const bHash = hashString(`${seed}:${b.id}`);
-            if (aHash !== bHash) return aHash - bHash;
-            return a.id.localeCompare(b.id);
-        });
-
     const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
     const getFilteredCardPool = (playerId: string | undefined, includeSpecial: boolean = false): ICard[] => {
@@ -1234,12 +1219,27 @@ const App: React.FC = () => {
             label: participant.name,
             peerId: participant.peerId
         }));
-        const enemySlots: CoopBattleTurnSlot[] = Array.from({ length: Math.max(1, coopSession.participants.length) }, (_, index) => ({
+        const enemySlotCount = Math.max(1, gameState.enemies.filter(enemy => enemy.currentHp > 0).length);
+        const enemySlots: CoopBattleTurnSlot[] = Array.from({ length: enemySlotCount }, (_, index) => ({
             id: `coop-turn-enemy-${battleKey}-${index}`,
             type: 'ENEMY',
             label: `敵${index + 1}`
         }));
-        const queue = deterministicOrder([...playerSlots, ...enemySlots], battleKey);
+        const queue: CoopBattleTurnSlot[] = [];
+        const baseEnemiesPerPlayer = Math.floor(enemySlots.length / playerSlots.length);
+        const extraEnemySlots = enemySlots.length % playerSlots.length;
+        let enemyInsertCursor = 0;
+        playerSlots.forEach((playerSlot, playerIndex) => {
+            queue.push(playerSlot);
+            const slotsForThisPlayer = baseEnemiesPerPlayer + (playerIndex < extraEnemySlots ? 1 : 0);
+            for (let i = 0; i < slotsForThisPlayer; i++) {
+                const enemySlot = enemySlots[enemyInsertCursor];
+                if (enemySlot) {
+                    queue.push(enemySlot);
+                    enemyInsertCursor++;
+                }
+            }
+        });
         const battlePlayers: CoopBattlePlayerState[] = coopSession.participants.map(participant => {
             const snapshot = coopPlayerSnapshots[participant.peerId] || (participant.peerId === coopSelfPeerId ? gameState.player : null);
             const basePlayer = snapshot ? { ...snapshot } : {
@@ -5558,6 +5558,14 @@ const App: React.FC = () => {
                 setCoopEnemyTurnCursor((startCursor + enemyActionCountOverride) % livingEnemiesAtStart.length);
             }
         }
+        setGameState(prev => ({
+            ...prev,
+            enemies: prev.enemies.map(enemy =>
+                (enemy.currentHp > 0 || (enemy.enemyType === 'THE_HEART' && enemy.phase === 1))
+                    ? { ...enemy, block: 0 }
+                    : enemy
+            )
+        }));
         for (const enemyTemplate of enemiesToAct) {
             if (stateRef.current.player.currentHp <= 0) break;
             const enemy = stateRef.current.enemies.find(e => e.id === enemyTemplate.id);
@@ -5595,7 +5603,6 @@ const App: React.FC = () => {
                     const newLogs: string[] = [];
                     const nextActiveEffects: VisualEffectInstance[] = [];
                     const intent = e.nextIntent;
-                    e.block = 0;
                     if (e.sleepTurns && e.sleepTurns > 0) {
                         const remainingSleep = e.sleepTurns - 1;
                         newLogs.push(`${trans(e.name, languageMode)}は眠っている...`);
@@ -5603,8 +5610,6 @@ const App: React.FC = () => {
                         e.nextIntent = remainingSleep > 0
                             ? { type: EnemyIntentType.SLEEP, value: 0 }
                             : getNextEnemyIntent(e, prev.turn + 1);
-                        if (e.vulnerable > 0) e.vulnerable--;
-                        if (e.weak > 0) e.weak--;
                         return {
                             ...prev,
                             player: p,
@@ -5823,8 +5828,6 @@ const App: React.FC = () => {
                             nextActiveEffects.push({ id: `vfx-edbuff-${Date.now()}`, type: 'DEBUFF', targetId: 'player' });
                         }
                     }
-                    if (e.vulnerable > 0) e.vulnerable--;
-                    if (e.weak > 0) e.weak--;
                     e.nextIntent = getNextEnemyIntent(e, prev.turn + 1);
                     const aliveEnemies = newEnemies.filter(en => en.currentHp > 0 || (en.enemyType === 'THE_HEART' && en.phase === 1));
                     if (hasRelic(p, 'BIRD_FACED_URN')) {
@@ -5847,6 +5850,16 @@ const App: React.FC = () => {
             });
             await wait(100);
         }
+        setGameState(prev => ({
+            ...prev,
+            enemies: prev.enemies.map(enemy => {
+                if (enemy.currentHp <= 0 && !(enemy.enemyType === 'THE_HEART' && enemy.phase === 1)) return enemy;
+                const nextEnemy = { ...enemy };
+                if (nextEnemy.vulnerable > 0) nextEnemy.vulnerable--;
+                if (nextEnemy.weak > 0) nextEnemy.weak--;
+                return nextEnemy;
+            })
+        }));
         setActingEnemyId(null);
         setGameState(prev => {
             const p = { ...prev.player };
