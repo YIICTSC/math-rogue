@@ -1,355 +1,297 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Player } from '../types';
 import { p2pService, P2PEvent } from '../services/p2pService';
-import { X, Wifi, WifiOff, Copy, Check, Users, Loader, AlertCircle, Sparkles } from 'lucide-react';
+import { X, Wifi, Users, Loader, AlertCircle, Copy, Check, Swords } from 'lucide-react';
 import { audioService } from '../services/audioService';
 
 interface P2PBattleSetupProps {
-    player: Player;
-    onBattleStart: (opponent: Player, isHost: boolean) => void;
-    onClose: () => void;
+  player: Player;
+  onBattleStart: (opponent: Player, isHost: boolean) => void;
+  onClose: () => void;
 }
 
 const P2PBattleSetup: React.FC<P2PBattleSetupProps> = ({ player, onBattleStart, onClose }) => {
-    const [mode, setMode] = useState<'SELECT' | 'HOST' | 'JOIN'>('SELECT');
-    const [battleCode, setBattleCode] = useState<string>('');
-    const [inputCode, setInputCode] = useState<string>('');
-    const [status, setStatus] = useState<'IDLE' | 'CONNECTING' | 'CONNECTED' | 'ERROR'>('IDLE');
-    const [errorMsg, setErrorMsg] = useState<string>('');
-    const [copied, setCopied] = useState(false);
-    const [urlCopied, setUrlCopied] = useState(false);
-    const [opponentPlayer, setOpponentPlayer] = useState<Player | null>(null);
+  const [mode, setMode] = useState<'SELECT' | 'HOST' | 'JOIN'>('SELECT');
+  const [myName, setMyName] = useState('');
+  const [battleCode, setBattleCode] = useState('');
+  const [inputCode, setInputCode] = useState('');
+  const [status, setStatus] = useState<'IDLE' | 'CONNECTING' | 'CONNECTED' | 'ERROR'>('IDLE');
+  const [errorMsg, setErrorMsg] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [inviteUrlCopied, setInviteUrlCopied] = useState(false);
+  const [opponentPlayer, setOpponentPlayer] = useState<Player | null>(null);
+  const joinInFlightRef = useRef(false);
 
-    useEffect(() => {
-        if (typeof window === 'undefined') return;
-        const params = new URLSearchParams(window.location.search);
-        const presetCode = (params.get('vsPin') || '').normalize('NFKC').replace(/[^0-9]/g, '').slice(0, 6);
-        if (presetCode.length === 6) {
-            setMode('JOIN');
-            setInputCode(presetCode);
-        }
-    }, []);
-
-    useEffect(() => {
-        console.log('🔧 Setting up P2P event handlers');
-
-        // Setup P2P event handlers
-        p2pService.onConnect = () => {
-            console.log('✅ Connection established, sending handshake');
-            setStatus('CONNECTED');
-            audioService.playSound('buff');
-
-            // Send handshake with player data immediately
-            setTimeout(() => {
-                console.log('📤 Sending handshake with player data');
-                p2pService.send({
-                    type: 'HANDSHAKE',
-                    player: player
-                });
-            }, 100); // Small delay to ensure connection is fully ready
-        };
-
-        p2pService.onData = (data: P2PEvent) => {
-            console.log('📨 Received data:', data.type);
-            if (data.type === 'HANDSHAKE') {
-                console.log('🤝 Received opponent player data');
-                setOpponentPlayer(data.player);
-                audioService.playSound('win');
-
-                // Send handshake back if we haven't sent one yet
-                if (!opponentPlayer) {
-                    console.log('📤 Sending handshake response');
-                    setTimeout(() => {
-                        p2pService.send({
-                            type: 'HANDSHAKE',
-                            player: player
-                        });
-                    }, 100);
-                }
-            }
-        };
-
-        p2pService.onClose = () => {
-            console.log('🔌 Connection closed');
-            setStatus('IDLE');
-            setErrorMsg('接続が切断されました');
-        };
-
-        p2pService.onError = (err) => {
-            console.error('❌ P2P Error:', err);
-            setStatus('ERROR');
-            setErrorMsg(err.message || '接続エラーが発生しました');
-            audioService.playSound('wrong');
-        };
-
-        return () => {
-            console.log('🧹 Cleaning up P2P event handlers');
-            p2pService.onConnect = null;
-            p2pService.onData = null;
-            p2pService.onClose = null;
-            p2pService.onError = null;
-        };
-    }, [player, opponentPlayer]);
-
-    const handleCreateRoom = async () => {
-        setStatus('CONNECTING');
-        setErrorMsg('');
-        try {
-            const code = await p2pService.initHost();
-            setBattleCode(code);
-            setMode('HOST');
-            audioService.playSound('select');
-        } catch (err: any) {
-            setStatus('ERROR');
-            setErrorMsg('ルーム作成に失敗しました: ' + (err.message || ''));
-            audioService.playSound('wrong');
-        }
-    };
-
-    const handleJoinRoom = async () => {
-        if (!inputCode || inputCode.length !== 6) {
-            audioService.playSound('wrong');
-            return;
-        }
-
-        setStatus('CONNECTING');
-        setErrorMsg('');
-        try {
-            await p2pService.connect(inputCode);
-            setBattleCode(inputCode);
-            setMode('JOIN');
-            audioService.playSound('select');
-        } catch (err: any) {
-            setStatus('ERROR');
-            setErrorMsg('接続に失敗しました: ' + (err.message || ''));
-            audioService.playSound('wrong');
-        }
-    };
-
-    const handleStartBattle = () => {
-        if (opponentPlayer) {
-            audioService.playSound('select');
-            onBattleStart(opponentPlayer, mode === 'HOST');
-        }
-    };
-
-    const handleCopy = () => {
-        navigator.clipboard.writeText(battleCode);
-        setCopied(true);
-        audioService.playSound('select');
-        setTimeout(() => setCopied(false), 2000);
-    };
-
-    const handleCopyJoinUrl = () => {
-        if (typeof window === 'undefined' || !battleCode) return;
-        const inviteUrl = new URL(window.location.href);
-        inviteUrl.searchParams.set('vsPin', battleCode);
-        navigator.clipboard.writeText(inviteUrl.toString());
-        setUrlCopied(true);
-        audioService.playSound('select');
-        setTimeout(() => setUrlCopied(false), 2000);
-    };
-
-    const handleBack = () => {
-        p2pService.close();
-        onClose();
-    };
-
-    if (mode === 'SELECT') {
-        return (
-            <div className="fixed inset-0 z-[200] bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950 flex items-center justify-center p-4">
-                <div className="bg-slate-900/95 border-4 border-indigo-500 rounded-3xl w-full max-w-lg p-8 relative shadow-[0_0_80px_rgba(79,70,229,0.6)] backdrop-blur-sm">
-                    <button onClick={handleBack} className="absolute top-4 right-4 text-gray-500 hover:text-white p-2 hover:bg-white/10 rounded-full transition-colors">
-                        <X size={28} />
-                    </button>
-
-                    <div className="text-center mb-8">
-                        <Users size={64} className="text-indigo-400 mx-auto mb-4 animate-pulse" />
-                        <h2 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 italic tracking-tighter mb-2">
-                            P2P BATTLE
-                        </h2>
-                        <p className="text-gray-400 text-sm">リアルタイム対戦モード</p>
-                    </div>
-
-                    <div className="flex flex-col gap-4">
-                        <button
-                            onClick={handleCreateRoom}
-                            className="group relative bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black py-6 rounded-2xl shadow-lg transition-all transform hover:scale-105 active:scale-95 overflow-hidden"
-                        >
-                            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                            <div className="relative flex items-center justify-center gap-3">
-                                <Wifi size={28} />
-                                <span className="text-xl">ルームを作成</span>
-                            </div>
-                        </button>
-
-                        <button
-                            onClick={() => setMode('JOIN')}
-                            className="group relative bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-black py-6 rounded-2xl shadow-lg transition-all transform hover:scale-105 active:scale-95 overflow-hidden"
-                        >
-                            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                            <div className="relative flex items-center justify-center gap-3">
-                                <Users size={28} />
-                                <span className="text-xl">ルームに参加</span>
-                            </div>
-                        </button>
-                    </div>
-
-                    {errorMsg && (
-                        <div className="mt-6 p-4 bg-red-900/50 border border-red-500 rounded-xl flex items-center gap-2 text-red-200 text-sm">
-                            <AlertCircle size={20} />
-                            <span>{errorMsg}</span>
-                        </div>
-                    )}
-                </div>
-            </div>
-        );
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const presetCode = (params.get('vsPin') || '').normalize('NFKC').replace(/[^0-9]/g, '').slice(0, 6);
+    if (presetCode.length === 6) {
+      setMode('JOIN');
+      setInputCode(presetCode);
     }
+  }, []);
 
-    if (mode === 'HOST') {
-        return (
-            <div className="fixed inset-0 z-[200] bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950 flex items-center justify-center p-4">
-                <div className="bg-slate-900/95 border-4 border-indigo-500 rounded-3xl w-full max-w-lg p-8 relative shadow-[0_0_80px_rgba(79,70,229,0.6)] backdrop-blur-sm">
-                    <button onClick={handleBack} className="absolute top-4 right-4 text-gray-500 hover:text-white p-2 hover:bg-white/10 rounded-full transition-colors">
-                        <X size={28} />
-                    </button>
+  useEffect(() => {
+    p2pService.onConnect = () => {
+      setStatus('CONNECTED');
+      setErrorMsg('');
+      p2pService.send({ type: 'HANDSHAKE', player: { ...player, name: myName.trim() || 'プレイヤー' } });
+    };
 
-                    <div className="text-center mb-6">
-                        <Wifi size={48} className="text-indigo-400 mx-auto mb-3 animate-pulse" />
-                        <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 italic tracking-tighter">
-                            対戦コード
-                        </h2>
-                    </div>
+    p2pService.onData = (data: P2PEvent) => {
+      if (data.type === 'HANDSHAKE') {
+        setOpponentPlayer(data.player);
+        p2pService.send({ type: 'HANDSHAKE', player: { ...player, name: myName.trim() || 'プレイヤー' } });
+      }
+    };
 
-                    {/* Battle Code Display */}
-                    <div className="bg-black/60 p-6 rounded-2xl border-2 border-indigo-500/50 mb-6">
-                        <div className="text-center mb-4">
-                            <div className="text-6xl font-black text-white tracking-widest font-mono">
-                                {battleCode}
-                            </div>
-                        </div>
-                        <button
-                            onClick={handleCopy}
-                            className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold transition-all ${copied ? 'bg-green-600 text-white' : 'bg-indigo-600/80 text-indigo-100 hover:bg-indigo-500'
-                                }`}
-                        >
-                            {copied ? <Check size={20} /> : <Copy size={20} />}
-                            {copied ? 'コピーしました！' : 'コードをコピー'}
-                        </button>
-                        <button
-                            onClick={handleCopyJoinUrl}
-                            className={`mt-2 w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold transition-all ${urlCopied ? 'bg-emerald-600 text-white' : 'bg-slate-700/80 text-slate-100 hover:bg-slate-600'}`}
-                        >
-                            {urlCopied ? <Check size={20} /> : <Copy size={20} />}
-                            {urlCopied ? 'URLをコピーしました！' : 'PIN入力済みURLをコピー'}
-                        </button>
-                    </div>
+    p2pService.onClose = () => {
+      setStatus('IDLE');
+      setOpponentPlayer(null);
+    };
 
-                    {/* Status */}
-                    {status === 'CONNECTED' && opponentPlayer ? (
-                        <div className="bg-green-900/50 border-2 border-green-500 rounded-2xl p-6 mb-6 animate-in zoom-in duration-300">
-                            <div className="flex items-center justify-center gap-2 text-green-400 font-black text-xl mb-4">
-                                <Sparkles size={24} />
-                                対戦相手が接続しました！
-                                <Sparkles size={24} />
-                            </div>
-                            <button
-                                onClick={handleStartBattle}
-                                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-black py-4 rounded-xl shadow-lg transition-all transform hover:scale-105 active:scale-95 text-xl"
-                            >
-                                対戦開始！
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="bg-indigo-900/30 border border-indigo-500/50 rounded-2xl p-6 text-center">
-                            <Loader size={32} className="text-indigo-400 mx-auto mb-3 animate-spin" />
-                            <p className="text-indigo-300 font-bold">対戦相手を待っています...</p>
-                            <p className="text-gray-500 text-sm mt-2">相手にコードを共有してください</p>
-                        </div>
-                    )}
-                </div>
-            </div>
-        );
+    p2pService.onError = (err) => {
+      setStatus('ERROR');
+      setErrorMsg(err?.message || '接続エラー');
+      audioService.playSound('wrong');
+    };
+
+    return () => {
+      p2pService.onConnect = null;
+      p2pService.onData = null;
+      p2pService.onClose = null;
+      p2pService.onError = null;
+    };
+  }, [myName, player]);
+
+  const handleCreateRoom = async () => {
+    if (!myName.trim()) return;
+    setStatus('CONNECTING');
+    setErrorMsg('');
+    try {
+      const code = await p2pService.initHost();
+      setBattleCode(code);
+      setMode('HOST');
+      setStatus('CONNECTED');
+      audioService.playSound('select');
+    } catch (err: any) {
+      setStatus('ERROR');
+      setErrorMsg(err?.message || 'ルーム作成に失敗');
+      audioService.playSound('wrong');
     }
+  };
 
-    if (mode === 'JOIN') {
-        return (
-            <div className="fixed inset-0 z-[200] bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950 flex items-center justify-center p-4">
-                <div className="bg-slate-900/95 border-4 border-pink-500 rounded-3xl w-full max-w-lg p-8 relative shadow-[0_0_80px_rgba(236,72,153,0.6)] backdrop-blur-sm">
-                    <button onClick={handleBack} className="absolute top-4 right-4 text-gray-500 hover:text-white p-2 hover:bg-white/10 rounded-full transition-colors">
-                        <X size={28} />
-                    </button>
-
-                    <div className="text-center mb-6">
-                        <Users size={48} className="text-pink-400 mx-auto mb-3" />
-                        <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-rose-400 italic tracking-tighter">
-                            ルームに参加
-                        </h2>
-                    </div>
-
-                    {status !== 'CONNECTED' ? (
-                        <>
-                            <div className="mb-6">
-                                <label className="block text-gray-400 text-sm font-bold mb-3">対戦コードを入力</label>
-                                <input
-                                    type="text"
-                                    value={inputCode}
-                                    onChange={(e) => setInputCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                                    placeholder="6ケタのコード"
-                                    className="w-full bg-black/60 border-2 border-pink-500/50 rounded-xl px-6 py-4 text-center text-4xl font-black text-white outline-none focus:border-pink-400 transition-all placeholder:text-gray-700 font-mono tracking-widest"
-                                    maxLength={6}
-                                    autoFocus
-                                />
-                            </div>
-
-                            <button
-                                onClick={handleJoinRoom}
-                                disabled={inputCode.length !== 6 || status === 'CONNECTING'}
-                                className="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 disabled:from-gray-700 disabled:to-gray-800 disabled:text-gray-500 text-white font-black py-4 rounded-xl shadow-lg transition-all transform hover:scale-105 active:scale-95 disabled:scale-100 text-xl flex items-center justify-center gap-2"
-                            >
-                                {status === 'CONNECTING' ? (
-                                    <>
-                                        <Loader size={24} className="animate-spin" />
-                                        接続中...
-                                    </>
-                                ) : (
-                                    '参加する'
-                                )}
-                            </button>
-
-                            {errorMsg && (
-                                <div className="mt-6 p-4 bg-red-900/50 border border-red-500 rounded-xl flex items-center gap-2 text-red-200 text-sm">
-                                    <AlertCircle size={20} />
-                                    <span>{errorMsg}</span>
-                                </div>
-                            )}
-                        </>
-                    ) : opponentPlayer ? (
-                        <div className="bg-green-900/50 border-2 border-green-500 rounded-2xl p-6 animate-in zoom-in duration-300">
-                            <div className="flex items-center justify-center gap-2 text-green-400 font-black text-xl mb-4">
-                                <Sparkles size={24} />
-                                接続成功！
-                                <Sparkles size={24} />
-                            </div>
-                            <button
-                                onClick={handleStartBattle}
-                                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-black py-4 rounded-xl shadow-lg transition-all transform hover:scale-105 active:scale-95 text-xl"
-                            >
-                                対戦開始！
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="bg-pink-900/30 border border-pink-500/50 rounded-2xl p-6 text-center">
-                            <Loader size={32} className="text-pink-400 mx-auto mb-3 animate-spin" />
-                            <p className="text-pink-300 font-bold">ハンドシェイク中...</p>
-                        </div>
-                    )}
-                </div>
-            </div>
-        );
+  const handleJoinRoom = async () => {
+    if (joinInFlightRef.current || status === 'CONNECTING' || battleCode) return;
+    if (!myName.trim() || inputCode.length !== 6) return;
+    joinInFlightRef.current = true;
+    setStatus('CONNECTING');
+    setErrorMsg('');
+    try {
+      await p2pService.connect(inputCode);
+      setBattleCode(inputCode);
+      setMode('JOIN');
+      audioService.playSound('select');
+    } catch (err: any) {
+      joinInFlightRef.current = false;
+      setStatus('ERROR');
+      setErrorMsg(err?.message || '接続に失敗');
+      audioService.playSound('wrong');
     }
+  };
 
-    return null;
+  const handleStartBattle = () => {
+    if (!opponentPlayer) return;
+    audioService.playSound('select');
+    onBattleStart(opponentPlayer, mode === 'HOST');
+  };
+
+  const handleCopyCode = () => {
+    if (!battleCode) return;
+    navigator.clipboard.writeText(battleCode);
+    setCopied(true);
+    audioService.playSound('select');
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleCopyInviteUrl = () => {
+    if (typeof window === 'undefined' || !battleCode) return;
+    const inviteUrl = new URL(window.location.href);
+    inviteUrl.searchParams.set('vsPin', battleCode);
+    navigator.clipboard.writeText(inviteUrl.toString());
+    setInviteUrlCopied(true);
+    audioService.playSound('select');
+    setTimeout(() => setInviteUrlCopied(false), 2000);
+  };
+
+  const handleBack = () => {
+    joinInFlightRef.current = false;
+    p2pService.close();
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-[200] bg-slate-950/95 flex items-center justify-center p-4 text-white">
+      <div className="bg-slate-900 border-2 border-indigo-500 rounded-2xl w-full max-w-lg p-6 relative">
+        <button onClick={handleBack} className="absolute top-3 right-3 text-gray-400 hover:text-white">
+          <X size={22} />
+        </button>
+
+        <h2 className="text-2xl font-black mb-4 flex items-center gap-2">
+          <Swords size={24} className="text-indigo-300" />
+          VSモード
+        </h2>
+
+        <div className="mb-4">
+          <label className="block text-sm text-gray-300 mb-2">名前</label>
+          <input
+            value={myName}
+            onChange={(e) => setMyName(e.target.value)}
+            placeholder="表示名"
+            className="w-full bg-black/60 border border-gray-600 rounded px-3 py-2"
+            maxLength={20}
+          />
+        </div>
+
+        <div className="mb-4 rounded-lg border border-indigo-500/40 bg-indigo-950/20 px-3 py-2 text-xs text-indigo-100">
+          1対1のリアルタイム対戦モードです。部屋作成か参加を選んで接続してください。
+        </div>
+
+        {mode === 'SELECT' && (
+          <div className="space-y-4">
+            <button
+              onClick={() => {
+                setMode('HOST');
+                setStatus('IDLE');
+                setErrorMsg('');
+              }}
+              className="w-full bg-indigo-600 py-4 rounded-xl font-bold flex items-center justify-center gap-2 text-lg"
+            >
+              <Wifi size={20} /> ルームを作成
+            </button>
+            <button
+              onClick={() => {
+                setMode('JOIN');
+                setStatus('IDLE');
+                setErrorMsg('');
+              }}
+              className="w-full bg-violet-700 py-4 rounded-xl font-bold flex items-center justify-center gap-2 text-lg"
+            >
+              <Users size={20} /> ルームに参加
+            </button>
+          </div>
+        )}
+
+        {mode === 'HOST' && (
+          <div className="space-y-3">
+            {!battleCode ? (
+              <>
+                <div className="text-sm text-gray-300">作成者名を入力して対戦ルームを作成します。</div>
+                <button
+                  onClick={handleCreateRoom}
+                  disabled={!myName.trim() || status === 'CONNECTING'}
+                  className="w-full bg-indigo-600 disabled:bg-gray-700 disabled:text-gray-300 py-3 rounded font-bold flex items-center justify-center gap-2"
+                >
+                  {status === 'CONNECTING' ? <Loader size={18} className="animate-spin" /> : <Wifi size={18} />}
+                  {status === 'CONNECTING' ? '作成中...' : 'ルームを作成'}
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="bg-black/60 border border-gray-700 rounded p-3">
+                  <div className="text-xs text-gray-400">ルームコード</div>
+                  <div className="text-4xl font-black tracking-widest">{battleCode}</div>
+                </div>
+                <button
+                  onClick={handleCopyCode}
+                  className={`w-full py-2.5 rounded font-bold flex items-center justify-center gap-2 transition-colors ${copied ? 'bg-emerald-600 text-white' : 'bg-indigo-900/60 hover:bg-indigo-800/70 text-indigo-100'}`}
+                >
+                  {copied ? <Check size={16} /> : <Copy size={16} />}
+                  {copied ? 'コードをコピーしました！' : 'コードをコピー'}
+                </button>
+                <button
+                  onClick={handleCopyInviteUrl}
+                  className={`w-full py-2.5 rounded font-bold flex items-center justify-center gap-2 transition-colors ${inviteUrlCopied ? 'bg-emerald-600 text-white' : 'bg-indigo-900/60 hover:bg-indigo-800/70 text-indigo-100'}`}
+                >
+                  {inviteUrlCopied ? <Check size={16} /> : <Copy size={16} />}
+                  {inviteUrlCopied ? 'URLをコピーしました！' : 'PIN入力済みURLをコピー'}
+                </button>
+                <div className="bg-black/40 border border-gray-700 rounded p-3">
+                  <div className="text-sm font-bold mb-2 flex items-center gap-1">
+                    <Users size={14} /> 接続状況
+                  </div>
+                  {opponentPlayer ? (
+                    <div className="text-sm text-gray-100">- {opponentPlayer.name || 'ゲスト'} が接続しました</div>
+                  ) : (
+                    <div className="text-sm text-gray-400">待機中...</div>
+                  )}
+                </div>
+                <button
+                  onClick={handleStartBattle}
+                  disabled={!opponentPlayer}
+                  className="w-full bg-emerald-600 disabled:bg-gray-700 py-3 rounded font-bold flex items-center justify-center gap-2"
+                >
+                  <Swords size={18} /> 対戦開始
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
+        {mode === 'JOIN' && (
+          <div className="space-y-3">
+            {!battleCode ? (
+              <>
+                <div className="text-sm text-gray-300">参加コードを入力して対戦ルームへ接続します。</div>
+                <input
+                  value={inputCode}
+                  onChange={(e) => setInputCode(e.target.value.normalize('NFKC').replace(/[^0-9]/g, '').slice(0, 6))}
+                  placeholder="6桁コード"
+                  className="w-full min-w-0 bg-black/60 border border-gray-600 rounded px-3 py-3 text-center text-2xl font-black tracking-[0.35em]"
+                />
+                <button
+                  onClick={handleJoinRoom}
+                  disabled={!myName.trim() || inputCode.length !== 6 || status === 'CONNECTING'}
+                  className="w-full bg-violet-700 disabled:bg-gray-700 disabled:text-gray-300 px-4 py-3 rounded font-bold flex items-center justify-center gap-2"
+                >
+                  {status === 'CONNECTING' ? <Loader size={18} className="animate-spin" /> : <Users size={18} />}
+                  {status === 'CONNECTING' ? '接続中...' : '参加する'}
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="bg-black/40 border border-gray-700 rounded p-3 text-sm text-gray-200">コード: {battleCode}</div>
+                <div className="bg-black/40 border border-gray-700 rounded p-3 max-h-44 overflow-auto">
+                  <div className="text-sm font-bold mb-2 flex items-center gap-1">
+                    <Users size={14} /> 接続状況
+                  </div>
+                  {opponentPlayer ? (
+                    <div className="text-sm text-gray-100">- {opponentPlayer.name || 'ホスト'} と接続しました</div>
+                  ) : (
+                    <div className="text-sm text-gray-400">ハンドシェイク中...</div>
+                  )}
+                </div>
+                <button
+                  onClick={handleStartBattle}
+                  disabled={!opponentPlayer}
+                  className="w-full bg-emerald-600 disabled:bg-gray-700 py-3 rounded font-bold flex items-center justify-center gap-2"
+                >
+                  <Swords size={18} /> 対戦開始
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
+        {status === 'ERROR' && (
+          <div className="mt-4 bg-red-900/40 border border-red-500 rounded p-3 text-sm flex items-center gap-2">
+            <AlertCircle size={14} /> {errorMsg}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default P2PBattleSetup;
