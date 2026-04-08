@@ -6,7 +6,7 @@ import { audioService } from '../services/audioService';
 
 interface P2PBattleSetupProps {
   player: Player;
-  onBattleStart: (opponent: Player, isHost: boolean) => void;
+  onBattleStart: (opponent: Player, isHost: boolean, myName: string) => void;
   onClose: () => void;
 }
 
@@ -104,7 +104,7 @@ const P2PBattleSetup: React.FC<P2PBattleSetupProps> = ({ player, onBattleStart, 
   const handleStartBattle = () => {
     if (!opponentPlayer) return;
     audioService.playSound('select');
-    onBattleStart(opponentPlayer, mode === 'HOST');
+    onBattleStart(opponentPlayer, mode === 'HOST', myName.trim() || 'プレイヤー');
   };
 
   const handleCopyCode = () => {

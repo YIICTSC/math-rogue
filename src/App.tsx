@@ -8835,9 +8835,10 @@ const App: React.FC = () => {
                     <div className="absolute inset-0">
                         <P2PBattleSetup
                             player={gameState.player}
-                            onBattleStart={(opp, isHost) => {
+                            onBattleStart={(opp, isHost, myName) => {
                                 setGameState(prev => ({
                                     ...prev,
+                                    player: { ...prev.player, name: myName },
                                     vsOpponent: opp,
                                     screen: GameScreen.VS_BATTLE,
                                     vsIsHost: isHost
