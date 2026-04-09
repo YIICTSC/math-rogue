@@ -4355,14 +4355,16 @@ const App: React.FC = () => {
             ) {
                 const possibleCards = getFilteredCardPool(p.id);
                 if (possibleCards.length > 0) {
-                    let newCard = { ...possibleCards[Math.floor(Math.random() * possibleCards.length)], id: `disc-${Date.now()}` } as ICard;
-                    if (p.powers['MASTER_REALITY']) newCard = getUpgradedCard(newCard);
-                    if (p.hand.length < HAND_SIZE + 5) {
-                        p.hand.push(newCard);
-                    } else {
-                        p.discardPile.push(newCard);
+                    for (let i = 0; i < 3; i++) {
+                        let newCard = { ...possibleCards[Math.floor(Math.random() * possibleCards.length)], id: `disc-${Date.now()}-${i}` } as ICard;
+                        if (p.powers['MASTER_REALITY']) newCard = getUpgradedCard(newCard);
+                        if (p.hand.length < HAND_SIZE + 5) {
+                            p.hand.push(newCard);
+                        } else {
+                            p.discardPile.push(newCard);
+                        }
+                        currentLogs.push(`${trans(newCard.name, languageMode)}を手札に加えた！`);
                     }
-                    currentLogs.push(`${trans(newCard.name, languageMode)}を手札に加えた！`);
                 }
                 nextActiveEffects.push({ id: `vfx-disc-${Date.now()}`, type: 'BUFF', targetId: 'player' });
             }

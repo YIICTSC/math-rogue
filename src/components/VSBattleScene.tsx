@@ -258,8 +258,9 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
             card.originalNames?.includes('SANSU_ZERO')
         ) {
             const pool = getFilteredCardPool();
-            const template = pool[Math.floor(Math.random() * pool.length)];
-            if (template) {
+            for (let i = 0; i < 3; i++) {
+                const template = pool[Math.floor(Math.random() * pool.length)];
+                if (!template) break;
                 let newCard = { ...template, id: `discovery-${Date.now()}-${Math.random()}` };
                 if (nextCurrent.powers['MASTER_REALITY']) newCard = getUpgradedCard(newCard);
                 nextCurrent.hand.push(newCard);
