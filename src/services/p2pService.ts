@@ -149,6 +149,7 @@ export type P2PEvent =
     | {
         type: 'COOP_BATTLE_PLAY_CARD',
         cardId: string,
+        playedCard?: any,
         player: any,
         enemies: any[],
         selectedEnemyId?: string | null,

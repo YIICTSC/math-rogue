@@ -711,7 +711,7 @@ const App: React.FC = () => {
     const coopApplyingRemoteBattleSyncRef = useRef(false);
     const coopLastBattleActionSignatureRef = useRef<string | null>(null);
     const coopPendingVoiceSyncRef = useRef<boolean | null>(null);
-    const queuedCoopBattleEventRef = useRef<{ type: 'COOP_BATTLE_PLAY_CARD' | 'COOP_BATTLE_USE_POTION' | 'COOP_BATTLE_TURN_START' | 'COOP_BATTLE_SELECTION_STATE' | 'COOP_BATTLE_MODAL_RESOLVE' | 'COOP_BATTLE_CODEX_SELECT', cardId?: string, potionId?: string } | null>(null);
+    const queuedCoopBattleEventRef = useRef<{ type: 'COOP_BATTLE_PLAY_CARD' | 'COOP_BATTLE_USE_POTION' | 'COOP_BATTLE_TURN_START' | 'COOP_BATTLE_SELECTION_STATE' | 'COOP_BATTLE_MODAL_RESOLVE' | 'COOP_BATTLE_CODEX_SELECT', cardId?: string, potionId?: string, playedCard?: ICard } | null>(null);
     const [queuedCoopBattleEventTick, setQueuedCoopBattleEventTick] = useState(0);
     const coopMapPendingTimerRef = useRef<number | null>(null);
     const transferFileInputRef = useRef<HTMLInputElement | null>(null);
@@ -1233,7 +1233,7 @@ const App: React.FC = () => {
             setGameState(prev => ({ ...prev, player }));
         }
     }, [coopSelfPeerId, updateCoopParticipantState, upsertCoopPlayerSnapshot]);
-    const queueCoopBattleEvent = useCallback((event: { type: 'COOP_BATTLE_PLAY_CARD' | 'COOP_BATTLE_USE_POTION' | 'COOP_BATTLE_TURN_START' | 'COOP_BATTLE_SELECTION_STATE' | 'COOP_BATTLE_MODAL_RESOLVE' | 'COOP_BATTLE_CODEX_SELECT', cardId?: string, potionId?: string }) => {
+    const queueCoopBattleEvent = useCallback((event: { type: 'COOP_BATTLE_PLAY_CARD' | 'COOP_BATTLE_USE_POTION' | 'COOP_BATTLE_TURN_START' | 'COOP_BATTLE_SELECTION_STATE' | 'COOP_BATTLE_MODAL_RESOLVE' | 'COOP_BATTLE_CODEX_SELECT', cardId?: string, potionId?: string, playedCard?: ICard }) => {
         queuedCoopBattleEventRef.current = event;
         setQueuedCoopBattleEventTick(prev => prev + 1);
     }, []);
@@ -1906,6 +1906,7 @@ const App: React.FC = () => {
             eventType: queuedEvent.type,
             cardId: queuedEvent.cardId ?? null,
             potionId: queuedEvent.potionId ?? null,
+            playedCardId: queuedEvent.playedCard?.id ?? null,
             battleKey: gameState.coopBattleState?.battleKey ?? null,
             turnCursor: gameState.coopBattleState?.turnCursor ?? 0,
             enemyTurnCursor: gameState.coopBattleState?.enemyTurnCursor ?? 0,
@@ -1926,6 +1927,7 @@ const App: React.FC = () => {
                 type: queuedEvent.type,
                 ...(queuedEvent.cardId ? { cardId: queuedEvent.cardId } : {}),
                 ...(queuedEvent.potionId ? { potionId: queuedEvent.potionId } : {}),
+                ...(queuedEvent.playedCard ? { playedCard: queuedEvent.playedCard } : {}),
                 player: gameState.player,
                 enemies: gameState.enemies,
                 selectedEnemyId: gameState.selectedEnemyId,
@@ -4148,7 +4150,7 @@ const App: React.FC = () => {
         setLastActionTime(Date.now());
         lastPlayedCardRef.current = card;
         if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
-            queueCoopBattleEvent({ type: 'COOP_BATTLE_PLAY_CARD', cardId: card.id });
+            queueCoopBattleEvent({ type: 'COOP_BATTLE_PLAY_CARD', cardId: card.id, playedCard: { ...card } });
         }
 
         setGameState(prev => {
@@ -8019,6 +8021,7 @@ const App: React.FC = () => {
     const applyHostCoopBattleSnapshot = useCallback((fromPeerId: string, payload: {
         player: Player,
         cardId?: string,
+        playedCard?: ICard,
         enemies?: Enemy[],
         selectedEnemyId?: string | null,
         combatLog?: string[],
@@ -8071,8 +8074,9 @@ const App: React.FC = () => {
                         || payload.player.hand.find(card => card.id === payload.cardId)
                         || payload.player.drawPile.find(card => card.id === payload.cardId)
                         || payload.player.deck.find(card => card.id === payload.cardId)
+                        || payload.playedCard
                     )
-                    : null;
+                    : payload.playedCard ?? null;
                 if (finisherCard && !battleFinisherCutinCard) {
                     setBattleFinisherCutinCard({ ...finisherCard });
                     if (victorySequenceTimerRef.current) {
