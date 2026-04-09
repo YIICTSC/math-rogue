@@ -971,11 +971,14 @@ const App: React.FC = () => {
                 if (coopSession.isHost) {
                     setCoopSession(prev => {
                         if (!prev) return prev;
-                        const nextParticipants = prev.participants.map(participant =>
-                            participant.peerId === coopSelfPeerId
-                                ? { ...participant, voiceEnabled: coopVoiceEnabled }
-                                : participant
-                        );
+                        let changed = false;
+                        const nextParticipants = prev.participants.map(participant => {
+                            if (participant.peerId !== coopSelfPeerId) return participant;
+                            if (participant.voiceEnabled === coopVoiceEnabled) return participant;
+                            changed = true;
+                            return { ...participant, voiceEnabled: coopVoiceEnabled };
+                        });
+                        if (!changed) return prev;
                         p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
                         return { ...prev, participants: nextParticipants };
                     });
