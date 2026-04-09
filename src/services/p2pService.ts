@@ -504,9 +504,15 @@ class P2PService {
             if (this.localStream) {
                 this.localStream.getAudioTracks().forEach(track => {
                     track.enabled = false;
+                    track.stop();
                 });
+                this.localStream = null;
             }
             return;
+        }
+        if (this.mediaConnections.size > 0) {
+            this.mediaConnections.forEach(call => call.close());
+            this.mediaConnections.clear();
         }
         const stream = await this.ensureLocalAudioStream();
         stream.getAudioTracks().forEach(track => {
