@@ -8093,6 +8093,18 @@ const App: React.FC = () => {
                     : payload.playedCard ?? null;
                 if (finisherCard && !battleFinisherCutinCard) {
                     setBattleFinisherCutinCard({ ...finisherCard });
+                    if (nextBattleState) {
+                        p2pService.send({
+                            type: 'COOP_BATTLE_SYNC',
+                            battleState: nextBattleState,
+                            enemies: payload.enemies,
+                            selectedEnemyId: payload.selectedEnemyId,
+                            combatLog: payload.combatLog,
+                            turnLog: payload.turnLog,
+                            actingEnemyId: payload.actingEnemyId,
+                            finisherCutinCard: { ...finisherCard }
+                        });
+                    }
                     if (victorySequenceTimerRef.current) {
                         clearTimeout(victorySequenceTimerRef.current);
                     }

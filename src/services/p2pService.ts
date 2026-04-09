@@ -483,13 +483,14 @@ class P2PService {
     }
 
     private async handleIncomingCall(call: MediaConnection) {
-        if (!this.voiceEnabled) {
-            call.close();
-            return;
-        }
         try {
-            const stream = await this.ensureLocalAudioStream();
-            call.answer(stream);
+            if (this.voiceEnabled) {
+                const stream = await this.ensureLocalAudioStream();
+                call.answer(stream);
+            } else {
+                // 自分のマイクがOFFでも、相手の音声は受信できるようにする
+                call.answer();
+            }
             this.bindMediaConnection(call.peer, call);
         } catch (err) {
             console.warn('Failed to answer voice call:', err);
@@ -505,8 +506,6 @@ class P2PService {
                     track.enabled = false;
                 });
             }
-            this.mediaConnections.forEach(call => call.close());
-            this.mediaConnections.clear();
             return;
         }
         const stream = await this.ensureLocalAudioStream();
