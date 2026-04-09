@@ -9133,17 +9133,6 @@ const App: React.FC = () => {
                     </div>
                 )}
 
-                {coopSession && gameState.challengeMode === 'COOP' && gameState.screen !== GameScreen.COOP_SETUP && coopSession.roomCode && (
-                    <div className="absolute left-1/2 top-2 sm:top-3 z-40 -translate-x-1/2">
-                        <div className="bg-slate-900/90 border border-emerald-500 rounded-lg px-2 py-1.5 sm:px-3 sm:py-2 text-emerald-100 shadow-lg">
-                            <div className="text-center text-[9px] sm:text-[10px] font-bold tracking-wide text-emerald-200">
-                                {coopSession.isHost ? '協力コード' : '参加中コード'}
-                            </div>
-                            <div className="text-center text-base sm:text-lg font-black tracking-[0.18em] sm:tracking-widest tabular-nums">{coopSession.roomCode}</div>
-                        </div>
-                    </div>
-                )}
-
                 {gameState.challengeMode === 'COOP' && coopSession && COOP_DECISION_HUD_SCREEN_SET.has(gameState.screen) && coopDecisionOwner && (
                     <div className="absolute right-2 sm:right-3 top-[60px] sm:top-[72px] z-30">
                         <div className="bg-slate-900/90 border border-cyan-500 rounded-lg px-2 py-1.5 sm:px-3 sm:py-2 text-cyan-100 shadow-lg min-w-[116px] sm:min-w-[168px] max-w-[42vw] sm:max-w-none">

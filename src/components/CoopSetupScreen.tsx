@@ -283,6 +283,10 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
               </>
             ) : (
               <>
+                <div className="bg-black/40 border border-emerald-500/60 rounded p-3 text-center">
+                  <div className="text-xs text-emerald-200/90 mb-1">ルームコード</div>
+                  <div className="text-2xl font-black tracking-[0.35em] tabular-nums text-emerald-100">{roomCode}</div>
+                </div>
                 <button
                   onClick={handleCopyInviteUrl}
                   className={`w-full py-2.5 rounded font-bold flex items-center justify-center gap-2 transition-colors ${inviteUrlCopied ? 'bg-emerald-600 text-white' : 'bg-emerald-900/60 hover:bg-emerald-800/70 text-emerald-100'}`}
@@ -332,6 +336,7 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
               </>
             ) : (
               <>
+                <div className="bg-black/40 border border-gray-700 rounded p-3 text-sm text-gray-200">コード: {roomCode}</div>
                 <div className="bg-black/40 border border-gray-700 rounded p-3 max-h-44 overflow-auto">
                   <div className="text-sm font-bold mb-2 flex items-center gap-1">
                     <Users size={14} /> 参加者 {participants.length} / {MAX_COOP_PLAYERS}
