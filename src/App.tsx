@@ -698,6 +698,7 @@ const App: React.FC = () => {
     const [coopRewardSets, setCoopRewardSets] = useState<Record<string, RewardItem[]>>({});
     const [coopAwaitingRewardSync, setCoopAwaitingRewardSync] = useState(false);
     const [coopAwaitingMapSync, setCoopAwaitingMapSync] = useState(false);
+    const [coopNeedsInitialMapSync, setCoopNeedsInitialMapSync] = useState(false);
     const [coopMapPendingNodeId, setCoopMapPendingNodeId] = useState<string | null>(null);
     const [coopBattleQueue, setCoopBattleQueue] = useState<CoopBattleTurnSlot[]>([]);
     const [coopBattleKey, setCoopBattleKey] = useState<string | null>(null);
@@ -1778,69 +1779,8 @@ const App: React.FC = () => {
         };
     }, [raceSession, gameState.challengeMode, gameState.screen, gameState.mode, applyRaceTrickEffectLocal, applyRaceGoldDelta, showRaceToast, raceSelfPeerId]);
 
-    useEffect(() => {
+    const sendCoopStateSync = useCallback(() => {
         if (!isCoopHost) return;
-        if (gameState.screen === GameScreen.COOP_SETUP || gameState.screen === GameScreen.START_MENU) return;
-
-        const syncableScreens = new Set<GameScreen>([
-            GameScreen.MODE_SELECTION,
-            GameScreen.CHARACTER_SELECTION,
-            GameScreen.RELIC_SELECTION,
-            GameScreen.MAP,
-            GameScreen.BATTLE,
-            GameScreen.REWARD,
-            GameScreen.REST,
-            GameScreen.SHOP,
-            GameScreen.TREASURE,
-            GameScreen.FLOOR_RESULT,
-            GameScreen.EVENT,
-            GameScreen.GAME_OVER,
-            GameScreen.ENDING
-        ]);
-
-        if (!syncableScreens.has(gameState.screen)) return;
-
-        const syncDelayMs = prevScreenRef.current === GameScreen.RELIC_SELECTION && gameState.screen === GameScreen.MAP
-            ? 0
-            : 80;
-        const timeout = window.setTimeout(() => {
-            p2pService.send({
-                type: 'COOP_STATE_SYNC',
-                state: buildCoopSharedState(gameState),
-                aux: {
-                    shopCards,
-                    shopRelics,
-                    shopPotions,
-                    treasureRewards,
-                    treasureOpened,
-                    treasurePools,
-                    eventData: eventData ? {
-                        title: eventData.title,
-                        description: eventData.description,
-                        image: eventData.image,
-                        imageKey: eventData.imageKey,
-                        options: (eventData.options || []).map((option: any) => ({
-                            label: option.label,
-                            text: option.text
-                        }))
-                    } : null,
-                    eventResultLog
-                }
-            });
-        }, syncDelayMs);
-
-        return () => window.clearTimeout(timeout);
-    }, [buildCoopSharedState, eventData, eventResultLog, gameState, isCoopHost, shopCards, shopPotions, shopRelics, treasureOpened, treasurePools, treasureRewards]);
-    useEffect(() => {
-        if (!coopSession?.isHost || gameState.challengeMode !== 'COOP') return;
-        if (prevScreenRef.current !== GameScreen.BATTLE || gameState.screen === GameScreen.BATTLE) return;
-        p2pService.send({
-            type: 'COOP_BATTLE_FINISH',
-            screen: gameState.screen,
-            enemies: gameState.enemies,
-            selectedEnemyId: gameState.selectedEnemyId,
-            combatLog: gameState.combatLog
-        });
         p2pService.send({
             type: 'COOP_STATE_SYNC',
             state: buildCoopSharedState(gameState),
@@ -1864,8 +1804,55 @@ const App: React.FC = () => {
                 eventResultLog
             }
         });
+    }, [buildCoopSharedState, eventData, eventResultLog, gameState, isCoopHost, shopCards, shopPotions, shopRelics, treasureOpened, treasurePools, treasureRewards]);
+    useEffect(() => {
+        if (!isCoopHost) return;
+        if (gameState.screen === GameScreen.COOP_SETUP || gameState.screen === GameScreen.START_MENU) return;
+
+        const syncableScreens = new Set<GameScreen>([
+            GameScreen.MODE_SELECTION,
+            GameScreen.CHARACTER_SELECTION,
+            GameScreen.RELIC_SELECTION,
+            GameScreen.MAP,
+            GameScreen.BATTLE,
+            GameScreen.REWARD,
+            GameScreen.REST,
+            GameScreen.SHOP,
+            GameScreen.TREASURE,
+            GameScreen.FLOOR_RESULT,
+            GameScreen.EVENT,
+            GameScreen.GAME_OVER,
+            GameScreen.ENDING
+        ]);
+
+        if (!syncableScreens.has(gameState.screen)) return;
+        if (
+            gameState.challengeMode === 'COOP' &&
+            coopNeedsInitialMapSync &&
+            prevScreenRef.current === GameScreen.RELIC_SELECTION &&
+            gameState.screen === GameScreen.MAP
+        ) {
+            return;
+        }
+        const timeout = window.setTimeout(() => {
+            sendCoopStateSync();
+        }, 80);
+
+        return () => window.clearTimeout(timeout);
+    }, [coopNeedsInitialMapSync, gameState.challengeMode, gameState.screen, isCoopHost, sendCoopStateSync]);
+    useEffect(() => {
+        if (!coopSession?.isHost || gameState.challengeMode !== 'COOP') return;
+        if (prevScreenRef.current !== GameScreen.BATTLE || gameState.screen === GameScreen.BATTLE) return;
+        p2pService.send({
+            type: 'COOP_BATTLE_FINISH',
+            screen: gameState.screen,
+            enemies: gameState.enemies,
+            selectedEnemyId: gameState.selectedEnemyId,
+            combatLog: gameState.combatLog
+        });
+        sendCoopStateSync();
         broadcastCoopBattleState(null);
-    }, [broadcastCoopBattleState, buildCoopSharedState, coopSession, eventData, eventResultLog, gameState, shopCards, shopPotions, shopRelics, treasureOpened, treasurePools, treasureRewards]);
+    }, [broadcastCoopBattleState, coopSession, gameState, sendCoopStateSync]);
     useEffect(() => {
         if (!coopSession?.isHost || gameState.challengeMode !== 'COOP' || !gameState.coopBattleState) return;
         const timeout = window.setTimeout(() => {
@@ -3253,6 +3240,9 @@ const App: React.FC = () => {
                 }
             }));
             return;
+        }
+        if (gameState.challengeMode === 'COOP' && coopSession?.isHost) {
+            setCoopNeedsInitialMapSync(true);
         }
         const map = generateDungeonMap();
         const unlockedCards = storageService.getUnlockedCards();
@@ -7019,6 +7009,12 @@ const App: React.FC = () => {
         coopRewardScreenRef.current = gameState.screen;
     }, [coopAwaitingRewardSync, coopSession, gameState.challengeMode, gameState.rewards.length, gameState.screen]);
     useEffect(() => {
+        if (gameState.challengeMode === 'COOP' && coopSession?.isHost) return;
+        if (coopNeedsInitialMapSync) {
+            setCoopNeedsInitialMapSync(false);
+        }
+    }, [coopNeedsInitialMapSync, coopSession, gameState.challengeMode]);
+    useEffect(() => {
         if (gameState.challengeMode !== 'COOP' || !coopSession || coopSession.isHost) {
             if (coopAwaitingMapSync) setCoopAwaitingMapSync(false);
             return;
@@ -9485,6 +9481,19 @@ const App: React.FC = () => {
                             selectionDisabled={(gameState.challengeMode === 'COOP' && !!coopSession?.isHost && !coopCanDecide) || coopMapSelectionPending}
                             selectionDisabledMessage={gameState.challengeMode === 'COOP' ? coopMapPendingMessage : undefined}
                         />
+                        {gameState.challengeMode === 'COOP' && coopSession?.isHost && coopNeedsInitialMapSync && (
+                            <div className="absolute left-1/2 -translate-x-1/2 top-[72px] z-30">
+                                <button
+                                    onClick={() => {
+                                        sendCoopStateSync();
+                                        setCoopNeedsInitialMapSync(false);
+                                    }}
+                                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-black px-4 py-2 rounded-lg shadow-lg border border-emerald-300"
+                                >
+                                    参加者にマップを同期
+                                </button>
+                            </div>
+                        )}
                         {raceSession && !raceSession.ended && (
                             <>
                                 <div className="absolute left-3 top-[72px] z-30">
