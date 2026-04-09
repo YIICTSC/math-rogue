@@ -919,6 +919,7 @@ const App: React.FC = () => {
         if (!activeCoopTurnSlot) return true;
         return activeCoopTurnSlot.type !== 'ENEMY' && activeCoopTurnSlot.peerId === coopSelfPeerId;
     }, [activeCoopTurnSlot, coopSelfPeerId, gameState.challengeMode, gameState.screen]);
+    const isCoopHost = gameState.challengeMode === 'COOP' && !!coopSession?.isHost;
     const coopBattleTurnOwnerLabel = activeCoopTurnSlot?.type === 'ENEMY'
         ? '敵の行動'
         : activeCoopTurnSlot?.label || '';
@@ -1778,7 +1779,7 @@ const App: React.FC = () => {
     }, [raceSession, gameState.challengeMode, gameState.screen, gameState.mode, applyRaceTrickEffectLocal, applyRaceGoldDelta, showRaceToast, raceSelfPeerId]);
 
     useEffect(() => {
-        if (!coopSession || !coopSession.isHost || gameState.challengeMode !== 'COOP') return;
+        if (!isCoopHost) return;
         if (gameState.screen === GameScreen.COOP_SETUP || gameState.screen === GameScreen.START_MENU) return;
 
         const syncableScreens = new Set<GameScreen>([
@@ -1799,6 +1800,9 @@ const App: React.FC = () => {
 
         if (!syncableScreens.has(gameState.screen)) return;
 
+        const syncDelayMs = prevScreenRef.current === GameScreen.RELIC_SELECTION && gameState.screen === GameScreen.MAP
+            ? 0
+            : 80;
         const timeout = window.setTimeout(() => {
             p2pService.send({
                 type: 'COOP_STATE_SYNC',
@@ -1823,10 +1827,10 @@ const App: React.FC = () => {
                     eventResultLog
                 }
             });
-        }, 80);
+        }, syncDelayMs);
 
         return () => window.clearTimeout(timeout);
-    }, [buildCoopSharedState, coopSession, eventData, eventResultLog, gameState, shopCards, shopPotions, shopRelics, treasureOpened, treasurePools, treasureRewards]);
+    }, [buildCoopSharedState, eventData, eventResultLog, gameState, isCoopHost, shopCards, shopPotions, shopRelics, treasureOpened, treasurePools, treasureRewards]);
     useEffect(() => {
         if (!coopSession?.isHost || gameState.challengeMode !== 'COOP') return;
         if (prevScreenRef.current !== GameScreen.BATTLE || gameState.screen === GameScreen.BATTLE) return;
