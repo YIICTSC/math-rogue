@@ -7159,6 +7159,7 @@ const App: React.FC = () => {
         const isLibrarian = player.id === 'LIBRARIAN';
         const isGardener = player.id === 'GARDENER';
         const rewardPrefix = `${rewardScope}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        const pickedCardTemplateIds = new Set<string>();
 
         if (bonusGold > 0) {
             let goldReward = bonusGold;
@@ -7183,7 +7184,18 @@ const App: React.FC = () => {
                 pool = allPossibleCards.filter(c => c.rarity === targetRarity);
             }
 
-            const candidate = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : allPossibleCards[Math.floor(Math.random() * allPossibleCards.length)];
+            const uniquePool = pool.filter(card => !pickedCardTemplateIds.has(card.id));
+            const fallbackUniquePool = allPossibleCards.filter(card => !pickedCardTemplateIds.has(card.id));
+            const pickSource =
+                uniquePool.length > 0
+                    ? uniquePool
+                    : fallbackUniquePool.length > 0
+                        ? fallbackUniquePool
+                        : pool.length > 0
+                            ? pool
+                            : allPossibleCards;
+            const candidate = pickSource[Math.floor(Math.random() * pickSource.length)];
+            pickedCardTemplateIds.add(candidate.id);
             rewards.push({ type: 'CARD', value: { ...candidate, id: `${rewardPrefix}-card-value-${i}` }, id: `${rewardPrefix}-card-${i}` });
         }
 
