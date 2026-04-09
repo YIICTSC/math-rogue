@@ -52,7 +52,7 @@ import { storageService } from './services/storageService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { trans } from './utils/textUtils';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Wifi, Flag, Keyboard, Users } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Wifi, Flag, Keyboard, Users, Mic, MicOff } from 'lucide-react';
 import { applyAdditionalCardLogic } from './services/cardEffectLogic';
 import { p2pService } from './services/p2pService';
 import { TypingLessonId } from './data/typingLessonConfig';
@@ -693,6 +693,7 @@ const App: React.FC = () => {
     const [raceRewardDummyDisplay, setRaceRewardDummyDisplay] = useState(0);
     const [coopSupportCards, setCoopSupportCards] = useState<CoopSupportCard[]>([]);
     const [coopPartyHudOpen, setCoopPartyHudOpen] = useState(true);
+    const [coopVoiceEnabled, setCoopVoiceEnabled] = useState(false);
     const [coopPlayerSnapshots, setCoopPlayerSnapshots] = useState<Record<string, Player>>({});
     const [coopRewardSets, setCoopRewardSets] = useState<Record<string, RewardItem[]>>({});
     const [coopAwaitingRewardSync, setCoopAwaitingRewardSync] = useState(false);
@@ -957,6 +958,54 @@ const App: React.FC = () => {
             return { ...prev, participants: nextParticipants };
         });
     }, []);
+    useEffect(() => {
+        if (gameState.challengeMode !== 'COOP' || !coopSession || !coopSelfPeerId) return;
+        let cancelled = false;
+        const syncVoice = async () => {
+            try {
+                await p2pService.setVoiceEnabled(coopVoiceEnabled);
+                if (coopVoiceEnabled) {
+                    await p2pService.startVoiceChatForAll();
+                }
+                if (cancelled) return;
+                if (coopSession.isHost) {
+                    setCoopSession(prev => {
+                        if (!prev) return prev;
+                        const nextParticipants = prev.participants.map(participant =>
+                            participant.peerId === coopSelfPeerId
+                                ? { ...participant, voiceEnabled: coopVoiceEnabled }
+                                : participant
+                        );
+                        p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                        return { ...prev, participants: nextParticipants };
+                    });
+                } else {
+                    p2pService.send({ type: 'COOP_SELF_STATE', voiceEnabled: coopVoiceEnabled });
+                }
+            } catch (err) {
+                console.warn('Failed to toggle coop voice:', err);
+                if (!cancelled) {
+                    setCoopVoiceEnabled(false);
+                    p2pService.setVoiceEnabled(false).catch(() => undefined);
+                }
+            }
+        };
+        syncVoice();
+        return () => {
+            cancelled = true;
+        };
+    }, [coopSelfPeerId, coopSession, coopVoiceEnabled, gameState.challengeMode]);
+    useEffect(() => {
+        if (gameState.challengeMode === 'COOP') return;
+        p2pService.setVoiceEnabled(false).catch(() => undefined);
+    }, [gameState.challengeMode]);
+    useEffect(() => {
+        if (!coopSession || !coopSelfPeerId) return;
+        const selfParticipant = coopSession.participants.find(participant => participant.peerId === coopSelfPeerId);
+        if (typeof selfParticipant?.voiceEnabled === 'boolean' && selfParticipant.voiceEnabled !== coopVoiceEnabled) {
+            setCoopVoiceEnabled(selfParticipant.voiceEnabled);
+        }
+    }, [coopSelfPeerId, coopSession, coopVoiceEnabled]);
     const setCoopBattleState = useCallback((battleState: CoopBattleState | null) => {
         setGameState(prev => ({ ...prev, coopBattleState: battleState }));
         setCoopBattleQueue(battleState?.turnQueue || []);
@@ -1181,7 +1230,8 @@ const App: React.FC = () => {
             nextTurnEnergy: gameState.player.nextTurnEnergy,
             strength: gameState.player.strength,
             buffer: gameState.player.powers['BUFFER'] || 0,
-            revivedThisBattle: false
+            revivedThisBattle: false,
+            voiceEnabled: coopVoiceEnabled
         };
 
         if (coopSession.isHost) {
@@ -1215,9 +1265,10 @@ const App: React.FC = () => {
             nextTurnEnergy: selfState.nextTurnEnergy,
             strength: selfState.strength,
             buffer: selfState.buffer,
-            revivedThisBattle: selfState.revivedThisBattle
+            revivedThisBattle: selfState.revivedThisBattle,
+            voiceEnabled: selfState.voiceEnabled
         });
-    }, [coopSelfPeerId, coopSession, gameState.challengeMode, gameState.player.block, gameState.player.currentHp, gameState.player.id, gameState.player.imageData, gameState.player.maxHp, gameState.player.nextTurnEnergy, gameState.player.powers, gameState.player.strength, selectedCharName]);
+    }, [coopSelfPeerId, coopSession, coopVoiceEnabled, gameState.challengeMode, gameState.player.block, gameState.player.currentHp, gameState.player.id, gameState.player.imageData, gameState.player.maxHp, gameState.player.nextTurnEnergy, gameState.player.powers, gameState.player.strength, selectedCharName]);
     useEffect(() => {
         if (gameState.challengeMode !== 'COOP' || !coopSession || !coopSelfPeerId || !gameState.player.id) return;
         upsertCoopPlayerSnapshot(coopSelfPeerId, gameState.player);
@@ -8058,7 +8109,8 @@ const App: React.FC = () => {
                             restResolved: data.restResolved ?? participant.restResolved,
                             shopResolved: data.shopResolved ?? participant.shopResolved,
                             rewardResolved: data.rewardResolved ?? participant.rewardResolved,
-                            treasureResolved: data.treasureResolved ?? participant.treasureResolved
+                            treasureResolved: data.treasureResolved ?? participant.treasureResolved,
+                            voiceEnabled: data.voiceEnabled ?? participant.voiceEnabled
                         };
                         changed = changed || JSON.stringify(nextParticipant) !== JSON.stringify(participant);
                         return nextParticipant;
@@ -9055,12 +9107,24 @@ const App: React.FC = () => {
                                     <div className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-emerald-200">Coop Party</div>
                                     <div className="text-[9px] sm:text-[10px] text-emerald-100/80">{coopSession.participants.length}人</div>
                                 </div>
-                                <button
-                                    onClick={() => setCoopPartyHudOpen(prev => !prev)}
-                                    className="rounded border border-emerald-400/40 bg-emerald-950/30 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[9px] sm:text-[10px] font-bold text-emerald-100 hover:bg-emerald-900/40"
-                                >
-                                    {coopPartyHudOpen ? '非表示' : '表示'}
-                                </button>
+                                <div className="flex items-center gap-1.5">
+                                    <button
+                                        onClick={() => setCoopVoiceEnabled(prev => !prev)}
+                                        className={`rounded border px-1.5 py-0.5 sm:px-2 sm:py-1 text-[9px] sm:text-[10px] font-bold ${coopVoiceEnabled ? 'border-cyan-300/60 bg-cyan-600/30 text-cyan-100 hover:bg-cyan-500/30' : 'border-slate-500/50 bg-slate-800/70 text-slate-200 hover:bg-slate-700/70'}`}
+                                        title={coopVoiceEnabled ? '音声通信をオフ' : '音声通信をオン'}
+                                    >
+                                        <span className="inline-flex items-center gap-1">
+                                            {coopVoiceEnabled ? <Mic size={11} /> : <MicOff size={11} />}
+                                            <span>{coopVoiceEnabled ? '通話ON' : '通話OFF'}</span>
+                                        </span>
+                                    </button>
+                                    <button
+                                        onClick={() => setCoopPartyHudOpen(prev => !prev)}
+                                        className="rounded border border-emerald-400/40 bg-emerald-950/30 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[9px] sm:text-[10px] font-bold text-emerald-100 hover:bg-emerald-900/40"
+                                    >
+                                        {coopPartyHudOpen ? '非表示' : '表示'}
+                                    </button>
+                                </div>
                             </div>
                             {coopPartyHudOpen && (
                             <div className="space-y-1.5 sm:space-y-2">
@@ -9073,8 +9137,9 @@ const App: React.FC = () => {
                                         <div key={participant.peerId} className={`rounded-lg border px-2 py-1.5 sm:px-2 sm:py-2 ${isDecisionOwner ? 'border-cyan-400/70 bg-cyan-950/20' : 'border-white/10 bg-black/20'}`}>
                                             <div className="mb-1 flex items-center justify-between gap-2">
                                                 <div className="min-w-0">
-                                                    <div className="truncate text-[11px] sm:text-xs font-black text-white">
+                                                    <div className="truncate text-[11px] sm:text-xs font-black text-white flex items-center gap-1">
                                                         {participant.name}{isSelf ? ' (あなた)' : ''}
+                                                        {participant.voiceEnabled ? <Mic size={10} className="text-cyan-300 shrink-0" /> : <MicOff size={10} className="text-slate-500 shrink-0" />}
                                                     </div>
                                                     <div className="hidden sm:block text-[10px] text-slate-300">
                                                         {isDecisionOwner ? '決定役' : '同行中'}

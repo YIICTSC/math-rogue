@@ -1,4 +1,4 @@
-import Peer, { DataConnection } from 'peerjs';
+import Peer, { DataConnection, MediaConnection } from 'peerjs';
 import { CoopSharedState, CoopSupportEffectId, CoopTreasurePool, RaceTrickEffectId } from '../types';
 
 export type P2PEvent =
@@ -38,6 +38,7 @@ export type P2PEvent =
             shopResolved?: boolean,
             rewardResolved?: boolean,
             treasureResolved?: boolean,
+            voiceEnabled?: boolean,
             floatingText?: any
         }>,
         decisionOwnerIndex?: number
@@ -65,7 +66,8 @@ export type P2PEvent =
         restResolved?: boolean,
         shopResolved?: boolean,
         rewardResolved?: boolean,
-        treasureResolved?: boolean
+        treasureResolved?: boolean,
+        voiceEnabled?: boolean
     }
     | {
         type: 'COOP_STATE_SYNC',
@@ -247,6 +249,10 @@ export type P2PEvent =
 class P2PService {
     private peer: Peer | null = null;
     private connections: Map<string, DataConnection> = new Map();
+    private mediaConnections: Map<string, MediaConnection> = new Map();
+    private remoteAudioElements: Map<string, HTMLAudioElement> = new Map();
+    private localStream: MediaStream | null = null;
+    private voiceEnabled = false;
     private myId: string | null = null;
 
     public onConnect: ((conn: DataConnection) => void) | null = null;
@@ -272,6 +278,9 @@ class P2PService {
 
                 this.peer.on('connection', (conn) => {
                     this.handleConnection(conn);
+                });
+                this.peer.on('call', (call) => {
+                    this.handleIncomingCall(call);
                 });
 
                 this.peer.on('error', (err) => {
@@ -305,6 +314,9 @@ class P2PService {
                     console.error('P2P Client Error:', err);
                     reject(err);
                 });
+                this.peer.on('call', (call) => {
+                    this.handleIncomingCall(call);
+                });
             } catch (e) {
                 reject(e);
             }
@@ -314,6 +326,12 @@ class P2PService {
     private handleConnection(conn: DataConnection) {
         this.connections.set(conn.peer, conn);
         console.log('Setting up connection handlers for:', conn.peer);
+
+        if (this.voiceEnabled) {
+            this.callPeer(conn.peer).catch((err) => {
+                console.warn('Voice call failed:', err);
+            });
+        }
 
         conn.on('data', (data: unknown) => {
             if (this.onData) this.onData(data as P2PEvent, conn.peer);
@@ -358,6 +376,19 @@ class P2PService {
     }
 
     public close() {
+        this.voiceEnabled = false;
+        this.mediaConnections.forEach(call => call.close());
+        this.mediaConnections.clear();
+        this.remoteAudioElements.forEach(audio => {
+            audio.pause();
+            audio.srcObject = null;
+            audio.remove();
+        });
+        this.remoteAudioElements.clear();
+        if (this.localStream) {
+            this.localStream.getTracks().forEach(track => track.stop());
+            this.localStream = null;
+        }
         this.connections.forEach(conn => conn.close());
         this.connections.clear();
         if (this.peer) {
@@ -369,6 +400,104 @@ class P2PService {
 
     public isConnected() {
         return Array.from(this.connections.values()).some(conn => conn.open);
+    }
+
+    private async ensureLocalAudioStream() {
+        if (this.localStream) return this.localStream;
+        if (!navigator?.mediaDevices?.getUserMedia) {
+            throw new Error('この環境では音声入力が利用できません');
+        }
+        this.localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        this.localStream.getAudioTracks().forEach(track => {
+            track.enabled = this.voiceEnabled;
+        });
+        return this.localStream;
+    }
+
+    private attachRemoteStream(peerId: string, stream: MediaStream) {
+        let audio = this.remoteAudioElements.get(peerId);
+        if (!audio) {
+            audio = document.createElement('audio');
+            audio.autoplay = true;
+            audio.playsInline = true;
+            audio.dataset.peerId = peerId;
+            audio.style.display = 'none';
+            document.body.appendChild(audio);
+            this.remoteAudioElements.set(peerId, audio);
+        }
+        audio.srcObject = stream;
+        audio.play().catch(() => {
+            // Browser autoplay policy may block playback until a user gesture.
+        });
+    }
+
+    private async callPeer(peerId: string) {
+        if (!this.peer || !this.voiceEnabled) return;
+        if (this.mediaConnections.has(peerId)) return;
+        const stream = await this.ensureLocalAudioStream();
+        const call = this.peer.call(peerId, stream);
+        this.bindMediaConnection(peerId, call);
+    }
+
+    private bindMediaConnection(peerId: string, call: MediaConnection) {
+        this.mediaConnections.set(peerId, call);
+        call.on('stream', (remoteStream) => {
+            this.attachRemoteStream(peerId, remoteStream);
+        });
+        call.on('close', () => {
+            this.mediaConnections.delete(peerId);
+            const audio = this.remoteAudioElements.get(peerId);
+            if (audio) {
+                audio.pause();
+                audio.srcObject = null;
+                audio.remove();
+                this.remoteAudioElements.delete(peerId);
+            }
+        });
+        call.on('error', (err) => {
+            console.warn('Voice media error:', err);
+        });
+    }
+
+    private async handleIncomingCall(call: MediaConnection) {
+        if (!this.voiceEnabled) {
+            call.close();
+            return;
+        }
+        try {
+            const stream = await this.ensureLocalAudioStream();
+            call.answer(stream);
+            this.bindMediaConnection(call.peer, call);
+        } catch (err) {
+            console.warn('Failed to answer voice call:', err);
+            call.close();
+        }
+    }
+
+    public async setVoiceEnabled(enabled: boolean) {
+        this.voiceEnabled = enabled;
+        if (!enabled) {
+            if (this.localStream) {
+                this.localStream.getAudioTracks().forEach(track => {
+                    track.enabled = false;
+                });
+            }
+            this.mediaConnections.forEach(call => call.close());
+            this.mediaConnections.clear();
+            return;
+        }
+        const stream = await this.ensureLocalAudioStream();
+        stream.getAudioTracks().forEach(track => {
+            track.enabled = true;
+        });
+    }
+
+    public async startVoiceChatForAll() {
+        if (!this.voiceEnabled) return;
+        const peerIds = Array.from(this.connections.keys());
+        for (const peerId of peerIds) {
+            await this.callPeer(peerId);
+        }
     }
 }
 
