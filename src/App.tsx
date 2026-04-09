@@ -2127,6 +2127,22 @@ const App: React.FC = () => {
         }
     };
 
+    const disableMathDebugSkip = () => {
+        if (!isMathDebugSkipped) return;
+        setIsMathDebugSkipped(false);
+        storageService.saveDebugMathSkip(false);
+        setTitleCount(0);
+        audioService.playSound('select');
+    };
+
+    const disableDebugHpOne = () => {
+        if (!isDebugHpOne) return;
+        setIsDebugHpOne(false);
+        storageService.saveDebugHpOne(false);
+        setLogClickCount(0);
+        audioService.playSound('select');
+    };
+
     const toggleLanguage = () => {
         const nextMode = languageMode === 'JAPANESE' ? 'HIRAGANA' : 'JAPANESE';
         setLanguageMode(nextMode);
@@ -8697,14 +8713,22 @@ const App: React.FC = () => {
                             </div>
 
                             {isMathDebugSkipped && (
-                                <div className="text-red-500 font-bold mb-1 text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse">
+                                <button
+                                    type="button"
+                                    onClick={disableMathDebugSkip}
+                                    className="text-red-500 font-bold mb-1 text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse cursor-pointer"
+                                >
                                     {trans("(デバッグ: けいさん スキップ ON)", languageMode)}
-                                </div>
+                                </button>
                             )}
                             {isDebugHpOne && (
-                                <div className="text-red-500 font-bold mb-6 text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse">
+                                <button
+                                    type="button"
+                                    onClick={disableDebugHpOne}
+                                    className="text-red-500 font-bold mb-6 text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse cursor-pointer"
+                                >
                                     {trans("(デバッグ: てきHP1 & ぜんかいほう ON)", languageMode)}
-                                </div>
+                                </button>
                             )}
                             {(!isMathDebugSkipped && !isDebugHpOne) && <div className="mb-2 h-2"></div>}
 
