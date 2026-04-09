@@ -1862,6 +1862,17 @@ const App: React.FC = () => {
     }, [broadcastCoopBattleState, coopSession, gameState.challengeMode, gameState.coopBattleState]);
     useEffect(() => {
         if (
+            !coopSession?.isHost ||
+            gameState.challengeMode !== 'COOP' ||
+            gameState.screen !== GameScreen.BATTLE ||
+            !gameState.coopBattleState
+        ) {
+            return;
+        }
+        broadcastCoopBattleState(gameState.coopBattleState);
+    }, [battleFinisherCutinCard, broadcastCoopBattleState, coopSession, gameState.challengeMode, gameState.coopBattleState, gameState.screen]);
+    useEffect(() => {
+        if (
             queuedCoopBattleEventTick === 0 ||
             gameState.challengeMode !== 'COOP' ||
             gameState.screen !== GameScreen.BATTLE ||

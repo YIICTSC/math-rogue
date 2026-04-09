@@ -283,16 +283,12 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
               </>
             ) : (
               <>
-                <div className="bg-black/60 border border-gray-700 rounded p-3">
-                  <div className="text-xs text-gray-400">ルームコード</div>
-                  <div className="text-4xl font-black tracking-widest">{roomCode}</div>
-                </div>
                 <button
                   onClick={handleCopyInviteUrl}
                   className={`w-full py-2.5 rounded font-bold flex items-center justify-center gap-2 transition-colors ${inviteUrlCopied ? 'bg-emerald-600 text-white' : 'bg-emerald-900/60 hover:bg-emerald-800/70 text-emerald-100'}`}
                 >
                   {inviteUrlCopied ? <Check size={16} /> : <Copy size={16} />}
-                  {inviteUrlCopied ? 'URLをコピーしました！' : 'PIN入力済みURLをコピー'}
+                  {inviteUrlCopied ? 'URLをコピーしました！' : '招待URLをコピー'}
                 </button>
                 <div className="bg-black/40 border border-gray-700 rounded p-3 max-h-44 overflow-auto">
                   <div className="text-sm font-bold mb-2 flex items-center gap-1">
@@ -336,7 +332,6 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
               </>
             ) : (
               <>
-                <div className="bg-black/40 border border-gray-700 rounded p-3 text-sm text-gray-200">コード: {roomCode}</div>
                 <div className="bg-black/40 border border-gray-700 rounded p-3 max-h-44 overflow-auto">
                   <div className="text-sm font-bold mb-2 flex items-center gap-1">
                     <Users size={14} /> 参加者 {participants.length} / {MAX_COOP_PLAYERS}
