@@ -7,6 +7,7 @@ import { audioService } from '../services/audioService';
 export interface CoopParticipantPayload {
   peerId: string;
   name: string;
+  voiceEnabled?: boolean;
   imageData?: string;
   selectedCharacterId?: string;
   maxHp?: number;
