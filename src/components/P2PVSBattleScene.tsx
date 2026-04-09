@@ -599,8 +599,9 @@ const P2PVSBattleScene: React.FC<P2PVSBattleSceneProps> = ({ player1, player2, i
             card.originalNames?.includes('SANSU_ZERO')
         ) {
             const pool = getFilteredCardPool();
-            const template = pool[Math.floor(Math.random() * pool.length)];
-            if (template) {
+            for (let i = 0; i < 3; i++) {
+                const template = pool[Math.floor(Math.random() * pool.length)];
+                if (!template) break;
                 let newCard = { ...template, id: `discovery-${Date.now()}-${Math.random()}` };
                 if (nextCurrent.powers['MASTER_REALITY']) newCard = getUpgradedCard(newCard);
                 if (nextCurrent.hand.length < 10) nextCurrent.hand.push(newCard);
