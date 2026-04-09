@@ -1003,9 +1003,13 @@ const App: React.FC = () => {
         p2pService.setVoiceEnabled(false).catch(() => undefined);
     }, [gameState.challengeMode]);
     useEffect(() => {
-        if (!coopSession || !coopSelfPeerId) return;
+        if (!coopSession || !coopSelfPeerId || coopSession.isHost) return;
         const selfParticipant = coopSession.participants.find(participant => participant.peerId === coopSelfPeerId);
-        if (typeof selfParticipant?.voiceEnabled === 'boolean' && selfParticipant.voiceEnabled !== coopVoiceEnabled) {
+        if (typeof selfParticipant?.voiceEnabled !== 'boolean') return;
+        if (coopVoiceEnabled && !selfParticipant.voiceEnabled) {
+            return;
+        }
+        if (selfParticipant.voiceEnabled !== coopVoiceEnabled) {
             setCoopVoiceEnabled(selfParticipant.voiceEnabled);
         }
     }, [coopSelfPeerId, coopSession, coopVoiceEnabled]);
@@ -9166,7 +9170,9 @@ const App: React.FC = () => {
                                                 <div className="min-w-0">
                                                     <div className="truncate text-[11px] sm:text-xs font-black text-white flex items-center gap-1">
                                                         {participant.name}{isSelf ? ' (あなた)' : ''}
-                                                        {participant.voiceEnabled ? <Mic size={10} className="text-cyan-300 shrink-0" /> : <MicOff size={10} className="text-slate-500 shrink-0" />}
+                                                        {(isSelf ? coopVoiceEnabled : participant.voiceEnabled)
+                                                            ? <Mic size={10} className="text-cyan-300 shrink-0" />
+                                                            : <MicOff size={10} className="text-slate-500 shrink-0" />}
                                                     </div>
                                                     <div className="hidden sm:block text-[10px] text-slate-300">
                                                         {isDecisionOwner ? '決定役' : '同行中'}
