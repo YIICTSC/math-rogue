@@ -1805,6 +1805,10 @@ const App: React.FC = () => {
             }
         });
     }, [buildCoopSharedState, eventData, eventResultLog, gameState, isCoopHost, shopCards, shopPotions, shopRelics, treasureOpened, treasurePools, treasureRewards]);
+    const requestCoopStateSync = useCallback(() => {
+        if (!coopSession || coopSession.isHost || gameState.challengeMode !== 'COOP') return;
+        p2pService.send({ type: 'COOP_STATE_SYNC_REQUEST' });
+    }, [coopSession, gameState.challengeMode]);
     useEffect(() => {
         if (!isCoopHost) return;
         if (gameState.screen === GameScreen.COOP_SETUP || gameState.screen === GameScreen.START_MENU) return;
@@ -8050,6 +8054,11 @@ const App: React.FC = () => {
 
         const previousOnData = p2pService.onData;
         p2pService.onData = (data, fromPeerId) => {
+            if (data.type === 'COOP_STATE_SYNC_REQUEST' && coopSession.isHost && fromPeerId) {
+                sendCoopStateSync();
+                return;
+            }
+
             if (data.type === 'COOP_STATE_SYNC' && !coopSession.isHost) {
                 if (data.aux) {
                     setShopCards(data.aux.shopCards || []);
@@ -8536,7 +8545,7 @@ const App: React.FC = () => {
         return () => {
             p2pService.onData = previousOnData;
         };
-    }, [applyCoopPlayerStateToPeer, applyCoopSharedState, applyCoopSupportEffect, applyHostCoopBattleSnapshot, applyRestAction, applyRewardToLocalPlayer, applySynthesizeCard, applyTreasureRewardsToPlayer, applyUpgradeCard, broadcastCoopBattleState, claimCoopTreasurePoolForPeer, coopPlayerSnapshots, coopRewardSets, coopSelfPeerId, coopSession, eventData, executeQueuedTurnTransition, gameState.challengeMode, gameState.coopBattleState, gameState.map, gameState.player, gameState.rewards, gameState.screen, handleNodeComplete, handleNodeSelect, handleShopBuyCard, handleShopBuyPotion, handleShopBuyRelic, handleShopLeave, handleShopRemoveCard, handleTreasureOpen, removeRewardFromList, resolveBattleVictory, resolveCoopEventOptionForPlayer, setCoopBattleState, shopCards, shopPotions, shopRelics, treasurePools, turnLog, upsertCoopPlayerSnapshot]);
+    }, [applyCoopPlayerStateToPeer, applyCoopSharedState, applyCoopSupportEffect, applyHostCoopBattleSnapshot, applyRestAction, applyRewardToLocalPlayer, applySynthesizeCard, applyTreasureRewardsToPlayer, applyUpgradeCard, broadcastCoopBattleState, claimCoopTreasurePoolForPeer, coopPlayerSnapshots, coopRewardSets, coopSelfPeerId, coopSession, eventData, executeQueuedTurnTransition, gameState.challengeMode, gameState.coopBattleState, gameState.map, gameState.player, gameState.rewards, gameState.screen, handleNodeComplete, handleNodeSelect, handleShopBuyCard, handleShopBuyPotion, handleShopBuyRelic, handleShopLeave, handleShopRemoveCard, handleTreasureOpen, removeRewardFromList, resolveBattleVictory, resolveCoopEventOptionForPlayer, sendCoopStateSync, setCoopBattleState, shopCards, shopPotions, shopRelics, treasurePools, turnLog, upsertCoopPlayerSnapshot]);
 
     const goToFloorResult = () => {
         // 未解放のカードがあれば1枚解放する
@@ -9130,6 +9139,18 @@ const App: React.FC = () => {
                             <div className="text-center text-[10px] font-bold tracking-wide text-cyan-200">参加コード</div>
                             <div className="text-center text-lg font-black tracking-widest tabular-nums">{raceSession.roomCode}</div>
                         </div>
+                    </div>
+                )}
+
+                {gameState.challengeMode === 'COOP' && coopSession && COOP_PARTY_HUD_SCREEN_SET.has(gameState.screen) && (
+                    <div className="absolute left-1/2 top-[60px] sm:top-[72px] z-30 -translate-x-1/2">
+                        <button
+                            onClick={coopSession.isHost ? sendCoopStateSync : requestCoopStateSync}
+                            className="rounded-md border border-slate-300/40 bg-slate-900/80 px-2 py-1 text-[10px] sm:text-xs font-bold text-slate-100 shadow-lg hover:bg-slate-800/90"
+                            title={coopSession.isHost ? '参加者へ現在のゲーム状態を再送信します' : 'ホストへ最新のゲーム状態を再受信します'}
+                        >
+                            {coopSession.isHost ? '状態を送信' : '状態を受信'}
+                        </button>
                     </div>
                 )}
 
