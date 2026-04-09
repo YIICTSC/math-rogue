@@ -110,6 +110,7 @@ export type P2PEvent =
         }
     }
     | { type: 'COOP_STATE_SYNC_REQUEST' }
+    | { type: 'COOP_REWARD_SYNC_REQUEST' }
     | {
         type: 'COOP_BATTLE_SYNC',
         battleState: {
