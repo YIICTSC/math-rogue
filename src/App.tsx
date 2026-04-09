@@ -963,9 +963,13 @@ const App: React.FC = () => {
         if (gameState.challengeMode !== 'COOP' || !coopSession || !coopSelfPeerId) return;
         let cancelled = false;
         const syncVoice = async () => {
+            const targetVoiceEnabled = coopVoiceEnabled;
+            if (!coopSession.isHost) {
+                coopPendingVoiceSyncRef.current = targetVoiceEnabled;
+            }
             try {
-                await p2pService.setVoiceEnabled(coopVoiceEnabled);
-                if (coopVoiceEnabled) {
+                await p2pService.setVoiceEnabled(targetVoiceEnabled);
+                if (targetVoiceEnabled) {
                     await p2pService.startVoiceChatForAll();
                 }
                 if (cancelled) return;
@@ -975,17 +979,16 @@ const App: React.FC = () => {
                         let changed = false;
                         const nextParticipants = prev.participants.map(participant => {
                             if (participant.peerId !== coopSelfPeerId) return participant;
-                            if (participant.voiceEnabled === coopVoiceEnabled) return participant;
+                            if (participant.voiceEnabled === targetVoiceEnabled) return participant;
                             changed = true;
-                            return { ...participant, voiceEnabled: coopVoiceEnabled };
+                            return { ...participant, voiceEnabled: targetVoiceEnabled };
                         });
                         if (!changed) return prev;
                         p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
                         return { ...prev, participants: nextParticipants };
                     });
                 } else {
-                    coopPendingVoiceSyncRef.current = coopVoiceEnabled;
-                    p2pService.send({ type: 'COOP_SELF_STATE', voiceEnabled: coopVoiceEnabled });
+                    p2pService.send({ type: 'COOP_SELF_STATE', voiceEnabled: targetVoiceEnabled });
                 }
             } catch (err) {
                 console.warn('Failed to toggle coop voice:', err);
