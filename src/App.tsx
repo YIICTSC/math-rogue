@@ -8018,6 +8018,7 @@ const App: React.FC = () => {
     };
     const applyHostCoopBattleSnapshot = useCallback((fromPeerId: string, payload: {
         player: Player,
+        cardId?: string,
         enemies?: Enemy[],
         selectedEnemyId?: string | null,
         combatLog?: string[],
@@ -8063,9 +8064,30 @@ const App: React.FC = () => {
         if (payload.enemies) {
             const isHeartTransforming = payload.enemies.some(enemy => enemy.enemyType === 'THE_HEART' && enemy.phase === 1 && enemy.currentHp <= 0);
             if (payload.enemies.length === 0 && !isHeartTransforming) {
-                window.setTimeout(() => {
-                    resolveBattleVictory();
-                }, 0);
+                const finisherCard = payload.cardId
+                    ? (
+                        payload.player.discardPile.find(card => card.id === payload.cardId)
+                        || payload.player.exhaustPile.find(card => card.id === payload.cardId)
+                        || payload.player.hand.find(card => card.id === payload.cardId)
+                        || payload.player.drawPile.find(card => card.id === payload.cardId)
+                        || payload.player.deck.find(card => card.id === payload.cardId)
+                    )
+                    : null;
+                if (finisherCard && !battleFinisherCutinCard) {
+                    setBattleFinisherCutinCard({ ...finisherCard });
+                    if (victorySequenceTimerRef.current) {
+                        clearTimeout(victorySequenceTimerRef.current);
+                    }
+                    victorySequenceTimerRef.current = setTimeout(() => {
+                        setBattleFinisherCutinCard(null);
+                        resolveBattleVictory();
+                        victorySequenceTimerRef.current = null;
+                    }, 1200);
+                } else {
+                    window.setTimeout(() => {
+                        resolveBattleVictory();
+                    }, 0);
+                }
                 return;
             }
         }
@@ -8077,7 +8099,7 @@ const App: React.FC = () => {
         } else if (nextBattleState) {
             broadcastCoopBattleState(nextBattleState);
         }
-    }, [broadcastCoopBattleState, executeQueuedTurnTransition, gameState.coopBattleState, resolveBattleVictory, setCoopBattleState, upsertCoopPlayerSnapshot]);
+    }, [battleFinisherCutinCard, broadcastCoopBattleState, executeQueuedTurnTransition, gameState.coopBattleState, resolveBattleVictory, setCoopBattleState, upsertCoopPlayerSnapshot]);
     useEffect(() => {
         if (!coopSession || gameState.challengeMode !== 'COOP' || gameState.screen === GameScreen.COOP_SETUP) return;
 
