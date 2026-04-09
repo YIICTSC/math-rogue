@@ -191,8 +191,12 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
       participants: currentParticipants
     };
     startTriggeredRef.current = true;
-    p2pService.send({ type: 'COOP_START', roomCode, participants: startParticipants });
     onStart(payload);
+    try {
+      p2pService.send({ type: 'COOP_START', roomCode, participants: startParticipants });
+    } catch (err) {
+      console.warn('Failed to broadcast COOP_START, but local coop session was started.', err);
+    }
   };
 
   const handleBack = () => {
