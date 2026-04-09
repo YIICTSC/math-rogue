@@ -513,13 +513,18 @@ class P2PService {
         stream.getAudioTracks().forEach(track => {
             track.enabled = true;
         });
+        await this.startVoiceChatForAll();
     }
 
     public async startVoiceChatForAll() {
         if (!this.voiceEnabled) return;
         const peerIds = Array.from(this.connections.keys());
         for (const peerId of peerIds) {
-            await this.callPeer(peerId);
+            try {
+                await this.callPeer(peerId);
+            } catch (err) {
+                console.warn(`Failed to start voice chat with ${peerId}:`, err);
+            }
         }
     }
 }

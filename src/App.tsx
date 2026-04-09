@@ -653,6 +653,7 @@ const App: React.FC = () => {
     const [totalMathCorrect, setTotalMathCorrect] = useState<number>(0);
     const [nextThreshold, setNextThreshold] = useState<number | null>(null);
     const [battleFinisherCutinCard, setBattleFinisherCutinCard] = useState<ICard | null>(null);
+    const battleFinisherCutinCardRef = useRef<ICard | null>(null);
 
     const [isMathDebugSkipped, setIsMathDebugSkipped] = useState<boolean>(false);
     const [isDebugHpOne, setIsDebugHpOne] = useState<boolean>(false);
@@ -711,6 +712,8 @@ const App: React.FC = () => {
     const coopApplyingRemoteBattleSyncRef = useRef(false);
     const coopLastBattleActionSignatureRef = useRef<string | null>(null);
     const coopPendingVoiceSyncRef = useRef<boolean | null>(null);
+    const coopRemoteFinisherShownAtRef = useRef<number | null>(null);
+    const coopRemoteFinisherClearTimerRef = useRef<number | null>(null);
     const queuedCoopBattleEventRef = useRef<{ type: 'COOP_BATTLE_PLAY_CARD' | 'COOP_BATTLE_USE_POTION' | 'COOP_BATTLE_TURN_START' | 'COOP_BATTLE_SELECTION_STATE' | 'COOP_BATTLE_MODAL_RESOLVE' | 'COOP_BATTLE_CODEX_SELECT', cardId?: string, potionId?: string, playedCard?: ICard } | null>(null);
     const [queuedCoopBattleEventTick, setQueuedCoopBattleEventTick] = useState(0);
     const coopMapPendingTimerRef = useRef<number | null>(null);
@@ -722,6 +725,17 @@ const App: React.FC = () => {
             window.clearTimeout(raceToastTimerRef.current);
         }
         raceToastTimerRef.current = window.setTimeout(() => setRaceToast(null), 2200);
+    }, []);
+    useEffect(() => {
+        battleFinisherCutinCardRef.current = battleFinisherCutinCard;
+    }, [battleFinisherCutinCard]);
+    useEffect(() => {
+        return () => {
+            if (coopRemoteFinisherClearTimerRef.current) {
+                window.clearTimeout(coopRemoteFinisherClearTimerRef.current);
+                coopRemoteFinisherClearTimerRef.current = null;
+            }
+        };
     }, []);
     const clearCoopMapPending = useCallback(() => {
         setCoopMapPendingNodeId(null);
@@ -8278,26 +8292,44 @@ const App: React.FC = () => {
             }
 
             if (data.type === 'COOP_BATTLE_FINISH' && !coopSession.isHost) {
-                coopApplyingRemoteBattleSyncRef.current = true;
-                queuedCoopBattleEventRef.current = null;
-                setCoopBattleState(null);
-                setBattleFinisherCutinCard(null);
-                setGameState(prev => ({
-                    ...prev,
-                    player: buildPostBattlePlayer(prev.player, data.screen !== GameScreen.GAME_OVER),
-                    screen: shouldPreserveLocalCoopScreen(prev.screen, data.screen) ? prev.screen : data.screen,
-                    enemies: data.enemies ?? prev.enemies,
-                    selectedEnemyId: data.selectedEnemyId ?? prev.selectedEnemyId,
-                    combatLog: data.combatLog ?? prev.combatLog,
-                    coopBattleState: null
-                }));
-                window.setTimeout(() => {
-                    coopApplyingRemoteBattleSyncRef.current = false;
-                    coopLastBattleActionSignatureRef.current = null;
-                    if (queuedCoopBattleEventRef.current) {
-                        setQueuedCoopBattleEventTick(prev => prev + 1);
+                const applyBattleFinish = () => {
+                    coopApplyingRemoteBattleSyncRef.current = true;
+                    queuedCoopBattleEventRef.current = null;
+                    setCoopBattleState(null);
+                    setBattleFinisherCutinCard(null);
+                    coopRemoteFinisherShownAtRef.current = null;
+                    setGameState(prev => ({
+                        ...prev,
+                        player: buildPostBattlePlayer(prev.player, data.screen !== GameScreen.GAME_OVER),
+                        screen: shouldPreserveLocalCoopScreen(prev.screen, data.screen) ? prev.screen : data.screen,
+                        enemies: data.enemies ?? prev.enemies,
+                        selectedEnemyId: data.selectedEnemyId ?? prev.selectedEnemyId,
+                        combatLog: data.combatLog ?? prev.combatLog,
+                        coopBattleState: null
+                    }));
+                    window.setTimeout(() => {
+                        coopApplyingRemoteBattleSyncRef.current = false;
+                        coopLastBattleActionSignatureRef.current = null;
+                        if (queuedCoopBattleEventRef.current) {
+                            setQueuedCoopBattleEventTick(prev => prev + 1);
+                        }
+                    }, 80);
+                };
+                const finisherShownAt = coopRemoteFinisherShownAtRef.current;
+                const finisherActive = !!battleFinisherCutinCardRef.current;
+                const elapsed = finisherShownAt ? Date.now() - finisherShownAt : Number.MAX_SAFE_INTEGER;
+                const remainingMs = Math.max(0, 1200 - elapsed);
+                if (finisherActive && remainingMs > 0) {
+                    if (coopRemoteFinisherClearTimerRef.current) {
+                        window.clearTimeout(coopRemoteFinisherClearTimerRef.current);
                     }
-                }, 80);
+                    coopRemoteFinisherClearTimerRef.current = window.setTimeout(() => {
+                        coopRemoteFinisherClearTimerRef.current = null;
+                        applyBattleFinish();
+                    }, remainingMs);
+                    return;
+                }
+                applyBattleFinish();
                 return;
             }
 
@@ -8326,7 +8358,33 @@ const App: React.FC = () => {
                         return { ...prev, participants: nextParticipants };
                     });
                 }
-                setBattleFinisherCutinCard(data.finisherCutinCard ?? null);
+                if (data.finisherCutinCard) {
+                    if (coopRemoteFinisherClearTimerRef.current) {
+                        window.clearTimeout(coopRemoteFinisherClearTimerRef.current);
+                        coopRemoteFinisherClearTimerRef.current = null;
+                    }
+                    coopRemoteFinisherShownAtRef.current = Date.now();
+                    setBattleFinisherCutinCard(data.finisherCutinCard);
+                } else if (battleFinisherCutinCardRef.current && coopRemoteFinisherShownAtRef.current) {
+                    const elapsed = Date.now() - coopRemoteFinisherShownAtRef.current;
+                    const remainingMs = Math.max(0, 1200 - elapsed);
+                    if (remainingMs > 0) {
+                        if (coopRemoteFinisherClearTimerRef.current) {
+                            window.clearTimeout(coopRemoteFinisherClearTimerRef.current);
+                        }
+                        coopRemoteFinisherClearTimerRef.current = window.setTimeout(() => {
+                            coopRemoteFinisherClearTimerRef.current = null;
+                            coopRemoteFinisherShownAtRef.current = null;
+                            setBattleFinisherCutinCard(null);
+                        }, remainingMs);
+                    } else {
+                        coopRemoteFinisherShownAtRef.current = null;
+                        setBattleFinisherCutinCard(null);
+                    }
+                } else {
+                    coopRemoteFinisherShownAtRef.current = null;
+                    setBattleFinisherCutinCard(null);
+                }
                 if (data.battleState && coopSelfPeerId) {
                     const selfBattlePlayer = data.battleState.players.find(entry => entry.peerId === coopSelfPeerId);
                     if (selfBattlePlayer) {
