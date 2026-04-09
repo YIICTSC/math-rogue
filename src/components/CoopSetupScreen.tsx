@@ -52,6 +52,7 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
   const [joinSent, setJoinSent] = useState(false);
   const [inviteUrlCopied, setInviteUrlCopied] = useState(false);
   const joinInFlightRef = useRef(false);
+  const startTriggeredRef = useRef(false);
 
   const canStart = useMemo(
     () => mode === 'HOST' && status === 'CONNECTED' && participants.length >= 1 && participants.length <= MAX_COOP_PLAYERS,
@@ -95,11 +96,13 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
       }
 
       if (data.type === 'COOP_START') {
+        if (startTriggeredRef.current) return;
+        startTriggeredRef.current = true;
         onStart({
           isHost: mode === 'HOST',
           name: myName.trim(),
-          roomCode,
-          participants
+          roomCode: data.roomCode || roomCode,
+          participants: data.participants || participants
         });
       }
     };
@@ -141,6 +144,7 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
       setStatus('CONNECTED');
       setParticipants([{ peerId: hostPeerId, name: myName.trim(), imageData: player.imageData }]);
       setJoinSent(false);
+      startTriggeredRef.current = false;
       audioService.playSound('select');
     } catch (err: any) {
       setStatus('ERROR');
@@ -160,6 +164,7 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
       setRoomCode(inputCode);
       setMode('JOIN');
       setJoinSent(false);
+      startTriggeredRef.current = false;
       audioService.playSound('select');
     } catch (err: any) {
       joinInFlightRef.current = false;
@@ -171,13 +176,15 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
 
   const handleStart = () => {
     if (!canStart) return;
-    p2pService.send({ type: 'COOP_START' });
-    onStart({
+    const payload: CoopStartPayload = {
       isHost: true,
       name: myName.trim(),
       roomCode,
       participants
-    });
+    };
+    startTriggeredRef.current = true;
+    onStart(payload);
+    p2pService.send({ type: 'COOP_START', roomCode, participants });
   };
 
   const handleBack = () => {

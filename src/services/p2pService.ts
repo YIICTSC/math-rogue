@@ -43,7 +43,27 @@ export type P2PEvent =
         }>,
         decisionOwnerIndex?: number
     }
-    | { type: 'COOP_START' }
+    | { type: 'COOP_START', roomCode?: string, participants?: Array<{
+        peerId: string,
+        name: string,
+        imageData?: string,
+        selectedCharacterId?: string,
+        maxHp?: number,
+        currentHp?: number,
+        block?: number,
+        nextTurnEnergy?: number,
+        strength?: number,
+        buffer?: number,
+        revivedThisBattle?: boolean,
+        quizResolved?: boolean,
+        quizCorrectCount?: number,
+        eventResolved?: boolean,
+        restResolved?: boolean,
+        shopResolved?: boolean,
+        rewardResolved?: boolean,
+        treasureResolved?: boolean,
+        voiceEnabled?: boolean
+    }> }
     | { type: 'COOP_MODE_SET', mode: any }
     | { type: 'COOP_CHARACTER_SELECT', characterId: string, name: string, imageData: string, maxHp: number, currentHp: number }
     | { type: 'COOP_QUIZ_RESULT', correctCount: number }
