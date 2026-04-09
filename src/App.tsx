@@ -709,6 +709,7 @@ const App: React.FC = () => {
     const coopStartedTurnSlotRef = useRef<string | null>(null);
     const coopApplyingRemoteBattleSyncRef = useRef(false);
     const coopLastBattleActionSignatureRef = useRef<string | null>(null);
+    const coopPendingVoiceSyncRef = useRef<boolean | null>(null);
     const queuedCoopBattleEventRef = useRef<{ type: 'COOP_BATTLE_PLAY_CARD' | 'COOP_BATTLE_USE_POTION' | 'COOP_BATTLE_TURN_START' | 'COOP_BATTLE_SELECTION_STATE' | 'COOP_BATTLE_MODAL_RESOLVE' | 'COOP_BATTLE_CODEX_SELECT', cardId?: string, potionId?: string } | null>(null);
     const [queuedCoopBattleEventTick, setQueuedCoopBattleEventTick] = useState(0);
     const coopMapPendingTimerRef = useRef<number | null>(null);
@@ -983,12 +984,14 @@ const App: React.FC = () => {
                         return { ...prev, participants: nextParticipants };
                     });
                 } else {
+                    coopPendingVoiceSyncRef.current = coopVoiceEnabled;
                     p2pService.send({ type: 'COOP_SELF_STATE', voiceEnabled: coopVoiceEnabled });
                 }
             } catch (err) {
                 console.warn('Failed to toggle coop voice:', err);
                 if (!cancelled) {
                     setCoopVoiceEnabled(false);
+                    coopPendingVoiceSyncRef.current = null;
                     p2pService.setVoiceEnabled(false).catch(() => undefined);
                 }
             }
@@ -1006,6 +1009,13 @@ const App: React.FC = () => {
         if (!coopSession || !coopSelfPeerId || coopSession.isHost) return;
         const selfParticipant = coopSession.participants.find(participant => participant.peerId === coopSelfPeerId);
         if (typeof selfParticipant?.voiceEnabled !== 'boolean') return;
+        if (coopPendingVoiceSyncRef.current !== null) {
+            if (selfParticipant.voiceEnabled === coopPendingVoiceSyncRef.current) {
+                coopPendingVoiceSyncRef.current = null;
+            } else {
+                return;
+            }
+        }
         if (coopVoiceEnabled && !selfParticipant.voiceEnabled) {
             return;
         }
