@@ -53,11 +53,16 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
   const [inviteUrlCopied, setInviteUrlCopied] = useState(false);
   const joinInFlightRef = useRef(false);
   const startTriggeredRef = useRef(false);
+  const participantsRef = useRef<CoopParticipantPayload[]>([]);
 
   const canStart = useMemo(
     () => mode === 'HOST' && status === 'CONNECTED' && participants.length >= 1 && participants.length <= MAX_COOP_PLAYERS,
     [mode, status, participants.length]
   );
+
+  useEffect(() => {
+    participantsRef.current = participants;
+  }, [participants]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -98,11 +103,12 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
       if (data.type === 'COOP_START') {
         if (startTriggeredRef.current) return;
         startTriggeredRef.current = true;
+        const latestParticipants = participantsRef.current;
         onStart({
           isHost: mode === 'HOST',
           name: myName.trim(),
           roomCode: data.roomCode || roomCode,
-          participants: data.participants || participants
+          participants: (data.participants && data.participants.length > 0) ? data.participants : latestParticipants
         });
       }
     };
@@ -176,15 +182,17 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
 
   const handleStart = () => {
     if (!canStart) return;
+    const currentParticipants = participantsRef.current;
+    const startParticipants = currentParticipants.map(({ imageData, ...rest }) => rest);
     const payload: CoopStartPayload = {
       isHost: true,
       name: myName.trim(),
       roomCode,
-      participants
+      participants: currentParticipants
     };
     startTriggeredRef.current = true;
+    p2pService.send({ type: 'COOP_START', roomCode, participants: startParticipants });
     onStart(payload);
-    p2pService.send({ type: 'COOP_START', roomCode, participants });
   };
 
   const handleBack = () => {
