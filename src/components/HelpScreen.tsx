@@ -65,6 +65,31 @@ const HelpScreen: React.FC<HelpScreenProps> = ({ onBack, languageMode = 'JAPANES
                     </div>
                 </section>
 
+                {/* Coop Rules */}
+                <section className="bg-gray-800 p-5 rounded border border-emerald-600/60">
+                    <h3 className="text-lg font-bold text-emerald-300 mb-4 border-b border-emerald-700/40 pb-2 flex items-center">
+                        <HelpCircle className="mr-2" /> {trans("協力モードの進行ルール", languageMode)}
+                    </h3>
+                    <ul className="list-disc list-inside text-sm text-gray-300 space-y-2">
+                        <li>
+                            <span className="font-bold text-cyan-300">{trans("決定役が進行を決める画面", languageMode)}:</span>
+                            {' '}
+                            {trans("マップ（分岐選択）", languageMode)}
+                        </li>
+                        <li>
+                            <span className="font-bold text-emerald-300">{trans("全員が同時に操作する画面", languageMode)}:</span>
+                            {' '}
+                            {trans("イベント / 休憩 / ショップ / 報酬", languageMode)}
+                        </li>
+                        <li>
+                            {trans("同時操作画面では、各自が完了すると進捗が共有され、全員完了で次へ進みます。", languageMode)}
+                        </li>
+                        <li>
+                            {trans("マップで参加者が行き先を選んだ後は、ホスト承認まで一時的に待機表示になります。", languageMode)}
+                        </li>
+                    </ul>
+                </section>
+
                 {/* Rest Site Features */}
                 <section className="bg-gray-800 p-5 rounded border border-gray-700">
                     <h3 className="text-lg font-bold text-orange-400 mb-4 border-b border-gray-600 pb-2 flex items-center">
