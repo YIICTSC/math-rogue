@@ -4,6 +4,7 @@ import PixelSprite from './PixelSprite';
 import EnemyIllustration from './EnemyIllustration';
 import { trans } from '../utils/textUtils';
 import { getCardIllustrationPaths } from '../utils/cardIllustration';
+import { getStatusCategoryLabel, getStatusCategoryClass } from '../utils/cardUtils';
 
 interface CardProps {
   card: CardType;
@@ -228,6 +229,8 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
 
   const displayName = translatedCardName + (card.upgraded ? '+' : '');
   const needsScroll = displayName.length > 6;
+  const statusCategoryLabel = getStatusCategoryLabel(card);
+  const statusCategoryClass = getStatusCategoryClass(card);
 
   return (
     <div
@@ -263,6 +266,12 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
           </span>
         )}
       </div>
+
+      {(card.type === EnumCardType.STATUS || card.type === EnumCardType.CURSE) && statusCategoryLabel && (
+        <div className={`mb-1 text-[10px] text-center rounded px-1 py-[1px] shrink-0 ${statusCategoryClass}`}>
+          {statusCategoryLabel}
+        </div>
+      )}
 
       {/* Description: layer, bottom position */}
       <div className="absolute bottom-5 left-2 right-2 z-20 pointer-events-none">
