@@ -243,10 +243,12 @@ export interface CoopBattleTurnSlot {
 
 export interface CoopBattleState {
   battleKey: string;
+  battleMode: 'TURN_BASED' | 'REALTIME';
   players: CoopBattlePlayerState[];
   turnQueue: CoopBattleTurnSlot[];
   turnCursor: number;
   enemyTurnCursor: number;
+  roundEndedPeerIds?: string[];
 }
 
 export interface ActStats {

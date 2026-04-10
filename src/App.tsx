@@ -108,6 +108,7 @@ type CoopSession = {
     name: string;
     roomCode?: string;
     startedAt: number;
+    battleMode: 'TURN_BASED' | 'REALTIME';
     participants: CoopParticipant[];
     decisionOwnerIndex: number;
 };
@@ -928,12 +929,16 @@ const App: React.FC = () => {
     const coopBattleCanAct = useMemo(() => {
         if (gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.BATTLE) return true;
         if (!activeCoopTurnSlot) return true;
+        if (coopBattleState?.battleMode === 'REALTIME') {
+            if (activeCoopTurnSlot.type === 'ENEMY') return false;
+            return !!coopSelfPeerId && !(coopBattleState.roundEndedPeerIds || []).includes(coopSelfPeerId);
+        }
         return activeCoopTurnSlot.type !== 'ENEMY' && activeCoopTurnSlot.peerId === coopSelfPeerId;
-    }, [activeCoopTurnSlot, coopSelfPeerId, gameState.challengeMode, gameState.screen]);
+    }, [activeCoopTurnSlot, coopBattleState, coopSelfPeerId, gameState.challengeMode, gameState.screen]);
     const isCoopHost = gameState.challengeMode === 'COOP' && !!coopSession?.isHost;
     const coopBattleTurnOwnerLabel = activeCoopTurnSlot?.type === 'ENEMY'
         ? '敵の行動'
-        : activeCoopTurnSlot?.label || '';
+        : (coopBattleState?.battleMode === 'REALTIME' ? 'みんなのターン' : activeCoopTurnSlot?.label || '');
     const coopBattlePlan = useMemo(() => {
         if (!coopBattleState || coopBattleState.turnQueue.length === 0) {
             return { enemyActions: 0, nextCursor: 0 };
@@ -1353,7 +1358,13 @@ const App: React.FC = () => {
             type: 'ENEMY',
             label: '敵'
         };
-        const queue: CoopBattleTurnSlot[] = [...randomizedPlayerSlots, enemySlot];
+        const queue: CoopBattleTurnSlot[] = coopSession.battleMode === 'REALTIME'
+            ? [{
+                id: `coop-turn-realtime-allies-${battleKey}`,
+                type: 'ALLY',
+                label: '全員',
+            }, enemySlot]
+            : [...randomizedPlayerSlots, enemySlot];
         const battlePlayers: CoopBattlePlayerState[] = coopSession.participants.map(participant => {
             const snapshot = coopPlayerSnapshots[participant.peerId] || (participant.peerId === coopSelfPeerId ? gameState.player : null);
             const basePlayer = snapshot ? { ...snapshot } : {
@@ -1381,10 +1392,12 @@ const App: React.FC = () => {
         });
         const nextBattleState: CoopBattleState = {
             battleKey,
+            battleMode: coopSession.battleMode,
             players: battlePlayers,
             turnQueue: queue,
             turnCursor: 0,
-            enemyTurnCursor: 0
+            enemyTurnCursor: 0,
+            roundEndedPeerIds: []
         };
         setCoopBattleState(nextBattleState);
         broadcastCoopBattleState(nextBattleState);
@@ -6178,10 +6191,13 @@ const App: React.FC = () => {
             await executeEndTurn(coopBattlePlan.enemyActions);
             if (coopSession?.isHost) {
                 const latestBattleState = stateRef.current.coopBattleState || coopBattleState;
+                const nextCursor = coopBattlePlan.nextCursor;
+                const nextSlot = latestBattleState.turnQueue[nextCursor];
                 const nextBattleState: CoopBattleState = {
                     ...latestBattleState,
-                    turnCursor: coopBattlePlan.nextCursor,
-                    enemyTurnCursor: latestBattleState.enemyTurnCursor + coopBattlePlan.enemyActions
+                    turnCursor: nextCursor,
+                    enemyTurnCursor: latestBattleState.enemyTurnCursor + coopBattlePlan.enemyActions,
+                    roundEndedPeerIds: nextSlot?.type === 'ENEMY' ? (latestBattleState.roundEndedPeerIds || []) : []
                 };
                 setCoopBattleState(nextBattleState);
                 broadcastCoopBattleState(nextBattleState);
@@ -6201,7 +6217,7 @@ const App: React.FC = () => {
             }, 0);
             return;
         }
-        if (activeCoopTurnSlot.peerId !== coopSelfPeerId) return;
+        if (coopBattleState.battleMode !== 'REALTIME' && activeCoopTurnSlot.peerId !== coopSelfPeerId) return;
         if (coopStartedTurnSlotRef.current === turnKey) return;
         if (gameState.turn === 1 && gameState.player.hand.length > 0 && coopStartedTurnSlotRef.current === null) {
             coopStartedTurnSlotRef.current = turnKey;
@@ -6215,6 +6231,9 @@ const App: React.FC = () => {
         if (isEndingTurnRef.current) return;
         if (weatherScryModal || galaxyExpressModal || goldFishModal || dreamCatcherModal) return;
         lastPlayedCardRef.current = null;
+        const isRealtimeCoopTurn = gameState.challengeMode === 'COOP'
+            && gameState.coopBattleState?.battleMode === 'REALTIME'
+            && gameState.coopBattleState.turnQueue[gameState.coopBattleState.turnCursor]?.type !== 'ENEMY';
         if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
             p2pService.send({
                 type: 'COOP_END_TURN',
@@ -6222,6 +6241,24 @@ const App: React.FC = () => {
                 selectedEnemyId: gameState.selectedEnemyId,
                 battleState: gameState.coopBattleState || null
             });
+            return;
+        }
+        if (isRealtimeCoopTurn && coopSession?.isHost && coopSelfPeerId && gameState.coopBattleState) {
+            const alreadyEnded = (gameState.coopBattleState.roundEndedPeerIds || []).includes(coopSelfPeerId);
+            if (!alreadyEnded) {
+                const nextEnded = [...(gameState.coopBattleState.roundEndedPeerIds || []), coopSelfPeerId];
+                const nextBattleState: CoopBattleState = { ...gameState.coopBattleState, roundEndedPeerIds: nextEnded };
+                setCoopBattleState(nextBattleState);
+                const alivePeerIds = nextBattleState.players.filter(entry => entry.player.currentHp > 0).map(entry => entry.peerId);
+                const allEnded = alivePeerIds.every(peerId => nextEnded.includes(peerId));
+                if (allEnded) {
+                    window.setTimeout(() => {
+                        void executeQueuedTurnTransition();
+                    }, 0);
+                } else {
+                    broadcastCoopBattleState(nextBattleState);
+                }
+            }
             return;
         }
 
@@ -8054,7 +8091,8 @@ const App: React.FC = () => {
         battleState?: CoopBattleState | null
     }, options?: { advanceTurn?: boolean }) => {
         const activeTurn = gameState.coopBattleState?.turnQueue[gameState.coopBattleState.turnCursor];
-        if (!activeTurn || activeTurn.type === 'ENEMY' || activeTurn.peerId !== fromPeerId) {
+        const isRealtimeTurn = gameState.coopBattleState?.battleMode === 'REALTIME' && activeTurn?.type !== 'ENEMY';
+        if (!activeTurn || activeTurn.type === 'ENEMY' || (!isRealtimeTurn && activeTurn.peerId !== fromPeerId)) {
             return;
         }
         upsertCoopPlayerSnapshot(fromPeerId, payload.player);
@@ -8133,6 +8171,21 @@ const App: React.FC = () => {
         }
 
         if (options?.advanceTurn) {
+            if (isRealtimeTurn && nextBattleState) {
+                const nextEnded = Array.from(new Set([...(nextBattleState.roundEndedPeerIds || []), fromPeerId]));
+                const updatedBattleState: CoopBattleState = { ...nextBattleState, roundEndedPeerIds: nextEnded };
+                setCoopBattleState(updatedBattleState);
+                const alivePeerIds = updatedBattleState.players.filter(entry => entry.player.currentHp > 0).map(entry => entry.peerId);
+                const allEnded = alivePeerIds.every(peerId => nextEnded.includes(peerId));
+                if (allEnded) {
+                    window.setTimeout(() => {
+                        void executeQueuedTurnTransition();
+                    }, 0);
+                } else {
+                    broadcastCoopBattleState(updatedBattleState);
+                }
+                return;
+            }
             window.setTimeout(() => {
                 void executeQueuedTurnTransition();
             }, 0);
@@ -8440,7 +8493,8 @@ const App: React.FC = () => {
 
             if (data.type === 'COOP_BATTLE_SELECT_ENEMY' && coopSession.isHost && fromPeerId && gameState.screen === GameScreen.BATTLE) {
                 const activeTurn = gameState.coopBattleState?.turnQueue[gameState.coopBattleState.turnCursor];
-                if (!activeTurn || activeTurn.type === 'ENEMY' || activeTurn.peerId !== fromPeerId) {
+                const isRealtimeTurn = gameState.coopBattleState?.battleMode === 'REALTIME' && activeTurn?.type !== 'ENEMY';
+                if (!activeTurn || activeTurn.type === 'ENEMY' || (!isRealtimeTurn && activeTurn.peerId !== fromPeerId)) {
                     return;
                 }
                 const nextBattleState = gameState.coopBattleState
@@ -9786,6 +9840,7 @@ const App: React.FC = () => {
                                     name: payload.name,
                                     roomCode: payload.roomCode,
                                     startedAt: Date.now(),
+                                    battleMode: payload.battleMode,
                                     participants: payload.participants,
                                     decisionOwnerIndex: 0
                                 });

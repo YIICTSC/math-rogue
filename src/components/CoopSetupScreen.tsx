@@ -31,6 +31,7 @@ export interface CoopStartPayload {
   name: string;
   roomCode: string;
   participants: CoopParticipantPayload[];
+  battleMode: 'TURN_BASED' | 'REALTIME';
 }
 
 interface CoopSetupScreenProps {
@@ -51,6 +52,7 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
   const [participants, setParticipants] = useState<CoopParticipantPayload[]>([]);
   const [joinSent, setJoinSent] = useState(false);
   const [inviteUrlCopied, setInviteUrlCopied] = useState(false);
+  const [battleMode, setBattleMode] = useState<'TURN_BASED' | 'REALTIME'>('TURN_BASED');
   const joinInFlightRef = useRef(false);
   const startTriggeredRef = useRef(false);
   const participantsRef = useRef<CoopParticipantPayload[]>([]);
@@ -108,7 +110,8 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
           isHost: mode === 'HOST',
           name: myName.trim(),
           roomCode: data.roomCode || roomCode,
-          participants: (data.participants && data.participants.length > 0) ? data.participants : latestParticipants
+          participants: (data.participants && data.participants.length > 0) ? data.participants : latestParticipants,
+          battleMode: data.battleMode === 'REALTIME' ? 'REALTIME' : 'TURN_BASED'
         });
       }
     };
@@ -188,12 +191,13 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
       isHost: true,
       name: myName.trim(),
       roomCode,
-      participants: currentParticipants
+      participants: currentParticipants,
+      battleMode
     };
     startTriggeredRef.current = true;
     onStart(payload);
     try {
-      p2pService.send({ type: 'COOP_START', roomCode, participants: startParticipants });
+      p2pService.send({ type: 'COOP_START', roomCode, participants: startParticipants, battleMode });
     } catch (err) {
       console.warn('Failed to broadcast COOP_START, but local coop session was started.', err);
     }
@@ -301,6 +305,28 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
                   {participants.map(p => (
                     <div key={p.peerId} className="text-sm text-gray-200">- {p.name}</div>
                   ))}
+                </div>
+                <div className="bg-black/40 border border-emerald-500/40 rounded p-3 space-y-2">
+                  <div className="text-xs text-emerald-200/90">戦闘進行モード（ホストが開始時に選択）</div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => setBattleMode('TURN_BASED')}
+                      className={`px-3 py-2 rounded text-sm font-bold border ${battleMode === 'TURN_BASED' ? 'bg-emerald-600 border-emerald-300 text-white' : 'bg-slate-800 border-slate-600 text-gray-200'}`}
+                    >
+                      ターンベース
+                    </button>
+                    <button
+                      onClick={() => setBattleMode('REALTIME')}
+                      className={`px-3 py-2 rounded text-sm font-bold border ${battleMode === 'REALTIME' ? 'bg-cyan-600 border-cyan-300 text-white' : 'bg-slate-800 border-slate-600 text-gray-200'}`}
+                    >
+                      リアルタイム
+                    </button>
+                  </div>
+                  <div className="text-[11px] text-gray-300">
+                    {battleMode === 'TURN_BASED'
+                      ? 'これまで通り、順番に行動します。'
+                      : '全員が同時にカードを使用し、全員がターン終了後に敵が行動します。'}
+                  </div>
                 </div>
                 <button
                   onClick={handleStart}
