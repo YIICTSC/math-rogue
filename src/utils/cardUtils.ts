@@ -54,6 +54,36 @@ const mergeIllustrationRefsCircular = (c1: Card, c2: Card, c3?: Card): { refs: s
     return { refs, writeIndex };
 };
 
+const STATUS_PAIN_IDS = new Set(['BURN', 'INJURY', 'SLIMED', 'WOUND', 'PAIN', 'DECAY']);
+const STATUS_HAND_LOCK_IDS = new Set(['DAZED', 'NORMALITY', 'VOID', 'CLUMSINESS']);
+const STATUS_DECK_POLLUTION_IDS = new Set(['REGRET', 'SHAME', 'DOUBT', 'WRITHE', 'PARASITE']);
+
+export type StatusCategoryKey = 'PAIN' | 'HAND_LOCK' | 'DECK_POLLUTION';
+
+export const getStatusCategoryKey = (card: Card): StatusCategoryKey | null => {
+    const id = card.id || '';
+    if (STATUS_PAIN_IDS.has(id)) return 'PAIN';
+    if (STATUS_HAND_LOCK_IDS.has(id)) return 'HAND_LOCK';
+    if (STATUS_DECK_POLLUTION_IDS.has(id)) return 'DECK_POLLUTION';
+    return null;
+};
+
+export const getStatusCategoryLabel = (card: Card): string | null => {
+    const key = getStatusCategoryKey(card);
+    if (key === 'PAIN') return '即時痛み型';
+    if (key === 'HAND_LOCK') return '手札阻害型';
+    if (key === 'DECK_POLLUTION') return '山札汚染型';
+    return null;
+};
+
+export const getStatusCategoryClass = (card: Card): string => {
+    const key = getStatusCategoryKey(card);
+    if (key === 'PAIN') return 'border-red-300/40 bg-red-900/50 text-red-100';
+    if (key === 'HAND_LOCK') return 'border-yellow-300/40 bg-yellow-900/50 text-yellow-100';
+    if (key === 'DECK_POLLUTION') return 'border-purple-300/40 bg-purple-900/50 text-purple-100';
+    return '';
+};
+
 // Helper to determine the visual shape of a card for synthesis
 export const getShapeFromCard = (card: Card): string => {
     if (card.textureRef) return card.textureRef.split('|')[0];

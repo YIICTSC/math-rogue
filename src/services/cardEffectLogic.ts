@@ -98,6 +98,33 @@ export const applyAdditionalCardLogic = (
                 nextActiveEffects.push({ id: `vfx-unit-${Date.now()}`, type: 'BUFF', targetId: 'player' });
                 break;
             }
+            case 'パニック': {
+                const pool = p.hand.filter(c => c.id !== card.id);
+                if (pool.length > 0) {
+                    const pick = pool[Math.floor(Math.random() * pool.length)];
+                    pick.cost = 0;
+                    currentLogs.push(trans(`パニック：「${pick.name}」が0コストになった`, languageMode));
+                    nextActiveEffects.push({ id: `vfx-panic-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+                }
+                break;
+            }
+            case '魅惑のカカオ': {
+                const handToReplace = p.hand.filter(c => c.id !== card.id);
+                p.hand = p.hand.filter(c => c.id === card.id);
+                handToReplace.forEach(c => p.discardPile.push(c));
+                for (let i = 0; i < handToReplace.length; i++) {
+                    if (p.drawPile.length === 0) {
+                        if (p.discardPile.length === 0) break;
+                        p.drawPile = shuffle(p.discardPile);
+                        p.discardPile = [];
+                    }
+                    const drawn = p.drawPile.pop();
+                    if (drawn) p.hand.push(drawn);
+                }
+                currentLogs.push(trans(`魅惑のカカオ：手札を${handToReplace.length}枚入れ替えた`, languageMode));
+                nextActiveEffects.push({ id: `vfx-cacao-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+                break;
+            }
 
             // --- 理科系 ---
             case '磁石の力': {
@@ -152,9 +179,27 @@ export const applyAdditionalCardLogic = (
                 break;
             }
             case '産業革命': {
-                p.currentEnergy += 2;
-                currentLogs.push(trans("産業革命：エナジー2獲得！", languageMode));
+                p.currentEnergy += 1;
+                p.nextTurnEnergy += 1;
+                if (p.drawPile.length === 0 && p.discardPile.length > 0) {
+                    p.drawPile = shuffle(p.discardPile);
+                    p.discardPile = [];
+                }
+                const drawn = p.drawPile.pop();
+                if (drawn) p.hand.push(drawn);
+                currentLogs.push(trans("産業革命：Eを今/次ターンに分割し、1枚引いた！", languageMode));
                 nextActiveEffects.push({ id: `vfx-rev-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+                break;
+            }
+            case '覚醒のコーヒー': {
+                if (p.drawPile.length === 0 && p.discardPile.length > 0) {
+                    p.drawPile = shuffle(p.discardPile);
+                    p.discardPile = [];
+                }
+                const drawn = p.drawPile.pop();
+                if (drawn) p.hand.push(drawn);
+                p.currentHp = Math.max(0, p.currentHp - 1);
+                currentLogs.push(trans("覚醒のコーヒー：1枚引いた（反動でHP-1）", languageMode));
                 break;
             }
             case '世界遺産登録': {
@@ -171,6 +216,66 @@ export const applyAdditionalCardLogic = (
                 currentLogs.push(trans("学芸会の主役：カードを使う度ブロック獲得！", languageMode));
                 break;
             }
+            case 'カンニング': {
+                const pool = p.hand.filter(c => c.id !== card.id && c.type === CardType.ATTACK);
+                if (pool.length > 0) {
+                    addCardToHand(pool[Math.floor(Math.random() * pool.length)], false);
+                    currentLogs.push(trans("カンニング：攻撃カードをコピーした", languageMode));
+                }
+                break;
+            }
+            case 'お人形遊び': {
+                const pool = p.hand.filter(c => c.id !== card.id && c.type === CardType.SKILL);
+                if (pool.length > 0) {
+                    addCardToHand(pool[Math.floor(Math.random() * pool.length)], false);
+                    currentLogs.push(trans("お人形遊び：スキルカードをコピーした", languageMode));
+                }
+                break;
+            }
+            case '二刀流': {
+                const pool = p.hand.filter(c => c.id !== card.id && (c.type === CardType.ATTACK || c.type === CardType.POWER));
+                if (pool.length > 0) {
+                    const pick = pool[Math.floor(Math.random() * pool.length)];
+                    addCardToHand(pick, false);
+                    addCardToHand(pick, false);
+                    currentLogs.push(trans("二刀流：カードを2枚コピーした", languageMode));
+                }
+                break;
+            }
+            case 'フォークダンス': {
+                const pool = p.hand.filter(c => c.id !== card.id);
+                if (pool.length > 0) {
+                    const pick = pool[Math.floor(Math.random() * pool.length)];
+                    addCardToHand(pick, false);
+                    const tossPool = p.hand.filter(c => c.id !== pick.id && c.id !== card.id);
+                    if (tossPool.length > 0) {
+                        const toss = tossPool[Math.floor(Math.random() * tossPool.length)];
+                        p.hand = p.hand.filter(c => c.id !== toss.id);
+                        p.discardPile.push(toss);
+                    }
+                    currentLogs.push(trans("フォークダンス：コピーして1枚捨てた", languageMode));
+                }
+                break;
+            }
+            case '鏡 (星新一)': {
+                const pool = p.hand.filter(c => c.id !== card.id);
+                if (pool.length > 0) {
+                    addCardToHand(pool[Math.floor(Math.random() * pool.length)], false);
+                    p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + 1;
+                    currentLogs.push(trans("鏡：コピーしたが、自分がびくびく1", languageMode));
+                }
+                break;
+            }
+            case 'きてんの窓': {
+                const highCost = p.hand.filter(c => c.id !== card.id && c.cost >= 2);
+                const pool = highCost.length > 0 ? highCost : p.hand.filter(c => c.id !== card.id);
+                if (pool.length > 0) {
+                    const copied = addCardToHand(pool[Math.floor(Math.random() * pool.length)], false);
+                    copied.cost = 0;
+                    currentLogs.push(trans("きてんの窓：高コスト優先コピーを0コスト化", languageMode));
+                }
+                break;
+            }
             case 'スポーツ王': {
                 p.powers['DEXTERITY'] = (p.powers['DEXTERITY'] || 0) + 2;
                 nextActiveEffects.push({ id: `vfx-champ-${Date.now()}`, type: 'BUFF', targetId: 'player' });
@@ -183,6 +288,65 @@ export const applyAdditionalCardLogic = (
                     p.hand.push(pick);
                     currentLogs.push(trans(`鉄棒の逆上がり：捨て札から「${pick.name}」を回収した！`, languageMode));
                     nextActiveEffects.push({ id: `vfx-pe-bar-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+                }
+                break;
+            }
+            case '顕微鏡': {
+                p.nextTurnDraw += 1;
+                currentLogs.push(trans("顕微鏡：次ターン1ドロー", languageMode));
+                break;
+            }
+            case 'キラキラの粉': {
+                e_list.forEach(enemy => applyDebuff(enemy, 'WEAK', 1));
+                currentLogs.push(trans("キラキラの粉：敵をへろへろ1にした", languageMode));
+                break;
+            }
+            case '邪智暴虐': {
+                if (p.drawPile.length === 0 && p.discardPile.length > 0) {
+                    p.drawPile = shuffle(p.discardPile);
+                    p.discardPile = [];
+                }
+                const drawn = p.drawPile.pop();
+                if (drawn) p.hand.push(drawn);
+                currentLogs.push(trans("邪智暴虐：1ドロー", languageMode));
+                break;
+            }
+            case '一寸法師': {
+                p.block += 3;
+                currentLogs.push(trans("一寸法師：連撃後にブロック3", languageMode));
+                break;
+            }
+            case '縄跳び': {
+                p.currentHp = Math.max(0, p.currentHp - 1);
+                currentLogs.push(trans("縄跳び：反動でHP-1", languageMode));
+                break;
+            }
+            case '飴玉の嵐': {
+                e_list.forEach(enemy => applyDebuff(enemy, 'WEAK', 1));
+                currentLogs.push(trans("飴玉の嵐：敵全体へろへろ1", languageMode));
+                break;
+            }
+            case 'ブーメラン': {
+                p.currentEnergy += 1;
+                currentLogs.push(trans("ブーメラン：エネルギー+1", languageMode));
+                break;
+            }
+            case 'かいけつゾロリ': {
+                p.block += 3;
+                currentLogs.push(trans("かいけつゾロリ：ブロック3", languageMode));
+                break;
+            }
+            case '側転': {
+                p.block += 2;
+                currentLogs.push(trans("側転：ブロック2", languageMode));
+                break;
+            }
+            case '電脳世界へのダイブ': {
+                const pool = p.hand.filter(c => c.id !== card.id);
+                if (pool.length > 0) {
+                    const pick = pool[Math.floor(Math.random() * pool.length)];
+                    pick.cost = 0;
+                    currentLogs.push(trans(`電脳世界へのダイブ：「${pick.name}」を0コスト化`, languageMode));
                 }
                 break;
             }

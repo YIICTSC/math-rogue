@@ -247,16 +247,10 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
         if (card.strength) nextCurrent.strength += card.strength;
         if (card.doubleStrength) nextCurrent.strength *= 2;
 
-        if (
-            card.name === '発見' ||
-            card.name === 'DISCOVERY' ||
-            card.name === 'ゼロの発見' ||
-            card.name === 'SANSU_ZERO' ||
-            card.originalNames?.includes('発見') ||
-            card.originalNames?.includes('DISCOVERY') ||
-            card.originalNames?.includes('ゼロの発見') ||
-            card.originalNames?.includes('SANSU_ZERO')
-        ) {
+        const matchesCardName = (...names: string[]) =>
+            names.includes(card.name) || names.some(n => card.originalNames?.includes(n));
+
+        if (matchesCardName('発見', 'DISCOVERY', 'ゼロの発見', 'SANSU_ZERO')) {
             const pool = getFilteredCardPool();
             for (let i = 0; i < 3; i++) {
                 const template = pool[Math.floor(Math.random() * pool.length)];
@@ -268,21 +262,160 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
             }
         }
 
-        if (
-            card.name === '山勘' ||
-            card.name === 'GAMBLE' ||
-            card.name === '単位変換' ||
-            card.name === 'SANSU_UNIT' ||
-            card.originalNames?.includes('山勘') ||
-            card.originalNames?.includes('GAMBLE') ||
-            card.originalNames?.includes('単位変換') ||
-            card.originalNames?.includes('SANSU_UNIT')
-        ) {
+        if (matchesCardName('山勘', 'GAMBLE', '単位変換', 'SANSU_UNIT')) {
             const handToReplace = [...nextCurrent.hand];
             nextCurrent.hand = [];
             handToReplace.forEach(c => nextCurrent.discardPile.push(c));
             drawCards(nextCurrent, handToReplace.length);
             addLog(`${handToReplace.length}枚入れ替えた`);
+        }
+
+        // 高優先: 手札操作系の差別化
+        if (matchesCardName('パニック', 'MADNESS')) {
+            const pool = nextCurrent.hand.filter(c => c.id !== card.id);
+            if (pool.length > 0) {
+                const pick = pool[Math.floor(Math.random() * pool.length)];
+                pick.cost = 0;
+                addLog(`パニック: 「${pick.name}」が0コストになった`);
+            }
+        }
+        if (matchesCardName('魅惑のカカオ', 'SWEET_CACAO')) {
+            const handToReplace = [...nextCurrent.hand];
+            nextCurrent.hand = [];
+            handToReplace.forEach(c => nextCurrent.discardPile.push(c));
+            drawCards(nextCurrent, handToReplace.length);
+            addLog(`魅惑のカカオ: 手札を${handToReplace.length}枚入れ替え`);
+        }
+
+        // 高優先: コピー系の差別化
+        const addCopy = (template: typeof card) => {
+            let copy = { ...template, id: `copy-${Date.now()}-${Math.random()}` };
+            if (nextCurrent.powers['MASTER_REALITY']) copy = getUpgradedCard(copy);
+            nextCurrent.hand.push(copy);
+            addLog(`${copy.name}をコピーした`);
+        };
+        if (matchesCardName('カンニング', 'HOLOGRAM')) {
+            const pool = nextCurrent.hand.filter(c => c.id !== card.id && c.type === CardType.ATTACK);
+            if (pool.length > 0) addCopy(pool[Math.floor(Math.random() * pool.length)]);
+        }
+        if (matchesCardName('お人形遊び', 'GIRLS_DOLL_HOUSE')) {
+            const pool = nextCurrent.hand.filter(c => c.id !== card.id && c.type === CardType.SKILL);
+            if (pool.length > 0) addCopy(pool[Math.floor(Math.random() * pool.length)]);
+        }
+        if (matchesCardName('二刀流', 'DUAL_WIELD')) {
+            const pool = nextCurrent.hand.filter(c => c.id !== card.id && (c.type === CardType.ATTACK || c.type === CardType.POWER));
+            if (pool.length > 0) {
+                const pick = pool[Math.floor(Math.random() * pool.length)];
+                addCopy(pick);
+                addCopy(pick);
+            }
+        }
+        if (matchesCardName('フォークダンス', 'PE_DANCE')) {
+            const pool = nextCurrent.hand.filter(c => c.id !== card.id);
+            if (pool.length > 0) {
+                const pick = pool[Math.floor(Math.random() * pool.length)];
+                addCopy(pick);
+                const discardPool = nextCurrent.hand.filter(c => c.id !== pick.id);
+                if (discardPool.length > 0) {
+                    const toss = discardPool[Math.floor(Math.random() * discardPool.length)];
+                    nextCurrent.hand = nextCurrent.hand.filter(c => c.id !== toss.id);
+                    nextCurrent.discardPile.push(toss);
+                    addLog(`フォークダンス: 「${toss.name}」を捨てた`);
+                }
+            }
+        }
+        if (matchesCardName('鏡 (星新一)', 'KAGAMI_HOSHI')) {
+            const pool = nextCurrent.hand.filter(c => c.id !== card.id);
+            if (pool.length > 0) {
+                addCopy(pool[Math.floor(Math.random() * pool.length)]);
+                nextCurrent = applyDebuff(nextCurrent, 'VULNERABLE', 1);
+                addLog('鏡: 自分にびくびく1（反動）');
+            }
+        }
+        if (matchesCardName('きてんの窓', 'KITSUNE_NO_MADO')) {
+            const hiCost = nextCurrent.hand.filter(c => c.id !== card.id && c.cost >= 2);
+            const pool = hiCost.length > 0 ? hiCost : nextCurrent.hand.filter(c => c.id !== card.id);
+            if (pool.length > 0) {
+                const pick = pool[Math.floor(Math.random() * pool.length)];
+                const copy = { ...pick, cost: 0 };
+                addCopy(copy);
+                addLog('きてんの窓: 高コスト優先コピーを0コスト化');
+            }
+        }
+
+        // 高優先: エナジー獲得系の差別化
+        if (matchesCardName('覚醒のコーヒー', 'AWAKE_COFFEE')) {
+            drawCards(nextCurrent, 1);
+            nextCurrent.currentHp = Math.max(0, nextCurrent.currentHp - 1);
+            addLog('覚醒のコーヒー: 1ドロー（反動でHP-1）');
+        }
+        if (matchesCardName('産業革命', 'SYAKAI_REVOLUTION')) {
+            nextCurrent.currentEnergy = Math.max(0, nextCurrent.currentEnergy - 1);
+            nextCurrent.nextTurnEnergy += 1;
+            drawCards(nextCurrent, 1);
+            addLog('産業革命: Eを来ターンへ分割し1ドロー');
+        }
+
+        // 中優先: びくびく付与系の差別化
+        if (card.id === 'RIKA_MICROSCOPE') {
+            nextCurrent.nextTurnDraw += 1;
+            addLog('顕微鏡: 次ターン1ドロー');
+        }
+        if (card.id === 'GIRLS_SPARKLE_DUST') {
+            nextTarget = applyDebuff(nextTarget, 'WEAK', 1);
+            addLog('キラキラの粉: へろへろ1を追加');
+        }
+        if (card.id === 'TRIP') {
+            nextCurrent.block += 3;
+            addLog('足払い: ブロック3を獲得');
+        }
+        if (card.id === 'JACHI_BOGYAKU') {
+            drawCards(nextCurrent, 1);
+            addLog('邪智暴虐: 1ドロー');
+        }
+
+        // 中優先: 全体多段/連撃系の差別化
+        if (card.id === 'ISSUN_BOSHI') {
+            nextCurrent.block += 3;
+            addLog('一寸法師: 連撃後にブロック3');
+        }
+        if (card.id === 'PE_JUMP') {
+            nextCurrent.currentHp = Math.max(0, nextCurrent.currentHp - 1);
+            addLog('縄跳び: 反動でHP-1');
+        }
+        if (card.id === 'GIRLS_CANDY_SHOWER') {
+            nextTarget = applyDebuff(nextTarget, 'WEAK', 1);
+            addLog('飴玉の嵐: へろへろ1を付与');
+        }
+        if (card.id === 'SWORD_BOOMERANG') {
+            nextCurrent.currentEnergy += 1;
+            addLog('ブーメラン: エネルギー+1');
+        }
+
+        // 中優先: ブロック+ドロー系の差別化
+        if (card.id === 'KAIKETSU_ZORORI') {
+            nextCurrent.block += 3;
+            addLog('かいけつゾロリ: ブロック3');
+        }
+        if (card.id === 'ACROBATICS') {
+            nextCurrent.block += 2;
+            addLog('側転: ブロック2');
+        }
+        if (card.id === 'BOYS_MECHA_DIVE') {
+            const pool = nextCurrent.hand.filter(c => c.id !== card.id);
+            if (pool.length > 0) {
+                const pick = pool[Math.floor(Math.random() * pool.length)];
+                pick.cost = 0;
+                addLog(`電脳世界へのダイブ: 「${pick.name}」を0コスト化`);
+            }
+        }
+        if (card.id === 'OUT_HIDDEN_SHORTCUT' && nextCurrent.drawPile.length > 0) {
+            const hiCost = nextCurrent.drawPile.filter(c => c.cost >= 2);
+            const pool = hiCost.length > 0 ? hiCost : nextCurrent.drawPile;
+            const pick = pool[Math.floor(Math.random() * pool.length)];
+            nextCurrent.drawPile = nextCurrent.drawPile.filter(c => c.id !== pick.id);
+            nextCurrent.hand.push({ ...pick, cost: 0 });
+            addLog(`秘密の近道: 「${pick.name}」を0コストで手札へ`);
         }
         
         if (card.draw) {
