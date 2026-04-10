@@ -306,7 +306,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     player, companions = [], coopSelfPeerId, coopEffectOwnerPeerId, coopTurnQueue = [], coopCanAct = true, coopTurnOwnerLabel, coopSupportCards = [], onUseCoopSupport, selfDown = false, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onPlaySynthesizedCard, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
     selectionState, onHandSelection, onCancelSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect, parryState, onParry, activeEffects, finisherCutinCard, hideEnemyIntents = false
 }) => {
-    const shouldRenderPlayerScopedVfxOnSelf = !coopEffectOwnerPeerId || !coopSelfPeerId || coopEffectOwnerPeerId === coopSelfPeerId;
+    const isCoopBattleView = !!coopSelfPeerId || companions.length > 0;
+    const shouldRenderPlayerScopedVfxOnSelf = isCoopBattleView
+        ? !!coopSelfPeerId && !!coopEffectOwnerPeerId && coopEffectOwnerPeerId === coopSelfPeerId
+        : true;
 
     const [lastVisibleEnemies, setLastVisibleEnemies] = useState<Enemy[]>([]);
     const [selectedSupportCard, setSelectedSupportCard] = useState<CoopSupportCard | null>(null);
