@@ -209,12 +209,7 @@ const CHALLENGE_SCREEN_SET = new Set<GameScreen>([
 ]);
 
 const COOP_DECISION_HUD_SCREEN_SET = new Set<GameScreen>([
-    GameScreen.CHARACTER_SELECTION,
-    GameScreen.MAP,
-    GameScreen.EVENT,
-    GameScreen.REST,
-    GameScreen.SHOP,
-    GameScreen.REWARD
+    GameScreen.MAP
 ]);
 
 const COOP_PARTY_HUD_SCREEN_SET = new Set<GameScreen>([
@@ -226,7 +221,8 @@ const COOP_PARTY_HUD_SCREEN_SET = new Set<GameScreen>([
     GameScreen.EVENT,
     GameScreen.REST,
     GameScreen.SHOP,
-    GameScreen.REWARD
+    GameScreen.REWARD,
+    GameScreen.TREASURE
 ]);
 
 const COOP_LOCAL_SETUP_SCREEN_SET = new Set<GameScreen>([
