@@ -859,11 +859,14 @@ const App: React.FC = () => {
     }, [coopSession, coopSelfPeerId]);
     const coopEffectOwnerPeerId = useMemo(() => {
         if (gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.BATTLE || !gameState.coopBattleState) return null;
+        if (gameState.coopBattleState.battleMode === 'REALTIME') {
+            return coopSelfPeerId || null;
+        }
         const activeTurn = gameState.coopBattleState.turnQueue[gameState.coopBattleState.turnCursor];
         if (!activeTurn) return null;
         if ((activeTurn.type === 'PLAYER' || activeTurn.type === 'ALLY') && activeTurn.peerId) return activeTurn.peerId;
         return null;
-    }, [gameState.challengeMode, gameState.coopBattleState, gameState.screen]);
+    }, [coopSelfPeerId, gameState.challengeMode, gameState.coopBattleState, gameState.screen]);
     const coopDecisionOwner = useMemo(() => {
         if (!coopSession || coopSession.participants.length === 0) return null;
         return coopSession.participants[coopSession.decisionOwnerIndex] || coopSession.participants[0] || null;
@@ -6706,7 +6709,12 @@ const App: React.FC = () => {
     useEffect(() => { stateRef.current = gameState; }, [gameState]);
 
     const resolveBattleVictory = useCallback(() => {
-        audioService.stopBGM();
+        const shouldKeepBattleBgm =
+            stateRef.current.challengeMode === 'COOP' &&
+            stateRef.current.coopBattleState?.battleMode === 'REALTIME';
+        if (!shouldKeepBattleBgm) {
+            audioService.stopBGM();
+        }
         audioService.playSound('win');
         setGameState(prev => {
             const nextPlayer = buildPostBattlePlayer(prev.player, true);
@@ -8463,13 +8471,18 @@ const App: React.FC = () => {
                 if (data.battleState && coopSelfPeerId) {
                     const selfBattlePlayer = data.battleState.players.find(entry => entry.peerId === coopSelfPeerId);
                     if (selfBattlePlayer) {
+                        const isRealtimeRound =
+                            data.battleState?.battleMode === 'REALTIME' &&
+                            data.battleState?.turnQueue[data.battleState.turnCursor]?.type !== 'ENEMY';
+                        const shouldPreserveLocalPlayer =
+                            !!pendingQueuedBattleEvent &&
+                            (
+                                isRealtimeRound ||
+                                data.battleState?.turnQueue[data.battleState.turnCursor]?.peerId === coopSelfPeerId
+                            );
                         setGameState(prev => ({
                             ...prev,
-                            player: (
-                                pendingQueuedBattleEvent &&
-                                data.battleState?.turnQueue[data.battleState.turnCursor]?.type !== 'ENEMY' &&
-                                data.battleState?.turnQueue[data.battleState.turnCursor]?.peerId === coopSelfPeerId
-                            )
+                            player: shouldPreserveLocalPlayer
                                 ? prev.player
                                 : selfBattlePlayer.player,
                             enemies: data.enemies ?? prev.enemies,
