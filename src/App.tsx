@@ -6706,9 +6706,12 @@ const App: React.FC = () => {
     const stateRef = useRef(gameState);
     const lastPlayedCardRef = useRef<ICard | null>(null);
     const victorySequenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const battleVictoryResolvingRef = useRef(false);
     useEffect(() => { stateRef.current = gameState; }, [gameState]);
 
     const resolveBattleVictory = useCallback(() => {
+        if (battleVictoryResolvingRef.current) return;
+        battleVictoryResolvingRef.current = true;
         const shouldKeepBattleBgm =
             stateRef.current.challengeMode === 'COOP' &&
             stateRef.current.coopBattleState?.battleMode === 'REALTIME';
@@ -6747,6 +6750,9 @@ const App: React.FC = () => {
     }, [coopSelfPeerId, coopSession, selectedCharName]);
 
     useEffect(() => {
+        if (gameState.screen !== GameScreen.BATTLE) {
+            battleVictoryResolvingRef.current = false;
+        }
         if (gameState.screen === GameScreen.BATTLE) {
             if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
                 return;
