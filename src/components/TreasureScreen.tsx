@@ -85,8 +85,8 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-gray-900 text-white relative items-center justify-center p-8">
-      <div className="z-10 flex flex-col items-center text-center">
+    <div className="flex flex-col h-full w-full overflow-y-auto bg-gray-900 text-white relative items-center justify-start sm:justify-center p-4 sm:p-8">
+      <div className="z-10 flex w-full max-w-5xl flex-col items-center text-center py-4 sm:py-0">
 
           {isPoolMode ? (
               <>
