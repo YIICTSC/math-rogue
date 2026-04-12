@@ -121,6 +121,7 @@ const createCoopSupportInstance = (card: CoopSupportCard): CoopSupportCard => ({
 const shouldClearAllCardRewards = (item: RewardItem) => item.type === 'CARD';
 const LEGACY_VERCEL_HOST = 'math-rogue.vercel.app';
 const PRIMARY_SITE_URL = 'https://yiictsc.github.io/math-rogue/';
+const COOP_VFX_DEBUG_STORAGE_KEY = 'mr.coopVfxDebug';
 
 type GalaxyExpressModalState = {
     cards: ICard[];
@@ -142,6 +143,13 @@ type RelicCardChoiceModalState = {
 type DataTransferStatus = {
     type: 'success' | 'error' | 'info';
     message: string;
+};
+
+type CoopVfxDebugEntry = {
+    ts: number;
+    role: 'HOST' | 'GUEST';
+    kind: 'CARD' | 'VFX' | 'LAG';
+    detail: string;
 };
 
 const compareRaceEntries = (a: RaceEntry, b: RaceEntry) => {
@@ -701,6 +709,12 @@ const App: React.FC = () => {
     const [coopBattleQueue, setCoopBattleQueue] = useState<CoopBattleTurnSlot[]>([]);
     const [coopBattleKey, setCoopBattleKey] = useState<string | null>(null);
     const [coopEnemyTurnCursor, setCoopEnemyTurnCursor] = useState(0);
+    const isCoopVfxDebugEnabled = useMemo(() => {
+        if (typeof window === 'undefined') return false;
+        const queryEnabled = new URLSearchParams(window.location.search).get('coopVfxDebug') === '1';
+        const storageEnabled = window.localStorage.getItem(COOP_VFX_DEBUG_STORAGE_KEY) === '1';
+        return queryEnabled || storageEnabled;
+    }, []);
     const prevScreenRef = useRef<GameScreen>(GameScreen.START_MENU);
     const coopRewardScreenRef = useRef<GameScreen>(GameScreen.START_MENU);
     const raceToastTimerRef = useRef<number | null>(null);
@@ -711,6 +725,10 @@ const App: React.FC = () => {
     const coopPendingVoiceSyncRef = useRef<boolean | null>(null);
     const coopRemoteFinisherShownAtRef = useRef<number | null>(null);
     const coopRemoteFinisherClearTimerRef = useRef<number | null>(null);
+    const coopLastBattleCardEventAtRef = useRef<number | null>(null);
+    const coopObservedEffectIdsRef = useRef<Set<string>>(new Set());
+    const coopVfxDebugLogRef = useRef<CoopVfxDebugEntry[]>([]);
+    const coopChainTrackerRef = useRef<{ lastActorPeerId: string | null; lastAt: number; chainCount: number }>({ lastActorPeerId: null, lastAt: 0, chainCount: 0 });
     const queuedCoopBattleEventRef = useRef<{ type: 'COOP_BATTLE_PLAY_CARD' | 'COOP_BATTLE_USE_POTION' | 'COOP_BATTLE_TURN_START' | 'COOP_BATTLE_SELECTION_STATE' | 'COOP_BATTLE_MODAL_RESOLVE' | 'COOP_BATTLE_CODEX_SELECT', cardId?: string, potionId?: string, playedCard?: ICard } | null>(null);
     const [queuedCoopBattleEventTick, setQueuedCoopBattleEventTick] = useState(0);
     const coopMapPendingTimerRef = useRef<number | null>(null);
@@ -734,6 +752,65 @@ const App: React.FC = () => {
             }
         };
     }, []);
+    const appendCoopVfxDebugLog = useCallback((kind: CoopVfxDebugEntry['kind'], detail: string) => {
+        if (!isCoopVfxDebugEnabled || typeof window === 'undefined') return;
+        const role: CoopVfxDebugEntry['role'] = coopSession?.isHost ? 'HOST' : 'GUEST';
+        const nextEntry: CoopVfxDebugEntry = { ts: Date.now(), role, kind, detail };
+        const nextLog = [...coopVfxDebugLogRef.current, nextEntry].slice(-120);
+        coopVfxDebugLogRef.current = nextLog;
+        (window as any).__MR_COOP_VFX_DEBUG__ = {
+            logs: nextLog,
+            latest: nextEntry,
+            lagCount: nextLog.filter((entry: CoopVfxDebugEntry) => entry.kind === 'LAG').length,
+            clear: () => {
+                coopVfxDebugLogRef.current = [];
+                (window as any).__MR_COOP_VFX_DEBUG__.logs = [];
+                (window as any).__MR_COOP_VFX_DEBUG__.latest = null;
+                (window as any).__MR_COOP_VFX_DEBUG__.lagCount = 0;
+            }
+        };
+    }, [coopSession?.isHost, isCoopVfxDebugEnabled]);
+    const registerCoopChain = useCallback((actorPeerId: string) => {
+        const now = Date.now();
+        const tracker = coopChainTrackerRef.current;
+        const isWithinWindow = (now - tracker.lastAt) <= 2600;
+        const isAlternating = tracker.lastActorPeerId !== null && tracker.lastActorPeerId !== actorPeerId;
+        const nextChainCount = (isWithinWindow && isAlternating) ? tracker.chainCount + 1 : 1;
+        coopChainTrackerRef.current = {
+            lastActorPeerId: actorPeerId,
+            lastAt: now,
+            chainCount: nextChainCount
+        };
+        return nextChainCount;
+    }, []);
+    useEffect(() => {
+        if (gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.BATTLE) {
+            coopObservedEffectIdsRef.current.clear();
+            return;
+        }
+        if (!isCoopVfxDebugEnabled) return;
+
+        const roleLabel = coopSession?.isHost ? 'HOST' : 'GUEST';
+        const now = Date.now();
+        const seenIds = coopObservedEffectIdsRef.current;
+        const newEffects = gameState.activeEffects.filter(effect => !seenIds.has(effect.id));
+        if (newEffects.length === 0) return;
+
+        newEffects.forEach(effect => seenIds.add(effect.id));
+        const sinceLastCardEventMs = coopLastBattleCardEventAtRef.current
+            ? Math.max(0, now - coopLastBattleCardEventAtRef.current)
+            : null;
+        const summary = newEffects
+            .map(effect => `${effect.type}:${effect.targetId}`)
+            .join(', ');
+        console.log(`[COOP_VFX_DEBUG] ${roleLabel} ${newEffects.length} effect(s) +${sinceLastCardEventMs ?? 'n/a'}ms :: ${summary}`);
+        appendCoopVfxDebugLog('VFX', `${newEffects.length} effect(s) +${sinceLastCardEventMs ?? 'n/a'}ms :: ${summary}`);
+        if (sinceLastCardEventMs !== null && sinceLastCardEventMs > 300) {
+            const lagMessage = `lag>${sinceLastCardEventMs}ms (${summary})`;
+            console.warn(`[COOP_VFX_DEBUG] ${roleLabel} ${lagMessage}`);
+            appendCoopVfxDebugLog('LAG', lagMessage);
+        }
+    }, [appendCoopVfxDebugLog, coopSession?.isHost, gameState.activeEffects, gameState.challengeMode, gameState.screen, isCoopVfxDebugEnabled]);
     const clearCoopMapPending = useCallback(() => {
         setCoopMapPendingNodeId(null);
         if (coopMapPendingTimerRef.current) {
@@ -4174,6 +4251,16 @@ const App: React.FC = () => {
         audioService.playSound(card.type === CardType.ATTACK ? 'attack' : 'block');
         setLastActionType(card.type);
         setLastActionTime(Date.now());
+        const localCoopChainCount = (gameState.challengeMode === 'COOP' && coopSession?.isHost && coopSelfPeerId)
+            ? registerCoopChain(coopSelfPeerId)
+            : 0;
+        if (gameState.challengeMode === 'COOP') {
+            coopLastBattleCardEventAtRef.current = Date.now();
+            appendCoopVfxDebugLog('CARD', `local:${card.name}`);
+            if (localCoopChainCount >= 2) {
+                appendCoopVfxDebugLog('CARD', `chain:x${localCoopChainCount}`);
+            }
+        }
         lastPlayedCardRef.current = card;
         if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
             queueCoopBattleEvent({ type: 'COOP_BATTLE_PLAY_CARD', cardId: card.id, playedCard: { ...card } });
@@ -4192,6 +4279,10 @@ const App: React.FC = () => {
             const additionalResult = applyAdditionalCardLogic(card, p, enemies, languageMode, currentLogs, nextActiveEffects);
             Object.assign(p, additionalResult.player);
             enemies = additionalResult.enemies;
+            if (localCoopChainCount >= 2) {
+                currentLogs.push(`🤝 連携 x${localCoopChainCount}！`);
+                nextActiveEffects.push({ id: `vfx-coop-chain-${Date.now()}`, type: 'FLASH', targetId: 'player' });
+            }
 
             const isGalaxyExpressCard =
                 card.name === '銀河鉄道の夜' ||
@@ -8109,6 +8200,10 @@ const App: React.FC = () => {
         if (!activeTurn || activeTurn.type === 'ENEMY' || (!isRealtimeTurn && activeTurn.peerId !== fromPeerId)) {
             return;
         }
+        const remoteCoopChainCount = (payload.cardId || payload.playedCard) ? registerCoopChain(fromPeerId) : 0;
+        if (remoteCoopChainCount >= 2) {
+            appendCoopVfxDebugLog('CARD', `chain:x${remoteCoopChainCount}`);
+        }
         upsertCoopPlayerSnapshot(fromPeerId, payload.player);
         const nextBattleState = payload.battleState
             ? {
@@ -8129,13 +8224,23 @@ const App: React.FC = () => {
                     )
                 }
                 : null;
-        setGameState(prev => ({
-            ...prev,
-            enemies: payload.enemies ?? prev.enemies,
-            selectedEnemyId: payload.selectedEnemyId ?? prev.selectedEnemyId,
-            combatLog: payload.combatLog ?? prev.combatLog,
-            coopBattleState: nextBattleState ?? prev.coopBattleState
-        }));
+        setGameState(prev => {
+            const baseLog = payload.combatLog ?? prev.combatLog;
+            const nextCombatLog = remoteCoopChainCount >= 2
+                ? [...baseLog, `🤝 連携 x${remoteCoopChainCount}！`].slice(-100)
+                : baseLog;
+            const nextEffects = remoteCoopChainCount >= 2
+                ? [...prev.activeEffects, { id: `vfx-coop-chain-${Date.now()}`, type: 'FLASH', targetId: 'player' as const }]
+                : prev.activeEffects;
+            return {
+                ...prev,
+                enemies: payload.enemies ?? prev.enemies,
+                selectedEnemyId: payload.selectedEnemyId ?? prev.selectedEnemyId,
+                combatLog: nextCombatLog,
+                activeEffects: nextEffects,
+                coopBattleState: nextBattleState ?? prev.coopBattleState
+            };
+        });
         if (payload.turnLog !== undefined) setTurnLog(payload.turnLog);
         if (payload.actingEnemyId !== undefined) setActingEnemyId(payload.actingEnemyId ?? null);
         setCoopBattleState(nextBattleState);
@@ -8206,7 +8311,7 @@ const App: React.FC = () => {
         } else if (nextBattleState) {
             broadcastCoopBattleState(nextBattleState);
         }
-    }, [battleFinisherCutinCard, broadcastCoopBattleState, executeQueuedTurnTransition, gameState.coopBattleState, resolveBattleVictory, setCoopBattleState, upsertCoopPlayerSnapshot]);
+    }, [appendCoopVfxDebugLog, battleFinisherCutinCard, broadcastCoopBattleState, executeQueuedTurnTransition, gameState.coopBattleState, registerCoopChain, resolveBattleVictory, setCoopBattleState, upsertCoopPlayerSnapshot]);
     useEffect(() => {
         if (!coopSession || gameState.challengeMode !== 'COOP' || gameState.screen === GameScreen.COOP_SETUP) return;
 
@@ -8539,6 +8644,8 @@ const App: React.FC = () => {
             }
 
             if (data.type === 'COOP_BATTLE_PLAY_CARD' && coopSession.isHost && fromPeerId && gameState.screen === GameScreen.BATTLE) {
+                coopLastBattleCardEventAtRef.current = Date.now();
+                appendCoopVfxDebugLog('CARD', `remote:${data.playedCard?.name ?? data.cardId}`);
                 applyHostCoopBattleSnapshot(fromPeerId, data);
                 return;
             }
