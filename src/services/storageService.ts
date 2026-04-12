@@ -845,6 +845,11 @@ export const storageService = {
   // --- Game State (Save/Load) ---
   saveGame: (state: GameState) => {
     try {
+      // Coop setup / coop run data should never appear as "continue".
+      // Those sessions depend on live peer connections and are not resumable from local save data.
+      if (state.screen === GameScreen.COOP_SETUP || state.challengeMode === 'COOP') {
+        return;
+      }
       // Don't save if we are on transient screens OR mini-games
       // Title screen resume should only work for the main game
       const transientOrMini = [
