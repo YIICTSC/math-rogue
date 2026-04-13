@@ -15,6 +15,8 @@ class AudioService {
   
   // BGM Mode: Default to STUDY
   private bgmMode: 'OSCILLATOR' | 'MP3' | 'STUDY' = 'STUDY';
+  private bgmVolume: number = 0.4;
+  private sfxVolume: number = 0.6;
   private audioBuffers: Record<string, AudioBuffer> = {};
   private sfxBuffers: Record<string, AudioBuffer> = {};
   private currentSource: AudioBufferSourceNode | null = null;
@@ -82,12 +84,12 @@ class AudioService {
 
     // BGM Bus
     this.bgmGain = this.ctx.createGain();
-    this.bgmGain.gain.value = 0.4;
+    this.bgmGain.gain.value = this.bgmVolume;
     this.bgmGain.connect(this.masterGain);
 
     // SFX Bus
     this.sfxGain = this.ctx.createGain();
-    this.sfxGain.gain.value = 0.6;
+    this.sfxGain.gain.value = this.sfxVolume;
     this.sfxGain.connect(this.masterGain);
 
     // Create Noise Buffer for Percussion
@@ -114,6 +116,28 @@ class AudioService {
 
   public getBgmMode() {
       return this.bgmMode;
+  }
+
+  public setBgmVolume(volume: number) {
+      this.bgmVolume = Math.max(0, Math.min(1, volume));
+      if (this.bgmGain && this.ctx) {
+          this.bgmGain.gain.setTargetAtTime(this.bgmVolume, this.ctx.currentTime, 0.05);
+      }
+  }
+
+  public getBgmVolume() {
+      return this.bgmVolume;
+  }
+
+  public setSfxVolume(volume: number) {
+      this.sfxVolume = Math.max(0, Math.min(1, volume));
+      if (this.sfxGain && this.ctx) {
+          this.sfxGain.gain.setTargetAtTime(this.sfxVolume, this.ctx.currentTime, 0.05);
+      }
+  }
+
+  public getSfxVolume() {
+      return this.sfxVolume;
   }
 
   public getBgmTrackList() {
@@ -812,7 +836,7 @@ class AudioService {
           } catch {}
       }
       this.sfxGain = this.ctx.createGain();
-      this.sfxGain.gain.value = 0.6;
+      this.sfxGain.gain.value = this.sfxVolume;
       this.sfxGain.connect(this.masterGain);
   }
 

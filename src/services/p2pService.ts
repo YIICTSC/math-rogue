@@ -276,6 +276,7 @@ class P2PService {
     private remoteAudioElements: Map<string, HTMLAudioElement> = new Map();
     private localStream: MediaStream | null = null;
     private voiceEnabled = false;
+    private voiceConstraints: MediaTrackConstraints = { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
     private myId: string | null = null;
 
     public onConnect: ((conn: DataConnection) => void) | null = null;
@@ -430,7 +431,7 @@ class P2PService {
         if (!navigator?.mediaDevices?.getUserMedia) {
             throw new Error('この環境では音声入力が利用できません');
         }
-        this.localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        this.localStream = await navigator.mediaDevices.getUserMedia({ audio: this.voiceConstraints, video: false });
         this.localStream.getAudioTracks().forEach(track => {
             track.enabled = this.voiceEnabled;
         });
@@ -530,6 +531,28 @@ class P2PService {
             } catch (err) {
                 console.warn(`Failed to start voice chat with ${peerId}:`, err);
             }
+        }
+    }
+
+    public async configureVoice(options: {
+        deviceId?: string;
+        echoCancellation?: boolean;
+        noiseSuppression?: boolean;
+        autoGainControl?: boolean;
+    }) {
+        this.voiceConstraints = {
+            ...this.voiceConstraints,
+            ...(typeof options.echoCancellation === 'boolean' ? { echoCancellation: options.echoCancellation } : {}),
+            ...(typeof options.noiseSuppression === 'boolean' ? { noiseSuppression: options.noiseSuppression } : {}),
+            ...(typeof options.autoGainControl === 'boolean' ? { autoGainControl: options.autoGainControl } : {}),
+            ...(options.deviceId ? { deviceId: { exact: options.deviceId } } : { deviceId: undefined })
+        };
+        if (this.localStream) {
+            this.localStream.getTracks().forEach(track => track.stop());
+            this.localStream = null;
+        }
+        if (this.voiceEnabled) {
+            await this.setVoiceEnabled(true);
         }
     }
 }

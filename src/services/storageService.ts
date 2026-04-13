@@ -51,6 +51,7 @@ const STORAGE_KEY_BGM_MODE = 'pixel_spire_bgm_mode_v1';
 
 // --- LANGUAGE MODE FLAG ---
 const STORAGE_KEY_LANGUAGE_MODE = 'pixel_spire_language_mode_v1';
+const STORAGE_KEY_APP_SETTINGS = 'pixel_spire_app_settings_v1';
 
 // --- PLAY TIME ---
 const STORAGE_KEY_TOTAL_PLAY_TIME = 'pixel_spire_total_play_time_v1';
@@ -732,6 +733,24 @@ export const storageService = {
     localStorage.setItem(STORAGE_KEY_LANGUAGE_MODE, mode);
   },
 
+  getAppSettings: <T>() : T | null => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_APP_SETTINGS);
+      if (!stored) return null;
+      return JSON.parse(stored) as T;
+    } catch {
+      return null;
+    }
+  },
+
+  saveAppSettings: <T>(settings: T) => {
+    try {
+      localStorage.setItem(STORAGE_KEY_APP_SETTINGS, JSON.stringify(settings));
+    } catch (e) {
+      console.warn('Failed to save app settings', e);
+    }
+  },
+
   // --- Play Time Management ---
   getTotalPlayTime: (): number => {
     try {
@@ -987,6 +1006,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_ENGLISH_VOICE);
       localStorage.removeItem(STORAGE_KEY_BGM_MODE);
       localStorage.removeItem(STORAGE_KEY_LANGUAGE_MODE);
+      localStorage.removeItem(STORAGE_KEY_APP_SETTINGS);
       localStorage.removeItem(STORAGE_KEY_TOTAL_PLAY_TIME);
       localStorage.removeItem(STORAGE_KEY_DAILY_PLAY_TIME);
       localStorage.removeItem(STORAGE_KEY_MODE_CORRECT_COUNTS);
