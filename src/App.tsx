@@ -1235,25 +1235,20 @@ const App: React.FC = () => {
         }
         const queue = coopBattleState.turnQueue;
         const currentCursor = coopBattleState.turnCursor;
-        const aliveEnemyCount = gameState.enemies.filter(enemy => enemy.currentHp > 0 || (enemy.enemyType === 'THE_HEART' && enemy.phase === 1)).length;
-        const immediateNextCursor = (currentCursor + 1) % queue.length;
-        const immediateNextSlot = queue[immediateNextCursor];
-        let enemyActions = 0;
-        let nextCursor = immediateNextCursor;
-
-        if (immediateNextSlot?.type === 'ENEMY' || queue[currentCursor]?.type === 'ENEMY') {
-            enemyActions = aliveEnemyCount;
-            nextCursor = immediateNextCursor;
-            for (let offset = 1; offset <= queue.length; offset++) {
-                const index = (immediateNextCursor + offset) % queue.length;
-                if (queue[index]?.type !== 'ENEMY') {
-                    nextCursor = index;
-                    break;
-                }
+        let enemyActions = queue[currentCursor]?.type === 'ENEMY' ? 1 : 0;
+        let nextCursor = currentCursor;
+        for (let offset = 1; offset <= queue.length; offset++) {
+            const index = (currentCursor + offset) % queue.length;
+            const slot = queue[index];
+            if (slot.type === 'ENEMY') {
+                enemyActions++;
+                continue;
             }
+            nextCursor = index;
+            break;
         }
         return { enemyActions, nextCursor };
-    }, [coopBattleState, gameState.enemies]);
+    }, [coopBattleState]);
     const getAliveCoopCompanions = useCallback(() => {
         if (!coopSession) return [];
         return coopSession.participants.filter(participant => participant.peerId !== coopSelfPeerId && (participant.currentHp ?? participant.maxHp ?? 0) > 0);
