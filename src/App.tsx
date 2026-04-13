@@ -44,6 +44,7 @@ import P2PVSBattleScene from './components/P2PVSBattleScene';
 import P2PRaceSetup from './components/P2PRaceSetup';
 import CoopSetupScreen, { CoopParticipantPayload, CoopStartPayload } from './components/CoopSetupScreen';
 import ModeSelectionScreen from './components/ModeSelectionScreen';
+import SettingsModal, { AppSettings, SettingsTab } from './components/SettingsModal';
 import Card from './components/Card';
 import { audioService } from './services/audioService';
 import { generateFlavorText, generateEnemyName } from './services/geminiService';
@@ -52,7 +53,7 @@ import { storageService } from './services/storageService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { trans } from './utils/textUtils';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Wifi, Flag, Keyboard, Users, Mic, MicOff } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Wifi, Flag, Keyboard, Users, Mic, MicOff, Settings } from 'lucide-react';
 import { applyAdditionalCardLogic } from './services/cardEffectLogic';
 import { p2pService } from './services/p2pService';
 import { TypingLessonId } from './data/typingLessonConfig';
@@ -195,6 +196,35 @@ const EMPTY_RACE_EFFECTS: RaceEffectState = {
     rewardDummyCount: 0,
     forgottenHomeworkCount: 0,
     hideEnemyIntentsOnce: false
+};
+
+const DEFAULT_APP_SETTINGS: AppSettings = {
+    bgmMode: 'STUDY',
+    bgmVolume: 0.4,
+    seVolume: 0.6,
+    micEnabled: false,
+    micSensitivity: 0.5,
+    pushToTalk: false,
+    selectedInputDeviceId: '',
+    noiseSuppression: true,
+    echoCancellation: true,
+    autoGainControl: true,
+    remoteVoiceVolume: 1,
+    joinMuted: true,
+    networkMode: 'quality',
+    reduceScreenShake: false,
+    effectIntensity: 'mid',
+    fontSize: 'normal',
+    colorAssist: false,
+    keyLayout: 'default',
+    longPressMs: 500,
+    vibration: false,
+    readAloud: false,
+    emphasizeJudgeSE: false,
+    hintLevel: 'normal',
+    parentLockEnabled: false,
+    parentPin: '',
+    lowDataMode: false
 };
 
 const RACE_TRICK_SCREEN_SET = new Set<GameScreen>([
@@ -605,7 +635,7 @@ const App: React.FC = () => {
         syncMobilePortrait();
         window.addEventListener('resize', syncMobilePortrait);
         return () => window.removeEventListener('resize', syncMobilePortrait);
-    }, []);
+    }, [appSettings]);
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
@@ -654,6 +684,13 @@ const App: React.FC = () => {
     const [bgmMode, setBgmMode] = useState<'OSCILLATOR' | 'MP3' | 'STUDY'>(() => {
         const saved = storageService.getBgmMode() as 'OSCILLATOR' | 'MP3' | 'STUDY' | null;
         return saved || 'STUDY';
+    });
+    const [showSettingsModal, setShowSettingsModal] = useState(false);
+    const [settingsTab, setSettingsTab] = useState<SettingsTab>('AUDIO');
+    const [inputDevices, setInputDevices] = useState<MediaDeviceInfo[]>([]);
+    const [appSettings, setAppSettings] = useState<AppSettings>(() => {
+        const saved = storageService.getAppSettings<AppSettings>();
+        return { ...DEFAULT_APP_SETTINGS, ...(saved || {}) };
     });
     const [totalMathCorrect, setTotalMathCorrect] = useState<number>(0);
     const [nextThreshold, setNextThreshold] = useState<number | null>(null);
@@ -1056,6 +1093,13 @@ const App: React.FC = () => {
             return { ...prev, participants: nextParticipants };
         });
     }, []);
+    useEffect(() => {
+        if (gameState.challengeMode !== 'COOP') return;
+        if (!appSettings.joinMuted) return;
+        if (coopVoiceEnabled) {
+            setCoopVoiceEnabled(false);
+        }
+    }, [appSettings.joinMuted, gameState.challengeMode, coopVoiceEnabled]);
     useEffect(() => {
         if (gameState.challengeMode !== 'COOP' || !coopSession || !coopSelfPeerId) return;
         let cancelled = false;
@@ -2232,13 +2276,41 @@ const App: React.FC = () => {
         setIsDebugHpOne(storageService.getDebugHpOne());
         setTotalMathCorrect(storageService.getMathCorrectCount());
 
-        audioService.setBgmMode(bgmMode);
+        audioService.setBgmMode(appSettings.bgmMode);
+        audioService.setBgmVolume(appSettings.bgmVolume);
+        audioService.setSfxVolume(appSettings.seVolume);
 
         if (gameState.screen === GameScreen.START_MENU) {
             audioService.init();
             audioService.playBGM('menu');
         }
     }, []);
+
+    useEffect(() => {
+        storageService.saveAppSettings(appSettings);
+        audioService.setBgmVolume(appSettings.bgmVolume);
+        audioService.setSfxVolume(appSettings.seVolume);
+    }, [appSettings]);
+
+    useEffect(() => {
+        if (bgmMode === appSettings.bgmMode) return;
+        setBgmMode(appSettings.bgmMode);
+        audioService.setBgmMode(appSettings.bgmMode);
+        storageService.saveBgmMode(appSettings.bgmMode);
+    }, [appSettings.bgmMode, bgmMode]);
+
+    useEffect(() => {
+        const loadDevices = async () => {
+            if (!navigator.mediaDevices?.enumerateDevices) return;
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                setInputDevices(devices.filter(device => device.kind === 'audioinput'));
+            } catch {
+                setInputDevices([]);
+            }
+        };
+        loadDevices();
+    }, [showSettingsModal]);
 
     useEffect(() => {
         const next = UNLOCK_THRESHOLDS.find(t => t > totalMathCorrect);
@@ -2300,6 +2372,7 @@ const App: React.FC = () => {
         else nextMode = 'STUDY';
 
         setBgmMode(nextMode);
+        setAppSettings(prev => ({ ...prev, bgmMode: nextMode }));
         audioService.setBgmMode(nextMode);
         storageService.saveBgmMode(nextMode);
         audioService.playSound('select');
@@ -8888,10 +8961,72 @@ const App: React.FC = () => {
     };
 
     const miniGame = MINI_GAMES.find(g => g.screen === gameState.screen);
+    const showGlobalSettingsGear = gameState.screen === GameScreen.START_MENU || gameState.screen === GameScreen.MAP || gameState.screen === GameScreen.BATTLE;
+
+    const updateSetting = useCallback(<K extends keyof AppSettings>(key: K, value: AppSettings[K]) => {
+        setAppSettings(prev => ({ ...prev, [key]: value }));
+        if (key === 'bgmMode') {
+            const mode = value as AppSettings['bgmMode'];
+            setBgmMode(mode);
+            audioService.setBgmMode(mode);
+            storageService.saveBgmMode(mode);
+        }
+        if (key === 'micEnabled') {
+            const enabled = value as boolean;
+            setCoopVoiceEnabled(enabled);
+            p2pService.setVoiceEnabled(enabled).catch(() => undefined);
+        }
+        if (key === 'remoteVoiceVolume') {
+            const volume = Math.max(0, Math.min(1, value as number));
+            document.querySelectorAll('audio[data-peer-id]').forEach(element => {
+                (element as HTMLAudioElement).volume = volume;
+            });
+        }
+        if (key === 'selectedInputDeviceId' || key === 'echoCancellation' || key === 'noiseSuppression' || key === 'autoGainControl') {
+            const next = {
+                ...appSettings,
+                [key]: value
+            };
+            p2pService.configureVoice({
+                deviceId: next.selectedInputDeviceId || undefined,
+                echoCancellation: next.echoCancellation,
+                noiseSuppression: next.noiseSuppression,
+                autoGainControl: next.autoGainControl
+            }).catch(() => undefined);
+        }
+    }, []);
+
+    const resetAudioSettings = useCallback(() => {
+        setAppSettings(prev => ({
+            ...prev,
+            bgmMode: DEFAULT_APP_SETTINGS.bgmMode,
+            bgmVolume: DEFAULT_APP_SETTINGS.bgmVolume,
+            seVolume: DEFAULT_APP_SETTINGS.seVolume,
+            micEnabled: DEFAULT_APP_SETTINGS.micEnabled,
+            micSensitivity: DEFAULT_APP_SETTINGS.micSensitivity,
+            pushToTalk: DEFAULT_APP_SETTINGS.pushToTalk,
+            selectedInputDeviceId: DEFAULT_APP_SETTINGS.selectedInputDeviceId,
+            noiseSuppression: DEFAULT_APP_SETTINGS.noiseSuppression,
+            echoCancellation: DEFAULT_APP_SETTINGS.echoCancellation,
+            autoGainControl: DEFAULT_APP_SETTINGS.autoGainControl
+        }));
+        setCoopVoiceEnabled(false);
+        p2pService.setVoiceEnabled(false).catch(() => undefined);
+    }, []);
+
+    const resetAllSettings = useCallback(() => {
+        setAppSettings(DEFAULT_APP_SETTINGS);
+        setCoopVoiceEnabled(DEFAULT_APP_SETTINGS.micEnabled);
+        setBgmMode(DEFAULT_APP_SETTINGS.bgmMode);
+        audioService.setBgmMode(DEFAULT_APP_SETTINGS.bgmMode);
+        audioService.setBgmVolume(DEFAULT_APP_SETTINGS.bgmVolume);
+        audioService.setSfxVolume(DEFAULT_APP_SETTINGS.seVolume);
+        p2pService.setVoiceEnabled(DEFAULT_APP_SETTINGS.micEnabled).catch(() => undefined);
+    }, []);
 
     return (
-        <div className="w-full h-[100dvh] bg-black overflow-hidden">
-            <div className={`w-full h-full relative overflow-hidden bg-black crt-scanline ${raceEffects.upsideDownUntil > raceEffectNow ? 'scale-x-[-1]' : ''} ${raceEffects.deskShakeUntil > raceEffectNow ? 'animate-[race-desk-shake_0.18s_linear_infinite]' : ''}`}>
+        <div className={`w-full h-[100dvh] bg-black overflow-hidden ${appSettings.fontSize === 'large' ? 'text-[105%]' : ''}`}>
+            <div className={`w-full h-full relative overflow-hidden bg-black ${appSettings.lowDataMode ? '' : 'crt-scanline'} ${raceEffects.upsideDownUntil > raceEffectNow ? 'scale-x-[-1]' : ''} ${(raceEffects.deskShakeUntil > raceEffectNow && !appSettings.reduceScreenShake) ? 'animate-[race-desk-shake_0.18s_linear_infinite]' : ''}`}>
                 <style>{`
                     @keyframes race-desk-shake {
                         0% { transform: translate(0, 0); }
@@ -8902,6 +9037,16 @@ const App: React.FC = () => {
                         100% { transform: translate(0, 0); }
                     }
                 `}</style>
+
+                {showGlobalSettingsGear && (
+                    <button
+                        onClick={() => setShowSettingsModal(true)}
+                        className="absolute top-2 right-2 z-[10010] bg-black/60 hover:bg-black/85 text-white border border-white/50 p-2 rounded-lg shadow-lg"
+                        title="セッティング"
+                    >
+                        <Settings size={16} />
+                    </button>
+                )}
 
                 {showTimeLimitModal && (
                     <div className="fixed inset-0 z-[10000] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-300">
@@ -9025,13 +9170,6 @@ const App: React.FC = () => {
                         )}
 
                         <div className="absolute top-2 right-2 z-9999 flex gap-2">
-                            <button
-                                onClick={toggleBgmMode}
-                                className={`bg-black/50 hover:bg-black/80 text-white border border-white/50 px-2 py-1 rounded text-xs flex items-center shadow-lg transition-colors font-bold ${bgmMode !== 'OSCILLATOR' && bgmMode !== 'MP3' ? 'border-indigo-500 text-indigo-400' : (bgmMode === 'MP3' ? 'border-green-500 text-green-400' : '')}`}
-                            >
-                                <Music size={14} className="mr-1" />
-                                {trans(bgmMode === 'STUDY' ? 'BGM: 学習(SEのみ)' : (bgmMode === 'MP3' ? 'BGM: MP3' : 'BGM: 電子音'), languageMode)}
-                            </button>
                             <button
                                 onClick={toggleLanguage}
                                 className="bg-black/50 hover:bg-black/80 text-white border border-white/50 px-2 py-1 rounded text-xs flex items-center shadow-lg transition-colors font-bold"
@@ -10562,6 +10700,17 @@ const App: React.FC = () => {
                         </div>
                     </div>
                 )}
+                <SettingsModal
+                    open={showSettingsModal}
+                    tab={settingsTab}
+                    settings={appSettings}
+                    inputDevices={inputDevices}
+                    onClose={() => setShowSettingsModal(false)}
+                    onChangeTab={setSettingsTab}
+                    onChange={updateSetting}
+                    onResetAudio={resetAudioSettings}
+                    onResetAll={resetAllSettings}
+                />
             </div>
         </div>
     );
