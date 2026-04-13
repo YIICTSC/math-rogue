@@ -1656,7 +1656,9 @@ const App: React.FC = () => {
 
     useEffect(() => {
         if (gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.BATTLE || !coopSession || !coopSession.isHost) return;
-        const battleKey = `${gameState.currentMapNodeId ?? 'debug'}:${gameState.enemies.map(enemy => enemy.id).join('|')}`;
+        // Keep the coop battle identity stable for the whole encounter.
+        // Tying it to the alive-enemy list causes a full battle-state rebuild whenever an enemy dies.
+        const battleKey = `${gameState.currentMapNodeId ?? 'debug'}`;
         if (coopBattleState?.battleKey === battleKey) return;
 
         const playerSlots: CoopBattleTurnSlot[] = coopSession.participants.map(participant => ({
