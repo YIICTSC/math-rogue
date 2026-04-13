@@ -1236,16 +1236,21 @@ const App: React.FC = () => {
         const queue = coopBattleState.turnQueue;
         const currentCursor = coopBattleState.turnCursor;
         const aliveEnemyCount = gameState.enemies.filter(enemy => enemy.currentHp > 0 || (enemy.enemyType === 'THE_HEART' && enemy.phase === 1)).length;
-        let enemyActions = queue[currentCursor]?.type === 'ENEMY' ? aliveEnemyCount : 0;
-        let nextCursor = currentCursor;
-        for (let offset = 1; offset <= queue.length; offset++) {
-            const index = (currentCursor + offset) % queue.length;
-            const slot = queue[index];
-            if (slot.type === 'ENEMY') {
-                continue;
+        const immediateNextCursor = (currentCursor + 1) % queue.length;
+        const immediateNextSlot = queue[immediateNextCursor];
+        let enemyActions = 0;
+        let nextCursor = immediateNextCursor;
+
+        if (immediateNextSlot?.type === 'ENEMY' || queue[currentCursor]?.type === 'ENEMY') {
+            enemyActions = aliveEnemyCount;
+            nextCursor = immediateNextCursor;
+            for (let offset = 1; offset <= queue.length; offset++) {
+                const index = (immediateNextCursor + offset) % queue.length;
+                if (queue[index]?.type !== 'ENEMY') {
+                    nextCursor = index;
+                    break;
+                }
             }
-            nextCursor = index;
-            break;
         }
         return { enemyActions, nextCursor };
     }, [coopBattleState, gameState.enemies]);
