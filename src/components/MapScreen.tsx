@@ -1,7 +1,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { MapNode, NodeType, Player, LanguageMode } from '../types';
-import { Swords, Skull, BedDouble, ShoppingBag, HelpCircle, AlertTriangle, PlayCircle, Coins, Heart, Layers, X, Home, MessageSquare } from 'lucide-react';
+import { Swords, Skull, BedDouble, ShoppingBag, HelpCircle, AlertTriangle, PlayCircle, Coins, Heart, Layers, X, Home, MessageSquare, Settings } from 'lucide-react';
 import { MAP_WIDTH, MAP_HEIGHT } from '../services/mapGenerator';
 import Card from './Card';
 import { trans } from '../utils/textUtils';
@@ -11,6 +11,7 @@ interface MapScreenProps {
     currentNodeId: string | null;
     onNodeSelect: (node: MapNode) => void;
     onReturnToTitle: () => void;
+    onOpenSettings?: () => void;
     player: Player;
     languageMode: LanguageMode;
     narrative?: string;
@@ -22,7 +23,7 @@ interface MapScreenProps {
     selectionDisabledMessage?: string;
 }
 
-const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelect, onReturnToTitle, player, languageMode, narrative, act, floor, typingMode = false, selectionHoldMs = 0, selectionDisabled = false, selectionDisabledMessage }) => {
+const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelect, onReturnToTitle, onOpenSettings, player, languageMode, narrative, act, floor, typingMode = false, selectionHoldMs = 0, selectionDisabled = false, selectionDisabledMessage }) => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [showDeck, setShowDeck] = useState(false);
     const holdTimerRef = useRef<number | null>(null);
@@ -173,14 +174,25 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                     <div className="h-1 w-16 md:w-24 bg-gradient-to-r from-transparent via-yellow-500 to-transparent"></div>
                 </div>
 
-                <button
-                    onClick={() => setShowDeck(true)}
-                    className="flex items-center gap-1 md:gap-2 text-blue-300 border-2 border-blue-500/20 bg-blue-900/20 px-2 py-0.5 md:px-3 md:py-1 rounded hover:bg-blue-800/40 hover:border-blue-400 transition-all cursor-pointer group"
-                >
-                    <Layers size={14} className="md:size-4 group-hover:scale-110 transition-transform" />
-                    <span className="font-bold text-[10px] md:text-sm uppercase"><span className="hidden sm:inline">DECK </span>({player.deck.length})</span>
-                    {typingMode && <span className="rounded border border-cyan-300 bg-cyan-950/95 px-1 py-0.5 text-[8px] font-black text-cyan-200">D</span>}
-                </button>
+                <div className="flex items-center gap-1 md:gap-2">
+                    <button
+                        onClick={() => setShowDeck(true)}
+                        className="flex items-center gap-1 md:gap-2 text-blue-300 border-2 border-blue-500/20 bg-blue-900/20 px-2 py-0.5 md:px-3 md:py-1 rounded hover:bg-blue-800/40 hover:border-blue-400 transition-all cursor-pointer group"
+                    >
+                        <Layers size={14} className="md:size-4 group-hover:scale-110 transition-transform" />
+                        <span className="font-bold text-[10px] md:text-sm uppercase"><span className="hidden sm:inline">DECK </span>({player.deck.length})</span>
+                        {typingMode && <span className="rounded border border-cyan-300 bg-cyan-950/95 px-1 py-0.5 text-[8px] font-black text-cyan-200">D</span>}
+                    </button>
+                    {onOpenSettings && (
+                        <button
+                            onClick={onOpenSettings}
+                            className="flex h-7 w-7 md:h-9 md:w-9 items-center justify-center border-2 border-slate-500 bg-slate-800 text-slate-200 shadow-[2px_2px_0_0_rgba(15,23,42,0.95)] transition-all hover:bg-slate-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+                            title="セッティング"
+                        >
+                            <Settings size={14} className="md:size-4" />
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* ナラティブバー (追加) */}

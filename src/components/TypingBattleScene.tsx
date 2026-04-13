@@ -6,7 +6,7 @@ import { trans } from '../utils/textUtils';
 import EnemyIllustration from './EnemyIllustration';
 import Card from './Card';
 import { BattleFinisherCutinOverlay as StandardBattleFinisherCutinOverlay, FloatingTextOverlay as StandardFloatingTextOverlay, VFXOverlay as StandardVFXOverlay } from './BattleScene';
-import { AlertCircle, FlaskConical, Gem, Heart, Keyboard, Shield, Skull, Triangle, Zap } from 'lucide-react';
+import { AlertCircle, FlaskConical, Gem, Heart, Keyboard, Shield, Skull, Triangle, Zap, Settings } from 'lucide-react';
 import { getTypingLessonDefinition, TypingLessonId } from '../data/typingLessonConfig';
 
 interface TypingBattleSceneProps {
@@ -32,6 +32,7 @@ interface TypingBattleSceneProps {
     lessonId?: string;
     onAbort: () => void;
     hideEnemyIntents?: boolean;
+    onOpenSettings?: () => void;
 }
 
 type FingerId =
@@ -531,7 +532,8 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
     floor,
     lessonId,
     onAbort,
-    hideEnemyIntents = false
+    hideEnemyIntents = false,
+    onOpenSettings
 }) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const autoEndTimerRef = useRef<number | null>(null);
@@ -765,6 +767,18 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                 <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
                     <div className="rounded border border-yellow-700 bg-gray-900/80 px-2 py-0.5 text-[10px] font-bold text-yellow-400">{trans(turnLog, languageMode)}</div>
                     <div className="rounded border border-amber-500/50 bg-amber-900/30 px-2 py-0.5 text-[10px] font-bold text-amber-100">{prompt?.title ?? 'AUTO TURN'}</div>
+                    {onOpenSettings && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onOpenSettings();
+                            }}
+                            className="flex items-center gap-1 border-2 border-slate-500 bg-slate-800 px-2 py-1 text-[10px] font-black text-slate-100 shadow-[2px_2px_0_0_rgba(15,23,42,0.95)] transition-all hover:bg-slate-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+                            title="セッティング"
+                        >
+                            <Settings size={10} /> SET
+                        </button>
+                    )}
                 </div>
             </div>
 

@@ -635,7 +635,7 @@ const App: React.FC = () => {
         syncMobilePortrait();
         window.addEventListener('resize', syncMobilePortrait);
         return () => window.removeEventListener('resize', syncMobilePortrait);
-    }, [appSettings]);
+    }, []);
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
@@ -8961,7 +8961,7 @@ const App: React.FC = () => {
     };
 
     const miniGame = MINI_GAMES.find(g => g.screen === gameState.screen);
-    const showGlobalSettingsGear = gameState.screen === GameScreen.START_MENU || gameState.screen === GameScreen.MAP || gameState.screen === GameScreen.BATTLE;
+    const showGlobalSettingsGear = false;
 
     const updateSetting = useCallback(<K extends keyof AppSettings>(key: K, value: AppSettings[K]) => {
         setAppSettings(prev => ({ ...prev, [key]: value }));
@@ -9038,7 +9038,7 @@ const App: React.FC = () => {
                     }
                 `}</style>
 
-                {showGlobalSettingsGear && (
+                {showGlobalSettingsGear && gameState.screen !== GameScreen.START_MENU && (
                     <button
                         onClick={() => setShowSettingsModal(true)}
                         className="absolute top-2 right-2 z-[10010] bg-black/60 hover:bg-black/85 text-white border border-white/50 p-2 rounded-lg shadow-lg"
@@ -9169,13 +9169,42 @@ const App: React.FC = () => {
                             </div>
                         )}
 
-                        <div className="absolute top-2 right-2 z-9999 flex gap-2">
+                        <div className="absolute top-2 right-2 z-[10010] flex items-center gap-1.5 sm:gap-2">
+                            <button
+                                onClick={toggleBgmMode}
+                                className={`flex h-9 items-center border-t-2 border-l-2 border-r-4 border-b-4 px-2 text-[10px] sm:text-xs font-black uppercase tracking-[0.08em] shadow-[0_0_0_1px_rgba(0,0,0,0.45)] transition-all active:translate-x-[2px] active:translate-y-[2px] active:border-r-2 active:border-b-2 ${
+                                    bgmMode === 'STUDY'
+                                        ? 'bg-indigo-950/95 text-indigo-200 border-t-indigo-300 border-l-indigo-300 border-r-indigo-700 border-b-indigo-700'
+                                        : bgmMode === 'MP3'
+                                            ? 'bg-emerald-950/95 text-emerald-200 border-t-emerald-300 border-l-emerald-300 border-r-emerald-700 border-b-emerald-700'
+                                            : 'bg-cyan-950/95 text-cyan-100 border-t-cyan-300 border-l-cyan-300 border-r-cyan-700 border-b-cyan-700'
+                                }`}
+                                title="BGMモード切替"
+                            >
+                                <Music size={13} className="mr-1 shrink-0" />
+                                {trans(
+                                    bgmMode === 'STUDY'
+                                        ? 'BGM: 学習'
+                                        : bgmMode === 'MP3'
+                                            ? 'BGM: MP3'
+                                            : 'BGM: 電子音',
+                                    languageMode
+                                )}
+                            </button>
                             <button
                                 onClick={toggleLanguage}
-                                className="bg-black/50 hover:bg-black/80 text-white border border-white/50 px-2 py-1 rounded text-xs flex items-center shadow-lg transition-colors font-bold"
+                                className="flex h-9 items-center border-t-2 border-l-2 border-r-4 border-b-4 border-t-amber-200 border-l-amber-200 border-r-amber-700 border-b-amber-700 bg-amber-950/95 px-2 text-[10px] sm:text-xs font-black uppercase tracking-[0.08em] text-amber-100 shadow-[0_0_0_1px_rgba(0,0,0,0.45)] transition-all active:translate-x-[2px] active:translate-y-[2px] active:border-r-2 active:border-b-2"
+                                title="言語切替"
                             >
-                                <Languages size={14} className="mr-1" />
+                                <Languages size={13} className="mr-1 shrink-0" />
                                 {languageMode === 'JAPANESE' ? 'にほんご' : '日本語'}
+                            </button>
+                            <button
+                                onClick={() => setShowSettingsModal(true)}
+                                className="flex h-9 w-9 items-center justify-center border-t-2 border-l-2 border-r-4 border-b-4 border-t-slate-200 border-l-slate-200 border-r-slate-700 border-b-slate-700 bg-slate-900/95 text-slate-100 shadow-[0_0_0_1px_rgba(0,0,0,0.45)] transition-all active:translate-x-[2px] active:translate-y-[2px] active:border-r-2 active:border-b-2"
+                                title="セッティング"
+                            >
+                                <Settings size={16} />
                             </button>
                         </div>
 
@@ -9949,6 +9978,7 @@ const App: React.FC = () => {
                             currentNodeId={gameState.currentMapNodeId}
                             onNodeSelect={handleNodeSelect}
                             onReturnToTitle={returnToTitle}
+                            onOpenSettings={() => setShowSettingsModal(true)}
                             player={gameState.player}
                             languageMode={languageMode}
                             narrative={currentNarrative}
@@ -10024,6 +10054,7 @@ const App: React.FC = () => {
                                 lessonId={gameState.typingLessonId}
                                 onAbort={returnToTitle}
                                 hideEnemyIntents={raceEffects.hideEnemyIntentsOnce}
+                                onOpenSettings={() => setShowSettingsModal(true)}
                             />
                         ) : (
                             <BattleScene
@@ -10033,6 +10064,7 @@ const App: React.FC = () => {
                                 onCancelSelection={handleCancelSelection}
                                 finisherCutinCard={battleFinisherCutinCard}
                                 hideEnemyIntents={raceEffects.hideEnemyIntentsOnce}
+                                onOpenSettings={() => setShowSettingsModal(true)}
                             />
                         )}
                     </div>

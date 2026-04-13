@@ -1,7 +1,7 @@
 
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode, ParryState, VisualEffectInstance, CoopSupportCard } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
-import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles, MessageCircle, Mic, ArrowRight, MousePointer2, ChevronsRight, ChevronDown, Flame, RotateCcw, Triangle } from 'lucide-react';
+import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles, MessageCircle, Mic, ArrowRight, MousePointer2, ChevronsRight, ChevronDown, Flame, RotateCcw, Triangle, Settings } from 'lucide-react';
 import PixelSprite from './PixelSprite';
 import EnemyIllustration from './EnemyIllustration';
 import { audioService } from '../services/audioService';
@@ -353,11 +353,12 @@ interface BattleSceneProps {
     activeEffects: VisualEffectInstance[];
     finisherCutinCard?: ICard | null;
     hideEnemyIntents?: boolean;
+    onOpenSettings?: () => void;
 }
 
 const BattleScene: React.FC<BattleSceneProps> = ({
     player, companions = [], coopSelfPeerId, coopEffectOwnerPeerId, coopTurnQueue = [], coopCanAct = true, coopTurnOwnerLabel, coopSupportCards = [], onUseCoopSupport, selfDown = false, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onPlaySynthesizedCard, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
-    selectionState, onHandSelection, onCancelSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect, parryState, onParry, activeEffects, finisherCutinCard, hideEnemyIntents = false
+    selectionState, onHandSelection, onCancelSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect, parryState, onParry, activeEffects, finisherCutinCard, hideEnemyIntents = false, onOpenSettings
 }) => {
     const isCoopBattleView = !!coopSelfPeerId || companions.length > 0;
     const shouldRenderPlayerScopedVfxOnSelf = isCoopBattleView
@@ -837,12 +838,23 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             </div>
                         </div>
                     )}
-                    <button
-                        onClick={() => setShowLog(!showLog)}
-                        className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold border transition-colors ${showLog ? 'bg-gray-700 border-gray-500 text-white' : 'bg-black/50 border-gray-600 text-gray-400 hover:text-white hover:border-gray-400'}`}
-                    >
-                        <FileText size={10} /> LOG
-                    </button>
+                    <div className="flex items-center gap-1">
+                        {onOpenSettings && (
+                            <button
+                                onClick={onOpenSettings}
+                                className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold border transition-colors bg-black/50 border-gray-600 text-gray-400 hover:text-white hover:border-gray-400"
+                                title="セッティング"
+                            >
+                                <Settings size={10} /> SET
+                            </button>
+                        )}
+                        <button
+                            onClick={() => setShowLog(!showLog)}
+                            className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold border transition-colors ${showLog ? 'bg-gray-700 border-gray-500 text-white' : 'bg-black/50 border-gray-600 text-gray-400 hover:text-white hover:border-gray-400'}`}
+                        >
+                            <FileText size={10} /> LOG
+                        </button>
+                    </div>
                 </div>
             </div>
 
