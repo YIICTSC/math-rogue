@@ -131,6 +131,7 @@ export type P2PEvent =
             turnCursor: number,
             enemyTurnCursor: number
         } | null,
+        activeEffects?: any[],
         enemies?: any[],
         selectedEnemyId?: string | null,
         combatLog?: string[],
@@ -173,7 +174,8 @@ export type P2PEvent =
             }>,
             turnCursor: number,
             enemyTurnCursor: number
-        } | null
+        } | null,
+        activeEffects?: any[]
     }
     | {
         type: 'COOP_BATTLE_USE_POTION',
@@ -201,7 +203,8 @@ export type P2PEvent =
             }>,
             turnCursor: number,
             enemyTurnCursor: number
-        } | null
+        } | null,
+        activeEffects?: any[]
     }
     | {
         type: 'COOP_BATTLE_TURN_START' | 'COOP_BATTLE_SELECTION_STATE' | 'COOP_BATTLE_MODAL_RESOLVE' | 'COOP_BATTLE_CODEX_SELECT',
@@ -228,7 +231,8 @@ export type P2PEvent =
             }>,
             turnCursor: number,
             enemyTurnCursor: number
-        } | null
+        } | null,
+        activeEffects?: any[]
     }
     | {
         type: 'COOP_END_TURN',

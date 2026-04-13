@@ -369,6 +369,18 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const shouldRenderPlayerScopedVfxOnSelf = isCoopBattleView
         ? !!coopSelfPeerId && !!coopEffectOwnerPeerId && coopEffectOwnerPeerId === coopSelfPeerId
         : true;
+    const getPlayerScopedEffectsForPeer = (peerId: string) => activeEffects
+        .filter(effect => effect.targetId === 'player')
+        .filter(effect => {
+            if (effect.ownerPeerId) return effect.ownerPeerId === peerId;
+            if (!isCoopBattleView) return true;
+            if (peerId === coopSelfPeerId) return shouldRenderPlayerScopedVfxOnSelf;
+            return !!coopEffectOwnerPeerId && coopEffectOwnerPeerId === peerId;
+        })
+        .map(effect => ({ ...effect, targetId: peerId }));
+    const selfScopedEffects = isCoopBattleView && coopSelfPeerId
+        ? getPlayerScopedEffectsForPeer(coopSelfPeerId)
+        : activeEffects.filter(effect => effect.targetId === 'player');
 
     const [lastVisibleEnemies, setLastVisibleEnemies] = useState<Enemy[]>([]);
     const [selectedSupportCard, setSelectedSupportCard] = useState<CoopSupportCard | null>(null);
@@ -1349,7 +1361,9 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 style={{ imageRendering: 'pixelated' }}
                             />
                             <FloatingTextOverlay data={player.floatingText} languageMode={languageMode} />
-                            {shouldRenderPlayerScopedVfxOnSelf && <VFXOverlay effects={activeEffects} targetId="player" />}
+                            {(isCoopBattleView ? selfScopedEffects.length > 0 : shouldRenderPlayerScopedVfxOnSelf) && (
+                                <VFXOverlay effects={isCoopBattleView ? selfScopedEffects : activeEffects} targetId={isCoopBattleView && coopSelfPeerId ? coopSelfPeerId : "player"} />
+                            )}
                         </div>
 
                         {player.partner && player.partner.currentHp > 0 && (
@@ -1394,6 +1408,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                     style={{ imageRendering: 'pixelated' }}
                                                 />
                                                 <FloatingTextOverlay data={companion.floatingText} languageMode={languageMode} offset="-top-2 -right-1" />
+                                                <VFXOverlay effects={getPlayerScopedEffectsForPeer(companion.id)} targetId={companion.id} />
                                             </div>
                                             <div className="mt-1 h-1.5 bg-gray-700 rounded-full border border-gray-500 overflow-hidden">
                                                 <div className={`h-full transition-all duration-500 ${isDown ? 'bg-gray-500' : 'bg-green-500'}`} style={{ width: `${hpPercent}%` }}></div>

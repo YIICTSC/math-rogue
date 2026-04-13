@@ -678,6 +678,7 @@ export interface VisualEffectInstance {
   id: string;
   type: VFXType;
   targetId: string;
+  ownerPeerId?: string;
   x?: number;
   y?: number;
   delay?: number;
