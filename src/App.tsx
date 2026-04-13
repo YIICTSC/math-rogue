@@ -1235,7 +1235,8 @@ const App: React.FC = () => {
         }
         const queue = coopBattleState.turnQueue;
         const currentCursor = coopBattleState.turnCursor;
-        let enemyActions = queue[currentCursor]?.type === 'ENEMY' ? 1 : 0;
+        const currentSlot = queue[currentCursor];
+        let enemyActions = currentSlot?.type === 'ENEMY' ? 1 : 0;
         let nextCursor = currentCursor;
         for (let offset = 1; offset <= queue.length; offset++) {
             const index = (currentCursor + offset) % queue.length;
@@ -1247,8 +1248,14 @@ const App: React.FC = () => {
             nextCursor = index;
             break;
         }
+        if (currentSlot?.type === 'ENEMY' && enemyActions === 1) {
+            const livingEnemyCount = gameState.enemies.filter(enemy =>
+                enemy.currentHp > 0 || (enemy.enemyType === 'THE_HEART' && enemy.phase === 1)
+            ).length;
+            enemyActions = livingEnemyCount;
+        }
         return { enemyActions, nextCursor };
-    }, [coopBattleState]);
+    }, [coopBattleState, gameState.enemies]);
     const getAliveCoopCompanions = useCallback(() => {
         if (!coopSession) return [];
         return coopSession.participants.filter(participant => participant.peerId !== coopSelfPeerId && (participant.currentHp ?? participant.maxHp ?? 0) > 0);
