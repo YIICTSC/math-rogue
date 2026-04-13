@@ -356,6 +356,11 @@ interface BattleSceneProps {
     onOpenSettings?: () => void;
 }
 
+type DrawEntryAnimation = {
+    cardId: string;
+    delayMs: number;
+};
+
 const BattleScene: React.FC<BattleSceneProps> = ({
     player, companions = [], coopSelfPeerId, coopEffectOwnerPeerId, coopTurnQueue = [], coopCanAct = true, coopTurnOwnerLabel, coopSupportCards = [], onUseCoopSupport, selfDown = false, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onPlaySynthesizedCard, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
     selectionState, onHandSelection, onCancelSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect, parryState, onParry, activeEffects, finisherCutinCard, hideEnemyIntents = false, onOpenSettings
@@ -405,7 +410,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const [fullscreenArtCard, setFullscreenArtCard] = useState<ICard | null>(null);
     const [showLog, setShowLog] = useState(false);
     const [finisherBurst, setFinisherBurst] = useState(false);
+    const [drawEntryAnimations, setDrawEntryAnimations] = useState<DrawEntryAnimation[]>([]);
     const logContainerRef = useRef<HTMLDivElement>(null);
+    const prevHandIdsRef = useRef<string[]>([]);
+    const drawEntryTimeoutsRef = useRef<number[]>([]);
 
     // --- BATTLE TUTORIAL STATE ---
     const [tutorialStep, setTutorialStep] = useState<number | null>(null);
@@ -491,6 +499,49 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
         }
     }, [combatLog, showLog]);
+
+    useEffect(() => {
+        const currentHandIds = player.hand.map(card => card.id);
+        const previousHandIds = prevHandIdsRef.current;
+        const newlyAddedIds = currentHandIds.filter(id => !previousHandIds.includes(id));
+        const DRAW_ENTRY_STAGGER_MS = 130;
+        const DRAW_ENTRY_DURATION_MS = 720;
+
+        if (newlyAddedIds.length > 0) {
+            setDrawEntryAnimations((prev) => {
+                const retained = prev.filter(entry => currentHandIds.includes(entry.cardId) && !newlyAddedIds.includes(entry.cardId));
+                const additions = newlyAddedIds.map((cardId, index) => ({
+                    cardId,
+                    delayMs: index * DRAW_ENTRY_STAGGER_MS
+                }));
+                return [...retained, ...additions];
+            });
+
+            newlyAddedIds.forEach((cardId, index) => {
+                const timeoutId = window.setTimeout(() => {
+                    setDrawEntryAnimations(prev => prev.filter(entry => entry.cardId !== cardId));
+                    drawEntryTimeoutsRef.current = drawEntryTimeoutsRef.current.filter(id => id !== timeoutId);
+                }, index * DRAW_ENTRY_STAGGER_MS + DRAW_ENTRY_DURATION_MS);
+                drawEntryTimeoutsRef.current.push(timeoutId);
+            });
+        } else {
+            setDrawEntryAnimations((prev) => prev.filter(entry => currentHandIds.includes(entry.cardId)));
+        }
+
+        prevHandIdsRef.current = currentHandIds;
+    }, [player.hand]);
+
+    useEffect(() => {
+        return () => {
+            drawEntryTimeoutsRef.current.forEach((timeoutId) => window.clearTimeout(timeoutId));
+            drawEntryTimeoutsRef.current = [];
+        };
+    }, []);
+
+    const drawEntryAnimationMap = useMemo(
+        () => new Map(drawEntryAnimations.map(entry => [entry.cardId, entry.delayMs])),
+        [drawEntryAnimations]
+    );
 
     const getActionClass = () => {
         if (!isActing) return '';
@@ -1580,6 +1631,27 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
             {/* 4. Hand Area */}
             <div className={`h-60 md:h-64 bg-gray-900 border-t border-gray-700 relative z-10 ${selectionState.active ? 'bg-blue-900/20' : ''} ${selfDown ? 'bg-red-950/20' : ''}`}>
+                <style>
+                    {`
+                        @keyframes battle-hand-card-entry {
+                            0% {
+                                transform: translateX(-220px) translateY(20px) rotate(-14deg) scale(0.78);
+                                opacity: 0;
+                            }
+                            30% {
+                                opacity: 1;
+                            }
+                            78% {
+                                transform: translateX(10px) translateY(-2px) rotate(2deg) scale(1.05);
+                                opacity: 1;
+                            }
+                            100% {
+                                transform: translateX(0) translateY(0) rotate(0deg) scale(1);
+                                opacity: 1;
+                            }
+                        }
+                    `}
+                </style>
                 {(selfDown || !coopCanAct) && (
                     <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/45 backdrop-blur-[1px]">
                         <div className={`rounded-lg px-4 py-3 text-center text-sm font-bold shadow-lg ${selfDown ? 'border border-red-500/70 bg-red-950/85 text-red-100' : 'border border-cyan-500/70 bg-cyan-950/85 text-cyan-100'}`}>
@@ -1611,19 +1683,28 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         const dist = i - mid;
                         const rotation = dist * 2.5;
                         const translateY = Math.abs(dist) * 4;
+                        const drawEntryDelayMs = drawEntryAnimationMap.get(card.id);
+                        const isDrawEntryAnimating = drawEntryDelayMs !== undefined;
+                        const baseZIndex = 10 + i;
+                        const selectedZIndex = 40;
+                        const animatingZIndex = 60 + i;
+                        const cardZIndex = Math.max(
+                            isSelectedActive || isSelectedDual ? selectedZIndex : baseZIndex,
+                            isDrawEntryAnimating ? animatingZIndex : baseZIndex
+                        );
 
                         return (
                             <div
                                 key={card.id}
                                 className={`inline-block align-middle transition-all duration-500 ease-out w-28 h-44 md:w-32 md:h-48 shrink-0 relative 
-                            -ml-20 first:ml-0 md:ml-0 
-                            group-hover/hand:-ml-2 group-active/hand:-ml-2 
+                            ml-0
+                            md:group-hover/hand:-ml-2 md:group-active/hand:-ml-2 
                             ${isSelectedActive || isSelectedDual ? 'cursor-pointer -translate-y-8 z-30 scale-110' : 'hover:-translate-y-4 hover:z-20'}
                             ${tutorialStep === 4 ? 'ring-4 ring-blue-500 ring-offset-2 ring-offset-transparent animate-pulse rounded-lg' : ''}
                         `}
                                 style={{
                                     transform: isSelectedActive || isSelectedDual ? 'translateY(-24px) scale(1.1)' : `rotate(${rotation}deg) translateY(${translateY}px)`,
-                                    zIndex: isSelectedActive || isSelectedDual ? 40 : 10 + i
+                                    zIndex: cardZIndex
                                 }}
                             >
                                 {isDualMode && isSelectedDual && (
@@ -1633,32 +1714,43 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 )}
 
                                 <div className="absolute top-0 left-0 origin-top-left scale-[0.95] md:scale-100">
-                                    <Card
-                                        card={displayCard}
-                                        onClick={() => {
-                                            if (selfDown || !coopCanAct) return;
-                                            if (selectionState.active) {
-                                                onHandSelection(card);
-                                            } else {
-                                                if (isDualMode) {
-                                                    handleCardClickDual(card, specialDisabled);
+                                    <div
+                                        className="shadow-lg transition-transform duration-200 ease-out hover:-translate-y-1 hover:scale-[1.03]"
+                                        style={isDrawEntryAnimating ? {
+                                            animationName: 'battle-hand-card-entry',
+                                            animationDuration: '720ms',
+                                            animationTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                                            animationDelay: `${drawEntryDelayMs}ms`,
+                                            animationFillMode: 'both'
+                                        } : undefined}
+                                    >
+                                        <Card
+                                            card={displayCard}
+                                            onClick={() => {
+                                                if (selfDown || !coopCanAct) return;
+                                                if (selectionState.active) {
+                                                    onHandSelection(card);
                                                 } else {
-                                                    if (!specialDisabled) onPlayCard(card);
-                                                    else if (isChokerDisabled || isNormalityDisabled) audioService.playSound('wrong');
+                                                    if (isDualMode) {
+                                                        handleCardClickDual(card, specialDisabled);
+                                                    } else {
+                                                        if (!specialDisabled) onPlayCard(card);
+                                                        else if (isChokerDisabled || isNormalityDisabled) audioService.playSound('wrong');
+                                                    }
                                                 }
+                                            }}
+                                            onInspect={onInspect}
+                                            disabled={
+                                                selectionState.active
+                                                    ? false
+                                                    : (isDualMode
+                                                        ? (!!actingEnemyId || card.unplayable || specialDisabled || selfDown || !coopCanAct)
+                                                        : (player.currentEnergy < displayCard.cost || !!actingEnemyId || card.unplayable || specialDisabled || selfDown || !coopCanAct)
+                                                    )
                                             }
-                                        }}
-                                        onInspect={onInspect}
-                                        disabled={
-                                            selectionState.active
-                                                ? false
-                                                : (isDualMode
-                                                    ? (!!actingEnemyId || card.unplayable || specialDisabled || selfDown || !coopCanAct)
-                                                    : (player.currentEnergy < displayCard.cost || !!actingEnemyId || card.unplayable || specialDisabled || selfDown || !coopCanAct)
-                                                )
-                                        }
-                                        languageMode={languageMode}
-                                    />
+                                            languageMode={languageMode}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         );
