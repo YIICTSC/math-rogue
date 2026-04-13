@@ -1713,42 +1713,44 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     </div>
                                 )}
 
-                                <div
-                                    className="absolute top-0 left-0 origin-top-left scale-[0.95] md:scale-100 shadow-lg transition-transform duration-200 ease-out hover:-translate-y-1 hover:scale-[1.03]"
-                                    style={isDrawEntryAnimating ? {
-                                        animationName: 'battle-hand-card-entry',
-                                        animationDuration: '720ms',
-                                        animationTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)',
-                                        animationDelay: `${drawEntryDelayMs}ms`,
-                                        animationFillMode: 'both'
-                                    } : undefined}
-                                >
-                                    <Card
-                                        card={displayCard}
-                                        onClick={() => {
-                                            if (selfDown || !coopCanAct) return;
-                                            if (selectionState.active) {
-                                                onHandSelection(card);
-                                            } else {
-                                                if (isDualMode) {
-                                                    handleCardClickDual(card, specialDisabled);
+                                <div className="absolute top-0 left-0 origin-top-left scale-[0.95] md:scale-100">
+                                    <div
+                                        className="shadow-lg transition-transform duration-200 ease-out hover:-translate-y-1 hover:scale-[1.03]"
+                                        style={isDrawEntryAnimating ? {
+                                            animationName: 'battle-hand-card-entry',
+                                            animationDuration: '720ms',
+                                            animationTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                                            animationDelay: `${drawEntryDelayMs}ms`,
+                                            animationFillMode: 'both'
+                                        } : undefined}
+                                    >
+                                        <Card
+                                            card={displayCard}
+                                            onClick={() => {
+                                                if (selfDown || !coopCanAct) return;
+                                                if (selectionState.active) {
+                                                    onHandSelection(card);
                                                 } else {
-                                                    if (!specialDisabled) onPlayCard(card);
-                                                    else if (isChokerDisabled || isNormalityDisabled) audioService.playSound('wrong');
+                                                    if (isDualMode) {
+                                                        handleCardClickDual(card, specialDisabled);
+                                                    } else {
+                                                        if (!specialDisabled) onPlayCard(card);
+                                                        else if (isChokerDisabled || isNormalityDisabled) audioService.playSound('wrong');
+                                                    }
                                                 }
+                                            }}
+                                            onInspect={onInspect}
+                                            disabled={
+                                                selectionState.active
+                                                    ? false
+                                                    : (isDualMode
+                                                        ? (!!actingEnemyId || card.unplayable || specialDisabled || selfDown || !coopCanAct)
+                                                        : (player.currentEnergy < displayCard.cost || !!actingEnemyId || card.unplayable || specialDisabled || selfDown || !coopCanAct)
+                                                    )
                                             }
-                                        }}
-                                        onInspect={onInspect}
-                                        disabled={
-                                            selectionState.active
-                                                ? false
-                                                : (isDualMode
-                                                    ? (!!actingEnemyId || card.unplayable || specialDisabled || selfDown || !coopCanAct)
-                                                    : (player.currentEnergy < displayCard.cost || !!actingEnemyId || card.unplayable || specialDisabled || selfDown || !coopCanAct)
-                                                )
-                                        }
-                                        languageMode={languageMode}
-                                    />
+                                            languageMode={languageMode}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         );
