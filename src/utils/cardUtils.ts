@@ -155,13 +155,16 @@ export const getUpgradedCard = (card: Card): Card => {
         replaceOnce(/(\d+)(ダメージ)/, (_m, _n, label) => `${newCard.damage}${label}`);
     }
     if (card.block !== undefined && newCard.block !== undefined && card.block !== newCard.block) {
-        replaceOnce(/(ブロック)(\d+)/, (_m, label) => `${label}${newCard.block}`);
+        replaceOnce(/(ブロック(?:を)?)(\d+)/, (_m, label) => `${label}${newCard.block}`);
+        replaceOnce(/(\d+)(ブロック)/, (_m, _n, label) => `${newCard.block}${label}`);
     }
     if (card.draw !== undefined && newCard.draw !== undefined && card.draw !== newCard.draw) {
         replaceOnce(/(\d+)(枚引く)/, (_m, _n, label) => `${newCard.draw}${label}`);
+        replaceOnce(/(カードを?)(\d+)(枚引く)/, (_m, prefix, _n, suffix) => `${prefix}${newCard.draw}${suffix}`);
     }
     if (card.energy !== undefined && newCard.energy !== undefined && card.energy !== newCard.energy) {
         replaceOnce(/(E)(\d+)(を得る)/, (_m, prefix, _n, suffix) => `${prefix}${newCard.energy}${suffix}`);
+        replaceOnce(/(エネルギー)(\d+)(を得る)/, (_m, prefix, _n, suffix) => `${prefix}${newCard.energy}${suffix}`);
     }
     if (card.poison !== undefined && newCard.poison !== undefined && card.poison !== newCard.poison) {
         replaceOnce(/(ドクドク)(\d+)/, (_m, label) => `${label}${newCard.poison}`);
@@ -177,6 +180,10 @@ export const getUpgradedCard = (card: Card): Card => {
     }
     if (card.poisonMultiplier !== undefined && newCard.poisonMultiplier !== undefined && card.poisonMultiplier !== newCard.poisonMultiplier) {
         replaceOnce(/(毒を)(\d+)(倍)/, (_m, prefix, _n, suffix) => `${prefix}${newCard.poisonMultiplier}${suffix}`);
+    }
+    if (card.addCardToHand && newCard.addCardToHand && card.addCardToHand.count !== newCard.addCardToHand.count) {
+        replaceOnce(/(\d+)(枚手札に加える)/, (_m, _n, label) => `${newCard.addCardToHand.count}${label}`);
+        replaceOnce(/(」を)(\d+)(枚手札に加える)/, (_m, prefix, _n, suffix) => `${prefix}${newCard.addCardToHand.count}${suffix}`);
     }
 
     newCard.description = syncedDesc;
