@@ -1366,15 +1366,28 @@ const App: React.FC = () => {
         };
     }, [coopSelfPeerId]);
     const preserveLocalBattleCardZones = useCallback((nextPlayer: Player, currentPlayer: Player): Player => {
+        const pickZone = <T,>(nextZone: T[], currentZone: T[]): T[] => {
+            if (currentZone.length > 0 || nextZone.length === 0) {
+                return [...currentZone];
+            }
+            return [...nextZone];
+        };
         const preservedPlayer: Player = {
             ...nextPlayer,
-            hand: [...currentPlayer.hand],
-            drawPile: [...currentPlayer.drawPile],
-            discardPile: [...currentPlayer.discardPile]
+            hand: pickZone(nextPlayer.hand, currentPlayer.hand),
+            drawPile: pickZone(nextPlayer.drawPile, currentPlayer.drawPile),
+            discardPile: pickZone(nextPlayer.discardPile, currentPlayer.discardPile)
         };
         const currentExhaustPile = (currentPlayer as any).exhaustPile;
+        const nextExhaustPile = (nextPlayer as any).exhaustPile;
         if (Array.isArray(currentExhaustPile)) {
-            (preservedPlayer as any).exhaustPile = [...currentExhaustPile];
+            if (currentExhaustPile.length > 0 || !Array.isArray(nextExhaustPile) || nextExhaustPile.length === 0) {
+                (preservedPlayer as any).exhaustPile = [...currentExhaustPile];
+            } else {
+                (preservedPlayer as any).exhaustPile = [...nextExhaustPile];
+            }
+        } else if (Array.isArray(nextExhaustPile)) {
+            (preservedPlayer as any).exhaustPile = [...nextExhaustPile];
         }
         return preservedPlayer;
     }, []);
