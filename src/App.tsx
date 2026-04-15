@@ -123,6 +123,7 @@ const shouldClearAllCardRewards = (item: RewardItem) => item.type === 'CARD';
 const LEGACY_VERCEL_HOST = 'math-rogue.vercel.app';
 const PRIMARY_SITE_URL = 'https://yiictsc.github.io/math-rogue/';
 const COOP_VFX_DEBUG_STORAGE_KEY = 'mr.coopVfxDebug';
+const COOP_FINISHER_DISPLAY_MS = 1800;
 
 type GalaxyExpressModalState = {
     cards: ICard[];
@@ -1755,8 +1756,7 @@ const App: React.FC = () => {
         if (gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.BATTLE || !coopSession || !coopSession.isHost) return;
         // Keep the coop battle identity stable for the whole encounter.
         // Tying it to the alive-enemy list causes a full battle-state rebuild whenever an enemy dies.
-        const battleEnemySignature = gameState.enemies.map(enemy => enemy.id).join(',');
-        const battleKey = `${gameState.currentMapNodeId ?? 'debug'}:${battleEnemySignature || 'no-enemy'}`;
+        const battleKey = coopBattleState?.battleKey ?? `${gameState.currentMapNodeId ?? 'debug'}:${Date.now()}`;
         if (coopBattleState?.battleKey === battleKey) return;
 
         const playerSlots: CoopBattleTurnSlot[] = coopSession.participants.map(participant => ({
@@ -7254,7 +7254,7 @@ const App: React.FC = () => {
                         setBattleFinisherCutinCard(null);
                         resolveBattleVictory();
                         victorySequenceTimerRef.current = null;
-                    }, 1200);
+                    }, COOP_FINISHER_DISPLAY_MS);
                 } else {
                     resolveBattleVictory();
                 }
@@ -8689,7 +8689,7 @@ const App: React.FC = () => {
                         setBattleFinisherCutinCard(null);
                         resolveBattleVictory();
                         victorySequenceTimerRef.current = null;
-                    }, 1200);
+                    }, COOP_FINISHER_DISPLAY_MS);
                 } else {
                     window.setTimeout(() => {
                         resolveBattleVictory();
@@ -8797,9 +8797,14 @@ const App: React.FC = () => {
                         data.state.screen === GameScreen.BATTLE
                             ? preserveLocalPlayerInCoopBattleState(nextSharedState.coopBattleState ?? null)
                             : nextSharedState.coopBattleState ?? null;
+                    const selfBattleEntry =
+                        data.state.screen === GameScreen.BATTLE && coopSelfPeerId
+                            ? normalizedSharedBattleState?.players.find(entry => entry.peerId === coopSelfPeerId)
+                            : null;
                     return {
                         ...nextSharedState,
                         player: prev.player,
+                        selectedEnemyId: selfBattleEntry?.selectedEnemyId ?? nextSharedState.selectedEnemyId,
                         coopBattleState: normalizedSharedBattleState,
                         screen: preserveLocalScreen ? prev.screen : data.state.screen,
                         rewards: (preserveLocalScreen || preserveLocalRewards)
@@ -8945,7 +8950,7 @@ const App: React.FC = () => {
                 const finisherShownAt = coopRemoteFinisherShownAtRef.current;
                 const finisherActive = !!battleFinisherCutinCardRef.current;
                 const elapsed = finisherShownAt ? Date.now() - finisherShownAt : Number.MAX_SAFE_INTEGER;
-                const remainingMs = Math.max(0, 1200 - elapsed);
+                const remainingMs = Math.max(0, COOP_FINISHER_DISPLAY_MS - elapsed);
                 if (finisherActive && remainingMs > 0) {
                     if (coopRemoteFinisherClearTimerRef.current) {
                         window.clearTimeout(coopRemoteFinisherClearTimerRef.current);
@@ -8994,7 +8999,7 @@ const App: React.FC = () => {
                     setBattleFinisherCutinCard(data.finisherCutinCard);
                 } else if (battleFinisherCutinCardRef.current && coopRemoteFinisherShownAtRef.current) {
                     const elapsed = Date.now() - coopRemoteFinisherShownAtRef.current;
-                    const remainingMs = Math.max(0, 1200 - elapsed);
+                    const remainingMs = Math.max(0, COOP_FINISHER_DISPLAY_MS - elapsed);
                     if (remainingMs > 0) {
                         if (coopRemoteFinisherClearTimerRef.current) {
                             window.clearTimeout(coopRemoteFinisherClearTimerRef.current);
