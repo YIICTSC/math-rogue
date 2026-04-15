@@ -8810,9 +8810,21 @@ const App: React.FC = () => {
                     const isSameBattle =
                         data.state.screen === GameScreen.BATTLE &&
                         normalizedSharedBattleState?.battleKey === prev.coopBattleState?.battleKey;
+                    const isRealtimeRound =
+                        normalizedSharedBattleState?.battleMode === 'REALTIME' &&
+                        normalizedSharedBattleState?.turnQueue[normalizedSharedBattleState.turnCursor]?.type !== 'ENEMY';
+                    const isLocalPlayersTurn =
+                        data.state.screen === GameScreen.BATTLE &&
+                        !!normalizedSharedBattleState &&
+                        (
+                            isRealtimeRound ||
+                            normalizedSharedBattleState?.turnQueue[normalizedSharedBattleState.turnCursor]?.peerId === coopSelfPeerId
+                        );
                     const nextPlayer =
                         data.state.screen === GameScreen.BATTLE && selfBattleEntry
-                            ? preserveLocalBattleCardZones(selfBattleEntry.player, prev.player, { preserveZones: !!isSameBattle })
+                            ? (isSameBattle && isLocalPlayersTurn
+                                ? prev.player
+                                : preserveLocalBattleCardZones(selfBattleEntry.player, prev.player, { preserveZones: !!isSameBattle }))
                             : prev.player;
                     return {
                         ...nextSharedState,
