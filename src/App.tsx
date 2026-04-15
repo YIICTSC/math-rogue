@@ -6059,9 +6059,6 @@ const App: React.FC = () => {
             if (!p.powers['BARRICADE']) {
                 p.block = 0;
             }
-            const nextCoopBattleState = prev.challengeMode === 'COOP'
-                ? updateCoopBattleStateForLocalPlayer(prev.coopBattleState, p, prev.selectedEnemyId)
-                : prev.coopBattleState;
             p.hand = newHand;
             p.drawPile = newDrawPile;
             p.discardPile = newDiscardPile;
@@ -6075,6 +6072,9 @@ const App: React.FC = () => {
             if (p.powers['TOOLS_OF_THE_TRADE']) {
                 nextSelection = { active: true, type: 'DISCARD', amount: 1 };
             }
+            const nextCoopBattleState = prev.challengeMode === 'COOP'
+                ? updateCoopBattleStateForLocalPlayer(prev.coopBattleState, p, prev.selectedEnemyId)
+                : prev.coopBattleState;
 
             isEndingTurnRef.current = false;
 
