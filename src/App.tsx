@@ -2339,18 +2339,19 @@ const App: React.FC = () => {
         if (!queuedEvent) {
             return;
         }
+        const latestState = stateRef.current;
         const actionSignature = JSON.stringify({
             eventType: queuedEvent.type,
             cardId: queuedEvent.cardId ?? null,
             potionId: queuedEvent.potionId ?? null,
             playedCardId: queuedEvent.playedCard?.id ?? null,
-            battleKey: gameState.coopBattleState?.battleKey ?? null,
-            turnCursor: gameState.coopBattleState?.turnCursor ?? 0,
-            enemyTurnCursor: gameState.coopBattleState?.enemyTurnCursor ?? 0,
-            selectedEnemyId: gameState.selectedEnemyId,
-            player: gameState.player,
-            enemies: gameState.enemies,
-            combatLog: gameState.combatLog,
+            battleKey: latestState.coopBattleState?.battleKey ?? null,
+            turnCursor: latestState.coopBattleState?.turnCursor ?? 0,
+            enemyTurnCursor: latestState.coopBattleState?.enemyTurnCursor ?? 0,
+            selectedEnemyId: latestState.selectedEnemyId,
+            player: latestState.player,
+            enemies: latestState.enemies,
+            combatLog: latestState.combatLog,
             turnLog,
             actingEnemyId
         });
@@ -2359,20 +2360,21 @@ const App: React.FC = () => {
             return;
         }
         const timeout = window.setTimeout(() => {
+            const latestState = stateRef.current;
             coopLastBattleActionSignatureRef.current = actionSignature;
             p2pService.send({
                 type: queuedEvent.type,
                 ...(queuedEvent.cardId ? { cardId: queuedEvent.cardId } : {}),
                 ...(queuedEvent.potionId ? { potionId: queuedEvent.potionId } : {}),
                 ...(queuedEvent.playedCard ? { playedCard: queuedEvent.playedCard } : {}),
-                player: gameState.player,
-                activeEffects: gameState.activeEffects,
-                enemies: gameState.enemies,
-                selectedEnemyId: gameState.selectedEnemyId,
-                combatLog: gameState.combatLog,
+                player: latestState.player,
+                activeEffects: latestState.activeEffects,
+                enemies: latestState.enemies,
+                selectedEnemyId: latestState.selectedEnemyId,
+                combatLog: latestState.combatLog,
                 turnLog,
                 actingEnemyId,
-                battleState: gameState.coopBattleState || null
+                battleState: latestState.coopBattleState || null
             } as any);
             queuedCoopBattleEventRef.current = null;
         }, 40);
@@ -6057,6 +6059,9 @@ const App: React.FC = () => {
             if (!p.powers['BARRICADE']) {
                 p.block = 0;
             }
+            const nextCoopBattleState = prev.challengeMode === 'COOP'
+                ? updateCoopBattleStateForLocalPlayer(prev.coopBattleState, p, prev.selectedEnemyId)
+                : prev.coopBattleState;
             p.hand = newHand;
             p.drawPile = newDrawPile;
             p.discardPile = newDiscardPile;
@@ -6076,6 +6081,7 @@ const App: React.FC = () => {
             return {
                 ...prev,
                 player: p,
+                coopBattleState: nextCoopBattleState,
                 selectionState: nextSelection,
                 turn: prev.turn + 1,
                 activeEffects: [...prev.activeEffects, ...nextActiveEffects],
@@ -8908,6 +8914,7 @@ const App: React.FC = () => {
                 upsertCoopPlayerSnapshot(fromPeerId, data.player);
                 setGameState(prev => {
                     if (!prev.coopBattleState) return prev;
+                    if (prev.screen === GameScreen.BATTLE) return prev;
                     const hasTargetEntry = prev.coopBattleState.players.some(entry => entry.peerId === fromPeerId);
                     if (!hasTargetEntry) return prev;
                     return {
