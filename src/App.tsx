@@ -8908,7 +8908,6 @@ const App: React.FC = () => {
                 upsertCoopPlayerSnapshot(fromPeerId, data.player);
                 setGameState(prev => {
                     if (!prev.coopBattleState) return prev;
-                    if (prev.screen === GameScreen.BATTLE) return prev;
                     const hasTargetEntry = prev.coopBattleState.players.some(entry => entry.peerId === fromPeerId);
                     if (!hasTargetEntry) return prev;
                     return {
