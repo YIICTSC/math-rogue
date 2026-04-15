@@ -1365,8 +1365,12 @@ const App: React.FC = () => {
             )
         };
     }, [coopSelfPeerId]);
-    const preserveLocalBattleCardZones = useCallback((nextPlayer: Player, currentPlayer: Player): Player => {
+    const preserveLocalBattleCardZones = useCallback((nextPlayer: Player, currentPlayer: Player, options?: { preserveZones?: boolean }): Player => {
+        const preserveZones = options?.preserveZones ?? true;
         const pickZone = <T,>(nextZone: T[], currentZone: T[]): T[] => {
+            if (!preserveZones) {
+                return [...nextZone];
+            }
             if (currentZone.length > 0 || nextZone.length === 0) {
                 return [...currentZone];
             }
@@ -1395,13 +1399,15 @@ const App: React.FC = () => {
         if (!battleState || !coopSelfPeerId) return battleState;
         const currentPlayer = stateRef.current.player;
         const currentSelectedEnemyId = stateRef.current.selectedEnemyId;
+        const currentBattleKey = stateRef.current.coopBattleState?.battleKey;
+        const shouldPreserveZones = currentBattleKey === battleState.battleKey;
         return {
             ...battleState,
             players: battleState.players.map(entry =>
                 entry.peerId === coopSelfPeerId
                     ? {
                         ...entry,
-                        player: preserveLocalBattleCardZones(entry.player, currentPlayer),
+                        player: preserveLocalBattleCardZones(entry.player, currentPlayer, { preserveZones: shouldPreserveZones }),
                         selectedEnemyId: currentSelectedEnemyId ?? entry.selectedEnemyId,
                         isDown: currentPlayer.currentHp <= 0
                     }
@@ -4654,7 +4660,7 @@ const App: React.FC = () => {
             enemies = additionalResult.enemies;
             if (localCoopChainCount >= 2) {
                 currentLogs.push(`🤝 連携 x${localCoopChainCount}！`);
-                nextActiveEffects.push({ id: `vfx-coop-chain-${Date.now()}`, type: 'FLASH', targetId: 'player' });
+                nextActiveEffects.push({ id: `vfx-coop-chain-${Date.now()}`, type: 'SHOCKWAVE', targetId: 'player' });
             }
 
             const isGalaxyExpressCard =
@@ -8589,7 +8595,7 @@ const App: React.FC = () => {
             ? payload.activeEffects
             : inferRemoteCoopBattleEffects(previousRemotePlayer, payload.player, fromPeerId, payload.playedCard, previousEnemies, payload.enemies ?? gameState.enemies);
         const chainEffects = remoteCoopChainCount >= 2
-            ? [{ id: `vfx-coop-chain-${Date.now()}`, type: 'FLASH' as const, targetId: 'player' as const, ownerPeerId: fromPeerId }]
+            ? [{ id: `vfx-coop-chain-${Date.now()}`, type: 'SHOCKWAVE' as const, targetId: 'player' as const, ownerPeerId: fromPeerId }]
             : [];
         const nextBattleState = payload.battleState
             ? {
@@ -9005,9 +9011,10 @@ const App: React.FC = () => {
                                 normalizedBattleState?.turnQueue[normalizedBattleState.turnCursor]?.peerId === coopSelfPeerId
                             );
                         setGameState(prev => {
+                            const isSameBattle = normalizedBattleState?.battleKey === prev.coopBattleState?.battleKey;
                             const mergedLocalPlayer = shouldPreserveLocalPlayer
                                 ? prev.player
-                                : preserveLocalBattleCardZones(selfBattlePlayer.player, prev.player);
+                                : preserveLocalBattleCardZones(selfBattlePlayer.player, prev.player, { preserveZones: isSameBattle });
                             return {
                                 ...prev,
                                 player: mergedLocalPlayer,
