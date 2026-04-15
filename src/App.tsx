@@ -9032,7 +9032,8 @@ const App: React.FC = () => {
                             );
                         setGameState(prev => {
                             const isSameBattle = normalizedBattleState?.battleKey === prev.coopBattleState?.battleKey;
-                            const mergedLocalPlayer = shouldPreserveLocalPlayer
+                            const canKeepQueuedLocalPlayer = shouldPreserveLocalPlayer && isSameBattle;
+                            const mergedLocalPlayer = canKeepQueuedLocalPlayer
                                 ? prev.player
                                 : preserveLocalBattleCardZones(selfBattlePlayer.player, prev.player, { preserveZones: isSameBattle });
                             return {
