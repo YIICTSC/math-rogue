@@ -453,6 +453,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
     // Screen shake on action or damage
     useEffect(() => {
+        if (selectionState.active) {
+            setIsShaking(false);
+            return;
+        }
         if (activeEffects.length > 0) {
             const impactTypes = activeEffects.map(e => e.type);
             const hasImpact = impactTypes.some(type => ['SLASH', 'FIRE', 'EXPLOSION', 'LIGHTNING', 'CRITICAL'].includes(type));
@@ -465,7 +469,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 return () => clearTimeout(timer);
             }
         }
-    }, [activeEffects]);
+    }, [activeEffects, selectionState.active]);
 
     useEffect(() => {
         if (!isFinisherActive) {
