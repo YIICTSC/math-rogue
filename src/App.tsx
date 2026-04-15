@@ -1750,7 +1750,8 @@ const App: React.FC = () => {
         if (gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.BATTLE || !coopSession || !coopSession.isHost) return;
         // Keep the coop battle identity stable for the whole encounter.
         // Tying it to the alive-enemy list causes a full battle-state rebuild whenever an enemy dies.
-        const battleKey = `${gameState.currentMapNodeId ?? 'debug'}`;
+        const battleEnemySignature = gameState.enemies.map(enemy => enemy.id).join(',');
+        const battleKey = `${gameState.currentMapNodeId ?? 'debug'}:${battleEnemySignature || 'no-enemy'}`;
         if (coopBattleState?.battleKey === battleKey) return;
 
         const playerSlots: CoopBattleTurnSlot[] = coopSession.participants.map(participant => ({
@@ -1786,9 +1787,10 @@ const App: React.FC = () => {
                 drawPile: [],
                 codexBuffer: []
             };
-            const player = participant.peerId === coopSelfPeerId && gameState.player.hand.length > 0
-                ? { ...gameState.player }
-                : preparePlayerForBattle(basePlayer, (gameState.map.find(node => node.id === gameState.currentMapNodeId)?.type || NodeType.COMBAT));
+            const player = preparePlayerForBattle(
+                basePlayer,
+                (gameState.map.find(node => node.id === gameState.currentMapNodeId)?.type || NodeType.COMBAT)
+            );
             return {
                 peerId: participant.peerId,
                 name: participant.name,
