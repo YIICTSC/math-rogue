@@ -8801,9 +8801,16 @@ const App: React.FC = () => {
                         data.state.screen === GameScreen.BATTLE && coopSelfPeerId
                             ? normalizedSharedBattleState?.players.find(entry => entry.peerId === coopSelfPeerId)
                             : null;
+                    const isSameBattle =
+                        data.state.screen === GameScreen.BATTLE &&
+                        normalizedSharedBattleState?.battleKey === prev.coopBattleState?.battleKey;
+                    const nextPlayer =
+                        data.state.screen === GameScreen.BATTLE && selfBattleEntry
+                            ? preserveLocalBattleCardZones(selfBattleEntry.player, prev.player, { preserveZones: !!isSameBattle })
+                            : prev.player;
                     return {
                         ...nextSharedState,
-                        player: prev.player,
+                        player: nextPlayer,
                         selectedEnemyId: selfBattleEntry?.selectedEnemyId ?? nextSharedState.selectedEnemyId,
                         coopBattleState: normalizedSharedBattleState,
                         screen: preserveLocalScreen ? prev.screen : data.state.screen,
