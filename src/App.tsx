@@ -9039,6 +9039,7 @@ const App: React.FC = () => {
                             normalizedBattleState?.turnQueue[normalizedBattleState.turnCursor]?.type !== 'ENEMY';
                         const shouldPreserveLocalPlayer =
                             !!pendingQueuedBattleEvent &&
+                            pendingQueuedBattleEvent.type !== 'COOP_BATTLE_TURN_START' &&
                             (
                                 isRealtimeRound ||
                                 normalizedBattleState?.turnQueue[normalizedBattleState.turnCursor]?.peerId === coopSelfPeerId
