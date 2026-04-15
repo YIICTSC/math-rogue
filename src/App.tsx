@@ -9037,13 +9037,14 @@ const App: React.FC = () => {
                         const isRealtimeRound =
                             normalizedBattleState?.battleMode === 'REALTIME' &&
                             normalizedBattleState?.turnQueue[normalizedBattleState.turnCursor]?.type !== 'ENEMY';
-                        const shouldPreserveLocalPlayer =
-                            !!pendingQueuedBattleEvent &&
-                            pendingQueuedBattleEvent.type !== 'COOP_BATTLE_TURN_START' &&
+                        const isLocalPlayersTurn =
+                            !!normalizedBattleState &&
                             (
                                 isRealtimeRound ||
                                 normalizedBattleState?.turnQueue[normalizedBattleState.turnCursor]?.peerId === coopSelfPeerId
                             );
+                        const shouldPreserveLocalPlayer =
+                            isLocalPlayersTurn;
                         setGameState(prev => {
                             const isSameBattle = normalizedBattleState?.battleKey === prev.coopBattleState?.battleKey;
                             const canKeepQueuedLocalPlayer = shouldPreserveLocalPlayer && isSameBattle;
