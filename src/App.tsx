@@ -762,6 +762,7 @@ const App: React.FC = () => {
     const coopPendingVoiceSyncRef = useRef<boolean | null>(null);
     const coopRemoteFinisherShownAtRef = useRef<number | null>(null);
     const coopRemoteFinisherClearTimerRef = useRef<number | null>(null);
+    const coopRemoteEffectClearTimerRef = useRef<number | null>(null);
     const coopLastBattleCardEventAtRef = useRef<number | null>(null);
     const coopObservedEffectIdsRef = useRef<Set<string>>(new Set());
     const coopVfxDebugLogRef = useRef<CoopVfxDebugEntry[]>([]);
@@ -786,6 +787,10 @@ const App: React.FC = () => {
             if (coopRemoteFinisherClearTimerRef.current) {
                 window.clearTimeout(coopRemoteFinisherClearTimerRef.current);
                 coopRemoteFinisherClearTimerRef.current = null;
+            }
+            if (coopRemoteEffectClearTimerRef.current) {
+                window.clearTimeout(coopRemoteEffectClearTimerRef.current);
+                coopRemoteEffectClearTimerRef.current = null;
             }
         };
     }, []);
@@ -8631,7 +8636,6 @@ const App: React.FC = () => {
             return {
                 ...prev,
                 enemies: payload.enemies ?? prev.enemies,
-                selectedEnemyId: payload.selectedEnemyId ?? prev.selectedEnemyId,
                 combatLog: nextCombatLog,
                 activeEffects: nextEffects,
                 coopBattleState: nextBattleState ?? prev.coopBattleState
@@ -8640,6 +8644,15 @@ const App: React.FC = () => {
         if (payload.turnLog !== undefined) setTurnLog(payload.turnLog);
         if (payload.actingEnemyId !== undefined) setActingEnemyId(payload.actingEnemyId ?? null);
         setCoopBattleState(nextBattleState);
+        if (remoteEffects.length > 0 || chainEffects.length > 0) {
+            if (coopRemoteEffectClearTimerRef.current) {
+                window.clearTimeout(coopRemoteEffectClearTimerRef.current);
+            }
+            coopRemoteEffectClearTimerRef.current = window.setTimeout(() => {
+                coopRemoteEffectClearTimerRef.current = null;
+                setGameState(prev => ({ ...prev, activeEffects: [] }));
+            }, 1200);
+        }
 
         if (payload.enemies) {
             const isHeartTransforming = payload.enemies.some(enemy => enemy.enemyType === 'THE_HEART' && enemy.phase === 1 && enemy.currentHp <= 0);
@@ -9059,12 +9072,15 @@ const App: React.FC = () => {
                     : null;
                 setGameState(prev => ({
                     ...prev,
-                    selectedEnemyId: data.enemyId,
                     coopBattleState: nextBattleState ?? prev.coopBattleState
                 }));
                 if (nextBattleState) {
                     setCoopBattleState(nextBattleState);
-                    broadcastCoopBattleState(nextBattleState);
+                    p2pService.send({
+                        type: 'COOP_BATTLE_SYNC',
+                        battleState: nextBattleState,
+                        selectedEnemyId: gameState.selectedEnemyId
+                    });
                 }
                 return;
             }
