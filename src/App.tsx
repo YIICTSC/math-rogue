@@ -2530,10 +2530,33 @@ const App: React.FC = () => {
     useEffect(() => {
         if (gameState.challengeMode !== 'RACE') return;
         if (gameState.screen === GameScreen.REWARD && prevScreenRef.current !== GameScreen.REWARD) {
-            setRaceRewardDummyDisplay(raceEffects.rewardDummyCount);
             if (raceEffects.rewardDummyCount > 0) {
+                const now = Date.now();
+                const statusPool = [
+                    STATUS_CARDS.DAZED,
+                    STATUS_CARDS.SLIMED,
+                    STATUS_CARDS.BURN,
+                    STATUS_CARDS.VOID,
+                ].filter(Boolean);
+                setGameState(prev => {
+                    if (prev.rewards.length === 0 || statusPool.length === 0) return prev;
+                    const preservedReward = prev.rewards[0];
+                    const statusRewards = Array.from({ length: Math.max(0, raceEffects.rewardDummyCount) }, (_, index) => {
+                        const template = statusPool[index % statusPool.length];
+                        return {
+                            type: 'CARD' as const,
+                            value: { ...template, id: `race-print-avalanche-card-${now}-${index}` },
+                            id: `race-print-avalanche-reward-${now}-${index}`
+                        };
+                    });
+                    return {
+                        ...prev,
+                        rewards: shuffle([preservedReward, ...statusRewards])
+                    };
+                });
                 setRaceEffects(prev => ({ ...prev, rewardDummyCount: 0 }));
             }
+            setRaceRewardDummyDisplay(0);
         } else if (gameState.screen !== GameScreen.REWARD && prevScreenRef.current === GameScreen.REWARD) {
             setRaceRewardDummyDisplay(0);
         }
