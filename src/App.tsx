@@ -8061,6 +8061,21 @@ const App: React.FC = () => {
                 .filter(entry => entry.player.currentHp > 0)
                 .slice()
                 .sort((a, b) => a.player.currentHp - b.player.currentHp)[0];
+            const drawCardsForPlayer = (player: Player, amount: number) => {
+                let remaining = amount;
+                while (remaining > 0) {
+                    if (player.drawPile.length === 0) {
+                        if (player.discardPile.length === 0) break;
+                        player.drawPile = shuffle([...player.discardPile]);
+                        player.discardPile = [];
+                    }
+                    const drawn = player.drawPile.pop();
+                    if (!drawn) break;
+                    player.hand.push(drawn);
+                    remaining--;
+                }
+                return amount - remaining;
+            };
             const downedTargetEntry = (
                 singleTargetEntry.player.currentHp <= 0 &&
                 !revivedPeerIds.has(singleTargetEntry.peerId)
@@ -8093,17 +8108,16 @@ const App: React.FC = () => {
                     }
                     break;
                 case 'ALLY_DRAW': {
-                    const drawAmount = Math.min(2, sourcePlayer.drawPile.length);
-                    for (let i = 0; i < drawAmount; i++) {
-                        const drawn = sourcePlayer.drawPile.shift();
-                        if (drawn) sourcePlayer.hand.push(drawn);
+                    const drawnCount = drawCardsForPlayer(targetPlayer, 2);
+                    targetPlayer.floatingText = { id: `coop-draw-${Date.now()}-${singleTargetEntry.peerId}`, text: `+${drawnCount}枚`, color: 'text-cyan-300' };
+                    if (singleTargetEntry.peerId !== sourcePeerId) {
+                        sourcePlayer.floatingText = { id: `coop-draw-source-${Date.now()}-${sourcePeerId}`, text: singleTargetEntry.name, color: 'text-emerald-300' };
                     }
-                    sourcePlayer.floatingText = { id: `coop-draw-${Date.now()}-${sourcePeerId}`, text: `+${drawAmount}枚`, color: 'text-cyan-300' };
                     break;
                 }
                 case 'ALLY_ATTACK_BOOST':
-                    targetPlayer.strength += 3;
-                    targetPlayer.floatingText = { id: `coop-boost-${Date.now()}-${singleTargetEntry.peerId}`, text: 'ATK+', color: 'text-red-300', iconType: 'sword' };
+                    targetPlayer.turnFlags['NEXT_ATTACK_DOUBLE_DAMAGE'] = true;
+                    targetPlayer.floatingText = { id: `coop-boost-${Date.now()}-${singleTargetEntry.peerId}`, text: 'NEXT ATK', color: 'text-red-300', iconType: 'sword' };
                     if (singleTargetEntry.peerId !== sourcePeerId) {
                         sourcePlayer.floatingText = { id: `coop-boost-source-${Date.now()}-${sourcePeerId}`, text: singleTargetEntry.name, color: 'text-emerald-300', iconType: 'sword' };
                     }
@@ -8117,8 +8131,10 @@ const App: React.FC = () => {
                     break;
                 case 'TEAM_CLEANSE':
                     nextBattleState.players.forEach(entry => {
-                        entry.player.block += 8;
-                        entry.player.floatingText = { id: `coop-team-cleanse-${Date.now()}-${entry.peerId}`, text: '+8', color: 'text-emerald-300', iconType: 'shield' };
+                        entry.player.powers['WEAK'] = Math.max(0, (entry.player.powers['WEAK'] || 0) - 1);
+                        entry.player.powers['VULNERABLE'] = Math.max(0, (entry.player.powers['VULNERABLE'] || 0) - 1);
+                        entry.player.powers['POISON'] = Math.max(0, (entry.player.powers['POISON'] || 0) - 1);
+                        entry.player.floatingText = { id: `coop-team-cleanse-${Date.now()}-${entry.peerId}`, text: 'CLEANSE', color: 'text-emerald-300', iconType: 'shield' };
                     });
                     break;
                 case 'TEAM_HEAL':
@@ -8208,6 +8224,21 @@ const App: React.FC = () => {
                 drawPile: [...prev.player.drawPile],
                 discardPile: [...prev.player.discardPile]
             };
+            const drawCardsForPlayer = (player: Player, amount: number) => {
+                let remaining = amount;
+                while (remaining > 0) {
+                    if (player.drawPile.length === 0) {
+                        if (player.discardPile.length === 0) break;
+                        player.drawPile = shuffle([...player.discardPile]);
+                        player.discardPile = [];
+                    }
+                    const drawn = player.drawPile.pop();
+                    if (!drawn) break;
+                    player.hand.push(drawn);
+                    remaining--;
+                }
+                return amount - remaining;
+            };
 
             switch (card.effectId) {
                 case 'ALLY_HEAL':
@@ -8250,25 +8281,20 @@ const App: React.FC = () => {
                     }
                     break;
                 case 'ALLY_DRAW': {
-                    const drawAmount = Math.min(2, p.drawPile.length);
-                    for (let i = 0; i < drawAmount; i++) {
-                        const drawn = p.drawPile.shift();
-                        if (drawn) p.hand.push(drawn);
-                    }
-                    p.floatingText = { id: `coop-draw-${Date.now()}`, text: `+${drawAmount}枚`, color: 'text-cyan-300' };
+                    const drawnCount = drawCardsForPlayer(p, 2);
+                    p.floatingText = { id: `coop-draw-${Date.now()}`, text: `+${drawnCount}枚`, color: 'text-cyan-300' };
                     break;
                 }
                 case 'ALLY_ATTACK_BOOST':
                     if (targetedCompanion && targetedCompanion.peerId !== coopSelfPeerId) {
                         updateCoopParticipantState(targetedCompanion.peerId, current => ({
                             ...current,
-                            strength: (current.strength ?? 0) + 3,
-                            floatingText: { id: `coop-boost-target-${Date.now()}-${targetedCompanion.peerId}`, text: 'ATK+', color: 'text-red-300', iconType: 'sword' }
+                            floatingText: { id: `coop-boost-target-${Date.now()}-${targetedCompanion.peerId}`, text: 'NEXT ATK', color: 'text-red-300', iconType: 'sword' }
                         }));
                         p.floatingText = { id: `coop-boost-self-${Date.now()}`, text: targetedCompanion.name, color: 'text-emerald-300', iconType: 'sword' };
                     } else {
-                        p.strength += 3;
-                        p.floatingText = { id: `coop-boost-${Date.now()}`, text: 'ATK+', color: 'text-red-300', iconType: 'sword' };
+                        p.turnFlags['NEXT_ATTACK_DOUBLE_DAMAGE'] = true;
+                        p.floatingText = { id: `coop-boost-${Date.now()}`, text: 'NEXT ATK', color: 'text-red-300', iconType: 'sword' };
                     }
                     break;
                 case 'ALLY_BUFFER':
@@ -8285,15 +8311,17 @@ const App: React.FC = () => {
                     }
                     break;
                 case 'TEAM_CLEANSE':
-                    p.block += 8;
-                    p.floatingText = { id: `coop-cleanse-${Date.now()}`, text: 'RESET', color: 'text-emerald-300', iconType: 'shield' };
+                    p.powers['WEAK'] = Math.max(0, (p.powers['WEAK'] || 0) - 1);
+                    p.powers['VULNERABLE'] = Math.max(0, (p.powers['VULNERABLE'] || 0) - 1);
+                    p.powers['POISON'] = Math.max(0, (p.powers['POISON'] || 0) - 1);
+                    p.floatingText = { id: `coop-cleanse-${Date.now()}`, text: 'CLEANSE', color: 'text-emerald-300', iconType: 'shield' };
                     if (coopSession) {
                         coopSession.participants
                             .filter(participant => participant.peerId !== coopSelfPeerId)
                             .forEach(participant => {
                                 updateCoopParticipantState(participant.peerId, current => ({
                                     ...current,
-                                    buffer: Math.max(0, (current.buffer ?? 0) - 1)
+                                    floatingText: { id: `coop-cleanse-target-${Date.now()}-${participant.peerId}`, text: 'CLEANSE', color: 'text-emerald-300', iconType: 'shield' }
                                 }));
                             });
                     }
