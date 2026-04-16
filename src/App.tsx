@@ -6136,6 +6136,20 @@ const App: React.FC = () => {
         setGameState(prev => {
             const p = { ...prev.player };
             const newLogs: string[] = [];
+            const tickPlayerDebuffs = (target: Player, label?: string) => {
+                if (target.powers['WEAK'] > 0) {
+                    target.powers['WEAK']--;
+                    if (target.powers['WEAK'] === 0 && label) newLogs.push(`${label}の${trans("へろろ", languageMode)}が回復した`);
+                }
+                if (target.powers['VULNERABLE'] > 0) {
+                    target.powers['VULNERABLE']--;
+                    if (target.powers['VULNERABLE'] === 0 && label) newLogs.push(`${label}の${trans("びくびく", languageMode)}が回復した`);
+                }
+                if (target.powers['CONFUSED'] > 0) {
+                    target.powers['CONFUSED']--;
+                    if (target.powers['CONFUSED'] === 0 && label) newLogs.push(`${label}の${trans("こんらん", languageMode)}が回復した`);
+                }
+            };
             if (hasRelic(p, 'POCKETWATCH')) {
                 p.relicCounters['POCKETWATCH_PENDING'] = p.cardsPlayedThisTurn <= 3 ? 1 : 0;
             }
@@ -6153,19 +6167,43 @@ const App: React.FC = () => {
                 p.block += p.powers['METALLICIZE'];
                 p.floatingText = { id: `pow-metal-${Date.now()}`, text: `+${p.powers['METALLICIZE']}`, color: 'text-blue-400', iconType: 'shield' };
             }
-            if (p.powers['WEAK'] > 0) {
-                p.powers['WEAK']--;
-                if (p.powers['WEAK'] === 0) newLogs.push(trans("へろろから回復した", languageMode));
+            tickPlayerDebuffs(p);
+            let nextCoopBattleState = prev.coopBattleState;
+            if (prev.challengeMode === 'COOP' && coopSession?.isHost && prev.coopBattleState) {
+                nextCoopBattleState = {
+                    ...prev.coopBattleState,
+                    players: prev.coopBattleState.players.map(entry => {
+                        if (entry.peerId === coopSelfPeerId) {
+                            return {
+                                ...entry,
+                                player: p,
+                                isDown: p.currentHp <= 0
+                            };
+                        }
+                        const nextPlayer = {
+                            ...entry.player,
+                            powers: { ...entry.player.powers }
+                        };
+                        tickPlayerDebuffs(nextPlayer, entry.name);
+                        updateCoopParticipantState(entry.peerId, current => ({
+                            ...current,
+                            block: nextPlayer.block,
+                            buffer: nextPlayer.powers['BUFFER'] || 0
+                        }));
+                        return {
+                            ...entry,
+                            player: nextPlayer,
+                            isDown: nextPlayer.currentHp <= 0
+                        };
+                    })
+                };
             }
-            if (p.powers['VULNERABLE'] > 0) {
-                p.powers['VULNERABLE']--;
-                if (p.powers['VULNERABLE'] === 0) newLogs.push(trans("びくびくから回復した", languageMode));
-            }
-            if (p.powers['CONFUSED'] > 0) {
-                p.powers['CONFUSED']--;
-                if (p.powers['CONFUSED'] === 0) newLogs.push(trans("こんらんから回復した", languageMode));
-            }
-            return { ...prev, player: p, combatLog: [...prev.combatLog, ...newLogs].slice(-100) };
+            return {
+                ...prev,
+                player: p,
+                coopBattleState: nextCoopBattleState,
+                combatLog: [...prev.combatLog, ...newLogs].slice(-100)
+            };
         });
         await wait(400);
         await new Promise<void>(resolve => {
