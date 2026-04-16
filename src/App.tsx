@@ -2532,17 +2532,18 @@ const App: React.FC = () => {
         if (gameState.screen === GameScreen.REWARD && prevScreenRef.current !== GameScreen.REWARD) {
             if (raceEffects.rewardDummyCount > 0) {
                 const now = Date.now();
-                const statusPool = [
+                const statusPool = shuffle([
                     STATUS_CARDS.DAZED,
                     STATUS_CARDS.SLIMED,
                     STATUS_CARDS.BURN,
                     STATUS_CARDS.VOID,
-                ].filter(Boolean);
+                ].filter(Boolean));
                 setGameState(prev => {
                     if (prev.rewards.length === 0 || statusPool.length === 0) return prev;
                     const preservedReward = prev.rewards[0];
-                    const statusRewards = Array.from({ length: Math.max(0, raceEffects.rewardDummyCount) }, (_, index) => {
-                        const template = statusPool[index % statusPool.length];
+                    const statusRewards = statusPool
+                        .slice(0, Math.max(0, raceEffects.rewardDummyCount))
+                        .map((template, index) => {
                         return {
                             type: 'CARD' as const,
                             value: { ...template, id: `race-print-avalanche-card-${now}-${index}` },
@@ -7752,6 +7753,7 @@ const App: React.FC = () => {
         const isLibrarian = player.id === 'LIBRARIAN';
         const isGardener = player.id === 'GARDENER';
         const rewardPrefix = `${rewardScope}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        const getRewardCardTemplateKey = (card: ICard) => card.originalNames?.[0] || card.name || card.id;
         const pickedCardTemplateIds = new Set<string>();
 
         if (bonusGold > 0) {
@@ -7777,8 +7779,8 @@ const App: React.FC = () => {
                 pool = allPossibleCards.filter(c => c.rarity === targetRarity);
             }
 
-            const uniquePool = pool.filter(card => !pickedCardTemplateIds.has(card.id));
-            const fallbackUniquePool = allPossibleCards.filter(card => !pickedCardTemplateIds.has(card.id));
+            const uniquePool = pool.filter(card => !pickedCardTemplateIds.has(getRewardCardTemplateKey(card)));
+            const fallbackUniquePool = allPossibleCards.filter(card => !pickedCardTemplateIds.has(getRewardCardTemplateKey(card)));
             const pickSource =
                 uniquePool.length > 0
                     ? uniquePool
@@ -7788,7 +7790,7 @@ const App: React.FC = () => {
                             ? pool
                             : allPossibleCards;
             const candidate = pickSource[Math.floor(Math.random() * pickSource.length)];
-            pickedCardTemplateIds.add(candidate.id);
+            pickedCardTemplateIds.add(getRewardCardTemplateKey(candidate));
             rewards.push({ type: 'CARD', value: { ...candidate, id: `${rewardPrefix}-card-value-${i}` }, id: `${rewardPrefix}-card-${i}` });
         }
 
