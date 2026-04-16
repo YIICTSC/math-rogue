@@ -9049,8 +9049,10 @@ const App: React.FC = () => {
                         const isRealtimeRound =
                             normalizedBattleState?.battleMode === 'REALTIME' &&
                             normalizedBattleState?.turnQueue[normalizedBattleState.turnCursor]?.type !== 'ENEMY';
+                        const enemyActing = data.actingEnemyId !== undefined && data.actingEnemyId !== null;
                         const isLocalPlayersTurn =
                             !!normalizedBattleState &&
+                            !enemyActing &&
                             (
                                 isRealtimeRound ||
                                 normalizedBattleState?.turnQueue[normalizedBattleState.turnCursor]?.peerId === coopSelfPeerId
