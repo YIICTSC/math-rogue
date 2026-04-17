@@ -253,6 +253,7 @@ const COOP_PARTY_HUD_SCREEN_SET = new Set<GameScreen>([
 ]);
 
 const COOP_LOCAL_SETUP_SCREEN_SET = new Set<GameScreen>([
+    GameScreen.MODE_SELECTION,
     GameScreen.CHARACTER_SELECTION,
     GameScreen.DECK_CONSTRUCTION,
     GameScreen.RELIC_SELECTION
@@ -260,6 +261,12 @@ const COOP_LOCAL_SETUP_SCREEN_SET = new Set<GameScreen>([
 
 const shouldPreserveLocalCoopScreen = (localScreen: GameScreen, incomingScreen: GameScreen) => {
     if (COOP_LOCAL_SETUP_SCREEN_SET.has(localScreen) && localScreen !== incomingScreen) {
+        return true;
+    }
+    if (
+        (localScreen === GameScreen.GAME_OVER || localScreen === GameScreen.ENDING) &&
+        COOP_LOCAL_SETUP_SCREEN_SET.has(incomingScreen)
+    ) {
         return true;
     }
     if (CHALLENGE_SCREEN_SET.has(localScreen) && !CHALLENGE_SCREEN_SET.has(incomingScreen)) {
@@ -1998,6 +2005,10 @@ const App: React.FC = () => {
             return { ...randomCardTemplate, id: `unlocked-${Date.now()}` } as ICard;
         }
         return null;
+    }, []);
+    const getAdditionalCardTemplateByName = useCallback((cardName?: string | null) => {
+        if (!cardName) return null;
+        return Object.values(ADDITIONAL_CARDS).find(card => card.name === cardName) || null;
     }, []);
 
     useEffect(() => {
@@ -7107,8 +7118,91 @@ const App: React.FC = () => {
 
     const handleRetry = () => {
         setLegacyCardSelected(false);
+        setNewlyUnlockedCard(null);
         if (gameState.challengeMode === 'TYPING') {
             startTypingGame();
+            return;
+        }
+        if (gameState.challengeMode === 'COOP' && coopSession) {
+            audioService.playSound('select');
+            setIsLoading(false);
+            setCoopSupportCards([]);
+            setCoopBattleQueue([]);
+            setCoopBattleKey(null);
+            setCoopEnemyTurnCursor(0);
+            setCoopBattleState(null);
+            setCoopAwaitingMapSync(false);
+            setCoopAwaitingRewardSync(false);
+            setCoopNeedsInitialMapSync(false);
+            setCoopMapPendingNodeId(null);
+            setCoopRewardSets({});
+            setEventData(null);
+            setEventResultLog(null);
+            setTreasureRewards([]);
+            setTreasureOpened(false);
+            setTreasurePools([]);
+            setCoopSession(prev => prev ? ({
+                ...prev,
+                participants: prev.participants.map(participant => ({
+                    peerId: participant.peerId,
+                    name: participant.name,
+                    imageData: participant.imageData,
+                    voiceEnabled: participant.voiceEnabled
+                })),
+                decisionOwnerIndex: 0
+            }) : prev);
+            setGameState(prev => ({
+                screen: GameScreen.MODE_SELECTION,
+                mode: prev.mode,
+                modePool: undefined,
+                challengeMode: 'COOP',
+                act: 1,
+                floor: 0,
+                turn: 0,
+                map: [],
+                currentMapNodeId: null,
+                player: {
+                    maxHp: INITIAL_HP,
+                    currentHp: INITIAL_HP,
+                    maxEnergy: INITIAL_ENERGY,
+                    currentEnergy: INITIAL_ENERGY,
+                    block: 0,
+                    strength: 0,
+                    gold: 99,
+                    deck: createDeck(),
+                    hand: [],
+                    discardPile: [],
+                    drawPile: [],
+                    relics: [],
+                    potions: [],
+                    powers: {},
+                    echoes: 0,
+                    cardsPlayedThisTurn: 0,
+                    attacksPlayedThisTurn: 0,
+                    typesPlayedThisTurn: [],
+                    relicCounters: {},
+                    turnFlags: {},
+                    imageData: HERO_IMAGE_DATA,
+                    floatingText: null,
+                    nextTurnEnergy: 0,
+                    nextTurnDraw: 0,
+                    codexBuffer: []
+                },
+                enemies: [],
+                selectedEnemyId: null,
+                narrativeLog: [trans("協力で再挑戦！", languageMode)],
+                combatLog: [],
+                rewards: [],
+                selectionState: { active: false, type: 'DISCARD', amount: 0 },
+                isEndless: false,
+                parryState: { active: false, enemyId: null, success: false },
+                activeEffects: [],
+                currentStoryIndex: Math.floor(Math.random() * GAME_STORIES.length),
+                actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 },
+                newlyUnlockedCardName: undefined,
+                coopBattleState: null
+            }));
+            audioService.playBGM('menu');
             return;
         }
         if (gameState.challengeMode === 'RACE') {
@@ -7257,6 +7351,7 @@ const App: React.FC = () => {
             const nextPlayer = buildPostBattlePlayer(prev.player, true);
 
             if (prev.act === 4 && !prev.isEndless) {
+                const unlockedCard = unlockRandomAdditionalCard();
                 const score = calculateScore(prev, true);
                 storageService.saveScore({
                     id: `victory-${Date.now()}`,
@@ -7270,9 +7365,15 @@ const App: React.FC = () => {
                     challengeMode: prev.challengeMode
                 });
 
+                setNewlyUnlockedCard(unlockedCard);
                 setLegacyCardSelected(false);
                 audioService.playBGM('victory');
-                return { ...prev, player: nextPlayer, screen: GameScreen.ENDING };
+                return {
+                    ...prev,
+                    player: nextPlayer,
+                    screen: GameScreen.ENDING,
+                    newlyUnlockedCardName: unlockedCard?.name
+                };
             } else {
                 if (prev.challengeMode === 'TYPING') {
                     return { ...prev, player: nextPlayer, screen: GameScreen.REWARD, rewards: [] };
@@ -7281,7 +7382,7 @@ const App: React.FC = () => {
                 return { ...prev, player: nextPlayer, screen: challengeScreen };
             }
         });
-    }, [coopSelfPeerId, coopSession, selectedCharName]);
+    }, [coopSelfPeerId, coopSession, selectedCharName, unlockRandomAdditionalCard]);
 
     useEffect(() => {
         if (gameState.screen !== GameScreen.BATTLE) {
@@ -7350,7 +7451,7 @@ const App: React.FC = () => {
 
                 // --- NEW UNLOCK LOGIC ON GAME OVER ---
                 const unlockedCard = unlockRandomAdditionalCard();
-                if (unlockedCard) setNewlyUnlockedCard(unlockedCard);
+                setNewlyUnlockedCard(unlockedCard);
 
                 setLegacyCardSelected(false);
                 audioService.playSound('lose');
@@ -7367,10 +7468,35 @@ const App: React.FC = () => {
                     date: Date.now(),
                     challengeMode: gameState.challengeMode
                 });
-                setGameState(prev => ({ ...prev, player: clearBattleOnlyCardState(clearBigLadleTemp(prev.player)), screen: GameScreen.GAME_OVER }));
+                setGameState(prev => ({
+                    ...prev,
+                    player: clearBattleOnlyCardState(clearBigLadleTemp(prev.player)),
+                    screen: GameScreen.GAME_OVER,
+                    newlyUnlockedCardName: unlockedCard?.name
+                }));
             }
         }
     }, [gameState.enemies, gameState.player.currentHp, gameState.screen, gameState.act, gameState.challengeMode, coopSession, unlockRandomAdditionalCard, battleFinisherCutinCard, resolveBattleVictory]);
+
+    useEffect(() => {
+        if (gameState.challengeMode !== 'COOP') return;
+        if (!gameState.newlyUnlockedCardName) {
+            if (gameState.screen !== GameScreen.GAME_OVER && gameState.screen !== GameScreen.ENDING) {
+                setNewlyUnlockedCard(null);
+            }
+            return;
+        }
+        const template = getAdditionalCardTemplateByName(gameState.newlyUnlockedCardName);
+        if (!template) return;
+        storageService.saveUnlockedCard(template.name);
+        if (gameState.screen === GameScreen.GAME_OVER || gameState.screen === GameScreen.ENDING) {
+            setNewlyUnlockedCard(current =>
+                current?.name === template.name
+                    ? current
+                    : { ...template, id: `coop-unlocked-${Date.now()}` }
+            );
+        }
+    }, [gameState.challengeMode, gameState.newlyUnlockedCardName, gameState.screen, getAdditionalCardTemplateByName]);
 
     useEffect(() => {
         return () => {
@@ -8874,6 +9000,17 @@ const App: React.FC = () => {
                     if (shouldReleaseInitialMapWait) {
                         setCoopAwaitingMapSync(false);
                     }
+                    if (
+                        preserveLocalScreen &&
+                        (
+                            prev.screen === GameScreen.GAME_OVER ||
+                            prev.screen === GameScreen.ENDING ||
+                            data.state.screen === GameScreen.GAME_OVER ||
+                            data.state.screen === GameScreen.ENDING
+                        )
+                    ) {
+                        return prev;
+                    }
                     const nextSharedState = applyCoopSharedState(prev, data.state);
                     const normalizedSharedBattleState =
                         data.state.screen === GameScreen.BATTLE
@@ -8922,7 +9059,12 @@ const App: React.FC = () => {
             }
 
             if (data.type === 'COOP_MODE_SET' && !coopSession.isHost) {
-                setGameState(prev => ({ ...prev, mode: data.mode, screen: GameScreen.CHARACTER_SELECTION }));
+                setGameState(prev => {
+                    if (prev.screen === GameScreen.GAME_OVER || prev.screen === GameScreen.ENDING) {
+                        return prev;
+                    }
+                    return { ...prev, mode: data.mode, screen: GameScreen.CHARACTER_SELECTION };
+                });
                 return;
             }
 
