@@ -1,35 +1,22 @@
 import React from 'react';
-import { Settings, X, Volume2, Mic, Monitor, Gamepad2, Wifi, Shield } from 'lucide-react';
+import { Settings, X, Volume2, Mic, Monitor, Wifi } from 'lucide-react';
 
 export type BgmMode = 'STUDY' | 'MP3' | 'OSCILLATOR';
-export type SettingsTab = 'AUDIO' | 'DISPLAY' | 'CONTROL' | 'COMM';
+export type SettingsTab = 'AUDIO' | 'DISPLAY' | 'COMM';
 
 export type AppSettings = {
   bgmMode: BgmMode;
   bgmVolume: number;
   seVolume: number;
   micEnabled: boolean;
-  micSensitivity: number;
-  pushToTalk: boolean;
   selectedInputDeviceId: string;
   noiseSuppression: boolean;
   echoCancellation: boolean;
   autoGainControl: boolean;
   remoteVoiceVolume: number;
   joinMuted: boolean;
-  networkMode: 'quality' | 'latency';
   reduceScreenShake: boolean;
-  effectIntensity: 'low' | 'mid' | 'high';
   fontSize: 'normal' | 'large';
-  colorAssist: boolean;
-  keyLayout: 'default' | 'compact';
-  longPressMs: number;
-  vibration: boolean;
-  readAloud: boolean;
-  emphasizeJudgeSE: boolean;
-  hintLevel: 'low' | 'normal' | 'high';
-  parentLockEnabled: boolean;
-  parentPin: string;
   lowDataMode: boolean;
 };
 
@@ -48,7 +35,6 @@ type Props = {
 const tabs: Array<{ key: SettingsTab; label: string; icon: React.ReactNode }> = [
   { key: 'AUDIO', label: '音声', icon: <Volume2 size={14} /> },
   { key: 'DISPLAY', label: '表示', icon: <Monitor size={14} /> },
-  { key: 'CONTROL', label: '操作', icon: <Gamepad2 size={14} /> },
   { key: 'COMM', label: '通信', icon: <Wifi size={14} /> }
 ];
 
@@ -91,10 +77,6 @@ const SettingsModal: React.FC<Props> = ({ open, tab, settings, inputDevices, onC
               <div className="rounded border border-slate-700 p-3 space-y-2">
                 <div className="font-bold flex items-center gap-1"><Mic size={14} /> マイク</div>
                 <label className="flex items-center gap-2"><input type="checkbox" checked={settings.micEnabled} onChange={e => onChange('micEnabled', e.target.checked)} />マイクON</label>
-                <label className="block">入力感度: {Math.round(settings.micSensitivity * 100)}%
-                  <input className="w-full" type="range" min={0} max={100} value={Math.round(settings.micSensitivity * 100)} onChange={e => onChange('micSensitivity', Number(e.target.value) / 100)} />
-                </label>
-                <label className="flex items-center gap-2"><input type="checkbox" checked={settings.pushToTalk} onChange={e => onChange('pushToTalk', e.target.checked)} />Push-to-talk</label>
                 <label className="block">入力デバイス
                   <select className="w-full bg-slate-800 rounded border border-slate-600 p-1" value={settings.selectedInputDeviceId} onChange={e => onChange('selectedInputDeviceId', e.target.value)}>
                     <option value="">既定デバイス</option>
@@ -111,36 +93,9 @@ const SettingsModal: React.FC<Props> = ({ open, tab, settings, inputDevices, onC
           {tab === 'DISPLAY' && (
             <>
               <label className="flex items-center gap-2"><input type="checkbox" checked={settings.reduceScreenShake} onChange={e => onChange('reduceScreenShake', e.target.checked)} />画面揺れ軽減</label>
-              <label className="block">エフェクト強度
-                <select className="w-full bg-slate-800 rounded border border-slate-600 p-1" value={settings.effectIntensity} onChange={e => onChange('effectIntensity', e.target.value as AppSettings['effectIntensity'])}>
-                  <option value="low">低</option><option value="mid">中</option><option value="high">高</option>
-                </select>
-              </label>
               <label className="block">文字サイズ
                 <select className="w-full bg-slate-800 rounded border border-slate-600 p-1" value={settings.fontSize} onChange={e => onChange('fontSize', e.target.value as AppSettings['fontSize'])}>
                   <option value="normal">標準</option><option value="large">大</option>
-                </select>
-              </label>
-              <label className="flex items-center gap-2"><input type="checkbox" checked={settings.colorAssist} onChange={e => onChange('colorAssist', e.target.checked)} />色覚サポート</label>
-              <label className="flex items-center gap-2"><input type="checkbox" checked={settings.readAloud} onChange={e => onChange('readAloud', e.target.checked)} />問題文の読み上げ</label>
-            </>
-          )}
-
-          {tab === 'CONTROL' && (
-            <>
-              <label className="block">キー配置
-                <select className="w-full bg-slate-800 rounded border border-slate-600 p-1" value={settings.keyLayout} onChange={e => onChange('keyLayout', e.target.value as AppSettings['keyLayout'])}>
-                  <option value="default">標準</option><option value="compact">コンパクト</option>
-                </select>
-              </label>
-              <label className="block">長押し判定(ms)
-                <input className="w-full" type="range" min={0} max={1500} step={50} value={settings.longPressMs} onChange={e => onChange('longPressMs', Number(e.target.value))} />
-              </label>
-              <label className="flex items-center gap-2"><input type="checkbox" checked={settings.vibration} onChange={e => onChange('vibration', e.target.checked)} />タップ時バイブ</label>
-              <label className="flex items-center gap-2"><input type="checkbox" checked={settings.emphasizeJudgeSE} onChange={e => onChange('emphasizeJudgeSE', e.target.checked)} />正誤SE強調</label>
-              <label className="block">ヒント表示レベル
-                <select className="w-full bg-slate-800 rounded border border-slate-600 p-1" value={settings.hintLevel} onChange={e => onChange('hintLevel', e.target.value as AppSettings['hintLevel'])}>
-                  <option value="low">少なめ</option><option value="normal">標準</option><option value="high">多め</option>
                 </select>
               </label>
             </>
@@ -152,19 +107,7 @@ const SettingsModal: React.FC<Props> = ({ open, tab, settings, inputDevices, onC
                 <input className="w-full" type="range" min={0} max={100} value={Math.round(settings.remoteVoiceVolume * 100)} onChange={e => onChange('remoteVoiceVolume', Number(e.target.value) / 100)} />
               </label>
               <label className="flex items-center gap-2"><input type="checkbox" checked={settings.joinMuted} onChange={e => onChange('joinMuted', e.target.checked)} />部屋参加時ミュート開始</label>
-              <label className="block">通信品質優先
-                <select className="w-full bg-slate-800 rounded border border-slate-600 p-1" value={settings.networkMode} onChange={e => onChange('networkMode', e.target.value as AppSettings['networkMode'])}>
-                  <option value="quality">音質優先</option><option value="latency">遅延優先</option>
-                </select>
-              </label>
               <label className="flex items-center gap-2"><input type="checkbox" checked={settings.lowDataMode} onChange={e => onChange('lowDataMode', e.target.checked)} />低データ通信モード</label>
-              <div className="pt-2 border-t border-slate-700 mt-2">
-                <div className="font-bold flex items-center gap-1"><Shield size={14} /> 安全</div>
-                <label className="flex items-center gap-2"><input type="checkbox" checked={settings.parentLockEnabled} onChange={e => onChange('parentLockEnabled', e.target.checked)} />保護者ロック</label>
-                <label className="block">PIN
-                  <input type="password" className="w-full bg-slate-800 rounded border border-slate-600 p-1" value={settings.parentPin} onChange={e => onChange('parentPin', e.target.value.slice(0, 8))} />
-                </label>
-              </div>
             </>
           )}
         </div>
