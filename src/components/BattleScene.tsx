@@ -221,11 +221,6 @@ export const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: s
                     )}
                 </div>
             )})}
-            {droppedEffectCount > 0 && (
-                <div className="absolute bottom-2 right-2 rounded-full bg-black/65 px-2 py-1 text-xs font-bold text-white">
-                    +{droppedEffectCount} VFX
-                </div>
-            )}
             <style>
                 {`
                     @keyframes slash-vfx {
