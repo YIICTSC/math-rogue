@@ -125,6 +125,14 @@ const PRIMARY_SITE_URL = 'https://yiictsc.github.io/math-rogue/';
 const COOP_VFX_DEBUG_STORAGE_KEY = 'mr.coopVfxDebug';
 const COOP_FINISHER_DISPLAY_MS = 1800;
 
+type LearningRogueElectronApi = {
+    isElectron: boolean;
+    quit: () => Promise<void>;
+    getWindowState: () => Promise<{ isFullScreen: boolean; isMaximized: boolean; bounds?: { width: number; height: number; x: number; y: number } }>;
+    setFullScreen: (enabled: boolean) => Promise<boolean>;
+    resetWindowState: () => Promise<boolean>;
+};
+
 type GalaxyExpressModalState = {
     cards: ICard[];
 };
@@ -476,6 +484,11 @@ const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
 };
 
 const App: React.FC = () => {
+    const electronApi = typeof window !== 'undefined'
+        ? ((window as Window & { learningRogue?: LearningRogueElectronApi }).learningRogue)
+        : undefined;
+    const isElectronApp = Boolean(electronApi?.isElectron);
+
     const detectMobilePortrait = () => {
         if (typeof window === 'undefined') return false;
         const isTouchLike = ('ontouchstart' in window) || navigator.maxTouchPoints > 0 || window.matchMedia('(pointer: coarse)').matches;
@@ -683,6 +696,7 @@ const App: React.FC = () => {
     const [showSettingsModal, setShowSettingsModal] = useState(false);
     const [settingsTab, setSettingsTab] = useState<SettingsTab>('AUDIO');
     const [inputDevices, setInputDevices] = useState<MediaDeviceInfo[]>([]);
+    const [isFullScreen, setIsFullScreen] = useState(false);
     const [appSettings, setAppSettings] = useState<AppSettings>(() => {
         const saved = storageService.getAppSettings<AppSettings>();
         return { ...DEFAULT_APP_SETTINGS, ...(saved || {}) };
@@ -1274,10 +1288,8 @@ const App: React.FC = () => {
     useEffect(() => {
         if (gameState.challengeMode !== 'COOP') return;
         if (!appSettings.joinMuted) return;
-        if (coopVoiceEnabled) {
-            setCoopVoiceEnabled(false);
-        }
-    }, [appSettings.joinMuted, gameState.challengeMode, coopVoiceEnabled]);
+        setCoopVoiceEnabled(false);
+    }, [appSettings.joinMuted, gameState.challengeMode]);
     useEffect(() => {
         if (gameState.challengeMode !== 'COOP' || !coopSession || !coopSelfPeerId) return;
         let cancelled = false;
@@ -2604,6 +2616,13 @@ const App: React.FC = () => {
         audioService.setBgmVolume(appSettings.bgmVolume);
         audioService.setSfxVolume(appSettings.seVolume);
     }, [appSettings]);
+
+    useEffect(() => {
+        if (!electronApi) return;
+        electronApi.getWindowState()
+            .then(state => setIsFullScreen(Boolean(state.isFullScreen)))
+            .catch(() => undefined);
+    }, [electronApi]);
 
     useEffect(() => {
         if (bgmMode === appSettings.bgmMode) return;
@@ -9644,6 +9663,22 @@ const App: React.FC = () => {
         p2pService.setVoiceEnabled(DEFAULT_APP_SETTINGS.micEnabled).catch(() => undefined);
     }, []);
 
+    const quitApp = useCallback(() => {
+        electronApi?.quit().catch(() => undefined);
+    }, [electronApi]);
+
+    const toggleFullScreen = useCallback((enabled: boolean) => {
+        electronApi?.setFullScreen(enabled)
+            .then(actual => setIsFullScreen(Boolean(actual)))
+            .catch(() => undefined);
+    }, [electronApi]);
+
+    const resetWindowState = useCallback(() => {
+        electronApi?.resetWindowState()
+            .then(() => setIsFullScreen(false))
+            .catch(() => undefined);
+    }, [electronApi]);
+
     return (
         <div className={`w-full h-[100dvh] bg-black overflow-hidden ${appSettings.fontSize === 'large' ? 'text-[105%]' : ''}`}>
             <div className={`w-full h-full relative overflow-hidden bg-black ${appSettings.lowDataMode ? '' : 'crt-scanline'} ${raceEffects.upsideDownUntil > raceEffectNow ? 'scale-x-[-1]' : ''} ${(raceEffects.deskShakeUntil > raceEffectNow && !appSettings.reduceScreenShake) ? 'animate-[race-desk-shake_0.18s_linear_infinite]' : ''}`}>
@@ -9826,6 +9861,15 @@ const App: React.FC = () => {
                             >
                                 <Settings size={16} />
                             </button>
+                            {isElectronApp && (
+                                <button
+                                    onClick={quitApp}
+                                    className="flex h-9 w-9 items-center justify-center border-t-2 border-l-2 border-r-4 border-b-4 border-t-red-200 border-l-red-200 border-r-red-800 border-b-red-800 bg-red-950/95 text-red-100 shadow-[0_0_0_1px_rgba(0,0,0,0.45)] transition-all hover:bg-red-900 active:translate-x-[2px] active:translate-y-[2px] active:border-r-2 active:border-b-2"
+                                    title="ゲームをとじる"
+                                >
+                                    <X size={16} />
+                                </button>
+                            )}
                         </div>
 
                         <div className="absolute bottom-2 left-2 z-9999 text-gray-500 text-[10px] font-mono flex flex-col gap-0.5">
@@ -11362,6 +11406,11 @@ const App: React.FC = () => {
                     onChange={updateSetting}
                     onResetAudio={resetAudioSettings}
                     onResetAll={resetAllSettings}
+                    isElectron={isElectronApp}
+                    isFullScreen={isFullScreen}
+                    onToggleFullScreen={toggleFullScreen}
+                    onResetWindowState={resetWindowState}
+                    onQuitApp={quitApp}
                 />
             </div>
         </div>
