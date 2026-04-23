@@ -124,7 +124,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
 
   return (
     <div className="flex flex-col h-full w-full bg-cyan-950 text-white relative items-center justify-center p-8 font-mono">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-20 pointer-events-none"></div>
+        <div className="absolute inset-0 texture-dark-matter opacity-20 pointer-events-none"></div>
         
         <div className="z-10 w-full max-w-md text-center">
             <div className="bg-black/40 border-4 border-white p-8 rounded-lg mb-8 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[260px]">

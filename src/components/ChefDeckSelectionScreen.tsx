@@ -63,7 +63,7 @@ const ChefDeckSelectionScreen: React.FC<ChefDeckSelectionScreenProps> = ({ onCom
 
   return (
     <div className="flex flex-col h-full w-full bg-gray-900 text-white p-4 overflow-hidden relative">
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-30 pointer-events-none"></div>
+      <div className="absolute inset-0 texture-dark-matter opacity-30 pointer-events-none"></div>
 
       {/* Header */}
       <div className="z-10 bg-black/80 border-b-4 border-pink-600 p-4 rounded-t-xl shrink-0 flex justify-between items-end">

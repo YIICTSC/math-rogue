@@ -49,7 +49,7 @@ const GardenScreen: React.FC<GardenScreenProps> = ({ player, onPlant, onHarvest,
   return (
     <div className="flex flex-col h-full w-full bg-[#2d1b0e] text-white font-mono relative overflow-hidden">
       {/* Background Texture */}
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-20 pointer-events-none"></div>
+      <div className="absolute inset-0 texture-dark-matter opacity-20 pointer-events-none"></div>
 
       {/* Header - More compact on mobile */}
       <div className="z-10 flex justify-between items-center bg-black/60 p-2 md:p-4 border-b-4 border-[#5d4037] shrink-0 shadow-xl">

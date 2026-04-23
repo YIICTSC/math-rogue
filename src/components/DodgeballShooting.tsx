@@ -124,7 +124,7 @@ const DodgeballShooting: React.FC<DodgeballShootingProps> = ({ enemy, playerImag
             className="w-full h-full bg-slate-800 flex flex-col items-center justify-center relative cursor-crosshair overflow-hidden"
             onClick={handleThrow}
         >
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-20 pointer-events-none"></div>
+            <div className="absolute inset-0 texture-dark-matter opacity-20 pointer-events-none"></div>
             
             {/* Header */}
             <div className="absolute top-10 text-center animate-pulse z-10 pointer-events-none">

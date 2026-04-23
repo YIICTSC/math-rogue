@@ -16,6 +16,15 @@ const BASE_SPEED = 4.5;
 const PLAYER_DEFAULT_X = 120;
 const MAX_PARTICLES = 60; 
 const MIN_OBSTACLE_GAP = 500; 
+const PLAYER_DASH_FRAME_COUNT = 8;
+const PLAYER_DASH_SPRITE_BASELINE_Y = 225;
+const PLAYER_DASH_DRAW_HEIGHT = 84;
+const PLAYER_DASH_SPRITE_SRC = `${(import.meta as any).env.BASE_URL || '/'}sprites/go-home-dash-8-loop-grid.png`;
+const PLAYER_JUMP_FRAME_COUNT = 3;
+const PLAYER_JUMP_SPRITE_BASELINE_Y = 594;
+const PLAYER_JUMP_DRAW_HEIGHT = 108;
+const PLAYER_JUMP_SPRITE_SRC = `${(import.meta as any).env.BASE_URL || '/'}sprites/go-home-dash-jump-3.png`;
+const PLAYER_JUMP_FRAME_X_OFFSETS = [36, 40, -10];
 
 interface Obstacle {
     id: string;
@@ -68,12 +77,46 @@ type DashGameState = 'START' | 'PLAYING' | 'CHALLENGE' | 'LEVEL_UP' | 'GAME_OVER
 const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const playerSpriteRef = useRef<HTMLImageElement | null>(null);
+    const playerJumpSpriteRef = useRef<HTMLImageElement | null>(null);
     const [gameState, setGameState] = useState<DashGameState>('START');
     const gameStateRef = useRef<DashGameState>('START');
     
     useEffect(() => {
         gameStateRef.current = gameState;
     }, [gameState]);
+
+    useEffect(() => {
+        const image = new Image();
+        image.onload = () => {
+            playerSpriteRef.current = image;
+        };
+        image.onerror = () => {
+            playerSpriteRef.current = null;
+        };
+        image.src = PLAYER_DASH_SPRITE_SRC;
+
+        return () => {
+            image.onload = null;
+            image.onerror = null;
+        };
+    }, []);
+
+    useEffect(() => {
+        const image = new Image();
+        image.onload = () => {
+            playerJumpSpriteRef.current = image;
+        };
+        image.onerror = () => {
+            playerJumpSpriteRef.current = null;
+        };
+        image.src = PLAYER_JUMP_SPRITE_SRC;
+
+        return () => {
+            image.onload = null;
+            image.onerror = null;
+        };
+    }, []);
 
     const [languageMode] = useState<LanguageMode>(() => storageService.getLanguageMode() || 'JAPANESE');
     
@@ -110,6 +153,7 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         expMult: 1,
         animFrame: 0,
         animTimer: 0,
+        jumpActionFrame: 0,
         autoHeal: false,
         autoHealTimer: 0,
         pierceShot: false,
@@ -206,7 +250,7 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         playerRef.current = {
             x: PLAYER_DEFAULT_X, y: GROUND_Y, vy: 0, isJumping: false, isFalling: false, isPressing: false, jumpCount: 0, maxJumps: 1, invulFrame: 0,
             speedBoost: 1, shootingRate: 0, shootingTimer: 0, barrier: false, barrierRegen: false, barrierTimer: 0, expMult: 1,
-            animFrame: 0, animTimer: 0, autoHeal: false, autoHealTimer: 0, 
+            animFrame: 0, animTimer: 0, jumpActionFrame: 0, autoHeal: false, autoHealTimer: 0, 
             pierceShot: false, doubleShot: false, tripleShot: false, homingShot: false, largeShot: false, landShockwave: false, 
             stompAbility: false, airStall: false, reflectShield: false, lifesteal: false, trailFire: false, jumpBoom: false,
             scoreBonus: 1, cleaningDuty: 0, animFrameTimer: 0
@@ -232,12 +276,11 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         });
     };
 
-    const handlePointerDown = (e: React.PointerEvent) => {
+    const triggerJump = () => {
         if (gameStateRef.current !== 'PLAYING') return;
         const p = playerRef.current;
-        p.isPressing = true;
         if (!p.isFalling && p.jumpCount < p.maxJumps) {
-            p.vy = JUMP_FORCE; p.isJumping = true; p.jumpCount++;
+            p.vy = JUMP_FORCE; p.isJumping = true; p.jumpCount++; p.jumpActionFrame = 12;
             audioService.playSound('select'); addParticle(p.x, p.y, '#ffffff');
             if (p.jumpBoom) {
                  addVfxRing(p.x, p.y, '#ffffff');
@@ -258,7 +301,37 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }
     };
 
+    const handlePointerDown = (e: React.PointerEvent) => {
+        if (gameStateRef.current !== 'PLAYING') return;
+        const p = playerRef.current;
+        p.isPressing = true;
+        triggerJump();
+    };
+
     const handlePointerUp = () => { playerRef.current.isPressing = false; };
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.code !== 'Space' && e.code !== 'ArrowUp' && e.code !== 'KeyW') return;
+            e.preventDefault();
+            if (e.repeat) return;
+            playerRef.current.isPressing = true;
+            triggerJump();
+        };
+
+        const handleKeyUp = (e: KeyboardEvent) => {
+            if (e.code !== 'Space' && e.code !== 'ArrowUp' && e.code !== 'KeyW') return;
+            e.preventDefault();
+            playerRef.current.isPressing = false;
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('keyup', handleKeyUp);
+        };
+    }, []);
 
     const isDestroyable = (type: string) => !['HOLE', 'STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS', 'IRON_BARRIER', 'VAULTING', 'CHALKBOARD'].includes(type);
 
@@ -277,9 +350,11 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         p.animFrameTimer = (p.animFrameTimer || 0) + 1;
         const animThreshold = Math.max(2, 6 - Math.floor(currentSpeed * 0.5));
         if (p.animFrameTimer > animThreshold) {
-            p.animFrame = (p.animFrame + 1) % 4; p.animFrameTimer = 0;
+            if (!p.isJumping && !p.isFalling) p.animFrame = (p.animFrame + 1) % PLAYER_DASH_FRAME_COUNT;
+            p.animFrameTimer = 0;
             if (!p.isJumping && !p.isFalling) addParticle(p.x - 10, p.y, '#8d6e63');
         }
+        if (p.jumpActionFrame > 0) p.jumpActionFrame--;
 
         if (p.airStall && p.isPressing && p.vy > 0) {
             p.vy *= 0.8; 
@@ -342,13 +417,16 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             if (overHole || p.isFalling) p.isFalling = true;
             else {
                 if (p.isFalling) p.isFalling = false;
-                if (p.isJumping && p.landShockwave) {
-                    addVfxRing(p.x, currentGroundLevel, '#ffeb3b');
-                    audioService.playSound('block');
-                    obstaclesRef.current = obstaclesRef.current.filter(obs => {
-                        if (!isDestroyable(obs.type)) return true;
-                        return Math.abs(obs.x - p.x) > 120;
-                    });
+                if (p.isJumping) {
+                    for (let i = 0; i < 5; i++) addParticle(p.x - 8 + i * 4, currentGroundLevel, '#cbd5e1');
+                    if (p.landShockwave) {
+                        addVfxRing(p.x, currentGroundLevel, '#ffeb3b');
+                        audioService.playSound('block');
+                        obstaclesRef.current = obstaclesRef.current.filter(obs => {
+                            if (!isDestroyable(obs.type)) return true;
+                            return Math.abs(obs.x - p.x) > 120;
+                        });
+                    }
                 }
                 p.y = currentGroundLevel; p.vy = 0; p.isJumping = false; p.jumpCount = 0;
             }
@@ -709,12 +787,67 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         const pl = playerRef.current;
         if (pl.invulFrame % 4 < 2) {
-            const bounce = (!pl.isJumping && !pl.isFalling) ? Math.sin(frameCount.current * 0.2) * 3 : 0;
+            const isAirborne = pl.isJumping || pl.isFalling;
+            const isLandingPose = isAirborne && !pl.isFalling && pl.vy > 3 && (GROUND_Y - pl.y) < 58;
+            const bounce = !isAirborne ? Math.sin(frameCount.current * 0.2) * 3 : 0;
             ctx.save(); ctx.translate(pl.x, pl.y + bounce);
-            const template = SPRITE_TEMPLATES['HERO_SIDE'];
-            const size = 40; const pixelSize = size / 16;
             ctx.shadowBlur = 4; ctx.shadowColor = "white";
-            for (let row = 0; row < 16; row++) { for (let col = 0; col < 16; col++) { const char = template[row][col]; if (char === '.') continue; ctx.fillStyle = char === '%' ? '#ffccbc' : (char === '@' ? '#000000' : '#dc2626'); ctx.fillRect(-20 + col * pixelSize, -40 + row * pixelSize, pixelSize + 0.5, pixelSize + 0.5); } }
+            ctx.save();
+            if (isAirborne) {
+                if (pl.vy < -5) {
+                    ctx.rotate(-0.12);
+                    ctx.scale(0.96, 1.04);
+                } else if (!isLandingPose) {
+                    ctx.rotate(-0.03);
+                } else {
+                    ctx.rotate(0.1);
+                    ctx.scale(1.03, 0.98);
+                }
+            }
+            const jumpSprite = playerJumpSpriteRef.current;
+            const canUseJumpSprite = isAirborne && jumpSprite && jumpSprite.complete && jumpSprite.naturalWidth > 0;
+            const sprite = canUseJumpSprite ? jumpSprite : playerSpriteRef.current;
+            if (sprite && sprite.complete && sprite.naturalWidth > 0) {
+                const frameCount = canUseJumpSprite ? PLAYER_JUMP_FRAME_COUNT : PLAYER_DASH_FRAME_COUNT;
+                const frameWidth = sprite.naturalWidth / frameCount;
+                const frameHeight = sprite.naturalHeight;
+                let frame = Math.abs(pl.animFrame || 0) % frameCount;
+                if (canUseJumpSprite) {
+                    frame = pl.vy < -5 ? 0 : (isLandingPose ? 2 : 1);
+                    if (pl.jumpActionFrame > 6 && pl.vy < 0) frame = 0;
+                } else if (isAirborne) {
+                    frame = pl.vy < -5
+                        ? 1
+                        : (isLandingPose ? 5 : 2);
+                    if (pl.jumpActionFrame > 6 && pl.vy < 0) frame = 1;
+                }
+                const drawHeightTarget = canUseJumpSprite ? PLAYER_JUMP_DRAW_HEIGHT : PLAYER_DASH_DRAW_HEIGHT;
+                const baselineY = canUseJumpSprite ? PLAYER_JUMP_SPRITE_BASELINE_Y : PLAYER_DASH_SPRITE_BASELINE_Y;
+                const scale = drawHeightTarget / frameHeight;
+                const drawWidth = frameWidth * scale;
+                const drawHeight = frameHeight * scale;
+                const frameXOffset = canUseJumpSprite ? (PLAYER_JUMP_FRAME_X_OFFSETS[frame] || 0) * scale : 0;
+                const drawX = -drawWidth / 2 - frameXOffset;
+                const drawY = -(baselineY * scale);
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                ctx.drawImage(
+                    sprite,
+                    frame * frameWidth,
+                    0,
+                    frameWidth,
+                    frameHeight,
+                    drawX,
+                    drawY,
+                    drawWidth,
+                    drawHeight
+                );
+            } else {
+                const template = SPRITE_TEMPLATES['HERO_SIDE'];
+                const size = 40; const pixelSize = size / 16;
+                for (let row = 0; row < 16; row++) { for (let col = 0; col < 16; col++) { const char = template[row][col]; if (char === '.') continue; ctx.fillStyle = char === '%' ? '#ffccbc' : (char === '@' ? '#000000' : '#dc2626'); ctx.fillRect(-20 + col * pixelSize, -40 + row * pixelSize, pixelSize + 0.5, pixelSize + 0.5); } }
+            }
+            ctx.restore();
             ctx.shadowBlur = 0;
             if (pl.barrier) { ctx.strokeStyle = '#00ffff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, -20, 30, 0, Math.PI * 2); ctx.stroke(); }
             ctx.restore();

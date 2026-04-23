@@ -1,5 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import jsQR from 'jsqr';
+import QRCode from 'qrcode';
 import { Player } from '../types';
 import { encodePlayerData, decodePlayerData } from '../services/vsService';
 import { X, Camera, QrCode, Play, Copy, Check, Share2, AlertCircle, RefreshCw, FlipHorizontal, Edit3 } from 'lucide-react';
@@ -17,6 +19,7 @@ const QRManager: React.FC<QRManagerProps> = ({ player, onOpponentLoaded, onClose
     const [copied, setCopied] = useState(false);
     const [imageError, setImageError] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [qrImageUrl, setQrImageUrl] = useState<string>("");
     
     // Scanner refs
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -34,6 +37,51 @@ const QRManager: React.FC<QRManagerProps> = ({ player, onOpponentLoaded, onClose
         setImageError(false);
         setIsLoading(true);
     }, [player]);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        const buildQrImage = async () => {
+            if (!qrData) {
+                setQrImageUrl("");
+                setIsLoading(false);
+                return;
+            }
+
+            try {
+                const dataUrl = await QRCode.toDataURL(qrData, {
+                    errorCorrectionLevel: 'M',
+                    margin: 2,
+                    width: 320,
+                    color: {
+                        dark: '#111827',
+                        light: '#ffffff'
+                    }
+                });
+                if (!cancelled) {
+                    setQrImageUrl(dataUrl);
+                    setImageError(false);
+                }
+            } catch (error) {
+                console.error('QR generation error:', error);
+                if (!cancelled) {
+                    setImageError(true);
+                    setQrImageUrl("");
+                }
+            } finally {
+                if (!cancelled) {
+                    setIsLoading(false);
+                }
+            }
+        };
+
+        setIsLoading(true);
+        buildQrImage();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [qrData]);
 
     // Handle Camera for Scanning
     useEffect(() => {
@@ -93,17 +141,6 @@ const QRManager: React.FC<QRManagerProps> = ({ player, onOpponentLoaded, onClose
     const startCamera = async () => {
         setScanError(null);
         try {
-            // Load jsQR from CDN dynamically
-            if (!(window as any).jsQR) {
-                await new Promise((resolve, reject) => {
-                    const script = document.createElement('script');
-                    script.src = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js";
-                    script.onload = resolve;
-                    script.onerror = () => reject(new Error("QRライブラリの読み込みに失敗しました"));
-                    document.head.appendChild(script);
-                });
-            }
-
             // selectedDeviceId がない場合は理想的な向きとして "environment" (背面) を指定
             const constraints: MediaStreamConstraints = {
                 video: selectedDeviceId 
@@ -143,7 +180,6 @@ const QRManager: React.FC<QRManagerProps> = ({ player, onOpponentLoaded, onClose
         if (videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
             const canvas = canvasRef.current;
             const video = videoRef.current;
-            const jsQR = (window as any).jsQR;
 
             if (canvas && video && jsQR) {
                 const ctx = canvas.getContext("2d", { willReadFrequently: true });
@@ -206,10 +242,6 @@ const QRManager: React.FC<QRManagerProps> = ({ player, onOpponentLoaded, onClose
             alert("無効なバトルコードです。");
         }
     };
-
-    const qrImageUrl = qrData 
-        ? `https://quickchart.io/qr?text=${encodeURIComponent(qrData)}&size=300&margin=2`
-        : "";
 
     return (
         <div className="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center p-4 backdrop-blur-sm">

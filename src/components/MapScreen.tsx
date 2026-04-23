@@ -143,7 +143,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
     return (
         <div className="flex flex-col h-full w-full bg-slate-950 relative overflow-hidden">
             {/* 背景テクスチャ（黒板風） */}
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-40 pointer-events-none"></div>
+            <div className="absolute inset-0 texture-dark-matter opacity-40 pointer-events-none"></div>
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-900/50 to-black pointer-events-none"></div>
 
             {/* 上部ステータスバー (モバイル最適化版) */}
@@ -377,7 +377,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                             </button>
                         </div>
 
-                        <div className="p-6 md:p-10 overflow-y-auto flex-grow bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] custom-scrollbar">
+                        <div className="p-6 md:p-10 overflow-y-auto flex-grow texture-carbon-fibre custom-scrollbar">
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 justify-items-center pb-10">
                                 {sortedDeck.map((card) => (
                                     <div key={card.id} className="scale-95 hover:scale-105 transition-transform duration-200">

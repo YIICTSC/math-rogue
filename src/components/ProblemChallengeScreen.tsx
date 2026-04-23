@@ -726,7 +726,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
 
   return (
     <div className="w-full h-full bg-slate-950 flex flex-col relative overflow-hidden">
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-30 pointer-events-none"></div>
+      <div className="absolute inset-0 texture-dark-matter opacity-30 pointer-events-none"></div>
       
       <div className="z-10 w-full max-w-6xl mx-auto flex flex-col flex-1 min-h-0 overflow-hidden">
         {/* Header - Fixed */}

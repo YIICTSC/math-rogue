@@ -30,6 +30,12 @@ type Props = {
   onChange: <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => void;
   onResetAudio: () => void;
   onResetAll: () => void;
+  isElectron?: boolean;
+  isFullScreen?: boolean;
+  onToggleFullScreen?: (enabled: boolean) => void;
+  onResetWindowState?: () => void;
+  onQuitApp?: () => void;
+  showCommunication?: boolean;
 };
 
 const tabs: Array<{ key: SettingsTab; label: string; icon: React.ReactNode }> = [
@@ -38,8 +44,25 @@ const tabs: Array<{ key: SettingsTab; label: string; icon: React.ReactNode }> = 
   { key: 'COMM', label: '通信', icon: <Wifi size={14} /> }
 ];
 
-const SettingsModal: React.FC<Props> = ({ open, tab, settings, inputDevices, onClose, onChangeTab, onChange, onResetAudio, onResetAll }) => {
+const SettingsModal: React.FC<Props> = ({
+  open,
+  tab,
+  settings,
+  inputDevices,
+  onClose,
+  onChangeTab,
+  onChange,
+  onResetAudio,
+  onResetAll,
+  isElectron = false,
+  isFullScreen = false,
+  onToggleFullScreen,
+  onResetWindowState,
+  onQuitApp,
+  showCommunication = true
+}) => {
   if (!open) return null;
+  const visibleTabs = showCommunication ? tabs : tabs.filter(t => t.key !== 'COMM');
 
   return (
     <div className="fixed inset-0 z-[10020] bg-black/70 backdrop-blur-sm flex items-center justify-center p-3" onClick={onClose}>
@@ -50,7 +73,7 @@ const SettingsModal: React.FC<Props> = ({ open, tab, settings, inputDevices, onC
         </div>
 
         <div className="px-3 pt-3 flex gap-2 flex-wrap">
-          {tabs.map(t => (
+          {visibleTabs.map(t => (
             <button key={t.key} onClick={() => onChangeTab(t.key)} className={`px-3 py-1 rounded border text-xs font-bold flex items-center gap-1 ${tab === t.key ? 'bg-cyan-700 border-cyan-300' : 'bg-slate-800 border-slate-600'}`}>
               {t.icon}{t.label}
             </button>
@@ -98,10 +121,22 @@ const SettingsModal: React.FC<Props> = ({ open, tab, settings, inputDevices, onC
                   <option value="normal">標準</option><option value="large">大</option>
                 </select>
               </label>
+              {isElectron && (
+                <div className="rounded border border-slate-700 p-3 space-y-2">
+                  <div className="font-bold">スクリーン</div>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" checked={isFullScreen} onChange={e => onToggleFullScreen?.(e.target.checked)} />
+                    フルスクリーン
+                  </label>
+                  <button onClick={onResetWindowState} className="px-3 py-1 text-xs rounded border border-slate-500 bg-slate-800 hover:bg-slate-700">
+                    画面サイズを初期化
+                  </button>
+                </div>
+              )}
             </>
           )}
 
-          {tab === 'COMM' && (
+          {showCommunication && tab === 'COMM' && (
             <>
               <label className="block">相手音量: {Math.round(settings.remoteVoiceVolume * 100)}%
                 <input className="w-full" type="range" min={0} max={100} value={Math.round(settings.remoteVoiceVolume * 100)} onChange={e => onChange('remoteVoiceVolume', Number(e.target.value) / 100)} />
@@ -110,12 +145,18 @@ const SettingsModal: React.FC<Props> = ({ open, tab, settings, inputDevices, onC
               <label className="flex items-center gap-2"><input type="checkbox" checked={settings.lowDataMode} onChange={e => onChange('lowDataMode', e.target.checked)} />低データ通信モード</label>
             </>
           )}
+
         </div>
 
         <div className="sticky bottom-0 bg-slate-900/95 border-t border-slate-700 p-3 flex justify-between">
           <div className="flex gap-2">
             <button onClick={onResetAudio} className="px-3 py-1 text-xs rounded border border-amber-400/70 bg-amber-600/30">音声を初期化</button>
             <button onClick={onResetAll} className="px-3 py-1 text-xs rounded border border-red-400/70 bg-red-600/30">全設定を初期化</button>
+            {isElectron && (
+              <button onClick={onQuitApp} className="px-3 py-1 text-xs rounded border border-red-400/70 bg-red-900/50 hover:bg-red-800/70">
+                ゲームをとじる
+              </button>
+            )}
           </div>
           <button onClick={onClose} className="px-4 py-1 rounded bg-cyan-600 hover:bg-cyan-500 font-bold">閉じる</button>
         </div>

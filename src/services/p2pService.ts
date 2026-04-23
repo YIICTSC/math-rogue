@@ -1,5 +1,6 @@
 import Peer, { DataConnection, MediaConnection } from 'peerjs';
 import { CoopSharedState, CoopSupportEffectId, CoopTreasurePool, RaceTrickEffectId } from '../types';
+import { OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE } from '../config/runtime';
 
 export type P2PEvent =
     | { type: 'HANDSHAKE', player: any }
@@ -291,6 +292,9 @@ class P2PService {
     constructor() { }
 
     public async initHost(): Promise<string> {
+        if (OFFLINE_DISTRIBUTABLE) {
+            throw new Error(OFFLINE_NETWORK_FEATURE_MESSAGE);
+        }
         return new Promise((resolve, reject) => {
             const code = Math.floor(100000 + Math.random() * 900000).toString();
             const peerId = `lr-battle-${code}`;
@@ -323,6 +327,9 @@ class P2PService {
     }
 
     public async connect(code: string): Promise<void> {
+        if (OFFLINE_DISTRIBUTABLE) {
+            throw new Error(OFFLINE_NETWORK_FEATURE_MESSAGE);
+        }
         return new Promise((resolve, reject) => {
             try {
                 const peerId = `lr-battle-${code}`;
@@ -403,7 +410,8 @@ class P2PService {
         return this.myId;
     }
 
-    private closeVoiceConnections() {
+    public close() {
+        this.voiceEnabled = false;
         this.mediaConnections.forEach(call => call.close());
         this.mediaConnections.clear();
         this.remoteAudioElements.forEach(audio => {
@@ -412,11 +420,6 @@ class P2PService {
             audio.remove();
         });
         this.remoteAudioElements.clear();
-    }
-
-    public close() {
-        this.voiceEnabled = false;
-        this.closeVoiceConnections();
         if (this.localStream) {
             this.localStream.getTracks().forEach(track => track.stop());
             this.localStream = null;
@@ -510,7 +513,6 @@ class P2PService {
     public async setVoiceEnabled(enabled: boolean) {
         this.voiceEnabled = enabled;
         if (!enabled) {
-            this.closeVoiceConnections();
             if (this.localStream) {
                 this.localStream.getAudioTracks().forEach(track => {
                     track.enabled = false;
@@ -521,7 +523,8 @@ class P2PService {
             return;
         }
         if (this.mediaConnections.size > 0) {
-            this.closeVoiceConnections();
+            this.mediaConnections.forEach(call => call.close());
+            this.mediaConnections.clear();
         }
         const stream = await this.ensureLocalAudioStream();
         stream.getAudioTracks().forEach(track => {

@@ -76,6 +76,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
   const [speechError, setSpeechError] = useState('');
   const visualCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
+  const [mapSymbolImageFailed, setMapSymbolImageFailed] = useState(false);
   const currentProblem = problems[currentProblemIndex];
   const mapSymbolAsset =
     currentProblem?.visual?.kind === 'map_symbol'
@@ -306,6 +307,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     setSpeechTranscript('');
     setSpeechError('');
     setIsListening(false);
+    setMapSymbolImageFailed(false);
   }, [currentProblemIndex]);
 
   const submitAnswerResult = useCallback((isCorrect: boolean, selected: string) => {
@@ -1451,6 +1453,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     currentProblem?.visual?.kind === 'fraction' ? `${currentProblem.visual.whole || 0},${currentProblem.visual.numerator},${currentProblem.visual.denominator}` : undefined,
     currentProblem?.visual?.kind === 'fraction_operation' ? `${currentProblem.visual.left.n}/${currentProblem.visual.left.d}${currentProblem.visual.op}${currentProblem.visual.right.n}/${currentProblem.visual.right.d}` : undefined,
     currentProblem?.visual?.kind === 'map_symbol' ? currentProblem.visual.symbol : undefined,
+    mapSymbolImageFailed,
   ]);
 
   if (debugSkip) return <div className="w-full h-full bg-black"></div>;
@@ -1465,7 +1468,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
 
   return (
     <div className={`flex flex-col h-full w-full ${bgClass} text-white relative items-center justify-center p-2 sm:p-3 md:p-8 font-mono overflow-y-auto overflow-x-hidden`}>
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-20 pointer-events-none"></div>
+        <div className="absolute inset-0 texture-dark-matter opacity-20 pointer-events-none"></div>
         
         <div className="z-10 w-full max-w-md text-center flex flex-col py-2 md:py-0 min-w-0">
             {isEnglishSpeakingReviewMode(mode) && !isChallenge && (
@@ -1534,15 +1537,25 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                         />
                     </div>
                 )}
-                {currentProblem.visual?.kind === 'map_symbol' && mapSymbolAsset && (
+                {currentProblem.visual?.kind === 'map_symbol' && (
                     <div className="w-full mb-4 flex justify-center">
                         <div className="flex w-full max-w-[240px] flex-col items-center gap-2">
                             <div className="flex w-full min-h-[165px] items-center justify-center rounded-lg border border-white/30 bg-white p-3">
-                                <img
-                                    src={mapSymbolAsset.src}
-                                    alt={mapSymbolAsset.title}
-                                    className="block h-auto max-h-[140px] w-full object-contain"
-                                />
+                                {mapSymbolAsset && !mapSymbolImageFailed ? (
+                                    <img
+                                        src={mapSymbolAsset.src}
+                                        alt={mapSymbolAsset.title}
+                                        className="block h-auto max-h-[140px] w-full object-contain"
+                                        onError={() => setMapSymbolImageFailed(true)}
+                                    />
+                                ) : (
+                                    <canvas
+                                        ref={visualCanvasRef}
+                                        width={260}
+                                        height={180}
+                                        className="w-full max-w-[220px] h-auto aspect-[13/9] rounded bg-white"
+                                    />
+                                )}
                             </div>
 
                         </div>

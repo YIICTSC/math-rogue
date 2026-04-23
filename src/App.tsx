@@ -59,6 +59,7 @@ import { p2pService } from './services/p2pService';
 import { TypingLessonId } from './data/typingLessonConfig';
 import { getRandomRaceTrickCard, getRaceTrickCard } from './raceTricks';
 import { getRandomCoopSupportCard } from './coopSupportCards';
+import { OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE } from './config/runtime';
 
 const calculateScore = (state: GameState, victory: boolean): number => {
     let score = 0;
@@ -658,6 +659,7 @@ const App: React.FC = () => {
                 : hasRacePin
                     ? GameScreen.RACE_SETUP
                     : null;
+        if (OFFLINE_DISTRIBUTABLE && targetScreen) return;
         if (!targetScreen) return;
         setGameState(prev => (
             prev.screen === GameScreen.START_MENU
@@ -872,6 +874,10 @@ const App: React.FC = () => {
     const handleMoveToPrimarySite = useCallback(() => {
         if (typeof window === 'undefined') return;
         window.location.replace(PRIMARY_SITE_URL);
+    }, []);
+    const handleOfflineMultiplayerUnavailable = useCallback(() => {
+        audioService.playSound('wrong');
+        alert(OFFLINE_NETWORK_FEATURE_MESSAGE);
     }, []);
     const refreshTransferExport = useCallback(() => {
         const payload = storageService.exportTransferData();
@@ -1288,8 +1294,10 @@ const App: React.FC = () => {
     useEffect(() => {
         if (gameState.challengeMode !== 'COOP') return;
         if (!appSettings.joinMuted) return;
-        setCoopVoiceEnabled(false);
-    }, [appSettings.joinMuted, gameState.challengeMode]);
+        if (coopVoiceEnabled) {
+            setCoopVoiceEnabled(false);
+        }
+    }, [appSettings.joinMuted, gameState.challengeMode, coopVoiceEnabled]);
     useEffect(() => {
         if (gameState.challengeMode !== 'COOP' || !coopSession || !coopSelfPeerId) return;
         let cancelled = false;
@@ -9945,7 +9953,7 @@ const App: React.FC = () => {
                                     {isLoading ? trans("じゅんびちゅう...", languageMode) : trans("冒険を始める", languageMode)}
                                 </button>
 
-                                <div className={`grid w-full ${isMobilePortrait ? 'grid-cols-4 gap-1' : 'grid-cols-2 sm:grid-cols-4 gap-2'}`}>
+                                <div className={`grid w-full ${OFFLINE_DISTRIBUTABLE ? 'grid-cols-1 gap-2' : isMobilePortrait ? 'grid-cols-4 gap-1' : 'grid-cols-2 sm:grid-cols-4 gap-2'}`}>
                                     <button
                                         onClick={startChallengeGame}
                                         className={`min-w-0 border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-red-900/80 text-red-100 border-red-500 hover:bg-red-800 hover:shadow-red-900/50'}`}
@@ -9953,47 +9961,51 @@ const App: React.FC = () => {
                                         <Swords className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("1A1D", languageMode)}
                                     </button>
 
-                                    <button
-                                        onClick={() => {
-                                            if (isDailyLimitReached) {
-                                                audioService.playSound('wrong');
-                                                setShowTimeLimitModal(true);
-                                                return;
-                                            }
-                                            setGameState(prev => ({ ...prev, screen: GameScreen.VS_SETUP }));
-                                        }}
-                                        className={`min-w-0 border-b-4 border-r-4 rounded-none bg-indigo-600/80 text-white border-indigo-400 hover:bg-indigo-700 cursor-pointer flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
-                                    >
-                                        <Wifi className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("VS", languageMode)}
-                                    </button>
+                                    {!OFFLINE_DISTRIBUTABLE && (
+                                        <>
+                                            <button
+                                                onClick={() => {
+                                                    if (isDailyLimitReached) {
+                                                        audioService.playSound('wrong');
+                                                        setShowTimeLimitModal(true);
+                                                        return;
+                                                    }
+                                                    setGameState(prev => ({ ...prev, screen: GameScreen.VS_SETUP }));
+                                                }}
+                                                className={`min-w-0 border-b-4 border-r-4 rounded-none bg-indigo-600/80 text-white border-indigo-400 flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : 'hover:bg-indigo-700 cursor-pointer'}`}
+                                            >
+                                                <Wifi className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("VS", languageMode)}
+                                            </button>
 
-                                    <button
-                                        onClick={() => {
-                                            if (isDailyLimitReached) {
-                                                audioService.playSound('wrong');
-                                                setShowTimeLimitModal(true);
-                                                return;
-                                            }
-                                            setGameState(prev => ({ ...prev, screen: GameScreen.COOP_SETUP }));
-                                        }}
-                                        className={`min-w-0 border-b-4 border-r-4 rounded-none bg-emerald-700/80 text-emerald-100 border-emerald-400 hover:bg-emerald-700 cursor-pointer flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
-                                    >
-                                        <Users className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("協力", languageMode)}
-                                    </button>
+                                            <button
+                                                onClick={() => {
+                                                    if (isDailyLimitReached) {
+                                                        audioService.playSound('wrong');
+                                                        setShowTimeLimitModal(true);
+                                                        return;
+                                                    }
+                                                    setGameState(prev => ({ ...prev, screen: GameScreen.COOP_SETUP }));
+                                                }}
+                                                className={`min-w-0 border-b-4 border-r-4 rounded-none bg-emerald-700/80 text-emerald-100 border-emerald-400 flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : 'hover:bg-emerald-700 cursor-pointer'}`}
+                                            >
+                                                <Users className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("協力", languageMode)}
+                                            </button>
 
-                                    <button
-                                        onClick={() => {
-                                            if (isDailyLimitReached) {
-                                                audioService.playSound('wrong');
-                                                setShowTimeLimitModal(true);
-                                                return;
-                                            }
-                                            setGameState(prev => ({ ...prev, screen: GameScreen.RACE_SETUP }));
-                                        }}
-                                        className={`min-w-0 border-b-4 border-r-4 rounded-none bg-cyan-700/80 text-cyan-100 border-cyan-400 hover:bg-cyan-700 cursor-pointer flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
-                                    >
-                                        <Flag className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("レース", languageMode)}
-                                    </button>
+                                            <button
+                                                onClick={() => {
+                                                    if (isDailyLimitReached) {
+                                                        audioService.playSound('wrong');
+                                                        setShowTimeLimitModal(true);
+                                                        return;
+                                                    }
+                                                    setGameState(prev => ({ ...prev, screen: GameScreen.RACE_SETUP }));
+                                                }}
+                                                className={`min-w-0 border-b-4 border-r-4 rounded-none bg-cyan-700/80 text-cyan-100 border-cyan-400 flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : 'hover:bg-cyan-700 cursor-pointer'}`}
+                                            >
+                                                <Flag className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("レース", languageMode)}
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
 
                                 {!isMobilePortrait && (
@@ -10218,68 +10230,88 @@ const App: React.FC = () => {
                     </div>
                 )}
 
-                {gameState.screen === GameScreen.VS_SETUP && (
+                {!OFFLINE_DISTRIBUTABLE && gameState.screen === GameScreen.VS_SETUP && (
                     <div className="absolute inset-0">
-                        <P2PBattleSetup
-                            player={gameState.player}
-                            onBattleStart={(opp, isHost, myName) => {
-                                setGameState(prev => ({
-                                    ...prev,
-                                    player: { ...prev.player, name: myName },
-                                    vsOpponent: opp,
-                                    screen: GameScreen.VS_BATTLE,
-                                    vsIsHost: isHost
-                                }));
-                            }}
-                            onClose={returnToTitle}
-                        />
+                        {OFFLINE_DISTRIBUTABLE ? (
+                            <div className="absolute inset-0 flex items-center justify-center bg-slate-950 p-4 text-white">
+                                <div className="max-w-md rounded-2xl border border-amber-500 bg-slate-900 p-6 text-center">
+                                    <div className="mb-2 text-xl font-black text-amber-300">VSモードは無効です</div>
+                                    <div className="mb-4 text-sm text-slate-200">{OFFLINE_NETWORK_FEATURE_MESSAGE}</div>
+                                    <button onClick={returnToTitle} className="rounded-lg bg-amber-500 px-4 py-2 font-bold text-slate-950">タイトルへ戻る</button>
+                                </div>
+                            </div>
+                        ) : (
+                            <P2PBattleSetup
+                                player={gameState.player}
+                                onBattleStart={(opp, isHost, myName) => {
+                                    setGameState(prev => ({
+                                        ...prev,
+                                        player: { ...prev.player, name: myName },
+                                        vsOpponent: opp,
+                                        screen: GameScreen.VS_BATTLE,
+                                        vsIsHost: isHost
+                                    }));
+                                }}
+                                onClose={returnToTitle}
+                            />
+                        )}
                     </div>
                 )}
 
-                {gameState.screen === GameScreen.RACE_SETUP && (
+                {!OFFLINE_DISTRIBUTABLE && gameState.screen === GameScreen.RACE_SETUP && (
                     <div className="absolute inset-0">
-                        <P2PRaceSetup
-                            player={gameState.player}
-                            onRaceStart={(payload) => {
-                                const baseEntries: RaceEntry[] = payload.participants.map(p => ({
-                                    peerId: p.peerId,
-                                    name: p.name,
-                                    imageData: p.imageData,
-                                    floor: 0,
-                                    maxDamage: 0,
-                                    gameOverCount: 0,
-                                    score: 0,
-                                    updatedAt: Date.now()
-                                }));
-                                setRaceSession({
-                                    isHost: payload.isHost,
-                                    name: payload.name,
-                                    roomCode: payload.roomCode,
-                                    durationSec: payload.durationSec,
-                                    endAt: payload.endAt,
-                                    startedAt: payload.endAt - payload.durationSec * 1000,
-                                    participants: payload.participants,
-                                    entries: baseEntries,
-                                    ended: false
-                                });
-                                setRaceRemainingSec(payload.durationSec);
-                                setRaceResultOpen(false);
-                                setRaceMaxDamage(0);
-                                setRaceGameOverCount(0);
-                                setRaceSelfPeerId(payload.isHost ? 'host' : (p2pService.getMyId() || 'guest'));
-                                setRaceTrickCards([]);
-                                setRaceEffects(EMPTY_RACE_EFFECTS);
-                                setRaceHudOpen(false);
-                                setRaceRewardDummyDisplay(0);
-                                setGameState(prev => ({
-                                    ...prev,
-                                    challengeMode: 'RACE',
-                                    mode: payload.mode ?? prev.mode,
-                                    screen: payload.mode ? GameScreen.CHARACTER_SELECTION : GameScreen.MODE_SELECTION
-                                }));
-                            }}
-                            onClose={returnToTitle}
-                        />
+                        {OFFLINE_DISTRIBUTABLE ? (
+                            <div className="absolute inset-0 flex items-center justify-center bg-slate-950 p-4 text-white">
+                                <div className="max-w-md rounded-2xl border border-amber-500 bg-slate-900 p-6 text-center">
+                                    <div className="mb-2 text-xl font-black text-amber-300">レースモードは無効です</div>
+                                    <div className="mb-4 text-sm text-slate-200">{OFFLINE_NETWORK_FEATURE_MESSAGE}</div>
+                                    <button onClick={returnToTitle} className="rounded-lg bg-amber-500 px-4 py-2 font-bold text-slate-950">タイトルへ戻る</button>
+                                </div>
+                            </div>
+                        ) : (
+                            <P2PRaceSetup
+                                player={gameState.player}
+                                onRaceStart={(payload) => {
+                                    const baseEntries: RaceEntry[] = payload.participants.map(p => ({
+                                        peerId: p.peerId,
+                                        name: p.name,
+                                        imageData: p.imageData,
+                                        floor: 0,
+                                        maxDamage: 0,
+                                        gameOverCount: 0,
+                                        score: 0,
+                                        updatedAt: Date.now()
+                                    }));
+                                    setRaceSession({
+                                        isHost: payload.isHost,
+                                        name: payload.name,
+                                        roomCode: payload.roomCode,
+                                        durationSec: payload.durationSec,
+                                        endAt: payload.endAt,
+                                        startedAt: payload.endAt - payload.durationSec * 1000,
+                                        participants: payload.participants,
+                                        entries: baseEntries,
+                                        ended: false
+                                    });
+                                    setRaceRemainingSec(payload.durationSec);
+                                    setRaceResultOpen(false);
+                                    setRaceMaxDamage(0);
+                                    setRaceGameOverCount(0);
+                                    setRaceSelfPeerId(payload.isHost ? 'host' : (p2pService.getMyId() || 'guest'));
+                                    setRaceTrickCards([]);
+                                    setRaceEffects(EMPTY_RACE_EFFECTS);
+                                    setRaceHudOpen(false);
+                                    setRaceRewardDummyDisplay(0);
+                                    setGameState(prev => ({
+                                        ...prev,
+                                        challengeMode: 'RACE',
+                                        mode: payload.mode ?? prev.mode,
+                                        screen: payload.mode ? GameScreen.CHARACTER_SELECTION : GameScreen.MODE_SELECTION
+                                    }));
+                                }}
+                                onClose={returnToTitle}
+                            />
+                        )}
                     </div>
                 )}
 
@@ -10790,28 +10822,38 @@ const App: React.FC = () => {
                     </div>
                 )}
 
-                {gameState.screen === GameScreen.COOP_SETUP && (
+                {!OFFLINE_DISTRIBUTABLE && gameState.screen === GameScreen.COOP_SETUP && (
                     <div className="absolute inset-0">
-                        <CoopSetupScreen
-                            player={gameState.player}
-                            onStart={(payload: CoopStartPayload) => {
-                                setCoopSession({
-                                    isHost: payload.isHost,
-                                    name: payload.name,
-                                    roomCode: payload.roomCode,
-                                    startedAt: Date.now(),
-                                    battleMode: payload.battleMode,
-                                    participants: payload.participants,
-                                    decisionOwnerIndex: 0
-                                });
-                                setGameState(prev => ({
-                                    ...prev,
-                                    challengeMode: 'COOP',
-                                    screen: GameScreen.MODE_SELECTION
-                                }));
-                            }}
-                            onClose={returnToTitle}
-                        />
+                        {OFFLINE_DISTRIBUTABLE ? (
+                            <div className="absolute inset-0 flex items-center justify-center bg-slate-950 p-4 text-white">
+                                <div className="max-w-md rounded-2xl border border-amber-500 bg-slate-900 p-6 text-center">
+                                    <div className="mb-2 text-xl font-black text-amber-300">協力モードは無効です</div>
+                                    <div className="mb-4 text-sm text-slate-200">{OFFLINE_NETWORK_FEATURE_MESSAGE}</div>
+                                    <button onClick={returnToTitle} className="rounded-lg bg-amber-500 px-4 py-2 font-bold text-slate-950">タイトルへ戻る</button>
+                                </div>
+                            </div>
+                        ) : (
+                            <CoopSetupScreen
+                                player={gameState.player}
+                                onStart={(payload: CoopStartPayload) => {
+                                    setCoopSession({
+                                        isHost: payload.isHost,
+                                        name: payload.name,
+                                        roomCode: payload.roomCode,
+                                        startedAt: Date.now(),
+                                        battleMode: payload.battleMode,
+                                        participants: payload.participants,
+                                        decisionOwnerIndex: 0
+                                    });
+                                    setGameState(prev => ({
+                                        ...prev,
+                                        challengeMode: 'COOP',
+                                        screen: GameScreen.MODE_SELECTION
+                                    }));
+                                }}
+                                onClose={returnToTitle}
+                            />
+                        )}
                     </div>
                 )}
 
@@ -11411,6 +11453,7 @@ const App: React.FC = () => {
                     onToggleFullScreen={toggleFullScreen}
                     onResetWindowState={resetWindowState}
                     onQuitApp={quitApp}
+                    showCommunication={!OFFLINE_DISTRIBUTABLE}
                 />
             </div>
         </div>

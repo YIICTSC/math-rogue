@@ -153,7 +153,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
 
   return (
     <div className="flex flex-col h-full w-full bg-indigo-950 text-white relative items-center justify-center p-4 md:p-8 font-mono">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-20 pointer-events-none"></div>
+        <div className="absolute inset-0 texture-dark-matter opacity-20 pointer-events-none"></div>
         
         {/* Header with Voice Toggle */}
         <div className="absolute top-4 right-4 z-50">
