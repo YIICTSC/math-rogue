@@ -695,6 +695,7 @@ const App: React.FC = () => {
         const saved = storageService.getBgmMode() as 'OSCILLATOR' | 'MP3' | 'STUDY' | null;
         return saved || 'STUDY';
     });
+    const [showBgmSwitchHint, setShowBgmSwitchHint] = useState<boolean>(() => !storageService.getSeenBgmSwitchHint());
     const [showSettingsModal, setShowSettingsModal] = useState(false);
     const [settingsTab, setSettingsTab] = useState<SettingsTab>('AUDIO');
     const [inputDevices, setInputDevices] = useState<MediaDeviceInfo[]>([]);
@@ -2705,7 +2706,14 @@ const App: React.FC = () => {
         audioService.playSound('select');
     };
 
+    const dismissBgmSwitchHint = useCallback(() => {
+        if (!showBgmSwitchHint) return;
+        setShowBgmSwitchHint(false);
+        storageService.saveSeenBgmSwitchHint();
+    }, [showBgmSwitchHint]);
+
     const toggleBgmMode = () => {
+        dismissBgmSwitchHint();
         let nextMode: 'OSCILLATOR' | 'MP3' | 'STUDY';
         if (bgmMode === 'STUDY') nextMode = 'MP3';
         else if (bgmMode === 'MP3') nextMode = 'OSCILLATOR';
@@ -9833,27 +9841,44 @@ const App: React.FC = () => {
                         )}
 
                         <div className="absolute top-2 right-2 z-[10010] flex items-center gap-1.5 sm:gap-2">
-                            <button
-                                onClick={toggleBgmMode}
-                                className={`flex h-9 items-center border-t-2 border-l-2 border-r-4 border-b-4 px-2 text-[10px] sm:text-xs font-black uppercase tracking-[0.08em] shadow-[0_0_0_1px_rgba(0,0,0,0.45)] transition-all active:translate-x-[2px] active:translate-y-[2px] active:border-r-2 active:border-b-2 ${
-                                    bgmMode === 'STUDY'
-                                        ? 'bg-indigo-950/95 text-indigo-200 border-t-indigo-300 border-l-indigo-300 border-r-indigo-700 border-b-indigo-700'
-                                        : bgmMode === 'MP3'
-                                            ? 'bg-emerald-950/95 text-emerald-200 border-t-emerald-300 border-l-emerald-300 border-r-emerald-700 border-b-emerald-700'
-                                            : 'bg-cyan-950/95 text-cyan-100 border-t-cyan-300 border-l-cyan-300 border-r-cyan-700 border-b-cyan-700'
-                                }`}
-                                title="BGMモード切替"
-                            >
-                                <Music size={13} className="mr-1 shrink-0" />
-                                {trans(
-                                    bgmMode === 'STUDY'
-                                        ? 'BGM: 学習'
-                                        : bgmMode === 'MP3'
-                                            ? 'BGM: MP3'
-                                            : 'BGM: 電子音',
-                                    languageMode
+                            <div className="relative">
+                                {showBgmSwitchHint && (
+                                    <div className="absolute right-0 top-11 z-[10011] w-56 rounded-xl border-2 border-yellow-300 bg-black/90 px-3 py-2 text-[11px] leading-relaxed text-yellow-100 shadow-[0_4px_14px_rgba(0,0,0,0.45)] sm:text-xs">
+                                        <div className="absolute -top-2 right-8 h-3 w-3 rotate-45 border-l-2 border-t-2 border-yellow-300 bg-black/90" />
+                                        <div className="flex items-start gap-2">
+                                            <HelpCircle size={13} className="mt-0.5 shrink-0 text-yellow-200" />
+                                            <div>{trans('ここで音楽を切り替えられます', languageMode)}</div>
+                                        </div>
+                                        <button
+                                            onClick={dismissBgmSwitchHint}
+                                            className="mt-1 text-[10px] font-black text-yellow-300 underline underline-offset-2 hover:text-yellow-200 sm:text-[11px]"
+                                        >
+                                            {trans('とじる', languageMode)}
+                                        </button>
+                                    </div>
                                 )}
-                            </button>
+                                <button
+                                    onClick={toggleBgmMode}
+                                    className={`flex h-9 items-center border-t-2 border-l-2 border-r-4 border-b-4 px-2 text-[10px] sm:text-xs font-black uppercase tracking-[0.08em] shadow-[0_0_0_1px_rgba(0,0,0,0.45)] transition-all active:translate-x-[2px] active:translate-y-[2px] active:border-r-2 active:border-b-2 ${
+                                        bgmMode === 'STUDY'
+                                            ? 'bg-indigo-950/95 text-indigo-200 border-t-indigo-300 border-l-indigo-300 border-r-indigo-700 border-b-indigo-700'
+                                            : bgmMode === 'MP3'
+                                                ? 'bg-emerald-950/95 text-emerald-200 border-t-emerald-300 border-l-emerald-300 border-r-emerald-700 border-b-emerald-700'
+                                                : 'bg-cyan-950/95 text-cyan-100 border-t-cyan-300 border-l-cyan-300 border-r-cyan-700 border-b-cyan-700'
+                                    }`}
+                                    title="BGMモード切替"
+                                >
+                                    <Music size={13} className="mr-1 shrink-0" />
+                                    {trans(
+                                        bgmMode === 'STUDY'
+                                            ? 'BGM: 学習'
+                                            : bgmMode === 'MP3'
+                                                ? 'BGM: MP3'
+                                                : 'BGM: 電子音',
+                                        languageMode
+                                    )}
+                                </button>
+                            </div>
                             <button
                                 onClick={toggleLanguage}
                                 className="flex h-9 items-center border-t-2 border-l-2 border-r-4 border-b-4 border-t-amber-200 border-l-amber-200 border-r-amber-700 border-b-amber-700 bg-amber-950/95 px-2 text-[10px] sm:text-xs font-black uppercase tracking-[0.08em] text-amber-100 shadow-[0_0_0_1px_rgba(0,0,0,0.45)] transition-all active:translate-x-[2px] active:translate-y-[2px] active:border-r-2 active:border-b-2"
