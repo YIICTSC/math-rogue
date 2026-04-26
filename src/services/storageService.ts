@@ -48,6 +48,7 @@ const STORAGE_KEY_ENGLISH_VOICE = 'pixel_spire_english_voice_v1';
 
 // --- BGM MODE FLAG ---
 const STORAGE_KEY_BGM_MODE = 'pixel_spire_bgm_mode_v1';
+const STORAGE_KEY_SEEN_BGM_SWITCH_HINT = 'pixel_spire_seen_bgm_switch_hint_v1';
 
 // --- LANGUAGE MODE FLAG ---
 const STORAGE_KEY_LANGUAGE_MODE = 'pixel_spire_language_mode_v1';
@@ -724,6 +725,14 @@ export const storageService = {
     localStorage.setItem(STORAGE_KEY_BGM_MODE, mode);
   },
 
+  getSeenBgmSwitchHint: (): boolean => {
+    return localStorage.getItem(STORAGE_KEY_SEEN_BGM_SWITCH_HINT) === 'true';
+  },
+
+  saveSeenBgmSwitchHint: () => {
+    localStorage.setItem(STORAGE_KEY_SEEN_BGM_SWITCH_HINT, 'true');
+  },
+
   // --- Language Mode ---
   getLanguageMode: (): LanguageMode | null => {
     return localStorage.getItem(STORAGE_KEY_LANGUAGE_MODE) as LanguageMode | null;
@@ -1010,6 +1019,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_CHALLENGE_RECORDS);
       localStorage.removeItem(STORAGE_KEY_ENGLISH_VOICE);
       localStorage.removeItem(STORAGE_KEY_BGM_MODE);
+      localStorage.removeItem(STORAGE_KEY_SEEN_BGM_SWITCH_HINT);
       localStorage.removeItem(STORAGE_KEY_LANGUAGE_MODE);
       localStorage.removeItem(STORAGE_KEY_APP_SETTINGS);
       localStorage.removeItem(STORAGE_KEY_TOTAL_PLAY_TIME);
