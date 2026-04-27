@@ -9955,7 +9955,7 @@ const App: React.FC = () => {
                             )}
                             {(!isMathDebugSkipped && !isDebugHpOne) && <div className="mb-2 h-2"></div>}
 
-                            <div className="flex flex-col gap-3 items-center w-full max-w-[320px]">
+                            <div className="start-menu-actions flex flex-col gap-2 items-center w-full max-w-[320px]">
                                 {hasSave && (
                                     <>
                                         <div className="text-[10px] text-red-400 font-bold animate-pulse mb-[-8px]">
@@ -10042,7 +10042,7 @@ const App: React.FC = () => {
                                     </button>
                                 )}
 
-                                <div className="flex gap-3 w-full">
+                                <div className="flex gap-2 w-full">
                                     <button onClick={startProblemChallenge} className="flex-1 py-2 px-2 text-sm font-bold border-b-4 border-r-4 rounded-none bg-emerald-900/80 text-emerald-100 border-emerald-500 hover:bg-emerald-800 cursor-pointer flex items-center justify-center shadow-md hover:shadow-emerald-900/50">
                                         <GraduationCap className="mr-1.5" size={18} /> {trans("問題", languageMode)}
                                     </button>
@@ -10061,7 +10061,7 @@ const App: React.FC = () => {
                                     </button>
                                 )}
 
-                                <div className="flex gap-2 w-full justify-between mt-2">
+                                <div className="flex gap-2 w-full justify-between">
                                     <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.COMPENDIUM }))} className="flex-1 bg-gray-800 text-amber-500 text-xs font-bold border-b-4 border-r-4 border-gray-600 hover:border-amber-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
                                         <BookOpen className="mb-1" size={20} /> {trans("図鑑", languageMode)}
                                     </button>
@@ -10073,11 +10073,11 @@ const App: React.FC = () => {
                                     </button>
                                 </div>
 
-                                <button onClick={openDataTransferModal} className="w-full bg-gray-800 text-cyan-300 py-2 text-sm font-bold border-b-4 border-r-4 border-gray-600 border-cyan-500 hover:bg-gray-700 cursor-pointer flex items-center justify-center rounded mt-2">
+                                <button onClick={openDataTransferModal} className="w-full bg-gray-800 text-cyan-300 py-2 text-sm font-bold border-b-4 border-r-4 border-gray-600 border-cyan-500 hover:bg-gray-700 cursor-pointer flex items-center justify-center rounded">
                                     <Globe className="mr-2" size={18} /> {trans("データ移行", languageMode)}
                                 </button>
 
-                                <button onClick={() => setShowDebugLog(true)} className="text-gray-600 text-[10px] hover:text-gray-400 mt-2 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
+                                <button onClick={() => setShowDebugLog(true)} className="start-menu-version text-gray-600 text-[10px] hover:text-gray-400 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
                                     <Terminal size={10} /> v1.0.4 YUSUKE ISHIGE
                                 </button>
                             </div>

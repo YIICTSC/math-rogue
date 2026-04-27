@@ -144,6 +144,33 @@ textarea {
   background-size: 22px 22px, 30px 30px, cover;
 }
 
+.start-menu-actions button:not(.start-menu-version) {
+  min-height: 40px;
+  height: 40px;
+  padding-top: 0;
+  padding-bottom: 0;
+  font-size: 0.875rem;
+  line-height: 1;
+}
+
+.start-menu-actions button:not(.start-menu-version) svg {
+  width: 16px;
+  height: 16px;
+}
+
+.start-menu-actions button:not(.start-menu-version) svg.mb-1 {
+  margin-bottom: 0;
+  margin-right: 0.375rem;
+}
+
+.start-menu-actions button:not(.start-menu-version).flex-col {
+  flex-direction: row;
+}
+
+.start-menu-actions .text-\[10px\] {
+  line-height: 1;
+}
+
 @media (orientation: landscape) and (max-height: 720px) {
   .battle-scene-root .battle-view {
     gap: 0.5rem;
