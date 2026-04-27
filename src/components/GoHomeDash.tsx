@@ -20,6 +20,16 @@ const PLAYER_DASH_FRAME_COUNT = 8;
 const PLAYER_DASH_SPRITE_BASELINE_Y = 225;
 const PLAYER_DASH_DRAW_HEIGHT = 84;
 const PLAYER_DASH_SPRITE_SRC = `${(import.meta as any).env.BASE_URL || '/'}sprites/go-home-dash-8-loop-grid.png`;
+const PLAYER_DASH_FRAME_ORDER = [
+    0, // contact
+    1, // down
+    2, // push
+    3, // air
+    4, // contact
+    5, // down
+    6, // push
+    7, // air
+] as const;
 const PLAYER_JUMP_FRAME_COUNT = 3;
 const PLAYER_JUMP_SPRITE_BASELINE_Y = 594;
 const PLAYER_JUMP_DRAW_HEIGHT = 108;
@@ -688,39 +698,83 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             shakeRef.current *= 0.9;
         }
 
-        ctx.fillStyle = '#1e293b'; 
-        ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-        const farOff = bgOffsets.current.far % 400;
-        ctx.fillStyle = '#334155';
-        for (let x = -farOff; x < CANVAS_WIDTH; x += 400) {
-            ctx.beginPath(); ctx.moveTo(x, 280); ctx.lineTo(x + 200, 80); ctx.lineTo(x + 400, 280); ctx.fill();
-        }
-
-        const midOff = bgOffsets.current.mid % 600;
-        for (let x = -midOff; x < CANVAS_WIDTH; x += 600) {
-            ctx.fillStyle = '#475569'; ctx.fillRect(x, 180, 450, 200); ctx.fillStyle = '#94a3b8';
-            for (let r = 0; r < 3; r++) { for (let c = 0; c < 8; c++) { ctx.fillRect(x + 30 + c * 50, 200 + r * 50, 30, 35); } }
-        }
-
-        const nearOff = bgOffsets.current.near % 60;
         const obstacles = obstaclesRef.current;
         const holes = obstacles.filter(o => o.type === 'HOLE');
 
-        ctx.fillStyle = '#3e2723';
-        for (let x = 0; x < CANVAS_WIDTH; x += 5) {
+        const skyBands = [
+            '#24163a', '#322052', '#4b2c66', '#6d3b69',
+            '#974a5f', '#c45e50', '#e07b45', '#f0a14b'
+        ];
+        const bandHeight = Math.ceil(GROUND_Y / skyBands.length);
+        for (let i = 0; i < skyBands.length; i++) {
+            ctx.fillStyle = skyBands[i];
+            ctx.fillRect(0, i * bandHeight, CANVAS_WIDTH, bandHeight + 1);
+        }
+
+        const farOff = Math.floor(bgOffsets.current.far) % 384;
+        ctx.fillStyle = '#2b2448';
+        for (let x = -farOff; x < CANVAS_WIDTH + 384; x += 384) {
+            ctx.fillRect(x + 10, 236, 116, 84);
+            ctx.fillRect(x + 132, 210, 82, 110);
+            ctx.fillRect(x + 226, 248, 124, 72);
+            ctx.fillStyle = '#40355d';
+            for (let c = 0; c < 5; c++) ctx.fillRect(x + 28 + c * 18, 254, 8, 10);
+            for (let c = 0; c < 3; c++) ctx.fillRect(x + 150 + c * 18, 230, 8, 10);
+            ctx.fillStyle = '#2b2448';
+            ctx.fillRect(x + 166, 190, 18, 20);
+            ctx.fillRect(x + 170, 176, 10, 14);
+        }
+
+        const midOff = Math.floor(bgOffsets.current.mid) % 512;
+        for (let x = -midOff; x < CANVAS_WIDTH + 512; x += 512) {
+            ctx.fillStyle = '#403151';
+            ctx.fillRect(x + 26, 280, 94, 44);
+            ctx.fillRect(x + 160, 266, 104, 58);
+            ctx.fillRect(x + 306, 274, 126, 50);
+            ctx.fillStyle = '#2a2038';
+            ctx.beginPath(); ctx.moveTo(x + 14, 280); ctx.lineTo(x + 74, 236); ctx.lineTo(x + 134, 280); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(x + 144, 266); ctx.lineTo(x + 212, 220); ctx.lineTo(x + 280, 266); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(x + 288, 274); ctx.lineTo(x + 366, 224); ctx.lineTo(x + 448, 274); ctx.fill();
+            ctx.fillStyle = '#ffc857';
+            for (let c = 0; c < 3; c++) ctx.fillRect(x + 48 + c * 24, 292, 10, 10);
+            for (let c = 0; c < 3; c++) ctx.fillRect(x + 184 + c * 26, 284, 10, 10);
+            for (let c = 0; c < 4; c++) ctx.fillRect(x + 326 + c * 24, 290, 10, 10);
+            ctx.fillStyle = '#2a2038';
+            ctx.fillRect(x + 470, 226, 8, 96);
+            ctx.fillRect(x + 444, 238, 60, 6);
+            ctx.fillStyle = '#f2c14e';
+            ctx.fillRect(x + 466, 248, 16, 12);
+        }
+
+        const nearOff = Math.floor(bgOffsets.current.near) % 64;
+        ctx.fillStyle = '#2b1a23';
+        ctx.fillRect(0, GROUND_Y - 22, CANVAS_WIDTH, 22);
+        ctx.fillStyle = '#3a211e';
+        for (let x = 0; x < CANVAS_WIDTH; x += 8) {
             const isHole = holes.some(h => x >= h.x - h.width / 2 && x <= h.x + h.width / 2);
-            if (!isHole) { ctx.fillRect(x, GROUND_Y, 6, CANVAS_HEIGHT - GROUND_Y); }
+            if (!isHole) {
+                ctx.fillRect(x, GROUND_Y, 8, CANVAS_HEIGHT - GROUND_Y);
+                ctx.fillStyle = x % 16 === 0 ? '#4a2a22' : '#2c1918';
+                ctx.fillRect(x, GROUND_Y + 10, 8, 4);
+                ctx.fillStyle = '#3a211e';
+            }
         }
 
         holes.forEach(hole => {
             if (hole.x > 0 && hole.x < CANVAS_WIDTH) { ctx.fillStyle = "#ef4444"; ctx.font = "bold 20px monospace"; ctx.textAlign = "center"; ctx.fillText("!", hole.x, GROUND_Y + 30); }
         });
 
-        ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2;
-        for (let x = -nearOff; x < CANVAS_WIDTH + 60; x += 60) {
+        for (let x = -nearOff; x < CANVAS_WIDTH + 64; x += 64) {
             const isHole = holes.some(h => x >= h.x - h.width / 2 && x <= h.x + h.width / 2);
-            if (!isHole) { ctx.beginPath(); ctx.moveTo(x, GROUND_Y - 40); ctx.lineTo(x, GROUND_Y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, GROUND_Y - 30); ctx.lineTo(x + 60, GROUND_Y - 30); ctx.stroke(); }
+            if (!isHole) {
+                ctx.fillStyle = '#1f2937';
+                ctx.fillRect(x, GROUND_Y - 46, 5, 46);
+                ctx.fillStyle = '#475569';
+                ctx.fillRect(x, GROUND_Y - 36, 64, 4);
+                ctx.fillRect(x, GROUND_Y - 22, 64, 3);
+                ctx.fillStyle = '#94a3b8';
+                ctx.fillRect(x + 2, GROUND_Y - 44, 2, 12);
+            }
         }
 
         const parts = particlesRef.current;
@@ -812,14 +866,19 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 const frameWidth = sprite.naturalWidth / frameCount;
                 const frameHeight = sprite.naturalHeight;
                 let frame = Math.abs(pl.animFrame || 0) % frameCount;
+                let sourceFrame = frame;
                 if (canUseJumpSprite) {
                     frame = pl.vy < -5 ? 0 : (isLandingPose ? 2 : 1);
                     if (pl.jumpActionFrame > 6 && pl.vy < 0) frame = 0;
+                    sourceFrame = frame;
                 } else if (isAirborne) {
                     frame = pl.vy < -5
                         ? 1
                         : (isLandingPose ? 5 : 2);
                     if (pl.jumpActionFrame > 6 && pl.vy < 0) frame = 1;
+                    sourceFrame = frame;
+                } else {
+                    sourceFrame = PLAYER_DASH_FRAME_ORDER[frame] ?? frame;
                 }
                 const drawHeightTarget = canUseJumpSprite ? PLAYER_JUMP_DRAW_HEIGHT : PLAYER_DASH_DRAW_HEIGHT;
                 const baselineY = canUseJumpSprite ? PLAYER_JUMP_SPRITE_BASELINE_Y : PLAYER_DASH_SPRITE_BASELINE_Y;
@@ -833,7 +892,7 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 ctx.imageSmoothingQuality = 'high';
                 ctx.drawImage(
                     sprite,
-                    frame * frameWidth,
+                    sourceFrame * frameWidth,
                     0,
                     frameWidth,
                     frameHeight,

@@ -143,3 +143,97 @@ textarea {
     linear-gradient(0deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.02));
   background-size: 22px 22px, 30px 30px, cover;
 }
+
+@media (orientation: landscape) and (max-height: 720px) {
+  .battle-scene-root .battle-view {
+    gap: 0.5rem;
+    padding: 0.375rem 0.5rem;
+  }
+
+  .battle-scene-root .battle-actors {
+    min-height: 0 !important;
+  }
+
+  .battle-scene-root .battle-enemies-area {
+    min-height: 8rem !important;
+    padding-top: 0.75rem !important;
+  }
+
+  .battle-scene-root .battle-enemy-intent {
+    top: 0.25rem !important;
+  }
+
+  .battle-scene-root .battle-player-area {
+    padding-bottom: 1rem !important;
+    padding-left: 0.25rem !important;
+  }
+
+  .battle-scene-root .battle-player-sprite {
+    width: 5rem !important;
+    height: 5rem !important;
+    margin-right: 0.5rem !important;
+  }
+
+  .battle-scene-root .battle-player-stats {
+    margin-bottom: 0.5rem !important;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  .battle-scene-root .battle-view {
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .battle-scene-root .battle-actors {
+    min-height: 0 !important;
+  }
+
+  .battle-scene-root .battle-enemies-area {
+    min-height: 6.5rem !important;
+    padding-top: 0.5rem !important;
+  }
+
+  .battle-scene-root .battle-enemy-intent {
+    top: 0 !important;
+  }
+
+  .battle-scene-root .battle-player-area {
+    padding-bottom: 0.75rem !important;
+    padding-left: 0.25rem !important;
+  }
+
+  .battle-scene-root .battle-player-sprite {
+    width: 4.25rem !important;
+    height: 4.25rem !important;
+    margin-right: 0.375rem !important;
+  }
+
+  .battle-scene-root .battle-player-stats {
+    width: 8.5rem !important;
+    margin-bottom: 0.25rem !important;
+    font-size: 0.65rem !important;
+    line-height: 1 !important;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  .battle-scene-root .battle-enemies-area {
+    min-height: 5.75rem !important;
+    padding-top: 0.25rem !important;
+  }
+
+  .battle-scene-root .battle-enemy-intent {
+    top: 0 !important;
+  }
+
+  .battle-scene-root .battle-player-sprite {
+    width: 3.75rem !important;
+    height: 3.75rem !important;
+  }
+
+  .battle-scene-root .battle-player-stats {
+    width: 8rem !important;
+    font-size: 0.6rem !important;
+  }
+}
