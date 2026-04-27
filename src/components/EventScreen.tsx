@@ -1,5 +1,5 @@
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { HelpCircle, ArrowRight } from 'lucide-react';
 
 interface EventOption {
@@ -33,12 +33,41 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
       `${baseUrl}event-illustrations/${encodedTitle}.svg`,
       `${baseUrl}event-illustrations/default.svg`
     ];
-  }, [title]);
+  }, [imageKey, title]);
   const [imageIndex, setImageIndex] = useState(0);
+  const [choiceLocked, setChoiceLocked] = useState(false);
+  const [continueLocked, setContinueLocked] = useState(false);
+  const inputLocked = interactionDisabled || choiceLocked;
+  const continueInputLocked = interactionDisabled || continueLocked;
 
   useEffect(() => {
     setImageIndex(0);
+    setChoiceLocked(false);
+    setContinueLocked(false);
   }, [imageKey, title]);
+
+  useEffect(() => {
+    if (!resultLog) return;
+    setChoiceLocked(false);
+    setContinueLocked(false);
+  }, [resultLog]);
+
+  const handleOptionAction = useCallback((option: EventOption) => {
+    if (inputLocked || resultLog) return;
+    setChoiceLocked(true);
+    try {
+      option.action();
+    } catch (error) {
+      setChoiceLocked(false);
+      throw error;
+    }
+  }, [inputLocked, resultLog]);
+
+  const handleContinueAction = useCallback(() => {
+    if (continueInputLocked || !resultLog) return;
+    setContinueLocked(true);
+    onContinue();
+  }, [continueInputLocked, resultLog, onContinue]);
 
   useEffect(() => {
     if (!typingMode || interactionDisabled) return;
@@ -46,7 +75,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
       if (resultLog) {
         if (e.key === 'Enter') {
           e.preventDefault();
-          onContinue();
+          handleContinueAction();
         }
         return;
       }
@@ -54,15 +83,15 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
         const option = options[Number(e.key) - 1];
         if (!option) return;
         e.preventDefault();
-        option.action();
+        handleOptionAction(option);
       } else if (e.key === 'Enter' && options[0]) {
         e.preventDefault();
-        options[0].action();
+        handleOptionAction(options[0]);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [typingMode, resultLog, options, onContinue, interactionDisabled]);
+  }, [typingMode, resultLog, options, interactionDisabled, handleContinueAction, handleOptionAction]);
 
   return (
     <div className="flex flex-col h-full w-full bg-gray-900 text-white relative items-center justify-center p-8">
@@ -114,8 +143,8 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                         {options.map((opt, idx) => (
                             <button 
                                 key={idx}
-                                onClick={interactionDisabled ? undefined : opt.action}
-                                disabled={interactionDisabled}
+                                onClick={() => handleOptionAction(opt)}
+                                disabled={inputLocked}
                                 className="relative w-full text-center p-3 sm:p-4 bg-black/40 hover:bg-purple-900/40 border border-gray-600 hover:border-purple-400 rounded transition-colors group min-h-[72px] sm:min-h-[88px] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-black/40 disabled:hover:border-gray-600"
                             >
                                 {typingMode && <span className="absolute right-2 top-2 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">{idx + 1}</span>}
@@ -128,8 +157,8 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                 ) : (
                     // Result Mode
                     <button 
-                        onClick={interactionDisabled ? undefined : onContinue}
-                        disabled={interactionDisabled}
+                        onClick={handleContinueAction}
+                        disabled={continueInputLocked}
                         className="w-full text-center p-4 bg-blue-900/40 hover:bg-blue-800/60 border border-blue-500 hover:border-blue-300 rounded transition-colors flex items-center justify-center font-bold text-xl animate-bounce disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-blue-900/40 disabled:hover:border-blue-500"
                     >
                         進む <ArrowRight className="ml-2" />
