@@ -7483,7 +7483,8 @@ const App: React.FC = () => {
             }));
             return;
         }
-        startGame();
+        // ゲームオーバーからの再挑戦は、既存セーブの上書き確認を出さずに直ちに新規冒険を開始する。
+        launchNewAdventure();
     };
 
     const handleFinalBridgeComplete = (upgradeType: 'HEAL' | 'APOTHEOSIS' | 'STRENGTH') => {
