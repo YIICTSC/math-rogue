@@ -1232,7 +1232,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     </div>
                                 )}
 
-                                <div className={`relative mb-1 transition-all duration-700 ${isTrueBossPhase2 ? ENEMY_ILLUSTRATION_SIZE_CLASS.battleTrueBossPhase2 : ENEMY_ILLUSTRATION_SIZE_CLASS.battleNormal}`}>
+                                <div className={`battle-enemy-sprite relative mb-1 transition-all duration-700 ${isTrueBossPhase2 ? ENEMY_ILLUSTRATION_SIZE_CLASS.battleTrueBossPhase2 : ENEMY_ILLUSTRATION_SIZE_CLASS.battleNormal}`}>
                                     {isFinisherActive ? (
                                         <div className="relative w-full h-full flex items-center justify-center">
                                             {!finisherBurst && (
@@ -1644,7 +1644,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             </div>
 
             {/* 4. Hand Area */}
-            <div className={`h-60 md:h-64 bg-gray-900 border-t border-gray-700 relative z-10 ${selectionState.active ? 'bg-blue-900/20' : ''} ${selfDown ? 'bg-red-950/20' : ''}`}>
+            <div className={`battle-hand-area h-60 md:h-64 bg-gray-900 border-t border-gray-700 relative z-10 ${selectionState.active ? 'bg-blue-900/20' : ''} ${selfDown ? 'bg-red-950/20' : ''}`}>
                 <style>
                     {`
                         @keyframes battle-hand-card-entry {
