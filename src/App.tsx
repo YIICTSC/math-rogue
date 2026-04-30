@@ -6519,7 +6519,8 @@ const App: React.FC = () => {
             const isAttackIntent =
                 enemy.nextIntent.type === EnemyIntentType.ATTACK ||
                 enemy.nextIntent.type === EnemyIntentType.ATTACK_DEBUFF ||
-                enemy.nextIntent.type === EnemyIntentType.ATTACK_DEFEND;
+                enemy.nextIntent.type === EnemyIntentType.ATTACK_DEFEND ||
+                enemy.nextIntent.type === EnemyIntentType.PIERCE_ATTACK;
             if (isBard && isAttackIntent) {
                 setGameState(prev => ({
                     ...prev,
@@ -6533,8 +6534,10 @@ const App: React.FC = () => {
             if (stateRef.current.parryState?.active) {
                 setGameState(prev => ({ ...prev, parryState: { active: false, enemyId: null, success: false } }));
             }
-            if (enemy.nextIntent.type === EnemyIntentType.ATTACK) audioService.playSound('attack');
+            if (isAttackIntent) audioService.playSound('attack');
             else if (enemy.nextIntent.type === EnemyIntentType.DEFEND) audioService.playSound('block');
+            else if (enemy.nextIntent.type === EnemyIntentType.BUFF) audioService.playSound('buff');
+            else if (enemy.nextIntent.type === EnemyIntentType.DEBUFF) audioService.playSound('debuff');
             else audioService.playSound('select');
             await new Promise<void>(resolve => {
                 setGameState(prev => {
@@ -6546,6 +6549,8 @@ const App: React.FC = () => {
                     newEnemies[currentEnemyIndex] = e;
                     const newLogs: string[] = [];
                     const nextActiveEffects: VisualEffectInstance[] = [];
+                    let didHpDamage = false;
+                    let didApplyDebuff = false;
                     let nextCoopBattleState = prev.coopBattleState
                         ? {
                             ...prev.coopBattleState,
@@ -6660,6 +6665,7 @@ const App: React.FC = () => {
                                     } else if (unblockedDamage > 0) {
                                         newLogs.push(`${targetName}が${unblockedDamage}ダメージを受けた！`);
                                         nextActiveEffects.push({ id: `vfx-eslash-${Date.now()}`, type: 'SLASH', targetId: 'player' });
+                                        didHpDamage = true;
                                     }
                                     if (isPierce && damage > 0) {
                                         nextActiveEffects.push({ id: `vfx-pierce-${Date.now()}`, type: 'CRITICAL', targetId: 'player' });
@@ -6697,6 +6703,7 @@ const App: React.FC = () => {
                                         newLogs.push(`${targetName}は${trans("ブロック", languageMode)}した！`);
                                     } else if (unblockedDamage > 0) {
                                         newLogs.push(`${targetName}が${unblockedDamage}ダメージを受けた！`);
+                                        didHpDamage = true;
                                     }
                                     if (nextHp <= 0) newLogs.push(`${targetName}が倒れた...`);
                                 }
@@ -6715,11 +6722,13 @@ const App: React.FC = () => {
                             } else if (unblockedDamage > 0) {
                                 newLogs.push(`${trans(e.name, languageMode)}から ${formula}${damage} ${trans("ダメージを受けた", languageMode)}`);
                                 nextActiveEffects.push({ id: `vfx-eslash-${Date.now()}`, type: 'SLASH', targetId: 'player' });
+                                didHpDamage = true;
                             }
                             if (unblockedDamage > 0 && Math.random() < 0.5) {
                                 p.partner.currentHp = Math.max(0, p.partner.currentHp - unblockedDamage);
                                 p.partner.floatingText = { id: `dmg-partner-${Date.now()}`, text: `-${unblockedDamage}`, color: 'text-red-500' };
                                 newLogs.push(`${p.partner.name}がダメージを受けた！`);
+                                didHpDamage = true;
                                 if (p.partner.currentHp <= 0) {
                                     newLogs.push(`${p.partner.name}が倒れた...`);
                                     p.partner = undefined;
@@ -6743,6 +6752,7 @@ const App: React.FC = () => {
                             } else if (unblockedDamage > 0) {
                                 newLogs.push(`${trans(e.name, languageMode)}から ${formula}${damage} ${trans("ダメージを受けた", languageMode)}`);
                                 nextActiveEffects.push({ id: `vfx-eslash-${Date.now()}`, type: 'SLASH', targetId: 'player' });
+                                didHpDamage = true;
                             }
                             p.currentHp = Math.max(0, p.currentHp - unblockedDamage);
                             p.hpLostThisTurn = (p.hpLostThisTurn || 0) + unblockedDamage;
@@ -6787,19 +6797,23 @@ const App: React.FC = () => {
                             if (type === 'WEAK') {
                                 target.powers['WEAK'] = (target.powers['WEAK'] || 0) + debuffAmt;
                                 newLogs.push(`${targetName}は${trans("へろへろ", languageMode)}${debuffAmt}`);
+                                didApplyDebuff = true;
                             }
                             if (type === 'VULNERABLE') {
                                 target.powers['VULNERABLE'] = (target.powers['VULNERABLE'] || 0) + debuffAmt;
                                 newLogs.push(`${targetName}は${trans("びくびく", languageMode)}${debuffAmt}`);
+                                didApplyDebuff = true;
                             }
                             if (type === 'CONFUSED') {
                                 target.powers['CONFUSED'] = (target.powers['CONFUSED'] || 0) + debuffAmt;
                                 newLogs.push(`${targetName}は${trans("混乱", languageMode)}${debuffAmt}`);
+                                didApplyDebuff = true;
                             }
                             if (type === 'POISON') {
                                 const status = { ...STATUS_CARDS.SLIMED, id: `slime-${Date.now()}-${Math.random().toString(36).slice(2, 7)}` };
                                 target.discardPile.push(status);
                                 newLogs.push(`${targetName}に${trans("粘液を混ぜられた", languageMode)}`);
+                                didApplyDebuff = true;
                             }
                         };
                         if (prev.challengeMode === 'COOP' && coopSession?.isHost && nextCoopBattleState) {
@@ -6827,6 +6841,8 @@ const App: React.FC = () => {
                         }
                     }
                     syncRedSkullState(p);
+                    if (didHpDamage) audioService.playSound('damage');
+                    if (didApplyDebuff && intent.type === EnemyIntentType.ATTACK_DEBUFF) audioService.playSound('debuff');
                     return {
                         ...prev,
                         player: p,
@@ -7483,8 +7499,7 @@ const App: React.FC = () => {
             }));
             return;
         }
-        // ゲームオーバーからの再挑戦は、既存セーブの上書き確認を出さずに直ちに新規冒険を開始する。
-        launchNewAdventure();
+        startGame();
     };
 
     const handleFinalBridgeComplete = (upgradeType: 'HEAL' | 'APOTHEOSIS' | 'STRENGTH') => {
