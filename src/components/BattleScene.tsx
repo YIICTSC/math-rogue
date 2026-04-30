@@ -345,6 +345,8 @@ interface BattleSceneProps {
     onCodexSelect: (card: ICard | null) => void;
     parryState?: ParryState;
     onParry: () => void;
+    showParryTutorial?: boolean;
+    onCloseParryTutorial?: () => void;
     activeEffects: VisualEffectInstance[];
     finisherCutinCard?: ICard | null;
     hideEnemyIntents?: boolean;
@@ -358,7 +360,7 @@ type DrawEntryAnimation = {
 
 const BattleScene: React.FC<BattleSceneProps> = ({
     player, companions = [], coopSelfPeerId, coopEffectOwnerPeerId, coopTurnQueue = [], coopCanAct = true, coopTurnOwnerLabel, coopSupportCards = [], onUseCoopSupport, selfDown = false, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onPlaySynthesizedCard, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
-    selectionState, onHandSelection, onCancelSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect, parryState, onParry, activeEffects, finisherCutinCard, hideEnemyIntents = false, onOpenSettings
+    selectionState, onHandSelection, onCancelSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect, parryState, onParry, showParryTutorial = false, onCloseParryTutorial, activeEffects, finisherCutinCard, hideEnemyIntents = false, onOpenSettings
 }) => {
     const isCoopBattleView = !!coopSelfPeerId || companions.length > 0;
     const shouldRenderPlayerScopedVfxOnSelf = isCoopBattleView
@@ -852,6 +854,29 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 </div>
             )}
 
+            {showParryTutorial && (
+                <div className="fixed inset-0 z-[210] flex items-center justify-center bg-black/75 p-4 animate-in fade-in duration-200">
+                    <div className="w-full max-w-md rounded-lg border-2 border-cyan-300 bg-slate-950 p-4 shadow-[0_0_32px_rgba(34,211,238,0.55)]">
+                        <div className="mb-3 flex items-center gap-2 text-cyan-200 font-black">
+                            <Mic size={22} className="text-cyan-300" />
+                            応答パリィ
+                        </div>
+                        <p className="mb-3 text-sm leading-relaxed text-slate-100">
+                            放送委員は、敵の攻撃にあわせて<span className="text-cyan-300 font-bold">応答!</span>を押すとダメージを受けずに音波を跳ね返せます。
+                        </p>
+                        <p className="mb-4 text-xs leading-relaxed text-slate-300">
+                            ゲージがなくなる前に押しましょう。出てすぐ押せると<span className="text-yellow-300 font-bold">ベストアンサー</span>になり、反射ダメージが強くなります。
+                        </p>
+                        <button
+                            onClick={onCloseParryTutorial}
+                            className="w-full rounded border-2 border-cyan-100 bg-cyan-600 px-4 py-2 text-sm font-black text-white shadow-[2px_2px_0_rgba(0,0,0,1)] transition hover:bg-cyan-500 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+                        >
+                            わかった、応答する！
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* 1. Top Bar: Narrative & Logs */}
             <div className="shrink-0 bg-black border-b-2 border-gray-700 p-2 z-30 relative min-h-[4rem] flex flex-col justify-center shadow-md">
                 <div className="flex flex-col w-full pr-24 overflow-hidden">
@@ -925,20 +950,25 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
                 {/* Parry UI Overlay (Bard Special) */}
                 {parryState?.active && !parryState.success && (
-                    <div className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none translate-y-32">
+                    <div className="absolute inset-0 z-[90] flex items-center justify-center pointer-events-none translate-y-14 md:translate-y-24">
+                        <div className="absolute inset-x-8 top-1/2 h-px bg-cyan-300/50 shadow-[0_0_18px_rgba(34,211,238,0.9)] animate-pulse"></div>
                         <button
                             onClick={(e) => { e.stopPropagation(); onParry(); }}
-                            className="bg-black/80 border-4 border-cyan-400 p-6 rounded-full shadow-[0_0_30px_rgba(34,211,238,0.6)] animate-bounce pointer-events-auto group transition-transform active:scale-90"
+                            className="relative bg-black/90 border-4 border-cyan-300 p-4 md:p-6 rounded-full shadow-[0_0_34px_rgba(34,211,238,0.8)] animate-bounce pointer-events-auto group transition-transform active:scale-90"
                         >
+                            <span className="absolute inset-[-12px] rounded-full border-2 border-cyan-200/60 animate-ping"></span>
                             <div className="flex flex-col items-center">
-                                <Mic size={48} className="text-cyan-400 mb-2 group-hover:scale-110" />
-                                <span className="text-white font-black text-xl tracking-widest">
-                                    {trans("インタビューではねかえせ！", languageMode)}
+                                <Mic size={44} className="text-cyan-300 mb-1 group-hover:scale-110" />
+                                <span className="text-white font-black text-lg md:text-xl tracking-widest">
+                                    {trans("応答!", languageMode)}
                                 </span>
-                                <div className="mt-2 w-16 h-1 bg-cyan-900 rounded-full overflow-hidden">
+                                <span className="text-[10px] md:text-xs text-cyan-100 font-bold">
+                                    {trans("音波をはねかえせ", languageMode)}
+                                </span>
+                                <div className="mt-2 w-20 h-1.5 bg-cyan-950 rounded-full overflow-hidden border border-cyan-700">
                                     <div
-                                        className="h-full bg-cyan-400 animate-shrink-width"
-                                        style={{ animation: 'shrink 300ms linear forwards' }}
+                                        className="h-full bg-gradient-to-r from-yellow-300 via-cyan-300 to-cyan-500"
+                                        style={{ animation: `shrink ${parryState.windowMs || 650}ms linear forwards` }}
                                     />
                                 </div>
                             </div>
@@ -1173,6 +1203,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         const enemyName = trans(enemy.name, languageMode);
                         const enemyNameNeedsScroll = enemyName.length > 5;
                         const isTrueBossPhase2 = enemy.enemyType === 'THE_HEART' && enemy.phase === 2;
+                        const isParryTarget = !!parryState?.active && parryState.enemyId === enemy.id;
                         const enemySvgAliases = isTrueBossPhase2
                             ? ['THE_HEART_PHASE2', '真ボス2形態目', '真ボス_2', '真ボス第二形態', `${enemy.enemyType}_2`]
                             : [];
@@ -1183,8 +1214,11 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 onClick={() => {
                                     if (!isFinisherActive && coopCanAct) onSelectEnemy(enemy.id);
                                 }}
-                                className={`flex flex-col items-center z-10 transition-all duration-200 cursor-pointer relative ${isSelected && !actionClass ? 'scale-105 z-20' : ''} ${!isSelected && !actionClass ? 'hover:scale-105' : ''} ${actionClass} ${isTrueBossPhase2 ? 'sinister-aura' : ''} ${tutorialStep === 2 ? 'ring-4 ring-red-500 ring-offset-4 ring-offset-transparent animate-pulse rounded-lg' : ''} ${isFinisherActive ? '!z-[300]' : ''}`}
+                                className={`flex flex-col items-center z-10 transition-all duration-200 cursor-pointer relative ${isSelected && !actionClass ? 'scale-105 z-20' : ''} ${!isSelected && !actionClass ? 'hover:scale-105' : ''} ${actionClass} ${isTrueBossPhase2 ? 'sinister-aura' : ''} ${tutorialStep === 2 ? 'ring-4 ring-red-500 ring-offset-4 ring-offset-transparent animate-pulse rounded-lg' : ''} ${isParryTarget ? 'ring-4 ring-cyan-300 ring-offset-4 ring-offset-slate-900 rounded-lg shadow-[0_0_30px_rgba(34,211,238,0.75)] z-[60]' : ''} ${isFinisherActive ? '!z-[300]' : ''}`}
                             >
+                                {isParryTarget && (
+                                    <div className="absolute -inset-5 rounded-full border-2 border-cyan-300/70 animate-ping pointer-events-none"></div>
+                                )}
                                 {isTrueBossPhase2 && (
                                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-900/20 blur-3xl rounded-full void-backglow pointer-events-none z-0"></div>
                                 )}

@@ -61,6 +61,9 @@ import { getRandomRaceTrickCard, getRaceTrickCard } from './raceTricks';
 import { getRandomCoopSupportCard } from './coopSupportCards';
 import { OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE } from './config/runtime';
 
+const PARRY_WINDOW_MS = 650;
+const PARRY_PERFECT_MS = 220;
+
 const calculateScore = (state: GameState, victory: boolean): number => {
     let score = 0;
     const floorPoints = (state.act - 1) * 150 + state.floor * 10;
@@ -708,6 +711,8 @@ const App: React.FC = () => {
     const [nextThreshold, setNextThreshold] = useState<number | null>(null);
     const [battleFinisherCutinCard, setBattleFinisherCutinCard] = useState<ICard | null>(null);
     const battleFinisherCutinCardRef = useRef<ICard | null>(null);
+    const [showParryTutorial, setShowParryTutorial] = useState(false);
+    const parryTutorialResolverRef = useRef<(() => void) | null>(null);
 
     const [isMathDebugSkipped, setIsMathDebugSkipped] = useState<boolean>(false);
     const [isDebugHpOne, setIsDebugHpOne] = useState<boolean>(false);
@@ -6340,11 +6345,24 @@ const App: React.FC = () => {
     };
 
     const handleParryClick = () => {
+        const currentParry = stateRef.current.parryState;
+        if (!currentParry?.active || currentParry.success) return;
+        const elapsedMs = currentParry.windowStartedAt ? Date.now() - currentParry.windowStartedAt : Number.MAX_SAFE_INTEGER;
+        const result = elapsedMs <= PARRY_PERFECT_MS ? 'perfect' : 'good';
         setGameState(prev => ({
             ...prev,
-            parryState: { ...prev.parryState!, success: true }
+            parryState: { ...prev.parryState!, success: true, result }
         }));
-        audioService.playSound('block');
+        audioService.playSound(result === 'perfect' ? 'buff' : 'block');
+    };
+
+    const handleCloseParryTutorial = () => {
+        storageService.saveSeenParryTutorial();
+        setShowParryTutorial(false);
+        const resolve = parryTutorialResolverRef.current;
+        parryTutorialResolverRef.current = null;
+        resolve?.();
+        audioService.playSound('select');
     };
 
     const executeEndTurn = async (enemyActionCountOverride?: number) => {
@@ -6522,17 +6540,26 @@ const App: React.FC = () => {
                 enemy.nextIntent.type === EnemyIntentType.ATTACK_DEFEND ||
                 enemy.nextIntent.type === EnemyIntentType.PIERCE_ATTACK;
             if (isBard && isAttackIntent) {
+                if (!storageService.getSeenParryTutorial()) {
+                    setShowParryTutorial(true);
+                    await new Promise<void>(resolve => {
+                        parryTutorialResolverRef.current = resolve;
+                    });
+                }
+                const windowStartedAt = Date.now();
                 setGameState(prev => ({
                     ...prev,
-                    parryState: { active: true, enemyId: enemy.id, success: false }
+                    parryState: { active: true, enemyId: enemy.id, success: false, windowStartedAt, windowMs: PARRY_WINDOW_MS }
                 }));
-                await wait(350);
+                await wait(PARRY_WINDOW_MS);
             } else {
                 await wait(300);
             }
-            const parrySuccess = stateRef.current.parryState?.success || false;
+            const latestParryState = stateRef.current.parryState;
+            const parrySuccess = latestParryState?.enemyId === enemy.id && !!latestParryState.success;
+            const parryResult = parrySuccess ? (latestParryState?.result || 'good') : 'miss';
             if (stateRef.current.parryState?.active) {
-                setGameState(prev => ({ ...prev, parryState: { active: false, enemyId: null, success: false } }));
+                setGameState(prev => ({ ...prev, parryState: { active: false, enemyId: null, success: false, result: parrySuccess ? parryResult : 'miss' } }));
             }
             if (isAttackIntent) audioService.playSound('attack');
             else if (enemy.nextIntent.type === EnemyIntentType.DEFEND) audioService.playSound('block');
@@ -6601,14 +6628,28 @@ const App: React.FC = () => {
                             logParts.push(`= 1(${trans("スケスケ", languageMode)})`);
                         }
                         if (parrySuccess) {
-                            const reflectedDmg = damage;
+                            const reflectedDmg = parryResult === 'perfect' ? damage : Math.ceil(damage * 0.5);
                             damage = 0;
                             e.currentHp -= reflectedDmg;
-                            e.floatingText = { id: `refl-${Date.now()}`, text: `${reflectedDmg}`, color: 'text-cyan-400', iconType: 'zap' };
-                            newLogs.push(trans("ナイス応答！音波を跳ね返した！", languageMode));
+                            e.floatingText = {
+                                id: `refl-${Date.now()}`,
+                                text: parryResult === 'perfect' ? `PERFECT ${reflectedDmg}` : `${reflectedDmg}`,
+                                color: 'text-cyan-400',
+                                iconType: 'zap'
+                            };
+                            newLogs.push(parryResult === 'perfect'
+                                ? trans("ベストアンサー！音波を完全に跳ね返した！", languageMode)
+                                : trans("ナイス応答！音波を跳ね返した！", languageMode));
                             newLogs.push(`${trans(e.name, languageMode)}に${reflectedDmg}の反射ダメージ`);
-                            audioService.playSound('buff');
-                            nextActiveEffects.push({ id: `vfx-parry-${Date.now()}`, type: 'FIRE', targetId: e.id });
+                            audioService.playSound(parryResult === 'perfect' ? 'finisher_slash' : 'buff');
+                            nextActiveEffects.push({ id: `vfx-parry-ring-${Date.now()}`, type: 'SHOCKWAVE', targetId: 'player' });
+                            nextActiveEffects.push({ id: `vfx-parry-${Date.now()}`, type: parryResult === 'perfect' ? 'LIGHTNING' : 'FIRE', targetId: e.id, delay: 120 });
+                            if (parryResult === 'perfect') {
+                                nextActiveEffects.push({ id: `vfx-parry-flash-${Date.now()}`, type: 'FLASH', targetId: 'player' });
+                            }
+                        } else if (isBard && isAttackIntent) {
+                            newLogs.push(trans("応答が間に合わなかった...", languageMode));
+                            nextActiveEffects.push({ id: `vfx-parry-miss-${Date.now()}`, type: 'DEBUFF', targetId: 'player' });
                         }
                         if (damage > 0) {
                             if (p.powers['BUFFER'] > 0) {
@@ -10984,7 +11025,7 @@ const App: React.FC = () => {
                             <BattleScene
                                 player={gameState.player} companions={gameState.challengeMode === 'COOP' ? coopCompanions : undefined} coopSelfPeerId={gameState.challengeMode === 'COOP' ? coopSelfPeerId : undefined} coopEffectOwnerPeerId={gameState.challengeMode === 'COOP' ? coopEffectOwnerPeerId : undefined} coopTurnQueue={gameState.challengeMode === 'COOP' ? coopBattleQueueView : undefined} coopCanAct={gameState.challengeMode === 'COOP' ? coopBattleCanAct : true} coopTurnOwnerLabel={gameState.challengeMode === 'COOP' ? coopBattleTurnOwnerLabel : undefined} coopSupportCards={gameState.challengeMode === 'COOP' ? coopSupportCards : undefined} onUseCoopSupport={gameState.challengeMode === 'COOP' ? handleUseCoopSupport : undefined} selfDown={gameState.challengeMode === 'COOP' && gameState.player.currentHp <= 0} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onEndTurn={handleEndTurnClick} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={gameState.selectionState} onHandSelection={handleHandSelection}
                                 onUsePotion={handleUsePotion} combatLog={gameState.combatLog} languageMode={languageMode} codexOptions={gameState.codexOptions} onCodexSelect={onCodexSelect} onPlaySynthesizedCard={handlePlaySynthesizedCard}
-                                parryState={gameState.parryState} onParry={handleParryClick} activeEffects={gameState.activeEffects}
+                                parryState={gameState.parryState} onParry={handleParryClick} showParryTutorial={showParryTutorial} onCloseParryTutorial={handleCloseParryTutorial} activeEffects={gameState.activeEffects}
                                 onCancelSelection={handleCancelSelection}
                                 finisherCutinCard={battleFinisherCutinCard}
                                 hideEnemyIntents={raceEffects.hideEnemyIntentsOnce}

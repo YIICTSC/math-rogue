@@ -670,6 +670,9 @@ export interface ParryState {
   active: boolean;
   enemyId: string | null;
   success: boolean;
+  windowStartedAt?: number;
+  windowMs?: number;
+  result?: 'perfect' | 'good' | 'miss';
 }
 
 export type VFXType = 'SLASH' | 'BLOCK' | 'BUFF' | 'DEBUFF' | 'HEAL' | 'FIRE' | 'EXPLOSION' | 'LIGHTNING' | 'CRITICAL' | 'SHOCKWAVE' | 'FLASH';
