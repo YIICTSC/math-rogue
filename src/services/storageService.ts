@@ -893,7 +893,8 @@ export const storageService = {
           GameScreen.START_MENU, GameScreen.GAME_OVER, GameScreen.ENDING,
           GameScreen.VICTORY, GameScreen.COMPENDIUM, GameScreen.HELP,
           GameScreen.CHARACTER_SELECTION, GameScreen.RANKING, GameScreen.PROBLEM_CHALLENGE,
-          GameScreen.MINI_GAME_SELECT, GameScreen.MINI_GAME_POKER, GameScreen.MINI_GAME_SURVIVOR,
+          GameScreen.MINI_GAME_SELECT, GameScreen.MINI_GAME_MODE_SELECTION,
+          GameScreen.MINI_GAME_POKER, GameScreen.MINI_GAME_SURVIVOR,
           GameScreen.MINI_GAME_DUNGEON, GameScreen.MINI_GAME_DUNGEON_2, GameScreen.MINI_GAME_KOCHO,
           GameScreen.MINI_GAME_PAPER_PLANE, GameScreen.MINI_GAME_GO_HOME
       ];

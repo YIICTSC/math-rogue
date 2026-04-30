@@ -638,6 +638,8 @@ const App: React.FC = () => {
         actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
     });
     const [pendingMiniGameScreen, setPendingMiniGameScreen] = useState<GameScreen | null>(null);
+    const [miniGameProblemMode, setMiniGameProblemMode] = useState<GameMode>(GameMode.MIXED);
+    const [miniGameProblemModePool, setMiniGameProblemModePool] = useState<string[] | undefined>(undefined);
     const [isMobilePortrait, setIsMobilePortrait] = useState(false);
     const previousScreenRef = useRef<GameScreen>(GameScreen.START_MENU);
     const isLegacyVercelHost = typeof window !== 'undefined' && window.location.hostname === LEGACY_VERCEL_HOST;
@@ -3407,8 +3409,10 @@ const App: React.FC = () => {
         }
         audioService.playSound('select');
         const nextScreen = pendingMiniGameScreen || GameScreen.MINI_GAME_SELECT;
+        setMiniGameProblemMode(mode);
+        setMiniGameProblemModePool(modePool);
         setPendingMiniGameScreen(null);
-        setGameState(prev => ({ ...prev, mode, modePool, screen: nextScreen }));
+        setGameState(prev => ({ ...prev, screen: nextScreen }));
     };
 
     const startEndlessMode = () => {
@@ -10705,8 +10709,8 @@ const App: React.FC = () => {
                         <MiniGameRouter
                             screen={gameState.screen}
                             onBack={returnToTitle}
-                            problemMode={gameState.mode}
-                            problemModePool={gameState.modePool}
+                            problemMode={miniGameProblemMode}
+                            problemModePool={miniGameProblemModePool}
                         />
                     </div>
                 )}
