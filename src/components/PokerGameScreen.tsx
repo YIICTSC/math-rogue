@@ -8,7 +8,7 @@ import {
 } from '../types';
 import { POKER_HAND_LEVELS, SUPPORTERS_LIBRARY, CONSUMABLES_LIBRARY, PACK_LIBRARY, POKER_ENHANCEMENTS, VOUCHERS_LIBRARY, EXPANDED_SUPPORTER_IDS } from '../constants';
 import { storageService } from '../services/storageService';
-import MathChallengeScreen from './MathChallengeScreen';
+import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 
 // --- Constants & Helpers ---
 const SUITS: PokerSuit[] = ['SPADE', 'HEART', 'DIAMOND', 'CLUB'];
@@ -329,6 +329,8 @@ const PLANET_TARGETS: Record<string, { hand: string; levels?: number }> = {
 
 interface PokerGameScreenProps {
   onBack: () => void;
+  problemMode?: GameMode;
+  problemModePool?: string[];
 }
 
 type ScoreAnimationState = {
@@ -352,7 +354,7 @@ type ScoreBreakdownEntry = {
   accent?: 'chips' | 'mult' | 'special';
 };
 
-const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
+const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode = GameMode.MIXED, problemModePool }) => {
   const expandedSupporterUnlockCount = Math.min(
       storageService.getPokerExpandedSupporterUnlockCount(),
       EXPANDED_SUPPORTER_IDS.length
@@ -1525,9 +1527,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack }) => {
 
   if (phase === 'MATH') {
       return (
-          <MathChallengeScreen 
-              mode={GameMode.MIXED} 
-              onComplete={handleMathComplete} 
+          <MiniGameProblemChallenge
+              mode={problemMode}
+              modePool={problemModePool}
+              onComplete={handleMathComplete}
           />
       );
   }

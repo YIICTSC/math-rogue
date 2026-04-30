@@ -4,8 +4,8 @@ import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, 
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { storageService } from '../services/storageService';
-import MathChallengeScreen from './MathChallengeScreen';
 import { GameMode } from '../types';
+import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 
 // --- TYPES ---
 type Facing = 1 | -1; // 1: Right, -1: Left
@@ -391,7 +391,7 @@ const getInitialState = (): KochoGameState => ({
 });
 
 // --- COMPONENT ---
-const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; problemModePool?: string[] }> = ({ onBack, problemMode = GameMode.MIXED, problemModePool }) => {
     
     // State
     const [gameState, setGameState] = useState<KochoGameState>(() => {
@@ -2179,7 +2179,7 @@ const KochoShowdown: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             {/* Math Challenge Overlay */}
             {gameState.phase === 'MATH' && (
                  <div className="absolute inset-0 z-[100] w-full h-full pointer-events-auto">
-                     <MathChallengeScreen mode={GameMode.MIXED} onComplete={handleMathComplete} />
+                     <MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} onComplete={handleMathComplete} />
                  </div>
             )}
 

@@ -3,8 +3,8 @@ import { Heart, Star, Skull, Brain, Book, Flame, Wind, Target, RotateCcw, ArrowL
 import { audioService } from '../services/audioService';
 import { SPRITE_TEMPLATES } from './PixelSprite';
 import { storageService } from '../services/storageService';
-import MathChallengeScreen from './MathChallengeScreen';
 import { GameMode, LanguageMode } from '../types';
+import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 
 // --- CONSTANTS ---
 const CANVAS_WIDTH = 800;
@@ -84,7 +84,7 @@ interface DashCardEffect {
 
 type DashGameState = 'START' | 'PLAYING' | 'CHALLENGE' | 'LEVEL_UP' | 'GAME_OVER';
 
-const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+const GoHomeDash: React.FC<{ onBack: () => void; problemMode?: GameMode; problemModePool?: string[] }> = ({ onBack, problemMode = GameMode.MIXED, problemModePool }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const playerSpriteRef = useRef<HTMLImageElement | null>(null);
@@ -999,7 +999,7 @@ const GoHomeDash: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
             {gameState === 'CHALLENGE' && (
                 <div className="absolute inset-0 z-[100] w-full h-full pointer-events-auto">
-                    <MathChallengeScreen mode={GameMode.MIXED} onComplete={handleChallengeComplete} isChallenge={false} streak={0} />
+                    <MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} onComplete={handleChallengeComplete} isChallenge={false} streak={0} />
                 </div>
             )}
 

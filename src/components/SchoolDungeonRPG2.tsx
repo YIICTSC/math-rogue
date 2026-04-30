@@ -4,15 +4,17 @@ import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, A
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
 import { storageService } from '../services/storageService';
-import MathChallengeScreen from './MathChallengeScreen';
 import { GameMode } from '../types';
 import { EXTRA_SCHOOL_DUNGEON_ITEMS } from '../data/schoolDungeonExtraItems';
+import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 
 // --- セッション内アイテム引き継ぎ用変数 ---
 let inheritedItemTemplate2: Item | null = null;
 
 interface SchoolDungeonRPG2Props {
   onBack: () => void;
+  problemMode?: GameMode;
+  problemModePool?: string[];
 }
 
 // --- GBC PALETTE (Dynamic based on Floor) ---
@@ -299,7 +301,7 @@ const computeDijkstraMap = (map: TileType[][], targetX: number, targetY: number)
     return dMap;
 };
 
-const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
+const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMode = GameMode.MIXED, problemModePool }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [map, setMap] = useState<TileType[][]>([]);
   const [visitedMap, setVisitedMap] = useState<boolean[][]>([]);
@@ -1468,7 +1470,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack }) => {
             </div>
         )}
         
-        {showMathChallenge && (<div className="fixed inset-0 z-[100] w-full h-full pointer-events-auto"><MathChallengeScreen mode={GameMode.MIXED} onComplete={handleMathComplete} /></div>)}
+        {showMathChallenge && (<div className="fixed inset-0 z-[100] w-full h-full pointer-events-auto"><MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} onComplete={handleMathComplete} /></div>)}
 
         {showDeck && (
             <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setShowDeck(false)}>

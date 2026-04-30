@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { GameScreen } from '../types';
+import { GameMode, GameScreen } from '../types';
 import PokerGameScreen from './PokerGameScreen';
 import SchoolyardSurvivorScreen from './SchoolyardSurvivorScreen';
 import SchoolDungeonRPG from './SchoolDungeonRPG';
@@ -12,13 +12,21 @@ import GoHomeDash from './GoHomeDash';
 interface MiniGameRouterProps {
     screen: GameScreen;
     onBack: () => void;
+    problemMode: GameMode;
+    problemModePool?: string[];
+}
+
+export interface MiniGameComponentProps {
+    onBack: () => void;
+    problemMode: GameMode;
+    problemModePool?: string[];
 }
 
 /**
  * 個別のミニゲームコンポーネントとGameScreenの対応表
  * 今後ミニゲームが増えた場合は、ここに追加するだけでApp.tsxを触らずに済みます
  */
-const MINI_GAME_MAP: Partial<Record<GameScreen, React.ComponentType<{ onBack: () => void }>>> = {
+const MINI_GAME_MAP: Partial<Record<GameScreen, React.ComponentType<MiniGameComponentProps>>> = {
     [GameScreen.MINI_GAME_POKER]: PokerGameScreen,
     [GameScreen.MINI_GAME_SURVIVOR]: SchoolyardSurvivorScreen,
     [GameScreen.MINI_GAME_DUNGEON]: SchoolDungeonRPG,
@@ -28,7 +36,7 @@ const MINI_GAME_MAP: Partial<Record<GameScreen, React.ComponentType<{ onBack: ()
     [GameScreen.MINI_GAME_GO_HOME]: GoHomeDash,
 };
 
-const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack }) => {
+const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, problemMode, problemModePool }) => {
     const Component = MINI_GAME_MAP[screen];
 
     if (!Component) {
@@ -41,7 +49,7 @@ const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack }) => {
         );
     }
 
-    return <Component onBack={onBack} />;
+    return <Component onBack={onBack} problemMode={problemMode} problemModePool={problemModePool} />;
 };
 
 export default MiniGameRouter;

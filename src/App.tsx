@@ -637,6 +637,7 @@ const App: React.FC = () => {
         currentStoryIndex: 0,
         actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
     });
+    const [pendingMiniGameScreen, setPendingMiniGameScreen] = useState<GameScreen | null>(null);
     const [isMobilePortrait, setIsMobilePortrait] = useState(false);
     const previousScreenRef = useRef<GameScreen>(GameScreen.START_MENU);
     const isLegacyVercelHost = typeof window !== 'undefined' && window.location.hostname === LEGACY_VERCEL_HOST;
@@ -3389,7 +3390,25 @@ const App: React.FC = () => {
             return;
         }
         audioService.playSound('select');
-        setGameState(prev => ({ ...prev, screen }));
+        if (screen === GameScreen.MINI_GAME_PAPER_PLANE) {
+            setPendingMiniGameScreen(null);
+            setGameState(prev => ({ ...prev, screen }));
+            return;
+        }
+        setPendingMiniGameScreen(screen);
+        setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_MODE_SELECTION }));
+    };
+
+    const handleMiniGameModeSelect = (mode: GameMode, modePool?: string[]) => {
+        if (isDailyLimitReached) {
+            audioService.playSound('wrong');
+            setShowTimeLimitModal(true);
+            return;
+        }
+        audioService.playSound('select');
+        const nextScreen = pendingMiniGameScreen || GameScreen.MINI_GAME_SELECT;
+        setPendingMiniGameScreen(null);
+        setGameState(prev => ({ ...prev, mode, modePool, screen: nextScreen }));
     };
 
     const startEndlessMode = () => {
@@ -10665,10 +10684,30 @@ const App: React.FC = () => {
                     </div>
                 )}
 
+                {gameState.screen === GameScreen.MINI_GAME_MODE_SELECTION && (
+                    <div className="absolute inset-0">
+                        <ModeSelectionScreen
+                            onSelectMode={handleMiniGameModeSelect}
+                            onBack={() => {
+                                setPendingMiniGameScreen(null);
+                                setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_SELECT }));
+                            }}
+                            languageMode={languageMode}
+                            modeMasteryMap={Object.fromEntries(Object.entries(modeCorrectCounts).map(([mode, count]) => [mode, count >= 100]))}
+                            modeCorrectCounts={modeCorrectCounts}
+                        />
+                    </div>
+                )}
+
                 {/* Generic Mini-Game Router */}
                 {miniGame && (
                     <div className="absolute inset-0">
-                        <MiniGameRouter screen={gameState.screen} onBack={returnToTitle} />
+                        <MiniGameRouter
+                            screen={gameState.screen}
+                            onBack={returnToTitle}
+                            problemMode={gameState.mode}
+                            problemModePool={gameState.modePool}
+                        />
                     </div>
                 )}
 
