@@ -19,111 +19,10 @@ interface GameEvent {
     options: EventOption[];
 }
 
-interface EventResolutionContext {
-    mutated: boolean;
-    allowFallback: boolean;
-    resolved: boolean;
-    eventTitle: string;
-    optionLabel: string;
-    optionText: string;
-}
-
-interface EventSpecialEffect {
-    effectId: string;
-    text: string;
-}
-
-const EVENT_NOOP_RECOVERY = 5;
-const EVENT_NOOP_RECOVERY_LOG = `深く息を吸うと、胸の奥に少し余裕が戻ってくる。HPが${EVENT_NOOP_RECOVERY}回復した。`;
-const NO_EFFECT_RESULT_PATTERN = /(何も|なにも|変化なし|へんかなし|変化はない|へんかはない|変わらなかった|かわらなかった|強化対象はなかった|きょうかたいしょうはなかった|強化できるカードはなかった|きょうかできるカードはなかった|取り除くカードはなかった|とりのぞくカードはなかった|成長はなかった|せいちょうはなかった|効果はなかった|こうかはなかった|見つからなかった|みつからなかった|映らなかった|うつらなかった|普通。|ふつう。|次に活きる手応え)/;
-const NO_EFFECT_SKIP_PATTERN = /(お金が足りない|おかねが たりない|所持金が足りない|しょじきんが たりない|これ以上受け取れない|これいじょう うけとれない|満杯|まんぱい)/;
-const EVENT_NOOP_SCENES = [
-    '「今回はこれでいい」そうつぶやくと、廊下のざわめきが少しだけ遠のいた。焦らず進む感覚が、手の中にしっかり残る。',
-    '期待していた展開とは少し違った。それでも、立ち止まって考えた時間が次の判断を軽くする。肩の力が抜け、次の一歩が決まった。',
-    '空気を読み切った手応えがあった。ランドセルの紐を直し、気持ちを切り替えて先へ進む。',
-    '先生の足音、窓の光、遠くのチャイム。小さな間の中で呼吸を整えると、さっきまでの迷いが少し薄れていった。',
-    '「まあ、こういう日もあるよね」苦笑いしながらノートを閉じる。心の余白が戻り、次の一手を選ぶ余裕が生まれた。'
-];
-
-const EVENT_SPECIAL_EFFECTS: Record<string, EventSpecialEffect> = {
-    "怪しい薬売り": { effectId: "EVENT_SHADY_MEDICINE_SAMPLE", text: "薬瓶の底に残った一滴をお守り代わりにしまった。次の戦闘開始時、思わぬ効き目が出る。" },
-    "踊り場の鏡": { effectId: "EVENT_MIRROR_DOUBLE", text: "鏡に映ったもう一人の自分が小さくうなずいた。次の戦闘で最初に使うカードに、鏡写しの力が宿る。" },
-    "呪われた書物": { effectId: "EVENT_CURSED_BOOKMARK", text: "しおり代わりに挟んだ紙片が、妙に温かい。次の戦闘で呪いや状態異常に少しだけ耐えやすくなる。" },
-    "伝説の給食": { effectId: "EVENT_LEGENDARY_LUNCH", text: "揚げパンの香りだけで元気が湧いてくる。次の戦闘開始時、少し回復する。" },
-    "校庭の野良犬": { effectId: "EVENT_STRAY_DOG_COMPANION", text: "足元に残った小さな足跡が、不思議と心強い。次の戦闘開始時、守りの構えを得る。" },
-    "謎の転校生": { effectId: "EVENT_TRANSFER_STUDENT_TRADE", text: "転校生が残した謎のメモをポケットに入れた。次の戦闘開始時、手札が少し増える。" },
-    "席替え": { effectId: "EVENT_NEW_SEAT_FOCUS", text: "新しい席から見る景色で頭が冴えた。次の戦闘開始時、手札が1枚増える。" },
-    "避難訓練": { effectId: "EVENT_EVACUATION_ROUTE", text: "避難経路を頭の中でなぞり直した。次の戦闘開始時、ブロックを得る。" },
-    "プール開き": { effectId: "EVENT_POOL_BREATHING", text: "水際で覚えた呼吸法が残っている。次の戦闘開始時、息を整えて回復する。" },
-    "修学旅行の積立金": { effectId: "EVENT_TRAVEL_FUND", text: "積立袋の端に小銭が残っていた。次の戦闘開始時、少し得をした気分で動ける。" },
-    "魔の掃除時間": { effectId: "EVENT_POLISHED_FLOOR", text: "磨いた床の反射で足運びが軽くなった。次の戦闘開始時、ブロックを得る。" },
-    "運命のテスト返却": { effectId: "EVENT_TEST_RESULT_REVIEW", text: "赤ペンの跡を見直し、次に活かす準備ができた。次の戦闘開始時、手札の1枚が一時的に強化される。" },
-    "放送室のジャック": { effectId: "EVENT_BROADCAST_JACK", text: "マイクの余韻が校内に残っている。次の戦闘開始時、敵全体を少し弱らせる。" },
-    "理科室の人体模型": { effectId: "EVENT_ANATOMY_MODEL", text: "人体模型の視線から急所の位置を学んだ。次の戦闘開始時、筋力を少し得る。" },
-    "図書室の静寂": { effectId: "EVENT_LIBRARY_SILENCE", text: "静けさの中で集中力が研ぎ澄まされた。次の戦闘開始時、カードを1枚多く引く。" },
-    "終わらない朝礼": { effectId: "EVENT_ENDLESS_ASSEMBLY", text: "長話に耐えた忍耐が残っている。次の戦闘開始時、ブロックを得る。" },
-    "置き勉の誘惑": { effectId: "EVENT_DESK_CACHE", text: "机の奥に残した予備の一手を思い出した。次の戦闘開始時、手札が少し増える。" },
-    "伝説の木の下": { effectId: "EVENT_LEGEND_TREE_PROMISE", text: "木漏れ日の下で交わした小さな約束が力になる。次の戦闘開始時、HPを回復する。" },
-    "体育倉庫のマット": { effectId: "EVENT_GYM_MAT_CUSHION", text: "マットの受け身を体が覚えている。次の戦闘開始時、ブロックを得る。" },
-    "秘密基地のパスワード": { effectId: "EVENT_SECRET_BASE_PASSWORD", text: "合言葉を唱えると少し勇気が出た。次の戦闘開始時、エナジーを1得る。" },
-    "職員室の呼び出し": { effectId: "EVENT_TEACHERS_ROOM_NOTICE", text: "職員室の緊張感で背筋が伸びた。次の戦闘開始時、エナジーを1得る。" },
-    "落とし物のリコーダー": { effectId: "EVENT_RECORDER_TUNE", text: "かすれた音色が耳に残る。次の戦闘開始時、敵1体を弱らせる。" },
-    "図工室の粘土": { effectId: "EVENT_CLAY_REPLICA", text: "手のひらの粘土が形を覚えている。次の戦闘開始時、ブロックを得る。" },
-    "家庭科室のつまみ食い": { effectId: "EVENT_HOME_EC_SNACK", text: "こっそり味見した分だけ元気が戻る。次の戦闘開始時、HPを回復する。" },
-    "体育祭の練習": { effectId: "EVENT_SPORTS_DAY_DRILL", text: "号令に合わせた一歩目が体に残った。次の戦闘開始時、筋力を少し得る。" },
-    "校章の輝き": { effectId: "EVENT_SCHOOL_BADGE_GLOW", text: "校章が一瞬だけ光った気がした。次の戦闘開始時、ブロックを得る。" },
-    "文化祭のポスター": { effectId: "EVENT_FESTIVAL_POSTER", text: "ポスターの派手な色使いが気分を上げる。次の戦闘開始時、カードを1枚多く引く。" },
-    "不気味な音楽室": { effectId: "EVENT_EERIE_MUSIC_ROOM", text: "不協和音が敵の集中を乱す予感がする。次の戦闘開始時、敵全体を少し弱らせる。" },
-    "屋上の柵": { effectId: "EVENT_ROOFTOP_RAILING", text: "高い場所で踏ん張った感覚が残った。次の戦闘開始時、HPが低いほど守りが固くなる。" },
-    "給食の残飯処理": { effectId: "EVENT_LEFTOVER_DUTY", text: "片付けたあとの達成感で胃袋が落ち着いた。次の戦闘開始時、HPを回復する。" },
-    "昇降口の下履き": { effectId: "EVENT_SHOE_LOCKER_STEP", text: "靴ひもを結び直し、足取りが整った。次の戦闘開始時、ブロックを得る。" },
-    "二宮金次郎の背負い物": { effectId: "EVENT_KINJIRO_LOAD", text: "背負う重さの意味が少し分かった。次の戦闘開始時、手札の1枚が一時的に強化される。" },
-    "保健室の視力検査": { effectId: "EVENT_EYE_TEST_FOCUS", text: "ぼやけていた狙いがはっきりした。次の戦闘開始時、筋力を少し得る。" },
-    "図書室の貸出カード": { effectId: "EVENT_LIBRARY_CARD", text: "貸出カードに残る記録が知恵をくれる。次の戦闘開始時、カードを1枚多く引く。" },
-    "飼育小屋の掃除": { effectId: "EVENT_HUT_CLEANUP", text: "きれいになった小屋の空気で心も軽い。次の戦闘開始時、状態異常を少し流しやすくなる。" },
-    "先生の忘れ物": { effectId: "EVENT_TEACHER_FORGOT_ITEM", text: "先生の忘れ物から段取りの大切さを学んだ。次の戦闘開始時、エナジーを1得る。" },
-    "学級文庫の漫画": { effectId: "EVENT_CLASS_MANGA", text: "漫画のテンポが頭に残り、動きが軽くなる。次の戦闘開始時、カードを1枚多く引く。" },
-    "理科室のアルコールランプ": { effectId: "EVENT_ALCOHOL_LAMP_FLAME", text: "青い炎が指先に残った気がする。次の戦闘開始時、敵全体に小さな火種を残す。" },
-    "音楽室の肖像画": { effectId: "EVENT_PORTRAIT_GAZE", text: "肖像画の視線が背中を押す。次の戦闘開始時、敵1体を弱らせる。" },
-    "体育館の跳び箱": { effectId: "EVENT_VAULT_JUMP", text: "踏み切りの感覚が足に残っている。次の戦闘開始時、ブロックを得る。" },
-    "水道の蛇口": { effectId: "EVENT_FAUCET_WATER", text: "冷たい水で頭がすっきりした。次の戦闘開始時、HPを回復する。" },
-    "家庭科の包丁": { effectId: "EVENT_KITCHEN_KNIFE", text: "包丁の扱いから切り込むタイミングを学んだ。次の戦闘開始時、筋力を少し得る。" },
-    "秘密の連絡帳": { effectId: "EVENT_SECRET_NOTEBOOK", text: "連絡帳の端に書かれた暗号がヒントになる。次の戦闘開始時、手札の1枚が一時的に強化される。" },
-    "校長先生の銅像": { effectId: "EVENT_PRINCIPAL_STATUE", text: "銅像の威厳を少し借りた。次の戦闘開始時、敵全体を少し弱らせる。" },
-    "階段の13段目": { effectId: "EVENT_THIRTEENTH_STEP", text: "十三段目を踏んだ感覚が妙に残る。次の戦闘開始時、不思議な力でブロックを得る。" },
-    "図書室の司書さん": { effectId: "EVENT_LIBRARIAN_ADVICE", text: "司書さんの助言で選ぶ目が冴えた。次の戦闘開始時、カードを1枚多く引く。" },
-    "屋上の貯水槽": { effectId: "EVENT_WATER_TANK_RESERVE", text: "貯水槽の冷気が体に残っている。次の戦闘開始時、HPを回復する。" },
-    "飼育室のウサギ": { effectId: "EVENT_RABBIT_LUCK", text: "白い毛が一筋、袖についていた。次の戦闘開始時、少し幸運な手札になる。" },
-    "学校のゴミ捨て場": { effectId: "EVENT_TRASH_TREASURE", text: "捨てられた物の中から使える発想を拾った。次の戦闘開始時、手札の1枚が一時的に強化される。" },
-    "放送室から変な声": { effectId: "EVENT_STRANGE_BROADCAST", text: "変な声の残響が敵を惑わせる。次の戦闘開始時、敵全体を少し弱らせる。" },
-    "掲示板の100点答案": { effectId: "EVENT_PERFECT_SCORE_NOTICE", text: "満点答案の余白に勝ち筋が見えた。次の戦闘開始時、手札の1枚が一時的に強化される。" },
-    "保健室のベッド": { effectId: "EVENT_INFIRMARY_NAP", text: "短い仮眠で体の芯が温まった。次の戦闘開始時、HPを回復する。" },
-    "給食の余りの牛乳": { effectId: "EVENT_EXTRA_MILK", text: "余った牛乳で骨まで強くなった気がする。次の戦闘開始時、HPを回復する。" },
-    "廊下のワックス": { effectId: "EVENT_WAXED_HALLWAY", text: "滑る床で身のこなしを覚えた。次の戦闘開始時、ブロックを得る。" },
-    "理科室の毒薬": { effectId: "EVENT_POISON_SAMPLE", text: "危険な薬品の扱い方を覚えた。次の戦闘開始時、敵1体に毒を与える。" },
-    "放課後の決闘": { effectId: "EVENT_AFTER_SCHOOL_DUEL", text: "決闘前の緊張感が闘志に変わる。次の戦闘開始時、筋力を少し得る。" },
-    "秘密基地": { effectId: "EVENT_SECRET_BASE_STASH", text: "秘密基地の隠し場所を覚えた。次の戦闘開始時、手札が少し増える。" },
-    "脱走したウサギ": { effectId: "EVENT_ESCAPED_RABBIT", text: "追いかけた足取りが素早さに変わる。次の戦闘開始時、ブロックを得る。" },
-    "飼育小屋の主": { effectId: "EVENT_HUT_BOSS_AURA", text: "小屋の主の迫力を借りる。次の戦闘開始時、敵全体を脆くする。" },
-    "闇の掲示板": { effectId: "EVENT_DARK_BULLETIN", text: "掲示板の黒い噂が敵の心をざわつかせる。次の戦闘開始時、敵全体を少し弱らせる。" },
-    "理科室の爆発": { effectId: "EVENT_LAB_EXPLOSION_RESIDUE", text: "爆発のすすがまだ袖に残っている。次の戦闘開始時、敵全体に小ダメージ。" },
-    "地獄の特訓": { effectId: "EVENT_HELL_TRAINING", text: "特訓の熱がまだ体に残っている。次の戦闘開始時、筋力を少し得る。" },
-    "校内放送ジャック": { effectId: "EVENT_SCHOOL_BROADCAST_HYPE", text: "放送の勢いで気分が乗っている。次の戦闘開始時、手札の1枚が一時的に強化される。" },
-    "延滞図書の督促": { effectId: "EVENT_OVERDUE_BOOK_NOTICE", text: "督促状の緊張感で集中力が増した。次の戦闘開始時、カードを1枚多く引く。" },
-    "肥沃な土壌": { effectId: "EVENT_FERTILE_SOIL", text: "土の匂いが成長の予感を運んでくる。次の戦闘開始時、手札の1枚が一時的に強化される。" },
-    "新メニューのインスピレーション": { effectId: "EVENT_NEW_MENU_IDEA", text: "新メニューのひらめきで体が温まる。次の戦闘開始時、HPを回復する。" }
-};
-
 const healPlayer = (player: Player, amount: number): Player => ({
     ...player,
     currentHp: Math.min(player.maxHp, player.currentHp + amount)
 });
-
-const shouldGrantNoopRecovery = (log: string | null, context: EventResolutionContext | null): boolean => {
-    if (!log || !context || context.mutated || context.resolved) return false;
-    if (NO_EFFECT_SKIP_PATTERN.test(log)) return false;
-    return context.allowFallback || NO_EFFECT_RESULT_PATTERN.test(log);
-};
 
 const getStableTextIndex = (text: string, size: number): number => {
     let hash = 0;
@@ -133,13 +32,97 @@ const getStableTextIndex = (text: string, size: number): number => {
     return hash % size;
 };
 
-const buildNoEffectResultLog = (log: string, context: EventResolutionContext): string => {
-    const scene = EVENT_NOOP_SCENES[getStableTextIndex(`${context.optionLabel}:${context.optionText}:${log}`, EVENT_NOOP_SCENES.length)];
-    const special = EVENT_SPECIAL_EFFECTS[context.eventTitle];
-    return `「${context.optionLabel}」を選んだ。\n${scene}${special ? `\n${special.text}` : ''}`;
+interface EventSparkResult {
+    player: Player;
+    message: string;
+    kind: 'gold' | 'heal' | 'maxHp' | 'upgrade' | 'potion';
+    subject?: string;
+    amount?: number;
+}
+
+const applyEventSpark = (player: Player, seed: string): EventSparkResult => {
+    const options: Array<() => EventSparkResult | null> = [
+        () => ({
+            player: { ...player, gold: player.gold + 16 },
+            message: "落ちていた購買券を見つけた。16Gを得た。",
+            kind: 'gold',
+            amount: 16
+        }),
+        () => player.currentHp < player.maxHp
+            ? {
+                player: healPlayer(player, 8),
+                message: "深呼吸で調子が戻った。HPが8回復した。",
+                kind: 'heal',
+                amount: 8
+            }
+            : null,
+        () => ({
+            player: { ...player, maxHp: player.maxHp + 1, currentHp: player.currentHp + 1 },
+            message: "小さな気づきが自信になった。最大HP+1。",
+            kind: 'maxHp',
+            amount: 1
+        }),
+        () => {
+            const upgradeable = player.deck.filter(card => !card.upgraded);
+            if (upgradeable.length === 0) return null;
+            const target = upgradeable[getStableTextIndex(seed, upgradeable.length)];
+            return {
+                player: {
+                    ...player,
+                    deck: player.deck.map(card => card.id === target.id ? getUpgradedCard(card) : card)
+                },
+                message: `ノートに追記したコツで「${target.name}」が強化された。`,
+                kind: 'upgrade',
+                subject: target.name
+            };
+        },
+        () => {
+            if (player.potions.length >= getPotionCapacity(player)) return null;
+            const potions = Object.values(POTION_LIBRARY);
+            const potion = potions[getStableTextIndex(seed, potions.length)];
+            return {
+                player: {
+                    ...player,
+                    potions: [...player.potions, { ...potion, id: `event-spark-${Date.now()}` }]
+                },
+                message: `机の奥から「${potion.name}」を見つけた。`,
+                kind: 'potion',
+                subject: potion.name
+            };
+        }
+    ];
+
+    const start = getStableTextIndex(seed, options.length);
+    for (let offset = 0; offset < options.length; offset++) {
+        const result = options[(start + offset) % options.length]();
+        if (result) return result;
+    }
+
+    return {
+        player: { ...player, gold: player.gold + 12 },
+        message: "小さな貸しを作った。12Gを得た。",
+        kind: 'gold',
+        amount: 12
+    };
 };
 
-const normalizeEventOptionText = (text: string): string => text.replace(/変化なし/g, `HP+${EVENT_NOOP_RECOVERY}`);
+const buildEventSparkMessage = (eventTitle: string | null, result: EventSparkResult): string => {
+    const title = eventTitle ?? 'この出来事';
+    switch (result.kind) {
+        case 'gold':
+            return `${title}で得た段取りが小さな謝礼につながった。${result.amount ?? 16}Gを得た。`;
+        case 'heal':
+            return `${title}の場を離れるころには呼吸が整っていた。HPが${result.amount ?? 8}回復した。`;
+        case 'maxHp':
+            return `${title}で腹が据わった。最大HP+${result.amount ?? 1}。`;
+        case 'upgrade':
+            return `${title}でつかんだコツをノートに書き込み、「${result.subject ?? 'カード'}」が強化された。`;
+        case 'potion':
+            return `${title}の片付け中に使えそうな「${result.subject ?? 'ポーション'}」を見つけた。`;
+        default:
+            return result.message;
+    }
+};
 
 const addPermanentStrengthBonus = (player: Player, amount: number): Player => ({
     ...player,
@@ -240,72 +223,33 @@ export const generateEvent = (
     unlockedCardNames: string[],
     preferredEventTitle?: string
 ): GameEvent => {
-    const rawSetGameState = setGameState;
-    const rawSetEventResultLog = setEventResultLog;
-    let activeResolutionContext: EventResolutionContext | null = null;
-
-    setGameState = update => {
-        if (activeResolutionContext && !activeResolutionContext.resolved) {
-            activeResolutionContext.mutated = true;
-        }
-        rawSetGameState(update);
-    };
-
-    setEventResultLog = log => {
-        const context = activeResolutionContext;
-        if (shouldGrantNoopRecovery(log, context)) {
-            const special = EVENT_SPECIAL_EFFECTS[context.eventTitle];
-            rawSetGameState(prev => ({
-                ...prev,
-                player: {
-                    ...healPlayer(prev.player, EVENT_NOOP_RECOVERY),
-                    relicCounters: special
-                        ? {
-                            ...prev.player.relicCounters,
-                            [special.effectId]: Math.max(1, prev.player.relicCounters[special.effectId] || 0)
-                        }
-                        : prev.player.relicCounters
-                }
-            }));
-            rawSetEventResultLog(`${trans(buildNoEffectResultLog(log ?? '', context), languageMode)}\n${trans(EVENT_NOOP_RECOVERY_LOG, languageMode)}`);
-        } else {
-            rawSetEventResultLog(log);
-        }
-
-        if (context) {
-            context.resolved = true;
-            if (activeResolutionContext === context) {
-                activeResolutionContext = null;
-            }
-        }
-    };
-
+    let activeEventTitle: string | null = null;
     const finalizeEvent = (event: GameEvent): GameEvent => ({
         ...event,
         options: event.options.map(option => ({
             ...option,
-            text: normalizeEventOptionText(option.text),
+            text: option.text,
             action: () => {
-                const context: EventResolutionContext = {
-                    mutated: false,
-                    allowFallback: option.text.includes('変化なし'),
-                    resolved: false,
-                    eventTitle: event.title,
-                    optionLabel: option.label,
-                    optionText: option.text
-                };
-                activeResolutionContext = context;
+                activeEventTitle = event.title;
                 try {
                     option.action();
-                } catch (error) {
-                    if (activeResolutionContext === context) {
-                        activeResolutionContext = null;
-                    }
-                    throw error;
+                } finally {
+                    activeEventTitle = null;
                 }
             }
         }))
     });
+
+    const resolveMomentum = (seed: string, flavor: string, listedEffectOption = false): void => {
+        const preview = applyEventSpark(player, seed);
+        setGameState(prev => ({
+            ...prev,
+            player: applyEventSpark(prev.player, seed).player
+        }));
+        const resultMessage = buildEventSparkMessage(activeEventTitle, preview);
+        const prefix = listedEffectOption ? '' : `${flavor}\n`;
+        setEventResultLog(trans(`${prefix}${resultMessage}`, languageMode));
+    };
 
     const charType = getCharacterType(player);
     let potentialEvents: GameEvent[] = [];
@@ -335,7 +279,7 @@ export const generateEvent = (
 残金: ${player.gold - 20}G`, languageMode));
                 }},
                 { label: "無視", text: "関わらず立ち去る", action: () => {
-                    setEventResultLog(trans("怪しい男を無視して先へ進んだ。", languageMode));
+                    resolveMomentum("怪しい男を無視して先へ進んだ。", "怪しい男を無視して先へ進んだ。");
                 }},
                 { label: "通報する", text: "先生を呼んで摘発を試みる", action: () => {
                     const roll = Math.random();
@@ -343,7 +287,7 @@ export const generateEvent = (
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 60 } }));
                         setEventResultLog(trans("摘発成功！謝礼と60G入手。", languageMode));
                     } else if (roll < 0.67) {
-                        setEventResultLog(trans("証拠不十分だった。相手は逃げた。", languageMode));
+                        resolveMomentum("証拠不十分だった。相手は逃げた。", "証拠不十分だった。相手は逃げた。");
                     } else {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 8) } }));
                         setEventResultLog(trans("逆恨みで反撃された！HP-8。", languageMode));
@@ -396,7 +340,7 @@ export const generateEvent = (
                             setGameState(prev => ({ ...prev, player: addCardWithEventRelics(prev.player, { ...target, id: `copy-${Date.now()}` } as Card) }));
                             setEventResultLog(trans(`鏡の中から「${target.name}」の複製が現れた。`, languageMode));
                         } else {
-                            setEventResultLog(trans("鏡面に自分の呼吸だけが揺れ、次に活きる手応えが残った。", languageMode));
+                            resolveMomentum("鏡面に自分の呼吸だけが揺れ、次に活きる手応えが残った。", "鏡面に自分の呼吸だけが揺れ、次に活きる手応えが残った。");
                         }
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 35 } }));
@@ -439,7 +383,7 @@ export const generateEvent = (
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 8) } }));
                         setEventResultLog(trans("慎重な判断が吉と出た。HP+8。", languageMode));
                     } else if (roll < 0.67) {
-                        setEventResultLog(trans("足音を殺して通り抜け、次に活きる手応えを胸にしまった。", languageMode));
+                        resolveMomentum("足音を殺して通り抜け、次に活きる手応えを胸にしまった。", "足音を殺して通り抜け、次に活きる手応えを胸にしまった。");
                     } else {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: Math.max(0, prev.player.gold - 25) } }));
                         setEventResultLog(trans("退却中に財布を落とした。25G失う。", languageMode));
@@ -486,7 +430,7 @@ export const generateEvent = (
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 12) } }));
                         setEventResultLog(trans("正しい判断だった。精神が安定しHP+12。", languageMode));
                     } else if (roll < 0.67) {
-                        setEventResultLog(trans("静かに封印を終え、次に活きる手応えが指先に残った。", languageMode));
+                        resolveMomentum("静かに封印を終え、次に活きる手応えが指先に残った。", "静かに封印を終え、次に活きる手応えが指先に残った。");
                     } else {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: Math.max(0, prev.player.gold - 30) } }));
                         setEventResultLog(trans("封印の儀式費用を請求された。30G失った。", languageMode));
@@ -572,7 +516,7 @@ export const generateEvent = (
                         setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 2, currentHp: prev.player.currentHp + 2 } }));
                         setEventResultLog(trans("潔さが評価され、最大HP+2。", languageMode));
                     } else if (roll < 0.67) {
-                        setEventResultLog(trans("平和な昼休みの空気を吸い込み、次に活きる手応えを得た。", languageMode));
+                        resolveMomentum("平和な昼休みの空気を吸い込み、次に活きる手応えを得た。", "平和な昼休みの空気を吸い込み、次に活きる手応えを得た。");
                     } else {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: Math.max(0, prev.player.gold - 20) } }));
                         setEventResultLog(trans("ジュースをおごる流れになり20G失った。", languageMode));
@@ -603,7 +547,7 @@ export const generateEvent = (
                         setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 3, currentHp: prev.player.currentHp + 3 } }));
                         setEventResultLog(trans("落ち着きを学び、最大HP+3。", languageMode));
                     } else if (roll < 0.67) {
-                        setEventResultLog(trans("眠る犬の寝息に合わせて肩の力が抜け、次に活きる手応えが残った。", languageMode));
+                        resolveMomentum("眠る犬の寝息に合わせて肩の力が抜け、次に活きる手応えが残った。", "眠る犬の寝息に合わせて肩の力が抜け、次に活きる手応えが残った。");
                     } else {
                         const c = { ...CURSE_CARDS.DAZED, id: `dog-dazed-${Date.now()}` };
                         setGameState(prev => ({ ...prev, player: addCardWithEventRelics(prev.player, c as Card) }));
@@ -673,7 +617,7 @@ export const generateEvent = (
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 10) } }));
                         setEventResultLog(trans("警戒した判断が当たった。HP+10。", languageMode));
                     } else if (roll < 0.67) {
-                        setEventResultLog(trans("転校生の背中を見送り、次に活きる手応えをポケットにしまった。", languageMode));
+                        resolveMomentum("転校生の背中を見送り、次に活きる手応えをポケットにしまった。", "転校生の背中を見送り、次に活きる手応えをポケットにしまった。");
                     } else {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: Math.max(0, prev.player.gold - 30) } }));
                         setEventResultLog(trans("去り際に財布を抜かれた。30G失った。", languageMode));
@@ -725,7 +669,7 @@ export const generateEvent = (
                         setEventResultLog(trans("最前列のど真ん中。緊張で胃が痛い...\nHPが6減った。", languageMode));
                     }
                 }},
-                { label: "先生に相談する", text: "学習効率調整（カード2枚強化 / HP+8 / 変化なし）", action: () => {
+                { label: "先生に相談する", text: "学習効率調整（カード2枚強化 / HP+8）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         const deck = [...prev.player.deck];
@@ -793,7 +737,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`避難導線を完璧に把握した。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("誘導の声が廊下に通り、次に活きる手応えが残った。", languageMode));
+                            else resolveMomentum("誘導の声が廊下に通り、次に活きる手応えが残った。", "誘導の声が廊下に通り、次に活きる手応えが残った。");
                         }, 50);
                     } else {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 5) } }));
@@ -814,7 +758,7 @@ export const generateEvent = (
                         setEventResultLog(trans("古い非常食でお腹を壊した...\n呪いカードを1枚受け取った。", languageMode));
                     }
                 }},
-                { label: "放送に従って避難", text: "基本重視（カード削除 / HP+8 / 変化なし）", action: () => {
+                { label: "放送に従って避難", text: "基本重視（カード削除 / HP+8）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         let removedName = "";
@@ -830,13 +774,13 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (removedName) setEventResultLog(trans(`手順通りに動き、ムダが消えた。\n「${removedName}」を取り除いた。`, languageMode));
-                            else setEventResultLog(trans("手順通りの避難で呼吸が整い、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("手順通りの避難で呼吸が整い、次に活きる手応えを得た。", "手順通りの避難で呼吸が整い、次に活きる手応えを得た。", true);
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 8) } }));
                         setEventResultLog(trans("混乱せず行動できた。\nHPが8回復した。", languageMode));
                     } else {
-                        setEventResultLog(trans("模範的な避難をやり切り、次に活きる手応えが足取りに残った。", languageMode));
+                        resolveMomentum("模範的な避難をやり切り、次に活きる手応えが足取りに残った。", "模範的な避難をやり切り、次に活きる手応えが足取りに残った。", true);
                     }
                 }},
                 { label: "非常ベルのモノマネ", text: "奇想天外（50G / 恒久ムキムキ+1 / 呪い「恥」）", action: () => {
@@ -889,7 +833,7 @@ export const generateEvent = (
                         setEventResultLog(trans("張り切りすぎて脚をつった。\nHPが6減った。", languageMode));
                     }
                 }},
-                { label: "見学して作戦会議", text: "冷静判断（カード削除 / 40G / 変化なし）", action: () => {
+                { label: "見学して作戦会議", text: "冷静判断（カード削除 / 40G）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         let removedName = "";
@@ -905,13 +849,13 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (removedName) setEventResultLog(trans(`泳がず観察し、無駄を削った。\n「${removedName}」を取り除いた。`, languageMode));
-                            else setEventResultLog(trans("作戦会議で頭が整理され、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("作戦会議で頭が整理され、次に活きる手応えを得た。", "作戦会議で頭が整理され、次に活きる手応えを得た。", true);
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 40 } }));
                         setEventResultLog(trans("監視係のバイト代をもらった。\n40G獲得。", languageMode));
                     } else {
-                        setEventResultLog(trans("安全第一で全体を見渡し、次に活きる手応えをつかんだ。", languageMode));
+                        resolveMomentum("安全第一で全体を見渡し、次に活きる手応えをつかんだ。", "安全第一で全体を見渡し、次に活きる手応えをつかんだ。", true);
                     }
                 }},
                 { label: "一人シンクロ百人分", text: "奇想天外（80G / 最大HP+5 / 呪い「恥」）", action: () => {
@@ -933,7 +877,7 @@ export const generateEvent = (
             title: "修学旅行の積立金",
             description: "集金袋を拾った。中にはお金が入っている。",
             options: [
-                { label: "職員室に届ける", text: "正攻法（レリック / 60G / 変化なし）", action: () => {
+                { label: "職員室に届ける", text: "正攻法（レリック / 60G）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({
@@ -963,7 +907,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`校内を駆け回った経験が糧に。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("校内を探し回った経験が、次に活きる手応えとして残った。", languageMode));
+                            else resolveMomentum("校内を探し回った経験が、次に活きる手応えとして残った。", "校内を探し回った経験が、次に活きる手応えとして残った。");
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 8) } }));
@@ -1008,7 +952,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (removedName) setEventResultLog(trans(`身元不明の英雄として語られた。\n「${removedName}」を取り除いた。`, languageMode));
-                            else setEventResultLog(trans("名もなき英雄として胸を張り、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("名もなき英雄として胸を張り、次に活きる手応えを得た。", "名もなき英雄として胸を張り、次に活きる手応えを得た。");
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: addPermanentStrengthBonus(prev.player, 1) }));
@@ -1039,7 +983,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`華麗に滑ってコツを掴んだ。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("滑りながら体勢を整え、次に活きる手応えをつかんだ。", languageMode));
+                            else resolveMomentum("滑りながら体勢を整え、次に活きる手応えをつかんだ。", "滑りながら体勢を整え、次に活きる手応えをつかんだ。");
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 70 } }));
@@ -1049,7 +993,7 @@ export const generateEvent = (
                         setEventResultLog(trans("勢い余って大転倒...\nHPが5減った。", languageMode));
                     }
                 }},
-                { label: "黙々と磨く", text: "堅実ルート（カード削除 / HP+10 / 変化なし）", action: () => {
+                { label: "黙々と磨く", text: "堅実ルート（カード削除 / HP+10）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         let removedName = "";
@@ -1065,7 +1009,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (removedName) setEventResultLog(trans(`床と一緒に迷いも磨かれた。\n「${removedName}」を取り除いた。`, languageMode));
-                            else setEventResultLog(trans("床を磨き切った達成感が、次に活きる手応えになった。", languageMode));
+                            else resolveMomentum("床を磨き切った達成感が、次に活きる手応えになった。", "床を磨き切った達成感が、次に活きる手応えになった。", true);
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 10) } }));
@@ -1125,7 +1069,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`結果は平凡だが学びは大きい。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("答案を見直すうちに、次に活きる手応えが見えてきた。", languageMode));
+                            else resolveMomentum("答案を見直すうちに、次に活きる手応えが見えてきた。", "答案を見直すうちに、次に活きる手応えが見えてきた。");
                         }, 50);
                     } else {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 10) } }));
@@ -1148,7 +1092,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (removedName) setEventResultLog(trans(`粘り勝ちで評価が見直された。\n「${removedName}」を取り除いた。`, languageMode));
-                            else setEventResultLog(trans("交渉を通した経験が、次に活きる手応えとして残った。", languageMode));
+                            else resolveMomentum("交渉を通した経験が、次に活きる手応えとして残った。", "交渉を通した経験が、次に活きる手応えとして残った。");
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 50 } }));
@@ -1206,7 +1150,7 @@ export const generateEvent = (
                         setEventResultLog(trans("緊張で喉を痛めた...\nHPが6減った。", languageMode));
                     }
                 }},
-                { label: "リクエスト曲を流す", text: "空気づくり（カード1枚強化 / HP+10 / 変化なし）", action: () => {
+                { label: "リクエスト曲を流す", text: "空気づくり（カード1枚強化 / HP+10）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         let upgradedName = "";
@@ -1221,13 +1165,13 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`選曲が完璧だった。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("選曲の余韻が心を整え、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("選曲の余韻が心を整え、次に活きる手応えを得た。", "選曲の余韻が心を整え、次に活きる手応えを得た。", true);
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 10) } }));
                         setEventResultLog(trans("音楽で気持ちが整った。\nHPが10回復した。", languageMode));
                     } else {
-                        setEventResultLog(trans("無難に場をまとめ、次に活きる手応えを持ち帰った。", languageMode));
+                        resolveMomentum("無難に場をまとめ、次に活きる手応えを持ち帰った。", "無難に場をまとめ、次に活きる手応えを持ち帰った。", true);
                     }
                 }},
                 { label: "校長のモノマネ演説", text: "賭け（120G / 恒久ムキムキ+1 / 呪い「後悔」）", action: () => {
@@ -1265,7 +1209,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (removedName) setEventResultLog(trans(`喋っているうちに悩みが一つ消えた。\n「${removedName}」を取り除いた。`, languageMode));
-                            else setEventResultLog(trans("勢いを声に乗せた感覚が、次に活きる手応えになった。", languageMode));
+                            else resolveMomentum("勢いを声に乗せた感覚が、次に活きる手応えになった。", "勢いを声に乗せた感覚が、次に活きる手応えになった。");
                         }, 50);
                     } else {
                         setGameState(prev => ({ ...prev, player: addCardWithEventRelics(prev.player, { ...CURSE_CARDS.SHAME, id: `broadcast-shame-${Date.now()}` } as Card) }));
@@ -1316,7 +1260,7 @@ export const generateEvent = (
                         setEventResultLog(trans("用語を噛んで空気が凍った...\n呪いカードを1枚受け取った。", languageMode));
                     }
                 }},
-                { label: "全力で逃げる", text: "生存優先（カード削除 / HP+6 / 変化なし）", action: () => {
+                { label: "全力で逃げる", text: "生存優先（カード削除 / HP+6）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         let removedName = "";
@@ -1332,13 +1276,13 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (removedName) setEventResultLog(trans(`恐怖で一つ記憶が飛んだ。\n「${removedName}」を取り除いた。`, languageMode));
-                            else setEventResultLog(trans("全力で逃げ切り、次に活きる手応えが息の奥に残った。", languageMode));
+                            else resolveMomentum("全力で逃げ切り、次に活きる手応えが息の奥に残った。", "全力で逃げ切り、次に活きる手応えが息の奥に残った。", true);
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 6) } }));
                         setEventResultLog(trans("助かった安堵で元気が戻る。\nHPが6回復。", languageMode));
                     } else {
-                        setEventResultLog(trans("見間違いかもしれない影を振り切り、次に活きる手応えを得た。", languageMode));
+                        resolveMomentum("見間違いかもしれない影を振り切り、次に活きる手応えを得た。", "見間違いかもしれない影を振り切り、次に活きる手応えを得た。", true);
                     }
                 }},
                 { label: "模型に白衣を着せる", text: "奇想天外（恒久ムキムキ+1 / 120G / 呪い「恥」）", action: () => {
@@ -1391,14 +1335,14 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`知識が技に結びついた。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("静かな学習の時間が、次に活きる手応えとして積み上がった。", languageMode));
+                            else resolveMomentum("静かな学習の時間が、次に活きる手応えとして積み上がった。", "静かな学習の時間が、次に活きる手応えとして積み上がった。");
                         }, 50);
                     } else {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 5) } }));
                         setEventResultLog(trans("難しすぎて頭痛がした...\nHPが5減った。", languageMode));
                     }
                 }},
-                { label: "返却棚を整える", text: "奉仕（カード削除 / 40G / 変化なし）", action: () => {
+                { label: "返却棚を整える", text: "奉仕（カード削除 / 40G）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         let removedName = "";
@@ -1414,13 +1358,13 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (removedName) setEventResultLog(trans(`本を整えて心も整った。\n「${removedName}」を取り除いた。`, languageMode));
-                            else setEventResultLog(trans("棚を整えたリズムが、次に活きる手応えをくれた。", languageMode));
+                            else resolveMomentum("棚を整えたリズムが、次に活きる手応えをくれた。", "棚を整えたリズムが、次に活きる手応えをくれた。", true);
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 40 } }));
                         setEventResultLog(trans("図書委員から謝礼を受け取った。\n40G獲得。", languageMode));
                     } else {
-                        setEventResultLog(trans("静かな作業を終え、次に活きる手応えが指先に残った。", languageMode));
+                        resolveMomentum("静かな作業を終え、次に活きる手応えが指先に残った。", "静かな作業を終え、次に活きる手応えが指先に残った。", true);
                     }
                 }},
                 { label: "朗読を全力でキメる", text: "奇想天外（120G / 恒久ムキムキ+1 / 呪い「恥」）", action: () => {
@@ -1458,7 +1402,7 @@ export const generateEvent = (
                         setEventResultLog(trans("立ちくらみでフラついた...\nHPが8減った。", languageMode));
                     }
                 }},
-                { label: "保健室に直行", text: "安全策（HP全回復+呪い / カード削除 / 変化なし）", action: () => {
+                { label: "保健室に直行", text: "安全策（HP全回復+呪い / カード削除）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({
@@ -1483,7 +1427,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (removedName) setEventResultLog(trans(`看護師の助言で心の重荷が消えた。\n「${removedName}」を取り除いた。`, languageMode));
-                            else setEventResultLog(trans("保健室の空気で呼吸が整い、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("保健室の空気で呼吸が整い、次に活きる手応えを得た。", "保健室の空気で呼吸が整い、次に活きる手応えを得た。", true);
                         }, 50);
                     } else {
                         setEventResultLog(trans("保健室は満員だった。戻るしかない。", languageMode));
@@ -1545,7 +1489,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (removedName) setEventResultLog(trans(`荷物整理で身軽になった。\n「${removedName}」を取り除いた。`, languageMode));
-                            else setEventResultLog(trans("机の中を見直し、次に活きる手応えだけを持ち帰った。", languageMode));
+                            else resolveMomentum("机の中を見直し、次に活きる手応えだけを持ち帰った。", "机の中を見直し、次に活きる手応えだけを持ち帰った。");
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 50 } }));
@@ -1568,7 +1512,7 @@ export const generateEvent = (
                         setEventResultLog(trans("肩が悲鳴を上げた...\nHPが6減った。", languageMode));
                     }
                 }},
-                { label: "友達に分担してもらう", text: "協力（HP+10 / カード1枚強化 / 変化なし）", action: () => {
+                { label: "友達に分担してもらう", text: "協力（HP+10 / カード1枚強化）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 10) } }));
@@ -1586,7 +1530,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`協力のコツを掴んだ。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("友達に声をかけた経験が、次に活きる手応えになった。", languageMode));
+                            else resolveMomentum("友達に声をかけた経験が、次に活きる手応えになった。", "友達に声をかけた経験が、次に活きる手応えになった。", true);
                         }, 50);
                     } else {
                         setEventResultLog(trans("みんなも手一杯だった。現状維持。", languageMode));
@@ -1627,7 +1571,7 @@ export const generateEvent = (
                         setEventResultLog(trans("イタズラ告白だった...\n呪い「悩み」を受けた。", languageMode));
                     }
                 }},
-                { label: "遠くから様子を見る", text: "観察（カード1枚強化 / HP+8 / 変化なし）", action: () => {
+                { label: "遠くから様子を見る", text: "観察（カード1枚強化 / HP+8）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         let upgradedName = "";
@@ -1642,13 +1586,13 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`人間観察で洞察が磨かれた。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("遠くから観察した視点が、次に活きる手応えを残した。", languageMode));
+                            else resolveMomentum("遠くから観察した視点が、次に活きる手応えを残した。", "遠くから観察した視点が、次に活きる手応えを残した。", true);
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 8) } }));
                         setEventResultLog(trans("穏やかな空気に癒やされた。\nHPが8回復。", languageMode));
                     } else {
-                        setEventResultLog(trans("静かな時間を見届け、次に活きる手応えを胸に立ち去った。", languageMode));
+                        resolveMomentum("静かな時間を見届け、次に活きる手応えを胸に立ち去った。", "静かな時間を見届け、次に活きる手応えを胸に立ち去った。", true);
                     }
                 }},
                 { label: "木に願い札を結ぶ", text: "祈願（最大HP+4 / カード削除 / HP-6）", action: () => {
@@ -1670,7 +1614,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (removedName) setEventResultLog(trans(`迷いを札に託した。\n「${removedName}」を取り除いた。`, languageMode));
-                            else setEventResultLog(trans("願い札だけ残して帰った。", languageMode));
+                            else resolveMomentum("願い札だけ残して帰った。", "願い札だけ残して帰った。");
                         }, 50);
                     } else {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 6) } }));
@@ -1713,7 +1657,7 @@ export const generateEvent = (
                         setEventResultLog(trans("マットの隙間に60Gが挟まっていた。", languageMode));
                     }
                 }},
-                { label: "掃除してから探す", text: "慎重策（カード削除 / HP+8 / 変化なし）", action: () => {
+                { label: "掃除してから探す", text: "慎重策（カード削除 / HP+8）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         let removedName = "";
@@ -1729,13 +1673,13 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (removedName) setEventResultLog(trans(`整理整頓で視界がクリアに。\n「${removedName}」を取り除いた。`, languageMode));
-                            else setEventResultLog(trans("掃除で場を整え、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("掃除で場を整え、次に活きる手応えを得た。", "掃除で場を整え、次に活きる手応えを得た。", true);
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 8) } }));
                         setEventResultLog(trans("ほこりを払って気分も回復。\nHPが8回復。", languageMode));
                     } else {
-                        setEventResultLog(trans("きれいにしただけで終わった。", languageMode));
+                        resolveMomentum("きれいにしただけで終わった。", "きれいにしただけで終わった。", true);
                     }
                 }},
                 { label: "マットで筋トレ", text: "鍛錬（恒久ムキムキ+1 / 最大HP+3 / HP-5）", action: () => {
@@ -1786,7 +1730,7 @@ export const generateEvent = (
                         setEventResultLog(trans("正解か不正解か分からないまま帰る羽目に...\n呪い「不安」を受けた。", languageMode));
                     }
                 }},
-                { label: "暗号を解読する", text: "知性（カード2枚強化 / HP+6 / 変化なし）", action: () => {
+                { label: "暗号を解読する", text: "知性（カード2枚強化 / HP+6）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         const deck = [...prev.player.deck];
@@ -1819,7 +1763,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (removedName) setEventResultLog(trans(`通行証をもらい迷いが消えた。\n「${removedName}」を取り除いた。`, languageMode));
-                            else setEventResultLog(trans("交渉の間合いを覚え、次に活きる手応えが残った。", languageMode));
+                            else resolveMomentum("交渉の間合いを覚え、次に活きる手応えが残った。", "交渉の間合いを覚え、次に活きる手応えが残った。");
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 90 } }));
@@ -1851,7 +1795,7 @@ export const generateEvent = (
             title: "職員室の呼び出し",
             description: "校内放送で名前を呼ばれた。心当たりはあるか？",
             options: [
-                { label: "正面から行く", text: "誠実（HP全回復+削除 / 80G / 変化なし）", action: () => {
+                { label: "正面から行く", text: "誠実（HP全回復+削除 / 80G）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         let removedName = "";
@@ -1873,7 +1817,7 @@ export const generateEvent = (
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 80 } }));
                         setEventResultLog(trans("校内係の謝礼を受けた。\n80G獲得。", languageMode));
                     } else {
-                        setEventResultLog(trans("連絡ミスを確認し、次に活きる手応えを胸に職員室を出た。", languageMode));
+                        resolveMomentum("連絡ミスを確認し、次に活きる手応えを胸に職員室を出た。", "連絡ミスを確認し、次に活きる手応えを胸に職員室を出た。", true);
                     }
                 }},
                 { label: "廊下で待ち伏せ", text: "奇策（カード1枚強化 / HP+8 / HP-6）", action: () => {
@@ -1891,7 +1835,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`先手を打って評価アップ。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("先手を打つ判断が冴え、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("先手を打つ判断が冴え、次に活きる手応えを得た。", "先手を打つ判断が冴え、次に活きる手応えを得た。");
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 8) } }));
@@ -1926,7 +1870,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (removedName) setEventResultLog(trans(`逃走ルート最適化で荷が軽くなった。\n「${removedName}」を取り除いた。`, languageMode));
-                            else setEventResultLog(trans("逃げ切った足取りに、次に活きる手応えが宿った。", languageMode));
+                            else resolveMomentum("逃げ切った足取りに、次に活きる手応えが宿った。", "逃げ切った足取りに、次に活きる手応えが宿った。");
                         }, 50);
                     } else {
                         setGameState(prev => ({ ...prev, player: addPermanentStrengthBonus(prev.player, 1) }));
@@ -1968,7 +1912,7 @@ export const generateEvent = (
                         setEventResultLog(trans("演奏を見た人が投げ銭してくれた。\n70G獲得。", languageMode));
                     }
                 }},
-                { label: "洗って届ける", text: "善行（HP+10 / カード削除 / 変化なし）", action: () => {
+                { label: "洗って届ける", text: "善行（HP+10 / カード削除）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 10) } }));
@@ -1987,7 +1931,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (removedName) setEventResultLog(trans(`感謝されて心のノイズが消えた。\n「${removedName}」を取り除いた。`, languageMode));
-                            else setEventResultLog(trans("善行のあとの清々しさが、次に活きる手応えになった。", languageMode));
+                            else resolveMomentum("善行のあとの清々しさが、次に活きる手応えになった。", "善行のあとの清々しさが、次に活きる手応えになった。", true);
                         }, 50);
                     } else {
                         setEventResultLog(trans("職員室が留守だった。また今度届けよう。", languageMode));
@@ -2011,7 +1955,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`本番経験で技が磨かれた。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("演奏の息づかいが整い、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("演奏の息づかいが整い、次に活きる手応えを得た。", "演奏の息づかいが整い、次に活きる手応えを得た。");
                         }, 50);
                     } else {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 5) } }));
@@ -2040,7 +1984,7 @@ export const generateEvent = (
             title: "図工室の粘土",
             description: "乾燥してカチカチの粘土がある。水をかければ使えるかもしれない。",
             options: [
-                { label: "丁寧にこねる", text: "造形（防御強化 / カード1枚強化 / 変化なし）", action: () => {
+                { label: "丁寧にこねる", text: "造形（防御強化 / カード1枚強化）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         let success = false;
@@ -2055,7 +1999,7 @@ export const generateEvent = (
                             return prev;
                         });
                         if (success) setEventResultLog(trans("鉄壁の造形が完成！「防御」が強化された。", languageMode));
-                        else setEventResultLog(trans("防御系カードが見つからず、作品だけ残った。", languageMode));
+                        else resolveMomentum("防御系カードが見つからず、作品だけ残った。", "防御系カードが見つからず、作品だけ残った。", true);
                     } else if (roll < 0.67) {
                         let upgradedName = "";
                         setGameState(prev => {
@@ -2069,7 +2013,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`発想が閃いた。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("粘土をこねる感触が、次に活きる手応えとして残った。", languageMode));
+                            else resolveMomentum("粘土をこねる感触が、次に活きる手応えとして残った。", "粘土をこねる感触が、次に活きる手応えとして残った。", true);
                         }, 50);
                     } else {
                         setEventResultLog(trans("いい作品ができた。効果は特にない。", languageMode));
@@ -2104,7 +2048,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (removedName) setEventResultLog(trans(`講評で課題が明確に。\n「${removedName}」を取り除いた。`, languageMode));
-                            else setEventResultLog(trans("講評の言葉を噛みしめ、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("講評の言葉を噛みしめ、次に活きる手応えを得た。", "講評の言葉を噛みしめ、次に活きる手応えを得た。");
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 8) } }));
@@ -2149,7 +2093,7 @@ export const generateEvent = (
                         setEventResultLog(trans("味見係として40Gをもらった。", languageMode));
                     }
                 }},
-                { label: "我慢する", text: "意志（カード強化 / 最大HP+3 / 変化なし）", action: () => {
+                { label: "我慢する", text: "意志（カード強化 / 最大HP+3）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         let upgradedName = "";
@@ -2164,13 +2108,13 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`誘惑に打ち勝った。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("誘惑に耐えた意志が、次に活きる手応えになった。", languageMode));
+                            else resolveMomentum("誘惑に耐えた意志が、次に活きる手応えになった。", "誘惑に耐えた意志が、次に活きる手応えになった。", true);
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 3, currentHp: prev.player.currentHp + 3 } }));
                         setEventResultLog(trans("自己管理が身についた。\n最大HPと現在HPが3増えた。", languageMode));
                     } else {
-                        setEventResultLog(trans("ぐっとこらえた呼吸が整い、次に活きる手応えを得た。", languageMode));
+                        resolveMomentum("ぐっとこらえた呼吸が整い、次に活きる手応えを得た。", "ぐっとこらえた呼吸が整い、次に活きる手応えを得た。", true);
                     }
                 }},
                 { label: "皆に配る", text: "共有（カード削除 / 70G / HP-5）", action: () => {
@@ -2189,7 +2133,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (removedName) setEventResultLog(trans(`感謝されて心が軽くなった。\n「${removedName}」を取り除いた。`, languageMode));
-                            else setEventResultLog(trans("配り終えた手際が、次に活きる手応えとして残った。", languageMode));
+                            else resolveMomentum("配り終えた手際が、次に活きる手応えとして残った。", "配り終えた手際が、次に活きる手応えとして残った。");
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 70 } }));
@@ -2241,7 +2185,7 @@ export const generateEvent = (
                         setEventResultLog(trans("足を引っかけて転倒...\n呪い「ドジ」を受けた。", languageMode));
                     }
                 }},
-                { label: "縄を回す", text: "支援役（グルグルバット強化 / カード削除 / 変化なし）", action: () => {
+                { label: "縄を回す", text: "支援役（グルグルバット強化 / カード削除）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         let success = false;
@@ -2256,7 +2200,7 @@ export const generateEvent = (
                             return prev;
                         });
                         if (success) setEventResultLog(trans("回転技術が向上した！「グルグルバット」が強化された。", languageMode));
-                        else setEventResultLog(trans("縄を回すリズムが体に残り、次に活きる手応えを得た。", languageMode));
+                        else resolveMomentum("縄を回すリズムが体に残り、次に活きる手応えを得た。", "縄を回すリズムが体に残り、次に活きる手応えを得た。", true);
                     } else if (roll < 0.67) {
                         let removedName = "";
                         setGameState(prev => {
@@ -2271,7 +2215,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (removedName) setEventResultLog(trans(`チーム運営で無駄が消えた。\n「${removedName}」を取り除いた。`, languageMode));
-                            else setEventResultLog(trans("運営の段取りが身につき、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("運営の段取りが身につき、次に活きる手応えを得た。", "運営の段取りが身につき、次に活きる手応えを得た。", true);
                         }, 50);
                     } else {
                         setEventResultLog(trans("練習は無難に終了。", languageMode));
@@ -2331,7 +2275,7 @@ export const generateEvent = (
                         setEventResultLog(trans("姿勢を正したら気持ちが整った。\nHPが6回復。", languageMode));
                     }
                 }},
-                { label: "職員室へ届ける", text: "正道（カード削除 / カード1枚強化 / 変化なし）", action: () => {
+                { label: "職員室へ届ける", text: "正道（カード削除 / カード1枚強化）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         let removedName = "";
@@ -2347,7 +2291,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (removedName) setEventResultLog(trans(`誠実な行いで心が軽くなった。\n「${removedName}」を取り除いた。`, languageMode));
-                            else setEventResultLog(trans("届け切った誠実さが、次に活きる手応えになった。", languageMode));
+                            else resolveMomentum("届け切った誠実さが、次に活きる手応えになった。", "届け切った誠実さが、次に活きる手応えになった。", true);
                         }, 50);
                     } else if (roll < 0.67) {
                         let upgradedName = "";
@@ -2362,7 +2306,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`評価されて自信がついた。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("評価の言葉が背中を押し、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("評価の言葉が背中を押し、次に活きる手応えを得た。", "評価の言葉が背中を押し、次に活きる手応えを得た。", true);
                         }, 50);
                     } else {
                         setEventResultLog(trans("無事に届けた。見返りはない。", languageMode));
@@ -2429,7 +2373,7 @@ export const generateEvent = (
                         setEventResultLog(trans("絵がSNSで拡散されて赤面...\n呪い「恥」を受けた。", languageMode));
                     }
                 }},
-                { label: "丁寧に清掃する", text: "整頓（カード削除 / HP+8 / 変化なし）", action: () => {
+                { label: "丁寧に清掃する", text: "整頓（カード削除 / HP+8）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         let removedName = "";
@@ -2450,7 +2394,7 @@ export const generateEvent = (
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 8) } }));
                         setEventResultLog(trans("作業後の達成感でHPが8回復。", languageMode));
                     } else {
-                        setEventResultLog(trans("清掃後の澄んだ空気が、次に活きる手応えを運んできた。", languageMode));
+                        resolveMomentum("清掃後の澄んだ空気が、次に活きる手応えを運んできた。", "清掃後の澄んだ空気が、次に活きる手応えを運んできた。", true);
                     }
                 }},
                 { label: "実行委員として調整", text: "運営（カード1枚強化 / 最大HP+3 / HP-5）", action: () => {
@@ -2468,7 +2412,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`采配が冴えた。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("運営の呼吸をつかみ、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("運営の呼吸をつかみ、次に活きる手応えを得た。", "運営の呼吸をつかみ、次に活きる手応えを得た。");
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 3, currentHp: prev.player.currentHp + 3 } }));
@@ -2537,7 +2481,7 @@ export const generateEvent = (
                         setEventResultLog(trans("不協和音で頭が真っ白に...\n呪いカードを1枚受け取った。", languageMode));
                     }
                 }},
-                { label: "逃げ出す", text: "撤退（カード削除 / HP+6 / 変化なし）", action: () => {
+                { label: "逃げ出す", text: "撤退（カード削除 / HP+6）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         let removedName = "";
@@ -2558,7 +2502,7 @@ export const generateEvent = (
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 6) } }));
                         setEventResultLog(trans("助かった安堵でHPが6回復。", languageMode));
                     } else {
-                        setEventResultLog(trans("何とか逃げ切り、次に活きる手応えを握りしめた。", languageMode));
+                        resolveMomentum("何とか逃げ切り、次に活きる手応えを握りしめた。", "何とか逃げ切り、次に活きる手応えを握りしめた。", true);
                     }
                 }},
                 { label: "肖像画とデュオ配信", text: "奇想天外（レリック / 180G / 呪い「恥」）", action: () => {
@@ -2599,7 +2543,7 @@ export const generateEvent = (
                         setEventResultLog(trans("胸のつかえが取れた。\nHPが8回復。", languageMode));
                     }
                 }},
-                { label: "景色を眺める", text: "静観（砂時計+後悔 / カード削除 / 変化なし）", action: () => {
+                { label: "景色を眺める", text: "静観（砂時計+後悔 / カード削除）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({
@@ -2624,10 +2568,10 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (removedName) setEventResultLog(trans(`考えが整理された。\n「${removedName}」を取り除いた。`, languageMode));
-                            else setEventResultLog(trans("景色を眺めただけで終わった。", languageMode));
+                            else resolveMomentum("景色を眺めただけで終わった。", "景色を眺めただけで終わった。", true);
                         }, 50);
                     } else {
-                        setEventResultLog(trans("夕焼けの光を浴び、次に活きる手応えが胸に残った。", languageMode));
+                        resolveMomentum("夕焼けの光を浴び、次に活きる手応えが胸に残った。", "夕焼けの光を浴び、次に活きる手応えが胸に残った。", true);
                     }
                 }},
                 { label: "フェンスを直す", text: "修繕（恒久ムキムキ+1 / 最大HP+4 / HP-6）", action: () => {
@@ -2684,7 +2628,7 @@ export const generateEvent = (
                         setEventResultLog(trans("お腹が重すぎる...\nHPが8減った。", languageMode));
                     }
                 }},
-                { label: "土に還す", text: "循環（再起動カード / カード削除 / 変化なし）", action: () => {
+                { label: "土に還す", text: "循環（再起動カード / カード削除）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({
@@ -2706,7 +2650,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (removedName) setEventResultLog(trans(`気持ちの整理がついた。\n「${removedName}」を取り除いた。`, languageMode));
-                            else setEventResultLog(trans("片付けた土の匂いが、次に活きる手応えを残した。", languageMode));
+                            else resolveMomentum("片付けた土の匂いが、次に活きる手応えを残した。", "片付けた土の匂いが、次に活きる手応えを残した。", true);
                         }, 50);
                     } else {
                         setEventResultLog(trans("静かに片付けが終わった。", languageMode));
@@ -2727,7 +2671,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`運用改善に成功。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("計画を練った時間が、次に活きる手応えになった。", languageMode));
+                            else resolveMomentum("計画を練った時間が、次に活きる手応えになった。", "計画を練った時間が、次に活きる手応えになった。");
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 8) } }));
@@ -2784,7 +2728,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (removedName) setEventResultLog(trans(`余計な癖が一つ消えた。\n「${removedName}」を取り除いた。`, languageMode));
-                            else setEventResultLog(trans("綺麗に揃えた靴先が、次に活きる手応えをくれた。", languageMode));
+                            else resolveMomentum("綺麗に揃えた靴先が、次に活きる手応えをくれた。", "綺麗に揃えた靴先が、次に活きる手応えをくれた。");
                         }, 50);
                     }
                 }},
@@ -2803,7 +2747,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`聞き込みで洞察が冴えた。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("探し回る視線が鍛えられ、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("探し回る視線が鍛えられ、次に活きる手応えを得た。", "探し回る視線が鍛えられ、次に活きる手応えを得た。");
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 80 } }));
@@ -2916,7 +2860,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (removedName) setEventResultLog(trans(`大事なノートを落とした...\n「${removedName}」を失った。`, languageMode));
-                            else setEventResultLog(trans("静けさの中で集中が深まり、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("静けさの中で集中が深まり、次に活きる手応えを得た。", "静けさの中で集中が深まり、次に活きる手応えを得た。");
                         }, 50);
                     }
                 }},
@@ -2958,7 +2902,7 @@ export const generateEvent = (
                         setEventResultLog(trans("目薬でスッキリ。\nHPが6回復。", languageMode));
                     }
                 }},
-                { label: "ランドルト環を暗記する", text: "対策（カード強化 / 70G / 変化なし）", action: () => {
+                { label: "ランドルト環を暗記する", text: "対策（カード強化 / 70G）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         let upgradedName = "";
@@ -2973,7 +2917,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`観察眼が鋭くなった。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("対策の積み重ねが、次に活きる手応えになった。", languageMode));
+                            else resolveMomentum("対策の積み重ねが、次に活きる手応えになった。", "対策の積み重ねが、次に活きる手応えになった。", true);
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 70 } }));
@@ -2998,7 +2942,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (removedName) setEventResultLog(trans(`面倒を一つ手放した。\n「${removedName}」を取り除いた。`, languageMode));
-                            else setEventResultLog(trans("逃げ切った足取りに、次に活きる手応えが残った。", languageMode));
+                            else resolveMomentum("逃げ切った足取りに、次に活きる手応えが残った。", "逃げ切った足取りに、次に活きる手応えが残った。");
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 5) } }));
@@ -3030,7 +2974,7 @@ export const generateEvent = (
             title: "図書室の貸出カード",
             description: "自分の名前が書かれた古い貸出カードを見つけた。昔の自分からのメッセージだ。",
             options: [
-                { label: "読み返す", text: "回想（カード強化+HP+5 / 最大HP+3 / 変化なし）", action: () => {
+                { label: "読み返す", text: "回想（カード強化+HP+5 / 最大HP+3）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         let upgradedName = "";
@@ -3046,13 +2990,13 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`昔の言葉に背中を押された。\nHPが5回復し「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("読み返した記憶が整理され、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("読み返した記憶が整理され、次に活きる手応えを得た。", "読み返した記憶が整理され、次に活きる手応えを得た。", true);
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 3, currentHp: prev.player.currentHp + 3 } }));
                         setEventResultLog(trans("初心を思い出した。\n最大HPと現在HPが3増えた。", languageMode));
                     } else {
-                        setEventResultLog(trans("静かにページを閉じ、次に活きる手応えを胸にしまった。", languageMode));
+                        resolveMomentum("静かにページを閉じ、次に活きる手応えを胸にしまった。", "静かにページを閉じ、次に活きる手応えを胸にしまった。", true);
                     }
                 }},
                 { label: "新しいメモを書き足す", text: "前進（カード2枚強化 / 80G / 呪い「不安」）", action: () => {
@@ -3154,7 +3098,7 @@ export const generateEvent = (
                         }, 50);
                     }
                 }},
-                { label: "ニワトリと遊ぶ", text: "交流（HP+10+後悔 / 恒久ムキムキ+1 / 変化なし）", action: () => {
+                { label: "ニワトリと遊ぶ", text: "交流（HP+10+後悔 / 恒久ムキムキ+1）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({
@@ -3169,7 +3113,7 @@ export const generateEvent = (
                         setGameState(prev => ({ ...prev, player: addPermanentStrengthBonus(prev.player, 1) }));
                         setEventResultLog(trans("追いかけっこで鍛えられた。\n恒久ムキムキ+1。", languageMode));
                     } else {
-                        setEventResultLog(trans("のんびりした時間が心をほどき、次に活きる手応えをくれた。", languageMode));
+                        resolveMomentum("のんびりした時間が心をほどき、次に活きる手応えをくれた。", "のんびりした時間が心をほどき、次に活きる手応えをくれた。", true);
                     }
                 }},
                 { label: "餌の配合を研究", text: "研究（カード1枚強化 / 最大HP+3 / 呪い）", action: () => {
@@ -3187,7 +3131,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`飼育理論が応用できた。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("研究の観察眼が磨かれ、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("研究の観察眼が磨かれ、次に活きる手応えを得た。", "研究の観察眼が磨かれ、次に活きる手応えを得た。");
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 3, currentHp: prev.player.currentHp + 3 } }));
@@ -3278,7 +3222,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`機転が効いた。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("走り回った熱が体に残り、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("走り回った熱が体に残り、次に活きる手応えを得た。", "走り回った熱が体に残り、次に活きる手応えを得た。");
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 6) } }));
@@ -3334,14 +3278,14 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`名台詞が刺さった。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("読破した余韻が、次に活きる手応えとして残った。", languageMode));
+                            else resolveMomentum("読破した余韻が、次に活きる手応えとして残った。", "読破した余韻が、次に活きる手応えとして残った。");
                         }, 50);
                     } else {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 80 } }));
                         setEventResultLog(trans("付録カードが売れた。\n80G獲得。", languageMode));
                     }
                 }},
-                { label: "寄付する", text: "奉仕（カード削除 / HP+10 / 変化なし）", action: () => {
+                { label: "寄付する", text: "奉仕（カード削除 / HP+10）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         let removedName = "";
@@ -3362,7 +3306,7 @@ export const generateEvent = (
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 10) } }));
                         setEventResultLog(trans("いいことをして元気が出た。\nHPが10回復。", languageMode));
                     } else {
-                        setEventResultLog(trans("静かな寄付のあと、次に活きる手応えが胸に残った。", languageMode));
+                        resolveMomentum("静かな寄付のあと、次に活きる手応えが胸に残った。", "静かな寄付のあと、次に活きる手応えが胸に残った。", true);
                     }
                 }},
                 { label: "続きの考察ノートを書く", text: "考察（カード2枚強化 / 呪い「不安」 / 最大HP+3）", action: () => {
@@ -3405,7 +3349,7 @@ export const generateEvent = (
             title: "理科室のアルコールランプ",
             description: "火がついたまま放置されている。危ない！",
             options: [
-                { label: "安全に消火する", text: "冷静（防御強化 / HP+6 / 変化なし）", action: () => {
+                { label: "安全に消火する", text: "冷静（防御強化 / HP+6）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         let success = false;
@@ -3420,12 +3364,12 @@ export const generateEvent = (
                             return prev;
                         });
                         if (success) setEventResultLog(trans("冷静な判断だ。\n防御カードが強化された。", languageMode));
-                        else setEventResultLog(trans("無事に消火した手順が、次に活きる手応えになった。", languageMode));
+                        else resolveMomentum("無事に消火した手順が、次に活きる手応えになった。", "無事に消火した手順が、次に活きる手応えになった。", true);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 6) } }));
                         setEventResultLog(trans("緊張を乗り越えた。\nHPが6回復。", languageMode));
                     } else {
-                        setEventResultLog(trans("安全確認の指差しが決まり、次に活きる手応えを得た。", languageMode));
+                        resolveMomentum("安全確認の指差しが決まり、次に活きる手応えを得た。", "安全確認の指差しが決まり、次に活きる手応えを得た。", true);
                     }
                 }},
                 { label: "実験を手伝う", text: "挑戦（カード1枚強化 / ポーション / HP-6）", action: () => {
@@ -3443,7 +3387,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`実験成功！\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("手伝った段取りが身につき、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("手伝った段取りが身につき、次に活きる手応えを得た。", "手伝った段取りが身につき、次に活きる手応えを得た。");
                         }, 50);
                     } else if (roll < 0.67) {
                         const p = { ...POTION_LIBRARY['FIRE_POTION'], id: `lamp-fire-${Date.now()}` };
@@ -3520,7 +3464,7 @@ export const generateEvent = (
                         setEventResultLog(trans("歌い切って気分爽快。\nHPが8回復。", languageMode));
                     }
                 }},
-                { label: "楽譜を読む", text: "分析（カード2枚強化 / カード削除 / 変化なし）", action: () => {
+                { label: "楽譜を読む", text: "分析（カード2枚強化 / カード削除）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         const deck = [...prev.player.deck];
@@ -3546,7 +3490,7 @@ export const generateEvent = (
                             setEventResultLog(trans(`雑念が一つ消えた。\n「${removedName || '迷い'}」を取り除いた。`, languageMode));
                         }, 50);
                     } else {
-                        setEventResultLog(trans("譜面の流れを読み取り、次に活きる手応えを得た。", languageMode));
+                        resolveMomentum("譜面の流れを読み取り、次に活きる手応えを得た。", "譜面の流れを読み取り、次に活きる手応えを得た。", true);
                     }
                 }},
                 { label: "目を見返す", text: "度胸（恒久ムキムキ+1 / HP-6 / 呪い「不安」）", action: () => {
@@ -3597,7 +3541,7 @@ export const generateEvent = (
                         setEventResultLog(trans("見事な演技に賞金が出た。\n100G獲得。", languageMode));
                     }
                 }},
-                { label: "跳び箱の中を探る", text: "探索（マトリョーシカ+悩み / カード削除 / 変化なし）", action: () => {
+                { label: "跳び箱の中を探る", text: "探索（マトリョーシカ+悩み / カード削除）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({
@@ -3624,7 +3568,7 @@ export const generateEvent = (
                             setEventResultLog(trans(`荷物を整理した。\n「${removedName || '無駄'}」を取り除いた。`, languageMode));
                         }, 50);
                     } else {
-                        setEventResultLog(trans("跳び箱の暗がりを探り、次に活きる手応えを持ち帰った。", languageMode));
+                        resolveMomentum("跳び箱の暗がりを探り、次に活きる手応えを持ち帰った。", "跳び箱の暗がりを探り、次に活きる手応えを持ち帰った。", true);
                     }
                 }},
                 { label: "助走のフォーム改善", text: "技術（カード1枚強化 / HP+8 / 呪い「不安」）", action: () => {
@@ -3642,7 +3586,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`フォームが固まった。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("練習の踏み切りが整い、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("練習の踏み切りが整い、次に活きる手応えを得た。", "練習の踏み切りが整い、次に活きる手応えを得た。");
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 8) } }));
@@ -3674,7 +3618,7 @@ export const generateEvent = (
             title: "水道の蛇口",
             description: "誰かが水を出しっぱなしにしている。もったいない。",
             options: [
-                { label: "蛇口を閉める", text: "節水（HP+10 / カード削除 / 変化なし）", action: () => {
+                { label: "蛇口を閉める", text: "節水（HP+10 / カード削除）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 10) } }));
@@ -3695,7 +3639,7 @@ export const generateEvent = (
                             setEventResultLog(trans(`心の濁りも流れた。\n「${removedName || '無駄'}」を取り除いた。`, languageMode));
                         }, 50);
                     } else {
-                        setEventResultLog(trans("蛇口を静かに閉め、次に活きる手応えを指先に残した。", languageMode));
+                        resolveMomentum("蛇口を静かに閉め、次に活きる手応えを指先に残した。", "蛇口を静かに閉め、次に活きる手応えを指先に残した。", true);
                     }
                 }},
                 { label: "飲んでみる", text: "直飲み（ポーション+HP-5 / HP+6 / 呪い）", action: () => {
@@ -3734,7 +3678,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`手際が良くなった。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("点検の目が冴え、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("点検の目が冴え、次に活きる手応えを得た。", "点検の目が冴え、次に活きる手応えを得た。");
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 70 } }));
@@ -3780,7 +3724,7 @@ export const generateEvent = (
                             return { ...prev, player: nextP };
                         });
                         if (name) setEventResultLog(trans(`切れ味最高！\n「${name}」をコピーした。`, languageMode));
-                        else setEventResultLog(trans("刃物の扱いに集中し、次に活きる手応えを得た。", languageMode));
+                        else resolveMomentum("刃物の扱いに集中し、次に活きる手応えを得た。", "刃物の扱いに集中し、次に活きる手応えを得た。");
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 80 } }));
                         setEventResultLog(trans("包丁研ぎ代で80G獲得。", languageMode));
@@ -3789,7 +3733,7 @@ export const generateEvent = (
                         setEventResultLog(trans("手元が狂った...\n呪い「骨折」を受けた。", languageMode));
                     }
                 }},
-                { label: "野菜を切る", text: "料理（HP+15 / カード1枚強化 / 変化なし）", action: () => {
+                { label: "野菜を切る", text: "料理（HP+15 / カード1枚強化）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 15) } }));
@@ -3807,10 +3751,10 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`包丁さばきが冴えた。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("料理の手順が体に入り、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("料理の手順が体に入り、次に活きる手応えを得た。", "料理の手順が体に入り、次に活きる手応えを得た。", true);
                         }, 50);
                     } else {
-                        setEventResultLog(trans("素直なおいしさが体に染み、次に活きる手応えを得た。", languageMode));
+                        resolveMomentum("素直なおいしさが体に染み、次に活きる手応えを得た。", "素直なおいしさが体に染み、次に活きる手応えを得た。", true);
                     }
                 }},
                 { label: "肉の解体に挑む", text: "本番（恒久ムキムキ+1 / HP-8 / カード削除）", action: () => {
@@ -3881,11 +3825,11 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`人の振り見て我が振り直せ。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("連絡帳の行間を読み、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("連絡帳の行間を読み、次に活きる手応えを得た。", "連絡帳の行間を読み、次に活きる手応えを得た。");
                         }, 50);
                     }
                 }},
-                { label: "そっと戻す", text: "良心（HP+8 / カード削除 / 変化なし）", action: () => {
+                { label: "そっと戻す", text: "良心（HP+8 / カード削除）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 8) } }));
@@ -3957,7 +3901,7 @@ export const generateEvent = (
                         setEventResultLog(trans("校内美化の謝礼で100G獲得。", languageMode));
                     }
                 }},
-                { label: "歴史を調べる", text: "学び（カード強化 / カード削除 / 変化なし）", action: () => {
+                { label: "歴史を調べる", text: "学び（カード強化 / カード削除）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         let upgradedName = "";
@@ -3972,7 +3916,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`知識が力になった。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("調べた歴史が頭に残り、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("調べた歴史が頭に残り、次に活きる手応えを得た。", "調べた歴史が頭に残り、次に活きる手応えを得た。", true);
                         }, 50);
                     } else if (roll < 0.67) {
                         let removedName = "";
@@ -3990,7 +3934,7 @@ export const generateEvent = (
                             setEventResultLog(trans(`価値観が整理された。\n「${removedName || '迷い'}」を取り除いた。`, languageMode));
                         }, 50);
                     } else {
-                        setEventResultLog(trans("閉まった資料室の前で考えを整理し、次に活きる手応えを得た。", languageMode));
+                        resolveMomentum("閉まった資料室の前で考えを整理し、次に活きる手応えを得た。", "閉まった資料室の前で考えを整理し、次に活きる手応えを得た。", true);
                     }
                 }},
                 { label: "落書きする", text: "背徳（150G+後悔 / 恒久ムキムキ+1 / HP-6）", action: () => {
@@ -4063,7 +4007,7 @@ export const generateEvent = (
                         setEventResultLog(trans("帰ってきたが胸騒ぎが残る...\n呪い「悩み」を受けた。", languageMode));
                     }
                 }},
-                { label: "飛び越える", text: "回避（回避カード / HP+8 / 変化なし）", action: () => {
+                { label: "飛び越える", text: "回避（回避カード / HP+8）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({ ...prev, player: addCardWithEventRelics(prev.player, { ...CARDS_LIBRARY.DEFLECT, id: `stairs-deflect-${Date.now()}` } as Card) }));
@@ -4072,7 +4016,7 @@ export const generateEvent = (
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 8) } }));
                         setEventResultLog(trans("危機を乗り越えHPが8回復。", languageMode));
                     } else {
-                        setEventResultLog(trans("ギリギリで回避した感覚が、次に活きる手応えになった。", languageMode));
+                        resolveMomentum("ギリギリで回避した感覚が、次に活きる手応えになった。", "ギリギリで回避した感覚が、次に活きる手応えになった。", true);
                     }
                 }},
                 { label: "段数を数え直す", text: "検証（カード2枚強化 / 70G / HP-5）", action: () => {
@@ -4138,11 +4082,11 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`一節が刺さった。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("本の余韻が静かに残り、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("本の余韻が静かに残り、次に活きる手応えを得た。", "本の余韻が静かに残り、次に活きる手応えを得た。");
                         }, 50);
                     }
                 }},
-                { label: "静かに去る", text: "礼儀（HP+5 / カード削除 / 変化なし）", action: () => {
+                { label: "静かに去る", text: "礼儀（HP+5 / カード削除）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 5) } }));
@@ -4163,7 +4107,7 @@ export const generateEvent = (
                             setEventResultLog(trans(`静かな決断。\n「${removedName || 'ノイズ'}」を取り除いた。`, languageMode));
                         }, 50);
                     } else {
-                        setEventResultLog(trans("礼儀正しく場を離れ、次に活きる手応えを持ち帰った。", languageMode));
+                        resolveMomentum("礼儀正しく場を離れ、次に活きる手応えを持ち帰った。", "礼儀正しく場を離れ、次に活きる手応えを持ち帰った。", true);
                     }
                 }},
                 { label: "司書さんに質問攻め", text: "探求（カード2枚強化 / 80G / 呪い「不安」）", action: () => {
@@ -4223,7 +4167,7 @@ export const generateEvent = (
                         setEventResultLog(trans("点検報酬として120G獲得。", languageMode));
                     }
                 }},
-                { label: "コンコン叩く", text: "反響（恒久ムキムキ+1 / カード強化 / 変化なし）", action: () => {
+                { label: "コンコン叩く", text: "反響（恒久ムキムキ+1 / カード強化）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({ ...prev, player: addPermanentStrengthBonus(prev.player, 1) }));
@@ -4241,10 +4185,10 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`反響で集中力が高まった。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("反響の違いを聞き分け、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("反響の違いを聞き分け、次に活きる手応えを得た。", "反響の違いを聞き分け、次に活きる手応えを得た。", true);
                         }, 50);
                     } else {
-                        setEventResultLog(trans("不思議な音の余韻が、次に活きる手応えとして残った。", languageMode));
+                        resolveMomentum("不思議な音の余韻が、次に活きる手応えとして残った。", "不思議な音の余韻が、次に活きる手応えとして残った。", true);
                     }
                 }},
                 { label: "配管を整備する", text: "整備（カード削除 / HP+8 / 呪い）", action: () => {
@@ -4294,7 +4238,7 @@ export const generateEvent = (
             title: "飼育室のウサギ",
             description: "モフモフのウサギがいる。癒やされる...",
             options: [
-                { label: "抱っこする", text: "癒やし（全回復+寄生虫 / HP+8 / 変化なし）", action: () => {
+                { label: "抱っこする", text: "癒やし（全回復+寄生虫 / HP+8）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({
@@ -4327,7 +4271,7 @@ export const generateEvent = (
                             return prev;
                         });
                         if (success) setEventResultLog(trans("動きを完璧に読んだ！「先読み」が強化された。", languageMode));
-                        else setEventResultLog(trans("先読みカードは無かった。", languageMode));
+                        else resolveMomentum("先読みカードは無かった。", "先読みカードは無かった。");
                     } else if (roll < 0.67) {
                         const deck = [...prev.player.deck];
                         for (let i = 0; i < Math.min(2, deck.length); i++) {
@@ -4407,7 +4351,7 @@ export const generateEvent = (
                         setEventResultLog(trans("売れそうな金属を回収。\n100G獲得。", languageMode));
                     }
                 }},
-                { label: "掃除する", text: "整理（カード削除 / HP+8 / 変化なし）", action: () => {
+                { label: "掃除する", text: "整理（カード削除 / HP+8）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         let removedName = "";
@@ -4428,7 +4372,7 @@ export const generateEvent = (
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 8) } }));
                         setEventResultLog(trans("空気が澄んでHPが8回復。", languageMode));
                     } else {
-                        setEventResultLog(trans("掃除を終えた達成感が、次に活きる手応えになった。", languageMode));
+                        resolveMomentum("掃除を終えた達成感が、次に活きる手応えになった。", "掃除を終えた達成感が、次に活きる手応えになった。", true);
                     }
                 }},
                 { label: "分別マスターになる", text: "研究（カード2枚強化 / 恒久ムキムキ+1 / HP-5）", action: () => {
@@ -4484,7 +4428,7 @@ export const generateEvent = (
                         setEventResultLog(trans("機材を運んで消耗...\nHPが6減った。", languageMode));
                     }
                 }},
-                { label: "聞き入る", text: "傾聴（HP+10+退屈 / カード強化 / 変化なし）", action: () => {
+                { label: "聞き入る", text: "傾聴（HP+10+退屈 / カード強化）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({
@@ -4508,10 +4452,10 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`耳が鍛えられた。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("最後まで耳を傾け、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("最後まで耳を傾け、次に活きる手応えを得た。", "最後まで耳を傾け、次に活きる手応えを得た。", true);
                         }, 50);
                     } else {
-                        setEventResultLog(trans("最後まで聴いた余韻が、次に活きる手応えを残した。", languageMode));
+                        resolveMomentum("最後まで聴いた余韻が、次に活きる手応えを残した。", "最後まで聴いた余韻が、次に活きる手応えを残した。", true);
                     }
                 }},
                 { label: "電源を落とす", text: "即断（カード削除 / HP+8 / 呪い「不安」）", action: () => {
@@ -4656,7 +4600,7 @@ export const generateEvent = (
             title: "保健室のベッド",
             description: "ふかふかのシーツ。今なら誰もいない。",
             options: [
-                { label: "寝る", text: "休息（全回復+次戦闘E-1 / HP+12 / 変化なし）", action: () => {
+                { label: "寝る", text: "休息（全回復+次戦闘E-1 / HP+12）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: prev.player.maxHp, nextTurnEnergy: -1 } }));
@@ -4665,7 +4609,7 @@ export const generateEvent = (
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 12) } }));
                         setEventResultLog(trans("短時間でも効いた。\nHPが12回復。", languageMode));
                     } else {
-                        setEventResultLog(trans("横になって深呼吸し、次に活きる手応えを体に戻した。", languageMode));
+                        resolveMomentum("横になって深呼吸し、次に活きる手応えを体に戻した。", "横になって深呼吸し、次に活きる手応えを体に戻した。", true);
                     }
                 }},
                 { label: "飛び跳ねる", text: "遊び（最大HP+3 / HP-6 / 恒久ムキムキ+1）", action: () => {
@@ -4711,7 +4655,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`手際が良くなった。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("ベッドを整えた手順が、次に活きる手応えになった。", languageMode));
+                            else resolveMomentum("ベッドを整えた手順が、次に活きる手応えになった。", "ベッドを整えた手順が、次に活きる手応えになった。");
                         }, 50);
                     } else {
                         setGameState(prev => ({ ...prev, player: addCardWithEventRelics(prev.player, { ...CURSE_CARDS.DOUBT, id: `bed-doubt-${Date.now()}` } as Card) }));
@@ -4769,7 +4713,7 @@ export const generateEvent = (
                         setEventResultLog(trans("後片付けで怒られた...\n呪い「恥」を受けた。", languageMode));
                     }
                 }},
-                { label: "分け合う", text: "協調（カード削除 / カード強化 / 変化なし）", action: () => {
+                { label: "分け合う", text: "協調（カード削除 / カード強化）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         let removedName = "";
@@ -4799,10 +4743,10 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`連携が良くなった。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("分け合った温かさが、次に活きる手応えとして残った。", languageMode));
+                            else resolveMomentum("分け合った温かさが、次に活きる手応えとして残った。", "分け合った温かさが、次に活きる手応えとして残った。", true);
                         }, 50);
                     } else {
-                        setEventResultLog(trans("平和な空気を味わい、次に活きる手応えを得た。", languageMode));
+                        resolveMomentum("平和な空気を味わい、次に活きる手応えを得た。", "平和な空気を味わい、次に活きる手応えを得た。", true);
                     }
                 }},
                 { label: "牛乳先物トレード", text: "奇想天外（レリック / 180G / 呪い「後悔」）", action: () => {
@@ -4847,7 +4791,7 @@ export const generateEvent = (
                         setEventResultLog(trans("転ばない体幹が身についた。\n恒久ムキムキ+1。", languageMode));
                     }
                 }},
-                { label: "慎重に歩く", text: "安全（カード削除 / HP+8 / 変化なし）", action: () => {
+                { label: "慎重に歩く", text: "安全（カード削除 / HP+8）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         let removedName = "";
@@ -4868,7 +4812,7 @@ export const generateEvent = (
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 8) } }));
                         setEventResultLog(trans("慎重さで疲れが減った。\nHPが8回復。", languageMode));
                     } else {
-                        setEventResultLog(trans("安全に通過した足運びが、次に活きる手応えになった。", languageMode));
+                        resolveMomentum("安全に通過した足運びが、次に活きる手応えになった。", "安全に通過した足運びが、次に活きる手応えになった。", true);
                     }
                 }},
                 { label: "ワックスがけを手伝う", text: "作業（カード強化 / HP-4 / 呪い「不安」）", action: () => {
@@ -4886,7 +4830,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`職人技を覚えた。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("手伝いの動きが身につき、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("手伝いの動きが身につき、次に活きる手応えを得た。", "手伝いの動きが身につき、次に活きる手応えを得た。");
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 4) } }));
@@ -4944,7 +4888,7 @@ export const generateEvent = (
                         setEventResultLog(trans("胃が限界...\n呪い「腹痛」を受けた。", languageMode));
                     }
                 }},
-                { label: "捨てる", text: "平和（50G+HP10 / カード削除 / 変化なし）", action: () => {
+                { label: "捨てる", text: "平和（50G+HP10 / カード削除）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => {
@@ -4970,7 +4914,7 @@ export const generateEvent = (
                             setEventResultLog(trans(`危険を断って思考が澄んだ。\n「${removedName || 'ノイズ'}」を取り除いた。`, languageMode));
                         }, 50);
                     } else {
-                        setEventResultLog(trans("安全に処理した手際が、次に活きる手応えになった。", languageMode));
+                        resolveMomentum("安全に処理した手際が、次に活きる手応えになった。", "安全に処理した手際が、次に活きる手応えになった。", true);
                     }
                 }},
                 { label: "解毒薬を調合する", text: "研究（カード2枚強化 / HP+8 / 70G）", action: () => {
@@ -5058,7 +5002,7 @@ export const generateEvent = (
                         setEventResultLog(trans("野次で心が折れた...\n呪い「恥」を受けた。", languageMode));
                     }
                 }},
-                { label: "言葉で和解する", text: "交渉（カード2枚強化 / HP-6 / 変化なし）", action: () => {
+                { label: "言葉で和解する", text: "交渉（カード2枚強化 / HP-6）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         const deck = [...prev.player.deck];
@@ -5072,7 +5016,7 @@ export const generateEvent = (
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 6) } }));
                         setEventResultLog(trans("話し合いは長引いた...\nHPが6減った。", languageMode));
                     } else {
-                        setEventResultLog(trans("言葉で場を収め、次に活きる手応えを得た。", languageMode));
+                        resolveMomentum("言葉で場を収め、次に活きる手応えを得た。", "言葉で場を収め、次に活きる手応えを得た。", true);
                     }
                 }},
                 { label: "決闘を興行化する", text: "奇想天外（レリック / 200G / 呪い「後悔」）", action: () => {
@@ -5097,7 +5041,7 @@ export const generateEvent = (
             title: "秘密基地",
             description: "森の奥に子供たちの秘密基地を見つけた。お菓子やマンガが置いてある。",
             options: [
-                { label: "休む", text: "休憩（HP+30 / カード強化 / 変化なし）", action: () => {
+                { label: "休む", text: "休憩（HP+30 / カード強化）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 30) } }));
@@ -5114,10 +5058,10 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`作戦会議がはかどった。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("休憩で頭が澄み、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("休憩で頭が澄み、次に活きる手応えを得た。", "休憩で頭が澄み、次に活きる手応えを得た。", true);
                         }, 50);
                     } else {
-                        setEventResultLog(trans("のんびりした時間が心を整え、次に活きる手応えを得た。", languageMode));
+                        resolveMomentum("のんびりした時間が心を整え、次に活きる手応えを得た。", "のんびりした時間が心を整え、次に活きる手応えを得た。", true);
                     }
                 }},
                 { label: "あさる", text: "探索（エナジー薬+30G / カード削除 / 呪い「後悔」）", action: () => {
@@ -5205,14 +5149,14 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`追跡で集中力が上がった。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("追いかけた足取りが軽くなり、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("追いかけた足取りが軽くなり、次に活きる手応えを得た。", "追いかけた足取りが軽くなり、次に活きる手応えを得た。");
                         }, 50);
                     } else {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 6) } }));
                         setEventResultLog(trans("全力疾走でバテた...\nHPが6減った。", languageMode));
                     }
                 }},
-                { label: "一緒に遊ぶ", text: "ふれあい（最大HP+3 / HP+10 / 変化なし）", action: () => {
+                { label: "一緒に遊ぶ", text: "ふれあい（最大HP+3 / HP+10）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 3, currentHp: prev.player.currentHp + 3 } }));
@@ -5221,7 +5165,7 @@ export const generateEvent = (
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 10) } }));
                         setEventResultLog(trans("ふわふわに癒やされた。\nHPが10回復。", languageMode));
                     } else {
-                        setEventResultLog(trans("ふれあいの温かさが残り、次に活きる手応えを得た。", languageMode));
+                        resolveMomentum("ふれあいの温かさが残り、次に活きる手応えを得た。", "ふれあいの温かさが残り、次に活きる手応えを得た。", true);
                     }
                 }},
                 { label: "ニンジンで誘導", text: "作戦（ポーション / 120G / 呪い「不安」）", action: () => {
@@ -5286,7 +5230,7 @@ export const generateEvent = (
                         setEventResultLog(trans("つつかれ続けて体幹が鍛えられた。\n恒久ムキムキ+1。", languageMode));
                     }
                 }},
-                { label: "卵をもらう", text: "交渉（ポーション / HP+10 / 変化なし）", action: () => {
+                { label: "卵をもらう", text: "交渉（ポーション / HP+10）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         const potion = POTION_LIBRARY['HEALTH_POTION'];
@@ -5296,7 +5240,7 @@ export const generateEvent = (
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 10) } }));
                         setEventResultLog(trans("栄養たっぷりの卵料理でHPが10回復。", languageMode));
                     } else {
-                        setEventResultLog(trans("にらみ合いの間合いを覚え、次に活きる手応えを得た。", languageMode));
+                        resolveMomentum("にらみ合いの間合いを覚え、次に活きる手応えを得た。", "にらみ合いの間合いを覚え、次に活きる手応えを得た。", true);
                     }
                 }},
                 { label: "掃除を手伝う", text: "奉仕（カード削除 / 100G / 呪い「不安」）", action: () => {
@@ -5390,7 +5334,7 @@ export const generateEvent = (
                         setEventResultLog(trans("修羅場を越えて鍛えられた。\n恒久ムキムキ+1。", languageMode));
                     }
                 }},
-                { label: "掲示板を消す", text: "鎮圧（HP+12 / カード強化 / 変化なし）", action: () => {
+                { label: "掲示板を消す", text: "鎮圧（HP+12 / カード強化）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 12) } }));
@@ -5407,10 +5351,10 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`迷いが消えた。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("掲示板を掃除した手つきが、次に活きる手応えになった。", languageMode));
+                            else resolveMomentum("掲示板を掃除した手つきが、次に活きる手応えになった。", "掲示板を掃除した手つきが、次に活きる手応えになった。", true);
                         }, 50);
                     } else {
-                        setEventResultLog(trans("静かになった掲示板を見上げ、次に活きる手応えを得た。", languageMode));
+                        resolveMomentum("静かになった掲示板を見上げ、次に活きる手応えを得た。", "静かになった掲示板を見上げ、次に活きる手応えを得た。", true);
                     }
                 }},
                 { label: "有料ニュース配信", text: "奇想天外（レリック / 200G / 呪い「後悔」）", action: () => {
@@ -5461,14 +5405,14 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`危機対応が洗練された。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("爆風に耐えた呼吸が、次に活きる手応えになった。", languageMode));
+                            else resolveMomentum("爆風に耐えた呼吸が、次に活きる手応えになった。", "爆風に耐えた呼吸が、次に活きる手応えになった。");
                         }, 50);
                     } else {
                         setGameState(prev => ({ ...prev, player: addCardWithEventRelics(prev.player, { ...CURSE_CARDS.PAIN, id: `exp-pain-${Date.now()}` } as Card) }));
                         setEventResultLog(trans("有毒ガスを吸ってしまった...\n呪い「腹痛」を受けた。", languageMode));
                     }
                 }},
-                { label: "逃げる", text: "退避（HP+10 / 90G / 変化なし）", action: () => {
+                { label: "逃げる", text: "退避（HP+10 / 90G）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 10) } }));
@@ -5477,7 +5421,7 @@ export const generateEvent = (
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 90 } }));
                         setEventResultLog(trans("避難誘導で感謝され、90G獲得。", languageMode));
                     } else {
-                        setEventResultLog(trans("大事を取る判断が冴え、次に活きる手応えを得た。", languageMode));
+                        resolveMomentum("大事を取る判断が冴え、次に活きる手応えを得た。", "大事を取る判断が冴え、次に活きる手応えを得た。", true);
                     }
                 }},
                 { label: "原因を解析する", text: "分析（カード2枚強化 / 恒久ムキムキ+1 / HP-8）", action: () => {
@@ -5547,7 +5491,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`フォーム改善で技が冴えた。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("走り込んだ熱が残り、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("走り込んだ熱が残り、次に活きる手応えを得た。", "走り込んだ熱が残り、次に活きる手応えを得た。");
                         }, 50);
                     }
                 }},
@@ -5564,7 +5508,7 @@ export const generateEvent = (
                         setEventResultLog(trans("サボりが見つかった...\n呪い「恥」を受けた。", languageMode));
                     }
                 }},
-                { label: "メニューを組み直す", text: "指導（カード削除 / HP+12 / 変化なし）", action: () => {
+                { label: "メニューを組み直す", text: "指導（カード削除 / HP+12）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         let removedName = "";
@@ -5585,7 +5529,7 @@ export const generateEvent = (
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 12) } }));
                         setEventResultLog(trans("負荷が適正化され、HPが12回復。", languageMode));
                     } else {
-                        setEventResultLog(trans("立てた計画の輪郭が、次に活きる手応えになった。", languageMode));
+                        resolveMomentum("立てた計画の輪郭が、次に活きる手応えになった。", "立てた計画の輪郭が、次に活きる手応えになった。", true);
                     }
                 }},
                 { label: "特訓配信でバズる", text: "奇想天外（レリック / 220G / 呪い「後悔」）", action: () => {
@@ -5630,7 +5574,7 @@ export const generateEvent = (
                         setEventResultLog(trans("腹式呼吸が身についた。\n恒久ムキムキ+1。", languageMode));
                     }
                 }},
-                { label: "バラード", text: "癒やし系（HP+20 / カード強化 / 変化なし）", action: () => {
+                { label: "バラード", text: "癒やし系（HP+20 / カード強化）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 20) } }));
@@ -5647,10 +5591,10 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`集中が研ぎ澄まされた。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("歌声の響きが残り、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("歌声の響きが残り、次に活きる手応えを得た。", "歌声の響きが残り、次に活きる手応えを得た。", true);
                         }, 50);
                     } else {
-                        setEventResultLog(trans("拍手の余韻を胸に、次に活きる手応えを得た。", languageMode));
+                        resolveMomentum("拍手の余韻を胸に、次に活きる手応えを得た。", "拍手の余韻を胸に、次に活きる手応えを得た。", true);
                     }
                 }},
                 { label: "機材を調整する", text: "裏方（カード削除 / ポーション / HP-6）", action: () => {
@@ -5727,7 +5671,7 @@ export const generateEvent = (
                         setEventResultLog(trans("度胸がついた。\n恒久ムキムキ+1。", languageMode));
                     }
                 }},
-                { label: "諦める", text: "撤退（呪い「不安」 / HP+10 / 変化なし）", action: () => {
+                { label: "諦める", text: "撤退（呪い「不安」 / HP+10）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({
@@ -5739,7 +5683,7 @@ export const generateEvent = (
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 10) } }));
                         setEventResultLog(trans("深呼吸して気持ちを立て直した。\nHPが10回復。", languageMode));
                     } else {
-                        setEventResultLog(trans("今日は見送る判断を選び、次に活きる手応えを得た。", languageMode));
+                        resolveMomentum("今日は見送る判断を選び、次に活きる手応えを得た。", "今日は見送る判断を選び、次に活きる手応えを得た。", true);
                     }
                 }},
                 { label: "先生に相談する", text: "公的手段（カード削除 / 90G / 呪い「恥」）", action: () => {
@@ -5809,7 +5753,7 @@ export const generateEvent = (
                             return prev;
                         });
                         if (success) setEventResultLog(trans("土の力で作物がぐんと育った。", languageMode));
-                        else setEventResultLog(trans("畑の土を見つめ直し、次に活きる手応えを得た。", languageMode));
+                        else resolveMomentum("畑の土を見つめ直し、次に活きる手応えを得た。", "畑の土を見つめ直し、次に活きる手応えを得た。");
                     } else if (roll < 0.67) {
                         let upgradedName = "";
                         setGameState(prev => {
@@ -5822,7 +5766,7 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`土いじりで集中した。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("耕した土の感触が、次に活きる手応えを残した。", languageMode));
+                            else resolveMomentum("耕した土の感触が、次に活きる手応えを残した。", "耕した土の感触が、次に活きる手応えを残した。");
                         }, 50);
                     } else {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 8) } }));
@@ -5843,7 +5787,7 @@ export const generateEvent = (
                         setEventResultLog(trans("土埃を吸い込みすぎた...\n呪い「腹痛」を受けた。", languageMode));
                     }
                 }},
-                { label: "土壌を分析する", text: "研究（カード削除 / 恒久ムキムキ+1 / 変化なし）", action: () => {
+                { label: "土壌を分析する", text: "研究（カード削除 / 恒久ムキムキ+1）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         let removedName = "";
@@ -5864,7 +5808,7 @@ export const generateEvent = (
                         setGameState(prev => ({ ...prev, player: addPermanentStrengthBonus(prev.player, 1) }));
                         setEventResultLog(trans("耕作で体幹が鍛えられた。\n恒久ムキムキ+1。", languageMode));
                     } else {
-                        setEventResultLog(trans("分析の過程で視点が増え、次に活きる手応えを得た。", languageMode));
+                        resolveMomentum("分析の過程で視点が増え、次に活きる手応えを得た。", "分析の過程で視点が増え、次に活きる手応えを得た。", true);
                     }
                 }},
                 { label: "土で巨大プリンを作る", text: "奇想天外（レリック / 180G / 呪い「恥」）", action: () => {
@@ -5889,7 +5833,7 @@ export const generateEvent = (
             title: "新メニューのインスピレーション",
             description: "食堂の隅に古いレシピ本がある。新しいアイデアが浮かぶかも。",
             options: [
-                { label: "研究する", text: "試作（カード変化 / カード強化 / 変化なし）", action: () => {
+                { label: "研究する", text: "試作（カード変化 / カード強化）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => {
@@ -5914,10 +5858,10 @@ export const generateEvent = (
                         });
                         setTimeout(() => {
                             if (upgradedName) setEventResultLog(trans(`味の調整が決まった。\n「${upgradedName}」が強化された。`, languageMode));
-                            else setEventResultLog(trans("研究のメモが増え、次に活きる手応えを得た。", languageMode));
+                            else resolveMomentum("研究のメモが増え、次に活きる手応えを得た。", "研究のメモが増え、次に活きる手応えを得た。", true);
                         }, 50);
                     } else {
-                        setEventResultLog(trans("試作の知見が増え、次に活きる手応えを得た。", languageMode));
+                        resolveMomentum("試作の知見が増え、次に活きる手応えを得た。", "試作の知見が増え、次に活きる手応えを得た。", true);
                     }
                 }},
                 { label: "試食する", text: "実食（HP+15+恒久ムキムキ+1 / 120G / 呪い「腹痛」）", action: () => {
