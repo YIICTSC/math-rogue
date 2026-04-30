@@ -171,6 +171,112 @@ textarea {
   line-height: 1;
 }
 
+@media (orientation: landscape) {
+  .battle-scene-root.battle-force-split .battle-view {
+    gap: 0.5rem;
+    padding: 0.375rem 0.5rem;
+  }
+
+  .battle-scene-root.battle-force-split .battle-hand-area {
+    height: 13rem !important;
+    z-index: 80 !important;
+  }
+
+  .battle-scene-root.battle-force-split .battle-actors {
+    display: grid !important;
+    flex: 1 1 auto !important;
+    grid-template-columns: minmax(12rem, 36%) minmax(0, 1fr) !important;
+    gap: 0.5rem !important;
+    min-height: 0 !important;
+    position: relative !important;
+  }
+
+  .battle-scene-root.battle-force-split .battle-enemies-area {
+    align-items: center !important;
+    bottom: auto !important;
+    display: flex !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    height: 100% !important;
+    justify-content: center !important;
+    left: auto !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    padding: 1.5rem 0.5rem 0.5rem !important;
+    position: relative !important;
+    right: auto !important;
+    top: auto !important;
+    transform: none !important;
+    z-index: 10 !important;
+    background: rgba(15, 23, 42, 0.44) !important;
+    border: 1px solid rgba(148, 163, 184, 0.35) !important;
+    border-radius: 0.5rem !important;
+  }
+
+  .battle-scene-root.battle-force-split .battle-enemies-area > * {
+    flex: 0 0 auto !important;
+  }
+
+  .battle-scene-root.battle-force-split .battle-enemies-area::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .battle-scene-root.battle-force-split .battle-enemy-sprite {
+    width: 5.25rem !important;
+    height: 5.25rem !important;
+  }
+
+  .battle-scene-root.battle-force-split .battle-enemy-intent {
+    top: 0.25rem !important;
+  }
+
+  .battle-scene-root.battle-force-split .battle-player-area {
+    align-items: flex-end !important;
+    background: rgba(2, 6, 23, 0.58) !important;
+    border: 1px solid rgba(148, 163, 184, 0.35) !important;
+    border-radius: 0.5rem !important;
+    bottom: auto !important;
+    display: flex !important;
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    height: 100% !important;
+    justify-content: center !important;
+    left: auto !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+    padding: 0.5rem 0.5rem 1rem !important;
+    position: relative !important;
+    z-index: 20 !important;
+  }
+
+  .battle-scene-root.battle-force-split .battle-player-area > div {
+    align-items: flex-end !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    max-width: 100% !important;
+  }
+
+  .battle-scene-root.battle-force-split .battle-player-sprite {
+    width: 4.75rem !important;
+    height: 4.75rem !important;
+    margin-right: 0.5rem !important;
+  }
+
+  .battle-scene-root.battle-force-split .battle-player-stats {
+    margin-bottom: 0.5rem !important;
+  }
+
+  .battle-scene-root.battle-force-split .battle-hand-scroll {
+    justify-content: center !important;
+    padding-bottom: 0.5rem !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    padding-top: 0.5rem !important;
+  }
+}
+
 @media (orientation: landscape) and (max-height: 720px) {
   .battle-scene-root .battle-view {
     gap: 0.5rem;

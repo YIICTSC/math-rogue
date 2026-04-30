@@ -418,8 +418,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const [inspectedCard, setInspectedCard] = useState<ICard | null>(null);
     const [fullscreenArtCard, setFullscreenArtCard] = useState<ICard | null>(null);
     const [showLog, setShowLog] = useState(false);
+    const [forceLandscapeSplit, setForceLandscapeSplit] = useState(false);
     const [finisherBurst, setFinisherBurst] = useState(false);
     const [drawEntryAnimations, setDrawEntryAnimations] = useState<DrawEntryAnimation[]>([]);
+    const battleViewRef = useRef<HTMLDivElement>(null);
     const logContainerRef = useRef<HTMLDivElement>(null);
     const prevHandIdsRef = useRef<string[]>([]);
     const drawEntryTimeoutsRef = useRef<number[]>([]);
@@ -487,6 +489,32 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
     // Get latest 2 logs
     const latestLogs = [...combatLog].reverse().slice(0, 2);
+
+    useEffect(() => {
+        const isLandscapeViewport = () => {
+            if (typeof window === 'undefined') return false;
+            return window.matchMedia('(orientation: landscape)').matches || window.innerWidth > window.innerHeight;
+        };
+
+        const syncLandscapeSplit = () => {
+            setForceLandscapeSplit((prev) => {
+                if (!isLandscapeViewport()) return false;
+                if (prev) return true;
+                const battleView = battleViewRef.current;
+                if (!battleView) return false;
+                return battleView.scrollHeight > battleView.clientHeight + 8;
+            });
+        };
+
+        syncLandscapeSplit();
+        window.addEventListener('resize', syncLandscapeSplit);
+        const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(syncLandscapeSplit) : null;
+        if (observer && battleViewRef.current) observer.observe(battleViewRef.current);
+        return () => {
+            window.removeEventListener('resize', syncLandscapeSplit);
+            observer?.disconnect();
+        };
+    }, [combatLog.length, enemies.length, player.currentHp, player.block, player.currentEnergy, player.hand.length, selectionState.active]);
 
     useEffect(() => {
         if (lastActionTime > 0) {
@@ -750,7 +778,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     };
 
     return (
-        <div className={`battle-scene-root flex flex-col h-full w-full bg-gray-900 text-white relative overflow-hidden ${isShaking ? 'animate-screen-shake' : ''}`}>
+        <div className={`battle-scene-root flex flex-col h-full w-full bg-gray-900 text-white relative overflow-hidden ${forceLandscapeSplit ? 'battle-force-split' : ''} ${isShaking ? 'animate-screen-shake' : ''}`}>
             {finisherCutinCard && (
                 <BattleFinisherCutinOverlay card={finisherCutinCard} languageMode={languageMode} />
             )}
@@ -946,7 +974,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             </div>
 
             {/* 2. Battle Viewport */}
-            <div className="battle-view flex-1 min-h-0 relative overflow-y-auto custom-scrollbar flex flex-col justify-between p-2 bg-gray-800/50 gap-4">
+            <div ref={battleViewRef} className="battle-view flex-1 min-h-0 relative overflow-y-auto custom-scrollbar flex flex-col justify-between p-2 bg-gray-800/50 gap-4">
 
                 {/* Parry UI Overlay (Bard Special) */}
                 {parryState?.active && !parryState.success && (
