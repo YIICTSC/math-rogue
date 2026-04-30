@@ -1644,7 +1644,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             </div>
 
             {/* 4. Hand Area */}
-            <div className={`battle-hand-area h-60 md:h-64 bg-gray-900 border-t border-gray-700 relative z-10 ${selectionState.active ? 'bg-blue-900/20' : ''} ${selfDown ? 'bg-red-950/20' : ''}`}>
+            <div className={`battle-hand-area h-60 md:h-64 bg-gray-900 border-t border-gray-700 relative z-[80] ${selectionState.active ? 'bg-blue-900/20' : ''} ${selfDown ? 'bg-red-950/20' : ''}`}>
                 <style>
                     {`
                         @keyframes battle-hand-card-entry {
@@ -1676,7 +1676,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         </div>
                     </div>
                 )}
-                <div className="group/hand w-full h-full overflow-x-auto px-8 md:px-10 flex items-end justify-start md:justify-center pt-5 pb-10 md:pb-8 custom-scrollbar touch-pan-x" style={{ overflowY: 'visible' }}>
+                <div className="battle-hand-scroll group/hand w-full h-full overflow-x-auto px-8 md:px-10 flex items-end justify-start md:justify-center pt-5 pb-10 md:pb-8 custom-scrollbar touch-pan-x" style={{ overflowY: 'visible' }}>
                     {player.hand.map((card, i) => {
                         const isClashDisabled = card.playCondition === 'HAND_ONLY_ATTACKS' && player.hand.some(c => c.type !== CardType.ATTACK && c.id !== card.id);
                         const isGrandFinaleDisabled = card.playCondition === 'DRAW_PILE_EMPTY' && player.drawPile.length > 0;
@@ -1699,9 +1699,9 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         const translateY = Math.abs(dist) * 4;
                         const drawEntryDelayMs = drawEntryAnimationMap.get(card.id);
                         const isDrawEntryAnimating = drawEntryDelayMs !== undefined;
-                        const baseZIndex = 10 + i;
-                        const selectedZIndex = 40;
-                        const animatingZIndex = 60 + i;
+                        const baseZIndex = 120 + i;
+                        const selectedZIndex = 220;
+                        const animatingZIndex = 180 + i;
                         const cardZIndex = Math.max(
                             isSelectedActive || isSelectedDual ? selectedZIndex : baseZIndex,
                             isDrawEntryAnimating ? animatingZIndex : baseZIndex
@@ -1710,7 +1710,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         return (
                             <div
                                 key={card.id}
-                                className={`inline-block align-middle transition-all duration-500 ease-out w-28 h-44 md:w-32 md:h-48 shrink-0 relative 
+                                className={`battle-hand-card inline-block align-middle transition-all duration-500 ease-out w-28 h-44 md:w-32 md:h-48 shrink-0 relative 
                             ml-0
                             md:group-hover/hand:-ml-2 md:group-active/hand:-ml-2 
                             ${isSelectedActive || isSelectedDual ? 'cursor-pointer -translate-y-8 z-30 scale-110' : 'hover:-translate-y-4 hover:z-20'}
@@ -1727,7 +1727,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     </div>
                                 )}
 
-                                <div className="absolute top-0 left-0 origin-top-left scale-[0.95] md:scale-100">
+                                <div className="battle-hand-card-inner absolute top-0 left-0 origin-top-left scale-[0.95] md:scale-100">
                                     <div
                                         className="shadow-lg transition-transform duration-200 ease-out hover:-translate-y-1 hover:scale-[1.03]"
                                         style={isDrawEntryAnimating ? {

@@ -179,29 +179,40 @@ textarea {
 
   .battle-scene-root .battle-hand-area {
     height: 13rem !important;
+    z-index: 80 !important;
   }
 
   .battle-scene-root .battle-actors {
+    display: grid !important;
     flex: 1 1 auto !important;
+    grid-template-columns: minmax(12rem, 36%) minmax(0, 1fr) !important;
+    gap: 0.5rem !important;
     min-height: 0 !important;
     position: relative !important;
   }
 
   .battle-scene-root .battle-enemies-area {
-    align-items: flex-start !important;
+    align-items: center !important;
     bottom: auto !important;
     display: flex !important;
-    justify-content: flex-start !important;
-    left: min(42vw, 30rem) !important;
-    max-width: calc(100% - min(42vw, 30rem) - 0.5rem) !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    height: 100% !important;
+    justify-content: center !important;
+    left: auto !important;
+    max-width: none !important;
     min-height: 0 !important;
     overflow-x: auto !important;
     overflow-y: visible !important;
-    padding-top: 0.5rem !important;
-    position: absolute !important;
-    right: 0.5rem !important;
-    top: 0 !important;
+    padding: 1.5rem 0.5rem 0.5rem !important;
+    position: relative !important;
+    right: auto !important;
+    top: auto !important;
+    transform: none !important;
     z-index: 10 !important;
+    background: rgba(15, 23, 42, 0.44) !important;
+    border: 1px solid rgba(148, 163, 184, 0.35) !important;
+    border-radius: 0.5rem !important;
   }
 
   .battle-scene-root .battle-enemies-area > * {
@@ -222,12 +233,29 @@ textarea {
   }
 
   .battle-scene-root .battle-player-area {
-    bottom: 0.375rem !important;
-    left: 0.25rem !important;
-    padding-bottom: 0 !important;
-    padding-left: 0.25rem !important;
-    position: absolute !important;
+    align-items: flex-end !important;
+    background: rgba(2, 6, 23, 0.58) !important;
+    border: 1px solid rgba(148, 163, 184, 0.35) !important;
+    border-radius: 0.5rem !important;
+    bottom: auto !important;
+    display: flex !important;
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    height: 100% !important;
+    justify-content: center !important;
+    left: auto !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+    padding: 0.5rem 0.5rem 1rem !important;
+    position: relative !important;
     z-index: 20 !important;
+  }
+
+  .battle-scene-root .battle-player-area > div {
+    align-items: flex-end !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    max-width: 100% !important;
   }
 
   .battle-scene-root .battle-player-sprite {
@@ -238,6 +266,14 @@ textarea {
 
   .battle-scene-root .battle-player-stats {
     margin-bottom: 0.5rem !important;
+  }
+
+  .battle-scene-root .battle-hand-scroll {
+    justify-content: center !important;
+    padding-bottom: 0.5rem !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    padding-top: 0.5rem !important;
   }
 }
 
@@ -258,10 +294,8 @@ textarea {
   }
 
   .battle-scene-root .battle-enemies-area {
-    left: min(44vw, 28rem) !important;
-    max-width: calc(100% - min(44vw, 28rem) - 0.5rem) !important;
     min-height: 0 !important;
-    padding-top: 0.25rem !important;
+    padding: 1.25rem 0.375rem 0.375rem !important;
   }
 
   .battle-scene-root .battle-enemy-sprite {
@@ -274,9 +308,7 @@ textarea {
   }
 
   .battle-scene-root .battle-player-area {
-    bottom: 0.25rem !important;
-    padding-bottom: 0 !important;
-    padding-left: 0.25rem !important;
+    padding: 0.375rem 0.375rem 0.75rem !important;
   }
 
   .battle-scene-root .battle-player-sprite {
@@ -291,6 +323,41 @@ textarea {
     font-size: 0.65rem !important;
     line-height: 1 !important;
   }
+
+  .battle-scene-root .battle-hand-scroll {
+    padding-bottom: 0.375rem !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+    padding-top: 0.375rem !important;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 720px) and (max-width: 760px) {
+  .battle-scene-root .battle-hand-scroll {
+    justify-content: flex-start !important;
+    padding-bottom: 0.375rem !important;
+    padding-left: 0.375rem !important;
+    padding-right: 0.375rem !important;
+    padding-top: 0.375rem !important;
+  }
+
+  .battle-scene-root .battle-hand-card {
+    z-index: 120 !important;
+  }
+
+  .battle-scene-root .battle-hand-card:hover,
+  .battle-scene-root .battle-hand-card:focus-within {
+    z-index: 240 !important;
+  }
+
+  .battle-scene-root .battle-hand-card {
+    width: 6.5rem !important;
+    height: 10.5rem !important;
+  }
+
+  .battle-scene-root .battle-hand-card-inner {
+    transform: scale(0.86) !important;
+  }
 }
 
 @media (orientation: landscape) and (max-height: 430px) {
@@ -299,11 +366,8 @@ textarea {
   }
 
   .battle-scene-root .battle-enemies-area {
-    left: min(46vw, 24rem) !important;
-    max-width: calc(100% - min(46vw, 24rem) - 0.375rem) !important;
     min-height: 0 !important;
-    padding-top: 0.25rem !important;
-    right: 0.375rem !important;
+    padding: 1rem 0.25rem 0.25rem !important;
   }
 
   .battle-scene-root .battle-enemy-sprite {
