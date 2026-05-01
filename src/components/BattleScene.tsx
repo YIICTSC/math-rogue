@@ -422,6 +422,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const [finisherBurst, setFinisherBurst] = useState(false);
     const [drawEntryAnimations, setDrawEntryAnimations] = useState<DrawEntryAnimation[]>([]);
     const battleViewRef = useRef<HTMLDivElement>(null);
+    const playerSpriteRef = useRef<HTMLDivElement>(null);
     const logContainerRef = useRef<HTMLDivElement>(null);
     const prevHandIdsRef = useRef<string[]>([]);
     const drawEntryTimeoutsRef = useRef<number[]>([]);
@@ -502,15 +503,28 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 if (prev) return true;
                 const battleView = battleViewRef.current;
                 if (!battleView) return false;
-                return battleView.scrollHeight > battleView.clientHeight + 8;
+                const hasBattleOverflow = battleView.scrollHeight > battleView.clientHeight + 8;
+                const playerSprite = playerSpriteRef.current;
+                const isPlayerClipped = (() => {
+                    if (!playerSprite) return false;
+                    const viewRect = battleView.getBoundingClientRect();
+                    const spriteRect = playerSprite.getBoundingClientRect();
+                    return spriteRect.top < viewRect.top - 2 || spriteRect.bottom > viewRect.bottom + 2;
+                })();
+                return hasBattleOverflow || isPlayerClipped;
             });
         };
 
         syncLandscapeSplit();
+        const rafId = window.requestAnimationFrame(syncLandscapeSplit);
+        const settleTimer = window.setTimeout(syncLandscapeSplit, 120);
         window.addEventListener('resize', syncLandscapeSplit);
         const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(syncLandscapeSplit) : null;
         if (observer && battleViewRef.current) observer.observe(battleViewRef.current);
+        if (observer && playerSpriteRef.current) observer.observe(playerSpriteRef.current);
         return () => {
+            window.cancelAnimationFrame(rafId);
+            window.clearTimeout(settleTimer);
             window.removeEventListener('resize', syncLandscapeSplit);
             observer?.disconnect();
         };
@@ -1407,7 +1421,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 <div className={isTrueBossPhase2Active ? "battle-player-area relative z-20 flex items-end pl-2 pb-2 shrink-0" : "battle-player-area flex items-end pl-2 pb-2 shrink-0 mt-auto"}>
                     <div className={isTrueBossPhase2Active ? "flex flex-col items-start md:flex-row md:items-end relative max-w-[48vw] md:max-w-none" : "flex items-end relative"}>
 
-                        <div className={`battle-player-sprite order-1 w-20 h-20 md:w-24 md:h-24 relative transition-all duration-150 ease-out ${isTrueBossPhase2Active ? 'mr-0 md:mr-2 mb-1 md:mb-0' : 'mr-2'} ${getActionClass()} ${selectedSupportCard ? 'ring-2 ring-emerald-300 rounded-lg cursor-pointer' : ''}`} onClick={() => {
+                        <div ref={playerSpriteRef} className={`battle-player-sprite order-1 w-20 h-20 md:w-24 md:h-24 relative transition-all duration-150 ease-out ${isTrueBossPhase2Active ? 'mr-0 md:mr-2 mb-1 md:mb-0' : 'mr-2'} ${getActionClass()} ${selectedSupportCard ? 'ring-2 ring-emerald-300 rounded-lg cursor-pointer' : ''}`} onClick={() => {
                             if (selectedSupportCard && onUseCoopSupport) {
                                 onUseCoopSupport(selectedSupportCard);
                                 setSelectedSupportCard(null);

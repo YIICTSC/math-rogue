@@ -35,6 +35,50 @@ const PLAYER_JUMP_SPRITE_BASELINE_Y = 594;
 const PLAYER_JUMP_DRAW_HEIGHT = 108;
 const PLAYER_JUMP_SPRITE_SRC = `${(import.meta as any).env.BASE_URL || '/'}sprites/go-home-dash-jump-3.png`;
 const PLAYER_JUMP_FRAME_X_OFFSETS = [36, 40, -10];
+const GO_HOME_DASH_ENEMY_SPRITE_SRC = `${(import.meta as any).env.BASE_URL || '/'}sprites/go-home-dash-enemies.png`;
+const GO_HOME_DASH_PROJECTILE_SPRITE_SRC = `${(import.meta as any).env.BASE_URL || '/'}sprites/go-home-dash-projectiles.png`;
+
+type ObstacleType =
+    | 'BACKPACK' | 'VAULTING' | 'CHALKBOARD' | 'BIRD' | 'IRON_BARRIER' | 'HOLE'
+    | 'STEPS' | 'HIGH_STEPS' | 'MOUNTAIN_STEPS' | 'JUMPING_SLIME' | 'DRONE' | 'TEACHER_RUNNER'
+    | 'HALL_MONITOR' | 'CURRICULUM_BOOK' | 'LAB_BOTTLE' | 'BASKETBALL_TURRET' | 'CLOCK_GHOST' | 'SHOE_ROLLER';
+
+type ProjectileSpriteKey = 'PLAYER_PENCIL' | 'CHALK' | 'LASER' | 'BOOK' | 'BASKETBALL' | 'ALARM' | 'ERASER' | 'CHEMICAL' | 'WHISTLE';
+
+interface SpriteCell {
+    col: number;
+    row: number;
+    cell: number;
+}
+
+const ENEMY_SPRITE_CELLS: Partial<Record<ObstacleType, SpriteCell>> = {
+    BACKPACK: { col: 0, row: 0, cell: 64 },
+    VAULTING: { col: 1, row: 0, cell: 64 },
+    CHALKBOARD: { col: 2, row: 0, cell: 64 },
+    BIRD: { col: 3, row: 0, cell: 64 },
+    IRON_BARRIER: { col: 0, row: 1, cell: 64 },
+    JUMPING_SLIME: { col: 1, row: 1, cell: 64 },
+    DRONE: { col: 2, row: 1, cell: 64 },
+    TEACHER_RUNNER: { col: 3, row: 1, cell: 64 },
+    HALL_MONITOR: { col: 0, row: 2, cell: 64 },
+    CURRICULUM_BOOK: { col: 1, row: 2, cell: 64 },
+    LAB_BOTTLE: { col: 2, row: 2, cell: 64 },
+    BASKETBALL_TURRET: { col: 3, row: 2, cell: 64 },
+    CLOCK_GHOST: { col: 0, row: 3, cell: 64 },
+    SHOE_ROLLER: { col: 1, row: 3, cell: 64 },
+};
+
+const PROJECTILE_SPRITE_CELLS: Record<ProjectileSpriteKey, SpriteCell> = {
+    PLAYER_PENCIL: { col: 0, row: 0, cell: 32 },
+    CHALK: { col: 1, row: 0, cell: 32 },
+    LASER: { col: 2, row: 0, cell: 32 },
+    BOOK: { col: 3, row: 0, cell: 32 },
+    BASKETBALL: { col: 4, row: 0, cell: 32 },
+    ALARM: { col: 0, row: 1, cell: 32 },
+    ERASER: { col: 1, row: 1, cell: 32 },
+    CHEMICAL: { col: 2, row: 1, cell: 32 },
+    WHISTLE: { col: 3, row: 1, cell: 32 },
+};
 
 interface Obstacle {
     id: string;
@@ -43,7 +87,7 @@ interface Obstacle {
     vy: number; // 垂直速度（ジャンプ用）
     width: number;
     height: number;
-    type: 'BACKPACK' | 'VAULTING' | 'CHALKBOARD' | 'BIRD' | 'IRON_BARRIER' | 'HOLE' | 'STEPS' | 'HIGH_STEPS' | 'MOUNTAIN_STEPS' | 'JUMPING_SLIME' | 'DRONE' | 'TEACHER_RUNNER';
+    type: ObstacleType;
     speedMult: number;
     isHard?: boolean;
     shootCooldown?: number;
@@ -59,6 +103,9 @@ interface Projectile {
     isLarge?: boolean;
     isPierce?: boolean;
     isEnemy?: boolean; // 敵の弾かどうか
+    spriteKey?: ProjectileSpriteKey;
+    gravity?: number;
+    radius?: number;
 }
 
 interface Particle {
@@ -84,11 +131,37 @@ interface DashCardEffect {
 
 type DashGameState = 'START' | 'PLAYING' | 'CHALLENGE' | 'LEVEL_UP' | 'GAME_OVER';
 
+const drawSpriteCell = (
+    ctx: CanvasRenderingContext2D,
+    image: HTMLImageElement | null,
+    cell: SpriteCell | undefined,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    flipX = false
+) => {
+    if (!image || !cell || !image.complete || image.naturalWidth <= 0) return false;
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    if (flipX) {
+        ctx.translate(x + width / 2, y + height / 2);
+        ctx.scale(-1, 1);
+        ctx.drawImage(image, cell.col * cell.cell, cell.row * cell.cell, cell.cell, cell.cell, -width / 2, -height / 2, width, height);
+    } else {
+        ctx.drawImage(image, cell.col * cell.cell, cell.row * cell.cell, cell.cell, cell.cell, x, y, width, height);
+    }
+    ctx.restore();
+    return true;
+};
+
 const GoHomeDash: React.FC<{ onBack: () => void; problemMode?: GameMode; problemModePool?: string[] }> = ({ onBack, problemMode = GameMode.MIXED, problemModePool }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const playerSpriteRef = useRef<HTMLImageElement | null>(null);
     const playerJumpSpriteRef = useRef<HTMLImageElement | null>(null);
+    const enemySpriteSheetRef = useRef<HTMLImageElement | null>(null);
+    const projectileSpriteSheetRef = useRef<HTMLImageElement | null>(null);
     const [gameState, setGameState] = useState<DashGameState>('START');
     const gameStateRef = useRef<DashGameState>('START');
     
@@ -125,6 +198,32 @@ const GoHomeDash: React.FC<{ onBack: () => void; problemMode?: GameMode; problem
         return () => {
             image.onload = null;
             image.onerror = null;
+        };
+    }, []);
+
+    useEffect(() => {
+        const enemyImage = new Image();
+        const projectileImage = new Image();
+        enemyImage.onload = () => {
+            enemySpriteSheetRef.current = enemyImage;
+        };
+        enemyImage.onerror = () => {
+            enemySpriteSheetRef.current = null;
+        };
+        projectileImage.onload = () => {
+            projectileSpriteSheetRef.current = projectileImage;
+        };
+        projectileImage.onerror = () => {
+            projectileSpriteSheetRef.current = null;
+        };
+        enemyImage.src = GO_HOME_DASH_ENEMY_SPRITE_SRC;
+        projectileImage.src = GO_HOME_DASH_PROJECTILE_SPRITE_SRC;
+
+        return () => {
+            enemyImage.onload = null;
+            enemyImage.onerror = null;
+            projectileImage.onload = null;
+            projectileImage.onerror = null;
         };
     }, []);
 
@@ -343,7 +442,17 @@ const GoHomeDash: React.FC<{ onBack: () => void; problemMode?: GameMode; problem
         };
     }, []);
 
-    const isDestroyable = (type: string) => !['HOLE', 'STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS', 'IRON_BARRIER', 'VAULTING', 'CHALKBOARD'].includes(type);
+    const isDestroyable = (type: string) => !['HOLE', 'STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS', 'IRON_BARRIER', 'VAULTING', 'CHALKBOARD', 'CURRICULUM_BOOK', 'BASKETBALL_TURRET'].includes(type);
+
+    const getObstaclePool = (): ObstacleType[] => {
+        const level = levelRef.current;
+        const pool: ObstacleType[] = ['BACKPACK', 'VAULTING', 'CHALKBOARD', 'BIRD', 'IRON_BARRIER', 'HOLE', 'STEPS', 'JUMPING_SLIME'];
+        if (level >= 2) pool.push('DRONE', 'SHOE_ROLLER');
+        if (level >= 3) pool.push('TEACHER_RUNNER', 'HALL_MONITOR', 'HIGH_STEPS');
+        if (level >= 4) pool.push('LAB_BOTTLE', 'CURRICULUM_BOOK');
+        if (level >= 5) pool.push('BASKETBALL_TURRET', 'CLOCK_GHOST', 'MOUNTAIN_STEPS');
+        return pool;
+    };
 
     const updateLogic = () => {
         if (gameStateRef.current !== 'PLAYING') return;
@@ -474,7 +583,9 @@ const GoHomeDash: React.FC<{ onBack: () => void; problemMode?: GameMode; problem
                             id: Math.random().toString(), x: p.x + 20, y: p.y - 25 - (i * 12), 
                             vx: (currentSpeed + 12) * Math.cos(angle), 
                             vy: (currentSpeed + 12) * Math.sin(angle),
-                            isHoming: p.homingShot, isLarge: p.largeShot, isPierce: p.pierceShot
+                            isHoming: p.homingShot, isLarge: p.largeShot, isPierce: p.pierceShot,
+                            spriteKey: 'PLAYER_PENCIL',
+                            radius: p.largeShot ? 12 : 7
                         });
                     }
                 }
@@ -501,12 +612,13 @@ const GoHomeDash: React.FC<{ onBack: () => void; problemMode?: GameMode; problem
         const enemyProjs = enemyProjectilesRef.current;
         for (let i = enemyProjs.length - 1; i >= 0; i--) {
             const ep = enemyProjs[i];
+            ep.vy += ep.gravity || 0;
             ep.x += ep.vx; ep.y += ep.vy;
             
             // プレイヤーとの当たり判定
             const dx = ep.x - p.x;
             const dy = ep.y - (p.y - 20);
-            if (Math.sqrt(dx*dx + dy*dy) < 25 && p.invulFrame <= 0) {
+            if (Math.sqrt(dx*dx + dy*dy) < 18 + (ep.radius || 7) && p.invulFrame <= 0) {
                 handlePlayerDamage(false);
                 enemyProjs.splice(i, 1);
                 continue;
@@ -528,13 +640,13 @@ const GoHomeDash: React.FC<{ onBack: () => void; problemMode?: GameMode; problem
         const dynamicGap = Math.max(160, MIN_OBSTACLE_GAP - (levelRef.current * 20));
 
         if ((!lastObs || (spawnX - lastObs.x) > dynamicGap) && Math.random() < spawnProb && obstacles.length < 8) {
-            const types: Obstacle['type'][] = ['BACKPACK', 'VAULTING', 'CHALKBOARD', 'BIRD', 'IRON_BARRIER', 'HOLE', 'STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS', 'JUMPING_SLIME', 'DRONE', 'TEACHER_RUNNER'];
+            const types = getObstaclePool();
             let type = types[Math.floor(Math.random() * types.length)];
-            if (lastObs?.type === 'HOLE' && type === 'HOLE') type = 'BACKPACK';
+            if (lastObs?.type === 'HOLE' && ['HOLE', 'STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS'].includes(type)) type = 'BACKPACK';
             
-            const isAir = type === 'BIRD' || type === 'DRONE'; 
+            const isAir = type === 'BIRD' || type === 'DRONE' || type === 'CLOCK_GHOST'; 
             const isHard = !isDestroyable(type);
-            const speedMult = type === 'TEACHER_RUNNER' ? 1.8 : (isAir ? 1.3 : 1.0);
+            const speedMult = type === 'TEACHER_RUNNER' ? 1.8 : type === 'HALL_MONITOR' ? 1.65 : type === 'SHOE_ROLLER' ? 1.9 : (isAir ? 1.25 : 1.0);
             
             let width = 40;
             let height = 40;
@@ -542,18 +654,21 @@ const GoHomeDash: React.FC<{ onBack: () => void; problemMode?: GameMode; problem
             else if (type === 'HIGH_STEPS') { width = 320; height = 110; }
             else if (type === 'MOUNTAIN_STEPS') { width = 480; height = 160; }
             else if (type === 'HOLE') { width = 70; }
+            else if (type === 'BASKETBALL_TURRET' || type === 'CURRICULUM_BOOK') { width = 52; height = 52; }
+            else if (type === 'CLOCK_GHOST') { width = 48; height = 48; }
+            else if (type === 'SHOE_ROLLER') { width = 46; height = 34; }
 
             obstaclesRef.current.push({ 
                 id: Math.random().toString(), 
                 x: spawnX, 
-                y: isAir ? GROUND_Y - 100 - Math.random() * 60 : (type === 'HOLE' ? GROUND_Y : GROUND_Y - 20), 
+                y: isAir ? GROUND_Y - 110 - Math.random() * 70 : (type === 'HOLE' ? GROUND_Y : GROUND_Y - height / 2), 
                 vy: 0,
                 width, 
                 height, 
                 type, 
                 speedMult, 
                 isHard,
-                shootCooldown: type === 'DRONE' ? 100 : 0
+                shootCooldown: ['DRONE', 'TEACHER_RUNNER', 'LAB_BOTTLE', 'BASKETBALL_TURRET', 'CLOCK_GHOST', 'HALL_MONITOR'].includes(type) ? 80 + Math.random() * 70 : 0
             });
         }
 
@@ -576,18 +691,38 @@ const GoHomeDash: React.FC<{ onBack: () => void; problemMode?: GameMode; problem
             }
 
             // 特殊挙動: 射撃
-            if (obs.type === 'DRONE') {
+            if (['DRONE', 'TEACHER_RUNNER', 'LAB_BOTTLE', 'BASKETBALL_TURRET', 'CLOCK_GHOST', 'HALL_MONITOR'].includes(obs.type)) {
                 obs.shootCooldown = (obs.shootCooldown || 0) - 1;
                 if (obs.shootCooldown <= 0) {
-                    enemyProjectilesRef.current.push({
+                    const dx = p.x - obs.x;
+                    const dy = (p.y - 24) - obs.y;
+                    const dist = Math.hypot(dx, dy) || 1;
+                    let projectile: Projectile = {
                         id: Math.random().toString(),
-                        x: obs.x - 20,
+                        x: obs.x - obs.width / 2,
                         y: obs.y,
                         vx: -8,
                         vy: 0,
-                        isEnemy: true
+                        isEnemy: true,
+                        spriteKey: 'CHALK',
+                        radius: 7
+                    };
+                    if (obs.type === 'TEACHER_RUNNER') {
+                        projectile = { ...projectile, vx: -6.2, vy: -1.2, spriteKey: Math.random() < 0.5 ? 'BOOK' : 'ERASER', radius: 9 };
+                    } else if (obs.type === 'LAB_BOTTLE') {
+                        projectile = { ...projectile, vx: -4.8, vy: -4.2, gravity: 0.16, spriteKey: 'CHEMICAL', radius: 10 };
+                    } else if (obs.type === 'BASKETBALL_TURRET') {
+                        projectile = { ...projectile, vx: -5.5, vy: -6.4, gravity: 0.22, spriteKey: 'BASKETBALL', radius: 12, isLarge: true };
+                    } else if (obs.type === 'CLOCK_GHOST') {
+                        projectile = { ...projectile, vx: (dx / dist) * 3.4, vy: (dy / dist) * 3.4, spriteKey: 'ALARM', radius: 11, isLarge: true };
+                    } else if (obs.type === 'HALL_MONITOR') {
+                        projectile = { ...projectile, vx: -7.3, vy: Math.sin(frameCount.current * 0.15) * 1.6, spriteKey: 'WHISTLE', radius: 8 };
+                    }
+                    enemyProjectilesRef.current.push({
+                        ...projectile
                     });
-                    obs.shootCooldown = 150 - Math.min(100, levelRef.current * 5);
+                    const baseCooldown = obs.type === 'BASKETBALL_TURRET' ? 150 : obs.type === 'CLOCK_GHOST' ? 135 : obs.type === 'LAB_BOTTLE' ? 125 : obs.type === 'HALL_MONITOR' ? 95 : 110;
+                    obs.shootCooldown = baseCooldown - Math.min(70, levelRef.current * 5);
                     audioService.playSound('attack');
                 }
             }
@@ -781,18 +916,30 @@ const GoHomeDash: React.FC<{ onBack: () => void; problemMode?: GameMode; problem
         for (const p of parts) { ctx.fillStyle = p.color; ctx.globalAlpha = p.life / 30; ctx.fillRect(p.x, p.y, p.size, p.size); }
         ctx.globalAlpha = 1.0;
 
+        const projectileSheet = projectileSpriteSheetRef.current;
         const projs = projectilesRef.current;
-        for (const proj of projs) { ctx.fillStyle = '#fbbf24'; const sz = proj.isLarge ? 20 : 10; ctx.fillRect(proj.x, proj.y, sz * 1.4, sz * 0.5); }
+        for (const proj of projs) {
+            const sz = proj.isLarge ? 24 : 14;
+            const drew = drawSpriteCell(ctx, projectileSheet, PROJECTILE_SPRITE_CELLS[proj.spriteKey || 'PLAYER_PENCIL'], proj.x - sz / 2, proj.y - sz / 2, sz, sz);
+            if (!drew) {
+                ctx.fillStyle = '#fbbf24';
+                ctx.fillRect(proj.x, proj.y, sz * 1.4, sz * 0.5);
+            }
+        }
         
         // 敵の弾の描画
         const enemyProjs = enemyProjectilesRef.current;
         for (const ep of enemyProjs) {
-            ctx.fillStyle = '#ef4444';
-            ctx.beginPath();
-            ctx.arc(ep.x, ep.y, 6, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = 'white';
-            ctx.stroke();
+            const sz = ep.isLarge ? 28 : 20;
+            const drew = drawSpriteCell(ctx, projectileSheet, PROJECTILE_SPRITE_CELLS[ep.spriteKey || 'CHALK'], ep.x - sz / 2, ep.y - sz / 2, sz, sz);
+            if (!drew) {
+                ctx.fillStyle = '#ef4444';
+                ctx.beginPath();
+                ctx.arc(ep.x, ep.y, ep.radius || 6, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = 'white';
+                ctx.stroke();
+            }
         }
 
         for (const obs of obstacles) {
@@ -809,10 +956,25 @@ const GoHomeDash: React.FC<{ onBack: () => void; problemMode?: GameMode; problem
                     ctx.strokeRect(obs.x - currentW/2, GROUND_Y - currentH, currentW, currentH);
                 }
             } else if (obs.type === 'IRON_BARRIER') {
-                ctx.shadowBlur = 10; ctx.shadowColor = "#00ffff"; ctx.fillStyle = '#e2e8f0'; 
-                ctx.fillRect(obs.x - obs.width/2, GROUND_Y - obs.height, obs.width, obs.height); 
+                ctx.shadowBlur = 10; ctx.shadowColor = "#00ffff";
+                const drew = drawSpriteCell(ctx, enemySpriteSheetRef.current, ENEMY_SPRITE_CELLS[obs.type], obs.x - obs.width / 2, GROUND_Y - obs.height, obs.width, obs.height);
+                if (!drew) {
+                    ctx.fillStyle = '#e2e8f0';
+                    ctx.fillRect(obs.x - obs.width/2, GROUND_Y - obs.height, obs.width, obs.height);
+                }
                 ctx.shadowBlur = 0;
             } else {
+                const drew = drawSpriteCell(
+                    ctx,
+                    enemySpriteSheetRef.current,
+                    ENEMY_SPRITE_CELLS[obs.type],
+                    obs.x - obs.width / 2,
+                    obs.y - obs.height / 2,
+                    obs.width,
+                    obs.height,
+                    obs.type === 'TEACHER_RUNNER' || obs.type === 'HALL_MONITOR'
+                );
+                if (drew) continue;
                 const spriteMap: any = { 
                     BACKPACK: 'BACKPACK', 
                     VAULTING: 'VAULTING', 
@@ -820,7 +982,13 @@ const GoHomeDash: React.FC<{ onBack: () => void; problemMode?: GameMode; problem
                     BIRD: 'BAT',
                     JUMPING_SLIME: 'SLIME',
                     DRONE: 'ROBOT',
-                    TEACHER_RUNNER: 'TEACHER'
+                    TEACHER_RUNNER: 'TEACHER',
+                    HALL_MONITOR: 'TEACHER',
+                    CURRICULUM_BOOK: 'NOTEBOOK',
+                    LAB_BOTTLE: 'POTION',
+                    BASKETBALL_TURRET: 'ROBOT',
+                    CLOCK_GHOST: 'GHOST',
+                    SHOE_ROLLER: 'SLIME'
                 };
                 const size = 40; const pixelSize = size / 16;
                 const template = SPRITE_TEMPLATES[spriteMap[obs.type] || 'SLIME'] || SPRITE_TEMPLATES.SLIME;
