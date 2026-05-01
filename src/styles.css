@@ -277,7 +277,7 @@ textarea {
   }
 }
 
-@media (orientation: landscape) and (max-height: 720px) {
+@media (orientation: landscape) and (max-height: 800px) {
   .battle-scene-root .battle-view {
     gap: 0.5rem;
     padding: 0.375rem 0.5rem;
@@ -438,7 +438,7 @@ textarea {
   }
 }
 
-@media (orientation: landscape) and (max-height: 720px) and (max-width: 760px) {
+@media (orientation: landscape) and (max-height: 800px) and (max-width: 760px) {
   .battle-scene-root .battle-hand-scroll {
     justify-content: flex-start !important;
     padding-bottom: 0.375rem !important;

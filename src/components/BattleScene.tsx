@@ -422,6 +422,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const [finisherBurst, setFinisherBurst] = useState(false);
     const [drawEntryAnimations, setDrawEntryAnimations] = useState<DrawEntryAnimation[]>([]);
     const battleViewRef = useRef<HTMLDivElement>(null);
+    const playerAreaRef = useRef<HTMLDivElement>(null);
+    const playerGroupRef = useRef<HTMLDivElement>(null);
     const playerSpriteRef = useRef<HTMLDivElement>(null);
     const logContainerRef = useRef<HTMLDivElement>(null);
     const prevHandIdsRef = useRef<string[]>([]);
@@ -504,14 +506,16 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 const battleView = battleViewRef.current;
                 if (!battleView) return false;
                 const hasBattleOverflow = battleView.scrollHeight > battleView.clientHeight + 8;
-                const playerSprite = playerSpriteRef.current;
+                const isManuallyScrolledForBattle = battleView.scrollTop > 4;
+                const playerTargets = [playerAreaRef.current, playerGroupRef.current, playerSpriteRef.current].filter(Boolean) as HTMLDivElement[];
                 const isPlayerClipped = (() => {
-                    if (!playerSprite) return false;
                     const viewRect = battleView.getBoundingClientRect();
-                    const spriteRect = playerSprite.getBoundingClientRect();
-                    return spriteRect.top < viewRect.top - 2 || spriteRect.bottom > viewRect.bottom + 2;
+                    return playerTargets.some((target) => {
+                        const targetRect = target.getBoundingClientRect();
+                        return targetRect.top < viewRect.top - 2 || targetRect.bottom > viewRect.bottom + 2;
+                    });
                 })();
-                return hasBattleOverflow || isPlayerClipped;
+                return hasBattleOverflow || isManuallyScrolledForBattle || isPlayerClipped;
             });
         };
 
@@ -519,13 +523,19 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         const rafId = window.requestAnimationFrame(syncLandscapeSplit);
         const settleTimer = window.setTimeout(syncLandscapeSplit, 120);
         window.addEventListener('resize', syncLandscapeSplit);
+        battleViewRef.current?.addEventListener('scroll', syncLandscapeSplit, { passive: true });
+        window.visualViewport?.addEventListener('resize', syncLandscapeSplit);
         const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(syncLandscapeSplit) : null;
         if (observer && battleViewRef.current) observer.observe(battleViewRef.current);
+        if (observer && playerAreaRef.current) observer.observe(playerAreaRef.current);
+        if (observer && playerGroupRef.current) observer.observe(playerGroupRef.current);
         if (observer && playerSpriteRef.current) observer.observe(playerSpriteRef.current);
         return () => {
             window.cancelAnimationFrame(rafId);
             window.clearTimeout(settleTimer);
             window.removeEventListener('resize', syncLandscapeSplit);
+            battleViewRef.current?.removeEventListener('scroll', syncLandscapeSplit);
+            window.visualViewport?.removeEventListener('resize', syncLandscapeSplit);
             observer?.disconnect();
         };
     }, [combatLog.length, enemies.length, player.currentHp, player.block, player.currentEnergy, player.hand.length, selectionState.active]);
@@ -1418,8 +1428,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 </div>
 
                 {/* Player Area */}
-                <div className={isTrueBossPhase2Active ? "battle-player-area relative z-20 flex items-end pl-2 pb-2 shrink-0" : "battle-player-area flex items-end pl-2 pb-2 shrink-0 mt-auto"}>
-                    <div className={isTrueBossPhase2Active ? "flex flex-col items-start md:flex-row md:items-end relative max-w-[48vw] md:max-w-none" : "flex items-end relative"}>
+                <div ref={playerAreaRef} className={isTrueBossPhase2Active ? "battle-player-area relative z-20 flex items-end pl-2 pb-2 shrink-0" : "battle-player-area flex items-end pl-2 pb-2 shrink-0 mt-auto"}>
+                    <div ref={playerGroupRef} className={isTrueBossPhase2Active ? "flex flex-col items-start md:flex-row md:items-end relative max-w-[48vw] md:max-w-none" : "flex items-end relative"}>
 
                         <div ref={playerSpriteRef} className={`battle-player-sprite order-1 w-20 h-20 md:w-24 md:h-24 relative transition-all duration-150 ease-out ${isTrueBossPhase2Active ? 'mr-0 md:mr-2 mb-1 md:mb-0' : 'mr-2'} ${getActionClass()} ${selectedSupportCard ? 'ring-2 ring-emerald-300 rounded-lg cursor-pointer' : ''}`} onClick={() => {
                             if (selectedSupportCard && onUseCoopSupport) {
