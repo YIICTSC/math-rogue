@@ -312,6 +312,90 @@ const PASSIVES: Record<PassiveType, PassiveDef> = {
     ORIGAMI: { id: 'ORIGAMI', name: '金ピカ折り紙', desc: '獲得ゴールド+20%', sprite: { template: 'FLIER', color: '#eab308', highlight: '#fef08a' } },
 };
 
+const SPRITE_ASSET_BASE = `${import.meta.env.BASE_URL}sprites/`;
+const SPRITE_ASSET_VERSION = 'schoolyard-survivor-v3';
+const SPRITE_SHEET_CELL_SIZE = 32;
+const SPRITE_SHEET_COLUMNS = 8;
+
+const SCHOOLYARD_ENEMY_ASSET_KEYS = [
+    'ENEMY_1', 'ENEMY_2', 'ENEMY_3', 'ENEMY_4', 'ENEMY_5', 'ENEMY_6', 'ENEMY_7', 'ENEMY_8',
+    'ENEMY_9', 'ENEMY_10', 'ENEMY_11', 'ENEMY_12', 'ENEMY_13', 'ENEMY_14', 'ENEMY_15', 'ENEMY_16'
+] as const;
+
+const SCHOOLYARD_WEAPON_ASSET_KEYS = [
+    'PENCIL', 'ERASER', 'RULER', 'HIGHLIGHTER', 'FLASK', 'RECORDER', 'SOCCER', 'UWABAKI',
+    'CURRY', 'COMPASS', 'MOP', 'MAGNIFIER', 'STAPLER', 'CUTTER', 'ART_BRUSH', 'GLOBE',
+    'PROTRACTOR_SWING', 'CHALK_SMOKE', 'SCISSORS', 'TAPE', 'DICTIONARY', 'PAPER_PLANE_S', 'GLUE_STICK', 'HAND_BELL',
+    'COMPASS_SPIKE', 'WHISTLE_S', 'MAGNET_U', 'TRIANGLE_RULER_S', 'STAPLE_REMOVER', 'JUMP_ROPE', 'PRISM', 'TROWEL',
+    'LUNCH_TRAY', 'BASKETBALL', 'DUSTER', 'FOUNTAIN_PEN', 'SCHOOL_CHIME', 'TRUMPET', 'CLAY', 'BROADCAST_MIC'
+] as const;
+
+const SCHOOLYARD_EFFECT_ASSET_KEYS = [
+    'CHALK_BULLET', 'BALL_BULLET', 'WHISTLE_WAVE', 'DUST_MINE', 'FIRE_POP', 'ICE_POP',
+    'HIT_SPARK', 'XP_GEM', 'SHOCK_RING', 'POISON_SPLASH', 'DASH_AFTERIMAGE', 'WARNING_MARK'
+] as const;
+
+const getSpriteSheetIconStyle = (fileName: string, keys: readonly string[], key: string): React.CSSProperties | undefined => {
+    const index = keys.indexOf(key);
+    if (index < 0) return undefined;
+    const col = index % SPRITE_SHEET_COLUMNS;
+    const row = Math.floor(index / SPRITE_SHEET_COLUMNS);
+    const rows = Math.ceil(keys.length / SPRITE_SHEET_COLUMNS);
+    return {
+        width: '100%',
+        height: '100%',
+        backgroundImage: `url("${SPRITE_ASSET_BASE}${fileName}?v=${SPRITE_ASSET_VERSION}")`,
+        backgroundPosition: `${SPRITE_SHEET_COLUMNS === 1 ? 0 : (col / (SPRITE_SHEET_COLUMNS - 1)) * 100}% ${rows === 1 ? 0 : (row / (rows - 1)) * 100}%`,
+        backgroundSize: `${SPRITE_SHEET_COLUMNS * 100}% ${rows * 100}%`,
+        backgroundRepeat: 'no-repeat',
+        imageRendering: 'pixelated',
+    };
+};
+
+type EnemyAttackKind = 'CONTACT' | 'RANGED' | 'BURST' | 'DASH' | 'MINE' | 'ZIGZAG';
+
+interface EnemyDef {
+    type: string;
+    hp: number;
+    speed: number;
+    width: number;
+    height: number;
+    damage: number;
+    defense?: number;
+    knockbackImmune?: boolean;
+    attackKind?: EnemyAttackKind;
+    xpValue?: number;
+}
+
+const SCHOOLYARD_ENEMY_DEFS: Record<string, EnemyDef> = {
+    ENEMY_1: { type: 'ENEMY_1', hp: 10, speed: 1.2, width: 24, height: 24, damage: 5, attackKind: 'CONTACT' },
+    ENEMY_2: { type: 'ENEMY_2', hp: 16, speed: 2.6, width: 24, height: 24, damage: 5, attackKind: 'ZIGZAG' },
+    ENEMY_3: { type: 'ENEMY_3', hp: 35, speed: 1.45, width: 26, height: 26, damage: 6, defense: 1 },
+    ENEMY_4: { type: 'ENEMY_4', hp: 70, speed: 2.45, width: 26, height: 26, damage: 7, attackKind: 'DASH' },
+    ENEMY_5: { type: 'ENEMY_5', hp: 85, speed: 3.2, width: 28, height: 28, damage: 8, attackKind: 'RANGED', defense: 1 },
+    ENEMY_6: { type: 'ENEMY_6', hp: 420, speed: 0.8, width: 48, height: 48, damage: 10, attackKind: 'BURST', knockbackImmune: true, xpValue: 10 },
+    ENEMY_7: { type: 'ENEMY_7', hp: 160, speed: 0.55, width: 50, height: 50, damage: 9, defense: 4, knockbackImmune: true, xpValue: 10 },
+    ENEMY_8: { type: 'ENEMY_8', hp: 24, speed: 1.8, width: 26, height: 26, damage: 6, attackKind: 'RANGED' },
+    ENEMY_9: { type: 'ENEMY_9', hp: 42, speed: 1.1, width: 30, height: 30, damage: 7, attackKind: 'MINE', defense: 1 },
+    ENEMY_10: { type: 'ENEMY_10', hp: 55, speed: 2.0, width: 30, height: 30, damage: 8, attackKind: 'DASH' },
+    ENEMY_11: { type: 'ENEMY_11', hp: 75, speed: 1.3, width: 32, height: 32, damage: 8, attackKind: 'BURST' },
+    ENEMY_12: { type: 'ENEMY_12', hp: 115, speed: 1.0, width: 36, height: 36, damage: 10, attackKind: 'RANGED', defense: 2 },
+    ENEMY_13: { type: 'ENEMY_13', hp: 90, speed: 2.2, width: 34, height: 34, damage: 9, attackKind: 'DASH' },
+    ENEMY_14: { type: 'ENEMY_14', hp: 180, speed: 1.1, width: 42, height: 42, damage: 11, attackKind: 'BURST', knockbackImmune: true, xpValue: 10 },
+    ENEMY_15: { type: 'ENEMY_15', hp: 130, speed: 0.9, width: 38, height: 38, damage: 10, attackKind: 'MINE', defense: 3 },
+    ENEMY_16: { type: 'ENEMY_16', hp: 260, speed: 0.75, width: 46, height: 46, damage: 12, attackKind: 'BURST', knockbackImmune: true, xpValue: 12 },
+};
+
+const pickEnemyType = (timeSec: number): string => {
+    const r = Math.random();
+    if (timeSec < 30) return r < 0.82 ? 'ENEMY_1' : 'ENEMY_8';
+    if (timeSec < 60) return r < 0.4 ? 'ENEMY_1' : (r < 0.75 ? 'ENEMY_2' : 'ENEMY_8');
+    if (timeSec < 120) return r < 0.3 ? 'ENEMY_2' : (r < 0.58 ? 'ENEMY_3' : (r < 0.8 ? 'ENEMY_9' : 'ENEMY_5'));
+    if (timeSec < 180) return r < 0.18 ? 'ENEMY_7' : (r < 0.36 ? 'ENEMY_10' : (r < 0.58 ? 'ENEMY_4' : (r < 0.78 ? 'ENEMY_5' : 'ENEMY_11')));
+    if (timeSec < 260) return r < 0.07 ? 'ENEMY_6' : (r < 0.18 ? 'ENEMY_12' : (r < 0.33 ? 'ENEMY_13' : (r < 0.5 ? 'ENEMY_7' : (r < 0.72 ? 'ENEMY_11' : 'ENEMY_10'))));
+    return r < 0.06 ? 'ENEMY_16' : (r < 0.18 ? 'ENEMY_14' : (r < 0.32 ? 'ENEMY_15' : (r < 0.5 ? 'ENEMY_12' : (r < 0.72 ? 'ENEMY_13' : 'ENEMY_5'))));
+};
+
 interface Entity {
     id: number;
     x: number;
@@ -331,6 +415,10 @@ interface Entity {
     knockback?: { x: number, y: number, time: number };
     knockbackImmune?: boolean; 
     defense?: number; 
+    attackKind?: EnemyAttackKind;
+    attackCooldown?: number;
+    movementPhase?: number;
+    xpValue?: number;
 }
 
 interface Projectile {
@@ -351,6 +439,20 @@ interface Projectile {
     hitIds: number[]; 
     speed?: number;
     swingAngle?: number;
+}
+
+interface EnemyBullet {
+    id: number;
+    x: number;
+    y: number;
+    dx: number;
+    dy: number;
+    damage: number;
+    radius: number;
+    duration: number;
+    spriteKey: typeof SCHOOLYARD_EFFECT_ASSET_KEYS[number];
+    color: string;
+    persistent?: boolean;
 }
 
 interface Gem {
@@ -439,6 +541,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     const player = useRef<Entity>({ id: 0, x: WORLD_WIDTH/2, y: WORLD_HEIGHT/2, type: 'WARRIOR', width: 24, height: 24, hp: 100, maxHp: 100, speed: PLAYER_SPEED, damage: 0, vx: 0, vy: 0, dead: false, flashTime: 0 });
     const enemies = useRef<Entity[]>([]);
     const projectiles = useRef<Projectile[]>([]);
+    const enemyBullets = useRef<EnemyBullet[]>([]);
     const gems = useRef<Gem[]>([]);
     const damageTexts = useRef<DamageText[]>([]);
     const particles = useRef<Particle[]>([]);
@@ -510,6 +613,30 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         return c;
     };
 
+    const loadSpriteSheetIntoCache = (
+        fileName: string,
+        keys: readonly string[],
+        options: { makeFlash?: boolean } = {}
+    ) => {
+        const img = new Image();
+        img.src = `${SPRITE_ASSET_BASE}${fileName}?v=${SPRITE_ASSET_VERSION}`;
+        img.onload = () => {
+            keys.forEach((key, index) => {
+                const c = document.createElement('canvas');
+                c.width = SPRITE_SHEET_CELL_SIZE;
+                c.height = SPRITE_SHEET_CELL_SIZE;
+                const ctx = c.getContext('2d');
+                if (!ctx) return;
+                ctx.imageSmoothingEnabled = false;
+                const sx = (index % SPRITE_SHEET_COLUMNS) * SPRITE_SHEET_CELL_SIZE;
+                const sy = Math.floor(index / SPRITE_SHEET_COLUMNS) * SPRITE_SHEET_CELL_SIZE;
+                ctx.drawImage(img, sx, sy, SPRITE_SHEET_CELL_SIZE, SPRITE_SHEET_CELL_SIZE, 0, 0, SPRITE_SHEET_CELL_SIZE, SPRITE_SHEET_CELL_SIZE);
+                spriteCache.current[key] = c;
+                if (options.makeFlash) spriteCache.current[`${key}_FLASH`] = createFlashSprite(c);
+            });
+        };
+    };
+
     const stopSurvivorAudio = () => {
         audioService.stopAllAudio();
     };
@@ -549,6 +676,9 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             spriteCache.current[w.id] = generateFromTemplate(w.sprite.template, w.sprite.color, w.sprite.highlight);
         });
         spriteCache.current['GEM'] = generateFromTemplate('EYE', '#eab308', '#fde047');
+        loadSpriteSheetIntoCache('schoolyard-survivor-enemies.png', SCHOOLYARD_ENEMY_ASSET_KEYS, { makeFlash: true });
+        loadSpriteSheetIntoCache('schoolyard-survivor-weapons.png', SCHOOLYARD_WEAPON_ASSET_KEYS);
+        loadSpriteSheetIntoCache('schoolyard-survivor-effects.png', SCHOOLYARD_EFFECT_ASSET_KEYS);
 
         isLoopActiveRef.current = true;
         const loop = (now: number) => {
@@ -655,6 +785,49 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         activeTimeouts.current = [];
     };
 
+    const damagePlayer = (rawDamage: number, defense: number, sourceX: number, sourceY: number, color = 'red') => {
+        if (player.current.flashTime > 0) return;
+        const finalDmg = Math.max(1, rawDamage - defense);
+        player.current.hp -= finalDmg;
+        player.current.flashTime = 30;
+        damageTexts.current.push({ id: Math.random(), x: player.current.x, y: player.current.y - 20, value: `-${Math.floor(finalDmg)}`, color, life: 60 });
+        const angle = Math.atan2(player.current.y - sourceY, player.current.x - sourceX);
+        addParticle(player.current.x + Math.cos(angle) * 10, player.current.y + Math.sin(angle) * 10, 'SPARK', color, { life: 20, size: 4 });
+        if (player.current.hp <= 0 && gameState.current === 'PLAYING') {
+            stopSurvivorAudio();
+            gameState.current = 'GAME_OVER';
+            saveRecord();
+            setUiState(prev => ({ ...prev, gameOver: true, hp: 0 }));
+            audioService.playSound('lose');
+            clearAllTimeouts();
+        }
+    };
+
+    const fireEnemyBullet = (
+        e: Entity,
+        spriteKey: EnemyBullet['spriteKey'],
+        speed: number,
+        damage: number,
+        radius: number,
+        color: string,
+        angleOffset = 0,
+        duration = 180
+    ) => {
+        const angle = Math.atan2(player.current.y - e.y, player.current.x - e.x) + angleOffset;
+        enemyBullets.current.push({
+            id: Math.random(),
+            x: e.x,
+            y: e.y,
+            dx: Math.cos(angle) * speed,
+            dy: Math.sin(angle) * speed,
+            damage,
+            radius,
+            duration,
+            spriteKey,
+            color
+        });
+    };
+
     const update = () => {
         if (gameState.current !== 'PLAYING') return;
 
@@ -728,27 +901,85 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             if (e.knockback && e.knockback.time > 0) {
                 e.x += e.knockback.x; e.y += e.knockback.y;
                 e.knockback.time--;
+            } else if (e.frozen && e.frozen > 0) {
+                e.frozen--;
             } else {
                 const angle = Math.atan2(player.current.y - e.y, player.current.x - e.x);
-                e.x += Math.cos(angle) * e.speed; e.y += Math.sin(angle) * e.speed;
+                const dist = Math.hypot(e.x - player.current.x, e.y - player.current.y);
+                const phase = e.movementPhase || 0;
+                const perp = Math.sin(frameCount.current * 0.06 + phase) * 0.8;
+                let moveX = Math.cos(angle);
+                let moveY = Math.sin(angle);
+                let moveSpeed = e.speed;
+                if (e.attackKind === 'RANGED' && dist < 190) {
+                    moveX *= -0.7;
+                    moveY *= -0.7;
+                } else if (e.attackKind === 'ZIGZAG') {
+                    moveX += Math.cos(angle + Math.PI / 2) * perp;
+                    moveY += Math.sin(angle + Math.PI / 2) * perp;
+                } else if (e.attackKind === 'DASH' && (e.attackCooldown || 0) < 18) {
+                    moveSpeed *= 3.1;
+                    if (frameCount.current % 3 === 0) addParticle(e.x, e.y, 'SMOKE', 'rgba(255,255,255,0.28)', { size: 6, life: 14 });
+                } else if (e.attackKind === 'MINE' && dist < 170) {
+                    moveSpeed *= 0.35;
+                }
+                const len = Math.hypot(moveX, moveY) || 1;
+                e.x += (moveX / len) * moveSpeed;
+                e.y += (moveY / len) * moveSpeed;
             }
             const dist = Math.hypot(e.x - player.current.x, e.y - player.current.y);
-            if (dist < 20 && player.current.flashTime <= 0) {
-                const finalDmg = Math.max(1, e.damage - defense);
-                player.current.hp -= finalDmg;
-                player.current.flashTime = 30;
-                damageTexts.current.push({ id: Math.random(), x: player.current.x, y: player.current.y - 20, value: `-${Math.floor(finalDmg)}`, color: 'red', life: 60 });
-                if (player.current.hp <= 0 && gameState.current === 'PLAYING') { 
-                    stopSurvivorAudio();
-                    gameState.current = 'GAME_OVER'; 
-                    saveRecord(); 
-                    setUiState(prev => ({ ...prev, gameOver: true, hp: 0 })); 
-                    audioService.playSound('lose');
-                    clearAllTimeouts(); 
+            e.attackCooldown = Math.max(0, (e.attackCooldown || 0) - 1);
+            if (e.attackCooldown <= 0 && dist < 520) {
+                if (e.attackKind === 'RANGED') {
+                    fireEnemyBullet(e, e.type === 'ENEMY_8' ? 'CHALK_BULLET' : 'BALL_BULLET', e.type === 'ENEMY_8' ? 3.4 : 2.7, e.damage, 10, e.type === 'ENEMY_8' ? '#f8fafc' : '#fb923c');
+                    e.attackCooldown = e.type === 'ENEMY_8' ? 95 : 120;
+                } else if (e.attackKind === 'BURST') {
+                    const shots = e.type === 'ENEMY_6' || e.type === 'ENEMY_16' ? 7 : 5;
+                    const spread = e.type === 'ENEMY_16' ? Math.PI * 2 : Math.PI * 0.9;
+                    for (let i = 0; i < shots; i++) {
+                        const offset = spread === Math.PI * 2 ? (Math.PI * 2 / shots) * i : (i - (shots - 1) / 2) * (spread / shots);
+                        fireEnemyBullet(e, 'WHISTLE_WAVE', 2.15, e.damage + 1, 12, '#93c5fd', offset, 210);
+                    }
+                    e.attackCooldown = e.type === 'ENEMY_16' ? 140 : 180;
+                    addParticle(e.x, e.y, 'RING', '#93c5fd', { scale: 1.3, life: 28 });
+                } else if (e.attackKind === 'MINE') {
+                    const angle = Math.atan2(player.current.y - e.y, player.current.x - e.x);
+                    enemyBullets.current.push({
+                        id: Math.random(),
+                        x: e.x + Math.cos(angle) * 70,
+                        y: e.y + Math.sin(angle) * 70,
+                        dx: 0,
+                        dy: 0,
+                        damage: e.damage + 2,
+                        radius: 24,
+                        duration: 240,
+                        spriteKey: 'DUST_MINE',
+                        color: '#a8a29e',
+                        persistent: true
+                    });
+                    e.attackCooldown = 210;
+                } else if (e.attackKind === 'DASH') {
+                    e.attackCooldown = 135;
                 }
             }
+            if (dist < Math.max(20, Math.max(e.width, e.height) * 0.45)) damagePlayer(e.damage, defense, e.x, e.y);
             if (e.flashTime > 0) e.flashTime--;
         });
+
+        for (let i = enemyBullets.current.length - 1; i >= 0; i--) {
+            const b = enemyBullets.current[i];
+            b.x += b.dx;
+            b.y += b.dy;
+            b.duration--;
+            if (frameCount.current % 6 === 0) addParticle(b.x, b.y, b.persistent ? 'SMOKE' : 'SPARK', b.color, { size: b.radius * 0.35, life: 12 });
+            const dist = Math.hypot(b.x - player.current.x, b.y - player.current.y);
+            if (dist < b.radius + 12) {
+                damagePlayer(b.damage, defense, b.x, b.y, b.color);
+                if (!b.persistent) enemyBullets.current.splice(i, 1);
+            } else if (b.duration <= 0 || b.x < -50 || b.x > WORLD_WIDTH + 50 || b.y < -50 || b.y > WORLD_HEIGHT + 50) {
+                enemyBullets.current.splice(i, 1);
+            }
+        }
 
         if (gameState.current !== 'PLAYING') return;
 
@@ -913,31 +1144,20 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             const clampX = Math.max(0, Math.min(WORLD_WIDTH, ex));
             const clampY = Math.max(0, Math.min(WORLD_HEIGHT, ey));
             const timeSec = time.current;
-            let enemyType = 'ENEMY_1'; let hp = 10; let speed = 1; let width = 24; let height = 24;
-            let knockbackImmune = false;
-            let defense = 0;
-
-            if (timeSec < 30) { hp = 10; speed = 1 + Math.random() * 0.5; }
-            else if (timeSec < 60) { enemyType = Math.random() < 0.5 ? 'ENEMY_1' : 'ENEMY_2'; hp = 15; speed = enemyType === 'ENEMY_2' ? 2.5 : 1.5; }
-            else if (timeSec < 120) { enemyType = Math.random() < 0.4 ? 'ENEMY_2' : 'ENEMY_3'; hp = enemyType === 'ENEMY_3' ? 35 : 20; speed = 1.5; }
-            else if (timeSec < 180) { 
-                const r = Math.random(); 
-                if (r < 0.2) { enemyType = 'ENEMY_7'; hp = 120; speed = 0.6; knockbackImmune = true; defense = 2; width = 48; height = 48; } 
-                else { enemyType = r < 0.5 ? 'ENEMY_3' : (r < 0.7 ? 'ENEMY_4' : 'ENEMY_5'); hp = 50; speed = enemyType === 'ENEMY_5' ? 3.5 : 1.5; }
-            }
-            else { 
-                const r = Math.random(); 
-                if (r < 0.05) { enemyType = 'ENEMY_6'; hp = 400 + (timeSec - 180) * 5; speed = 0.8; width = 48; height = 48; knockbackImmune = true; } 
-                else if (r < 0.2) { enemyType = 'ENEMY_7'; hp = 200; speed = 0.5; knockbackImmune = true; defense = 5; width = 52; height = 52; }
-                else if (r < 0.4) { enemyType = 'ENEMY_5'; hp = 80; speed = 3.5; knockbackImmune = Math.random() < 0.3; } 
-                else { enemyType = 'ENEMY_4'; hp = 70; speed = 2.5; } 
-            }
+            const enemyType = pickEnemyType(timeSec);
+            const def = SCHOOLYARD_ENEMY_DEFS[enemyType] || SCHOOLYARD_ENEMY_DEFS.ENEMY_1;
+            const hpScale = 1 + Math.max(0, timeSec - 60) * 0.012;
+            const hp = Math.floor(def.hp * hpScale + Math.floor(timeSec / 45) * 4);
             
             enemies.current.push({ 
                 id: Math.random(), x: clampX, y: clampY, type: enemyType, 
-                width: width, height: height, hp: hp, maxHp: hp, speed: speed, 
-                damage: 5 + Math.floor(timeSec/60), vx: 0, vy: 0, dead: false, 
-                flashTime: 0, knockbackImmune, defense
+                width: def.width, height: def.height, hp: hp, maxHp: hp, speed: def.speed + Math.random() * 0.15, 
+                damage: def.damage + Math.floor(timeSec/70), vx: 0, vy: 0, dead: false, 
+                flashTime: 0, knockbackImmune: def.knockbackImmune, defense: def.defense || 0,
+                attackKind: def.attackKind || 'CONTACT',
+                attackCooldown: 40 + Math.floor(Math.random() * 90),
+                movementPhase: Math.random() * Math.PI * 2,
+                xpValue: def.xpValue
             });
         }
 
@@ -995,7 +1215,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
         if (e.hp <= 0 && !e.dead) {
             e.dead = true; score.current += 15;
-            const gemVal = e.type === 'ENEMY_6' || e.type === 'ENEMY_7' ? 10 : 1;
+            const gemVal = e.xpValue || (e.type === 'ENEMY_6' || e.type === 'ENEMY_7' ? 10 : 1);
             if (Math.random() < 0.75) gems.current.push({ id: Math.random(), x: e.x, y: e.y, value: gemVal, collected: false });
             for(let i=0; i<15; i++) addParticle(e.x, e.y, 'SMOKE', 'rgba(120,120,120,0.6)', { size: (Math.random()*8+3) * p.scale, life: 50 });
             shakeAmount.current = 3;
@@ -1148,8 +1368,34 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
         gems.current.forEach(g => {
             if (Math.abs(g.x - camera.current.x) > (viewW/ZOOM_SCALE) || Math.abs(g.y - camera.current.y) > (viewH/ZOOM_SCALE)) return;
-            const sprite = spriteCache.current['GEM'];
+            const sprite = spriteCache.current['XP_GEM'] || spriteCache.current['GEM'];
             if(sprite) ctx.drawImage(sprite, g.x-8, g.y-8, 16, 16);
+        });
+
+        enemyBullets.current.forEach(b => {
+            if (Math.abs(b.x - camera.current.x) > (viewW/ZOOM_SCALE + 60) || Math.abs(b.y - camera.current.y) > (viewH/ZOOM_SCALE + 60)) return;
+            const sprite = spriteCache.current[b.spriteKey];
+            ctx.save();
+            ctx.translate(b.x, b.y);
+            if (!b.persistent) ctx.rotate(Math.atan2(b.dy, b.dx));
+            if (sprite) {
+                const size = Math.max(16, b.radius * 2);
+                ctx.drawImage(sprite, -size / 2, -size / 2, size, size);
+            } else {
+                ctx.fillStyle = b.color;
+                ctx.beginPath();
+                ctx.arc(0, 0, b.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            if (b.persistent) {
+                ctx.globalAlpha = Math.max(0.2, Math.min(0.65, b.duration / 240));
+                ctx.strokeStyle = b.color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(0, 0, b.radius + Math.sin(frameCount.current * 0.15) * 3, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            ctx.restore();
         });
 
         projectiles.current.forEach(p => {
@@ -1359,7 +1605,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         clearAllTimeouts(); 
         player.current = { ...player.current, x: WORLD_WIDTH/2, y: WORLD_HEIGHT/2, hp: 100, dead: false };
         camera.current = { x: WORLD_WIDTH/2, y: WORLD_HEIGHT/2 };
-        enemies.current = []; projectiles.current = []; gems.current = []; damageTexts.current = []; particles.current = [];
+        enemies.current = []; projectiles.current = []; enemyBullets.current = []; gems.current = []; damageTexts.current = []; particles.current = [];
         score.current = 0; time.current = 0; frameCount.current = 0; level.current = 1; xp.current = 0; nextLevelXp.current = BASE_XP_REQUIREMENT;
         setWeapons(() => {
             const initial: any = {};
@@ -1396,8 +1642,11 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                         {upgradeOptions.map((opt, idx) => {
                             let itemDef: any = opt.type === 'WEAPON' ? WEAPONS[opt.id as WeaponType] : (opt.type === 'PASSIVE' ? PASSIVES[opt.id as PassiveType] : { name: '特別給食', desc: 'HP 50回復', sprite: { template: 'POTION', color: '#f472b6' } });
                             let isEvo = opt.isEvo;
+                            const weaponIconStyle = opt.type === 'WEAPON'
+                                ? getSpriteSheetIconStyle('schoolyard-survivor-weapons.png', SCHOOLYARD_WEAPON_ASSET_KEYS, opt.id)
+                                : undefined;
                             return (
-                                <button key={idx} onClick={() => selectUpgrade(opt)} className={`bg-slate-900 border-4 ${isEvo ? 'border-yellow-400 bg-yellow-900/40 shadow-[0_0_20px_rgba(250,204,21,0.3)]' : 'border-slate-700'} hover:border-blue-400 hover:bg-slate-800 p-4 rounded-2xl flex items-center text-left transition-all group relative overflow-hidden shadow-2xl`}><div className={`w-16 h-16 bg-black/60 mr-4 ${isEvo ? 'animate-bounce' : ''} shrink-0 p-2 border-2 border-slate-600 rounded-xl shadow-inner`}><PixelSprite seed={opt.id} name={`${itemDef.sprite.template}|${itemDef.sprite.color}`} className="w-full h-full"/></div><div className="flex-1"><div className="flex justify-between items-center mb-1"><div className={`text-xl font-black leading-tight ${isEvo ? 'text-yellow-300' : 'text-white'}`}>{isEvo ? itemDef.evolvedName : itemDef.name}</div><div className="text-[10px] text-blue-300 font-black bg-blue-900/60 px-3 py-1 rounded-full border border-blue-400/50 uppercase">{opt.isNew ? 'New Weapon' : (opt.type === 'HEAL' ? 'Bonus' : `Lv ${opt.level || 'Master'}`)}</div></div><div className="text-xs text-gray-300 leading-snug font-bold">{isEvo ? itemDef.evolvedDesc : itemDef.desc}</div>{opt.type === 'WEAPON' && !isEvo && <div className="text-[10px] text-indigo-400 mt-1 flex items-center gap-1 font-black"><Sparkles size={10}/> SYNERGY: {PASSIVES[itemDef.synergy as PassiveType].name}</div>}</div>{isEvo && <div className="absolute top-0 right-0 bg-gradient-to-b from-yellow-400 to-orange-600 text-black text-[10px] font-black px-4 py-1 rounded-bl-xl shadow-lg">協助進化</div>}</button>
+                                <button key={idx} onClick={() => selectUpgrade(opt)} className={`bg-slate-900 border-4 ${isEvo ? 'border-yellow-400 bg-yellow-900/40 shadow-[0_0_20px_rgba(250,204,21,0.3)]' : 'border-slate-700'} hover:border-blue-400 hover:bg-slate-800 p-4 rounded-2xl flex items-center text-left transition-all group relative overflow-hidden shadow-2xl`}><div className={`w-16 h-16 bg-black/60 mr-4 ${isEvo ? 'animate-bounce' : ''} shrink-0 p-2 border-2 border-slate-600 rounded-xl shadow-inner`}>{weaponIconStyle ? <div className="w-full h-full" style={weaponIconStyle} /> : <PixelSprite seed={opt.id} name={`${itemDef.sprite.template}|${itemDef.sprite.color}`} className="w-full h-full"/>}</div><div className="flex-1"><div className="flex justify-between items-center mb-1"><div className={`text-xl font-black leading-tight ${isEvo ? 'text-yellow-300' : 'text-white'}`}>{isEvo ? itemDef.evolvedName : itemDef.name}</div><div className="text-[10px] text-blue-300 font-black bg-blue-900/60 px-3 py-1 rounded-full border border-blue-400/50 uppercase">{opt.isNew ? 'New Weapon' : (opt.type === 'HEAL' ? 'Bonus' : `Lv ${opt.level || 'Master'}`)}</div></div><div className="text-xs text-gray-300 leading-snug font-bold">{isEvo ? itemDef.evolvedDesc : itemDef.desc}</div>{opt.type === 'WEAPON' && !isEvo && <div className="text-[10px] text-indigo-400 mt-1 flex items-center gap-1 font-black"><Sparkles size={10}/> SYNERGY: {PASSIVES[itemDef.synergy as PassiveType].name}</div>}</div>{isEvo && <div className="absolute top-0 right-0 bg-gradient-to-b from-yellow-400 to-orange-600 text-black text-[10px] font-black px-4 py-1 rounded-bl-xl shadow-lg">協助進化</div>}</button>
                             );
                         })}
                     </div>
