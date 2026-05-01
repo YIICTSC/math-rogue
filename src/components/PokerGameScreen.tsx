@@ -13,6 +13,99 @@ import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 // --- Constants & Helpers ---
 const SUITS: PokerSuit[] = ['SPADE', 'HEART', 'DIAMOND', 'CLUB'];
 const RANKS: PokerRank[] = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+const POKER_ASSET_VERSION = 'after-school-poker-gptimage2-v5';
+const POKER_ITEM_SHEET = `/sprites/after-school-poker-items.png?v=${POKER_ASSET_VERSION}`;
+const POKER_ORNAMENT_SHEET = `/sprites/after-school-poker-card-ornaments.png?v=${POKER_ASSET_VERSION}`;
+const POKER_OVERRIDE_SHEET = `/sprites/after-school-poker-overrides.png?v=${POKER_ASSET_VERSION}`;
+const POKER_CONSUMABLE_OVERRIDE_SHEET = `/sprites/after-school-poker-consumable-overrides.png?v=${POKER_ASSET_VERSION}`;
+const POKER_TABLE_IMAGE = `/sprites/after-school-poker-table.png?v=${POKER_ASSET_VERSION}`;
+const POKER_ITEM_KEYS = [
+    'TEACHER','BOSS','CHEF','MUSCLE','LIBRARIAN','POTION','SHOE','FLAME',
+    'PLANT','NOTEBOOK','SLIME','WIZARD','FLIER','ALIEN','SWORD','GOLD_BAG',
+    'BACKPACK','SKELETON','SHIELD','GEM','HUMANOID','GHOST','ROBOT','SMILE',
+    'FLAG','MOON','SUN','SPARKLES','BELL','SHOP','EYE','FIST','CLOCK'
+];
+const POKER_ORNAMENT_KEYS = [
+    'SPADE','HEART','DIAMOND','CLUB','WILD','CHIP_BLUE','CHIP_RED','CHIP_GOLD',
+    'BONUS','MULT','GOLD','STEEL','GLASS','STONE','CARD_BACK','PACK'
+];
+const POKER_OVERRIDE_KEYS = [
+    'V_GRABBER','V_WASTE','V_SEED_MONEY','V_CLEARANCE','V_PAINT_BRUSH',
+    'V_OVERSTOCK','PACK_STD','PACK_STD_PLUS','PACK_BUFF','PACK_BUFF_L',
+    'PACK_SUPP','PACK_SPEC','SUP_ICE_CREAM','SUP_ACE_STRIKER','SUP_PIGGY',
+    'SUP_BUS','SUP_CAMPFIRE','SUP_RUNNER','SUP_CLOVER','SUP_SHORTCUT'
+];
+const POKER_CONSUMABLE_OVERRIDE_KEYS = [
+    'SPC_BLACKHOLE','SPC_IMMOLATE','SPC_ANKH','SPC_HEX','SPC_OUIJA',
+    'SPC_METEOR','SPC_PHANTOM_BELL','SPC_MIRROR','SPC_VOID_NOTE','SPC_CURSE_BOX',
+    'SPC_AURA','SPC_TIME_SKIP','SPC_GHOST_WRITER','STA_RULER','STA_ERASER',
+    'STA_STICKER','STA_MARKER','STA_PAINT','STA_INK','STA_DEATH'
+];
+const pokerTableBackgroundStyle: React.CSSProperties = {
+    backgroundImage: `linear-gradient(rgba(6, 8, 18, 0.36), rgba(6, 8, 18, 0.42)), url(${POKER_TABLE_IMAGE})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    imageRendering: 'pixelated'
+};
+
+const getSpriteSheetStyle = (sheet: string, keys: string[], key: string, columns: number, cellSize: number): React.CSSProperties => {
+    const index = Math.max(0, keys.indexOf(key));
+    const column = index % columns;
+    const row = Math.floor(index / columns);
+    const rows = Math.ceil(keys.length / columns);
+    const x = columns <= 1 ? 0 : (column / (columns - 1)) * 100;
+    const y = rows <= 1 ? 0 : (row / (rows - 1)) * 100;
+    return {
+        backgroundImage: `url(${sheet})`,
+        backgroundPosition: `${x}% ${y}%`,
+        backgroundSize: `${columns * 100}% ${rows * 100}%`,
+        backgroundRepeat: 'no-repeat',
+        imageRendering: 'pixelated'
+    };
+};
+
+const getPokerOrnamentStyle = (key: string): React.CSSProperties => (
+    getSpriteSheetStyle(POKER_ORNAMENT_SHEET, POKER_ORNAMENT_KEYS, key, 8, 64)
+);
+
+const getPokerItemStyle = (icon: string): React.CSSProperties => {
+    const key = icon.split('|')[0] || 'NOTEBOOK';
+    return getSpriteSheetStyle(POKER_ITEM_SHEET, POKER_ITEM_KEYS, key, 8, 48);
+};
+
+const getPokerOverrideStyle = (itemId: string): React.CSSProperties => (
+    getSpriteSheetStyle(POKER_OVERRIDE_SHEET, POKER_OVERRIDE_KEYS, itemId, 5, 64)
+);
+
+const getPokerConsumableOverrideStyle = (itemId: string): React.CSSProperties => (
+    getSpriteSheetStyle(POKER_CONSUMABLE_OVERRIDE_SHEET, POKER_CONSUMABLE_OVERRIDE_KEYS, itemId, 5, 64)
+);
+
+const renderPokerItemIcon = (icon: string, name: string, className: string, itemId?: string) => {
+    if (itemId && POKER_CONSUMABLE_OVERRIDE_KEYS.includes(itemId)) {
+        return <div className={`${className} bg-no-repeat bg-contain`} style={getPokerConsumableOverrideStyle(itemId)} title={name} />;
+    }
+    if (itemId && POKER_OVERRIDE_KEYS.includes(itemId)) {
+        return <div className={`${className} bg-no-repeat bg-contain`} style={getPokerOverrideStyle(itemId)} title={name} />;
+    }
+    const key = icon.split('|')[0] || 'NOTEBOOK';
+    if (!POKER_ITEM_KEYS.includes(key)) {
+        return <PixelSprite seed={icon} name={name} className={className} />;
+    }
+    return <div className={`${className} bg-no-repeat bg-contain`} style={getPokerItemStyle(icon)} title={name} />;
+};
+
+const getPokerCardFaceStyle = (card: PokerCard): React.CSSProperties => {
+    const accent = card.enhancement === 'GOLD' ? '#f6d66d'
+        : card.enhancement === 'STEEL' ? '#b8c1d1'
+        : card.enhancement === 'GLASS' ? '#bdf6ff'
+        : card.enhancement === 'STONE' ? '#c6cbd4'
+        : '#f8f0df';
+    return {
+        backgroundImage: `linear-gradient(135deg, ${accent} 0%, #fffaf0 38%, #e4d3aa 100%)`,
+        imageRendering: 'pixelated'
+    };
+};
 
 // --- HAND EXAMPLES FOR RULES ---
 const HAND_EXAMPLES: Record<string, { desc: string, cards: {r: string, s: PokerSuit}[] }> = {
@@ -289,13 +382,8 @@ const getRankDisplay = (rank: PokerRank) => {
 };
 
 const getSuitIcon = (suit: PokerSuit, isWild?: boolean) => {
-    if (isWild) return <Sparkles className="text-purple-400 fill-current animate-pulse" />;
-    switch(suit) {
-        case 'SPADE': return <Spade className="text-blue-400 fill-current" />;
-        case 'HEART': return <Heart className="text-red-500 fill-current" />;
-        case 'DIAMOND': return <Diamond className="text-yellow-400 fill-current" />;
-        case 'CLUB': return <Club className="text-green-500 fill-current" />;
-    }
+    const key = isWild ? 'WILD' : suit;
+    return <span className="inline-block h-6 w-6 bg-no-repeat bg-contain align-middle" style={getPokerOrnamentStyle(key)} />;
 };
 
 const getSuitColorClass = (suit: PokerSuit) => {
@@ -1437,7 +1525,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                   <button onClick={() => setInspectedItem(null)} className="absolute top-2 right-2 text-gray-400 hover:text-white"><X size={24}/></button>
                   {isCard ? (
                       <div className="flex flex-col items-center mb-4">
-                          <div className="w-32 h-48 bg-white text-black rounded-lg border-4 border-slate-300 shadow-xl flex flex-col items-center justify-between p-2 mb-4">
+                          <div className="w-32 h-48 bg-white text-black rounded-lg border-4 border-yellow-300 shadow-xl flex flex-col items-center justify-between p-2 mb-4" style={getPokerCardFaceStyle(cardItem)}>
                               <div className={`text-2xl font-bold w-full text-left ${['HEART', 'DIAMOND'].includes(cardItem.suit) ? 'text-red-600' : 'text-black'}`}>{getRankDisplay(cardItem.rank)}</div>
                               <div className="scale-150">{getSuitIcon(cardItem.suit, cardItem.enhancement === 'WILD')}</div>
                               <div className="text-xs text-center font-bold text-gray-500">{cardItem.enhancement || ''}</div>
@@ -1455,7 +1543,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                   ) : isPack ? (
                       <>
                         <div className="flex flex-col items-center mb-4">
-                            <div className="w-24 h-24 mb-4"><PixelSprite seed={(item as PokerPack).icon} name={(item as PokerPack).icon} className="w-full h-full"/></div>
+                            <div className="w-24 h-24 mb-4">{renderPokerItemIcon((item as PokerPack).icon, (item as PokerPack).name, 'w-full h-full', (item as PokerPack).id)}</div>
                             <h3 className="text-2xl font-bold text-yellow-400 mb-2">{(item as PokerPack).name}</h3>
                             <div className="text-sm font-bold text-white bg-orange-700 px-3 py-1 rounded-full">PACK</div>
                         </div>
@@ -1466,7 +1554,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                       <> 
                         <div className="flex flex-col items-center mb-4">
                             <div className={`w-24 h-24 mb-4 rounded-lg overflow-hidden border-4 ${edition ? editionColor : 'border-transparent'}`}>
-                                <PixelSprite seed={(item as any).icon} name={(item as any).icon} className="w-full h-full"/>
+                                {renderPokerItemIcon((item as any).icon, (item as any).name, 'w-full h-full', (item as any).id)}
                             </div>
                             <h3 className="text-2xl font-bold text-yellow-400 mb-1">{(item as any).name}</h3>
                             
@@ -1575,7 +1663,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
   if (phase === 'BLIND_SELECT') {
       const config = runState.currentBlind;
       return (
-          <div className="flex flex-col h-full w-full bg-slate-900 text-white p-8 items-center justify-center relative font-mono">
+          <div className="flex flex-col h-full w-full bg-slate-900 text-white p-8 items-center justify-center relative font-mono" style={pokerTableBackgroundStyle}>
               <div className="absolute top-4 left-4">
                   <button onClick={handleQuit} className="text-gray-400 hover:text-white flex items-center"><ArrowLeft className="mr-2"/> Quit</button>
               </div>
@@ -1602,7 +1690,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       
       if (phase === 'PACK_OPEN' && currentPack) {
           return (
-              <div className="flex flex-col h-full w-full bg-slate-900 text-white p-4 items-center justify-center relative font-mono overflow-hidden">
+              <div className="flex flex-col h-full w-full bg-slate-900 text-white p-4 items-center justify-center relative font-mono overflow-hidden" style={pokerTableBackgroundStyle}>
                   <div className="absolute inset-0 bg-black/80 z-0"></div>
                   {renderInspectionModal()}
                   
@@ -1612,7 +1700,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                       {!isPackOpened ? (
                           <div className="cursor-pointer hover:scale-110 transition-transform animate-bounce relative" onClick={revealPack}>
                               <div className="w-48 h-64 bg-gradient-to-br from-yellow-600 to-yellow-800 rounded-lg border-4 border-yellow-300 shadow-[0_0_50px_rgba(253,224,71,0.5)] flex flex-col items-center justify-center p-4 text-center">
-                                  <div className="text-6xl mb-4"><PixelSprite seed={currentPack.icon} name={currentPack.icon} className="w-24 h-24"/></div>
+                                  <div className="text-6xl mb-4">{renderPokerItemIcon(currentPack.icon, currentPack.name, 'w-24 h-24', currentPack.id)}</div>
                                   <div className="text-2xl font-black text-white drop-shadow-md">{currentPack.name}</div>
                                   <div className="text-sm text-yellow-200 mt-2">{currentPack.description}</div>
                               </div>
@@ -1629,8 +1717,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                                   const type = isCard ? 'CARD' : isSupporter ? 'SUPPORTER' : 'CONSUMABLE';
                                   return (
                                       <div key={idx} className={`relative cursor-pointer transition-transform hover:-translate-y-4 duration-300 ${disabled ? 'opacity-50 grayscale cursor-not-allowed' : ''}`} onClick={() => !disabled && selectPackItem(item)} onContextMenu={(e) => handleContextMenu(e, item, type, false)} onTouchStart={() => handleTouchStart(item, type, false)} onTouchEnd={handleTouchEnd}>
-                                          {isCard && <div className="w-32 h-48 bg-white text-black rounded-lg border-4 border-slate-300 shadow-xl flex flex-col items-center justify-between p-2"><div className={`text-2xl font-bold w-full text-left ${['HEART', 'DIAMOND'].includes((item as PokerCard).suit) ? 'text-red-600' : 'text-black'}`}>{getRankDisplay((item as PokerCard).rank)}</div><div className="scale-150">{getSuitIcon((item as PokerCard).suit, (item as PokerCard).enhancement === 'WILD')}</div><div className="text-xs text-center font-bold text-gray-500">{(item as PokerCard).enhancement || ''}</div><div className={`text-2xl font-bold w-full text-right rotate-180 ${['HEART', 'DIAMOND'].includes((item as PokerCard).suit) ? 'text-red-600' : 'text-black'}`}>{getRankDisplay((item as PokerCard).rank)}</div></div>}
-                                          {!isCard && <div className="w-32 h-48 bg-slate-800 text-white rounded-lg border-4 border-blue-400 shadow-xl flex flex-col items-center justify-center p-2 text-center"><PixelSprite seed={(item as any).icon} name={(item as any).icon} className="w-16 h-16 mb-2"/><div className="font-bold text-sm">{(item as any).name}</div><div className="text-[10px] text-gray-400 mt-2 leading-tight">{(item as any).description}</div></div>}
+                                          {isCard && <div className="w-32 h-48 bg-white text-black rounded-lg border-4 border-yellow-300 shadow-xl flex flex-col items-center justify-between p-2" style={getPokerCardFaceStyle(item as PokerCard)}><div className={`text-2xl font-bold w-full text-left ${['HEART', 'DIAMOND'].includes((item as PokerCard).suit) ? 'text-red-600' : 'text-black'}`}>{getRankDisplay((item as PokerCard).rank)}</div><div className="scale-150">{getSuitIcon((item as PokerCard).suit, (item as PokerCard).enhancement === 'WILD')}</div><div className="text-xs text-center font-bold text-gray-500">{(item as PokerCard).enhancement || ''}</div><div className={`text-2xl font-bold w-full text-right rotate-180 ${['HEART', 'DIAMOND'].includes((item as PokerCard).suit) ? 'text-red-600' : 'text-black'}`}>{getRankDisplay((item as PokerCard).rank)}</div></div>}
+                                          {!isCard && <div className="w-32 h-48 bg-slate-800 text-white rounded-lg border-4 border-blue-400 shadow-xl flex flex-col items-center justify-center p-2 text-center">{renderPokerItemIcon((item as any).icon, (item as any).name, 'w-16 h-16 mb-2', (item as any).id)}<div className="font-bold text-sm">{(item as any).name}</div><div className="text-[10px] text-gray-400 mt-2 leading-tight">{(item as any).description}</div></div>}
                                           <button className={`absolute -bottom-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold shadow-lg ${disabled ? 'bg-gray-600 text-gray-300' : 'bg-blue-600 text-white animate-pulse'}`}>{disabled ? 'FULL' : 'SELECT'}</button>
                                       </div>
                                   );
@@ -1649,7 +1737,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       const voucher = runState.shopVoucher;
 
       return (
-          <div className="flex flex-col h-full w-full bg-slate-900 text-white p-4 font-mono relative overflow-hidden">
+          <div className="flex flex-col h-full w-full bg-slate-900 text-white p-4 font-mono relative overflow-hidden" style={pokerTableBackgroundStyle}>
               {renderInspectionModal()}
               
               {showRoundResult && roundResult && (
@@ -1702,7 +1790,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                               <div className="flex-1 flex items-center gap-1 overflow-x-auto custom-scrollbar">
                                   {runState.supporters.map((s, i) => (
                                       <div key={i} className={`bg-slate-800 p-0.5 rounded flex-shrink-0 border cursor-pointer hover:bg-slate-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center relative group ${s.edition === 'POLYCHROME' ? 'border-yellow-400 animate-pulse' : s.edition === 'HOLOGRAPHIC' ? 'border-red-400' : s.edition === 'FOIL' ? 'border-blue-400' : 'border-slate-600'}`} onClick={() => setInspectedItem({ item: s, type: 'SUPPORTER', isOwned: true, index: i })} onContextMenu={(e) => handleContextMenu(e, s, 'SUPPORTER', true, i)} onTouchStart={() => handleTouchStart(s, 'SUPPORTER', true, i)} onTouchEnd={handleTouchEnd}>
-                                          <PixelSprite seed={s.icon} name={s.icon} className="w-full h-full"/>
+                                          {renderPokerItemIcon(s.icon, s.name, 'w-full h-full', s.id)}
                                       </div>
                                   ))}
                                   {[...Array(5 - runState.supporters.length)].map((_, i) => (
@@ -1716,7 +1804,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                               <div className="flex-1 flex items-center gap-1 justify-center">
                                   {runState.consumables.map((c, i) => (
                                       <div key={i} className="bg-slate-800 p-0.5 rounded flex-shrink-0 border border-slate-600 cursor-pointer hover:bg-slate-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center relative group" onClick={() => setInspectedItem({ item: c, type: 'CONSUMABLE', isOwned: true, index: i })} onContextMenu={(e) => handleContextMenu(e, c, 'CONSUMABLE', true, i)} onTouchStart={() => handleTouchStart(c, 'CONSUMABLE', true, i)} onTouchEnd={handleTouchEnd}>
-                                          <PixelSprite seed={c.icon} name={c.icon} className="w-full h-full"/>
+                                          {renderPokerItemIcon(c.icon, c.name, 'w-full h-full', c.id)}
                                       </div>
                                   ))}
                                   {[...Array(2 - runState.consumables.length)].map((_, i) => (
@@ -1733,7 +1821,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                                   if (!v) return null;
                                   return (
                                       <div key={i} className="h-4 w-4 rounded-full bg-slate-700 border border-slate-500 flex items-center justify-center flex-shrink-0 cursor-help" title={v.name} onClick={() => setInspectedItem({ item: v, type: 'VOUCHER', isOwned: true })}>
-                                          <PixelSprite seed={v.icon} name={v.icon} className="w-3 h-3"/>
+                                          {renderPokerItemIcon(v.icon, v.name, 'w-3 h-3', v.id)}
                                       </div>
                                   );
                               })}
@@ -1755,7 +1843,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                                   >
                                       <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest w-full border-b border-gray-700 pb-1">Voucher</div>
                                       <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center border-2 border-slate-700 mt-2">
-                                          <PixelSprite seed={voucher.icon} name={voucher.icon} className="w-8 h-8"/>
+                                          {renderPokerItemIcon(voucher.icon, voucher.name, 'w-8 h-8', voucher.id)}
                                       </div>
                                       <div className="font-bold text-xs">{voucher.name}</div>
                                       <div className="text-[9px] text-gray-400 leading-tight h-8 overflow-hidden">{voucher.description}</div>
@@ -1771,7 +1859,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                           {shopPacks.map((item) => (
                               <div key={item.id} className="bg-slate-700 p-2 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg justify-between min-h-[160px]" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'PACK', false)} onTouchStart={() => handleTouchStart(item, 'PACK', false)} onTouchEnd={handleTouchEnd}>
                                   <div className="absolute top-1 left-1 text-[8px] font-bold text-orange-300 bg-orange-900/50 px-1.5 py-0.5 rounded">PACK</div>
-                                  <div className="w-12 h-12 mt-4"><PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/></div>
+                                  <div className="w-12 h-12 mt-4">{renderPokerItemIcon(item.icon, item.name, 'w-full h-full', item.id)}</div>
                                   <div className="font-bold text-xs">{item.name}</div>
                                   <div className="text-[9px] text-gray-400 h-8 overflow-hidden leading-tight">{item.description}</div>
                                   <button disabled={runState.money < getPrice(item.price)} className={`w-full py-1 rounded font-bold text-xs ${runState.money >= getPrice(item.price) ? 'bg-orange-600 hover:bg-orange-500 shadow-md' : 'bg-gray-600 cursor-not-allowed'}`}>${getPrice(item.price)}</button>
@@ -1781,7 +1869,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                           {shopSupporters.map((item) => (
                               <div key={item.id} className="bg-slate-700 p-2 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg justify-between min-h-[160px]" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'SUPPORTER', false)} onTouchStart={() => handleTouchStart(item, 'SUPPORTER', false)} onTouchEnd={handleTouchEnd}>
                                   <div className="absolute top-1 left-1 text-[8px] font-bold text-blue-300 bg-blue-900/50 px-1.5 py-0.5 rounded">SUPPORTER</div>
-                                  <div className="w-12 h-12 mt-4"><PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/></div>
+                                  <div className="w-12 h-12 mt-4">{renderPokerItemIcon(item.icon, item.name, 'w-full h-full', item.id)}</div>
                                   <div className="font-bold text-xs">{item.name}</div>
                                   <div className="text-[9px] text-gray-400 h-8 overflow-hidden leading-tight">{item.description}</div>
                                   <button disabled={runState.money < getPrice(item.price)} className={`w-full py-1 rounded font-bold text-xs ${runState.money >= getPrice(item.price) ? 'bg-blue-600 hover:bg-blue-500 shadow-md' : 'bg-gray-600 cursor-not-allowed'}`}>${getPrice(item.price)}</button>
@@ -1791,7 +1879,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                           {shopConsumables.map((item) => (
                               <div key={item.id} className="bg-slate-700 p-2 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg justify-between min-h-[160px]" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'CONSUMABLE', false)} onTouchStart={() => handleTouchStart(item, 'CONSUMABLE', false)} onTouchEnd={handleTouchEnd}>
                                   <div className="absolute top-1 left-1 text-[8px] font-bold text-purple-300 bg-purple-900/50 px-1.5 py-0.5 rounded">CARD</div>
-                                  <div className="w-12 h-12 mt-4"><PixelSprite seed={item.icon} name={item.icon} className="w-full h-full"/></div>
+                                  <div className="w-12 h-12 mt-4">{renderPokerItemIcon(item.icon, item.name, 'w-full h-full', item.id)}</div>
                                   <div className="font-bold text-xs">{item.name}</div>
                                   <div className="text-[9px] text-gray-400 h-8 overflow-hidden leading-tight">{item.description}</div>
                                   <button disabled={runState.money < getPrice(item.price)} className={`w-full py-1 rounded font-bold text-xs ${runState.money >= getPrice(item.price) ? 'bg-purple-600 hover:bg-purple-500 shadow-md' : 'bg-gray-600 cursor-not-allowed'}`}>${getPrice(item.price)}</button>
@@ -1874,7 +1962,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
   ) : null;
 
   return (
-    <div className="flex flex-col h-full w-full bg-green-900 text-white font-mono relative overflow-hidden">
+    <div className="flex flex-col h-full w-full bg-green-900 text-white font-mono relative overflow-hidden" style={pokerTableBackgroundStyle}>
         {renderInspectionModal()}
         {showRulesModal && (
             <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowRulesModal(false)}>
@@ -1947,7 +2035,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                         onTouchStart={() => handleTouchStart(s, 'SUPPORTER', true, i)} 
                         onTouchEnd={handleTouchEnd}
                     >
-                        <PixelSprite seed={s.icon} name={s.icon} className="w-8 h-8"/>
+                        {renderPokerItemIcon(s.icon, s.name, 'w-8 h-8', s.id)}
                     </div>
                 ))}
                 {[...Array(Math.max(0, 5 - runState.supporters.length))].map((_, i) => (
@@ -1955,7 +2043,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                 ))}
             </div>
             <div className="flex gap-2 items-center border-l border-white/20 pl-2">
-                {runState.consumables.map((c, i) => (<div key={i} className="w-10 h-10 md:w-12 md:h-12 bg-slate-800 border-2 border-purple-500 rounded flex items-center justify-center relative group cursor-pointer hover:scale-110 transition-transform" onClick={() => setInspectedItem({ item: c, type: 'CONSUMABLE', isOwned: true, index: i })} onContextMenu={(e) => handleContextMenu(e, c, 'CONSUMABLE', true, i)} onTouchStart={() => handleTouchStart(c, 'CONSUMABLE', true, i)} onTouchEnd={handleTouchEnd}><PixelSprite seed={c.icon} name={c.icon} className="w-8 h-8"/>{selectedConsumable === c && <div className="absolute inset-0 bg-white/30 rounded animate-pulse"></div>}</div>))}
+                {runState.consumables.map((c, i) => (<div key={i} className="w-10 h-10 md:w-12 md:h-12 bg-slate-800 border-2 border-purple-500 rounded flex items-center justify-center relative group cursor-pointer hover:scale-110 transition-transform" onClick={() => setInspectedItem({ item: c, type: 'CONSUMABLE', isOwned: true, index: i })} onContextMenu={(e) => handleContextMenu(e, c, 'CONSUMABLE', true, i)} onTouchStart={() => handleTouchStart(c, 'CONSUMABLE', true, i)} onTouchEnd={handleTouchEnd}>{renderPokerItemIcon(c.icon, c.name, 'w-8 h-8', c.id)}{selectedConsumable === c && <div className="absolute inset-0 bg-white/30 rounded animate-pulse"></div>}</div>))}
                 {[...Array(Math.max(0, 2 - runState.consumables.length))].map((_, i) => (
                     <div key={`consumable-empty-${i}`} className="w-10 h-10 md:w-12 md:h-12 rounded border border-dashed border-slate-700/70 bg-slate-900/20" />
                 ))}
@@ -1991,6 +2079,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                     <div 
                         key={card.id} data-card-id={card.id} onPointerDown={(e) => handlePointerDown(e, card.id)} onContextMenu={(e) => handleContextMenu(e, card, 'CARD', true)} onTouchStart={() => handleTouchStart(card, 'CARD', true)} onTouchEnd={handleTouchEnd}
                         className={`w-20 h-32 md:w-28 md:h-40 rounded-lg border-2 shadow-xl flex flex-col items-center justify-between p-2 cursor-pointer transition-transform duration-200 -ml-4 first:ml-0 relative ${isSelected ? '-translate-y-6 z-20 border-yellow-400 ring-2 ring-yellow-400' : 'border-gray-400 hover:-translate-y-2 z-10'} ${selectedConsumable ? 'hover:ring-2 hover:ring-purple-400' : ''} ${card.enhancement === 'GOLD' ? 'bg-amber-100 border-amber-500' : ''} ${card.enhancement === 'STEEL' ? 'bg-slate-300 border-slate-500' : ''} ${card.enhancement === 'GLASS' ? 'bg-cyan-100/80 border-cyan-300 backdrop-blur-sm' : ''} ${!card.enhancement ? 'bg-gray-100' : ''}`}
+                        style={getPokerCardFaceStyle(card)}
                     >
                         {card.bonusChips > 0 && <div className="absolute -top-2 -right-2 bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-md z-30 border border-white">+{card.bonusChips}</div>}
                         {card.multMultiplier > 1 && <div className="absolute -top-2 -left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-md z-30 border border-white">x{card.multMultiplier}</div>}
