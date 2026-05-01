@@ -13,11 +13,12 @@ import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 // --- Constants & Helpers ---
 const SUITS: PokerSuit[] = ['SPADE', 'HEART', 'DIAMOND', 'CLUB'];
 const RANKS: PokerRank[] = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
-const POKER_ASSET_VERSION = 'after-school-poker-gptimage2-v5';
+const POKER_ASSET_VERSION = 'after-school-poker-gptimage2-v6';
 const POKER_ITEM_SHEET = `/sprites/after-school-poker-items.png?v=${POKER_ASSET_VERSION}`;
 const POKER_ORNAMENT_SHEET = `/sprites/after-school-poker-card-ornaments.png?v=${POKER_ASSET_VERSION}`;
 const POKER_OVERRIDE_SHEET = `/sprites/after-school-poker-overrides.png?v=${POKER_ASSET_VERSION}`;
 const POKER_CONSUMABLE_OVERRIDE_SHEET = `/sprites/after-school-poker-consumable-overrides.png?v=${POKER_ASSET_VERSION}`;
+const POKER_STATIONERY_OVERRIDE_SHEET = `/sprites/after-school-poker-stationery-overrides.png?v=${POKER_ASSET_VERSION}`;
 const POKER_TABLE_IMAGE = `/sprites/after-school-poker-table.png?v=${POKER_ASSET_VERSION}`;
 const POKER_ITEM_KEYS = [
     'TEACHER','BOSS','CHEF','MUSCLE','LIBRARIAN','POTION','SHOE','FLAME',
@@ -40,6 +41,12 @@ const POKER_CONSUMABLE_OVERRIDE_KEYS = [
     'SPC_METEOR','SPC_PHANTOM_BELL','SPC_MIRROR','SPC_VOID_NOTE','SPC_CURSE_BOX',
     'SPC_AURA','SPC_TIME_SKIP','SPC_GHOST_WRITER','STA_RULER','STA_ERASER',
     'STA_STICKER','STA_MARKER','STA_PAINT','STA_INK','STA_DEATH'
+];
+const POKER_STATIONERY_OVERRIDE_KEYS = [
+    'STA_GOLD_SPRAY','STA_GLASS_WORK','STA_STEEL_RULER','STA_RAINBOW_PEN','STA_BLUE_MARKER',
+    'STA_GREEN_MARKER','STA_CHALK_WHITE','STA_CLUB_STAMP','STA_DIAMOND_DUST','STA_SHARPENER',
+    'STA_NOTE_SWAP','STA_COPY_SHEET','STA_HOLOGRAM','STA_LUNCH_PASS','TXT_MATH',
+    'TXT_JPN','TXT_SCI','TXT_SOC','TXT_ENG','TXT_ART'
 ];
 const pokerTableBackgroundStyle: React.CSSProperties = {
     backgroundImage: `linear-gradient(rgba(6, 8, 18, 0.36), rgba(6, 8, 18, 0.42)), url(${POKER_TABLE_IMAGE})`,
@@ -81,7 +88,14 @@ const getPokerConsumableOverrideStyle = (itemId: string): React.CSSProperties =>
     getSpriteSheetStyle(POKER_CONSUMABLE_OVERRIDE_SHEET, POKER_CONSUMABLE_OVERRIDE_KEYS, itemId, 5, 64)
 );
 
+const getPokerStationeryOverrideStyle = (itemId: string): React.CSSProperties => (
+    getSpriteSheetStyle(POKER_STATIONERY_OVERRIDE_SHEET, POKER_STATIONERY_OVERRIDE_KEYS, itemId, 5, 64)
+);
+
 const renderPokerItemIcon = (icon: string, name: string, className: string, itemId?: string) => {
+    if (itemId && POKER_STATIONERY_OVERRIDE_KEYS.includes(itemId)) {
+        return <div className={`${className} bg-no-repeat bg-contain`} style={getPokerStationeryOverrideStyle(itemId)} title={name} />;
+    }
     if (itemId && POKER_CONSUMABLE_OVERRIDE_KEYS.includes(itemId)) {
         return <div className={`${className} bg-no-repeat bg-contain`} style={getPokerConsumableOverrideStyle(itemId)} title={name} />;
     }
