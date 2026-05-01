@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './src/styles.css';
+import './src/poker-fixes.css';
 import App from './src/App';
 
 const rootElement = document.getElementById('root');
