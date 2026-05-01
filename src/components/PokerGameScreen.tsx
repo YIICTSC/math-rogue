@@ -13,13 +13,15 @@ import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 // --- Constants & Helpers ---
 const SUITS: PokerSuit[] = ['SPADE', 'HEART', 'DIAMOND', 'CLUB'];
 const RANKS: PokerRank[] = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
-const POKER_ASSET_VERSION = 'after-school-poker-gptimage2-v6';
-const POKER_ITEM_SHEET = `/sprites/after-school-poker-items.png?v=${POKER_ASSET_VERSION}`;
-const POKER_ORNAMENT_SHEET = `/sprites/after-school-poker-card-ornaments.png?v=${POKER_ASSET_VERSION}`;
-const POKER_OVERRIDE_SHEET = `/sprites/after-school-poker-overrides.png?v=${POKER_ASSET_VERSION}`;
-const POKER_CONSUMABLE_OVERRIDE_SHEET = `/sprites/after-school-poker-consumable-overrides.png?v=${POKER_ASSET_VERSION}`;
-const POKER_STATIONERY_OVERRIDE_SHEET = `/sprites/after-school-poker-stationery-overrides.png?v=${POKER_ASSET_VERSION}`;
-const POKER_TABLE_IMAGE = `/sprites/after-school-poker-table.png?v=${POKER_ASSET_VERSION}`;
+const POKER_ASSET_VERSION = 'after-school-poker-gptimage2-v7';
+const POKER_ASSET_BASE = `${import.meta.env.BASE_URL}sprites/`;
+const POKER_ITEM_SHEET = `${POKER_ASSET_BASE}after-school-poker-items.png?v=${POKER_ASSET_VERSION}`;
+const POKER_ORNAMENT_SHEET = `${POKER_ASSET_BASE}after-school-poker-card-ornaments.png?v=${POKER_ASSET_VERSION}`;
+const POKER_OVERRIDE_SHEET = `${POKER_ASSET_BASE}after-school-poker-overrides.png?v=${POKER_ASSET_VERSION}`;
+const POKER_CONSUMABLE_OVERRIDE_SHEET = `${POKER_ASSET_BASE}after-school-poker-consumable-overrides.png?v=${POKER_ASSET_VERSION}`;
+const POKER_STATIONERY_OVERRIDE_SHEET = `${POKER_ASSET_BASE}after-school-poker-stationery-overrides.png?v=${POKER_ASSET_VERSION}`;
+const POKER_SUPPORTER_FIX_SHEET = `${POKER_ASSET_BASE}after-school-poker-supporter-fixes.png?v=${POKER_ASSET_VERSION}`;
+const POKER_TABLE_IMAGE = `${POKER_ASSET_BASE}after-school-poker-table.png?v=${POKER_ASSET_VERSION}`;
 const POKER_ITEM_KEYS = [
     'TEACHER','BOSS','CHEF','MUSCLE','LIBRARIAN','POTION','SHOE','FLAME',
     'PLANT','NOTEBOOK','SLIME','WIZARD','FLIER','ALIEN','SWORD','GOLD_BAG',
@@ -48,6 +50,7 @@ const POKER_STATIONERY_OVERRIDE_KEYS = [
     'STA_NOTE_SWAP','STA_COPY_SHEET','STA_HOLOGRAM','STA_LUNCH_PASS','TXT_MATH',
     'TXT_JPN','TXT_SCI','TXT_SOC','TXT_ENG','TXT_ART'
 ];
+const POKER_SUPPORTER_FIX_KEYS = ['SUP_PIGGY','SUP_LUCKY7'];
 const pokerTableBackgroundStyle: React.CSSProperties = {
     backgroundImage: `linear-gradient(rgba(6, 8, 18, 0.36), rgba(6, 8, 18, 0.42)), url(${POKER_TABLE_IMAGE})`,
     backgroundSize: 'cover',
@@ -92,21 +95,28 @@ const getPokerStationeryOverrideStyle = (itemId: string): React.CSSProperties =>
     getSpriteSheetStyle(POKER_STATIONERY_OVERRIDE_SHEET, POKER_STATIONERY_OVERRIDE_KEYS, itemId, 5, 64)
 );
 
+const getPokerSupporterFixStyle = (itemId: string): React.CSSProperties => (
+    getSpriteSheetStyle(POKER_SUPPORTER_FIX_SHEET, POKER_SUPPORTER_FIX_KEYS, itemId, 2, 64)
+);
+
 const renderPokerItemIcon = (icon: string, name: string, className: string, itemId?: string) => {
+    if (itemId && POKER_SUPPORTER_FIX_KEYS.includes(itemId)) {
+        return <div className={`${className} bg-no-repeat bg-contain`} style={getPokerSupporterFixStyle(itemId)} title={name} />;
+    }
     if (itemId && POKER_STATIONERY_OVERRIDE_KEYS.includes(itemId)) {
-        return <div className={`${className} bg-no-repeat`} style={getPokerStationeryOverrideStyle(itemId)} title={name} />;
+        return <div className={`${className} bg-no-repeat bg-contain`} style={getPokerStationeryOverrideStyle(itemId)} title={name} />;
     }
     if (itemId && POKER_CONSUMABLE_OVERRIDE_KEYS.includes(itemId)) {
-        return <div className={`${className} bg-no-repeat`} style={getPokerConsumableOverrideStyle(itemId)} title={name} />;
+        return <div className={`${className} bg-no-repeat bg-contain`} style={getPokerConsumableOverrideStyle(itemId)} title={name} />;
     }
     if (itemId && POKER_OVERRIDE_KEYS.includes(itemId)) {
-        return <div className={`${className} bg-no-repeat`} style={getPokerOverrideStyle(itemId)} title={name} />;
+        return <div className={`${className} bg-no-repeat bg-contain`} style={getPokerOverrideStyle(itemId)} title={name} />;
     }
     const key = icon.split('|')[0] || 'NOTEBOOK';
     if (!POKER_ITEM_KEYS.includes(key)) {
         return <PixelSprite seed={icon} name={name} className={className} />;
     }
-    return <div className={`${className} bg-no-repeat`} style={getPokerItemStyle(icon)} title={name} />;
+    return <div className={`${className} bg-no-repeat bg-contain`} style={getPokerItemStyle(icon)} title={name} />;
 };
 
 const getPokerCardFaceStyle = (card: PokerCard): React.CSSProperties => {
@@ -397,7 +407,7 @@ const getRankDisplay = (rank: PokerRank) => {
 
 const getSuitIcon = (suit: PokerSuit, isWild?: boolean) => {
     const key = isWild ? 'WILD' : suit;
-    return <span className="inline-block h-6 w-6 bg-no-repeat align-middle" style={getPokerOrnamentStyle(key)} />;
+    return <span className="inline-block h-6 w-6 bg-no-repeat bg-contain align-middle" style={getPokerOrnamentStyle(key)} />;
 };
 
 const getSuitColorClass = (suit: PokerSuit) => {
