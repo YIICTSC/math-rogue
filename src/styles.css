@@ -277,7 +277,7 @@ textarea {
   }
 }
 
-@media (orientation: landscape) and (min-width: 900px) {
+@media (min-width: 900px) {
   .battle-scene-root .battle-view {
     gap: 0.5rem;
     padding: 0.375rem 0.5rem;
