@@ -1,5 +1,5 @@
 {
-  "version": "after-school-poker-gptimage2-v5",
+  "version": "after-school-poker-gptimage2-v6",
   "source": "GPTimage2 generated, chroma-key processed locally, cleaned cell bleed",
   "itemSheet": "/sprites/after-school-poker-items.png",
   "ornamentSheet": "/sprites/after-school-poker-card-ornaments.png",
@@ -106,5 +106,29 @@
     "STA_PAINT",
     "STA_INK",
     "STA_DEATH"
+  ],
+  "stationeryOverrideSheet": "/sprites/after-school-poker-stationery-overrides.png",
+  "stationeryOverrideCellSize": 64,
+  "stationeryOverrideKeys": [
+    "STA_GOLD_SPRAY",
+    "STA_GLASS_WORK",
+    "STA_STEEL_RULER",
+    "STA_RAINBOW_PEN",
+    "STA_BLUE_MARKER",
+    "STA_GREEN_MARKER",
+    "STA_CHALK_WHITE",
+    "STA_CLUB_STAMP",
+    "STA_DIAMOND_DUST",
+    "STA_SHARPENER",
+    "STA_NOTE_SWAP",
+    "STA_COPY_SHEET",
+    "STA_HOLOGRAM",
+    "STA_LUNCH_PASS",
+    "TXT_MATH",
+    "TXT_JPN",
+    "TXT_SCI",
+    "TXT_SOC",
+    "TXT_ENG",
+    "TXT_ART"
   ]
 }
