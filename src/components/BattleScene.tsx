@@ -498,10 +498,15 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             if (typeof window === 'undefined') return false;
             return window.matchMedia('(orientation: landscape)').matches || window.innerWidth > window.innerHeight;
         };
+        const isDesktopLandscapeViewport = () => {
+            if (typeof window === 'undefined') return false;
+            return isLandscapeViewport() && window.innerWidth >= 900;
+        };
 
         const syncLandscapeSplit = () => {
             setForceLandscapeSplit((prev) => {
                 if (!isLandscapeViewport()) return false;
+                if (isDesktopLandscapeViewport()) return true;
                 if (prev) return true;
                 const battleView = battleViewRef.current;
                 if (!battleView) return false;
