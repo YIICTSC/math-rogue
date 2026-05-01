@@ -94,19 +94,19 @@ const getPokerStationeryOverrideStyle = (itemId: string): React.CSSProperties =>
 
 const renderPokerItemIcon = (icon: string, name: string, className: string, itemId?: string) => {
     if (itemId && POKER_STATIONERY_OVERRIDE_KEYS.includes(itemId)) {
-        return <div className={`${className} bg-no-repeat bg-contain`} style={getPokerStationeryOverrideStyle(itemId)} title={name} />;
+        return <div className={`${className} bg-no-repeat`} style={getPokerStationeryOverrideStyle(itemId)} title={name} />;
     }
     if (itemId && POKER_CONSUMABLE_OVERRIDE_KEYS.includes(itemId)) {
-        return <div className={`${className} bg-no-repeat bg-contain`} style={getPokerConsumableOverrideStyle(itemId)} title={name} />;
+        return <div className={`${className} bg-no-repeat`} style={getPokerConsumableOverrideStyle(itemId)} title={name} />;
     }
     if (itemId && POKER_OVERRIDE_KEYS.includes(itemId)) {
-        return <div className={`${className} bg-no-repeat bg-contain`} style={getPokerOverrideStyle(itemId)} title={name} />;
+        return <div className={`${className} bg-no-repeat`} style={getPokerOverrideStyle(itemId)} title={name} />;
     }
     const key = icon.split('|')[0] || 'NOTEBOOK';
     if (!POKER_ITEM_KEYS.includes(key)) {
         return <PixelSprite seed={icon} name={name} className={className} />;
     }
-    return <div className={`${className} bg-no-repeat bg-contain`} style={getPokerItemStyle(icon)} title={name} />;
+    return <div className={`${className} bg-no-repeat`} style={getPokerItemStyle(icon)} title={name} />;
 };
 
 const getPokerCardFaceStyle = (card: PokerCard): React.CSSProperties => {
@@ -397,7 +397,7 @@ const getRankDisplay = (rank: PokerRank) => {
 
 const getSuitIcon = (suit: PokerSuit, isWild?: boolean) => {
     const key = isWild ? 'WILD' : suit;
-    return <span className="inline-block h-6 w-6 bg-no-repeat bg-contain align-middle" style={getPokerOrnamentStyle(key)} />;
+    return <span className="inline-block h-6 w-6 bg-no-repeat align-middle" style={getPokerOrnamentStyle(key)} />;
 };
 
 const getSuitColorClass = (suit: PokerSuit) => {
