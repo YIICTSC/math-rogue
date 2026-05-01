@@ -1,4 +1,3 @@
-import '@fontsource/dotgothic16';
 import './styles.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
