@@ -395,6 +395,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         card.effectId === 'REVIVE_NURSE'
     );
     const isTrueBossPhase2Active = visualEnemies.some(enemy => enemy.enemyType === 'THE_HEART' && enemy.phase === 2);
+    const isPcBrowserViewport = typeof window !== 'undefined' && window.innerWidth >= 900;
 
     useEffect(() => {
         if (enemies.length > 0) {
@@ -807,7 +808,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     };
 
     return (
-        <div className={`battle-scene-root flex flex-col h-full w-full bg-gray-900 text-white relative overflow-hidden ${forceLandscapeSplit ? 'battle-force-split' : ''} ${isShaking ? 'animate-screen-shake' : ''}`}>
+        <div className={`battle-scene-root flex flex-col h-full w-full bg-gray-900 text-white relative overflow-hidden ${forceLandscapeSplit || isPcBrowserViewport ? 'battle-force-split battle-pc-split' : ''} ${isShaking ? 'animate-screen-shake' : ''}`}>
             {finisherCutinCard && (
                 <BattleFinisherCutinOverlay card={finisherCutinCard} languageMode={languageMode} />
             )}
