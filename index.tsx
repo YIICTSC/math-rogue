@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import '@fontsource/dotgothic16';
 import './src/styles.css';
 import App from './src/App';
 
