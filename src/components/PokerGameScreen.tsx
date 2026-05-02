@@ -9,11 +9,16 @@ import {
 import { POKER_HAND_LEVELS, SUPPORTERS_LIBRARY, CONSUMABLES_LIBRARY, PACK_LIBRARY, POKER_ENHANCEMENTS, VOUCHERS_LIBRARY, EXPANDED_SUPPORTER_IDS } from '../constants';
 import { storageService } from '../services/storageService';
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
+import {
+    POKER_ALL_ITEM_SPRITE_COLUMNS,
+    POKER_ALL_ITEM_SPRITE_ENTRIES,
+    POKER_ALL_ITEM_SPRITE_KEYS
+} from '../data/pokerItemSpriteManifest';
 
 // --- Constants & Helpers ---
 const SUITS: PokerSuit[] = ['SPADE', 'HEART', 'DIAMOND', 'CLUB'];
 const RANKS: PokerRank[] = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
-const POKER_ASSET_VERSION = 'after-school-poker-gptimage2-v7';
+const POKER_ASSET_VERSION = 'after-school-poker-gptimage2-v11';
 const POKER_ASSET_BASE = `${import.meta.env.BASE_URL}sprites/`;
 const POKER_ITEM_SHEET = `${POKER_ASSET_BASE}after-school-poker-items.png?v=${POKER_ASSET_VERSION}`;
 const POKER_ORNAMENT_SHEET = `${POKER_ASSET_BASE}after-school-poker-card-ornaments.png?v=${POKER_ASSET_VERSION}`;
@@ -58,7 +63,7 @@ const pokerTableBackgroundStyle: React.CSSProperties = {
     imageRendering: 'pixelated'
 };
 
-const getSpriteSheetStyle = (sheet: string, keys: string[], key: string, columns: number, cellSize: number): React.CSSProperties => {
+const getSpriteSheetStyle = (sheet: string, keys: readonly string[], key: string, columns: number, cellSize: number): React.CSSProperties => {
     const index = Math.max(0, keys.indexOf(key));
     const column = index % columns;
     const row = Math.floor(index / columns);
@@ -99,7 +104,27 @@ const getPokerSupporterFixStyle = (itemId: string): React.CSSProperties => (
     getSpriteSheetStyle(POKER_SUPPORTER_FIX_SHEET, POKER_SUPPORTER_FIX_KEYS, itemId, 2, 64)
 );
 
+const getPokerAllItemStyle = (itemId: string): React.CSSProperties => {
+    const entry = POKER_ALL_ITEM_SPRITE_ENTRIES[itemId as keyof typeof POKER_ALL_ITEM_SPRITE_ENTRIES];
+    if (!entry) return {};
+    const sheetName = `after-school-poker-item-sheet-${String(entry.sheet).padStart(2, '0')}.png`;
+    const col = entry.index % POKER_ALL_ITEM_SPRITE_COLUMNS;
+    const row = Math.floor(entry.index / POKER_ALL_ITEM_SPRITE_COLUMNS);
+    const x = POKER_ALL_ITEM_SPRITE_COLUMNS <= 1 ? 0 : (col / (POKER_ALL_ITEM_SPRITE_COLUMNS - 1)) * 100;
+    const y = POKER_ALL_ITEM_SPRITE_COLUMNS <= 1 ? 0 : (row / (POKER_ALL_ITEM_SPRITE_COLUMNS - 1)) * 100;
+    return {
+        backgroundImage: `url(${POKER_ASSET_BASE}${sheetName}?v=${POKER_ASSET_VERSION})`,
+        backgroundSize: `${POKER_ALL_ITEM_SPRITE_COLUMNS * 100}% ${POKER_ALL_ITEM_SPRITE_COLUMNS * 100}%`,
+        backgroundPosition: `${x}% ${y}%`,
+        backgroundRepeat: 'no-repeat',
+        imageRendering: 'pixelated',
+    };
+};
+
 const renderPokerItemIcon = (icon: string, name: string, className: string, itemId?: string) => {
+    if (itemId && POKER_ALL_ITEM_SPRITE_KEYS.includes(itemId as any)) {
+        return <div className={`${className} bg-no-repeat bg-contain`} style={getPokerAllItemStyle(itemId)} title={name} />;
+    }
     if (itemId && POKER_SUPPORTER_FIX_KEYS.includes(itemId)) {
         return <div className={`${className} bg-no-repeat bg-contain`} style={getPokerSupporterFixStyle(itemId)} title={name} />;
     }
