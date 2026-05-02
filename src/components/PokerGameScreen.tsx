@@ -18,8 +18,9 @@ import {
 // --- Constants & Helpers ---
 const SUITS: PokerSuit[] = ['SPADE', 'HEART', 'DIAMOND', 'CLUB'];
 const RANKS: PokerRank[] = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
-const POKER_ASSET_VERSION = 'after-school-poker-gptimage2-v11';
+const POKER_ASSET_VERSION = 'after-school-poker-gptimage2-v12';
 const POKER_ASSET_BASE = `${import.meta.env.BASE_URL}sprites/`;
+const POKER_RIVAL_SHEET_BASE = `${POKER_ASSET_BASE}after-school-poker-rivals-`;
 const POKER_ITEM_SHEET = `${POKER_ASSET_BASE}after-school-poker-items.png?v=${POKER_ASSET_VERSION}`;
 const POKER_ORNAMENT_SHEET = `${POKER_ASSET_BASE}after-school-poker-card-ornaments.png?v=${POKER_ASSET_VERSION}`;
 const POKER_OVERRIDE_SHEET = `${POKER_ASSET_BASE}after-school-poker-overrides.png?v=${POKER_ASSET_VERSION}`;
@@ -56,6 +57,32 @@ const POKER_STATIONERY_OVERRIDE_KEYS = [
     'TXT_JPN','TXT_SCI','TXT_SOC','TXT_ENG','TXT_ART'
 ];
 const POKER_SUPPORTER_FIX_KEYS = ['SUP_PIGGY','SUP_LUCKY7'];
+const POKER_RIVALS = [
+    { id: 'rival_lucky_nanami', name: 'ラッキー七海' },
+    { id: 'rival_math_bancho', name: '計算番長' },
+    { id: 'rival_stationery_leo', name: '文具王レオ' },
+    { id: 'rival_lunch_misuzu', name: '給食マスター美鈴' },
+    { id: 'rival_iron_hayato', name: '鉄壁ハヤト' },
+    { id: 'rival_music_sora', name: '音楽室のソラ' },
+    { id: 'rival_science_rika', name: '理科室リカ' },
+    { id: 'rival_library_ren', name: '図書委員レン' },
+    { id: 'rival_discipline_ayame', name: '風紀のアヤメ' },
+    { id: 'rival_art_momo', name: '美術部モモ' },
+    { id: 'rival_track_kakeru', name: '陸上カケル' },
+    { id: 'rival_occult_kurosaki', name: 'オカルト黒崎' },
+    { id: 'rival_president_karen', name: '生徒会長カレン' },
+    { id: 'rival_baseball_takumi', name: '野球部タクミ' },
+    { id: 'rival_twins_minato', name: '双子のミナト' },
+    { id: 'rival_tea_yui', name: '茶道のユイ' },
+    { id: 'rival_alien_aru', name: '宇宙転校生アル' },
+    { id: 'rival_principal_shion', name: '校長の孫シオン' },
+    { id: 'rival_galaxy_mio', name: '銀河ノートのミオ' },
+    { id: 'rival_shop_goro', name: '購買部ゴロー' },
+    { id: 'rival_maze_rin', name: '迷路名人リン' },
+    { id: 'rival_raffle_hina', name: '福引きヒナ' },
+    { id: 'rival_hidden_jin', name: '裏番長ジン' },
+    { id: 'rival_graduate_akira', name: '卒業王アキラ' },
+] as const;
 const pokerTableBackgroundStyle: React.CSSProperties = {
     backgroundImage: `linear-gradient(rgba(6, 8, 18, 0.36), rgba(6, 8, 18, 0.42)), url(${POKER_TABLE_IMAGE})`,
     backgroundSize: 'cover',
@@ -103,6 +130,32 @@ const getPokerStationeryOverrideStyle = (itemId: string): React.CSSProperties =>
 const getPokerSupporterFixStyle = (itemId: string): React.CSSProperties => (
     getSpriteSheetStyle(POKER_SUPPORTER_FIX_SHEET, POKER_SUPPORTER_FIX_KEYS, itemId, 2, 64)
 );
+
+const getPokerRival = (ante: number, index: number) => {
+    const rawIndex = (ante - 1) * 3 + index;
+    const rivalIndex = rawIndex % POKER_RIVALS.length;
+    return { ...POKER_RIVALS[rivalIndex], index: rivalIndex };
+};
+
+const getPokerRivalExpression = (currentScore: number, scoreGoal: number) => {
+    const ratio = scoreGoal > 0 ? currentScore / scoreGoal : 0;
+    if (ratio >= 1) return 2;
+    if (ratio >= 0.65) return 1;
+    return 0;
+};
+
+const getPokerRivalPortraitStyle = (rivalIndex: number, expression: number): React.CSSProperties => {
+    const sheet = Math.floor(rivalIndex / 3) + 1;
+    const row = rivalIndex % 3;
+    const col = Math.max(0, Math.min(2, expression));
+    return {
+        backgroundImage: `url(${POKER_RIVAL_SHEET_BASE}${String(sheet).padStart(2, '0')}.png?v=${POKER_ASSET_VERSION})`,
+        backgroundSize: '300% 300%',
+        backgroundPosition: `${col * 50}% ${row * 50}%`,
+        backgroundRepeat: 'no-repeat',
+        imageRendering: 'pixelated',
+    };
+};
 
 const getPokerAllItemStyle = (itemId: string): React.CSSProperties => {
     const entry = POKER_ALL_ITEM_SPRITE_ENTRIES[itemId as keyof typeof POKER_ALL_ITEM_SPRITE_ENTRIES];
@@ -213,6 +266,7 @@ const HAND_EXAMPLES: Record<string, { desc: string, cards: {r: string, s: PokerS
 };
 
 const getBlindConfig = (ante: number, index: number): PokerBlind => {
+    const rival = getPokerRival(ante, index);
     // Scaling Logic
     let goal: number;
     if (ante <= 8) {
@@ -225,18 +279,18 @@ const getBlindConfig = (ante: number, index: number): PokerBlind => {
         goal = baseEndless * Math.pow(2.5, ante - 8);
     }
 
-    let name = "Pop Quiz";
+    let name = rival.name;
     let reward = 3 + ante;
     
     if (index === 0) {
-        name = "Pop Quiz (小テスト)";
+        name = rival.name;
         goal = Math.floor(goal * 1.0);
     } else if (index === 1) {
-        name = "Midterm (中間テスト)";
+        name = rival.name;
         goal = Math.floor(goal * 1.5);
         reward += 1;
     } else {
-        name = "Final Exam (期末テスト)";
+        name = rival.name;
         goal = Math.floor(goal * 2.5); // Boss is hard
         reward += 2;
     }
@@ -254,7 +308,7 @@ const getBlindConfig = (ante: number, index: number): PokerBlind => {
         // Cycle boss abilities
         const ability = abilities[(ante - 1) % abilities.length];
         bossAbility = ability.id;
-        name = `${ability.name} (期末テスト)`;
+        name = rival.name;
         desc = ability.desc;
         if (ability.id === 'THE_WALL') goal *= 2;
     }
@@ -266,7 +320,7 @@ const getBlindConfig = (ante: number, index: number): PokerBlind => {
         goal = Math.floor(goal / 10) * 10;
     }
 
-    return { name, scoreGoal: Math.floor(goal), rewardMoney: reward, bossAbility, description: desc };
+    return { name, rivalId: rival.id, rivalName: rival.name, scoreGoal: Math.floor(goal), rewardMoney: reward, bossAbility, description: desc };
 };
 
 const createDeck = (): PokerCard[] => {
@@ -533,6 +587,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
 
       return {
           ...state,
+          currentBlind: getBlindConfig(state.ante, state.blindIndex),
           supporters: hydrateSupporters(state.supporters),
           consumables: hydrateConsumables(state.consumables),
           shopInventory: hydrateShop(state.shopInventory),
@@ -663,6 +718,11 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
           isDisallowed
       };
   }, [selectedCards, runState.hand, runState.handLevels, runState.supporters, runState.currentBlind.bossAbility, runState.lastHandTypePlayed]);
+
+  const currentRivalIndex = Math.max(0, POKER_RIVALS.findIndex(r => r.id === runState.currentBlind.rivalId));
+  const currentRivalName = runState.currentBlind.rivalName || runState.currentBlind.name;
+  const currentRivalExpression = getPokerRivalExpression(runState.currentScore, runState.currentBlind.scoreGoal);
+  const currentRivalPortraitStyle = getPokerRivalPortraitStyle(currentRivalIndex, currentRivalExpression);
 
   // --- Initialization & Auto Save ---
   useEffect(() => {
@@ -1696,13 +1756,13 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                     onClick={proceedToEndless}
                     className="bg-purple-600 hover:bg-purple-500 text-white text-xl font-bold py-4 px-8 rounded-lg shadow-lg border-2 border-purple-300 flex items-center justify-center"
                   >
-                      <RotateCcw className="mr-3" /> Endless Mode
+                      <RotateCcw className="mr-3" /> エンドレスモード
                   </button>
                   <button 
                     onClick={finishRunVictory}
                     className="bg-slate-700 hover:bg-slate-600 text-gray-200 text-lg font-bold py-4 px-8 rounded-lg flex items-center justify-center"
                   >
-                      <ArrowLeft className="mr-3" /> Return to Menu
+                      <ArrowLeft className="mr-3" /> メニューへ
                   </button>
               </div>
           </div>
@@ -1714,21 +1774,23 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       return (
           <div className="flex flex-col h-full w-full bg-slate-900 text-white p-8 items-center justify-center relative font-mono" style={pokerTableBackgroundStyle}>
               <div className="absolute top-4 left-4">
-                  <button onClick={handleQuit} className="text-gray-400 hover:text-white flex items-center"><ArrowLeft className="mr-2"/> Quit</button>
+                  <button onClick={handleQuit} className="text-gray-400 hover:text-white flex items-center"><ArrowLeft className="mr-2"/> 戻る</button>
               </div>
               <div className="text-center animate-in zoom-in duration-300">
-                  <div className="text-2xl text-yellow-500 mb-2 font-bold">ANTE {runState.ante} / 8</div>
-                  {runState.isEndless && <div className="text-purple-400 text-sm font-bold animate-pulse mb-2">ENDLESS MODE</div>}
-                  <div className="text-6xl font-black mb-4 text-white tracking-tighter">{config.name}</div>
+                  <div className="text-2xl text-yellow-500 mb-2 font-bold">第{runState.ante}幕 / 8</div>
+                  {runState.isEndless && <div className="text-purple-400 text-sm font-bold animate-pulse mb-2">エンドレスモード</div>}
+                  <div className="mx-auto mb-3 h-28 w-28 rounded-2xl border-4 border-yellow-400 bg-slate-950/80 bg-no-repeat shadow-[0_0_24px_rgba(250,204,21,0.25)]" style={getPokerRivalPortraitStyle(currentRivalIndex, 0)} />
+                  <div className="text-sm font-black tracking-[0.35em] text-yellow-300">次のライバル</div>
+                  <div className="text-4xl md:text-6xl font-black mb-4 text-white tracking-tighter leading-tight">{config.rivalName || config.name}</div>
                   <div className="bg-slate-800 p-6 rounded-xl border-4 border-slate-600 mb-8 min-w-[300px]">
-                      <div className="text-gray-400 mb-2 text-sm uppercase tracking-widest">Score Goal</div>
+                      <div className="text-gray-400 mb-2 text-sm uppercase tracking-widest">目標スコア</div>
                       <div className="text-5xl font-bold text-red-500 mb-4">{config.scoreGoal.toLocaleString()}</div>
-                      <div className="text-gray-400 mb-2 text-sm uppercase tracking-widest">Reward</div>
+                      <div className="text-gray-400 mb-2 text-sm uppercase tracking-widest">勝利報酬</div>
                       <div className="text-3xl font-bold text-yellow-400 mb-2">${config.rewardMoney}</div>
                       {config.description && <div className="text-purple-300 text-sm mt-4 border-t border-slate-600 pt-2">{config.description}</div>}
                   </div>
                   <button onClick={startBlind} className="bg-red-600 hover:bg-red-500 text-white text-2xl font-bold py-4 px-12 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.5)] animate-pulse flex items-center justify-center mx-auto">
-                      <Play className="mr-2 fill-current"/> START
+                      <Play className="mr-2 fill-current"/> 対戦開始
                   </button>
               </div>
           </div>
@@ -1792,42 +1854,42 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
               {showRoundResult && roundResult && (
                   <div className="absolute inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={closeResultModal}>
                       <div className="bg-slate-800 border-4 border-yellow-500 rounded-lg p-6 w-full max-w-sm shadow-2xl relative animate-in zoom-in duration-300" onClick={e => e.stopPropagation()}>
-                          <h2 className="text-3xl font-black text-white text-center mb-6 border-b border-slate-600 pb-2">ROUND CLEAR</h2>
+                          <h2 className="text-3xl font-black text-white text-center mb-6 border-b border-slate-600 pb-2">ラウンド勝利</h2>
                           
                           <div className="space-y-3 font-mono text-sm mb-6">
                               <div className="flex justify-between items-center text-gray-300">
-                                  <span>Blind Reward</span>
+                                  <span>ライバル撃破報酬</span>
                                   <span className="font-bold text-yellow-400">${roundResult.blind}</span>
                               </div>
                               <div className="flex justify-between items-center text-gray-300">
-                                  <span>Interest</span>
+                                  <span>利息</span>
                                   <span className="font-bold text-yellow-400">${roundResult.interest}</span>
                               </div>
                               <div className="flex justify-between items-center text-gray-300">
-                                  <span>Hands Left</span>
+                                  <span>残り手数</span>
                                   <span className="font-bold text-yellow-400">${roundResult.hands}</span>
                               </div>
                               <div className="flex justify-between items-center text-cyan-300 border-t border-slate-600 pt-2">
-                                  <span className="flex items-center"><Calculator className="mr-2" size={14}/> Math Bonus</span>
+                                  <span className="flex items-center"><Calculator className="mr-2" size={14}/> 計算ボーナス</span>
                                   <span className="font-bold">+${roundResult.math}</span>
                               </div>
                               <div className="flex justify-between items-center text-xl font-black text-white bg-slate-700 p-2 rounded mt-2">
-                                  <span>TOTAL</span>
+                                  <span>合計</span>
                                   <span className="text-yellow-400">${roundResult.blind + roundResult.interest + roundResult.hands + roundResult.math}</span>
                               </div>
                           </div>
                           
                           <button onClick={closeResultModal} className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg flex items-center justify-center shadow-lg transition-colors">
-                              <Check className="mr-2"/> Go to Shop
+                              <Check className="mr-2"/> 購買部へ
                           </button>
                       </div>
                   </div>
               )}
 
               <div className="flex justify-between items-center mb-4 bg-slate-800 p-4 rounded-lg shadow-lg shrink-0">
-                  <h2 className="text-2xl font-bold flex items-center"><ShoppingBag className="mr-2 text-yellow-500"/> School Store</h2>
+                  <h2 className="text-2xl font-bold flex items-center"><ShoppingBag className="mr-2 text-yellow-500"/> 購買部</h2>
                   <div className="text-2xl font-bold text-yellow-400">${runState.money}</div>
-                  <button onClick={nextBlind} className="bg-green-600 hover:bg-green-500 px-6 py-2 rounded font-bold flex items-center shadow-lg transform transition active:translate-y-1">Next Round <ArrowLeft className="rotate-180 inline ml-1"/></button>
+                  <button onClick={nextBlind} className="bg-green-600 hover:bg-green-500 px-6 py-2 rounded font-bold flex items-center shadow-lg transform transition active:translate-y-1">次のライバルへ <ArrowLeft className="rotate-180 inline ml-1"/></button>
               </div>
               
               <div className="flex-grow flex flex-col gap-4 overflow-hidden">
@@ -2051,24 +2113,28 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
 
         <div className="flex flex-col md:flex-row justify-between items-stretch md:items-start p-2 md:p-4 bg-black/60 z-20 shadow-md shrink-0 gap-2">
             <div className="flex gap-2 w-full md:w-auto">
+                <div className="w-16 md:w-20 shrink-0 rounded border border-yellow-500 bg-slate-900/90 p-1 flex flex-col items-center justify-center shadow-lg">
+                    <div className="w-10 h-10 md:w-12 md:h-12 bg-no-repeat bg-contain" style={currentRivalPortraitStyle} title={currentRivalName} />
+                    <div className="mt-0.5 w-full truncate text-center text-[8px] md:text-[9px] font-bold text-yellow-100 leading-tight">{currentRivalName}</div>
+                </div>
                 <div className="flex flex-col items-start bg-slate-800 p-2 rounded border border-slate-600 flex-grow md:w-48 shadow-lg justify-center">
-                    <div className="flex justify-between w-full md:block"><div className="text-[10px] text-red-400 font-bold uppercase">Score Goal</div><div className="text-[10px] text-gray-400 md:mt-1 block md:hidden">Curr: {runState.currentScore.toLocaleString()}</div></div>
+                    <div className="flex justify-between w-full md:block"><div className="text-[10px] text-red-400 font-bold uppercase">目標スコア</div><div className="text-[10px] text-gray-400 md:mt-1 block md:hidden">現在: {runState.currentScore.toLocaleString()}</div></div>
                     <div className="text-xl md:text-3xl font-black text-white leading-tight">{runState.currentBlind.scoreGoal.toLocaleString()}</div>
                     <div className="w-full h-1.5 bg-gray-700 rounded-full mt-1 overflow-hidden"><div className="h-full bg-red-500 transition-all duration-500" style={{ width: `${Math.min(100, (runState.currentScore / runState.currentBlind.scoreGoal) * 100)}%` }}></div></div>
-                    <div className="text-xs text-gray-400 mt-1 hidden md:block">Current: {runState.currentScore.toLocaleString()}</div>
+                    <div className="text-xs text-gray-400 mt-1 hidden md:block">現在: {runState.currentScore.toLocaleString()}</div>
                 </div>
-                <div className="bg-slate-800 p-2 rounded border border-yellow-500 flex flex-col items-center justify-center w-20 md:hidden shrink-0"><div className="text-[10px] text-yellow-400 uppercase">Money</div><div className="text-lg font-bold text-yellow-400">${runState.money}</div></div>
+                <div className="bg-slate-800 p-2 rounded border border-yellow-500 flex flex-col items-center justify-center w-20 md:hidden shrink-0"><div className="text-[10px] text-yellow-400 uppercase">所持金</div><div className="text-lg font-bold text-yellow-400">${runState.money}</div></div>
             </div>
             <div className="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto">
                 <div className="flex gap-2">
-                    <button onClick={() => { setShowRulesModal(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><HelpCircle size={18} className="md:w-5 md:h-5 text-yellow-400"/><span className="text-[9px] md:text-[10px] leading-none mt-1">Rules</span></button>
-                    <button onClick={() => { setShowDeckList(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><Layers size={18} className="md:w-5 md:h-5"/><span className="text-[9px] md:text-[10px] leading-none mt-1">Deck</span></button>
-                    <button onClick={() => { setShowHandList(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><BarChart3 size={18} className="md:w-5 md:h-5"/><span className="text-[9px] md:text-[10px] leading-none mt-1">Levels</span></button>
+                    <button onClick={() => { setShowRulesModal(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><HelpCircle size={18} className="md:w-5 md:h-5 text-yellow-400"/><span className="text-[9px] md:text-[10px] leading-none mt-1">ルール</span></button>
+                    <button onClick={() => { setShowDeckList(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><Layers size={18} className="md:w-5 md:h-5"/><span className="text-[9px] md:text-[10px] leading-none mt-1">山札</span></button>
+                    <button onClick={() => { setShowHandList(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><BarChart3 size={18} className="md:w-5 md:h-5"/><span className="text-[9px] md:text-[10px] leading-none mt-1">役</span></button>
                 </div>
                 <div className="flex gap-2">
-                    <div className="bg-slate-800 p-1 md:p-2 rounded border border-blue-600 flex flex-col items-center w-14 md:w-20 justify-center"><div className="text-[9px] md:text-[10px] text-blue-400 uppercase">Hands</div><div className="text-base md:text-lg font-bold text-blue-100">{runState.handsRemaining}</div></div>
-                    <div className="bg-slate-800 p-1 md:p-2 rounded border border-red-900 flex flex-col items-center w-14 md:w-20 justify-center"><div className="text-[9px] md:text-[10px] text-red-400 uppercase">Disc</div><div className="text-base md:text-lg font-bold text-red-100">{runState.discardsRemaining}</div></div>
-                    <div className="bg-slate-800 p-2 rounded border border-yellow-500 hidden md:flex flex-col items-center w-20 justify-center"><div className="text-[10px] text-yellow-400 uppercase">Money</div><div className="text-lg font-bold text-yellow-400">${runState.money}</div></div>
+                    <div className="bg-slate-800 p-1 md:p-2 rounded border border-blue-600 flex flex-col items-center w-14 md:w-20 justify-center"><div className="text-[9px] md:text-[10px] text-blue-400 uppercase">手数</div><div className="text-base md:text-lg font-bold text-blue-100">{runState.handsRemaining}</div></div>
+                    <div className="bg-slate-800 p-1 md:p-2 rounded border border-red-900 flex flex-col items-center w-14 md:w-20 justify-center"><div className="text-[9px] md:text-[10px] text-red-400 uppercase">捨札</div><div className="text-base md:text-lg font-bold text-red-100">{runState.discardsRemaining}</div></div>
+                    <div className="bg-slate-800 p-2 rounded border border-yellow-500 hidden md:flex flex-col items-center w-20 justify-center"><div className="text-[10px] text-yellow-400 uppercase">所持金</div><div className="text-lg font-bold text-yellow-400">${runState.money}</div></div>
                 </div>
             </div>
         </div>

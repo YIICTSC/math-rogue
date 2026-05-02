@@ -587,6 +587,8 @@ export interface PokerVoucher {
 
 export interface PokerBlind {
   name: string;
+  rivalId?: string;
+  rivalName?: string;
   scoreGoal: number;
   rewardMoney: number;
   bossAbility?: string;
