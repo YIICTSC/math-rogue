@@ -1892,7 +1892,7 @@ const buildScienceSupplementProblem = (unitName: string, index: number): General
     (label) => q(`${label}の 予想を立てるときに よい考え方は？`, 'これまでの観察や知識をもとにする', 'さいころで決める', '一番長い選択肢を選ぶ', '友だちと同じにするだけ', '根拠のある予想にする。'),
     (label) => q(`${label}で うまくいかなかった実験の扱いとして 正しいものは？`, '条件や手順を見直してもう一度考える', '結果をなかったことにする', '記録をすてる', '答えだけ写す', '失敗も考察の材料になる。'),
   ];
-  return variants[index % variants.length](`【${unitName}】確認${Math.floor(index / variants.length) + 1}`);
+  return variants[index % variants.length](unitName);
 };
 
 const ensureMinimumUnitProblems = (unitName: string, problems: GeneralProblem[]): GeneralProblem[] => {

@@ -30,7 +30,7 @@ export const cycleProblems = (problems: GeneralProblem[]) => {
     const round = Math.floor(result.length / problems.length) + 1;
     result.push({
       ...base,
-      question: `${base.question}\n復習${round}`,
+      question: base.question,
     });
   }
   return result;
@@ -171,13 +171,13 @@ export const buildFixedChoiceUnit = (
 
   items.forEach((item, index) => {
     fixed.push({
-      question: `【${unitTitle}】「${item.en}」の意味として正しいものを1つ選ぼう。`,
+      question: `「${item.en}」の意味として正しいものを1つ選ぼう。`,
       answer: item.jp,
       options: d(item.jp, ...pickDistinct(jpPool, item.jp, index + 1, 3)),
       hint: '単語の意味を確認しよう。',
     });
     fixed.push({
-      question: `【${unitTitle}】「${item.jp}」を英語で表すとどれ？`,
+      question: `「${item.jp}」を英語で表すとどれ？`,
       answer: item.en,
       options: d(item.en, ...pickDistinct(enPool, item.en, index + 2, 3)),
       hint: '英語表現を選ぼう。',
@@ -187,7 +187,7 @@ export const buildFixedChoiceUnit = (
   while (fixed.length < MIN_ENGLISH_UNIT_PROBLEMS) {
     const item = items[fixed.length % items.length];
     fixed.push({
-      question: `【${unitTitle}】復習：${item.jp} に当てはまる英語は？`,
+      question: `${item.jp} に当てはまる英語は？`,
       answer: item.en,
       options: d(item.en, ...pickDistinct(enPool, item.en, fixed.length + 1, 3)),
       hint: '4つの選択肢から選ぼう。',
