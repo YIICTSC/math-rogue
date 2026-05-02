@@ -2009,7 +2009,7 @@ const buildSocialSupplementProblem = (unitName: string, index: number): GeneralP
     (label) => q(`${label}で 複数の資料を比べる目的は？`, '一つの資料だけでは見えない特色を見つけるため', '答えを長くするため', '文字を増やすため', '地図を隠すため', '資料を組み合わせて考える。'),
     (label) => q(`${label}の 学習を生活とつなげるときに見るものは？`, '今のくらしや地域との関係', 'えんぴつの色だけ', '机の形だけ', '天気だけ', '社会の学習は身近な生活にもつながる。'),
   ];
-  return variants[index % variants.length](`【${unitName}】確認${Math.floor(index / variants.length) + 1}`);
+  return variants[index % variants.length](unitName);
 };
 
 const ensureMinimumUnitProblems = (unitName: string, problems: GeneralProblem[]): GeneralProblem[] => {
