@@ -427,11 +427,18 @@ const getHandResult = (cards: PokerCard[], supporters: PokerSupporter[] = []): {
     // Check for rule-bending supporters
     const hasFourFingers = supporters.some(s => s.id === 'SUP_CLOVER'); 
     const hasShortcut = supporters.some(s => s.id === 'SUP_SHORTCUT'); 
+    const hasYearbook = supporters.some(s => s.id === 'SUP_YEARBOOK');
 
     const reqCount = hasFourFingers ? 4 : 5;
+    const getEffectiveRank = (card: PokerCard): PokerRank => {
+        if (!hasYearbook) return card.rank;
+        if (card.rank <= 5) return 11;
+        if (card.rank <= 10) return 12;
+        return 13;
+    };
 
     const sorted = [...cards].sort((a, b) => a.rank - b.rank);
-    const ranks = sorted.map(c => c.rank);
+    const ranks = sorted.map(getEffectiveRank);
     
     // Flush Check
     let isFlush = false;
@@ -493,7 +500,7 @@ const getHandResult = (cards: PokerCard[], supporters: PokerSupporter[] = []): {
 
     if (countsValues[0] >= 5) {
         const rank = Object.keys(counts).find(key => counts[Number(key)] >= 5);
-        return { type: 'FIVE_OF_A_KIND', cards: sorted.filter(c => c.rank === Number(rank)) };
+        return { type: 'FIVE_OF_A_KIND', cards: sorted.filter(c => getEffectiveRank(c) === Number(rank)) };
     }
 
     if (isFlush && isStraight) {
@@ -503,7 +510,7 @@ const getHandResult = (cards: PokerCard[], supporters: PokerSupporter[] = []): {
     
     if (countsValues[0] === 4) {
         const rank = Object.keys(counts).find(key => counts[Number(key)] === 4);
-        return { type: 'FOUR_OF_A_KIND', cards: sorted.filter(c => c.rank === Number(rank)) };
+        return { type: 'FOUR_OF_A_KIND', cards: sorted.filter(c => getEffectiveRank(c) === Number(rank)) };
     }
     
     if (countsValues[0] === 3 && countsValues[1] >= 2) {
@@ -517,17 +524,17 @@ const getHandResult = (cards: PokerCard[], supporters: PokerSupporter[] = []): {
     
     if (countsValues[0] === 3) {
         const rank = Object.keys(counts).find(key => counts[Number(key)] === 3);
-        return { type: 'THREE_OF_A_KIND', cards: sorted.filter(c => c.rank === Number(rank)) };
+        return { type: 'THREE_OF_A_KIND', cards: sorted.filter(c => getEffectiveRank(c) === Number(rank)) };
     }
     
     if (countsValues[0] === 2 && countsValues[1] === 2) {
         const pairRanks = Object.keys(counts).filter(key => counts[Number(key)] === 2).map(Number);
-        return { type: 'TWO_PAIR', cards: sorted.filter(c => pairRanks.includes(c.rank)) };
+        return { type: 'TWO_PAIR', cards: sorted.filter(c => pairRanks.includes(getEffectiveRank(c))) };
     }
     
     if (countsValues[0] === 2) {
         const rank = Object.keys(counts).find(key => counts[Number(key)] === 2);
-        return { type: 'PAIR', cards: sorted.filter(c => c.rank === Number(rank)) };
+        return { type: 'PAIR', cards: sorted.filter(c => getEffectiveRank(c) === Number(rank)) };
     }
     
     return { type: 'HIGH_CARD', cards: [sorted[sorted.length - 1]] }; 
@@ -599,6 +606,7 @@ type ScoreBreakdownEntry = {
   chipsDelta?: number;
   multDelta?: number;
   multFactor?: number;
+  moneyDelta?: number;
   accent?: 'chips' | 'mult' | 'special';
 };
 
@@ -942,8 +950,11 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       const heldCards = runState.hand.filter(c => !selectedCards.includes(c.id));
       const { type, cards: scoringCards } = getHandResult(playedCards, runState.supporters);
       const breakdown: ScoreBreakdownEntry[] = [];
+      const maxHandsForBlind = runState.currentBlind.bossAbility === 'THE_NEEDLE' ? 1 : 4;
+      const handsPlayedThisBlind = maxHandsForBlind - runState.handsRemaining + 1;
       
-      const level = runState.handLevels[type] || 1;
+      const spaceLevelUp = runState.supporters.some(s => s.id === 'SUP_SPACE') && Math.random() < 0.25;
+      const level = (runState.handLevels[type] || 1) + (spaceLevelUp ? 1 : 0);
       const baseStats = POKER_HAND_LEVELS[type];
       
       // Boss Constraint: THE_EYE (Cannot repeat hand types)
@@ -953,6 +964,13 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       let mult = isDisallowed ? 0 : (baseStats.baseMult + (level - 1) * 1);
 
       if (!isDisallowed) {
+          if (spaceLevelUp) {
+              breakdown.push({
+                  id: `space-${Date.now()}`,
+                  label: `宇宙人がひらめいた (${baseStats.name} Lv.${level})`,
+                  accent: 'special'
+              });
+          }
           breakdown.push({
               id: `base-${Date.now()}`,
               label: `${baseStats.name} Lv.${level}`,
@@ -967,6 +985,29 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       const scoringCardAdjustmentEntries: ScoreBreakdownEntry[] = [];
       let totalScoringCardChipGain = 0;
       let totalScoringCardMultGain = 0;
+      const vampireAbsorbedCards = runState.supporters.some(s => s.id === 'SUP_VAMPIRE')
+          ? scoringCards.filter(c => c.enhancement)
+          : [];
+      const vampireAbsorbedIds = new Set(vampireAbsorbedCards.map(c => c.id));
+      const scoringCounters = { ...runState.persistentCounters };
+      const dnaCloneCard = runState.supporters.some(s => s.id === 'SUP_DNA') && handsPlayedThisBlind === 1 && playedCards.length === 1
+          ? { ...playedCards[0], id: `dna-${Date.now()}-${Math.random()}`, isSelected: false }
+          : null;
+      if (vampireAbsorbedCards.length > 0) {
+          scoringCounters['VAMPIRE_ABSORBED'] = (scoringCounters['VAMPIRE_ABSORBED'] || 0) + vampireAbsorbedCards.length;
+          breakdown.push({
+              id: `vampire-absorb-${Date.now()}`,
+              label: `吸血鬼が強化を吸収 (${vampireAbsorbedCards.length}枚 / 永続 x${(1 + scoringCounters['VAMPIRE_ABSORBED'] * 0.2).toFixed(1)})`,
+              accent: 'special'
+          });
+      }
+      if (dnaCloneCard) {
+          breakdown.push({
+              id: `dna-${Date.now()}`,
+              label: `クローン実験で ${formatPokerCardLabel(playedCards[0])} をデッキにコピー`,
+              accent: 'special'
+          });
+      }
 
       scoringCards.forEach(c => {
           let val = c.rank;
@@ -1023,33 +1064,39 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       });
 
       const ctx: PokerScoringContext = {
-          chips, mult, handType: type, cards: scoringCards,
-          handsPlayed: (4 - runState.handsRemaining) + 1,
+          chips, mult, handType: type, cards: scoringCards, handCards: runState.hand,
+          handsPlayed: handsPlayedThisBlind,
+          handsRemaining: runState.handsRemaining,
           discardsUsed: (3 - runState.discardsRemaining),
           discardsRemaining: runState.discardsRemaining,
+          consumablesCount: runState.consumables.length,
+          moneyDelta: 0,
           deckState: runState.deck,
           money: runState.money,
-          persistentCounters: runState.persistentCounters
+          persistentCounters: scoringCounters
       };
       
       runState.supporters.forEach(s => {
           if (s.triggerOn !== 'HAND_PLAYED' && s.triggerOn) return;
           const beforeChips = ctx.chips;
           const beforeMult = ctx.mult;
+          const beforeMoneyDelta = ctx.moneyDelta;
           s.effect(ctx);
           const chipDelta = Math.floor(ctx.chips - beforeChips);
           const multDelta = Math.floor(ctx.mult - beforeMult);
+          const moneyDelta = Math.floor(ctx.moneyDelta - beforeMoneyDelta);
           const multFactor = beforeMult !== 0 && ctx.mult !== beforeMult && Math.abs(multDelta) === 0
               ? Number((ctx.mult / beforeMult).toFixed(2))
               : undefined;
-          if (chipDelta !== 0 || multDelta !== 0 || (multFactor !== undefined && multFactor !== 1)) {
+          if (chipDelta !== 0 || multDelta !== 0 || moneyDelta !== 0 || (multFactor !== undefined && multFactor !== 1)) {
               breakdown.push({
                   id: `supporter-${s.id}-${breakdown.length}`,
                   label: s.name,
                   chipsDelta: chipDelta !== 0 ? chipDelta : undefined,
                   multDelta: multDelta !== 0 ? multDelta : undefined,
+                  moneyDelta: moneyDelta !== 0 ? moneyDelta : undefined,
                   multFactor: multFactor !== undefined && multFactor !== 1 ? multFactor : undefined,
-                  accent: multDelta !== 0 || multFactor ? 'mult' : 'chips'
+                  accent: moneyDelta !== 0 ? 'special' : (multDelta !== 0 || multFactor ? 'mult' : 'chips')
               });
           }
       });
@@ -1087,6 +1134,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
 
       chips = Math.floor(ctx.chips);
       mult = Math.floor(ctx.mult);
+      bonusMoney += Math.floor(ctx.moneyDelta);
       const score = chips * mult;
       const handName = isDisallowed ? "制約により無効" : baseStats.name;
 
@@ -1142,11 +1190,22 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       }
 
       const newScore = runState.currentScore + score;
-      const remainingPlayedCards = playedCards.filter(c => !cardsToDestroy.includes(c.id));
+      const removeVampireAbsorbedEnhancement = (card: PokerCard): PokerCard => {
+          if (!vampireAbsorbedIds.has(card.id)) return card;
+          return {
+              ...card,
+              enhancement: undefined,
+              bonusChips: 0,
+              multMultiplier: 1
+          };
+      };
+      const remainingPlayedCards = playedCards
+          .filter(c => !cardsToDestroy.includes(c.id))
+          .map(removeVampireAbsorbedEnhancement);
       
-      let newHand = heldCards;
-      let currentDeck = [...runState.deck];
-      let newDiscardPile = [...runState.discardPile, ...remainingPlayedCards];
+      let newHand = heldCards.map(removeVampireAbsorbedEnhancement);
+      let currentDeck = runState.deck.map(removeVampireAbsorbedEnhancement);
+      let newDiscardPile = [...runState.discardPile.map(removeVampireAbsorbedEnhancement), ...remainingPlayedCards];
       
       if (runState.currentBlind.bossAbility === 'THE_HOOK') {
           if (newHand.length > 0) {
@@ -1165,14 +1224,23 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
           const drawn = currentDeck.splice(0, drawCount);
           newHand = [...newHand, ...drawn];
       }
+      if (dnaCloneCard) {
+          currentDeck.push(removeVampireAbsorbedEnhancement(dnaCloneCard));
+      }
       newHand.sort((a, b) => b.rank - a.rank);
 
       setRunState(prev => {
           const newCounters = { ...prev.persistentCounters };
           newCounters['HANDS_PLAYED'] = (newCounters['HANDS_PLAYED'] || 0) + 1;
+          if (vampireAbsorbedCards.length > 0) {
+              newCounters['VAMPIRE_ABSORBED'] = (newCounters['VAMPIRE_ABSORBED'] || 0) + vampireAbsorbedCards.length;
+          }
           if (type === 'STRAIGHT' || type === 'STRAIGHT_FLUSH' || type === 'ROYAL_FLUSH') {
               newCounters['STRAIGHTS_PLAYED'] = (newCounters['STRAIGHTS_PLAYED'] || 0) + 1;
           }
+          const nextHandLevels = spaceLevelUp
+              ? { ...prev.handLevels, [type]: Math.max(prev.handLevels[type] || 1, level) }
+              : prev.handLevels;
 
           return {
             ...prev,
@@ -1183,6 +1251,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
             handsRemaining: prev.handsRemaining - 1,
             money: prev.money + bonusMoney,
             persistentCounters: newCounters,
+            handLevels: nextHandLevels,
             lastHandTypePlayed: type // Record last hand for "The Eye"
           }
       });
@@ -2087,6 +2156,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                                   {entry.chipsDelta !== undefined && <span className="text-cyan-300">+{entry.chipsDelta}</span>}
                                   {entry.multDelta !== undefined && <span className="text-rose-300">+{entry.multDelta}M</span>}
                                   {entry.multFactor !== undefined && <span className="text-yellow-300">x{entry.multFactor}</span>}
+                                  {entry.moneyDelta !== undefined && <span className="text-emerald-300">+${entry.moneyDelta}</span>}
                               </div>
                           </div>
                       ))}

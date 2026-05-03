@@ -807,7 +807,15 @@ export const SUPPORTERS_LIBRARY: PokerSupporter[] = [
 
     // Special Mechanics
     { id: 'SUP_DNA', name: 'クローン実験', description: '最初のハンドが1枚なら、そのカードをコピーしてデッキに加える', price: 8, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: () => { }, icon: 'SLIME|#00bcd4' },
-    { id: 'SUP_VAMPIRE', name: '吸血鬼', description: '得点カードの強化を吸い取り、倍率x0.2を得る(永続)', price: 7, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => ctx.mult *= 2, icon: 'GHOST|#f44336' },
+    {
+        id: 'SUP_VAMPIRE', name: '吸血鬼', description: '強化カードを得点カードとして出した時に吸収。吸収1枚ごとに永続倍率がx0.2ずつ上がる', price: 7, rarity: 'RARE', triggerOn: 'HAND_PLAYED',
+        effect: (ctx) => {
+            const absorbed = ctx.persistentCounters['VAMPIRE_ABSORBED'] || 0;
+            if (absorbed > 0) ctx.mult *= (1 + absorbed * 0.2);
+        },
+        getDynamicDescription: (state) => `(現在: x${(1 + (state.persistentCounters['VAMPIRE_ABSORBED'] || 0) * 0.2).toFixed(1)})`,
+        icon: 'GHOST|#f44336'
+    },
     { id: 'SUP_SPACE', name: '宇宙人', description: '1/4の確率で役のレベルを上げる', price: 6, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: () => { }, icon: 'ALIEN|#9c27b0' },
 
     // Conditional / Type Specific
@@ -817,14 +825,14 @@ export const SUPPORTERS_LIBRARY: PokerSupporter[] = [
     { id: 'SUP_HALF', name: 'ハーフパンツ', description: '3枚以下の役なら倍率+20', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if (ctx.cards.length <= 3) ctx.mult += 20; }, icon: 'SHOE|#ff5722' },
     {
         id: 'SUP_BANNER', name: '校旗', description: '残りの手札捨て回数につきチップ+40', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED',
-        effect: (ctx) => ctx.chips += ctx.discardsUsed * 40,
+        effect: (ctx) => ctx.chips += ctx.discardsRemaining * 40,
         getDynamicDescription: (state) => `(Current: +${state.discardsRemaining * 40})`,
         icon: 'FLIER|#ffeb3b'
     },
     {
-        id: 'SUP_ICE_CREAM', name: '溶けたアイス', description: 'チップ+100、手札を出すたび-5', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED',
-        effect: (ctx) => ctx.chips += Math.max(0, 100 - (ctx.handsPlayed * 5)),
-        getDynamicDescription: (state) => `(Current: +${Math.max(0, 100 - ((state.currentBlind.bossAbility === 'THE_NEEDLE' ? 1 : 4) - state.handsRemaining) * 5)})`,
+        id: 'SUP_ICE_CREAM', name: '溶けたアイス', description: 'チップ+100から開始。手札を出すたび、このラン中ずっと-5', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED',
+        effect: (ctx) => ctx.chips += Math.max(0, 100 - ((ctx.persistentCounters['HANDS_PLAYED'] || 0) * 5)),
+        getDynamicDescription: (state) => `(現在: +${Math.max(0, 100 - ((state.persistentCounters['HANDS_PLAYED'] || 0) * 5))})`,
         icon: 'SLIME|#ffffff'
     },
 
@@ -846,17 +854,17 @@ export const SUPPORTERS_LIBRARY: PokerSupporter[] = [
     { id: 'SUP_TWINS', name: '双子', description: '役がワンペアなら倍率x2', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if (ctx.handType === 'PAIR') ctx.mult *= 2; }, icon: 'HUMANOID|#e91e63' },
     { id: 'SUP_RICH_KID', name: '御曹司', description: '所持金が$25以上なら倍率x2', price: 8, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if (ctx.money >= 25) ctx.mult *= 2; }, icon: 'GOLD_BAG|#ffd700' },
     { id: 'SUP_POOR_STUDENT', name: '苦学生', description: '所持金が$5以下なら倍率+15', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if (ctx.money <= 5) ctx.mult += 15; }, icon: 'SLIME|#795548' },
-    { id: 'SUP_LAST_SPURT', name: 'ラストスパート', description: '最後の手札なら倍率x3', price: 7, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if (ctx.handsPlayed === 0) ctx.mult *= 3; }, icon: 'SHIELD|#f44336' },
+    { id: 'SUP_LAST_SPURT', name: 'ラストスパート', description: '最後の手札なら倍率x3', price: 7, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if (ctx.handsRemaining === 1) ctx.mult *= 3; }, icon: 'SHIELD|#f44336' },
     {
         id: 'SUP_START_DASH', name: 'スタートダッシュ', description: '最初の手札なら倍率+15', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => {
-            if (ctx.handsPlayed >= 3) ctx.mult += 15;
+            if (ctx.handsPlayed === 1) ctx.mult += 15;
         }, icon: 'SWORD|#f44336'
     },
 
     // Meta / Collection
     {
         id: 'SUP_SNACKER', name: '買い食い', description: '所持している消費アイテム1つにつき倍率+4', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED',
-        effect: (ctx) => { },
+        effect: (ctx) => { ctx.mult += ctx.consumablesCount * 4; },
         icon: 'POTION|#ff9800'
     },
     {
@@ -872,7 +880,7 @@ export const SUPPORTERS_LIBRARY: PokerSupporter[] = [
     { id: 'SUP_GLASS_BLOWER', name: 'ガラス職人', description: '得点カードのガラスカード1枚につき倍率x1.5', price: 7, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const count = ctx.cards.filter(c => c.enhancement === 'GLASS').length; if (count > 0) ctx.mult *= Math.pow(1.5, count); }, icon: 'POTION|#a5f3fc' },
     {
         id: 'SUP_ALCHEMIST', name: '錬金術師', description: '得点カードのゴールドカード1枚につき$2獲得', price: 7, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => {
-            const count = ctx.cards.filter(c => c.enhancement === 'GOLD').length; ctx.chips += count * 50;
+            const count = ctx.cards.filter(c => c.enhancement === 'GOLD').length; ctx.moneyDelta += count * 2;
         }, icon: 'SWORD|#ffc107'
     },
     { id: 'SUP_PRESIDENT', name: '生徒会長', description: '役がハイカードなら倍率x3', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if (ctx.handType === 'HIGH_CARD') ctx.mult *= 3; }, icon: 'BOSS|ffeb3b' },
@@ -892,8 +900,8 @@ export const SUPPORTERS_LIBRARY: PokerSupporter[] = [
     { id: 'SUP_DELINQUENT', name: 'ヤンキー', description: '絵札1枚につきチップ+45', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const count = ctx.cards.filter(c => [11, 12, 13].includes(c.rank)).length; ctx.chips += count * 45; }, icon: 'GHOST|#8d6e63' },
     { id: 'SUP_PERFECT_ATTENDANCE', name: '皆勤賞', description: '残り捨て回数が多いほど倍率+6ずつ', price: 7, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { ctx.mult += ctx.discardsRemaining * 6; }, icon: 'SHIELD|#66bb6a' },
     { id: 'SUP_LATE_NIGHT', name: '徹夜組', description: '出した手札数1回につきチップ+25', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { ctx.chips += ctx.handsPlayed * 25; }, icon: 'MOON|#5c6bc0' },
-    { id: 'SUP_HOMEROOM', name: '朝の会', description: '最初の手札ならチップ+120', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if (ctx.handsPlayed >= 3) ctx.chips += 120; }, icon: 'TEACHER|#26a69a' },
-    { id: 'SUP_FINAL_BELL', name: '終礼', description: '最後の手札ならチップ+200', price: 8, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if (ctx.handsPlayed === 0) ctx.chips += 200; }, icon: 'BELL|#ffa726' },
+    { id: 'SUP_HOMEROOM', name: '朝の会', description: '最初の手札ならチップ+120', price: 6, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if (ctx.handsPlayed === 1) ctx.chips += 120; }, icon: 'TEACHER|#26a69a' },
+    { id: 'SUP_FINAL_BELL', name: '終礼', description: '最後の手札ならチップ+200', price: 8, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if (ctx.handsRemaining === 1) ctx.chips += 200; }, icon: 'BELL|#ffa726' },
     { id: 'SUP_SAFETY_HELMET', name: '安全ヘルメット', description: '4枚以下の役ならチップ+90', price: 5, rarity: 'COMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if (ctx.cards.length <= 4) ctx.chips += 90; }, icon: 'SHIELD|#fdd835' },
     { id: 'SUP_CRAM_SCHOOL', name: '学習塾', description: 'ストレート系なら倍率+14', price: 7, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if (ctx.handType.includes('STRAIGHT')) ctx.mult += 14; }, icon: 'NOTEBOOK|#5e35b1' },
     { id: 'SUP_ART_ROOM', name: '美術室', description: 'フラッシュ系なら倍率+14', price: 7, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if (ctx.handType.includes('FLUSH') || ctx.handType === 'FLUSH_HOUSE') ctx.mult += 14; }, icon: 'POTION|#ec407a' },
@@ -912,7 +920,7 @@ export const SUPPORTERS_LIBRARY: PokerSupporter[] = [
     { id: 'SUP_PINNED_NOTICE', name: '掲示板', description: '得点カード5枚ならチップ+140', price: 7, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if (ctx.cards.length >= 5) ctx.chips += 140; }, icon: 'FLAG|#66bb6a' },
     { id: 'SUP_RED_PEN_MASTER', name: '添削名人', description: '倍率補正カード1枚につき倍率+7', price: 7, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const count = ctx.cards.filter(c => c.enhancement === 'MULT' || c.multMultiplier > 1).length; ctx.mult += count * 7; }, icon: 'POTION|#ef5350' },
     { id: 'SUP_BONUS_SEAL', name: 'ごほうびシール', description: 'ボーナスカード1枚につきチップ+80', price: 7, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const count = ctx.cards.filter(c => c.enhancement === 'BONUS').length; ctx.chips += count * 80; }, icon: 'GEM|#66bb6a' },
-    { id: 'SUP_STEEL_HEART', name: '鉄のメンタル', description: '手札内のスチール1枚につき倍率+8', price: 7, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const count = ctx.cards.filter(c => c.enhancement === 'STEEL').length; ctx.mult += count * 8; }, icon: 'SHIELD|#78909c' },
+    { id: 'SUP_STEEL_HEART', name: '鉄のメンタル', description: '手札内のスチール1枚につき倍率+8', price: 7, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const count = ctx.handCards.filter(c => c.enhancement === 'STEEL').length; ctx.mult += count * 8; }, icon: 'SHIELD|#78909c' },
     { id: 'SUP_RAINBOW_CHALK', name: '虹チョーク', description: 'ワイルドカード1枚につき倍率+12', price: 8, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => { const count = ctx.cards.filter(c => c.enhancement === 'WILD').length; ctx.mult += count * 12; }, icon: 'POTION|#7e57c2' },
     { id: 'SUP_HIDDEN_TALENT', name: '隠れた才能', description: 'ハイカードならチップ+220', price: 7, rarity: 'UNCOMMON', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if (ctx.handType === 'HIGH_CARD') ctx.chips += 220; }, icon: 'SPARKLES|#ffca28' },
     { id: 'SUP_IRON_RULE', name: '鉄の校則', description: 'フルハウス以上ならチップ+180', price: 8, rarity: 'RARE', triggerOn: 'HAND_PLAYED', effect: (ctx) => { if (['FULL_HOUSE', 'FLUSH_HOUSE', 'FOUR_OF_A_KIND', 'STRAIGHT_FLUSH', 'ROYAL_FLUSH', 'FIVE_OF_A_KIND', 'FLUSH_FIVE'].includes(ctx.handType)) ctx.chips += 180; }, icon: 'SHIELD|#90a4ae' },

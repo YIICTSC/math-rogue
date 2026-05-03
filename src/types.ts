@@ -536,9 +536,13 @@ export interface PokerScoringContext {
   mult: number;
   handType: string;
   cards: PokerCard[];
+  handCards: PokerCard[];
   handsPlayed: number;
+  handsRemaining: number;
   discardsUsed: number;
   discardsRemaining: number;
+  consumablesCount: number;
+  moneyDelta: number;
   deckState: PokerCard[];
   money: number;
   persistentCounters: Record<string, number>;
