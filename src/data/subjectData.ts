@@ -1,5 +1,5 @@
 
-import { GeneralProblem } from './subjects/utils';
+import { GeneralProblem, normalizeProblemQuestionLabels } from './subjects/utils';
 import { LIFE_G1_DATA } from './subjects/life_g1';
 import { LIFE_G2_DATA } from './subjects/life_g2';
 import { SCIENCE_G3_DATA } from './subjects/science_g3';
@@ -136,7 +136,7 @@ const GENERALIZED_KANJI_DATA: Record<string, GeneralProblem[]> = Object.fromEntr
 
 GENERALIZED_KANJI_DATA.KANJI_MIXED = Object.values(GENERALIZED_KANJI_DATA).flat();
 
-export const SUBJECT_DATA: Record<string, GeneralProblem[]> = {
+const RAW_SUBJECT_DATA: Record<string, GeneralProblem[]> = {
     ...BASE_SUBJECT_DATA,
     ...SCIENCE_UNIT_ALIAS_DATA,
     ...SOCIAL_UNIT_ALIAS_DATA,
@@ -144,3 +144,10 @@ export const SUBJECT_DATA: Record<string, GeneralProblem[]> = {
     ...DEDICATED_SCIENCE_UNIT_DATA,
     ...DEDICATED_SOCIAL_UNIT_DATA,
 };
+
+export const SUBJECT_DATA: Record<string, GeneralProblem[]> = Object.fromEntries(
+    Object.entries(RAW_SUBJECT_DATA).map(([mode, problems]) => [
+        mode,
+        problems.map(normalizeProblemQuestionLabels),
+    ])
+);

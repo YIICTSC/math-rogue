@@ -1,4 +1,4 @@
-import { GeneralProblem, d } from './utils';
+import { GeneralProblem, d, stripReviewStepLabel } from './utils';
 import { SOCIAL_GRADE_UNITS } from '../../socialUnitConfig';
 import { SOCIAL_G3_DATA } from './social_g3';
 import { SOCIAL_G4_DATA } from './social_g4';
@@ -1999,6 +1999,7 @@ const getAssignedSourceSlice = (mode: string, sourceMode: string): GeneralProble
 const MIN_SOCIAL_UNIT_PROBLEMS = 50;
 
 const buildSocialSupplementProblem = (unitName: string, index: number): GeneralProblem => {
+  const cleanUnitName = stripReviewStepLabel(unitName);
   const variants: Array<(label: string) => GeneralProblem> = [
     (label) => q(`${label}を 学ぶとき、資料からまず読み取ることは？`, 'いつ・どこで・何が起きたか', '紙の厚さ', '文字の大きさだけ', '余白の広さ', '資料の基本情報をつかむ。'),
     (label) => q(`${label}で 理由を考えるときに 大切なことは？`, '人々のくらしや社会のしくみと結びつける', '名前だけ暗記する', '一番短い答えを選ぶ', '関係ない数字を見る', '社会科はつながりを考える。'),
@@ -2009,7 +2010,7 @@ const buildSocialSupplementProblem = (unitName: string, index: number): GeneralP
     (label) => q(`${label}で 複数の資料を比べる目的は？`, '一つの資料だけでは見えない特色を見つけるため', '答えを長くするため', '文字を増やすため', '地図を隠すため', '資料を組み合わせて考える。'),
     (label) => q(`${label}の 学習を生活とつなげるときに見るものは？`, '今のくらしや地域との関係', 'えんぴつの色だけ', '机の形だけ', '天気だけ', '社会の学習は身近な生活にもつながる。'),
   ];
-  return variants[index % variants.length](unitName);
+  return variants[index % variants.length](cleanUnitName);
 };
 
 const ensureMinimumUnitProblems = (unitName: string, problems: GeneralProblem[]): GeneralProblem[] => {
