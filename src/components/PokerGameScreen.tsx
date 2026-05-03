@@ -18,9 +18,10 @@ import {
 // --- Constants & Helpers ---
 const SUITS: PokerSuit[] = ['SPADE', 'HEART', 'DIAMOND', 'CLUB'];
 const RANKS: PokerRank[] = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
-const POKER_ASSET_VERSION = 'after-school-poker-gptimage2-v12';
+const POKER_ASSET_VERSION = 'after-school-poker-gptimage2-v13';
 const POKER_ASSET_BASE = `${import.meta.env.BASE_URL}sprites/`;
 const POKER_RIVAL_SHEET_BASE = `${POKER_ASSET_BASE}after-school-poker-rivals-`;
+const POKER_ENDLESS_RIVAL_SHEET_BASE = `${POKER_ASSET_BASE}after-school-poker-endless-rivals-`;
 const POKER_ITEM_SHEET = `${POKER_ASSET_BASE}after-school-poker-items.png?v=${POKER_ASSET_VERSION}`;
 const POKER_ORNAMENT_SHEET = `${POKER_ASSET_BASE}after-school-poker-card-ornaments.png?v=${POKER_ASSET_VERSION}`;
 const POKER_OVERRIDE_SHEET = `${POKER_ASSET_BASE}after-school-poker-overrides.png?v=${POKER_ASSET_VERSION}`;
@@ -83,6 +84,44 @@ const POKER_RIVALS = [
     { id: 'rival_hidden_jin', name: '裏番長ジン' },
     { id: 'rival_graduate_akira', name: '卒業王アキラ' },
 ] as const;
+const POKER_ENDLESS_RIVALS = [
+    { id: 'endless_rival_principal_genda', name: '校長ゲンダ' },
+    { id: 'endless_rival_nurse_makino', name: '保健室マキノ' },
+    { id: 'endless_rival_caretaker_iwata', name: '用務員イワタ' },
+    { id: 'endless_rival_librarian_sumire', name: '図書館司書スミレ' },
+    { id: 'endless_rival_cafeteria_tome', name: '給食長トメ' },
+    { id: 'endless_rival_coach_goro', name: '体育教師ゴロー' },
+    { id: 'endless_rival_crossing_guard_hana', name: '見守りハナさん' },
+    { id: 'endless_rival_stationer_matsui', name: '文房具屋マツイ' },
+    { id: 'endless_rival_bakery_mugi', name: 'パン屋ムギさん' },
+    { id: 'endless_rival_bus_driver_sabu', name: 'バス運転手サブ' },
+    { id: 'endless_rival_flower_rika', name: '花屋リカさん' },
+    { id: 'endless_rival_police_kondo', name: '交番の近藤さん' },
+    { id: 'endless_rival_cat_mike', name: '三毛ねこミケ' },
+    { id: 'endless_rival_dog_pochi', name: 'しば犬ポチ' },
+    { id: 'endless_rival_rabbit_mochi', name: 'うさぎモチ' },
+    { id: 'endless_rival_hamster_kurumi', name: 'ハムスターくるみ' },
+    { id: 'endless_rival_penguin_pen', name: 'ペンギンのペン太' },
+    { id: 'endless_rival_owl_fukuro', name: 'ふくろう博士' },
+    { id: 'endless_rival_art_teacher_daigo', name: '美術教師ダイゴ' },
+    { id: 'endless_rival_music_teacher_otoha', name: '音楽教師オトハ' },
+    { id: 'endless_rival_science_teacher_tsubaki', name: '理科教師ツバキ' },
+    { id: 'endless_rival_math_teacher_sakuma', name: '数学教師サクマ' },
+    { id: 'endless_rival_janitor_robot_jiro', name: '掃除ロボ次郎' },
+    { id: 'endless_rival_pta_madam_reiko', name: 'PTAレイコ' },
+    { id: 'endless_rival_turtle_kamekichi', name: 'かめ吉' },
+    { id: 'endless_rival_sparrow_chun', name: 'すずめのチュン' },
+    { id: 'endless_rival_hedgehog_hari', name: 'はりねずみハリ' },
+    { id: 'endless_rival_red_panda_maru', name: 'レッサーマル' },
+    { id: 'endless_rival_alpaca_paca', name: 'アルパカぱか' },
+    { id: 'endless_rival_fox_kon', name: 'きつねコン' },
+    { id: 'endless_rival_convenience_nana', name: 'コンビニ店長ナナ' },
+    { id: 'endless_rival_bookstore_honda', name: '本屋ホンダ' },
+    { id: 'endless_rival_dentist_shiro', name: '歯医者シロ先生' },
+    { id: 'endless_rival_curry_master_kenta', name: 'カレー屋ケンタ' },
+    { id: 'endless_rival_mailman_hayashi', name: '郵便屋ハヤシ' },
+    { id: 'endless_rival_mayor_sakura', name: '町長サクラ' },
+] as const;
 const pokerTableBackgroundStyle: React.CSSProperties = {
     backgroundImage: `linear-gradient(rgba(6, 8, 18, 0.36), rgba(6, 8, 18, 0.42)), url(${POKER_TABLE_IMAGE})`,
     backgroundSize: 'cover',
@@ -137,6 +176,22 @@ const getPokerRival = (ante: number, index: number) => {
     return { ...POKER_RIVALS[rivalIndex], index: rivalIndex };
 };
 
+const getPokerRivalById = (rivalId?: string) => {
+    const regularIndex = POKER_RIVALS.findIndex(r => r.id === rivalId);
+    if (regularIndex >= 0) return { ...POKER_RIVALS[regularIndex], index: regularIndex, isEndless: false };
+    const endlessIndex = POKER_ENDLESS_RIVALS.findIndex(r => r.id === rivalId);
+    if (endlessIndex >= 0) return { ...POKER_ENDLESS_RIVALS[endlessIndex], index: endlessIndex, isEndless: true };
+    return null;
+};
+
+const getRandomEndlessRival = (excludeId?: string) => {
+    const pool = POKER_ENDLESS_RIVALS.filter(rival => rival.id !== excludeId);
+    const rivalIndexInPool = Math.floor(Math.random() * pool.length);
+    const rival = pool[rivalIndexInPool] || POKER_ENDLESS_RIVALS[0];
+    const rivalIndex = POKER_ENDLESS_RIVALS.findIndex(entry => entry.id === rival.id);
+    return { ...rival, index: Math.max(0, rivalIndex), isEndless: true };
+};
+
 const getPokerRivalExpression = (currentScore: number, scoreGoal: number) => {
     const ratio = scoreGoal > 0 ? currentScore / scoreGoal : 0;
     if (ratio >= 1) return 2;
@@ -144,12 +199,12 @@ const getPokerRivalExpression = (currentScore: number, scoreGoal: number) => {
     return 0;
 };
 
-const getPokerRivalPortraitStyle = (rivalIndex: number, expression: number): React.CSSProperties => {
-    const sheet = Math.floor(rivalIndex / 3) + 1;
-    const row = rivalIndex % 3;
+const getPokerRivalPortraitStyle = (visual: { index: number; isEndless: boolean }, expression: number): React.CSSProperties => {
+    const sheet = Math.floor(visual.index / 3) + 1;
+    const row = visual.index % 3;
     const col = Math.max(0, Math.min(2, expression));
     return {
-        backgroundImage: `url(${POKER_RIVAL_SHEET_BASE}${String(sheet).padStart(2, '0')}.png?v=${POKER_ASSET_VERSION})`,
+        backgroundImage: `url(${visual.isEndless ? POKER_ENDLESS_RIVAL_SHEET_BASE : POKER_RIVAL_SHEET_BASE}${String(sheet).padStart(2, '0')}.png?v=${POKER_ASSET_VERSION})`,
         backgroundSize: '300% 300%',
         backgroundPosition: `${col * 50}% ${row * 50}%`,
         backgroundRepeat: 'no-repeat',
@@ -265,8 +320,10 @@ const HAND_EXAMPLES: Record<string, { desc: string, cards: {r: string, s: PokerS
     }
 };
 
-const getBlindConfig = (ante: number, index: number): PokerBlind => {
-    const rival = getPokerRival(ante, index);
+const getBlindConfig = (ante: number, index: number, rivalId?: string, excludeRivalId?: string): PokerBlind => {
+    const rival = ante > 8
+        ? (getPokerRivalById(rivalId) || getRandomEndlessRival(excludeRivalId))
+        : getPokerRival(ante, index);
     // Scaling Logic
     let goal: number;
     if (ante <= 8) {
@@ -587,7 +644,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
 
       return {
           ...state,
-          currentBlind: getBlindConfig(state.ante, state.blindIndex),
+          currentBlind: getBlindConfig(state.ante, state.blindIndex, state.currentBlind?.rivalId),
           supporters: hydrateSupporters(state.supporters),
           consumables: hydrateConsumables(state.consumables),
           shopInventory: hydrateShop(state.shopInventory),
@@ -719,10 +776,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       };
   }, [selectedCards, runState.hand, runState.handLevels, runState.supporters, runState.currentBlind.bossAbility, runState.lastHandTypePlayed]);
 
-  const currentRivalIndex = Math.max(0, POKER_RIVALS.findIndex(r => r.id === runState.currentBlind.rivalId));
+  const currentRivalVisual = getPokerRivalById(runState.currentBlind.rivalId) || { ...POKER_RIVALS[0], index: 0, isEndless: false };
   const currentRivalName = runState.currentBlind.rivalName || runState.currentBlind.name;
   const currentRivalExpression = getPokerRivalExpression(runState.currentScore, runState.currentBlind.scoreGoal);
-  const currentRivalPortraitStyle = getPokerRivalPortraitStyle(currentRivalIndex, currentRivalExpression);
+  const currentRivalPortraitStyle = getPokerRivalPortraitStyle(currentRivalVisual, currentRivalExpression);
 
   // --- Initialization & Auto Save ---
   useEffect(() => {
@@ -1374,7 +1431,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       let nextIndex = runState.blindIndex + 1;
       let nextAnte = runState.ante;
       if (nextIndex > 2) { nextIndex = 0; nextAnte++; }
-      setRunState(prev => ({ ...prev, ante: nextAnte, blindIndex: nextIndex, currentBlind: getBlindConfig(nextAnte, nextIndex) }));
+      setRunState(prev => ({ ...prev, ante: nextAnte, blindIndex: nextIndex, currentBlind: getBlindConfig(nextAnte, nextIndex, undefined, prev.currentBlind.rivalId) }));
       setPhase('BLIND_SELECT');
   };
 
@@ -1779,7 +1836,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
               <div className="text-center animate-in zoom-in duration-300">
                   <div className="text-2xl text-yellow-500 mb-2 font-bold">第{runState.ante}幕 / 8</div>
                   {runState.isEndless && <div className="text-purple-400 text-sm font-bold animate-pulse mb-2">エンドレスモード</div>}
-                  <div className="mx-auto mb-3 h-28 w-28 rounded-2xl border-4 border-yellow-400 bg-slate-950/80 bg-no-repeat shadow-[0_0_24px_rgba(250,204,21,0.25)]" style={getPokerRivalPortraitStyle(currentRivalIndex, 0)} />
+                  <div className="mx-auto mb-3 h-28 w-28 rounded-2xl border-4 border-yellow-400 bg-slate-950/80 bg-no-repeat shadow-[0_0_24px_rgba(250,204,21,0.25)]" style={getPokerRivalPortraitStyle(currentRivalVisual, 0)} />
                   <div className="text-sm font-black tracking-[0.35em] text-yellow-300">次のライバル</div>
                   <div className="text-4xl md:text-6xl font-black mb-4 text-white tracking-tighter leading-tight">{config.rivalName || config.name}</div>
                   <div className="bg-slate-800 p-6 rounded-xl border-4 border-slate-600 mb-8 min-w-[300px]">
