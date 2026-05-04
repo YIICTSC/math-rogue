@@ -51,6 +51,54 @@ const VIEW_H = 9;
 const TILE_SIZE = 16; 
 const SCALE = 3; 
 const MAX_INVENTORY = 20;
+const FURAI_SHEET_COLUMNS = 5;
+const FURAI_SHEET_PAGE_SIZE = 25;
+const FURAI_SHEET_CELL = 72;
+const FURAI_SHEET_GAP = 16;
+const FURAI_SHEET_PATHS = {
+    hero: 'sprites/furai-sfc-v2-hero-base-5x5.png?v=sfcv2-dirfix2',
+    enemy1: 'sprites/furai-sfc-v2-enemy-5x5-1.png?v=sfcv2',
+    enemy2: 'sprites/furai-sfc-v2-enemy-5x5-2.png?v=sfcv2',
+    enemy3: 'sprites/furai-sfc-v2-enemy-5x5-3.png?v=sfcv2',
+    enemy4: 'sprites/furai-sfc-v2-enemy-5x5-4.png?v=sfcv2',
+    weapons1: 'sprites/furai-sfc-v2-weapons-5x5-1.png?v=sfcv2',
+    weapons2: 'sprites/furai-sfc-v2-weapons-5x5-2.png?v=sfcv2',
+    armor1: 'sprites/furai-sfc-v2-armor-5x5-1.png?v=sfcv2',
+    armor2: 'sprites/furai-sfc-v2-armor-5x5-2.png?v=sfcv2',
+    items1: 'sprites/furai-sfc-v2-items-5x5-1.png?v=sfcv2',
+    items2: 'sprites/furai-sfc-v2-items-5x5-2.png?v=sfcv2',
+    effects: 'sprites/furai-sfc-v2-effects-5x5.png?v=sfcv2',
+} as const;
+type FuraiSheetKey = keyof typeof FURAI_SHEET_PATHS;
+
+const ENEMY_SPRITE_ORDER: EnemyType[] = [
+    'SLIME', 'BAT', 'GHOST', 'DRAIN', 'DRAGON', 'METAL', 'THIEF', 'MANDRAKE',
+    'GOLEM', 'NINJA', 'MAGE', 'SHOPKEEPER', 'BOSS', 'MIMIC', 'NOTEBOOK', 'FIRE_SPIRIT',
+    'BALL', 'CLOCK', 'DUST', 'TEST_MONSTER',
+];
+
+const WEAPON_SPRITE_TYPES = [
+    'PENCIL_SWORD', 'METAL_BAT', 'PROTRACTOR_EDGE', 'OFUDA_RULER', 'VITAMIN_INJECT', 'LADLE', 'STAINLESS_PEN', 'RICH_WATCH',
+    'WOOD_RULER', 'BRASS_TRIANGLE', 'EXAM_CUTTER', 'SCIENCE_SCALPEL', 'GYM_PICKAXE', 'BROOM_NAGINATA', 'FIRE_EXTINGUISHER_LANCE', 'DRAGON_WHISTLE_BLADE',
+    'KAMAITACHI_RULER', 'GHOST_ERASER', 'EYE_PATCH_COMPASS', 'CANTEEN_HAMMER', 'BROKEN_UMBRELLA_SPEAR', 'REPORT_CARD_EDGE', 'CLEANING_MOP_HALBERD', 'DESK_LEG_AXE',
+    'MORNING_BELL_MACE', 'GRADUATION_SHEARS', 'BLACKBOARD_BLADE', 'PRINCIPAL_POINTER', 'MATH_COMPASS_SABER', 'CHALKBOARD_ERASER_AXE', 'RECORDER_RAPIER', 'ART_KNIFE',
+    'STAPLER_MACE', 'LIBRARY_SPEAR', 'LAB_TONGS', 'BELL_RINGER', 'FLOOR_POLISHER_BLADE', 'HOMEWORK_BINDER_CLUB',
+];
+
+const ARMOR_SPRITE_TYPES = [
+    'GYM_CLOTHES', 'RANDO_SERU', 'PRINCIPAL_SHIELD', 'VINYL_APRON', 'NAME_TAG', 'DISASTER_HOOD', 'FIREFIGHTER', 'GOLD_BADGE',
+    'LEATHER_GYM_UNIFORM', 'THICK_TRACKSUIT', 'HARD_RANDO_SERU', 'SCIENCE_GOGGLES_SUIT', 'CLEANING_APRON_PLUS', 'LIBRARY_CARDIGAN', 'BELL_HELMET', 'GOLDEN_NAME_TAG_ARMOR',
+    'RAINCOAT_PONCHO', 'SEWING_CUSHION_VEST', 'ART_ROOM_SMOCK', 'MUSIC_STAND_GUARD', 'CLASS_MONITOR_SASH', 'PRINCIPAL_CURTAIN', 'CEREMONY_HAKAMA', 'PAPER_ARMOR',
+    'LAB_COAT_PLUS', 'GYM_MAT_CAPE', 'LIBRARY_HARD_COVER', 'MUSIC_ROOM_TAILCOAT', 'ROOF_WIND_BREAKER', 'KOCHO_DESK_PLATE', 'CEREMONY_CORSAGE_MAIL',
+];
+
+const GENERAL_ITEM_SPRITE_TYPES = [
+    'GENERIC_UMBRELLA', 'GENERIC_BRACELET', 'GOLD', 'CHALK', 'STONES', 'SHADOW_PIN', 'PAPER_PLANE_BUNDLE', 'THUMBTACK_BOX',
+    'ERASER_SHURIKEN', 'WATER_BALLOON', 'RED_CHALK_BUNDLE', 'MARBLE_POUCH', 'INK_CARTRIDGE', 'MINI_SOCCER_BALL', 'SCROLL_SLEEP', 'SCROLL_THUNDER',
+    'SCROLL_CRISIS', 'SCROLL_BERSERK', 'SCROLL_MAP', 'SCROLL_UP_W', 'SCROLL_UP_A', 'SCROLL_BLANK', 'SCROLL_WARP', 'SCROLL_CONFUSE',
+    'SCROLL_IDENTIFY', 'FOOD_ONIGIRI', 'FOOD_MEAT', 'GRASS_HEAL', 'GRASS_LIFE', 'GRASS_SPEED', 'GRASS_EYE', 'GRASS_POISON',
+    'POT_GLUE', 'POT_CHANGE', 'BOMB', 'TRAP',
+];
 
 const HUNGER_INTERVAL = 10;
 const REGEN_INTERVAL = 5;
@@ -66,7 +114,7 @@ const UNIDENTIFIED_NAMES = [
 type TileType = 'WALL' | 'FLOOR' | 'STAIRS' | 'HALLWAY';
 type Direction = { x: 0 | 1 | -1, y: 0 | 1 | -1 };
 type ItemCategory = 'WEAPON' | 'ARMOR' | 'RANGED' | 'CONSUMABLE' | 'SYNTH' | 'STAFF' | 'ACCESSORY';
-type EnemyType = 'SLIME' | 'GHOST' | 'DRAIN' | 'DRAGON' | 'METAL' | 'FLOATING' | 'THIEF' | 'BAT' | 'BOSS' | 'MANDRAKE' | 'GOLEM' | 'NINJA' | 'MAGE' | 'SHOPKEEPER';
+type EnemyType = 'SLIME' | 'GHOST' | 'DRAIN' | 'DRAGON' | 'METAL' | 'FLOATING' | 'THIEF' | 'BAT' | 'BOSS' | 'MANDRAKE' | 'GOLEM' | 'NINJA' | 'MAGE' | 'SHOPKEEPER' | 'MIMIC' | 'NOTEBOOK' | 'FIRE_SPIRIT' | 'BALL' | 'CLOCK' | 'DUST' | 'TEST_MONSTER';
 type VisualEffectType = 'SLASH' | 'THUNDER' | 'EXPLOSION' | 'TEXT' | 'FLASH' | 'PROJECTILE' | 'WARP' | 'BEAM' | 'MAGIC_PROJ';
 type TrapType = 'BOMB' | 'SLEEP' | 'POISON' | 'WARP' | 'RUST' | 'SUMMON';
 
@@ -286,6 +334,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   const [floorMapRevealed, setFloorMapRevealed] = useState(false); // Map Scroll effect
   const roomsRef = useRef<RoomRect[]>([]); // Keep track of rooms for logic
   const spriteCache = useRef<Record<string, HTMLCanvasElement>>({});
+  const spriteSheetImages = useRef<Partial<Record<FuraiSheetKey, HTMLImageElement>>>({});
+  const [spriteSheetRevision, setSpriteSheetRevision] = useState(0);
   
   const [player, setPlayer] = useState<Entity>({
     id: 0, type: 'PLAYER', x: 1, y: 1, char: '@', name: 'わんぱく小学生', 
@@ -367,6 +417,17 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
     if (player.equipment?.accessory) items.push(player.equipment.accessory);
     return items;
   }, [inventory, player.equipment, gameOver]);
+
+  useEffect(() => {
+    (Object.entries(FURAI_SHEET_PATHS) as [FuraiSheetKey, string][]).forEach(([key, path]) => {
+        const img = new Image();
+        img.onload = () => {
+            spriteSheetImages.current[key] = img;
+            setSpriteSheetRevision(prev => prev + 1);
+        };
+        img.src = `${import.meta.env.BASE_URL}${path}`;
+    });
+  }, []);
 
   // Init
   useEffect(() => {
@@ -532,6 +593,266 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       });
   };
 
+  const stableSpriteIndex = (value: string, modulo: number) => {
+      let hash = 0;
+      for (let i = 0; i < value.length; i++) hash = ((hash << 5) - hash) + value.charCodeAt(i);
+      return Math.abs(hash) % modulo;
+  };
+
+  const drawSheetSprite = (
+      ctx: CanvasRenderingContext2D,
+      sheet: FuraiSheetKey,
+      index: number,
+      dx: number,
+      dy: number,
+      dw: number,
+      dh: number,
+      options: { alpha?: number; inset?: number } = {}
+  ) => {
+      const img = spriteSheetImages.current[sheet];
+      if (!img || !img.complete) return false;
+      const normalizedIndex = ((index % FURAI_SHEET_PAGE_SIZE) + FURAI_SHEET_PAGE_SIZE) % FURAI_SHEET_PAGE_SIZE;
+      const col = normalizedIndex % FURAI_SHEET_COLUMNS;
+      const row = Math.floor(normalizedIndex / FURAI_SHEET_COLUMNS);
+      const sx = FURAI_SHEET_GAP + col * (FURAI_SHEET_CELL + FURAI_SHEET_GAP);
+      const sy = FURAI_SHEET_GAP + row * (FURAI_SHEET_CELL + FURAI_SHEET_GAP);
+      const inset = options.inset || 0;
+      ctx.save();
+      if (options.alpha !== undefined) ctx.globalAlpha = options.alpha;
+      ctx.drawImage(img, sx, sy, FURAI_SHEET_CELL, FURAI_SHEET_CELL, dx + inset, dy + inset, dw - inset * 2, dh - inset * 2);
+      ctx.restore();
+      return true;
+  };
+
+  const getPagedSheet = (base: 'enemy' | 'weapons' | 'armor' | 'items', index: number): { sheet: FuraiSheetKey; cell: number } => {
+      const page = Math.floor(Math.max(0, index) / FURAI_SHEET_PAGE_SIZE) + 1;
+      const sheet = `${base}${page}` as FuraiSheetKey;
+      return { sheet: FURAI_SHEET_PATHS[sheet] ? sheet : `${base}1` as FuraiSheetKey, cell: index % FURAI_SHEET_PAGE_SIZE };
+  };
+
+  const getHeroDirectionIndex = (dir: Direction) => {
+      const key = getDirectionKey(dir, true);
+      return ['S', 'N', 'E', 'W', 'SE', 'SW', 'NE', 'NW'].indexOf(key);
+  };
+
+  const getEnemyDirectionIndex = (dir: Direction) => {
+      const key = getDirectionKey(dir, false);
+      return ['S', 'N', 'E', 'W'].indexOf(key);
+  };
+
+  const getWeaponSpriteIndex = (type?: string) => {
+      if (!type) return -1;
+      const idx = WEAPON_SPRITE_TYPES.indexOf(type);
+      return idx >= 0 ? idx : stableSpriteIndex(type, 64);
+  };
+
+  const getArmorSpriteIndex = (type?: string) => {
+      if (!type) return -1;
+      const idx = ARMOR_SPRITE_TYPES.indexOf(type);
+      return idx >= 0 ? idx : stableSpriteIndex(type, 64);
+  };
+
+  const getGeneralItemSpriteIndex = (item: Entity) => {
+      if (item.type === 'GOLD') return GENERAL_ITEM_SPRITE_TYPES.indexOf('GOLD');
+      const data = item.itemData;
+      if (!data) return 0;
+      if (data.category === 'STAFF') return GENERAL_ITEM_SPRITE_TYPES.indexOf('GENERIC_UMBRELLA');
+      if (data.category === 'ACCESSORY') return GENERAL_ITEM_SPRITE_TYPES.indexOf('GENERIC_BRACELET');
+      const idx = GENERAL_ITEM_SPRITE_TYPES.indexOf(data.type);
+      return idx >= 0 ? idx : stableSpriteIndex(data.type, 64);
+  };
+
+  const drawPlayerFromSheets = (ctx: CanvasRenderingContext2D, entity: Entity, sx: number, sy: number, ts: number) => {
+      const baseIndex = Math.max(0, getHeroDirectionIndex(entity.dir));
+      return drawSheetSprite(ctx, 'hero', baseIndex, sx, sy, ts, ts);
+  };
+
+  const drawEnemyFromSheets = (ctx: CanvasRenderingContext2D, enemy: Entity, sx: number, sy: number, ts: number) => {
+      const enemyBase = ENEMY_SPRITE_ORDER.indexOf(enemy.enemyType || 'SLIME');
+      const enemyIndex = (enemyBase >= 0 ? enemyBase : stableSpriteIndex(enemy.enemyType || enemy.name, 16)) * 4 + Math.max(0, getEnemyDirectionIndex(enemy.dir));
+      const enemySlot = getPagedSheet('enemy', enemyIndex);
+      return drawSheetSprite(ctx, enemySlot.sheet, enemySlot.cell, sx, sy, ts, ts);
+  };
+
+  const drawFloorItemFromSheets = (ctx: CanvasRenderingContext2D, item: Entity, sx: number, sy: number, ts: number) => {
+      const data = item.itemData;
+      if (data?.category === 'WEAPON') {
+          const slot = getPagedSheet('weapons', getWeaponSpriteIndex(data.type));
+          return drawSheetSprite(ctx, slot.sheet, slot.cell, sx, sy, ts, ts);
+      }
+      if (data?.category === 'ARMOR') {
+          const slot = getPagedSheet('armor', getArmorSpriteIndex(data.type));
+          return drawSheetSprite(ctx, slot.sheet, slot.cell, sx, sy, ts, ts);
+      }
+      const slot = getPagedSheet('items', getGeneralItemSpriteIndex(item));
+      return drawSheetSprite(ctx, slot.sheet, slot.cell, sx, sy, ts, ts);
+  };
+
+  const drawEffectFromSheet = (ctx: CanvasRenderingContext2D, type: VisualEffectType, sx: number, sy: number, ts: number, alpha = 1) => {
+      const effectIndexMap: Record<string, number> = { SLASH: 0, EXPLOSION: 1, THUNDER: 2, BEAM: 3, PROJECTILE: 4, MAGIC_PROJ: 4, WARP: 5, FLASH: 6 };
+      return drawSheetSprite(ctx, 'effects', effectIndexMap[type] ?? 7, sx, sy, ts, ts, { alpha });
+  };
+
+  const directionAngle = (dir?: Direction) => {
+      const d = dir || { x: 1, y: 0 };
+      if (d.x === 0 && d.y === 0) return 0;
+      return Math.atan2(d.y, d.x);
+  };
+
+  const drawDirectionalEffectFromSheet = (ctx: CanvasRenderingContext2D, type: VisualEffectType, sx: number, sy: number, ts: number, dir?: Direction, alpha = 1) => {
+      ctx.save();
+      ctx.translate(sx + ts / 2, sy + ts / 2);
+      ctx.rotate(directionAngle(dir));
+      const drew = drawEffectFromSheet(ctx, type, -ts / 2, -ts / 2, ts, alpha);
+      ctx.restore();
+      return drew;
+  };
+
+  const getDirectionKey = (dir: Direction, diagonals: boolean = true) => {
+      if (diagonals && dir.x === -1 && dir.y === -1) return 'NW';
+      if (diagonals && dir.x === 1 && dir.y === -1) return 'NE';
+      if (diagonals && dir.x === -1 && dir.y === 1) return 'SW';
+      if (diagonals && dir.x === 1 && dir.y === 1) return 'SE';
+      if (dir.y === -1) return 'N';
+      if (dir.y === 1) return 'S';
+      if (dir.x === -1) return 'W';
+      if (dir.x === 1) return 'E';
+      return 'S';
+  };
+
+  const getDirectionalBaseSprite = (dirKey: string, seed: string, name: string, isPlayer = false) => {
+      const baseShape = isPlayer
+          ? (dirKey === 'N' ? 'HERO_BACK' : dirKey === 'S' ? 'HERO_FRONT' : 'HERO_SIDE')
+          : name;
+      const base = createPixelSpriteCanvas(seed, baseShape, 16);
+      const canvas = document.createElement('canvas');
+      canvas.width = base.width;
+      canvas.height = base.height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return canvas;
+      ctx.imageSmoothingEnabled = false;
+      const flip = dirKey === 'W' || dirKey === 'NW' || dirKey === 'SW';
+      if (flip) {
+          ctx.translate(canvas.width, 0);
+          ctx.scale(-1, 1);
+      }
+      ctx.drawImage(base, 0, 0);
+      if (flip) ctx.setTransform(1, 0, 0, 1, 0, 0);
+      const px = 8;
+      const cell = (x: number, y: number, color: string) => {
+          ctx.fillStyle = color;
+          ctx.fillRect((x + 1) * px, (y + 1) * px, px, px);
+      };
+      if (dirKey.includes('N')) {
+          cell(6, 3, '#0f380f'); cell(9, 3, '#0f380f');
+      } else if (dirKey.includes('S')) {
+          cell(5, 5, '#0f380f'); cell(10, 5, '#0f380f');
+      } else if (dirKey.includes('E')) {
+          cell(11, 5, '#0f380f'); cell(12, 6, '#0f380f');
+      } else if (dirKey.includes('W')) {
+          cell(4, 5, '#0f380f'); cell(3, 6, '#0f380f');
+      }
+      return canvas;
+  };
+
+  const drawItemPixels = (ctx: CanvasRenderingContext2D, points: [number, number][], color: string) => {
+      const px = 8;
+      ctx.fillStyle = color;
+      points.forEach(([x, y]) => ctx.fillRect((x + 1) * px, (y + 1) * px, px, px));
+  };
+
+  const visualToneFor = (value: string) => {
+      const tones = ['#8bac0f', '#306230', '#9bbc0f', '#5d7f1f', '#6b8e23', '#2f6b46', '#c4a84a', '#7a6f33'];
+      let hash = 0;
+      for (let i = 0; i < value.length; i++) hash = ((hash << 5) - hash) + value.charCodeAt(i);
+      return tones[Math.abs(hash) % tones.length];
+  };
+
+  const getPlayerSpriteCanvas = (entity: Entity) => {
+      const dirKey = getDirectionKey(entity.dir, true);
+      const weaponType = entity.equipment?.weapon?.type || 'NONE';
+      const armorType = entity.equipment?.armor?.type || 'NONE';
+      const cacheKey = `PLAYER_${dirKey}_${weaponType}_${armorType}`;
+      if (spriteCache.current[cacheKey]) return spriteCache.current[cacheKey];
+
+      const canvas = getDirectionalBaseSprite(dirKey, cacheKey, `HERO_${dirKey}|赤`, true);
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+          ctx.imageSmoothingEnabled = false;
+          const weaponColor = entity.equipment?.weapon ? visualToneFor(entity.equipment.weapon.type) : '';
+          const armorColor = entity.equipment?.armor ? visualToneFor(entity.equipment.armor.type + 'armor') : '';
+          if (armorColor) {
+              drawItemPixels(ctx, [[5, 8], [6, 8], [7, 8], [8, 8], [9, 8], [10, 8], [5, 9], [10, 9], [6, 10], [9, 10]], armorColor);
+              if (entity.equipment?.armor?.name.includes('ランドセル') || entity.equipment?.armor?.name.includes('バッグ')) {
+                  drawItemPixels(ctx, [[3, 7], [3, 8], [3, 9], [4, 9]], '#5d4037');
+              }
+              if (entity.equipment?.armor?.name.includes('ヘルメット') || entity.equipment?.armor?.name.includes('頭巾')) {
+                  drawItemPixels(ctx, [[5, 2], [6, 2], [7, 2], [8, 2], [9, 2], [10, 2]], armorColor);
+              }
+          }
+          if (weaponColor) {
+              const left = dirKey === 'W' || dirKey === 'NW' || dirKey === 'SW';
+              const weaponPixels: [number, number][] = left
+                  ? [[3, 7], [2, 8], [2, 9], [1, 10]]
+                  : [[12, 7], [13, 8], [13, 9], [14, 10]];
+              drawItemPixels(ctx, weaponPixels, weaponColor);
+              if (entity.equipment?.weapon?.name.includes('バット') || entity.equipment?.weapon?.name.includes('ハンマー')) {
+                  drawItemPixels(ctx, left ? [[1, 9], [1, 8]] : [[14, 9], [14, 8]], '#3b2f1b');
+              }
+          }
+      }
+      spriteCache.current[cacheKey] = canvas;
+      return canvas;
+  };
+
+  const getEnemySpriteCanvas = (enemy: Entity) => {
+      const dirKey = getDirectionKey(enemy.dir, false);
+      const cacheKey = `ENEMY_${enemy.enemyType || 'SLIME'}_${dirKey}`;
+      if (!spriteCache.current[cacheKey]) {
+          spriteCache.current[cacheKey] = getDirectionalBaseSprite(dirKey, cacheKey, `${enemy.name}|${enemy.enemyType || 'SLIME'}`, false);
+      }
+      return spriteCache.current[cacheKey];
+  };
+
+  const getFloorItemSpriteCanvas = (item: Entity) => {
+      if (item.type === 'GOLD') return spriteCache.current['GOLD_BAG'];
+      const data = item.itemData;
+      if (!data) return spriteCache.current['CONSUMABLE'];
+      const visualKey = data.category === 'STAFF' ? 'GENERIC_UMBRELLA' : data.category === 'ACCESSORY' ? 'GENERIC_BRACELET' : data.type;
+      const cacheKey = `ITEM_${visualKey}`;
+      if (!spriteCache.current[cacheKey]) {
+          const visualName = data.category === 'STAFF' ? 'UMBRELLA|#00BCD4' : data.category === 'ACCESSORY' ? 'SHIELD|#FFD700' : data.name;
+          spriteCache.current[cacheKey] = createPixelSpriteCanvas(cacheKey, visualName, 16);
+      }
+      return spriteCache.current[cacheKey];
+  };
+
+  const getEffectSpriteCanvas = (type: VisualEffectType) => {
+      const cacheKey = `EFFECT_${type}`;
+      if (spriteCache.current[cacheKey]) return spriteCache.current[cacheKey];
+      const base = createPixelSpriteCanvas(cacheKey, type === 'MAGIC_PROJ' ? 'MAGIC_BULLET|#00BCD4' : 'CROSS|#FFFFFF', 16);
+      const canvas = document.createElement('canvas');
+      canvas.width = base.width;
+      canvas.height = base.height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return canvas;
+      ctx.imageSmoothingEnabled = false;
+      const draw = (points: [number, number][], color: string) => drawItemPixels(ctx, points, color);
+      if (type === 'SLASH') {
+          draw([[4, 11], [5, 10], [6, 9], [7, 8], [8, 7], [9, 6], [10, 5], [11, 4], [12, 3]], '#9bbc0f');
+          draw([[6, 11], [7, 10], [8, 9], [9, 8], [10, 7]], '#ffffff');
+      } else if (type === 'EXPLOSION') {
+          draw([[7, 2], [8, 2], [6, 3], [9, 3], [4, 5], [11, 5], [3, 8], [12, 8], [5, 11], [10, 11]], '#f8e878');
+          draw([[7, 5], [8, 5], [6, 6], [7, 6], [8, 6], [9, 6], [6, 7], [7, 7], [8, 7], [9, 7], [7, 8], [8, 8]], '#d95b27');
+      } else if (type === 'PROJECTILE' || type === 'MAGIC_PROJ') {
+          draw([[7, 6], [8, 6], [6, 7], [7, 7], [8, 7], [9, 7], [7, 8], [8, 8], [5, 8], [4, 9]], type === 'MAGIC_PROJ' ? '#00BCD4' : '#9bbc0f');
+      } else if (type === 'WARP') {
+          draw([[7, 3], [8, 3], [9, 4], [10, 5], [10, 6], [9, 7], [8, 7], [7, 7], [6, 8], [6, 9], [7, 10], [8, 10]], '#26c6da');
+      }
+      spriteCache.current[cacheKey] = canvas;
+      return canvas;
+  };
+
   const triggerShake = (duration: number) => {
       shake.current.duration = duration;
   };
@@ -643,14 +964,20 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       } else {
           if (r < 0.20) { t = 'SLIME'; name="スライム"; hp=10+hpScale; atk=3+scaling; xp=5+xpScale; }
           else if (r < 0.35) { t = 'BAT'; name="コウモリ"; hp=8+hpScale; atk=5+scaling; xp=7+xpScale; }
-          else if (r < 0.45 && floorLevel > 2) { t = 'MANDRAKE'; name="人食い植物"; hp=20+hpScale; atk=5+scaling; xp=12+xpScale; }
-          else if (r < 0.60) { t = 'GHOST'; name="浮遊霊"; hp=15+hpScale; atk=4+scaling; xp=10+xpScale; def=2+Math.floor(floorLevel/2); }
-          else if (r < 0.70) { t = 'THIEF'; name="トド"; hp=20+hpScale; atk=2+scaling; xp=15+xpScale; }
-          else if (r < 0.80) { t = 'DRAIN'; name="くさった死体"; hp=30+hpScale; atk=6+scaling; xp=20+xpScale; }
-          else if (r < 0.85 && floorLevel > 5) { t = 'NINJA'; name="忍者ごっこ"; hp=25+hpScale; atk=8+scaling; xp=25+xpScale; }
-          else if (r < 0.90 && floorLevel > 7) { t = 'GOLEM'; name="人体模型"; hp=60+hpScale*1.5; atk=12+scaling; xp=40+xpScale; def=5; }
-          else if (r < 0.95 && floorLevel > 10) { t = 'MAGE'; name="魔法使い"; hp=30+hpScale; atk=10+scaling; xp=35+xpScale; }
-          else if (r < 0.98 && floorLevel > 4) { t = 'DRAGON'; name="ドラゴン"; hp=50+hpScale*2; atk=10+scaling*1.5; xp=50+xpScale*2; }
+          else if (r < 0.42 && floorLevel > 2) { t = 'MANDRAKE'; name="人食い植物"; hp=20+hpScale; atk=5+scaling; xp=12+xpScale; }
+          else if (r < 0.50) { t = 'GHOST'; name="浮遊霊"; hp=15+hpScale; atk=4+scaling; xp=10+xpScale; def=2+Math.floor(floorLevel/2); }
+          else if (r < 0.58) { t = 'NOTEBOOK'; name="呪いのノート"; hp=18+hpScale; atk=5+scaling; xp=16+xpScale; def=1; }
+          else if (r < 0.65) { t = 'THIEF'; name="トド"; hp=20+hpScale; atk=2+scaling; xp=15+xpScale; }
+          else if (r < 0.72) { t = 'DUST'; name="ほこりのかたまり"; hp=16+hpScale; atk=4+scaling; xp=15+xpScale; }
+          else if (r < 0.78) { t = 'DRAIN'; name="くさった死体"; hp=30+hpScale; atk=6+scaling; xp=20+xpScale; }
+          else if (r < 0.83 && floorLevel > 4) { t = 'BALL'; name="暴走ボール"; hp=22+hpScale; atk=8+scaling; xp=24+xpScale; }
+          else if (r < 0.87 && floorLevel > 5) { t = 'NINJA'; name="忍者ごっこ"; hp=25+hpScale; atk=8+scaling; xp=25+xpScale; }
+          else if (r < 0.90 && floorLevel > 6) { t = 'MIMIC'; name="跳び箱ミミック"; hp=42+hpScale; atk=10+scaling; xp=38+xpScale; def=4; }
+          else if (r < 0.93 && floorLevel > 7) { t = 'GOLEM'; name="人体模型"; hp=60+hpScale*1.5; atk=12+scaling; xp=40+xpScale; def=5; }
+          else if (r < 0.955 && floorLevel > 8) { t = 'FIRE_SPIRIT'; name="理科室の火の玉"; hp=30+hpScale; atk=11+scaling; xp=34+xpScale; }
+          else if (r < 0.975 && floorLevel > 10) { t = 'MAGE'; name="魔法使い"; hp=30+hpScale; atk=10+scaling; xp=35+xpScale; }
+          else if (r < 0.99 && floorLevel > 12) { t = 'CLOCK'; name="遅刻チャイム"; hp=36+hpScale; atk=12+scaling; xp=45+xpScale; def=3; }
+          else if (r < 0.997 && floorLevel > 4) { t = 'DRAGON'; name="ドラゴン"; hp=50+hpScale*2; atk=10+scaling*1.5; xp=50+xpScale*2; }
           else if (floorLevel > 6) { t = 'METAL'; name="メタル生徒"; hp=4+Math.floor(floorLevel/5); atk=1+scaling; xp=100+xpScale*3; def=999; }
       }
 
@@ -1083,7 +1410,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                   if (dmg > 0) {
                       addLog(`${e.name}の攻撃！${dmg}ダメージ！`, "red");
                       setPlayer(p => { const newHp = p.hp - dmg; if (newHp <= 0) { setGameOver(true); saveDungeonScore(`Killed by ${e.name}`); storageService.clearDungeonState(); } return { ...p, hp: newHp }; });
-                      nextEnemies.push({ ...e, offset: { x: (tx - e.x) * 6, y: (ty - e.y) * 6 } });
+                      nextEnemies.push({ ...e, dir: { x: Math.sign(tx - e.x) as 0|1|-1, y: Math.sign(ty - e.y) as 0|1|-1 }, offset: { x: (tx - e.x) * 6, y: (ty - e.y) * 6 } });
                       attackingEnemyIds.push(e.id);
                       triggerShake(5);
                       addVisualEffect('TEXT', px, py, { value: `${dmg}`, color: 'red' });
@@ -1093,7 +1420,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                   if (!map[ty][tx] || map[ty][tx] === 'WALL' || occupied.has(`${tx},${ty}`) || prevEnemies.some(o => o.id !== e.id && o.x === tx && o.y === ty)) {
                       occupied.add(`${e.x},${e.y}`); nextEnemies.push(e); 
                   } else {
-                      occupied.add(`${tx},${ty}`); nextEnemies.push({ ...e, x: tx, y: ty });
+                      occupied.add(`${tx},${ty}`); nextEnemies.push({ ...e, x: tx, y: ty, dir: { x: Math.sign(tx - e.x) as 0|1|-1, y: Math.sign(ty - e.y) as 0|1|-1 } });
                   }
               } else {
                   occupied.add(`${e.x},${e.y}`); nextEnemies.push(e);
@@ -2203,7 +2530,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           renderGame();
       }, 50); 
       return () => clearInterval(loop);
-  }, [map, player, enemies, floorItems, traps, menuOpen, visitedMap, floorMapRevealed, currentTheme]);
+  }, [map, player, enemies, floorItems, traps, menuOpen, visitedMap, floorMapRevealed, currentTheme, spriteSheetRevision]);
 
   const renderGame = () => {
       const canvas = canvasRef.current;
@@ -2284,35 +2611,28 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
               if (canSeeEntities) {
                   const item = floorItems.find(i => i.x === mx && i.y === my);
                   if (item) {
-                      let spriteKey = 'CONSUMABLE';
-                      if (item.type === 'GOLD') {
-                          spriteKey = 'GOLD_BAG';
-                      } else if (item.itemData) {
-                          const cat = item.itemData.category;
-                          if (cat === 'WEAPON') spriteKey = 'WEAPON';
-                          if (cat === 'ARMOR') spriteKey = 'ARMOR';
-                          if (cat === 'RANGED') spriteKey = 'RANGED';
-                          if (cat === 'STAFF') spriteKey = 'STAFF';
-                          if (cat === 'ACCESSORY') spriteKey = 'ACCESSORY';
-                          if (item.itemData.type === 'POT_GLUE') spriteKey = 'SYNTH';
-                      }
-                      
-                      const sprite = spriteCache.current[spriteKey];
+                      if (drawFloorItemFromSheets(ctx, item, sx, sy, ts)) {
+                          // drawn from fixed 8x8 category sheet
+                      } else {
+                      const sprite = getFloorItemSpriteCanvas(item);
                       if (sprite) {
                           ctx.drawImage(sprite, sx, sy, ts, ts);
                       } else {
                           ctx.fillStyle = C1;
                           ctx.fillRect(sx + 4*SCALE, sy + 4*SCALE, 8*SCALE, 8*SCALE);
                       }
+                      }
                   }
 
                   const enemy = enemies.find(e => e.x === mx && e.y === my);
                   if (enemy) {
-                      const spriteKey = enemy.enemyType || 'SLIME';
-                      const sprite = spriteCache.current[spriteKey];
                       const offX = (enemy.offset?.x || 0) * SCALE;
                       const offY = (enemy.offset?.y || 0) * SCALE;
 
+                      if (drawEnemyFromSheets(ctx, enemy, sx + offX, sy + offY, ts)) {
+                          if (enemy.status.sleep > 0) { ctx.fillStyle='white'; ctx.font='10px monospace'; ctx.fillText('Zzz', sx, sy); }
+                      } else {
+                      const sprite = getEnemySpriteCanvas(enemy);
                       if (sprite) {
                           if (enemy.status.sleep > 0) ctx.globalAlpha = 0.5;
                           ctx.drawImage(sprite, sx + offX, sy + offY, ts, ts);
@@ -2322,34 +2642,24 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                           ctx.fillStyle = C1;
                           ctx.fillRect(sx + 2*SCALE + offX, sy + 2*SCALE + offY, 12*SCALE, 12*SCALE);
                       }
+                      }
                   }
               }
 
               if (mx === player.x && my === player.y) {
-                  let spriteKey = 'PLAYER_FRONT';
-                  let flip = false;
-                  if (player.dir.y === -1) spriteKey = 'PLAYER_BACK';
-                  else if (player.dir.x !== 0) {
-                      spriteKey = 'PLAYER_SIDE';
-                      if (player.dir.x === -1) flip = true;
-                  }
-                  const sprite = spriteCache.current[spriteKey];
                   const offX = (player.offset?.x || 0) * SCALE;
                   const offY = (player.offset?.y || 0) * SCALE;
 
+                  if (drawPlayerFromSheets(ctx, player, sx + offX, sy + offY, ts)) {
+                      // drawn from fixed 8x8 category sheets
+                  } else {
+                  const sprite = getPlayerSpriteCanvas(player);
                   if (sprite) {
-                      if (flip) {
-                          ctx.save();
-                          ctx.translate(sx + ts + offX, sy + offY);
-                          ctx.scale(-1, 1);
-                          ctx.drawImage(sprite, 0, 0, ts, ts);
-                          ctx.restore();
-                      } else {
-                          ctx.drawImage(sprite, sx + offX, sy + offY, ts, ts);
-                      }
+                      ctx.drawImage(sprite, sx + offX, sy + offY, ts, ts);
                   } else {
                       ctx.fillStyle = C0;
                       ctx.fillRect(sx + 3*SCALE + offX, sy + 3*SCALE + offY, 10*SCALE, 10*SCALE);
+                  }
                   }
               }
           }
@@ -2370,7 +2680,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
               const sx = (currentX - startX) * ts;
               const sy = (currentY - startY) * ts;
               
-              if (sprite) {
+              if (drawEffectFromSheet(ctx, 'MAGIC_PROJ', sx, sy, ts)) {
+                   // drawn from fixed effects sheet
+              } else if (sprite) {
                    if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
                        ctx.drawImage(sprite, sx, sy, ts, ts);
                    }
@@ -2389,19 +2701,27 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           }
           else if (fx.type === 'SLASH') {
               if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
-                  ctx.strokeStyle = 'white';
-                  ctx.lineWidth = 4;
-                  ctx.beginPath();
                   const d = fx.dir || {x:1, y:0};
-                  const cx = sx + ts/2;
-                  const cy = sy + ts/2;
-                  ctx.moveTo(cx - d.y*10 - d.x*10, cy - d.x*10 + d.y*10);
-                  ctx.lineTo(cx + d.y*10 + d.x*10, cy + d.x*10 - d.y*10);
-                  ctx.stroke();
+                  const alpha = Math.max(0.35, fx.duration / fx.maxDuration);
+                  const slashDir = { x: -d.x as 0 | 1 | -1, y: -d.y as 0 | 1 | -1 };
+                  if (!drawDirectionalEffectFromSheet(ctx, 'SLASH', sx, sy, ts, slashDir, alpha)) {
+                      const sprite = getEffectSpriteCanvas('SLASH');
+                      ctx.save();
+                      ctx.translate(sx + ts / 2, sy + ts / 2);
+                      ctx.rotate(directionAngle(slashDir));
+                      ctx.globalAlpha = alpha;
+                      ctx.drawImage(sprite, -ts / 2, -ts / 2, ts, ts);
+                      ctx.restore();
+                  }
               }
           }
           else if (fx.type === 'EXPLOSION') {
               if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
+                  drawEffectFromSheet(ctx, 'EXPLOSION', sx, sy, ts, Math.max(0.25, fx.duration / fx.maxDuration));
+                  const sprite = getEffectSpriteCanvas('EXPLOSION');
+                  ctx.globalAlpha = Math.max(0.25, fx.duration / fx.maxDuration);
+                  ctx.drawImage(sprite, sx, sy, ts, ts);
+                  ctx.globalAlpha = 1.0;
                   ctx.fillStyle = ['white', 'orange', 'red'][Math.floor(Math.random()*3)];
                   const rad = (1 - fx.duration / fx.maxDuration) * ts * (fx.scale || 2);
                   ctx.beginPath();
@@ -2424,6 +2744,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           }
           else if (fx.type === 'PROJECTILE') {
               if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
+                  drawEffectFromSheet(ctx, 'PROJECTILE', sx, sy, ts);
+                  const sprite = getEffectSpriteCanvas('PROJECTILE');
+                  ctx.drawImage(sprite, sx, sy, ts, ts);
                   ctx.fillStyle = currentTheme.colors.C3;
                   ctx.beginPath();
                   ctx.arc(sx + ts/2, sy + ts/2, 4 * SCALE, 0, Math.PI*2);
@@ -2432,9 +2755,12 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           }
           else if (fx.type === 'WARP') {
               if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
+                  drawEffectFromSheet(ctx, 'WARP', sx, sy, ts, fx.duration / (fx.maxDuration || 10));
+                  const sprite = getEffectSpriteCanvas('WARP');
                   ctx.fillStyle = 'cyan';
                   const alpha = fx.duration / (fx.maxDuration || 10);
                   ctx.globalAlpha = alpha;
+                  ctx.drawImage(sprite, sx, sy, ts, ts);
                   ctx.beginPath();
                   ctx.arc(sx + ts/2, sy + ts/2, 10 * SCALE, 0, Math.PI*2);
                   ctx.fill();
