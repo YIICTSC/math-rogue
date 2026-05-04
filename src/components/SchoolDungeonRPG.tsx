@@ -699,6 +699,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       return Math.atan2(d.y, d.x);
   };
 
+  const directionFromDelta = (dx: number, dy: number): Direction => ({
+      x: Math.sign(dx) as 0 | 1 | -1,
+      y: Math.sign(dy) as 0 | 1 | -1,
+  });
+
   const drawDirectionalEffectFromSheet = (ctx: CanvasRenderingContext2D, type: VisualEffectType, sx: number, sy: number, ts: number, dir?: Direction, alpha = 1) => {
       ctx.save();
       ctx.translate(sx + ts / 2, sy + ts / 2);
@@ -2048,18 +2053,20 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   const executeStaffEffect = (item: Item, target: Entity | null, x: number, y: number): { hit: boolean, msg?: string } => {
       let hit = false;
       let msg = "";
+      const effectDir = directionFromDelta((target ? target.x : x) - player.x, (target ? target.y : y) - player.y);
 
       addVisualEffect('MAGIC_PROJ', 0, 0, {
           startX: player.x,
           startY: player.y,
           targetX: target ? target.x : x, 
           targetY: target ? target.y : y,
+          dir: effectDir,
           duration: 5,
           maxDuration: 5
       });
 
       if (item.type === 'UMB_FIRE') {
-          addVisualEffect('BEAM', x, y, { color: 'red' });
+          addVisualEffect('BEAM', x, y, { color: 'red', dir: effectDir });
           if (target) {
               const dmg = 20;
               const nhp = target.hp - dmg;
@@ -2679,12 +2686,17 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
               const sprite = spriteCache.current['MAGIC_BULLET'];
               const sx = (currentX - startX) * ts;
               const sy = (currentY - startY) * ts;
+              const effectDir = fx.dir || directionFromDelta(fx.targetX - fx.startX, fx.targetY - fx.startY);
               
-              if (drawEffectFromSheet(ctx, 'MAGIC_PROJ', sx, sy, ts)) {
+              if (drawDirectionalEffectFromSheet(ctx, 'MAGIC_PROJ', sx, sy, ts, effectDir)) {
                    // drawn from fixed effects sheet
               } else if (sprite) {
                    if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
-                       ctx.drawImage(sprite, sx, sy, ts, ts);
+                       ctx.save();
+                       ctx.translate(sx + ts / 2, sy + ts / 2);
+                       ctx.rotate(directionAngle(effectDir));
+                       ctx.drawImage(sprite, -ts / 2, -ts / 2, ts, ts);
+                       ctx.restore();
                    }
               }
               return; 
@@ -2731,10 +2743,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           }
           else if (fx.type === 'BEAM') {
               if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
+                  const d = fx.dir || {x:1, y:0};
+                  drawDirectionalEffectFromSheet(ctx, 'BEAM', sx, sy, ts, d, Math.max(0.35, fx.duration / fx.maxDuration));
                   ctx.strokeStyle = fx.color || 'red';
                   ctx.lineWidth = 5;
                   ctx.beginPath();
-                  const d = fx.dir || {x:1, y:0};
                   const cx = sx + ts/2;
                   const cy = sy + ts/2;
                   ctx.moveTo(cx, cy);
@@ -2744,13 +2757,19 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           }
           else if (fx.type === 'PROJECTILE') {
               if (sx >= -ts && sx < w && sy >= -ts && sy < h) {
-                  drawEffectFromSheet(ctx, 'PROJECTILE', sx, sy, ts);
-                  const sprite = getEffectSpriteCanvas('PROJECTILE');
-                  ctx.drawImage(sprite, sx, sy, ts, ts);
-                  ctx.fillStyle = currentTheme.colors.C3;
-                  ctx.beginPath();
-                  ctx.arc(sx + ts/2, sy + ts/2, 4 * SCALE, 0, Math.PI*2);
-                  ctx.fill();
+                  const d = fx.dir || {x:1, y:0};
+                  if (!drawDirectionalEffectFromSheet(ctx, 'PROJECTILE', sx, sy, ts, d)) {
+                      const sprite = getEffectSpriteCanvas('PROJECTILE');
+                      ctx.save();
+                      ctx.translate(sx + ts / 2, sy + ts / 2);
+                      ctx.rotate(directionAngle(d));
+                      ctx.drawImage(sprite, -ts / 2, -ts / 2, ts, ts);
+                      ctx.restore();
+                      ctx.fillStyle = currentTheme.colors.C3;
+                      ctx.beginPath();
+                      ctx.arc(sx + ts/2, sy + ts/2, 4 * SCALE, 0, Math.PI*2);
+                      ctx.fill();
+                  }
               }
           }
           else if (fx.type === 'WARP') {
