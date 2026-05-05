@@ -139,10 +139,10 @@ interface KochoGameState {
 type KochoSheetKey = 'characters' | 'icons' | 'effects' | 'backgrounds';
 
 const KOCHO_SPRITE_SHEETS: Record<KochoSheetKey, string> = {
-    characters: '/sprites/kocho-characters-5x5.png',
-    icons: '/sprites/kocho-cards-items-relics-5x5.png',
-    effects: '/sprites/kocho-effects-5x5.png',
-    backgrounds: '/sprites/kocho-backgrounds-5x5.png',
+    characters: `${import.meta.env.BASE_URL}sprites/kocho-characters-5x5.png`,
+    icons: `${import.meta.env.BASE_URL}sprites/kocho-cards-items-relics-5x5.png`,
+    effects: `${import.meta.env.BASE_URL}sprites/kocho-effects-5x5.png`,
+    backgrounds: `${import.meta.env.BASE_URL}sprites/kocho-backgrounds-5x5.png`,
 };
 
 const sheetPosition = (cell: number) => {
