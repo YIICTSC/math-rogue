@@ -94,22 +94,22 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
   }, [typingMode, resultLog, options, interactionDisabled, handleContinueAction, handleOptionAction]);
 
   return (
-    <div className="flex flex-col h-full w-full bg-gray-900 text-white relative items-center justify-center p-8">
+    <div className="flex h-full w-full flex-col items-center justify-start overflow-y-auto bg-gray-900 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-white relative custom-scrollbar sm:justify-center sm:p-8">
         
-        <div className="z-10 max-w-2xl w-full bg-gray-800 border-2 border-gray-600 p-8 rounded-lg shadow-2xl">
+        <div className="z-10 my-auto w-full max-w-2xl rounded-lg border-2 border-gray-600 bg-gray-800 p-4 shadow-2xl sm:p-8">
             {interactionDisabled && (
                 <div className="mb-4 rounded-lg border border-cyan-500/50 bg-cyan-950/30 px-4 py-3 text-center text-sm font-bold text-cyan-100">
                     {interactionDisabledMessage ?? '他のプレイヤーの選択を待っています'}
                 </div>
             )}
-            <div className="flex items-center mb-6 border-b border-gray-700 pb-4">
-                <div className="bg-purple-900 p-3 rounded-full mr-4 border border-purple-500">
-                    <HelpCircle size={32} className="text-purple-300" />
+            <div className="mb-4 flex items-center border-b border-gray-700 pb-3 sm:mb-6 sm:pb-4">
+                <div className="mr-3 rounded-full border border-purple-500 bg-purple-900 p-2 sm:mr-4 sm:p-3">
+                    <HelpCircle size={28} className="text-purple-300 sm:h-8 sm:w-8" />
                 </div>
-                <h2 className="text-3xl font-bold text-purple-100">{title}</h2>
+                <h2 className="text-2xl font-bold text-purple-100 sm:text-3xl">{title}</h2>
             </div>
 
-            <div className="relative mb-6 h-44 sm:h-56 rounded-xl overflow-hidden border border-purple-400/40 bg-slate-900">
+            <div className="relative mb-4 h-36 overflow-hidden rounded-xl border border-purple-400/40 bg-slate-900 sm:mb-6 sm:h-56">
                 <img
                     src={imageCandidates[imageIndex]}
                     alt={`${title} thumbnail`}
@@ -126,7 +126,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                 <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
             </div>
             
-            <div className="text-lg text-gray-300 mb-8 leading-relaxed whitespace-pre-wrap min-h-[6rem]">
+            <div className="mb-6 min-h-[6rem] whitespace-pre-wrap text-base leading-relaxed text-gray-300 sm:mb-8 sm:text-lg">
                 {resultLog ? (
                     <div className="animate-in fade-in duration-500">
                         <p className="text-yellow-300 font-bold mb-2">結果:</p>
@@ -139,7 +139,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
 
             <div className="flex flex-col gap-4">
                 {!resultLog ? (
-                    <div className="grid grid-cols-2 gap-3 max-h-[36vh] overflow-y-auto pr-1">
+                    <div className="grid max-h-[36vh] grid-cols-1 gap-3 overflow-y-auto pr-1 sm:grid-cols-2">
                         {options.map((opt, idx) => (
                             <button 
                                 key={idx}
