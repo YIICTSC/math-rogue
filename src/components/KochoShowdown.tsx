@@ -91,6 +91,7 @@ interface KochoVFX {
     color?: string;
     direction?: Facing;
     durationMs?: number;
+    sourceCardName?: string;
 }
 
 interface KochoAnnouncement {
@@ -139,11 +140,28 @@ interface KochoGameState {
 type KochoSheetKey = 'characters' | 'icons' | 'effects' | 'backgrounds';
 
 const KOCHO_SPRITE_SHEETS: Record<KochoSheetKey, string> = {
-    characters: `${import.meta.env.BASE_URL}sprites/kocho-characters-5x5.png`,
+    characters: `${import.meta.env.BASE_URL}sprites/kocho-hero-actions-01.png`,
     icons: `${import.meta.env.BASE_URL}sprites/kocho-cards-items-relics-5x5.png`,
-    effects: `${import.meta.env.BASE_URL}sprites/kocho-effects-5x5.png`,
+    effects: `${import.meta.env.BASE_URL}sprites/kocho-effects-01.png`,
     backgrounds: `${import.meta.env.BASE_URL}sprites/kocho-backgrounds-5x5.png`,
 };
+
+const KOCHO_HERO_ACTION_SHEETS = [
+    `${import.meta.env.BASE_URL}sprites/kocho-hero-actions-01.png`,
+    `${import.meta.env.BASE_URL}sprites/kocho-hero-actions-02.png`,
+    `${import.meta.env.BASE_URL}sprites/kocho-hero-actions-03.png`,
+    `${import.meta.env.BASE_URL}sprites/kocho-hero-actions-04.png`,
+];
+
+const KOCHO_ENEMY_SHEETS = [
+    `${import.meta.env.BASE_URL}sprites/kocho-enemies-01.png`,
+];
+
+const KOCHO_EFFECT_SHEETS = [
+    `${import.meta.env.BASE_URL}sprites/kocho-effects-01.png`,
+    `${import.meta.env.BASE_URL}sprites/kocho-effects-02.png`,
+    `${import.meta.env.BASE_URL}sprites/kocho-effects-03.png`,
+];
 
 const sheetPosition = (cell: number) => {
     const col = cell % 5;
@@ -157,17 +175,64 @@ const KochoSheetSprite: React.FC<{
     className?: string;
     flipX?: boolean;
     title?: string;
-}> = ({ sheet, cell, className = '', flipX = false, title }) => (
+    src?: string;
+}> = ({ sheet, cell, className = '', flipX = false, title, src }) => (
     <div
         title={title}
         className={`kocho-sheet-sprite ${className}`}
         style={{
-            backgroundImage: `url(${KOCHO_SPRITE_SHEETS[sheet]})`,
+            backgroundImage: `url(${src || KOCHO_SPRITE_SHEETS[sheet]})`,
             backgroundPosition: sheetPosition(cell),
             transform: flipX ? 'scaleX(-1)' : undefined,
         }}
     />
 );
+
+const KOCHO_ACTION_CARD_NAMES = [
+    '定規スラッシュ', 'コンパス突き', 'ダッシュ', 'バックステップ', '大声',
+    'お辞儀', '回し蹴り', 'チョーク投げ', 'スライディング', '教科書ガード',
+    '竹刀', '金属バット', 'カウンター定規', '張り手', '後ろ蹴り',
+    '釣り竿', '消火器', 'タックル', '雷', '回転モップ',
+    '竹箒', '絶対防御', 'リコーダー', '三角定規',
+    'バレーボール', '吸血', '雑巾がけ', '赤ペン連打', '連絡帳スマッシュ',
+    'メガホン指導', '保健室の包帯', '跳び箱ダッシュ', '黒板消し投げ', '竹ぼうきスイープ',
+    '笛の合図', '鉄パイプ', '防犯シールド', '号令ラッシュ', '釣り針フック',
+    '教鞭ビンタ', '教鞭ショック', '体育倉庫前進', 'タイヤ引き', '救急箱',
+    '防災頭巾', 'チョーク連射', 'バケツ返し', '花壇ジャンプ', '朝礼アタック',
+    'ランドセル投げ', '校旗突き', 'ラジカセ爆音', '授業参観ガード', '雑誌投げ',
+    '水筒チャージ', 'スポドリ補給', '非常階段ダッシュ', '竹馬ストライド', 'ホイッスルバースト',
+    '校内放送', '裏門回り込み', '旋風脚', 'たすき掛け', '箱馬タックル',
+    'フロアモップ', '金管アラーム', '絆創膏ケア', '校章ブーメラン', '清掃ワゴン',
+    '鉄扇', 'ドア反撃', '生徒会バッジ', '非常口スライド', 'ロープウェイ',
+    '校歌斉唱', '救護スプレー', '金庫破り',
+];
+
+const getKochoHeroActionAsset = (cardName?: string | null) => {
+    if (!cardName) return { src: KOCHO_HERO_ACTION_SHEETS[0], cell: 0 };
+    const index = KOCHO_ACTION_CARD_NAMES.indexOf(cardName);
+    if (index < 0) return { src: KOCHO_HERO_ACTION_SHEETS[0], cell: 0 };
+    if (index < 24) return { src: KOCHO_HERO_ACTION_SHEETS[0], cell: index + 1 };
+    if (index < 49) return { src: KOCHO_HERO_ACTION_SHEETS[1], cell: index - 24 };
+    if (index < 74) return { src: KOCHO_HERO_ACTION_SHEETS[2], cell: index - 49 };
+    return { src: KOCHO_HERO_ACTION_SHEETS[3], cell: index - 74 };
+};
+
+const getKochoHeroDamageAsset = (kind: 'light' | 'heavy' | 'break' | 'stun' | 'low' | 'down') => {
+    const cells = { light: 3, heavy: 4, break: 5, stun: 6, low: 8, down: 9 };
+    return { src: KOCHO_HERO_ACTION_SHEETS[3], cell: cells[kind] };
+};
+
+const getKochoEffectAssetForCard = (cardName?: string) => {
+    const index = cardName ? KOCHO_ACTION_CARD_NAMES.indexOf(cardName) : -1;
+    if (index < 0) return { src: KOCHO_EFFECT_SHEETS[0], cell: 11 };
+    if (index < 25) return { src: KOCHO_EFFECT_SHEETS[0], cell: index };
+    if (index < 50) return { src: KOCHO_EFFECT_SHEETS[1], cell: index - 25 };
+    if (index < 74) return { src: KOCHO_EFFECT_SHEETS[2], cell: index - 50 };
+    if (cardName === '校歌斉唱') return { src: KOCHO_EFFECT_SHEETS[2], cell: 9 };
+    if (cardName === '救護スプレー') return { src: KOCHO_EFFECT_SHEETS[2], cell: 16 };
+    if (cardName === '金庫破り') return { src: KOCHO_EFFECT_SHEETS[2], cell: 13 };
+    return { src: KOCHO_EFFECT_SHEETS[2], cell: 24 };
+};
 
 const getKochoCardSpriteCell = (card: Pick<KCard, 'name' | 'effectType' | 'type'>) => {
     if (card.name.includes('定規')) return 0;
@@ -387,6 +452,21 @@ const ENEMY_TYPES: EnemyTemplate[] = [
     { name: '校長', maxHp: 25, sprite: 'BOSS|#FFD700', attackDmg: 5, range: [1, 2], speed: 4, attackCooldown: 2 },
     { name: '激怒校長', maxHp: 30, sprite: 'BOSS|#d32f2f', attackDmg: 8, range: [1, 2, 3], speed: 6, attackCooldown: 1 },
     { name: '真・校長', maxHp: 50, sprite: 'BOSS|#212121', attackDmg: 10, range: [1, 2, 3, 4], speed: 5, attackCooldown: 2 },
+
+    // Additional illustrated enemies
+    { name: '図書委員長', maxHp: 7, sprite: 'BOOK_OPEN|#7c3aed', attackDmg: 3, range: [2, 3], speed: 4, attackCooldown: 2 },
+    { name: '保健室の先生', maxHp: 9, sprite: 'TEACHER|#22c55e', attackDmg: 2, range: [1, 2], speed: 4, attackCooldown: 2, special: 'SHIELD' },
+    { name: '放送部の怪人', maxHp: 8, sprite: 'RADIO_TOWER|#f59e0b', attackDmg: 3, range: [2, 3, 4], speed: 5, attackCooldown: 2, special: 'LULLABY' },
+    { name: '美術教師', maxHp: 10, sprite: 'ART_PALETTE|#ec4899', attackDmg: 4, range: [1, 2], speed: 5, attackCooldown: 2 },
+    { name: '給食番長', maxHp: 11, sprite: 'LUNCH_TRAY|#f97316', attackDmg: 5, range: [1], speed: 5, attackCooldown: 1 },
+    { name: '校庭ランナー', maxHp: 6, sprite: 'SHOE|#38bdf8', attackDmg: 3, range: [1], speed: 7, attackCooldown: 1 },
+    { name: '守衛ロボ', maxHp: 12, sprite: 'ROBOT|#94a3b8', attackDmg: 4, range: [1, 2], speed: 4, attackCooldown: 2, special: 'SHIELD' },
+    { name: '旧校舎の影', maxHp: 9, sprite: 'GHOST|#111827', attackDmg: 4, range: [1, 2, 3], speed: 6, attackCooldown: 2 },
+    { name: 'テストの化身', maxHp: 13, sprite: 'TEST_MONSTER|#ef4444', attackDmg: 5, range: [1, 2], speed: 5, attackCooldown: 2, special: 'LECTURE' },
+    { name: 'PTAの圧', maxHp: 10, sprite: 'BOSS|#facc15', attackDmg: 3, range: [1, 2, 3], speed: 4, attackCooldown: 2, special: 'CONFISCATE' },
+    { name: '飼育小屋番', maxHp: 8, sprite: 'DOG|#84cc16', attackDmg: 3, range: [1], speed: 5, attackCooldown: 1 },
+    { name: '文化祭実行委員', maxHp: 11, sprite: 'FLAG|#06b6d4', attackDmg: 4, range: [1, 2], speed: 5, attackCooldown: 2 },
+    { name: '卒業式の亡霊', maxHp: 14, sprite: 'GHOST|#e5e7eb', attackDmg: 5, range: [1, 2, 3], speed: 5, attackCooldown: 2, special: 'LULLABY' },
 ];
 
 const GRID_SIZE = 7;
@@ -484,6 +564,8 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
     }, [gameState]);
 
     const [animating, setAnimating] = useState(false);
+    const [activeActionCardName, setActiveActionCardName] = useState<string | null>(null);
+    const activeActionCardNameRef = useRef<string | null>(null);
     const [rewardCards, setRewardCards] = useState<KCard[]>([]);
     const [newlyUnlockedCard, setNewlyUnlockedCard] = useState<(typeof KOCHO_UNLOCKABLE_CARD_DB)[number] | null>(null);
     const [kochoUnlockedCount, setKochoUnlockedCount] = useState(() => storageService.getUnlockedKochoCards().length);
@@ -572,7 +654,8 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
 
     const addVfx = (type: KochoVFX['type'], pos: number, options: Partial<KochoVFX> = {}) => {
         const id = options.id || Math.random().toString(36).substr(2, 9);
-        setVfxList(prev => [...prev, { ...options, id, type, pos }]);
+        const sourceCardName = options.sourceCardName ?? activeActionCardNameRef.current ?? undefined;
+        setVfxList(prev => [...prev, { ...options, sourceCardName, id, type, pos }]);
         setTimeout(() => {
             setVfxList(prev => prev.filter(v => v.id !== id));
         }, options.durationMs ?? 800); // Effect duration
@@ -700,15 +783,20 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
 
                 const diff = stage + (sequence * 2) + Math.floor(wave / 2);
                 const count = Math.min(4, Math.floor(diff / 2) + 1);
+                const mobPoolNames = [
+                    '不良生徒', '熱血教師', '用務員', 'ガリ勉',
+                    ...(stage >= 3 ? ['図書委員長', '校庭ランナー', '飼育小屋番'] : []),
+                    ...(stage >= 4 ? ['保健室の先生', '美術教師', '給食番長', '守衛ロボ'] : []),
+                    ...(stage >= 5 ? ['放送部の怪人', '旧校舎の影', 'テストの化身'] : []),
+                    ...(stage >= 6 ? ['PTAの圧', '文化祭実行委員', '卒業式の亡霊'] : []),
+                ];
+                const mobPool = mobPoolNames
+                    .map(name => ENEMY_TYPES.find(e => e.name === name))
+                    .filter((enemy): enemy is EnemyTemplate => Boolean(enemy));
                 
                 for(let i=0; i<count; i++) {
-                    const r = Math.random();
-                    let eType = 0; // Senior
-                    if (stage > 2 && r < 0.4) eType = 1; // Teacher
-                    if (stage > 4 && r < 0.2) eType = 2; // Janitor
-                    if (stage > 1 && r < 0.1) eType = 3; // Nerd
-                    
-                    newEnemies.push(createEnemySafe(ENEMY_TYPES[eType], i));
+                    const template = mobPool[Math.floor(Math.random() * mobPool.length)] || ENEMY_TYPES[0];
+                    newEnemies.push(createEnemySafe(template, i));
                 }
                 logMsg = `Stage ${stage}-${sequence+1} Wave ${wave}/${maxW}`;
                 
@@ -1405,6 +1493,8 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
         for (const card of queue) {
             if (currentState.status === 'GAME_OVER') break;
             
+            activeActionCardNameRef.current = card.name;
+            setActiveActionCardName(card.name);
             addLog(`${card.name}！`);
             
             const p = currentState.player;
@@ -1735,10 +1825,15 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
                 await new Promise(r => setTimeout(r, 90));
             }
             await new Promise(r => setTimeout(r, 400));
+            activeActionCardNameRef.current = null;
+            setActiveActionCardName(null);
             
             // Check pickup after move
             setGameState(prev => handlePickup(prev.player.pos, prev));
         }
+
+        activeActionCardNameRef.current = null;
+        setActiveActionCardName(null);
 
         // Enemy Turn after combo
         if (currentState.status !== 'GAME_OVER' && currentState.enemies.some(e => e.hp > 0)) {
@@ -2094,35 +2189,34 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
     };
 
     // --- RENDER HELPERS ---
-    const getKochoPlayerCell = () => {
-        const active = vfxList[0];
-        if (!active) return 0;
-        if (active.type === 'SLASH') return 1;
-        if (active.type === 'BLAST' || active.type === 'IMPACT') return 2;
-        if (active.type === 'BARRIER' || active.type === 'BLOCK') return 5;
-        if (active.type === 'AFTERIMAGE') return 4;
-        if (active.type === 'COUNTER') return 7;
-        if (active.type === 'PUSH') return 8;
-        if (active.type === 'PULL') return 9;
-        if (active.type === 'STUN') return 10;
-        if (active.type === 'HEAL') return 11;
-        if (active.type === 'BUFF') return 12;
-        return 15;
+    const getKochoPlayerAsset = () => {
+        if (activeActionCardName) return getKochoHeroActionAsset(activeActionCardName);
+        const playerVfx = vfxList.find(v => v.pos === gameState.player.pos);
+        if (!playerVfx) return getKochoHeroActionAsset(null);
+        if (playerVfx.type === 'STUN') return getKochoHeroDamageAsset('stun');
+        if (playerVfx.type === 'BLOCK' || playerVfx.type === 'BARRIER') return getKochoHeroDamageAsset('break');
+        if (playerVfx.type === 'TEXT' && playerVfx.color?.includes('red')) return getKochoHeroDamageAsset('heavy');
+        if (playerVfx.type === 'BLAST' || playerVfx.type === 'IMPACT' || playerVfx.type === 'SLASH') return getKochoHeroDamageAsset('light');
+        if (gameState.player.hp <= Math.max(2, Math.floor(gameState.player.maxHp * 0.25))) return getKochoHeroDamageAsset('low');
+        return getKochoHeroActionAsset(null);
     };
 
-    const getKochoEnemyCell = (enemy: KEntity) => {
-        if (enemy.name.includes('真・校長')) return 18;
-        if (enemy.name.includes('激怒校長')) return 17;
-        if (enemy.name.includes('校長')) return 16;
-        if (enemy.name.includes('教頭')) return 19;
-        if (enemy.name.includes('理科')) return 20;
-        if (enemy.name.includes('体育')) return 21;
-        if (enemy.name.includes('音楽')) return 22;
-        if (enemy.name.includes('生活') || enemy.name.includes('教師') || enemy.name.includes('用務員')) return 23;
-        return 24;
+    const getKochoEnemyAsset = (enemy: KEntity) => {
+        const nameCells: Array<[string, number]> = [
+            ['不良生徒', 0], ['熱血教師', 1], ['用務員', 2], ['ガリ勉', 3], ['教頭', 4],
+            ['理科の先生', 5], ['体育の先生', 6], ['音楽の先生', 7], ['生活指導', 8],
+            ['真・校長', 11], ['激怒校長', 10], ['校長', 9],
+            ['図書委員長', 12], ['保健室の先生', 13], ['放送部の怪人', 14], ['美術教師', 15],
+            ['給食番長', 16], ['校庭ランナー', 17], ['守衛ロボ', 18], ['旧校舎の影', 19],
+            ['テストの化身', 20], ['PTAの圧', 21], ['飼育小屋番', 22], ['文化祭実行委員', 23],
+            ['卒業式の亡霊', 24],
+        ];
+        const match = nameCells.find(([name]) => enemy.name.includes(name));
+        return { src: KOCHO_ENEMY_SHEETS[0], cell: match ? match[1] : 0 };
     };
 
-    const getKochoEffectCell = (vfx: KochoVFX) => {
+    const getKochoEffectAsset = (vfx: KochoVFX) => {
+        if (vfx.sourceCardName) return getKochoEffectAssetForCard(vfx.sourceCardName);
         const cells: Record<KochoVFX['type'], number> = {
             SLASH: 0,
             BLAST: 1,
@@ -2141,7 +2235,7 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
             PULL: 12,
             AFTERIMAGE: 5,
         };
-        return cells[vfx.type] ?? 1;
+        return { src: KOCHO_EFFECT_SHEETS[0], cell: cells[vfx.type] ?? 1 };
     };
 
     const getKochoBackgroundCell = () => {
@@ -2164,18 +2258,22 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
                 {/* VFX */}
                 {cellVfx.map(v => (
                     <div key={v.id} className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
-                        {v.type !== 'TEXT' && v.type !== 'AFTERIMAGE' && (
-                            <KochoSheetSprite
-                                sheet="effects"
-                                cell={getKochoEffectCell(v)}
-                                flipX={v.direction === -1}
-                                className="absolute inset-1 opacity-90 animate-pulse"
-                            />
-                        )}
+                        {(() => {
+                            const effectAsset = getKochoEffectAsset(v);
+                            return v.type !== 'TEXT' && v.type !== 'AFTERIMAGE' ? (
+                                <KochoSheetSprite
+                                    sheet="effects"
+                                    src={effectAsset.src}
+                                    cell={effectAsset.cell}
+                                    flipX={v.direction === -1}
+                                    className="absolute inset-1 opacity-90 animate-pulse"
+                                />
+                            ) : null;
+                        })()}
                         {v.type === 'TEXT' && <div className={`text-xl font-bold animate-bounce ${v.color || 'text-white'} drop-shadow-md`}>{v.text}</div>}
                         {v.type === 'AFTERIMAGE' && (
                             <div className={`opacity-25 blur-[1px] ${v.direction === -1 ? 'scale-x-[-1]' : ''}`}>
-                                <KochoSheetSprite sheet="characters" cell={4} className={`h-16 w-16 md:h-32 md:w-32 ${v.color || 'text-white'}`} />
+                                <KochoSheetSprite sheet="characters" src={getKochoHeroActionAsset(activeActionCardNameRef.current).src} cell={getKochoHeroActionAsset(activeActionCardNameRef.current).cell} className={`h-16 w-16 md:h-32 md:w-32 ${v.color || 'text-white'}`} />
                             </div>
                         )}
                     </div>
@@ -2193,7 +2291,10 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
                 {p.pos === idx && (
                     <div className="relative w-full h-full flex items-end justify-center z-20">
                         <div className={`transition-transform duration-200 ${p.facing === -1 ? 'scale-x-[-1]' : ''}`}>
-                            <KochoSheetSprite sheet="characters" cell={getKochoPlayerCell()} className="h-20 w-20 md:h-36 md:w-36" />
+                            {(() => {
+                                const asset = getKochoPlayerAsset();
+                                return <KochoSheetSprite sheet="characters" src={asset.src} cell={asset.cell} className="h-20 w-20 md:h-36 md:w-36" />;
+                            })()}
                         </div>
                         {p.barrier > 0 && <div className="absolute inset-0 border-2 border-yellow-400 rounded-full animate-pulse opacity-50"></div>}
                         {p.shield > 0 && <div className="absolute top-0 right-0 bg-blue-600 text-white text-xs px-1 rounded border border-white">{p.shield}</div>}
@@ -2202,8 +2303,11 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
                 )}
                 {e && (
                     <div className="relative w-full h-full flex items-end justify-center z-20">
-                        <div className={`transition-transform duration-200 ${e.facing === 1 ? 'scale-x-[-1]' : ''}`}>
-                            <KochoSheetSprite sheet="characters" cell={getKochoEnemyCell(e)} className="h-20 w-20 md:h-36 md:w-36" />
+                        <div className={`transition-transform duration-200 ${e.facing === -1 ? 'scale-x-[-1]' : ''}`}>
+                            {(() => {
+                                const asset = getKochoEnemyAsset(e);
+                                return <KochoSheetSprite sheet="characters" src={asset.src} cell={asset.cell} className="h-20 w-20 md:h-36 md:w-36" />;
+                            })()}
                         </div>
                         {e.intent && (
                             <div
