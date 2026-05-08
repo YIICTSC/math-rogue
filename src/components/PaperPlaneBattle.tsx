@@ -3509,96 +3509,96 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const unlockedShips = SHIPS.filter(s => progress.rank >= s.unlockRank);
 
         return (
-            <div className="w-full h-full bg-slate-900 text-white p-4 flex flex-col font-mono overflow-y-auto relative">
+            <div className="w-full h-full bg-slate-900 text-white p-2 md:p-4 flex flex-col font-mono overflow-hidden md:overflow-y-auto relative">
                 <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.setup} alpha={0.22} />
-                <div className="relative z-10 flex items-center mb-6">
-                     <button onClick={onBack} className="text-gray-400 hover:text-white mr-4"><ArrowLeft/></button>
-                     <h2 className="text-2xl font-bold text-cyan-400">MISSION BRIEFING</h2>
-                     <div className="ml-auto text-sm bg-indigo-900 px-3 py-1 rounded-full border border-indigo-500 flex items-center">
+                <div className="relative z-10 flex items-center mb-2 md:mb-6">
+                     <button onClick={onBack} className="text-gray-400 hover:text-white mr-2 md:mr-4"><ArrowLeft size={20}/></button>
+                     <h2 className="text-lg md:text-2xl font-bold text-cyan-400">MISSION BRIEFING</h2>
+                     <div className="ml-auto text-[10px] md:text-sm bg-indigo-900 px-2 md:px-3 py-1 rounded-full border border-indigo-500 flex items-center">
                          <Star size={14} className="mr-1 text-yellow-400"/> ランク: {progress.rank}
                      </div>
                 </div>
 
-                <div className="relative z-10 flex justify-center mb-8 gap-4 border-b border-gray-700 pb-2">
-                     <button onClick={() => setSetupStep('SHIP')} className={`px-4 py-2 rounded-t-lg font-bold transition-colors ${setupStep==='SHIP'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>機体</button>
-                     <button onClick={() => setSetupStep('PILOT')} className={`px-4 py-2 rounded-t-lg font-bold transition-colors ${setupStep==='PILOT'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>パイロット</button>
-                     <button onClick={() => setSetupStep('MISSION')} className={`px-4 py-2 rounded-t-lg font-bold transition-colors ${setupStep==='MISSION'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>任務</button>
+                <div className="relative z-10 flex justify-center mb-3 md:mb-8 gap-2 md:gap-4 border-b border-gray-700 pb-1 md:pb-2">
+                     <button onClick={() => setSetupStep('SHIP')} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-t-lg font-bold text-xs md:text-base transition-colors ${setupStep==='SHIP'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>機体</button>
+                     <button onClick={() => setSetupStep('PILOT')} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-t-lg font-bold text-xs md:text-base transition-colors ${setupStep==='PILOT'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>パイロット</button>
+                     <button onClick={() => setSetupStep('MISSION')} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-t-lg font-bold text-xs md:text-base transition-colors ${setupStep==='MISSION'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>任務</button>
                 </div>
 
-                <div className="relative z-10 flex-1 max-w-4xl mx-auto w-full">
+                <div className="relative z-10 flex-1 min-h-0 max-w-4xl mx-auto w-full">
                     {setupStep === 'SHIP' && (
-                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                         <div className="grid grid-cols-3 gap-2 md:gap-6">
                              {SHIPS.map(ship => {
                                  const isUnlocked = progress.rank >= ship.unlockRank;
                                  return (
                                      <div 
                                         key={ship.id} 
                                         onClick={() => isUnlocked && setSelectedShipId(ship.id)}
-                                        className={`border-2 p-6 rounded-xl flex flex-col items-center cursor-pointer transition-all relative overflow-hidden ${selectedShipId === ship.id ? 'border-cyan-400 bg-slate-800 shadow-[0_0_20px_rgba(34,211,238,0.3)]' : 'border-slate-600 bg-slate-900 hover:bg-slate-800'} ${!isUnlocked ? 'opacity-50 grayscale' : ''}`}
+                                        className={`border-2 p-2 md:p-6 rounded-lg md:rounded-xl flex flex-col items-center cursor-pointer transition-all relative overflow-hidden ${selectedShipId === ship.id ? 'border-cyan-400 bg-slate-800 shadow-[0_0_20px_rgba(34,211,238,0.3)]' : 'border-slate-600 bg-slate-900 hover:bg-slate-800'} ${!isUnlocked ? 'opacity-50 grayscale' : ''}`}
                                      >
-                                         <div className={`w-full h-32 ${ship.color} mb-4 rounded-lg flex items-center justify-center relative overflow-hidden`}>
-                                             <PaperPlaneSheetImage sprite={getPaperPlaneShipSprite(ship.id)} title={ship.name} className="absolute inset-2 bg-no-repeat" />
-                                             {!isUnlocked && <Lock size={32} className="absolute text-gray-300"/>}
+                                         <div className={`w-full h-16 md:h-32 ${ship.color} mb-2 md:mb-4 rounded-lg flex items-center justify-center relative overflow-hidden`}>
+                                             <PaperPlaneSheetImage sprite={getPaperPlaneShipSprite(ship.id)} title={ship.name} className="absolute inset-1 md:inset-2 bg-no-repeat" />
+                                             {!isUnlocked && <Lock size={24} className="absolute text-gray-300 md:w-8 md:h-8"/>}
                                          </div>
-                                         <h3 className="text-xl font-bold mb-2">{ship.name}</h3>
-                                         <p className="text-sm text-gray-400 text-center mb-4 min-h-[3em]">{ship.description}</p>
+                                         <h3 className="text-[11px] md:text-xl font-bold mb-1 md:mb-2 leading-tight text-center">{ship.name}</h3>
+                                         <p className="hidden md:block text-sm text-gray-400 text-center mb-4 min-h-[3em]">{ship.description}</p>
                                          {!isUnlocked ? (
-                                             <div className="text-red-400 text-xs font-bold">ランク {ship.unlockRank} で解放</div>
+                                             <div className="text-red-400 text-[9px] md:text-xs font-bold text-center">ランク {ship.unlockRank}</div>
                                          ) : (
-                                             <div className="text-green-400 text-xs font-bold">選択可能</div>
+                                             <div className="text-green-400 text-[9px] md:text-xs font-bold">選択可能</div>
                                          )}
                                      </div>
                                  )
                              })}
                              <div className="col-span-full text-center mt-4">
-                                <button onClick={() => setSetupStep('PILOT')} className="bg-cyan-600 hover:bg-cyan-500 px-12 py-3 rounded-full font-bold text-lg shadow-lg animate-pulse">次へ</button>
+                                <button onClick={() => setSetupStep('PILOT')} className="bg-cyan-600 hover:bg-cyan-500 px-10 md:px-12 py-2 md:py-3 rounded-full font-bold text-base md:text-lg shadow-lg animate-pulse">次へ</button>
                              </div>
                          </div>
                     )}
 
                     {setupStep === 'PILOT' && (
                         <div className="flex flex-col items-center w-full max-w-4xl mx-auto">
-                            <div className="flex justify-between w-full mb-4 px-4 bg-slate-800 p-2 rounded">
-                                <span className="text-sm text-gray-400">現在のリロール回数</span>
-                                <span className="font-bold text-yellow-400 flex items-center"><RefreshCw size={14} className="mr-1"/> {progress.rerollCount}</span>
+                            <div className="flex justify-between w-full mb-2 md:mb-4 px-3 md:px-4 bg-slate-800 p-1.5 md:p-2 rounded">
+                                <span className="text-xs md:text-sm text-gray-400">現在のリロール回数</span>
+                                <span className="font-bold text-yellow-400 flex items-center text-xs md:text-base"><RefreshCw size={14} className="mr-1"/> {progress.rerollCount}</span>
                             </div>
 
 
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mb-6">
+                            <div className="grid grid-cols-3 gap-2 md:gap-6 w-full mb-2 md:mb-6">
                                 {pilotOptions.map((pilot, i) => (
                                     <div 
                                         key={i}
-                                        className={`relative border-2 p-4 rounded-xl cursor-pointer transition-all flex flex-col h-full ${selectedPilotIndex === i ? 'border-yellow-400 bg-slate-800 shadow-[0_0_15px_rgba(250,204,21,0.3)] scale-105' : 'border-slate-600 bg-slate-900 hover:border-slate-400'}`}
+                                        className={`relative border-2 p-2 md:p-4 rounded-lg md:rounded-xl cursor-pointer transition-all flex flex-col h-full ${selectedPilotIndex === i ? 'border-yellow-400 bg-slate-800 shadow-[0_0_15px_rgba(250,204,21,0.3)] md:scale-105' : 'border-slate-600 bg-slate-900 hover:border-slate-400'}`}
                                         onClick={() => setSelectedPilotIndex(i)}
                                     >
                                         <div className="absolute top-2 right-2">
                                             <button 
                                                 onClick={(e) => { e.stopPropagation(); setPinnedPilotIndex(pinnedPilotIndex === i ? null : i); }}
-                                                className={`p-1.5 rounded-full ${pinnedPilotIndex === i ? 'bg-yellow-500 text-black shadow-lg' : 'bg-slate-700 text-gray-400 hover:text-white hover:bg-slate-600'}`}
+                                                className={`p-1 md:p-1.5 rounded-full ${pinnedPilotIndex === i ? 'bg-yellow-500 text-black shadow-lg' : 'bg-slate-700 text-gray-400 hover:text-white hover:bg-slate-600'}`}
                                                 title="固定する"
                                             >
-                                                <User size={14}/>
+                                                <User size={12} className="md:w-3.5 md:h-3.5"/>
                                             </button>
                                         </div>
 
-                                        <div className="flex flex-col items-center mb-4">
-                                            <div className="w-20 h-20 mb-2 rounded-lg bg-black/30 border border-cyan-500/20 overflow-hidden">
+                                        <div className="flex flex-col items-center mb-2 md:mb-4">
+                                            <div className="w-14 h-14 md:w-20 md:h-20 mb-1 md:mb-2 rounded-lg bg-black/30 border border-cyan-500/20 overflow-hidden">
                                                  <img src={getPaperPlanePilotImage(pilot.id)} alt="" className="w-full h-full object-contain [image-rendering:pixelated]" />
                                             </div>
-                                            <div className="font-bold text-lg">{pilot.name}</div>
+                                            <div className="font-bold text-[10px] md:text-lg leading-tight text-center pr-4 md:pr-0">{pilot.name}</div>
                                         </div>
                                         
-                                        <div className="text-sm bg-slate-800 border border-yellow-500/30 p-3 rounded mt-auto w-full">
-                                            <div className="font-bold text-yellow-400 mb-1 flex items-center"><Zap size={14} className="mr-1"/> {pilot.intrinsicTalent.name}</div>
-                                            <div className="text-gray-300 leading-relaxed font-bold">{pilot.intrinsicTalent.description}</div>
+                                        <div className="text-[9px] md:text-sm bg-slate-800 border border-yellow-500/30 p-1.5 md:p-3 rounded mt-auto w-full min-h-[64px] md:min-h-[92px] flex flex-col justify-start">
+                                            <div className="font-bold text-yellow-400 mb-1 flex items-center leading-tight"><Zap size={12} className="mr-1 shrink-0 md:w-3.5 md:h-3.5"/> {pilot.intrinsicTalent.name}</div>
+                                            <div className="text-gray-300 leading-tight md:leading-relaxed font-bold">{pilot.intrinsicTalent.description}</div>
                                         </div>
                                         
                                         {pilot.randomTalents && pilot.randomTalents.length > 0 && (
-                                            <div className="text-xs bg-indigo-900/40 p-2 rounded mt-2 w-full">
-                                                <div className="font-bold text-indigo-300 mb-1 flex items-center"><Star size={12} className="mr-1"/> ランダム特性</div>
+                                            <div className="text-[8px] md:text-xs bg-indigo-900/40 p-1.5 md:p-2 rounded mt-1 md:mt-2 w-full leading-tight">
+                                                <div className="font-bold text-indigo-300 mb-0.5 md:mb-1 flex items-center"><Star size={10} className="mr-1 shrink-0 md:w-3 md:h-3"/> ランダム特性</div>
                                                 {pilot.randomTalents.map((t, idx) => (
-                                                    <div key={idx} className="mb-1 last:mb-0">
+                                                    <div key={idx} className="mb-0.5 md:mb-1 last:mb-0">
                                                         <span className="text-white font-bold">{t.name}</span>: <span className="text-gray-400">{t.description}</span>
                                                     </div>
                                                 ))}
@@ -3609,44 +3609,44 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             </div>
                             
                             {/* Stat Preview */}
-                            <div className="w-full bg-slate-800/80 border border-cyan-500/30 p-4 rounded-xl mb-6">
-                                <div className="text-cyan-400 font-bold mb-2 flex items-center justify-center"><Activity size={16} className="mr-2"/> 機体スペック予想 ({SHIPS.find(s => s.id === selectedShipId)?.name || '未選択'})</div>
-                                <div className="flex justify-center gap-8">
+                            <div className="w-full bg-slate-800/80 border border-cyan-500/30 p-2 md:p-4 rounded-xl mb-2 md:mb-6">
+                                <div className="text-cyan-400 font-bold mb-1 md:mb-2 flex items-center justify-center text-[10px] md:text-base"><Activity size={14} className="mr-1 md:mr-2"/> 機体スペック予想 ({SHIPS.find(s => s.id === selectedShipId)?.name || '未選択'})</div>
+                                <div className="flex justify-center gap-6 md:gap-8">
                                     <div className="text-center">
-                                        <div className="text-xs text-gray-400 mb-1">最大HP</div>
-                                        <div className="text-xl font-bold text-green-400">
+                                        <div className="text-[9px] md:text-xs text-gray-400 mb-0.5 md:mb-1">最大HP</div>
+                                        <div className="text-base md:text-xl font-bold text-green-400">
                                             {(SHIPS.find(s => s.id === selectedShipId)?.baseHp || 0) + 
                                              (selectedPilotIndex !== -1 ? [pilotOptions[selectedPilotIndex].intrinsicTalent, ...(pilotOptions[selectedPilotIndex].randomTalents || [])].filter(t => t.effectType === 'MAX_HP').reduce((a, b) => a + (b.value || 0), 0) : 0)}
                                         </div>
                                     </div>
                                     <div className="text-center">
-                                        <div className="text-xs text-gray-400 mb-1">最大燃料</div>
-                                        <div className="text-xl font-bold text-orange-400">
+                                        <div className="text-[9px] md:text-xs text-gray-400 mb-0.5 md:mb-1">最大燃料</div>
+                                        <div className="text-base md:text-xl font-bold text-orange-400">
                                             {MAX_FUEL + 
                                              (selectedPilotIndex !== -1 ? [pilotOptions[selectedPilotIndex].intrinsicTalent, ...(pilotOptions[selectedPilotIndex].randomTalents || [])].filter(t => t.effectType === 'FUEL').reduce((a, b) => a + (b.value || 0), 0) : 0)}
                                         </div>
                                     </div>
                                     <div className="text-center">
-                                        <div className="text-xs text-gray-400 mb-1">パッシブ出力</div>
-                                        <div className="text-xl font-bold text-yellow-400">
+                                        <div className="text-[9px] md:text-xs text-gray-400 mb-0.5 md:mb-1">パッシブ出力</div>
+                                        <div className="text-base md:text-xl font-bold text-yellow-400">
                                             +{(selectedPilotIndex !== -1 ? [pilotOptions[selectedPilotIndex].intrinsicTalent, ...(pilotOptions[selectedPilotIndex].randomTalents || [])].filter(t => t.effectType === 'PASSIVE_POWER').reduce((a, b) => a + (b.value || 0), 0) : 0)}
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="flex gap-4">
+                            <div className="flex gap-3 md:gap-4">
                                 <button 
                                     onClick={handleRerollPilots} 
                                     disabled={progress.rerollCount <= 0}
-                                    className={`bg-gray-700 hover:bg-gray-600 text-white px-8 py-3 rounded-lg font-bold flex items-center ${progress.rerollCount <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    className={`bg-gray-700 hover:bg-gray-600 text-white px-4 md:px-8 py-2 md:py-3 rounded-lg font-bold flex items-center text-sm md:text-base ${progress.rerollCount <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     <RefreshCw className="mr-2"/> 呼び直す
                                 </button>
                                 <button 
                                     onClick={() => setSetupStep('MISSION')} 
                                     disabled={selectedPilotIndex === -1}
-                                    className={`bg-cyan-600 hover:bg-cyan-500 px-12 py-3 rounded-lg font-bold text-lg shadow-lg ${selectedPilotIndex === -1 ? 'opacity-50 cursor-not-allowed' : 'animate-pulse'}`}
+                                    className={`bg-cyan-600 hover:bg-cyan-500 px-8 md:px-12 py-2 md:py-3 rounded-lg font-bold text-base md:text-lg shadow-lg ${selectedPilotIndex === -1 ? 'opacity-50 cursor-not-allowed' : 'animate-pulse'}`}
                                 >
                                     次へ
                                 </button>
@@ -3656,16 +3656,16 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                     {setupStep === 'MISSION' && (
                         <div className="flex flex-col items-center max-w-lg mx-auto">
-                            <div className="w-full bg-slate-800 p-6 rounded-xl border border-slate-600 text-center mb-8">
-                                <h3 className="text-xl font-bold text-red-400 mb-2">難易度設定</h3>
-                                <div className="flex items-center justify-center gap-6 my-6">
+                            <div className="w-full bg-slate-800 p-3 md:p-6 rounded-xl border border-slate-600 text-center mb-4 md:mb-8">
+                                <h3 className="text-lg md:text-xl font-bold text-red-400 mb-1 md:mb-2">難易度設定</h3>
+                                <div className="flex items-center justify-center gap-6 my-3 md:my-6">
                                     <button 
                                         onClick={() => setSelectedMissionLevel(l => Math.max(0, l - 1))}
-                                        className="bg-slate-700 p-3 rounded-full hover:bg-slate-600"
+                                        className="bg-slate-700 p-2 md:p-3 rounded-full hover:bg-slate-600"
                                     >
                                         <ChevronsLeft/>
                                     </button>
-                                    <div className="text-6xl font-black text-white w-20">{selectedMissionLevel}</div>
+                                    <div className="text-5xl md:text-6xl font-black text-white w-20">{selectedMissionLevel}</div>
                                     <button 
                                         onClick={() => {
                                             const shipMax = progress.maxClearedLevel[selectedShipId] ?? -1;
@@ -3676,12 +3676,12 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                                 audioService.playSound('wrong');
                                             }
                                         }}
-                                        className={`bg-slate-700 p-3 rounded-full hover:bg-slate-600 ${(selectedMissionLevel > (progress.maxClearedLevel[selectedShipId] ?? -1)) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        className={`bg-slate-700 p-2 md:p-3 rounded-full hover:bg-slate-600 ${(selectedMissionLevel > (progress.maxClearedLevel[selectedShipId] ?? -1)) ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     >
                                         <ChevronsRight/>
                                     </button>
                                 </div>
-                                <div className="text-sm text-gray-400 mb-4">
+                                <div className="text-xs md:text-sm text-gray-400 mb-2 md:mb-4">
                                     {(progress.maxClearedLevel[selectedShipId] ?? -1) < selectedMissionLevel ? (
                                         <div className="flex flex-col items-center">
                                             <span className="text-red-500 font-bold mb-1">未クリア (挑戦中)</span>
@@ -3696,7 +3696,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     )}
                                 </div>
                                 
-                                <div className="bg-black/40 p-4 rounded text-left text-sm space-y-2">
+                                <div className="bg-black/40 p-3 md:p-4 rounded text-left text-xs md:text-sm space-y-1.5 md:space-y-2">
                                     <div className="flex justify-between"><span className="text-gray-400">敵攻撃力:</span> <span className="text-red-400">+{selectedMissionLevel >= 1 ? (selectedMissionLevel >= 6 ? '2' : '1') : '0'}</span></div>
                                     <div className="flex justify-between"><span className="text-gray-400">開始HP:</span> <span className="text-red-400">{selectedMissionLevel >= 2 ? (selectedMissionLevel >= 4 ? '-20%' : '-5') : '通常'}</span></div>
                                     <div className="flex justify-between"><span className="text-gray-400">敵耐久:</span> <span className="text-red-400">+{selectedMissionLevel >= 5 ? '強化' : '通常'}</span></div>
@@ -3704,7 +3704,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 </div>
                             </div>
                             
-                            <button onClick={confirmSetup} className="bg-red-600 hover:bg-red-500 text-white w-full py-4 rounded-xl font-bold text-2xl shadow-[0_0_20px_rgba(220,38,38,0.6)] animate-pulse flex items-center justify-center">
+                            <button onClick={confirmSetup} className="bg-red-600 hover:bg-red-500 text-white w-full py-3 md:py-4 rounded-xl font-bold text-xl md:text-2xl shadow-[0_0_20px_rgba(220,38,38,0.6)] animate-pulse flex items-center justify-center">
                                 <Target className="mr-2"/> 出撃開始
                             </button>
                         </div>
