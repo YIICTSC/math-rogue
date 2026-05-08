@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation, Droplets, Recycle, Repeat, User, Lock, Users, Target, UserPlus, Gauge, Swords, Dice5, Ghost, Rocket, Fan, Cpu } from 'lucide-react';
 import { audioService } from '../services/audioService';
-import PixelSprite from './PixelSprite';
 import { storageService, PaperPlaneProgress } from '../services/storageService';
 
 // --- TYPES & CONSTANTS ---
@@ -250,7 +249,7 @@ const SHIPS: ShipTemplate[] = [
 const ENEMY_DATA: EnemyDataTemplate[] = [
     { 
         name: "折り紙偵察機", hp: 40, durability: 3, 
-        layout: ['EMPTY', 'CANNON', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'CANNON', 'EMPTY'], 
+        layout: ['EMPTY', 'CANNON', 'EMPTY', 'EMPTY', 'CANNON', 'EMPTY', 'EMPTY', 'CANNON', 'EMPTY'], 
         energy: 2, colors: ['WHITE'], moveChance: 0.3 
     },
     { 
@@ -729,6 +728,71 @@ const UNLOCKABLE_PART_TEMPLATES: Omit<ShipPart, 'id'>[] = [
 ];
 
 const PAPER_PLANE_UNLOCK_TARGET = 50;
+type PaperPlaneSheetSprite = { sheet: string; row: number; col: number };
+
+const PAPER_PLANE_ASSET_BASE = '/sprites/paper-plane';
+const PAPER_PLANE_GRID_SIZE = 5;
+const PAPER_PLANE_PART_NAMES = Array.from(new Set([
+    ...SHIPS.flatMap(ship => ship.layout.map(part => part.name)),
+    ...PART_TEMPLATES.map(part => part.name),
+    ...UNLOCKABLE_PART_TEMPLATES.map(part => part.name),
+].filter(name => name !== '空き')));
+
+const createSheetSprite = (sheetPrefix: string, index: number): PaperPlaneSheetSprite => ({
+    sheet: `${PAPER_PLANE_ASSET_BASE}/${sheetPrefix}-${String(Math.floor(index / 25) + 1).padStart(2, '0')}.png`,
+    row: Math.floor((index % 25) / PAPER_PLANE_GRID_SIZE),
+    col: index % PAPER_PLANE_GRID_SIZE,
+});
+
+const getPaperPlanePartSprite = (name: string): PaperPlaneSheetSprite | null => {
+    const baseName = name.replace(/\+$/, '');
+    const index = PAPER_PLANE_PART_NAMES.indexOf(baseName);
+    return index >= 0 ? createSheetSprite('parts', index) : null;
+};
+
+const getPaperPlanePilotImage = (pilotId: string): string => `${PAPER_PLANE_ASSET_BASE}/pilots/${pilotId}.png`;
+
+const getPaperPlaneShipSprite = (shipId: string): PaperPlaneSheetSprite | null => {
+    const index = SHIPS.findIndex(ship => ship.id === shipId);
+    return index >= 0 ? {
+        sheet: `${PAPER_PLANE_ASSET_BASE}/pilots-02.png`,
+        row: 0,
+        col: index + 1,
+    } : null;
+};
+
+const getPaperPlaneStageBackground = (stageNumber: number): PaperPlaneSheetSprite => {
+    const index = Math.max(0, (stageNumber - 1) % 25);
+    return {
+        sheet: `${PAPER_PLANE_ASSET_BASE}/stage-backgrounds-5x5.png`,
+        row: Math.floor(index / PAPER_PLANE_GRID_SIZE),
+        col: index % PAPER_PLANE_GRID_SIZE,
+    };
+};
+
+const PAPER_PLANE_SCENE_BACKGROUNDS: Record<string, PaperPlaneSheetSprite> = {
+    setup: { sheet: `${PAPER_PLANE_ASSET_BASE}/scene-backgrounds-5x5.png`, row: 0, col: 0 },
+    tutorial: { sheet: `${PAPER_PLANE_ASSET_BASE}/scene-backgrounds-5x5.png`, row: 4, col: 3 },
+    battle: { sheet: `${PAPER_PLANE_ASSET_BASE}/scene-backgrounds-5x5.png`, row: 0, col: 4 },
+    reward: { sheet: `${PAPER_PLANE_ASSET_BASE}/scene-backgrounds-5x5.png`, row: 1, col: 0 },
+    vacation: { sheet: `${PAPER_PLANE_ASSET_BASE}/scene-backgrounds-5x5.png`, row: 1, col: 2 },
+    hangar: { sheet: `${PAPER_PLANE_ASSET_BASE}/scene-backgrounds-5x5.png`, row: 1, col: 3 },
+    gameOver: { sheet: `${PAPER_PLANE_ASSET_BASE}/scene-backgrounds-5x5.png`, row: 2, col: 1 },
+    victory: { sheet: `${PAPER_PLANE_ASSET_BASE}/scene-backgrounds-5x5.png`, row: 2, col: 2 },
+};
+
+const getSheetSpriteStyle = (sprite: PaperPlaneSheetSprite, zoom = 1): React.CSSProperties => ({
+    backgroundImage: `url("${sprite.sheet}")`,
+    backgroundSize: `${PAPER_PLANE_GRID_SIZE * 100 * zoom}% ${PAPER_PLANE_GRID_SIZE * 100 * zoom}%`,
+    backgroundPosition: `${(sprite.col / (PAPER_PLANE_GRID_SIZE - 1)) * 100}% ${(sprite.row / (PAPER_PLANE_GRID_SIZE - 1)) * 100}%`,
+    imageRendering: 'pixelated',
+});
+
+const getSceneBackgroundStyle = (sprite: PaperPlaneSheetSprite, alpha = 0.35): React.CSSProperties => ({
+    ...getSheetSpriteStyle(sprite),
+    opacity: alpha,
+});
+
 const getAvailablePartTemplates = (progress: PaperPlaneProgress) => {
     const unlockedNames = new Set(progress.unlockedPartNames || []);
     return [
@@ -1282,6 +1346,13 @@ const PoolView: React.FC<{ pool: PoolState, onClose: () => void }> = ({ pool, on
                     合計: {allNumbers.length} 枚
                 </div>
 
+                <div className="mt-5 rounded-lg border border-cyan-800/70 bg-slate-950/70 p-3 text-xs leading-relaxed text-slate-300">
+                    <div className="mb-2 font-bold text-cyan-300">POOLの循環ルール</div>
+                    <p>バトル開始時とFIRE後、生成プールから数値と色を1つずつ取り出してエネルギーカードを作ります。</p>
+                    <p className="mt-1">使ったカードはそのターンの解決後にクールプールへ移り、生成プールが空になるとクールプールがまとめて生成プールへ戻って再利用されます。</p>
+                    <p className="mt-1">休暇・パイロット特性・イベントで追加された数値や色はプールに残り続け、以後の循環にも混ざります。</p>
+                </div>
+
                 <button onClick={onClose} className="mt-4 w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition-colors">閉じる</button>
             </div>
         </div>
@@ -1320,6 +1391,26 @@ const EnergyCardView: React.FC<{ card: EnergyCard, onClick?: () => void, selecte
         </div>
     );
 };
+
+const PaperPlaneSheetImage: React.FC<{ sprite: PaperPlaneSheetSprite | null; className?: string; title?: string; zoom?: number }> = ({ sprite, className = '', title, zoom = 1 }) => {
+    if (!sprite) return null;
+    return (
+        <div
+            className={`bg-no-repeat ${className}`}
+            style={getSheetSpriteStyle(sprite, zoom)}
+            title={title}
+            aria-hidden={!title}
+        />
+    );
+};
+
+const PaperPlaneSceneBackdrop: React.FC<{ sprite: PaperPlaneSheetSprite; alpha?: number; className?: string }> = ({ sprite, alpha = 0.35, className = '' }) => (
+    <div
+        className={`absolute inset-0 bg-no-repeat pointer-events-none ${className}`}
+        style={getSceneBackgroundStyle(sprite, alpha)}
+        aria-hidden="true"
+    />
+);
 
 const ShipPartView: React.FC<{ 
     part: ShipPart, 
@@ -1423,6 +1514,7 @@ const ShipPartView: React.FC<{
     const { isFull, output: totalPower, specialBonus } = calculatePartOutput(part, evalContext);
     
     const displayPower = totalPower + bonusPower;
+    const partSprite = getPaperPlanePartSprite(part.name);
 
     return (
         <div 
@@ -1440,7 +1532,12 @@ const ShipPartView: React.FC<{
             `}
             style={{ WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
         >
-            <div className="flex justify-between items-center">
+            <PaperPlaneSheetImage
+                sprite={partSprite}
+                title={part.name}
+                className={`absolute inset-1 bg-contain opacity-75 ${isEnemy ? '' : 'scale-x-[-1]'}`}
+            />
+            <div className="relative z-10 flex justify-between items-center">
                 <div className={`${textColor}`}>{icon}</div>
                 {((totalPower > 0) || (bonusPower > 0)) && showPower && part.type !== 'AMPLIFIER' && (
                     <div className="text-[10px] font-bold text-white shadow-black drop-shadow-md flex items-center">
@@ -1455,7 +1552,7 @@ const ShipPartView: React.FC<{
                 )}
             </div>
 
-            <div className="flex gap-0.5 justify-center mt-1">
+            <div className="relative z-10 flex gap-0.5 justify-center mt-1">
                 {part.slots.map((slot, i) => {
                     let slotColor = 'bg-slate-900 border-slate-600';
                     if (slot.value !== null) {
@@ -1478,7 +1575,7 @@ const ShipPartView: React.FC<{
                 })}
             </div>
             
-            <div className="text-[8px] text-center text-gray-400 truncate w-full mt-auto">{part.name}</div>
+            <div className="relative z-10 text-[8px] text-center text-gray-200 truncate w-full mt-auto drop-shadow">{part.name}</div>
         </div>
     );
 };
@@ -3407,8 +3504,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const unlockedShips = SHIPS.filter(s => progress.rank >= s.unlockRank);
 
         return (
-            <div className="w-full h-full bg-slate-900 text-white p-4 flex flex-col font-mono overflow-y-auto">
-                <div className="flex items-center mb-6">
+            <div className="w-full h-full bg-slate-900 text-white p-4 flex flex-col font-mono overflow-y-auto relative">
+                <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.setup} alpha={0.22} />
+                <div className="relative z-10 flex items-center mb-6">
                      <button onClick={onBack} className="text-gray-400 hover:text-white mr-4"><ArrowLeft/></button>
                      <h2 className="text-2xl font-bold text-cyan-400">MISSION BRIEFING</h2>
                      <div className="ml-auto text-sm bg-indigo-900 px-3 py-1 rounded-full border border-indigo-500 flex items-center">
@@ -3416,13 +3514,13 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                      </div>
                 </div>
 
-                <div className="flex justify-center mb-8 gap-4 border-b border-gray-700 pb-2">
+                <div className="relative z-10 flex justify-center mb-8 gap-4 border-b border-gray-700 pb-2">
                      <button onClick={() => setSetupStep('SHIP')} className={`px-4 py-2 rounded-t-lg font-bold transition-colors ${setupStep==='SHIP'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>機体</button>
                      <button onClick={() => setSetupStep('PILOT')} className={`px-4 py-2 rounded-t-lg font-bold transition-colors ${setupStep==='PILOT'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>パイロット</button>
                      <button onClick={() => setSetupStep('MISSION')} className={`px-4 py-2 rounded-t-lg font-bold transition-colors ${setupStep==='MISSION'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>任務</button>
                 </div>
 
-                <div className="flex-1 max-w-4xl mx-auto w-full">
+                <div className="relative z-10 flex-1 max-w-4xl mx-auto w-full">
                     {setupStep === 'SHIP' && (
                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                              {SHIPS.map(ship => {
@@ -3433,8 +3531,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                         onClick={() => isUnlocked && setSelectedShipId(ship.id)}
                                         className={`border-2 p-6 rounded-xl flex flex-col items-center cursor-pointer transition-all relative overflow-hidden ${selectedShipId === ship.id ? 'border-cyan-400 bg-slate-800 shadow-[0_0_20px_rgba(34,211,238,0.3)]' : 'border-slate-600 bg-slate-900 hover:bg-slate-800'} ${!isUnlocked ? 'opacity-50 grayscale' : ''}`}
                                      >
-                                         <div className={`w-full h-32 ${ship.color} mb-4 rounded-lg flex items-center justify-center relative`}>
-                                             <Send size={48} className="text-white"/>
+                                         <div className={`w-full h-32 ${ship.color} mb-4 rounded-lg flex items-center justify-center relative overflow-hidden`}>
+                                             <PaperPlaneSheetImage sprite={getPaperPlaneShipSprite(ship.id)} title={ship.name} className="absolute inset-2 bg-no-repeat" />
                                              {!isUnlocked && <Lock size={32} className="absolute text-gray-300"/>}
                                          </div>
                                          <h3 className="text-xl font-bold mb-2">{ship.name}</h3>
@@ -3480,8 +3578,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                         </div>
 
                                         <div className="flex flex-col items-center mb-4">
-                                            <div className="w-16 h-16 mb-2">
-                                                 <PixelSprite seed={pilot.id} name={pilot.spriteName} className="w-full h-full"/>
+                                            <div className="w-20 h-20 mb-2 rounded-lg bg-black/30 border border-cyan-500/20 overflow-hidden">
+                                                 <img src={getPaperPlanePilotImage(pilot.id)} alt="" className="w-full h-full object-contain [image-rendering:pixelated]" />
                                             </div>
                                             <div className="font-bold text-lg">{pilot.name}</div>
                                         </div>
@@ -3613,9 +3711,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     if (phase === 'TUTORIAL') {
         return (
-            <div className="w-full h-full bg-slate-900 text-white p-8 flex flex-col items-center justify-center font-mono">
-                <Send size={64} className="text-cyan-400 mb-4 animate-bounce"/>
-                <h1 className="text-4xl font-bold mb-4">紙飛行機バトル v3.0</h1>
+            <div className="w-full h-full bg-slate-900 text-white p-8 flex flex-col items-center justify-center font-mono relative overflow-hidden">
+                <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.tutorial} alpha={0.24} />
+                <Send size={64} className="relative z-10 text-cyan-400 mb-4 animate-bounce"/>
+                <h1 className="relative z-10 text-4xl font-bold mb-4">紙飛行機バトル v3.0</h1>
                 <div className="max-w-md text-sm text-gray-300 space-y-2 mb-8 bg-slate-800 p-4 rounded border border-slate-600">
                     <p>・機体は3x3のモジュールで構成されています。</p>
                     <p>・エネルギーの色には相性があります。</p>
@@ -3627,10 +3726,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     <p className="text-green-400 font-bold">・戦闘後は「休暇」で機体を強化しよう！</p>
                     <p className="text-blue-400 font-bold mt-2">※オートセーブ機能搭載！</p>
                 </div>
-                <button onClick={() => { setPhase('SETUP'); initPilotRoll(); }} className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-8 rounded shadow-lg animate-pulse flex items-center">
+                <button onClick={() => { setPhase('SETUP'); initPilotRoll(); }} className="relative z-10 bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-8 rounded shadow-lg animate-pulse flex items-center">
                     <Play className="mr-2"/> 出撃準備
                 </button>
-                <button onClick={onBack} className="mt-4 text-gray-500 hover:text-white underline text-xs">戻る</button>
+                <button onClick={onBack} className="relative z-10 mt-4 text-gray-500 hover:text-white underline text-xs">戻る</button>
             </div>
         );
     }
@@ -3639,6 +3738,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
          const rerollCost = Math.max(0, 50 - player.talents.filter(t => t.effectType === 'DISCOUNT_REROLL_REWARD').reduce((a,b)=>a+b.value, 0));
          return (
              <div className="w-full h-full bg-black/90 text-white p-4 flex flex-col items-center justify-start md:justify-center font-mono z-50 relative overflow-y-auto py-8">
+                 <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.reward} alpha={0.2} />
                  <RenderTooltip />
                  <Trophy size={64} className="text-yellow-400 mb-4 animate-bounce"/>
                  <h2 className="text-4xl font-bold mb-4 text-white">VICTORY!</h2>
@@ -3683,6 +3783,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
          return (
              <div className="w-full h-full bg-slate-900 text-white p-4 font-mono flex flex-col items-center relative overflow-y-auto">
+                 <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.reward} alpha={0.18} />
                  <RenderTooltip />
                  <div className="text-center mb-6 mt-4">
                      <h2 className="text-2xl font-bold text-green-400 mb-2">パーツ換装</h2>
@@ -3738,6 +3839,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         return (
             <div className="w-full h-full bg-slate-900 text-white p-4 font-mono flex flex-col items-center relative overflow-hidden">
+                <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.hangar} alpha={0.2} />
                 <RenderTooltip />
                 <div className="text-center mb-4 mt-2 shrink-0">
                     <h2 className="text-2xl font-bold text-orange-400 mb-2 flex items-center justify-center"><Settings className="mr-2"/> 機体改造 (Hangar)</h2>
@@ -3812,6 +3914,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         return (
             <div className="w-full h-full bg-slate-900 text-white p-2 md:p-4 font-mono relative overflow-hidden flex flex-col">
+                <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.vacation} alpha={0.2} />
                 <RenderTooltip />
                 {/* Pool Overlay */}
                 {showPool && <PoolView pool={pool} onClose={() => setShowPool(false)} />}
@@ -3941,6 +4044,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     return (
         <div className="w-full h-full bg-[#101018] text-white flex flex-col font-mono relative overflow-hidden">
+            <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.battle} alpha={0.16} />
             <RenderTooltip />
             {/* Pool Overlay */}
             {showPool && <PoolView pool={pool} onClose={() => setShowPool(false)} />}
@@ -3960,6 +4064,17 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     <li>パーツには<strong>スロット</strong>があり、手札のエネルギーカードをはめることで起動します。</li>
                                     <li><strong>色相性:</strong> <span className="text-orange-400 font-bold">橙</span> &gt; <span className="text-blue-400 font-bold">青</span> &gt; <span className="text-slate-200 font-bold">白</span>。上位の色は下位のスロットにも使えます。</li>
                                     <li>スロットを全て埋めると<strong>起動ボーナス</strong>が発生します。</li>
+                                </ul>
+                            </section>
+
+                            <section>
+                                <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><Cpu className="mr-2 text-purple-400"/> パーツ種類</h3>
+                                <ul className="list-disc pl-5 space-y-1">
+                                    <li><strong className="text-red-300">砲台:</strong> 同じ行に攻撃出力を出す基本攻撃パーツです。</li>
+                                    <li><strong className="text-orange-300">ミサイル:</strong> 砲台より高出力になりやすい攻撃パーツです。</li>
+                                    <li><strong className="text-blue-300">盾:</strong> 行のぶつかり合いで受けるダメージを抑える防御パーツです。</li>
+                                    <li><strong className="text-emerald-300">エンジン:</strong> 燃料・移動・特殊効果で戦いやすさを支える補助パーツです。</li>
+                                    <li><strong className="text-purple-300">増幅器:</strong> 隣接パーツの出力を上げる支援パーツです。</li>
                                 </ul>
                             </section>
 
@@ -4007,6 +4122,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
             {/* Battle Grid */}
             <div className="flex-1 relative bg-[#1a1a24] overflow-y-auto custom-scrollbar overflow-hidden">
+                <PaperPlaneSceneBackdrop sprite={getPaperPlaneStageBackground(stage)} alpha={0.28} />
                 <div className="absolute inset-0 flex pointer-events-none overflow-hidden mix-blend-screen z-0 opacity-40">
                     <div 
                         className="absolute w-1/2 left-0 h-full flex items-center justify-center transition-transform duration-500 ease-out animate-pulse"

@@ -103,6 +103,8 @@ const GENERAL_ITEM_SPRITE_TYPES = [
 const HUNGER_INTERVAL = 10;
 const REGEN_INTERVAL = 5;
 const ENEMY_SPAWN_RATE = 25;
+const ENEMY_NOTICE_RANGE = 7;
+const ENEMY_WANDER_CHANCE = 0.3;
 
 // Unidentified names for STAFF items (Umbrellas)
 const UNIDENTIFIED_NAMES = [
@@ -1336,9 +1338,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
               
               const dx = px - e.x; const dy = py - e.y;
               const dist = Math.abs(dx) + Math.abs(dy);
+              const noticeDist = Math.max(Math.abs(dx), Math.abs(dy));
+              const hasNoticedPlayer = noticeDist <= ENEMY_NOTICE_RANGE;
               
               // Special Attacks
-              if (e.enemyType === 'DRAGON' && dist <= 2 && dist > 0 && Math.random() < 0.3) {
+              if (hasNoticedPlayer && e.enemyType === 'DRAGON' && dist <= 2 && dist > 0 && Math.random() < 0.3) {
                   addLog(`${e.name}の炎！`, "red");
                   let dmg = 15;
                   if (player.equipment?.armor?.type === 'FIREFIGHTER') dmg = Math.floor(dmg / 2);
@@ -1348,7 +1352,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                   continue;
               }
 
-              if (e.enemyType === 'MAGE' && dist <= 4 && dist > 0 && Math.random() < 0.2) {
+              if (hasNoticedPlayer && e.enemyType === 'MAGE' && dist <= 4 && dist > 0 && Math.random() < 0.2) {
                   addLog(`${e.name}の魔法！混乱した！`, "yellow");
                   setPlayer(p => ({ ...p, status: { ...p.status, confused: 5 } }));
                   occupied.add(`${e.x},${e.y}`); nextEnemies.push(e);
@@ -1368,8 +1372,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                   tx = e.x + r[0]; ty = e.y + r[1];
                   moved = true; 
               } 
-              // Standard Pathfinding (Dijkstra) if "awake"
-              else if (dist <= 15) {
+              // Standard Pathfinding (Dijkstra) after noticing the player.
+              else if (hasNoticedPlayer) {
                   const neighbors = [
                       {x:e.x, y:e.y-1}, {x:e.x, y:e.y+1}, {x:e.x-1, y:e.y}, {x:e.x+1, y:e.y},
                       {x:e.x-1, y:e.y-1}, {x:e.x+1, y:e.y-1}, {x:e.x-1, y:e.y+1}, {x:e.x+1, y:e.y+1}
@@ -1404,6 +1408,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                       ty = bestMove.y;
                       moved = true;
                   }
+              } else if (Math.random() < ENEMY_WANDER_CHANCE) {
+                  const dirs = [[0,1], [0,-1], [1,0], [-1,0]];
+                  const r = dirs[Math.floor(Math.random()*4)];
+                  tx = e.x + r[0]; ty = e.y + r[1];
+                  moved = true;
               }
 
               if (tx === px && ty === py) {
@@ -1422,7 +1431,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                   } else { nextEnemies.push(e); }
                   occupied.add(`${e.x},${e.y}`);
               } else if (moved) {
-                  if (!map[ty][tx] || map[ty][tx] === 'WALL' || occupied.has(`${tx},${ty}`) || prevEnemies.some(o => o.id !== e.id && o.x === tx && o.y === ty)) {
+                  if (!map[ty]?.[tx] || map[ty][tx] === 'WALL' || occupied.has(`${tx},${ty}`) || prevEnemies.some(o => o.id !== e.id && o.x === tx && o.y === ty)) {
                       occupied.add(`${e.x},${e.y}`); nextEnemies.push(e); 
                   } else {
                       occupied.add(`${tx},${ty}`); nextEnemies.push({ ...e, x: tx, y: ty, dir: { x: Math.sign(tx - e.x) as 0|1|-1, y: Math.sign(ty - e.y) as 0|1|-1 } });
