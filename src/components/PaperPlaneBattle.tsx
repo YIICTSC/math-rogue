@@ -744,7 +744,7 @@ const PAPER_PLANE_PART_NAMES = Array.from(new Set([
 ].filter(name => name !== '空き')));
 
 const createSheetSprite = (sheetPrefix: string, index: number): PaperPlaneSheetSprite => ({
-    sheet: `${PAPER_PLANE_ASSET_BASE}/${sheetPrefix}-${String(Math.floor(index / 25) + 1).padStart(2, '0')}.png`,
+    sheet: `${PAPER_PLANE_ASSET_BASE}/${sheetPrefix}-${String(Math.floor(index / 25) + 1).padStart(2, '0')}-source.png`,
     row: Math.floor((index % 25) / PAPER_PLANE_GRID_SIZE),
     col: index % PAPER_PLANE_GRID_SIZE,
 });
