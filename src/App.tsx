@@ -719,7 +719,9 @@ const App: React.FC = () => {
 
     const [isMathDebugSkipped, setIsMathDebugSkipped] = useState<boolean>(false);
     const [isDebugHpOne, setIsDebugHpOne] = useState<boolean>(false);
+    const [isMiniGameDebugUnlocked, setIsMiniGameDebugUnlocked] = useState<boolean>(false);
     const [titleClickCount, setTitleCount] = useState<number>(0);
+    const [miniGameUnlockClickCount, setMiniGameUnlockClickCount] = useState<number>(0);
     const [logClickCount, setLogClickCount] = useState<number>(0);
     const [debugLoadout, setDebugLoadout] = useState<{ deck: ICard[], relics: Relic[], potions: Potion[] } | null>(null);
 
@@ -2616,6 +2618,7 @@ const App: React.FC = () => {
         setClearCount(storageService.getClearCount());
         setIsMathDebugSkipped(storageService.getDebugMathSkip());
         setIsDebugHpOne(storageService.getDebugHpOne());
+        setIsMiniGameDebugUnlocked(storageService.getDebugMiniGameUnlock());
         setTotalMathCorrect(storageService.getMathCorrectCount());
 
         audioService.setBgmMode(appSettings.bgmMode);
@@ -2691,6 +2694,19 @@ const App: React.FC = () => {
         }
     };
 
+    const handleMiniGameUnlockClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        const next = miniGameUnlockClickCount + 1;
+        setMiniGameUnlockClickCount(next);
+        if (next >= 10) {
+            const newState = !isMiniGameDebugUnlocked;
+            setIsMiniGameDebugUnlocked(newState);
+            storageService.saveDebugMiniGameUnlock(newState);
+            setMiniGameUnlockClickCount(0);
+            audioService.playSound('select');
+        }
+    };
+
     const disableMathDebugSkip = () => {
         if (!isMathDebugSkipped) return;
         setIsMathDebugSkipped(false);
@@ -2704,6 +2720,14 @@ const App: React.FC = () => {
         setIsDebugHpOne(false);
         storageService.saveDebugHpOne(false);
         setLogClickCount(0);
+        audioService.playSound('select');
+    };
+
+    const disableMiniGameDebugUnlock = () => {
+        if (!isMiniGameDebugUnlocked) return;
+        setIsMiniGameDebugUnlocked(false);
+        storageService.saveDebugMiniGameUnlock(false);
+        setMiniGameUnlockClickCount(0);
         audioService.playSound('select');
     };
 
@@ -3089,9 +3113,11 @@ const App: React.FC = () => {
         });
     }, [gameState.player, gameState.screen, peacePipeModal]);
 
-    const handleNodeComplete = () => {
+    const handleNodeComplete = useCallback(() => {
+        setIsLoading(false);
         setEventData(null);
         setEventResultLog(null);
+        const shouldAdvanceCoopDecisionOwner = gameState.challengeMode === 'COOP';
         setGameState(prev => {
             const newMap = prev.map.map(n => {
                 if (n.id === prev.currentMapNodeId) return { ...n, completed: true };
@@ -3104,7 +3130,7 @@ const App: React.FC = () => {
                 currentEventTitle: undefined
             };
         });
-        if (gameState.challengeMode === 'COOP') {
+        if (shouldAdvanceCoopDecisionOwner) {
             setCoopSession(prev => {
                 if (!prev || prev.participants.length === 0) return prev;
                 const next = {
@@ -3112,13 +3138,40 @@ const App: React.FC = () => {
                     decisionOwnerIndex: (prev.decisionOwnerIndex + 1) % prev.participants.length
                 };
                 if (prev.isHost) {
-                p2pService.send({ type: 'COOP_PARTICIPANTS', participants: next.participants, decisionOwnerIndex: next.decisionOwnerIndex });
+                    p2pService.send({ type: 'COOP_PARTICIPANTS', participants: next.participants, decisionOwnerIndex: next.decisionOwnerIndex });
                 }
                 return next;
             });
         }
         audioService.playBGM('map');
-    };
+    }, [gameState.challengeMode]);
+
+    useEffect(() => {
+        if (gameState.screen !== GameScreen.EVENT || eventData) return;
+        const timeout = window.setTimeout(() => {
+            setGameState(prev => {
+                if (prev.screen !== GameScreen.EVENT) return prev;
+                const currentNode = prev.currentMapNodeId
+                    ? prev.map.find(node => node.id === prev.currentMapNodeId)
+                    : null;
+                const nextMap = currentNode?.type === NodeType.EVENT
+                    ? prev.map.map(node => node.id === prev.currentMapNodeId ? { ...node, completed: true } : node)
+                    : prev.map;
+                return {
+                    ...prev,
+                    map: nextMap,
+                    screen: prev.map.length > 0 ? GameScreen.MAP : GameScreen.RELIC_SELECTION,
+                    currentEventTitle: undefined
+                };
+            });
+            setEventResultLog(null);
+            setIsLoading(false);
+            audioService.playBGM('map');
+            addLog(trans("イベント復帰に失敗したため、マップへ戻しました。", languageMode), "yellow");
+        }, 120);
+
+        return () => window.clearTimeout(timeout);
+    }, [addLog, eventData, gameState.screen, languageMode]);
 
     const continueGame = () => {
         if (isDailyLimitReached) {
@@ -10007,7 +10060,11 @@ const App: React.FC = () => {
                                 {trans("学習ローグ", languageMode)}
                             </h1>
 
-                            <div className="mb-6 bg-black/40 px-4 py-2 rounded-lg border border-gray-600">
+                            <div
+                                className="mb-6 bg-black/40 px-4 py-2 rounded-lg border border-gray-600 cursor-pointer select-none"
+                                onClick={handleMiniGameUnlockClick}
+                                title="ミニゲーム全開放デバッグ切替"
+                            >
                                 {isDailyLimitReached ? (
                                     <div className="text-red-500 text-xs md:text-sm font-bold animate-pulse flex items-center gap-2">
                                         <AlertTriangle size={16} /> {trans("本日のプレイ制限に達しました。問題チャレンジで勉強しましょう！", languageMode)}
@@ -10026,7 +10083,7 @@ const App: React.FC = () => {
                                 <button
                                     type="button"
                                     onClick={disableMathDebugSkip}
-                                    className="text-red-500 font-bold mb-1 text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse cursor-pointer"
+                                    className={`text-red-500 font-bold ${isMiniGameDebugUnlocked ? 'mb-1' : 'mb-6'} text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse cursor-pointer`}
                                 >
                                     {trans("(デバッグ: けいさん スキップ ON)", languageMode)}
                                 </button>
@@ -10035,12 +10092,21 @@ const App: React.FC = () => {
                                 <button
                                     type="button"
                                     onClick={disableDebugHpOne}
-                                    className="text-red-500 font-bold mb-6 text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse cursor-pointer"
+                                    className="text-red-500 font-bold mb-1 text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse cursor-pointer"
                                 >
                                     {trans("(デバッグ: てきHP1 & ぜんかいほう ON)", languageMode)}
                                 </button>
                             )}
-                            {(!isMathDebugSkipped && !isDebugHpOne) && <div className="mb-2 h-2"></div>}
+                            {isMiniGameDebugUnlocked && (
+                                <button
+                                    type="button"
+                                    onClick={disableMiniGameDebugUnlock}
+                                    className="text-red-500 font-bold mb-6 text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse cursor-pointer"
+                                >
+                                    {trans("(デバッグ: ミニゲームぜんかいほう ON)", languageMode)}
+                                </button>
+                            )}
+                            {(!isMathDebugSkipped && !isDebugHpOne && !isMiniGameDebugUnlocked) && <div className="mb-2 h-2"></div>}
 
                             <div className="start-menu-actions flex flex-col gap-2 items-center w-full max-w-[320px]">
                                 {hasSave && (
@@ -10683,7 +10749,7 @@ const App: React.FC = () => {
                             onSelect={handleMiniGameSelect}
                             onBack={returnToTitle}
                             totalMathCorrect={totalMathCorrect}
-                            isDebug={isDebugHpOne}
+                            isDebug={isDebugHpOne || isMiniGameDebugUnlocked}
                         />
                     </div>
                 )}

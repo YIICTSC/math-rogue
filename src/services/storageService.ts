@@ -16,6 +16,7 @@ const STORAGE_KEY_VS_RANKING = 'pixel_spire_vs_ranking_v1';
 const STORAGE_KEY_LEGACY_CARD = 'pixel_spire_legacy_card_v1';
 const STORAGE_KEY_DEBUG_MATH_SKIP = 'pixel_spire_debug_math_skip_v1';
 const STORAGE_KEY_DEBUG_HP_ONE = 'pixel_spire_debug_hp_one_v1';
+const STORAGE_KEY_DEBUG_MINI_GAME_UNLOCK = 'pixel_spire_debug_mini_game_unlock_v1';
 const STORAGE_KEY_MATH_CORRECT_COUNT = 'pixel_spire_math_correct_count_v1';
 const STORAGE_KEY_CHALLENGE_RECORDS = 'pixel_spire_challenge_records_v1';
 
@@ -969,6 +970,16 @@ export const storageService = {
       } catch { return false; }
   },
 
+  saveDebugMiniGameUnlock: (enabled: boolean) => {
+      localStorage.setItem(STORAGE_KEY_DEBUG_MINI_GAME_UNLOCK, JSON.stringify(enabled));
+  },
+
+  getDebugMiniGameUnlock: (): boolean => {
+      try {
+          return JSON.parse(localStorage.getItem(STORAGE_KEY_DEBUG_MINI_GAME_UNLOCK) || 'false');
+      } catch { return false; }
+  },
+
   exportTransferData: (): StorageTransferPayload => {
       const entries = collectTransferEntries();
       return {
@@ -1024,6 +1035,7 @@ export const storageService = {
       // NOTE: STORAGE_KEY_LEGACY_CARD はリセット対象から除外（ユーザー要望）
       localStorage.removeItem(STORAGE_KEY_DEBUG_MATH_SKIP);
       localStorage.removeItem(STORAGE_KEY_DEBUG_HP_ONE);
+      localStorage.removeItem(STORAGE_KEY_DEBUG_MINI_GAME_UNLOCK);
       localStorage.removeItem(STORAGE_KEY_MATH_CORRECT_COUNT);
       localStorage.removeItem(STORAGE_KEY_SEEN_BATTLE_TUTORIAL);
       localStorage.removeItem(STORAGE_KEY_SEEN_PARRY_TUTORIAL);

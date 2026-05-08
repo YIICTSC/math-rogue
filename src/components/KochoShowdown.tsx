@@ -217,6 +217,8 @@ const getKochoHeroActionAsset = (cardName?: string | null) => {
     return { src: KOCHO_HERO_ACTION_SHEETS[3], cell: index - 74 };
 };
 
+const shouldFlipKochoHeroAction = (cardName?: string | null) => cardName === '定規スラッシュ';
+
 const getKochoHeroDamageAsset = (kind: 'light' | 'heavy' | 'break' | 'stun' | 'low' | 'down') => {
     const cells = { light: 3, heavy: 4, break: 5, stun: 6, low: 8, down: 9 };
     return { src: KOCHO_HERO_ACTION_SHEETS[3], cell: cells[kind] };
@@ -232,6 +234,23 @@ const getKochoEffectAssetForCard = (cardName?: string) => {
     if (cardName === '救護スプレー') return { src: KOCHO_EFFECT_SHEETS[2], cell: 16 };
     if (cardName === '金庫破り') return { src: KOCHO_EFFECT_SHEETS[2], cell: 13 };
     return { src: KOCHO_EFFECT_SHEETS[2], cell: 24 };
+};
+
+const KochoCardActionArt: React.FC<{
+    card: Pick<KCard, 'name'>;
+    className?: string;
+}> = ({ card, className = '' }) => {
+    const asset = getKochoHeroActionAsset(card.name);
+    return (
+        <KochoSheetSprite
+            sheet="characters"
+            src={asset.src}
+            cell={asset.cell}
+            flipX={shouldFlipKochoHeroAction(card.name)}
+            className={className}
+            title={card.name}
+        />
+    );
 };
 
 const getKochoCardSpriteCell = (card: Pick<KCard, 'name' | 'effectType' | 'type'>) => {
@@ -264,16 +283,16 @@ const getKochoItemSpriteCell = (item: Pick<KConsumable, 'id' | 'type'>) => {
 
 const getKochoRelicSpriteCell = (relic: Pick<KRelic, 'id'>) => {
     const cells: Record<string, number> = {
+        R_SHIELD: 17,
         R_DISCOUNT: 18,
         R_THORN: 19,
         R_BOOTS: 20,
         R_RECYCLE: 21,
         R_FANG: 22,
         R_GLOVES: 23,
-        R_SHIELD: 24,
         R_POTION: 11,
     };
-    return cells[relic.id] ?? 17;
+    return cells[relic.id] ?? 24;
 };
 
 // --- DATA ---
@@ -2273,7 +2292,13 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
                         {v.type === 'TEXT' && <div className={`text-xl font-bold animate-bounce ${v.color || 'text-white'} drop-shadow-md`}>{v.text}</div>}
                         {v.type === 'AFTERIMAGE' && (
                             <div className={`opacity-25 blur-[1px] ${v.direction === -1 ? 'scale-x-[-1]' : ''}`}>
-                                <KochoSheetSprite sheet="characters" src={getKochoHeroActionAsset(activeActionCardNameRef.current).src} cell={getKochoHeroActionAsset(activeActionCardNameRef.current).cell} className={`h-16 w-16 md:h-32 md:w-32 ${v.color || 'text-white'}`} />
+                                <KochoSheetSprite
+                                    sheet="characters"
+                                    src={getKochoHeroActionAsset(activeActionCardNameRef.current).src}
+                                    cell={getKochoHeroActionAsset(activeActionCardNameRef.current).cell}
+                                    flipX={shouldFlipKochoHeroAction(activeActionCardNameRef.current)}
+                                    className={`h-16 w-16 md:h-32 md:w-32 ${v.color || 'text-white'}`}
+                                />
                             </div>
                         )}
                     </div>
@@ -2293,7 +2318,15 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
                         <div className={`transition-transform duration-200 ${p.facing === -1 ? 'scale-x-[-1]' : ''}`}>
                             {(() => {
                                 const asset = getKochoPlayerAsset();
-                                return <KochoSheetSprite sheet="characters" src={asset.src} cell={asset.cell} className="h-20 w-20 md:h-36 md:w-36" />;
+                                return (
+                                    <KochoSheetSprite
+                                        sheet="characters"
+                                        src={asset.src}
+                                        cell={asset.cell}
+                                        flipX={shouldFlipKochoHeroAction(activeActionCardName)}
+                                        className="h-20 w-20 md:h-36 md:w-36"
+                                    />
+                                );
                             })()}
                         </div>
                         {p.barrier > 0 && <div className="absolute inset-0 border-2 border-yellow-400 rounded-full animate-pulse opacity-50"></div>}
@@ -2529,7 +2562,7 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
                                     <div className="flex gap-4 md:gap-8 justify-center flex-wrap">
                                         {rewardCards.map((card, i) => (
                                             <div key={i} className="w-32 md:w-40 bg-slate-800 border-4 border-yellow-500 rounded-xl p-4 flex flex-col items-center hover:scale-105 transition-transform cursor-pointer" onClick={() => selectReward(card)}>
-                                                <KochoSheetSprite sheet="icons" cell={getKochoCardSpriteCell(card)} className="mb-2 h-16 w-16 rounded-lg border border-indigo-400/40 bg-black/40" title={card.name} />
+                                                <KochoCardActionArt card={card} className="mb-2 h-16 w-16 rounded-lg border border-indigo-400/40 bg-black/40" />
                                                 <div className="font-bold text-white mb-1 text-center text-sm md:text-base leading-tight">{card.name}</div>
                                                 
                                                 {/* ADDED STATS DISPLAY */}
@@ -2564,7 +2597,7 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
                                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                             {gameState.hand.map((card, i) => (
                                                 <div key={i} className={`bg-slate-800 p-3 rounded border relative transition-all ${gameState.shopUpgradeUsed ? 'opacity-50 cursor-not-allowed border-slate-600' : 'hover:border-yellow-400 cursor-pointer border-slate-600'}`} onClick={() => handleApplyUpgrade(i)}>
-                                                    <KochoSheetSprite sheet="icons" cell={getKochoCardSpriteCell(card)} className="mb-2 h-10 w-10 rounded border border-slate-600 bg-black/40" title={card.name} />
+                                                    <KochoCardActionArt card={card} className="mb-2 h-10 w-10 rounded border border-slate-600 bg-black/40" />
                                                     <div className="font-bold text-sm text-white mb-1">{card.name}</div>
                                                     <div className="text-xs text-gray-400 mb-2">{card.description}</div>
                                                     <div className="flex gap-2 text-[10px] mb-1">
@@ -2600,7 +2633,7 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
                                             <div className="grid grid-cols-2 gap-4">
                                                 {gameState.hand.map((card, i) => (
                                                     <div key={i} className={`bg-slate-800 p-3 rounded border relative transition-all ${gameState.shopUpgradeUsed ? 'opacity-50 cursor-not-allowed border-slate-600' : 'hover:border-yellow-400 cursor-pointer border-slate-600'}`} onClick={() => handleApplyUpgrade(i)}>
-                                                        <KochoSheetSprite sheet="icons" cell={getKochoCardSpriteCell(card)} className="mb-2 h-10 w-10 rounded border border-slate-600 bg-black/40" title={card.name} />
+                                                        <KochoCardActionArt card={card} className="mb-2 h-10 w-10 rounded border border-slate-600 bg-black/40" />
                                                         <div className="font-bold text-sm text-white mb-1">{card.name}</div>
                                                         <div className="text-xs text-gray-400 mb-2">{card.description}</div>
                                                         <div className="flex gap-2 text-[10px] mb-1">{card.damage > 0 && <span className="text-red-400 bg-red-900/30 px-1 rounded">ATK:{card.damage}</span>}<span className="text-blue-400 bg-blue-900/30 px-1 rounded">CD:{card.cooldown}</span></div>
@@ -2624,7 +2657,7 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
                                                     return (
                                                         <div key={item.id} className={`bg-slate-800 p-3 rounded border flex justify-between items-center ${owned ? 'opacity-50 border-gray-700' : 'border-slate-500'}`}>
                                                             <div className="flex min-w-0 items-center gap-3">
-                                                                <KochoSheetSprite sheet="icons" cell={getKochoRelicSpriteCell(item)} className="h-10 w-10 shrink-0 rounded border border-yellow-500/30 bg-black/40" title={item.name} />
+                                                                <KochoSheetSprite sheet="icons" cell={getKochoRelicSpriteCell(item)} className="h-10 w-10 shrink-0 rounded-md border border-yellow-500/30 bg-black/40" title={item.name} />
                                                                 <div className="min-w-0"><div className="font-bold text-sm text-yellow-200">{item.name}</div><div className="text-xs text-gray-400">{item.desc}</div></div>
                                                             </div>
                                                             <button disabled={owned} onClick={() => buyShopItem(item)} className={`px-3 py-1 rounded text-sm font-bold ${owned ? 'bg-gray-600 text-gray-400' : 'bg-yellow-600 text-black hover:bg-yellow-500'}`}>{owned ? 'Sold' : `${finalPrice}G`}</button>
@@ -2652,7 +2685,7 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
                                     {newlyUnlockedCard ? (
                                         <div className="mx-auto mb-8 w-64 rounded-2xl border-4 border-yellow-500 bg-slate-900 p-5 shadow-xl">
                                             <div className="mb-2 text-xs font-black tracking-[0.2em] text-yellow-300">NEW CARD</div>
-                                            <KochoSheetSprite sheet="icons" cell={getKochoCardSpriteCell(newlyUnlockedCard)} className="mx-auto mb-3 h-16 w-16 rounded-full border border-yellow-400/50 bg-black/40" title={newlyUnlockedCard.name} />
+                                            <KochoCardActionArt card={newlyUnlockedCard} className="mx-auto mb-3 h-16 w-16 rounded-full border border-yellow-400/50 bg-black/40" />
                                             <div className="text-lg font-bold text-white">{newlyUnlockedCard.name}</div>
                                             <div className="mt-2 flex justify-center gap-2 text-[11px]">
                                                 {newlyUnlockedCard.damage > 0 && <span className="rounded bg-red-900/40 px-2 py-1 font-bold text-red-300">ATK {newlyUnlockedCard.damage}</span>}
@@ -2702,7 +2735,7 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
                                             {gameState.relics.map((relic, i) => (
                                                 <div key={i} className="bg-slate-900 p-6 rounded-xl border-2 border-slate-600 flex items-start gap-4 shadow-lg hover:border-yellow-500 transition-colors">
                                                     <div className="w-16 h-16 bg-slate-800 rounded-full border-4 border-yellow-600 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(234,179,8,0.3)]">
-                                                        <KochoSheetSprite sheet="icons" cell={getKochoRelicSpriteCell(relic)} className="h-full w-full rounded-full" title={relic.name} />
+                                                        <KochoSheetSprite sheet="icons" cell={getKochoRelicSpriteCell(relic)} className="h-14 w-14 rounded-md" title={relic.name} />
                                                     </div>
                                                     <div>
                                                         <div className="font-bold text-white text-xl mb-2">{relic.name}</div>
@@ -2770,7 +2803,7 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
                                         <div key={i} className="w-12 h-16 md:w-16 md:h-20 bg-slate-800 border border-slate-600 rounded flex flex-col items-center justify-center relative group cursor-pointer hover:border-red-400 shrink-0" onClick={() => handleUnqueueCard(i)}>
                                             <div className={`w-full h-1 ${card.color} absolute top-0`}></div>
                                             <div className="text-[9px] md:text-xs text-center font-bold px-1 overflow-hidden whitespace-nowrap text-ellipsis w-full">{card.name}</div>
-                                            <KochoSheetSprite sheet="icons" cell={getKochoCardSpriteCell(card)} className="h-7 w-7 rounded bg-black/40" title={card.name} />
+                                            <KochoCardActionArt card={card} className="h-7 w-7 rounded bg-black/40" />
                                             <X size={12} className="absolute -top-1 -right-1 bg-red-500 rounded-full text-white opacity-0 group-hover:opacity-100"/>
                                         </div>
                                     ) : (
@@ -2800,12 +2833,12 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
 
                                     <div className="flex flex-col h-full w-full md:hidden">
                                         <div className="mt-1 text-[9px] font-bold text-center leading-tight truncate">{card.name}</div>
-                                        <KochoSheetSprite sheet="icons" cell={getKochoCardSpriteCell(card)} className="mx-auto my-0.5 h-8 w-8 rounded bg-black/40" title={card.name} />
+                                        <KochoCardActionArt card={card} className="mx-auto my-0.5 h-8 w-8 rounded bg-black/40" />
                                         <div className="text-[8px] text-gray-400 text-center leading-tight h-6 overflow-hidden">{card.description}</div>
                                         <div className="flex justify-between items-center text-[8px] text-gray-500 mt-auto font-mono w-full"><span>CD:{card.cooldown}</span>{card.damage > 0 ? <span className="text-red-400 font-bold">{card.damage}</span> : <span className="opacity-70">{card.type}</span>}</div>
                                     </div>
                                     <div className="hidden md:flex flex-row items-center w-full pl-2 gap-2">
-                                        <KochoSheetSprite sheet="icons" cell={getKochoCardSpriteCell(card)} className="h-9 w-9 shrink-0 rounded bg-black/40" title={card.name} />
+                                        <KochoCardActionArt card={card} className="h-9 w-9 shrink-0 rounded bg-black/40" />
                                         <div className="flex-grow min-w-0">
                                             <div className="text-xs font-bold truncate">{card.name}</div>
                                             <div className="text-[10px] text-gray-400 truncate">{card.description}</div>
