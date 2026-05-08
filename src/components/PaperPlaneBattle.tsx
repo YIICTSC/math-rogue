@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation, Droplets, Recycle, Repeat, User, Lock, Users, Target, UserPlus, Gauge, Swords, Dice5, Ghost, Rocket, Fan, Cpu } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { storageService, PaperPlaneProgress } from '../services/storageService';
+import PixelSprite from './PixelSprite';
 
 // --- TYPES & CONSTANTS ---
 
@@ -1406,6 +1407,49 @@ const PaperPlaneSheetImage: React.FC<{ sprite: PaperPlaneSheetSprite | null; cla
             title={title}
             aria-hidden={!title}
         />
+    );
+};
+
+const ChromaKeyPilotSprite: React.FC<{ src: string; fallbackSprite: string; className?: string; chromaKey?: [number, number, number] }> = ({ src, fallbackSprite, className = '', chromaKey = [0, 255, 0] }) => {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [loaded, setLoaded] = useState(false);
+
+    useEffect(() => {
+        let active = true;
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+            if (!active || !canvasRef.current) return;
+            const canvas = canvasRef.current;
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            if (!ctx) return;
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.clearRect(0, 0, img.width, img.height);
+            ctx.drawImage(img, 0, 0);
+            const imageData = ctx.getImageData(0, 0, img.width, img.height);
+            const data = imageData.data;
+            const [kr, kg, kb] = chromaKey;
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                const isGreenLike = g > 100 && g > r * 1.2 && g > b * 1.2;
+                const nearKey = Math.abs(r - kr) + Math.abs(g - kg) + Math.abs(b - kb) < 120;
+                if (isGreenLike || nearKey) data[i + 3] = 0;
+            }
+            ctx.putImageData(imageData, 0, 0);
+            setLoaded(true);
+        };
+        img.onerror = () => setLoaded(false);
+        img.src = src;
+        return () => { active = false; };
+    }, [src, chromaKey]);
+
+    return loaded ? (
+        <canvas ref={canvasRef} className={`${className} [image-rendering:pixelated]`} />
+    ) : (
+        <PixelSprite seed={src} name={fallbackSprite} className={className} />
     );
 };
 
@@ -3538,6 +3582,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                      >
                                          <div className={`w-full h-32 ${ship.color} mb-4 rounded-lg flex items-center justify-center relative overflow-hidden`}>
                                              <PaperPlaneSheetImage sprite={getPaperPlaneShipSprite(ship.id)} title={ship.name} className="absolute inset-2 bg-no-repeat" />
+                                             {!getPaperPlaneShipSprite(ship.id) && (
+                                                <PixelSprite seed={ship.id} name={`ROCKET|#e2e8f0`} className="absolute inset-6 opacity-90" />
+                                             )}
                                              {!isUnlocked && <Lock size={32} className="absolute text-gray-300"/>}
                                          </div>
                                          <h3 className="text-xl font-bold mb-2">{ship.name}</h3>
@@ -3584,7 +3631,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                                         <div className="flex flex-col items-center mb-4">
                                             <div className="w-20 h-20 mb-2 rounded-lg bg-black/30 border border-cyan-500/20 overflow-hidden">
-                                                 <img src={getPaperPlanePilotImage(pilot.id)} alt="" className="w-full h-full object-contain [image-rendering:pixelated]" />
+                                                 <ChromaKeyPilotSprite
+                                                    src={getPaperPlanePilotImage(pilot.id)}
+                                                    fallbackSprite={pilot.spriteName}
+                                                    className="w-full h-full object-contain"
+                                                 />
                                             </div>
                                             <div className="font-bold text-lg">{pilot.name}</div>
                                         </div>
