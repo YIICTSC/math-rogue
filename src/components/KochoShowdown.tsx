@@ -137,11 +137,10 @@ interface KochoGameState {
     nextWaveMessage?: string; // Message to display at start of next wave
 }
 
-type KochoSheetKey = 'characters' | 'icons' | 'effects' | 'backgrounds';
+type KochoSheetKey = 'characters' | 'effects' | 'backgrounds';
 
 const KOCHO_SPRITE_SHEETS: Record<KochoSheetKey, string> = {
     characters: `${import.meta.env.BASE_URL}sprites/kocho-hero-actions-01.png`,
-    icons: `${import.meta.env.BASE_URL}sprites/kocho-cards-items-relics-5x5.png`,
     effects: `${import.meta.env.BASE_URL}sprites/kocho-effects-01.png`,
     backgrounds: `${import.meta.env.BASE_URL}sprites/kocho-backgrounds-5x5.png`,
 };
@@ -253,47 +252,58 @@ const KochoCardActionArt: React.FC<{
     );
 };
 
-const getKochoCardSpriteCell = (card: Pick<KCard, 'name' | 'effectType' | 'type'>) => {
-    if (card.name.includes('定規')) return 0;
-    if (card.name.includes('コンパス') || card.name.includes('校旗')) return 1;
-    if (card.name.includes('チョーク')) return 2;
-    if (card.name.includes('ガード') || card.name.includes('防御') || card.name.includes('シールド')) return 3;
-    if (card.name.includes('モップ') || card.name.includes('箒') || card.name.includes('ぼうき')) return 4;
-    if (card.name.includes('笛') || card.name.includes('リコーダー') || card.name.includes('ホイッスル')) return 5;
-    if (card.name.includes('メガホン') || card.name.includes('号令') || card.name.includes('放送')) return 6;
-    if (card.name.includes('旗')) return 7;
-    if (card.name.includes('ランドセル') || card.name.includes('連絡帳') || card.name.includes('教科書') || card.name.includes('雑誌')) return 8;
-    if (card.name.includes('ダッシュ') || card.name.includes('タックル') || card.type === 'MOVE') return 9;
-    if (card.effectType === 'HEAL') return 11;
-    if (card.effectType === 'STUN') return 5;
-    if (card.effectType === 'PULL') return 1;
-    if (card.effectType === 'PUSH') return 0;
-    return 0;
-};
-
-const getKochoItemSpriteCell = (item: Pick<KConsumable, 'id' | 'type'>) => {
-    if (item.id === 'C_MILK') return 10;
-    if (item.type === 'HEAL') return 11;
-    if (item.type === 'BARRIER') return 12;
-    if (item.type === 'CD_REDUCE') return 13;
-    if (item.type === 'BOMB') return 15;
-    if (item.type === 'STRENGTH') return 16;
-    return 14;
-};
-
-const getKochoRelicSpriteCell = (relic: Pick<KRelic, 'id'>) => {
-    const cells: Record<string, number> = {
-        R_SHIELD: 17,
-        R_DISCOUNT: 18,
-        R_THORN: 19,
-        R_BOOTS: 20,
-        R_RECYCLE: 21,
-        R_FANG: 22,
-        R_GLOVES: 23,
-        R_POTION: 11,
+const getKochoItemImageSrc = (item: Pick<KConsumable, 'id'>) => {
+    const version = '20260508-item-redraw';
+    const files: Record<string, string> = {
+        C_MILK: 'kocho-item-milk.png',
+        C_BARRIER: 'kocho-item-barrier.png',
+        C_BATTERY: 'kocho-item-battery.png',
+        C_CURRY: 'kocho-item-curry.png',
+        C_DRINK: 'kocho-item-drink.png',
     };
-    return cells[relic.id] ?? 24;
+    return `${import.meta.env.BASE_URL}sprites/${files[item.id] || 'kocho-item-generic.png'}?v=${version}`;
 };
+
+const KochoItemImage: React.FC<{
+    item: Pick<KConsumable, 'id' | 'name'>;
+    className?: string;
+}> = ({ item, className = '' }) => (
+    <img
+        src={getKochoItemImageSrc(item)}
+        alt=""
+        title={item.name}
+        className={`object-contain ${className}`}
+        draggable={false}
+    />
+);
+
+const getKochoRelicImageSrc = (relic: Pick<KRelic, 'id'>) => {
+    const version = '20260508-relic-redraw';
+    const files: Record<string, string> = {
+        R_SHIELD: 'kocho-relic-shield.png',
+        R_DISCOUNT: 'kocho-relic-discount.png',
+        R_THORN: 'kocho-relic-thorn.png',
+        R_BOOTS: 'kocho-relic-boots.png',
+        R_RECYCLE: 'kocho-relic-recycle.png',
+        R_FANG: 'kocho-relic-fang.png',
+        R_GLOVES: 'kocho-relic-gloves.png',
+        R_POTION: 'kocho-relic-potion.png',
+    };
+    return `${import.meta.env.BASE_URL}sprites/${files[relic.id] || 'kocho-relic-seal.png'}?v=${version}`;
+};
+
+const KochoRelicImage: React.FC<{
+    relic: Pick<KRelic, 'id' | 'name'>;
+    className?: string;
+}> = ({ relic, className = '' }) => (
+    <img
+        src={getKochoRelicImageSrc(relic)}
+        alt=""
+        title={relic.name}
+        className={`object-contain ${className}`}
+        draggable={false}
+    />
+);
 
 // --- DATA ---
 const BASE_CARD_DB: Omit<KCard, 'id' | 'currentCooldown' | 'usedSlots'>[] = [
@@ -2308,7 +2318,7 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
                 {groundItem && (
                     <div className="absolute bottom-1 z-10 animate-bounce">
                         <div className={`h-9 w-9 bg-black/60 rounded-full border ${groundItem.data.color}`}>
-                            <KochoSheetSprite sheet="icons" cell={getKochoItemSpriteCell(groundItem.data)} className="h-full w-full rounded-full" title={groundItem.data.name} />
+                            <KochoItemImage item={groundItem.data} className="h-full w-full rounded-full" />
                         </div>
                     </div>
                 )}
@@ -2442,14 +2452,14 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
                     KOCHO SHOWDOWN <span className="text-xs text-pink-400 ml-2">Stage {gameState.battleStage}</span>
                 </h2>
                 <div className="flex items-center gap-2 md:gap-4">
-                    <button onClick={() => setShowItemModal(true)} className="flex items-center gap-2 text-green-200 hover:text-white transition-colors text-xs md:text-sm font-bold border border-green-500/30 px-2 py-1 rounded bg-black/20">
-                        <Package size={14}/> <span className="hidden md:inline">Items</span> ({gameState.consumables.length})
-                    </button>
                     <button onClick={() => setShowHelpModal(true)} className="flex items-center gap-2 text-indigo-200 hover:text-white transition-colors text-xs md:text-sm font-bold border border-indigo-500/30 px-2 py-1 rounded bg-black/20">
                         <HelpCircle size={14}/> <span className="hidden md:inline">Help</span>
                     </button>
                     <button onClick={() => setShowRelicModal(true)} className="flex items-center gap-2 text-yellow-200 hover:text-white transition-colors text-xs md:text-sm font-bold border border-yellow-500/30 px-2 py-1 rounded bg-black/20">
                         <Gift size={14}/> <span className="hidden md:inline">Relics</span> ({gameState.relics.length})
+                    </button>
+                    <button onClick={() => setShowItemModal(true)} className="flex items-center gap-2 text-green-200 hover:text-white transition-colors text-xs md:text-sm font-bold border border-green-500/30 px-2 py-1 rounded bg-black/20">
+                        <Package size={14}/> <span className="hidden md:inline">Items</span> ({gameState.consumables.length})
                     </button>
                     <div className="text-xs md:text-sm font-bold text-yellow-400 flex items-center gap-2 bg-black/40 px-2 py-1 rounded border border-yellow-500/50">
                         <Coins size={14}/> {gameState.money} G
@@ -2517,7 +2527,7 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
                                     <div key={i} className="bg-slate-900 border border-slate-600 p-4 rounded-lg flex items-center justify-between">
                                         <div className="flex items-center gap-4">
                                             <div className={`w-12 h-12 bg-slate-800 border-2 border-slate-600 rounded-full flex items-center justify-center ${item.color}`}>
-                                                <KochoSheetSprite sheet="icons" cell={getKochoItemSpriteCell(item)} className="h-full w-full rounded-full" title={item.name} />
+                                                <KochoItemImage item={item} className="h-full w-full rounded-full" />
                                             </div>
                                             <div>
                                                 <div className="font-bold text-white text-lg">{item.name}</div>
@@ -2648,19 +2658,24 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
                                                 ))}
                                             </div>
                                         </div>
-                                        <div className="w-full md:w-80 bg-slate-900 border border-slate-600 rounded-lg p-4 shrink-0">
+                                        <div className="w-full md:w-96 bg-slate-900 border border-slate-600 rounded-lg p-4 shrink-0">
                                             <h3 className="text-xl font-bold text-white mb-4 flex items-center"><Gift className="mr-2 text-yellow-400"/> Relics (2 Random)</h3>
                                             <div className="space-y-4">
                                                 {gameState.shopInventory.map(item => {
                                                     const owned = gameState.relics.some(r => r.id === item.id) && item.id !== 'R_POTION';
                                                     const finalPrice = getShopPrice(item.price);
                                                     return (
-                                                        <div key={item.id} className={`bg-slate-800 p-3 rounded border flex justify-between items-center ${owned ? 'opacity-50 border-gray-700' : 'border-slate-500'}`}>
-                                                            <div className="flex min-w-0 items-center gap-3">
-                                                                <KochoSheetSprite sheet="icons" cell={getKochoRelicSpriteCell(item)} className="h-10 w-10 shrink-0 rounded-md border border-yellow-500/30 bg-black/40" title={item.name} />
-                                                                <div className="min-w-0"><div className="font-bold text-sm text-yellow-200">{item.name}</div><div className="text-xs text-gray-400">{item.desc}</div></div>
+                                                        <div key={item.id} className={`bg-slate-800 p-3 rounded border flex items-center gap-3 ${owned ? 'opacity-50 border-gray-700' : 'border-slate-500'}`}>
+                                                            <div className="flex min-w-0 flex-1 items-center gap-3">
+                                                                <div className="h-12 w-12 shrink-0 rounded-md border border-yellow-500/30 bg-black/40 p-0.5">
+                                                                    <KochoRelicImage relic={item} className="h-full w-full rounded-sm" />
+                                                                </div>
+                                                                <div className="min-w-0 flex-1">
+                                                                    <div className="font-bold text-sm text-yellow-200 leading-tight">{item.name}</div>
+                                                                    <div className="text-xs text-gray-400 leading-tight break-words">{item.desc}</div>
+                                                                </div>
                                                             </div>
-                                                            <button disabled={owned} onClick={() => buyShopItem(item)} className={`px-3 py-1 rounded text-sm font-bold ${owned ? 'bg-gray-600 text-gray-400' : 'bg-yellow-600 text-black hover:bg-yellow-500'}`}>{owned ? 'Sold' : `${finalPrice}G`}</button>
+                                                            <button disabled={owned} onClick={() => buyShopItem(item)} className={`shrink-0 px-3 py-1 rounded text-sm font-bold ${owned ? 'bg-gray-600 text-gray-400' : 'bg-yellow-600 text-black hover:bg-yellow-500'}`}>{owned ? 'Sold' : `${finalPrice}G`}</button>
                                                         </div>
                                                     );
                                                 })}
@@ -2734,8 +2749,8 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                             {gameState.relics.map((relic, i) => (
                                                 <div key={i} className="bg-slate-900 p-6 rounded-xl border-2 border-slate-600 flex items-start gap-4 shadow-lg hover:border-yellow-500 transition-colors">
-                                                    <div className="w-16 h-16 bg-slate-800 rounded-full border-4 border-yellow-600 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(234,179,8,0.3)]">
-                                                        <KochoSheetSprite sheet="icons" cell={getKochoRelicSpriteCell(relic)} className="h-14 w-14 rounded-md" title={relic.name} />
+                                                    <div className="w-16 h-16 bg-slate-800 rounded-lg border-4 border-yellow-600 flex items-center justify-center shrink-0 p-1 shadow-[0_0_15px_rgba(234,179,8,0.3)]">
+                                                        <KochoRelicImage relic={relic} className="h-full w-full rounded-sm" />
                                                     </div>
                                                     <div>
                                                         <div className="font-bold text-white text-xl mb-2">{relic.name}</div>
