@@ -730,7 +730,12 @@ const UNLOCKABLE_PART_TEMPLATES: Omit<ShipPart, 'id'>[] = [
 const PAPER_PLANE_UNLOCK_TARGET = 50;
 type PaperPlaneSheetSprite = { sheet: string; row: number; col: number };
 
-const PAPER_PLANE_ASSET_BASE = '/sprites/paper-plane';
+const getBaseAssetPath = (path: string): string => {
+    const baseUrl = import.meta.env.BASE_URL || './';
+    return `${baseUrl.replace(/\/?$/, '/')}${path.replace(/^\//, '')}`;
+};
+
+const PAPER_PLANE_ASSET_BASE = getBaseAssetPath('sprites/paper-plane');
 const PAPER_PLANE_GRID_SIZE = 5;
 const PAPER_PLANE_PART_NAMES = Array.from(new Set([
     ...SHIPS.flatMap(ship => ship.layout.map(part => part.name)),
