@@ -10063,7 +10063,6 @@ const App: React.FC = () => {
                             <div
                                 className="mb-6 bg-black/40 px-4 py-2 rounded-lg border border-gray-600 cursor-pointer select-none"
                                 onClick={handleMiniGameUnlockClick}
-                                title="ミニゲーム全開放デバッグ切替"
                             >
                                 {isDailyLimitReached ? (
                                     <div className="text-red-500 text-xs md:text-sm font-bold animate-pulse flex items-center gap-2">
