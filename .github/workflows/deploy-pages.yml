@@ -34,6 +34,33 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Rebase public sprite paths for GitHub Pages
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+
+          const root = 'dist';
+          const extensions = new Set(['.css', '.html', '.js']);
+
+          const walk = (dir) => {
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+              const fullPath = path.join(dir, entry.name);
+              if (entry.isDirectory()) {
+                walk(fullPath);
+                continue;
+              }
+              if (!extensions.has(path.extname(entry.name))) continue;
+
+              const before = fs.readFileSync(fullPath, 'utf8');
+              const after = before.replaceAll('/sprites/', '/math-rogue/sprites/');
+              if (after !== before) fs.writeFileSync(fullPath, after);
+            }
+          };
+
+          walk(root);
+          NODE
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
