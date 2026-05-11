@@ -8,6 +8,8 @@ import Card from './Card';
 import { BattleFinisherCutinOverlay as StandardBattleFinisherCutinOverlay, FloatingTextOverlay as StandardFloatingTextOverlay, VFXOverlay as StandardVFXOverlay } from './BattleScene';
 import { AlertCircle, FlaskConical, Gem, Heart, Keyboard, Shield, Skull, Triangle, Zap, Settings } from 'lucide-react';
 import { getTypingLessonDefinition, TypingLessonId } from '../data/typingLessonConfig';
+import { PotionIcon, RelicIcon } from './ItemIcon';
+import { getBattleBackgroundSceneById } from '../data/battleBackgrounds';
 
 interface TypingBattleSceneProps {
     player: Player;
@@ -33,6 +35,7 @@ interface TypingBattleSceneProps {
     onAbort: () => void;
     hideEnemyIntents?: boolean;
     onOpenSettings?: () => void;
+    battleBackgroundId?: string;
 }
 
 type FingerId =
@@ -533,7 +536,8 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
     lessonId,
     onAbort,
     hideEnemyIntents = false,
-    onOpenSettings
+    onOpenSettings,
+    battleBackgroundId
 }) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const autoEndTimerRef = useRef<number | null>(null);
@@ -741,6 +745,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
     };
 
     const focusInput = () => inputRef.current?.focus();
+    const battleBackgroundScene = getBattleBackgroundSceneById(battleBackgroundId);
 
     return (
         <div className={`flex h-full w-full flex-col overflow-hidden bg-gray-950 text-white ${isShaking ? 'animate-screen-shake' : ''}`} onClick={focusInput}>
@@ -782,7 +787,12 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                 </div>
             </div>
 
-            <div className="flex min-h-0 flex-1 flex-col justify-between gap-2 overflow-y-auto bg-gray-800/50 p-2 custom-scrollbar">
+            <div className="relative flex min-h-0 flex-1 flex-col justify-between gap-2 overflow-y-auto bg-gray-800/50 p-2 custom-scrollbar">
+                <div
+                    className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-76"
+                    style={{ backgroundImage: `url(${battleBackgroundScene.image})` }}
+                />
+                <div className="pointer-events-none absolute inset-0 bg-slate-950/45" />
                 <div className="flex min-h-[118px] shrink-0 items-start justify-center gap-2 pt-6 md:min-h-[140px] md:pt-8">
                     {visualEnemies.map(enemy => {
                         const enemyHpPercent = Math.max(0, (enemy.currentHp / enemy.maxHp) * 100);
@@ -864,8 +874,8 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                                     {displayedRelics.slice(0, 5).map(relic => {
                                         const counter = getRelicCounter(relic.id);
                                         return (
-                                            <div key={relic.id} className="relative flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-yellow-600 bg-gray-700">
-                                                <Gem size={9} className="text-yellow-400" />
+                                            <div key={relic.id} className="relative flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-yellow-600 bg-gray-700 p-0.5">
+                                                <RelicIcon id={relic.id} alt={relic.name} />
                                                 {counter !== undefined && counter > 0 && (
                                                     <div className="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full border border-white bg-red-600 text-[7px] font-bold text-white">
                                                         {counter}
@@ -892,7 +902,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                                             disabled={!!actingEnemyId || selectionState.active}
                                             title={trans(potion.name, languageMode)}
                                         >
-                                            <FlaskConical size={9} style={{ color: potion.color }} />
+                                            <PotionIcon id={potion.templateId} alt={potion.name} />
                                         </button>
                                     ))}
                                 </div>

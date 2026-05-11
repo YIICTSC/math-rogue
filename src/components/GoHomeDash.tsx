@@ -19,7 +19,7 @@ const MIN_OBSTACLE_GAP = 500;
 const PLAYER_DASH_FRAME_COUNT = 8;
 const PLAYER_DASH_SPRITE_BASELINE_Y = 225;
 const PLAYER_DASH_DRAW_HEIGHT = 84;
-const PLAYER_DASH_SPRITE_SRC = `${(import.meta as any).env.BASE_URL || '/'}sprites/go-home-dash-8-loop-grid.png`;
+const PLAYER_DASH_SPRITE_SRC = `${(import.meta as any).env.BASE_URL || '/'}sprites/go-home-dash-8-loop-grid.webp`;
 const PLAYER_DASH_FRAME_ORDER = [
     0, // contact
     1, // down
@@ -33,10 +33,10 @@ const PLAYER_DASH_FRAME_ORDER = [
 const PLAYER_JUMP_FRAME_COUNT = 3;
 const PLAYER_JUMP_SPRITE_BASELINE_Y = 594;
 const PLAYER_JUMP_DRAW_HEIGHT = 108;
-const PLAYER_JUMP_SPRITE_SRC = `${(import.meta as any).env.BASE_URL || '/'}sprites/go-home-dash-jump-3.png`;
+const PLAYER_JUMP_SPRITE_SRC = `${(import.meta as any).env.BASE_URL || '/'}sprites/go-home-dash-jump-3.webp`;
 const PLAYER_JUMP_FRAME_X_OFFSETS = [36, 40, -10];
-const GO_HOME_DASH_ENEMY_SPRITE_SRC = `${(import.meta as any).env.BASE_URL || '/'}sprites/go-home-dash-enemies.png`;
-const GO_HOME_DASH_PROJECTILE_SPRITE_SRC = `${(import.meta as any).env.BASE_URL || '/'}sprites/go-home-dash-projectiles.png`;
+const GO_HOME_DASH_ENEMY_SPRITE_SRC = `${(import.meta as any).env.BASE_URL || '/'}sprites/go-home-dash-enemies.webp`;
+const GO_HOME_DASH_PROJECTILE_SPRITE_SRC = `${(import.meta as any).env.BASE_URL || '/'}sprites/go-home-dash-projectiles.webp`;
 
 type ObstacleType =
     | 'BACKPACK' | 'VAULTING' | 'CHALKBOARD' | 'BIRD' | 'IRON_BARRIER' | 'HOLE'

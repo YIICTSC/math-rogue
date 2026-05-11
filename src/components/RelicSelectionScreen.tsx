@@ -5,6 +5,7 @@ import { Relic } from '../types';
 import { Gem, MousePointer2 } from 'lucide-react';
 import { trans } from '../utils/textUtils';
 import { audioService } from '../services/audioService';
+import { RelicIcon } from './ItemIcon';
 
 interface RelicSelectionScreenProps {
   relics: Relic[];
@@ -38,7 +39,8 @@ const RelicSelectionScreen: React.FC<RelicSelectionScreenProps> = ({ relics, onS
   }, [typingMode, relics, onSelect]);
 
   return (
-    <div className="flex flex-col h-full w-full bg-gray-900 text-white relative overflow-y-auto custom-scrollbar">
+    <div className="flex flex-col h-full w-full bg-gray-900 bg-[url('/sprites/backgrounds/learning-rogue/selection-entrance.webp')] bg-cover bg-center text-white relative overflow-y-auto custom-scrollbar">
+      <div className="absolute inset-0 bg-slate-950/60 pointer-events-none" />
       
       <div className="z-10 flex flex-col items-center min-h-full justify-start p-4 py-12">
         <div className="text-center mb-8 shrink-0">
@@ -56,8 +58,8 @@ const RelicSelectionScreen: React.FC<RelicSelectionScreenProps> = ({ relics, onS
                 onClick={() => onSelect(relic)}
             >
                 {typingMode && <div className="absolute right-3 top-3 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">{relics.findIndex(r => r.id === relic.id) + 1}</div>}
-                <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-800 rounded-full border-4 border-gray-600 flex items-center justify-center mb-4 group-hover:border-yellow-500 transition-colors">
-                    <Gem size={32} className="text-yellow-200" />
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-800 rounded-full border-4 border-gray-600 flex items-center justify-center mb-4 group-hover:border-yellow-500 transition-colors p-3">
+                    <RelicIcon id={relic.id} alt={relic.name} />
                 </div>
                 <h3 className="text-lg md:text-xl font-bold text-yellow-100 mb-2 group-hover:text-yellow-400">{trans(relic.name, languageMode)}</h3>
                 <p className="text-xs md:text-sm text-gray-400 text-center mb-4 min-h-[2.5rem] md:min-h-[3rem]">{trans(relic.description, languageMode)}</p>

@@ -11,6 +11,7 @@ import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
 import { getCardIllustrationPaths } from '../utils/cardIllustration';
 import { ENEMY_ILLUSTRATION_SIZE_CLASS } from '../constants/uiSizing';
+import { PotionIcon, RelicIcon } from './ItemIcon';
 
 interface CompendiumScreenProps {
     unlockedCardNames: string[];
@@ -136,7 +137,8 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
     };
 
     return (
-        <div className="flex flex-col h-full w-full bg-gray-900 text-white relative">
+        <div className="flex flex-col h-full w-full bg-gray-900 bg-[url('/sprites/backgrounds/learning-rogue/compendium-library.webp')] bg-cover bg-center text-white relative">
+            <div className="absolute inset-0 bg-slate-950/62 pointer-events-none" />
 
             {/* Header */}
             <div className="z-10 bg-black/80 border-b-4 border-amber-600 p-4 flex flex-col md:flex-row justify-between items-center shadow-xl gap-4 shrink-0">
@@ -224,8 +226,8 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                                     onPointerMove={handlePointerMove}
                                     className={`bg-black/60 border ${isUnlocked ? 'border-gray-600 hover:border-yellow-500' : 'border-gray-800'} p-4 rounded flex flex-col items-center text-center cursor-pointer transition-colors aspect-square justify-center`}
                                 >
-                                    <div className={`w-12 h-12 bg-gray-800 rounded-full border border-yellow-600 flex items-center justify-center mb-2 ${!isUnlocked ? 'grayscale opacity-30' : ''}`}>
-                                        <Gem size={24} className="text-yellow-400" />
+                                    <div className={`w-12 h-12 bg-gray-800 rounded-full border border-yellow-600 flex items-center justify-center mb-2 p-1.5 ${!isUnlocked ? 'grayscale opacity-30' : ''}`}>
+                                        <RelicIcon id={relic.id} alt={relic.name} />
                                     </div>
                                     <div className={`font-bold text-xs mb-1 truncate w-full ${isUnlocked ? 'text-yellow-200' : 'text-gray-600'}`}>{isUnlocked ? trans(relic.name, languageMode) : '???'}</div>
                                 </div>
@@ -247,8 +249,8 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                                     onPointerMove={handlePointerMove}
                                     className={`bg-black/60 border ${isUnlocked ? 'border-gray-600 hover:border-white' : 'border-gray-800'} p-4 rounded flex flex-col items-center text-center cursor-pointer transition-colors aspect-square justify-center`}
                                 >
-                                    <div className={`w-12 h-12 bg-gray-800 rounded flex items-center justify-center mb-2 border border-white/30 ${!isUnlocked ? 'grayscale opacity-30' : ''}`}>
-                                        <FlaskConical size={24} style={{ color: potion.color }} />
+                                    <div className={`w-12 h-12 bg-gray-800 rounded flex items-center justify-center mb-2 border border-white/30 p-1.5 ${!isUnlocked ? 'grayscale opacity-30' : ''}`}>
+                                        <PotionIcon id={potion.templateId} alt={potion.name} />
                                     </div>
                                     <div className={`font-bold text-xs mb-1 truncate w-full ${isUnlocked ? 'text-white' : 'text-gray-600'}`}>{isUnlocked ? trans(potion.name, languageMode) : '???'}</div>
                                 </div>
@@ -316,10 +318,10 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                                 ) : <Lock size={64} className="text-gray-600" />
                             )}
                             {selectedItem.type === 'RELIC' && (
-                                selectedItem.unlocked ? <Gem size={80} className="text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]" /> : <Gem size={80} className="text-gray-700" />
+                                selectedItem.unlocked ? <div className="h-24 w-24 rounded-full border border-yellow-500/60 bg-gray-900 p-3 drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]"><RelicIcon id={selectedItem.data.id} alt={selectedItem.data.name} /></div> : <Gem size={80} className="text-gray-700" />
                             )}
                             {selectedItem.type === 'POTION' && (
-                                selectedItem.unlocked ? <FlaskConical size={80} style={{ color: selectedItem.data.color }} className="drop-shadow-[0_0_10px_currentColor]" /> : <FlaskConical size={80} className="text-gray-700" />
+                                selectedItem.unlocked ? <div className="h-24 w-24 rounded border border-white/30 bg-gray-900 p-3 drop-shadow-[0_0_10px_rgba(255,255,255,0.35)]"><PotionIcon id={selectedItem.data.templateId} alt={selectedItem.data.name} /></div> : <FlaskConical size={80} className="text-gray-700" />
                             )}
                             {selectedItem.type === 'ENEMY' && (
                                 <div className={`${ENEMY_ILLUSTRATION_SIZE_CLASS.compendiumDetail} bg-black rounded border border-gray-600 relative`}>

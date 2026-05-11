@@ -4,6 +4,7 @@ import { Card as ICard, RewardItem, Potion, LanguageMode, RaceTrickCard, CoopSup
 import Card, { KEYWORD_DEFINITIONS } from './Card';
 import { Gift, Gem, Coins, FlaskConical, X, Flag, Sparkles, Users } from 'lucide-react';
 import { trans } from '../utils/textUtils';
+import { PotionIcon, RelicIcon } from './ItemIcon';
 
 interface RewardScreenProps {
   rewards: RewardItem[];
@@ -142,7 +143,8 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-full w-full bg-gray-900 text-white relative p-4">
+    <div className="flex flex-col items-center justify-center h-full w-full bg-gray-900 bg-[url('/sprites/backgrounds/learning-rogue/reward-rooftop.webp')] bg-cover bg-center text-white relative p-4">
+      <div className="absolute inset-0 bg-slate-950/58 pointer-events-none" />
       
       {/* Inspection Modal */}
        {inspectedItem && (
@@ -159,13 +161,13 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                             </div>
                         )}
                         {inspectedItem.type === 'RELIC' && (
-                            <div className="w-20 h-20 bg-gray-800 border-4 border-yellow-600 rounded-full flex items-center justify-center mb-4 shadow-lg">
-                                <Gem className="text-yellow-400" size={40}/>
+                            <div className="w-20 h-20 bg-gray-800 border-4 border-yellow-600 rounded-full flex items-center justify-center mb-4 shadow-lg p-3">
+                                <RelicIcon id={inspectedItem.data.id} alt={inspectedItem.data.name} />
                             </div>
                         )}
                         {inspectedItem.type === 'POTION' && (
-                            <div className="w-20 h-20 bg-gray-800 border-2 border-white/50 rounded flex items-center justify-center mb-4 shadow-lg">
-                                <FlaskConical size={40} style={{ color: inspectedItem.data.color }}/>
+                            <div className="w-20 h-20 bg-gray-800 border-2 border-white/50 rounded flex items-center justify-center mb-4 shadow-lg p-3">
+                                <PotionIcon id={inspectedItem.data.templateId} alt={inspectedItem.data.name} />
                             </div>
                         )}
                         
@@ -211,8 +213,8 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                                 onClick={() => confirmReplace(p.id)}
                             >
                                 {typingMode && <div className="absolute -right-1 -top-1 z-10 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">{currentPotions.findIndex(cp => cp.id === p.id) + 1}</div>}
-                                <div className="w-12 h-12 bg-gray-800 border-2 border-white rounded-full flex items-center justify-center mb-1">
-                                    <FlaskConical size={24} style={{ color: p.color }} />
+                                <div className="w-12 h-12 bg-gray-800 border-2 border-white rounded-full flex items-center justify-center mb-1 p-1.5">
+                                    <PotionIcon id={p.templateId} alt={p.name} />
                                 </div>
                                 <div className="text-xs text-gray-400 w-16 truncate text-center">{trans(p.name, languageMode)}</div>
                             </div>
@@ -268,8 +270,8 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                     onPointerMove={handlePointerMove}
                 >
                     {typingMode && <div className="absolute right-2 top-2 z-20 rounded-full border border-cyan-300 bg-cyan-950/95 px-2 py-0.5 text-[10px] font-black text-cyan-200">{rewards.findIndex(r => r.id === reward.id) + 1}</div>}
-                    <div className="bg-gray-800 p-4 rounded-full border-2 border-yellow-600 mb-4 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                        <Gem size={40} className="text-yellow-400" />
+                    <div className="bg-gray-800 p-3 rounded-full border-2 border-yellow-600 mb-4 shadow-[0_0_15px_rgba(234,179,8,0.5)] h-20 w-20">
+                        <RelicIcon id={reward.value.id} alt={reward.value.name} />
                     </div>
                     <div className="text-center mb-auto w-full">
                         <div className="text-yellow-100 font-bold text-lg mb-2 truncate">{trans(reward.value.name, languageMode)}</div>
@@ -303,8 +305,8 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                     onPointerMove={handlePointerMove}
                 >
                     {typingMode && <div className="absolute right-2 top-2 z-20 rounded-full border border-cyan-300 bg-cyan-950/95 px-2 py-0.5 text-[10px] font-black text-cyan-200">{rewards.findIndex(r => r.id === reward.id) + 1}</div>}
-                    <div className="bg-gray-800 p-4 rounded-full border-2 border-white/50 mb-4 shadow-[0_0_15px_rgba(255,255,255,0.3)]">
-                        <FlaskConical size={40} style={{ color: (reward.value as Potion).color }} />
+                    <div className="bg-gray-800 p-3 rounded-full border-2 border-white/50 mb-4 shadow-[0_0_15px_rgba(255,255,255,0.3)] h-20 w-20">
+                        <PotionIcon id={(reward.value as Potion).templateId} alt={reward.value.name} />
                     </div>
                     <div className="text-center mb-auto w-full">
                         <div className="text-white font-bold text-lg mb-2 truncate">{trans(reward.value.name, languageMode)}</div>

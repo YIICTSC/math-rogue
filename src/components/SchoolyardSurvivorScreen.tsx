@@ -676,9 +676,9 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             spriteCache.current[w.id] = generateFromTemplate(w.sprite.template, w.sprite.color, w.sprite.highlight);
         });
         spriteCache.current['GEM'] = generateFromTemplate('EYE', '#eab308', '#fde047');
-        loadSpriteSheetIntoCache('schoolyard-survivor-enemies.png', SCHOOLYARD_ENEMY_ASSET_KEYS, { makeFlash: true });
-        loadSpriteSheetIntoCache('schoolyard-survivor-weapons.png', SCHOOLYARD_WEAPON_ASSET_KEYS);
-        loadSpriteSheetIntoCache('schoolyard-survivor-effects.png', SCHOOLYARD_EFFECT_ASSET_KEYS);
+        loadSpriteSheetIntoCache('schoolyard-survivor-enemies.webp', SCHOOLYARD_ENEMY_ASSET_KEYS, { makeFlash: true });
+        loadSpriteSheetIntoCache('schoolyard-survivor-weapons.webp', SCHOOLYARD_WEAPON_ASSET_KEYS);
+        loadSpriteSheetIntoCache('schoolyard-survivor-effects.webp', SCHOOLYARD_EFFECT_ASSET_KEYS);
 
         isLoopActiveRef.current = true;
         const loop = (now: number) => {
@@ -1643,7 +1643,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                             let itemDef: any = opt.type === 'WEAPON' ? WEAPONS[opt.id as WeaponType] : (opt.type === 'PASSIVE' ? PASSIVES[opt.id as PassiveType] : { name: '特別給食', desc: 'HP 50回復', sprite: { template: 'POTION', color: '#f472b6' } });
                             let isEvo = opt.isEvo;
                             const weaponIconStyle = opt.type === 'WEAPON'
-                                ? getSpriteSheetIconStyle('schoolyard-survivor-weapons.png', SCHOOLYARD_WEAPON_ASSET_KEYS, opt.id)
+                                ? getSpriteSheetIconStyle('schoolyard-survivor-weapons.webp', SCHOOLYARD_WEAPON_ASSET_KEYS, opt.id)
                                 : undefined;
                             return (
                                 <button key={idx} onClick={() => selectUpgrade(opt)} className={`bg-slate-900 border-4 ${isEvo ? 'border-yellow-400 bg-yellow-900/40 shadow-[0_0_20px_rgba(250,204,21,0.3)]' : 'border-slate-700'} hover:border-blue-400 hover:bg-slate-800 p-4 rounded-2xl flex items-center text-left transition-all group relative overflow-hidden shadow-2xl`}><div className={`w-16 h-16 bg-black/60 mr-4 ${isEvo ? 'animate-bounce' : ''} shrink-0 p-2 border-2 border-slate-600 rounded-xl shadow-inner`}>{weaponIconStyle ? <div className="w-full h-full" style={weaponIconStyle} /> : <PixelSprite seed={opt.id} name={`${itemDef.sprite.template}|${itemDef.sprite.color}`} className="w-full h-full"/>}</div><div className="flex-1"><div className="flex justify-between items-center mb-1"><div className={`text-xl font-black leading-tight ${isEvo ? 'text-yellow-300' : 'text-white'}`}>{isEvo ? itemDef.evolvedName : itemDef.name}</div><div className="text-[10px] text-blue-300 font-black bg-blue-900/60 px-3 py-1 rounded-full border border-blue-400/50 uppercase">{opt.isNew ? 'New Weapon' : (opt.type === 'HEAL' ? 'Bonus' : `Lv ${opt.level || 'Master'}`)}</div></div><div className="text-xs text-gray-300 leading-snug font-bold">{isEvo ? itemDef.evolvedDesc : itemDef.desc}</div>{opt.type === 'WEAPON' && !isEvo && <div className="text-[10px] text-indigo-400 mt-1 flex items-center gap-1 font-black"><Sparkles size={10}/> SYNERGY: {PASSIVES[itemDef.synergy as PassiveType].name}</div>}</div>{isEvo && <div className="absolute top-0 right-0 bg-gradient-to-b from-yellow-400 to-orange-600 text-black text-[10px] font-black px-4 py-1 rounded-bl-xl shadow-lg">協助進化</div>}</button>

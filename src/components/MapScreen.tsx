@@ -139,6 +139,12 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
         if (a.cost !== b.cost) return a.cost - b.cost;
         return a.name.localeCompare(b.name);
     });
+    const mapBackgrounds = [
+        '/sprites/backgrounds/learning-rogue/map-campus.webp',
+        '/sprites/backgrounds/learning-rogue/map-indoor.webp',
+        '/sprites/backgrounds/learning-rogue/map-festival.webp'
+    ];
+    const mapBackground = mapBackgrounds[(Math.max(1, act) - 1) % mapBackgrounds.length];
 
     return (
         <div className="flex flex-col h-full w-full bg-slate-950 relative overflow-hidden">
@@ -210,6 +216,11 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
             {/* メインマップエリア */}
             <div ref={scrollRef} className="flex-grow overflow-y-auto relative custom-scrollbar z-10" style={{ scrollBehavior: 'smooth' }}>
                 <div className="relative w-full max-w-2xl mx-auto" style={{ height: `${MAP_HEIGHT * 100 + 300}px` }}>
+                    <div
+                        className="pointer-events-none absolute inset-0 bg-cover bg-top opacity-70"
+                        style={{ backgroundImage: `url(${mapBackground})` }}
+                    />
+                    <div className="pointer-events-none absolute inset-0 bg-slate-950/50" />
 
                     {/* 経路描画 (SVG) */}
                     <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">

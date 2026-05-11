@@ -887,8 +887,9 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   };
 
   return (
-    <div className="w-full h-full bg-slate-950 flex flex-col text-white overflow-hidden">
-      <div className="w-full max-w-6xl mx-auto flex flex-col flex-1 min-h-0 overflow-hidden">
+    <div className="w-full h-full bg-slate-950 bg-[url('/sprites/backgrounds/learning-rogue/selection-entrance.webp')] bg-cover bg-center flex flex-col text-white overflow-hidden relative">
+      <div className="absolute inset-0 bg-slate-950/65 pointer-events-none" />
+      <div className="relative z-10 w-full max-w-6xl mx-auto flex flex-col flex-1 min-h-0 overflow-hidden">
         <div className="text-center border-b border-slate-800 p-4 shrink-0">
           <h2 className="text-2xl md:text-3xl font-bold text-yellow-400 tracking-widest">{trans('モード選択', languageMode)}</h2>
         </div>

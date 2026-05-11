@@ -79,13 +79,13 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
   const MiniGameSpriteIcon: React.FC<{ game: MiniGameConfig }> = ({ game }) => {
     const assetBase = `${import.meta.env.BASE_URL || './'}`.replace(/\/?$/, '/');
     const spriteIcons: Record<string, { src: string; columns: number; rows: number; index: number; offsetX?: number; offsetY?: number } | { src: string; columns: number; rows: number; index: number; cell: number; gap: number; offsetX?: number; offsetY?: number }> = {
-      GO_HOME: { src: 'sprites/go-home-dash-8-loop-grid.png', columns: 8, rows: 1, index: 2 },
-      SURVIVOR: { src: 'sprites/schoolyard-survivor-weapons.png', columns: 8, rows: 5, index: 0 },
-      POKER: { src: 'sprites/after-school-poker-card-ornaments.png', columns: 8, rows: 2, index: 0 },
-      DUNGEON: { src: 'sprites/furai-sfc-v2-hero-base-5x5.png', columns: 5, rows: 5, index: 0, cell: 72, gap: 16 },
-      KOCHO: { src: 'sprites/kocho-hero-actions-01.png', columns: 5, rows: 5, index: 0 },
-      PAPER_PLANE: { src: 'sprites/paper-plane/pilots-02.png', columns: 5, rows: 5, index: 1, offsetX: -12, offsetY: 2 },
-      DUNGEON_2: { src: 'sprites/furai-shogakusei2-card-sheet.png', columns: 6, rows: 5, index: 0, cell: 72, gap: 16 },
+      GO_HOME: { src: 'sprites/go-home-dash-8-loop-grid.webp', columns: 8, rows: 1, index: 2 },
+      SURVIVOR: { src: 'sprites/schoolyard-survivor-weapons.webp', columns: 8, rows: 5, index: 0 },
+      POKER: { src: 'sprites/after-school-poker-card-ornaments.webp', columns: 8, rows: 2, index: 0 },
+      DUNGEON: { src: 'sprites/furai-sfc-v2-hero-base-5x5.webp', columns: 5, rows: 5, index: 0, cell: 72, gap: 16 },
+      KOCHO: { src: 'sprites/kocho-hero-actions-01.webp', columns: 5, rows: 5, index: 0 },
+      PAPER_PLANE: { src: 'sprites/paper-plane/pilots-02.webp', columns: 5, rows: 5, index: 1, offsetX: -12, offsetY: 2 },
+      DUNGEON_2: { src: 'sprites/furai-shogakusei2-card-sheet.webp', columns: 6, rows: 5, index: 0, cell: 72, gap: 16 },
     };
     const sprite = spriteIcons[game.id];
     const fallbackIcon = <game.icon size={24} className="text-white fill-current md:w-7 md:h-7" />;
@@ -147,7 +147,8 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-gray-900 text-white relative">
+    <div className="flex flex-col h-full w-full bg-gray-900 bg-[url('/sprites/backgrounds/learning-rogue/selection-entrance.webp')] bg-cover bg-center text-white relative">
+      <div className="absolute inset-0 bg-slate-950/64 pointer-events-none" />
       <div className="absolute inset-0 texture-dark-matter opacity-30 pointer-events-none"></div>
       
       {/* Delete Confirmation Modal */}

@@ -196,7 +196,8 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-gray-900 text-white relative items-center justify-center p-4 md:p-8">
+    <div className="flex flex-col h-full w-full bg-gray-900 bg-[url('/sprites/backgrounds/learning-rogue/rest-infirmary.webp')] bg-cover bg-center text-white relative items-center justify-center p-4 md:p-8">
+        <div className="absolute inset-0 bg-slate-950/58 pointer-events-none" />
         
         <div className="z-10 bg-black p-6 md:p-8 border-4 border-orange-800 rounded-lg max-w-4xl w-full text-center shadow-2xl flex flex-col max-h-[90vh]">
             {interactionDisabled && (

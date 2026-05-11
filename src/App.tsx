@@ -47,7 +47,7 @@ import ModeSelectionScreen from './components/ModeSelectionScreen';
 import SettingsModal, { AppSettings, SettingsTab } from './components/SettingsModal';
 import Card from './components/Card';
 import { audioService } from './services/audioService';
-import { generateFlavorText, generateEnemyName } from './services/geminiService';
+import { generateEnemyName } from './services/geminiService';
 import { generateDungeonMap } from './services/mapGenerator';
 import { storageService } from './services/storageService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
@@ -59,6 +59,7 @@ import { p2pService } from './services/p2pService';
 import { TypingLessonId } from './data/typingLessonConfig';
 import { getRandomRaceTrickCard, getRaceTrickCard } from './raceTricks';
 import { getRandomCoopSupportCard } from './coopSupportCards';
+import { chooseBattleBackgroundScene, getBattleBackgroundFlavor } from './data/battleBackgrounds';
 import { OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE } from './config/runtime';
 
 const PARRY_WINDOW_MS = 650;
@@ -676,6 +677,7 @@ const App: React.FC = () => {
 
     const [languageMode, setLanguageMode] = useState<LanguageMode>(() => storageService.getLanguageMode() || 'JAPANESE');
     const [currentNarrative, setCurrentNarrative] = useState<string>("...");
+    const [currentBattleBackgroundId, setCurrentBattleBackgroundId] = useState<string>('classroom');
     const [turnLog, setTurnLog] = useState<string>("あなたのターン");
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [lastActionTime, setLastActionTime] = useState<number>(0);
@@ -4042,7 +4044,8 @@ const App: React.FC = () => {
                     });
                 }
 
-                const flavor = await generateFlavorText(node.type === NodeType.BOSS ? "ボスが現れた！" : "敵と遭遇した。");
+                const battleBackgroundScene = chooseBattleBackgroundScene(node.type, nextState.act, nextState.floor);
+                const flavor = getBattleBackgroundFlavor(battleBackgroundScene, nextState.act * 100 + nextState.floor);
 
                 const p = preparePlayerForBattle(nextState.player, node.type);
 
@@ -4101,6 +4104,7 @@ const App: React.FC = () => {
                 if (p.id === 'DODGEBALL' && (node.type === NodeType.COMBAT || node.type === NodeType.START)) {
                     setGameState({ ...nextGameState, screen: GameScreen.DODGEBALL_SHOOTING });
                 } else {
+                    setCurrentBattleBackgroundId(battleBackgroundScene.id);
                     setGameState({ ...nextGameState, screen: GameScreen.BATTLE });
                     setCurrentNarrative(flavor);
                     audioService.playBGM(bgmType);
@@ -6317,7 +6321,7 @@ const App: React.FC = () => {
             });
             if (hasRelic(p, 'ORICHALCUM') && p.block <= 0) {
                 p.block = 6;
-                newLogs.push("オリハルコン: ブロック+6");
+                newLogs.push("厚紙シールド: ブロック+6");
             }
             if (p.powers['METALLICIZE']) {
                 p.block += p.powers['METALLICIZE'];
@@ -9914,7 +9918,9 @@ const App: React.FC = () => {
                 )}
 
                 {gameState.screen === GameScreen.START_MENU && (
-                    <div className="w-full h-full bg-gray-900 flex items-center justify-center relative">
+                    <div className="w-full h-full bg-gray-900 bg-[url('/sprites/learning-rogue-title-background.webp')] bg-cover bg-[position:38%_center] md:bg-center flex items-center justify-center relative overflow-hidden">
+                        <div className="absolute inset-0 bg-slate-950/55" />
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(15,23,42,0.12),rgba(2,6,23,0.72))]" />
                         {isLegacyVercelHost && showMigrationNotice && (
                             <div className="fixed inset-0 z-[10001] bg-black/80 flex items-center justify-center p-3 sm:p-4">
                                 <div
@@ -10052,12 +10058,31 @@ const App: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="text-center p-8 w-full flex flex-col items-center">
+                        <div className="relative z-10 text-center p-8 w-full flex flex-col items-center">
                             <h1
-                                className="text-5xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-b from-purple-400 to-blue-600 mb-8 font-bold animate-pulse tracking-widest leading-tight cursor-pointer select-none"
+                                className="relative mb-7 flex min-h-[104px] w-full max-w-[560px] cursor-pointer select-none items-center justify-center leading-none"
                                 onClick={handleTitleClick}
                             >
-                                {trans("学習ローグ", languageMode)}
+                                <img
+                                    src="/sprites/learning-rogue-logo-emblem.webp"
+                                    alt=""
+                                    className="absolute inset-x-0 top-1/2 z-0 mx-auto h-28 w-full max-w-[520px] -translate-y-1/2 object-contain opacity-90 drop-shadow-[0_0_22px_rgba(147,197,253,0.42)]"
+                                    draggable={false}
+                                />
+                                <span
+                                    className="relative z-10 text-[3rem] font-black text-transparent md:text-[4rem]"
+                                    style={{
+                                        WebkitTextStroke: '1.5px rgba(255,255,255,0.78)',
+                                        backgroundImage: 'linear-gradient(180deg, #fff7cc 8%, #f6c453 36%, #7dd3fc 62%, #1d4ed8 92%)',
+                                        WebkitBackgroundClip: 'text',
+                                        backgroundClip: 'text',
+                                        fontFamily: '"Yu Mincho", "Hiragino Mincho ProN", "YuMincho", serif',
+                                        letterSpacing: '0',
+                                        textShadow: '0 3px 0 rgba(15,23,42,0.95), 0 0 18px rgba(59,130,246,0.7), 0 0 30px rgba(250,204,21,0.35)'
+                                    }}
+                                >
+                                    {trans("学習ローグ", languageMode)}
+                                </span>
                             </h1>
 
                             <div
@@ -10351,7 +10376,7 @@ const App: React.FC = () => {
                 )}
 
                 {showDebugLog && (
-                    <div className="fixed inset-0 z-100 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowDebugLog(false)}>
+                    <div className="fixed inset-0 z-[10020] bg-black/90 flex items-center justify-center p-4" onClick={() => setShowDebugLog(false)}>
                         <div className="bg-gray-900 border-2 border-green-500 p-6 rounded-lg max-w-lg w-full shadow-[0_0_20px_rgba(34,197,94,0.3)]" onClick={e => e.stopPropagation()}>
                             <h2
                                 className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2 select-none active:text-green-200"
@@ -10948,6 +10973,7 @@ const App: React.FC = () => {
                                 onAbort={returnToTitle}
                                 hideEnemyIntents={raceEffects.hideEnemyIntentsOnce}
                                 onOpenSettings={() => setShowSettingsModal(true)}
+                                battleBackgroundId={currentBattleBackgroundId}
                             />
                         ) : (
                             <BattleScene
@@ -10958,6 +10984,7 @@ const App: React.FC = () => {
                                 finisherCutinCard={battleFinisherCutinCard}
                                 hideEnemyIntents={raceEffects.hideEnemyIntentsOnce}
                                 onOpenSettings={() => setShowSettingsModal(true)}
+                                battleBackgroundId={currentBattleBackgroundId}
                             />
                         )}
                     </div>
@@ -11531,8 +11558,9 @@ const App: React.FC = () => {
                 )}
 
                 {gameState.screen === GameScreen.GAME_OVER && (
-                    <div className="w-full h-full bg-red-900 flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar">
-                        <div className="my-auto w-full max-w-2xl py-8">
+                    <div className="w-full h-full bg-red-900 bg-[url('/sprites/backgrounds/learning-rogue/event-hallway.webp')] bg-cover bg-center flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar relative">
+                        <div className="absolute inset-0 bg-red-950/72 pointer-events-none" />
+                        <div className="relative z-10 my-auto w-full max-w-2xl py-8">
                             <h1 className="text-6xl mb-4 font-bold">しゅくだいがふえた…</h1>
                             <p className="mb-8 text-2xl">Act {gameState.act} - Floor {gameState.floor}</p>
 
@@ -11586,8 +11614,9 @@ const App: React.FC = () => {
                 )}
 
                 {gameState.screen === GameScreen.ENDING && (
-                    <div className="w-full h-full bg-yellow-900 flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar">
-                        <div className="my-auto w-full max-w-2xl py-8">
+                    <div className="w-full h-full bg-yellow-900 bg-[url('/sprites/backgrounds/learning-rogue/reward-rooftop.webp')] bg-cover bg-center flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar relative">
+                        <div className="absolute inset-0 bg-amber-950/62 pointer-events-none" />
+                        <div className="relative z-10 my-auto w-full max-w-2xl py-8">
                             <Trophy size={80} className="text-yellow-400 mx-auto mb-6 animate-pulse shrink-0" />
                             <h1 className="text-4xl md:text-6xl mb-4 font-bold text-yellow-200 shrink-0">ゲームクリア！</h1>
                             <p className="mb-8 text-lg md:text-xl shrink-0">あなたは校長先生をせっとくし、<br />でんせつの しょうがくせいとして かたりつがれることでしょう。</p>

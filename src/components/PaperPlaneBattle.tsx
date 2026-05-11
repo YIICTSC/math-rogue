@@ -744,7 +744,7 @@ const PAPER_PLANE_PART_NAMES = Array.from(new Set([
 ].filter(name => name !== '空き')));
 
 const createSheetSprite = (sheetPrefix: string, index: number): PaperPlaneSheetSprite => ({
-    sheet: `${PAPER_PLANE_ASSET_BASE}/${sheetPrefix}-${String(Math.floor(index / 25) + 1).padStart(2, '0')}.png`,
+    sheet: `${PAPER_PLANE_ASSET_BASE}/${sheetPrefix}-${String(Math.floor(index / 25) + 1).padStart(2, '0')}.webp`,
     row: Math.floor((index % 25) / PAPER_PLANE_GRID_SIZE),
     col: index % PAPER_PLANE_GRID_SIZE,
 });
@@ -755,12 +755,12 @@ const getPaperPlanePartSprite = (name: string): PaperPlaneSheetSprite | null => 
     return index >= 0 ? createSheetSprite('parts', index) : null;
 };
 
-const getPaperPlanePilotImage = (pilotId: string): string => `${PAPER_PLANE_ASSET_BASE}/pilots/${pilotId}.png`;
+const getPaperPlanePilotImage = (pilotId: string): string => `${PAPER_PLANE_ASSET_BASE}/pilots/${pilotId}.webp`;
 
 const getPaperPlaneShipSprite = (shipId: string): PaperPlaneSheetSprite | null => {
     const index = SHIPS.findIndex(ship => ship.id === shipId);
     return index >= 0 ? {
-        sheet: `${PAPER_PLANE_ASSET_BASE}/pilots-02.png`,
+        sheet: `${PAPER_PLANE_ASSET_BASE}/pilots-02.webp`,
         row: 0,
         col: index + 1,
     } : null;
@@ -769,21 +769,21 @@ const getPaperPlaneShipSprite = (shipId: string): PaperPlaneSheetSprite | null =
 const getPaperPlaneStageBackground = (stageNumber: number): PaperPlaneSheetSprite => {
     const index = Math.max(0, (stageNumber - 1) % 25);
     return {
-        sheet: `${PAPER_PLANE_ASSET_BASE}/stage-backgrounds-5x5.png`,
+        sheet: `${PAPER_PLANE_ASSET_BASE}/stage-backgrounds-5x5.webp`,
         row: Math.floor(index / PAPER_PLANE_GRID_SIZE),
         col: index % PAPER_PLANE_GRID_SIZE,
     };
 };
 
 const PAPER_PLANE_SCENE_BACKGROUNDS: Record<string, PaperPlaneSheetSprite> = {
-    setup: { sheet: `${PAPER_PLANE_ASSET_BASE}/scene-backgrounds-5x5.png`, row: 0, col: 0 },
-    tutorial: { sheet: `${PAPER_PLANE_ASSET_BASE}/scene-backgrounds-5x5.png`, row: 4, col: 3 },
-    battle: { sheet: `${PAPER_PLANE_ASSET_BASE}/scene-backgrounds-5x5.png`, row: 0, col: 4 },
-    reward: { sheet: `${PAPER_PLANE_ASSET_BASE}/scene-backgrounds-5x5.png`, row: 1, col: 0 },
-    vacation: { sheet: `${PAPER_PLANE_ASSET_BASE}/scene-backgrounds-5x5.png`, row: 1, col: 2 },
-    hangar: { sheet: `${PAPER_PLANE_ASSET_BASE}/scene-backgrounds-5x5.png`, row: 1, col: 3 },
-    gameOver: { sheet: `${PAPER_PLANE_ASSET_BASE}/scene-backgrounds-5x5.png`, row: 2, col: 1 },
-    victory: { sheet: `${PAPER_PLANE_ASSET_BASE}/scene-backgrounds-5x5.png`, row: 2, col: 2 },
+    setup: { sheet: `${PAPER_PLANE_ASSET_BASE}/scene-backgrounds-5x5.webp`, row: 0, col: 0 },
+    tutorial: { sheet: `${PAPER_PLANE_ASSET_BASE}/scene-backgrounds-5x5.webp`, row: 4, col: 3 },
+    battle: { sheet: `${PAPER_PLANE_ASSET_BASE}/scene-backgrounds-5x5.webp`, row: 0, col: 4 },
+    reward: { sheet: `${PAPER_PLANE_ASSET_BASE}/scene-backgrounds-5x5.webp`, row: 1, col: 0 },
+    vacation: { sheet: `${PAPER_PLANE_ASSET_BASE}/scene-backgrounds-5x5.webp`, row: 1, col: 2 },
+    hangar: { sheet: `${PAPER_PLANE_ASSET_BASE}/scene-backgrounds-5x5.webp`, row: 1, col: 3 },
+    gameOver: { sheet: `${PAPER_PLANE_ASSET_BASE}/scene-backgrounds-5x5.webp`, row: 2, col: 1 },
+    victory: { sheet: `${PAPER_PLANE_ASSET_BASE}/scene-backgrounds-5x5.webp`, row: 2, col: 2 },
 };
 
 const getSheetSpriteStyle = (sprite: PaperPlaneSheetSprite, zoom = 1): React.CSSProperties => ({

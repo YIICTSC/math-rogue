@@ -1122,7 +1122,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.ANCIENT_TEA_SET] }
                         }));
-                        setEventResultLog(trans("時空を超えた赤ペン添削！？\nレリック「古代のティーセット」を得た。", languageMode));
+                        setEventResultLog(trans("時空を超えた赤ペン添削！？\nレリック「放課後の水筒」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 120 } }));
                         setEventResultLog(trans("未来の投資アドバイスが届いた。\n120G獲得。", languageMode));
@@ -1194,7 +1194,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.SMILING_MASK] }
                         }));
-                        setEventResultLog(trans("伝説回になった。\nレリック「スマイリング・マスク」を得た。", languageMode));
+                        setEventResultLog(trans("伝説回になった。\nレリック「スマイルシール」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         let removedName = "";
                         setGameState(prev => {
@@ -1546,7 +1546,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.BAG_OF_PREPARATION] }
                         }));
-                        setEventResultLog(trans("業者から記念品をもらった。\nレリック「準備のカバン」を得た。", languageMode));
+                        setEventResultLog(trans("業者から記念品をもらった。\nレリック「予習かばん」を得た。", languageMode));
                     } else {
                         setGameState(prev => ({ ...prev, player: addCardWithEventRelics(prev.player, { ...CURSE_CARDS.REGRET, id: `okiben-regret-${Date.now()}` } as Card) }));
                         setEventResultLog(trans("翌日、荷物が届かず大混乱...\n呪い「後悔」を受けた。", languageMode));
@@ -1702,7 +1702,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.ORICHALCUM] }
                         }));
-                        setEventResultLog(trans("難攻不落の要塞完成。\nレリック「オリハルコン」を得た。", languageMode));
+                        setEventResultLog(trans("難攻不落の要塞完成。\nレリック「厚紙シールド」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 120 } }));
                         setEventResultLog(trans("秘密基地ツアーが有料化された。\n120G獲得。", languageMode));
@@ -1780,7 +1780,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.LANTERN] }
                         }));
-                        setEventResultLog(trans("基地の主になった。\nレリック「ランタン」を得た。", languageMode));
+                        setEventResultLog(trans("基地の主になった。\nレリック「懐中電灯」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 150 } }));
                         setEventResultLog(trans("会員権販売で150G獲得。", languageMode));
@@ -1884,7 +1884,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.POCKETWATCH] }
                         }));
-                        setEventResultLog(trans("放送進行が評価された。\nレリック「懐中時計」を得た。", languageMode));
+                        setEventResultLog(trans("放送進行が評価された。\nレリック「チャイム時計」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 140 } }));
                         setEventResultLog(trans("校内MCの謝礼で140G獲得。", languageMode));
@@ -1969,7 +1969,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.TINY_CHEST] }
                         }));
-                        setEventResultLog(trans("落とし物事件を解決。\nレリック「ちいさな宝箱」を得た。", languageMode));
+                        setEventResultLog(trans("落とし物事件を解決。\nレリック「小物入れ」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 130 } }));
                         setEventResultLog(trans("調査協力費として130G獲得。", languageMode));
@@ -2065,7 +2065,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.DOLLYS_MIRROR] }
                         }));
-                        setEventResultLog(trans("分身が微笑んだ。\nレリック「ドリーの鏡」を得た。", languageMode));
+                        setEventResultLog(trans("分身が微笑んだ。\nレリック「合わせ鏡」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: addPermanentStrengthBonus(prev.player, 1) }));
                         setEventResultLog(trans("粘土運びで鍛えられた。\n恒久ムキムキ+1。", languageMode));
@@ -2150,7 +2150,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.ANCIENT_TEA_SET] }
                         }));
-                        setEventResultLog(trans("臨時カフェが大盛況。\nレリック「古代のティーセット」を得た。", languageMode));
+                        setEventResultLog(trans("臨時カフェが大盛況。\nレリック「放課後の水筒」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 150 } }));
                         setEventResultLog(trans("売上で150G獲得。", languageMode));
@@ -2241,7 +2241,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.FROZEN_EYE] }
                         }));
-                        setEventResultLog(trans("配信がバズった。\nレリック「フローズンアイ」を得た。", languageMode));
+                        setEventResultLog(trans("配信がバズった。\nレリック「観察メモ」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 160 } }));
                         setEventResultLog(trans("投げ銭が飛んだ。\n160G獲得。", languageMode));
@@ -2256,7 +2256,7 @@ export const generateEvent = (
             title: "校章の輝き",
             description: "地面に落ちているピカピカの校章。学校への愛着を試されている。",
             options: [
-                { label: "丁寧に磨く", text: "敬意（金剛杵+悩み / 100G / HP+6）", action: () => {
+                { label: "丁寧に磨く", text: "敬意（金の定規+悩み / 100G / HP+6）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({
@@ -2266,7 +2266,7 @@ export const generateEvent = (
                                 relics: [...prev.player.relics, RELIC_LIBRARY.VAJRA]
                             }
                         }));
-                        setEventResultLog(trans("輝きが増した！レリック「金剛杵」を得た。\nだが執着して呪い「悩み」を受けた。", languageMode));
+                        setEventResultLog(trans("輝きが増した！レリック「金の定規」を得た。\nだが執着して呪い「悩み」を受けた。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 100 } }));
                         setEventResultLog(trans("落とし主から謝礼を受けた。\n100G獲得。", languageMode));
@@ -2341,7 +2341,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.MEMBERSHIP_CARD] }
                         }));
-                        setEventResultLog(trans("公式に認められた。\nレリック「会員証」を得た。", languageMode));
+                        setEventResultLog(trans("公式に認められた。\nレリック「図書カード」を得た。", languageMode));
                     } else {
                         setGameState(prev => ({ ...prev, player: addCardWithEventRelics(prev.player, { ...CURSE_CARDS.REGRET, id: `crest-regret-${Date.now()}` } as Card) }));
                         setEventResultLog(trans("在庫を抱えて赤字...\n呪い「後悔」を受けた。", languageMode));
@@ -2512,7 +2512,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.BIRD_FACED_URN] }
                         }));
-                        setEventResultLog(trans("怪演が評価された。\nレリック「鳥面の壺」を得た。", languageMode));
+                        setEventResultLog(trans("怪演が評価された。\nレリック「飼育小屋のえさ皿」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 180 } }));
                         setEventResultLog(trans("配信収益で180G獲得。", languageMode));
@@ -2543,7 +2543,7 @@ export const generateEvent = (
                         setEventResultLog(trans("胸のつかえが取れた。\nHPが8回復。", languageMode));
                     }
                 }},
-                { label: "景色を眺める", text: "静観（砂時計+後悔 / カード削除）", action: () => {
+                { label: "景色を眺める", text: "静観（チャイム砂時計+後悔 / カード削除）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({
@@ -2553,7 +2553,7 @@ export const generateEvent = (
                                 relics: [...prev.player.relics, RELIC_LIBRARY.MERCURY_HOURGLASS]
                             }
                         }));
-                        setEventResultLog(trans("時を忘れて佇んだ。\nレリック「砂時計」を得たが、呪い「後悔」を受けた。", languageMode));
+                        setEventResultLog(trans("時を忘れて佇んだ。\nレリック「チャイム砂時計」を得たが、呪い「後悔」を受けた。", languageMode));
                     } else if (roll < 0.67) {
                         let removedName = "";
                         setGameState(prev => {
@@ -2594,7 +2594,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.TINY_HOUSE] }
                         }));
-                        setEventResultLog(trans("屋上名物になった。\nレリック「ちいさな家」を得た。", languageMode));
+                        setEventResultLog(trans("屋上名物になった。\nレリック「ミニ校舎模型」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 180 } }));
                         setEventResultLog(trans("スポンサー契約成立。\n180G獲得。", languageMode));
@@ -2688,7 +2688,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.CERAMIC_FISH] }
                         }));
-                        setEventResultLog(trans("作品が芸術祭で入賞。\nレリック「セラミックフィッシュ」を得た。", languageMode));
+                        setEventResultLog(trans("作品が芸術祭で入賞。\nレリック「図工の魚皿」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 160 } }));
                         setEventResultLog(trans("入場料で160G獲得。", languageMode));
@@ -2710,7 +2710,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.HORN_CLEAT] }
                         }));
-                        setEventResultLog(trans("徳を積んだ。\nレリック「上履き(角笛)」を得た。", languageMode));
+                        setEventResultLog(trans("徳を積んだ。\nレリック「上履き」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 8) } }));
                         setEventResultLog(trans("気持ちが整った。\nHPが8回復。", languageMode));
@@ -2783,7 +2783,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.SMILING_MASK] }
                         }));
-                        setEventResultLog(trans("展示が話題に。\nレリック「スマイリング・マスク」を得た。", languageMode));
+                        setEventResultLog(trans("展示が話題に。\nレリック「スマイルシール」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 140 } }));
                         setEventResultLog(trans("観覧料で140G獲得。", languageMode));
@@ -2871,7 +2871,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.POCKETWATCH] }
                         }));
-                        setEventResultLog(trans("時を忘れる名著会だった。\nレリック「懐中時計」を得た。", languageMode));
+                        setEventResultLog(trans("時を忘れる名著会だった。\nレリック「チャイム時計」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: addPermanentStrengthBonus(prev.player, 1) }));
                         setEventResultLog(trans("薪運び読書会で鍛えられた。\n恒久ムキムキ+1。", languageMode));
@@ -2959,7 +2959,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.FROZEN_EYE] }
                         }));
-                        setEventResultLog(trans("占いが当たりまくる。\nレリック「フローズンアイ」を得た。", languageMode));
+                        setEventResultLog(trans("占いが当たりまくる。\nレリック「観察メモ」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 150 } }));
                         setEventResultLog(trans("行列ができて150G獲得。", languageMode));
@@ -3049,7 +3049,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.TINY_CHEST] }
                         }));
-                        setEventResultLog(trans("デジタル遺産として評価された。\nレリック「ちいさな宝箱」を得た。", languageMode));
+                        setEventResultLog(trans("デジタル遺産として評価された。\nレリック「小物入れ」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 180 } }));
                         setEventResultLog(trans("購入希望者が現れて180G獲得。", languageMode));
@@ -3148,7 +3148,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.BIRD_FACED_URN] }
                         }));
-                        setEventResultLog(trans("人気企画になった。\nレリック「鳥面の壺」を得た。", languageMode));
+                        setEventResultLog(trans("人気企画になった。\nレリック「飼育小屋のえさ皿」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 150 } }));
                         setEventResultLog(trans("視聴者から投げ銭で150G獲得。", languageMode));
@@ -3334,7 +3334,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.SMILING_MASK] }
                         }));
-                        setEventResultLog(trans("語りが刺さった。\nレリック「スマイリング・マスク」を得た。", languageMode));
+                        setEventResultLog(trans("語りが刺さった。\nレリック「スマイルシール」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 170 } }));
                         setEventResultLog(trans("広告収益で170G獲得。", languageMode));
@@ -3429,7 +3429,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.ORRERY] }
                         }));
-                        setEventResultLog(trans("未知の知識を授かった。\nレリック「オーレリー」を得た。", languageMode));
+                        setEventResultLog(trans("未知の知識を授かった。\nレリック「星座早見盤」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: addPermanentStrengthBonus(prev.player, 1) }));
                         setEventResultLog(trans("熱気で鍛えられた。\n恒久ムキムキ+1。", languageMode));
@@ -3513,7 +3513,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.FROZEN_EYE] }
                         }));
-                        setEventResultLog(trans("神回になった。\nレリック「フローズンアイ」を得た。", languageMode));
+                        setEventResultLog(trans("神回になった。\nレリック「観察メモ」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 180 } }));
                         setEventResultLog(trans("配信収益で180G獲得。", languageMode));
@@ -3695,7 +3695,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.MERCURY_HOURGLASS] }
                         }));
-                        setEventResultLog(trans("噴水演出が大成功。\nレリック「砂時計」を得た。", languageMode));
+                        setEventResultLog(trans("噴水演出が大成功。\nレリック「チャイム砂時計」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 160 } }));
                         setEventResultLog(trans("入場料で160G獲得。", languageMode));
@@ -3789,7 +3789,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.SHURIKEN] }
                         }));
-                        setEventResultLog(trans("演武が評価された。\nレリック「手裏剣」を得た。", languageMode));
+                        setEventResultLog(trans("演武が評価された。\nレリック「紙飛行機」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 170 } }));
                         setEventResultLog(trans("投げ銭で170G獲得。", languageMode));
@@ -3873,7 +3873,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.PEACE_PIPE] }
                         }));
-                        setEventResultLog(trans("相談所が人気化。\nレリック「平和のパイプ」を得た。", languageMode));
+                        setEventResultLog(trans("相談所が人気化。\nレリック「相談室の整理券」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 180 } }));
                         setEventResultLog(trans("相談料で180G獲得。", languageMode));
@@ -3963,7 +3963,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.LANTERN] }
                         }));
-                        setEventResultLog(trans("夜の校庭が映えた。\nレリック「ランタン」を得た。", languageMode));
+                        setEventResultLog(trans("夜の校庭が映えた。\nレリック「懐中電灯」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 180 } }));
                         setEventResultLog(trans("観覧料で180G獲得。", languageMode));
@@ -4001,7 +4001,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.POCKETWATCH] }
                         }));
-                        setEventResultLog(trans("時の狭間を見た。\nレリック「懐中時計」を得た。", languageMode));
+                        setEventResultLog(trans("時の狭間を見た。\nレリック「チャイム時計」を得た。", languageMode));
                     } else {
                         setGameState(prev => ({ ...prev, player: addCardWithEventRelics(prev.player, { ...CURSE_CARDS.WRITHE, id: `stairs-writhe-${Date.now()}` } as Card) }));
                         setEventResultLog(trans("帰ってきたが胸騒ぎが残る...\n呪い「悩み」を受けた。", languageMode));
@@ -4044,7 +4044,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.FROZEN_EYE] }
                         }));
-                        setEventResultLog(trans("怪談ガイドとして名を上げた。\nレリック「フローズンアイ」を得た。", languageMode));
+                        setEventResultLog(trans("怪談ガイドとして名を上げた。\nレリック「観察メモ」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 180 } }));
                         setEventResultLog(trans("参加費で180G獲得。", languageMode));
@@ -4223,7 +4223,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.CERAMIC_FISH] }
                         }));
-                        setEventResultLog(trans("謎施設が流行った。\nレリック「セラミックフィッシュ」を得た。", languageMode));
+                        setEventResultLog(trans("謎施設が流行った。\nレリック「図工の魚皿」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 180 } }));
                         setEventResultLog(trans("利用料で180G獲得。", languageMode));
@@ -4400,7 +4400,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.TINY_CHEST] }
                         }));
-                        setEventResultLog(trans("伝説の発掘回だった。\nレリック「ちいさな宝箱」を得た。", languageMode));
+                        setEventResultLog(trans("伝説の発掘回だった。\nレリック「小物入れ」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 180 } }));
                         setEventResultLog(trans("広告収益で180G獲得。", languageMode));
@@ -4490,7 +4490,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.FROZEN_EYE] }
                         }));
-                        setEventResultLog(trans("怪電波がカルト的人気に。\nレリック「フローズンアイ」を得た。", languageMode));
+                        setEventResultLog(trans("怪電波がカルト的人気に。\nレリック「観察メモ」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 180 } }));
                         setEventResultLog(trans("投げ銭で180G獲得。", languageMode));
@@ -4585,7 +4585,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.MEMBERSHIP_CARD] }
                         }));
-                        setEventResultLog(trans("教育祭で評価された。\nレリック「会員証」を得た。", languageMode));
+                        setEventResultLog(trans("教育祭で評価された。\nレリック「図書カード」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 180 } }));
                         setEventResultLog(trans("入場料で180G獲得。", languageMode));
@@ -4669,7 +4669,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.TINY_HOUSE] }
                         }));
-                        setEventResultLog(trans("寝具経営が成功。\nレリック「ちいさな家」を得た。", languageMode));
+                        setEventResultLog(trans("寝具経営が成功。\nレリック「ミニ校舎模型」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 180 } }));
                         setEventResultLog(trans("宿泊費で180G獲得。", languageMode));
@@ -4756,7 +4756,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.CAULDRON] }
                         }));
-                        setEventResultLog(trans("乳製品市場を制した。\nレリック「大鍋」を得た。", languageMode));
+                        setEventResultLog(trans("乳製品市場を制した。\nレリック「給食の大鍋」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 180 } }));
                         setEventResultLog(trans("相場読み成功で180G獲得。", languageMode));
@@ -4942,7 +4942,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.CAULDRON] }
                         }));
-                        setEventResultLog(trans("怪しい店が繁盛。\nレリック「大鍋」を得た。", languageMode));
+                        setEventResultLog(trans("怪しい店が繁盛。\nレリック「給食の大鍋」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 180 } }));
                         setEventResultLog(trans("常連客で180G獲得。", languageMode));
@@ -4957,7 +4957,7 @@ export const generateEvent = (
             title: "放課後の決闘",
             description: "隣の小学校の番長が待ち構えている。「俺と勝負しろ！」",
             options: [
-                { label: "受けて立つ", text: "真剣勝負（HP-20+金剛杵 / 150G / 恒久ムキムキ+2）", action: () => {
+                { label: "受けて立つ", text: "真剣勝負（HP-20+金の定規 / 150G / 恒久ムキムキ+2）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({
@@ -4968,7 +4968,7 @@ export const generateEvent = (
                                 relics: [...prev.player.relics, RELIC_LIBRARY.VAJRA]
                             }
                         }));
-                        setEventResultLog(trans("激闘に勝利！\nHP-20、レリック「金剛杵」を得た。", languageMode));
+                        setEventResultLog(trans("激闘に勝利！\nHP-20、レリック「金の定規」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 150 } }));
                         setEventResultLog(trans("引き分けの手打ち金で150G獲得。", languageMode));
@@ -5026,7 +5026,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.RED_SKULL] }
                         }));
-                        setEventResultLog(trans("番長リーグ設立。\nレリック「レッドスカル」を得た。", languageMode));
+                        setEventResultLog(trans("番長リーグ設立。\nレリック「赤点答案」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 200 } }));
                         setEventResultLog(trans("観客席が埋まり200G獲得。", languageMode));
@@ -5117,7 +5117,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.ORICHALCUM] }
                         }));
-                        setEventResultLog(trans("秘密基地が難攻不落になった。\nレリック「オリハルコン」を得た。", languageMode));
+                        setEventResultLog(trans("秘密基地が難攻不落になった。\nレリック「厚紙シールド」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 180 } }));
                         setEventResultLog(trans("防衛費のカンパが集まり180G獲得。", languageMode));
@@ -5189,7 +5189,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.LANTERN] }
                         }));
-                        setEventResultLog(trans("大盛況の夜レース！\nレリック「ランタン」を得た。", languageMode));
+                        setEventResultLog(trans("大盛況の夜レース！\nレリック「懐中電灯」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 180 } }));
                         setEventResultLog(trans("参加費で180G獲得。", languageMode));
@@ -5275,7 +5275,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.CAULDRON] }
                         }));
-                        setEventResultLog(trans("王国の戴冠式が始まった。\nレリック「大鍋」を得た。", languageMode));
+                        setEventResultLog(trans("王国の戴冠式が始まった。\nレリック「給食の大鍋」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 200 } }));
                         setEventResultLog(trans("観光収入で200G獲得。", languageMode));
@@ -5364,7 +5364,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.LANTERN] }
                         }));
-                        setEventResultLog(trans("配信が大当たり。\nレリック「ランタン」を得た。", languageMode));
+                        setEventResultLog(trans("配信が大当たり。\nレリック「懐中電灯」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 200 } }));
                         setEventResultLog(trans("課金が集まり200G獲得。", languageMode));
@@ -5539,7 +5539,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.RED_SKULL] }
                         }));
-                        setEventResultLog(trans("鬼コーチ企画がヒット。\nレリック「レッドスカル」を得た。", languageMode));
+                        setEventResultLog(trans("鬼コーチ企画がヒット。\nレリック「赤点答案」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 220 } }));
                         setEventResultLog(trans("広告収入で220G獲得。", languageMode));
@@ -5630,7 +5630,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.LANTERN] }
                         }));
-                        setEventResultLog(trans("照明演出が大成功。\nレリック「ランタン」を得た。", languageMode));
+                        setEventResultLog(trans("照明演出が大成功。\nレリック「懐中電灯」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 220 } }));
                         setEventResultLog(trans("チケット収入で220G獲得。", languageMode));
@@ -5718,7 +5718,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.LANTERN] }
                         }));
-                        setEventResultLog(trans("説教ラップが学校中で話題に。\nレリック「ランタン」を得た。", languageMode));
+                        setEventResultLog(trans("説教ラップが学校中で話題に。\nレリック「懐中電灯」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 200 } }));
                         setEventResultLog(trans("配信収益で200G獲得。", languageMode));
@@ -5818,7 +5818,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.CAULDRON] }
                         }));
-                        setEventResultLog(trans("謎料理がなぜか絶賛された。\nレリック「大鍋」を得た。", languageMode));
+                        setEventResultLog(trans("謎料理がなぜか絶賛された。\nレリック「給食の大鍋」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 180 } }));
                         setEventResultLog(trans("屋台が売れて180G獲得。", languageMode));
@@ -5919,7 +5919,7 @@ export const generateEvent = (
                             ...prev,
                             player: { ...prev.player, relics: [...prev.player.relics, RELIC_LIBRARY.CAULDRON] }
                         }));
-                        setEventResultLog(trans("大鍋メニューが大ヒット。\nレリック「大鍋」を得た。", languageMode));
+                        setEventResultLog(trans("給食の大鍋メニューが大ヒット。\nレリック「給食の大鍋」を得た。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 220 } }));
                         setEventResultLog(trans("来場者が殺到して220G獲得。", languageMode));

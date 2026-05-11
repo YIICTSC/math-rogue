@@ -140,26 +140,26 @@ interface KochoGameState {
 type KochoSheetKey = 'characters' | 'effects' | 'backgrounds';
 
 const KOCHO_SPRITE_SHEETS: Record<KochoSheetKey, string> = {
-    characters: `${import.meta.env.BASE_URL}sprites/kocho-hero-actions-01.png`,
-    effects: `${import.meta.env.BASE_URL}sprites/kocho-effects-01.png`,
-    backgrounds: `${import.meta.env.BASE_URL}sprites/kocho-backgrounds-5x5.png`,
+    characters: `${import.meta.env.BASE_URL}sprites/kocho-hero-actions-01.webp`,
+    effects: `${import.meta.env.BASE_URL}sprites/kocho-effects-01.webp`,
+    backgrounds: `${import.meta.env.BASE_URL}sprites/kocho-backgrounds-5x5.webp`,
 };
 
 const KOCHO_HERO_ACTION_SHEETS = [
-    `${import.meta.env.BASE_URL}sprites/kocho-hero-actions-01.png`,
-    `${import.meta.env.BASE_URL}sprites/kocho-hero-actions-02.png`,
-    `${import.meta.env.BASE_URL}sprites/kocho-hero-actions-03.png`,
-    `${import.meta.env.BASE_URL}sprites/kocho-hero-actions-04.png`,
+    `${import.meta.env.BASE_URL}sprites/kocho-hero-actions-01.webp`,
+    `${import.meta.env.BASE_URL}sprites/kocho-hero-actions-02.webp`,
+    `${import.meta.env.BASE_URL}sprites/kocho-hero-actions-03.webp`,
+    `${import.meta.env.BASE_URL}sprites/kocho-hero-actions-04.webp`,
 ];
 
 const KOCHO_ENEMY_SHEETS = [
-    `${import.meta.env.BASE_URL}sprites/kocho-enemies-01.png`,
+    `${import.meta.env.BASE_URL}sprites/kocho-enemies-01.webp`,
 ];
 
 const KOCHO_EFFECT_SHEETS = [
-    `${import.meta.env.BASE_URL}sprites/kocho-effects-01.png`,
-    `${import.meta.env.BASE_URL}sprites/kocho-effects-02.png`,
-    `${import.meta.env.BASE_URL}sprites/kocho-effects-03.png`,
+    `${import.meta.env.BASE_URL}sprites/kocho-effects-01.webp`,
+    `${import.meta.env.BASE_URL}sprites/kocho-effects-02.webp`,
+    `${import.meta.env.BASE_URL}sprites/kocho-effects-03.webp`,
 ];
 
 const sheetPosition = (cell: number) => {
@@ -255,13 +255,13 @@ const KochoCardActionArt: React.FC<{
 const getKochoItemImageSrc = (item: Pick<KConsumable, 'id'>) => {
     const version = '20260508-item-redraw';
     const files: Record<string, string> = {
-        C_MILK: 'kocho-item-milk.png',
-        C_BARRIER: 'kocho-item-barrier.png',
-        C_BATTERY: 'kocho-item-battery.png',
-        C_CURRY: 'kocho-item-curry.png',
-        C_DRINK: 'kocho-item-drink.png',
+        C_MILK: 'kocho-item-milk.webp',
+        C_BARRIER: 'kocho-item-barrier.webp',
+        C_BATTERY: 'kocho-item-battery.webp',
+        C_CURRY: 'kocho-item-curry.webp',
+        C_DRINK: 'kocho-item-drink.webp',
     };
-    return `${import.meta.env.BASE_URL}sprites/${files[item.id] || 'kocho-item-generic.png'}?v=${version}`;
+    return `${import.meta.env.BASE_URL}sprites/${files[item.id] || 'kocho-item-generic.webp'}?v=${version}`;
 };
 
 const KochoItemImage: React.FC<{
@@ -280,16 +280,16 @@ const KochoItemImage: React.FC<{
 const getKochoRelicImageSrc = (relic: Pick<KRelic, 'id'>) => {
     const version = '20260508-relic-redraw';
     const files: Record<string, string> = {
-        R_SHIELD: 'kocho-relic-shield.png',
-        R_DISCOUNT: 'kocho-relic-discount.png',
-        R_THORN: 'kocho-relic-thorn.png',
-        R_BOOTS: 'kocho-relic-boots.png',
-        R_RECYCLE: 'kocho-relic-recycle.png',
-        R_FANG: 'kocho-relic-fang.png',
-        R_GLOVES: 'kocho-relic-gloves.png',
-        R_POTION: 'kocho-relic-potion.png',
+        R_SHIELD: 'kocho-relic-shield.webp',
+        R_DISCOUNT: 'kocho-relic-discount.webp',
+        R_THORN: 'kocho-relic-thorn.webp',
+        R_BOOTS: 'kocho-relic-boots.webp',
+        R_RECYCLE: 'kocho-relic-recycle.webp',
+        R_FANG: 'kocho-relic-fang.webp',
+        R_GLOVES: 'kocho-relic-gloves.webp',
+        R_POTION: 'kocho-relic-potion.webp',
     };
-    return `${import.meta.env.BASE_URL}sprites/${files[relic.id] || 'kocho-relic-seal.png'}?v=${version}`;
+    return `${import.meta.env.BASE_URL}sprites/${files[relic.id] || 'kocho-relic-seal.webp'}?v=${version}`;
 };
 
 const KochoRelicImage: React.FC<{

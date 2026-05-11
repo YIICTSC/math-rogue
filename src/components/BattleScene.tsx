@@ -12,6 +12,8 @@ import { getUpgradedCard, synthesizeCards } from '../utils/cardUtils';
 import { getCardIllustrationPaths } from '../utils/cardIllustration';
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { storageService } from '../services/storageService';
+import { PotionIcon, RelicIcon } from './ItemIcon';
+import { getBattleBackgroundSceneById } from '../data/battleBackgrounds';
 
 const POWER_DEFINITIONS: Record<string, { name: string, desc: string }> = {
     WEAK: { name: "へろへろ", desc: "攻撃で与えるダメージが25%減っちゃう。" },
@@ -351,6 +353,7 @@ interface BattleSceneProps {
     finisherCutinCard?: ICard | null;
     hideEnemyIntents?: boolean;
     onOpenSettings?: () => void;
+    battleBackgroundId?: string;
 }
 
 type DrawEntryAnimation = {
@@ -360,9 +363,10 @@ type DrawEntryAnimation = {
 
 const BattleScene: React.FC<BattleSceneProps> = ({
     player, companions = [], coopSelfPeerId, coopEffectOwnerPeerId, coopTurnQueue = [], coopCanAct = true, coopTurnOwnerLabel, coopSupportCards = [], onUseCoopSupport, selfDown = false, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onPlaySynthesizedCard, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
-    selectionState, onHandSelection, onCancelSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect, parryState, onParry, showParryTutorial = false, onCloseParryTutorial, activeEffects, finisherCutinCard, hideEnemyIntents = false, onOpenSettings
+    selectionState, onHandSelection, onCancelSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect, parryState, onParry, showParryTutorial = false, onCloseParryTutorial, activeEffects, finisherCutinCard, hideEnemyIntents = false, onOpenSettings, battleBackgroundId
 }) => {
     const isCoopBattleView = !!coopSelfPeerId || companions.length > 0;
+    const battleBackgroundScene = getBattleBackgroundSceneById(battleBackgroundId);
     const shouldRenderPlayerScopedVfxOnSelf = isCoopBattleView
         ? !!coopSelfPeerId && !!coopEffectOwnerPeerId && coopEffectOwnerPeerId === coopSelfPeerId
         : true;
@@ -1005,6 +1009,11 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
             {/* 2. Battle Viewport */}
             <div ref={battleViewRef} className="battle-view flex-1 min-h-0 relative overflow-y-auto custom-scrollbar flex flex-col justify-between p-2 bg-gray-800/50 gap-4">
+                <div
+                    className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-76"
+                    style={{ backgroundImage: `url(${battleBackgroundScene.image})` }}
+                />
+                <div className="pointer-events-none absolute inset-0 bg-slate-950/45" />
 
                 {/* Parry UI Overlay (Bard Special) */}
                 {parryState?.active && !parryState.success && (
@@ -1177,8 +1186,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                         const counter = getRelicCounter(r.id);
                                         return (
                                             <div key={r.id} className="bg-black/40 p-3 rounded border border-gray-600 flex items-start gap-3">
-                                                <div className="bg-gray-700 p-2 rounded-full border border-yellow-600 shrink-0 relative">
-                                                    <Gem size={20} className="text-yellow-400" />
+                                                <div className="bg-gray-700 p-1.5 rounded-full border border-yellow-600 shrink-0 relative h-10 w-10">
+                                                    <RelicIcon id={r.id} alt={r.name} />
                                                     {counter !== undefined && counter > 0 && (
                                                         <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold border border-white shadow-md">
                                                             {counter}
@@ -1225,8 +1234,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4" onClick={() => setPotionConfirmation(null)}>
                         <div className="bg-gray-900 border-2 border-white p-6 rounded shadow-2xl max-xs w-full text-center animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
                             <div className="mb-4 flex justify-center">
-                                <div className="w-16 h-16 bg-gray-800 rounded-full border-2 border-white flex items-center justify-center">
-                                    <FlaskConical size={32} style={{ color: potionConfirmation.color }} />
+                                <div className="w-16 h-16 bg-gray-800 rounded-full border-2 border-white flex items-center justify-center p-2">
+                                    <PotionIcon id={potionConfirmation.templateId} alt={potionConfirmation.name} />
                                 </div>
                             </div>
                             <h3 className="text-xl font-bold text-white mb-2">{trans(potionConfirmation.name, languageMode)}</h3>
@@ -1524,8 +1533,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     {displayedRelics.slice(0, 5).map(r => {
                                         const counter = getRelicCounter(r.id);
                                         return (
-                                            <div key={r.id} className="w-4 h-4 md:w-5 md:h-5 bg-gray-700 rounded-full border border-yellow-600 flex items-center justify-center shrink-0 relative group">
-                                                <Gem size={10} className="text-yellow-400" />
+                                            <div key={r.id} className="w-4 h-4 md:w-5 md:h-5 bg-gray-700 rounded-full border border-yellow-600 flex items-center justify-center shrink-0 relative group p-0.5">
+                                                <RelicIcon id={r.id} alt={r.name} />
                                                 {counter !== undefined && counter > 0 && (
                                                     <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold border border-white shadow-md z-10 pointer-events-none scale-125">
                                                         {counter}
@@ -1554,7 +1563,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                             }}
                                             className="w-4 h-4 md:w-5 md:h-5 bg-gray-800 rounded border border-white flex items-center justify-center cursor-pointer hover:scale-110"
                                         >
-                                            <FlaskConical size={10} style={{ color: p.color }} />
+                                            <PotionIcon id={p.templateId} alt={p.name} />
                                         </div>
                                     ))}
                                 </div>

@@ -6,6 +6,7 @@ import { RELIC_LIBRARY, CARDS_LIBRARY, CHARACTER_ACCESSORIES } from '../constant
 import { trans } from '../utils/textUtils';
 import { audioService } from '../services/audioService';
 import { storageService } from '../services/storageService';
+import { RelicIcon } from './ItemIcon';
 
 interface CharacterSelectionScreenProps {
   characters: Character[];
@@ -162,7 +163,8 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-gray-900 text-white relative overflow-hidden">
+    <div className="flex flex-col h-full w-full bg-gray-900 bg-[url('/sprites/backgrounds/learning-rogue/selection-entrance.webp')] bg-cover bg-center text-white relative overflow-hidden">
+      <div className="absolute inset-0 bg-slate-950/60 pointer-events-none" />
       
       {/* Camera Modal */}
       {showCamera && (
@@ -402,8 +404,8 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
 
                             {/* Starting Relic Detail */}
                             <div className="bg-white/5 rounded-xl p-3 border border-white/10 flex items-start">
-                                <div className="bg-yellow-500/20 p-1.5 rounded-lg mr-3 mt-0.5">
-                                    <Gem size={16} className="text-yellow-400" />
+                                <div className="bg-yellow-500/20 p-1 rounded-lg mr-3 mt-0.5 h-8 w-8 shrink-0">
+                                    {relic ? <RelicIcon id={relic.id} alt={relic.name} /> : <Gem size={16} className="text-yellow-400" />}
                                 </div>
                                 <div className="text-left">
                                     <div className="text-[10px] text-yellow-300 font-black uppercase tracking-tighter mb-0.5">{trans("初期装備", languageMode)}</div>
