@@ -78,7 +78,6 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
   });
 
   const MiniGameSpriteIcon: React.FC<{ game: MiniGameConfig }> = ({ game }) => {
-    const assetBase = `${import.meta.env.BASE_URL || './'}`.replace(/\/?$/, '/');
     const spriteIcons: Record<string, { src: string; columns: number; rows: number; index: number; offsetX?: number; offsetY?: number } | { src: string; columns: number; rows: number; index: number; cell: number; gap: number; offsetX?: number; offsetY?: number }> = {
       GO_HOME: { src: 'sprites/go-home-dash-8-loop-grid.webp', columns: 8, rows: 1, index: 2 },
       SURVIVOR: { src: 'sprites/schoolyard-survivor-weapons.webp', columns: 8, rows: 5, index: 0 },
@@ -95,7 +94,7 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
 
     const col = sprite.index % sprite.columns;
     const row = Math.floor(sprite.index / sprite.columns);
-    const src = `${assetBase}${sprite.src}`;
+    const src = assetUrl(sprite.src);
 
     if ('cell' in sprite) {
       const sheetWidth = sprite.gap + sprite.columns * (sprite.cell + sprite.gap);

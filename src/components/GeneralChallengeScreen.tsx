@@ -52,12 +52,6 @@ const getBackgroundClass = (mode: string) => {
     return 'bg-slate-900';
 };
 
-const isEnglishReviewMode = (mode: string) =>
-  /^ENGLISH_G[3-6]_U(11|12|13|14)$/.test(mode) ||
-  /^ENGLISH_G7_U(13|14|15|16)$/.test(mode) ||
-  /^ENGLISH_G8_U(10|11|12|13)$/.test(mode) ||
-  /^ENGLISH_G9_U(11|12|13|14)$/.test(mode);
-
 const isEnglishSpeakingReviewMode = (mode: string) =>
   /^ENGLISH_G[3-6]_U(12|13|14)$/.test(mode) ||
   /^ENGLISH_G7_U(14|15|16)$/.test(mode) ||
@@ -263,7 +257,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       problemPool = SUBJECT_DATA.MAP_SYMBOLS.map((p) => ({ ...p, sourceMode: 'MAP_SYMBOLS' }));
     }
     
-    const count = isChallenge ? 1 : (isEnglishReviewMode(mode) ? problemPool.length : 3);
+    const count = isChallenge ? 1 : 3;
     const shuffled = [...problemPool]
         .sort(() => Math.random() - 0.5)
         .slice(0, count)

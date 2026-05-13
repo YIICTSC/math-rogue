@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation, Droplets, Recycle, Repeat, User, Lock, Users, Target, UserPlus, Gauge, Swords, Dice5, Ghost, Rocket, Fan, Cpu } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { storageService, PaperPlaneProgress } from '../services/storageService';
+import { assetUrl } from '../utils/assetPaths';
 
 // --- TYPES & CONSTANTS ---
 
@@ -731,8 +732,7 @@ const PAPER_PLANE_UNLOCK_TARGET = 50;
 type PaperPlaneSheetSprite = { sheet: string; row: number; col: number };
 
 const getBaseAssetPath = (path: string): string => {
-    const baseUrl = import.meta.env.BASE_URL || './';
-    return `${baseUrl.replace(/\/?$/, '/')}${path.replace(/^\//, '')}`;
+    return assetUrl(path);
 };
 
 const PAPER_PLANE_ASSET_BASE = getBaseAssetPath('sprites/paper-plane');

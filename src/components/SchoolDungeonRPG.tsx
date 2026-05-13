@@ -7,6 +7,7 @@ import { storageService } from '../services/storageService';
 import { GameMode } from '../types';
 import { EXTRA_SCHOOL_DUNGEON_ITEMS } from '../data/schoolDungeonExtraItems';
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
+import { assetUrl } from '../utils/assetPaths';
 
 // --- セッション内アイテム引き継ぎ用変数 ---
 let inheritedItemTemplate: Item | null = null;
@@ -427,7 +428,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
             spriteSheetImages.current[key] = img;
             setSpriteSheetRevision(prev => prev + 1);
         };
-        img.src = `${import.meta.env.BASE_URL}${path}`;
+        img.src = assetUrl(path);
     });
   }, []);
 

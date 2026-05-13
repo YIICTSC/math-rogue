@@ -5,6 +5,7 @@ import { audioService } from '../services/audioService';
 import { storageService } from '../services/storageService';
 import { GameMode } from '../types';
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
+import { assetUrl } from '../utils/assetPaths';
 
 // --- TYPES ---
 type Facing = 1 | -1; // 1: Right, -1: Left
@@ -140,26 +141,26 @@ interface KochoGameState {
 type KochoSheetKey = 'characters' | 'effects' | 'backgrounds';
 
 const KOCHO_SPRITE_SHEETS: Record<KochoSheetKey, string> = {
-    characters: `${import.meta.env.BASE_URL}sprites/kocho-hero-actions-01.webp`,
-    effects: `${import.meta.env.BASE_URL}sprites/kocho-effects-01.webp`,
-    backgrounds: `${import.meta.env.BASE_URL}sprites/kocho-backgrounds-5x5.webp`,
+    characters: assetUrl('sprites/kocho-hero-actions-01.webp'),
+    effects: assetUrl('sprites/kocho-effects-01.webp'),
+    backgrounds: assetUrl('sprites/kocho-backgrounds-5x5.webp'),
 };
 
 const KOCHO_HERO_ACTION_SHEETS = [
-    `${import.meta.env.BASE_URL}sprites/kocho-hero-actions-01.webp`,
-    `${import.meta.env.BASE_URL}sprites/kocho-hero-actions-02.webp`,
-    `${import.meta.env.BASE_URL}sprites/kocho-hero-actions-03.webp`,
-    `${import.meta.env.BASE_URL}sprites/kocho-hero-actions-04.webp`,
+    assetUrl('sprites/kocho-hero-actions-01.webp'),
+    assetUrl('sprites/kocho-hero-actions-02.webp'),
+    assetUrl('sprites/kocho-hero-actions-03.webp'),
+    assetUrl('sprites/kocho-hero-actions-04.webp'),
 ];
 
 const KOCHO_ENEMY_SHEETS = [
-    `${import.meta.env.BASE_URL}sprites/kocho-enemies-01.webp`,
+    assetUrl('sprites/kocho-enemies-01.webp'),
 ];
 
 const KOCHO_EFFECT_SHEETS = [
-    `${import.meta.env.BASE_URL}sprites/kocho-effects-01.webp`,
-    `${import.meta.env.BASE_URL}sprites/kocho-effects-02.webp`,
-    `${import.meta.env.BASE_URL}sprites/kocho-effects-03.webp`,
+    assetUrl('sprites/kocho-effects-01.webp'),
+    assetUrl('sprites/kocho-effects-02.webp'),
+    assetUrl('sprites/kocho-effects-03.webp'),
 ];
 
 const sheetPosition = (cell: number) => {
@@ -261,7 +262,7 @@ const getKochoItemImageSrc = (item: Pick<KConsumable, 'id'>) => {
         C_CURRY: 'kocho-item-curry.webp',
         C_DRINK: 'kocho-item-drink.webp',
     };
-    return `${import.meta.env.BASE_URL}sprites/${files[item.id] || 'kocho-item-generic.webp'}?v=${version}`;
+    return `${assetUrl(`sprites/${files[item.id] || 'kocho-item-generic.webp'}`)}?v=${version}`;
 };
 
 const KochoItemImage: React.FC<{
@@ -289,7 +290,7 @@ const getKochoRelicImageSrc = (relic: Pick<KRelic, 'id'>) => {
         R_GLOVES: 'kocho-relic-gloves.webp',
         R_POTION: 'kocho-relic-potion.webp',
     };
-    return `${import.meta.env.BASE_URL}sprites/${files[relic.id] || 'kocho-relic-seal.webp'}?v=${version}`;
+    return `${assetUrl(`sprites/${files[relic.id] || 'kocho-relic-seal.webp'}`)}?v=${version}`;
 };
 
 const KochoRelicImage: React.FC<{

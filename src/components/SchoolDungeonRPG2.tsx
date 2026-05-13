@@ -7,6 +7,7 @@ import { storageService } from '../services/storageService';
 import { GameMode } from '../types';
 import { EXTRA_SCHOOL_DUNGEON_ITEMS } from '../data/schoolDungeonExtraItems';
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
+import { assetUrl } from '../utils/assetPaths';
 
 // --- セッション内アイテム引き継ぎ用変数 ---
 let inheritedItemTemplate2: Item | null = null;
@@ -482,7 +483,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
         img.onload = () => {
             spriteSheetImages.current[key] = img;
         };
-        img.src = `${import.meta.env.BASE_URL}${path}`;
+        img.src = assetUrl(path);
     });
   }, []);
 
@@ -749,7 +750,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                       top: `-${(sy / FURAI_SHEET_CELL) * 100}%`,
                       width: `${(sheetWidth / FURAI_SHEET_CELL) * 100}%`,
                       height: `${(sheetHeight / FURAI_SHEET_CELL) * 100}%`,
-                      backgroundImage: `url(${import.meta.env.BASE_URL}${FURAI_SHEET_PATHS[sheet]})`,
+                      backgroundImage: `url(${assetUrl(FURAI_SHEET_PATHS[sheet])})`,
                       backgroundSize: '100% 100%',
                       imageRendering: 'pixelated',
                   }}

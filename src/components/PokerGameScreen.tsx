@@ -14,21 +14,20 @@ import {
     POKER_ALL_ITEM_SPRITE_ENTRIES,
     POKER_ALL_ITEM_SPRITE_KEYS
 } from '../data/pokerItemSpriteManifest';
+import { assetUrl } from '../utils/assetPaths';
 
 // --- Constants & Helpers ---
 const SUITS: PokerSuit[] = ['SPADE', 'HEART', 'DIAMOND', 'CLUB'];
 const RANKS: PokerRank[] = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
 const POKER_ASSET_VERSION = 'after-school-poker-gptimage2-v13';
-const POKER_ASSET_BASE = `${import.meta.env.BASE_URL}sprites/`;
-const POKER_RIVAL_SHEET_BASE = `${POKER_ASSET_BASE}after-school-poker-rivals-`;
-const POKER_ENDLESS_RIVAL_SHEET_BASE = `${POKER_ASSET_BASE}after-school-poker-endless-rivals-`;
-const POKER_ITEM_SHEET = `${POKER_ASSET_BASE}after-school-poker-items.webp?v=${POKER_ASSET_VERSION}`;
-const POKER_ORNAMENT_SHEET = `${POKER_ASSET_BASE}after-school-poker-card-ornaments.webp?v=${POKER_ASSET_VERSION}`;
-const POKER_OVERRIDE_SHEET = `${POKER_ASSET_BASE}after-school-poker-overrides.webp?v=${POKER_ASSET_VERSION}`;
-const POKER_CONSUMABLE_OVERRIDE_SHEET = `${POKER_ASSET_BASE}after-school-poker-consumable-overrides.webp?v=${POKER_ASSET_VERSION}`;
-const POKER_STATIONERY_OVERRIDE_SHEET = `${POKER_ASSET_BASE}after-school-poker-stationery-overrides.webp?v=${POKER_ASSET_VERSION}`;
-const POKER_SUPPORTER_FIX_SHEET = `${POKER_ASSET_BASE}after-school-poker-supporter-fixes.webp?v=${POKER_ASSET_VERSION}`;
-const POKER_TABLE_IMAGE = `${POKER_ASSET_BASE}after-school-poker-table.webp?v=${POKER_ASSET_VERSION}`;
+const pokerAsset = (fileName: string) => `${assetUrl(`sprites/${fileName}`)}?v=${POKER_ASSET_VERSION}`;
+const POKER_ITEM_SHEET = pokerAsset('after-school-poker-items.webp');
+const POKER_ORNAMENT_SHEET = pokerAsset('after-school-poker-card-ornaments.webp');
+const POKER_OVERRIDE_SHEET = pokerAsset('after-school-poker-overrides.webp');
+const POKER_CONSUMABLE_OVERRIDE_SHEET = pokerAsset('after-school-poker-consumable-overrides.webp');
+const POKER_STATIONERY_OVERRIDE_SHEET = pokerAsset('after-school-poker-stationery-overrides.webp');
+const POKER_SUPPORTER_FIX_SHEET = pokerAsset('after-school-poker-supporter-fixes.webp');
+const POKER_TABLE_IMAGE = pokerAsset('after-school-poker-table.webp');
 const POKER_ITEM_KEYS = [
     'TEACHER','BOSS','CHEF','MUSCLE','LIBRARIAN','POTION','SHOE','FLAME',
     'PLANT','NOTEBOOK','SLIME','WIZARD','FLIER','ALIEN','SWORD','GOLD_BAG',
@@ -203,8 +202,9 @@ const getPokerRivalPortraitStyle = (visual: { index: number; isEndless: boolean 
     const sheet = Math.floor(visual.index / 3) + 1;
     const row = visual.index % 3;
     const col = Math.max(0, Math.min(2, expression));
+    const sheetName = `${visual.isEndless ? 'after-school-poker-endless-rivals' : 'after-school-poker-rivals'}-${String(sheet).padStart(2, '0')}.webp`;
     return {
-        backgroundImage: `url(${visual.isEndless ? POKER_ENDLESS_RIVAL_SHEET_BASE : POKER_RIVAL_SHEET_BASE}${String(sheet).padStart(2, '0')}.webp?v=${POKER_ASSET_VERSION})`,
+        backgroundImage: `url(${pokerAsset(sheetName)})`,
         backgroundSize: '300% 300%',
         backgroundPosition: `${col * 50}% ${row * 50}%`,
         backgroundRepeat: 'no-repeat',
@@ -221,7 +221,7 @@ const getPokerAllItemStyle = (itemId: string): React.CSSProperties => {
     const x = POKER_ALL_ITEM_SPRITE_COLUMNS <= 1 ? 0 : (col / (POKER_ALL_ITEM_SPRITE_COLUMNS - 1)) * 100;
     const y = POKER_ALL_ITEM_SPRITE_COLUMNS <= 1 ? 0 : (row / (POKER_ALL_ITEM_SPRITE_COLUMNS - 1)) * 100;
     return {
-        backgroundImage: `url(${POKER_ASSET_BASE}${sheetName}?v=${POKER_ASSET_VERSION})`,
+        backgroundImage: `url(${pokerAsset(sheetName)})`,
         backgroundSize: `${POKER_ALL_ITEM_SPRITE_COLUMNS * 100}% ${POKER_ALL_ITEM_SPRITE_COLUMNS * 100}%`,
         backgroundPosition: `${x}% ${y}%`,
         backgroundRepeat: 'no-repeat',

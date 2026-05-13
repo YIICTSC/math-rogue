@@ -7,6 +7,7 @@ import { audioService } from '../services/audioService';
 import { storageService } from '../services/storageService';
 import { GameMode } from '../types';
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
+import { assetUrl } from '../utils/assetPaths';
 
 // --- GAME CONSTANTS ---
 const WORLD_WIDTH = 2000;
@@ -312,7 +313,6 @@ const PASSIVES: Record<PassiveType, PassiveDef> = {
     ORIGAMI: { id: 'ORIGAMI', name: '金ピカ折り紙', desc: '獲得ゴールド+20%', sprite: { template: 'FLIER', color: '#eab308', highlight: '#fef08a' } },
 };
 
-const SPRITE_ASSET_BASE = `${import.meta.env.BASE_URL}sprites/`;
 const SPRITE_ASSET_VERSION = 'schoolyard-survivor-v3';
 const SPRITE_SHEET_CELL_SIZE = 32;
 const SPRITE_SHEET_COLUMNS = 8;
@@ -344,7 +344,7 @@ const getSpriteSheetIconStyle = (fileName: string, keys: readonly string[], key:
     return {
         width: '100%',
         height: '100%',
-        backgroundImage: `url("${SPRITE_ASSET_BASE}${fileName}?v=${SPRITE_ASSET_VERSION}")`,
+        backgroundImage: `url("${assetUrl(`sprites/${fileName}`)}?v=${SPRITE_ASSET_VERSION}")`,
         backgroundPosition: `${SPRITE_SHEET_COLUMNS === 1 ? 0 : (col / (SPRITE_SHEET_COLUMNS - 1)) * 100}% ${rows === 1 ? 0 : (row / (rows - 1)) * 100}%`,
         backgroundSize: `${SPRITE_SHEET_COLUMNS * 100}% ${rows * 100}%`,
         backgroundRepeat: 'no-repeat',
@@ -619,7 +619,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         options: { makeFlash?: boolean } = {}
     ) => {
         const img = new Image();
-        img.src = `${SPRITE_ASSET_BASE}${fileName}?v=${SPRITE_ASSET_VERSION}`;
+        img.src = `${assetUrl(`sprites/${fileName}`)}?v=${SPRITE_ASSET_VERSION}`;
         img.onload = () => {
             keys.forEach((key, index) => {
                 const c = document.createElement('canvas');
