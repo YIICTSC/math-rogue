@@ -4,6 +4,7 @@ import { ArrowLeft, Gamepad2, AlertTriangle, Trash2, Lock } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { MINI_GAMES, MiniGameConfig } from '../miniGameConfig';
 import { GameScreen } from '../types';
+import { assetUrl } from '../utils/assetPaths';
 
 interface MiniGameSelectScreenProps {
   onSelect: (screen: GameScreen) => void;
@@ -147,7 +148,10 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-gray-900 bg-[url('/sprites/backgrounds/learning-rogue/selection-entrance.webp')] bg-cover bg-center text-white relative">
+    <div
+      className="flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative"
+      style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/selection-entrance.webp')})` }}
+    >
       <div className="absolute inset-0 bg-slate-950/64 pointer-events-none" />
       <div className="absolute inset-0 texture-dark-matter opacity-30 pointer-events-none"></div>
       

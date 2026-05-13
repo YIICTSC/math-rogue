@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { GameMode, LanguageMode, GameScreen } from '../types';
+import { AnswerMode, GameMode, LanguageMode, GameScreen } from '../types';
 import { storageService } from '../services/storageService';
 import { audioService } from '../services/audioService';
 import MathChallengeScreen from './MathChallengeScreen';
@@ -14,6 +14,8 @@ import { ENGLISH_GRADE_UNITS } from '../englishUnitConfig';
 import { SCIENCE_GRADE_UNITS, getScienceGradeMode } from '../scienceUnitConfig';
 import { SOCIAL_GRADE_UNITS, getSocialGradeMode } from '../socialUnitConfig';
 import { trans, transProblemSubjectName } from '../utils/textUtils';
+import { assetUrl } from '../utils/assetPaths';
+import { saveAnswerModePreference } from '../utils/answerMode';
 
 interface ProblemChallengeScreenProps {
   onBack: () => void;
@@ -189,6 +191,7 @@ const KOKUGO_GRADE_UNITS: Record<number, MathUnitOption[]> = {
 interface ActiveChallengeConfig {
   subMode: SubModeConfig;
   modePool?: string[];
+  answerMode?: AnswerMode;
 }
 
 const getGradeLabel = (grade: number, languageMode: LanguageMode) =>
@@ -492,10 +495,12 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   const [selectedMathGrade, setSelectedMathGrade] = useState<number>(1);
   const [selectedMathUnitIds, setSelectedMathUnitIds] = useState<string[]>([]);
   const [selectedBgmId, setSelectedBgmId] = useState('random');
+  const [answerMode, setAnswerMode] = useState<AnswerMode>('CHOICE');
   const [streak, setStreak] = useState(0);
   const [records, setRecords] = useState<Record<string, number>>({});
   const [isQuitting, setIsQuitting] = useState(false);
   const isUnitCategory = selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL' || selectedCategory.id === 'SUMMARY';
+  const canSelectAnswerMode = selectedCategory.id === 'MATH' || selectedCategory.id === 'KANJI';
   
   // Voice feature control
   const [voiceEnabled, setVoiceEnabled] = useState(() => storageService.getEnglishVoiceEnabled());
@@ -530,6 +535,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
         mode: representativeMode
       },
       modePool,
+      answerMode: 'CHOICE',
     };
   };
 
@@ -574,8 +580,9 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     }
     const challengeConfig = isUnitCategory 
       ? getCombinedSelection()
-      : { subMode: selectedSubMode };
+      : { subMode: selectedSubMode, answerMode: canSelectAnswerMode ? answerMode : 'CHOICE' };
 
+    saveAnswerModePreference(challengeConfig.answerMode || 'CHOICE');
     setActiveChallenge(challengeConfig);
     setPhase('CHALLENGE');
     setStreak(0);
@@ -635,13 +642,46 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     return 0;
   };
 
+  const renderAnswerModeSelector = () => {
+    if (!canSelectAnswerMode) return null;
+
+    return (
+      <div className="rounded-lg border border-slate-700 bg-slate-950/60 p-2">
+        <div className="mb-1 text-[10px] font-bold text-slate-400">答え方</div>
+        <div className="grid grid-cols-2 gap-1.5">
+          {([
+            ['CHOICE', '4択'],
+            ['INPUT', '入力'],
+          ] as const).map(([mode, label]) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => {
+                setAnswerMode(mode);
+                saveAnswerModePreference(mode);
+                audioService.playSound('select');
+              }}
+              className={`rounded border px-2 py-1.5 text-xs font-black transition-colors ${answerMode === mode ? 'border-yellow-300 bg-yellow-500 text-slate-950' : 'border-slate-600 bg-slate-800 text-slate-200 hover:border-slate-400'}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   if (phase === 'CHALLENGE') {
     const challengeSubMode = activeChallenge?.subMode ?? selectedSubMode;
     const challengeModePool = activeChallenge?.modePool;
+    const challengeAnswerMode = activeChallenge?.answerMode || 'CHOICE';
     const ChallengeScreen = getChallengeScreenForMode(challengeSubMode.mode);
     
     return (
-      <div className="w-full h-full relative bg-black bg-[url('/sprites/backgrounds/learning-rogue/compendium-library.webp')] bg-cover bg-center flex flex-col">
+      <div
+        className="w-full h-full relative bg-black bg-cover bg-center flex flex-col"
+        style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/compendium-library.webp')})` }}
+      >
         <div className="absolute inset-0 bg-slate-950/62 pointer-events-none" />
         <div className="bg-black/80 border-b-2 border-gray-700 p-2 flex justify-between items-center z-50 shrink-0">
           <div className="flex gap-4 items-center">
@@ -669,6 +709,8 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
             <MathChallengeScreen 
               key={streak} 
               mode={challengeSubMode.mode} 
+              answerMode={challengeAnswerMode}
+              useSavedAnswerMode
               onComplete={handleCompleteOne} 
               isChallenge={true}
               streak={streak}
@@ -678,6 +720,8 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
             <KanjiChallengeScreen 
               key={streak}
               mode={challengeSubMode.mode} 
+              answerMode={challengeAnswerMode}
+              useSavedAnswerMode
               onComplete={handleCompleteOne} 
               isChallenge={true}
               streak={streak}
@@ -728,7 +772,10 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     : getSubLabel(selectedSubMode);
 
   return (
-    <div className="w-full h-full bg-slate-950 bg-[url('/sprites/backgrounds/learning-rogue/selection-entrance.webp')] bg-cover bg-center flex flex-col relative overflow-hidden">
+    <div
+      className="w-full h-full bg-slate-950 bg-cover bg-center flex flex-col relative overflow-hidden"
+      style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/selection-entrance.webp')})` }}
+    >
       <div className="absolute inset-0 bg-slate-950/65 pointer-events-none"></div>
       <div className="absolute inset-0 texture-dark-matter opacity-30 pointer-events-none"></div>
       
@@ -833,7 +880,9 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                     )}
                   </div>
                 ) : (
-                  <div className={`grid ${selectedCategory.id === 'KANJI' ? 'grid-cols-3' : 'grid-cols-2'} gap-2`}>
+                  <div className="space-y-3">
+                    {renderAnswerModeSelector()}
+                    <div className={`grid ${selectedCategory.id === 'KANJI' ? 'grid-cols-3' : 'grid-cols-2'} gap-2`}>
                       {selectedCategory.subModes.map((sub) => {
                         const recordKey = `${selectedCategory.id}_${sub.id}`;
                         const isSelected = selectedSubMode.id === sub.id;
@@ -855,6 +904,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                           </button>
                         );
                       })}
+                    </div>
                   </div>
                 )}
             </div>
@@ -866,6 +916,11 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
               <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mb-2">{trans('選択中', languageMode)}</div>
               <div className="text-xs font-bold text-emerald-400">{getCategoryLabel(selectedCategory.name)} / {footerSelectionLabel}</div>
             </div>
+            {canSelectAnswerMode && (
+              <div className="bg-black/40 rounded-xl border border-slate-800 p-3 text-xs text-slate-300">
+                答え方: <span className="font-bold text-white">{answerMode === 'CHOICE' ? '4択' : '入力'}</span>
+              </div>
+            )}
             
             <button 
               onClick={handleStart}

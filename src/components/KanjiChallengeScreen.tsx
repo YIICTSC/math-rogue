@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { audioService } from '../services/audioService';
-import { GameMode } from '../types';
+import { AnswerMode, GameMode } from '../types';
 import { storageService } from '../services/storageService';
 import { KANJI_DATA, KanjiProblem } from '../data/kanjiData';
+import { resolveAnswerMode } from '../utils/answerMode';
 
 interface KanjiChallengeScreenProps {
   onComplete: (correctCount: number) => void;
   mode: GameMode;
+  answerMode?: AnswerMode;
+  useSavedAnswerMode?: boolean;
   debugSkip?: boolean;
   isChallenge?: boolean;
   streak?: number;
@@ -17,13 +20,22 @@ interface ExtendedKanjiProblem extends KanjiProblem {
   actualCorrectAnswer: string;
 }
 
-const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete, mode, debugSkip, isChallenge, streak = 0 }) => {
+const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete, mode, answerMode = 'CHOICE', useSavedAnswerMode = false, debugSkip, isChallenge, streak = 0 }) => {
+  const resolvedAnswerMode = resolveAnswerMode(answerMode, useSavedAnswerMode);
   const [problems, setProblems] = useState<ExtendedKanjiProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [inputAnswer, setInputAnswer] = useState('');
   const [isAnswered, setIsAnswered] = useState(false);
   const [feedback, setFeedback] = useState<'CORRECT' | 'WRONG' | null>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!isAnswered && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isAnswered, currentProblemIndex]);
 
   // 表記のゆらぎ（スペース、括弧内の補足、全角半角など）を排除して比較する関数
   const normalize = (s: string) => {
@@ -104,6 +116,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
       } else if (currentProblemIndex < problems.length - 1) {
         setCurrentProblemIndex(prev => prev + 1);
         setSelectedOption(null);
+        setInputAnswer('');
         setIsAnswered(false);
         setFeedback(null);
       } else {
@@ -111,6 +124,22 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
       }
     }, 1000);
   };
+
+  const handleInputSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (normalize(inputAnswer) === '') return;
+    handleAnswer(inputAnswer);
+  };
+
+  useEffect(() => {
+    if (!isAnswered && problems.length > 0 && resolvedAnswerMode === 'INPUT') {
+      const normalizedInput = normalize(inputAnswer);
+      if (normalizedInput && normalizedInput === normalize(problems[currentProblemIndex]?.actualCorrectAnswer)) {
+        handleAnswer(inputAnswer);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputAnswer]);
 
   if (debugSkip) return <div className="w-full h-full bg-black"></div>;
 
@@ -148,7 +177,27 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
                 )}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            {resolvedAnswerMode === 'INPUT' ? (
+              <form onSubmit={handleInputSubmit} className="space-y-3">
+                <input
+                  ref={inputRef}
+                  value={inputAnswer}
+                  onChange={(event) => setInputAnswer(event.target.value)}
+                  disabled={isAnswered}
+                  autoFocus
+                  className={`w-full rounded-lg border-4 bg-white px-4 py-4 text-center text-2xl font-black text-slate-950 outline-none transition-colors ${isAnswered ? 'border-slate-400 opacity-80' : 'border-cyan-500 focus:border-yellow-300'}`}
+                  placeholder="読み方を入力"
+                />
+                <button
+                  type="submit"
+                  disabled={isAnswered || normalize(inputAnswer) === ''}
+                  className="w-full rounded-lg border-b-4 border-cyan-950 bg-cyan-700 py-4 text-xl font-bold transition-all hover:bg-cyan-600 active:translate-y-1 active:border-b-0 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  決定
+                </button>
+              </form>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
                 {currentProblem.options.map((opt, idx) => (
                     <button
                         key={idx}
@@ -164,7 +213,8 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
                         {opt}
                     </button>
                 ))}
-            </div>
+              </div>
+            )}
         </div>
     </div>
   );

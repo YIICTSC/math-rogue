@@ -4,6 +4,7 @@ import { Player, Card as ICard, Relic, Potion, LanguageMode } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
 import { ShoppingBag, Trash2, Coins, Gem, FlaskConical, X } from 'lucide-react';
 import { trans } from '../utils/textUtils';
+import { assetUrl } from '../utils/assetPaths';
 import { PotionIcon, RelicIcon } from './ItemIcon';
 
 interface ShopScreenProps {
@@ -20,6 +21,7 @@ interface ShopScreenProps {
   potionCapacity?: number;
   typingMode?: boolean;
   priceMultiplier?: number;
+  removeCost?: number;
   interactionDisabled?: boolean;
   interactionDisabledMessage?: string;
 }
@@ -27,7 +29,7 @@ interface ShopScreenProps {
 const REMOVE_COST = 75;
 const SHOP_SHORTCUT_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'];
 
-const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics = [], shopPotions = [], onBuyCard, onBuyRelic, onBuyPotion, onRemoveCard, onLeave, languageMode, potionCapacity = 3, typingMode = false, priceMultiplier = 1, interactionDisabled = false, interactionDisabledMessage }) => {
+const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics = [], shopPotions = [], onBuyCard, onBuyRelic, onBuyPotion, onRemoveCard, onLeave, languageMode, potionCapacity = 3, typingMode = false, priceMultiplier = 1, removeCost, interactionDisabled = false, interactionDisabledMessage }) => {
   const [purchasedIds, setPurchasedIds] = useState<string[]>([]);
   const [removed, setRemoved] = useState(false);
   const [viewMode, setViewMode] = useState<'BUY' | 'REMOVE'>('BUY');
@@ -115,7 +117,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
 
   const handleRemove = (cardId: string) => {
       if (interactionDisabled) return;
-      let cost = player.relics.find(r => r.id === 'SMILING_MASK') ? 50 : REMOVE_COST;
+      let cost = removeCost ?? (player.relics.find(r => r.id === 'SMILING_MASK') ? 50 : REMOVE_COST);
       if (player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) cost = Math.floor(cost * 0.5);
       cost = Math.floor(cost * priceMultiplier);
 
@@ -217,7 +219,10 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-gray-900 bg-[url('/sprites/backgrounds/learning-rogue/shop-store.webp')] bg-cover bg-center text-white relative">
+    <div
+      className="flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative"
+      style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/shop-store.webp')})` }}
+    >
        <div className="absolute inset-0 bg-slate-950/60 pointer-events-none" />
        
        {/* Inspection Modal */}
@@ -341,10 +346,10 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                 </button>
                 <button 
                     onClick={() => setViewMode('REMOVE')}
-                    disabled={removed || player.gold < getPrice(player.relics.find(r => r.id === 'SMILING_MASK') ? 50 : REMOVE_COST)}
+                    disabled={removed || player.gold < getPrice(removeCost ?? (player.relics.find(r => r.id === 'SMILING_MASK') ? 50 : REMOVE_COST))}
                     className={`flex-1 py-2 rounded border-2 flex items-center justify-center gap-1 cursor-pointer text-sm ${viewMode === 'REMOVE' ? 'bg-red-600 border-white' : 'bg-gray-800 border-gray-600 text-gray-400'} ${removed ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                    <Trash2 size={14}/> {trans("カード削除", languageMode)} ({getPrice(player.relics.find(r => r.id === 'SMILING_MASK') ? 50 : REMOVE_COST)} 円){typingMode && ' [0]'}
+                    <Trash2 size={14}/> {trans("カード削除", languageMode)} ({getPrice(removeCost ?? (player.relics.find(r => r.id === 'SMILING_MASK') ? 50 : REMOVE_COST))} 円){typingMode && ' [0]'}
                 </button>
            </div>
            {typingMode && (

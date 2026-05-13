@@ -1,15 +1,17 @@
 
 
 import { MapNode, NodeType } from '../types';
+import { getDifficultyConfig } from '../config/difficulty';
 
 export const MAP_HEIGHT = 15; // Number of floors including Boss
 export const MAP_WIDTH = 7;   // Max width of the grid
 
 const getRandomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-export const generateDungeonMap = (): MapNode[] => {
+export const generateDungeonMap = (difficultyLevel: number = 1): MapNode[] => {
   const nodes: MapNode[] = [];
   const floors: MapNode[][] = [];
+  const difficulty = getDifficultyConfig(difficultyLevel);
 
   // Helper to create node
   const createNode = (x: number, y: number, type: NodeType): MapNode => {
@@ -62,13 +64,25 @@ export const generateDungeonMap = (): MapNode[] => {
         } else if (y === MAP_HEIGHT - 2) {
              type = NodeType.REST; // Rest before boss
         } else {
-             // General Random
-            if (r < 0.45) type = NodeType.COMBAT;
-            else if (r < 0.60) type = NodeType.EVENT;
-            else if (r < 0.72) type = NodeType.SHOP;
-            else if (r < 0.85) type = NodeType.REST;
-            else if (r < 0.98) type = NodeType.ELITE;
-            else type = NodeType.TREASURE; // Rare random treasure
+            const restChance = difficulty.scienceRoomChance;
+            const weights = [
+                { type: NodeType.COMBAT, weight: 0.45 + Math.max(0, 0.13 - restChance) },
+                { type: NodeType.EVENT, weight: 0.15 },
+                { type: NodeType.SHOP, weight: 0.12 },
+                { type: NodeType.REST, weight: restChance },
+                { type: NodeType.ELITE, weight: 0.13 },
+                { type: NodeType.TREASURE, weight: 0.02 },
+            ];
+            const totalWeight = weights.reduce((sum, entry) => sum + entry.weight, 0);
+            let cursor = r * totalWeight;
+            type = NodeType.COMBAT;
+            for (const entry of weights) {
+                cursor -= entry.weight;
+                if (cursor <= 0) {
+                    type = entry.type;
+                    break;
+                }
+            }
         }
 
         floorNodes.push(createNode(x, y, type));
@@ -97,10 +111,15 @@ export const generateDungeonMap = (): MapNode[] => {
               const closest = sortedCandidates[0];
               curr.nextNodes.push(closest.id);
 
+              const straightAhead = sortedCandidates.find(candidate => candidate.x === curr.x);
+              if (straightAhead && !curr.nextNodes.includes(straightAhead.id)) {
+                  curr.nextNodes.push(straightAhead.id);
+              }
+
               // Chance for secondary connection (branching)
               if (sortedCandidates.length > 1) {
                   const second = sortedCandidates[1];
-                  if (Math.abs(second.x - curr.x) <= 2 && Math.random() < 0.4) {
+                  if (Math.abs(second.x - curr.x) <= 2 && Math.random() < 0.4 && !curr.nextNodes.includes(second.id)) {
                       curr.nextNodes.push(second.id);
                   }
               }

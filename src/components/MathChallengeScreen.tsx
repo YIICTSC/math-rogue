@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { audioService } from '../services/audioService';
-import { GameMode } from '../types';
+import { AnswerMode, GameMode } from '../types';
 import { storageService } from '../services/storageService';
+import { resolveAnswerMode } from '../utils/answerMode';
 
 interface MathProblem {
   question: string;
@@ -11,13 +12,22 @@ interface MathProblem {
   answer: number;
 }
 
-const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, mode, debugSkip, isChallenge, streak = 0 }) => {
+const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, mode, answerMode = 'CHOICE', useSavedAnswerMode = false, debugSkip, isChallenge, streak = 0 }) => {
+  const resolvedAnswerMode = resolveAnswerMode(answerMode, useSavedAnswerMode);
   const [problems, setProblems] = useState<MathProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [inputAnswer, setInputAnswer] = useState('');
   const [isAnswered, setIsAnswered] = useState(false);
   const [feedback, setFeedback] = useState<'CORRECT' | 'WRONG' | null>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!isAnswered && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isAnswered, currentProblemIndex]);
 
   useEffect(() => {
     if (debugSkip) {
@@ -129,6 +139,12 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
     setProblems(generatedProblems);
   }, [mode, debugSkip, isChallenge]);
 
+  const normalizeNumberInput = (value: string) => value
+    .replace(/[０-９]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 0xFEE0))
+    .replace(/[，,]/g, '')
+    .replace(/[\s　]+/g, '')
+    .trim();
+
   const handleAnswer = (option: number) => {
     if (isAnswered) return;
     
@@ -154,6 +170,7 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
       } else if (currentProblemIndex < problems.length - 1) {
         setCurrentProblemIndex(prev => prev + 1);
         setSelectedOption(null);
+        setInputAnswer('');
         setIsAnswered(false);
         setFeedback(null);
       } else {
@@ -161,6 +178,31 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
       }
     }, 1000);
   };
+
+  const handleInputSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const normalized = normalizeNumberInput(inputAnswer);
+    if (!normalized) return;
+    const numericAnswer = Number(normalized);
+    if (!Number.isFinite(numericAnswer)) {
+      handleAnswer(Number.NaN);
+      return;
+    }
+    handleAnswer(numericAnswer);
+  };
+
+  useEffect(() => {
+    if (!isAnswered && problems.length > 0 && resolvedAnswerMode === 'INPUT') {
+      const normalized = normalizeNumberInput(inputAnswer);
+      if (normalized) {
+        const numericAnswer = Number(normalized);
+        if (numericAnswer === problems[currentProblemIndex]?.answer) {
+          handleAnswer(numericAnswer);
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputAnswer]);
 
   if (debugSkip) return <div className="w-full h-full bg-black"></div>;
 
@@ -191,7 +233,29 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
                 )}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            {resolvedAnswerMode === 'INPUT' ? (
+              <form onSubmit={handleInputSubmit} className="space-y-3">
+                <input
+                  ref={inputRef}
+                  value={inputAnswer}
+                  onChange={(event) => setInputAnswer(event.target.value)}
+                  disabled={isAnswered}
+                  autoFocus
+                  inputMode="numeric"
+                  pattern="[0-9０-９,，\\s]*"
+                  className={`w-full rounded-lg border-4 bg-white px-4 py-4 text-center text-3xl font-black text-slate-950 outline-none transition-colors ${isAnswered ? 'border-slate-400 opacity-80' : 'border-blue-500 focus:border-yellow-300'}`}
+                  placeholder="答えを入力"
+                />
+                <button
+                  type="submit"
+                  disabled={isAnswered || normalizeNumberInput(inputAnswer) === ''}
+                  className="w-full rounded-lg border-b-4 border-blue-900 bg-blue-600 py-4 text-xl font-bold transition-all hover:bg-blue-500 active:translate-y-1 active:border-b-0 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  決定
+                </button>
+              </form>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
                 {currentProblem.options.map((opt, idx) => (
                     <button
                         key={idx}
@@ -207,7 +271,8 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
                         {opt}
                     </button>
                 ))}
-            </div>
+              </div>
+            )}
         </div>
     </div>
   );
@@ -217,6 +282,8 @@ export default MathChallengeScreen;
 interface MathChallengeScreenProps {
   onComplete: (correctCount: number) => void;
   mode: GameMode;
+  answerMode?: AnswerMode;
+  useSavedAnswerMode?: boolean;
   debugSkip?: boolean;
   isChallenge?: boolean;
   streak?: number;

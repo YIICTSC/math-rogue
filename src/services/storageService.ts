@@ -19,6 +19,8 @@ const STORAGE_KEY_DEBUG_HP_ONE = 'pixel_spire_debug_hp_one_v1';
 const STORAGE_KEY_DEBUG_MINI_GAME_UNLOCK = 'pixel_spire_debug_mini_game_unlock_v1';
 const STORAGE_KEY_MATH_CORRECT_COUNT = 'pixel_spire_math_correct_count_v1';
 const STORAGE_KEY_CHALLENGE_RECORDS = 'pixel_spire_challenge_records_v1';
+const STORAGE_KEY_MAX_UNLOCKED_DIFFICULTY = 'pixel_spire_max_unlocked_difficulty_v1';
+const STORAGE_KEY_FIRST_STARTER_RELIC_SKIPPED = 'pixel_spire_first_starter_relic_skipped_v1';
 
 const STORAGE_KEY_DUNGEON_STATE = 'pixel_spire_dungeon_state_v1';
 const STORAGE_KEY_POKER_STATE = 'pixel_spire_poker_state_v1';
@@ -368,6 +370,34 @@ export const storageService = {
       } catch (e) {
           console.warn("Failed to save challenge record", e);
       }
+  },
+
+  getMaxUnlockedDifficulty: (): number => {
+      try {
+          const stored = localStorage.getItem(STORAGE_KEY_MAX_UNLOCKED_DIFFICULTY);
+          const parsed = stored ? parseInt(stored, 10) : 1;
+          return Math.min(10, Math.max(1, Number.isFinite(parsed) ? parsed : 1));
+      } catch (e) {
+          return 1;
+      }
+  },
+
+  unlockDifficulty: (level: number) => {
+      try {
+          const current = storageService.getMaxUnlockedDifficulty();
+          const next = Math.min(10, Math.max(current, level));
+          localStorage.setItem(STORAGE_KEY_MAX_UNLOCKED_DIFFICULTY, next.toString());
+      } catch (e) {
+          console.warn("Failed to unlock difficulty", e);
+      }
+  },
+
+  hasSkippedFirstStarterRelic: (): boolean => {
+      return localStorage.getItem(STORAGE_KEY_FIRST_STARTER_RELIC_SKIPPED) === 'true';
+  },
+
+  markFirstStarterRelicSkipped: () => {
+      localStorage.setItem(STORAGE_KEY_FIRST_STARTER_RELIC_SKIPPED, 'true');
   },
 
   // --- Adventure Log / Scores ---
@@ -893,7 +923,7 @@ export const storageService = {
       const transientOrMini = [
           GameScreen.START_MENU, GameScreen.GAME_OVER, GameScreen.ENDING,
           GameScreen.VICTORY, GameScreen.COMPENDIUM, GameScreen.HELP,
-          GameScreen.CHARACTER_SELECTION, GameScreen.RANKING, GameScreen.PROBLEM_CHALLENGE,
+          GameScreen.CHARACTER_SELECTION, GameScreen.DIFFICULTY_SELECTION, GameScreen.RANKING, GameScreen.PROBLEM_CHALLENGE,
           GameScreen.MINI_GAME_SELECT, GameScreen.MINI_GAME_MODE_SELECTION,
           GameScreen.MINI_GAME_POKER, GameScreen.MINI_GAME_SURVIVOR,
           GameScreen.MINI_GAME_DUNGEON, GameScreen.MINI_GAME_DUNGEON_2, GameScreen.MINI_GAME_KOCHO,
@@ -1040,6 +1070,8 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_SEEN_BATTLE_TUTORIAL);
       localStorage.removeItem(STORAGE_KEY_SEEN_PARRY_TUTORIAL);
       localStorage.removeItem(STORAGE_KEY_CHALLENGE_RECORDS);
+      localStorage.removeItem(STORAGE_KEY_MAX_UNLOCKED_DIFFICULTY);
+      localStorage.removeItem(STORAGE_KEY_FIRST_STARTER_RELIC_SKIPPED);
       localStorage.removeItem(STORAGE_KEY_ENGLISH_VOICE);
       localStorage.removeItem(STORAGE_KEY_BGM_MODE);
       localStorage.removeItem(STORAGE_KEY_SEEN_BGM_SWITCH_HINT);

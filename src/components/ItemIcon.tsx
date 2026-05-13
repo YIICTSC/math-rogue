@@ -1,4 +1,5 @@
 import React from 'react';
+import { assetUrl } from '../utils/assetPaths';
 
 interface ItemIconProps {
   id: string;
@@ -11,7 +12,7 @@ const iconClass = (className = '') =>
 
 export const RelicIcon: React.FC<ItemIconProps> = ({ id, className, alt = '' }) => (
   <img
-    src={`/sprites/relic-icons/${id}.webp`}
+    src={assetUrl(`sprites/relic-icons/${id}.webp`)}
     alt={alt}
     className={iconClass(className)}
     draggable={false}
@@ -20,7 +21,7 @@ export const RelicIcon: React.FC<ItemIconProps> = ({ id, className, alt = '' }) 
 
 export const PotionIcon: React.FC<ItemIconProps> = ({ id, className, alt = '' }) => (
   <img
-    src={`/sprites/potion-icons/${id}.webp`}
+    src={assetUrl(`sprites/potion-icons/${id}.webp`)}
     alt={alt}
     className={iconClass(className)}
     draggable={false}

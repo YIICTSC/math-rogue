@@ -4,6 +4,7 @@ import { Character, LanguageMode } from '../types';
 import { Lock, Heart, Coins, Gem, ArrowRight, Swords, Shield, Zap, Sparkles, Brain, GraduationCap, Camera, X, RefreshCw, AlertCircle, Keyboard } from 'lucide-react';
 import { RELIC_LIBRARY, CARDS_LIBRARY, CHARACTER_ACCESSORIES } from '../constants';
 import { trans } from '../utils/textUtils';
+import { assetUrl } from '../utils/assetPaths';
 import { audioService } from '../services/audioService';
 import { storageService } from '../services/storageService';
 import { RelicIcon } from './ItemIcon';
@@ -163,7 +164,10 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-gray-900 bg-[url('/sprites/backgrounds/learning-rogue/selection-entrance.webp')] bg-cover bg-center text-white relative overflow-hidden">
+    <div
+      className="flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative overflow-hidden"
+      style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/selection-entrance.webp')})` }}
+    >
       <div className="absolute inset-0 bg-slate-950/60 pointer-events-none" />
       
       {/* Camera Modal */}

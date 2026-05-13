@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
     GameState, GameScreen, Enemy, Card as ICard,
-    CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode, LanguageMode, VisualEffectInstance, GardenSlot, VFXType, ActStats, RaceTrickCard, RaceTrickEffectId, CoopSupportCard, CoopBattleState, CoopBattleTurnSlot, CoopBattlePlayerState, CoopSharedState, CoopTreasurePool
+    CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode, LanguageMode, AnswerMode, VisualEffectInstance, GardenSlot, VFXType, ActStats, RaceTrickCard, RaceTrickEffectId, CoopSupportCard, CoopBattleState, CoopBattleTurnSlot, CoopBattlePlayerState, CoopSharedState, CoopTreasurePool
 } from './types';
 import {
     INITIAL_HP, INITIAL_ENERGY, HAND_SIZE,
@@ -24,6 +24,7 @@ import HelpScreen from './components/HelpScreen';
 import TreasureScreen from './components/TreasureScreen';
 import CharacterSelectionScreen from './components/CharacterSelectionScreen';
 import TypingModeSelectionScreen from './components/TypingModeSelectionScreen';
+import DifficultySelectionScreen from './components/DifficultySelectionScreen';
 import RankingScreen from './components/RankingScreen';
 import MathChallengeScreen from './components/MathChallengeScreen';
 import KanjiChallengeScreen from './components/KanjiChallengeScreen';
@@ -53,6 +54,9 @@ import { storageService } from './services/storageService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { trans } from './utils/textUtils';
+import { assetUrl } from './utils/assetPaths';
+import { getDifficultyConfig } from './config/difficulty';
+import { CARD_ERASER_TEMPLATE_ID, CARD_ERASER_NAME, eraseCardEffect, getErasableEffectOptions } from './utils/cardEraser';
 import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Wifi, Flag, Keyboard, Users, Mic, MicOff, Settings } from 'lucide-react';
 import { applyAdditionalCardLogic } from './services/cardEffectLogic';
 import { p2pService } from './services/p2pService';
@@ -267,6 +271,7 @@ const COOP_PARTY_HUD_SCREEN_SET = new Set<GameScreen>([
 
 const COOP_LOCAL_SETUP_SCREEN_SET = new Set<GameScreen>([
     GameScreen.MODE_SELECTION,
+    GameScreen.DIFFICULTY_SELECTION,
     GameScreen.CHARACTER_SELECTION,
     GameScreen.DECK_CONSTRUCTION,
     GameScreen.RELIC_SELECTION
@@ -560,6 +565,11 @@ const App: React.FC = () => {
         }).map((c, i) => ({ ...c, id: `pool-${i}-${Math.random()}` } as ICard));
     };
 
+    const createCardEraserCard = (idPrefix: string = 'eraser'): ICard => ({
+        ...CARDS_LIBRARY[CARD_ERASER_TEMPLATE_ID],
+        id: `${idPrefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    } as ICard);
+
     const clearCombatDebuffs = (player: Player): Player => {
         const nextPowers = { ...player.powers };
         ['WEAK', 'VULNERABLE', 'FRAIL', 'CONFUSED'].forEach(powerId => {
@@ -593,6 +603,9 @@ const App: React.FC = () => {
     const [gameState, setGameState] = useState<GameState>({
         screen: GameScreen.START_MENU,
         mode: GameMode.MULTIPLICATION,
+        answerMode: 'CHOICE',
+        difficultyLevel: 1,
+        shopRemoveCount: 0,
         act: 1,
         floor: 0,
         turn: 0,
@@ -744,6 +757,7 @@ const App: React.FC = () => {
     const [treasureOpened, setTreasureOpened] = useState(false);
     const [treasurePools, setTreasurePools] = useState<CoopTreasurePool[]>([]);
     const [clearCount, setClearCount] = useState<number>(0);
+    const [maxUnlockedDifficulty, setMaxUnlockedDifficulty] = useState<number>(() => storageService.getMaxUnlockedDifficulty());
     const [raceSession, setRaceSession] = useState<RaceSession | null>(null);
     const [coopSession, setCoopSession] = useState<CoopSession | null>(null);
     const [raceResultOpen, setRaceResultOpen] = useState(false);
@@ -1479,6 +1493,9 @@ const App: React.FC = () => {
         screen: state.screen,
         mode: state.mode,
         modePool: state.modePool,
+        answerMode: state.answerMode,
+        difficultyLevel: state.difficultyLevel,
+        shopRemoveCount: state.shopRemoveCount,
         challengeMode: state.challengeMode,
         typingLessonId: state.typingLessonId,
         act: state.act,
@@ -1622,6 +1639,9 @@ const App: React.FC = () => {
         screen: sharedState.screen,
         mode: sharedState.mode,
         modePool: sharedState.modePool,
+        answerMode: sharedState.answerMode || 'CHOICE',
+        difficultyLevel: sharedState.difficultyLevel,
+        shopRemoveCount: sharedState.shopRemoveCount,
         challengeMode: 'COOP',
         typingLessonId: sharedState.typingLessonId,
         act: sharedState.act,
@@ -3246,6 +3266,9 @@ const App: React.FC = () => {
         setGameState({
             screen: GameScreen.MODE_SELECTION,
             mode: GameMode.MULTIPLICATION,
+            answerMode: 'CHOICE',
+            difficultyLevel: 1,
+            shopRemoveCount: 0,
             act: 1,
             floor: 0,
             turn: 0,
@@ -3303,6 +3326,9 @@ const App: React.FC = () => {
         setGameState({
             screen: GameScreen.MODE_SELECTION,
             mode: GameMode.MULTIPLICATION,
+            answerMode: 'CHOICE',
+            difficultyLevel: 1,
+            shopRemoveCount: 0,
             act: 1,
             floor: 0,
             turn: 0,
@@ -3372,6 +3398,9 @@ const App: React.FC = () => {
         setGameState({
             screen: GameScreen.TYPING_MODE_SELECTION,
             mode: GameMode.MULTIPLICATION,
+            answerMode: 'CHOICE',
+            difficultyLevel: 1,
+            shopRemoveCount: 0,
             act: 1,
             floor: 0,
             turn: 0,
@@ -3425,7 +3454,7 @@ const App: React.FC = () => {
         setGameState(prev => ({
             ...prev,
             typingLessonId: lessonId,
-            screen: GameScreen.CHARACTER_SELECTION
+            screen: GameScreen.DIFFICULTY_SELECTION
         }));
     };
 
@@ -3476,7 +3505,7 @@ const App: React.FC = () => {
             ...prev,
             act: prev.act + 1,
             floor: 0,
-            map: generateDungeonMap(),
+            map: generateDungeonMap(prev.difficultyLevel || 1),
             currentMapNodeId: null,
             screen: GameScreen.MAP,
             isEndless: true,
@@ -3489,7 +3518,7 @@ const App: React.FC = () => {
         }));
     };
 
-    const handleModeSelect = (mode: GameMode, modePool?: string[]) => {
+    const handleModeSelect = (mode: GameMode, modePool?: string[], answerMode: AnswerMode = 'CHOICE') => {
         if (isDailyLimitReached) {
             audioService.playSound('wrong');
             setShowTimeLimitModal(true);
@@ -3510,11 +3539,17 @@ const App: React.FC = () => {
                 p2pService.send({ type: 'COOP_MODE_SET', mode });
             }
         }
-        setGameState(prev => ({ ...prev, mode, modePool, screen: GameScreen.CHARACTER_SELECTION }));
+        setGameState(prev => ({ ...prev, mode, modePool, answerMode, screen: GameScreen.DIFFICULTY_SELECTION }));
+    };
+
+    const handleDifficultySelect = (level: number) => {
+        if (level > maxUnlockedDifficulty && !isDebugHpOne) return;
+        audioService.playSound('select');
+        setGameState(prev => ({ ...prev, difficultyLevel: level, shopRemoveCount: 0, screen: GameScreen.CHARACTER_SELECTION }));
     };
 
     const handleDebugStart = (deck: ICard[], relics: Relic[], potions: Potion[]) => {
-        const map = generateDungeonMap();
+        const map = generateDungeonMap(gameState.difficultyLevel || 1);
         setDebugLoadout({ deck, relics, potions });
 
         setGameState(prev => ({
@@ -3564,7 +3599,7 @@ const App: React.FC = () => {
     };
 
     const handleDebugStartAct3Boss = async (deck: ICard[], relics: Relic[], potions: Potion[]) => {
-        const map = generateDungeonMap();
+        const map = generateDungeonMap(gameState.difficultyLevel || 1);
         setDebugLoadout({ deck, relics, potions });
 
         const bossNode = map.find(n => n.type === NodeType.BOSS);
@@ -3671,6 +3706,8 @@ const App: React.FC = () => {
         const commonRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'COMMON');
         const bonusOptions = shuffle(commonRelics).slice(0, 3);
         setStarterRelics(bonusOptions);
+        const shouldSkipStarterRelic = !storageService.hasSkippedFirstStarterRelic();
+        if (shouldSkipStarterRelic) storageService.markFirstStarterRelicSkipped();
 
         const garden = char.id === 'GARDENER' ? Array(9).fill(null).map(() => ({ plantedCard: null, growth: 0, maxGrowth: 0 })) : undefined;
 
@@ -3840,33 +3877,40 @@ const App: React.FC = () => {
             return;
         }
 
+        const nextScreen = shouldSkipStarterRelic ? GameScreen.MAP : GameScreen.RELIC_SELECTION;
+        const nextMap = shouldSkipStarterRelic ? generateDungeonMap(gameState.difficultyLevel || 1) : [];
         setGameState(prev => ({
             ...prev,
-            screen: GameScreen.RELIC_SELECTION,
+            screen: nextScreen,
             act: 1,
             floor: 0,
             turn: 0,
-            map: [],
+            map: nextMap,
             currentMapNodeId: null,
             player: initialPlayerState,
-            narrativeLog: logs,
+            narrativeLog: shouldSkipStarterRelic ? [...logs, trans("初回のため、レリックなしで冒険を開始した。", languageMode)] : logs,
             combatLog: [],
             activeEffects: []
         }));
+        if (shouldSkipStarterRelic) audioService.playBGM('map');
     };
 
     const handleChefDeckSelection = (selectedCards: ICard[]) => {
         const cardNames = selectedCards.map(c => c.name);
         storageService.saveUnlockedCards(cardNames);
 
+        const shouldSkipStarterRelic = !storageService.hasSkippedFirstStarterRelic();
+        if (shouldSkipStarterRelic) storageService.markFirstStarterRelicSkipped();
         setGameState(prev => ({
             ...prev,
-            screen: GameScreen.RELIC_SELECTION,
+            screen: shouldSkipStarterRelic ? GameScreen.MAP : GameScreen.RELIC_SELECTION,
+            map: shouldSkipStarterRelic ? generateDungeonMap(prev.difficultyLevel || 1) : prev.map,
             player: {
                 ...prev.player,
                 deck: selectedCards
             }
         }));
+        if (shouldSkipStarterRelic) audioService.playBGM('map');
     };
 
     const handleRelicSelect = (relic: Relic) => {
@@ -3885,10 +3929,11 @@ const App: React.FC = () => {
         if (gameState.challengeMode === 'COOP' && coopSession?.isHost) {
             setCoopNeedsInitialMapSync(true);
         }
-        const map = generateDungeonMap();
+        const map = generateDungeonMap(gameState.difficultyLevel || 1);
         const unlockedCards = storageService.getUnlockedCards();
 
-        const legacyCard = (gameState.challengeMode === 'RACE' || gameState.challengeMode === 'COOP')
+        const difficulty = getDifficultyConfig(gameState.difficultyLevel);
+        const legacyCard = (gameState.challengeMode === 'RACE' || gameState.challengeMode === 'COOP' || !difficulty.legacyCardAllowed)
             ? null
             : storageService.getLegacyCard();
         if (legacyCard) {
@@ -3971,7 +4016,8 @@ const App: React.FC = () => {
                 let bgmType: 'battle' | 'mid_boss' | 'boss' | 'final_boss' = 'battle';
 
                 const maxAtkDmg = estimateBossScalingSingleCardDamage(nextState.player.deck);
-                const enemyHpMultiplier = coopEnemyHpMultiplier;
+                const difficulty = getDifficultyConfig(gameState.difficultyLevel);
+                const enemyHpMultiplier = coopEnemyHpMultiplier * difficulty.enemyHpMultiplier;
 
                 if (gameState.act === 4 && node.type === NodeType.BOSS) {
                     let finalHeartHp = TRUE_BOSS.maxHp;
@@ -4040,7 +4086,8 @@ const App: React.FC = () => {
                     enemies = enemies.map(e => {
                         const type = determineEnemyType(e.name, node.type === NodeType.BOSS);
                         storageService.saveDefeatedEnemy(e.name);
-                        return { ...e, enemyType: type, nextIntent: getNextEnemyIntent({ ...e, enemyType: type }, 1) };
+                        const scaledEnemy = { ...e, enemyType: type, strength: e.strength + difficulty.enemyStrengthBonus };
+                        return { ...scaledEnemy, nextIntent: getNextEnemyIntent(scaledEnemy, 1) };
                     });
                 }
 
@@ -4177,6 +4224,12 @@ const App: React.FC = () => {
                     if (c.rarity === 'LEGENDARY') price += 100;
                     if (c.rarity === 'SPECIAL') price += 30;
                     cards.push({ id: `shop-${i}-${Date.now()}`, ...c, price });
+                }
+                if (getDifficultyConfig(gameState.difficultyLevel).cardEraserEnabled && Math.random() < 0.35) {
+                    cards[Math.floor(Math.random() * Math.max(1, cards.length))] = {
+                        ...createCardEraserCard('shop-eraser'),
+                        price: 70 + (gameState.difficultyLevel || 1) * 5
+                    };
                 }
                 setShopCards(cards);
 
@@ -7334,6 +7387,7 @@ const App: React.FC = () => {
                 screen: GameScreen.MODE_SELECTION,
                 mode: prev.mode,
                 modePool: undefined,
+                answerMode: 'CHOICE',
                 challengeMode: 'COOP',
                 act: 1,
                 floor: 0,
@@ -7531,6 +7585,9 @@ const App: React.FC = () => {
 
             if (prev.act === 4 && !prev.isEndless) {
                 const unlockedCard = unlockRandomAdditionalCard();
+                const nextDifficultyUnlock = Math.min(10, (prev.difficultyLevel || 1) + 1);
+                storageService.unlockDifficulty(nextDifficultyUnlock);
+                setMaxUnlockedDifficulty(storageService.getMaxUnlockedDifficulty());
                 const score = calculateScore(prev, true);
                 storageService.saveScore({
                     id: `victory-${Date.now()}`,
@@ -7628,9 +7685,7 @@ const App: React.FC = () => {
                 // --- FIXED: Immediate save deletion to prevent repeat unlocks ---
                 storageService.clearSave();
 
-                // --- NEW UNLOCK LOGIC ON GAME OVER ---
-                const unlockedCard = unlockRandomAdditionalCard();
-                setNewlyUnlockedCard(unlockedCard);
+                setNewlyUnlockedCard(null);
 
                 setLegacyCardSelected(false);
                 audioService.playSound('lose');
@@ -7651,7 +7706,7 @@ const App: React.FC = () => {
                     ...prev,
                     player: clearBattleOnlyCardState(clearBigLadleTemp(prev.player)),
                     screen: GameScreen.GAME_OVER,
-                    newlyUnlockedCardName: unlockedCard?.name
+                    newlyUnlockedCardName: undefined
                 }));
             }
         }
@@ -7736,7 +7791,7 @@ const App: React.FC = () => {
             if (currentNode && currentNode.type === NodeType.BOSS) {
                 if (prev.isEndless) {
                     const nextAct = prev.act + 1;
-                    const newMap = generateDungeonMap();
+                    const newMap = generateDungeonMap(prev.difficultyLevel || 1);
                     audioService.playBGM('map');
                     const isGardener = nextPlayer.id === 'GARDENER';
 
@@ -8084,6 +8139,12 @@ const App: React.FC = () => {
             const candidate = pickSource[Math.floor(Math.random() * pickSource.length)];
             pickedCardTemplateIds.add(getRewardCardTemplateKey(candidate));
             rewards.push({ type: 'CARD', value: { ...candidate, id: `${rewardPrefix}-card-value-${i}` }, id: `${rewardPrefix}-card-${i}` });
+        }
+        if (getDifficultyConfig(gameState.difficultyLevel).cardEraserEnabled && Math.random() < 0.25) {
+            const replaceIndex = rewards.findIndex(reward => reward.type === 'CARD');
+            const eraserReward = { type: 'CARD' as const, value: createCardEraserCard(`${rewardPrefix}-eraser-value`), id: `${rewardPrefix}-eraser` };
+            if (replaceIndex >= 0) rewards[replaceIndex] = eraserReward;
+            else rewards.push(eraserReward);
         }
 
         if (challengeMode === 'RACE' && Math.random() < 0.3) {
@@ -8755,6 +8816,24 @@ const App: React.FC = () => {
         applyUpgradeCard(card);
     };
 
+    const applySelfStudyEraser = (card: ICard, effectId: string) => {
+        setGameState(prev => {
+            const eraserIndex = prev.player.deck.findIndex(c => c.name === CARD_ERASER_NAME || c.originalNames?.includes(CARD_ERASER_NAME));
+            if (eraserIndex < 0) return prev;
+            const erasedCard = eraseCardEffect(card, effectId);
+            let eraserRemoved = false;
+            const nextDeck = prev.player.deck.flatMap(deckCard => {
+                if (deckCard.id === card.id) return [erasedCard];
+                if (!eraserRemoved && deckCard.id === prev.player.deck[eraserIndex].id) {
+                    eraserRemoved = true;
+                    return [];
+                }
+                return [deckCard];
+            });
+            return { ...prev, player: { ...prev.player, deck: nextDeck } };
+        });
+    };
+
     const handleRestLeave = () => {
         if (gameState.challengeMode === 'COOP' && coopSession && coopSelfPeerId) {
             setCoopSession(prev => {
@@ -8780,7 +8859,7 @@ const App: React.FC = () => {
                 return { ...prev, screen: GameScreen.FINAL_BRIDGE };
             }
             const nextAct = prev.act + 1;
-            const newMap = generateDungeonMap();
+            const newMap = generateDungeonMap(prev.difficultyLevel || 1);
             audioService.playBGM('map');
             const isGardener = prev.player.id === 'GARDENER';
             return {
@@ -8926,7 +9005,7 @@ const App: React.FC = () => {
                 }
                 const newDeck = p.deck.filter(c => c.id !== cardId);
                 const newHp = Math.min(p.currentHp, newMaxHp);
-                return { ...prev, player: { ...p, gold: p.gold - cost, deck: newDeck, maxHp: newMaxHp, currentHp: newHp } };
+                return { ...prev, shopRemoveCount: (prev.shopRemoveCount || 0) + 1, player: { ...p, gold: p.gold - cost, deck: newDeck, maxHp: newMaxHp, currentHp: newHp } };
             });
             return;
         }
@@ -8939,7 +9018,7 @@ const App: React.FC = () => {
             }
             const newDeck = p.deck.filter(c => c.id !== cardId);
             const newHp = Math.min(p.currentHp, newMaxHp);
-            return { ...prev, player: { ...p, gold: p.gold - cost, deck: newDeck, maxHp: newMaxHp, currentHp: newHp } };
+            return { ...prev, shopRemoveCount: (prev.shopRemoveCount || 0) + 1, player: { ...p, gold: p.gold - cost, deck: newDeck, maxHp: newMaxHp, currentHp: newHp } };
         });
     };
 
@@ -9918,7 +9997,10 @@ const App: React.FC = () => {
                 )}
 
                 {gameState.screen === GameScreen.START_MENU && (
-                    <div className="w-full h-full bg-gray-900 bg-[url('/sprites/learning-rogue-title-background.webp')] bg-cover bg-[position:38%_center] md:bg-center flex items-center justify-center relative overflow-hidden">
+                    <div
+                        className="w-full h-full bg-gray-900 bg-cover bg-[position:38%_center] md:bg-center flex items-center justify-center relative overflow-hidden"
+                        style={{ backgroundImage: `url(${assetUrl('sprites/learning-rogue-title-background.webp')})` }}
+                    >
                         <div className="absolute inset-0 bg-slate-950/55" />
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(15,23,42,0.12),rgba(2,6,23,0.72))]" />
                         {isLegacyVercelHost && showMigrationNotice && (
@@ -10064,7 +10146,7 @@ const App: React.FC = () => {
                                 onClick={handleTitleClick}
                             >
                                 <img
-                                    src="/sprites/learning-rogue-logo-emblem.webp"
+                                    src={assetUrl('sprites/learning-rogue-logo-emblem.webp')}
                                     alt=""
                                     className="absolute inset-x-0 top-1/2 z-0 mx-auto h-28 w-full max-w-[520px] -translate-y-1/2 object-contain opacity-90 drop-shadow-[0_0_22px_rgba(147,197,253,0.42)]"
                                     draggable={false}
@@ -10848,6 +10930,17 @@ const App: React.FC = () => {
                     </div>
                 )}
 
+                {gameState.screen === GameScreen.DIFFICULTY_SELECTION && (
+                    <div className="absolute inset-0">
+                        <DifficultySelectionScreen
+                            maxUnlockedDifficulty={isDebugHpOne ? 10 : maxUnlockedDifficulty}
+                            onSelectDifficulty={handleDifficultySelect}
+                            onBack={() => setGameState(prev => ({ ...prev, screen: prev.challengeMode === 'TYPING' ? GameScreen.TYPING_MODE_SELECTION : GameScreen.MODE_SELECTION }))}
+                            languageMode={languageMode}
+                        />
+                    </div>
+                )}
+
                 {gameState.screen === GameScreen.DECK_CONSTRUCTION && (
                     <div className="absolute inset-0">
                         <ChefDeckSelectionScreen
@@ -11004,6 +11097,8 @@ const App: React.FC = () => {
                     <div className="absolute inset-0">
                         <MathChallengeScreen
                             mode={gameState.mode}
+                            answerMode={gameState.answerMode || 'CHOICE'}
+                            useSavedAnswerMode
                             onComplete={handleMathChallengeComplete}
                             debugSkip={isMathDebugSkipped}
                             isChallenge={false}
@@ -11015,6 +11110,8 @@ const App: React.FC = () => {
                     <div className="absolute inset-0">
                         <KanjiChallengeScreen
                             mode={gameState.mode}
+                            answerMode={gameState.answerMode || 'CHOICE'}
+                            useSavedAnswerMode
                             onComplete={handleMathChallengeComplete}
                             debugSkip={isMathDebugSkipped}
                             isChallenge={false}
@@ -11105,9 +11202,11 @@ const App: React.FC = () => {
                             onRest={handleRestAction}
                             onUpgrade={handleUpgradeCard}
                             onSynthesize={handleSynthesizeCard}
+                            onSelfStudy={applySelfStudyEraser}
                             onLeave={handleRestLeave}
                             languageMode={languageMode}
                             typingMode={gameState.challengeMode === 'TYPING'}
+                            scienceRoomChance={getDifficultyConfig(gameState.difficultyLevel).scienceRoomChance}
                             interactionDisabled={gameState.challengeMode === 'COOP' ? false : coopInteractionDisabled}
                             interactionDisabledMessage={coopInteractionDisabledMessage}
                         />
@@ -11130,6 +11229,11 @@ const App: React.FC = () => {
                             languageMode={languageMode}
                             typingMode={gameState.challengeMode === 'TYPING'}
                             priceMultiplier={raceEffects.shopMarkupUntil > raceEffectNow ? 1.25 : 1}
+                            removeCost={(() => {
+                                const difficulty = getDifficultyConfig(gameState.difficultyLevel);
+                                const base = gameState.player.relics.find(r => r.id === 'SMILING_MASK') ? Math.min(50, difficulty.removeBaseCost) : difficulty.removeBaseCost;
+                                return base + (gameState.shopRemoveCount || 0) * difficulty.removeCostStep;
+                            })()}
                             interactionDisabled={gameState.challengeMode === 'COOP' ? false : coopInteractionDisabled}
                             interactionDisabledMessage={coopInteractionDisabledMessage}
                         />
@@ -11558,7 +11662,10 @@ const App: React.FC = () => {
                 )}
 
                 {gameState.screen === GameScreen.GAME_OVER && (
-                    <div className="w-full h-full bg-red-900 bg-[url('/sprites/backgrounds/learning-rogue/event-hallway.webp')] bg-cover bg-center flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar relative">
+                    <div
+                        className="w-full h-full bg-red-900 bg-cover bg-center flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar relative"
+                        style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/event-hallway.webp')})` }}
+                    >
                         <div className="absolute inset-0 bg-red-950/72 pointer-events-none" />
                         <div className="relative z-10 my-auto w-full max-w-2xl py-8">
                             <h1 className="text-6xl mb-4 font-bold">しゅくだいがふえた…</h1>
@@ -11579,7 +11686,7 @@ const App: React.FC = () => {
                                 </div>
                             )}
 
-                            {!legacyCardSelected ? (
+                            {getDifficultyConfig(gameState.difficultyLevel).legacyCardAllowed && !legacyCardSelected ? (
                                 <div className="mb-8 shrink-0">
                                     <p className="mb-4 text-sm text-red-200 font-bold">次回の冒険に持っていくカードを1枚選んでください</p>
                                     <div className="flex flex-wrap justify-center gap-2 max-h-60 overflow-y-auto custom-scrollbar p-2 bg-black/30 rounded border border-red-700/50">
@@ -11590,12 +11697,12 @@ const App: React.FC = () => {
                                         ))}
                                     </div>
                                 </div>
-                            ) : (
+                            ) : getDifficultyConfig(gameState.difficultyLevel).legacyCardAllowed ? (
                                 <div className="mb-8 p-4 bg-black/50 border border-gray-500 rounded-lg animate-in zoom-in duration-150 shrink-0">
                                     <p className="text-gray-300 font-bold text-xl">遺志は継がれた...</p>
                                     <p className="text-sm text-gray-500 mt-1">次の児童が拾うことになる。</p>
                                 </div>
-                            )}
+                            ) : null}
                             <div className="flex flex-col gap-4 items-center">
                                 <button onClick={handleRetry} className="bg-black border-2 border-white px-8 py-3 cursor-pointer w-64 hover:bg-gray-800 flex items-center justify-center"><RotateCcw className="mr-2" size={20} /> {trans("再挑戦", languageMode)}</button>
                                 <button
@@ -11614,7 +11721,10 @@ const App: React.FC = () => {
                 )}
 
                 {gameState.screen === GameScreen.ENDING && (
-                    <div className="w-full h-full bg-yellow-900 bg-[url('/sprites/backgrounds/learning-rogue/reward-rooftop.webp')] bg-cover bg-center flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar relative">
+                    <div
+                        className="w-full h-full bg-yellow-900 bg-cover bg-center flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar relative"
+                        style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/reward-rooftop.webp')})` }}
+                    >
                         <div className="absolute inset-0 bg-amber-950/62 pointer-events-none" />
                         <div className="relative z-10 my-auto w-full max-w-2xl py-8">
                             <Trophy size={80} className="text-yellow-400 mx-auto mb-6 animate-pulse shrink-0" />
@@ -11636,7 +11746,7 @@ const App: React.FC = () => {
                                 </div>
                             )}
 
-                            {!legacyCardSelected ? (
+                            {getDifficultyConfig(gameState.difficultyLevel).legacyCardAllowed && !legacyCardSelected ? (
                                 <div className="mb-8 shrink-0">
                                     <p className="mb-4 text-sm text-yellow-100 font-bold">次回の冒険に持っていくカードを1枚選んでください</p>
                                     <div className="flex flex-wrap justify-center gap-2 max-h-60 overflow-y-auto custom-scrollbar p-2 bg-black/30 rounded border border-yellow-700/50">
@@ -11647,12 +11757,12 @@ const App: React.FC = () => {
                                         ))}
                                     </div>
                                 </div>
-                            ) : (
+                            ) : getDifficultyConfig(gameState.difficultyLevel).legacyCardAllowed ? (
                                 <div className="mb-8 p-4 bg-green-900/50 border-green-500 rounded-lg animate-in zoom-in duration-150 shrink-0">
                                     <p className="text-green-400 font-bold text-xl">カードを継承しました！</p>
                                     <p className="text-sm text-green-200 mt-1">次の冒険の初期デッキに追加されます。</p>
                                 </div>
-                            )}
+                            ) : null}
                             <div className="flex flex-col gap-4 items-center mt-4 pb-8 shrink-0">
                                 <button onClick={startEndlessMode} className="bg-purple-900 border-4 border-purple-500 px-8 py-4 cursor-pointer text-xl hover:bg-purple-800 font-bold w-full max-sm shadow-[0_0_20px_rgba(168,85,247,0.5)] transform transition-transform hover:scale-105 active:scale-95 flex items-center justify-center animate-pulse">
                                     <Infinity className="mr-2" /> エンドレスモードへ (Act {gameState.act + 1})

@@ -2,9 +2,11 @@
 import React, { useEffect, useState } from 'react';
 import { Player, Card as ICard, LanguageMode } from '../types';
 import Card from './Card';
-import { BedDouble, Hammer, ArrowRight, FlaskConical, Plus, Shuffle, Check, DoorOpen } from 'lucide-react';
+import { BedDouble, Hammer, ArrowRight, FlaskConical, Plus, Shuffle, Check, DoorOpen, Eraser } from 'lucide-react';
 import { getUpgradedCard } from '../utils/cardUtils';
 import { trans } from '../utils/textUtils';
+import { assetUrl } from '../utils/assetPaths';
+import { CARD_ERASER_NAME, getErasableEffectOptions } from '../utils/cardEraser';
 
 const REST_SHORTCUT_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'];
 
@@ -13,22 +15,24 @@ interface RestScreenProps {
   onRest: () => void;
   onUpgrade: (card: ICard) => void;
   onSynthesize: (cards: ICard[]) => ICard;
+  onSelfStudy: (card: ICard, effectId: string) => void;
   onLeave: () => void;
   languageMode: LanguageMode;
   typingMode?: boolean;
+  scienceRoomChance?: number;
   interactionDisabled?: boolean;
   interactionDisabledMessage?: string;
 }
 
-const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSynthesize, onLeave, languageMode, typingMode = false, interactionDisabled = false, interactionDisabledMessage }) => {
-  const [mode, setMode] = useState<'CHOICE' | 'UPGRADE' | 'SYNTHESIS' | 'PREVIEW_UPGRADE' | 'PREVIEW_SYNTHESIS' | 'RESULT' | 'DONE'>('CHOICE');
+const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSynthesize, onSelfStudy, onLeave, languageMode, typingMode = false, scienceRoomChance = 0.5, interactionDisabled = false, interactionDisabledMessage }) => {
+  const [mode, setMode] = useState<'CHOICE' | 'UPGRADE' | 'SYNTHESIS' | 'SELF_STUDY' | 'ERASER_EFFECT' | 'PREVIEW_UPGRADE' | 'PREVIEW_SYNTHESIS' | 'RESULT' | 'DONE'>('CHOICE');
   const [message, setMessage] = useState("放課後の校舎だ。どこへ行こう？");
   const [selectedCard, setSelectedCard] = useState<ICard | null>(null);
   const [synthCards, setSynthCards] = useState<ICard[]>([]);
   const [resultCard, setResultCard] = useState<ICard | null>(null);
   
   // 50% chance for Science Room to be open normally
-  const [isScienceRoomOpen] = useState(() => Math.random() < 0.5);
+  const [isScienceRoomOpen] = useState(() => Math.random() < scienceRoomChance);
 
   const isMage = player.id === 'MAGE';
   // Science Club Kid (MAGE) always has the key to the Science Room
@@ -36,9 +40,13 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
   
   const healAmount = Math.floor(player.maxHp * 0.3);
   const requiredCards = isMage ? 3 : 2;
+  const hasCardEraser = player.deck.some(card => card.name === CARD_ERASER_NAME || card.originalNames?.includes(CARD_ERASER_NAME));
   const selectableCards = mode === 'UPGRADE'
     ? player.deck.filter(c => !c.upgraded)
+    : mode === 'SELF_STUDY'
+      ? player.deck.filter(c => getErasableEffectOptions(c).length > 0)
     : player.deck;
+  const selectedEraserOptions = selectedCard ? getErasableEffectOptions(selectedCard) : [];
 
   useEffect(() => {
       if (!typingMode || interactionDisabled) return;
@@ -47,10 +55,11 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
               if (e.key === '1') { e.preventDefault(); handleRest(); }
               else if (e.key === '2') { e.preventDefault(); handleSmithChoice(); }
               else if (e.key === '3') { e.preventDefault(); handleSynthesizeChoice(); }
+              else if (e.key === '4' && hasCardEraser) { e.preventDefault(); handleSelfStudyChoice(); }
               else if (e.key === '0' || e.key === 'Enter') { e.preventDefault(); onLeave(); }
               return;
           }
-          if (mode === 'UPGRADE' || mode === 'SYNTHESIS') {
+          if (mode === 'UPGRADE' || mode === 'SYNTHESIS' || mode === 'SELF_STUDY') {
               const shortcutIndex = REST_SHORTCUT_KEYS.indexOf(e.key.toLowerCase());
               if (shortcutIndex >= 0) {
                   const card = selectableCards[shortcutIndex];
@@ -65,7 +74,19 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                   e.preventDefault();
                   setMode('CHOICE');
                   setSynthCards([]);
+                  setSelectedCard(null);
                   setMessage("放課後の校舎だ。どこへ行こう？");
+              }
+              return;
+          }
+          if (mode === 'ERASER_EFFECT') {
+              const index = Number(e.key) - 1;
+              if (index >= 0 && selectedCard && selectedEraserOptions[index]) {
+                  e.preventDefault();
+                  confirmSelfStudy(selectedEraserOptions[index].id);
+              } else if (e.key === '0' || e.key === 'Escape') {
+                  e.preventDefault();
+                  setMode('SELF_STUDY');
               }
               return;
           }
@@ -94,7 +115,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       };
       window.addEventListener('keydown', handleKeyDown);
       return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [typingMode, mode, selectableCards, synthCards, selectedCard, requiredCards, interactionDisabled]);
+  }, [typingMode, mode, selectableCards, synthCards, selectedCard, requiredCards, interactionDisabled, hasCardEraser, selectedEraserOptions]);
 
   const handleRest = () => {
       if (interactionDisabled) return;
@@ -123,6 +144,13 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
           : "理科室だ。混ぜ合わせたいカードを2枚選んでね。");
   };
 
+  const handleSelfStudyChoice = () => {
+      if (interactionDisabled || !hasCardEraser) return;
+      setMode('SELF_STUDY');
+      setSelectedCard(null);
+      setMessage("自習だ。カード消しゴムで、どのカードの不要な効果を消す？");
+  };
+
   const handleCardClick = (card: ICard) => {
       if (interactionDisabled) return;
       if (mode === 'UPGRADE') {
@@ -146,7 +174,21 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                   }
               }
           }
+      } else if (mode === 'SELF_STUDY') {
+          const options = getErasableEffectOptions(card);
+          if (options.length === 0) return;
+          setSelectedCard(card);
+          setMode('ERASER_EFFECT');
+          setMessage("消したい効果を選んでください。カード消しゴムは使用後に除外されます。");
       }
+  };
+
+  const confirmSelfStudy = (effectId: string) => {
+      if (interactionDisabled || !selectedCard) return;
+      onSelfStudy(selectedCard, effectId);
+      setMode('DONE');
+      setMessage(`${trans(selectedCard.name, languageMode)} の不要な効果を消した！カード消しゴムは使い切った。`);
+      setSelectedCard(null);
   };
 
   const handleRandomSynthesis = () => {
@@ -196,7 +238,10 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-gray-900 bg-[url('/sprites/backgrounds/learning-rogue/rest-infirmary.webp')] bg-cover bg-center text-white relative items-center justify-center p-4 md:p-8">
+    <div
+      className="flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative items-center justify-center p-4 md:p-8"
+      style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/rest-infirmary.webp')})` }}
+    >
         <div className="absolute inset-0 bg-slate-950/58 pointer-events-none" />
         
         <div className="z-10 bg-black p-6 md:p-8 border-4 border-orange-800 rounded-lg max-w-4xl w-full text-center shadow-2xl flex flex-col max-h-[90vh]">
@@ -253,10 +298,21 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                                 : trans("鍵がかかってる", languageMode)}
                         </span>
                     </button>
+                    {hasCardEraser && (
+                        <button 
+                            onClick={handleSelfStudyChoice}
+                            className="group relative flex flex-col items-center gap-2 p-4 border-2 border-gray-600 hover:border-cyan-400 rounded-lg hover:bg-gray-800 transition-all w-32 md:w-40"
+                        >
+                            {typingMode && <div className="absolute right-2 top-2 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">4</div>}
+                            <Eraser size={40} className="text-cyan-300 group-hover:rotate-12 transition-transform" />
+                            <span className="font-bold text-lg">{trans("自習", languageMode)}</span>
+                            <span className="text-xs text-gray-400">{trans("不要効果を削除", languageMode)}</span>
+                        </button>
+                    )}
                 </div>
             )}
 
-            {(mode === 'UPGRADE' || mode === 'SYNTHESIS') && (
+            {(mode === 'UPGRADE' || mode === 'SYNTHESIS' || mode === 'SELF_STUDY') && (
                 <div className="flex flex-col items-center flex-grow overflow-hidden">
                      {mode === 'SYNTHESIS' && (
                          <button 
@@ -283,6 +339,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                             );
                         })}
                         {mode === 'UPGRADE' && player.deck.every(c => c.upgraded) && <p className="text-gray-500">{trans("強化できるカードがない...", languageMode)}</p>}
+                        {mode === 'SELF_STUDY' && selectableCards.length === 0 && <p className="text-gray-500">{trans("消せる効果があるカードがない...", languageMode)}</p>}
                      </div>
                      {typingMode && (
                         <div className="mt-3 text-xs text-cyan-200/90">
@@ -291,6 +348,28 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                         </div>
                      )}
                      <button onClick={() => { setMode('CHOICE'); setSynthCards([]); setMessage("放課後の校舎だ。どこへ行こう？"); }} className="mt-4 text-gray-400 underline hover:text-white shrink-0">{trans("戻る", languageMode)}{typingMode && ' [0]'}</button>
+                </div>
+            )}
+
+            {mode === 'ERASER_EFFECT' && selectedCard && (
+                <div className="flex flex-col items-center gap-4">
+                    <div className="scale-90">
+                        <Card card={selectedCard} onClick={() => {}} disabled={false} languageMode={languageMode}/>
+                    </div>
+                    <div className="grid w-full max-w-xl gap-3">
+                        {selectedEraserOptions.map((option, index) => (
+                            <button
+                                key={option.id}
+                                onClick={() => confirmSelfStudy(option.id)}
+                                className="relative rounded border-2 border-cyan-500 bg-cyan-950/40 px-4 py-3 text-left hover:bg-cyan-900/60"
+                            >
+                                {typingMode && <span className="absolute right-2 top-2 rounded-full border border-cyan-300 px-2 py-0.5 text-xs font-black">{index + 1}</span>}
+                                <div className="font-black text-cyan-100">{trans(option.label, languageMode)}</div>
+                                <div className="text-xs text-cyan-200/80">{trans(option.description, languageMode)}</div>
+                            </button>
+                        ))}
+                    </div>
+                    <button onClick={() => setMode('SELF_STUDY')} className="text-gray-400 underline hover:text-white">{trans("戻る", languageMode)}{typingMode && ' [0]'}</button>
                 </div>
             )}
 

@@ -9,6 +9,7 @@ import PixelSprite from './PixelSprite';
 import { storageService } from '../services/storageService';
 import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
+import { assetUrl } from '../utils/assetPaths';
 import { getCardIllustrationPaths } from '../utils/cardIllustration';
 import { ENEMY_ILLUSTRATION_SIZE_CLASS } from '../constants/uiSizing';
 import { PotionIcon, RelicIcon } from './ItemIcon';
@@ -137,7 +138,10 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
     };
 
     return (
-        <div className="flex flex-col h-full w-full bg-gray-900 bg-[url('/sprites/backgrounds/learning-rogue/compendium-library.webp')] bg-cover bg-center text-white relative">
+        <div
+            className="flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative"
+            style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/compendium-library.webp')})` }}
+        >
             <div className="absolute inset-0 bg-slate-950/62 pointer-events-none" />
 
             {/* Header */}

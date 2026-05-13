@@ -4,6 +4,7 @@ import { Card as ICard, RewardItem, Potion, LanguageMode, RaceTrickCard, CoopSup
 import Card, { KEYWORD_DEFINITIONS } from './Card';
 import { Gift, Gem, Coins, FlaskConical, X, Flag, Sparkles, Users } from 'lucide-react';
 import { trans } from '../utils/textUtils';
+import { assetUrl } from '../utils/assetPaths';
 import { PotionIcon, RelicIcon } from './ItemIcon';
 
 interface RewardScreenProps {
@@ -143,7 +144,10 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-full w-full bg-gray-900 bg-[url('/sprites/backgrounds/learning-rogue/reward-rooftop.webp')] bg-cover bg-center text-white relative p-4">
+    <div
+      className="flex flex-col items-center justify-center h-full w-full bg-gray-900 bg-cover bg-center text-white relative p-4"
+      style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/reward-rooftop.webp')})` }}
+    >
       <div className="absolute inset-0 bg-slate-950/58 pointer-events-none" />
       
       {/* Inspection Modal */}
@@ -234,10 +238,10 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
             {interactionDisabledMessage ?? '他のプレイヤーの選択を待っています'}
           </div>
         )}
-        <h2 className="text-3xl md:text-4xl text-yellow-400 font-bold mb-2 flex items-center justify-center animate-pulse">
+        <h2 className="text-3xl md:text-4xl text-amber-100 font-bold mb-2 flex items-center justify-center animate-pulse drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] [text-shadow:0_0_10px_rgba(120,53,15,0.95)]">
           <Gift className="mr-3" size={32} /> {trans("勝利", languageMode)}
         </h2>
-        <p className="text-gray-300 text-sm">{trans("欲しい報酬を選択してください", languageMode)}</p>
+        <p className="text-white text-sm font-bold drop-shadow-[0_2px_3px_rgba(0,0,0,0.95)] [text-shadow:0_0_8px_rgba(15,23,42,0.9)]">{trans("欲しい報酬を選択してください", languageMode)}</p>
       </div>
 
       <div className={`z-10 flex flex-row items-center gap-8 w-full overflow-x-auto md:justify-center landscape:justify-center custom-scrollbar px-4 pt-20 pb-8 min-h-[420px] snap-x ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>

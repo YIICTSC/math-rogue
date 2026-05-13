@@ -1,6 +1,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { HelpCircle, ArrowRight } from 'lucide-react';
+import { assetUrl } from '../utils/assetPaths';
 
 interface EventOption {
     text: string;
@@ -94,7 +95,10 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
   }, [typingMode, resultLog, options, interactionDisabled, handleContinueAction, handleOptionAction]);
 
   return (
-    <div className="flex h-full w-full flex-col items-center justify-start overflow-y-auto bg-gray-900 bg-[url('/sprites/backgrounds/learning-rogue/event-hallway.webp')] bg-cover bg-center p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-white relative custom-scrollbar sm:justify-center sm:p-8">
+    <div
+      className="flex h-full w-full flex-col items-center justify-start overflow-y-auto bg-gray-900 bg-cover bg-center p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-white relative custom-scrollbar sm:justify-center sm:p-8"
+      style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/event-hallway.webp')})` }}
+    >
         <div className="absolute inset-0 bg-slate-950/60 pointer-events-none" />
         
         <div className="z-10 my-auto w-full max-w-2xl rounded-lg border-2 border-gray-600 bg-gray-800 p-4 shadow-2xl sm:p-8">

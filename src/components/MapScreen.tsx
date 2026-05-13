@@ -5,6 +5,7 @@ import { Swords, Skull, BedDouble, ShoppingBag, HelpCircle, AlertTriangle, PlayC
 import { MAP_WIDTH, MAP_HEIGHT } from '../services/mapGenerator';
 import Card from './Card';
 import { trans } from '../utils/textUtils';
+import { assetUrl } from '../utils/assetPaths';
 
 interface MapScreenProps {
     nodes: MapNode[];
@@ -79,6 +80,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
         }
     }
     const availableNodes = nodes.filter(n => availableNodeIds.includes(n.id));
+    const isInitialRouteSelection = currentNodeId === null;
 
     useEffect(() => {
         if (!typingMode || showDeck || selectionDisabled) return;
@@ -123,15 +125,52 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [typingMode, showDeck]);
 
+    // 将来到達可能なノードの算出
+    const reachableNodeIds = new Set<string>();
+    const computeReachable = (startIds: string[]) => {
+        const queue = [...startIds];
+        while (queue.length > 0) {
+            const currId = queue.shift()!;
+            if (!reachableNodeIds.has(currId)) {
+                reachableNodeIds.add(currId);
+                const node = nodes.find(n => n.id === currId);
+                if (node) {
+                    queue.push(...node.nextNodes);
+                }
+            }
+        }
+    };
+
+    if (isInitialRouteSelection) {
+        computeReachable(nodes.filter(n => n.y === 0).map(n => n.id));
+    } else if (currentNodeId) {
+        reachableNodeIds.add(currentNodeId);
+        computeReachable(availableNodeIds);
+    }
+
     // 経路データの作成
-    const connections = [];
+    const connections: { from: MapNode; to: MapNode }[] = [];
+    const connectionKeys = new Set<string>();
+    const addConnection = (from: MapNode, to: MapNode) => {
+        const key = `${from.id}-${to.id}`;
+        if (connectionKeys.has(key)) return;
+        connectionKeys.add(key);
+        connections.push({ from, to });
+    };
+
     nodes.forEach(node => {
         node.nextNodes.forEach(nextId => {
             const nextNode = nodes.find(n => n.id === nextId);
             if (nextNode) {
-                connections.push({ from: node, to: nextNode });
+                addConnection(node, nextNode);
             }
         });
+    });
+    nodes.forEach(node => {
+        const straightNextNode = nodes.find(nextNode => nextNode.y === node.y + 1 && nextNode.x === node.x);
+        if (straightNextNode) {
+            addConnection(node, straightNextNode);
+        }
     });
 
     const sortedDeck = [...player.deck].sort((a, b) => {
@@ -140,9 +179,9 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
         return a.name.localeCompare(b.name);
     });
     const mapBackgrounds = [
-        '/sprites/backgrounds/learning-rogue/map-campus.webp',
-        '/sprites/backgrounds/learning-rogue/map-indoor.webp',
-        '/sprites/backgrounds/learning-rogue/map-festival.webp'
+        assetUrl('sprites/backgrounds/learning-rogue/map-campus.webp'),
+        assetUrl('sprites/backgrounds/learning-rogue/map-indoor.webp'),
+        assetUrl('sprites/backgrounds/learning-rogue/map-festival.webp')
     ];
     const mapBackground = mapBackgrounds[(Math.max(1, act) - 1) % mapBackgrounds.length];
 
@@ -217,13 +256,13 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
             <div ref={scrollRef} className="flex-grow overflow-y-auto relative custom-scrollbar z-10" style={{ scrollBehavior: 'smooth' }}>
                 <div className="relative w-full max-w-2xl mx-auto" style={{ height: `${MAP_HEIGHT * 100 + 300}px` }}>
                     <div
-                        className="pointer-events-none absolute inset-0 bg-cover bg-top opacity-70"
+                        className="pointer-events-none absolute inset-0 z-0 bg-cover bg-top opacity-70"
                         style={{ backgroundImage: `url(${mapBackground})` }}
                     />
-                    <div className="pointer-events-none absolute inset-0 bg-slate-950/50" />
+                    <div className="pointer-events-none absolute inset-0 z-0 bg-slate-950/50" />
 
                     {/* 経路描画 (SVG) */}
-                    <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
                         <defs>
                             <filter id="glow">
                                 <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
@@ -243,33 +282,50 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                             const svgY1 = totalH - y1;
                             const svgY2 = totalH - y2;
 
-                            let strokeColor = "rgba(71, 85, 105, 0.4)"; // 灰色
+                            let strokeColor = "rgba(71, 85, 105, 0.4)";
                             let strokeWidth = "2";
                             let dashArray = "6, 4";
 
                             const isCurrentPath = conn.from.completed && currentNodeId === conn.from.id && availableNodeIds.includes(conn.to.id);
                             const isPastPath = conn.from.completed && conn.to.completed;
+                            const isFuturePath = !isPastPath && reachableNodeIds.has(conn.from.id) && conn.from.nextNodes.includes(conn.to.id);
 
                             if (isCurrentPath) {
                                 strokeColor = "#fbbf24";
                                 strokeWidth = "3";
                                 dashArray = "0"; // 実線
+                            } else if (isFuturePath) {
+                                strokeColor = "#fbbf24";
+                                strokeWidth = "3";
                             } else if (isPastPath) {
                                 strokeColor = "rgba(148, 163, 184, 0.6)";
                                 dashArray = "0";
                             }
 
                             return (
-                                <line
-                                    key={`${conn.from.id}-${conn.to.id}`}
-                                    x1={`${x1}%`} y1={svgY1}
-                                    x2={`${x2}%`} y2={svgY2}
-                                    stroke={strokeColor}
-                                    strokeWidth={strokeWidth}
-                                    strokeDasharray={dashArray}
-                                    filter={isCurrentPath ? "url(#glow)" : ""}
-                                    className="transition-all duration-1000"
-                                />
+                                <g key={`${conn.from.id}-${conn.to.id}`}>
+                                    {(isFuturePath || isCurrentPath) && (
+                                        <line
+                                            x1={`${x1}%`} y1={svgY1}
+                                            x2={`${x2}%`} y2={svgY2}
+                                            stroke="rgba(15, 23, 42, 0.78)"
+                                            strokeWidth="7"
+                                            strokeDasharray={dashArray}
+                                            strokeLinecap="round"
+                                            className="transition-all duration-1000"
+                                        />
+                                    )}
+                                    <line
+                                        x1={`${x1}%`} y1={svgY1}
+                                        x2={`${x2}%`} y2={svgY2}
+                                        stroke={strokeColor}
+                                        strokeWidth={strokeWidth}
+                                        strokeDasharray={dashArray}
+                                        strokeLinecap="round"
+                                        filter={isFuturePath || isCurrentPath ? "url(#glow)" : ""}
+                                        className="transition-all duration-1000"
+                                    />
+                                </g>
                             );
                         })}
                     </svg>
@@ -281,7 +337,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                         const isCompleted = node.completed;
                         const { left, bottom } = getGridPosition(node);
 
-                        let nodeBaseStyle = "border-4 transition-all duration-500 z-10 scale-100";
+                        let nodeBaseStyle = "border-4 transition-all duration-500 z-20 scale-100";
                         let bgClass = "bg-slate-900 border-slate-700 text-slate-500 shadow-lg";
 
                         if (isCompleted) {

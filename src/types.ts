@@ -100,6 +100,7 @@ export interface Card {
   battleBaseExhaust?: boolean;
   battleBonusDrawOnPlay?: number;
   battleRestore?: Partial<Card>;
+  eraserOnly?: boolean;
 }
 
 export enum EnemyIntentType {
@@ -261,6 +262,7 @@ export enum GameScreen {
   START_MENU = 'START_MENU',
   DEBUG_MENU = 'DEBUG_MENU',
   MODE_SELECTION = 'MODE_SELECTION',
+  DIFFICULTY_SELECTION = 'DIFFICULTY_SELECTION',
   CHARACTER_SELECTION = 'CHARACTER_SELECTION',
   RELIC_SELECTION = 'RELIC_SELECTION',
   DECK_CONSTRUCTION = 'DECK_CONSTRUCTION',
@@ -397,6 +399,7 @@ export enum GameMode {
 }
 
 export type LanguageMode = 'JAPANESE' | 'HIRAGANA';
+export type AnswerMode = 'CHOICE' | 'INPUT';
 
 export enum NodeType {
   COMBAT = 'COMBAT',
@@ -699,6 +702,9 @@ export interface GameState {
   screen: GameScreen;
   mode: GameMode;
   modePool?: string[];
+  answerMode?: AnswerMode;
+  difficultyLevel?: number;
+  shopRemoveCount?: number;
   challengeMode?: string;
   typingLessonId?: string;
   act: number;
@@ -731,6 +737,9 @@ export interface CoopSharedState {
   screen: GameScreen;
   mode: GameMode;
   modePool?: string[];
+  answerMode?: AnswerMode;
+  difficultyLevel?: number;
+  shopRemoveCount?: number;
   challengeMode?: string;
   typingLessonId?: string;
   act: number;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GameMode, LanguageMode } from '../types';
+import { AnswerMode, GameMode, LanguageMode } from '../types';
 import {
   Brain, Book, Languages, FlaskConical, Globe, MapPin,
   Home, ArrowLeft, GraduationCap
@@ -10,9 +10,11 @@ import { ENGLISH_GRADE_UNITS } from '../englishUnitConfig';
 import { SCIENCE_GRADE_UNITS, getScienceGradeMode } from '../scienceUnitConfig';
 import { SOCIAL_GRADE_UNITS, getSocialGradeMode } from '../socialUnitConfig';
 import { trans, transProblemSubjectName } from '../utils/textUtils';
+import { assetUrl } from '../utils/assetPaths';
+import { saveAnswerModePreference } from '../utils/answerMode';
 
 interface ModeSelectionScreenProps {
-  onSelectMode: (mode: GameMode, modePool?: string[]) => void;
+  onSelectMode: (mode: GameMode, modePool?: string[], answerMode?: AnswerMode) => void;
   onBack: () => void;
   languageMode: LanguageMode;
   modeMasteryMap?: Record<string, boolean>;
@@ -441,10 +443,14 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   const [selectedMathGrade, setSelectedMathGrade] = useState<number>(1);
   const [selectedMathUnitIds, setSelectedMathUnitIds] = useState<string[]>([]);
   const isUnitCategory = selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL' || selectedCategory.id === 'SUMMARY';
+  const [answerMode, setAnswerMode] = useState<AnswerMode>('CHOICE');
+  const canSelectAnswerMode = selectedCategory.id === 'MATH' || selectedCategory.id === 'KANJI';
 
   const handleSelect = (mode: string, modePool?: string[]) => {
     audioService.playSound('select');
-    onSelectMode(mode as GameMode, modePool);
+    const selectedAnswerMode = canSelectAnswerMode ? answerMode : 'CHOICE';
+    saveAnswerModePreference(selectedAnswerMode);
+    onSelectMode(mode as GameMode, modePool, selectedAnswerMode);
   };
 
   const isMastered = (mode: string) => !!modeMasteryMap[mode];
@@ -475,6 +481,35 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
       setSelectedMathGrade(3);
     }
     audioService.playSound('select');
+  };
+
+  const renderAnswerModeSelector = () => {
+    if (!canSelectAnswerMode) return null;
+
+    return (
+      <div className="rounded-lg border border-slate-700 bg-slate-950/60 p-2">
+        <div className="mb-1 text-[10px] font-bold text-slate-400">答え方</div>
+        <div className="grid grid-cols-2 gap-1.5">
+          {([
+            ['CHOICE', '4択'],
+            ['INPUT', '入力'],
+          ] as const).map(([mode, label]) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => {
+                setAnswerMode(mode);
+                saveAnswerModePreference(mode);
+                audioService.playSound('select');
+              }}
+              className={`rounded border px-2 py-1.5 text-xs font-black transition-colors ${answerMode === mode ? 'border-yellow-300 bg-yellow-500 text-slate-950' : 'border-slate-600 bg-slate-800 text-slate-200 hover:border-slate-400'}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
   };
 
   const selectedSubMode = selectedCategory.subModes.find((sub) => sub.id === selectedSubModeId) || selectedCategory.subModes[0];
@@ -708,20 +743,23 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
     }
 
     return (
-      <div className={`grid ${selectedCategory.id === 'KANJI' ? 'grid-cols-3' : 'grid-cols-2'} gap-2`}>
-        {selectedCategory.subModes.map((sub) => (
-          <button
-            key={sub.id}
-            onClick={() => {
-              setSelectedSubModeId(sub.id);
-              audioService.playSound('select');
-            }}
-            className={`p-2 rounded-lg border text-left text-[10px] md:text-xs font-bold transition-colors ${selectedSubModeId === sub.id ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'}`}
-          >
-            {renderMasteryPrefix(sub.mode)}
-            {getSubLabel(sub.id, sub.name)}
-          </button>
-        ))}
+      <div className="space-y-3">
+        {renderAnswerModeSelector()}
+        <div className={`grid ${selectedCategory.id === 'KANJI' ? 'grid-cols-3' : 'grid-cols-2'} gap-2`}>
+          {selectedCategory.subModes.map((sub) => (
+            <button
+              key={sub.id}
+              onClick={() => {
+                setSelectedSubModeId(sub.id);
+                audioService.playSound('select');
+              }}
+              className={`p-2 rounded-lg border text-left text-[10px] md:text-xs font-bold transition-colors ${selectedSubModeId === sub.id ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'}`}
+            >
+              {renderMasteryPrefix(sub.mode)}
+              {getSubLabel(sub.id, sub.name)}
+            </button>
+          ))}
+        </div>
       </div>
     );
   };
@@ -731,17 +769,20 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
 
     if (cat.uiType === 'grid') {
       return (
-        <div className={`grid ${cat.id === 'KANJI' ? 'grid-cols-3' : 'grid-cols-2'} gap-1.5`}>
-          {cat.subModes.map(sub => (
-            <button
-              key={sub.id}
-              onClick={() => handleSelect(sub.mode)}
-              className="bg-slate-800 border border-slate-600 p-1.5 rounded hover:border-white transition-colors text-[10px] md:text-xs font-bold truncate"
-            >
-              {renderMasteryPrefix(sub.mode)}
-              {getSubLabel(sub.id, sub.name)}
-            </button>
-          ))}
+        <div className="space-y-3">
+          {renderAnswerModeSelector()}
+          <div className={`grid ${cat.id === 'KANJI' ? 'grid-cols-3' : 'grid-cols-2'} gap-1.5`}>
+            {cat.subModes.map(sub => (
+              <button
+                key={sub.id}
+                onClick={() => handleSelect(sub.mode)}
+                className="bg-slate-800 border border-slate-600 p-1.5 rounded hover:border-white transition-colors text-[10px] md:text-xs font-bold truncate"
+              >
+                {renderMasteryPrefix(sub.mode)}
+                {getSubLabel(sub.id, sub.name)}
+              </button>
+            ))}
+          </div>
         </div>
       );
     }
@@ -887,7 +928,10 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   };
 
   return (
-    <div className="w-full h-full bg-slate-950 bg-[url('/sprites/backgrounds/learning-rogue/selection-entrance.webp')] bg-cover bg-center flex flex-col text-white overflow-hidden relative">
+    <div
+      className="w-full h-full bg-slate-950 bg-cover bg-center flex flex-col text-white overflow-hidden relative"
+      style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/selection-entrance.webp')})` }}
+    >
       <div className="absolute inset-0 bg-slate-950/65 pointer-events-none" />
       <div className="relative z-10 w-full max-w-6xl mx-auto flex flex-col flex-1 min-h-0 overflow-hidden">
         <div className="text-center border-b border-slate-800 p-4 shrink-0">
@@ -931,6 +975,11 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
                 {trans('学年', languageMode)}: {getDisplayGradeLabel(selectedMathGrade, languageMode)}
                 <br />
                 {trans('選択単元数', languageMode)}: {selectedMathUnitIds.length}
+              </div>
+            )}
+            {canSelectAnswerMode && (
+              <div className="bg-black/40 rounded-xl border border-slate-800 p-3 text-xs text-slate-300">
+                答え方: <span className="font-bold text-white">{answerMode === 'CHOICE' ? '4択' : '入力'}</span>
               </div>
             )}
             {selectedCategory.uiType === 'grade_term' && !isUnitCategory && (

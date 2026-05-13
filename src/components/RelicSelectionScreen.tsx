@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import { Relic } from '../types';
 import { Gem, MousePointer2 } from 'lucide-react';
 import { trans } from '../utils/textUtils';
+import { assetUrl } from '../utils/assetPaths';
 import { audioService } from '../services/audioService';
 import { RelicIcon } from './ItemIcon';
 
@@ -39,7 +40,10 @@ const RelicSelectionScreen: React.FC<RelicSelectionScreenProps> = ({ relics, onS
   }, [typingMode, relics, onSelect]);
 
   return (
-    <div className="flex flex-col h-full w-full bg-gray-900 bg-[url('/sprites/backgrounds/learning-rogue/selection-entrance.webp')] bg-cover bg-center text-white relative overflow-y-auto custom-scrollbar">
+    <div
+      className="flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative overflow-y-auto custom-scrollbar"
+      style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/selection-entrance.webp')})` }}
+    >
       <div className="absolute inset-0 bg-slate-950/60 pointer-events-none" />
       
       <div className="z-10 flex flex-col items-center min-h-full justify-start p-4 py-12">

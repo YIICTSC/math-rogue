@@ -4,6 +4,7 @@ import { Archive, Key, Check } from 'lucide-react';
 import { RewardItem, LanguageMode, CoopTreasurePool } from '../types';
 import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
+import { assetUrl } from '../utils/assetPaths';
 
 interface TreasureScreenProps {
   onOpen?: () => void;
@@ -85,7 +86,10 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full w-full overflow-y-auto bg-gray-900 bg-[url('/sprites/backgrounds/learning-rogue/treasure-storage.webp')] bg-cover bg-center text-white relative items-center justify-start sm:justify-center p-4 sm:p-8">
+    <div
+      className="flex flex-col h-full w-full overflow-y-auto bg-gray-900 bg-cover bg-center text-white relative items-center justify-start sm:justify-center p-4 sm:p-8"
+      style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/treasure-storage.webp')})` }}
+    >
       <div className="absolute inset-0 bg-slate-950/60 pointer-events-none" />
       <div className="z-10 flex w-full max-w-5xl flex-col items-center text-center py-4 sm:py-0">
 
