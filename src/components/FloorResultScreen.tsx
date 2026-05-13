@@ -33,17 +33,6 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
     return { ...cardTemplate, id: `unlock-display-${Date.now()}` } as ICard;
   }, [newlyUnlockedCardName]);
 
-  // 音声読み上げ関数
-  const speakStory = useCallback((text: string) => {
-    if (!('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'ja-JP';
-    utterance.rate = 0.85; 
-    utterance.pitch = 1.0; 
-    utterance.volume = 1.0;
-    window.speechSynthesis.speak(utterance);
-  }, []);
 
   useEffect(() => {
     let index = 0;
@@ -52,8 +41,6 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
     
     setDisplayedText("");
     setIsTyping(true);
-
-    speakStory(translatedContent);
     
     const interval = setInterval(() => {
       if (index < translatedContent.length) {
@@ -67,20 +54,14 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
 
     return () => {
       clearInterval(interval);
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
     };
-  }, [currentPart, languageMode, speakStory]);
+  }, [currentPart, languageMode]);
 
   const handleNext = () => {
     if (isTyping) {
       setDisplayedText(trans(currentPart.content, languageMode));
       setIsTyping(false);
     } else {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
       onNext();
       audioService.playSound('select');
     }

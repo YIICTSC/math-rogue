@@ -76,7 +76,11 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
     } else {
         const currentNode = nodes.find(n => n.id === currentNodeId);
         if (currentNode) {
-            availableNodeIds = currentNode.nextNodes;
+            availableNodeIds = [...currentNode.nextNodes];
+            const straightNode = nodes.find(n => Number(n.x) === Number(currentNode.x) && Number(n.y) === Number(currentNode.y) + 1);
+            if (straightNode && !availableNodeIds.includes(straightNode.id)) {
+                availableNodeIds.push(straightNode.id);
+            }
         }
     }
     const availableNodes = nodes.filter(n => availableNodeIds.includes(n.id));
@@ -106,7 +110,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
             }
         };
         window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
+        window.__MAP_DEBUG = { connections: connections.map(c => ({from: c.from.id, to: c.to.id})), reachable: Array.from(reachableNodeIds), available: availableNodeIds, nodes: nodes }; return () => window.removeEventListener('keydown', handleKeyDown);
     }, [typingMode, showDeck, availableNodes, onNodeSelect, selectionDisabled]);
 
     useEffect(() => () => {
@@ -135,7 +139,12 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                 reachableNodeIds.add(currId);
                 const node = nodes.find(n => n.id === currId);
                 if (node) {
-                    queue.push(...node.nextNodes);
+                    const nexts = [...node.nextNodes];
+                    const straight = nodes.find(n => Number(n.x) === Number(node.x) && Number(n.y) === Number(node.y) + 1);
+                    if (straight && !nexts.includes(straight.id)) {
+                        nexts.push(straight.id);
+                    }
+                    queue.push(...nexts);
                 }
             }
         }
@@ -256,10 +265,10 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
             <div ref={scrollRef} className="flex-grow overflow-y-auto relative custom-scrollbar z-10" style={{ scrollBehavior: 'smooth' }}>
                 <div className="relative w-full max-w-2xl mx-auto" style={{ height: `${MAP_HEIGHT * 100 + 300}px` }}>
                     <div
-                        className="pointer-events-none absolute inset-0 z-0 bg-cover bg-top opacity-70"
+                        className="pointer-events-none absolute inset-0 z-0 bg-cover bg-top opacity-100"
                         style={{ backgroundImage: `url(${mapBackground})` }}
                     />
-                    <div className="pointer-events-none absolute inset-0 z-0 bg-slate-950/50" />
+                    <div className="pointer-events-none absolute inset-0 z-0 bg-slate-950/20" />
 
                     {/* 経路描画 (SVG) */}
                     <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
@@ -273,6 +282,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                             </filter>
                         </defs>
                         {connections.map((conn, idx) => {
+                            const isStraight = Number(conn.from.x) === Number(conn.to.x) && Number(conn.from.y) + 1 === Number(conn.to.y);
                             const x1 = ((conn.from.x + 0.5) / MAP_WIDTH) * 100;
                             const y1 = (conn.from.y * 100 + 120);
                             const x2 = ((conn.to.x + 0.5) / MAP_WIDTH) * 100;
@@ -288,7 +298,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
 
                             const isCurrentPath = conn.from.completed && currentNodeId === conn.from.id && availableNodeIds.includes(conn.to.id);
                             const isPastPath = conn.from.completed && conn.to.completed;
-                            const isFuturePath = !isPastPath && reachableNodeIds.has(conn.from.id) && conn.from.nextNodes.includes(conn.to.id);
+                            const isFuturePath = !isPastPath && reachableNodeIds.has(conn.from.id) && (conn.from.nextNodes.includes(conn.to.id) || isStraight);
 
                             if (isCurrentPath) {
                                 strokeColor = "#fbbf24";
@@ -297,6 +307,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                             } else if (isFuturePath) {
                                 strokeColor = "#fbbf24";
                                 strokeWidth = "3";
+                                if (isStraight) dashArray = "0"; // 上への直線は実線に変更
                             } else if (isPastPath) {
                                 strokeColor = "rgba(148, 163, 184, 0.6)";
                                 dashArray = "0";
@@ -304,7 +315,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
 
                             return (
                                 <g key={`${conn.from.id}-${conn.to.id}`}>
-                                    {(isFuturePath || isCurrentPath) && (
+                                    {(isFuturePath || isCurrentPath) && !isStraight && (
                                         <line
                                             x1={`${x1}%`} y1={svgY1}
                                             x2={`${x2}%`} y2={svgY2}
@@ -322,7 +333,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                                         strokeWidth={strokeWidth}
                                         strokeDasharray={dashArray}
                                         strokeLinecap="round"
-                                        filter={isFuturePath || isCurrentPath ? "url(#glow)" : ""}
+                                        filter={(isFuturePath || isCurrentPath) && !isStraight ? "url(#glow)" : ""}
                                         className="transition-all duration-1000"
                                     />
                                 </g>
