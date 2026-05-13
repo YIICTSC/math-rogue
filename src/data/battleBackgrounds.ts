@@ -1,4 +1,5 @@
 import { NodeType } from '../types';
+import { assetUrl } from '../utils/assetPaths';
 
 export interface BattleBackgroundScene {
   id: string;
@@ -6,12 +7,12 @@ export interface BattleBackgroundScene {
   flavorTexts: string[];
 }
 
-const BATTLE_BACKGROUND_BASE = '/sprites/backgrounds/learning-rogue';
+const battleBackgroundUrl = (fileName: string) => assetUrl(`sprites/backgrounds/learning-rogue/${fileName}`);
 
 export const BATTLE_BACKGROUND_SCENES: BattleBackgroundScene[] = [
   {
     id: 'classroom',
-    image: `${BATTLE_BACKGROUND_BASE}/battle-classroom.webp`,
+    image: battleBackgroundUrl('battle-classroom.webp'),
     flavorTexts: [
       '放課後の教室に、まだ消えていないチョークの匂いが残っている。',
       '机の影が長く伸び、黒板の前に不穏な気配が集まっている。',
@@ -20,7 +21,7 @@ export const BATTLE_BACKGROUND_SCENES: BattleBackgroundScene[] = [
   },
   {
     id: 'library',
-    image: `${BATTLE_BACKGROUND_BASE}/battle-library.webp`,
+    image: battleBackgroundUrl('battle-library.webp'),
     flavorTexts: [
       '図書室の本棚の奥で、ページをめくる音だけが続いている。',
       '古い本の匂いにまぎれて、ただならぬ気配が近づいてくる。',
@@ -29,7 +30,7 @@ export const BATTLE_BACKGROUND_SCENES: BattleBackgroundScene[] = [
   },
   {
     id: 'science-lab',
-    image: `${BATTLE_BACKGROUND_BASE}/battle-science-lab.webp`,
+    image: battleBackgroundUrl('battle-science-lab.webp'),
     flavorTexts: [
       '理科室のフラスコが青白く光り、実験台の影がざわついた。',
       'アルコールランプの火が揺れ、薬品棚の奥から気配がした。',
@@ -38,7 +39,7 @@ export const BATTLE_BACKGROUND_SCENES: BattleBackgroundScene[] = [
   },
   {
     id: 'hallway',
-    image: `${BATTLE_BACKGROUND_BASE}/battle-hallway.webp`,
+    image: battleBackgroundUrl('battle-hallway.webp'),
     flavorTexts: [
       '夕暮れの廊下に、上履きの足音がひとつ余計に響いている。',
       '掲示板の紙が揺れ、長い廊下の奥から何かが近づいてくる。',
@@ -47,7 +48,7 @@ export const BATTLE_BACKGROUND_SCENES: BattleBackgroundScene[] = [
   },
   {
     id: 'rooftop',
-    image: `${BATTLE_BACKGROUND_BASE}/battle-rooftop.webp`,
+    image: battleBackgroundUrl('battle-rooftop.webp'),
     flavorTexts: [
       '屋上のフェンスが風に鳴り、空の色が戦いを急かしている。',
       '風に舞うプリントの向こうで、影がこちらを見ている。',
@@ -56,7 +57,7 @@ export const BATTLE_BACKGROUND_SCENES: BattleBackgroundScene[] = [
   },
   {
     id: 'courtyard',
-    image: `${BATTLE_BACKGROUND_BASE}/battle-courtyard.webp`,
+    image: battleBackgroundUrl('battle-courtyard.webp'),
     flavorTexts: [
       '校庭の砂ぼこりが舞い、遊具の影が長く伸びている。',
       '誰もいないはずの校庭で、鉄棒がかすかに鳴った。',
@@ -65,7 +66,7 @@ export const BATTLE_BACKGROUND_SCENES: BattleBackgroundScene[] = [
   },
   {
     id: 'music-room',
-    image: `${BATTLE_BACKGROUND_BASE}/battle-music-room.webp`,
+    image: battleBackgroundUrl('battle-music-room.webp'),
     flavorTexts: [
       '音楽室のピアノが、触れてもいないのに低く鳴った。',
       '譜面台の影が揺れ、カーテンの向こうから旋律が漏れる。',
@@ -74,7 +75,7 @@ export const BATTLE_BACKGROUND_SCENES: BattleBackgroundScene[] = [
   },
   {
     id: 'gym',
-    image: `${BATTLE_BACKGROUND_BASE}/battle-gym.webp`,
+    image: battleBackgroundUrl('battle-gym.webp'),
     flavorTexts: [
       '体育館の床がきしみ、ステージの暗がりに大きな気配がある。',
       'バスケットゴールの影が伸び、広い体育館が妙に狭く感じる。',
