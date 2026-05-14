@@ -9,8 +9,6 @@ export type AttackEffectDefinition = {
 };
 
 export const ATTACK_EFFECT_COLUMNS = 4;
-export const ATTACK_EFFECT_ROWS = 15;
-export const ATTACK_EFFECT_SHEET_PATH = 'sprites/attack-vfx-sheet.png';
 
 export const ATTACK_EFFECTS: Record<AttackEffectKey, AttackEffectDefinition> = {
     slash: { key: 'slash', label: '斬撃', row: 0, frames: 4, frameMs: 75 },

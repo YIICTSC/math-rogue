@@ -9,8 +9,6 @@ export type StatusEffectDefinition = {
 };
 
 export const STATUS_EFFECT_COLUMNS = 4;
-export const STATUS_EFFECT_ROWS = 8;
-export const STATUS_EFFECT_SHEET_PATH = 'sprites/status-vfx-sheet.png';
 
 export const STATUS_EFFECTS: Record<StatusEffectKey, StatusEffectDefinition> = {
     block: { key: 'block', label: 'ブロック', row: 0, frames: 4, frameMs: 80 },
