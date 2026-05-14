@@ -32,6 +32,21 @@ export const ATTACK_EFFECT_LIST = Object.values(ATTACK_EFFECTS);
 
 const includesAny = (text: string, terms: string[]) => terms.some(term => text.includes(term));
 
+export const getMultihitFrameSequence = (hitCount: number): number[] => {
+    const count = Math.max(1, Math.floor(hitCount));
+    if (count === 1) return [0];
+    if (count === 2) return [0, 1];
+    if (count === 3) return [0, 1, 0];
+    if (count === 4) return [0, 1, 0, 1];
+    if (count === 5) return [0, 1, 0, 1, 2];
+
+    const sequence = [0, 1, 2, 3];
+    for (let i = 4; i < count; i++) {
+        sequence.push(i % 2 === 0 ? 2 : 3);
+    }
+    return sequence;
+};
+
 export const getAttackEffectKeyForCard = (card: Card, hitCount = 1, defeated = false): AttackEffectKey => {
     const name = `${card.name} ${card.originalNames?.join(' ') || ''}`;
     const texture = card.textureRef || '';
