@@ -54,7 +54,7 @@ const StatusEffectSprite: React.FC<StatusEffectSpriteProps> = ({
             style={{
                 width: size,
                 height: size,
-                backgroundImage: `url(${assetUrl(`sprites/status-vfx-${effectKey}.png`)})`,
+                backgroundImage: `url(${assetUrl(`sprites/status-vfx-${effectKey}.webp`)})`,
                 backgroundSize: `${bgWidth}px ${bgHeight}px`,
                 backgroundPosition: `${posX}px ${posY}px`,
                 ...style

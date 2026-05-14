@@ -58,7 +58,7 @@ const AttackEffectSprite: React.FC<AttackEffectSpriteProps> = ({
             style={{
                 width: size,
                 height: size,
-                backgroundImage: `url(${assetUrl(`sprites/attack-vfx-${effectKey}.png`)})`,
+                backgroundImage: `url(${assetUrl(`sprites/attack-vfx-${effectKey}.webp`)})`,
                 backgroundSize: `${bgWidth}px ${bgHeight}px`,
                 backgroundPosition: `${posX}px ${posY}px`,
                 ...style
