@@ -2163,8 +2163,9 @@ const App: React.FC = () => {
                         : [...prev.entries, { peerId: fromPeerId, name: data.name, imageData: data.imageData, floor: 0, maxDamage: 0, gameOverCount: 0, score: 0, updatedAt: Date.now() }];
                     const sortedEntries = [...nextEntries].sort(compareRaceEntries);
                     p2pService.sendTo(fromPeerId, { type: 'RACE_PARTICIPANTS', participants: nextParticipants });
-                    p2pService.sendTo(fromPeerId, { type: 'RACE_START', endAt: prev.endAt, durationSec: prev.durationSec, mode: gameState.mode });
+                    p2pService.sendTo(fromPeerId, { type: 'RACE_START', endAt: prev.endAt, durationSec: prev.durationSec, mode: gameState.mode, difficultyLevel: gameState.difficultyLevel });
                     p2pService.sendTo(fromPeerId, { type: 'RACE_MODE_SET', mode: gameState.mode });
+                    p2pService.sendTo(fromPeerId, { type: 'RACE_DIFFICULTY_SET', difficultyLevel: gameState.difficultyLevel || 1 });
                     p2pService.sendTo(fromPeerId, { type: 'RACE_LEADERBOARD', entries: sortedEntries });
                     if (prev.ended) {
                         p2pService.sendTo(fromPeerId, { type: 'RACE_END', entries: sortedEntries });
@@ -2175,7 +2176,17 @@ const App: React.FC = () => {
             }
 
             if (data.type === 'RACE_MODE_SET' && !raceSession.isHost) {
-                setGameState(prev => ({ ...prev, mode: data.mode, screen: GameScreen.CHARACTER_SELECTION }));
+                setGameState(prev => ({ ...prev, mode: data.mode, screen: GameScreen.DIFFICULTY_SELECTION }));
+                return;
+            }
+
+            if (data.type === 'RACE_DIFFICULTY_SET' && !raceSession.isHost) {
+                setGameState(prev => ({
+                    ...prev,
+                    difficultyLevel: data.difficultyLevel,
+                    shopRemoveCount: 0,
+                    screen: GameScreen.CHARACTER_SELECTION
+                }));
                 return;
             }
 
@@ -3545,6 +3556,17 @@ const App: React.FC = () => {
     const handleDifficultySelect = (level: number) => {
         if (level > maxUnlockedDifficulty && !isDebugHpOne) return;
         audioService.playSound('select');
+        if (gameState.challengeMode === 'RACE' && raceSession?.isHost) {
+            p2pService.send({ type: 'RACE_DIFFICULTY_SET', difficultyLevel: level });
+        }
+        if (gameState.challengeMode === 'COOP') {
+            if (coopSession && !coopSession.isHost) {
+                return;
+            }
+            if (coopSession?.isHost) {
+                p2pService.send({ type: 'COOP_DIFFICULTY_SET', difficultyLevel: level });
+            }
+        }
         setGameState(prev => ({ ...prev, difficultyLevel: level, shopRemoveCount: 0, screen: GameScreen.CHARACTER_SELECTION }));
     };
 
@@ -9321,7 +9343,22 @@ const App: React.FC = () => {
                     if (prev.screen === GameScreen.GAME_OVER || prev.screen === GameScreen.ENDING) {
                         return prev;
                     }
-                    return { ...prev, mode: data.mode, screen: GameScreen.CHARACTER_SELECTION };
+                    return { ...prev, mode: data.mode, screen: GameScreen.DIFFICULTY_SELECTION };
+                });
+                return;
+            }
+
+            if (data.type === 'COOP_DIFFICULTY_SET' && !coopSession.isHost) {
+                setGameState(prev => {
+                    if (prev.screen === GameScreen.GAME_OVER || prev.screen === GameScreen.ENDING) {
+                        return prev;
+                    }
+                    return {
+                        ...prev,
+                        difficultyLevel: data.difficultyLevel,
+                        shopRemoveCount: 0,
+                        screen: GameScreen.CHARACTER_SELECTION
+                    };
                 });
                 return;
             }
@@ -10590,7 +10627,10 @@ const App: React.FC = () => {
                                         ...prev,
                                         challengeMode: 'RACE',
                                         mode: payload.mode ?? prev.mode,
-                                        screen: payload.mode ? GameScreen.CHARACTER_SELECTION : GameScreen.MODE_SELECTION
+                                        difficultyLevel: payload.difficultyLevel ?? prev.difficultyLevel,
+                                        screen: payload.mode
+                                            ? (payload.difficultyLevel ? GameScreen.CHARACTER_SELECTION : GameScreen.DIFFICULTY_SELECTION)
+                                            : GameScreen.MODE_SELECTION
                                     }));
                                 }}
                                 onClose={returnToTitle}
@@ -10932,12 +10972,25 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.DIFFICULTY_SELECTION && (
                     <div className="absolute inset-0">
-                        <DifficultySelectionScreen
-                            maxUnlockedDifficulty={isDebugHpOne ? 10 : maxUnlockedDifficulty}
-                            onSelectDifficulty={handleDifficultySelect}
-                            onBack={() => setGameState(prev => ({ ...prev, screen: prev.challengeMode === 'TYPING' ? GameScreen.TYPING_MODE_SELECTION : GameScreen.MODE_SELECTION }))}
-                            languageMode={languageMode}
-                        />
+                        {((gameState.challengeMode === 'RACE' && raceSession && !raceSession.isHost) ||
+                          (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost)) ? (
+                            <div className="flex h-full w-full items-center justify-center bg-slate-950 p-6 text-white">
+                                <div className="max-w-md rounded-2xl border border-cyan-500 bg-slate-900 p-6 text-center shadow-2xl">
+                                    <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-cyan-500 border-t-transparent" />
+                                    <h2 className="mb-2 text-2xl font-black text-cyan-200">難易度決定待ち</h2>
+                                    <p className="text-sm font-bold leading-relaxed text-slate-300">
+                                        ホストがゲーム難易度を選ぶまで待っています。
+                                    </p>
+                                </div>
+                            </div>
+                        ) : (
+                            <DifficultySelectionScreen
+                                maxUnlockedDifficulty={isDebugHpOne ? 10 : maxUnlockedDifficulty}
+                                onSelectDifficulty={handleDifficultySelect}
+                                onBack={() => setGameState(prev => ({ ...prev, screen: prev.challengeMode === 'TYPING' ? GameScreen.TYPING_MODE_SELECTION : GameScreen.MODE_SELECTION }))}
+                                languageMode={languageMode}
+                            />
+                        )}
                     </div>
                 )}
 

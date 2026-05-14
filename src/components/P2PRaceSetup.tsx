@@ -11,6 +11,7 @@ interface RaceStartPayload {
     durationSec: number;
     endAt: number;
     mode?: GameMode;
+    difficultyLevel?: number;
     participants: Array<{ peerId: string; name: string; imageData?: string }>;
 }
 
@@ -79,6 +80,7 @@ const P2PRaceSetup: React.FC<P2PRaceSetupProps> = ({ player, onRaceStart, onClos
                     durationSec: data.durationSec,
                     endAt: data.endAt,
                     mode: (data.mode as GameMode | undefined) ?? hostSelectedMode,
+                    difficultyLevel: data.difficultyLevel,
                     participants
                 });
             }

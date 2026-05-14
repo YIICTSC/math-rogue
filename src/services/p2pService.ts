@@ -9,8 +9,9 @@ export type P2PEvent =
     | { type: 'GIVE_UP' }
     | { type: 'RACE_JOIN', name: string, imageData?: string }
     | { type: 'RACE_PARTICIPANTS', participants: Array<{ peerId: string, name: string, imageData?: string }> }
-    | { type: 'RACE_START', endAt: number, durationSec: number, mode?: any }
+    | { type: 'RACE_START', endAt: number, durationSec: number, mode?: any, difficultyLevel?: number }
     | { type: 'RACE_MODE_SET', mode: any }
+    | { type: 'RACE_DIFFICULTY_SET', difficultyLevel: number }
     | { type: 'RACE_PROGRESS', name: string, imageData?: string, floor: number, maxDamage: number, gameOverCount: number, score: number, updatedAt: number }
     | { type: 'RACE_LEADERBOARD', entries: Array<{ peerId: string, name: string, imageData?: string, floor: number, maxDamage: number, gameOverCount: number, score: number, updatedAt: number }> }
     | { type: 'RACE_END', entries: Array<{ peerId: string, name: string, imageData?: string, floor: number, maxDamage: number, gameOverCount: number, score: number, updatedAt: number }> }
@@ -66,6 +67,7 @@ export type P2PEvent =
         voiceEnabled?: boolean
     }> }
     | { type: 'COOP_MODE_SET', mode: any }
+    | { type: 'COOP_DIFFICULTY_SET', difficultyLevel: number }
     | { type: 'COOP_CHARACTER_SELECT', characterId: string, name: string, imageData: string, maxHp: number, currentHp: number }
     | { type: 'COOP_QUIZ_RESULT', correctCount: number }
     | { type: 'COOP_PLAYER_SNAPSHOT', player: any }
