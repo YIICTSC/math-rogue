@@ -65,7 +65,7 @@ import { getRandomRaceTrickCard, getRaceTrickCard } from './raceTricks';
 import { getRandomCoopSupportCard } from './coopSupportCards';
 import { chooseBattleBackgroundScene, getBattleBackgroundFlavor } from './data/battleBackgrounds';
 import { OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE } from './config/runtime';
-import { getAttackEffectKeyForCard } from './data/attackEffects';
+import { getAttackEffectKeyForCard, getMultihitFrameSequence } from './data/attackEffects';
 
 const PARRY_WINDOW_MS = 650;
 const PARRY_PERFECT_MS = 220;
@@ -4862,11 +4862,17 @@ const App: React.FC = () => {
             return;
         }
 
+        let cardAttackPreviewHitCount = 1;
         if (card.type === CardType.ATTACK) {
-            const previewHitCount = card.playCopies
-                ? 1 + card.playCopies
-                : (card.hitsPerSkillInHand || card.hitsPerAttackPlayed ? 3 : 1);
-            audioService.playAttackEffectSound(getAttackEffectKeyForCard(card, previewHitCount));
+            if (card.playCopies) cardAttackPreviewHitCount += card.playCopies;
+            if (card.hitsPerSkillInHand) {
+                cardAttackPreviewHitCount = gameState.player.hand.filter(c => c.type === CardType.SKILL && c.id !== card.id).length;
+            }
+            if (card.hitsPerAttackPlayed) {
+                cardAttackPreviewHitCount = gameState.player.attacksPlayedThisTurn + 1;
+            }
+            cardAttackPreviewHitCount = Math.max(1, Math.min(100, cardAttackPreviewHitCount));
+            audioService.playAttackEffectSound(getAttackEffectKeyForCard(card, cardAttackPreviewHitCount), cardAttackPreviewHitCount);
         } else {
             audioService.playSound('block');
         }
@@ -5206,6 +5212,7 @@ const App: React.FC = () => {
                 const maxHits = 100;
                 if (hits > maxHits) hits = maxHits;
                 const hitsToLog = Math.min(hits, 10);
+                const multihitFrameSequence = getMultihitFrameSequence(hits);
 
                 for (let h = 0; h < hits; h++) {
                     const hitDelay = (act * hits + h) * 80;
@@ -5268,6 +5275,9 @@ const App: React.FC = () => {
                             const attackEffectKey = card.type === CardType.ATTACK
                                 ? getAttackEffectKeyForCard(card, hits, e.currentHp <= 0)
                                 : undefined;
+                            const attackEffectFrame = attackEffectKey === 'multihit'
+                                ? multihitFrameSequence[h] ?? multihitFrameSequence[multihitFrameSequence.length - 1]
+                                : undefined;
                             if (card.type === CardType.ATTACK) {
                                 finalVfx = 'ATTACK_SPRITE';
                             } else {
@@ -5281,7 +5291,8 @@ const App: React.FC = () => {
                                 targetId: e.id,
                                 delay: hitDelay,
                                 rotation: Math.random() * 360,
-                                attackEffectKey
+                                attackEffectKey,
+                                attackEffectFrame
                             });
 
                             if (e.currentHp <= 0 && e.enemyType === 'THE_HEART' && e.phase === 1) {
@@ -6112,9 +6123,10 @@ const App: React.FC = () => {
             };
         });
 
+        const effectClearDelay = Math.max(1200, Math.min(5000, cardAttackPreviewHitCount * 80 + 700));
         setTimeout(() => {
             setGameState(prev => ({ ...prev, activeEffects: [] }));
-        }, 1200);
+        }, effectClearDelay);
     };
 
     const startPlayerTurn = () => {

@@ -10,6 +10,7 @@ interface AttackEffectSpriteProps {
     paused?: boolean;
     loop?: boolean;
     playToken?: number;
+    fixedFrame?: number;
     style?: React.CSSProperties;
 }
 
@@ -20,12 +21,17 @@ const AttackEffectSprite: React.FC<AttackEffectSpriteProps> = ({
     paused = false,
     loop = true,
     playToken = 0,
+    fixedFrame,
     style
 }) => {
     const definition = ATTACK_EFFECTS[effectKey];
     const [frame, setFrame] = useState(0);
 
     useEffect(() => {
+        if (fixedFrame !== undefined) {
+            setFrame(Math.max(0, Math.min(definition.frames - 1, fixedFrame)));
+            return;
+        }
         if (paused) {
             setFrame(0);
             return;
@@ -38,9 +44,9 @@ const AttackEffectSprite: React.FC<AttackEffectSpriteProps> = ({
             });
         }, definition.frameMs);
         return () => window.clearInterval(timer);
-    }, [definition.frameMs, definition.frames, effectKey, loop, paused, playToken]);
+    }, [definition.frameMs, definition.frames, effectKey, fixedFrame, loop, paused, playToken]);
 
-    const shouldUseFittedStrip = effectKey === 'wind' || effectKey === 'plant' || effectKey === 'graduation';
+    const shouldUseFittedStrip = effectKey === 'multihit' || effectKey === 'wind' || effectKey === 'plant' || effectKey === 'graduation';
     // Legacy attack strips still use a slight zoom to hide old edge bleed. Newly recut strips are already fitted.
     const zoom = shouldUseFittedStrip ? 1 : 1.3;
     const bgWidth = size * ATTACK_EFFECT_COLUMNS * zoom;

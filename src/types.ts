@@ -700,6 +700,7 @@ export interface VisualEffectInstance {
   delay?: number;
   rotation?: number;
   attackEffectKey?: AttackEffectKey;
+  attackEffectFrame?: number;
   statusEffectKey?: StatusEffectKey;
 }
 

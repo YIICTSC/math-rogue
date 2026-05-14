@@ -914,7 +914,20 @@ class AudioService {
       })();
   }
 
-  public playAttackEffectSound(effect: AttackEffectKey) {
+  private playAttackSlashSfx() {
+      this.playSfxMp3('attack-effects/slash', () => this.playAttackSynth(this.ctx!.currentTime));
+  }
+
+  public playAttackSlashSequence(hitCount: number, intervalMs: number = 80) {
+      this.init();
+      if (!this.ctx || !this.sfxGain || this.isMuted) return;
+      const count = Math.max(1, Math.min(100, Math.floor(hitCount)));
+      for (let i = 0; i < count; i++) {
+          window.setTimeout(() => this.playAttackSlashSfx(), i * intervalMs);
+      }
+  }
+
+  public playAttackEffectSound(effect: AttackEffectKey, hitCount: number = 1) {
       const fallbackByEffect: Record<AttackEffectKey, () => void> = {
           slash: () => this.playAttackSynth(this.ctx!.currentTime),
           impact: () => this.playSound('damage'),
@@ -934,6 +947,10 @@ class AudioService {
       };
       this.init();
       if (!this.ctx || !this.sfxGain || this.isMuted) return;
+      if (effect === 'multihit') {
+          this.playAttackSlashSequence(hitCount, 80);
+          return;
+      }
       this.playSfxMp3(`attack-effects/${effect}`, fallbackByEffect[effect]);
   }
 

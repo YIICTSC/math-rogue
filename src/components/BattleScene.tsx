@@ -128,7 +128,8 @@ export const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: s
         if (category === 'RECOVERY') return 'border-emerald-300/70';
         return 'border-white/50';
     };
-    const MAX_SIMULTANEOUS_VFX = 6;
+    const hasMultihitSequence = activeOnThisTarget.some(effect => effect.type === 'ATTACK_SPRITE' && effect.attackEffectKey === 'multihit');
+    const MAX_SIMULTANEOUS_VFX = hasMultihitSequence ? 40 : 6;
     const prioritizedEffects = [...activeOnThisTarget]
         .sort((a, b) => {
             const aImpact = IMPACT_VFX_TYPES.has(a.type) ? 1 : 0;
@@ -176,7 +177,7 @@ export const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: s
                                     transform: `rotate(${vfx.rotation || 0}deg)`
                                 }}
                             >
-                                <AttackEffectSprite effectKey={vfx.attackEffectKey || 'slash'} size={176} />
+                                <AttackEffectSprite effectKey={vfx.attackEffectKey || 'slash'} size={176} fixedFrame={vfx.attackEffectFrame} />
                             </div>
                         )}
                         {vfx.type === 'BLOCK' && (
