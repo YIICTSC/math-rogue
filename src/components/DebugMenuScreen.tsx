@@ -2,12 +2,17 @@
 import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY, ENEMY_LIBRARY } from '../constants';
 import { GAME_STORIES } from '../data/stories';
 import { FLAVOR_TEXTS, ENEMY_NAMES } from '../services/geminiService';
-import { Card as ICard, Relic, Potion, CardType, TargetType, LanguageMode } from '../types';
+import { AttackEffectKey, StatusEffectKey, Card as ICard, Relic, Potion, CardType, TargetType, LanguageMode } from '../types';
 import Card from './Card';
-import { ArrowRight, Trash2, Plus, Gem, FlaskConical, Swords, Shield, Zap, Search, Beaker, RotateCcw, Skull, Clock, History, Languages, FileText, BookOpen, MessageSquare, HelpCircle, AlertCircle, Copy, Check, X } from 'lucide-react';
+import AttackEffectSprite from './AttackEffectSprite';
+import StatusEffectSprite from './StatusEffectSprite';
+import { ArrowRight, Trash2, Plus, Gem, FlaskConical, Swords, Shield, Zap, Search, Beaker, RotateCcw, Skull, Clock, History, Languages, FileText, BookOpen, MessageSquare, HelpCircle, AlertCircle, Copy, Check, X, Volume2 } from 'lucide-react';
 import { synthesizeCards } from '../utils/cardUtils';
 import { storageService } from '../services/storageService';
+import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
+import { ATTACK_EFFECT_LIST } from '../data/attackEffects';
+import { STATUS_EFFECT_LIST } from '../data/statusEffects';
 import React, { useMemo, useState, useCallback } from 'react';
 
 interface DebugMenuScreenProps {
@@ -75,11 +80,15 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     nextMiniGameThreshold,
     languageMode: initialLanguageMode
 }) => {
-    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'SYSTEM' | 'TRANSLATION'>('CARDS');
+    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'SYSTEM' | 'EFFECTS' | 'TRANSLATION'>('CARDS');
     const [searchTerm, setSearchTerm] = useState("");
     const [debugLanguageMode, setDebugLanguageMode] = useState<LanguageMode>(initialLanguageMode);
     const [transSubTab, setTransSubTab] = useState<'STORY' | 'FLAVOR' | 'CARD' | 'EVENT' | 'ENEMY' | 'MISSING'>('STORY');
     const [copied, setCopied] = useState(false);
+    const [effectPreviewTokens, setEffectPreviewTokens] = useState<Record<AttackEffectKey, number>>({} as Record<AttackEffectKey, number>);
+    const [playingEffectKey, setPlayingEffectKey] = useState<AttackEffectKey | null>(null);
+    const [statusPreviewTokens, setStatusPreviewTokens] = useState<Record<StatusEffectKey, number>>({} as Record<StatusEffectKey, number>);
+    const [playingStatusKey, setPlayingStatusKey] = useState<StatusEffectKey | null>(null);
 
     const [selectedDeck, setSelectedDeck] = useState<ICard[]>([]);
     const [selectedRelics, setSelectedRelics] = useState<Relic[]>([]);
@@ -207,6 +216,26 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
         setTimeout(() => setCopied(false), 2000);
     };
 
+    const playEffectPreview = (effectKey: AttackEffectKey) => {
+        audioService.playAttackEffectSound(effectKey);
+        const token = Date.now();
+        setEffectPreviewTokens(prev => ({ ...prev, [effectKey]: token }));
+        setPlayingEffectKey(effectKey);
+        window.setTimeout(() => {
+            setPlayingEffectKey(current => current === effectKey ? null : current);
+        }, 520);
+    };
+
+    const playStatusPreview = (effectKey: StatusEffectKey) => {
+        audioService.playStatusEffectSound(effectKey);
+        const token = Date.now();
+        setStatusPreviewTokens(prev => ({ ...prev, [effectKey]: token }));
+        setPlayingStatusKey(effectKey);
+        window.setTimeout(() => {
+            setPlayingStatusKey(current => current === effectKey ? null : current);
+        }, 620);
+    };
+
     return (
         <div className="flex flex-col h-full w-full bg-gray-900 text-white relative">
             <div className="bg-red-900/90 border-b-2 border-red-500 p-2 md:p-4 flex justify-between items-center shrink-0 z-20">
@@ -238,6 +267,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                         <button onClick={() => setActiveTab('POTIONS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'POTIONS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>ポーション</button>
                         <button onClick={() => setActiveTab('SYNTHESIS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'SYNTHESIS' ? 'bg-purple-900 text-white' : 'text-purple-400 hover:bg-gray-750'}`}>合成</button>
                         <button onClick={() => setActiveTab('SYSTEM')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'SYSTEM' ? 'bg-indigo-900 text-white' : 'text-indigo-400 hover:bg-gray-750'}`}>システム</button>
+                        <button onClick={() => setActiveTab('EFFECTS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'EFFECTS' ? 'bg-orange-900 text-white' : 'text-orange-400 hover:bg-gray-750'}`}>エフェクト</button>
                         <button onClick={() => setActiveTab('TRANSLATION')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'TRANSLATION' ? 'bg-emerald-900 text-white' : 'text-emerald-400 hover:bg-gray-750'}`}>翻訳確認</button>
                     </div>
 
@@ -412,6 +442,73 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                         </button>
                                     </div>
                                 </section>
+                            </div>
+                        )}
+
+                        {activeTab === 'EFFECTS' && (
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between gap-3 border-b border-orange-700/60 pb-3">
+                                    <h3 className="text-orange-300 font-bold flex items-center">
+                                        <Zap size={18} className="mr-2" /> 攻撃エフェクト確認
+                                    </h3>
+                                    <div className="text-xs text-gray-400">攻撃15種 + 状態8種 / 各4フレーム</div>
+                                </div>
+                                <div className="flex items-center gap-2 text-xs font-bold text-orange-200">
+                                    <Swords size={14} /> 攻撃
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
+                                    {ATTACK_EFFECT_LIST.map(effect => (
+                                        <div key={effect.key} className="bg-black/35 border border-gray-700 rounded-lg p-3 flex flex-col items-center gap-2">
+                                            <div className="w-32 h-32 flex items-center justify-center bg-slate-950/80 rounded overflow-hidden">
+                                                <AttackEffectSprite
+                                                    effectKey={effect.key}
+                                                    size={128}
+                                                    paused={playingEffectKey !== effect.key}
+                                                    loop={false}
+                                                    playToken={effectPreviewTokens[effect.key] || 0}
+                                                />
+                                            </div>
+                                            <div className="w-full flex items-center justify-between gap-2 text-xs">
+                                                <span className="font-bold text-orange-100">{effect.label}</span>
+                                                <span className="text-gray-500">{effect.frames}F</span>
+                                            </div>
+                                            <button
+                                                onClick={() => playEffectPreview(effect.key)}
+                                                className="w-full bg-orange-700 hover:bg-orange-600 text-white py-1.5 rounded font-bold text-xs flex items-center justify-center gap-1"
+                                            >
+                                                <Volume2 size={13} /> SE
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="flex items-center gap-2 text-xs font-bold text-cyan-200 pt-2 border-t border-gray-700">
+                                    <Shield size={14} /> 状態変化
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
+                                    {STATUS_EFFECT_LIST.map(effect => (
+                                        <div key={effect.key} className="bg-black/35 border border-gray-700 rounded-lg p-3 flex flex-col items-center gap-2">
+                                            <div className="w-32 h-32 flex items-center justify-center bg-slate-950/80 rounded overflow-hidden">
+                                                <StatusEffectSprite
+                                                    effectKey={effect.key}
+                                                    size={128}
+                                                    paused={playingStatusKey !== effect.key}
+                                                    loop={false}
+                                                    playToken={statusPreviewTokens[effect.key] || 0}
+                                                />
+                                            </div>
+                                            <div className="w-full flex items-center justify-between gap-2 text-xs">
+                                                <span className="font-bold text-cyan-100">{effect.label}</span>
+                                                <span className="text-gray-500">{effect.frames}F</span>
+                                            </div>
+                                            <button
+                                                onClick={() => playStatusPreview(effect.key)}
+                                                className="w-full bg-cyan-700 hover:bg-cyan-600 text-white py-1.5 rounded font-bold text-xs flex items-center justify-center gap-1"
+                                            >
+                                                <Volume2 size={13} /> SE
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         )}
 

@@ -65,6 +65,7 @@ import { getRandomRaceTrickCard, getRaceTrickCard } from './raceTricks';
 import { getRandomCoopSupportCard } from './coopSupportCards';
 import { chooseBattleBackgroundScene, getBattleBackgroundFlavor } from './data/battleBackgrounds';
 import { OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE } from './config/runtime';
+import { getAttackEffectKeyForCard } from './data/attackEffects';
 
 const PARRY_WINDOW_MS = 650;
 const PARRY_PERFECT_MS = 220;
@@ -798,6 +799,7 @@ const App: React.FC = () => {
     const coopApplyingRemoteBattleSyncRef = useRef(false);
     const coopLastBattleActionSignatureRef = useRef<string | null>(null);
     const coopPendingVoiceSyncRef = useRef<boolean | null>(null);
+    const coopPendingEndTurnKeyRef = useRef<string | null>(null);
     const coopRemoteFinisherShownAtRef = useRef<number | null>(null);
     const coopRemoteFinisherClearTimerRef = useRef<number | null>(null);
     const coopRemoteEffectClearTimerRef = useRef<number | null>(null);
@@ -1319,13 +1321,6 @@ const App: React.FC = () => {
         });
     }, []);
     useEffect(() => {
-        if (gameState.challengeMode !== 'COOP') return;
-        if (!appSettings.joinMuted) return;
-        if (coopVoiceEnabled) {
-            setCoopVoiceEnabled(false);
-        }
-    }, [appSettings.joinMuted, gameState.challengeMode, coopVoiceEnabled]);
-    useEffect(() => {
         if (gameState.challengeMode !== 'COOP' || !coopSession || !coopSelfPeerId) return;
         let cancelled = false;
         const syncVoice = async () => {
@@ -1373,7 +1368,19 @@ const App: React.FC = () => {
     useEffect(() => {
         if (gameState.challengeMode === 'COOP') return;
         p2pService.setVoiceEnabled(false).catch(() => undefined);
+        coopPendingEndTurnKeyRef.current = null;
     }, [gameState.challengeMode]);
+    useEffect(() => {
+        if (gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.BATTLE || gameState.coopBattleState?.battleMode !== 'REALTIME') {
+            coopPendingEndTurnKeyRef.current = null;
+            return;
+        }
+        const battleState = gameState.coopBattleState;
+        const turnKey = `${battleState.battleKey}:${battleState.turnCursor}:${battleState.enemyTurnCursor}`;
+        if (coopPendingEndTurnKeyRef.current && coopPendingEndTurnKeyRef.current !== turnKey) {
+            coopPendingEndTurnKeyRef.current = null;
+        }
+    }, [gameState.challengeMode, gameState.coopBattleState, gameState.screen]);
     useEffect(() => {
         if (!coopSession || !coopSelfPeerId || coopSession.isHost) return;
         const selfParticipant = coopSession.participants.find(participant => participant.peerId === coopSelfPeerId);
@@ -2606,12 +2613,12 @@ const App: React.FC = () => {
                     const statusRewards = statusPool
                         .slice(0, Math.max(0, raceEffects.rewardDummyCount))
                         .map((template, index) => {
-                        return {
-                            type: 'CARD' as const,
-                            value: { ...template, id: `race-print-avalanche-card-${now}-${index}` },
-                            id: `race-print-avalanche-reward-${now}-${index}`
-                        };
-                    });
+                            return {
+                                type: 'CARD' as const,
+                                value: { ...template, id: `race-print-avalanche-card-${now}-${index}` },
+                                id: `race-print-avalanche-reward-${now}-${index}`
+                            };
+                        });
                     return {
                         ...prev,
                         rewards: shuffle([preservedReward, ...statusRewards])
@@ -3725,7 +3732,7 @@ const App: React.FC = () => {
         const starterRelic = RELIC_LIBRARY[char.startingRelicId];
         const relics = starterRelic ? [starterRelic] : [];
 
-        const commonRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'COMMON');
+        const commonRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'COMMON' && r.id !== 'SPIRIT_POOP');
         const bonusOptions = shuffle(commonRelics).slice(0, 3);
         setStarterRelics(bonusOptions);
         const shouldSkipStarterRelic = !storageService.hasSkippedFirstStarterRelic();
@@ -4690,7 +4697,7 @@ const App: React.FC = () => {
                 if (target) {
                     applyDebuff(target, 'POISON', 6);
                     newLogs.push(`${trans(target.name, languageMode)}に${trans("ドクドク", languageMode)}6を${trans("付与", languageMode)}`);
-                    nextActiveEffects.push({ id: `vfx-pot-psn-${Date.now()}`, type: 'DEBUFF', targetId: target.id });
+                    nextActiveEffects.push({ id: `vfx-pot-psn-${Date.now()}`, type: 'DEBUFF', targetId: target.id, statusEffectKey: 'poison' });
                 }
             } else if (potion.templateId === 'HEALTH_POTION') {
                 const heal = 15;
@@ -4855,7 +4862,14 @@ const App: React.FC = () => {
             return;
         }
 
-        audioService.playSound(card.type === CardType.ATTACK ? 'attack' : 'block');
+        if (card.type === CardType.ATTACK) {
+            const previewHitCount = card.playCopies
+                ? 1 + card.playCopies
+                : (card.hitsPerSkillInHand || card.hitsPerAttackPlayed ? 3 : 1);
+            audioService.playAttackEffectSound(getAttackEffectKeyForCard(card, previewHitCount));
+        } else {
+            audioService.playSound('block');
+        }
         setLastActionType(card.type);
         setLastActionTime(Date.now());
         const localCoopChainCount = (gameState.challengeMode === 'COOP' && coopSession?.isHost && coopSelfPeerId)
@@ -5250,16 +5264,24 @@ const App: React.FC = () => {
                             else { damage -= e.block; e.block = 0; }
                             e.currentHp -= damage;
 
-                            let finalVfx = baseVfx;
-                            if (damage > 15 && finalVfx === 'SLASH') finalVfx = 'CRITICAL';
-                            if (e.currentHp <= 0 && (finalVfx === 'SLASH' || finalVfx === 'CRITICAL')) finalVfx = 'EXPLOSION';
+                            let finalVfx: VFXType = baseVfx as VFXType;
+                            const attackEffectKey = card.type === CardType.ATTACK
+                                ? getAttackEffectKeyForCard(card, hits, e.currentHp <= 0)
+                                : undefined;
+                            if (card.type === CardType.ATTACK) {
+                                finalVfx = 'ATTACK_SPRITE';
+                            } else {
+                                if (damage > 15 && finalVfx === 'SLASH') finalVfx = 'CRITICAL';
+                                if (e.currentHp <= 0 && (finalVfx === 'SLASH' || finalVfx === 'CRITICAL')) finalVfx = 'EXPLOSION';
+                            }
 
                             nextActiveEffects.push({
                                 id: `vfx-${Date.now()}-${Math.random()}`,
-                                type: finalVfx as VFXType,
+                                type: finalVfx,
                                 targetId: e.id,
                                 delay: hitDelay,
-                                rotation: Math.random() * 360
+                                rotation: Math.random() * 360,
+                                attackEffectKey
                             });
 
                             if (e.currentHp <= 0 && e.enemyType === 'THE_HEART' && e.phase === 1) {
@@ -5486,7 +5508,7 @@ const App: React.FC = () => {
                             currentLogs.push(`${trans("敵のムキムキ", languageMode)}${card.strength > 0 ? '+' : ''}${card.strength}`);
                         } else {
                             p.strength += card.strength;
-                            nextActiveEffects.push({ id: `vfx-buff-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
+                            nextActiveEffects.push({ id: `vfx-buff-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay, statusEffectKey: 'strength' });
                             currentLogs.push(`${trans("ムキムキ", languageMode)}+${card.strength}`);
                         }
                     }
@@ -5494,24 +5516,24 @@ const App: React.FC = () => {
                         if (card.target === TargetType.SELF) {
                             p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + card.vulnerable;
                             p.floatingText = { id: `self-vuln-${Date.now()}`, text: `${trans("びくびく", languageMode)}+${card.vulnerable}`, color: 'text-pink-400' };
-                            nextActiveEffects.push({ id: `vfx-self-dbuff-${Date.now()}`, type: 'DEBUFF', targetId: 'player', delay: hitDelay });
+                            nextActiveEffects.push({ id: `vfx-self-dbuff-${Date.now()}`, type: 'DEBUFF', targetId: 'player', delay: hitDelay, statusEffectKey: 'vulnerable' });
                         } else {
                             targets.forEach(e => {
                                 applyDebuff(e, 'VULNERABLE', card.vulnerable!);
-                                nextActiveEffects.push({ id: `vfx-dbuff-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay });
+                                nextActiveEffects.push({ id: `vfx-dbuff-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay, statusEffectKey: 'vulnerable' });
                             });
                         }
                     }
                     if (card.weak) targets.forEach(e => {
                         applyDebuff(e, 'WEAK', card.weak!);
-                        nextActiveEffects.push({ id: `vfx-dbuff-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay });
+                        nextActiveEffects.push({ id: `vfx-dbuff-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay, statusEffectKey: 'weak' });
                     });
                     if (card.poison) {
                         let amt = card.poison;
                         if (p.relics.find(r => r.id === 'SNAKE_SKULL')) amt += 1;
                         targets.forEach(e => {
                             applyDebuff(e, 'POISON', amt);
-                            nextActiveEffects.push({ id: `vfx-dbuff-p-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay });
+                            nextActiveEffects.push({ id: `vfx-dbuff-p-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay, statusEffectKey: 'poison' });
                         });
                         if (h < hitsToLog) currentLogs.push(`${trans("ドクドク", languageMode)}${amt}${trans("を付与", languageMode)}`);
                     }
@@ -5520,7 +5542,7 @@ const App: React.FC = () => {
                             if (e.poison > 0) {
                                 e.poison *= card.poisonMultiplier!;
                                 currentLogs.push(`${trans(e.name, languageMode)}の${trans("毒", languageMode)}が${card.poisonMultiplier}倍になった！`);
-                                nextActiveEffects.push({ id: `vfx-dbuff-pm-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay });
+                                nextActiveEffects.push({ id: `vfx-dbuff-pm-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay, statusEffectKey: 'poison' });
                             }
                         });
                     }
@@ -5949,7 +5971,7 @@ const App: React.FC = () => {
                 p.relicCounters['ATTACK_COUNT'] = (p.relicCounters['ATTACK_COUNT'] || 0) + 1;
                 if (p.relicCounters['ATTACK_COUNT'] % 3 === 0) {
                     if (p.relics.find(r => r.id === 'KUNAI')) { p.powers['DEXTERITY'] = (p.powers['DEXTERITY'] || 0) + 1; p.floatingText = { id: `kunai-${Date.now()}`, text: `${trans("カチカチ", languageMode)}+1`, color: 'text-blue-400', iconType: 'shield' }; nextActiveEffects.push({ id: `vfx-kunai-${Date.now()}`, type: 'BLOCK', targetId: 'player' }); }
-                    if (p.relics.find(r => r.id === 'SHURIKEN')) { p.strength += 1; p.floatingText = { id: `shuri-${Date.now()}`, text: `${trans("ムキムキ", languageMode)}+1`, color: 'text-red-400', iconType: 'sword' }; nextActiveEffects.push({ id: `vfx-shuri-${Date.now()}`, type: 'BUFF', targetId: 'player' }); }
+                    if (p.relics.find(r => r.id === 'SHURIKEN')) { p.strength += 1; p.floatingText = { id: `shuri-${Date.now()}`, text: `${trans("ムキムキ", languageMode)}+1`, color: 'text-red-400', iconType: 'sword' }; nextActiveEffects.push({ id: `vfx-shuri-${Date.now()}`, type: 'BUFF', targetId: 'player', statusEffectKey: 'strength' }); }
                     if (p.relics.find(r => r.id === 'ORNAMENTAL_FAN')) { p.block += 4; p.floatingText = { id: `fan-${Date.now()}`, text: '+4 Block', color: 'text-blue-400', iconType: 'shield' }; nextActiveEffects.push({ id: `vfx-fan-${Date.now()}`, type: 'BLOCK', targetId: 'player' }); }
                     // Compass (Calipers) Effect: Draw 1 card every 3 attacks
                     if (p.relics.find(r => r.id === 'CALIPERS')) {
@@ -6146,7 +6168,7 @@ const App: React.FC = () => {
             if (p.powers['NOXIOUS_FUMES']) {
                 const enemies = prev.enemies.map(e => {
                     const newPoison = e.poison + p.powers['NOXIOUS_FUMES'];
-                    nextActiveEffects.push({ id: `vfx-fumes-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id });
+                    nextActiveEffects.push({ id: `vfx-fumes-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, statusEffectKey: 'poison' });
                     return { ...e, poison: newPoison };
                 });
                 prev.enemies = enemies;
@@ -6442,11 +6464,11 @@ const App: React.FC = () => {
         });
         await wait(400);
         await new Promise<void>(resolve => {
-                setGameState(prev => {
-                    let nextEnemies = prev.enemies.map(e => ({ ...e }));
-                    const p = { ...prev.player };
-                    const nextActiveEffects: VisualEffectInstance[] = [];
-                    const nextLogs: string[] = [];
+            setGameState(prev => {
+                let nextEnemies = prev.enemies.map(e => ({ ...e }));
+                const p = { ...prev.player };
+                const nextActiveEffects: VisualEffectInstance[] = [];
+                const nextLogs: string[] = [];
                 nextEnemies = nextEnemies.map(enemy => {
                     if (enemy.poison > 0) {
                         const poisonDmg = enemy.poison;
@@ -7037,6 +7059,13 @@ const App: React.FC = () => {
             && gameState.coopBattleState?.battleMode === 'REALTIME'
             && gameState.coopBattleState.turnQueue[gameState.coopBattleState.turnCursor]?.type !== 'ENEMY';
         if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
+            if (isRealtimeCoopTurn && gameState.coopBattleState && coopSelfPeerId) {
+                const turnKey = `${gameState.coopBattleState.battleKey}:${gameState.coopBattleState.turnCursor}:${gameState.coopBattleState.enemyTurnCursor}`;
+                if ((gameState.coopBattleState.roundEndedPeerIds || []).includes(coopSelfPeerId) || coopPendingEndTurnKeyRef.current === turnKey) {
+                    return;
+                }
+                coopPendingEndTurnKeyRef.current = turnKey;
+            }
             p2pService.send({
                 type: 'COOP_END_TURN',
                 player: gameState.player,
@@ -7211,13 +7240,21 @@ const App: React.FC = () => {
     const applySynthesizeCard = (cards: ICard[]) => {
         const [c1, c2, c3] = cards;
         const newCard = synthesizeCards(c1, c2, c3);
-        setGameState(prev => ({
-            ...prev,
-            player: {
+        setGameState(prev => {
+            const nextPlayer = {
                 ...prev.player,
                 deck: [...prev.player.deck.filter(c => !cards.some(target => target.id === c.id)), newCard]
+            };
+            if (prev.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
+                window.setTimeout(() => {
+                    p2pService.send({ type: 'COOP_PLAYER_SNAPSHOT', player: nextPlayer });
+                }, 0);
             }
-        }));
+            return {
+                ...prev,
+                player: nextPlayer
+            };
+        });
         return newCard;
     };
 
@@ -8858,6 +8895,9 @@ const App: React.FC = () => {
 
     const handleRestLeave = () => {
         if (gameState.challengeMode === 'COOP' && coopSession && coopSelfPeerId) {
+            if (!coopSession.isHost) {
+                p2pService.send({ type: 'COOP_PLAYER_SNAPSHOT', player: stateRef.current.player });
+            }
             setCoopSession(prev => {
                 if (!prev) return prev;
                 const nextParticipants = prev.participants.map(participant =>
@@ -9189,6 +9229,19 @@ const App: React.FC = () => {
 
         if (options?.advanceTurn) {
             if (isRealtimeTurn && nextBattleState) {
+                if ((nextBattleState.roundEndedPeerIds || []).includes(fromPeerId)) {
+                    broadcastCoopBattleState(nextBattleState, {
+                        activeEffects: [...gameState.activeEffects, ...remoteEffects, ...chainEffects],
+                        enemies: payload.enemies ?? gameState.enemies,
+                        selectedEnemyId: payload.selectedEnemyId ?? gameState.selectedEnemyId,
+                        combatLog: remoteCoopChainCount >= 2
+                            ? [...(payload.combatLog ?? gameState.combatLog), `🤝 連携 x${remoteCoopChainCount}！`].slice(-100)
+                            : (payload.combatLog ?? gameState.combatLog),
+                        turnLog: payload.turnLog,
+                        actingEnemyId: payload.actingEnemyId ?? null
+                    });
+                    return;
+                }
                 const nextEnded = Array.from(new Set([...(nextBattleState.roundEndedPeerIds || []), fromPeerId]));
                 const updatedBattleState: CoopBattleState = { ...nextBattleState, roundEndedPeerIds: nextEnded };
                 setCoopBattleState(updatedBattleState);
@@ -10124,13 +10177,12 @@ const App: React.FC = () => {
                                 )}
                                 <button
                                     onClick={toggleBgmMode}
-                                    className={`flex h-9 items-center border-t-2 border-l-2 border-r-4 border-b-4 px-2 text-[10px] sm:text-xs font-black uppercase tracking-[0.08em] shadow-[0_0_0_1px_rgba(0,0,0,0.45)] transition-all active:translate-x-[2px] active:translate-y-[2px] active:border-r-2 active:border-b-2 ${
-                                        bgmMode === 'STUDY'
+                                    className={`flex h-9 items-center border-t-2 border-l-2 border-r-4 border-b-4 px-2 text-[10px] sm:text-xs font-black uppercase tracking-[0.08em] shadow-[0_0_0_1px_rgba(0,0,0,0.45)] transition-all active:translate-x-[2px] active:translate-y-[2px] active:border-r-2 active:border-b-2 ${bgmMode === 'STUDY'
                                             ? 'bg-indigo-950/95 text-indigo-200 border-t-indigo-300 border-l-indigo-300 border-r-indigo-700 border-b-indigo-700'
                                             : bgmMode === 'MP3'
                                                 ? 'bg-emerald-950/95 text-emerald-200 border-t-emerald-300 border-l-emerald-300 border-r-emerald-700 border-b-emerald-700'
                                                 : 'bg-cyan-950/95 text-cyan-100 border-t-cyan-300 border-l-cyan-300 border-r-cyan-700 border-b-cyan-700'
-                                    }`}
+                                        }`}
                                     title="BGMモード切替"
                                 >
                                     <Music size={13} className="mr-1 shrink-0" />
@@ -10398,13 +10450,12 @@ const App: React.FC = () => {
                             </div>
 
                             {transferStatus && (
-                                <div className={`mb-4 rounded-xl border px-4 py-3 text-sm font-bold ${
-                                    transferStatus.type === 'success'
+                                <div className={`mb-4 rounded-xl border px-4 py-3 text-sm font-bold ${transferStatus.type === 'success'
                                         ? 'border-emerald-500/50 bg-emerald-900/30 text-emerald-200'
                                         : transferStatus.type === 'error'
                                             ? 'border-red-500/50 bg-red-900/30 text-red-200'
                                             : 'border-cyan-500/50 bg-cyan-900/30 text-cyan-200'
-                                }`}>
+                                    }`}>
                                     {transferStatus.message}
                                 </div>
                             )}
@@ -10698,72 +10749,72 @@ const App: React.FC = () => {
                                 </div>
                             </div>
                             {coopPartyHudOpen && (
-                            <div className="space-y-1.5 sm:space-y-2">
-                                {coopSession.participants.map(participant => {
-                                    const isSelf = participant.peerId === coopSelfPeerId;
-                                    const isDecisionOwner = participant.peerId === coopDecisionOwner?.peerId;
-                                    const hpValue = participant.currentHp ?? participant.maxHp ?? 0;
-                                    const maxHpValue = participant.maxHp ?? hpValue;
-                                    return (
-                                        <div key={participant.peerId} className={`rounded-lg border px-2 py-1.5 sm:px-2 sm:py-2 ${isDecisionOwner ? 'border-cyan-400/70 bg-cyan-950/20' : 'border-white/10 bg-black/20'}`}>
-                                            <div className="mb-1 flex items-center justify-between gap-2">
-                                                <div className="min-w-0">
-                                                    <div className="truncate text-[11px] sm:text-xs font-black text-white flex items-center gap-1">
-                                                        {participant.name}{isSelf ? ' (あなた)' : ''}
-                                                        {(isSelf ? coopVoiceEnabled : participant.voiceEnabled)
-                                                            ? <Mic size={10} className="text-cyan-300 shrink-0" />
-                                                            : <MicOff size={10} className="text-slate-500 shrink-0" />}
+                                <div className="space-y-1.5 sm:space-y-2">
+                                    {coopSession.participants.map(participant => {
+                                        const isSelf = participant.peerId === coopSelfPeerId;
+                                        const isDecisionOwner = participant.peerId === coopDecisionOwner?.peerId;
+                                        const hpValue = participant.currentHp ?? participant.maxHp ?? 0;
+                                        const maxHpValue = participant.maxHp ?? hpValue;
+                                        return (
+                                            <div key={participant.peerId} className={`rounded-lg border px-2 py-1.5 sm:px-2 sm:py-2 ${isDecisionOwner ? 'border-cyan-400/70 bg-cyan-950/20' : 'border-white/10 bg-black/20'}`}>
+                                                <div className="mb-1 flex items-center justify-between gap-2">
+                                                    <div className="min-w-0">
+                                                        <div className="truncate text-[11px] sm:text-xs font-black text-white flex items-center gap-1">
+                                                            {participant.name}{isSelf ? ' (あなた)' : ''}
+                                                            {(isSelf ? coopVoiceEnabled : participant.voiceEnabled)
+                                                                ? <Mic size={10} className="text-cyan-300 shrink-0" />
+                                                                : <MicOff size={10} className="text-slate-500 shrink-0" />}
+                                                        </div>
+                                                        <div className="hidden sm:block text-[10px] text-slate-300">
+                                                            {isDecisionOwner ? '決定役' : '同行中'}
+                                                        </div>
                                                     </div>
-                                                    <div className="hidden sm:block text-[10px] text-slate-300">
-                                                        {isDecisionOwner ? '決定役' : '同行中'}
+                                                    <div className={`text-[9px] sm:text-[10px] font-bold ${hpValue > 0 ? 'text-emerald-300' : 'text-red-300'}`}>
+                                                        {hpValue > 0 ? '生存' : 'ダウン'}
                                                     </div>
                                                 </div>
-                                                <div className={`text-[9px] sm:text-[10px] font-bold ${hpValue > 0 ? 'text-emerald-300' : 'text-red-300'}`}>
-                                                    {hpValue > 0 ? '生存' : 'ダウン'}
+                                                <div className="mb-1 h-1 sm:h-1.5 overflow-hidden rounded-full bg-slate-800">
+                                                    <div
+                                                        className={`h-full rounded-full ${hpValue > 0 ? 'bg-emerald-400' : 'bg-red-500'}`}
+                                                        style={{ width: `${maxHpValue > 0 ? Math.max(0, Math.min(100, (hpValue / maxHpValue) * 100)) : 0}%` }}
+                                                    />
+                                                </div>
+                                                <div className="flex items-center justify-between gap-2 text-[9px] sm:text-[10px] text-slate-300">
+                                                    <span className="shrink-0">HP {hpValue}/{maxHpValue}</span>
+                                                    {gameState.screen === GameScreen.REWARD ? (
+                                                        <span className={`truncate text-right ${participant.rewardResolved ? 'text-yellow-300' : 'text-slate-300'}`}>
+                                                            {participant.rewardResolved ? '報酬完了' : '報酬中'}
+                                                        </span>
+                                                    ) : gameState.screen === GameScreen.SHOP ? (
+                                                        <span className={`truncate text-right ${participant.shopResolved ? 'text-yellow-300' : 'text-slate-300'}`}>
+                                                            {participant.shopResolved ? '買い物完了' : '買い物中'}
+                                                        </span>
+                                                    ) : gameState.screen === GameScreen.REST ? (
+                                                        <span className={`truncate text-right ${participant.restResolved ? 'text-yellow-300' : 'text-slate-300'}`}>
+                                                            {participant.restResolved ? '休憩完了' : '休憩中'}
+                                                        </span>
+                                                    ) : gameState.screen === GameScreen.EVENT ? (
+                                                        <span className={`truncate text-right ${participant.eventResolved ? 'text-yellow-300' : 'text-slate-300'}`}>
+                                                            {participant.eventResolved ? 'イベント完了' : 'イベント中'}
+                                                        </span>
+                                                    ) : gameState.screen === GameScreen.TREASURE ? (
+                                                        <span className={`truncate text-right ${participant.treasureResolved ? 'text-yellow-300' : 'text-slate-300'}`}>
+                                                            {participant.treasureResolved ? '宝確認完了' : '宝確認中'}
+                                                        </span>
+                                                    ) : CHALLENGE_SCREEN_SET.has(gameState.screen) ? (
+                                                        <span className={`truncate text-right ${participant.quizResolved ? 'text-yellow-300' : 'text-slate-300'}`}>
+                                                            {participant.quizResolved ? `クイズ ${participant.quizCorrectCount ?? 0}` : 'クイズ中'}
+                                                        </span>
+                                                    ) : (
+                                                        <span className={`truncate text-right ${isDecisionOwner ? 'text-cyan-300' : 'text-slate-400'}`}>
+                                                            {isDecisionOwner ? '進行中' : '待機'}
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
-                                            <div className="mb-1 h-1 sm:h-1.5 overflow-hidden rounded-full bg-slate-800">
-                                                <div
-                                                    className={`h-full rounded-full ${hpValue > 0 ? 'bg-emerald-400' : 'bg-red-500'}`}
-                                                    style={{ width: `${maxHpValue > 0 ? Math.max(0, Math.min(100, (hpValue / maxHpValue) * 100)) : 0}%` }}
-                                                />
-                                            </div>
-                                            <div className="flex items-center justify-between gap-2 text-[9px] sm:text-[10px] text-slate-300">
-                                                <span className="shrink-0">HP {hpValue}/{maxHpValue}</span>
-                                                {gameState.screen === GameScreen.REWARD ? (
-                                                    <span className={`truncate text-right ${participant.rewardResolved ? 'text-yellow-300' : 'text-slate-300'}`}>
-                                                        {participant.rewardResolved ? '報酬完了' : '報酬中'}
-                                                    </span>
-                                                ) : gameState.screen === GameScreen.SHOP ? (
-                                                    <span className={`truncate text-right ${participant.shopResolved ? 'text-yellow-300' : 'text-slate-300'}`}>
-                                                        {participant.shopResolved ? '買い物完了' : '買い物中'}
-                                                    </span>
-                                                ) : gameState.screen === GameScreen.REST ? (
-                                                    <span className={`truncate text-right ${participant.restResolved ? 'text-yellow-300' : 'text-slate-300'}`}>
-                                                        {participant.restResolved ? '休憩完了' : '休憩中'}
-                                                    </span>
-                                                ) : gameState.screen === GameScreen.EVENT ? (
-                                                    <span className={`truncate text-right ${participant.eventResolved ? 'text-yellow-300' : 'text-slate-300'}`}>
-                                                        {participant.eventResolved ? 'イベント完了' : 'イベント中'}
-                                                    </span>
-                                                ) : gameState.screen === GameScreen.TREASURE ? (
-                                                    <span className={`truncate text-right ${participant.treasureResolved ? 'text-yellow-300' : 'text-slate-300'}`}>
-                                                        {participant.treasureResolved ? '宝確認完了' : '宝確認中'}
-                                                    </span>
-                                                ) : CHALLENGE_SCREEN_SET.has(gameState.screen) ? (
-                                                    <span className={`truncate text-right ${participant.quizResolved ? 'text-yellow-300' : 'text-slate-300'}`}>
-                                                        {participant.quizResolved ? `クイズ ${participant.quizCorrectCount ?? 0}` : 'クイズ中'}
-                                                    </span>
-                                                ) : (
-                                                    <span className={`truncate text-right ${isDecisionOwner ? 'text-cyan-300' : 'text-slate-400'}`}>
-                                                        {isDecisionOwner ? '進行中' : '待機'}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                                        );
+                                    })}
+                                </div>
                             )}
                         </div>
                     </div>
@@ -10973,7 +11024,7 @@ const App: React.FC = () => {
                 {gameState.screen === GameScreen.DIFFICULTY_SELECTION && (
                     <div className="absolute inset-0">
                         {((gameState.challengeMode === 'RACE' && raceSession && !raceSession.isHost) ||
-                          (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost)) ? (
+                            (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost)) ? (
                             <div className="flex h-full w-full items-center justify-center bg-slate-950 p-6 text-white">
                                 <div className="max-w-md rounded-2xl border border-cyan-500 bg-slate-900 p-6 text-center shadow-2xl">
                                     <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-cyan-500 border-t-transparent" />
@@ -11696,7 +11747,7 @@ const App: React.FC = () => {
                                                     </div>
                                                 ))}
                                             </div>
-                                    </div>
+                                        </div>
 
                                         <button
                                             onClick={() => {

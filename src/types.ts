@@ -685,7 +685,10 @@ export interface ParryState {
   result?: 'perfect' | 'good' | 'miss';
 }
 
-export type VFXType = 'SLASH' | 'BLOCK' | 'BUFF' | 'DEBUFF' | 'HEAL' | 'FIRE' | 'EXPLOSION' | 'LIGHTNING' | 'CRITICAL' | 'SHOCKWAVE' | 'FLASH';
+export type AttackEffectKey = 'slash' | 'impact' | 'projectile' | 'fire' | 'lightning' | 'poison' | 'shockwave' | 'multihit' | 'drain' | 'finisher' | 'laser' | 'soundwave' | 'wind' | 'plant' | 'graduation';
+export type StatusEffectKey = 'block' | 'heal' | 'buff' | 'strength' | 'debuff' | 'weak' | 'vulnerable' | 'poison';
+
+export type VFXType = 'SLASH' | 'BLOCK' | 'BUFF' | 'DEBUFF' | 'HEAL' | 'FIRE' | 'EXPLOSION' | 'LIGHTNING' | 'CRITICAL' | 'SHOCKWAVE' | 'FLASH' | 'ATTACK_SPRITE';
 
 export interface VisualEffectInstance {
   id: string;
@@ -696,6 +699,8 @@ export interface VisualEffectInstance {
   y?: number;
   delay?: number;
   rotation?: number;
+  attackEffectKey?: AttackEffectKey;
+  statusEffectKey?: StatusEffectKey;
 }
 
 export interface GameState {

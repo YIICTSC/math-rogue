@@ -1,4 +1,6 @@
 
+import type { AttackEffectKey, StatusEffectKey } from '../types';
+
 class AudioService {
   private ctx: AudioContext | null = null;
   private masterGain: GainNode | null = null;
@@ -910,6 +912,45 @@ class AudioService {
           }
           fallback();
       })();
+  }
+
+  public playAttackEffectSound(effect: AttackEffectKey) {
+      const fallbackByEffect: Record<AttackEffectKey, () => void> = {
+          slash: () => this.playAttackSynth(this.ctx!.currentTime),
+          impact: () => this.playSound('damage'),
+          projectile: () => this.playAttackSynth(this.ctx!.currentTime),
+          fire: () => this.playSound('explosion'),
+          lightning: () => this.playSound('buff'),
+          poison: () => this.playSound('debuff'),
+          shockwave: () => this.playSound('explosion'),
+          multihit: () => this.playAttackSynth(this.ctx!.currentTime),
+          drain: () => this.playSound('buff'),
+          finisher: () => this.playSound('finisher_slash'),
+          laser: () => this.playSound('buff'),
+          soundwave: () => this.playSound('explosion'),
+          wind: () => this.playSound('buff'),
+          plant: () => this.playSound('buff'),
+          graduation: () => this.playSound('finisher_explosion'),
+      };
+      this.init();
+      if (!this.ctx || !this.sfxGain || this.isMuted) return;
+      this.playSfxMp3(`attack-effects/${effect}`, fallbackByEffect[effect]);
+  }
+
+  public playStatusEffectSound(effect: StatusEffectKey) {
+      const fallbackByEffect: Record<StatusEffectKey, () => void> = {
+          block: () => this.playSound('block'),
+          heal: () => this.playSound('buff'),
+          buff: () => this.playSound('buff'),
+          strength: () => this.playSound('buff'),
+          debuff: () => this.playSound('debuff'),
+          weak: () => this.playSound('debuff'),
+          vulnerable: () => this.playSound('debuff'),
+          poison: () => this.playSound('debuff'),
+      };
+      this.init();
+      if (!this.ctx || !this.sfxGain || this.isMuted) return;
+      this.playSfxMp3(`status-effects/${effect}`, fallbackByEffect[effect]);
   }
 
   public playSound(effect: 'select' | 'attack' | 'block' | 'win' | 'lose' | 'correct' | 'wrong' | 'buff' | 'debuff' | 'damage' | 'explosion' | 'finisher_slash' | 'finisher_explosion') {

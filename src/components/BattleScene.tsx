@@ -4,6 +4,8 @@ import Card, { KEYWORD_DEFINITIONS } from './Card';
 import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles, MessageCircle, Mic, ArrowRight, MousePointer2, ChevronsRight, ChevronDown, Flame, RotateCcw, Triangle, Settings } from 'lucide-react';
 import PixelSprite from './PixelSprite';
 import EnemyIllustration from './EnemyIllustration';
+import AttackEffectSprite from './AttackEffectSprite';
+import StatusEffectSprite from './StatusEffectSprite';
 import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
 import { HERO_IMAGE_DATA, CARDS_LIBRARY, STATUS_CARDS } from '../constants';
@@ -14,6 +16,7 @@ import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { storageService } from '../services/storageService';
 import { PotionIcon, RelicIcon } from './ItemIcon';
 import { getBattleBackgroundSceneById } from '../data/battleBackgrounds';
+import { getStatusEffectKeyForVfx } from '../data/statusEffects';
 
 const POWER_DEFINITIONS: Record<string, { name: string, desc: string }> = {
     WEAK: { name: "へろへろ", desc: "攻撃で与えるダメージが25%減っちゃう。" },
@@ -94,11 +97,22 @@ export const FloatingTextOverlay: React.FC<{ data: FloatingText | null, language
 // Component for handling visual effects like slashes
 export const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: string }> = ({ effects, targetId }) => {
     const activeOnThisTarget = effects.filter(e => e.targetId === targetId);
+    const playedStatusSoundIdsRef = useRef<Set<string>>(new Set());
+    useEffect(() => {
+        activeOnThisTarget.forEach(effect => {
+            if (!['BLOCK', 'BUFF', 'DEBUFF', 'HEAL'].includes(effect.type)) return;
+            if (playedStatusSoundIdsRef.current.has(effect.id)) return;
+            playedStatusSoundIdsRef.current.add(effect.id);
+            window.setTimeout(() => {
+                audioService.playStatusEffectSound(effect.statusEffectKey || getStatusEffectKeyForVfx(effect.type));
+            }, effect.delay || 0);
+        });
+    }, [activeOnThisTarget]);
     if (activeOnThisTarget.length === 0) return null;
 
-    const IMPACT_VFX_TYPES = new Set(['SLASH', 'FIRE', 'EXPLOSION', 'LIGHTNING', 'CRITICAL', 'FLASH', 'SHOCKWAVE']);
+    const IMPACT_VFX_TYPES = new Set(['SLASH', 'FIRE', 'EXPLOSION', 'LIGHTNING', 'CRITICAL', 'FLASH', 'SHOCKWAVE', 'ATTACK_SPRITE']);
     const getUnifiedCategory = (type: VisualEffectInstance['type']) => {
-        if (['SLASH', 'FIRE', 'EXPLOSION', 'LIGHTNING', 'CRITICAL', 'SHOCKWAVE'].includes(type)) return 'OFFENSE';
+        if (['SLASH', 'FIRE', 'EXPLOSION', 'LIGHTNING', 'CRITICAL', 'SHOCKWAVE', 'ATTACK_SPRITE'].includes(type)) return 'OFFENSE';
         if (type === 'BLOCK') return 'DEFENSE';
         if (type === 'BUFF') return 'BUFF';
         if (type === 'DEBUFF') return 'DEBUFF';
@@ -132,103 +146,125 @@ export const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: s
                 const queuedDelay = impactType ? 0 : Math.min(200, index * 40);
                 const totalDelay = (vfx.delay || 0) + queuedDelay;
                 return (
-                <div key={vfx.id} className="absolute inset-0 flex items-center justify-center">
-                    {vfx.type !== 'FLASH' && (
-                        <div
-                            className={`absolute w-20 h-20 rounded-full border-2 ${getUnifiedPreludeClass(vfx.type)}`}
-                            style={{
-                                animation: 'unified-vfx-prelude 260ms ease-out',
-                                animationDelay: `${Math.max(0, totalDelay - 50)}ms`,
-                                animationFillMode: 'both'
-                            }}
-                        ></div>
-                    )}
-                    {vfx.type === 'SLASH' && (
-                        <div
-                            className="w-48 h-2 bg-gradient-to-r from-transparent via-white to-transparent animate-slash-vfx shadow-[0_0_20px_rgba(255,255,255,0.8)]"
-                            style={{
-                                transform: `rotate(${vfx.rotation !== undefined ? vfx.rotation : 45}deg)`,
-                                animationDelay: `${totalDelay}ms`,
-                                animationFillMode: 'both'
-                            }}
-                        ></div>
-                    )}
-                    {vfx.type === 'BLOCK' && (
-                        <div
-                            className="relative flex items-center justify-center"
-                            style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}
-                        >
-                            <div className="absolute w-32 h-32 border-4 border-blue-400 rounded-full animate-pulse-expand opacity-0"></div>
-                            <div className="animate-block-vfx p-4 bg-blue-500/30 border-2 border-blue-300 rounded-lg shadow-[0_0_20px_rgba(59,130,246,0.6)]">
-                                <Shield size={48} className="text-blue-100 fill-blue-500/50" />
+                    <div key={vfx.id} className="absolute inset-0 flex items-center justify-center">
+                        {vfx.type !== 'FLASH' && (
+                            <div
+                                className={`absolute w-20 h-20 rounded-full border-2 ${getUnifiedPreludeClass(vfx.type)}`}
+                                style={{
+                                    animation: 'unified-vfx-prelude 260ms ease-out',
+                                    animationDelay: `${Math.max(0, totalDelay - 50)}ms`,
+                                    animationFillMode: 'both'
+                                }}
+                            ></div>
+                        )}
+                        {vfx.type === 'SLASH' && (
+                            <div
+                                className="w-48 h-2 bg-gradient-to-r from-transparent via-white to-transparent animate-slash-vfx shadow-[0_0_20px_rgba(255,255,255,0.8)]"
+                                style={{
+                                    transform: `rotate(${vfx.rotation !== undefined ? vfx.rotation : 45}deg)`,
+                                    animationDelay: `${totalDelay}ms`,
+                                    animationFillMode: 'both'
+                                }}
+                            ></div>
+                        )}
+                        {vfx.type === 'ATTACK_SPRITE' && (
+                            <div
+                                className="animate-attack-sprite-vfx drop-shadow-[0_0_18px_rgba(255,255,255,0.45)]"
+                                style={{
+                                    animationDelay: `${totalDelay}ms`,
+                                    animationFillMode: 'both',
+                                    transform: `rotate(${vfx.rotation || 0}deg)`
+                                }}
+                            >
+                                <AttackEffectSprite effectKey={vfx.attackEffectKey || 'slash'} size={176} />
                             </div>
-                        </div>
-                    )}
-                    {vfx.type === 'BUFF' && (
-                        <div className="animate-buff-vfx p-2" style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}>
-                            <Sparkles size={56} className="text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.8)]" />
-                        </div>
-                    )}
-                    {vfx.type === 'DEBUFF' && (
-                        <div className="animate-debuff-vfx p-2" style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}>
-                            <Skull size={56} className="text-purple-400 drop-shadow-[0_0_15px_rgba(168,85,247,0.8)]" />
-                        </div>
-                    )}
-                    {vfx.type === 'HEAL' && (
-                        <div className="animate-heal-vfx" style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}>
-                            <Heart size={56} className="text-green-300 fill-green-500/50 drop-shadow-[0_0_15px_rgba(34,197,94,0.8)]" />
-                        </div>
-                    )}
-                    {vfx.type === 'FIRE' && (
-                        <div className="relative flex items-center justify-center" style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}>
-                            <div className="absolute w-24 h-24 bg-orange-500/40 blur-xl animate-ping rounded-full"></div>
-                            <div className="animate-fire-vfx">
-                                <Flame size={64} className="text-orange-400 fill-orange-600/50 drop-shadow-[0_0_20px_rgba(249,115,22,0.8)]" />
+                        )}
+                        {vfx.type === 'BLOCK' && (
+                            <div
+                                className="animate-status-sprite-vfx drop-shadow-[0_0_18px_rgba(125,211,252,0.5)]"
+                                style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}
+                            >
+                                <StatusEffectSprite effectKey={vfx.statusEffectKey || 'block'} size={168} />
                             </div>
-                        </div>
-                    )}
-                    {vfx.type === 'EXPLOSION' && (
-                        <div
-                            className="w-32 h-32 bg-orange-500 rounded-full animate-explosion-vfx shadow-[0_0_40px_orange]"
-                            style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}
-                        ></div>
-                    )}
-                    {vfx.type === 'LIGHTNING' && (
-                        <div
-                            className="w-4 h-64 bg-cyan-200 animate-lightning-vfx shadow-[0_0_30px_cyan]"
-                            style={{
-                                animationDelay: `${totalDelay}ms`,
-                                transform: `rotate(${vfx.rotation || 0}deg)`,
-                                animationFillMode: 'both'
-                            }}
-                        ></div>
-                    )}
-                    {vfx.type === 'CRITICAL' && (
-                        <div
-                            className="w-64 h-64 border-8 border-yellow-400 rounded-full animate-critical-vfx"
-                            style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}
-                        ></div>
-                    )}
-                    {vfx.type === 'SHOCKWAVE' && (
-                        <div
-                            className="w-16 h-16 border-4 border-white/50 rounded-full animate-shockwave-vfx"
-                            style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}
-                        ></div>
-                    )}
-                    {vfx.type === 'FLASH' && (
-                        <div
-                            className="absolute w-[200vw] h-[200vh] bg-white animate-flash-vfx"
-                            style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}
-                        ></div>
-                    )}
-                </div>
-            )})}
+                        )}
+                        {vfx.type === 'BUFF' && (
+                            <div className="animate-status-sprite-vfx drop-shadow-[0_0_18px_rgba(250,204,21,0.5)]" style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}>
+                                <StatusEffectSprite effectKey={vfx.statusEffectKey || 'buff'} size={168} />
+                            </div>
+                        )}
+                        {vfx.type === 'DEBUFF' && (
+                            <div className="animate-status-sprite-vfx drop-shadow-[0_0_18px_rgba(168,85,247,0.5)]" style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}>
+                                <StatusEffectSprite effectKey={vfx.statusEffectKey || getStatusEffectKeyForVfx(vfx.type)} size={168} />
+                            </div>
+                        )}
+                        {vfx.type === 'HEAL' && (
+                            <div className="animate-status-sprite-vfx drop-shadow-[0_0_18px_rgba(74,222,128,0.5)]" style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}>
+                                <StatusEffectSprite effectKey={vfx.statusEffectKey || 'heal'} size={168} />
+                            </div>
+                        )}
+                        {vfx.type === 'FIRE' && (
+                            <div className="relative flex items-center justify-center" style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}>
+                                <div className="absolute w-24 h-24 bg-orange-500/40 blur-xl animate-ping rounded-full"></div>
+                                <div className="animate-fire-vfx">
+                                    <Flame size={64} className="text-orange-400 fill-orange-600/50 drop-shadow-[0_0_20px_rgba(249,115,22,0.8)]" />
+                                </div>
+                            </div>
+                        )}
+                        {vfx.type === 'EXPLOSION' && (
+                            <div
+                                className="w-32 h-32 bg-orange-500 rounded-full animate-explosion-vfx shadow-[0_0_40px_orange]"
+                                style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}
+                            ></div>
+                        )}
+                        {vfx.type === 'LIGHTNING' && (
+                            <div
+                                className="w-4 h-64 bg-cyan-200 animate-lightning-vfx shadow-[0_0_30px_cyan]"
+                                style={{
+                                    animationDelay: `${totalDelay}ms`,
+                                    transform: `rotate(${vfx.rotation || 0}deg)`,
+                                    animationFillMode: 'both'
+                                }}
+                            ></div>
+                        )}
+                        {vfx.type === 'CRITICAL' && (
+                            <div
+                                className="w-64 h-64 border-8 border-yellow-400 rounded-full animate-critical-vfx"
+                                style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}
+                            ></div>
+                        )}
+                        {vfx.type === 'SHOCKWAVE' && (
+                            <div
+                                className="w-16 h-16 border-4 border-white/50 rounded-full animate-shockwave-vfx"
+                                style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}
+                            ></div>
+                        )}
+                        {vfx.type === 'FLASH' && (
+                            <div
+                                className="absolute w-[200vw] h-[200vh] bg-white animate-flash-vfx"
+                                style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}
+                            ></div>
+                        )}
+                    </div>
+                )
+            })}
             <style>
                 {`
                     @keyframes slash-vfx {
                         0% { transform: rotate(45deg) scaleX(0) translateX(-100%); opacity: 0; }
                         20% { transform: rotate(45deg) scaleX(1.8) translateX(0); opacity: 1; }
                         100% { transform: rotate(45deg) scaleX(2.5) translateX(100%); opacity: 0; }
+                    }
+                    @keyframes attack-sprite-vfx {
+                        0% { transform: scale(0.55); opacity: 0; filter: brightness(1.6); }
+                        12% { transform: scale(1.08); opacity: 1; filter: brightness(1.25); }
+                        65% { transform: scale(1.18); opacity: 1; filter: brightness(1); }
+                        100% { transform: scale(1.38); opacity: 0; filter: brightness(0.8); }
+                    }
+                    .animate-attack-sprite-vfx {
+                        animation: attack-sprite-vfx 420ms ease-out forwards;
+                    }
+                    .animate-status-sprite-vfx {
+                        animation: attack-sprite-vfx 520ms ease-out forwards;
                     }
                     @keyframes unified-vfx-prelude {
                         0% { transform: scale(0.4); opacity: 0; }
@@ -466,7 +502,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         }
         if (activeEffects.length > 0) {
             const impactTypes = activeEffects.map(e => e.type);
-            const hasImpact = impactTypes.some(type => ['SLASH', 'FIRE', 'EXPLOSION', 'LIGHTNING', 'CRITICAL'].includes(type));
+            const hasImpact = impactTypes.some(type => ['SLASH', 'FIRE', 'EXPLOSION', 'LIGHTNING', 'CRITICAL', 'ATTACK_SPRITE'].includes(type));
             if (hasImpact) {
                 const isHeavyImpact = impactTypes.some(type => type === 'CRITICAL' || type === 'EXPLOSION');
                 const isMediumImpact = !isHeavyImpact && impactTypes.some(type => type === 'LIGHTNING' || type === 'FIRE');
@@ -972,13 +1008,12 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 {coopTurnQueue.map((slot) => (
                                     <div
                                         key={slot.id}
-                                        className={`flex items-center gap-0.5 sm:gap-1 rounded border px-1 py-0.5 sm:px-1.5 text-[8px] sm:text-[9px] font-bold ${
-                                            slot.type === 'SELF'
+                                        className={`flex items-center gap-0.5 sm:gap-1 rounded border px-1 py-0.5 sm:px-1.5 text-[8px] sm:text-[9px] font-bold ${slot.type === 'SELF'
                                                 ? 'border-yellow-400 bg-yellow-900/50 text-yellow-100'
                                                 : slot.type === 'ALLY'
                                                     ? 'border-emerald-400 bg-emerald-900/40 text-emerald-100'
                                                     : 'border-red-400 bg-red-950/40 text-red-100'
-                                        }`}
+                                            }`}
                                     >
                                         {slot.type === 'SELF' ? <Zap size={9} /> : slot.type === 'ALLY' ? <Users size={9} /> : <Skull size={9} />}
                                         <span className="max-w-[56px] sm:max-w-[96px] truncate">{slot.label}</span>
@@ -1076,7 +1111,17 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         ref={logContainerRef}
                         className="absolute top-2 right-2 z-[45] w-64 max-h-48 bg-black/80 border border-gray-600 rounded p-2 text-xs text-gray-300 font-mono overflow-y-auto custom-scrollbar shadow-xl backdrop-blur-sm pointer-events-auto overscroll-contain"
                     >
-                        <div className="text-center text-gray-500 border-b border-gray-700 pb-1 mb-1 font-bold sticky top-0 bg-black/90 w-full">Battle Log</div>
+                        <div className="sticky top-0 mb-1 flex w-full items-center justify-between border-b border-gray-700 bg-black/90 pb-1 font-bold text-gray-500">
+                            <span className="flex-1 text-center">Battle Log</span>
+                            <button
+                                type="button"
+                                onClick={() => setShowLog(false)}
+                                className="ml-2 rounded border border-gray-600 bg-gray-900/90 p-0.5 text-gray-300 hover:border-gray-400 hover:text-white"
+                                title="バトルログを閉じる"
+                            >
+                                <X size={12} />
+                            </button>
+                        </div>
                         {combatLog.length === 0 ? (
                             <div className="text-center italic opacity-50">No actions yet</div>
                         ) : (
@@ -1261,336 +1306,337 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 {/* Enemies + Player Area */}
                 <div className={isTrueBossPhase2Active ? "battle-actors relative min-h-[220px] md:min-h-[320px] pt-2 md:pt-4" : "battle-actors flex flex-col flex-1 min-h-0"}>
 
-                {/* Enemies Area */}
-                <div className={isTrueBossPhase2Active ? `battle-enemies-area absolute right-2 md:left-1/2 md:-translate-x-1/2 bottom-0 flex justify-end md:justify-center items-end gap-2 min-h-0 shrink-0 ${isFinisherActive ? 'z-[280]' : 'z-10'}` : `battle-enemies-area flex justify-center items-start pt-8 md:pt-14 gap-2 min-h-[180px] shrink-0 ${isFinisherActive ? 'z-[280]' : ''}`}>
-                    {visualEnemies.map((enemy) => {
-                        const enemyHpPercent = (enemy.currentHp / enemy.maxHp) * 100;
-                        const isSelected = !isFinisherActive && selectedEnemyId === enemy.id;
-                        const actionClass = getEnemyActionClass(enemy);
-                        const enemyName = trans(enemy.name, languageMode);
-                        const enemyNameNeedsScroll = enemyName.length > 5;
-                        const isTrueBossPhase2 = enemy.enemyType === 'THE_HEART' && enemy.phase === 2;
-                        const isParryTarget = !!parryState?.active && parryState.enemyId === enemy.id;
-                        const enemySvgAliases = isTrueBossPhase2
-                            ? ['THE_HEART_PHASE2', '真ボス2形態目', '真ボス_2', '真ボス第二形態', `${enemy.enemyType}_2`]
-                            : [];
+                    {/* Enemies Area */}
+                    <div className={isTrueBossPhase2Active ? `battle-enemies-area absolute right-2 md:left-1/2 md:-translate-x-1/2 bottom-0 flex justify-end md:justify-center items-end gap-2 min-h-0 shrink-0 ${isFinisherActive ? 'z-[280]' : 'z-10'}` : `battle-enemies-area flex justify-center items-start pt-8 md:pt-14 gap-2 min-h-[180px] shrink-0 ${isFinisherActive ? 'z-[280]' : ''}`}>
+                        {visualEnemies.map((enemy) => {
+                            const enemyHpPercent = (enemy.currentHp / enemy.maxHp) * 100;
+                            const isSelected = !isFinisherActive && selectedEnemyId === enemy.id;
+                            const actionClass = getEnemyActionClass(enemy);
+                            const enemyName = trans(enemy.name, languageMode);
+                            const enemyNameNeedsScroll = enemyName.length > 5;
+                            const isTrueBossPhase2 = enemy.enemyType === 'THE_HEART' && enemy.phase === 2;
+                            const isFinalBoss = enemy.enemyType === 'THE_HEART';
+                            const isParryTarget = !!parryState?.active && parryState.enemyId === enemy.id;
+                            const enemySvgAliases = isTrueBossPhase2
+                                ? ['THE_HEART_PHASE2', '真ボス2形態目', '真ボス_2', '真ボス第二形態', `${enemy.enemyType}_2`]
+                                : [];
 
-                        return (
-                            <div
-                                key={enemy.id}
-                                onClick={() => {
-                                    if (!isFinisherActive && coopCanAct) onSelectEnemy(enemy.id);
-                                }}
-                                className={`flex flex-col items-center z-10 transition-all duration-200 cursor-pointer relative ${isSelected && !actionClass ? 'scale-105 z-20' : ''} ${!isSelected && !actionClass ? 'hover:scale-105' : ''} ${actionClass} ${isTrueBossPhase2 ? 'sinister-aura' : ''} ${tutorialStep === 2 ? 'ring-4 ring-red-500 ring-offset-4 ring-offset-transparent animate-pulse rounded-lg' : ''} ${isParryTarget ? 'ring-4 ring-cyan-300 ring-offset-4 ring-offset-slate-900 rounded-lg shadow-[0_0_30px_rgba(34,211,238,0.75)] z-[60]' : ''} ${isFinisherActive ? '!z-[300]' : ''}`}
-                            >
-                                {isParryTarget && (
-                                    <div className="absolute -inset-5 rounded-full border-2 border-cyan-300/70 animate-ping pointer-events-none"></div>
-                                )}
-                                {isTrueBossPhase2 && (
-                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-900/20 blur-3xl rounded-full void-backglow pointer-events-none z-0"></div>
-                                )}
+                            return (
+                                <div
+                                    key={enemy.id}
+                                    onClick={() => {
+                                        if (!isFinisherActive && coopCanAct) onSelectEnemy(enemy.id);
+                                    }}
+                                    className={`flex flex-col items-center z-10 transition-all duration-200 cursor-pointer relative ${isFinalBoss ? 'md:flex-row md:items-center md:gap-3' : ''} ${isSelected && !actionClass ? 'scale-105 z-20' : ''} ${!isSelected && !actionClass ? 'hover:scale-105' : ''} ${actionClass} ${isTrueBossPhase2 ? 'sinister-aura' : ''} ${tutorialStep === 2 ? 'ring-4 ring-red-500 ring-offset-4 ring-offset-transparent animate-pulse rounded-lg' : ''} ${isParryTarget ? 'ring-4 ring-cyan-300 ring-offset-4 ring-offset-slate-900 rounded-lg shadow-[0_0_30px_rgba(34,211,238,0.75)] z-[60]' : ''} ${isFinisherActive ? '!z-[300]' : ''}`}
+                                >
+                                    {isParryTarget && (
+                                        <div className="absolute -inset-5 rounded-full border-2 border-cyan-300/70 animate-ping pointer-events-none"></div>
+                                    )}
+                                    {isTrueBossPhase2 && (
+                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-900/20 blur-3xl rounded-full void-backglow pointer-events-none z-0"></div>
+                                    )}
 
-                                {!isFinisherActive && (
-                                    <div
-                                        className={`battle-enemy-intent absolute ${isTrueBossPhase2 ? '-top-1 md:-top-6' : '-top-6'} left-1/2 -translate-x-1/2 z-30 transition-all duration-300 text-xs font-extrabold px-1.5 py-0.5 rounded border-2 animate-bounce whitespace-nowrap shadow-xl flex items-center justify-center min-w-[40px] ${hideEnemyIntents ? 'bg-slate-900 text-slate-100 border-slate-500' : enemy.nextIntent.type === 'PIERCE_ATTACK' ? 'bg-red-800 text-white border-yellow-400 scale-125 ring-2 ring-red-400 shadow-red-900/50' : 'bg-white text-black border-red-600'}`}
-                                        onClick={(e) => { e.stopPropagation(); showInfo(trans("敵", languageMode), trans("敵の次の行動です。", languageMode)); }}
-                                        title={hideEnemyIntents ? "???" : trans(getIntentHoverText(enemy), languageMode)}
-                                    >
-                                        {hideEnemyIntents ? (
-                                            <span className="tracking-[0.25em]">???</span>
-                                        ) : (
-                                            <>
-                                                {(enemy.nextIntent.type === 'ATTACK' || enemy.nextIntent.type === 'ATTACK_DEBUFF' || enemy.nextIntent.type === 'ATTACK_DEFEND' || enemy.nextIntent.type === 'PIERCE_ATTACK') && (
-                                                    <>
-                                                        {enemy.nextIntent.type === 'PIERCE_ATTACK' ? (
-                                                            <div className="relative flex items-center justify-center mr-1.5">
-                                                                <Triangle size={18} className="text-yellow-400 fill-yellow-400" />
-                                                                <span className="absolute text-[10px] font-black text-red-900 top-[3px]">!</span>
-                                                            </div>
-                                                        ) : (
-                                                            <Skull size={12} className="mr-1 text-red-600" />
-                                                        )}
-                                                        <span className="inline-flex items-center">
-                                                            {enemy.nextIntent.value}
-                                                        </span>
-                                                        {enemy.nextIntent.type === 'ATTACK_DEFEND' && (
-                                                            <span className="inline-flex items-center ml-1.5 text-blue-600">
-                                                                <Shield size={11} className="mr-0.5" />
-                                                                {enemy.nextIntent.secondaryValue ?? enemy.nextIntent.value}
-                                                            </span>
-                                                        )}
-                                                    </>
-                                                )}
-                                                {enemy.nextIntent.type === 'DEFEND' && (
-                                                    <><Shield size={12} className="mr-1 text-blue-600" /> {enemy.nextIntent.value}</>
-                                                )}
-                                                {(enemy.nextIntent.type === 'BUFF' || enemy.nextIntent.type === 'DEBUFF' || enemy.nextIntent.type === 'SLEEP') && (
-                                                    <><Zap size={12} className="mr-1 text-yellow-500 fill-yellow-500" /> !</>
-                                                )}
-                                                {enemy.nextIntent.type === 'UNKNOWN' && <span className="text-gray-600">?</span>}
-                                            </>
-                                        )}
-                                    </div>
-                                )}
-
-                                <div className={`battle-enemy-sprite relative mb-1 transition-all duration-700 ${isTrueBossPhase2 ? ENEMY_ILLUSTRATION_SIZE_CLASS.battleTrueBossPhase2 : ENEMY_ILLUSTRATION_SIZE_CLASS.battleNormal}`}>
-                                    {isFinisherActive ? (
-                                        <div className="relative w-full h-full flex items-center justify-center">
-                                            {!finisherBurst && (
-                                                <div className="w-full h-full animate-finisher-enemy-focus">
-                                                    <EnemyIllustration
-                                                        name={enemy.name}
-                                                        seed={`${enemy.id}-finisher-main`}
-                                                        aliases={enemySvgAliases}
-                                                        className="w-full h-full drop-shadow-[0_0_20px_rgba(255,255,255,0.5)] rotate-[6deg] scale-110"
-                                                        size={24}
-                                                    />
-                                                </div>
-                                            )}
-                                            {finisherBurst && (
+                                    {!isFinisherActive && (
+                                        <div
+                                            className={`battle-enemy-intent absolute ${isTrueBossPhase2 ? '-top-1 md:-top-6' : '-top-6'} left-1/2 -translate-x-1/2 z-30 transition-all duration-300 text-xs font-extrabold px-1.5 py-0.5 rounded border-2 animate-bounce whitespace-nowrap shadow-xl flex items-center justify-center min-w-[40px] ${hideEnemyIntents ? 'bg-slate-900 text-slate-100 border-slate-500' : enemy.nextIntent.type === 'PIERCE_ATTACK' ? 'bg-red-800 text-white border-yellow-400 scale-125 ring-2 ring-red-400 shadow-red-900/50' : 'bg-white text-black border-red-600'}`}
+                                            onClick={(e) => { e.stopPropagation(); showInfo(trans("敵", languageMode), trans("敵の次の行動です。", languageMode)); }}
+                                            title={hideEnemyIntents ? "???" : trans(getIntentHoverText(enemy), languageMode)}
+                                        >
+                                            {hideEnemyIntents ? (
+                                                <span className="tracking-[0.25em]">???</span>
+                                            ) : (
                                                 <>
-                                                    {[
-                                                        { tx: '-110px', ty: '-85px', rot: -42 },
-                                                        { tx: '110px', ty: '-85px', rot: 42 },
-                                                        { tx: '-130px', ty: '5px', rot: -28 },
-                                                        { tx: '130px', ty: '5px', rot: 28 },
-                                                        { tx: '-80px', ty: '105px', rot: -33 },
-                                                        { tx: '80px', ty: '105px', rot: 33 },
-                                                    ].map((v, idx) => (
-                                                        <div
-                                                            key={`enemy-shatter-${enemy.id}-${idx}`}
-                                                            className="absolute w-[42%] h-[42%] animate-finisher-enemy-shatter"
-                                                            style={
-                                                                {
-                                                                    '--tx': v.tx,
-                                                                    '--ty': v.ty,
-                                                                    '--rot': `${v.rot}deg`,
-                                                                    animationDelay: `${idx * 22}ms`
-                                                                } as React.CSSProperties
-                                                            }
-                                                        >
-                                                            <EnemyIllustration
-                                                                name={enemy.name}
-                                                                seed={`${enemy.id}-finisher-piece-${idx}`}
-                                                                aliases={enemySvgAliases}
-                                                                className="w-full h-full"
-                                                                size={16}
-                                                            />
-                                                        </div>
-                                                    ))}
-                                                    <div className="absolute w-16 h-16 md:w-24 md:h-24 rounded-full bg-orange-500/90 shadow-[0_0_60px_rgba(249,115,22,0.95)] animate-finisher-enemy-explosion"></div>
-                                                    <div className="absolute w-24 h-24 md:w-36 md:h-36 rounded-full border-4 border-yellow-200/90 animate-finisher-enemy-shockwave"></div>
+                                                    {(enemy.nextIntent.type === 'ATTACK' || enemy.nextIntent.type === 'ATTACK_DEBUFF' || enemy.nextIntent.type === 'ATTACK_DEFEND' || enemy.nextIntent.type === 'PIERCE_ATTACK') && (
+                                                        <>
+                                                            {enemy.nextIntent.type === 'PIERCE_ATTACK' ? (
+                                                                <div className="relative flex items-center justify-center mr-1.5">
+                                                                    <Triangle size={18} className="text-yellow-400 fill-yellow-400" />
+                                                                    <span className="absolute text-[10px] font-black text-red-900 top-[3px]">!</span>
+                                                                </div>
+                                                            ) : (
+                                                                <Skull size={12} className="mr-1 text-red-600" />
+                                                            )}
+                                                            <span className="inline-flex items-center">
+                                                                {enemy.nextIntent.value}
+                                                            </span>
+                                                            {enemy.nextIntent.type === 'ATTACK_DEFEND' && (
+                                                                <span className="inline-flex items-center ml-1.5 text-blue-600">
+                                                                    <Shield size={11} className="mr-0.5" />
+                                                                    {enemy.nextIntent.secondaryValue ?? enemy.nextIntent.value}
+                                                                </span>
+                                                            )}
+                                                        </>
+                                                    )}
+                                                    {enemy.nextIntent.type === 'DEFEND' && (
+                                                        <><Shield size={12} className="mr-1 text-blue-600" /> {enemy.nextIntent.value}</>
+                                                    )}
+                                                    {(enemy.nextIntent.type === 'BUFF' || enemy.nextIntent.type === 'DEBUFF' || enemy.nextIntent.type === 'SLEEP') && (
+                                                        <><Zap size={12} className="mr-1 text-yellow-500 fill-yellow-500" /> !</>
+                                                    )}
+                                                    {enemy.nextIntent.type === 'UNKNOWN' && <span className="text-gray-600">?</span>}
                                                 </>
                                             )}
                                         </div>
-                                    ) : (
-                                        <EnemyIllustration name={enemy.name} seed={enemy.id} aliases={enemySvgAliases} className="w-full h-full drop-shadow-lg relative z-10" />
                                     )}
-                                    {!isFinisherActive && <FloatingTextOverlay data={enemy.floatingText} languageMode={languageMode} />}
-                                    {!isFinisherActive && <VFXOverlay effects={activeEffects} targetId={enemy.id} />}
-                                </div>
 
-                                {!isFinisherActive && (
-                                    <div className={`${isTrueBossPhase2 ? 'w-32 md:w-40 scale-110' : 'w-24 md:w-28'} bg-black/90 border-2 px-1 py-0.5 text-white text-[9px] md:text-[10px] transition-all shadow-md rounded relative z-10 ${isSelected ? 'border-yellow-400 ring-1 ring-yellow-400/50' : 'border-gray-600'} ${isTrueBossPhase2 ? 'border-purple-500' : ''}`}>
-                                    <div className="flex items-center justify-between mb-0.5 h-4 w-full overflow-hidden">
-                                        <div className="flex-1 min-w-0 overflow-hidden relative h-full">
-                                            {enemyNameNeedsScroll ? (
-                                                <div className="flex w-max animate-marquee-scroll text-red-200 font-bold">
-                                                    <span className="pr-4">{enemyName}</span>
-                                                    <span className="pr-4">{enemyName}</span>
+                                    <div className={`battle-enemy-sprite ${isFinalBoss ? 'battle-final-boss-sprite' : ''} ${isTrueBossPhase2 ? 'battle-true-boss-sprite' : ''} relative mb-1 transition-all duration-700 ${isTrueBossPhase2 ? ENEMY_ILLUSTRATION_SIZE_CLASS.battleTrueBossPhase2 : isFinalBoss ? ENEMY_ILLUSTRATION_SIZE_CLASS.battleFinalBoss : ENEMY_ILLUSTRATION_SIZE_CLASS.battleNormal}`}>
+                                        {isFinisherActive ? (
+                                            <div className="relative w-full h-full flex items-center justify-center">
+                                                {!finisherBurst && (
+                                                    <div className="w-full h-full animate-finisher-enemy-focus">
+                                                        <EnemyIllustration
+                                                            name={enemy.name}
+                                                            seed={`${enemy.id}-finisher-main`}
+                                                            aliases={enemySvgAliases}
+                                                            className="w-full h-full drop-shadow-[0_0_20px_rgba(255,255,255,0.5)] rotate-[6deg] scale-110"
+                                                            size={24}
+                                                        />
+                                                    </div>
+                                                )}
+                                                {finisherBurst && (
+                                                    <>
+                                                        {[
+                                                            { tx: '-110px', ty: '-85px', rot: -42 },
+                                                            { tx: '110px', ty: '-85px', rot: 42 },
+                                                            { tx: '-130px', ty: '5px', rot: -28 },
+                                                            { tx: '130px', ty: '5px', rot: 28 },
+                                                            { tx: '-80px', ty: '105px', rot: -33 },
+                                                            { tx: '80px', ty: '105px', rot: 33 },
+                                                        ].map((v, idx) => (
+                                                            <div
+                                                                key={`enemy-shatter-${enemy.id}-${idx}`}
+                                                                className="absolute w-[42%] h-[42%] animate-finisher-enemy-shatter"
+                                                                style={
+                                                                    {
+                                                                        '--tx': v.tx,
+                                                                        '--ty': v.ty,
+                                                                        '--rot': `${v.rot}deg`,
+                                                                        animationDelay: `${idx * 22}ms`
+                                                                    } as React.CSSProperties
+                                                                }
+                                                            >
+                                                                <EnemyIllustration
+                                                                    name={enemy.name}
+                                                                    seed={`${enemy.id}-finisher-piece-${idx}`}
+                                                                    aliases={enemySvgAliases}
+                                                                    className="w-full h-full"
+                                                                    size={16}
+                                                                />
+                                                            </div>
+                                                        ))}
+                                                        <div className="absolute w-16 h-16 md:w-24 md:h-24 rounded-full bg-orange-500/90 shadow-[0_0_60px_rgba(249,115,22,0.95)] animate-finisher-enemy-explosion"></div>
+                                                        <div className="absolute w-24 h-24 md:w-36 md:h-36 rounded-full border-4 border-yellow-200/90 animate-finisher-enemy-shockwave"></div>
+                                                    </>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <EnemyIllustration name={enemy.name} seed={enemy.id} aliases={enemySvgAliases} className="w-full h-full drop-shadow-lg relative z-10" />
+                                        )}
+                                        {!isFinisherActive && <FloatingTextOverlay data={enemy.floatingText} languageMode={languageMode} />}
+                                        {!isFinisherActive && <VFXOverlay effects={activeEffects} targetId={enemy.id} />}
+                                    </div>
+
+                                    {!isFinisherActive && (
+                                        <div className={`${isTrueBossPhase2 ? 'w-32 md:w-48' : isFinalBoss ? 'w-32 md:w-44' : 'w-24 md:w-28'} ${isFinalBoss ? 'md:shrink-0 md:self-center' : ''} bg-black/90 border-2 px-1 py-0.5 text-white text-[9px] md:text-[10px] transition-all shadow-md rounded relative z-10 ${isSelected ? 'border-yellow-400 ring-1 ring-yellow-400/50' : 'border-gray-600'} ${isTrueBossPhase2 ? 'border-purple-500 shadow-[0_0_18px_rgba(168,85,247,0.35)]' : isFinalBoss ? 'border-red-500 shadow-[0_0_14px_rgba(239,68,68,0.25)]' : ''}`}>
+                                            <div className="flex items-center justify-between mb-0.5 h-4 w-full overflow-hidden">
+                                                <div className="flex-1 min-w-0 overflow-hidden relative h-full">
+                                                    {enemyNameNeedsScroll ? (
+                                                        <div className="flex w-max animate-marquee-scroll text-red-200 font-bold">
+                                                            <span className="pr-4">{enemyName}</span>
+                                                            <span className="pr-4">{enemyName}</span>
+                                                        </div>
+                                                    ) : (
+                                                        <div className={`${isTrueBossPhase2 ? 'text-purple-400' : 'text-red-200'} font-bold truncate`}>{enemyName}</div>
+                                                    )}
                                                 </div>
-                                            ) : (
-                                                <div className={`${isTrueBossPhase2 ? 'text-purple-400' : 'text-red-200'} font-bold truncate`}>{enemyName}</div>
-                                            )}
-                                        </div>
-                                        {enemy.block > 0 && <span className="text-blue-300 flex items-center bg-blue-900/80 px-1 rounded text-[8px] font-bold ml-1 shrink-0" onClick={(e) => { e.stopPropagation(); showInfo(trans("ブロック", languageMode), trans("次のターン開始時までダメージを防ぐ。", languageMode)); }}><Shield size={8} className="mr-0.5" /> {enemy.block}</span>}
-                                    </div>
-
-                                    <div className="relative w-full h-3 bg-gray-800 rounded-full overflow-hidden border border-gray-600 mb-0.5" onClick={(e) => { e.stopPropagation(); showInfo("HP", `現在: ${enemy.currentHp} / 最大: ${enemy.maxHp}`); }}>
-                                        <div className={`h-full ${isTrueBossPhase2 ? 'bg-gradient-to-r from-purple-800 to-red-600' : 'bg-gradient-to-r from-red-600 to-red-500'} transition-all duration-500`} style={{ width: `${enemyHpPercent}%` }}></div>
-                                        <div className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-white shadow-black drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] leading-none">
-                                            {enemy.currentHp}/{enemy.maxHp}
-                                        </div>
-                                    </div>
-
-                                    <div className="flex flex-wrap gap-0.5 justify-center min-h-[14px]">
-                                        {enemy.vulnerable > 0 && (
-                                            <div className="flex items-center bg-pink-900/80 rounded px-0.5 border border-pink-500/50 cursor-pointer" onClick={(e) => { e.stopPropagation(); showInfo(trans("脆弱", languageMode), trans("攻撃から受けるダメージが50%増加。", languageMode)); }}>
-                                                <AlertCircle size={8} className="text-pink-300" /> <span className="text-[8px] ml-0.5 font-bold">{enemy.vulnerable}</span>
+                                                {enemy.block > 0 && <span className="text-blue-300 flex items-center bg-blue-900/80 px-1 rounded text-[8px] font-bold ml-1 shrink-0" onClick={(e) => { e.stopPropagation(); showInfo(trans("ブロック", languageMode), trans("次のターン開始時までダメージを防ぐ。", languageMode)); }}><Shield size={8} className="mr-0.5" /> {enemy.block}</span>}
                                             </div>
-                                        )}
-                                        {enemy.weak > 0 && (
-                                            <div className="flex items-center bg-gray-700/80 rounded px-0.5 border border-gray-500/50 cursor-pointer" onClick={(e) => { e.stopPropagation(); showInfo(trans("弱体", languageMode), trans("攻撃で与えるダメージが25%減少。", languageMode)); }}>
-                                                <TrendingDown size={8} className="text-gray-300" /> <span className="text-[8px] ml-0.5 font-bold">{enemy.weak}</span>
+
+                                            <div className="relative w-full h-3 bg-gray-800 rounded-full overflow-hidden border border-gray-600 mb-0.5" onClick={(e) => { e.stopPropagation(); showInfo("HP", `現在: ${enemy.currentHp} / 最大: ${enemy.maxHp}`); }}>
+                                                <div className={`h-full ${isTrueBossPhase2 ? 'bg-gradient-to-r from-purple-800 to-red-600' : 'bg-gradient-to-r from-red-600 to-red-500'} transition-all duration-500`} style={{ width: `${enemyHpPercent}%` }}></div>
+                                                <div className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-white shadow-black drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] leading-none">
+                                                    {enemy.currentHp}/{enemy.maxHp}
+                                                </div>
                                             </div>
-                                        )}
-                                        {enemy.poison > 0 && (
-                                            <div className="flex items-center bg-green-900/80 rounded px-0.5 border border-green-500/50 cursor-pointer" onClick={(e) => { e.stopPropagation(); showInfo(trans("ドクドク", languageMode), trans("ターン終了時にHPダメージを受け、数値が1減る。", languageMode)); }}>
-                                                <Droplets size={8} className="text-green-300" /> <span className="text-[8px] ml-0.5 font-bold">{enemy.poison}</span>
-                                            </div>
-                                        )}
-                                        {enemy.artifact > 0 && (
-                                            <div className="flex items-center bg-yellow-900/80 rounded px-0.5 border border-yellow-500/50 cursor-pointer" onClick={(e) => { e.stopPropagation(); showInfo(trans("キラキラ", languageMode), trans("デバフを無効化する。", languageMode)); }}>
-                                                <Hexagon size={8} className="text-yellow-200" /> <span className="text-[8px] ml-0.5 font-bold">{enemy.artifact}</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
 
-                {/* Player Area */}
-                <div ref={playerAreaRef} className={isTrueBossPhase2Active ? "battle-player-area relative z-20 flex items-end pl-2 pb-2 shrink-0" : "battle-player-area flex items-end pl-2 pb-2 shrink-0 mt-auto"}>
-                    <div ref={playerGroupRef} className={isTrueBossPhase2Active ? "flex flex-col items-start md:flex-row md:items-end relative max-w-[48vw] md:max-w-none" : "flex items-end relative"}>
-
-                        <div ref={playerSpriteRef} className={`battle-player-sprite order-1 w-20 h-20 md:w-24 md:h-24 relative transition-all duration-150 ease-out ${isTrueBossPhase2Active ? 'mr-0 md:mr-2 mb-1 md:mb-0' : 'mr-2'} ${getActionClass()} ${selectedSupportCard ? 'ring-2 ring-emerald-300 rounded-lg cursor-pointer' : ''}`} onClick={() => {
-                            if (selectedSupportCard && onUseCoopSupport) {
-                                onUseCoopSupport(selectedSupportCard);
-                                setSelectedSupportCard(null);
-                                return;
-                            }
-                            showInfo(trans("自分", languageMode), trans("あなたのキャラクター。\nHPが0になるとゲームオーバー。", languageMode));
-                        }}>
-                            <img
-                                src={player.imageData}
-                                alt="Hero"
-                                className="w-full h-full pixel-art"
-                                style={{ imageRendering: 'pixelated' }}
-                            />
-                            <FloatingTextOverlay data={player.floatingText} languageMode={languageMode} />
-                            {(isCoopBattleView ? selfScopedEffects.length > 0 : shouldRenderPlayerScopedVfxOnSelf) && (
-                                <VFXOverlay effects={isCoopBattleView ? selfScopedEffects : activeEffects} targetId={isCoopBattleView && coopSelfPeerId ? coopSelfPeerId : "player"} />
-                            )}
-                        </div>
-
-                        {player.partner && player.partner.currentHp > 0 && (
-                            <div className={`order-3 w-16 h-16 md:w-20 md:h-20 relative transition-all duration-150 ease-out ${isTrueBossPhase2Active ? 'mr-0 md:mr-2 -ml-3 md:-ml-6 mb-1 md:mb-0' : 'mr-2 -ml-6'} z-0 ${getActionClass()}`} onClick={() => showInfo(trans(player.partner!.name, languageMode), trans("パートナー。\n倒れるとデッキが1枚しか使えなくなります。", languageMode))}>
-                                <img
-                                    src={player.partner.imageData}
-                                    alt="Partner"
-                                    className="w-full h-full pixel-art grayscale-[0.2]"
-                                    style={{ imageRendering: 'pixelated' }}
-                                />
-                                <FloatingTextOverlay data={player.partner.floatingText} languageMode={languageMode} offset="-top-2 -right-2" />
-
-                                <div className="absolute -bottom-2 left-0 w-full h-1 bg-gray-700 rounded-full border border-gray-500 overflow-hidden">
-                                    <div className="h-full bg-green-500 transition-all duration-500" style={{ width: `${(player.partner.currentHp / player.partner.maxHp) * 100}%` }}></div>
-                                </div>
-                            </div>
-                        )}
-
-                        {companions.length > 0 && (
-                            <div className={`order-3 flex items-end gap-1 md:gap-2 ${player.partner && player.partner.currentHp > 0 ? 'ml-0' : 'ml-1'} mb-2`}>
-                                {companions.map((companion) => {
-                                    const hpPercent = Math.max(0, Math.min(100, (companion.currentHp / Math.max(1, companion.maxHp)) * 100));
-                                    const isDown = companion.currentHp <= 0;
-                                    return (
-                                        <div
-                                            key={companion.id}
-                                            className={`w-14 md:w-16 shrink-0 ${selectedSupportCard ? 'cursor-pointer' : ''}`}
-                                            onClick={() => {
-                                                if (selectedSupportCard && onUseCoopSupport) {
-                                                    onUseCoopSupport(selectedSupportCard, companion.id);
-                                                    setSelectedSupportCard(null);
-                                                    return;
-                                                }
-                                                showInfo(companion.name, trans("協力モードの同行プレイヤー。HPのみを表示します。", languageMode));
-                                            }}
-                                        >
-                                            <div className={`w-14 h-14 md:w-16 md:h-16 relative rounded-lg border border-white/10 bg-black/35 overflow-hidden ${isDown ? 'grayscale opacity-55' : ''} ${selectedSupportCard ? 'ring-2 ring-emerald-300/80' : ''}`}>
-                                                <img
-                                                    src={companion.imageData}
-                                                    alt={companion.name}
-                                                    className="w-full h-full pixel-art"
-                                                    style={{ imageRendering: 'pixelated' }}
-                                                />
-                                                <FloatingTextOverlay data={companion.floatingText} languageMode={languageMode} offset="-top-2 -right-1" />
-                                                <VFXOverlay effects={getPlayerScopedEffectsForPeer(companion.id)} targetId={companion.id} />
-                                            </div>
-                                            <div className="mt-1 h-1.5 bg-gray-700 rounded-full border border-gray-500 overflow-hidden">
-                                                <div className={`h-full transition-all duration-500 ${isDown ? 'bg-gray-500' : 'bg-green-500'}`} style={{ width: `${hpPercent}%` }}></div>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-
-                        <div className={`battle-player-stats order-2 bg-black/80 border-2 border-white p-1 text-white text-xs ${isTrueBossPhase2Active ? 'w-28 md:w-40' : 'w-36 md:w-40'} mb-2 shadow-lg rounded z-20 ${tutorialStep === 1 ? 'ring-4 ring-green-500 ring-offset-4 ring-offset-transparent animate-pulse' : ''}`}>
-                            <div className="flex items-center justify-between mb-1">
-                                <span className="text-red-400 flex items-center font-bold" onClick={() => showInfo("HP", trans("ヒットポイント。0になると死亡する。", languageMode))}><Heart size={12} className="mr-1" /> {player.currentHp}/{player.maxHp}</span>
-                                <span className="text-blue-400 flex items-center font-bold" onClick={() => showInfo(trans("ブロック", languageMode), trans("次のターン開始時までダメージを防ぐ。", languageMode))}><Shield size={12} className="mr-1" /> {player.block}</span>
-                            </div>
-                            <div className="w-full h-1.5 bg-gray-700 rounded-full border border-gray-500 overflow-hidden mb-1">
-                                <div className="h-full bg-green-500 transition-all duration-500" style={{ width: `${playerHpPercent}%` }}></div>
-                            </div>
-
-                            <div className="flex items-center justify-between border-t border-gray-700 pt-1" onClick={() => setShowRelicList(true)}>
-                                <div className="flex -space-x-1 overflow-hidden w-20 cursor-pointer hover:bg-white/10 rounded px-1 transition-colors">
-                                    {displayedRelics.slice(0, 5).map(r => {
-                                        const counter = getRelicCounter(r.id);
-                                        return (
-                                            <div key={r.id} className="w-4 h-4 md:w-5 md:h-5 bg-gray-700 rounded-full border border-yellow-600 flex items-center justify-center shrink-0 relative group p-0.5">
-                                                <RelicIcon id={r.id} alt={r.name} />
-                                                {counter !== undefined && counter > 0 && (
-                                                    <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold border border-white shadow-md z-10 pointer-events-none scale-125">
-                                                        {counter}
+                                            <div className="flex flex-wrap gap-0.5 justify-center min-h-[14px]">
+                                                {enemy.vulnerable > 0 && (
+                                                    <div className="flex items-center bg-pink-900/80 rounded px-0.5 border border-pink-500/50 cursor-pointer" onClick={(e) => { e.stopPropagation(); showInfo(trans("脆弱", languageMode), trans("攻撃から受けるダメージが50%増加。", languageMode)); }}>
+                                                        <AlertCircle size={8} className="text-pink-300" /> <span className="text-[8px] ml-0.5 font-bold">{enemy.vulnerable}</span>
+                                                    </div>
+                                                )}
+                                                {enemy.weak > 0 && (
+                                                    <div className="flex items-center bg-gray-700/80 rounded px-0.5 border border-gray-500/50 cursor-pointer" onClick={(e) => { e.stopPropagation(); showInfo(trans("弱体", languageMode), trans("攻撃で与えるダメージが25%減少。", languageMode)); }}>
+                                                        <TrendingDown size={8} className="text-gray-300" /> <span className="text-[8px] ml-0.5 font-bold">{enemy.weak}</span>
+                                                    </div>
+                                                )}
+                                                {enemy.poison > 0 && (
+                                                    <div className="flex items-center bg-green-900/80 rounded px-0.5 border border-green-500/50 cursor-pointer" onClick={(e) => { e.stopPropagation(); showInfo(trans("ドクドク", languageMode), trans("ターン終了時にHPダメージを受け、数値が1減る。", languageMode)); }}>
+                                                        <Droplets size={8} className="text-green-300" /> <span className="text-[8px] ml-0.5 font-bold">{enemy.poison}</span>
+                                                    </div>
+                                                )}
+                                                {enemy.artifact > 0 && (
+                                                    <div className="flex items-center bg-yellow-900/80 rounded px-0.5 border border-yellow-500/50 cursor-pointer" onClick={(e) => { e.stopPropagation(); showInfo(trans("キラキラ", languageMode), trans("デバフを無効化する。", languageMode)); }}>
+                                                        <Hexagon size={8} className="text-yellow-200" /> <span className="text-[8px] ml-0.5 font-bold">{enemy.artifact}</span>
                                                     </div>
                                                 )}
                                             </div>
-                                        );
-                                    })}
-                                    {player.relics.length > 5 && (
-                                        <div className="w-4 h-4 md:w-5 md:h-5 bg-gray-800 rounded-full border border-gray-500 flex items-center justify-center shrink-0 text-[8px] font-bold text-white z-10">
-                                            +{player.relics.length - 5}
                                         </div>
                                     )}
-                                    {player.relics.length === 0 && <span className="text-[9px] text-gray-500">No Relics</span>}
                                 </div>
+                            );
+                        })}
+                    </div>
 
-                                <div className="flex gap-0.5">
-                                    {player.potions.map(p => (
-                                        <div
-                                            key={p.id}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                if (!actingEnemyId && !selectionState.active && coopCanAct) {
-                                                    setPotionConfirmation(p);
-                                                }
-                                            }}
-                                            className="w-4 h-4 md:w-5 md:h-5 bg-gray-800 rounded border border-white flex items-center justify-center cursor-pointer hover:scale-110"
-                                        >
-                                            <PotionIcon id={p.templateId} alt={p.name} />
-                                        </div>
-                                    ))}
-                                </div>
+                    {/* Player Area */}
+                    <div ref={playerAreaRef} className={isTrueBossPhase2Active ? "battle-player-area relative z-20 flex items-end pl-2 pb-2 shrink-0" : "battle-player-area flex items-end pl-2 pb-2 shrink-0 mt-auto"}>
+                        <div ref={playerGroupRef} className={isTrueBossPhase2Active ? "flex flex-col items-start md:flex-row md:items-end relative max-w-[48vw] md:max-w-none" : "flex items-end relative"}>
+
+                            <div ref={playerSpriteRef} className={`battle-player-sprite order-1 w-20 h-20 md:w-24 md:h-24 relative transition-all duration-150 ease-out ${isTrueBossPhase2Active ? 'mr-0 md:mr-2 mb-1 md:mb-0' : 'mr-2'} ${getActionClass()} ${selectedSupportCard ? 'ring-2 ring-emerald-300 rounded-lg cursor-pointer' : ''}`} onClick={() => {
+                                if (selectedSupportCard && onUseCoopSupport) {
+                                    onUseCoopSupport(selectedSupportCard);
+                                    setSelectedSupportCard(null);
+                                    return;
+                                }
+                                showInfo(trans("自分", languageMode), trans("あなたのキャラクター。\nHPが0になるとゲームオーバー。", languageMode));
+                            }}>
+                                <img
+                                    src={player.imageData}
+                                    alt="Hero"
+                                    className="w-full h-full pixel-art"
+                                    style={{ imageRendering: 'pixelated' }}
+                                />
+                                <FloatingTextOverlay data={player.floatingText} languageMode={languageMode} />
+                                {(isCoopBattleView ? selfScopedEffects.length > 0 : shouldRenderPlayerScopedVfxOnSelf) && (
+                                    <VFXOverlay effects={isCoopBattleView ? selfScopedEffects : activeEffects} targetId={isCoopBattleView && coopSelfPeerId ? coopSelfPeerId : "player"} />
+                                )}
                             </div>
 
-                            <div className="flex flex-wrap gap-0.5 mt-1">
-                                {player.strength !== 0 && (
-                                    <span
-                                        className={`flex items-center ${player.strength > 0 ? 'text-red-400' : 'text-gray-400'} text-[9px] font-bold border border-gray-700 px-1 rounded bg-black cursor-pointer`}
-                                        onClick={() => showInfo(trans("筋力", languageMode), trans("攻撃カードのダメージを増加させる。", languageMode))}
-                                    >
-                                        <Sword size={8} className="mr-0.5" /> {player.strength}
-                                    </span>
-                                )}
-                                {Object.entries(player.powers).map(([key, val]) => {
-                                    if ((val as number) <= 0) return null;
-                                    const def = POWER_DEFINITIONS[key] || { name: key, desc: "効果不明" };
-                                    return (
-                                        <span key={key} className="text-yellow-400 text-[8px] border border-yellow-600 px-0.5 rounded bg-black/50 cursor-pointer" onClick={() => showInfo(trans(def.name, languageMode), trans(def.desc, languageMode))}>
-                                            {trans(def.name, languageMode)}:{val as number}
+                            {player.partner && player.partner.currentHp > 0 && (
+                                <div className={`order-3 w-16 h-16 md:w-20 md:h-20 relative transition-all duration-150 ease-out ${isTrueBossPhase2Active ? 'mr-0 md:mr-2 -ml-3 md:-ml-6 mb-1 md:mb-0' : 'mr-2 -ml-6'} z-0 ${getActionClass()}`} onClick={() => showInfo(trans(player.partner!.name, languageMode), trans("パートナー。\n倒れるとデッキが1枚しか使えなくなります。", languageMode))}>
+                                    <img
+                                        src={player.partner.imageData}
+                                        alt="Partner"
+                                        className="w-full h-full pixel-art grayscale-[0.2]"
+                                        style={{ imageRendering: 'pixelated' }}
+                                    />
+                                    <FloatingTextOverlay data={player.partner.floatingText} languageMode={languageMode} offset="-top-2 -right-2" />
+
+                                    <div className="absolute -bottom-2 left-0 w-full h-1 bg-gray-700 rounded-full border border-gray-500 overflow-hidden">
+                                        <div className="h-full bg-green-500 transition-all duration-500" style={{ width: `${(player.partner.currentHp / player.partner.maxHp) * 100}%` }}></div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {companions.length > 0 && (
+                                <div className={`order-3 flex items-end gap-1 md:gap-2 ${player.partner && player.partner.currentHp > 0 ? 'ml-0' : 'ml-1'} mb-2`}>
+                                    {companions.map((companion) => {
+                                        const hpPercent = Math.max(0, Math.min(100, (companion.currentHp / Math.max(1, companion.maxHp)) * 100));
+                                        const isDown = companion.currentHp <= 0;
+                                        return (
+                                            <div
+                                                key={companion.id}
+                                                className={`w-14 md:w-16 shrink-0 ${selectedSupportCard ? 'cursor-pointer' : ''}`}
+                                                onClick={() => {
+                                                    if (selectedSupportCard && onUseCoopSupport) {
+                                                        onUseCoopSupport(selectedSupportCard, companion.id);
+                                                        setSelectedSupportCard(null);
+                                                        return;
+                                                    }
+                                                    showInfo(companion.name, trans("協力モードの同行プレイヤー。HPのみを表示します。", languageMode));
+                                                }}
+                                            >
+                                                <div className={`w-14 h-14 md:w-16 md:h-16 relative rounded-lg border border-white/10 bg-black/35 overflow-hidden ${isDown ? 'grayscale opacity-55' : ''} ${selectedSupportCard ? 'ring-2 ring-emerald-300/80' : ''}`}>
+                                                    <img
+                                                        src={companion.imageData}
+                                                        alt={companion.name}
+                                                        className="w-full h-full pixel-art"
+                                                        style={{ imageRendering: 'pixelated' }}
+                                                    />
+                                                    <FloatingTextOverlay data={companion.floatingText} languageMode={languageMode} offset="-top-2 -right-1" />
+                                                    <VFXOverlay effects={getPlayerScopedEffectsForPeer(companion.id)} targetId={companion.id} />
+                                                </div>
+                                                <div className="mt-1 h-1.5 bg-gray-700 rounded-full border border-gray-500 overflow-hidden">
+                                                    <div className={`h-full transition-all duration-500 ${isDown ? 'bg-gray-500' : 'bg-green-500'}`} style={{ width: `${hpPercent}%` }}></div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+
+                            <div className={`battle-player-stats order-2 bg-black/80 border-2 border-white p-1 text-white text-xs ${isTrueBossPhase2Active ? 'w-28 md:w-40' : 'w-36 md:w-40'} mb-2 shadow-lg rounded z-20 ${tutorialStep === 1 ? 'ring-4 ring-green-500 ring-offset-4 ring-offset-transparent animate-pulse' : ''}`}>
+                                <div className="flex items-center justify-between mb-1">
+                                    <span className="text-red-400 flex items-center font-bold" onClick={() => showInfo("HP", trans("ヒットポイント。0になると死亡する。", languageMode))}><Heart size={12} className="mr-1" /> {player.currentHp}/{player.maxHp}</span>
+                                    <span className="text-blue-400 flex items-center font-bold" onClick={() => showInfo(trans("ブロック", languageMode), trans("次のターン開始時までダメージを防ぐ。", languageMode))}><Shield size={12} className="mr-1" /> {player.block}</span>
+                                </div>
+                                <div className="w-full h-1.5 bg-gray-700 rounded-full border border-gray-500 overflow-hidden mb-1">
+                                    <div className="h-full bg-green-500 transition-all duration-500" style={{ width: `${playerHpPercent}%` }}></div>
+                                </div>
+
+                                <div className="flex items-center justify-between border-t border-gray-700 pt-1" onClick={() => setShowRelicList(true)}>
+                                    <div className="flex -space-x-1 overflow-hidden w-20 cursor-pointer hover:bg-white/10 rounded px-1 transition-colors">
+                                        {displayedRelics.slice(0, 5).map(r => {
+                                            const counter = getRelicCounter(r.id);
+                                            return (
+                                                <div key={r.id} className="w-4 h-4 md:w-5 md:h-5 bg-gray-700 rounded-full border border-yellow-600 flex items-center justify-center shrink-0 relative group p-0.5">
+                                                    <RelicIcon id={r.id} alt={r.name} />
+                                                    {counter !== undefined && counter > 0 && (
+                                                        <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold border border-white shadow-md z-10 pointer-events-none scale-125">
+                                                            {counter}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                        {player.relics.length > 5 && (
+                                            <div className="w-4 h-4 md:w-5 md:h-5 bg-gray-800 rounded-full border border-gray-500 flex items-center justify-center shrink-0 text-[8px] font-bold text-white z-10">
+                                                +{player.relics.length - 5}
+                                            </div>
+                                        )}
+                                        {player.relics.length === 0 && <span className="text-[9px] text-gray-500">No Relics</span>}
+                                    </div>
+
+                                    <div className="flex gap-0.5">
+                                        {player.potions.map(p => (
+                                            <div
+                                                key={p.id}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    if (!actingEnemyId && !selectionState.active && coopCanAct) {
+                                                        setPotionConfirmation(p);
+                                                    }
+                                                }}
+                                                className="w-4 h-4 md:w-5 md:h-5 bg-gray-800 rounded border border-white flex items-center justify-center cursor-pointer hover:scale-110"
+                                            >
+                                                <PotionIcon id={p.templateId} alt={p.name} />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-wrap gap-0.5 mt-1">
+                                    {player.strength !== 0 && (
+                                        <span
+                                            className={`flex items-center ${player.strength > 0 ? 'text-red-400' : 'text-gray-400'} text-[9px] font-bold border border-gray-700 px-1 rounded bg-black cursor-pointer`}
+                                            onClick={() => showInfo(trans("筋力", languageMode), trans("攻撃カードのダメージを増加させる。", languageMode))}
+                                        >
+                                            <Sword size={8} className="mr-0.5" /> {player.strength}
                                         </span>
-                                    );
-                                })}
+                                    )}
+                                    {Object.entries(player.powers).map(([key, val]) => {
+                                        if ((val as number) <= 0) return null;
+                                        const def = POWER_DEFINITIONS[key] || { name: key, desc: "効果不明" };
+                                        return (
+                                            <span key={key} className="text-yellow-400 text-[8px] border border-yellow-600 px-0.5 rounded bg-black/50 cursor-pointer" onClick={() => showInfo(trans(def.name, languageMode), trans(def.desc, languageMode))}>
+                                                {trans(def.name, languageMode)}:{val as number}
+                                            </span>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 </div>
             </div>
             <style>
@@ -1656,13 +1702,12 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                             setSelectedSupportCard(current => current?.id === supportCard.id ? null : supportCard);
                                                         }}
                                                         disabled={!canUse}
-                                                        className={`rounded border px-2 py-1 text-[11px] font-bold ${
-                                                            canUse
+                                                        className={`rounded border px-2 py-1 text-[11px] font-bold ${canUse
                                                                 ? isSelected
                                                                     ? 'border-emerald-200 bg-emerald-600/70 text-white hover:bg-emerald-500/80'
                                                                     : 'border-emerald-300/50 bg-emerald-700/40 text-emerald-50 hover:bg-emerald-600/60'
                                                                 : 'border-gray-600 bg-gray-700 text-gray-400 cursor-not-allowed'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         {isSelected ? '対象を選択中' : '対象を選ぶ'}
                                                     </button>
@@ -1673,11 +1718,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                             onUseCoopSupport(supportCard);
                                                         }}
                                                         disabled={!canUse}
-                                                        className={`rounded border px-2 py-1 text-[11px] font-bold ${
-                                                            canUse
+                                                        className={`rounded border px-2 py-1 text-[11px] font-bold ${canUse
                                                                 ? 'border-emerald-300/50 bg-emerald-700/40 text-emerald-50 hover:bg-emerald-600/60'
                                                                 : 'border-gray-600 bg-gray-700 text-gray-400 cursor-not-allowed'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         使う
                                                     </button>
@@ -2123,15 +2167,14 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                         {collagePanels.map((panel) => (
                             <div
                                 key={`collage-${panel.index}`}
-                                className={`absolute inset-0 opacity-0 ${
-                                    shuffledDirections[panel.index % shuffledDirections.length] === 'left'
+                                className={`absolute inset-0 opacity-0 ${shuffledDirections[panel.index % shuffledDirections.length] === 'left'
                                         ? 'animate-finish-cutin-stack-left'
                                         : shuffledDirections[panel.index % shuffledDirections.length] === 'right'
                                             ? 'animate-finish-cutin-stack-right'
                                             : shuffledDirections[panel.index % shuffledDirections.length] === 'up'
                                                 ? 'animate-finish-cutin-stack-up'
                                                 : 'animate-finish-cutin-stack-down'
-                                }`}
+                                    }`}
                                 style={{
                                     clipPath: panel.clip,
                                     WebkitClipPath: panel.clip,
@@ -2170,15 +2213,14 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                                 }}
                             >
                                 <div
-                                    className={`w-full h-full rounded-2xl overflow-hidden border-4 border-orange-300/70 shadow-[0_0_45px_rgba(251,146,60,0.45)] bg-black/35 opacity-0 ${
-                                        direction === 'left'
+                                    className={`w-full h-full rounded-2xl overflow-hidden border-4 border-orange-300/70 shadow-[0_0_45px_rgba(251,146,60,0.45)] bg-black/35 opacity-0 ${direction === 'left'
                                             ? 'animate-finish-cutin-stack-left'
                                             : direction === 'right'
                                                 ? 'animate-finish-cutin-stack-right'
                                                 : direction === 'up'
                                                     ? 'animate-finish-cutin-stack-up'
                                                     : 'animate-finish-cutin-stack-down'
-                                    }`}
+                                        }`}
                                     style={{ animationDelay: `${panelDelays[idx] ?? idx * delayStepMs}ms` }}
                                 >
                                     <FinisherArtPiece token={entry.token} seed={`${card.id}-stack-${idx}`} languageMode={languageMode} />
@@ -2196,15 +2238,14 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                             return (
                                 <div
                                     key={`strip-${entry.token}-${idx}`}
-                                    className={`absolute top-[-8%] h-[116%] opacity-0 ${
-                                        direction === 'left'
+                                    className={`absolute top-[-8%] h-[116%] opacity-0 ${direction === 'left'
                                             ? 'animate-finish-cutin-multi-left'
                                             : direction === 'right'
                                                 ? 'animate-finish-cutin-multi-right'
                                                 : direction === 'up'
                                                     ? 'animate-finish-cutin-multi-up'
                                                     : 'animate-finish-cutin-multi-down'
-                                    }`}
+                                        }`}
                                     style={{
                                         left: `${idx * stripWidth}%`,
                                         width: `${stripWidth + 1.4}%`,
@@ -2230,15 +2271,14 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                             return (
                                 <div
                                     key={`radial-${entry.token}-${idx}`}
-                                    className={`absolute left-1/2 top-1/2 w-[68vw] max-w-[920px] h-[27vh] max-h-[250px] -translate-x-1/2 -translate-y-1/2 opacity-0 ${
-                                        direction === 'left'
+                                    className={`absolute left-1/2 top-1/2 w-[68vw] max-w-[920px] h-[27vh] max-h-[250px] -translate-x-1/2 -translate-y-1/2 opacity-0 ${direction === 'left'
                                             ? 'animate-finish-cutin-stack-left'
                                             : direction === 'right'
                                                 ? 'animate-finish-cutin-stack-right'
                                                 : direction === 'up'
                                                     ? 'animate-finish-cutin-stack-up'
                                                     : 'animate-finish-cutin-stack-down'
-                                    }`}
+                                        }`}
                                     style={{
                                         transform: `translate(-50%, -50%) rotate(${angle}deg) scale(${0.9 + idx * 0.03})`,
                                         transformOrigin: '14% 50%',
@@ -2268,15 +2308,14 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                             return (
                                 <div
                                     key={`grid-${entry.token}-${idx}`}
-                                    className={`absolute opacity-0 ${
-                                        direction === 'left'
+                                    className={`absolute opacity-0 ${direction === 'left'
                                             ? 'animate-finish-cutin-stack-left'
                                             : direction === 'right'
                                                 ? 'animate-finish-cutin-stack-right'
                                                 : direction === 'up'
                                                     ? 'animate-finish-cutin-stack-up'
                                                     : 'animate-finish-cutin-stack-down'
-                                    }`}
+                                        }`}
                                     style={{
                                         left: `${col * cellW}%`,
                                         top: `${row * cellH}%`,
@@ -2308,15 +2347,14 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                             return (
                                 <div
                                     key={`diag-${entry.token}-${idx}`}
-                                    className={`absolute opacity-0 ${
-                                        direction === 'left'
+                                    className={`absolute opacity-0 ${direction === 'left'
                                             ? 'animate-finish-cutin-multi-left'
                                             : direction === 'right'
                                                 ? 'animate-finish-cutin-multi-right'
                                                 : direction === 'up'
                                                     ? 'animate-finish-cutin-multi-up'
                                                     : 'animate-finish-cutin-multi-down'
-                                    }`}
+                                        }`}
                                     style={{
                                         left: `${col * w}%`,
                                         top: `${row * h}%`,
@@ -2345,15 +2383,14 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                             return (
                                 <div
                                     key={`burst-${entry.token}-${idx}`}
-                                    className={`absolute left-1/2 top-1/2 w-[54vw] max-w-[760px] h-[24vh] max-h-[220px] -translate-x-1/2 -translate-y-1/2 opacity-0 ${
-                                        direction === 'left'
+                                    className={`absolute left-1/2 top-1/2 w-[54vw] max-w-[760px] h-[24vh] max-h-[220px] -translate-x-1/2 -translate-y-1/2 opacity-0 ${direction === 'left'
                                             ? 'animate-finish-cutin-stack-left'
                                             : direction === 'right'
                                                 ? 'animate-finish-cutin-stack-right'
                                                 : direction === 'up'
                                                     ? 'animate-finish-cutin-stack-up'
                                                     : 'animate-finish-cutin-stack-down'
-                                    }`}
+                                        }`}
                                     style={{
                                         transform: `translate(calc(-50% + ${pos.x}vw), calc(-50% + ${pos.y}vh)) rotate(${pos.rot}deg) scale(${pos.scale})`,
                                         animationDelay: `${panelDelays[idx] ?? idx * delayStepMs}ms`,
@@ -2379,15 +2416,14 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                             return (
                                 <div
                                     key={`wave-${entry.token}-${idx}`}
-                                    className={`absolute top-0 h-full opacity-0 ${
-                                        direction === 'left'
+                                    className={`absolute top-0 h-full opacity-0 ${direction === 'left'
                                             ? 'animate-finish-cutin-stack-left'
                                             : direction === 'right'
                                                 ? 'animate-finish-cutin-stack-right'
                                                 : direction === 'up'
                                                     ? 'animate-finish-cutin-stack-up'
                                                     : 'animate-finish-cutin-stack-down'
-                                    }`}
+                                        }`}
                                     style={{
                                         left: `${idx * barW}%`,
                                         width: `${barW + 1.2}%`,

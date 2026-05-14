@@ -340,6 +340,16 @@ textarea {
     height: 5.25rem !important;
   }
 
+  .battle-scene-root .battle-enemy-sprite.battle-final-boss-sprite {
+    width: 14rem !important;
+    height: 14rem !important;
+  }
+
+  .battle-scene-root .battle-enemy-sprite.battle-true-boss-sprite {
+    width: 19rem !important;
+    height: 19rem !important;
+  }
+
   .battle-scene-root .battle-enemy-intent {
     top: 0.25rem !important;
   }
@@ -446,6 +456,16 @@ textarea {
     height: 5.25rem !important;
   }
 
+  .battle-scene-root .battle-enemy-sprite.battle-final-boss-sprite {
+    width: 12rem !important;
+    height: 12rem !important;
+  }
+
+  .battle-scene-root .battle-enemy-sprite.battle-true-boss-sprite {
+    width: 15rem !important;
+    height: 15rem !important;
+  }
+
   .battle-scene-root .battle-enemy-intent {
     top: 0.25rem !important;
   }
@@ -521,6 +541,16 @@ textarea {
     height: 4.5rem !important;
   }
 
+  .battle-scene-root .battle-enemy-sprite.battle-final-boss-sprite {
+    width: 9.5rem !important;
+    height: 9.5rem !important;
+  }
+
+  .battle-scene-root .battle-enemy-sprite.battle-true-boss-sprite {
+    width: 11rem !important;
+    height: 11rem !important;
+  }
+
   .battle-scene-root .battle-enemy-intent {
     top: 0 !important;
   }
@@ -591,6 +621,16 @@ textarea {
   .battle-scene-root .battle-enemy-sprite {
     width: 4rem !important;
     height: 4rem !important;
+  }
+
+  .battle-scene-root .battle-enemy-sprite.battle-final-boss-sprite {
+    width: 7.5rem !important;
+    height: 7.5rem !important;
+  }
+
+  .battle-scene-root .battle-enemy-sprite.battle-true-boss-sprite {
+    width: 8.5rem !important;
+    height: 8.5rem !important;
   }
 
   .battle-scene-root .battle-enemy-intent {
