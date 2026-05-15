@@ -3,7 +3,7 @@ import { CheckCircle, XCircle } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { AnswerMode, GameMode } from '../types';
 import { storageService } from '../services/storageService';
-import { KANJI_DATA, KanjiProblem } from '../data/kanjiData';
+import { HARD_KANJI_DATA, KANJI_DATA, KANKEN_DATA, KanjiProblem } from '../data/kanjiData';
 import { resolveAnswerMode } from '../utils/answerMode';
 
 interface KanjiChallengeScreenProps {
@@ -63,6 +63,16 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
     let problemPool: KanjiProblem[];
     if (mode === GameMode.KANJI_MIXED) {
         problemPool = Object.values(KANJI_DATA).flat();
+    } else if (mode === GameMode.KANKEN_MIXED) {
+        problemPool = Object.values(KANKEN_DATA).flat();
+    } else if (mode === GameMode.HARD_KANJI_MIXED) {
+        problemPool = Object.values(HARD_KANJI_DATA).flat();
+    } else if (mode in KANKEN_DATA) {
+        const kankenKey = mode as keyof typeof KANKEN_DATA;
+        problemPool = KANKEN_DATA[kankenKey];
+    } else if (mode in HARD_KANJI_DATA) {
+        const hardKanjiKey = mode as keyof typeof HARD_KANJI_DATA;
+        problemPool = HARD_KANJI_DATA[hardKanjiKey];
     } else {
         const gradeKey = mode as keyof typeof KANJI_DATA;
         problemPool = KANJI_DATA[gradeKey] || KANJI_DATA.KANJI_1;
@@ -75,11 +85,14 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
         .map(p => {
             // 指示通り、options[0]を絶対的な正解として保持する
             const correctAnswer = p.options[0];
+            const contextualOptions = p.distractorPool && p.distractorPool.length >= 3
+                ? [correctAnswer, ...p.distractorPool.slice(0, 3)]
+                : p.options;
             return {
                 ...p,
                 actualCorrectAnswer: correctAnswer,
                 // 表示用にはシャッフルした選択肢を渡す
-                options: [...p.options].sort(() => Math.random() - 0.5)
+                options: [...contextualOptions].sort(() => Math.random() - 0.5)
             };
         });
         

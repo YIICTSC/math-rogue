@@ -436,6 +436,8 @@ const getCategoryIcon = (id: string) => {
         case 'MATH': return <Brain size={20} />;
         case 'KOKUGO_GRADES': return <Book size={20} />;
         case 'KANJI': return <Book size={20} />;
+        case 'KANKEN': return <Book size={20} />;
+        case 'HARD_KANJI': return <Book size={20} />;
         case 'ENGLISH': return <Languages size={20} />;
         case 'SCIENCE': return <FlaskConical size={20} />;
         case 'SOCIAL': return <Globe size={20} />;
@@ -500,7 +502,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   const [records, setRecords] = useState<Record<string, number>>({});
   const [isQuitting, setIsQuitting] = useState(false);
   const isUnitCategory = selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL' || selectedCategory.id === 'SUMMARY';
-  const canSelectAnswerMode = selectedCategory.id === 'MATH' || selectedCategory.id === 'KANJI';
+  const canSelectAnswerMode = selectedCategory.id === 'MATH' || selectedCategory.id === 'KANJI' || selectedCategory.id === 'KANKEN' || selectedCategory.id === 'HARD_KANJI';
   
   // Voice feature control
   const [voiceEnabled, setVoiceEnabled] = useState(() => storageService.getEnglishVoiceEnabled());
@@ -882,7 +884,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                 ) : (
                   <div className="space-y-3">
                     {renderAnswerModeSelector()}
-                    <div className={`grid ${selectedCategory.id === 'KANJI' ? 'grid-cols-3' : 'grid-cols-2'} gap-2`}>
+                    <div className={`grid ${selectedCategory.id === 'KANJI' || selectedCategory.id === 'KANKEN' || selectedCategory.id === 'HARD_KANJI' ? 'grid-cols-3' : 'grid-cols-2'} gap-2`}>
                       {selectedCategory.subModes.map((sub) => {
                         const recordKey = `${selectedCategory.id}_${sub.id}`;
                         const isSelected = selectedSubMode.id === sub.id;

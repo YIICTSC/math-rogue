@@ -297,6 +297,8 @@ const CATEGORY_LABELS: Record<SubjectCategoryType, string> = {
   MATH_GRADES: '算数・数学',
   KOKUGO_GRADES: '国語',
   KANJI: '漢字',
+  KANKEN: '漢検',
+  HARD_KANJI: '難読漢字',
   SCIENCE: '生活・理科',
   SOCIAL: '社会',
   ENGLISH: '英語',
@@ -324,7 +326,32 @@ const SUBMODE_LABELS: Record<string, string> = {
   K7: '中1漢字',
   K8: '中2漢字',
   K9: '中3漢字',
+  K10: '高校基礎',
+  K11: '高校標準',
+  K12: '高校発展',
   K_MIXED: 'ミックス',
+  KK10: '漢検10級',
+  KK9: '漢検9級',
+  KK8: '漢検8級',
+  KK7: '漢検7級',
+  KK6: '漢検6級',
+  KK5: '漢検5級',
+  KK4: '漢検4級',
+  KK3: '漢検3級',
+  KK_PRE2: '漢検準2級',
+  KK2: '漢検2級',
+  KK_PRE1: '漢検準1級',
+  KK1: '漢検1級',
+  KK_MIXED: 'ミックス',
+  HK_JUKUJIKUN: '超難読 熟字訓',
+  HK_FLORA: '動植物 極',
+  HK_ATEJI: '当て字・外来語 極',
+  HK_PLACE: '地名・国名 難読',
+  HK_KOKUJI: '国字・和製漢字',
+  HK_CLASSICS: '仏教・神道・古典語',
+  HK_YOJI: '四字熟語 極',
+  HK_HISTORY: '古典表記・歴史語彙',
+  HK_MIXED: 'ミックス',
   E_ES: '小学校英語',
   E_J1: '中1英語',
   E_J2: '中2英語',
@@ -352,6 +379,8 @@ const getCategoryIcon = (id: SubjectCategoryType) => {
     case 'MATH': return <Brain size={20} />;
     case 'KOKUGO_GRADES': return <Book size={20} />;
     case 'KANJI': return <Book size={20} />;
+    case 'KANKEN': return <Book size={20} />;
+    case 'HARD_KANJI': return <Book size={20} />;
     case 'ENGLISH': return <Languages size={20} />;
     case 'SCIENCE': return <FlaskConical size={20} />;
     case 'SOCIAL': return <Globe size={20} />;
@@ -444,7 +473,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   const [selectedMathUnitIds, setSelectedMathUnitIds] = useState<string[]>([]);
   const isUnitCategory = selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL' || selectedCategory.id === 'SUMMARY';
   const [answerMode, setAnswerMode] = useState<AnswerMode>('CHOICE');
-  const canSelectAnswerMode = selectedCategory.id === 'MATH' || selectedCategory.id === 'KANJI';
+  const canSelectAnswerMode = selectedCategory.id === 'MATH' || selectedCategory.id === 'KANJI' || selectedCategory.id === 'KANKEN' || selectedCategory.id === 'HARD_KANJI';
 
   const handleSelect = (mode: string, modePool?: string[]) => {
     audioService.playSound('select');
@@ -745,7 +774,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
     return (
       <div className="space-y-3">
         {renderAnswerModeSelector()}
-        <div className={`grid ${selectedCategory.id === 'KANJI' ? 'grid-cols-3' : 'grid-cols-2'} gap-2`}>
+        <div className={`grid ${selectedCategory.id === 'KANJI' || selectedCategory.id === 'KANKEN' || selectedCategory.id === 'HARD_KANJI' ? 'grid-cols-3' : 'grid-cols-2'} gap-2`}>
           {selectedCategory.subModes.map((sub) => (
             <button
               key={sub.id}
@@ -771,7 +800,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
       return (
         <div className="space-y-3">
           {renderAnswerModeSelector()}
-          <div className={`grid ${cat.id === 'KANJI' ? 'grid-cols-3' : 'grid-cols-2'} gap-1.5`}>
+          <div className={`grid ${cat.id === 'KANJI' || cat.id === 'KANKEN' || cat.id === 'HARD_KANJI' ? 'grid-cols-3' : 'grid-cols-2'} gap-1.5`}>
             {cat.subModes.map(sub => (
               <button
                 key={sub.id}

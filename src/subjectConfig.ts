@@ -1,7 +1,7 @@
 
 import { GameMode, GameScreen } from './types';
 
-export type SubjectCategoryType = 'MATH' | 'MATH_GRADES' | 'KOKUGO_GRADES' | 'KANJI' | 'SCIENCE' | 'SOCIAL' | 'ENGLISH' | 'SUMMARY' | 'MAP_PREF' | 'IT_INFO';
+export type SubjectCategoryType = 'MATH' | 'MATH_GRADES' | 'KOKUGO_GRADES' | 'KANJI' | 'KANKEN' | 'HARD_KANJI' | 'SCIENCE' | 'SOCIAL' | 'ENGLISH' | 'SUMMARY' | 'MAP_PREF' | 'IT_INFO';
 
 export interface SubModeConfig {
     id: string;
@@ -82,7 +82,32 @@ const MODE_TO_SCREEN: Record<string, GameScreen> = {
     [GameMode.KANJI_7]: GameScreen.KANJI_CHALLENGE,
     [GameMode.KANJI_8]: GameScreen.KANJI_CHALLENGE,
     [GameMode.KANJI_9]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.KANJI_10]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.KANJI_11]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.KANJI_12]: GameScreen.KANJI_CHALLENGE,
     [GameMode.KANJI_MIXED]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.KANKEN_10]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.KANKEN_9]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.KANKEN_8]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.KANKEN_7]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.KANKEN_6]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.KANKEN_5]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.KANKEN_4]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.KANKEN_3]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.KANKEN_PRE2]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.KANKEN_2]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.KANKEN_PRE1]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.KANKEN_1]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.KANKEN_MIXED]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.HARD_KANJI_JUKUJIKUN]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.HARD_KANJI_FLORA_FAUNA]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.HARD_KANJI_ATEJI]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.HARD_KANJI_PLACE_NAMES]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.HARD_KANJI_KOKUJI]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.HARD_KANJI_CLASSICS]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.HARD_KANJI_YOJUKUGO]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.HARD_KANJI_HISTORY]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.HARD_KANJI_MIXED]: GameScreen.KANJI_CHALLENGE,
     
     // 英語系
     [GameMode.ENGLISH_ES]: GameScreen.ENGLISH_CHALLENGE,
@@ -194,7 +219,48 @@ export const SUBJECT_CATEGORIES: SubjectCategoryConfig[] = [
         { id: 'K7', name: '中学1年', mode: GameMode.KANJI_7 },
         { id: 'K8', name: '中学2年', mode: GameMode.KANJI_8 },
         { id: 'K9', name: '中学3年', mode: GameMode.KANJI_9 },
+        { id: 'K10', name: '高校基礎', mode: GameMode.KANJI_10 },
+        { id: 'K11', name: '高校標準', mode: GameMode.KANJI_11 },
+        { id: 'K12', name: '高校発展', mode: GameMode.KANJI_12 },
         { id: 'K_MIXED', name: 'ミックス', mode: GameMode.KANJI_MIXED },
+    ]
+  },
+  {
+    id: 'KANKEN',
+    name: '漢検',
+    color: 'cyan',
+    uiType: 'grid',
+    subModes: [
+        { id: 'KK10', name: '10級', mode: GameMode.KANKEN_10 },
+        { id: 'KK9', name: '9級', mode: GameMode.KANKEN_9 },
+        { id: 'KK8', name: '8級', mode: GameMode.KANKEN_8 },
+        { id: 'KK7', name: '7級', mode: GameMode.KANKEN_7 },
+        { id: 'KK6', name: '6級', mode: GameMode.KANKEN_6 },
+        { id: 'KK5', name: '5級', mode: GameMode.KANKEN_5 },
+        { id: 'KK4', name: '4級', mode: GameMode.KANKEN_4 },
+        { id: 'KK3', name: '3級', mode: GameMode.KANKEN_3 },
+        { id: 'KK_PRE2', name: '準2級', mode: GameMode.KANKEN_PRE2 },
+        { id: 'KK2', name: '2級', mode: GameMode.KANKEN_2 },
+        { id: 'KK_PRE1', name: '準1級', mode: GameMode.KANKEN_PRE1 },
+        { id: 'KK1', name: '1級', mode: GameMode.KANKEN_1 },
+        { id: 'KK_MIXED', name: 'ミックス', mode: GameMode.KANKEN_MIXED },
+    ]
+  },
+  {
+    id: 'HARD_KANJI',
+    name: '難読漢字',
+    color: 'rose',
+    uiType: 'grid',
+    subModes: [
+        { id: 'HK_JUKUJIKUN', name: '超難読 熟字訓', mode: GameMode.HARD_KANJI_JUKUJIKUN },
+        { id: 'HK_FLORA', name: '動植物 極', mode: GameMode.HARD_KANJI_FLORA_FAUNA },
+        { id: 'HK_ATEJI', name: '当て字・外来語 極', mode: GameMode.HARD_KANJI_ATEJI },
+        { id: 'HK_PLACE', name: '地名・国名 難読', mode: GameMode.HARD_KANJI_PLACE_NAMES },
+        { id: 'HK_KOKUJI', name: '国字・和製漢字', mode: GameMode.HARD_KANJI_KOKUJI },
+        { id: 'HK_CLASSICS', name: '仏教・神道・古典語', mode: GameMode.HARD_KANJI_CLASSICS },
+        { id: 'HK_YOJI', name: '四字熟語 極', mode: GameMode.HARD_KANJI_YOJUKUGO },
+        { id: 'HK_HISTORY', name: '古典表記・歴史語彙', mode: GameMode.HARD_KANJI_HISTORY },
+        { id: 'HK_MIXED', name: 'ミックス', mode: GameMode.HARD_KANJI_MIXED },
     ]
   },
   { 
