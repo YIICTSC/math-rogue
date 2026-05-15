@@ -414,18 +414,7 @@ class P2PService {
 
     public close() {
         this.voiceEnabled = false;
-        this.mediaConnections.forEach(call => call.close());
-        this.mediaConnections.clear();
-        this.remoteAudioElements.forEach(audio => {
-            audio.pause();
-            audio.srcObject = null;
-            audio.remove();
-        });
-        this.remoteAudioElements.clear();
-        if (this.localStream) {
-            this.localStream.getTracks().forEach(track => track.stop());
-            this.localStream = null;
-        }
+        this.closeVoiceChat();
         this.connections.forEach(conn => conn.close());
         this.connections.clear();
         if (this.peer) {
@@ -433,6 +422,51 @@ class P2PService {
             this.peer = null;
         }
         this.myId = null;
+    }
+
+    private closeVoiceChat() {
+        this.mediaConnections.forEach(call => {
+            try {
+                call.close();
+            } catch {}
+        });
+        this.mediaConnections.clear();
+        this.remoteAudioElements.forEach(audio => {
+            audio.pause();
+            audio.srcObject = null;
+            audio.remove();
+        });
+        this.remoteAudioElements.clear();
+        this.stopLocalMicCapture();
+    }
+
+    private stopLocalMicCapture() {
+        this.mediaConnections.forEach(call => this.muteOutgoingAudio(call));
+        if (this.localStream) {
+            this.localStream.getTracks().forEach(track => {
+                track.enabled = false;
+                track.stop();
+            });
+            this.localStream = null;
+        }
+    }
+
+    private muteOutgoingAudio(call: MediaConnection) {
+        const peerConnection = (call as any).peerConnection;
+        const senders: RTCRtpSender[] = typeof peerConnection?.getSenders === 'function'
+            ? peerConnection.getSenders()
+            : [];
+        senders
+            .filter(sender => sender.track?.kind === 'audio')
+            .forEach(sender => {
+                try {
+                    if (sender.track) {
+                        sender.track.enabled = false;
+                        sender.track.stop();
+                    }
+                    sender.replaceTrack(null).catch(() => undefined);
+                } catch {}
+            });
     }
 
     public isConnected() {
@@ -502,7 +536,6 @@ class P2PService {
                 const stream = await this.ensureLocalAudioStream();
                 call.answer(stream);
             } else {
-                // 自分のマイクがOFFでも、相手の音声は受信できるようにする
                 call.answer();
             }
             this.bindMediaConnection(call.peer, call);
@@ -515,13 +548,7 @@ class P2PService {
     public async setVoiceEnabled(enabled: boolean) {
         this.voiceEnabled = enabled;
         if (!enabled) {
-            if (this.localStream) {
-                this.localStream.getAudioTracks().forEach(track => {
-                    track.enabled = false;
-                    track.stop();
-                });
-                this.localStream = null;
-            }
+            this.stopLocalMicCapture();
             return;
         }
         if (this.mediaConnections.size > 0) {
