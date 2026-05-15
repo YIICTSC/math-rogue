@@ -268,9 +268,58 @@ const MIXED_DRILLS = [
 
 const pickRandom = <T,>(items: T[]): T => items[Math.floor(Math.random() * items.length)];
 const normalizeAnswer = (value: string) => value.trim().toLowerCase().replace(/\s+/g, '');
-const isPrefixValid = (input: string, answers: string[]) => {
-    const normalized = normalizeAnswer(input);
-    return answers.some(answer => normalizeAnswer(answer).startsWith(normalized));
+const HAS_KANA_RE = /[ぁ-ゖァ-ヺ]/;
+const ROMAJI_VARIANT_RULES = [
+    ['sha', 'sya'],
+    ['shu', 'syu'],
+    ['sho', 'syo'],
+    ['cha', 'tya'],
+    ['chu', 'tyu'],
+    ['cho', 'tyo'],
+    ['ja', 'zya'],
+    ['ju', 'zyu'],
+    ['jo', 'zyo'],
+    ['ltsu', 'xtsu'],
+    ['ltu', 'xtu'],
+    ['lya', 'xya'],
+    ['lyu', 'xyu'],
+    ['lyo', 'xyo'],
+    ['la', 'xa'],
+    ['li', 'xi'],
+    ['lu', 'xu'],
+    ['le', 'xe'],
+    ['lo', 'xo'],
+    ['shi', 'si'],
+    ['chi', 'ti'],
+    ['tsu', 'tu'],
+    ['fu', 'hu'],
+    ['ji', 'zi'],
+    ['wo', 'o']
+] as const;
+const LATIN_ROMAJI_RE = /^[a-z0-9,._+\-/*:;[\](){}!?]+$/;
+
+const expandRomajiVariants = (answer: string): string[] => {
+    const normalized = normalizeAnswer(answer);
+    if (!LATIN_ROMAJI_RE.test(normalized)) return [normalized];
+
+    let variants = new Set([normalized]);
+    ROMAJI_VARIANT_RULES.forEach(([source, replacement]) => {
+        const next = new Set(variants);
+        variants.forEach(candidate => {
+            if (candidate.includes(source)) {
+                next.add(candidate.split(source).join(replacement));
+            }
+        });
+        variants = next;
+    });
+    return Array.from(variants);
+};
+
+const getAcceptedAnswersForPrompt = (prompt: TypingPrompt | null): string[] => {
+    if (!prompt) return [];
+    const answers = prompt.acceptedAnswers.map(normalizeAnswer);
+    if (!HAS_KANA_RE.test(prompt.text)) return Array.from(new Set(answers));
+    return Array.from(new Set(answers.flatMap(expandRomajiVariants)));
 };
 const pickBiased = <T,>(items: T[], score: (item: T) => number): T => {
     const weighted = items.map(item => ({ item, weight: Math.max(1, score(item)) }));
@@ -562,7 +611,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
         return player.hand[0] ?? null;
     }, [player.hand]);
     const queuedHandCards = useMemo(() => player.hand.slice(1), [player.hand]);
-    const normalizedAnswers = useMemo(() => (prompt?.acceptedAnswers ?? []).map(normalizeAnswer), [prompt]);
+    const normalizedAnswers = useMemo(() => getAcceptedAnswersForPrompt(prompt), [prompt]);
     const getRelicCounter = (relicId: string) => {
         if (relicId === 'KUNAI' || relicId === 'SHURIKEN' || relicId === 'ORNAMENTAL_FAN') {
             return player.relicCounters['ATTACK_COUNT'];
@@ -580,13 +629,14 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
     }, [player.relicCounters, player.relics]);
     const nextExpectedKey = useMemo(() => {
         if (!prompt) return '';
-        const base = prompt.acceptedAnswers[0] ?? prompt.answer;
-        const answer = normalizeAnswer(base);
         const typed = normalizeAnswer(input);
+        const answer = normalizedAnswers.find(candidate => candidate.startsWith(typed))
+            ?? normalizedAnswers[0]
+            ?? normalizeAnswer(prompt.answer);
         return answer[typed.length] ?? answer[answer.length - 1] ?? '';
-    }, [prompt, input]);
+    }, [prompt, input, normalizedAnswers]);
     const currentFinger = (nextExpectedKey && KEY_FINGER_MAP[nextExpectedKey]) || prompt?.finger || null;
-    const isWrongPrefix = !!prompt && normalizeAnswer(input).length > 0 && !isPrefixValid(input, prompt.acceptedAnswers);
+    const isWrongPrefix = !!prompt && normalizeAnswer(input).length > 0 && !normalizedAnswers.some(answer => answer.startsWith(normalizeAnswer(input)));
     const weakKeyEntries = useMemo(() => getWeakKeyEntries(lessonId), [lessonId, prompt?.id, input.length]);
 
     const rtbDurationMs = useMemo(() => {
@@ -604,9 +654,12 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
     const promptFillCount = useMemo(() => {
         if (!prompt) return 0;
         const typedLen = normalizeAnswer(input).length;
-        const answerLen = Math.max(1, normalizeAnswer(prompt.acceptedAnswers[0] ?? prompt.answer).length);
+        const matchedAnswer = normalizedAnswers.find(answer => answer.startsWith(normalizeAnswer(input)))
+            ?? normalizedAnswers[0]
+            ?? normalizeAnswer(prompt.answer);
+        const answerLen = Math.max(1, matchedAnswer.length);
         return Math.min(prompt.text.length, Math.ceil((typedLen / answerLen) * prompt.text.length));
-    }, [prompt, input]);
+    }, [prompt, input, normalizedAnswers]);
 
     useEffect(() => {
         if (currentCard) {
