@@ -59,7 +59,7 @@ const DifficultySelectionScreen: React.FC<DifficultySelectionScreenProps> = ({
             const locked = config.level > maxUnlockedDifficulty;
             const features = [
               config.level === 1 ? '' : `敵HP x${config.enemyHpMultiplier.toFixed(2)}`,
-              config.scienceRoomChance <= 0 ? '理科室なし' : `理科室 ${Math.round(config.scienceRoomChance * 100)}%`,
+              config.scienceRoomChance <= 0 ? '休憩時理科室なし' : `休憩時理科室 ${Math.round(config.scienceRoomChance * 100)}%`,
               config.legacyCardAllowed ? '引継ぎあり' : '引継ぎなし',
               config.cardEraserEnabled ? 'カード消しゴム出現' : '',
               config.removeCostStep > 0 ? `削除費 +${config.removeCostStep}G` : '削除費固定',

@@ -64,9 +64,9 @@ export const generateDungeonMap = (difficultyLevel: number = 1): MapNode[] => {
         } else if (y === MAP_HEIGHT - 2) {
              type = NodeType.REST; // Rest before boss
         } else {
-            const restChance = difficulty.scienceRoomChance;
+            const restChance = 0.13;
             const weights = [
-                { type: NodeType.COMBAT, weight: 0.45 + Math.max(0, 0.13 - restChance) },
+                { type: NodeType.COMBAT, weight: 0.45 },
                 { type: NodeType.EVENT, weight: 0.15 },
                 { type: NodeType.SHOP, weight: 0.12 },
                 { type: NodeType.REST, weight: restChance },
