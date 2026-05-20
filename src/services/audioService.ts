@@ -970,13 +970,16 @@ class AudioService {
       this.playSfxMp3(`status-effects/${effect}`, fallbackByEffect[effect]);
   }
 
-  public playSound(effect: 'select' | 'attack' | 'block' | 'win' | 'lose' | 'correct' | 'wrong' | 'buff' | 'debuff' | 'damage' | 'explosion' | 'finisher_slash' | 'finisher_explosion') {
+  public playSound(effect: 'select' | 'jump' | 'attack' | 'block' | 'win' | 'lose' | 'correct' | 'wrong' | 'buff' | 'debuff' | 'damage' | 'explosion' | 'finisher_slash' | 'finisher_explosion') {
       this.init();
       if (!this.ctx || !this.sfxGain || this.isMuted) return;
       const t = this.ctx.currentTime;
       switch(effect) {
           case 'select':
               this.playOsc(1100, t, 0.05, 'triangle', 0.2, this.sfxGain);
+              break;
+          case 'jump':
+              this.playSfxMp3('jump', () => this.playOsc(880, this.ctx!.currentTime, 0.08, 'triangle', 0.2, this.sfxGain!));
               break;
           case 'attack':
               this.playAttackSynth(t);

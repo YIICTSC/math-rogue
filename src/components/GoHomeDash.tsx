@@ -239,6 +239,7 @@ const GoHomeDash: React.FC<{ onBack: () => void; problemMode?: GameMode; problem
 
     const scoreRef = useRef(0);
     const levelRef = useRef(1);
+    const maxHpRef = useRef(3);
     const expRef = useRef(0);
     const nextLevelExpRef = useRef(200);
     const frameCount = useRef(0);
@@ -283,6 +284,10 @@ const GoHomeDash: React.FC<{ onBack: () => void; problemMode?: GameMode; problem
         animFrameTimer: 0
     });
 
+    useEffect(() => {
+        maxHpRef.current = maxHp;
+    }, [maxHp]);
+
     const obstaclesRef = useRef<Obstacle[]>([]);
     const projectilesRef = useRef<Projectile[]>([]);
     const enemyProjectilesRef = useRef<Projectile[]>([]);
@@ -315,11 +320,24 @@ const GoHomeDash: React.FC<{ onBack: () => void; problemMode?: GameMode; problem
         { id: 'MOVE_6', name: 'ロケットスタート', description: '初期位置から少し前に進む。', iconType: 'PE', apply: (p) => { p.x = Math.min(p.x + 50, 300); } },
         { id: 'MOVE_8', name: '瞬足の極意', description: '速度が大幅アップし、無敵時間増加。', iconType: 'PE', apply: (p) => { p.speedBoost += 0.3; } },
         { id: 'DEF_1', name: 'ノートバリア', description: '衝突を防ぐバリアを展開。', iconType: 'JAPANESE', apply: (p) => { p.barrier = true; } },
-        { id: 'DEF_2', name: '給食おかわり', description: '最大HPが+1され、全回復。', iconType: 'SOCIAL', apply: (p, setHp, setMaxHp) => { setMaxHp((prev:number)=>prev+1); setHp((prev:number)=>prev+1); } },
+        { id: 'DEF_2', name: '給食おかわり', description: '最大HPが+1され、全回復。', iconType: 'SOCIAL', apply: (p, setHp, setMaxHp) => {
+            setMaxHp((prev:number) => {
+                const next = prev + 1;
+                maxHpRef.current = next;
+                setHp(next);
+                return next;
+            });
+        } },
         { id: 'DEF_3', name: '自動修復ノート', description: '一定時間ごとにバリアが自動復活。', iconType: 'JAPANESE', apply: (p) => { p.barrierRegen = true; } },
         { id: 'DEF_4', name: '保健室の飴', description: '一定時間ごとにHPが1回復する。', iconType: 'SOCIAL', apply: (p) => { p.autoHeal = true; } },
-        { id: 'DEF_7', name: 'カルシウム摂取', description: '最大HP+2。', iconType: 'SOCIAL', apply: (p, setHp, setMaxHp) => { setMaxHp((prev:number)=>prev+2); } },
-        { id: 'DEF_10', name: 'ビタミン補給', description: 'HPを2回復し、加速。', iconType: 'SOCIAL', apply: (p, setHp) => { setHp((prev:number)=>Math.min(5, prev+2)); p.speedBoost += 0.1; } },
+        { id: 'DEF_7', name: 'カルシウム摂取', description: '最大HP+2。', iconType: 'SOCIAL', apply: (p, setHp, setMaxHp) => {
+            setMaxHp((prev:number) => {
+                const next = prev + 2;
+                maxHpRef.current = next;
+                return next;
+            });
+        } },
+        { id: 'DEF_10', name: 'ビタミン補給', description: 'HPを2回復し、加速。', iconType: 'SOCIAL', apply: (p, setHp) => { setHp((prev:number)=>Math.min(maxHpRef.current, prev+2)); p.speedBoost += 0.1; } },
         { id: 'UTIL_1', name: '進級パワー', description: '獲得EXPが常時1.5倍に。', iconType: 'SCIENCE', apply: (p) => { p.expMult += 0.5; } },
         { id: 'UTIL_2', name: 'お年玉ボーナス', description: 'スコアの増加速度がアップ。', iconType: 'SOCIAL', apply: (p) => { p.scoreBonus += 0.5; } },
         { id: 'UTIL_4', name: '大掃除', description: '画面内の敵をすべて消去する。', iconType: 'SOCIAL', apply: (p) => { p.cleaningDuty = 1; } },
@@ -356,6 +374,7 @@ const GoHomeDash: React.FC<{ onBack: () => void; problemMode?: GameMode; problem
 
     const initGame = () => {
         scoreRef.current = 0; levelRef.current = 1; expRef.current = 0; nextLevelExpRef.current = 200;
+        maxHpRef.current = 3;
         setScore(0); setLevel(1); setExp(0); setHp(3); setMaxHp(3); setNextLevelExp(200);
         playerRef.current = {
             x: PLAYER_DEFAULT_X, y: GROUND_Y, vy: 0, isJumping: false, isFalling: false, isPressing: false, jumpCount: 0, maxJumps: 1, invulFrame: 0,
@@ -391,7 +410,7 @@ const GoHomeDash: React.FC<{ onBack: () => void; problemMode?: GameMode; problem
         const p = playerRef.current;
         if (!p.isFalling && p.jumpCount < p.maxJumps) {
             p.vy = JUMP_FORCE; p.isJumping = true; p.jumpCount++; p.jumpActionFrame = 12;
-            audioService.playSound('select'); addParticle(p.x, p.y, '#ffffff');
+            audioService.playSound('jump'); addParticle(p.x, p.y, '#ffffff');
             if (p.jumpBoom) {
                  addVfxRing(p.x, p.y, '#ffffff');
                  obstaclesRef.current = obstaclesRef.current.filter(obs => {
@@ -562,7 +581,7 @@ const GoHomeDash: React.FC<{ onBack: () => void; problemMode?: GameMode; problem
 
         if (p.autoHeal) {
             p.autoHealTimer++;
-            if (p.autoHealTimer > 1200) { setHp(h => Math.min(maxHp, h + 1)); p.autoHealTimer = 0; audioService.playSound('buff'); }
+            if (p.autoHealTimer > 1200) { setHp(h => Math.min(maxHpRef.current, h + 1)); p.autoHealTimer = 0; audioService.playSound('buff'); }
         }
 
         if (p.trailFire && frameCount.current % 10 === 0) {
@@ -758,7 +777,7 @@ const GoHomeDash: React.FC<{ onBack: () => void; problemMode?: GameMode; problem
                         if (!proj.isPierce) projs.splice(j, 1);
                         obstacles.splice(i, 1); audioService.playSound('attack');
                         scoreRef.current += 50; addParticle(obs.x, obs.y, '#ffeb3b');
-                        if (p.lifesteal && Math.random() < 0.1) setHp(h => Math.min(maxHp, h + 1));
+                        if (p.lifesteal && Math.random() < 0.1) setHp(h => Math.min(maxHpRef.current, h + 1));
                     }
                     break;
                 }
@@ -798,7 +817,7 @@ const GoHomeDash: React.FC<{ onBack: () => void; problemMode?: GameMode; problem
 
     const handleChallengeComplete = (correctCount: number) => {
         if (correctCount >= 3) {
-            setHp(h => Math.min(maxHp, h + 1));
+            setHp(h => Math.min(maxHpRef.current, h + 1));
             audioService.playSound('buff');
         }
         setGameState('LEVEL_UP');
