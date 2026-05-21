@@ -526,11 +526,11 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                                     {HIGH_SCHOOL_EVENT_THEMES.map(event => (
                                         <div key={event.imageIndex} className="bg-black/35 border border-gray-700 rounded-lg overflow-hidden">
-                                            <div className="aspect-video bg-slate-950 overflow-hidden">
+                                            <div className="aspect-square bg-slate-950 overflow-hidden">
                                                 <img
                                                     src={assetUrl(`sprites/high-school/events/${event.imageIndex}.png`)}
                                                     alt={event.title}
-                                                    className="w-full h-full object-cover"
+                                                    className={`w-full h-full object-cover ${event.imageIndex < 18 ? 'scale-[1.18]' : ''}`}
                                                 />
                                             </div>
                                             <div className="p-3 space-y-1">

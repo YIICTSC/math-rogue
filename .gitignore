@@ -7,3 +7,13 @@ dist/
 .env.*
 !.env.example
 coverage/
+
+# Local iOS app work. Keep the GitHub repo focused on the web game.
+ios/
+*.xcodeproj/
+*.xcworkspace/
+DerivedData/
+Pods/
+*.ipa
+*.xcarchive
+*.dSYM/

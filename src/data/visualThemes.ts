@@ -273,5 +273,69 @@ export const HIGH_SCHOOL_EVENT_THEMES: HighSchoolEventTheme[] = [
   { title: '深夜のファミレス', description: '参考書とドリンクバーの明かりの中で、友人たちがまだ粘っている。', imageIndex: 53 },
 ];
 
-export const getHighSchoolEventTheme = (title: string): HighSchoolEventTheme =>
-  HIGH_SCHOOL_EVENT_THEMES[getStableIndex(title, HIGH_SCHOOL_EVENT_THEMES.length)];
+const HIGH_SCHOOL_NEUTRAL_EVENT_INDICES = [
+  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 53,
+];
+const HIGH_SCHOOL_SPRING_EVENT_INDICES = [18, 19, 20, 21, 22, 23, 24, 25, 26];
+const HIGH_SCHOOL_SUMMER_EVENT_INDICES = [27, 28, 29, 30, 31, 32, 33, 34, 35];
+const HIGH_SCHOOL_AUTUMN_EVENT_INDICES = [36, 37, 38, 39, 40, 41, 42, 43, 44];
+const HIGH_SCHOOL_WINTER_EVENT_INDICES = [45, 46, 47, 48, 49, 50];
+const HIGH_SCHOOL_FINALE_EVENT_INDICES = [51, 52];
+
+const themesFromIndices = (indices: number[]) =>
+  indices.map(index => HIGH_SCHOOL_EVENT_THEMES[index]).filter(Boolean);
+
+const getSeasonalHighSchoolEventPool = (act = 1, floor = 1): HighSchoolEventTheme[] => {
+  const safeAct = Math.max(1, act);
+  const safeFloor = Math.max(1, floor);
+  const neutral = themesFromIndices(HIGH_SCHOOL_NEUTRAL_EVENT_INDICES);
+
+  if (safeAct <= 1) {
+    if (safeFloor <= 6) {
+      return [...themesFromIndices(HIGH_SCHOOL_SPRING_EVENT_INDICES), ...neutral];
+    }
+    if (safeFloor <= 10) {
+      return [
+        ...themesFromIndices(HIGH_SCHOOL_SPRING_EVENT_INDICES),
+        ...themesFromIndices(HIGH_SCHOOL_SUMMER_EVENT_INDICES),
+        ...neutral,
+      ];
+    }
+    return [...themesFromIndices(HIGH_SCHOOL_SUMMER_EVENT_INDICES), ...neutral];
+  }
+
+  if (safeAct === 2) {
+    if (safeFloor <= 7) {
+      return [...themesFromIndices(HIGH_SCHOOL_SUMMER_EVENT_INDICES), ...neutral];
+    }
+    return [...themesFromIndices(HIGH_SCHOOL_AUTUMN_EVENT_INDICES), ...neutral];
+  }
+
+  if (safeAct === 3) {
+    if (safeFloor <= 5) {
+      return [
+        ...themesFromIndices(HIGH_SCHOOL_AUTUMN_EVENT_INDICES),
+        ...themesFromIndices(HIGH_SCHOOL_WINTER_EVENT_INDICES),
+        ...neutral,
+      ];
+    }
+    if (safeFloor <= 10) {
+      return [...themesFromIndices(HIGH_SCHOOL_WINTER_EVENT_INDICES), ...neutral];
+    }
+    return [
+      ...themesFromIndices(HIGH_SCHOOL_FINALE_EVENT_INDICES),
+      ...themesFromIndices(HIGH_SCHOOL_WINTER_EVENT_INDICES),
+      ...neutral,
+    ];
+  }
+
+  return HIGH_SCHOOL_EVENT_THEMES;
+};
+
+export const getHighSchoolEventTheme = (title: string, act = 1, floor = 1): HighSchoolEventTheme => {
+  const pool = getSeasonalHighSchoolEventPool(act, floor);
+  return pool[getStableIndex(title, pool.length)];
+};
+
+export const getHighSchoolEventThemeByTitle = (title: string): HighSchoolEventTheme | undefined =>
+  HIGH_SCHOOL_EVENT_THEMES.find(theme => theme.title === title);
