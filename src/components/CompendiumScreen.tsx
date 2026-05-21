@@ -13,12 +13,14 @@ import { assetUrl } from '../utils/assetPaths';
 import { getCardIllustrationPaths } from '../utils/cardIllustration';
 import { ENEMY_ILLUSTRATION_SIZE_CLASS } from '../constants/uiSizing';
 import { PotionIcon, RelicIcon } from './ItemIcon';
+import { getHighSchoolEnemyVariant, type VisualThemeId } from '../data/visualThemes';
 
 interface CompendiumScreenProps {
     unlockedCardNames: string[];
     onBack: () => void;
     languageMode: LanguageMode;
     isDebug?: boolean;
+    visualTheme?: VisualThemeId;
 }
 
 const shuffleList = <T,>(items: T[]) => {
@@ -30,7 +32,7 @@ const shuffleList = <T,>(items: T[]) => {
     return next;
 };
 
-const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, onBack, languageMode, isDebug = false }) => {
+const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, onBack, languageMode, isDebug = false, visualTheme = 'elementary' }) => {
     const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'ENEMIES'>('CARDS');
     const [unlockedRelics, setUnlockedRelics] = useState<string[]>([]);
     const [unlockedPotions, setUnlockedPotions] = useState<string[]>([]);
@@ -83,6 +85,9 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
     const allRelics = useMemo(() => Object.values(RELIC_LIBRARY), []);
     const allPotions = useMemo(() => Object.values(POTION_LIBRARY), []);
     const allEnemies = useMemo(() => Object.values(ENEMY_LIBRARY).sort((a, b) => a.tier - b.tier), []);
+    const getEnemyDisplayName = (enemy: { name: string }) => visualTheme === 'high-school'
+        ? getHighSchoolEnemyVariant({ name: enemy.name, enemyType: 'GENERIC', phase: undefined }).name
+        : enemy.name;
     const unlockedCardsForShowcase = useMemo(() => {
         const visibleNames = isDebug ? allCards.map(card => card.name) : unlockedCardNames;
         const uniqueNames = Array.from(new Set(visibleNames));
@@ -277,9 +282,9 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                                     className={`bg-black/60 border ${isUnlocked ? 'border-red-900 hover:border-red-500' : 'border-gray-800'} p-2 rounded flex flex-col items-center text-center cursor-pointer transition-colors aspect-square justify-center relative overflow-hidden`}
                                 >
                                     <div className={`${ENEMY_ILLUSTRATION_SIZE_CLASS.compendiumGrid} mb-2 bg-gray-900 rounded relative ${!isUnlocked ? 'brightness-0 opacity-20' : ''}`}>
-                                        <EnemyIllustration name={enemy.name} seed={enemy.name} className="w-full h-full" size={16} />
+                                        <EnemyIllustration name={enemy.name} seed={enemy.name} className="w-full h-full" size={16} visualTheme={visualTheme} />
                                     </div>
-                                    <div className={`font-bold text-[10px] truncate w-full ${isUnlocked ? 'text-red-200' : 'text-gray-600'}`}>{isUnlocked ? trans(enemy.name, languageMode) : '???'}</div>
+                                    <div className={`font-bold text-[10px] truncate w-full ${isUnlocked ? 'text-red-200' : 'text-gray-600'}`}>{isUnlocked ? trans(getEnemyDisplayName(enemy), languageMode) : '???'}</div>
                                     {!isUnlocked && <Lock size={16} className="absolute top-2 right-2 text-gray-600" />}
                                 </div>
                             );
@@ -297,7 +302,9 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                         </button>
 
                         <h3 className={`text-2xl font-bold mb-4 ${selectedItem.unlocked ? 'text-amber-200' : 'text-gray-500'}`}>
-                            {selectedItem.unlocked ? trans(selectedItem.data.name, languageMode) : trans('未発見', languageMode)}
+                            {selectedItem.unlocked
+                                ? trans(selectedItem.type === 'ENEMY' ? getEnemyDisplayName(selectedItem.data) : selectedItem.data.name, languageMode)
+                                : trans('未発見', languageMode)}
                         </h3>
 
                         <div
@@ -330,7 +337,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                             {selectedItem.type === 'ENEMY' && (
                                 <div className={`${ENEMY_ILLUSTRATION_SIZE_CLASS.compendiumDetail} bg-black rounded border border-gray-600 relative`}>
                                     {selectedItem.unlocked ?
-                                        <EnemyIllustration name={selectedItem.data.name} seed={selectedItem.data.name} className="w-full h-full" size={16} />
+                                        <EnemyIllustration name={selectedItem.data.name} seed={selectedItem.data.name} className="w-full h-full" size={16} visualTheme={visualTheme} />
                                         : <div className="w-full h-full flex items-center justify-center text-gray-700 text-4xl">?</div>
                                     }
                                 </div>
@@ -459,10 +466,18 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
     }, [activeCard.id, transitionVariants]);
 
     useEffect(() => {
+        audioService.setBackgroundPlaybackEnabled(true);
         audioService.setBgmAdvanceMode(playOrder, bgmTracks);
         audioService.playBGM(activeTrack as any, isRepeat);
         setIsPlaying(true);
         setIsPaused(false);
+        return () => {
+            audioService.setBackgroundPlaybackEnabled(false);
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = 'none';
+                navigator.mediaSession.metadata = null;
+            }
+        };
     }, []);
 
     useEffect(() => {
@@ -576,6 +591,37 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
         if (cards.length <= 1) return;
         setCardIndex(prev => (prev + 1) % cards.length);
     };
+
+    useEffect(() => {
+        if (!('mediaSession' in navigator)) return;
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: activeTrack,
+            artist: '学習ローグ',
+            album: '図鑑 BGM モード'
+        });
+        navigator.mediaSession.setActionHandler('play', () => {
+            if (!isPlaying) {
+                setIsPlaying(true);
+                return;
+            }
+            audioService.resumeBGM();
+            setIsPaused(false);
+        });
+        navigator.mediaSession.setActionHandler('pause', () => {
+            audioService.pauseBGM();
+            setIsPaused(true);
+        });
+        navigator.mediaSession.setActionHandler('stop', handleStop);
+        navigator.mediaSession.setActionHandler('previoustrack', handlePrevTrack);
+        navigator.mediaSession.setActionHandler('nexttrack', handleNextTrack);
+        return () => {
+            navigator.mediaSession.setActionHandler('play', null);
+            navigator.mediaSession.setActionHandler('pause', null);
+            navigator.mediaSession.setActionHandler('stop', null);
+            navigator.mediaSession.setActionHandler('previoustrack', null);
+            navigator.mediaSession.setActionHandler('nexttrack', null);
+        };
+    }, [activeTrack, isPlaying]);
 
     return (
         <div className="fixed inset-0 z-[80] bg-black flex flex-col">

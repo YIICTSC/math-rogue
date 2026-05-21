@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ActStats, LanguageMode, Card as ICard } from '../types';
 import { GAME_STORIES } from '../data/stories';
+import { HIGH_SCHOOL_STORIES } from '../data/highSchoolStories';
 import { ADDITIONAL_CARDS } from '../constants1';
 import { trans } from '../utils/textUtils';
 import { Skull, Coins, Brain, ArrowRight, BookOpen, Sparkles } from 'lucide-react';
@@ -16,13 +17,15 @@ interface FloorResultScreenProps {
   languageMode: LanguageMode;
   newlyUnlockedCardName?: string; // 追加
   typingMode?: boolean;
+  visualTheme?: 'elementary' | 'high-school';
 }
 
-const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, storyIndex, onNext, languageMode, newlyUnlockedCardName, typingMode = false }) => {
+const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, storyIndex, onNext, languageMode, newlyUnlockedCardName, typingMode = false, visualTheme = 'elementary' }) => {
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
   
-  const storySet = GAME_STORIES[storyIndex] || GAME_STORIES[0];
+  const storyPool = visualTheme === 'high-school' ? HIGH_SCHOOL_STORIES : GAME_STORIES;
+  const storySet = storyPool[storyIndex % storyPool.length] || storyPool[0];
   const currentPart = storySet.parts[(act - 1) % 3]; 
 
   // 解放されたカード情報の取得

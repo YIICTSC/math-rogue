@@ -25,6 +25,13 @@ interface EventScreenProps {
 const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, imageKey, image, resultLog, onContinue, typingMode = false, interactionDisabled = false, interactionDisabledMessage }) => {
   const imageCandidates = useMemo(() => {
     const baseUrl = (import.meta as any).env.BASE_URL || '/';
+    const highSchoolMatch = imageKey?.match(/^high-school-event-(\d+)$/);
+    if (highSchoolMatch) {
+      return [
+        `${baseUrl}sprites/high-school/events/${highSchoolMatch[1]}.png`,
+        `${baseUrl}event-illustrations/default.svg`,
+      ];
+    }
     const encodedTitle = encodeURIComponent(imageKey ?? title);
     return [
       `${baseUrl}event-illustrations/${encodedTitle}.webp`,

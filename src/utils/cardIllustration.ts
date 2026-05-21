@@ -19,21 +19,32 @@ const deriveNameAliases = (name: string): string[] => {
   return Array.from(aliases);
 };
 
+const getNameVariants = (value: string): string[] => [
+  value,
+  value.normalize('NFC'),
+  value.normalize('NFD'),
+  value.normalize('NFKC'),
+  value.normalize('NFKD'),
+];
+
+const CARD_ILLUSTRATION_ASSET_VERSION = '20260521-card-art';
+
 export const getCardIllustrationPaths = (id: string, name: string, aliases: string[] = []): string[] => {
   const baseUrl = (import.meta as any).env.BASE_URL || '/';
-  const rawCandidates = [name, ...deriveNameAliases(name), ...aliases, id, 'SEED_SHARED', 'unknown-card']
+  const derivedAliases = deriveNameAliases(name);
+  const shouldUseSharedSeedArt = derivedAliases.length > 0 || aliases.some((alias) => deriveNameAliases(alias).length > 0);
+  const rawCandidates = [name, ...derivedAliases, ...aliases, id, ...(shouldUseSharedSeedArt ? ['SEED_SHARED'] : []), 'unknown-card']
     .filter(Boolean)
     .map((value) => value.trim());
   const candidates = Array.from(
     new Set(
-      rawCandidates.flatMap((value) => [
-        sanitizeCardIllustrationName(value),
-        sanitizeCardIllustrationName(value.normalize('NFKC')),
-      ])
+      rawCandidates.flatMap((value) =>
+        getNameVariants(value).map((variant) => sanitizeCardIllustrationName(variant))
+      )
     )
   );
   const extensions = ['webp', 'png', 'jpg', 'jpeg', 'svg'];
   return candidates.flatMap((fileName) =>
-    extensions.map((ext) => `${baseUrl}card-illustrations/${encodeURIComponent(`${fileName}.${ext}`)}`)
+    extensions.map((ext) => `${baseUrl}card-illustrations/${encodeURIComponent(`${fileName}.${ext}`)}?v=${CARD_ILLUSTRATION_ASSET_VERSION}`)
   );
 };

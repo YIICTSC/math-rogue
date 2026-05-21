@@ -389,7 +389,7 @@ const VSBattleScene: React.FC<VSBattleSceneProps> = ({ player1, player2, onFinis
         }
         if (card.id === 'SWORD_BOOMERANG') {
             nextCurrent.currentEnergy += 1;
-            addLog('ブーメラン: エネルギー+1');
+            addLog('ブーメラン: エナジー+1');
         }
 
         // 中優先: ブロック+ドロー系の差別化

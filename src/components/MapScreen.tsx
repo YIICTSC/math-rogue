@@ -6,6 +6,7 @@ import { MAP_WIDTH, MAP_HEIGHT } from '../services/mapGenerator';
 import Card from './Card';
 import { trans } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
+import type { VisualThemeId } from '../data/visualThemes';
 
 interface MapScreenProps {
     nodes: MapNode[];
@@ -22,9 +23,10 @@ interface MapScreenProps {
     selectionHoldMs?: number;
     selectionDisabled?: boolean;
     selectionDisabledMessage?: string;
+    visualTheme?: VisualThemeId;
 }
 
-const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelect, onReturnToTitle, onOpenSettings, player, languageMode, narrative, act, floor, typingMode = false, selectionHoldMs = 0, selectionDisabled = false, selectionDisabledMessage }) => {
+const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelect, onReturnToTitle, onOpenSettings, player, languageMode, narrative, act, floor, typingMode = false, selectionHoldMs = 0, selectionDisabled = false, selectionDisabledMessage, visualTheme = 'elementary' }) => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [showDeck, setShowDeck] = useState(false);
     const holdTimerRef = useRef<number | null>(null);
@@ -192,7 +194,9 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
         assetUrl('sprites/backgrounds/learning-rogue/map-indoor.webp'),
         assetUrl('sprites/backgrounds/learning-rogue/map-festival.webp')
     ];
-    const mapBackground = mapBackgrounds[(Math.max(1, act) - 1) % mapBackgrounds.length];
+    const mapBackground = visualTheme === 'high-school'
+        ? assetUrl('sprites/backgrounds/learning-rogue/high-school-map.webp')
+        : mapBackgrounds[(Math.max(1, act) - 1) % mapBackgrounds.length];
 
     return (
         <div className="flex flex-col h-full w-full bg-slate-950 relative overflow-hidden">

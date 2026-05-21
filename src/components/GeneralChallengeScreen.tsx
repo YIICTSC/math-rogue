@@ -25,6 +25,7 @@ interface ExtendedGeneralProblem extends GeneralProblem {
 
 type BrowserSpeechRecognition = {
   lang: string;
+  continuous: boolean;
   interimResults: boolean;
   maxAlternatives: number;
   onresult: ((event: any) => void) | null;
@@ -203,13 +204,16 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
 
   const matchesSpeechPrompt = useCallback((transcript: string, speechPrompt: NonNullable<GeneralProblem['speechPrompt']>) => {
     const normalizedTranscript = normalize(transcript);
+    if (normalizedTranscript.length < 2) return false;
     const answers = [
       speechPrompt.expected,
       ...(speechPrompt.alternates || []),
     ];
     const exactMatch = answers.some((answer) => {
       const normalizedAnswer = normalize(answer);
-      return normalizedTranscript.includes(normalizedAnswer) || normalizedAnswer.includes(normalizedTranscript);
+      return normalizedTranscript.includes(normalizedAnswer)
+        || (normalizedTranscript.length >= Math.max(3, Math.ceil(normalizedAnswer.length * 0.7))
+          && normalizedAnswer.includes(normalizedTranscript));
     });
     if (exactMatch) return true;
 
@@ -358,16 +362,29 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
 
     const recognition = new RecognitionCtor();
     recognition.lang = currentProblem.speechPrompt.lang || 'en-US';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 3;
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 5;
     recognition.onresult = (event) => {
-      const transcript = String(event.results?.[0]?.[0]?.transcript || '').trim();
+      const result = event.results?.[event.resultIndex ?? 0] ?? event.results?.[0];
+      const alternatives = Array.from(result || [])
+        .map((candidate: any) => String(candidate?.transcript || '').trim())
+        .filter(Boolean);
+      const transcript = alternatives[0] || '';
       setSpeechTranscript(transcript);
-      const isCorrect = matchesSpeechPrompt(transcript, currentProblem.speechPrompt!);
-      submitAnswerResult(isCorrect, transcript || currentProblem.speechPrompt!.expected);
+      if (!result?.isFinal) return;
+      const acceptedTranscript = alternatives.find(candidate => matchesSpeechPrompt(candidate, currentProblem.speechPrompt!));
+      submitAnswerResult(!!acceptedTranscript, acceptedTranscript || transcript || currentProblem.speechPrompt!.expected);
     };
-    recognition.onerror = () => {
-      setSpeechError('うまく ききとれませんでした');
+    recognition.onerror = (event: any) => {
+      const detail = event?.error;
+      setSpeechError(
+        detail === 'not-allowed' || detail === 'service-not-allowed'
+          ? 'マイクの許可を確認してください'
+          : detail === 'no-speech'
+            ? '声が聞こえませんでした。もう一度どうぞ'
+            : 'うまく ききとれませんでした'
+      );
       setIsListening(false);
     };
     recognition.onend = () => {

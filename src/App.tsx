@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
-    GameState, GameScreen, Enemy, Card as ICard,
+    GameState, GameScreen, Enemy, Card as ICard, ActiveFamiliar,
     CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode, LanguageMode, AnswerMode, VisualEffectInstance, GardenSlot, VFXType, ActStats, RaceTrickCard, RaceTrickEffectId, CoopSupportCard, CoopBattleState, CoopBattleTurnSlot, CoopBattlePlayerState, CoopSharedState, CoopTreasurePool
 } from './types';
 import {
@@ -9,6 +9,7 @@ import {
 } from './constants';
 import { ADDITIONAL_CARDS } from './constants1';
 import { GAME_STORIES } from './data/stories';
+import { HIGH_SCHOOL_STORIES } from './data/highSchoolStories';
 import { getChallengeScreenForMode } from './subjectConfig'; // New Utility
 import BattleScene from './components/BattleScene';
 import TypingBattleScene from './components/TypingBattleScene';
@@ -66,6 +67,7 @@ import { getRandomCoopSupportCard } from './coopSupportCards';
 import { chooseBattleBackgroundScene, getBattleBackgroundFlavor } from './data/battleBackgrounds';
 import { OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE } from './config/runtime';
 import { getAttackEffectKeyForCard, getMultihitFrameSequence } from './data/attackEffects';
+import { getThemedCharacters, type VisualThemeId } from './data/visualThemes';
 
 const PARRY_WINDOW_MS = 650;
 const PARRY_PERFECT_MS = 220;
@@ -218,7 +220,7 @@ const EMPTY_RACE_EFFECTS: RaceEffectState = {
 };
 
 const DEFAULT_APP_SETTINGS: AppSettings = {
-    bgmMode: 'STUDY',
+    bgmMode: 'MP3',
     bgmVolume: 0.4,
     seVolume: 0.6,
     micEnabled: false,
@@ -541,6 +543,8 @@ const App: React.FC = () => {
         return Object.values(CARDS_LIBRARY).filter(c => {
             // Basic type filtering
             if (c.type === CardType.STATUS || c.type === CardType.CURSE) return false;
+            if (visualTheme === 'high-school') return c.visualTheme === 'high-school';
+            if (c.visualTheme === 'high-school') return false;
 
             const cleanName = c.name.trim();
 
@@ -604,6 +608,7 @@ const App: React.FC = () => {
     const [gameState, setGameState] = useState<GameState>({
         screen: GameScreen.START_MENU,
         mode: GameMode.MULTIPLICATION,
+        visualTheme: window.localStorage.getItem('learning-rogue-visual-theme') === 'high-school' ? 'high-school' : 'elementary',
         answerMode: 'CHOICE',
         difficultyLevel: 1,
         shopRemoveCount: 0,
@@ -690,6 +695,10 @@ const App: React.FC = () => {
     }, []);
 
     const [languageMode, setLanguageMode] = useState<LanguageMode>(() => storageService.getLanguageMode() || 'JAPANESE');
+    const [visualTheme, setVisualTheme] = useState<VisualThemeId>(() =>
+        window.localStorage.getItem('learning-rogue-visual-theme') === 'high-school' ? 'high-school' : 'elementary'
+    );
+    const themedCharacters = useMemo(() => getThemedCharacters(CHARACTERS, visualTheme), [visualTheme]);
     const [currentNarrative, setCurrentNarrative] = useState<string>("...");
     const [currentBattleBackgroundId, setCurrentBattleBackgroundId] = useState<string>('classroom');
     const [turnLog, setTurnLog] = useState<string>("あなたのターン");
@@ -704,6 +713,15 @@ const App: React.FC = () => {
     const [newlyUnlockedCard, setNewlyUnlockedCard] = useState<ICard | null>(null); // New State
     const [newlyUnlockedCharacters, setNewlyUnlockedCharacters] = useState<Character[]>([]);
     const [newlyUnlockedMiniGames, setNewlyUnlockedMiniGames] = useState<(typeof MINI_GAMES)[number][]>([]);
+
+    useEffect(() => {
+        window.localStorage.setItem('learning-rogue-visual-theme', visualTheme);
+        void audioService.setBgmTheme(visualTheme);
+    }, [visualTheme]);
+    const getRandomCurrentStoryIndex = useCallback(() => {
+        const storyCount = visualTheme === 'high-school' ? HIGH_SCHOOL_STORIES.length : GAME_STORIES.length;
+        return Math.floor(Math.random() * storyCount);
+    }, [visualTheme]);
     const [unlockCheckStartMathCorrect, setUnlockCheckStartMathCorrect] = useState<number>(0);
     const [debugMenuStartClearCount, setDebugMenuStartClearCount] = useState<number>(0);
     const [debugMenuStartMathCorrect, setDebugMenuStartMathCorrect] = useState<number>(0);
@@ -715,7 +733,7 @@ const App: React.FC = () => {
     const [transferStatus, setTransferStatus] = useState<DataTransferStatus | null>(null);
     const [bgmMode, setBgmMode] = useState<'OSCILLATOR' | 'MP3' | 'STUDY'>(() => {
         const saved = storageService.getBgmMode() as 'OSCILLATOR' | 'MP3' | 'STUDY' | null;
-        return saved || 'STUDY';
+        return saved || 'MP3';
     });
     const [showBgmSwitchHint, setShowBgmSwitchHint] = useState<boolean>(() => !storageService.getSeenBgmSwitchHint());
     const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -724,7 +742,8 @@ const App: React.FC = () => {
     const [isFullScreen, setIsFullScreen] = useState(false);
     const [appSettings, setAppSettings] = useState<AppSettings>(() => {
         const saved = storageService.getAppSettings<AppSettings>();
-        return { ...DEFAULT_APP_SETTINGS, ...(saved || {}) };
+        const merged = { ...DEFAULT_APP_SETTINGS, ...(saved || {}) };
+        return storageService.getBgmMode() ? merged : { ...merged, bgmMode: 'MP3' };
     });
     const [totalMathCorrect, setTotalMathCorrect] = useState<number>(0);
     const [nextThreshold, setNextThreshold] = useState<number | null>(null);
@@ -1505,6 +1524,7 @@ const App: React.FC = () => {
         shopRemoveCount: state.shopRemoveCount,
         challengeMode: state.challengeMode,
         typingLessonId: state.typingLessonId,
+        visualTheme: state.visualTheme,
         act: state.act,
         floor: state.floor,
         turn: state.turn,
@@ -1524,7 +1544,7 @@ const App: React.FC = () => {
         newlyUnlockedCardName: state.newlyUnlockedCardName,
         coopBattleState: state.coopBattleState ?? null
     }), []);
-    const getBgmForCoopScreen = useCallback((state: Pick<GameState, 'screen' | 'map' | 'currentMapNodeId' | 'enemies'>) => {
+    const getBgmForScreen = useCallback((state: Pick<GameState, 'screen' | 'map' | 'currentMapNodeId' | 'enemies'>) => {
         switch (state.screen) {
             case GameScreen.MAP:
             case GameScreen.GARDEN:
@@ -1575,6 +1595,8 @@ const App: React.FC = () => {
             cardsPlayedThisTurn: 0,
             attacksPlayedThisTurn: 0,
             codexBuffer: [],
+            familiars: [],
+            familiarActionQueue: [],
             floatingText: null
         };
 
@@ -1651,6 +1673,7 @@ const App: React.FC = () => {
         shopRemoveCount: sharedState.shopRemoveCount,
         challengeMode: 'COOP',
         typingLessonId: sharedState.typingLessonId,
+        visualTheme: sharedState.visualTheme,
         act: sharedState.act,
         floor: sharedState.floor,
         turn: sharedState.turn,
@@ -1799,10 +1822,18 @@ const App: React.FC = () => {
     }, [coopSelfPeerId, gameState.challengeMode, gameState.player, gameState.selectedEnemyId, gameState.coopBattleState]);
     useEffect(() => {
         if (gameState.challengeMode !== 'COOP' || !coopSession || coopSession.isHost) return;
-        const bgmType = getBgmForCoopScreen(gameState);
+        const bgmType = getBgmForScreen(gameState);
         if (!bgmType) return;
         void audioService.playBGM(bgmType);
-    }, [coopSession, gameState, getBgmForCoopScreen]);
+    }, [coopSession, gameState, getBgmForScreen]);
+
+    useEffect(() => {
+        if (gameState.challengeMode === 'COOP') return;
+        if (gameState.screen === GameScreen.TREASURE) return;
+        const bgmType = getBgmForScreen(gameState);
+        if (!bgmType) return;
+        void audioService.playBGM(bgmType);
+    }, [gameState.screen, gameState.currentMapNodeId, gameState.challengeMode, gameState.enemies, getBgmForScreen]);
 
     useEffect(() => {
         if (gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.BATTLE || !coopSession || !coopSession.isHost) return;
@@ -2671,6 +2702,31 @@ const App: React.FC = () => {
         }
     }, []);
 
+    const handleStartMenuBackgroundPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+        const target = event.target as HTMLElement;
+        if (target.closest('button, a, input, select, textarea, [role="button"]')) return;
+        void audioService.unlockAudio();
+    };
+
+    useEffect(() => {
+        let pausedForBackground = false;
+        const handleVisibilityChange = () => {
+            if (document.hidden) {
+                if (!audioService.isBackgroundPlaybackEnabled()) {
+                    audioService.pauseBGM();
+                    pausedForBackground = true;
+                }
+                return;
+            }
+            if (pausedForBackground) {
+                audioService.resumeBGM();
+                pausedForBackground = false;
+            }
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    }, []);
+
     useEffect(() => {
         storageService.saveAppSettings(appSettings);
         audioService.setBgmVolume(appSettings.bgmVolume);
@@ -2844,16 +2900,16 @@ const App: React.FC = () => {
             const previousClearCount = storageService.getClearCount();
             storageService.incrementClearCount();
             const nextClearCount = previousClearCount + 1;
-            const previousUnlockedCount = Math.min(CHARACTERS.length, previousClearCount + 2);
-            const nextUnlockedCount = Math.min(CHARACTERS.length, nextClearCount + 2);
+            const previousUnlockedCount = Math.min(themedCharacters.length, previousClearCount + 2);
+            const nextUnlockedCount = Math.min(themedCharacters.length, nextClearCount + 2);
             setClearCount(nextClearCount);
-            setNewlyUnlockedCharacters(CHARACTERS.slice(previousUnlockedCount, nextUnlockedCount));
+            setNewlyUnlockedCharacters(themedCharacters.slice(previousUnlockedCount, nextUnlockedCount));
         } else if (isDebugReturn) {
             const nextClearCount = storageService.getClearCount();
-            const previousUnlockedCount = Math.min(CHARACTERS.length, debugMenuStartClearCount + 2);
-            const nextUnlockedCount = Math.min(CHARACTERS.length, nextClearCount + 2);
+            const previousUnlockedCount = Math.min(themedCharacters.length, debugMenuStartClearCount + 2);
+            const nextUnlockedCount = Math.min(themedCharacters.length, nextClearCount + 2);
             setClearCount(nextClearCount);
-            setNewlyUnlockedCharacters(CHARACTERS.slice(previousUnlockedCount, nextUnlockedCount));
+            setNewlyUnlockedCharacters(themedCharacters.slice(previousUnlockedCount, nextUnlockedCount));
         } else {
             setNewlyUnlockedCharacters([]);
         }
@@ -2923,6 +2979,116 @@ const App: React.FC = () => {
         }
         const card = player.drawPile.pop();
         return card ? { ...card } : null;
+    };
+
+    const resolveHighSchoolFamiliars = (player: Player, enemies: Enemy[], logs: string[], effects: VisualEffectInstance[]) => {
+        const nextFamiliars: ActiveFamiliar[] = [];
+        const actionQueue: ActiveFamiliar[] = [];
+        let nextEnemies = enemies.map(enemy => ({ ...enemy }));
+        const livingEnemies = () => nextEnemies.filter(enemy => enemy.currentHp > 0);
+        const hitRandomEnemy = (amount: number) => {
+            const targets = livingEnemies();
+            const target = targets[Math.floor(Math.random() * targets.length)];
+            if (!target) return;
+            target.currentHp -= amount;
+            target.floatingText = { id: `fam-hit-${Date.now()}-${target.id}`, text: `${amount}`, color: 'text-fuchsia-300', iconType: 'zap' };
+            effects.push({ id: `vfx-fam-${Date.now()}-${target.id}`, type: 'LIGHTNING', targetId: target.id });
+        };
+
+        (player.familiars || []).forEach(familiar => {
+            const shouldAct =
+                familiar.trigger === 'END_TURN' ||
+                (familiar.trigger === 'ONCE_END_TURN' && !familiar.used) ||
+                (familiar.trigger === 'EVERY_OTHER_TURN' && familiar.turnsActive % 2 === 0) ||
+                (familiar.trigger === 'LOW_HP_END_TURN' && player.currentHp <= Math.floor(player.maxHp / 2)) ||
+                (familiar.trigger === 'NO_BLOCK_END_TURN' && player.block <= 0);
+            if (shouldAct) {
+                const actionPulse = Date.now() + actionQueue.length * 720;
+                actionQueue.push({ ...familiar, actionPulse });
+                const amount = familiar.effect.amount;
+                switch (familiar.effect.kind) {
+                    case 'DAMAGE':
+                        hitRandomEnemy(amount);
+                        break;
+                    case 'AOE_DAMAGE':
+                        nextEnemies = nextEnemies.map(enemy => {
+                            if (enemy.currentHp <= 0) return enemy;
+                            effects.push({ id: `vfx-fam-aoe-${Date.now()}-${enemy.id}`, type: 'FIRE', targetId: enemy.id });
+                            return {
+                                ...enemy,
+                                currentHp: enemy.currentHp - amount,
+                                floatingText: { id: `fam-aoe-${Date.now()}-${enemy.id}`, text: `${amount}`, color: 'text-fuchsia-300', iconType: 'zap' }
+                            };
+                        });
+                        break;
+                    case 'BLOCK':
+                        player.block += amount;
+                        player.floatingText = { id: `fam-block-${Date.now()}`, text: `+${amount}`, color: 'text-blue-300', iconType: 'shield' };
+                        effects.push({ id: `vfx-fam-block-${Date.now()}`, type: 'BLOCK', targetId: 'player' });
+                        break;
+                    case 'HEAL':
+                        player.currentHp = Math.min(player.maxHp, player.currentHp + amount);
+                        player.floatingText = { id: `fam-heal-${Date.now()}`, text: `+${amount}`, color: 'text-green-300', iconType: 'heart' };
+                        effects.push({ id: `vfx-fam-heal-${Date.now()}`, type: 'HEAL', targetId: 'player' });
+                        break;
+                    case 'DRAW':
+                        for (let i = 0; i < amount; i += 1) {
+                            const drawn = drawOneCard(player);
+                            if (drawn) player.hand.push(drawn);
+                        }
+                        player.floatingText = { id: `fam-draw-${Date.now()}`, text: `+${amount}枚`, color: 'text-cyan-200', iconType: 'zap' };
+                        effects.push({ id: `vfx-fam-draw-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+                        break;
+                    case 'ENERGY_NEXT':
+                        player.nextTurnEnergy += amount;
+                        player.floatingText = { id: `fam-energy-${Date.now()}`, text: `次+${amount}`, color: 'text-yellow-200', iconType: 'zap' };
+                        effects.push({ id: `vfx-fam-energy-${Date.now()}`, type: 'LIGHTNING', targetId: 'player' });
+                        break;
+                    case 'POISON':
+                        livingEnemies().forEach(enemy => {
+                            enemy.poison += amount;
+                            enemy.floatingText = { id: `fam-poison-${Date.now()}-${enemy.id}`, text: `毒${amount}`, color: 'text-green-300', iconType: 'poison' };
+                            effects.push({ id: `vfx-fam-poison-${Date.now()}-${enemy.id}`, type: 'DEBUFF', targetId: enemy.id, statusEffectKey: 'poison' });
+                        });
+                        break;
+                    case 'WEAK':
+                        livingEnemies().forEach(enemy => {
+                            enemy.weak += amount;
+                            enemy.floatingText = { id: `fam-weak-${Date.now()}-${enemy.id}`, text: `弱${amount}`, color: 'text-purple-200', iconType: 'skull' };
+                            effects.push({ id: `vfx-fam-weak-${Date.now()}-${enemy.id}`, type: 'DEBUFF', targetId: enemy.id, statusEffectKey: 'weak' });
+                        });
+                        break;
+                    case 'VULNERABLE':
+                        livingEnemies().forEach(enemy => {
+                            enemy.vulnerable += amount;
+                            enemy.floatingText = { id: `fam-vuln-${Date.now()}-${enemy.id}`, text: `脆${amount}`, color: 'text-amber-200', iconType: 'shield' };
+                            effects.push({ id: `vfx-fam-vuln-${Date.now()}-${enemy.id}`, type: 'DEBUFF', targetId: enemy.id, statusEffectKey: 'vulnerable' });
+                        });
+                        break;
+                    case 'STRENGTH':
+                        player.strength += amount;
+                        player.floatingText = { id: `fam-strength-${Date.now()}`, text: `力+${amount}`, color: 'text-red-300', iconType: 'sword' };
+                        effects.push({ id: `vfx-fam-strength-${Date.now()}`, type: 'BUFF', targetId: 'player', statusEffectKey: 'strength' });
+                        break;
+                    case 'GOLD':
+                        player.gold += amount;
+                        player.floatingText = { id: `fam-gold-${Date.now()}`, text: `+${amount}G`, color: 'text-yellow-300', iconType: 'zap' };
+                        effects.push({ id: `vfx-fam-gold-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+                        break;
+                    default:
+                        break;
+                }
+                logs.push(`${familiar.name}が行動した`);
+            }
+            const turnsActive = familiar.turnsActive + 1;
+            const expired = familiar.trigger === 'ONCE_END_TURN' || (typeof familiar.duration === 'number' && turnsActive >= familiar.duration);
+            if (!expired) nextFamiliars.push({ ...familiar, turnsActive, used: familiar.used || shouldAct, actionPulse: shouldAct ? Date.now() : familiar.actionPulse });
+        });
+
+        player.familiars = nextFamiliars;
+        player.familiarActionQueue = actionQueue;
+        nextEnemies = nextEnemies.filter(enemy => enemy.currentHp > 0 || (enemy.enemyType === 'THE_HEART' && enemy.phase === 1));
+        return nextEnemies;
     };
 
     const syncRedSkullState = (player: Player) => {
@@ -3041,6 +3207,8 @@ const App: React.FC = () => {
         nextTurnEnergy: 0,
         nextTurnDraw: 0,
         codexBuffer: [],
+        familiars: [],
+        familiarActionQueue: [],
         floatingText: null,
         relicCounters: Object.fromEntries(
             Object.entries(player.relicCounters).filter(([key]) =>
@@ -3213,7 +3381,7 @@ const App: React.FC = () => {
         return () => window.clearTimeout(timeout);
     }, [addLog, eventData, gameState.screen, languageMode]);
 
-    const continueGame = () => {
+    const continueGame = async () => {
         if (isDailyLimitReached) {
             audioService.playSound('wrong');
             setShowTimeLimitModal(true);
@@ -3222,6 +3390,8 @@ const App: React.FC = () => {
         setShowStartOverConfirm(false);
         const saved = storageService.loadGame();
         if (saved) {
+            const savedVisualTheme = saved.visualTheme === 'high-school' || (!saved.visualTheme && visualTheme === 'high-school') ? 'high-school' : 'elementary';
+            setVisualTheme(savedVisualTheme);
             // セーブ破損対策: HPが0以下ならセーブを無効化
             if (saved.player.currentHp <= 0) {
                 storageService.clearSave();
@@ -3242,7 +3412,8 @@ const App: React.FC = () => {
                         setEventResultLog,
                         languageMode,
                         unlockedCards,
-                        saved.currentEventTitle
+                        saved.currentEventTitle,
+                        savedVisualTheme
                     );
                     setEventData(restoredEvent);
                     setEventResultLog(null);
@@ -3259,16 +3430,10 @@ const App: React.FC = () => {
                 saved.currentEventTitle = undefined;
             }
 
+            saved.visualTheme = savedVisualTheme;
             setGameState(saved);
-            if (saved.screen === GameScreen.BATTLE) {
-                audioService.playBGM('battle');
-            } else if (saved.screen === GameScreen.MAP) {
-                audioService.playBGM('map');
-            } else if (saved.screen === GameScreen.SHOP) {
-                audioService.playBGM('shop');
-            } else {
-                audioService.playBGM('map');
-            }
+            const bgmType = getBgmForScreen(saved) || 'map';
+            await audioService.switchThemeAndPlayBGM(savedVisualTheme, bgmType);
             addLog(trans("続きから再開しました。", languageMode), "blue");
         }
     };
@@ -3284,6 +3449,7 @@ const App: React.FC = () => {
         setGameState({
             screen: GameScreen.MODE_SELECTION,
             mode: GameMode.MULTIPLICATION,
+            visualTheme,
             answerMode: 'CHOICE',
             difficultyLevel: 1,
             shopRemoveCount: 0,
@@ -3328,7 +3494,7 @@ const App: React.FC = () => {
             isEndless: false,
             parryState: { active: false, enemyId: null, success: false },
             activeEffects: [],
-            currentStoryIndex: Math.floor(Math.random() * GAME_STORIES.length),
+            currentStoryIndex: getRandomCurrentStoryIndex(),
             actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
         });
     };
@@ -3344,6 +3510,7 @@ const App: React.FC = () => {
         setGameState({
             screen: GameScreen.MODE_SELECTION,
             mode: GameMode.MULTIPLICATION,
+            visualTheme,
             answerMode: 'CHOICE',
             difficultyLevel: 1,
             shopRemoveCount: 0,
@@ -3389,7 +3556,7 @@ const App: React.FC = () => {
             parryState: { active: false, enemyId: null, success: false },
             activeEffects: [],
             challengeMode: '1A1D',
-            currentStoryIndex: Math.floor(Math.random() * GAME_STORIES.length),
+            currentStoryIndex: getRandomCurrentStoryIndex(),
             actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
         });
     };
@@ -3416,6 +3583,7 @@ const App: React.FC = () => {
         setGameState({
             screen: GameScreen.TYPING_MODE_SELECTION,
             mode: GameMode.MULTIPLICATION,
+            visualTheme,
             answerMode: 'CHOICE',
             difficultyLevel: 1,
             shopRemoveCount: 0,
@@ -3462,7 +3630,7 @@ const App: React.FC = () => {
             activeEffects: [],
             challengeMode: 'TYPING',
             typingLessonId: undefined,
-            currentStoryIndex: Math.floor(Math.random() * GAME_STORIES.length),
+            currentStoryIndex: getRandomCurrentStoryIndex(),
             actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
         });
     };
@@ -3829,7 +3997,7 @@ const App: React.FC = () => {
         }
 
         if (char.id === 'ASSASSIN') {
-            const warrior = CHARACTERS.find(c => c.id === 'WARRIOR');
+            const warrior = themedCharacters.find(c => c.id === 'WARRIOR');
 
             const specialEvent = {
                 title: "放課後の勧誘",
@@ -3855,7 +4023,9 @@ const App: React.FC = () => {
                                 handleNodeComplete,
                                 setEventResultLog,
                                 languageMode,
-                                unlockedCards
+                                unlockedCards,
+                                undefined,
+                                visualTheme
                             );
                             setEventData(ev);
                             setEventResultLog(null);
@@ -4310,7 +4480,9 @@ const App: React.FC = () => {
                     handleNodeComplete,
                     setEventResultLog,
                     languageMode,
-                    unlockedCards
+                    unlockedCards,
+                    undefined,
+                    visualTheme
                 );
                 setEventData(ev);
                 setEventResultLog(null);
@@ -4687,7 +4859,7 @@ const App: React.FC = () => {
                 nextActiveEffects.push({ id: `vfx-pot-zap-${Date.now()}`, type: 'BUFF', targetId: 'player' });
             } else if (potion.templateId === 'ENERGY_POTION') {
                 p.currentEnergy += 2;
-                newLogs.push(`${trans("エネルギー", languageMode)}+2`);
+                newLogs.push(`${trans("エナジー", languageMode)}+2`);
                 nextActiveEffects.push({ id: `vfx-pot-zap-${Date.now()}`, type: 'BUFF', targetId: 'player' });
             } else if (potion.templateId === 'WEAK_POTION' && target) {
                 applyDebuff(target, 'WEAK', 3);
@@ -5024,6 +5196,18 @@ const App: React.FC = () => {
                 delete p.turnFlags['NEXT_ATTACK_COST_DOWN'];
             }
             p.cardsPlayedThisTurn++;
+            if (card.familiarSummon) {
+                const familiar: ActiveFamiliar = {
+                    ...card.familiarSummon,
+                    instanceId: `fam-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                    turnsActive: 0
+                };
+                p.familiars = [...(p.familiars || []), familiar].slice(-5);
+                p.floatingText = { id: `summon-${Date.now()}`, text: `${familiar.name} 召喚`, color: 'text-fuchsia-300', iconType: 'zap' };
+                currentLogs.push(`${familiar.name}を召喚した`);
+                nextActiveEffects.push({ id: `vfx-summon-${Date.now()}`, type: 'SHOCKWAVE', targetId: 'player' });
+                audioService.playSound('buff');
+            }
             if (hasRelic(p, 'INK_BOTTLE')) {
                 const inkCount = (p.relicCounters['INK_BOTTLE_COUNT'] || 0) + 1;
                 if (inkCount >= 10) {
@@ -5712,7 +5896,7 @@ const App: React.FC = () => {
                     }
                     if (card.name === '迷い犬の恩返し' || card.originalNames?.includes('迷い犬の恩返し') || card.id?.includes('OUT_STREET_DOG')) {
                         p.turnFlags = { ...p.turnFlags, STREET_DOG_NEXT_BATTLE: true };
-                        currentLogs.push(trans("次の戦闘開始時、エネルギー+3", languageMode));
+                        currentLogs.push(trans("次の戦闘開始時、エナジー+3", languageMode));
                     }
                     if (card.name === '究極の10連ガチャ' || card.originalNames?.includes('究極の10連ガチャ') || card.id?.includes('OUT_SUPER_GACHA')) {
                         const pool = getFilteredCardPool(p.id).filter(c => c.type !== CardType.CURSE && c.type !== CardType.STATUS);
@@ -5860,7 +6044,7 @@ const App: React.FC = () => {
                         (card.name === '奇跡のリボン' || card.originalNames?.includes('奇跡のリボン') || card.id?.includes('GIRLS_MIRACLE_RIBBON'))
                     ) {
                         p.currentEnergy = p.maxEnergy;
-                        currentLogs.push(trans("エネルギーを全回復した！", languageMode));
+                        currentLogs.push(trans("エナジーを全回復した！", languageMode));
                     }
                     if (card.name === 'おじいちゃんの古民家' || card.originalNames?.includes('おじいちゃんの古民家') || card.id?.includes('OUT_OLD_HOUSE')) {
                         p.currentHp = p.maxHp;
@@ -6088,7 +6272,7 @@ const App: React.FC = () => {
                         if (!drawn) break;
                         p.hand.push(drawn);
                     }
-                    currentLogs.push('クエスト達成: エネルギー1、2ドロー');
+                    currentLogs.push('クエスト達成: エナジー1、2ドロー');
                     delete p.relicCounters['OUT_STAMP_QUEST_REMAINING'];
                     nextActiveEffects.push({ id: `vfx-quest-${Date.now()}`, type: 'BUFF', targetId: 'player' });
                 } else {
@@ -6405,6 +6589,7 @@ const App: React.FC = () => {
         setGameState(prev => {
             const p = { ...prev.player };
             const newLogs: string[] = [];
+            const nextActiveEffects: VisualEffectInstance[] = [];
             const tickPlayerDebuffs = (target: Player, label?: string) => {
                 if (target.powers['WEAK'] > 0) {
                     target.powers['WEAK']--;
@@ -6437,6 +6622,10 @@ const App: React.FC = () => {
                 p.floatingText = { id: `pow-metal-${Date.now()}`, text: `+${p.powers['METALLICIZE']}`, color: 'text-blue-400', iconType: 'shield' };
             }
             tickPlayerDebuffs(p);
+            let nextEnemies = prev.enemies;
+            if ((p.familiars || []).length > 0) {
+                nextEnemies = resolveHighSchoolFamiliars(p, prev.enemies, newLogs, nextActiveEffects);
+            }
             let nextCoopBattleState = prev.coopBattleState;
             if (prev.challengeMode === 'COOP' && coopSession?.isHost && prev.coopBattleState) {
                 nextCoopBattleState = {
@@ -6470,8 +6659,10 @@ const App: React.FC = () => {
             return {
                 ...prev,
                 player: p,
+                enemies: nextEnemies,
                 coopBattleState: nextCoopBattleState,
-                combatLog: [...prev.combatLog, ...newLogs].slice(-100)
+                combatLog: [...prev.combatLog, ...newLogs].slice(-100),
+                activeEffects: [...prev.activeEffects, ...nextActiveEffects]
             };
         });
         await wait(400);
@@ -7370,7 +7561,8 @@ const App: React.FC = () => {
                 fakeSetEventResultLog,
                 languageMode,
                 unlockedCardNames,
-                eventData.title
+                eventData.title,
+                visualTheme
             );
         }
 
@@ -7457,6 +7649,7 @@ const App: React.FC = () => {
             setGameState(prev => ({
                 screen: GameScreen.MODE_SELECTION,
                 mode: prev.mode,
+                visualTheme,
                 modePool: undefined,
                 answerMode: 'CHOICE',
                 challengeMode: 'COOP',
@@ -7501,7 +7694,7 @@ const App: React.FC = () => {
                 isEndless: false,
                 parryState: { active: false, enemyId: null, success: false },
                 activeEffects: [],
-                currentStoryIndex: Math.floor(Math.random() * GAME_STORIES.length),
+                currentStoryIndex: getRandomCurrentStoryIndex(),
                 actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 },
                 newlyUnlockedCardName: undefined,
                 coopBattleState: null
@@ -7517,6 +7710,7 @@ const App: React.FC = () => {
             setGameState(prev => ({
                 screen: GameScreen.CHARACTER_SELECTION,
                 mode: prev.mode,
+                visualTheme,
                 modePool: prev.modePool,
                 challengeMode: prev.challengeMode,
                 act: 1,
@@ -7560,7 +7754,7 @@ const App: React.FC = () => {
                 isEndless: false,
                 parryState: { active: false, enemyId: null, success: false },
                 activeEffects: [],
-                currentStoryIndex: Math.floor(Math.random() * GAME_STORIES.length),
+                currentStoryIndex: getRandomCurrentStoryIndex(),
                 actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
             }));
             return;
@@ -8182,6 +8376,13 @@ const App: React.FC = () => {
         }
 
         const allPossibleCards = getFilteredCardPool(player.id);
+        const isHighSchoolReward = stateRef.current.visualTheme === 'high-school'
+            || window.localStorage.getItem('learning-rogue-visual-theme') === 'high-school';
+        const nonFamiliarCards = allPossibleCards.filter(card => !card.familiarSummon);
+        const familiarCards = allPossibleCards.filter(card => !!card.familiarSummon);
+        const familiarRewardSlot = isHighSchoolReward && familiarCards.length > 0 && Math.random() < 0.55
+            ? Math.floor(Math.random() * 3)
+            : -1;
 
         for (let i = 0; i < 3; i++) {
             const roll = Math.random() * 100;
@@ -8193,12 +8394,20 @@ const App: React.FC = () => {
                 pool = Object.values(LIBRARIAN_CARDS);
             } else if (isGardener && i === 0 && Math.random() < 0.7) {
                 pool = Object.values(GARDEN_SEEDS);
+            } else if (isHighSchoolReward && i === familiarRewardSlot) {
+                pool = familiarCards.filter(c => c.rarity === targetRarity);
+                if (pool.length === 0) pool = familiarCards;
             } else {
-                pool = allPossibleCards.filter(c => c.rarity === targetRarity);
+                const basePool = isHighSchoolReward && nonFamiliarCards.length > 0 ? nonFamiliarCards : allPossibleCards;
+                pool = basePool.filter(c => c.rarity === targetRarity);
+                if (pool.length === 0) pool = basePool;
             }
 
             const uniquePool = pool.filter(card => !pickedCardTemplateIds.has(getRewardCardTemplateKey(card)));
-            const fallbackUniquePool = allPossibleCards.filter(card => !pickedCardTemplateIds.has(getRewardCardTemplateKey(card)));
+            const fallbackBasePool = isHighSchoolReward && i !== familiarRewardSlot && nonFamiliarCards.length > 0
+                ? nonFamiliarCards
+                : allPossibleCards;
+            const fallbackUniquePool = fallbackBasePool.filter(card => !pickedCardTemplateIds.has(getRewardCardTemplateKey(card)));
             const pickSource =
                 uniquePool.length > 0
                     ? uniquePool
@@ -8211,7 +8420,7 @@ const App: React.FC = () => {
             pickedCardTemplateIds.add(getRewardCardTemplateKey(candidate));
             rewards.push({ type: 'CARD', value: { ...candidate, id: `${rewardPrefix}-card-value-${i}` }, id: `${rewardPrefix}-card-${i}` });
         }
-        if (getDifficultyConfig(gameState.difficultyLevel).cardEraserEnabled && Math.random() < 0.25) {
+        if (getDifficultyConfig(stateRef.current.difficultyLevel).cardEraserEnabled && Math.random() < 0.25) {
             const replaceIndex = rewards.findIndex(reward => reward.type === 'CARD');
             const eraserReward = { type: 'CARD' as const, value: createCardEraserCard(`${rewardPrefix}-eraser-value`), id: `${rewardPrefix}-eraser` };
             if (replaceIndex >= 0) rewards[replaceIndex] = eraserReward;
@@ -10021,7 +10230,7 @@ const App: React.FC = () => {
     }, [electronApi]);
 
     return (
-        <div className={`w-full h-[100dvh] bg-black overflow-hidden ${appSettings.fontSize === 'large' ? 'text-[105%]' : ''}`}>
+        <div className={`app-shell w-full h-[100dvh] bg-black overflow-hidden ${appSettings.fontSize === 'large' ? 'text-[105%]' : ''}`}>
             <div className={`w-full h-full relative overflow-hidden bg-black ${appSettings.lowDataMode ? '' : 'crt-scanline'} ${raceEffects.upsideDownUntil > raceEffectNow ? 'scale-x-[-1]' : ''} ${(raceEffects.deskShakeUntil > raceEffectNow && !appSettings.reduceScreenShake) ? 'animate-[race-desk-shake_0.18s_linear_infinite]' : ''}`}>
                 <style>{`
                     @keyframes race-desk-shake {
@@ -10100,9 +10309,20 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.START_MENU && (
                     <div
-                        className="w-full h-full bg-gray-900 bg-cover bg-[position:38%_center] md:bg-center flex items-center justify-center relative overflow-hidden"
-                        style={{ backgroundImage: `url(${assetUrl('sprites/learning-rogue-title-background.webp')})` }}
+                        className="w-full h-full bg-gray-900 flex items-center justify-center relative overflow-hidden"
+                        onPointerDown={handleStartMenuBackgroundPointerDown}
                     >
+                        <div
+                            className={`absolute inset-0 bg-cover bg-[position:38%_center] md:bg-center transition-all duration-700 ease-out ${visualTheme === 'high-school' ? 'opacity-0 scale-105 blur-sm' : 'opacity-100 scale-100 blur-0'}`}
+                            style={{ backgroundImage: `url(${assetUrl('sprites/learning-rogue-title-background.webp')})` }}
+                        />
+                        <div
+                            className={`absolute inset-0 bg-cover bg-center transition-all duration-700 ease-out ${visualTheme === 'high-school' ? 'opacity-100 scale-100 blur-0' : 'opacity-0 scale-110 blur-sm'}`}
+                            style={{ backgroundImage: `url(${assetUrl('sprites/high-school/title-background.webp')})`, clipPath: visualTheme === 'high-school' ? 'polygon(0 0, 100% 0, 100% 100%, 0 100%)' : 'polygon(0 0, 0 0, 0 100%, 0 100%)' }}
+                        />
+                        {visualTheme === 'high-school' && (
+                            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,transparent_0%,transparent_42%,rgba(239,68,68,0.45)_48%,transparent_54%,transparent_100%)] animate-pulse" />
+                        )}
                         <div className="absolute inset-0 bg-slate-950/55" />
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(15,23,42,0.12),rgba(2,6,23,0.72))]" />
                         {isLegacyVercelHost && showMigrationNotice && (
@@ -10314,6 +10534,26 @@ const App: React.FC = () => {
                                 </button>
                             )}
                             {(!isMathDebugSkipped && !isDebugHpOne && !isMiniGameDebugUnlocked) && <div className="mb-2 h-2"></div>}
+
+                            <div className="mb-4 inline-flex overflow-hidden border-2 border-slate-500 bg-black/55 shadow-lg">
+                                {([
+                                    { id: 'elementary', label: '小学生編' },
+                                    { id: 'high-school', label: '高校編' },
+                                ] as const).map((theme) => (
+                                    <button
+                                        key={theme.id}
+                                        type="button"
+                                        onClick={() => setVisualTheme(theme.id)}
+                                        className={`px-4 py-2 text-sm font-black transition-colors ${
+                                            visualTheme === theme.id
+                                                ? 'bg-amber-300 text-slate-950'
+                                                : 'bg-slate-950/70 text-slate-300 hover:bg-slate-800'
+                                        }`}
+                                    >
+                                        {theme.label}
+                                    </button>
+                                ))}
+                            </div>
 
                             <div className="start-menu-actions flex flex-col gap-2 items-center w-full max-w-[320px]">
                                 {hasSave && (
@@ -10553,6 +10793,7 @@ const App: React.FC = () => {
                             languageMode={languageMode}
                             newlyUnlockedCardName={gameState.newlyUnlockedCardName}
                             typingMode={gameState.challengeMode === 'TYPING'}
+                            visualTheme={gameState.visualTheme || visualTheme}
                         />
                     </div>
                 )}
@@ -11021,8 +11262,8 @@ const App: React.FC = () => {
                 {gameState.screen === GameScreen.CHARACTER_SELECTION && (
                     <div className="absolute inset-0">
                         <CharacterSelectionScreen
-                            characters={CHARACTERS}
-                            unlockedCount={isDebugHpOne ? CHARACTERS.length : Math.min(CHARACTERS.length, clearCount + 2)}
+                            characters={themedCharacters}
+                            unlockedCount={isDebugHpOne ? themedCharacters.length : Math.min(themedCharacters.length, clearCount + 2)}
                             onSelect={handleCharacterSelect}
                             challengeMode={gameState.challengeMode}
                             languageMode={languageMode}
@@ -11082,7 +11323,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.COMPENDIUM && (
                     <div className="absolute inset-0">
-                        <CompendiumScreen unlockedCardNames={unlockedCardNames} onBack={returnToTitle} languageMode={languageMode} isDebug={isDebugHpOne} />
+                        <CompendiumScreen unlockedCardNames={unlockedCardNames} onBack={returnToTitle} languageMode={languageMode} isDebug={isDebugHpOne} visualTheme={visualTheme} />
                     </div>
                 )}
 
@@ -11115,6 +11356,7 @@ const App: React.FC = () => {
                             selectionHoldMs={raceEffects.shoeLaceUntil > raceEffectNow ? 400 : 0}
                             selectionDisabled={(gameState.challengeMode === 'COOP' && !!coopSession?.isHost && !coopCanDecide) || coopMapSelectionPending}
                             selectionDisabledMessage={gameState.challengeMode === 'COOP' ? coopMapPendingMessage : undefined}
+                            visualTheme={visualTheme}
                         />
                         {gameState.challengeMode === 'COOP' && coopSession?.isHost && coopNeedsInitialMapSync && (
                             <div className="absolute left-1/2 -translate-x-1/2 top-[72px] z-30">
@@ -11183,6 +11425,7 @@ const App: React.FC = () => {
                                 hideEnemyIntents={raceEffects.hideEnemyIntentsOnce}
                                 onOpenSettings={() => setShowSettingsModal(true)}
                                 battleBackgroundId={currentBattleBackgroundId}
+                                visualTheme={visualTheme}
                             />
                         ) : (
                             <BattleScene
@@ -11194,6 +11437,7 @@ const App: React.FC = () => {
                                 hideEnemyIntents={raceEffects.hideEnemyIntentsOnce}
                                 onOpenSettings={() => setShowSettingsModal(true)}
                                 battleBackgroundId={currentBattleBackgroundId}
+                                visualTheme={visualTheme}
                             />
                         )}
                     </div>
@@ -11396,8 +11640,8 @@ const App: React.FC = () => {
                             title={trans(eventData.title, languageMode)}
                             description={trans(eventData.description, languageMode)}
                             options={eventData.options.map((o: any, idx: number) => ({ ...o, action: () => handleCoopEventOptionSelect(idx), label: trans(o.label, languageMode), text: trans(o.text, languageMode) }))}
-                            imageKey={eventData.title}
-                            image={gameState.player.imageData}
+                            imageKey={eventData.imageKey ?? eventData.title}
+                            image={visualTheme === 'high-school' ? undefined : gameState.player.imageData}
                             resultLog={eventResultLog ? trans(eventResultLog, languageMode) : null}
                             onContinue={handleEventComplete}
                             typingMode={gameState.challengeMode === 'TYPING'}
@@ -11417,6 +11661,7 @@ const App: React.FC = () => {
                             player={gameState.player}
                             onComplete={handleFinalBridgeComplete}
                             languageMode={languageMode}
+                            visualTheme={gameState.visualTheme || visualTheme}
                         />
                     </div>
                 )}

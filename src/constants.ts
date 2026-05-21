@@ -1,6 +1,7 @@
 
 import { Card, CardType, TargetType, Relic, Potion, Character, PokerHandResult, PokerSupporter, PokerConsumable, PokerPack, PokerSuit, PokerVoucher } from './types';
 import { ADDITIONAL_CARDS } from './constants1';
+import { HIGH_SCHOOL_CARDS } from './data/highSchoolCards';
 
 export const INITIAL_HP = 75;
 export const INITIAL_ENERGY = 3;
@@ -96,7 +97,7 @@ export const GARDEN_SEEDS: Record<string, Omit<Card, 'id'>> = {
 };
 
 export const GROWN_PLANTS: Record<string, Omit<Card, 'id'>> = {
-    SUNFLOWER: { name: 'ヒマワリ', cost: 0, type: CardType.SKILL, description: 'エネルギー1。1枚引く。廃棄。', energy: 1, draw: 1, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|黄|SKILL' },
+    SUNFLOWER: { name: 'ヒマワリ', cost: 0, type: CardType.SKILL, description: 'エナジー1。1枚引く。廃棄。', energy: 1, draw: 1, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|黄|SKILL' },
     CACTUS: { name: 'サボテン', cost: 1, type: CardType.POWER, description: 'トゲトゲ4を得る。', applyPower: { id: 'THORNS', amount: 4 }, rarity: 'SPECIAL', textureRef: 'PLANT|緑|POWER' },
     ROSE: { name: 'バラ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '12ダメージ。ドクドク4。廃棄。', damage: 12, poison: 4, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|赤|ATTACK' },
     GIANT_VINE: { name: '巨大なツル', cost: 2, type: CardType.ATTACK, target: TargetType.ALL_ENEMIES, description: '全体15ダメージ。敵全体をへろへろ2にする。廃棄。', damage: 15, weak: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|緑|ATTACK' },
@@ -106,7 +107,7 @@ export const GROWN_PLANTS: Record<string, Omit<Card, 'id'>> = {
     IRON_PUMPKIN: { name: '鉄壁カボチャ', cost: 2, type: CardType.SKILL, description: 'ブロック25を得る。廃棄。', block: 25, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|橙|SKILL' },
     HOT_CHILI: { name: '激辛トウガラシ', cost: 1, type: CardType.POWER, description: 'ムキムキ3を得る。', strength: 3, rarity: 'SPECIAL', textureRef: 'PLANT|赤|POWER' },
     GOLDEN_WHEAT: { name: '黄金の小麦', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '10ダメージ。これで倒すと最大HP+4。廃棄。', damage: 10, fatalMaxHp: 4, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|黄|ATTACK' },
-    SACRED_LOTUS: { name: '聖なるハス', cost: 0, type: CardType.SKILL, description: 'エネルギー2。2枚引く。廃棄。', energy: 2, draw: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|白|SKILL' },
+    SACRED_LOTUS: { name: '聖なるハス', cost: 0, type: CardType.SKILL, description: 'エナジー2。2枚引く。廃棄。', energy: 2, draw: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|白|SKILL' },
     LUCKY_CLOVER: { name: '四つ葉のクローバー', cost: 0, type: CardType.SKILL, description: 'キラキラ2を得る。廃棄。', applyPower: { id: 'ARTIFACT', amount: 2 }, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|緑|SKILL' },
     POISON_IVY: { name: '毒蔦アイビー', cost: 1, type: CardType.SKILL, target: TargetType.ENEMY, description: 'ドクドク10を与える。廃棄。', poison: 10, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|緑|SKILL' },
     TULIP_DRAW: { name: '魅惑のチューリップ', cost: 1, type: CardType.POWER, description: 'ターン開始時にカードを1枚引く。', applyPower: { id: 'DRAW_POWER', amount: 1 }, rarity: 'SPECIAL', textureRef: 'PLANT|桃|POWER' },
@@ -116,7 +117,7 @@ export const GROWN_PLANTS: Record<string, Omit<Card, 'id'>> = {
     CRIMSON_MAPLE: { name: '真紅のモミジ', cost: 1, type: CardType.SKILL, description: '手札を全て強化する。廃棄。', upgradeHand: true, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|赤|SKILL' },
     HOLY_GARLIC: { name: '魔除けのニンニク', cost: 0, type: CardType.SKILL, description: 'キラキラ3を得る。廃棄。', applyPower: { id: 'ARTIFACT', amount: 3 }, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|白|SKILL' },
     HEALING_GINGER: { name: '癒やしのショウガ', cost: 0, type: CardType.SKILL, description: 'HPを5回復。全デバフを解除。廃棄。', heal: 5, applyPower: { id: 'CLEAR_DEBUFFS', amount: 1 }, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|茶|SKILL' },
-    CALM_LAVENDER: { name: '安らぎのラベンダー', cost: 1, type: CardType.SKILL, description: '次ターン、エネルギー2。廃棄。', nextTurnEnergy: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|紫|SKILL' },
+    CALM_LAVENDER: { name: '安らぎのラベンダー', cost: 1, type: CardType.SKILL, description: '次ターン、エナジー2。廃棄。', nextTurnEnergy: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|紫|SKILL' },
     GREAT_OAK: { name: '大樹のカシ', cost: 2, type: CardType.SKILL, description: 'ブロック35を得る。廃棄。', block: 35, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|茶|SKILL' },
     MORNING_GLORY: { name: '朝露のアサガオ', cost: 0, type: CardType.SKILL, target: TargetType.ALL_ENEMIES, description: '敵全体をへろへろ2にする。廃棄。', weak: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|青|SKILL' },
     RAINBOW_HYDRANGEA: { name: '七変化のアジサイ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '手札の枚数x4ダメージ。廃棄。', damage: 0, damagePerCardInHand: 4, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|青|ATTACK' },
@@ -135,8 +136,8 @@ export const GROWN_PLANTS: Record<string, Omit<Card, 'id'>> = {
     CAUSTIC_WASABI: { name: '劇薬ワサビ', cost: 1, type: CardType.SKILL, target: TargetType.ENEMY, description: 'ドクドクを3倍にする。廃棄。', poisonMultiplier: 3, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|緑|SKILL' },
     POWER_SHIITAKE: { name: '剛力のシイタケ', cost: 1, type: CardType.SKILL, description: 'ムキムキ2を得る。廃棄。', strength: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|茶|SKILL' },
     BOUNTY_PERSIMMON: { name: '豊穣のカキ', cost: 1, type: CardType.SKILL, description: '次のターン、追加で2枚引く。廃棄。', nextTurnDraw: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|橙|SKILL' },
-    EARLY_PLUM: { name: '早咲きのウメ', cost: 0, type: CardType.SKILL, description: '次のターン、エネルギー1を得る。廃棄。', nextTurnEnergy: 1, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|赤|SKILL' },
-    AWAKE_COFFEE: { name: '覚醒のコーヒー', cost: 0, type: CardType.SKILL, description: 'エネルギー2を得る。1枚引く。HPを1失う。廃棄。', energy: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|黒|SKILL' },
+    EARLY_PLUM: { name: '早咲きのウメ', cost: 0, type: CardType.SKILL, description: '次のターン、エナジー1を得る。廃棄。', nextTurnEnergy: 1, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|赤|SKILL' },
+    AWAKE_COFFEE: { name: '覚醒のコーヒー', cost: 0, type: CardType.SKILL, description: 'エナジー2を得る。1枚引く。HPを1失う。廃棄。', energy: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|黒|SKILL' },
     SWEET_CACAO: { name: '魅惑のカカオ', cost: 0, type: CardType.SKILL, description: '手札を全て捨て、同数引く。廃棄。', exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|茶|SKILL' },
     EXPLOSIVE_PEPPER: { name: '爆炎のコショウ', cost: 2, type: CardType.ATTACK, target: TargetType.ALL_ENEMIES, description: '全体20ダメージ。自分に3ダメージ。廃棄。', damage: 20, selfDamage: 3, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|灰|ATTACK' },
     WILLOW_WIND: { name: '柳に風', cost: 2, type: CardType.SKILL, description: 'スケスケ1（無敵）を得る。廃棄。', applyPower: { id: 'INTANGIBLE', amount: 1 }, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|緑|SKILL' },
@@ -286,7 +287,7 @@ export const ENEMY_LIBRARY: Record<string, { name: string, description: string, 
 export const RELIC_LIBRARY: Record<string, Relic> = {
     BURNING_BLOOD: { id: 'BURNING_BLOOD', name: '給食の余り', description: '戦闘終了時、HPを6回復する。', rarity: 'STARTER' },
     SNAKE_RING: { id: 'SNAKE_RING', name: '秘密のメモ帳', description: '戦闘開始時、追加で2枚カードを引く。', rarity: 'STARTER' },
-    HOLY_WATER: { id: 'HOLY_WATER', name: 'スポーツドリンク', description: '戦闘開始時、エネルギーを1得る。', rarity: 'STARTER' },
+    HOLY_WATER: { id: 'HOLY_WATER', name: 'スポーツドリンク', description: '戦闘開始時、エナジーを1得る。', rarity: 'STARTER' },
     MEGAPHONE: { id: 'MEGAPHONE', name: '校内放送マイク', description: '戦闘開始時、敵全体をびくびく1にする。', rarity: 'STARTER' },
     HACHIMAKI: { id: 'HACHIMAKI', name: '必勝ハチマキ', description: '戦闘開始時、カチカチ1を得る。', rarity: 'STARTER' },
     BOOKMARK: { id: 'BOOKMARK', name: '図書室のしおり', description: 'ターン終了時、カードを1枚保留する。', rarity: 'STARTER' },
@@ -303,9 +304,9 @@ export const RELIC_LIBRARY: Record<string, Relic> = {
     ANCHOR: { id: 'ANCHOR', name: '重いランドセル', description: '1ターン目の開始時、ブロック10を得る。', rarity: 'COMMON', price: 150 },
     BAG_OF_PREP: { id: 'BAG_OF_PREP', name: '予習セット', description: '戦闘開始時、追加で2枚引く。', rarity: 'COMMON', price: 150 },
     BLOOD_VIAL: { id: 'BLOOD_VIAL', name: '保健室の飴', description: '戦闘開始時、HPを2回復する。', rarity: 'COMMON', price: 150 },
-    LANTERN: { id: 'LANTERN', name: '懐中電灯', description: '戦闘開始時、エネルギーを1得る。', rarity: 'COMMON', price: 160 },
+    LANTERN: { id: 'LANTERN', name: '懐中電灯', description: '戦闘開始時、エナジーを1得る。', rarity: 'COMMON', price: 160 },
     ANCIENT_TEA_SET: { id: 'ANCIENT_TEA_SET', name: '放課後の水筒', description: '休憩場所に着いた時、次の戦闘開始時にE+2。', rarity: 'COMMON', price: 150 },
-    HAPPY_FLOWER: { id: 'HAPPY_FLOWER', name: 'アサガオ', description: '3ターンごとにエネルギーを1得る。', rarity: 'COMMON', price: 150 },
+    HAPPY_FLOWER: { id: 'HAPPY_FLOWER', name: 'アサガオ', description: '3ターンごとにエナジーを1得る。', rarity: 'COMMON', price: 150 },
     PEN_NIB: { id: 'PEN_NIB', name: 'すごいペン先', description: '攻撃を10回プレイする度、その攻撃のダメージが倍になる。', rarity: 'COMMON', price: 180 },
     MERCURY_HOURGLASS: { id: 'MERCURY_HOURGLASS', name: 'チャイム砂時計', description: 'ターン開始時、敵全体に3ダメージを与える。', rarity: 'RARE', price: 220 },
     HORN_CLEAT: { id: 'HORN_CLEAT', name: '上履き', description: '2ターン目の開始時、ブロック14を得る。', rarity: 'RARE', price: 200 },
@@ -317,7 +318,7 @@ export const RELIC_LIBRARY: Record<string, Relic> = {
     PENTOGRAPH: { id: 'PENTOGRAPH', name: '習字セット', description: 'ボス戦開始時、HPを25回復する。', rarity: 'RARE', price: 250 },
     BRONZE_SCALES: { id: 'BRONZE_SCALES', name: '画鋲', description: '戦闘開始時、トゲトゲ3(反撃)を得る。', rarity: 'RARE', price: 200 },
     CALIPERS: { id: 'CALIPERS', name: 'コンパス', description: 'アタックを3回使う度、カードを1枚引く。', rarity: 'UNCOMMON', price: 280 },
-    ICE_CREAM: { id: 'ICE_CREAM', name: '溶けないアイス', description: 'エネルギーがターン終了時に保存される。', rarity: 'RARE', price: 300 },
+    ICE_CREAM: { id: 'ICE_CREAM', name: '溶けないアイス', description: 'エナジーがターン終了時に保存される。', rarity: 'RARE', price: 300 },
     OLD_COIN: { id: 'OLD_COIN', name: '遠足の小銭入れ', description: '獲得時、300円を得る。', rarity: 'RARE', price: 0 },
     LIZARD_TAIL: { id: 'LIZARD_TAIL', name: '予備の上履き', description: '敗北時、HP50%で復活する(1回のみ)。', rarity: 'RARE', price: 350 },
     MEMBERSHIP_CARD: { id: 'MEMBERSHIP_CARD', name: '図書カード', description: 'ショップの商品が安くなる。', rarity: 'SHOP', price: 100 },
@@ -359,7 +360,7 @@ export const POTION_LIBRARY: Record<string, Omit<Potion, 'id'>> = {
     FIRE_POTION: { templateId: 'FIRE_POTION', name: 'コーラ', description: '敵1体に20ダメージを与える。', rarity: 'COMMON', color: '#f87171', price: 50 },
     BLOCK_POTION: { templateId: 'BLOCK_POTION', name: '牛乳', description: 'ブロック12を得る。', rarity: 'COMMON', color: '#60a5fa', price: 50 },
     STRENGTH_POTION: { templateId: 'STRENGTH_POTION', name: 'プロテイン', description: 'ムキムキ2を得る。', rarity: 'COMMON', color: '#ef4444', price: 75 },
-    ENERGY_POTION: { templateId: 'ENERGY_POTION', name: 'エナジードリンク', description: 'エネルギー2を得る。', rarity: 'COMMON', color: '#fbbf24', price: 50 },
+    ENERGY_POTION: { templateId: 'ENERGY_POTION', name: 'エナジードリンク', description: 'エナジー2を得る。', rarity: 'COMMON', color: '#fbbf24', price: 50 },
     WEAK_POTION: { templateId: 'WEAK_POTION', name: '変なジュース', description: '敵1体にへろへろ3を与える。', rarity: 'COMMON', color: '#9ca3af', price: 40 },
     POISON_POTION: { templateId: 'POISON_POTION', name: '墨汁', description: '敵1体にドクドク6を与える。', rarity: 'COMMON', color: '#4ade80', price: 50 },
     HEALTH_POTION: { templateId: 'HEALTH_POTION', name: 'フルーツポンチ', description: 'HPを15回復する。', rarity: 'RARE', color: '#4ade80', price: 100 },
@@ -432,7 +433,7 @@ export const LIBRARIAN_CARDS: Record<string, Omit<Card, 'id'>> = {
     TORA_HO: { name: '虎咆', cost: 2, type: CardType.ATTACK, target: TargetType.ALL_ENEMIES, description: '全体12ダメージ。びくびく1。', damage: 12, vulnerable: 1, rarity: 'SPECIAL', textureRef: 'BEAST|黒|ATTACK' },
     BOKKO_CHAN: { name: 'ボッコちゃん', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'トゲトゲ4(反撃)を得る。', applyPower: { id: 'THORNS', amount: 4 }, rarity: 'SPECIAL', textureRef: 'HUMANOID|桃|SKILL' },
     OI_DETEKOI: { name: 'おーい、でてこい', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '18ダメージ。次ターンE+1。', damage: 18, nextTurnEnergy: 1, rarity: 'SPECIAL', textureRef: 'SLIME|黒|ATTACK' },
-    KOROSHIYA: { name: '殺し屋ですのよ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '9ダメージ。たおすとエネルギー2を得る。', damage: 9, fatalEnergy: 2, rarity: 'SPECIAL', textureRef: 'DAGGER|紫|ATTACK' },
+    KOROSHIYA: { name: '殺し屋ですのよ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '9ダメージ。たおすとエナジー2を得る。', damage: 9, fatalEnergy: 2, rarity: 'SPECIAL', textureRef: 'DAGGER|紫|ATTACK' },
     HOSHI_PRESENT: { name: '星のプレゼント', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'ランダムなポーションを1つ得る。廃棄。', exhaust: true, rarity: 'SPECIAL', textureRef: 'GEM|黄|SKILL' },
     KAGAMI_HOSHI: { name: '鏡 (星新一)', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '手札のカード1枚をコピーして手札に加える。自分にびくびく1。', promptsCopy: 1, rarity: 'SPECIAL', textureRef: 'EYE|青|SKILL' },
     YOSEI_HOSHI: { name: '妖精 (星新一)', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'HPを10回復。手札のカード1枚を廃棄する。', heal: 10, promptsExhaust: 1, rarity: 'SPECIAL', textureRef: 'GHOST|緑|SKILL' },
@@ -441,7 +442,7 @@ export const LIBRARIAN_CARDS: Record<string, Omit<Card, 'id'>> = {
     KAIKETSU_ZORORI: { name: 'かいけつゾロリ', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '3枚引き、1枚捨てる。ブロック3。', draw: 3, promptsDiscard: 1, rarity: 'SPECIAL', textureRef: 'BEAST|橙|SKILL' },
     ZENITEN_DO: { name: '銭天堂', cost: 2, type: CardType.SKILL, target: TargetType.SELF, description: '手札に「やる気スイッチ(コスト0)」を加える。', addCardToHand: { cardName: 'INFLAME', count: 1, cost0: true }, rarity: 'SPECIAL', textureRef: 'NOTEBOOK|緑|SKILL' },
     HOSHI_NO_OJI: { name: '星の王子さま', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '最大HP+2。HP2回復。廃棄。', fatalMaxHp: 2, heal: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'HUMANOID|黄|SKILL' },
-    MOMO_TIME: { name: 'モモ', cost: 2, type: CardType.POWER, target: TargetType.SELF, description: '余ったエネルギーを次のターンに持ち越す。', applyPower: { id: 'ICE_CREAM', amount: 1 }, rarity: 'SPECIAL', textureRef: 'CLOCK|桃|POWER' },
+    MOMO_TIME: { name: 'モモ', cost: 2, type: CardType.POWER, target: TargetType.SELF, description: '余ったエナジーを次のターンに持ち越す。', applyPower: { id: 'ICE_CREAM', amount: 1 }, rarity: 'SPECIAL', textureRef: 'CLOCK|桃|POWER' },
     TIME_THIEF: { name: '時間どろぼう', cost: 0, type: CardType.ATTACK, target: TargetType.ENEMY, description: '5ダメージ。敵の次の行動を1ターン遅らせる。', damage: 5, rarity: 'SPECIAL', textureRef: 'GHOST|黒|ATTACK' },
     NEVERENDING_STORY: { name: 'はてしない物語', cost: 3, type: CardType.POWER, target: TargetType.SELF, description: 'ターンの開始時、全てのカードのコストを1下げる。', applyPower: { id: 'COST_REDUCTION', amount: 1 }, rarity: 'SPECIAL', textureRef: 'NOTEBOOK|紫|POWER' },
     TOTTO_CHAN: { name: '窓ぎわのトットちゃん', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '捨て札を全て山札に戻す。1枚引く。廃棄。', shuffleHandToDraw: true, draw: 1, exhaust: true, rarity: 'SPECIAL', textureRef: 'HUMANOID|白|SKILL' },
@@ -480,6 +481,7 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
     ...GARDEN_SEEDS,
     ...GROWN_PLANTS,
     ...ADDITIONAL_CARDS,
+    ...HIGH_SCHOOL_CARDS,
 
     YATSUATARI: { name: 'むしゃくしゃ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '8ダメージ。使用する度、この戦闘中ダメージ+5。', damage: 8, rarity: 'UNCOMMON', textureRef: 'FIST|赤|ATTACK' },
     EXPULSION: { name: '早退', cost: 1, type: CardType.SKILL, target: TargetType.ENEMY, description: '敵のHPが30以下ならすぐにたおす。', rarity: 'RARE', textureRef: 'BOSS|黒|SKILL' },
@@ -502,14 +504,14 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
     SLICE: { name: 'ひっかく', cost: 0, type: CardType.ATTACK, target: TargetType.ENEMY, description: '6ダメージ。', damage: 6, rarity: 'COMMON', textureRef: 'SWORD|灰|ATTACK' },
     BEAM_CELL: { name: 'レーザーポインター', cost: 0, type: CardType.ATTACK, target: TargetType.ENEMY, description: '4ダメージ。びくびく1を与える。', damage: 4, vulnerable: 1, rarity: 'COMMON', textureRef: 'LIGHTNING|赤|ATTACK' },
     COLD_SNAP: { name: '寒いギャグ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '6ダメージ。ブロック4を得る。', damage: 6, block: 4, rarity: 'COMMON', textureRef: 'FLAME|青|ATTACK' },
-    BALL_LIGHTNING: { name: '静電気', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '7ダメージ。エネルギー1回復。', damage: 7, energy: 1, rarity: 'COMMON', textureRef: 'LIGHTNING|黄|ATTACK' },
-    SWORD_BOOMERANG: { name: 'ブーメラン', cost: 1, type: CardType.ATTACK, target: TargetType.RANDOM_ENEMY, description: 'ランダムな敵に3ダメージを3回。エネルギー1を得る。', damage: 3, playCopies: 2, rarity: 'COMMON', textureRef: 'SWORD|灰|ATTACK' },
+    BALL_LIGHTNING: { name: '静電気', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '7ダメージ。エナジー1回復。', damage: 7, energy: 1, rarity: 'COMMON', textureRef: 'LIGHTNING|黄|ATTACK' },
+    SWORD_BOOMERANG: { name: 'ブーメラン', cost: 1, type: CardType.ATTACK, target: TargetType.RANDOM_ENEMY, description: 'ランダムな敵に3ダメージを3回。エナジー1を得る。', damage: 3, playCopies: 2, rarity: 'COMMON', textureRef: 'SWORD|灰|ATTACK' },
     BODY_SLAM: { name: 'ボディスラム', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '現在のブロック値分のダメージを与える。', damage: 0, damageBasedOnBlock: true, rarity: 'COMMON', textureRef: 'FIST|青|ATTACK' },
     WILD_STRIKE: { name: '暴れる', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '12ダメージ。山札に「ケガ」を加える。', damage: 12, addCardToDraw: { cardName: 'WOUND', count: 1 }, rarity: 'COMMON', textureRef: 'HUMANOID|赤|ATTACK' },
     PERFECTED_STRIKE: { name: '完璧な回答', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '6ダメージ。デッキの「えんぴつ攻撃」1枚につき+2。', damage: 6, damagePerStrike: 2, rarity: 'COMMON', textureRef: 'NOTEBOOK|黄|ATTACK' },
     ANGER: { name: 'キレる', cost: 0, type: CardType.ATTACK, target: TargetType.ENEMY, description: '6ダメージ。捨て札に「キレる」を1枚加える。', damage: 6, addCardToDiscard: { cardName: 'ANGER', count: 1 }, rarity: 'COMMON', textureRef: 'FLAME|赤|ATTACK' },
     FLYING_KNEE: { name: '飛び膝蹴り', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '8ダメージ。ブロック3。次ターンE+1。', damage: 8, block: 3, nextTurnEnergy: 1, rarity: 'COMMON', textureRef: 'SHOE|赤|ATTACK' },
-    EMPTY_FIST: { name: 'グーパンチ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '9ダメージ。次のターン、エネルギー1を得る。', damage: 9, nextTurnEnergy: 1, rarity: 'COMMON', textureRef: 'FIST|灰|ATTACK' },
+    EMPTY_FIST: { name: 'グーパンチ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '9ダメージ。次のターン、エナジー1を得る。', damage: 9, nextTurnEnergy: 1, rarity: 'COMMON', textureRef: 'FIST|灰|ATTACK' },
     CONSECRATE: { name: '掃除の時間', cost: 0, type: CardType.ATTACK, target: TargetType.ALL_ENEMIES, description: '全体5ダメージ。', damage: 5, rarity: 'COMMON', textureRef: 'SLIME|白|ATTACK' },
     CUT_THROUGH: { name: '列に割り込む', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '7ダメージ。ブロック3。1ドロー。', damage: 7, block: 3, draw: 1, rarity: 'COMMON', textureRef: 'FIST|赤|ATTACK' },
     SASH_WHIP: { name: 'タオル攻撃', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '8ダメージ。へろへろ1。びくびく1。', damage: 8, weak: 1, vulnerable: 1, rarity: 'COMMON', textureRef: 'SWORD|白|ATTACK' },
@@ -531,7 +533,7 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
     HOLOGRAM: { name: 'カンニング', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '手札の攻撃カードを1枚コピーする。', promptsCopy: 1, rarity: 'UNCOMMON', textureRef: 'NOTEBOOK|青|SKILL' },
     THIRD_EYE: { name: '予習', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック7。1枚引き、1枚捨てる。', block: 7, draw: 1, promptsDiscard: 1, rarity: 'COMMON', textureRef: 'EYE|青|SKILL' },
     EMPTY_BODY: { name: '瞑想', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック10。', block: 10, rarity: 'COMMON', textureRef: 'HUMANOID|青|SKILL' },
-    PROSTRATE: { name: '土下座', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック4。エネルギー1を得る。', block: 4, energy: 1, rarity: 'COMMON', textureRef: 'HUMANOID|黄|SKILL' },
+    PROSTRATE: { name: '土下座', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック4。エナジー1を得る。', block: 4, energy: 1, rarity: 'COMMON', textureRef: 'HUMANOID|黄|SKILL' },
     SCRY: { name: '先読み', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック4を得る。2枚引く。', block: 4, draw: 2, rarity: 'COMMON', textureRef: 'EYE|黄|SKILL' },
     SKIM: { name: '速読', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '3枚引く。', draw: 3, rarity: 'COMMON', textureRef: 'NOTEBOOK|白|SKILL' },
     TURBO: { name: 'カフェイン', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'E2を得る。虚無追加。', energy: 2, addCardToDraw: { cardName: 'VOID', count: 1 }, rarity: 'COMMON', textureRef: 'POTION|黄|SKILL' },
@@ -576,7 +578,7 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
     SHOCKWAVE: { name: '衝撃波', cost: 2, type: CardType.SKILL, target: TargetType.ALL_ENEMIES, description: '敵全体にへろへろ3とびくびく3。廃棄。', weak: 3, vulnerable: 3, exhaust: true, rarity: 'RARE', textureRef: 'LIGHTNING|黄|SKILL' },
     IMPERVIOUS: { name: '鉄壁', cost: 2, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック30を得る。廃棄。', block: 30, exhaust: true, rarity: 'RARE', textureRef: 'SHIELD|青|SKILL' },
     OFFERING: { name: 'パシリ', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '自分に6ダメージ。E2と3枚ドロー。廃棄。', selfDamage: 6, energy: 2, draw: 3, exhaust: true, rarity: 'RARE', textureRef: 'NOTEBOOK|赤|SKILL' },
-    SEEING_RED: { name: '興奮', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'エネルギー2を得る。廃棄。', energy: 2, exhaust: true, rarity: 'RARE', textureRef: 'FLAME|赤|SKILL' },
+    SEEING_RED: { name: '興奮', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'エナジー2を得る。廃棄。', energy: 2, exhaust: true, rarity: 'RARE', textureRef: 'FLAME|赤|SKILL' },
     ADRENALINE: { name: 'テンションMAX', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'E1を得て2枚引く。廃棄。', energy: 1, draw: 2, exhaust: true, rarity: 'RARE', textureRef: 'POTION|黄|SKILL' },
     GLACIER: { name: 'かまくら', cost: 2, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック12。', block: 12, rarity: 'RARE', textureRef: 'SHIELD|青|SKILL' },
     REBOOT: { name: '再起動', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '捨て札を山札に戻し、4枚引く。廃棄。', shuffleHandToDraw: true, draw: 4, exhaust: true, rarity: 'RARE', textureRef: 'LIGHTNING|黄|SKILL' },
@@ -620,9 +622,9 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
     STATIC_DISCHARGE: { name: '摩擦熱', cost: 1, type: CardType.POWER, target: TargetType.SELF, description: '被ダメ時、ランダムに5ダメージ。', applyPower: { id: 'STATIC_DISCHARGE', amount: 1 }, rarity: 'RARE', textureRef: 'LIGHTNING|黄|POWER' },
     BUFFER: { name: '心の壁', cost: 2, type: CardType.POWER, target: TargetType.SELF, description: '次に受けるHPダメージを0にする。', applyPower: { id: 'BUFFER', amount: 1 }, rarity: 'RARE', textureRef: 'SHIELD|青|POWER' },
     CREATIVE_AI: { name: '自由研究', cost: 3, type: CardType.POWER, target: TargetType.SELF, description: '毎ターンランダムなパワー生成。', applyPower: { id: 'CREATIVE_AI', amount: 1 }, rarity: 'LEGENDARY', textureRef: 'LIGHTNING|黄|POWER' },
-    DEVA_FORM: { name: '受験勉強', cost: 3, type: CardType.POWER, target: TargetType.SELF, description: 'ターン開始時、エネルギーを得る。毎ターン増加。', applyPower: { id: 'DEVA_FORM', amount: 1 }, rarity: 'LEGENDARY', textureRef: 'FLAME|黄|POWER' },
+    DEVA_FORM: { name: '受験勉強', cost: 3, type: CardType.POWER, target: TargetType.SELF, description: 'ターン開始時、エナジーを得る。毎ターン増加。', applyPower: { id: 'DEVA_FORM', amount: 1 }, rarity: 'LEGENDARY', textureRef: 'FLAME|黄|POWER' },
     MASTER_REALITY: { name: '模範解答', cost: 1, type: CardType.POWER, target: TargetType.SELF, description: 'カード生成時アップグレード。', applyPower: { id: 'MASTER_REALITY', amount: 1 }, rarity: 'RARE', textureRef: 'NOTEBOOK|白|POWER' },
-    BERSERK: { name: '逆ギレ', cost: 0, type: CardType.POWER, target: TargetType.SELF, description: '自分にびくびく2を与える。毎ターンエネルギー1を得る。', applyPower: { id: 'BERSERK_POWER', amount: 1 }, vulnerable: 2, rarity: 'RARE', textureRef: 'FLAME|赤|POWER' },
+    BERSERK: { name: '逆ギレ', cost: 0, type: CardType.POWER, target: TargetType.SELF, description: '自分にびくびく2を与える。毎ターンエナジー1を得る。', applyPower: { id: 'BERSERK_POWER', amount: 1 }, vulnerable: 2, rarity: 'RARE', textureRef: 'FLAME|赤|POWER' },
     INFINITE_BLADES: { name: '鉛筆削り', cost: 1, type: CardType.POWER, target: TargetType.SELF, description: '毎ターン手札にえんぴつの削りかすを加える。', applyPower: { id: 'INFINITE_BLADES', amount: 1 }, rarity: 'UNCOMMON', textureRef: 'SWORD|灰|POWER' },
     ACCURACY: { name: '集中力', cost: 1, type: CardType.POWER, target: TargetType.SELF, description: 'えんぴつの削りかすのダメージ+4。', applyPower: { id: 'ACCURACY', amount: 4 }, rarity: 'UNCOMMON', textureRef: 'EYE|黄|POWER' },
 };
@@ -1103,7 +1105,7 @@ export const VOUCHERS_LIBRARY: PokerVoucher[] = [
 // --- CARD WITH UPDATED EFFECT ---
 export const UPDATED_CARDS: Record<string, Omit<Card, 'id'>> = {
     HOLOGRAM: { name: 'カンニング', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '手札の攻撃カードを1枚コピーする。', promptsCopy: 1, rarity: 'UNCOMMON', textureRef: 'NOTEBOOK|青|SKILL' },
-    BERSERK: { name: '逆ギレ', cost: 0, type: CardType.POWER, target: TargetType.SELF, description: '自分にびくびく2を与える。毎ターンエネルギー1を得る。', applyPower: { id: 'BERSERK_POWER', amount: 1 }, vulnerable: 2, rarity: 'RARE', textureRef: 'FLAME|赤|POWER' },
+    BERSERK: { name: '逆ギレ', cost: 0, type: CardType.POWER, target: TargetType.SELF, description: '自分にびくびく2を与える。毎ターンエナジー1を得る。', applyPower: { id: 'BERSERK_POWER', amount: 1 }, vulnerable: 2, rarity: 'RARE', textureRef: 'FLAME|赤|POWER' },
     DISCOVERY: { name: '発見', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ランダムなカード3枚を手札に加える。', exhaust: true, rarity: 'UNCOMMON', textureRef: 'NOTEBOOK|白|SKILL' },
 };
 

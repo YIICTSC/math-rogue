@@ -164,7 +164,7 @@ export const getUpgradedCard = (card: Card): Card => {
     }
     if (card.energy !== undefined && newCard.energy !== undefined && card.energy !== newCard.energy) {
         replaceOnce(/(E)(\d+)(を得る)/, (_m, prefix, _n, suffix) => `${prefix}${newCard.energy}${suffix}`);
-        replaceOnce(/(エネルギー)(\d+)(を得る)/, (_m, prefix, _n, suffix) => `${prefix}${newCard.energy}${suffix}`);
+        replaceOnce(/(エナジー|エネルギー)(\d+)(を得る)/, (_m, prefix, _n, suffix) => `${prefix}${newCard.energy}${suffix}`);
     }
     if (card.poison !== undefined && newCard.poison !== undefined && card.poison !== newCard.poison) {
         replaceOnce(/(ドクドク)(\d+)/, (_m, label) => `${label}${newCard.poison}`);

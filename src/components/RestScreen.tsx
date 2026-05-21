@@ -41,10 +41,13 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
   const healAmount = Math.floor(player.maxHp * 0.3);
   const requiredCards = isMage ? 3 : 2;
   const hasCardEraser = player.deck.some(card => card.name === CARD_ERASER_NAME || card.originalNames?.includes(CARD_ERASER_NAME));
+  const synthesisCandidates = player.deck.filter(card => !card.familiarSummon);
   const selectableCards = mode === 'UPGRADE'
     ? player.deck.filter(c => !c.upgraded)
     : mode === 'SELF_STUDY'
       ? player.deck.filter(c => getErasableEffectOptions(c).length > 0)
+    : mode === 'SYNTHESIS'
+      ? synthesisCandidates
     : player.deck;
   const selectedEraserOptions = selectedCard ? getErasableEffectOptions(selectedCard) : [];
 
@@ -133,7 +136,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
   const handleSynthesizeChoice = () => {
       if (interactionDisabled) return;
       if (!scienceRoomAvailable) return;
-      if (player.deck.length < requiredCards) {
+      if (synthesisCandidates.length < requiredCards) {
           setMessage(trans(`実験材料（カード）が${requiredCards}枚足りない...`, languageMode));
           return;
       }
@@ -193,8 +196,8 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
 
   const handleRandomSynthesis = () => {
       if (interactionDisabled) return;
-      if (player.deck.length < requiredCards) return;
-      const shuffled = [...player.deck].sort(() => Math.random() - 0.5);
+      if (synthesisCandidates.length < requiredCards) return;
+      const shuffled = [...synthesisCandidates].sort(() => Math.random() - 0.5);
       const selection = shuffled.slice(0, requiredCards);
       setSynthCards(selection);
       setMode('PREVIEW_SYNTHESIS');

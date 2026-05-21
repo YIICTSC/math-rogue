@@ -17,6 +17,8 @@ import { storageService } from '../services/storageService';
 import { PotionIcon, RelicIcon } from './ItemIcon';
 import { getBattleBackgroundSceneById } from '../data/battleBackgrounds';
 import { getStatusEffectKeyForVfx } from '../data/statusEffects';
+import { getHighSchoolCharacterSpritePath, getHighSchoolEnemyVariant, getHighSchoolHumanoidEnemyVariant, getThemedEnemyDisplayName, type HighSchoolEnemyAction, type HighSchoolHeroAction, type VisualThemeId } from '../data/visualThemes';
+import { assetUrl } from '../utils/assetPaths';
 
 const POWER_DEFINITIONS: Record<string, { name: string, desc: string }> = {
     WEAK: { name: "へろへろ", desc: "攻撃で与えるダメージが25%減っちゃう。" },
@@ -47,7 +49,7 @@ const POWER_DEFINITIONS: Record<string, { name: string, desc: string }> = {
     STATIC_DISCHARGE: { name: '摩擦熱', desc: '攻撃を受けた時、ランダムな敵にダメージを与える。' },
     BUFFER: { name: '心の壁', desc: '次に受ける HPダメージを0にする。' },
     CREATIVE_AI: { name: '自由研究', desc: 'ターン開始時、ランダムなパワーカードを加える。' },
-    DEVA_FORM: { name: '受験勉強', desc: 'ターン開始時、エネルギーを得る。' },
+    DEVA_FORM: { name: '受験勉強', desc: 'ターン開始時、エナジーを得る。' },
     MASTER_REALITY: { name: '模範解答', desc: 'カードが生成された時、それをアップグレードする。' },
     BURST: { name: 'バースト', desc: '次にプレイするスキルカードが2回発動する。' },
     DOUBLE_POISON: { name: '化学反応', desc: 'ドクドクの効果を増幅させる。' },
@@ -57,7 +59,7 @@ const POWER_DEFINITIONS: Record<string, { name: string, desc: string }> = {
     EVOLVE: { name: '進級', desc: '状態異常カードを引いた時、カードを引く。' },
     APOTHEOSIS: { name: '覚醒', desc: 'デッキの全てのカードがアップグレードされる。' },
     ACCURACY: { name: '精度上昇', desc: 'えんぴつの削りかすのダメージが増加する。' },
-    STRATEGIST: { name: 'カンニングペーパー', desc: 'このカードが捨てられた時、エネルギーを得る。' },
+    STRATEGIST: { name: 'カンニングペーパー', desc: 'このカードが捨てられた時、エナジーを得る。' },
     INFLAME: { name: 'やる気スイッチ', desc: 'ムキムキを得る。' },
 };
 
@@ -391,6 +393,7 @@ interface BattleSceneProps {
     hideEnemyIntents?: boolean;
     onOpenSettings?: () => void;
     battleBackgroundId?: string;
+    visualTheme?: VisualThemeId;
 }
 
 type DrawEntryAnimation = {
@@ -400,7 +403,7 @@ type DrawEntryAnimation = {
 
 const BattleScene: React.FC<BattleSceneProps> = ({
     player, companions = [], coopSelfPeerId, coopEffectOwnerPeerId, coopTurnQueue = [], coopCanAct = true, coopTurnOwnerLabel, coopSupportCards = [], onUseCoopSupport, selfDown = false, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onPlaySynthesizedCard, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
-    selectionState, onHandSelection, onCancelSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect, parryState, onParry, showParryTutorial = false, onCloseParryTutorial, activeEffects, finisherCutinCard, hideEnemyIntents = false, onOpenSettings, battleBackgroundId
+    selectionState, onHandSelection, onCancelSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect, parryState, onParry, showParryTutorial = false, onCloseParryTutorial, activeEffects, finisherCutinCard, hideEnemyIntents = false, onOpenSettings, battleBackgroundId, visualTheme = 'elementary'
 }) => {
     const isCoopBattleView = !!coopSelfPeerId || companions.length > 0;
     const battleBackgroundScene = getBattleBackgroundSceneById(battleBackgroundId);
@@ -421,6 +424,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         : activeEffects.filter(effect => effect.targetId === 'player');
 
     const [lastVisibleEnemies, setLastVisibleEnemies] = useState<Enemy[]>([]);
+    const themedEnemyNameMapRef = useRef<Map<string, string>>(new Map());
     const [selectedSupportCard, setSelectedSupportCard] = useState<CoopSupportCard | null>(null);
     const [coopSupportHudOpen, setCoopSupportHudOpen] = useState(false);
     const isFinisherActive = !!finisherCutinCard;
@@ -461,6 +465,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const [fullscreenArtCard, setFullscreenArtCard] = useState<ICard | null>(null);
     const [showLog, setShowLog] = useState(false);
     const [forceLandscapeSplit, setForceLandscapeSplit] = useState(false);
+    const [isTouchPortraitViewport, setIsTouchPortraitViewport] = useState(false);
+    const [mobileFamiliarPresentation, setMobileFamiliarPresentation] = useState<{ index: number; phase: 'stand' | 'action' } | null>(null);
     const [finisherBurst, setFinisherBurst] = useState(false);
     const [drawEntryAnimations, setDrawEntryAnimations] = useState<DrawEntryAnimation[]>([]);
     const battleViewRef = useRef<HTMLDivElement>(null);
@@ -473,6 +479,21 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
     // --- BATTLE TUTORIAL STATE ---
     const [tutorialStep, setTutorialStep] = useState<number | null>(null);
+
+    useEffect(() => {
+        const updateViewportMode = () => {
+            if (typeof window === 'undefined') return;
+            const isCoarsePointer = window.matchMedia?.('(pointer: coarse)').matches ?? false;
+            setIsTouchPortraitViewport(isCoarsePointer && window.innerHeight > window.innerWidth);
+        };
+        updateViewportMode();
+        window.addEventListener('resize', updateViewportMode);
+        window.addEventListener('orientationchange', updateViewportMode);
+        return () => {
+            window.removeEventListener('resize', updateViewportMode);
+            window.removeEventListener('orientationchange', updateViewportMode);
+        };
+    }, []);
 
     useEffect(() => {
         if (!storageService.getSeenBattleTutorial()) {
@@ -665,6 +686,69 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         }
     };
 
+    const highSchoolHeroAction: HighSchoolHeroAction = !isActing
+        ? 'idle'
+        : lastActionType === CardType.ATTACK
+            ? 'attack'
+            : lastActionType === CardType.SKILL || lastActionType === CardType.POWER
+                ? 'skill'
+                : 'idle';
+    const playerSpriteSource = visualTheme === 'high-school'
+        ? getHighSchoolCharacterSpritePath(player.id, highSchoolHeroAction)
+        : player.imageData;
+    const familiarActionSequence = useMemo(
+        () => (player.familiarActionQueue || [])
+            .filter(familiar => familiar.actionPulse)
+            .sort((a, b) => (a.actionPulse || 0) - (b.actionPulse || 0)),
+        [player.familiarActionQueue]
+    );
+    const familiarActionSequenceKey = familiarActionSequence.map(familiar => `${familiar.instanceId}:${familiar.actionPulse}`).join('|');
+    useEffect(() => {
+        if (!isTouchPortraitViewport || familiarActionSequence.length === 0) {
+            setMobileFamiliarPresentation(null);
+            return;
+        }
+        const timers: number[] = [];
+        familiarActionSequence.forEach((_, index) => {
+            const baseDelay = index * 980;
+            timers.push(window.setTimeout(() => {
+                setMobileFamiliarPresentation({ index, phase: 'stand' });
+            }, baseDelay));
+            timers.push(window.setTimeout(() => {
+                setMobileFamiliarPresentation({ index, phase: 'action' });
+            }, baseDelay + 300));
+        });
+        timers.push(window.setTimeout(() => {
+            setMobileFamiliarPresentation(null);
+        }, familiarActionSequence.length * 980 + 220));
+        return () => timers.forEach(timer => window.clearTimeout(timer));
+    }, [isTouchPortraitViewport, familiarActionSequence.length, familiarActionSequenceKey]);
+    const mobileActiveFamiliar = isTouchPortraitViewport && visualTheme === 'high-school'
+        ? familiarActionSequence[mobileFamiliarPresentation?.index ?? -1] || null
+        : null;
+    const displayedPlayerSpriteSource = mobileActiveFamiliar
+        ? assetUrl(`sprites/high-school/${mobileFamiliarPresentation?.phase === 'action' ? 'familiars-action' : 'familiars'}/${mobileActiveFamiliar.imageIndex}.webp`)
+        : playerSpriteSource;
+    const displayedPlayerSpriteKey = mobileActiveFamiliar
+        ? `${mobileActiveFamiliar.instanceId}-${mobileFamiliarPresentation?.phase}`
+        : `hero-${player.id}-${highSchoolHeroAction}`;
+    useEffect(() => {
+        if (visualTheme !== 'high-school') {
+            themedEnemyNameMapRef.current.clear();
+            return;
+        }
+        enemies.forEach(enemy => {
+            themedEnemyNameMapRef.current.set(enemy.name, getThemedEnemyDisplayName(enemy, visualTheme));
+        });
+    }, [enemies, visualTheme]);
+    const renderBattleLog = (log: string) => {
+        if (visualTheme !== 'high-school') return trans(log, languageMode);
+        const themedLog = [...themedEnemyNameMapRef.current.entries()]
+            .sort(([a], [b]) => b.length - a.length)
+            .reduce((nextLog, [baseName, themedName]) => nextLog.replaceAll(baseName, themedName), log);
+        return trans(themedLog, languageMode);
+    };
+
     const getEnemyActionClass = (enemy: Enemy) => {
         if (actingEnemyId !== enemy.id) return '';
         if (enemy.nextIntent.type === 'ATTACK' || enemy.nextIntent.type === 'ATTACK_DEBUFF' || enemy.nextIntent.type === 'ATTACK_DEFEND') {
@@ -812,7 +896,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
         if (!c1 || !c2) return;
 
-        const isCombo = c1.type === c2.type;
+        const isCombo = c1.type === c2.type && !c1.familiarSummon && !c2.familiarSummon;
         const comboCost = Math.max(c1.cost, c2.cost);
         const totalCost = c1.cost + c2.cost;
         const requiredCost = isCombo ? comboCost : totalCost;
@@ -849,7 +933,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     };
 
     return (
-        <div className={`battle-scene-root flex flex-col h-full w-full bg-gray-900 text-white relative overflow-hidden ${forceLandscapeSplit || isPcBrowserViewport ? 'battle-force-split battle-pc-split' : ''} ${isShaking ? 'animate-screen-shake' : ''}`}>
+        <div className={`battle-scene-root ${visualTheme === 'high-school' ? 'battle-high-school' : ''} flex flex-col h-full w-full bg-gray-900 text-white relative overflow-hidden ${forceLandscapeSplit || isPcBrowserViewport ? 'battle-force-split battle-pc-split' : ''} ${isShaking ? 'animate-screen-shake' : ''}`}>
             {finisherCutinCard && (
                 <BattleFinisherCutinOverlay card={finisherCutinCard} languageMode={languageMode} />
             )}
@@ -985,11 +1069,11 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     {latestLogs.length > 0 ? (
                         <>
                             <div className="text-[10px] text-gray-200 truncate leading-snug">
-                                {trans(latestLogs[0], languageMode)}
+                                {renderBattleLog(latestLogs[0])}
                             </div>
                             {latestLogs.length > 1 && (
                                 <div className="text-[10px] text-gray-500 truncate leading-snug">
-                                    {trans(latestLogs[1], languageMode)}
+                                    {renderBattleLog(latestLogs[1])}
                                 </div>
                             )}
                         </>
@@ -1129,7 +1213,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             <div className="flex flex-col gap-1">
                                 {combatLog.map((log, i) => (
                                     <div key={i} className="border-b border-gray-800 pb-0.5 last:border-0 leading-tight break-words">
-                                        {trans(log, languageMode)}
+                                        {renderBattleLog(log)}
                                     </div>
                                 ))}
                             </div>
@@ -1313,10 +1397,21 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             const enemyHpPercent = (enemy.currentHp / enemy.maxHp) * 100;
                             const isSelected = !isFinisherActive && selectedEnemyId === enemy.id;
                             const actionClass = getEnemyActionClass(enemy);
-                            const enemyName = trans(enemy.name, languageMode);
+                            const themedEnemy = visualTheme === 'high-school'
+                                ? getHighSchoolEnemyVariant(enemy)
+                                : null;
+                            const enemyName = trans(themedEnemy?.name ?? enemy.name, languageMode);
                             const enemyNameNeedsScroll = enemyName.length > 5;
                             const isTrueBossPhase2 = enemy.enemyType === 'THE_HEART' && enemy.phase === 2;
                             const isFinalBoss = enemy.enemyType === 'THE_HEART';
+                            const humanoidEnemy = visualTheme === 'high-school'
+                                ? getHighSchoolHumanoidEnemyVariant(enemy)
+                                : null;
+                            const highSchoolEnemyAction: HighSchoolEnemyAction = actingEnemyId !== enemy.id
+                                ? 'idle'
+                                : ['ATTACK', 'ATTACK_DEBUFF', 'ATTACK_DEFEND', 'PIERCE_ATTACK'].includes(enemy.nextIntent.type)
+                                    ? 'attack'
+                                    : 'skill';
                             const isParryTarget = !!parryState?.active && parryState.enemyId === enemy.id;
                             const enemySvgAliases = isTrueBossPhase2
                                 ? ['THE_HEART_PHASE2', '真ボス2形態目', '真ボス_2', '真ボス第二形態', `${enemy.enemyType}_2`]
@@ -1380,7 +1475,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                         </div>
                                     )}
 
-                                    <div className={`battle-enemy-sprite ${isFinalBoss ? 'battle-final-boss-sprite' : ''} ${isTrueBossPhase2 ? 'battle-true-boss-sprite' : ''} relative mb-1 transition-all duration-700 ${isTrueBossPhase2 ? ENEMY_ILLUSTRATION_SIZE_CLASS.battleTrueBossPhase2 : isFinalBoss ? ENEMY_ILLUSTRATION_SIZE_CLASS.battleFinalBoss : ENEMY_ILLUSTRATION_SIZE_CLASS.battleNormal}`}>
+                                    <div className={`battle-enemy-sprite ${humanoidEnemy ? 'battle-humanoid-enemy-sprite' : ''} ${isFinalBoss ? 'battle-final-boss-sprite' : ''} ${isTrueBossPhase2 ? 'battle-true-boss-sprite' : ''} relative mb-1 transition-all duration-700 ${humanoidEnemy ? 'w-40 h-40 md:w-48 md:h-48' : isTrueBossPhase2 ? ENEMY_ILLUSTRATION_SIZE_CLASS.battleTrueBossPhase2 : isFinalBoss ? ENEMY_ILLUSTRATION_SIZE_CLASS.battleFinalBoss : ENEMY_ILLUSTRATION_SIZE_CLASS.battleNormal}`}>
                                         {isFinisherActive ? (
                                             <div className="relative w-full h-full flex items-center justify-center">
                                                 {!finisherBurst && (
@@ -1389,6 +1484,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                             name={enemy.name}
                                                             seed={`${enemy.id}-finisher-main`}
                                                             aliases={enemySvgAliases}
+                                                            visualTheme={visualTheme}
+                                                            enemyType={enemy.enemyType}
+                                                            phase={enemy.phase}
+                                                            action={highSchoolEnemyAction}
                                                             className="w-full h-full drop-shadow-[0_0_20px_rgba(255,255,255,0.5)] rotate-[6deg] scale-110"
                                                             size={24}
                                                         />
@@ -1420,6 +1519,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                                     name={enemy.name}
                                                                     seed={`${enemy.id}-finisher-piece-${idx}`}
                                                                     aliases={enemySvgAliases}
+                                                                    visualTheme={visualTheme}
+                                                                    enemyType={enemy.enemyType}
+                                                                    phase={enemy.phase}
+                                                                    action={highSchoolEnemyAction}
                                                                     className="w-full h-full"
                                                                     size={16}
                                                                 />
@@ -1431,7 +1534,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                 )}
                                             </div>
                                         ) : (
-                                            <EnemyIllustration name={enemy.name} seed={enemy.id} aliases={enemySvgAliases} className="w-full h-full drop-shadow-lg relative z-10" />
+                                            <EnemyIllustration name={enemy.name} seed={enemy.id} aliases={enemySvgAliases} visualTheme={visualTheme} enemyType={enemy.enemyType} phase={enemy.phase} action={highSchoolEnemyAction} className="w-full h-full drop-shadow-lg relative z-10" />
                                         )}
                                         {!isFinisherActive && <FloatingTextOverlay data={enemy.floatingText} languageMode={languageMode} />}
                                         {!isFinisherActive && <VFXOverlay effects={activeEffects} targetId={enemy.id} />}
@@ -1493,7 +1596,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     <div ref={playerAreaRef} className={isTrueBossPhase2Active ? "battle-player-area relative z-20 flex items-end pl-2 pb-2 shrink-0" : "battle-player-area flex items-end pl-2 pb-2 shrink-0 mt-auto"}>
                         <div ref={playerGroupRef} className={isTrueBossPhase2Active ? "flex flex-col items-start md:flex-row md:items-end relative max-w-[48vw] md:max-w-none" : "flex items-end relative"}>
 
-                            <div ref={playerSpriteRef} className={`battle-player-sprite order-1 w-20 h-20 md:w-24 md:h-24 relative transition-all duration-150 ease-out ${isTrueBossPhase2Active ? 'mr-0 md:mr-2 mb-1 md:mb-0' : 'mr-2'} ${getActionClass()} ${selectedSupportCard ? 'ring-2 ring-emerald-300 rounded-lg cursor-pointer' : ''}`} onClick={() => {
+                            <div ref={playerSpriteRef} className={`battle-player-sprite order-1 ${visualTheme === 'high-school' ? 'w-40 h-40 md:w-48 md:h-48' : 'w-20 h-20 md:w-24 md:h-24'} relative transition-all duration-150 ease-out ${isTrueBossPhase2Active ? 'mr-0 md:mr-2 mb-1 md:mb-0' : 'mr-2'} ${getActionClass()} ${selectedSupportCard ? 'ring-2 ring-emerald-300 rounded-lg cursor-pointer' : ''}`} onClick={() => {
                                 if (selectedSupportCard && onUseCoopSupport) {
                                     onUseCoopSupport(selectedSupportCard);
                                     setSelectedSupportCard(null);
@@ -1501,11 +1604,41 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 }
                                 showInfo(trans("自分", languageMode), trans("あなたのキャラクター。\nHPが0になるとゲームオーバー。", languageMode));
                             }}>
+                                {visualTheme === 'high-school' && !mobileActiveFamiliar && (player.familiars || []).length > 0 && (
+                                    <div className="pointer-events-none absolute -inset-x-28 -top-24 bottom-0 z-0 md:-inset-x-36 md:-top-28">
+                                        {(player.familiars || []).slice(-5).map((familiar, index) => {
+                                            const active = familiar.actionPulse && Date.now() - familiar.actionPulse < 900;
+                                            const src = assetUrl(`sprites/high-school/${active ? 'familiars-action' : 'familiars'}/${familiar.imageIndex}.webp`);
+                                            const positions = [
+                                                { left: '-34%', bottom: '0%', zIndex: 0 },
+                                                { left: '70%', bottom: '3%', zIndex: 18 },
+                                                { left: '-12%', bottom: '46%', zIndex: 0 },
+                                                { left: '52%', bottom: '50%', zIndex: 0 },
+                                                { left: '18%', bottom: '-8%', zIndex: 18 },
+                                            ];
+                                            const pos = positions[index % positions.length];
+                                            return (
+                                                <img
+                                                    key={familiar.instanceId}
+                                                    src={src}
+                                                    alt={familiar.name}
+                                                    className={`absolute h-40 w-32 object-contain drop-shadow-[0_0_10px_rgba(217,70,239,0.9)] md:h-48 md:w-40 ${active ? 'animate-pulse' : ''}`}
+                                                    style={{
+                                                        ...pos,
+                                                        transform: `scale(${active ? 1.08 : 1})`,
+                                                        transformOrigin: 'center bottom'
+                                                    }}
+                                                />
+                                            );
+                                        })}
+                                    </div>
+                                )}
                                 <img
-                                    src={player.imageData}
-                                    alt="Hero"
-                                    className="w-full h-full pixel-art"
-                                    style={{ imageRendering: 'pixelated' }}
+                                    key={displayedPlayerSpriteKey}
+                                    src={displayedPlayerSpriteSource}
+                                    alt={mobileActiveFamiliar?.name || "Hero"}
+                                    className={`relative z-10 w-full h-full transition-all duration-300 ease-out animate-in fade-in zoom-in-95 ${mobileActiveFamiliar ? `object-contain drop-shadow-[0_0_14px_rgba(217,70,239,0.95)] ${mobileFamiliarPresentation?.phase === 'action' ? 'animate-pulse' : ''}` : 'pixel-art'} ${visualTheme === 'high-school' && !mobileActiveFamiliar ? '-scale-x-100' : ''}`}
+                                    style={mobileActiveFamiliar ? undefined : { imageRendering: 'pixelated' }}
                                 />
                                 <FloatingTextOverlay data={player.floatingText} languageMode={languageMode} />
                                 {(isCoopBattleView ? selfScopedEffects.length > 0 : shouldRenderPlayerScopedVfxOnSelf) && (
@@ -1748,7 +1881,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             {/* 3. Control Bar */}
             <div className="h-12 bg-gray-800 border-t-2 border-white flex items-center justify-between px-2 shrink-0 z-20 shadow-lg">
                 <div className="flex items-center">
-                    <div className={`bg-black border-2 border-yellow-500 text-yellow-400 px-2 py-0.5 rounded-full flex items-center shadow-lg mr-2 ${tutorialStep === 3 ? 'ring-4 ring-yellow-400 ring-offset-2 ring-offset-transparent animate-pulse' : ''} ${selfDown ? 'opacity-60' : ''}`} onClick={() => showInfo(trans("エネルギー", languageMode), trans("カードを使用するために必要。ターン毎に回復する。", languageMode))}>
+                    <div className={`bg-black border-2 border-yellow-500 text-yellow-400 px-2 py-0.5 rounded-full flex items-center shadow-lg mr-2 ${tutorialStep === 3 ? 'ring-4 ring-yellow-400 ring-offset-2 ring-offset-transparent animate-pulse' : ''} ${selfDown ? 'opacity-60' : ''}`} onClick={() => showInfo(trans("エナジー", languageMode), trans("カードを使用するために必要。ターン毎に回復する。", languageMode))}>
                         <Zap size={14} className="mr-1 fill-yellow-400" />
                         <span className="text-lg font-bold">{player.currentEnergy}/{player.maxEnergy}</span>
                     </div>

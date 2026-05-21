@@ -65,6 +65,9 @@ export interface Card {
   illustrationRefWriteIndex?: number;
   enemyIllustrationName?: string;
   enemyIllustrationNames?: string[];
+  visualTheme?: 'elementary' | 'high-school';
+  highSchoolCardArtIndex?: number;
+  familiarSummon?: FamiliarSummonSpec;
 
   nextTurnEnergy?: number;
   nextTurnDraw?: number;
@@ -101,6 +104,47 @@ export interface Card {
   battleBonusDrawOnPlay?: number;
   battleRestore?: Partial<Card>;
   eraserOnly?: boolean;
+}
+
+export type FamiliarTrigger =
+  | 'ONCE_END_TURN'
+  | 'END_TURN'
+  | 'EVERY_OTHER_TURN'
+  | 'LOW_HP_END_TURN'
+  | 'NO_BLOCK_END_TURN';
+
+export type FamiliarActionKind =
+  | 'DAMAGE'
+  | 'AOE_DAMAGE'
+  | 'BLOCK'
+  | 'HEAL'
+  | 'DRAW'
+  | 'ENERGY_NEXT'
+  | 'POISON'
+  | 'WEAK'
+  | 'VULNERABLE'
+  | 'STRENGTH'
+  | 'GOLD';
+
+export interface FamiliarEffect {
+  kind: FamiliarActionKind;
+  amount: number;
+}
+
+export interface FamiliarSummonSpec {
+  id: string;
+  name: string;
+  imageIndex: number;
+  duration: number | 'BATTLE';
+  trigger: FamiliarTrigger;
+  effect: FamiliarEffect;
+}
+
+export interface ActiveFamiliar extends FamiliarSummonSpec {
+  instanceId: string;
+  turnsActive: number;
+  used?: boolean;
+  actionPulse?: number;
 }
 
 export enum EnemyIntentType {
@@ -145,6 +189,7 @@ export interface Enemy {
   artifact: number;
   corpseExplosion: boolean;
   floatingText: FloatingText | null;
+  familiars?: ActiveFamiliar[];
   sleepTurns?: number;
   phase?: number;
 }
@@ -225,6 +270,7 @@ export interface Player {
   partner?: Partner;
   garden?: GardenSlot[];
   codexBuffer?: Card[]; // 秘密の攻略本用
+  familiarActionQueue?: ActiveFamiliar[];
 }
 
 export interface CoopBattlePlayerState {
@@ -722,6 +768,7 @@ export interface VisualEffectInstance {
 export interface GameState {
   screen: GameScreen;
   mode: GameMode;
+  visualTheme?: 'elementary' | 'high-school';
   modePool?: string[];
   answerMode?: AnswerMode;
   difficultyLevel?: number;
@@ -757,6 +804,7 @@ export interface GameState {
 export interface CoopSharedState {
   screen: GameScreen;
   mode: GameMode;
+  visualTheme?: 'elementary' | 'high-school';
   modePool?: string[];
   answerMode?: AnswerMode;
   difficultyLevel?: number;

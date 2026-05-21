@@ -328,7 +328,7 @@ export const applyAdditionalCardLogic = (
             }
             case 'ブーメラン': {
                 p.currentEnergy += 1;
-                currentLogs.push(trans("ブーメラン：エネルギー+1", languageMode));
+                currentLogs.push(trans("ブーメラン：エナジー+1", languageMode));
                 break;
             }
             case 'かいけつゾロリ': {
@@ -402,7 +402,7 @@ export const applyAdditionalCardLogic = (
             }
             case '奇跡のリボン': {
                 p.currentEnergy = p.maxEnergy;
-                currentLogs.push(trans("奇跡のリボン：エネルギーを全回復！", languageMode));
+                currentLogs.push(trans("奇跡のリボン：エナジーを全回復！", languageMode));
                 nextActiveEffects.push({ id: `vfx-ribbon-${Date.now()}`, type: 'BUFF', targetId: 'player' });
                 break;
             }
@@ -492,7 +492,7 @@ export const applyAdditionalCardLogic = (
 
             case '迷い犬の恩返し': {
                 p.nextTurnEnergy += 3;
-                currentLogs.push(trans(`恩返しで次のターン、エネルギー+3！`, languageMode));
+                currentLogs.push(trans(`恩返しで次のターン、エナジー+3！`, languageMode));
                 nextActiveEffects.push({ id: `vfx-dog-${Date.now()}`, type: 'BUFF', targetId: 'player' });
                 break;
             }

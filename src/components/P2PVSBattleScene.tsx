@@ -737,7 +737,7 @@ const P2PVSBattleScene: React.FC<P2PVSBattleSceneProps> = ({ player1, player2, i
         }
         if (card.id === 'SWORD_BOOMERANG') {
             nextCurrent.currentEnergy += 1;
-            addLog('ブーメラン: エネルギー+1');
+            addLog('ブーメラン: エナジー+1');
         }
 
         // 中優先: ブロック+ドロー系の差別化

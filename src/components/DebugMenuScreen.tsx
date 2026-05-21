@@ -13,6 +13,8 @@ import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
 import { ATTACK_EFFECT_LIST } from '../data/attackEffects';
 import { STATUS_EFFECT_LIST } from '../data/statusEffects';
+import { HIGH_SCHOOL_EVENT_THEMES } from '../data/visualThemes';
+import { assetUrl } from '../utils/assetPaths';
 import React, { useMemo, useState, useCallback } from 'react';
 
 interface DebugMenuScreenProps {
@@ -80,7 +82,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     nextMiniGameThreshold,
     languageMode: initialLanguageMode
 }) => {
-    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'SYSTEM' | 'EFFECTS' | 'TRANSLATION'>('CARDS');
+    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'SYSTEM' | 'EFFECTS' | 'EVENTS' | 'TRANSLATION'>('CARDS');
     const [searchTerm, setSearchTerm] = useState("");
     const [debugLanguageMode, setDebugLanguageMode] = useState<LanguageMode>(initialLanguageMode);
     const [transSubTab, setTransSubTab] = useState<'STORY' | 'FLAVOR' | 'CARD' | 'EVENT' | 'ENEMY' | 'MISSING'>('STORY');
@@ -268,6 +270,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                         <button onClick={() => setActiveTab('SYNTHESIS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'SYNTHESIS' ? 'bg-purple-900 text-white' : 'text-purple-400 hover:bg-gray-750'}`}>合成</button>
                         <button onClick={() => setActiveTab('SYSTEM')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'SYSTEM' ? 'bg-indigo-900 text-white' : 'text-indigo-400 hover:bg-gray-750'}`}>システム</button>
                         <button onClick={() => setActiveTab('EFFECTS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'EFFECTS' ? 'bg-orange-900 text-white' : 'text-orange-400 hover:bg-gray-750'}`}>エフェクト</button>
+                        <button onClick={() => setActiveTab('EVENTS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'EVENTS' ? 'bg-cyan-900 text-white' : 'text-cyan-400 hover:bg-gray-750'}`}>高校編イベント</button>
                         <button onClick={() => setActiveTab('TRANSLATION')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'TRANSLATION' ? 'bg-emerald-900 text-white' : 'text-emerald-400 hover:bg-gray-750'}`}>翻訳確認</button>
                     </div>
 
@@ -506,6 +509,35 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                             >
                                                 <Volume2 size={13} /> SE
                                             </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'EVENTS' && (
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between gap-3 border-b border-cyan-700/60 pb-3">
+                                    <h3 className="text-cyan-300 font-bold flex items-center">
+                                        <HelpCircle size={18} className="mr-2" /> 高校編イベント確認
+                                    </h3>
+                                    <div className="text-xs text-gray-400">{HIGH_SCHOOL_EVENT_THEMES.length}件</div>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                                    {HIGH_SCHOOL_EVENT_THEMES.map(event => (
+                                        <div key={event.imageIndex} className="bg-black/35 border border-gray-700 rounded-lg overflow-hidden">
+                                            <div className="aspect-video bg-slate-950 overflow-hidden">
+                                                <img
+                                                    src={assetUrl(`sprites/high-school/events/${event.imageIndex}.png`)}
+                                                    alt={event.title}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
+                                            <div className="p-3 space-y-1">
+                                                <div className="text-xs text-cyan-400 font-bold">#{event.imageIndex}</div>
+                                                <div className="font-bold text-white">{event.title}</div>
+                                                <div className="text-xs text-gray-300 leading-relaxed">{event.description}</div>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>

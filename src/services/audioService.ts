@@ -10,18 +10,28 @@ class AudioService {
   private isMuted: boolean = false;
   private isPlayingBGM: boolean = false;
   private isBgmPaused: boolean = false;
+  private hasUnlockedAudio: boolean = false;
+  private backgroundPlaybackEnabled: boolean = false;
   private isLooping: boolean = true;
   private currentBgmType: string | null = null;
   private bgmAdvanceMode: 'random' | 'sorted' = 'random';
   private bgmSequence: string[] = [];
   
-  // BGM Mode: Default to STUDY
-  private bgmMode: 'OSCILLATOR' | 'MP3' | 'STUDY' = 'STUDY';
+  private bgmMode: 'OSCILLATOR' | 'MP3' | 'STUDY' = 'MP3';
+  private bgmTheme: 'elementary' | 'high-school' = 'elementary';
   private bgmVolume: number = 0.4;
   private sfxVolume: number = 0.6;
   private audioBuffers: Record<string, AudioBuffer> = {};
   private sfxBuffers: Record<string, AudioBuffer> = {};
+  private sfxLoadPromises: Record<string, Promise<AudioBuffer | null> | undefined> = {};
+  private activeSfxSources: Map<string, Set<AudioBufferSourceNode>> = new Map();
+  private activeHtmlSfx: Map<string, Set<HTMLAudioElement>> = new Map();
+  private htmlSfxStopTimers: WeakMap<HTMLAudioElement, number> = new WeakMap();
+  private sfxPlaybackGenerations: Map<string, number> = new Map();
   private currentSource: AudioBufferSourceNode | null = null;
+  private currentHtmlAudio: HTMLAudioElement | null = null;
+  private activeBgmHtmlAudios: Set<HTMLAudioElement> = new Set();
+  private playbackGeneration: number = 0;
 
   // Sequencer State
   private nextNoteTime: number = 0;
@@ -118,6 +128,40 @@ class AudioService {
 
   public getBgmMode() {
       return this.bgmMode;
+  }
+
+  public async setBgmTheme(theme: 'elementary' | 'high-school') {
+      if (this.bgmTheme === theme) return;
+      this.bgmTheme = theme;
+      await this.restartCurrentBGM();
+  }
+
+  public setBackgroundPlaybackEnabled(enabled: boolean) {
+      this.backgroundPlaybackEnabled = enabled;
+  }
+
+  public isBackgroundPlaybackEnabled() {
+      return this.backgroundPlaybackEnabled;
+  }
+
+  public async unlockAudio() {
+      this.init();
+      if (!this.ctx) return;
+      if (this.ctx.state === 'suspended') {
+          await this.ctx.resume().catch(() => undefined);
+      }
+      if (!this.hasUnlockedAudio) {
+          this.hasUnlockedAudio = true;
+          await this.restartCurrentBGM();
+      }
+  }
+
+  private async restartCurrentBGM() {
+      if (!this.currentBgmType || !this.isPlayingBGM || this.bgmMode === 'STUDY') return;
+      const type = this.currentBgmType;
+      const loop = this.isLooping;
+      this.stopBGM();
+      await this.playBGM(type as any, loop);
   }
 
   public setBgmVolume(volume: number) {
@@ -711,6 +755,7 @@ class AudioService {
       if (this.isPlayingBGM && this.currentBgmType === type) return;
       this.init(); 
       this.stopBGM();
+      const playbackGeneration = this.playbackGeneration;
       this.currentBgmType = type;
       this.isPlayingBGM = true;
       this.isBgmPaused = false;
@@ -719,10 +764,16 @@ class AudioService {
       if (this.bgmMode === 'STUDY') return;
 
       if (this.bgmMode === 'MP3') {
-          await this.playMp3(type, loop);
+          await this.playMp3(type, loop, playbackGeneration);
       } else {
           this.playOscillatorBGM(type);
       }
+  }
+
+  public async switchThemeAndPlayBGM(theme: 'elementary' | 'high-school', type: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane_setup' | 'paper_plane_battle' | 'paper_plane_vacation' | 'relic_select' | 'kocho_setup' | 'kocho_battle' | 'kocho_boss', loop: boolean = true) {
+      this.bgmTheme = theme;
+      this.stopBGM();
+      await this.playBGM(type, loop);
   }
 
   public async playRandomBGM() {
@@ -755,12 +806,29 @@ class AudioService {
       await this.playBGM(sequence[nextIndex] as any, false);
   }
 
-  private async playMp3(type: string, loop: boolean) {
+  private async playMp3(type: string, loop: boolean, playbackGeneration: number) {
       if (!this.ctx || !this.bgmGain) return;
+      if (!this.isCurrentPlayback(type, playbackGeneration)) return;
+      const baseUrl = (import.meta as any).env.BASE_URL;
+      const themedPaths = this.bgmTheme === 'high-school'
+          ? [
+              `${baseUrl}bgm/high-school/${type}.mp3`,
+              `/bgm/high-school/${type}.mp3`,
+              `bgm/high-school/${type}.mp3`,
+          ]
+          : [];
+      const paths = [
+          ...themedPaths,
+          `${baseUrl}bgm/${type}.mp3`,
+          `/bgm/${type}.mp3`,
+          `bgm/${type}.mp3`,
+          `/${type}.mp3`,
+          `${type}.mp3`
+      ];
+      if (await this.playHtmlAudioMp3(paths, loop, type, playbackGeneration)) return;
+      if (!this.isCurrentPlayback(type, playbackGeneration)) return;
       let buffer = this.audioBuffers[type];
       if (!buffer) {
-          const baseUrl = (import.meta as any).env.BASE_URL;
-          const paths = [`${baseUrl}bgm/${type}.mp3`, `/bgm/${type}.mp3`, `bgm/${type}.mp3`, `/${type}.mp3`, `${type}.mp3` ];
           for (const path of paths) {
               try {
                   const response = await fetch(path);
@@ -774,10 +842,11 @@ class AudioService {
           }
       }
       if (!buffer) {
+          if (!this.isCurrentPlayback(type, playbackGeneration)) return;
           this.playOscillatorBGM(type);
           return;
       }
-      if (!this.isPlayingBGM || this.currentBgmType !== type) return;
+      if (!this.isCurrentPlayback(type, playbackGeneration)) return;
       if (this.bgmMode !== 'MP3') return;
 
       try {
@@ -801,7 +870,49 @@ class AudioService {
       }
   }
 
+  private async playHtmlAudioMp3(paths: string[], loop: boolean, type: string, playbackGeneration: number) {
+      for (const path of paths) {
+          try {
+              const audio = new Audio(path);
+              audio.preload = 'auto';
+              audio.loop = loop;
+              audio.volume = this.bgmVolume;
+              audio.onended = () => {
+                  if (this.isPlayingBGM && !loop) {
+                      if (this.bgmAdvanceMode === 'sorted') {
+                          this.playNextSequentialBGM();
+                      } else {
+                          this.playRandomBGM();
+                      }
+                  }
+              };
+              await audio.play();
+              if (!this.isCurrentPlayback(type, playbackGeneration)) {
+                  audio.pause();
+                  audio.currentTime = 0;
+                  return true;
+              }
+              this.currentHtmlAudio = audio;
+              this.activeBgmHtmlAudios.add(audio);
+              if ('mediaSession' in navigator) {
+                  navigator.mediaSession.playbackState = 'playing';
+              }
+              return true;
+          } catch {
+              // Try the next URL shape before falling back to synthesized BGM.
+          }
+      }
+      return false;
+  }
+
+  private isCurrentPlayback(type: string, playbackGeneration: number) {
+      return this.isPlayingBGM
+          && this.currentBgmType === type
+          && this.playbackGeneration === playbackGeneration;
+  }
+
   public stopBGM() {
+      this.playbackGeneration += 1;
       if (this.timerID) clearTimeout(this.timerID);
       this.timerID = null;
       if (this.currentSource) {
@@ -812,25 +923,57 @@ class AudioService {
           } catch(e) {}
           this.currentSource = null;
       }
+      if (this.currentHtmlAudio) {
+          this.currentHtmlAudio.onended = null;
+          this.currentHtmlAudio.pause();
+          this.currentHtmlAudio.currentTime = 0;
+          this.currentHtmlAudio = null;
+      }
+      this.activeBgmHtmlAudios.forEach(audio => {
+          try {
+              audio.onended = null;
+              audio.pause();
+              audio.currentTime = 0;
+          } catch {}
+      });
+      this.activeBgmHtmlAudios.clear();
       this.isPlayingBGM = false;
       this.isBgmPaused = false;
       this.currentBgmType = null;
+      if ('mediaSession' in navigator) {
+          navigator.mediaSession.playbackState = 'none';
+      }
   }
 
   public pauseBGM() {
       if (!this.ctx || !this.isPlayingBGM || this.isBgmPaused) return;
       this.ctx.suspend().catch(() => {});
+      this.currentHtmlAudio?.pause();
       this.isBgmPaused = true;
+      if ('mediaSession' in navigator) {
+          navigator.mediaSession.playbackState = 'paused';
+      }
   }
 
   public resumeBGM() {
       if (!this.ctx || !this.isPlayingBGM || !this.isBgmPaused) return;
       this.ctx.resume().catch(() => {});
+      this.currentHtmlAudio?.play().catch(() => {});
       this.isBgmPaused = false;
+      if ('mediaSession' in navigator) {
+          navigator.mediaSession.playbackState = 'playing';
+      }
   }
 
   public stopAllAudio() {
       this.stopBGM();
+      const activeSfxNames = new Set([
+          ...this.activeSfxSources.keys(),
+          ...this.activeHtmlSfx.keys(),
+      ]);
+      for (const name of activeSfxNames) {
+          this.stopActiveSfx(name);
+      }
       if (!this.ctx || !this.masterGain) return;
       if (this.sfxGain) {
           try {
@@ -872,30 +1015,13 @@ class AudioService {
       this.playNoise(t + 0.03, 0.2, 0.7, 'snare');
   }
 
-  private playSfxMp3(name: string, fallback: () => void) {
-      if (!this.ctx || !this.sfxGain) {
-          fallback();
-          return;
-      }
+  private async loadSfxBuffer(name: string) {
+      if (this.sfxBuffers[name]) return this.sfxBuffers[name];
+      if (this.sfxLoadPromises[name]) return this.sfxLoadPromises[name];
 
-      const cached = this.sfxBuffers[name];
-      if (cached) {
-          try {
-              const source = this.ctx.createBufferSource();
-              source.buffer = cached;
-              source.connect(this.sfxGain);
-              source.start(0);
-              return;
-          } catch {
-              fallback();
-              return;
-          }
-      }
-
-      const baseUrl = (import.meta as any).env.BASE_URL;
-      const paths = [`${baseUrl}sfx/${name}.mp3`, `/sfx/${name}.mp3`, `sfx/${name}.mp3`];
-
-      (async () => {
+      const promise = (async () => {
+          const baseUrl = (import.meta as any).env.BASE_URL;
+          const paths = [`${baseUrl}sfx/${name}.mp3`, `/sfx/${name}.mp3`, `sfx/${name}.mp3`];
           for (const path of paths) {
               try {
                   const response = await fetch(path);
@@ -903,19 +1029,148 @@ class AudioService {
                   const arrayBuffer = await response.arrayBuffer();
                   const buffer = await this.ctx!.decodeAudioData(arrayBuffer);
                   this.sfxBuffers[name] = buffer;
-                  const source = this.ctx!.createBufferSource();
-                  source.buffer = buffer;
-                  source.connect(this.sfxGain!);
-                  source.start(0);
-                  return;
+                  return buffer;
               } catch {}
           }
+          return null;
+      })();
+
+      this.sfxLoadPromises[name] = promise;
+      const buffer = await promise;
+      delete this.sfxLoadPromises[name];
+      return buffer;
+  }
+
+  private stopActiveSfx(name: string) {
+      const sources = this.activeSfxSources.get(name);
+      if (sources) {
+          for (const source of sources) {
+              try {
+                  source.onended = null;
+                  source.stop();
+                  source.disconnect();
+              } catch {}
+          }
+          this.activeSfxSources.delete(name);
+      }
+
+      const htmlAudios = this.activeHtmlSfx.get(name);
+      if (!htmlAudios) return;
+      for (const audio of htmlAudios) {
+          const timer = this.htmlSfxStopTimers.get(audio);
+          if (timer) window.clearTimeout(timer);
+          audio.onended = null;
+          audio.pause();
+          audio.currentTime = 0;
+      }
+      this.activeHtmlSfx.delete(name);
+  }
+
+  private startSfxSource(name: string, buffer: AudioBuffer, maxDurationMs: number, overlap: boolean) {
+      if (!this.ctx || !this.sfxGain) return false;
+      if (!overlap) this.stopActiveSfx(name);
+      try {
+          const source = this.ctx.createBufferSource();
+          source.buffer = buffer;
+          source.connect(this.sfxGain);
+          const sources = this.activeSfxSources.get(name) ?? new Set<AudioBufferSourceNode>();
+          sources.add(source);
+          this.activeSfxSources.set(name, sources);
+          source.onended = () => {
+              sources.delete(source);
+              if (sources.size === 0) this.activeSfxSources.delete(name);
+              try {
+                  source.disconnect();
+              } catch {}
+          };
+          source.start(0);
+          source.stop(this.ctx.currentTime + Math.min(buffer.duration, maxDurationMs / 1000));
+          return true;
+      } catch {
+          return false;
+      }
+  }
+
+  private async playHtmlSfx(
+      name: string,
+      paths: string[],
+      maxDurationMs: number,
+      overlap: boolean,
+      generation: number,
+  ) {
+      for (const path of paths) {
+          try {
+              const audio = new Audio(path);
+              audio.preload = 'auto';
+              audio.volume = this.sfxVolume;
+              await audio.play();
+              if (!overlap && this.sfxPlaybackGenerations.get(name) !== generation) {
+                  audio.pause();
+                  audio.currentTime = 0;
+                  return true;
+              }
+              if (!overlap) this.stopActiveSfx(name);
+
+              const audios = this.activeHtmlSfx.get(name) ?? new Set<HTMLAudioElement>();
+              audios.add(audio);
+              this.activeHtmlSfx.set(name, audios);
+              const cleanup = () => {
+                  const timer = this.htmlSfxStopTimers.get(audio);
+                  if (timer) window.clearTimeout(timer);
+                  audios.delete(audio);
+                  if (audios.size === 0) this.activeHtmlSfx.delete(name);
+              };
+              audio.onended = cleanup;
+              const timer = window.setTimeout(() => {
+                  audio.pause();
+                  audio.currentTime = 0;
+                  cleanup();
+              }, maxDurationMs);
+              this.htmlSfxStopTimers.set(audio, timer);
+              return true;
+          } catch {
+              // Try the next URL shape before falling back to WebAudio or synth.
+          }
+      }
+      return false;
+  }
+
+  private playSfxMp3(name: string, fallback: () => void, options?: { maxDurationMs?: number; overlap?: boolean }) {
+      this.init();
+      if (!this.ctx || !this.sfxGain) {
           fallback();
+          return;
+      }
+
+      this.ctx.resume().catch(() => {});
+      const maxDurationMs = options?.maxDurationMs ?? 1400;
+      const overlap = options?.overlap ?? false;
+      const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
+      this.sfxPlaybackGenerations.set(name, generation);
+      const baseUrl = (import.meta as any).env.BASE_URL;
+      const paths = [`${baseUrl}sfx/${name}.mp3`, `/sfx/${name}.mp3`, `sfx/${name}.mp3`];
+
+      void (async () => {
+          if (await this.playHtmlSfx(name, paths, maxDurationMs, overlap, generation)) return;
+          if (!overlap && this.sfxPlaybackGenerations.get(name) !== generation) return;
+
+          const cached = this.sfxBuffers[name];
+          if (cached) {
+              if (!this.startSfxSource(name, cached, maxDurationMs, overlap)) fallback();
+              return;
+          }
+
+          const buffer = await this.loadSfxBuffer(name);
+          if (!overlap && this.sfxPlaybackGenerations.get(name) !== generation) return;
+          if (!buffer || !this.startSfxSource(name, buffer, maxDurationMs, overlap)) fallback();
       })();
   }
 
   private playAttackSlashSfx() {
-      this.playSfxMp3('attack-effects/slash', () => this.playAttackSynth(this.ctx!.currentTime));
+      this.playSfxMp3('attack-effects/slash', () => this.playAttackSynth(this.ctx!.currentTime), {
+          maxDurationMs: 320,
+          overlap: true,
+      });
   }
 
   public playAttackSlashSequence(hitCount: number, intervalMs: number = 80) {
@@ -951,7 +1206,7 @@ class AudioService {
           this.playAttackSlashSequence(hitCount, 80);
           return;
       }
-      this.playSfxMp3(`attack-effects/${effect}`, fallbackByEffect[effect]);
+      this.playSfxMp3(`attack-effects/${effect}`, fallbackByEffect[effect], { maxDurationMs: 1400 });
   }
 
   public playStatusEffectSound(effect: StatusEffectKey) {
@@ -967,19 +1222,16 @@ class AudioService {
       };
       this.init();
       if (!this.ctx || !this.sfxGain || this.isMuted) return;
-      this.playSfxMp3(`status-effects/${effect}`, fallbackByEffect[effect]);
+      this.playSfxMp3(`status-effects/${effect}`, fallbackByEffect[effect], { maxDurationMs: 1400 });
   }
 
-  public playSound(effect: 'select' | 'jump' | 'attack' | 'block' | 'win' | 'lose' | 'correct' | 'wrong' | 'buff' | 'debuff' | 'damage' | 'explosion' | 'finisher_slash' | 'finisher_explosion') {
+  public playSound(effect: 'select' | 'attack' | 'block' | 'win' | 'lose' | 'correct' | 'wrong' | 'buff' | 'debuff' | 'damage' | 'explosion' | 'finisher_slash' | 'finisher_explosion') {
       this.init();
       if (!this.ctx || !this.sfxGain || this.isMuted) return;
       const t = this.ctx.currentTime;
       switch(effect) {
           case 'select':
               this.playOsc(1100, t, 0.05, 'triangle', 0.2, this.sfxGain);
-              break;
-          case 'jump':
-              this.playSfxMp3('jump', () => this.playOsc(880, this.ctx!.currentTime, 0.08, 'triangle', 0.2, this.sfxGain!));
               break;
           case 'attack':
               this.playAttackSynth(t);
@@ -1044,10 +1296,10 @@ class AudioService {
               this.playExplosionSynth(t);
               break;
           case 'finisher_slash':
-              this.playSfxMp3('finisher-slash', () => this.playAttackSynth(this.ctx!.currentTime));
+              this.playSfxMp3('finisher-slash', () => this.playAttackSynth(this.ctx!.currentTime), { maxDurationMs: 900 });
               break;
           case 'finisher_explosion':
-              this.playSfxMp3('finisher-explosion', () => this.playExplosionSynth(this.ctx!.currentTime));
+              this.playSfxMp3('finisher-explosion', () => this.playExplosionSynth(this.ctx!.currentTime), { maxDurationMs: 1500 });
               break;
       }
   }

@@ -5,6 +5,7 @@ import EnemyIllustration from './EnemyIllustration';
 import { trans } from '../utils/textUtils';
 import { getCardIllustrationPaths } from '../utils/cardIllustration';
 import { getStatusCategoryLabel, getStatusCategoryClass } from '../utils/cardUtils';
+import { assetUrl } from '../utils/assetPaths';
 
 interface CardProps {
   card: CardType;
@@ -179,6 +180,41 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
   };
 
   const renderCardArt = () => {
+    if (card.familiarSummon) {
+      return (
+        <div className="relative h-full w-full overflow-hidden bg-[radial-gradient(circle_at_55%_45%,rgba(236,72,153,0.32),rgba(15,23,42,0.78)_55%,rgba(0,0,0,0.95))]">
+          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(248,250,252,0.18),transparent_28%,rgba(239,68,68,0.22)_52%,transparent_70%)]" />
+          <img
+            src={assetUrl(`sprites/high-school/familiars-action/${card.familiarSummon.imageIndex}.webp`)}
+            alt={card.familiarSummon.name}
+            className="absolute left-1/2 top-[18%] h-[205%] w-[205%] -translate-x-1/2 -translate-y-1/2 object-contain opacity-100 drop-shadow-[0_0_12px_rgba(244,114,182,0.85)]"
+            style={{ transform: 'translate(-50%, -50%)' }}
+          />
+        </div>
+      );
+    }
+
+    if (card.visualTheme === 'high-school' && imageIndex < imageCandidates.length) {
+      return (
+        <img
+          src={imageCandidates[imageIndex]}
+          alt={translatedCardName}
+          className="w-full h-full object-cover opacity-95 drop-shadow-md"
+          onError={() => setImageIndex((prev) => prev + 1)}
+        />
+      );
+    }
+
+    if (card.highSchoolCardArtIndex !== undefined) {
+      return (
+        <img
+          src={assetUrl(`sprites/high-school/cards/${card.highSchoolCardArtIndex}.webp`)}
+          alt={translatedCardName}
+          className="w-full h-full object-cover opacity-95 drop-shadow-md"
+        />
+      );
+    }
+
     if (compositeIllustrationRefs.length > 1) {
       const sliceWidth = `${100 / compositeIllustrationRefs.length}%`;
       return (

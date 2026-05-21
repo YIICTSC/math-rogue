@@ -9,19 +9,28 @@ interface FinalBridgeScreenProps {
   player: Player;
   onComplete: (upgradeType: 'HEAL' | 'APOTHEOSIS' | 'STRENGTH') => void;
   languageMode: LanguageMode;
+  visualTheme?: 'elementary' | 'high-school';
 }
 
-const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplete, languageMode }) => {
+const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplete, languageMode, visualTheme = 'elementary' }) => {
   const [step, setStep] = useState(0);
   const [showChoices, setShowChoices] = useState(false);
 
-  const storyTexts = [
+  const elementaryStoryTexts = [
     "ついに、校舎の最上階へと続く『最後の渡り廊下』にたどり着いた...",
     "背後には、これまでに乗り越えてきた数々のテストや宿題の記憶が遠ざかっていく。",
     "前方にそびえ立つ重厚な扉の向こうには、この学校の全てを統べる『校長先生』が待っている。",
     "「君はよく頑張った。だが、本当の試験はこれからだ...」",
     "心の中に、かつてない勇気が湧き上がってくる。最後の準備を整えよう。"
   ];
+  const highSchoolStoryTexts = [
+    "夜の校舎をつなぐガラス張りのブリッジに、街の光が反射している。",
+    "背後には、噂、試験、進路、そして使い魔たちと越えてきた放課後の記憶が残っている。",
+    "前方の特別棟には、学園の未来を一つの型へ押し込めようとする『校長』が待っている。",
+    "「自由な選択は混乱を生む。だから私が、全員の正解を決める」",
+    "その言葉に従えば安全かもしれない。けれど、自分の答えを選ぶために、最後の準備を整えよう。"
+  ];
+  const storyTexts = visualTheme === 'high-school' ? highSchoolStoryTexts : elementaryStoryTexts;
 
   useEffect(() => {
     audioService.playBGM('event');

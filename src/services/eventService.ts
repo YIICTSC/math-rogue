@@ -6,6 +6,7 @@ import { trans } from '../utils/textUtils';
 import { LanguageMode } from '../types';
 import { getUpgradedCard } from '../utils/cardUtils';
 import { ADDITIONAL_CARDS } from '../constants1';
+import { getHighSchoolEventTheme, type VisualThemeId } from '../data/visualThemes';
 
 interface EventOption {
     label: string;
@@ -17,6 +18,7 @@ interface GameEvent {
     title: string;
     description: string;
     options: EventOption[];
+    imageKey?: string;
 }
 
 const healPlayer = (player: Player, amount: number): Player => ({
@@ -221,10 +223,16 @@ export const generateEvent = (
     setEventResultLog: (log: string | null) => void,
     languageMode: LanguageMode,
     unlockedCardNames: string[],
-    preferredEventTitle?: string
+    preferredEventTitle?: string,
+    visualTheme: VisualThemeId = 'elementary'
 ): GameEvent => {
     let activeEventTitle: string | null = null;
-    const finalizeEvent = (event: GameEvent): GameEvent => ({
+    const finalizeEvent = (event: GameEvent): GameEvent => {
+        const themedEvent = visualTheme === 'high-school'
+            ? getHighSchoolEventTheme(event.title)
+            : null;
+        if (themedEvent) return buildHighSchoolEvent(event);
+        return {
         ...event,
         options: event.options.map(option => ({
             ...option,
@@ -238,7 +246,8 @@ export const generateEvent = (
                 }
             }
         }))
-    });
+    };
+    };
 
     const resolveMomentum = (seed: string, flavor: string, listedEffectOption = false): void => {
         const preview = applyEventSpark(player, seed);
@@ -249,6 +258,376 @@ export const generateEvent = (
         const resultMessage = buildEventSparkMessage(activeEventTitle, preview);
         const prefix = listedEffectOption ? '' : `${flavor}\n`;
         setEventResultLog(trans(`${prefix}${resultMessage}`, languageMode));
+    };
+
+    type HighSchoolEffect =
+        | { kind: 'gold'; amount: number }
+        | { kind: 'heal'; amount: number }
+        | { kind: 'maxHp'; amount: number }
+        | { kind: 'strength'; amount: number }
+        | { kind: 'upgrade' }
+        | { kind: 'skillCard' }
+        | { kind: 'potion'; potionId: keyof typeof POTION_LIBRARY }
+        | { kind: 'momentum' };
+
+    const highSchoolChoices: Record<number, Array<{ label: string; text: string; result: string; effect: HighSchoolEffect }>> = {
+        0: [
+            { label: '残って勉強する', text: 'カードを1枚強化する', result: '静かな机で復習が進んだ。', effect: { kind: 'upgrade' } },
+            { label: '少し仮眠する', text: 'HPを12回復する', result: '短い仮眠で頭が冴えた。', effect: { kind: 'heal', amount: 12 } },
+            { label: '机を片付ける', text: '小さな成果を得る', result: '机まわりを整えると、次の一手も見えやすくなった。', effect: { kind: 'momentum' } },
+        ],
+        1: [
+            { label: '深呼吸する', text: '最大HP+2', result: '冷たい風で腹が据わった。', effect: { kind: 'maxHp', amount: 2 } },
+            { label: '夕景をメモする', text: 'カードを1枚強化する', result: '考えが整理され、ノートの要点がつながった。', effect: { kind: 'upgrade' } },
+            { label: 'すぐ戻る', text: '25Gを得る', result: '忘れていた小遣い袋を鞄で見つけた。', effect: { kind: 'gold', amount: 25 } },
+        ],
+        2: [
+            { label: '答案を見直す', text: 'カードを1枚強化する', result: '間違いの癖を一つ潰した。', effect: { kind: 'upgrade' } },
+            { label: '苦手だけ復習する', text: '恒久ムキムキ+1', result: '弱点を直視したぶん、次の勝負に強くなった。', effect: { kind: 'strength', amount: 1 } },
+            { label: 'いったんしまう', text: 'HPを8回復する', result: '気持ちを切り替え、肩の力が抜けた。', effect: { kind: 'heal', amount: 8 } },
+        ],
+        3: [
+            { label: '飾り付けを進める', text: '35Gを得る', result: '段取りの良さを買われ、謝礼を受け取った。', effect: { kind: 'gold', amount: 35 } },
+            { label: '会計を手伝う', text: 'カードを1枚強化する', result: '数字を追ううちに、手札の扱いも洗練された。', effect: { kind: 'upgrade' } },
+            { label: '休憩を入れる', text: 'HPを10回復する', result: '教室の隅で一息ついた。', effect: { kind: 'heal', amount: 10 } },
+        ],
+        4: [
+            { label: 'ポスターを読む', text: '小さな成果を得る', result: '掲示を見比べるうちに、今の自分に必要なことが見えた。', effect: { kind: 'momentum' } },
+            { label: '体験入部の紙を取る', text: 'スキルカードを1枚得る', result: '新しい活動の要領を覚えた。', effect: { kind: 'skillCard' } },
+            { label: '廊下を抜ける', text: '20Gを得る', result: '落ちていた購買券を拾って届け、謝礼をもらった。', effect: { kind: 'gold', amount: 20 } },
+        ],
+        5: [
+            { label: '換気する', text: 'HPを10回復する', result: '空気が入れ替わり、むせ返る匂いが消えた。', effect: { kind: 'heal', amount: 10 } },
+            { label: '残った試料を調べる', text: 'ポーションを得る', result: '安全な分だけ小瓶に分けた。', effect: { kind: 'potion', potionId: 'STRENGTH_POTION' } },
+            { label: '記録を残す', text: 'カードを1枚強化する', result: '事故の経過を整理し、使える知見に変えた。', effect: { kind: 'upgrade' } },
+        ],
+        6: [
+            { label: '軽食を買う', text: 'HPを14回復する', result: '温かい軽食で空腹が落ち着いた。', effect: { kind: 'heal', amount: 14 } },
+            { label: '栄養ドリンクを選ぶ', text: 'ポーションを得る', result: '棚から集中用の一本を選んだ。', effect: { kind: 'potion', potionId: 'ENERGY_POTION' } },
+            { label: 'ポイントを使う', text: '30Gを得る', result: '貯まっていたポイントを換金した。', effect: { kind: 'gold', amount: 30 } },
+        ],
+        7: [
+            { label: '資料を分類する', text: 'カードを1枚強化する', result: '山積みの資料を整理し、判断も速くなった。', effect: { kind: 'upgrade' } },
+            { label: '予算案を読む', text: '40Gを得る', result: '無駄を一つ見つけ、協力費を受け取った。', effect: { kind: 'gold', amount: 40 } },
+            { label: '会議の空気を整える', text: '最大HP+2', result: '面倒な場をさばいて、少し肝が据わった。', effect: { kind: 'maxHp', amount: 2 } },
+        ],
+        8: [
+            { label: '雨宿りする', text: 'HPを10回復する', result: '雨脚が弱まるまで休んだ。', effect: { kind: 'heal', amount: 10 } },
+            { label: '雨音を聞く', text: '小さな成果を得る', result: '単調な雨音で思考が整った。', effect: { kind: 'momentum' } },
+            { label: '傘立てを整える', text: '25Gを得る', result: '落とし主から礼を受け取った。', effect: { kind: 'gold', amount: 25 } },
+        ],
+        9: [
+            { label: 'ノートを整える', text: 'カードを1枚強化する', result: '机に向かうと、今日の学びが一本につながった。', effect: { kind: 'upgrade' } },
+            { label: '窓を開ける', text: 'HPを10回復する', result: '夕方の風で、教室の空気が入れ替わった。', effect: { kind: 'heal', amount: 10 } },
+            { label: '明日の準備をする', text: '小さな成果を得る', result: '先に段取りを済ませると、気持ちに余白ができた。', effect: { kind: 'momentum' } },
+        ],
+        10: [
+            { label: '譜面を整える', text: 'カードを1枚強化する', result: 'ばらけた譜面を並べると、手順の癖も見えた。', effect: { kind: 'upgrade' } },
+            { label: '一曲だけ弾く', text: '恒久ムキムキ+1', result: '指が温まり、気持ちも前へ出た。', effect: { kind: 'strength', amount: 1 } },
+            { label: '静けさを味わう', text: 'HPを12回復する', result: '余韻の中で疲れがほどけた。', effect: { kind: 'heal', amount: 12 } },
+        ],
+        11: [
+            { label: '忘れ物を届ける', text: '35Gを得る', result: '持ち主に届け、礼を受け取った。', effect: { kind: 'gold', amount: 35 } },
+            { label: '軽くストレッチする', text: '最大HP+2', result: '固まっていた体がほぐれた。', effect: { kind: 'maxHp', amount: 2 } },
+            { label: '備品を整える', text: '小さな成果を得る', result: '誰も見ていない片付けが、妙に気分を整えた。', effect: { kind: 'momentum' } },
+        ],
+        12: [
+            { label: '読みかけの本を開く', text: 'スキルカードを1枚得る', result: '一節が思わぬ発想をくれた。', effect: { kind: 'skillCard' } },
+            { label: '調べ物を進める', text: 'カードを1枚強化する', result: '必要なページに辿り着いた。', effect: { kind: 'upgrade' } },
+            { label: '灯りを消して帰る', text: 'HPを8回復する', result: '区切りをつけると、気持ちが軽くなった。', effect: { kind: 'heal', amount: 8 } },
+        ],
+        13: [
+            { label: 'サドルを拭く', text: '25Gを得る', result: '困っていた生徒を手伝い、礼を受け取った。', effect: { kind: 'gold', amount: 25 } },
+            { label: '雨粒を払う', text: 'HPを10回復する', result: '冷たい空気で頭がすっきりした。', effect: { kind: 'heal', amount: 10 } },
+            { label: '帰り道を考える', text: '小さな成果を得る', result: '濡れた道を見ながら、次の動きが自然に整理できた。', effect: { kind: 'momentum' } },
+        ],
+        14: [
+            { label: '少し横になる', text: 'HPを16回復する', result: '短く休んで、だいぶ持ち直した。', effect: { kind: 'heal', amount: 16 } },
+            { label: '薬箱を整理する', text: 'ポーションを得る', result: '使える備品を一つ分けてもらった。', effect: { kind: 'potion', potionId: 'BLOCK_POTION' } },
+            { label: '体調メモを書く', text: '最大HP+2', result: '自分の限界を把握し、無理の線引きが上手くなった。', effect: { kind: 'maxHp', amount: 2 } },
+        ],
+        15: [
+            { label: '色を足す', text: '恒久ムキムキ+1', result: '一筆入れる覚悟が、そのまま力になった。', effect: { kind: 'strength', amount: 1 } },
+            { label: '道具を洗う', text: '25Gを得る', result: '丁寧な片付けを見込まれ、材料費の残りを託された。', effect: { kind: 'gold', amount: 25 } },
+            { label: 'しばらく眺める', text: '小さな成果を得る', result: '未完成の絵を見ていると、自分の次の手も浮かんだ。', effect: { kind: 'momentum' } },
+        ],
+        16: [
+            { label: '靴を並べ直す', text: '25Gを得る', result: '落とし物の持ち主から礼を受けた。', effect: { kind: 'gold', amount: 25 } },
+            { label: '風に当たる', text: 'HPを10回復する', result: '涼しい風で熱が引いた。', effect: { kind: 'heal', amount: 10 } },
+            { label: '明日の予定を確認する', text: 'カードを1枚強化する', result: '明日の段取りが見え、動きが洗練された。', effect: { kind: 'upgrade' } },
+        ],
+        17: [
+            { label: 'ベンチで待つ', text: 'HPを12回復する', result: '夜風に当たりながら、電車を待った。', effect: { kind: 'heal', amount: 12 } },
+            { label: '時刻表を確認する', text: '40Gを得る', result: '乗り継ぎを見直し、余った交通費が残った。', effect: { kind: 'gold', amount: 40 } },
+            { label: '考えをまとめる', text: '小さな成果を得る', result: 'ホームの静けさで、次にやることが整理できた。', effect: { kind: 'momentum' } },
+        ],
+        18: [
+            { label: '写真を撮る', text: 'HPを10回復する', result: '春の景色を残すと、肩の力が抜けた。', effect: { kind: 'heal', amount: 10 } },
+            { label: '式次第を確認する', text: 'カードを1枚強化する', result: '最初の段取りを把握し、動きが整った。', effect: { kind: 'upgrade' } },
+            { label: '新入生を案内する', text: '25Gを得る', result: '迷っていた後輩を助け、礼を受けた。', effect: { kind: 'gold', amount: 25 } },
+        ],
+        19: [
+            { label: '話を聞いて回る', text: 'スキルカードを1枚得る', result: 'いくつもの勧誘を聞き、新しい要領を覚えた。', effect: { kind: 'skillCard' } },
+            { label: 'チラシ配りを手伝う', text: '35Gを得る', result: '先輩に手際を買われ、差し入れ代をもらった。', effect: { kind: 'gold', amount: 35 } },
+            { label: '少し距離を置く', text: '小さな成果を得る', result: '喧騒を眺めるうち、自分に合う場所が見えてきた。', effect: { kind: 'momentum' } },
+        ],
+        20: [
+            { label: '前列を引く', text: '最大HP+2', result: '逃げ場のない席を引き、腹が据わった。', effect: { kind: 'maxHp', amount: 2 } },
+            { label: '友人と笑う', text: 'HPを8回復する', result: 'どの席でも何とかなる気がしてきた。', effect: { kind: 'heal', amount: 8 } },
+            { label: '席表を書き直す', text: 'カードを1枚強化する', result: '配置を整理しながら、自分の手も整えた。', effect: { kind: 'upgrade' } },
+        ],
+        21: [
+            { label: '弁当を分ける', text: 'HPを14回復する', result: '笑いながら食べる昼食は、思った以上に効いた。', effect: { kind: 'heal', amount: 14 } },
+            { label: '進路の話をする', text: '小さな成果を得る', result: '他人の言葉で、自分の考えも少し輪郭を持った。', effect: { kind: 'momentum' } },
+            { label: '昼休みに復習する', text: 'カードを1枚強化する', result: '短い時間をうまく使えた。', effect: { kind: 'upgrade' } },
+        ],
+        22: [
+            { label: '傘に入る', text: 'HPを10回復する', result: '雨を避けるだけで、気持ちまで少し軽くなった。', effect: { kind: 'heal', amount: 10 } },
+            { label: '予備の傘を貸す', text: '25Gを得る', result: '翌日、丁寧なお礼が返ってきた。', effect: { kind: 'gold', amount: 25 } },
+            { label: '雨脚を読む', text: '小さな成果を得る', result: '待つべき時を見極める感覚が磨かれた。', effect: { kind: 'momentum' } },
+        ],
+        23: [
+            { label: '添削を読み込む', text: 'カードを1枚強化する', result: '赤字の意図がつながり、理解が深まった。', effect: { kind: 'upgrade' } },
+            { label: '質問する', text: 'スキルカードを1枚得る', result: '一歩踏み込んだ問いで、新しい視点を得た。', effect: { kind: 'skillCard' } },
+            { label: '礼を言う', text: '最大HP+2', result: '素直に受け取る強さが少し身についた。', effect: { kind: 'maxHp', amount: 2 } },
+        ],
+        24: [
+            { label: '議事録を取る', text: 'カードを1枚強化する', result: '話の流れを追ううち、判断が速くなった。', effect: { kind: 'upgrade' } },
+            { label: '予算を確認する', text: '40Gを得る', result: '余剰費を見つけ、協力分を受け取った。', effect: { kind: 'gold', amount: 40 } },
+            { label: '意見を出す', text: '恒久ムキムキ+1', result: '場に声を置いたことで、少し前へ出られた。', effect: { kind: 'strength', amount: 1 } },
+        ],
+        25: [
+            { label: '丁寧に掃く', text: 'HPを10回復する', result: '単調な動きで呼吸が整った。', effect: { kind: 'heal', amount: 10 } },
+            { label: '落ち葉を集める', text: '25Gを得る', result: '作業を見ていた教師から差し入れ代をもらった。', effect: { kind: 'gold', amount: 25 } },
+            { label: '季節を惜しむ', text: '小さな成果を得る', result: '終わるものを見送る余裕ができた。', effect: { kind: 'momentum' } },
+        ],
+        26: [
+            { label: '差出人を探す', text: 'スキルカードを1枚得る', result: '手がかりを追ううち、観察眼が冴えた。', effect: { kind: 'skillCard' } },
+            { label: '返事を書く', text: 'カードを1枚強化する', result: '言葉を選ぶ中で、自分の考えも研ぎ澄まされた。', effect: { kind: 'upgrade' } },
+            { label: 'そっと戻す', text: 'HPを8回復する', result: '踏み込みすぎない選択に、心が少し静まった。', effect: { kind: 'heal', amount: 8 } },
+        ],
+        27: [
+            { label: '全力で走る', text: '恒久ムキムキ+1', result: '最後まで脚を緩めず、体に芯が通った。', effect: { kind: 'strength', amount: 1 } },
+            { label: '応援に回る', text: 'HPを10回復する', result: '声を出しているうちに、気分まで晴れた。', effect: { kind: 'heal', amount: 10 } },
+            { label: 'バトンを磨く', text: 'カードを1枚強化する', result: '受け渡しを見直し、手順が洗練された。', effect: { kind: 'upgrade' } },
+        ],
+        28: [
+            { label: '氷を削る', text: '25Gを得る', result: '手際の良さを見込まれ、売上の一部を任された。', effect: { kind: 'gold', amount: 25 } },
+            { label: '味見する', text: 'HPを12回復する', result: '冷たさで一気に生き返った。', effect: { kind: 'heal', amount: 12 } },
+            { label: '段取りを組む', text: '小さな成果を得る', result: '混雑を想像して、先回りの感覚を得た。', effect: { kind: 'momentum' } },
+        ],
+        29: [
+            { label: '教え合う', text: 'スキルカードを1枚得る', result: '説明することで、自分の理解も深まった。', effect: { kind: 'skillCard' } },
+            { label: '要点をまとめる', text: 'カードを1枚強化する', result: '散らばった知識が、使える形にまとまった。', effect: { kind: 'upgrade' } },
+            { label: '休憩を促す', text: 'HPを10回復する', result: '全員で一息つき、集中力が戻った。', effect: { kind: 'heal', amount: 10 } },
+        ],
+        30: [
+            { label: '風を入れる', text: 'HPを10回復する', result: '熱気が抜け、頭の中まで少し涼しくなった。', effect: { kind: 'heal', amount: 10 } },
+            { label: '夏の句を考える', text: '小さな成果を得る', result: '音を言葉にするうち、思考が整った。', effect: { kind: 'momentum' } },
+            { label: '短く復習する', text: 'カードを1枚強化する', result: 'だるさの中でも、一歩だけ進めた。', effect: { kind: 'upgrade' } },
+        ],
+        31: [
+            { label: '水分を取る', text: 'HPを14回復する', result: '冷たい水が体の奥まで染みた。', effect: { kind: 'heal', amount: 14 } },
+            { label: 'フォームを見直す', text: 'カードを1枚強化する', result: '無駄な動きが一つ減った。', effect: { kind: 'upgrade' } },
+            { label: '後輩に教える', text: '最大HP+2', result: '人に伝えることで、自信も少し増した。', effect: { kind: 'maxHp', amount: 2 } },
+        ],
+        32: [
+            { label: '最後まで見る', text: 'HPを12回復する', result: '夜空の光を見上げ、心がゆるんだ。', effect: { kind: 'heal', amount: 12 } },
+            { label: '写真を撮る', text: '25Gを得る', result: '良い一枚が撮れ、後で譲って礼を受けた。', effect: { kind: 'gold', amount: 25 } },
+            { label: '願いを決める', text: '小さな成果を得る', result: '言葉にしない目標が、少しだけ固まった。', effect: { kind: 'momentum' } },
+        ],
+        33: [
+            { label: '譜面を読む', text: 'カードを1枚強化する', result: '全体の流れが見え、手も迷わなくなった。', effect: { kind: 'upgrade' } },
+            { label: '合奏に混ざる', text: '恒久ムキムキ+1', result: '音を合わせる緊張で、背筋が伸びた。', effect: { kind: 'strength', amount: 1 } },
+            { label: '片付けを手伝う', text: '25Gを得る', result: '顧問から差し入れ代を預かった。', effect: { kind: 'gold', amount: 25 } },
+        ],
+        34: [
+            { label: '冷たい飲み物を買う', text: 'HPを12回復する', result: '喉が潤い、夕方の疲れが抜けた。', effect: { kind: 'heal', amount: 12 } },
+            { label: '新商品を試す', text: 'ポーションを得る', result: '妙に効きそうな一本を見つけた。', effect: { kind: 'potion', potionId: 'ENERGY_POTION' } },
+            { label: '寄り道の相談をする', text: '小さな成果を得る', result: '雑談の中で、次の予定が自然に決まった。', effect: { kind: 'momentum' } },
+        ],
+        35: [
+            { label: '雨宿りする', text: 'HPを10回復する', result: '雨音を聞いているうち、焦りが薄れた。', effect: { kind: 'heal', amount: 10 } },
+            { label: '自転車を拭く', text: '25Gを得る', result: '困っていた生徒に感謝された。', effect: { kind: 'gold', amount: 25 } },
+            { label: '空模様を読む', text: '小さな成果を得る', result: '待つべき時を見極める感覚が少し冴えた。', effect: { kind: 'momentum' } },
+        ],
+        36: [
+            { label: '大道具を組む', text: '恒久ムキムキ+1', result: '重い板を運び切り、腕に自信がついた。', effect: { kind: 'strength', amount: 1 } },
+            { label: '設計を見直す', text: 'カードを1枚強化する', result: '導線を整えると、手順もすっきりした。', effect: { kind: 'upgrade' } },
+            { label: '演出を考える', text: '小さな成果を得る', result: '驚かせ方を考えるうち、発想が広がった。', effect: { kind: 'momentum' } },
+        ],
+        37: [
+            { label: '色を拾う', text: 'カードを1枚強化する', result: '葉の色を見比べ、観察が深まった。', effect: { kind: 'upgrade' } },
+            { label: '静かに描く', text: 'HPを10回復する', result: '手を動かす時間で、心が落ち着いた。', effect: { kind: 'heal', amount: 10 } },
+            { label: '友人の絵を見る', text: '小さな成果を得る', result: '別の見方に触れ、自分の視界も広がった。', effect: { kind: 'momentum' } },
+        ],
+        38: [
+            { label: '志望を話す', text: '最大HP+2', result: '口に出したぶん、覚悟が少し固まった。', effect: { kind: 'maxHp', amount: 2 } },
+            { label: '資料を読む', text: 'カードを1枚強化する', result: '必要な条件が整理できた。', effect: { kind: 'upgrade' } },
+            { label: '別案も聞く', text: 'スキルカードを1枚得る', result: '思いがけない選択肢を知った。', effect: { kind: 'skillCard' } },
+        ],
+        39: [
+            { label: '荷物を運ぶ', text: '恒久ムキムキ+1', result: '重い鞄を手伝い、足腰に力が入った。', effect: { kind: 'strength', amount: 1 } },
+            { label: 'しおりを確認する', text: 'カードを1枚強化する', result: '行程を頭に入れ、動きが滑らかになった。', effect: { kind: 'upgrade' } },
+            { label: '売店を見る', text: '25Gを得る', result: '余った小銭をうまくやりくりできた。', effect: { kind: 'gold', amount: 25 } },
+        ],
+        40: [
+            { label: '素振りを続ける', text: '恒久ムキムキ+1', result: '夕日が沈むまで、振りを崩さなかった。', effect: { kind: 'strength', amount: 1 } },
+            { label: '球拾いを手伝う', text: '25Gを得る', result: '監督から飲み物代を渡された。', effect: { kind: 'gold', amount: 25 } },
+            { label: 'フォームを観察する', text: 'カードを1枚強化する', result: '良い動きを盗み、自分の手札にも活かした。', effect: { kind: 'upgrade' } },
+        ],
+        41: [
+            { label: '味見をする', text: 'HPを12回復する', result: '焼きたての甘さで元気が戻った。', effect: { kind: 'heal', amount: 12 } },
+            { label: '分量を量る', text: 'カードを1枚強化する', result: '正確さを意識し、手順が安定した。', effect: { kind: 'upgrade' } },
+            { label: '余りを売る', text: '35Gを得る', result: '好評で、材料費以上の売上になった。', effect: { kind: 'gold', amount: 35 } },
+        ],
+        42: [
+            { label: '質問を受ける', text: '最大HP+2', result: '自分の考えを言葉にし、少し肝が据わった。', effect: { kind: 'maxHp', amount: 2 } },
+            { label: '記事を読む', text: 'スキルカードを1枚得る', result: '人の見方を知り、新しい切り口を得た。', effect: { kind: 'skillCard' } },
+            { label: '写真を手伝う', text: '25Gを得る', result: '撮影補助のお礼をもらった。', effect: { kind: 'gold', amount: 25 } },
+        ],
+        43: [
+            { label: '話を聞く', text: 'HPを10回復する', result: '友人の声で、胸のつかえが少しほどけた。', effect: { kind: 'heal', amount: 10 } },
+            { label: '相談に乗る', text: '小さな成果を得る', result: '相手の考えを整理するうち、自分も整った。', effect: { kind: 'momentum' } },
+            { label: '写真を撮る', text: '25Gを得る', result: '良い一枚を渡し、あとで礼を受けた。', effect: { kind: 'gold', amount: 25 } },
+        ],
+        44: [
+            { label: '結果を読む', text: 'カードを1枚強化する', result: '数字を受け止め、次の課題が見えた。', effect: { kind: 'upgrade' } },
+            { label: '友人を励ます', text: 'HPを10回復する', result: '声をかけるうち、自分も少し前向きになった。', effect: { kind: 'heal', amount: 10 } },
+            { label: '次を決める', text: '最大HP+2', result: '落ち込む前に動くと、芯が少し太くなった。', effect: { kind: 'maxHp', amount: 2 } },
+        ],
+        45: [
+            { label: '雪を踏みしめる', text: 'HPを10回復する', result: '静かな朝の冷気で、気分が澄んだ。', effect: { kind: 'heal', amount: 10 } },
+            { label: '早めに登校する', text: 'カードを1枚強化する', result: '余裕を持てたぶん、準備も丁寧になった。', effect: { kind: 'upgrade' } },
+            { label: '転びそうな後輩を支える', text: '25Gを得る', result: 'あとで温かい飲み物をおごってもらった。', effect: { kind: 'gold', amount: 25 } },
+        ],
+        46: [
+            { label: '手を温める', text: 'HPを12回復する', result: '冷えた指が戻り、体も楽になった。', effect: { kind: 'heal', amount: 12 } },
+            { label: '朝学習を始める', text: 'カードを1枚強化する', result: '静かな時間をうまく使えた。', effect: { kind: 'upgrade' } },
+            { label: '友人を呼ぶ', text: '小さな成果を得る', result: '集まる空気の中で、少し元気が戻った。', effect: { kind: 'momentum' } },
+        ],
+        47: [
+            { label: '募金を呼びかける', text: '最大HP+2', result: '声を張るうち、人前に立つ強さがついた。', effect: { kind: 'maxHp', amount: 2 } },
+            { label: '品物を並べる', text: '35Gを得る', result: '売上が伸び、運営から礼を受けた。', effect: { kind: 'gold', amount: 35 } },
+            { label: '飾りを直す', text: '小さな成果を得る', result: '細部を整える感覚が、次にも活きそうだ。', effect: { kind: 'momentum' } },
+        ],
+        48: [
+            { label: '願いを書く', text: 'カードを1枚強化する', result: '目標を文字にすると、手が少し迷わなくなった。', effect: { kind: 'upgrade' } },
+            { label: '甘酒を飲む', text: 'HPを12回復する', result: '温かさが体に広がった。', effect: { kind: 'heal', amount: 12 } },
+            { label: 'おみくじを引く', text: 'ポーションを得る', result: '妙に縁起の良い小瓶を授かった。', effect: { kind: 'potion', potionId: 'STRENGTH_POTION' } },
+        ],
+        49: [
+            { label: '弱点を確認する', text: 'カードを1枚強化する', result: '避けていた問題に、ようやく名前をつけられた。', effect: { kind: 'upgrade' } },
+            { label: '計画を立てる', text: '小さな成果を得る', result: '焦りが予定に変わり、少し呼吸が楽になった。', effect: { kind: 'momentum' } },
+            { label: '助言を受ける', text: 'スキルカードを1枚得る', result: '次に使える具体策を持ち帰った。', effect: { kind: 'skillCard' } },
+        ],
+        50: [
+            { label: '受け取る', text: 'HPを10回復する', result: '照れくささごと、甘さが疲れをほどいた。', effect: { kind: 'heal', amount: 10 } },
+            { label: 'お返しを考える', text: '小さな成果を得る', result: '相手のことを考える時間が、少し自分を整えた。', effect: { kind: 'momentum' } },
+            { label: '箱をしまう', text: '25Gを得る', result: '落とし物を届けた礼が、思わぬ形で返ってきた。', effect: { kind: 'gold', amount: 25 } },
+        ],
+        51: [
+            { label: '花束を受け取る', text: 'HPを14回復する', result: '積み重ねを思い出し、胸が少し温かくなった。', effect: { kind: 'heal', amount: 14 } },
+            { label: '後輩に言葉を残す', text: '最大HP+2', result: '伝える側に立つと、背筋が自然に伸びた。', effect: { kind: 'maxHp', amount: 2 } },
+            { label: '写真に写る', text: '35Gを得る', result: '記念写真の手伝いで、後から礼を受けた。', effect: { kind: 'gold', amount: 35 } },
+        ],
+        52: [
+            { label: '机をなでる', text: 'HPを12回復する', result: '静けさの中で、ようやく一息つけた。', effect: { kind: 'heal', amount: 12 } },
+            { label: '黒板を消す', text: 'カードを1枚強化する', result: '最後を整えると、次へ進む準備もできた。', effect: { kind: 'upgrade' } },
+            { label: '教室を見渡す', text: '小さな成果を得る', result: '終わった時間を受け止め、前を向けた。', effect: { kind: 'momentum' } },
+        ],
+        53: [
+            { label: '問題を解き切る', text: 'カードを1枚強化する', result: '眠気の向こうで、一問だけ確かな手応えを得た。', effect: { kind: 'upgrade' } },
+            { label: 'ドリンクを足す', text: 'HPを12回復する', result: '温かい飲み物で、もう少しだけ粘れそうだ。', effect: { kind: 'heal', amount: 12 } },
+            { label: '互いに教える', text: 'スキルカードを1枚得る', result: '友人の説明から、新しい見方を拾った。', effect: { kind: 'skillCard' } },
+        ],
+    };
+
+    const applyHighSchoolEffect = (themeTitle: string, choice: { result: string; effect: HighSchoolEffect }) => {
+        switch (choice.effect.kind) {
+            case 'gold':
+                setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + choice.effect.amount } }));
+                setEventResultLog(trans(`${choice.result}\n${choice.effect.amount}Gを得た。`, languageMode));
+                return;
+            case 'heal':
+                setGameState(prev => ({ ...prev, player: healPlayer(prev.player, choice.effect.amount) }));
+                setEventResultLog(trans(`${choice.result}\nHPが${choice.effect.amount}回復した。`, languageMode));
+                return;
+            case 'maxHp':
+                setGameState(prev => ({
+                    ...prev,
+                    player: {
+                        ...prev.player,
+                        maxHp: prev.player.maxHp + choice.effect.amount,
+                        currentHp: prev.player.currentHp + choice.effect.amount,
+                    }
+                }));
+                setEventResultLog(trans(`${choice.result}\n最大HP+${choice.effect.amount}。`, languageMode));
+                return;
+            case 'strength':
+                setGameState(prev => ({ ...prev, player: addPermanentStrengthBonus(prev.player, choice.effect.amount) }));
+                setEventResultLog(trans(`${choice.result}\n恒久ムキムキ+${choice.effect.amount}。`, languageMode));
+                return;
+            case 'upgrade': {
+                let upgradedName = '';
+                setGameState(prev => {
+                    const upgradeable = prev.player.deck.filter(card => !card.upgraded);
+                    if (upgradeable.length === 0) return prev;
+                    const target = upgradeable[Math.floor(Math.random() * upgradeable.length)];
+                    upgradedName = target.name;
+                    return {
+                        ...prev,
+                        player: {
+                            ...prev.player,
+                            deck: prev.player.deck.map(card => card.id === target.id ? getUpgradedCard(card) : card),
+                        }
+                    };
+                });
+                setTimeout(() => {
+                    if (upgradedName) {
+                        setEventResultLog(trans(`${choice.result}\n「${upgradedName}」が強化された。`, languageMode));
+                    } else {
+                        resolveMomentum(themeTitle, choice.result, true);
+                    }
+                }, 50);
+                return;
+            }
+            case 'skillCard': {
+                const pool = Object.values(CARDS_LIBRARY).filter(card => card.type === CardType.SKILL && isCardAvailable(card, unlockedCardNames));
+                const card = pool[Math.floor(Math.random() * pool.length)];
+                setGameState(prev => ({ ...prev, player: addCardWithEventRelics(prev.player, { ...card, id: `hs-card-${Date.now()}` } as Card) }));
+                setEventResultLog(trans(`${choice.result}\n「${card.name}」を得た。`, languageMode));
+                return;
+            }
+            case 'potion': {
+                const potion = { ...POTION_LIBRARY[choice.effect.potionId], id: `hs-pot-${Date.now()}` };
+                setGameState(prev => ({
+                    ...prev,
+                    player: {
+                        ...prev.player,
+                        potions: [...prev.player.potions, potion].slice(0, getPotionCapacity(prev.player)),
+                    }
+                }));
+                setEventResultLog(trans(`${choice.result}\n「${potion.name}」を得た。`, languageMode));
+                return;
+            }
+            case 'momentum':
+                resolveMomentum(themeTitle, choice.result);
+        }
+    };
+
+    const buildHighSchoolEvent = (event: GameEvent): GameEvent => {
+        const theme = getHighSchoolEventTheme(event.title);
+        return {
+            title: theme.title,
+            description: theme.description,
+            imageKey: `high-school-event-${theme.imageIndex}`,
+            options: highSchoolChoices[theme.imageIndex].map(choice => ({
+                label: choice.label,
+                text: choice.text,
+                action: () => applyHighSchoolEffect(theme.title, choice),
+            })),
+        };
     };
 
     const charType = getCharacterType(player);
@@ -5933,7 +6312,10 @@ export const generateEvent = (
     );
 
     if (preferredEventTitle) {
-        const matched = potentialEvents.find(e => e.title === preferredEventTitle);
+        const matched = potentialEvents.find(e =>
+            e.title === preferredEventTitle ||
+            (visualTheme === 'high-school' && getHighSchoolEventTheme(e.title).title === preferredEventTitle)
+        );
         if (matched) return finalizeEvent(matched);
     }
 
