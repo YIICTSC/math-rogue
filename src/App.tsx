@@ -2702,12 +2702,6 @@ const App: React.FC = () => {
         }
     }, []);
 
-    const handleStartMenuBackgroundPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-        const target = event.target as HTMLElement;
-        if (target.closest('button, a, input, select, textarea, [role="button"]')) return;
-        void audioService.unlockAudio();
-    };
-
     useEffect(() => {
         let pausedForBackground = false;
         const handleVisibilityChange = () => {
@@ -10316,10 +10310,7 @@ const App: React.FC = () => {
                 )}
 
                 {gameState.screen === GameScreen.START_MENU && (
-                    <div
-                        className="w-full h-full bg-gray-900 flex items-center justify-center relative overflow-hidden"
-                        onPointerDown={handleStartMenuBackgroundPointerDown}
-                    >
+                    <div className="w-full h-full bg-gray-900 flex items-center justify-center relative overflow-hidden">
                         <div
                             className={`absolute inset-0 bg-cover bg-[position:38%_center] md:bg-center transition-all duration-700 ease-out ${visualTheme === 'high-school' ? 'opacity-0 scale-105 blur-sm' : 'opacity-100 scale-100 blur-0'}`}
                             style={{ backgroundImage: `url(${assetUrl('sprites/learning-rogue-title-background.webp')})` }}
