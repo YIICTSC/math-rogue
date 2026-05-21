@@ -23,25 +23,27 @@ interface EventScreenProps {
 }
 
 const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, imageKey, image, resultLog, onContinue, typingMode = false, interactionDisabled = false, interactionDisabledMessage }) => {
+  const highSchoolEventIndex = useMemo(() => {
+    const match = imageKey?.match(/^high-school-event-(\d+)$/);
+    return match ? Number(match[1]) : null;
+  }, [imageKey]);
   const imageCandidates = useMemo(() => {
-    const baseUrl = (import.meta as any).env.BASE_URL || '/';
-    const highSchoolMatch = imageKey?.match(/^high-school-event-(\d+)$/);
-    if (highSchoolMatch) {
+    if (highSchoolEventIndex !== null) {
       return [
-        `${baseUrl}sprites/high-school/events/${highSchoolMatch[1]}.png`,
-        `${baseUrl}event-illustrations/default.svg`,
+        assetUrl(`sprites/high-school/events/${highSchoolEventIndex}.png`),
+        assetUrl('event-illustrations/default.svg'),
       ];
     }
     const encodedTitle = encodeURIComponent(imageKey ?? title);
     return [
-      `${baseUrl}event-illustrations/${encodedTitle}.webp`,
-      `${baseUrl}event-illustrations/${encodedTitle}.png`,
-      `${baseUrl}event-illustrations/${encodedTitle}.jpg`,
-      `${baseUrl}event-illustrations/${encodedTitle}.jpeg`,
-      `${baseUrl}event-illustrations/${encodedTitle}.svg`,
-      `${baseUrl}event-illustrations/default.svg`
+      assetUrl(`event-illustrations/${encodedTitle}.webp`),
+      assetUrl(`event-illustrations/${encodedTitle}.png`),
+      assetUrl(`event-illustrations/${encodedTitle}.jpg`),
+      assetUrl(`event-illustrations/${encodedTitle}.jpeg`),
+      assetUrl(`event-illustrations/${encodedTitle}.svg`),
+      assetUrl('event-illustrations/default.svg')
     ];
-  }, [imageKey, title]);
+  }, [highSchoolEventIndex, imageKey, title]);
   const [imageIndex, setImageIndex] = useState(0);
   const [choiceLocked, setChoiceLocked] = useState(false);
   const [continueLocked, setContinueLocked] = useState(false);
@@ -121,11 +123,11 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                 <h2 className="text-2xl font-bold text-purple-100 sm:text-3xl">{title}</h2>
             </div>
 
-            <div className="relative mb-4 h-36 overflow-hidden rounded-xl border border-purple-400/40 bg-slate-900 sm:mb-6 sm:h-56">
+            <div className="relative mx-auto mb-4 aspect-square w-full max-w-[18rem] overflow-hidden rounded-xl border border-purple-400/40 bg-slate-900 sm:mb-6 sm:max-w-[22rem]">
                 <img
                     src={imageCandidates[imageIndex]}
                     alt={`${title} thumbnail`}
-                    className="absolute inset-0 w-full h-full object-cover"
+                    className={`absolute inset-0 h-full w-full object-cover ${highSchoolEventIndex !== null && highSchoolEventIndex < 18 ? 'scale-[1.18]' : ''}`}
                     onError={() => setImageIndex(prev => Math.min(prev + 1, imageCandidates.length - 1))}
                 />
                 {image && (

@@ -6,7 +6,7 @@ import { trans } from '../utils/textUtils';
 import { LanguageMode } from '../types';
 import { getUpgradedCard } from '../utils/cardUtils';
 import { ADDITIONAL_CARDS } from '../constants1';
-import { getHighSchoolEventTheme, type VisualThemeId } from '../data/visualThemes';
+import { getHighSchoolEventTheme, getHighSchoolEventThemeByTitle, type HighSchoolEventTheme, type VisualThemeId } from '../data/visualThemes';
 
 interface EventOption {
     label: string;
@@ -224,14 +224,16 @@ export const generateEvent = (
     languageMode: LanguageMode,
     unlockedCardNames: string[],
     preferredEventTitle?: string,
-    visualTheme: VisualThemeId = 'elementary'
+    visualTheme: VisualThemeId = 'elementary',
+    currentAct = 1,
+    currentFloor = 1
 ): GameEvent => {
     let activeEventTitle: string | null = null;
     const finalizeEvent = (event: GameEvent): GameEvent => {
         const themedEvent = visualTheme === 'high-school'
-            ? getHighSchoolEventTheme(event.title)
+            ? getHighSchoolEventTheme(event.title, currentAct, currentFloor)
             : null;
-        if (themedEvent) return buildHighSchoolEvent(event);
+        if (themedEvent) return buildHighSchoolEvent(themedEvent);
         return {
         ...event,
         options: event.options.map(option => ({
@@ -616,8 +618,7 @@ export const generateEvent = (
         }
     };
 
-    const buildHighSchoolEvent = (event: GameEvent): GameEvent => {
-        const theme = getHighSchoolEventTheme(event.title);
+    const buildHighSchoolEvent = (theme: HighSchoolEventTheme): GameEvent => {
         return {
             title: theme.title,
             description: theme.description,
@@ -6312,9 +6313,12 @@ export const generateEvent = (
     );
 
     if (preferredEventTitle) {
+        if (visualTheme === 'high-school') {
+            const matchedTheme = getHighSchoolEventThemeByTitle(preferredEventTitle);
+            if (matchedTheme) return buildHighSchoolEvent(matchedTheme);
+        }
         const matched = potentialEvents.find(e =>
-            e.title === preferredEventTitle ||
-            (visualTheme === 'high-school' && getHighSchoolEventTheme(e.title).title === preferredEventTitle)
+            e.title === preferredEventTitle
         );
         if (matched) return finalizeEvent(matched);
     }
