@@ -10323,7 +10323,7 @@ const App: React.FC = () => {
                         {visualTheme === 'high-school' && (
                             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,transparent_0%,transparent_42%,rgba(239,68,68,0.45)_48%,transparent_54%,transparent_100%)] animate-pulse" />
                         )}
-                        <div className="absolute inset-0 bg-slate-950/55" />
+                        <div className="absolute inset-0 bg-slate-950/45" />
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(15,23,42,0.12),rgba(2,6,23,0.72))]" />
                         {isLegacyVercelHost && showMigrationNotice && (
                             <div className="fixed inset-0 z-[10001] bg-black/80 flex items-center justify-center p-3 sm:p-4">
