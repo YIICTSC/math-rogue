@@ -161,6 +161,8 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
         return 'border-blue-500 bg-blue-900/95';
       case EnumCardType.POWER:
         return 'border-yellow-500 bg-yellow-900/95';
+      case EnumCardType.SUMMON:
+        return 'border-fuchsia-500 bg-fuchsia-950/95';
       default:
         return 'border-gray-500 bg-gray-800';
     }
@@ -174,6 +176,8 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
         return trans('スキル', languageMode);
       case EnumCardType.POWER:
         return trans('パワー', languageMode);
+      case EnumCardType.SUMMON:
+        return trans('サモン', languageMode);
       default:
         return trans('その他', languageMode);
     }

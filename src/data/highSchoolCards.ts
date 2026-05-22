@@ -78,14 +78,14 @@ export const HIGH_SCHOOL_FAMILIAR_CARDS: Record<string, Omit<Card, 'id'>> = Obje
     return [`HS_FAMILIAR_${String(index).padStart(3, '0')}`, {
       name: `${name}の契約`,
       cost: index % 9 === 0 ? 0 : index % 7 === 0 ? 2 : 1,
-      type: CardType.POWER,
+      type: CardType.SUMMON,
       target: TargetType.SELF,
-      description: `${name}を召喚。${triggerText}、${effectText}`,
+      description: `${name}を召喚。${triggerText}、${effectText}廃棄。`,
       exhaust: true,
       rarity,
       visualTheme: 'high-school',
       highSchoolCardArtIndex: index,
-      textureRef: `FAMILIAR|${index}|POWER`,
+      textureRef: `FAMILIAR|${index}|SUMMON`,
       familiarSummon: {
         id: `fam-${index}`,
         name,
