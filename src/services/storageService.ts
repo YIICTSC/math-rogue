@@ -46,6 +46,7 @@ const STORAGE_KEY_GO_HOME_RANKING = 'pixel_spire_go_home_ranking_v1';
 // --- BATTLE TUTORIAL FLAG ---
 const STORAGE_KEY_SEEN_BATTLE_TUTORIAL = 'pixel_spire_seen_battle_tutorial_v1';
 const STORAGE_KEY_SEEN_PARRY_TUTORIAL = 'pixel_spire_seen_parry_tutorial_v1';
+const STORAGE_KEY_SEEN_EXHAUST_CARD_HINT = 'pixel_spire_seen_exhaust_card_hint_v1';
 
 // --- ENGLISH VOICE FLAG ---
 const STORAGE_KEY_ENGLISH_VOICE = 'pixel_spire_english_voice_v1';
@@ -746,6 +747,14 @@ export const storageService = {
       localStorage.setItem(STORAGE_KEY_SEEN_PARRY_TUTORIAL, 'true');
   },
 
+  getSeenExhaustCardHint: (): boolean => {
+      return localStorage.getItem(STORAGE_KEY_SEEN_EXHAUST_CARD_HINT) === 'true';
+  },
+
+  saveSeenExhaustCardHint: () => {
+      localStorage.setItem(STORAGE_KEY_SEEN_EXHAUST_CARD_HINT, 'true');
+  },
+
   // --- English Voice Flag ---
   getEnglishVoiceEnabled: (): boolean => {
     const stored = localStorage.getItem(STORAGE_KEY_ENGLISH_VOICE);
@@ -1069,6 +1078,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_MATH_CORRECT_COUNT);
       localStorage.removeItem(STORAGE_KEY_SEEN_BATTLE_TUTORIAL);
       localStorage.removeItem(STORAGE_KEY_SEEN_PARRY_TUTORIAL);
+      localStorage.removeItem(STORAGE_KEY_SEEN_EXHAUST_CARD_HINT);
       localStorage.removeItem(STORAGE_KEY_CHALLENGE_RECORDS);
       localStorage.removeItem(STORAGE_KEY_MAX_UNLOCKED_DIFFICULTY);
       localStorage.removeItem(STORAGE_KEY_FIRST_STARTER_RELIC_SKIPPED);
