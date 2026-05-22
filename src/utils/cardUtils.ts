@@ -100,6 +100,7 @@ export const getShapeFromCard = (card: Card): string => {
     if (card.type === CardType.ATTACK) return 'SWORD';
     if (card.type === CardType.SKILL) return 'SHIELD';
     if (card.type === CardType.POWER) return 'FLAME';
+    if (card.type === CardType.SUMMON) return 'FAMILIAR';
     return 'NOTEBOOK';
 };
 

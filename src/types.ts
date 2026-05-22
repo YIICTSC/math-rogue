@@ -3,6 +3,7 @@ export enum CardType {
   ATTACK = 'ATTACK',
   SKILL = 'SKILL',
   POWER = 'POWER',
+  SUMMON = 'SUMMON',
   STATUS = 'STATUS',
   CURSE = 'CURSE'
 }
