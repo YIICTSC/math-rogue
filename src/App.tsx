@@ -543,8 +543,7 @@ const App: React.FC = () => {
         return Object.values(CARDS_LIBRARY).filter(c => {
             // Basic type filtering
             if (c.type === CardType.STATUS || c.type === CardType.CURSE) return false;
-            if (visualTheme === 'high-school') return c.visualTheme === 'high-school';
-            if (c.visualTheme === 'high-school') return false;
+            if (visualTheme !== 'high-school' && c.visualTheme === 'high-school') return false;
 
             const cleanName = c.name.trim();
 
