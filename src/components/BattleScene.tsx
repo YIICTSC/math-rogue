@@ -469,6 +469,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const [mobileFamiliarPresentation, setMobileFamiliarPresentation] = useState<{ index: number; phase: 'stand' | 'action' } | null>(null);
     const [finisherBurst, setFinisherBurst] = useState(false);
     const [drawEntryAnimations, setDrawEntryAnimations] = useState<DrawEntryAnimation[]>([]);
+    const [pendingExhaustCardHint, setPendingExhaustCardHint] = useState(false);
+    const [showExhaustCardHint, setShowExhaustCardHint] = useState(false);
     const battleViewRef = useRef<HTMLDivElement>(null);
     const playerAreaRef = useRef<HTMLDivElement>(null);
     const playerGroupRef = useRef<HTMLDivElement>(null);
@@ -641,6 +643,14 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         const DRAW_ENTRY_DURATION_MS = 720;
 
         if (newlyAddedIds.length > 0) {
+            const newlyAddedCards = player.hand.filter(card => newlyAddedIds.includes(card.id));
+            if (
+                newlyAddedCards.some(card => card.exhaust) &&
+                !storageService.getSeenExhaustCardHint()
+            ) {
+                setPendingExhaustCardHint(true);
+            }
+
             setDrawEntryAnimations((prev) => {
                 const retained = prev.filter(entry => currentHandIds.includes(entry.cardId) && !newlyAddedIds.includes(entry.cardId));
                 const additions = newlyAddedIds.map((cardId, index) => ({
@@ -663,6 +673,13 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
         prevHandIdsRef.current = currentHandIds;
     }, [player.hand]);
+
+    useEffect(() => {
+        if (!pendingExhaustCardHint || tutorialStep !== null || storageService.getSeenExhaustCardHint()) return;
+        setShowExhaustCardHint(true);
+        setPendingExhaustCardHint(false);
+        storageService.saveSeenExhaustCardHint();
+    }, [pendingExhaustCardHint, tutorialStep]);
 
     useEffect(() => {
         return () => {
@@ -1056,6 +1073,31 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         >
                             わかった、応答する！
                         </button>
+                    </div>
+                </div>
+            )}
+
+            {showExhaustCardHint && (
+                <div className="fixed inset-0 z-[210] flex items-end justify-center bg-black/35 p-4 pb-28 md:items-center md:pb-4 animate-in fade-in duration-200">
+                    <div className="w-full max-w-md rounded-xl border-2 border-fuchsia-400 bg-slate-900/95 p-4 text-white shadow-[0_0_24px_rgba(217,70,239,0.45)]">
+                        <div className="mb-2 flex items-center gap-2 text-fuchsia-200">
+                            <Sparkles size={20} className="fill-current" />
+                            <h3 className="text-lg font-black">{trans("廃棄カード", languageMode)}</h3>
+                        </div>
+                        <p className="mb-4 text-sm leading-relaxed text-slate-100">
+                            {trans("「廃棄」と書かれたカードは、使うとその戦闘中は山札や捨て札に戻りません。強力な効果が多いので、使いどころを選びましょう。", languageMode)}
+                        </p>
+                        <div className="flex justify-end">
+                            <button
+                                onClick={() => {
+                                    setShowExhaustCardHint(false);
+                                    audioService.playSound('select');
+                                }}
+                                className="rounded bg-fuchsia-600 px-4 py-2 text-sm font-bold text-white hover:bg-fuchsia-500"
+                            >
+                                {trans("わかった", languageMode)}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
