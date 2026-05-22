@@ -4404,6 +4404,13 @@ const App: React.FC = () => {
                 }
                 const isGardener = nextState.player.id === 'GARDENER';
                 const allPossibleCards = getFilteredCardPool(nextState.player.id);
+                const isHighSchoolShop = nextState.visualTheme === 'high-school'
+                    || window.localStorage.getItem('learning-rogue-visual-theme') === 'high-school';
+                const nonFamiliarShopCards = allPossibleCards.filter(card => !card.familiarSummon);
+                const familiarShopCards = allPossibleCards.filter(card => !!card.familiarSummon);
+                const familiarShopSlot = isHighSchoolShop && familiarShopCards.length > 0
+                    ? Math.floor(Math.random() * 5)
+                    : -1;
 
                 const cards: ICard[] = [];
                 for (let i = 0; i < 5; i++) {
@@ -4411,6 +4418,10 @@ const App: React.FC = () => {
                     let candidatePool = allPossibleCards;
                     if (isGardener && i < 2) {
                         candidatePool = Object.values(GARDEN_SEEDS).map(s => ({ ...s, id: `shop-seed-${i}-${Date.now()}` }) as ICard);
+                    } else if (isHighSchoolShop && i === familiarShopSlot) {
+                        candidatePool = familiarShopCards;
+                    } else if (isHighSchoolShop && nonFamiliarShopCards.length > 0) {
+                        candidatePool = nonFamiliarShopCards;
                     }
 
                     const cTemplate = candidatePool[Math.floor(Math.random() * candidatePool.length)];
@@ -4423,7 +4434,14 @@ const App: React.FC = () => {
                     cards.push({ id: `shop-${i}-${Date.now()}`, ...c, price });
                 }
                 if (getDifficultyConfig(gameState.difficultyLevel).cardEraserEnabled && Math.random() < 0.35) {
-                    cards[Math.floor(Math.random() * Math.max(1, cards.length))] = {
+                    const replaceableCardIndexes = cards
+                        .map((card, index) => ({ card, index }))
+                        .filter(({ card }) => !card.familiarSummon)
+                        .map(({ index }) => index);
+                    const replaceIndexPool = replaceableCardIndexes.length > 0
+                        ? replaceableCardIndexes
+                        : cards.map((_, index) => index);
+                    cards[replaceIndexPool[Math.floor(Math.random() * Math.max(1, replaceIndexPool.length))]] = {
                         ...createCardEraserCard('shop-eraser'),
                         price: 70 + (gameState.difficultyLevel || 1) * 5
                     };
