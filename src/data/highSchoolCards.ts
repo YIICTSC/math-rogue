@@ -24,18 +24,20 @@ const FAMILIAR_NAMES = [
 ] as const;
 
 const EFFECTS = [
-  ['DAMAGE', 7, 'ランダムな敵に7ダメージ。'],
-  ['AOE_DAMAGE', 4, '敵全体に4ダメージ。'],
-  ['BLOCK', 6, 'ブロック6。'],
-  ['HEAL', 3, 'HPを3回復。'],
-  ['DRAW', 1, 'カードを1枚引く。'],
-  ['ENERGY_NEXT', 1, '次ターンのエナジー+1。'],
-  ['POISON', 3, 'ランダムな敵にドクドク3。'],
-  ['WEAK', 1, '敵全体にへろへろ1。'],
-  ['VULNERABLE', 1, '敵全体にびくびく1。'],
-  ['STRENGTH', 1, 'ムキムキ+1。'],
-  ['GOLD', 8, 'ゴールド8を得る。'],
-  ['DAMAGE', 11, 'ランダムな敵に11ダメージ。'],
+  ['DAMAGE', 16],
+  ['AOE_DAMAGE', 10],
+  ['BLOCK', 15],
+  ['HEAL', 10],
+  ['DRAW', 2],
+  ['ENERGY_NEXT', 2],
+  ['POISON', 8],
+  ['WEAK', 2],
+  ['VULNERABLE', 2],
+  ['STRENGTH', 2],
+  ['GOLD', 22],
+  ['RANDOM_HITS', 20],
+  ['AOE_POISON', 6],
+  ['CHAOS_SURGE', 2],
 ] as const;
 
 const TRIGGERS = [
@@ -50,6 +52,8 @@ const buildFamiliarEffectText = (kind: (typeof EFFECTS)[number][0], amount: numb
   switch (kind) {
     case 'DAMAGE':
       return `ランダムな敵に${amount}ダメージ。`;
+    case 'RANDOM_HITS':
+      return `ランダムな敵に1ダメージを${amount}回与える。`;
     case 'AOE_DAMAGE':
       return `敵全体に${amount}ダメージ。`;
     case 'BLOCK':
@@ -62,6 +66,8 @@ const buildFamiliarEffectText = (kind: (typeof EFFECTS)[number][0], amount: numb
       return `次ターンのエナジー+${amount}。`;
     case 'POISON':
       return `ランダムな敵にドクドク${amount}。`;
+    case 'AOE_POISON':
+      return `敵全体にドクドク${amount}。`;
     case 'WEAK':
       return `敵全体にへろへろ${amount}。`;
     case 'VULNERABLE':
@@ -70,6 +76,8 @@ const buildFamiliarEffectText = (kind: (typeof EFFECTS)[number][0], amount: numb
       return `ムキムキ+${amount}。`;
     case 'GOLD':
       return `ゴールド${amount}を得る。`;
+    case 'CHAOS_SURGE':
+      return `カードを${amount}枚引き、ムキムキ+${amount}、次ターンのエナジー+${Math.max(1, amount - 1)}。`;
     default:
       return '';
   }
@@ -103,13 +111,18 @@ export const HIGH_SCHOOL_FAMILIAR_CARDS: Record<string, Omit<Card, 'id'>> = Obje
     const [kind, baseAmount] = EFFECTS[index % EFFECTS.length];
     const [trigger, triggerText] = TRIGGERS[index % TRIGGERS.length];
     const isOneShot = trigger === 'ONCE_END_TURN';
-    const amount = isOneShot ? Math.max(baseAmount + 3, Math.floor(baseAmount * 1.8)) : baseAmount;
+    const rarity = index >= 95 ? 'LEGENDARY' : index >= 72 ? 'RARE' : index >= 36 ? 'UNCOMMON' : 'COMMON';
+    const rarityBoost = rarity === 'LEGENDARY' ? 1.9 : rarity === 'RARE' ? 1.55 : rarity === 'UNCOMMON' ? 1.25 : 1;
+    const oneShotBoost = isOneShot ? 1.4 : 1;
+    const scaled = Math.round(baseAmount * rarityBoost * oneShotBoost);
+    const amount = kind === 'DAMAGE' || kind === 'AOE_DAMAGE' || kind === 'RANDOM_HITS'
+      ? Math.min(50, scaled)
+      : scaled;
     const effectText = buildFamiliarEffectText(kind, amount);
     const duration = isOneShot ? 1 : 'BATTLE';
-    const rarity = index >= 95 ? 'LEGENDARY' : index >= 72 ? 'RARE' : index >= 36 ? 'UNCOMMON' : 'COMMON';
     return [`HS_FAMILIAR_${String(index).padStart(3, '0')}`, {
       name: `${name}の契約`,
-      cost: isOneShot ? (index % 6 === 0 ? 4 : 3) : (index % 9 === 0 ? 0 : index % 7 === 0 ? 2 : 1),
+      cost: isOneShot ? 3 : (index % 11 === 0 ? 0 : index % 4 === 0 ? 2 : 1),
       type: CardType.SUMMON,
       target: TargetType.SELF,
       description: `${name}を召喚。${triggerText}、${effectText}廃棄。`,
