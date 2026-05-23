@@ -1,7 +1,7 @@
 
 import { GameMode, GameScreen } from './types';
 
-export type SubjectCategoryType = 'MATH' | 'MATH_GRADES' | 'KOKUGO_GRADES' | 'KANJI' | 'KANKEN' | 'HARD_KANJI' | 'SCIENCE' | 'SOCIAL' | 'ENGLISH' | 'SUMMARY' | 'MAP_PREF' | 'IT_INFO';
+export type SubjectCategoryType = 'MATH' | 'MATH_GRADES' | 'KOKUGO_GRADES' | 'KANJI' | 'KANKEN' | 'HARD_KANJI' | 'LIFE' | 'SCIENCE' | 'SOCIAL' | 'ENGLISH' | 'SUMMARY' | 'MAP_PREF' | 'IT_INFO';
 
 export interface SubModeConfig {
     id: string;
@@ -227,7 +227,7 @@ export const SUBJECT_CATEGORIES: SubjectCategoryConfig[] = [
   },
   {
     id: 'KANKEN',
-    name: '漢検',
+    name: '漢検・難読',
     color: 'cyan',
     uiType: 'grid',
     subModes: [
@@ -244,14 +244,6 @@ export const SUBJECT_CATEGORIES: SubjectCategoryConfig[] = [
         { id: 'KK_PRE1', name: '準1級', mode: GameMode.KANKEN_PRE1 },
         { id: 'KK1', name: '1級', mode: GameMode.KANKEN_1 },
         { id: 'KK_MIXED', name: 'ミックス', mode: GameMode.KANKEN_MIXED },
-    ]
-  },
-  {
-    id: 'HARD_KANJI',
-    name: '難読漢字',
-    color: 'rose',
-    uiType: 'grid',
-    subModes: [
         { id: 'HK_JUKUJIKUN', name: '超難読 熟字訓', mode: GameMode.HARD_KANJI_JUKUJIKUN },
         { id: 'HK_FLORA', name: '動植物 極', mode: GameMode.HARD_KANJI_FLORA_FAUNA },
         { id: 'HK_ATEJI', name: '当て字・外来語 極', mode: GameMode.HARD_KANJI_ATEJI },
@@ -279,8 +271,8 @@ export const SUBJECT_CATEGORIES: SubjectCategoryConfig[] = [
     ]
   },
   { 
-    id: 'SCIENCE', 
-    name: '生活・理科', 
+    id: 'LIFE', 
+    name: '生活', 
     color: 'amber',
     uiType: 'grade_term',
     subModes: [
@@ -290,6 +282,14 @@ export const SUBJECT_CATEGORIES: SubjectCategoryConfig[] = [
         { id: 'L2_1', name: '生 小2 1学期', mode: GameMode.LIFE_2_1 },
         { id: 'L2_2', name: '生 小2 2学期', mode: GameMode.LIFE_2_2 },
         { id: 'L2_3', name: '生 小2 3学期', mode: GameMode.LIFE_2_3 },
+    ]
+  },
+  { 
+    id: 'SCIENCE', 
+    name: '理科', 
+    color: 'amber',
+    uiType: 'grade_term',
+    subModes: [
         { id: 'S3_1', name: '理 小3 1学期', mode: GameMode.SCIENCE_3_1 },
         { id: 'S3_2', name: '理 小3 2学期', mode: GameMode.SCIENCE_3_2 },
         { id: 'S3_3', name: '理 小3 3学期', mode: GameMode.SCIENCE_3_3 },

@@ -299,7 +299,8 @@ const CATEGORY_LABELS: Record<SubjectCategoryType, string> = {
   KANJI: '漢字',
   KANKEN: '漢検',
   HARD_KANJI: '難読漢字',
-  SCIENCE: '生活・理科',
+  LIFE: '生活',
+  SCIENCE: '理科',
   SOCIAL: '社会',
   ENGLISH: '英語',
   SUMMARY: 'まとめ',
@@ -382,6 +383,7 @@ const getCategoryIcon = (id: SubjectCategoryType) => {
     case 'KANKEN': return <Book size={20} />;
     case 'HARD_KANJI': return <Book size={20} />;
     case 'ENGLISH': return <Languages size={20} />;
+    case 'LIFE': return <Home size={20} />;
     case 'SCIENCE': return <FlaskConical size={20} />;
     case 'SOCIAL': return <Globe size={20} />;
     case 'SUMMARY': return <GraduationCap size={20} />;
@@ -437,7 +439,8 @@ const getCurrentUnitsForCategory = (categoryId: SubjectCategoryType, grade: numb
     return summaryUnit.modes && summaryUnit.modes.length > 0 ? [summaryUnit] : [];
   }
   if (categoryId === 'ENGLISH') return (ENGLISH_GRADE_UNITS[grade] || []).map((unit) => ({ ...unit, modes: [unit.mode] }));
-  if (categoryId === 'SCIENCE') return (SCIENCE_GRADE_UNITS[grade] || []).map((unit) => ({ ...unit, modes: [unit.mode] }));
+  if (categoryId === 'LIFE') return (SCIENCE_GRADE_UNITS[grade] || []).filter((unit) => unit.mode.startsWith('LIFE_')).map((unit) => ({ ...unit, modes: [unit.mode] }));
+  if (categoryId === 'SCIENCE') return (SCIENCE_GRADE_UNITS[grade] || []).filter((unit) => unit.mode.startsWith('SCIENCE_')).map((unit) => ({ ...unit, modes: [unit.mode] }));
   if (categoryId === 'SOCIAL') return (SOCIAL_GRADE_UNITS[grade] || []).map((unit) => ({ ...unit, modes: [unit.mode] }));
   if (categoryId === 'KOKUGO_GRADES') return (KOKUGO_GRADE_UNITS[grade] || []).map((unit) => ({ ...unit, modes: unit.modes || (unit.mode ? [unit.mode] : []) }));
   if (categoryId === 'MATH_GRADES') return (MATH_GRADE_UNITS[grade] || []).map((unit) => ({ ...unit, modes: unit.modes || (unit.mode ? [unit.mode] : []) }));
@@ -454,6 +457,8 @@ const getAllSelectableUnits = (): SelectableUnitOption[] => [
 ];
 
 const getSelectableGrades = (categoryId: SubjectCategoryType): number[] => {
+  if (categoryId === 'LIFE') return [1, 2];
+  if (categoryId === 'SCIENCE') return [3, 4, 5, 6, 7, 8, 9];
   if (categoryId === 'ENGLISH' || categoryId === 'SOCIAL') return [3, 4, 5, 6, 7, 8, 9];
   return [1, 2, 3, 4, 5, 6, 7, 8, 9];
 };
@@ -471,7 +476,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   const [selectedTerm, setSelectedTerm] = useState<number>(1);
   const [selectedMathGrade, setSelectedMathGrade] = useState<number>(1);
   const [selectedMathUnitIds, setSelectedMathUnitIds] = useState<string[]>([]);
-  const isUnitCategory = selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL' || selectedCategory.id === 'SUMMARY';
+  const isUnitCategory = selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'LIFE' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL' || selectedCategory.id === 'SUMMARY';
   const [answerMode, setAnswerMode] = useState<AnswerMode>('CHOICE');
   const canSelectAnswerMode = selectedCategory.id === 'MATH' || selectedCategory.id === 'KANJI' || selectedCategory.id === 'KANKEN' || selectedCategory.id === 'HARD_KANJI';
 
@@ -576,7 +581,8 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
 
     if (selectedCategory.uiType === 'grade_term') {
       const mode = (() => {
-        if (selectedCategory.id === 'SCIENCE') return selectedGrade <= 2 ? `LIFE_${selectedGrade}_${selectedTerm}` : `SCIENCE_${selectedGrade}_${selectedTerm}`;
+        if (selectedCategory.id === 'LIFE') return `LIFE_${selectedGrade}_${selectedTerm}`;
+        if (selectedCategory.id === 'SCIENCE') return `SCIENCE_${selectedGrade}_${selectedTerm}`;
         if (selectedCategory.id === 'SOCIAL') return `SOCIAL_${selectedGrade}_${selectedTerm}`;
         return selectedSubMode?.mode || selectedCategory.subModes[0]?.mode;
       })() as string;
@@ -673,7 +679,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
     }
 
     if (selectedCategory.uiType === 'grade_term') {
-      const grades = selectedCategory.id === 'SCIENCE' ? [1, 2, 3, 4, 5, 6, 7, 8, 9] : [3, 4, 5, 6, 7, 8, 9];
+      const grades = selectedCategory.id === 'LIFE' ? [1, 2] : [3, 4, 5, 6, 7, 8, 9];
 
       return (
         <div className="space-y-3">
@@ -817,15 +823,18 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
     }
 
     if (cat.uiType === 'grade_term') {
-      if (cat.id === 'MATH_GRADES' || cat.id === 'KOKUGO_GRADES' || cat.id === 'ENGLISH' || cat.id === 'SCIENCE' || cat.id === 'SOCIAL') {
+      if (cat.id === 'MATH_GRADES' || cat.id === 'KOKUGO_GRADES' || cat.id === 'ENGLISH' || cat.id === 'LIFE' || cat.id === 'SCIENCE' || cat.id === 'SOCIAL') {
         const isKokugo = cat.id === 'KOKUGO_GRADES';
         const isEnglish = cat.id === 'ENGLISH';
+        const isLife = cat.id === 'LIFE';
         const isScience = cat.id === 'SCIENCE';
         const isSocial = cat.id === 'SOCIAL';
         const gradeUnits = isEnglish
           ? (ENGLISH_GRADE_UNITS[selectedMathGrade] || [])
-          : isScience
-          ? (SCIENCE_GRADE_UNITS[selectedMathGrade] || [])
+          : (isLife || isScience)
+          ? (isLife
+            ? (SCIENCE_GRADE_UNITS[selectedMathGrade] || []).filter((unit) => unit.mode.startsWith('LIFE_'))
+            : (SCIENCE_GRADE_UNITS[selectedMathGrade] || []).filter((unit) => unit.mode.startsWith('SCIENCE_')))
           : isSocial
           ? (SOCIAL_GRADE_UNITS[selectedMathGrade] || [])
           : isKokugo
@@ -833,7 +842,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
           : (MATH_GRADE_UNITS[selectedMathGrade] || []);
         const allUnitsAcrossGrades = [
           ...Object.values(ENGLISH_GRADE_UNITS).flat(),
-          ...Object.values(SCIENCE_GRADE_UNITS).flat(),
+          ...Object.values(SCIENCE_GRADE_UNITS).flat().filter((unit) => isLife ? unit.mode.startsWith('LIFE_') : unit.mode.startsWith('SCIENCE_')),
           ...Object.values(SOCIAL_GRADE_UNITS).flat(),
           ...Object.values(KOKUGO_GRADE_UNITS).flat(),
           ...Object.values(MATH_GRADE_UNITS).flat()
