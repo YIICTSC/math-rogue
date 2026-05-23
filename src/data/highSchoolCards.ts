@@ -122,7 +122,7 @@ export const HIGH_SCHOOL_FAMILIAR_CARDS: Record<string, Omit<Card, 'id'>> = Obje
     const duration = isOneShot ? 1 : 'BATTLE';
     return [`HS_FAMILIAR_${String(index).padStart(3, '0')}`, {
       name: `${name}の契約`,
-      cost: isOneShot ? 3 : (index % 11 === 0 ? 0 : index % 4 === 0 ? 2 : 1),
+      cost: isOneShot ? 3 : (index % 4 === 0 ? 2 : 1),
       type: CardType.SUMMON,
       target: TargetType.SELF,
       description: `${name}を召喚。${triggerText}、${effectText}廃棄。`,
