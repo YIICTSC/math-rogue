@@ -10441,21 +10441,6 @@ const App: React.FC = () => {
 
                         <div className="absolute top-2 right-2 z-[10010] flex items-center gap-1.5 sm:gap-2">
                             <div className="relative">
-                                {showBgmSwitchHint && (
-                                    <div className="absolute right-0 top-11 z-[10011] w-56 rounded-xl border-2 border-yellow-300 bg-black/90 px-3 py-2 text-[11px] leading-relaxed text-yellow-100 shadow-[0_4px_14px_rgba(0,0,0,0.45)] sm:text-xs">
-                                        <div className="absolute -top-2 right-8 h-3 w-3 rotate-45 border-l-2 border-t-2 border-yellow-300 bg-black/90" />
-                                        <div className="flex items-start gap-2">
-                                            <HelpCircle size={13} className="mt-0.5 shrink-0 text-yellow-200" />
-                                            <div>{trans('ここで音楽を切り替えられます', languageMode)}</div>
-                                        </div>
-                                        <button
-                                            onClick={dismissBgmSwitchHint}
-                                            className="mt-1 text-[10px] font-black text-yellow-300 underline underline-offset-2 hover:text-yellow-200 sm:text-[11px]"
-                                        >
-                                            {trans('とじる', languageMode)}
-                                        </button>
-                                    </div>
-                                )}
                                 <button
                                     onClick={toggleBgmMode}
                                     className={`flex h-9 items-center border-t-2 border-l-2 border-r-4 border-b-4 px-2 text-[10px] sm:text-xs font-black uppercase tracking-[0.08em] shadow-[0_0_0_1px_rgba(0,0,0,0.45)] transition-all active:translate-x-[2px] active:translate-y-[2px] active:border-r-2 active:border-b-2 ${bgmMode === 'STUDY'
