@@ -509,6 +509,11 @@ const App: React.FC = () => {
         return isTouchLike && isPortrait;
     };
 
+    const detectShortMobilePortrait = () => {
+        if (typeof window === 'undefined') return false;
+        return detectMobilePortrait() && window.innerHeight <= 740;
+    };
+
     const createDeck = (template: string[] = STARTING_DECK_TEMPLATE): ICard[] => {
         return template.map((key, index) => {
             const cardTemplate = CARDS_LIBRARY[key];
@@ -660,12 +665,16 @@ const App: React.FC = () => {
     const [miniGameProblemMode, setMiniGameProblemMode] = useState<GameMode>(GameMode.MIXED);
     const [miniGameProblemModePool, setMiniGameProblemModePool] = useState<string[] | undefined>(undefined);
     const [isMobilePortrait, setIsMobilePortrait] = useState(false);
+    const [isShortMobilePortrait, setIsShortMobilePortrait] = useState(false);
     const previousScreenRef = useRef<GameScreen>(GameScreen.START_MENU);
     const isLegacyVercelHost = typeof window !== 'undefined' && window.location.hostname === LEGACY_VERCEL_HOST;
     const [showMigrationNotice, setShowMigrationNotice] = useState<boolean>(() => isLegacyVercelHost);
 
     useEffect(() => {
-        const syncMobilePortrait = () => setIsMobilePortrait(detectMobilePortrait());
+        const syncMobilePortrait = () => {
+            setIsMobilePortrait(detectMobilePortrait());
+            setIsShortMobilePortrait(detectShortMobilePortrait());
+        };
         syncMobilePortrait();
         window.addEventListener('resize', syncMobilePortrait);
         return () => window.removeEventListener('resize', syncMobilePortrait);
@@ -10528,10 +10537,11 @@ const App: React.FC = () => {
                                 </span>
                             </h1>
 
-                            <div
-                                className="mb-6 bg-black/40 px-4 py-2 rounded-lg border border-gray-600 cursor-pointer select-none"
-                                onClick={handleMiniGameUnlockClick}
-                            >
+                            {!isShortMobilePortrait && (
+                                <div
+                                    className="mb-6 bg-black/40 px-4 py-2 rounded-lg border border-gray-600 cursor-pointer select-none"
+                                    onClick={handleMiniGameUnlockClick}
+                                >
                                 {isDailyLimitReached ? (
                                     <div className="text-red-500 text-xs md:text-sm font-bold animate-pulse flex items-center gap-2">
                                         <AlertTriangle size={16} /> {trans("本日のプレイ制限に達しました。問題チャレンジで勉強しましょう！", languageMode)}
@@ -10543,8 +10553,9 @@ const App: React.FC = () => {
                                 ) : (
                                     <div className="text-green-400 text-xs md:text-sm font-bold animate-pulse">{trans("全ミニゲーム開放済み！", languageMode)}</div>
                                 )}
-                                <div className="text-gray-500 text-[10px] mt-1">{trans("累計正解数", languageMode)}: {totalMathCorrect}{trans("問", languageMode)}</div>
-                            </div>
+                                    <div className="text-gray-500 text-[10px] mt-1">{trans("累計正解数", languageMode)}: {totalMathCorrect}{trans("問", languageMode)}</div>
+                                </div>
+                            )}
 
                             {isMathDebugSkipped && (
                                 <button
