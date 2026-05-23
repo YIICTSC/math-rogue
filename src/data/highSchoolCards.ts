@@ -46,6 +46,35 @@ const TRIGGERS = [
   ['NO_BLOCK_END_TURN', 'ブロック0ならターン終了時'],
 ] as const;
 
+const buildFamiliarEffectText = (kind: (typeof EFFECTS)[number][0], amount: number) => {
+  switch (kind) {
+    case 'DAMAGE':
+      return `ランダムな敵に${amount}ダメージ。`;
+    case 'AOE_DAMAGE':
+      return `敵全体に${amount}ダメージ。`;
+    case 'BLOCK':
+      return `ブロック${amount}。`;
+    case 'HEAL':
+      return `HPを${amount}回復。`;
+    case 'DRAW':
+      return `カードを${amount}枚引く。`;
+    case 'ENERGY_NEXT':
+      return `次ターンのエナジー+${amount}。`;
+    case 'POISON':
+      return `ランダムな敵にドクドク${amount}。`;
+    case 'WEAK':
+      return `敵全体にへろへろ${amount}。`;
+    case 'VULNERABLE':
+      return `敵全体にびくびく${amount}。`;
+    case 'STRENGTH':
+      return `ムキムキ+${amount}。`;
+    case 'GOLD':
+      return `ゴールド${amount}を得る。`;
+    default:
+      return '';
+  }
+};
+
 export const HIGH_SCHOOL_STARTER_REPLACEMENTS: Record<string, string> = {
   BASH: 'HS_STARTER_BREAK',
 };
@@ -71,13 +100,16 @@ export const HIGH_SCHOOL_STARTER_CARDS: Record<string, Omit<Card, 'id'>> = {
 
 export const HIGH_SCHOOL_FAMILIAR_CARDS: Record<string, Omit<Card, 'id'>> = Object.fromEntries(
   FAMILIAR_NAMES.map((name, index) => {
-    const [kind, amount, effectText] = EFFECTS[index % EFFECTS.length];
+    const [kind, baseAmount] = EFFECTS[index % EFFECTS.length];
     const [trigger, triggerText] = TRIGGERS[index % TRIGGERS.length];
-    const duration = trigger === 'ONCE_END_TURN' ? 1 : (index % 4 === 0 ? 'BATTLE' : 2 + (index % 4));
+    const isOneShot = trigger === 'ONCE_END_TURN';
+    const amount = isOneShot ? Math.max(baseAmount + 3, Math.floor(baseAmount * 1.8)) : baseAmount;
+    const effectText = buildFamiliarEffectText(kind, amount);
+    const duration = isOneShot ? 1 : 'BATTLE';
     const rarity = index >= 95 ? 'LEGENDARY' : index >= 72 ? 'RARE' : index >= 36 ? 'UNCOMMON' : 'COMMON';
     return [`HS_FAMILIAR_${String(index).padStart(3, '0')}`, {
       name: `${name}の契約`,
-      cost: index % 9 === 0 ? 0 : index % 7 === 0 ? 2 : 1,
+      cost: isOneShot ? (index % 6 === 0 ? 4 : 3) : (index % 9 === 0 ? 0 : index % 7 === 0 ? 2 : 1),
       type: CardType.SUMMON,
       target: TargetType.SELF,
       description: `${name}を召喚。${triggerText}、${effectText}廃棄。`,
