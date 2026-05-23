@@ -3,6 +3,28 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { HelpCircle, ArrowRight } from 'lucide-react';
 import { assetUrl } from '../utils/assetPaths';
 
+
+const HIGH_SCHOOL_EVENT_IMAGE_POSITION: Partial<Record<number, string>> = {
+  0: '50% 42%',
+  1: '50% 42%',
+  2: '50% 42%',
+  3: '50% 42%',
+  4: '50% 42%',
+  5: '50% 42%',
+  6: '50% 42%',
+  7: '50% 42%',
+  8: '50% 42%',
+  9: '50% 42%',
+  10: '50% 42%',
+  11: '50% 42%',
+  12: '50% 42%',
+  13: '50% 42%',
+  14: '50% 42%',
+  15: '50% 42%',
+  16: '50% 42%',
+  17: '50% 42%',
+};
+
 interface EventOption {
     text: string;
     action: () => void;
@@ -27,6 +49,11 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
     const match = imageKey?.match(/^high-school-event-(\d+)$/);
     return match ? Number(match[1]) : null;
   }, [imageKey]);
+  const highSchoolEventObjectPosition = useMemo(() => {
+    if (highSchoolEventIndex === null) return undefined;
+    return HIGH_SCHOOL_EVENT_IMAGE_POSITION[highSchoolEventIndex];
+  }, [highSchoolEventIndex]);
+
   const imageCandidates = useMemo(() => {
     if (highSchoolEventIndex !== null) {
       return [
@@ -128,6 +155,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                     src={imageCandidates[imageIndex]}
                     alt={`${title} thumbnail`}
                     className={`absolute inset-0 h-full w-full object-cover ${highSchoolEventIndex !== null && highSchoolEventIndex < 18 ? 'scale-[1.18]' : ''}`}
+                    style={highSchoolEventObjectPosition ? { objectPosition: highSchoolEventObjectPosition } : undefined}
                     onError={() => setImageIndex(prev => Math.min(prev + 1, imageCandidates.length - 1))}
                 />
                 {image && (
