@@ -1267,6 +1267,10 @@ const App: React.FC = () => {
         if (!coopSession || gameState.screen !== GameScreen.REST) return false;
         return coopSession.participants.length > 0 && coopSession.participants.every(participant => participant.restResolved);
     }, [coopSession, gameState.screen]);
+    useEffect(() => {
+        if (gameState.screen !== GameScreen.MAP) return;
+        audioService.playBGM('map');
+    }, [gameState.screen]);
     const coopRewardSkipDisabled = gameState.challengeMode === 'COOP' && gameState.screen === GameScreen.REWARD && gameState.rewards.length === 0 && !coopAllRewardsResolved;
     const coopBattleState = gameState.coopBattleState || null;
     const coopBattleQueueView = useMemo(() => {
