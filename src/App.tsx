@@ -3007,6 +3007,9 @@ const App: React.FC = () => {
                     case 'DAMAGE':
                         hitRandomEnemy(amount);
                         break;
+                    case 'RANDOM_HITS':
+                        for (let i = 0; i < amount; i += 1) hitRandomEnemy(1);
+                        break;
                     case 'AOE_DAMAGE':
                         nextEnemies = nextEnemies.map(enemy => {
                             if (enemy.currentHp <= 0) return enemy;
@@ -3048,6 +3051,13 @@ const App: React.FC = () => {
                             effects.push({ id: `vfx-fam-poison-${Date.now()}-${enemy.id}`, type: 'DEBUFF', targetId: enemy.id, statusEffectKey: 'poison' });
                         });
                         break;
+                    case 'AOE_POISON':
+                        livingEnemies().forEach(enemy => {
+                            enemy.poison += amount;
+                            enemy.floatingText = { id: `fam-aoe-poison-${Date.now()}-${enemy.id}`, text: `猛毒${amount}`, color: 'text-green-200', iconType: 'poison' };
+                            effects.push({ id: `vfx-fam-aoe-poison-${Date.now()}-${enemy.id}`, type: 'DEBUFF', targetId: enemy.id, statusEffectKey: 'poison' });
+                        });
+                        break;
                     case 'WEAK':
                         livingEnemies().forEach(enemy => {
                             enemy.weak += amount;
@@ -3071,6 +3081,16 @@ const App: React.FC = () => {
                         player.gold += amount;
                         player.floatingText = { id: `fam-gold-${Date.now()}`, text: `+${amount}G`, color: 'text-yellow-300', iconType: 'zap' };
                         effects.push({ id: `vfx-fam-gold-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+                        break;
+                    case 'CHAOS_SURGE':
+                        for (let i = 0; i < amount; i += 1) {
+                            const drawn = drawOneCard(player);
+                            if (drawn) player.hand.push(drawn);
+                        }
+                        player.strength += amount;
+                        player.nextTurnEnergy += Math.max(1, amount - 1);
+                        player.floatingText = { id: `fam-chaos-${Date.now()}`, text: `混沌+${amount}`, color: 'text-fuchsia-200', iconType: 'zap' };
+                        effects.push({ id: `vfx-fam-chaos-${Date.now()}`, type: 'BUFF', targetId: 'player' });
                         break;
                     default:
                         break;

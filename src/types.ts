@@ -116,16 +116,19 @@ export type FamiliarTrigger =
 
 export type FamiliarActionKind =
   | 'DAMAGE'
+  | 'RANDOM_HITS'
   | 'AOE_DAMAGE'
   | 'BLOCK'
   | 'HEAL'
   | 'DRAW'
   | 'ENERGY_NEXT'
   | 'POISON'
+  | 'AOE_POISON'
   | 'WEAK'
   | 'VULNERABLE'
   | 'STRENGTH'
-  | 'GOLD';
+  | 'GOLD'
+  | 'CHAOS_SURGE';
 
 export interface FamiliarEffect {
   kind: FamiliarActionKind;
