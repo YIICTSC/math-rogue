@@ -6103,41 +6103,46 @@ const App: React.FC = () => {
                         currentLogs.push(trans("HPを全回復した！", languageMode));
                     }
                     if (card.draw && !isGalaxyExpressCard) {
-                        for (let j = 0; j < card.draw; j++) {
-                            if (p.drawPile.length === 0) {
-                                if (p.discardPile === undefined || p.discardPile.length === 0) break;
-                                p.drawPile = shuffle(p.discardPile);
-                                p.discardPile = [];
-                            }
-                            const newCard = p.drawPile.pop();
-                            if (newCard) {
-                                const card = { ...newCard };
-                                if (card.name === '虚無' || card.name === 'VOID') {
-                                    p.currentEnergy = Math.max(0, p.currentEnergy - 1);
-                                    p.floatingText = { id: `void-turn-${Date.now()}-${j}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
+                        if (card.familiarSummon) {
+                            p.nextTurnDraw += card.draw;
+                            currentLogs.push(trans(`召喚効果：次のターン開始時に${card.draw}枚ドロー`, languageMode));
+                        } else {
+                            for (let j = 0; j < card.draw; j++) {
+                                if (p.drawPile.length === 0) {
+                                    if (p.discardPile === undefined || p.discardPile.length === 0) break;
+                                    p.drawPile = shuffle(p.discardPile);
+                                    p.discardPile = [];
                                 }
-                                if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && card.cost >= 0) {
-                                    card.cost = Math.floor(Math.random() * 4);
-                                }
-                                p.hand.push(card);
-                                if (p.powers['EVOLVE'] && (card.type === CardType.STATUS || card.type === CardType.CURSE)) {
-                                    for (let k = 0; k < p.powers['EVOLVE']; k++) {
-                                        if (p.drawPile.length === 0) {
-                                            if (p.discardPile === undefined || p.discardPile.length === 0) break;
-                                            p.drawPile = shuffle(p.discardPile);
-                                            p.discardPile = [];
-                                        }
-                                        const extraCardRaw = p.drawPile.pop();
-                                        if (extraCardRaw) {
-                                            const extraCard = { ...extraCardRaw };
-                                            if (extraCard.name === '虚無' || extraCard.name === 'VOID') {
-                                                p.currentEnergy = Math.max(0, p.currentEnergy - 1);
-                                                p.floatingText = { id: `void-evolve-${Date.now()}-${k}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
+                                const newCard = p.drawPile.pop();
+                                if (newCard) {
+                                    const card = { ...newCard };
+                                    if (card.name === '虚無' || card.name === 'VOID') {
+                                        p.currentEnergy = Math.max(0, p.currentEnergy - 1);
+                                        p.floatingText = { id: `void-turn-${Date.now()}-${j}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
+                                    }
+                                    if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && card.cost >= 0) {
+                                        card.cost = Math.floor(Math.random() * 4);
+                                    }
+                                    p.hand.push(card);
+                                    if (p.powers['EVOLVE'] && (card.type === CardType.STATUS || card.type === CardType.CURSE)) {
+                                        for (let k = 0; k < p.powers['EVOLVE']; k++) {
+                                            if (p.drawPile.length === 0) {
+                                                if (p.discardPile === undefined || p.discardPile.length === 0) break;
+                                                p.drawPile = shuffle(p.discardPile);
+                                                p.discardPile = [];
                                             }
-                                            if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && extraCard.cost >= 0) {
-                                                extraCard.cost = Math.floor(Math.random() * 4);
+                                            const extraCardRaw = p.drawPile.pop();
+                                            if (extraCardRaw) {
+                                                const extraCard = { ...extraCardRaw };
+                                                if (extraCard.name === '虚無' || extraCard.name === 'VOID') {
+                                                    p.currentEnergy = Math.max(0, p.currentEnergy - 1);
+                                                    p.floatingText = { id: `void-evolve-${Date.now()}-${k}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
+                                                }
+                                                if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && extraCard.cost >= 0) {
+                                                    extraCard.cost = Math.floor(Math.random() * 4);
+                                                }
+                                                p.hand.push(extraCard);
                                             }
-                                            p.hand.push(extraCard);
                                         }
                                     }
                                 }
