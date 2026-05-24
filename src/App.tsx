@@ -5247,14 +5247,16 @@ const App: React.FC = () => {
             }
             p.cardsPlayedThisTurn++;
             if (card.familiarSummon) {
+                const summonHpCost = card.familiarSummon.hpCost;
+                p.currentHp = Math.max(0, p.currentHp - summonHpCost);
                 const familiar: ActiveFamiliar = {
                     ...card.familiarSummon,
                     instanceId: `fam-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
                     turnsActive: 0
                 };
                 p.familiars = [...(p.familiars || []), familiar].slice(-5);
-                p.floatingText = { id: `summon-${Date.now()}`, text: `${familiar.name} 召喚`, color: 'text-fuchsia-300', iconType: 'zap' };
-                currentLogs.push(`${familiar.name}を召喚した`);
+                p.floatingText = { id: `summon-${Date.now()}`, text: `-${summonHpCost} / ${familiar.name} 召喚`, color: 'text-fuchsia-300', iconType: 'zap' };
+                currentLogs.push(`${familiar.name}を召喚した（HP-${summonHpCost}）`);
                 nextActiveEffects.push({ id: `vfx-summon-${Date.now()}`, type: 'SHOCKWAVE', targetId: 'player' });
                 audioService.playSound('buff');
             }
