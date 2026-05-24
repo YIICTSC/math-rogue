@@ -4436,8 +4436,7 @@ const App: React.FC = () => {
                 }
                 const isGardener = nextState.player.id === 'GARDENER';
                 const allPossibleCards = getFilteredCardPool(nextState.player.id);
-                const isHighSchoolShop = nextState.visualTheme === 'high-school'
-                    || window.localStorage.getItem('learning-rogue-visual-theme') === 'high-school';
+                const isHighSchoolShop = nextState.visualTheme === 'high-school';
                 const nonFamiliarShopCards = allPossibleCards.filter(card => !card.familiarSummon);
                 const familiarShopCards = allPossibleCards.filter(card => !!card.familiarSummon);
                 const familiarShopSlot = isHighSchoolShop && familiarShopCards.length > 0
@@ -4447,7 +4446,9 @@ const App: React.FC = () => {
                 const cards: ICard[] = [];
                 for (let i = 0; i < 5; i++) {
                     if (allPossibleCards.length === 0) break;
-                    let candidatePool = allPossibleCards;
+                    let candidatePool = !isHighSchoolShop && nonFamiliarShopCards.length > 0
+                        ? nonFamiliarShopCards
+                        : allPossibleCards;
                     if (isGardener && i < 2) {
                         candidatePool = Object.values(GARDEN_SEEDS).map(s => ({ ...s, id: `shop-seed-${i}-${Date.now()}` }) as ICard);
                     } else if (isHighSchoolShop && i === familiarShopSlot) {
@@ -8435,8 +8436,7 @@ const App: React.FC = () => {
         }
 
         const allPossibleCards = getFilteredCardPool(player.id);
-        const isHighSchoolReward = stateRef.current.visualTheme === 'high-school'
-            || window.localStorage.getItem('learning-rogue-visual-theme') === 'high-school';
+        const isHighSchoolReward = stateRef.current.visualTheme === 'high-school';
         const nonFamiliarCards = allPossibleCards.filter(card => !card.familiarSummon);
         const familiarCards = allPossibleCards.filter(card => !!card.familiarSummon);
         const familiarRewardSlot = isHighSchoolReward && familiarCards.length > 0 && Math.random() < 0.55
@@ -8465,7 +8465,7 @@ const App: React.FC = () => {
             const uniquePool = pool.filter(card => !pickedCardTemplateIds.has(getRewardCardTemplateKey(card)));
             const fallbackBasePool = isHighSchoolReward && i !== familiarRewardSlot && nonFamiliarCards.length > 0
                 ? nonFamiliarCards
-                : allPossibleCards;
+                : (!isHighSchoolReward && nonFamiliarCards.length > 0 ? nonFamiliarCards : allPossibleCards);
             const fallbackUniquePool = fallbackBasePool.filter(card => !pickedCardTemplateIds.has(getRewardCardTemplateKey(card)));
             const pickSource =
                 uniquePool.length > 0
