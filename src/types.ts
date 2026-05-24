@@ -138,6 +138,7 @@ export interface FamiliarEffect {
 export interface FamiliarSummonSpec {
   id: string;
   name: string;
+  hpCost: number;
   imageIndex: number;
   duration: number | 'BATTLE';
   trigger: FamiliarTrigger;

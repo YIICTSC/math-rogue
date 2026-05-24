@@ -120,12 +120,13 @@ export const HIGH_SCHOOL_FAMILIAR_CARDS: Record<string, Omit<Card, 'id'>> = Obje
       : scaled;
     const effectText = buildFamiliarEffectText(kind, amount);
     const duration = isOneShot ? 1 : 'BATTLE';
+    const hpCost = 3 + (index % 3);
     return [`HS_FAMILIAR_${String(index).padStart(3, '0')}`, {
       name: `${name}の契約`,
       cost: isOneShot ? 3 : (index % 4 === 0 ? 2 : 1),
       type: CardType.SUMMON,
       target: TargetType.SELF,
-      description: `${name}を召喚。${triggerText}、${effectText}廃棄。`,
+      description: `HPを${hpCost}消費して${name}を召喚。${triggerText}、${effectText}廃棄。`,
       exhaust: true,
       rarity,
       visualTheme: 'high-school',
@@ -134,6 +135,7 @@ export const HIGH_SCHOOL_FAMILIAR_CARDS: Record<string, Omit<Card, 'id'>> = Obje
       familiarSummon: {
         id: `fam-${index}`,
         name,
+        hpCost,
         imageIndex: index,
         duration,
         trigger,
